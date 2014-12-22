@@ -13,6 +13,8 @@ import config
 import math
 import getpass
 import re
+import sys
+import time
 
 #check if command line flag --nompl set to disable matplotlib 
 if not(config.nompl):
@@ -190,6 +192,9 @@ def constantUpdateActor(self,config):
     
 def updateProcTable(self,config):
     if self.doUpdates==True:
+        
+        Ncpus=len(psutil.cpu_percent(percpu=True))
+        
         table=self.ui.tableWidgetProcess
         #first remove all rows
         Nrows=table.rowCount()
@@ -221,25 +226,93 @@ def updateProcTable(self,config):
         d_cpu={}
         d_mem={}
         d_name={}
+        d_cpuTimes={}
+        d_procTimes={}
 
         #fill the dictionaries - seems to need to be done faster than within loop which also fills the table...not sure why...
-        for proc in psutil.process_iter():
-            try:
-                #check if process still exists, if so, update dictionaries
-                cpupct=proc.get_cpu_percent(interval=0) if config.psutilVer == 1 else proc.cpu_percent(interval=0)
-                memVal=float(int(float(proc.get_memory_percent())*100.0))/100.0 if config.psutilVer == 1 else float(int(float(proc.memory_percent())*100.0))/100.0
-                try:
-                    #don't update dictionaries if name gives an access denied error when checking process name
-                    pname=proc.name if config.psutilVer == 1 else proc.name()
-                    d_user.update({proc.pid:proc.username}) if config.psutilVer == 1 else d_user.update({proc.pid:proc.username()})
-                    d_cpu.update({proc.pid:cpupct})
-                    d_mem.update({proc.pid:memVal})
-                    d_name.update({proc.pid:pname})
-                except:
-                    pass #place holder
-            except:
-                pass #skip this process - case where it no longer exists
 
+        try:
+            #check if this dictionary exists or not
+            self.ui.d_procTimes
+            self.ui.d_cpuTimes
+            #if so, move on
+            pass
+        except:
+            #case to initialize the dictionary
+            for proc in psutil.process_iter():
+                try:
+                    #check if acess denied 
+                    pname=proc.name
+                    proctime=proc.get_cpu_times() #get 
+                    cputime=psutil.cpu_times()
+                    d_procTimes.update({proc.pid:proctime})
+                    d_cpuTimes.update({proc.pid:cputime})
+                except:
+                    #case we skip a process
+                    pass
+            self.ui.d_cpuTimes=d_cpuTimes
+            self.ui.d_procTimes=d_procTimes
+            d_cpuTimes={}
+            d_procTimes={}
+
+        updateInterval=float(self.update) #timer interval in seconds
+        for proc in psutil.process_iter():
+            #try:
+            if psutil.Process(proc.pid).is_running():
+            #if proc.pid == 37196:    
+                #check if process still exists, if so, update dictionaries
+                try:
+                    #check if process previously existed - if so we can calculate a cpupct
+                    proctimeHold=self.ui.d_procTimes[proc.pid]                    
+                    proctime=proc.get_cpu_times() #get 
+                    deltaProcTime=(proctime.user+proctime.system) - (proctimeHold.user+proctimeHold.system)                    
+                    
+                    cputimeHold=self.ui.d_cpuTimes[proc.pid]
+                    cputime=psutil.cpu_times()
+                    deltaCPUTime=(cputime.user+cputime.system+cputime.idle) - (cputimeHold.user+cputimeHold.system+cputimeHold.idle)
+                    
+                    if deltaProcTime > 0:
+                        if deltaCPUTime < updateInterval:
+                            deltaCPUTime=updateInterval
+                        else:
+                            pass
+                        cpupct=float(deltaProcTime)/float(deltaCPUTime)*100.0
+                        
+                    else:
+                        cpupct=0
+                    
+                    if cpupct < 0:
+                        cpupct=0
+                    
+                    cpupct=float(int(float(cpupct)*100))/100  #only keep two decimal places
+                    memVal=float(int(float(proc.get_memory_percent())*100.0))/100.0 if config.psutilVer == 1 else float(int(float(proc.memory_percent())*100.0))/100.0
+                    
+                    try:
+                        #don't update dictionaries if name gives an access denied error when checking process name
+                        #print "Updating"
+                        pname=proc.name if config.psutilVer == 1 else proc.name()
+                        d_user.update({proc.pid:proc.username}) if config.psutilVer == 1 else d_user.update({proc.pid:proc.username()})
+                        d_cpu.update({proc.pid:cpupct})
+                        d_mem.update({proc.pid:memVal})
+                        d_name.update({proc.pid:pname})
+                        d_cpuTimes.update({proc.pid:cputime})
+                        d_procTimes.update({proc.pid:proctime})
+    
+                    except:
+                        #print "psutil General Error: ",sys.exc_info()[0]
+                        pass
+                    
+                except:
+                    #else process did not previously exist and we cannot give an update this iteration
+                    #print "except - pid: ",proc.pid
+
+                    pass
+                
+           
+        #once the dictionarys are updated, update cpu times for next loop
+        self.ui.d_cpuTimes=d_cpuTimes
+        self.ui.d_procTimes=d_procTimes
+        
         #now fill the table for display
         for proc in d_user.keys():
             #print "proc: ",proc," type: ",type(proc)
@@ -295,25 +368,98 @@ def updateUserChart(self,config):
     d_cpu={}
     d_mem={}
     d_name={}
-    #fill the dictionaries - seems to need to be done faster than within loop which also fills the table...not sure why...
+    d_cpuTimes={}
+    d_procTimes={}
+    
+    try:
+        #check if this dictionary exists or not
+        self.ui.d_procTimes
+        self.ui.d_cpuTimes
+        #if so, move on
+        pass
+    except:
+        #case to initialize the dictionary
+        for proc in psutil.process_iter():
+            try:
+                #check if acess denied 
+                pname=proc.name
+                proctime=proc.get_cpu_times() #get 
+                cputime=psutil.cpu_times()
+                d_procTimes.update({proc.pid:proctime})
+                d_cpuTimes.update({proc.pid:cputime})
+            except:
+                #case we skip a process
+                pass
+        self.ui.d_cpuTimes=d_cpuTimes
+        self.ui.d_procTimes=d_procTimes
+        d_cpuTimes={}
+        d_procTimes={}
+
+    updateInterval=float(self.update) #timer interval in seconds
+    totcpupct=0
     for proc in psutil.process_iter():
         try:
+            psutil.Process(proc.pid).is_running()
+        #if proc.pid == 37196:    
             #check if process still exists, if so, update dictionaries
-            cpupct=proc.get_cpu_percent(interval=0) if config.psutilVer == 1 else proc.cpu_percent(interval=0)
-            memVal=float(int(float(proc.get_memory_percent())*100.0))/100.0 if config.psutilVer == 1 else float(int(float(proc.memory_percent())*100.0))/100.0
             try:
-                #don't update dictionaries if name gives an access denied error when checking process name
-                pname=proc.name if config.psutilVer == 1 else proc.name()
-                d_user.update({proc.pid:proc.username}) if config.psutilVer == 1 else d_user.update({proc.pid:proc.username()})
-                d_cpu.update({proc.pid:cpupct})
-                d_mem.update({proc.pid:memVal})
-                d_name.update({proc.pid:pname})
+                #check if process previously existed - if so we can calculate a cpupct
+                proctimeHold=self.ui.d_procTimes[proc.pid]                    
+                proctime=proc.get_cpu_times() #get 
+                deltaProcTime=(proctime.user+proctime.system) - (proctimeHold.user+proctimeHold.system)                    
+                
+                cputimeHold=self.ui.d_cpuTimes[proc.pid]
+                cputime=psutil.cpu_times()
+                deltaCPUTime=(cputime.user+cputime.system+cputime.idle) - (cputimeHold.user+cputimeHold.system+cputimeHold.idle)
+                
+                if deltaProcTime > 0:
+                    if deltaCPUTime < updateInterval:
+                        deltaCPUTime=updateInterval
+                    else:
+                        pass
+                    cpupct=float(deltaProcTime)/float(deltaCPUTime)*100.0
+                    
+                else:
+                    cpupct=0
+                
+                if cpupct < 0:
+                    cpupct=0
+                
+                cpupct=float(int(float(cpupct)*100))/100  #only keep two decimal places
+                totcpupct+=cpupct
+                memVal=float(int(float(proc.get_memory_percent())*100.0))/100.0 if config.psutilVer == 1 else float(int(float(proc.memory_percent())*100.0))/100.0
+                
+                try:
+                    #don't update dictionaries if name gives an access denied error when checking process name
+                    #print "Updating"
+                    pname=proc.name if config.psutilVer == 1 else proc.name()
+                    d_user.update({proc.pid:proc.username}) if config.psutilVer == 1 else d_user.update({proc.pid:proc.username()})
+                    #System Idle process should not be listed in users cpu totals so set it to zero
+                    if pname =="System Idle Process":
+                        cpupct=0
+                    d_cpu.update({proc.pid:cpupct})
+                    d_mem.update({proc.pid:memVal})
+                    d_name.update({proc.pid:pname})
+                    d_cpuTimes.update({proc.pid:cputime})
+                    d_procTimes.update({proc.pid:proctime})
+
+                except:
+                    #print "psutil General Error: ",sys.exc_info()[0]
+                    pass
+                
             except:
-                #print "access denied"
-                pass #place holder
+                #else process did not previously exist and we cannot give an update this iteration
+                #print "except - pid: ",proc.pid
+
+                pass
         except:
-            #print "skipped process"
-            pass #skip this process as it no longer exists
+            #process no longer exists - do nothing
+            pass
+            
+                
+    self.ui.d_cpuTimes=d_cpuTimes
+    self.ui.d_procTimes=d_procTimes
+      
     #print "** Total Mem Used: ",sum(d_mem.values())
     users=d_user.values()
     users_unique=list(set(users)) #use set() to find unique users then convert the resulting set to a list via list()
@@ -335,7 +481,7 @@ def updateUserChart(self,config):
         user=d_user[pid]
         cpu_by_users[user]=cpu_by_users[user] + d_cpu[pid]
         mem_by_users[user]=mem_by_users[user] + d_mem[pid]
-
+    #print d_cpu[35296],d_cpu[37196],d_cpu[35296]+d_cpu[37196]
     #now convert to a list which we can index
     cpu_by_users_lst=cpu_by_users.values()
     mem_by_users_lst=mem_by_users.values()
@@ -370,6 +516,7 @@ def updateUserChart(self,config):
             indx=sorted(range(len(mem_by_users_lst)), key=mem_by_users_lst.__getitem__,reverse=True)
     else:
         print 'Incorrect sort parameter'
+        
     #sort lists
     cpu_by_users_sorted=[cpu_by_users_lst[x] for x in indx]
     mem_by_users_sorted=[mem_by_users_lst[x] for x in indx]
@@ -438,10 +585,10 @@ def updateUserChart(self,config):
     frame=plt.gca()
     frame.axes.get_yaxis().set_ticks([])
     plt.xticks(np.arange(2)+width/2.,('CPU','Mem'),fontsize=config.pltFont,fontweight='bold')
-    ymaxCPU=int((sum(cpu_by_users_sorted)+100)/100)*100    #range ymaxCPU to nearest 100%
+    ymaxCPU=int(round(sum(cpu_by_users_sorted)+10))/10*10    #range ymaxCPU to nearest 10%
     ymaxMEM=int(round(sum(mem_by_users_sorted)+10))/10*10  #range ymaxMEM to nearest 10%
     
-    ymaxMAX=max([ymaxCPU,ymaxMEM,100])
+    ymaxMAX=max([ymaxCPU,ymaxMEM])
 
     if sortBy == 'cpu':
         ymax=max([ymaxCPU,10])
@@ -452,20 +599,23 @@ def updateUserChart(self,config):
     elif sortBy == 'max':
         ymax=max([ymaxMAX,10])
         auto=True
-#    print 'ymaxCPU: ',ymaxCPU,'  ymaxMEM: ',ymaxMEM,'  ymaxMAX: ',ymaxMAX,'  ymax: ',ymax,' sum(mem_by_users_sorted): ',sum(mem_by_users_sorted)
-    plt.ylim(0,ymax,auto=auto)
+    #print 'ymaxCPU: ',ymaxCPU,'  ymaxMEM: ',ymaxMEM,'  ymaxMAX: ',ymaxMAX,'  ymax: ',ymax
+    #print 'sum(cpu_by_users_sorted): ',sum(cpu_by_users_sorted),'sum(mem_by_users_sorted): ',sum(mem_by_users_sorted)
+    #print cpu_by_users
+    plt.ylim(0,ymax,auto=True)
     
 
     
     #compute composite %
     sumCPU=sum(cpu_by_users_sorted)
-    ylab=np.arange(5)/4.0*float(sumCPU)/float(self.ui.Ncpus)
+    sumCPU=float(int(sumCPU*100))/100 #use two digits
+    ylab=np.arange(5)/4.0*float(sumCPU)#/float(self.ui.Ncpus)
     scl=float(ymax)/float(sumCPU)
     ylab=ylab*100*scl
     tmp=ylab.astype('int')
     tmp1=tmp.astype('float')
     tmp1=tmp1/100
-    ylab1=tmp1
+    ylab1=np.round(tmp1)
     
     ax1=plt.twinx()
     ax1.set_ylabel('Composite CPU Percent',fontsize=config.pltFont,fontweight='bold')
@@ -496,7 +646,7 @@ def updateUserChart(self,config):
     #place second y axis label on plot
     ylab2=np.arange(5)/4.0*float(ymax)
     ax2=plt.twinx()
-    ax2.set_ylabel('Percent',fontsize=config.pltFont,fontweight='bold',position=(0.9,0.5))
+    ax2.set_ylabel('Memory Percent',fontsize=config.pltFont,fontweight='bold',position=(0.9,0.5))
     ax2.set_yticks(ylab2)
     #ax2.set_yticks(ylab2)
     ax2.yaxis.set_ticks_position('right')
