@@ -36,7 +36,8 @@ class PropertyManager(NonIDF_Properties):
         1) Simple properties from IDF are stored in class dictionary in the form __dict__[property name]=property value
 
         2) Complex properties from IDF implemented as instances of ReductionHelpers.ComplexProperty class and are stored
-          in class dictionary in the forn __dict__[_property name] = ReductionHelpers.ComplexProperty([dependent properties list])
+          in class dictionary in the form __dict__[_property name] = ReductionHelpers.ComplexProperty([dependent properties list])
+          (note underscore in front of property name)
           __getattr__ and __setattr__ are overloaded to understand such calls
 
         3) Descriptors with the name present in IDF do not store their values and names in __dict__ 
@@ -44,7 +45,12 @@ class PropertyManager(NonIDF_Properties):
           This is not considered a problem as only one instance of property manager is expected. 
 
         4) __getattr__ (and __setattr__ ) method is overloaded to provide call to descriptor before the search in the system dictionary.
-           This works only if Python does not find a property name in the __dict__ or __class__.__dict__ (and mro()) first 
+           Custom __getattr__ naturally works only if Python does not find a property name in the __dict__ or __class__.__dict__ (and mro()),
+           e.g. in case when an descriptor is called through one of its synonym name.
+
+           A problem will occur if a key with name equal to descriptor name is also present in __dict__. This name would override descriptor.
+           This is why any new descriptor should never place a key with its name in __dict__. Current design automatically remove IDF name 
+           from __dict__ if a descriptor with such name exist, so further development should support this behavior.
 
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
