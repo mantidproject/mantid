@@ -318,8 +318,8 @@ public:
     convert_alg.setPropertyValue("OutputWorkspace", "_"); // Not really required for child algorithm
     convert_alg.execute();
     MatrixWorkspace_sptr out_ws = convert_alg.getProperty("OutputWorkspace");
-
-    TSM_ASSERT_EQUALS("Wrong dimension auto selected for output x-axis", "X", out_ws->getDimension(0)->getName());
+    // Should select the first dimension in this case.
+    TSM_ASSERT_EQUALS("Wrong dimension auto selected for output x-axis", in_ws->getDimension(0)->getName(), out_ws->getDimension(0)->getName());
     TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 1);
     auto first_x_spectra = out_ws->readX(0);
 
@@ -376,8 +376,8 @@ public:
     convert_alg.setPropertyValue("OutputWorkspace", "_"); // Not really required for child algorithm
     convert_alg.execute();
     MatrixWorkspace_sptr out_ws = convert_alg.getProperty("OutputWorkspace");
-
-    TSM_ASSERT_EQUALS("Wrong dimension auto selected for output x-axis", "Y", out_ws->getDimension(0)->getName());
+    // Should select the 2nd dimension for the x-axis in this case.
+    TSM_ASSERT_EQUALS("Wrong dimension auto selected for output x-axis", in_ws->getDimension(1)->getName(), out_ws->getDimension(0)->getName());
     TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 1);
     auto first_x_spectra = out_ws->readX(0);
     TSM_ASSERT_DELTA("First coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.front(), -8, 1e-3);

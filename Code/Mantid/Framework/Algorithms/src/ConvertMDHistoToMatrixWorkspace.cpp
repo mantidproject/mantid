@@ -36,6 +36,7 @@ Find the dimension to use as the plot axis.
 @param logger : log object
 @param id : id, or current index for the dimension to use as the x-plot
 dimension
+@param xAxisLabel : in/out reference for text to use as the x-axis label.
 
 @return id/index of the dimension with the longest span in the original
 coordinate system.
@@ -43,7 +44,7 @@ coordinate system.
 size_t findXAxis(const VMD &start, const VMD &end,
                  CoordTransform const *const transform,
                  IMDHistoWorkspace const *const inputWorkspace, Logger &logger,
-                 const size_t id) {
+                 const size_t id, std::string& xAxisLabel) {
 
   // Find the start and end points in the original workspace
   VMD originalStart = transform->applyVMD(start);
@@ -74,6 +75,8 @@ size_t findXAxis(const VMD &start, const VMD &end,
       }
     }
   }
+  // Use the x-axis label from the original workspace.
+  xAxisLabel = originalWS->getDimension(dimIndex)->getName();
   return dimIndex;
 }
 }
@@ -205,11 +208,12 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
 
   assert(X.size() == outputWorkspace->dataX(0).size());
 
+  std::string xAxisLabel = inputWorkspace->getDimension(id)->getName();
   const bool autoFind = this->getProperty("FindXAxis");
   if (autoFind) {
     // We look to the original workspace if possbible to find the dimension of
     // interest to plot against.
-    id = findXAxis(start, end, transform.get(), inputWorkspace.get(), g_log, id);
+    id = findXAxis(start, end, transform.get(), inputWorkspace.get(), g_log, id, xAxisLabel);
   }
 
   for (size_t i = 0; i < X.size(); ++i) {
@@ -223,7 +227,7 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
   boost::shared_ptr<Kernel::Units::Label> labelX =
       boost::dynamic_pointer_cast<Kernel::Units::Label>(
           Kernel::UnitFactory::Instance().create("Label"));
-  labelX->setLabel(inputWorkspace->getDimension(id)->getName());
+  labelX->setLabel(xAxisLabel);
   outputWorkspace->getAxis(0)->unit() = labelX;
 
   outputWorkspace->setYUnitLabel("Signal");
