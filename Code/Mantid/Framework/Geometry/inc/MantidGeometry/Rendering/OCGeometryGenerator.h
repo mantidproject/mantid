@@ -98,7 +98,7 @@ public:
   /// mesh
   double *getTriangleVertices();
   /// get a pointer to the 3x(NumberOFaces) integers describing points forming
-  /// faces (p1,p2,p3)(p4,p5,p6)..
+  /// faces (p1,p2,p3)(p4,p5,p6).
   int *getTriangleFaces();
 };
 
