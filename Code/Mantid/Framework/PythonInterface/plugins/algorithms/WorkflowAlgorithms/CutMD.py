@@ -171,36 +171,7 @@ class CutMD(DataProcessorAlgorithm):
             labels.append( [cmapping.replace(x) for x in projection[i]  ] )
         
         return labels
-    
-    
-    def __verify_input_workspace(self, to_cut):
-        coord_system = to_cut.getSpecialCoordinateSystem()
-        
-        ndims = to_cut.getNumDims()
-        if ndims < 3 or ndims > 4:
-            raise ValueError("Input Workspace should be 3 or 4 dimensional")
-        
-        # Try to sanity check the order of the dimensions. This is important.
-        axes_check = self.getProperty("CheckAxes").value
-        
-        # Coordinate system message
-        restricted_coordinates_message = "Input Workspace should be in reciprocal lattice dimensions (HKL)"
-        if axes_check:
-            
-            if not coord_system == SpecialCoordinateSystem.HKL:
-                raise ValueError(restricted_coordinates_message)
-            
-            predicates = ["^(H.*)|(\\[H,0,0\\].*)$","^(K.*)|(\\[0,K,0\\].*)$","^(L.*)|(\\[0,0,L\\].*)$"]  
-            n_crystallographic_dims = __builtin__.min(3, ndims)
-            for i in range(n_crystallographic_dims):
-                dimension = to_cut.getDimension(i)
-                p = re.compile(predicates[i])
-                if not p.match( dimension.getName() ):
-                    raise ValueError("Dimensions must be in order H, K, L")
-        else:
-            if not coord_system == SpecialCoordinateSystem.HKL:
-                logger.warning(restricted_coordinates_message)
-
+ 
     def __verify_projection_input(self, projection_table):
         if isinstance(projection_table, ITableWorkspace):
             column_names = set(projection_table.getColumnNames())
@@ -210,8 +181,7 @@ class CutMD(DataProcessorAlgorithm):
                             raise ValueError("Projection table schema is wrong! Column names received: " + str(column_names) )
             if projection_table.rowCount() != 3:
                 raise ValueError("Projection table expects 3 rows")
-            
-            
+               
     def __scale_projection(self, (u, v, w), origin_units, target_units, to_cut):
         
         if set(origin_units) == set(target_units):
@@ -242,7 +212,7 @@ class CutMD(DataProcessorAlgorithm):
         logger.warning('You are running algorithm %s that is the beta stage of development' % (self.name()))
         
         to_cut = self.getProperty("InputWorkspace").value
-        self.__verify_input_workspace(to_cut)
+        
         ndims = to_cut.getNumDims()
         
         nopix = self.getProperty("NoPix").value
