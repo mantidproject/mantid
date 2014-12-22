@@ -146,7 +146,7 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
   Mantid::Kernel::VMD start = VMD(nd);
   Mantid::Kernel::VMD end = VMD(nd);
 
-  size_t id;
+  size_t id = 0;
   for (size_t d = 0; d < nd; d++) {
     Mantid::Geometry::IMDDimension_const_sptr dim =
         inputWorkspace->getDimension(d);
