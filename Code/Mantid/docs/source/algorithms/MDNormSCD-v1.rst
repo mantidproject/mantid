@@ -12,7 +12,7 @@ Description
 
 The algorithm calculates a normalization MD workspace for single crystal diffraction experiments. 
 Trajectories of each detector in reciprocal space are calculated, and the flux is integrated between intersections with each
-MDBox.
+MDBox. A brief introduction to the multi-dimensional data normalization can be found :ref:`here <MDNorm>`.
 
 
 Usage
