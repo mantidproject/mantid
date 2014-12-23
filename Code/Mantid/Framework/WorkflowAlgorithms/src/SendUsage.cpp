@@ -87,7 +87,8 @@ const std::string SendUsage::summary() const {
 /** Initialize the algorithm's properties.
  */
 void SendUsage::init() {
-  // declareProperty("UsageString", "", Direction::Input);
+  declareProperty("Application", "mantidplot", "how mantid was invoked");
+  declareProperty("Component", "", "leave blank for now");
   declareProperty("Json", "", Direction::Output);
   declareProperty("HtmlCode", -1, Direction::Output);
 }
@@ -127,7 +128,23 @@ void SendUsage::sendReport(const std::string &json) {
 std::string SendUsage::generateJson() {
   // later in life the additional parameters can be done after
   // the current date and time
-  return std::string(g_header + currentDateAndTime() + "}");
+  std::stringstream buffer;
+  buffer << g_header << currentDateAndTime();
+
+  // get the properties that were set
+  std::string application = this->getPropertyValue("Application");
+  if (!application.empty()) {
+    buffer << ",\"application\":\"" << application << "\"";
+  }
+  std::string component = this->getPropertyValue("Component");
+  if (!component.empty()) {
+    buffer << ",\"component\":\"" << component << "\"";
+  }
+
+  // close the document
+  buffer << "}";
+
+  return buffer.str();
 }
 
 /**
