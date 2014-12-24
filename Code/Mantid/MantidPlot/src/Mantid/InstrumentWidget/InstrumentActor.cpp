@@ -48,7 +48,9 @@ struct Sqrt
 double InstrumentActor::m_tolerance = 0.00001;
 
 /**
- * Constructor
+ * Constructor. Creates a tree of GLActors. Each actor is responsible for displaying insrument components in 3D.
+ * Some of the components have "pick ID" assigned to them. Pick IDs can be uniquely converted to a RGB colour value
+ * which in turn can be used for picking the component from the screen.
  * @param wsName :: Workspace name
  * @param autoscaling :: True to start with autoscaling option on. If on the min and max of
  *   the colormap scale are defined by the min and max of the data.

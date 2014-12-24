@@ -11,6 +11,7 @@ class Instrument3DWidget;
 class InstrumentActor;
 class CollapsiblePanel;
 class OneCurvePlot;
+class ComponentInfoController;
 
 class QPushButton;
 class QTextEdit;
@@ -69,7 +70,6 @@ private slots:
   void addPeak(double,double);
   void storeCurve();
   void removeCurve(const QString &);
-  void savePlotToWorkspace();
   void singleComponentTouched(size_t pickID);
   void singleComponentPicked(size_t pickID);
   void updateSelectionInfoDisplay();
@@ -77,30 +77,7 @@ private slots:
   void updatePlotMultipleDetectors();
 private:
   void showEvent (QShowEvent *);
-  void updatePlot(int detid);
-  void updateSelectionInfo(int detid);
-  void plotSingle(int detid);
-  void plotTube(int detid);
-  void plotTubeSums(int detid);
-  void plotTubeIntegrals(int detid);
-  void prepareDataForSinglePlot(
-    int detid,
-    std::vector<double>&x,
-    std::vector<double>&y,
-    std::vector<double>* err = NULL);
-  void prepareDataForSumsPlot(
-    int detid,
-    std::vector<double>&x,
-    std::vector<double>&y,
-    std::vector<double>* err = NULL);
-  void prepareDataForIntegralsPlot(
-    int detid,
-    std::vector<double>&x,
-    std::vector<double>&y,
-    std::vector<double>* err = NULL);
-    QString getTubeXUnitsName(TubeXUnits unit) const;
-  QString getNonDetectorInfo();
-  QString getParameterInfo(Mantid::Geometry::IComponent_const_sptr comp);
+  QString getTubeXUnitsName(TubeXUnits unit) const;
   QColor getShapeBorderColor() const;
   static double getOutOfPlaneAngle(const Mantid::Kernel::V3D& pos, const Mantid::Kernel::V3D& origin, const Mantid::Kernel::V3D& normal);
 
@@ -141,6 +118,77 @@ private:
   int m_currentDetID;
   TubeXUnits m_tubeXUnits; ///< quantity the time bin integrals to be plotted against
   mutable bool m_freezePlot;
+
+  /// Controller responsible for the info display.
+  ComponentInfoController* m_infoController;
+};
+
+/**
+ * Class containing the logic of displaying info on the selected
+ * component(s) in the info text widget.
+ */
+class ComponentInfoController: public QObject
+{
+  Q_OBJECT
+public:
+  /// Constructor.
+  ComponentInfoController(InstrumentWindowPickTab *tab, InstrumentActor* instrActor, QTextEdit* infoDisplay);
+public slots:
+  void displayInfo(size_t pickID);
+private:
+  void displayDetectorInfo(Mantid::detid_t detid);
+  QString getParameterInfo(Mantid::Geometry::IComponent_const_sptr comp);
+  QString getNonDetectorInfo();
+
+  InstrumentWindowPickTab* m_tab;
+  InstrumentActor* m_instrActor;
+  QTextEdit* m_selectionInfoDisplay;
+
+  bool m_freezePlot;
+  bool m_instrWindowBlocked;
+  size_t m_currentPickID;
+  QString m_xUnits;
+
+};
+
+/**
+ * Class contining the logic of plotting the data in detectors/tubes.
+ */
+class DetectorPlotController: public QObject
+{
+  Q_OBJECT
+public:
+private:
+
+  void updatePlot(int detid);
+  void plotSingle(int detid);
+  void plotTube(int detid);
+  void plotTubeSums(int detid);
+  void plotTubeIntegrals(int detid);
+  void prepareDataForSinglePlot(
+    int detid,
+    std::vector<double>&x,
+    std::vector<double>&y,
+    std::vector<double>* err = NULL);
+  void prepareDataForSumsPlot(
+    int detid,
+    std::vector<double>&x,
+    std::vector<double>&y,
+    std::vector<double>* err = NULL);
+  void prepareDataForIntegralsPlot(
+    int detid,
+    std::vector<double>&x,
+    std::vector<double>&y,
+    std::vector<double>* err = NULL);
+  void savePlotToWorkspace();
+
+  InstrumentWindowPickTab* m_tab;
+  InstrumentActor* m_instrActor;
+  OneCurvePlot* m_plot;
+
+  bool m_instrWindowBlocked;
+  bool m_plotSum;
+
 };
 
 
