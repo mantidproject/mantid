@@ -2,7 +2,8 @@
 #define MANTID_DATAHANDLING_LOADSPICEASCII_H_
 
 #include "MantidKernel/System.h"
-
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace Mantid
 {
@@ -31,12 +32,29 @@ namespace DataHandling
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LoadSpiceAscii 
+  class DLLExport LoadSpiceAscii : public API::Algorithm
   {
   public:
     LoadSpiceAscii();
     virtual ~LoadSpiceAscii();
+
+  private:
+    void init();
+    void exec();
+
+    bool validateLogNamesType(const std::vector<std::string> &floatlognames,
+                              const std::vector<std::string> &intlognames,
+                              const std::vector<std::string>& strlognames);
+
+    /// Parse SPICE Ascii file to dictionary
+    void parseSPICEAscii(const std::string &filename,
+                         std::vector<std::vector<std::string> > &datalist,
+                         std::vector<std::string>& titles,
+                         std::map<std::string, std::string>& runinfodict);
     
+    /// Create data workspace
+    API::ITableWorkspace_sptr createDataWS(const std::vector<std::vector<std::string> >& datalist,
+                                           const std::vector<std::string> &titles);
   };
 
 
