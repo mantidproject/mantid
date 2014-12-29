@@ -453,7 +453,7 @@ class ExportExperimentLog(PythonAlgorithm):
             if logclass == "StringPropertyWithValue":
                 propertyvalue = logproperty.value
                 # operationtype = self._sampleLogOperations[il]
-                if operationtype.lower() == "localtime":
+                if operationtype.lower().count("time") > 0:
                     propertyvalue = self._convertLocalTimeString(propertyvalue)
             elif logclass == "FloatPropertyWithValue":
                 propertyvalue = logproperty.value
@@ -487,20 +487,41 @@ class ExportExperimentLog(PythonAlgorithm):
         from datetime import datetime
         from dateutil import tz
 
+        # Make certain that the input is utc time string
         utctimestr = str(utctimestr)
 
-        self.log().information("Input UTC time = %s" % (utctimestr))
+        # Return if time zone is UTC (no need to convert)
+        if self._timezone == "UTC":
+            return utctimestr
+
+        # Convert
+        self.log().debug("Input UTC time = %s" % (utctimestr))
 
         from_zone = tz.gettz('UTC')
         to_zone = tz.gettz(self._timezone)
 
+        # Determine the parsing format
+        if utctimestr.count("T") == 0:
+            srctimeformat = '%Y-%m-%d %H:%M:%S.%f'
+        else:
+            srctimeformat = '%Y-%m-%dT%H:%M:%S.%f'
+
         try:
+            extra = ""
             if utctimestr.count(".") == 1:
+                # Time format's microsecond part %.f can take only 6 digit
                 tail = utctimestr.split(".")[1]
                 extralen = len(tail)-6
-                extra = utctimestr[-extralen:]
-                utctimestr = utctimestr[0:-extralen]
-            utctime = datetime.strptime(utctimestr, '%Y-%m-%dT%H:%M:%S.%f')
+                if extralen > 0:
+                    extra = utctimestr[-extralen:]
+                    utctimestr = utctimestr[0:-extralen]
+            elif utctimestr.count(".") == 0:
+                # There is no .%f part in source time string:
+                srctimeformat = srctimeformat.split(".")[0]
+            else:
+                # Un perceived situation
+                raise NotImplementedError("Is it possible to have time as %s?" % (utctimestr))
+            utctime = datetime.strptime(utctimestr, srctimeformat)
         except ValueError as err:
             self.log().error("Unable to convert time string %s. Error message: %s" % (utctimestr, str(err)))
             raise err
