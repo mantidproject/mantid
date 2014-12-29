@@ -32,7 +32,6 @@ class ExportExperimentLogTest(unittest.TestCase):
         # Locate file
         outfilename = alg_test.getProperty("OutputFilename").value
         try:
-            print "Output file is %s. " % (outfilename)
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
@@ -694,9 +693,8 @@ class ExportExperimentLogTest(unittest.TestCase):
         v5 = float(terms[5])
         self.assertAlmostEqual(avgpcharge, v5)
 
-        #
-        # # Remove generated files
-        #os.remove(outfilename)
+        # Remove generated files
+        os.remove(outfilename)
         AnalysisDataService.remove("TestMatrixWS")
 
         return

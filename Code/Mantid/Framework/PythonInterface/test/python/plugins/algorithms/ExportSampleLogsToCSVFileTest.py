@@ -196,8 +196,8 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         self.assertEquals(goodlines, 3)
 
         # Clean
-        #os.remove(outfilename)
-        #os.remove(headerfilename)
+        os.remove(outfilename)
+        os.remove(headerfilename)
         AnalysisDataService.remove("TestMatrixWS")
 
         return
