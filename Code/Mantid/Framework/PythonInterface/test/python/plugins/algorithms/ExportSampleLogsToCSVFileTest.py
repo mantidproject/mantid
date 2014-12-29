@@ -151,6 +151,58 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         return
 
 
+    def test_exportUTC(self):
+        """ Test to export logs without header file
+        """
+        import os
+        import os.path
+        # Generate the matrix workspace with some logs
+        ws = self.createTestWorkspace()
+        AnalysisDataService.addOrReplace("TestMatrixWS", ws)
+
+        # Test algorithm
+        alg_test = run_algorithm("ExportSampleLogsToCSVFile",
+            InputWorkspace = "TestMatrixWS",
+            OutputFilename = "furnace20339utc.txt",
+            SampleLogNames = ["SensorA", "SensorB", "SensorC"],
+            WriteHeaderFile = True,
+            TimeZone = 'UTC', 
+            Header = "SensorA[K]\t SensorB[K]\t SensorC[K]")
+
+        # Validate
+        self.assertTrue(alg_test.isExecuted())
+
+        # Locate file
+        outfilename = alg_test.getProperty("OutputFilename").value
+        filepath = os.path.dirname(outfilename)
+        basename = os.path.basename(outfilename)
+        baseheadername = basename.split(".")[0] + "_header.txt"
+        headerfilename = os.path.join(filepath, baseheadername)
+        try:
+            ifile = open(headerfilename)
+            lines = ifile.readlines()
+            ifile.close()
+        except IOError as err:
+            errmsg = "Unable to open header file %s. " % (headerfilename)
+            self.assertEquals(errmsg, "")
+            return
+
+        # Count lines in the file
+        goodlines = 0
+        for line in lines:
+            line = line.strip()
+            if len(line) > 0:
+                goodlines += 1
+        self.assertEquals(goodlines, 3)
+
+        # Clean
+        #os.remove(outfilename)
+        #os.remove(headerfilename)
+        AnalysisDataService.remove("TestMatrixWS")
+
+        return
+
+
     def test_exportFileMissingLog(self):
         """ Test to export logs without header file
         """
