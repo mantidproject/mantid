@@ -31,6 +31,47 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
+class MyPopErrorMsg(QWidget):
+    """ Pop up dialog window
+    """
+    def __init__(self):
+        """ Init
+        """
+        import Ui_ErrorMessage as errui
+        QWidget.__init__(self)
+
+
+        self.ui = errui.Ui_Dialog()
+        self.ui.setupUi(self)
+
+        QtCore.QObject.connect(self.ui.pushButton_quit, QtCore.SIGNAL('clicked()'), self.quit)
+
+    def setMessage(self, errmsg):
+        """ Set message
+        """
+        self.ui.label_errmsg.setWordWrap(True)
+        self.ui.label_errmsg.setText(errmsg)
+
+        return
+
+
+    def quit(self):
+        """ Quit
+        """
+        self.close()
+
+        return
+
+    def XpaintEvent(self, e):
+        """ ???
+        """
+        import Ui_ErrorMessage as errui
+
+        self.ui = errui.Ui_Dialog()
+        self.ui.setupUi(self)
+
+        return
+
 class MainWindow(QtGui.QMainWindow): 
     """ Class of Main Window (top)
 
@@ -632,7 +673,9 @@ class MainWindow(QtGui.QMainWindow):
 
         dataws = self._loadFile(str(filename))
         if dataws is None:
-            print "Unable to locate run %s in default directory %s." % (filename, self._defaultdir)
+            errmsg = "Unable to locate run %s in default directory %s." % (filename, self._defaultdir)
+            print errmsg
+            self._setErrorMsg(errmsg)
         else:
             self._importDataWorkspace(dataws)
             self._defaultdir = os.path.dirname(str(filename))
@@ -1128,16 +1171,21 @@ class MainWindow(QtGui.QMainWindow):
     def _clearErrorMsg(self):
         """ Clear error message
         """
-        self.ui.plainTextEdit_ErrorMsg.setPlainText("") 
-        self.ui.label_error.hide()
+        #self.ui.plainTextEdit_ErrorMsg.setPlainText("")
+        #self.ui.label_error.hide()
 
         return
 
     def _setErrorMsg(self, errmsg):
         """ Clear error message
         """ 
-        self.ui.plainTextEdit_ErrorMsg.setPlainText(errmsg) 
-        self.ui.label_error.show()
+        #self.ui.plainTextEdit_ErrorMsg.setPlainText(errmsg)
+        #self.ui.label_error.show()
+
+        #print "Testing Pop-up Error Message Window: %s" % (errmsg)
+        self._errMsgWindow = MyPopErrorMsg()
+        self._errMsgWindow.setMessage(errmsg)
+        self._errMsgWindow.show()
 
         return
 
