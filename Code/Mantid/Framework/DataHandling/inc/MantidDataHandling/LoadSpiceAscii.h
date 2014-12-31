@@ -55,6 +55,20 @@ namespace DataHandling
     /// Create data workspace
     API::ITableWorkspace_sptr createDataWS(const std::vector<std::vector<std::string> >& datalist,
                                            const std::vector<std::string> &titles);
+
+
+    /// Create run information workspace
+    API::MatrixWorkspace_sptr createRunInfoWS(std::map<std::string, std::string> runinfodict,
+                                              std::vector<std::string> floatlognamelist,
+                                              std::vector<std::string> intlognamelist,
+                                              std::vector<std::string> strlognamelist,
+                                              bool ignoreunlisted);
+
+    void addFloatProperty(API::MatrixWorkspace_sptr ws, const std::string &pname, float pvalue);
+
+    void addIntegerProperty(API::MatrixWorkspace_sptr ws, const std::string &pname, int ivalue);
+
+    void addStringProperty(API::MatrixWorkspace_sptr ws, const std::string &pname, const std::string& svalue);
   };
 
 

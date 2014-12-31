@@ -9,6 +9,9 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TableRow.h"
 
+#include <boost/algorithm/string/iter_find.hpp>
+#include <boost/algorithm/string/finder.hpp>
+
 using namespace boost::algorithm;
 
 using namespace Mantid::API;
@@ -19,6 +22,33 @@ namespace Mantid
 {
 namespace DataHandling
 {
+
+  static bool endswith(const std::string &s, const std::string &subs)
+  {
+    // s is not long enough
+    if (s.size() < subs.size())
+      return false;
+
+    // get a substring
+    std::string tail = s.substr(s.size()-subs.size());
+
+    if (tail.compare(subs) != 0)
+      return false;
+
+    return true;
+  }
+
+  static bool checkIntersection(std::vector<std::string> v1, std::vector<std::string> v2)
+  {
+    throw std::runtime_error("Implement ASAP");
+    return true;
+  }
+
+  static bool checkIntersection(std::set<std::string> v1, std::set<std::string> v2)
+  {
+    throw std::runtime_error("Implement ASAP");
+    return true;
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -195,14 +225,16 @@ namespace DataHandling
             g_log.warning("Something is not right.");
           runinfodict.insert(std::make_pair(terms[0], infovalue));
         }
-        else if (line.find('Pt.'))
+        else if (line.find("Pt."))
         {
           // Title line
           boost::split(titles, line, boost::is_any_of(" \t"));
         }
-        else if (line.endswith("scan completed") < line.size())
+        else if (endswith(line, "scan completed"))
         {
-          std::string time = splitByString(line, "scan completed");
+          std::vector<std::string> terms;
+          boost::iter_split(terms, line, boost::algorithm::first_finder("scan completed"));
+          std::string time = terms.back();
           boost::trim(time);
           runinfodict.insert(std::make_pair("runend", time));
         }
@@ -272,6 +304,103 @@ namespace DataHandling
 
     ITableWorkspace_sptr tablews = boost::dynamic_pointer_cast<ITableWorkspace>(outws);
     return tablews;
+  }
+
+
+  //-----------------------------------------
+  /** Create run information workspace
+   * @brief LoadSpiceAscii::createRunInfoWS
+   * @param runinfodict
+   * @param floatlognamelist
+   * @param intlognamelist
+   * @param strlognamelist
+   * @param ignoreunlisted
+   * @return
+   */
+  API::MatrixWorkspace_sptr LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
+                                                            std::vector<std::string> floatlognamelist,
+                                                            std::vector<std::string> intlognamelist,
+                                                            std::vector<std::string> strlognamelist,
+                                                            bool ignoreunlisted)
+  {
+    // Create an empty workspace
+    API::MatrixWorkspace_sptr infows
+        = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
+
+    throw std::runtime_error("Set up VerticalAxisUnit='SpectraNumber'");
+
+    // Sort
+    std::sort(floatlognamelist.begin(), floatlognamelist.end());
+    std::sort(intlognamelist.begin(), intlognamelist.end());
+    std::sort(strlognamelist.begin(), strlognamelist.end());
+
+    // Create sample log properties
+    std::map<std::string, std::string>::iterator miter;
+    for (miter = runinfodict.begin(); miter != runinfodict.end(); ++miter)
+    {
+      const std::string title = miter->first;
+      const std::string strvalue = miter->second;
+
+      if (std::find(floatlognamelist.begin(), floatlognamelist.end(), title) != floatlognamelist.end())
+      {
+        // Case as a double property
+        bool adderrorvalue = false;
+        double value, error;
+
+        // Convert to float value and error (if exists)
+        if (strvalue.find("+/-") != std::string::npos)
+        {
+          adderrorvalue = true;
+
+          std::vector<std::string> terms;
+          boost::iter_split(terms, strvalue, boost::algorithm::first_finder("+/-"));
+          value = atof(terms[0].c_str());
+          error = atof(terms[1].c_str());
+        }
+        else
+        {
+          value = atof(strvalue.c_str());
+          error = 0;
+        }
+
+        // Add properties
+        addFloatProperty(infows, title, value);
+        if (adderrorvalue)
+        {
+          std::stringstream tss;
+          tss << title << ".error";
+          addFloatProperty(infows, tss.str(), error);
+        }
+      }
+      else if (std::find(intlognamelist.begin(), intlognamelist.end(), title) != intlognamelist.end())
+      {
+        // It is an integer log
+        addIntegerProperty(infows, title, atoi(strvalue.c_str()));
+      }
+      else if (!ignoreunlisted || std::find(strlognamelist.begin(), strlognamelist.end(), title) != strlognamelist.end())
+      {
+        // It is a string log or it is not defined but not ignored either
+        addStringProperty(infows, title, strvalue);
+      }
+
+    }
+
+    return infows;
+  }
+
+  void LoadSpiceAscii::addFloatProperty(API::MatrixWorkspace_sptr ws, const std::string &pname, float pvalue)
+  {
+
+  }
+
+  void LoadSpiceAscii::addIntegerProperty(API::MatrixWorkspace_sptr ws, const std::string &pname, int ivalue)
+  {
+
+  }
+
+  void LoadSpiceAscii::addStringProperty(API::MatrixWorkspace_sptr ws, const std::string &pname, const std::string& svalue)
+  {
+
   }
 
 
