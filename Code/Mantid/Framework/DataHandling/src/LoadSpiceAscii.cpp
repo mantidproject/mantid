@@ -8,6 +8,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/FileLoaderRegistry.h"
 
 #include <boost/algorithm/string/iter_find.hpp>
 #include <boost/algorithm/string/finder.hpp>
@@ -22,6 +23,9 @@ namespace Mantid
 {
 namespace DataHandling
 {
+
+  // DECLARE_FILELOADER_ALGORITHM(LoadSpiceAscii)
+  DECLARE_ALGORITHM(LoadSpiceAscii)
 
   static bool endswith(const std::string &s, const std::string &subs)
   {
@@ -40,13 +44,17 @@ namespace DataHandling
 
   static bool checkIntersection(std::vector<std::string> v1, std::vector<std::string> v2)
   {
-    throw std::runtime_error("Implement ASAP");
-    return true;
-  }
+    // Sort
+    std::sort(v1.begin(), v1.end());
+    std::sort(v2.begin(), v2.end());
 
-  static bool checkIntersection(std::set<std::string> v1, std::set<std::string> v2)
-  {
-    throw std::runtime_error("Implement ASAP");
+    // Check intersectiom
+    std::vector<std::string> intersectvec(v1.size() + v2.size());
+    std::vector<std::string>::iterator outiter
+        = std::set_intersection(v1.begin(), v1.end(), v2.begin(), v2.end(), intersectvec.begin());
+    if (static_cast<int>(outiter-intersectvec.begin()) == 0)
+      return false;
+
     return true;
   }
 
@@ -64,6 +72,27 @@ namespace DataHandling
   {
   }
 
+  const std::string LoadSpiceAscii::name() const
+  {
+    return "LoadSpiceAscii";
+  }
+
+  int LoadSpiceAscii::version() const
+  {
+    return 1;
+  }
+
+  const std::string LoadSpiceAscii::category() const
+  {
+    return "DataHandling";
+  }
+
+  const std::string LoadSpiceAscii::summary() const
+  {
+    return "Load Spice data to workspaces in general.";
+  }
+
+
   //----------------------------------------------------------------------------------------------
   /** Declaration of properties
    */
@@ -75,13 +104,18 @@ namespace DataHandling
     declareProperty(new FileProperty("Filename", "", API::FileProperty::Load, exts),
                     "Name of SPICE data file.");
 
-    // Logs to be string type sample log
-    auto strspckeyprop = new ArrayProperty<std::string>("StringSampleLogNames", Direction::Input);
-    declareProperty(strspckeyprop, "List of log names that will be imported as string property.");
 
     // Logs to be float type sample log
     auto floatspckeyprop = new ArrayProperty<std::string>("FloatSampleLogNames", Direction::Input);
     declareProperty(floatspckeyprop, "List of log names that will be imported as float property.");
+
+    // Logs to be integer type sample log
+    auto intspckeyprop = new ArrayProperty<std::string>("IntegerSampleLogNames", Direction::Input);
+    declareProperty(intspckeyprop, "List of log names that will be imported as integer property.");
+
+    // Logs to be string type sample log
+    auto strspckeyprop = new ArrayProperty<std::string>("StringSampleLogNames", Direction::Input);
+    declareProperty(strspckeyprop, "List of log names that will be imported as string property.");
 
     declareProperty("IgnoreUnlistedLogs", false,
                     "If it is true, all log names are not listed in any of above 3 input lists will be ignored. "
@@ -102,10 +136,13 @@ namespace DataHandling
     */
   void LoadSpiceAscii::exec()
   {
+
+    g_log.notice("[DB] In....");
+
     // Input properties and validate
     std::string filename = getPropertyValue("Filename");
     std::vector<std::string> strlognames = getProperty("StringSampleLogNames");
-    std::vector<std::string> intlognames = getProperty("IntSampleLogNames");
+    std::vector<std::string> intlognames = getProperty("IntegerSampleLogNames");
     std::vector<std::string> floatlognames = getProperty("FloatSampleLogNames");
     bool ignoreunlisted = getProperty("IgnoreUnlistedLogs");
 
@@ -137,30 +174,18 @@ namespace DataHandling
                                             const std::vector<std::string> &intlognames,
                                             const std::vector<std::string>& strlognames)
   {
-    std::vector<std::set<std::string> > vec_logsets;
+    std::vector<std::vector<std::string> > vec_lognamelist;
+    vec_lognamelist.push_back(floatlognames);
+    vec_lognamelist.push_back(intlognames);
+    vec_lognamelist.push_back(strlognames);
 
-    std::set<std::string> fset;
-    for (size_t i = 0; i < floatlognames.size(); ++i)
-      fset.insert(floatlognames[i]);
-    vec_logsets.push_back(fset);
-
-    std::set<std::string> iset;
-    for (size_t i = 0; i < intlognames.size(); ++i)
-      iset.insert(intlognames[i]);
-    vec_logsets.push_back(iset);
-
-    std::set<std::string> sset;
-    for (size_t i = 0; i < strlognames.size(); ++i)
-      sset.insert(strlognames[i]);
-    vec_logsets.push_back(sset);
 
     // Check whther there is any intersction among 3 sets
     bool hascommon = false;
-    for (size_t i = 0; i < 3; ++i)
-    {
-      for (size_t j = 0; j < i; ++j)
+    for (size_t i = 0; i < 3; ++i)   
+      for (size_t j = i+1; j < 3; ++j)
       {
-        hascommon = checkIntersection(vec_logsets[i], vec_logsets[j]);
+        hascommon = checkIntersection(vec_lognamelist[i], vec_lognamelist[j]);
         if (hascommon)
         {
           std::stringstream ess;
@@ -169,7 +194,6 @@ namespace DataHandling
           break;
         }
       }
-    }
 
     return (!hascommon);
   }
@@ -212,29 +236,50 @@ namespace DataHandling
         line.erase(0, 1);
         boost::trim(line);
 
-        if (line.find('='))
+        if (line.find('=') != std::string::npos)
         {
           // run information line
           std::vector<std::string> terms;
           boost::split(terms, line, boost::is_any_of("="));
           boost::trim(terms[0]);
+          g_log.debug() << "[DB] Title = " << terms[0] << ", number of splitted terms = " << terms.size() << "\n";
           std::string infovalue("");
           if (terms.size() == 2)
-            boost::trim(terms[1]);
+          {
+            infovalue = terms[1];
+            boost::trim(infovalue);
+          }
+          else if (terms.size() > 2)
+          {
+            // Content contains '='
+            for (size_t j = 1; j < terms.size(); ++j)
+            {
+              if (j > 1)
+                infovalue += "=";
+              infovalue += terms[j];
+            }
+          }
           else
-            g_log.warning("Something is not right.");
+          {
+            std::stringstream wss;
+            wss << "Line '" << line << "' is hard to parse.  It has more than 1 '='.";
+            g_log.warning(wss.str());
+          }
           runinfodict.insert(std::make_pair(terms[0], infovalue));
         }
-        else if (line.find("Pt."))
+        else if (line.find("Pt.") != std::string::npos)
         {
           // Title line
-          boost::split(titles, line, boost::is_any_of(" \t"));
+          boost::split(titles, line, boost::is_any_of("\t\n "), boost::token_compress_on);
+          //g_log.notice() << "[DB] Title line is splitted to  " << titles.size() << " terms" << "\n";
+          //for (size_t k = 0; k < titles.size(); ++k)
+          //  g_log.notice() << "Title[" << k << "] = " << titles[k] << "\n";
         }
-        else if (endswith(line, "scan completed"))
+        else if (endswith(line, "scan completed."))
         {
           std::vector<std::string> terms;
-          boost::iter_split(terms, line, boost::algorithm::first_finder("scan completed"));
-          std::string time = terms.back();
+          boost::iter_split(terms, line, boost::algorithm::first_finder("scan completed."));
+          std::string time = terms.front();
           boost::trim(time);
           runinfodict.insert(std::make_pair("runend", time));
         }
@@ -250,10 +295,12 @@ namespace DataHandling
       {
         // data line
         std::vector<std::string> terms;
-        boost::split(terms, line, boost::is_any_of(" \t\n"));
+        boost::split(terms, line, boost::is_any_of(" \t\n"), boost::token_compress_on);
         datalist.push_back(terms);
       }
     }
+
+    g_log.notice() << "[DB] Run info dictionary has " << runinfodict.size() << " entries." << "\n";
 
     return;
   }
@@ -326,8 +373,11 @@ namespace DataHandling
     // Create an empty workspace
     API::MatrixWorkspace_sptr infows
         = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
+    Axis* yaxis = infows->getAxis(1);
 
-    throw std::runtime_error("Set up VerticalAxisUnit='SpectraNumber'");
+    /// TODO !
+    g_log.warning("Need to set unit label/whatever to Y axis as SpectraNumber!");
+    // yaxis->setUnit("SpectraNumber");
 
     // Sort
     std::sort(floatlognamelist.begin(), floatlognamelist.end());
@@ -340,6 +390,8 @@ namespace DataHandling
     {
       const std::string title = miter->first;
       const std::string strvalue = miter->second;
+
+      g_log.debug() << "Trying to add property " << title << " with value " << strvalue << "\n";
 
       if (std::find(floatlognamelist.begin(), floatlognamelist.end(), title) != floatlognamelist.end())
       {
@@ -388,19 +440,38 @@ namespace DataHandling
     return infows;
   }
 
+  //---
+  /** Add a property of float type
+   * @brief LoadSpiceAscii::addFloatProperty
+   * @param ws
+   * @param pname
+   * @param pvalue
+   */
   void LoadSpiceAscii::addFloatProperty(API::MatrixWorkspace_sptr ws, const std::string &pname, float pvalue)
   {
+    Run& therun = ws->mutableRun();
+    therun.addLogData(new PropertyWithValue<double>(pname, pvalue));
 
+    // g_log.notice() << "Added float proeprty " << pname << " with value " << pvalue << "\n";
+    return;
   }
 
   void LoadSpiceAscii::addIntegerProperty(API::MatrixWorkspace_sptr ws, const std::string &pname, int ivalue)
   {
-
+    Run& therun = ws->mutableRun();
+    therun.addLogData(new PropertyWithValue<int>(pname, ivalue));
+    return;
   }
 
   void LoadSpiceAscii::addStringProperty(API::MatrixWorkspace_sptr ws, const std::string &pname, const std::string& svalue)
   {
+    Run& therun = ws->mutableRun();
+    therun.addLogData(new PropertyWithValue<std::string>(pname, svalue));
 
+    // g_log.notice() << "Added string proeprty " << pname << " with value " << svalue
+    //              << " and ws has the property as " << ws->run().hasProperty(pname) << "\n";
+
+    return;
   }
 
 

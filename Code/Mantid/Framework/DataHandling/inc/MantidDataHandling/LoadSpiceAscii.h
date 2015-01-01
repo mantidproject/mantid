@@ -5,6 +5,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
 
+#include "MantidAPI/IFileLoader.h"
+
 namespace Mantid
 {
 namespace DataHandling
@@ -37,6 +39,11 @@ namespace DataHandling
   public:
     LoadSpiceAscii();
     virtual ~LoadSpiceAscii();
+
+    virtual const std::string name() const;
+    virtual int version() const;
+    virtual const std::string category() const;
+    virtual const std::string summary() const;
 
   private:
     void init();
