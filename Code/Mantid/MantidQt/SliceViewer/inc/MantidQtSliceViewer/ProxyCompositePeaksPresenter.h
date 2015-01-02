@@ -57,6 +57,8 @@ namespace MantidQt
       bool getIsHidden(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) const;
       /// Perform a requested update.
       void performUpdate();
+      /// Perform a peaks workspace replacement
+      void updatePeaksWorkspace(const std::string& toName, boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace);
       /// Register an updateable view
       void registerView(UpdateableOnDemand* view);
       /// Get optional zoomed peak presenter.

@@ -112,15 +112,40 @@ namespace MantidQt
       // Check that the workspaces appear to be compatible. Log if otherwise.
       checkWorkspaceCompatibilities(mdWS);
 
-      const bool transformSucceeded = this->configureMappingTransform();
+      this->initialize();
+    }
 
-      // Make and register each peak widget.
-      produceViews();
+    /**
+     * reInitialize the setup. Reuse the same presenter around a new peaks workspace.
+     * @param peaksWS : re-initialize around a peaks workspace
+     */
+    void ConcretePeaksPresenter::reInitialize(IPeaksWorkspace_sptr& peaksWS)
+    {
+        m_peaksWS = peaksWS;
 
-      if (!transformSucceeded)
-      {
-        hideAll();
-      }
+        // The view factory also needs an updated reference.
+        m_viewFactory->swapPeaksWorkspace(peaksWS);
+
+        this->initialize();
+
+        doFindPeaksInRegion();
+    }
+
+    /**
+     * @brief initialize inner components. Produces the views.
+     */
+    void ConcretePeaksPresenter::initialize()
+    {
+        const bool transformSucceeded = this->configureMappingTransform();
+
+        // Make and register each peak widget.
+        produceViews();
+
+        if (!transformSucceeded)
+        {
+          hideAll();
+        }
+
     }
 
     /**

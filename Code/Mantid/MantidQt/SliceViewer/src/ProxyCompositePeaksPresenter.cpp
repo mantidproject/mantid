@@ -130,6 +130,14 @@ namespace MantidQt
       }
     }
 
+    void ProxyCompositePeaksPresenter::updatePeaksWorkspace(const std::string &toName, boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace)
+    {
+        if(m_updateableView)
+        {
+            m_updateableView->updatePeaksWorkspace(toName, toWorkspace);
+        }
+    }
+
     bool ProxyCompositePeaksPresenter::getIsHidden(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) const
     {
       return m_compositePresenter->getIsHidden(peaksWS);

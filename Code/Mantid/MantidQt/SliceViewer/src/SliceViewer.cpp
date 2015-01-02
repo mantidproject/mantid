@@ -2349,7 +2349,19 @@ void SliceViewer::zoomToRectangle(const PeakBoundingBox& boundingBox)
  */
 void SliceViewer::resetView()
 {
-  this->resetZoom();
+    this->resetZoom();
+}
+
+void SliceViewer::peakWorkspaceChanged(const std::string &wsName, boost::shared_ptr<Mantid::API::IPeaksWorkspace>& changedPeaksWS)
+{
+    // Tell the composite presenter about it
+    m_peaksPresenter->notifyWorkspaceChanged(wsName, changedPeaksWS);
+}
+
+void SliceViewer::peakWorkspaceRemoved(const std::string &wsName, IPeaksWorkspace const * const removedPeaksWS)
+{
+    // Tell the composite presenter about it
+    m_peaksPresenter->notifyWorkspaceRemoved(wsName, removedPeaksWS);
 }
 
 void SliceViewer::onPeaksViewerOverlayOptions()

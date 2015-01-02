@@ -213,6 +213,41 @@ namespace MantidQt
       }
     }
 
+    void PeaksViewer::updatePeaksWorkspace(const std::string &toName, boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace)
+    {
+        /* Any widget with *toWorkspace*  peaks workspace being wrapped. Although, if that's the case, we don't need to perform
+         * a replacement, we only need to prompt the widget to update itself around the existing reference.
+         *
+         * Alternately, if the name is the same, but the workspace has changed, then we need to replace the workspace first.
+        */
+
+        // Now find the PeaksWorkspaceWidget corresponding to this workspace name.
+        QList<PeaksWorkspaceWidget*> children = qFindChildren<PeaksWorkspaceWidget*>(this);
+
+        for(int i = 0; i < children.size(); ++i)
+        {
+          PeaksWorkspaceWidget* candidateWidget = children.at(i);
+          if(candidateWidget->getWSName() == toWorkspace->getName())
+          {
+            // We have the right widget to update. Swap the workspace and redraw the table
+            candidateWidget->workspaceUpdate(toWorkspace);
+            return;
+          }
+        }
+        for(int i = 0; i < children.size(); ++i)
+        {
+          PeaksWorkspaceWidget* candidateWidget = children.at(i);
+          Mantid::API::IPeaksWorkspace_const_sptr candidateWorkspace = candidateWidget->getPeaksWorkspace();
+          if(candidateWorkspace == toWorkspace)
+          {
+            // We have the right widget to update. Workspace is the same, just redraw the table.
+            candidateWidget->workspaceUpdate();
+            return;
+          }
+        }
+
+    }
+
 
     /**
      * Slot called when the user wants to see the dialog for selecting

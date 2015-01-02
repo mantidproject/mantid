@@ -12,6 +12,15 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
 
+namespace Mantid
+{
+namespace API
+{
+// Forward declaration
+class IPeaksWorkspace;
+}
+}
+
 namespace MantidQt
 {
   namespace SliceViewer
@@ -42,6 +51,7 @@ namespace MantidQt
       virtual void zoomToPeak(const int) {/* Do nothing */ }
       virtual std::string getTransformName() const;
       virtual bool isHidden() const {return m_default->isHidden();}
+      virtual void reInitialize(boost::shared_ptr<Mantid::API::IPeaksWorkspace>& peaksWS) { /*Do nothing*/ }
       
       /// Constructor
       CompositePeaksPresenter(ZoomablePeaksView* const zoomablePlottingWidget,  PeaksPresenter_sptr defaultPresenter = PeaksPresenter_sptr(new NullPeaksPresenter));
@@ -99,7 +109,15 @@ namespace MantidQt
       boost::optional<PeaksPresenter_sptr> getZoomedPeakPresenter() const;
       /// Get optional zoomed peak index.
       int getZoomedPeakIndex() const;
+      /// Make notification that some workspace has been removed.
+      void notifyWorkspaceRemoved(const std::string &wsName, Mantid::API::IPeaksWorkspace const * const removedPeaksWS);
+      /// Make notification that some workspace has been changed.
+      void notifyWorkspaceChanged(const std::string &wsName, boost::shared_ptr<Mantid::API::IPeaksWorkspace>& changedPeaksWS);
+
+
     private:
+      /// Updateable on demand method.
+      void updatePeaksWorkspace(const std::string &toName, boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace);
       /// Alias for container of subjects type.
       typedef std::vector<PeaksPresenter_sptr> SubjectContainer;
       /// Subject presenters.
@@ -110,6 +128,8 @@ namespace MantidQt
       SubjectContainer::iterator getPresenterIteratorFromWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws);
       /// Get the presenter for a given workspace.
       SubjectContainer::const_iterator getPresenterIteratorFromWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
+      /// Get the presenter from a workspace name.
+      SubjectContainer::iterator getPresenterIteratorFromName(const QString &name);
       /// Colour pallette.
       PeakPalette m_palette;
       /// Zoomable peaks view.
@@ -122,6 +142,7 @@ namespace MantidQt
       boost::optional<PeaksPresenter_sptr> m_zoomedPresenter;
       /// index of peak zoomed in on.
       int m_zoomedPeakIndex;
+
     };
   }
 }

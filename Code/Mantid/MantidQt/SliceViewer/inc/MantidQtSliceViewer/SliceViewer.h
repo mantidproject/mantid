@@ -29,7 +29,16 @@
 #include <Poco/NObserver.h>
 #include "MantidAPI/Algorithm.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
+#include <boost/shared_ptr.hpp>
 
+
+namespace Mantid
+{
+namespace API
+{
+ class IPeaksWorkspace;
+}
+}
 namespace MantidQt
 {
 namespace SliceViewer
@@ -105,6 +114,10 @@ public:
   /* -- Methods from implementation of ZoomablePeaksView. --*/
   virtual void zoomToRectangle(const PeakBoundingBox& box);
   virtual void resetView();
+
+  /* Methods associated with workspace observers. Driven by SliceViewerWindow */
+  void peakWorkspaceChanged(const std::string& wsName, boost::shared_ptr<Mantid::API::IPeaksWorkspace>& changedPeaksWS);
+  void peakWorkspaceRemoved(const std::string& wsName, Mantid::API::IPeaksWorkspace const * const removePeaksWS);
 
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed

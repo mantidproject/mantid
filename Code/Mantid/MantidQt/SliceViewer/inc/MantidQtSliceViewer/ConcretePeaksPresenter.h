@@ -30,6 +30,7 @@ namespace MantidQt
     {
     public:
       ConcretePeaksPresenter(PeakOverlayViewFactory_sptr viewFactory, Mantid::API::IPeaksWorkspace_sptr peaksWS, boost::shared_ptr<Mantid::API::MDGeometry> mdWS, Mantid::API::PeakTransformFactory_sptr transformFactory);
+      void reInitialize(Mantid::API::IPeaksWorkspace_sptr& peaksWS);
       virtual ~ConcretePeaksPresenter();
       virtual void update();
       virtual void updateWithSlicePoint(const PeakBoundingBox& slicePoint);
@@ -89,6 +90,8 @@ namespace MantidQt
       void doFindPeaksInRegion();
       /// make owner update.
       void informOwnerUpdate();
+      /// initialize the setup
+      void initialize();
     };
 
   }

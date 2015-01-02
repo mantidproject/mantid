@@ -35,6 +35,7 @@ namespace MantidQt
       virtual void registerOwningPresenter(UpdateableOnDemand*) {};
       virtual void zoomToPeak(const int){};
       virtual bool isHidden() const {return true;}
+      virtual void reInitialize(boost::shared_ptr<Mantid::API::IPeaksWorkspace>& peaksWS) {/*Do nothing*/}
     };
 
   }

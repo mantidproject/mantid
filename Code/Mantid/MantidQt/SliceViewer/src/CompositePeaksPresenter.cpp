@@ -463,6 +463,24 @@ namespace MantidQt
       };
     }
 
+    CompositePeaksPresenter::SubjectContainer::iterator  CompositePeaksPresenter::getPresenterIteratorFromName(const QString& name)
+    {
+        MatchWorkspaceName comparitor(name);
+        SubjectContainer::iterator presenterFound = m_subjects.end();
+        for (auto presenterIterator = m_subjects.begin(); presenterIterator != m_subjects.end();
+            ++presenterIterator)
+        {
+          auto wsOfSubject = (*presenterIterator)->presentedWorkspaces();
+          SetPeaksWorkspaces::iterator iteratorFound = std::find_if(wsOfSubject.begin(), wsOfSubject.end(), comparitor);
+          if (iteratorFound != wsOfSubject.end())
+          {
+            presenterFound = presenterIterator;
+            break;
+          }
+        }
+        return presenterFound;
+    }
+
     /**
      * Get the peaks presenter correspoinding to a peaks workspace name.
      * @param name
@@ -470,19 +488,7 @@ namespace MantidQt
      */
     PeaksPresenter* CompositePeaksPresenter::getPeaksPresenter(const QString& name)
     {
-      MatchWorkspaceName comparitor(name);
-      SubjectContainer::iterator presenterFound = m_subjects.end();
-      for (auto presenterIterator = m_subjects.begin(); presenterIterator != m_subjects.end();
-          ++presenterIterator)
-      {
-        auto wsOfSubject = (*presenterIterator)->presentedWorkspaces();
-        SetPeaksWorkspaces::iterator iteratorFound = std::find_if(wsOfSubject.begin(), wsOfSubject.end(), comparitor);
-        if (iteratorFound != wsOfSubject.end())
-        {
-          presenterFound = presenterIterator;
-          break;
-        }
-      }
+      SubjectContainer::iterator presenterFound = this->getPresenterIteratorFromName(name);
       if(presenterFound == m_subjects.end())
       {
         throw std::invalid_argument("Cannot find peaks workspace called :" + name.toStdString());
@@ -557,7 +563,10 @@ namespace MantidQt
       m_zoomablePlottingWidget->zoomToRectangle(box);
       m_zoomedPresenter = *it;
       m_zoomedPeakIndex = peakIndex;
-      m_owner->performUpdate();
+      if(m_owner)
+      {
+          m_owner->performUpdate();
+      }
     }
 
     /**
@@ -580,7 +589,10 @@ namespace MantidQt
     {
       m_zoomedPeakIndex = -1;
       m_zoomedPresenter.reset();
-      m_owner->performUpdate(); // This tells any 'listening GUIs' to sort themselves out.
+      if(m_owner)
+      {
+          m_owner->performUpdate(); // This tells any 'listening GUIs' to sort themselves out.
+      }
     }
 
     /**
@@ -596,7 +608,51 @@ namespace MantidQt
      */
     int CompositePeaksPresenter::getZoomedPeakIndex() const
     {
-      return m_zoomedPeakIndex;
+        return m_zoomedPeakIndex;
+    }
+
+    void CompositePeaksPresenter::notifyWorkspaceRemoved(const std::string &wsName, const Mantid::API::IPeaksWorkspace * const removedPeaksWS)
+    {
+
+    }
+
+    void CompositePeaksPresenter::updatePeaksWorkspace(const std::string& toName, boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace)
+    {
+        if(m_owner)
+        {
+            m_owner->updatePeaksWorkspace(toName, toWorkspace);
+        }
+    }
+
+    void CompositePeaksPresenter::notifyWorkspaceChanged(const std::string &wsName, Mantid::API::IPeaksWorkspace_sptr& changedPeaksWS)
+    {
+        if(m_owner)
+        {
+        // Try to find the peaks workspace via location, in the case of changes involving in-place operations.
+        auto iterator = this->getPresenterIteratorFromWorkspace(changedPeaksWS);
+
+        // If the above strategy fails. Look for a presenter via a name.
+        if ( iterator ==  m_subjects.end() )
+        {
+            // Try to find the peaks workspace via name in the case of changes involving changes to ADS values, but no changes to keys (copy-swap type operations).
+
+            // The peaks workspace location may have changed, but the workspace name has not.
+            iterator = this->getPresenterIteratorFromName(wsName.c_str()); // TODO. don't ask the peaks workspace for it's name directly as it gets it from the workspace object, and that object would have been changed!
+            if ( iterator ==  m_subjects.end() )
+            {
+                return;
+            }
+        }
+        const int pos = static_cast<int>(std::distance(m_subjects.begin(), iterator));
+        m_subjects[pos]->reInitialize(changedPeaksWS);
+
+        auto presentedWorkspaces = m_subjects[pos]->presentedWorkspaces();
+        // We usually only have a single workspace, but just incase there are more.
+        for(SetPeaksWorkspaces::iterator it = presentedWorkspaces.begin(); it != presentedWorkspaces.end(); ++it)
+        {
+            m_owner->updatePeaksWorkspace(wsName, *it);
+        }
+        }
     }
 
   }

@@ -7,6 +7,15 @@
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/UpdateableOnDemand.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include <boost/shared_ptr.hpp>
+
+namespace Mantid
+{
+namespace API
+{
+class IPeaksWorkspace;
+}
+}
 
 namespace MantidQt
 {
@@ -26,6 +35,7 @@ public:
     void setPeaksWorkspaces(const SetPeaksWorkspaces& workspaces);
     void setPresenter(boost::shared_ptr<ProxyCompositePeaksPresenter> presenter);
     void performUpdate();
+    void updatePeaksWorkspace(const std::string &toName, boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace);
     void hide();
     ~PeaksViewer();
 public slots:

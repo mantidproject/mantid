@@ -24,6 +24,8 @@ namespace SliceViewer
     void setShowBackground(bool showBackground);
     void setHidden(bool isHidden);
     void setSelectedPeak(int index);
+    std::string getWSName() const;
+    void workspaceUpdate(Mantid::API::IPeaksWorkspace_const_sptr ws = Mantid::API::IPeaksWorkspace_const_sptr());
   signals:
     void peakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
     void backgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
@@ -35,6 +37,8 @@ namespace SliceViewer
   private:
     /// Populate the widget with model data.
     void populate();
+    /// Create the MVC table for peaks display
+    void createTableMVC();
     /// Auto-generated UI controls.
     Ui::PeaksWorkspaceWidget ui;
     /// Peaks workspace to view.
@@ -45,8 +49,10 @@ namespace SliceViewer
     QColor m_foregroundColour;
     /// Background colour
     QColor m_backgroundColour;
-
+    /// Original table width
     int m_originalTableWidth;
+    /// Workspace name.
+    QString m_nameText;
 
   private slots:
       void onBackgroundColourClicked();

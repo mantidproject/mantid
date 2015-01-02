@@ -64,6 +64,7 @@ namespace SliceViewer
     virtual void zoomToPeak(const int peakIndex) = 0;
     virtual bool isHidden() const = 0;
     virtual ~PeaksPresenter(){};
+    virtual void reInitialize(boost::shared_ptr<Mantid::API::IPeaksWorkspace>& peaksWS) = 0;
   };
 
 

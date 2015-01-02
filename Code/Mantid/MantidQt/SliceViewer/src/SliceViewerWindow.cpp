@@ -408,23 +408,44 @@ void SliceViewerWindow::changePlanarWidth(double width)
 void SliceViewerWindow::preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
   Mantid::API::IMDWorkspace * ws_ptr = dynamic_cast<Mantid::API::IMDWorkspace*>(ws.get());
-  if (!ws_ptr) return;
+  if (ws_ptr)
+  {
   if (ws_ptr == m_ws.get() || wsName == m_wsName)
   {
     emit needToClose();
   }
+  }
+  else
+  {
+      Mantid::API::IPeaksWorkspace_sptr new_peaks_ws =
+          boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(ws);
+      if (new_peaks_ws) {
+        // Delegate the deletion/removal issue to the slicer
+        m_slicer->peakWorkspaceRemoved(wsName, new_peaks_ws.get());
+      }
+  }
 }
 
 //------------------------------------------------------------------------------------------------
-/** Signal that the workspace being looked at was just replaced with a different one */
-void SliceViewerWindow::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
-{
-  Mantid::API::IMDWorkspace_sptr new_ws = boost::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(ws);
-  if (!new_ws) return;
-  if (new_ws.get() == m_ws.get() || wsName == m_wsName)
-  {
-    m_ws = new_ws;
-    emit needToUpdate();
+/** Signal that the workspace being looked at was just replaced with a different
+ * one */
+void SliceViewerWindow::afterReplaceHandle(
+    const std::string &wsName,
+    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+  Mantid::API::IMDWorkspace_sptr new_md_ws =
+      boost::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(ws);
+  if (new_md_ws) {
+    if (new_md_ws.get() == m_ws.get() || wsName == m_wsName) {
+      m_ws = new_md_ws;
+      emit needToUpdate();
+    }
+  } else {
+    Mantid::API::IPeaksWorkspace_sptr new_peaks_ws =
+        boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(ws);
+    if (new_peaks_ws) {
+      // Delegate the replacement issue to the slicer
+      m_slicer->peakWorkspaceChanged(wsName, new_peaks_ws);
+    }
   }
 }
 }//namespace SliceViewer

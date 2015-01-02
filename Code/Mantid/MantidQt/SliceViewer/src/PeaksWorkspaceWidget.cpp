@@ -72,11 +72,35 @@ namespace MantidQt
     /**
     Populate controls with data ready for rendering.
     */
+    void PeaksWorkspaceWidget::createTableMVC()
+    {
+        auto model = new QPeaksTableModel(this->m_ws);
+        connect(model, SIGNAL(peaksSorted(const std::string&, const bool)), this, SLOT(onPeaksSorted(const std::string&, const bool)));
+        ui.tblPeaks->setModel(model);
+        const std::vector<int> hideCols = model->defaultHideCols();
+        for (auto it = hideCols.begin(); it != hideCols.end(); ++it)
+          ui.tblPeaks->setColumnHidden(*it,true);
+        ui.tblPeaks->verticalHeader()->setResizeMode(QHeaderView::Interactive);
+        ui.tblPeaks->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
+        m_originalTableWidth = ui.tblPeaks->horizontalHeader()->length();
+
+        // calculate the average width (in pixels) of numbers
+        QString allNums("0123456789");
+        double char_width = static_cast<double>(ui.tblPeaks->fontMetrics().boundingRect(allNums).width())
+            / static_cast<double>(allNums.size());
+        // set the starting width of each column
+        for (int i = 0; i < m_originalTableWidth; ++i)
+        {
+          double width = static_cast<double>(model->numCharacters(i) + 3) * char_width;
+          ui.tblPeaks->horizontalHeader()->resizeSection(i, static_cast<int>(width));
+        }
+    }
+
     void PeaksWorkspaceWidget::populate()
     {
-      const QString nameText = QString(m_ws->name().c_str());
-      ui.lblWorkspaceName->setText(nameText);
-      ui.lblWorkspaceName->setToolTip(nameText);
+      m_nameText = QString(m_ws->name().c_str());
+      ui.lblWorkspaceName->setText(m_nameText);
+      ui.lblWorkspaceName->setToolTip(m_nameText);
 
       const QString integratedText = "Integrated: " + QString(m_ws->hasIntegratedPeaks() ? "Yes" : "No");
 
@@ -90,26 +114,8 @@ namespace MantidQt
       ui.btnBackgroundColor->setBackgroundColor(m_backgroundColour);
       ui.btnPeakColor->setBackgroundColor(m_foregroundColour);
 
-      auto model = new QPeaksTableModel(this->m_ws);
-      connect(model, SIGNAL(peaksSorted(const std::string&, const bool)), this, SLOT(onPeaksSorted(const std::string&, const bool)));
-      ui.tblPeaks->setModel(model);
-      const std::vector<int> hideCols = model->defaultHideCols();
-      for (auto it = hideCols.begin(); it != hideCols.end(); ++it)
-        ui.tblPeaks->setColumnHidden(*it,true);
-      ui.tblPeaks->verticalHeader()->setResizeMode(QHeaderView::Interactive);
-      ui.tblPeaks->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
-      m_originalTableWidth = ui.tblPeaks->horizontalHeader()->length();
-
-      // calculate the average width (in pixels) of numbers
-      QString allNums("0123456789");
-      double char_width = static_cast<double>(ui.tblPeaks->fontMetrics().boundingRect(allNums).width())
-          / static_cast<double>(allNums.size());
-      // set the starting width of each column
-      for (int i = 0; i < m_originalTableWidth; ++i)
-      {
-        double width = static_cast<double>(model->numCharacters(i) + 3) * char_width;
-        ui.tblPeaks->horizontalHeader()->resizeSection(i, static_cast<int>(width));
-      }
+      // Setup table
+      createTableMVC();
 
     }
 
@@ -241,6 +247,24 @@ namespace MantidQt
       ui.tblPeaks->clearSelection();
       ui.tblPeaks->setCurrentIndex(ui.tblPeaks->model()->index(index, 0));
 
+    }
+
+    std::string PeaksWorkspaceWidget::getWSName() const
+    {
+        return m_nameText.toStdString();
+    }
+
+    void PeaksWorkspaceWidget::workspaceUpdate(Mantid::API::IPeaksWorkspace_const_sptr ws)
+    {
+        // Only if we provide a peaks workspace for replacement.
+        if(ws)
+        {
+            m_ws = ws;
+        }
+        // Recreate the table.
+        createTableMVC();
+        // Update the display name of the workspace.
+        this->ui.lblWorkspaceName->setText(m_ws->getName().c_str());
     }
 
   } // namespace
