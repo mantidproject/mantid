@@ -136,9 +136,6 @@ namespace DataHandling
     */
   void LoadSpiceAscii::exec()
   {
-
-    g_log.notice("[DB] In....");
-
     // Input properties and validate
     std::string filename = getPropertyValue("Filename");
     std::vector<std::string> strlognames = getProperty("StringSampleLogNames");

@@ -130,6 +130,22 @@ public:
 
   }
 
+  void test_ThrowsException()
+  {
+    LoadSpiceAscii testalg;
+    testalg.initialize();
+
+    testalg.setProperty("Filename", "HB2A_exp0231_scan0001.dat");
+    testalg.setPropertyValue("StringSampleLogNames", "a, experiment, scan_title, b, proposal");
+    testalg.setPropertyValue("IntegerSampleLogNames", "a, Sum of Counts, scan, mode, experiment_number");
+    testalg.setPropertyValue("FloatSampleLogNames", "samplemosaic, preset_value, Full Width Half-Maximum, Center of Mass");
+    testalg.setPropertyValue("OutputWorkspace", "HB2A_0231_0001_Data");
+    testalg.setPropertyValue("RunInfoWorkspace", "HB2A_0231_Info2");
+    testalg.setProperty("IgnoreUnlistedLogs", true);
+
+    testalg.execute();
+    TS_ASSERT(!testalg.isExecuted());
+  }
 
 };
 
