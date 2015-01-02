@@ -234,9 +234,9 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.pushButton_refreshCorrWSList.hide()
 
         # Error message
-        self.connect(self.ui.pushButton_clearerror, SIGNAL('clicked()'), self._clearErrorMsg)
-        self.ui.plainTextEdit_ErrorMsg.setReadOnly(True)
-        self.ui.label_error.hide()
+        # self.connect(self.ui.pushButton_clearerror, SIGNAL('clicked()'), self._clearErrorMsg)
+        # self.ui.plainTextEdit_ErrorMsg.setReadOnly(True)
+        # self.ui.label_error.hide()
 
         # Set up for workspaces
         self._dataWS = None
@@ -318,10 +318,10 @@ class MainWindow(QtGui.QMainWindow):
             self._leftSlideValue = newx
 
             # Move the vertical line
-            xlim = self.ui.theplot.get_xlim()
+            xlim = self.ui.graphicsView.theplot().get_xlim()
             newx = xlim[0] + newx*(xlim[1] - xlim[0])*0.01
             leftx = [newx, newx]
-            lefty = self.ui.theplot.get_ylim()
+            lefty = self.ui.graphicsView.theplot().get_ylim()
             setp(self.leftslideline, xdata=leftx, ydata=lefty)
 
             self.ui.graphicsView.draw()
@@ -342,7 +342,7 @@ class MainWindow(QtGui.QMainWindow):
         inps = str(self.ui.lineEdit_3.text())
         print "Starting time = %s" % (inps)
        
-        xlim = self.ui.theplot.get_xlim()
+        xlim = self.ui.graphicsView.theplot().get_xlim()
         if inps == "":
             # Empty. Use default
             newtime0 = xlim[0]
@@ -377,7 +377,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Move the vertical line
         leftx = [newtime0, newtime0]
-        lefty = self.ui.theplot.get_ylim()
+        lefty = self.ui.graphicsView.theplot().get_ylim()
         setp(self.leftslideline, xdata=leftx, ydata=lefty)
 
         self.ui.graphicsView.draw()
@@ -399,10 +399,10 @@ class MainWindow(QtGui.QMainWindow):
             # Allowed value: move the value bar
             self._rightSlideValue = newx
 
-            xlim = self.ui.theplot.get_xlim()
+            xlim = self.ui.graphicsView.theplot().get_xlim()
             newx = xlim[0] + newx*(xlim[1] - xlim[0])*0.01
             leftx = [newx, newx]
-            lefty = self.ui.theplot.get_ylim()
+            lefty = self.ui.graphicsView.theplot().get_ylim()
             setp(self.rightslideline, xdata=leftx, ydata=lefty)
 
             self.ui.graphicsView.draw()
@@ -423,7 +423,7 @@ class MainWindow(QtGui.QMainWindow):
         inps = str(self.ui.lineEdit_4.text())
         print "Stopping time = %s" % (inps)
         
-        xlim = self.ui.theplot.get_xlim()
+        xlim = self.ui.graphicsView.theplot().get_xlim()
         if inps == "":
             # Empty. Use default
             newtimef = xlim[1]
@@ -456,7 +456,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Move the vertical line
         rightx = [newtimef, newtimef]
-        righty = self.ui.theplot.get_ylim()
+        righty = self.ui.graphicsView.theplot().get_ylim()
         setp(self.rightslideline, xdata=rightx, ydata=righty)
 
         self.ui.graphicsView.draw()
@@ -492,9 +492,9 @@ class MainWindow(QtGui.QMainWindow):
             setLineEdit = True
 
         # Move the lower vertical bar
-        ylim = self.ui.theplot.get_ylim()
+        ylim = self.ui.graphicsView.theplot().get_ylim()
         newy = ylim[0] + inewy*(ylim[1] - ylim[0])*0.01
-        lowerx = self.ui.theplot.get_xlim() 
+        lowerx = self.ui.graphicsView.theplot().get_xlim()
         lowery = [newy, newy]
         setp(self.lowerslideline, xdata=lowerx, ydata=lowery)
 
@@ -514,7 +514,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         print "Minimum Log Value = %s" %(str(self.ui.lineEdit_5.text()))
 
-        ylim = self.ui.theplot.get_ylim()
+        ylim = self.ui.graphicsView.theplot().get_ylim()
       
         if str(self.ui.lineEdit_5.text()) == "":
             # Empty. Default to minY
@@ -542,7 +542,7 @@ class MainWindow(QtGui.QMainWindow):
             newminY = ylim[0] + iminlogval * (ylim[1]-ylim[0]) * 0.01
 
         # Move the vertical line
-        lowerx =  self.ui.theplot.get_xlim()
+        lowerx =  self.ui.graphicsView.theplot().get_xlim()
         lowery =  [newminY, newminY]        
         setp(self.lowerslideline, xdata=lowerx, ydata=lowery)
 
@@ -580,9 +580,9 @@ class MainWindow(QtGui.QMainWindow):
             setLineEdit = True
 
         # Move the upper value bar: upperx and uppery are real value (float but not (0,100)) of the figure
-        ylim = self.ui.theplot.get_ylim()
+        ylim = self.ui.graphicsView.theplot().get_ylim()
         newy = ylim[0] + inewy*(ylim[1] - ylim[0])*0.01
-        upperx = self.ui.theplot.get_xlim() 
+        upperx = self.ui.graphicsView.theplot().get_xlim()
         uppery = [newy, newy]
         setp(self.upperslideline, xdata=upperx, ydata=uppery)
 
@@ -1243,7 +1243,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.checkBox_splitLog.setCheckState(False)
 
         # Error message
-        self.ui.plainTextEdit_ErrorMsg.clear()
+        # self.ui.plainTextEdit_ErrorMsg.clear()
 
         return
 
