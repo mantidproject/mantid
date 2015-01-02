@@ -220,7 +220,9 @@ namespace DataHandling
   /** Parse SPICE Ascii file to dictionary
    * @brief LoadSpiceAscii::parseSPICEAscii
    * @param filename
-   * @param a
+   * @param datalist
+   * @param titles
+   * @param runinfodict
    */
   void LoadSpiceAscii::parseSPICEAscii(const std::string &filename,
                                        std::vector<std::vector<std::string> > &datalist,
@@ -430,23 +432,23 @@ namespace DataHandling
         }
 
         // Add properties
-        addFloatProperty(infows, title, value);
+        addProperty<double>(infows, title, value);
         if (adderrorvalue)
         {
           std::stringstream tss;
           tss << title << ".error";
-          addFloatProperty(infows, tss.str(), error);
+          addProperty<double>(infows, tss.str(), error);
         }
       }
       else if (std::find(intlognamelist.begin(), intlognamelist.end(), title) != intlognamelist.end())
       {
         // It is an integer log
-        addIntegerProperty(infows, title, atoi(strvalue.c_str()));
+        addProperty<int>(infows, title, atoi(strvalue.c_str()));
       }
       else if (!ignoreunlisted || std::find(strlognamelist.begin(), strlognamelist.end(), title) != strlognamelist.end())
       {
         // It is a string log or it is not defined but not ignored either
-        addStringProperty(infows, title, strvalue);
+        addProperty<std::string>(infows, title, strvalue);
       }
 
     }
@@ -455,46 +457,16 @@ namespace DataHandling
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Add a property of float type
-   * @brief LoadSpiceAscii::addFloatProperty
+  /** Add property to workspace
+   * @brief LoadSpiceAscii::addProperty
    * @param ws
    * @param pname
    * @param pvalue
    */
-  void LoadSpiceAscii::addFloatProperty(API::MatrixWorkspace_sptr ws,
-                                        const std::string &pname,
-                                        double pvalue) {
-    Run& therun = ws->mutableRun();
-    therun.addLogData(new PropertyWithValue<double>(pname, pvalue));
-
-    return;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Add a property of integer type
-   * @brief LoadSpiceAscii::addIntegerProperty
-   * @param ws
-   * @param pname
-   * @param ivalue
-   */
-  void LoadSpiceAscii::addIntegerProperty(API::MatrixWorkspace_sptr ws, const std::string &pname, int ivalue)
-  {
-    Run& therun = ws->mutableRun();
-    therun.addLogData(new PropertyWithValue<int>(pname, ivalue));
-    return;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Add string property
-   * @brief LoadSpiceAscii::addStringProperty
-   * @param ws
-   * @param pname
-   * @param svalue
-   */
-  void LoadSpiceAscii::addStringProperty(API::MatrixWorkspace_sptr ws, const std::string &pname, const std::string& svalue)
-  {
-    Run& therun = ws->mutableRun();
-    therun.addLogData(new PropertyWithValue<std::string>(pname, svalue));
+  template <typename T>
+  void LoadSpiceAscii::addProperty(API::MatrixWorkspace_sptr ws,
+                                   const std::string &pname, T pvalue) {
+    ws->mutableRun().addLogData(new PropertyWithValue<T>(pname, pvalue));
 
     return;
   }
