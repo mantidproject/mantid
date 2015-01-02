@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ErrorMessage.ui'
 #
-# Created: Fri Jan  2 10:26:59 2015
+# Created: Fri Jan  2 15:48:09 2015
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,20 +26,18 @@ except AttributeError:
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName(_fromUtf8("Dialog"))
-        Dialog.resize(397, 244)
+        Dialog.resize(408, 262)
         Dialog.setMinimumSize(QtCore.QSize(40, 20))
-        self.widget = QtGui.QWidget(Dialog)
-        self.widget.setGeometry(QtCore.QRect(0, 0, 397, 245))
-        self.widget.setObjectName(_fromUtf8("widget"))
-        self.verticalLayout_3 = QtGui.QVBoxLayout(self.widget)
-        self.verticalLayout_3.setMargin(0)
+        self.gridLayout = QtGui.QGridLayout(Dialog)
+        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+        self.verticalLayout_3 = QtGui.QVBoxLayout()
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
         self.horizontalLayout_5 = QtGui.QHBoxLayout()
         self.horizontalLayout_5.setSizeConstraint(QtGui.QLayout.SetMinimumSize)
         self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_5.addItem(spacerItem)
-        self.label_title = QtGui.QLabel(self.widget)
+        self.label_title = QtGui.QLabel(Dialog)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -65,7 +63,7 @@ class Ui_Dialog(object):
         self.horizontalLayout_6.setObjectName(_fromUtf8("horizontalLayout_6"))
         spacerItem3 = QtGui.QSpacerItem(41, 146, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_6.addItem(spacerItem3)
-        self.label_errmsg = QtGui.QLabel(self.widget)
+        self.label_errmsg = QtGui.QLabel(Dialog)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -85,12 +83,15 @@ class Ui_Dialog(object):
         self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
         spacerItem6 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_7.addItem(spacerItem6)
-        self.pushButton_quit = QtGui.QPushButton(self.widget)
+        self.pushButton_quit = QtGui.QPushButton(Dialog)
         self.pushButton_quit.setObjectName(_fromUtf8("pushButton_quit"))
         self.horizontalLayout_7.addWidget(self.pushButton_quit)
         spacerItem7 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_7.addItem(spacerItem7)
         self.verticalLayout_3.addLayout(self.horizontalLayout_7)
+        self.gridLayout.addLayout(self.verticalLayout_3, 0, 0, 1, 1)
+        spacerItem8 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.gridLayout.addItem(spacerItem8, 1, 0, 1, 1)
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
