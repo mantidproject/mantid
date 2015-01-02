@@ -106,40 +106,27 @@ public:
     size_t numrows = datatbws->rowCount();
     TS_ASSERT_EQUALS(numrows, 61);
 
+    std::vector<std::string> colnames = datatbws->getColumnNames();
+    TS_ASSERT_EQUALS(colnames[0], "Pt.");
+
     Mantid::API::MatrixWorkspace_sptr runinfows = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
           AnalysisDataService::Instance().retrieve("HB2A_0231_Info2"));
     TS_ASSERT(runinfows);
 
+    std::vector<Mantid::Kernel::Property*> properties = runinfows->run().getProperties();
+    TS_ASSERT_EQUALS(properties.size(), 13);
 
-    /*
-     *
- 76
- 77         self.assertTrue(datatbws is not None)
- 78
- 79         numcols = datatbws.columnCount()
- 80         self.assertEquals(numcols, 70)
- 81
- 82         colnames = datatbws.getColumnNames()
- 83         self.assertEquals(colnames[0], "Pt.")
- 84
- 85         numrows = datatbws.rowCount()
- 86         self.assertEquals(numrows, 61)
- 87
- 88
- 89         self.assertTrue(runinfows is not None)
- 90
- 91         samplesloglist = runinfows.getRun().getProperties()
- 92         self.assertEquals(len(samplesloglist), 14) # 32 come with file and 1 native to workspace (run_title)
- 93
- 94         ipts = runinfows.getRun().getProperty('proposal').value
- 95         self.assertEquals(ipts, 'IPTS-6174')
- 96
- 97         mode = runinfows.getRun().getProperty('mode').value
- 98         self.assertEquals(mode, 3)
- 99
-100         comerr = runinfows.getRun().getProperty('Center of Mass.error').value
-101         self.assertEquals(comerr, 0.009214)
-*/
+    std::string ipts = runinfows->run().getProperty("proposal")->value();
+    TS_ASSERT_EQUALS(ipts, "IPTS-6174");
+
+    int mode = atoi(runinfows->run().getProperty("mode")->value().c_str());
+    TS_ASSERT_EQUALS(mode, 3);
+
+    double comerr = atof(runinfows->run().getProperty("Center of Mass.error")->value().c_str());
+    TS_ASSERT_DELTA(comerr, 0.009214, 0.000001);
+
+    AnalysisDataService::Instance().remove("HB2A_0231_0001_Data");
+    AnalysisDataService::Instance().remove("HB2A_0231_Info2");
 
   }
 
