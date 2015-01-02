@@ -72,21 +72,37 @@ namespace DataHandling
   {
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Name
+   * @brief LoadSpiceAscii::name
+   * @return
+   */
   const std::string LoadSpiceAscii::name() const
   {
     return "LoadSpiceAscii";
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Version
+   * @brief LoadSpiceAscii::version
+   * @return
+   */
   int LoadSpiceAscii::version() const
   {
     return 1;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Category
+   */
   const std::string LoadSpiceAscii::category() const
   {
     return "DataHandling";
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Summary
+   */
   const std::string LoadSpiceAscii::summary() const
   {
     return "Load Spice data to workspaces in general.";
@@ -131,8 +147,8 @@ namespace DataHandling
     return;
   }
 
-  //--
-  /**
+  //----------------------------------------------------------------------------------------------
+  /** Exec
     */
   void LoadSpiceAscii::exec()
   {
@@ -164,9 +180,14 @@ namespace DataHandling
     setProperty("RunInfoWorkspace", runinfows);
   }
 
-  //---
+  //----------------------------------------------------------------------------------------------
   /** Check whether 3 sets of values have intersection
-    */
+   * @brief LoadSpiceAscii::validateLogNamesType
+   * @param floatlognames
+   * @param intlognames
+   * @param strlognames
+   * @return
+   */
   bool LoadSpiceAscii::validateLogNamesType(const std::vector<std::string> &floatlognames,
                                             const std::vector<std::string> &intlognames,
                                             const std::vector<std::string>& strlognames)
@@ -195,7 +216,7 @@ namespace DataHandling
     return (!hascommon);
   }
 
-  //------------------------
+  //----------------------------------------------------------------------------------------------
   /** Parse SPICE Ascii file to dictionary
    * @brief LoadSpiceAscii::parseSPICEAscii
    * @param filename
@@ -302,8 +323,7 @@ namespace DataHandling
     return;
   }
 
-
-  //-----
+  //----------------------------------------------------------------------------------------------
   /** Create the table workspace containing experimental data
   Each row is a data point measured in experiment
    * @brief LoadSpiceAscii::createDataWS
@@ -350,8 +370,7 @@ namespace DataHandling
     return tablews;
   }
 
-
-  //-----------------------------------------
+  //----------------------------------------------------------------------------------------------
   /** Create run information workspace
    * @brief LoadSpiceAscii::createRunInfoWS
    * @param runinfodict
@@ -370,11 +389,9 @@ namespace DataHandling
     // Create an empty workspace
     API::MatrixWorkspace_sptr infows
         = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
-    Axis* yaxis = infows->getAxis(1);
 
-    /// TODO !
-    g_log.warning("Need to set unit label/whatever to Y axis as SpectraNumber!");
-    // yaxis->setUnit("SpectraNumber");
+    // SpectraNumber is the default setup for y-axis unit. It is not a unit
+    // indeed.
 
     // Sort
     std::sort(floatlognamelist.begin(), floatlognamelist.end());
@@ -437,22 +454,29 @@ namespace DataHandling
     return infows;
   }
 
-  //---
+  //----------------------------------------------------------------------------------------------
   /** Add a property of float type
    * @brief LoadSpiceAscii::addFloatProperty
    * @param ws
    * @param pname
    * @param pvalue
    */
-  void LoadSpiceAscii::addFloatProperty(API::MatrixWorkspace_sptr ws, const std::string &pname, float pvalue)
-  {
+  void LoadSpiceAscii::addFloatProperty(API::MatrixWorkspace_sptr ws,
+                                        const std::string &pname,
+                                        double pvalue) {
     Run& therun = ws->mutableRun();
     therun.addLogData(new PropertyWithValue<double>(pname, pvalue));
 
-    // g_log.notice() << "Added float proeprty " << pname << " with value " << pvalue << "\n";
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Add a property of integer type
+   * @brief LoadSpiceAscii::addIntegerProperty
+   * @param ws
+   * @param pname
+   * @param ivalue
+   */
   void LoadSpiceAscii::addIntegerProperty(API::MatrixWorkspace_sptr ws, const std::string &pname, int ivalue)
   {
     Run& therun = ws->mutableRun();
@@ -460,13 +484,17 @@ namespace DataHandling
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Add string property
+   * @brief LoadSpiceAscii::addStringProperty
+   * @param ws
+   * @param pname
+   * @param svalue
+   */
   void LoadSpiceAscii::addStringProperty(API::MatrixWorkspace_sptr ws, const std::string &pname, const std::string& svalue)
   {
     Run& therun = ws->mutableRun();
     therun.addLogData(new PropertyWithValue<std::string>(pname, svalue));
-
-    // g_log.notice() << "Added string proeprty " << pname << " with value " << svalue
-    //              << " and ws has the property as " << ws->run().hasProperty(pname) << "\n";
 
     return;
   }

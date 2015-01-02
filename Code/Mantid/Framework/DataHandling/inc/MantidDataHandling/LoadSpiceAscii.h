@@ -71,7 +71,8 @@ namespace DataHandling
                                               std::vector<std::string> strlognamelist,
                                               bool ignoreunlisted);
 
-    void addFloatProperty(API::MatrixWorkspace_sptr ws, const std::string &pname, float pvalue);
+    void addFloatProperty(API::MatrixWorkspace_sptr ws,
+                          const std::string &pname, double pvalue);
 
     void addIntegerProperty(API::MatrixWorkspace_sptr ws, const std::string &pname, int ivalue);
 

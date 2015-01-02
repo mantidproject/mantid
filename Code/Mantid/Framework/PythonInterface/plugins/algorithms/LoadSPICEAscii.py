@@ -235,4 +235,4 @@ class LoadSPICEAscii(PythonAlgorithm):
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(LoadSPICEAscii)
+# AlgorithmFactory.subscribe(LoadSPICEAscii)
