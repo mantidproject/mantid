@@ -660,6 +660,17 @@ public:
     EXPECT_CALL(*pPresenter, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pPresenter, presentedWorkspaces()).WillRepeatedly(Return(set));
 
+    /*
+
+      composite
+          |
+          |
+      -----
+      |
+      p1 (ws1, ws2)
+
+     */
+
     // Create the composite.
     CompositePeaksPresenter composite(&_fakeZoomableView);
     composite.addPeaksPresenter(presenter);
@@ -675,6 +686,193 @@ public:
     AnalysisDataService::Instance().remove("ws1");
     AnalysisDataService::Instance().remove("ws2");
   }
+
+  void test_lookup_presenters_via_workspace_names_using_getPeaksPresenter_continued()
+  {
+    using namespace Mantid::API;
+
+    //One nested presenter. Create setup environment.
+    IPeaksWorkspace_sptr peaksWS_1 = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+    IPeaksWorkspace_sptr peaksWS_2 = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+    AnalysisDataService::Instance().add("ws1", peaksWS_1);
+    AnalysisDataService::Instance().add("ws2", peaksWS_2);
+    SetPeaksWorkspaces set1;
+    set1.insert(peaksWS_1);
+    SetPeaksWorkspaces set2;
+    set2.insert(peaksWS_2);
+
+    MockPeaksPresenter* pPresenter1 = new MockPeaksPresenter;
+    PeaksPresenter_sptr presenter1(pPresenter1);
+
+    MockPeaksPresenter* pPresenter2 = new MockPeaksPresenter;
+    PeaksPresenter_sptr presenter2(pPresenter2);
+
+
+    EXPECT_CALL(*pPresenter1, registerOwningPresenter(_)).Times(AtLeast(1));
+    EXPECT_CALL(*pPresenter1, presentedWorkspaces()).WillRepeatedly(Return(set1));
+
+    EXPECT_CALL(*pPresenter2, registerOwningPresenter(_)).Times(AtLeast(1));
+    EXPECT_CALL(*pPresenter2, presentedWorkspaces()).WillRepeatedly(Return(set2));
+
+    // Create the composite.
+    CompositePeaksPresenter composite(&_fakeZoomableView);
+    composite.addPeaksPresenter(presenter1);
+    composite.addPeaksPresenter(presenter2);
+
+    /*
+
+      composite
+          |
+          |
+      -------------
+      |            |
+      p1 (ws1)     p2 (ws2)
+
+
+     */
+
+    // Now perform searches
+    PeaksPresenter* foundPresenter = composite.getPeaksPresenter(QString("ws1"));
+    TS_ASSERT_EQUALS(foundPresenter, pPresenter1)
+    foundPresenter = composite.getPeaksPresenter(QString("ws2"));
+    TS_ASSERT_EQUALS(foundPresenter, pPresenter2)
+
+    // Clean up.
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pPresenter1));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pPresenter2));
+    AnalysisDataService::Instance().remove("ws1");
+    AnalysisDataService::Instance().remove("ws2");
+  }
+
+  void test_notify_workspace_replaced_with_same_ADS_key()
+  {
+      using namespace Mantid::API;
+
+      //One nested presenter. Create setup environment.
+      IPeaksWorkspace_sptr peaksWS_1 = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+      IPeaksWorkspace_sptr peaksWS_2 = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+      AnalysisDataService::Instance().add("ws1", peaksWS_1);
+      AnalysisDataService::Instance().add("ws2", peaksWS_2);
+      SetPeaksWorkspaces set1;
+      set1.insert(peaksWS_1);
+      SetPeaksWorkspaces set2;
+      set2.insert(peaksWS_2);
+
+      MockPeaksPresenter* pPresenter1 = new MockPeaksPresenter;
+      PeaksPresenter_sptr presenter1(pPresenter1);
+
+      MockPeaksPresenter* pPresenter2 = new MockPeaksPresenter;
+      PeaksPresenter_sptr presenter2(pPresenter2);
+
+      EXPECT_CALL(*pPresenter1, registerOwningPresenter(_)).Times(AtLeast(1));
+      EXPECT_CALL(*pPresenter1, presentedWorkspaces()).WillRepeatedly(Return(set1));
+
+      EXPECT_CALL(*pPresenter2, registerOwningPresenter(_)).Times(AtLeast(1));
+      EXPECT_CALL(*pPresenter2, presentedWorkspaces()).WillRepeatedly(Return(set2));
+
+
+      // Create the composite.
+      CompositePeaksPresenter composite(&_fakeZoomableView);
+      composite.addPeaksPresenter(presenter1);
+      composite.addPeaksPresenter(presenter2);
+
+      /*
+
+        composite
+            |
+            |
+        -------------
+        |            |
+        p1 (ws1)     p2 (ws2)
+
+
+       */
+
+      /*
+      Same key different object.
+      Now we are going to replace ws2, and we expect the sub presenter for that to be informed.
+      */
+
+      EXPECT_CALL(*pPresenter2, reInitialize(_)).Times(1);
+
+      peaksWS_2 = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+      AnalysisDataService::Instance().addOrReplace("ws2", peaksWS_2); // Same key (name) different object.
+      composite.notifyWorkspaceChanged("ws2", peaksWS_2);
+
+      // Clean up.
+      TS_ASSERT(Mock::VerifyAndClearExpectations(pPresenter1));
+      TS_ASSERT(Mock::VerifyAndClearExpectations(pPresenter2));
+      AnalysisDataService::Instance().remove("ws1");
+      AnalysisDataService::Instance().remove("ws2");
+
+  }
+
+  void test_notify_workspace_renamed_in_ADS()
+  {
+      using namespace Mantid::API;
+
+      //One nested presenter. Create setup environment.
+      IPeaksWorkspace_sptr peaksWS_1 = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+      IPeaksWorkspace_sptr peaksWS_2 = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+      AnalysisDataService::Instance().add("ws1", peaksWS_1);
+      AnalysisDataService::Instance().add("ws2", peaksWS_2);
+      SetPeaksWorkspaces set1;
+      set1.insert(peaksWS_1);
+      SetPeaksWorkspaces set2;
+      set2.insert(peaksWS_2);
+
+      MockPeaksPresenter* pPresenter1 = new MockPeaksPresenter;
+      PeaksPresenter_sptr presenter1(pPresenter1);
+
+      MockPeaksPresenter* pPresenter2 = new MockPeaksPresenter;
+      PeaksPresenter_sptr presenter2(pPresenter2);
+
+
+      EXPECT_CALL(*pPresenter1, registerOwningPresenter(_)).Times(AtLeast(1));
+      EXPECT_CALL(*pPresenter1, presentedWorkspaces()).WillRepeatedly(Return(set1));
+
+      EXPECT_CALL(*pPresenter2, registerOwningPresenter(_)).Times(AtLeast(1));
+      EXPECT_CALL(*pPresenter2, presentedWorkspaces()).WillRepeatedly(Return(set2));
+
+
+      // Create the composite.
+      CompositePeaksPresenter composite(&_fakeZoomableView);
+      composite.addPeaksPresenter(presenter1);
+      composite.addPeaksPresenter(presenter2);
+
+      /*
+
+        composite
+            |
+            |
+        -------------
+        |            |
+        p1 (ws1)     p2 (ws2)
+
+
+       */
+
+      /*
+      Same object different key.
+      Now we are going to rename ws2, and we expect the sub presenter for that to be informed.
+
+      peaksWS_2 is already a worspace managed by one of the sub-presenters, so that subpresenter should be updated with the new name.
+      */
+      EXPECT_CALL(*pPresenter2, reInitialize(_)).Times(1);
+      AnalysisDataService::Instance().addOrReplace("ws3", peaksWS_2); // Same value (object) different key.
+      composite.notifyWorkspaceChanged("ws3", peaksWS_2);
+
+
+      // Clean up.
+      TS_ASSERT(Mock::VerifyAndClearExpectations(pPresenter1));
+      TS_ASSERT(Mock::VerifyAndClearExpectations(pPresenter2));
+      AnalysisDataService::Instance().remove("ws1");
+      AnalysisDataService::Instance().remove("ws2");
+      AnalysisDataService::Instance().remove("ws3");
+
+  }
+
+
 
 };
 

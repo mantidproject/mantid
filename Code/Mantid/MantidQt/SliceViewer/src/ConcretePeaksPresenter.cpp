@@ -119,14 +119,15 @@ namespace MantidQt
      * reInitialize the setup. Reuse the same presenter around a new peaks workspace.
      * @param peaksWS : re-initialize around a peaks workspace
      */
-    void ConcretePeaksPresenter::reInitialize(IPeaksWorkspace_sptr& peaksWS)
+    void ConcretePeaksPresenter::reInitialize(IPeaksWorkspace_sptr peaksWS)
     {
         m_peaksWS = peaksWS;
 
         // The view factory also needs an updated reference.
         m_viewFactory->swapPeaksWorkspace(peaksWS);
 
-        this->initialize();
+        // Make and register each peak widget.
+        produceViews();
 
         doFindPeaksInRegion();
     }
@@ -145,7 +146,6 @@ namespace MantidQt
         {
           hideAll();
         }
-
     }
 
     /**

@@ -613,7 +613,7 @@ namespace MantidQt
 
     void CompositePeaksPresenter::notifyWorkspaceRemoved(const std::string &wsName, const Mantid::API::IPeaksWorkspace * const removedPeaksWS)
     {
-
+        // TODO
     }
 
     void CompositePeaksPresenter::updatePeaksWorkspace(const std::string& toName, boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace)
@@ -626,8 +626,6 @@ namespace MantidQt
 
     void CompositePeaksPresenter::notifyWorkspaceChanged(const std::string &wsName, Mantid::API::IPeaksWorkspace_sptr& changedPeaksWS)
     {
-        if(m_owner)
-        {
         // Try to find the peaks workspace via location, in the case of changes involving in-place operations.
         auto iterator = this->getPresenterIteratorFromWorkspace(changedPeaksWS);
 
@@ -648,6 +646,8 @@ namespace MantidQt
 
         auto presentedWorkspaces = m_subjects[pos]->presentedWorkspaces();
         // We usually only have a single workspace, but just incase there are more.
+        if(m_owner)
+        {
         for(SetPeaksWorkspaces::iterator it = presentedWorkspaces.begin(); it != presentedWorkspaces.end(); ++it)
         {
             m_owner->updatePeaksWorkspace(wsName, *it);

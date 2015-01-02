@@ -51,7 +51,7 @@ namespace MantidQt
       virtual void zoomToPeak(const int) {/* Do nothing */ }
       virtual std::string getTransformName() const;
       virtual bool isHidden() const {return m_default->isHidden();}
-      virtual void reInitialize(boost::shared_ptr<Mantid::API::IPeaksWorkspace>& peaksWS) { /*Do nothing*/ }
+      virtual void reInitialize(boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS) { /*Do nothing*/ }
       
       /// Constructor
       CompositePeaksPresenter(ZoomablePeaksView* const zoomablePlottingWidget,  PeaksPresenter_sptr defaultPresenter = PeaksPresenter_sptr(new NullPeaksPresenter));
