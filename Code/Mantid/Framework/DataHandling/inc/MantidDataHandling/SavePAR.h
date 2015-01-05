@@ -3,10 +3,8 @@
 
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace DataHandling
-{
+namespace Mantid {
+namespace DataHandling {
 /**
  *  Saves a workspace into an ASCII PAR file.
  *
@@ -16,10 +14,12 @@ namespace DataHandling
  *    <LI> Filename - The filename for output </LI>
  *    </UL>
  *
- *     @author Alex Buts; after save PHX Sturat Cambell, ScD, Oak Ridge National Laboratory
+ *     @author Alex Buts; after save PHX Sturat Cambell, ScD, Oak Ridge National
+ *Laboratory
  *     @date 15/09/2011
  *
- *     Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ *     Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
+ *Ridge National Laboratory & European Spallation Source
  *
  *     This file is part of Mantid.
  *
@@ -36,11 +36,12 @@ namespace DataHandling
  *     You should have received a copy of the GNU General Public License
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *     File change history is stored at: <https://github.com/mantidproject/mantid>
+ *     File change history is stored at:
+ *<https://github.com/mantidproject/mantid>
  *     Code Documentation is available at: <http://doxygen.mantidproject.org>
  *
  */
-/*!  
+/*!
 *    an ASCII Tobyfit par file format:
 *
 *     par(6,ndet)         contents of array
@@ -55,38 +56,40 @@ namespace DataHandling
 *         6th  &quot;          DetID (m) \n
 *-----------------------------------------------------------------------
 */
-class DLLExport SavePAR : public Mantid::API::Algorithm
-{
+class DLLExport SavePAR : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
-  SavePAR() : Mantid::API::Algorithm()
-  {}
+  SavePAR() : Mantid::API::Algorithm() {}
   /// Virtual destructor
-  virtual ~SavePAR()
-  {}
+  virtual ~SavePAR() {}
   /// Algorithm's name
-  virtual const std::string name() const
-  { return "SavePAR";}
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Writes the detector geometry information of a workspace into a Tobyfit PAR format file.";}
+  virtual const std::string name() const { return "SavePAR"; }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Writes the detector geometry information of a workspace into a "
+           "Tobyfit PAR format file.";
+  }
 
   /// Algorithm's version
-  virtual int version() const
-  { return (1);}
+  virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const
-  { return "DataHandling\\SPE;Inelastic";}
-  /** the method used in tests. It requested the ChildAlgorithm, which does the detectors
-   *  position calculations to produce a target workspace This workspace then can be retrieved 
-      from analysis data service and used to check  the results of the save algorithm. */
-  void set_resulting_workspace(const std::string &ws_name){
-      det_par_ws_name=ws_name;
+  virtual const std::string category() const {
+    return "DataHandling\\SPE;Inelastic";
   }
+  /** the method used in tests. It requested the ChildAlgorithm, which does the
+   detectors
+   *  position calculations to produce a target workspace This workspace then
+   can be retrieved
+      from analysis data service and used to check  the results of the save
+   algorithm. */
+  void set_resulting_workspace(const std::string &ws_name) {
+    det_par_ws_name = ws_name;
+  }
+
 private:
-  
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
   /// The name of the table workpsace with detectors positions used in tests
   std::string det_par_ws_name;

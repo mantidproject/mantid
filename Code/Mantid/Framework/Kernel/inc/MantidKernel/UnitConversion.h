@@ -1,7 +1,8 @@
 #ifndef MANTID_KERNEL_UNITCONVERSION_H_
 #define MANTID_KERNEL_UNITCONVERSION_H_
 /**
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -25,50 +26,47 @@
 #include "MantidKernel/DllConfig.h"
 #include <string>
 
-namespace Mantid
-{
-  namespace Kernel
-  {
-    //-------------------------------------------------------------------------
-    // Forward declations
-    //-------------------------------------------------------------------------
-    class Unit;
+namespace Mantid {
+namespace Kernel {
+//-------------------------------------------------------------------------
+// Forward declarations
+//-------------------------------------------------------------------------
+class Unit;
 
-    /**
-     * A set of static helper methods to perform conversions between units
-     */
-    class MANTID_KERNEL_DLL UnitConversion
-    {
-    public:
-      /// Convert a single value between the given units (as strings)
-      static double run(const std::string & src, const std::string & dest,
-                        const double srcValue,
-                        const double l1, const double l2,
-                        const double twoTheta, const DeltaEMode::Type emode, const double efixed);
-      /// Convert a single value between the given units
-      static double run(Unit & srcUnit, Unit & destUnit,
-                        const double srcValue,
-                        const double l1, const double l2,
-                        const double twoTheta, const DeltaEMode::Type emode, const double efixed);
+/**
+ * A set of static helper methods to perform conversions between units
+ */
+class MANTID_KERNEL_DLL UnitConversion {
+public:
+  /// Convert a single value between the given units (as strings)
+  static double run(const std::string &src, const std::string &dest,
+                    const double srcValue, const double l1, const double l2,
+                    const double twoTheta, const DeltaEMode::Type emode,
+                    const double efixed);
+  /// Convert a single value between the given units
+  static double run(Unit &srcUnit, Unit &destUnit, const double srcValue,
+                    const double l1, const double l2, const double twoTheta,
+                    const DeltaEMode::Type emode, const double efixed);
 
-      /// Convert to ElasticQ
-      static double run(const double twoTheta, const double efixed);
+  /// Convert to ElasticQ
+  static double run(const double twoTheta, const double efixed);
 
-    private:
-      /// Perform a quick conversion
-      static double convertQuickly(const double srcValue, const double factor, const double power);
-      /// Convert through TOF
-      static double convertViaTOF(Unit & srcUnit, Unit & destUnit,
-                                  const double srcValue,
-                                  const double l1, const double l2,
-                                  const double twoTheta, const DeltaEMode::Type emode, const double efixed);
+private:
+  /// Perform a quick conversion
+  static double convertQuickly(const double srcValue, const double factor,
+                               const double power);
+  /// Convert through TOF
+  static double convertViaTOF(Unit &srcUnit, Unit &destUnit,
+                              const double srcValue, const double l1,
+                              const double l2, const double twoTheta,
+                              const DeltaEMode::Type emode,
+                              const double efixed);
 
-      /// Convert to ElasticQ from Energy
-      static double convertToElasticQ(const double twoTheta, const double efixed);
-    };
+  /// Convert to ElasticQ from Energy
+  static double convertToElasticQ(const double twoTheta, const double efixed);
+};
 
-
-  } // namespace Kernel
+} // namespace Kernel
 } // namespace Mantid
 
-#endif  /* MANTID_KERNEL_UNITCONVERSION_H_ */
+#endif /* MANTID_KERNEL_UNITCONVERSION_H_ */

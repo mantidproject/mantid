@@ -7,6 +7,7 @@ set ( SRC_FILES
 	src/BinMD.cpp
 	src/BinaryOperationMD.cpp
 	src/BooleanBinaryOperationMD.cpp
+	src/CalculateCoverageDGS.cpp
 	src/CentroidPeaksMD.cpp
 	src/CentroidPeaksMD2.cpp
 	src/CloneMDWorkspace.cpp
@@ -39,6 +40,7 @@ set ( SRC_FILES
 	src/LoadMD.cpp
 	src/LoadSQW.cpp
 	src/LogarithmMD.cpp
+	src/MDNormDirectSC.cpp
 	src/MDNormSCD.cpp
 	src/MaskMD.cpp
 	src/MergeMD.cpp
@@ -87,6 +89,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/BinMD.h
 	inc/MantidMDAlgorithms/BinaryOperationMD.h
 	inc/MantidMDAlgorithms/BooleanBinaryOperationMD.h
+	inc/MantidMDAlgorithms/CalculateCoverageDGS.h
 	inc/MantidMDAlgorithms/CentroidPeaksMD.h
 	inc/MantidMDAlgorithms/CentroidPeaksMD2.h
 	inc/MantidMDAlgorithms/CloneMDWorkspace.h
@@ -121,6 +124,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/LoadMD.h
 	inc/MantidMDAlgorithms/LoadSQW.h
 	inc/MantidMDAlgorithms/LogarithmMD.h
+	inc/MantidMDAlgorithms/MDNormDirectSC.h
 	inc/MantidMDAlgorithms/MDNormSCD.h
 	inc/MantidMDAlgorithms/MaskMD.h
 	inc/MantidMDAlgorithms/MergeMD.h
@@ -169,6 +173,7 @@ set ( TEST_FILES
 	AndMDTest.h
 	BooleanBinaryOperationMDTest.h
 	CachedExperimentInfoTest.h
+	CalculateCoverageDGSTest.h
 	CentroidPeaksMD2Test.h
 	CentroidPeaksMDTest.h
 	CloneMDWorkspaceTest.h
@@ -202,6 +207,7 @@ set ( TEST_FILES
 	LoadMDTest.h
 	LoadSQWTest.h
 	LogarithmMDTest.h
+	MDNormDirectSCTest.h
 	MDNormSCDTest.h
 	MDResolutionConvolutionFactoryTest.h
 	MaskMDTest.h

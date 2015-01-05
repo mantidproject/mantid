@@ -6,93 +6,91 @@
 #include "MantidAPI/FunctionDomainMD.h"
 #include "MantidAPI/FunctionValues.h"
 
-namespace Mantid
-{
-namespace MDAlgorithms
-{
+namespace Mantid {
+namespace MDAlgorithms {
 
-  using Mantid::Kernel::Direction;
-  using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
+using Mantid::API::WorkspaceProperty;
 
-  // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(EvaluateMDFunction)
-  
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(EvaluateMDFunction)
 
+//----------------------------------------------------------------------------------------------
+/** Constructor
+ */
+EvaluateMDFunction::EvaluateMDFunction() {}
 
-  //----------------------------------------------------------------------------------------------
-  /** Constructor
-   */
-  EvaluateMDFunction::EvaluateMDFunction()
-  {
-  }
-    
-  //----------------------------------------------------------------------------------------------
-  /** Destructor
-   */
-  EvaluateMDFunction::~EvaluateMDFunction()
-  {
-  }
-  
+//----------------------------------------------------------------------------------------------
+/** Destructor
+ */
+EvaluateMDFunction::~EvaluateMDFunction() {}
 
-  //----------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------
 
-  
-  /// Algorithm's version for identification. @see Algorithm::version
-  int EvaluateMDFunction::version() const { return 1;};
-  
-  /// Algorithm's category for identification. @see Algorithm::category
-  const std::string EvaluateMDFunction::category() const { return "MDAlgorithms";}
+/// Algorithm's version for identification. @see Algorithm::version
+int EvaluateMDFunction::version() const { return 1; };
 
-  /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-  const std::string EvaluateMDFunction::summary() const { return "Evaluates an MD function on a MD histo workspace.";};
+/// Algorithm's category for identification. @see Algorithm::category
+const std::string EvaluateMDFunction::category() const {
+  return "MDAlgorithms";
+}
 
-  //----------------------------------------------------------------------------------------------
-  /** Initialize the algorithm's properties.
-   */
-  void EvaluateMDFunction::init()
-  {
-    declareProperty(new WorkspaceProperty<API::IMDHistoWorkspace>("InputWorkspace","",Direction::Input), "An input workspace that provides dimensions for the output.");
-    declareProperty(new API::FunctionProperty("Function"),"Parameters defining the fitting function and its initial values");
-    declareProperty(new WorkspaceProperty<API::IMDHistoWorkspace>("OutputWorkspace","",Direction::Output), "An output workspace.");
-  }
+/// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
+const std::string EvaluateMDFunction::summary() const {
+  return "Evaluates an MD function on a MD histo workspace.";
+};
 
-  //----------------------------------------------------------------------------------------------
-  /** Execute the algorithm.
-   */
-  void EvaluateMDFunction::exec()
-  {
-    API::IMDHistoWorkspace_sptr input = getProperty("InputWorkspace");
+//----------------------------------------------------------------------------------------------
+/** Initialize the algorithm's properties.
+ */
+void EvaluateMDFunction::init() {
+  declareProperty(
+      new WorkspaceProperty<API::IMDHistoWorkspace>("InputWorkspace", "",
+                                                    Direction::Input),
+      "An input workspace that provides dimensions for the output.");
+  declareProperty(
+      new API::FunctionProperty("Function"),
+      "Parameters defining the fitting function and its initial values");
+  declareProperty(new WorkspaceProperty<API::IMDHistoWorkspace>(
+                      "OutputWorkspace", "", Direction::Output),
+                  "An output workspace.");
+}
 
-    auto cloner = API::AlgorithmManager::Instance().create("CloneMDWorkspace");
-    cloner->initialize();
-    cloner->setChild(true);
-    cloner->setProperty("InputWorkspace", input);
-    cloner->setPropertyValue("OutputWorkspace", "_");
-    cloner->execute();
+//----------------------------------------------------------------------------------------------
+/** Execute the algorithm.
+ */
+void EvaluateMDFunction::exec() {
+  API::IMDHistoWorkspace_sptr input = getProperty("InputWorkspace");
 
-    API::IMDWorkspace_sptr clone = cloner->getProperty("OutputWorkspace");
-    API::IMDHistoWorkspace_sptr output = boost::dynamic_pointer_cast<API::IMDHistoWorkspace>(clone);
+  auto cloner = API::AlgorithmManager::Instance().create("CloneMDWorkspace");
+  cloner->initialize();
+  cloner->setChild(true);
+  cloner->setProperty("InputWorkspace", input);
+  cloner->setPropertyValue("OutputWorkspace", "_");
+  cloner->execute();
 
-    if ( !output )
-      throw std::runtime_error("Cannot create output workspace");
+  API::IMDWorkspace_sptr clone = cloner->getProperty("OutputWorkspace");
+  API::IMDHistoWorkspace_sptr output =
+      boost::dynamic_pointer_cast<API::IMDHistoWorkspace>(clone);
 
-    API::IFunction_sptr function = getProperty("Function");
-    function->setWorkspace( output );
+  if (!output)
+    throw std::runtime_error("Cannot create output workspace");
 
-    API::FunctionDomainMD domain( output );
-    API::FunctionValues values( domain );
+  API::IFunction_sptr function = getProperty("Function");
+  function->setWorkspace(output);
 
-    function->function( domain, values );
+  API::FunctionDomainMD domain(output);
+  API::FunctionValues values(domain);
 
-    double *data = values.getPointerToCalculated(0);
-    size_t length = values.size();
-    double *outputData = output->getSignalArray();
-    std::copy( data, data + length, outputData );
+  function->function(domain, values);
 
-    setProperty("OutputWorkspace",output);
-  }
+  double *data = values.getPointerToCalculated(0);
+  size_t length = values.size();
+  double *outputData = output->getSignalArray();
+  std::copy(data, data + length, outputData);
 
-
+  setProperty("OutputWorkspace", output);
+}
 
 } // namespace MDAlgorithms
 } // namespace Mantid

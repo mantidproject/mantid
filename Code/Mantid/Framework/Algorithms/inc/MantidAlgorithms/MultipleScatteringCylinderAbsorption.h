@@ -7,19 +7,17 @@
 #include "MantidAPI/Algorithm.h"
 #include <vector>
 
-namespace Mantid
-{
-namespace Algorithms
-{
-/** Multiple scattering absorption correction, originally used to 
+namespace Mantid {
+namespace Algorithms {
+/** Multiple scattering absorption correction, originally used to
     correct vanadium spectrum at IPNS.  Algorithm originally worked
     out by Jack Carpenter and Asfia Huq and implmented in Java by
     Alok Chatterjee.  Translated to C++ by Dennis Mikkelson.
 
-    @author Dennis Mikkelson 
+    @author Dennis Mikkelson
     @date 17/08/2010
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & 
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory &
     NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -41,10 +39,8 @@ namespace Algorithms
                   <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport MultipleScatteringCylinderAbsorption : public API::Algorithm
-{
+class DLLExport MultipleScatteringCylinderAbsorption : public API::Algorithm {
 public:
-
   /// Default constructor
   MultipleScatteringCylinderAbsorption();
 
@@ -59,33 +55,34 @@ public:
 
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const;
-  
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Multiple scattering absorption correction, originally used to correct vanadium spectrum at IPNS.";}
+
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Multiple scattering absorption correction, originally used to "
+           "correct vanadium spectrum at IPNS.";
+  }
 
 private:
-
   // Overridden Algorithm methods
   void init();
   void exec();
 
   // Attenuation Factor
-  double AttFac(const double sigir, const double sigsr, const std::vector<double>& Z);
+  double AttFac(const double sigir, const double sigsr,
+                const std::vector<double> &Z);
 
   // Set up "Z" array for specified angle
-  void ZSet(const double angle_deg, std::vector<double>& Z);
+  void ZSet(const double angle_deg, std::vector<double> &Z);
 
   // Wavelength function
-  double wavelength( double path_length_m, double tof_us );
+  double wavelength(double path_length_m, double tof_us);
 
   /// MultipleScatteringCylinderAbsorption correction calculation.
-  void apply_msa_correction( double total_path,
-                             double angle_deg,
-                             double radius,
-                             double coeff1, double coeff2, double coeff3,
-                             std::vector<double>& tof,
-                             std::vector<double>& y_val,
-                             std::vector<double>&errors);
+  void apply_msa_correction(double total_path, double angle_deg, double radius,
+                            double coeff1, double coeff2, double coeff3,
+                            std::vector<double> &tof,
+                            std::vector<double> &y_val,
+                            std::vector<double> &errors);
 };
 
 } // namespace Algorithm

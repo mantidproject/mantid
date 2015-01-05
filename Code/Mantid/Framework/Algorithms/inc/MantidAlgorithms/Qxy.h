@@ -7,10 +7,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/GravitySANSHelper.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** This algorithm rebins a 2D workspace in units of wavelength into 2D Q.
     The result is stored in a 2D workspace with units of Q on both axes.
     @todo Doesn't (yet) calculate the errors.
@@ -18,17 +16,21 @@ namespace Algorithms
     Required Properties:
     <UL>
     <LI> InputWorkspace  - The corrected data in units of wavelength. </LI>
-    <LI> OutputWorkspace - The workspace in which to store data as x & y components of Q. </LI>
-    <LI> MaxQxy          - The upper limit of the Qx-Qy grid (goes from -MaxQxy to +MaxQxy). </LI>
+    <LI> OutputWorkspace - The workspace in which to store data as x & y
+   components of Q. </LI>
+    <LI> MaxQxy          - The upper limit of the Qx-Qy grid (goes from -MaxQxy
+   to +MaxQxy). </LI>
     <LI> DeltaQ          - The dimension of a Qx-Qy cell. </LI>
     <LI> AccountForGravity - If true, account for gravity. </LI>
-    <LI> SolidAngleWeighting - If true, pixels will be weighted by their solid angle. </LI>
+    <LI> SolidAngleWeighting - If true, pixels will be weighted by their solid
+   angle. </LI>
     </UL>
-    
+
     @author Russell Taylor, Tessella plc
     @date 09/04/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -48,8 +50,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Qxy : public API::Algorithm
-{
+class DLLExport Qxy : public API::Algorithm {
 public:
   /// (Empty) Constructor
   Qxy() : API::Algorithm() {}
@@ -57,8 +58,11 @@ public:
   virtual ~Qxy() {}
   /// Algorithm's name
   virtual const std::string name() const { return "Qxy"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Performs the final part of a SANS (LOQ/SANS2D) two dimensional (in Q) data reduction.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Performs the final part of a SANS (LOQ/SANS2D) two dimensional (in "
+           "Q) data reduction.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -66,13 +70,13 @@ public:
   virtual const std::string category() const { return "SANS"; }
 
 private:
-  
   /// Initialisation code
   void init();
   /// Execution code
   void exec();
 
-  API::MatrixWorkspace_sptr setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace);
+  API::MatrixWorkspace_sptr
+  setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace);
 };
 
 } // namespace Algorithms

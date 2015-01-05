@@ -1016,9 +1016,12 @@ else ()
 	# Make a ctest target for each file
 	foreach  ( PYFILE ${MANTIDPLOT_TEST_PY_FILES} )
 	 	# Add the test. Name of test = name of the file
-		ADD_TEST( ${PYFILE} ${MANTIDPLOT_PATH} -xq ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} )
+		add_test ( ${PYFILE} ${MANTIDPLOT_PATH} -xq ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} )
 		# Set the previously-built environment
-		set_tests_properties( ${PYFILE} PROPERTIES RUN_SERIAL 1 ENVIRONMENT "${TEST_ENVIRONMENT}")
+		set_tests_properties ( ${PYFILE} PROPERTIES
+                           RUN_SERIAL 1
+                           ENVIRONMENT "${TEST_ENVIRONMENT}"
+                           TIMEOUT ${TESTING_TIMEOUT} )
 	endforeach ()
 
     add_dependencies( GUITests MantidPlot )
@@ -1036,6 +1039,9 @@ install ( TARGETS MantidPlot RUNTIME DESTINATION ${BIN_DIR}
 install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR} )
 foreach(PY_FILE ${MTDPLOTPY_FILES} )
   install ( FILES pymantidplot/${PY_FILE} DESTINATION ${BIN_DIR}/pymantidplot )
+endforeach()
+foreach(FUT_PY_FILE ${FUTURE_FILES} )
+  install ( FILES pymantidplot/future/${FUT_PY_FILE} DESTINATION ${BIN_DIR}/pymantidplot/future )
 endforeach()
 foreach(PY_FILE ${IPY_FILES} )
   install ( FILES ipython_widget/${PY_FILE} DESTINATION ${BIN_DIR}/ipython_widget )

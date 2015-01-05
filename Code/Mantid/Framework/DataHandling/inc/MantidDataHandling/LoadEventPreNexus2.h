@@ -9,16 +9,14 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 
-
-namespace Mantid
-{
-  namespace DataHandling
-  {
+namespace Mantid {
+namespace DataHandling {
 /** @class Mantid::DataHandling::LoadEventPreNexus2
 
     A data loading routine for SNS pre-nexus event files
-    
-    Copyright &copy; 2010-11 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+
+    Copyright &copy; 2010-11 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -35,12 +33,11 @@ namespace Mantid
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>    
+    File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 
 /// This define is used to quickly turn parallel code on or off.
 #undef LOADEVENTPRENEXUS_ALLOW_PARALLEL
-
 
 /// Make the code clearer by having this an explicit type
 typedef int PixelType;
@@ -49,9 +46,8 @@ typedef int PixelType;
 typedef int DasTofType;
 
 /// Structure that matches the form in the binary event list.
-#pragma pack(push, 4) //Make sure the structure is 8 bytes.
-struct DasEvent
-{
+#pragma pack(push, 4) // Make sure the structure is 8 bytes.
+struct DasEvent {
   /// Time of flight.
   DasTofType tof;
   /// Pixel identifier as published by the DAS/DAE/DAQ.
@@ -59,11 +55,9 @@ struct DasEvent
 };
 #pragma pack(pop)
 
-
 /// Structure used as an intermediate for parallel processing of events
-#pragma pack(push, 4) //Make sure the structure is 8 bytes.
-struct IntermediateEvent
-{
+#pragma pack(push, 4) // Make sure the structure is 8 bytes.
+struct IntermediateEvent {
   /// Time of flight.
   DasTofType tof;
   /// Pixel identifier as published by the DAS/DAE/DAQ.
@@ -75,13 +69,11 @@ struct IntermediateEvent
 };
 #pragma pack(pop)
 
-
-
 /// Structure that matches the form in the new pulseid files.
-#pragma pack(push, 4) //Make sure the structure is 16 bytes.
-struct Pulse
-{
-  /// The number of nanoseconds since the seconds field. This is not necessarily less than one second.
+#pragma pack(push, 4) // Make sure the structure is 16 bytes.
+struct Pulse {
+  /// The number of nanoseconds since the seconds field. This is not necessarily
+  /// less than one second.
   uint32_t nanoseconds;
 
   /// The number of seconds since January 1, 1990.
@@ -95,9 +87,8 @@ struct Pulse
 };
 #pragma pack(pop)
 
-
-class DLLExport LoadEventPreNexus2 : public API::IFileLoader<Kernel::FileDescriptor>
-{
+class DLLExport LoadEventPreNexus2
+    : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Constructor
   LoadEventPreNexus2();
@@ -108,25 +99,29 @@ public:
   /// Algorithm's version
   virtual int version() const { return (2); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DataHandling\\PreNexus"; }
+  virtual const std::string category() const {
+    return "DataHandling\\PreNexus";
+  }
   /// Algorithm's aliases
   virtual const std::string alias() const { return "LoadEventPreNeXus2"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Loads SNS raw neutron event data format and stores it in a workspace.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Loads SNS raw neutron event data format and stores it in a "
+           "workspace.";
+  }
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::FileDescriptor & descriptor) const;
-  
-private:
+  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
 
+private:
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
 
-  Mantid::API::Progress * prog;
+  Mantid::API::Progress *prog;
 
   DataObjects::EventWorkspace_sptr localWorkspace; //< Output EventWorkspace
-  std::vector<int64_t> spectra_list; ///<the list of Spectra
+  std::vector<int64_t> spectra_list;               ///<the list of Spectra
 
   /// The times for each pulse.
   std::vector<Kernel::DateAndTime> pulsetimes;
@@ -136,7 +131,8 @@ private:
   std::vector<double> proton_charge;
   /// The total proton charge for the run.
   double proton_charge_tot;
-  /// The value of the vector is the workspace index. The index into it is the pixel ID from DAS
+  /// The value of the vector is the workspace index. The index into it is the
+  /// pixel ID from DAS
   std::vector<std::size_t> pixel_to_wkspindex;
   /// Map between the DAS pixel IDs and our pixel IDs, used while loading.
   std::vector<PixelType> pixelmap;
@@ -145,25 +141,26 @@ private:
   Mantid::detid_t detid_max;
 
   /// Handles loading from the event file
-  Mantid::Kernel::BinaryFile<DasEvent> * eventfile;
+  Mantid::Kernel::BinaryFile<DasEvent> *eventfile;
   std::size_t num_events; ///< The number of events in the file
   std::size_t num_pulses; ///<the number of pulses
-  uint32_t numpixel; ///<the number of pixels
+  uint32_t numpixel;      ///<the number of pixels
 
-  std::size_t num_good_events; ///< The number of good events loaded
+  std::size_t num_good_events;  ///< The number of good events loaded
   std::size_t num_error_events; ///< The number of error events encountered
   std::size_t num_bad_events; ///<The number of bad events. Part of error events
-  std::size_t num_wrongdetid_events; ///<The number of events with wrong detector IDs. Part of error events.
+  std::size_t num_wrongdetid_events; ///<The number of events with wrong
+  /// detector IDs. Part of error events.
   std::set<PixelType> wrongdetids; ///<set of all wrong detector IDs
   std::map<PixelType, size_t> wrongdetidmap;
-  std::vector<std::vector<Kernel::DateAndTime> > wrongdetid_pulsetimes;
-  std::vector<std::vector<double> > wrongdetid_tofs;
+  std::vector<std::vector<Kernel::DateAndTime>> wrongdetid_pulsetimes;
+  std::vector<std::vector<double>> wrongdetid_tofs;
 
-  /// the number of events that were ignored (not loaded) because, e.g. of only loading some spectra.
+  /// the number of events that were ignored (not loaded) because, e.g. of only
+  /// loading some spectra.
   std::size_t num_ignored_events;
-  std::size_t first_event;   ///< The first event to load (count from zero)
-  std::size_t max_events;    ///< Number of events to load
-
+  std::size_t first_event; ///< The first event to load (count from zero)
+  std::size_t max_events;  ///< Number of events to load
 
   /// Set to true if a valid Mapping file was provided.
   bool using_mapping_file;
@@ -187,8 +184,8 @@ private:
   /// sample environment event
   std::vector<detid_t> mSEids;
   std::map<size_t, detid_t> mSEmap;
-  std::vector<std::vector<int64_t> > mSEpulseids;
-  std::vector<std::vector<double> > mSEtofs;
+  std::vector<std::vector<int64_t>> mSEpulseids;
+  std::vector<std::vector<double>> mSEtofs;
 
   /// Investigation properties
   bool m_dbOutput;
@@ -202,16 +199,20 @@ private:
 
   void readPulseidFile(const std::string &filename, const bool throwError);
 
-  void runLoadInstrument(const std::string &eventfilename, API::MatrixWorkspace_sptr localWorkspace);
+  void runLoadInstrument(const std::string &eventfilename,
+                         API::MatrixWorkspace_sptr localWorkspace);
 
   inline void fixPixelId(PixelType &pixel, uint32_t &period) const;
 
-  void procEvents(DataObjects::EventWorkspace_sptr & workspace);
+  void procEvents(DataObjects::EventWorkspace_sptr &workspace);
 
-  void procEventsLinear(DataObjects::EventWorkspace_sptr & workspace, std::vector<DataObjects::TofEvent> ** arrayOfVectors, DasEvent * event_buffer,
-                        size_t current_event_buffer_size, size_t fileOffset, bool dbprint);
+  void procEventsLinear(DataObjects::EventWorkspace_sptr &workspace,
+                        std::vector<DataObjects::TofEvent> **arrayOfVectors,
+                        DasEvent *event_buffer,
+                        size_t current_event_buffer_size, size_t fileOffset,
+                        bool dbprint);
 
-  void setProtonCharge(DataObjects::EventWorkspace_sptr & workspace);
+  void setProtonCharge(DataObjects::EventWorkspace_sptr &workspace);
 
   void addToWorkspaceLog(std::string logtitle, size_t mindex);
 
@@ -227,9 +228,7 @@ private:
 
   /// Processing the input properties for purpose of investigation
   void processInvestigationInputs();
-
 };
-
-  }
+}
 }
 #endif /*LOADEVENTPRENEXUS_H_*/

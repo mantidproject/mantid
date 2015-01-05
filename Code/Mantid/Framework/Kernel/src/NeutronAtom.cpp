@@ -10,11 +10,9 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 
-namespace Mantid
-{
+namespace Mantid {
 
-namespace PhysicalConstants
-{
+namespace PhysicalConstants {
 
 /// Reference wavelength for absorption cross section values.
 const double NeutronAtom::ReferenceLambda = 1.7982;
@@ -29,15 +27,14 @@ const double NeutronAtom::ReferenceLambda = 1.7982;
  * @param tot_xs :: The total neutron cross-section
  * @param abs_xs :: The absolute neutron cross-section
  */
-NeutronAtom::NeutronAtom(const uint16_t z,
-                         const double coh_b_real, const double inc_b_real,
-                         const double coh_xs, const double inc_xs,
-                         const double tot_xs, const double abs_xs):
-                         z_number(z), a_number(0),
-                         coh_scatt_length_real(coh_b_real), coh_scatt_length_img(0.),
-                         inc_scatt_length_real(inc_b_real), inc_scatt_length_img(0.),
-                         coh_scatt_xs(coh_xs), inc_scatt_xs(inc_xs),
-                         tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {}
+NeutronAtom::NeutronAtom(const uint16_t z, const double coh_b_real,
+                         const double inc_b_real, const double coh_xs,
+                         const double inc_xs, const double tot_xs,
+                         const double abs_xs)
+    : z_number(z), a_number(0), coh_scatt_length_real(coh_b_real),
+      coh_scatt_length_img(0.), inc_scatt_length_real(inc_b_real),
+      inc_scatt_length_img(0.), coh_scatt_xs(coh_xs), inc_scatt_xs(inc_xs),
+      tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {}
 /**
  * Atom constructor
  * @param z :: The atomic number of the atom
@@ -52,12 +49,11 @@ NeutronAtom::NeutronAtom(const uint16_t z,
 NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
                          const double coh_b_real, const double inc_b_real,
                          const double coh_xs, const double inc_xs,
-                         const double tot_xs, const double abs_xs):
-                         z_number(z), a_number(a),
-                         coh_scatt_length_real(coh_b_real), coh_scatt_length_img(0.),
-                         inc_scatt_length_real(inc_b_real), inc_scatt_length_img(0.),
-                         coh_scatt_xs(coh_xs), inc_scatt_xs(inc_xs),
-                         tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {}
+                         const double tot_xs, const double abs_xs)
+    : z_number(z), a_number(a), coh_scatt_length_real(coh_b_real),
+      coh_scatt_length_img(0.), inc_scatt_length_real(inc_b_real),
+      inc_scatt_length_img(0.), coh_scatt_xs(coh_xs), inc_scatt_xs(inc_xs),
+      tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {}
 /**
  * Atom constructor
  * @param z :: The atomic number of the atom
@@ -75,53 +71,51 @@ NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
                          const double coh_b_real, const double coh_b_img,
                          const double inc_b_real, const double inc_b_img,
                          const double coh_xs, const double inc_xs,
-                         const double tot_xs, const double abs_xs):
-                         z_number(z), a_number(a),
-                         coh_scatt_length_real(coh_b_real), coh_scatt_length_img(coh_b_img),
-                         inc_scatt_length_real(inc_b_real), inc_scatt_length_img(inc_b_img),
-                         coh_scatt_xs(coh_xs), inc_scatt_xs(inc_xs),
-                         tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {}
+                         const double tot_xs, const double abs_xs)
+    : z_number(z), a_number(a), coh_scatt_length_real(coh_b_real),
+      coh_scatt_length_img(coh_b_img), inc_scatt_length_real(inc_b_real),
+      inc_scatt_length_img(inc_b_img), coh_scatt_xs(coh_xs),
+      inc_scatt_xs(inc_xs), tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {}
 
 /// Copy constructor.
-NeutronAtom::NeutronAtom(const NeutronAtom& other):
-             z_number(other.z_number), a_number(other.a_number),
-             coh_scatt_length_real(other.coh_scatt_length_real),
-             coh_scatt_length_img(other.coh_scatt_length_img),
-             inc_scatt_length_real(other.inc_scatt_length_real),
-             inc_scatt_length_img(other.inc_scatt_length_img),
-             coh_scatt_xs(other.coh_scatt_xs),
-             inc_scatt_xs(other.inc_scatt_xs),
-             tot_scatt_xs(other.tot_scatt_xs),
-             abs_scatt_xs(other.abs_scatt_xs)
-{}
-
+NeutronAtom::NeutronAtom(const NeutronAtom &other)
+    : z_number(other.z_number), a_number(other.a_number),
+      coh_scatt_length_real(other.coh_scatt_length_real),
+      coh_scatt_length_img(other.coh_scatt_length_img),
+      inc_scatt_length_real(other.inc_scatt_length_real),
+      inc_scatt_length_img(other.inc_scatt_length_img),
+      coh_scatt_xs(other.coh_scatt_xs), inc_scatt_xs(other.inc_scatt_xs),
+      tot_scatt_xs(other.tot_scatt_xs), abs_scatt_xs(other.abs_scatt_xs) {}
 
 /**
  * DO NOT USE THIS! This constructor generates a complete garbage NeutronAtom
  * that is only available to allow for callers to declare variables then
  * initialize them.
  */
-NeutronAtom::NeutronAtom():
-  z_number(0), a_number(0),
-  coh_scatt_length_real(NAN), coh_scatt_length_img(NAN),
-  inc_scatt_length_real(NAN), inc_scatt_length_img(NAN),
-  coh_scatt_xs(NAN), inc_scatt_xs(NAN),
-  tot_scatt_xs(NAN), abs_scatt_xs(NAN) {}
+NeutronAtom::NeutronAtom()
+    : z_number(0), a_number(0), coh_scatt_length_real(NAN),
+      coh_scatt_length_img(NAN), inc_scatt_length_real(NAN),
+      inc_scatt_length_img(NAN), coh_scatt_xs(NAN), inc_scatt_xs(NAN),
+      tot_scatt_xs(NAN), abs_scatt_xs(NAN) {}
 
 /// @cond
-static const NeutronAtom H( 1, -3.7390, 0., 1.7568, 80.26, 82.02, 0.3326);
-static const NeutronAtom H1(1, 1, -3.7406, 25.274, 1.7583, 80.27, 82.03, 0.3326);
+static const NeutronAtom H(1, -3.7390, 0., 1.7568, 80.26, 82.02, 0.3326);
+static const NeutronAtom H1(1, 1, -3.7406, 25.274, 1.7583, 80.27, 82.03,
+                            0.3326);
 static const NeutronAtom H2(1, 2, 6.671, 4.04, 5.592, 2.05, 7.64, 0.000519);
 static const NeutronAtom H3(1, 3, 4.792, -1.04, 2.89, 0.14, 3.03, 0.);
 static const NeutronAtom He(2, 3.26, 0., 1.34, 0., 1.34, 0.00747);
-static const NeutronAtom He3(2, 3, 5.74, -1.483, -2.5, 2.568, 4.42, 1.6, 6, 5333.);
+static const NeutronAtom He3(2, 3, 5.74, -1.483, -2.5, 2.568, 4.42, 1.6, 6,
+                             5333.);
 static const NeutronAtom He4(2, 4, 3.26, 0., 1.34, 0., 1.34, 0.);
 static const NeutronAtom Li(3, -1.90, 0., 0.454, 0.92, 1.37, 70.5);
-static const NeutronAtom Li6(3, 6, 2.00, -0.261, -1.89, 0.26, 0.51, 0.46, 0.97, 940.);
+static const NeutronAtom Li6(3, 6, 2.00, -0.261, -1.89, 0.26, 0.51, 0.46, 0.97,
+                             940.);
 static const NeutronAtom Li7(3, 7, -2.22, -2.49, 0.619, 0.78, 1.4, 0.0454);
 static const NeutronAtom Be(4, 7.79, 0.12, 7.63, 0.0018, 7.63, 0.0076);
 static const NeutronAtom B(5, 0, 5.30, -0.213, 0., 0., 3.54, 1.7, 5.24, 767.);
-static const NeutronAtom B10(5, 10, -0.1, -1.066, -4.7, 1.231, 0.144, 3, 3.1, 3835.);
+static const NeutronAtom B10(5, 10, -0.1, -1.066, -4.7, 1.231, 0.144, 3, 3.1,
+                             3835.);
 static const NeutronAtom B11(5, 11, 6.65, -1.3, 5.56, 0.21, 5.77, 0.0055);
 static const NeutronAtom C(6, 6.6460, 0., 5.551, 0.001, 5.551, 0.0035);
 static const NeutronAtom C12(6, 12, 6.6511, 0., 5.559, 0., 5.559, 0.00353);
@@ -136,7 +130,8 @@ static const NeutronAtom O18(8, 18, 5.84, 0., 4.29, 0., 4.29, 0.00016);
 static const NeutronAtom F(9, 5.654, -0.082, 4.017, 0.0008, 4.018, 0.0096);
 static const NeutronAtom Ne(10, 4.566, 0., 2.62, 0.008, 2.628, 0.039);
 static const NeutronAtom Ne20(10, 20, 4.631, 0., 2.695, 0., 2.695, 0.036);
-static const NeutronAtom Ne21(10, 21, 6.66, NAN, 5.6, 0.05, 5.7, 0.67); // (+/-)0.6
+static const NeutronAtom Ne21(10, 21, 6.66, NAN, 5.6, 0.05, 5.7,
+                              0.67); // (+/-)0.6
 static const NeutronAtom Ne22(10, 22, 3.87, 0., 1.88, 0., 1.88, 0.046);
 static const NeutronAtom Na(11, 3.63, 3.59, 1.66, 1.62, 3.28, 0.53);
 static const NeutronAtom Mg(12, 5.375, 0., 3.631, 0.08, 3.71, 0.063);
@@ -196,8 +191,9 @@ static const NeutronAtom Fe58(26, 58, 15., 0., 28, 0., 28., 1.28);
 static const NeutronAtom Co(27, 2.49, -6.2, 0.779, 4.8, 5.6, 37.18);
 static const NeutronAtom Ni(28, 10.3, 0., 13.3, 5.2, 18.5, 4.49);
 static const NeutronAtom Ni58(28, 58, 14.4, 0., 26.1, 0., 26.1, 4.6);
-static const NeutronAtom Ni60(28, 60,  2.8, 0., 0.99, 0., 0.99, 2.9);
-static const NeutronAtom Ni61(28, 61, 7.60, NAN, 7.26, 1.9, 9.2, 2.5); // (+/-)3.9
+static const NeutronAtom Ni60(28, 60, 2.8, 0., 0.99, 0., 0.99, 2.9);
+static const NeutronAtom Ni61(28, 61, 7.60, NAN, 7.26, 1.9, 9.2,
+                              2.5); // (+/-)3.9
 static const NeutronAtom Ni62(28, 62, -8.7, 0., 9.5, 0., 9.5, 14.5);
 static const NeutronAtom Ni64(28, 64, -0.37, 0., 0.017, 0., 0.017, 1.52);
 static const NeutronAtom Cu(29, 7.718, 0., 7.485, 0.55, 8.03, 3.78);
@@ -222,7 +218,8 @@ static const NeutronAtom As(33, 6.58, -0.69, 5.44, 0.06, 5.5, 4.5);
 static const NeutronAtom Se(34, 7.970, 0., 7.98, 0.32, 8.3, 11.7);
 static const NeutronAtom Se74(34, 74, 0.8, 0., 0.1, 0., 0.1, 51.8);
 static const NeutronAtom Se76(34, 76, 12.2, 0., 18.7, 0., 18.7, 85.);
-static const NeutronAtom Se77(34, 77, 8.25, NAN, 8.6, 0.05, 8.65, 42.); // (+/-)0.6(1.6)
+static const NeutronAtom Se77(34, 77, 8.25, NAN, 8.6, 0.05, 8.65,
+                              42.); // (+/-)0.6(1.6)
 static const NeutronAtom Se78(34, 78, 8.24, 0., 8.5, 0., 8.5, 0.43);
 static const NeutronAtom Se80(34, 80, 7.48, 0., 7.03, 0., 7.03, 0.61);
 static const NeutronAtom Se82(34, 82, 6.34, 0., 5.05, 0., 5.05, 0.044);
@@ -280,18 +277,22 @@ static const NeutronAtom Pd110(46, 110, 7.7, 0., 7.5, 0., 7.5, 0.226);
 static const NeutronAtom Ag(47, 5.922, 0., 4.407, 0.58, 4.99, 63.3);
 static const NeutronAtom Ag107(47, 107, 7.555, 1.00, 7.17, 0.13, 7.3, 37.6);
 static const NeutronAtom Ag109(47, 109, 4.165, -1.60, 2.18, 0.32, 2.5, 91.0);
-static const NeutronAtom Cd(48, 0, 4.87,-0.70, 0., 0., 3.04, 3.46, 6.5, 2520.);
+static const NeutronAtom Cd(48, 0, 4.87, -0.70, 0., 0., 3.04, 3.46, 6.5, 2520.);
 static const NeutronAtom Cd106(48, 106, 5., 0., 3.1, 0., 3.1, 1);
 static const NeutronAtom Cd108(48, 108, 5.4, 0., 3.7, 0., 3.7, 1.1);
 static const NeutronAtom Cd110(48, 110, 5.9, 0., 4.4, 0., 4.4, 11);
 static const NeutronAtom Cd111(48, 111, 6.5, 0., 5.3, 0.3, 5.6, 24);
 static const NeutronAtom Cd112(48, 112, 6.4, 0., 5.1, 0., 5.1, 2.2);
-static const NeutronAtom Cd113(48, 113, -8.0, -5.73, 0., 0., 12.1, 0.3, 12.4, 20600.);
+static const NeutronAtom Cd113(48, 113, -8.0, -5.73, 0., 0., 12.1, 0.3, 12.4,
+                               20600.);
 static const NeutronAtom Cd114(48, 114, 7.5, 0., 7.1, 0., 7.1, 0.34);
 static const NeutronAtom Cd116(48, 116, 6.3, 0., 5, 0., 5, 0.075);
-static const NeutronAtom In(49, 0, 4.065, -0.0539, 0., 0., 2.08, 0.54, 2.62, 193.8);
-static const NeutronAtom In113(49, 113, 5.39, NAN, 3.65, 0.000037, 3.65, 12.0); // (+/-)0.017
-static const NeutronAtom In115(49, 115, 4.01, -0.0562, -2.1, 0., 2.02, 0.55, 2.57, 202.);
+static const NeutronAtom In(49, 0, 4.065, -0.0539, 0., 0., 2.08, 0.54, 2.62,
+                            193.8);
+static const NeutronAtom In113(49, 113, 5.39, NAN, 3.65, 0.000037, 3.65,
+                               12.0); // (+/-)0.017
+static const NeutronAtom In115(49, 115, 4.01, -0.0562, -2.1, 0., 2.02, 0.55,
+                               2.57, 202.);
 static const NeutronAtom Sn(50, 6.225, 0., 4.871, 0.022, 4.892, 0.626);
 static const NeutronAtom Sn112(50, 112, 6., 0., 4.5, 0., 4.5, 1);
 static const NeutronAtom Sn114(50, 114, 6.2, 0., 4.8, 0., 4.8, 0.114);
@@ -309,7 +310,8 @@ static const NeutronAtom Sb123(51, 123, 5.38, -0.10, 3.64, 0.001, 3.64, 3.8);
 static const NeutronAtom Te(52, 5.80, 0., 4.23, 0.09, 4.32, 4.7);
 static const NeutronAtom Te120(52, 120, 5.3, 0., 3.5, 0., 3.5, 2.3);
 static const NeutronAtom Te122(52, 122, 3.8, 0., 1.8, 0., 1.8, 3.4);
-static const NeutronAtom Te123(52, 123, -0.05, -0.116, -2.04, 0., 0.002, 0.52, 0.52, 418.);
+static const NeutronAtom Te123(52, 123, -0.05, -0.116, -2.04, 0., 0.002, 0.52,
+                               0.52, 418.);
 static const NeutronAtom Te124(52, 124, 7.96, 0., 8, 0., 8, 6.8);
 static const NeutronAtom Te125(52, 125, 5.02, -0.26, 3.17, 0.008, 3.18, 1.55);
 static const NeutronAtom Te126(52, 126, 5.56, 0., 3.88, 0., 3.88, 1.04);
@@ -346,41 +348,53 @@ static const NeutronAtom Ce142(58, 142, 4.75, 0., 2.84, 0., 2.84, 0.95);
 static const NeutronAtom Pr(59, 4.58, -0.35, 2.64, 0.015, 2.66, 11.5);
 static const NeutronAtom Nd(60, 7.69, 0., 7.43, 9.2, 16.6, 50.5);
 static const NeutronAtom Nd142(60, 142, 7.7, 0., 7.5, 0., 7.5, 18.7);
-static const NeutronAtom Nd143(60, 143, 14., NAN, 25., 55., 80., 337.); // (+/-)21.(1.)
+static const NeutronAtom Nd143(60, 143, 14., NAN, 25., 55., 80.,
+                               337.); // (+/-)21.(1.)
 static const NeutronAtom Nd144(60, 144, 2.8, 0., 1, 0., 1, 3.6);
 static const NeutronAtom Nd145(60, 145, 14., 0., 25., 5., 30., 42.);
 static const NeutronAtom Nd146(60, 146, 8.7, 0., 9.5, 0., 9.5, 1.4);
 static const NeutronAtom Nd148(60, 148, 5.7, 0., 4.1, 0., 4.1, 2.5);
 static const NeutronAtom Nd150(60, 150, 5.3, 0., 3.5, 0., 3.5, 1.2);
-static const NeutronAtom Pm(61, 12.6, NAN, 20.0, 1.3, 21.3, 168.4); // (+/-)3.2(2.5)
+static const NeutronAtom Pm(61, 12.6, NAN, 20.0, 1.3, 21.3,
+                            168.4); // (+/-)3.2(2.5)
 static const NeutronAtom Sm(62, 0, 0.80, -1.65, 0., 0., 0.422, 39., 39., 5922.);
 static const NeutronAtom Sm144(62, 144, -3., 0., 1., 0., 1., 0.7);
-static const NeutronAtom Sm147(62, 147, 14., NAN, 25., 143, 39., 57.); // (+/-)11.(7.)
+static const NeutronAtom Sm147(62, 147, 14., NAN, 25., 143, 39.,
+                               57.); // (+/-)11.(7.)
 static const NeutronAtom Sm148(62, 148, -3., 0., 1., 0., 1., 2.4);
-static const NeutronAtom Sm149(62, 149, -19.2, -11.7, NAN, -10.3, 63.5, 137., 200., 42080.); // (+/-)31.4
+static const NeutronAtom Sm149(62, 149, -19.2, -11.7, NAN, -10.3, 63.5, 137.,
+                               200., 42080.); // (+/-)31.4
 static const NeutronAtom Sm150(62, 150, 14., 0., 25., 0., 25., 104.);
 static const NeutronAtom Sm152(62, 152, -5.0, 0., 3.1, 0., 3.1, 206.);
 static const NeutronAtom Sm154(62, 154, 9.3, 0., 11., 0., 11., 8.4);
 static const NeutronAtom Eu(63, 0, 7.22, -1.26, 0., 0., 6.57, 2.5, 9.2, 4530.);
-static const NeutronAtom Eu151(63, 151, 6.13, -2.53, NAN, -2.14, 5.5, 3.1, 8.6, 9100.); // (+/-)4.5
-static const NeutronAtom Eu153(63, 153, 8.22, NAN, 8.5, 1.3, 9.8, 312.); // (+/-)3.2
-static const NeutronAtom Gd(64, 0, 6.5, -13.82, 0., 0., 29.3, 151., 180., 49700.);
+static const NeutronAtom Eu151(63, 151, 6.13, -2.53, NAN, -2.14, 5.5, 3.1, 8.6,
+                               9100.); // (+/-)4.5
+static const NeutronAtom Eu153(63, 153, 8.22, NAN, 8.5, 1.3, 9.8,
+                               312.); // (+/-)3.2
+static const NeutronAtom Gd(64, 0, 6.5, -13.82, 0., 0., 29.3, 151., 180.,
+                            49700.);
 static const NeutronAtom Gd152(64, 152, 10., 0., 13., 0., 13., 735.);
 static const NeutronAtom Gd154(64, 154, 10., 0., 13., 0., 13., 85.);
-static const NeutronAtom Gd155(64, 155, 6.0, -17.0, NAN, -13.16, 40.8, 25., 66., 61100.); // (+/-)5.(5.)
+static const NeutronAtom Gd155(64, 155, 6.0, -17.0, NAN, -13.16, 40.8, 25., 66.,
+                               61100.); // (+/-)5.(5.)
 static const NeutronAtom Gd156(64, 156, 6.3, 0., 5, 0., 5, 1.5);
-static const NeutronAtom Gd157(64, 157, -1.14, -71.9, NAN, -55.8, 650., 394., 1044., 259000.); // (+/-)5.(5.)
+static const NeutronAtom Gd157(64, 157, -1.14, -71.9, NAN, -55.8, 650., 394.,
+                               1044., 259000.); // (+/-)5.(5.)
 static const NeutronAtom Gd158(64, 158, 9., 0., 10., 0., 10., 2.2);
 static const NeutronAtom Gd160(64, 160, 9.15, 0., 10.52, 0., 10.52, 0.77);
 static const NeutronAtom Tb(65, 7.38, -0.17, 6.84, 0.004, 6.84, 23.4);
-static const NeutronAtom Dy(66, 0, 16.9, -0.276, 0., 0., 35.9, 54.4, 90.3, 994.);
+static const NeutronAtom Dy(66, 0, 16.9, -0.276, 0., 0., 35.9, 54.4, 90.3,
+                            994.);
 static const NeutronAtom Dy156(66, 156, 6.1, 0., 4.7, 0., 4.7, 33.);
 static const NeutronAtom Dy158(66, 158, 6., 0., 5., 0., 5., 43.);
 static const NeutronAtom Dy160(66, 160, 6.7, 0., 5.6, 0., 5.6, 56.);
-static const NeutronAtom Dy161(66, 161, 10.3, NAN, 13.3, 3., 16., 600.); // (+/-)4.9
+static const NeutronAtom Dy161(66, 161, 10.3, NAN, 13.3, 3., 16.,
+                               600.); // (+/-)4.9
 static const NeutronAtom Dy162(66, 162, -1.4, 0., 0.25, 0., 0.25, 194.);
 static const NeutronAtom Dy163(66, 163, 5.0, 1.3, 3.1, 0.21, 3.3, 124.);
-static const NeutronAtom Dy164(66, 164, 49.4, -0.79, 0., 0., 307., 0., 307., 2840.);
+static const NeutronAtom Dy164(66, 164, 49.4, -0.79, 0., 0., 307., 0., 307.,
+                               2840.);
 static const NeutronAtom Ho(67, 8.01, -1.70, 8.06, 0.36, 8.42, 64.7);
 static const NeutronAtom Er(68, 7.79, 0., 7.63, 1.1, 8.7, 159.);
 static const NeutronAtom Er162(68, 162, 8.8, 0., 9.7, 0., 9.7, 19.);
@@ -391,7 +405,8 @@ static const NeutronAtom Er168(68, 168, 7.4, 0., 6.9, 0., 6.9, 2.74);
 static const NeutronAtom Er170(68, 170, 9.6, 0., 11.6, 0., 11.6, 5.8);
 static const NeutronAtom Tm(69, 7.07, 0.9, 6.28, 0.1, 6.38, 100.);
 static const NeutronAtom Yb(70, 12.43, 0., 19.42, 4, 23.4, 34.8);
-static const NeutronAtom Yb168(70, 168, -4.07, -0.62, 0., 0., 2.13, 0., 2.13, 2230.);
+static const NeutronAtom Yb168(70, 168, -4.07, -0.62, 0., 0., 2.13, 0., 2.13,
+                               2230.);
 static const NeutronAtom Yb170(70, 170, 6.77, 0., 5.8, 0., 5.8, 11.4);
 static const NeutronAtom Yb171(70, 171, 9.66, -5.59, 11.7, 3.9, 15.6, 48.6);
 static const NeutronAtom Yb172(70, 172, 9.43, 0., 11.2, 0., 11.2, 0.8);
@@ -399,14 +414,18 @@ static const NeutronAtom Yb173(70, 173, 9.56, -5.3, 11.5, 3.5, 15, 17.1);
 static const NeutronAtom Yb174(70, 174, 19.3, 0., 46.8, 0., 46.8, 69.4);
 static const NeutronAtom Yb176(70, 176, 8.72, 0., 9.6, 0., 9.6, 2.85);
 static const NeutronAtom Lu(71, 7.21, 0., 6.53, 0.7, 7.2, 74.);
-static const NeutronAtom Lu175(71, 175, 7.24, NAN, 6.59, 0.6, 7.2, 21.); // (+/-)2.2
-static const NeutronAtom Lu176(71, 175, 6.1, -0.57, NAN, 0.61, 4.7, 1.2, 5.9, 2065.); // (+/-)3.0
+static const NeutronAtom Lu175(71, 175, 7.24, NAN, 6.59, 0.6, 7.2,
+                               21.); // (+/-)2.2
+static const NeutronAtom Lu176(71, 175, 6.1, -0.57, NAN, 0.61, 4.7, 1.2, 5.9,
+                               2065.); // (+/-)3.0
 static const NeutronAtom Hf(72, 7.7, 0., 7.6, 2.6, 10.2, 104.1);
 static const NeutronAtom Hf174(72, 174, 10.9, 0., 15., 0., 15., 561.);
 static const NeutronAtom Hf176(72, 176, 6.61, 0., 5.5, 0., 5.5, 23.5);
-static const NeutronAtom Hf177(72, 177, 0.8, NAN, 0.1, 0.1, 0.2, 373.); // (+/-)0.9(1.3)
+static const NeutronAtom Hf177(72, 177, 0.8, NAN, 0.1, 0.1, 0.2,
+                               373.); // (+/-)0.9(1.3)
 static const NeutronAtom Hf178(72, 178, 5.9, 0., 4.4, 0., 4.4, 84.);
-static const NeutronAtom Hf179(72, 179, 7.46, NAN, 7, 0.14, 7.1, 41.); // (+/-)1.06
+static const NeutronAtom Hf179(72, 179, 7.46, NAN, 7, 0.14, 7.1,
+                               41.); // (+/-)1.06
 static const NeutronAtom Hf180(72, 180, 13.2, 0., 21.9, 0., 21.9, 13.04);
 static const NeutronAtom Ta(73, 6.91, 0., 6, 0.01, 6.01, 20.6);
 static const NeutronAtom Ta180(73, 180, 7., 0., 6.2, 0.5, 7., 563.);
@@ -418,8 +437,10 @@ static const NeutronAtom W183(74, 183, 6.53, 0., 5.36, 0.3, 5.7, 10.1);
 static const NeutronAtom W184(74, 184, 7.48, 0., 7.03, 0., 7.03, 1.7);
 static const NeutronAtom W186(74, 186, -0.72, 0., 0.065, 0., 0.065, 37.9);
 static const NeutronAtom Re(75, 9.2, 0., 10.6, 0.9, 11.5, 89.7);
-static const NeutronAtom Re185(75, 185, 9.0, NAN, 10.2, 0.5, 10.7, 112.); // (+/-)2.0
-static const NeutronAtom Re187(75, 187, 9.3, NAN, 10.9, 1, 11.9, 76.4); // (+/-)2.8
+static const NeutronAtom Re185(75, 185, 9.0, NAN, 10.2, 0.5, 10.7,
+                               112.); // (+/-)2.0
+static const NeutronAtom Re187(75, 187, 9.3, NAN, 10.9, 1, 11.9,
+                               76.4); // (+/-)2.8
 static const NeutronAtom Os(76, 10.7, 0., 14.4, 0.3, 14.7, 16);
 static const NeutronAtom Os184(76, 184, 10., 0., 13., 0., 13., 3000.);
 static const NeutronAtom Os186(76, 186, 11.6, 0., 17., 0., 17., 80.);
@@ -442,14 +463,16 @@ static const NeutronAtom Au(79, 7.63, -1.84, 7.32, 0.43, 7.75, 98.65);
 static const NeutronAtom Hg(80, 12.692, 0., 20.24, 6.6, 26.8, 372.3);
 static const NeutronAtom Hg196(80, 196, 30.3, 0., 115., 0., 115., 3080.);
 static const NeutronAtom Hg198(80, 198, 0., 0., 0., 0., 0., 2);
-static const NeutronAtom Hg199(80, 199, 16.9, NAN, 36., 30., 66., 2150.); // (+/-)15.5
+static const NeutronAtom Hg199(80, 199, 16.9, NAN, 36., 30., 66.,
+                               2150.);                            // (+/-)15.5
 static const NeutronAtom Hg200(80, 200, 0., 0., 0., 0., 0., NAN); // TODO <60.
 static const NeutronAtom Hg201(80, 201, 0., 0., 0., 0., 0., 7.8);
 static const NeutronAtom Hg202(80, 202, 0., 0., 0., 0., 9.828, 4.89);
 static const NeutronAtom Hg204(80, 204, 0., 0., 0., 0., 0., 0.43);
 static const NeutronAtom Tl(81, 8.776, 0., 9.678, 0.21, 9.89, 3.43);
 static const NeutronAtom Tl203(81, 203, 6.99, 1.06, 6.14, 0.14, 6.28, 11.4);
-static const NeutronAtom Tl205(81, 205, 9.52, -0.242, 11.39, 0.007, 11.4, 0.104);
+static const NeutronAtom Tl205(81, 205, 9.52, -0.242, 11.39, 0.007, 11.4,
+                               0.104);
 static const NeutronAtom Pb(82, 9.405, 0., 11.115, 0.003, 11.118, 0.171);
 static const NeutronAtom Pb204(82, 204, 9.90, 0., 12.3, 0., 12.3, 0.65);
 static const NeutronAtom Pb206(82, 206, 9.22, 0., 10.68, 0., 10.68, 0.03);
@@ -465,14 +488,17 @@ static const NeutronAtom Ac(89, 0., 0., 0., 0., 0., 0.);
 static const NeutronAtom Th(90, 10.31, 0., 13.36, 0., 13.36, 7.37);
 static const NeutronAtom Pa(91, 9.1, 0., 10.4, 0.1, 10.5, 200.6);
 static const NeutronAtom U(92, 8.417, 0., 8.903, 0.005, 8.908, 7.57);
-static const NeutronAtom U233(92, 233, 10.1, NAN, 12.8, 0.1, 12.9, 574.7); // (+/-)1.(3.)
+static const NeutronAtom U233(92, 233, 10.1, NAN, 12.8, 0.1, 12.9,
+                              574.7); // (+/-)1.(3.)
 static const NeutronAtom U234(92, 234, 12.4, 0., 19.3, 0., 19.3, 100.1);
-static const NeutronAtom U235(92, 235, 10.47, NAN, 13.78, 0.2, 14, 680.9); // (+/-)1.3
+static const NeutronAtom U235(92, 235, 10.47, NAN, 13.78, 0.2, 14,
+                              680.9); // (+/-)1.3
 static const NeutronAtom U238(92, 238, 8.402, 0., 8.871, 0., 8.871, 2.68);
 static const NeutronAtom Np(93, 10.55, 0., 14, 0.5, 14.5, 175.9);
 static const NeutronAtom Pu(94, 0., 0., 0., 0., 0., 0.);
 static const NeutronAtom Pu238(94, 238, 14.1, 0., 25.0, 0., 25.0, 558.);
-static const NeutronAtom Pu239(94, 239, 7.7, NAN, 7.5, 0.2, 7.7, 1017.3); // (+/-)1.3(1.9)
+static const NeutronAtom Pu239(94, 239, 7.7, NAN, 7.5, 0.2, 7.7,
+                               1017.3); // (+/-)1.3(1.9)
 static const NeutronAtom Pu240(94, 240, 3.5, 0., 1.54, 0., 1.54, 289.6);
 static const NeutronAtom Pu242(94, 242, 8.1, 0., 8.2, 0., 8.2, 18.5);
 static const NeutronAtom Am(95, 8.3, NAN, 8.7, 0.3, 9.0, 75.3); // (+/-)2.(7.)
@@ -483,49 +509,46 @@ static const NeutronAtom Cm248(96, 248, 7.7, 0., 7.5, 0., 7.5, 3);
 /// @endcond
 
 /** All of the atoms in a single array so it can be searched. */
-static NeutronAtom ATOMS[] = {H, H1, H2, H3, He, He3, He4, Li, Li6, Li7, Be, B, B10,
-				    B11, C, C12, C13, N, N14, N15, O, O16, O17, O18, F, Ne,
-				    Ne20, Ne21, Ne22, Na, Mg, Mg24, Mg25, Mg26, Al, Si, 
-				    Si28, Si29, Si30, P, S, S32, S33, S34, S36, Cl, Cl35, 
-				    Cl37, Ar, Ar36, Ar38, Ar40, K, K39, K40, K41, Ca, Ca40, 
-				    Ca42, Ca43, Ca44, Ca46, Ca48, Sc, Ti, Ti46, Ti47, Ti48, 
-				    Ti49, Ti50, V, V50, V51, Cr, Cr50, Cr52, Cr53, Cr54, Mn,
-				    Fe, Fe54, Fe56, Fe57, Fe58, Co, Ni, Ni58, Ni60, Ni61,
-				    Ni62, Ni64, Cu, Cu63, Cu65, Zn, Zn64, Zn66, Zn67, Zn68,
-				    Zn70, Ga, Ga69, Ga71, Ge, Ge70, Ge72, Ge73, Ge74, Ge76,
-				    As, Se, Se74, Se76, Se77, Se78, Se80, Se82, Br, Br79, Br81,
-				    Kr, Kr78, Kr80, Kr82, Kr83, Kr84, Kr86, Rb, Rb85, Rb87, 
-				    Sr, Sr84, Sr86, Sr87, Sr88, Y, Zr, Zr90, Zr91, Zr92, Zr94,
-				    Zr96, Nb, Mo, Mo92, Mo94, Mo95, Mo96, Mo97, Mo98, Mo100, Tc,
-				    Ru, Ru96, Ru98, Ru99, Ru100, Ru101, Ru102, Ru104, Rh, Pd,
-				    Pd102, Pd104, Pd105, Pd106, Pd108, Pd110, Ag, Ag107, Ag109,
-				    Cd, Cd106, Cd108, Cd110, Cd111, Cd112, Cd113, Cd114, Cd116,
-				    In, In113, In115, Sn, Sn112, Sn114, Sn115, Sn116, Sn117,
-				    Sn118, Sn119, Sn120, Sn122, Sn124, Sb, Sb121, Sb123, Te,
-				    Te120, Te122, Te123, Te124, Te125, Te126, Te128, Te130, I,
-				    Xe, Xe124, Xe126, Xe128, Xe129, Xe130, Xe131, Xe132, Xe134,
-				    Xe136, Cs, Ba, Ba130, Ba132, Ba134, Ba135, Ba136, Ba137,
-				    Ba138, La, La138, La139, Ce, Ce136, Ce138, Ce140, Ce142, Pr,
-				    Nd, Nd142, Nd143, Nd144, Nd145, Nd146, Nd148, Nd150, Pm, Sm,
-				    Sm144, Sm147, Sm148, Sm149, Sm150, Sm152, Sm154, Eu, Eu151,
-				    Eu153, Gd, Gd152, Gd154, Gd155, Gd156, Gd157, Gd158, Gd160,
-				    Tb, Dy, Dy156, Dy158, Dy160, Dy161, Dy162, Dy163, Dy164, Ho,
-				    Er, Er162, Er164, Er166, Er167, Er168, Er170, Tm, Yb, Yb168,
-				    Yb170, Yb171, Yb172, Yb173, Yb174, Yb176, Lu, Lu175, Lu176,
-				    Hf, Hf174, Hf176, Hf177, Hf178, Hf179, Hf180, Ta, Ta180,
-				    Ta181, W, W180, W182, W183, W184, W186, Re, Re185, Re187, Os,
-				    Os184, Os186, Os187, Os188, Os189, Os190, Os192, Ir, Ir191,
-				    Ir193, Pt, Pt190, Pt192, Pt194, Pt195, Pt196, Pt198, Au, Hg,
-				    Hg196, Hg198, Hg199, Hg200, Hg201, Hg202, Hg204, Tl, Tl203,
-				    Tl205, Pb, Pb204, Pb206, Pb207, Pb208, Bi, Po, At, Rn, Fr, Ra,
-				    Ac, Th, Pa, U, U233, U234, U235, U238, Np, Pu, Pu238, Pu239,
-				    Pu240, Pu242, Am, Cm, Cm244, Cm246, Cm248};
+static NeutronAtom ATOMS[] = {
+    H,     H1,    H2,    H3,    He,    He3,   He4,   Li,    Li6,   Li7,   Be,
+    B,     B10,   B11,   C,     C12,   C13,   N,     N14,   N15,   O,     O16,
+    O17,   O18,   F,     Ne,    Ne20,  Ne21,  Ne22,  Na,    Mg,    Mg24,  Mg25,
+    Mg26,  Al,    Si,    Si28,  Si29,  Si30,  P,     S,     S32,   S33,   S34,
+    S36,   Cl,    Cl35,  Cl37,  Ar,    Ar36,  Ar38,  Ar40,  K,     K39,   K40,
+    K41,   Ca,    Ca40,  Ca42,  Ca43,  Ca44,  Ca46,  Ca48,  Sc,    Ti,    Ti46,
+    Ti47,  Ti48,  Ti49,  Ti50,  V,     V50,   V51,   Cr,    Cr50,  Cr52,  Cr53,
+    Cr54,  Mn,    Fe,    Fe54,  Fe56,  Fe57,  Fe58,  Co,    Ni,    Ni58,  Ni60,
+    Ni61,  Ni62,  Ni64,  Cu,    Cu63,  Cu65,  Zn,    Zn64,  Zn66,  Zn67,  Zn68,
+    Zn70,  Ga,    Ga69,  Ga71,  Ge,    Ge70,  Ge72,  Ge73,  Ge74,  Ge76,  As,
+    Se,    Se74,  Se76,  Se77,  Se78,  Se80,  Se82,  Br,    Br79,  Br81,  Kr,
+    Kr78,  Kr80,  Kr82,  Kr83,  Kr84,  Kr86,  Rb,    Rb85,  Rb87,  Sr,    Sr84,
+    Sr86,  Sr87,  Sr88,  Y,     Zr,    Zr90,  Zr91,  Zr92,  Zr94,  Zr96,  Nb,
+    Mo,    Mo92,  Mo94,  Mo95,  Mo96,  Mo97,  Mo98,  Mo100, Tc,    Ru,    Ru96,
+    Ru98,  Ru99,  Ru100, Ru101, Ru102, Ru104, Rh,    Pd,    Pd102, Pd104, Pd105,
+    Pd106, Pd108, Pd110, Ag,    Ag107, Ag109, Cd,    Cd106, Cd108, Cd110, Cd111,
+    Cd112, Cd113, Cd114, Cd116, In,    In113, In115, Sn,    Sn112, Sn114, Sn115,
+    Sn116, Sn117, Sn118, Sn119, Sn120, Sn122, Sn124, Sb,    Sb121, Sb123, Te,
+    Te120, Te122, Te123, Te124, Te125, Te126, Te128, Te130, I,     Xe,    Xe124,
+    Xe126, Xe128, Xe129, Xe130, Xe131, Xe132, Xe134, Xe136, Cs,    Ba,    Ba130,
+    Ba132, Ba134, Ba135, Ba136, Ba137, Ba138, La,    La138, La139, Ce,    Ce136,
+    Ce138, Ce140, Ce142, Pr,    Nd,    Nd142, Nd143, Nd144, Nd145, Nd146, Nd148,
+    Nd150, Pm,    Sm,    Sm144, Sm147, Sm148, Sm149, Sm150, Sm152, Sm154, Eu,
+    Eu151, Eu153, Gd,    Gd152, Gd154, Gd155, Gd156, Gd157, Gd158, Gd160, Tb,
+    Dy,    Dy156, Dy158, Dy160, Dy161, Dy162, Dy163, Dy164, Ho,    Er,    Er162,
+    Er164, Er166, Er167, Er168, Er170, Tm,    Yb,    Yb168, Yb170, Yb171, Yb172,
+    Yb173, Yb174, Yb176, Lu,    Lu175, Lu176, Hf,    Hf174, Hf176, Hf177, Hf178,
+    Hf179, Hf180, Ta,    Ta180, Ta181, W,     W180,  W182,  W183,  W184,  W186,
+    Re,    Re185, Re187, Os,    Os184, Os186, Os187, Os188, Os189, Os190, Os192,
+    Ir,    Ir191, Ir193, Pt,    Pt190, Pt192, Pt194, Pt195, Pt196, Pt198, Au,
+    Hg,    Hg196, Hg198, Hg199, Hg200, Hg201, Hg202, Hg204, Tl,    Tl203, Tl205,
+    Pb,    Pb204, Pb206, Pb207, Pb208, Bi,    Po,    At,    Rn,    Fr,    Ra,
+    Ac,    Th,    Pa,    U,     U233,  U234,  U235,  U238,  Np,    Pu,    Pu238,
+    Pu239, Pu240, Pu242, Am,    Cm,    Cm244, Cm246, Cm248};
 
 /** The total number of atoms in the array. */
 static const size_t NUM_ATOMS = 371;
 
-bool NeutronAtomEqualsWithNaN(const double left, const double right)
-{
+bool NeutronAtomEqualsWithNaN(const double left, const double right) {
   if (left == right)
     return true;
   if ((boost::math::isnan)(left) && (boost::math::isnan)(right))
@@ -538,8 +561,7 @@ bool NeutronAtomEqualsWithNaN(const double left, const double right)
  * @param right :: NeutronAtom to compare
  * @return boolean
  */
-bool operator==(const NeutronAtom& left, const NeutronAtom& right)
-{
+bool operator==(const NeutronAtom &left, const NeutronAtom &right) {
   if (&left == &right)
     return true;
 
@@ -547,13 +569,17 @@ bool operator==(const NeutronAtom& left, const NeutronAtom& right)
     return false;
   if (left.a_number != right.a_number)
     return false;
-  if (!NeutronAtomEqualsWithNaN(left.coh_scatt_length_real, right.coh_scatt_length_real))
+  if (!NeutronAtomEqualsWithNaN(left.coh_scatt_length_real,
+                                right.coh_scatt_length_real))
     return false;
-  if (!NeutronAtomEqualsWithNaN(left.coh_scatt_length_img, right.coh_scatt_length_img))
+  if (!NeutronAtomEqualsWithNaN(left.coh_scatt_length_img,
+                                right.coh_scatt_length_img))
     return false;
-  if (!NeutronAtomEqualsWithNaN(left.inc_scatt_length_real, right.inc_scatt_length_real))
+  if (!NeutronAtomEqualsWithNaN(left.inc_scatt_length_real,
+                                right.inc_scatt_length_real))
     return false;
-  if (!NeutronAtomEqualsWithNaN(left.inc_scatt_length_img, right.inc_scatt_length_img))
+  if (!NeutronAtomEqualsWithNaN(left.inc_scatt_length_img,
+                                right.inc_scatt_length_img))
     return false;
   if (!NeutronAtomEqualsWithNaN(left.coh_scatt_xs, right.coh_scatt_xs))
     return false;
@@ -573,8 +599,7 @@ bool operator==(const NeutronAtom& left, const NeutronAtom& right)
  * @param right :: NeutronAtom to compare
  * @return boolean
  */
-bool operator!=(const NeutronAtom& left, const NeutronAtom& right)
-{
+bool operator!=(const NeutronAtom &left, const NeutronAtom &right) {
   return !(left == right);
 }
 
@@ -583,16 +608,12 @@ bool operator!=(const NeutronAtom& left, const NeutronAtom& right)
  * @param atom :: NeutronAtom
  * @return stream
  */
-std::ostream& operator<<(std::ostream& out, const NeutronAtom &atom)
-{
-  out <<  "coh_real " << atom.coh_scatt_length_real
-      << " coh_img "  << atom.coh_scatt_length_img
-      << " inc_real " << atom.inc_scatt_length_real
-      << " inc_img "  << atom.inc_scatt_length_img
-      << " coh_xs " << atom.coh_scatt_xs
-      << " inc_xs " << atom.inc_scatt_xs
-      << " tot_xs " << atom.tot_scatt_xs
-      << " abs_xs " << atom.abs_scatt_xs;
+std::ostream &operator<<(std::ostream &out, const NeutronAtom &atom) {
+  out << "coh_real " << atom.coh_scatt_length_real << " coh_img "
+      << atom.coh_scatt_length_img << " inc_real " << atom.inc_scatt_length_real
+      << " inc_img " << atom.inc_scatt_length_img << " coh_xs "
+      << atom.coh_scatt_xs << " inc_xs " << atom.inc_scatt_xs << " tot_xs "
+      << atom.tot_scatt_xs << " abs_xs " << atom.abs_scatt_xs;
   return out;
 }
 
@@ -601,12 +622,10 @@ std::ostream& operator<<(std::ostream& out, const NeutronAtom &atom)
  * @param right :: NeutronAtom to compare
  * @return boolean
  */
-bool compareAtoms(const NeutronAtom &left, const NeutronAtom &right)
-{
+bool compareAtoms(const NeutronAtom &left, const NeutronAtom &right) {
   if (left.z_number == right.z_number) {
     return (left.a_number < right.a_number);
-  }
-  else {
+  } else {
     return (left.z_number < right.z_number);
   }
 }
@@ -615,8 +634,7 @@ bool compareAtoms(const NeutronAtom &left, const NeutronAtom &right)
  * Adding two NeutronAtoms together sets a_number=z_number=0 and adds
  * all of the scattering information.
  */
-NeutronAtom operator+(const NeutronAtom& left, const NeutronAtom& right)
-{
+NeutronAtom operator+(const NeutronAtom &left, const NeutronAtom &right) {
   // copy left
   NeutronAtom result(left);
   // reset the atom information since it is senseless
@@ -624,10 +642,14 @@ NeutronAtom operator+(const NeutronAtom& left, const NeutronAtom& right)
   result.z_number = 0;
 
   // do the math
-  result.coh_scatt_length_real = left.coh_scatt_length_real + right.coh_scatt_length_real;
-  result.coh_scatt_length_img = left.coh_scatt_length_img + right.coh_scatt_length_img;
-  result.inc_scatt_length_real = left.inc_scatt_length_real + right.inc_scatt_length_real;
-  result.inc_scatt_length_img = left.inc_scatt_length_img + right.inc_scatt_length_img;
+  result.coh_scatt_length_real =
+      left.coh_scatt_length_real + right.coh_scatt_length_real;
+  result.coh_scatt_length_img =
+      left.coh_scatt_length_img + right.coh_scatt_length_img;
+  result.inc_scatt_length_real =
+      left.inc_scatt_length_real + right.inc_scatt_length_real;
+  result.inc_scatt_length_img =
+      left.inc_scatt_length_img + right.inc_scatt_length_img;
   result.coh_scatt_xs = left.coh_scatt_xs + right.coh_scatt_xs;
   result.inc_scatt_xs = left.inc_scatt_xs + right.inc_scatt_xs;
   result.tot_scatt_xs = left.tot_scatt_xs + right.tot_scatt_xs;
@@ -636,13 +658,11 @@ NeutronAtom operator+(const NeutronAtom& left, const NeutronAtom& right)
   return result;
 }
 
-
 /**
  * Multiplying a NeutronAtom by a number sets a_number=z_number=0
  * and multiplies all of the scattering information.
  */
-NeutronAtom operator*(const NeutronAtom& left, const double right)
-{
+NeutronAtom operator*(const NeutronAtom &left, const double right) {
   // copy left
   NeutronAtom result(left);
   // reset the atom information since it is senseless
@@ -666,8 +686,7 @@ NeutronAtom operator*(const NeutronAtom& left, const double right)
  * This calls @link operator*(const NeutronAtom&, const double) @endlink
  * with the parameters reversed.
  */
-NeutronAtom operator*(const double left, const NeutronAtom& right)
-{
+NeutronAtom operator*(const double left, const NeutronAtom &right) {
   // the operation is just abelian
   return right * left;
 }
@@ -677,38 +696,35 @@ NeutronAtom operator*(const double left, const NeutronAtom& right)
  * @param a_number :: Mass number of the atom to get
  * @return The atom corresponding to the given Z and A
  */
-NeutronAtom getNeutronAtom(const uint16_t z_number, const uint16_t a_number)
-{
-  NeutronAtom temp(z_number, a_number, 
-		   NAN, NAN, NAN, NAN, NAN, NAN);
+NeutronAtom getNeutronAtom(const uint16_t z_number, const uint16_t a_number) {
+  NeutronAtom temp(z_number, a_number, NAN, NAN, NAN, NAN, NAN, NAN);
 
-  NeutronAtom *result = std::lower_bound(&(ATOMS[0]), &(ATOMS[NUM_ATOMS]), temp, compareAtoms);
-  if (result == &(ATOMS[NUM_ATOMS]) || result->z_number != z_number
-      || result->a_number != a_number)
-  {
+  NeutronAtom *result =
+      std::lower_bound(&(ATOMS[0]), &(ATOMS[NUM_ATOMS]), temp, compareAtoms);
+  if (result == &(ATOMS[NUM_ATOMS]) || result->z_number != z_number ||
+      result->a_number != a_number) {
     std::stringstream msg;
-    msg << "Failed to find a NeutronAtom with z=" << z_number << " and a=" << a_number;
+    msg << "Failed to find a NeutronAtom with z=" << z_number
+        << " and a=" << a_number;
     throw std::runtime_error(msg.str());
   }
 
   return *result;
 }
-const NeutronAtom getNeutronNoExceptions(const uint16_t z_number, const uint16_t a_number)
-{
+const NeutronAtom getNeutronNoExceptions(const uint16_t z_number,
+                                         const uint16_t a_number) {
 
-  NeutronAtom temp(z_number, a_number, 
-		   NAN, NAN, NAN, NAN, NAN, NAN);   // set to junk value
+  NeutronAtom temp(z_number, a_number, NAN, NAN, NAN, NAN, NAN,
+                   NAN); // set to junk value
 
-  NeutronAtom *result = std::lower_bound(&(ATOMS[0]), &(ATOMS[NUM_ATOMS]), temp, compareAtoms);
-  if (result == &(ATOMS[NUM_ATOMS]) || result->z_number != z_number
-      || result->a_number != a_number)
-  {
-     return temp;
-  }
-  else 
-      return *result;
+  NeutronAtom *result =
+      std::lower_bound(&(ATOMS[0]), &(ATOMS[NUM_ATOMS]), temp, compareAtoms);
+  if (result == &(ATOMS[NUM_ATOMS]) || result->z_number != z_number ||
+      result->a_number != a_number) {
+    return temp;
+  } else
+    return *result;
 }
 
 } // namespace PhysicalConstants
 } // namespace Mantid
-

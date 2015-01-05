@@ -7,10 +7,8 @@
 #include <boost/shared_ptr.hpp>
 #include <set>
 
-namespace Mantid
-{
-namespace Geometry
-{
+namespace Mantid {
+namespace Geometry {
 
 /** CyclicGroup :
 
@@ -44,7 +42,8 @@ namespace Geometry
 
     In code, the example is very concise:
 
-        Group_const_sptr pointGroup4 = GroupFactory::create<CyclicGroup>("-y,x,z");
+        Group_const_sptr pointGroup4 =
+   GroupFactory::create<CyclicGroup>("-y,x,z");
 
     This is much more convenient than having to construct a Group,
     where all four symmetry operations would have to be supplied.
@@ -79,23 +78,21 @@ namespace Geometry
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class MANTID_GEOMETRY_DLL CyclicGroup : public Group
-{
+class MANTID_GEOMETRY_DLL CyclicGroup : public Group {
 public:
-    CyclicGroup(const std::string &symmetryOperationString);
-    CyclicGroup(const SymmetryOperation &symmetryOperation);
-    virtual ~CyclicGroup() { }
+  CyclicGroup(const std::string &symmetryOperationString);
+  CyclicGroup(const SymmetryOperation &symmetryOperation);
+  virtual ~CyclicGroup() {}
 
 protected:
-    std::vector<SymmetryOperation> generateAllOperations(const SymmetryOperation &operation) const;
-
+  std::vector<SymmetryOperation>
+  generateAllOperations(const SymmetryOperation &operation) const;
 };
 
 typedef boost::shared_ptr<CyclicGroup> CyclicGroup_sptr;
 typedef boost::shared_ptr<const CyclicGroup> CyclicGroup_const_sptr;
 
-
 } // namespace Geometry
 } // namespace Mantid
 
-#endif  /* MANTID_GEOMETRY_CYCLICGROUP_H_ */
+#endif /* MANTID_GEOMETRY_CYCLICGROUP_H_ */

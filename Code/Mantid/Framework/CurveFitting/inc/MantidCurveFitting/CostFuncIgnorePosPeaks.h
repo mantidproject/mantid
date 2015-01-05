@@ -6,17 +6,16 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/ICostFunction.h"
 
-namespace Mantid
-{
-namespace CurveFitting
-{
+namespace Mantid {
+namespace CurveFitting {
 /** Cost function which allows positive peaks to be ignored and is suitable
     for e.g. fitting the background
 
     @author Anders Markvardsen, ISIS, RAL
     @date 12/05/2010
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -36,25 +35,26 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CostFuncIgnorePosPeaks : public API::ICostFunction 
-{
+class DLLExport CostFuncIgnorePosPeaks : public API::ICostFunction {
 public:
   /// Virtual destructor
   virtual ~CostFuncIgnorePosPeaks() {}
 
   /// Constructor
-  CostFuncIgnorePosPeaks() : m_name("Ignore positive peaks") { }
+  CostFuncIgnorePosPeaks() : m_name("Ignore positive peaks") {}
 
   /// Get name of minimizer
-  virtual std::string name() const { return m_name;}
+  virtual std::string name() const { return m_name; }
 
   /// Calculate value of cost function from observed
   /// and calculated values
-  virtual double val(const double* yData, const double* inverseError, double* yCal, const size_t& n);
+  virtual double val(const double *yData, const double *inverseError,
+                     double *yCal, const size_t &n);
 
   /// Calculate the derivatives of the cost function
-  virtual void deriv(const double* yData, const double* inverseError, const double* yCal, 
-                     const double* jacobian, double* outDerivs, const size_t& p, const size_t& n);
+  virtual void deriv(const double *yData, const double *inverseError,
+                     const double *yCal, const double *jacobian,
+                     double *outDerivs, const size_t &p, const size_t &n);
 
 private:
   /// name of this minimizer

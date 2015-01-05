@@ -1,5 +1,6 @@
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction
-from mantid.kernel import Direction, StringListValidator
+from mantid.kernel import Direction, StringListValidator 
+import warnings
 
 _OUTPUTLEVEL = "NOOUTPUT"
 
@@ -40,6 +41,8 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
     def PyExec(self):
         """ Main Execution Body
         """
+        warnings.warn("A message", ModuleDeprecationWarning)
+
         # 1. Get Input properties
         inppeakws = self.getProperty("BraggPeakParameterWorkspace").value
         inpzscows = self.getProperty("ZscoreWorkspace").value

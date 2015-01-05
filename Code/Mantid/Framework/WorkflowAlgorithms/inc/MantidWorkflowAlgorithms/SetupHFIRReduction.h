@@ -9,15 +9,14 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PropertyManager.h"
 
-namespace Mantid
-{
-namespace WorkflowAlgorithms
-{
+namespace Mantid {
+namespace WorkflowAlgorithms {
 /**
 
     Set up the reduction options for HFIR reduction.
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -38,8 +37,7 @@ namespace WorkflowAlgorithms
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport SetupHFIRReduction : public API::Algorithm
-{
+class DLLExport SetupHFIRReduction : public API::Algorithm {
 public:
   /// Constructor
   SetupHFIRReduction() : API::Algorithm() {}
@@ -47,8 +45,10 @@ public:
   virtual ~SetupHFIRReduction() {}
   /// Algorithm's name
   virtual const std::string name() const { return "SetupHFIRReduction"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Set up HFIR SANS reduction options.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Set up HFIR SANS reduction options.";
+  }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -59,9 +59,12 @@ private:
   void init();
   /// Execution code
   void exec();
-  void setupTransmission(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
-  void setupBackground(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
-  void setupSensitivity(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
+  void setupTransmission(
+      boost::shared_ptr<Kernel::PropertyManager> reductionManager);
+  void
+  setupBackground(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
+  void
+  setupSensitivity(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
 };
 
 } // namespace Algorithms

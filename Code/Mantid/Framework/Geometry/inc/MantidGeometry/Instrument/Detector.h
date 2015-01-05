@@ -9,10 +9,8 @@
 #include <string>
 #include "MantidKernel/V3D.h"
 
-namespace Mantid
-{
-namespace Geometry
-{
+namespace Mantid {
+namespace Geometry {
 
 /**
  * This class represents a detector - i.e. a single pixel in an instrument.
@@ -23,7 +21,8 @@ namespace Geometry
   @author Laurent C Chapon, ISIS RAL
   @date 01/11/2007
 
-  Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -43,40 +42,48 @@ namespace Geometry
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_GEOMETRY_DLL Detector : public virtual IDetector, public ObjComponent
-{
+class MANTID_GEOMETRY_DLL Detector : public virtual IDetector,
+                                     public ObjComponent {
 public:
-  ///A string representation of the component type
-  virtual std::string type() const {return "DetectorComponent";}
+  /// A string representation of the component type
+  virtual std::string type() const { return "DetectorComponent"; }
 
   /// Constructor for parametrized version
-  Detector(const Detector* base, const ParameterMap * map);
-  Detector(const std::string& name, int id, IComponent* parent);
-  Detector(const std::string& name, int it, boost::shared_ptr<Object> shape, IComponent* parent);
+  Detector(const Detector *base, const ParameterMap *map);
+  Detector(const std::string &name, int id, IComponent *parent);
+  Detector(const std::string &name, int it, boost::shared_ptr<Object> shape,
+           IComponent *parent);
   virtual ~Detector();
   // functions inherited from IObjectComponent
-  virtual Component* clone() const {return new Detector(*this);}
+  virtual Component *clone() const { return new Detector(*this); }
 
   // IDetector methods
   detid_t getID() const;
-  std::size_t nDets() const { return 1; } ///< A Detector object represents a single physical detector
-  double getDistance(const IComponent& comp) const;
-  double getTwoTheta(const Kernel::V3D& observer, const Kernel::V3D& axis) const;
-  double getSignedTwoTheta(const Kernel::V3D& observer, const Kernel::V3D& axis, const Kernel::V3D& instrumentUp) const;
+  std::size_t nDets() const {
+    return 1;
+  } ///< A Detector object represents a single physical detector
+  double getDistance(const IComponent &comp) const;
+  double getTwoTheta(const Kernel::V3D &observer,
+                     const Kernel::V3D &axis) const;
+  double getSignedTwoTheta(const Kernel::V3D &observer, const Kernel::V3D &axis,
+                           const Kernel::V3D &instrumentUp) const;
   double getPhi() const;
-  double getPhiOffset(const double& offset) const;
+  double getPhiOffset(const double &offset) const;
   bool isMasked() const;
   bool isMonitor() const;
-  // end IDetector methods 
+  // end IDetector methods
   void markAsMonitor(const bool flag = true);
-  /** returns the detector's topology, namely, the meaning of the detector's angular measurements.
-      It is different in cartesian and cylindrical (surrounding the beam) coordinate system */
-  det_topology getTopology(Kernel::V3D &center)const;
+  /** returns the detector's topology, namely, the meaning of the detector's
+     angular measurements.
+      It is different in cartesian and cylindrical (surrounding the beam)
+     coordinate system */
+  det_topology getTopology(Kernel::V3D &center) const;
 
   /// Return the relative position to the parent
-  virtual const Kernel::V3D getRelativePos() const
-  { return ObjComponent::getRelativePos(); }
- 
+  virtual const Kernel::V3D getRelativePos() const {
+    return ObjComponent::getRelativePos();
+  }
+
 private:
   /// The detector id
   const detid_t m_id;

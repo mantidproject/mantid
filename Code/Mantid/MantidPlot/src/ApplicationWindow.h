@@ -1196,6 +1196,7 @@ private slots:
 
 public:
   // TODO: a lot of this stuff should be private
+  bool d_showFirstTimeSetup;
   //! End of line convention used for copy/paste operations and when exporting tables/matrices to ASCII files.
   EndLineChar d_eol;
   //! Flag telling if the in-place editing of 2D plot labels is enabled

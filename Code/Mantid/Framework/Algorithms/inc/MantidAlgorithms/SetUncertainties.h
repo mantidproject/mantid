@@ -6,10 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** Set the uncertainties of the data to zero.
 
  Required Properties:
@@ -20,7 +18,8 @@ namespace Algorithms
 
  @date 10/12/2010
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -40,8 +39,7 @@ namespace Algorithms
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport SetUncertainties : public API::Algorithm
-{
+class DLLExport SetUncertainties : public API::Algorithm {
 public:
   /// (Empty) Constructor
   SetUncertainties();
@@ -51,18 +49,20 @@ public:
 
   /// Algorithm's name
   virtual const std::string name() const;
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "This algorithm creates a workspace which is the duplicate of the input, but where the error value for every bin has been set to zero.";}
-
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "This algorithm creates a workspace which is the duplicate of the "
+           "input, but where the error value for every bin has been set to "
+           "zero.";
+  }
 
   /// Algorithm's version
   virtual int version() const;
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Arithmetic\\Errors";}
+  virtual const std::string category() const { return "Arithmetic\\Errors"; }
 
 private:
-  
   /// Initialisation code
   void init();
   /// Execution code
