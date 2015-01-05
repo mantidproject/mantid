@@ -40,10 +40,8 @@ def constantUpdateActor(self,config):
     #set duration number
     Ndur=self.duration
 
-    #get current CPU stats
-    cpu_stats = psutil.cpu_times_percent(interval=0,percpu=False) #syntax seems to be same for psutil versions 1 and 2
-    #determine total busy percentage based upon system and users
-    percentcpubusy=cpu_stats.system+cpu_stats.user
+    #get current CPU percent busy
+    percentcpubusy = psutil.cpu_percent()
 
     percentmembusy=psutil.virtual_memory().percent
     self.ui.progressBarStatusMemory.setValue(round(percentmembusy))

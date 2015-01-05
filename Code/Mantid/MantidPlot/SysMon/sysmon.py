@@ -13,12 +13,13 @@ import psutil
 
 #check psutil version as command syntax changes between version 1 and version 2
 ver=psutil.__version__
-verChk1=re.match('1.[0-9].[0-9]',ver) #latest psutil version 1 is 1.2.1 - using positional numeric wildcards to check sub versions
-#thus the check is for version 1 as version 2 and following versions are still evolving
-#match returns a string if a match is found else returns NoneType
-if verChk1 != None:
+#using positional numeric wildcards for re.match() to check sub versions
+#match returns a match object if a match is found else returns NoneType
+if re.match('0.[0-9].[0-9]',ver) or re.match('1.[0-9].[0-9]',ver) != None:
+    #set flag to version 1 if either version 0 or version 1 psutil imported
     config.psutilVer=1
 else:
+    #set flat to version 2 for any versions higher than version 1
     config.psutilVer=2
 
 from ui_sysmon import *
@@ -162,7 +163,7 @@ class SysMon(QtGui.QWidget):
         self.ui.tabWidget.setCurrentIndex(config.SYST_TAB)
         
         #initialize version label
-        self.ui.labelVersion.setText("Version: "+__version__)
+        self.ui.labelVersion.setText("Version: "+__version__+"_"+psutil.__version__)
 
     def constantUpdate(self):
         #redirct to global function
