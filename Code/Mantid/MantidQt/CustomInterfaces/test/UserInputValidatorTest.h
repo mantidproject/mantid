@@ -67,6 +67,70 @@ public:
     TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\n\nBin width must allow for even splitting of the range.");
   }
 
+  void test_validRange()
+  {
+    UserInputValidator uiv;
+    std::pair<double, double> range(1, 5);
+    TS_ASSERT(uiv.checkValidRange("test range", range));
+    TS_ASSERT(uiv.isAllInputValid());
+  }
+
+  void test_invalidRangeReversed()
+  {
+    UserInputValidator uiv;
+    std::pair<double, double> range(10, 5);
+    TS_ASSERT(!uiv.checkValidRange("test range", range));
+    TS_ASSERT(!uiv.isAllInputValid());
+    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\n\nThe start of test range must be less than the end.");
+  }
+
+  void test_invalidRangeZeroWidth()
+  {
+    UserInputValidator uiv;
+    std::pair<double, double> range(5, 5);
+    TS_ASSERT(!uiv.checkValidRange("test range", range));
+    TS_ASSERT(!uiv.isAllInputValid());
+    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\n\ntest range must have a non-zero width.");
+  }
+
+  void test_nonOverlappingRanges()
+  {
+    UserInputValidator uiv;
+    std::pair<double, double> rangeA(1, 5);
+    std::pair<double, double> rangeB(6, 10);
+    TS_ASSERT(uiv.checkRangesDontOverlap(rangeA, rangeB));
+    TS_ASSERT(uiv.isAllInputValid());
+  }
+
+  void test_overlappingRanges()
+  {
+    UserInputValidator uiv;
+    std::pair<double, double> rangeA(1, 5);
+    std::pair<double, double> rangeB(3, 8);
+    TS_ASSERT(!uiv.checkRangesDontOverlap(rangeA, rangeB));
+    TS_ASSERT(!uiv.isAllInputValid());
+    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\n\nThe ranges must not overlap: [1,5], [3,8].");
+  }
+
+  void test_enclosedRange()
+  {
+    UserInputValidator uiv;
+    std::pair<double, double> outer(1, 10);
+    std::pair<double, double> inner(3, 8);
+    TS_ASSERT(uiv.checkRangeIsEnclosed("outer range", outer, "inner range", inner));
+    TS_ASSERT(uiv.isAllInputValid());
+  }
+
+  void test_nonEnclosedRange()
+  {
+    UserInputValidator uiv;
+    std::pair<double, double> outer(1, 10);
+    std::pair<double, double> inner(3, 15);
+    TS_ASSERT(!uiv.checkRangeIsEnclosed("outer range", outer, "inner range", inner));
+    TS_ASSERT(!uiv.isAllInputValid());
+    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\n\nouter range must completely enclose inner range.");
+  }
+
 };
 
 #endif
