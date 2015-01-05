@@ -230,7 +230,7 @@ namespace DataHandling
                                        std::map<std::string, std::string>& runinfodict)
   {
     // Import file
-    std::ifstream spicefile(filename);
+    std::ifstream spicefile(filename.c_str());
     if (!spicefile.is_open())
     {
       std::stringstream ess;
