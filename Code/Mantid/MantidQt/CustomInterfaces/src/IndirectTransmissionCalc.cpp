@@ -96,7 +96,10 @@ namespace MantidQt
       enableInstrumentControls(true);
 
       if(error)
+      {
+        emit showMessageBox("Failed to execute IndirectTransmission algorithm.\nSee Results Log for details.");
         return;
+      }
 
       std::string instrumentName = m_uiForm.cbInstrument->currentText().toStdString();
       std::string outWsName = instrumentName + "_transmission";
