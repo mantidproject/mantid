@@ -47,7 +47,7 @@ public:
   virtual void zoomToPeak(const int){};
   virtual bool isHidden() const { return true; }
   virtual void reInitialize(
-      boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS) { /*Do nothing*/
+      boost::shared_ptr<Mantid::API::IPeaksWorkspace> ) { /*Do nothing*/
   }
 };
 }

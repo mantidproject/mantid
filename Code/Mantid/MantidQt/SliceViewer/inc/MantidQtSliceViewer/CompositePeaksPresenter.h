@@ -60,7 +60,7 @@ public:
   virtual std::string getTransformName() const;
   virtual bool isHidden() const { return m_default->isHidden(); }
   virtual void reInitialize(
-      boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS) { /*Do nothing*/
+      boost::shared_ptr<Mantid::API::IPeaksWorkspace> ) { /*Do nothing*/
   }
 
   /// Constructor
