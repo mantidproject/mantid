@@ -9,4 +9,4 @@ Overview
 
 .. interface:: Diffraction
 
-.. categories:: Interfaces Reflectometry
+.. categories:: Interfaces Indirect

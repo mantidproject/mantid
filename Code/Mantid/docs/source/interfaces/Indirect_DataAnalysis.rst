@@ -51,4 +51,4 @@ Apply Corrections
 .. interface:: Data Analysis
   :widget: tabApplyAbsorptionCorrections
 
-.. categories:: Interfaces Reflectometry
+.. categories:: Interfaces Indirect

@@ -51,4 +51,4 @@ Moments
 .. interface:: Data Reduction
   :widget: tabMoments
 
-.. categories:: Interfaces Reflectometry
+.. categories:: Interfaces Indirect

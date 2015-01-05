@@ -21,4 +21,4 @@ Sassena
 .. interface:: Simulation
   :widget: sassena
 
-.. categories:: Interfaces Reflectometry
+.. categories:: Interfaces Indirect

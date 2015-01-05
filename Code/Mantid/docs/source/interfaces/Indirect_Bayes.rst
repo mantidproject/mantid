@@ -33,4 +33,4 @@ JumpFit
 .. interface:: Bayes
   :widget: JumpFit
 
-.. categories:: Interfaces Reflectometry
+.. categories:: Interfaces Indirect
