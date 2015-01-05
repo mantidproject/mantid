@@ -78,7 +78,7 @@ class MainWindow(QtGui.QMainWindow):
     Move to ui.setupUI
 
     # Version 3.0 + Import for Ui_MainWindow.py
-        import Qt4MplCanvas from MplFigureCanvas
+        from MplFigureCanvas import Qt4MplCanvas 
 
         # Replace 'self.graphicsView = QtGui.QtGraphicsView' with the following
         self.graphicsView = Qt4MplCanvas(self.centralwidget)
@@ -157,7 +157,6 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.horizontalSlider.setTracking(True)
         self.ui.horizontalSlider.setTickPosition(QSlider.NoTicks)
         self.connect(self.ui.horizontalSlider, SIGNAL('valueChanged(int)'), self.move_leftSlider)
-
 
         self.ui.horizontalSlider_2.setRange(0, 100)
         self.ui.horizontalSlider_2.setValue(self._rightSlideValue)
@@ -327,10 +326,10 @@ class MainWindow(QtGui.QMainWindow):
             self._leftSlideValue = newx
 
             # Move the vertical line
-            xlim = self.ui.mainplot().get_xlim()
+            xlim = self.ui.mainplot.get_xlim()
             newx = xlim[0] + newx*(xlim[1] - xlim[0])*0.01
             leftx = [newx, newx]
-            lefty = self.ui.mainplot().get_ylim()
+            lefty = self.ui.mainplot.get_ylim()
             setp(self.leftslideline, xdata=leftx, ydata=lefty)
 
             self.ui.graphicsView.draw()
@@ -1085,7 +1084,10 @@ class MainWindow(QtGui.QMainWindow):
                 LogName             = samplelog,
                 InformationWorkspace = splitinfowsname, **kwargs)
 
-        self.splitWksp(splitws, infows)
+        try: 
+            self.splitWksp(splitws, infows)
+        except Exception as mtderror:
+            self._setErrorMsg("Splitting Failed!\n %s" % (str(mtderror)))
 
         return
 
