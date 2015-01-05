@@ -16,7 +16,6 @@ namespace MantidQt
 			Quasi(QWidget * parent = 0);
 
 			// Inherited methods from IndirectBayesTab
-			QString help() { return "Quasi"; };
       void setup();
 			bool validate();
 			void run();
