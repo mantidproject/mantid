@@ -75,30 +75,39 @@ class MyPopErrorMsg(QWidget):
 class MainWindow(QtGui.QMainWindow): 
     """ Class of Main Window (top)
 
-      Move to ui.setupUI
-        Replacement is not a valid approach as the UI is setup at the end of self.ui.setupUI
-        self.dpi = 100
-        self.fig = Figure((5.0, 4.0), dpi=self.dpi)
-        self.figure = Figure((4.0, 3.0), dpi=100)
-        self.theplot = self.figure.add_subplot(111)
-        self.ui.graphicsView = FigureCanvas(self.figure)
-        self.ui.graphicsView.setParent(self.centralwidget)
-        self.ui.graphicsView.setGeometry(QtCore.QRect(40, 230, 821, 411))
-        self.ui.graphicsView.setObjectName(_fromUtf8("graphicsView"))
+    Move to ui.setupUI
+
+    # Version 3.0 + Import for Ui_MainWindow.py
+        import Qt4MplCanvas from MplFigureCanvas
+
+        # Replace 'self.graphicsView = QtGui.QtGraphicsView' with the following
+        self.graphicsView = Qt4MplCanvas(self.centralwidget)
+        self.mainplot = self.graphicsView.getPlot()
 
         
-        # Version 2.0 + Import
+    # Version 2.0 + Import
         import matplotlib
         from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
         from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
         from matplotlib.figure import Figure
 
         self.figure = Figure((4.0, 3.0), dpi=100)
-        self.theplot = self.figure.add_subplot(111)
+        self.mainplot = self.figure.add_subplot(111)
         self.graphicsView = FigureCanvas(self.figure)
         self.graphicsView.setParent(self.centralwidget)
         self.graphicsView.setGeometry(QtCore.QRect(20, 150, 741, 411))
         self.graphicsView.setObjectName(_fromUtf8("graphicsView"))
+
+    # Version 1.0
+        Replacement is not a valid approach as the UI is setup at the end of self.ui.setupUI
+        self.dpi = 100
+        self.fig = Figure((5.0, 4.0), dpi=self.dpi)
+        self.figure = Figure((4.0, 3.0), dpi=100)
+        self.mainplot = self.figure.add_subplot(111)
+        self.ui.graphicsView = FigureCanvas(self.figure)
+        self.ui.graphicsView.setParent(self.centralwidget)
+        self.ui.graphicsView.setGeometry(QtCore.QRect(40, 230, 821, 411))
+        self.ui.graphicsView.setObjectName(_fromUtf8("graphicsView"))
 
     """ 
     
@@ -122,20 +131,20 @@ class MainWindow(QtGui.QMainWindow):
         # Do initialize plotting
         vecx, vecy, xlim, ylim = self.computeMock()
 
-        self.mainline = self.ui.theplot.plot(vecx, vecy, 'r-')
+        self.mainline = self.ui.mainplot.plot(vecx, vecy, 'r-')
 
         leftx = [xlim[0], xlim[0]]
         lefty = [ylim[0], ylim[1]]
-        self.leftslideline = self.ui.theplot.plot(leftx, lefty, 'b--')
+        self.leftslideline = self.ui.mainplot.plot(leftx, lefty, 'b--')
         rightx = [xlim[1], xlim[1]]
         righty = [ylim[0], ylim[1]]
-        self.rightslideline = self.ui.theplot.plot(rightx, righty, 'g--')
+        self.rightslideline = self.ui.mainplot.plot(rightx, righty, 'g--')
         upperx = [xlim[0], xlim[1]]
         uppery = [ylim[1], ylim[1]]
-        self.upperslideline = self.ui.theplot.plot(upperx, uppery, 'b--')
+        self.upperslideline = self.ui.mainplot.plot(upperx, uppery, 'b--')
         lowerx = [xlim[0], xlim[1]]
         lowery = [ylim[0], ylim[0]]
-        self.lowerslideline = self.ui.theplot.plot(lowerx, lowery, 'g--')
+        self.lowerslideline = self.ui.mainplot.plot(lowerx, lowery, 'g--')
 
         self.ui.graphicsView.mpl_connect('button_press_event', self.on_mouseDownEvent)
 
@@ -318,10 +327,10 @@ class MainWindow(QtGui.QMainWindow):
             self._leftSlideValue = newx
 
             # Move the vertical line
-            xlim = self.ui.graphicsView.theplot().get_xlim()
+            xlim = self.ui.mainplot().get_xlim()
             newx = xlim[0] + newx*(xlim[1] - xlim[0])*0.01
             leftx = [newx, newx]
-            lefty = self.ui.graphicsView.theplot().get_ylim()
+            lefty = self.ui.mainplot().get_ylim()
             setp(self.leftslideline, xdata=leftx, ydata=lefty)
 
             self.ui.graphicsView.draw()
@@ -342,7 +351,7 @@ class MainWindow(QtGui.QMainWindow):
         inps = str(self.ui.lineEdit_3.text())
         print "Starting time = %s" % (inps)
        
-        xlim = self.ui.graphicsView.theplot().get_xlim()
+        xlim = self.ui.mainplot.get_xlim()
         if inps == "":
             # Empty. Use default
             newtime0 = xlim[0]
@@ -377,7 +386,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Move the vertical line
         leftx = [newtime0, newtime0]
-        lefty = self.ui.graphicsView.theplot().get_ylim()
+        lefty = self.ui.mainplot.get_ylim()
         setp(self.leftslideline, xdata=leftx, ydata=lefty)
 
         self.ui.graphicsView.draw()
@@ -399,10 +408,10 @@ class MainWindow(QtGui.QMainWindow):
             # Allowed value: move the value bar
             self._rightSlideValue = newx
 
-            xlim = self.ui.graphicsView.theplot().get_xlim()
+            xlim = self.ui.mainplot.get_xlim()
             newx = xlim[0] + newx*(xlim[1] - xlim[0])*0.01
             leftx = [newx, newx]
-            lefty = self.ui.graphicsView.theplot().get_ylim()
+            lefty = self.ui.mainplot.get_ylim()
             setp(self.rightslideline, xdata=leftx, ydata=lefty)
 
             self.ui.graphicsView.draw()
@@ -423,7 +432,7 @@ class MainWindow(QtGui.QMainWindow):
         inps = str(self.ui.lineEdit_4.text())
         print "Stopping time = %s" % (inps)
         
-        xlim = self.ui.graphicsView.theplot().get_xlim()
+        xlim = self.ui.mainplot.get_xlim()
         if inps == "":
             # Empty. Use default
             newtimef = xlim[1]
@@ -456,7 +465,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Move the vertical line
         rightx = [newtimef, newtimef]
-        righty = self.ui.graphicsView.theplot().get_ylim()
+        righty = self.ui.mainplot.get_ylim()
         setp(self.rightslideline, xdata=rightx, ydata=righty)
 
         self.ui.graphicsView.draw()
@@ -492,9 +501,9 @@ class MainWindow(QtGui.QMainWindow):
             setLineEdit = True
 
         # Move the lower vertical bar
-        ylim = self.ui.graphicsView.theplot().get_ylim()
+        ylim = self.ui.mainplot.get_ylim()
         newy = ylim[0] + inewy*(ylim[1] - ylim[0])*0.01
-        lowerx = self.ui.graphicsView.theplot().get_xlim()
+        lowerx = self.ui.mainplot.get_xlim()
         lowery = [newy, newy]
         setp(self.lowerslideline, xdata=lowerx, ydata=lowery)
 
@@ -514,7 +523,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         print "Minimum Log Value = %s" %(str(self.ui.lineEdit_5.text()))
 
-        ylim = self.ui.graphicsView.theplot().get_ylim()
+        ylim = self.ui.mainplot.get_ylim()
       
         if str(self.ui.lineEdit_5.text()) == "":
             # Empty. Default to minY
@@ -542,7 +551,7 @@ class MainWindow(QtGui.QMainWindow):
             newminY = ylim[0] + iminlogval * (ylim[1]-ylim[0]) * 0.01
 
         # Move the vertical line
-        lowerx =  self.ui.graphicsView.theplot().get_xlim()
+        lowerx =  self.ui.mainplot.get_xlim()
         lowery =  [newminY, newminY]        
         setp(self.lowerslideline, xdata=lowerx, ydata=lowery)
 
@@ -580,9 +589,9 @@ class MainWindow(QtGui.QMainWindow):
             setLineEdit = True
 
         # Move the upper value bar: upperx and uppery are real value (float but not (0,100)) of the figure
-        ylim = self.ui.graphicsView.theplot().get_ylim()
+        ylim = self.ui.mainplot.get_ylim()
         newy = ylim[0] + inewy*(ylim[1] - ylim[0])*0.01
-        upperx = self.ui.graphicsView.theplot().get_xlim()
+        upperx = self.ui.mainplot.get_xlim()
         uppery = [newy, newy]
         setp(self.upperslideline, xdata=upperx, ydata=uppery)
 
@@ -601,7 +610,7 @@ class MainWindow(QtGui.QMainWindow):
         inps = str(self.ui.lineEdit_6.text())
         print "Maximum Log Value = %s" %(inps)
 
-        ylim = self.ui.theplot.get_ylim()
+        ylim = self.ui.mainplot.get_ylim()
         if inps == "":
             # Empty. Default to minY
             newmaxY = ylim[1]
@@ -631,7 +640,7 @@ class MainWindow(QtGui.QMainWindow):
             newmaxY = ylim[0] + imaxlogval * (ylim[1] - ylim[0]) * 0.01
 
         # Move the vertical line
-        upperx =  self.ui.theplot.get_xlim()
+        upperx =  self.ui.mainplot.get_xlim()
         uppery =  [newmaxY, newmaxY]        
         setp(self.upperslideline, xdata=upperx, ydata=uppery)
 
@@ -737,8 +746,8 @@ class MainWindow(QtGui.QMainWindow):
         # Set to plot
         xlim = [min(vecreltimes), max(vecreltimes)]
         ylim = [min(vecvalue), max(vecvalue)]
-        self.ui.theplot.set_xlim(xlim[0], xlim[1])
-        self.ui.theplot.set_ylim(ylim[0], ylim[1])
+        self.ui.mainplot.set_xlim(xlim[0], xlim[1])
+        self.ui.mainplot.set_ylim(ylim[0], ylim[1])
 
         setp(self.mainline, xdata=vecreltimes, ydata=vecvalue) 
 
@@ -747,7 +756,7 @@ class MainWindow(QtGui.QMainWindow):
             ylabel = logname
         else:
             ylabel = "%s (%s)" % (logname, samunit)
-        self.ui.theplot.set_ylabel(ylabel, fontsize=13)
+        self.ui.mainplot.set_ylabel(ylabel, fontsize=13)
 
         # assume that all logs are on almost same X-range.  Only Y need to be reset
         setp(self.leftslideline, ydata=ylim)
@@ -965,11 +974,11 @@ class MainWindow(QtGui.QMainWindow):
         ymax = max(vecy)
 
         # Reset graph  
-        self.ui.theplot.set_xlim(xmin, xmax)
-        self.ui.theplot.set_ylim(ymin, ymax)
+        self.ui.mainplot.set_xlim(xmin, xmax)
+        self.ui.mainplot.set_ylim(ymin, ymax)
 
-        self.ui.theplot.set_xlabel('Time (seconds)', fontsize=13)
-        self.ui.theplot.set_ylabel('Counts', fontsize=13)
+        self.ui.mainplot.set_xlabel('Time (seconds)', fontsize=13)
+        self.ui.mainplot.set_ylabel('Counts', fontsize=13)
 
         # Set up main line
         setp(self.mainline, xdata=vecx, ydata=vecy) 
@@ -1213,10 +1222,10 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.verticalSlider_2.setValue(0)
         self.ui.verticalSlider.setValue(100)
 
-        ylim = self.ui.theplot.get_ylim()
+        ylim = self.ui.mainplot.get_ylim()
         miny = ylim[0]
         maxy = ylim[1]
-        xlim = self.ui.theplot.get_xlim() 
+        xlim = self.ui.mainplot.get_xlim() 
         setp(self.lowerslideline, xdata=xlim, ydata=[miny, miny])
         setp(self.upperslideline, xdata=xlim, ydata=[maxy, maxy])
         self.ui.graphicsView.draw()

@@ -90,6 +90,8 @@ class Ui_MainWindow(object):
         """ VZ Mofication Manually """
         #self.graphicsView = QtGui.QGraphicsView(self.centralwidget)
         self.graphicsView = Qt4MplCanvas(self.centralwidget)
+        self.mainplot = self.graphicsView.getPlot()
+
         self.graphicsView.setMinimumSize(QtCore.QSize(160, 160))
         self.graphicsView.setObjectName(_fromUtf8("graphicsView"))
         self.horizontalLayout_4.addWidget(self.graphicsView)
@@ -99,7 +101,6 @@ class Ui_MainWindow(object):
         # VZ - self.graphicsView.setObjectName(_fromUtf8("graphicsView"))
         # VZ - self.horizontalLayout_4.addWidget(self.graphicsView)
 
-        self.theplot = self.graphicsView.theplot()
 
         """ End of VZ Manual Mod """
         spacerItem6 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Minimum)

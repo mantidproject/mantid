@@ -343,6 +343,19 @@
          </widget>
         </item>
         <item>
+         <spacer name="horizontalSpacer_12">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
          <widget class="QLabel" name="label_4">
           <property name="text">
            <string>Stopping Time</string>
@@ -374,6 +387,22 @@
          <widget class="QLineEdit" name="lineEdit_outwsname"/>
         </item>
         <item>
+         <spacer name="horizontalSpacer_13">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Preferred</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
          <widget class="QLabel" name="label_5">
           <property name="text">
            <string>Splitter Title</string>
@@ -394,13 +423,13 @@
          <attribute name="title">
           <string>Filter By Log</string>
          </attribute>
-         <widget class="QWidget" name="">
+         <widget class="QWidget" name="layoutWidget">
           <property name="geometry">
            <rect>
             <x>10</x>
             <y>20</y>
             <width>529</width>
-            <height>221</height>
+            <height>240</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -643,13 +672,13 @@
          <attribute name="title">
           <string>Advanced Setup</string>
          </attribute>
-         <widget class="QWidget" name="">
+         <widget class="QWidget" name="layoutWidget">
           <property name="geometry">
            <rect>
             <x>0</x>
             <y>30</y>
             <width>496</width>
-            <height>244</height>
+            <height>259</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -880,7 +909,7 @@
      <x>0</x>
      <y>0</y>
      <width>1258</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
