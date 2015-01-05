@@ -150,8 +150,6 @@ void loadGroupingFromXML(const std::string& filename, Grouping& g)
 
     g.groups[ig] = idlistElement->getAttribute("val");
   }
-
-  groups->release();
   
 
   // Parse information for pairs
@@ -237,8 +235,6 @@ void loadGroupingFromXML(const std::string& filename, Grouping& g)
     }
 
   }
-  
-  pairs->release(); 
 
   // Try to get description
   if (pRootElem->hasAttribute("description"))
@@ -254,8 +250,6 @@ void loadGroupingFromXML(const std::string& filename, Grouping& g)
     
     g.defaultName = defaultElement->getAttribute("name");
   }
-
-  pDoc->release();
 }
 
 /**
