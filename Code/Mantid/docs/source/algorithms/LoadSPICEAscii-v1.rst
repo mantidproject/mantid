@@ -45,7 +45,7 @@ Usage
 
 .. testcode:: ExLoadHB2AData
 
-  LoadSPICEAscii(Filename="HB2A_exp0231_scan0001.dat", 
+  LoadSpiceAscii(Filename="HB2A_exp0231_scan0001.dat", 
         IntSampleLogNames="Sum of Counts, scan, mode, experiment_number",
         FloatSampleLogNames="samplemosaic, preset_value, Full Width Half-Maximum, Center of Mass", 
         OutputWorkspace="HB2A_0231_0001_Data", 
