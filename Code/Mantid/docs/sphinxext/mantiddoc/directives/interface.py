@@ -78,6 +78,7 @@ class InterfaceDirective(BaseDirective):
         Args:
           picture (Screenshot): A Screenshot object
           align: The alignment to use, None for block, "left" or "right" for flowing
+          width: The width to use (in pixels, defaults to width of screenshot)
         """
         env = self.state.document.settings.env
         format_str = ".. figure:: %s\n"\

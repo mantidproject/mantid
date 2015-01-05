@@ -8,5 +8,7 @@ Overview
 --------
 
 .. interface:: Diffraction
+  :align: right
+  :width: 350
 
 .. categories:: Interfaces Indirect

@@ -8,6 +8,8 @@ Overview
 --------
 
 .. interface:: Simulation
+  :align: right
+  :width: 350
 
 MolDyn
 ------

@@ -8,6 +8,8 @@ Overview
 --------
 
 .. interface:: Data Analysis
+  :align: right
+  :width: 350
 
 Elwin
 -----
@@ -41,6 +43,8 @@ Conv Fit
 
 Calculate Corrections
 ---------------------
+
+.. warning:: This interface is only available on Windows
 
 .. interface:: Data Analysis
   :widget: tabAbsF2P
