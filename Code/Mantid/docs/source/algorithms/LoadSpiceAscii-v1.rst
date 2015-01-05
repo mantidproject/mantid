@@ -71,7 +71,7 @@ Output:
 
   Number of measuring points = 61
   Number of columns in data workspace = 70
-  Number of run information = 35
+  Number of run information = 34
   Sum of Counts = 1944923
   Center of Mass = 9.00076 +/- 0.00921
 
