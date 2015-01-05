@@ -297,7 +297,10 @@ namespace MantidQt
         return;
       }
       auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
+      if( iterator != m_subjects.end() )
+      {
       m_subjects.erase(iterator);
+      }
     }
 
     /**
@@ -609,11 +612,6 @@ namespace MantidQt
     int CompositePeaksPresenter::getZoomedPeakIndex() const
     {
         return m_zoomedPeakIndex;
-    }
-
-    void CompositePeaksPresenter::notifyWorkspaceRemoved(const std::string &wsName, const Mantid::API::IPeaksWorkspace * const removedPeaksWS)
-    {
-        // TODO
     }
 
     void CompositePeaksPresenter::updatePeaksWorkspace(const std::string& toName, boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace)

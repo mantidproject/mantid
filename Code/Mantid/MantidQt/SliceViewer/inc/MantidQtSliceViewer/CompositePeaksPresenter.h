@@ -109,8 +109,6 @@ namespace MantidQt
       boost::optional<PeaksPresenter_sptr> getZoomedPeakPresenter() const;
       /// Get optional zoomed peak index.
       int getZoomedPeakIndex() const;
-      /// Make notification that some workspace has been removed.
-      void notifyWorkspaceRemoved(const std::string &wsName, Mantid::API::IPeaksWorkspace const * const removedPeaksWS);
       /// Make notification that some workspace has been changed.
       void notifyWorkspaceChanged(const std::string &wsName, boost::shared_ptr<Mantid::API::IPeaksWorkspace>& changedPeaksWS);
 

@@ -100,6 +100,16 @@ namespace MantidQt
     {
     }
 
+
+    /**
+     * @brief PeaksViewer::hasThingsToShow
+     * @return True if there are workspaces to present.
+     */
+    bool PeaksViewer::hasThingsToShow() const
+    {
+        return m_presenter->size() >= 1;
+    }
+
     /**
      * Handler for changing the peak radius colour.
      * @param peaksWS : Peaks workspace to change the foreground colour on.
@@ -136,7 +146,7 @@ namespace MantidQt
      */
     void PeaksViewer::onRemoveWorkspace(Mantid::API::IPeaksWorkspace_const_sptr peaksWS)
     {
-      m_presenter->remove(peaksWS);
+      this->removePeaksWorkspace(peaksWS);
     }
 
     /**
@@ -245,6 +255,29 @@ namespace MantidQt
             return;
           }
         }
+
+    }
+
+    bool PeaksViewer::removePeaksWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toRemove)
+    {
+        bool somethingToRemove = false;
+        QList<PeaksWorkspaceWidget*> children = qFindChildren<PeaksWorkspaceWidget*>(this);
+
+        for(int i = 0; i < children.size(); ++i)
+        {
+          PeaksWorkspaceWidget* candidateWidget = children.at(i);
+          Mantid::API::IPeaksWorkspace_const_sptr candidateWorkspace = candidateWidget->getPeaksWorkspace();
+          somethingToRemove = (candidateWorkspace == toRemove);
+          if(somethingToRemove)
+          {
+            // We have the right widget to update. Workspace is the same, just redraw the table.
+            candidateWidget->hide();
+            children.removeAt(i);
+            break;
+          }
+        }
+        m_presenter->remove(toRemove);
+        return somethingToRemove;
 
     }
 

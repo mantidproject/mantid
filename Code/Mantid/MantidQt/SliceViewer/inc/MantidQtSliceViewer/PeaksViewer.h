@@ -36,8 +36,10 @@ public:
     void setPresenter(boost::shared_ptr<ProxyCompositePeaksPresenter> presenter);
     void performUpdate();
     void updatePeaksWorkspace(const std::string &toName, boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace);
+    bool removePeaksWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toRemove);
     void hide();
     ~PeaksViewer();
+    bool hasThingsToShow() const;
 public slots:
       void onPeakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
       void onBackgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
