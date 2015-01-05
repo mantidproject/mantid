@@ -36,6 +36,10 @@ namespace MantidQt
 
       connect(m_uiForm.cbInstrument, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(instrumentSelected(const QString&)));
       connect(m_uiForm.cbAnalyser, SIGNAL(currentIndexChanged(int)), this, SLOT(analyserSelected(int)));
+
+      QRegExp chemicalFormulaRegex("[A-Za-z0-9\\-\\(\\)]*");
+      QValidator *chemicalFormulaValidator = new QRegExpValidator(chemicalFormulaRegex, this);
+      m_uiForm.leChemicalFormula->setValidator(chemicalFormulaValidator);
     }
 
     /**
