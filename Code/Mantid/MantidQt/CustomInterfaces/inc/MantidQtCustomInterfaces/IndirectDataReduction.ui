@@ -1825,7 +1825,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabSymmertrise">
+     <widget class="QWidget" name="tabSymmetrise">
       <attribute name="title">
        <string>Symmetrise</string>
       </attribute>
