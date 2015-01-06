@@ -65,8 +65,7 @@ class ExportExperimentLogTest(unittest.TestCase):
         v4 = float(terms[4])
         self.assertAlmostEqual(avgpcharge, v4)
 
-        #
-        # # Remove generated files
+        # Remove generated files
         os.remove(outfilename)
         AnalysisDataService.remove("TestMatrixWS")
 
@@ -631,7 +630,6 @@ class ExportExperimentLogTest(unittest.TestCase):
     def test_exportFileUTC(self):
         """ Test to export logs without header file
         """
-        print "TEST UTC"
         # Generate the matrix workspace with some logs
         ws = self.createTestWorkspace()
         AnalysisDataService.addOrReplace("TestMatrixWS", ws)
@@ -682,7 +680,7 @@ class ExportExperimentLogTest(unittest.TestCase):
 
         # run start time
         v2 = str(terms[2])
-        self.assertEqual(runstarttime, v2.split(".")[0])
+        self.assertEqual(runstarttime, v2.split("UTC")[0].strip())
 
         v3 = float(terms[3])
         self.assertAlmostEqual(sumpcharge, v3)
@@ -694,7 +692,7 @@ class ExportExperimentLogTest(unittest.TestCase):
         self.assertAlmostEqual(avgpcharge, v5)
 
         # Remove generated files
-        os.remove(outfilename)
+        # os.remove(outfilename)
         AnalysisDataService.remove("TestMatrixWS")
 
         return

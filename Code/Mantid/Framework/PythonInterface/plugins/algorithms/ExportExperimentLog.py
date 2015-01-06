@@ -48,7 +48,6 @@ class ExportExperimentLog(PythonAlgorithm):
         overrideprop = StringArrayProperty("OverrideLogValue", values=[], direction=Direction.Input)
         self.declareProperty(overrideprop, "List of paired strings as log title and value to override values from workspace.")
 
-
         # Time zone
         timezones = ["UTC", "America/New_York"]
         self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones))
@@ -481,8 +480,9 @@ class ExportExperimentLog(PythonAlgorithm):
         return valuedict
 
 
-    def _convertLocalTimeString(self, utctimestr):
+    def _convertLocalTimeString(self, utctimestr, addtimezone=True):
         """ Convert a UTC time in string to the local time in string
+        and add
         """
         from datetime import datetime
         from dateutil import tz
@@ -492,6 +492,8 @@ class ExportExperimentLog(PythonAlgorithm):
 
         # Return if time zone is UTC (no need to convert)
         if self._timezone == "UTC":
+            if addtimezone is True:
+                utctimestr = "%s UTC" % (utctimestr)
             return utctimestr
 
         # Convert
@@ -530,6 +532,11 @@ class ExportExperimentLog(PythonAlgorithm):
         localtime = utctime.astimezone(to_zone)
 
         localtimestr = localtime.strftime("%Y-%m-%d %H:%M:%S.%f") + extra
+
+        # Add time zone info
+        if addtimezone is True:
+            tzn = to_zone.tzname(localtime)
+            localtimestr = "%s-%s" % (localtimestr, tzn)
 
         return localtimestr
 
