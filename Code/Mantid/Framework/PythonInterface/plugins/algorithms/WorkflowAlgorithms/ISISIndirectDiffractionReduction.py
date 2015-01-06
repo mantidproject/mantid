@@ -101,7 +101,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 # Otherwise rebin to first spectrum
                 RebinToWorkspace(WorkspaceToRebin=ws_name, WorkspaceToMatch=ws_name, OutputWorkspace=ws_name)
 
-        # TODO: spectra grouping
+            # Group workspace spectra
+            self._group_spectra(ws_name)
 
         # Rename output workspaces
         output_workspace_names = [self._rename_workspace(ws_name) for ws_name in workspace_names]
@@ -121,11 +122,15 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self._output_ws = self.getPropertyValue('OutputWorkspace')
         self._raw_file_list = self.getProperty('InputFiles').value
         self._instrument_name = self.getPropertyValue('Instrument')
+        self._mode = self.getPropertyValue('Mode')
         self._spectra_range = self.getProperty('SpectraRange').value
         self._rebin_params = self.getPropertyValue('RebinParam')
 
         if self._rebin_params == '':
             self._rebin_params = None
+
+        self._ipf_filename = self._instrument_name + '_diffraction_' + self._mode + '_Parameters.xml'
+        logger.information('IPF filename is: %s' % (self._ipf_filename))
 
 
     def _load_files(self):
@@ -151,9 +156,11 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 # Good ole' Load will do for everything else
                 Load(Filename=filename, OutputWorkspace=ws_name)
 
-            raw_workspaces.append(ws_name)
+            # Load the instrument parameters
+            LoadParameterFile(Workspace=ws_name, Filename=self._ipf_filename)
 
-            # TODO: Load parameter file
+            # Add the workspace to the list of workspaces
+            raw_workspaces.append(ws_name)
 
         # Extract monitor spectra and detectors we care about
         for ws_name in raw_workspaces:
@@ -204,8 +211,9 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         """
 
         monitor_ws_name = ws_name + '_mon'
-
         instrument = mtd[monitor_ws_name].getInstrument()
+
+        # Determine if the monitor should be unwrapped
         try:
             unwrap = instrument.getStringParameter('Workflow.UnwrapMonitor')[0]
 
@@ -292,6 +300,18 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         if scale_factor != 1.0:
             Scale(InputWorkspace=monitor_ws_name, OutputWorkspace=monitor_ws_name,
                     Factor=1.0 / scale_factor, Operation='Multiply')
+
+
+    def _group_spectra(self, ws_name):
+        """
+        Groups spectra in a given workspace according to the Workflow.GroupingMethod and
+        Workflow.GroupingFile parameters.
+
+        @param ws_name Name of workspace to group spectra of
+        """
+
+        # TODO
+        pass
 
 
     def _rename_workspace(self, ws_name):
