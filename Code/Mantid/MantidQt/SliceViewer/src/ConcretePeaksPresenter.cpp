@@ -173,31 +173,41 @@ void ConcretePeaksPresenter::doFindPeaksInRegion() {
                                        // a single plane with z = 0 thickness.
   transformedViewableRegion.transformBox(m_transform);
 
-  double effectiveRadius =
-      m_viewPeaks->getRadius(); // Effective radius of each peak representation.
+  // Don't bother to find peaks in the region if there are no peaks to find.
+  if (this->m_peaksWS->getNumberPeaks() >= 1) {
 
-  Mantid::API::IPeaksWorkspace_sptr peaksWS =
-      boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(this->m_peaksWS);
+    double effectiveRadius =
+        m_viewPeaks
+            ->getRadius(); // Effective radius of each peak representation.
 
-  Mantid::API::IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create("PeaksInRegion");
-  alg->setChild(true);
-  alg->setRethrows(true);
-  alg->initialize();
-  alg->setProperty("InputWorkspace", peaksWS);
-  alg->setProperty("OutputWorkspace", peaksWS->name() + "_peaks_in_region");
-  alg->setProperty("Extents", transformedViewableRegion.toExtents());
-  alg->setProperty("CheckPeakExtents", true);
-  alg->setProperty("PeakRadius", effectiveRadius);
-  alg->setPropertyValue("CoordinateFrame", m_transform->getFriendlyName());
-  alg->execute();
-  ITableWorkspace_sptr outTable = alg->getProperty("OutputWorkspace");
-  std::vector<bool> viewablePeaks(outTable->rowCount());
-  for (size_t i = 0; i < outTable->rowCount(); ++i) {
-    viewablePeaks[i] = outTable->cell<Boolean>(i, 1);
+    Mantid::API::IPeaksWorkspace_sptr peaksWS =
+        boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
+            this->m_peaksWS);
+
+    Mantid::API::IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create("PeaksInRegion");
+    alg->setChild(true);
+    alg->setRethrows(true);
+    alg->initialize();
+    alg->setProperty("InputWorkspace", peaksWS);
+    alg->setProperty("OutputWorkspace", peaksWS->name() + "_peaks_in_region");
+    alg->setProperty("Extents", transformedViewableRegion.toExtents());
+    alg->setProperty("CheckPeakExtents", true);
+    alg->setProperty("PeakRadius", effectiveRadius);
+    alg->setPropertyValue("CoordinateFrame", m_transform->getFriendlyName());
+    alg->execute();
+    ITableWorkspace_sptr outTable = alg->getProperty("OutputWorkspace");
+    std::vector<bool> viewablePeaks(outTable->rowCount());
+    for (size_t i = 0; i < outTable->rowCount(); ++i) {
+      viewablePeaks[i] = outTable->cell<Boolean>(i, 1);
+    }
+    m_viewablePeaks = viewablePeaks;
+
   }
-  m_viewablePeaks = viewablePeaks;
-
+  else{
+    // No peaks will be viewable
+    m_viewablePeaks = std::vector<bool>();
+  }
   m_viewPeaks->setSlicePoint(m_slicePoint.slicePoint(), m_viewablePeaks);
 }
 

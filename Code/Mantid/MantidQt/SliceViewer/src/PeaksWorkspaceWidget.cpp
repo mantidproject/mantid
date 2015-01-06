@@ -85,6 +85,7 @@ void PeaksWorkspaceWidget::createTableMVC() {
   connect(model, SIGNAL(peaksSorted(const std::string &, const bool)), this,
           SLOT(onPeaksSorted(const std::string &, const bool)));
   ui.tblPeaks->setModel(model);
+  model->update();
   const std::vector<int> hideCols = model->defaultHideCols();
   for (auto it = hideCols.begin(); it != hideCols.end(); ++it)
     ui.tblPeaks->setColumnHidden(*it, true);
