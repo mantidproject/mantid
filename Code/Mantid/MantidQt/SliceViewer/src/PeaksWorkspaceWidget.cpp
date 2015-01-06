@@ -81,11 +81,10 @@ void PeaksWorkspaceWidget::setShownColumns(std::set<QString> &cols) {
 Populate controls with data ready for rendering.
 */
 void PeaksWorkspaceWidget::createTableMVC() {
-  auto model = new QPeaksTableModel(this->m_ws);
+  QPeaksTableModel* model = new QPeaksTableModel(this->m_ws);
   connect(model, SIGNAL(peaksSorted(const std::string &, const bool)), this,
           SLOT(onPeaksSorted(const std::string &, const bool)));
   ui.tblPeaks->setModel(model);
-  model->update();
   const std::vector<int> hideCols = model->defaultHideCols();
   for (auto it = hideCols.begin(); it != hideCols.end(); ++it)
     ui.tblPeaks->setColumnHidden(*it, true);
@@ -252,8 +251,8 @@ void PeaksWorkspaceWidget::workspaceUpdate(
   if (ws) {
     m_ws = ws;
   }
-  // Recreate the table.
-  createTableMVC();
+  // Set at new representation for the model.
+  static_cast<QPeaksTableModel*>(this->ui.tblPeaks->model())->setPeaksWorkspace(m_ws);
   // Update the display name of the workspace.
   this->ui.lblWorkspaceName->setText(m_ws->getName().c_str());
 }

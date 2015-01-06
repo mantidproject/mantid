@@ -9,7 +9,6 @@ namespace MantidQt
 {
 namespace SliceViewer
 {
-
   class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeaksWorkspaceWidget : public QWidget
   {
     Q_OBJECT
