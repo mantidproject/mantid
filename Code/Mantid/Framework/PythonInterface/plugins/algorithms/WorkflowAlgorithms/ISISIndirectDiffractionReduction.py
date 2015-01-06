@@ -13,7 +13,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
 
     def summary(self):
-        return ''  # TODO
+        return 'Performs a diffraction reduction for a set of raw run files for an ISIS indirect spectrometer'
 
 
     def PyInit(self):
@@ -69,6 +69,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
         self._setup()
+
         workspace_names = self._load_files()
 
         self._identify_bad_detectors(workspace_names[0])
@@ -87,17 +88,29 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             Divide(LHSWorkspace=ws_name, RHSWorkspace=monitor_ws_name, OutputWorkspace=ws_name)
 
             # Remove the no longer needed monitor workspace
-            # DeleteWorkspace(monitor_ws_name)
+            DeleteWorkspace(monitor_ws_name)
 
             # Convert to dSpacing
             ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target='dSpacing', EMode='Elastic')
 
             # Rebin in dSpacing
             if self._rebin_params is not None:
+                # Rebin using params if given
                 Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=self._rebin_params)
+            else:
+                # Otherwise rebin to first spectrum
+                RebinToWorkspace(WorkspaceToRebin=ws_name, WorkspaceToMatch=ws_name, OutputWorkspace=ws_name)
 
         # TODO: spectra grouping
-        # TODO: workspace grouping
+
+        # Rename output workspaces
+        output_workspace_names = [self._rename_workspace(ws_name) for ws_name in workspace_names]
+
+        # Group result workspaces
+        GroupWorkspaces(InputWorkspaces=output_workspace_names, OutputWorkspace=self._output_ws)
+
+        self.setProperty('OutputWorkspace', self._output_ws)
+
 
 
     def _setup(self):
@@ -105,6 +118,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         Gets algorithm properties.
         """
 
+        self._output_ws = self.getPropertyValue('OutputWorkspace')
         self._raw_file_list = self.getProperty('InputFiles').value
         self._instrument_name = self.getPropertyValue('Instrument')
         self._spectra_range = self.getProperty('SpectraRange').value
@@ -138,6 +152,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 Load(Filename=filename, OutputWorkspace=ws_name)
 
             raw_workspaces.append(ws_name)
+
+            # TODO: Load parameter file
 
         # Extract monitor spectra and detectors we care about
         for ws_name in raw_workspaces:
@@ -276,6 +292,23 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         if scale_factor != 1.0:
             Scale(InputWorkspace=monitor_ws_name, OutputWorkspace=monitor_ws_name,
                     Factor=1.0 / scale_factor, Operation='Multiply')
+
+
+    def _rename_workspace(self, ws_name):
+        """
+        Renames a worksapce according to the naming policy in the Workflow.NamingConvention parameter.
+
+        @param ws_name Name of workspace
+        @return New name of workspace
+        """
+
+        # TODO
+        new_name = ws_name + '_a'
+
+        logger.information('New name for %s workspace: %s' % (ws_name, new_name))
+
+        RenameWorkspace(InputWorkspace=ws_name, OutputWorkspace=new_name)
+        return new_name
 
 
 AlgorithmFactory.subscribe(ISISIndirectDiffractionReduction)

@@ -14,15 +14,15 @@ The generic routine used to reduce diffraction runs from indirect inelastic geom
 Usage
 -----
 
-**Example - Running MSGDiffractionReduction.**
+**Example - Running ISISIndirectDiffractionReduction.**
 
-.. testcode:: ExMSGDiffractionReductionSimple
+.. testcode:: ExISISIndirectDiffractionReductionSimple
 
-    MSGDiffractionReduction(InputFiles='IRS21360.raw',
-                            OutputWorkspace='DiffractionReductions',
-                            Instrument='IRIS',
-                            Mode='diffspec',
-                            DetectorRange=[105,112])
+    ISISIndirectDiffractionReduction(InputFiles='IRS21360.raw',
+                                     OutputWorkspace='DiffractionReductions',
+                                     Instrument='IRIS',
+                                     Mode='diffspec',
+                                     SpectraRange=[105,112])
 
     ws = mtd['DiffractionReductions'].getItem(0)
 
@@ -32,7 +32,7 @@ Usage
 
 Output:
 
-.. testoutput:: ExMSGDiffractionReductionSimple
+.. testoutput:: ExISISIndirectDiffractionReductionSimple
 
     Workspace name: irs21360_diffspec_red
     Number of spectra: 1
