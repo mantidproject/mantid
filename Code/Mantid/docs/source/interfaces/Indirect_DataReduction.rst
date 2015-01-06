@@ -196,7 +196,8 @@ Plot
   If enabled will plot the result as a spectra plot.
 
 Save
-  If enabled the result will be saved as a NeXus file in the default save.
+  If enabled the result will be saved as a NeXus file in the default save
+  directory.
 
 Calibration
 ###########
