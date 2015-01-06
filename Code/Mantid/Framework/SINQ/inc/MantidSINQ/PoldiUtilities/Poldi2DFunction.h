@@ -58,6 +58,8 @@ private:
   size_t m_iteration;
 };
 
+typedef boost::shared_ptr<Poldi2DFunction> Poldi2DFunction_sptr;
+
 } // namespace SINQ
 } // namespace Mantid
 

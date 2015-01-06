@@ -102,7 +102,7 @@ void PoldiFitPeaks2D::init() {
  */
 PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
     const IFunction_sptr &fitFunction) const {
-  boost::shared_ptr<Poldi2DFunction> poldi2DFunction =
+  Poldi2DFunction_sptr poldi2DFunction =
       boost::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
 
   if (!poldi2DFunction) {
@@ -153,10 +153,9 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
  *intensities
  * @return Poldi2DFunction with one PoldiSpectrumDomainFunction per peak
  */
-boost::shared_ptr<Poldi2DFunction>
-PoldiFitPeaks2D::getFunctionFromPeakCollection(
+Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(
     const PoldiPeakCollection_sptr &peakCollection) const {
-  boost::shared_ptr<Poldi2DFunction> mdFunction(new Poldi2DFunction);
+  Poldi2DFunction_sptr mdFunction(new Poldi2DFunction);
 
   for (size_t i = 0; i < peakCollection->peakCount(); ++i) {
     PoldiPeak_sptr peak = peakCollection->peak(i);
@@ -217,8 +216,8 @@ void PoldiFitPeaks2D::exec() {
  *
  * @param poldi2DFunction :: Poldi2DFunction to which the background is added.
  */
-void PoldiFitPeaks2D::addBackgroundTerms(
-    boost::shared_ptr<Poldi2DFunction> poldi2DFunction) const {
+void PoldiFitPeaks2D::addBackgroundTerms(Poldi2DFunction_sptr poldi2DFunction)
+    const {
   bool addConstantBackground = getProperty("FitConstantBackground");
   if (addConstantBackground) {
     IFunction_sptr constantBackground =
@@ -258,7 +257,7 @@ IAlgorithm_sptr PoldiFitPeaks2D::calculateSpectrum(
   PoldiPeakCollection_sptr normalizedPeakCollection =
       getNormalizedPeakCollection(integratedPeaks);
 
-  boost::shared_ptr<Poldi2DFunction> mdFunction =
+  Poldi2DFunction_sptr mdFunction =
       getFunctionFromPeakCollection(normalizedPeakCollection);
 
   addBackgroundTerms(mdFunction);
@@ -392,7 +391,8 @@ PoldiPeakCollection_sptr
 PoldiFitPeaks2D::getPeakCollection(const TableWorkspace_sptr &peakTable) const {
   try {
     return boost::make_shared<PoldiPeakCollection>(peakTable);
-  } catch (...) {
+  }
+  catch (...) {
     throw std::runtime_error("Could not initialize peak collection.");
   }
 }
