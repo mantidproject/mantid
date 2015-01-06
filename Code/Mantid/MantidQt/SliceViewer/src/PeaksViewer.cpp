@@ -269,23 +269,28 @@ void PeaksViewer::updatePeaksWorkspace(
 bool PeaksViewer::removePeaksWorkspace(
     boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toRemove) {
   bool somethingToRemove = false;
-  QList<PeaksWorkspaceWidget *> children =
-      qFindChildren<PeaksWorkspaceWidget *>(this);
 
-  for (int i = 0; i < children.size(); ++i) {
-    PeaksWorkspaceWidget *candidateWidget = children.at(i);
-    Mantid::API::IPeaksWorkspace_const_sptr candidateWorkspace =
-        candidateWidget->getPeaksWorkspace();
-    somethingToRemove = (candidateWorkspace == toRemove);
-    if (somethingToRemove) {
-      // We have the right widget to update. Workspace is the same, just redraw
-      // the table.
-      candidateWidget->hide();
-      children.removeAt(i);
-      break;
+  if (m_presenter) {
+
+    QList<PeaksWorkspaceWidget *> children =
+        qFindChildren<PeaksWorkspaceWidget *>(this);
+
+    for (int i = 0; i < children.size(); ++i) {
+      PeaksWorkspaceWidget *candidateWidget = children.at(i);
+      Mantid::API::IPeaksWorkspace_const_sptr candidateWorkspace =
+          candidateWidget->getPeaksWorkspace();
+      somethingToRemove = (candidateWorkspace == toRemove);
+      if (somethingToRemove) {
+        // We have the right widget to update. Workspace is the same, just
+        // redraw
+        // the table.
+        candidateWidget->hide();
+        children.removeAt(i);
+        break;
+      }
     }
+    m_presenter->remove(toRemove);
   }
-  m_presenter->remove(toRemove);
   return somethingToRemove;
 }
 
