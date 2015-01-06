@@ -12,6 +12,7 @@ class InstrumentActor;
 class CollapsiblePanel;
 class OneCurvePlot;
 class ComponentInfoController;
+class DetectorPlotController;
 
 class QPushButton;
 class QTextEdit;
@@ -45,12 +46,11 @@ public:
   ///               markers. Selected peaks can be deleted by pressing the Delete key.
   enum SelectionType {Single=0,AddPeak,ErasePeak,SingleDetectorSelection,Tube, Draw};
   enum ToolType {Zoom,PixelSelect,TubeSelect,PeakSelect,PeakErase, DrawEllipse, DrawRectangle, EditShape};
-  enum TubeXUnits {DETECTOR_ID = 0,LENGTH,PHI,OUT_OF_PLANE_ANGLE,NUMBER_OF_UNITS};
 
   InstrumentWindowPickTab(InstrumentWindow* instrWindow);
   void updatePick(int detid);
   bool canUpdateTouchedDetector()const;
-  TubeXUnits getTubeXUnits() const {return m_tubeXUnits;}
+//  TubeXUnits getTubeXUnits() const {return m_tubeXUnits;}
   void mouseLeftInstrmentDisplay();
   void initSurface();
   void saveSettings(QSettings& settings) const;
@@ -77,9 +77,7 @@ private slots:
   void updatePlotMultipleDetectors();
 private:
   void showEvent (QShowEvent *);
-  QString getTubeXUnitsName(TubeXUnits unit) const;
   QColor getShapeBorderColor() const;
-  static double getOutOfPlaneAngle(const Mantid::Kernel::V3D& pos, const Mantid::Kernel::V3D& origin, const Mantid::Kernel::V3D& normal);
 
   /* Pick tab controls */
   OneCurvePlot* m_plot; ///< Miniplot to display data in the detectors
@@ -116,11 +114,16 @@ private:
   CollapsiblePanel* m_infoPanel;
   SelectionType m_selectionType;
   int m_currentDetID;
-  TubeXUnits m_tubeXUnits; ///< quantity the time bin integrals to be plotted against
   mutable bool m_freezePlot;
 
   /// Controller responsible for the info display.
   ComponentInfoController* m_infoController;
+  /// Controller responsible for the plot.
+  DetectorPlotController* m_plotController;
+
+  // Temporary caches for values from settings
+  int m_tubeXUnitsCache;
+  int m_plotTypeCache;
 };
 
 /**
@@ -157,10 +160,28 @@ private:
 class DetectorPlotController: public QObject
 {
   Q_OBJECT
+
 public:
+
+  enum PlotType {Single = 0, DetectorSum, TubeSum, TubeIntegral};
+  enum TubeXUnits {DETECTOR_ID = 0,LENGTH,PHI,OUT_OF_PLANE_ANGLE,NUMBER_OF_UNITS};
+
+  DetectorPlotController(InstrumentWindowPickTab *tab, InstrumentActor* instrActor, OneCurvePlot* plot);
+  void setEnabled( bool on ) { m_enabled = on; }
+  void setPlotData(size_t pickID);
+  void setPlotData(QList<int> detIDs);
+  void updatePlot();
+  void clear();
+
+  void setPlotType(PlotType type) { m_plotType = type; }
+  PlotType getPlotType() const { return m_plotType; }
+  void setTubeXUnits( TubeXUnits units ) { m_tubeXUnits = units; }
+  TubeXUnits getTubeXUnits() const { return m_tubeXUnits; }
+  QString getTubeXUnitsName(TubeXUnits unit) const;
+  QString DetectorPlotController::getPlotCaption() const;
+
 private:
 
-  void updatePlot(int detid);
   void plotSingle(int detid);
   void plotTube(int detid);
   void plotTubeSums(int detid);
@@ -181,13 +202,15 @@ private:
     std::vector<double>&y,
     std::vector<double>* err = NULL);
   void savePlotToWorkspace();
+  static double getOutOfPlaneAngle(const Mantid::Kernel::V3D& pos, const Mantid::Kernel::V3D& origin, const Mantid::Kernel::V3D& normal);
 
   InstrumentWindowPickTab* m_tab;
   InstrumentActor* m_instrActor;
   OneCurvePlot* m_plot;
 
-  bool m_instrWindowBlocked;
-  bool m_plotSum;
+  PlotType m_plotType;
+  bool m_enabled;
+  TubeXUnits m_tubeXUnits; ///< quantity the time bin integrals to be plotted against
 
 };
 

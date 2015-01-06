@@ -64,7 +64,7 @@ struct Sqrt
 InstrumentWindowPickTab::InstrumentWindowPickTab(InstrumentWindow* instrWindow):
 InstrumentWindowTab(instrWindow),
 m_currentDetID(-1),
-m_tubeXUnits(DETECTOR_ID),
+//m_tubeXUnits(DETECTOR_ID),
 m_freezePlot(false)
 {
 
@@ -112,22 +112,22 @@ m_freezePlot(false)
 
   m_detidUnits = new QAction("Detector ID",this);
   m_detidUnits->setCheckable(true);
-  m_unitsMapper->setMapping(m_detidUnits,DETECTOR_ID);
+  m_unitsMapper->setMapping(m_detidUnits,DetectorPlotController::DETECTOR_ID);
   connect(m_detidUnits,SIGNAL(triggered()),m_unitsMapper,SLOT(map()));
 
   m_lengthUnits = new QAction("Tube length",this);
   m_lengthUnits->setCheckable(true);
-  m_unitsMapper->setMapping(m_lengthUnits,LENGTH);
+  m_unitsMapper->setMapping(m_lengthUnits,DetectorPlotController::LENGTH);
   connect(m_lengthUnits,SIGNAL(triggered()),m_unitsMapper,SLOT(map()));
 
   m_phiUnits = new QAction("Phi",this);
   m_phiUnits->setCheckable(true);
-  m_unitsMapper->setMapping(m_phiUnits,PHI);
+  m_unitsMapper->setMapping(m_phiUnits,DetectorPlotController::PHI);
   connect(m_phiUnits,SIGNAL(triggered()),m_unitsMapper,SLOT(map()));
 
   m_outOfPlaneAngleUnits = new QAction("Out of plane angle",this);
   m_outOfPlaneAngleUnits->setCheckable(true);
-  m_unitsMapper->setMapping(m_outOfPlaneAngleUnits,OUT_OF_PLANE_ANGLE);
+  m_unitsMapper->setMapping(m_outOfPlaneAngleUnits,DetectorPlotController::OUT_OF_PLANE_ANGLE);
   connect(m_outOfPlaneAngleUnits,SIGNAL(triggered()),m_unitsMapper,SLOT(map()));
 
   m_unitsGroup = new QActionGroup(this);
@@ -234,14 +234,11 @@ m_freezePlot(false)
   connect(m_ring_ellipse,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_ring_rectangle,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_edit,SIGNAL(clicked()),this,SLOT(setSelectionType()));
-  setSelectionType();
 
   // lay out the widgets
   layout->addWidget(m_activeTool);
   layout->addLayout(toolBox);
   layout->addWidget(panelStack);
-
-  setPlotCaption();
 
 }
 
@@ -260,21 +257,17 @@ bool InstrumentWindowPickTab::canUpdateTouchedDetector()const
 void InstrumentWindowPickTab::plotContextMenu()
 {
   QMenu context(this);
+
+  auto plotType = m_plotController->getPlotType();
   
-  if (m_selectionType > SingleDetectorSelection)
-  {// only for multiple detector selectors
+  if ( plotType == DetectorPlotController::TubeSum || 
+    plotType == DetectorPlotController::TubeIntegral )
+  {
+    // only for multiple detector selectors
     context.addActions(m_summationType->actions());
-    if ( m_selectionType == Draw )
-    {
-        m_sumDetectors->setChecked(true);
-        m_integrateTimeBins->setEnabled(false);
-    }
-    else
-    {
-        m_sumDetectors->setChecked(m_plotSum);
-        m_integrateTimeBins->setChecked(!m_plotSum);
-        m_integrateTimeBins->setEnabled(true);
-    }
+    m_sumDetectors->setChecked( plotType == DetectorPlotController::TubeSum );
+    m_integrateTimeBins->setChecked( plotType != DetectorPlotController::TubeSum );
+    m_integrateTimeBins->setEnabled(true);
     context.addSeparator();
   }
 
@@ -312,16 +305,17 @@ void InstrumentWindowPickTab::plotContextMenu()
   }
 
   // Tube x units menu options
-  if (m_selectionType > SingleDetectorSelection && !m_plotSum)
+  if ( plotType == DetectorPlotController::TubeIntegral )
   {
     axes->addSeparator();
     axes->addActions(m_unitsGroup->actions());
-    switch(m_tubeXUnits)
+    auto tubeXUnits = m_plotController->getTubeXUnits();
+    switch(tubeXUnits)
     {
-    case DETECTOR_ID: m_detidUnits->setChecked(true); break;
-    case LENGTH: m_lengthUnits->setChecked(true); break;
-    case PHI: m_phiUnits->setChecked(true); break;
-    case OUT_OF_PLANE_ANGLE: m_outOfPlaneAngleUnits->setChecked(true); break;
+    case DetectorPlotController::DETECTOR_ID:         m_detidUnits->setChecked(true); break;
+    case DetectorPlotController::LENGTH:              m_lengthUnits->setChecked(true); break;
+    case DetectorPlotController::PHI:                 m_phiUnits->setChecked(true); break;
+    case DetectorPlotController::OUT_OF_PLANE_ANGLE:  m_outOfPlaneAngleUnits->setChecked(true); break;
     default: m_detidUnits->setChecked(true);
     }
   }
@@ -342,24 +336,7 @@ void InstrumentWindowPickTab::plotContextMenu()
  */
 void InstrumentWindowPickTab::setPlotCaption()
 {
-  QString caption;
-  if (m_selectionType < SingleDetectorSelection)
-  {
-    caption = "Plotting detector spectra";
-  }
-  else if (m_edit->isChecked())
-  {
-    caption = "Plotting multiple detector sum";
-  }
-  else if (m_plotSum)
-  {
-    caption = "Plotting sum";
-  }
-  else
-  {
-    caption = "Plotting integral";
-  }
-  m_plotPanel->setCaption(caption);
+  m_plotPanel->setCaption(m_plotController->getPlotCaption());
 }
 
 /**
@@ -367,7 +344,8 @@ void InstrumentWindowPickTab::setPlotCaption()
  */
 void InstrumentWindowPickTab::sumDetectors()
 {
-  m_plotSum = true;
+  //m_plotSum = true;
+  m_plotController->setPlotType( DetectorPlotController::TubeSum  );
   m_plot->clearAll();
   m_plot->replot();
   setPlotCaption();
@@ -378,7 +356,8 @@ void InstrumentWindowPickTab::sumDetectors()
  */
 void InstrumentWindowPickTab::integrateTimeBins()
 {
-  m_plotSum = false;
+  //m_plotSum = false;
+  m_plotController->setPlotType( DetectorPlotController::TubeIntegral );
   m_plot->clearAll();
   m_plot->replot();
   setPlotCaption();
@@ -400,6 +379,7 @@ void InstrumentWindowPickTab::updatePick(int detid)
 void InstrumentWindowPickTab::setSelectionType()
 {
   ProjectionSurface::InteractionMode surfaceMode = ProjectionSurface::PickSingleMode;
+  auto plotType = m_plotController->getPlotType();
   if (m_zoom->isChecked())
   {
     m_selectionType = Single;
@@ -411,18 +391,24 @@ void InstrumentWindowPickTab::setSelectionType()
     m_selectionType = Single;
     m_activeTool->setText("Tool: Pixel selection");
     surfaceMode = ProjectionSurface::PickSingleMode;
+    plotType = DetectorPlotController::Single;
   }
   else if (m_tube->isChecked())
   {
     m_selectionType = Tube;
     m_activeTool->setText("Tool: Tube/bank selection");
     surfaceMode = ProjectionSurface::PickTubeMode;
+    if ( plotType < DetectorPlotController::TubeSum )
+    {
+      plotType = DetectorPlotController::TubeSum;
+    }
   }
   else if (m_peak->isChecked())
   {
     m_selectionType = AddPeak;
     m_activeTool->setText("Tool: Add a single crystal peak");
     surfaceMode = ProjectionSurface::AddPeakMode;
+    plotType = DetectorPlotController::Single;
   }
   else if (m_peakSelect->isChecked())
   {
@@ -435,6 +421,7 @@ void InstrumentWindowPickTab::setSelectionType()
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Rectangle");
     surfaceMode = ProjectionSurface::DrawMode;
+    plotType = DetectorPlotController::Single;
     m_instrWindow->getSurface()->startCreatingShape2D("rectangle",Qt::green,QColor(255,255,255,80));
   }
   else if (m_ellipse->isChecked())
@@ -442,6 +429,7 @@ void InstrumentWindowPickTab::setSelectionType()
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Ellipse");
     surfaceMode = ProjectionSurface::DrawMode;
+    plotType = DetectorPlotController::Single;
     m_instrWindow->getSurface()->startCreatingShape2D("ellipse",Qt::green,QColor(255,255,255,80));
   }
   else if (m_ring_ellipse->isChecked())
@@ -449,6 +437,7 @@ void InstrumentWindowPickTab::setSelectionType()
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Elliptical ring");
     surfaceMode = ProjectionSurface::DrawMode;
+    plotType = DetectorPlotController::Single;
     m_instrWindow->getSurface()->startCreatingShape2D("ring ellipse",Qt::green,QColor(255,255,255,80));
   }
   else if (m_ring_rectangle->isChecked())
@@ -456,6 +445,7 @@ void InstrumentWindowPickTab::setSelectionType()
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Rectangular ring");
     surfaceMode = ProjectionSurface::DrawMode;
+    plotType = DetectorPlotController::Single;
     m_instrWindow->getSurface()->startCreatingShape2D("ring rectangle",Qt::green,QColor(255,255,255,80));
   }
   else if (m_edit->isChecked())
@@ -463,7 +453,9 @@ void InstrumentWindowPickTab::setSelectionType()
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Shape editing");
     surfaceMode = ProjectionSurface::DrawMode;
+    plotType = DetectorPlotController::Single;
   }
+  m_plotController->setPlotType( plotType );
   auto surface = m_instrWindow->getSurface();
   if ( surface ) 
   {
@@ -604,29 +596,13 @@ void InstrumentWindowPickTab::removeCurve(const QString & label)
  */
 void InstrumentWindowPickTab::setTubeXUnits(int units)
 {
-  if (units < 0 || units >= NUMBER_OF_UNITS) return;
-  m_tubeXUnits = static_cast<TubeXUnits>(units);
+  if (units < 0 || units >= DetectorPlotController::NUMBER_OF_UNITS) return;
+  auto tubeXUnits = static_cast<DetectorPlotController::TubeXUnits>(units);
+  m_plotController->setTubeXUnits(tubeXUnits);
   m_plot->clearAll();
   m_plot->replot();
 }
 
-
-/**
- * Return symbolic name of a TubeXUnit.
- * @param unit :: One of TubeXUnits.
- * @return :: Symbolic name of the units, caseless: Detector_ID, Length, Phi
- */
-QString InstrumentWindowPickTab::getTubeXUnitsName(InstrumentWindowPickTab::TubeXUnits unit) const
-{
-  switch(unit)
-  {
-  case LENGTH: return "Length";
-  case PHI: return "Phi";
-  case OUT_OF_PLANE_ANGLE: return "Out of plane angle";
-  default: return "Detector_ID";
-  }
-  return "Detector_ID";
-}
 
 /**
  * Get the color of the overlay shapes in this tab.
@@ -685,6 +661,11 @@ void InstrumentWindowPickTab::initSurface()
         connect(p3d,SIGNAL(finishedMove()),this,SLOT(updatePlotMultipleDetectors()));
     }
     m_infoController = new ComponentInfoController(this, m_instrWindow->getInstrumentActor(),m_selectionInfoDisplay);
+    m_plotController = new DetectorPlotController(this, m_instrWindow->getInstrumentActor(),m_plot);
+    m_plotController->setTubeXUnits( static_cast<DetectorPlotController::TubeXUnits>(m_tubeXUnitsCache) );
+    m_plotController->setPlotType( static_cast<DetectorPlotController::PlotType>(m_plotTypeCache) );
+    setSelectionType();
+    setPlotCaption();
 }
 
 /**
@@ -692,8 +673,8 @@ void InstrumentWindowPickTab::initSurface()
   */
 void InstrumentWindowPickTab::saveSettings(QSettings &settings) const
 {
-    settings.setValue("TubeXUnits",getTubeXUnits());
-    settings.setValue("PlotSum", m_plotSum);
+  settings.setValue("TubeXUnits",m_plotController->getTubeXUnits());
+  settings.setValue("PlotType", m_plotController->getPlotType());
 }
 
 /**
@@ -701,10 +682,10 @@ void InstrumentWindowPickTab::saveSettings(QSettings &settings) const
  */
 void InstrumentWindowPickTab::loadSettings(const QSettings &settings)
 {
-    int unitsNum = settings.value("TubeXUnits",0).toInt();
-    m_tubeXUnits = TubeXUnits( unitsNum );
-    m_plotSum = settings.value("PlotSum",true).toBool();
-    setPlotCaption();
+  // loadSettings is called when m_plotController is not created yet.
+  // Cache the settings and apply them later
+  m_tubeXUnitsCache = settings.value("TubeXUnits",0).toInt();
+  m_plotTypeCache =  settings.value("PlotType",DetectorPlotController::Single).toInt();
 }
 
 /**
@@ -763,12 +744,16 @@ void InstrumentWindowPickTab::singleComponentTouched(size_t pickID)
   if (canUpdateTouchedDetector())
   {
     m_infoController->displayInfo( pickID );
+    m_plotController->setPlotData( pickID );
+    m_plotController->updatePlot();
   }
 }
 
 void InstrumentWindowPickTab::singleComponentPicked(size_t pickID)
 {
     m_infoController->displayInfo( pickID );
+    m_plotController->setPlotData( pickID );
+    m_plotController->updatePlot();
 }
 
 /**
@@ -796,40 +781,17 @@ void InstrumentWindowPickTab::updatePlotMultipleDetectors()
 {
     if ( !isVisible() ) return;
     ProjectionSurface &surface = *getSurface();
-    m_plot->clearCurve();
-    m_plot->clearPeakLabels();
-    if ( !surface.hasMasks() )
+    if ( surface.hasMasks() )
     {
-        m_plot->replot();
-        return;
+      QList<int> dets;
+      surface.getMaskedDetectors( dets );
+      m_plotController->setPlotData( dets );
     }
-    QList<int> dets;
-    surface.getMaskedDetectors( dets );
-    std::vector<double> x,y;
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    m_instrWindow->getInstrumentActor()->sumDetectors( dets, x, y, static_cast<size_t>(m_plot->width()) );
-    QApplication::restoreOverrideCursor();
-    if ( !x.empty() )
+    else
     {
-        m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()), m_instrWindow->getInstrumentActor()->getWorkspace()->getAxis(0)->unit()->unitID());
+      m_plotController->clear();
     }
-    m_plot->setLabel("multiple");
     m_plot->replot();
-}
-
-/**
-  * Calculate the angle between a vector ( == pos - origin ) and a plane ( orthogonal to normal ).
-  * The angle is positive if the vector and the normal make an acute angle.
-  * @param pos :: Vector's end.
-  * @param origin :: Vector's origin.
-  * @param normal :: Normal to the plane.
-  * @return :: Angle between the vector and the plane in radians in [-pi/2, pi/2]. 
-  */
-double InstrumentWindowPickTab::getOutOfPlaneAngle(const Mantid::Kernel::V3D& pos, const Mantid::Kernel::V3D& origin, const Mantid::Kernel::V3D& normal)
-{
-  Mantid::Kernel::V3D vec = pos - origin;
-  vec.normalize();
-  return asin(vec.scalar_prod(normal));
 }
 
 //=====================================================================================//
@@ -898,12 +860,9 @@ void ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid)
     QString wsIndex;
     try {
       wsIndex = QString::number(m_instrActor->getWorkspaceIndex(detid));
-      //updatePlot(detid); // Update the plot if the detector links to some data
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       // Detector doesn't have a workspace index relating to it
       wsIndex = "None";
-      //m_plot->clearCurve(); // Clear the plot window
-      //m_plot->replot();
     }
     text += "Workspace index: " + wsIndex + '\n';
     Mantid::Kernel::V3D pos = det->getPos();
@@ -1033,35 +992,98 @@ QString ComponentInfoController::getNonDetectorInfo()
 //=====================================================================================//
 
 /**
- * Update the miniplot for a selected detector.
+ * Constructor.
+ * @param tab :: The parent tab.
+ * @param instrActor :: A pointer to the InstrumentActor.
+ * @param plot :: The plot widget.
+ */
+DetectorPlotController::DetectorPlotController(InstrumentWindowPickTab *tab, InstrumentActor* instrActor, OneCurvePlot* plot):
+  QObject(tab),
+  m_tab(tab),
+  m_instrActor(instrActor),
+  m_plot(plot),
+  m_plotType(Single),
+  m_enabled(true)
+{
+}
+
+/**
+ * Update the miniplot for a selected detector. The curve data depend on the 
+ * plot type.
  * @param detid :: ID of detector to use to update the plot.
  */
-void DetectorPlotController::updatePlot(int detid)
+void DetectorPlotController::setPlotData(size_t pickID)
 {
-  if (m_instrWindowBlocked)
+  if ( m_plotType == DetectorSum )
+  {
+    m_plotType = Single;
+  }
+
+  int detid = m_instrActor->getDetID(pickID);
+
+  if (!m_enabled)
   {
     m_plot->clearCurve();
     return;
   }
-  //if (m_plotPanel->isCollapsed()) return;
 
   if (detid >= 0)
   {
-    //if (m_one->isChecked() || m_peak->isChecked())
-    //{// plot spectrum of a single detector
-    //  plotSingle(detid);
-    //}
-    //else if (m_tube->isChecked())
-    //{// plot integrals
-    //  plotTube(detid);
-    //}
+    if ( m_plotType == Single )
+    {
+      plotSingle(detid);
+    }
+    else if (m_plotType == TubeSum || m_plotType == TubeIntegral)
+    {
+      plotTube(detid);
+    }
+    else
+    {
+      throw std::logic_error("setPlotData: Unexpected plot type.");
+    }
   }
   else
   {
     m_plot->clearCurve();
   }
+}
+
+/**
+ * Set curev data from multiple detectors: sum their spectra.
+ * @param detIDs :: A list of detector IDs.
+ */
+void DetectorPlotController::setPlotData(QList<int> detIDs)
+{
+  setPlotType( DetectorSum );
+  clear();
+  std::vector<double> x,y;
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  m_instrActor->sumDetectors( detIDs, x, y, static_cast<size_t>(m_plot->width()) );
+  QApplication::restoreOverrideCursor();
+  if ( !x.empty() )
+  {
+      m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()), m_instrActor->getWorkspace()->getAxis(0)->unit()->unitID());
+  }
+  m_plot->setLabel("multiple");
+}
+
+/**
+ * Update the miniplot for a selected detector.
+ * @param detid :: ID of detector to use to update the plot.
+ */
+void DetectorPlotController::updatePlot()
+{
   m_plot->recalcAxisDivs();
   m_plot->replot();
+}
+
+/**
+ * Clear the plot.
+ */
+void DetectorPlotController::clear()
+{
+  m_plot->clearCurve();
+  m_plot->clearPeakLabels();
 }
 
 /**
@@ -1111,12 +1133,13 @@ void DetectorPlotController::plotTube(int detid)
   Mantid::Geometry::ICompAssembly_const_sptr ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(parent);
   if (parent && ass)
   {
-    if (m_plotSum) // plot sums over detectors vs time bins
+    if (m_plotType == TubeSum) // plot sums over detectors vs time bins
     {
       plotTubeSums(detid);
     }
     else // plot detector integrals vs detID or a function of detector position in the tube
     {
+      assert( m_plotType == TubeIntegral );
       plotTubeIntegrals(detid);
     }
   }
@@ -1343,18 +1366,18 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
         const int id = idet->getID();
         // get the x-value for detector idet
         double xvalue = 0;
-        //switch(m_tubeXUnits)
-        //{
-        //case LENGTH: xvalue = idet->getDistance(*idet0); break;
-        //case PHI: xvalue = bOffsetPsi ? idet->getPhiOffset(M_PI) : idet->getPhi(); break;
-        //case OUT_OF_PLANE_ANGLE: 
-        //  {
-        //    Mantid::Kernel::V3D pos = idet->getPos();
-        //    xvalue = getOutOfPlaneAngle(pos, samplePos, normal);
-        //    break;
-        //  }
-        //default: xvalue = static_cast<double>(id);
-        //}
+        switch(m_tubeXUnits)
+        {
+        case LENGTH: xvalue = idet->getDistance(*idet0); break;
+        case PHI: xvalue = bOffsetPsi ? idet->getPhiOffset(M_PI) : idet->getPhi(); break;
+        case OUT_OF_PLANE_ANGLE: 
+          {
+            Mantid::Kernel::V3D pos = idet->getPos();
+            xvalue = getOutOfPlaneAngle(pos, samplePos, normal);
+            break;
+          }
+        default: xvalue = static_cast<double>(id);
+        }
         size_t index = m_instrActor->getWorkspaceIndex(id);
         // get the y-value for detector idet
         const Mantid::MantidVec& Y = ws->readY(index);
@@ -1538,3 +1561,53 @@ void DetectorPlotController::savePlotToWorkspace()
     } // !detids.empty()
   }
 }
+
+/**
+  * Calculate the angle between a vector ( == pos - origin ) and a plane ( orthogonal to normal ).
+  * The angle is positive if the vector and the normal make an acute angle.
+  * @param pos :: Vector's end.
+  * @param origin :: Vector's origin.
+  * @param normal :: Normal to the plane.
+  * @return :: Angle between the vector and the plane in radians in [-pi/2, pi/2]. 
+  */
+double DetectorPlotController::getOutOfPlaneAngle(const Mantid::Kernel::V3D& pos, const Mantid::Kernel::V3D& origin, const Mantid::Kernel::V3D& normal)
+{
+  Mantid::Kernel::V3D vec = pos - origin;
+  vec.normalize();
+  return asin(vec.scalar_prod(normal));
+}
+
+/**
+ * Return symbolic name of a TubeXUnit.
+ * @param unit :: One of TubeXUnits.
+ * @return :: Symbolic name of the units, caseless: Detector_ID, Length, Phi
+ */
+QString DetectorPlotController::getTubeXUnitsName(DetectorPlotController::TubeXUnits unit) const
+{
+  switch(unit)
+  {
+  case LENGTH: return "Length";
+  case PHI: return "Phi";
+  case OUT_OF_PLANE_ANGLE: return "Out of plane angle";
+  default: return "Detector_ID";
+  }
+  return "Detector_ID";
+}
+
+/**
+ * Get the plot caption for the current plot type.
+ */
+QString DetectorPlotController::getPlotCaption() const
+{
+
+  switch( m_plotType )
+  {
+  case Single:      return "Plotting detector spectra";
+  case DetectorSum: return "Plotting multiple detector sum";
+  case TubeSum:     return "Plotting sum";
+  case TubeIntegral:return "Plotting integral";
+  default: throw std::logic_error("getPlotCaption: Unknown plot type.");
+  }
+
+}
+
