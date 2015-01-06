@@ -21,14 +21,14 @@ Instrument Options
 ~~~~~~~~~~~~~~~~~~
 
 Instrument
-  Used to select the instrument on which the data being reduced was created on
+  Used to select the instrument on which the data being reduced was created on.
 
 Analyser
   The analyser bank that was active when the experiment was run, or for which
   you are interested in seeing the results of.
 
 Reflection
-  The reflection number of the instrument setup
+  The reflection number of the instrument setup.
 
 .. tip:: If you need clarification as to the instrument setup you should use
   please speak to the instrument scientist who dealt with your experiment.
@@ -37,17 +37,17 @@ Action Buttons
 ~~~~~~~~~~~~~~
 
 ?
-  Opens this help page
+  Opens this help page.
 
 Py
-  Exports a Python script which will replicate the processing done by the current tab
+  Exports a Python script which will replicate the processing done by the current tab.
 
 Run
-  Runs the processing configured on the current tab
+  Runs the processing configured on the current tab.
 
 Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
-  and default save directory and enable/disable data archive search
+  and default save directory and enable/disable data archive search.
 
 Energy Transfer
 ---------------
@@ -68,57 +68,57 @@ Run Files
   by a comma (,) or a sequence can be specified by using a dash (-).
 
 Use Calib File & Calibration File
-  Allows you to select a calibration file created using the Calibration tab
+  Allows you to select a calibration file created using the Calibration tab.
 
 Sum Files
   If selected the data from each raw file will be summed and from then on
-  treated as a single run
+  treated as a single run.
 
 Load Logs
-  If selected the sample logs will be laoded from each of the run files
+  If selected the sample logs will be laoded from each of the run files.
 
 Grouping
-  Provides option of how data should be grouped
+  Provides option of how data should be grouped.
 
 Background Removal
-  Allows removal of a background given a time-of-flight range
+  Allows removal of a background given a time-of-flight range.
 
 Plot Time
   Can be used to create a time plot of a specific spectra range (or single
-  spectrum)
+  spectrum).
 
 Detailed Balance
   Gives the option to perform an exponential correction on the data once it has
-  been converted to Energy based on the temperature
+  been converted to Energy based on the temperature.
 
 Scale
-  Gives the option to scale the output by a given factor
+  Gives the option to scale the output by a given factor.
 
 Spectra Min & Spectra Max
   Selecte the range of detectors you are interested in, default values are
-  chosen based on the instrument and analyser bank selected
+  chosen based on the instrument and analyser bank selected.
 
 Rebin Steps
-  Select the type of rebinning you wish to perform
+  Select the type of rebinning you wish to perform.
 
 Do Not Rebin
-  If selected will disable the rebinning step
+  If selected will disable the rebinning step.
 
 Plot Output
-  Allows the result to be plotted as either a spectrum plot or contour plot
+  Allows the result to be plotted as either a spectrum plot or contour plot.
 
 Fold Multiple Frames
   This option is only relevant for TOSCA. If unchecked, then reduction on
   multiply-framed data will cease at the point where the frames would have been
-  merged
+  merged.
 
 Output in :math:`cm-1`
   Converts the units of the energy axis from :math:`meV` to wave number
-  (:math:`cm-1`)
+  (:math:`cm-1`).
 
 Select Save Formats
   Allows you to select multiple output save formats to save the reduced data as,
-  in all cases the file will be saved in the defaut save directory
+  in all cases the file will be saved in the defaut save directory.
 
 Grouping
 ~~~~~~~~
@@ -128,20 +128,20 @@ The following options are available for grouping output data:
 Default
   The data will be grouped according to the Workflow.GroupingMethod parameter in
   the instrument's parameter file. If this value is not set then Individual is
-  used
+  used.
 
 Individual
-  All detectors will remain on individual spectra
+  All detectors will remain on individual spectra.
 
 Groups
-  The detectors will automatically be divided into a given number of gorups
+  The detectors will automatically be divided into a given number of gorups.
 
 All
-  All detectors will be grouped into a single spectra
+  All detectors will be grouped into a single spectra.
 
 File
   Gives the option of supplying a grouping file to be used with the
-  GroupDetectors algorithm
+  GroupDetectors algorithm.
 
 Rebinning
 ~~~~~~~~~
@@ -184,19 +184,19 @@ Run No
   .raw file with the Browse button or through entering the number in the box.
 
 Plot Raw
-  Updates the preview plots
+  Updates the preview plots.
 
 Intensity Scale Factor
-  Optionally applies a scale by a given factor to the raw input data
+  Optionally applies a scale by a given factor to the raw input data.
 
 Verbose
-  Enables outputting additional information to the Results Log
+  Enables outputting additional information to the Results Log.
 
 Plot
-  If enabled will plot the result as a spectra plot
+  If enabled will plot the result as a spectra plot.
 
 Save
-  If enabled the result will be saved as a NeXus file in the default save
+  If enabled the result will be saved as a NeXus file in the default save.
 
 Calibration
 ###########
@@ -213,24 +213,24 @@ Resolution
 ##########
 
 Create RES File
-  If selected will create a resolution file when the tab is run
+  If selected will create a resolution file when the tab is run.
 
 Smooth RES
   If selected the WienerSmooth algorithm will be applied to the output of the
-  resolution algorithm
+  resolution algorithm.
 
 Scale RES
-  Optionally apply a scale by a given factor to the resolution output
+  Optionally apply a scale by a given factor to the resolution output.
 
 Spectra Min & Spectra Max
   Allows restriction of the range of spectra used when creating the resolution
-  curve
+  curve.
 
 Background Start & Background End
-  Defines the time-of-flight range used to calculate the background noise
+  Defines the time-of-flight range used to calculate the background noise.
 
 Low, Width & High
-  Binning parameters used to rebin the resolution curve
+  Binning parameters used to rebin the resolution curve.
 
 Diagnostics
 -----------
@@ -249,16 +249,16 @@ Input
   allows you to select a run for the function to use, either by selecting the
   .raw file with the Browse button or through entering the number in the box.
   Multiple files can be selected, in the same manner as described for the Energy
-  Transfer tab
+  Transfer tab.
 
 Use Calibration
   Allows you to select either a calibrtion file or workspace to apply to the raw
-  files
+  files.
 
 Spectra Min & Spectra Max
   Allows selection of the range of detectors you are interested in, this is
   automatically set based on the instrument and analyser bank that are currently
-  selected
+  selected.
 
 Peak
   The time-of-flight range that will be integrated over to give the result (the
@@ -266,7 +266,7 @@ Peak
   from the instrument's parameter file.
 
 Use Two Ranges
-  If selected, enables subtraction of the background range
+  If selected, enables subtraction of the background range.
 
 Background
   An optional range denoting background noice that is to be removed from the raw
@@ -274,13 +274,13 @@ Background
   provided from the instrument's parameter file.
 
 Verbose
-  Enables outputting additional information to the Results Log
+  Enables outputting additional information to the Results Log.
 
 Plot
-  If enabled will plot the result as a spectra plot
+  If enabled will plot the result as a spectra plot.
 
 Save
-  If enabled the result will be saved as a NeXus file in the default save
+  If enabled the result will be saved as a NeXus file in the default save.
 
 Transmission
 ------------
@@ -299,19 +299,19 @@ Options
 ~~~~~~~
 
 Sample
-  Allows selection of a raw file or workspace to be used as the sample
+  Allows selection of a raw file or workspace to be used as the sample.
 
 Background
-  Allows selection of a raw file or workspace to be used as the background
+  Allows selection of a raw file or workspace to be used as the background.
 
 Verbose
-  Enables outputting additional information to the Results Log
+  Enables outputting additional information to the Results Log.
 
 Plot
-  If enabled will plot the result as a spectra plot
+  If enabled will plot the result as a spectra plot.
 
 Save
-  If enabled the result will be saved as a NeXus file in the default save
+  If enabled the result will be saved as a NeXus file in the default save.
 
 Symmetrise
 ----------
@@ -332,30 +332,30 @@ Options
 
 Input
   Allows you to select a reduced NeXus file (_red.nxs) or workspace (_red) as the
-  input to the algorithm
+  input to the algorithm.
 
 EMin & EMax
-  Sets the energy range that is to be reflected about :math:`y=0`
+  Sets the energy range that is to be reflected about :math:`y=0`.
 
 Spectrum No
-  Changes the spectra shown in the preview plots
+  Changes the spectra shown in the preview plots.
 
 XRange
   Changes the range of the preview plot, this can be useful for inspecting the
-  curve before running the algorithm
+  curve before running the algorithm.
 
 Preview
   This button will update the preview plot and parameters under the Preview
-  section
+  section.
 
 Verbose
-  Enables outputting additional information to the Results Log
+  Enables outputting additional information to the Results Log.
 
 Plot
-  If enabled will plot the result as a spectra plot
+  If enabled will plot the result as a spectra plot.
 
 Save
-  If enabled the result will be saved as a NeXus file in the default save
+  If enabled the result will be saved as a NeXus file in the default save.
 
 Preview
 ~~~~~~~
@@ -365,14 +365,14 @@ it has been symmetrised and gives an idea of how well the value of EMin fits the
 curve on both sides of the peak.
 
 Negative Y
-  The value of :math:`y` at :math:`x=-EMin`
+  The value of :math:`y` at :math:`x=-EMin`.
 
 Positive Y
-  The value of :math:`y` at :math:`x=EMin`
+  The value of :math:`y` at :math:`x=EMin`.
 
 Delta Y
   The difference between Negative and Positive Y, typically this should be as
-  close to zero as possible
+  close to zero as possible.
 
 S(Q, w)
 -------
@@ -387,30 +387,30 @@ Options
 
 Input
   Allows you to select a reduced NeXus file (_red.nxs) or workspace (_red) as the
-  input to the algorithm
+  input to the algorithm.
 
 Rebin Type
-  Selects the SofQW algorithm that will be used
+  Selects the SofQW algorithm that will be used.
 
 Q Low, Q Width & Q High
-  Q binning parameters that are passed to the SofQW algorithm
+  Q binning parameters that are passed to the SofQW algorithm.
 
 Rebin in Energy
   If enabled the data will first be rebinned in energy before being passed to
-  the SofQW algorithm
+  the SofQW algorithm.
 
 E Low, E Width & E High
-  Energy rebinning parameters
+  Energy rebinning parameters.
 
 Verbose
-  Enables outputting additional information to the Results Log
+  Enables outputting additional information to the Results Log.
 
 Plot
-  Allows the result to be plotted as either a spectrum plot or contour plot
+  Allows the result to be plotted as either a spectrum plot or contour plot.
 
 Save
   If enabled the result will be saved as a NeXus file in the default save
-  directory
+  directory.
 
 Moments
 -------
@@ -426,24 +426,24 @@ Options
 
 Input
   Allows you to select an :math:`S(Q, \omega)` file (_sqw.nxs) or workspace
-  (_sqw) as the input to the algorithm
+  (_sqw) as the input to the algorithm.
 
 Scale By
   Used to set an optional scale factor by which to scale the output of the
-  algorithm
+  algorithm.
 
 EMin & EMax
   Used to set the energy range of the sample that the algorithm will use for
-  processing
+  processing.
 
 Verbose
-  Enables outputting additional information to the Results Log
+  Enables outputting additional information to the Results Log.
 
 Plot
-  If enabled will plot the result as a spectra plot
+  If enabled will plot the result as a spectra plot.
 
 Save
   If enabled the result will be saved as a NeXus file in the default save
-  directory
+  directory.
 
 .. categories:: Interfaces Indirect

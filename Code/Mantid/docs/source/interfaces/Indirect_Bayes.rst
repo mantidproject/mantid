@@ -13,6 +13,19 @@ Overview
 
 TODO
 
+Action Buttons
+--------------
+
+?
+  Opens this help page.
+
+Run
+  Runs the processing configured on the current tab.
+
+Manage Directories
+  Opens the Manage Directories dialog allowing you to change your search directories
+  and default save directory and enable/disable data archive search.
+
 ResNorm
 -------
 
@@ -38,25 +51,25 @@ Options
 
 Vanadium File
   Either a reduced file created using the Energy Transfer tab or an
-  :math:`S(Q, /omega)` file
+  :math:`S(Q, /omega)` file.
 
 Resolution File
-  A resolution file created using the Calibrtion tab
+  A resolution file created using the Calibrtion tab.
 
 EMin & EMax
-  The energy range to perform fitting within
+  The energy range to perform fitting within.
 
 Van Binning
-  Vanadium binning to use
+  Vanadium binning to use.
 
 Verbose
-  Provides more information on the Results Log
+  Provides more information on the Results Log.
 
 Plot Result
-  Plots the result workspaces
+  Plots the result workspaces.
 
 Save Result
-  Saves the result in the default save directory
+  Saves the result in the default save directory.
 
 Quasi
 -----
@@ -96,46 +109,46 @@ Options
 
 Input
   Either a reduced file created using the Energy Transfer tab or an
-  :math:`S(Q, /omega)` file
+  :math:`S(Q, /omega)` file.
 
 Resolution
-  A resolution file created using the Calibrtion tab
+  A resolution file created using the Calibrtion tab.
 
 Program
-  The curve fitting program to use
+  The curve fitting program to use.
 
 Background
-  The background fitting program to use
+  The background fitting program to use.
 
 Elastic Peak
-  If an elastic peak should be used
+  If an elastic peak should be used.
 
 Sequential Fit
-  Enables multiple fitting iterations
+  Enables multiple fitting iterations.
 
 Fix Width
-  Allows selection of a width file
+  Allows selection of a width file.
 
 Use ResNorm
-  Allows selection of a ResNorm output file or workspace to use with fitting
+  Allows selection of a ResNorm output file or workspace to use with fitting.
 
 EMin & EMax
-  The energy range to perform fitting within
+  The energy range to perform fitting within.
 
 Sample Binning
-  Sample binning to use
+  Sample binning to use.
 
 Resolution Binning
-  Resolution binning to use
+  Resolution binning to use.
 
 Verbose
-  Provides more information on the Results Log
+  Provides more information on the Results Log.
 
 Plot Result
-  Plots the result workspaces
+  Plots the result workspaces.
 
 Save Result
-  Saves the result in the default save directory
+  Saves the result in the default save directory.
 
 Stretch
 -------
@@ -154,40 +167,40 @@ Options
 
 Sample
   Either a reduced file created using the Energy Transfer tab or an
-  :math:`S(Q, /omega)` file
+  :math:`S(Q, /omega)` file.
 
 Resolution
-  A resolution file created using the Calibrtion tab
+  A resolution file created using the Calibrtion tab.
 
 Background
-  The background fitting program to use
+  The background fitting program to use.
 
 Elastic Peak
-  If an elastic peak should be used
+  If an elastic peak should be used.
 
 Sequential Fit
-  Enables multiple fitting iterations
+  Enables multiple fitting iterations.
 
 EMin & EMax
-  The energy range to perform fitting within
+  The energy range to perform fitting within.
 
 Sample Binning
-  Sample binning to use
+  Sample binning to use.
 
 Sigma
-  Value of Sigma to use
+  Value of Sigma to use.
 
 Beta
-  Value of Beta to use
+  Value of Beta to use.
 
 Verbose
-  Provides more information on the Results Log
+  Provides more information on the Results Log.
 
 Plot Result
-  Plots the result workspaces
+  Plots the result workspaces.
 
 Save Result
-  Saves the result in the default save directory
+  Saves the result in the default save directory.
 
 JumpFit
 -------
@@ -204,24 +217,24 @@ Options
 ~~~~~~~
 
 Sample
-  A sample workspace created with either ConvFit or Quasi
+  A sample workspace created with either ConvFit or Quasi.
 
 Fit Funcion
-  Selects the model to be used for fitting
+  Selects the model to be used for fitting.
 
 Width
-  Spectrum in the sample workspace to fit
+  Spectrum in the sample workspace to fit.
 
 QMin & QMax
-  The Q range to perform fitting within
+  The Q range to perform fitting within.
 
 Verbose
-  Provides more information on the Results Log
+  Provides more information on the Results Log.
 
 Plot Result
-  Plots the result workspaces
+  Plots the result workspaces.
 
 Save Result
-  Saves the result in the default save directory
+  Saves the result in the default save directory.
 
 .. categories:: Interfaces Indirect
