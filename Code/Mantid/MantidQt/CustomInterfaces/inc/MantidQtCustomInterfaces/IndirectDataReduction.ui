@@ -712,7 +712,7 @@ p, li { white-space: pre-wrap; }
                   <property name="currentIndex">
                    <number>0</number>
                   </property>
-                  <widget class="QWidget" name="page_17">
+                  <widget class="QWidget" name="pageRebinSingle">
                    <layout class="QVBoxLayout" name="verticalLayout_16">
                     <property name="spacing">
                      <number>0</number>
@@ -857,7 +857,7 @@ p, li { white-space: pre-wrap; }
                     </item>
                    </layout>
                   </widget>
-                  <widget class="QWidget" name="page_18">
+                  <widget class="QWidget" name="pageRebinString">
                    <layout class="QHBoxLayout" name="horizontalLayout_28">
                     <property name="spacing">
                      <number>0</number>
