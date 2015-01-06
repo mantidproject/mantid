@@ -152,7 +152,7 @@ public:
     Poco::File orphanedFile(orphanedFilePath);
     TSM_ASSERT("The orphaned file was not deleted",orphanedFile.exists()==false);
 
-    cleanupDiretory(localInstDir);
+    deleteFile(orphanedFilePath.toString());
   }
 
   int runDownloadInstrument()
@@ -171,25 +171,26 @@ public:
   
   void cleanupDiretory(std::string dir)
   {
-    deleteFiles(dir, "*.xml");
-    deleteFiles(dir, "*.json");
-  }
-
-  size_t deleteFiles(std::string filePath, std::string pattern)
-  {
-    Poco::Path path(filePath);
+    Poco::Path path(dir);
     path.makeDirectory();
-    path.setFileName(pattern);
-    std::set<std::string> files;
-    Poco::Glob::glob(path.toString(),files);
-    for (auto it = files.begin(); it != files.end(); ++it)
-    {
-      Poco::File file(*it);
-      file.remove();
-    }
-    return files.size();
+    deleteFile(path.setFileName("github.json").toString());
+    deleteFile(path.setFileName("NewFile.xml").toString());
+    deleteFile(path.setFileName("UpdatableFile.xml").toString());
   }
 
+  bool deleteFile(std::string filePath)
+  {
+    Poco::File file(filePath);
+    if(file.exists())
+    {
+      file.remove();
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
 
 };
 
