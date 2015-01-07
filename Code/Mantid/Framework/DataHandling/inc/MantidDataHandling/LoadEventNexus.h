@@ -195,6 +195,8 @@ public:
 
   /// Do we load the sample logs?
   bool loadlogs;
+  /// have the logs been loaded?
+  bool logs_loaded_correctly;
 
   /// Pointer to the vector of events
   typedef std::vector<Mantid::DataObjects::TofEvent> *EventVector_pt;
