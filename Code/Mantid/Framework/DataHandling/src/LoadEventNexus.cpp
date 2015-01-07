@@ -933,8 +933,10 @@ private:
 /** Empty default constructor
 */
 LoadEventNexus::LoadEventNexus()
-    : IFileLoader<Kernel::NexusDescriptor>(), discarded_events(0),
-      event_id_is_spec(false) {}
+    : IFileLoader<Kernel::NexusDescriptor>(),
+    instrument_loaded_correctly(false),
+    discarded_events(0),
+    event_id_is_spec(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor */
@@ -1338,6 +1340,8 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
 * @param prog :: A pointer to the progress reporting object
 * @param monitors :: If true the events from the monitors are loaded and not the
 * main banks
+*
+* This also loads the instrument, but only if it has not been loaded before.
 */
 void LoadEventNexus::loadEvents(API::Progress *const prog,
                                 const bool monitors) {
@@ -1376,10 +1380,12 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     m_allBanksPulseTimes = boost::make_shared<BankPulseTimes>(temp);
   }
 
-  // Load the instrument
-  prog->report("Loading instrument");
-  instrument_loaded_correctly =
+  if (!instrument_loaded_correctly) {
+    // Load the instrument
+    prog->report("Loading instrument");
+    instrument_loaded_correctly =
       loadInstrument(m_filename, WS, m_top_entry_name, this);
+  }
 
   if (!this->instrument_loaded_correctly)
     throw std::runtime_error(
