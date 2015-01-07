@@ -291,6 +291,10 @@ void LoadGSASInstrumentFile::parseBank(std::map<std::string, double>& parammap, 
 /** Get next INS line of .prm file at or after given line index 
 * @param lines :: [input] vector of lines from .irf file;
 * @param lineIndex :: [input] index of line to search from
+* @param param1 :: [output] first parameter in line
+* @param param2 :: [output] second parameter in line
+* @param param3 :: [output] third parameter in line
+* @param param4 :: [output] fourth parameter in line
 * @return line index for INS file
 * @throw end of file error
 */ 
