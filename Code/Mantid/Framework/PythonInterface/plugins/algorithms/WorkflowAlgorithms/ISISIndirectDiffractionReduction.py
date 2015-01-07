@@ -72,12 +72,13 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         workspace_names = self._load_files()
 
-        self._identify_bad_detectors(workspace_names[0])
-
         for ws_name in workspace_names:
+            # Get list of detectors to mask
+            masked_detectors = self._identify_bad_detectors(ws_name)
+
             # Process monitor
             self._unwrap_monitor(ws_name)
-            ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target='Wavelength')
+            ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target='Wavelength', EMode='Indirect')
             self._process_monitor_efficiency(ws_name)
             self._scale_monitor(ws_name)
 
@@ -102,7 +103,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 RebinToWorkspace(WorkspaceToRebin=ws_name, WorkspaceToMatch=ws_name, OutputWorkspace=ws_name)
 
             # Group workspace spectra
-            self._group_spectra(ws_name)
+            self._group_spectra(ws_name, masked_detectors)
 
         # Rename output workspaces
         output_workspace_names = [self._rename_workspace(ws_name) for ws_name in workspace_names]
@@ -120,10 +121,12 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         self._output_ws = self.getPropertyValue('OutputWorkspace')
         self._raw_file_list = self.getProperty('InputFiles').value
+        self._sum_files = self.getProperty('SumFiles').value
         self._instrument_name = self.getPropertyValue('Instrument')
         self._mode = self.getPropertyValue('Mode')
         self._spectra_range = self.getProperty('SpectraRange').value
         self._rebin_params = self.getPropertyValue('RebinParam')
+        self._individual_groups = self.getProperty('IndividualGrouping').value
 
         if self._rebin_params == '':
             self._rebin_params = None
@@ -199,9 +202,22 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         logger.information('Masking type: %s' % (masking_type))
 
+        masked_spec = list()
+
         if masking_type == 'IdentifyNoisyDetectors':
             ws_mask = '__workspace_mask'
             IdentifyNoisyDetectors(InputWorkspace=ws_name, OutputWorkspace=ws_mask)
+
+            # Convert workspace to a list of spectra
+            num_spec = mtd[ws_mask].getNumberHistograms()
+            masked_spec = [spec for spec in range(0, num_spec) if mtd[ws_mask].readY(spec)[0] == 0.0]
+
+            # Remove the temporary masking workspace
+            DeleteWorkspace(ws_mask)
+
+        logger.debug('Masked specta for workspace %s: %s' % (ws_name, str(masked_spec)))
+
+        return masked_spec
 
 
     def _unwrap_monitor(self, ws_name):
@@ -303,16 +319,59 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                     Factor=1.0 / scale_factor, Operation='Multiply')
 
 
-    def _group_spectra(self, ws_name):
+    def _group_spectra(self, ws_name, masked_detectors):
         """
         Groups spectra in a given workspace according to the Workflow.GroupingMethod and
         Workflow.GroupingFile parameters.
 
         @param ws_name Name of workspace to group spectra of
+        @param masked_detectors List of spectra numbers to mask
         """
 
-        # TODO
-        pass
+        instrument = mtd[ws_name].getInstrument()
+
+        # Get the grouping mthod from the parameter file
+        try:
+            grouping_method = instrument.getStringParameter('Workflow.GroupingMethod')[0]
+        except IndexError:
+            grouping_method = 'All'
+
+        # The individial grouping option overrides the grouping method in the parameter file
+        if self._individual_groups:
+            grouping_method = 'Individual'
+
+        logger.information('Grouping method for workspace %s is %s' % (ws_name, grouping_method))
+
+        if grouping_method == 'Individual':
+            # Nothing to do here
+            return
+
+        elif grouping_method == 'All':
+            # Get a list of all spectra minus those which are masked
+            num_spec = mtd[ws_name].getNumberHistograms()
+            spectra_list = [spec for spec in range(0, num_spec) if spec not in masked_detectors]
+
+            # Apply the grouping
+            GroupDetectors(InputWorkspace=ws_name, OutputWorkspace=ws_name, Behaviour='Average',
+                           WorkspaceIndexList=spectra_list)
+
+        elif grouping_method == 'File':
+            # Get the filename for the grouping file
+            try:
+                grouping_file = instrument.getStringParameter('Workflow.GroupingFile')[0]
+            except IndexError:
+                raise RuntimeError('IPF requests grouping using file but does not specify a filename')
+
+            # Mask detectors if required
+            if len(masked_detectors) > 0:
+                MaskDetectors(Workspace=ws_name, WorkspaceIndexList=masked_detectors)
+
+            # Apply the grouping
+            GroupDetectors(InputWorkspace=ws_name, OutputWorkspace=ws_name, Behaviour='Average',
+                           MapFile=grouping_file)
+
+        else:
+            raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, ws_name))
 
 
     def _rename_workspace(self, ws_name):
