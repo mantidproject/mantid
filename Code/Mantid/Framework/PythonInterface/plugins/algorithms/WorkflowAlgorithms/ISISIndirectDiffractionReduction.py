@@ -201,7 +201,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             summed_monitor_ws_name = raw_workspaces[0] + '_mon'
 
             # Get a list of the run numbers for the original data
-            run_numbers = [mtd[ws_name].getRunNumber() for ws_name in raw_workspaces]
+            run_numbers = ','.join([str(mtd[ws_name].getRunNumber()) for ws_name in raw_workspaces])
 
             # Generate lists of the detector and monitor workspaces
             detector_workspaces = ','.join(raw_workspaces)
@@ -225,6 +225,10 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                   Factor=scale_factor)
             Scale(InputWorkspace=summed_monitor_ws_name, OutputWorkspace=summed_monitor_ws_name,
                   Factor=scale_factor)
+
+            # Add the list of run numbers to the result workspace as a sample log
+            AddSampleLog(Workspace=summed_detector_ws_name, LogName='multi_run_numbers',
+                        LogType='String', LogText=run_numbers)
 
             # Only have the one workspace now
             raw_workspaces = [summed_detector_ws_name]
