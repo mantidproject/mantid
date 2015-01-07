@@ -85,6 +85,11 @@ protected:
   API::IFunction_sptr
   getFunction(const API::IAlgorithm_sptr &fitAlgorithm) const;
 
+  API::MatrixWorkspace_sptr
+  get1DSpectrum(const API::IFunction_sptr &fitFunction,
+                const API::MatrixWorkspace_sptr &workspace) const;
+
+  void setPoldiInstrument(const PoldiInstrumentAdapter_sptr &instrument);
   void setTimeTransformerFromInstrument(
       const PoldiInstrumentAdapter_sptr &poldiInstrument);
   void
@@ -96,6 +101,7 @@ protected:
 
   void throwOnInsufficientState();
 
+  PoldiInstrumentAdapter_sptr m_poldiInstrument;
   PoldiTimeTransformer_sptr m_timeTransformer;
   double m_deltaT;
 

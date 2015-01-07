@@ -11,15 +11,19 @@ use the Build/wiki_maker.py script to generate your full wiki page.
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
+#include "MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h"
+#include "MantidAPI/FunctionDomain1D.h"
 
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 #include "MantidSINQ/PoldiUtilities/PeakFunctionIntegrator.h"
 #include "MantidAPI/IPeakFunction.h"
 
 #include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
 
 #include "boost/make_shared.hpp"
+#include "MantidSINQ/PoldiUtilities/PoldiDGrid.h"
 
 namespace Mantid {
 namespace Poldi {
@@ -33,7 +37,7 @@ using namespace DataObjects;
 /** Constructor
  */
 PoldiFitPeaks2D::PoldiFitPeaks2D()
-    : Algorithm(), m_timeTransformer(), m_deltaT(0.0) {}
+    : Algorithm(), m_poldiInstrument(), m_timeTransformer(), m_deltaT(0.0) {}
 
 /** Destructor
  */
@@ -84,6 +88,10 @@ void PoldiFitPeaks2D::init() {
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
                                                          Direction::Output),
                   "Calculated POLDI 2D-spectrum");
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("Calculated1DSpectrum",
+                                                         "", Direction::Output),
+                  "Calculated POLDI 1D-spectrum.");
+
   declareProperty(new WorkspaceProperty<TableWorkspace>(
                       "RefinedPoldiPeakWorkspace", "", Direction::Output),
                   "Table workspace with fitted peaks.");
@@ -182,8 +190,8 @@ void PoldiFitPeaks2D::exec() {
   MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
   setDeltaTFromWorkspace(ws);
 
-  setTimeTransformerFromInstrument(
-      boost::make_shared<PoldiInstrumentAdapter>(ws));
+  setPoldiInstrument(boost::make_shared<PoldiInstrumentAdapter>(ws));
+  setTimeTransformerFromInstrument(m_poldiInstrument);
 
   PoldiPeakCollection_sptr peakCollection = getPeakCollection(peakTable);
 
@@ -196,6 +204,9 @@ void PoldiFitPeaks2D::exec() {
   IAlgorithm_sptr fitAlgorithm = calculateSpectrum(peakCollection, ws);
 
   IFunction_sptr fitFunction = getFunction(fitAlgorithm);
+
+  MatrixWorkspace_sptr outWs1D = get1DSpectrum(fitFunction, ws);
+
   PoldiPeakCollection_sptr normalizedPeaks =
       getPeakCollectionFromFunction(fitFunction);
   PoldiPeakCollection_sptr integralPeaks =
@@ -205,6 +216,7 @@ void PoldiFitPeaks2D::exec() {
 
   setProperty("OutputWorkspace", getWorkspace(fitAlgorithm));
   setProperty("RefinedPoldiPeakWorkspace", integralPeaks->asTableWorkspace());
+  setProperty("Calculated1DSpectrum", outWs1D);
 }
 
 /**
@@ -304,6 +316,94 @@ PoldiFitPeaks2D::getFunction(const IAlgorithm_sptr &fitAlgorithm) const {
 
   IFunction_sptr fitFunction = fitAlgorithm->getProperty("Function");
   return fitFunction;
+}
+
+MatrixWorkspace_sptr PoldiFitPeaks2D::get1DSpectrum(
+    const IFunction_sptr &fitFunction,
+    const API::MatrixWorkspace_sptr &workspace) const {
+  if (!m_poldiInstrument) {
+    throw std::runtime_error("No time transformer available.");
+  }
+
+  if (!fitFunction) {
+    throw std::invalid_argument("Cannot process null-function.");
+  }
+
+  boost::shared_ptr<Poldi2DFunction> poldiFunction =
+      boost::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
+
+  if (!poldiFunction) {
+    throw std::invalid_argument("Can only process Poldi2DFunctions.");
+  }
+
+  PoldiAbstractDetector_sptr detector(new PoldiDeadWireDecorator(
+      workspace->getInstrument(), m_poldiInstrument->detector()));
+  std::vector<int> indices = detector->availableElements();
+
+  PoldiDGrid grid(detector, m_poldiInstrument->chopper(), m_deltaT,
+                  std::make_pair(1.1, 5.0));
+
+  FunctionDomain1DVector domain(grid.grid());
+  FunctionValues values(domain);
+
+  for (size_t i = 0; i < poldiFunction->nFunctions(); ++i) {
+    IFunction_sptr currentFunction = poldiFunction->getFunction(i);
+    boost::shared_ptr<PoldiSpectrumDomainFunction> spectrumFunction =
+        boost::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(
+            currentFunction);
+
+    if (spectrumFunction) {
+      // std::cout << "Gauss: " << spectrumFunction->getParameter(3) << "+/-" <<
+      // spectrumFunction->getError(3) << std::endl;
+
+      for (size_t j = 0; j < indices.size(); ++j) {
+        spectrumFunction->functionPoldi1D(static_cast<size_t>(indices[j]),
+                                          domain, values);
+      }
+
+      continue;
+    }
+
+    double factor = static_cast<double>(indices.size()) * 500.0 /
+                    static_cast<double>(domain.size());
+
+    boost::shared_ptr<PoldiSpectrumLinearBackground> linearBg =
+        boost::dynamic_pointer_cast<PoldiSpectrumLinearBackground>(
+            currentFunction);
+    if (linearBg) {
+      double linearBgParam = linearBg->getParameter(0);
+      for (size_t j = 0; j < domain.size(); ++j) {
+        values.addToCalculated(j, linearBgParam *
+                                      static_cast<double>(indices.size()) /
+                                      2.0 * factor);
+      }
+
+      continue;
+    }
+
+    double constantBgParam = currentFunction->getParameter(0);
+    for (size_t j = 0; j < domain.size(); ++j) {
+      values.addToCalculated(j, constantBgParam * factor);
+    }
+  }
+
+  MatrixWorkspace_sptr ws1D = WorkspaceFactory::Instance().create(
+      "Workspace2D", 1, domain.size(), values.size());
+
+  MantidVec &xData = ws1D->dataX(0);
+  MantidVec &yData = ws1D->dataY(0);
+  size_t offset = values.size() - 1;
+  for (size_t i = 0; i < values.size(); ++i) {
+    xData[offset - i] = Conversions::dToQ(domain[i]);
+    yData[offset - i] = values[i];
+  }
+
+  return ws1D;
+}
+
+void PoldiFitPeaks2D::setPoldiInstrument(
+    const PoldiInstrumentAdapter_sptr &instrument) {
+  m_poldiInstrument = instrument;
 }
 
 /**
