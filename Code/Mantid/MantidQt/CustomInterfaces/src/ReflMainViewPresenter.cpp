@@ -129,6 +129,7 @@ namespace MantidQt
       instruments.push_back("SURF");
       instruments.push_back("CRISP");
       instruments.push_back("POLREF");
+      instruments.push_back("OFFSPEC");
 
       //If the user's configured default instrument is in this list, set it as the default, otherwise use INTER
       const std::string defaultInst = Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
