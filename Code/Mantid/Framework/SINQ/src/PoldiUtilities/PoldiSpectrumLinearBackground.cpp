@@ -1,5 +1,6 @@
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid {
 namespace Poldi {
@@ -10,7 +11,21 @@ DECLARE_FUNCTION(PoldiSpectrumLinearBackground)
 
 /// Default constructor
 PoldiSpectrumLinearBackground::PoldiSpectrumLinearBackground()
-    : ParamFunction(), IFunction1DSpectrum() {}
+    : ParamFunction(), IFunction1DSpectrum(), m_timeBinCount(0) {}
+
+void PoldiSpectrumLinearBackground::setWorkspace(boost::shared_ptr<const Workspace> ws)
+{
+    MatrixWorkspace_const_sptr matrixWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+
+    if(matrixWs && matrixWs->getNumberHistograms() > 0) {
+        m_timeBinCount = matrixWs->readX(0).size();
+    }
+}
+
+size_t PoldiSpectrumLinearBackground::getTimeBinCount() const
+{
+    return m_timeBinCount;
+}
 
 /// Calculates the function values as f(x) = A1 * wi
 void PoldiSpectrumLinearBackground::function1DSpectrum(

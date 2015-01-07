@@ -50,6 +50,9 @@ public:
 
   virtual std::string name() const { return "PoldiSpectrumLinearBackground"; }
 
+  virtual void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
+  size_t getTimeBinCount() const;
+
   virtual void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
                                   API::FunctionValues &values) const;
   virtual void
@@ -58,6 +61,8 @@ public:
 
 protected:
   void init();
+
+  size_t m_timeBinCount;
 };
 
 } // namespace Poldi
