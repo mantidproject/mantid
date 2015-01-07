@@ -53,6 +53,9 @@ public:
   virtual void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
                                   API::FunctionValues &values) const;
 
+  void functionPoldi1D(size_t index, const API::FunctionDomain1D &domain,
+                       API::FunctionValues &values) const;
+
 protected:
   virtual void init();
   void initializeParametersFromWorkspace(
