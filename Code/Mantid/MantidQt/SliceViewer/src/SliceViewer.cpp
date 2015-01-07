@@ -2321,7 +2321,10 @@ void SliceViewer::dropEvent(QDropEvent *e) {
 
     }
     if(!wsNames.empty()){
+        // Show these peaks workspaces
         this->setPeaksWorkspaces(wsNames);
+        // Depresses the button without raising the clicked event
+        this->ui.btnPeakOverlay->setDown(true);
     }
 }
 }
