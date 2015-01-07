@@ -4,5 +4,52 @@
   <parameter name="show-signed-theta" type="string">
     <value val="Always" />
   </parameter>
+
+  <parameter name="MonitorBackgroundMin">
+    <value val="15.0"/>
+  </parameter>
+
+  <parameter name="MonitorBackgroundMax">
+    <value val="20.0"/>
+  </parameter>
+
+  <parameter name="MonitorIntegralMin">
+    <value val="2.0"/>
+  </parameter>
+
+  <parameter name="MonitorIntegralMax">
+   <value val="14.0"/>
+  </parameter>
+
+<!-- here we need to add the other monitors -->
+
+  <parameter name="PointDetectorStart">
+    <value val="3"/>
+  </parameter>
+
+  <parameter name="PointDetectorStop">
+    <value val="3"/>
+  </parameter>
+
+  <parameter name="MultiDetectorStart">
+    <value val="3"/>
+  </parameter>
+
+  <parameter name="I0MonitorIndex">
+    <value val="1"/>
+  </parameter>
+
+  <!-- In the old Reflectometry UI, LambdaMin's value has 1 added to it.
+       In the new Reflectometry UI, this adjustment is NOT made. -->
+  <parameter name="LambdaMin">
+    <value val="2.0"/>
+  </parameter>
+
+  <!-- In the old Reflectometry UI, LambdaMax's value has 2 subtracted from it.
+       In the new Reflectometry UI, this adjustment is NOT made. -->
+  <parameter name="LambdaMax">
+    <value val="14.0"/>
+  </parameter>
+
 </component-link>
 </parameter-file>
