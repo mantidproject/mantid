@@ -37,8 +37,9 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self.declareProperty(name='RebinParam', defaultValue='',
                              doc='Rebin parameters.')
 
-        self.declareProperty(name='IndividualGrouping', defaultValue=False,
-                             doc='Do not group results into a single spectra.')
+        self.declareProperty(name='GroupingPolicy', defaultValue='All',
+                             validator=StringListValidator(['All', 'Individual', 'IPF']),
+                             doc='Selects the type of detector grouping to be used.')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                              direction=Direction.Output),
@@ -78,13 +79,13 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
             # Process monitor
             self._unwrap_monitor(ws_name)
-            ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target='Wavelength', EMode='Indirect')
+            ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target='Wavelength', EMode='Elastic')
             self._process_monitor_efficiency(ws_name)
             self._scale_monitor(ws_name)
 
             # Scale detector data by monitor intensities
             monitor_ws_name = ws_name + '_mon'
-            ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target='Wavelength', EMode='Indirect')
+            ConvertUnits(InputWorkspace=monitor_ws_name, OutputWorkspace=monitor_ws_name, Target='Wavelength', EMode='Elastic')
             RebinToWorkspace(WorkspaceToRebin=ws_name, WorkspaceToMatch=monitor_ws_name, OutputWorkspace=ws_name)
             Divide(LHSWorkspace=ws_name, RHSWorkspace=monitor_ws_name, OutputWorkspace=ws_name)
 
@@ -126,7 +127,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self._mode = self.getPropertyValue('Mode')
         self._spectra_range = self.getProperty('SpectraRange').value
         self._rebin_params = self.getPropertyValue('RebinParam')
-        self._individual_groups = self.getProperty('IndividualGrouping').value
+        self._grouping_policy = self.getPropertyValue('GroupingPolicy')
 
         if self._rebin_params == '':
             self._rebin_params = None
@@ -322,7 +323,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
     def _group_spectra(self, ws_name, masked_detectors):
         """
         Groups spectra in a given workspace according to the Workflow.GroupingMethod and
-        Workflow.GroupingFile parameters.
+        Workflow.GroupingFile parameters and GrpupingPolicy property.
 
         @param ws_name Name of workspace to group spectra of
         @param masked_detectors List of spectra numbers to mask
@@ -330,15 +331,17 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         instrument = mtd[ws_name].getInstrument()
 
-        # Get the grouping mthod from the parameter file
-        try:
-            grouping_method = instrument.getStringParameter('Workflow.GroupingMethod')[0]
-        except IndexError:
-            grouping_method = 'All'
+        # If grouping as per he IPF is desired
+        if self._grouping_policy == 'IPF':
+            # Get the grouping method from the parameter file
+            try:
+                grouping_method = instrument.getStringParameter('Workflow.GroupingMethod')[0]
+            except IndexError:
+                grouping_method = 'All'
 
-        # The individial grouping option overrides the grouping method in the parameter file
-        if self._individual_groups:
-            grouping_method = 'Individual'
+        else:
+            # Otherwise use the value of GroupingPolicy
+            grouping_method = self._grouping_policy
 
         logger.information('Grouping method for workspace %s is %s' % (ws_name, grouping_method))
 
@@ -361,6 +364,14 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 grouping_file = instrument.getStringParameter('Workflow.GroupingFile')[0]
             except IndexError:
                 raise RuntimeError('IPF requests grouping using file but does not specify a filename')
+
+            # If the file is not found assume it is in the grouping files directory
+            if not path.isfile(grouping_file):
+                grouping_file = path.join(config.getString('groupingFiles.directory'), grouping_file)
+
+            # If it is still not found just give up
+            if not path.isfile(grouping_file):
+                raise RuntimeError('Cannot find grouping file %s' % grouping_file)
 
             # Mask detectors if required
             if len(masked_detectors) > 0:
