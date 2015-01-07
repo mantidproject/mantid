@@ -359,7 +359,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         instrument = mtd[ws_name].getInstrument()
 
         try:
-            scale_factor = instrument.getNumberParameter('Workflow.MonitorScalingFactor')[0]
+            scale_factor = instrument.getNumberParameter('Workflow.Monitor1-ScalingFactor')[0]
         except IndexError:
             logger.information('No monitor scaling factor found for workspace %s' % ws_name)
             return
