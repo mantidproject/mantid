@@ -77,6 +77,8 @@
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/PlotAxis.h"
+#include <QDragEnterEvent>
+#include <QDropEvent>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -177,6 +179,7 @@ SliceViewer::SliceViewer(QWidget *parent)
       boost::make_shared<PeakTransformQSampleFactory>());
   m_peakTransformSelector.registerCandidate(
       boost::make_shared<PeakTransformQLabFactory>());
+  this->setAcceptDrops(true);
 }
 
 //------------------------------------------------------------------------------------
@@ -2286,6 +2289,43 @@ void SliceViewer::onPeaksViewerOverlayOptions() {
   PeaksViewerOverlayDialog dlg(this->m_peaksPresenter);
   dlg.exec();
 }
+
+void SliceViewer::dragEnterEvent(QDragEnterEvent *e) {
+  QString name = e->mimeData()->objectName();
+  if (name == "MantidWorkspace") {
+    e->accept();
+  } else {
+    e->ignore();
+  }
+}
+
+void SliceViewer::dropEvent(QDropEvent *e) {
+  QString name = e->mimeData()->objectName();
+  if (name == "MantidWorkspace") {
+    QString text = e->mimeData()->text();
+    int endIndex = 0;
+    QStringList wsNames;
+    while (text.indexOf("[\"", endIndex) > -1) {
+      int startIndex = text.indexOf("[\"", endIndex) + 2;
+      endIndex = text.indexOf("\"]", startIndex);
+      QString candidate = text.mid(startIndex, endIndex - startIndex);
+      if(boost::dynamic_pointer_cast<IPeaksWorkspace>(AnalysisDataService::Instance().retrieve(candidate.toStdString())))
+      {
+          wsNames.append(candidate);
+          e->accept();
+      }
+      else
+      {
+          e->ignore();
+      }
+
+    }
+    if(!wsNames.empty()){
+        this->setPeaksWorkspaces(wsNames);
+    }
+}
+}
+
 
 } // namespace
 }
