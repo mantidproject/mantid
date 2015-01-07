@@ -1,8 +1,13 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorMapManager.h"
+#include "MantidQtAPI/MdSettings.h"
 #include "MantidKernel/ConfigService.h"
-#include <QSettings>
 #include <map>
 #include <string>
+
+// Have to deal with ParaView warnings and Intel compiler the hard way.
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1170
+#endif
 
 namespace Mantid
 {
@@ -10,49 +15,50 @@ namespace Mantid
   {
     namespace SimpleGui
     {
-      ColorMapManager::ColorMapManager() : indexCounter(0)
+      ColorMapManager::ColorMapManager() : indexCounter(0), mdSettings(new MantidQt::API::MdSettings())
       {
-        // Check if this is the first time a color map will be loaded
-        QSettings settings;
-
-        settings.beginGroup("Mantid/Vsi");
-
-        settings.setValue("intitialcolormap", "Cool to Warm");
-
-        settings.endGroup();
       }
-      
+
       ColorMapManager::~ColorMapManager()
       {
       }
-      
-      int ColorMapManager::getDefaultColorMapIndex()
+
+      int ColorMapManager::getDefaultColorMapIndex(bool viewSwitched)
       {
-        // Read from QSettings
-        QSettings settings;
-
-        settings.beginGroup("Mantid/Vsi");
-
         std::string defaultColorMap;
 
-        if (settings.value("firststartup", true).asBool())
+        // If the view has switched use the last color map index
+        if (viewSwitched)
         {
-          defaultColorMap = settings.value("intitialcolormap", QString("")).toString().toStdString();
-
-          settings.setValue("firststartup", false);
+          defaultColorMap = mdSettings->getLastSessionColorMap();
         }
-        else
+        else 
         {
-          defaultColorMap = settings.value("colormap", QString("")).toString().toStdString();
+          // Check if the user wants a general MD color map
+          if (mdSettings->getUsageGeneralMdColorMap())
+          {
+            defaultColorMap = mdSettings->getGeneralMdColorMap();
+          }
+          else 
+          {
+            // Check if the user wants to use the last session
+            if (mdSettings->getUsageLastSession())
+            {
+              defaultColorMap = mdSettings->getLastSessionColorMap();
+            }
+            else
+            {
+              defaultColorMap = mdSettings->getUserSettingColorMap();
+            }
+          }
         }
-
-        settings.endGroup();
 
         // Set the default colormap
         int defaultColorMapIndex = 0;
 
         if (!defaultColorMap.empty())
         {
+          mdSettings->setLastSessionColorMap(defaultColorMap);
           defaultColorMapIndex = this->getColorMapIndex(defaultColorMap);
         }
 
@@ -99,11 +105,7 @@ namespace Mantid
         // Persist the new value of the color map in the QSettings object.
         if (indexToName.count(index) > 0)
         {
-          // Persist default color map
-          QSettings settings;
-          settings.beginGroup("Mantid/Vsi");
-          settings.setValue("colormap", QString::fromStdString(indexToName[index]));
-          settings.endGroup();
+          mdSettings->setLastSessionColorMap(indexToName[index]);
         }
       }
     }

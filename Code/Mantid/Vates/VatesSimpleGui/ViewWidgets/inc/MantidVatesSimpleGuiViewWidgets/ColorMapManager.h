@@ -2,8 +2,11 @@
 #define COLORMAP_MANAGER_H_
 
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "MantidQtAPI/MdSettings.h"
 #include <string>
 #include <map>
+#include "boost/scoped_ptr.hpp"
+
 
 namespace Mantid
 {
@@ -37,7 +40,7 @@ namespace Mantid
         File change history is stored at: <https://github.com/mantidproject/mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
       */
-      
+
       class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ColorMapManager
       {
         public:
@@ -47,9 +50,10 @@ namespace Mantid
           
           /**
            * Get default color map
+           * @param viewSwitched If the view has switched or not.
            * @returns index The index of the default color map in the list of color maps.
            */
-          int getDefaultColorMapIndex();
+          int getDefaultColorMapIndex(bool viewSwitched);
 
           /**
            * Read in and store the available color maps
@@ -81,6 +85,8 @@ namespace Mantid
           int indexCounter;
           std::map<std::string, int> nameToIndex;
           std::map<int, std::string> indexToName;
+
+          boost::scoped_ptr<MantidQt::API::MdSettings> mdSettings;
       };
     }
   }

@@ -64,7 +64,7 @@ public:
   /// Get the maximum color range value
   double getMaxRange();
   /// Load the default color map
-  void loadDefaultColorMap();
+  void loadColorMap(bool viewSwitched);
 
 public slots:
   /// Set state for all control widgets.

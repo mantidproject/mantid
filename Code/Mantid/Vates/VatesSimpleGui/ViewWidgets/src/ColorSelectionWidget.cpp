@@ -100,10 +100,11 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
 
  /**
   * Load the default color map
+  * @param viewSwitched Flag if the view has switched or not.
   */
-  void ColorSelectionWidget::loadDefaultColorMap()
+  void ColorSelectionWidget::loadColorMap(bool viewSwitched)
   {
-    int defaultColorMapIndex = this->colorMapManager->getDefaultColorMapIndex();
+    int defaultColorMapIndex = this->colorMapManager->getDefaultColorMapIndex(viewSwitched);
 
     const pqColorMapModel *colorMap = this->presets->getModel()->getColorMap(defaultColorMapIndex);
 

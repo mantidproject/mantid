@@ -6,6 +6,10 @@
 
 #include "MantidQtAPI/VatesViewerInterface.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
+#include "boost/shared_ptr.hpp"
+#include "MantidQtAPI/MdConstants.h"
+#include "MantidQtAPI/MdSettings.h"
+#include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 
 #include <QPointer>
 #include <QWidget>
@@ -127,6 +131,9 @@ private:
   pqViewSettingsReaction *viewSettings; ///< Holder for the view settings reaction
   bool viewSwitched;
   ModeControlWidget::Views initialView; ///< Holds the initial view
+  boost::shared_ptr<MantidQt::API::MdSettings> mdSettings;///<Holds the MD settings which are used to persist data
+  boost::shared_ptr<MantidQt::API::MdConstants> mdConstants;/// < Holds the MD constants
+  boost::shared_ptr<BackgroundRgbProvider> backgroundRgbProvider;/// < Holds the manager for background color related tasks.
 
 
   /// Check the environmental variables.

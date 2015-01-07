@@ -17,6 +17,10 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/InstrumentInfo.h"
 
+#include "boost/shared_ptr.hpp"
+#include "MantidQtAPI/MdConstants.h"
+#include "MantidQtAPI/MdSettings.h"
+
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -115,7 +119,7 @@ REGISTER_VATESGUI(MdViewerWidget)
  */
 MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   dataLoader(NULL), hiddenView(NULL), lodAction(NULL), screenShot(NULL), viewLayout(NULL),
-  viewSettings(NULL)
+  viewSettings(NULL), mdSettings(new MantidQt::API::MdSettings()), mdConstants(new MantidQt::API::MdConstants()), backgroundRgbProvider(new BackgroundRgbProvider(mdSettings))
 {
   // Calling workspace observer functions.
   observeAfterReplace();
@@ -387,8 +391,10 @@ void MdViewerWidget::setParaViewComponentsForView()
   pqActiveObjects *activeObjects = &pqActiveObjects::instance();
   QObject::connect(activeObjects, SIGNAL(portChanged(pqOutputPort*)),
                    this->ui.propertiesPanel, SLOT(setOutputPort(pqOutputPort*)));
+
   QObject::connect(activeObjects, SIGNAL(representationChanged(pqRepresentation*)),
                    this->ui.propertiesPanel, SLOT(setRepresentation(pqRepresentation*)));
+ 
   QObject::connect(activeObjects, SIGNAL(viewChanged(pqView*)),
                    this->ui.propertiesPanel, SLOT(setView(pqView*)));
 
@@ -472,8 +478,9 @@ void MdViewerWidget::renderingDone()
 {
   if (this->viewSwitched)
   {
-    this->viewSwitched = false;
     this->currentView->setColorsForView();
+    this->ui.colorSelectionWidget->loadColorMap(this->viewSwitched); // Load the default color map
+    this->viewSwitched = false;
   }
 }
 
@@ -716,7 +723,7 @@ void MdViewerWidget::renderAndFinalSetup()
 {
   this->setDefaultColorForBackground();
   this->currentView->render();
-  this->ui.colorSelectionWidget->loadDefaultColorMap();
+  this->ui.colorSelectionWidget->loadColorMap(this->viewSwitched);
   this->currentView->setColorsForView();
   this->currentView->checkView(this->initialView);
   this->currentView->updateAnimationControls();
@@ -727,14 +734,8 @@ void MdViewerWidget::renderAndFinalSetup()
  */
 void MdViewerWidget::setDefaultColorForBackground()
 {
-  // Get background setting
-  BackgroundRgbProvider backgroundRgbProvider;
-  std::vector<double> backgroundRgb = backgroundRgbProvider.getRgb();
-
-  vtkSMDoubleVectorProperty* background = vtkSMDoubleVectorProperty::SafeDownCast(this->currentView->getView()->getViewProxy()->GetProperty("Background"));
-  background->SetElements3(backgroundRgb[0],backgroundRgb[1],backgroundRgb[2]);
-
-  this->currentView->getView()->resetCamera();
+  backgroundRgbProvider->setBackgroundColor(this->currentView->getView(), this->viewSwitched);
+  backgroundRgbProvider->observe(this->currentView->getView());
 }
 
 /**
@@ -801,7 +802,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->setDefaultColorForBackground(); // Keeps background color to default value
   this->currentView->render();
   this->currentView->setColorsForView();
-  this->ui.colorSelectionWidget->loadDefaultColorMap(); // Load the default color map
+  
   this->currentView->checkViewOnSwitch();
   this->updateAppState();
   this->initialView = v; 
@@ -1113,7 +1114,6 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
     emit this->requestClose();
   }
 }
-
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid

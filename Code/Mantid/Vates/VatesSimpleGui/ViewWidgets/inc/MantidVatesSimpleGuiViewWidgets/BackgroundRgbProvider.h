@@ -2,9 +2,14 @@
 #define BACKGROUNDRGB_PROVIDER_H_
 
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "MantidQtAPI/MdSettings.h"
+#include "boost/shared_ptr.hpp"
 #include <vector>
 #include <map>
 #include <string>
+#include <pqRenderView.h>
+
+class vtkObject;
 
 namespace Mantid
 {
@@ -38,71 +43,59 @@ namespace Mantid
         File change history is stored at: <https://github.com/mantidproject/mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
       */
-      
+
       class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS BackgroundRgbProvider
       {
         public:
-          BackgroundRgbProvider();
+          BackgroundRgbProvider(boost::shared_ptr<MantidQt::API::MdSettings> settings);
           
-          virtual ~BackgroundRgbProvider();
-          
+          ~BackgroundRgbProvider();
+
           /**
-           * Get the Rgb values for the color of the view's background
-           * @returns A vector with the RGB values
+           * Set the Rgb values for the color of the view's background.
+           * @param viewSwitched Is this the initial loading or were the views switched?
+           * @param view The view which has its background color set.
            */
-          std::vector<double> getRgb();
-        
+          void setBackgroundColor(pqRenderView* view, bool viewSwitched);
+
+          /**
+           * Listen to a change in the background color
+           *@param view The view which we want to listen to.
+           */
+          void observe(pqRenderView* view);
+
        private:
           /**
-          * Get the Rgb values for the color of the view's background from the user setting
+          * Get the Rgb values for the color of the view's background from the user setting.
+          * @param viewSwitched Is this the initial loading or were the views switched?
           * @returns A vector with the RGB values
           */
-          std::vector<double> getRbgFromPropertiesFile();
+          std::vector<double> getRgbFromSetting(bool viewSwitched);
 
           /**
-           * Extract the rgb vector from the numeric user setting
-           * @param background A vector with three color settings
-           * @returns A vector with the RGB values or a default RGB vector
+           * Get the Rgb values for the color of the view's background
+           * @param viewSwitched Is this the initial loading or were the views switched?
+           * @returns A vector with the RGB values
            */
-          std::vector<double> getFromNumericSetting(std::vector<std::string> background);
+          std::vector<double> getRgb(bool viewSwitched);
 
           /**
-           * Extract the rgb vector from the name setting
-           * @param background A string with a color setting
-           * @returns A vector with the RGB values or a default RGB vector
+           * Update the last session background color.
            */
-          std::vector<double> getFromNameSetting(std::string background);
+          void updateLastSessionBackgroundColor();
 
           /**
-           * Extract all comma separated elements from the background setting string.
-           * @param background A string with a color setting.
-           * @returns A vector with the color entries.
+           * Callback function for background color changing events
+           *@param caller Calling object.
+           *@param eventId Not used.
+           *@param clientData Not used.
+           *@parma callData Not used.
            */
-          std::vector<std::string> getCommaSeparatedEntries(std::string background);
+          static void backgroundColorChangeCallbackFunction(vtkObject* caller, long unsigned int vtkNotUsed(eventId), void* vtkNotUsed(clientData), void* vtkNotUsed(callData));
 
-          /**
-           * Check if the numeric entry is acceptable, i.e. if it is between 0 and 255
-           * @param entry The color value.
-           * @returns True if the value is in the acceptable range.
-           */
-          bool BackgroundRgbProvider::isValidNumericEntry(double entry);
+          static QColor currentBackgroundColor;
 
-          /**
-           * Check if the entry is a numeric entry at all
-           * @param entry entry The color value.
-           * @returns True if the value is a numeric value, otherwise false.
-           */
-          bool isNumeric(std::string entry);
-
-          /// The separator string
-          std::string separator;
-
-          /// The default background color
-          std::vector<double> defaultBackground;
-
-          /// Background map which associates a name with an RGB vector
-          std::map<std::string, std::vector<double>> backgroundMap;
-
+          boost::shared_ptr<MantidQt::API::MdSettings> mdSettings;
       };
     }
   }
