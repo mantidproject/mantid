@@ -16,6 +16,7 @@ set ( SRC_FILES
 	src/PoldiPeakSearch.cpp
 	src/PoldiRemoveDeadWires.cpp
 	src/PoldiTruncateData.cpp
+	src/PoldiUtilities/IPoldiFunction1D.cpp
 	src/PoldiUtilities/MillerIndices.cpp
         src/PoldiUtilities/PeakFunctionIntegrator.cpp
 	src/PoldiUtilities/Poldi2DFunction.cpp
@@ -62,6 +63,7 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiPeakSearch.h
 	inc/MantidSINQ/PoldiRemoveDeadWires.h
 	inc/MantidSINQ/PoldiTruncateData.h
+	inc/MantidSINQ/PoldiUtilities/IPoldiFunction1D.h
 	inc/MantidSINQ/PoldiUtilities/MillerIndices.h
 	inc/MantidSINQ/PoldiUtilities/MillerIndicesIO.h
         inc/MantidSINQ/PoldiUtilities/PeakFunctionIntegrator.h

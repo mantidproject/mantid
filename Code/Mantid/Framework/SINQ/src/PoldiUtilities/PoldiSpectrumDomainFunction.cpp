@@ -118,36 +118,37 @@ void PoldiSpectrumDomainFunction::function1DSpectrum(
 }
 
 void
-PoldiSpectrumDomainFunction::functionPoldi1D(size_t index,
+PoldiSpectrumDomainFunction::poldiFunction1D(const std::vector<int> &indices,
                                              const FunctionDomain1D &domain,
                                              FunctionValues &values) const {
+  for (auto index = indices.begin(); index != indices.end(); ++index) {
+    double deltaD = domain[1] - domain[0];
 
-  double deltaD = domain[1] - domain[0];
+    double fwhm = getParameter("Fwhm");
+    double fwhmChannel = fwhm / deltaD;
+    double sigmaChannel = fwhmChannel / (2.0 * sqrt(2.0 * log(2.0)));
 
-  double fwhm = getParameter("Fwhm");
-  double fwhmChannel = fwhm / deltaD;
-  double sigmaChannel = fwhmChannel / (2.0 * sqrt(2.0 * log(2.0)));
+    double centre = getParameter("Centre");
 
-  double centre = getParameter("Centre");
+    double area = getParameter("Area");
+    double areaT = m_timeTransformer->timeTransformedIntensity(
+        area, centre, static_cast<size_t>(*index));
 
-  double area = getParameter("Area");
-  double areaT =
-      m_timeTransformer->timeTransformedIntensity(area, centre, index);
+    double centreTOffsetChannel = centre / deltaD;
+    int centreChannel = static_cast<int>(centreTOffsetChannel);
+    int widthChannels = std::max(2, static_cast<int>(fwhmChannel * 2.0));
 
-  double centreTOffsetChannel = centre / deltaD;
-  int centreChannel = static_cast<int>(centreTOffsetChannel);
-  int widthChannels = std::max(2, static_cast<int>(fwhmChannel * 2.0));
+    int offset = static_cast<int>(domain[0] / deltaD + 0.5);
 
-  int offset = static_cast<int>(domain[0] / deltaD + 0.5);
+    for (int i = centreChannel - widthChannels;
+         i <= centreChannel + widthChannels; ++i) {
+      double xValue = static_cast<double>(i);
 
-  for (int i = centreChannel - widthChannels;
-       i <= centreChannel + widthChannels; ++i) {
-    double xValue = static_cast<double>(i);
-
-    values.addToCalculated(
-        i - offset,
-        actualFunction(xValue, centreTOffsetChannel, sigmaChannel, areaT) *
-            static_cast<double>(m_chopperSlitOffsets.size()));
+      values.addToCalculated(
+          i - offset,
+          actualFunction(xValue, centreTOffsetChannel, sigmaChannel, areaT) *
+              static_cast<double>(m_chopperSlitOffsets.size()));
+    }
   }
 }
 

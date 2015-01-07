@@ -14,6 +14,7 @@ use the Build/wiki_maker.py script to generate your full wiki page.
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h"
 #include "MantidAPI/FunctionDomain1D.h"
 
+#include "MantidSINQ/PoldiUtilities/IPoldiFunction1D.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
@@ -348,19 +349,12 @@ MatrixWorkspace_sptr PoldiFitPeaks2D::get1DSpectrum(
 
   for (size_t i = 0; i < poldiFunction->nFunctions(); ++i) {
     IFunction_sptr currentFunction = poldiFunction->getFunction(i);
-    boost::shared_ptr<PoldiSpectrumDomainFunction> spectrumFunction =
-        boost::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(
+    boost::shared_ptr<IPoldiFunction1D> spectrumFunction =
+        boost::dynamic_pointer_cast<IPoldiFunction1D>(
             currentFunction);
 
     if (spectrumFunction) {
-      // std::cout << "Gauss: " << spectrumFunction->getParameter(3) << "+/-" <<
-      // spectrumFunction->getError(3) << std::endl;
-
-      for (size_t j = 0; j < indices.size(); ++j) {
-        spectrumFunction->functionPoldi1D(static_cast<size_t>(indices[j]),
-                                          domain, values);
-      }
-
+        spectrumFunction->poldiFunction1D(indices, domain, values);
       continue;
     }
 

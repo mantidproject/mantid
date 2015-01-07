@@ -7,6 +7,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include <string>
 
+#include "MantidSINQ/PoldiUtilities/IPoldiFunction1D.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h"
 
@@ -42,7 +43,8 @@ namespace Poldi {
 
 class MANTID_SINQ_DLL PoldiSpectrumDomainFunction
     : virtual public API::ParamFunction,
-      virtual public API::IFunction1DSpectrum {
+      virtual public API::IFunction1DSpectrum,
+      public IPoldiFunction1D {
 public:
   PoldiSpectrumDomainFunction();
   virtual ~PoldiSpectrumDomainFunction() {}
@@ -53,7 +55,8 @@ public:
   virtual void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
                                   API::FunctionValues &values) const;
 
-  void functionPoldi1D(size_t index, const API::FunctionDomain1D &domain,
+  void poldiFunction1D(const std::vector<int> &indices,
+                       const API::FunctionDomain1D &domain,
                        API::FunctionValues &values) const;
 
 protected:
