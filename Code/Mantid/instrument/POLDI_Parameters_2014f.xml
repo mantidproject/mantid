@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument="POLDI" valid-from="2014-09-07 00:00:00">
+<parameter-file instrument="POLDI" valid-from="2014-10-13 07:41:00">
     
     <component-link name="chopper">
         <parameter name="t0" type="number">
-            <value val="-0.0079" />
+            <value val="-0.009" />
         </parameter>
         <parameter name="t0_const" type="number">
-            <value val="-17.74" />
+            <value val="-18.4" />
         </parameter>
     </component-link>
     
     <component-link name="detector">
         <parameter name="two_theta" type="number">
-            <value val="91.12" />
+            <value val="91.134" />
         </parameter>
         <parameter name="x">
-            <value val="-0.8352" />
+            <value val="-0.89675" />
         </parameter>
         <parameter name="y">
-            <value val="-0.91" />
+            <value val="-0.8905" />
         </parameter>
     </component-link>
     
