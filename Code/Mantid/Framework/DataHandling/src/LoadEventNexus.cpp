@@ -1381,15 +1381,15 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   }
 
   if (!instrument_loaded_correctly) {
-    // Load the instrument
+    // Load the instrument (if not loaded before)
     prog->report("Loading instrument");
     instrument_loaded_correctly =
       loadInstrument(m_filename, WS, m_top_entry_name, this);
-  }
 
-  if (!this->instrument_loaded_correctly)
-    throw std::runtime_error(
+    if (!instrument_loaded_correctly)
+      throw std::runtime_error(
         "Instrument was not initialized correctly! Loading cannot continue.");
+  }
 
   // top level file information
   ::NeXus::File file(m_filename);
@@ -2250,7 +2250,7 @@ bool LoadEventNexus::hasEventMonitors() {
 * workspace. The name of the new event workspace is contructed by
 * appending '_monitors' to the base workspace name.
 *
-* This is used when the property "MnitorsAsEvents" is enabled, and
+* This is used when the property "MonitorsAsEvents" is enabled, and
 * there are monitors with events.
 *
 * @param prog :: progress reporter
