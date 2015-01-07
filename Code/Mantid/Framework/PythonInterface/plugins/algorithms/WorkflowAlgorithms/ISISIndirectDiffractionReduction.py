@@ -122,7 +122,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         self._output_ws = self.getPropertyValue('OutputWorkspace')
         self._raw_file_list = self.getProperty('InputFiles').value
-        self._sum_files = self.getProperty('SumFiles').value
         self._instrument_name = self.getPropertyValue('Instrument')
         self._mode = self.getPropertyValue('Mode')
         self._spectra_range = self.getProperty('SpectraRange').value
@@ -132,10 +131,21 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         if self._rebin_params == '':
             self._rebin_params = None
 
+        # Get the IPF filename
         self._ipf_filename = self._instrument_name + '_diffraction_' + self._mode + '_Parameters.xml'
         logger.information('IPF filename is: %s' % (self._ipf_filename))
 
-        self._multiple_runs = False
+        # Only enable sum files if we actually have more than one file
+        sum_files = self.getProperty('SumFiles').value
+        self._sum_files = False
+
+        if sum_files:
+            num_raw_files = len(self._raw_file_list)
+            if num_raw_files > 1:
+                self._sum_files = True
+                logger.information('Summing files enabled (have %d files)' % num_raw_files)
+            else:
+                logger.information('SumFiles options is ignored when only one file is provided')
 
 
     def _load_files(self):
@@ -183,6 +193,41 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             CropWorkspace(InputWorkspace=ws_name, OutputWorkspace=ws_name,
                           StartWorkspaceIndex=self._spectra_range[0] - 1,
                           EndWorkspaceIndex=self._spectra_range[1] - 1)
+
+        # Sum files if needed
+        if self._sum_files:
+            # Use the first workspace name as the result of summation
+            summed_detector_ws_name = raw_workspaces[0]
+            summed_monitor_ws_name = raw_workspaces[0] + '_mon'
+
+            # Get a list of the run numbers for the original data
+            run_numbers = [mtd[ws_name].getRunNumber() for ws_name in raw_workspaces]
+
+            # Generate lists of the detector and monitor workspaces
+            detector_workspaces = ','.join(raw_workspaces)
+            monitor_workspaces = ','.join([ws_name + '_mon' for ws_name in raw_workspaces])
+
+            # Merge the raw workspaces
+            MergeRuns(InputWorkspaces=detector_workspaces, OutputWorkspace=summed_detector_ws_name)
+            MergeRuns(InputWorkspaces=monitor_workspaces, OutputWorkspace=summed_monitor_ws_name)
+
+            # Delete old workspaces
+            for idx in range(1, len(raw_workspaces)):
+                DeleteWorkspace(raw_workspaces[idx])
+                DeleteWorkspace(raw_workspaces[idx] + '_mon')
+
+            # Derive the scale factor based on number of merged workspaces
+            scale_factor = 1.0 / len(raw_workspaces)
+            logger.information('Scale factor for summed workspaces: %f' % scale_factor)
+
+            # Scale the new detector and monitor workspaces
+            Scale(InputWorkspace=summed_detector_ws_name, OutputWorkspace=summed_detector_ws_name,
+                  Factor=scale_factor)
+            Scale(InputWorkspace=summed_monitor_ws_name, OutputWorkspace=summed_monitor_ws_name,
+                  Factor=scale_factor)
+
+            # Only have the one workspace now
+            raw_workspaces = [summed_detector_ws_name]
 
         return raw_workspaces
 
@@ -415,7 +460,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         logger.information('Short name for instrument %s is %s' % (inst_name, short_inst_name))
 
         run_title = mtd[ws_name].getRun()['run_number'].value
-        if self._multiple_runs:
+        if self._sum_files:
             multi_run_marker = '_multi'
         else:
             multi_run_marker = ''
