@@ -4,6 +4,7 @@
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1DSpectrum.h"
+#include "MantidSINQ/PoldiUtilities/IPoldiFunction1D.h"
 
 namespace Mantid {
 namespace Poldi {
@@ -43,7 +44,8 @@ namespace Poldi {
   */
 class MANTID_SINQ_DLL PoldiSpectrumLinearBackground
     : virtual public API::ParamFunction,
-      virtual public API::IFunction1DSpectrum {
+      virtual public API::IFunction1DSpectrum,
+      public IPoldiFunction1D {
 public:
   PoldiSpectrumLinearBackground();
   virtual ~PoldiSpectrumLinearBackground() {}
@@ -58,6 +60,10 @@ public:
   virtual void
   functionDeriv1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
                           API::Jacobian &jacobian);
+
+  virtual void poldiFunction1D(const std::vector<int> &indices,
+                               const API::FunctionDomain1D &domain,
+                               API::FunctionValues &values) const;
 
 protected:
   void init();

@@ -350,30 +350,15 @@ MatrixWorkspace_sptr PoldiFitPeaks2D::get1DSpectrum(
   for (size_t i = 0; i < poldiFunction->nFunctions(); ++i) {
     IFunction_sptr currentFunction = poldiFunction->getFunction(i);
     boost::shared_ptr<IPoldiFunction1D> spectrumFunction =
-        boost::dynamic_pointer_cast<IPoldiFunction1D>(
-            currentFunction);
+        boost::dynamic_pointer_cast<IPoldiFunction1D>(currentFunction);
 
     if (spectrumFunction) {
-        spectrumFunction->poldiFunction1D(indices, domain, values);
+      spectrumFunction->poldiFunction1D(indices, domain, values);
       continue;
     }
 
     double factor = static_cast<double>(indices.size()) * 500.0 /
                     static_cast<double>(domain.size());
-
-    boost::shared_ptr<PoldiSpectrumLinearBackground> linearBg =
-        boost::dynamic_pointer_cast<PoldiSpectrumLinearBackground>(
-            currentFunction);
-    if (linearBg) {
-      double linearBgParam = linearBg->getParameter(0);
-      for (size_t j = 0; j < domain.size(); ++j) {
-        values.addToCalculated(j, linearBgParam *
-                                      static_cast<double>(indices.size()) /
-                                      2.0 * factor);
-      }
-
-      continue;
-    }
 
     double constantBgParam = currentFunction->getParameter(0);
     for (size_t j = 0; j < domain.size(); ++j) {
