@@ -113,7 +113,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self.setProperty('OutputWorkspace', self._output_ws)
 
 
-
     def _setup(self):
         """
         Gets algorithm properties.
@@ -131,6 +130,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         self._ipf_filename = self._instrument_name + '_diffraction_' + self._mode + '_Parameters.xml'
         logger.information('IPF filename is: %s' % (self._ipf_filename))
+
+        self._multiple_runs = False
 
 
     def _load_files(self):
@@ -322,8 +323,49 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         @return New name of workspace
         """
 
-        # TODO
-        new_name = ws_name + '_a'
+        # Get the naming convention parameter form the parameter file
+        instrument = mtd[ws_name].getInstrument()
+        try:
+            convention = instrument.getStringParameter('Workflow.NamingConvention')[0]
+        except IndexError:
+            # Defualt to run title if naming convention parameter not set
+            convention = 'RunTitle'
+        logger.information('Naming convention for workspace %s is %s' % (ws_name, convention))
+
+        run_number = mtd[ws_name].getRun()['run_number'].value
+        logger.information('Run number for workspace %s is %s' % (ws_name, run_number))
+
+        inst_name = instrument.getName()
+        for facility in config.getFacilities():
+            try:
+                short_inst_name = facility.instrument(inst_name).shortName()
+                break
+            except:
+                pass
+        logger.information('Short name for instrument %s is %s' % (inst_name, short_inst_name))
+
+        run_title = mtd[ws_name].getRun()['run_number'].value
+        if self._multiple_runs:
+            multi_run_marker = '_multi'
+        else:
+            multi_run_marker = ''
+
+        if convention == 'None':
+            new_name = ws_name
+
+        elif convention == 'RunTitle':
+            valid = "-_.() %s%s" % (string.ascii_letters, string.digits)
+            formatted_title = ''.join(c for c in run_title in c in valid)
+            new_name = '%s%s%s-%s' % (short_inst_name.lower(), run_number, multi_run_marker, formatted_title)
+
+        elif convention == 'AnalyserReflection':
+            analyser = instrument.getStringParameter('analyser')[0]
+            reflection = instrument.getStringParameter('reflection')[0]
+            new_name = '%s%s%s_%s%s_red' % (short_inst_name.upper(), run_number, multi_run_marker,
+                                            analyser, reflection)
+
+        else:
+            raise RuntimeError('No valid naming convention for workspace %s' % ws_name)
 
         logger.information('New name for %s workspace: %s' % (ws_name, new_name))
 
