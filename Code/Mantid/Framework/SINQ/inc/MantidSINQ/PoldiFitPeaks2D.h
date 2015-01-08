@@ -90,7 +90,7 @@ protected:
                 const API::MatrixWorkspace_sptr &workspace) const;
 
   API::MatrixWorkspace_sptr
-  getQSpectrum(const API::FunctionDomain &domain,
+  getQSpectrum(const API::FunctionDomain1D &domain,
                const API::FunctionValues &values) const;
 
   void setPoldiInstrument(const PoldiInstrumentAdapter_sptr &instrument);

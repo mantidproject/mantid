@@ -93,6 +93,11 @@ void PoldiFitPeaks2D::init() {
                                                          "", Direction::Output),
                   "Calculated POLDI 1D-spectrum.");
 
+  declareProperty("LambdaMin", 1.1,
+                  "Minimum wavelength for 1D spectrum calculation");
+  declareProperty("LambdaMax", 5.0,
+                  "Minimum wavelength for 1D spectrum calculation");
+
   declareProperty(new WorkspaceProperty<TableWorkspace>(
                       "RefinedPoldiPeakWorkspace", "", Direction::Output),
                   "Table workspace with fitted peaks.");
@@ -369,7 +374,7 @@ MatrixWorkspace_sptr PoldiFitPeaks2D::get1DSpectrum(
 
 /// Takes a d-based domain and creates a Q-based MatrixWorkspace.
 MatrixWorkspace_sptr
-PoldiFitPeaks2D::getQSpectrum(const FunctionDomain &domain,
+PoldiFitPeaks2D::getQSpectrum(const FunctionDomain1D &domain,
                               const FunctionValues &values) const {
   // Put result into workspace, based on Q
   MatrixWorkspace_sptr ws1D = WorkspaceFactory::Instance().create(
