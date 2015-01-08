@@ -40,7 +40,7 @@ class ReductionWrapper(object):
                       row = "{0}\'{1}\':{2}".format(str_wrapper,key,val)
                   f.write(row);
                   str_wrapper=',\n         '
-        f.write("}\nadvanced_vars={\n")
+        f.write("\n}\nadvanced_vars={\n")
 
         str_wrapper='         '
         for key,val in self._advanced_properties.iteritems():
@@ -50,7 +50,7 @@ class ReductionWrapper(object):
                       row = "{0}\'{1}\':{2}".format(str_wrapper,key,val)
                   f.write(row);
                   str_wrapper=',\n        '
-        f.write("}\n")
+        f.write("\n}\n")
         f.close();
 
 
