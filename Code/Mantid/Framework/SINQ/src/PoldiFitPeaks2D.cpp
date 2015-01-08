@@ -234,7 +234,7 @@ void PoldiFitPeaks2D::addBackgroundTerms(Poldi2DFunction_sptr poldi2DFunction)
   bool addConstantBackground = getProperty("FitConstantBackground");
   if (addConstantBackground) {
     IFunction_sptr constantBackground =
-        FunctionFactory::Instance().createFunction("FlatBackground");
+        FunctionFactory::Instance().createFunction("PoldiSpectrumConstantBackground");
     constantBackground->setParameter(
         0, getProperty("ConstantBackgroundParameter"));
     poldi2DFunction->addFunction(constantBackground);
@@ -354,15 +354,6 @@ MatrixWorkspace_sptr PoldiFitPeaks2D::get1DSpectrum(
 
     if (spectrumFunction) {
       spectrumFunction->poldiFunction1D(indices, domain, values);
-      continue;
-    }
-
-    double factor = static_cast<double>(indices.size()) * 500.0 /
-                    static_cast<double>(domain.size());
-
-    double constantBgParam = currentFunction->getParameter(0);
-    for (size_t j = 0; j < domain.size(); ++j) {
-      values.addToCalculated(j, constantBgParam * factor);
     }
   }
 
