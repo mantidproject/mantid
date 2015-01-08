@@ -63,8 +63,8 @@ IndirectDiffractionReduction::~IndirectDiffractionReduction()
  */
 void IndirectDiffractionReduction::demonRun()
 {
-  QString instName = m_uiForm.cbInst->currentText();
-  QString mode = m_uiForm.cbReflection->currentText();
+  QString instName = "IRIS";
+  QString mode = "diffspec";
 
   if(instName == "OSIRIS" && mode == "diffonly")
   {
@@ -114,8 +114,8 @@ void IndirectDiffractionReduction::plotResults(bool error)
     AnalysisDataService::Instance().remove("IndirectDiffraction_Workspaces");
   }
 
-  QString instName = m_uiForm.cbInst->currentText();
-  QString mode = m_uiForm.cbReflection->currentText();
+  QString instName = "IRIS";
+  QString mode = "diffspec";
 
   QString plotType = m_uiForm.cbPlotType->currentText();
 
@@ -310,28 +310,6 @@ MatrixWorkspace_sptr IndirectDiffractionReduction::loadInstrument(std::string in
  */
 void IndirectDiffractionReduction::instrumentSelected(int)
 {
-  // If the interface is not shown, do not go looking for parameter files, etc.
-  if(!m_uiForm.cbInst->isVisible())
-    return;
-
-  std::string instrumentName = m_uiForm.cbInst->currentText().toStdString();
-  MatrixWorkspace_sptr instWorkspace = loadInstrument(instrumentName);
-  Instrument_const_sptr instrument = instWorkspace->getInstrument();
-
-  std::vector<std::string> analysers;
-  boost::split(analysers, instrument->getStringParameter("refl-diffraction")[0], boost::is_any_of(","));
-
-  m_uiForm.cbReflection->blockSignals(true);
-  m_uiForm.cbReflection->clear();
-
-  for(auto it = analysers.begin(); it != analysers.end(); ++it)
-  {
-    std::string reflection = *it;
-    m_uiForm.cbReflection->addItem(QString::fromStdString(reflection));
-  }
-
-  reflectionSelected(m_uiForm.cbReflection->currentIndex());
-  m_uiForm.cbReflection->blockSignals(false);
 }
 
 /**
@@ -339,8 +317,8 @@ void IndirectDiffractionReduction::instrumentSelected(int)
  */
 void IndirectDiffractionReduction::reflectionSelected(int)
 {
-  std::string instrumentName = m_uiForm.cbInst->currentText().toStdString();
-  std::string reflection = m_uiForm.cbReflection->currentText().toStdString();
+  std::string instrumentName = "IRIS";
+  std::string reflection = "diffspec";
   MatrixWorkspace_sptr instWorkspace = loadInstrument(instrumentName, reflection);
   Instrument_const_sptr instrument = instWorkspace->getInstrument();
 
@@ -417,9 +395,6 @@ void IndirectDiffractionReduction::initLayout()
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(demonRun()));
-
-  connect(m_uiForm.cbInst, SIGNAL(currentIndexChanged(int)), this, SLOT(instrumentSelected(int)));
-  connect(m_uiForm.cbReflection, SIGNAL(currentIndexChanged(int)), this, SLOT(reflectionSelected(int)));
 
   // Update run button based on state of raw files field
   connect(m_uiForm.dem_rawFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(runFilesChanged()));

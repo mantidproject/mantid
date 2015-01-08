@@ -85,9 +85,11 @@ namespace MantidQt
       /// Gets the name of the selected reflection
       QString getReflectionName();
 
-    public slots:
+    private slots:
       /// Updates the list of analysers and reflections based on the selected instrument
-      void updateInstrumentConfigurations();
+      void updateInstrumentConfigurations(const QString & instrumentName);
+      /// Updates the list of reflections when an analyser is selected
+      void updateReflectionsList(int index);
 
     private:
       /// Member containing the widgets child widgets.

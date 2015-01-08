@@ -1,11 +1,20 @@
 #include "MantidQtMantidWidgets/IndirectInstrumentConfig.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
 
 
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
 using MantidQt::MantidWidgets::InstrumentSelector;
+
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("IndirectInstrumentConfig");
+}
 
 
 namespace MantidQt
@@ -18,8 +27,13 @@ namespace MantidQt
     {
       m_uiForm.setupUi(this);
 
-      m_instrumentSelector = new InstrumentSelector(parent, init);
+      m_instrumentSelector = new InstrumentSelector(0, init);
 			m_uiForm.loInstrument->addWidget(m_instrumentSelector);
+
+      connect(m_instrumentSelector, SIGNAL(instrumentSelectionChanged(const QString)),
+              this, SLOT(updateInstrumentConfigurations(const QString)));
+      connect(m_uiForm.cbAnalyser, SIGNAL(currentIndexChanged(int)),
+              this, SLOT(updateReflectionsList(int)));
     }
 
     IndirectInstrumentConfig::~IndirectInstrumentConfig()
@@ -132,11 +146,84 @@ namespace MantidQt
     }
 
 
-    void IndirectInstrumentConfig::updateInstrumentConfigurations()
+    void IndirectInstrumentConfig::updateInstrumentConfigurations(const QString & instrumentName)
     {
-      //TODO
+      g_log.debug() << "Loading configuration for instrument: " << instrumentName.toStdString() << std::endl;
+
+      bool analyserPreviousBlocking = m_uiForm.cbAnalyser->signalsBlocked();
+      m_uiForm.cbAnalyser->blockSignals(true);
+
+      m_uiForm.cbAnalyser->clear();
+
+      IAlgorithm_sptr loadInstAlg = AlgorithmManager::Instance().create("CreateSimulationWorkspace");
+      loadInstAlg->initialize();
+      loadInstAlg->setChild(true);
+      loadInstAlg->setProperty("Instrument", instrumentName.toStdString());
+      loadInstAlg->setProperty("BinParams", "0,0.5,1");
+      loadInstAlg->setProperty("OutputWorkspace", "__empty_instrument_workspace");
+      loadInstAlg->execute();
+      MatrixWorkspace_sptr instWorkspace = loadInstAlg->getProperty("OutputWorkspace");
+
+      QList<QPair<QString, QString>> instrumentModes;
+      Instrument_const_sptr instrument = instWorkspace->getInstrument();
+
+      std::string ipfAnalysers = instrument->getStringParameter("analysers")[0];
+      QStringList analysers = QString::fromStdString(ipfAnalysers).split(",");
+
+      for(auto it = analysers.begin(); it != analysers.end(); ++it)
+      {
+        QString analyser = *it;
+        std::string ipfReflections = instrument->getStringParameter("refl-" + analyser.toStdString())[0];
+        QStringList reflections = QString::fromStdString(ipfReflections).split(",");
+
+        if(m_removeDiffraction && analyser == "diffraction")
+          continue;
+
+        if(m_forceDiffraction && analyser != "diffraction")
+          continue;
+
+        if(reflections.size() > 0)
+        {
+          QVariant data = QVariant(reflections);
+          m_uiForm.cbAnalyser->addItem(analyser, data);
+        }
+        else
+        {
+          m_uiForm.cbAnalyser->addItem(analyser);
+        }
+      }
+
+      int index = m_uiForm.cbAnalyser->currentIndex();
+      updateReflectionsList(index);
+
+      m_uiForm.cbAnalyser->blockSignals(analyserPreviousBlocking);
     }
 
+
+    void IndirectInstrumentConfig::updateReflectionsList(int index)
+    {
+      bool reflectionPreviousBlocking = m_uiForm.cbReflection->signalsBlocked();
+      m_uiForm.cbReflection->blockSignals(true);
+
+      m_uiForm.cbReflection->clear();
+
+      QVariant currentData = m_uiForm.cbAnalyser->itemData(index);
+      bool valid = currentData != QVariant::Invalid;
+      m_uiForm.cbReflection->setEnabled(valid);
+
+      if(valid)
+      {
+        QStringList reflections = currentData.toStringList();
+        for ( int i = 0; i < reflections.count(); i++ )
+          m_uiForm.cbReflection->addItem(reflections[i]);
+      }
+      else
+      {
+        m_uiForm.cbReflection->addItem("No Valid Reflections");
+      }
+
+      m_uiForm.cbReflection->blockSignals(reflectionPreviousBlocking);
+    }
 
   } /* namespace MantidWidgets */
 } /* namespace MantidQt */

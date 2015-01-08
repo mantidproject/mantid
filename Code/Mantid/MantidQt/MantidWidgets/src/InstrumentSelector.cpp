@@ -152,9 +152,10 @@ namespace MantidWidgets
   {
     ConfigServiceImpl & mantidSettings = ConfigService::Instance();
 
-    blockSignals(true);
-    clear();
-    blockSignals(false);
+    this->blockSignals(true);
+    this->clear();
+
+    bool sb = this->signalsBlocked();
 
     try
     {
@@ -205,10 +206,12 @@ namespace MantidWidgets
     {
       index = 0;
     }
+
     // Don't affect the default instrument
-    this->blockSignals(true);
     this->setCurrentIndex(index);
     this->blockSignals(false);
+
+    emit instrumentSelectionChanged(this->currentText());
   }
 
  /**
