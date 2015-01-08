@@ -345,6 +345,18 @@ class PropertyManager(NonIDF_Properties):
         old_changes  = self.getChangedProperties()
         self.setChangedProperties(set())
 
+        # find all changes, present in the old changes list
+        existing_changes = old_changes.copy()
+        for change in old_changes:
+            dependencies = None
+            try:
+                prop = self.__class__.__dict__[change]
+                dependencies = prop.dependencies()
+            except:
+                pass
+            if dependencies:
+                 existing_changes.update(dependencies)
+
         param_list = prop_helpers.get_default_idf_param_list(pInstrument)
         param_list =  self._convert_params_to_properties(param_list,False)
 
@@ -377,12 +389,12 @@ class PropertyManager(NonIDF_Properties):
                # is complex property changed through its dependent properties?
                dependent_prop = val.dependencies()
                replace_old_value = True
-               if public_name in old_changes:
+               if public_name in existing_changes:
                    replace_old_value = False
 
                if replace_old_value: # may be property have changed through its dependencies
                     for prop_name in dependent_prop:
-                        if  prop_name in old_changes:
+                        if  prop_name in existing_changes:
                             replace_old_value =False
                             break
                #
@@ -399,7 +411,7 @@ class PropertyManager(NonIDF_Properties):
                        pass
             # simple property
             else: 
-                if public_name in old_changes:
+                if public_name in existing_changes:
                     continue
                 else: 
                    old_val = getattr(self,name);
