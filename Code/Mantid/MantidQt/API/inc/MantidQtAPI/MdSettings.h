@@ -102,16 +102,23 @@ namespace MantidQt
         void setLastSessionBackgroundColor(QColor backgroundColor);
 
         /** 
-          * Set the general Md color map
-          * @param colormap The general colormap for VSI and Slice Viewer.
+          * Set the general MD color map
+          * @param colorMapName The name of the general color map.
+          * @param colorMapFile The file name of the general color map.
           */
-        void setGeneralMdColorMap(std::string colorMap);
+        void setGeneralMdColorMap(QString colorMapName, QString colorMapFile);
 
         /**
-          * Get the general Md color map
-          * @returns The general colormap for VSI and Slice Viewer.
+          * Get the general MD color map file
+          * @returns The file path to the general md color map .map file.
           */
-        std::string getGeneralMdColorMap();
+        QString getGeneralMdColorMapFile();
+
+        /**
+         * Get the general MD color map name
+         * @returns The name of the general Md color map.
+         */
+        QString getGeneralMdColorMapName();
 
         /**
           *  Set the flag if general color map is desired or not.
@@ -148,13 +155,18 @@ namespace MantidQt
 
         QString vsiGroup;
         QString generalMdGroup;
+        QString sliceViewerGroup;
 
         QString lblUserSettingColorMap;
         QString lblLastSessionColorMap;
         QString lblUseLastSessionColorMap;
         QString lblGeneralMdColorMap;
         QString lblUseGeneralMdColorMap;
-        
+        QString lblGeneralMdColorMapName;
+
+        QString lblSliceViewerColorMap;
+        QString lblSliceViewerPreviousColorMap;
+
         QString lblUserSettingBackgroundColor;
         QString lblLastSessionBackgroundColor;
     };

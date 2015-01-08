@@ -16,24 +16,17 @@ namespace MantidQt
 
     void MdConstants::initializeSettingsConstants()
     {
-
-
       // General MD Color Map
-      generalMdColorMap = "Cool to Warm";
-
-
-      // LastSession color map
-
+      generalMdColorMap = "ColdFire";
 
       // Background color
       defaultBackgroundColor = QColor(84,89,109);
-
 
       // Populate the optional color maps
       vsiColorMaps.append("Cool to Warm");
       vsiColorMaps.append("Blue to Red Rainbow");
       vsiColorMaps.append("Red to Blue Rainbow");
-      vsiColorMaps.append("Greyscale");
+      vsiColorMaps.append("Grayscale");
       vsiColorMaps.append("X Ray");
       vsiColorMaps.append("Blue to Yellow");
     }

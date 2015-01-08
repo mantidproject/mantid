@@ -10,6 +10,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/VMD.h"
 #include "MantidQtAPI/MantidColorMap.h"
+#include "MantidQtAPI/MdSettings.h"
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
 #include "MantidQtAPI/SyncedCheckboxes.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
@@ -299,6 +300,9 @@ private:
 
   /// If true, the rebinned overlayWS is locked until refreshed.
   bool m_rebinLocked;
+
+  /// Md Settings for color maps 
+  boost::shared_ptr<MantidQt::API::MdSettings>  m_mdSettings;
 
   // -------------------------- Controllers ------------------------
   boost::shared_ptr<CompositePeaksPresenter>  m_peaksPresenter;

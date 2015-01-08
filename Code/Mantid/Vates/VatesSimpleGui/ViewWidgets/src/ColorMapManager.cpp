@@ -37,7 +37,8 @@ namespace Mantid
           // Check if the user wants a general MD color map
           if (mdSettings->getUsageGeneralMdColorMap())
           {
-            defaultColorMap = mdSettings->getGeneralMdColorMap();
+            // The name is sufficient for the VSI to find the color map
+            defaultColorMap = mdSettings->getGeneralMdColorMapName(); 
           }
           else 
           {

@@ -8,13 +8,17 @@ using namespace MantidQt::API;
 MdSettings::MdSettings() : mdConstants(new MdConstants()),
                            vsiGroup("Mantid/MdPlotting/Vsi"),
                            generalMdGroup("Mantid/MdPlotting/General"),
+                           sliceViewerGroup("Mantid/SliceViewer"),
                            lblUserSettingColorMap("usersettingcolormap"),
                            lblGeneralMdColorMap("generalcolormap"),
+                           lblGeneralMdColorMapName("generalcolormapname"),
                            lblUseGeneralMdColorMap("usegeneralcolormap"),
                            lblLastSessionColorMap("lastsessioncolormap"),
                            lblUseLastSessionColorMap("uselastsessioncolormap"),
                            lblUserSettingBackgroundColor("usersettingbackgroundcolor"),
-                           lblLastSessionBackgroundColor("lastsessionbackgroundcolor")
+                           lblLastSessionBackgroundColor("lastsessionbackgroundcolor"),
+                           lblSliceViewerColorMap("ColormapFile"),
+                           lblSliceViewerPreviousColorMap("generalcolormapprevious")
 {
   mdConstants->initializeSettingsConstants();
 };
@@ -108,26 +112,40 @@ void MdSettings::setLastSessionBackgroundColor(QColor backgroundColor)
   settings.endGroup();
 }
 
-void MdSettings::setGeneralMdColorMap(std::string colorMap)
+void MdSettings::setGeneralMdColorMap(QString colorMapName, QString colorMapFile)
 {
   QSettings settings;
-        
+
   settings.beginGroup(generalMdGroup);
-  settings.setValue(lblGeneralMdColorMap, QString(colorMap.c_str()));
+  settings.setValue(lblGeneralMdColorMapName, colorMapName);
+  settings.setValue(lblGeneralMdColorMap, colorMapFile);
+  bool generalMdPlotting = settings.value(lblUseGeneralMdColorMap, false).asBool();
   settings.endGroup();
 }
 
-std::string MdSettings::getGeneralMdColorMap()
+QString  MdSettings::getGeneralMdColorMapFile()
 {
   QSettings settings;
 
   settings.beginGroup(generalMdGroup);
-  std::string colorMap = settings.value(lblGeneralMdColorMap,
-                                        mdConstants->getGeneralMdColorMap()).toString().toStdString();
+  QString colorMap = settings.value(lblGeneralMdColorMap, QString("")).toString();
   settings.endGroup();
 
   return colorMap;
 }
+
+
+QString MdSettings::getGeneralMdColorMapName()
+{
+  QSettings settings;
+
+  settings.beginGroup(generalMdGroup);
+  QString  colorMap = settings.value(lblGeneralMdColorMapName, mdConstants->getGeneralMdColorMap()).toString();
+  settings.endGroup();
+
+  return colorMap;
+}
+
 
 void MdSettings::setUsageGeneralMdColorMap(bool flag)
 {

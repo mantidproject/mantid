@@ -78,6 +78,7 @@ Description          : Preferences dialog
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidQtMantidWidgets/InstrumentSelector.h"
 #include "MantidQtAPI/MdSettings.h"
+#include "MantidQtAPI/MdPlottingCmapsProvider.h"
 
 #include <limits>
 
@@ -754,11 +755,31 @@ void ConfigDialog::initMdPlottingGeneralTab()
   lblGeneralDefaultColorMap = new QLabel();
   gridVsiGeneralDefaultColorMap->addWidget(lblGeneralDefaultColorMap, 1, 0);
   gridVsiGeneralDefaultColorMap->addWidget(mdPlottingGeneralColorMap, 1, 1);
-  
+
   gridVsiGeneralDefaultColorMap->setRowStretch(2,1);
 
   QLabel* label = new QLabel("<span style=\"font-weight:600;\">Note: Changes will not take effect until MantidPlot has been restarted.</span>");
   generalTabLayout->addWidget(label);
+
+  // Set the color maps
+  MantidQt::API::MdPlottingCmapsProvider mdPlottingCmapsProvider;
+  QStringList colorMapNames;
+  QStringList colorMapFiles;
+  mdPlottingCmapsProvider.getColorMapsForMdPlotting(colorMapNames, colorMapFiles);
+
+  if (colorMapNames.size() == colorMapFiles.size())
+  {
+    for (int index = 0; index < colorMapNames.size(); ++index)
+    {
+      mdPlottingGeneralColorMap->addItem(colorMapNames[index], colorMapFiles[index]);
+    }
+  }
+
+  int currentIndex = mdPlottingGeneralColorMap->findData(mdSettings->getGeneralMdColorMapName(), Qt::DisplayRole);
+  if (currentIndex != -1)
+  {
+    mdPlottingGeneralColorMap->setCurrentIndex(currentIndex);
+  }
 }
 
 /**
@@ -785,13 +806,8 @@ void ConfigDialog::initMdPlottingVsiTab()
   lblVsiDefaultColorMap = new QLabel();
   grid->addWidget(lblVsiDefaultColorMap, 1, 0);
   grid->addWidget(vsiDefaultColorMap, 1, 1);
-  vsiDefaultColorMap->addItems(mdSettings->getVsiColorMaps());
 
-  int index = vsiDefaultColorMap->findData(QString::fromStdString(mdSettings->getUserSettingColorMap()), Qt::DisplayRole);
-  if (index != -1)
-  {
-    vsiDefaultColorMap->setCurrentIndex(index);
-  }
+
 
   // Background Color
   vsiDefaultBackground = new ColorButton();
@@ -808,6 +824,20 @@ void ConfigDialog::initMdPlottingVsiTab()
   vsiTabLayout->addWidget(label1);
   QLabel* label2 = new QLabel("<span style=\"font-weight:600;\">Note: Changes will not take effect until MantidPlot has been restarted.</span>");
   vsiTabLayout->addWidget(label2);
+
+  // Set the remaining color maps
+  QStringList maps;
+  MantidQt::API::MdPlottingCmapsProvider mdPlottingCmapsProvider;
+  mdPlottingCmapsProvider.getColorMapsForVSI(maps);
+
+  vsiDefaultColorMap->addItems(mdSettings->getVsiColorMaps());
+  vsiDefaultColorMap->addItems(maps);
+
+  int index = vsiDefaultColorMap->findData(QString::fromStdString(mdSettings->getUserSettingColorMap()), Qt::DisplayRole);
+  if (index != -1)
+  {
+    vsiDefaultColorMap->setCurrentIndex(index);
+  }
 }
 
 /**
@@ -1859,7 +1889,7 @@ void ConfigDialog::languageChange()
   itemsList->item(3)->setIcon(QIcon(getQPixmap("config_curves_xpm")));
   itemsList->item(4)->setIcon(QIcon(getQPixmap("logo_xpm")));
   itemsList->item(5)->setIcon(QIcon(getQPixmap("fit_xpm")));
-  itemsList->item(6)->setIcon(QIcon(getQPixmap("fit_xpm")));
+  itemsList->item(6)->setIcon(QIcon(":/mdPlotting32x32.png"));
   itemsList->setIconSize(QSize(32,32));
   // calculate a sensible width for the items list
   // (default QListWidget size is 256 which looks too big)
@@ -2363,6 +2393,8 @@ void ConfigDialog::apply()
  */
 void ConfigDialog::updateMdPlottingSettings()
 {
+  //////// GENERAL TAB 
+
   // Read the common color map check box 
   if (mdPlottingGeneralFrame->isChecked())
   {
@@ -2372,6 +2404,16 @@ void ConfigDialog::updateMdPlottingSettings()
   {
     mdSettings->setUsageGeneralMdColorMap(false);
   }
+
+  if (mdPlottingGeneralColorMap)
+  {
+    QString generalTabColorMapName  = mdPlottingGeneralColorMap->currentText();
+    QString generalTabColorMapFile = mdPlottingGeneralColorMap->itemData(mdPlottingGeneralColorMap->currentIndex()).toString();
+
+    mdSettings->setGeneralMdColorMap(generalTabColorMapName, generalTabColorMapFile);
+  }
+
+  ///// VSI TAB
 
   // Read the Vsi color map
   if (vsiDefaultColorMap)

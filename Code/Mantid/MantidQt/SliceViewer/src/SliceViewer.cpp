@@ -16,6 +16,7 @@
 #include "MantidKernel/DataService.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/VMD.h"
+#include "MantidQtAPI/MdSettings.h"
 #include "MantidQtAPI/QwtRasterDataMD.h"
 #include "MantidQtAPI/SignalRange.h"
 #include "MantidQtSliceViewer/CustomTools.h"
@@ -112,7 +113,8 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_rebinLocked(true), 
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
-      m_peaksSliderWidget(NULL)
+      m_peaksSliderWidget(NULL),
+      m_mdSettings(new MantidQt::API::MdSettings())
 {
 	ui.setupUi(this);
 
@@ -195,8 +197,18 @@ void SliceViewer::loadSettings()
   QSettings settings;
   settings.beginGroup("Mantid/SliceViewer");
   bool scaleType = (bool)settings.value("LogColorScale", 0 ).toInt();
-  //Load Colormap. If the file is invalid the default stored colour map is used
-  m_currentColorMapFile = settings.value("ColormapFile", "").toString();
+
+  //Load Colormap. If the file is invalid the default stored colour map is used. If the 
+  // user selected a unified color map for the SliceViewer and the VSI, then this is loaded.
+  if (m_mdSettings != NULL && m_mdSettings->getUsageGeneralMdColorMap())
+  {
+    m_currentColorMapFile = m_mdSettings->getGeneralMdColorMapFile();
+  }
+  else
+  {
+    m_currentColorMapFile = settings.value("ColormapFile", "").toString();
+  }
+
   // Set values from settings
   if (!m_currentColorMapFile.isEmpty())
     loadColorMap(m_currentColorMapFile);

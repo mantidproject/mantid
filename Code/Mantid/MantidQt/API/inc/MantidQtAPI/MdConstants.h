@@ -60,7 +60,6 @@ namespace MantidQt
         QString generalMdColorMap;
         QColor defaultBackgroundColor;
         QStringList vsiColorMaps;
-        QStringList mdColorMaps;
     };
   }
 }
