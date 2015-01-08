@@ -24,7 +24,7 @@ public:
 
   SaveReflCustomAsciiTest()
   {
-    m_filename = "SaveReflCustomAsciiTestFile.txt";
+    m_filename = "SaveReflCustomAsciiFile.txt";
     m_name = "SaveReflCustomAsciiWS";
     for (int i = 1; i < 11; ++i)
     {
@@ -64,13 +64,12 @@ public:
 
     std::vector<std::string> columns;
     boost::split(columns, fullline, boost::is_any_of("\t"), boost::token_compress_on);
-    TS_ASSERT_EQUALS(columns.size(),5); ///////
+    TS_ASSERT_EQUALS(columns.size(),4);
     //the first is black due to the leading tab
     TS_ASSERT(columns.at(0) == "");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(4)), 0.6, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 2.5, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 2, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 2, 0.01);
     in.close();
 
     cleanupafterwards();
@@ -98,13 +97,12 @@ public:
     getline(in,fullline);
     std::vector<std::string> columns;
     boost::split(columns, fullline, boost::is_any_of("\t"), boost::token_compress_on);
-    TS_ASSERT_EQUALS(columns.size(),5);
+    TS_ASSERT_EQUALS(columns.size(),4);
     //the first is black due to the leading tab
     TS_ASSERT(columns.at(0) == "");
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);
-    TS_ASSERT((columns.at(4) == "nan") || (columns.at(4) == "inf"));
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 2, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 2, 0.01);
     in.close();
 
     cleanupafterwards();
@@ -132,13 +130,12 @@ public:
     getline(in,fullline);
     std::vector<std::string> columns;
     boost::split(columns, fullline, boost::is_any_of("\t"), boost::token_compress_on);
-    TS_ASSERT_EQUALS(columns.size(),5);
+    TS_ASSERT_EQUALS(columns.size(),4);
     //the first is black due to the leading tab
     TS_ASSERT(columns.at(0) == "");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 2.5, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);  
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(4)), 0.6, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 2, 0.01);  
     in.close();
 
     cleanupafterwards();
@@ -166,13 +163,12 @@ public:
     getline(in,fullline);
     std::vector<std::string> columns;
     boost::split(columns, fullline, boost::is_any_of("\t"), boost::token_compress_on);
-    TS_ASSERT_EQUALS(columns.size(),5);
+    TS_ASSERT_EQUALS(columns.size(),4);
     //the first is black due to the leading tab
     TS_ASSERT(columns.at(0) == "");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 2.5, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 2, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(4)), 0.6, 0.01);
     in.close();
 
     cleanupafterwards();
@@ -186,7 +182,6 @@ public:
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
     alg->setPropertyValue("Title", "Testing this algorithm");
-    alg->setPropertyValue("WriteDeltaQ", false);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
 
     if ( ! alg->isExecuted() )
@@ -203,13 +198,12 @@ public:
 
     std::vector<std::string> columns;
     boost::split(columns, fullline, boost::is_any_of("\t"), boost::token_compress_on);
-    TS_ASSERT_EQUALS(columns.size(),5);
+    TS_ASSERT_EQUALS(columns.size(),4);
     //the first is black due to the leading tab
     TS_ASSERT(columns.at(0) == "");
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(4)), 0.6, 0.01);
     in.close();
 
     cleanupafterwards();
@@ -230,25 +224,12 @@ public:
 private:
   void headingsTests(std::ifstream & in,std::string & fullline, bool propertiesLogs = false)
   {
-    if (propertiesLogs)
-    {
-      getline(in,fullline);
-      TS_ASSERT(fullline == "Title: Testing this algorithm");
-      getline(in,fullline);
-      TS_ASSERT(fullline == "Subtitle: ILL COSMOS save test");
-    }
-    else
-    {
-    }
+    getline(in,fullline);
+    getline(in,fullline);
   }
   void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false, bool createLogs = false)
   {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(1,10);
-
-    if (createLogs)
-    {
-    }
-
     AnalysisDataService::Instance().addOrReplace(m_name, ws);
     //Check if any of X, Y or E should be zeroed to check for divide by zero or similiar
     if (zeroX)
