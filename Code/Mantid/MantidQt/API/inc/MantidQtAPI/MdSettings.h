@@ -4,7 +4,6 @@
 #include "DllOption.h"
 #include "boost/scoped_ptr.hpp"
 #include "MantidQtAPI/MdConstants.h"
-#include <string>
 #include <QColor>
 #include <QString>
 #include <QStringList>
@@ -52,24 +51,24 @@ namespace MantidQt
          * Set the UserSetting color map for the vsi.
          *@param colorMap UserSetting colormap for the vsi
          */
-        void setUserSettingColorMap(std::string colorMap);
+        void setUserSettingColorMap(QString colorMap);
 
         /**
           * Get the UserSetting color map for the vsi.
           * @returns The UserSetting color map for the vsi.
           */
-        std::string getUserSettingColorMap();
+        QString getUserSettingColorMap();
 
         /**
           * Get the LastSession color map
           */
-        std::string getLastSessionColorMap();
+        QString getLastSessionColorMap();
 
         /** 
           * Set the LastSession color map
           * @param colormap The colormap for the VSI.
           */
-        void setLastSessionColorMap(std::string colorMap);
+        void setLastSessionColorMap(QString colorMap);
 
         /**
           * Get the background color for the user setting.
@@ -145,10 +144,16 @@ namespace MantidQt
         bool getUsageLastSession();
 
         /**
-         * Get the list of color maps for the VSI.
-         * @returns A list of color maps for the VSI.
+         * Get user setting for the initial view.
+         * @returns The initial view
          */
-        QStringList getVsiColorMaps();
+        QString getUserSettingInitialView();
+
+        /**
+         * Set the user setting for the initial view.
+         * @param initialView The selected initial view.
+         */
+        void setUserSettingIntialView(QString initialView);
 
       private:
         boost::scoped_ptr<MdConstants> mdConstants;
@@ -165,10 +170,11 @@ namespace MantidQt
         QString lblGeneralMdColorMapName;
 
         QString lblSliceViewerColorMap;
-        QString lblSliceViewerPreviousColorMap;
 
         QString lblUserSettingBackgroundColor;
         QString lblLastSessionBackgroundColor;
+
+        QString lblUserSettingInitialView;
     };
   }
 }

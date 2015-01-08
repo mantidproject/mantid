@@ -25,7 +25,7 @@ namespace Mantid
 
       int ColorMapManager::getDefaultColorMapIndex(bool viewSwitched)
       {
-        std::string defaultColorMap;
+        QString defaultColorMap;
 
         // If the view has switched use the last color map index
         if (viewSwitched)
@@ -57,10 +57,10 @@ namespace Mantid
         // Set the default colormap
         int defaultColorMapIndex = 0;
 
-        if (!defaultColorMap.empty())
+        if (!defaultColorMap.isEmpty())
         {
           mdSettings->setLastSessionColorMap(defaultColorMap);
-          defaultColorMapIndex = this->getColorMapIndex(defaultColorMap);
+          defaultColorMapIndex = this->getColorMapIndex(defaultColorMap.toStdString());
         }
 
         return defaultColorMapIndex;
@@ -106,7 +106,7 @@ namespace Mantid
         // Persist the new value of the color map in the QSettings object.
         if (indexToName.count(index) > 0)
         {
-          mdSettings->setLastSessionColorMap(indexToName[index]);
+          mdSettings->setLastSessionColorMap(QString::fromStdString(indexToName[index]));
         }
       }
     }

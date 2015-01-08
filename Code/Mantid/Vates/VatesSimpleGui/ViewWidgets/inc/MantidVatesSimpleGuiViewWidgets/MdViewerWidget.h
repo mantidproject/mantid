@@ -177,7 +177,7 @@ private:
   /// Get the technique associated with an instrument.
   const std::string getTechniqueForInstrument(const std::string& instrumentName) const;
   /// Get the view for a specified instrument
-  std::string getViewForInstrument(const std::string& instrument) const;
+  QString getViewForInstrument(const std::string& instrument) const;
   /// Check if a technique contains a keyword
   bool checkIfTechniqueContainsKeyword(const std::set<std::string>& techniques, const std::string& keyword) const;
   /// Reset the current view to the appropriate initial view.

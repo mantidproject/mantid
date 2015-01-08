@@ -216,8 +216,8 @@ private:
   //MDPlotting
   QTabWidget* mdPlottingTabWidget;
   QWidget *vsiPage, *mdPlottingGeneralPage;
-  QComboBox *vsiDefaultColorMap, *mdPlottingGeneralColorMap;
-  QLabel *lblVsiDefaultColorMap, *lblVsiDefaultBackground, *lblGeneralDefaultColorMap, *lblBoxGeneralDefaultColorMap, *lblVsiLastSession;
+  QComboBox *vsiDefaultColorMap, *vsiInitialView, *mdPlottingGeneralColorMap;
+  QLabel *lblVsiDefaultColorMap, *lblVsiDefaultBackground, *lblGeneralDefaultColorMap, *lblBoxGeneralDefaultColorMap, *lblVsiLastSession, *lblVsiInitialView;
   ColorButton *vsiDefaultBackground;
   QGroupBox* mdPlottingGeneralFrame;
   QCheckBox* vsiLastSession;

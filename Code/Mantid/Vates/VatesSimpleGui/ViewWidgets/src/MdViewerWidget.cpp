@@ -523,6 +523,7 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
   {
      resetCurrentView(workspaceType, instrumentName);
   }
+
 }
 
 /**
@@ -588,11 +589,19 @@ void MdViewerWidget::resetCurrentView(int workspaceType, const std::string& inst
 ModeControlWidget::Views MdViewerWidget::getInitialView(int workspaceType, std::string instrumentName)
 {
   // Get the possible initial views
-  std::string initialViewFromUserProperties = Mantid::Kernel::ConfigService::Instance().getVsiInitialView();
-  std::string initialViewFromTechnique = getViewForInstrument(instrumentName);
+  QString initialViewFromUserProperties = mdSettings->getUserSettingInitialView();
+  QString initialViewFromTechnique = getViewForInstrument(instrumentName);
 
-  // The user-properties-defined default view takes precedence over the techique-defined default view
-  std::string initialView = initialViewFromUserProperties.empty() ?  initialViewFromTechnique : initialViewFromUserProperties;
+  // The user-properties-defined default view takes precedence over the technique-defined default view
+  QString initialView;
+  if (initialViewFromUserProperties == mdConstants->getTechniqueDependence())
+  {
+   initialView = initialViewFromTechnique;
+  }
+  else
+  {
+   initialView = initialViewFromUserProperties;
+  }
 
   ModeControlWidget::Views view =  this->ui.modeControlWidget->getViewFromString(initialView);
 
@@ -606,12 +615,12 @@ ModeControlWidget::Views MdViewerWidget::getInitialView(int workspaceType, std::
  *                       data was measured.
  * @returns A view.
  */
-std::string MdViewerWidget::getViewForInstrument(const std::string& instrumentName) const
+QString MdViewerWidget::getViewForInstrument(const std::string& instrumentName) const
 {
   // If nothing is specified the standard view is chosen
   if (instrumentName.empty())
   {
-    return "STANDARD";
+    return mdConstants->getStandardView();
   }
 
   // Check for techniques
@@ -621,22 +630,22 @@ std::string MdViewerWidget::getViewForInstrument(const std::string& instrumentNa
   //               4. Other --> STANDARD
   const std::set<std::string> techniques = Mantid::Kernel::ConfigService::Instance().getInstrument(instrumentName).techniques();
 
-  std::string associatedView;
+  QString associatedView;
 
   if (techniques.count("Single Crystal Diffraction") > 0 )
   {
-    associatedView = "SPLATTERPLOT";
+    associatedView = mdConstants->getSplatterPlotView();
   }
   else if (techniques.count("Neutron Diffraction") > 0 )
   {
-    associatedView = "SPLATTERPLOT";
+    associatedView = mdConstants->getSplatterPlotView();
   } else if (checkIfTechniqueContainsKeyword(techniques, "Spectroscopy"))
   {
-    associatedView = "MULTISLICE";
+    associatedView = mdConstants->getMultiSliceView();
   }
   else
   {
-    associatedView = "STANDARD";
+    associatedView = mdConstants->getStandardView();
   }
 
   return associatedView;

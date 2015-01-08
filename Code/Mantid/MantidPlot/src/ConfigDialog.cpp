@@ -77,6 +77,7 @@ Description          : Preferences dialog
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidQtMantidWidgets/InstrumentSelector.h"
+#include "MantidQtAPI/MdConstants.h"
 #include "MantidQtAPI/MdSettings.h"
 #include "MantidQtAPI/MdPlottingCmapsProvider.h"
 
@@ -794,49 +795,67 @@ void ConfigDialog::initMdPlottingVsiTab()
   QGridLayout *grid = new QGridLayout(frame);
   mdPlottingTabWidget->addTab(vsiPage, QString());
 
-  // Usage of current Color Map
-  vsiLastSession = new QCheckBox();
-  lblVsiLastSession = new QLabel();
-  grid->addWidget(lblVsiLastSession , 0, 0);
-  grid->addWidget(vsiLastSession , 0, 1);
-  vsiLastSession->setChecked(mdSettings->getUsageLastSession());
-
   // Color Map
   vsiDefaultColorMap = new QComboBox();
   lblVsiDefaultColorMap = new QLabel();
-  grid->addWidget(lblVsiDefaultColorMap, 1, 0);
-  grid->addWidget(vsiDefaultColorMap, 1, 1);
-
-
+  grid->addWidget(lblVsiDefaultColorMap, 0, 0);
+  grid->addWidget(vsiDefaultColorMap, 0, 1);
 
   // Background Color
   vsiDefaultBackground = new ColorButton();
   lblVsiDefaultBackground = new QLabel();
-  grid->addWidget(lblVsiDefaultBackground, 2, 0);
-  grid->addWidget(vsiDefaultBackground, 2, 1);
+  grid->addWidget(lblVsiDefaultBackground, 1, 0);
+  grid->addWidget(vsiDefaultBackground, 1, 1);
 
   const QColor backgroundColor = mdSettings->getUserSettingBackgroundColor();
   vsiDefaultBackground->setColor(backgroundColor);
 
-  grid->setRowStretch(3,1);
+  // Initial View when loading into the VSI
+  vsiInitialView = new QComboBox();
+  lblVsiInitialView = new QLabel();
+  grid->addWidget(lblVsiInitialView, 2, 0);
+  grid->addWidget(vsiInitialView, 2, 1);
+
+  // Usage of current Color Map
+  vsiLastSession = new QCheckBox();
+  lblVsiLastSession = new QLabel();
+  grid->addWidget(lblVsiLastSession , 3, 0);
+  grid->addWidget(vsiLastSession , 3, 1);
+  vsiLastSession->setChecked(mdSettings->getUsageLastSession());
+
+  grid->setRowStretch(4,1);
 
   QLabel* label1 = new QLabel("<span style=\"font-weight:600;\">Note: The General Tab settings take precedence over the VSI Tab settings.</span>");
   vsiTabLayout->addWidget(label1);
   QLabel* label2 = new QLabel("<span style=\"font-weight:600;\">Note: Changes will not take effect until MantidPlot has been restarted.</span>");
   vsiTabLayout->addWidget(label2);
 
-  // Set the remaining color maps
+  // Set the color map selection for the VSI
   QStringList maps;
   MantidQt::API::MdPlottingCmapsProvider mdPlottingCmapsProvider;
   mdPlottingCmapsProvider.getColorMapsForVSI(maps);
 
-  vsiDefaultColorMap->addItems(mdSettings->getVsiColorMaps());
+  MantidQt::API::MdConstants mdConstants;
+  vsiDefaultColorMap->addItems(mdConstants.getVsiColorMaps());
   vsiDefaultColorMap->addItems(maps);
 
-  int index = vsiDefaultColorMap->findData(QString::fromStdString(mdSettings->getUserSettingColorMap()), Qt::DisplayRole);
+  int index = vsiDefaultColorMap->findData(mdSettings->getUserSettingColorMap(), Qt::DisplayRole);
   if (index != -1)
   {
     vsiDefaultColorMap->setCurrentIndex(index);
+  }
+
+  // Set the initial view selection for the VSI
+  QStringList views;
+
+  views = mdConstants.getAllInitialViews();
+  vsiInitialView->addItems(views);
+
+  int indexInitialView = vsiInitialView->findData(mdSettings->getUserSettingInitialView(), Qt::DisplayRole);
+
+  if (index != -1)
+  {
+    vsiInitialView->setCurrentIndex(indexInitialView);
   }
 }
 
@@ -856,10 +875,6 @@ void ConfigDialog::changeUsageGeneralMdColorMap(bool state)
   // Default Color Map
   vsiDefaultColorMap->setDisabled(state);
   lblVsiDefaultColorMap->setDisabled(state);
-
-  // Current Color Map
-  vsiLastSession->setDisabled(state);
-  lblVsiLastSession->setDisabled(state);
 }
 
 /**
@@ -2151,6 +2166,7 @@ void ConfigDialog::languageChange()
   lblVsiDefaultColorMap->setText(tr("Default Color Map"));
   lblVsiDefaultBackground->setText(tr("Background Color"));
   lblVsiLastSession->setText(tr("Use the settings of the last VSI session"));
+  lblVsiInitialView->setText(tr("Initial View"));
 
   mdPlottingTabWidget->setTabText(mdPlottingTabWidget->indexOf(mdPlottingGeneralPage), tr("General"));
   lblGeneralDefaultColorMap->setText(tr("General Color Map"));
@@ -2418,7 +2434,7 @@ void ConfigDialog::updateMdPlottingSettings()
   // Read the Vsi color map
   if (vsiDefaultColorMap)
   {
-    mdSettings->setUserSettingColorMap(vsiDefaultColorMap->currentText().toStdString());
+    mdSettings->setUserSettingColorMap(vsiDefaultColorMap->currentText());
   }
 
   // Read if the usage of the last color map should be performed
@@ -2431,6 +2447,12 @@ void ConfigDialog::updateMdPlottingSettings()
   if (vsiDefaultBackground)
   {
     mdSettings->setUserSettingBackgroundColor(vsiDefaultBackground->color());
+  }
+
+  // Read the initial view selection
+  if (vsiInitialView)
+  {
+    mdSettings->setUserSettingIntialView(vsiInitialView->currentText());
   }
 }
 

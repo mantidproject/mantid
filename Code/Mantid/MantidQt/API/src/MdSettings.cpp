@@ -8,7 +8,7 @@ using namespace MantidQt::API;
 MdSettings::MdSettings() : mdConstants(new MdConstants()),
                            vsiGroup("Mantid/MdPlotting/Vsi"),
                            generalMdGroup("Mantid/MdPlotting/General"),
-                           sliceViewerGroup("Mantid/SliceViewer"),
+                           sliceViewerGroup("Mantid/SliceViewer"),// This is the same as in Slice Viewer !!
                            lblUserSettingColorMap("usersettingcolormap"),
                            lblGeneralMdColorMap("generalcolormap"),
                            lblGeneralMdColorMapName("generalcolormapname"),
@@ -17,51 +17,51 @@ MdSettings::MdSettings() : mdConstants(new MdConstants()),
                            lblUseLastSessionColorMap("uselastsessioncolormap"),
                            lblUserSettingBackgroundColor("usersettingbackgroundcolor"),
                            lblLastSessionBackgroundColor("lastsessionbackgroundcolor"),
-                           lblSliceViewerColorMap("ColormapFile"),
-                           lblSliceViewerPreviousColorMap("generalcolormapprevious")
+                           lblSliceViewerColorMap("ColormapFile"), // This is the same as in Slice Viewer !!
+                           lblUserSettingInitialView("initialview")
 {
   mdConstants->initializeSettingsConstants();
 };
 
 MdSettings::~MdSettings(){};
 
-std::string MdSettings::getUserSettingColorMap()
+QString MdSettings::getUserSettingColorMap()
 {
     QSettings settings;
 
     settings.beginGroup(vsiGroup);
-    std::string UserSettingColorMap = settings.value(lblUserSettingColorMap, QString("")).toString().toStdString();
+    QString userSettingColorMap = settings.value(lblUserSettingColorMap, QString("")).toString();
     settings.endGroup();
         
-    return UserSettingColorMap;
+    return userSettingColorMap;
 }
 
-void MdSettings::setUserSettingColorMap(std::string colorMap)
+void MdSettings::setUserSettingColorMap(QString colorMap)
 {
   QSettings settings;
 
   settings.beginGroup(vsiGroup);
-  settings.setValue(lblUserSettingColorMap, QString::fromStdString(colorMap));
+  settings.setValue(lblUserSettingColorMap, colorMap);
   settings.endGroup();
 }
 
-std::string MdSettings::getLastSessionColorMap()
+QString MdSettings::getLastSessionColorMap()
 {
   QSettings settings;
 
   settings.beginGroup(vsiGroup);
-  std::string colormap = settings.value(lblLastSessionColorMap, QString("")).toString().toStdString();
+  QString colormap = settings.value(lblLastSessionColorMap, QString("")).toString();
   settings.endGroup();
 
   return colormap;
 }
 
-void MdSettings::setLastSessionColorMap(std::string colorMap)
+void MdSettings::setLastSessionColorMap(QString colorMap)
 {
   QSettings settings;
 
   settings.beginGroup(vsiGroup);
-  settings.setValue(lblLastSessionColorMap, QString::fromStdString(colorMap));
+  settings.setValue(lblLastSessionColorMap, colorMap);
   settings.endGroup();
 }
 
@@ -187,8 +187,22 @@ bool MdSettings::getUsageLastSession()
   return flag;
 }
 
-QStringList MdSettings::getVsiColorMaps()
+QString MdSettings::getUserSettingInitialView()
 {
-  return mdConstants->getVsiColorMaps();
+  QSettings settings;
+
+  settings.beginGroup(vsiGroup);
+  QString initialView = settings.value(lblUserSettingInitialView, mdConstants->getTechniqueDependence()).asString();
+  settings.endGroup();
+
+  return initialView;
 }
 
+void MdSettings::setUserSettingIntialView(QString initialView)
+{
+  QSettings settings;
+
+  settings.beginGroup(vsiGroup);
+  settings.setValue(lblUserSettingInitialView, initialView);
+  settings.endGroup();
+}

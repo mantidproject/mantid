@@ -50,16 +50,38 @@ namespace MantidQt
          */
         void initializeSettingsConstants();
 
+        /**
+         * Initialize constants which are required for the view
+         */
+        void initializeViewConstants();
+
         QString getGeneralMdColorMap() const;
 
         QColor getDefaultBackgroundColor() const;
 
         QStringList getVsiColorMaps() const;
 
+        QString getStandardView() const;
+
+        QString getMultiSliceView() const;
+
+        QString getThreeSliceView() const;
+
+        QString getSplatterPlotView() const;
+
+        QString getTechniqueDependence() const;
+
+        QStringList getAllInitialViews() const;
+
       private:
         QString generalMdColorMap;
         QColor defaultBackgroundColor;
         QStringList vsiColorMaps;
+        QString standardView;
+        QString multiSliceView;
+        QString threeSliceView;
+        QString splatterPlotView;
+        QString techniqueDependence;
     };
   }
 }
