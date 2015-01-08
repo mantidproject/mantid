@@ -34,7 +34,6 @@ set( SOURCE_FILES
 )
 
 set( TEST_FILES
-  test/unitTests/BackgroundRgbProviderTest.h
   test/unitTests/ColorMapManagerTest.h
 )
 
