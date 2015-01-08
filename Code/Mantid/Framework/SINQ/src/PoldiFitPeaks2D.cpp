@@ -234,7 +234,8 @@ void PoldiFitPeaks2D::addBackgroundTerms(Poldi2DFunction_sptr poldi2DFunction)
   bool addConstantBackground = getProperty("FitConstantBackground");
   if (addConstantBackground) {
     IFunction_sptr constantBackground =
-        FunctionFactory::Instance().createFunction("PoldiSpectrumConstantBackground");
+        FunctionFactory::Instance().createFunction(
+            "PoldiSpectrumConstantBackground");
     constantBackground->setParameter(
         0, getProperty("ConstantBackgroundParameter"));
     poldi2DFunction->addFunction(constantBackground);
@@ -323,15 +324,11 @@ MatrixWorkspace_sptr PoldiFitPeaks2D::get1DSpectrum(
     const IFunction_sptr &fitFunction,
     const API::MatrixWorkspace_sptr &workspace) const {
   if (!m_poldiInstrument) {
-    throw std::runtime_error("No time transformer available.");
+    throw std::runtime_error("No POLDI instrument available.");
   }
 
-  if (!fitFunction) {
-    throw std::invalid_argument("Cannot process null-function.");
-  }
-
-  boost::shared_ptr<Poldi2DFunction> poldiFunction =
-      boost::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
+  boost::shared_ptr<IPoldiFunction1D> poldiFunction =
+      boost::dynamic_pointer_cast<IPoldiFunction1D>(fitFunction);
 
   if (!poldiFunction) {
     throw std::invalid_argument("Can only process Poldi2DFunctions.");
@@ -347,15 +344,7 @@ MatrixWorkspace_sptr PoldiFitPeaks2D::get1DSpectrum(
   FunctionDomain1DVector domain(grid.grid());
   FunctionValues values(domain);
 
-  for (size_t i = 0; i < poldiFunction->nFunctions(); ++i) {
-    IFunction_sptr currentFunction = poldiFunction->getFunction(i);
-    boost::shared_ptr<IPoldiFunction1D> spectrumFunction =
-        boost::dynamic_pointer_cast<IPoldiFunction1D>(currentFunction);
-
-    if (spectrumFunction) {
-      spectrumFunction->poldiFunction1D(indices, domain, values);
-    }
-  }
+  poldiFunction->poldiFunction1D(indices, domain, values);
 
   MatrixWorkspace_sptr ws1D = WorkspaceFactory::Instance().create(
       "Workspace2D", 1, domain.size(), values.size());

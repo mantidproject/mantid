@@ -89,6 +89,29 @@ public:
         }
     }
 
+    void testPoldiFunction1D()
+    {
+        boost::shared_ptr<Poldi2DFunction> function2D(new Poldi2DFunction);
+
+        IFunction_sptr first(new SummingFunction);
+        IFunction_sptr second(new TestPoldiFunction1D);
+
+        function2D->addFunction(first);
+        function2D->addFunction(second);
+
+        // indices for poldiFunction1D
+        std::vector<int> indices(10, 0.0);
+
+        FunctionDomain1DVector domain(0.0, 10.0, 11);
+        FunctionValues values(domain);
+
+        function2D->poldiFunction1D(indices, domain, values);
+
+        for(size_t i = 0; i < values.size(); ++i) {
+            TS_ASSERT_EQUALS(values[i], static_cast<double>(i) + 10.0)
+        }
+    }
+
 private:
     /* small test function that behaves like PoldiSpectrumDomainFunction
      * in that it uses FunctionValues::addToCalculated.
@@ -109,6 +132,19 @@ private:
         void functionDeriv1DSpectrum(const FunctionDomain1DSpectrum &domain, Jacobian &jacobian) {
             UNUSED_ARG(domain);
             UNUSED_ARG(jacobian);
+        }
+    };
+
+    class TestPoldiFunction1D : public SummingFunction, public IPoldiFunction1D
+    {
+    public:
+        void poldiFunction1D(const std::vector<int> &indices, const FunctionDomain1D &domain, FunctionValues &values) const
+        {
+            double totalSize = static_cast<double>(indices.size());
+
+            for(size_t i = 0; i < values.size(); ++i) {
+                values.addToCalculated(i, domain[i] + totalSize);
+            }
         }
 
     };
