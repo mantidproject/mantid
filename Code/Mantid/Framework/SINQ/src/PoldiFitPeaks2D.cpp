@@ -359,8 +359,11 @@ MatrixWorkspace_sptr PoldiFitPeaks2D::get1DSpectrum(
   std::vector<int> indices = detector->availableElements();
 
   // Create the grid for the diffractogram and corresponding domain/values
+  double lambdaMin = getProperty("LambdaMin");
+  double lambdaMax = getProperty("LambdaMax");
+
   PoldiDGrid grid(detector, m_poldiInstrument->chopper(), m_deltaT,
-                  std::make_pair(1.1, 5.0));
+                  std::make_pair(lambdaMin, lambdaMax));
 
   FunctionDomain1DVector domain(grid.grid());
   FunctionValues values(domain);

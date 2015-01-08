@@ -17,6 +17,8 @@ At the moment all profiles are calculated independently, using Gaussian function
 
 PoldiFitPeaks2D can also be used to calculate a theoretical 2D pattern from a set of peaks by limiting the iterations to 0.
 
+In addition to performing the 2D-fit, a theoretical 1D-diffractogram of the fit-function is calculated as well, which can be used in conjunction with :ref:`algm-PoldiAnalyseResiduals` to assess the quality of a fit.
+
 Usage
 -----
 
@@ -47,6 +49,7 @@ PoldiFitPeaks2D operates on a MatrixWorkspace with a valid POLDI instrument defi
     PoldiFitPeaks2D(InputWorkspace=truncated_6904,
                                 PoldiPeakWorkspace="peaks_refined_6904",
                                 RefinedPoldiPeakWorkspace="peaks_fit_2d_6904",
+                                Calculated1DSpectrum="simulated_1d_6904",
                                 OutputWorkspace="simulated_6904")
     
 After this step, there is a new workspace containing the simulated spectrum. It should look similar to the one in the following figure:
@@ -84,6 +87,7 @@ In general, there is a background in POLDI data that depends on :math:`2\theta`.
                              PoldiPeakWorkspace="peaks_refined_6904",
                              OutputWorkspace="simulated_6904",
                              RefinedPoldiPeakWorkspace="peaks_fit_2d_6904",
+                             Calculated1DSpectrum="simulated_1d_6904",
                              LinearBackgroundParameter=0.01)
 
 Now the spectrum looks different, like in the example below.

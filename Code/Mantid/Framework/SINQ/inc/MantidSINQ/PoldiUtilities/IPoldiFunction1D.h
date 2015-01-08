@@ -13,10 +13,18 @@ namespace Poldi {
     This is an auxilliary interface that has to be implemented by
     functions that are supposed to be used for POLDI fits.
 
-      @author Michael Wedel, Paul Scherrer Institut - SINQ
-      @date 14/03/2014
+    This way the calculation of a theoretical diffractogram can be
+    performed by the corresponding functions, which may behave differently
+    depending on their nature. For examples see the following classes:
 
-      Copyright © 2014 PSI-MSS
+        PoldiSpectrumConstantBackground
+        PoldiSpectrumDomainFunction
+        Poldi2DFunction
+
+      @author Michael Wedel, Paul Scherrer Institut - SINQ
+      @date 07/01/2015
+
+      Copyright © 2015 PSI-MSS
 
     This file is part of Mantid.
 
