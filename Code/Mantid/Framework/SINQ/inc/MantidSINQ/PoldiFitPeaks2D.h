@@ -89,6 +89,10 @@ protected:
   get1DSpectrum(const API::IFunction_sptr &fitFunction,
                 const API::MatrixWorkspace_sptr &workspace) const;
 
+  API::MatrixWorkspace_sptr
+  getQSpectrum(const API::FunctionDomain &domain,
+               const API::FunctionValues &values) const;
+
   void setPoldiInstrument(const PoldiInstrumentAdapter_sptr &instrument);
   void setTimeTransformerFromInstrument(
       const PoldiInstrumentAdapter_sptr &poldiInstrument);

@@ -310,6 +310,7 @@ PoldiFitPeaks2D::getWorkspace(const IAlgorithm_sptr &fitAlgorithm) const {
   return outputWorkspace;
 }
 
+/// Extracts the fit function from the fit algorithm
 IFunction_sptr
 PoldiFitPeaks2D::getFunction(const IAlgorithm_sptr &fitAlgorithm) const {
   if (!fitAlgorithm) {
@@ -320,13 +321,22 @@ PoldiFitPeaks2D::getFunction(const IAlgorithm_sptr &fitAlgorithm) const {
   return fitFunction;
 }
 
+/**
+ * Calculates the 1D diffractogram based on the supplied function
+ *
+ * This method takes a fit function and checks whether it implements the
+ * IPoldiFunction1D interface. If that's the case, it calculates the
+ * diffractogram based on the function.
+ *
+ * @param fitFunction :: IFunction that also implements IPoldiFunction1D.
+ * @param workspace :: Workspace with POLDI raw data.
+ * @return :: Q-based diffractogram.
+ */
 MatrixWorkspace_sptr PoldiFitPeaks2D::get1DSpectrum(
     const IFunction_sptr &fitFunction,
     const API::MatrixWorkspace_sptr &workspace) const {
-  if (!m_poldiInstrument) {
-    throw std::runtime_error("No POLDI instrument available.");
-  }
 
+  // Check whether the function is of correct type
   boost::shared_ptr<IPoldiFunction1D> poldiFunction =
       boost::dynamic_pointer_cast<IPoldiFunction1D>(fitFunction);
 
@@ -334,18 +344,34 @@ MatrixWorkspace_sptr PoldiFitPeaks2D::get1DSpectrum(
     throw std::invalid_argument("Can only process Poldi2DFunctions.");
   }
 
+  // And that we have an instrument available
+  if (!m_poldiInstrument) {
+    throw std::runtime_error("No POLDI instrument available.");
+  }
+
   PoldiAbstractDetector_sptr detector(new PoldiDeadWireDecorator(
       workspace->getInstrument(), m_poldiInstrument->detector()));
   std::vector<int> indices = detector->availableElements();
 
+  // Create the grid for the diffractogram and corresponding domain/values
   PoldiDGrid grid(detector, m_poldiInstrument->chopper(), m_deltaT,
                   std::make_pair(1.1, 5.0));
 
   FunctionDomain1DVector domain(grid.grid());
   FunctionValues values(domain);
 
+  // Calculate 1D function
   poldiFunction->poldiFunction1D(indices, domain, values);
 
+  // Create and return Q-based workspace with spectrum
+  return getQSpectrum(domain, values);
+}
+
+/// Takes a d-based domain and creates a Q-based MatrixWorkspace.
+MatrixWorkspace_sptr
+PoldiFitPeaks2D::getQSpectrum(const FunctionDomain &domain,
+                              const FunctionValues &values) const {
+  // Put result into workspace, based on Q
   MatrixWorkspace_sptr ws1D = WorkspaceFactory::Instance().create(
       "Workspace2D", 1, domain.size(), values.size());
 
