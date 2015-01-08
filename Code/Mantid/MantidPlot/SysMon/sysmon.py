@@ -119,7 +119,8 @@ class SysMon(QtGui.QWidget):
             #create drawing canvas
             # a figure instance to plot on
 
-            if not re.match('1.[0-1]',matplotlib.__version__):
+            #rc_context in matplotlib requires version 1.2.0 or later, so check we don't have an older version of matplotlib
+            if not re.match('1.[0-1]',matplotlib.__version__) and not re.match('0.',matplotlib.__version__):
                 #if not an old version of matplotlib, then use the following command 
                 matplotlib.rc_context({'toolbar':False})
             #initialize figure 1 and its canvas for cpu and memory history plots
@@ -163,7 +164,7 @@ class SysMon(QtGui.QWidget):
         self.ui.tabWidget.setCurrentIndex(config.SYST_TAB)
         
         #initialize version label
-        self.ui.labelVersion.setText("Version: "+__version__+"_"+psutil.__version__)
+        self.ui.labelVersion.setText("Version: "+__version__+"_"+matplotlib.__version__+"_"+psutil.__version__)
 
     def constantUpdate(self):
         #redirct to global function
