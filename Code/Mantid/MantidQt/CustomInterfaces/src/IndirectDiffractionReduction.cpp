@@ -59,12 +59,50 @@ IndirectDiffractionReduction::~IndirectDiffractionReduction()
 }
 
 /**
+ * Sets up UI components and Qt signal/slot connections.
+ */
+void IndirectDiffractionReduction::initLayout()
+{
+  m_uiForm.setupUi(this);
+
+  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
+  connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(demonRun()));
+
+  connect(m_uiForm.iicInstrumentConfiguration, SIGNAL(instrumentConfigurationUpdated(const QString &, const QString &, const QSting &)),
+          this, SLOT(instrumentSelected(const QString &, const QString &, const QString &)));
+
+  // Update run button based on state of raw files field
+  connect(m_uiForm.dem_rawFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(runFilesChanged()));
+  connect(m_uiForm.dem_rawFiles, SIGNAL(findingFiles()), this, SLOT(runFilesFinding()));
+  connect(m_uiForm.dem_rawFiles, SIGNAL(fileFindingFinished()), this, SLOT(runFilesFound()));
+
+  m_valInt = new QIntValidator(this);
+  m_valDbl = new QDoubleValidator(this);
+
+  m_uiForm.set_leSpecMin->setValidator(m_valInt);
+  m_uiForm.set_leSpecMax->setValidator(m_valInt);
+
+  m_uiForm.leRebinStart->setValidator(m_valDbl);
+  m_uiForm.leRebinWidth->setValidator(m_valDbl);
+  m_uiForm.leRebinEnd->setValidator(m_valDbl);
+
+  // Update the list of plot options when individual grouping is toggled
+  connect(m_uiForm.ckIndividualGrouping, SIGNAL(stateChanged(int)), this, SLOT(individualGroupingToggled(int)));
+
+  loadSettings();
+
+  // Update invalid rebinning markers
+  validateRebin();
+}
+
+/**
  * Runs a diffraction reduction when the user clieks Run.
  */
 void IndirectDiffractionReduction::demonRun()
 {
-  QString instName = "IRIS";
-  QString mode = "diffspec";
+  QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
+  QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
 
   if(instName == "OSIRIS" && mode == "diffonly")
   {
@@ -114,8 +152,8 @@ void IndirectDiffractionReduction::plotResults(bool error)
     AnalysisDataService::Instance().remove("IndirectDiffraction_Workspaces");
   }
 
-  QString instName = "IRIS";
-  QString mode = "diffspec";
+  QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
+  QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
 
   QString plotType = m_uiForm.cbPlotType->currentText();
 
@@ -306,20 +344,18 @@ MatrixWorkspace_sptr IndirectDiffractionReduction::loadInstrument(std::string in
 }
 
 /**
- * Handles loading an instrument and reflections when an instruiment is selected form the drop down.
+ * Handles setting default spectra range when an instrument configuration is selected.
+ *
+ * @param instrumentName Name of selected instrument
+ * @param analyserName Name of selected analyser (should always be "diffraction")
+ * @param reflectionName Name of diffraction mode selected
  */
-void IndirectDiffractionReduction::instrumentSelected(int)
+void IndirectDiffractionReduction::instrumentSelected(const QString & instrumentName, const QString & analyserName,
+    const QString & reflectionName)
 {
-}
+  UNUSED_ARG(analyserName);
 
-/**
- * Handles setting default spectra range when a reflection is slected from the drop down.
- */
-void IndirectDiffractionReduction::reflectionSelected(int)
-{
-  std::string instrumentName = "IRIS";
-  std::string reflection = "diffspec";
-  MatrixWorkspace_sptr instWorkspace = loadInstrument(instrumentName, reflection);
+  MatrixWorkspace_sptr instWorkspace = loadInstrument(instrumentName.toStdString(), reflectionName.toStdString());
   Instrument_const_sptr instrument = instWorkspace->getInstrument();
 
   // Get default spectra range
@@ -341,7 +377,7 @@ void IndirectDiffractionReduction::reflectionSelected(int)
     m_uiForm.swVanadium->setCurrentIndex(1);
 
   // Hide options that the current instrument config cannot process
-  if(instrumentName == "OSIRIS" && reflection == "diffonly")
+  if(instrumentName == "OSIRIS" && reflectionName == "diffonly")
   {
     // Disable individual grouping
     m_uiForm.ckIndividualGrouping->setToolTip("OSIRIS cannot group detectors individually in diffonly mode");
@@ -385,44 +421,8 @@ void IndirectDiffractionReduction::help()
   QDesktopServices::openUrl(QUrl(url));
 }
 
-/**
- * Sets up UI components and Qt signal/slot connections.
- */
-void IndirectDiffractionReduction::initLayout()
-{
-  m_uiForm.setupUi(this);
-
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(demonRun()));
-
-  // Update run button based on state of raw files field
-  connect(m_uiForm.dem_rawFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(runFilesChanged()));
-  connect(m_uiForm.dem_rawFiles, SIGNAL(findingFiles()), this, SLOT(runFilesFinding()));
-  connect(m_uiForm.dem_rawFiles, SIGNAL(fileFindingFinished()), this, SLOT(runFilesFound()));
-
-  m_valInt = new QIntValidator(this);
-  m_valDbl = new QDoubleValidator(this);
-
-  m_uiForm.set_leSpecMin->setValidator(m_valInt);
-  m_uiForm.set_leSpecMax->setValidator(m_valInt);
-
-  m_uiForm.leRebinStart->setValidator(m_valDbl);
-  m_uiForm.leRebinWidth->setValidator(m_valDbl);
-  m_uiForm.leRebinEnd->setValidator(m_valDbl);
-
-  // Update the list of plot options when individual grouping is toggled
-  connect(m_uiForm.ckIndividualGrouping, SIGNAL(stateChanged(int)), this, SLOT(individualGroupingToggled(int)));
-
-  loadSettings();
-
-  // Update invalid rebinning markers
-  validateRebin();
-}
-
 void IndirectDiffractionReduction::initLocalPython()
 {
-  instrumentSelected(0);
 }
 
 void IndirectDiffractionReduction::loadSettings()

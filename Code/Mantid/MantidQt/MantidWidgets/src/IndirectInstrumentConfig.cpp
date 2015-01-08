@@ -34,6 +34,8 @@ namespace MantidQt
               this, SLOT(updateInstrumentConfigurations(const QString)));
       connect(m_uiForm.cbAnalyser, SIGNAL(currentIndexChanged(int)),
               this, SLOT(updateReflectionsList(int)));
+      connect(m_uiForm.cbReflection, SIGNAL(currentIndexChanged(int)),
+              this, SLOT(newInstrumentConfiguration()));
     }
 
     IndirectInstrumentConfig::~IndirectInstrumentConfig()
@@ -223,6 +225,18 @@ namespace MantidQt
       }
 
       m_uiForm.cbReflection->blockSignals(reflectionPreviousBlocking);
+    }
+
+
+    void IndirectInstrumentConfig::newInstrumentConfiguration()
+    {
+      g_log.information() << "Instrument configuration: "
+                          << "Instrument=" << getInstrumentName().toStdString()
+                          << ", Analyser=" << getAnalyserName().toStdString()
+                          << ", Reflection=" << getReflectionName().toStdString()
+                          << std::endl;
+
+      emit instrumentConfigurationUpdated(getInstrumentName(), getAnalyserName(), getReflectionName());
     }
 
   } /* namespace MantidWidgets */
