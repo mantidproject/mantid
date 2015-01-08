@@ -311,7 +311,13 @@ void Matrix::setDimensions(int rows, int cols)
     return;
 
   if (rows <= 0 || cols <= 0 || INT_MAX/rows < cols) //avoid integer overflow
+  {
+    QApplication::restoreOverrideCursor();
+    QMessageBox::critical(d_matrix_model->matrix(), tr("MantidPlot") + " - " + tr("Input Size Error"),
+      tr("The dimensions you have specified are not acceptable!") + "\n" +
+      tr("Please enter positive values for which the product rows*columns does not exceed the maximum integer value available on your system!"));
     return;
+  }
 
   if(rows*cols > r*c && !d_matrix_model->canResize(rows, cols))
     return;

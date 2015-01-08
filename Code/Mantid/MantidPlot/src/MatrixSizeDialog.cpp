@@ -47,12 +47,12 @@ MatrixSizeDialog::MatrixSizeDialog( Matrix *m, QWidget* parent, Qt::WFlags fl )
 	QHBoxLayout *topLayout = new QHBoxLayout(groupBox1);
 	topLayout->addWidget( new QLabel(tr( "Rows" )) );
     boxRows = new QSpinBox();
-	boxRows->setRange(1, 1000000);
+    boxRows->setRange(1, sqrt(INT_MAX));
 	topLayout->addWidget(boxRows);
 	topLayout->addStretch();
 	topLayout->addWidget( new QLabel(tr( "Columns" )) );
     boxCols = new QSpinBox();
-	boxCols->setRange(1, 1000000);
+	boxCols->setRange(1, sqrt(INT_MAX));
 	topLayout->addWidget(boxCols);
 
     groupBox2 = new QGroupBox(tr("Coordinates"));
