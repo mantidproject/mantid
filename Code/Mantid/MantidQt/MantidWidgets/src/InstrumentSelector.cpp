@@ -155,8 +155,6 @@ namespace MantidWidgets
     this->blockSignals(true);
     this->clear();
 
-    bool sb = this->signalsBlocked();
-
     try
     {
       if( name.isEmpty() )
