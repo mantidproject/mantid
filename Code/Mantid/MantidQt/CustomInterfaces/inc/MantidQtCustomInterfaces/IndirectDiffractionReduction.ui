@@ -15,6 +15,27 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
+
+    <item>
+     <widget class="MantidQt::MantidWidgets::IndirectInstrumentConfig" name="iicInstrumentConfiguration">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="techniques" stdset="0">
+       <stringlist>
+        <string>TOF Indirect Geometry Spectroscopy</string>
+        <string>TOF Indirect Geometry Diffraction</string>
+       </stringlist>
+      </property>
+      <property name="facility" stdset="0">
+       <string>ISIS</string>
+      </property>
+     </widget>
+    </item>
+
     <item>
      <widget class="QGroupBox" name="gbInstrument">
       <property name="title">
@@ -469,6 +490,11 @@
    <class>MantidQt::MantidWidgets::InstrumentSelector</class>
    <extends>QComboBox</extends>
    <header>MantidQtMantidWidgets/InstrumentSelector.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::IndirectInstrumentConfig</class>
+   <extends>QComboBox</extends>
+   <header>MantidQtMantidWidgets/IndirectInstrumentConfig.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
