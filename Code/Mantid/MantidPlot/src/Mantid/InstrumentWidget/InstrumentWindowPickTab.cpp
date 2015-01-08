@@ -794,6 +794,14 @@ void InstrumentWindowPickTab::updatePlotMultipleDetectors()
     m_plot->replot();
 }
 
+/**
+ * Save data plotted on the miniplot into a MatrixWorkspace.
+ */
+void InstrumentWindowPickTab::savePlotToWorkspace()
+{
+  m_plotController->savePlotToWorkspace();
+}
+
 //=====================================================================================//
 
 /**
@@ -818,13 +826,13 @@ ComponentInfoController::ComponentInfoController(InstrumentWindowPickTab *tab, I
  */
 void ComponentInfoController::displayInfo(size_t pickID)
 {
-    if (m_freezePlot)
-    {// freeze the plot for one update
-      m_freezePlot = false;
-      pickID = m_currentPickID;
-    }
-    int detid = m_instrActor->getDetID( pickID );
-    displayDetectorInfo(detid);
+  if (m_freezePlot)
+  {// freeze the plot for one update
+    m_freezePlot = false;
+    pickID = m_currentPickID;
+  }
+  int detid = m_instrActor->getDetID( pickID );
+  displayDetectorInfo(detid);
 }
 
 /**
@@ -1181,11 +1189,16 @@ void DetectorPlotController::plotTubeIntegrals(int detid)
   boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
   // curve label: "tube_name (detid) Integrals"
   // detid is included to distiguish tubes with the same name
-  QString label = QString::fromStdString(parent->getName()) + " (" + QString::number(detid) + ") Integrals"; 
-  //label += "/" + getTubeXUnitsName(m_tubeXUnits);
+  QString label = QString::fromStdString(parent->getName()) + " (" + QString::number(detid) + ") Integrals/" + getTubeXUnitsName(); 
   std::vector<double> x,y;
   prepareDataForIntegralsPlot(detid,x,y);
-  m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
+  auto xAxisCaption = getTubeXUnitsName();
+  auto xAxisUnits = getTubeXUnitsUnits();
+  if ( !xAxisUnits.isEmpty() )
+  {
+    xAxisCaption += " (" + xAxisUnits + ")";
+  }
+  m_plot->setData( &x[0], &y[0], static_cast<int>(y.size()), xAxisCaption.toStdString() );
   m_plot->setLabel(label);
 }
 
@@ -1578,20 +1591,33 @@ double DetectorPlotController::getOutOfPlaneAngle(const Mantid::Kernel::V3D& pos
 }
 
 /**
- * Return symbolic name of a TubeXUnit.
- * @param unit :: One of TubeXUnits.
- * @return :: Symbolic name of the units, caseless: Detector_ID, Length, Phi
+ * Return symbolic name of current TubeXUnit.
  */
-QString DetectorPlotController::getTubeXUnitsName(DetectorPlotController::TubeXUnits unit) const
+QString DetectorPlotController::getTubeXUnitsName() const
 {
-  switch(unit)
+  switch(m_tubeXUnits)
   {
   case LENGTH: return "Length";
   case PHI: return "Phi";
   case OUT_OF_PLANE_ANGLE: return "Out of plane angle";
-  default: return "Detector_ID";
+  default: return "Detector ID";
   }
-  return "Detector_ID";
+  return "Detector ID";
+}
+
+/**
+ * Return symbolic name of units of current TubeXUnit.
+ */
+QString DetectorPlotController::getTubeXUnitsUnits() const
+{
+  switch(m_tubeXUnits)
+  {
+  case LENGTH: return "m";
+  case PHI: return "radians";
+  case OUT_OF_PLANE_ANGLE: return "radians";
+  default: return "";
+  }
+  return "";
 }
 
 /**

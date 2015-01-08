@@ -120,6 +120,7 @@ public:
   boost::shared_ptr<const Mantid::Geometry::IDetector> getDetector(size_t pickID)const;
   /// Get a detector ID by a pick ID converted form a color in the pick image.
   Mantid::detid_t getDetID(size_t pickID)const;
+  /// Get a component ID for a non-detector.
   /// Cache detector positions.
   void cacheDetPos() const;
   /// Get position of a detector by a pick ID converted form a color in the pick image.
@@ -213,7 +214,7 @@ private:
 
   /// All det ids in the instrument in order of pickIDs, populated by Obj..Actor constructors
   mutable std::vector<Mantid::detid_t> m_detIDs;
-  /// All non-detector component IDs inorder of pickIDs. Fot index any i a pickID of the component
+  /// All non-detector component IDs in order of pickIDs. For any index i a pickID of the component
   /// is m_detIDs.size() + i.
   mutable std::vector<Mantid::Geometry::ComponentID> m_nonDetIDs;
   /// Temporary stores addresses of actors for non-detector components until initialisation completes

@@ -50,7 +50,6 @@ public:
   InstrumentWindowPickTab(InstrumentWindow* instrWindow);
   void updatePick(int detid);
   bool canUpdateTouchedDetector()const;
-//  TubeXUnits getTubeXUnits() const {return m_tubeXUnits;}
   void mouseLeftInstrmentDisplay();
   void initSurface();
   void saveSettings(QSettings& settings) const;
@@ -75,6 +74,7 @@ private slots:
   void updateSelectionInfoDisplay();
   void shapeCreated();
   void updatePlotMultipleDetectors();
+  void savePlotToWorkspace();
 private:
   void showEvent (QShowEvent *);
   QColor getShapeBorderColor() const;
@@ -172,12 +172,14 @@ public:
   void setPlotData(QList<int> detIDs);
   void updatePlot();
   void clear();
+  void savePlotToWorkspace();
 
   void setPlotType(PlotType type) { m_plotType = type; }
   PlotType getPlotType() const { return m_plotType; }
   void setTubeXUnits( TubeXUnits units ) { m_tubeXUnits = units; }
   TubeXUnits getTubeXUnits() const { return m_tubeXUnits; }
-  QString getTubeXUnitsName(TubeXUnits unit) const;
+  QString getTubeXUnitsName() const;
+  QString getTubeXUnitsUnits() const;
   QString DetectorPlotController::getPlotCaption() const;
 
 private:
@@ -201,7 +203,6 @@ private:
     std::vector<double>&x,
     std::vector<double>&y,
     std::vector<double>* err = NULL);
-  void savePlotToWorkspace();
   static double getOutOfPlaneAngle(const Mantid::Kernel::V3D& pos, const Mantid::Kernel::V3D& origin, const Mantid::Kernel::V3D& normal);
 
   InstrumentWindowPickTab* m_tab;
