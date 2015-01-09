@@ -403,6 +403,69 @@ public:
     dotest_LoadAnEventFile(WEIGHTED_NOTIME);
   }
 
+  void test_loadEventNexus_Min()
+  {
+    // TODO
+  }
+
+  void test_loadEventNexus_Max()
+  {
+    // TODO
+  }
+
+  void test_loadEventNexus_Min_Max()
+  {
+    // TODO: re-use file, don't repeat... (can also be re-used in other, older tests in this file)
+    std::string filename_root = "LoadNexusProcessed_ExecEvent_";
+    std::string savedFile;
+    EventWorkspace_sptr origWS = SaveNexusProcessedTest::do_testExec_EventWorkspaces(filename_root, TOF,
+        savedFile, false, false);
+    // this will make for example 'bin/Testing/LoadNexusProcessed_ExecEvent_0.nxs' (0: TOF)
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", savedFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumMin", "2");
+    alg.setPropertyValue("SpectrumMax", "4");
+    // this should imply 3==ws->getNumberHistograms()
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Test basic props of the ws
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve(output_ws));
+    TS_ASSERT(workspace);
+    if (!workspace)
+      return;
+    TS_ASSERT(workspace.get());
+
+    EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    TS_ASSERT(ews);
+    if (!ews)
+      return;
+    TS_ASSERT(ews.get());
+    TS_ASSERT_EQUALS(ews->getNumberHistograms(), 3);
+
+    doHistoryTest(ews);
+
+    // remove saved /loaded test event data file
+    if (Poco::File(savedFile).exists())
+      Poco::File(savedFile).remove();
+  }
+
+  void test_loadEventNexus_List()
+  {
+    // TODO
+  }
+
+  void test_loadEventNexus_Min_Max_List()
+  {
+    // TODO
+  }
+
   void test_load_saved_workspace_group()
   {
     LoadNexusProcessed alg;
