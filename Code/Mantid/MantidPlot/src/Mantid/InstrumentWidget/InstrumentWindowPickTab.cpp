@@ -63,8 +63,6 @@ struct Sqrt
  */
 InstrumentWindowPickTab::InstrumentWindowPickTab(InstrumentWindow* instrWindow):
 InstrumentWindowTab(instrWindow),
-m_currentDetID(-1),
-//m_tubeXUnits(DETECTOR_ID),
 m_freezePlot(false)
 {
 
@@ -84,7 +82,6 @@ m_freezePlot(false)
   m_plot->setXScale(0,1);
   m_plot->setYScale(-1.2,1.2);
   connect(m_plot,SIGNAL(showContextMenu()),this,SLOT(plotContextMenu()));
-  connect(m_plot,SIGNAL(clickedAt(double,double)),this,SLOT(addPeak(double,double)));
 
   // Plot context menu actions
   m_sumDetectors = new QAction("Sum",this);
@@ -344,7 +341,6 @@ void InstrumentWindowPickTab::setPlotCaption()
  */
 void InstrumentWindowPickTab::sumDetectors()
 {
-  //m_plotSum = true;
   m_plotController->setPlotType( DetectorPlotController::TubeSum  );
   m_plot->clearAll();
   m_plot->replot();
@@ -356,7 +352,6 @@ void InstrumentWindowPickTab::sumDetectors()
  */
 void InstrumentWindowPickTab::integrateTimeBins()
 {
-  //m_plotSum = false;
   m_plotController->setPlotType( DetectorPlotController::TubeIntegral );
   m_plot->clearAll();
   m_plot->replot();
@@ -370,7 +365,6 @@ void InstrumentWindowPickTab::integrateTimeBins()
 void InstrumentWindowPickTab::updatePick(int detid)
 {
   //updateSelectionInfo(detid); // Also calls updatePlot
-  m_currentDetID = detid;
 }
 
 /**
@@ -476,91 +470,6 @@ void InstrumentWindowPickTab::setSelectionType()
 }
 
 /**
-  * Add a peak to the single crystal peak table.
-  * @param x :: Time of flight
-  * @param y :: Peak height (counts)
-  */
-void InstrumentWindowPickTab::addPeak(double x,double y)
-{
-  if (!m_peak->isChecked() ||  m_currentDetID < 0) return;
-
-  try
-  {
-      Mantid::API::IPeaksWorkspace_sptr tw = m_instrWindow->getSurface()->getEditPeaksWorkspace();
-      InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
-      Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
-      std::string peakTableName;
-      bool newPeaksWorkspace = false;
-      if ( tw )
-      {
-          peakTableName = tw->name();
-      }
-      else
-      {
-          peakTableName = "SingleCrystalPeakTable";
-          // This does need to get the instrument from the workspace as it's doing calculations
-          // .....and this method should be an algorithm! Or at least somewhere different to here.
-          Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
-
-          if (! Mantid::API::AnalysisDataService::Instance().doesExist(peakTableName))
-          {
-              tw = Mantid::API::WorkspaceFactory::Instance().createPeaks("PeaksWorkspace");
-              tw->setInstrument(instr);
-              Mantid::API::AnalysisDataService::Instance().add(peakTableName,tw);
-              newPeaksWorkspace = true;
-          }
-          else
-          {
-              tw = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(peakTableName));
-              if (!tw)
-              {
-                  QMessageBox::critical(this,"Mantid - Error","Workspace " + QString::fromStdString(peakTableName) + " is not a TableWorkspace");
-                  return;
-              }
-          }
-          auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>( m_instrWindow->getSurface() );
-          if ( surface )
-          {
-              surface->setPeaksWorkspace(boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(tw));
-          }
-      }
-
-      // Run the AddPeak algorithm
-      auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("AddPeak");
-      alg->setPropertyValue( "RunWorkspace", ws->name() );
-      alg->setPropertyValue( "PeaksWorkspace", peakTableName );
-      alg->setProperty( "DetectorID", m_currentDetID );
-      alg->setProperty( "TOF", x );
-      alg->setProperty( "Height", instrActor->getIntegratedCounts(m_currentDetID) );
-      alg->setProperty( "BinCount", y );
-      alg->execute();
-
-      // if data WS has UB copy it to the new peaks workspace
-      if ( newPeaksWorkspace && ws->sample().hasOrientedLattice() )
-      {
-          auto UB = ws->sample().getOrientedLattice().getUB();
-          auto lattice = new Mantid::Geometry::OrientedLattice;
-          lattice->setUB(UB);
-          tw->mutableSample().setOrientedLattice(lattice);
-      }
-
-      // if there is a UB available calculate HKL for the new peak
-      if ( tw->sample().hasOrientedLattice() )
-      {
-          auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("CalculatePeaksHKL");
-          alg->setPropertyValue( "PeaksWorkspace", peakTableName );
-          alg->execute();
-      }
-  }
-  catch(std::exception& e)
-  {
-      QMessageBox::critical(this,"MantidPlot -Error",
-                            "Cannot create a Peak object because of the error:\n"+QString(e.what()));
-  }
-
-}
-
-/**
  * Respond to the show event.
  */
 void InstrumentWindowPickTab::showEvent (QShowEvent *)
@@ -646,26 +555,32 @@ void InstrumentWindowPickTab::mouseLeftInstrmentDisplay()
 
 void InstrumentWindowPickTab::initSurface()
 {
-    ProjectionSurface *surface = getSurface().get();
-    connect(surface,SIGNAL(singleComponentTouched(size_t)),this,SLOT(singleComponentTouched(size_t)));
-    connect(surface,SIGNAL(singleComponentPicked(size_t)),this,SLOT(singleComponentPicked(size_t)));
-    connect(surface,SIGNAL(peaksWorkspaceAdded()),this,SLOT(updateSelectionInfoDisplay()));
-    connect(surface,SIGNAL(peaksWorkspaceDeleted()),this,SLOT(updateSelectionInfoDisplay()));
-    connect(surface,SIGNAL(shapeCreated()),this,SLOT(shapeCreated()));
-    connect(surface,SIGNAL(shapeChangeFinished()),this,SLOT(updatePlotMultipleDetectors()));
-    connect(surface,SIGNAL(shapesCleared()),this,SLOT(updatePlotMultipleDetectors()));
-    connect(surface,SIGNAL(shapesRemoved()),this,SLOT(updatePlotMultipleDetectors()));
-    Projection3D *p3d = dynamic_cast<Projection3D*>( surface );
-    if ( p3d )
-    {
-        connect(p3d,SIGNAL(finishedMove()),this,SLOT(updatePlotMultipleDetectors()));
-    }
-    m_infoController = new ComponentInfoController(this, m_instrWindow->getInstrumentActor(),m_selectionInfoDisplay);
-    m_plotController = new DetectorPlotController(this, m_instrWindow->getInstrumentActor(),m_plot);
-    m_plotController->setTubeXUnits( static_cast<DetectorPlotController::TubeXUnits>(m_tubeXUnitsCache) );
-    m_plotController->setPlotType( static_cast<DetectorPlotController::PlotType>(m_plotTypeCache) );
-    setSelectionType();
-    setPlotCaption();
+  ProjectionSurface *surface = getSurface().get();
+  connect(surface,SIGNAL(singleComponentTouched(size_t)),this,SLOT(singleComponentTouched(size_t)));
+  connect(surface,SIGNAL(singleComponentPicked(size_t)),this,SLOT(singleComponentPicked(size_t)));
+  connect(surface,SIGNAL(peaksWorkspaceAdded()),this,SLOT(updateSelectionInfoDisplay()));
+  connect(surface,SIGNAL(peaksWorkspaceDeleted()),this,SLOT(updateSelectionInfoDisplay()));
+  connect(surface,SIGNAL(shapeCreated()),this,SLOT(shapeCreated()));
+  connect(surface,SIGNAL(shapeChangeFinished()),this,SLOT(updatePlotMultipleDetectors()));
+  connect(surface,SIGNAL(shapesCleared()),this,SLOT(updatePlotMultipleDetectors()));
+  connect(surface,SIGNAL(shapesRemoved()),this,SLOT(updatePlotMultipleDetectors()));
+  Projection3D *p3d = dynamic_cast<Projection3D*>( surface );
+  if ( p3d )
+  {
+      connect(p3d,SIGNAL(finishedMove()),this,SLOT(updatePlotMultipleDetectors()));
+  }
+  m_infoController = new ComponentInfoController(this, m_instrWindow->getInstrumentActor(),m_selectionInfoDisplay);
+  m_plotController = new DetectorPlotController(this, m_instrWindow->getInstrumentActor(),m_plot);
+  m_plotController->setTubeXUnits( static_cast<DetectorPlotController::TubeXUnits>(m_tubeXUnitsCache) );
+  m_plotController->setPlotType( static_cast<DetectorPlotController::PlotType>(m_plotTypeCache) );
+}
+
+/**
+ * Return current ProjectionSurface.
+ */
+boost::shared_ptr<ProjectionSurface> InstrumentWindowPickTab::getSurface() const
+{
+  return m_instrWindow->getSurface();
 }
 
 /**
@@ -831,20 +746,44 @@ void ComponentInfoController::displayInfo(size_t pickID)
     m_freezePlot = false;
     pickID = m_currentPickID;
   }
+
+  QString text = "";
   int detid = m_instrActor->getDetID( pickID );
-  displayDetectorInfo(detid);
+  if ( detid >= 0 )
+  {
+    text += displayDetectorInfo(detid);
+  }
+  else if (auto componentID = m_instrActor->getComponentID(pickID) )
+  {
+    text += displayNonDetectorInfo(componentID);
+  }
+  else
+  {
+    m_selectionInfoDisplay->clear();
+  }
+  // display info about peak overlays
+  text += getPeakOverlayInfo();
+
+  if ( !text.isEmpty() )
+  {
+      m_selectionInfoDisplay->setText(text);
+  }
+  else
+  {
+      m_selectionInfoDisplay->clear();
+  }
 }
 
 /**
- * Display info on a detector.
+ * Return string with info on a detector.
  * @param detid :: A detector ID.
  */
-void ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid)
+QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid)
 {
   if ( m_instrWindowBlocked ) 
   {
     m_selectionInfoDisplay->clear();
-    return;
+    return "";
   }
 
   QString text;
@@ -860,7 +799,7 @@ void ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid)
     {
         // if this slot is called during instrument window deletion
         // expect exceptions thrown
-        return;
+        return "";
     }
 
     text = "Selected detector: " + QString::fromStdString(det->getName()) + "\n";
@@ -892,47 +831,25 @@ void ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid)
     const double integrated = m_instrActor->getIntegratedCounts(detid);
     const QString counts = integrated == -1.0 ? "N/A" : QString::number(integrated);
     text += "Counts: " + counts + '\n';
-    //QString xUnits;
-    //if (m_selectionType > SingleDetectorSelection && !m_plotSum)
-    //{
-    //  switch(m_tubeXUnits)
-    //  {
-    //  case DETECTOR_ID: xUnits = "Detector ID"; break;
-    //  case LENGTH: xUnits = "Length"; break;
-    //  case PHI: xUnits = "Phi"; break;
-    //  case OUT_OF_PLANE_ANGLE: xUnits = "Out of plane angle"; break;
-    //  default: xUnits = "Detector ID";
-    //  }
-    //}
-    //else
-    //{
-    //  xUnits = QString::fromStdString(m_instrActor->getWorkspace()->getAxis(0)->unit()->caption());
-    //}
-    text += "X units: " + m_xUnits + '\n';
     // display info about peak overlays
     text += getParameterInfo(det);
   }
-  else
-  {
-    //m_plot->clearCurve(); // Clear the plot window
-    //m_plot->replot();
-  }
-
-  // display info about peak overlays
-  text += getNonDetectorInfo();
-
-
-
-  if ( !text.isEmpty() )
-  {
-      m_selectionInfoDisplay->setText(text);
-  }
-  else
-  {
-      m_selectionInfoDisplay->clear();
-  }
+  return text;
 }
 
+/**
+ * string with information about a selected non-detector component (such as choppers, etc).
+ * @param compID :: A component ID for a component to display.
+ */
+QString ComponentInfoController::displayNonDetectorInfo(Mantid::Geometry::ComponentID compID)
+{
+  auto component = m_instrActor->getInstrument()->getComponentByID(compID);
+  QString text = "Selected component: ";
+  text += QString::fromStdString(component->getName());
+  text += "\n";
+  text += getParameterInfo(component);
+  return text;
+}
 
 /**
  * Form a string for output from the components instrument parameters
@@ -986,7 +903,7 @@ QString ComponentInfoController::getParameterInfo(Mantid::Geometry::IComponent_c
 /**
   * Return non-detector info to be displayed in the selection info display.
   */
-QString ComponentInfoController::getNonDetectorInfo()
+QString ComponentInfoController::getPeakOverlayInfo()
 {
     QString text;
     QStringList overlays = m_tab->getSurface()->getPeaksWorkspaceNames();
@@ -1011,8 +928,10 @@ DetectorPlotController::DetectorPlotController(InstrumentWindowPickTab *tab, Ins
   m_instrActor(instrActor),
   m_plot(plot),
   m_plotType(Single),
-  m_enabled(true)
+  m_enabled(true),
+  m_currentDetID(-1)
 {
+  connect(m_plot,SIGNAL(clickedAt(double,double)),this,SLOT(addPeak(double,double)));
 }
 
 /**
@@ -1022,6 +941,8 @@ DetectorPlotController::DetectorPlotController(InstrumentWindowPickTab *tab, Ins
  */
 void DetectorPlotController::setPlotData(size_t pickID)
 {
+  m_currentDetID = -1;
+
   if ( m_plotType == DetectorSum )
   {
     m_plotType = Single;
@@ -1039,6 +960,7 @@ void DetectorPlotController::setPlotData(size_t pickID)
   {
     if ( m_plotType == Single )
     {
+      m_currentDetID = detid;
       plotSingle(detid);
     }
     else if (m_plotType == TubeSum || m_plotType == TubeIntegral)
@@ -1101,10 +1023,11 @@ void DetectorPlotController::clear()
 void DetectorPlotController::plotSingle(int detid)
 {
 
+  clear();
   std::vector<double> x,y;
   prepareDataForSinglePlot(detid,x,y);
+  if ( x.empty() || y.empty() ) return;
 
-  m_plot->clearPeakLabels();
   // set the data 
   m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()), m_instrActor->getWorkspace()->getAxis(0)->unit()->unitID());
   m_plot->setLabel("Detector " + QString::number(detid));
@@ -1186,12 +1109,13 @@ void DetectorPlotController::plotTubeSums(int detid)
 void DetectorPlotController::plotTubeIntegrals(int detid)
 {
   Mantid::Geometry::IDetector_const_sptr det = m_instrActor->getInstrument()->getDetector(detid);
-  boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
-  // curve label: "tube_name (detid) Integrals"
-  // detid is included to distiguish tubes with the same name
-  QString label = QString::fromStdString(parent->getName()) + " (" + QString::number(detid) + ") Integrals/" + getTubeXUnitsName(); 
   std::vector<double> x,y;
   prepareDataForIntegralsPlot(detid,x,y);
+  if ( x.empty() || y.empty() )
+  {
+    clear();
+    return;
+  }
   auto xAxisCaption = getTubeXUnitsName();
   auto xAxisUnits = getTubeXUnitsUnits();
   if ( !xAxisUnits.isEmpty() )
@@ -1199,6 +1123,10 @@ void DetectorPlotController::plotTubeIntegrals(int detid)
     xAxisCaption += " (" + xAxisUnits + ")";
   }
   m_plot->setData( &x[0], &y[0], static_cast<int>(y.size()), xAxisCaption.toStdString() );
+  boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
+  // curve label: "tube_name (detid) Integrals"
+  // detid is included to distiguish tubes with the same name
+  QString label = QString::fromStdString(parent->getName()) + " (" + QString::number(detid) + ") Integrals/" + getTubeXUnitsName(); 
   m_plot->setLabel(label);
 }
 
@@ -1337,6 +1265,12 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
   std::vector<double>&y,
   std::vector<double>* err)
 {
+
+#define PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED     x.clear();\
+    y.clear();\
+    if ( err ) err->clear();\
+    return;
+
   Mantid::API::MatrixWorkspace_const_sptr ws = m_instrActor->getWorkspace();
 
   // Does the instrument definition specify that psi should be offset.
@@ -1364,10 +1298,21 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
     // don't think it's ever possible but...
     throw std::runtime_error("PickTab miniplot: empty instrument assembly");
   }
+  if ( n == 1 )
+  {
+    // if assembly has just one element there is nothing to plot
+    PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED
+  }
   // collect and sort xy pairs in xymap
   std::map<double,double> xymap,errmap;
   // get the first detector in the tube for lenth calculation
   Mantid::Geometry::IDetector_sptr idet0 = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[0]);
+  if ( !idet0 )
+  {
+    // it's not an assembly of detectors,
+    // could be a mixture of monitors and other components
+    PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED
+  }
   Mantid::Kernel::V3D normal = (*ass)[1]->getPos() - idet0->getPos();
   normal.normalize();
   for(int i = 0; i < n; ++i)
@@ -1435,13 +1380,9 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
   }
   else
   {
-    x.clear();
-    y.clear();
-    if (err)
-    {
-      err->clear();
-    }
+    PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED
   }
+#undef PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED
 }
 
 /**
@@ -1633,6 +1574,92 @@ QString DetectorPlotController::getPlotCaption() const
   case TubeSum:     return "Plotting sum";
   case TubeIntegral:return "Plotting integral";
   default: throw std::logic_error("getPlotCaption: Unknown plot type.");
+  }
+
+}
+
+/**
+  * Add a peak to the single crystal peak table.
+  * @param x :: Time of flight
+  * @param y :: Peak height (counts)
+  */
+void DetectorPlotController::addPeak(double x,double y)
+{
+  if ( m_currentDetID < 0 ) return;
+
+  try
+  {
+    auto surface = m_tab->getSurface();
+    if ( !surface ) return;
+    Mantid::API::IPeaksWorkspace_sptr tw = surface->getEditPeaksWorkspace();
+    Mantid::API::MatrixWorkspace_const_sptr ws = m_instrActor->getWorkspace();
+    std::string peakTableName;
+    bool newPeaksWorkspace = false;
+    if ( tw )
+    {
+        peakTableName = tw->name();
+    }
+    else
+    {
+        peakTableName = "SingleCrystalPeakTable";
+        // This does need to get the instrument from the workspace as it's doing calculations
+        // .....and this method should be an algorithm! Or at least somewhere different to here.
+        Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
+
+        if (! Mantid::API::AnalysisDataService::Instance().doesExist(peakTableName))
+        {
+            tw = Mantid::API::WorkspaceFactory::Instance().createPeaks("PeaksWorkspace");
+            tw->setInstrument(instr);
+            Mantid::API::AnalysisDataService::Instance().add(peakTableName,tw);
+            newPeaksWorkspace = true;
+        }
+        else
+        {
+            tw = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(peakTableName));
+            if (!tw)
+            {
+                QMessageBox::critical(m_tab,"Mantid - Error","Workspace " + QString::fromStdString(peakTableName) + " is not a TableWorkspace");
+                return;
+            }
+        }
+        auto unwrappedSurface = dynamic_cast<UnwrappedSurface*>( surface.get() );
+        if ( unwrappedSurface )
+        {
+            unwrappedSurface->setPeaksWorkspace(boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(tw));
+        }
+    }
+
+    // Run the AddPeak algorithm
+    auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("AddPeak");
+    alg->setPropertyValue( "RunWorkspace", ws->name() );
+    alg->setPropertyValue( "PeaksWorkspace", peakTableName );
+    alg->setProperty( "DetectorID", m_currentDetID );
+    alg->setProperty( "TOF", x );
+    alg->setProperty( "Height", m_instrActor->getIntegratedCounts(m_currentDetID) );
+    alg->setProperty( "BinCount", y );
+    alg->execute();
+
+    // if data WS has UB copy it to the new peaks workspace
+    if ( newPeaksWorkspace && ws->sample().hasOrientedLattice() )
+    {
+        auto UB = ws->sample().getOrientedLattice().getUB();
+        auto lattice = new Mantid::Geometry::OrientedLattice;
+        lattice->setUB(UB);
+        tw->mutableSample().setOrientedLattice(lattice);
+    }
+
+    // if there is a UB available calculate HKL for the new peak
+    if ( tw->sample().hasOrientedLattice() )
+    {
+        auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("CalculatePeaksHKL");
+        alg->setPropertyValue( "PeaksWorkspace", peakTableName );
+        alg->execute();
+    }
+  }
+  catch(std::exception& e)
+  {
+      QMessageBox::critical(m_tab,"MantidPlot -Error",
+                            "Cannot create a Peak object because of the error:\n"+QString(e.what()));
   }
 
 }

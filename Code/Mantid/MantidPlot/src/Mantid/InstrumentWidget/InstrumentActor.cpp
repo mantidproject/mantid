@@ -359,6 +359,24 @@ Mantid::detid_t InstrumentActor::getDetID(size_t pickID)const
   return -1;
 }
 
+/**
+ * Get a component id of a picked component.
+ */
+Mantid::Geometry::ComponentID InstrumentActor::getComponentID(size_t pickID) const
+{
+  size_t ndet = m_detIDs.size();
+  if ( pickID < ndet )
+  {
+    auto det = getDetector( m_detIDs[pickID] );
+    return det->getComponentID();
+  }
+  else if (pickID < ndet + m_nonDetIDs.size())
+  {
+    return m_nonDetIDs[pickID - ndet];
+  }
+  return Mantid::Geometry::ComponentID();
+}
+
 /** Retrieve the workspace index corresponding to a particular detector
  *  @param id The detector id
  *  @returns  The workspace index containing data for this detector

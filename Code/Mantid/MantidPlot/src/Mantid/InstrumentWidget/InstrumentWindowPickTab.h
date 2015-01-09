@@ -13,6 +13,7 @@ class CollapsiblePanel;
 class OneCurvePlot;
 class ComponentInfoController;
 class DetectorPlotController;
+class ProjectionSurface;
 
 class QPushButton;
 class QTextEdit;
@@ -56,6 +57,7 @@ public:
   void loadSettings(const QSettings& settings);
   bool addToDisplayContextMenu(QMenu&) const;
   void selectTool(const ToolType tool);
+  boost::shared_ptr<ProjectionSurface> getSurface() const;
 
 public slots:
   void setTubeXUnits(int units);
@@ -66,7 +68,6 @@ private slots:
   void integrateTimeBins();
   void setPlotCaption();
   void setSelectionType();
-  void addPeak(double,double);
   void storeCurve();
   void removeCurve(const QString &);
   void singleComponentTouched(size_t pickID);
@@ -113,7 +114,6 @@ private:
   QTextEdit* m_selectionInfoDisplay; ///< Text control for displaying selection information
   CollapsiblePanel* m_infoPanel;
   SelectionType m_selectionType;
-  int m_currentDetID;
   mutable bool m_freezePlot;
 
   /// Controller responsible for the info display.
@@ -139,9 +139,10 @@ public:
 public slots:
   void displayInfo(size_t pickID);
 private:
-  void displayDetectorInfo(Mantid::detid_t detid);
+  QString displayDetectorInfo(Mantid::detid_t detid);
+  QString displayNonDetectorInfo(Mantid::Geometry::ComponentID compID);
   QString getParameterInfo(Mantid::Geometry::IComponent_const_sptr comp);
-  QString getNonDetectorInfo();
+  QString getPeakOverlayInfo();
 
   InstrumentWindowPickTab* m_tab;
   InstrumentActor* m_instrActor;
@@ -180,7 +181,11 @@ public:
   TubeXUnits getTubeXUnits() const { return m_tubeXUnits; }
   QString getTubeXUnitsName() const;
   QString getTubeXUnitsUnits() const;
-  QString DetectorPlotController::getPlotCaption() const;
+  QString getPlotCaption() const;
+
+private slots:
+
+  void addPeak(double x,double y);
 
 private:
 
@@ -212,6 +217,7 @@ private:
   PlotType m_plotType;
   bool m_enabled;
   TubeXUnits m_tubeXUnits; ///< quantity the time bin integrals to be plotted against
+  int m_currentDetID;
 
 };
 

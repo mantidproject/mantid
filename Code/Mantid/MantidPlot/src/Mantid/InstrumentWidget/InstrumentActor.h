@@ -121,6 +121,7 @@ public:
   /// Get a detector ID by a pick ID converted form a color in the pick image.
   Mantid::detid_t getDetID(size_t pickID)const;
   /// Get a component ID for a non-detector.
+  Mantid::Geometry::ComponentID getComponentID(size_t pickID) const;
   /// Cache detector positions.
   void cacheDetPos() const;
   /// Get position of a detector by a pick ID converted form a color in the pick image.
