@@ -142,7 +142,7 @@ def iliad(main):
         use_web_variables= False;
         if host._web_var and output_directory:
             use_web_variables = True;
-            config.appendDataSearchDir(output_directory)
+            config.appendDataSearchDir(str(output_directory))
             web_vars = dict(host._web_var.standard_vars.items()+host._web_var.advanced_vars.items());
             host.iliad_prop.set_input_parameters(**web_vars);
             host.iliad_prop.sample_run = input_file;
