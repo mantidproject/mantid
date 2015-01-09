@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FileLoaderRegistry.h"
+#include "MantidKernel/ArrayProperty.h"
 
 #include <boost/algorithm/string/iter_find.hpp>
 #include <boost/algorithm/string/finder.hpp>
@@ -137,6 +138,9 @@ namespace DataHandling
                     "If it is true, all log names are not listed in any of above 3 input lists will be ignored. "
                     "Otherwise, any log name is not listed will be treated as string property.");
 
+    declareProperty(new ArrayProperty<std::string>("DateAndTimeLog"),
+                    "Name and format for date and time");
+
     // Output
     declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace", "", Direction::Output),
                     "Name of TableWorkspace containing experimental data.");
@@ -158,6 +162,7 @@ namespace DataHandling
     std::vector<std::string> intlognames = getProperty("IntegerSampleLogNames");
     std::vector<std::string> floatlognames = getProperty("FloatSampleLogNames");
     bool ignoreunlisted = getProperty("IgnoreUnlistedLogs");
+    std::vector<std::string> datetimeprop = getProperty("DateAndTimeLog");
 
     bool valid = validateLogNamesType(floatlognames, intlognames, strlognames);
     if (!valid)
@@ -174,6 +179,9 @@ namespace DataHandling
 
     // Build run information workspace
     API::MatrixWorkspace_sptr runinfows = createRunInfoWS(runinfodict, floatlognames, intlognames, strlognames, ignoreunlisted);
+
+    // Process date and time for run start explicitly
+    setupRunStartTime(runinfows, datetimeprop);
 
     // Set properties
     setProperty("OutputWorkspace", outws);
@@ -454,6 +462,164 @@ namespace DataHandling
     }
 
     return infows;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**
+   * @brief LoadSpiceAscii::setupRunStartTime
+   * @param runinfows
+   * @param datetimeprop
+   */
+  void LoadSpiceAscii::setupRunStartTime(
+      API::MatrixWorkspace_sptr runinfows,
+      const std::vector<std::string> &datetimeprop) {
+    // Check if no need to process run start time
+    if (datetimeprop.size() == 0) {
+      g_log.information("User chooses not to set up run start date and time.");
+      return;
+    }
+
+    // Parse property vector
+    if (datetimeprop.size() != 4) {
+      g_log.warning() << "Run start date and time property must contain 4 "
+                         "strings.  User only specifies " << datetimeprop.size()
+                      << ".  Set up failed."
+                      << "\n";
+      return;
+    }
+
+    // Parse
+    std::string datelogname = datetimeprop[0];
+    std::string timelogname = datetimeprop[2];
+    if (!(runinfows->run().hasProperty(datelogname) &&
+          runinfows->run().hasProperty(timelogname))) {
+      std::stringstream errss;
+      errss << "Unable to locate user specified date and time sample logs "
+            << datelogname << " and " << timelogname << ".";
+      throw std::runtime_error(errss.str());
+    }
+
+    const std::string &rawdatestring =
+        runinfows->run().getProperty(datelogname)->value();
+    const std::string &dateformat = datetimeprop[1];
+    std::string mtddatestring = processDateString(rawdatestring, dateformat);
+
+    const std::string &rawtimestring =
+        runinfows->run().getProperty(timelogname)->value();
+    const std::string &timeformat = datetimeprop[3];
+    std::string mtdtimestring = processTimeString(rawtimestring, timeformat);
+
+    std::string mtddatetimestr = mtddatestring + "T" + mtdtimestring;
+
+    // Set up property
+    DateAndTime runstart(mtddatetimestr);
+    addProperty<std::string>(runinfows, "run_start",
+                             runstart.toISO8601String());
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**
+   * @brief LoadSpiceAscii::processDateString
+   * @param rawdate
+   * @param dateformat
+   * @return
+   */
+  std::string LoadSpiceAscii::processDateString(const std::string &rawdate,
+                                                const std::string &dateformat) {
+    // Identify splitter
+    std::string splitter("");
+    if (dateformat.find('/') != std::string::npos)
+      splitter += "/";
+    else if (dateformat.find('-') != std::string::npos)
+      splitter += "-";
+    else if (dateformat.find('.') != std::string::npos)
+      splitter += ".";
+    else
+      throw std::runtime_error("Input date format does not contain any of / - "
+                               "or '.'.  Format unsupported.");
+
+    // Split
+    std::vector<std::string> dateterms;
+    std::vector<std::string> formatterms;
+    boost::split(dateterms, rawdate, boost::is_any_of(splitter));
+    boost::split(formatterms, dateformat, boost::is_any_of(splitter));
+
+    if (dateterms.size() != formatterms.size() || dateterms.size() != 3)
+      throw std::runtime_error("Unsupported date string and format");
+    std::string year("");
+    std::string month("");
+    std::string day("");
+    for (size_t i = 0; i < 3; ++i) {
+      if (formatterms[i].find("Y") != std::string::npos)
+        year = dateterms[i];
+      else if (formatterms[i].find("M") != std::string::npos) {
+        month = dateterms[i];
+        if (month.size() == 1)
+          month = "0" + month;
+      } else {
+        day = dateterms[i];
+        if (day.size() == 1)
+          day = "0" + day;
+      }
+    }
+
+    std::string formatdate = year + "-" + month + "-" + day;
+
+    return formatdate;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**
+   * @brief LoadSpiceAscii::processTimeString
+   * @param rawtime
+   * @param timeformat
+   * @return
+   */
+  std::string LoadSpiceAscii::processTimeString(const std::string &rawtime,
+                                                const std::string &timeformat) {
+    // Process time format to find out it is 12 hour or 24 hour format
+    std::string timeformatcpy(timeformat);
+    boost::trim(timeformatcpy);
+
+    int format;
+    if (timeformatcpy.find(' ') == std::string::npos)
+      format = 24;
+    else
+      format = 12;
+
+    // Process
+    std::string mtdtime;
+    if (format == 24)
+      mtdtime = rawtime;
+    else {
+      std::vector<std::string> terms;
+      boost::split(terms, rawtime, boost::is_any_of(" "));
+      bool pm = false;
+      if (terms[1].compare("PM") == 0)
+        pm = true;
+
+      std::vector<std::string> terms2;
+      boost::split(terms2, terms[0], boost::is_any_of(":"));
+      int hour = atoi(terms[0].c_str());
+      if (hour < 12 && pm)
+        hour += 12;
+
+      std::stringstream hourss;
+      hourss << hour;
+      std::string hourstr = hourss.str();
+      if (hourstr.size() == 1)
+        hourstr = "0" + hourstr;
+      std::string minstr = terms2[1];
+      if (minstr.size() == 1)
+        minstr = "0" + minstr;
+      std::string secstr = terms2[2];
+      if (secstr.size() == 1)
+        secstr = "0" + secstr;
+
+      mtdtime = hourstr + ":" + minstr + ":" + secstr;
+    }
+
+    return mtdtime;
   }
 
   //----------------------------------------------------------------------------------------------

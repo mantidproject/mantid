@@ -39,6 +39,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(testalg.setProperty("OutputWorkspace", "HB2A_0231_0001_Data"));
     TS_ASSERT_THROWS_NOTHING(testalg.setProperty("RunInfoWorkspace", "HB2A_0231_Info"));
     TS_ASSERT_THROWS_NOTHING(testalg.setProperty("IgnoreUnlistedLogs", false));
+    TS_ASSERT_THROWS_NOTHING(testalg.setPropertyValue(
+        "DateAndTimeLog", "date, M/D/Y, time, H:M:S M"));
 
     testalg.execute();
     TS_ASSERT(testalg.isExecuted());
@@ -69,12 +71,16 @@ public:
     std::string ipts = p1->value();
     TS_ASSERT_EQUALS(ipts.compare("IPTS-6174"), 0);
 
+    // Run start
+    std::string runstart = infows->run().getProperty("run_start")->value();
+    TS_ASSERT_EQUALS(runstart, "2012-08-13T13:07:33");
+
     // Run end
     std::string runend = infows->run().getProperty("runend")->value();
     TS_ASSERT_EQUALS(runend, "12:33:21 PM  8/13/2012");
 
     std::vector<Mantid::Kernel::Property*> properties = infows->run().getProperties();
-    TS_ASSERT_EQUALS(properties.size(), 32);
+    TS_ASSERT_EQUALS(properties.size(), 33);
 
     AnalysisDataService::Instance().remove("HB2A_0231_Info");
     AnalysisDataService::Instance().remove("HB2A_0231_0001_Data");

@@ -71,6 +71,18 @@ namespace DataHandling
                                               std::vector<std::string> strlognamelist,
                                               bool ignoreunlisted);
 
+    /// Convert input date string to mantid date string
+    std::string processDateString(const std::string &rawdate,
+                                  const std::string &dateformat);
+
+    /// Convert input time string to mantid time string
+    std::string processTimeString(const std::string &rawtime,
+                                  const std::string &timeformat);
+
+    /// Set up run start time
+    void setupRunStartTime(API::MatrixWorkspace_sptr runinfows,
+                           const std::vector<std::string> &datetimeprop);
+
     /// Add property to workspace
     template <typename T>
     void addProperty(API::MatrixWorkspace_sptr ws, const std::string &pname,
