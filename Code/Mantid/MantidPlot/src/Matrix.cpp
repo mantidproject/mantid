@@ -315,7 +315,7 @@ void Matrix::setDimensions(int rows, int cols)
     QApplication::restoreOverrideCursor();
     QMessageBox::critical(d_matrix_model->matrix(), tr("MantidPlot") + " - " + tr("Input Size Error"),
       tr("The dimensions you have specified are not acceptable!") + "\n" +
-      tr("Please enter positive values for which the product rows*columns does not exceed the maximum integer value available (") + tr(std::to_string(INT_MAX).c_str()) + tr(")!"));
+      tr("Please enter positive values for which the product rows*columns does not exceed the maximum integer value available (") + tr(QString::number(INT_MAX)) + tr(")!"));
     return;
   }
 
