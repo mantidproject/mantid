@@ -21,8 +21,10 @@ class EnginXFitPeaks(PythonAlgorithm):
     	self.declareProperty("WorkspaceIndex", 0,
     		"Index of the spectra to fit peaks in")
 
-    	self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),
+    	self.declareProperty(FloatArrayProperty("ExpectedPeaks", [0.6, 1.9]),
     		"A list of dSpacing values to be translated into TOF to find expected peaks.")
+    	
+    	self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",action=FileAction.OptionalLoad,extensions = [".csv"]),"Load from file a list of dSpacing values to be translated into TOF to find expected peaks.")
 
     	self.declareProperty("Difc", 0.0, direction = Direction.Output,
     		doc = "Fitted Difc value")
@@ -33,7 +35,7 @@ class EnginXFitPeaks(PythonAlgorithm):
     def PyExec(self):
     	# Get expected peaks in TOF for the detector
     	expectedPeaksTof = self._expectedPeaksInTOF()
-
+      
     	# FindPeaks will returned a list of peaks sorted by the centre found. Sort the peaks as well,
     	# so we can match them with fitted centres later.
     	expectedPeaksTof = sorted(expectedPeaksTof)
