@@ -9,7 +9,8 @@ import numpy as np
 
 import CommonFunctions as common
 import diagnostics
-from PropertyManager import PropertyManager;
+from PropertyManager import PropertyManager
+from ReductionHelpers import extract_non_system_names
 
 
 def setup_reducer(inst_name,reload_instrument=False):
@@ -1298,14 +1299,28 @@ class DirectEnergyConversion(object):
     @property 
     def prop_man(self):
         """ Return property manager containing DirectEnergyConversion parameters """
-        return self._propMan;
+        return self._propMan
     @prop_man.setter
     def prop_man(self,value):
         """ Assign new instance of direct property manager to provide DirectEnergyConversion parameters """
         if isinstance(value,PropertyManager):
-            self._propMan = value;
+            self._propMan = value
         else:
             raise KeyError("Property manager can be initialized by an instance of ProperyManager only")
+    @property
+    def spectra_masks(self):
+        """ check if spectra masks are defined """ 
+        if hasattr(self,'_spectra_masks'):
+            return self._spectra_masks
+        else:
+            return None
+
+    @spectra_masks.setter
+    def spectra_masks(self,value):
+        """ set up spectra masks """ 
+        self._spectra_masks = value
+
+
     #---------------------------------------------------------------------------
     # Behind the scenes stuff
     #---------------------------------------------------------------------------
@@ -1314,6 +1329,10 @@ class DirectEnergyConversion(object):
         """
         Constructor
         """
+        all_methods = dir(self)
+        # define list of all existing properties, which have descriptors
+        object.__setattr__(self,'_descriptors',extract_non_system_names(all_methods))
+
         if instr_name:
             self.initialise(instr_name,reload_instrument);
         else:
@@ -1321,8 +1340,30 @@ class DirectEnergyConversion(object):
             #
             self._keep_wb_workspace = False;
             self._do_ISIS_normalization = True;
-            self.spectra_masks = None;
+            self._spectra_masks = None;
         #end
+
+    def __getattr__(selv,attr_name):
+       """  overloaded to return values of properties non-existing in the class dictionary from the property manager class except this
+            property already have descriptor
+       """ 
+       if attr_name in self._descriptors:
+          return object.__getattr__(self,attr_name)
+       else:
+          return getattr(self._propMan,attr_name)
+
+    def __setattr__(self,attr_name,attr_value):
+        """ overloaded to prohibit adding non-starting with _properties to the class instance
+            and add all other properties to property manager except this property already have descriptor
+        """
+        if attr_name[0] == '_':
+            object.__setattr__(self,attr_name,attr_value)
+        else:
+            if attr_name in self._descriptors:
+                object.__setattr__(self,attr_name,attr_value)
+            else:
+                setattr(self._propMan,attr_name,attr_value)
+            
 
  
     def initialise(self, instr,reload_instrument=False):
