@@ -77,15 +77,20 @@ namespace MantidQt
       bool willAutoLoadConfigurations();
       void autoLoadConfigurations(bool autoLoad);
 
+      /// Gets the name of the selected instrument
+      QString getInstrumentName();
       /// Set the displayed instrument (if exists)
       void setInstrument(const QString & instrumentName);
 
-      /// Gets the name of the selected instrument
-      QString getInstrumentName();
       /// Gets the name of the selected analyser
       QString getAnalyserName();
+      /// Set the displayed analyser bank (if exists)
+      void setAnalyser(const QString & analyserName);
+
       /// Gets the name of the selected reflection
       QString getReflectionName();
+      /// Set the displayed reflection mode (if exists)
+      void setReflection(const QString & reflectionName);
 
     public slots:
       /// Called when an instrument configuration is selected
@@ -101,6 +106,8 @@ namespace MantidQt
       void updateInstrumentConfigurations(const QString & instrumentName);
       /// Updates the list of reflections when an analyser is selected
       void updateReflectionsList(int index);
+      /// Filters out any disabled instruments
+      void filterDisabledInstruments();
 
     private:
       /// Member containing the widgets child widgets.

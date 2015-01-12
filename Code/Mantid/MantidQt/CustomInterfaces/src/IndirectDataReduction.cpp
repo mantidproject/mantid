@@ -421,11 +421,20 @@ void IndirectDataReduction::readSettings()
 
   // Load the last used instrument
   settings.beginGroup(m_settingsGroup);
-  QString instName = settings.value("instrument-name", "").toString();
-  settings.endGroup();
 
-  if(!instName.isEmpty())
-    m_uiForm.iicInstrumentConfiguration->setInstrument(instName);
+  QString instrumentName = settings.value("instrument-name", "").toString();
+  if(!instrumentName.isEmpty())
+    m_uiForm.iicInstrumentConfiguration->setInstrument(instrumentName);
+
+  QString analyserName = settings.value("analyser-name", "").toString();
+  if(!analyserName.isEmpty())
+    m_uiForm.iicInstrumentConfiguration->setAnalyser(analyserName);
+
+  QString reflectionName = settings.value("reflection-name", "").toString();
+  if(!reflectionName.isEmpty())
+    m_uiForm.iicInstrumentConfiguration->setReflection(reflectionName);
+
+  settings.endGroup();
 }
 
 
@@ -436,11 +445,16 @@ void IndirectDataReduction::saveSettings()
 {
   QSettings settings;
   settings.beginGroup(m_settingsGroup);
-  QString instrName;
 
-  instrName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
+  QString instrumentName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
+  settings.setValue("instrument-name", instrumentName);
 
-  settings.setValue("instrument-name", instrName);
+  QString analyserName = m_uiForm.iicInstrumentConfiguration->getAnalyserName();
+  settings.setValue("analyser-name", analyserName);
+
+  QString reflectionName = m_uiForm.iicInstrumentConfiguration->getReflectionName();
+  settings.setValue("reflection-name", reflectionName);
+
   settings.endGroup();
 }
 

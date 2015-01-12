@@ -23,13 +23,18 @@ namespace MantidQt
   {
 
     IndirectInstrumentConfig::IndirectInstrumentConfig(QWidget *parent, bool init): API::MantidWidget(parent),
-      m_algRunner()
+      m_algRunner(),
+      m_disabledInstruments()
     {
       m_uiForm.setupUi(this);
 
       m_instrumentSelector = new InstrumentSelector(0, init);
       m_instrumentSelector->updateInstrumentOnSelection(false);
 			m_uiForm.loInstrument->addWidget(m_instrumentSelector);
+
+      // Use this signal to filter the instrument list for disabled instruments
+      connect(m_instrumentSelector, SIGNAL(currentIndexChanged(int)),
+              this, SLOT(filterDisabledInstruments()));
 
       connect(m_instrumentSelector, SIGNAL(instrumentSelectionChanged(const QString)),
               this, SLOT(updateInstrumentConfigurations(const QString)));
@@ -39,9 +44,11 @@ namespace MantidQt
               this, SLOT(newInstrumentConfiguration()));
     }
 
+
     IndirectInstrumentConfig::~IndirectInstrumentConfig()
     {
     }
+
 
     /**
      * Gets the list of techniques used to filter instruments by.
@@ -52,6 +59,7 @@ namespace MantidQt
     {
       return m_instrumentSelector->getTechniques();
     }
+
 
     /**
      * Set a list of techniques by which the list of instruments should be filtered.
@@ -64,15 +72,27 @@ namespace MantidQt
     }
 
 
+    /**
+     * Gets a list of instruments that have been removed from the instrument list.
+     *
+     * @return List of disabled instruments
+     */
     QStringList IndirectInstrumentConfig::getDisabledInstruments()
     {
       return m_disabledInstruments;
     }
 
 
+    /**
+     * Removes a list of instruments from the instrument list.
+     *
+     * @param instrumentNames List of names of instruments to remove
+     */
     void IndirectInstrumentConfig::setDisabledInstruments(const QStringList & instrumentNames)
     {
-      //TODO
+      m_disabledInstruments.append(instrumentNames);
+
+      filterDisabledInstruments();
     }
 
 
@@ -96,6 +116,7 @@ namespace MantidQt
     {
       m_instrumentSelector->setAutoUpdate(false);
       m_instrumentSelector->setFacility(facilityName);
+      filterDisabledInstruments();
     }
 
 
@@ -183,6 +204,28 @@ namespace MantidQt
 
 
     /**
+     * Sets the currently displayed analyser, providing that the name given
+     * exists in the list currently displayed.
+     *
+     * @param instrumentName Name of analyser to display
+     */
+    void IndirectInstrumentConfig::setAnalyser(const QString & analyserName)
+    {
+      int index = m_uiForm.cbAnalyser->findText(analyserName);
+
+      if(index >= 0)
+      {
+        m_uiForm.cbAnalyser->setCurrentIndex(index);
+      }
+      else
+      {
+        g_log.information() << "Analyser " << analyserName.toStdString()
+                            << " not found in current list, using default" << std::endl;
+      }
+    }
+
+
+    /**
      * Gets the name of the analyser bank that is currently selected.
      *
      * @return Name of analyser bank
@@ -190,6 +233,28 @@ namespace MantidQt
     QString IndirectInstrumentConfig::getAnalyserName()
     {
       return m_uiForm.cbAnalyser->currentText();
+    }
+
+
+    /**
+     * Sets the currently displayed reflection, providing that the name given
+     * exists in the list currently displayed.
+     *
+     * @param instrumentName Name of reflection to display
+     */
+    void IndirectInstrumentConfig::setReflection(const QString & reflectionName)
+    {
+      int index = m_uiForm.cbReflection->findText(reflectionName);
+
+      if(index >= 0)
+      {
+        m_uiForm.cbReflection->setCurrentIndex(index);
+      }
+      else
+      {
+        g_log.information() << "Reflection " << reflectionName.toStdString()
+                            << " not found in current list, using default" << std::endl;
+      }
     }
 
 
@@ -316,6 +381,25 @@ namespace MantidQt
                     << std::endl;
 
       emit instrumentConfigurationUpdated(getInstrumentName(), getAnalyserName(), getReflectionName());
+    }
+
+
+    /**
+     * Filters all disabled instruments out of the instrument list.
+     */
+    void IndirectInstrumentConfig::filterDisabledInstruments()
+    {
+      for(int i = 0; i < m_instrumentSelector->count();)
+      {
+        if(m_disabledInstruments.contains(m_instrumentSelector->itemText(i)))
+        {
+          m_instrumentSelector->removeItem(i);
+        }
+        else
+        {
+          ++i;
+        }
+      }
     }
 
   } /* namespace MantidWidgets */
