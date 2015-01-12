@@ -342,8 +342,7 @@ void InstrumentWindowPickTab::setPlotCaption()
 void InstrumentWindowPickTab::sumDetectors()
 {
   m_plotController->setPlotType( DetectorPlotController::TubeSum  );
-  m_plot->clearAll();
-  m_plot->replot();
+  m_plotController->updatePlot();
   setPlotCaption();
 }
 
@@ -353,8 +352,7 @@ void InstrumentWindowPickTab::sumDetectors()
 void InstrumentWindowPickTab::integrateTimeBins()
 {
   m_plotController->setPlotType( DetectorPlotController::TubeIntegral );
-  m_plot->clearAll();
-  m_plot->replot();
+  m_plotController->updatePlot();
   setPlotCaption();
 }
 
@@ -508,8 +506,7 @@ void InstrumentWindowPickTab::setTubeXUnits(int units)
   if (units < 0 || units >= DetectorPlotController::NUMBER_OF_UNITS) return;
   auto tubeXUnits = static_cast<DetectorPlotController::TubeXUnits>(units);
   m_plotController->setTubeXUnits(tubeXUnits);
-  m_plot->clearAll();
-  m_plot->replot();
+  m_plotController->updatePlot();
 }
 
 
@@ -529,8 +526,7 @@ QColor InstrumentWindowPickTab::getShapeBorderColor() const
  */
 void InstrumentWindowPickTab::changedIntegrationRange(double,double)
 {
-  m_plot->clearAll();
-  m_plot->replot();
+  m_plotController->updatePlot();
   auto surface = m_instrWindow->getSurface();
   if ( surface )
   {
@@ -845,8 +841,12 @@ QString ComponentInfoController::displayNonDetectorInfo(Mantid::Geometry::Compon
 {
   auto component = m_instrActor->getInstrument()->getComponentByID(compID);
   QString text = "Selected component: ";
-  text += QString::fromStdString(component->getName());
-  text += "\n";
+  text += QString::fromStdString(component->getName()) + '\n';
+  Mantid::Kernel::V3D pos = component->getPos();
+  text += "xyz: " + QString::number(pos.X()) + "," + QString::number(pos.Y()) + "," + QString::number(pos.Z())  + '\n';
+  double r,t,p;
+  pos.getSpherical(r,t,p);
+  text += "rtp: " + QString::number(r) + "," + QString::number(t) + "," + QString::number(p)  + '\n';
   text += getParameterInfo(component);
   return text;
 }
