@@ -489,6 +489,11 @@ void MdViewerWidget::renderingDone()
  */
 void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, std::string instrumentName)
 {
+  if (this->currentView->getNumSources() == 0)
+  {
+    this->ui.modeControlWidget->setToStandardView();
+  }
+
   // If there are no other sources, then set the required 
   if (this->currentView->getNumSources() == 0)
   {
@@ -843,7 +848,6 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
       pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
       builder->destroySources();
 
-      this->ui.modeControlWidget->setToStandardView();
       return true;
     }
   }
