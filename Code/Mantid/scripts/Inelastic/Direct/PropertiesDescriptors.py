@@ -162,13 +162,6 @@ def check_ei_bin_consistent(ei,binning_range):
 
     return (True,'')
 
-#-----------------------------------------------------------------------------------------
-# END Descriptors for NonIDF_Properties class
-#-----------------------------------------------------------------------------------------
-
-#-----------------------------------------------------------------------------------------
-# Descriptors, providing overloads for some complex properties in PropertyManager
-#-----------------------------------------------------------------------------------------
 class VanadiumRMM(object):
     """ define constant static rmm for vanadium """ 
     def __get__(self,instance,owner=None):
@@ -178,7 +171,33 @@ class VanadiumRMM(object):
     def __set__(self,instance,value):
         raise AttributeError("Can not change vanadium rmm");
 #end VanadiumRMM
-#
+#-----------------------------------------------------------------------------------------
+# END Descriptors for NonIDF_Properties class
+#-----------------------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------------------
+# Descriptors, providing overloads for some complex properties in PropertyManager
+#-----------------------------------------------------------------------------------------
+class PropertyFromRange(object):
+    """ Descriptor for property, which can have one value from a list of values """
+    def __init__(self,availible_values,default_value):
+        self._availible_values = availible_values
+        self.__set__(None,default_value)
+
+    def __get__(self,instance,owner):
+        """ Return current value for the property with range of values. """
+        if instance is None:
+           return self
+        return self._current_value
+
+    def __set__(self,instance,val):
+       """ set detector calibration file using various formats """ 
+       if val in self._availible_values:
+           self._current_value = val
+       else:
+           raise KeyError(' Property can not have value {0}'.format(val))
+
+
 class DetCalFile(object):
     """ property describes various sources for the detector calibration file """
     def __init__(self):

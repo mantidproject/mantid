@@ -78,7 +78,6 @@ class NonIDF_Properties(object):
     facility = InstrumentDependentProp('_facility')
     #
     van_rmm = VanadiumRMM()
-
     #-----------------------------------------------------------------------------------
     @property
     def instrument(self):

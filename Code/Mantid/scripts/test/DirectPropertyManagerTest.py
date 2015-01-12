@@ -1,5 +1,5 @@
 import os
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -306,6 +306,10 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(propman.normalise_method, 'current')
 
         self.assertRaises(KeyError,setattr,propman,'normalise_method','unsupported');
+
+        # Only direct method is supported
+        self.assertEqual(propman.deltaE_mode, 'direct')
+        self.assertRaises(KeyError,setattr,propman,'deltaE_mode','unsupported');
 
     def test_ki_kf(self):
         propman = self.prop_man

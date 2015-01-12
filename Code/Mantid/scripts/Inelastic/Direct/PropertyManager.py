@@ -28,7 +28,7 @@ class PropertyManager(NonIDF_Properties):
         3) Attempt to create property not present in this file throws. 
         4) A standard behavior is defined for the most of the properties (get/set appropriate value) when there is number of 
            overloaded properties, which support more complex behavior using specially written Descriptors 
-        5) Changes to the properties are recorded and list of changed properties is available on request
+        5) Changes to the properties are recorded and the list of changed properties is available on request
 
         ########
         design remarks:
@@ -82,8 +82,8 @@ class PropertyManager(NonIDF_Properties):
         # Overloaded parameters, defined through properties rather then descriptors
         object.__setattr__(self,'_mask_run',None)
 
-        # define private properties served the class
-        private_properties = {'descriptors':[],'subst_dict':{},'prop_allowed_values':{},'changed_properties':set(),
+        # define private properties served the class (Accessible through __Property_name call
+        private_properties = {'descriptors':[],'subst_dict':{},'changed_properties':set(),
                               'file_properties':[],'abs_norm_file_properties':[]}
         # place these properties to __dict__  with proper decoration
         self._init_private_properties(private_properties)
@@ -110,10 +110,6 @@ class PropertyManager(NonIDF_Properties):
         object.__setattr__(self,class_dec+'abs_norm_file_properties',['monovan_mapfile'])
 
         # properties with allowed values
-        self.__prop_allowed_values['normalise_method']=[None,'monitor-1','monitor-2','current']  # 'uamph', peak -- disabled/unknown at the moment
-        self.__prop_allowed_values['deltaE_mode']=['direct'] # I do not think we should try other modes here
-
-
    
     def _convert_params_to_properties(self,param_list,detine_subst_dict=True,descr_list=[]):
         """ method processes parameters obtained from IDF and modifies the IDF properties
@@ -184,15 +180,7 @@ class PropertyManager(NonIDF_Properties):
 
         if type(val) is list and len(val) == 0:
             val = None;
- 
-
-        # Check allowed values property if value allowed TODO: re-implement through descriptors
-        if name in self.__prop_allowed_values:
-            allowed_values = self.__prop_allowed_values[name];
-            if not(val in allowed_values):
-                raise KeyError(" Property {0} can not have value: {1}".format(name,val));
-        #end
-
+              
         # set property value:
         if name in self.__descriptors:
            super(PropertyManager,self).__setattr__(name,val)
@@ -244,7 +232,9 @@ class PropertyManager(NonIDF_Properties):
     diag_spectra = DiagSpectra()
     #
     background_test_range = BackbgroundTestRange()
-
+    # Properties with allowed value
+    normalise_method= PropertyFromRange([None,'monitor-1','monitor-2','current'],'current')
+    deltaE_mode     = PropertyFromRange(['direct'],'direct') # other modes should not be considered here
 #----------------------------------------------------------------------------------------------------------------
     def getChangedProperties(self):
         """ method returns set of the properties changed from defaults """
