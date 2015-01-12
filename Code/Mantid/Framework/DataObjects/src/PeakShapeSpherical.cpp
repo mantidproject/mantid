@@ -110,6 +110,13 @@ PeakShapeSpherical* PeakShapeSpherical::clone() const
     return new PeakShapeSpherical(*this);
 }
 
+bool PeakShapeSpherical::operator==(const PeakShapeSpherical &other) const
+{
+    return other.centre() == this->centre() &&
+    other.radius() == this->radius() &&
+    other.frame() == this->frame();
+}
+
 /**
  * @brief Get radius of sphere
  * @return radius

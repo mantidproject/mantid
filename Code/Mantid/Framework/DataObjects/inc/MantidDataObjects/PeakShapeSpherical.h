@@ -55,7 +55,8 @@ namespace DataObjects
     virtual int algorithmVersion() const;
     /// Clone the peak shape
     virtual PeakShapeSpherical* clone() const;
-
+    /// Equals operator
+    bool operator==(const PeakShapeSpherical& other) const;
     /// Peak centre
     Mantid::Kernel::VMD centre() const;
     /// Peak radius

@@ -122,7 +122,17 @@ public:
       TS_ASSERT_EQUALS(algorithmVersion, output["algorithm_version"].asInt());
       TS_ASSERT_EQUALS(frame, output["frame"].asInt());
       TS_ASSERT_EQUALS(radius, output["radius"].asDouble());
+ }
 
+ void test_equals()
+ {
+     TS_ASSERT_EQUALS(PeakShapeSpherical(V3D(0,0,0), 1.0, QSample), PeakShapeSpherical(V3D(0,0,0), 1.0, QSample));
+
+     TSM_ASSERT_DIFFERS("Different centre", PeakShapeSpherical(V3D(0,0,0), 1.0, QSample), PeakShapeSpherical(V3D(1,0,0), 1.0, QSample));
+
+     TSM_ASSERT_DIFFERS("Different radius", PeakShapeSpherical(V3D(0,0,0), 1.0, QSample), PeakShapeSpherical(V3D(0,0,0), 2.0, QSample));
+
+     TSM_ASSERT_DIFFERS("Different frame", PeakShapeSpherical(V3D(0,0,0), 1.0, QSample), PeakShapeSpherical(V3D(0,0,0), 1.0, QLab));
  }
 
 

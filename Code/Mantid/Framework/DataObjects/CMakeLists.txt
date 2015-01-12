@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/Peak.cpp
 	src/PeakColumn.cpp
 	src/PeakShapeSpherical.cpp
+	src/PeakShapeSphericalFactory.cpp
 	src/PeaksWorkspace.cpp
 	src/RebinnedOutput.cpp
 	src/SpecialWorkspace2D.cpp
@@ -44,7 +45,9 @@ set ( INC_FILES
 	inc/MantidDataObjects/Peak.h
 	inc/MantidDataObjects/PeakColumn.h
 	inc/MantidDataObjects/PeakShape.h
+	inc/MantidDataObjects/PeakShapeFactory.h
 	inc/MantidDataObjects/PeakShapeSpherical.h
+	inc/MantidDataObjects/PeakShapeSphericalFactory.h
 	inc/MantidDataObjects/PeaksWorkspace.h
 	inc/MantidDataObjects/RebinnedOutput.h
 	inc/MantidDataObjects/SpecialWorkspace2D.h
@@ -68,6 +71,7 @@ set ( TEST_FILES
 	MementoTableWorkspaceTest.h
 	OffsetsWorkspaceTest.h
 	PeakColumnTest.h
+	PeakShapeSphericalFactoryTest.h
 	PeakShapeSphericalTest.h
 	PeakTest.h
 	PeaksWorkspaceTest.h
