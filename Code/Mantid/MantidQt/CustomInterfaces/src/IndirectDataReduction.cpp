@@ -223,30 +223,27 @@ Mantid::API::MatrixWorkspace_sptr IndirectDataReduction::loadInstrumentIfNotExis
   std::string instWorkspaceName = "__empty_" + instrumentName;
   std::string idfDirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
 
-  // If the workspace does not exist in ADS then load an empty instrument
-  if(!AnalysisDataService::Instance().doesExist(instWorkspaceName))
-  {
-    std::string parameterFilename = idfDirectory + instrumentName + "_Definition.xml";
-    IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
-    loadAlg->initialize();
-    loadAlg->setProperty("Filename", parameterFilename);
-    loadAlg->setProperty("OutputWorkspace", instWorkspaceName);
-    loadAlg->execute();
-  }
+  std::string parameterFilename = idfDirectory + instrumentName + "_Definition.xml";
+  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  loadAlg->setChild(true);
+  loadAlg->initialize();
+  loadAlg->setProperty("Filename", parameterFilename);
+  loadAlg->setProperty("OutputWorkspace", instWorkspaceName);
+  loadAlg->execute();
+  MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
 
   // Load the IPF if given an analyser and reflection
   if(!analyser.empty() && !reflection.empty())
   {
     std::string ipfFilename = idfDirectory + instrumentName + "_" + analyser + "_" + reflection + "_Parameters.xml";
     IAlgorithm_sptr loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
+    loadParamAlg->setChild(true);
     loadParamAlg->initialize();
     loadParamAlg->setProperty("Filename", ipfFilename);
-    loadParamAlg->setProperty("Workspace", instWorkspaceName);
+    loadParamAlg->setProperty("Workspace", instWorkspace);
     loadParamAlg->execute();
+    instWorkspace = loadParamAlg->getProperty("Workspace");
   }
-
-  // Get the workspace, which should exist now
-  MatrixWorkspace_sptr instWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(instWorkspaceName);
 
   return instWorkspace;
 }
