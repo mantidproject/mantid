@@ -75,12 +75,22 @@ namespace MantidQt
     }
 
 
+    /**
+     * Gets the name of the facility instruments are displayed from.
+     *
+     * @return Name of facility
+     */
     QString IndirectInstrumentConfig::getFacility()
     {
       return m_instrumentSelector->getFacility();
     }
 
 
+    /**
+     * Sets a facility to lock the widget to.
+     *
+     * @param facilityName Name of facility
+     */
     void IndirectInstrumentConfig::setFacility(const QString & facilityName)
     {
       m_instrumentSelector->setAutoUpdate(false);
@@ -88,12 +98,22 @@ namespace MantidQt
     }
 
 
+    /**
+     * Checks to see if diffraction is allowed in the analyser bank list.
+     *
+     * @return True if diffraction is an allowed analyser, false otherwise
+     */
     bool IndirectInstrumentConfig::isDiffractionEnabled()
     {
       return !m_removeDiffraction;
     }
 
 
+    /**
+     * Sets if diffraction should bre removed from list of analyser banks.
+     *
+     * @param enabled Set to false to remove diffraction option
+     */
     void IndirectInstrumentConfig::enableDiffraction(bool enabled)
     {
       if(!enabled)
@@ -103,12 +123,22 @@ namespace MantidQt
     }
 
 
+    /**
+     * Checks to see if diffraction is the only allowed analyser bank.
+     *
+     * @return True if diffraction is the only allowed analyser
+     */
     bool IndirectInstrumentConfig::isDiffractionForced()
     {
       return m_forceDiffraction;
     }
 
 
+    /**
+     * Sets if diffraction should be the only allowed analyser bank option.
+     *
+     * @param forced If diffraction is the only allowed analyser
+     */
     void IndirectInstrumentConfig::forceDiffraction(bool forced)
     {
       if(forced)
@@ -118,36 +148,44 @@ namespace MantidQt
     }
 
 
-    bool IndirectInstrumentConfig::willAutoLoadConfigurations()
-    {
-      return m_autoLoad;
-    }
-
-
-    void IndirectInstrumentConfig::autoLoadConfigurations(bool autoLoad)
-    {
-      m_autoLoad = autoLoad;
-    }
-
-
+    /**
+     * Gets the name of the instrument that is currently selected.
+     *
+     * @return Name of instrument.
+     */
     QString IndirectInstrumentConfig::getInstrumentName()
     {
       return m_instrumentSelector->currentText();
     }
 
 
+    /**
+     * Gets the name of the analyser bank that is currently selected.
+     *
+     * @return Name of analyser bank
+     */
     QString IndirectInstrumentConfig::getAnalyserName()
     {
       return m_uiForm.cbAnalyser->currentText();
     }
 
 
+    /**
+     * Gets the name of the reflection mode currently selected.
+     *
+     * @return Name of reflection mode
+     */
     QString IndirectInstrumentConfig::getReflectionName()
     {
       return m_uiForm.cbReflection->currentText();
     }
 
 
+    /**
+     * Updates the analyser and reflection names in the UI when an instrument is selected.
+     *
+     * @param instrumentName Nmae of instrument
+     */
     void IndirectInstrumentConfig::updateInstrumentConfigurations(const QString & instrumentName)
     {
       g_log.debug() << "Loading configuration for instrument: " << instrumentName.toStdString() << std::endl;
@@ -202,6 +240,11 @@ namespace MantidQt
     }
 
 
+    /**
+     * Updates the list of reflection model when an analyser bank is selected.
+     *
+     * @param index Index of the analyser selected
+     */
     void IndirectInstrumentConfig::updateReflectionsList(int index)
     {
       bool reflectionPreviousBlocking = m_uiForm.cbReflection->signalsBlocked();
@@ -225,9 +268,16 @@ namespace MantidQt
       }
 
       m_uiForm.cbReflection->blockSignals(reflectionPreviousBlocking);
+
+      newInstrumentConfiguration();
     }
 
 
+    /**
+     * Handles logging and signal emission when the instrument setup has been updated.
+     *
+     * Can be called manually to use instrumentConfigurationUpdated signal to init UI elements.
+     */
     void IndirectInstrumentConfig::newInstrumentConfiguration()
     {
       g_log.information() << "Instrument configuration: "

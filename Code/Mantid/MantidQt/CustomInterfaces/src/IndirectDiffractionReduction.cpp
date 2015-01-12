@@ -69,7 +69,7 @@ void IndirectDiffractionReduction::initLayout()
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(demonRun()));
 
-  connect(m_uiForm.iicInstrumentConfiguration, SIGNAL(instrumentConfigurationUpdated(const QString &, const QString &, const QSting &)),
+  connect(m_uiForm.iicInstrumentConfiguration, SIGNAL(instrumentConfigurationUpdated(const QString &, const QString &, const QString &)),
           this, SLOT(instrumentSelected(const QString &, const QString &, const QString &)));
 
   // Update run button based on state of raw files field
@@ -89,6 +89,9 @@ void IndirectDiffractionReduction::initLayout()
 
   // Update the list of plot options when individual grouping is toggled
   connect(m_uiForm.ckIndividualGrouping, SIGNAL(stateChanged(int)), this, SLOT(individualGroupingToggled(int)));
+
+  // Set initial layout based on instrument
+  m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
 
   loadSettings();
 

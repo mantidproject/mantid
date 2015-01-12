@@ -53,7 +53,6 @@ namespace MantidQt
       Q_PROPERTY(QString facility READ getFacility WRITE setFacility)
       Q_PROPERTY(bool enableDiffraction READ isDiffractionEnabled WRITE enableDiffraction)
       Q_PROPERTY(bool forceDiffraction READ isDiffractionForced WRITE forceDiffraction)
-      Q_PROPERTY(bool autoLoadConfigurations READ willAutoLoadConfigurations WRITE autoLoadConfigurations)
 
     public:
       IndirectInstrumentConfig(QWidget *parent = 0, bool init = true);
@@ -85,6 +84,10 @@ namespace MantidQt
       /// Gets the name of the selected reflection
       QString getReflectionName();
 
+    public slots:
+      /// Called when an instrument configuration is selected
+      void newInstrumentConfiguration();
+
     signals:
       /// Emmitted when the instrument configuration is changed
       void instrumentConfigurationUpdated(const QString & instrumentName,
@@ -95,8 +98,6 @@ namespace MantidQt
       void updateInstrumentConfigurations(const QString & instrumentName);
       /// Updates the list of reflections when an analyser is selected
       void updateReflectionsList(int index);
-      /// Called when an instrument configuration is selected
-      void newInstrumentConfiguration();
 
     private:
       /// Member containing the widgets child widgets.
@@ -109,7 +110,6 @@ namespace MantidQt
       QStringList m_disabledInstruments;
       bool m_removeDiffraction;
       bool m_forceDiffraction;
-      bool m_autoLoad;
 
     };
 
