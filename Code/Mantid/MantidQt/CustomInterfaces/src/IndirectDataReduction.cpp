@@ -53,7 +53,8 @@ IndirectDataReduction::IndirectDataReduction(QWidget *parent) :
   m_instrument(""),
   m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
   m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
-  m_changeObserver(*this, &IndirectDataReduction::handleDirectoryChange)
+  m_changeObserver(*this, &IndirectDataReduction::handleDirectoryChange),
+  m_instWorkspace(NULL)
 {
   // Signals to report load instrument algo result
   connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(instrumentLoadingDone(bool)));
@@ -143,10 +144,6 @@ void IndirectDataReduction::initLayout()
   m_tabs["S(Q, w)"] = new IndirectSqw(m_uiForm, this);
   m_tabs["Moments"] = new IndirectMoments(m_uiForm, this);
 
-  // Handle instrument configuration changes
-  connect(m_uiForm.iicInstrumentConfiguration, SIGNAL(instrumentConfigurationUpdated(const QString &, const QString &, const QString &)),
-          this, SLOT(instrumentSetupChanged(const QString &, const QString &, const QString &)));
-
   // Connect "?" (Help) Button
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
   // Connect the Python export buton
@@ -168,6 +165,10 @@ void IndirectDataReduction::initLayout()
     connect(this, SIGNAL(newInstrumentConfiguration()), it->second, SIGNAL(newInstrumentConfiguration())),
     it->second->setupTab();
   }
+
+  // Handle instrument configuration changes
+  connect(m_uiForm.iicInstrumentConfiguration, SIGNAL(instrumentConfigurationUpdated(const QString &, const QString &, const QString &)),
+          this, SLOT(instrumentSetupChanged(const QString &, const QString &, const QString &)));
 
   // Update the instrument configuration across the UI
   m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
@@ -198,9 +199,11 @@ void IndirectDataReduction::initLocalPython()
 void IndirectDataReduction::instrumentSetupChanged(const QString & instrumentName, const QString & analyser,
                                                    const QString & reflection)
 {
-  MatrixWorkspace_sptr ws = loadInstrumentIfNotExist(instrumentName.toStdString(), analyser.toStdString(), reflection.toStdString());
-  instrumentLoadingDone(ws == NULL);
-  emit newInstrumentConfiguration();
+  m_instWorkspace = loadInstrumentIfNotExist(instrumentName.toStdString(), analyser.toStdString(), reflection.toStdString());
+  instrumentLoadingDone(m_instWorkspace == NULL);
+
+  if(m_instWorkspace != NULL)
+    emit newInstrumentConfiguration();
 }
 
 
@@ -246,6 +249,105 @@ Mantid::API::MatrixWorkspace_sptr IndirectDataReduction::loadInstrumentIfNotExis
   MatrixWorkspace_sptr instWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(instWorkspaceName);
 
   return instWorkspace;
+}
+
+
+/**
+ * Gets details for the current instrument configuration.
+ *
+ * @return Map of information ID to value
+ */
+std::map<QString, QString> IndirectDataReduction::getInstrumentDetails()
+{
+  std::map<QString, QString> instDetails;
+
+  std::string instrumentName = m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString();
+  std::string analyser = m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString();
+  std::string reflection = m_uiForm.iicInstrumentConfiguration->getReflectionName().toStdString();
+
+  instDetails["instrument"] = QString::fromStdString(instrumentName);
+  instDetails["analyser"] = QString::fromStdString(analyser);
+  instDetails["reflection"] = QString::fromStdString(reflection);
+
+  // List of values to get from IPF
+  std::vector<std::string> ipfElements;
+  ipfElements.push_back("analysis-type");
+  ipfElements.push_back("spectra-min");
+  ipfElements.push_back("spectra-max");
+  ipfElements.push_back("efixed-val");
+  ipfElements.push_back("peak-start");
+  ipfElements.push_back("peak-end");
+  ipfElements.push_back("back-start");
+  ipfElements.push_back("back-end");
+  ipfElements.push_back("rebin-default");
+  ipfElements.push_back("cm-1-convert-choice");
+  ipfElements.push_back("save-ascii-choice");
+
+  // In the IRIS IPF there is no fmica component
+  if(instrumentName == "IRIS" && analyser == "fmica")
+    analyser = "mica";
+
+  if(m_instWorkspace == NULL)
+    return instDetails;
+
+  // Get the instrument
+  auto instrument = m_instWorkspace->getInstrument();
+  if(instrument == NULL)
+    return instDetails;
+
+  // Get the analyser component
+  auto component = instrument->getComponentByName(analyser);
+
+  // For each parameter we want to get
+  for(auto it = ipfElements.begin(); it != ipfElements.end(); ++it)
+  {
+    try
+    {
+      std::string key = *it;
+
+      QString value = getInstrumentParameterFrom(instrument, key);
+
+      if(value.isEmpty() && component != NULL)
+        QString value = getInstrumentParameterFrom(component, key);
+
+      instDetails[QString::fromStdString(key)] = value;
+    }
+    // In the case that the parameter does not exist
+    catch(Mantid::Kernel::Exception::NotFoundError &nfe)
+    {
+      UNUSED_ARG(nfe);
+      g_log.warning() << "Could not find parameter " << *it << " in instrument " << instrumentName << std::endl;
+    }
+  }
+
+  return instDetails;
+}
+
+
+/**
+ * Gets a parameter from an instrument component as a string.
+ *
+ * @param comp Instrument component
+ * @param param Parameter name
+ * @return Value as QString
+ */
+QString IndirectDataReduction::getInstrumentParameterFrom(Mantid::Geometry::IComponent_const_sptr comp, std::string param)
+{
+  QString value;
+
+  if(!comp->hasParameter(param))
+    return "";
+
+  // Determine it's type and call the corresponding get function
+  std::string paramType = comp->getParameterType(param);
+
+  if(paramType == "string")
+    value = QString::fromStdString(comp->getStringParameter(param)[0]);
+
+  if(paramType == "double")
+    value = QString::number(comp->getNumberParameter(param)[0]);
+
+  return value;
 }
 
 

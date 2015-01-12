@@ -82,7 +82,7 @@ namespace CustomInterfaces
 
   protected:
     Mantid::API::MatrixWorkspace_sptr loadInstrumentIfNotExist(std::string instrumentName, std::string analyser="", std::string reflection="");
-    /// Function to get details about the instrument configuration defined on C2E tab
+    /// Function to get details about the instrumet from a given workspace
     std::map<QString, QString> getInstrumentDetails();
 
     std::map<std::string, double> getRangesFromInstrument(QString instName = "", QString analyser = "", QString reflection = "");
@@ -97,8 +97,6 @@ namespace CustomInterfaces
 
   private:
     bool m_tabRunning;
-
-    QString getInstrumentParameterFrom(Mantid::Geometry::IComponent_const_sptr comp, std::string param);
 
   private slots:
     void tabExecutionComplete(bool error);

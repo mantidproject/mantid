@@ -86,9 +86,6 @@ namespace CustomInterfaces
   {
     detailedBalanceCheck(m_uiForm.ckDetailedBalance->isChecked());
     scaleMultiplierCheck(m_uiForm.ckScaleMultiplier->isChecked());
-
-    // Load the default instrument parameters
-    setInstrumentDefault();
   }
 
   void IndirectConvertToEnergy::run()

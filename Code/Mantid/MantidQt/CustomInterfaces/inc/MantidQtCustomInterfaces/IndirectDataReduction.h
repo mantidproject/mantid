@@ -77,6 +77,7 @@ namespace MantidQt
           std::string analyser = "", std::string reflection = "");
 
       std::vector<std::pair<std::string, std::vector<std::string> > > getInstrumentModes();
+      std::map<QString, QString> getInstrumentDetails();
 
     signals:
       /// Emitted when the instrument setup is changed
@@ -104,7 +105,7 @@ namespace MantidQt
       void instrumentSetupChanged(const QString & instrumentName, const QString & analyser, const QString & reflection);
 
     private:
-      void updateAnalyserList();
+      QString getInstrumentParameterFrom(Mantid::Geometry::IComponent_const_sptr comp, std::string param);
 
       void readSettings();
       void saveSettings();
@@ -129,6 +130,9 @@ namespace MantidQt
       Poco::NObserver<IndirectDataReduction, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
       QString m_dataDir; ///< default data search directory
       QString m_saveDir; ///< default data save directory
+
+      // Pointer to the current empty instrument workspace
+      Mantid::API::MatrixWorkspace_sptr m_instWorkspace;
     };
 
   }
