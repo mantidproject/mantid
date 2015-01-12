@@ -39,8 +39,10 @@ class EnginXFitPeaks(PythonAlgorithm):
     	# FindPeaks will returned a list of peaks sorted by the centre found. Sort the peaks as well,
     	# so we can match them with fitted centres later.
     	expectedPeaksTof = sorted(expectedPeaksTof)
-    	expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
-
+    	expectedPeaksD = self._readInExpectedPeaks()
+    	#expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
+     
+      
     	# Find approximate peak positions, asumming Gaussian shapes
     	findPeaksAlg = self.createChildAlgorithm('FindPeaks')
     	findPeaksAlg.setProperty('InputWorkspace', self.getProperty("InputWorkspace").value)
@@ -105,6 +107,25 @@ class EnginXFitPeaks(PythonAlgorithm):
 
     	self.setProperty('Difc', difc)
     	self.setProperty('Zero', zero)
+
+    def _readInExpectedPeaks(self):
+      readInArray = []
+      exPeakArray = []
+      updateFileName = self.getPropertyValue("ExpectedPeaksFromFile")
+      if updateFileName != "":
+        with open(updateFileName) as f:
+          for line in f:
+            readInArray.append([float(x) for x in line.split(',')])
+        for a in readInArray:
+          for b in a:
+            exPeakArray.append(b) 
+        print "using file"
+        expectedPeaksD = sorted(exPeakArray)
+      else:
+        print "using defaults" #check it is defaults, or change message to using manually entered numbers
+        expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
+       
+      return expectedPeaksD
 
     def _fitDSpacingToTOF(self, fittedPeaksTable):
     	""" Fits a linear background to the dSpacing <-> TOF relationship and returns fitted difc
