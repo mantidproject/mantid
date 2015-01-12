@@ -223,7 +223,6 @@ namespace VATES
     points->Delete();
     visualDataset->Squeeze();
     return visualDataset.GetPointer();
-
   }
 
 

@@ -17,17 +17,14 @@ using Kernel::IntMatrix;
  * Returns all equivalent reflections for the supplied hkl.
  *
  * This method returns a vector containing all equivalent hkls for the supplied
- *one.
- * It depends on the internal state of the pointgroup object (e.g. which
- *symmetry operations
- * and therefore, which transformation matrices are present). This internal
- *state
- * is unique for each concrete point group and is set in the constructor.
+ * one. It depends on the internal state of the pointgroup object (e.g. which
+ * symmetry operations and therefore, which transformation matrices are
+ * present). This internal state is unique for each concrete point group and
+ * is set in the constructor.
  *
  * The returned vector always contains a set of unique hkls, so for special hkls
- *like (100),
- * it has fewer entries than for a general hkl. See also
- *PointGroup::getEquivalentSet.
+ * like (100), it has fewer entries than for a general hkl. See also
+ * PointGroup::getEquivalentSet.
  *
  * @param hkl :: Arbitrary hkl
  * @return :: std::vector containing all equivalent hkls.
@@ -42,14 +39,11 @@ std::vector<V3D> PointGroup::getEquivalents(const V3D &hkl) const {
  * Returns the same V3D for all equivalent hkls.
  *
  * This method is closely related to PointGroup::getEquivalents. It returns the
- *same
- * V3D for all hkls of one "family". For example in a cubic point group it will
- *return (100)
- * for (001), (010), (0-10), etc.
+ * same V3D for all hkls of one "family". For example in a cubic point group
+ * it will return (100) for (001), (010), (0-10), etc.
  *
  * It can be used to generate a set of symmetry independent hkls, useful for
- *example
- * in powder diffraction.
+ * example in powder diffraction.
  *
  * @param hkl :: Arbitrary hkl
  * @return :: hkl specific to a family of index-triplets

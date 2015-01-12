@@ -148,8 +148,8 @@ string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
 }
 
 /**
- * Set the instance variables before running a test of @link
- *ResampleX::determineBinning @endlink
+ * Set the instance variables before running a test of
+ * @link ResampleX::determineBinning @endlink
  *
  * @param numBins The number of bins that will be used.
  * @param useLogBins True if you want log binning.

@@ -63,6 +63,6 @@ Output:
 
 .. testoutput:: ExPairAsymmetry
 
-   Integrated asymmetry for the run: 106.326
+   Integrated asymmetry for the run: 1.701
 
 .. categories::

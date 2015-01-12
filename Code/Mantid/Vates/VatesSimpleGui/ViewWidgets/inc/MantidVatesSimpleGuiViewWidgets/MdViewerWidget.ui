@@ -6,14 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1361</width>
+    <width>1057</width>
     <height>710</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1057</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,1,0">
+  <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -172,12 +178,26 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
+<<<<<<< HEAD
       <property name="handleWidth">
        <number>3</number>
       </property>
       <widget class="QSplitter" name="splitter">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
+=======
+      <widget class="pqPipelineBrowserWidget" name="pipelineBrowser" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>350</width>
+         <height>50</height>
+        </size>
+       </property>
+      </widget>
+      <widget class="QTabWidget" name="propInfoTabs">
+       <property name="currentIndex">
+        <number>0</number>
+>>>>>>> origin/master
        </property>
        <widget class="pqPipelineBrowserWidget" name="pipelineBrowser" native="true">
         <property name="minimumSize">
@@ -187,6 +207,7 @@
          </size>
         </property>
        </widget>
+<<<<<<< HEAD
        <widget class="QTabWidget" name="propInfoTabs">
         <property name="currentIndex">
          <number>0</number>
@@ -221,6 +242,26 @@
            <widget class="QScrollArea" name="scrollArea">
             <property name="widgetResizable">
              <bool>true</bool>
+=======
+       <widget class="QWidget" name="information">
+        <attribute name="title">
+         <string>Information</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QScrollArea" name="scrollArea">
+           <property name="widgetResizable">
+            <bool>true</bool>
+           </property>
+           <widget class="QWidget" name="scrollAreaWidgetContents">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>274</width>
+              <height>370</height>
+             </rect>
+>>>>>>> origin/master
             </property>
             <widget class="QWidget" name="scrollAreaWidgetContents">
              <property name="geometry">
@@ -252,9 +293,18 @@
        </property>
       </widget>
      </widget>
+<<<<<<< HEAD
      <widget class="QDockWidget" name="colorMapEditorDock">
       <property name="windowTitle">
        <string>Color Map Editor</string>
+=======
+     <widget class="QWidget" name="viewWidget" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>600</width>
+        <height>600</height>
+       </size>
+>>>>>>> origin/master
       </property>
       <widget class="pqColorMapEditor" name="colorMapEditorPanel">
        <property name="minimumSize">

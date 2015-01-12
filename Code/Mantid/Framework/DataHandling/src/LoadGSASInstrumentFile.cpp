@@ -331,9 +331,9 @@ LoadGSASInstrumentFile::findINSLine(const std::vector<std::string> &lines,
 
 //----------------------------------------------------------------------------------------------
 /** Generate output workspace
-**
-**  TO DO Resolve duplication of this code with
-*LoadFullprofResolution::genetableWorkspace(...)
+*
+* TODO Resolve duplication of this code with
+* LoadFullprofResolution::genetableWorkspace(...)
 */
 TableWorkspace_sptr LoadGSASInstrumentFile::genTableWorkspace(
     map<size_t, map<string, double>> bankparammap) {
