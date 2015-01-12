@@ -15,7 +15,13 @@ import os
 #-----------------------------------------------------------------------------------------
 # Descriptors, providing overloads for complex properties in NonIDF_Properties class
 #-----------------------------------------------------------------------------------------
-class IncidentEnergy(object):
+class PropDescriptor(object):
+    """ Class provides common custom interface for property descriptors """
+    def dependencies(self):
+        """ returns the list of other properties names, this property depends on""" 
+        return []
+# end PropDescriptor
+class IncidentEnergy(PropDescriptor):
     """ descriptor for incident energy or range of incident energies to be processed """
     def __init__(self): 
         self._incident_energy = None
@@ -66,7 +72,7 @@ class IncidentEnergy(object):
             raise KeyError("Incident energy have to be positive number of list of positive numbers."+
                            " For value {0} got negative {1}".format(value,inc_en))
 # end IncidentEnergy
-class EnergyBins(object):
+class EnergyBins(PropDescriptor):
     """ Property provides various energy bin possibilities """
     def __init__(self):
         self._energy_bins=None
@@ -93,7 +99,7 @@ class EnergyBins(object):
        #TODO: implement single value settings according to rebin
        self._energy_bins = value
 #end EnergyBins
-class SaveFileName(object):
+class SaveFileName(PropDescriptor):
     """ Property defines default file name to save result to
 
         See similar property get_sample_ws_name TODO: (leave only one)
@@ -130,7 +136,7 @@ class SaveFileName(object):
 #end SaveFileName
 
 #
-class InstrumentDependentProp(object):
+class InstrumentDependentProp(PropDescriptor):
     """ Generic property describing some aspects of instrument (e.g. name, short name etc), 
         which are undefined if no instrument is defined
     """
@@ -162,7 +168,7 @@ def check_ei_bin_consistent(ei,binning_range):
 
     return (True,'')
 
-class VanadiumRMM(object):
+class VanadiumRMM(PropDescriptor):
     """ define constant static rmm for vanadium """ 
     def __get__(self,instance,owner=None):
         """ return rmm for vanadium """
@@ -178,7 +184,7 @@ class VanadiumRMM(object):
 #-----------------------------------------------------------------------------------------
 # Descriptors, providing overloads for some complex properties in PropertyManager
 #-----------------------------------------------------------------------------------------
-class PropertyFromRange(object):
+class PropertyFromRange(PropDescriptor):
     """ Descriptor for property, which can have one value from a list of values """
     def __init__(self,availible_values,default_value):
         self._availible_values = availible_values
@@ -198,7 +204,7 @@ class PropertyFromRange(object):
            raise KeyError(' Property can not have value {0}'.format(val))
 
 
-class DetCalFile(object):
+class DetCalFile(PropDescriptor):
     """ property describes various sources for the detector calibration file """
     def __init__(self):
         self._det_cal_file = None
@@ -236,7 +242,7 @@ class DetCalFile(object):
     #    Reducer.log('Setting detector calibration to detector block info from '+str(sample_run))
 #end DetCalFile
 
-class MapMaskFile(object):
+class MapMaskFile(PropDescriptor):
     """ common method to wrap around an auxiliary file name """
     def __init__(self,file_ext,doc_string=None):
         self._file_name=None;
@@ -404,7 +410,7 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
 #end MonovanIntegrationRange
 
 
-class SpectraToMonitorsList(object):
+class SpectraToMonitorsList(PropDescriptor):
    """ property describes list of spectra, used as monitors to estimate incident energy
        in a direct scattering experiment. 
 
@@ -453,7 +459,7 @@ class SpectraToMonitorsList(object):
        return result
 #end SpectraToMonitorsList
 
-class SaveFormat(object):
+class SaveFormat(PropDescriptor):
    # formats available for saving the data
    save_formats = ['spe','nxspe','nxs']
    def __init__(self):
@@ -500,7 +506,7 @@ class SaveFormat(object):
         self._save_format.add(value)
 #end SaveFormat
 
-class DiagSpectra(object):
+class DiagSpectra(PropDescriptor):
     """ class describes spectra list which should be used in diagnostics 
 
         consist of tuples list where each tuple are the numbers 
@@ -542,7 +548,7 @@ class DiagSpectra(object):
             raise ValueError("Spectra For diagnostics can be a string inthe form (num1,num2);(num3,num4) etc. or None")
 #end class DiagSpectra
 
-class BackbgroundTestRange(object):
+class BackbgroundTestRange(PropDescriptor):
     """ The TOF range used in diagnostics to reject high background spectra. 
 
         Usually it is the same range as the TOF range used to remove 

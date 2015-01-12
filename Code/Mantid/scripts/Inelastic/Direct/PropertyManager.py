@@ -321,9 +321,9 @@ class PropertyManager(NonIDF_Properties):
                      "*** This only works if both instruments have the same reduction properties!"\
                       .format(self.instr_name,pInstrument.getName()),'warning')
 
+        # Retrieve the properties, changed or set from interface earlier
         old_changes_list  = self.getChangedProperties()
         self.setChangedProperties(set())
-
         # record all changes, present in the old changes list
         old_changes={}
         for prop_name in old_changes_list:
@@ -336,36 +336,11 @@ class PropertyManager(NonIDF_Properties):
         #sort parameters to have complex properties (with underscore _) first    
         sorted_param =  OrderedDict(sorted(param_list.items(),key=lambda x : ord((x[0][0]).lower())))
 
-        # Walk through complex properties first
-        for key,val in sorted_param.iteritems():
-            # complex properties change through their dependencies so we are setting them first
-            if isinstance(val,prop_helpers.ComplexProperty):
-                public_name = key[1:]
-                prop_new_val = val.__get__(param_list)
-                try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains 
-                    # properties, not present in recent IDF.
-                  cur_val = getattr(self,public_name)
-                except:
-                   self.log("property {0} have not been found in existing IDF. Ignoring this property"\
-                       .format(public_name),'warning')
-                   continue
-
-                
-                if prop_new_val !=cur_val :
-                      setattr(self,public_name,prop_new_val)
-                      dependencies = val.dependencies()
-                      for dep_name in dependencies:
-                          # delete dependent properties not to deal with them again
-                           del sorted_param[dep_name]
-                del sorted_param[key]
-                continue
-            else:
-                break # no complex properties left. finish for the time being
-        #end
-        # now the same for descriptors. Assignment to descriptors should accept the form, descriptor is written in IDF
+        # Walk through descriptors list and set their values 
+        # Assignment to descriptors should accept the form, descriptor is written in IDF
         for key,new_val in descr_dict.iteritems():
             try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains 
-                    # properties, not present in recent IDF.
+                   # properties, not present in recent IDF.
                   cur_val = getattr(self,key)
             except:
                    self.log("property {0} have not been found in existing IDF. Ignoring this property"\
@@ -380,21 +355,38 @@ class PropertyManager(NonIDF_Properties):
 
               for dep_name in dependencies:
                 if dep_name in sorted_param:
-                      del sorted_param[dep_name]
+                   del sorted_param[dep_name]
+        #end loop
 
-        #end loop
-        # only simple properties left. Deal with them
-        for key,new_val in sorted_param.iteritems():
+        # Walk through the complex properties first and then through simple properties
+        for key,val in sorted_param.iteritems():
+            # complex properties change through their dependencies so we are setting them first
+            if isinstance(val,prop_helpers.ComplexProperty):
+                public_name = key[1:]
+                prop_new_val = val.__get__(param_list)
+            else:
+                # no complex properties left so we have simple key-value pairs
+                public_name = key
+                prop_new_val = val
+
             try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains 
-                    # properties, not present in recent IDF.
-               cur_val = getattr(self,key)
+                # properties, not present in recent IDF.
+                 cur_val = getattr(self,public_name)
             except:
-               self.log("property {0} have not been found in existing IDF. Ignoring this property"\
-                   .format(key),'warning')
-               continue
-            if new_val != cur_val:
-               setattr(self,key,new_val)
-        #end loop
+                self.log("property {0} have not been found in existing IDF. Ignoring this property"\
+                    .format(public_name),'warning')
+                continue
+
+            if prop_new_val !=cur_val :
+               setattr(self,public_name,prop_new_val)
+               try:
+                    dependencies = val.dependencies()
+               except:
+                   dependencies =[]
+               for dep_name in dependencies:
+                  # delete dependent properties not to deal with them again
+                  del sorted_param[dep_name]
+        #end
 
 
         new_changes_list  = self.getChangedProperties()

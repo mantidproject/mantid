@@ -39,7 +39,7 @@ class ComplexProperty(object):
                 #changed_prop.append(key);
         #return changed_prop;
     def dependencies(self):
-        """ returns the list of properties names, this property depends on"""
+        """ returns the list of other properties names, this property depends on"""
         return self._other_prop
 
     def len(self):
