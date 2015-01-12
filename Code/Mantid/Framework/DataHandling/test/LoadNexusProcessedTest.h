@@ -42,15 +42,16 @@ public:
     delete suite;
   }
 
-  LoadNexusProcessedTest() :
-      testFile("GEM38370_Focussed_Legacy.nxs"), output_ws("nxstest")
+  LoadNexusProcessedTest():
+      testFile("GEM38370_Focussed_Legacy.nxs"), output_ws("nxstest"),
+      m_savedTmpEventFile("")
   {
-
   }
 
   ~LoadNexusProcessedTest()
   {
     AnalysisDataService::Instance().clear();
+    clearTmpEventNexus();
   }
 
   void testFastMultiPeriodDefault()
@@ -405,34 +406,88 @@ public:
 
   void test_loadEventNexus_Min()
   {
-    // TODO
-  }
-
-  void test_loadEventNexus_Max()
-  {
-    // TODO
-  }
-
-  void test_loadEventNexus_Min_Max()
-  {
-    // TODO: re-use file, don't repeat... (can also be re-used in other, older tests in this file)
-    std::string filename_root = "LoadNexusProcessed_ExecEvent_";
-    std::string savedFile;
-    EventWorkspace_sptr origWS = SaveNexusProcessedTest::do_testExec_EventWorkspaces(filename_root, TOF,
-        savedFile, false, false);
-    // this will make for example 'bin/Testing/LoadNexusProcessed_ExecEvent_0.nxs' (0: TOF)
+    writeTmpEventNexus();
 
     LoadNexusProcessed alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT( alg.isInitialized());
 
-    alg.setPropertyValue("Filename", savedFile);
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumMin", "3");
+    // this should imply 4==ws->getNumberHistograms()
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted());
+
+    // Test basic props of the ws
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve(output_ws));
+    TS_ASSERT(workspace);
+    if (!workspace)
+      return;
+    TS_ASSERT(workspace.get());
+
+    EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    TS_ASSERT(ews);
+    if (!ews)
+      return;
+    TS_ASSERT(ews.get());
+    TS_ASSERT_EQUALS(ews->getNumberHistograms(), 4);
+
+    TS_ASSERT_EQUALS(ews->getHistory().size(), 2);
+  }
+
+  void test_loadEventNexus_Max()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumMax", "2");
+    // this should imply 3==ws->getNumberHistograms()
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted());
+
+    // Test basic props of the ws
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve(output_ws));
+    TS_ASSERT(workspace);
+    if (!workspace)
+      return;
+    TS_ASSERT(workspace.get());
+
+    EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    TS_ASSERT(ews);
+    if (!ews)
+      return;
+    TS_ASSERT(ews.get());
+    TS_ASSERT_EQUALS(ews->getNumberHistograms(), 2);
+
+    TS_ASSERT_EQUALS(ews->getHistory().size(), 2);
+  }
+
+  void test_loadEventNexus_Min_Max()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
     alg.setPropertyValue("OutputWorkspace", output_ws);
     alg.setPropertyValue("SpectrumMin", "2");
     alg.setPropertyValue("SpectrumMax", "4");
     // this should imply 3==ws->getNumberHistograms()
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted());
 
     // Test basic props of the ws
     Workspace_sptr workspace;
@@ -449,21 +504,165 @@ public:
     TS_ASSERT(ews.get());
     TS_ASSERT_EQUALS(ews->getNumberHistograms(), 3);
 
-    doHistoryTest(ews);
+    // expect: load + LoadInst (child)
+    TS_ASSERT_EQUALS(ews->getHistory().size(), 2);
+  }
 
-    // remove saved /loaded test event data file
-    if (Poco::File(savedFile).exists())
-      Poco::File(savedFile).remove();
+  void test_loadEventNexus_Fail()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumList", "1,3,5,89");
+    // the 89 should cause trouble, but gracefully...
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(!alg.isExecuted());
   }
 
   void test_loadEventNexus_List()
   {
-    // TODO
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumList", "1,3,5");
+    // this should imply 3==ws->getNumberHistograms()
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Test basic props of the ws
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve(output_ws));
+    TS_ASSERT(workspace);
+    if (!workspace)
+      return;
+    TS_ASSERT(workspace.get());
+
+    EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    TS_ASSERT(ews);
+    if (!ews)
+      return;
+    TS_ASSERT(ews.get());
+    TS_ASSERT_EQUALS(ews->getNumberHistograms(), 3);
+
+    TS_ASSERT_EQUALS(ews->getHistory().size(), 2);
+  }
+
+  void test_loadEventNexus_Min_List()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumList", "5");
+    alg.setPropertyValue("SpectrumMin", "4");
+    // this should imply 2==ws->getNumberHistograms()
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Test basic props of the ws
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve(output_ws));
+    TS_ASSERT(workspace);
+    if (!workspace)
+      return;
+    TS_ASSERT(workspace.get());
+
+    EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    TS_ASSERT(ews);
+    if (!ews)
+      return;
+    TS_ASSERT(ews.get());
+    TS_ASSERT_EQUALS(ews->getNumberHistograms(), 3);
+
+    TS_ASSERT_EQUALS(ews->getHistory().size(), 2);
+  }
+
+  void test_loadEventNexus_Max_List()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumMax", "2");
+    alg.setPropertyValue("SpectrumList", "3,5");
+    // this should imply 4==ws->getNumberHistograms()
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Test basic props of the ws
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve(output_ws));
+    TS_ASSERT(workspace);
+    if (!workspace)
+      return;
+    TS_ASSERT(workspace.get());
+
+    EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    TS_ASSERT(ews);
+    if (!ews)
+      return;
+    TS_ASSERT(ews.get());
+    TS_ASSERT_EQUALS(ews->getNumberHistograms(), 4);
+
+    TS_ASSERT_EQUALS(ews->getHistory().size(), 2);
   }
 
   void test_loadEventNexus_Min_Max_List()
   {
-    // TODO
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumMin", "3");
+    alg.setPropertyValue("SpectrumMax", "5");
+    alg.setPropertyValue("SpectrumList", "1,2,3,5");
+    // this should imply 5(all)==ws->getNumberHistograms()
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Test basic props of the ws
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve(output_ws));
+    TS_ASSERT(workspace);
+    if (!workspace)
+      return;
+    TS_ASSERT(workspace.get());
+
+    EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    TS_ASSERT(ews);
+    if (!ews)
+      return;
+    TS_ASSERT(ews.get());
+    TS_ASSERT_EQUALS(ews->getNumberHistograms(), 5);
+
+    TS_ASSERT_EQUALS(ews->getHistory().size(), 2);
   }
 
   void test_load_saved_workspace_group()
@@ -727,8 +926,9 @@ public:
     saveAlg.initialize();
     saveAlg.setPropertyValue("InputWorkspace", inTableEntry.name());
     saveAlg.setPropertyValue("Filename", savedFileName);
-    TS_ASSERT_THROWS_NOTHING( saveAlg.execute());
-    TS_ASSERT( saveAlg.isExecuted());
+
+    TS_ASSERT_THROWS_NOTHING(saveAlg.execute());
+    TS_ASSERT(saveAlg.isExecuted());
 
     if (!saveAlg.isExecuted())
       return; // Nothing to check
@@ -847,8 +1047,73 @@ private:
     }
   }
 
-  LoadNexusProcessed algToBeTested;
+  void writeTmpEventNexus()
+  {
+    //return;
+    if (!m_savedTmpEventFile.empty() && Poco::File(m_savedTmpEventFile).exists()) {
+      std::cerr << "NOOOOOT SAVING ------" << std::endl;
+      return;
+    } else {
+    std::cerr << "SAVING ------" << std::endl;
+    /*
+    SaveNexusProcessedTest::do_testExec_EventWorkspaces("LoadNexusProcessed_TmpEvent_",
+                                                        WEIGHTED,
+                                                        m_savedTmpEventFile,
+                                                        true, false);
+    std::cerr << " --------- output tmp file: " << m_savedTmpEventFile << std::endl;
+    */
+    // after this, m_savedTmpEventFile will be like 'LoadNexusProcessed_TmpEvent_1.nxs'
+    /*
+    if (!m_savedTmpEventFile.empty() && Poco::File(m_savedTmpEventFile).exists())
+      Poco::File(m_savedTmpEventFile).remove();
+    */
+
+    std::vector< std::vector<int> > groups(6);
+    groups[0].push_back(9);
+    groups[0].push_back(12);
+    groups[1].push_back(5);
+    groups[1].push_back(10);
+    groups[2].push_back(20);
+    groups[2].push_back(21);
+    groups[3].push_back(10);
+    groups[4].push_back(50);
+    groups[5].push_back(15);
+    groups[5].push_back(20);
+
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 30, 1.0);
+    ws->getEventList(4).clear();
+
+    TS_ASSERT_EQUALS( ws->getNumberHistograms(), groups.size());
+
+    SaveNexusProcessed alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", boost::dynamic_pointer_cast<Workspace>(ws));
+    m_savedTmpEventFile = "LoadNexusProcessed_TmpEvent.nxs";
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("Title", "Tmp test event workspace as NexusProcessed file");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+
+    // Get absolute path to the saved file
+    m_savedTmpEventFile = alg.getPropertyValue("Filename");
+    std::cerr << " -------------- ABS PATH saved: " << m_savedTmpEventFile << std::endl;
+
+    }
+  }
+
+  void clearTmpEventNexus()
+  {
+    // remove saved/re-loaded test event data file
+    if (!m_savedTmpEventFile.empty() && Poco::File(m_savedTmpEventFile).exists())
+      Poco::File(m_savedTmpEventFile).remove();
+  }
+
+
   std::string testFile, output_ws;
+  /// Saved using SaveNexusProcessed and re-used in several load event tests
+  std::string m_savedTmpEventFile;
+  static const EventType m_savedTmpType = TOF;
 };
 
 //------------------------------------------------------------------------------
