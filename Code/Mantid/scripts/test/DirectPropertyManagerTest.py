@@ -722,7 +722,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman.energy_bins = None
         self.assertFalse(propman.energy_bins)
        
-        #TODO: this one is not completed
+        #TODO: this one is not completed. Multirep mode to come
 
 
     

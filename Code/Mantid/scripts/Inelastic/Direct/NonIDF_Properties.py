@@ -1,4 +1,5 @@
 from PropertiesDescriptors import *
+from RunDescriptor import RunDescriptor,RunDescriptorDependent
 
 
 class NonIDF_Properties(object):
@@ -26,11 +27,8 @@ class NonIDF_Properties(object):
                        deployed in reduction
         """
         #
-        object.__setattr__(self,'_sample_run',run_workspace)
-        object.__setattr__(self,'_wb_run',None)
-
-        object.__setattr__(self,'_monovan_run',None)
-        object.__setattr__(self,'_wb_for_monovan_run',None)
+        if not(run_workspace is None):
+            object.__setattr__(self,'sample_run',run_workspace)
 
         # Helper properties, defining logging options
         object.__setattr__(self,'_log_level','notice')
@@ -42,9 +40,6 @@ class NonIDF_Properties(object):
         # SNS motor stuff which is difficult to test as I've never seen it
         object.__setattr__(self,'_motor_name',None)
         object.__setattr__(self,'_motor_offset',0)
-
-
-        object.__setattr__(self,'_second_white',None)
 
         object.__setattr__(self,'_save_file_name',None)
  
@@ -78,6 +73,14 @@ class NonIDF_Properties(object):
     facility = InstrumentDependentProp('_facility')
     #
     van_rmm = VanadiumRMM()
+    # Run descriptors
+    sample_run = RunDescriptor("Run ID (number) to convert to energy or list of the such run numbers")
+    wb_run     = RunDescriptor("Run ID (number) for vanadium run used in detectors calibration")
+    monovan_run = RunDescriptor("Run ID (number) for monochromatic vanadium used in absolute units normalization ")
+    wb_for_monovan_run = RunDescriptorDependent(wb_run,""" white beam run used To calculating monovanadium integrals.\n If not explicitly set, white beam for processing run is used instead """)
+    # TODO: do something about it.  Second white is explicitly used in
+    # diagnostics.
+    seclond_white  = RunDescriptor("Second white beam currently unused in the  workflow. Should it be used for Monovan Diagnostics?") 
     #-----------------------------------------------------------------------------------
     @property
     def instrument(self):
@@ -86,18 +89,6 @@ class NonIDF_Properties(object):
         else: 
             return self._pInstrument
     #
-    #-----------------------------------------------------------------------------------
-    # TODO: do something about it.  Second white is explicitly used in
-    # diagnostics.
-    @property 
-    def seclond_white(self):
-        """ Second white beam currently unused in the  workflow """
-        return self._second_white
-    @seclond_white.setter 
-    def seclond_white(self,value):
-        """ Second white beam currently unused in the  workflow """
-        pass
-        #return self._second_white;
     #-----------------------------------------------------------------------------------
     #TODO: do something about it
     @property
@@ -108,59 +99,6 @@ class NonIDF_Properties(object):
     def print_diag_results(self,value):
         pass
     #-----------------------------------------------------------------------------------
-    @property
-    #-----------------------------------------------------------------------------------
-    def sample_run(self):
-        """ run number to process or list of the run numbers """
-        if self._sample_run is None:
-            raise KeyError("Sample run has not been defined")
-        return self._sample_run
-
-    @sample_run.setter
-    def sample_run(self,value):
-        """ sets a run number to process or list of run numbers """
-        object.__setattr__(self,'_sample_run',value)
-    #-----------------------------------------------------------------------------------
-    @property
-    def wb_run(self):
-        if self._wb_run is None:
-            raise KeyError("White beam run has not been defined")
-        return self._wb_run
-    @wb_run.setter
-    def wb_run(self,value):
-        object.__setattr__(self,'_wb_run',value)
-
-    #-----------------------------------------------------------------------------------
-    @property 
-    def monovan_run(self): 
-        """ run ID (number or workspace) for monochromatic vanadium used in absolute units normalization """
-        return self._monovan_run
-
-    @monovan_run.setter
-    def monovan_run(self,value): 
-        """ run ID (number or workspace) for monochromatic vanadium used in normalization """
-        object.__setattr__(self,'_monovan_run',value)
-    #-----------------------------------------------------------------------------------
-    @property 
-    def wb_for_monovan_run(self):
-        """ white beam  run used for calculating monovanadium integrals. 
-            If not explicitly set, white beam for processing run is used instead
-        """
-        if self._wb_for_monovan_run:
-            return self._wb_for_monovan_run
-        else:
-            return self._wb_run
-
-    @wb_for_monovan_run.setter
-    def wb_for_monovan_run(self,value): 
-        """ run number for monochromatic vanadium used in normalization """
-        if value == self._wb_run:
-            object.__setattr__(self,'_wb_for_monovan_run',None)
-        else:
-            object.__setattr__(self,'_wb_for_monovan_run',value)
-
-    #-----------------------------------------------------------------------------------
- 
     # -----------------------------------------------------------------------------
     @property
     def log_to_mantid(self):
