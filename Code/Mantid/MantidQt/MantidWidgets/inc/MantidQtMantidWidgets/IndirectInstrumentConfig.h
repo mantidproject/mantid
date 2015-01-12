@@ -77,6 +77,9 @@ namespace MantidQt
       bool willAutoLoadConfigurations();
       void autoLoadConfigurations(bool autoLoad);
 
+      /// Set the displayed instrument (if exists)
+      void setInstrument(const QString & instrumentName);
+
       /// Gets the name of the selected instrument
       QString getInstrumentName();
       /// Gets the name of the selected analyser

@@ -149,6 +149,28 @@ namespace MantidQt
 
 
     /**
+     * Sets the currently displayed instrument, providing that the name given
+     * exists in the list currently displayed.
+     *
+     * @param instrumentName Name of instrument to display
+     */
+    void IndirectInstrumentConfig::setInstrument(const QString & instrumentName)
+    {
+      int index = m_instrumentSelector->findText(instrumentName);
+
+      if(index >= 0)
+      {
+        m_instrumentSelector->setCurrentIndex(index);
+      }
+      else
+      {
+        g_log.information() << "Instrument " << instrumentName.toStdString()
+                            << " not found in current list, using default" << std::endl;
+      }
+    }
+
+
+    /**
      * Gets the name of the instrument that is currently selected.
      *
      * @return Name of instrument.
@@ -280,11 +302,11 @@ namespace MantidQt
      */
     void IndirectInstrumentConfig::newInstrumentConfiguration()
     {
-      g_log.information() << "Instrument configuration: "
-                          << "Instrument=" << getInstrumentName().toStdString()
-                          << ", Analyser=" << getAnalyserName().toStdString()
-                          << ", Reflection=" << getReflectionName().toStdString()
-                          << std::endl;
+      g_log.debug() << "Instrument configuration: "
+                    << "Instrument=" << getInstrumentName().toStdString()
+                    << ", Analyser=" << getAnalyserName().toStdString()
+                    << ", Reflection=" << getReflectionName().toStdString()
+                    << std::endl;
 
       emit instrumentConfigurationUpdated(getInstrumentName(), getAnalyserName(), getReflectionName());
     }

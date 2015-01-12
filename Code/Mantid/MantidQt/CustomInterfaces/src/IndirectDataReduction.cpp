@@ -426,6 +426,9 @@ void IndirectDataReduction::readSettings()
   settings.beginGroup(m_settingsGroup);
   QString instName = settings.value("instrument-name", "").toString();
   settings.endGroup();
+
+  if(!instName.isEmpty())
+    m_uiForm.iicInstrumentConfiguration->setInstrument(instName);
 }
 
 
