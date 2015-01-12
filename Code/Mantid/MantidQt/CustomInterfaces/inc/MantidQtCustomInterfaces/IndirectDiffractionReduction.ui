@@ -46,6 +46,9 @@
          <property name="forceDiffraction" stdset="0">
           <bool>true</bool>
          </property>
+         <property name="showInstrumentLabel" stdset="0">
+          <bool>false</bool>
+         </property>
         </widget>
        </item>
       </layout>

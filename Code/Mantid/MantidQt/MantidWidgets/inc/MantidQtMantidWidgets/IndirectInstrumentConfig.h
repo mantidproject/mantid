@@ -53,6 +53,7 @@ namespace MantidQt
       Q_PROPERTY(QString facility READ getFacility WRITE setFacility)
       Q_PROPERTY(bool enableDiffraction READ isDiffractionEnabled WRITE enableDiffraction)
       Q_PROPERTY(bool forceDiffraction READ isDiffractionForced WRITE forceDiffraction)
+      Q_PROPERTY(bool showInstrumentLabel READ isInstrumentLabelShown WRITE setShowInstrumentLabel)
 
     public:
       IndirectInstrumentConfig(QWidget *parent = 0, bool init = true);
@@ -74,8 +75,8 @@ namespace MantidQt
       bool isDiffractionForced();
       void forceDiffraction(bool forced);
 
-      bool willAutoLoadConfigurations();
-      void autoLoadConfigurations(bool autoLoad);
+      bool isInstrumentLabelShown();
+      void setShowInstrumentLabel(bool visible);
 
       /// Gets the name of the selected instrument
       QString getInstrumentName();

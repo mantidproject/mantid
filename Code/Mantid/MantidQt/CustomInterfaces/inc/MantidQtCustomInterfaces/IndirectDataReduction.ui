@@ -46,6 +46,9 @@
         <property name="enableDiffraction" stdset="0">
          <bool>false</bool>
         </property>
+        <property name="showInstrumentLabel" stdset="0">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
      </layout>

@@ -171,6 +171,28 @@ namespace MantidQt
 
 
     /**
+     * Check to see if the "Instrument" label is shown.
+     *
+     * @return If label is shown
+     */
+    bool IndirectInstrumentConfig::isInstrumentLabelShown()
+    {
+      return m_uiForm.lbInstrument->isVisible();
+    }
+
+
+    /**
+     * Sets if the "Instrument" label should be shown or now.
+     *
+     * @param visible If the label is visible
+     */
+    void IndirectInstrumentConfig::setShowInstrumentLabel(bool visible)
+    {
+      m_uiForm.lbInstrument->setVisible(visible);
+    }
+
+
+    /**
      * Sets the currently displayed instrument, providing that the name given
      * exists in the list currently displayed.
      *
