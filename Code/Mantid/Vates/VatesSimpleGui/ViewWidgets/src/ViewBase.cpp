@@ -704,6 +704,14 @@ void ViewBase::onVisibilityChanged(pqPipelineSource *source, pqDataRepresentatio
   }
 }
 
+/**
+ * Initializes the settings of the color scale 
+ */
+void ViewBase::initializeColorScale()
+{
+  colorUpdater.initializeColorScale();
+}
+
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid

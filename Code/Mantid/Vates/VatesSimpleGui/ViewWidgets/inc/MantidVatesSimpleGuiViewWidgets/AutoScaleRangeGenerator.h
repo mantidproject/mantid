@@ -29,6 +29,8 @@
 
 */
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "MantidQtAPI/MdConstants.h"
+#include "MantidQtAPI/MdSettings.h"
 #include <qlist.h>
 
 class pqPipelineSource;
@@ -63,6 +65,12 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS  AutoScaleRangeGenerator
     /// Enum for different modes
     typedef enum COLORSCALEMODE{STANDARD, TECHNIQUEDEPENDENT, OFFSET} COLORSCALEMODE;
 
+    /// Initialize the color scale
+    void initializeColorScale();
+
+    /// Update log scale setting
+    void updateLogScaleSetting(bool logScale);
+
   private:
     /// Selected color scale mode.
     COLORSCALEMODE mode;
@@ -79,6 +87,9 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS  AutoScaleRangeGenerator
     /// Make sure that the color scale is valid.
     void sanityCheck(VsiColorScale& colorscale);
 
+    /// Gets the log scale setting for the mode
+    bool getLogScale();
+
   /**
    * Extract the min and max values of a source. If we are dealing with a filter which does not
    * have the information then look upstream for the information
@@ -87,6 +98,12 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS  AutoScaleRangeGenerator
    * @param maxValueBuffer A reference to a max value.
    */
     void AutoScaleRangeGenerator::setMinBufferAndMaxBuffer(pqPipelineSource* source, double& minValue, double& maxValue);
+
+    /// Md constants
+    MantidQt::API::MdConstants m_mdConstants;
+
+    /// Md Settings
+    MantidQt::API::MdSettings m_mdSettings;
 };
 
 }

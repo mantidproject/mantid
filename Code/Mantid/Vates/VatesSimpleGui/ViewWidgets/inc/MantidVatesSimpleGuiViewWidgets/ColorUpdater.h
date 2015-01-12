@@ -79,7 +79,8 @@ public:
   double getMaximumRange();
   /// Get the minimum color scaling range value.
   double getMinimumRange();
-
+  /// Initializes the color scale
+  void initializeColorScale();
   /**
    * Set logarithmic color scaling on the data.
    * @param state flag to determine whether or not to use log color scaling

@@ -1,5 +1,5 @@
 #include "MantidVatesSimpleGuiViewWidgets/AutoScaleRangeGenerator.h"
-
+#include "MantidQtAPI/MdConstants.h"
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -18,6 +18,7 @@
 #include <vtkSMDoubleVectorProperty.h>
 
 #include <QPair>
+#include "MantidQtAPI/MdSettings.h"
 
 namespace Mantid
 {
@@ -28,7 +29,39 @@ namespace SimpleGui
   /**
    * Note that the mode is currently set to standard.
    */
-  AutoScaleRangeGenerator::AutoScaleRangeGenerator() : mode(STANDARD), defaultValue(1e-2) {};
+  AutoScaleRangeGenerator::AutoScaleRangeGenerator() : mode(STANDARD), defaultValue(1e-2) 
+  {
+    //Set the initial log scale state due to the mode
+    m_mdSettings.setLastSessionLogScale(getLogScale());
+  };
+
+  /**
+   * Gets the log scale for the mode
+   * @returns The log scale state.
+   */
+  bool AutoScaleRangeGenerator::getLogScale()
+  {   
+    bool logScale = false;
+
+    switch(mode)
+    {
+      case(STANDARD):
+        logScale = false;
+        break;
+
+      case(TECHNIQUEDEPENDENT):
+        // Implement technique-dependence here
+
+      case(OFFSET):
+          // Implement color scale which accounts for noise floor here.
+
+      default:
+        logScale= false;
+        break;
+    }
+
+    return logScale;
+  }
 
   /**
    * Get the auto color scale which depends on the mode setting.
@@ -54,10 +87,14 @@ namespace SimpleGui
       default:
         colorScaleContainer.maxValue = 1.0;
         colorScaleContainer.minValue = 0.0;
-        colorScaleContainer.useLogScale= FALSE;
+        colorScaleContainer.useLogScale= false;
 
         break;
     }
+
+    // Set the colorScale Container
+    colorScaleContainer.useLogScale = m_mdSettings.getLastSessionLogScale();
+
 
     // Make sure that the color scale is valid, and if not set default values.
     sanityCheck(colorScaleContainer);
@@ -83,7 +120,7 @@ namespace SimpleGui
     double minValue = this->defaultValue; 
     double minValueBuffer = this->defaultValue;
 
-    bool initialSetting = TRUE;
+    bool initialSetting = true;
 
     QList<pqPipelineSource *> sources = getAllPVSources();
 
@@ -114,7 +151,7 @@ namespace SimpleGui
             minValue = minValueBuffer;
           }
 
-          initialSetting = FALSE;
+          initialSetting = false;
         }
       }
     }
@@ -133,8 +170,7 @@ namespace SimpleGui
     } 
 
     vsiColorScale.minValue = minValue;
-    vsiColorScale.maxValue = minValue + 0.1*(maxValue - minValue);
-    vsiColorScale.useLogScale = TRUE;
+    vsiColorScale.maxValue = minValue + (maxValue - minValue)*m_mdConstants.getColorScaleStandardMax();
 
     return vsiColorScale;
   }
@@ -232,6 +268,23 @@ namespace SimpleGui
     {
       colorscale.maxValue = this->defaultValue;
     }
+  }
+
+  /**
+   * Initializes the color scale state, in particular if it is a log scale.
+   */
+  void AutoScaleRangeGenerator::initializeColorScale()
+  {
+    m_mdSettings.setLastSessionLogScale(getLogScale());
+  }
+
+  /**
+   * Update the log scale setting
+   * @param logScale The log scale setting
+   */
+  void AutoScaleRangeGenerator::updateLogScaleSetting(bool logScale)
+  {
+    m_mdSettings.setLastSessionLogScale(logScale);
   }
 }
 }

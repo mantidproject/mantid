@@ -59,6 +59,9 @@ VsiColorScale ColorUpdater::autoScale()
   // Set the color scale for all sources
   this->minScale = vsiColorScale.minValue;
   this->maxScale = vsiColorScale.maxValue;
+
+  // If the view 
+
   this->logScaleState = vsiColorScale.useLogScale;
 
   // Update the lookup tables, i.e. react to a color scale change
@@ -199,6 +202,7 @@ void ColorUpdater::updateState(ColorSelectionWidget *cs)
   this->logScaleState = cs->getLogScaleState();
   this->minScale = cs->getMinRange();
   this->maxScale = cs->getMaxRange();
+  this->autoScaleRangeGenerator.updateLogScaleSetting(this->logScaleState);
 }
 
 /**
@@ -245,6 +249,13 @@ void ColorUpdater::print()
   std::cout << "Max Range: " << this->maxScale << std::endl;
 }
 
+/**
+ * Initializes the color scale
+ */
+void ColorUpdater::initializeColorScale()
+{
+  autoScaleRangeGenerator.initializeColorScale();
+}
 }
 }
 }

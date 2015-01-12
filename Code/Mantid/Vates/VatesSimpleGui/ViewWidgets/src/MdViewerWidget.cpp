@@ -489,6 +489,13 @@ void MdViewerWidget::renderingDone()
  */
 void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, std::string instrumentName)
 {
+  // If there are no other sources, then set the required 
+  if (this->currentView->getNumSources() == 0)
+  {
+    // Set the auto log scale state
+    this->currentView->initializeColorScale();
+  }
+
   QString sourcePlugin = "";
   if (VatesViewerInterface::PEAKS == workspaceType)
   {
@@ -758,6 +765,12 @@ void MdViewerWidget::checkForUpdates()
   if (QString(proxy->GetXMLName()).contains("ScaleWorkspace"))
   {
     this->currentView->resetDisplay();
+  }
+
+  // Make sure that the color scale is calculated
+  if (this->ui.colorSelectionWidget->getAutoScaleState())
+  {
+    this->currentView->onAutoScale(this->ui.colorSelectionWidget);
   }
 }
 

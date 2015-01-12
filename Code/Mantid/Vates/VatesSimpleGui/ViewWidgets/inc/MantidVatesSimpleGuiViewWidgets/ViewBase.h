@@ -115,6 +115,8 @@ public:
   virtual void setPluginSource(QString pluginName, QString wsName);
   /// Determines if source has timesteps (4D).
   virtual bool srcHasTimeSteps(pqPipelineSource *src);
+  /// Initializes the settings of the color scale 
+  virtual void initializeColorScale();
 
   /// Enumeration for Cartesian coordinates
   enum Direction {X, Y, Z};
