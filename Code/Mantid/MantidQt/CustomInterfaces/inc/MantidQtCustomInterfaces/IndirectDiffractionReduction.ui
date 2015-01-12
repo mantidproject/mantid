@@ -35,6 +35,11 @@
            <string>TOF Indirect Geometry Diffraction</string>
           </stringlist>
          </property>
+         <property name="disabledInstruments" stdset="0">
+          <stringlist>
+           <string>TFXA</string>
+          </stringlist>
+         </property>
          <property name="facility" stdset="0">
           <string>ISIS</string>
          </property>
