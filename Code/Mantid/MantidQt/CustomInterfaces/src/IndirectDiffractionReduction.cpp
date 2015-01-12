@@ -102,7 +102,7 @@ void IndirectDiffractionReduction::plotResults(bool error)
     return;
   }
 
-  // Ungroup the output workspace if MSGDiffractionReduction was used
+  // Ungroup the output workspace if generic reducer was used
   if(AnalysisDataService::Instance().doesExist("IndirectDiffraction_Workspaces"))
   {
     WorkspaceGroup_sptr diffResultsGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IndirectDiffraction_Workspaces");
@@ -153,15 +153,13 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
   if(!rebinStart.isEmpty() && !rebinWidth.isEmpty() && !rebinEnd.isEmpty())
       rebin = rebinStart + "," + rebinWidth + "," + rebinEnd;
 
-  bool individualGrouping = m_uiForm.ckIndividualGrouping->isChecked();
-
   // Get detector range
   std::vector<long> detRange;
   detRange.push_back(m_uiForm.set_leSpecMin->text().toLong());
   detRange.push_back(m_uiForm.set_leSpecMax->text().toLong());
 
-  // Get MSGDiffractionReduction algorithm instance
-  IAlgorithm_sptr msgDiffReduction = AlgorithmManager::Instance().create("MSGDiffractionReduction");
+  // Get generic reduction algorithm instance
+  IAlgorithm_sptr msgDiffReduction = AlgorithmManager::Instance().create("ISISIndirectDiffractionReduction");
   msgDiffReduction->initialize();
 
   // Get save formats
@@ -175,13 +173,17 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
   msgDiffReduction->setProperty("Mode", mode.toStdString());
   msgDiffReduction->setProperty("SumFiles", m_uiForm.dem_ckSumFiles->isChecked());
   msgDiffReduction->setProperty("InputFiles", m_uiForm.dem_rawFiles->getFilenames().join(",").toStdString());
-  msgDiffReduction->setProperty("DetectorRange", detRange);
+  msgDiffReduction->setProperty("SpectraRange", detRange);
   msgDiffReduction->setProperty("RebinParam", rebin.toStdString());
-  msgDiffReduction->setProperty("IndividualGrouping", individualGrouping);
-  msgDiffReduction->setProperty("SaveFormats", saveFormats);
   msgDiffReduction->setProperty("OutputWorkspace", "IndirectDiffraction_Workspaces");
 
+  // Add the pproperty for grouping policy if needed
+  if(m_uiForm.ckIndividualGrouping->isChecked())
+    msgDiffReduction->setProperty("GroupingPolicy", "Individual");
+
   m_batchAlgoRunner->addAlgorithm(msgDiffReduction);
+
+  //TODO: saving
 
   m_batchAlgoRunner->executeBatchAsync();
 }

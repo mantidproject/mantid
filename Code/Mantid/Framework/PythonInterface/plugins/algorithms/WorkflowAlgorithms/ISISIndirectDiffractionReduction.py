@@ -3,7 +3,7 @@ from mantid.api import *
 from mantid.kernel import *
 from mantid import config
 
-import os.path as path
+import os
 
 
 class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
@@ -133,6 +133,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         # Get the IPF filename
         self._ipf_filename = self._instrument_name + '_diffraction_' + self._mode + '_Parameters.xml'
+        if not os.path.exists(self._ipf_filename):
+            self._ipf_filename = os.path.join(config['instrumentDefinition.directory'], self._ipf_filename)
         logger.information('IPF filename is: %s' % (self._ipf_filename))
 
         # Only enable sum files if we actually have more than one file
@@ -159,7 +161,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         for filename in self._raw_file_list:
             # The filename without path and extension will be the workspace name
-            ws_name = path.splitext(path.basename(filename))[0]
+            ws_name = os.path.splitext(os.path.basename(filename))[0]
 
             logger.debug('Loading file %s as workspace %s' % (filename, ws_name))
 
@@ -415,11 +417,11 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 raise RuntimeError('IPF requests grouping using file but does not specify a filename')
 
             # If the file is not found assume it is in the grouping files directory
-            if not path.isfile(grouping_file):
-                grouping_file = path.join(config.getString('groupingFiles.directory'), grouping_file)
+            if not os.path.isfile(grouping_file):
+                grouping_file = os.path.join(config.getString('groupingFiles.directory'), grouping_file)
 
             # If it is still not found just give up
-            if not path.isfile(grouping_file):
+            if not os.path.isfile(grouping_file):
                 raise RuntimeError('Cannot find grouping file %s' % grouping_file)
 
             # Mask detectors if required
