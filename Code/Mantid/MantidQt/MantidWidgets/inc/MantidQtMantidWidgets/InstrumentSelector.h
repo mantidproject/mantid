@@ -53,6 +53,7 @@ namespace MantidQt
     class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentSelector : public QComboBox
     {
       Q_OBJECT
+
       Q_PROPERTY(QStringList techniques READ getTechniques WRITE setTechniques)
       Q_PROPERTY(bool updateOnFacilityChange READ getAutoUpdate WRITE setAutoUpdate)
       Q_PROPERTY(QString facility READ getFacility WRITE setFacility)

@@ -34,74 +34,19 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_5">
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <item>
-        <widget class="QLabel" name="lblInstrument">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Instrument: </string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInstrument">
-         <property name="techniques">
-          <stringlist>
-           <string>Reactor Indirect Geometry Spectroscopy</string>
-          </stringlist>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
-       <item>
-        <widget class="QLabel" name="lblAnalyser">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Analyser:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="cbAnalyser"/>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_4">
-       <item>
-        <widget class="QLabel" name="lblReflection">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Reflection:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="cbReflection"/>
-       </item>
-      </layout>
-     </item>
-    </layout>
+    <widget class="MantidQt::MantidWidgets::IndirectInstrumentConfig" name="iicInstrumentConfiguration">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="techniques" stdset="0">
+      <stringlist>
+       <string>Reactor Indirect Geometry Spectroscopy</string>
+      </stringlist>
+     </property>
+    </widget>
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout">
@@ -269,9 +214,9 @@
    <header>MantidQtMantidWidgets/MWRunFiles.h</header>
   </customwidget>
   <customwidget>
-   <class>MantidQt::MantidWidgets::InstrumentSelector</class>
+   <class>MantidQt::MantidWidgets::IndirectInstrumentConfig</class>
    <extends>QComboBox</extends>
-   <header>MantidQtMantidWidgets/InstrumentSelector.h</header>
+   <header>MantidQtMantidWidgets/IndirectInstrumentConfig.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

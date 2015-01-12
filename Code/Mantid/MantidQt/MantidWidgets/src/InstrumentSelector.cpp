@@ -250,6 +250,8 @@ namespace MantidWidgets
   {
     if( techniques.isEmpty() ) return;
 
+    this->blockSignals(true);
+
     QStringList supportedInstruments;
     QStringListIterator techItr(techniques);
     while( techItr.hasNext() )
@@ -274,6 +276,8 @@ namespace MantidWidgets
         ++i;
       }
     }
+
+    this->blockSignals(false);
   }
 
 } // namespace: MantidWidgets

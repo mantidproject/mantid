@@ -28,6 +28,7 @@ namespace MantidQt
       m_uiForm.setupUi(this);
 
       m_instrumentSelector = new InstrumentSelector(0, init);
+      m_instrumentSelector->updateInstrumentOnSelection(false);
 			m_uiForm.loInstrument->addWidget(m_instrumentSelector);
 
       connect(m_instrumentSelector, SIGNAL(instrumentSelectionChanged(const QString)),
@@ -210,6 +211,9 @@ namespace MantidQt
      */
     void IndirectInstrumentConfig::updateInstrumentConfigurations(const QString & instrumentName)
     {
+      if(instrumentName.isEmpty())
+        return;
+
       g_log.debug() << "Loading configuration for instrument: " << instrumentName.toStdString() << std::endl;
 
       bool analyserPreviousBlocking = m_uiForm.cbAnalyser->signalsBlocked();
@@ -229,8 +233,11 @@ namespace MantidQt
       QList<QPair<QString, QString>> instrumentModes;
       Instrument_const_sptr instrument = instWorkspace->getInstrument();
 
-      std::string ipfAnalysers = instrument->getStringParameter("analysers")[0];
-      QStringList analysers = QString::fromStdString(ipfAnalysers).split(",");
+      std::vector<std::string> ipfAnalysers = instrument->getStringParameter("analysers");
+      if(ipfAnalysers.size() == 0)
+        return;
+
+      QStringList analysers = QString::fromStdString(ipfAnalysers[0]).split(",");
 
       for(auto it = analysers.begin(); it != analysers.end(); ++it)
       {
