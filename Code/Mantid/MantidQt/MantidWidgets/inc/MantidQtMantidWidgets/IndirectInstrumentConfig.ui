@@ -6,15 +6,27 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>446</width>
-    <height>35</height>
+    <width>500</width>
+    <height>25</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>200</width>
+    <height>25</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>25</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
@@ -31,8 +43,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="loInstrument">
-    </layout>
+    <layout class="QHBoxLayout" name="loInstrument"/>
    </item>
    <item>
     <spacer name="horizontalSpacer_2">
@@ -83,7 +94,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets/>
  <resources/>
  <connections/>
 </ui>
