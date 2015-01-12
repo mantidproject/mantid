@@ -33,7 +33,6 @@ Description          : Preferences dialog
 #include <QCheckBox>
 #include <map>
 #include "MantidQtAPI/MdSettings.h"
-#include "boost/scoped_ptr.hpp"
 
 class QLineEdit;
 class QGroupBox;
@@ -221,7 +220,7 @@ private:
   ColorButton *vsiDefaultBackground;
   QGroupBox* mdPlottingGeneralFrame;
   QCheckBox* vsiLastSession;
-  boost::scoped_ptr<MantidQt::API::MdSettings> mdSettings;
+  MantidQt::API::MdSettings m_mdSettings;
 
   QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
   QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;
@@ -278,6 +277,7 @@ private:
 
   public slots:
     void changeUsageGeneralMdColorMap(bool state);
+    void changeUsageLastSession(bool state);
 };
 
 #endif // CONFIGDIALOG_H

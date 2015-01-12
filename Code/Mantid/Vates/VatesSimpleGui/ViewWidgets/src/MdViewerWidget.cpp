@@ -18,6 +18,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 
 #include "boost/shared_ptr.hpp"
+#include "boost/scoped_ptr.hpp"
 #include "MantidQtAPI/MdConstants.h"
 #include "MantidQtAPI/MdSettings.h"
 
@@ -119,7 +120,7 @@ REGISTER_VATESGUI(MdViewerWidget)
  */
 MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   dataLoader(NULL), hiddenView(NULL), lodAction(NULL), screenShot(NULL), viewLayout(NULL),
-  viewSettings(NULL), mdSettings(new MantidQt::API::MdSettings()), mdConstants(new MantidQt::API::MdConstants()), backgroundRgbProvider(new BackgroundRgbProvider(mdSettings))
+  viewSettings(NULL)
 {
   // Calling workspace observer functions.
   observeAfterReplace();
@@ -493,6 +494,18 @@ void MdViewerWidget::renderingDone()
  */
 void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, std::string instrumentName)
 {
+  // Workaround: Note that setting to the standard view was part of the eventFilter. This causes the 
+  //             VSI window to not close properly. Moving it here ensures that we have the switch, but
+  //             after the window is started again.
+  if (this->currentView->getNumSources() == 0)
+  {
+    this->setColorForBackground();
+    this->ui.colorSelectionWidget->loadColorMap(this->viewSwitched);
+
+    this->ui.modeControlWidget->setToStandardView();
+    this->currentView->hide();
+  }
+
   QString sourcePlugin = "";
   if (VatesViewerInterface::PEAKS == workspaceType)
   {
@@ -518,12 +531,10 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
   // correct initial after calling renderAndFinalSetup. We first 
   // need to load in the current view and then switch to be inline
   // with the current architecture.
-  
   if (VatesViewerInterface::PEAKS != workspaceType)
   {
      resetCurrentView(workspaceType, instrumentName);
   }
-
 }
 
 /**
@@ -573,6 +584,10 @@ void MdViewerWidget::resetCurrentView(int workspaceType, const std::string& inst
   {
     this->ui.modeControlWidget->setToSelectedView(initialView);
   }
+  else
+  {
+    this->currentView->show();
+  }
 
   this->initialView = initialView;
 }
@@ -589,12 +604,12 @@ void MdViewerWidget::resetCurrentView(int workspaceType, const std::string& inst
 ModeControlWidget::Views MdViewerWidget::getInitialView(int workspaceType, std::string instrumentName)
 {
   // Get the possible initial views
-  QString initialViewFromUserProperties = mdSettings->getUserSettingInitialView();
+  QString initialViewFromUserProperties = mdSettings.getUserSettingInitialView();
   QString initialViewFromTechnique = getViewForInstrument(instrumentName);
 
   // The user-properties-defined default view takes precedence over the technique-defined default view
   QString initialView;
-  if (initialViewFromUserProperties == mdConstants->getTechniqueDependence())
+  if (initialViewFromUserProperties == mdConstants.getTechniqueDependence())
   {
    initialView = initialViewFromTechnique;
   }
@@ -620,7 +635,7 @@ QString MdViewerWidget::getViewForInstrument(const std::string& instrumentName) 
   // If nothing is specified the standard view is chosen
   if (instrumentName.empty())
   {
-    return mdConstants->getStandardView();
+    return mdConstants.getStandardView();
   }
 
   // Check for techniques
@@ -634,18 +649,18 @@ QString MdViewerWidget::getViewForInstrument(const std::string& instrumentName) 
 
   if (techniques.count("Single Crystal Diffraction") > 0 )
   {
-    associatedView = mdConstants->getSplatterPlotView();
+    associatedView = mdConstants.getSplatterPlotView();
   }
   else if (techniques.count("Neutron Diffraction") > 0 )
   {
-    associatedView = mdConstants->getSplatterPlotView();
+    associatedView = mdConstants.getSplatterPlotView();
   } else if (checkIfTechniqueContainsKeyword(techniques, "Spectroscopy"))
   {
-    associatedView = mdConstants->getMultiSliceView();
+    associatedView = mdConstants.getMultiSliceView();
   }
   else
   {
-    associatedView = mdConstants->getStandardView();
+    associatedView = mdConstants.getStandardView();
   }
 
   return associatedView;
@@ -730,7 +745,7 @@ void MdViewerWidget::setupPluginMode()
  */
 void MdViewerWidget::renderAndFinalSetup()
 {
-  this->setDefaultColorForBackground();
+  this->setColorForBackground();
   this->currentView->render();
   this->ui.colorSelectionWidget->loadColorMap(this->viewSwitched);
   this->currentView->setColorsForView();
@@ -741,10 +756,9 @@ void MdViewerWidget::renderAndFinalSetup()
 /**
  * Set the background color for this view. 
  */
-void MdViewerWidget::setDefaultColorForBackground()
+void MdViewerWidget::setColorForBackground()
 {
-  backgroundRgbProvider->setBackgroundColor(this->currentView->getView(), this->viewSwitched);
-  backgroundRgbProvider->observe(this->currentView->getView());
+  this->currentView->setColorForBackground(this->viewSwitched);
 }
 
 /**
@@ -808,7 +822,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->hiddenView->close();
   this->hiddenView->destroyView();
   delete this->hiddenView;
-  this->setDefaultColorForBackground(); // Keeps background color to default value
+  this->setColorForBackground();
   this->currentView->render();
   this->currentView->setColorsForView();
   
@@ -848,12 +862,16 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
       {
         this->ui.parallelProjButton->toggle();
       }
+
       this->ui.colorSelectionWidget->reset();
       this->currentView->setColorScaleState(this->ui.colorSelectionWidget);
+
       pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
       builder->destroySources();
 
-      this->ui.modeControlWidget->setToStandardView();
+      this->currentView->updateSettings();
+      this->currentView->hide();
+
       return true;
     }
   }
@@ -1123,6 +1141,7 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
     emit this->requestClose();
   }
 }
+
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid

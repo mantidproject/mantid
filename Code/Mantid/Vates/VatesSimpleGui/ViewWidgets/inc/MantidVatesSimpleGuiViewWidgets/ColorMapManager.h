@@ -5,7 +5,6 @@
 #include "MantidQtAPI/MdSettings.h"
 #include <string>
 #include <map>
-#include "boost/scoped_ptr.hpp"
 
 
 namespace Mantid
@@ -82,11 +81,11 @@ namespace Mantid
           void setNewActiveColorMap(int index);
 
         private:
-          int indexCounter;
-          std::map<std::string, int> nameToIndex;
-          std::map<int, std::string> indexToName;
+          int m_indexCounter;
+          std::map<std::string, int> m_nameToIndex;
+          std::map<int, std::string> m_indexToName;
 
-          boost::scoped_ptr<MantidQt::API::MdSettings> mdSettings;
+          MantidQt::API::MdSettings m_mdSettings;
       };
     }
   }

@@ -1,6 +1,6 @@
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidQtAPI/MdSettings.h"
-#include "boost/shared_ptr.hpp"
+#include "MantidKernel/Logger.h"
 
 #include <vector>
 #include <pqRenderView.h>
@@ -24,14 +24,14 @@ namespace Mantid
 
       QColor BackgroundRgbProvider::currentBackgroundColor = QColor(84,89,109);
 
-      BackgroundRgbProvider::BackgroundRgbProvider(boost::shared_ptr<MantidQt::API::MdSettings> settings) : mdSettings(settings)
+      BackgroundRgbProvider::BackgroundRgbProvider()
       {
       };
 
       BackgroundRgbProvider::~BackgroundRgbProvider()
       {
-        // Update the settings before exiting
-        updateLastSessionBackgroundColor();
+         // Need to record the background color
+         update();
       };
 
       std::vector<double> BackgroundRgbProvider::getRgb(bool viewSwitched)
@@ -56,22 +56,22 @@ namespace Mantid
         if (viewSwitched)
         {
           // Update the settings
-          updateLastSessionBackgroundColor();
+          update();
 
-          userBackground = mdSettings->getLastSessionBackgroundColor();
+          userBackground = m_mdSettings.getLastSessionBackgroundColor();
         }
         else
         {
-          if (mdSettings->getUsageLastSession())
+          if (m_mdSettings.getUsageLastSession())
           {
-            userBackground = mdSettings->getLastSessionBackgroundColor();
+            userBackground = m_mdSettings.getLastSessionBackgroundColor();
           }
           else
           {
             // Select the user setting as the background color and make the user setting the last session color
-            userBackground= mdSettings->getUserSettingBackgroundColor();
+            userBackground= m_mdSettings.getUserSettingBackgroundColor();
 
-            mdSettings->setLastSessionBackgroundColor(userBackground);
+            m_mdSettings.setLastSessionBackgroundColor(userBackground);
           }
 
           // Need to make sure that the static variable is initialized correctly, else it will show a black background
@@ -92,7 +92,7 @@ namespace Mantid
         else
         {
           // Set the default
-          QColor defaultBackgroundColor = mdSettings->getDefaultBackgroundColor();
+          QColor defaultBackgroundColor = m_mdSettings.getDefaultBackgroundColor();
           rVal = defaultBackgroundColor.red();
           gVal = defaultBackgroundColor.green();
           bVal = defaultBackgroundColor.blue();
@@ -105,9 +105,9 @@ namespace Mantid
         return background;
       }
 
-      void BackgroundRgbProvider::updateLastSessionBackgroundColor()
+      void BackgroundRgbProvider::update()
       {
-        mdSettings->setLastSessionBackgroundColor(currentBackgroundColor);
+        m_mdSettings.setLastSessionBackgroundColor(currentBackgroundColor);
       }
 
       void BackgroundRgbProvider::setBackgroundColor(pqRenderView* view, bool viewSwitched)

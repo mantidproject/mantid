@@ -19,27 +19,27 @@ namespace MantidQt
     void MdConstants::initializeSettingsConstants()
     {
       // General MD Color Map
-      generalMdColorMap = "ColdFire";
+      m_generalMdColorMap = "ColdFire";
 
       // Background color
-      defaultBackgroundColor = QColor(84,89,109);
+      m_defaultBackgroundColor = QColor(84,89,109);
 
       // Populate the optional color maps
-      vsiColorMaps.append("Cool to Warm");
-      vsiColorMaps.append("Blue to Red Rainbow");
-      vsiColorMaps.append("Red to Blue Rainbow");
-      vsiColorMaps.append("Grayscale");
-      vsiColorMaps.append("X Ray");
-      vsiColorMaps.append("Blue to Yellow");
+      m_vsiColorMaps.append("Cool to Warm");
+      m_vsiColorMaps.append("Blue to Red Rainbow");
+      m_vsiColorMaps.append("Red to Blue Rainbow");
+      m_vsiColorMaps.append("Grayscale");
+      m_vsiColorMaps.append("X Ray");
+      m_vsiColorMaps.append("Blue to Yellow");
     }
 
     void MdConstants::initializeViewConstants()
     {
-      techniqueDependence = "Technique-Dependent";
-      standardView = "Standard";
-      multiSliceView = "Multi Slice";
-      threeSliceView = "Three Slice";
-      splatterPlotView = "Splatter Plot";
+      m_techniqueDependence = "Technique-Dependent";
+      m_standardView = "Standard";
+      m_multiSliceView = "Multi Slice";
+      m_threeSliceView = "Three Slice";
+      m_splatterPlotView = "Splatter Plot";
     }
 
     /**
@@ -48,7 +48,7 @@ namespace MantidQt
      */
     QString MdConstants::getGeneralMdColorMap() const
     {
-      return generalMdColorMap;
+      return m_generalMdColorMap;
     }
 
     /**
@@ -57,7 +57,7 @@ namespace MantidQt
      */
     QColor MdConstants::getDefaultBackgroundColor() const
     {
-      return defaultBackgroundColor;
+      return m_defaultBackgroundColor;
     }
 
     /**
@@ -66,7 +66,7 @@ namespace MantidQt
      */
     QStringList MdConstants::getVsiColorMaps() const
     {
-      return vsiColorMaps;
+      return m_vsiColorMaps;
     }
 
     /**
@@ -75,7 +75,7 @@ namespace MantidQt
      */
     QString MdConstants::getStandardView() const
     {
-      return standardView;
+      return m_standardView;
     }
 
      /**
@@ -84,7 +84,7 @@ namespace MantidQt
      */
     QString MdConstants::getMultiSliceView() const
     {
-      return multiSliceView;
+      return m_multiSliceView;
     }
 
      /**
@@ -93,7 +93,7 @@ namespace MantidQt
      */
     QString MdConstants::getThreeSliceView() const
     {
-      return threeSliceView;
+      return m_threeSliceView;
     }
 
      /**
@@ -102,7 +102,7 @@ namespace MantidQt
      */
     QString MdConstants::getSplatterPlotView() const
     {
-      return splatterPlotView;
+      return m_splatterPlotView;
     }
 
      /**
@@ -111,7 +111,7 @@ namespace MantidQt
      */
     QString MdConstants::getTechniqueDependence() const
     {
-      return techniqueDependence;
+      return m_techniqueDependence;
     }
 
      /**

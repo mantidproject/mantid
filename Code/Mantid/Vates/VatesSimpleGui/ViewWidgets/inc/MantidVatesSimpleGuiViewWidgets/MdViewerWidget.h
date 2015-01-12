@@ -131,10 +131,8 @@ private:
   pqViewSettingsReaction *viewSettings; ///< Holder for the view settings reaction
   bool viewSwitched;
   ModeControlWidget::Views initialView; ///< Holds the initial view
-  boost::shared_ptr<MantidQt::API::MdSettings> mdSettings;///<Holds the MD settings which are used to persist data
-  boost::shared_ptr<MantidQt::API::MdConstants> mdConstants;/// < Holds the MD constants
-  boost::shared_ptr<BackgroundRgbProvider> backgroundRgbProvider;/// < Holds the manager for background color related tasks.
-
+  MantidQt::API::MdSettings mdSettings;///<Holds the MD settings which are used to persist data
+  MantidQt::API::MdConstants mdConstants;/// < Holds the MD constants
 
   /// Check the environmental variables.
   void checkEnvSetup();
@@ -183,7 +181,7 @@ private:
   /// Reset the current view to the appropriate initial view.
   void resetCurrentView(int workspaceType, const std::string& instrumentName);
   /// Set up the default color for the background of the view.
-  void setDefaultColorForBackground();
+  void setColorForBackground();
 };
 
 } // SimpleGui

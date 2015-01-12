@@ -2,7 +2,6 @@
 #define MDSETTINGS_H_
 
 #include "DllOption.h"
-#include "boost/scoped_ptr.hpp"
 #include "MantidQtAPI/MdConstants.h"
 #include <QColor>
 #include <QString>
@@ -156,25 +155,25 @@ namespace MantidQt
         void setUserSettingIntialView(QString initialView);
 
       private:
-        boost::scoped_ptr<MdConstants> mdConstants;
+        MdConstants m_mdConstants;
 
-        QString vsiGroup;
-        QString generalMdGroup;
-        QString sliceViewerGroup;
+        QString m_vsiGroup;
+        QString m_generalMdGroup;
+        QString m_sliceViewerGroup;
 
-        QString lblUserSettingColorMap;
-        QString lblLastSessionColorMap;
-        QString lblUseLastSessionColorMap;
-        QString lblGeneralMdColorMap;
-        QString lblUseGeneralMdColorMap;
-        QString lblGeneralMdColorMapName;
+        QString m_lblUserSettingColorMap;
+        QString m_lblLastSessionColorMap;
+        QString m_lblUseLastSessionColorMap;
+        QString m_lblGeneralMdColorMap;
+        QString m_lblUseGeneralMdColorMap;
+        QString m_lblGeneralMdColorMapName;
 
-        QString lblSliceViewerColorMap;
+        QString m_lblSliceViewerColorMap;
 
-        QString lblUserSettingBackgroundColor;
-        QString lblLastSessionBackgroundColor;
+        QString m_lblUserSettingBackgroundColor;
+        QString m_lblLastSessionBackgroundColor;
 
-        QString lblUserSettingInitialView;
+        QString m_lblUserSettingInitialView;
     };
   }
 }

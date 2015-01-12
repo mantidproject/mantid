@@ -74,14 +74,14 @@ namespace MantidQt
         QStringList getAllInitialViews() const;
 
       private:
-        QString generalMdColorMap;
-        QColor defaultBackgroundColor;
-        QStringList vsiColorMaps;
-        QString standardView;
-        QString multiSliceView;
-        QString threeSliceView;
-        QString splatterPlotView;
-        QString techniqueDependence;
+        QString m_generalMdColorMap;
+        QColor m_defaultBackgroundColor;
+        QStringList m_vsiColorMaps;
+        QString m_standardView;
+        QString m_multiSliceView;
+        QString m_threeSliceView;
+        QString m_splatterPlotView;
+        QString m_techniqueDependence;
     };
   }
 }

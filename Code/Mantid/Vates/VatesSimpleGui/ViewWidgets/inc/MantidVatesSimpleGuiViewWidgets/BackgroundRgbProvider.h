@@ -3,7 +3,6 @@
 
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidQtAPI/MdSettings.h"
-#include "boost/shared_ptr.hpp"
 #include <vector>
 #include <map>
 #include <string>
@@ -47,7 +46,7 @@ namespace Mantid
       class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS BackgroundRgbProvider
       {
         public:
-          BackgroundRgbProvider(boost::shared_ptr<MantidQt::API::MdSettings> settings);
+          BackgroundRgbProvider();
           
           ~BackgroundRgbProvider();
 
@@ -63,6 +62,11 @@ namespace Mantid
            *@param view The view which we want to listen to.
            */
           void observe(pqRenderView* view);
+
+          /**
+           * Update the last session background color.
+           */
+          void update();
 
        private:
           /**
@@ -80,11 +84,6 @@ namespace Mantid
           std::vector<double> getRgb(bool viewSwitched);
 
           /**
-           * Update the last session background color.
-           */
-          void updateLastSessionBackgroundColor();
-
-          /**
            * Callback function for background color changing events
            *@param caller Calling object.
            *@param eventId Not used.
@@ -95,7 +94,7 @@ namespace Mantid
 
           static QColor currentBackgroundColor;
 
-          boost::shared_ptr<MantidQt::API::MdSettings> mdSettings;
+          MantidQt::API::MdSettings m_mdSettings;
       };
     }
   }

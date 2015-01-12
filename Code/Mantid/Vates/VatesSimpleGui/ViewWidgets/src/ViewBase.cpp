@@ -1,4 +1,5 @@
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
+#include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -597,6 +598,13 @@ void ViewBase::updateView()
 {
 }
 
+/// This function is used to update settings, such as background color etc.
+void ViewBase::updateSettings()
+{
+  this->backgroundRgbProvider.update();
+}
+
+
 /**
  * This function checks the current pipeline for a filter with the specified
  * name. The function works for generic filter names only.
@@ -679,6 +687,16 @@ bool ViewBase::hasWorkspaceType(const QString &wsTypeName)
     }
   }
   return hasWsType;
+}
+
+/**
+ * This function sets the default colors for the background and connects a tracker for changes of the background color by the user.
+ * @param viewSwitched If the view was switched or created.
+ */
+void ViewBase::setColorForBackground(bool viewSwitched)
+{
+  backgroundRgbProvider.setBackgroundColor(this->getView(), viewSwitched);
+  backgroundRgbProvider.observe(this->getView());
 }
 
 } // namespace SimpleGui

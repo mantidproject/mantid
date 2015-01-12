@@ -1,6 +1,7 @@
 #ifndef VIEWBASE_H_
 #define VIEWBASE_H_
 
+#include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
@@ -114,9 +115,12 @@ public:
   virtual void setPluginSource(QString pluginName, QString wsName);
   /// Determines if source has timesteps (4D).
   virtual bool srcHasTimeSteps(pqPipelineSource *src);
-
+  /// Set the the background color for the view
+  virtual void setColorForBackground(bool viewSwitched);
   /// Enumeration for Cartesian coordinates
   enum Direction {X, Y, Z};
+  /// Update settings
+  virtual void updateSettings();
 
   QPointer<pqPipelineSource> origSrc; ///< The original source
   QPointer<pqPipelineRepresentation> origRep; ///< The original source representation
@@ -199,6 +203,7 @@ private:
   void handleTimeInfo(vtkSMDoubleVectorProperty *dvp);
 
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
+  BackgroundRgbProvider backgroundRgbProvider; /// < Holds the manager for background color related tasks.
 };
 
 }

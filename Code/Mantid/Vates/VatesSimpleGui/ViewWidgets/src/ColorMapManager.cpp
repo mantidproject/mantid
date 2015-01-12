@@ -15,7 +15,7 @@ namespace Mantid
   {
     namespace SimpleGui
     {
-      ColorMapManager::ColorMapManager() : indexCounter(0), mdSettings(new MantidQt::API::MdSettings())
+      ColorMapManager::ColorMapManager() : m_indexCounter(0)
       {
       }
 
@@ -30,26 +30,26 @@ namespace Mantid
         // If the view has switched use the last color map index
         if (viewSwitched)
         {
-          defaultColorMap = mdSettings->getLastSessionColorMap();
+          defaultColorMap = m_mdSettings.getLastSessionColorMap();
         }
         else 
         {
           // Check if the user wants a general MD color map
-          if (mdSettings->getUsageGeneralMdColorMap())
+          if (m_mdSettings.getUsageGeneralMdColorMap())
           {
             // The name is sufficient for the VSI to find the color map
-            defaultColorMap = mdSettings->getGeneralMdColorMapName(); 
+            defaultColorMap = m_mdSettings.getGeneralMdColorMapName(); 
           }
           else 
           {
             // Check if the user wants to use the last session
-            if (mdSettings->getUsageLastSession())
+            if (m_mdSettings.getUsageLastSession())
             {
-              defaultColorMap = mdSettings->getLastSessionColorMap();
+              defaultColorMap = m_mdSettings.getLastSessionColorMap();
             }
             else
             {
-              defaultColorMap = mdSettings->getUserSettingColorMap();
+              defaultColorMap = m_mdSettings.getUserSettingColorMap();
             }
           }
         }
@@ -59,7 +59,7 @@ namespace Mantid
 
         if (!defaultColorMap.isEmpty())
         {
-          mdSettings->setLastSessionColorMap(defaultColorMap);
+          m_mdSettings.setLastSessionColorMap(defaultColorMap);
           defaultColorMapIndex = this->getColorMapIndex(defaultColorMap.toStdString());
         }
 
@@ -71,17 +71,17 @@ namespace Mantid
         // Add the name to the colormap map and increment the index counter
         if (!name.empty())
         {
-          this->nameToIndex.insert(std::pair<std::string, int>(name, this->indexCounter));
-          this->indexToName.insert(std::pair<int,std::string>(this->indexCounter, name));
-          this->indexCounter = this->indexCounter + 1;
+          m_nameToIndex.insert(std::pair<std::string, int>(name, m_indexCounter));
+          m_indexToName.insert(std::pair<int,std::string>(m_indexCounter, name));
+          m_indexCounter = m_indexCounter + 1;
         }
       }
       
       int ColorMapManager::getColorMapIndex(std::string colorMap)
       {
-        if (this->nameToIndex.count(colorMap) == 1 )
+        if (m_nameToIndex.count(colorMap) == 1 )
         {
-          return nameToIndex[colorMap];
+          return m_nameToIndex[colorMap];
         }
         else
         {
@@ -91,7 +91,7 @@ namespace Mantid
 
       bool ColorMapManager::isRecordedColorMap(std::string colorMap)
       {
-        if (this->nameToIndex.count(colorMap) > 0)
+        if (m_nameToIndex.count(colorMap) > 0)
         {
           return true;
         }
@@ -104,9 +104,9 @@ namespace Mantid
       void ColorMapManager::setNewActiveColorMap(int index)
       {
         // Persist the new value of the color map in the QSettings object.
-        if (indexToName.count(index) > 0)
+        if (m_indexToName.count(index) > 0)
         {
-          mdSettings->setLastSessionColorMap(QString::fromStdString(indexToName[index]));
+          m_mdSettings.setLastSessionColorMap(QString::fromStdString(m_indexToName[index]));
         }
       }
     }
