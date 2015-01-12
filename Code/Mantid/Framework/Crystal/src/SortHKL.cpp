@@ -116,15 +116,17 @@ void SortHKL::exec() {
   int equivalent = 0;
   for (int i = 0; i < NumberPeaks; i++) {
     V3D hkl1 = peaks[i].getHKL();
-    std::string bank1 = peaks[i].getBankName();
+    //std::string bank1 = peaks[i].getBankName();
+    bool found = false;
     for (int j = i + 1; j < NumberPeaks; j++) {
       V3D hkl2 = peaks[j].getHKL();
-      std::string bank2 = peaks[j].getBankName();
-      if (pointGroup->isEquivalent(hkl1, hkl2) && bank1.compare(bank2) == 0) {
+      //std::string bank2 = peaks[j].getBankName();
+      if (pointGroup->isEquivalent(hkl1, hkl2) ) { //&& bank1.compare(bank2) == 0) {
         peaks[j].setHKL(hkl1);
-        equivalent++;
+        found = true;
       }
     }
+    if(found) equivalent++;
   }
   std::vector<std::pair<std::string, bool> > criteria;
   // Sort by wavelength
@@ -170,18 +172,18 @@ void SortHKL::exec() {
   std::vector<int> peakno;
   double rSum = 0, rpSum = 0, f2Sum = 0;
   V3D hkl1;
-  std::string bank1;
+  //std::string bank1;
   for (int i = 1; i < NumberPeaks; i++) {
     hkl1 = peaks[i - 1].getHKL();
-    bank1 = peaks[i - 1].getBankName();
+    //bank1 = peaks[i - 1].getBankName();
     if (i == 1) {
       peakno.push_back(0);
       data.push_back(peaks[i - 1].getIntensity());
       sig2.push_back(std::pow(peaks[i - 1].getSigmaIntensity(), 2));
     }
     V3D hkl2 = peaks[i].getHKL();
-    std::string bank2 = peaks[i].getBankName();
-    if (hkl1 == hkl2 && bank1.compare(bank2) == 0) {
+    //std::string bank2 = peaks[i].getBankName();
+    if (hkl1 == hkl2) { // && bank1.compare(bank2) == 0) {
       peakno.push_back(i);
       data.push_back(peaks[i].getIntensity());
       sig2.push_back(std::pow(peaks[i].getSigmaIntensity(), 2));
@@ -230,7 +232,7 @@ void SortHKL::exec() {
       data.clear();
       sig2.clear();
       hkl1 = hkl2;
-      bank1 = bank2;
+      //bank1 = bank2;
       peakno.push_back(i);
       data.push_back(peaks[i].getIntensity());
       sig2.push_back(std::pow(peaks[i].getSigmaIntensity(), 2));
