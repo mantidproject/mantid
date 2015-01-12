@@ -100,12 +100,8 @@ namespace MantidQt
       /// Called when the load instrument algorithms complete
       void instrumentLoadingDone(bool error);
 
-      /// Called when an instrument is selected from the combo box
-      void instrumentSelected(const QString& prefix);
-      /// Called when an analyser is selected form the combo box
-      void analyserSelected(int index);
       /// Called when the instrument setup has been changed
-      void instrumentSetupChanged();
+      void instrumentSetupChanged(const QString & instrumentName, const QString & analyser, const QString & reflection);
 
     private:
       void updateAnalyserList();

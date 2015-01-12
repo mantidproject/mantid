@@ -134,9 +134,6 @@ void IndirectDataReduction::initLayout()
   // Do not allow running until setup  and instrument laoding are done
   updateRunButton(false, "Loading UI", "Initialising user interface components...");
 
-  if(m_instrument == "")
-    instrumentSelected(m_uiForm.cbInst->currentText());
-
   // Create the tabs
   m_tabs["Energy Transfer"] = new IndirectConvertToEnergy(m_uiForm, this);
   m_tabs["Calibration"] = new IndirectCalibration(m_uiForm, this);
@@ -146,12 +143,9 @@ void IndirectDataReduction::initLayout()
   m_tabs["S(Q, w)"] = new IndirectSqw(m_uiForm, this);
   m_tabs["Moments"] = new IndirectMoments(m_uiForm, this);
 
-  // Handle the instrument being changed
-  connect(m_uiForm.cbInst, SIGNAL(instrumentSelectionChanged(const QString&)), this, SLOT(instrumentSelected(const QString&)));
-  // Handle the analyser being changed
-  connect(m_uiForm.cbAnalyser, SIGNAL(currentIndexChanged(int)), this, SLOT(analyserSelected(int)));
-  // Handle the reflection being changed
-  connect(m_uiForm.cbReflection, SIGNAL(currentIndexChanged(int)), this, SLOT(instrumentSetupChanged()));
+  // Handle instrument configuration changes
+  connect(m_uiForm.iicInstrumentConfiguration, SIGNAL(instrumentConfigurationUpdated(const QString &, const QString &, const QString &)),
+          this, SLOT(instrumentSetupChanged(const QString &, const QString &, const QString &)));
 
   // Connect "?" (Help) Button
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
@@ -174,6 +168,9 @@ void IndirectDataReduction::initLayout()
     connect(this, SIGNAL(newInstrumentConfiguration()), it->second, SIGNAL(newInstrumentConfiguration())),
     it->second->setupTab();
   }
+
+  // Update the instrument configuration across the UI
+  m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
 }
 
 
@@ -193,18 +190,17 @@ void IndirectDataReduction::initLocalPython()
  * Called when any of the instrument configuration options are changed.
  *
  * Used to notify tabs that rely on the instrument config when the config changes.
+ *
+ * @param instrumentName Name of selected instrument
+ * @param analyser Name of selected analyser bank
+ * @param reflection Name of selected reflection mode
  */
-void IndirectDataReduction::instrumentSetupChanged()
+void IndirectDataReduction::instrumentSetupChanged(const QString & instrumentName, const QString & analyser,
+                                                   const QString & reflection)
 {
-  QString instrumentName = m_uiForm.cbInst->currentText();
-  QString analyser = m_uiForm.cbAnalyser->currentText();
-  QString reflection = m_uiForm.cbReflection->currentText();
-
-  if(instrumentName != "" && analyser != "" && reflection != "")
-  {
-    loadInstrumentIfNotExist(instrumentName.toStdString(), analyser.toStdString(), reflection.toStdString());
-    emit newInstrumentConfiguration();
-  }
+  MatrixWorkspace_sptr ws = loadInstrumentIfNotExist(instrumentName.toStdString(), analyser.toStdString(), reflection.toStdString());
+  instrumentLoadingDone(ws == NULL);
+  emit newInstrumentConfiguration();
 }
 
 
@@ -254,145 +250,18 @@ Mantid::API::MatrixWorkspace_sptr IndirectDataReduction::loadInstrumentIfNotExis
 
 
 /**
- * Gets the operation modes for the current instrument as defined in it's parameter file.
- *
- * @returns A list of analysers and a vector of reflections that can be used with each
- */
-std::vector<std::pair<std::string, std::vector<std::string> > > IndirectDataReduction::getInstrumentModes()
-{
-  std::vector<std::pair<std::string, std::vector<std::string> > > modes;
-  MatrixWorkspace_sptr instWorkspace = loadInstrumentIfNotExist(m_instrument.toStdString());
-  Instrument_const_sptr instrument = instWorkspace->getInstrument();
-
-  std::vector<std::string> analysers;
-  boost::split(analysers, instrument->getStringParameter("analysers")[0], boost::is_any_of(","));
-
-  for(auto it = analysers.begin(); it != analysers.end(); ++it)
-  {
-    std::string analyser = *it;
-    std::string ipfReflections = instrument->getStringParameter("refl-" + analyser)[0];
-
-    std::vector<std::string> reflections;
-    boost::split(reflections, ipfReflections, boost::is_any_of(","), boost::token_compress_on);
-
-    std::pair<std::string, std::vector<std::string> > data(analyser, reflections);
-    modes.push_back(data);
-  }
-
-  return modes;
-}
-
-
-/**
- * Updated the list of analysers based on the current instrument.
- */
-void IndirectDataReduction::updateAnalyserList()
-{
-  auto instModes = getInstrumentModes();
-
-  m_uiForm.cbAnalyser->clear();
-
-  for(auto modesIt = instModes.begin(); modesIt != instModes.end(); ++modesIt)
-  {
-    QString analyser = QString::fromStdString(modesIt->first);
-    std::vector<std::string> reflections = modesIt->second;
-
-    if(analyser != "diffraction") // Do not put diffraction into the analyser list
-    {
-      if(reflections.size() > 0)
-      {
-        QStringList reflectionsList;
-        for(auto reflIt = reflections.begin(); reflIt != reflections.end(); ++reflIt)
-          reflectionsList.push_back(QString::fromStdString(*reflIt));
-        QVariant data = QVariant(reflectionsList);
-        m_uiForm.cbAnalyser->addItem(analyser, data);
-      }
-      else
-      {
-        m_uiForm.cbAnalyser->addItem(analyser);
-      }
-    }
-  }
-
-  analyserSelected(m_uiForm.cbAnalyser->currentIndex());
-}
-
-
-/**
  * Tasks to be carried out after an empty instument has finished loading
  */
 void IndirectDataReduction::instrumentLoadingDone(bool error)
 {
-  QString curInstPrefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString();
-  if((curInstPrefix == "") || error)
+  if(error)
   {
     g_log.error("Instument loading failed! (this can be caused by having both direct and indirect interfaces open)");
-    m_uiForm.cbInst->setEnabled(true);
     updateRunButton(false, "No Instrument", "No instrument is currently loaded.");
     return;
   }
 
-  updateAnalyserList();
   updateRunButton();
-  m_uiForm.cbInst->setEnabled(true);
-}
-
-
-/**
- * Handled loading thebase instrument when it is selected form the instrument combo box.
- *
- * @param instName Instrument name from QComboBox object
- */
-void IndirectDataReduction::instrumentSelected(const QString& instName)
-{
-  if(instName != m_instrument)
-  {
-    // Remove the old empty instrument workspace if it is there
-    std::string wsName = "__empty_" + m_instrument.toStdString();
-    Mantid::API::AnalysisDataServiceImpl& dataStore = Mantid::API::AnalysisDataService::Instance();
-    if(dataStore.doesExist(wsName))
-      dataStore.remove(wsName);
-
-    updateRunButton(false, "Loading Inst.", "Loading the selected instrument...");
-    m_uiForm.cbInst->setEnabled(false);
-    loadInstrumentIfNotExist(instName.toStdString());
-    m_instrument = instName;
-
-    //TODO
-    instrumentLoadingDone(false);
-  }
-}
-
-
-/**
- * Updates the list of reflections in the reflection combo box when the analyser is changed.
- *
- * @param index Index of analyser in combo box
- */
-void IndirectDataReduction::analyserSelected(int index)
-{
-  // Populate Reflection combobox with correct values for Analyser selected.
-  m_uiForm.cbReflection->clear();
-
-  QVariant currentData = m_uiForm.cbAnalyser->itemData(index);
-  if ( currentData == QVariant::Invalid )
-  {
-    m_uiForm.lbReflection->setEnabled(false);
-    m_uiForm.cbReflection->setEnabled(false);
-    return;
-  }
-  else
-  {
-    m_uiForm.lbReflection->setEnabled(true);
-    m_uiForm.cbReflection->setEnabled(true);
-    QStringList reflections = currentData.toStringList();
-    for ( int i = 0; i < reflections.count(); i++ )
-    {
-      m_uiForm.cbReflection->addItem(reflections[i]);
-    }
-  }
-
-  emit instrumentSetupChanged();
 }
 
 
@@ -455,13 +324,6 @@ void IndirectDataReduction::readSettings()
   settings.beginGroup(m_settingsGroup);
   QString instName = settings.value("instrument-name", "").toString();
   settings.endGroup();
-
-  if(instName.isEmpty())
-    return;
-
-  int index = m_uiForm.cbInst->findText(instName);
-  if(index >= 0)
-    m_uiForm.cbInst->setCurrentIndex(index);
 }
 
 
@@ -474,7 +336,7 @@ void IndirectDataReduction::saveSettings()
   settings.beginGroup(m_settingsGroup);
   QString instrName;
 
-  instrName = m_uiForm.cbInst->currentText();
+  instrName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
 
   settings.setValue("instrument-name", instrName);
   settings.endGroup();

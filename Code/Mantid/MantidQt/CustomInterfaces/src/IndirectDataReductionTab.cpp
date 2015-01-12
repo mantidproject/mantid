@@ -93,9 +93,9 @@ namespace CustomInterfaces
     std::map<QString, QString> instDetails;
 
     // Get instrument configuration
-    std::string instrumentName = m_uiForm.cbInst->currentText().toStdString();
-    std::string analyser = m_uiForm.cbAnalyser->currentText().toStdString();
-    std::string reflection = m_uiForm.cbReflection->currentText().toStdString();
+    std::string instrumentName = m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString();
+    std::string analyser = m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString();
+    std::string reflection = m_uiForm.iicInstrumentConfiguration->getReflectionName().toStdString();
 
     instDetails["instrument"] = QString::fromStdString(instrumentName);
     instDetails["analyser"] = QString::fromStdString(analyser);
@@ -188,11 +188,11 @@ namespace CustomInterfaces
   {
     // Get any unset parameters
     if(instName.isEmpty())
-      instName = m_uiForm.cbInst->currentText();
+      instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
     if(analyser.isEmpty())
-      analyser = m_uiForm.cbAnalyser->currentText();
+      analyser = m_uiForm.iicInstrumentConfiguration->getAnalyserName();
     if(reflection.isEmpty())
-      reflection = m_uiForm.cbReflection->currentText();
+      reflection = m_uiForm.iicInstrumentConfiguration->getReflectionName();
 
     std::map<std::string, double> ranges;
 
