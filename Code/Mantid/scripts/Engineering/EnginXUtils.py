@@ -42,3 +42,6 @@ def getWsIndicesForBank(bank, ws):
 
     return filter(isIndexInBank, range(0, ws.getNumberHistograms()))
 
+def getExpectedPeakDefaults():
+    ExpectPeakDefault = [3.1243, 2.7057, 1.9132,1.6316, 1.5621, 1.3529, 1.2415,1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, 0.8556, 0.8252, 0.8158, 0.7811]
+    return ExpectPeakDefault

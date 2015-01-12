@@ -3,6 +3,8 @@ from mantid.api import *
 
 import math
 import numpy as np
+import EnginXUtils #contains default values and loading mech
+
 
 class EnginXFitPeaks(PythonAlgorithm):
     def category(self):
@@ -15,13 +17,14 @@ class EnginXFitPeaks(PythonAlgorithm):
     	return "The algorithm fits an expected diffraction pattern to a workpace spectrum by performing single peak fits."
 
     def PyInit(self):
+      
     	self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
     		"Workspace to fit peaks in. ToF is expected X unit.")
 
     	self.declareProperty("WorkspaceIndex", 0,
     		"Index of the spectra to fit peaks in")
 
-    	self.declareProperty(FloatArrayProperty("ExpectedPeaks", [0.6, 1.9]),
+    	self.declareProperty(FloatArrayProperty("ExpectedPeaks", EnginXUtils.getExpectedPeakDefaults()),
     		"A list of dSpacing values to be translated into TOF to find expected peaks.")
     	
     	self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",action=FileAction.OptionalLoad,extensions = [".csv"]),"Load from file a list of dSpacing values to be translated into TOF to find expected peaks.")
@@ -31,6 +34,7 @@ class EnginXFitPeaks(PythonAlgorithm):
 
     	self.declareProperty("Zero", 0.0, direction = Direction.Output,
     		doc = "Fitted Zero value")
+    	
 
     def PyExec(self):
     	# Get expected peaks in TOF for the detector
