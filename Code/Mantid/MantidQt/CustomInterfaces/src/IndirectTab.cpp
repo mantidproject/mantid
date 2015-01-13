@@ -2,9 +2,12 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtAPI/AlgorithmDialog.h"
+#include "MantidQtAPI/InterfaceManager.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 
 namespace
 {
@@ -23,7 +26,8 @@ namespace CustomInterfaces
       m_properties(),
       m_dblManager(new QtDoublePropertyManager()), m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
       m_dblEdFac(new DoubleEditorFactory()),
-      m_pythonRunner()
+      m_pythonRunner(),
+      m_tabStartTime(DateAndTime::getCurrentTime()), m_tabEndTime(DateAndTime::maximum())
   {
     m_parentWidget = dynamic_cast<QWidget *>(parent);
 
@@ -49,9 +53,14 @@ namespace CustomInterfaces
   void IndirectTab::runTab()
   {
     if(validate())
+    {
+      m_tabStartTime = DateAndTime::getCurrentTime();
       run();
+    }
     else
+    {
       g_log.warning("Failed to validate indirect tab input!");
+    }
   }
 
   void IndirectTab::setupTab()
@@ -62,6 +71,46 @@ namespace CustomInterfaces
   bool IndirectTab::validateTab()
   {
     return validate();
+  }
+
+  /**
+   * Handles generating a Python script for the algorithms run on the current tab.
+   */
+  void IndirectTab::exportPythonScript()
+  {
+    g_log.information() << "Python export for workspace: " << m_pythonExportWsName <<
+      ", between " << m_tabStartTime << " and " << m_tabEndTime << std::endl;
+
+    // Take the search times to be a second either side of the actual times, just in case
+    DateAndTime startSearchTime = m_tabStartTime - 1.0;
+    DateAndTime endSearchTime = m_tabEndTime + 1.0;
+
+    // Don't let the user change the time range
+    QStringList enabled;
+    enabled << "Filename" << "InputWorkspace" << "UnrollAll" << "SpecifyAlgorithmVersions";
+
+    // Give some indication to the user that they will have to specify the workspace
+    if(m_pythonExportWsName.empty())
+      g_log.warning("This tab has not specified a result workspace name.");
+
+    // Set default properties
+    QHash<QString, QString> props;
+    props["Filename"] = "IndirectInterfacePythonExport.py";
+    props["InputWorkspace"] = QString::fromStdString(m_pythonExportWsName);
+    props["SpecifyAlgorithmVersions"] = "Specify All";
+    props["UnrollAll"] = "1";
+    props["StartTimestamp"] = QString::fromStdString(startSearchTime.toISO8601String());
+    props["EndTimestamp"] = QString::fromStdString(endSearchTime.toISO8601String());
+
+    // Create an algorithm dialog for the script export algorithm
+    MantidQt::API::InterfaceManager interfaceManager;
+    MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialogFromName("GeneratePythonScript", -1,
+        NULL, false, props, "", enabled);
+
+    // Show the dialog
+    dlg->show();
+    dlg->raise();
+    dlg->activateWindow();
   }
 
   /**
@@ -83,10 +132,10 @@ namespace CustomInterfaces
     load->setProperty("OutputWorkspace", outputName.toStdString());
 
     if(specMin != -1)
-      load->setProperty("SpectrumMin", specMin);
+      load->setPropertyValue("SpectrumMin", boost::lexical_cast<std::string>(specMin));
 
     if(specMax != -1)
-      load->setProperty("SpectrumMax", specMax);
+      load->setPropertyValue("SpectrumMax", boost::lexical_cast<std::string>(specMax));
 
     load->execute();
 
@@ -200,7 +249,8 @@ namespace CustomInterfaces
     if( wsIndex >= workspace->getNumberHistograms() || workspace->readX(0).size() < 2 )
       return;
 
-    QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(wsIndex), false);
+    const bool logScale(false), distribution(false);
+    QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(wsIndex), logScale, distribution);
 
     removeCurve(cID);
 
@@ -280,6 +330,8 @@ namespace CustomInterfaces
    */
   void IndirectTab::algorithmFinished(bool error)
   {
+    m_tabEndTime = DateAndTime::getCurrentTime();
+
     if(error)
     {
       emit showMessageBox("Error running algorithm. \nSee results log for details.");

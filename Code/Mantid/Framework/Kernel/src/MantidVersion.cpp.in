@@ -17,6 +17,26 @@ const char* MantidVersion::version()
   return "@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@";
 }
 
+std::string MantidVersion::releaseNotes()
+{
+  const std::string STEM = "http://www.mantidproject.org/Release_Notes_";
+  // Cast here in those cases where patch number is of the form 20131022.1356.
+  const unsigned int patchVersion = static_cast<unsigned int>(@VERSION_PATCH@);
+
+  // For major/minor/patch releases we point users to a specific release-notes, for
+  // dev versions we just point to the last main release notes.  A simple way to see whether or not
+  // we're currently in a dev version is to check if the patch version is larger than
+  // some arbitrarily low value.
+
+  std::stringstream url;
+  url << STEM << @VERSION_MAJOR@ << "." << @VERSION_MINOR@;
+  
+  if(( patchVersion < 100 ) && ( patchVersion != 0 ))
+    url << "." << patchVersion;
+
+  return url.str();
+}
+
 const char* MantidVersion::revision()
 {
   return "@MtdVersion_WC_LAST_CHANGED_SHA@";
@@ -42,7 +62,7 @@ std::string MantidVersion::doi()
   // dev versions we just point to the main DOI.  A simple way to see whether or not
   // we're currently in a dev version is to check if the patch version is larger than
   // some arbitrarily low value.
-  if( patchVersion > 10 )
+  if( patchVersion > 100 )
     return MAIN;
 
   std::stringstream doi;
@@ -53,6 +73,11 @@ std::string MantidVersion::doi()
     doi << "." << patchVersion;
 
   return doi.str();
+}
+
+std::string MantidVersion::paperCitation()
+{
+  return "http://dx.doi.org/10.1016/j.nima.2014.07.029";
 }
 
 } // namespace Kernel

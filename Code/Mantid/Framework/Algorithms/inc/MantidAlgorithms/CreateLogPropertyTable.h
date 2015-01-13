@@ -9,13 +9,12 @@
 
 #include <string>
 
-namespace Mantid
-{
-namespace Algorithms
-{
-/** 
-    
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+namespace Mantid {
+namespace Algorithms {
+/**
+
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -35,8 +34,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CreateLogPropertyTable : public API::Algorithm
-{
+class DLLExport CreateLogPropertyTable : public API::Algorithm {
 public:
   /// (Empty) Constructor
   CreateLogPropertyTable() : Mantid::API::Algorithm() {}
@@ -44,18 +42,23 @@ public:
   virtual ~CreateLogPropertyTable() {}
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "CreateLogPropertyTable";};
+  virtual const std::string name() const { return "CreateLogPropertyTable"; };
   /// Algorithm's version for identification
-  virtual int version() const { return 1;};
+  virtual int version() const { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Utility;PythonAlgorithms";}
-  
+  virtual const std::string category() const {
+    return "Utility;PythonAlgorithms";
+  }
+
   /// Algorithm's summary
-  virtual const std::string summary() const { return "  Takes a list of workspaces and a list of log property names.  For each workspace, the Run info is inspected and "
-    "all log property values are used to populate a resulting output TableWorkspace."; }
+  virtual const std::string summary() const {
+    return "  Takes a list of workspaces and a list of log property names.  "
+           "For each workspace, the Run info is inspected and "
+           "all log property values are used to populate a resulting output "
+           "TableWorkspace.";
+  }
 
 private:
-
   /// Initialise the properties
   void init();
   /// Run the algorithm

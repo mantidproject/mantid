@@ -4,17 +4,14 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
 
-
 #include <complex>
 #include <boost/shared_ptr.hpp>
 
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TypedValidator.h"
 
-namespace Mantid
-{
-namespace Geometry
-{
+namespace Mantid {
+namespace Geometry {
 
 typedef std::complex<double> StructureFactor;
 
@@ -68,41 +65,42 @@ class BraggScatterer;
 
 typedef boost::shared_ptr<BraggScatterer> BraggScatterer_sptr;
 
-class MANTID_GEOMETRY_DLL BraggScatterer : public Kernel::PropertyManager
-{
+class MANTID_GEOMETRY_DLL BraggScatterer : public Kernel::PropertyManager {
 public:
-    BraggScatterer();
-    virtual ~BraggScatterer() { }
+  BraggScatterer();
+  virtual ~BraggScatterer() {}
 
-    void initialize();
-    bool isInitialized();
+  void initialize();
+  bool isInitialized();
 
-    virtual std::string name() const = 0;
-    virtual BraggScatterer_sptr clone() const = 0;
+  virtual std::string name() const = 0;
+  virtual BraggScatterer_sptr clone() const = 0;
 
-    virtual StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const = 0;
+  virtual StructureFactor
+  calculateStructureFactor(const Kernel::V3D &hkl) const = 0;
+  double calculateFSquared(const Kernel::V3D &hkl) const;
 
-    bool isPropertyExposedToComposite(const std::string &propertyName) const;
-    bool isPropertyExposedToComposite(Kernel::Property *property) const;
-    
+  bool isPropertyExposedToComposite(const std::string &propertyName) const;
+  bool isPropertyExposedToComposite(Kernel::Property *property) const;
+
 protected:
-    /// Base implementation does nothing, can be re-implemented by subclasses.
-    void afterPropertySet(const std::string &) { }
+  /// Base implementation does nothing, can be re-implemented by subclasses.
+  void afterPropertySet(const std::string &) {}
 
-    /// Base implementation does nothing - for implementing classes only.
-    virtual void declareProperties() { }
+  /// Base implementation does nothing - for implementing classes only.
+  virtual void declareProperties() {}
 
-    void exposePropertyToComposite(const std::string &propertyName);
-    void unexposePropertyFromComposite(const std::string &propertyName);
+  void exposePropertyToComposite(const std::string &propertyName);
+  void unexposePropertyFromComposite(const std::string &propertyName);
 
-    const std::string &getPropagatingGroupName() const;
+  const std::string &getPropagatingGroupName() const;
 
 private:
-    std::string m_propagatingGroupName;
-    bool m_isInitialized;
+  std::string m_propagatingGroupName;
+  bool m_isInitialized;
 };
 
 } // namespace Geometry
 } // namespace Mantid
 
-#endif  /* MANTID_GEOMETRY_BRAGGSCATTERER_H_ */
+#endif /* MANTID_GEOMETRY_BRAGGSCATTERER_H_ */

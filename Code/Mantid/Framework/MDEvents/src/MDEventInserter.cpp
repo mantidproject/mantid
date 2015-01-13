@@ -4,18 +4,13 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid
-{
-namespace MDEvents
-{
+namespace Mantid {
+namespace MDEvents {
 
-
-  //----------------------------------------------------------------------------------------------
-  /** Constructor
-   */
-  MDEventInserter::MDEventInserter()
-  {
-  }
+//----------------------------------------------------------------------------------------------
+/** Constructor
+ */
+MDEventInserter::MDEventInserter() {}
 
 } // namespace Mantid
 } // namespace MDEvents

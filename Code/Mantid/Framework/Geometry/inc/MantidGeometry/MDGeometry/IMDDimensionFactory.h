@@ -1,23 +1,20 @@
 #ifndef IMDDIMENSIONFACTORY_H_
-#define IMDDIMENSIONFACTORY_H_ 
+#define IMDDIMENSIONFACTORY_H_
 
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
-namespace Poco
-{
-namespace XML
-{
-  class Element;
+namespace Poco {
+namespace XML {
+class Element;
 }
 }
 
-namespace Mantid
-{
-namespace Geometry
-{
+namespace Mantid {
+namespace Geometry {
 /** Creates IMDDimension objects based on input XML.
  *
- *  Copyright &copy; 2010-2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ *  Copyright &copy; 2010-2014 ISIS Rutherford Appleton Laboratory, NScD Oak
+ *Ridge National Laboratory & European Spallation Source
  *
  *  This file is part of Mantid.
  *
@@ -38,10 +35,13 @@ namespace Geometry
  *  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-MANTID_GEOMETRY_DLL IMDDimension_sptr createDimension(const std::string& dimensionXMLString);
-MANTID_GEOMETRY_DLL IMDDimension_sptr createDimension(const Poco::XML::Element& dimensionXML);
-MANTID_GEOMETRY_DLL IMDDimension_sptr createDimension(const std::string& dimensionXMLString, int nBins, coord_t min, coord_t max);
-
+MANTID_GEOMETRY_DLL IMDDimension_sptr
+    createDimension(const std::string &dimensionXMLString);
+MANTID_GEOMETRY_DLL IMDDimension_sptr
+    createDimension(const Poco::XML::Element &dimensionXML);
+MANTID_GEOMETRY_DLL IMDDimension_sptr
+    createDimension(const std::string &dimensionXMLString, int nBins,
+                    coord_t min, coord_t max);
 }
 }
 

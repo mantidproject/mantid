@@ -9,16 +9,13 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidKernel/Logger.h"
 
-namespace Mantid
-{
+namespace Mantid {
 
-namespace CurveFitting
-{
-  class Fit;
+namespace CurveFitting {
+class Fit;
 }
 
-namespace API
-{
+namespace API {
 
 //----------------------------------------------------------------------
 // Forward declaration
@@ -30,13 +27,15 @@ class IConstraint;
 class ParameterReference;
 class FunctionHandler;
 /** This is a specialization of IFunction for functions of one real argument.
-    It uses FunctionDomain1D as a domain. Implement function1D(...) method in a concrete
+    It uses FunctionDomain1D as a domain. Implement function1D(...) method in a
+   concrete
     function. Implement functionDeriv1D to use analytical derivatives.
 
     @author Roman Tolchenov, Tessella Support Services plc
     @date 16/10/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -56,28 +55,33 @@ class FunctionHandler;
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL IFunction1D: public virtual IFunction
-{
+class MANTID_API_DLL IFunction1D : public virtual IFunction {
 public:
-  /// Virtual destructor 
-  /// (avoids warnings about non-trivial move assignment in virtually inheriting classes)
+  /// Virtual destructor
+  /// (avoids warnings about non-trivial move assignment in virtually inheriting
+  /// classes)
   virtual ~IFunction1D() {}
 
   /* Overidden methods */
 
-  virtual void function(const FunctionDomain& domain,FunctionValues& values)const;
-  virtual void derivative(const FunctionDomain& domain,FunctionValues& values, const size_t order=1)const;
+  virtual void function(const FunctionDomain &domain,
+                        FunctionValues &values) const;
+  virtual void derivative(const FunctionDomain &domain, FunctionValues &values,
+                          const size_t order = 1) const;
 
-  void functionDeriv(const FunctionDomain& domain, Jacobian& jacobian);
+  void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian);
 
   /// Function you want to fit to.
-  virtual void function1D(double* out, const double* xValues, const size_t nData)const = 0;
+  virtual void function1D(double *out, const double *xValues,
+                          const size_t nData) const = 0;
 
   /// Function to calculate the derivatives of the data set
-  virtual void derivative1D(double* out, const double* xValues, const size_t nData, const size_t order)const;
+  virtual void derivative1D(double *out, const double *xValues,
+                            const size_t nData, const size_t order) const;
 
   /// Derivatives of function with respect to active parameters
-  virtual void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData);
+  virtual void functionDeriv1D(Jacobian *out, const double *xValues,
+                               const size_t nData);
 
 protected:
   /// Logger instance
@@ -85,7 +89,6 @@ protected:
 
   /// Making a friend
   friend class CurveFitting::Fit;
-
 };
 
 typedef boost::shared_ptr<IFunction1D> IFunction1D_sptr;

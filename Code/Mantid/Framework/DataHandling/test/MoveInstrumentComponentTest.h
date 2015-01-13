@@ -141,7 +141,7 @@ public:
 
 private:
     std::string wsName;
-    Detector *det1,*det2,*det3;
+    Detector *det1;
     boost::shared_ptr<Instrument> instrument;
     MatrixWorkspace_sptr WS;
 

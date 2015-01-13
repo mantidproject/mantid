@@ -9,9 +9,10 @@ set ( SRC_FILES
 	src/CatalogInfo.cpp
 	src/CompositeValidator.cpp
 	src/ConfigService.cpp
+	src/ChecksumHelper.cpp
 	src/DataItem.cpp
 	src/DateAndTime.cpp
-	src/DateTimeValidator.cpp
+	src/DateTimeValidator.cpp 
 	src/DateValidator.cpp
 	src/DeltaEMode.cpp
 	src/DirectoryValidator.cpp
@@ -32,6 +33,7 @@ set ( SRC_FILES
 	src/IPropertyManager.cpp
 	src/ISaveable.cpp
 	src/InstrumentInfo.cpp
+	src/InternetHelper.cpp
 	src/Interpolation.cpp
 	src/LibraryManager.cpp
 	src/LibraryWrapper.cpp
@@ -127,6 +129,7 @@ set ( INC_FILES
 	inc/MantidKernel/CatalogInfo.h
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ConfigService.h
+	inc/MantidKernel/ChecksumHelper.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
 	inc/MantidKernel/DateAndTime.h
@@ -160,6 +163,7 @@ set ( INC_FILES
 	inc/MantidKernel/IValidator.h
 	inc/MantidKernel/Instantiator.h
 	inc/MantidKernel/InstrumentInfo.h
+	inc/MantidKernel/InternetHelper.h
 	inc/MantidKernel/Interpolation.h
 	inc/MantidKernel/LibraryManager.h
 	inc/MantidKernel/LibraryWrapper.h
@@ -259,6 +263,7 @@ set ( TEST_FILES
 	CatalogInfoTest.h
 	CompositeValidatorTest.h
 	ConfigServiceTest.h
+	ChecksumHelperTest.h
 	DataServiceTest.h
 	DateAndTimeTest.h
 	DateTimeValidatorTest.h
@@ -284,6 +289,7 @@ set ( TEST_FILES
 	ISaveableTest.h
 	IValidatorTest.h
 	InstrumentInfoTest.h
+	InternetHelperTest.h
 	InterpolationTest.h
 	ListValidatorTest.h
 	LogFilterTest.h
@@ -376,7 +382,13 @@ set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel
 # Add to the 'Framework' group in VS
 set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Kernel ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${NETWORK_LIBRARIES} )
+# For older gcc versions (<4.5) if we do not put stdc++ first then things crash when an exceptions are
+# thrown in Python.
+if ( GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5" )
+ target_link_libraries ( Kernel stdc++ )
+endif()
+target_link_libraries ( Kernel ${NEXUS_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES} 
+                        ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} )
 if ( WIN32 )
   target_link_libraries ( Kernel Psapi.lib ) # For memory usage queries
 endif()
@@ -421,6 +433,8 @@ set ( PLUGINS "." )
 set ( PV_PLUGINS "./pvplugins" )
 set ( IGNORE_PARAVIEW "0" )
 set ( QTPLUGINS "." )
+set ( UPDATE_INSTRUMENT_DEFINTITIONS "0" )
+set ( ENABLE_USAGE_REPORTS "0" )
 set ( PYTHONPLUGIN_DIRS "${MANTID_ROOT}/Framework/PythonInterface/plugins" )
 set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/../../Test/AutoTestData/UsageData;${MANTID_ROOT}/instrument )
 set ( COLORMAPS_FOLDER ${MANTID_ROOT}/Installers/colormaps/ )
@@ -497,6 +511,8 @@ endif ()
 
 set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
+set ( UPDATE_INSTRUMENT_DEFINTITIONS "1" )
+set ( ENABLE_USAGE_REPORTS "1" )
 set ( DATADIRS "" )
 set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish" )
 set ( HTML_ROOT ../share/doc/html )

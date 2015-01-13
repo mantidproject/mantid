@@ -7,67 +7,65 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 
+namespace Mantid {
+namespace MDAlgorithms {
 
-namespace Mantid
-{
-namespace MDAlgorithms
-{
+/** Merge several MDWorkspaces into one.
 
-  /** Merge several MDWorkspaces into one.
-    
-    @date 2012-01-17
+  @date 2012-01-17
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    This file is part of Mantid.
+  This file is part of Mantid.
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport MergeMD  : public Mantid::MDEvents::BoxControllerSettingsAlgorithm
-  {
-  public:
-    MergeMD();
-    virtual ~MergeMD();
-    
-    virtual const std::string name() const;
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Merge several MDWorkspaces into one.";}
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport MergeMD
+    : public Mantid::MDEvents::BoxControllerSettingsAlgorithm {
+public:
+  MergeMD();
+  virtual ~MergeMD();
 
-    virtual int version() const;
-    virtual const std::string category() const;
+  virtual const std::string name() const;
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Merge several MDWorkspaces into one.";
+  }
 
-  private:
-    void init();
-    void exec();
-    void createOutputWorkspace(std::vector<std::string> & inputs);
+  virtual int version() const;
+  virtual const std::string category() const;
 
-    template<typename MDE, size_t nd>
-    void doPlus(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+private:
+  void init();
+  void exec();
+  void createOutputWorkspace(std::vector<std::string> &inputs);
 
-    /// Vector of input MDWorkspaces
-    std::vector<Mantid::API::IMDEventWorkspace_sptr> m_workspaces;
+  template <typename MDE, size_t nd>
+  void doPlus(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
-    /// Output MDEventWorkspace
-    Mantid::API::IMDEventWorkspace_sptr out;
+  /// Vector of input MDWorkspaces
+  std::vector<Mantid::API::IMDEventWorkspace_sptr> m_workspaces;
 
-  };
-
+  /// Output MDEventWorkspace
+  Mantid::API::IMDEventWorkspace_sptr out;
+};
 
 } // namespace MDAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_MDALGORITHMS_MERGEMD_H_ */
+#endif /* MANTID_MDALGORITHMS_MERGEMD_H_ */

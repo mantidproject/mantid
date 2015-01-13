@@ -2,15 +2,19 @@ from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
 from mantid import config
+
 import os.path, math
+
 
 class MSGDiffractionReduction(PythonAlgorithm):
 
     def category(self):
         return 'Diffraction;PythonAlgorithms'
 
+
     def summary(self):
         return 'Calculates the scattering & transmission for Indirect Geometry spectrometers.'
+
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
@@ -36,12 +40,13 @@ class MSGDiffractionReduction(PythonAlgorithm):
         self.declareProperty(name='RebinParam', defaultValue='',
                              doc='Rebin parameters.')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceGroup', '',
-                             direction=Direction.Output, optional=PropertyMode.Optional),
-                             doc='Optionally group the result workspaces.')
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
+                             direction=Direction.Output),
+                             doc='Group name for the result workspaces.')
 
         self.declareProperty(StringArrayProperty(name='SaveFormats'),
                              doc='Save formats to save output in.')
+
 
     def validateInputs(self):
         """
@@ -72,6 +77,7 @@ class MSGDiffractionReduction(PythonAlgorithm):
 
         return issues
 
+
     def PyExec(self):
         from IndirectCommon import StartTime, EndTime
         from IndirectDiffractionReduction import MSGDiffractionReducer
@@ -85,7 +91,7 @@ class MSGDiffractionReduction(PythonAlgorithm):
         mode = self.getPropertyValue('Mode')
         detector_range = self.getProperty('DetectorRange').value
         rebin_string = self.getPropertyValue('RebinParam')
-        output_ws_group = self.getPropertyValue('OutputWorkspaceGroup')
+        output_ws_group = self.getPropertyValue('OutputWorkspace')
         save_formats = self.getProperty('SaveFormats').value
 
         ipf_filename = instrument_name + '_diffraction_' + mode + '_Parameters.xml'
@@ -111,10 +117,9 @@ class MSGDiffractionReduction(PythonAlgorithm):
 
         reducer.reduce()
 
-        if output_ws_group != '':
-            result_ws_list = reducer.get_result_workspaces()
-            GroupWorkspaces(InputWorkspaces=result_ws_list, OutputWorkspace=output_ws_group)
-            self.setProperty('OutputWorkspaceGroup', output_ws_group)
+        result_ws_list = reducer.get_result_workspaces()
+        GroupWorkspaces(InputWorkspaces=result_ws_list, OutputWorkspace=output_ws_group)
+        self.setProperty('OutputWorkspace', output_ws_group)
 
         EndTime('MSGDiffractionReduction')
 

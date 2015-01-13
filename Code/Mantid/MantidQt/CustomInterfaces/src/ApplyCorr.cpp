@@ -78,16 +78,6 @@ namespace IDA
    */
   void ApplyCorr::newData(const QString &dataName)
   {
-    bool isSqw = dataName.endsWith("_sqw", Qt::CaseInsensitive);
-
-    if(isSqw)
-    {
-      g_log.information("Input data is in S(Q, w), correction file cannot be used");
-      uiForm().abscor_ckUseCorrections->setCheckState(Qt::Unchecked);
-    }
-
-    uiForm().abscor_ckUseCorrections->setEnabled(!isSqw);
-
     removeCurve("CalcCurve");
     removeCurve("CanCurve");
     // removeCurve would usually need a replot() but this is done in plotMiniPlot()
@@ -240,12 +230,15 @@ namespace IDA
 
     outputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(pyOutput.toStdString());
     plotPreview(uiForm().abscor_spPreviewSpec->value());
+
+    // Set the result workspace for Python script export
+    m_pythonExportWsName = pyOutput.toStdString();
   }
 
   /**
-  * Ask the user is they wish to rebin the can to the sample.
-  * @return whether a rebin of the can workspace is required.
-  */
+   * Ask the user is they wish to rebin the can to the sample.
+   * @return whether a rebin of the can workspace is required.
+   */
   bool ApplyCorr::requireCanRebin()
   {
     QString message = "The sample and can energy ranges do not match, this is not recommended."
@@ -257,6 +250,25 @@ namespace IDA
 
   bool ApplyCorr::validate()
   {
+    bool useCan = uiForm().abscor_ckUseCan->isChecked();
+
+    if(useCan)
+    {
+      QString sample = uiForm().abscor_dsSample->getCurrentDataName();
+      QString sampleType = sample.right(sample.length() - sample.lastIndexOf("_"));
+      QString container = uiForm().abscor_dsContainer->getCurrentDataName();
+      QString containerType = container.right(container.length() - container.lastIndexOf("_"));
+
+      g_log.debug() << "Sample type is: " << sampleType.toStdString() << std::endl;
+      g_log.debug() << "Container type is: " << containerType.toStdString() << std::endl;
+
+      if(containerType != sampleType)
+      {
+        g_log.error("Must use the same type of files for sample and container inputs.");
+        return false;
+      }
+    }
+
     return true;
   }
 
@@ -279,13 +291,13 @@ namespace IDA
     {
       case 0:
         // Geomtry is flat
-        ext = "_flt_Abs";
+        ext = "_flt_abs";
         uiForm().abscor_dsCorrections->setWSSuffixes(QStringList(ext));
         uiForm().abscor_dsCorrections->setFBSuffixes(QStringList(ext + ".nxs"));
         break;
       case 1:
         // Geomtry is cylinder
-        ext = "_cyl_Abs";
+        ext = "_cyl_abs";
         uiForm().abscor_dsCorrections->setWSSuffixes(QStringList(ext));
         uiForm().abscor_dsCorrections->setFBSuffixes(QStringList(ext + ".nxs"));
         break;

@@ -9,30 +9,33 @@
 
 #include <set>
 
-namespace Mantid
-{
-namespace Algorithms
-{
-/** Takes a workspace as input and sums all of the spectra within it maintaining the existing bin structure and units.
+namespace Mantid {
+namespace Algorithms {
+/** Takes a workspace as input and sums all of the spectra within it maintaining
+   the existing bin structure and units.
     The result is stored as a new workspace containing a single spectra.
 
     Required Properties:
     <UL>
     <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
+    <LI> OutputWorkspace - The name of the workspace in which to store the
+   result </LI>
     </UL>
 
     Optional Properties (assume that you count from zero):
     <UL>
-    <LI> StartSpectrum - Workspace index number to integrate from (default 0)</LI>
+    <LI> StartSpectrum - Workspace index number to integrate from (default
+   0)</LI>
     <LI> EndSpectrum - Workspace index number to integrate to (default max)</LI>
-    <LI> IncludeMonitors - Whether to include monitor spectra in the sum (default yes)
+    <LI> IncludeMonitors - Whether to include monitor spectra in the sum
+   (default yes)
     </UL>
 
     @author Nick Draper, Tessella Support Services plc
     @date 22/01/2009
 
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
+   Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -52,37 +55,42 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport SumSpectra : public API::Algorithm
-{
+class DLLExport SumSpectra : public API::Algorithm {
 public:
   /// Default constructor
-  SumSpectra() : API::Algorithm() {};
+  SumSpectra() : API::Algorithm(){};
   /// Destructor
-  virtual ~SumSpectra() {};
+  virtual ~SumSpectra(){};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SumSpectra";}
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "The SumSpectra algorithm adds the data values in each time bin across a range of spectra; the output workspace has a single spectrum. If the input is an EventWorkspace, the output is also an EventWorkspace; otherwise it will be a Workspace2D.";}
+  virtual const std::string name() const { return "SumSpectra"; }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "The SumSpectra algorithm adds the data values in each time bin "
+           "across a range of spectra; the output workspace has a single "
+           "spectrum. If the input is an EventWorkspace, the output is also an "
+           "EventWorkspace; otherwise it will be a Workspace2D.";
+  }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1);}
+  virtual int version() const { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Grouping";}
+  virtual const std::string category() const { return "Transforms\\Grouping"; }
 
 private:
   /// Handle logic for RebinnedOutput workspaces
   void doRebinnedOutput(API::MatrixWorkspace_sptr outputWorkspace,
-                        API::Progress &progress,
-                        size_t &numSpectra,size_t &numMasked,size_t &numZeros);
+                        API::Progress &progress, size_t &numSpectra,
+                        size_t &numMasked, size_t &numZeros);
   /// Handle logic for Workspace2D workspaces
   void doWorkspace2D(API::MatrixWorkspace_const_sptr localworkspace,
                      API::ISpectrum *outSpec, API::Progress &progress,
-                     size_t &numSpectra,size_t &numMasked,size_t &numZeros);
-  
+                     size_t &numSpectra, size_t &numMasked, size_t &numZeros);
+
   // Overridden Algorithm methods
   void init();
   void exec();
-  void execEvent(DataObjects::EventWorkspace_const_sptr localworkspace, std::set<int> &indices);
+  void execEvent(DataObjects::EventWorkspace_const_sptr localworkspace,
+                 std::set<int> &indices);
   specid_t getOutputSpecId(API::MatrixWorkspace_const_sptr localworkspace);
 
   /// The output spectrum id
@@ -100,7 +108,8 @@ private:
   /// Set of indicies to sum
   std::set<int> indices;
 
-  // if calculateing additional workspace with specially weighted averages is necessary
+  // if calculateing additional workspace with specially weighted averages is
+  // necessary
   bool m_CalculateWeightedSum;
 };
 

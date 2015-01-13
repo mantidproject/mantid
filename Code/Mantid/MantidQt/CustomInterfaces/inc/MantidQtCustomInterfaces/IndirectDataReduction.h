@@ -30,7 +30,7 @@ namespace MantidQt
     @author Martyn Gigg, Tessella Support Services plc
     @author Michael Whitty
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -85,6 +85,8 @@ namespace MantidQt
     private slots:
       /// Opens the help page for the current tab
       void helpClicked();
+      /// Exports the current tab algorithms as a Python script
+      void exportTabPython();
       /// Runs the current tab
       void runClicked();
       /// Opens the manage directory dialog

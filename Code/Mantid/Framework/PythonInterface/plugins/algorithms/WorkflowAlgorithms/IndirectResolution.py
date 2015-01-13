@@ -59,7 +59,7 @@ class IndirectResolution(DataProcessorAlgorithm):
                                    SumFiles=True,
                                    InputFiles=self._input_files,
                                    DetectorRange=self._detector_range,
-                                   OutputWorkspaceGroup='__icon_ws_group')
+                                   OutputWorkspace='__icon_ws_group')
 
         icon_ws = mtd['__icon_ws_group'].getItem(0).getName()
 

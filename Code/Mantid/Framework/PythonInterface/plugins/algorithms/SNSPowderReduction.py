@@ -79,6 +79,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty("VanadiumPeakTol", 0.05,
                              "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. Default=0.05, negative turns off")
         self.declareProperty("VanadiumSmoothParams", "20,2", "Default=20,2")
+        self.declareProperty("BackgroundSmoothParams", "", "Default=off, suggested 20,2")
         self.declareProperty("FilterBadPulses", 95.,
                              doc="Filter out events measured while proton charge is more than 5% below average")
         self.declareProperty("ScaleData", defaultValue=1., validator=FloatBoundedValidator(lower=0., exclusive=True),
@@ -99,13 +100,13 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         self.declareProperty("NormalizeByCurrent", True, "Normalize by current")
 
-        self.declareProperty("CompressTOFTolerance", 0.01, "Tolerance to compress events in TOF.") 
-        
-        self.declareProperty(StringArrayProperty("FrequencyLogNames", ["SpeedRequest1", "Speed1", "frequency"], 
+        self.declareProperty("CompressTOFTolerance", 0.01, "Tolerance to compress events in TOF.")
+
+        self.declareProperty(StringArrayProperty("FrequencyLogNames", ["SpeedRequest1", "Speed1", "frequency"],
             direction=Direction.Input),
             "Possible log names for frequency.")
 
-        self.declareProperty(StringArrayProperty("WaveLengthLogNames", ["LambdaRequest", "lambda"], 
+        self.declareProperty(StringArrayProperty("WaveLengthLogNames", ["LambdaRequest", "lambda"],
             direction=Direction.Input),
             "Candidate log names for wave length.")
 
@@ -300,6 +301,12 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     canRun = self._focusChunks(canRun, SUFFIX, canFilterWall, calib,
                                preserveEvents=preserveEvents)
                 canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
+
+                smoothParams = self.getProperty("BackgroundSmoothParams").value
+                if smoothParams != None and len(smoothParams)>0:
+                    canRun = api.FFTSmooth(InputWorkspace=canRun, OutputWorkspace=canRun, Filter="Butterworth",
+                                       Params=smoothParams,IgnoreXBins=True,AllSpectra=True)
+
                 workspacelist.append(str(canRun))
             else:
                 canRun = None
@@ -388,6 +395,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 return
             # the final bit of math
             if canRun is not None:
+                # must convert the sample to a matrix workspace if the can run isn't one
+                if canRun.id() != EVENT_WORKSPACE_ID and samRun.id() == EVENT_WORKSPACE_ID:
+                    samRun = api.ConvertToMatrixWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun)
                 samRun = api.Minus(LHSWorkspace=samRun, RHSWorkspace=canRun, OutputWorkspace=samRun)
                 if samRun.id() == EVENT_WORKSPACE_ID:
                     samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
@@ -493,7 +503,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                        LowerCutoff=self._filterBadPulses)
 
             if isEventWS is True:
-                # Event workspace 
+                # Event workspace
                 self.log().information("FilterBadPulses reduces number of events from %d to %d (under %s percent) of workspace %s." % (
                         numeventsbefore, wksp.getNumberEvents(), str(self._filterBadPulses), str(wksp)))
 
@@ -664,7 +674,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     self.log().debug("[DBx131] ws %d: spectrum ID = %d. " % (iws, spec.getSpectrumNo()))
 
                 if preserveEvents is True and isinstance(temp, mantid.api._api.IEventWorkspace) is True:
-                    self.log().information("After being aligned and focussed workspace %s; Number of events = %d of chunk %d " % (str(temp), 
+                    self.log().information("After being aligned and focussed workspace %s; Number of events = %d of chunk %d " % (str(temp),
                         temp.getNumberEvents(), ichunk))
 
                 # Rename and/or add to workspace of same splitter but different chunk

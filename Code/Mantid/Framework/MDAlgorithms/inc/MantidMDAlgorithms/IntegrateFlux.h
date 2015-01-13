@@ -4,62 +4,73 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
+namespace Mantid {
 
-namespace DataObjects
-{
-  class EventWorkspace;
+namespace API {
+class MatrixWorkspace;
 }
 
-namespace MDAlgorithms
-{
+namespace DataObjects {
+class EventWorkspace;
+}
 
-  /** Algorithm IntegrateFlux.
+namespace MDAlgorithms {
 
-    Calculates indefinite integral of the spectra in the input workspace sampled at a regular grid.
-    The input workspace is expected to be an event workspace with weighted-no-time events.
+/** Algorithm IntegrateFlux.
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Calculates indefinite integral of the spectra in the input workspace sampled
+  at a regular grid.
 
-    This file is part of Mantid.
+  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport IntegrateFlux  : public API::Algorithm
-  {
-  public:
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    virtual const std::string name() const;
-    virtual int version() const;
-    virtual const std::string category() const;
-    virtual const std::string summary() const;
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport IntegrateFlux : public API::Algorithm {
+public:
+  virtual const std::string name() const;
+  virtual int version() const;
+  virtual const std::string category() const;
+  virtual const std::string summary() const;
 
-  private:
-    void init();
-    void exec();
+private:
+  void init();
+  void exec();
 
-    boost::shared_ptr<API::MatrixWorkspace> createOutputWorkspace( const DataObjects::EventWorkspace& eventWS, size_t nX ) const;
-    void integrateSpectra( const DataObjects::EventWorkspace& eventWS, API::MatrixWorkspace &integrWS );
+  boost::shared_ptr<API::MatrixWorkspace>
+  createOutputWorkspace(const API::MatrixWorkspace &inputWS, size_t nX) const;
+  void integrateSpectra(const API::MatrixWorkspace &inputWS,
+                        API::MatrixWorkspace &integrWS) const;
+  template <class EventType>
+  void integrateSpectraEvents(const DataObjects::EventWorkspace &inputWS,
+                              API::MatrixWorkspace &integrWS) const;
+  void integrateSpectraMatrix(const API::MatrixWorkspace &inputWS,
+                              API::MatrixWorkspace &integrWS) const;
+  void integrateSpectraHistograms(const API::MatrixWorkspace &inputWS,
+                                  API::MatrixWorkspace &integrWS) const;
+  void integrateSpectraPointData(const API::MatrixWorkspace &inputWS,
+                                 API::MatrixWorkspace &integrWS) const;
 
-  };
-
+  size_t getMaxNumberOfPoints(const API::MatrixWorkspace &inputWS) const;
+};
 
 } // namespace MDAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_MDALGORITHMS_INTEGRATEFLUX_H_ */
+#endif /* MANTID_MDALGORITHMS_INTEGRATEFLUX_H_ */

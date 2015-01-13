@@ -4,10 +4,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid
-{
-namespace DataHandling
-{
+namespace Mantid {
+namespace DataHandling {
 /** @class Mantid::DataHandling::LoadPreNeXusMonitors
 
     A data loading routine for SNS PreNeXus beam monitor (histogram) files.
@@ -15,7 +13,8 @@ namespace DataHandling
     @author Stuart Campbell, SNS ORNL
     @date 20/08/2010
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -34,48 +33,33 @@ namespace DataHandling
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class DLLExport LoadPreNexusMonitors: public Mantid::API::Algorithm
-{
+class DLLExport LoadPreNexusMonitors : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
-  LoadPreNexusMonitors() :
-    Mantid::API::Algorithm()
-  {
-  }
+  LoadPreNexusMonitors() : Mantid::API::Algorithm() {}
   /// Virtual destructor
-  virtual ~LoadPreNexusMonitors()
-  {
-  }
+  virtual ~LoadPreNexusMonitors() {}
   /// Algorithm's name
-  virtual const std::string name() const
-  {
-    return "LoadPreNexusMonitors";
+  virtual const std::string name() const { return "LoadPreNexusMonitors"; }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "This is a routine to load in the beam monitors from SNS preNeXus "
+           "files into a workspace.";
   }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "This is a routine to load in the beam monitors from SNS preNeXus files into a workspace.";}
 
   /// Algorithm's version
-  virtual int version() const
-  {
-    return (1);
-  }
+  virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const
-  {
+  virtual const std::string category() const {
     return "DataHandling\\PreNexus";
   }
   /// Algorithm's aliases
-  virtual const std::string alias() const
-  {
-      return "LoadPreNeXusMonitors";
-  }
-
+  virtual const std::string alias() const { return "LoadPreNeXusMonitors"; }
 
 private:
-  
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
 
   /// Number of monitors
@@ -84,8 +68,8 @@ private:
   /// Set to true when instrument geometry was loaded.
   bool instrument_loaded_correctly;
 
-  void runLoadInstrument(const std::string& instrument, API::MatrixWorkspace_sptr localWorkspace);
-
+  void runLoadInstrument(const std::string &instrument,
+                         API::MatrixWorkspace_sptr localWorkspace);
 };
 
 } // namespace DataHandling

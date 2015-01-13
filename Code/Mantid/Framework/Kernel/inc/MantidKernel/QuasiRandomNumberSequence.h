@@ -1,7 +1,8 @@
 #ifndef MANTID_KERNEL_QUASIRANDOMNUMBERSEQUENCE_H_
 #define MANTID_KERNEL_QUASIRANDOMNUMBERSEQUENCE_H_
 /**
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -26,25 +27,22 @@
 //------------------------------------------------------------------------------
 #include "MantidKernel/NDRandomNumberGenerator.h"
 
-namespace Mantid
-{
-  namespace Kernel
-  {
-    /**
-     *
-     * Defines an interface to a quasi-random number sequence. A quasi-random sequence
-     * progressively covers a d-dimensional space with a set of points that are
-     * uniformly distributed.
-     */
-    class MANTID_KERNEL_DLL QuasiRandomNumberSequence : public NDRandomNumberGenerator
-    {
-    public:
-      QuasiRandomNumberSequence(const unsigned int ndims)
-        : NDRandomNumberGenerator(ndims)
-      {}
-
-    };
-  }
+namespace Mantid {
+namespace Kernel {
+/**
+ *
+ * Defines an interface to a quasi-random number sequence. A quasi-random
+ *sequence
+ * progressively covers a d-dimensional space with a set of points that are
+ * uniformly distributed.
+ */
+class MANTID_KERNEL_DLL QuasiRandomNumberSequence
+    : public NDRandomNumberGenerator {
+public:
+  QuasiRandomNumberSequence(const unsigned int ndims)
+      : NDRandomNumberGenerator(ndims) {}
+};
+}
 }
 
 #endif /* MANTID_KERNEL_QUASIRANDOMNUMBERSEQUENCE_H_ */

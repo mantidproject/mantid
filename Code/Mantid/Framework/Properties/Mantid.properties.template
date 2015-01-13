@@ -37,6 +37,13 @@ python.plugins.directories = @PYTHONPLUGIN_DIRS@
 # Where to load instrument definition files from
 instrumentDefinition.directory = @MANTID_ROOT@/instrument
 
+# Whether to check for updated instrument definitions on startup of Mantid
+UpdateInstrumentDefinitions.OnStartup = @UPDATE_INSTRUMENT_DEFINTITIONS@
+UpdateInstrumentDefinitions.URL = https://api.github.com/repos/mantidproject/mantid/contents/Code/Mantid/instrument
+
+# Whether to report usage statistics back to central server
+usagereports.enabled = @ENABLE_USAGE_REPORTS@
+
 # Where to load Grouping files (that are shipped with Mantid) from
 groupingFiles.directory = @MANTID_ROOT@/instrument/Grouping
 
@@ -105,6 +112,12 @@ curvefitting.peakRadius = 5
 curvefitting.defaultPeak=Gaussian
 curvefitting.findPeaksFWHM=7
 curvefitting.findPeaksTolerance=4
+
+# Allows the system proxy to be overridden (leave commented out to use the system proxy
+# proxy.host = 
+# proxy.port = 8080
+# This is to force https proxy requests to use the http proxy (current necessary)
+proxy.httpsTargetUrl = http://www.mantidproject.org
 
 # Defines the precision of h, k, and l when output in peak workspace table
 PeakColumn.hklPrec=2
@@ -182,7 +195,7 @@ interfaces.categories.hidden =
 UploaderWebServer = @MANTIDPUBLISHER@
 # Local system path for the script repository.
 ScriptLocalRepository =
-# Url for the remote script repository.
+# Base Url for the remote script repository. Not necessarily accessible, it is used to construct longer URLs
 ScriptRepository = http://download.mantidproject.org/scriptrepository/
 # Pattern given to ScriptRepository that is used to hide entries from repository to the users. It is a csv string separated with ';'
 ScriptRepositoryIgnore = *pyc;

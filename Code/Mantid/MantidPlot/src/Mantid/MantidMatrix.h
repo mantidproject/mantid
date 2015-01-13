@@ -19,6 +19,7 @@
 #include "../MdiSubWindow.h"
 #include "../Graph.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
+#include "Mantid/IProjectSerialisable.h"
 
 #include <qwt_double_rect.h>
 #include <qwt_color_map.h>
@@ -56,7 +57,7 @@ It has separate tabs for displaying spectrum values, bin boundaries, and errors.
 
 @author Roman Tolchenov, Tessella Support Services plc
 
-Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 
@@ -77,7 +78,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 */
-class MantidMatrix : public MdiSubWindow, MantidQt::API::WorkspaceObserver
+class MantidMatrix : public MdiSubWindow, MantidQt::API::WorkspaceObserver, public Mantid::IProjectSerialisable
 {
   Q_OBJECT
 
@@ -138,8 +139,9 @@ public:
   // Return number precision of the active model
   int precision();
 
-  /// for saving the matrix workspace  to mantid project
-  QString saveToString(const QString &, bool saveAsTemplate= false);
+  // Loading and saving projects
+  void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
+  std::string saveToProject(ApplicationWindow* app);
 
   /// returns the workspace name
   const std::string & getWorkspaceName();

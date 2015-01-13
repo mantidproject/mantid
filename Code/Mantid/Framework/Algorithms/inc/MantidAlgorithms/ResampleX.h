@@ -6,69 +6,71 @@
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 
-  /** ResampleX : TODO: DESCRIPTION
-    
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+/** ResampleX : TODO: DESCRIPTION
 
-    This file is part of Mantid.
+  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport ResampleX  : public Algorithms::Rebin
-  {
-  public:
-    ResampleX();
-    virtual ~ResampleX();
-    
-    virtual const std::string name() const;
-    virtual int version() const;
-    virtual const std::string category() const;
-    virtual const std::string alias() const;
-    
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Resample the x-axis of the data with the requested number of points.";}
-    
-    /// MADE PUBLIC FOR TESTING ONLY - DO NOT USE
-    double determineBinning(MantidVec& xValues, const double xmin, const double xmax);
-    /// MADE PUBLIC FOR TESTING ONLY - DO NOT USE
-    void setOptions(const int numBins, const bool useLogBins, const bool isDist);
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  private:
-    const std::string workspaceMethodName() const { return ""; } // Override the one from Rebin to ignore us
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport ResampleX : public Algorithms::Rebin {
+public:
+  ResampleX();
+  virtual ~ResampleX();
 
+  virtual const std::string name() const;
+  virtual int version() const;
+  virtual const std::string category() const;
+  virtual const std::string alias() const;
 
-    void init();
-    void exec();
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Resample the x-axis of the data with the requested number of "
+           "points.";
+  }
 
-    std::map<std::string, std::string> validateInputs();
-    bool m_useLogBinning;
-    bool m_preserveEvents;
-    int m_numBins;
-    bool m_isDistribution;
-    bool m_isHistogram;
-  };
+  /// MADE PUBLIC FOR TESTING ONLY - DO NOT USE
+  double determineBinning(MantidVec &xValues, const double xmin,
+                          const double xmax);
+  /// MADE PUBLIC FOR TESTING ONLY - DO NOT USE
+  void setOptions(const int numBins, const bool useLogBins, const bool isDist);
 
+private:
+  const std::string workspaceMethodName() const {
+    return "";
+  } // Override the one from Rebin to ignore us
+
+  void init();
+  void exec();
+
+  std::map<std::string, std::string> validateInputs();
+  bool m_useLogBinning;
+  bool m_preserveEvents;
+  int m_numBins;
+  bool m_isDistribution;
+  bool m_isHistogram;
+};
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_REBINRAGGED_H_ */
+#endif /* MANTID_ALGORITHMS_REBINRAGGED_H_ */

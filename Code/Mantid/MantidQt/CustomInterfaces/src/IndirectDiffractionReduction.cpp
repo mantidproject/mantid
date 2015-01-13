@@ -102,6 +102,18 @@ void IndirectDiffractionReduction::plotResults(bool error)
     return;
   }
 
+  // Ungroup the output workspace if MSGDiffractionReduction was used
+  if(AnalysisDataService::Instance().doesExist("IndirectDiffraction_Workspaces"))
+  {
+    WorkspaceGroup_sptr diffResultsGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IndirectDiffraction_Workspaces");
+
+    m_plotWorkspaces.clear();
+    m_plotWorkspaces = diffResultsGroup->getNames();
+
+    diffResultsGroup->removeAll();
+    AnalysisDataService::Instance().remove("IndirectDiffraction_Workspaces");
+  }
+
   QString instName = m_uiForm.cbInst->currentText();
   QString mode = m_uiForm.cbReflection->currentText();
 
@@ -112,13 +124,13 @@ void IndirectDiffractionReduction::plotResults(bool error)
   if(plotType == "Spectra" || plotType == "Both")
   {
     for(auto it = m_plotWorkspaces.begin(); it != m_plotWorkspaces.end(); ++it)
-      pyInput += "plotSpectrum('" + *it + "', 0)\n";
+      pyInput += "plotSpectrum('" + QString::fromStdString(*it) + "', 0)\n";
   }
 
   if(plotType == "Contour" || plotType == "Both")
   {
     for(auto it = m_plotWorkspaces.begin(); it != m_plotWorkspaces.end(); ++it)
-      pyInput += "plot2D('" + *it + "')\n";
+      pyInput += "plot2D('" + QString::fromStdString(*it) + "')\n";
   }
 
   runPythonCode(pyInput);
@@ -167,12 +179,9 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
   msgDiffReduction->setProperty("RebinParam", rebin.toStdString());
   msgDiffReduction->setProperty("IndividualGrouping", individualGrouping);
   msgDiffReduction->setProperty("SaveFormats", saveFormats);
-  msgDiffReduction->setProperty("OutputWorkspaceGroup", "IndirectDiffraction_Workspaces");
+  msgDiffReduction->setProperty("OutputWorkspace", "IndirectDiffraction_Workspaces");
 
   m_batchAlgoRunner->addAlgorithm(msgDiffReduction);
-
-  m_plotWorkspaces.clear();
-  m_plotWorkspaces.push_back("IndirectDiffraction_Workspaces");
 
   m_batchAlgoRunner->executeBatchAsync();
 }
@@ -251,8 +260,8 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction()
   }
 
   m_plotWorkspaces.clear();
-  m_plotWorkspaces.push_back(tofWsName);
-  m_plotWorkspaces.push_back(drangeWsName);
+  m_plotWorkspaces.push_back(tofWsName.toStdString());
+  m_plotWorkspaces.push_back(drangeWsName.toStdString());
 
   m_batchAlgoRunner->executeBatchAsync();
 }

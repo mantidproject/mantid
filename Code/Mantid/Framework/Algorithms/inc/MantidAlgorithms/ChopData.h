@@ -3,19 +3,19 @@
 
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /**
 
-  For use in TOSCA reduction. Splits a 0-100k microsecond workspace into either five 20k or
+  For use in TOSCA reduction. Splits a 0-100k microsecond workspace into either
+  five 20k or
   three 20k and a 40k workspaces
 
   @author Michael Whitty
   @date 03/02/2011
 
-  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -35,24 +35,33 @@ namespace Algorithms
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-  class DLLExport ChopData : public API::Algorithm
-  {
-  public:
-    ChopData() : API::Algorithm() {} ///< Empty constructor
-    virtual ~ChopData() {} ///< Empty destructor
+class DLLExport ChopData : public API::Algorithm {
+public:
+  ChopData() : API::Algorithm() {} ///< Empty constructor
+  virtual ~ChopData() {}           ///< Empty destructor
 
-    virtual const std::string name() const { return "ChopData"; } ///< @return the algorithms name
-    virtual const std::string category() const { return "Transforms\\Splitting"; } ///< @return the algorithms category
-    virtual int version() const { return (1); } ///< @return version number of algorithm
-    /// Algorithm's summary
-    virtual const std::string summary() const { return "Splits an input workspace into a grouped workspace, where each spectra "
-      "if 'chopped' at a certain point (given in 'Step' input value) "
-      "and the X values adjusted to give all the workspace in the group the same binning."; }
+  virtual const std::string name() const {
+    return "ChopData";
+  } ///< @return the algorithms name
+  virtual const std::string category() const {
+    return "Transforms\\Splitting";
+  } ///< @return the algorithms category
+  virtual int version() const {
+    return (1);
+  } ///< @return version number of algorithm
+  /// Algorithm's summary
+  virtual const std::string summary() const {
+    return "Splits an input workspace into a grouped workspace, where each "
+           "spectra "
+           "if 'chopped' at a certain point (given in 'Step' input value) "
+           "and the X values adjusted to give all the workspace in the group "
+           "the same binning.";
+  }
 
-  private:
-    void init(); ///< Initialise the algorithm. Declare properties, etc.
-    void exec(); ///< Executes the algorithm.
-  };
+private:
+  void init(); ///< Initialise the algorithm. Declare properties, etc.
+  void exec(); ///< Executes the algorithm.
+};
 }
 }
 #endif

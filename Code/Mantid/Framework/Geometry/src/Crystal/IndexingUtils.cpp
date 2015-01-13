@@ -7,13 +7,12 @@
 #include <stdexcept>
 #include <algorithm>
 
-extern "C"
-{
+extern "C" {
 #include <gsl/gsl_errno.h>
-#include <gsl/gsl_sys.h> 
-#include <gsl/gsl_vector.h> 
-#include <gsl/gsl_matrix.h> 
-#include <gsl/gsl_linalg.h> 
+#include <gsl/gsl_sys.h>
+#include <gsl/gsl_vector.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_linalg.h>
 #include <gsl/gsl_fft_real.h>
 }
 
@@ -23,52 +22,49 @@ using Mantid::Kernel::Matrix;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::Quat;
 
-#define round(x) ((x)>=0?(int)((x)+0.5):(int)((x)-0.5))
-namespace
-{
-  const double DEG_TO_RAD = M_PI / 180.;
-  const double RAD_TO_DEG = 180. / M_PI;
+#define round(x) ((x) >= 0 ? (int)((x)+0.5) : (int)((x)-0.5))
+namespace {
+const double DEG_TO_RAD = M_PI / 180.;
+const double RAD_TO_DEG = 180. / M_PI;
 }
 
-
-
-/** 
-  STATIC method Find_UB: Calculates the matrix that most nearly indexes 
-  the specified q_vectors, given the lattice parameters.  The sum of the 
+/**
+  STATIC method Find_UB: Calculates the matrix that most nearly indexes
+  the specified q_vectors, given the lattice parameters.  The sum of the
   squares of the residual errors is returned.  This method first sorts the
-  specified q_vectors in order of increasing magnitude.  It then searches 
+  specified q_vectors in order of increasing magnitude.  It then searches
   through all possible orientations to find an initial UB that indexes the
-  lowest magnitude peaks.  
+  lowest magnitude peaks.
      The resolution of the search through possible orientations is specified
   by the degrees_per_step parameter.  Approximately 2-4 degrees_per_step is
-  usually adequate.  NOTE: This is an expensive calculation which takes 
-  approximately 1 second using 2 degrees_per_step.  However, the execution 
-  time is O(n^3) so decreasing the resolution to 1 degree per step will take 
-  about 8 seconds, etc.  It should not be necessary to decrease this value 
+  usually adequate.  NOTE: This is an expensive calculation which takes
+  approximately 1 second using 2 degrees_per_step.  However, the execution
+  time is O(n^3) so decreasing the resolution to 1 degree per step will take
+  about 8 seconds, etc.  It should not be necessary to decrease this value
   below 1 degree per step, and users will have to be VERY patient, if it is
   decreased much below 1 degree per step.
     The number of peaks used to obtain an initial indexing is specified by
-  the "NumInitial" parameter.  Good values for this are typically around 
-  10-15, though with accurate peak positions, and good values for the lattice 
+  the "NumInitial" parameter.  Good values for this are typically around
+  10-15, though with accurate peak positions, and good values for the lattice
   paramters, as few as 2 can be used.  Using substantially more than 15 peaks
   initially typically has no benefit and increases execution time.
-  
+
   @param  UB                  3x3 matrix that will be set to the UB matrix
-  @param  q_vectors           std::vector of V3D objects that contains the 
+  @param  q_vectors           std::vector of V3D objects that contains the
                               list of q_vectors that are to be indexed
                               NOTE: There must be at least 2 q_vectors.
-  @param  a                   First unit cell edge length in Angstroms.  
-  @param  b                   Second unit cell edge length in Angstroms.  
-  @param  c                   Third unit cell edge length in Angstroms.  
+  @param  a                   First unit cell edge length in Angstroms.
+  @param  b                   Second unit cell edge length in Angstroms.
+  @param  c                   Third unit cell edge length in Angstroms.
   @param  alpha               First unit cell angle in degrees.
   @param  beta                second unit cell angle in degrees.
   @param  gamma               third unit cell angle in degrees.
   @param  required_tolerance  The maximum allowed deviation of Miller indices
                               from integer values for a peak to be indexed.
-  @param  base_index          The sequence number of the peak that should 
+  @param  base_index          The sequence number of the peak that should
                               be used as the central peak.  On the first
                               scan for a UB matrix that fits the data,
-                              the remaining peaks in the list of q_vectors 
+                              the remaining peaks in the list of q_vectors
                               will be shifted by -base_peak, where base_peak
                               is the q_vector with the specified base index.
                               If fewer than 5 peaks are specified in the
@@ -83,185 +79,162 @@ namespace
                               orientations used during the initial scan.
 
   @return  This will return the sum of the squares of the residual errors.
-  
-  @throws  std::invalid_argument exception if UB is not a 3X3 matrix, 
-                                 if there are not at least 2 q vectors, 
-                                 if num_initial is < 2, or 
+
+  @throws  std::invalid_argument exception if UB is not a 3X3 matrix,
+                                 if there are not at least 2 q vectors,
+                                 if num_initial is < 2, or
                                  if the required_tolerance or degrees_per_step
-                                 is <= 0. 
+                                 is <= 0.
 */
-double IndexingUtils::Find_UB(       DblMatrix        & UB,
-                               const std::vector<V3D> & q_vectors,
-                                     double a, double b, double c,
-                                     double alpha, double beta, double gamma,
-                                     double             required_tolerance,
-                                     int                base_index,
-                                     size_t             num_initial,
-                                     double             degrees_per_step )
-{
-  if ( UB.numRows() != 3 || UB.numCols() != 3 )
-  {
-   throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
+double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
+                              double a, double b, double c, double alpha,
+                              double beta, double gamma,
+                              double required_tolerance, int base_index,
+                              size_t num_initial, double degrees_per_step) {
+  if (UB.numRows() != 3 || UB.numCols() != 3) {
+    throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
 
-  if ( q_vectors.size() < 2 )
-  {
-   throw std::invalid_argument("Find_UB(): Two or more indexed peaks needed to find UB");
+  if (q_vectors.size() < 2) {
+    throw std::invalid_argument(
+        "Find_UB(): Two or more indexed peaks needed to find UB");
   }
 
-  if ( required_tolerance <= 0 )
-  {
-   throw std::invalid_argument("Find_UB(): required_tolerance must be positive");
+  if (required_tolerance <= 0) {
+    throw std::invalid_argument(
+        "Find_UB(): required_tolerance must be positive");
   }
 
-  if ( num_initial < 2 )
-  {
-   throw std::invalid_argument("Find_UB(): number of peaks for inital scan must be > 2");
+  if (num_initial < 2) {
+    throw std::invalid_argument(
+        "Find_UB(): number of peaks for inital scan must be > 2");
   }
 
-  if ( degrees_per_step <= 0 )
-  {
-   throw std::invalid_argument("Find_UB(): degrees_per_step must be positive");
+  if (degrees_per_step <= 0) {
+    throw std::invalid_argument("Find_UB(): degrees_per_step must be positive");
   }
 
-                                      // get list of peaks, sorted on |Q|
+  // get list of peaks, sorted on |Q|
   std::vector<V3D> sorted_qs;
-  sorted_qs.reserve( q_vectors.size() );
+  sorted_qs.reserve(q_vectors.size());
 
-  if ( q_vectors.size() > 5 )       // shift to be centered on peak (we lose
-                                    // one peak that way, so require > 5)
+  if (q_vectors.size() > 5) // shift to be centered on peak (we lose
+                            // one peak that way, so require > 5)
   {
-    std::vector<V3D> shifted_qs( q_vectors );
-    size_t mid_ind = q_vectors.size()/3;
-                                    // either do an initial sort and use
-                                    // default mid index, or use the index
-                                    // specified by the base_peak parameter
-    if ( base_index < 0 || base_index >= (int)q_vectors.size() )
-    {
-      std::sort( shifted_qs.begin(), shifted_qs.end(), V3D::CompareMagnitude );
-    }
-    else
-    {
+    std::vector<V3D> shifted_qs(q_vectors);
+    size_t mid_ind = q_vectors.size() / 3;
+    // either do an initial sort and use
+    // default mid index, or use the index
+    // specified by the base_peak parameter
+    if (base_index < 0 || base_index >= (int)q_vectors.size()) {
+      std::sort(shifted_qs.begin(), shifted_qs.end(), V3D::CompareMagnitude);
+    } else {
       mid_ind = base_index;
     }
-    V3D mid_vec( shifted_qs[mid_ind] );
+    V3D mid_vec(shifted_qs[mid_ind]);
 
-    for ( size_t i = 0; i < shifted_qs.size(); i++ )
-    {
-      if ( i != mid_ind )
-      {
-        V3D shifted_vec( shifted_qs[i] );
+    for (size_t i = 0; i < shifted_qs.size(); i++) {
+      if (i != mid_ind) {
+        V3D shifted_vec(shifted_qs[i]);
         shifted_vec -= mid_vec;
-        sorted_qs.push_back( shifted_vec );
+        sorted_qs.push_back(shifted_vec);
       }
     }
-  }
-  else
-  {
-    for ( size_t i = 0; i < q_vectors.size(); i++ )
-      sorted_qs.push_back( q_vectors[i] );
+  } else {
+    for (size_t i = 0; i < q_vectors.size(); i++)
+      sorted_qs.push_back(q_vectors[i]);
   }
 
-  std::sort( sorted_qs.begin(), sorted_qs.end(), V3D::CompareMagnitude );
+  std::sort(sorted_qs.begin(), sorted_qs.end(), V3D::CompareMagnitude);
 
-  if ( num_initial > sorted_qs.size() )
+  if (num_initial > sorted_qs.size())
     num_initial = sorted_qs.size();
 
   std::vector<V3D> some_qs;
-  some_qs.reserve( q_vectors.size() );
+  some_qs.reserve(q_vectors.size());
 
-  for ( size_t i = 0; i < num_initial; i++ )
-    some_qs.push_back( sorted_qs[i] );
+  for (size_t i = 0; i < num_initial; i++)
+    some_qs.push_back(sorted_qs[i]);
 
-  ScanFor_UB( UB, some_qs,
-              a, b, c, alpha, beta, gamma,
-              degrees_per_step,
-              required_tolerance );
+  ScanFor_UB(UB, some_qs, a, b, c, alpha, beta, gamma, degrees_per_step,
+             required_tolerance);
 
-  double  fit_error = 0;
+  double fit_error = 0;
   std::vector<V3D> miller_ind;
   std::vector<V3D> indexed_qs;
-  miller_ind.reserve( q_vectors.size() );
-  indexed_qs.reserve( q_vectors.size() );
-                                     // now gradually bring in the remaining
-                                     // peaks and re-optimize the UB to index
-                                     // them as well
+  miller_ind.reserve(q_vectors.size());
+  indexed_qs.reserve(q_vectors.size());
+  // now gradually bring in the remaining
+  // peaks and re-optimize the UB to index
+  // them as well
   size_t count = 0;
-  while ( num_initial < sorted_qs.size() )
-  {
+  while (num_initial < sorted_qs.size()) {
     count++;
     num_initial = round(1.5 * (double)(num_initial + 3));
-                                             // add 3, in case we started with
-                                             // a very small number of peaks!
-    if ( num_initial >= sorted_qs.size() )
+    // add 3, in case we started with
+    // a very small number of peaks!
+    if (num_initial >= sorted_qs.size())
       num_initial = sorted_qs.size();
 
-    for ( size_t i = some_qs.size(); i < num_initial; i++ )
-      some_qs.push_back( sorted_qs[i] );
+    for (size_t i = some_qs.size(); i < num_initial; i++)
+      some_qs.push_back(sorted_qs[i]);
 
-    try
-    {
-      GetIndexedPeaks( UB, some_qs, required_tolerance,
-                       miller_ind, indexed_qs, fit_error );
-      Matrix<double> temp_UB(3,3,false);
-      fit_error = Optimize_UB( temp_UB, miller_ind, indexed_qs );
+    try {
+      GetIndexedPeaks(UB, some_qs, required_tolerance, miller_ind, indexed_qs,
+                      fit_error);
+      Matrix<double> temp_UB(3, 3, false);
+      fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
       UB = temp_UB;
-    }
-    catch (...)
-    {
+    } catch (...) {
       // failed to fit using these peaks, so add some more and try again
     }
   }
 
-  if ( q_vectors.size() >= 3 )    // try one last refinement using all peaks
+  if (q_vectors.size() >= 3) // try one last refinement using all peaks
   {
-    try 
-    {
-      GetIndexedPeaks( UB, q_vectors, required_tolerance,
-                       miller_ind, indexed_qs, fit_error );
-      Matrix<double> temp_UB(3,3,false);
-      fit_error = Optimize_UB( temp_UB, miller_ind, indexed_qs );
+    try {
+      GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_ind, indexed_qs,
+                      fit_error);
+      Matrix<double> temp_UB(3, 3, false);
+      fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
       UB = temp_UB;
-    }
-    catch (...)
-    {
-      // failed to improve UB using these peaks, so just return the current UB 
+    } catch (...) {
+      // failed to improve UB using these peaks, so just return the current UB
     }
   }
-                                 // Regardless of how we got the UB, find the
-                                 // sum-squared errors for the indexing in 
-                                 // HKL space.
-  GetIndexedPeaks( UB, q_vectors, required_tolerance,
-                   miller_ind, indexed_qs, fit_error );
+  // Regardless of how we got the UB, find the
+  // sum-squared errors for the indexing in
+  // HKL space.
+  GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_ind, indexed_qs,
+                  fit_error);
   return fit_error;
 }
 
-
-/** 
-    STATIC method Find_UB: This method will attempt to calculate the matrix 
-  that most nearly indexes the specified q_vectors, given only a range of 
-  possible unit cell edge lengths.  If successful, the matrix should 
+/**
+    STATIC method Find_UB: This method will attempt to calculate the matrix
+  that most nearly indexes the specified q_vectors, given only a range of
+  possible unit cell edge lengths.  If successful, the matrix should
   correspond to the Niggli reduced cell.
      The resolution of the search through possible orientations is specified
   by the degrees_per_step parameter.  Approximately 1-3 degrees_per_step is
-  usually adequate.  NOTE: This is an expensive calculation which takes 
-  approximately 1 second using 1 degree_per_step.  However, the execution 
-  time is O(n^3) so decreasing the resolution to 0.5 degree per step will take 
-  about 8 seconds, etc.  It should not be necessary to decrease this value 
+  usually adequate.  NOTE: This is an expensive calculation which takes
+  approximately 1 second using 1 degree_per_step.  However, the execution
+  time is O(n^3) so decreasing the resolution to 0.5 degree per step will take
+  about 8 seconds, etc.  It should not be necessary to decrease this value
   below 1 degree per step, and users will have to be VERY patient, if it is
   decreased much below 1 degree per step.
     The number of peaks used to obtain an initial indexing is specified by
-  the "NumInitial" parameter.  Good values for this are typically around 
+  the "NumInitial" parameter.  Good values for this are typically around
   15-25.  The specified q_vectors must correspond to a single crystal.  If
-  several crystallites are present or there are other sources of "noise" 
+  several crystallites are present or there are other sources of "noise"
   leading to invalid peaks, this method will not work well.  The method that
   uses lattice parameters may be better in such cases.  Alternatively, adjust
   the list of specified q_vectors so it does not include noise peaks or peaks
   from more than one crystal, by increasing the threshold for what counts
   as a peak, or by other methods.
-  
+
   @param  UB                  3x3 matrix that will be set to the UB matrix
-  @param  q_vectors           std::vector of V3D objects that contains the 
+  @param  q_vectors           std::vector of V3D objects that contains the
                               list of q_vectors that are to be indexed
                               NOTE: There must be at least 3 q_vectors.
   @param  min_d               Lower bound on shortest unit cell edge length.
@@ -274,10 +247,10 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
                               length in angstroms.
   @param  required_tolerance  The maximum allowed deviation of Miller indices
                               from integer values for a peak to be indexed.
-  @param  base_index          The sequence number of the peak that should 
+  @param  base_index          The sequence number of the peak that should
                               be used as the central peak.  On the first
                               scan for a UB matrix that fits the data,
-                              the remaining peaks in the list of q_vectors 
+                              the remaining peaks in the list of q_vectors
                               will be shifted by -base_peak, where base_peak
                               is the q_vector with the specified base index.
                               If fewer than 6 peaks are specified in the
@@ -292,199 +265,172 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
                               orientations used during the initial scan.
 
   @return  This will return the sum of the squares of the residual errors.
-  
-  @throws  std::invalid_argument exception if UB is not a 3X3 matrix, 
-                                 if there are not at least 3 q vectors, 
+
+  @throws  std::invalid_argument exception if UB is not a 3X3 matrix,
+                                 if there are not at least 3 q vectors,
                                  if min_d >= max_d or min_d <= 0
-                                 if num_initial is < 3, or 
+                                 if num_initial is < 3, or
                                  if the required_tolerance or degrees_per_step
-                                 is <= 0. 
+                                 is <= 0.
 */
-double IndexingUtils::Find_UB(       DblMatrix        & UB,
-                               const std::vector<V3D> & q_vectors,
-                                     double             min_d,
-                                     double             max_d,
-                                     double             required_tolerance,
-                                     int                base_index,
-                                     size_t             num_initial,
-                                     double             degrees_per_step )
-{
-  if ( UB.numRows() != 3 || UB.numCols() != 3 )
-  {
-   throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
+double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
+                              double min_d, double max_d,
+                              double required_tolerance, int base_index,
+                              size_t num_initial, double degrees_per_step) {
+  if (UB.numRows() != 3 || UB.numCols() != 3) {
+    throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
 
-  if ( q_vectors.size() < 3 )
-  {
-   throw std::invalid_argument("Find_UB(): Three or more indexed peaks needed to find UB");
+  if (q_vectors.size() < 3) {
+    throw std::invalid_argument(
+        "Find_UB(): Three or more indexed peaks needed to find UB");
   }
 
-  if ( min_d >= max_d || min_d <= 0 )
-  {
-   throw std::invalid_argument("Find_UB(): Need 0 < min_d < max_d");
+  if (min_d >= max_d || min_d <= 0) {
+    throw std::invalid_argument("Find_UB(): Need 0 < min_d < max_d");
   }
 
-  if ( required_tolerance <= 0 )
-  {
-   throw std::invalid_argument("Find_UB(): required_tolerance must be positive");
+  if (required_tolerance <= 0) {
+    throw std::invalid_argument(
+        "Find_UB(): required_tolerance must be positive");
   }
 
-  if ( num_initial < 3 )
-  {
-   throw std::invalid_argument("Find_UB(): number of peaks for inital scan must be > 2");
+  if (num_initial < 3) {
+    throw std::invalid_argument(
+        "Find_UB(): number of peaks for inital scan must be > 2");
   }
 
-  if ( degrees_per_step <= 0 )
-  {
-   throw std::invalid_argument("Find_UB(): degrees_per_step must be positive");
+  if (degrees_per_step <= 0) {
+    throw std::invalid_argument("Find_UB(): degrees_per_step must be positive");
   }
 
-                                    // get list of peaks, sorted on |Q|
+  // get list of peaks, sorted on |Q|
   std::vector<V3D> sorted_qs;
-  sorted_qs.reserve( q_vectors.size() );
+  sorted_qs.reserve(q_vectors.size());
 
-  if ( q_vectors.size() > 5 )       // shift to be centered on peak (we lose
-                                    // one peak that way, so require > 5)
+  if (q_vectors.size() > 5) // shift to be centered on peak (we lose
+                            // one peak that way, so require > 5)
   {
-    std::vector<V3D> shifted_qs( q_vectors );
-    size_t mid_ind = q_vectors.size()/2;
-                                    // either do an initial sort and use
-                                    // default mid index, or use the index
-                                    // specified by the base_peak parameter
-    if ( base_index < 0 || base_index >= (int)q_vectors.size() )
-    {
-      std::sort( shifted_qs.begin(), shifted_qs.end(), V3D::CompareMagnitude );
-    }
-    else
-    {
+    std::vector<V3D> shifted_qs(q_vectors);
+    size_t mid_ind = q_vectors.size() / 2;
+    // either do an initial sort and use
+    // default mid index, or use the index
+    // specified by the base_peak parameter
+    if (base_index < 0 || base_index >= (int)q_vectors.size()) {
+      std::sort(shifted_qs.begin(), shifted_qs.end(), V3D::CompareMagnitude);
+    } else {
       mid_ind = base_index;
     }
-    V3D mid_vec( shifted_qs[mid_ind] );
+    V3D mid_vec(shifted_qs[mid_ind]);
 
-    for ( size_t i = 0; i < shifted_qs.size(); i++ )
-    {
-      if ( i != mid_ind )
-      {
-        V3D shifted_vec( shifted_qs[i] );
+    for (size_t i = 0; i < shifted_qs.size(); i++) {
+      if (i != mid_ind) {
+        V3D shifted_vec(shifted_qs[i]);
         shifted_vec -= mid_vec;
-        sorted_qs.push_back( shifted_vec );
+        sorted_qs.push_back(shifted_vec);
       }
     }
-  }
-  else
-  {
-    for ( size_t i = 0; i < q_vectors.size(); i++ )
-      sorted_qs.push_back( q_vectors[i] );
+  } else {
+    for (size_t i = 0; i < q_vectors.size(); i++)
+      sorted_qs.push_back(q_vectors[i]);
   }
 
-  std::sort( sorted_qs.begin(), sorted_qs.end(), V3D::CompareMagnitude );
+  std::sort(sorted_qs.begin(), sorted_qs.end(), V3D::CompareMagnitude);
 
-  if ( num_initial > sorted_qs.size() )
+  if (num_initial > sorted_qs.size())
     num_initial = sorted_qs.size();
 
   std::vector<V3D> some_qs;
-  some_qs.reserve( q_vectors.size() );
+  some_qs.reserve(q_vectors.size());
 
-  for ( size_t i = 0; i < num_initial; i++ )
-    some_qs.push_back( sorted_qs[i] );
+  for (size_t i = 0; i < num_initial; i++)
+    some_qs.push_back(sorted_qs[i]);
   std::vector<V3D> directions;
-  ScanFor_Directions( directions,
-                      some_qs,
-                      min_d, max_d,
-                      required_tolerance,
-                      degrees_per_step );
+  ScanFor_Directions(directions, some_qs, min_d, max_d, required_tolerance,
+                     degrees_per_step);
 
-  if ( directions.size() < 3 )
-  {
+  if (directions.size() < 3) {
     throw std::runtime_error(
-                 "Find_UB(): Could not find at least three possible lattice directions");
+        "Find_UB(): Could not find at least three possible lattice directions");
   }
 
-  std::sort( directions.begin(), directions.end(), V3D::CompareMagnitude );
+  std::sort(directions.begin(), directions.end(), V3D::CompareMagnitude);
 
-  if ( ! FormUB_From_abc_Vectors(UB, directions, 0, min_d, max_d )  )
-  {
-    throw std::runtime_error("Find_UB(): Could not find independent a, b, c directions" );
+  if (!FormUB_From_abc_Vectors(UB, directions, 0, min_d, max_d)) {
+    throw std::runtime_error(
+        "Find_UB(): Could not find independent a, b, c directions");
   }
-                                     // now gradually bring in the remaining
-                                     // peaks and re-optimize the UB to index
-                                     // them as well
+  // now gradually bring in the remaining
+  // peaks and re-optimize the UB to index
+  // them as well
   std::vector<V3D> miller_ind;
   std::vector<V3D> indexed_qs;
-  miller_ind.reserve( q_vectors.size() );
-  indexed_qs.reserve( q_vectors.size() );
+  miller_ind.reserve(q_vectors.size());
+  indexed_qs.reserve(q_vectors.size());
 
-  Matrix<double> temp_UB(3,3,false);
-  double         fit_error = 0;
-  while ( num_initial < sorted_qs.size() )
-  {
+  Matrix<double> temp_UB(3, 3, false);
+  double fit_error = 0;
+  while (num_initial < sorted_qs.size()) {
     num_initial = round(1.5 * (double)num_initial + 3);
-                                             // add 3, in case we started with
-                                             // a very small number of peaks!
-    if ( num_initial >= sorted_qs.size() )
+    // add 3, in case we started with
+    // a very small number of peaks!
+    if (num_initial >= sorted_qs.size())
       num_initial = sorted_qs.size();
 
-    for ( size_t i = some_qs.size(); i < num_initial; i++ )
-      some_qs.push_back( sorted_qs[i] );
+    for (size_t i = some_qs.size(); i < num_initial; i++)
+      some_qs.push_back(sorted_qs[i]);
 
-    GetIndexedPeaks( UB, some_qs, required_tolerance,
-                     miller_ind, indexed_qs, fit_error );
-    try
-    {
-      fit_error = Optimize_UB( temp_UB, miller_ind, indexed_qs );
+    GetIndexedPeaks(UB, some_qs, required_tolerance, miller_ind, indexed_qs,
+                    fit_error);
+    try {
+      fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
       UB = temp_UB;
-    }
-    catch (...)
-    {
+    } catch (...) {
       // failed to improve with these peaks, so continue with more peaks
       // if possible
     }
   }
 
-  if ( q_vectors.size() >= 5 )   // try one last refinement using all peaks
+  if (q_vectors.size() >= 5) // try one last refinement using all peaks
   {
-    GetIndexedPeaks( UB, q_vectors, required_tolerance,
-                     miller_ind, indexed_qs, fit_error );
-    try
-    {
-      fit_error = Optimize_UB( temp_UB, miller_ind, indexed_qs );
+    GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_ind, indexed_qs,
+                    fit_error);
+    try {
+      fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
       UB = temp_UB;
-    }
-    catch (...)
-    {
-      // failed to improve with all peaks, so return the UB we had 
+    } catch (...) {
+      // failed to improve with all peaks, so return the UB we had
     }
   }
 
-  if ( NiggliCell::MakeNiggliUB( UB, temp_UB ) )
+  if (NiggliCell::MakeNiggliUB(UB, temp_UB))
     UB = temp_UB;
 
   return fit_error;
 }
 
-
-/** 
-    STATIC method Find_UB: This method will attempt to calculate the matrix 
-  that most nearly indexes the specified q_vectors, using FFTs to find 
+/**
+    STATIC method Find_UB: This method will attempt to calculate the matrix
+  that most nearly indexes the specified q_vectors, using FFTs to find
   patterns in projected Q-vectors, given only a range of possible unit cell
-  edge lengths. If successful, the resulting matrix should correspond to 
+  edge lengths. If successful, the resulting matrix should correspond to
   the Niggli reduced cell.
     The resolution of the search through possible orientations is specified
-  by the degrees_per_step parameter.  One to two degrees per step is usually 
+  by the degrees_per_step parameter.  One to two degrees per step is usually
   adequate.
   NOTE: The execution time is O(n^3) where n is the number of degrees per
-  step, so decreasing the resolution to 0.5 degree per step will take 
-  about 8 times longer than using 1 degree per step.  It should not be 
-  necessary to decrease this value below 1 degree per step, and users will 
+  step, so decreasing the resolution to 0.5 degree per step will take
+  about 8 times longer than using 1 degree per step.  It should not be
+  necessary to decrease this value below 1 degree per step, and users will
   have to be VERY patient, if it is decreased much below 1 degree per step.
     The specified q_vectors should correspond to a single crystal, for this
   to work reliably.
-  
+
   @param  UB                  3x3 matrix that will be set to the UB matrix
-  @param  q_vectors           std::vector of V3D objects that contains the 
+  @param  q_vectors           std::vector of V3D objects that contains the
                               list of q_vectors that are to be indexed
                               NOTE: There must be at least 4 q_vectors and it
-                              really should have at least 10 or more peaks 
+                              really should have at least 10 or more peaks
                               for this to work quite consistently.
   @param  min_d               Lower bound on shortest unit cell edge length.
                               This does not have to be specified exactly but
@@ -500,130 +446,120 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
                               orientations used during the initial scan.
 
   @return  This will return the sum of the squares of the residual errors.
-  
-  @throws  std::invalid_argument exception if UB is not a 3X3 matrix, 
-                                 if there are not at least 3 q vectors, 
+
+  @throws  std::invalid_argument exception if UB is not a 3X3 matrix,
+                                 if there are not at least 3 q vectors,
                                  if min_d >= max_d or min_d <= 0,
                                  if the required_tolerance or degrees_per_step
                                  is <= 0,
                                  if at least three possible a,b,c directions
                                  were not found,
-                                 or if a valid UB matrix could not be formed 
+                                 or if a valid UB matrix could not be formed
                                  from the a,b,c directions that were found.
 */
-double IndexingUtils::Find_UB(       DblMatrix        & UB,
-                               const std::vector<V3D> & q_vectors,
-                                     double             min_d,
-                                     double             max_d,
-                                     double             required_tolerance,
-                                     double             degrees_per_step )
-{
-  if ( UB.numRows() != 3 || UB.numCols() != 3 )
-  {
-   throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
+double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
+                              double min_d, double max_d,
+                              double required_tolerance,
+                              double degrees_per_step) {
+  if (UB.numRows() != 3 || UB.numCols() != 3) {
+    throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
 
-  if ( q_vectors.size() < 4 )
-  {
-   throw std::invalid_argument("Find_UB(): Three or more indexed peaks needed to find UB");
+  if (q_vectors.size() < 4) {
+    throw std::invalid_argument(
+        "Find_UB(): Three or more indexed peaks needed to find UB");
   }
 
-  if ( min_d >= max_d || min_d <= 0 )
-  {
-   throw std::invalid_argument("Find_UB(): Need 0 < min_d < max_d");
+  if (min_d >= max_d || min_d <= 0) {
+    throw std::invalid_argument("Find_UB(): Need 0 < min_d < max_d");
   }
 
-  if ( required_tolerance <= 0 )
-  {
-   throw std::invalid_argument("Find_UB(): required_tolerance must be positive");
+  if (required_tolerance <= 0) {
+    throw std::invalid_argument(
+        "Find_UB(): required_tolerance must be positive");
   }
 
-  if ( degrees_per_step <= 0 )
-  {
-   throw std::invalid_argument("Find_UB(): degrees_per_step must be positive");
+  if (degrees_per_step <= 0) {
+    throw std::invalid_argument("Find_UB(): degrees_per_step must be positive");
   }
 
   std::vector<V3D> directions;
 
-                           // NOTE: we use a somewhat higher tolerance when 
-                           // finding individual directions since it is easier
-                           // to index one direction individually compared to
-                           // indexing three directions simultaneously.
-  size_t max_indexed = FFTScanFor_Directions( directions, q_vectors,
-                                              min_d, max_d,
-                                              0.75f * required_tolerance,
-                                              degrees_per_step );
+  // NOTE: we use a somewhat higher tolerance when
+  // finding individual directions since it is easier
+  // to index one direction individually compared to
+  // indexing three directions simultaneously.
+  size_t max_indexed =
+      FFTScanFor_Directions(directions, q_vectors, min_d, max_d,
+                            0.75f * required_tolerance, degrees_per_step);
 
-  if ( max_indexed == 0 )
-  {
-   throw std::invalid_argument("Find_UB(): Could not find any a,b,c vectors to index Qs");
+  if (max_indexed == 0) {
+    throw std::invalid_argument(
+        "Find_UB(): Could not find any a,b,c vectors to index Qs");
   }
 
-  if ( directions.size() < 3 )
-  {
-   throw std::invalid_argument("Find_UB(): Could not find enough a,b,c vectors");
+  if (directions.size() < 3) {
+    throw std::invalid_argument(
+        "Find_UB(): Could not find enough a,b,c vectors");
   }
 
-  std::sort( directions.begin(), directions.end(), V3D::CompareMagnitude );
+  std::sort(directions.begin(), directions.end(), V3D::CompareMagnitude);
 
-  double    min_vol = min_d * min_d * min_d / 4.0;
+  double min_vol = min_d * min_d * min_d / 4.0;
 
-  if ( !FormUB_From_abc_Vectors( UB, directions, q_vectors,
-                                 required_tolerance, min_vol ) )
-  {
-    throw std::invalid_argument("Find_UB(): Could not form UB matrix from a,b,c vectors");
+  if (!FormUB_From_abc_Vectors(UB, directions, q_vectors, required_tolerance,
+                               min_vol)) {
+    throw std::invalid_argument(
+        "Find_UB(): Could not form UB matrix from a,b,c vectors");
   }
 
-  Matrix<double> temp_UB(3,3,false);
+  Matrix<double> temp_UB(3, 3, false);
   double fit_error = 0;
-  if ( q_vectors.size() >= 5 )                 // repeatedly refine UB
+  if (q_vectors.size() >= 5) // repeatedly refine UB
   {
     std::vector<V3D> miller_ind;
     std::vector<V3D> indexed_qs;
-    miller_ind.reserve( q_vectors.size() );
-    indexed_qs.reserve( q_vectors.size() );
+    miller_ind.reserve(q_vectors.size());
+    indexed_qs.reserve(q_vectors.size());
 
-    GetIndexedPeaks( UB, q_vectors, required_tolerance,
-                     miller_ind, indexed_qs, fit_error );
+    GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_ind, indexed_qs,
+                    fit_error);
 
-    for ( int counter = 0; counter < 4; counter++ )
-    {
-      try
-      {
-        fit_error = Optimize_UB( temp_UB, miller_ind, indexed_qs );
+    for (int counter = 0; counter < 4; counter++) {
+      try {
+        fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
         UB = temp_UB;
-        GetIndexedPeaks( UB, q_vectors, required_tolerance,
-                         miller_ind, indexed_qs, fit_error );
-      }
-      catch ( std::exception& )
-      {
-        // failed to improve with all peaks, so just keep the UB we had 
+        GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_ind,
+                        indexed_qs, fit_error);
+      } catch (std::exception &) {
+        // failed to improve with all peaks, so just keep the UB we had
       }
     }
   }
 
-  if ( NiggliCell::MakeNiggliUB( UB, temp_UB ) )
+  if (NiggliCell::MakeNiggliUB(UB, temp_UB))
     UB = temp_UB;
 
   return fit_error;
 }
 
-/** 
+/**
   STATIC method Optimize_UB: Calculates the matrix that most nearly maps
   the specified hkl_vectors to the specified q_vectors.  The calculated
   UB minimizes the sum squared differences between UB*(h,k,l) and the
   corresponding (qx,qy,qz) for all of the specified hkl and Q vectors.
   The sum of the squares of the residual errors is returned.  This method is
   used to optimize the UB matrix once an initial indexing has been found.
-  
+
   @param  UB           3x3 matrix that will be set to the UB matrix
-  @param  hkl_vectors  std::vector of V3D objects that contains the 
+  @param  hkl_vectors  std::vector of V3D objects that contains the
                        list of hkl values
-  @param  q_vectors    std::vector of V3D objects that contains the list of 
+  @param  q_vectors    std::vector of V3D objects that contains the list of
                        q_vectors that are indexed by the corresponding hkl
                        vectors.
   @param  sigabc      error in the crystal lattice parameter values if length
-                      is at least 6. NOTE: Calculation of these errors is based on
+                      is at least 6. NOTE: Calculation of these errors is based
+  on
                       SCD FORTRAN code base at IPNS. Contributors to the least
                       squares application(1979) are J.Marc Overhage, G.Anderson,
                       P. C. W. Leung, R. G. Teller, and  A. J. Schultz
@@ -643,66 +579,56 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
                                  the UB matrix can't be calculated or if
                                  UB is a singular matrix.
 */
-double IndexingUtils::Optimize_UB(      DblMatrix         & UB,
-                                  const std::vector<V3D>  & hkl_vectors,
-                                  const std::vector<V3D>  & q_vectors ,
-                                  std::vector<double> & sigabc)
-{
-  double result = Optimize_UB( UB, hkl_vectors,q_vectors);
-  if( sigabc.size() <6)
-  {
+double IndexingUtils::Optimize_UB(DblMatrix &UB,
+                                  const std::vector<V3D> &hkl_vectors,
+                                  const std::vector<V3D> &q_vectors,
+                                  std::vector<double> &sigabc) {
+  double result = Optimize_UB(UB, hkl_vectors, q_vectors);
+  if (sigabc.size() < 6) {
     sigabc.clear();
     return result;
-  }else
-    for( int i=0;i<6;i++)
-      sigabc[i]=0.0;
+  } else
+    for (int i = 0; i < 6; i++)
+      sigabc[i] = 0.0;
 
-  size_t nDOF= 3*(hkl_vectors.size()-3);
-  DblMatrix HKLTHKL(3,3);
-  for( int r=0; r < 3; r++)
-    for( int c=0; c<3;c++)
-     for( size_t i =0; i< hkl_vectors.size();i++)
-     {
-       HKLTHKL[r][c] += hkl_vectors[i][r]*hkl_vectors[i][c];//rounded??? to nearest integer
-     }
+  size_t nDOF = 3 * (hkl_vectors.size() - 3);
+  DblMatrix HKLTHKL(3, 3);
+  for (int r = 0; r < 3; r++)
+    for (int c = 0; c < 3; c++)
+      for (size_t i = 0; i < hkl_vectors.size(); i++) {
+        HKLTHKL[r][c] += hkl_vectors[i][r] *
+                         hkl_vectors[i][c]; // rounded??? to nearest integer
+      }
 
   HKLTHKL.Invert();
 
-
-  double SMALL =1.525878906E-5;
-  Matrix<double> derivs( 3,7);
+  double SMALL = 1.525878906E-5;
+  Matrix<double> derivs(3, 7);
   std::vector<double> latOrig, latNew;
-  GetLatticeParameters( UB, latOrig);
+  GetLatticeParameters(UB, latOrig);
 
-
-  for( int r=0; r<3;r++)
-  {
-    for( int c=0; c<3;c++)
-    {
+  for (int r = 0; r < 3; r++) {
+    for (int c = 0; c < 3; c++) {
 
       UB[r][c] += SMALL;
 
-      GetLatticeParameters( UB, latNew);
+      GetLatticeParameters(UB, latNew);
       UB[r][c] -= SMALL;
 
-      for( int l=0;   l<7; l++ )
-        derivs[c][l] =  (latNew[l]-latOrig[l])/SMALL;
-
-
+      for (int l = 0; l < 7; l++)
+        derivs[c][l] = (latNew[l] - latOrig[l]) / SMALL;
     }
 
-    for( size_t l=0;l<std::min<size_t>((size_t)7,sigabc.size());l++)
-      for( int m=0; m<3;m++)
-        for( int n=0; n<3;n++)
+    for (size_t l = 0; l < std::min<size_t>((size_t)7, sigabc.size()); l++)
+      for (int m = 0; m < 3; m++)
+        for (int n = 0; n < 3; n++)
           sigabc[l] += (derivs[m][l] * HKLTHKL[m][n] * derivs[n][l]);
   }
 
-  double delta = result /(double)nDOF;
+  double delta = result / (double)nDOF;
 
-  for( size_t i = 0; i < std::min<size_t>(7,sigabc.size()); i++ )
-            sigabc[i] = sqrt( delta * sigabc[i] );
-
-
+  for (size_t i = 0; i < std::min<size_t>(7, sigabc.size()); i++)
+    sigabc[i] = sqrt(delta * sigabc[i]);
 
   return result;
 }
@@ -723,257 +649,232 @@ double IndexingUtils::Optimize_UB(      DblMatrix         & UB,
                        vectors.
   NOTE: The number of hkl_vectors and q_vectors must be the same, and must
         be at least 3.
-  
-  @return  This will return the sum of the squares of the residual differences 
-           between the Q vectors provided and the UB*hkl values, in 
-           reciprocal space. 
- 
+
+  @return  This will return the sum of the squares of the residual differences
+           between the Q vectors provided and the UB*hkl values, in
+           reciprocal space.
+
   @throws  std::invalid_argument exception if there are not at least 3
                                  hkl and q vectors, or if the numbers of
                                  hkl and q vectors are not the same, or if
                                  the UB matrix is not a 3x3 matrix.
-   
+
   @throws  std::runtime_error    exception if the QR factorization fails or
-                                 the UB matrix can't be calculated or if 
+                                 the UB matrix can't be calculated or if
                                  UB is a singular matrix.
-*/  
-double IndexingUtils::Optimize_UB(      DblMatrix         & UB,
-                                  const std::vector<V3D>  & hkl_vectors, 
-                                  const std::vector<V3D>  & q_vectors )
-{
-  if ( UB.numRows() != 3 || UB.numCols() != 3 )
-  {
-   throw std::invalid_argument("Optimize_UB(): UB matrix NULL or not 3X3");
+*/
+double IndexingUtils::Optimize_UB(DblMatrix &UB,
+                                  const std::vector<V3D> &hkl_vectors,
+                                  const std::vector<V3D> &q_vectors) {
+  if (UB.numRows() != 3 || UB.numCols() != 3) {
+    throw std::invalid_argument("Optimize_UB(): UB matrix NULL or not 3X3");
   }
 
-  if ( hkl_vectors.size() < 3 ) 
-  {
-   throw std::invalid_argument("Optimize_UB(): Three or more indexed peaks needed to find UB");
+  if (hkl_vectors.size() < 3) {
+    throw std::invalid_argument(
+        "Optimize_UB(): Three or more indexed peaks needed to find UB");
   }
 
-  if ( hkl_vectors.size() != q_vectors.size() )
-  {
-   throw std::invalid_argument("Optimize_UB(): Number of hkl_vectors != number of q_vectors");
+  if (hkl_vectors.size() != q_vectors.size()) {
+    throw std::invalid_argument(
+        "Optimize_UB(): Number of hkl_vectors != number of q_vectors");
   }
 
-  gsl_matrix *H_transpose = gsl_matrix_alloc( hkl_vectors.size(), 3 );
-  gsl_vector *tau         = gsl_vector_alloc( 3 );
+  gsl_matrix *H_transpose = gsl_matrix_alloc(hkl_vectors.size(), 3);
+  gsl_vector *tau = gsl_vector_alloc(3);
 
   double sum_sq_error = 0;
-                                      // Make the H-transpose matrix from the
-                                      // hkl vectors and form QR factorization
-  for ( size_t row = 0; row < hkl_vectors.size(); row++ )
-  {
-    for ( size_t col = 0; col < 3; col++ )
-    {
-      gsl_matrix_set( H_transpose, row, col, (hkl_vectors[row])[col] );
+  // Make the H-transpose matrix from the
+  // hkl vectors and form QR factorization
+  for (size_t row = 0; row < hkl_vectors.size(); row++) {
+    for (size_t col = 0; col < 3; col++) {
+      gsl_matrix_set(H_transpose, row, col, (hkl_vectors[row])[col]);
     }
   }
 
-  int returned_flag = gsl_linalg_QR_decomp( H_transpose, tau );
+  int returned_flag = gsl_linalg_QR_decomp(H_transpose, tau);
 
-  if ( returned_flag != 0 )
-  {
-    gsl_matrix_free( H_transpose );
-    gsl_vector_free( tau );
-    throw std::runtime_error("Optimize_UB(): gsl QR_decomp failed, invalid hkl values");
+  if (returned_flag != 0) {
+    gsl_matrix_free(H_transpose);
+    gsl_vector_free(tau);
+    throw std::runtime_error(
+        "Optimize_UB(): gsl QR_decomp failed, invalid hkl values");
   }
-                                      // solve for each row of UB, using the 
-                                      // QR factorization of and accumulate the 
-                                      // sum of the squares of the residuals
-  gsl_vector *UB_row      = gsl_vector_alloc( 3 );
-  gsl_vector *q           = gsl_vector_alloc( q_vectors.size() );
-  gsl_vector *residual    = gsl_vector_alloc( q_vectors.size() );
+  // solve for each row of UB, using the
+  // QR factorization of and accumulate the
+  // sum of the squares of the residuals
+  gsl_vector *UB_row = gsl_vector_alloc(3);
+  gsl_vector *q = gsl_vector_alloc(q_vectors.size());
+  gsl_vector *residual = gsl_vector_alloc(q_vectors.size());
 
   bool found_UB = true;
 
-  for ( size_t row = 0; row < 3; row++ )
-  {
-    for ( size_t i = 0; i < q_vectors.size(); i++ )
-    {
-      gsl_vector_set( q, i, (q_vectors[i])[row] / (2.0 * M_PI) );
+  for (size_t row = 0; row < 3; row++) {
+    for (size_t i = 0; i < q_vectors.size(); i++) {
+      gsl_vector_set(q, i, (q_vectors[i])[row] / (2.0 * M_PI));
     }
 
-    returned_flag = gsl_linalg_QR_lssolve(H_transpose,tau,q,UB_row,residual);
-    if ( returned_flag != 0 )
-    {
+    returned_flag =
+        gsl_linalg_QR_lssolve(H_transpose, tau, q, UB_row, residual);
+    if (returned_flag != 0) {
       found_UB = false;
     }
 
-    for ( size_t i = 0; i < 3; i++ )
-    {
-      double value = gsl_vector_get( UB_row, i );      
-      if ( gsl_isnan( value ) || gsl_isinf( value) )
+    for (size_t i = 0; i < 3; i++) {
+      double value = gsl_vector_get(UB_row, i);
+      if (gsl_isnan(value) || gsl_isinf(value))
         found_UB = false;
     }
 
-    V3D row_values( gsl_vector_get( UB_row, 0 ), 
-                    gsl_vector_get( UB_row, 1 ),
-                    gsl_vector_get( UB_row, 2 ) );
-    UB.setRow( row, row_values );
+    V3D row_values(gsl_vector_get(UB_row, 0), gsl_vector_get(UB_row, 1),
+                   gsl_vector_get(UB_row, 2));
+    UB.setRow(row, row_values);
 
-    for ( size_t i = 0; i < q_vectors.size(); i++ )
-    {
+    for (size_t i = 0; i < q_vectors.size(); i++) {
       sum_sq_error += gsl_vector_get(residual, i) * gsl_vector_get(residual, i);
     }
   }
 
-  gsl_matrix_free( H_transpose );
-  gsl_vector_free( tau );
-  gsl_vector_free( UB_row );
-  gsl_vector_free( q );
-  gsl_vector_free( residual );
+  gsl_matrix_free(H_transpose);
+  gsl_vector_free(tau);
+  gsl_vector_free(UB_row);
+  gsl_vector_free(q);
+  gsl_vector_free(residual);
 
-  if ( !found_UB )
-  {
-    throw std::runtime_error("Optimize_UB(): Failed to find UB, invalid hkl or Q values");
+  if (!found_UB) {
+    throw std::runtime_error(
+        "Optimize_UB(): Failed to find UB, invalid hkl or Q values");
   }
 
-  if ( ! CheckUB( UB ) )
-  {
-    throw std::runtime_error( "Optimize_UB(): The optimized UB is not valid");
+  if (!CheckUB(UB)) {
+    throw std::runtime_error("Optimize_UB(): The optimized UB is not valid");
   }
 
   return sum_sq_error;
 }
 
-
-/** 
+/**
   STATIC method Optimize_Direction: Calculates the vector for which the
-  dot product of the the vector with each of the specified Qxyz vectors 
+  dot product of the the vector with each of the specified Qxyz vectors
   is most nearly the corresponding integer index.  The calculated best_vec
-  minimizes the sum squared differences between best_vec dot (qx,qy,z) 
-  and the corresponding index for all of the specified Q vectors and 
+  minimizes the sum squared differences between best_vec dot (qx,qy,z)
+  and the corresponding index for all of the specified Q vectors and
   indices.  The sum of the squares of the residual errors is returned.
   NOTE: This method is similar the Optimize_UB method, but this method only
         optimizes the plane normal in one direction.  Also, this optimizes
-        the mapping from (qx,qy,qz) to one index (Q to index), while the 
+        the mapping from (qx,qy,qz) to one index (Q to index), while the
         Optimize_UB method optimizes the mapping from three (h,k,l) to
         (qx,qy,qz) (3 indices to Q).
-  
-  @param  best_vec     V3D vector that will be set to a vector whose 
+
+  @param  best_vec     V3D vector that will be set to a vector whose
                        direction most nearly corresponds to the plane
-                       normal direction and whose magnitude is d.  The 
-                       corresponding plane spacing in reciprocal space 
+                       normal direction and whose magnitude is d.  The
+                       corresponding plane spacing in reciprocal space
                        is 1/d.
-  @param  index_values std::vector of ints that contains the list of indices 
-  @param  q_vectors    std::vector of V3D objects that contains the list of 
-                       q_vectors that are indexed in one direction by the 
+  @param  index_values std::vector of ints that contains the list of indices
+  @param  q_vectors    std::vector of V3D objects that contains the list of
+                       q_vectors that are indexed in one direction by the
                        corresponding index values.
   NOTE: The number of index_values and q_vectors must be the same, and must
         be at least 3.
-  
+
   @return  This will return the sum of the squares of the residual errors.
-  
+
   @throws  std::invalid_argument exception if there are not at least 3
                                  indices and q vectors, or if the numbers of
                                  indices and q vectors are not the same.
-   
+
   @throws  std::runtime_error    exception if the QR factorization fails or
                                  the best direction can't be calculated.
 */
 
-double IndexingUtils::Optimize_Direction(          V3D          & best_vec,
-                                        const std::vector<int>  & index_values,
-                                        const std::vector<V3D>  & q_vectors )
-{
-  if ( index_values.size() < 3 )
-  {
-   throw std::invalid_argument("Optimize_Direction(): Three or more indexed values needed");
+double IndexingUtils::Optimize_Direction(V3D &best_vec,
+                                         const std::vector<int> &index_values,
+                                         const std::vector<V3D> &q_vectors) {
+  if (index_values.size() < 3) {
+    throw std::invalid_argument(
+        "Optimize_Direction(): Three or more indexed values needed");
   }
 
-  if ( index_values.size() != q_vectors.size() )
-  {
-   throw std::invalid_argument("Optimize_Direction(): Number of index_values != number of q_vectors");
+  if (index_values.size() != q_vectors.size()) {
+    throw std::invalid_argument(
+        "Optimize_Direction(): Number of index_values != number of q_vectors");
   }
 
-  gsl_matrix *H_transpose = gsl_matrix_alloc( q_vectors.size(), 3 );
-  gsl_vector *tau         = gsl_vector_alloc( 3 );
+  gsl_matrix *H_transpose = gsl_matrix_alloc(q_vectors.size(), 3);
+  gsl_vector *tau = gsl_vector_alloc(3);
 
   double sum_sq_error = 0;
-                                     // Make the H-transpose matrix from the
-                                     // q vectors and form QR factorization
+  // Make the H-transpose matrix from the
+  // q vectors and form QR factorization
 
-  for ( size_t row = 0; row < q_vectors.size(); row++ )
-  {
-    for ( size_t col = 0; col < 3; col++ )
-    {
-      gsl_matrix_set( H_transpose, row, col, (q_vectors[row])[col] / (2.0 * M_PI) );
+  for (size_t row = 0; row < q_vectors.size(); row++) {
+    for (size_t col = 0; col < 3; col++) {
+      gsl_matrix_set(H_transpose, row, col,
+                     (q_vectors[row])[col] / (2.0 * M_PI));
     }
   }
-  int returned_flag = gsl_linalg_QR_decomp( H_transpose, tau );
+  int returned_flag = gsl_linalg_QR_decomp(H_transpose, tau);
 
-  if ( returned_flag != 0 )
-  {
-    gsl_matrix_free( H_transpose );
-    gsl_vector_free( tau );
-    throw std::runtime_error("Optimize_Direction(): gsl QR_decomp failed, invalid hkl values");
+  if (returned_flag != 0) {
+    gsl_matrix_free(H_transpose);
+    gsl_vector_free(tau);
+    throw std::runtime_error(
+        "Optimize_Direction(): gsl QR_decomp failed, invalid hkl values");
   }
-                                      // solve for the best_vec, using the
-                                      // QR factorization and accumulate the 
-                                      // sum of the squares of the residuals
-  gsl_vector *x        = gsl_vector_alloc( 3 );
-  gsl_vector *indices  = gsl_vector_alloc( index_values.size() );
-  gsl_vector *residual = gsl_vector_alloc( index_values.size() );
+  // solve for the best_vec, using the
+  // QR factorization and accumulate the
+  // sum of the squares of the residuals
+  gsl_vector *x = gsl_vector_alloc(3);
+  gsl_vector *indices = gsl_vector_alloc(index_values.size());
+  gsl_vector *residual = gsl_vector_alloc(index_values.size());
 
   bool found_best_vec = true;
 
-  for ( size_t i = 0; i < index_values.size(); i++ )
-  {
-    gsl_vector_set( indices, i, index_values[i] );
+  for (size_t i = 0; i < index_values.size(); i++) {
+    gsl_vector_set(indices, i, index_values[i]);
   }
 
-  returned_flag = gsl_linalg_QR_lssolve( H_transpose,
-                                         tau,
-                                         indices,
-                                         x,
-                                         residual);
-  if ( returned_flag != 0 )
-  {
+  returned_flag = gsl_linalg_QR_lssolve(H_transpose, tau, indices, x, residual);
+  if (returned_flag != 0) {
     found_best_vec = false;
   }
 
-  for ( size_t i = 0; i < 3; i++ )
-  {
-    double value = gsl_vector_get( x, i );
-    if ( gsl_isnan( value ) || gsl_isinf( value) )
+  for (size_t i = 0; i < 3; i++) {
+    double value = gsl_vector_get(x, i);
+    if (gsl_isnan(value) || gsl_isinf(value))
       found_best_vec = false;
   }
 
-  best_vec( gsl_vector_get( x, 0 ),
-            gsl_vector_get( x, 1 ),
-            gsl_vector_get( x, 2 ) );
+  best_vec(gsl_vector_get(x, 0), gsl_vector_get(x, 1), gsl_vector_get(x, 2));
 
-  for ( size_t i = 0; i < index_values.size(); i++ )
-  {
+  for (size_t i = 0; i < index_values.size(); i++) {
     sum_sq_error += gsl_vector_get(residual, i) * gsl_vector_get(residual, i);
   }
 
-  gsl_matrix_free( H_transpose );
-  gsl_vector_free( tau );
-  gsl_vector_free( x );
-  gsl_vector_free( indices );
-  gsl_vector_free( residual );
+  gsl_matrix_free(H_transpose);
+  gsl_vector_free(tau);
+  gsl_vector_free(x);
+  gsl_vector_free(indices);
+  gsl_vector_free(residual);
 
-  if ( !found_best_vec )
-  {
-    throw std::runtime_error(
-                      "Optimize_Direction(): Failed to find best_vec, invalid indexes or Q values");
+  if (!found_best_vec) {
+    throw std::runtime_error("Optimize_Direction(): Failed to find best_vec, "
+                             "invalid indexes or Q values");
   }
 
   return sum_sq_error;
 }
 
-
 /**
-    The method uses two passes to scan across all possible directions and 
+    The method uses two passes to scan across all possible directions and
     orientations to find the direction and orientation for the unit cell
-    that best fits the specified list of peaks.  
-    On the first pass, only those sets of directions that index the 
-    most peaks are kept.  On the second pass, the directions that minimize 
-    the sum-squared deviations from integer indices are selected from that 
-    smaller set of directions.  This method should be most useful if number 
-    of peaks is on the order of 10-20, and most of the peaks belong to the 
+    that best fits the specified list of peaks.
+    On the first pass, only those sets of directions that index the
+    most peaks are kept.  On the second pass, the directions that minimize
+    the sum-squared deviations from integer indices are selected from that
+    smaller set of directions.  This method should be most useful if number
+    of peaks is on the order of 10-20, and most of the peaks belong to the
     same crystallite.
     @param UB                 This will be set to the UB matrix that best
                               indexes the supplied list of q_vectors.
@@ -984,47 +885,44 @@ double IndexingUtils::Optimize_Direction(          V3D          & best_vec,
     @param alpha              Lattice parameter alpha.
     @param beta               Lattice parameter beta.
     @param gamma              Lattice parameter gamma.
-    @param degrees_per_step   The number of degrees per step used when 
+    @param degrees_per_step   The number of degrees per step used when
                               scanning through all possible directions and
                               orientations for the unit cell. NOTE: The
                               work required rises very rapidly as the number
                               of degrees per step decreases. A value of 1
                               degree leads to about 10 seconds of compute time.
                               while a value of 2 only requires a bit more than
-                              1 sec.  The required time is O(n^3) where 
+                              1 sec.  The required time is O(n^3) where
                               n = 1/degrees_per_step.
-                               
+
     @param required_tolerance The maximum distance from an integer that the
-                              calculated h,k,l values can have if a peak 
+                              calculated h,k,l values can have if a peak
                               is to be considered indexed.
 
   @throws std::invalid_argument exception if the UB matrix is not a 3X3 matrix.
-  @throws std::runtime_error exception if the matrix inversion fails and UB 
+  @throws std::runtime_error exception if the matrix inversion fails and UB
                              can't be formed
 
  */
-double IndexingUtils::ScanFor_UB(      DblMatrix         & UB,
-                                 const std::vector<V3D>  & q_vectors,
-                                       double a, double b, double c,
-                                       double alpha, double beta, double gamma,
-                                       double degrees_per_step,
-                                       double required_tolerance )
-{
-  if ( UB.numRows() != 3 || UB.numCols() != 3 )
-  {
-   throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
+double IndexingUtils::ScanFor_UB(DblMatrix &UB,
+                                 const std::vector<V3D> &q_vectors, double a,
+                                 double b, double c, double alpha, double beta,
+                                 double gamma, double degrees_per_step,
+                                 double required_tolerance) {
+  if (UB.numRows() != 3 || UB.numCols() != 3) {
+    throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
 
   V3D a_dir;
   V3D b_dir;
   V3D c_dir;
 
-  int    num_a_steps   = round( 90.0 / degrees_per_step );
+  int num_a_steps = round(90.0 / degrees_per_step);
   double gamma_radians = gamma * DEG_TO_RAD;
 
-  int num_b_steps = round( 4 * sin( gamma_radians ) * num_a_steps );
+  int num_b_steps = round(4 * sin(gamma_radians) * num_a_steps);
 
-  std::vector<V3D> a_dir_list = MakeHemisphereDirections( num_a_steps );
+  std::vector<V3D> a_dir_list = MakeHemisphereDirections(num_a_steps);
 
   std::vector<V3D> b_dir_list;
 
@@ -1034,107 +932,97 @@ double IndexingUtils::ScanFor_UB(      DblMatrix         & UB,
 
   double error;
   double dot_prod;
-  int    nearest_int;
-  int    max_indexed = 0;
-  V3D    q_vec;
-                                              // first select those directions
-                                              // that index the most peaks
+  int nearest_int;
+  int max_indexed = 0;
+  V3D q_vec;
+  // first select those directions
+  // that index the most peaks
   std::vector<V3D> selected_a_dirs;
   std::vector<V3D> selected_b_dirs;
   std::vector<V3D> selected_c_dirs;
 
-  for ( size_t a_dir_num = 0; a_dir_num < a_dir_list.size(); a_dir_num++ )
-  {
-    a_dir_temp = a_dir_list[ a_dir_num ]; 
-    a_dir_temp = V3D( a_dir_temp );
+  for (size_t a_dir_num = 0; a_dir_num < a_dir_list.size(); a_dir_num++) {
+    a_dir_temp = a_dir_list[a_dir_num];
+    a_dir_temp = V3D(a_dir_temp);
     a_dir_temp *= a;
 
-    b_dir_list = MakeCircleDirections( num_b_steps, a_dir_temp, gamma );
+    b_dir_list = MakeCircleDirections(num_b_steps, a_dir_temp, gamma);
 
-    for ( size_t b_dir_num = 0; b_dir_num < b_dir_list.size(); b_dir_num++ )
-    {
-      b_dir_temp = b_dir_list[ b_dir_num ];
-      b_dir_temp = V3D( b_dir_temp );
+    for (size_t b_dir_num = 0; b_dir_num < b_dir_list.size(); b_dir_num++) {
+      b_dir_temp = b_dir_list[b_dir_num];
+      b_dir_temp = V3D(b_dir_temp);
       b_dir_temp *= b;
-      c_dir_temp = Make_c_dir( a_dir_temp, b_dir_temp,
-                               c, alpha, beta, gamma );
+      c_dir_temp = Make_c_dir(a_dir_temp, b_dir_temp, c, alpha, beta, gamma);
       int num_indexed = 0;
-      for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
-      {
+      for (size_t q_num = 0; q_num < q_vectors.size(); q_num++) {
         bool indexes_peak = true;
-        q_vec = q_vectors[ q_num ] / (2.0 * M_PI);
-        dot_prod = a_dir_temp.scalar_prod( q_vec );
-        nearest_int = round( dot_prod );
-        error = fabs( dot_prod - nearest_int );
-        if ( error > required_tolerance )
+        q_vec = q_vectors[q_num] / (2.0 * M_PI);
+        dot_prod = a_dir_temp.scalar_prod(q_vec);
+        nearest_int = round(dot_prod);
+        error = fabs(dot_prod - nearest_int);
+        if (error > required_tolerance)
           indexes_peak = false;
-        else
-        {
-          dot_prod = b_dir_temp.scalar_prod( q_vec );
-          nearest_int = round( dot_prod );
-          error = fabs( dot_prod - nearest_int );
-          if ( error > required_tolerance )
+        else {
+          dot_prod = b_dir_temp.scalar_prod(q_vec);
+          nearest_int = round(dot_prod);
+          error = fabs(dot_prod - nearest_int);
+          if (error > required_tolerance)
             indexes_peak = false;
-          else
-          {
-            dot_prod = c_dir_temp.scalar_prod( q_vec );
-            nearest_int = round( dot_prod );
-            error = fabs( dot_prod - nearest_int );
-            if ( error > required_tolerance )
+          else {
+            dot_prod = c_dir_temp.scalar_prod(q_vec);
+            nearest_int = round(dot_prod);
+            error = fabs(dot_prod - nearest_int);
+            if (error > required_tolerance)
               indexes_peak = false;
           }
         }
-        if ( indexes_peak )
+        if (indexes_peak)
           num_indexed++;
       }
 
-      if ( num_indexed > max_indexed )     // only keep those directions that
-      {                                    // index the max number of peaks
+      if (num_indexed > max_indexed) // only keep those directions that
+      {                              // index the max number of peaks
         selected_a_dirs.clear();
         selected_b_dirs.clear();
         selected_c_dirs.clear();
         max_indexed = num_indexed;
       }
-      if ( num_indexed == max_indexed )
-      {
-        selected_a_dirs.push_back( a_dir_temp );
-        selected_b_dirs.push_back( b_dir_temp );
-        selected_c_dirs.push_back( c_dir_temp );
+      if (num_indexed == max_indexed) {
+        selected_a_dirs.push_back(a_dir_temp);
+        selected_b_dirs.push_back(b_dir_temp);
+        selected_c_dirs.push_back(c_dir_temp);
       }
     }
   }
-                                          // now, for each such direction, find
-                                          // the one that indexes closes to
-                                          // integer values
+  // now, for each such direction, find
+  // the one that indexes closes to
+  // integer values
   double min_error = 1e50;
-  for ( size_t dir_num = 0; dir_num < selected_a_dirs.size(); dir_num++ )
-  {
-    a_dir_temp = selected_a_dirs[ dir_num ];
-    b_dir_temp = selected_b_dirs[ dir_num ];
-    c_dir_temp = selected_c_dirs[ dir_num ];
+  for (size_t dir_num = 0; dir_num < selected_a_dirs.size(); dir_num++) {
+    a_dir_temp = selected_a_dirs[dir_num];
+    b_dir_temp = selected_b_dirs[dir_num];
+    c_dir_temp = selected_c_dirs[dir_num];
 
     double sum_sq_error = 0;
-    for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
-    {
-      q_vec = q_vectors[ q_num ] / (2.0 * M_PI);
-      dot_prod = a_dir_temp.scalar_prod( q_vec );
-      nearest_int = round( dot_prod );
+    for (size_t q_num = 0; q_num < q_vectors.size(); q_num++) {
+      q_vec = q_vectors[q_num] / (2.0 * M_PI);
+      dot_prod = a_dir_temp.scalar_prod(q_vec);
+      nearest_int = round(dot_prod);
       error = dot_prod - nearest_int;
       sum_sq_error += error * error;
 
-      dot_prod = b_dir_temp.scalar_prod( q_vec );
-      nearest_int = round( dot_prod );
+      dot_prod = b_dir_temp.scalar_prod(q_vec);
+      nearest_int = round(dot_prod);
       error = dot_prod - nearest_int;
       sum_sq_error += error * error;
 
-      dot_prod = c_dir_temp.scalar_prod( q_vec );
-      nearest_int = round( dot_prod );
+      dot_prod = c_dir_temp.scalar_prod(q_vec);
+      nearest_int = round(dot_prod);
       error = dot_prod - nearest_int;
       sum_sq_error += error * error;
     }
 
-    if ( sum_sq_error < min_error )
-    {
+    if (sum_sq_error < min_error) {
       min_error = sum_sq_error;
       a_dir = a_dir_temp;
       b_dir = b_dir_temp;
@@ -1142,14 +1030,12 @@ double IndexingUtils::ScanFor_UB(      DblMatrix         & UB,
     }
   }
 
-  if ( !OrientedLattice::GetUB( UB, a_dir, b_dir, c_dir ) )
-  {
-    throw std::runtime_error( "UB could not be formed, invert matrix failed");
+  if (!OrientedLattice::GetUB(UB, a_dir, b_dir, c_dir)) {
+    throw std::runtime_error("UB could not be formed, invert matrix failed");
   }
 
   return min_error;
 }
-
 
 /**
    Get list of possible edge vectors for the real space unit cell.  This list
@@ -1158,7 +1044,7 @@ double IndexingUtils::ScanFor_UB(      DblMatrix         & UB,
    less than the required tolerance for it to count as an integer.
     @param  directions          Vector that will be filled with the directions
                                 that may correspond to unit cell edges.
-    @param  q_vectors           Vector of new Vector3D objects that contains 
+    @param  q_vectors           Vector of new Vector3D objects that contains
                                 the list of q_vectors that are to be indexed.
     @param  min_d               Lower bound on shortest unit cell edge length.
                                 This does not have to be specified exactly but
@@ -1171,125 +1057,107 @@ double IndexingUtils::ScanFor_UB(      DblMatrix         & UB,
     @param  required_tolerance  The maximum allowed deviation of Miller indices
                                 from integer values for a peak to be indexed.
     @param  degrees_per_step    The number of degrees between directions that
-                                are checked while scanning for an initial 
+                                are checked while scanning for an initial
                                 indexing of the peaks with lowest |Q|.
  */
 
-size_t IndexingUtils::ScanFor_Directions( std::vector<V3D>  & directions,   
-                                    const std::vector<V3D>  & q_vectors,
-                                          double min_d,
-                                          double max_d,
-                                          double required_tolerance,
-                                          double degrees_per_step )
-{
+size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions,
+                                         const std::vector<V3D> &q_vectors,
+                                         double min_d, double max_d,
+                                         double required_tolerance,
+                                         double degrees_per_step) {
   double error;
   double fit_error;
   double dot_prod;
-  int    nearest_int;
-  int    max_indexed = 0;
-  V3D    q_vec;
-                           // first, make hemisphere of possible directions 
-                           // with specified resolution.
-  int    num_steps   = round( 90.0 / degrees_per_step );
-  std::vector<V3D> full_list = MakeHemisphereDirections( num_steps );
-                           // Now, look for possible real-space unit cell edges
-                           // by checking for vectors with length between 
-                           // min_d and max_d that would index the most peaks,
-                           // in some direction, keeping the shortest vector
-                           // for each direction where the max peaks are indexed
+  int nearest_int;
+  int max_indexed = 0;
+  V3D q_vec;
+  // first, make hemisphere of possible directions
+  // with specified resolution.
+  int num_steps = round(90.0 / degrees_per_step);
+  std::vector<V3D> full_list = MakeHemisphereDirections(num_steps);
+  // Now, look for possible real-space unit cell edges
+  // by checking for vectors with length between
+  // min_d and max_d that would index the most peaks,
+  // in some direction, keeping the shortest vector
+  // for each direction where the max peaks are indexed
   double delta_d = 0.1f;
-  int    n_steps = round( 1 +(max_d - min_d)/delta_d );
+  int n_steps = round(1 + (max_d - min_d) / delta_d);
 
   std::vector<V3D> selected_dirs;
-  V3D         dir_temp;
+  V3D dir_temp;
 
-  for ( size_t dir_num = 0; dir_num < full_list.size(); dir_num++ )
-  {
-    V3D current_dir = full_list[ dir_num ];
+  for (size_t dir_num = 0; dir_num < full_list.size(); dir_num++) {
+    V3D current_dir = full_list[dir_num];
 
-    for ( int step = 0; step <= n_steps; step++ )
-    {
+    for (int step = 0; step <= n_steps; step++) {
       dir_temp = current_dir;
-      dir_temp *= ( min_d + step * delta_d );    // increasing size
+      dir_temp *= (min_d + step * delta_d); // increasing size
 
       int num_indexed = 0;
-      for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
-      {
-        q_vec = q_vectors[ q_num ] / (2.0 * M_PI);
-        dot_prod = dir_temp.scalar_prod( q_vec );
-        nearest_int = round( dot_prod );
-        error = fabs( dot_prod - nearest_int );
-        if ( error <= required_tolerance )
+      for (size_t q_num = 0; q_num < q_vectors.size(); q_num++) {
+        q_vec = q_vectors[q_num] / (2.0 * M_PI);
+        dot_prod = dir_temp.scalar_prod(q_vec);
+        nearest_int = round(dot_prod);
+        error = fabs(dot_prod - nearest_int);
+        if (error <= required_tolerance)
           num_indexed++;
       }
 
-      if ( num_indexed > max_indexed )     // only keep those directions that
-      {                                    // index the max number of peaks
+      if (num_indexed > max_indexed) // only keep those directions that
+      {                              // index the max number of peaks
         selected_dirs.clear();
         max_indexed = num_indexed;
       }
-      if ( num_indexed >= max_indexed )
-      {
-        selected_dirs.push_back( V3D( dir_temp ) );
+      if (num_indexed >= max_indexed) {
+        selected_dirs.push_back(V3D(dir_temp));
       }
     }
   }
-                           // Now, optimize each direction and discard possible
-                           // unit cell edges that are duplicates, putting the
-                           // new smaller list in the vector "directions"
+  // Now, optimize each direction and discard possible
+  // unit cell edges that are duplicates, putting the
+  // new smaller list in the vector "directions"
   std::vector<int> index_vals;
   std::vector<V3D> indexed_qs;
-  index_vals.reserve( q_vectors.size() );
-  indexed_qs.reserve( q_vectors.size() );
+  index_vals.reserve(q_vectors.size());
+  indexed_qs.reserve(q_vectors.size());
 
   directions.clear();
   V3D current_dir;
   V3D diff;
-  for ( size_t dir_num = 0; dir_num < selected_dirs.size(); dir_num++ )
-  {
-    current_dir = selected_dirs[ dir_num ];
+  for (size_t dir_num = 0; dir_num < selected_dirs.size(); dir_num++) {
+    current_dir = selected_dirs[dir_num];
 
-    GetIndexedPeaks_1D( current_dir,
-                        q_vectors,
-                        required_tolerance,
-                        index_vals,
-                        indexed_qs,
-                        fit_error  );
+    GetIndexedPeaks_1D(current_dir, q_vectors, required_tolerance, index_vals,
+                       indexed_qs, fit_error);
 
-    Optimize_Direction( current_dir, index_vals, indexed_qs );
+    Optimize_Direction(current_dir, index_vals, indexed_qs);
 
     double length = current_dir.norm();
-    if ( length >= min_d && length <= max_d )   // only keep if within range
+    if (length >= min_d && length <= max_d) // only keep if within range
     {
       bool duplicate = false;
-      for ( size_t i = 0; i < directions.size(); i++ )
-      {
+      for (size_t i = 0; i < directions.size(); i++) {
         dir_temp = directions[i];
-        diff = current_dir - dir_temp;        
-                                                // discard same direction  
-        if ( diff.norm() < 0.001 )
-        {
+        diff = current_dir - dir_temp;
+        // discard same direction
+        if (diff.norm() < 0.001) {
           duplicate = true;
-        }
-        else
-        { 
+        } else {
           diff = current_dir + dir_temp;
-                                                // discard opposite direction 
-          if ( diff.norm() < 0.001 ) 
-          {
+          // discard opposite direction
+          if (diff.norm() < 0.001) {
             duplicate = true;
           }
         }
       }
-      if (!duplicate)
-      {
-        directions.push_back( current_dir );
+      if (!duplicate) {
+        directions.push_back(current_dir);
       }
     }
   }
   return max_indexed;
 }
-
 
 /**
    Get list of possible edge vectors for the real space unit cell.  This
@@ -1300,7 +1168,7 @@ size_t IndexingUtils::ScanFor_Directions( std::vector<V3D>  & directions,
    less than the required tolerance for it to count as an integer.
     @param  directions          Vector that will be filled with the directions
                                 that may correspond to unit cell edges.
-    @param  q_vectors           Vector of new Vector3D objects that contains 
+    @param  q_vectors           Vector of new Vector3D objects that contains
                                 the list of q_vectors that are to be indexed.
     @param  min_d               Lower bound on shortest unit cell edge length.
                                 This does not have to be specified exactly but
@@ -1313,596 +1181,516 @@ size_t IndexingUtils::ScanFor_Directions( std::vector<V3D>  & directions,
     @param  required_tolerance  The maximum allowed deviation of Miller indices
                                 from integer values for a peak to be indexed.
     @param  degrees_per_step    The number of degrees between directions that
-                                are checked while scanning for an initial 
+                                are checked while scanning for an initial
                                 indexing of the peaks with lowest |Q|.
  */
 
-size_t IndexingUtils::FFTScanFor_Directions( std::vector<V3D>  & directions,
-                                       const std::vector<V3D>  & q_vectors,
-                                             double min_d,
-                                             double max_d,
-                                             double required_tolerance,
-                                             double degrees_per_step )
-{
-#define N_FFT_STEPS    512
+size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
+                                            const std::vector<V3D> &q_vectors,
+                                            double min_d, double max_d,
+                                            double required_tolerance,
+                                            double degrees_per_step) {
+#define N_FFT_STEPS 512
 #define HALF_FFT_STEPS 256
 
   double fit_error;
-  int    max_indexed = 0;
+  int max_indexed = 0;
 
-                           // first, make hemisphere of possible directions 
-                           // with specified resolution.
-  int num_steps = round( 90.0 / degrees_per_step );
-  std::vector<V3D> full_list = MakeHemisphereDirections( num_steps );
+  // first, make hemisphere of possible directions
+  // with specified resolution.
+  int num_steps = round(90.0 / degrees_per_step);
+  std::vector<V3D> full_list = MakeHemisphereDirections(num_steps);
 
-                           // find the maximum magnitude of Q to set range
-                           // needed for FFT
+  // find the maximum magnitude of Q to set range
+  // needed for FFT
   double max_mag_Q = 0;
-  for ( size_t q_num = 1; q_num < q_vectors.size(); q_num++ )
-  {
-    double mag_Q = q_vectors[ q_num ].norm() / (2.0 * M_PI);
-    if ( mag_Q > max_mag_Q )
+  for (size_t q_num = 1; q_num < q_vectors.size(); q_num++) {
+    double mag_Q = q_vectors[q_num].norm() / (2.0 * M_PI);
+    if (mag_Q > max_mag_Q)
       max_mag_Q = mag_Q;
   }
 
-  max_mag_Q *= 1.1f;      // allow for a little "headroom" for FFT range
+  max_mag_Q *= 1.1f; // allow for a little "headroom" for FFT range
 
-                          // apply the FFT to each of the directions, and
-                          // keep track of their maximum magnitude past DC
-  double  max_mag_fft;
+  // apply the FFT to each of the directions, and
+  // keep track of their maximum magnitude past DC
+  double max_mag_fft;
   std::vector<double> max_fft_val;
-  max_fft_val.resize( full_list.size() );
+  max_fft_val.resize(full_list.size());
 
-  double projections[ N_FFT_STEPS ];
-  double magnitude_fft[ HALF_FFT_STEPS ];
+  double projections[N_FFT_STEPS];
+  double magnitude_fft[HALF_FFT_STEPS];
 
-  double index_factor = N_FFT_STEPS / max_mag_Q;     // maps |proj Q| to index 
+  double index_factor = N_FFT_STEPS / max_mag_Q; // maps |proj Q| to index
 
-  for ( size_t dir_num = 0; dir_num < full_list.size(); dir_num++ )
-  {
-    V3D current_dir = full_list[ dir_num ];
-    max_mag_fft = GetMagFFT( q_vectors, 
-                             current_dir,
-                             N_FFT_STEPS,
-                             projections,
-                             index_factor,
-                             magnitude_fft );
+  for (size_t dir_num = 0; dir_num < full_list.size(); dir_num++) {
+    V3D current_dir = full_list[dir_num];
+    max_mag_fft = GetMagFFT(q_vectors, current_dir, N_FFT_STEPS, projections,
+                            index_factor, magnitude_fft);
 
-    max_fft_val[ dir_num ] = max_mag_fft;
+    max_fft_val[dir_num] = max_mag_fft;
   }
-                          // find the directions with the 500 largest
-                          // fft values, and place them in temp_dirs vector
+  // find the directions with the 500 largest
+  // fft values, and place them in temp_dirs vector
   int N_TO_TRY = 500;
 
   std::vector<double> max_fft_copy;
-  max_fft_copy.resize( full_list.size() );
-  for ( size_t i = 0; i < max_fft_copy.size(); i++ )
-  {
+  max_fft_copy.resize(full_list.size());
+  for (size_t i = 0; i < max_fft_copy.size(); i++) {
     max_fft_copy[i] = max_fft_val[i];
   }
 
-  std::sort( max_fft_copy.begin(), max_fft_copy.end() );
+  std::sort(max_fft_copy.begin(), max_fft_copy.end());
 
   size_t index = max_fft_copy.size() - 1;
-  max_mag_fft = max_fft_copy[ index ];
+  max_mag_fft = max_fft_copy[index];
 
   double threshold = max_mag_fft;
-  while ( ( index > max_fft_copy.size() - N_TO_TRY ) &&
-            threshold >= max_mag_fft / 2)
-  {
+  while ((index > max_fft_copy.size() - N_TO_TRY) &&
+         threshold >= max_mag_fft / 2) {
     index--;
-    threshold = max_fft_copy[ index ];
+    threshold = max_fft_copy[index];
   }
 
   std::vector<V3D> temp_dirs;
-  for ( size_t i = 0; i < max_fft_val.size(); i++ )
-  {
-    if ( max_fft_val[i] >= threshold )
-    {
-      temp_dirs.push_back( full_list[i] );
+  for (size_t i = 0; i < max_fft_val.size(); i++) {
+    if (max_fft_val[i] >= threshold) {
+      temp_dirs.push_back(full_list[i]);
     }
   }
-                                  // now scan through temp_dirs and use the
-                                  // FFT to find the cell edge length that
-                                  // corresponds to the max_mag_fft.  Only keep
-                                  // directions with length nearly in bounds
+  // now scan through temp_dirs and use the
+  // FFT to find the cell edge length that
+  // corresponds to the max_mag_fft.  Only keep
+  // directions with length nearly in bounds
   V3D temp;
   std::vector<V3D> temp_dirs_2;
 
-  for ( size_t i = 0; i < temp_dirs.size(); i++ )
-  {
-    GetMagFFT( q_vectors, 
-      temp_dirs[i],
-      N_FFT_STEPS,
-      projections,
-      index_factor,
-      magnitude_fft );
+  for (size_t i = 0; i < temp_dirs.size(); i++) {
+    GetMagFFT(q_vectors, temp_dirs[i], N_FFT_STEPS, projections, index_factor,
+              magnitude_fft);
 
     double position = GetFirstMaxIndex(magnitude_fft, N_FFT_STEPS, threshold);
-    if ( position > 0 )
-    {
+    if (position > 0) {
       double q_val = max_mag_Q / position;
       double d_val = 1 / q_val;
-      if ( d_val >= 0.8 * min_d && d_val <= 1.2 * max_d )
-      {
+      if (d_val >= 0.8 * min_d && d_val <= 1.2 * max_d) {
         temp = temp_dirs[i] * d_val;
-        temp_dirs_2.push_back( temp );
+        temp_dirs_2.push_back(temp);
       }
     }
   }
-                                   // look at how many peaks were indexed
-                                   // for each of the initial directions
+  // look at how many peaks were indexed
+  // for each of the initial directions
   max_indexed = 0;
   int num_indexed;
   V3D current_dir;
-  for ( size_t dir_num = 0; dir_num < temp_dirs_2.size(); dir_num++ )
-  {
-    current_dir = temp_dirs_2[ dir_num ];
+  for (size_t dir_num = 0; dir_num < temp_dirs_2.size(); dir_num++) {
+    current_dir = temp_dirs_2[dir_num];
     num_indexed = NumberIndexed_1D(current_dir, q_vectors, required_tolerance);
-    if ( num_indexed > max_indexed )
+    if (num_indexed > max_indexed)
       max_indexed = num_indexed;
   }
 
-                                    // only keep original directions that index
-                                    // at least 50% of max num indexed
+  // only keep original directions that index
+  // at least 50% of max num indexed
   temp_dirs.clear();
-  for ( size_t dir_num = 0; dir_num < temp_dirs_2.size(); dir_num++ )
-  {
-    current_dir = temp_dirs_2[ dir_num ];
+  for (size_t dir_num = 0; dir_num < temp_dirs_2.size(); dir_num++) {
+    current_dir = temp_dirs_2[dir_num];
     num_indexed = NumberIndexed_1D(current_dir, q_vectors, required_tolerance);
-    if ( num_indexed >= 0.50 * max_indexed )
-      temp_dirs.push_back( current_dir );
+    if (num_indexed >= 0.50 * max_indexed)
+      temp_dirs.push_back(current_dir);
   }
-                                   // refine directions and again find the 
-                                   // max number indexed, for the optimized
-                                   // directions
+  // refine directions and again find the
+  // max number indexed, for the optimized
+  // directions
   max_indexed = 0;
   std::vector<int> index_vals;
   std::vector<V3D> indexed_qs;
-  for ( size_t dir_num = 0; dir_num < temp_dirs.size(); dir_num++ )
-  {
-    num_indexed = GetIndexedPeaks_1D( temp_dirs[ dir_num ],
-                                      q_vectors,
-                                      required_tolerance,
-                                      index_vals,
-                                      indexed_qs,
-                                      fit_error  );
-    try
-    {
+  for (size_t dir_num = 0; dir_num < temp_dirs.size(); dir_num++) {
+    num_indexed =
+        GetIndexedPeaks_1D(temp_dirs[dir_num], q_vectors, required_tolerance,
+                           index_vals, indexed_qs, fit_error);
+    try {
       int count = 0;
-      while ( count < 5 )                // 5 iterations should be enough for
-      {                                  // the optimization to stabilize
-        Optimize_Direction( temp_dirs[dir_num], index_vals, indexed_qs );
+      while (count < 5) // 5 iterations should be enough for
+      {                 // the optimization to stabilize
+        Optimize_Direction(temp_dirs[dir_num], index_vals, indexed_qs);
 
-        num_indexed = GetIndexedPeaks_1D( temp_dirs[dir_num],
-                                          q_vectors,
-                                          required_tolerance,
-                                          index_vals,
-                                          indexed_qs,
-                                          fit_error  );
-        if ( num_indexed > max_indexed )
+        num_indexed = GetIndexedPeaks_1D(temp_dirs[dir_num], q_vectors,
+                                         required_tolerance, index_vals,
+                                         indexed_qs, fit_error);
+        if (num_indexed > max_indexed)
           max_indexed = num_indexed;
 
         count++;
       }
-    }
-    catch ( ... )
-    {
+    } catch (...) {
       // don't continue to refine if the direction fails to optimize properly
     }
   }
-                                     // discard those with length out of bounds
+  // discard those with length out of bounds
   temp_dirs_2.clear();
-  for ( size_t i = 0; i < temp_dirs.size(); i++ )
-  {
+  for (size_t i = 0; i < temp_dirs.size(); i++) {
     current_dir = temp_dirs[i];
     double length = current_dir.norm();
-    if ( length >= min_d && length <= max_d )
-      temp_dirs_2.push_back( current_dir );
+    if (length >= min_d && length <= max_d)
+      temp_dirs_2.push_back(current_dir);
   }
-                                    // only keep directions that index at 
-                                    // least 75% of the max number of peaks
+  // only keep directions that index at
+  // least 75% of the max number of peaks
   temp_dirs.clear();
-  for ( size_t dir_num = 0; dir_num < temp_dirs_2.size(); dir_num++ )
-  {
-    current_dir = temp_dirs_2[ dir_num ];
+  for (size_t dir_num = 0; dir_num < temp_dirs_2.size(); dir_num++) {
+    current_dir = temp_dirs_2[dir_num];
     num_indexed = NumberIndexed_1D(current_dir, q_vectors, required_tolerance);
-    if ( num_indexed > max_indexed * 0.75 )
-      temp_dirs.push_back( current_dir );
+    if (num_indexed > max_indexed * 0.75)
+      temp_dirs.push_back(current_dir);
   }
 
-  std::sort( temp_dirs.begin(), temp_dirs.end(), V3D::CompareMagnitude );
+  std::sort(temp_dirs.begin(), temp_dirs.end(), V3D::CompareMagnitude);
 
-                                      // discard duplicates:
-  double len_tol = 0.1;               // 10% tolerance for lengths
-  double ang_tol = 5.0;               // 5 degree tolerance for angles
-  DiscardDuplicates( directions,
-                     temp_dirs,
-                     q_vectors,
-                     required_tolerance,
-                     len_tol,
-                     ang_tol );
+  // discard duplicates:
+  double len_tol = 0.1; // 10% tolerance for lengths
+  double ang_tol = 5.0; // 5 degree tolerance for angles
+  DiscardDuplicates(directions, temp_dirs, q_vectors, required_tolerance,
+                    len_tol, ang_tol);
 
   return max_indexed;
 }
 
-
 /**
-    Fill an array with the magnitude of the FFT of the 
+    Fill an array with the magnitude of the FFT of the
     projections of the specified q_vectors on the specified direction.
     The largest value in the magnitude FFT that occurs at index 5 or more
     is returned as the value of the function.
-  
-    @param q_vectors     The list of Q vectors to project on the specified 
+
+    @param q_vectors     The list of Q vectors to project on the specified
                          direction.
     @param current_dir   The direction the Q vectors will be projected on.
     @param N             The size of the projections[] array.  This MUST BE
-                         a power of 2.  The magnitude_fft[] array must be 
+                         a power of 2.  The magnitude_fft[] array must be
                          half the size.
     @param projections   Array to hold the projections of the Q vectors.  This
                          must be long enough so that all projected values map
                          map to a valid index, after they are multiplied by the
                          index_factor.
-    @param index_factor  Factor that when multiplied by a projected Q vector 
+    @param index_factor  Factor that when multiplied by a projected Q vector
                          will give a valid index into the projections array.
     @param magnitude_fft Array that will be filled out with the magnitude of
                          the FFT of the projections.
     @return The largest value in the magnitude_fft, that is stored in position
             5 or more.
  */
-double IndexingUtils::GetMagFFT( const std::vector<V3D> & q_vectors,
-                                 const V3D              & current_dir,
-                                 const size_t             N,
-                                       double             projections[],
-                                       double             index_factor,
-                                       double             magnitude_fft[] )
-{
-  for ( size_t i = 0; i < N; i++ )
-  {
+double IndexingUtils::GetMagFFT(const std::vector<V3D> &q_vectors,
+                                const V3D &current_dir, const size_t N,
+                                double projections[], double index_factor,
+                                double magnitude_fft[]) {
+  for (size_t i = 0; i < N; i++) {
     projections[i] = 0.0;
   }
-                                                      // project onto direction
-  V3D     q_vec;
-  for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
-  {
-    q_vec = q_vectors[ q_num ] / (2.0 * M_PI);
-    double dot_prod = current_dir.scalar_prod( q_vec );
+  // project onto direction
+  V3D q_vec;
+  for (size_t q_num = 0; q_num < q_vectors.size(); q_num++) {
+    q_vec = q_vectors[q_num] / (2.0 * M_PI);
+    double dot_prod = current_dir.scalar_prod(q_vec);
     size_t index = static_cast<size_t>(fabs(index_factor * dot_prod));
-    if ( index < N )
-      projections[ index ] += 1;
+    if (index < N)
+      projections[index] += 1;
     else
-      projections[ N-1 ] += 1;     // This should not happen, but trap it in
-  }                                // case of rounding errors.
+      projections[N - 1] += 1; // This should not happen, but trap it in
+  }                            // case of rounding errors.
 
-                                                      // get the |FFT|
-  gsl_fft_real_radix2_transform ( projections, 1, N );
-  for ( size_t i = 1; i < N/2; i++ )
-  {
-    magnitude_fft[i] = sqrt( projections[i]   * projections[i] +
-                             projections[N-i] * projections[N-i] );
+  // get the |FFT|
+  gsl_fft_real_radix2_transform(projections, 1, N);
+  for (size_t i = 1; i < N / 2; i++) {
+    magnitude_fft[i] = sqrt(projections[i] * projections[i] +
+                            projections[N - i] * projections[N - i]);
   }
 
-  magnitude_fft[0] = fabs( projections[0] );
+  magnitude_fft[0] = fabs(projections[0]);
 
-  size_t dc_end      = 5;        // we may need a better estimate of this
+  size_t dc_end = 5; // we may need a better estimate of this
   double max_mag_fft = 0.0;
-  for ( size_t i = dc_end; i < N/2; i++ )
-    if ( magnitude_fft[i] > max_mag_fft )
+  for (size_t i = dc_end; i < N / 2; i++)
+    if (magnitude_fft[i] > max_mag_fft)
       max_mag_fft = magnitude_fft[i];
 
- return max_mag_fft;
+  return max_mag_fft;
 }
-
 
 /**
    Scan the FFT array for the first maximum that exceeds
    the specified threshold and is beyond the initial DC term/interval.
-   @param magnitude_fft   The array containing the magnitude of the 
+   @param magnitude_fft   The array containing the magnitude of the
                           FFT values.
    @param N               The size of the FFT array.
    @param threshold       The required threshold for the first peak.  This
                           must be positive.
    @return The centroid (index) where the first maximum occurs, or -1
-           if no point in the FFT (beyond the DC term) equals or exceeds 
+           if no point in the FFT (beyond the DC term) equals or exceeds
            the required threshold.
  */
-double IndexingUtils::GetFirstMaxIndex( const double magnitude_fft[], 
-                                              size_t N,
-                                              double threshold )
-{
-                                     // find first local min below threshold
+double IndexingUtils::GetFirstMaxIndex(const double magnitude_fft[], size_t N,
+                                       double threshold) {
+  // find first local min below threshold
   size_t i = 2;
-  bool   found_min = false;
+  bool found_min = false;
   double val;
-  while ( i < N-1 && !found_min )
-  {
+  while (i < N - 1 && !found_min) {
     val = magnitude_fft[i];
-    if ( val <  threshold          &&
-         val <= magnitude_fft[i-1] &&
-         val <= magnitude_fft[i+1]  )
+    if (val < threshold && val <= magnitude_fft[i - 1] &&
+        val <= magnitude_fft[i + 1])
       found_min = true;
     i++;
   }
 
-  if ( !found_min )
+  if (!found_min)
     return -1;
-                                     // find next local max above threshold
+  // find next local max above threshold
   bool found_max = false;
-  while ( i < N-1 && !found_max )
-  {
+  while (i < N - 1 && !found_max) {
     val = magnitude_fft[i];
-    if ( val >= threshold          &&
-         val >= magnitude_fft[i-1] &&
-         val >= magnitude_fft[i+1]  )
+    if (val >= threshold && val >= magnitude_fft[i - 1] &&
+        val >= magnitude_fft[i + 1])
       found_max = true;
     else
       i++;
   }
 
-  if ( found_max )
-  {
-    double sum   = 0;
+  if (found_max) {
+    double sum = 0;
     double w_sum = 0;
-    for ( size_t j = i-2; j <= i+2; j++ )
-    {
-      sum   += (double)j * magnitude_fft[j];
+    for (size_t j = i - 2; j <= i + 2; j++) {
+      sum += (double)j * magnitude_fft[j];
       w_sum += magnitude_fft[j];
     }
     return sum / w_sum;
-  }
-  else
+  } else
     return -1;
 }
-
 
 /**
     Form a UB matrix from the given list of possible directions, using the
     direction at the specified index for the "a" direction.  The "b" and "c"
-    directions are chosen so that 
-     1) |a| < |b| < |c|, 
-     2) the angle between the a, b, c, vectors is at least a minimum 
+    directions are chosen so that
+     1) |a| < |b| < |c|,
+     2) the angle between the a, b, c, vectors is at least a minimum
         angle based on min_d/max_d
      3) c is not in the same plane as a and b.
-  
-    @param UB           The calculated UB matrix will be returned in this 
+
+    @param UB           The calculated UB matrix will be returned in this
                         parameter
     @param directions   List of possible vectors for a, b, c.  This list MUST
                         be sorted in order of increasing magnitude.
-    @param a_index      The index to use for the a vector.  The b and c 
+    @param a_index      The index to use for the a vector.  The b and c
                         vectors will be choosen from LATER positions in the
                         directions list.
     @param min_d        Minimum possible real space unit cell edge length.
     @param max_d        Maximum possible real space unit cell edge length.
-  
+
     @return true if a UB matrix was set, and false if it not possible to
             choose a,b,c (i.e. UB) from the list of directions, starting
             with the specified a_index.
 
   @throws std::invalid_argument exception if the UB matrix is not a 3X3 matrix.
-  @throws std::runtime_error exception if the matrix inversion fails and UB 
+  @throws std::runtime_error exception if the matrix inversion fails and UB
                              can't be formed
  */
-bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
-                                       const std::vector<V3D>  & directions,
-                                             size_t              a_index,
-                                             double              min_d,
-                                             double              max_d )
+bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
+                                            const std::vector<V3D> &directions,
+                                            size_t a_index, double min_d,
+                                            double max_d)
 
 {
-  if ( UB.numRows() != 3 || UB.numCols() != 3 )
-  {
-   throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
+  if (UB.numRows() != 3 || UB.numCols() != 3) {
+    throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
 
   size_t index = a_index;
-  V3D a_dir = directions[ index ];
+  V3D a_dir = directions[index];
   index++;
-                                         // the possible range of d-values
-                                         // implies a bound on the minimum
-                                         // angle between a,b, c vectors.
-  double min_deg = (RAD_TO_DEG) * atan(2.0 * min_d/max_d);
+  // the possible range of d-values
+  // implies a bound on the minimum
+  // angle between a,b, c vectors.
+  double min_deg = (RAD_TO_DEG)*atan(2.0 * min_d / max_d);
 
-  double epsilon = 5;                    //  tolerance on right angle (degrees)
+  double epsilon = 5; //  tolerance on right angle (degrees)
   V3D b_dir;
   bool b_found = false;
-  while ( !b_found && index < directions.size() )
-  {
-    V3D    vec   = directions[ index ];
-    double gamma = a_dir.angle( vec ) * RAD_TO_DEG;
+  while (!b_found && index < directions.size()) {
+    V3D vec = directions[index];
+    double gamma = a_dir.angle(vec) * RAD_TO_DEG;
 
-    if ( gamma >= min_deg && (180. - gamma) >= min_deg )
-    {
+    if (gamma >= min_deg && (180. - gamma) >= min_deg) {
       b_dir = vec;
-      if ( gamma > 90 + epsilon )       // try for Nigli cell with angles <= 90
+      if (gamma > 90 + epsilon) // try for Nigli cell with angles <= 90
         b_dir *= -1.0;
       b_found = true;
       index++;
-    }
-    else
+    } else
       index++;
   }
 
-  if ( ! b_found )
+  if (!b_found)
     return false;
 
   V3D c_dir;
   bool c_found = false;
 
-  V3D perp = a_dir.cross_prod( b_dir );
+  V3D perp = a_dir.cross_prod(b_dir);
   perp.normalize();
   double perp_ang;
   double alpha;
   double beta;
-  while ( !c_found && index < directions.size() )
-  {
+  while (!c_found && index < directions.size()) {
     V3D vec = directions[index];
     int factor = 1;
-    while ( !c_found && factor >= -1 )         // try c in + or - direction
+    while (!c_found && factor >= -1) // try c in + or - direction
     {
       c_dir = vec;
       c_dir *= factor;
-      perp_ang = perp.angle( c_dir )  * RAD_TO_DEG;
-      alpha    = b_dir.angle( c_dir ) * RAD_TO_DEG;
-      beta     = a_dir.angle( c_dir ) * RAD_TO_DEG;
-                                       // keep a,b,c right handed by choosing
-                                       // c in general directiion of a X b
-      if ( perp_ang < 90. - epsilon                      &&
-           alpha >= min_deg && (180. - alpha) >= min_deg &&
-           beta  >= min_deg && (180. - beta ) >= min_deg  )
-      {
+      perp_ang = perp.angle(c_dir) * RAD_TO_DEG;
+      alpha = b_dir.angle(c_dir) * RAD_TO_DEG;
+      beta = a_dir.angle(c_dir) * RAD_TO_DEG;
+      // keep a,b,c right handed by choosing
+      // c in general directiion of a X b
+      if (perp_ang < 90. - epsilon && alpha >= min_deg &&
+          (180. - alpha) >= min_deg && beta >= min_deg &&
+          (180. - beta) >= min_deg) {
         c_found = true;
       }
       factor -= 2;
     }
-    if ( ! c_found )
+    if (!c_found)
       index++;
   }
 
-  if ( ! c_found )
-  {
+  if (!c_found) {
     return false;
   }
-                                     // now build the UB matrix from a,b,c
-  if ( !OrientedLattice::GetUB( UB, a_dir, b_dir, c_dir ) )
-  {
-    throw std::runtime_error( "UB could not be formed, invert matrix failed");
+  // now build the UB matrix from a,b,c
+  if (!OrientedLattice::GetUB(UB, a_dir, b_dir, c_dir)) {
+    throw std::runtime_error("UB could not be formed, invert matrix failed");
   }
 
   return true;
 }
-
 
 /**
     Form a UB matrix from the given list of possible directions, using the
     three directions that correspond to a unit cell with the smallest volume
     (greater than or equal to the specified minimum volume) that indexes at
-    least 80% of the maximum number of peaks indexed by any set of three 
+    least 80% of the maximum number of peaks indexed by any set of three
     distinct vectors chosen from the list.
-  
-    @param UB            The calculated UB matrix will be returned in this 
+
+    @param UB            The calculated UB matrix will be returned in this
                          parameter
     @param directions    List of possible vectors for a, b, c.  This list MUST
                          be sorted in order of increasing magnitude.
-    @param q_vectors     The list of q_vectors that should be indexed 
+    @param q_vectors     The list of q_vectors that should be indexed
     @param req_tolerance The required tolerance on h,k,l to consider a peak
                          to be indexed.
     @param min_vol       The smallest possible unit cell volume.
-  
+
     @return true if a UB matrix was set, and false if it not possible to
             choose a,b,c (i.e. UB) from the list of directions, starting
             with the specified a_index.
 
-    @throws std::invalid_argument exception if the UB matrix is not a 3X3 matrix.
-    @throws std::runtime_error exception if the matrix inversion fails and UB 
+    @throws std::invalid_argument exception if the UB matrix is not a 3X3
+   matrix.
+    @throws std::runtime_error exception if the matrix inversion fails and UB
                                can't be formed
 
  */
-bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
-                                       const std::vector<V3D>  & directions,
-                                       const std::vector<V3D>  & q_vectors,
-                                             double              req_tolerance,
-                                             double              min_vol )
-{
-   if ( UB.numRows() != 3 || UB.numCols() != 3 )
-   {
+bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
+                                            const std::vector<V3D> &directions,
+                                            const std::vector<V3D> &q_vectors,
+                                            double req_tolerance,
+                                            double min_vol) {
+  if (UB.numRows() != 3 || UB.numCols() != 3) {
     throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
-   }
-
-   int    num_indexed = 0;
-   int    max_indexed = 0;
-   V3D    a_dir(0,0,0);
-   V3D    b_dir(0,0,0);
-   V3D    c_dir(0,0,0);
-   V3D    a_temp;
-   V3D    b_temp;
-   V3D    c_temp;
-   V3D    acrossb;
-   double vol;
-
-   for ( size_t i = 0; i < directions.size()-2; i++ )
-   {
-     a_temp = directions[i];
-     for ( size_t j = i+1; j < directions.size()-1; j++ )
-     {
-       b_temp = directions[j];
-       acrossb = a_temp.cross_prod( b_temp );
-       for ( size_t k = j+1; k < directions.size(); k++ )
-       {
-         c_temp = directions[k];
-         vol = fabs( acrossb.scalar_prod( c_temp ) );
-         if ( vol > min_vol )
-         {
-           num_indexed = NumberIndexed_3D( a_temp, b_temp, c_temp,
-                                           q_vectors, req_tolerance );
-
-           // Requiring 20% more indexed with longer edge lengths, favors 
-           // the smaller unit cells.
-           if ( num_indexed > 1.20 * max_indexed )
-           {
-             max_indexed = num_indexed;
-             a_dir = a_temp;
-             b_dir = b_temp;
-             c_dir = c_temp;
-           }
-         }
-       }
-     }
   }
 
-  if ( max_indexed <= 0 )
-  {
+  int num_indexed = 0;
+  int max_indexed = 0;
+  V3D a_dir(0, 0, 0);
+  V3D b_dir(0, 0, 0);
+  V3D c_dir(0, 0, 0);
+  V3D a_temp;
+  V3D b_temp;
+  V3D c_temp;
+  V3D acrossb;
+  double vol;
+
+  for (size_t i = 0; i < directions.size() - 2; i++) {
+    a_temp = directions[i];
+    for (size_t j = i + 1; j < directions.size() - 1; j++) {
+      b_temp = directions[j];
+      acrossb = a_temp.cross_prod(b_temp);
+      for (size_t k = j + 1; k < directions.size(); k++) {
+        c_temp = directions[k];
+        vol = fabs(acrossb.scalar_prod(c_temp));
+        if (vol > min_vol) {
+          num_indexed = NumberIndexed_3D(a_temp, b_temp, c_temp, q_vectors,
+                                         req_tolerance);
+
+          // Requiring 20% more indexed with longer edge lengths, favors
+          // the smaller unit cells.
+          if (num_indexed > 1.20 * max_indexed) {
+            max_indexed = num_indexed;
+            a_dir = a_temp;
+            b_dir = b_temp;
+            c_dir = c_temp;
+          }
+        }
+      }
+    }
+  }
+
+  if (max_indexed <= 0) {
     return false;
   }
-                                     // force a,b,c to be right handed
-  acrossb = a_dir.cross_prod( b_dir ); 
-  if ( acrossb.scalar_prod( c_dir ) < 0 )
-  {
+  // force a,b,c to be right handed
+  acrossb = a_dir.cross_prod(b_dir);
+  if (acrossb.scalar_prod(c_dir) < 0) {
     c_dir = c_dir * (-1.0);
-  } 
-                                     // now build the UB matrix from a,b,c
-  if ( !OrientedLattice::GetUB( UB, a_dir, b_dir, c_dir ) )
-  {
-    throw std::runtime_error( "UB could not be formed, invert matrix failed");
+  }
+  // now build the UB matrix from a,b,c
+  if (!OrientedLattice::GetUB(UB, a_dir, b_dir, c_dir)) {
+    throw std::runtime_error("UB could not be formed, invert matrix failed");
   }
 
   return true;
 }
 
-
 /**
     For a rotated unit cell, calculate the vector in the direction of edge
-    "c" given two vectors a_dir and b_dir in the directions of edges "a" 
+    "c" given two vectors a_dir and b_dir in the directions of edges "a"
     and "b", with lengths a and b, and the cell angles.  The calculation is
-    explained in the Mantid document UBMatriximplementationnotes.pdf, pg 3, 
+    explained in the Mantid document UBMatriximplementationnotes.pdf, pg 3,
     Andre Savici.
-    @param  a_dir   V3D object with length "a" in the direction of the rotated 
+    @param  a_dir   V3D object with length "a" in the direction of the rotated
                     cell edge "a"
-    @param  b_dir   V3D object with length "b" in the direction of the rotated 
+    @param  b_dir   V3D object with length "b" in the direction of the rotated
                     cell edge "b"
     @param  c       The length of the third cell edge, c.
-    @param  alpha   angle between edges b and c. 
-    @param  beta    angle between edges c and a. 
-    @param  gamma   angle between edges a and b. 
+    @param  alpha   angle between edges b and c.
+    @param  beta    angle between edges c and a.
+    @param  gamma   angle between edges a and b.
 
     @return A new V3D object with length "c", in the direction of the third
             rotated unit cell edge, "c".
  */
-V3D IndexingUtils::Make_c_dir( const V3D  & a_dir,
-                               const V3D  & b_dir,
-                                     double c,
-                                     double alpha, double beta, double gamma )
-{
-  double cos_alpha = cos( DEG_TO_RAD * alpha );
-  double cos_beta  = cos( DEG_TO_RAD * beta  );
-  double cos_gamma = cos( DEG_TO_RAD * gamma );
-  double sin_gamma = sin( DEG_TO_RAD * gamma );
+V3D IndexingUtils::Make_c_dir(const V3D &a_dir, const V3D &b_dir, double c,
+                              double alpha, double beta, double gamma) {
+  double cos_alpha = cos(DEG_TO_RAD * alpha);
+  double cos_beta = cos(DEG_TO_RAD * beta);
+  double cos_gamma = cos(DEG_TO_RAD * gamma);
+  double sin_gamma = sin(DEG_TO_RAD * gamma);
 
   double c1 = c * cos_beta;
-  double c2 = c * ( cos_alpha - cos_gamma * cos_beta )/sin_gamma;
-  double V  = sqrt( 1 - cos_alpha * cos_alpha
-                      - cos_beta  * cos_beta
-                      - cos_gamma * cos_gamma
-                      + 2 * cos_alpha * cos_beta * cos_gamma );
+  double c2 = c * (cos_alpha - cos_gamma * cos_beta) / sin_gamma;
+  double V = sqrt(1 - cos_alpha * cos_alpha - cos_beta * cos_beta -
+                  cos_gamma * cos_gamma + 2 * cos_alpha * cos_beta * cos_gamma);
   double c3 = c * V / sin_gamma;
 
   V3D basis_1(a_dir);
@@ -1912,7 +1700,7 @@ V3D IndexingUtils::Make_c_dir( const V3D  & a_dir,
   basis_3 = basis_3.cross_prod(b_dir);
   basis_3.normalize();
 
-  V3D basis_2( basis_3 );
+  V3D basis_2(basis_3);
   basis_2 = basis_2.cross_prod(basis_1);
   basis_2.normalize();
 
@@ -1925,10 +1713,10 @@ V3D IndexingUtils::Make_c_dir( const V3D  & a_dir,
     Construct a sublist of the specified list of a,b,c directions, by removing
    all directions that seem to be duplicates.  If several directions all have
    the same length (within the specified length tolerance) and have the
-   same direction (within the specified angle tolerange) then only one of 
+   same direction (within the specified angle tolerange) then only one of
    those directions will be recorded in the sublist.  The one that indexes
    the most peaks, within the specified tolerance will be kept.
- 
+
    @param  new_list            This vector will be cleared and filled with the
                                vectors from the directions list that are not
                                duplicates of other vectors in the list.
@@ -1937,7 +1725,7 @@ V3D IndexingUtils::Make_c_dir( const V3D  & a_dir,
                                list will be cleared by this method.
    @param  q_vectors           List of q_vectors that should be indexed
    @param  required_tolerance  The tolerance for indexing
-   @param  len_tol             The tolerance on the relative difference in 
+   @param  len_tol             The tolerance on the relative difference in
                                length for two directions to be considered
                                equal.  Eg. if relative differences must be
                                less than 5% for two lengths to be considered
@@ -1946,86 +1734,78 @@ V3D IndexingUtils::Make_c_dir( const V3D  & a_dir,
                                specified in degrees.
 
  */
-void IndexingUtils::DiscardDuplicates( std::vector<V3D>  & new_list,
-                                       std::vector<V3D>  & directions,
-                                 const std::vector<V3D>  & q_vectors,
-                                       double              required_tolerance,
-                                       double              len_tol,
-                                       double              ang_tol )
-{
+void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
+                                      std::vector<V3D> &directions,
+                                      const std::vector<V3D> &q_vectors,
+                                      double required_tolerance, double len_tol,
+                                      double ang_tol) {
   new_list.clear();
   std::vector<V3D> temp;
 
   V3D current_dir;
   V3D next_dir;
-  V3D zero_vec(0,0,0);
+  V3D zero_vec(0, 0, 0);
 
   double next_length;
   double length_diff;
-  double angle; 
+  double angle;
   size_t dir_num = 0;
   size_t check_index;
-  bool   new_dir;
+  bool new_dir;
 
-  while ( dir_num < directions.size() )     // put sequence of similar vectors
-  {                                         // in list temp
-    current_dir    = directions[ dir_num ];
+  while (dir_num < directions.size()) // put sequence of similar vectors
+  {                                   // in list temp
+    current_dir = directions[dir_num];
     double current_length = current_dir.norm();
     dir_num++;
 
-    if ( current_length > 0 )                // skip any zero vectors
+    if (current_length > 0) // skip any zero vectors
     {
       temp.clear();
-      temp.push_back( current_dir );
+      temp.push_back(current_dir);
       check_index = dir_num;
-      new_dir     = false;
-      while ( check_index < directions.size() && !new_dir )
-      {
-        next_dir    = directions[ check_index ];
+      new_dir = false;
+      while (check_index < directions.size() && !new_dir) {
+        next_dir = directions[check_index];
         next_length = next_dir.norm();
-        if ( next_length > 0 )
-        {
-          length_diff = fabs( next_dir.norm() - current_length );
-          if ( ( length_diff/current_length ) < len_tol )  // continue scan
+        if (next_length > 0) {
+          length_diff = fabs(next_dir.norm() - current_length);
+          if ((length_diff / current_length) < len_tol) // continue scan
           {
-            angle = current_dir.angle( next_dir ) * RAD_TO_DEG;
-            if ( (boost::math::isnan)(angle) )
+            angle = current_dir.angle(next_dir) * RAD_TO_DEG;
+            if ((boost::math::isnan)(angle))
               angle = 0;
-            if ( (angle < ang_tol) || (angle > (180.0-ang_tol)) )
-            {
-              temp.push_back( next_dir );
-              directions[check_index] = zero_vec; // mark off this direction 
+            if ((angle < ang_tol) || (angle > (180.0 - ang_tol))) {
+              temp.push_back(next_dir);
+              directions[check_index] = zero_vec; // mark off this direction
             }                                     // since it was duplicate
 
-            check_index++;                    // keep checking all vectors with 
-          }                                   // essentially the same length   
+            check_index++; // keep checking all vectors with
+          }                // essentially the same length
           else
-            new_dir = true;                   // we only know we have a new
-                                              // direction if the length is 
-                                              // different, since list is 
-        }                                     // sorted by length !
+            new_dir = true; // we only know we have a new
+                            // direction if the length is
+                            // different, since list is
+        }                   // sorted by length !
         else
-          check_index++;                      // just move on
+          check_index++; // just move on
       }
-                                              // now scan through temp list to
-      int max_indexed = 0;                    // find the one that indexes most
+      // now scan through temp list to
+      int max_indexed = 0; // find the one that indexes most
 
       int max_i = -1;
-      for ( size_t i = 0; i < temp.size(); i++ )
-      {
-        int num_indexed = NumberIndexed_1D( temp[i],
-                                        q_vectors,
-                                        required_tolerance );
-        if ( num_indexed > max_indexed )
-        {
+      for (size_t i = 0; i < temp.size(); i++) {
+        int num_indexed =
+            NumberIndexed_1D(temp[i], q_vectors, required_tolerance);
+        if (num_indexed > max_indexed) {
           max_indexed = num_indexed;
           max_i = (int)i;
         }
       }
 
-      if ( max_indexed > 0 )               // don't bother to add any direction
-      {                                    // that doesn't index anything
-        new_list.push_back( temp[ max_i ] );
+      if (max_indexed > 0) // don't bother to add any direction
+      {                    // that doesn't index anything
+        new_list.push_back(temp[max_i]);
       }
     }
   }
@@ -2033,23 +1813,19 @@ void IndexingUtils::DiscardDuplicates( std::vector<V3D>  & new_list,
   directions.clear();
 }
 
-
 /**
-  Round all of the components of all vectors to the nearest integer.  This 
+  Round all of the components of all vectors to the nearest integer.  This
   is useful when the vectors in the list represent Miller indices.  Since
   the PeaksWorkspace records the Miller indices as sets of three doubles,
   there is no guarantee that the Miller indices will be integers.
 
-  @param hkl_list   Vector of V3D objects whose components will be rounded. 
+  @param hkl_list   Vector of V3D objects whose components will be rounded.
 
  */
-void IndexingUtils::RoundHKLs( std::vector<V3D> & hkl_list )
-{
-  for ( size_t entry = 0; entry < hkl_list.size(); entry++ )
-  {
-    for ( size_t i = 0; i < 3; i++ )
-    {
-      hkl_list[entry][i] = (double)( round(hkl_list[entry][i]) );
+void IndexingUtils::RoundHKLs(std::vector<V3D> &hkl_list) {
+  for (size_t entry = 0; entry < hkl_list.size(); entry++) {
+    for (size_t i = 0; i < 3; i++) {
+      hkl_list[entry][i] = (double)(round(hkl_list[entry][i]));
     }
   }
 }
@@ -2059,12 +1835,11 @@ void IndexingUtils::RoundHKLs( std::vector<V3D> & hkl_list )
  * @param tolerance Allowable distance from integer.
  * @return True if the value is within tolerance of a whole number
  */
-inline bool withinTol(const double value, const double tolerance)
-{
+inline bool withinTol(const double value, const double tolerance) {
   double myVal = fabs(value);
   if (myVal - floor(myVal) < tolerance)
     return true;
-  if (floor(myVal+1.) - myVal < tolerance)
+  if (floor(myVal + 1.) - myVal < tolerance)
     return true;
   return false;
 }
@@ -2082,14 +1857,12 @@ inline bool withinTol(const double value, const double tolerance)
                integer values (h,k,l) and (h,k,l) is NOT (0,0,0)
  */
 
-bool IndexingUtils::ValidIndex( const V3D & hkl, double tolerance )
-{
+bool IndexingUtils::ValidIndex(const V3D &hkl, double tolerance) {
   if ((hkl[0] == 0.) && (hkl[1] == 0.) && (hkl[2] == 0.))
     return false;
 
-  return (withinTol(hkl[0], tolerance)
-      && withinTol(hkl[1], tolerance)
-      && withinTol(hkl[2], tolerance));
+  return (withinTol(hkl[0], tolerance) && withinTol(hkl[1], tolerance) &&
+          withinTol(hkl[2], tolerance));
 }
 
 /**
@@ -2102,32 +1875,28 @@ bool IndexingUtils::ValidIndex( const V3D & hkl, double tolerance )
   @param average_error This is set to the average error in the hkl values for
                        the hkl values that are valid Miller indices.
 */
-int IndexingUtils::NumberOfValidIndexes( 
-                                      const std::vector<V3D>  & hkls,
-                                            double              tolerance,
-                                            double            & average_error )
-{
+int IndexingUtils::NumberOfValidIndexes(const std::vector<V3D> &hkls,
+                                        double tolerance,
+                                        double &average_error) {
 
   double h_error;
   double k_error;
   double l_error;
   double total_error = 0;
-  int    count       = 0;
-  V3D    hkl;
-  for ( size_t i = 0; i < hkls.size(); i++ )
-  {
+  int count = 0;
+  V3D hkl;
+  for (size_t i = 0; i < hkls.size(); i++) {
     hkl = hkls[i];
-    if ( ValidIndex( hkl, tolerance ) )
-    {
+    if (ValidIndex(hkl, tolerance)) {
       count++;
-      h_error = fabs( round(hkl[0]) - hkl[0] );
-      k_error = fabs( round(hkl[1]) - hkl[1] );
-      l_error = fabs( round(hkl[2]) - hkl[2] );
+      h_error = fabs(round(hkl[0]) - hkl[0]);
+      k_error = fabs(round(hkl[1]) - hkl[1]);
+      l_error = fabs(round(hkl[2]) - hkl[2]);
       total_error += h_error + k_error + l_error;
     }
   }
 
-  if ( count > 0 )
+  if (count > 0)
     average_error = total_error / (3.0 * (double)count);
   else
     average_error = 0.0;
@@ -2135,79 +1904,67 @@ int IndexingUtils::NumberOfValidIndexes(
   return count;
 }
 
-  /// Find the average indexing error for UB with the specified q's and hkls
-double IndexingUtils::IndexingError( const DblMatrix         & UB,
-                                     const std::vector<V3D>  & hkls,
-                                     const std::vector<V3D>  & q_vectors )
-{
-  DblMatrix UB_inverse( UB );
-  if ( CheckUB( UB ) )
-  {
+/// Find the average indexing error for UB with the specified q's and hkls
+double IndexingUtils::IndexingError(const DblMatrix &UB,
+                                    const std::vector<V3D> &hkls,
+                                    const std::vector<V3D> &q_vectors) {
+  DblMatrix UB_inverse(UB);
+  if (CheckUB(UB)) {
     UB_inverse.Invert();
+  } else {
+    throw std::runtime_error("The UB in IndexingError() is not valid");
   }
-  else
-  {
-    throw std::runtime_error( "The UB in IndexingError() is not valid");
-  }
-  if ( hkls.size() != q_vectors.size() )
-  {
+  if (hkls.size() != q_vectors.size()) {
     throw std::runtime_error(
-                      "Different size hkl and q_vectors in IndexingError()");
+        "Different size hkl and q_vectors in IndexingError()");
   }
-
 
   double total_error = 0;
-  V3D    hkl;
-  for ( size_t i = 0; i < hkls.size(); i++ )
-  {
+  V3D hkl;
+  for (size_t i = 0; i < hkls.size(); i++) {
     hkl = UB_inverse * q_vectors[i] / (2.0 * M_PI);
 
-    double h_error = fabs( hkl[0] - round(hkl[0]) );
-    double k_error = fabs( hkl[1] - round(hkl[1]) );
-    double l_error = fabs( hkl[2] - round(hkl[2]) );
+    double h_error = fabs(hkl[0] - round(hkl[0]));
+    double k_error = fabs(hkl[1] - round(hkl[1]));
+    double l_error = fabs(hkl[2] - round(hkl[2]));
     total_error += h_error + k_error + l_error;
   }
 
-  if ( hkls.size() > 0 )
-    return total_error / ( 3.0 * (double)hkls.size() );
+  if (hkls.size() > 0)
+    return total_error / (3.0 * (double)hkls.size());
   else
-    return 0; 
+    return 0;
 }
-
 
 /**
   Check whether or not the specified matrix is reasonable for an orientation
   matrix.  In particular, check that it is a 3x3 matrix without any nan or
-  infinite values and that its determinant is within a reasonable range, for 
+  infinite values and that its determinant is within a reasonable range, for
   an orientation matrix.
 
   @param UB  A 3x3 matrix of doubles holding the UB matrix
 
-  @return true if this could be a valid UB matrix. 
+  @return true if this could be a valid UB matrix.
  */
 
-bool IndexingUtils::CheckUB( const DblMatrix & UB )
-{
-  if ( UB.numRows() != 3 || UB.numCols() != 3 )
+bool IndexingUtils::CheckUB(const DblMatrix &UB) {
+  if (UB.numRows() != 3 || UB.numCols() != 3)
     return false;
 
-  for ( size_t row = 0; row < 3; row++ )
-    for ( size_t col = 0; col < 3; col++ )
-    {
-      if ( (boost::math::isnan)(UB[row][col]) )
-      {
+  for (size_t row = 0; row < 3; row++)
+    for (size_t col = 0; col < 3; col++) {
+      if ((boost::math::isnan)(UB[row][col])) {
         return false;
       }
-      if ( (boost::math::isinf)(UB[row][col]) )
-      {
+      if ((boost::math::isinf)(UB[row][col])) {
         return false;
       }
     }
 
-  double det =   UB.determinant();
+  double det = UB.determinant();
 
   double abs_det = fabs(det);
-  if ( abs_det > 10 || abs_det < 1e-12 ) // UB not found correctly
+  if (abs_det > 10 || abs_det < 1e-12) // UB not found correctly
   {
     return false;
   }
@@ -2215,50 +1972,43 @@ bool IndexingUtils::CheckUB( const DblMatrix & UB )
   return true;
 }
 
-
 /**
-  Calculate the number of Q vectors that are mapped to integer h,k,l 
+  Calculate the number of Q vectors that are mapped to integer h,k,l
   values by UB.  Each of the Miller indexes, h, k and l must be within
   the specified tolerance of an integer, in order to count the peak
   as indexed.  Also, if (h,k,l) = (0,0,0) the peak will NOT be counted
   as indexed, since (0,0,0) is not a valid index of any peak.
-  
+
   @param UB           A 3x3 matrix of doubles holding the UB matrix.
                       The UB matrix must not be singular.
-  @param q_vectors    std::vector of V3D objects that contains the list of 
+  @param q_vectors    std::vector of V3D objects that contains the list of
                       q_vectors that are indexed by the corresponding hkl
                       vectors.
   @param tolerance    The maximum allowed distance between each component
                       of UB^(-1)*Q and the nearest integer value, required to
                       to count the peak as indexed by UB.
 
-  @return A non-negative integer giving the number of peaks indexed by UB. 
-  
+  @return A non-negative integer giving the number of peaks indexed by UB.
+
   @throws std::invalid_argument exception if the UB matrix is not a 3X3 matrix,
                                 or if UB is singular.
  */
-int IndexingUtils::NumberIndexed( const DblMatrix         & UB,
-                                  const std::vector<V3D>  & q_vectors,
-                                        double              tolerance )
-{
+int IndexingUtils::NumberIndexed(const DblMatrix &UB,
+                                 const std::vector<V3D> &q_vectors,
+                                 double tolerance) {
   int count = 0;
 
-  DblMatrix UB_inverse( UB );
-  if ( CheckUB( UB ) )
-  {
+  DblMatrix UB_inverse(UB);
+  if (CheckUB(UB)) {
     UB_inverse.Invert();
-  }
-  else
-  {
-    throw std::runtime_error( "The UB in NumberIndexed() is not valid");
+  } else {
+    throw std::runtime_error("The UB in NumberIndexed() is not valid");
   }
 
   V3D hkl;
-  for ( size_t i = 0; i < q_vectors.size(); i++ )
-  {
+  for (size_t i = 0; i < q_vectors.size(); i++) {
     hkl = UB_inverse * q_vectors[i] / (2.0 * M_PI);
-    if ( ValidIndex( hkl, tolerance ) )
-    {
+    if (ValidIndex(hkl, tolerance)) {
       count++;
     }
   }
@@ -2266,40 +2016,36 @@ int IndexingUtils::NumberIndexed( const DblMatrix         & UB,
   return count;
 }
 
-
 /**
   Calculate the number of Q vectors that are mapped to a integer index
-  value by taking the dot product with the specified direction vector.  The 
+  value by taking the dot product with the specified direction vector.  The
   direction vector represents a possible unit cell edge vector in real space.
-  The dot product must be within the specified tolerance of an integer, 
+  The dot product must be within the specified tolerance of an integer,
   in order to count as indexed.
-  
+
   @param direction    A V3D specifying a possible edge vector in real space.
-  @param q_vectors    std::vector of V3D objects that contains the list of 
+  @param q_vectors    std::vector of V3D objects that contains the list of
                       q_vectors that are indexed by the corresponding hkl
                       vectors.
   @param tolerance    The maximum allowed distance to an integer from the dot
                       products of peaks with the specified direction.
 
   @return A non-negative integer giving the number of q-vectors indexed in
-          one direction by the specified direction vector. 
+          one direction by the specified direction vector.
  */
-int IndexingUtils::NumberIndexed_1D( const V3D               & direction,
-                                     const std::vector<V3D>  & q_vectors,
-                                           double              tolerance )
-{
-  if ( direction.norm() == 0 )
+int IndexingUtils::NumberIndexed_1D(const V3D &direction,
+                                    const std::vector<V3D> &q_vectors,
+                                    double tolerance) {
+  if (direction.norm() == 0)
     return 0;
 
-  int    count = 0;
- 
-  for ( size_t i = 0; i < q_vectors.size(); i++ )
-  {
-    double proj_value = direction.scalar_prod( q_vectors[i] ) / (2.0 * M_PI);
-    int nearest_int = round( proj_value );
-    double error = fabs( proj_value - nearest_int );
-    if ( error <= tolerance )
-    {
+  int count = 0;
+
+  for (size_t i = 0; i < q_vectors.size(); i++) {
+    double proj_value = direction.scalar_prod(q_vectors[i]) / (2.0 * M_PI);
+    int nearest_int = round(proj_value);
+    double error = fabs(proj_value - nearest_int);
+    if (error <= tolerance) {
       count++;
     }
   }
@@ -2307,47 +2053,42 @@ int IndexingUtils::NumberIndexed_1D( const V3D               & direction,
   return count;
 }
 
-
 /**
    Calculate the number of Q vectors for which the dot product with three
    specified direction vectors is an integer triple, NOT equal to (0,0,0) to
-   within the specified tolerance.  This give the number of peaks that would 
-   be indexed by the UB matrix formed from the specified those three real 
+   within the specified tolerance.  This give the number of peaks that would
+   be indexed by the UB matrix formed from the specified those three real
    space unit cell edge vectors.
-   NOTE: This method assumes that the three edge vectors are linearly 
+   NOTE: This method assumes that the three edge vectors are linearly
          independent and could be used to form a valid UB matrix.
 
    @param a_dir        A Vector3D representing unit cell edge vector a
    @param b_dir        A Vector3D representing unit cell edge vector b
    @param c_dir        A Vector3D representing unit cell edge vector c
-   @param q_vectors    Vector of Vector3D objects that contains the list of 
+   @param q_vectors    Vector of Vector3D objects that contains the list of
                        q_vectors that are indexed by the corresponding hkl
                        vectors.
    @param tolerance    The maximum allowed distance to an integer from the dot
                        products of peaks with the specified direction.
 
    @return A non-negative integer giving the number of peaks simultaneously
-           indexed in all three directions by the specified direction vectors. 
+           indexed in all three directions by the specified direction vectors.
  */
-int IndexingUtils::NumberIndexed_3D( const V3D               & a_dir,
-                                     const V3D               & b_dir,
-                                     const V3D               & c_dir,
-                                     const std::vector<V3D>  & q_vectors,
-                                           double              tolerance )
-{
-  if ( a_dir.norm() == 0 || b_dir.norm() == 0 || c_dir.norm() == 0 )
+int IndexingUtils::NumberIndexed_3D(const V3D &a_dir, const V3D &b_dir,
+                                    const V3D &c_dir,
+                                    const std::vector<V3D> &q_vectors,
+                                    double tolerance) {
+  if (a_dir.norm() == 0 || b_dir.norm() == 0 || c_dir.norm() == 0)
     return 0;
 
   V3D hkl_vec;
   int count = 0;
 
-  for ( size_t i = 0; i < q_vectors.size(); i++ )
-  {
-    hkl_vec[0] = a_dir.scalar_prod( q_vectors[i] ) / (2.0 * M_PI);
-    hkl_vec[1] = b_dir.scalar_prod( q_vectors[i] ) / (2.0 * M_PI);
-    hkl_vec[2] = c_dir.scalar_prod( q_vectors[i] ) / (2.0 * M_PI);
-    if ( ValidIndex( hkl_vec, tolerance ) )
-    {
+  for (size_t i = 0; i < q_vectors.size(); i++) {
+    hkl_vec[0] = a_dir.scalar_prod(q_vectors[i]) / (2.0 * M_PI);
+    hkl_vec[1] = b_dir.scalar_prod(q_vectors[i]) / (2.0 * M_PI);
+    hkl_vec[2] = c_dir.scalar_prod(q_vectors[i]) / (2.0 * M_PI);
+    if (ValidIndex(hkl_vec, tolerance)) {
       count++;
     }
   }
@@ -2355,94 +2096,80 @@ int IndexingUtils::NumberIndexed_3D( const V3D               & a_dir,
   return count;
 }
 
-
 /**
   Calculate the Miller Indices for each of the specified Q vectors, using the
-  inverse of the specified UB matrix.  The Miller Indices will be set to 
-  0, 0, 0 for any peak for which h, k or l differs from an intenger by more 
-  than the specified tolerance.  Also (h,k,l) = (0,0,0) the peak will NOT be 
+  inverse of the specified UB matrix.  The Miller Indices will be set to
+  0, 0, 0 for any peak for which h, k or l differs from an intenger by more
+  than the specified tolerance.  Also (h,k,l) = (0,0,0) the peak will NOT be
   counted as indexed, since (0,0,0) is not a valid index of any peak.
-  
+
   @param UB             A 3x3 matrix of doubles holding the UB matrix
-  @param q_vectors      std::vector of V3D objects that contains the list of 
+  @param q_vectors      std::vector of V3D objects that contains the list of
                         q_vectors that are to be indexed.
   @param tolerance      The maximum allowed distance between each component
                         of UB^(-1)*Q and the nearest integer value, required to
                         to count the peak as indexed by UB.
-  @param miller_indices This vector returns a list of Miller Indices, with 
-                        one entry for each given Q vector. 
+  @param miller_indices This vector returns a list of Miller Indices, with
+                        one entry for each given Q vector.
   @param ave_error      The average error from all lattice directions.
 
   @return A non-negative integer giving the number of peaks indexed by UB,
-          within the specified tolerance on h,k,l. 
-  
+          within the specified tolerance on h,k,l.
+
   @throws std::invalid_argument exception if the UB matrix is not a 3X3 matrix,
                                 or if UB is singular.
  */
-int IndexingUtils::CalculateMillerIndices( 
-                                  const DblMatrix         & UB,
-                                  const std::vector<V3D>  & q_vectors,
-                                        double              tolerance,
-                                        std::vector<V3D>  & miller_indices,
-                                        double            & ave_error )
-{
-  DblMatrix UB_inverse( UB );
+int IndexingUtils::CalculateMillerIndices(const DblMatrix &UB,
+                                          const std::vector<V3D> &q_vectors,
+                                          double tolerance,
+                                          std::vector<V3D> &miller_indices,
+                                          double &ave_error) {
+  DblMatrix UB_inverse(UB);
 
-  if ( CheckUB( UB ) )
-  {
+  if (CheckUB(UB)) {
     UB_inverse.Invert();
-  }
-  else
-  {
+  } else {
     throw std::runtime_error("The UB in CalculateMillerIndices() is not valid");
   }
 
   miller_indices.clear();
-  miller_indices.reserve( q_vectors.size() );
+  miller_indices.reserve(q_vectors.size());
 
   int count = 0;
-  double h_error,
-         k_error,
-         l_error;
+  double h_error, k_error, l_error;
   ave_error = 0.0;
   V3D hkl;
-  for ( size_t i = 0; i < q_vectors.size(); i++ )
-  {
+  for (size_t i = 0; i < q_vectors.size(); i++) {
     hkl = UB_inverse * q_vectors[i] / (2.0 * M_PI);
-    if ( ValidIndex( hkl, tolerance ) )
-    {
+    if (ValidIndex(hkl, tolerance)) {
       count++;
-      miller_indices.push_back( V3D(hkl) );
-      h_error = fabs( round(hkl[0]) - hkl[0] );
-      k_error = fabs( round(hkl[1]) - hkl[1] );
-      l_error = fabs( round(hkl[2]) - hkl[2] );
-      ave_error += h_error + k_error + l_error; 
-    }
-    else
-      miller_indices.push_back( V3D(0,0,0) );
+      miller_indices.push_back(V3D(hkl));
+      h_error = fabs(round(hkl[0]) - hkl[0]);
+      k_error = fabs(round(hkl[1]) - hkl[1]);
+      l_error = fabs(round(hkl[2]) - hkl[2]);
+      ave_error += h_error + k_error + l_error;
+    } else
+      miller_indices.push_back(V3D(0, 0, 0));
   }
 
-  if ( count > 0 )
-  {
-    ave_error /= ( 3.0 * count );
+  if (count > 0) {
+    ave_error /= (3.0 * count);
   }
 
   return count;
 }
 
-
-
 /**
-  Given one plane normal direction for a family of parallel planes in 
-  reciprocal space, find the peaks that lie on these planes to within the 
-  specified tolerance.  The direction is specified as a vector with length 
-  "a" if the plane spacing in reciprocal space is 1/a.  In that way, the 
-  dot product of a peak Qxyz with the direction vector will be an integer 
-  if the peak lies on one of the planes.   
+  Given one plane normal direction for a family of parallel planes in
+  reciprocal space, find the peaks that lie on these planes to within the
+  specified tolerance.  The direction is specified as a vector with length
+  "a" if the plane spacing in reciprocal space is 1/a.  In that way, the
+  dot product of a peak Qxyz with the direction vector will be an integer
+  if the peak lies on one of the planes.
 
-  @param direction           Direction vector in the direction of the 
+  @param direction           Direction vector in the direction of the
                              normal vector for a family of parallel planes
-                             in reciprocal space.  The length of this vector 
+                             in reciprocal space.  The length of this vector
                              must be the reciprocal of the plane spacing.
   @param q_vectors           List of V3D peaks in reciprocal space
   @param required_tolerance  The maximum allowed error (as a faction of
@@ -2453,42 +2180,39 @@ int IndexingUtils::CalculateMillerIndices(
   @param indexed_qs          List of Qxyz value for the peaks that were
                              indexed indexed in the specified direction.
   @param fit_error           The sum of the squares of the distances from
-                             integer values for the projections of the 
+                             integer values for the projections of the
                              indexed q_vectors on the specified direction.
                              This is a measure of the error in HKL space.
 
   @return The number of q_vectors that are indexed to within the specified
           tolerance, in the specified direction.
  */
-int IndexingUtils::GetIndexedPeaks_1D( const V3D              & direction,
-                                       const std::vector<V3D> & q_vectors,
-                                             double        required_tolerance,
-                                             std::vector<int> & index_vals,
-                                             std::vector<V3D> & indexed_qs,
-                                             double           & fit_error )
-{
-  int     num_indexed = 0;
+int IndexingUtils::GetIndexedPeaks_1D(const V3D &direction,
+                                      const std::vector<V3D> &q_vectors,
+                                      double required_tolerance,
+                                      std::vector<int> &index_vals,
+                                      std::vector<V3D> &indexed_qs,
+                                      double &fit_error) {
+  int num_indexed = 0;
   index_vals.clear();
   indexed_qs.clear();
-  index_vals.reserve( q_vectors.size() );
-  indexed_qs.reserve( q_vectors.size() );
+  index_vals.reserve(q_vectors.size());
+  indexed_qs.reserve(q_vectors.size());
 
   fit_error = 0;
 
-  if ( direction.norm() == 0 )    // special case, zero vector will NOT index
-   return 0;                      // any peaks, even though dot product
-                                  // with Q vectors is always an integer!
+  if (direction.norm() == 0) // special case, zero vector will NOT index
+    return 0;                // any peaks, even though dot product
+                             // with Q vectors is always an integer!
 
-  for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
-  {
-    double proj_value = direction.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
-    int nearest_int = round( proj_value );
-    double error = fabs( proj_value - nearest_int );
-    if ( error < required_tolerance )
-    {
+  for (size_t q_num = 0; q_num < q_vectors.size(); q_num++) {
+    double proj_value = direction.scalar_prod(q_vectors[q_num]) / (2.0 * M_PI);
+    int nearest_int = round(proj_value);
+    double error = fabs(proj_value - nearest_int);
+    if (error < required_tolerance) {
       fit_error += error * error;
-      indexed_qs.push_back( q_vectors[q_num] );
-      index_vals.push_back( nearest_int );
+      indexed_qs.push_back(q_vectors[q_num]);
+      index_vals.push_back(nearest_int);
       num_indexed++;
     }
   }
@@ -2496,10 +2220,9 @@ int IndexingUtils::GetIndexedPeaks_1D( const V3D              & direction,
   return num_indexed;
 }
 
-
 /**
-  Given three plane normal directions for three families of parallel planes in 
-  reciprocal space, find the peaks that lie on these planes to within the 
+  Given three plane normal directions for three families of parallel planes in
+  reciprocal space, find the peaks that lie on these planes to within the
   specified tolerance.  The three directions are specified as vectors with
   lengths that are the reciprocals of the corresponding plane spacings.  In
   that way, the dot product of a peak Qxyz with one of the direction vectors
@@ -2525,57 +2248,54 @@ int IndexingUtils::GetIndexedPeaks_1D( const V3D              & direction,
   @param indexed_qs          List of Qxyz value for the peaks that were
                              indexed indexed in all specified directions.
   @param fit_error           The sum of the squares of the distances from
-                             integer values for the projections of the 
+                             integer values for the projections of the
                              indexed q_vectors on the specified directions.
                              This is a measure of the error in HKL space.
 
   @return The number of q_vectors that are indexed to within the specified
           tolerance, in the specified direction.
  */
-int IndexingUtils::GetIndexedPeaks_3D( const V3D              & direction_1,
-                                       const V3D              & direction_2,
-                                       const V3D              & direction_3,
-                                       const std::vector<V3D> & q_vectors,
-                                             double        required_tolerance,
-                                             std::vector<V3D> & miller_indices,
-                                             std::vector<V3D> & indexed_qs,
-                                             double           & fit_error )
-{
-  V3D     hkl;
-  int     num_indexed = 0;
+int IndexingUtils::GetIndexedPeaks_3D(
+    const V3D &direction_1, const V3D &direction_2, const V3D &direction_3,
+    const std::vector<V3D> &q_vectors, double required_tolerance,
+    std::vector<V3D> &miller_indices, std::vector<V3D> &indexed_qs,
+    double &fit_error) {
+  V3D hkl;
+  int num_indexed = 0;
 
   miller_indices.clear();
-  miller_indices.reserve( q_vectors.size() );
+  miller_indices.reserve(q_vectors.size());
 
   indexed_qs.clear();
-  indexed_qs.reserve( q_vectors.size() );
+  indexed_qs.reserve(q_vectors.size());
 
   fit_error = 0;
 
-  for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
-  {
-    double projected_h = direction_1.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
-    double projected_k = direction_2.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
-    double projected_l = direction_3.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
+  for (size_t q_num = 0; q_num < q_vectors.size(); q_num++) {
+    double projected_h =
+        direction_1.scalar_prod(q_vectors[q_num]) / (2.0 * M_PI);
+    double projected_k =
+        direction_2.scalar_prod(q_vectors[q_num]) / (2.0 * M_PI);
+    double projected_l =
+        direction_3.scalar_prod(q_vectors[q_num]) / (2.0 * M_PI);
 
-    hkl( projected_h, projected_k, projected_l );
+    hkl(projected_h, projected_k, projected_l);
 
-    if ( ValidIndex( hkl, required_tolerance ) )
-    {
-      int h_int = round( projected_h );
-      int k_int = round( projected_k );
-      int l_int = round( projected_l );
+    if (ValidIndex(hkl, required_tolerance)) {
+      int h_int = round(projected_h);
+      int k_int = round(projected_k);
+      int l_int = round(projected_l);
 
-      double h_error = fabs( projected_h - h_int );
-      double k_error = fabs( projected_k - k_int );
-      double l_error = fabs( projected_l - l_int );
+      double h_error = fabs(projected_h - h_int);
+      double k_error = fabs(projected_k - k_int);
+      double l_error = fabs(projected_l - l_int);
 
-      fit_error += h_error*h_error + k_error*k_error + l_error*l_error;
+      fit_error += h_error * h_error + k_error * k_error + l_error * l_error;
 
-      indexed_qs.push_back( q_vectors[q_num] );
+      indexed_qs.push_back(q_vectors[q_num]);
 
-      V3D miller_ind( h_int, k_int, l_int );
-      miller_indices.push_back( miller_ind );
+      V3D miller_ind(h_int, k_int, l_int);
+      miller_indices.push_back(miller_ind);
 
       num_indexed++;
     }
@@ -2583,7 +2303,6 @@ int IndexingUtils::GetIndexedPeaks_3D( const V3D              & direction_1,
 
   return num_indexed;
 }
-
 
 /**
   Given a list of peak positions and a UB matrix, get the list of Miller
@@ -2604,57 +2323,50 @@ int IndexingUtils::GetIndexedPeaks_3D( const V3D              & direction_1,
                              indexed indexed in all specified directions.
   @param fit_error           The sum of the squares of the distances from
                              integer values for the UB*Q for the specified
-                             UB matrix and the specified q_vectors. 
+                             UB matrix and the specified q_vectors.
                              This is a measure of the error in HKL space.
 
   @return The number of q_vectors that are indexed to within the specified
           tolerance, in the specified direction.
  */
-int IndexingUtils::GetIndexedPeaks( const DblMatrix         & UB,
-                                    const std::vector<V3D>  & q_vectors,
-                                          double            required_tolerance,
-                                          std::vector<V3D>  & miller_indices,
-                                          std::vector<V3D>  & indexed_qs,
-                                          double            & fit_error )
-{
-  double  error;
-  int     num_indexed = 0;
-  V3D     hkl;
+int IndexingUtils::GetIndexedPeaks(const DblMatrix &UB,
+                                   const std::vector<V3D> &q_vectors,
+                                   double required_tolerance,
+                                   std::vector<V3D> &miller_indices,
+                                   std::vector<V3D> &indexed_qs,
+                                   double &fit_error) {
+  double error;
+  int num_indexed = 0;
+  V3D hkl;
 
   miller_indices.clear();
-  miller_indices.reserve( q_vectors.size() );
+  miller_indices.reserve(q_vectors.size());
 
   indexed_qs.clear();
-  indexed_qs.reserve( q_vectors.size() );
+  indexed_qs.reserve(q_vectors.size());
 
   fit_error = 0;
 
-  DblMatrix UB_inverse( UB );
-  if ( CheckUB( UB ) )
-  {
+  DblMatrix UB_inverse(UB);
+  if (CheckUB(UB)) {
     UB_inverse.Invert();
-  }
-  else
-  {
+  } else {
     throw std::runtime_error("The UB in GetIndexedPeaks() is not valid");
   }
 
-  for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
-  {
+  for (size_t q_num = 0; q_num < q_vectors.size(); q_num++) {
     hkl = UB_inverse * q_vectors[q_num] / (2.0 * M_PI);
 
-    if ( ValidIndex( hkl, required_tolerance ) )
-    {
-      for ( int i = 0; i < 3; i++ )
-      {
+    if (ValidIndex(hkl, required_tolerance)) {
+      for (int i = 0; i < 3; i++) {
         error = hkl[i] - round(hkl[i]);
-        fit_error += error * error; 
+        fit_error += error * error;
       }
 
-      indexed_qs.push_back( q_vectors[q_num] );
+      indexed_qs.push_back(q_vectors[q_num]);
 
-      V3D miller_ind( round(hkl[0]), round(hkl[1]), round(hkl[2]) );
-      miller_indices.push_back( miller_ind );
+      V3D miller_ind(round(hkl[0]), round(hkl[1]), round(hkl[2]));
+      miller_indices.push_back(miller_ind);
 
       num_indexed++;
     }
@@ -2663,15 +2375,14 @@ int IndexingUtils::GetIndexedPeaks( const DblMatrix         & UB,
   return num_indexed;
 }
 
-
 /**
   Make a list of directions, approximately uniformly distributed over a
-  hemisphere, with the angular separation between direction vectors 
+  hemisphere, with the angular separation between direction vectors
   approximately 90 degrees/n_steps.
-  NOTE: This method provides a list of possible directions for plane 
-        normals for reciprocal lattice planes.  This facilitates a 
+  NOTE: This method provides a list of possible directions for plane
+        normals for reciprocal lattice planes.  This facilitates a
         brute force search for lattice planes with a specific spacing
-        between planes.  This will be used for finding the UB matrix, 
+        between planes.  This will be used for finding the UB matrix,
         given the lattice parameters.
 
   @param n_steps   The number of subdivisions in latitude in the upper
@@ -2682,122 +2393,113 @@ int IndexingUtils::GetIndexedPeaks( const DblMatrix         & UB,
 
   @throws std::invalid_argument exception if the number of steps is <= 0.
  */
-std::vector<V3D> IndexingUtils::MakeHemisphereDirections( int n_steps )
-{
-  if ( n_steps <= 0 )
-  {
-    throw std::invalid_argument("MakeHemisphereDirections(): n_steps must be greater than 0");
+std::vector<V3D> IndexingUtils::MakeHemisphereDirections(int n_steps) {
+  if (n_steps <= 0) {
+    throw std::invalid_argument(
+        "MakeHemisphereDirections(): n_steps must be greater than 0");
   }
 
   std::vector<V3D> direction_list;
 
-  double angle_step = M_PI / (2*n_steps);
+  double angle_step = M_PI / (2 * n_steps);
 
-  for ( double phi = 0; phi <= (1.0001)*M_PI/2.; phi += angle_step )
-  {
+  for (double phi = 0; phi <= (1.0001) * M_PI / 2.; phi += angle_step) {
     double r = sin(phi);
 
-    int n_theta = (int)( 2. * M_PI * r / angle_step + 0.5 );
-     
+    int n_theta = (int)(2. * M_PI * r / angle_step + 0.5);
+
     double theta_step;
-      
-    if ( n_theta == 0 )                     // n = ( 0, 1, 0 ).  Just
-      theta_step = 2. * M_PI + 1.;              // use one vector at the pole
+
+    if (n_theta == 0)              // n = ( 0, 1, 0 ).  Just
+      theta_step = 2. * M_PI + 1.; // use one vector at the pole
 
     else
       theta_step = 2. * M_PI / n_theta;
-      
+
     double last_theta = 2. * M_PI - theta_step / 2.;
 
-    if ( fabs(phi - M_PI/2.) < angle_step/2. )  // use half the equator to avoid
-     last_theta = M_PI - theta_step/2.;        // vectors that are the negatives
-                                            // of other vectors in the list.
+    if (fabs(phi - M_PI / 2.) <
+        angle_step / 2.)                   // use half the equator to avoid
+      last_theta = M_PI - theta_step / 2.; // vectors that are the negatives
+                                           // of other vectors in the list.
 
-    for ( double theta = 0.; theta < last_theta; theta += theta_step )
-    {
-      V3D direction( r*cos(theta), cos(phi), r*sin(theta) );
-      direction_list.push_back( direction );
+    for (double theta = 0.; theta < last_theta; theta += theta_step) {
+      V3D direction(r * cos(theta), cos(phi), r * sin(theta));
+      direction_list.push_back(direction);
     }
   }
 
   return direction_list;
 }
 
-
 /**
   Make a list of directions, uniformly distributed around a circle, all of
-  which form the specified angle with the specified axis. 
+  which form the specified angle with the specified axis.
 
-  @param n_steps   The number of vectors to generate around the circle. 
+  @param n_steps   The number of vectors to generate around the circle.
   @param axis      The specified axis
   @param angle_degrees  The specified angle
 
   @return A std::vector containing direction vectors forming the same angle
           with the axis.
 
-  @throws std::invalid_argument exception if the number of steps is <= 0, or 
+  @throws std::invalid_argument exception if the number of steps is <= 0, or
                                 if the axix length is 0.
  */
-std::vector<V3D> IndexingUtils::MakeCircleDirections(        int    n_steps,
-                                                       const V3D    axis,
-                                                       double angle_degrees )
-{
-  if ( n_steps <= 0 )
-  {
-    throw std::invalid_argument("MakeCircleDirections(): n_steps must be greater than 0");
+std::vector<V3D> IndexingUtils::MakeCircleDirections(int n_steps,
+                                                     const V3D axis,
+                                                     double angle_degrees) {
+  if (n_steps <= 0) {
+    throw std::invalid_argument(
+        "MakeCircleDirections(): n_steps must be greater than 0");
   }
-                               // first get a vector perpendicular to axis
-  double max_component = fabs( axis[0] );
-  double min_component = fabs( axis[0] );
+  // first get a vector perpendicular to axis
+  double max_component = fabs(axis[0]);
+  double min_component = fabs(axis[0]);
   size_t min_index = 0;
-  for ( size_t i = 1; i < 3; i++ )
-  {
-    if ( fabs( axis[i] ) < min_component )
-    {
-      min_component = fabs( axis[i] );
+  for (size_t i = 1; i < 3; i++) {
+    if (fabs(axis[i]) < min_component) {
+      min_component = fabs(axis[i]);
       min_index = i;
     }
-    if ( fabs( axis[i] ) > max_component )
-    {
-      max_component = fabs( axis[i] );
+    if (fabs(axis[i]) > max_component) {
+      max_component = fabs(axis[i]);
     }
   }
 
-  if ( max_component == 0 )
-  {
-    throw std::invalid_argument("MakeCircleDirections(): Axis vector must be non-zero!");
+  if (max_component == 0) {
+    throw std::invalid_argument(
+        "MakeCircleDirections(): Axis vector must be non-zero!");
   }
 
-  V3D second_vec( 0, 0, 0 );
+  V3D second_vec(0, 0, 0);
   second_vec[min_index] = 1;
 
-  V3D perp_vec = second_vec.cross_prod( axis );
+  V3D perp_vec = second_vec.cross_prod(axis);
   perp_vec.normalize();
 
-                                // next get a vector that is the specified 
-                                // number of degrees away from the axis
-  Quat rotation_1( angle_degrees, perp_vec );
-  V3D  vector_at_angle( axis );
-  rotation_1.rotate( vector_at_angle );
+  // next get a vector that is the specified
+  // number of degrees away from the axis
+  Quat rotation_1(angle_degrees, perp_vec);
+  V3D vector_at_angle(axis);
+  rotation_1.rotate(vector_at_angle);
   vector_at_angle.normalize();
 
-                                // finally, form the circle of directions 
-                                // consisting of vectors that are at the 
-                                // specified angle from the original axis
+  // finally, form the circle of directions
+  // consisting of vectors that are at the
+  // specified angle from the original axis
   double angle_step = 360.0 / n_steps;
-  Quat rotation_2( 0, axis );
+  Quat rotation_2(0, axis);
   std::vector<V3D> directions;
-  for ( int i = 0; i < n_steps; i++ )
-  {
-    V3D vec( vector_at_angle );
-    rotation_2.setAngleAxis( i*angle_step, axis );
-    rotation_2.rotate( vec );
-    directions.push_back( vec );
+  for (int i = 0; i < n_steps; i++) {
+    V3D vec(vector_at_angle);
+    rotation_2.setAngleAxis(i * angle_step, axis);
+    rotation_2.rotate(vec);
+    directions.push_back(vec);
   }
 
   return directions;
 }
-
 
 /**
   Choose the direction vector that most nearly corresponds to a family of
@@ -2817,66 +2519,62 @@ std::vector<V3D> IndexingUtils::MakeCircleDirections(        int    n_steps,
                               space.
   @param  required_tolerance  The maximum deviation of the component of a
                               peak Qxyz in the direction of the best_direction
-                              vector for that peak to count as being indexed. 
+                              vector for that peak to count as being indexed.
                               NOTE: The tolerance is specified in terms of
-                              Miller Index.  That is, the distance between 
+                              Miller Index.  That is, the distance between
                               adjacent planes is effectively normalized to one
                               for measuring the error in the computed index.
 
   @return The number of peaks that lie within the specified tolerance of the
-          family of planes with normal direction = best_direction and with 
+          family of planes with normal direction = best_direction and with
           spacing given by plane_spacing.
 
-  @throws invalid_argument exception of no Q vectors or directions are 
+  @throws invalid_argument exception of no Q vectors or directions are
                            specified.
  */
-int IndexingUtils::SelectDirection(       V3D & best_direction,
-                                   const  std::vector<V3D> q_vectors,
-                                   const  std::vector<V3D> direction_list,
+int IndexingUtils::SelectDirection(V3D &best_direction,
+                                   const std::vector<V3D> q_vectors,
+                                   const std::vector<V3D> direction_list,
                                    double plane_spacing,
-                                   double required_tolerance )
-{
-  if ( q_vectors.size() == 0 )
-  {
+                                   double required_tolerance) {
+  if (q_vectors.size() == 0) {
     throw std::invalid_argument("SelectDirection(): No Q vectors specified");
   }
 
-  if ( direction_list.size() == 0 )
-  {
-    throw std::invalid_argument("SelectDirection(): List of possible directions has zero length");
+  if (direction_list.size() == 0) {
+    throw std::invalid_argument(
+        "SelectDirection(): List of possible directions has zero length");
   }
 
-  int    nearest_int;
+  int nearest_int;
   double error;
   double min_sum_sq_error = 1.0e100;
 
-  for ( size_t dir_num = 0; dir_num < direction_list.size(); dir_num++ )
-  {
+  for (size_t dir_num = 0; dir_num < direction_list.size(); dir_num++) {
     double sum_sq_error = 0;
-    V3D direction = direction_list[ dir_num ];
-    direction/=plane_spacing;
-    for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
-    {
-      double dot_product = direction.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
-      nearest_int = round( dot_product );
-      error = fabs( dot_product - nearest_int );
+    V3D direction = direction_list[dir_num];
+    direction /= plane_spacing;
+    for (size_t q_num = 0; q_num < q_vectors.size(); q_num++) {
+      double dot_product =
+          direction.scalar_prod(q_vectors[q_num]) / (2.0 * M_PI);
+      nearest_int = round(dot_product);
+      error = fabs(dot_product - nearest_int);
       sum_sq_error += error * error;
     }
 
-    if ( sum_sq_error < min_sum_sq_error + DBL_EPSILON )
-    {
+    if (sum_sq_error < min_sum_sq_error + DBL_EPSILON) {
       min_sum_sq_error = sum_sq_error;
       best_direction = direction;
     }
   }
 
-  int    num_indexed = 0;
-  for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
-  {
-    double proj_value = best_direction.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
-    nearest_int = round( proj_value );
-    error = fabs( proj_value - nearest_int );
-    if ( error < required_tolerance )
+  int num_indexed = 0;
+  for (size_t q_num = 0; q_num < q_vectors.size(); q_num++) {
+    double proj_value =
+        best_direction.scalar_prod(q_vectors[q_num]) / (2.0 * M_PI);
+    nearest_int = round(proj_value);
+    error = fabs(proj_value - nearest_int);
+    if (error < required_tolerance)
       num_indexed++;
   }
 
@@ -2884,8 +2582,6 @@ int IndexingUtils::SelectDirection(       V3D & best_direction,
 
   return num_indexed;
 }
-
-
 
 /**
  *  Get the lattice parameters, a, b, c, alpha, beta, gamma and cell volume
@@ -2898,48 +2594,42 @@ int IndexingUtils::SelectDirection(       V3D & best_direction,
  *  @return true if the lattice_par vector was filled with the lattice
  *          parameters and false if the matrix could not be inverted.
  */
-bool IndexingUtils::GetLatticeParameters( const DblMatrix   & UB,
-                                          std::vector<double> & lattice_par )
-{
-	OrientedLattice o_lattice;
-	o_lattice.setUB( UB );
+bool IndexingUtils::GetLatticeParameters(const DblMatrix &UB,
+                                         std::vector<double> &lattice_par) {
+  OrientedLattice o_lattice;
+  o_lattice.setUB(UB);
 
-	lattice_par.clear();
-	lattice_par.push_back( o_lattice.a() );
-	lattice_par.push_back( o_lattice.b() );
-	lattice_par.push_back( o_lattice.c() );
+  lattice_par.clear();
+  lattice_par.push_back(o_lattice.a());
+  lattice_par.push_back(o_lattice.b());
+  lattice_par.push_back(o_lattice.c());
 
+  lattice_par.push_back(o_lattice.alpha());
+  lattice_par.push_back(o_lattice.beta());
+  lattice_par.push_back(o_lattice.gamma());
 
-	lattice_par.push_back( o_lattice.alpha() );
-	lattice_par.push_back( o_lattice.beta()  );
-	lattice_par.push_back( o_lattice.gamma() );
-
-	lattice_par.push_back( o_lattice.volume() );    // keep volume > 0 even if
-											// cell is left handed
-	return true;
+  lattice_par.push_back(o_lattice.volume()); // keep volume > 0 even if
+                                             // cell is left handed
+  return true;
 }
 
-
 /**
- *  Get a nicely formatted string listing the lattice parameters and cell 
+ *  Get a nicely formatted string listing the lattice parameters and cell
  *  volume.
  *
  *  @return a string listing the cell parameters.
  */
-std::string IndexingUtils::GetLatticeParameterString( const DblMatrix & UB )
-{
+std::string IndexingUtils::GetLatticeParameterString(const DblMatrix &UB) {
   std::vector<double> lat_par;
-  IndexingUtils::GetLatticeParameters( UB, lat_par );
+  IndexingUtils::GetLatticeParameters(UB, lat_par);
 
   char buffer[100];
 
-  sprintf( buffer,
-           std::string(" %8.4f %8.4f %8.4f  %8.3f %8.3f %8.3f  %9.2f").c_str(),
-           lat_par[0], lat_par[1], lat_par[2], 
-           lat_par[3], lat_par[4], lat_par[5], lat_par[6]);
+  sprintf(buffer,
+          std::string(" %8.4f %8.4f %8.4f  %8.3f %8.3f %8.3f  %9.2f").c_str(),
+          lat_par[0], lat_par[1], lat_par[2], lat_par[3], lat_par[4],
+          lat_par[5], lat_par[6]);
 
-  std::string result( buffer );
+  std::string result(buffer);
   return result;
 }
-
-

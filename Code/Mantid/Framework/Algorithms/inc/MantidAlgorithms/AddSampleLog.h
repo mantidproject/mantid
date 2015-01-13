@@ -6,10 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /**
     Used to insert a single string into the sample in a workspace
 
@@ -25,9 +23,10 @@ namespace Algorithms
     to the sample during the experiment. This algorithm allows one named log
     to be entered.
 
-    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
+   Ridge National Laboratory & European Spallation Source
 
-    This file is part of Mantid.  
+    This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,8 +44,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport AddSampleLog : public API::Algorithm
-{
+class DLLExport AddSampleLog : public API::Algorithm {
 public:
   /// (Empty) Constructor
   AddSampleLog() : API::Algorithm() {}
@@ -54,8 +52,10 @@ public:
   virtual ~AddSampleLog() {}
   /// Algorithm's name
   virtual const std::string name() const { return "AddSampleLog"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Used to insert a value into the sample logs in a workspace.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Used to insert a value into the sample logs in a workspace.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -63,7 +63,6 @@ public:
   virtual const std::string category() const { return "DataHandling\\Logs"; }
 
 private:
-  
   /// Initialisation code
   void init();
   /// Execution code

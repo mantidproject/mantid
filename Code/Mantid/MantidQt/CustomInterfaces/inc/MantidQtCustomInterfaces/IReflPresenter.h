@@ -16,7 +16,7 @@ namespace MantidQt
 
     IReflPresenter is an interface which defines the functions any reflectometry interface presenter needs to support.
 
-    Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -63,6 +63,8 @@ namespace MantidQt
         TransferFlag,
         ImportTableFlag,
         ExportTableFlag,
+        PlotRowFlag,
+        PlotGroupFlag,
       };
 
       //Tell the presenter something happened

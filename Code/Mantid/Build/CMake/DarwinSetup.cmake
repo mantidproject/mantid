@@ -79,14 +79,16 @@ endif ()
 ###########################################################################
 # Force 64-bit compiler as that's all we support
 ###########################################################################
-set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64" )
+
+set ( CLANG_WARNINGS "-Wall -Wno-deprecated-register")
+
+set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64 ${CLANG_WARNINGS}" )
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64 -std=c++0x" )
 set ( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x" )
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
-  set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-register" )
-  set ( CMAKE_XCODE_ATTRIBUTE_OTHER_CPLUSPLUSFLAGS "-Wno-deprecated-register")
+  set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CLANG_WARNINGS} -stdlib=libc++" )
+  set ( CMAKE_XCODE_ATTRIBUTE_OTHER_CPLUSPLUSFLAGS "${CLANG_WARNINGS}")
   set ( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++" )
 endif()
 
@@ -158,7 +160,7 @@ install ( DIRECTORY ${PYQT4_PYTHONPATH}/uic DESTINATION ${BIN_DIR}/PyQt4 )
 file ( GLOB THIRDPARTY_PYTHON_PACKAGES ${CMAKE_LIBRARY_PATH}/Python/* )
 foreach ( PYPACKAGE ${THIRDPARTY_PYTHON_PACKAGES} )
   if ( IS_DIRECTORY ${PYPACKAGE} )
-    install ( DIRECTORY ${PYPACKAGE} DESTINATION ${BIN_DIR} )
+    install ( DIRECTORY ${PYPACKAGE} DESTINATION ${BIN_DIR} USE_SOURCE_PERMISSIONS )
   else()
     install ( FILES ${PYPACKAGE} DESTINATION ${BIN_DIR} )
   endif()

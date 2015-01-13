@@ -1710,6 +1710,50 @@ Later steps in the process (saving, renaming) will not be done.</string>
             </property>
            </layout>
           </item>
+          <item>
+           <layout class="QHBoxLayout" name="trans_loPreviewLegend">
+            <item>
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="trans_lbSample_2">
+              <property name="styleSheet">
+               <string notr="true">color: rgb(255, 0, 0);</string>
+              </property>
+              <property name="text">
+               <string>Sample</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="trans_lbCan">
+              <property name="text">
+               <string>Background</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="trans_lbTransmission">
+              <property name="styleSheet">
+               <string notr="true">color: rgb(0, 255, 0);</string>
+              </property>
+              <property name="text">
+               <string>Transmission</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
          </layout>
         </widget>
        </item>
@@ -2288,11 +2332,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
                 </property>
                 <item>
                  <property name="text">
-                  <string>Centre (SofQW)</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
                   <string>Parallelepiped (SofQW2)</string>
                  </property>
                 </item>
@@ -2661,6 +2700,12 @@ Later steps in the process (saving, renaming) will not be done.</string>
     <layout class="QHBoxLayout" name="horizontalLayout_6">
      <item>
       <widget class="QPushButton" name="pbHelp">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="maximumSize">
         <size>
          <width>25</width>
@@ -2676,13 +2721,35 @@ Later steps in the process (saving, renaming) will not be done.</string>
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="pbPythonExport">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>25</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Export a Python script for the algorithms run on this tab.</string>
+       </property>
+       <property name="text">
+        <string>Py</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_1">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>40</width>
+         <width>30</width>
          <height>20</height>
         </size>
        </property>

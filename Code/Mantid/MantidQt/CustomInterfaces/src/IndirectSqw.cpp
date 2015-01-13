@@ -180,9 +180,7 @@ namespace CustomInterfaces
     IAlgorithm_sptr sqwAlg;
     QString rebinType = m_uiForm.sqw_cbRebinType->currentText();
 
-    if(rebinType == "Centre (SofQW)")
-      sqwAlg = AlgorithmManager::Instance().create("SofQW");
-    else if(rebinType == "Parallelepiped (SofQW2)")
+    if(rebinType == "Parallelepiped (SofQW2)")
       sqwAlg = AlgorithmManager::Instance().create("SofQW2");
     else if(rebinType == "Parallelepiped/Fractional Area (SofQW3)")
       sqwAlg = AlgorithmManager::Instance().create("SofQW3");
@@ -231,6 +229,9 @@ namespace CustomInterfaces
 
       m_batchAlgoRunner->addAlgorithm(saveNexusAlg, inputToSaveNexusProps);
     }
+
+    // Set the name of the result workspace for Python export
+    m_pythonExportWsName = sqwWsName.toStdString();
 
     m_batchAlgoRunner->executeBatch();
   }

@@ -26,6 +26,7 @@ be no gaps between bins. Rebin ensures that any of these space filling
 bins cannot be less than 25% or more than 125% of the width that was
 specified.
 
+
 .. _rebin-example-strings:
 
 Example Rebin param strings
@@ -76,6 +77,8 @@ following will happen:
 -  **From 4** rebin in bins of size 3 **up to 10**.
 
 Hence the actual *Param* string used is "0, 2, 4, 3, 10".
+
+
 
 .. _rebin-usage:
 
@@ -189,4 +192,5 @@ Output:
    What type is the workspace after 1st rebin: <class 'mantid.api._api.IEventWorkspace'>
    What type is the workspace after 2nd rebin: <class 'mantid.api._api.MatrixWorkspace'>
 
+  
 .. categories::

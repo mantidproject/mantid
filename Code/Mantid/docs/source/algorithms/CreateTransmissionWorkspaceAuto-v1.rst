@@ -12,6 +12,12 @@ Description
 Facade over
 :ref:`algm-CreateTransmissionWorkspace`. Pulls numeric parameters out of the instrument parameters where possible. You can override any of these automatically applied defaults by providing your own value for the input.
 
+If ProcessingInstructions is not set its value is inferred from other properties:
+
+* If AnalysisMode = PointDetectorAnalaysis and PointDetectorStart = PointDetectorStop then the spectrum specified by PointDetectorStart is used.
+* If AnalysisMode = PointDetectorAnalaysis and PointDetectorStart ≠ PointDetectorStop then the spectra specified by PointDetectorStart and PointDetectorStop are used.
+* If AnalysisMode = MultiDetectorAnalaysis then the spectrum specified by MultiDetectorStart and the last spectrum are used.
+
 See :ref:`algm-CreateTransmissionWorkspace` for more information on the wrapped algorithm.
 
 Usage

@@ -15,7 +15,7 @@ namespace RefDetectorViewer
 /** This class extends the SpectrumViewer::SpectrumDisplay class to communicate left-clicks
     to the RefLimitsHandler (and thence to the peak/background/TOF line edits in the gui)
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

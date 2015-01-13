@@ -6,23 +6,26 @@
 namespace Mantid {
 namespace RemoteAlgorithms {
 /*** Authenticate to the remote compute resource.
-    
+
     Input Properties:
     <UL>
-    <LI> ComputeResource  - The name of the compute resource that will execute the job </LI>
+    <LI> ComputeResource  - The name of the compute resource that will execute
+   the job </LI>
     <LI> UserName         - User name on the compute resource </LI>
     <LI> Password         - Password for the compute resource </LI>
     </UL>
 
     Output Properties: None.
-    If the authentication is successfull, a cookie is received that is stored internally and
+    If the authentication is successfull, a cookie is received that is stored
+   internally and
     re-used for all subsequent interactions with the compute resource.
 
-    
+
     @author Ross Miller, ORNL
     @date 04/30/2013
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -43,8 +46,7 @@ namespace RemoteAlgorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-class Authenticate : public Mantid::API::Algorithm
-{
+class Authenticate : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
   Authenticate() : Mantid::API::Algorithm() {}
@@ -52,8 +54,10 @@ public:
   virtual ~Authenticate() {}
   /// Algorithm's name
   virtual const std::string name() const { return "Authenticate"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Authenticate to the remote compute resource.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Authenticate to the remote compute resource.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -62,9 +66,8 @@ public:
 
 private:
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
-
 };
 
 } // end namespace RemoteAlgorithms

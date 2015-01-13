@@ -39,7 +39,7 @@ def diagnose(white_int, **kwargs):
           van_hi      - Fraction of median to consider counting high for the white beam diag
           van_sig     - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the
                         difference with respect to the median value must also exceed this number of error bars
-          samp_zero    - If true then zeroes in background are masked also
+          samp_zero    - If true then zeros in background are masked also
           samp_lo      - Fraction of median to consider counting low for the background  diag
           samp_hi      - Fraction of median to consider counting high for the background diag
           samp_sig     - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
@@ -50,7 +50,7 @@ def diagnose(white_int, **kwargs):
           bleed_maxrate - If the bleed test is on then this is the maximum framerate allowed in a tube
           bleed_pixels - If the bleed test is on then this is the number of pixels ignored within the
                          bleed test diagnostic
-          print_results - If True then the results are printed to the screen
+          print_diag_results - If True then the results are printed to the screen
     """
     if white_int is None and str(white_int) != '':
         raise RuntimeError("No white beam integral specified. This is the minimum required to run diagnostics")
@@ -67,7 +67,7 @@ def diagnose(white_int, **kwargs):
     # Hard mask
     hardmask_file = kwargs.get('hard_mask_file', None)
     if hardmask_file is not None:
-        LoadMask(Instrument=kwargs.get('instrument_name',''),InputFile=parser.hard_mask_file,
+        LoadMask(Instrument=kwargs.get('instr_name',''),InputFile=parser.hard_mask_file,
                  OutputWorkspace='hard_mask_ws')
         MaskDetectors(Workspace=white_int, MaskedWorkspace='hard_mask_ws')
         # Find out how many detectors we hard masked
@@ -132,7 +132,7 @@ def diagnose(white_int, **kwargs):
     start_index_name = "from: start"
     end_index_name=" to: end"
     default = True
-    if hasattr(parser, 'print_results') and parser.print_results:
+    if hasattr(parser, 'print_diag_results') and parser.print_diag_results:
             default=True
     if 'start_index' in kwargs:
             default = False
@@ -146,7 +146,7 @@ def diagnose(white_int, **kwargs):
     if not default :
        testName = " For bank: "+start_index_name+end_index_name
 
-    if hasattr(parser, 'print_results') and parser.print_results:
+    if hasattr(parser, 'print_diag_results') and parser.print_diag_results:
         print_test_summary(test_results,testName)
 
 #-------------------------------------------------------------------------------
@@ -371,9 +371,9 @@ def print_test_summary(test_results,test_name=None):
         ['PSD Bleed test :',test_results[4]] \
         )
     if test_name == None:
-        print '==== Diagnostic Test Summary ===='
+        print '======== Diagnostic Test Summary '
     else:
-        print '==== Diagnostic Test Summary {0} ===='.format(test_name)
+        print '======== Diagnostic Test Summary {0} '.format(test_name)
 
     max_name_length = -1
     max_ws_length = -1
@@ -396,7 +396,9 @@ def print_test_summary(test_results,test_name=None):
                workspace + ' '*(max_ws_length-len(workspace)) + str(nfailed)
         print line
     # Append a new line
+    print '================================================================'
     print ''
+
 
 #-------------------------------------------------------------------------------
 

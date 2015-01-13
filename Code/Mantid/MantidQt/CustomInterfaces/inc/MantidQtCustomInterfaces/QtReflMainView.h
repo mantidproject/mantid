@@ -18,7 +18,7 @@ namespace MantidQt
 
     /** QtReflMainView : Provides an interface for processing reflectometry data.
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -46,7 +46,7 @@ namespace MantidQt
       virtual ~QtReflMainView();
 
       /// Name of the interface
-      static std::string name() { return "New ISIS Reflectometry (Prototype)"; }
+      static std::string name() { return "ISIS Reflectometry (Polref)"; }
       // This interface's categories.
       static QString categoryInfo() { return "Reflectometry"; }
 
@@ -61,6 +61,9 @@ namespace MantidQt
       virtual void giveUserWarning(std::string prompt, std::string title);
       virtual void giveUserCritical(std::string prompt, std::string title);
       virtual void showAlgorithmDialog(const std::string& algorithm);
+
+      //Plotting
+      virtual void plotWorkspaces(const std::set<std::string>& workspaces);
 
       //Set the status of the progress bar
       virtual void setProgressRange(int min, int max);
@@ -117,6 +120,12 @@ namespace MantidQt
       void on_actionTransfer_triggered();
       void on_actionImportTable_triggered();
       void on_actionExportTable_triggered();
+      void on_actionHelp_triggered();
+      void on_actionPlotRow_triggered();
+      void on_actionPlotGroup_triggered();
+
+      void on_comboSearchInstrument_currentIndexChanged(int index);
+      void on_comboProcessInstrument_currentIndexChanged(int index);
 
       void setModel(QString name);
       void tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight);

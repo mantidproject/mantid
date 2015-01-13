@@ -11,31 +11,13 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>ISIS Reflectometry</string>
+   <string>ISIS Reflectometry (Polref)</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="layoutMain">
     <property name="margin">
      <number>1</number>
     </property>
-    <item>
-     <widget class="QLabel" name="labelPrototype">
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-        <underline>false</underline>
-       </font>
-      </property>
-      <property name="text">
-       <string>PROTOTYPE</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
     <item>
      <widget class="QSplitter" name="splitterTables">
       <property name="sizePolicy">
@@ -241,6 +223,9 @@
             <addaction name="actionProcess"/>
             <addaction name="actionExpandSelection"/>
             <addaction name="separator"/>
+            <addaction name="actionPlotRow"/>
+            <addaction name="actionPlotGroup"/>
+            <addaction name="separator"/>
             <addaction name="actionAppendRow"/>
             <addaction name="actionDeleteRow"/>
             <addaction name="separator"/>
@@ -249,6 +234,7 @@
             <addaction name="actionCutSelected"/>
             <addaction name="actionPasteSelected"/>
             <addaction name="actionClearSelected"/>
+            <addaction name="actionHelp"/>
            </widget>
           </item>
           <item>
@@ -390,6 +376,9 @@
     </property>
     <addaction name="actionProcess"/>
     <addaction name="actionExpandSelection"/>
+    <addaction name="separator"/>
+    <addaction name="actionPlotRow"/>
+    <addaction name="actionPlotGroup"/>
     <addaction name="separator"/>
     <addaction name="actionPrependRow"/>
     <addaction name="actionAppendRow"/>
@@ -646,6 +635,54 @@
    </property>
    <property name="whatsThis">
     <string>Exports a table workspace to a .TBL file that can be used by the ISIS Reflectometry UI in older versions of Mantid.</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/help.png</normaloff>:/help.png</iconset>
+   </property>
+   <property name="text">
+    <string>Help</string>
+   </property>
+   <property name="toolTip">
+    <string>Opens the documentation.</string>
+   </property>
+   <property name="whatsThis">
+    <string>Opens the interface's documentation in the Qt Help Browser.</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
+  </action>
+  <action name="actionPlotRow">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/graph.png</normaloff>:/graph.png</iconset>
+   </property>
+   <property name="text">
+    <string>Plot Selected Rows</string>
+   </property>
+   <property name="toolTip">
+    <string>Plot the selected rows</string>
+   </property>
+   <property name="whatsThis">
+    <string>Creates a plot of the IvsQ workspaces produced by the selected rows.</string>
+   </property>
+  </action>
+  <action name="actionPlotGroup">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/trajectory.png</normaloff>:/trajectory.png</iconset>
+   </property>
+   <property name="text">
+    <string>Plot Selected Groups</string>
+   </property>
+   <property name="toolTip">
+    <string>Plot the selected groups</string>
+   </property>
+   <property name="whatsThis">
+    <string>Creates a plot of the stitched IvsQ workspaces produced by any groups any selected rows are in.</string>
    </property>
   </action>
  </widget>

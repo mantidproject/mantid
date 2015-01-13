@@ -186,6 +186,8 @@ public:
     std::string username = ConfigService::Instance().getUsername();
     TS_ASSERT_LESS_THAN(0, username.length());
     TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getOSVersion().length()); //check that the string is not empty
+    TS_ASSERT_LESS_THAN(
+        0, ConfigService::Instance().getOSVersionReadable().length());
     TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getCurrentDir().length()); //check that the string is not empty
 //        TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getHomeDir().length()); //check that the string is not empty
     TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getTempDir().length()); //check that the string is not empty

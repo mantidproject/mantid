@@ -117,6 +117,10 @@ namespace IDA
     furyAlg->setProperty("DryRun", false);
 
     runAlgorithm(furyAlg);
+
+    // Set the result workspace for Python script export
+    QString sampleName = uiForm().fury_dsInput->getCurrentDataName();
+    m_pythonExportWsName = sampleName.left(sampleName.lastIndexOf("_")).toStdString() + "_iqt";
   }
 
   /**
@@ -187,12 +191,13 @@ namespace IDA
 
     QString wsName = uiForm().fury_dsInput->getCurrentDataName();
     QString resName = uiForm().fury_dsResInput->getCurrentDataName();
+    if(wsName.isEmpty() || resName.isEmpty())
+      return;
 
     double energyMin = m_dblManager->value(m_properties["ELow"]);
     double energyMax = m_dblManager->value(m_properties["EHigh"]);
-    long numBins = static_cast<long>(m_dblManager->value(m_properties["SampleBinning"]));
-
-    if(wsName.isEmpty() || resName.isEmpty() || numBins == 0)
+    long numBins = static_cast<long>(m_dblManager->value(m_properties["SampleBinning"])); // Default value
+    if(numBins == 0)
       return;
 
     bool verbose = uiForm().fury_ckVerbose->isChecked();
@@ -259,35 +264,50 @@ namespace IDA
     try
     {
       const std::pair<double, double> range = getCurveRange("FuryCurve");
-      double rounded_min = floor(range.first * 10 + 0.5) / 10.0;
-      double rounded_max = floor(range.second * 10 + 0.5) / 10.0;
-
-      //corrections for if nearest value is outside of range
-      if (rounded_max > range.second)
+      double rounded_min(range.first);
+      double rounded_max(range.second);
+      const std::string instrName( workspace->getInstrument()->getName() );
+      if(instrName == "BASIS")
       {
-        rounded_max -= 0.1;
-      }
-
-      if(rounded_min < range.first)
-      {
-        rounded_min += 0.1;
-      }
-
-      //check incase we have a really small range
-      if (fabs(rounded_min) > 0 && fabs(rounded_max) > 0)
-      {
-        m_rangeSelectors["FuryRange"]->setRange(rounded_min, rounded_max);
+        m_rangeSelectors["FuryRange"]->setRange(range.first, range.second);
         m_dblManager->setValue(m_properties["ELow"], rounded_min);
         m_dblManager->setValue(m_properties["EHigh"], rounded_max);
+        m_dblManager->setValue(m_properties["EWidth"], 0.0004);
+        m_dblManager->setValue(m_properties["SampleBinning"], 1);
       }
       else
       {
-        m_rangeSelectors["FuryRange"]->setRange(range.first, range.second);
-        m_dblManager->setValue(m_properties["ELow"], range.first);
-        m_dblManager->setValue(m_properties["EHigh"], range.second);
+        rounded_min = floor(rounded_min * 10 + 0.5) / 10.0;
+        rounded_max = floor(rounded_max * 10 + 0.5) / 10.0;
+
+        //corrections for if nearest value is outside of range
+        if (rounded_max > range.second)
+        {
+          rounded_max -= 0.1;
+        }
+
+        if(rounded_min < range.first)
+        {
+          rounded_min += 0.1;
+        }
+
+        //check incase we have a really small range
+        if (fabs(rounded_min) > 0 && fabs(rounded_max) > 0)
+        {
+          m_rangeSelectors["FuryRange"]->setRange(rounded_min, rounded_max);
+          m_dblManager->setValue(m_properties["ELow"], rounded_min);
+          m_dblManager->setValue(m_properties["EHigh"], rounded_max);
+        }
+        else
+        {
+          m_rangeSelectors["FuryRange"]->setRange(range.first, range.second);
+          m_dblManager->setValue(m_properties["ELow"], range.first);
+          m_dblManager->setValue(m_properties["EHigh"], range.second);
+        }
+        //set default value for width
+        m_dblManager->setValue(m_properties["EWidth"], 0.005);
       }
-      //set default value for width
-      m_dblManager->setValue(m_properties["EWidth"], 0.005);
+
       replot("FuryPlot");
     }
     catch(std::invalid_argument & exc)

@@ -17,6 +17,11 @@ on an input theta value.
 Historically the work performed by this algorithm was known as the Quick
 script.
 
+Workflow
+########
+
+.. image:: ../images/ReflectometryReductionOne-Workflow.png
+
 Analysis Modes
 ##############
 

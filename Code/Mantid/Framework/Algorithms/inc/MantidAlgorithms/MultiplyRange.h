@@ -6,10 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** An algorithm to multiply a range of bins in a workspace by the factor given.
 
     Required Properties:
@@ -18,13 +16,15 @@ namespace Algorithms
     <LI> OutputWorkspace - The name of the output workspace</LI>
     <LI> StartBin        - The bin index at the start of the range</LI>
     <LI> EndBin          - The bin index at the end of the range</LI>
-    <LI> Factor          - The value by which to multiply the input data range</LI>
+    <LI> Factor          - The value by which to multiply the input data
+   range</LI>
     </UL>
 
     @author Robert Dalgliesh, ISIS, RAL
     @date 12/1/2010
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -44,30 +44,31 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport MultiplyRange : public API::Algorithm
-{
+class DLLExport MultiplyRange : public API::Algorithm {
 public:
-  ///no arg constructor
+  /// no arg constructor
   MultiplyRange() : API::Algorithm() {}
-  ///virtual destructor
+  /// virtual destructor
   virtual ~MultiplyRange() {}
 
-  virtual const std::string name() const { return "MultiplyRange";}
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "An algorithm to multiply a range of bins in a workspace by the factor given.";}
+  virtual const std::string name() const { return "MultiplyRange"; }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "An algorithm to multiply a range of bins in a workspace by the "
+           "factor given.";
+  }
 
-  virtual int version() const { return (1);}
-  virtual const std::string category() const { return "CorrectionFunctions";}
+  virtual int version() const { return (1); }
+  virtual const std::string category() const { return "CorrectionFunctions"; }
 
 private:
-  
-  ///Initialisation code
+  /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
 
-  int m_startBin; ///< start bin
-  int m_endBin; ///< end bin
+  int m_startBin;  ///< start bin
+  int m_endBin;    ///< end bin
   double m_factor; ///<factor
 };
 

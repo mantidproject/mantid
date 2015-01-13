@@ -103,6 +103,18 @@ public:
         TS_ASSERT_EQUALS(scattererCollection->propertyCount(), 0);
     }
 
+    void testRemoveAllScatterers()
+    {
+        CompositeBraggScatterer_sptr scattererCollection = getCompositeScatterer();
+
+        TS_ASSERT_DIFFERS(scattererCollection->nScatterers(), 0);
+        TS_ASSERT_THROWS_NOTHING(scattererCollection->removeAllScatterers());
+        TS_ASSERT_EQUALS(scattererCollection->nScatterers(), 0);
+
+        TS_ASSERT_THROWS_NOTHING(scattererCollection->removeAllScatterers());
+        TS_ASSERT_EQUALS(scattererCollection->propertyCount(), 0);
+    }
+
     void testStructureFactorCalculation()
     {
         /* To check that structure factor calculation is correct also for

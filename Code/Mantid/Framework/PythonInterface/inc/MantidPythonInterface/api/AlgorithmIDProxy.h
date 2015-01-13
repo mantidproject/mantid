@@ -1,7 +1,8 @@
 #ifndef MANTID_PYTHONINTERFACE_ALGORITHMIDPROXY_H_
 #define MANTID_PYTHONINTERFACE_ALGORITHMIDPROXY_H_
 /**
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -23,28 +24,21 @@
  */
 #include "MantidAPI/IAlgorithm.h" // for AlgorithmID typedef
 
-namespace Mantid
-{
-  namespace PythonInterface
-  {
-    /**
-     * Provides a concrete type to wrap & return AlgorithmIDs that are actually
-     * just typedefs for void*
-     */
-    struct AlgorithmIDProxy
-    {
-      /// Construct with existing pointer
-      explicit AlgorithmIDProxy(API::AlgorithmID p) : id(p)
-      {}
+namespace Mantid {
+namespace PythonInterface {
+/**
+ * Provides a concrete type to wrap & return AlgorithmIDs that are actually
+ * just typedefs for void*
+ */
+struct AlgorithmIDProxy {
+  /// Construct with existing pointer
+  explicit AlgorithmIDProxy(API::AlgorithmID p) : id(p) {}
 
-      bool operator==(const AlgorithmIDProxy & rhs)
-      {
-        return (id == rhs.id);
-      }
-      /// held ID value
-      API::AlgorithmID id;
-    };
-  }
+  bool operator==(const AlgorithmIDProxy &rhs) { return (id == rhs.id); }
+  /// held ID value
+  API::AlgorithmID id;
+};
+}
 }
 
 #endif /* MANTID_PYTHONINTERFACE_ALGORITHMIDPROXY_H_ */

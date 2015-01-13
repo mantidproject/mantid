@@ -10,6 +10,11 @@
 <parameter name="det_cal_file" type="string">
    <value val="det_LET_cycle12-3.dat"/>
 </parameter>
+<!-- Specify that the detector positions should be taken from the data file (Not used TODO!) -->
+<parameter name="det-pos-source" type="string">
+  <value val="datafile"/>
+</parameter>
+
 <!-- The file which defines detectors to spectra mapping; File extension has to be specified here but filepath not
      if None - one2one map is used  -->
 <parameter name="map_file" type="string">
@@ -92,7 +97,7 @@
  
 <!--if you use some detectors as monitors and work in event mode, one needs to specify the comma separated list of these detectors here 
     to copy detectors spectra to monitors spectra collected in histogram mode. If no such monitors are used "None" 
-    (with brackets) has to be specified as the value
+    (with quotes) has to be specified as the value
 -->
 <parameter name="spectra_to_monitors_list"  type="string">
   <value val="5506"/>
@@ -380,10 +385,9 @@
        monovan_integr_range=abs_units_van_range;
        monovan_lo_value = monovan-integr-min;
        monovan_hi_value = monovan-integr-max;       
-       use_hard_mask_only=hardmaskOnly;
        bkgd_range = background_range;
        background_test_range = diag_background_test_range;
-       hard_mask_file=hard_mask  =hardmaskPlus;       
+       hard_mask_file=hard_mask;
        van_out_lo = diag_van_median_rate_limit_lo=diag_van_out_lo;
        van_out_hi = diag_van_median_rate_limit_hi=diag_van_out_hi;
        van_lo     = diag_van_median_sigma_lo=diag_van_lo;
@@ -399,7 +403,9 @@
        bleed_test = bleed = diag_bleed_test;
        bleed_maxrate = diag_bleed_maxrate;
        bleed_pixels  = diag_bleed_pixels;
-       ei-mon2-spec = test_ei2_mon_spectra;
+       deltaE_mode =  deltaE-mode;
+       ei-mon1-spec=ei_mon1_spec;       
+       ei-mon2-spec = test_ei2_mon_spectra=ei_mon2_spec;
        ei_mon_spectra=test_mon_spectra_composite"
     />
 </parameter>

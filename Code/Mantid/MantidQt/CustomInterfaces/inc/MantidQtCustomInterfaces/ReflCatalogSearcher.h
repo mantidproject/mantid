@@ -11,7 +11,7 @@ namespace MantidQt
 
     ReflCatalogSearcher implements IReflSearcher to provide ICAT search functionality.
 
-    Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

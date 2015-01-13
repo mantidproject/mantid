@@ -6,37 +6,48 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
-/** Calculates attenuation due to absorption and scattering in an HRPD 'slab' can
+namespace Mantid {
+namespace Algorithms {
+/** Calculates attenuation due to absorption and scattering in an HRPD 'slab'
+  can
 
   Properties:
   <UL>
   <LI> InputWorkspace  - The name of the input workspace. </LI>
-  <LI> OutputWorkspace - The name of the output workspace. Can be the same as the input one. </LI>
-  <LI> SampleAttenuationXSection - The attenuation cross-section for the sample material in barns. </LI>
-  <LI> SampleScatteringXSection - The scattering cross-section for the sample material in barns. </LI>
-  <LI> SampleNumberDensity - The number density of the sample in Angstrom^-3.</LI>
-  <LI> NumberOfWavelengthPoints - The number of wavelength points for which numerical integral is calculated (default: all points). </LI>
-  <LI> ExpMethod - The method to calculate exponential function (Normal or Fast approximation). </LI>
+  <LI> OutputWorkspace - The name of the output workspace. Can be the same as
+  the input one. </LI>
+  <LI> SampleAttenuationXSection - The attenuation cross-section for the sample
+  material in barns. </LI>
+  <LI> SampleScatteringXSection - The scattering cross-section for the sample
+  material in barns. </LI>
+  <LI> SampleNumberDensity - The number density of the sample in
+  Angstrom^-3.</LI>
+  <LI> NumberOfWavelengthPoints - The number of wavelength points for which
+  numerical integral is calculated (default: all points). </LI>
+  <LI> ExpMethod - The method to calculate exponential function (Normal or Fast
+  approximation). </LI>
   <LI> Thickness - The thickness of the sample holder in centimetres. </LI>
-  <LI> ElementSize - The side dimension of an integration element cube in mm (default: 1). </LI>
+  <LI> ElementSize - The side dimension of an integration element cube in mm
+  (default: 1). </LI>
   </UL>
 
-  This algorithm uses the FlatPlateAbsorption algorithm to numerically calculate the
-  correction for the sample itself, and then further modifies the correction to account
-  for the vanadium windows at the front and rear of the sample holder, and the traversal
+  This algorithm uses the FlatPlateAbsorption algorithm to numerically calculate
+  the
+  correction for the sample itself, and then further modifies the correction to
+  account
+  for the vanadium windows at the front and rear of the sample holder, and the
+  traversal
   of the holder material (aluminium) itself en route to the 90 degree bank.
 
-  The further corrections calculated within this algorithm use an analytical approximation
+  The further corrections calculated within this algorithm use an analytical
+  approximation
   of the form exp(-mt/cos(theta)).
 
   @author Russell Taylor, Tessella plc
   @date 05/02/2010
 
-  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -56,8 +67,7 @@ namespace Algorithms
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport HRPDSlabCanAbsorption : public API::Algorithm
-{
+class DLLExport HRPDSlabCanAbsorption : public API::Algorithm {
 public:
   /// (Empty) Constructor
   HRPDSlabCanAbsorption() : API::Algorithm() {}
@@ -65,8 +75,11 @@ public:
   virtual ~HRPDSlabCanAbsorption() {}
   /// Algorithm's name
   virtual const std::string name() const { return "HRPDSlabCanAbsorption"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Calculates attenuation due to absorption and scattering in an HRPD 'slab' can.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Calculates attenuation due to absorption and scattering in an HRPD "
+           "'slab' can.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -74,13 +87,12 @@ public:
   virtual const std::string category() const { return "Diffraction"; }
 
 private:
-  
   /// Initialisation code
   void init();
   /// Execution code
   void exec();
 
-  ///runs the flat plate absorption
+  /// runs the flat plate absorption
   API::MatrixWorkspace_sptr runFlatPlateAbsorption();
 };
 

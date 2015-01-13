@@ -3,6 +3,7 @@
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidKernel/ConfigService.h"
 #include <qinputdialog.h>
 #include <qmessagebox.h>
@@ -257,6 +258,42 @@ namespace MantidQt
       m_presenter->notify(IReflPresenter::ImportTableFlag);
     }
 
+    /** This slot is used to syncrhonise the two instrument selection widgets */
+    void QtReflMainView::on_comboProcessInstrument_currentIndexChanged(int index)
+    {
+      ui.comboSearchInstrument->setCurrentIndex(index);
+    }
+
+    /** This slot is used to syncrhonise the two instrument selection widgets */
+    void QtReflMainView::on_comboSearchInstrument_currentIndexChanged(int index)
+    {
+      ui.comboProcessInstrument->setCurrentIndex(index);
+    }
+
+    /**
+    This slot opens the documentation when the "help" button has been pressed
+    */
+    void QtReflMainView::on_actionHelp_triggered()
+    {
+      MantidQt::API::HelpWindow::showPage(this, QString("qthelp://org.mantidproject/doc/interfaces/ISIS_Reflectometry.html"));
+    }
+
+    /**
+    This slot notifies the presenter that the "plot selected rows" button has been pressed
+    */
+    void QtReflMainView::on_actionPlotRow_triggered()
+    {
+      m_presenter->notify(IReflPresenter::PlotRowFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "plot selected groups" button has been pressed
+    */
+    void QtReflMainView::on_actionPlotGroup_triggered()
+    {
+      m_presenter->notify(IReflPresenter::PlotGroupFlag);
+    }
+
     /**
     This slot notifies the presenter that the table has been updated/changed by the user
     */
@@ -281,6 +318,9 @@ namespace MantidQt
       QMenu* menu = new QMenu(this);
       menu->addAction(ui.actionProcess);
       menu->addAction(ui.actionExpandSelection);
+      menu->addSeparator();
+      menu->addAction(ui.actionPlotRow);
+      menu->addAction(ui.actionPlotGroup);
       menu->addSeparator();
       menu->addAction(ui.actionPrependRow);
       menu->addAction(ui.actionAppendRow);
@@ -383,6 +423,24 @@ namespace MantidQt
       pythonSrc << "  " << algorithm << "Dialog()\n";
       pythonSrc << "except:\n";
       pythonSrc << "  pass\n";
+      runPythonCode(QString::fromStdString(pythonSrc.str()));
+    }
+
+    /**
+    Plot a workspace
+    */
+    void QtReflMainView::plotWorkspaces(const std::set<std::string>& workspaces)
+    {
+      if(workspaces.empty())
+        return;
+
+      std::stringstream pythonSrc;
+      pythonSrc << "base_graph = None\n";
+      for(auto ws = workspaces.begin(); ws != workspaces.end(); ++ws)
+        pythonSrc << "base_graph = plotSpectrum(\"" << *ws << "\", 0, True, window = base_graph)\n";
+
+      pythonSrc << "base_graph.activeLayer().logLogAxes()\n";
+
       runPythonCode(QString::fromStdString(pythonSrc.str()));
     }
 
