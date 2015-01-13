@@ -8,7 +8,6 @@ src/ADSWorkspaceProvider.cpp
 src/Clipper.cpp
 src/Common.cpp
 src/DimensionPresenter.cpp
-src/EscalatingRebinningActionManager.cpp
 src/EventNexusLoadingPresenter.cpp
 src/FieldDataToMetadata.cpp
 src/IgnoreZerosThresholdRange.cpp
@@ -56,7 +55,6 @@ inc/MantidVatesAPI/Common.h
 inc/MantidVatesAPI/DimensionPresenter.h
 inc/MantidVatesAPI/DimensionView.h
 inc/MantidVatesAPI/DimensionViewFactory.h
-inc/MantidVatesAPI/EscalatingRebinningActionManager.h
 inc/MantidVatesAPI/EventNexusLoadingPresenter.h
 inc/MantidVatesAPI/FieldDataToMetadata.h
 inc/MantidVatesAPI/FilteringUpdateProgressAction.h
@@ -80,7 +78,6 @@ inc/MantidVatesAPI/IMDDimensionComparitor.h
 inc/MantidVatesAPI/MetadataToFieldData.h
 inc/MantidVatesAPI/NoThresholdRange.h
 inc/MantidVatesAPI/ProgressAction.h
-inc/MantidVatesAPI/RebinningActionManager.h
 inc/MantidVatesAPI/RebinningCutterXMLDefinitions.h 
 inc/MantidVatesAPI/RebinningKnowledgeSerializer.h
 inc/MantidVatesAPI/SQWLoadingPresenter.h
@@ -114,7 +111,6 @@ test/vtkDataSetToWsNameTest.h
 test/vtkDataSetToWsLocationTest.h
 test/ADSWorkspaceProviderTest.h
 test/DimensionPresenterTest.h
-test/EscalatingRebinningActionManagerTest.h
 test/EventNexusLoadingPresenterTest.h
 test/vtkDataSetFactoryTest.h
 test/vtkDataSetToGeometryTest.h

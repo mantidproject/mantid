@@ -19,7 +19,6 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/ProgressAction.h"
-#include "MantidVatesAPI/RebinningActionManager.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MantidAPI/NullCoordTransform.h"
@@ -186,16 +185,6 @@ public:
   MOCK_METHOD0(die, void());
   virtual ~MockClipper(){}
 };
-
-class MockRebinningActionManager : public Mantid::VATES::RebinningActionManager
-{
-public:
-  MOCK_METHOD1(ask, void(Mantid::VATES::RebinningIterationAction));
-  MOCK_CONST_METHOD0(action, Mantid::VATES::RebinningIterationAction());
-  MOCK_METHOD0(reset, void());
-  virtual ~MockRebinningActionManager(){}
-};
-
 
 class MockWorkspaceProvider : public Mantid::VATES::WorkspaceProvider
 {
