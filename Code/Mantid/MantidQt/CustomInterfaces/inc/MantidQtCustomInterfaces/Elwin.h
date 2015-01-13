@@ -27,6 +27,8 @@ namespace IDA
     void setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws);
 
   private slots:
+    void newInputFiles();
+    void newPreviewFileSelected(int index);
     void plotInput();
     void twoRanges(QtProperty* prop, bool);
     void minChanged(double val);

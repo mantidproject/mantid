@@ -9,17 +9,16 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/GridDomain.h"
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 /*Base class that represents a one dimensional grid domain,
   from which a function may take its arguments.
 
   @author Jose Borreguero
   @date Aug/28/2012
 
-  Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -40,20 +39,19 @@ namespace API
   Code Documentation is available at: <http://doxygen.mantidproject.org>.
 */
 
-class MANTID_API_DLL GridDomain1D: public API::GridDomain
-{
+class MANTID_API_DLL GridDomain1D : public API::GridDomain {
 public:
-  GridDomain1D() {};
-  virtual ~GridDomain1D() {};
+  GridDomain1D(){};
+  virtual ~GridDomain1D(){};
   /// initialize
   void initialize(double &startX, double &endX, size_t &n, std::string scaling);
   /// number of grid point	s
   size_t size() const { return m_points.size(); }
   /// number of dimensions in the grid
   size_t nDimensions() { return 1; }
-  void reScale( const std::string &scaling );
+  void reScale(const std::string &scaling);
   void SetScalingName(const std::string scaling);
-  std::vector<double> &getPoints(){ return m_points; }
+  std::vector<double> &getPoints() { return m_points; }
 
 private:
   std::string m_scaling;

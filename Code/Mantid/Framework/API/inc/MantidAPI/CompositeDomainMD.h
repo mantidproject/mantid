@@ -9,20 +9,19 @@
 
 #include <vector>
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 class FunctionDomainMD;
 
-/** 
+/**
     A composite domain for MD functions.
-    
+
 
     @author Roman Tolchenov, Tessella plc
     @date 15/11/2011
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -42,21 +41,22 @@ class FunctionDomainMD;
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL CompositeDomainMD: public CompositeDomain
-{
+class MANTID_API_DLL CompositeDomainMD : public CompositeDomain {
 public:
   CompositeDomainMD(IMDWorkspace_const_sptr ws, size_t maxDomainSize);
   ~CompositeDomainMD();
   /// Return the total number of arguments in the domain
-  virtual size_t size() const  {return m_totalSize;}
+  virtual size_t size() const { return m_totalSize; }
   /// Return the number of parts in the domain
-  virtual size_t getNParts() const {return m_domains.size();}
+  virtual size_t getNParts() const { return m_domains.size(); }
   /// Return i-th domain
-  virtual const FunctionDomain& getDomain(size_t i) const;
+  virtual const FunctionDomain &getDomain(size_t i) const;
+
 protected:
-  mutable IMDIterator* m_iterator; ///< IMDIterator
-  size_t m_totalSize; ///< The total size of the domain
-  mutable std::vector<FunctionDomainMD*> m_domains; ///< smaller parts of the domain
+  mutable IMDIterator *m_iterator; ///< IMDIterator
+  size_t m_totalSize;              ///< The total size of the domain
+  mutable std::vector<FunctionDomainMD *>
+      m_domains; ///< smaller parts of the domain
 };
 
 } // namespace API

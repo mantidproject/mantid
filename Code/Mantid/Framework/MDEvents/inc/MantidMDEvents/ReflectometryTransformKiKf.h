@@ -7,82 +7,86 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidMDEvents/ReflectometryTransform.h"
 
-namespace Mantid
-{
-namespace MDEvents
-{
-  /**
-  class CalculateReflectometryK: Calculation type for converting to ki or kf given a theta value (in degrees) and a wavelength
-  */
-  class CalculateReflectometryK
-  {
-  private:
-    double to_radians_factor;
-    double two_pi;
-    double m_theta;
-    public:
-    CalculateReflectometryK(double theta) : to_radians_factor(3.14159265/180), two_pi(6.28318531), m_theta(theta) {}
-    ~CalculateReflectometryK(){};
-    double execute(const double& wavelength)
-    {
-      double wavenumber = two_pi/wavelength;
-      return wavenumber * sin(to_radians_factor*m_theta);
-    }
-  };
+namespace Mantid {
+namespace MDEvents {
+/**
+class CalculateReflectometryK: Calculation type for converting to ki or kf given
+a theta value (in degrees) and a wavelength
+*/
+class CalculateReflectometryK {
+private:
+  double to_radians_factor;
+  double two_pi;
+  double m_theta;
 
-  /** ReflectometryTransformKiKf : Type to transform from R vs Wavelength workspace to a 2D MDEW with dimensions of Ki and Kf. 
-    
-    @date 2012-06-06
+public:
+  CalculateReflectometryK(double theta)
+      : to_radians_factor(3.14159265 / 180), two_pi(6.28318531),
+        m_theta(theta) {}
+  ~CalculateReflectometryK(){};
+  double execute(const double &wavelength) {
+    double wavenumber = two_pi / wavelength;
+    return wavenumber * sin(to_radians_factor * m_theta);
+  }
+};
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+/** ReflectometryTransformKiKf : Type to transform from R vs Wavelength
+  workspace to a 2D MDEW with dimensions of Ki and Kf.
 
-    This file is part of Mantid.
+  @date 2012-06-06
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This file is part of Mantid.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport ReflectometryTransformKiKf : public ReflectometryTransform
-  {
-  private:
-    const double m_kiMin;
-    const double m_kiMax;
-    const double m_kfMin;
-    const double m_kfMax;
-    /// Object performing raw caclcation to determine Ki
-    mutable CalculateReflectometryK m_KiCalculation;
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-  public:
-    ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta, int numberOfBinsQx=100, int numberOfBinsQz=100);
-    virtual ~ReflectometryTransformKiKf();
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    /// Execute transformation
-    virtual Mantid::API::MatrixWorkspace_sptr execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport ReflectometryTransformKiKf : public ReflectometryTransform {
+private:
+  const double m_kiMin;
+  const double m_kiMax;
+  const double m_kfMin;
+  const double m_kfMax;
+  /// Object performing raw caclcation to determine Ki
+  mutable CalculateReflectometryK m_KiCalculation;
 
-    /// Execute transformation
-    virtual Mantid::API::IMDEventWorkspace_sptr executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs, Mantid::API::BoxController_sptr boxController) const;
+public:
+  ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin,
+                             double kfMax, double incidentTheta,
+                             int numberOfBinsQx = 100,
+                             int numberOfBinsQz = 100);
+  virtual ~ReflectometryTransformKiKf();
 
-  private:
+  /// Execute transformation
+  virtual Mantid::API::MatrixWorkspace_sptr
+  execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
 
-    DISABLE_DEFAULT_CONSTRUCT(ReflectometryTransformKiKf)
-    DISABLE_COPY_AND_ASSIGN(ReflectometryTransformKiKf)
-    
-  };
+  /// Execute transformation
+  virtual Mantid::API::IMDEventWorkspace_sptr
+  executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs,
+            Mantid::API::BoxController_sptr boxController) const;
 
+private:
+  DISABLE_DEFAULT_CONSTRUCT(ReflectometryTransformKiKf)
+  DISABLE_COPY_AND_ASSIGN(ReflectometryTransformKiKf)
+};
 
 } // namespace MDEvents
 } // namespace Mantid
 
-#endif  /* MANTID_MDEVENTS_REFLECTOMETRYTRANSFORMKIKF_H_ */
+#endif /* MANTID_MDEVENTS_REFLECTOMETRYTRANSFORMKIKF_H_ */

@@ -1,7 +1,8 @@
 #ifndef MANTID_KERNEL_CLASSMACROS_H_
 #define MANTID_KERNEL_CLASSMACROS_H_
 /**
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -23,17 +24,16 @@
 */
 
 /**
- * This file defines macros for altering class behaviour, i.e. disabling copying etc
+ * This file defines macros for altering class behaviour, i.e. disabling copying
+ * etc
  */
 
 /// Disable default construction
-#define DISABLE_DEFAULT_CONSTRUCT(ClassType) \
-  ClassType();
+#define DISABLE_DEFAULT_CONSTRUCT(ClassType) ClassType();
 
 /// Disable copy & assign
-#define DISABLE_COPY_AND_ASSIGN(ClassType) \
-  ClassType(const ClassType&);\
-  ClassType& operator=(const ClassType&);
-
+#define DISABLE_COPY_AND_ASSIGN(ClassType)                                     \
+  ClassType(const ClassType &);                                                \
+  ClassType &operator=(const ClassType &);
 
 #endif /* MANTID_KERNEL_CLASSMACROS_H_ */

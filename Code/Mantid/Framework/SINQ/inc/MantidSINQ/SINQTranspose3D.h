@@ -1,14 +1,18 @@
 /**
- * This algorithm takes a 3D MD workspace and performs certain axis transposings on it.
- * Essentially this fixes some mess which developed at SINQ when being to hasty taking the
+ * This algorithm takes a 3D MD workspace and performs certain axis transposings
+ on it.
+ * Essentially this fixes some mess which developed at SINQ when being to hasty
+ taking the
  * EMBL detectors into operation.
  *
- * I am afraid that this code has grown to do something else: I suspect that Mantids MDHistoWorkspace
+ * I am afraid that this code has grown to do something else: I suspect that
+ Mantids MDHistoWorkspace
  * is acting in F77 storage order. This, then, is also fixed here.
  *
  * Original contributor: Mark Koennecke: mark.koennecke@psi.ch
- * 
- * Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ *
+ * Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  * This file is part of Mantid.
 
@@ -35,8 +39,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 
-class MANTID_SINQ_DLL SINQTranspose3D : public Mantid::API::Algorithm
-{
+class MANTID_SINQ_DLL SINQTranspose3D : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
   SINQTranspose3D() : Mantid::API::Algorithm() {}
@@ -44,8 +47,10 @@ public:
   virtual ~SINQTranspose3D() {}
   /// Algorithm's name
   virtual const std::string name() const { return "Transpose3D"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "SINQ specific MD data reordering";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "SINQ specific MD data reordering";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -55,15 +60,16 @@ public:
 private:
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
 
-  void doYXZ( Mantid::API::IMDHistoWorkspace_sptr inws);
-  void doXZY( Mantid::API::IMDHistoWorkspace_sptr inws);
-  void doTRICS( Mantid::API::IMDHistoWorkspace_sptr inws);
-  void doAMOR( Mantid::API::IMDHistoWorkspace_sptr inws);
+  void doYXZ(Mantid::API::IMDHistoWorkspace_sptr inws);
+  void doXZY(Mantid::API::IMDHistoWorkspace_sptr inws);
+  void doTRICS(Mantid::API::IMDHistoWorkspace_sptr inws);
+  void doAMOR(Mantid::API::IMDHistoWorkspace_sptr inws);
 
-  void copyMetaData( Mantid::API::IMDHistoWorkspace_sptr inws,  Mantid::API::IMDHistoWorkspace_sptr outws);
+  void copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inws,
+                    Mantid::API::IMDHistoWorkspace_sptr outws);
 };
 
 #endif /*TRANSPOSE3D_H_*/

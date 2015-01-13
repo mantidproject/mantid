@@ -8,18 +8,16 @@
 #include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidCurveFitting/GSLVector.h"
 
-namespace Mantid
-{
-namespace Kernel
-{
-  class Logger;
+namespace Mantid {
+namespace Kernel {
+class Logger;
 }
-namespace CurveFitting
-{
-  class SeqDomain;
-  class ParDomain;
+namespace CurveFitting {
+class SeqDomain;
+class ParDomain;
 
-/** Cost function for Rwp = (sum_i (( obs_i - cal_i )/sigma_i)**2 ) / (sum_i (obs_i/sigma_i)**2)
+/** Cost function for Rwp = (sum_i (( obs_i - cal_i )/sigma_i)**2 ) / (sum_i
+   (obs_i/sigma_i)**2)
 
     @author
     @date
@@ -44,8 +42,7 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CostFuncRwp : public CostFuncLeastSquares
-{
+class DLLExport CostFuncRwp : public CostFuncLeastSquares {
 public:
   /// Constructor
   CostFuncRwp();
@@ -53,21 +50,22 @@ public:
   virtual ~CostFuncRwp() {}
 
   /// Get name of minimizer
-  virtual std::string name() const { return "Rwp";}
+  virtual std::string name() const { return "Rwp"; }
 
   /// Get short name of minimizer - useful for say labels in guis
-  virtual std::string shortName() const {return "Rwp";}
+  virtual std::string shortName() const { return "Rwp"; }
 
 private:
-
-  virtual std::vector<double> getFitWeights(API::FunctionValues_sptr values) const;
+  virtual std::vector<double>
+  getFitWeights(API::FunctionValues_sptr values) const;
 
   /// Get weight (1/sigma)
-  double getWeight(API::FunctionValues_sptr values, size_t i, double sqrtW=1.0) const;
+  double getWeight(API::FunctionValues_sptr values, size_t i,
+                   double sqrtW = 1.0) const;
 
-  /// Calcualte sqrt(W). Final cost function = sum_i [ (obs_i - cal_i) / (sigma * sqrt(W))]**2
+  /// Calcualte sqrt(W). Final cost function = sum_i [ (obs_i - cal_i) / (sigma
+  /// * sqrt(W))]**2
   double calSqrtW(API::FunctionValues_sptr values) const;
-
 };
 
 } // namespace CurveFitting

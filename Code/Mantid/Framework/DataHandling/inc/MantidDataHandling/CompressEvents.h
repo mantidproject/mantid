@@ -6,22 +6,24 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace DataHandling
-{
-/** Compress an EventWorkspace by lumping together events with very close TOF value,
+namespace Mantid {
+namespace DataHandling {
+/** Compress an EventWorkspace by lumping together events with very close TOF
+ value,
  * while ignoring the event's pulse time.
  *
- * This algorithm will go through all event lists and sum up together the weights and errors
+ * This algorithm will go through all event lists and sum up together the
+ weights and errors
  * of events with times-of-flight within a specified tolerance.
- * The event list data type is converted to WeightedEventNoTime, where the pulse time information
+ * The event list data type is converted to WeightedEventNoTime, where the pulse
+ time information
  * is not saved, in order to save memory.
 
     @author Janik Zikovsky, SNS
     @date Jan 19, 2011
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -41,24 +43,26 @@ namespace DataHandling
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CompressEvents : public API::Algorithm
-{
+class DLLExport CompressEvents : public API::Algorithm {
 public:
   CompressEvents();
   virtual ~CompressEvents();
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "CompressEvents";};
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Reduce the number of events in an EventWorkspace by grouping together events with identical or similar X-values (time-of-flight).";}
+  virtual const std::string name() const { return "CompressEvents"; };
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Reduce the number of events in an EventWorkspace by grouping "
+           "together events with identical or similar X-values "
+           "(time-of-flight).";
+  }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1;};
+  virtual int version() const { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Events";}
+  virtual const std::string category() const { return "Events"; }
 
 private:
-  
   // Implement abstract Algorithm methods
   void init();
   void exec();

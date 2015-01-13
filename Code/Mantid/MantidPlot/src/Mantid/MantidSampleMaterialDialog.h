@@ -22,7 +22,7 @@ and allows it to be modified.
 @author Dan Nixon
 @date 22/10/2014
 
-Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 

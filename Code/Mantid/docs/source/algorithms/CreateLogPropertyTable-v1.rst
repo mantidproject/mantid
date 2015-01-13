@@ -87,7 +87,7 @@ Output:
 
 .. testoutput:: CreateLogPropertyTable
 
-    Column names are:  ['run_title','ImportantParameter']
+    Column names are:  ['run_title', 'ImportantParameter']
     The values of the ImportantParameter are: ['1', '2', '3']
     
 .. categories::

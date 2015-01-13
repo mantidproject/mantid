@@ -38,7 +38,10 @@ namespace IDA
 
   private slots:
     void typeSelection(int index);
+    void newDataLoaded(const QString wsName);
     void plotInput();
+    void specMinChanged(int value);
+    void specMaxChanged(int value);
     void xMinSelected(double val);
     void xMaxSelected(double val);
     void backgroundSelected(double val);
@@ -57,7 +60,7 @@ namespace IDA
     void setDefaultParameters(const QString& name);
     QString fitTypeString() const;
     void constrainIntensities(Mantid::API::CompositeFunction_sptr func);
-    
+
     QtStringPropertyManager* m_stringManager;
     QtTreePropertyBrowser* m_ffTree; ///< FuryFit Property Browser
     QtDoublePropertyManager* m_ffRangeManager; ///< StartX and EndX for FuryFit

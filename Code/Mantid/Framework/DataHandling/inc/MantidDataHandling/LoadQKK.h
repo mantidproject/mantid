@@ -6,18 +6,18 @@
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 
-namespace Mantid
-{
-namespace DataHandling
-{
+namespace Mantid {
+namespace DataHandling {
 /**
-     Loads a Quokka data file. Implements API::IFileLoader and its file check methods to
+     Loads a Quokka data file. Implements API::IFileLoader and its file check
+   methods to
      recognise a file as the one containing QUOKKA data.
 
      @author Roman Tolchenov, Tessella plc
      @date 31/10/2011
 
-     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
      This file is part of Mantid.
 
@@ -37,8 +37,7 @@ namespace DataHandling
      File change history is stored at: <https://github.com/mantidproject/mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport LoadQKK : public  API::IFileLoader<Kernel::NexusDescriptor>
-{
+class DLLExport LoadQKK : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// (Empty) Constructor
   LoadQKK() {}
@@ -46,8 +45,10 @@ public:
   virtual ~LoadQKK() {}
   /// Algorithm's name
   virtual const std::string name() const { return "LoadQKK"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Loads a ANSTO QKK file. ";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Loads a ANSTO QKK file. ";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -55,15 +56,14 @@ public:
   virtual const std::string category() const { return "DataHandling"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
+  virtual int confidence(Kernel::NexusDescriptor &descriptor) const;
 
 private:
-  
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
 };
 }
 }
-#endif //DATAHANDING_LOADQKK_H_
+#endif // DATAHANDING_LOADQKK_H_

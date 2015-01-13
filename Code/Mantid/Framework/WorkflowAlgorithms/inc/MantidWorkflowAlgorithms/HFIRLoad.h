@@ -8,10 +8,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid
-{
-namespace WorkflowAlgorithms
-{
+namespace Mantid {
+namespace WorkflowAlgorithms {
 /**
 
     Subtract dark current for HFIR SANS.
@@ -24,10 +22,15 @@ namespace WorkflowAlgorithms
 
     Optional Properties:
     <UL>
-    <LI> BeamCenterX - Beam position in X pixel coordinates (used only if UseConfigBeam is false)</LI>
-    <LI> BeamCenterY        - Beam position in Y pixel coordinates (used only if UseConfigBeam is false)</LI>
-    <LI> SampleDetectorDistance         - Sample to detector distance to use (overrides meta data), in mm</LI>
-    <LI> SampleDetectorDistanceOffset         - Offset to the sample to detector distance (use only when using the distance found in the meta data), in mm</LI>
+    <LI> BeamCenterX - Beam position in X pixel coordinates (used only if
+   UseConfigBeam is false)</LI>
+    <LI> BeamCenterY        - Beam position in Y pixel coordinates (used only if
+   UseConfigBeam is false)</LI>
+    <LI> SampleDetectorDistance         - Sample to detector distance to use
+   (overrides meta data), in mm</LI>
+    <LI> SampleDetectorDistanceOffset         - Offset to the sample to detector
+   distance (use only when using the distance found in the meta data), in
+   mm</LI>
     </UL>
 
     Output Property:
@@ -40,8 +43,7 @@ namespace WorkflowAlgorithms
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport HFIRLoad : public API::Algorithm
-{
+class DLLExport HFIRLoad : public API::Algorithm {
 public:
   /// Constructor
   HFIRLoad() : API::Algorithm(), m_center_x(0), m_center_y(0) {
@@ -51,12 +53,14 @@ public:
   virtual ~HFIRLoad() {}
   /// Algorithm's name
   virtual const std::string name() const { return "HFIRLoad"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Load HFIR SANS data.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const { return "Load HFIR SANS data."; }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Workflow\\SANS\\UsesPropertyManager"; }
+  virtual const std::string category() const {
+    return "Workflow\\SANS\\UsesPropertyManager";
+  }
 
 private:
   /// Initialisation code

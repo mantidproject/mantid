@@ -12,7 +12,7 @@ Description
 Assuming that the *InputWorkspace* contains measured 
 counts as a function of time, the algorithm returns a workspace 
 containing two spectra (squashograms) as a function of the same time binning.
-Either *PhaseList* or *PhaseTable* must be provided. 
+Either *PhaseList* or *PhaseTable* must be provided. Note: The first column is ignored in both cases.
 
 *PhaseList* is expected to have a six-row header, including overall information, and 6 columns:
 
@@ -20,14 +20,15 @@ Either *PhaseList* or *PhaseTable* must be provided.
 2. Double type, containing detector asymmetry
 3. Double type, containing detector phase
 4. Double type, containing detector lag
-5. Double type, containing detector deadtime::math::`_{c}`
-6. Double type, containing detector deadtime::math::`_{m}`
+5. Double type, containing detector deadtime :math:`c`
+6. Double type, containing detector deadtime :math:`m`
 
-*PhaseTable* is expected to have at least three columns:
+*PhaseTable* is expected to have four columns:
 
 1. Boolean type, containing if detector is OK
 2. Double type, containing detector asymmetry
 3. Double type, containing detector phase
+4. Double type, containing detector deadtime
 
 Usage
 -----
@@ -53,7 +54,7 @@ Usage
 	   file.write("1 1.0 0.0 -1 -1 -1\n")
    file.close()
 
-   output = PhaseQuad('input','','PhaseList.txt')
+   output = PhaseQuad('input','',60,0,0,'PhaseList.txt')
    print "Counts: ", input[0].readY(0)[24]
 
 Output:

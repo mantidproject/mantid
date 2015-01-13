@@ -8,17 +8,16 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 
-namespace Mantid
-{
-namespace Crystal
-{
+namespace Mantid {
+namespace Crystal {
 /**
  Find the offsets for each detector
 
  @author Vickie Lynch, SNS, ORNL
  @date 02/08/2011
 
- Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -38,8 +37,7 @@ namespace Crystal
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport MaskPeaksWorkspace: public API::Algorithm
-{
+class DLLExport MaskPeaksWorkspace : public API::Algorithm {
 public:
   /// Default constructor
   MaskPeaksWorkspace();
@@ -51,9 +49,11 @@ public:
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Crystal"; }
-  
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Masks a peaks workspace.";}
+
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Masks a peaks workspace.";
+  }
 
 private:
   API::MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace
@@ -61,17 +61,19 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-  std::size_t getWkspIndex(const detid2index_map& pixel_to_wi, Geometry::IComponent_const_sptr comp,
-                           const int x, const int y);
-  void getTofRange(double &tofMin, double &tofMax, const double tofPeak, const MantidVec& tof);
+  std::size_t getWkspIndex(const detid2index_map &pixel_to_wi,
+                           Geometry::IComponent_const_sptr comp, const int x,
+                           const int y);
+  void getTofRange(double &tofMin, double &tofMax, const double tofPeak,
+                   const MantidVec &tof);
   int findPixelID(std::string bankName, int col, int row);
 
   /// Read in all the input parameters
   void retrieveProperties();
-  int m_xMin;        ///< The start of the X range for fitting
-  int m_xMax;        ///< The end of the X range for fitting
-  int m_yMin;        ///< The start of the Y range for fitting
-  int m_yMax;        ///< The end of the Y range for fitting
+  int m_xMin;      ///< The start of the X range for fitting
+  int m_xMax;      ///< The end of the X range for fitting
+  int m_yMin;      ///< The start of the Y range for fitting
+  int m_yMax;      ///< The end of the Y range for fitting
   double m_tofMin; ///< The start of the box around the peak in tof
   double m_tofMax; ///< The end of the box around the peak in tof
 };

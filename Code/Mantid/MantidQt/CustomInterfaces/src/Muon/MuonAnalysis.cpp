@@ -393,7 +393,6 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
 
     // Plot the workspace
     plotSpectrum( wsNameQ, (plotType == Logorithm) );
-
     setCurrentDataName( wsNameQ );
   }
   catch(std::exception& e)
@@ -1999,7 +1998,8 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
 
       s << "w = graph('%WSNAME%-1')";
       s << "if w == None:";
-      s << "  w = plotSpectrum('%WSNAME%', 0, %ERRORS%, %CONNECT%)";
+      s << "  pw = newGraph('%WSNAME%', 0)";
+      s << "  w = plotSpectrum('%WSNAME%', 0, %ERRORS%, %CONNECT%, window = pw)";
       s << "  w.setObjectName('%WSNAME%')";
       s << "else:";
       s << "  plotSpectrum('%WSNAME%', 0, %ERRORS%, %CONNECT%, window = w, clearWindow = True)";
@@ -2042,7 +2042,6 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
       pyS += "l.setAxisScale(Layer.Left, %1, %2)\n";
       pyS = pyS.arg(params["YAxisMin"]).arg(params["YAxisMax"]);
     }
-
     runPythonCode( pyS );
 }
 

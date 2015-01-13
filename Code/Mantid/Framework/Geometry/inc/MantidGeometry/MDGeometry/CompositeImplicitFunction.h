@@ -8,22 +8,22 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
 #ifndef Q_MOC_RUN
-# include <boost/shared_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #endif
 
-namespace Mantid
-{
-namespace Geometry
-{
+namespace Mantid {
+namespace Geometry {
 /**
 
- This class represents a composite implicit function used for communicating and implementing an operation against
+ This class represents a composite implicit function used for communicating and
+ implementing an operation against
  an MDWorkspace.
 
  @author Owen Arnold, Tessella plc
  @date 01/10/2010
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -44,32 +44,29 @@ namespace Geometry
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport CompositeImplicitFunction: public Mantid::Geometry::MDImplicitFunction
-{
+class DLLExport CompositeImplicitFunction
+    : public Mantid::Geometry::MDImplicitFunction {
 public:
-
   //---------------------------------- Override base-class methods---
-  virtual bool isPointContained(const coord_t * coords);
-  virtual bool isPointContained(const std::vector<coord_t> & coords);
+  virtual bool isPointContained(const coord_t *coords);
+  virtual bool isPointContained(const std::vector<coord_t> &coords);
   // Unhide base class methods (avoids Intel compiler warning)
   using MDImplicitFunction::isPointContained;
   //-----------------------------------------------------------------
 
   CompositeImplicitFunction();
   virtual ~CompositeImplicitFunction();
-  bool addFunction(Mantid::Geometry::MDImplicitFunction_sptr constituentFunction);
+  bool
+  addFunction(Mantid::Geometry::MDImplicitFunction_sptr constituentFunction);
   std::string getName() const;
   std::string toXMLString() const;
   int getNFunctions() const;
-  static std::string functionName()
-  {
-    return "CompositeImplicitFunction";
-  }
-protected:
-  std::vector<Mantid::Geometry::MDImplicitFunction_sptr > m_Functions;
-  typedef std::vector<Mantid::Geometry::MDImplicitFunction_sptr >::const_iterator
-      FunctionIterator;
+  static std::string functionName() { return "CompositeImplicitFunction"; }
 
+protected:
+  std::vector<Mantid::Geometry::MDImplicitFunction_sptr> m_Functions;
+  typedef std::vector<Mantid::Geometry::MDImplicitFunction_sptr>::const_iterator
+      FunctionIterator;
 };
 }
 }

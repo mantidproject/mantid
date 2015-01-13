@@ -13,7 +13,7 @@ namespace SpectrumView
 /** An interface to the SliderHandler, which manages the horizontal and vertical
     scroll bars for the SpectrumView data viewer.
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

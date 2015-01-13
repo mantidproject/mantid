@@ -201,6 +201,7 @@ namespace CustomInterfaces
     symmetriseAlg->setProperty("Verbose", verbose);
     symmetriseAlg->setProperty("Save", save);
     symmetriseAlg->setProperty("OutputWorkspace", outputWorkspaceName.toStdString());
+    symmetriseAlg->setProperty("OutputPropertiesTable", "__SymmetriseProps_temp");
 
     // Set the workspace name for Python script export
     m_pythonExportWsName = outputWorkspaceName.toStdString();

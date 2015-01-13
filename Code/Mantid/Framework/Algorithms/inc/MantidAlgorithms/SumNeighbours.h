@@ -6,12 +6,11 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** Sums neighboring pixels on rectangular detectors.
- * Each spectrum in the output workspace is a sum of a block of SumX*SumY pixels.
+ * Each spectrum in the output workspace is a sum of a block of SumX*SumY
+ pixels.
  * Only works on EventWorkspaces and for instruments with RectangularDetector's.
  *
  * This only works for instruments that have RectangularDetector's defined;
@@ -20,7 +19,8 @@ namespace Algorithms
     @author Janik Zikovsky, SNS
     @date Oct 2010
 
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
+ Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -40,25 +40,29 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport SumNeighbours : public API::Algorithm
-{
+class DLLExport SumNeighbours : public API::Algorithm {
 public:
   /// Default constructor
-  SumNeighbours() : API::Algorithm() {};
+  SumNeighbours() : API::Algorithm(){};
   /// Destructor
-  virtual ~SumNeighbours() {};
+  virtual ~SumNeighbours(){};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SumNeighbours";}
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Sum event lists from neighboring pixels in rectangular area detectors - e.g. to reduce the signal-to-noise of individual spectra. Each spectrum in the output workspace is a sum of a block of SumX*SumY pixels. Only works on EventWorkspaces and for instruments with RectangularDetector's.";}
+  virtual const std::string name() const { return "SumNeighbours"; }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Sum event lists from neighboring pixels in rectangular area "
+           "detectors - e.g. to reduce the signal-to-noise of individual "
+           "spectra. Each spectrum in the output workspace is a sum of a block "
+           "of SumX*SumY pixels. Only works on EventWorkspaces and for "
+           "instruments with RectangularDetector's.";
+  }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1);}
+  virtual int version() const { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Grouping";}
+  virtual const std::string category() const { return "Transforms\\Grouping"; }
 
 private:
-  
   // Overridden Algorithm methods
   void init();
   void exec();

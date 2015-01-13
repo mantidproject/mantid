@@ -6,13 +6,13 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
-/** Takes an input Workspace2D that contains 'raw' data, unwraps the data according to
+namespace Mantid {
+namespace Algorithms {
+/** Takes an input Workspace2D that contains 'raw' data, unwraps the data
+   according to
     the reference flightpath provided and converts the units to wavelength.
-    The output workspace will have common bins in the maximum theoretical wavelength range.
+    The output workspace will have common bins in the maximum theoretical
+   wavelength range.
 
     Required Properties:
     <UL>
@@ -24,7 +24,8 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 25/07/2008
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -44,8 +45,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport UnwrapMonitor : public API::Algorithm
-{
+class DLLExport UnwrapMonitor : public API::Algorithm {
 public:
   UnwrapMonitor();
   virtual ~UnwrapMonitor();
@@ -53,35 +53,47 @@ public:
   virtual const std::string name() const { return "UnwrapMonitor"; }
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
-    return "Takes an input workspace that contains 'raw' data, unwraps the data "
-        "according to the reference flightpath provided and converts the units to wavelength."
-        "The output workspace will have common bins in the maximum theoretical wavelength range.";
+    return "Takes an input workspace that contains 'raw' data, unwraps the "
+           "data "
+           "according to the reference flightpath provided and converts the "
+           "units to wavelength."
+           "The output workspace will have common bins in the maximum "
+           "theoretical wavelength range.";
   }
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "CorrectionFunctions\\InstrumentCorrections";}
+  virtual const std::string category() const {
+    return "CorrectionFunctions\\InstrumentCorrections";
+  }
 
 private:
-  
   void init();
   void exec();
 
   double getPrimaryFlightpath() const;
-  double calculateFlightpath(const int& spectrum, const double& L1, bool& isMonitor) const;
-  const std::vector<int> unwrapX(const API::MatrixWorkspace_sptr& tempWS, const int& spectrum, const double& Ld);
-  std::pair<int,int> handleFrameOverlapped(const MantidVec& xdata, const double& Ld, std::vector<double>& tempX);
-  void unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const int& spectrum, const std::vector<int>& rangeBounds);
-  API::MatrixWorkspace_sptr rebin(const API::MatrixWorkspace_sptr& workspace, const double& min, const double& max, const int& numBins);
+  double calculateFlightpath(const int &spectrum, const double &L1,
+                             bool &isMonitor) const;
+  const std::vector<int> unwrapX(const API::MatrixWorkspace_sptr &tempWS,
+                                 const int &spectrum, const double &Ld);
+  std::pair<int, int> handleFrameOverlapped(const MantidVec &xdata,
+                                            const double &Ld,
+                                            std::vector<double> &tempX);
+  void unwrapYandE(const API::MatrixWorkspace_sptr &tempWS, const int &spectrum,
+                   const std::vector<int> &rangeBounds);
+  API::MatrixWorkspace_sptr rebin(const API::MatrixWorkspace_sptr &workspace,
+                                  const double &min, const double &max,
+                                  const int &numBins);
 
-  double m_conversionConstant; ///< The constant used in the conversion from TOF to wavelength
+  double m_conversionConstant; ///< The constant used in the conversion from TOF
+  /// to wavelength
   API::MatrixWorkspace_const_sptr m_inputWS; ///< Pointer to the input workspace
-  double m_LRef; ///< The 'reference' flightpath
-  double m_Tmin; ///< The start of the time-of-flight frame
-  double m_Tmax; ///< The end of the time-of-flight frame
+  double m_LRef;                             ///< The 'reference' flightpath
+  double m_Tmin;  ///< The start of the time-of-flight frame
+  double m_Tmax;  ///< The end of the time-of-flight frame
   size_t m_XSize; ///< The size of the X vectors in the input workspace
   /// Progress reporting
-  API::Progress* m_progress;
+  API::Progress *m_progress;
 };
 
 } // namespace Algorithm

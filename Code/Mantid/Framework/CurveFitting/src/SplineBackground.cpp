@@ -7,36 +7,33 @@
 #include <gsl/gsl_statistics.h>
 #include "MantidKernel/BoundedValidator.h"
 
-namespace Mantid
-{
-namespace CurveFitting
-{
+namespace Mantid {
+namespace CurveFitting {
 
 DECLARE_ALGORITHM(SplineBackground)
-
-
 
 using namespace Kernel;
 using namespace API;
 
 /// Initialisation method
-void SplineBackground::init()
-{
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace",
-    "",Direction::Input), "The name of the input workspace.");
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",
-    "",Direction::Output), "The name to use for the output workspace.");
-  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
+void SplineBackground::init() {
+  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+                      "InputWorkspace", "", Direction::Input),
+                  "The name of the input workspace.");
+  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+                      "OutputWorkspace", "", Direction::Output),
+                  "The name to use for the output workspace.");
+  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty("WorkspaceIndex",0,mustBePositive,"The index of the spectrum for fitting.");
-  declareProperty("NCoeff",10,"The number of b-spline coefficients.");
+  declareProperty("WorkspaceIndex", 0, mustBePositive,
+                  "The index of the spectrum for fitting.");
+  declareProperty("NCoeff", 10, "The number of b-spline coefficients.");
 }
 
 /** Executes the algorithm
  *
  */
-void SplineBackground::exec()
-{
+void SplineBackground::exec() {
 
   API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   int spec = getProperty("WorkspaceIndex");
@@ -44,9 +41,9 @@ void SplineBackground::exec()
   if (spec > static_cast<int>(inWS->getNumberHistograms()))
     throw std::out_of_range("WorkspaceIndex is out of range.");
 
-  const MantidVec& X = inWS->readX(spec);
-  const MantidVec& Y = inWS->readY(spec);
-  const MantidVec& E = inWS->readE(spec);
+  const MantidVec &X = inWS->readX(spec);
+  const MantidVec &Y = inWS->readY(spec);
+  const MantidVec &E = inWS->readE(spec);
   const bool isHistogram = inWS->isHistogramData();
 
   const int ncoeffs = getProperty("NCoeff");
@@ -67,15 +64,15 @@ void SplineBackground::exec()
   int n = static_cast<int>(Y.size());
   bool isMasked = inWS->hasMaskedBins(spec);
   std::vector<int> masked(Y.size());
-  if (isMasked)
-  {
-    for(API::MatrixWorkspace::MaskList::const_iterator it=inWS->maskedBins(spec).begin();it!=inWS->maskedBins(spec).end();++it)
+  if (isMasked) {
+    for (API::MatrixWorkspace::MaskList::const_iterator it =
+             inWS->maskedBins(spec).begin();
+         it != inWS->maskedBins(spec).end(); ++it)
       masked[it->first] = 1;
     n -= static_cast<int>(inWS->maskedBins(spec).size());
   }
 
-  if (n < ncoeffs)
-  {
+  if (n < ncoeffs) {
     g_log.error("Too many basis functions (NCoeff)");
     throw std::out_of_range("Too many basis functions (NCoeff)");
   }
@@ -94,18 +91,19 @@ void SplineBackground::exec()
 
   /* this is the data to be fitted */
   int j = 0;
-  for (MantidVec::size_type i = 0; i < Y.size(); ++i)
-  {
-    if (isMasked && masked[i]) continue;
-    gsl_vector_set(x, j, (isHistogram ? (0.5*(X[i]+X[i+1])) : X[i])); // Middle of the bins, if a histogram
+  for (MantidVec::size_type i = 0; i < Y.size(); ++i) {
+    if (isMasked && masked[i])
+      continue;
+    gsl_vector_set(x, j,
+                   (isHistogram ? (0.5 * (X[i] + X[i + 1]))
+                                : X[i])); // Middle of the bins, if a histogram
     gsl_vector_set(y, j, Y[i]);
-    gsl_vector_set(w, j, E[i]>0.?1./(E[i]*E[i]):0.);
+    gsl_vector_set(w, j, E[i] > 0. ? 1. / (E[i] * E[i]) : 0.);
 
     ++j;
   }
 
-  if (n != j)
-  {
+  if (n != j) {
     gsl_bspline_free(bw);
     gsl_vector_free(B);
     gsl_vector_free(x);
@@ -120,22 +118,20 @@ void SplineBackground::exec()
   }
 
   double xStart = X.front();
-  double xEnd =   X.back();
+  double xEnd = X.back();
 
   /* use uniform breakpoints */
   gsl_bspline_knots_uniform(xStart, xEnd, bw);
 
   /* construct the fit matrix X */
-  for (int i = 0; i < n; ++i)
-  {
-    double xi=gsl_vector_get(x, i);
+  for (int i = 0; i < n; ++i) {
+    double xi = gsl_vector_get(x, i);
 
     /* compute B_j(xi) for all j */
     gsl_bspline_eval(xi, B, bw);
 
     /* fill in row i of X */
-    for (j = 0; j < ncoeffs; ++j)
-    {
+    for (j = 0; j < ncoeffs; ++j) {
       double Bj = gsl_vector_get(B, j);
       gsl_matrix_set(Z, i, j, Bj);
     }
@@ -145,12 +141,13 @@ void SplineBackground::exec()
   gsl_multifit_wlinear(Z, w, y, c, cov, &chisq, mw);
 
   /* output the smoothed curve */
-  API::MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(inWS,1,X.size(),Y.size());
+  API::MatrixWorkspace_sptr outWS =
+      WorkspaceFactory::Instance().create(inWS, 1, X.size(), Y.size());
   {
-    outWS->getSpectrum(0)->setSpectrumNo(inWS->getSpectrum(spec)->getSpectrumNo());
+    outWS->getSpectrum(0)
+        ->setSpectrumNo(inWS->getSpectrum(spec)->getSpectrumNo());
     double yi, yerr;
-    for (MantidVec::size_type i=0;i<Y.size();i++)
-    {
+    for (MantidVec::size_type i = 0; i < Y.size(); i++) {
       double xi = X[i];
       gsl_bspline_eval(xi, B, bw);
       gsl_multifit_linear_est(B, c, cov, &yi, &yerr);
@@ -170,8 +167,7 @@ void SplineBackground::exec()
   gsl_matrix_free(cov);
   gsl_multifit_linear_free(mw);
 
-  setProperty("OutputWorkspace",outWS);
-
+  setProperty("OutputWorkspace", outWS);
 }
 
 } // namespace Algorithm

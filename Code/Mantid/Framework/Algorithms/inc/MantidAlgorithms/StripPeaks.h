@@ -7,10 +7,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** This algorithm calls FindPeaks as a ChildAlgorithm and then subtracts
     all the peaks found from the data, leaving just the 'background'.
 
@@ -19,20 +17,23 @@ namespace Algorithms
     Required Properties:
     <UL>
     <LI> InputWorkspace - The name of the Workspace to take as input. </LI>
-    <LI> OutputWorkspace - The name under which to store the output workspace. </LI>
+    <LI> OutputWorkspace - The name under which to store the output workspace.
+   </LI>
     </UL>
 
     Optional Properties:
     <UL>
     <LI> fwhm - passed to the FindPeaks ChildAlgorithm</LI>
     <LI> Tolerance - passed to the FindPeaks ChildAlgorithm</LI>
-    <LI> WorkspaceIndex - The spectrum from which to remove peaks. Will search all spectra if absent.</LI>
+    <LI> WorkspaceIndex - The spectrum from which to remove peaks. Will search
+   all spectra if absent.</LI>
     </UL>
 
     @author Russell Taylor, Tessella Support Services plc
     @date 30/10/2008
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -52,8 +53,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport StripPeaks : public API::Algorithm
-{
+class DLLExport StripPeaks : public API::Algorithm {
 public:
   /// (Empty) Constructor
   StripPeaks();
@@ -61,23 +61,29 @@ public:
   virtual ~StripPeaks() {}
   /// Algorithm's name
   virtual const std::string name() const { return "StripPeaks"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "This algorithm attempts to find all the peaks in all spectra of a workspace and subtract them from the data, leaving just the 'background'.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "This algorithm attempts to find all the peaks in all spectra of a "
+           "workspace and subtract them from the data, leaving just the "
+           "'background'.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "CorrectionFunctions;Optimization\\PeakFinding"; }
+  virtual const std::string category() const {
+    return "CorrectionFunctions;Optimization\\PeakFinding";
+  }
 
 private:
-  
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
 
   API::ITableWorkspace_sptr findPeaks(API::MatrixWorkspace_sptr WS);
-  API::MatrixWorkspace_sptr removePeaks(API::MatrixWorkspace_const_sptr input, API::ITableWorkspace_sptr peakslist);
+  API::MatrixWorkspace_sptr removePeaks(API::MatrixWorkspace_const_sptr input,
+                                        API::ITableWorkspace_sptr peakslist);
   double m_maxChiSq;
 };
 

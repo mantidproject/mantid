@@ -6,14 +6,14 @@
 # TCMALLOC_LIBRARIES libraries to link against
 # TCMALLOC_FOUND If false, do not try to use TCMALLOC
 
-find_path ( TCMALLOC_INCLUDE_DIR tcmalloc.h 
+find_path ( TCMALLOC_INCLUDE_DIR tcmalloc.h
             PATHS /usr/include/gperftools
 )
 
-find_library ( TCMALLOC_LIB NAMES tcmalloc tcmalloc_minimal )
+find_library ( TCMALLOC_LIB NAMES tcmalloc_minimal tcmalloc )
 set ( TCMALLOC_LIBRARIES ${TCMALLOC_LIB} )
 
-# handle the QUIETLY and REQUIRED arguments and set TCMALLOC_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set TCMALLOC_FOUND to TRUE if
 # all listed variables are TRUE
 include ( FindPackageHandleStandardArgs )
 find_package_handle_standard_args( Tcmalloc DEFAULT_MSG TCMALLOC_LIBRARIES TCMALLOC_INCLUDE_DIR )

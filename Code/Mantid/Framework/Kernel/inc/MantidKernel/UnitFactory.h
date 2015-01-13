@@ -9,14 +9,16 @@
  * The second operation that this macro performs is to provide the definition
  * of the unitID method for the concrete unit.
  */
-#define DECLARE_UNIT(classname) \
-  namespace { \
-    Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-       ((Mantid::Kernel::UnitFactory::Instance().subscribe<classname>(#classname)) \
-       , 0)); \
-  } \
-  const std::string Mantid::Kernel::Units::classname::unitID() const {return #classname;}
-
+#define DECLARE_UNIT(classname)                                                \
+  namespace {                                                                  \
+  Mantid::Kernel::RegistrationHelper                                           \
+      register_alg_##classname(((Mantid::Kernel::UnitFactory::Instance()       \
+                                     .subscribe<classname>(#classname)),       \
+                                0));                                           \
+  }                                                                            \
+  const std::string Mantid::Kernel::Units::classname::unitID() const {         \
+    return #classname;                                                         \
+  }
 
 //----------------------------------------------------------------------
 // Includes
@@ -25,10 +27,8 @@
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 
-namespace Mantid
-{
-namespace Kernel
-{
+namespace Mantid {
+namespace Kernel {
 
 //----------------------------------------------------------------------
 // Forward declaration
@@ -36,15 +36,19 @@ namespace Kernel
 class Unit;
 
 /** Creates instances of concrete units.
-    The factory is a singleton that hands out shared pointers to the base Unit class.
-    It overrides the base class DynamicFactory::create method so that only a single
-    instance of a given unit is ever created, and a pointer to that same instance
+    The factory is a singleton that hands out shared pointers to the base Unit
+   class.
+    It overrides the base class DynamicFactory::create method so that only a
+   single
+    instance of a given unit is ever created, and a pointer to that same
+   instance
     is passed out each time the unit is requested.
 
     @author Russell Taylor, Tessella Support Services plc
     @date 13/03/2008
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -64,8 +68,7 @@ class Unit;
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_KERNEL_DLL UnitFactoryImpl : public DynamicFactory<Unit>
-{
+class MANTID_KERNEL_DLL UnitFactoryImpl : public DynamicFactory<Unit> {
 
 private:
   friend struct CreateUsingNew<UnitFactoryImpl>;
@@ -73,17 +76,19 @@ private:
   /// Private Constructor for singleton class
   UnitFactoryImpl();
   /// Private copy constructor - NO COPY ALLOWED
-  UnitFactoryImpl(const UnitFactoryImpl&);
+  UnitFactoryImpl(const UnitFactoryImpl &);
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  UnitFactoryImpl& operator = (const UnitFactoryImpl&);
-  ///Private Destructor
+  UnitFactoryImpl &operator=(const UnitFactoryImpl &);
+  /// Private Destructor
   virtual ~UnitFactoryImpl();
 };
 
-///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) .
+/// Forward declaration of a specialisation of SingletonHolder for
+/// AlgorithmFactoryImpl (needed for dllexport/dllimport) .
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-  template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<UnitFactoryImpl>;
+template class MANTID_KERNEL_DLL
+    Mantid::Kernel::SingletonHolder<UnitFactoryImpl>;
 #endif /* _WIN32 */
 /// The specialisation of the SingletonHolder class that holds the UnitFactory
 typedef SingletonHolder<UnitFactoryImpl> UnitFactory;

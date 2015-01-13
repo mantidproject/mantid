@@ -195,6 +195,66 @@ public:
     TS_ASSERT( !mask->getInstrument()->getDetector(1)->isMasked() );
   }
 
+
+  //----------------------------------------------------------------------------------------------
+  /** Test the feature to import fit windows with univeral spectrum from table workspace
+    */
+  void testExecFitWindowTableUniversal()
+  {
+    // ---- (Re-)Create the simple workspace -------
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1,200);
+    AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+    const Mantid::MantidVec &X = WS->readX(0);
+    Mantid::MantidVec &Y = WS->dataY(0);
+    Mantid::MantidVec &E = WS->dataE(0);
+    for (size_t i = 0; i < Y.size(); ++i)
+    {
+      const double x = (X[i]+X[i+1])/2;
+      Y[i] = 5.1*exp(-0.5*pow((x-10)/1.0,2));
+      E[i] = 0.001;
+    }
+
+    // Create table workspace
+    TableWorkspace_sptr fitWindowWS = boost::make_shared<TableWorkspace>();
+    fitWindowWS->addColumn("int", "spectrum");
+    fitWindowWS->addColumn("double", "peak0_left");
+    fitWindowWS->addColumn("double", "peak0_right");
+
+    TableRow newrow = fitWindowWS->appendRow();
+    newrow << -1 << 9.9 << 11.0;
+
+    AnalysisDataService::Instance().addOrReplace("PeakFitRangeTableWS", fitWindowWS);
+
+    // ---- Run algo -----
+    offsets.initialize();
+    TS_ASSERT_THROWS_NOTHING( offsets.setProperty("InputWorkspace","temp_event_ws" ) );
+    TS_ASSERT_THROWS_NOTHING( offsets.setProperty("FitwindowTableWorkspace", fitWindowWS) );
+    std::string outputWS("offsetsped");
+    std::string maskWS("masksped");
+    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("OutputWorkspace",outputWS) );
+    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("MaskWorkspace",maskWS) );
+    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("MaxOffset", "3.0") );
+    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("DReference","30.98040"));
+    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("SpectraFitInfoTableWorkspace", "FitInfoTable"));
+    TS_ASSERT_THROWS_NOTHING( offsets.execute() );
+    TS_ASSERT( offsets.isExecuted() );
+
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
+    if (!output) return;
+
+    // TS_ASSERT_DELTA( output->dataY(0)[0], -0.002, 0.0002);
+
+    AnalysisDataService::Instance().remove(outputWS);
+    AnalysisDataService::Instance().remove("PeakFitRangeTableWS");
+
+    MatrixWorkspace_const_sptr mask;
+    TS_ASSERT_THROWS_NOTHING( mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(maskWS) );
+    if (!mask) return;
+    TS_ASSERT( !mask->getInstrument()->getDetector(1)->isMasked() );
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Test using the resolution workspace as input
    */

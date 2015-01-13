@@ -6,10 +6,8 @@
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 
-namespace Mantid
-{
-namespace DataHandling
-{
+namespace Mantid {
+namespace DataHandling {
 /**
   Loads an SPE format file into a Mantid workspace.
 
@@ -22,7 +20,8 @@ namespace DataHandling
   @author Russell Taylor, Tessella plc
   @date 02/02/2010
 
-  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -40,10 +39,9 @@ namespace DataHandling
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>    
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport LoadSPE : public API::IFileLoader<Kernel::FileDescriptor>
-{
+class DLLExport LoadSPE : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Constructor
   LoadSPE() : API::IFileLoader<Kernel::FileDescriptor>() {}
@@ -51,25 +49,29 @@ public:
   virtual ~LoadSPE() {}
   /// Algorithm's name
   virtual const std::string name() const { return "LoadSPE"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Loads a file written in the spe format.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Loads a file written in the spe format.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DataHandling\\SPE;Inelastic"; }
+  virtual const std::string category() const {
+    return "DataHandling\\SPE;Inelastic";
+  }
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::FileDescriptor & descriptor) const;
+  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
 
 private:
-  
   // Initialisation code
   void init();
   // Execution code
   void exec();
 
-  void readHistogram(FILE* speFile, API::MatrixWorkspace_sptr workspace, size_t index);
-  void reportFormatError(const std::string& what);
+  void readHistogram(FILE *speFile, API::MatrixWorkspace_sptr workspace,
+                     size_t index);
+  void reportFormatError(const std::string &what);
 
   std::string m_filename; ///< The file to load
 };

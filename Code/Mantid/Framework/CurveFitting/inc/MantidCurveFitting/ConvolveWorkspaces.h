@@ -13,13 +13,12 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
 
-namespace Mantid
-{
-namespace CurveFitting
-{
+namespace Mantid {
+namespace CurveFitting {
 /** Convolution of two workspaces
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -40,15 +39,16 @@ namespace CurveFitting
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport ConvolveWorkspaces : public API::Algorithm
-{
+class DLLExport ConvolveWorkspaces : public API::Algorithm {
 public:
   ConvolveWorkspaces();
   virtual ~ConvolveWorkspaces();
   /// Algorithm's name
   virtual const std::string name() const { return "ConvolveWorkspaces"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Convolution of two workspaces.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Convolution of two workspaces.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -60,8 +60,9 @@ private:
   void init();
   /// Execution code
   void exec();
-  void convolve(MantidVec& xValues, const MantidVec& Y1, const MantidVec& Y2, MantidVec& out)const;
-  API::Progress * prog;
+  void convolve(MantidVec &xValues, const MantidVec &Y1, const MantidVec &Y2,
+                MantidVec &out) const;
+  API::Progress *prog;
 };
 
 } // namespace CurveFitting

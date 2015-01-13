@@ -3,8 +3,9 @@
  * thereby yielding a dataset with one dimension less.
  *
  * Original contributor: Mark Koennecke: mark.koennecke@psi.ch
- * 
- * Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ *
+ * Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  * This file is part of Mantid.
 
@@ -31,8 +32,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 
-class MANTID_SINQ_DLL ProjectMD : public Mantid::API::Algorithm
-{
+class MANTID_SINQ_DLL ProjectMD : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
   ProjectMD() : Mantid::API::Algorithm() {}
@@ -40,8 +40,10 @@ public:
   virtual ~ProjectMD() {}
   /// Algorithm's name
   virtual const std::string name() const { return "ProjectMD"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Sum a MDHistoWorkspace along a choosen dimension";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Sum a MDHistoWorkspace along a choosen dimension";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -51,12 +53,15 @@ public:
 private:
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
 
-  void copyMetaData( Mantid::API::IMDHistoWorkspace_sptr inws,  Mantid::API::IMDHistoWorkspace_sptr outws);
-  void sumData( Mantid::API::IMDHistoWorkspace_sptr inws,  Mantid::API::IMDHistoWorkspace_sptr outws,
-		  int *sourceDim, int *targetDim, int targetDimCount, int dimNo, int start, int end, int currentDim);
+  void copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inws,
+                    Mantid::API::IMDHistoWorkspace_sptr outws);
+  void sumData(Mantid::API::IMDHistoWorkspace_sptr inws,
+               Mantid::API::IMDHistoWorkspace_sptr outws, int *sourceDim,
+               int *targetDim, int targetDimCount, int dimNo, int start,
+               int end, int currentDim);
 
   double getValue(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim);
   void putValue(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim, double val);

@@ -35,6 +35,7 @@
 #include "muParserScript.h"
 #include "ApplicationWindow.h"
 #include "pixmaps.h"
+#include "TSVSerialiser.h"
 
 #include <QMessageBox>
 #include <QDateTime>
@@ -58,6 +59,10 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_sort_vector.h>
+
+#include <boost/algorithm/string.hpp>
+
+#include <MantidKernel/Strings.h>
 
 #include <ctime>
 
@@ -498,24 +503,6 @@ void Table::setColumnTypes(const QStringList& ctl)
   }
 }
 
-QString Table::saveColumnWidths()
-{
-  QString s="ColWidth\t";
-  for (int i=0;i<d_table->numCols();i++)
-    s+=QString::number(d_table->columnWidth (i))+"\t";
-
-  return s+"\n";
-}
-
-QString Table::saveColumnTypes()
-{
-  QString s="ColType";
-  for (int i=0; i<d_table->numCols(); i++)
-    s += "\t"+QString::number(colTypes[i])+";"+col_format[i];
-
-  return s+"\n";
-}
-
 void Table::setCommands(const QStringList& com)
 {
   commands.clear();
@@ -711,100 +698,47 @@ Q3TableSelection Table::getSelection()
   return sel;
 }
 
-QString Table::saveCommands()
+std::string Table::saveToProject(ApplicationWindow* app)
 {
-  QString s="<com>\n";
-  for (int col=0; col<numCols(); col++)
-    if (!commands[col].isEmpty())
+  TSVSerialiser tsv;
+
+  tsv.writeRaw("<table>");
+  tsv.writeLine(objectName().toStdString()) << d_table->numRows() << d_table->numCols() << birthDate();
+  tsv.writeRaw(app->windowGeometryInfo(this));
+
+  //If you're looking for most of the table's saving routine, it's in saveTableMetadata().
+  tsv.writeRaw(saveTableMetadata());
+
+  tsv.writeLine("WindowLabel");
+  tsv << windowLabel() << captionPolicy();
+
+  //Save text
+  {
+    QString text;
+    int cols = d_table->numCols();
+    int rows = d_table->numRows();
+    for(int i = 0; i < rows; i++)
     {
-      s += "<col nr=\""+QString::number(col)+"\">\n";
-      s += commands[col];
-      s += "\n</col>\n";
+      if(isEmptyRow(i))
+        continue;
+
+      text += QString::number(i) + "\t";
+      for(int j = 0; j < cols; j++)
+      {
+        if(colTypes[j] == Numeric && !d_table->text(i, j).isEmpty())
+          text += QString::number(cell(i, j), 'e', 14);
+        else
+          text += d_table->text(i, j);
+        //For the last column, append a newline. Otherwise, separate with tabs.
+        text += (j+1 == cols) ? "\n" : "\t";
+      }
     }
-  s += "</com>\n";
-  return s;
-}
-
-QString Table::saveComments()
-{
-  QString s = "Comments\t";
-  for (int i=0; i<d_table->numCols(); i++){
-    if (comments.count() > i)
-      s += comments[i] + "\t";
-    else
-      s += "\t";
+    tsv.writeSection("data", text.toUtf8().constData());
   }
-  return s + "\n";
-}
 
-QString Table::saveToString(const QString& geometry, bool saveAsTemplate)
-{
-  QString s = "<table>";
-  if (saveAsTemplate){
-    s += "\t" + QString::number(d_table->numRows()) + "\t";
-    s += QString::number(d_table->numCols()) + "\n";
-  } else {
-    s += "\n" + QString(objectName()) + "\t";
-    s += QString::number(d_table->numRows()) + "\t";
-    s += QString::number(d_table->numCols()) + "\t";
-    s += birthDate() + "\n";
-  }
-  s += geometry;
-  s += saveHeader();
-  s += saveColumnWidths();
-  s += saveCommands();
-  s += saveColumnTypes();
-  s += saveReadOnlyInfo();
-  s += saveHiddenColumnsInfo();
-  s += saveComments();
-  if (!saveAsTemplate){
-    s += "WindowLabel\t" + windowLabel() + "\t" + QString::number(captionPolicy()) + "\n";
-    s += saveText();
-  }
-  return s += "</table>\n";
-}
+  tsv.writeRaw("</table>");
 
-QString Table::saveAsTemplate(const QString& geometryInfo)
-{
-  return saveToString(geometryInfo, true);
-}
-
-QString Table::saveHeader()
-{
-  QString s = "header";
-  for (int j=0; j<d_table->numCols(); j++){
-    if (col_plot_type[j] == X)
-      s += "\t" + colLabel(j) + "[X]";
-    else if (col_plot_type[j] == Y)
-      s += "\t" + colLabel(j) + "[Y]";
-    else if (col_plot_type[j] == Z)
-      s += "\t" + colLabel(j) + "[Z]";
-    else if (col_plot_type[j] == xErr)
-      s += "\t" + colLabel(j) + "[xEr]";
-    else if (col_plot_type[j] == yErr)
-      s += "\t" + colLabel(j) + "[yEr]";
-    else if (col_plot_type[j] == Label)
-      s += "\t" + colLabel(j) + "[L]";
-    else
-      s += "\t" + colLabel(j);
-  }
-  return s += "\n";
-}
-
-QString Table::saveReadOnlyInfo()
-{
-  QString s = "ReadOnlyColumn";
-  for (int i=0; i<d_table->numCols(); i++)
-    s += "\t" + QString::number(d_table->isColumnReadOnly(i));
-  return s += "\n";
-}
-
-QString Table::saveHiddenColumnsInfo()
-{
-  QString s = "HiddenColumn";
-  for (int i=0; i<d_table->numCols(); i++)
-    s += "\t" + QString::number(d_table->isColumnHidden(i));
-  return s += "\n";
+  return tsv.outputLines();
 }
 
 int Table::firstXCol()
@@ -954,18 +888,6 @@ QStringList Table::selectedXColumns()
   {
     if(d_table->isColumnSelected (i) && col_plot_type[i] == X)
       names<<QString(name())+"_"+col_label[i];
-  }
-  return names;
-}
-
-QStringList Table::selectedErrColumns()
-{
-  QStringList names;
-  for (int i=0;i<d_table->numCols();i++)
-  {
-    if(d_table->isColumnSelected (i,true) &&
-        (col_plot_type[i] == yErr || col_plot_type[i] == xErr))
-      names<<QString(objectName())+"_"+col_label[i];
   }
   return names;
 }
@@ -1189,22 +1111,6 @@ void Table::clearCol()
   }
 
   emit modifiedData(this, colName(selectedCol));
-}
-
-void Table::clearCell(int row, int col)
-{
-  if (col < 0 || col >= d_table->numCols())
-    return;
-
-  if (d_table->isColumnReadOnly(col)){
-    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("Column '%1' is read only!").arg(colName(col)));
-    return;
-  }
-
-  d_table->setText(row, col, "");
-
-  emit modifiedData(this, colName(col));
-  emit modifiedWindow(this);
 }
 
 void Table::deleteSelectedRows()
@@ -1777,39 +1683,6 @@ bool Table::isEmptyColumn(int col)
   return true;
 }
 
-QString Table::saveText()
-{
-  QString text = "<data>\n";
-  int cols = d_table->numCols() - 1;
-  int rows = d_table->numRows();
-  for (int i=0; i<rows; i++){
-    if (!isEmptyRow(i)){
-      text += QString::number(i) + "\t";
-      for (int j=0; j<cols; j++){
-        if (colTypes[j] == Numeric && !d_table->text(i, j).isEmpty())
-          text += QString::number(cell(i, j), 'e', 14) + "\t";
-        else
-          text += d_table->text(i, j) + "\t";
-      }
-      if (colTypes[cols] == Numeric && !d_table->text(i, cols).isEmpty())
-        text += QString::number(cell(i, cols), 'e', 14) + "\n";
-      else
-        text += d_table->text(i, cols) + "\n";
-    }
-  }
-  return text + "</data>\n";
-}
-
-int Table::nonEmptyRows()
-{
-  int r=0;
-  for (int i=0;i<d_table->numRows();i++){
-    if (!isEmptyRow(i))
-      r++;
-  }
-  return r;
-}
-
 double Table::cell(int row, int col)
 {
   return locale().toDouble(d_table->text(row, col));
@@ -1984,14 +1857,6 @@ void Table::setColNumericFormat(int f, int prec, int col, bool updateCells)
         setText(i, col, locale().toString(locale().toDouble(t), format, prec));
     }
   }
-}
-
-void Table::setColumnsFormat(const QStringList& lst)
-{
-  if (col_format == lst)
-    return;
-
-  col_format = lst;
 }
 
 bool Table::setDateFormat(const QString& format, int col, bool updateCells)
@@ -2745,48 +2610,6 @@ void Table::customEvent(QEvent *e)
     scriptingChangeEvent(static_cast<ScriptingChangeEvent*>(e));
 }
 
-QString& Table::getSpecifications()
-{
-  return specifications;
-}
-
-void Table::setSpecifications(const QString& s)
-{
-  if (specifications == s)
-    return;
-
-  specifications=s;
-}
-
-void Table::setNewSpecifications()
-{
-
-  newSpecifications = saveToString("geometry\n");
-}
-
-QString& Table::getNewSpecifications()
-{
-  return newSpecifications;
-}
-
-QString Table::oldCaption()
-{
-  QTextStream ts( &specifications, QIODevice::ReadOnly );
-  ts.readLine();
-  QString s=ts.readLine();
-  int pos=s.find("\t",0);
-  return s.left(pos);
-}
-
-QString Table::newCaption()
-{
-  QTextStream ts(&newSpecifications, QIODevice::ReadOnly );
-  ts.readLine();
-  QString s=ts.readLine();
-  int pos=s.find("\t",0);
-  return s.left(pos);
-}
-
 // TODO: This should probably be changed to restore(QString * spec)
 void Table::restore(QString& spec)
 {
@@ -3329,6 +3152,213 @@ void Table::showAllColumns()
   }
 }
 
+void Table::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
+{
+  Q_UNUSED(fileVersion);
+
+  TSVSerialiser tsv(lines);
+
+  if(tsv.selectLine("geometry"))
+    app->restoreWindowGeometry(app, this, QString::fromStdString(tsv.lineAsString("geometry")));
+
+  if(tsv.selectLine("tgeometry"))
+    app->restoreWindowGeometry(app, this, QString::fromStdString(tsv.lineAsString("tgeometry")));
+
+  if(tsv.selectLine("header"))
+  {
+    const QString headerLine = QString::fromUtf8(tsv.lineAsString("header").c_str());
+    QStringList sl = headerLine.split("\t");
+    sl.pop_front();
+    loadHeader(sl);
+  }
+
+  if(tsv.selectLine("ColWidth"))
+  {
+    const QString cwLine = QString::fromUtf8(tsv.lineAsString("ColWidth").c_str());
+    QStringList sl = cwLine.split("\t");
+    sl.pop_front();
+    setColWidths(sl);
+  }
+
+  if(tsv.hasSection("com"))
+  {
+    std::vector<std::string> sections = tsv.sections("com");
+    for(auto it = sections.begin(); it != sections.end(); ++it)
+    {
+      /* This is another special case because of legacy.
+       * Format: `<col nr="X">\nYYY\n</col>`
+       * where X is the row index (0..n), and YYY is the formula.
+       * YYY may span multiple lines.
+       * There may be multiple <col>s in each com section.
+       */
+      const std::string lines = *it;
+      std::vector<std::string> valVec;
+      boost::split(valVec, lines, boost::is_any_of("\n"));
+
+      for(size_t i = 0; i < valVec.size(); ++i)
+      {
+        const std::string line = valVec[i];
+        if(line.length() < 11)
+          continue;
+        const std::string colStr = line.substr(9, line.length() - 11);
+        int col;
+        Mantid::Kernel::Strings::convert<int>(colStr, col);
+        std::string formula;
+        for(++i; i < valVec.size() && valVec[i] != "</col>"; ++i)
+        {
+          //If we've already got a line, put a newline in first.
+          if(formula.length() > 0)
+            formula += "\n";
+
+          formula += valVec[i];
+        }
+        setCommand(col, QString::fromUtf8(formula.c_str()));
+      }
+    }
+  }
+
+  if(tsv.selectLine("ColType"))
+  {
+    const QString ctLine = QString::fromUtf8(tsv.lineAsString("ColType").c_str());
+    QStringList sl = ctLine.split("\t");
+    sl.pop_front();
+    setColumnTypes(sl);
+  }
+
+  if(tsv.selectLine("Comments"))
+  {
+    const QString cLine = QString::fromUtf8(tsv.lineAsString("Comments").c_str());
+    QStringList sl = cLine.split("\t");
+    sl.pop_front();
+    setColComments(sl);
+    setHeaderColType();
+  }
+
+  if(tsv.selectLine("ReadOnlyColumn"))
+  {
+    const QString rocLine = QString::fromUtf8(tsv.lineAsString("ReadOnlyColumn").c_str());
+    QStringList sl = rocLine.split("\t");
+    sl.pop_front();
+    for(int i = 0; i < numCols(); ++i)
+      setReadOnlyColumn(i, sl[i] == "1");
+  }
+
+  if(tsv.selectLine("HiddenColumn"))
+  {
+    const QString hcLine = QString::fromUtf8(tsv.lineAsString("HiddenColumn").c_str());
+    QStringList sl = hcLine.split("\t");
+    sl.pop_front();
+    for(int i = 0; i < numCols(); ++i)
+      hideColumn(i, sl[i] == "1");
+  }
+
+  if(tsv.selectLine("WindowLabel"))
+  {
+    QString label;
+    int policy;
+    tsv >> label >> policy;
+    setWindowLabel(label);
+    setCaptionPolicy((MdiSubWindow::CaptionPolicy)policy);
+  }
+
+  if(tsv.selectSection("data"))
+  {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    table()->blockSignals(true);
+
+    QString dataStr;
+    tsv >> dataStr;
+    QStringList dataLines = dataStr.split("\n");
+
+    for(auto it = dataLines.begin(); it != dataLines.end(); ++it)
+    {
+      QStringList fields = it->split("\t");
+      int row = fields[0].toInt();
+      for(int col = 0; col < numCols(); ++col)
+      {
+        if(fields.count() >= col + 2)
+        {
+          QString cell = fields[col+1];
+
+          if(cell.isEmpty())
+            continue;
+
+          if(columnType(col) == Table::Numeric)
+            setCell(row, col, cell.toDouble());
+          else
+            setText(row, col, cell);
+        }
+      }
+    }
+
+    QApplication::processEvents(QEventLoop::ExcludeUserInput);
+    QApplication::restoreOverrideCursor();
+    table()->blockSignals(false);
+  }
+}
+
+std::string Table::saveTableMetadata()
+{
+  TSVSerialiser tsv;
+  tsv.writeLine("header");
+  for(int j = 0; j < d_table->numCols(); j++)
+  {
+    QString val = colLabel(j);
+    switch(col_plot_type[j])
+    {
+      case     X: val += "[X]";   break;
+      case     Y: val += "[Y]";   break;
+      case     Z: val += "[Z]";   break;
+      case  xErr: val += "[xEr]"; break;
+      case  yErr: val += "[yEr]"; break;
+      case Label: val += "[L]";   break;
+    }
+    tsv << val;
+  }
+
+  tsv.writeLine("ColWidth");
+  for(int i = 0; i < d_table->numCols(); i++)
+    tsv << d_table->columnWidth(i);
+
+  QString cmds;
+  for(int col = 0; col < d_table->numCols(); col++)
+  {
+    if(!commands[col].isEmpty())
+    {
+      cmds += "<col nr=\"" + QString::number(col) + "\">\n";
+      cmds += commands[col] + "\n";
+      cmds += "</col>\n";
+    }
+  }
+  tsv.writeSection("com", cmds.toUtf8().constData());
+
+  tsv.writeLine("ColType");
+  for(int i = 0; i < d_table->numCols(); i++)
+  {
+    QString val = QString::number(colTypes[i]) + ";" + col_format[i];
+    tsv << val;
+  }
+
+  tsv.writeLine("ReadOnlyColumn");
+  for(int i = 0; i < d_table->numCols(); i++)
+    tsv << d_table->isColumnReadOnly(i);
+
+  tsv.writeLine("HiddenColumn");
+  for(int i = 0; i < d_table->numCols(); i++)
+    tsv << d_table->isColumnHidden(i);
+
+  tsv.writeLine("Comments");
+  for(int i = 0; i < d_table->numCols(); ++i)
+  {
+    if(comments.count() > i)
+      tsv << comments[i];
+    else
+      tsv << "";
+  }
+
+  return tsv.outputLines();
+}
+
 /*****************************************************************************
  *
  * Class MyTable
@@ -3342,20 +3372,6 @@ MyTable::MyTable(QWidget * parent, const char * name)
 MyTable::MyTable(int numRows, int numCols, QWidget * parent, const char * name)
 :Q3Table(numRows, numCols, parent, name),m_blockResizing(false)
 {}
-
-void MyTable::activateNextCell()
-{
-  int row = currentRow();
-  int col = currentColumn();
-
-  clearSelection (true);
-
-  if(row+1 >= numRows())
-    setNumRows(row + 11);
-
-  setCurrentCell (row + 1, col);
-  selectCells(row+1, col, row+1, col);
-}
 
 void MyTable::blockResizing(bool yes)
 {

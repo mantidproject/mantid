@@ -3,17 +3,17 @@
 
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 
-/** Calculates derivatives of the spectra in a MatrixWorkspace using a Fast Fourier Transform.
+/** Calculates derivatives of the spectra in a MatrixWorkspace using a Fast
+   Fourier Transform.
 
     @author Roman Tolchenov
     @date 21/02/2011
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -33,8 +33,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class FFTDerivative : public Mantid::API::Algorithm
-{
+class FFTDerivative : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
   FFTDerivative() : Mantid::API::Algorithm() {}
@@ -42,8 +41,11 @@ public:
   virtual ~FFTDerivative() {}
   /// Algorithm's name
   virtual const std::string name() const { return "FFTDerivative"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Calculated derivatives of a spectra in the MatrixWorkspace using Fast Fourier Transform (FFT).";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Calculated derivatives of a spectra in the MatrixWorkspace using "
+           "Fast Fourier Transform (FFT).";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -51,14 +53,12 @@ public:
   virtual const std::string category() const { return "Arithmetic\\FFT"; }
 
 private:
-  
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
   void execRealFFT();
   void execComplexFFT();
-
 };
 
 } // FFT

@@ -6,41 +6,55 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/AbsorptionCorrection.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
-/** Calculates attenuation due to absorption and scattering in a flat plate/slab sample.
+namespace Mantid {
+namespace Algorithms {
+/** Calculates attenuation due to absorption and scattering in a flat plate/slab
+   sample.
 
     Properties:
     <UL>
     <LI> InputWorkspace  - The name of the input workspace. </LI>
-    <LI> OutputWorkspace - The name of the output workspace. Can be the same as the input one. </LI>
-    <LI> AttenuationXSection - The attenuation cross-section for the sample material in barns. </LI>
-    <LI> ScatteringXSection - The scattering cross-section for the sample material in barns. </LI>
-    <LI> SampleNumberDensity - The number density of the sample in Angstrom^-3.</LI>
-    <LI> NumberOfWavelengthPoints - The number of wavelength points for which numerical integral is calculated (default: all points). </LI>
-    <LI> ExpMethod - The method to calculate exponential function (Normal or Fast approximation). </LI>
+    <LI> OutputWorkspace - The name of the output workspace. Can be the same as
+   the input one. </LI>
+    <LI> AttenuationXSection - The attenuation cross-section for the sample
+   material in barns. </LI>
+    <LI> ScatteringXSection - The scattering cross-section for the sample
+   material in barns. </LI>
+    <LI> SampleNumberDensity - The number density of the sample in
+   Angstrom^-3.</LI>
+    <LI> NumberOfWavelengthPoints - The number of wavelength points for which
+   numerical integral is calculated (default: all points). </LI>
+    <LI> ExpMethod - The method to calculate exponential function (Normal or
+   Fast approximation). </LI>
     <LI> SampleHeight - The height of the sample in centimetres. </LI>
     <LI> SampleWidth - The width of the sample in centimetres. </LI>
     <LI> SampleThickness - The thickness of the sample in centimetres. </LI>
-    <LI> Emode  - The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry) </LI>
-    <LI> Efixed - Value of fixed energy: EI (emode=1) or EF (emode=2) (meV) </LI>
-    <LI> ElementSize - The side dimension of an integration element cube in mm (default: 1). </LI>
+    <LI> Emode  - The energy mode (0=elastic, 1=direct geometry, 2=indirect
+   geometry) </LI>
+    <LI> Efixed - Value of fixed energy: EI (emode=1) or EF (emode=2) (meV)
+   </LI>
+    <LI> ElementSize - The side dimension of an integration element cube in mm
+   (default: 1). </LI>
     </UL>
 
-    This algorithm uses numerical integration method to calculate attenuation factors
-    resulting from absorption and single scattering in a flat plate sample with the dimensions 
-    and material properties given. Factors are calculated for each spectrum (i.e. detector position)
-    and wavelength point, as defined by the input workspace. 
-    The sample is divided up into a small cubes and thenpath lengths through the sample are
+    This algorithm uses numerical integration method to calculate attenuation
+   factors
+    resulting from absorption and single scattering in a flat plate sample with
+   the dimensions
+    and material properties given. Factors are calculated for each spectrum
+   (i.e. detector position)
+    and wavelength point, as defined by the input workspace.
+    The sample is divided up into a small cubes and thenpath lengths through the
+   sample are
     calculated for the centre-point of each element and a numerical
-    integration is carried out using these path lengths over the volume elements.
+    integration is carried out using these path lengths over the volume
+   elements.
 
     @author Russell Taylor, Tessella plc
     @date 15/01/2010
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -60,8 +74,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport FlatPlateAbsorption : public AbsorptionCorrection
-{
+class DLLExport FlatPlateAbsorption : public AbsorptionCorrection {
 public:
   /// (Empty) Constructor
   FlatPlateAbsorption();
@@ -69,8 +82,11 @@ public:
   virtual ~FlatPlateAbsorption() {}
   /// Algorithm's name
   virtual const std::string name() const { return "FlatPlateAbsorption"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Calculates bin-by-bin correction factors for attenuation due to absorption and scattering in a sample of 'flat plate' geometry.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Calculates bin-by-bin correction factors for attenuation due to "
+           "absorption and scattering in a sample of 'flat plate' geometry.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -79,7 +95,6 @@ protected:
   void initialiseCachedDistances();
 
 private:
-  
   void defineProperties();
   void retrieveProperties();
   std::string sampleXML();

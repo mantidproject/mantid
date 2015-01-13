@@ -6,16 +6,16 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
-/** First attempt at spectrum by spectrum division for vanadium normalisation correction.
+namespace Mantid {
+namespace Algorithms {
+/** First attempt at spectrum by spectrum division for vanadium normalisation
+   correction.
 
     @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
     @date 04/03/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -35,30 +35,35 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PointByPointVCorrection : public API::Algorithm
-{
+class DLLExport PointByPointVCorrection : public API::Algorithm {
 public:
   PointByPointVCorrection();
   virtual ~PointByPointVCorrection();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "PointByPointVCorrection"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Spectrum by spectrum division for vanadium normalisation correction.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Spectrum by spectrum division for vanadium normalisation "
+           "correction.";
+  }
 
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Diffraction;CorrectionFunctions\\SpecialCorrections";}
+  virtual const std::string category() const {
+    return "Diffraction;CorrectionFunctions\\SpecialCorrections";
+  }
 
 private:
-  
   // Overridden Algorithm methods
   void init();
   void exec();
-  void check_validity(API::MatrixWorkspace_const_sptr& w1,
-		  API::MatrixWorkspace_const_sptr& w2,API::MatrixWorkspace_sptr& out);
-  void check_masks(const API::MatrixWorkspace_const_sptr& w1,
-		  const API::MatrixWorkspace_const_sptr& w2, const int& index) const;
+  void check_validity(API::MatrixWorkspace_const_sptr &w1,
+                      API::MatrixWorkspace_const_sptr &w2,
+                      API::MatrixWorkspace_sptr &out);
+  void check_masks(const API::MatrixWorkspace_const_sptr &w1,
+                   const API::MatrixWorkspace_const_sptr &w2,
+                   const int &index) const;
 };
 
 } // namespace Algorithm

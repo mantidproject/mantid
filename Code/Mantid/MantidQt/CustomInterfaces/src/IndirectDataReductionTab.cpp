@@ -112,6 +112,8 @@ namespace CustomInterfaces
     ipfElements.push_back("back-start");
     ipfElements.push_back("back-end");
     ipfElements.push_back("rebin-default");
+    ipfElements.push_back("cm-1-convert-choice");
+    ipfElements.push_back("save-ascii-choice");
 
     // Get the instrument workspace
     MatrixWorkspace_sptr instWorkspace = loadInstrumentIfNotExist(instrumentName, analyser, reflection);

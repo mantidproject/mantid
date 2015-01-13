@@ -1710,6 +1710,50 @@ Later steps in the process (saving, renaming) will not be done.</string>
             </property>
            </layout>
           </item>
+          <item>
+           <layout class="QHBoxLayout" name="trans_loPreviewLegend">
+            <item>
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="trans_lbSample_2">
+              <property name="styleSheet">
+               <string notr="true">color: rgb(255, 0, 0);</string>
+              </property>
+              <property name="text">
+               <string>Sample</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="trans_lbCan">
+              <property name="text">
+               <string>Background</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="trans_lbTransmission">
+              <property name="styleSheet">
+               <string notr="true">color: rgb(0, 255, 0);</string>
+              </property>
+              <property name="text">
+               <string>Transmission</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
          </layout>
         </widget>
        </item>
@@ -2122,6 +2166,19 @@ Later steps in the process (saving, renaming) will not be done.</string>
                 </property>
                </widget>
               </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="sqw_lbRebinType">
+                <property name="minimumSize">
+                 <size>
+                  <width>43</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Rebin Type:</string>
+                </property>
+               </widget>
+              </item>
               <item row="2" column="2">
                <widget class="QLabel" name="sqw_valQWidth">
                 <property name="styleSheet">
@@ -2248,6 +2305,41 @@ Later steps in the process (saving, renaming) will not be done.</string>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QComboBox" name="sqw_cbRebinType">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>200</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>200</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="currentIndex">
+                 <number>0</number>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Parallelepiped (SofQW2)</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Parallelepiped/Fractional Area (SofQW3)</string>
+                 </property>
+                </item>
                </widget>
               </item>
              </layout>
@@ -2774,6 +2866,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>trans_ckVerbose</tabstop>
   <tabstop>trans_ckPlot</tabstop>
   <tabstop>trans_ckSave</tabstop>
+  <tabstop>sqw_cbRebinType</tabstop>
   <tabstop>sqw_leQLow</tabstop>
   <tabstop>sqw_leQWidth</tabstop>
   <tabstop>sqw_leQHigh</tabstop>

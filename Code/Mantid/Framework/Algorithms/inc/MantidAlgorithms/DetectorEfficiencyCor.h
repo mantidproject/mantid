@@ -9,26 +9,24 @@
 #include <string>
 #include <vector>
 
-namespace Mantid
-{
-namespace Algorithms
-{
-/** 
+namespace Mantid {
+namespace Algorithms {
+/**
   Returns efficiency of cylindrical helium gas tube.
     wvec      Final neutron wavevector (Angsstrom^-1)
     rad       Outer radius of cylinder (m)
-    atms      Pressure in number of atmospheres of 3He 
+    atms      Pressure in number of atmospheres of 3He
     t2rad     Ratio of thickness of tube wall to the
              radius
     sintheta  Sine of the angle between the cylinder
-             axis and the directin of travel of the 
-             neutron i.e. sintheta=1.0d0 when 
+             axis and the directin of travel of the
+             neutron i.e. sintheta=1.0d0 when
              neutron hits the detector perpendicular
              to the cylinder axis.
 
-   
+
   T.G.Perring June 1990:
-  
+
   Algorithm is based on a combination of Taylor series and
   asymptotic expansion of the double integral for the
   efficiency, linearly interpolating between the two in
@@ -37,7 +35,7 @@ namespace Algorithms
   or better over the entire domain of the input arguments
 
   T.G.Perring August 2009:
-  
+
   Added generalisation to allow for arbitrary direction of
   path of neutron with respect to the cylinder.
 
@@ -63,7 +61,8 @@ namespace Algorithms
     @author Steve Williams based on code by T.G.Perring
     @date 6/10/2009
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -82,23 +81,28 @@ namespace Algorithms
 
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/              
-class DLLExport DetectorEfficiencyCor : public API::Algorithm
-{
- public:
+*/
+class DLLExport DetectorEfficiencyCor : public API::Algorithm {
+public:
   DetectorEfficiencyCor();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "DetectorEfficiencyCor"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "This algorithm adjusts the binned data in a workspace for detector efficiency, calculated from the neutrons' kinetic energy, the gas filled detector's geometry and gas pressure. The data are then multiplied by :math:`k_i/k_f`";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "This algorithm adjusts the binned data in a workspace for detector "
+           "efficiency, calculated from the neutrons' kinetic energy, the gas "
+           "filled detector's geometry and gas pressure. The data are then "
+           "multiplied by :math:`k_i/k_f`";
+  }
 
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const{return "CorrectionFunctions\\EfficiencyCorrections;Inelastic";}
+  virtual const std::string category() const {
+    return "CorrectionFunctions\\EfficiencyCorrections;Inelastic";
+  }
 
- private:
-   
+private:
   /// Retrieve algorithm properties
   void retrieveProperties();
   /// Correct the given spectra index for efficiency
@@ -106,16 +110,18 @@ class DLLExport DetectorEfficiencyCor : public API::Algorithm
   /// Calculate one over the wave vector for 2 bin bounds
   double calculateOneOverK(double loBinBound, double uppBinBound) const;
   /// Sets the detector geometry cache if necessary
-  void getDetectorGeometry(const Geometry::IDetector_const_sptr & det, double & detRadius, Kernel::V3D & detAxis);
+  void getDetectorGeometry(const Geometry::IDetector_const_sptr &det,
+                           double &detRadius, Kernel::V3D &detAxis);
   /// Computes the distance to the given shape from a starting point
-  double distToSurface(const Kernel::V3D & start, const Geometry::Object *shape) const;
+  double distToSurface(const Kernel::V3D &start,
+                       const Geometry::Object *shape) const;
   /// Computes the detector efficiency for a given paramater
   double detectorEfficiency(const double alpha) const;
   /// Computes an approximate expansion of a Chebysev polynomial
-  double chebevApprox(double a, double b, const double exspansionCoefs[], double x) const;
+  double chebevApprox(double a, double b, const double exspansionCoefs[],
+                      double x) const;
   /// Log any errors with spectra that occurred
   void logErrors(size_t totalNDetectors) const;
-
 
 private:
   /// the user selected workspace
@@ -130,18 +136,18 @@ private:
   /// stores the wave number of incidient neutrons, calculated from the energy
   double m_ki;
 
-  /// A lookup of previously seen shape objects used to save calculation time as most detectors have the same shape
-  std::map<const Geometry::Object *, std::pair<double, Kernel::V3D> > m_shapeCache;
+  /// A lookup of previously seen shape objects used to save calculation time as
+  /// most detectors have the same shape
+  std::map<const Geometry::Object *, std::pair<double, Kernel::V3D>>
+      m_shapeCache;
   /// Sample position
   Kernel::V3D m_samplePos;
   /// The spectra numbers that were skipped
   std::list<int64_t> m_spectraSkipped;
 
-
   // Implement abstract Algorithm methods
   void init();
   void exec();
-
 };
 
 } // namespace Algorithms

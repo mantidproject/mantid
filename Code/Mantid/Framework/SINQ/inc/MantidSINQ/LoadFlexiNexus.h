@@ -1,21 +1,22 @@
 /**
- * This is a flexible NeXus file loader. It takes as input a filename 
- * and a dictionary file and loads the data from the file into a 
+ * This is a flexible NeXus file loader. It takes as input a filename
+ * and a dictionary file and loads the data from the file into a
  * suitable workspace. The dictionary can contain to types of lines:
  * Lines starting with # are ignored and treated as comments
- * Then there are lines: property=value These define how the workspace 
- * is constructed. Value can either be an value or a path into the NeXus 
- * file. Data will be loaded from that path then. For property there are 
+ * Then there are lines: property=value These define how the workspace
+ * is constructed. Value can either be an value or a path into the NeXus
+ * file. Data will be loaded from that path then. For property there are
  * some special values:
  *
- * data defines the path to the main data item. This will determine the 
+ * data defines the path to the main data item. This will determine the
  *       dimensionality and type of the resulting workspace.
  * x,y,z-axis  is the path to the data for the appropriate axis
  * x,y,z-axis-name is the name of the axis
  *
  * Original contributor: Mark Koennecke: mark.koennecke@psi.ch
- * 
- * Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ *
+ * Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  * This file is part of Mantid.
 
@@ -49,17 +50,18 @@
 #include <boost/shared_array.hpp>
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
-class MANTID_SINQ_DLL LoadFlexiNexus : public Mantid::API::Algorithm
-{
+class MANTID_SINQ_DLL LoadFlexiNexus : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
- LoadFlexiNexus() : Mantid::API::Algorithm() {}
+  LoadFlexiNexus() : Mantid::API::Algorithm() {}
   /// Virtual destructor
   virtual ~LoadFlexiNexus() {}
   /// Algorithm's name
   virtual const std::string name() const { return "LoadFlexiNexus"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Loads a NeXus file directed by a dictionary file";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Loads a NeXus file directed by a dictionary file";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -69,11 +71,11 @@ public:
 private:
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
 
   // A dictionary
-  std::map<std::string,std::string> dictionary;
+  std::map<std::string, std::string> dictionary;
 
   void loadDictionary(std::string dictionaryFile);
 
@@ -86,14 +88,16 @@ private:
   /// Personal wrapper for sqrt to allow msvs to compile
   static double dblSqrt(double in);
 
-  Mantid::Geometry::MDHistoDimension_sptr makeDimension(NeXus::File *fin, int index, int length);
+  Mantid::Geometry::MDHistoDimension_sptr makeDimension(NeXus::File *fin,
+                                                        int index, int length);
 
-  std::set<std::string>populateSpecialMap();
+  std::set<std::string> populateSpecialMap();
 
-  void addMetaData(NeXus::File *fin, Mantid::API::Workspace_sptr ws, Mantid::API::ExperimentInfo_sptr info);
+  void addMetaData(NeXus::File *fin, Mantid::API::Workspace_sptr ws,
+                   Mantid::API::ExperimentInfo_sptr info);
 
   int safeOpenpath(NeXus::File *fin, std::string path);
-  int calculateCAddress(int *pos, int* dim, int rank);
+  int calculateCAddress(int *pos, int *dim, int rank);
   int calculateF77Address(int *pos, int rank);
 };
 
