@@ -22,17 +22,15 @@ public:
   static void destroySuite(PeakShapeSphericalTest *suite) { delete suite; }
 
   void test_constructor() {
-    const V3D centre(1, 1, 1);
     const double radius = 2;
     const SpecialCoordinateSystem frame = HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
 
     // Construct it.
-    PeakShapeSpherical shape(centre, radius, frame, algorithmName,
+    PeakShapeSpherical shape(radius, frame, algorithmName,
                              algorithmVersion);
 
-    TS_ASSERT_EQUALS(centre.toString(), shape.centre().toString());
     TS_ASSERT_EQUALS(radius, shape.radius());
     TS_ASSERT_EQUALS(frame, shape.frame());
     TS_ASSERT_EQUALS(algorithmName, shape.algorithmName());
@@ -40,19 +38,17 @@ public:
   }
 
   void test_copy_constructor() {
-    const V3D centre(1, 1, 1);
     const double radius = 2;
     const SpecialCoordinateSystem frame = HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
 
     // Construct it.
-    PeakShapeSpherical a(centre, radius, frame, algorithmName,
+    PeakShapeSpherical a(radius, frame, algorithmName,
                          algorithmVersion);
     // Copy construct it
     PeakShapeSpherical b(a);
 
-    TS_ASSERT_EQUALS(centre.toString(), b.centre().toString());
     TS_ASSERT_EQUALS(radius, b.radius());
     TS_ASSERT_EQUALS(frame, b.frame());
     TS_ASSERT_EQUALS(algorithmName, b.algorithmName());
@@ -60,22 +56,20 @@ public:
   }
 
   void test_assignment() {
-    const V3D centre(1, 1, 1);
     const double radius = 2;
     const SpecialCoordinateSystem frame = HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
 
     // Construct it.
-    PeakShapeSpherical a(centre, radius, frame, algorithmName,
+    PeakShapeSpherical a(radius, frame, algorithmName,
                          algorithmVersion);
-    PeakShapeSpherical b(V3D(0, 0, 0), 1.0, QSample, "bar", -2);
+    PeakShapeSpherical b(1.0, QSample, "bar", -2);
 
     // Assign to it
     b = a;
 
     // Test the assignments
-    TS_ASSERT_EQUALS(a.centre().toString(), b.centre().toString());
     TS_ASSERT_EQUALS(a.radius(), b.radius());
     TS_ASSERT_EQUALS(a.frame(), b.frame());
     TS_ASSERT_EQUALS(a.algorithmName(), b.algorithmName());
@@ -83,18 +77,16 @@ public:
   }
 
   void test_clone() {
-    const V3D centre(1, 1, 1);
     const double radius = 2;
     const SpecialCoordinateSystem frame = HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
 
     // Construct it.
-    PeakShapeSpherical a(centre, radius, frame, algorithmName,
+    PeakShapeSpherical a(radius, frame, algorithmName,
                          algorithmVersion);
     PeakShapeSpherical *clone = a.clone();
 
-    TS_ASSERT_EQUALS(a.centre().toString(), clone->centre().toString());
     TS_ASSERT_EQUALS(a.radius(), clone->radius());
     TS_ASSERT_EQUALS(a.frame(), clone->frame());
     TS_ASSERT_EQUALS(a.algorithmName(), clone->algorithmName());
@@ -103,14 +95,13 @@ public:
   }
 
   void test_toJSON() {
-    const V3D centre(1, 1, 1);
     const double radius = 2;
     const SpecialCoordinateSystem frame = HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
 
     // Construct it.
-    PeakShapeSpherical shape(centre, radius, frame, algorithmName,
+    PeakShapeSpherical shape(radius, frame, algorithmName,
                              algorithmVersion);
     const std::string json = shape.toJSON();
 
@@ -125,29 +116,25 @@ public:
   }
 
   void test_equals() {
-    TS_ASSERT_EQUALS(PeakShapeSpherical(V3D(0, 0, 0), 1.0, QSample),
-                     PeakShapeSpherical(V3D(0, 0, 0), 1.0, QSample));
-
-    TSM_ASSERT_DIFFERS("Different centre",
-                       PeakShapeSpherical(V3D(0, 0, 0), 1.0, QSample),
-                       PeakShapeSpherical(V3D(1, 0, 0), 1.0, QSample));
+    TS_ASSERT_EQUALS(PeakShapeSpherical(1.0, QSample),
+                     PeakShapeSpherical(1.0, QSample));
 
     TSM_ASSERT_DIFFERS("Different radius",
-                       PeakShapeSpherical(V3D(0, 0, 0), 1.0, QSample),
-                       PeakShapeSpherical(V3D(0, 0, 0), 2.0, QSample));
+                       PeakShapeSpherical(1.0, QSample),
+                       PeakShapeSpherical(2.0, QSample));
 
     TSM_ASSERT_DIFFERS("Different frame",
-                       PeakShapeSpherical(V3D(0, 0, 0), 1.0, QSample),
-                       PeakShapeSpherical(V3D(0, 0, 0), 1.0, QLab));
+                       PeakShapeSpherical(1.0, QSample),
+                       PeakShapeSpherical(1.0, QLab));
   }
 
   void test_shape_name() {
-    const V3D centre(0, 0, 0);
+
     const double radius = 1;
     const SpecialCoordinateSystem frame = HKL;
 
     // Construct it.
-    PeakShapeSpherical shape(centre, radius, frame);
+    PeakShapeSpherical shape(radius, frame);
 
     TS_ASSERT_EQUALS("spherical", shape.shapeName());
   }

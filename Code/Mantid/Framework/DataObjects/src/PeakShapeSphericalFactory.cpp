@@ -37,12 +37,8 @@ PeakShape *PeakShapeSphericalFactory::create(const std::string &source) const {
       const SpecialCoordinateSystem frame(
           static_cast<SpecialCoordinateSystem>(root["frame"].asInt()));
       const double radius(root["radius"].asDouble());
-      Json::Value centre(root["centre"]);
-      Kernel::VMD centre_nd(centre.size());
-      for (Json::ArrayIndex i = 0; i < centre.size(); ++i) {
-        centre_nd[i] = centre[i].asFloat();
-      }
-      product = new PeakShapeSpherical(centre_nd, radius, frame, algorithmName,
+
+      product = new PeakShapeSpherical(radius, frame, algorithmName,
                                        algorithmVersion);
     } else {
       if (m_successor) {

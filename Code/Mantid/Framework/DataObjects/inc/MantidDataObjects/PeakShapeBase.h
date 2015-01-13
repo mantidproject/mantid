@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/PeakShape.h"
 #include "MantidAPI/SpecialCoordinateSystem.h"
-#include "MantidKernel/V3D.h"
+#include <string>
 
 namespace Json {
 // Forward declaration
@@ -41,8 +41,7 @@ class DLLExport PeakShapeBase : public PeakShape {
 
 public:
   /// Constructor
-  PeakShapeBase(const Mantid::Kernel::VMD &peakCentre,
-                API::SpecialCoordinateSystem frame,
+  PeakShapeBase(API::SpecialCoordinateSystem frame,
                 std::string algorithmName = std::string(),
                 int algorithmVersion = -1);
   /// Destructor
@@ -53,8 +52,6 @@ public:
   std::string algorithmName() const;
   /// Get the version of the algorithm used to make this shape
   int algorithmVersion() const;
-  /// Get the centre of the peak
-  Mantid::Kernel::VMD centre() const;
 
 protected:
   /// Copy constructor
@@ -62,9 +59,6 @@ protected:
 
   /// Assignment operator
   PeakShapeBase &operator=(const PeakShapeBase &other);
-
-  /// Peak centre
-  Mantid::Kernel::VMD m_centre;
 
   /// Special coordinate system
   Mantid::API::SpecialCoordinateSystem m_frame;

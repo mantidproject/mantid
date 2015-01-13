@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAOBJECTS_PEAKSHAPENONE_H_
-#define MANTID_DATAOBJECTS_PEAKSHAPENONE_H_
+#ifndef MANTID_DATAOBJECTS_NOSHAPE_H_
+#define MANTID_DATAOBJECTS_NOSHAPE_H_
 
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/PeakShapeBase.h"
@@ -7,7 +7,7 @@
 namespace Mantid {
 namespace DataObjects {
 
-/** PeakShapeNone : No peak shape positional representation only.
+/** PeakShapeNone : No peak shape. Null Object. For unintegrated peaks.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -30,30 +30,28 @@ namespace DataObjects {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PeakShapeNone : public PeakShapeBase {
+class DLLExport NoShape : public PeakShape {
+
 public:
-  /// Constructor
-  PeakShapeNone(const Mantid::Kernel::VMD &peakCentre,
-                API::SpecialCoordinateSystem frame,
-                std::string algorithmName = std::string(),
-                int algorithmVersion = -1);
-  /// Destructor
-  virtual ~PeakShapeNone();
-  /// Copy constructor
-  PeakShapeNone(const PeakShapeNone &other);
-  /// Assignment operator
-  PeakShapeNone &operator=(const PeakShapeNone &other);
-  /// Serialization method
-  virtual std::string toJSON() const;
-  /// Clone the peak shape
-  virtual PeakShapeNone *clone() const;
-  /// Shape name
-  std::string shapeName() const;
-  /// Equals operator
-  bool operator==(const PeakShapeNone &other) const;
+    /// Constructor
+    NoShape();
+    /// Destructor
+    virtual ~NoShape();
+    /// Serialize
+    std::string toJSON() const;
+    /// Clone
+    NoShape *clone() const;
+    /// Return the algorithn name
+    std::string algorithmName() const;
+    /// Return the algorithm version
+    int algorithmVersion() const;
+    /// Return the shape name
+    std::string shapeName() const;
+    /// Get the coordinate frame
+    API::SpecialCoordinateSystem frame() const;
 };
 
 } // namespace DataObjects
 } // namespace Mantid
 
-#endif /* MANTID_DATAOBJECTS_PEAKSHAPENONE_H_ */
+#endif /* MANTID_DATAOBJECTS_NOSHAPE_H_ */

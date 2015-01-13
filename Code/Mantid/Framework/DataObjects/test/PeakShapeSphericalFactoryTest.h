@@ -70,14 +70,13 @@ public:
   }
 
   void test_create() {
-    const V3D centre(1, 1, 1);
     const double radius = 2;
     const SpecialCoordinateSystem frame = HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
 
     // Make a source shape
-    PeakShapeSpherical sourceShape(centre, radius, frame, algorithmName,
+    PeakShapeSpherical sourceShape(radius, frame, algorithmName,
                                    algorithmVersion);
 
     PeakShapeSphericalFactory factory;

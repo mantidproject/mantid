@@ -2,9 +2,9 @@
 #define MANTID_DATAOBJECTS_PEAKSHAPESPHERICAL_H_
 
 #include "MantidKernel/System.h"
-#include "MantidKernel/VMD.h"
 #include "MantidDataObjects/PeakShapeBase.h"
 #include "MantidAPI/SpecialCoordinateSystem.h"
+#include <string>
 
 namespace Mantid {
 namespace DataObjects {
@@ -35,8 +35,7 @@ namespace DataObjects {
 class DLLExport PeakShapeSpherical : public PeakShapeBase {
 public:
   /// Constructor
-  PeakShapeSpherical(const Mantid::Kernel::VMD &peakCentre,
-                     const double &peakRadius,
+  PeakShapeSpherical(const double &peakRadius,
                      API::SpecialCoordinateSystem frame,
                      std::string algorithmName = std::string(),
                      int algorithmVersion = -1);

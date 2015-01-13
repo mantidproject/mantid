@@ -2,8 +2,8 @@
 #define MANTID_DATAOBJECTS_PEAKSHAPE_H_
 
 #include "MantidKernel/System.h"
-#include "MantidKernel/VMD.h"
 #include "MantidAPI/SpecialCoordinateSystem.h"
+#include <string>
 
 namespace Mantid {
 namespace DataObjects {
@@ -43,8 +43,6 @@ public:
   virtual std::string algorithmName() const = 0;
   /// Algorithm Version
   virtual int algorithmVersion() const = 0;
-  /// Peak centre
-  virtual Mantid::Kernel::VMD centre() const = 0;
   /// Shape name
   virtual std::string shapeName() const = 0;
   /// Destructor

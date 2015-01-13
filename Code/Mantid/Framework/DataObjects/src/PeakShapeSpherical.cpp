@@ -5,12 +5,11 @@
 namespace Mantid {
 namespace DataObjects {
 
-PeakShapeSpherical::PeakShapeSpherical(const Kernel::VMD &peakCentre,
-                                       const double &peakRadius,
+PeakShapeSpherical::PeakShapeSpherical(const double &peakRadius,
                                        API::SpecialCoordinateSystem frame,
                                        std::string algorithmName,
                                        int algorithmVersion)
-    : PeakShapeBase(peakCentre, frame, algorithmName, algorithmVersion),
+    : PeakShapeBase(frame, algorithmName, algorithmVersion),
       m_radius(peakRadius) {}
 
 //----------------------------------------------------------------------------------------------
