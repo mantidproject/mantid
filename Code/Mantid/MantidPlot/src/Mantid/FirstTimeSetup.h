@@ -35,11 +35,9 @@ private slots:
   void facilitySelected(const QString& facility);
   void openManageUserDirectories();
 
-  void testAlternateFormat();
 
 private:
   Ui::FirstTimeSetup m_uiForm;
-  QString TESTorig;
 };
 
 #endif
