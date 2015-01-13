@@ -3,8 +3,6 @@ from mantid.api import *
 
 import math
 import numpy as np
-import EnginXUtils #contains default values and loading mech
-
 
 class EnginXFitPeaks(PythonAlgorithm):
     def category(self):
@@ -17,14 +15,13 @@ class EnginXFitPeaks(PythonAlgorithm):
     	return "The algorithm fits an expected diffraction pattern to a workpace spectrum by performing single peak fits."
 
     def PyInit(self):
-      
     	self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
     		"Workspace to fit peaks in. ToF is expected X unit.")
 
     	self.declareProperty("WorkspaceIndex", 0,
     		"Index of the spectra to fit peaks in")
 
-    	self.declareProperty(FloatArrayProperty("ExpectedPeaks", EnginXUtils.getExpectedPeakDefaults()),
+    	self.declareProperty(FloatArrayProperty("ExpectedPeaks", [0.6, 1.9]),
     		"A list of dSpacing values to be translated into TOF to find expected peaks.")
     	
     	self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",action=FileAction.OptionalLoad,extensions = [".csv"]),"Load from file a list of dSpacing values to be translated into TOF to find expected peaks.")
@@ -34,7 +31,6 @@ class EnginXFitPeaks(PythonAlgorithm):
 
     	self.declareProperty("Zero", 0.0, direction = Direction.Output,
     		doc = "Fitted Zero value")
-    	
 
     def PyExec(self):
     	# Get expected peaks in TOF for the detector
@@ -122,12 +118,21 @@ class EnginXFitPeaks(PythonAlgorithm):
             readInArray.append([float(x) for x in line.split(',')])
         for a in readInArray:
           for b in a:
-            exPeakArray.append(b) 
-        print "using file"
-        expectedPeaksD = sorted(exPeakArray)
+            exPeakArray.append(b)
+        if exPeakArray == []:
+          print "File could not be read. Defaults being used."
+          expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
+        else: 
+          print "using file"
+          expectedPeaksD = sorted(exPeakArray)
       else:
-        print "using defaults" #check it is defaults, or change message to using manually entered numbers
-        expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
+        if (self.getProperty('ExpectedPeaks').value) != [0.9, 1.6]:
+          print "using manually entered numbers"
+          expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)          
+        else:
+          print "using defaults" 
+          expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
+          
        
       return expectedPeaksD
 
@@ -172,8 +177,7 @@ class EnginXFitPeaks(PythonAlgorithm):
 
     	# Function for converting dSpacing -> TOF for the detector
     	dSpacingToTof = lambda d: 252.816 * 2 * (50 + detL2) * math.sin(detTwoTheta / 2.0) * d
-
-    	expectedPeaks = self.getProperty("ExpectedPeaks").value
+    	expectedPeaks = self._readInExpectedPeaks()
 
     	# Expected peak positions in TOF for the detector
     	expectedPeaksTof = map(dSpacingToTof, expectedPeaks)
