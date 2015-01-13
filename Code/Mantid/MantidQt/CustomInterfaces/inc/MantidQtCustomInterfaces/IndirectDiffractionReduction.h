@@ -54,6 +54,7 @@ private:
       std::string reflection = "");
 
   void runGenericReduction(QString instName, QString mode);
+  void saveGenericReductions();
   void runOSIRISdiffonlyReduction();
 
 private:

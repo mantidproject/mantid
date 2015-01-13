@@ -52,11 +52,13 @@ IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent) :
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotResults(bool)));
 }
 
+
 ///Destructor
 IndirectDiffractionReduction::~IndirectDiffractionReduction()
 {
   saveSettings();
 }
+
 
 /**
  * Runs a diffraction reduction when the user clieks Run.
@@ -88,6 +90,7 @@ void IndirectDiffractionReduction::demonRun()
   }
 }
 
+
 /**
  * Handles plotting result spectra from algorithm chains.
  *
@@ -112,6 +115,8 @@ void IndirectDiffractionReduction::plotResults(bool error)
 
     diffResultsGroup->removeAll();
     AnalysisDataService::Instance().remove("IndirectDiffraction_Workspaces");
+
+    saveGenericReductions();
   }
 
   QString instName = m_uiForm.cbInst->currentText();
@@ -135,6 +140,66 @@ void IndirectDiffractionReduction::plotResults(bool error)
 
   runPythonCode(pyInput);
 }
+
+
+/**
+ * Handles saving the reductions from the generic algorithm.
+ */
+void IndirectDiffractionReduction::saveGenericReductions()
+{
+  for(auto it = m_plotWorkspaces.begin(); it != m_plotWorkspaces.end(); ++it)
+  {
+    std::string wsName = *it;
+
+    if(m_uiForm.ckGSS->isChecked())
+    {
+      std::string tofWsName = wsName + "_tof";
+
+      // Convert to TOF for GSS
+      IAlgorithm_sptr convertUnits = AlgorithmManager::Instance().create("ConvertUnits");
+      convertUnits->initialize();
+      convertUnits->setProperty("InputWorkspace", wsName);
+      convertUnits->setProperty("OutputWorkspace", tofWsName);
+      convertUnits->setProperty("Target", "TOF");
+      m_batchAlgoRunner->addAlgorithm(convertUnits);
+
+      BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromConvUnitsProps;
+      inputFromConvUnitsProps["InputWorkspace"] = tofWsName;
+
+      // Save GSS
+      std::string gssFilename = wsName + ".gss";
+      IAlgorithm_sptr saveGSS = AlgorithmManager::Instance().create("SaveGSS");
+      saveGSS->initialize();
+      saveGSS->setProperty("Filename", gssFilename);
+      m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
+    }
+
+    if(m_uiForm.ckNexus->isChecked())
+    {
+      // Save NEXus using SaveNexusProcessed
+      std::string nexusFilename = wsName + ".nxs";
+      IAlgorithm_sptr saveNexus = AlgorithmManager::Instance().create("SaveNexusProcessed");
+      saveNexus->initialize();
+      saveNexus->setProperty("InputWorkspace", wsName);
+      saveNexus->setProperty("Filename", nexusFilename);
+      m_batchAlgoRunner->addAlgorithm(saveNexus);
+    }
+
+    if(m_uiForm.ckAscii->isChecked())
+    {
+      // Save ASCII using SaveAscii version 1
+      std::string asciiFilename = wsName + ".dat";
+      IAlgorithm_sptr saveASCII = AlgorithmManager::Instance().create("SaveAscii", 1);
+      saveASCII->initialize();
+      saveASCII->setProperty("InputWorkspace", wsName);
+      saveASCII->setProperty("Filename", asciiFilename);
+      m_batchAlgoRunner->addAlgorithm(saveASCII);
+    }
+  }
+
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
 
 /**
  * Runs a diffraction reduction for any instrument in any mode.
@@ -183,10 +248,9 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
 
   m_batchAlgoRunner->addAlgorithm(msgDiffReduction);
 
-  //TODO: saving
-
   m_batchAlgoRunner->executeBatchAsync();
 }
+
 
 /**
  * Runs a diffraction reduction for OSIRIS operating in diffonly mode using the OSIRISDiffractionReduction algorithm.
@@ -268,6 +332,7 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction()
   m_batchAlgoRunner->executeBatchAsync();
 }
 
+
 /**
  * Loads an empty instrument and returns a pointer to the workspace.
  *
@@ -307,6 +372,7 @@ MatrixWorkspace_sptr IndirectDiffractionReduction::loadInstrument(std::string in
   return instWorkspace;
 }
 
+
 /**
  * Handles loading an instrument and reflections when an instruiment is selected form the drop down.
  */
@@ -335,6 +401,7 @@ void IndirectDiffractionReduction::instrumentSelected(int)
   reflectionSelected(m_uiForm.cbReflection->currentIndex());
   m_uiForm.cbReflection->blockSignals(false);
 }
+
 
 /**
  * Handles setting default spectra range when a reflection is slected from the drop down.
@@ -390,6 +457,7 @@ void IndirectDiffractionReduction::reflectionSelected(int)
   }
 }
 
+
 /**
  * Handles opening the directory manager window.
  */
@@ -400,6 +468,7 @@ void IndirectDiffractionReduction::openDirectoryDialog()
   ad->setFocus();
 }
 
+
 /**
  * Handles the user clicking the help button.
  */
@@ -408,6 +477,7 @@ void IndirectDiffractionReduction::help()
   QString url = "http://www.mantidproject.org/Indirect_Diffraction_Reduction";
   QDesktopServices::openUrl(QUrl(url));
 }
+
 
 /**
  * Sets up UI components and Qt signal/slot connections.
@@ -447,10 +517,12 @@ void IndirectDiffractionReduction::initLayout()
   validateRebin();
 }
 
+
 void IndirectDiffractionReduction::initLocalPython()
 {
   instrumentSelected(0);
 }
+
 
 void IndirectDiffractionReduction::loadSettings()
 {
@@ -466,6 +538,7 @@ void IndirectDiffractionReduction::loadSettings()
   settings.endGroup();
 }
 
+
 void IndirectDiffractionReduction::saveSettings()
 {
   QSettings settings;
@@ -475,6 +548,7 @@ void IndirectDiffractionReduction::saveSettings()
   settings.setValue("last_van_files", m_uiForm.dem_vanadiumFile->getText());
   settings.endGroup();
 }
+
 
 /**
  * Validates the rebinning fields and updates invalid markers.
@@ -525,6 +599,7 @@ bool IndirectDiffractionReduction::validateRebin()
   return rebinValid;
 }
 
+
 /**
  * Checks to see if the vanadium and cal file fields are valid.
  *
@@ -541,6 +616,7 @@ bool IndirectDiffractionReduction::validateVanCal()
   return true;
 }
 
+
 /**
  * Disables and shows message on run button indicating that run files have benn changed.
  */
@@ -550,6 +626,7 @@ void IndirectDiffractionReduction::runFilesChanged()
   m_uiForm.pbRun->setText("Editing...");
 }
 
+
 /**
  * Disables and shows message on run button to indicate searching for data files.
  */
@@ -558,6 +635,7 @@ void IndirectDiffractionReduction::runFilesFinding()
   m_uiForm.pbRun->setEnabled(false);
   m_uiForm.pbRun->setText("Finding files...");
 }
+
 
 /**
  * Updates run button with result of file search.
@@ -577,6 +655,7 @@ void IndirectDiffractionReduction::runFilesFound()
   if(fileCount < 2)
     m_uiForm.dem_ckSumFiles->setChecked(false);
 }
+
 
 /**
  * Handles the user toggling the individual grouping check box.
