@@ -112,9 +112,9 @@ Fold Multiple Frames
   multiply-framed data will cease at the point where the frames would have been
   merged.
 
-Output in :math:`cm-1`
+Output in :math:`cm^{-1}`
   Converts the units of the energy axis from :math:`meV` to wave number
-  (:math:`cm-1`).
+  (:math:`cm^{-1}`).
 
 Select Save Formats
   Allows you to select multiple output save formats to save the reduced data as,
@@ -181,7 +181,7 @@ Options
 
 Run No
   allows you to select a run for the function to use, either by selecting the
-  .raw file with the Browse button or through entering the number in the box.
+  *.raw* file with the Browse button or through entering the number in the box.
 
 Plot Raw
   Updates the preview plots.
@@ -248,7 +248,7 @@ Options
 
 Input
   allows you to select a run for the function to use, either by selecting the
-  .raw file with the Browse button or through entering the number in the box.
+  *.raw* file with the Browse button or through entering the number in the box.
   Multiple files can be selected, in the same manner as described for the Energy
   Transfer tab.
 
@@ -332,7 +332,7 @@ Options
 ~~~~~~~
 
 Input
-  Allows you to select a reduced NeXus file (_red.nxs) or workspace (_red) as the
+  Allows you to select a reduced NeXus file (*_red.nxs*) or workspace (*_red*) as the
   input to the algorithm.
 
 EMin & EMax
@@ -387,7 +387,7 @@ Options
 ~~~~~~~
 
 Input
-  Allows you to select a reduced NeXus file (_red.nxs) or workspace (_red) as the
+  Allows you to select a reduced NeXus file (*_red.nxs*) or workspace (*_red*) as the
   input to the algorithm.
 
 Rebin Type
@@ -428,7 +428,7 @@ Options
 
 Input
   Allows you to select an :math:`S(Q, \omega)` file (*_sqw.nxs*) or workspace
-  (_sqw) as the input to the algorithm.
+  (*_sqw*) as the input to the algorithm.
 
 Scale By
   Used to set an optional scale factor by which to scale the output of the

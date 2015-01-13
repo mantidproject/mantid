@@ -125,7 +125,7 @@
         <item row="1" column="1">
          <widget class="QDoubleSpinBox" name="spNumberDensity">
           <property name="suffix">
-           <string> atoms/A^3</string>
+           <string> atoms/Å^3</string>
           </property>
           <property name="maximum">
            <double>10000.000000000000000</double>

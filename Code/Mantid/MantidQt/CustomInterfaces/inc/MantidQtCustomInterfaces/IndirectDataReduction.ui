@@ -858,6 +858,18 @@ p, li { white-space: pre-wrap; }
                    </layout>
                   </widget>
                   <widget class="QWidget" name="pageRebinString">
+                   <property name="minimumSize">
+                    <size>
+                     <width>200</width>
+                     <height>25</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>1000000</width>
+                     <height>30</height>
+                    </size>
+                   </property>
                    <layout class="QHBoxLayout" name="horizontalLayout_28">
                     <property name="spacing">
                      <number>0</number>
