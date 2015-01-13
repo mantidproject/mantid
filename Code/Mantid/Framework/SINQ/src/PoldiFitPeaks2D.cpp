@@ -391,6 +391,7 @@ PoldiFitPeaks2D::getQSpectrum(const FunctionDomain1D &domain,
     yData[offset - i] = values[i];
   }
 
+  ws1D->getAxis(0)->setUnit("MomentumTransfer");
   return ws1D;
 }
 
