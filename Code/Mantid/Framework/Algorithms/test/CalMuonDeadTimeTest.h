@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadMuonNexus.h"
+#include "MantidDataHandling/LoadMuonNexus1.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -42,7 +42,7 @@ public:
   void xtestCalDeadTime()
   {
     //Load the muon nexus file
-    Mantid::DataHandling::LoadMuonNexus loader;
+    Mantid::DataHandling::LoadMuonNexus1 loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "emu00006473.nxs");
     loader.setPropertyValue("OutputWorkspace", "EMU6473");
