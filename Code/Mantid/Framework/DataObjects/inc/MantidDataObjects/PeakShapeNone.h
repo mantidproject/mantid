@@ -1,15 +1,13 @@
-#ifndef MANTID_DATAOBJECTS_PEAKSHAPESPHERICAL_H_
-#define MANTID_DATAOBJECTS_PEAKSHAPESPHERICAL_H_
+#ifndef MANTID_DATAOBJECTS_PEAKSHAPENONE_H_
+#define MANTID_DATAOBJECTS_PEAKSHAPENONE_H_
 
 #include "MantidKernel/System.h"
-#include "MantidKernel/VMD.h"
 #include "MantidDataObjects/PeakShapeBase.h"
-#include "MantidAPI/SpecialCoordinateSystem.h"
 
 namespace Mantid {
 namespace DataObjects {
 
-/** PeakShapeSpherical : PeakShape for a spherical peak
+/** PeakShapeNone : No peak shape positional representation only.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -32,37 +30,30 @@ namespace DataObjects {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PeakShapeSpherical : public PeakShapeBase {
+class DLLExport PeakShapeNone : public PeakShapeBase {
 public:
   /// Constructor
-  PeakShapeSpherical(const Mantid::Kernel::VMD &peakCentre,
-                     const double &peakRadius,
-                     API::SpecialCoordinateSystem frame,
-                     std::string algorithmName = std::string(),
-                     int algorithmVersion = -1);
+  PeakShapeNone(const Mantid::Kernel::VMD &peakCentre,
+                API::SpecialCoordinateSystem frame,
+                std::string algorithmName = std::string(),
+                int algorithmVersion = -1);
   /// Destructor
-  virtual ~PeakShapeSpherical();
+  virtual ~PeakShapeNone();
   /// Copy constructor
-  PeakShapeSpherical(const PeakShapeSpherical &other);
+  PeakShapeNone(const PeakShapeNone &other);
   /// Assignment operator
-  PeakShapeSpherical &operator=(const PeakShapeSpherical &other);
+  PeakShapeNone &operator=(const PeakShapeNone &other);
   /// Serialization method
   virtual std::string toJSON() const;
   /// Clone the peak shape
-  virtual PeakShapeSpherical *clone() const;
+  virtual PeakShapeNone *clone() const;
   /// Shape name
   std::string shapeName() const;
   /// Equals operator
-  bool operator==(const PeakShapeSpherical &other) const;
-  /// Peak radius
-  double radius() const;
-
-private:
-  /// Peak radius
-  double m_radius;
+  bool operator==(const PeakShapeNone &other) const;
 };
 
 } // namespace DataObjects
 } // namespace Mantid
 
-#endif /* MANTID_DATAOBJECTS_PEAKSHAPESPHERICAL_H_ */
+#endif /* MANTID_DATAOBJECTS_PEAKSHAPENONE_H_ */

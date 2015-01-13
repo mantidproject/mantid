@@ -7,6 +7,8 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
+#include "MantidDataObjects/PeakShape.h"
+#include <boost/scoped_ptr.hpp>
 
 namespace Mantid {
 namespace DataObjects {
@@ -184,6 +186,9 @@ private:
 
   /// List of contributing detectors IDs
   std::set<int> m_detIDs;
+
+  /// Peak shape
+  //boost::scoped_ptr<PeakShape> m_peakShape;
 };
 
 } // namespace Mantid

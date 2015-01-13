@@ -24,7 +24,7 @@ PeakShapeSphericalFactory::~PeakShapeSphericalFactory() {}
  * @param source : Source JSON
  * @return PeakShape object
  */
-PeakShape* PeakShapeSphericalFactory::create(const std::string &source) const {
+PeakShape *PeakShapeSphericalFactory::create(const std::string &source) const {
   Json::Reader reader;
   Json::Value root;
   PeakShape *product = NULL;
@@ -32,12 +32,13 @@ PeakShape* PeakShapeSphericalFactory::create(const std::string &source) const {
     const std::string shape = root["shape"].asString();
     if (shape == "spherical") {
 
-      const std::string algorithmName( root["algorithm_name"].asString() );
-      const int algorithmVersion( root["algorithm_version"].asInt() );
-      const SpecialCoordinateSystem frame( static_cast<SpecialCoordinateSystem> ( root["frame"].asInt() ) );
-      const double radius( root["radius"].asDouble() );
-      Json::Value centre( root["centre"] );
-      Kernel::VMD centre_nd( centre.size() );
+      const std::string algorithmName(root["algorithm_name"].asString());
+      const int algorithmVersion(root["algorithm_version"].asInt());
+      const SpecialCoordinateSystem frame(
+          static_cast<SpecialCoordinateSystem>(root["frame"].asInt()));
+      const double radius(root["radius"].asDouble());
+      Json::Value centre(root["centre"]);
+      Kernel::VMD centre_nd(centre.size());
       for (Json::ArrayIndex i = 0; i < centre.size(); ++i) {
         centre_nd[i] = centre[i].asFloat();
       }
@@ -47,8 +48,9 @@ PeakShape* PeakShapeSphericalFactory::create(const std::string &source) const {
       if (m_successor) {
         product = m_successor->create(source);
       } else {
-        throw std::invalid_argument(
-            "PeakShapeSphericalFactory:: No successor factory able to process : " + source);
+        throw std::invalid_argument("PeakShapeSphericalFactory:: No successor "
+                                    "factory able to process : " +
+                                    source);
       }
     }
 
@@ -56,8 +58,9 @@ PeakShape* PeakShapeSphericalFactory::create(const std::string &source) const {
     if (m_successor) {
       product = m_successor->create(source);
     } else {
-      throw std::invalid_argument(
-          "PeakShapeSphericalFactory:: Source JSON for the peak shape is not valid: " + source);
+      throw std::invalid_argument("PeakShapeSphericalFactory:: Source JSON for "
+                                  "the peak shape is not valid: " +
+                                  source);
     }
   }
   return product;

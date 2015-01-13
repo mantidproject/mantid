@@ -2,6 +2,7 @@
 #define MANTID_DATAOBJECTS_PEAKSHAPE_H_
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/VMD.h"
 #include "MantidAPI/SpecialCoordinateSystem.h"
 
 namespace Mantid {
@@ -36,14 +37,18 @@ public:
   virtual Mantid::API::SpecialCoordinateSystem frame() const = 0;
   /// Serialize
   virtual std::string toJSON() const = 0;
-  /// Deep copy a Peak
-  virtual PeakShape* clone() const = 0;
+  /// Deep copy this
+  virtual PeakShape *clone() const = 0;
   /// Algorithm
   virtual std::string algorithmName() const = 0;
   /// Algorithm Version
   virtual int algorithmVersion() const = 0;
+  /// Peak centre
+  virtual Mantid::Kernel::VMD centre() const = 0;
+  /// Shape name
+  virtual std::string shapeName() const = 0;
   /// Destructor
-  virtual ~PeakShape(){}
+  virtual ~PeakShape() {}
 };
 
 } // namespace DataObjects
