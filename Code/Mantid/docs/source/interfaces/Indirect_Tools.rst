@@ -40,7 +40,7 @@ Chemical Formula
   :ref:`SetSampleMaterial <algm-SetSampleMaterial>` algorithm.
 
 Number Density
-  The density of the sample in :math:`atoms/Å^3`.
+  The density of the sample in :math:`atoms/\mathrm{\AA{}}^3`.
 
 Thickness
   The thickness of the sample in :math:`cm`.
