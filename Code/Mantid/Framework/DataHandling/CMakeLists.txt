@@ -425,6 +425,7 @@ set ( TEST_FILES
 	SaveReflThreeColumnAsciiTest.h
 	SaveSPETest.h
 	SaveToSNSHistogramNexusTest.h
+	SaveTomoConfigTest.h
 	SetSampleMaterialTest.h
 	SetScalingPSDTest.h
 	SortTableWorkspaceTest.h
