@@ -45,10 +45,6 @@ StandardView::StandardView(QWidget *parent) : ViewBase(parent)
   QObject::connect(this->ui.cutButton, SIGNAL(clicked()), this,
                    SLOT(onCutButtonClicked()));
 
-  // Set the rebin button to create the RebinCutter operator
-  QObject::connect(this->ui.rebinButton, SIGNAL(clicked()), this,
-                   SLOT(onRebinButtonClicked()));
-
   // Set the scale button to create the ScaleWorkspace operator
   QObject::connect(this->ui.scaleButton, SIGNAL(clicked()),
                    this, SLOT(onScaleButtonClicked()));
@@ -89,13 +85,8 @@ void StandardView::render()
   }
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
-  if (this->isMDHistoWorkspace(this->origSrc))
-  {
-    this->ui.rebinButton->setEnabled(false);
-  }
   if (this->isPeaksWorkspace(this->origSrc))
   {
-    this->ui.rebinButton->setEnabled(false);
     this->ui.cutButton->setEnabled(false);
   }
 

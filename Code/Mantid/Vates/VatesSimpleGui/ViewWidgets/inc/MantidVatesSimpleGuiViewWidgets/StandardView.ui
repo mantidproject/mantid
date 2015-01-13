@@ -30,13 +30,6 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="rebinButton">
-       <property name="text">
-        <string>Rebin</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QPushButton" name="scaleButton">
        <property name="toolTip">
         <string>Invoke plugin to scale the current dataset on any of the given axes.</string>
