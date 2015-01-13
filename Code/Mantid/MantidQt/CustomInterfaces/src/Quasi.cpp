@@ -6,7 +6,7 @@ namespace MantidQt
 {
 	namespace CustomInterfaces
 	{
-		Quasi::Quasi(QWidget * parent) : 
+		Quasi::Quasi(QWidget * parent) :
 			IndirectBayesTab(parent)
 		{
 			m_uiForm.setupUi(parent);
@@ -30,7 +30,7 @@ namespace MantidQt
 			m_properties["EMax"] = m_dblManager->addProperty("EMax");
 			m_properties["SampleBinning"] = m_dblManager->addProperty("Sample Binning");
 			m_properties["ResBinning"] = m_dblManager->addProperty("Resolution Binning");
-			
+
 			m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
 			m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
 			m_dblManager->setDecimals(m_properties["SampleBinning"], INT_DECIMALS);
@@ -60,7 +60,7 @@ namespace MantidQt
 		/**
 		 * Set the data selectors to use the default save directory
 		 * when browsing for input files.
-		 *  
+		 *
      * @param settings :: The current settings
 		 */
 		void Quasi::loadSettings(const QSettings& settings)
@@ -77,7 +77,7 @@ namespace MantidQt
 
 		/**
 		 * Validate the form to check the program can be run
-		 * 
+		 *
 		 * @return :: Whether the form was valid
 		 */
 		bool Quasi::validate()
@@ -85,7 +85,7 @@ namespace MantidQt
 			UserInputValidator uiv;
 			uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
 			uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
-			
+
 			//check that the ResNorm file is valid if we are using it
 			if(m_uiForm.chkUseResNorm->isChecked())
 			{
@@ -124,7 +124,7 @@ namespace MantidQt
 		 * Collect the settings on the GUI and build a python
 		 * script that runs Quasi
 		 */
-		void Quasi::run() 
+		void Quasi::run()
 		{
       using namespace Mantid::API;
 
@@ -141,7 +141,7 @@ namespace MantidQt
 			QString useResNorm("False");
 			QString resNormFile("");
 
-			QString pyInput = 
+			QString pyInput =
 				"from IndirectBayes import QLRun\n";
 
 			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
@@ -167,8 +167,8 @@ namespace MantidQt
 			if(m_uiForm.chkElasticPeak->isChecked()) { elasticPeak = "True"; }
 			if(m_uiForm.chkSequentialFit->isChecked()) { sequence = "True"; }
 
-			if(m_uiForm.chkFixWidth->isChecked()) 
-			{ 
+			if(m_uiForm.chkFixWidth->isChecked())
+			{
 				fixedWidth = "True";
 				fixedWidthFile = m_uiForm.mwFixWidthDat->getFirstFilename();
 			}
@@ -231,14 +231,14 @@ namespace MantidQt
           m_curves[specName]->setPen(QColor(Qt::green));
         }
       }
-  
+
       replot("QuasiPlot");
 		}
 
 		/**
 		 * Plots the loaded file to the miniplot and sets the guides
 		 * and the range
-		 * 
+		 *
 		 * @param filename :: The name of the workspace to plot
 		 */
 		void Quasi::handleSampleInputReady(const QString& filename)
@@ -266,7 +266,7 @@ namespace MantidQt
 		 */
     void Quasi::maxValueChanged(double max)
     {
-			m_dblManager->setValue(m_properties["EMax"], max);	
+			m_dblManager->setValue(m_properties["EMax"], max);
     }
 
 		/**

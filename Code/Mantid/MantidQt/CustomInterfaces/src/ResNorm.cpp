@@ -1,3 +1,4 @@
+#include "MantidAPI/TextAxis.h"
 #include "MantidQtCustomInterfaces/ResNorm.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
@@ -5,7 +6,7 @@ namespace MantidQt
 {
 	namespace CustomInterfaces
 	{
-		ResNorm::ResNorm(QWidget * parent) : 
+		ResNorm::ResNorm(QWidget * parent) :
 			IndirectBayesTab(parent)
 		{
 			m_uiForm.setupUi(parent);
@@ -28,7 +29,7 @@ namespace MantidQt
 			m_properties["EMin"] = m_dblManager->addProperty("EMin");
 			m_properties["EMax"] = m_dblManager->addProperty("EMax");
 			m_properties["VanBinning"] = m_dblManager->addProperty("Van Binning");
-			
+
 			m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
 			m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
 			m_dblManager->setDecimals(m_properties["VanBinning"], INT_DECIMALS);
@@ -51,7 +52,7 @@ namespace MantidQt
 
 		/**
 		 * Validate the form to check the program can be run
-		 * 
+		 *
 		 * @return :: Whether the form was valid
 		 */
 		bool ResNorm::validate()
@@ -74,12 +75,14 @@ namespace MantidQt
 		 * Collect the settings on the GUI and build a python
 		 * script that runs ResNorm
 		 */
-		void ResNorm::run() 
+		void ResNorm::run()
 		{
+      using namespace Mantid::API;
+
 			QString verbose("False");
 			QString save("False");
 
-			QString pyInput = 
+			QString pyInput =
 				"from IndirectBayes import ResNormRun\n";
 
 			// get the file names
@@ -103,12 +106,36 @@ namespace MantidQt
 										" Save="+save+", Plot='"+plot+"', Verbose="+verbose+")\n";
 
 			runPythonScript(pyInput);
+
+      // Update mini plot
+      QString outWsName = VanName.left(VanName.size() - 1) + "_ResNorm_Fit";
+      MatrixWorkspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName.toStdString());
+      TextAxis* axis = dynamic_cast<TextAxis*>(outputWorkspace->getAxis(1));
+
+      for(size_t histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++)
+      {
+        QString specName = QString::fromStdString(axis->label(histIndex));
+
+        if(specName.contains("fit"))
+        {
+          plotMiniPlot(outputWorkspace, histIndex, "ResNormPlot", specName);
+          m_curves[specName]->setPen(QColor(Qt::red));
+        }
+
+        if(specName.contains("diff"))
+        {
+          plotMiniPlot(outputWorkspace, histIndex, "ResNormPlot", specName);
+          m_curves[specName]->setPen(QColor(Qt::green));
+        }
+      }
+
+      replot("ResNormPlot");
 		}
 
 		/**
 		 * Set the data selectors to use the default save directory
 		 * when browsing for input files.
-		 *  
+		 *
      * @param settings :: The current settings
 		 */
 		void ResNorm::loadSettings(const QSettings& settings)
@@ -120,7 +147,7 @@ namespace MantidQt
 		/**
 		 * Plots the loaded file to the miniplot and sets the guides
 		 * and the range
-		 * 
+		 *
 		 * @param filename :: The name of the workspace to plot
 		 */
 		void ResNorm::handleVanadiumInputReady(const QString& filename)
@@ -163,7 +190,7 @@ namespace MantidQt
 		 */
     void ResNorm::maxValueChanged(double max)
     {
-			m_dblManager->setValue(m_properties["EMax"], max);	
+			m_dblManager->setValue(m_properties["EMax"], max);
     }
 
 		/**
