@@ -49,11 +49,6 @@ StandardView::StandardView(QWidget *parent) : ViewBase(parent)
   QObject::connect(this->ui.scaleButton, SIGNAL(clicked()),
                    this, SLOT(onScaleButtonClicked()));
 
-  // Check for rebinning source being deleted
-  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  QObject::connect(builder, SIGNAL(destroying(pqPipelineSource*)),
-                   this, SLOT(onDestroyingSource(pqPipelineSource*)));
-
   this->view = this->createRenderView(this->ui.renderFrame);
 
   QObject::connect(this->view.data(), SIGNAL(endRender()),
@@ -161,22 +156,6 @@ void StandardView::updateUI()
 void StandardView::updateView()
 {
   this->cameraReset = true;
-}
-
-/**
- * This function checks a pipeline source that ParaView says is being
- * deleted. If the source is a Mantid rebinning filter, the restriction
- * on the SplatterPlot view should be lifted. Also, the cut button can
- * be enabled.
- * @param src : The pipeline source being checked
- */
-void StandardView::onDestroyingSource(pqPipelineSource *src)
-{
-  if (src->getSMName().contains("MantidRebinning"))
-  {
-    emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, true);
-    this->ui.cutButton->setEnabled(true);
-  }
 }
 
 } // SimpleGui

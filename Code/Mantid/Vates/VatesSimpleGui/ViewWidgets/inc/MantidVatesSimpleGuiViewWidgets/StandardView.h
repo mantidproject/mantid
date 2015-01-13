@@ -74,8 +74,6 @@ public:
 protected slots:
   /// Add a slice to the current dataset.
   void onCutButtonClicked();
-  /// Check for a rebinning source being destroyed.
-  void onDestroyingSource(pqPipelineSource *src);
   /// Perform operations when rendering is done.
   void onRenderDone();
   /// Invoke the ScaleWorkspace on the current dataset.
@@ -85,7 +83,6 @@ private:
   Q_DISABLE_COPY(StandardView)
 
   bool cameraReset;
-  QPointer<pqPipelineSource> rebinCut; ///< Holder for the RebinnerCutter
   QPointer<pqPipelineSource> scaler; ///< Holder for the ScaleWorkspace
   Ui::StandardView ui; ///< The standard view's UI form
   QPointer<pqRenderView> view; ///< The main view
