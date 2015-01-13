@@ -17,7 +17,7 @@ ENDIF()
 set (GMOCK_VERSION ${GMOCK_VERSION} CACHE INTERNAL "")
 
 find_path ( GMOCK_INCLUDE_DIR gmock/gmock.h
-            PATHS ${PROJECT_SOURCE_DIR}/TestingTools/gmock-${GMOCK_VERSION}/include
+            PATHS ${PROJECT_SOURCE_DIR}/Code/Mantid/TestingTools/gmock-${GMOCK_VERSION}/include
                   ${PROJECT_SOURCE_DIR}/../TestingTools/gmock-${GMOCK_VERSION}/include
             NO_DEFAULT_PATH )
 

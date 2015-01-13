@@ -59,12 +59,12 @@ endmacro ( PYUNITTEST_ADD_TEST )
 
 # find the driver script
 find_program ( PYUNITTEST_GEN_EXEC pyunit_gen.py
-               PATHS ${PROJECT_SOURCE_DIR}/TestingTools/pyunit_gen
+               PATHS ${PROJECT_SOURCE_DIR}/Code/Mantid/TestingTools/pyunit_gen
                      ${PROJECT_SOURCE_DIR}/../TestingTools/pyunit_gen )
 
 # determine where the xmlrunner lives
 find_path ( PYUNITTEST_XMLRUNNER xmlrunner/__init__.py
-            PATHS ${PROJECT_SOURCE_DIR}/TestingTools/unittest-xml-reporting/src/
+            PATHS ${PROJECT_SOURCE_DIR}/Code/Mantid/TestingTools/unittest-xml-reporting/src/
                   ${PROJECT_SOURCE_DIR}/../TestingTools/unittest-xml-reporting/src/ )
 
 # let people know whether or not it was found

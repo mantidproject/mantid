@@ -3,7 +3,7 @@
 # GTEST_FOUND If false, do not try to use Google Test
 
 find_path ( GTEST_INCLUDE_DIR gtest/gtest.h
-            PATHS ${PROJECT_SOURCE_DIR}/TestingTools/gmock-${GMOCK_VERSION}/gtest/include
+            PATHS ${PROJECT_SOURCE_DIR}/Code/Mantid/TestingTools/gmock-${GMOCK_VERSION}/gtest/include
                   ${PROJECT_SOURCE_DIR}/../TestingTools/gmock-${GMOCK_VERSION}/gtest/include 
             NO_DEFAULT_PATH )
 

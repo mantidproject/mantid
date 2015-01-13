@@ -1,21 +1,12 @@
-###########################################################################
-# CMake version check.
-# Only versions after 2.8.5 will find the HL component for HDF5
-###########################################################################
-cmake_minimum_required ( VERSION 2.8.5 )
-
 # System package target is important for the windows builds as it allows us to package only the dlls and exes and exclude libs. Defaults to empty for other platforms.
 set ( SYSTEM_PACKAGE_TARGET "")
 
 # Add the path to our custom 'find' modules
-set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Build/CMake")
+set ( CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Build/CMake" )
 
-# Define the project name.
-project ( Mantid )
+# Packaging
 set ( CPACK_PACKAGE_SUFFIX "" CACHE STRING "suffix used to determine the deployment type")
 set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #empty string and release are treated as the same thing
-
-#Set package name here
 set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 
 ###########################################################################
@@ -34,7 +25,7 @@ include ( ParaViewSetup )
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
   if ( NOT THIRD_PARTY )
-      set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
+      set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/Code/Third_Party" )
   endif ()
   # Print out where we think we are looking for 3rd party stuff
   message (STATUS "Setting THIRD_PARTY to be ${THIRD_PARTY}." )
@@ -57,7 +48,7 @@ ENDIF()
 IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
   if ( NOT THIRD_PARTY )
-    set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
+    set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/Third_Party" )
   endif ()
 
   # Print out where we think we are looking for 3rd party stuff
