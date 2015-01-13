@@ -11,114 +11,127 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
-namespace Mantid
-{
-namespace Poldi
-{
-  /// Helper class for refining peaks with overlapping ranges
-  class RefinedRange
-  {
-  public:
-    RefinedRange(const PoldiPeak_sptr &peak, double fwhmMultiples);
-    RefinedRange(double xStart, double xEnd, const std::vector<PoldiPeak_sptr> &peaks);
-    RefinedRange(const RefinedRange &other);
+namespace Mantid {
+namespace Poldi {
+/// Helper class for refining peaks with overlapping ranges
+class RefinedRange {
+public:
+  RefinedRange(const PoldiPeak_sptr &peak, double fwhmMultiples);
+  RefinedRange(double xStart, double xEnd,
+               const std::vector<PoldiPeak_sptr> &peaks);
+  RefinedRange(const RefinedRange &other);
 
-    bool operator <(const RefinedRange &other) const;
+  bool operator<(const RefinedRange &other) const;
 
-    bool overlaps(const RefinedRange &other) const;
-    void merge(const RefinedRange &other);
+  bool overlaps(const RefinedRange &other) const;
+  void merge(const RefinedRange &other);
 
-    const std::vector<PoldiPeak_sptr> getPeaks() const { return m_peaks; }
+  const std::vector<PoldiPeak_sptr> getPeaks() const { return m_peaks; }
 
-    double getXStart() const { return m_xStart; }
-    double getXEnd() const { return m_xEnd; }
+  double getXStart() const { return m_xStart; }
+  double getXEnd() const { return m_xEnd; }
 
-  private:
-    std::vector<PoldiPeak_sptr> m_peaks;
-    double m_xStart;
-    double m_xEnd;
-  };
+private:
+  std::vector<PoldiPeak_sptr> m_peaks;
+  double m_xStart;
+  double m_xEnd;
+};
 
-  typedef boost::shared_ptr<RefinedRange> RefinedRange_sptr;
+typedef boost::shared_ptr<RefinedRange> RefinedRange_sptr;
 
-  bool operator <(const RefinedRange_sptr &lhs, const RefinedRange_sptr &rhs);
+bool operator<(const RefinedRange_sptr &lhs, const RefinedRange_sptr &rhs);
 
-  /** PoldiFitPeaks1D2 :
-    
-    PoldiFitPeaks1D2 fits multiple peaks to POLDI auto-correlation data.
+/** PoldiFitPeaks1D2 :
 
-      @author Michael Wedel, Paul Scherrer Institut - SINQ
-      @date 17/03/2014
+  PoldiFitPeaks1D2 fits multiple peaks to POLDI auto-correlation data.
 
-    Copyright © 2014 PSI-MSS
+    @author Michael Wedel, Paul Scherrer Institut - SINQ
+    @date 17/03/2014
 
-    This file is part of Mantid.
+  Copyright © 2014 PSI-MSS
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class MANTID_SINQ_DLL PoldiFitPeaks1D2  : public API::Algorithm
-  {
-  public:
-    PoldiFitPeaks1D2();
-    virtual ~PoldiFitPeaks1D2();
-    
-    virtual const std::string name() const;
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "PoldiPeakFit1D fits peak profiles to POLDI auto-correlation data.";}
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    virtual int version() const;
-    virtual const std::string category() const;
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class MANTID_SINQ_DLL PoldiFitPeaks1D2 : public API::Algorithm {
+public:
+  PoldiFitPeaks1D2();
+  virtual ~PoldiFitPeaks1D2();
 
-  protected:
-    PoldiPeakCollection_sptr fitPeaks(const PoldiPeakCollection_sptr &peaks);
+  virtual const std::string name() const;
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "PoldiPeakFit1D fits peak profiles to POLDI auto-correlation data.";
+  }
 
-    int getBestChebyshevPolynomialDegree(const DataObjects::Workspace2D_sptr &dataWorkspace, const RefinedRange_sptr &range);
+  virtual int version() const;
+  virtual const std::string category() const;
 
-    PoldiPeakCollection_sptr getReducedPeakCollection(const PoldiPeakCollection_sptr &peaks) const;
-    bool peakIsAcceptable(const PoldiPeak_sptr &peak) const;
+protected:
+  PoldiPeakCollection_sptr fitPeaks(const PoldiPeakCollection_sptr &peaks);
 
-    void setPeakFunction(const std::string &peakFunction);
-    PoldiPeakCollection_sptr getInitializedPeakCollection(const DataObjects::TableWorkspace_sptr &peakTable) const;
+  int getBestChebyshevPolynomialDegree(
+      const DataObjects::Workspace2D_sptr &dataWorkspace,
+      const RefinedRange_sptr &range);
 
-    std::vector<RefinedRange_sptr> getRefinedRanges(const PoldiPeakCollection_sptr &peaks) const;
-    std::vector<RefinedRange_sptr> getReducedRanges(const std::vector<RefinedRange_sptr> &ranges) const;
+  PoldiPeakCollection_sptr
+  getReducedPeakCollection(const PoldiPeakCollection_sptr &peaks) const;
 
-    API::IFunction_sptr getRangeProfile(const RefinedRange_sptr &range, int n) const;
-    API::IFunction_sptr getPeakProfile(const PoldiPeak_sptr &poldiPeak) const;
-    void setValuesFromProfileFunction(PoldiPeak_sptr poldiPeak, const API::IFunction_sptr &fittedFunction) const;
-    double getFwhmWidthRelation(API::IPeakFunction_sptr peakFunction) const;
+  bool peakIsAcceptable(const PoldiPeak_sptr &peak) const;
+  void setPeakFunction(const std::string &peakFunction);
 
-    API::IAlgorithm_sptr getFitAlgorithm(const DataObjects::Workspace2D_sptr &dataWorkspace, const RefinedRange_sptr &range, int n);
+  PoldiPeakCollection_sptr getInitializedPeakCollection(
+      const DataObjects::TableWorkspace_sptr &peakTable) const;
 
-    PoldiPeakCollection_sptr m_peaks;
-    std::string m_profileTemplate;
+  std::vector<RefinedRange_sptr>
+  getRefinedRanges(const PoldiPeakCollection_sptr &peaks) const;
 
-    API::WorkspaceGroup_sptr m_fitplots;
+  std::vector<RefinedRange_sptr>
+  getReducedRanges(const std::vector<RefinedRange_sptr> &ranges) const;
 
+  API::IFunction_sptr getRangeProfile(const RefinedRange_sptr &range,
+                                      int n) const;
 
-    double m_fwhmMultiples;
+  API::IFunction_sptr getPeakProfile(const PoldiPeak_sptr &poldiPeak) const;
 
-  private:
-    void init();
-    void exec();
-  };
+  void
+  setValuesFromProfileFunction(PoldiPeak_sptr poldiPeak,
+                               const API::IFunction_sptr &fittedFunction) const;
 
+  double getFwhmWidthRelation(API::IPeakFunction_sptr peakFunction) const;
+
+  API::IAlgorithm_sptr
+  getFitAlgorithm(const DataObjects::Workspace2D_sptr &dataWorkspace,
+                  const RefinedRange_sptr &range, int n);
+
+  PoldiPeakCollection_sptr m_peaks;
+  std::string m_profileTemplate;
+
+  API::WorkspaceGroup_sptr m_fitplots;
+
+  double m_fwhmMultiples;
+
+private:
+  void init();
+  void exec();
+};
 
 } // namespace Poldi
 } // namespace Mantid
 
-#endif  /* MANTID_SINQ_POLDIFITPEAKS1D2_H_ */
+#endif /* MANTID_SINQ_POLDIFITPEAKS1D2_H_ */
