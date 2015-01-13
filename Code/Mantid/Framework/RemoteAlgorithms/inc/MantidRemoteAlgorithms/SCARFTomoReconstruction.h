@@ -20,12 +20,11 @@ namespace RemoteAlgorithms {
 
     Output Properties: None.
     If the authentication is successfull, a cookie is received that is stored
-   internally and
-    re-used for all subsequent interactions with the compute resource.
+    internally and re-used for all subsequent interactions with the compute
+    resource.
 
-
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
+    Copyright &copy; 2014-2015 ISIS Rutherford Appleton Laboratory,
+    NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
