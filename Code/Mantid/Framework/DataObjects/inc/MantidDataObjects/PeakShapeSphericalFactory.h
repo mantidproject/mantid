@@ -43,10 +43,10 @@ class PeakShape;
     virtual ~PeakShapeSphericalFactory();
     /// Make product
     PeakShape* create(const std::string &source) const;
-
-  private:
     /// Set a successor should this factory be unsuitable
     void setSuccessor(PeakShapeFactory_const_sptr successorFactory);
+
+  private:
     /// Successor factory
     PeakShapeFactory_const_sptr m_successor;
 
