@@ -99,4 +99,13 @@ Now the spectrum looks different, like in the example below.
    
    Simulated 2D-spectrum of silicon powder with background.
 
+Furthermore, a 1D diffractogram is also calculated, which shows all peaks that were used to calculate the 2D spectrum as well.
+
+.. figure:: /images/PoldiFitPeaks2D_Si_1D.png
+   :figwidth: 15 cm
+   :align: center
+   :alt: Calculated diffractogram for Silicon powder standard.
+
+   Calculated diffractogram for Silicon powder standard.
+
 .. categories::
