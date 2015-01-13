@@ -107,7 +107,48 @@
        <item>
         <layout class="QHBoxLayout" name="underPlotSpace">
          <item>
-          <widget class="QSpinBox" name="spPreviewSpectrum"/>
+          <widget class="QLabel" name="lblPreviewSpec">
+           <property name="text">
+            <string>Preview Spectrum: </string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="spPreviewSpectrum">
+           <property name="maximum" stdset="0">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="legendSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="lblPlotLegendData">
+           <property name="text">
+            <string>Vanadium</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="lblPplotLegendFit">
+           <property name="text">
+            <string>Fit</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color: rgb(255, 0, 0);</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
