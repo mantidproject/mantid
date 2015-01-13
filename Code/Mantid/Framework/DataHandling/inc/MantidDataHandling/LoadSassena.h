@@ -7,7 +7,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include <hdf5.h>
+#include <hdf5/serial/hdf5.h>
 
 namespace Mantid
 {

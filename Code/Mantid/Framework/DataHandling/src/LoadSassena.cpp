@@ -10,7 +10,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <hdf5_hl.h>
+#include <hdf5/serial/hdf5_hl.h>
 
 namespace Mantid
 {
