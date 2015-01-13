@@ -7,23 +7,25 @@ namespace Mantid {
 namespace RemoteAlgorithms {
 /***
     Algorithm to initiate a tomographic reconstruction on SCARF at RAL.
-    The algorithm can also be used to to retrieve information about a reconstruction job or to cancel it.
+    The algorithm can also be used to to retrieve information about a
+   reconstruction job or to cancel it.
 
     Input Properties:
     <UL>
-    <LI> ComputeResource  - The name of the compute resource that will execute the job </LI>
+    <LI> ComputeResource  - The name of the compute resource that will execute
+   the job </LI>
     <LI> UserName         - User name on the compute resource </LI>
     <LI> Password         - Password for the compute resource </LI>
     </UL>
 
     Output Properties: None.
-    If the authentication is successfull, a cookie is received that is stored internally and
+    If the authentication is successfull, a cookie is received that is stored
+   internally and
     re-used for all subsequent interactions with the compute resource.
 
-    
-    @author John R Hill, RAL
-    @date 19/11/2014
 
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -44,9 +46,7 @@ namespace RemoteAlgorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-
-class SCARFTomoReconstruction : public Mantid::API::Algorithm
-{
+class SCARFTomoReconstruction : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
   SCARFTomoReconstruction() : Mantid::API::Algorithm() {}
@@ -54,8 +54,10 @@ public:
   virtual ~SCARFTomoReconstruction() {}
   /// Algorithm's name
   virtual const std::string name() const { return "SCARFTomoReconstruction"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Perform a tomographic reconstruction action on SCARF at RAL";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Perform a tomographic reconstruction action on SCARF at RAL";
+  }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -63,7 +65,7 @@ public:
 
 private:
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
 
   // ***********
