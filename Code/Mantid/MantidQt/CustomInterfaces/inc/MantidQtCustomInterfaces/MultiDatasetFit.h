@@ -37,6 +37,7 @@ namespace MantidQt
 namespace MantidWidgets
 {
   class FunctionBrowser;
+  class FitOptionsBrowser;
 }
 
 namespace API
@@ -120,6 +121,8 @@ private:
   PlotController *m_plotController;
   /// Function editor
   MantidWidgets::FunctionBrowser *m_functionBrowser;
+  /// Browser for setting other Fit properties
+  MantidWidgets::FitOptionsBrowser *m_fitOptionsBrowser;
   /// Name of the output workspace
   std::string m_outputWorkspaceName;
   /// Storage for local paramtere values

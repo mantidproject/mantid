@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit.h"
 #include "MantidQtMantidWidgets/FunctionBrowser.h"
+#include "MantidQtMantidWidgets/FitOptionsBrowser.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -17,6 +18,7 @@
 #include <QMessageBox>
 #include <QToolBar>
 #include <QActionGroup>
+#include <QSplitter>
 
 #include <boost/make_shared.hpp>
 #include <qwt_plot_curve.h>
@@ -595,10 +597,17 @@ void MultiDatasetFit::initLayout()
                                         m_uiForm.btnNext);
   connect(m_plotController,SIGNAL(currentIndexChanged(int)),this,SLOT(updateLocalParameters(int)));
 
+  QSplitter* splitter = new QSplitter(Qt::Vertical,this);
+
   m_functionBrowser = new MantidQt::MantidWidgets::FunctionBrowser(NULL, true);
-  m_uiForm.browserLayout->addWidget( m_functionBrowser );
+  splitter->addWidget( m_functionBrowser );
   connect(m_functionBrowser,SIGNAL(localParameterButtonClicked(const QString&)),this,SLOT(editLocalParameterValues(const QString&)));
   connect(m_functionBrowser,SIGNAL(functionStructureChanged()),this,SLOT(reset()));
+
+  m_fitOptionsBrowser = new MantidQt::MantidWidgets::FitOptionsBrowser(NULL);
+  splitter->addWidget( m_fitOptionsBrowser );
+
+  m_uiForm.browserLayout->addWidget( splitter );
 
   createPlotToolbar();
 
