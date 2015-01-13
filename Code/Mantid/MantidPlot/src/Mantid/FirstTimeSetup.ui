@@ -56,7 +56,6 @@ QDialog#FirstTimeSetup QPushButton{
 QDialog#FirstTimeSetup QCommandLinkButton{
 	font: 28px &quot;Open Sans&quot;;
 }
-
 </string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -394,7 +393,7 @@ font-size: 32px;</string>
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>80</height>
+             <height>60</height>
             </size>
            </property>
           </spacer>
@@ -569,10 +568,16 @@ background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgb
               <item row="3" column="1">
                <widget class="QCheckBox" name="chkAllowUsageData">
                 <property name="styleSheet">
-                 <string notr="true">color: rgba(235, 235, 235, 0);</string>
+                 <string notr="true">padding: 4px;</string>
                 </property>
                 <property name="text">
-                 <string>Report usage data</string>
+                 <string/>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>16</width>
+                  <height>16</height>
+                 </size>
                 </property>
                 <property name="checked">
                  <bool>true</bool>
@@ -660,33 +665,64 @@ color: rgb(25,125,25);</string>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="chkDoNotShowUntilNextRelease">
-           <property name="font">
-            <font>
-             <family>Open Sans</family>
-             <pointsize>-1</pointsize>
-             <weight>50</weight>
-             <italic>false</italic>
-             <bold>false</bold>
-            </font>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <property name="spacing">
+            <number>7</number>
            </property>
-           <property name="styleSheet">
-            <string notr="true">font: 16px &quot;Open Sans&quot;;
+           <item>
+            <widget class="QCheckBox" name="chkDoNotShowUntilNextRelease">
+             <property name="font">
+              <font>
+               <family>Open Sans</family>
+               <pointsize>-1</pointsize>
+               <weight>50</weight>
+               <italic>false</italic>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">font: 16px &quot;Open Sans&quot;;
 color: rgb(25,125,25);</string>
-           </property>
-           <property name="text">
-            <string>Do not show again until next release</string>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>32</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_4">
+             <property name="styleSheet">
+              <string notr="true">font: 16px &quot;Open Sans&quot;;
+color: rgb(25,125,25);</string>
+             </property>
+             <property name="text">
+              <string>Do not show again until next release</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
          </item>
         </layout>
        </item>
@@ -753,6 +789,13 @@ color: rgb(25,125,25);</string>
          </property>
         </spacer>
        </item>
+       <item>
+        <widget class="QCheckBox" name="chkTest">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
     </layout>
@@ -777,7 +820,6 @@ color: rgb(25,125,25);</string>
   <tabstop>cbInstrument</tabstop>
   <tabstop>pbMUD</tabstop>
   <tabstop>chkAllowUsageData</tabstop>
-  <tabstop>chkDoNotShowUntilNextRelease</tabstop>
   <tabstop>pbCancel</tabstop>
   <tabstop>pbConfirm</tabstop>
  </tabstops>

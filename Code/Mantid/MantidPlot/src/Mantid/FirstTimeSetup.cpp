@@ -88,22 +88,25 @@ void FirstTimeSetup::initLayout()
   }
   connect(m_uiForm.chkAllowUsageData, SIGNAL(stateChanged (int)), this, SLOT(allowUsageDataStateChanged(int)));
 
-  QString stlyeName = QApplication::style()->metaObject()->className();
-  if(stlyeName!="QWindowsVistaStyle")
-  {
-    //add stylesheet formatting for other environemnts
-    QString ss =  this->styleSheet();
-    ss += "\n"
-          "QDialog#FirstTimeSetup QCommandLinkButton {"
-          " background-color: rgba(255, 255, 255, 0);"
-          "  border-radius: 15px;"
-          "}"
-          "\n"
-          "QDialog#FirstTimeSetup QCommandLinkButton:hover {"
-	        "  background-color: rgba(255, 255, 255, 128);"
-          "}";
-    this->setStyleSheet(ss);
-  }
+  
+  connect(m_uiForm.chkTest, SIGNAL(clicked()), this, SLOT(testAlternateFormat()));
+
+  //QString stlyeName = QApplication::style()->metaObject()->className();
+  //if(stlyeName!="QWindowsVistaStyle")
+  //{
+  //  //add stylesheet formatting for other environemnts
+  //  QString ss =  this->styleSheet();
+  //  ss += "\n"
+  //        "QDialog#FirstTimeSetup QCommandLinkButton {"
+  //        " background-color: rgba(255, 255, 255, 0);"
+  //        "  border-radius: 15px;"
+  //        "}"
+  //        "\n"
+  //        "QDialog#FirstTimeSetup QCommandLinkButton:hover {"
+	 //       "  background-color: rgba(255, 255, 255, 128);"
+  //        "}";
+  //  this->setStyleSheet(ss);
+  //}
 }
 
 
@@ -196,4 +199,25 @@ void FirstTimeSetup::openPythonInMantid()
 void FirstTimeSetup::openExtendingMantid()
 {
   QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Extending_Mantid_With_Python"));
+}
+
+void FirstTimeSetup::testAlternateFormat()
+{
+  if (m_uiForm.chkTest->isChecked()) {
+    //add stylesheet formatting for other environemnts
+    QString ss =  this->styleSheet();
+    TESTorig = ss;
+    ss += "\n"
+          "QDialog#FirstTimeSetup QCommandLinkButton {"
+          " background-color: rgba(255, 255, 255, 0);"
+          "  border-radius: 15px;"
+          "}"
+          "\n"
+          "QDialog#FirstTimeSetup QCommandLinkButton:hover {"
+	        "  background-color: rgba(217, 217, 217, 128);"
+          "}";
+    this->setStyleSheet(ss);
+  } else {
+    this->setStyleSheet(TESTorig);
+  }
 }
