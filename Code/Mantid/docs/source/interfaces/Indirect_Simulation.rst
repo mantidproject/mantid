@@ -33,13 +33,14 @@ MolDyn
   :widget: molDyn
 
 The MolDyn interface is used to import simulation data created using nMOLDYN (by
-using the Mantid algorithm MolDyn), tab operates on either .dat or .cdl files.
+using the :ref:`MolDyn <algm-MolDyn>` algorithm), tab operates on either *.dat*
+or *.cdl* files.
 
 Options
 ~~~~~~~
 
 Sample Run
-  The data file (.cdl or .dat) to load.
+  The data file (*.cdl* or *.dat*) to load.
 
 Function Names
   A comm separated list of functions to load from a .cdl file.
@@ -76,7 +77,7 @@ Options
 ~~~~~~~
 
 Sample File
-  The data file (.h5 or .hd5) to load.
+  The data file (*.h5* or *.hd5*) to load.
 
 Time per Data Point
   Specifies the time interval between each data point in the loaded data file.

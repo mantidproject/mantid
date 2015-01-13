@@ -141,7 +141,7 @@ All
 
 File
   Gives the option of supplying a grouping file to be used with the
-  GroupDetectors algorithm.
+  :ref:`GroupDetectors <algm-GroupDetectors>` algorithm.
 
 Rebinning
 ~~~~~~~~~
@@ -163,8 +163,8 @@ Multiple
 .. interface:: Data Reduction
   :widget: pageRebinString
 
-In this mode multiple binning ranges can be defined using he rebin strung syntax
-used by the Rebin algorithm.
+In this mode multiple binning ranges can be defined using he rebin string syntax
+used by the :ref:`Rebin <algm-Rebin>` algorithm.
 
 Calibration & Resolution
 ------------------------
@@ -217,8 +217,8 @@ Create RES File
   If selected will create a resolution file when the tab is run.
 
 Smooth RES
-  If selected the WienerSmooth algorithm will be applied to the output of the
-  resolution algorithm.
+  If selected the :ref:`WienerSmooth <algm-WienerSmooth>` algorithm will be
+  applied to the output of the resolution algorithm.
 
 Scale RES
   Optionally apply a scale by a given factor to the resolution output.
@@ -419,14 +419,15 @@ Moments
 .. interface:: Data Reduction
   :widget: tabMoments
 
-This interface uses the SofQWMoments algorithm to calculate the :math:`n^{th}`
-moment of an <math>S(Q, \omega)</math> workspace created by the SofQW tab.
+This interface uses the :ref:`SofQWMoments <algm-SofQWMoments>` algorithm to
+calculate the :math:`n^{th}` moment of an :math:`S(Q, \omega)` workspace created
+by the SofQW tab.
 
 Options
 ~~~~~~~
 
 Input
-  Allows you to select an :math:`S(Q, \omega)` file (_sqw.nxs) or workspace
+  Allows you to select an :math:`S(Q, \omega)` file (*_sqw.nxs*) or workspace
   (_sqw) as the input to the algorithm.
 
 Scale By

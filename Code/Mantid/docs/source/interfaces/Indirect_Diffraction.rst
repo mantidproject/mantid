@@ -68,8 +68,9 @@ OSIRIS diffonly
 .. interface:: Diffraction
   :widget: pageCalibration
 
-OSIRIS is supported through the OSIRISDiffractionReduction algorithm, and as
-such has a radically different workflow to IRIS and TOSCA.
+OSIRIS is supported through the :ref:`OSIRISDiffractionReduction
+<algm-OSIRISDiffractionReduction>` algorithm, and as such has a radically
+different workflow to IRIS and TOSCA.
 
 The available options are the same, except that a single calibration file and
 one or more vanadium files must be specified instead of rebinning values. These
@@ -88,8 +89,8 @@ IRIS, OSIRIS diffspec, TOSCA & VESUVIO
 .. interface:: Diffraction
   :widget: pageDSpaceRebin
 
-All other instruments are supported through the MSGDiffractionReduction
-algorithm and share the same set of options:
+All other instruments are supported through the :ref:`MSGDiffractionReduction
+<algm-MSGDiffractionReduction>` algorithm and share the same set of options:
 
 Sum Files
   If selected the raw files will be summed after they are loaded and the

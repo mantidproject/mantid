@@ -16,9 +16,9 @@ for analysing reduced data from indirect geometry spectrometers, such as IRIS an
 OSIRIS.
 
 The majority of the functions used within this interface can be used with both
-reduced files (_red.nxs) and workspaces (_red) created using the Indirect Data
-Reduction interface or using :math:`S(Q, \omega)` files (_sqw.nxs) and
-workspaces (_sqw) created using either the Indirect Data Reduction interface or
+reduced files (*_red.nxs*) and workspaces (*_red*) created using the Indirect Data
+Reduction interface or using :math:`S(Q, \omega)` files (*_sqw.nxs*) and
+workspaces (*_sqw*) created using either the Indirect Data Reduction interface or
 taken from a bespoke algorithm or auto reduction.
 
 Action Buttons
@@ -43,9 +43,9 @@ Elwin
 .. interface:: Data Analysis
   :widget: tabElwin
 
-Provides an interface for the ElasticWindow algorithm, with the option of
-selecting the range to integrate over as well as the background range. An
-on-screen plot is also provided.
+Provides an interface for the :ref:`ElasticWindow <algm-ElasticWindow>`
+algorithm, with the option of selecting the range to integrate over as well as
+the background range. An on-screen plot is also provided.
 
 For workspaces that have a sample log or have a sample log file available in the
 Mantid data search paths that contains the sample environment information the
@@ -56,7 +56,7 @@ Options
 ~~~~~~~
 
 Input File
-  Specify a range of input files that are either reduced (_red.nxs) or
+  Specify a range of input files that are either reduced (*_red.nxs*) or
   :math:`S(Q, \omega)`.
 
 Range One
@@ -150,12 +150,12 @@ Options
 ~~~~~~~
 
 Sample
-  Either a reduced file (_red.nxs) or workspace (_red) or an :math:`S(Q, \omega)`
-  file (_sqw.nxs) or workspace (_sqw).
+  Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
+  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
 
 Resolution
-  Either a resolution file (_res.nxs) or workspace (_res) or an :math:`S(Q, \omega)`
-  file (_sqw.nxs) or workspace (_sqw).
+  Either a resolution file (_res.nxs) or workspace (_res) or an :math:`S(Q,
+  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
 
 ELow, EHigh
   The rebiinning range.
@@ -206,14 +206,14 @@ Fury Fit
   :widget: tabFuryFit
 
 FuryFit provides a simplified interface for controlling various fitting
-functions (see the Fit algorithm for more info). The functions are also
-available via the fit wizard.
+functions (see the :ref:`Fit <algm-Fit>` algorithm for more info). The functions
+are also available via the fit wizard.
 
 Additionally, in the bottom-right of the interface there are options for doing a
 sequential fit. This is where the program loops through each spectrum in the
 input workspace, using the fitted values from the previous spectrum as input
-values for fitting the next. This is done by means of the PlotPeakByLogValue
-algorithm.
+values for fitting the next. This is done by means of the
+:ref:`PlotPeakByLogValue <algm-PlotPeakByLogValue>` algorithm.
 
 A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
@@ -223,7 +223,7 @@ Options
 ~~~~~~~
 
 Input
-  Either a file (_iqt.nxs) or workspace (_iqt) that has been created using
+  Either a file (*_iqt.nxs*) or workspace (*_iqt*) that has been created using
   the Fury tab.
 
 Fit Type
@@ -279,14 +279,14 @@ Conv Fit
   :widget: tabConFit
 
 Similarly to FuryFit, ConvFit provides a simplified interface for controlling
-various fitting functions (see the Fit algorithm for more info). The functions
-are also available via the fit wizard.
+various fitting functions (see the :ref:`Fit <algm-Fit>` algorithm for more
+info). The functions are also available via the fit wizard.
 
 Additionally, in the bottom-right of the interface there are options for doing a
 sequential fit. This is where the program loops through each spectrum in the
 input workspace, using the fitted values from the previous spectrum as input
-values for fitting the next. This is done by means of the PlotPeakByLogValue
-algorithm.
+values for fitting the next. This is done by means of the
+:ref:`PlotPeakByLogValue <algm-PlotPeakByLogValue>` algorithm.
 
 A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
@@ -296,12 +296,12 @@ Options
 ~~~~~~~
 
 Sample
-  Either a reduced file (_red.nxs) or workspace (_red) or an :math:`S(Q, \omega)`
-  file (_sqw.nxs) or workspace (_sqw).
+  Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
+  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
 
 Resolution
-  Either a resolution file (_res.nxs) or workspace (_res) or an :math:`S(Q, \omega)`
-  file (_sqw.nxs) or workspace (_sqw).
+  Either a resolution file (_res.nxs) or workspace (_res) or an :math:`S(Q,
+  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
 
 Fit Type
   The type of fitting to perform.
@@ -382,13 +382,13 @@ Options
 ~~~~~~~
 
 Input
-  Either a reduced file (_red.nxs) or workspace (_red) or an :math:`S(Q, \omega)`
-  file (_sqw.nxs) or workspace (_sqw).
+  Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
+  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
 
 Use Can
   If checked allows you to select a workspace for the container in the format of
-  either a reduced file (_red.nxs) or workspace (_red) or an :math:`S(Q, \omega)`
-  file (_sqw.nxs) or workspace (_sqw).
+  either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
+  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
 
 Sample Shape
   Sets the shape of the sample, this affects the options for the sample details,
@@ -401,8 +401,8 @@ Verbose
   Enables outputting additional information to the Results Log.
 
 Plot Result
-  Plots the :math:`A_{s,s}`, :math:`A_{s,sc}`, :math:`A_{c,sc}` and :math:`A_{c,c}`
-  workspaces as spectra plots.
+  Plots the :math:`A_{s,s}`, :math:`A_{s,sc}`, :math:`A_{c,sc}` and
+  :math:`A_{c,c}` workspaces as spectra plots.
 
 Save Result
   If enabled the result will be saved as a NeXus file in the default save
@@ -475,8 +475,8 @@ Options
 ~~~~~~~
 
 Input
-  Either a reduced file (_red.nxs) or workspace (_red) or an :math:`S(Q, \omega)`
-  file (_sqw.nxs) or workspace (_sqw).
+  Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
+  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
 
 Geometry
   Sets the sample geometry (this must match the sample shape used when running
@@ -484,8 +484,8 @@ Geometry
 
 Use Can
   If checked allows you to select a workspace for the container in the format of
-  either a reduced file (_red.nxs) or workspace (_red) or an :math:`S(Q, \omega)`
-  file (_sqw.nxs) or workspace (_sqw).
+  either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
+  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
 
 Corrections File
   The output file (_Abs.nxs) or workspace group (_Abs) generated by Calculate
