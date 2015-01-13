@@ -69,6 +69,8 @@
 #include "Mantid/MantidMDCurveDialog.h"
 #include "MantidQtSliceViewer/LinePlotOptions.h"
 
+#include "TSVSerialiser.h"
+
 namespace
 {
   /// static logger
@@ -1162,39 +1164,6 @@ bool MultiLayer::isEmpty ()
 		return false;
 }
 
-QString MultiLayer::saveToString(const QString& geometry, bool saveAsTemplate)
-{
-    bool notTemplate = !saveAsTemplate;
-	QString s="<multiLayer>\n";
-	if (notTemplate)
-        s+=QString(objectName())+"\t";
-	s+=QString::number(d_cols)+"\t";
-	s+=QString::number(d_rows)+"\t";
-	if (notTemplate)
-        s+=birthDate()+"\n";
-	s+=geometry;
-	if (notTemplate)
-        s+="WindowLabel\t" + windowLabel() + "\t" + QString::number(captionPolicy()) + "\n";
-	s+="Margins\t"+QString::number(left_margin)+"\t"+QString::number(right_margin)+"\t"+
-		QString::number(top_margin)+"\t"+QString::number(bottom_margin)+"\n";
-	s+="Spacing\t"+QString::number(rowsSpace)+"\t"+QString::number(colsSpace)+"\n";
-	s+="LayerCanvasSize\t"+QString::number(l_canvas_width)+"\t"+QString::number(l_canvas_height)+"\n";
-	s+="Alignement\t"+QString::number(hor_align)+"\t"+QString::number(vert_align)+"\n";
-
-  foreach (Graph *g, graphsList)
-    s += g->saveToString(saveAsTemplate);
-
-  if ( d_is_waterfall_plot )
-    s += "<waterfall>1</waterfall>\n";
-
-	return s+"</multiLayer>\n";
-}
-
-QString MultiLayer::saveAsTemplate(const QString& geometryInfo)
-{
-	return saveToString(geometryInfo, true);
-}
-
 void MultiLayer::setMargins (int lm, int rm, int tm, int bm)
 {
 	if (left_margin != lm)
@@ -1426,7 +1395,9 @@ void MultiLayer::dropOntoMatrixCurve(Graph *g, MantidMatrixCurve* originalCurve,
     for( ; setIt != it.value().end(); ++setIt)
     {
       try {
-        new MantidMatrixCurve(it.key(),g,(*setIt),MantidMatrixCurve::Spectrum, errorBars); // The graph takes ownership
+        // If the current curve is plotted as a distribution then do so also here
+        new MantidMatrixCurve(it.key(),g,(*setIt),MantidMatrixCurve::Spectrum, errorBars,
+                              originalCurve->isDistribution()); // The graph takes ownership
       } catch (Mantid::Kernel::Exception::NotFoundError &) {
         // Get here if workspace name is invalid - shouldn't be possible, but just in case
       } catch (std::invalid_argument&) {
@@ -1735,3 +1706,105 @@ void WaterfallFillDialog::setFillMode()
   }
 }
 
+void MultiLayer::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
+{
+  TSVSerialiser tsv(lines);
+
+  if(tsv.hasLine("geometry"))
+    app->restoreWindowGeometry(app, this, QString::fromStdString(tsv.lineAsString("geometry")));
+
+  blockSignals(true);
+
+  if(tsv.selectLine("WindowLabel"))
+  {
+    setWindowLabel(QString::fromUtf8(tsv.asString(1).c_str()));
+    setCaptionPolicy((MdiSubWindow::CaptionPolicy)tsv.asInt(2));
+  }
+
+  if(tsv.selectLine("Margins"))
+  {
+    int left, right, top, bottom;
+    tsv >> left >> right >> top >> bottom;
+    setMargins(left, right, top, bottom);
+  }
+
+  if(tsv.selectLine("Spacing"))
+  {
+    int rowSpace, colSpace;
+    tsv >> rowSpace >> colSpace;
+    setSpacing(rowSpace, colSpace);
+  }
+
+  if(tsv.selectLine("LayerCanvasSize"))
+  {
+    int width, height;
+    tsv >> width >> height;
+    setLayerCanvasSize(width, height);
+  }
+
+  if(tsv.selectLine("Alignement"))
+  {
+    int hor, vert;
+    tsv >> hor >> vert;
+    setAlignement(hor, vert);
+  }
+
+  if(tsv.hasSection("waterfall"))
+  {
+    const std::string wfStr = tsv.sections("waterfall").front();
+
+    if(wfStr == "1")
+      setWaterfallLayout(true);
+    else
+      setWaterfallLayout(false);
+  }
+
+  if(tsv.hasSection("graph"))
+  {
+    std::vector<std::string> graphSections = tsv.sections("graph");
+    for(auto it = graphSections.begin(); it != graphSections.end(); ++it)
+    {
+      const std::string graphLines = *it;
+
+      TSVSerialiser gtsv(graphLines);
+
+      if(gtsv.selectLine("ggeometry"))
+      {
+        int x, y, w, h;
+        gtsv >> x >> y >> w >> h;
+
+        Graph* g = dynamic_cast<Graph*>(addLayer(x,y,w,h));
+        if(g)
+          g->loadFromProject(graphLines, app, fileVersion);
+      }
+    }
+  }
+
+  blockSignals(false);
+}
+
+std::string MultiLayer::saveToProject(ApplicationWindow* app)
+{
+  TSVSerialiser tsv;
+
+  tsv.writeRaw("<multiLayer>");
+
+  tsv.writeLine(objectName().toStdString()) << d_cols << d_rows << birthDate();
+  tsv.writeRaw(app->windowGeometryInfo(this));
+
+  tsv.writeLine("WindowLabel") << windowLabel() << captionPolicy();
+  tsv.writeLine("Margins") << left_margin << right_margin << top_margin << bottom_margin;
+  tsv.writeLine("Spacing") << rowsSpace << colsSpace;
+  tsv.writeLine("LayerCanvasSize") << l_canvas_width << l_canvas_height;
+  tsv.writeLine("Alignement") << hor_align << vert_align;
+
+  foreach(Graph* g, graphsList)
+    tsv.writeSection("graph", g->saveToProject());
+
+  if(d_is_waterfall_plot)
+    tsv.writeInlineSection("waterfall", "1");
+
+  tsv.writeRaw("</multiLayer>");
+
+  return tsv.outputLines();
+}

@@ -5,58 +5,60 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidMDAlgorithms/BooleanBinaryOperationMD.h"
 
-namespace Mantid
-{
-namespace MDAlgorithms
-{
+namespace Mantid {
+namespace MDAlgorithms {
 
-  /** GreaterThanMD : boolean operation on MDHistoWorkspaces
-    
-    @date 2011-11-08
+/** GreaterThanMD : boolean operation on MDHistoWorkspaces
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  @date 2011-11-08
 
-    This file is part of Mantid.
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport GreaterThanMD : public BooleanBinaryOperationMD
-  {
-  public:
-    GreaterThanMD();
-    virtual ~GreaterThanMD();
-    
-    virtual const std::string name() const;
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Perform the GreaterThan boolean operation on two MDHistoWorkspaces.";}
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    virtual int version() const;
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport GreaterThanMD : public BooleanBinaryOperationMD {
+public:
+  GreaterThanMD();
+  virtual ~GreaterThanMD();
 
-  private:
-    bool acceptScalar() const { return true; }
-    bool commutative() const { return false; }
+  virtual const std::string name() const;
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Perform the GreaterThan boolean operation on two "
+           "MDHistoWorkspaces.";
+  }
 
-    void execHistoHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::MDEvents::MDHistoWorkspace_const_sptr operand);
-    void execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar);
+  virtual int version() const;
 
-  };
+private:
+  bool acceptScalar() const { return true; }
+  bool commutative() const { return false; }
 
+  void execHistoHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out,
+                      Mantid::MDEvents::MDHistoWorkspace_const_sptr operand);
+  void
+  execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out,
+                  Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar);
+};
 
 } // namespace MDAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_MDALGORITHMS_GREATERTHANMD_H_ */
+#endif /* MANTID_MDALGORITHMS_GREATERTHANMD_H_ */

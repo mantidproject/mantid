@@ -1,6 +1,8 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/IndirectSimulationTab.h"
 
+using namespace Mantid::API;
+
 namespace MantidQt
 {
 	namespace CustomInterfaces
@@ -9,9 +11,8 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Constructor
      */
-    IndirectSimulationTab::IndirectSimulationTab(QWidget * parent) : QWidget(parent)
+    IndirectSimulationTab::IndirectSimulationTab(QWidget * parent) : IndirectTab(parent)
     {
-
     }
 
     //----------------------------------------------------------------------------------------------
@@ -23,23 +24,13 @@ namespace MantidQt
 
     /**
      * Method to build a URL to the appropriate page on the wiki for this tab.
-     * 
+     *
      * @return The URL to the wiki page
      */
     QString IndirectSimulationTab::tabHelpURL()
-    { 
+    {
       return "http://www.mantidproject.org/IndirectSimualtion:" + help();
     }
 
-    /**
-     * Emits a signal to run a python script using the method in the parent
-     * UserSubWindow
-     * 
-     * @param pyInput :: A string of python code to execute
-     */
-    void IndirectSimulationTab::runPythonScript(const QString& pyInput)
-    {
-      emit executePythonScript(pyInput, false);
-    }
   }
 } // namespace MantidQt

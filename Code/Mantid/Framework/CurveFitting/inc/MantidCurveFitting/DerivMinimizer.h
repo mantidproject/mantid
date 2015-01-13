@@ -10,16 +10,16 @@
 #include <gsl/gsl_multimin.h>
 #include <gsl/gsl_multifit_nlin.h>
 
-namespace Mantid
-{
-namespace CurveFitting
-{
-/** A wrapper around the GSL functions implementing a minimizer using derivatives.
+namespace Mantid {
+namespace CurveFitting {
+/** A wrapper around the GSL functions implementing a minimizer using
+   derivatives.
     Concrete classes must implement the getGSLMinimizerType() method.
 
     @author Roman Tolchenov, Tessella plc
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -39,8 +39,7 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport DerivMinimizer : public API::IFuncMinimizer
-{
+class DLLExport DerivMinimizer : public API::IFuncMinimizer {
 public:
   /// Constructor
   DerivMinimizer();
@@ -53,16 +52,16 @@ public:
   /// Return current value of the cost function
   double costFunctionVal();
   /// Calculate the covariance matrix.
-  void calCovarianceMatrix(gsl_matrix * covar, double epsrel = 0.0001);
+  void calCovarianceMatrix(gsl_matrix *covar, double epsrel = 0.0001);
   /// Initialize minimizer, i.e. pass a function to minimize.
-  virtual void initialize(API::ICostFunction_sptr function,size_t maxIterations = 0);
+  virtual void initialize(API::ICostFunction_sptr function,
+                          size_t maxIterations = 0);
   /// Set maximum value of the gradient at which iterations can stop
   void setStopGradient(const double value);
 
 protected:
-
   /// Return a concrete type to initialize m_gslSolver with
-  virtual const gsl_multimin_fdfminimizer_type* getGSLMinimizerType() = 0;
+  virtual const gsl_multimin_fdfminimizer_type *getGSLMinimizerType() = 0;
 
   /// Function to minimize.
   API::ICostFunction_sptr m_costFunction;
@@ -83,13 +82,13 @@ protected:
   /// Tolerance
   double m_tolerance;
   /// Used by the GSL
-  static double fun(const gsl_vector * x, void * params);
+  static double fun(const gsl_vector *x, void *params);
   /// Used by the GSL
-  static void dfun(const gsl_vector * x, void * params, gsl_vector * g);
+  static void dfun(const gsl_vector *x, void *params, gsl_vector *g);
   /// Used by the GSL
-  static void fundfun (const gsl_vector * x, void * params, double * f, gsl_vector * g);
+  static void fundfun(const gsl_vector *x, void *params, double *f,
+                      gsl_vector *g);
 };
-
 
 } // namespace CurveFitting
 } // namespace Mantid

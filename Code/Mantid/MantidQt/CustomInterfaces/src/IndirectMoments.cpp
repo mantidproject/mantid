@@ -56,13 +56,13 @@ namespace CustomInterfaces
 
     m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
     m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
-    
+
     m_uiForm.moment_leScale->setValidator(new QDoubleValidator());
 
     connect(m_uiForm.moment_dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
     connect(m_uiForm.moment_ckScale, SIGNAL(toggled(bool)), m_uiForm.moment_leScale, SLOT(setEnabled(bool)));
     connect(m_uiForm.moment_ckScale, SIGNAL(toggled(bool)), m_uiForm.moment_validScale, SLOT(setVisible(bool)));
-    
+
     connect(m_rangeSelectors["MomentsRangeSelector"], SIGNAL(selectionChangedLazy(double, double)), this, SLOT(rangeChanged(double, double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateProperties(QtProperty*, double)));
 
@@ -71,14 +71,14 @@ namespace CustomInterfaces
 
     m_uiForm.moment_validScale->setStyleSheet("QLabel { color : #aa0000; }");
   }
-    
+
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
   IndirectMoments::~IndirectMoments()
   {
   }
-  
+
   void IndirectMoments::setup()
   {
   }
@@ -112,7 +112,10 @@ namespace CustomInterfaces
     momentsAlg->setProperty("Save", save);
     momentsAlg->setProperty("OutputWorkspace", outputWorkspaceName);
 
-    //execute algorithm on seperate thread
+    // Set the workspace name for Python script export
+    m_pythonExportWsName = outputWorkspaceName + "_M0";
+
+    // Execute algorithm on seperate thread
     runAlgorithm(momentsAlg);
   }
 
@@ -130,7 +133,7 @@ namespace CustomInterfaces
     {
       emit showMessageBox(msg);
       return false;
-    } 
+    }
 
     return true;
   }
@@ -159,7 +162,7 @@ namespace CustomInterfaces
   void IndirectMoments::rangeChanged(double min, double max)
   {
     m_dblManager->setValue(m_properties["EMin"], min);
-    m_dblManager->setValue(m_properties["EMax"], max);  
+    m_dblManager->setValue(m_properties["EMax"], max);
   }
 
   /**
@@ -175,11 +178,11 @@ namespace CustomInterfaces
     if(prop == m_properties["EMin"])
     {
       double emax = m_dblManager->value(m_properties["EMax"]);
-      if(val >  emax) 
+      if(val >  emax)
       {
         m_dblManager->setValue(prop, emax);
       }
-      else 
+      else
       {
         m_rangeSelectors["MomentsRangeSelector"]->setMinimum(val);
       }
@@ -187,11 +190,11 @@ namespace CustomInterfaces
     else if (prop == m_properties["EMax"])
     {
       double emin = m_dblManager->value(m_properties["EMin"]);
-      if(emin > val) 
+      if(emin > val)
       {
         m_dblManager->setValue(prop, emin);
       }
-      else 
+      else
       {
         m_rangeSelectors["MomentsRangeSelector"]->setMaximum(val);
       }

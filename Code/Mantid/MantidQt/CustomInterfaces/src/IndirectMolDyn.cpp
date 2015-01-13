@@ -3,85 +3,105 @@
 #include <QFileInfo>
 #include <QString>
 
+using namespace Mantid::API;
+
 namespace MantidQt
 {
-	namespace CustomInterfaces
-	{
-		IndirectMolDyn::IndirectMolDyn(QWidget * parent) : 
-			IndirectSimulationTab(parent)
-		{
-			m_uiForm.setupUi(parent);
-		}
+  namespace CustomInterfaces
+  {
+    IndirectMolDyn::IndirectMolDyn(QWidget * parent) :
+      IndirectSimulationTab(parent)
+    {
+      m_uiForm.setupUi(parent);
 
-		/**
-		 * Validate the form to check the program can be run
-		 * 
-		 * @return :: Whether the form was valid
-		 */
-		bool IndirectMolDyn::validate()
-		{
-			QString filename = m_uiForm.mwRun->getFirstFilename();
-			QFileInfo finfo(filename);
-			QString ext = finfo.extension().toLower();
+      connect(m_uiForm.ckCropEnergy, SIGNAL(toggled(bool)), m_uiForm.dspMaxEnergy, SLOT(setEnabled(bool)));
+      connect(m_uiForm.ckResolution, SIGNAL(toggled(bool)), m_uiForm.dsResolution, SLOT(setEnabled(bool)));
+    }
 
-			if(ext != "dat" && ext != "cdl")
-			{
-				emit showMessageBox("File is not of expected type:\n File type must be .dat or .cdl");
-				return false;
-			} 
+    void IndirectMolDyn::setup()
+    {
+    }
 
-			return true;
-		}
+    /**
+     * Validate the form to check the program can be run
+     *
+     * @return :: Whether the form was valid
+     */
+    bool IndirectMolDyn::validate()
+    {
+      QString filename = m_uiForm.mwRun->getFirstFilename();
+      QFileInfo finfo(filename);
+      QString ext = finfo.extension().toLower();
 
-		/**
-		 * Collect the settings on the GUI and build a python
-		 * script that runs IndirectMolDyn
-		 */
-		void IndirectMolDyn::run() 
-		{
-			QString verbose("False");
-			QString plot("False");
-			QString save("False");
+      if(ext != "dat" && ext != "cdl")
+      {
+        emit showMessageBox("File is not of expected type.\n File type must be .dat or .cdl");
+        return false;
+      }
 
-			QString filename = m_uiForm.mwRun->getFirstFilename();
-			QFileInfo finfo(filename);
-			QString ext = finfo.extension().toLower();
+      QString functions = m_uiForm.leFunctionNames->text();
+      if(ext == "cdl" && functions.isEmpty())
+      {
+        emit showMessageBox("Must specify at least one function when loading CDL file.");
+        return false;
+      }
 
-			QString funcNames = m_uiForm.leFunctionNames->text();
+      if(m_uiForm.ckResolution->isChecked() && !m_uiForm.dsResolution->isValid())
+      {
+        emit showMessageBox("Invalid resolution file.");
+        return false;
+      }
 
-			//output options
-			if(m_uiForm.chkVerbose->isChecked()){ verbose = "True"; }
-			if(m_uiForm.chkSave->isChecked()){ save ="True"; }
-			plot = m_uiForm.cbPlot->currentText();
+      if(m_uiForm.ckResolution->isChecked() && !m_uiForm.ckSymmetrise->isChecked())
+      {
+        emit showMessageBox("Must symmetrise when convolving with resolution.");
+        return false;
+      }
 
+      return true;
+    }
 
-			QString pyInput = 
-				"from IndirectMolDyn import ";
+    /**
+     * Collect the settings on the GUI and run the MolDyn algorithm.
+     */
+    void IndirectMolDyn::run()
+    {
+      // Get filename and base filename (for naming output workspace group)
+      QString filename = m_uiForm.mwRun->getFirstFilename();
+      QFileInfo fi(filename);
+      QString baseName = fi.baseName();
 
-			QString pyFunc("");
-			if(ext == "dat")
-			{
-				pyFunc = "MolDynText";
-				pyInput += pyFunc + "\n" + pyFunc + "('"+filename+"',"+verbose+",'"+plot+"',"+save+")";
-			}
-			else if (ext == "cdl")
-			{
-				pyFunc = "MolDynImport";
-				pyInput += pyFunc + "\n" + pyFunc + "('"+filename+"','"+funcNames+"',"+verbose+",'"+plot+"',"+save+")";
-			}
+      // Setup algorithm
+      IAlgorithm_sptr molDynAlg = AlgorithmManager::Instance().create("MolDyn");
+      molDynAlg->setProperty("Filename", filename.toStdString());
+      molDynAlg->setProperty("Functions", m_uiForm.leFunctionNames->text().toStdString());
+      molDynAlg->setProperty("SymmetriseEnergy", m_uiForm.ckSymmetrise->isChecked());
+      molDynAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
+      molDynAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
+      molDynAlg->setProperty("Plot", m_uiForm.cbPlot->currentText().toStdString());
+      molDynAlg->setProperty("OutputWorkspace", baseName.toStdString());
 
-			runPythonScript(pyInput);
-		}
+      // Set energy crop option
+      if(m_uiForm.ckCropEnergy->isChecked())
+        molDynAlg->setProperty("MaxEnergy", QString::number(m_uiForm.dspMaxEnergy->value()).toStdString());
 
-		/**
-		 * Set the data selectors to use the default save directory
-		 * when browsing for input files.
-		 *  
-		 * @param settings :: The settings to loading into the interface
-		 */
-		void IndirectMolDyn::loadSettings(const QSettings& settings)
-		{
-			m_uiForm.mwRun->readSettings(settings.group());
-		}
-	} // namespace CustomInterfaces
+      // Set instrument resolution option
+      if(m_uiForm.ckResolution->isChecked())
+        molDynAlg->setProperty("Resolution", m_uiForm.dsResolution->getCurrentDataName().toStdString());
+
+      runAlgorithm(molDynAlg);
+    }
+
+    /**
+     * Set the data selectors to use the default save directory
+     * when browsing for input files.
+     *
+     * @param settings :: The settings to loading into the interface
+     */
+    void IndirectMolDyn::loadSettings(const QSettings& settings)
+    {
+      m_uiForm.mwRun->readSettings(settings.group());
+    }
+
+  } // namespace CustomInterfaces
 } // namespace MantidQt

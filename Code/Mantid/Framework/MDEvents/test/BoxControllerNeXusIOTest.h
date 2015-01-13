@@ -109,6 +109,39 @@ void setUp()
          Poco::File(FullPathFile).remove();   
  }
 
+ void test_free_space_index_is_written_out_and_read_in()
+ {
+     MDEvents::BoxControllerNeXusIO *pSaver(NULL);
+     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNeXusIO(sc.get()));
+     std::string FullPathFile;
+
+     TS_ASSERT_THROWS_NOTHING(pSaver->openFile(this->xxfFileName,"w"));
+     TS_ASSERT_THROWS_NOTHING(FullPathFile = pSaver->getFileName());
+
+     std::vector<uint64_t> freeSpaceVectorToSet;
+     for (uint64_t i = 0; i < 20; i++) {
+         freeSpaceVectorToSet.push_back(i);
+     }
+     pSaver->setFreeSpaceVector(freeSpaceVectorToSet);
+
+     TS_ASSERT_THROWS_NOTHING(pSaver->closeFile());
+
+     TS_ASSERT(!pSaver->isOpened());
+
+     TS_ASSERT_THROWS_NOTHING(pSaver->openFile(this->xxfFileName,"w"));
+
+     std::vector<uint64_t> freeSpaceVectorToGet;
+     pSaver->getFreeSpaceVector(freeSpaceVectorToGet);
+
+     TS_ASSERT_EQUALS(freeSpaceVectorToSet, freeSpaceVectorToGet);
+
+     TS_ASSERT_THROWS_NOTHING(pSaver->closeFile());
+
+     delete pSaver;
+     if(Poco::File(FullPathFile).exists())
+         Poco::File(FullPathFile).remove();
+ }
+
  //---------------------------------------------------------------------------------------------------------
  // tests to read/write double/vs float events
  template<typename FROM,typename TO>

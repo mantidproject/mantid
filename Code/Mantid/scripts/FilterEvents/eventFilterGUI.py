@@ -17,6 +17,8 @@ import mantid.simpleapi as api
 import mantid.kernel
 from mantid.simpleapi import AnalysisDataService 
 
+from mantid.kernel import ConfigService
+
 import os
 
 HUGE_FAST = 10000
@@ -45,11 +47,16 @@ class MainWindow(QtGui.QMainWindow):
 
         
         # Version 2.0 + Import
+        import matplotlib
+        from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+        from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+        from matplotlib.figure import Figure
+
         self.figure = Figure((4.0, 3.0), dpi=100)
         self.theplot = self.figure.add_subplot(111)
         self.graphicsView = FigureCanvas(self.figure)
         self.graphicsView.setParent(self.centralwidget)
-        self.graphicsView.setGeometry(QtCore.QRect(40, 230, 721, 411))
+        self.graphicsView.setGeometry(QtCore.QRect(20, 150, 741, 411))
         self.graphicsView.setObjectName(_fromUtf8("graphicsView"))
 
     """ 
@@ -59,6 +66,10 @@ class MainWindow(QtGui.QMainWindow):
         """
         # Base class
         QtGui.QMainWindow.__init__(self,parent)
+
+        # Mantid configuration
+        config = ConfigService.Instance()
+        self._instrument = config["default.instrument"]
 
         # Central widget 
         self.centralwidget = QtGui.QWidget(self)
@@ -94,14 +105,14 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.horizontalSlider.setRange(0, 100)
         self.ui.horizontalSlider.setValue(self._leftSlideValue)
         self.ui.horizontalSlider.setTracking(True)
-        self.ui.horizontalSlider.setTickPosition(QSlider.TicksAbove)
+        self.ui.horizontalSlider.setTickPosition(QSlider.NoTicks)
         self.connect(self.ui.horizontalSlider, SIGNAL('valueChanged(int)'), self.move_leftSlider)
 
 
         self.ui.horizontalSlider_2.setRange(0, 100)
         self.ui.horizontalSlider_2.setValue(self._rightSlideValue)
         self.ui.horizontalSlider_2.setTracking(True)
-        self.ui.horizontalSlider_2.setTickPosition(QSlider.TicksAbove)
+        self.ui.horizontalSlider_2.setTickPosition(QSlider.NoTicks)
         self.connect(self.ui.horizontalSlider_2, SIGNAL('valueChanged(int)'), self.move_rightSlider)
         
         # self.connect(self.ui.lineEdit_3, QtCore.SIGNAL("textChanged(QString)"), 
@@ -117,7 +128,8 @@ class MainWindow(QtGui.QMainWindow):
         # File loader
         self.scanEventWorkspaces()
         self.connect(self.ui.pushButton_refreshWS, SIGNAL('clicked()'), self.scanEventWorkspaces)
-        self.connect(self.ui.pushButton_2, SIGNAL('clicked()'), self.browse_openFile)
+        self.connect(self.ui.pushButton_browse, SIGNAL('clicked()'), self.browse_File)
+        self.connect(self.ui.pushButton_load, SIGNAL('clicked()'), self.load_File)
         self.connect(self.ui.pushButton_3, SIGNAL('clicked()'), self.use_existWS)
 
         # Set up time
@@ -526,7 +538,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             setLineEdit = True
 
-        # Move the upper value bar
+        # Move the upper value bar: upperx and uppery are real value (float but not (0,100)) of the figure
         ylim = self.ui.theplot.get_ylim()
         newy = ylim[0] + inewy*(ylim[1] - ylim[0])*0.01
         upperx = self.ui.theplot.get_xlim() 
@@ -594,7 +606,7 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def browse_openFile(self):
+    def browse_File(self):
         """ Open a file dialog to get file
         """
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Input File Dialog', 
@@ -602,12 +614,31 @@ class MainWindow(QtGui.QMainWindow):
 
         self.ui.lineEdit.setText(str(filename))
 
-        print "Selected file: ", filename
+        # print "Selected file: ", filename
+
+        return
+
+    def load_File(self):
+        """ Load the file by file name or run number
+        """
+        # Get file name from line editor
+        filename = str(self.ui.lineEdit.text())
+
+        # Find out it is relative path or absolute path
+        if os.path.abspath(filename) == filename:
+            isabspath = True
+        else:
+            isabspath = False
 
         dataws = self._loadFile(str(filename))
-        self._importDataWorkspace(dataws)
+        if dataws is None:
+            print "Unable to locate run %s in default directory %s." % (filename, self._defaultdir)
+        else:
+            self._importDataWorkspace(dataws)
+            self._defaultdir = os.path.dirname(str(filename))
 
-        self._defaultdir = os.path.dirname(str(filename))
+        # Reset GUI
+        self._resetGUI(resetfilerun=False)
 
         return
 
@@ -622,6 +653,9 @@ class MainWindow(QtGui.QMainWindow):
             self._importDataWorkspace(dataws)
         except KeyError: 
             pass
+
+        # Reset GUI
+        self._resetGUI(resetfilerun=True)
 
         return
 
@@ -664,6 +698,13 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.theplot.set_ylim(ylim[0], ylim[1])
 
         setp(self.mainline, xdata=vecreltimes, ydata=vecvalue) 
+
+        samunit = samplelog.units
+        if len(samunit) == 0:
+            ylabel = logname
+        else:
+            ylabel = "%s (%s)" % (logname, samunit)
+        self.ui.theplot.set_ylabel(ylabel, fontsize=13)
 
         # assume that all logs are on almost same X-range.  Only Y need to be reset
         setp(self.leftslideline, ydata=ylim)
@@ -779,17 +820,53 @@ class MainWindow(QtGui.QMainWindow):
         # ENDFOR
 
         if len(eventwsnames) > 0: 
+            self.ui.comboBox.clear()
             self.ui.comboBox.addItems(eventwsnames)
 
         return
 
 
     def _loadFile(self, filename):
-        """ Load file
+        """ Load file or run
         File will be loaded to a workspace shown in MantidPlot
         """
-        wsname = os.path.splitext(os.path.split(filename)[1])[0]
+        config = ConfigService
 
+        # Check input file name and output workspace name
+        if filename.isdigit() is True:
+            # Construct a file name from run number
+            runnumber = int(filename)
+            if runnumber <= 0:
+                print "Run number cannot be less or equal to zero.  User gives %s. " % (filename)
+                return None
+            else: 
+                ishort = config.getInstrument(self._instrument).shortName()
+                filename = "%s_%s" %(ishort, filename)
+                wsname = filename + "_event"
+
+        elif filename.count(".") > 0:
+            # A proper file name
+            wsname = os.path.splitext(os.path.split(filename)[1])[0]
+
+        elif filename.count("_") == 1:
+            # A short one as instrument_runnumber
+            iname = filename.split("_")[0]
+            str_runnumber = filename.split("_")[1]
+            if str_runnumber.isdigit() is True and int(str_runnumber) > 0:
+                # Acccepted format
+                ishort = config.getInstrument(iname).shortName()
+                wsname = "%s_%s_event" % (ishort, str_runnumber)
+            else:
+                # Non-supported
+                print "File name / run number in such format %s is not supported. " % (filename)
+                return None
+
+        else:
+            # Unsupported format
+            print "File name / run number in such format %s is not supported. " % (filename)
+            return None
+
+        # Load
         try: 
             ws = api.Load(Filename=filename, OutputWorkspace=wsname)
         except:
@@ -825,10 +902,14 @@ class MainWindow(QtGui.QMainWindow):
             if timeres < 1.0:
                 timeres = 1.0
 
-            sumws = api.RebinByPulseTimes(InputWorkspace=wksp, OutputWorkspace = "Summed_%s"%(str(wksp)), 
-                Params="0, %f, %d"%(timeres, timeduration))
-            sumws = api.SumSpectra(InputWorkspace=sumws, OutputWorkspace=str(sumws))
-            sumws = api.ConvertToPointData(InputWorkspace=sumws, OutputWorkspace=str(sumws))
+            sumwsname = "_Summed_%s"%(str(wksp))
+            if AnalysisDataService.doesExist(sumwsname) is False:
+                sumws = api.RebinByPulseTimes(InputWorkspace=wksp, OutputWorkspace = sumwsname, 
+                    Params="0, %f, %d"%(timeres, timeduration))
+                sumws = api.SumSpectra(InputWorkspace=sumws, OutputWorkspace=str(sumws))
+                sumws = api.ConvertToPointData(InputWorkspace=sumws, OutputWorkspace=str(sumws))
+            else:
+                sumws = AnalysisDataService.retrieve(sumwsname)
         except Exception as e:
             return str(e)
 
@@ -840,9 +921,12 @@ class MainWindow(QtGui.QMainWindow):
         ymin = min(vecy)
         ymax = max(vecy)
 
-        # Reset graph
+        # Reset graph  
         self.ui.theplot.set_xlim(xmin, xmax)
         self.ui.theplot.set_ylim(ymin, ymax)
+
+        self.ui.theplot.set_xlabel('Time (seconds)', fontsize=13)
+        self.ui.theplot.set_ylabel('Counts', fontsize=13)
 
         # Set up main line
         setp(self.mainline, xdata=vecx, ydata=vecy) 
@@ -1056,3 +1140,62 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.label_error.show()
 
         return
+
+
+    def _resetGUI(self, resetfilerun=False, resetwslist=False):
+        """ Reset GUI including all text edits and etc. 
+        """
+        if resetfilerun is True:
+            self.ui.lineEdit.clear()
+
+        # Plot related
+        self.ui.lineEdit_3.clear()
+        self.ui.lineEdit_4.clear()
+        self.ui.horizontalSlider.setValue(0)
+        self.ui.horizontalSlider_2.setValue(100)
+
+
+        self.ui.lineEdit_outwsname.clear()
+        self.ui.lineEdit_title.clear()
+
+        # Filter by log value
+        self.ui.lineEdit_5.clear()
+        self.ui.lineEdit_6.clear()
+
+        self.ui.verticalSlider_2.setValue(0)
+        self.ui.verticalSlider.setValue(100)
+
+        ylim = self.ui.theplot.get_ylim()
+        miny = ylim[0]
+        maxy = ylim[1]
+        xlim = self.ui.theplot.get_xlim() 
+        setp(self.lowerslideline, xdata=xlim, ydata=[miny, miny])
+        setp(self.upperslideline, xdata=xlim, ydata=[maxy, maxy])
+        self.ui.graphicsView.draw()
+
+        self.ui.lineEdit_7.clear()
+        self.ui.lineEdit_8.clear()
+        self.ui.lineEdit_9.clear()
+
+        # Filter by time
+        self.ui.lineEdit_timeInterval.clear()
+
+        # Advanced setup
+        self.ui.comboBox_tofCorr.setCurrentIndex(0)
+        self.ui.lineEdit_Ei.clear()
+
+        self.ui.checkBox_fastLog.setCheckState(False)
+        self.ui.checkBox_doParallel.setCheckState(False)
+
+        self.ui.comboBox_skipSpectrum.setCurrentIndex(0)
+        
+        self.ui.checkBox_filterByPulse.setCheckState(False)
+        self.ui.checkBox_from1.setCheckState(False)
+        self.ui.checkBox_groupWS.setCheckState(True)
+        self.ui.checkBox_splitLog.setCheckState(False)
+
+        # Error message
+        self.ui.plainTextEdit_ErrorMsg.clear()
+
+        return
+

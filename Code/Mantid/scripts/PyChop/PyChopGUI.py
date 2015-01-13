@@ -4,11 +4,10 @@ from PyChopUI import Ui_MainWindow
 from PyQt4 import QtCore, uic,QtGui
 #from DirectEnergyConversion import *
 import time as time
-from mantidplotpy import *
+from mantidplot import *
 import dgreduce
 import inspect
 import numpy
-from mantidplot import *
 from mantid import *
 from mantid.simpleapi import *
 import math

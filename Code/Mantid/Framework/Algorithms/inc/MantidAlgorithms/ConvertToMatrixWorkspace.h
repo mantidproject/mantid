@@ -6,11 +6,10 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
-/** Creates a copy of the matrix workspace representation of the input workspace. At the moment, this
+namespace Mantid {
+namespace Algorithms {
+/** Creates a copy of the matrix workspace representation of the input
+ workspace. At the moment, this
  is only available for MatrixWorkspaces and EventWorkspaces.
 
  Required Properties:
@@ -22,7 +21,8 @@ namespace Algorithms
  @author Stuart Campbell, ORNL
  @date 10/12/2010
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -42,30 +42,27 @@ namespace Algorithms
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport ConvertToMatrixWorkspace : public API::Algorithm
-{
+class DLLExport ConvertToMatrixWorkspace : public API::Algorithm {
 public:
   /// (Empty) Constructor
-  ConvertToMatrixWorkspace() : API::Algorithm()
-  {}
+  ConvertToMatrixWorkspace() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~ConvertToMatrixWorkspace()
-  {}
+  virtual ~ConvertToMatrixWorkspace() {}
   /// Algorithm's name
-  virtual const std::string name() const  { return "ConvertToMatrixWorkspace";}
-    
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Converts an EventWorkspace into a Workspace2D, using the input workspace's current X bin values.";}
-  
+  virtual const std::string name() const { return "ConvertToMatrixWorkspace"; }
+
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Converts an EventWorkspace into a Workspace2D, using the input "
+           "workspace's current X bin values.";
+  }
+
   /// Algorithm's version
-  virtual int version() const
-  { return (1);}
+  virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const
-  { return "Events";}
+  virtual const std::string category() const { return "Events"; }
 
 private:
-  
   /// Initialisation code
   void init();
   /// Execution code

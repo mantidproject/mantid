@@ -4,6 +4,7 @@
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidKernel/V3D.h"
 #include "OpenGLError.h"
+#include <limits>
 
 /**
  * Initialize with defaults.
@@ -362,11 +363,16 @@ void Viewport::generateZoomTo(int a, int b)
  */
 void Viewport::wheelZoom( int a, int b, int d)
 {
+  // OpenGL works with floats. Set a limit to the zoom factor
+  // based on the epsilon for floats
+  const double zoomLimit = std::numeric_limits<float>::epsilon() * 1000;
   Mantid::Kernel::V3D point;
   generateTranslationPoint( a, b, point );
-  double diff = 1.0 + 12.0 / d;
+  double diff = 1.0 + static_cast<double>(d) / 600;
+  double newZoomFactor = m_zoomFactor * diff;
+  if ( newZoomFactor < zoomLimit || 1.0 / newZoomFactor < zoomLimit ) return;
   // set new zoom factor
-  m_zoomFactor *= diff;
+  m_zoomFactor = newZoomFactor;
   // update translation vector to keep 
   Mantid::Kernel::V3D T(m_xTrans, m_yTrans, 0.0);
   T = point - (point - T) * diff;

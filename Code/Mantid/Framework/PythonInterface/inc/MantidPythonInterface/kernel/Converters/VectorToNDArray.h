@@ -1,7 +1,8 @@
 #ifndef MANTID_PYTHONINTERFACE_VECTORTONDARRAY_H_
 #define MANTID_PYTHONINTERFACE_VECTORTONDARRAY_H_
 /**
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -26,40 +27,33 @@
 #include <boost/python/detail/prefix.hpp>
 #include <vector>
 
-namespace Mantid
-{
-  namespace PythonInterface
-  {
-    namespace Converters
-    {
-      //-----------------------------------------------------------------------
-      // Converter implementation
-      //-----------------------------------------------------------------------
-      /**
-       * Converter that takes a std::vector and converts it into a flat numpy array.
-       *
-       * The type of conversion is specified by another struct/class that
-       * contains a static member create.
-       */
-      template<typename ElementType, typename ConversionPolicy>
-      struct VectorToNDArray
-      {
-        /**
-         * Converts a cvector to a numpy array
-         * @param cdata :: A const reference to a vector
-         * @returns A new PyObject that wraps the vector in a numpy array
-         */
-        inline PyObject * operator()(const std::vector<ElementType> & cdata) const
-        {
-          // Hand off the work to the conversion policy
-          typedef typename ConversionPolicy::template apply<ElementType> policy;
-          return policy::create1D(cdata);
-        }
-      };
-
-    }
+namespace Mantid {
+namespace PythonInterface {
+namespace Converters {
+//-----------------------------------------------------------------------
+// Converter implementation
+//-----------------------------------------------------------------------
+/**
+ * Converter that takes a std::vector and converts it into a flat numpy array.
+ *
+ * The type of conversion is specified by another struct/class that
+ * contains a static member create.
+ */
+template <typename ElementType, typename ConversionPolicy>
+struct VectorToNDArray {
+  /**
+   * Converts a cvector to a numpy array
+   * @param cdata :: A const reference to a vector
+   * @returns A new PyObject that wraps the vector in a numpy array
+   */
+  inline PyObject *operator()(const std::vector<ElementType> &cdata) const {
+    // Hand off the work to the conversion policy
+    typedef typename ConversionPolicy::template apply<ElementType> policy;
+    return policy::create1D(cdata);
   }
+};
 }
-
+}
+}
 
 #endif /* MANTID_PYTHONINTERFACE_VECTORTONDARRAY_H_ */

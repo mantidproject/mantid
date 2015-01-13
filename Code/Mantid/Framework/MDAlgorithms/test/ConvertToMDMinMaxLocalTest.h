@@ -137,6 +137,7 @@ public:
     Mantid::API::FrameworkManager::Instance();
     ConvertToMDMinMaxLocal alg;
     Mantid::API::MatrixWorkspace_sptr  ws=MakeWorkspace(-2.5,0.05,true,0,5);
+
     WorkspaceCreationHelper::storeWS(WSName,ws);
 
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )

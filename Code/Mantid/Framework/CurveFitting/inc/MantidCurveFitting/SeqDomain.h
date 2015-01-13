@@ -15,16 +15,15 @@
 #include <vector>
 #include <algorithm>
 
-namespace Mantid
-{
-namespace CurveFitting
-{
+namespace Mantid {
+namespace CurveFitting {
 /** An implementation of CompositeDomain.
 
     @author Roman Tolchenov, Tessella plc
     @date 15/11/2011
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -44,40 +43,47 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_CURVEFITTING_DLL SeqDomain: public API::FunctionDomain
-{
+class MANTID_CURVEFITTING_DLL SeqDomain : public API::FunctionDomain {
 public:
-  SeqDomain():API::FunctionDomain(),m_currentIndex(0){}
-  virtual ~SeqDomain(){}
+  SeqDomain() : API::FunctionDomain(), m_currentIndex(0) {}
+  virtual ~SeqDomain() {}
   /// Return the number of points in the domain
   virtual size_t size() const;
   /// Return the number of parts in the domain
   virtual size_t getNDomains() const;
   /// Create and return i-th domain and i-th values, (i-1)th domain is released.
-  virtual void getDomainAndValues(size_t i, API::FunctionDomain_sptr& domain, API::FunctionValues_sptr& values) const;
+  virtual void getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain,
+                                  API::FunctionValues_sptr &values) const;
   /// Add new domain creator
-  void addCreator( API::IDomainCreator_sptr creator );
+  void addCreator(API::IDomainCreator_sptr creator);
   /// Calculate the value of a least squares cost function
-  virtual void leastSquaresVal(const CostFuncLeastSquares& leastSquares);
-  /// Calculate the value, first and second derivatives of a least squares cost function
-  virtual void leastSquaresValDerivHessian(const CostFuncLeastSquares& leastSquares, bool evalFunction, bool evalDeriv, bool evalHessian);
+  virtual void leastSquaresVal(const CostFuncLeastSquares &leastSquares);
+  /// Calculate the value, first and second derivatives of a least squares cost
+  /// function
+  virtual void
+  leastSquaresValDerivHessian(const CostFuncLeastSquares &leastSquares,
+                              bool evalFunction, bool evalDeriv,
+                              bool evalHessian);
   /// Calculate the value of a Rwp cost function
-  void rwpVal(const CostFuncRwp& rwp);
+  void rwpVal(const CostFuncRwp &rwp);
   /// Calculate the value, first and second derivatives of a RWP cost function
-  void rwpValDerivHessian(const CostFuncRwp& rwp, bool evalFunction, bool evalDeriv, bool evalHessian);
+  void rwpValDerivHessian(const CostFuncRwp &rwp, bool evalFunction,
+                          bool evalDeriv, bool evalHessian);
 
-  /// Create an instance of SeqDomain in one of two forms: either SeqDomain for sequential domain creation
+  /// Create an instance of SeqDomain in one of two forms: either SeqDomain for
+  /// sequential domain creation
   /// or ParDomain for parallel calculations
-  static SeqDomain* create(API::IDomainCreator::DomainType type);
+  static SeqDomain *create(API::IDomainCreator::DomainType type);
+
 protected:
   /// Current index
   mutable size_t m_currentIndex;
   /// Currently active domain.
-  mutable std::vector< API::FunctionDomain_sptr > m_domain;
+  mutable std::vector<API::FunctionDomain_sptr> m_domain;
   /// Currently active values.
-  mutable std::vector< API::FunctionValues_sptr > m_values;
+  mutable std::vector<API::FunctionValues_sptr> m_values;
   /// Domain creators.
-  std::vector< boost::shared_ptr<API::IDomainCreator> > m_creators;
+  std::vector<boost::shared_ptr<API::IDomainCreator>> m_creators;
 };
 
 } // namespace CurveFitting

@@ -6,14 +6,15 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/WorkspaceJoiners.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
-/** Joins two partial, non-overlapping workspaces into one. Used in the situation where you
-    want to load a raw file in two halves, process the data and then join them back into
+namespace Mantid {
+namespace Algorithms {
+/** Joins two partial, non-overlapping workspaces into one. Used in the
+   situation where you
+    want to load a raw file in two halves, process the data and then join them
+   back into
     a single dataset.
-    The input workspaces must come from the same instrument, have common units and bins
+    The input workspaces must come from the same instrument, have common units
+   and bins
     and no detectors that contribute to spectra should overlap.
 
     Required Properties:
@@ -22,12 +23,14 @@ namespace Algorithms
     <LI> InputWorkspace2  - The name of the second input workspace. </LI>
     </UL>
 
-    The output will be stored in the first named input workspace, the second will be deleted.
+    The output will be stored in the first named input workspace, the second
+   will be deleted.
 
     @author Russell Taylor, Tessella
     @date 25/08/2008
 
-    Copyright &copy; 2008-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
+   Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -47,8 +50,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ConjoinWorkspaces : public WorkspaceJoiners
-{
+class DLLExport ConjoinWorkspaces : public WorkspaceJoiners {
 public:
   /// Empty constructor
   ConjoinWorkspaces();
@@ -64,8 +66,12 @@ private:
   void init();
   void exec();
 
-  void checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2, bool checkSpectra) const;
-  virtual void fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2, API::MatrixWorkspace_sptr output);
+  void checkForOverlap(API::MatrixWorkspace_const_sptr ws1,
+                       API::MatrixWorkspace_const_sptr ws2,
+                       bool checkSpectra) const;
+  virtual void fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
+                                  API::MatrixWorkspace_const_sptr ws2,
+                                  API::MatrixWorkspace_sptr output);
   bool processGroups();
 
   /// True if spectra overlap

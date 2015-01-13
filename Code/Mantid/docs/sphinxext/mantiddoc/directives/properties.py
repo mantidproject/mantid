@@ -55,12 +55,24 @@ class PropertiesDirective(AlgorithmBaseDirective):
             # int.
             direction_string = ["Input", "Output", "InOut", "None"]
 
+            #dictionary to convert from property type to link to category page (where possible)
+            property_type_dict = {
+                "Workspace":":ref:`Workspace <Workspace>`",
+                "Workspace2D":":ref:`Workspace2D <Workspace2D>`",
+                "EventWorkspace":":ref:`EventWorkspace <EventWorkspace>`",
+                "MatrixWorkspace":":ref:`MatrixWorkspace <MatrixWorkspace>`",
+                "GroupWorkspace":":ref:`GroupWorkspace <WorkspaceGroup>`",
+                "MDEventWorkspace":":ref:`MDEventWorkspace <MDWorkspace>`",
+                "MDHistoWorkspace":":ref:`MDHistoWorkspace <MDHistoWorkspace>`",
+                "TableWorkspace":":ref:`TableWorkspace <Table Workspaces>`"
+            }
+
             for prop in alg_properties:
                 # Append a tuple of properties to the list.
                 properties.append((
                     str(prop.name),
                     str(direction_string[prop.direction]),
-                    str(prop.type),
+                    property_type_dict.get(str(prop.type),str(prop.type)),
                     str(self._get_default_prop(prop)),
                     str(prop.documentation.replace("\n", " "))
                     ))

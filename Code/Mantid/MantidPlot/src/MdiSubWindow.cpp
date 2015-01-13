@@ -545,3 +545,41 @@ QWidget* MdiSubWindow::getWrapperWindow() const
   return wrapper;
 }
 
+/**
+ * Wrapper for the resize method.
+ */
+void MdiSubWindow::resize(int w, int h)
+{
+  QWidget* pw = getWrapperWindow();
+  if(pw)
+  {
+    setGeometry(x(), y(), w, h);
+    pw->adjustSize();
+  }
+  else
+  {
+    QFrame::resize(w,h);
+  }
+}
+
+/**
+ * Wrapper for the resize method.
+ */
+void MdiSubWindow::resize(const QSize& size)
+{
+  QWidget* pw = getWrapperWindow();
+  if(pw)
+  {
+    setGeometry(pw->x(), pw->y(), size.width(), size.height());
+    pw->adjustSize();
+  }
+  else
+  {
+    QFrame::resize(size);
+  }
+}
+
+QSize MdiSubWindow::sizeHint() const
+{
+  return size();
+}

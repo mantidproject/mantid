@@ -59,7 +59,9 @@ namespace
     Q_UNUSED(arg);
     int retcode(0);
     if(event != PyTrace_LINE) return retcode;
-    PyObject_CallMethod(scriptObj, "lineNumberChanged", "O i", frame->f_code->co_filename, frame->f_lineno);
+      std::string str1 = "lineNumberChanged";
+      std::string str2 = "O i";
+    PyObject_CallMethod(scriptObj,&str1[0],&str2[0], frame->f_code->co_filename, frame->f_lineno);
     return retcode;
   }
 
@@ -237,8 +239,10 @@ void PythonScript::emit_error()
 
   // return early if nothing happened
   if (!PyErr_Occurred())
+  {
+    emit finished(MSG_FINISHED);
     return;
-
+  }
   // get the error information out
   PyObject *exception(NULL), *value(NULL), *traceback(NULL);
   PyErr_Fetch(&exception, &value, &traceback);

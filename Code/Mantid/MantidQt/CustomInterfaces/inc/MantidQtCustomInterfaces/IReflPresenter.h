@@ -1,7 +1,13 @@
 #ifndef MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
 
+#include <map>
+#include <string>
+
 #include "MantidKernel/System.h"
+
+#include <QVariant>
+
 namespace MantidQt
 {
   namespace CustomInterfaces
@@ -10,7 +16,7 @@ namespace MantidQt
 
     IReflPresenter is an interface which defines the functions any reflectometry interface presenter needs to support.
 
-    Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -34,10 +40,37 @@ namespace MantidQt
     {
     public:
       virtual ~IReflPresenter() {};
-      //Tell the presenter something happened
-      virtual void notify(int flag) = 0;
-    private:
 
+      enum Flag
+      {
+        SaveFlag,
+        SaveAsFlag,
+        AppendRowFlag,
+        PrependRowFlag,
+        DeleteRowFlag,
+        ProcessFlag,
+        GroupRowsFlag,
+        OpenTableFlag,
+        NewTableFlag,
+        TableUpdatedFlag,
+        ExpandSelectionFlag,
+        OptionsDialogFlag,
+        ClearSelectedFlag,
+        CopySelectedFlag,
+        CutSelectedFlag,
+        PasteSelectedFlag,
+        SearchFlag,
+        TransferFlag,
+        ImportTableFlag,
+        ExportTableFlag,
+        PlotRowFlag,
+        PlotGroupFlag,
+      };
+
+      //Tell the presenter something happened
+      virtual void notify(IReflPresenter::Flag flag) = 0;
+      virtual const std::map<std::string,QVariant>& options() const = 0;
+      virtual void setOptions(const std::map<std::string,QVariant>& options) = 0;
     };
   }
 }

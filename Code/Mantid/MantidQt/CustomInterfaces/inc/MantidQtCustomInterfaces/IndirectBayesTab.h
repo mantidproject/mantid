@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_INDIRECTBAYESTAB_H_
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtCustomInterfaces/IndirectTab.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
@@ -46,7 +47,7 @@ namespace MantidQt
 
 			@author Samuel Jackson, STFC
 
-			Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+			Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
 			This file is part of Mantid.
 
@@ -72,7 +73,7 @@ namespace MantidQt
 		/// precision for integer properties in bayes tabs
 		static const unsigned int INT_DECIMALS = 0;
 
-		class DLLExport IndirectBayesTab : public QWidget
+		class DLLExport IndirectBayesTab : public IndirectTab
 		{
 			Q_OBJECT
 
@@ -83,66 +84,32 @@ namespace MantidQt
 			/// Returns a URL for the wiki help page for this interface
 			QString tabHelpURL();
 
-			/// Base methods implemented in derived classes 
+			/// Base methods implemented in derived classes
 			virtual QString help() = 0;
-			virtual bool validate() = 0;
-			virtual void run() = 0;
 			virtual void loadSettings(const QSettings& settings) = 0;
 
 		signals:
-			/// Send signal to parent window to execute python script
-			void executePythonScript(const QString& pyInput, bool output);
 			/// Send signal to parent window to show a message box to user
 			void showMessageBox(const QString& message);
 
-		protected slots:
-			/// Slot for when the min range on the range selector changes
-			virtual void minValueChanged(double min) = 0;
-			/// Slot for when the min range on the range selector changes
-			virtual void maxValueChanged(double max) = 0;
-			/// Slot to handle when a user edits a property
+    protected slots:
+			/// Slot to update the guides when the range properties change
 			virtual void updateProperties(QtProperty* prop, double val) = 0;
 
 		protected:
-			/// Function to plot a workspace to the miniplot using a workspace name
-			void plotMiniPlot(const QString& workspace, size_t index);
-			/// Function to plot a workspace to the miniplot using a workspace pointer
-			void plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex);
-			/// Function to set the range selector on the mini plot
-			void setMiniPlotGuides(QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds);
 			/// Function to run a string as python code
 			void runPythonScript(const QString& pyInput);
 			/// Function to read an instrument's resolution from the IPF using a string
-    	    bool getInstrumentResolution(const QString& filename, std::pair<double,double>& res);
+    	bool getInstrumentResolution(const QString& filename, std::pair<double,double>& res);
 			/// Function to read an instrument's resolution from the IPF using a workspace pointer
 			bool getInstrumentResolution(Mantid::API::MatrixWorkspace_const_sptr ws, std::pair<double,double>& res);
-			/// Function to set the range limits of the plot
-			void setPlotRange(QtProperty* min, QtProperty* max, const std::pair<double, double>& bounds);
 			/// Function to set the position of the lower guide on the plot
-    	    void updateLowerGuide(QtProperty* lower, QtProperty* upper, double value);
+	    void updateLowerGuide(MantidQt::MantidWidgets::RangeSelector* rs, QtProperty* lower, QtProperty* upper, double value);
 			/// Function to set the position of the upper guide on the plot
-    	    void updateUpperGuide(QtProperty* lower, QtProperty* upper, double value);
-			/// Function to get the range of the curve displayed on the mini plot
-			std::pair<double,double> getCurveRange();
-            /// Run an algorithm async
-            void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
+	    void updateUpperGuide(MantidQt::MantidWidgets::RangeSelector* rs, QtProperty* lower, QtProperty* upper, double value);
 
-			/// Plot of the input
-			QwtPlot* m_plot;
-			/// Curve on the plot
-			QwtPlotCurve* m_curve;
-			/// Range selector widget for mini plot
-			MantidQt::MantidWidgets::RangeSelector* m_rangeSelector;
 			/// Tree of the properties
 			QtTreePropertyBrowser* m_propTree;
-			/// Internal list of the properties
-			QMap<QString, QtProperty*> m_properties;
-			/// Double manager to create properties
-			QtDoublePropertyManager* m_dblManager;
-			/// Double editor facotry for the properties browser
-			DoubleEditorFactory* m_dblEdFac;
-            /// Algorithm runner object to execute algorithms on a seperate thread from the gui
-            MantidQt::API::AlgorithmRunner* m_algRunner;
 
 		};
 	} // namespace CustomInterfaces

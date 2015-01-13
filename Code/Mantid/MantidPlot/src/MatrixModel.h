@@ -81,7 +81,7 @@ public:
 	virtual QString text(int row, int col);
 	virtual void setText(int row, int col, const QString&);
 
-	virtual QString saveToString();
+	std::string saveToProject();
 	virtual QImage renderImage();
 
 	virtual double data(int row, int col) const;

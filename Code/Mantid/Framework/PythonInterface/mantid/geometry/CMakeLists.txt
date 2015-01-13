@@ -30,12 +30,12 @@ set ( EXPORT_FILES
   src/Exports/SpaceGroupFactory.cpp
   src/Exports/SymmetryOperation.cpp
   src/Exports/SymmetryOperationFactory.cpp
-)  
+)
 
 set ( SRC_FILES
 )
 
-set ( INC_FILES 
+set ( INC_FILES
 )
 
 set ( PY_FILES
@@ -45,7 +45,7 @@ set ( PY_FILES
 #############################################################################################
 # Generate a source file from the export definitions and provided template
 #############################################################################################
-create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/geometry.cpp EXPORT_FILES 
+create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/geometry.cpp EXPORT_FILES
                 SRC_FILES )
 
 #############################################################################################
@@ -59,8 +59,8 @@ if(CMAKE_GENERATOR STREQUAL Xcode)
   set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/geometry )
 endif()
 
-copy_python_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
-                           PYTHON_INSTALL_FILES )
+copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
+                     PYTHON_INSTALL_FILES )
 
 #############################################################################################
 # Create the target for this directory
@@ -70,12 +70,12 @@ add_library ( PythonGeometryModule ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FI
 set_python_properties( PythonGeometryModule _geometry )
 set_target_output_directory ( PythonGeometryModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies
-target_link_libraries ( PythonGeometryModule PythonKernelModule ${PYTHON_DEPS} )
+target_link_libraries ( PythonGeometryModule PythonKernelModule Geometry )
 
 ###########################################################################
 # Installation settings
 ###########################################################################
 install ( TARGETS PythonGeometryModule ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR}/mantid/geometry )
 
-# Pure Python files 
+# Pure Python files
 install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/geometry )

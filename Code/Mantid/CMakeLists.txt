@@ -33,21 +33,21 @@ include ( ParaViewSetup )
 ###########################################################################
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
-	if ( NOT THIRD_PARTY )
-  		set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
-	endif ()
-	# Print out where we think we are looking for 3rd party stuff
-	message (STATUS "Setting THIRD_PARTY to be ${THIRD_PARTY}." )
+  if ( NOT THIRD_PARTY )
+      set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
+  endif ()
+  # Print out where we think we are looking for 3rd party stuff
+  message (STATUS "Setting THIRD_PARTY to be ${THIRD_PARTY}." )
 
-	# Check that the 3rd party directory exists.
-	if (NOT IS_DIRECTORY "${THIRD_PARTY}")
+  # Check that the 3rd party directory exists.
+  if (NOT IS_DIRECTORY "${THIRD_PARTY}")
         message ( WARNING "Specified THIRD_PARTY directory doesn't exist!" )
-	endif()
+  endif()
 
-	include ( WindowsSetup )
+  include ( WindowsSetup )
 
-	# Settings for generating the windows Nullsoft package via CPack
-	include ( WindowsNSIS )
+  # Settings for generating the windows Nullsoft package via CPack
+  include ( WindowsNSIS )
 
 ENDIF()
 
@@ -121,6 +121,7 @@ set ( CORE_MANTIDLIBS Kernel Geometry API )
 
 # Add a target for all GUI tests
 add_custom_target ( GUITests )
+add_dependencies ( GUITests MantidWidgetsTest)
 add_dependencies ( check GUITests )
 # Collect all tests together
 add_custom_target ( AllTests )
@@ -185,12 +186,8 @@ if ( ENABLE_CPACK )
 
       # rhel requirements
       set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,nexus-python,gsl,glibc,qwtplot3d-qt4,muParser,numpy" )
-      # OpenCASCADE changed names when packaged for Fedora 20 and RHEL7
-      if( "${UNIX_CODENAME}" MATCHES "Heisenbug" OR "${UNIX_CODENAME}" MATCHES "Maipo" )
-        set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-devel" )
-      else()
-        set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0" )
-      endif()
+      # OCE
+      set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization")
       # Qwt is qwt5-qt4 in RHEL7
       if( "${UNIX_CODENAME}" MATCHES "Maipo" )
         set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},qwt5-qt4" )
@@ -202,7 +199,7 @@ if ( ENABLE_CPACK )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-ipython >= 1.1.0" )
       # scipy & matplotlib
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy,python-matplotlib" )
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5,jsoncpp" )
 
       if( "${UNIX_CODENAME}" MATCHES "Santiago" )
         # On RHEL6 we have to use an updated qscintilla to fix an auto complete bug
@@ -223,25 +220,26 @@ if ( ENABLE_CPACK )
         set ( DEPENDS_LIST "libboost-date-time${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-regex${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-python${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
-                           "libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9,"
                            "libnexus0 (>= 4.3),libgsl0ldbl,libqtcore4 (>= 4.2),libqtgui4 (>= 4.2),libqt4-opengl (>= 4.2),"
                            "libqt4-xml (>= 4.2),libqt4-svg (>= 4.2),libqt4-qt3support (>= 4.2),qt4-dev-tools,"
-                           "libqwt5-qt4,libqwtplot3d-qt4-0,python-numpy,python-sip,python-qt4" )
+                           "libqwt5-qt4,libqwtplot3d-qt4-0,python-numpy,python-sip,python-qt4,libjsoncpp0" )
         set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools0 (>= 1.7)" )
         if( "${UNIX_CODENAME}" MATCHES "lucid" )
           list ( APPEND DEPENDS_LIST ",libqscintilla2-5,"
                                      "libopencascade-foundation-6.3.0 (>= 6.3.0),libopencascade-modeling-6.3.0 (>= 6.3.0),"
-                                     "libmuparser0" )
+                                     "libmuparser0,libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9" )
         elseif( "${UNIX_CODENAME}" MATCHES "precise" )
           list ( APPEND DEPENDS_LIST ",libqscintilla2-8,"
                                      "libopencascade-foundation-6.5.0 (>= 6.5.0),libopencascade-modeling-6.5.0 (>= 6.5.0),"
                                      "libmuparser0debian1,"
-                                     "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy" )
+                                     "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy,"
+                                     "libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9")
         elseif( "${UNIX_CODENAME}" STREQUAL "trusty" )
           list ( APPEND DEPENDS_LIST ",libqscintilla2-11,"
                                      "liboce-foundation8,liboce-modeling8,"
                                      "libmuparser2,"
-                                     "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy" )
+                                     "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy,"
+                                     "libpocofoundation11,libpocoutil11,libpoconet11,libpoconetssl11,libpococrypto11,libpocoxml11")
           set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
         else()
           message( WARNING "Mantid does not support packaging of this Ubuntu version: ${UNIX_CODENAME}")
@@ -249,8 +247,8 @@ if ( ENABLE_CPACK )
         # parse list to string required for deb package
         string ( REPLACE ";" "" CPACK_DEBIAN_PACKAGE_DEPENDS ${DEPENDS_LIST} )
       endif()
-      # soft requirement of tcmalloc - if built with it, then require it
-      IF ( USE_TCMALLOC AND TCMALLOC_FOUND )
+      # soft requirement of tcmalloc if selected
+      IF ( USE_TCMALLOC )
         message ( STATUS " Adding gperftools to the package requirements" )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},gperftools-libs >= 2.0" )
         set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},${PERFTOOLS_DEB_PACKAGE}" )

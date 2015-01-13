@@ -15,7 +15,7 @@ namespace MantidQt
 
     /** QReflTableModel : Provides a QAbstractTableModel for a Mantid ITableWorkspace.
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -44,16 +44,20 @@ namespace MantidQt
       //emit a signal saying things have changed
       void update();
       //row and column counts
-      int rowCount(const QModelIndex &parent) const;
-      int columnCount(const QModelIndex &parent) const;
+      int rowCount(const QModelIndex &parent = QModelIndex()) const;
+      int columnCount(const QModelIndex &parent = QModelIndex()) const;
       //get data fro a cell
-      QVariant data(const QModelIndex &index, int role) const;
+      QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
       //get header data for the table
       QVariant headerData(int section, Qt::Orientation orientation, int role) const;
       //get flags for a cell
       Qt::ItemFlags flags(const QModelIndex &index) const;
-      //chage or add data to the model
-      bool setData ( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole );
+      //change or add data to the model
+      bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole);
+      //add new rows to the model
+      bool insertRows(int row, int count, const QModelIndex& parent = QModelIndex());
+      //remove rows from the model
+      bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex());
     private:
 
       typedef QString ColumnNameType;
@@ -119,6 +123,8 @@ namespace MantidQt
       ColumnIndexNameMap m_columnNameMap;
     };
 
+    /// Typedef for a shared pointer to \c QReflTableModel
+    typedef boost::shared_ptr<QReflTableModel> QReflTableModel_sptr;
 
   } // namespace CustomInterfaces
 } // namespace Mantid

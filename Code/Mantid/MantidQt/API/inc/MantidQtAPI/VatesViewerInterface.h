@@ -5,6 +5,8 @@
 
 #include <QWidget>
 
+#include <string>
+
 class QString;
 
 namespace MantidQt
@@ -20,7 +22,7 @@ namespace API
   @author Michael Reuter
   @date 08/09/2011
 
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -55,11 +57,15 @@ public:
   virtual ~VatesViewerInterface();
   /**
    * Function to create the source from the given workspace.
-   * @param wsname the name of the workspace to visualize
-   * @param wstype the type of workspace being visualized
+   * @param workspaceName the name of the workspace to visualize
+   * @param workspaceType the type of workspace being visualized
+   * @param instrumentName The Name of the instrument.
    */
-  virtual void renderWorkspace(QString wsname, int wstype);
-  /// Special function of correct widget invocation for plugin mode.
+  virtual void renderWorkspace(QString workspaceName, int workspaceType, std::string instrumentName);
+
+  /**
+   * Special function of correct widget invocation for plugin mode.
+   */
   virtual void setupPluginMode();
 
   /// Enum to track the workspace type

@@ -47,6 +47,7 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
                 "Name of table workspace containing reflections (bragg peaks) in form of Miller index.")
         self.declareProperty(FileProperty("ProfileFilename","", FileAction.OptionalLoad, ['.irf']),
                 "Name of input data file.")
+        self.declareProperty("Lattice", -0.0, "Lattice size of the cubic unit cell.")
         self.declareProperty("GenerateInformationWS", False, "Optional to genearte profile table workspace and Bragg peak table. ")
 
         # Background
@@ -77,6 +78,7 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
         self.loaddata = self.getProperty("LoadData").value
         if self.loaddata is False:
             self.dataws = self.getProperty("InputWorkspace").value
+            self.datawsname = str(self.dataws)
             self.datafilename = ""
         else:
             self.dataws = None
@@ -93,6 +95,9 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
             self.irffilename = self.getProperty("ProfileFilename").value
             self.inputparamws = None
             self.inputbraggws = None
+            self.latticesize = self.getProperty("Lattice").value
+            if self.latticesize < 0.:
+                self.latticesize = None
         else:
             self.irffilename = ""
             self.inputparamws = self.getProperty("ProfileWorkspace").value
@@ -137,6 +142,9 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
 
         # Load .irf file and .hkl file optionally
         if self.loadinfofile is True:
+            if dir(self).count('latticesize') == 0 or self.latticesize is None: 
+                raise NotImplementedError("Lattice size is not defined.  Unable to use option 'LoadInfo'")
+
             api.CreateLeBailFitInput(
                     FullprofParameterFile   = self.irffilename,
                     MaxHKL                  = [13, 13, 13],

@@ -11,16 +11,16 @@
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 
 /**
-    @class SpectrumPlotItem 
-  
-       This class is responsible for actually drawing the image data onto
+    @class SpectrumPlotItem
+
+    This class is responsible for actually drawing the image data onto
     a QwtPlot for the SpectrumView data viewer.
- 
-    @author Dennis Mikkelson 
-    @date   2012-04-03 
-     
+
+    @author Dennis Mikkelson
+    @date   2012-04-03
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -35,8 +35,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
 
@@ -45,47 +45,46 @@ namespace MantidQt
 namespace SpectrumView
 {
 
-
 class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumPlotItem : public QwtPlotItem
 {
 
 public:
-  
+
   /// Construct basic plot item with NO data to plot.
   SpectrumPlotItem();
 
   virtual ~SpectrumPlotItem();
-  
+
   /// Specify the data to be plotted and the color table to use
-  void SetData( DataArray* data_array, 
-                std::vector<QRgb>* positive_color_table,
-                std::vector<QRgb>* negative_color_table );
+  void setData( DataArray_const_sptr dataArray,
+                std::vector<QRgb>* positiveColorTable,
+                std::vector<QRgb>* negativeColorTable );
 
   /// Set a non-linear lookup table to scale data values before mapping to color
-  void SetIntensityTable( std::vector<double>*  intensity_table );
+  void setIntensityTable( std::vector<double>*  intensityTable );
 
   /// Draw the image (this is called by QWT and must not be called directly.)
   virtual void draw(      QPainter    * painter,
-                    const QwtScaleMap & xMap, 
+                    const QwtScaleMap & xMap,
                     const QwtScaleMap & yMap,
                     const QRect       & canvasRect) const;
 
 protected:
-  int                   buffer_ID;        // set to 0 or 1 to select buffer 
-  DataArray*            data_array_0;     // these provide double buffers
-  DataArray*            data_array_1;     // for the float data.
+  int m_bufferID;       // set to 0 or 1 to select buffer
+  DataArray_const_sptr m_dataArray0;     // these provide double buffers
+  DataArray_const_sptr m_dataArray1;     // for the float data.
 
 private:
-                                          // This class just uses the following
-                                          // but they are created and deleted
-                                          // in the upper level classes
-  std::vector<QRgb>*    positive_color_table;
-  std::vector<QRgb>*    negative_color_table;
-  std::vector<double>*  intensity_table;
+  /* This class just uses the following */
+  /* but they are created and deleted */
+  /* in the upper level classes */
+  std::vector<QRgb>   * m_positiveColorTable;
+  std::vector<QRgb>   * m_negativeColorTable;
+  std::vector<double> * m_intensityTable;
 
 };
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif  // SPECTRUM_PLOT_ITEM_H

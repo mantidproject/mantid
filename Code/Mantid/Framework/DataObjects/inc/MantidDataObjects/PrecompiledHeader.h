@@ -4,4 +4,4 @@
 // Mantid
 #include "MantidAPI/Algorithm.h"
 
-#endif //MANTID_DATAOBJECTS_PRECOMPILEDHEADER_H_
+#endif // MANTID_DATAOBJECTS_PRECOMPILEDHEADER_H_

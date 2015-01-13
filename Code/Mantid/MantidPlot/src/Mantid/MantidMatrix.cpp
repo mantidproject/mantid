@@ -10,6 +10,7 @@
 #include "Preferences.h"
 #include "../pixmaps.h"
 
+#include "TSVSerialiser.h"
 
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RefAxis.h"
@@ -642,7 +643,7 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
     using MantidQt::API::PlotAxis;
     plot->setXAxisLabel(PlotAxis(*m_workspace, 0).title());
     plot->setYAxisLabel(PlotAxis(*m_workspace, 1).title());
-    plot->setZAxisLabel(PlotAxis(*m_workspace).title());
+    plot->setZAxisLabel(PlotAxis(false, *m_workspace).title());
 
     a->initPlot3D(plot);
     //plot->confirmClose(false);
@@ -1091,16 +1092,6 @@ void MantidMatrix::goToTab(const QString & name)
   }
   else return;
 }
-QString MantidMatrix::saveToString(const QString &geometry, bool saveAsTemplate)
-{
-  (void) saveAsTemplate; //Avoid unused warning
-
-  QString s="<mantidmatrix>\n";
-  s+="WorkspaceName\t"+QString::fromStdString(m_strName)+"\n";
-  s+=geometry;
-  s+="</mantidmatrix>\n";
-  return s;
-}
 
 /**  returns the workspace name
 */
@@ -1366,7 +1357,7 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const
 bool MantidMatrixModel::checkMonitorCache(int row) const
 {
   row += m_startRow; //correctly offset the row
-  if (m_workspace->getAxis(1)->isSpectra())
+  if (m_workspace->axes() > 1 && m_workspace->getAxis(1)->isSpectra())
   {
     bool isMon = false;
     if (m_monCache.contains(row))
@@ -1459,4 +1450,24 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy)
     else
       maxy += fabs(miny);
   }
+}
+
+void MantidMatrix::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
+{
+  Q_UNUSED(lines);
+  Q_UNUSED(app);
+  Q_UNUSED(fileVersion);
+  //We don't actually need to do any loading. It's all taken care of by ApplicationWindow.
+}
+
+std::string MantidMatrix::saveToProject(ApplicationWindow* app)
+{
+  TSVSerialiser tsv;
+
+  tsv.writeRaw("<mantidmatrix>");
+  tsv.writeLine("WorkspaceName") << m_strName;
+  tsv.writeRaw(app->windowGeometryInfo(this));
+  tsv.writeRaw("</mantidmatrix>");
+
+  return tsv.outputLines();
 }

@@ -28,9 +28,8 @@
 #include <boost/unordered_set.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
-//Poco
+// Poco
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/DOMParser.h>
 
-
-#endif //MANTID_GEOMETRY_PRECOMPILEDHEADER_H
+#endif // MANTID_GEOMETRY_PRECOMPILEDHEADER_H

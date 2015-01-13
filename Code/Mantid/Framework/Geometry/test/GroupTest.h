@@ -179,8 +179,16 @@ public:
         Group_const_sptr null;
 
         TS_ASSERT_THROWS(null * null, std::invalid_argument);
+        //AppleClang gives a warning if we don't use the result
+#if __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-comparison"
+#endif
         TS_ASSERT_THROWS(null == null, std::invalid_argument);
         TS_ASSERT_THROWS(null != null, std::invalid_argument);
+#if __clang__
+#pragma clang diagnostic pop
+#endif
         TS_ASSERT_THROWS(three * null, std::invalid_argument);
         TS_ASSERT_THROWS(null * three, std::invalid_argument);
 

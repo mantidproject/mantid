@@ -21,7 +21,8 @@ public:
 	}
 
 	LoadILLReflectometryTest() :
-			m_dataFile("ILLD17_111686.nxs") {
+			m_dataFile("ILLD17-161876-Ni.nxs")
+	{
 	}
 
 	void test_Init() {
@@ -60,13 +61,12 @@ public:
 		double channelWidth = getPropertyFromRun<double>(output, "channel_width");
 		TS_ASSERT_EQUALS(channelWidth, 57.0);
 
-
+    double analyserAngle = getPropertyFromRun<double>(output, "dan.value");
+    TS_ASSERT_EQUALS(analyserAngle, 3.1909999847412109);
 
 
 		if (!output)
 			return;
-
-		// TODO: Check the results
 
 		// Remove workspace from the data service.
 		AnalysisDataService::Instance().clear();

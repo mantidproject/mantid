@@ -8,19 +8,18 @@
 #include "MantidCurveFitting/GSLVector.h"
 #include "MantidCurveFitting/GSLMatrix.h"
 
-namespace Mantid
-{
-namespace CurveFitting
-{
+namespace Mantid {
+namespace CurveFitting {
 
 class CostFuncLeastSquares;
 
-/** 
+/**
     Implements a least squares minimization algorithm with damping.
 
     @author Roman Tolchenov, Tessella plc
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -40,16 +39,16 @@ class CostFuncLeastSquares;
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport DampingMinimizer : public API::IFuncMinimizer
-{
+class DLLExport DampingMinimizer : public API::IFuncMinimizer {
 public:
   /// Constructor
-  DampingMinimizer();
+  DampingMinimizer(double relTol = 0.0001);
   /// Name of the minimizer.
-  std::string name() const {return "DampingMinimizer";}
+  std::string name() const { return "DampingMinimizer"; }
 
   /// Initialize minimizer, i.e. pass a function to minimize.
-  virtual void initialize(API::ICostFunction_sptr function,size_t maxIterations = 0);
+  virtual void initialize(API::ICostFunction_sptr function,
+                          size_t maxIterations = 0);
   /// Do one iteration.
   virtual bool iterate(size_t);
   /// Return current value of the cost function
@@ -61,9 +60,8 @@ private:
   /// Relative tolerance.
   double m_relTol;
   /// The damping mu parameter in the Levenberg-Marquardt method.
-  //double m_damping;
+  // double m_damping;
 };
-
 
 } // namespace CurveFitting
 } // namespace Mantid

@@ -8,6 +8,19 @@
 #include <boost/shared_ptr.hpp>
 #include <QString>
 
+namespace MantidQt
+{
+
+  // Enumerate how to handle distributions
+  enum DistributionFlag
+  {
+    DistributionDefault = 0, // Use preferences value
+    DistributionTrue, // Force distribution plotting
+    DistributionFalse // Disable distribution plotting
+  };
+
+}
+
 //=================================================================================================
 //=================================================================================================
 /**  This class implements QwtData with direct access to a spectrum in a MatrixWorkspace.
@@ -15,7 +28,9 @@
 class EXPORT_OPT_MANTIDQT_API QwtWorkspaceSpectrumData : public MantidQwtMatrixWorkspaceData
 {
 public:
-  QwtWorkspaceSpectrumData(const Mantid::API::MatrixWorkspace & workspace, int specIndex, const bool logScale, bool distr = false);
+
+  QwtWorkspaceSpectrumData(const Mantid::API::MatrixWorkspace & workspace, int specIndex,
+                           const bool logScale, const bool plotAsDistribution);
 
   //! @return Pointer to a copy (virtual copy constructor)
   virtual QwtWorkspaceSpectrumData *copy() const;
@@ -52,7 +67,8 @@ public:
   /// Return the label to use for the Y axis
   QString getYAxisLabel() const;
 
-  bool isHistogram()const{return m_isHistogram;}
+  bool isHistogram() const { return m_isHistogram; }
+  bool dataIsNormalized() const { return m_dataIsNormalized; }
 
   /// Inform the data that it is to be plotted on a log y scale
   void setLogScale(bool on);
@@ -84,6 +100,8 @@ private:
 
   /// Is the spectrum a histogram?
   bool m_isHistogram;
+  /// If true the data already has the bin widths divided in
+  bool m_dataIsNormalized;
   /// This field can be set true for a histogram workspace. If it's true x(i) returns (X[i]+X[i+1])/2
   bool m_binCentres;
   /// Indicates that the data is plotted on a log y scale

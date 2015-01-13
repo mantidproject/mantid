@@ -27,13 +27,14 @@
  *                                                                         *
  ***************************************************************************/
 #include "Graph3D.h"
+#include "ApplicationWindow.h"
 #include "Bar.h"
 #include "Cone3D.h"
 #include "MyParser.h"
 #include "MatrixModel.h"
 #include "UserFunction.h"//Mantid
-//#include "ApplicationWindow.h"
 
+#include "TSVSerialiser.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -2288,213 +2289,6 @@ QString Graph3D::formula()
     return plotAssociation;
 }
 
-QString Graph3D::saveToString(const QString& geometry, bool)
-{
-	QString s="<SurfacePlot>\n";
-	s+= QString(name())+"\t";
-	s+= birthDate() + "\n";
-	s+= geometry;
-	s+= "SurfaceFunction\t";
-
-	sp->makeCurrent();
-	if (d_func)
-    {
-        s += d_func->saveToString() + "\t";
-	}
-	else if (d_surface){
-		s += d_surface->xFormula() + "," + d_surface->yFormula() + "," + d_surface->zFormula() + ",";
-		s += QString::number(d_surface->uStart(), 'e', 15) + ",";
-		s += QString::number(d_surface->uEnd(), 'e', 15) + ",";
-		s += QString::number(d_surface->vStart(), 'e', 15) + ",";
-		s += QString::number(d_surface->vEnd(), 'e', 15) + ",";
-		s += QString::number(d_surface->columns()) + ",";
-		s += QString::number(d_surface->rows()) + ",";
-		s += QString::number(d_surface->uPeriodic()) + ",";
-		s += QString::number(d_surface->vPeriodic());
-	} else { 
-		s += plotAssociation;
-		s += "\t";
-	}
-	double start,stop;
-	sp->coordinates()->axes[X1].limits(start,stop);
-	s+=QString::number(start)+"\t";
-	s+=QString::number(stop)+"\t";
-	sp->coordinates()->axes[Y1].limits(start,stop);
-	s+=QString::number(start)+"\t";
-	s+=QString::number(stop)+"\t";
-	sp->coordinates()->axes[Z1].limits(start,stop);
-	s+=QString::number(start)+"\t";
-	s+=QString::number(stop)+"\n";
-    
-	QString st;
-	if (sp->coordinates()->style() == Qwt3D::NOCOORD)
-		st="nocoord";
-	else if (sp->coordinates()->style() == Qwt3D::BOX)
-		st="box";
-	else
-		st="frame";
-	QString style;
-	style.setNum(style_);
-	s+="Style\t"+style+"\t"+st+"\t";
-
-	switch(sp->floorStyle ())
-	{
-		case NOFLOOR:
-			st="nofloor";
-			break;
-
-		case FLOORISO:
-			st="flooriso";
-			break;
-
-		case FLOORDATA:
-			st="floordata";
-			break;
-	}
-	s+=st+"\t";
-
-	switch(sp->plotStyle())
-	{
-		case USER:
-			if (pointStyle == VerticalBars)
-				st="bars\t"+QString::number(barsRad);
-			else if (pointStyle == Dots){
-				st="points\t"+QString::number(d_point_size);
-				st+="\t"+QString::number(d_smooth_points);
-			} else if (pointStyle == Cones) {
-				st="cones\t"+QString::number(conesRad);
-				st+="\t"+QString::number(conesQuality);
-			} else if (pointStyle == HairCross) {
-				st="cross\t"+QString::number(crossHairRad);
-				st+="\t"+QString::number(crossHairLineWidth);
-				st+="\t"+QString::number(crossHairSmooth);
-				st+="\t"+QString::number(crossHairBoxed);
-			}
-			break;
-
-		case WIREFRAME:
-			st="wireframe";
-			break;
-
-		case HIDDENLINE:
-			st="hiddenline";
-			break;
-
-		case FILLED:
-			st="filled";
-			break;
-
-		case FILLEDMESH:
-			st="filledmesh";
-			break;
-
-		default:
-			break;
-	}
-	s+=st+"\n";
-
-	s+="grids\t";
-	s+=QString::number(sp->coordinates()->grids())+"\n";
-
-	s+="title\t";
-	s+=title+"\t";
-	s+=titleCol.name()+"\t";
-	s+=titleFnt.family()+"\t";
-	s+=QString::number(titleFnt.pointSize())+"\t";
-	s+=QString::number(titleFnt.weight())+"\t";
-	s+=QString::number(titleFnt.italic())+"\n";
-
-	s+="colors\t";
-	s+=meshCol.name()+"\t";
-	s+=axesCol.name()+"\t";
-	s+=numCol.name()+"\t";
-	s+=labelsCol.name()+"\t";
-	s+=bgCol.name()+"\t";
-	s+=gridCol.name()+"\t";
-	s+=fromColor.name()+"\t";
-	s+=toColor.name()+"\t";
-	s+=QString::number(alpha) + "\t" + color_map + "\n";
-
-	s+="axesLabels\t";
-	s+=labels.join("\t")+"\n";
-
-	s+="tics\t";
-	QStringList tl=scaleTicks();
-	s+=tl.join("\t")+"\n";
-
-	s+="tickLengths\t";
-	tl=axisTickLengths();
-	s+=tl.join("\t")+"\n";
-
-	s+="options\t";
-	s+=QString::number(legendOn)+"\t";
-	s+=QString::number(sp->resolution())+"\t";
-	s+=QString::number(labelsDist)+"\n";
-
-	s+="numbersFont\t";
-	QFont fnt=sp->coordinates()->axes[X1].numberFont();
-	s+=fnt.family()+"\t";
-	s+=QString::number(fnt.pointSize())+"\t";
-	s+=QString::number(fnt.weight())+"\t";
-	s+=QString::number(fnt.italic())+"\n";
-
-	s+="xAxisLabelFont\t";
-	fnt=sp->coordinates()->axes[X1].labelFont();
-	s+=fnt.family()+"\t";
-	s+=QString::number(fnt.pointSize())+"\t";
-	s+=QString::number(fnt.weight())+"\t";
-	s+=QString::number(fnt.italic())+"\n";
-
-	s+="yAxisLabelFont\t";
-	fnt=sp->coordinates()->axes[Y1].labelFont();
-	s+=fnt.family()+"\t";
-	s+=QString::number(fnt.pointSize())+"\t";
-	s+=QString::number(fnt.weight())+"\t";
-	s+=QString::number(fnt.italic())+"\n";
-
-	s+="zAxisLabelFont\t";
-	fnt=sp->coordinates()->axes[Z1].labelFont();
-	s+=fnt.family()+"\t";
-	s+=QString::number(fnt.pointSize())+"\t";
-	s+=QString::number(fnt.weight())+"\t";
-	s+=QString::number(fnt.italic())+"\n";
-
-	s+="rotation\t";
-	s+=QString::number(sp->xRotation())+"\t";
-	s+=QString::number(sp->yRotation())+"\t";
-	s+=QString::number(sp->zRotation())+"\n";
-
-	s+="zoom\t";
-	s+=QString::number(sp->zoom())+"\n";
-
-	s+="scaling\t";
-	s+=QString::number(sp->xScale())+"\t";
-	s+=QString::number(sp->yScale())+"\t";
-	s+=QString::number(sp->zScale())+"\n";
-
-	s+="shift\t";
-	s+=QString::number(sp->xShift())+"\t";
-	s+=QString::number(sp->yShift())+"\t";
-	s+=QString::number(sp->zShift())+"\n";
-
-	s+="LineWidth\t";
-	s+=QString::number(sp->meshLineWidth())+"\n";
-	s+="WindowLabel\t" + windowLabel() + "\t" + QString::number(captionPolicy()) + "\n";
-	s+="Orthogonal\t" + QString::number(sp->ortho())+"\n";
-	s+="</SurfacePlot>\n";
-	return s;
-}
-
-QString Graph3D::saveAsTemplate(const QString& geometryInfo)
-{
-	QString s = saveToString(geometryInfo);
-	QStringList lst = s.split("\n", QString::SkipEmptyParts);
-	QStringList l = lst[3].split("\t");
-	l[1] = QString();
-	lst[3] = l.join("\t");
-	return lst.join("\n");
-}
-
 void Graph3D::showColorLegend(bool show)
 {
 	if (legendOn == show)
@@ -2853,4 +2647,280 @@ Graph3D::~Graph3D()
 {
 	if (d_surface)
 		delete d_surface;
+}
+
+void Graph3D::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
+{
+  Q_UNUSED(app);
+  Q_UNUSED(fileVersion);
+
+  TSVSerialiser tsv(lines);
+
+  if(tsv.selectLine("grids"))
+  {
+    setGrid(tsv.asInt(1));
+  }
+
+  if(tsv.selectLine("title"))
+  {
+    QString qTitle = QString::fromUtf8(tsv.lineAsString("title").c_str());
+    setTitle(qTitle.split("\t"));
+  }
+
+  if(tsv.selectLine("colors"))
+  {
+    QString qColors = QString::fromUtf8(tsv.lineAsString("colors").c_str());
+    setColors(qColors.split("\t"));
+  }
+
+  if(tsv.selectLine("axesLabels"))
+  {
+    QString qLabels = QString::fromUtf8(tsv.lineAsString("axesLabels").c_str());
+    QStringList qLabelList = qLabels.split("\t");
+    qLabelList.pop_front();
+    setAxesLabels(qLabelList);
+  }
+
+  if(tsv.selectLine("tics"))
+  {
+    QString qTicks = QString::fromUtf8(tsv.lineAsString("tics").c_str());
+    setTicks(qTicks.split("\t"));
+  }
+
+  if(tsv.selectLine("tickLengths"))
+  {
+    QString qTickLen = QString::fromUtf8(tsv.lineAsString("tickLengths").c_str());
+    setTickLengths(qTickLen.split("\t"));
+  }
+
+  if(tsv.selectLine("options"))
+  {
+    QString qOpts = QString::fromUtf8(tsv.lineAsString("options").c_str());
+    setOptions(qOpts.split("\t"));
+  }
+
+  if(tsv.selectLine("numbersFont"))
+  {
+    QString qFont = QString::fromUtf8(tsv.lineAsString("numbersFont").c_str());
+    setNumbersFont(qFont.split("\t"));
+  }
+
+  if(tsv.selectLine("xAxisLabelFont"))
+  {
+    QString qAxisFont = QString::fromUtf8(tsv.lineAsString("xAxisLabelFont").c_str());
+    setXAxisLabelFont(qAxisFont.split("\t"));
+  }
+
+  if(tsv.selectLine("yAxisLabelFont"))
+  {
+    QString qAxisFont = QString::fromUtf8(tsv.lineAsString("yAxisLabelFont").c_str());
+    setYAxisLabelFont(qAxisFont.split("\t"));
+  }
+
+  if(tsv.selectLine("zAxisLabelFont"))
+  {
+    QString qAxisFont = QString::fromUtf8(tsv.lineAsString("zAxisLabelFont").c_str());
+    setZAxisLabelFont(qAxisFont.split("\t"));
+  }
+
+  if(tsv.selectLine("rotation"))
+  {
+    double x, y, z;
+    tsv >> x >> y >> z;
+    setRotation(x,y,z);
+  }
+
+  if(tsv.selectLine("zoom"))
+  {
+    setZoom(tsv.asDouble(1));
+  }
+
+  if(tsv.selectLine("scaling"))
+  {
+    double x, y, z;
+    tsv >> x >> y >> z;
+    setScale(x,y,z);
+  }
+
+  if(tsv.selectLine("shift"))
+  {
+    double x, y, z;
+    tsv >> x >> y >> z;
+    setShift(x,y,z);
+  }
+
+  if(tsv.selectLine("LineWidth"))
+  {
+    setMeshLineWidth(tsv.asDouble(1));
+  }
+
+  if(tsv.selectLine("WindowLabel"))
+  {
+    QString label;
+    int policy;
+    tsv >> label >> policy;
+    setWindowLabel(label);
+    setCaptionPolicy((MdiSubWindow::CaptionPolicy)policy);
+  }
+
+  if(tsv.selectLine("Orthogonal"))
+  {
+    setOrthogonal(tsv.asInt(1));
+  }
+
+  if(tsv.selectLine("Style"))
+  {
+    QString qStyle = QString::fromUtf8(tsv.lineAsString("Style").c_str());
+    QStringList sl = qStyle.split("\t");
+    sl.pop_front();
+    setStyle(sl);
+  }
+
+  setIgnoreFonts(true);
+  update();
+}
+
+std::string Graph3D::saveToProject(ApplicationWindow* app)
+{
+  TSVSerialiser tsv;
+  tsv.writeRaw("<SurfacePlot>");
+  tsv.writeLine(name().toStdString()) << birthDate();
+  tsv.writeRaw(app->windowGeometryInfo(this));
+
+  QString surfFunc;
+  if(d_func)
+  {
+    surfFunc += d_func->saveToString() + "\t";
+  }
+  else if(d_surface)
+  {
+    surfFunc += d_surface->xFormula() + "," + d_surface->yFormula() + "," + d_surface->zFormula() + ",";
+    surfFunc += QString::number(d_surface->uStart(), 'e', 15) + ",";
+    surfFunc += QString::number(d_surface->uEnd(), 'e', 15) + ",";
+    surfFunc += QString::number(d_surface->vStart(), 'e', 15) + ",";
+    surfFunc += QString::number(d_surface->vEnd(), 'e', 15) + ",";
+    surfFunc += QString::number(d_surface->columns()) + ",";
+    surfFunc += QString::number(d_surface->rows()) + ",";
+    surfFunc += QString::number(d_surface->uPeriodic()) + ",";
+    surfFunc += QString::number(d_surface->vPeriodic());
+  }
+  else
+  {
+    surfFunc += plotAssociation + "\t";
+  }
+
+  double start, stop;
+  sp->coordinates()->axes[X1].limits(start,stop);
+  surfFunc += QString::number(start)+"\t";
+  surfFunc += QString::number(stop)+"\t";
+  sp->coordinates()->axes[Y1].limits(start,stop);
+  surfFunc += QString::number(start)+"\t";
+  surfFunc += QString::number(stop)+"\t";
+  sp->coordinates()->axes[Z1].limits(start,stop);
+  surfFunc += QString::number(start)+"\t";
+  surfFunc += QString::number(stop);
+
+  tsv.writeLine("SurfaceFunction") << surfFunc.toStdString();
+
+  tsv.writeLine("Style") << style_;
+
+  if(sp->coordinates()->style() == Qwt3D::NOCOORD)
+    tsv << "nocoord";
+  else if(sp->coordinates()->style() == Qwt3D::BOX)
+    tsv << "box";
+  else
+    tsv << "frame";
+
+  if(sp->floorStyle() == NOFLOOR)
+    tsv << "nofloor";
+  else if(sp->floorStyle() == FLOORISO)
+    tsv << "flooriso";
+  else if(sp->floorStyle() == FLOORDATA)
+    tsv << "floordata";
+
+  switch(sp->plotStyle())
+  {
+    case USER:
+      if(pointStyle == VerticalBars)
+        tsv << "bars" << barsRad;
+      else if(pointStyle == Dots)
+        tsv << "points" << d_point_size << d_smooth_points;
+      else if(pointStyle == Cones)
+        tsv << "cones" << conesRad << conesQuality;
+      else if(pointStyle == HairCross)
+        tsv << "cross" << crossHairRad << crossHairLineWidth << crossHairSmooth << crossHairBoxed;
+      break;
+
+    case WIREFRAME:
+      tsv << "wireframe";
+      break;
+
+    case HIDDENLINE:
+      tsv << "hiddenline";
+      break;
+
+    case FILLED:
+      tsv << "filled";
+      break;
+
+    case FILLEDMESH:
+      tsv << "filledmesh";
+      break;
+
+    default:
+      break;
+  }
+
+  tsv.writeLine("grids") << sp->coordinates()->grids();
+
+  tsv.writeLine("title");
+  tsv << title << titleCol.name() << titleFnt.family();
+  tsv << titleFnt.pointSize() << titleFnt.weight() << titleFnt.italic();
+
+  tsv.writeLine("colors");
+  tsv << meshCol.name() << axesCol.name() << numCol.name();
+  tsv << labelsCol.name() << bgCol.name() << gridCol.name();
+  tsv << fromColor.name() << toColor.name();
+  tsv << alpha << color_map;
+
+  tsv.writeLine("axesLabels");
+  foreach(QString label, labels)
+    tsv << label;
+
+  tsv.writeLine("tics");
+  foreach(QString tick, scaleTicks())
+    tsv << tick;
+
+  tsv.writeLine("tickLengths");
+  foreach(QString tick, axisTickLengths())
+    tsv << tick;
+
+  tsv.writeLine("options") << legendOn << sp->resolution() << labelsDist;
+
+  tsv.writeLine("numbersFont");
+  QFont fnt = sp->coordinates()->axes[X1].numberFont();
+  tsv << fnt.family() << fnt.pointSize() << fnt.weight() << fnt.italic();
+
+  tsv.writeLine("xAxisLabelFont");
+  fnt = sp->coordinates()->axes[X1].labelFont();
+  tsv << fnt.family() << fnt.pointSize() << fnt.weight() << fnt.italic();
+
+  tsv.writeLine("yAxisLabelFont");
+  fnt = sp->coordinates()->axes[Y1].labelFont();
+  tsv << fnt.family() << fnt.pointSize() << fnt.weight() << fnt.italic();
+
+  tsv.writeLine("zAxisLabelFont");
+  fnt = sp->coordinates()->axes[Z1].labelFont();
+  tsv << fnt.family() << fnt.pointSize() << fnt.weight() << fnt.italic();
+
+  tsv.writeLine("rotation") << sp->xRotation() << sp->yRotation() << sp->zRotation();
+  tsv.writeLine("zoom") << sp->zoom();
+  tsv.writeLine("scaling") << sp->xScale() << sp->yScale() << sp->zScale();
+  tsv.writeLine("shift") << sp->xShift() << sp->yShift() << sp->zShift();
+  tsv.writeLine("LineWidth") << sp->meshLineWidth();
+  tsv.writeLine("WindowLabel") << windowLabel() << captionPolicy();
+  tsv.writeLine("Orthogonal") << sp->ortho();
+
+  tsv.writeRaw("</SurfacePlot>");
+  return tsv.outputLines();
 }

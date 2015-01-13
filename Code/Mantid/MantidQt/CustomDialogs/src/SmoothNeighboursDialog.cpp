@@ -13,7 +13,8 @@ const QString SmoothNeighboursDialog::RECTANGULAR_GROUP = "Rectangular Detectors
 const QString SmoothNeighboursDialog::INPUT_WORKSPACE = "InputWorkspace";
 
 SmoothNeighboursDialog::SmoothNeighboursDialog(QWidget* parent) 
-  : AlgorithmDialog(parent)
+  : AlgorithmDialog(parent),
+  m_propertiesWidget(NULL), m_dialogLayout(NULL)
 {
 }
  

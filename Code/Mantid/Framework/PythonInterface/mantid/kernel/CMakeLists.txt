@@ -6,7 +6,7 @@ set ( MODULE_TEMPLATE src/kernel.cpp.in )
 
 # Files containing export definitions, these are automatically processed
 # -- Do NOT sort this list. The order defines the order in which the export
-#    definitions occur and some depend on their base classes being exported first -- 
+#    definitions occur and some depend on their base classes being exported first --
 set ( EXPORT_FILES
   src/Exports/ConfigService.cpp
   src/Exports/DataItem.cpp
@@ -48,7 +48,7 @@ set ( EXPORT_FILES
   src/Exports/ProgressBase.cpp
   src/Exports/Material.cpp
   src/Exports/Statistics.cpp
-)  
+)
 
 set ( SRC_FILES
   src/Converters/CloneToNumpy.cpp
@@ -67,7 +67,7 @@ set ( SRC_FILES
   src/Environment/WrapperHelpers.cpp
 )
 
-set ( INC_FILES 
+set ( INC_FILES
   ${HEADER_DIR}/kernel/Converters/CArrayToNDArray.h
   ${HEADER_DIR}/kernel/Converters/MatrixToNDArray.h
   ${HEADER_DIR}/kernel/Converters/NDArrayToVector.h
@@ -88,7 +88,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Registry/PropertyWithValueFactory.h
   ${HEADER_DIR}/kernel/Registry/SequenceTypeHandler.h
   ${HEADER_DIR}/kernel/Registry/TypedPropertyValueHandler.h
-  ${HEADER_DIR}/kernel/Registry/TypeRegistry.h  
+  ${HEADER_DIR}/kernel/Registry/TypeRegistry.h
   ${HEADER_DIR}/kernel/Registry/DowncastRegistry.h
   ${HEADER_DIR}/kernel/DataServiceExporter.h
   ${HEADER_DIR}/kernel/IsNone.h
@@ -99,10 +99,9 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/TypedValidatorExporter.h
 )
 
-set ( PY_FILES 
+set ( PY_FILES
   __init__.py
   _aliases.py
-  dlopen.py
   environment.py
   funcreturns.py
   plugins.py
@@ -111,7 +110,7 @@ set ( PY_FILES
 #############################################################################################
 # Generate a source file from the export definitions and provided template
 #############################################################################################
-create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp EXPORT_FILES 
+create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp EXPORT_FILES
                 SRC_FILES )
 
 #############################################################################################
@@ -124,8 +123,8 @@ if(CMAKE_GENERATOR STREQUAL Xcode)
   set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/kernel )
 endif()
 
-copy_python_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
-                           PYTHON_INSTALL_FILES )
+copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
+                     PYTHON_INSTALL_FILES )
 
 #############################################################################################
 # Generate the packagesetup module for the build & install package
@@ -139,8 +138,8 @@ endif()
 # Build version
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.py )
 # Copy py to build directory, taking care of multi-config (MSVC) builds
-copy_python_files_to_dir ( ${PACKAGESETUP_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR}
-                           PYTHON_INSTALL_FILES )
+copy_files_to_dir ( ${PACKAGESETUP_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR}
+                    PYTHON_INSTALL_FILES )
 
 # Package version
 if ( WIN32 OR APPLE )
@@ -158,32 +157,15 @@ add_library ( PythonKernelModule ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILE
 set_python_properties( PythonKernelModule _kernel )
 set_target_output_directory ( PythonKernelModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies
-target_link_libraries ( PythonKernelModule ${PYTHON_DEPS} )
-
-if ( UNIX )
-  add_library ( _dlopen src/dlopen.c )
-  set_python_properties ( _dlopen _dlopen )
-  set_target_output_directory ( _dlopen ${OUTPUT_DIR} .pyd )
-if ( APPLE )
-  # and in .so on the Mac
-  # Need to remove OpenMP
-  set ( CMAKE_C_FLAGS -m64 )
-  set_target_properties ( _dlopen PROPERTIES SUFFIX .so )
-  target_link_libraries ( _dlopen ${PYTHON_LIBRARIES} )
-endif()
-  add_dependencies( PythonKernelModule _dlopen )
-endif()
+target_link_libraries ( PythonKernelModule Kernel ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${PYTHON_DEPS} )
 
 ###########################################################################
 # Installation settings
 ###########################################################################
-install ( TARGETS PythonKernelModule ${SYSTEM_PACKAGE_TARGET} DESTINATION 
+install ( TARGETS PythonKernelModule ${SYSTEM_PACKAGE_TARGET} DESTINATION
           ${BIN_DIR}/mantid/kernel )
-if ( UNIX )
-  install ( TARGETS _dlopen DESTINATION ${BIN_DIR}/mantid/kernel )
-endif()
 
-# Pure Python files 
+# Pure Python files
 install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/kernel )
 # packagesetup.py that will overwrite the ones from the built target
 install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py DESTINATION

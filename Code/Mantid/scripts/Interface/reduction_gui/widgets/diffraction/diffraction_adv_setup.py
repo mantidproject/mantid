@@ -83,9 +83,6 @@ class AdvancedSetupWidget(BaseWidget):
 
         self._content.stripvanpeaks_chkbox.setChecked(True)
         self._syncStripVanPeakWidgets(True)
-        # self._content.vanpeakfwhm_edit.setEnabled(False)
-        # self._content.vansmoothpar_edit.setEnabled(False)
-        # self._content.vanpeaktol_edit.setEnabled(False)
 
         self._content.preserveevents_checkbox.setChecked(True)
 
@@ -101,6 +98,7 @@ class AdvancedSetupWidget(BaseWidget):
         self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),
                 self._show_help)
         # Hanlder for events
+        # FIXME - Need to add an event hanlder for the change of instrument and facility
 
         # Validated widgets
 
@@ -118,6 +116,7 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.maxchunksize_edit.setText(str(state.maxchunksize))
         self._content.scaledata_edit.setText(str(state.scaledata))
         self._content.filterbadpulses_edit.setText(str(state.filterbadpulses))
+        self._content.bkgdsmoothpar_edit.setText(str(state.bkgdsmoothpars))
 
         self._content.stripvanpeaks_chkbox.setChecked(state.stripvanadiumpeaks)
         self._syncStripVanPeakWidgets(state.stripvanadiumpeaks)
@@ -146,6 +145,7 @@ class AdvancedSetupWidget(BaseWidget):
         s.maxchunksize = self._content.maxchunksize_edit.text()
         s.scaledata = self._content.scaledata_edit.text()
         s.filterbadpulses = self._content.filterbadpulses_edit.text()
+        s.bkgdsmoothpars = self._content.bkgdsmoothpar_edit.text()
 
         s.stripvanadiumpeaks = self._content.stripvanpeaks_chkbox.isChecked()
         s.vanadiumfwhm = self._content.vanpeakfwhm_edit.text()
@@ -171,16 +171,6 @@ class AdvancedSetupWidget(BaseWidget):
         """ Handling if strip-vanadium-peak check box is clicked
         """
         self._syncStripVanPeakWidgets(self._content.stripvanpeaks_chkbox.isChecked())
-        #if self._content.stripvanpeaks_chkbox.isChecked() is True:
-        #    # Enable all the edits
-        #    self._content.vanpeakfwhm_edit.setEnabled(True)
-        #    self._content.vansmoothpar_edit.setEnabled(True)
-        #    self._content.vanpeaktol_edit.setEnabled(True)
-        #else:
-        #    # Disable all the edits
-        #    self._content.vanpeakfwhm_edit.setEnabled(False)
-        #    self._content.vansmoothpar_edit.setEnabled(False)
-        #    self._content.vanpeaktol_edit.setEnabled(False)
 
         return
 

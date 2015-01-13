@@ -6,16 +6,13 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /**
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Q1DTOF : public API::Algorithm
-{
+class DLLExport Q1DTOF : public API::Algorithm {
 public:
   /// (Empty) Constructor
   Q1DTOF() : API::Algorithm() {}
@@ -23,8 +20,10 @@ public:
   virtual ~Q1DTOF() {}
   /// Algorithm's name
   virtual const std::string name() const { return "Q1DTOF"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Performs azimuthal averaging on a 2D SANS data to produce I(Q).";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Performs azimuthal averaging on a 2D SANS data to produce I(Q).";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -32,7 +31,6 @@ public:
   virtual const std::string category() const { return "SANS"; }
 
 private:
-  
   /// Initialisation code
   void init();
   /// Execution code

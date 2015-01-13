@@ -1,5 +1,5 @@
 Name:           mantid-developer
-Version:        1.4
+Version:        1.7
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -9,7 +9,7 @@ License:        GPL
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %{?fc20:Requires: rpmfusion-nonfree-release}
-Requires: cmake-gui >= 2.8.5
+Requires: cmake-gui >= 2.8.12
 Requires: boost-devel
 %{?el6:Requires: epel-release}
 Requires: gperftools-devel
@@ -19,6 +19,7 @@ Requires: git-all
 Requires: gsl-devel
 Requires: hdf-devel
 Requires: hdf5-devel
+Requires: jsoncpp-devel
 Requires: muParser-devel
 Requires: mxml-devel
 Requires: nexus >= 4.2
@@ -30,6 +31,7 @@ Requires: PyQt4-devel
 Requires: python-devel
 Requires: python-ipython >= 1.1
 Conflicts: python-ipython >= 2.0
+Requires: python-pip
 Requires: python-sphinx
 Requires: qscintilla-devel
 Requires: qt-devel >= 4.6
@@ -46,8 +48,12 @@ Requires: sip-devel
 Requires: git
 Requires: openssl-devel
 Requires: texlive-latex
+%if 0%{?el6}
+# do nothing
+%else
 Requires: texlive-latex-bin
 Requires: texlive-was
+%endif
 Requires: tex-preview
 Requires: dvipng
 %if 0%{?el6}

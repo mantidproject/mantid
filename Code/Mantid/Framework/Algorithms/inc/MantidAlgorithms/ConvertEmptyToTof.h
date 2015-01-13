@@ -6,17 +6,19 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include <utility>      // std::pair
+#include <utility> // std::pair
 
 namespace Mantid {
 namespace Algorithms {
 
 /** ConvertEmptyToTof :
 
- At the ILL the data is loaded in raw format : no units used. The X-axis represent the time channel number.
+ At the ILL the data is loaded in raw format : no units used. The X-axis
+ represent the time channel number.
  This algorithm converts the channel number to time of flight
 
- Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -36,7 +38,7 @@ namespace Algorithms {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport ConvertEmptyToTof: public API::Algorithm {
+class DLLExport ConvertEmptyToTof : public API::Algorithm {
 public:
   ConvertEmptyToTof();
   virtual ~ConvertEmptyToTof();
@@ -44,7 +46,7 @@ public:
   virtual const std::string name() const;
   virtual int version() const;
   virtual const std::string category() const;
-  ///Summary of algorithms purpose
+  /// Summary of algorithms purpose
   virtual const std::string summary() const {
     return "Converts the channel number to time of flight.";
   }
@@ -57,20 +59,20 @@ private:
   void validateChannelIndices(std::vector<int> &v);
 
   std::map<int, int> findElasticPeakPositions(const std::vector<int> &,
-      const std::vector<int> &);
+                                              const std::vector<int> &);
 
-  void estimateFWHM(const Mantid::MantidVec&, double&, double&, double&,
-      double&, double&);
+  void estimateFWHM(const Mantid::MantidVec &, double &, double &, double &,
+                    double &, double &);
 
-  bool doFitGaussianPeak(int, double&, double&, double&, double, double);
-  std::pair<int, double> findAverageEppAndEpTof(const std::map<int, int>&);
+  bool doFitGaussianPeak(int, double &, double &, double &, double, double);
+  std::pair<int, double> findAverageEppAndEpTof(const std::map<int, int> &);
 
   double getL1(API::MatrixWorkspace_const_sptr);
   double getL2(API::MatrixWorkspace_const_sptr, int);
   double calculateTOF(double, double);
   bool areEqual(double, double, double);
-  template<typename T> T getPropertyFromRun(API::MatrixWorkspace_const_sptr,
-      const std::string&);
+  template <typename T>
+  T getPropertyFromRun(API::MatrixWorkspace_const_sptr, const std::string &);
   int roundUp(double);
   std::vector<double> makeTofAxis(int, double, size_t, double);
   void setTofInWS(const std::vector<double> &, API::MatrixWorkspace_sptr);
@@ -82,4 +84,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_CONVERTEMPTYTOTOF_H_ */
+#endif /* MANTID_ALGORITHMS_CONVERTEMPTYTOTOF_H_ */

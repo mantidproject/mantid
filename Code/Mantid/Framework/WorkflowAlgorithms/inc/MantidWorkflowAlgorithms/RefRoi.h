@@ -6,15 +6,15 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace WorkflowAlgorithms
-{
+namespace Mantid {
+namespace WorkflowAlgorithms {
 /**
 
-    Workflow algorithm for reflectometry to sum up a region of interest on a 2D detector.
+    Workflow algorithm for reflectometry to sum up a region of interest on a 2D
+   detector.
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -35,8 +35,7 @@ namespace WorkflowAlgorithms
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport RefRoi : public API::Algorithm
-{
+class DLLExport RefRoi : public API::Algorithm {
 public:
   /// (Empty) Constructor
   RefRoi() : API::Algorithm() {}
@@ -44,12 +43,17 @@ public:
   virtual ~RefRoi() {}
   /// Algorithm's name
   virtual const std::string name() const { return "RefRoi"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Workflow algorithm for reflectometry to sum up a region of interest on a 2D detector.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Workflow algorithm for reflectometry to sum up a region of "
+           "interest on a 2D detector.";
+  }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Workflow\\Reflectometry"; }
+  virtual const std::string category() const {
+    return "Workflow\\Reflectometry";
+  }
 
 private:
   /// Initialisation code
@@ -67,7 +71,6 @@ private:
   int m_yMax;
   int m_nXPixel;
   int m_nYPixel;
-
 };
 
 } // namespace Algorithms

@@ -6,17 +6,17 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** @author Michael Whitty, STFC ISIS
     @date 25/10/2010
 
-    This algorithm uses the Integration, ConvertSpectrumAxis and Transpose algorithms
+    This algorithm uses the Integration, ConvertSpectrumAxis and Transpose
+   algorithms
     to provide an integrated value over q and q^2..
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -36,8 +36,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ElasticWindow : public API::Algorithm
-{
+class DLLExport ElasticWindow : public API::Algorithm {
 public:
   /// (Empty) Constructor
   ElasticWindow() : API::Algorithm() {}
@@ -45,8 +44,13 @@ public:
   virtual ~ElasticWindow() {}
   /// Algorithm's name
   virtual const std::string name() const { return "ElasticWindow"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "This algorithm performs an integration over an energy range, with the option to subtract a background over a second range, then transposes the result into a single-spectrum workspace with units in Q and Q^2.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "This algorithm performs an integration over an energy range, with "
+           "the option to subtract a background over a second range, then "
+           "transposes the result into a single-spectrum workspace with units "
+           "in Q and Q^2.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -54,7 +58,6 @@ public:
   virtual const std::string category() const { return "Inelastic"; }
 
 private:
-  
   /// Initialisation code
   void init();
   /// Execution code

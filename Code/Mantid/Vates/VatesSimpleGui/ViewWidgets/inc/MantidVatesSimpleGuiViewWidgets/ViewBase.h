@@ -33,7 +33,7 @@ class ColorSelectionWidget;
 
   @date 24/05/2011
 
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -63,7 +63,7 @@ public:
   virtual ~ViewBase() {}
 
   /// Poll the view to set status for mode control buttons.
-  virtual void checkView();
+  virtual void checkView(ModeControlWidget::Views initialView);
   /// Poll the view to set status for mode control buttons on view switch.
   virtual void checkViewOnSwitch();
   /// Close view generated sub-windows.
@@ -181,9 +181,10 @@ signals:
   void setViewStatus(ModeControlWidget::Views mode, bool state);
   /**
    * Signal to set the status of the view mode buttons.
-   * @param state whether or not to enable to view mode buttons
+	 * @param view The initial view.
+   * @param state Whether or not to enable to view mode buttons.
    */
-  void setViewsStatus(bool state);
+  void setViewsStatus(ModeControlWidget::Views view, bool state);
 
 private:
   Q_DISABLE_COPY(ViewBase)

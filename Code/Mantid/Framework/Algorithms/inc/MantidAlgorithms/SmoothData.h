@@ -6,29 +6,32 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
-/** Smooths the data of the input workspace by making each point the mean average of itself and
+namespace Mantid {
+namespace Algorithms {
+/** Smooths the data of the input workspace by making each point the mean
+   average of itself and
     one or more points lying symmetrically either side of it.
 
     Required Properties:
     <UL>
     <LI> InputWorkspace - The name of the workspace to take as input. </LI>
-    <LI> OutputWorkspace - The name under which to store the output workspace. </LI>
+    <LI> OutputWorkspace - The name under which to store the output workspace.
+   </LI>
     </UL>
 
     Optional Properties:
     <UL>
-    <LI> NPoints - The number of points to average over. Must be at least 3 (the default). If
-         an even number is given, it will be incremented by 1 to make it odd.</LI>
+    <LI> NPoints - The number of points to average over. Must be at least 3 (the
+   default). If
+         an even number is given, it will be incremented by 1 to make it
+   odd.</LI>
     </UL>
 
     @author Russell Taylor, Tessella Support Services plc
     @date 23/10/2008
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -48,8 +51,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SmoothData : public API::Algorithm
-{
+class DLLExport SmoothData : public API::Algorithm {
 public:
   /// (Empty) Constructor
   SmoothData() : API::Algorithm() {}
@@ -57,8 +59,10 @@ public:
   virtual ~SmoothData() {}
   /// Algorithm's name
   virtual const std::string name() const { return "SmoothData"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Smooths out statistical fluctuations in a workspace's data.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Smooths out statistical fluctuations in a workspace's data.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -66,10 +70,9 @@ public:
   virtual const std::string category() const { return "Transforms\\Smoothing"; }
 
 private:
-  
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
   int validateSpectrumInGroup(size_t wi);
   // This map does not need to be ordered, just a lookup for udet
@@ -77,7 +80,6 @@ private:
   typedef std::map<detid_t, int> udet2groupmap;
   std::vector<int> udet2group;
   API::MatrixWorkspace_const_sptr inputWorkspace;
-
 };
 
 } // namespace Algorithms

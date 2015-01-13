@@ -119,7 +119,7 @@ namespace API
           filter.append(QString::fromStdString(*itr) + " (*" + QString::fromStdString(*itr) + ");;");
         }
       }
-      filter.trimmed();
+      filter = filter.trimmed();
     }
     filter.append("All Files (*.*)");
     return filter;

@@ -21,16 +21,41 @@
        <enum>Qt::Horizontal</enum>
       </property>
       <widget class="QSplitter" name="vgraphSplitter">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
-       <widget class="QwtPlot" name="v_graphPlot"/>
-       <widget class="QLabel" name="label_8">
-        <property name="text">
-         <string>Vertical Graph Info</string>
+       <widget class="QwtPlot" name="v_graphPlot">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
        </widget>
-       <widget class="QTableWidget" name="v_graph_table"/>
+       <widget class="QWidget" name="verticalLayoutWidget">
+        <layout class="QVBoxLayout" name="v_graphInfo">
+         <item>
+          <widget class="QLabel" name="v_graphInfoLabel">
+           <property name="text">
+            <string>Vertical Graph Info</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTableWidget" name="v_graph_table">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
       <widget class="QSplitter" name="imageSplitter">
        <property name="orientation">
@@ -57,7 +82,29 @@
          </item>
         </layout>
        </widget>
-       <widget class="QwtPlot" name="h_graphPlot"/>
+       <widget class="QWidget" name="layoutWidget2">
+        <layout class="QHBoxLayout" name="h_graphLayout">
+         <item>
+          <widget class="QwtPlot" name="h_graphPlot"/>
+         </item>
+         <item>
+          <spacer name="h_scrollBarSpace">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>16</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
       </widget>
       <widget class="QWidget" name="layoutWidget_grid4">
        <layout class="QGridLayout" name="gridLayout_4">
@@ -143,23 +190,37 @@
         </item>
         <item row="7" column="0">
          <widget class="QLabel" name="table_label">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="text">
            <string>Image Info</string>
           </property>
          </widget>
         </item>
         <item row="8" column="0">
-         <widget class="QTableWidget" name="image_table"/>
+         <widget class="QTableWidget" name="image_table">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
         <item row="9" column="0">
          <widget class="QLabel" name="label">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="text">
            <string>Horizontal Graph Info</string>
           </property>
          </widget>
         </item>
         <item row="10" column="0">
-         <widget class="QTableWidget" name="h_graph_table"/>
+         <widget class="QTableWidget" name="h_graph_table">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
         <item row="5" column="0">
          <widget class="QComboBox" name="emode_combo_box">
@@ -210,7 +271,7 @@
      <x>0</x>
      <y>0</y>
      <width>1251</width>
-     <height>26</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

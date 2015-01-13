@@ -18,6 +18,7 @@
 
    algorithms/*
    concepts/index
+   interfaces/index
    fitfunctions/*
    api/index
 
@@ -27,6 +28,7 @@ This is the documentation for Mantid |release|.
 
 * `Algorithms <algorithms/index.html>`_
 * `Concepts <concepts/index.html>`_
+* `Interfaces <interfaces/index.html>`_
 * `Fit Functions <fitfunctions/index.html>`_
 * `API <api/index.html>`_
     - `Python <api/python/index.html>`_

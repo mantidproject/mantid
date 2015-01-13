@@ -4,10 +4,8 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 
-namespace Mantid
-{
-namespace Geometry
-{
+namespace Mantid {
+namespace Geometry {
 
 /** A general N-dimensional plane implicit function.
   This relies on MDPlane to do the heavy lifting. The main thing for
@@ -15,7 +13,8 @@ namespace Geometry
 
   @date 2011-13-12
 
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -35,14 +34,15 @@ namespace Geometry
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MDPlaneImplicitFunction : public MDImplicitFunction
-{
+class DLLExport MDPlaneImplicitFunction : public MDImplicitFunction {
 public:
   /// Default constructor.
   MDPlaneImplicitFunction();
   /// Parameter constructor for setting origin.
-  MDPlaneImplicitFunction(const size_t nd, const float * normal, const float * point);
-  MDPlaneImplicitFunction(const size_t nd, const double * normal, const double * point);
+  MDPlaneImplicitFunction(const size_t nd, const float *normal,
+                          const float *point);
+  MDPlaneImplicitFunction(const size_t nd, const double *normal,
+                          const double *point);
   /// Class destructor.
   virtual ~MDPlaneImplicitFunction();
 

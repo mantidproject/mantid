@@ -3,16 +3,15 @@
 
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** Algorithm basic test class.
 
     @author Matt Clarke, ISIS, RAL
     @date 09/11/2007
 
-    Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -32,25 +31,26 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class HelloWorldAlgorithm : public API::Algorithm
-{
+class HelloWorldAlgorithm : public API::Algorithm {
 public:
-  ///no arg constructor
+  /// no arg constructor
   HelloWorldAlgorithm() : API::Algorithm() {}
-  ///virtual destructor
+  /// virtual destructor
   virtual ~HelloWorldAlgorithm() {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "HelloWorldAlgorithm";}
+  virtual const std::string name() const { return "HelloWorldAlgorithm"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1);}
+  virtual int version() const { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Examples";}
-  virtual const std::string summary() const { return "Summary of this algorithm - Outputs Hello World!."; }
+  virtual const std::string category() const { return "Examples"; }
+  virtual const std::string summary() const {
+    return "Summary of this algorithm - Outputs Hello World!.";
+  }
 
 private:
-  ///Initialisation code
+  /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
 };
 
@@ -58,4 +58,3 @@ private:
 } // namespace Mantid
 
 #endif /*USER_ALGORITHMS_HELLOWORLDALGORITHM_H_*/
-

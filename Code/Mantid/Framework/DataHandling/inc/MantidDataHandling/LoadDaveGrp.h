@@ -5,10 +5,8 @@
 #include <fstream>
 #include <string>
 
-namespace Mantid
-{
-namespace DataHandling
-{
+namespace Mantid {
+namespace DataHandling {
 /** @class Mantid::DataHandling::LoadDaveGrp
      Reads the DAVE grouped ASCII format into a workspace.
 
@@ -21,7 +19,8 @@ namespace DataHandling
      <LI> IsMicroEV - The original file is in micro-electron-volts </LI>
      </UL>
 
-     @author Michael Reuter ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+     @author Michael Reuter ISIS Rutherford Appleton Laboratory & NScD Oak Ridge
+   National Laboratory
      @date 25/02/2011
 
      This file is part of Mantid.
@@ -42,8 +41,7 @@ namespace DataHandling
      File change history is stored at: <https://github.com/mantidproject/mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport LoadDaveGrp : public API::IFileLoader<Kernel::FileDescriptor>
-{
+class DLLExport LoadDaveGrp : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Constructor
   LoadDaveGrp();
@@ -51,18 +49,22 @@ public:
   virtual ~LoadDaveGrp() {}
   /// Algorithm's name
   virtual const std::string name() const { return "LoadDaveGrp"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Loads data from a DAVE grouped ASCII file and stores it in a 2D workspace (Workspace2D class).";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Loads data from a DAVE grouped ASCII file and stores it in a 2D "
+           "workspace (Workspace2D class).";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DataHandling\\Text;Inelastic"; }
+  virtual const std::string category() const {
+    return "DataHandling\\Text;Inelastic";
+  }
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::FileDescriptor & descriptor) const;
+  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
 
 private:
-  
   /// Initialization code
   void init();
   /// Execution code

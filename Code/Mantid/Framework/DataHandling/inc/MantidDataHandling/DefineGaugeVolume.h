@@ -6,19 +6,19 @@
 //--------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace DataHandling
-{
+namespace Mantid {
+namespace DataHandling {
 
-/** 
-    This class allows the shape of the sample to be defined by using the allowed XML
+/**
+    This class allows the shape of the sample to be defined by using the allowed
+   XML
     expressions
 
     @author Russell Taylor, Tessella
     @date 04/10/2010
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -36,10 +36,9 @@ namespace DataHandling
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport DefineGaugeVolume : public API::Algorithm
-{
+class DLLExport DefineGaugeVolume : public API::Algorithm {
 public:
   /// (Empty) Constructor
   DefineGaugeVolume() : API::Algorithm() {}
@@ -47,8 +46,11 @@ public:
   virtual ~DefineGaugeVolume() {}
   /// Algorithm's name
   virtual const std::string name() const { return "DefineGaugeVolume"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Defines a geometrical shape object to be used as the gauge volume in the AbsorptionCorrection algorithm.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Defines a geometrical shape object to be used as the gauge volume "
+           "in the AbsorptionCorrection algorithm.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -56,13 +58,11 @@ public:
   virtual const std::string category() const { return "Sample"; }
 
 private:
-  
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
 };
-
 }
 }
 

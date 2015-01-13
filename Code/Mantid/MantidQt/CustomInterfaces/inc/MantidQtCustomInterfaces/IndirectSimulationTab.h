@@ -1,7 +1,10 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTSIMULATIONTAB_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTSIMULATIONTAB_H_
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/System.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtCustomInterfaces/IndirectTab.h"
 #include <QSettings>
 #include <QWidget>
 
@@ -13,10 +16,10 @@ namespace MantidQt
 			This class defines a abstract base class for the different tabs of the Indirect Simulation interface.
 			Any joint functionality shared between each of the tabs should be implemented here as well as defining
 			shared member functions.
-    
+
 			@author Samuel Jackson, STFC
 
-			Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+			Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
 			This file is part of Mantid.
 
@@ -37,7 +40,7 @@ namespace MantidQt
 			Code Documentation is available at: <http://doxygen.mantidproject.org>
 		*/
 
-		class DLLExport IndirectSimulationTab : public QWidget
+		class DLLExport IndirectSimulationTab : public IndirectTab
 		{
 			Q_OBJECT
 
@@ -48,20 +51,8 @@ namespace MantidQt
 			/// Returns a URL for the wiki help page for this interface
 			QString tabHelpURL();
 
-			/// Base methods implemented in derived classes 
 			virtual QString help() = 0;
-			virtual bool validate() = 0;
-			virtual void run() = 0;
 			virtual void loadSettings(const QSettings& settings) = 0;
-
-		signals:
-			/// Send signal to parent window to execute python script
-			void executePythonScript(const QString& pyInput, bool output);
-			/// Send signal to parent window to show a message box to user
-			void showMessageBox(const QString& message);
-
-		protected:
-			void runPythonScript(const QString& pyInput);
 
 		};
 	} // namespace CustomInterfaces

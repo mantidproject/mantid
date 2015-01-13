@@ -4,6 +4,8 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/IndirectBayesTab.h"
 
+using MantidQt::MantidWidgets::RangeSelector;
+
 namespace MantidQt
 {
 	namespace CustomInterfaces
@@ -12,23 +14,13 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Constructor
      */
-    IndirectBayesTab::IndirectBayesTab(QWidget * parent) : QWidget(parent),  
-      m_plot(new QwtPlot(parent)), m_curve(new QwtPlotCurve()), m_rangeSelector(new MantidWidgets::RangeSelector(m_plot)),
-      m_propTree(new QtTreePropertyBrowser()), m_properties(), m_dblManager(new QtDoublePropertyManager()), 
-      m_dblEdFac(new DoubleEditorFactory()),
-      m_algRunner(new MantidQt::API::AlgorithmRunner(parent))
+    IndirectBayesTab::IndirectBayesTab(QWidget * parent) : IndirectTab(parent),
+      m_propTree(new QtTreePropertyBrowser())
     {
       m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
-      m_rangeSelector->setInfoOnly(false);
 
-      connect(m_rangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
-      connect(m_rangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
+      // Connect double maneger signals
       connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateProperties(QtProperty*, double)));
-
-      // initilise plot
-      m_plot->setCanvasBackground(Qt::white);
-      m_plot->setAxisFont(QwtPlot::xBottom, parent->font());
-      m_plot->setAxisFont(QwtPlot::yLeft, parent->font());
     }
 
     //----------------------------------------------------------------------------------------------
@@ -40,94 +32,27 @@ namespace MantidQt
 
     /**
      * Method to build a URL to the appropriate page on the wiki for this tab.
-     * 
+     *
      * @return The URL to the wiki page
      */
     QString IndirectBayesTab::tabHelpURL()
-    { 
+    {
       return "http://www.mantidproject.org/IndirectBayes:" + help();
     }
 
     /**
      * Emits a signal to run a python script using the method in the parent
      * UserSubWindow
-     * 
+     *
      * @param pyInput :: A string of python code to execute
      */
     void IndirectBayesTab::runPythonScript(const QString& pyInput)
     {
-      emit executePythonScript(pyInput, true);
+      emit runAsPythonScript(pyInput, true);
     }
 
     /**
-    * Runs an algorithm async
-    *
-    * @param algorithm :: The algorithm to be run
-    */
-    void IndirectBayesTab::runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm)
-    {
-      algorithm->setRethrows(true);
-      m_algRunner->startAlgorithm(algorithm);
-    }
-
-    /**
-     * Plot a workspace to the miniplot given a workspace name and
-     * a specturm index.
-     *
-     * This method uses the analysis data service to retrieve the workspace.
-     * 
-     * @param workspace :: The name of the workspace
-     * @param index :: The spectrum index of the workspace
-     */
-    void IndirectBayesTab::plotMiniPlot(const QString& workspace, size_t index)
-    {
-      auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::MatrixWorkspace>(workspace.toStdString());
-      plotMiniPlot(ws, index);
-    }
-
-    /**
-     * Plot a workspace to the miniplot given a workspace pointer and
-     * a specturm index.
-     * 
-     * @param workspace :: Pointer to the workspace
-     * @param wsIndex :: The spectrum index of the workspace
-     */
-    void IndirectBayesTab::plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex)
-    {
-      using Mantid::MantidVec;
-
-      //check if we can plot
-      if( wsIndex >= workspace->getNumberHistograms() || workspace->readX(0).size() < 2 )
-      {
-        return;
-      }
-
-      QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(wsIndex), false);
-
-      if ( m_curve != NULL )
-      {
-        m_curve->attach(0);
-        delete m_curve;
-        m_curve = NULL;
-      }
-
-      size_t nhist = workspace->getNumberHistograms();
-      if ( wsIndex >= nhist )
-      {
-        emit showMessageBox("Error: Workspace index out of range.");
-      }
-      else
-      {
-        m_curve = new QwtPlotCurve();
-        m_curve->setData(wsData);
-        m_curve->attach(m_plot);
-
-        m_plot->replot();
-      }
-    }
-
-    /**
-     * Checks the workspace's intrument for a resolution parameter to use as 
+     * Checks the workspace's intrument for a resolution parameter to use as
      * a default for the energy range on the mini plot
      *
      * @param workspace :: Name of the workspace to use
@@ -140,7 +65,7 @@ namespace MantidQt
     }
 
     /**
-     * Checks the workspace's intrument for a resolution parameter to use as 
+     * Checks the workspace's intrument for a resolution parameter to use as
      * a default for the energy range on the mini plot
      *
      * @param ws :: Pointer to the workspace to use
@@ -168,89 +93,38 @@ namespace MantidQt
     }
 
     /**
-     * Gets the range of the curve plotted in the mini plot
-     *
-     * @return A pair containing the maximum and minimum points of the curve
-     */
-    std::pair<double,double> IndirectBayesTab::getCurveRange()
-    {
-      size_t npts = m_curve->data().size();
-
-      if( npts < 2 )
-        throw std::invalid_argument("Too few points on data curve to determine range.");
-
-      return std::make_pair(m_curve->data().x(0), m_curve->data().x(npts-1));
-    }
-
-    /**
-     * Sets the edge bounds of plot to prevent the user inputting invalid values
-     * 
-     * @param min :: The lower bound property in the property browser
-     * @param max :: The upper bound property in the property browser
-     * @param bounds :: The upper and lower bounds to be set
-     */
-    void IndirectBayesTab::setPlotRange(QtProperty* min, QtProperty* max, const std::pair<double, double>& bounds)
-    {
-      m_dblManager->setMinimum(min, bounds.first);
-      m_dblManager->setMaximum(min, bounds.second);
-      m_dblManager->setMinimum(max, bounds.first);
-      m_dblManager->setMaximum(max, bounds.second);
-      m_rangeSelector->setRange(bounds.first, bounds.second);
-    }
-
-    /**
-     * Set the position of the guides on the mini plot
-     * 
-     * @param lower :: The lower bound property in the property browser
-     * @param upper :: The upper bound property in the property browser
-     * @param bounds :: The upper and lower bounds to be set
-     */
-    void IndirectBayesTab::setMiniPlotGuides(QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds)
-    {
-      m_dblManager->setValue(lower, bounds.first);
-      m_dblManager->setValue(upper, bounds.second);
-      m_rangeSelector->setMinimum(bounds.first);
-      m_rangeSelector->setMaximum(bounds.second);
-    }
-
-    /**
      * Set the position of the lower guide on the mini plot
-     * 
+     *
+     * @param rs :: Range selector to update
      * @param lower :: The lower guide property in the property browser
      * @param upper :: The upper guide property in the property browser
      * @param value :: The value of the lower guide
      */
-    void IndirectBayesTab::updateLowerGuide(QtProperty* lower, QtProperty* upper, double value)
+    void IndirectBayesTab::updateLowerGuide(RangeSelector* rs, QtProperty* lower, QtProperty* upper, double value)
     {
       // Check if the user is setting the max less than the min
       if(value > m_dblManager->value(upper))
-      {
         m_dblManager->setValue(lower, m_dblManager->value(upper));
-      }
       else
-      {
-        m_rangeSelector->setMinimum(value);
-      }
+        rs->setMinimum(value);
     }
 
     /**
      * Set the position of the upper guide on the mini plot
-     * 
+     *
+     * @param rs :: Range selector to update
      * @param lower :: The lower guide property in the property browser
      * @param upper :: The upper guide property in the property browser
      * @param value :: The value of the upper guide
      */
-    void IndirectBayesTab::updateUpperGuide(QtProperty* lower, QtProperty* upper, double value)
+    void IndirectBayesTab::updateUpperGuide(RangeSelector* rs, QtProperty* lower, QtProperty* upper, double value)
     {
       // Check if the user is setting the min greater than the max
       if(value < m_dblManager->value(lower))
-      {
         m_dblManager->setValue(upper, m_dblManager->value(lower));
-      }
       else
-      {
-        m_rangeSelector->setMaximum(value);
-      }
+        rs->setMaximum(value);
     }
+
   }
 } // namespace MantidQt

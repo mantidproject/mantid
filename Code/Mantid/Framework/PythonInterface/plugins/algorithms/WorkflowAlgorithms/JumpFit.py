@@ -12,7 +12,7 @@ class JumpFit(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
-                doc='Input workspace')
+                doc='Input workspace in HWHM')
 
         valid_functions = ['ChudleyElliot', 'HallRoss', 'FickDiffusion', 'TeixeiraWater']
         self.declareProperty(name='Function', defaultValue=valid_functions[0],
@@ -50,9 +50,6 @@ class JumpFit(PythonAlgorithm):
         # Select the width we wish to fit
         spectrum_ws = "__" + self._in_ws
         ExtractSingleSpectrum(InputWorkspace=self._in_ws, OutputWorkspace=spectrum_ws, WorkspaceIndex=self._width)
-
-        # Convert to HWHM
-        Scale(InputWorkspace=spectrum_ws, Factor=0.5, OutputWorkspace=spectrum_ws)
 
         if self._verbose:
             logger.notice('Cropping from Q= ' + str(self._q_min) + ' to ' + str(self._q_max))
@@ -105,7 +102,8 @@ class JumpFit(PythonAlgorithm):
 
         # Run fit function
         if self._out_name is "":
-            self._out_name = self._in_ws[:-10] + '_' + self._jump_function + 'fit'
+            ws_suffix_index = self._in_ws.rfind('_')
+            self._out_name = self._in_ws[:ws_suffix_index] + '_' + self._jump_function + '_fit'
 
         Fit(Function=function, InputWorkspace=spectrum_ws, CreateOutput=True, Output=self._out_name,
             StartX=self._q_min, EndX=self._q_max)
@@ -142,6 +140,7 @@ class JumpFit(PythonAlgorithm):
         self._plot = self.getProperty('Plot').value
         self._save = self.getProperty('Save').value
 
+
     def _process_output(self, workspace):
         if self._save:
             from mantid.simpleapi import SaveNexusProcessed
@@ -157,6 +156,7 @@ class JumpFit(PythonAlgorithm):
             from IndirectImport import import_mantidplot
             mtd_plot = import_mantidplot()
             mtd_plot.plotSpectrum(workspace, [0, 1, 2], True)
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(JumpFit)

@@ -6,20 +6,22 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /**
-    This algorithm performs a Fast Fourier Transform on each spectra of the input workspace.
-    It then takes a specified part of the FFT result (parameter "FFTPart") and places it in
-    a new workspace, which will share the Y axis of the old one (ie, spectra-detector map) and
+    This algorithm performs a Fast Fourier Transform on each spectra of the
+   input workspace.
+    It then takes a specified part of the FFT result (parameter "FFTPart") and
+   places it in
+    a new workspace, which will share the Y axis of the old one (ie,
+   spectra-detector map) and
     have the unit label set to "Time / ns" (a non-functional unit).
 
     @author Michael Whitty, STFC ISIS
     @date 21/09/2010
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -39,8 +41,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ExtractFFTSpectrum : public API::Algorithm
-{
+class DLLExport ExtractFFTSpectrum : public API::Algorithm {
 public:
   /// (Empty) Constructor
   ExtractFFTSpectrum() : API::Algorithm() {}
@@ -48,8 +49,13 @@ public:
   virtual ~ExtractFFTSpectrum() {}
   /// Algorithm's name
   virtual const std::string name() const { return "ExtractFFTSpectrum"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "This algorithm performs a Fast Fourier Transform on each spectrum in a workspace, and from the result takes the indicated spectrum and places it into the OutputWorkspace, so that you end up with one result spectrum for each input spectrum in the same workspace.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "This algorithm performs a Fast Fourier Transform on each spectrum "
+           "in a workspace, and from the result takes the indicated spectrum "
+           "and places it into the OutputWorkspace, so that you end up with "
+           "one result spectrum for each input spectrum in the same workspace.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -57,7 +63,6 @@ public:
   virtual const std::string category() const { return "Arithmetic\\FFT"; }
 
 private:
-  
   /// Initialisation code
   void init();
   /// Execution code

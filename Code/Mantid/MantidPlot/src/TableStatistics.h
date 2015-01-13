@@ -49,8 +49,9 @@ class TableStatistics : public Table
 		Type type() const { return d_type; }
 		//! return the base table of which statistics are displayed
 		Table *base() const { return d_base; }
-		// saving
-		virtual QString saveToString(const QString &geometry, bool = false);
+
+    void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
+    std::string saveToProject(ApplicationWindow* app);
 
     public slots:
         //! update statistics after a column has changed (to be connected with Table::modifiedData)

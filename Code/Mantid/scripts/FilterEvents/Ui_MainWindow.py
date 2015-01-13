@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Wed Sep 24 11:22:31 2014
+# Created: Tue Nov  4 15:50:54 2014
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -28,12 +28,9 @@ class Ui_MainWindow(object):
         self.graphicsView = QtGui.QGraphicsView(self.centralwidget)
         self.graphicsView.setGeometry(QtCore.QRect(20, 150, 741, 411))
         self.graphicsView.setObjectName(_fromUtf8("graphicsView"))
-        self.pushButton_2 = QtGui.QPushButton(self.centralwidget)
-        self.pushButton_2.setGeometry(QtCore.QRect(560, 30, 98, 27))
-        self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
-        self.label_2 = QtGui.QLabel(self.centralwidget)
-        self.label_2.setGeometry(QtCore.QRect(20, 30, 66, 17))
-        self.label_2.setObjectName(_fromUtf8("label_2"))
+        self.pushButton_browse = QtGui.QPushButton(self.centralwidget)
+        self.pushButton_browse.setGeometry(QtCore.QRect(530, 30, 61, 27))
+        self.pushButton_browse.setObjectName(_fromUtf8("pushButton_browse"))
         self.lineEdit = QtGui.QLineEdit(self.centralwidget)
         self.lineEdit.setGeometry(QtCore.QRect(130, 30, 381, 27))
         self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
@@ -48,10 +45,10 @@ class Ui_MainWindow(object):
         self.verticalSlider.setTickPosition(QtGui.QSlider.TicksAbove)
         self.verticalSlider.setObjectName(_fromUtf8("verticalSlider"))
         self.comboBox = QtGui.QComboBox(self.centralwidget)
-        self.comboBox.setGeometry(QtCore.QRect(130, 80, 381, 27))
+        self.comboBox.setGeometry(QtCore.QRect(130, 80, 461, 27))
         self.comboBox.setObjectName(_fromUtf8("comboBox"))
         self.pushButton_3 = QtGui.QPushButton(self.centralwidget)
-        self.pushButton_3.setGeometry(QtCore.QRect(560, 80, 98, 27))
+        self.pushButton_3.setGeometry(QtCore.QRect(610, 80, 98, 27))
         self.pushButton_3.setObjectName(_fromUtf8("pushButton_3"))
         self.lineEdit_3 = QtGui.QLineEdit(self.centralwidget)
         self.lineEdit_3.setGeometry(QtCore.QRect(120, 600, 151, 27))
@@ -282,7 +279,7 @@ class Ui_MainWindow(object):
         self.lineEdit_outwsname.setGeometry(QtCore.QRect(120, 650, 211, 27))
         self.lineEdit_outwsname.setObjectName(_fromUtf8("lineEdit_outwsname"))
         self.label_error = QtGui.QLabel(self.centralwidget)
-        self.label_error.setGeometry(QtCore.QRect(700, 20, 81, 41))
+        self.label_error.setGeometry(QtCore.QRect(730, 20, 81, 41))
         font = QtGui.QFont()
         font.setPointSize(14)
         font.setBold(True)
@@ -290,6 +287,12 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.label_error.setFont(font)
         self.label_error.setObjectName(_fromUtf8("label_error"))
+        self.label_logname_2 = QtGui.QLabel(self.centralwidget)
+        self.label_logname_2.setGeometry(QtCore.QRect(20, 30, 111, 17))
+        self.label_logname_2.setObjectName(_fromUtf8("label_logname_2"))
+        self.pushButton_load = QtGui.QPushButton(self.centralwidget)
+        self.pushButton_load.setGeometry(QtCore.QRect(610, 30, 98, 27))
+        self.pushButton_load.setObjectName(_fromUtf8("pushButton_load"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 823, 25))
@@ -299,7 +302,6 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
         MainWindow.setStatusBar(self.statusbar)
 
-        # Add figure to graphics view
         self.figure = Figure((4.0, 3.0), dpi=100)
         self.theplot = self.figure.add_subplot(111)
         self.graphicsView = FigureCanvas(self.figure)
@@ -313,8 +315,8 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "MainWindow", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_2.setText(QtGui.QApplication.translate("MainWindow", "Load", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_2.setText(QtGui.QApplication.translate("MainWindow", "File Name", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButton_browse.setText(QtGui.QApplication.translate("MainWindow", "Browse", None, QtGui.QApplication.UnicodeUTF8))
+        self.lineEdit.setToolTip(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p>The name of the NeXus file or the run number to load. </p><p><br/></p><p>Run number should be InstrumentName_RunNumber (for example, NOM_11788)</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_3.setText(QtGui.QApplication.translate("MainWindow", "Use", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("MainWindow", "Starting Time", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("MainWindow", "Stopping Time", None, QtGui.QApplication.UnicodeUTF8))
@@ -369,4 +371,8 @@ class Ui_MainWindow(object):
         self.label_5.setText(QtGui.QApplication.translate("MainWindow", "Splitter Title", None, QtGui.QApplication.UnicodeUTF8))
         self.label_outwsname.setText(QtGui.QApplication.translate("MainWindow", "Output Name", None, QtGui.QApplication.UnicodeUTF8))
         self.label_error.setText(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p><span style=\" color:#ff0000;\">ERROR!</span></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_logname_2.setToolTip(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p>The name of the NeXus file or the run number to load</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_logname_2.setWhatsThis(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p>Label for file name or run number</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_logname_2.setText(QtGui.QApplication.translate("MainWindow", "File / Run ", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButton_load.setText(QtGui.QApplication.translate("MainWindow", "Load", None, QtGui.QApplication.UnicodeUTF8))
 

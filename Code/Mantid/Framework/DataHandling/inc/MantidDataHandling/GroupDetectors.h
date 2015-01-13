@@ -6,24 +6,27 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace DataHandling
-{
+namespace Mantid {
+namespace DataHandling {
 /** An algorithm for grouping detectors and the spectra associated with them
     into a single DetectorGroup and spectrum.
     This algorithm can only be used on a workspace that has common X bins.
 
     Required Properties:
     <UL>
-    <LI> Workspace - The name of the (input & output) Workspace2D on which to perform the algorithm </LI>
+    <LI> Workspace - The name of the (input & output) Workspace2D on which to
+   perform the algorithm </LI>
     </UL>
 
-    Optional Properties (Only one of these should be set. Priority to highest listed below if more than one is set.):
+    Optional Properties (Only one of these should be set. Priority to highest
+   listed below if more than one is set.):
     <UL>
-    <LI> SpectraList - An ArrayProperty containing a list of spectra to combine </LI>
-    <LI> DetectorList - An ArrayProperty containing a list of detector IDs to combine </LI>
-    <LI> WorkspaceIndexList - An ArrayProperty containing the workspace indices to combine </LI>
+    <LI> SpectraList - An ArrayProperty containing a list of spectra to combine
+   </LI>
+    <LI> DetectorList - An ArrayProperty containing a list of detector IDs to
+   combine </LI>
+    <LI> WorkspaceIndexList - An ArrayProperty containing the workspace indices
+   to combine </LI>
     </UL>
 
     Output Properties:
@@ -34,7 +37,8 @@ namespace DataHandling
     @author Russell Taylor, Tessella Support Services plc
     @date 17/04/2008
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -54,24 +58,28 @@ namespace DataHandling
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport GroupDetectors : public API::Algorithm
-{
+class DLLExport GroupDetectors : public API::Algorithm {
 public:
   GroupDetectors();
   virtual ~GroupDetectors();
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "GroupDetectors";};
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Sums spectra bin-by-bin, equivalent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file.";}
+  virtual const std::string name() const { return "GroupDetectors"; };
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Sums spectra bin-by-bin, equivalent to grouping the data from a "
+           "set of detectors.  Individual groups can be specified by passing "
+           "the algorithm a list of spectrum numbers, detector IDs or "
+           "workspace indices. Many spectra groups can be created in one "
+           "execution via an input file.";
+  }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1;};
+  virtual int version() const { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Grouping";}
+  virtual const std::string category() const { return "Transforms\\Grouping"; }
 
 private:
-  
   // Implement abstract Algorithm methods
   void init();
   void exec();

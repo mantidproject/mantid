@@ -7,77 +7,78 @@
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidAPI/BoxController.h"
 
-namespace Mantid
-{
-  namespace API
-  {
-    class MatrixWorkspace;
-  }
-  namespace MDEvents
-  {
+namespace Mantid {
+namespace API {
+class MatrixWorkspace;
+}
+namespace MDEvents {
 
-    /** ReflectometryMDTransform : Abstract type for reflectometry transforms to MDWorkspaces. This is a Strategy Design Pattern.
+/** ReflectometryMDTransform : Abstract type for reflectometry transforms to
+ MDWorkspaces. This is a Strategy Design Pattern.
 
-     @date 2012-05-29
+ @date 2012-05-29
 
-     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
-     This file is part of Mantid.
+ This file is part of Mantid.
 
-     Mantid is free software; you can redistribute it and/or modify
-     it under the terms of the GNU General Public License as published by
-     the Free Software Foundation; either version 3 of the License, or
-     (at your option) any later version.
+ Mantid is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
 
-     Mantid is distributed in the hope that it will be useful,
-     but WITHOUT ANY WARRANTY; without even the implied warranty of
-     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-     GNU General Public License for more details.
+ Mantid is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-     You should have received a copy of the GNU General Public License
-     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-     File change history is stored at: <https://github.com/mantidproject/mantid>
-     Code Documentation is available at: <http://doxygen.mantidproject.org>
-     */
-    class DLLExport ReflectometryTransform
-    {
+ File change history is stored at: <https://github.com/mantidproject/mantid>
+ Code Documentation is available at: <http://doxygen.mantidproject.org>
+ */
+class DLLExport ReflectometryTransform {
 
-    protected:
+protected:
+  const size_t m_nbinsx;
+  const size_t m_nbinsz;
 
-      const size_t m_nbinsx;
-      const size_t m_nbinsz;
+  boost::shared_ptr<MDEventWorkspace2Lean>
+  createMDWorkspace(Mantid::Geometry::IMDDimension_sptr,
+                    Mantid::Geometry::IMDDimension_sptr,
+                    Mantid::API::BoxController_sptr boxController) const;
 
-      boost::shared_ptr<MDEventWorkspace2Lean> createMDWorkspace(Mantid::Geometry::IMDDimension_sptr,
-          Mantid::Geometry::IMDDimension_sptr, Mantid::API::BoxController_sptr boxController) const;
+public:
+  // Execute the strategy to produce a transformed, output MDWorkspace
+  virtual Mantid::API::IMDEventWorkspace_sptr
+  executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs,
+            Mantid::API::BoxController_sptr boxController) const = 0;
 
-    public:
+  // Execute the strategy to produce a transformed, output group of Matrix (2D)
+  // Workspaces
+  virtual Mantid::API::MatrixWorkspace_sptr
+  execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const = 0;
 
-      //Execute the strategy to produce a transformed, output MDWorkspace
-      virtual Mantid::API::IMDEventWorkspace_sptr executeMD(
-          Mantid::API::MatrixWorkspace_const_sptr inputWs,
-          Mantid::API::BoxController_sptr boxController) const = 0;
+  virtual ~ReflectometryTransform();
+  ReflectometryTransform(int numberOfBinsQx, int numberOfBinsQz);
+};
 
-      //Execute the strategy to produce a transformed, output group of Matrix (2D) Workspaces
-      virtual Mantid::API::MatrixWorkspace_sptr execute(
-          Mantid::API::MatrixWorkspace_const_sptr inputWs) const = 0;
+/// Create a new x-axis for the output workspace
+MantidVec createXAxis(Mantid::API::MatrixWorkspace *const ws,
+                      const double gradQx, const double cxToUnit,
+                      const size_t nBins, const std::string &caption,
+                      const std::string &units);
 
-      virtual ~ReflectometryTransform();
-      ReflectometryTransform(int numberOfBinsQx, int numberOfBinsQz);
-    };
+/// Create a new y(vertical)-axis for the output workspace
+void createVerticalAxis(Mantid::API::MatrixWorkspace *const ws,
+                        const MantidVec &xAxisVec, const double gradQz,
+                        const double cyToUnit, const size_t nBins,
+                        const std::string &caption, const std::string &units);
 
-    /// Create a new x-axis for the output workspace
-    MantidVec createXAxis(Mantid::API::MatrixWorkspace* const ws, const double gradQx,
-        const double cxToUnit, const size_t nBins, const std::string& caption,
-        const std::string& units);
-
-    /// Create a new y(vertical)-axis for the output workspace
-    void createVerticalAxis(Mantid::API::MatrixWorkspace* const ws, const MantidVec& xAxisVec,
-        const double gradQz, const double cyToUnit, const size_t nBins, const std::string& caption,
-        const std::string& units);
-
-    // Helper typedef for scoped pointer of this type.
-    typedef boost::shared_ptr<ReflectometryTransform> ReflectometryTransform_sptr;
-  }
+// Helper typedef for scoped pointer of this type.
+typedef boost::shared_ptr<ReflectometryTransform> ReflectometryTransform_sptr;
+}
 }
 #endif

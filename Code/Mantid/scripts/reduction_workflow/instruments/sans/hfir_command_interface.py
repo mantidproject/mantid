@@ -112,7 +112,7 @@ def NoSolidAngle():
     ReductionSingleton().reduction_properties["SolidAngleCorrection"]=False
 
 def AzimuthalAverage(binning=None, suffix="_Iq", error_weighting=False,
-                     n_bins=100, n_subpix=1, log_binning=False):
+                     n_bins=100, n_subpix=1, log_binning=False, align_log_with_decades=False):
     # Suffix is no longer used but kept for backward compatibility
     ReductionSingleton().reduction_properties["DoAzimuthalAverage"]=True
     if binning is not None:
@@ -123,6 +123,7 @@ def AzimuthalAverage(binning=None, suffix="_Iq", error_weighting=False,
     ReductionSingleton().reduction_properties["IQLogBinning"]=log_binning
     ReductionSingleton().reduction_properties["NumberOfSubpixels"]=n_subpix
     ReductionSingleton().reduction_properties["ErrorWeighting"]=error_weighting
+    ReductionSingleton().reduction_properties["IQAlignLogWithDecades"]=align_log_with_decades
 
 def NoTransmission():
     if ReductionSingleton().reduction_properties.has_key("TransmissionValue"):
@@ -354,6 +355,17 @@ def DivideByThickness(thickness=1.0):
             del ReductionSingleton().reduction_properties["SampleThickness"]
     else:
         ReductionSingleton().reduction_properties["SampleThickness"] = thickness
+
+def SetWedges(number_of_wedges=2, wedge_angle=30.0, wedge_offset=0.0):
+    """
+        Set the wedge properties
+        @param number_of_wedges: number of wedges to calculate
+        @param wedge_angle: augular opening of each wedge, in degrees
+        @param wedge_offset: angular offset for the wedges, in degrees
+    """
+    ReductionSingleton().reduction_properties["NumberOfWedges"] = number_of_wedges
+    ReductionSingleton().reduction_properties["WedgeAngle"] = wedge_angle
+    ReductionSingleton().reduction_properties["WedgeOffset"] = wedge_offset
 
 def Stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
            scale=None, save_output=False):
