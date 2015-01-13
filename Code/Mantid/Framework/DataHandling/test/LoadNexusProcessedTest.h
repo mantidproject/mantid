@@ -417,25 +417,8 @@ public:
     alg.setPropertyValue("SpectrumMin", "3");
     // this should imply 4==ws->getNumberHistograms()
 
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT( alg.isExecuted());
-
-    // Test basic props of the ws
-    Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve(output_ws));
-    TS_ASSERT(workspace);
-    if (!workspace)
-      return;
-    TS_ASSERT(workspace.get());
-
-    EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
-    TS_ASSERT(ews);
-    if (!ews)
-      return;
-    TS_ASSERT(ews.get());
-    TS_ASSERT_EQUALS(ews->getNumberHistograms(), 4);
-
-    TS_ASSERT_EQUALS(ews->getHistory().size(), 2);
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 4, 2);
   }
 
   void test_loadEventNexus_Max()
@@ -450,6 +433,10 @@ public:
     alg.setPropertyValue("OutputWorkspace", output_ws);
     alg.setPropertyValue("SpectrumMax", "2");
     // this should imply 3==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 2, 2);
+    return;
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted());
@@ -485,6 +472,11 @@ public:
     alg.setPropertyValue("SpectrumMin", "2");
     alg.setPropertyValue("SpectrumMax", "4");
     // this should imply 3==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 3, 2);
+    return;
+
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted());
@@ -538,6 +530,11 @@ public:
     alg.setPropertyValue("SpectrumList", "1,3,5");
     // this should imply 3==ws->getNumberHistograms()
 
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 3, 2);
+    return;
+
+
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -572,6 +569,10 @@ public:
     alg.setPropertyValue("SpectrumList", "5");
     alg.setPropertyValue("SpectrumMin", "4");
     // this should imply 2==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 3, 2);
+    return;
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -608,6 +609,12 @@ public:
     alg.setPropertyValue("SpectrumList", "3,5");
     // this should imply 4==ws->getNumberHistograms()
 
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 4, 2);
+    return;
+
+
+
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -643,6 +650,11 @@ public:
     alg.setPropertyValue("SpectrumMax", "5");
     alg.setPropertyValue("SpectrumList", "1,2,3,5");
     // this should imply 5(all)==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 5, 2);
+    return;
+
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -1032,6 +1044,7 @@ public:
   }
 
 private:
+
   void doHistoryTest(MatrixWorkspace_sptr matrix_ws)
   {
     const WorkspaceHistory history = matrix_ws->getHistory();
@@ -1047,26 +1060,44 @@ private:
     }
   }
 
+  /**
+   * Do a few standard checks that are repeated in multiple tests of
+   * partial event data loading
+   *
+   * @param alg initialized and parameterized load algorithm
+   * @param nSpectra expected number of spectra
+   * @param nHistory expected number of entries in the algorithm
+   * history
+   **/
+  void doCommonEventLoadChecks(LoadNexusProcessed& alg, size_t nSpectra,
+                               size_t nHistory)
+  {
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted());
+
+    // Test basic props of the ws
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve(output_ws));
+    TS_ASSERT(workspace);
+    if (!workspace)
+      return;
+    TS_ASSERT(workspace.get());
+
+    EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    TS_ASSERT(ews);
+    if (!ews)
+      return;
+    TS_ASSERT(ews.get());
+    TS_ASSERT_EQUALS(ews->getNumberHistograms(), nSpectra);
+
+    TS_ASSERT_EQUALS(ews->getHistory().size(), nHistory);
+  }
+
   void writeTmpEventNexus()
   {
     //return;
-    if (!m_savedTmpEventFile.empty() && Poco::File(m_savedTmpEventFile).exists()) {
-      std::cerr << "NOOOOOT SAVING ------" << std::endl;
-      return;
-    } else {
-    std::cerr << "SAVING ------" << std::endl;
-    /*
-    SaveNexusProcessedTest::do_testExec_EventWorkspaces("LoadNexusProcessed_TmpEvent_",
-                                                        WEIGHTED,
-                                                        m_savedTmpEventFile,
-                                                        true, false);
-    std::cerr << " --------- output tmp file: " << m_savedTmpEventFile << std::endl;
-    */
-    // after this, m_savedTmpEventFile will be like 'LoadNexusProcessed_TmpEvent_1.nxs'
-    /*
     if (!m_savedTmpEventFile.empty() && Poco::File(m_savedTmpEventFile).exists())
-      Poco::File(m_savedTmpEventFile).remove();
-    */
+      return;
 
     std::vector< std::vector<int> > groups(6);
     groups[0].push_back(9);
@@ -1097,9 +1128,6 @@ private:
 
     // Get absolute path to the saved file
     m_savedTmpEventFile = alg.getPropertyValue("Filename");
-    std::cerr << " -------------- ABS PATH saved: " << m_savedTmpEventFile << std::endl;
-
-    }
   }
 
   void clearTmpEventNexus()
@@ -1108,7 +1136,6 @@ private:
     if (!m_savedTmpEventFile.empty() && Poco::File(m_savedTmpEventFile).exists())
       Poco::File(m_savedTmpEventFile).remove();
   }
-
 
   std::string testFile, output_ws;
   /// Saved using SaveNexusProcessed and re-used in several load event tests
