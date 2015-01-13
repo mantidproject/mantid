@@ -149,6 +149,7 @@ namespace CustomInterfaces
     std::vector<double> e(4, 0);
 
     IAlgorithm_sptr createWsAlg = AlgorithmManager::Instance().create("CreateWorkspace");
+    createWsAlg->setChild(true);
     createWsAlg->initialize();
     createWsAlg->setProperty("OutputWorkspace", "__energy");
     createWsAlg->setProperty("DataX", x);
@@ -157,28 +158,34 @@ namespace CustomInterfaces
     createWsAlg->setProperty("Nspec", 1);
     createWsAlg->setProperty("UnitX", "DeltaE");
     createWsAlg->execute();
+    MatrixWorkspace_sptr energyWs = createWsAlg->getProperty("OutputWorkspace");
 
     IAlgorithm_sptr convertHistAlg = AlgorithmManager::Instance().create("ConvertToHistogram");
+    convertHistAlg->setChild(true);
     convertHistAlg->initialize();
-    convertHistAlg->setProperty("InputWorkspace", "__energy");
+    convertHistAlg->setProperty("InputWorkspace", energyWs);
     convertHistAlg->setProperty("OutputWorkspace", "__energy");
     convertHistAlg->execute();
+    energyWs = convertHistAlg->getProperty("OutputWorkspace");
 
     IAlgorithm_sptr loadInstAlg = AlgorithmManager::Instance().create("LoadInstrument");
+    loadInstAlg->setChild(true);
     loadInstAlg->initialize();
-    loadInstAlg->setProperty("Workspace", "__energy");
+    loadInstAlg->setProperty("Workspace", energyWs);
     loadInstAlg->setProperty("InstrumentName", instName.toStdString());
     loadInstAlg->execute();
+    energyWs = loadInstAlg->getProperty("Workspace");
 
     QString ipfFilename = instName + "_" + analyser + "_" + reflection + "_Parameters.xml";
 
     IAlgorithm_sptr loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
+    loadParamAlg->setChild(true);
     loadParamAlg->initialize();
-    loadParamAlg->setProperty("Workspace", "__energy");
+    loadParamAlg->setProperty("Workspace", energyWs);
     loadParamAlg->setProperty("Filename", ipfFilename.toStdString());
     loadParamAlg->execute();
+    energyWs = loadParamAlg->getProperty("Workspace");
 
-    auto energyWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__energy");
     double efixed = energyWs->getInstrument()->getNumberParameter("efixed-val")[0];
 
     auto spectrum = energyWs->getSpectrum(0);
@@ -187,15 +194,15 @@ namespace CustomInterfaces
     spectrum->addDetectorID(3);
 
     IAlgorithm_sptr convUnitsAlg = AlgorithmManager::Instance().create("ConvertUnits");
+    convUnitsAlg->setChild(true);
     convUnitsAlg->initialize();
-    convUnitsAlg->setProperty("InputWorkspace", "__energy");
+    convUnitsAlg->setProperty("InputWorkspace", energyWs);
     convUnitsAlg->setProperty("OutputWorkspace", "__tof");
     convUnitsAlg->setProperty("Target", "TOF");
     convUnitsAlg->setProperty("EMode", "Indirect");
     convUnitsAlg->setProperty("EFixed", efixed);
     convUnitsAlg->execute();
-
-    auto tofWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__tof");
+    MatrixWorkspace_sptr tofWs = convUnitsAlg->getProperty("OutputWorkspace");
 
     std::vector<double> tofData = tofWs->readX(0);
     ranges["peak-start-tof"] = tofData[0];
