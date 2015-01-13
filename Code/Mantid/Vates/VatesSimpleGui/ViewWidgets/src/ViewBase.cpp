@@ -233,7 +233,7 @@ bool ViewBase::isPeaksWorkspace(pqPipelineSource *src)
   }
   QString wsType(vtkSMPropertyHelper(src->getProxy(),
                                      "WorkspaceTypeName", true).GetAsString());
-  // This must be a Mantid rebinner filter if the property is empty.
+
   if (wsType.isEmpty())
   {
     wsType = src->getSMName();
@@ -315,8 +315,7 @@ void ViewBase::checkView(ModeControlWidget::Views initialView)
  */
 void ViewBase::checkViewOnSwitch()
 {
-  if (this->hasWorkspaceType("MDHistoWorkspace") ||
-      this->hasFilter("MantidRebinning"))
+  if (this->hasWorkspaceType("MDHistoWorkspace"))
   {
     emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, false);
   }
@@ -574,7 +573,7 @@ bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src)
   }
   QString wsType(vtkSMPropertyHelper(src->getProxy(),
                                      "WorkspaceTypeName", true).GetAsString());
-  // This must be a Mantid rebinner filter if the property is empty.
+
   if (wsType.isEmpty())
   {
     wsType = src->getSMName();
@@ -667,7 +666,7 @@ bool ViewBase::hasWorkspaceType(const QString &wsTypeName)
   {
     QString wsType(vtkSMPropertyHelper((*source)->getProxy(),
                                        "WorkspaceTypeName", true).GetAsString());
-    // This must be a Mantid rebinner filter if the property is empty.
+
     if (wsType.isEmpty())
     {
       wsType = (*source)->getSMName();

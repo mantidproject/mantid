@@ -162,19 +162,14 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
   foreach (pqPipelineSource *src, srcs)
   {
     const QString name(src->getProxy()->GetXMLName());
-    if (name.contains("MDEWRebinningCutter"))
-    {
-      src1 = src;
-    }
+
     if (name.contains("ScaleWorkspace"))
     {
       src2 = src;
     }
   }
-  if (NULL == src1)
-  {
-    src1 = smModel->getItemAtIndex<pqPipelineSource *>(0);
-  }
+
+  src1 = smModel->getItemAtIndex<pqPipelineSource *>(0);
 
   // Get the current dataset characteristics
   const char *inGeomXML = vtkSMPropertyHelper(src1->getProxy(),
