@@ -34,11 +34,11 @@ class RunDescriptorTest(unittest.TestCase):
         tmp_ws_name = '__empty_' + InstrumentName
         if not mtd.doesExist(tmp_ws_name):
                LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
-        return mtd[tmp_ws_name].getInstrument();
+        return mtd[tmp_ws_name].getInstrument()
 
  
-    def test_basic_descr(self):
-        propman  = self.prop_man;
+    def test_descr_basic(self):
+        propman  = self.prop_man
 
         self.assertTrue(propman.sample_run is None)
         self.assertTrue(PropertyManager.sample_run.get_workspace() is None)
@@ -55,8 +55,69 @@ class RunDescriptorTest(unittest.TestCase):
 
         self.assertEqual(rez,'Success!')
 
+    def test_descr_dependend(self):
+        propman  = self.prop_man
+        propman.wb_run = 100
+        self.assertEqual(propman.wb_run,100)
+        self.assertEqual(propman.wb_for_monovan_run,100)
+
+        propman.wb_for_monovan_run = 200
+        self.assertEqual(propman.wb_for_monovan_run,200)
+        self.assertEqual(propman.wb_run,100)
+
+    def test_find_file(self):
+        propman  = self.prop_man
+        propman.sample_run = 11001
+
+        file=PropertyManager.sample_run.find_file()
+        self.assertTrue(len(file)>0)
+
+        ext = PropertyManager.sample_run.get_file_ext()
+        self.assertEqual(ext,'.raw')
+
+        PropertyManager.sample_run.set_file_ext('nxs')
+        ext = PropertyManager.sample_run.get_file_ext()
+        self.assertEqual(ext,'.nxs')
+
+        test_dir = config.getString('defaultsave.directory')
+
+        testFile1=os.path.normpath(test_dir+'MAR101111.nxs')
+        testFile2=os.path.normpath(test_dir+'MAR101111.raw')
+
+        f=open(testFile1,'w')
+        f.write('aaaaaa');
+        f.close()
+
+        f=open(testFile2,'w')
+        f.write('bbbb')
+        f.close()
+
+
+        propman.sample_run = 101111
+        file=PropertyManager.sample_run.find_file()
+        self.assertEqual(testFile1,os.path.normpath(file))
+        PropertyManager.sample_run.set_file_ext('.raw')
+        file=PropertyManager.sample_run.find_file()
+        self.assertEqual(testFile2,os.path.normpath(file))
+
+        os.remove(testFile1)
+        os.remove(testFile2)
+
+    def test_load_workspace(self):
+        propman  = self.prop_man
+
+        # MARI run with number 11001 and extension raw must among unit test files
+        propman.sample_run = 11001
+        PropertyManager.sample_run.set_file_ext('raw')
+
+        ws = PropertyManager.sample_run.get_workspace()
+
+        self.assertTrue(isinstance(ws, api.Workspace))
+        self.assertEqual(ws.name(), PropertyManager.sample_run.get_ws_name())
+
 
     
+
 
 if __name__=="__main__":
     unittest.main()

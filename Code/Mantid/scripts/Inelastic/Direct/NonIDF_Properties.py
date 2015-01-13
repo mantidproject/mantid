@@ -44,21 +44,12 @@ class NonIDF_Properties(object):
         object.__setattr__(self,'_save_file_name',None)
  
         self._set_instrument_and_facility(Instrument,run_workspace)
+
+        # set up descriptors holder class reference
+        RunDescriptor.__holder_class__ = self
+        RunDescriptor.logger   = self.log
   
     #end
-    def get_sample_ws_name(self):
-        """ build and return sample workspace name 
-
-            See similar property save_file_name TODO: (leave only one)
-        """ 
-        if not self.sum_runs:
-            return common.create_resultname(self.sample_run,self.instr_name)
-        else:
-            return common.create_resultname(self.sample_run,self.instr_name,'-sum')
-
-    def getDefaultParameterValue(self,par_name):
-        """ method to get default parameter value, specified in IDF """
-        return prop_helpers.get_default_parameter(self.instrument,par_name)
     #-----------------------------------------------------------------------------
     # Complex properties with personal descriptors
     #-----------------------------------------------------------------------------
@@ -74,14 +65,17 @@ class NonIDF_Properties(object):
     #
     van_rmm = VanadiumRMM()
     # Run descriptors
-    sample_run = RunDescriptor("Run ID (number) to convert to energy or list of the such run numbers")
-    wb_run     = RunDescriptor("Run ID (number) for vanadium run used in detectors calibration")
-    monovan_run = RunDescriptor("Run ID (number) for monochromatic vanadium used in absolute units normalization ")
-    wb_for_monovan_run = RunDescriptorDependent(wb_run,""" white beam run used To calculating monovanadium integrals.\n If not explicitly set, white beam for processing run is used instead """)
+    sample_run = RunDescriptor("_RUN","Run ID (number) to convert to energy or list of the such run numbers")
+    wb_run     = RunDescriptor("_WB","Run ID (number) for vanadium run used in detectors calibration")
+    monovan_run = RunDescriptor("_MONO","Run ID (number) for monochromatic vanadium used in absolute units normalization ")
+    wb_for_monovan_run = RunDescriptorDependent(wb_run,"_MONOWB",""" white beam run used to calculate monovanadium integrals.\n If not explicitly set, white beam for processing run is used instead """)
     # TODO: do something about it.  Second white is explicitly used in
-    # diagnostics.
+    # diagnostics but not accessed at all
     seclond_white  = RunDescriptor("Second white beam currently unused in the  workflow. Should it be used for Monovan Diagnostics?") 
     #-----------------------------------------------------------------------------------
+    def getDefaultParameterValue(self,par_name):
+        """ method to get default parameter value, specified in IDF """
+        return prop_helpers.get_default_parameter(self.instrument,par_name)
     @property
     def instrument(self):
         if self._pInstrument is None:
