@@ -114,29 +114,6 @@ void StandardView::onCutButtonClicked()
   builder->createFilter("filters", "Cut", this->getPvActiveSrc());
 }
 
-void StandardView::onRebinButtonClicked()
-{
-  const QString filterName = "MantidRebinning";
-  if (this->hasFilter(filterName))
-  {
-    QMessageBox::warning(this, QApplication::tr("Overplotting Warning"),
-                         QApplication::tr("Please click on the "+filterName+\
-                                          " entry to modify the rebinning "\
-                                          "parameters."));
-    return;
-  }
-  if (this->origSrc)
-  {
-    pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-    this->rebinCut = builder->createFilter("filters", "MDEWRebinningCutter",
-                                           this->origSrc);
-    this->ui.cutButton->setEnabled(false);
-    // Resulting MDHW can crash VSI when switching to SplatterPlot view,
-    // so disable that mode.
-    emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, false);
-  }
-}
-
 void StandardView::onScaleButtonClicked()
 {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();

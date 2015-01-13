@@ -76,8 +76,6 @@ protected slots:
   void onCutButtonClicked();
   /// Check for a rebinning source being destroyed.
   void onDestroyingSource(pqPipelineSource *src);
-  /// Invoke the RebinnerCutter on the current dataset.
-  void onRebinButtonClicked();
   /// Perform operations when rendering is done.
   void onRenderDone();
   /// Invoke the ScaleWorkspace on the current dataset.
