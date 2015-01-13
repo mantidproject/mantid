@@ -3,7 +3,8 @@
 /**
     Defines utility functions and classes for dealing with Python threads
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -25,48 +26,44 @@
 */
 #include <boost/python/detail/wrap_python.hpp>
 
-namespace Mantid { namespace PythonInterface {
-  namespace Environment
-  {
+namespace Mantid {
+namespace PythonInterface {
+namespace Environment {
 
-    /// Saves a pointer to the PyThreadState of the main thread
-    void saveMainThreadState(PyThreadState *threadState);
+/// Saves a pointer to the PyThreadState of the main thread
+void saveMainThreadState(PyThreadState *threadState);
 
-    /**
-     * Defines a structure for creating and destroying a
-     * Python thread state using the RAII pattern
-     */
-    struct PythonThreadState
-    {
-      explicit PythonThreadState();
-      ~PythonThreadState();
-    private:
-      PythonThreadState(const PythonThreadState&);
-      PythonThreadState& operator=(const PythonThreadState&);
+/**
+ * Defines a structure for creating and destroying a
+ * Python thread state using the RAII pattern
+ */
+struct PythonThreadState {
+  explicit PythonThreadState();
+  ~PythonThreadState();
 
-      PyThreadState * m_mainThreadState;
-      PyThreadState * m_thisThreadState;
-    };
+private:
+  PythonThreadState(const PythonThreadState &);
+  PythonThreadState &operator=(const PythonThreadState &);
 
-    /**
-     * Defines a structure for acquiring/releasing the Python GIL
-     * using the RAII pattern
-     */
-    struct GlobalInterpreterLock
-    {
-      GlobalInterpreterLock() : m_state(PyGILState_Ensure())
-      {}
+  PyThreadState *m_mainThreadState;
+  PyThreadState *m_thisThreadState;
+};
 
-      ~GlobalInterpreterLock()
-      {
-        PyGILState_Release(m_state);
-      }
-    private:
-      /// Current GIL state
-      PyGILState_STATE m_state;
-    };
-  }
-}}
+/**
+ * Defines a structure for acquiring/releasing the Python GIL
+ * using the RAII pattern
+ */
+struct GlobalInterpreterLock {
+  GlobalInterpreterLock() : m_state(PyGILState_Ensure()) {}
 
+  ~GlobalInterpreterLock() { PyGILState_Release(m_state); }
+
+private:
+  /// Current GIL state
+  PyGILState_STATE m_state;
+};
+}
+}
+}
 
 #endif /* MANTID_PYTHONAPI_PYTHONTHREADING_H_ */

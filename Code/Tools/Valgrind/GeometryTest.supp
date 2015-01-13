@@ -10,7 +10,7 @@
    <OpenCascade_memory_allocation_2>
    Memcheck:Leak
    fun:calloc
-   fun:_ZN16Standard_MMgrOpt8AllocateEm
+   fun:_ZN16Standard_MMgrRaw8AllocateEm
    ...
 }
 {
@@ -35,4 +35,24 @@
    ...
    fun:_ZN6Mantid8Geometry14SurfaceFactory15registerSurfaceEv
    ...
+}
+{
+   <OpenCascade_conditional_jump_1>
+   Memcheck:Cond
+   fun:_ZN18BOPAlgo_PaveFiller14MakeSplitEdgesEv
+   fun:_ZN18BOPAlgo_PaveFiller7PerformEv
+   fun:_ZN28BRepAlgoAPI_BooleanOperation5BuildEv
+   fun:_ZN18BRepAlgoAPI_CommonC1ERK12TopoDS_ShapeS2_
+   ...
+   fun:_ZN6Mantid8Geometry19OCGeometryGenerator11AnalyzeRuleEPNS0_4RuleE
+}
+{
+   <OpenCascade_conditional_jump_2>
+   Memcheck:Cond
+   fun:_ZN18BOPAlgo_PaveFiller14MakeSplitEdgesEv
+   fun:_ZN18BOPAlgo_PaveFiller7PerformEv
+   fun:_ZN28BRepAlgoAPI_BooleanOperation5BuildEv
+   fun:_ZN18BRepAlgoAPI_CommonC1ERK12TopoDS_ShapeS2_
+   ...
+   fun:_ZN6Mantid8Geometry19OCGeometryGenerator11AnalyzeRuleEPNS0_4RuleE
 }

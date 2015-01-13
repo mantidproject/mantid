@@ -8,18 +8,16 @@
 #include <Poco/Glob.h>
 #include <Poco/Path.h>
 
-
-namespace Mantid
-{
-namespace Kernel
-{
+namespace Mantid {
+namespace Kernel {
 /** This Glob class overrides the glob() method of Poco::Glob class
     to make it more reliable.
 
     @author Roman Tolchenov, Tessella plc
     @date 23/07/2009
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -40,13 +38,12 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class MANTID_KERNEL_DLL Glob:public Poco::Glob
-{
+class MANTID_KERNEL_DLL Glob : public Poco::Glob {
 public:
-    /// Creates a set of files that match the given pathPattern.
-    static void glob(const Poco::Path& pathPattern, std::set<std::string>& files, int options = 0);
+  /// Creates a set of files that match the given pathPattern.
+  static void glob(const Poco::Path &pathPattern, std::set<std::string> &files,
+                   int options = 0);
 };
-
 
 } // namespace Kernel
 } // namespace Mantid

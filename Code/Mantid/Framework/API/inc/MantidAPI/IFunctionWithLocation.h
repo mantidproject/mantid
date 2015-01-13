@@ -8,19 +8,18 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
 
-namespace Mantid
-{
-namespace API
-{
-/** An interface to a function with location, which here means a 
-    function for which the user may ask what is its centre and  height. 
-    Also allow the user to set these values. Setting the centre and height 
+namespace Mantid {
+namespace API {
+/** An interface to a function with location, which here means a
+    function for which the user may ask what is its centre and  height.
+    Also allow the user to set these values. Setting the centre and height
     may e.g. be used to get better starting values for the fitting.
 
     @author Anders Markvardsen, ISIS, RAL
     @date 2/11/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -40,20 +39,25 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL IFunctionWithLocation : public virtual ParamFunction, public virtual IFunction1D
-{
+class MANTID_API_DLL IFunctionWithLocation : public virtual ParamFunction,
+                                             public virtual IFunction1D {
 public:
-  /// Virtual destructor 
-  /// (avoids warnings about non-trivial move assignment in virtually inheriting classes)
+  /// Virtual destructor
+  /// (avoids warnings about non-trivial move assignment in virtually inheriting
+  /// classes)
   virtual ~IFunctionWithLocation() {}
 
-  /// Returns the centre of the function, which may be something as simple as the centre of
-  /// the fitting range in the case of a background function or peak shape function this 
+  /// Returns the centre of the function, which may be something as simple as
+  /// the centre of
+  /// the fitting range in the case of a background function or peak shape
+  /// function this
   /// return value reflects the centre of the peak
-  virtual double centre()const = 0;
+  virtual double centre() const = 0;
 
-  /// Returns the height of the function. For a background function this may return an average height of the background. For a peak function this return value is the height of the peak
-  virtual double height()const = 0;
+  /// Returns the height of the function. For a background function this may
+  /// return an average height of the background. For a peak function this
+  /// return value is the height of the peak
+  virtual double height() const = 0;
 
   /// Sets the parameters such that centre == c
   virtual void setCentre(const double c) = 0;
@@ -65,4 +69,4 @@ public:
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_API_IIFUNCTIONWITHLOCATION_H_*/ 
+#endif /*MANTID_API_IIFUNCTIONWITHLOCATION_H_*/

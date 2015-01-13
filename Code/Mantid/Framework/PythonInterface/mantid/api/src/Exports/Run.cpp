@@ -6,6 +6,7 @@
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include <boost/python/copy_const_reference.hpp>
 
+#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
 using Mantid::API::Run;
 using Mantid::Kernel::Property;
@@ -23,32 +24,20 @@ namespace
      * @param units A string representing a unit
      * @param replace If true, replace an existing property with this one else raise an error
      */
-    void addPropertyWithUnit(Run & self, const std::string & name, PyObject *value, const std::string & units, bool replace)
+    void addPropertyWithUnit(Run & self, const std::string & name, const bpl::object & value, const std::string & units, bool replace)
     {
       extract<Property*> extractor(value);
       if(extractor.check())
       {
         Property *prop = extractor();
         self.addProperty(prop->clone(), replace); // Clone the property as Python owns the one that is passed in
+        return;
       }
-      else if( PyFloat_Check(value) )
-      {
-        self.addProperty(name, extract<double>(value)(), units, replace);
-      }
-      else if( PyInt_Check(value) )
-      {
-        self.addProperty(name, extract<long>(value)(), units, replace);
-      }
-      else if( PyString_Check(value) )
-      {
-        self.addProperty(name, extract<std::string>(value)(), units, replace);
-      }
-      else
-      {
-        std::ostringstream msg;
-        msg << "Run::addProperty - Unknown value type given: " << value->ob_type->tp_name;
-        throw std::invalid_argument(msg.str());
-      }
+
+      // Use the factory
+      auto property = Mantid::PythonInterface::Registry::PropertyWithValueFactory::create(name, value, Mantid::Kernel::Direction::Input);
+      property->setUnits(units);
+      self.addProperty(property, replace);
     }
 
   /**
@@ -58,7 +47,7 @@ namespace
    * @param value The value of the property
    * @param replace If true, replace an existing property with this one else raise an error
    */
-  void addProperty(Run & self, const std::string & name, PyObject *value, bool replace)
+  void addProperty(Run & self, const std::string & name, const bpl::object & value, bool replace)
   {
     addPropertyWithUnit(self, name, value, "", replace);
   }
@@ -69,7 +58,7 @@ namespace
    * @param name The name of the new property
    * @param value The value of the property
    */
-  void addOrReplaceProperty(Run & self, const std::string & name, PyObject *value)
+  void addOrReplaceProperty(Run & self, const std::string & name, const bpl::object & value)
   {
     addProperty(self, name, value, true);
   }

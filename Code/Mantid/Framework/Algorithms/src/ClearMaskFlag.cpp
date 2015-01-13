@@ -1,60 +1,52 @@
 #include "MantidAlgorithms/ClearMaskFlag.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 
-  using namespace API;
-  using Kernel::Direction;
+using namespace API;
+using Kernel::Direction;
 
-  // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(ClearMaskFlag)
-  
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(ClearMaskFlag)
 
+//----------------------------------------------------------------------------------------------
+/** Constructor
+ */
+ClearMaskFlag::ClearMaskFlag() {}
 
-  //----------------------------------------------------------------------------------------------
-  /** Constructor
-   */
-  ClearMaskFlag::ClearMaskFlag() {}
-    
-  //----------------------------------------------------------------------------------------------
-  /** Destructor
-   */
-  ClearMaskFlag::~ClearMaskFlag() {}
+//----------------------------------------------------------------------------------------------
+/** Destructor
+ */
+ClearMaskFlag::~ClearMaskFlag() {}
 
-  //----------------------------------------------------------------------------------------------
-  /// Algorithm's name for identification. @see Algorithm::name
-  const std::string ClearMaskFlag::name() const { return "ClearMaskFlag";};
-  
-  /// Algorithm's version for identification. @see Algorithm::version
-  int ClearMaskFlag::version() const { return 1;};
-  
-  /// Algorithm's category for identification. @see Algorithm::category
-  const std::string ClearMaskFlag::category() const { return "Utility";}
+//----------------------------------------------------------------------------------------------
+/// Algorithm's name for identification. @see Algorithm::name
+const std::string ClearMaskFlag::name() const { return "ClearMaskFlag"; };
 
+/// Algorithm's version for identification. @see Algorithm::version
+int ClearMaskFlag::version() const { return 1; };
 
-  //----------------------------------------------------------------------------------------------
-  /** Initialize the algorithm's properties.
-   */
-  void ClearMaskFlag::init()
-  {
-    declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut), "Workspace to clear the mask flag of.");
-  }
+/// Algorithm's category for identification. @see Algorithm::category
+const std::string ClearMaskFlag::category() const { return "Utility"; }
 
-  //----------------------------------------------------------------------------------------------
-  /** Execute the algorithm.
-   */
-  void ClearMaskFlag::exec()
-  {
-    MatrixWorkspace_sptr ws = getProperty("Workspace");
+//----------------------------------------------------------------------------------------------
+/** Initialize the algorithm's properties.
+ */
+void ClearMaskFlag::init() {
+  declareProperty(new WorkspaceProperty<>("Workspace", "", Direction::InOut),
+                  "Workspace to clear the mask flag of.");
+}
 
-    // Clear the mask flags
-    Geometry::ParameterMap & pmap = ws->instrumentParameters();
-    pmap.clearParametersByName("masked");
-  }
+//----------------------------------------------------------------------------------------------
+/** Execute the algorithm.
+ */
+void ClearMaskFlag::exec() {
+  MatrixWorkspace_sptr ws = getProperty("Workspace");
 
-
+  // Clear the mask flags
+  Geometry::ParameterMap &pmap = ws->instrumentParameters();
+  pmap.clearParametersByName("masked");
+}
 
 } // namespace Algorithms
 } // namespace Mantid

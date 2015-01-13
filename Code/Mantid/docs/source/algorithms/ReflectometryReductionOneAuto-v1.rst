@@ -21,6 +21,21 @@ If ProcessingInstructions is not set its value is inferred from other properties
 
 See :ref:`algm-ReflectometryReductionOne` for more information on the wrapped algorithm.
 
+Workflow for WorkspaceGroups
+############################
+
+If a WorkspaceGroup is provided to ReflectometryReductionOneAuto, it will follow the steps shown in the diagram below to produce its output.
+
+.. image:: ../images/ReflectometryReductionOneAuto-Groups.png
+
+Workflow for Polarization Correction
+####################################
+
+If polarization correction is enabled, it is performed as an additional step once the main processing has completed.
+The following diagram shows how the :ref:`algm-PolarizationCorrection` algorithm is used.
+
+.. image:: ../images/ReflectometryReductionOneAuto-Groups.png
+
 Usage
 -----
 

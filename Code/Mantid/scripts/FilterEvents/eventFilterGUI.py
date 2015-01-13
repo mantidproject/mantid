@@ -105,14 +105,14 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.horizontalSlider.setRange(0, 100)
         self.ui.horizontalSlider.setValue(self._leftSlideValue)
         self.ui.horizontalSlider.setTracking(True)
-        self.ui.horizontalSlider.setTickPosition(QSlider.TicksAbove)
+        self.ui.horizontalSlider.setTickPosition(QSlider.NoTicks)
         self.connect(self.ui.horizontalSlider, SIGNAL('valueChanged(int)'), self.move_leftSlider)
 
 
         self.ui.horizontalSlider_2.setRange(0, 100)
         self.ui.horizontalSlider_2.setValue(self._rightSlideValue)
         self.ui.horizontalSlider_2.setTracking(True)
-        self.ui.horizontalSlider_2.setTickPosition(QSlider.TicksAbove)
+        self.ui.horizontalSlider_2.setTickPosition(QSlider.NoTicks)
         self.connect(self.ui.horizontalSlider_2, SIGNAL('valueChanged(int)'), self.move_rightSlider)
         
         # self.connect(self.ui.lineEdit_3, QtCore.SIGNAL("textChanged(QString)"), 
@@ -538,7 +538,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             setLineEdit = True
 
-        # Move the upper value bar
+        # Move the upper value bar: upperx and uppery are real value (float but not (0,100)) of the figure
         ylim = self.ui.theplot.get_ylim()
         newy = ylim[0] + inewy*(ylim[1] - ylim[0])*0.01
         upperx = self.ui.theplot.get_xlim() 
@@ -637,6 +637,9 @@ class MainWindow(QtGui.QMainWindow):
             self._importDataWorkspace(dataws)
             self._defaultdir = os.path.dirname(str(filename))
 
+        # Reset GUI
+        self._resetGUI(resetfilerun=False)
+
         return
 
 
@@ -650,6 +653,9 @@ class MainWindow(QtGui.QMainWindow):
             self._importDataWorkspace(dataws)
         except KeyError: 
             pass
+
+        # Reset GUI
+        self._resetGUI(resetfilerun=True)
 
         return
 
@@ -692,6 +698,13 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.theplot.set_ylim(ylim[0], ylim[1])
 
         setp(self.mainline, xdata=vecreltimes, ydata=vecvalue) 
+
+        samunit = samplelog.units
+        if len(samunit) == 0:
+            ylabel = logname
+        else:
+            ylabel = "%s (%s)" % (logname, samunit)
+        self.ui.theplot.set_ylabel(ylabel, fontsize=13)
 
         # assume that all logs are on almost same X-range.  Only Y need to be reset
         setp(self.leftslideline, ydata=ylim)
@@ -889,10 +902,14 @@ class MainWindow(QtGui.QMainWindow):
             if timeres < 1.0:
                 timeres = 1.0
 
-            sumws = api.RebinByPulseTimes(InputWorkspace=wksp, OutputWorkspace = "Summed_%s"%(str(wksp)), 
-                Params="0, %f, %d"%(timeres, timeduration))
-            sumws = api.SumSpectra(InputWorkspace=sumws, OutputWorkspace=str(sumws))
-            sumws = api.ConvertToPointData(InputWorkspace=sumws, OutputWorkspace=str(sumws))
+            sumwsname = "_Summed_%s"%(str(wksp))
+            if AnalysisDataService.doesExist(sumwsname) is False:
+                sumws = api.RebinByPulseTimes(InputWorkspace=wksp, OutputWorkspace = sumwsname, 
+                    Params="0, %f, %d"%(timeres, timeduration))
+                sumws = api.SumSpectra(InputWorkspace=sumws, OutputWorkspace=str(sumws))
+                sumws = api.ConvertToPointData(InputWorkspace=sumws, OutputWorkspace=str(sumws))
+            else:
+                sumws = AnalysisDataService.retrieve(sumwsname)
         except Exception as e:
             return str(e)
 
@@ -904,9 +921,12 @@ class MainWindow(QtGui.QMainWindow):
         ymin = min(vecy)
         ymax = max(vecy)
 
-        # Reset graph
+        # Reset graph  
         self.ui.theplot.set_xlim(xmin, xmax)
         self.ui.theplot.set_ylim(ymin, ymax)
+
+        self.ui.theplot.set_xlabel('Time (seconds)', fontsize=13)
+        self.ui.theplot.set_ylabel('Counts', fontsize=13)
 
         # Set up main line
         setp(self.mainline, xdata=vecx, ydata=vecy) 
@@ -1120,3 +1140,62 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.label_error.show()
 
         return
+
+
+    def _resetGUI(self, resetfilerun=False, resetwslist=False):
+        """ Reset GUI including all text edits and etc. 
+        """
+        if resetfilerun is True:
+            self.ui.lineEdit.clear()
+
+        # Plot related
+        self.ui.lineEdit_3.clear()
+        self.ui.lineEdit_4.clear()
+        self.ui.horizontalSlider.setValue(0)
+        self.ui.horizontalSlider_2.setValue(100)
+
+
+        self.ui.lineEdit_outwsname.clear()
+        self.ui.lineEdit_title.clear()
+
+        # Filter by log value
+        self.ui.lineEdit_5.clear()
+        self.ui.lineEdit_6.clear()
+
+        self.ui.verticalSlider_2.setValue(0)
+        self.ui.verticalSlider.setValue(100)
+
+        ylim = self.ui.theplot.get_ylim()
+        miny = ylim[0]
+        maxy = ylim[1]
+        xlim = self.ui.theplot.get_xlim() 
+        setp(self.lowerslideline, xdata=xlim, ydata=[miny, miny])
+        setp(self.upperslideline, xdata=xlim, ydata=[maxy, maxy])
+        self.ui.graphicsView.draw()
+
+        self.ui.lineEdit_7.clear()
+        self.ui.lineEdit_8.clear()
+        self.ui.lineEdit_9.clear()
+
+        # Filter by time
+        self.ui.lineEdit_timeInterval.clear()
+
+        # Advanced setup
+        self.ui.comboBox_tofCorr.setCurrentIndex(0)
+        self.ui.lineEdit_Ei.clear()
+
+        self.ui.checkBox_fastLog.setCheckState(False)
+        self.ui.checkBox_doParallel.setCheckState(False)
+
+        self.ui.comboBox_skipSpectrum.setCurrentIndex(0)
+        
+        self.ui.checkBox_filterByPulse.setCheckState(False)
+        self.ui.checkBox_from1.setCheckState(False)
+        self.ui.checkBox_groupWS.setCheckState(True)
+        self.ui.checkBox_splitLog.setCheckState(False)
+
+        # Error message
+        self.ui.plainTextEdit_ErrorMsg.clear()
+
+        return
+

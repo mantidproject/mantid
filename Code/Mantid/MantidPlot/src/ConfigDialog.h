@@ -207,7 +207,7 @@ private:
 
   QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
   QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;
-  QCheckBox *boxTitle, *boxFrame, *boxPlots3D, *boxPlots2D, *boxTables, *boxNotes, *boxFolders,*boxInstrWindow;
+  QCheckBox *boxTitle, *boxFrame, *boxDistribution, *boxPlots3D, *boxPlots2D, *boxTables, *boxNotes, *boxFolders,*boxInstrWindow;
   QCheckBox *boxSave, *boxBackbones, *boxShowLegend, *boxSmoothMesh;
   QCheckBox *boxAutoscaling, *boxShowProjection, *boxMatrices, *boxScaleFonts, *boxResize, *boxAspectRatio;
   QComboBox *boxMajTicks, *boxMinTicks, *boxStyle, *boxCurveStyle, *boxSeparator, *boxLanguage, *boxDecimalSeparator;

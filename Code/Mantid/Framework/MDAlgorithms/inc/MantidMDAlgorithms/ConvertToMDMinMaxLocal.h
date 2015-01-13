@@ -5,59 +5,61 @@
 #include "MantidMDAlgorithms/ConvertToMDParent.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-namespace Mantid
-{
-namespace MDAlgorithms
-{
+namespace Mantid {
+namespace MDAlgorithms {
 
-  /** ConvertToMDMinMaxLocal : Algorithm to calculate limits for ConvertToMD
-    
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+/** ConvertToMDMinMaxLocal : Algorithm to calculate limits for ConvertToMD
 
-    This file is part of Mantid.
+  Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport ConvertToMDMinMaxLocal  : public ConvertToMDParent
-  {
-  public:
-    ConvertToMDMinMaxLocal();
-    virtual ~ConvertToMDMinMaxLocal();
-    
-    virtual const std::string name() const;
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Calculate limits of ConvertToMD transformation possible for this particular workspace and the instrument, attached to it.";}
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    virtual int version() const{return 1;}
-  protected: // for testing 
-     void findMinMaxValues(MDEvents::MDWSDescription &targWSDescr,
-                            MDEvents::MDTransfInterface  *const qTransf,Kernel::DeltaEMode::Type dEMode,
-                            std::vector<double> &MinValues,std::vector<double> &MaxValues);
-  private:
-    void exec();
-    void init();
-    /// pointer to the input workspace;
-    Mantid::DataObjects::Workspace2D_sptr m_MinMaxWS2D;
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport ConvertToMDMinMaxLocal : public ConvertToMDParent {
+public:
+  ConvertToMDMinMaxLocal();
+  virtual ~ConvertToMDMinMaxLocal();
 
+  virtual const std::string name() const;
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Calculate limits of ConvertToMD transformation possible for this "
+           "particular workspace and the instrument, attached to it.";
+  }
 
-  };
+  virtual int version() const { return 1; }
 
+protected: // for testing
+  void findMinMaxValues(MDEvents::MDWSDescription &targWSDescr,
+                        MDEvents::MDTransfInterface *const qTransf,
+                        Kernel::DeltaEMode::Type dEMode,
+                        std::vector<double> &MinValues,
+                        std::vector<double> &MaxValues);
+
+private:
+  void exec();
+  void init();
+  /// pointer to the input workspace;
+  Mantid::DataObjects::Workspace2D_sptr m_MinMaxWS2D;
+};
 
 } // namespace MDAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_MDALGORITHMS_CONVERTTOMDHELPER_H_ */
+#endif /* MANTID_MDALGORITHMS_CONVERTTOMDHELPER_H_ */

@@ -85,10 +85,10 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   layout->addWidget(m_workspaceFilter);
   layout->addWidget(m_tree);
 
-
   m_loadMenu = new QMenu(this);
+  m_saveMenu = new QMenu(this);
 
-  QAction* loadFileAction = new QAction("File",this);
+  QAction *loadFileAction = new QAction("File",this);
   QAction *liveDataAction = new QAction("Live Data",this);
   m_loadMapper = new QSignalMapper(this);
   m_loadMapper->setMapping(liveDataAction,"StartLiveData");
@@ -109,7 +109,6 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   createSortMenuActions();
   createWorkspaceMenuActions();
 
-  connect(m_saveButton,SIGNAL(clicked()),this,SLOT(saveWorkspaces()));
   connect(m_deleteButton,SIGNAL(clicked()),this,SLOT(deleteWorkspaces()));
   connect(m_tree,SIGNAL(itemClicked(QTreeWidgetItem*, int)),this,SLOT(clickedWorkspace(QTreeWidgetItem*, int)));
   connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(workspaceSelected()));
@@ -180,9 +179,6 @@ void MantidDockWidget::createWorkspaceMenuActions()
 
   m_plotSpecErr = new QAction(tr("Plot Spectrum with Errors..."),this);
   connect(m_plotSpecErr,SIGNAL(triggered()),this,SLOT(plotSpectraErr()));
-
-  m_plotSpecDistr = new QAction(tr("Plot spectrum as distribution..."),this);
-  connect(m_plotSpecDistr,SIGNAL(triggered()),this,SLOT(plotSpectraDistribution()));
 
   m_colorFill = new QAction(tr("Color Fill Plot"), this);
   connect(m_colorFill, SIGNAL(triggered()), this, SLOT(drawColorFillPlot()));
@@ -819,6 +815,32 @@ void MantidDockWidget::workspaceSelected()
 { 
   QList<QTreeWidgetItem*> selectedItems=m_tree->selectedItems();
   if(selectedItems.isEmpty()) return;
+
+  // If there are multiple workspaces selected group and save as Nexus
+  if(selectedItems.length() > 1)
+  {
+    connect(m_saveButton, SIGNAL(clicked()), this, SLOT(saveWorkspaceGroup()));
+
+    // Don't display as a group
+    m_saveButton->setMenu(NULL);
+  }
+  else
+  {
+    // Don't run the save group function when clicked
+    disconnect(m_saveButton, SIGNAL(clicked()), this, SLOT(saveWorkspaceGroup()));
+
+    // Remove all existing save algorithms from list
+    m_saveMenu->clear();
+
+    // Add some save algorithms
+    addSaveMenuOption("SaveNexus", "Nexus");
+    addSaveMenuOption("SaveAscii", "ASCII");
+    addSaveMenuOption("SaveAscii.1", "ASCII v1");
+
+    // Set the button to show the menu
+    m_saveButton->setMenu(m_saveMenu);
+  }
+
   QString wsName=selectedItems[0]->text(0);
   if(m_ads.doesExist(wsName.toStdString()))
   {
@@ -827,25 +849,40 @@ void MantidDockWidget::workspaceSelected()
 }
 
 /**
+ * Adds an algorithm to the save menu.
+ *
+ * @param algorithmString Algorithm string in format ALGO_NAME.VERSION or ALGO_NAME
+ * @param menuEntryName Text to be shown in menu
+ */
+void MantidDockWidget::addSaveMenuOption(QString algorithmString, QString menuEntryName)
+{
+  // Default to algo string if no entry name given
+  if(menuEntryName.isEmpty())
+    menuEntryName = algorithmString;
+
+  // Create the action and add data
+  QAction *saveAction = new QAction(menuEntryName, this);
+  saveAction->setData(QVariant(algorithmString));
+
+  // Connect the tigger slot to show algorithm dialog
+  connect(saveAction, SIGNAL(triggered()), this, SLOT(handleShowSaveAlgorithm()));
+
+  // Add it to the menu
+  m_saveMenu->addAction(saveAction);
+}
+
+/**
  * Save all selected workspaces
  */
-void MantidDockWidget::saveWorkspaces()
+void MantidDockWidget::saveWorkspaceGroup()
 {
   QList<QTreeWidgetItem*> items = m_tree->selectedItems();
-  if(items.empty())
+  if(items.size() < 2)
     return;
 
-  // Call same save asction as popup menu for a single workspace
-  if(items.size() == 1)
-  {
-    m_mantidUI->saveNexusWorkspace();
-  }
-  else
-  {
-    m_saveFolderDialog->setWindowTitle("Select save folder");
-    m_saveFolderDialog->setLabelText(QFileDialog::Accept, "Select");
-    m_saveFolderDialog->open(this, SLOT(saveWorkspacesToFolder(const QString &)));
-  }
+  m_saveFolderDialog->setWindowTitle("Select save folder");
+  m_saveFolderDialog->setLabelText(QFileDialog::Accept, "Select");
+  m_saveFolderDialog->open(this, SLOT(saveWorkspacesToFolder(const QString &)));
 }
 
 /**
@@ -878,6 +915,53 @@ void MantidDockWidget::saveWorkspacesToFolder(const QString &folder)
         << ": " << rte.what() << std::endl;
     }
   }
+}
+
+/**
+ * Handles a save algorithm being triggered by the Save menu.
+ *
+ * To select a specific algorithm add a QString to the data of the QAction
+ * in the form ALGORITHM_NAME.VERSION or just ALGORITHM_NAME to use the
+ * most recent version.
+ */
+void MantidDockWidget::handleShowSaveAlgorithm()
+{
+  QAction *sendingAction = dynamic_cast<QAction *>(sender());
+
+  if(sendingAction)
+  {
+    QString wsName = getSelectedWorkspaceName();
+    QVariant data = sendingAction->data();
+
+    if(data.canConvert<QString>())
+    {
+      QString algorithmName;
+      int version = -1;
+
+      QStringList splitData = data.toString().split(".");
+      switch(splitData.length())
+      {
+        case 2:
+          version = splitData[1].toInt();
+        case 1:
+          algorithmName = splitData[0];
+          break;
+        default:
+          m_mantidUI->saveNexusWorkspace();
+          return;
+      }
+
+      QHash<QString,QString> presets;
+      if(!wsName.isEmpty())
+        presets["InputWorkspace"] = wsName;
+
+      m_mantidUI->showAlgorithmDialog(algorithmName, presets, NULL, version);
+      return;
+    }
+  }
+
+  // If we can't get the type of algorithm this should be we can always fall back on Nexus
+  m_mantidUI->saveNexusWorkspace();
 }
 
 /**
@@ -1266,17 +1350,7 @@ void MantidDockWidget::plotSpectra()
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
 
-  m_mantidUI->plot1D(toPlot, true, false);
-}
-
-/// Plots a single spectrum from each selected workspace
-void MantidDockWidget::plotSpectraDistribution()
-{
-  const QMultiMap<QString,std::set<int> > toPlot = m_tree->chooseSpectrumFromSelected();
-  // An empty map will be returned if the user clicks cancel in the spectrum selection
-  if (toPlot.empty()) return;
-
-  m_mantidUI->plot1D(toPlot, true, false, true );
+  m_mantidUI->plot1D(toPlot, true, MantidQt::DistributionDefault, false);
 }
 
 /// Plots a single spectrum from each selected workspace with errors
@@ -1286,17 +1360,7 @@ void MantidDockWidget::plotSpectraErr()
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
 
-  m_mantidUI->plot1D(toPlot, true, true);
-}
-
-/// Plots a single spectrum from each selected workspace with erros
-void MantidDockWidget::plotSpectraDistributionErr()
-{
-  const QMultiMap<QString,std::set<int> > toPlot = m_tree->chooseSpectrumFromSelected();
-  // An empty map will be returned if the user clicks cancel in the spectrum selection
-  if (toPlot.empty()) return;
-
-  m_mantidUI->plot1D(toPlot, true, true, true );
+  m_mantidUI->plot1D(toPlot, true, MantidQt::DistributionDefault, true);
 }
 
 /**

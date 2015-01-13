@@ -9,10 +9,8 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
-namespace Mantid
-{
-namespace Kernel
-{
+namespace Mantid {
+namespace Kernel {
 //----------------------------------------------------------------------
 // Forward Declaration
 //----------------------------------------------------------------------
@@ -25,7 +23,8 @@ class Property;
     @author Dickon Champion, ISIS, RAL
     @date 21/01/2008
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -45,38 +44,36 @@ class Property;
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_KERNEL_DLL PropertyHistory
-{
+class MANTID_KERNEL_DLL PropertyHistory {
 public:
-  PropertyHistory(const std::string& name, const std::string& value, const std::string& type,
-                  const bool isdefault, const unsigned int direction = 99 );
+  PropertyHistory(const std::string &name, const std::string &value,
+                  const std::string &type, const bool isdefault,
+                  const unsigned int direction = 99);
 
   /// construct a property history from a property object
-  PropertyHistory(Property const * const prop);
-  PropertyHistory(const PropertyHistory&);
-  PropertyHistory& operator=(const PropertyHistory&);
+  PropertyHistory(Property const *const prop);
+  PropertyHistory(const PropertyHistory &);
+  PropertyHistory &operator=(const PropertyHistory &);
   virtual ~PropertyHistory();
   /// get name of algorithm parameter const
-  const std::string& name() const {return m_name;};
+  const std::string &name() const { return m_name; };
   /// get value of algorithm parameter const
-  const std::string& value() const {return m_value;};
+  const std::string &value() const { return m_value; };
   /// set value of algorithm parameter
-  void setValue(const std::string& value) { m_value = value; };
+  void setValue(const std::string &value) { m_value = value; };
   /// get type of algorithm parameter const
-  const std::string& type() const {return m_type;};
+  const std::string &type() const { return m_type; };
   /// get isdefault flag of algorithm parameter const
-  bool isDefault() const {return m_isDefault;};
+  bool isDefault() const { return m_isDefault; };
   /// get direction flag of algorithm parameter const
-  unsigned int direction() const {return m_direction;};
+  unsigned int direction() const { return m_direction; };
   /// print contents of object
-  void printSelf(std::ostream&, const int indent = 0) const;
+  void printSelf(std::ostream &, const int indent = 0) const;
 
-  ///this is required for boost.python
-  bool operator==(const PropertyHistory &other) const
-  {
+  /// this is required for boost.python
+  bool operator==(const PropertyHistory &other) const {
     if (name() == other.name() && value() == other.value() &&
-        type() == other.type() && isDefault() == other.isDefault())
-    {
+        type() == other.type() && isDefault() == other.isDefault()) {
       return true;
     }
     return false;
@@ -95,13 +92,13 @@ private:
   unsigned int m_direction;
 };
 
-//typedefs for property history pointers
+// typedefs for property history pointers
 typedef boost::shared_ptr<PropertyHistory> PropertyHistory_sptr;
 typedef boost::shared_ptr<const PropertyHistory> PropertyHistory_const_sptr;
 typedef std::vector<PropertyHistory_sptr> PropertyHistories;
 
-MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const PropertyHistory&);
-
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
+                                           const PropertyHistory &);
 
 } // namespace Kernel
 } // namespace Mantid

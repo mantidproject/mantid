@@ -115,6 +115,23 @@ public:
 
   }
 
+  void test_smooth_all_spectra()
+  {
+    std::vector<int> wsIndexList;
+    do_multispectra_test( wsIndexList );
+  }
+
+  void test_smooth_some_spectra()
+  {
+    std::vector<int> wsIndexList(3);
+    wsIndexList[0] = 2;
+    wsIndexList[1] = 1;
+    wsIndexList[2] = 4;
+    do_multispectra_test( wsIndexList );
+  }
+
+private:
+
   void do_test(size_t nx, double* x, size_t ny, double* y, double* e, double* ysmooth)
   {
 
@@ -126,7 +143,8 @@ public:
     Y.assign( y, y + ny );
     E.assign( e, e + ny );
 
-    auto outputWs = runWienerSmooth( dataWS, 0 );
+    std::vector<int> wsIndexList(1, 0);
+    auto outputWs = runWienerSmooth( dataWS, wsIndexList );
 
     auto &outY = outputWs->readY(0);
 
@@ -139,7 +157,43 @@ public:
     AnalysisDataService::Instance().clear();
   }
   
-  MatrixWorkspace_sptr runWienerSmooth(MatrixWorkspace_sptr inputWS, size_t wsIndex)
+  void do_multispectra_test(const std::vector<int>& wsIndexList)
+  {
+    auto inputWS = createWorkspace();
+    auto outputWS = runWienerSmooth( inputWS, wsIndexList );
+
+    size_t nSpec = outputWS->getNumberHistograms();
+    TS_ASSERT_EQUALS( outputWS->blocksize(), inputWS->blocksize() );
+    TS_ASSERT_EQUALS( outputWS->isHistogramData(), inputWS->isHistogramData() );
+    if ( wsIndexList.empty() )
+    {
+      TS_ASSERT_EQUALS( nSpec, inputWS->getNumberHistograms() );
+    }
+    else
+    {
+      TS_ASSERT_EQUALS( nSpec, wsIndexList.size() );
+    }
+
+    for(size_t outSpec = 0; outSpec < nSpec; ++outSpec)
+    {
+      size_t inSpec = wsIndexList.empty() ? outSpec : wsIndexList[outSpec];
+      auto& inY = inputWS->readY(inSpec);
+      auto& outY = outputWS->readY(outSpec);
+      TS_ASSERT( ! std::equal( outY.begin(), outY.end(), inY.begin() ) );
+
+      std::vector<double> diff(inY.size());
+      std::transform( inY.begin(), inY.end(), outY.begin(), diff.begin(), std::minus<double>() );
+
+      auto countPos = std::count_if( diff.begin(), diff.end(), std::bind2nd( std::greater<double>(), 0.0 ) );
+      auto countNeg = std::count_if( diff.begin(), diff.end(), std::bind2nd( std::less<double>(), 0.0 ) );
+
+      // the delta here is just a guess
+      TS_ASSERT_DELTA( double(countPos) / double(countNeg), 1.0, 1e-1 );
+
+    }
+  }
+
+  MatrixWorkspace_sptr runWienerSmooth(MatrixWorkspace_sptr inputWS, const std::vector<int>& wsIndexList)
   {
     // Name of the output workspace.
     std::string outWSName("WienerSmoothTest_OutputWS");
@@ -149,7 +203,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inputWS) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("WorkspaceIndex", static_cast<int>(wsIndex)) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("WorkspaceIndexList", wsIndexList) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
@@ -159,17 +213,49 @@ public:
     TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName) );
     TS_ASSERT(ws);
 
-    auto &inX = inputWS->readX(wsIndex);
-    auto &inE = inputWS->readE(wsIndex);
+    auto &inX = inputWS->readX(0);
+    auto &inE = inputWS->readE(0);
 
-    auto outX = ws->readX(0);
-    auto outE = ws->readE(0);
+    for(size_t i = 0; i < ws->getNumberHistograms(); ++i)
+    {
 
-    TS_ASSERT_EQUALS( inputWS->readY(wsIndex).size(), ws->readY(0).size() );
-    TS_ASSERT( std::equal( outX.begin(), outX.end(), inX.begin() ) );
-    TS_ASSERT( std::equal( outE.begin(), outE.end(), inE.begin() ) );
+      auto outX = ws->readX(i);
+      auto outE = ws->readE(i);
+
+      TS_ASSERT( std::equal( outX.begin(), outX.end(), inX.begin() ) );
+      TS_ASSERT( std::equal( outE.begin(), outE.end(), inE.begin() ) );
+
+    }
 
     return ws;
+  }
+
+  MatrixWorkspace_sptr createWorkspace()
+  {
+    double x[] = {2.27988, 2.5079,  2.73593, 2.96398, 3.19203, 3.4201, 3.64818, 3.87627, 4.10439, 4.33251, 4.56066, 4.78882, 5.017,   5.2452,  5.47342, 5.70167, 5.92994, 6.15823, 6.38654, 6.61488};
+    double y[] = {0.1189,  0.14286, 0.15511, 0.20033, 0.24087, 0.2996, 0.3667,  0.45925, 0.54581, 0.64787, 0.72139, 0.75917, 0.7592,  0.70437, 0.66543, 0.61568, 0.57946, 0.56725, 0.54555, 0.54935};
+    double e[] = {0.04306, 0.05999, 0.04333, 0.04134, 0.04024, 0.04153,0.04734, 0.05491, 0.04546, 0.04019, 0.03919, 0.03947, 0.05077, 0.05629, 0.04336, 0.04067, 0.04076, 0.04336, 0.05906, 0.03617};
+
+    size_t nx = sizeof(x) / sizeof(double);
+    size_t ny = sizeof(y) / sizeof(double);
+
+    const size_t nSpec = 5;
+
+    auto dataWS = WorkspaceFactory::Instance().create( "Workspace2D", nSpec, nx, ny );
+
+    for(size_t i = 0; i < nSpec; ++i)
+    {
+      auto &X = dataWS->dataX(i);
+      auto &Y = dataWS->dataY(i);
+      auto &E = dataWS->dataE(i);
+      X.assign( x, x + nx );
+      Y.assign( y, y + ny );
+      E.assign( e, e + ny );
+
+      std::transform( Y.begin(), Y.end(), Y.begin(), std::bind2nd( std::multiplies<double>(), double(i+1) ) );
+    }
+
+    return dataWS;
   }
 
 };

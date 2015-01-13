@@ -22,7 +22,7 @@ class Fury(PythonAlgorithm):
 
         self.declareProperty(name='EnergyMin', defaultValue=-0.5, doc='Minimum energy for fit. Default=-0.5')
         self.declareProperty(name='EnergyMax', defaultValue=0.5, doc='Maximum energy for fit. Default=0.5')
-        self.declareProperty(name='NumBins', defaultValue=10, doc='Binning value (integer) for sample. Default=1')
+        self.declareProperty(name='NumBins', defaultValue=1, doc='Decrease total number of spectrum points by this ratio through merging of intensities from neighbouring bins. Default=1')
 
         self.declareProperty(MatrixWorkspaceProperty('ParameterWorkspace', '',
                              direction=Direction.Output, optional=PropertyMode.Optional),
@@ -44,7 +44,7 @@ class Fury(PythonAlgorithm):
         self._calculate_parameters()
 
         if not self._dry_run:
-            self._fury('__Fury_sample_cropped')
+            self._fury()
 
             self._add_logs()
 
@@ -61,8 +61,6 @@ class Fury(PythonAlgorithm):
             if self._verbose:
                 logger.notice('Dry run, will not run Fury')
 
-        DeleteWorkspace('__Fury_sample_cropped')
-
         self.setProperty('ParameterWorkspace', self._parameter_table)
         self.setProperty('OutputWorkspace', self._output_workspace)
 
@@ -78,7 +76,7 @@ class Fury(PythonAlgorithm):
 
         self._e_min = self.getProperty('EnergyMin').value
         self._e_max = self.getProperty('EnergyMax').value
-        self._num_bins = self.getProperty('NumBins').value
+        self._number_points_per_bin = self.getProperty('NumBins').value
 
         self._parameter_table = self.getPropertyValue('ParameterWorkspace')
         if self._parameter_table == '':
@@ -119,19 +117,30 @@ class Fury(PythonAlgorithm):
         CropWorkspace(InputWorkspace=self._sample, OutputWorkspace='__Fury_sample_cropped', Xmin=self._e_min, Xmax=self._e_max)
         x_data = mtd['__Fury_sample_cropped'].readX(0)
         number_input_points = len(x_data) - 1
-        number_points_per_bin = number_input_points / self._num_bins
-        self._e_width = (abs(self._e_min) + abs(self._e_max)) / number_points_per_bin
+        num_bins = number_input_points / self._number_points_per_bin
+        self._e_width = (abs(self._e_min) + abs(self._e_max)) / num_bins
 
         try:
             instrument = mtd[self._sample].getInstrument()
-            analyser = instrument.getStringParameter('analyser')[0]
-            resolution = instrument.getComponentByName(analyser).getNumberParameter('resolution')[0]
+
+            analyserName = instrument.getStringParameter('analyser')[0]
+            analyser = instrument.getComponentByName(analyserName)
+
+            if analyser is not None:
+                logger.debug('Found %s component in instrument %s, will look for resolution there'
+                             % (analyserName, instrument))
+                resolution = analyser.getNumberParameter('resolution')[0]
+            else:
+                logger.debug('No %s component found on instrument %s, will look for resolution in top level instrument'
+                             % (analyserName, instrument))
+                resolution = instrument.getNumberParameter('resolution')[0]
 
             if self._verbose:
                 logger.information('Got resolution from IPF: %f' % resolution)
-        except IndexError:
-            logger.warning('Could not get resolution from IPF, using default value.')
+
+        except (AttributeError, IndexError):
             resolution = 0.0175
+            logger.warning('Could not get resolution from IPF, using default value: %f' % resolution)
 
         resolution_bins = int(round((2 * resolution) / self._e_width))
 
@@ -149,9 +158,11 @@ class Fury(PythonAlgorithm):
         param_table.addColumn('float', 'Resolution')
         param_table.addColumn('int', 'ResolutionBins')
 
-        param_table.addRow([number_input_points, self._num_bins, number_points_per_bin,
+        param_table.addRow([number_input_points, self._number_points_per_bin, num_bins,
                             self._e_min, self._e_max, self._e_width,
                             resolution, resolution_bins])
+
+        DeleteWorkspace('__Fury_sample_cropped')
 
         self.setProperty('ParameterWorkspace', param_table)
 
@@ -178,55 +189,52 @@ class Fury(PythonAlgorithm):
         AddSampleLog(Workspace=self._output_workspace, LogName='fury_rebin_emax', LogType='Number', LogText=str(self._e_max))
 
 
-    def _fury(self, sam_workspace):
+    def _fury(self):
         """
         Run Fury.
         """
-        from IndirectCommon import StartTime, EndTime, CheckHistZero, CheckHistSame, CheckAnalysers
+        from IndirectCommon import CheckHistZero, CheckHistSame, CheckAnalysers
 
-        StartTime('Fury')
+        # Process resolution data
+        CheckAnalysers(self._sample, self._resolution, self._verbose)
+        num_res_hist = CheckHistZero(self._resolution)[0]
+        if num_res_hist > 1:
+            CheckHistSame(self._sample, 'Sample', self._resolution, 'Resolution')
 
         rebin_param = str(self._e_min) + ',' + str(self._e_width) + ',' + str(self._e_max)
-        Rebin(InputWorkspace=sam_workspace, OutputWorkspace=sam_workspace, Params=rebin_param, FullBinsOnly=True)
+        Rebin(InputWorkspace=self._sample, OutputWorkspace='__sam_rebin', Params=rebin_param, FullBinsOnly=True)
 
-        # Process RES Data Only Once
-        CheckAnalysers(sam_workspace, self._resolution, self._verbose)
-        nres, _ = CheckHistZero(self._resolution)
-        if nres > 1:
-            CheckHistSame(sam_workspace, 'Sample', self._resolution, 'Resolution')
+        Rebin(InputWorkspace=self._resolution, OutputWorkspace='__res_data', Params=rebin_param)
+        Integration(InputWorkspace='__res_data', OutputWorkspace='__res_int')
+        ConvertToPointData(InputWorkspace='__res_data', OutputWorkspace='__res_data')
+        ExtractFFTSpectrum(InputWorkspace='__res_data', OutputWorkspace='__res_fft', FFTPart=2)
+        Divide(LHSWorkspace='__res_fft', RHSWorkspace='__res_int', OutputWorkspace='__res')
 
-        tmp_res_workspace = '__tmp_' + self._resolution
-        Rebin(InputWorkspace=self._resolution, OutputWorkspace=tmp_res_workspace, Params=rebin_param, FullBinsOnly=True)
-        Integration(InputWorkspace=tmp_res_workspace, OutputWorkspace='res_int')
-        ConvertToPointData(InputWorkspace=tmp_res_workspace, OutputWorkspace=tmp_res_workspace)
-        ExtractFFTSpectrum(InputWorkspace=tmp_res_workspace, OutputWorkspace='res_fft', FFTPart=2)
-        Divide(LHSWorkspace='res_fft', RHSWorkspace='res_int', OutputWorkspace='res')
-        Rebin(InputWorkspace=sam_workspace, OutputWorkspace='sam_data', Params=rebin_param)
-        Integration(InputWorkspace='sam_data', OutputWorkspace='sam_int')
-        ConvertToPointData(InputWorkspace='sam_data', OutputWorkspace='sam_data')
-        ExtractFFTSpectrum(InputWorkspace='sam_data', OutputWorkspace='sam_fft', FFTPart=2)
-        Divide(LHSWorkspace='sam_fft', RHSWorkspace='sam_int', OutputWorkspace='sam')
+        Rebin(InputWorkspace='__sam_rebin', OutputWorkspace='__sam_data', Params=rebin_param)
+        Integration(InputWorkspace='__sam_data', OutputWorkspace='__sam_int')
+        ConvertToPointData(InputWorkspace='__sam_data', OutputWorkspace='__sam_data')
+        ExtractFFTSpectrum(InputWorkspace='__sam_data', OutputWorkspace='__sam_fft', FFTPart=2)
+        Divide(LHSWorkspace='__sam_fft', RHSWorkspace='__sam_int', OutputWorkspace='__sam')
 
-        Divide(LHSWorkspace='sam', RHSWorkspace='res', OutputWorkspace=self._output_workspace)
+        Divide(LHSWorkspace='__sam', RHSWorkspace='__res', OutputWorkspace=self._output_workspace)
 
-        # Cleanup Sample Files
-        DeleteWorkspace('sam_data')
-        DeleteWorkspace('sam_int')
-        DeleteWorkspace('sam_fft')
-        DeleteWorkspace('sam')
+        # Cleanup sample workspaces
+        DeleteWorkspace('__sam_rebin')
+        DeleteWorkspace('__sam_data')
+        DeleteWorkspace('__sam_int')
+        DeleteWorkspace('__sam_fft')
+        DeleteWorkspace('__sam')
 
         # Crop nonsense values off workspace
         binning = int(math.ceil(mtd[self._output_workspace].blocksize() / 2.0))
         bin_v = mtd[self._output_workspace].dataX(0)[binning]
         CropWorkspace(InputWorkspace=self._output_workspace, OutputWorkspace=self._output_workspace, XMax=bin_v)
 
-        # Clean up RES files
-        DeleteWorkspace(tmp_res_workspace)
-        DeleteWorkspace('res_int')
-        DeleteWorkspace('res_fft')
-        DeleteWorkspace('res')
-
-        EndTime('Fury')
+        # Clean up resolution workspaces
+        DeleteWorkspace('__res_data')
+        DeleteWorkspace('__res_int')
+        DeleteWorkspace('__res_fft')
+        DeleteWorkspace('__res')
 
 
 # Register algorithm with Mantid

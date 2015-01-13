@@ -1,7 +1,8 @@
 #ifndef MANTID_PYTHONINTERFACE_PROEPRTYWITHVALUEFACTORY_H_
 #define MANTID_PYTHONINTERFACE_PROEPRTYWITHVALUEFACTORY_H_
 /**
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -27,41 +28,40 @@
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 #include <string>
 
-namespace Mantid
-{
-  //---------------------------------------------------------------------------
-  // Forward declarations
-  //---------------------------------------------------------------------------
-  namespace Kernel
-  {
-    class Property;
-  }
-
-  namespace PythonInterface
-  {
-    namespace Registry
-    {
-      /**
-       * Defines a static factory class that creates PropertyWithValue
-       * instances from python objects.
-       */
-      class DLLExport PropertyWithValueFactory
-      {
-      public:
-        /// Creates a property from the value, validator and direction
-        static Kernel::Property * create(const std::string & name, const boost::python::object & defaultValue,
-            const boost::python::object & validator, const unsigned int direction);
-        /// Creates a property from the given value and direction
-        static Kernel::Property * create(const std::string & name, const boost::python::object & defaultValue,
-            const unsigned int direction);
-      private:
-        /// Return a handler that maps the python type to a C++ type
-        static const PropertyValueHandler & lookup(PyObject * const object);
-        /// Return a string based on the python array type
-        static const std::string isArray(PyObject * const object);
-      };
-    }
-  }
+namespace Mantid {
+//---------------------------------------------------------------------------
+// Forward declarations
+//---------------------------------------------------------------------------
+namespace Kernel {
+class Property;
 }
 
-#endif //MANTID_PYTHONINTERFACE_PROEPRTYWITHVALUEFACTORY_H_
+namespace PythonInterface {
+namespace Registry {
+/**
+ * Defines a static factory class that creates PropertyWithValue
+ * instances from python objects.
+ */
+class DLLExport PropertyWithValueFactory {
+public:
+  /// Creates a property from the value, validator and direction
+  static Kernel::Property *create(const std::string &name,
+                                  const boost::python::object &defaultValue,
+                                  const boost::python::object &validator,
+                                  const unsigned int direction);
+  /// Creates a property from the given value and direction
+  static Kernel::Property *create(const std::string &name,
+                                  const boost::python::object &defaultValue,
+                                  const unsigned int direction);
+
+private:
+  /// Return a handler that maps the python type to a C++ type
+  static const PropertyValueHandler &lookup(PyObject *const object);
+  /// Return a string based on the python array type
+  static const std::string isArray(PyObject *const object);
+};
+}
+}
+}
+
+#endif // MANTID_PYTHONINTERFACE_PROEPRTYWITHVALUEFACTORY_H_

@@ -2,11 +2,13 @@
 #define MANTID_VATES_vtkSplatterPlotFactory_H_
 
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDNode.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
+#include <vtkPoints.h>
 #include <boost/shared_ptr.hpp>
 
 using Mantid::MDEvents::MDEventWorkspace;
@@ -22,7 +24,7 @@ namespace VATES
  *
  * @date August 16, 2011
  *
- * Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ * Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
  *
  * This file is part of Mantid.
  *
@@ -42,6 +44,7 @@ namespace VATES
  * File change history is stored at: <https://github.com/mantidproject/mantid>
  * Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
+
 class DLLExport vtkSplatterPlotFactory : public vtkDataSetFactory
 {
 public:
@@ -81,6 +84,15 @@ private:
   template<typename MDE, size_t nd>
   void doCreate(typename MDEventWorkspace<MDE, nd>::sptr ws) const;
 
+  ///Check if the MDHisto workspace is 3D or 4D in nature
+  bool doMDHisto4D(Mantid::API::IMDHistoWorkspace_sptr workspace) const;
+
+  /// Generate the vtkDataSet from the objects input MDHistoWorkspace
+  void doCreateMDHisto(Mantid::API::IMDHistoWorkspace_sptr workspace) const;
+
+  /// Set the signals and the valid points which are to be displayed
+  signal_t extractScalarSignal(Mantid::API::IMDHistoWorkspace_sptr workspace, bool do4D, const int x, const int y, const int z) const;
+
   /// Template Method pattern to validate the factory before use.
   virtual void validate() const;
 
@@ -91,7 +103,7 @@ private:
   const std::string m_scalarName;
 
   /// Member workspace to generate vtkdataset from.
-  Mantid::API::IMDEventWorkspace_sptr m_workspace;
+  Mantid::API::IMDWorkspace_sptr m_workspace;
 
   /// Approximate number of points to plot
   size_t m_numPoints;

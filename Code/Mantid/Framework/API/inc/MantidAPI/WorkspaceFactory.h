@@ -6,11 +6,12 @@
  * is used in the call to its constructor to effect a call to the factory's
  * subscribe method.
  */
-#define DECLARE_WORKSPACE(classname) \
-  namespace { \
-    Mantid::Kernel::RegistrationHelper register_ws_##classname( \
-       ((Mantid::API::WorkspaceFactory::Instance().subscribe<classname>(#classname)) \
-       , 0)); \
+#define DECLARE_WORKSPACE(classname)                                           \
+  namespace {                                                                  \
+  Mantid::Kernel::RegistrationHelper                                           \
+      register_ws_##classname(((Mantid::API::WorkspaceFactory::Instance()      \
+                                    .subscribe<classname>(#classname)),        \
+                               0));                                            \
   }
 
 //----------------------------------------------------------------------
@@ -21,15 +22,13 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid
-{
-namespace API
-{
-  //----------------------------------------------------------------------
-  // Forward declarations
-  //----------------------------------------------------------------------
-  class ITableWorkspace;
-  class IPeaksWorkspace;
+namespace Mantid {
+namespace API {
+//----------------------------------------------------------------------
+// Forward declarations
+//----------------------------------------------------------------------
+class ITableWorkspace;
+class IPeaksWorkspace;
 
 /** The WorkspaceFactory class is in charge of the creation of all types
     of workspaces. It inherits most of its implementation from
@@ -40,7 +39,8 @@ namespace API
     @author Russell Taylor, Tessella Support Services plc
     @date 26/09/2007
 
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -61,22 +61,28 @@ namespace API
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class MANTID_API_DLL WorkspaceFactoryImpl : public Kernel::DynamicFactory<Workspace>
-{
+class MANTID_API_DLL WorkspaceFactoryImpl
+    : public Kernel::DynamicFactory<Workspace> {
 public:
-  MatrixWorkspace_sptr create(const MatrixWorkspace_const_sptr& parent,
-                                   size_t NVectors = size_t(-1), size_t XLength = size_t(-1), size_t YLength = size_t(-1)) const;
-  MatrixWorkspace_sptr create(const std::string& className, const size_t& NVectors,
-                                   const size_t& XLength, const size_t& YLength) const;
-  
+  MatrixWorkspace_sptr create(const MatrixWorkspace_const_sptr &parent,
+                              size_t NVectors = size_t(-1),
+                              size_t XLength = size_t(-1),
+                              size_t YLength = size_t(-1)) const;
+  MatrixWorkspace_sptr create(const std::string &className,
+                              const size_t &NVectors, const size_t &XLength,
+                              const size_t &YLength) const;
+
   void initializeFromParent(const MatrixWorkspace_const_sptr parent,
-                            const MatrixWorkspace_sptr child, const bool differentSize) const;
+                            const MatrixWorkspace_sptr child,
+                            const bool differentSize) const;
 
   /// Create a ITableWorkspace
-  boost::shared_ptr<ITableWorkspace> createTable(const std::string& className = "TableWorkspace") const;
+  boost::shared_ptr<ITableWorkspace>
+  createTable(const std::string &className = "TableWorkspace") const;
 
   /// Create a IPeaksWorkspace
-  boost::shared_ptr<IPeaksWorkspace> createPeaks(const std::string& className = "PeaksWorkspace") const;
+  boost::shared_ptr<IPeaksWorkspace>
+  createPeaks(const std::string &className = "PeaksWorkspace") const;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<WorkspaceFactoryImpl>;
@@ -84,22 +90,25 @@ private:
   /// Private Constructor for singleton class
   WorkspaceFactoryImpl();
   /// Private copy constructor - NO COPY ALLOWED
-  WorkspaceFactoryImpl(const WorkspaceFactoryImpl&);
+  WorkspaceFactoryImpl(const WorkspaceFactoryImpl &);
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  WorkspaceFactoryImpl& operator = (const WorkspaceFactoryImpl&);
-  ///Private Destructor
+  WorkspaceFactoryImpl &operator=(const WorkspaceFactoryImpl &);
+  /// Private Destructor
   virtual ~WorkspaceFactoryImpl();
 
   // Unhide the inherited create method but make it private
   using Kernel::DynamicFactory<Workspace>::create;
 };
 
-///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
+/// Forward declaration of a specialisation of SingletonHolder for
+/// AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
-  // this breaks new namespace declaraion rules; need to find a better fix
-  template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>;
+// this breaks new namespace declaraion rules; need to find a better fix
+template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>;
 #endif /* _WIN32 */
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl> WorkspaceFactory;
+typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>
+    WorkspaceFactory;
 
 } // namespace Kernel
 } // namespace Mantid

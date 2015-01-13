@@ -263,6 +263,38 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
   
+  void test_failure_due_to_bad_bin_width()
+  {
+    /* Equivalent of this python command:
+      mono_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000,XUnit='DeltaE',XMin=-5,XMax=15)
+    */
+    std::string outWSName = "CreateSampleWorkspaceTest_test_failure_due_to_bad_bin_width";
+    CreateSampleWorkspace alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
+    alg.setPropertyValue("OutputWorkspace", outWSName);
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("NumBanks", 1) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("BankPixelWidth", 4) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("NumEvents", 10000) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("XUnit", "DeltaE") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("XMin", -5.0) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("XMax", 15.0) );
+    //leave the default bin width of 200, which is inappropriate
+    
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+
+    // Retrieve the workspace from data service. TODO: Change to your desired type
+    MatrixWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName) );
+    TS_ASSERT(ws);
+    //just one bin
+    TS_ASSERT_EQUALS(ws->blocksize(),1);
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
 };
 
 

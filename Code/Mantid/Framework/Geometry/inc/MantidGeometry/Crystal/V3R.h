@@ -8,10 +8,8 @@
 
 #include <boost/rational.hpp>
 
-namespace Mantid
-{
-namespace Geometry
-{
+namespace Mantid {
+namespace Geometry {
 
 /** V3R :
 
@@ -49,87 +47,86 @@ namespace Geometry
   */
 typedef boost::rational<int> RationalNumber;
 
-class MANTID_GEOMETRY_DLL V3R
-{
+class MANTID_GEOMETRY_DLL V3R {
 public:
-    V3R();
-    V3R(const RationalNumber &x, const RationalNumber &y, const RationalNumber &z);
-    V3R(const std::vector<int> &vector);
+  V3R();
+  V3R(const RationalNumber &x, const RationalNumber &y,
+      const RationalNumber &z);
+  V3R(const std::vector<int> &vector);
 
-    V3R(const V3R &other);
-    V3R &operator =(const V3R &other);
+  V3R(const V3R &other);
+  V3R &operator=(const V3R &other);
 
-    ~V3R();
+  ~V3R();
 
-    const RationalNumber& x() const;
-    void setX(const RationalNumber &newX);
+  const RationalNumber &x() const;
+  void setX(const RationalNumber &newX);
 
-    const RationalNumber& y() const;
-    void setY(const RationalNumber &newY);
+  const RationalNumber &y() const;
+  void setY(const RationalNumber &newY);
 
-    const RationalNumber& z() const;
-    void setZ(const RationalNumber &newZ);
+  const RationalNumber &z() const;
+  void setZ(const RationalNumber &newZ);
 
-    RationalNumber& operator [](size_t index);
-    const RationalNumber& operator [](size_t index) const;
+  RationalNumber &operator[](size_t index);
+  const RationalNumber &operator[](size_t index) const;
 
-    // Operations with other vectors of rational numbers
-    V3R operator +(const V3R &other) const;
-    V3R &operator +=(const V3R &other);
+  // Operations with other vectors of rational numbers
+  V3R operator+(const V3R &other) const;
+  V3R &operator+=(const V3R &other);
 
-    V3R operator -() const;
-    V3R operator -(const V3R &other) const;
-    V3R &operator -=(const V3R &other);
+  V3R operator-() const;
+  V3R operator-(const V3R &other) const;
+  V3R &operator-=(const V3R &other);
 
-    // Operations with integers
-    V3R operator +(int other) const;
-    V3R &operator +=(int other);
+  // Operations with integers
+  V3R operator+(int other) const;
+  V3R &operator+=(int other);
 
-    V3R operator -(int other) const;
-    V3R &operator -=(int other);
+  V3R operator-(int other) const;
+  V3R &operator-=(int other);
 
-    V3R operator *(int other) const;
-    V3R &operator *=(int other);
+  V3R operator*(int other) const;
+  V3R &operator*=(int other);
 
-    V3R operator /(int other) const;
-    V3R &operator /=(int other);
+  V3R operator/(int other) const;
+  V3R &operator/=(int other);
 
-    // Operations with rational numbers
-    V3R operator +(const RationalNumber &other) const;
-    V3R &operator +=(const RationalNumber &other);
+  // Operations with rational numbers
+  V3R operator+(const RationalNumber &other) const;
+  V3R &operator+=(const RationalNumber &other);
 
-    V3R operator -(const RationalNumber &other) const;
-    V3R &operator -=(const RationalNumber &other);
+  V3R operator-(const RationalNumber &other) const;
+  V3R &operator-=(const RationalNumber &other);
 
-    V3R operator *(const RationalNumber &other) const;
-    V3R &operator *=(const RationalNumber &other);
+  V3R operator*(const RationalNumber &other) const;
+  V3R &operator*=(const RationalNumber &other);
 
-    V3R operator /(const RationalNumber &other) const;
-    V3R &operator /=(const RationalNumber &other);
+  V3R operator/(const RationalNumber &other) const;
+  V3R &operator/=(const RationalNumber &other);
 
-    // Operations with V3D
-    operator Kernel::V3D() const;
-    Kernel::V3D operator +(const Kernel::V3D &other) const;
-    Kernel::V3D operator -(const Kernel::V3D &other) const;
+  // Operations with V3D
+  operator Kernel::V3D() const;
+  Kernel::V3D operator+(const Kernel::V3D &other) const;
+  Kernel::V3D operator-(const Kernel::V3D &other) const;
 
-    // Comparison operators
-    bool operator ==(const V3R &other) const;
-    bool operator !=(const V3R &other) const;
-    bool operator <(const V3R &other) const;
+  // Comparison operators
+  bool operator==(const V3R &other) const;
+  bool operator!=(const V3R &other) const;
+  bool operator<(const V3R &other) const;
 
-    bool operator ==(int other) const;
-    bool operator !=(int other) const;
-    
+  bool operator==(int other) const;
+  bool operator!=(int other) const;
+
 protected:
-    RationalNumber m_x;
-    RationalNumber m_y;
-    RationalNumber m_z;
-
+  RationalNumber m_x;
+  RationalNumber m_y;
+  RationalNumber m_z;
 };
 
-MANTID_GEOMETRY_DLL V3R operator *(const Kernel::IntMatrix &lhs, const V3R &rhs);
+MANTID_GEOMETRY_DLL V3R operator*(const Kernel::IntMatrix &lhs, const V3R &rhs);
 
 } // namespace Geometry
 } // namespace Mantid
 
-#endif  /* MANTID_GEOMETRY_V3R_H_ */
+#endif /* MANTID_GEOMETRY_V3R_H_ */

@@ -6,23 +6,24 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
-/** Calculates and outputs the solid angles for each detector in the instrument.  
-    The sample position is taken as a point source for the solid angle calculations.
+namespace Mantid {
+namespace Algorithms {
+/** Calculates and outputs the solid angles for each detector in the instrument.
+    The sample position is taken as a point source for the solid angle
+   calculations.
 
     Required Properties:
     <UL>
     <LI> InputWorkspace  - The name of the input workspace. </LI>
-    <LI> OutputWorkspace - The name of the output workspace. Can be the same as the input one. </LI>
+    <LI> OutputWorkspace - The name of the output workspace. Can be the same as
+   the input one. </LI>
     </UL>
 
     @author Nick Draper, Tessella Support Services plc
     @date 26/01/2009
 
-    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
+   Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -42,8 +43,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SolidAngle : public API::Algorithm
-{
+class DLLExport SolidAngle : public API::Algorithm {
 public:
   /// Default constructor
   SolidAngle();
@@ -51,16 +51,22 @@ public:
   virtual ~SolidAngle();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "SolidAngle"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "The SolidAngle algorithm calculates the solid angle in steradians for each of the detectors in an instrument and outputs the data in a workspace.  This can then be used to normalize a data workspace using the divide algorithm should you wish.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "The SolidAngle algorithm calculates the solid angle in steradians "
+           "for each of the detectors in an instrument and outputs the data in "
+           "a workspace.  This can then be used to normalize a data workspace "
+           "using the divide algorithm should you wish.";
+  }
 
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "CorrectionFunctions\\InstrumentCorrections";}
+  virtual const std::string category() const {
+    return "CorrectionFunctions\\InstrumentCorrections";
+  }
 
 private:
-  
   // Overridden Algorithm methods
   void init();
   void exec();

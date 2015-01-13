@@ -6,13 +6,13 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** Renames a workspace to a different name in the data service.
-    If the same name is provided for input and output then the algorithm will fail with an error.
-    The renaming is implemented as a removal of the original workspace from the data service
+    If the same name is provided for input and output then the algorithm will
+   fail with an error.
+    The renaming is implemented as a removal of the original workspace from the
+   data service
     and re-addition under the new name.
 
     Required Properties:
@@ -21,7 +21,8 @@ namespace Algorithms
     <LI> OutputWorkspace - The name of the to rename the workspace to </LI>
     </UL>
 
-    Copyright &copy; 2007-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2012 ISIS Rutherford Appleton Laboratory, NScD Oak
+   Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -40,34 +41,33 @@ namespace Algorithms
 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport RenameWorkspace : public API::Algorithm
-{
+class DLLExport RenameWorkspace : public API::Algorithm {
 public:
   /// Default constructor
-  RenameWorkspace() : API::Algorithm() {};
+  RenameWorkspace() : API::Algorithm(){};
   /// Destructor
-  virtual ~RenameWorkspace() {};
+  virtual ~RenameWorkspace(){};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "RenameWorkspace";}
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Rename the Workspace.";}
+  virtual const std::string name() const { return "RenameWorkspace"; }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const { return "Rename the Workspace."; }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1);}
+  virtual int version() const { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Utility\\Workspaces";}
+  virtual const std::string category() const { return "Utility\\Workspaces"; }
 
 private:
   const std::string workspaceMethodName() const { return "rename"; }
-  const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
+  const std::string workspaceMethodInputProperty() const {
+    return "InputWorkspace";
+  }
 
-  
   // Overridden Algorithm methods
   void init();
   void exec();
 
   bool processGroups();
-
 };
 
 } // namespace Algorithm

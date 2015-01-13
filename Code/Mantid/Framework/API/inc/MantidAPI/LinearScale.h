@@ -9,17 +9,16 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ITransformScale.h"
 
-
-namespace Mantid
-{
-namespace API
-{
-/*Base class  representing a linear scaling transformation acting on a one-dimensional grid domain
+namespace Mantid {
+namespace API {
+/*Base class  representing a linear scaling transformation acting on a
+  one-dimensional grid domain
 
   @author Jose Borreguero
   @date Aug/28/2012
 
-  Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -40,16 +39,15 @@ namespace API
   Code Documentation is available at: <http://doxygen.mantidproject.org>.
 */
 
-class MANTID_API_DLL LinearScale : public API::ITransformScale
-{
+class MANTID_API_DLL LinearScale : public API::ITransformScale {
 public:
-  LinearScale() {};
-  virtual ~LinearScale() {};
-  /// The scaling transformation. First and last elements of the grid remain unchanged
+  LinearScale(){};
+  virtual ~LinearScale(){};
+  /// The scaling transformation. First and last elements of the grid remain
+  /// unchanged
   virtual const std::string name() const { return "LinearScale"; }
-  virtual void transform( std::vector<double> &gd );
+  virtual void transform(std::vector<double> &gd);
 }; // class LinearScale
-
 
 } // namespace API
 } // namespace Mantid

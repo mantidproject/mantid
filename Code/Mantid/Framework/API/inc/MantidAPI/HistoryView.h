@@ -12,19 +12,19 @@
 #include <list>
 #include <vector>
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 
 /** @class HistoryView
 
-    This class builds a view of the algorithm history by "unrolling" parent algorithms.
+    This class builds a view of the algorithm history by "unrolling" parent
+   algorithms.
 
     @author Samuel Jackson, ISIS, RAL
     @date 21/01/2008
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -45,18 +45,18 @@ namespace API
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-
-class MANTID_API_DLL HistoryView
-{
+class MANTID_API_DLL HistoryView {
 public:
-  HistoryView(const WorkspaceHistory& wsHist);
-  virtual ~HistoryView() {};
+  HistoryView(const WorkspaceHistory &wsHist);
+  virtual ~HistoryView(){};
 
   void unroll(size_t index);
   void unrollAll();
   void roll(size_t index);
   void rollAll();
-  void filterBetweenExecDate(Mantid::Kernel::DateAndTime start, Mantid::Kernel::DateAndTime end = Mantid::Kernel::DateAndTime::getCurrentTime());
+  void filterBetweenExecDate(Mantid::Kernel::DateAndTime start,
+                             Mantid::Kernel::DateAndTime end =
+                                 Mantid::Kernel::DateAndTime::getCurrentTime());
   const std::vector<HistoryItem> getAlgorithmsList() const;
   size_t size() const { return m_historyItems.size(); }
 

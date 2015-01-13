@@ -90,20 +90,6 @@
           </property>
          </widget>
         </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="mantidlabel">
-          <property name="text">
-           <string>Homepage:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QLabel" name="mantidurl">
-          <property name="text">
-           <string>TextLabel</string>
-          </property>
-         </widget>
-        </item>
         <item row="3" column="0">
          <widget class="QLabel" name="revision_label">
           <property name="text">
@@ -118,8 +104,15 @@
           </property>
          </widget>
         </item>
-        <item row="5" column="1">
-         <widget class="QLabel" name="mantiddoi">
+        <item row="4" column="0">
+         <widget class="QLabel" name="mantidlabel">
+          <property name="text">
+           <string>Homepage:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QLabel" name="mantidurl">
           <property name="text">
            <string>TextLabel</string>
           </property>
@@ -129,6 +122,27 @@
          <widget class="QLabel" name="doi_label">
           <property name="text">
            <string>Citation:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QLabel" name="mantidcitation">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="ReleaseDoi_label">
+          <property name="text">
+           <string>Release doi:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
+         <widget class="QLabel" name="mantiddoi">
+          <property name="text">
+           <string>TextLabel</string>
           </property>
          </widget>
         </item>
@@ -180,7 +194,7 @@
    <item row="3" column="0">
     <widget class="QGroupBox" name="groupBox_3">
      <property name="title">
-      <string>Contributors</string>
+      <string>Project Members</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <property name="margin">
@@ -198,8 +212,8 @@
           </property>
           <property name="maximumSize">
            <size>
-            <width>1000</width>
-            <height>1000</height>
+            <width>122</width>
+            <height>54</height>
            </size>
           </property>
           <property name="text">
@@ -214,24 +228,24 @@
          </widget>
         </item>
         <item row="1" column="3">
-         <widget class="QLabel" name="tessellaLogo">
+         <widget class="QLabel" name="ornlLogo">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
             <horstretch>0</horstretch>
-            <verstretch>100</verstretch>
+            <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="maximumSize">
            <size>
-            <width>187</width>
-            <height>75</height>
+            <width>200</width>
+            <height>30</height>
            </size>
           </property>
           <property name="text">
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="../../../Images/images.qrc">:/Tessella_Logo_Transparent.gif</pixmap>
+           <pixmap resource="../../../Images/images.qrc">:/Ornl_hfir_sns_logo_small.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -278,7 +292,7 @@
            <pixmap resource="../../../Images/images.qrc">:/ISIS_Logo_Transparent.gif</pixmap>
           </property>
           <property name="scaledContents">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <property name="alignment">
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -288,8 +302,8 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
-         <widget class="QLabel" name="snsLogo">
+        <item row="3" column="1">
+         <widget class="QLabel" name="essLogo">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -298,22 +312,22 @@
           </property>
           <property name="maximumSize">
            <size>
-            <width>110</width>
-            <height>75</height>
+            <width>151</width>
+            <height>62</height>
            </size>
           </property>
           <property name="text">
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="../../../Images/images.qrc">:/SNS_logo_trans_back.gif</pixmap>
+           <pixmap resource="../../../Images/images.qrc">:/ess_logo_transparent_small.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
           </property>
          </widget>
         </item>
-        <item row="2" column="2">
+        <item row="3" column="2">
          <spacer name="horizontalSpacer_3">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -352,7 +366,7 @@
           </property>
          </spacer>
         </item>
-        <item row="2" column="0">
+        <item row="3" column="0">
          <spacer name="horizontalSpacer_7">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -365,7 +379,7 @@
           </property>
          </spacer>
         </item>
-        <item row="2" column="4">
+        <item row="3" column="4">
          <spacer name="horizontalSpacer_8">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -378,19 +392,19 @@
           </property>
          </spacer>
         </item>
-        <item row="2" column="3">
+        <item row="3" column="3">
          <widget class="QLabel" name="hfirLogo">
           <property name="maximumSize">
            <size>
-            <width>169</width>
-            <height>75</height>
+            <width>198</width>
+            <height>79</height>
            </size>
           </property>
           <property name="text">
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="../../../Images/images.qrc">:/HFIR_logo_small.png</pixmap>
+           <pixmap resource="../../../Images/images.qrc">:/Tessella_Logo_Transparent.gif</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -399,6 +413,19 @@
            <set>Qt::AlignCenter</set>
           </property>
          </widget>
+        </item>
+        <item row="2" column="3">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </item>

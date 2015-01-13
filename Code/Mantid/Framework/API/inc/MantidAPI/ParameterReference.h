@@ -7,23 +7,21 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IFunction.h"
 
-namespace mu
-{
-  class Parser;
+namespace mu {
+class Parser;
 }
 
-namespace Mantid
-{
-namespace API
-{
-/** 
+namespace Mantid {
+namespace API {
+/**
     A reference to a parameter in a function. To uniquely identify a parameter
     in a composite function
 
     @author Roman Tolchenov, Tessella Support Services plc
     @date 26/02/2010
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -43,21 +41,22 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class MANTID_API_DLL ParameterReference
-{
+class MANTID_API_DLL ParameterReference {
 public:
   ParameterReference();
-  ParameterReference(IFunction* fun, std::size_t index, bool isDefault = false);
+  ParameterReference(IFunction *fun, std::size_t index, bool isDefault = false);
   std::size_t getIndex() const;
-  void reset(IFunction* fun, std::size_t index, bool isDefault = false);
-  void setParameter(const double& value);
+  void reset(IFunction *fun, std::size_t index, bool isDefault = false);
+  void setParameter(const double &value);
   double getParameter() const;
-  IFunction* getFunction() const;
+  IFunction *getFunction() const;
   bool isDefault() const;
+
 private:
-  IFunction* m_function; ///< pointer to the function
-  std::size_t m_index; ///< parameter index
-  /// Flag to mark as default the value of an object associated with this reference:
+  IFunction *m_function; ///< pointer to the function
+  std::size_t m_index;   ///< parameter index
+  /// Flag to mark as default the value of an object associated with this
+  /// reference:
   /// a tie or a constraint.
   bool m_isDefault;
 };

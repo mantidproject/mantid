@@ -29,27 +29,26 @@ macro ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
       add_test ( NAME ${_pyunit_separate_name}_Debug CONFIGURATIONS Debug
                  COMMAND ${PYTHON_EXECUTABLE_DEBUG} -B ${_test_src_dir}/${_filename} )
       # Set the PYTHONPATH so that the built modules can be found
-      set_property ( TEST ${_pyunit_separate_name}_Debug 
-        PROPERTY ENVIRONMENT "PYTHONPATH=${_module_dir_debug}" )
-      set_property ( TEST ${_pyunit_separate_name}_Debug 
-        PROPERTY WORKING_DIRECTORY ${_working_dir_debug} )
-
+      set_tests_properties ( ${_pyunit_separate_name}_Debug PROPERTIES
+                             ENVIRONMENT "PYTHONPATH=${_module_dir_debug}"
+                             WORKING_DIRECTORY ${_working_dir_debug}
+                             TIMEOUT ${TESTING_TIMEOUT} )
       # Release
       add_test ( NAME ${_pyunit_separate_name} CONFIGURATIONS Release
                  COMMAND ${PYTHON_EXECUTABLE} -B ${_test_src_dir}/${_filename} )
       # Set the PYTHONPATH so that the built modules can be found
-      set_property ( TEST ${_pyunit_separate_name}
-        PROPERTY ENVIRONMENT "PYTHONPATH=${_module_dir}" )
-      set_property ( TEST ${_pyunit_separate_name} 
-        PROPERTY WORKING_DIRECTORY ${_working_dir} )
+      set_tests_properties ( ${_pyunit_separate_name} PROPERTIES
+                             ENVIRONMENT "PYTHONPATH=${_module_dir}"
+                             WORKING_DIRECTORY ${_working_dir}
+                             TIMEOUT ${TESTING_TIMEOUT} )
     else()
       add_test ( NAME ${_pyunit_separate_name}
                  COMMAND ${PYTHON_EXECUTABLE} -B ${_test_src_dir}/${_filename} )
       # Set the PYTHONPATH so that the built modules can be found
-      set_property ( TEST ${_pyunit_separate_name} 
-        PROPERTY ENVIRONMENT "PYTHONPATH=${_module_dir}" )
-      set_property ( TEST ${_pyunit_separate_name} 
-        PROPERTY WORKING_DIRECTORY ${_working_dir} )
+      set_tests_properties ( ${_pyunit_separate_name} PROPERTIES
+                             ENVIRONMENT "PYTHONPATH=${_module_dir}"
+                             WORKING_DIRECTORY ${_working_dir}
+                             TIMEOUT ${TESTING_TIMEOUT} )
     endif()
   endforeach ( part ${ARGN} )
 endmacro ( PYUNITTEST_ADD_TEST )

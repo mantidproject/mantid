@@ -643,63 +643,19 @@ namespace MantidQt
 
       auto runWS = prepareRunWorkspace(runStr);
       const std::string runNo = getRunNumber(runWS);
-      auto runMWS = boost::dynamic_pointer_cast<MatrixWorkspace>(runWS);
-      auto runWSG = boost::dynamic_pointer_cast<WorkspaceGroup>(runWS);
 
       Workspace_sptr transWS;
       if(!transStr.empty())
         transWS = makeTransWS(transStr);
-      auto transMWS = boost::dynamic_pointer_cast<MatrixWorkspace>(transWS);
-      auto transWSG = boost::dynamic_pointer_cast<WorkspaceGroup>(transWS);
-
-      //Build a vector of workspaces to process, in the event the input workspace is a workspace group
-      std::vector<MatrixWorkspace_sptr> runVec;
-      std::vector<MatrixWorkspace_sptr> transVec;
-
-      if(runMWS)
-      {
-        runVec.push_back(runMWS);
-      }
-      else if(runWSG)
-      {
-        //If it's a workspace group, let's process all its members
-        for(size_t i = 0; i < runWSG->size(); ++i)
-        {
-          auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(runWSG->getItem(i));
-          if(ws)
-            runVec.push_back(ws);
-        }
-      }
-      else
-      {
-        throw std::runtime_error(runWS->name() + " is not a valid sample run workspace.");
-      }
-
-      //If the trans workspace isn't a group, re-use it for all group members of the run workspace
-      if(transMWS)
-      {
-        transVec.resize(runVec.size(), transMWS);
-      }
-      else if(transWSG)
-      {
-        for(size_t i = 0; i < transWSG->size(); ++i)
-        {
-          auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(transWSG->getItem(i));
-          if(ws)
-            transVec.push_back(ws);
-        }
-
-        if(transVec.size() != runVec.size())
-          throw std::runtime_error("Transmission run workspace groups must be the same size as sample run workspace groups.");
-      }
-      else if(transWS)
-      {
-        //We've got a workspace but we couldn't do anything with it
-        throw std::runtime_error(transWS->name() + " is not a valid transmission run workspace.");
-      }
 
       IAlgorithm_sptr algReflOne = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
       algReflOne->initialize();
+      algReflOne->setProperty("InputWorkspace", runWS->name());
+      if(transWS)
+        algReflOne->setProperty("FirstTransmissionRun", transWS->name());
+      algReflOne->setProperty("OutputWorkspace", "IvsQ_" + runNo);
+      algReflOne->setProperty("OutputWorkspaceWaveLength", "IvsLam_" + runNo);
+
       if(thetaGiven)
         algReflOne->setProperty("ThetaIn", theta);
 
@@ -717,54 +673,23 @@ namespace MantidQt
         }
       }
 
-      IAlgorithm_sptr algScale = AlgorithmManager::Instance().create("Scale");
-      algScale->initialize();
+      algReflOne->execute();
 
-      //List of workspaces to group together
-      std::vector<std::string> IvQToGroup;
-      std::vector<std::string> IvLamToGroup;
+      if(!algReflOne->isExecuted())
+        throw std::runtime_error("Failed to run ReflectometryReductionOneAuto.");
 
-      //Now, iterate over the sample/transmission runs provided
-      for(size_t i = 0; i < runVec.size(); ++i)
+      const double scale = m_model->data(m_model->index(rowNo, COL_SCALE)).toDouble();
+      if(scale != 1.0)
       {
-        const std::string suffix = runVec.size() > 1 ? "_" + boost::lexical_cast<std::string>(i+1) : "";
-        algReflOne->setProperty("InputWorkspace", runVec[i]->name());
-        if(i < transVec.size())
-          algReflOne->setProperty("FirstTransmissionRun", transVec[i]->name());
-        algReflOne->setProperty("OutputWorkspace", "IvsQ_" + runNo + suffix);
-        algReflOne->setProperty("OutputWorkspaceWaveLength", "IvsLam_" + runNo + suffix);
-        IvQToGroup.push_back("IvsQ_" + runNo + suffix);
-        IvLamToGroup.push_back("IvsLam_" + runNo + suffix);
-        algReflOne->execute();
+        IAlgorithm_sptr algScale = AlgorithmManager::Instance().create("Scale");
+        algScale->initialize();
+        algScale->setProperty("InputWorkspace", "IvsQ_" + runNo);
+        algScale->setProperty("OutputWorkspace", "IvsQ_" + runNo);
+        algScale->setProperty("Factor", 1.0 / scale);
+        algScale->execute();
 
-        if(!thetaGiven)
-        {
-          theta = algReflOne->getProperty("ThetaOut");
-          thetaGiven = true;
-        }
-
-        const double scale = m_model->data(m_model->index(rowNo, COL_SCALE)).toDouble();
-        if(scale != 1.0)
-        {
-          algScale->setProperty("InputWorkspace", "IvsQ_" + runNo + suffix);
-          algScale->setProperty("OutputWorkspace", "IvsQ_" + runNo + suffix);
-          algScale->setProperty("Factor", 1.0 / scale);
-          algScale->execute();
-        }
-      }
-
-      //If we need to, group the output
-      if(IvQToGroup.size() > 1 && IvLamToGroup.size() > 1)
-      {
-        IAlgorithm_sptr algGroup = AlgorithmManager::Instance().create("GroupWorkspaces");
-        algGroup->initialize();
-
-        algGroup->setProperty("InputWorkspaces", IvQToGroup);
-        algGroup->setProperty("OutputWorkspace", "IvsQ_" + runNo);
-        algGroup->execute();
-        algGroup->setProperty("InputWorkspaces", IvLamToGroup);
-        algGroup->setProperty("OutputWorkspace", "IvsLam_" + runNo);
-        algGroup->execute();
+        if(!algScale->isExecuted())
+          throw std::runtime_error("Failed to run Scale algorithm");
       }
 
       //Reduction has completed. Put Qmin and Qmax into the table if needed, for stitching.
@@ -884,6 +809,11 @@ namespace MantidQt
       endOverlaps.pop_back();
 
       std::string outputWSName = "IvsQ_" + boost::algorithm::join(runs, "_");
+
+      //If the previous stitch result is in the ADS already, we'll need to remove it.
+      //If it's a group, we'll get an error for trying to group into a used group name
+      if(AnalysisDataService::Instance().doesExist(outputWSName))
+        AnalysisDataService::Instance().remove(outputWSName);
 
       IAlgorithm_sptr algStitch = AlgorithmManager::Instance().create("Stitch1DMany");
       algStitch->initialize();

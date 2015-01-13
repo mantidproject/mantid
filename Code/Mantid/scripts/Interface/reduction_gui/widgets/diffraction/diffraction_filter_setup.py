@@ -10,6 +10,8 @@ from reduction_gui.reduction.diffraction.diffraction_filter_setup_script import 
 import ui.diffraction.ui_diffraction_filter_setup
 import ui.diffraction.ui_filter_info
 
+import os
+
 IS_IN_MANTIDPLOT = False
 try:
     import mantid.simpleapi as api
@@ -276,7 +278,7 @@ class FilterSetupWidget(BaseWidget):
         # 3. Update the log name combo box
         if metaws is None:
             self._content.info_text_browser.setText(
-                    str("Error! Failed to load data file %s. " % (eventnxsname)))
+                    str("Error! Failed to load data file %s.  Current working directory is %s. " % (eventnxsname, os.getcwd())))
         else:
             self._metaws = metaws
 

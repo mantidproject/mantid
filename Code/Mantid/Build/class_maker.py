@@ -67,7 +67,7 @@ namespace %s
 
   /** %s : TODO: DESCRIPTION
 
-    Copyright &copy; %s ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; %s ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

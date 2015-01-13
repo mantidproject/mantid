@@ -9,14 +9,13 @@
 
 #include <utility>
 
-namespace Mantid
-{
-namespace Poldi
-{
+namespace Mantid {
+namespace Poldi {
 
 /** PoldiAbstractDetector :
  *
-  Abstract representation of detector, used for POLDI related calculations. Calculation
+  Abstract representation of detector, used for POLDI related calculations.
+ Calculation
   methods are the repsonsibility of concrete implementations.
 
     @author Michael Wedel, Paul Scherrer Institut - SINQ
@@ -43,32 +42,31 @@ namespace Poldi
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class MANTID_SINQ_DLL PoldiAbstractDetector
-{
+class MANTID_SINQ_DLL PoldiAbstractDetector {
 public:
-    virtual ~PoldiAbstractDetector() {}
+  virtual ~PoldiAbstractDetector() {}
 
-    virtual void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) = 0;
+  virtual void
+  loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) = 0;
 
-    virtual double efficiency() = 0;
+  virtual double efficiency() = 0;
 
-    virtual double twoTheta(int elementIndex) = 0;
-    virtual double distanceFromSample(int elementIndex) = 0;
+  virtual double twoTheta(int elementIndex) = 0;
+  virtual double distanceFromSample(int elementIndex) = 0;
 
-    virtual size_t elementCount() = 0;
-    virtual size_t centralElement() = 0;
+  virtual size_t elementCount() = 0;
+  virtual size_t centralElement() = 0;
 
-    virtual const std::vector<int>& availableElements() = 0;
+  virtual const std::vector<int> &availableElements() = 0;
 
-    virtual std::pair<double, double> qLimits(double lambdaMin, double lambdaMax) = 0;
+  virtual std::pair<double, double> qLimits(double lambdaMin,
+                                            double lambdaMax) = 0;
 
 protected:
-    PoldiAbstractDetector() {}
-
+  PoldiAbstractDetector() {}
 };
 
 typedef boost::shared_ptr<PoldiAbstractDetector> PoldiAbstractDetector_sptr;
-
 }
 }
 #endif // POLDIABSTRACTDETECTOR_H

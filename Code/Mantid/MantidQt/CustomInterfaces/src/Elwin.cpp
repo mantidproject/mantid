@@ -10,6 +10,11 @@
 using namespace Mantid::API;
 using namespace MantidQt::API;
 
+namespace
+{
+  Mantid::Kernel::Logger g_log("Elwin");
+}
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -35,7 +40,7 @@ namespace IDA
     m_properties["R1S"] = m_dblManager->addProperty("Start");
     m_dblManager->setDecimals(m_properties["R1S"], NUM_DECIMALS);
     m_properties["R1E"] = m_dblManager->addProperty("End");
-    m_dblManager->setDecimals(m_properties["R1E"], NUM_DECIMALS);  
+    m_dblManager->setDecimals(m_properties["R1E"], NUM_DECIMALS);
     m_properties["R2S"] = m_dblManager->addProperty("Start");
     m_dblManager->setDecimals(m_properties["R2S"], NUM_DECIMALS);
     m_properties["R2E"] = m_dblManager->addProperty("End");
@@ -76,13 +81,14 @@ namespace IDA
     m_rangeSelectors["ElwinRange2"]->setRange(m_rangeSelectors["ElwinRange1"]->getRange());
     // Refresh the plot window
     replot("ElwinPlot");
-  
+
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
     connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(twoRanges(QtProperty*, bool)));
     twoRanges(m_properties["UseTwoRanges"], false);
 
-    connect(uiForm().elwin_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
-    connect(uiForm().elwin_inputFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
+    connect(uiForm().elwin_inputFile, SIGNAL(filesFound()), this, SLOT(newInputFiles()));
+    connect(uiForm().elwin_cbPreviewFile, SIGNAL(currentIndexChanged(int)), this, SLOT(newPreviewFileSelected(int)));
+    connect(uiForm().elwin_spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
 
     // Set any default values
     m_dblManager->setValue(m_properties["R1S"], -0.02);
@@ -154,7 +160,7 @@ namespace IDA
       elwinMultAlg->setProperty("Range2Start", boost::lexical_cast<std::string>(m_dblManager->value(m_properties["R1S"])));
       elwinMultAlg->setProperty("Range2End", boost::lexical_cast<std::string>(m_dblManager->value(m_properties["R1E"])));
     }
-    
+
     if(m_blnManager->value(m_properties["Normalise"]))
     {
       elwinMultAlg->setProperty("OutputELT", eltWorkspace.toStdString());
@@ -209,7 +215,7 @@ namespace IDA
   bool Elwin::validate()
   {
     UserInputValidator uiv;
-    
+
     uiv.checkMWRunFilesIsValid("Input", uiForm().elwin_inputFile);
 
     auto rangeOne = std::make_pair(m_dblManager->value(m_properties["R1S"]), m_dblManager->value(m_properties["R1E"]));
@@ -254,7 +260,6 @@ namespace IDA
         m_dblManager->setValue(m_properties["R2S"], -10*res);
         m_dblManager->setValue(m_properties["R2E"], -9*res);
       }
-
     }
   }
 
@@ -268,49 +273,104 @@ namespace IDA
     {
       logName = QString::fromStdString(log[0]);
     }
-    
+
     uiForm().leLogName->setText(logName);
   }
 
+  /**
+   * Handles a new set of input files being entered.
+   *
+   * Updates preview seletcion combo box.
+   */
+  void Elwin::newInputFiles()
+  {
+    // Clear the existing list of files
+    uiForm().elwin_cbPreviewFile->clear();
 
+    // Populate the combo box with the filenames
+    QStringList filenames = uiForm().elwin_inputFile->getFilenames();
+    for(auto it = filenames.begin(); it != filenames.end(); ++it)
+    {
+      QString rawFilename = *it;
+      QFileInfo inputFileInfo(rawFilename);
+      QString sampleName = inputFileInfo.baseName();
+
+      // Add the item using the base filename as the display string and the raw filename as the data value
+      uiForm().elwin_cbPreviewFile->addItem(sampleName, rawFilename);
+    }
+
+    // Default to the first file
+    uiForm().elwin_cbPreviewFile->setCurrentIndex(0);
+  }
+
+  /**
+   * Handles a new input file being selected for preview.
+   *
+   * Loads the file and resets the spectra selection spinner.
+   *
+   * @param index Index of the new selected file
+   */
+  void Elwin::newPreviewFileSelected(int index)
+  {
+    QString wsName = uiForm().elwin_cbPreviewFile->itemText(index);
+    QString filename = uiForm().elwin_cbPreviewFile->itemData(index).toString();
+
+    // Ignore empty filenames (can happen when new files are loaded and the widget is being populated)
+    if(filename.isEmpty())
+      return;
+
+    if(!loadFile(filename, wsName))
+    {
+      g_log.error("Failed to load input workspace.");
+      return;
+    }
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
+    int numHist = static_cast<int>(ws->getNumberHistograms()) - 1;
+
+    uiForm().elwin_spPreviewSpec->setMaximum(numHist);
+    uiForm().elwin_spPreviewSpec->setValue(0);
+
+    plotInput();
+  }
+
+  /**
+   * Replots the preview plot.
+   */
   void Elwin::plotInput()
   {
-    using namespace Mantid::API;
+    QString wsName = uiForm().elwin_cbPreviewFile->currentText();
 
-    if ( uiForm().elwin_inputFile->isValid() )
+    if(!AnalysisDataService::Instance().doesExist(wsName.toStdString()))
     {
-      QString filename = uiForm().elwin_inputFile->getFirstFilename();
-      QFileInfo fi(filename);
-      QString wsname = fi.baseName();
-
-      loadFile(filename, wsname);
-      auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname.toStdString());
-
-      if(!ws)
-      {
-        return;
-      }
-
-      setDefaultResolution(ws);
-      setDefaultSampleLog(ws);
-
-      plotMiniPlot(ws, 0, "ElwinPlot", "ElwinDataCurve");
-      try
-      {
-        const std::pair<double, double> range = getCurveRange("ElwinDataCurve");
-        m_rangeSelectors["ElwinRange1"]->setRange(range.first, range.second);
-        // Replot
-        replot("ElwinPlot");
-      }
-      catch(std::invalid_argument & exc)
-      {
-        showMessageBox(exc.what());
-      }
-
+      g_log.error("Workspace not found in ADS. Try reloading input files.");
+      return;
     }
-    else
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
+
+    if(!ws)
     {
-      showMessageBox("Selected input files are invalid.");
+      g_log.error("Failed to get input workspace from ADS.");
+      return;
+    }
+
+    int specNo = uiForm().elwin_spPreviewSpec->value();
+
+    setDefaultResolution(ws);
+    setDefaultSampleLog(ws);
+
+    plotMiniPlot(ws, specNo, "ElwinPlot", "ElwinDataCurve");
+
+    try
+    {
+      const std::pair<double, double> range = getCurveRange("ElwinDataCurve");
+      m_rangeSelectors["ElwinRange1"]->setRange(range.first, range.second);
+      replot("ElwinPlot");
+    }
+    catch(std::invalid_argument & exc)
+    {
+      showMessageBox(exc.what());
     }
   }
 

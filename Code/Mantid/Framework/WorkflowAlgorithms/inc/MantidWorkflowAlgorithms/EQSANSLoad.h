@@ -9,15 +9,14 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 
-namespace Mantid
-{
-namespace WorkflowAlgorithms
-{
+namespace Mantid {
+namespace WorkflowAlgorithms {
 /**
 
     Subtract dark current for EQSANS.
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -38,16 +37,17 @@ namespace WorkflowAlgorithms
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-  class DLLExport EQSANSLoad : public API::Algorithm
-{
+class DLLExport EQSANSLoad : public API::Algorithm {
 public:
   /// Constructor
-  EQSANSLoad() : API::Algorithm(), m_low_TOF_cut(0), m_high_TOF_cut(0),
-  m_center_x(0), m_center_y(0), m_moderator_position(0) {
+  EQSANSLoad()
+      : API::Algorithm(), m_low_TOF_cut(0), m_high_TOF_cut(0), m_center_x(0),
+        m_center_y(0), m_moderator_position(0) {
     m_mask_as_string = "";
     m_output_message = "";
-    for(int i=0; i<3; i++)
-      for(int j=0; j<8; j++) m_slit_positions[i][j] = EQSANSInstrument::default_slit_positions[i][j];
+    for (int i = 0; i < 3; i++)
+      for (int j = 0; j < 8; j++)
+        m_slit_positions[i][j] = EQSANSInstrument::default_slit_positions[i][j];
 
     // Slit to source distance in mm for the three slit wheels
     m_slit_to_source[0] = 10080;
@@ -58,8 +58,8 @@ public:
   virtual ~EQSANSLoad() {}
   /// Algorithm's name
   virtual const std::string name() const { return "EQSANSLoad"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Load EQSANS data.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const { return "Load EQSANS data."; }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -70,13 +70,13 @@ private:
   void init();
   /// Execution code
   void exec();
-  std::string findConfigFile(const int& run);
-  void readConfigFile(const std::string& filePath);
-  void readRectangularMasks(const std::string& line);
-  void readTOFcuts(const std::string& line);
-  void readBeamCenter(const std::string& line);
-  void readModeratorPosition(const std::string& line);
-  void readSourceSlitSize(const std::string& line);
+  std::string findConfigFile(const int &run);
+  void readConfigFile(const std::string &filePath);
+  void readRectangularMasks(const std::string &line);
+  void readTOFcuts(const std::string &line);
+  void readBeamCenter(const std::string &line);
+  void readModeratorPosition(const std::string &line);
+  void readSourceSlitSize(const std::string &line);
   void getSourceSlitSize();
   void moveToBeamCenter();
 

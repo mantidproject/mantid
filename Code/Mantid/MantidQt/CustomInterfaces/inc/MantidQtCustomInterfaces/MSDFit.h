@@ -26,7 +26,10 @@ namespace IDA
   private slots:
     void singleFit();
     void plotFit(QString wsName);
+    void newDataLoaded(const QString wsName);
     void plotInput();
+    void specMinChanged(int value);
+    void specMaxChanged(int value);
     void minChanged(double val);
     void maxChanged(double val);
     void updateRS(QtProperty* prop, double val);

@@ -62,13 +62,6 @@
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QPushButton" name="elwin_pbPlotInput">
-            <property name="text">
-             <string>Plot Input</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
@@ -78,7 +71,46 @@
           <layout class="QVBoxLayout" name="elwin_properties"/>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="elwin_plot"/>
+          <layout class="QVBoxLayout" name="elwin_loPlotAndOptions">
+           <item>
+            <layout class="QHBoxLayout" name="elwin_loPreviewSelection">
+             <item>
+              <widget class="QLabel" name="elwin_lbPreviewFile">
+               <property name="text">
+                <string>Preview file:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="elwin_cbPreviewFile">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="elwin_lbPreviewSpec">
+               <property name="text">
+                <string>Spectrum:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="elwin_spPreviewSpec">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="elwin_plot"/>
+           </item>
+          </layout>
          </item>
         </layout>
        </item>
@@ -225,6 +257,47 @@
             <layout class="QVBoxLayout" name="msd_plot"/>
            </item>
            <item>
+            <layout class="QHBoxLayout" name="msd_gpLegend">
+             <item>
+              <widget class="QPushButton" name="msd_pbSingle">
+               <property name="text">
+                <string>Fit Single Spectrum</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="msd_spLegendSpace">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="msd_lbLegendSample">
+               <property name="text">
+                <string>Sample</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="msd_lbLegendFit">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text">
+                <string>Fit</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
             <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
               <widget class="QLabel" name="label_51">
@@ -234,12 +307,12 @@
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="msd_lePlotSpectrum">
-               <property name="maximumSize">
-                <size>
-                 <width>50</width>
-                 <height>16777215</height>
-                </size>
+              <widget class="QSpinBox" name="msd_spPlotSpectrum">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
                </property>
               </widget>
              </item>
@@ -273,18 +346,12 @@
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="msd_leSpectraMin">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
+              <widget class="QSpinBox" name="msd_spSpectraMin">
+               <property name="maximum">
+                <number>0</number>
                </property>
-               <property name="maximumSize">
-                <size>
-                 <width>50</width>
-                 <height>16777215</height>
-                </size>
+               <property name="minimum">
+                <number>0</number>
                </property>
               </widget>
              </item>
@@ -302,44 +369,14 @@
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="msd_leSpectraMax">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
+              <widget class="QSpinBox" name="msd_spSpectraMax">
+               <property name="maximum">
+                <number>0</number>
                </property>
-               <property name="maximumSize">
-                <size>
-                 <width>50</width>
-                 <height>16777215</height>
-                </size>
+               <property name="minimum">
+                <number>0</number>
                </property>
               </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_15">
-             <item>
-              <widget class="QPushButton" name="msd_pbSingle">
-               <property name="text">
-                <string>Fit Single Spectrum</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
              </item>
             </layout>
            </item>
@@ -494,12 +531,14 @@
              <stringlist>
               <string>_res</string>
               <string>_red</string>
+              <string>_sqw</string>
              </stringlist>
             </property>
             <property name="fileBrowserSuffixes" stdset="0">
              <stringlist>
               <string>_res.nxs</string>
               <string>_red.nxs</string>
+              <string>_sqw.nxs</string>
              </stringlist>
             </property>
             <property name="showLoad" stdset="0">
@@ -596,81 +635,32 @@
          </property>
          <layout class="QHBoxLayout" name="furyfit_layoutInput">
           <item>
-           <widget class="QComboBox" name="furyfit_cbInputType">
-            <item>
-             <property name="text">
-              <string>File</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Workspace</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item>
-           <widget class="QStackedWidget" name="furyfit_swInput">
+           <widget class="MantidQt::MantidWidgets::DataSelector" name="furyfit_dsSampleInput" native="true">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="currentIndex">
-             <number>0</number>
+            <property name="autoLoad" stdset="0">
+             <bool>true</bool>
             </property>
-            <widget class="QWidget" name="furyfit_page_inputFile">
-             <layout class="QHBoxLayout" name="horizontalLayout_19">
-              <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="furyfit_inputFile" native="true">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>41</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="findRunFiles" stdset="0">
-                 <bool>false</bool>
-                </property>
-                <property name="label" stdset="0">
-                 <string/>
-                </property>
-                <property name="multipleFiles" stdset="0">
-                 <bool>false</bool>
-                </property>
-                <property name="fileExtensions" stdset="0">
-                 <stringlist>
-                  <string>_iqt.nxs</string>
-                 </stringlist>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="furyfit_pbPlotInput">
-                <property name="text">
-                 <string>Plot Input</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-            <widget class="QWidget" name="furyfit_page_inputWorkspace">
-             <layout class="QHBoxLayout" name="horizontalLayout_12">
-              <item>
-               <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="furyfit_wsIqt">
-                <property name="WorkspaceTypes" stdset="0">
-                 <stringlist/>
-                </property>
-                <property name="Suffix" stdset="0">
-                 <stringlist>
-                  <string>_iqt</string>
-                 </stringlist>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
+            <property name="workspaceSuffixes" stdset="0">
+             <stringlist>
+              <string>_iqt</string>
+             </stringlist>
+            </property>
+            <property name="fileBrowserSuffixes" stdset="0">
+             <stringlist>
+              <string>_iqt.nxs</string>
+             </stringlist>
+            </property>
+            <property name="showLoad" stdset="0">
+             <bool>false</bool>
+            </property>
+            <property name="autoLoad" stdset="0">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
          </layout>
@@ -766,6 +756,47 @@
             <layout class="QVBoxLayout" name="furyfit_vlPlot"/>
            </item>
            <item>
+            <layout class="QHBoxLayout" name="furyfit_gpLegend">
+             <item>
+              <widget class="QPushButton" name="furyfit_pbSingle">
+               <property name="text">
+                <string>Fit Single Spectrum</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="furyfit_spLegendSpace">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="furyfit_lbLegendSample">
+               <property name="text">
+                <string>Sample</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="furyfit_lbLegendFit">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text">
+                <string>Fit</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
             <layout class="QHBoxLayout" name="horizontalLayout_27">
              <item>
               <widget class="QLabel" name="furyfit_lbSpectra">
@@ -775,9 +806,12 @@
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="furyfit_lePlotSpectrum">
-               <property name="text">
-                <string>0</string>
+              <widget class="QSpinBox" name="furyfit_spPlotSpectrum">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
                </property>
               </widget>
              </item>
@@ -802,7 +836,14 @@
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="furyfit_leSpectraMin"/>
+              <widget class="QSpinBox" name="furyfit_spSpectraMin">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+              </widget>
              </item>
              <item>
               <widget class="QLabel" name="label_4">
@@ -812,31 +853,14 @@
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="furyfit_leSpectraMax"/>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_14">
-             <item>
-              <widget class="QPushButton" name="furyfit_pbSingle">
-               <property name="text">
-                <string>Fit Single Spectum</string>
+              <widget class="QSpinBox" name="furyfit_spSpectraMax">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
                </property>
               </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_3">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
              </item>
             </layout>
            </item>
@@ -1016,12 +1040,14 @@
              <stringlist>
               <string>_res</string>
               <string>_red</string>
+              <string>_sqw</string>
              </stringlist>
             </property>
             <property name="fileBrowserSuffixes" stdset="0">
              <stringlist>
               <string>_res.nxs</string>
               <string>_red.nxs</string>
+              <string>_sqw.nxs</string>
              </stringlist>
             </property>
             <property name="showLoad" stdset="0">
@@ -1156,6 +1182,47 @@
             <layout class="QHBoxLayout" name="confit_plot"/>
            </item>
            <item>
+            <layout class="QHBoxLayout" name="confit_gpLegend">
+             <item>
+              <widget class="QPushButton" name="confit_pbSingle">
+               <property name="text">
+                <string>Fit Single Spectrum</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="confit_spLegendSpace">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="confit_lbLegendSample">
+               <property name="text">
+                <string>Sample</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="confit_lbLegendFit">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text">
+                <string>Fit</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
             <layout class="QHBoxLayout" name="confit_layoutSpectra">
              <item>
               <widget class="QLabel" name="label_5">
@@ -1165,21 +1232,12 @@
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="confit_lePlotSpectrum">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
+              <widget class="QSpinBox" name="confit_spPlotSpectrum">
+               <property name="maximum">
+                <number>0</number>
                </property>
-               <property name="maximumSize">
-                <size>
-                 <width>65</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>0</string>
+               <property name="minimum">
+                <number>0</number>
                </property>
               </widget>
              </item>
@@ -1204,18 +1262,12 @@
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="confit_leSpectraMin">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
+              <widget class="QSpinBox" name="confit_spSpectraMin">
+               <property name="maximum">
+                <number>0</number>
                </property>
-               <property name="maximumSize">
-                <size>
-                 <width>65</width>
-                 <height>16777215</height>
-                </size>
+               <property name="minimum">
+                <number>0</number>
                </property>
               </widget>
              </item>
@@ -1227,47 +1279,14 @@
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="confit_leSpectraMax">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
+              <widget class="QSpinBox" name="confit_spSpectraMax">
+               <property name="maximum">
+                <number>0</number>
                </property>
-               <property name="maximumSize">
-                <size>
-                 <width>65</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string/>
+               <property name="minimum">
+                <number>0</number>
                </property>
               </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_13">
-             <item>
-              <widget class="QPushButton" name="confit_pbSingle">
-               <property name="text">
-                <string>Fit Single Spectrum</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_2">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
              </item>
             </layout>
            </item>
@@ -2495,11 +2514,13 @@
            <property name="workspaceSuffixes" stdset="0">
             <stringlist>
              <string>_red</string>
+             <string>_sqw</string>
             </stringlist>
            </property>
            <property name="fileBrowserSuffixes" stdset="0">
             <stringlist>
              <string>_red.nxs</string>
+             <string>_sqw.nxs</string>
             </stringlist>
            </property>
            <property name="showLoad" stdset="0">
@@ -2557,12 +2578,12 @@
            </property>
            <property name="workspaceSuffixes" stdset="0">
             <stringlist>
-             <string>_flt_Abs</string>
+             <string>_flt_abs</string>
             </stringlist>
            </property>
            <property name="fileBrowserSuffixes" stdset="0">
             <stringlist>
-             <string>_flt_Abs.nxs</string>
+             <string>_flt_abs.nxs</string>
             </stringlist>
            </property>
            <property name="showLoad" stdset="0">
@@ -2863,47 +2884,57 @@
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>elwin_inputFile</tabstop>
-  <tabstop>elwin_pbPlotInput</tabstop>
+  <tabstop>leLogName</tabstop>
+  <tabstop>elwin_cbPreviewFile</tabstop>
+  <tabstop>elwin_spPreviewSpec</tabstop>
   <tabstop>elwin_ckPlot</tabstop>
   <tabstop>elwin_ckSave</tabstop>
+  <tabstop>msd_spPlotSpectrum</tabstop>
+  <tabstop>msd_spSpectraMin</tabstop>
+  <tabstop>msd_spSpectraMax</tabstop>
   <tabstop>msd_ckVerbose</tabstop>
   <tabstop>msd_ckPlot</tabstop>
   <tabstop>msd_ckSave</tabstop>
   <tabstop>fury_ckVerbose</tabstop>
   <tabstop>fury_ckPlot</tabstop>
   <tabstop>fury_ckSave</tabstop>
-  <tabstop>furyfit_cbInputType</tabstop>
+  <tabstop>furyfit_dsSampleInput</tabstop>
   <tabstop>furyfit_cbFitType</tabstop>
   <tabstop>furyfit_ckConstrainIntensities</tabstop>
   <tabstop>furyfit_ckPlotGuess</tabstop>
-  <tabstop>furyfit_lePlotSpectrum</tabstop>
+  <tabstop>furyfit_ckConstrainBeta</tabstop>
+  <tabstop>furyfit_spPlotSpectrum</tabstop>
+  <tabstop>furyfit_spSpectraMin</tabstop>
+  <tabstop>furyfit_spSpectraMax</tabstop>
+  <tabstop>furyfit_pbSingle</tabstop>
+  <tabstop>furyfit_ckVerbose</tabstop>
+  <tabstop>furyfit_cbPlotOutput</tabstop>
+  <tabstop>furyfit_ckSaveSeq</tabstop>
+  <tabstop>confit_dsSampleInput</tabstop>
+  <tabstop>confit_dsResInput</tabstop>
   <tabstop>confit_cbFitType</tabstop>
   <tabstop>confit_cbBackground</tabstop>
+  <tabstop>confit_ckTempCorrection</tabstop>
+  <tabstop>confit_leTempCorrection</tabstop>
   <tabstop>confit_ckPlotGuess</tabstop>
-  <tabstop>abscor_cbPlotOutput</tabstop>
-  <tabstop>pbHelp</tabstop>
-  <tabstop>pbRun</tabstop>
-  <tabstop>pbManageDirs</tabstop>
-  <tabstop>leLogName</tabstop>
-  <tabstop>furyfit_inputFile</tabstop>
-  <tabstop>furyfit_pbPlotInput</tabstop>
-  <tabstop>furyfit_wsIqt</tabstop>
-  <tabstop>furyfit_ckConstrainBeta</tabstop>
-  <tabstop>furyfit_ckVerbose</tabstop>
-  <tabstop>furyfit_ckSaveSeq</tabstop>
   <tabstop>confit_ckTieCentres</tabstop>
+  <tabstop>confit_spPlotSpectrum</tabstop>
+  <tabstop>confit_spSpectraMin</tabstop>
+  <tabstop>confit_spSpectraMax</tabstop>
+  <tabstop>confit_pbSingle</tabstop>
   <tabstop>confit_ckVerbose</tabstop>
+  <tabstop>confit_cbPlotOutput</tabstop>
   <tabstop>confit_ckSaveSeq</tabstop>
   <tabstop>absp_ckUseCan</tabstop>
   <tabstop>absp_cbShape</tabstop>
-  <tabstop>absp_leavar</tabstop>
-  <tabstop>absp_lewidth</tabstop>
   <tabstop>absp_lets</tabstop>
   <tabstop>absp_letc1</tabstop>
   <tabstop>absp_letc2</tabstop>
   <tabstop>absp_ler1</tabstop>
   <tabstop>absp_ler2</tabstop>
   <tabstop>absp_ler3</tabstop>
+  <tabstop>absp_leavar</tabstop>
+  <tabstop>absp_lewidth</tabstop>
   <tabstop>absp_lesamden</tabstop>
   <tabstop>absp_cbSampleInputType</tabstop>
   <tabstop>absp_lesamsigs</tabstop>
@@ -2923,7 +2954,11 @@
   <tabstop>abscor_leScaleMultiplier</tabstop>
   <tabstop>abscor_ckUseCorrections</tabstop>
   <tabstop>abscor_ckVerbose</tabstop>
+  <tabstop>abscor_cbPlotOutput</tabstop>
   <tabstop>abscor_ckSave</tabstop>
+  <tabstop>pbHelp</tabstop>
+  <tabstop>pbRun</tabstop>
+  <tabstop>pbManageDirs</tabstop>
  </tabstops>
  <resources/>
  <connections/>

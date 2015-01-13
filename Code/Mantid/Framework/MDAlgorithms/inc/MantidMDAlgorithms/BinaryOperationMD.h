@@ -9,112 +9,115 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 
-namespace Mantid
-{
-namespace MDAlgorithms
-{
+namespace Mantid {
+namespace MDAlgorithms {
 
-  /** Abstract base class for binary operations on IMDWorkspaces,
-    e.g. A = B + C or A = B / C.
+/** Abstract base class for binary operations on IMDWorkspaces,
+  e.g. A = B + C or A = B / C.
 
-    Handles most of the validation and delegates to a handful of execXXX functions.
+  Handles most of the validation and delegates to a handful of execXXX
+  functions.
 
-    This will be subclassed by, e.g. PlusMD, MinusMD, MultiplyMD, etc.
-    
-    @author Janik Zikovsky
-    @date 2011-11-04
+  This will be subclassed by, e.g. PlusMD, MinusMD, MultiplyMD, etc.
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  @author Janik Zikovsky
+  @date 2011-11-04
 
-    This file is part of Mantid.
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport BinaryOperationMD  : public API::Algorithm
-  {
-  public:
-    BinaryOperationMD();
-    virtual ~BinaryOperationMD();
-    
-    virtual const std::string name() const;
-    virtual int version() const;
-    virtual const std::string category() const;
-    virtual const std::string summary() const { return "Abstract base class for binary operations on IMDWorkspaces, e.g. A = B + C or A = B / C."; }
-    
-  protected:
-    /// Is the operation commutative?
-    virtual bool commutative() const = 0;
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    /// Check the inputs and throw if the algorithm cannot be run
-    virtual void checkInputs() = 0;
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport BinaryOperationMD : public API::Algorithm {
+public:
+  BinaryOperationMD();
+  virtual ~BinaryOperationMD();
 
-    /// Run the algorithm with an MDEventWorkspace as output
-    virtual void execEvent() = 0;
+  virtual const std::string name() const;
+  virtual int version() const;
+  virtual const std::string category() const;
+  virtual const std::string summary() const {
+    return "Abstract base class for binary operations on IMDWorkspaces, e.g. A "
+           "= B + C or A = B / C.";
+  }
 
-    /// Run the algorithm with a MDHisotWorkspace as output and operand
-    virtual void execHistoHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::MDEvents::MDHistoWorkspace_const_sptr operand) = 0;
+protected:
+  /// Is the operation commutative?
+  virtual bool commutative() const = 0;
 
-    /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
-    virtual void execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) = 0;
+  /// Check the inputs and throw if the algorithm cannot be run
+  virtual void checkInputs() = 0;
 
-    /// The name of the first input workspace property
-    virtual std::string inputPropName1() const { return "LHSWorkspace";}
-    /// The name of the second input workspace property
-    virtual std::string inputPropName2() const { return "RHSWorkspace";}
-    /// The name of the output workspace property
-    virtual std::string outputPropName() const { return "OutputWorkspace";}
+  /// Run the algorithm with an MDEventWorkspace as output
+  virtual void execEvent() = 0;
 
-    void init();
-    virtual void initExtraProperties();
-    virtual void exec();
+  /// Run the algorithm with a MDHisotWorkspace as output and operand
+  virtual void
+  execHistoHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out,
+                 Mantid::MDEvents::MDHistoWorkspace_const_sptr operand) = 0;
 
-    /// LHS workspace
-    Mantid::API::IMDWorkspace_sptr m_lhs;
-    /// RHS workspace
-    Mantid::API::IMDWorkspace_sptr m_rhs;
-    /// Output workspace
-    Mantid::API::IMDWorkspace_sptr m_out;
+  /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
+  virtual void execHistoScalar(
+      Mantid::MDEvents::MDHistoWorkspace_sptr out,
+      Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) = 0;
 
-    /// For checkInputs
-    Mantid::API::IMDEventWorkspace_sptr m_lhs_event;
-    Mantid::API::IMDEventWorkspace_sptr m_rhs_event;
-    Mantid::MDEvents::MDHistoWorkspace_sptr m_lhs_histo;
-    Mantid::MDEvents::MDHistoWorkspace_sptr m_rhs_histo;
-    Mantid::DataObjects::WorkspaceSingleValue_sptr m_lhs_scalar;
-    Mantid::DataObjects::WorkspaceSingleValue_sptr m_rhs_scalar;
+  /// The name of the first input workspace property
+  virtual std::string inputPropName1() const { return "LHSWorkspace"; }
+  /// The name of the second input workspace property
+  virtual std::string inputPropName2() const { return "RHSWorkspace"; }
+  /// The name of the output workspace property
+  virtual std::string outputPropName() const { return "OutputWorkspace"; }
 
-    /// Operand MDEventWorkspace
-    Mantid::API::IMDEventWorkspace_sptr m_operand_event;
-    /// Output MDEventWorkspace
-    Mantid::API::IMDEventWorkspace_sptr m_out_event;
+  void init();
+  virtual void initExtraProperties();
+  virtual void exec();
 
-    /// Operand MDHistoWorkspace
-    Mantid::MDEvents::MDHistoWorkspace_sptr m_operand_histo;
-    /// Output MDHistoWorkspace
-    Mantid::MDEvents::MDHistoWorkspace_sptr m_out_histo;
+  /// LHS workspace
+  Mantid::API::IMDWorkspace_sptr m_lhs;
+  /// RHS workspace
+  Mantid::API::IMDWorkspace_sptr m_rhs;
+  /// Output workspace
+  Mantid::API::IMDWorkspace_sptr m_out;
 
-    /// Operand WorkspaceSingleValue
-    Mantid::DataObjects::WorkspaceSingleValue_sptr m_operand_scalar;
+  /// For checkInputs
+  Mantid::API::IMDEventWorkspace_sptr m_lhs_event;
+  Mantid::API::IMDEventWorkspace_sptr m_rhs_event;
+  Mantid::MDEvents::MDHistoWorkspace_sptr m_lhs_histo;
+  Mantid::MDEvents::MDHistoWorkspace_sptr m_rhs_histo;
+  Mantid::DataObjects::WorkspaceSingleValue_sptr m_lhs_scalar;
+  Mantid::DataObjects::WorkspaceSingleValue_sptr m_rhs_scalar;
 
+  /// Operand MDEventWorkspace
+  Mantid::API::IMDEventWorkspace_sptr m_operand_event;
+  /// Output MDEventWorkspace
+  Mantid::API::IMDEventWorkspace_sptr m_out_event;
 
-  };
+  /// Operand MDHistoWorkspace
+  Mantid::MDEvents::MDHistoWorkspace_sptr m_operand_histo;
+  /// Output MDHistoWorkspace
+  Mantid::MDEvents::MDHistoWorkspace_sptr m_out_histo;
 
+  /// Operand WorkspaceSingleValue
+  Mantid::DataObjects::WorkspaceSingleValue_sptr m_operand_scalar;
+};
 
 } // namespace MDAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_MDALGORITHMS_BINARYOPERATIONMD_H_ */
+#endif /* MANTID_MDALGORITHMS_BINARYOPERATIONMD_H_ */
