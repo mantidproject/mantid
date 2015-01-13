@@ -1,4 +1,4 @@
-#include "MantidQtAPI\AlgorithmRunner.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtCustomInterfaces/TomoReconstruction.h"
 #include "MantidAPI/TableRow.h"
 
@@ -150,7 +150,7 @@ void TomoReconstruction::currentPluginSelected()
 }
 
 // On user editing a parameter tree item, update the data object to match.
-void TomoReconstruction::paramValModified(QTreeWidgetItem* item, int column)
+void TomoReconstruction::paramValModified(QTreeWidgetItem* item, int /*column*/)
 {  
   OwnTreeWidgetItem *ownItem = dynamic_cast<OwnTreeWidgetItem*>(item);
   int topLevelIndex = -1;
@@ -227,7 +227,7 @@ void TomoReconstruction::moveDownClicked()
 {
   if(m_uiForm.treeCurrentPlugins->selectedItems().count() != 0)
   {      
-    int currInd = m_uiForm.treeCurrentPlugins->currentIndex().row();
+    unsigned int currInd = m_uiForm.treeCurrentPlugins->currentIndex().row();
     if(currInd < m_currPlugins.size()-1 )
     {
       std::iter_swap(m_currPlugins.begin()+currInd,m_currPlugins.begin()+currInd+1);    
@@ -256,9 +256,10 @@ void TomoReconstruction::removeClicked()
 
 void TomoReconstruction::menuOpenClicked()
 { 
-  std::string returned = QFileDialog::getOpenFileName(0,"Open file",QDir::currentPath(),
-        "NeXus files (*.nxs);;All files (*.*)", new QString("NeXus files (*.nxs)"));
-  
+  QString s = QFileDialog::getOpenFileName(0,"Open file",QDir::currentPath(),
+                                           "NeXus files (*.nxs);;All files (*.*)",
+                                           new QString("NeXus files (*.nxs)"));
+  std::string returned = s.toStdString();
   if(returned != "")
   {    
     if(!Poco::File(returned).exists())
@@ -329,9 +330,10 @@ void TomoReconstruction::menuSaveClicked()
 
 void TomoReconstruction::menuSaveAsClicked()
 {
-  std::string returned = QFileDialog::getSaveFileName(0,"Save file",QDir::currentPath(),
-        "NeXus files (*.nxs);;All files (*.*)", new QString("NeXus files (*.nxs)"));
-  
+  QString s = QFileDialog::getSaveFileName(0,"Save file",QDir::currentPath(),
+                                           "NeXus files (*.nxs);;All files (*.*)",
+                                           new QString("NeXus files (*.nxs)"));
+  std::string returned = s.toStdString();
   if(returned != "")
   {
     m_currentParamPath = returned;
