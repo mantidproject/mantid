@@ -15,7 +15,6 @@ src/IgnoreZerosThresholdRange.cpp
 src/IMDDimensionComparitor.cpp
 src/LoadVTK.cpp
 src/MDEWEventNexusLoadingPresenter.cpp
-src/MDEWRebinningPresenter.cpp
 src/MDEWLoadingPresenter.cpp
 src/MDEWInMemoryLoadingPresenter.cpp
 src/MDHWInMemoryLoadingPresenter.cpp
@@ -24,7 +23,6 @@ src/MDHWNexusLoadingPresenter.cpp
 src/MedianAndBelowThresholdRange.cpp
 src/MetadataToFieldData.cpp
 src/NoThresholdRange.cpp
-src/NullRebinningPresenter.cpp
 src/ProgressAction.cpp
 src/RebinningCutterXMLDefinitions.cpp
 src/RebinningKnowledgeSerializer.cpp
@@ -68,14 +66,12 @@ inc/MantidVatesAPI/LoadVTK.h
 inc/MantidVatesAPI/MDEWEventNexusLoadingPresenter.h
 inc/MantidVatesAPI/MDEWLoadingPresenter.h
 inc/MantidVatesAPI/MDEWInMemoryLoadingPresenter.h
-inc/MantidVatesAPI/MDEWRebinningPresenter.h
 inc/MantidVatesAPI/MDHWInMemoryLoadingPresenter.h
 inc/MantidVatesAPI/MDHWLoadingPresenter.h
 inc/MantidVatesAPI/MDHWNexusLoadingPresenter.h
 inc/MantidVatesAPI/MDLoadingPresenter.h
 inc/MantidVatesAPI/MDLoadingView.h
 inc/MantidVatesAPI/MDLoadingViewAdapter.h
-inc/MantidVatesAPI/MDRebinningPresenter.h
 inc/MantidVatesAPI/MDRebinningView.h
 inc/MantidVatesAPI/MDRebinningViewAdapter.h
 inc/MantidVatesAPI/MedianAndBelowThresholdRange.h
@@ -83,7 +79,6 @@ inc/MantidVatesAPI/IgnoreZerosThresholdRange.h
 inc/MantidVatesAPI/IMDDimensionComparitor.h
 inc/MantidVatesAPI/MetadataToFieldData.h
 inc/MantidVatesAPI/NoThresholdRange.h
-inc/MantidVatesAPI/NullRebinningPresenter.h
 inc/MantidVatesAPI/ProgressAction.h
 inc/MantidVatesAPI/RebinningActionManager.h
 inc/MantidVatesAPI/RebinningCutterXMLDefinitions.h 
@@ -140,11 +135,9 @@ test/MDRebinningViewAdapterTest.h
 test/MDEWEventNexusLoadingPresenterTest.h
 test/MDEWInMemoryLoadingPresenterTest.h
 test/MDEWLoadingPresenterTest.h
-test/MDEWRebinningPresenterTest.h
 test/MDHWInMemoryLoadingPresenterTest.h
 test/MDHWLoadingPresenterTest.h
 test/MDHWNexusLoadingPresenterTest.h
-test/NullRebinningPresenterTest.h
 test/MetadataToFieldDataTest.h
 test/RebinningKnowledgeSerializerTest.h
 test/SQWLoadingPresenterTest.h
