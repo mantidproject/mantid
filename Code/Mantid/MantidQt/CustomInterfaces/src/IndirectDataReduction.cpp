@@ -208,9 +208,10 @@ void IndirectDataReduction::instrumentSetupChanged(const QString & instrumentNam
 
 
 /**
- * Loads an empty instrument into a workspace (__empty_INST) unless the workspace already exists.
+ * Loads an empty instrument into a workspace and returns a pointer to it.
  *
  * If an analyser and reflection are supplied then the corresponding IPF is also loaded.
+ * The workspace is not stored in ADS.
  *
  * @param instrumentName Name of the instrument to load
  * @param analyser Analyser being used (optional)
@@ -220,7 +221,6 @@ void IndirectDataReduction::instrumentSetupChanged(const QString & instrumentNam
 Mantid::API::MatrixWorkspace_sptr IndirectDataReduction::loadInstrumentIfNotExist(std::string instrumentName,
     std::string analyser, std::string reflection)
 {
-  std::string instWorkspaceName = "__empty_" + instrumentName;
   std::string idfDirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
 
   std::string parameterFilename = idfDirectory + instrumentName + "_Definition.xml";
@@ -228,7 +228,7 @@ Mantid::API::MatrixWorkspace_sptr IndirectDataReduction::loadInstrumentIfNotExis
   loadAlg->setChild(true);
   loadAlg->initialize();
   loadAlg->setProperty("Filename", parameterFilename);
-  loadAlg->setProperty("OutputWorkspace", instWorkspaceName);
+  loadAlg->setProperty("OutputWorkspace", "__IDR_Inst");
   loadAlg->execute();
   MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
 
@@ -242,7 +242,6 @@ Mantid::API::MatrixWorkspace_sptr IndirectDataReduction::loadInstrumentIfNotExis
     loadParamAlg->setProperty("Filename", ipfFilename);
     loadParamAlg->setProperty("Workspace", instWorkspace);
     loadParamAlg->execute();
-    instWorkspace = loadParamAlg->getProperty("Workspace");
   }
 
   return instWorkspace;

@@ -317,29 +317,26 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction()
  */
 MatrixWorkspace_sptr IndirectDiffractionReduction::loadInstrument(std::string instrumentName, std::string reflection)
 {
-  std::string instWorkspaceName = "__empty_" + instrumentName;
   std::string idfPath = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
 
-  if(!AnalysisDataService::Instance().doesExist(instWorkspaceName))
-  {
-    std::string parameterFilename = idfPath + instrumentName + "_Definition.xml";
-    IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
-    loadAlg->initialize();
-    loadAlg->setProperty("Filename", parameterFilename);
-    loadAlg->setProperty("OutputWorkspace", instWorkspaceName);
-    loadAlg->execute();
-  }
-
-  MatrixWorkspace_sptr instWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(instWorkspaceName);
+  std::string parameterFilename = idfPath + instrumentName + "_Definition.xml";
+  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  loadAlg->setChild(true);
+  loadAlg->initialize();
+  loadAlg->setProperty("Filename", parameterFilename);
+  loadAlg->setProperty("OutputWorkspace", "__InDiff_Inst");
+  loadAlg->execute();
+  MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
 
   // Load parameter file if a reflection was given
   if(!reflection.empty())
   {
     std::string ipfFilename = idfPath + instrumentName + "_diffraction_" + reflection + "_Parameters.xml";
     IAlgorithm_sptr loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
+    loadParamAlg->setChild(true);
     loadParamAlg->initialize();
     loadParamAlg->setProperty("Filename", ipfFilename);
-    loadParamAlg->setProperty("Workspace", instWorkspaceName);
+    loadParamAlg->setProperty("Workspace", instWorkspace);
     loadParamAlg->execute();
   }
 
