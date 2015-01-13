@@ -436,27 +436,6 @@ public:
 
     // expected number of spectra and length of the alg history
     doCommonEventLoadChecks(alg, 2, 2);
-    return;
-
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT( alg.isExecuted());
-
-    // Test basic props of the ws
-    Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve(output_ws));
-    TS_ASSERT(workspace);
-    if (!workspace)
-      return;
-    TS_ASSERT(workspace.get());
-
-    EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
-    TS_ASSERT(ews);
-    if (!ews)
-      return;
-    TS_ASSERT(ews.get());
-    TS_ASSERT_EQUALS(ews->getNumberHistograms(), 2);
-
-    TS_ASSERT_EQUALS(ews->getHistory().size(), 2);
   }
 
   void test_loadEventNexus_Min_Max()
@@ -474,30 +453,8 @@ public:
     // this should imply 3==ws->getNumberHistograms()
 
     // expected number of spectra and length of the alg history
+    // in history, expect: load + LoadInst (child)
     doCommonEventLoadChecks(alg, 3, 2);
-    return;
-
-
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT( alg.isExecuted());
-
-    // Test basic props of the ws
-    Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve(output_ws));
-    TS_ASSERT(workspace);
-    if (!workspace)
-      return;
-    TS_ASSERT(workspace.get());
-
-    EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
-    TS_ASSERT(ews);
-    if (!ews)
-      return;
-    TS_ASSERT(ews.get());
-    TS_ASSERT_EQUALS(ews->getNumberHistograms(), 3);
-
-    // expect: load + LoadInst (child)
-    TS_ASSERT_EQUALS(ews->getHistory().size(), 2);
   }
 
   void test_loadEventNexus_Fail()
@@ -532,28 +489,6 @@ public:
 
     // expected number of spectra and length of the alg history
     doCommonEventLoadChecks(alg, 3, 2);
-    return;
-
-
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted());
-
-    // Test basic props of the ws
-    Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve(output_ws));
-    TS_ASSERT(workspace);
-    if (!workspace)
-      return;
-    TS_ASSERT(workspace.get());
-
-    EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
-    TS_ASSERT(ews);
-    if (!ews)
-      return;
-    TS_ASSERT(ews.get());
-    TS_ASSERT_EQUALS(ews->getNumberHistograms(), 3);
-
-    TS_ASSERT_EQUALS(ews->getHistory().size(), 2);
   }
 
   void test_loadEventNexus_Min_List()
@@ -572,27 +507,6 @@ public:
 
     // expected number of spectra and length of the alg history
     doCommonEventLoadChecks(alg, 3, 2);
-    return;
-
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted());
-
-    // Test basic props of the ws
-    Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve(output_ws));
-    TS_ASSERT(workspace);
-    if (!workspace)
-      return;
-    TS_ASSERT(workspace.get());
-
-    EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
-    TS_ASSERT(ews);
-    if (!ews)
-      return;
-    TS_ASSERT(ews.get());
-    TS_ASSERT_EQUALS(ews->getNumberHistograms(), 3);
-
-    TS_ASSERT_EQUALS(ews->getHistory().size(), 2);
   }
 
   void test_loadEventNexus_Max_List()
@@ -611,29 +525,6 @@ public:
 
     // expected number of spectra and length of the alg history
     doCommonEventLoadChecks(alg, 4, 2);
-    return;
-
-
-
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted());
-
-    // Test basic props of the ws
-    Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve(output_ws));
-    TS_ASSERT(workspace);
-    if (!workspace)
-      return;
-    TS_ASSERT(workspace.get());
-
-    EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
-    TS_ASSERT(ews);
-    if (!ews)
-      return;
-    TS_ASSERT(ews.get());
-    TS_ASSERT_EQUALS(ews->getNumberHistograms(), 4);
-
-    TS_ASSERT_EQUALS(ews->getHistory().size(), 2);
   }
 
   void test_loadEventNexus_Min_Max_List()
@@ -653,28 +544,6 @@ public:
 
     // expected number of spectra and length of the alg history
     doCommonEventLoadChecks(alg, 5, 2);
-    return;
-
-
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted());
-
-    // Test basic props of the ws
-    Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve(output_ws));
-    TS_ASSERT(workspace);
-    if (!workspace)
-      return;
-    TS_ASSERT(workspace.get());
-
-    EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
-    TS_ASSERT(ews);
-    if (!ews)
-      return;
-    TS_ASSERT(ews.get());
-    TS_ASSERT_EQUALS(ews->getNumberHistograms(), 5);
-
-    TS_ASSERT_EQUALS(ews->getHistory().size(), 2);
   }
 
   void test_load_saved_workspace_group()
