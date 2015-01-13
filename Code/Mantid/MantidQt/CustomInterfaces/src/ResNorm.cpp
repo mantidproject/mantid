@@ -1,13 +1,15 @@
-#include "MantidAPI/TextAxis.h"
 #include "MantidQtCustomInterfaces/ResNorm.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
+
+using namespace Mantid::API;
 
 namespace MantidQt
 {
 	namespace CustomInterfaces
 	{
 		ResNorm::ResNorm(QWidget * parent) :
-			IndirectBayesTab(parent)
+			IndirectBayesTab(parent),
+      m_previewSpec(0)
 		{
 			m_uiForm.setupUi(parent);
 
@@ -44,6 +46,9 @@ namespace MantidQt
 
 			// Connect data selector to handler method
 			connect(m_uiForm.dsVanadium, SIGNAL(dataReady(const QString&)), this, SLOT(handleVanadiumInputReady(const QString&)));
+
+      // Connect the preview spectrum selector
+      connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this, SLOT(previewSpecChanged(int)));
 		}
 
     void ResNorm::setup()
@@ -77,8 +82,6 @@ namespace MantidQt
 		 */
 		void ResNorm::run()
 		{
-      using namespace Mantid::API;
-
 			QString verbose("False");
 			QString save("False");
 
@@ -107,27 +110,9 @@ namespace MantidQt
 
 			runPythonScript(pyInput);
 
-      // Update mini plot
-      QString outWsName = VanName.left(VanName.size() - 1) + "_ResNorm_Fit";
-      MatrixWorkspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName.toStdString());
-      TextAxis* axis = dynamic_cast<TextAxis*>(outputWorkspace->getAxis(1));
-
-      for(size_t histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++)
-      {
-        QString specName = QString::fromStdString(axis->label(histIndex));
-
-        if(specName.contains("fit"))
-        {
-          plotMiniPlot(outputWorkspace, histIndex, "ResNormPlot", specName);
-          m_curves[specName]->setPen(QColor(Qt::red));
-        }
-
-        if(specName.contains("diff"))
-        {
-          plotMiniPlot(outputWorkspace, histIndex, "ResNormPlot", specName);
-          m_curves[specName]->setPen(QColor(Qt::green));
-        }
-      }
+      // Plot the fit curve
+      plotMiniPlot("Fit", m_previewSpec, "ResNormPlot", "ResNormFitCurve");
+      m_curves["ResNormFitCurve"]->setPen(QColor(Qt::red));
 
       replot("ResNormPlot");
 		}
@@ -152,9 +137,12 @@ namespace MantidQt
 		 */
 		void ResNorm::handleVanadiumInputReady(const QString& filename)
 		{
-			plotMiniPlot(filename, 0, "ResNormPlot", "RawPlotCurve");
+			plotMiniPlot(filename, m_previewSpec, "ResNormPlot", "RawPlotCurve");
 			std::pair<double,double> res;
 			std::pair<double,double> range = getCurveRange("RawPlotCurve");
+
+      MatrixWorkspace_sptr vanWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(filename.toStdString());
+      m_uiForm.spPreviewSpectrum->setMaximum(static_cast<int>(vanWs->getNumberHistograms()) - 1);
 
 			//Use the values from the instrument parameter file if we can
 			if(getInstrumentResolution(filename, res))
@@ -210,5 +198,27 @@ namespace MantidQt
     		updateUpperGuide(m_rangeSelectors["ResNormERange"], m_properties["EMin"], m_properties["EMax"], val);
 			}
     }
+
+    /**
+     * Sets a new preview spectrum for the mini plot.
+     *
+     * @parm value Spectrum index
+     */
+    void ResNorm::previewSpecChanged(int value)
+    {
+      m_previewSpec = value;
+
+      if(m_uiForm.dsVanadium->isValid())
+  			plotMiniPlot(m_uiForm.dsVanadium->getCurrentDataName(), m_previewSpec, "ResNormPlot", "RawPlotCurve");
+
+      if(AnalysisDataService::Instance().doesExist("Fit"))
+      {
+        plotMiniPlot("Fit", m_previewSpec, "ResNormPlot", "ResNormFitCurve");
+        m_curves["ResNormFitCurve"]->setPen(QColor(Qt::red));
+      }
+
+      replot("ResNormPlot");
+    }
+
 	} // namespace CustomInterfaces
 } // namespace MantidQt

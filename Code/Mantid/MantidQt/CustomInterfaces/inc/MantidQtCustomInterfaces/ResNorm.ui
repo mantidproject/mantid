@@ -100,7 +100,18 @@
       <layout class="QVBoxLayout" name="treeSpace"/>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="plotSpace"/>
+      <layout class="QVBoxLayout" name="plotPane">
+       <item>
+        <layout class="QVBoxLayout" name="plotSpace"/>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="underPlotSpace">
+         <item>
+          <widget class="QSpinBox" name="spPreviewSpectrum"/>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
