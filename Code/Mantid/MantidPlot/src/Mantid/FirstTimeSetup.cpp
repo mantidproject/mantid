@@ -4,7 +4,9 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 
 #include <QDesktopServices>
+#include <QFontDatabase>
 #include <QMessageBox>
+#include <QPainter>
 #include <QSettings>
 #include <QUrl>
 
@@ -20,6 +22,20 @@ FirstTimeSetup::~FirstTimeSetup()
 
 void FirstTimeSetup::initLayout()
 {
+  QFontDatabase::addApplicationFont(":/fonts/MontserratAlternates-Bold.ttf");
+  QFontDatabase::addApplicationFont(":/fonts/MontserratAlternates-Regular.ttf");
+  QFontDatabase::addApplicationFont(":/fonts/pontano-sans.regular.ttf");
+  QFontDatabase::addApplicationFont(":/fonts/OpenSans-Bold.ttf");
+  QFontDatabase::addApplicationFont(":/fonts/OpenSans-BoldItalic.ttf");
+  QFontDatabase::addApplicationFont(":/fonts/OpenSans-ExtraBold.ttf");
+  QFontDatabase::addApplicationFont(":/fonts/OpenSans-ExtraBoldItalic.ttf");
+  QFontDatabase::addApplicationFont(":/fonts/OpenSans-Italic.ttf");
+  QFontDatabase::addApplicationFont(":/fonts/OpenSans-Light.ttf");
+  QFontDatabase::addApplicationFont(":/fonts/OpenSans-LightItalic.ttf");
+  QFontDatabase::addApplicationFont(":/fonts/OpenSans-Regular.ttf");
+  QFontDatabase::addApplicationFont(":/fonts/OpenSans-Semibold.ttf");
+  QFontDatabase::addApplicationFont(":/fonts/OpenSans-SemiboldItalic.ttf");
+
   this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
   this->setWindowTitle(this->windowTitle() + " " + Mantid::Kernel::MantidVersion::version());
 
@@ -90,8 +106,8 @@ void FirstTimeSetup::initLayout()
   }
 }
 
-void FirstTimeSetup::confirm()
-{
+
+void FirstTimeSetup::confirm() {
   Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
   std::string filename = config.getUserFilename();
   config.setString("default.facility", m_uiForm.cbFacility->currentText().toStdString());
