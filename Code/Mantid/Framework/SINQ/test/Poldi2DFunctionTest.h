@@ -100,7 +100,7 @@ public:
         function2D->addFunction(second);
 
         // indices for poldiFunction1D
-        std::vector<int> indices(10, 0.0);
+        std::vector<int> indices(10, 0);
 
         FunctionDomain1DVector domain(0.0, 10.0, 11);
         FunctionValues values(domain);
