@@ -70,8 +70,6 @@ inc/MantidVatesAPI/MDHWNexusLoadingPresenter.h
 inc/MantidVatesAPI/MDLoadingPresenter.h
 inc/MantidVatesAPI/MDLoadingView.h
 inc/MantidVatesAPI/MDLoadingViewAdapter.h
-inc/MantidVatesAPI/MDRebinningView.h
-inc/MantidVatesAPI/MDRebinningViewAdapter.h
 inc/MantidVatesAPI/MedianAndBelowThresholdRange.h
 inc/MantidVatesAPI/IgnoreZerosThresholdRange.h
 inc/MantidVatesAPI/IMDDimensionComparitor.h
@@ -127,7 +125,6 @@ test/FieldDataToMetadataTest.h
 test/FilteringUpdateProgressActionTest.h
 test/LoadVTKTest.h
 test/MDLoadingViewAdapterTest.h
-test/MDRebinningViewAdapterTest.h
 test/MDEWEventNexusLoadingPresenterTest.h
 test/MDEWInMemoryLoadingPresenterTest.h
 test/MDEWLoadingPresenterTest.h

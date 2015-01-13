@@ -15,7 +15,6 @@
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/Clipper.h"
 #include "MantidVatesAPI/Common.h"
-#include "MantidVatesAPI/MDRebinningView.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/ProgressAction.h"
@@ -28,7 +27,6 @@
 #include <vtkCharArray.h>
 #include <vtkStringArray.h>
 
-using Mantid::VATES::MDRebinningView;
 using Mantid::Geometry::MDHistoDimension;
 using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::coord_t;
@@ -144,31 +142,6 @@ public:
   MOCK_CONST_METHOD0(getLoadInMemory, bool());
   MOCK_METHOD2(updateAlgorithmProgress, void(double, const std::string&));
   ~MockMDLoadingView(){}
-};
-
-class MockMDRebinningView : public MDRebinningView 
-{
-public:
-  MOCK_CONST_METHOD0(getMaxThreshold,
-    double());
-  MOCK_CONST_METHOD0(getMinThreshold,
-    double());
-  MOCK_CONST_METHOD0(getApplyClip,
-    bool());
-  MOCK_CONST_METHOD0(getTimeStep,
-    double());
-  MOCK_CONST_METHOD0(getAppliedGeometryXML,
-    const char*());
-  MOCK_METHOD2(updateAlgorithmProgress,
-    void(double, const std::string&));
-  MOCK_CONST_METHOD0(getOrigin, Mantid::Kernel::V3D());
-  MOCK_CONST_METHOD0(getB1, Mantid::Kernel::V3D());
-  MOCK_CONST_METHOD0(getB2, Mantid::Kernel::V3D());
-  MOCK_CONST_METHOD0(getLengthB1, double());
-  MOCK_CONST_METHOD0(getLengthB2, double());
-  MOCK_CONST_METHOD0(getLengthB3, double());
-  MOCK_CONST_METHOD0(getForceOrthogonal, bool());
-  MOCK_CONST_METHOD0(getOutputHistogramWS, bool());
 };
 
 class MockClipper: public Mantid::VATES::Clipper
