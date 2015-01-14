@@ -118,7 +118,7 @@ void DataComparison::addData()
   m_uiForm.twCurrentData->setItem(currentRows, SPEC_OFFSET, offsetItem);
 
   // Insert the current displayed spectra
-  QTableWidgetItem *currentSpecItem = new QTableWidgetItem(tr(""));
+  QTableWidgetItem *currentSpecItem = new QTableWidgetItem(tr("n/a"));
   currentSpecItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
   m_uiForm.twCurrentData->setItem(currentRows, CURRENT_SPEC, currentSpecItem);
 
@@ -158,6 +158,7 @@ void DataComparison::removeSelectedData()
   }
 
   // Replot the workspaces
+  normaliseSpectraOffsets();
   plotWorkspaces();
 }
 
@@ -179,10 +180,10 @@ void DataComparison::removeAllData()
     // Detach the old curve from the plot if it exists
     if(m_curves.contains(workspaceName))
       m_curves[workspaceName]->attach(NULL);
-
-    // Replot the workspaces
-    plotWorkspaces();
   }
+
+  // Replot the workspaces
+  plotWorkspaces();
 }
 
 
@@ -268,7 +269,24 @@ void DataComparison::normaliseSpectraOffsets()
 {
   m_uiForm.twCurrentData->blockSignals(true);
 
-  //TODO
+  int numRows = m_uiForm.twCurrentData->rowCount();
+  int lowestOffset = INT_MAX;
+
+  // Find the lowest offset in the data table
+  for(int row = 0; row < numRows; row++)
+  {
+    int specOffset = m_uiForm.twCurrentData->item(row, SPEC_OFFSET)->text().toInt();
+    if(specOffset < lowestOffset)
+      lowestOffset = specOffset;
+  }
+
+  // Subtract the loest offset from all offsets to ensure at least one offset is zero
+  for(int row = 0; row < numRows; row++)
+  {
+    int specOffset = m_uiForm.twCurrentData->item(row, SPEC_OFFSET)->text().toInt();
+    specOffset -= lowestOffset;
+    m_uiForm.twCurrentData->item(row, SPEC_OFFSET)->setText(tr(QString::number(specOffset)));
+  }
 
   m_uiForm.twCurrentData->blockSignals(false);
 }
