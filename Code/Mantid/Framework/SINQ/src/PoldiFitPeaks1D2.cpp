@@ -29,35 +29,84 @@ using namespace CurveFitting;
 
 RefinedRange::RefinedRange(const PoldiPeak_sptr &peak, double fwhmMultiples)
     : m_peaks(1, peak) {
+
+  if (!peak) {
+    throw std::invalid_argument(
+        "Cannot construct RefinedRange from null-peak.");
+  }
+
+  if (fwhmMultiples < 0) {
+    throw std::invalid_argument("Cannot construct a RefinedRange of width 0.");
+  }
+
   double width = peak->fwhm();
   double extent = std::max(0.002, width) * fwhmMultiples;
 
-  m_xStart = peak->q() - extent;
-  m_xEnd = peak->q() + extent;
+  setRangeBorders(peak->q() - extent, peak->q() + extent);
 }
 
 RefinedRange::RefinedRange(double xStart, double xEnd,
                            const std::vector<PoldiPeak_sptr> &peaks)
-    : m_peaks(peaks), m_xStart(xStart), m_xEnd(xEnd) {}
+    : m_peaks(peaks) {
+
+  setRangeBorders(xStart, xEnd);
+}
 
 RefinedRange::RefinedRange(const RefinedRange &other)
-    : m_peaks(other.m_peaks), m_xStart(other.m_xStart), m_xEnd(other.m_xEnd) {}
+    : m_peaks(other.m_peaks), m_xStart(other.m_xStart), m_xEnd(other.m_xEnd),
+      m_width(other.m_width) {}
+
+double RefinedRange::getWidth() const { return m_width; }
 
 bool RefinedRange::operator<(const RefinedRange &other) const {
   return m_xStart < other.m_xStart;
 }
 
 bool RefinedRange::overlaps(const RefinedRange &other) const {
-  return (other.m_xStart > m_xStart && other.m_xStart < m_xEnd) ||
-         (other.m_xEnd > m_xStart && other.m_xEnd < m_xEnd) ||
-         (other.m_xStart < m_xStart && other.m_xEnd > m_xEnd);
+  return overlaps(other, 0.0);
+}
+
+bool RefinedRange::overlaps(const RefinedRange &other, double fraction) const {
+  return getOverlapFraction(other) > fraction;
+}
+
+bool RefinedRange::contains(const RefinedRange &other) const {
+  return (other.m_xStart > m_xStart && other.m_xEnd < m_xEnd);
+}
+
+double RefinedRange::getOverlapFraction(const RefinedRange &other) const {
+  double reference = getWidth();
+
+  if (contains(other)) {
+    return other.getWidth() / reference;
+  }
+
+  if (other.contains(*this)) {
+    return reference / other.getWidth();
+  }
+
+  if (*this < other) {
+    return std::max(0.0, m_xEnd - other.m_xStart) / reference;
+  } else {
+    return std::max(0.0, other.m_xEnd - m_xStart) / reference;
+  }
 }
 
 void RefinedRange::merge(const RefinedRange &other) {
   m_peaks.insert(m_peaks.end(), other.m_peaks.begin(), other.m_peaks.end());
 
-  m_xStart = std::min(m_xStart, other.m_xStart);
-  m_xEnd = std::max(m_xEnd, other.m_xEnd);
+  setRangeBorders(std::min(m_xStart, other.m_xStart),
+                  std::max(m_xEnd, other.m_xEnd));
+}
+
+void RefinedRange::setRangeBorders(double start, double end) {
+  if (start >= end) {
+    throw std::invalid_argument("Range start is larger than range end.");
+  }
+
+  m_xStart = start;
+  m_xEnd = end;
+  m_width = end - start;
 }
 
 bool operator<(const RefinedRange_sptr &lhs, const RefinedRange_sptr &rhs) {
@@ -95,8 +144,15 @@ void PoldiFitPeaks1D2::init() {
       "Each peak will be fitted using x times FWHM data in each direction.",
       Direction::Input);
 
+  boost::shared_ptr<BoundedValidator<double> > allowedOverlapFraction =
+      boost::make_shared<BoundedValidator<double> >(0.0, 1.0);
+  declareProperty("AllowedOverlap", 0.25, allowedOverlapFraction,
+                  "If a fraction larger than this value overlaps with the next "
+                  "range, the ranges are merged.");
+
   std::vector<std::string> peakFunctions =
       FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
+
   boost::shared_ptr<ListValidator<std::string> > peakFunctionNames(
       new ListValidator<std::string>(peakFunctions));
   declareProperty("PeakFunction", "Gaussian", peakFunctionNames,
@@ -147,11 +203,14 @@ std::vector<RefinedRange_sptr> PoldiFitPeaks1D2::getReducedRanges(
   reducedRanges.push_back(
       boost::make_shared<RefinedRange>(*(workingRanges.front())));
 
+  double allowedOverlap = getProperty("AllowedOverlap");
+
   for (size_t i = 1; i < workingRanges.size(); ++i) {
     RefinedRange_sptr lastReduced = reducedRanges.back();
     RefinedRange_sptr current = workingRanges[i];
 
-    if (!lastReduced->overlaps(*current)) {
+    if (!lastReduced->contains(*current) &&
+        !lastReduced->overlaps(*current, allowedOverlap)) {
       reducedRanges.push_back(boost::make_shared<RefinedRange>(*current));
     } else {
       lastReduced->merge(*current);

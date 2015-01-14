@@ -109,9 +109,136 @@ public:
         TS_ASSERT_EQUALS(names.count("PeakFunction"), 1);
         TS_ASSERT_EQUALS(names.count("PoldiPeakTable"), 1);
         TS_ASSERT_EQUALS(names.count("OutputWorkspace"), 1);
-        TS_ASSERT_EQUALS(names.count("ResultTableWorkspace"), 1);
         TS_ASSERT_EQUALS(names.count("FitPlotsWorkspace"), 1);
+        TS_ASSERT_EQUALS(names.count("AllowedOverlap"), 1);
     }
+
+    void testRefinedRangePeakConstructor()
+    {
+        double fwhm = m_testPeak->fwhm();
+        double peakQ = m_testPeak->q();
+        double rangeXStart = peakQ - 2.0 * fwhm;
+        double rangeXEnd = peakQ + 2.0 * fwhm;
+
+        RefinedRange range(m_testPeak, 2.0);
+        TS_ASSERT_EQUALS(range.getXStart(), rangeXStart);
+        TS_ASSERT_EQUALS(range.getXEnd(), rangeXEnd);
+        TS_ASSERT_DELTA(range.getWidth(), 4.0 * fwhm, 1e-15);
+
+        // Null pointer does not work
+        PoldiPeak_sptr nullPeak;
+        TS_ASSERT_THROWS(RefinedRange invalid(nullPeak, 2.0), std::invalid_argument);
+
+        // 0 or fewer multiples does not work
+        TS_ASSERT_THROWS(RefinedRange invalid(m_testPeak, 0.0), std::invalid_argument);
+        TS_ASSERT_THROWS(RefinedRange invalid(m_testPeak, -1.0), std::invalid_argument);
+    }
+
+    void testRefinedRangeLimitConstructor()
+    {
+        std::vector<PoldiPeak_sptr> peaks(1, m_testPeak);
+
+        TS_ASSERT_THROWS_NOTHING(RefinedRange range(0.0, 1.0, peaks));
+        TS_ASSERT_THROWS(RefinedRange invalid(1.0, 0.0, peaks), std::invalid_argument);
+        TS_ASSERT_THROWS(RefinedRange invalid(1.0, 1.0, peaks), std::invalid_argument);
+
+        RefinedRange range(3.0, 4.0, peaks);
+        TS_ASSERT_EQUALS(range.getXStart(), 3.0);
+        TS_ASSERT_EQUALS(range.getXEnd(), 4.0);
+        TS_ASSERT_EQUALS(range.getWidth(), 1.0);
+    }
+
+    void testContains()
+    {
+        std::vector<PoldiPeak_sptr> peaks(1, m_testPeak);
+
+        RefinedRange largeRange(1.0, 3.0, peaks);
+        RefinedRange smallRange(1.5, 2.5, peaks);
+
+        TS_ASSERT(largeRange.contains(smallRange));
+        TS_ASSERT(!smallRange.contains(largeRange));
+
+        RefinedRange outsideRange(2.5, 4.5, peaks);
+        TS_ASSERT(!largeRange.contains(outsideRange));
+    }
+
+    void testOperatorLessThan()
+    {
+        std::vector<PoldiPeak_sptr> peaks(1, m_testPeak);
+
+        RefinedRange firstRange(1.0, 3.0, peaks);
+        RefinedRange secondRange(1.5, 2.5, peaks);
+
+        TS_ASSERT(firstRange < secondRange);
+        TS_ASSERT(!(secondRange < firstRange));
+    }
+
+    void testMerge()
+    {
+        std::vector<PoldiPeak_sptr> peaks(1, m_testPeak);
+
+        RefinedRange firstRange(1.0, 2.0, peaks);
+        RefinedRange secondRange(1.5, 3.5, peaks);
+
+        TS_ASSERT_THROWS_NOTHING(firstRange.merge(secondRange));
+        TS_ASSERT_EQUALS(firstRange.getXStart(), 1.0);
+        TS_ASSERT_EQUALS(firstRange.getXEnd(), 3.5);
+        TS_ASSERT_EQUALS(firstRange.getWidth(), 2.5);
+    }
+
+    void testGetOverlap()
+    {
+        std::vector<PoldiPeak_sptr> peaks(1, m_testPeak);
+
+        RefinedRange firstRange(1.0, 2.0, peaks);
+        RefinedRange secondRange(1.5, 3.5, peaks);
+
+        TS_ASSERT_EQUALS(firstRange.getOverlapFraction(secondRange), 0.5);
+        TS_ASSERT_EQUALS(secondRange.getOverlapFraction(firstRange), 0.25);
+
+        RefinedRange noOverlapLeft(0.0, 0.5, peaks);
+        TS_ASSERT_EQUALS(firstRange.getOverlapFraction(noOverlapLeft), 0.0);
+        TS_ASSERT_EQUALS(noOverlapLeft.getOverlapFraction(firstRange), 0.0);
+
+        RefinedRange noOverlapRight(4.0, 4.5, peaks);
+        TS_ASSERT_EQUALS(firstRange.getOverlapFraction(noOverlapRight), 0.0);
+        TS_ASSERT_EQUALS(noOverlapRight.getOverlapFraction(firstRange), 0.0);
+
+        RefinedRange noOverlapLeftLimit(0.0, 1.0, peaks);
+        TS_ASSERT_EQUALS(firstRange.getOverlapFraction(noOverlapLeftLimit), 0.0);
+        TS_ASSERT_EQUALS(noOverlapLeftLimit.getOverlapFraction(firstRange), 0.0);
+
+        RefinedRange contained(2.0, 2.5, peaks);
+        TS_ASSERT_EQUALS(secondRange.getOverlapFraction(contained), 0.25);
+    }
+
+    void testOverlaps()
+    {
+        std::vector<PoldiPeak_sptr> peaks(1, m_testPeak);
+
+        RefinedRange firstRange(1.0, 2.0, peaks);
+        RefinedRange secondRange(1.5, 3.5, peaks);
+
+        TS_ASSERT(firstRange.overlaps(secondRange));
+        TS_ASSERT(secondRange.overlaps(firstRange));
+
+        RefinedRange noOverlapLeft(0.0, 0.5, peaks);
+        TS_ASSERT(!firstRange.overlaps(noOverlapLeft));
+    }
+
+    void testOverlapsFraction()
+    {
+        std::vector<PoldiPeak_sptr> peaks(1, m_testPeak);
+
+        RefinedRange firstRange(1.0, 2.0, peaks);
+        RefinedRange secondRange(1.5, 3.5, peaks);
+
+        TS_ASSERT(firstRange.overlaps(secondRange, 0.1));
+        TS_ASSERT(firstRange.overlaps(secondRange, 0.15));
+        TS_ASSERT(!firstRange.overlaps(secondRange, 0.55));
+    }
+
+
 
 private:
     PoldiPeak_sptr m_testPeak;

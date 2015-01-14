@@ -21,9 +21,16 @@ public:
                const std::vector<PoldiPeak_sptr> &peaks);
   RefinedRange(const RefinedRange &other);
 
+  double getWidth() const;
+
   bool operator<(const RefinedRange &other) const;
 
   bool overlaps(const RefinedRange &other) const;
+  bool overlaps(const RefinedRange &other, double fraction) const;
+  bool contains(const RefinedRange &other) const;
+
+  double getOverlapFraction(const RefinedRange &other) const;
+
   void merge(const RefinedRange &other);
 
   const std::vector<PoldiPeak_sptr> getPeaks() const { return m_peaks; }
@@ -32,9 +39,12 @@ public:
   double getXEnd() const { return m_xEnd; }
 
 private:
+  void setRangeBorders(double start, double end);
+
   std::vector<PoldiPeak_sptr> m_peaks;
   double m_xStart;
   double m_xEnd;
+  double m_width;
 };
 
 typedef boost::shared_ptr<RefinedRange> RefinedRange_sptr;
