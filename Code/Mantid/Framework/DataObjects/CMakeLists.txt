@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/OffsetsWorkspace.cpp
 	src/Peak.cpp
 	src/PeakColumn.cpp
+	src/PeakNoShapeFactory.cpp
 	src/PeakShapeBase.cpp
 	src/PeakShapeSpherical.cpp
 	src/PeakShapeSphericalFactory.cpp
@@ -47,6 +48,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/OffsetsWorkspace.h
 	inc/MantidDataObjects/Peak.h
 	inc/MantidDataObjects/PeakColumn.h
+	inc/MantidDataObjects/PeakNoShapeFactory.h
 	inc/MantidDataObjects/PeakShape.h
 	inc/MantidDataObjects/PeakShapeBase.h
 	inc/MantidDataObjects/PeakShapeFactory.h
@@ -76,6 +78,7 @@ set ( TEST_FILES
 	NoShapeTest.h
 	OffsetsWorkspaceTest.h
 	PeakColumnTest.h
+	PeakNoShapeFactoryTest.h
 	PeakShapeSphericalFactoryTest.h
 	PeakShapeSphericalTest.h
 	PeakTest.h
