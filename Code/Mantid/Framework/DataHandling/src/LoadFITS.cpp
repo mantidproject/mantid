@@ -18,10 +18,14 @@ using Poco::BinaryReader;
 
 namespace {
 static const std::string BIT_DEPTH_NAME = "BitDepthName";
-static const std::string ROTATION_NAME = "RotationName";
 static const std::string AXIS_NAMES_NAME = "AxisNames";
-static const std::string IMAGE_KEY_NAME = "ImageKeyName";
+
 static const std::string HEADER_MAP_NAME = "HeaderMapFile";
+
+// for specific use in tomography
+static const std::string IMAGE_KEY_NAME = "ImageKeyName";
+static const std::string ROTATION_NAME = "RotationName";
+static const std::string INTENSITY_NAME = "IntensityName";
 
 /**
 * Used with find_if to check a string isn't a fits file (by checking extension)

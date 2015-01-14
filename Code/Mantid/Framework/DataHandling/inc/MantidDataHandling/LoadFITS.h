@@ -30,6 +30,8 @@ struct FITSInfo {
   string extension;
   string filePath;
   bool isFloat;
+  // TODO: move inside class
+  // TODO: add key (above), rotation and intensity
 };
 
 namespace Mantid {
