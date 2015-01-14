@@ -92,6 +92,18 @@ void DataComparison::addData()
   colourCombo->addItem("Red", QVariant(Qt::red));
   colourCombo->addItem("Green", QVariant(Qt::green));
   colourCombo->addItem("Blue", QVariant(Qt::blue));
+  colourCombo->addItem("Cyan", QVariant(Qt::cyan));
+  colourCombo->addItem("Magenta", QVariant(Qt::magenta));
+  colourCombo->addItem("Yellow", QVariant(Qt::yellow));
+  colourCombo->addItem("Light Gray", QVariant(Qt::lightGray));
+  colourCombo->addItem("Gray", QVariant(Qt::gray));
+  colourCombo->addItem("Dark Red", QVariant(Qt::darkRed));
+  colourCombo->addItem("Dark Green", QVariant(Qt::darkGreen));
+  colourCombo->addItem("Dark Blue", QVariant(Qt::darkBlue));
+  colourCombo->addItem("Dark Cyan", QVariant(Qt::darkCyan));
+  colourCombo->addItem("Dark Magenta", QVariant(Qt::darkMagenta));
+  colourCombo->addItem("Dark Yellow", QVariant(Qt::darkYellow));
+  colourCombo->addItem("Dark Gray", QVariant(Qt::darkGray));
   connect(colourCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(plotWorkspaces()));
   m_uiForm.twCurrentData->setCellWidget(currentRows, COLOUR, colourCombo);
 
