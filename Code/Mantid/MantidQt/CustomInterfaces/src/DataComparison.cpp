@@ -54,7 +54,10 @@ void DataComparison::initLayout()
   connect(m_uiForm.pbClearDiff, SIGNAL(clicked()), this, SLOT(clearDiff()));
 
   // Replot spectra when the spectrum index is changed
-  connect(m_uiForm.sbSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(plotWorkspaces()));
+  connect(m_uiForm.sbSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotWorkspaces()));
+
+  // Handle data in the table being changed
+  connect(m_uiForm.twCurrentData, SIGNAL(cellChanged(int, int)), this, SLOT(handleCellChanged(int, int)));
 
   // Add headers to data table
   QStringList headerLabels;
@@ -76,6 +79,8 @@ void DataComparison::initLayout()
 void DataComparison::addData()
 {
   QString dataName = m_uiForm.dsData->getCurrentDataName();
+
+  m_uiForm.twCurrentData->blockSignals(true);
 
   // Append a new row to the data table
   int currentRows = m_uiForm.twCurrentData->rowCount();
@@ -100,6 +105,8 @@ void DataComparison::addData()
   QTableWidgetItem *currentSpecItem = new QTableWidgetItem(tr(""));
   currentSpecItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
   m_uiForm.twCurrentData->setItem(currentRows, CURRENT_SPEC, currentSpecItem);
+
+  m_uiForm.twCurrentData->blockSignals(false);
 
   // Fit columns
   m_uiForm.twCurrentData->resizeColumnsToContents();
@@ -168,27 +175,51 @@ void DataComparison::removeAllData()
  */
 void DataComparison::plotWorkspaces()
 {
+  int globalSpecIndex = m_uiForm.sbSpectrum->value();
+  int maxGlobalSpecIndex = 0;
+
   int numRows = m_uiForm.twCurrentData->rowCount();
   for(int row = 0; row < numRows; row++)
   {
-    int specIndex = 0;  //TODO
-
     // Get workspace
     QString workspaceName = m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
     MatrixWorkspace_const_sptr workspace =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
+    int numSpec = static_cast<int>(workspace->getNumberHistograms());
+
+    // Calculate spectrum number
+    int specOffset = m_uiForm.twCurrentData->item(row, SPEC_OFFSET)->text().toInt();
+    int specIndex = globalSpecIndex - specOffset;
+    g_log.debug() << "Spectrum index for workspace " << workspaceName.toStdString()
+                  << " is " << specIndex << ", with offset " << specOffset << std::endl;
+
+    // See if this workspace extends the reach of the global spectrum selector
+    int maxGlobalSpecIndexForWs = numSpec + specOffset - 1;
+    if(maxGlobalSpecIndexForWs > maxGlobalSpecIndex)
+      maxGlobalSpecIndex = maxGlobalSpecIndexForWs;
+
+    // Check the spectrum index is in range
+    if(specIndex >= numSpec || specIndex < 0)
+    {
+      g_log.debug() << "Workspace " << workspaceName.toStdString()
+                    << ", spectrum index out of range." << std::endl;;
+
+      // Give "n/a" in current spectrum display
+      m_uiForm.twCurrentData->item(row, CURRENT_SPEC)->setText(tr("n/a"));
+
+      // Detech the curve from the plot
+      if(m_curves.contains(workspaceName))
+        m_curves[workspaceName]->attach(NULL);
+
+      continue;
+    }
+
+    // Update current spectrum display
+    m_uiForm.twCurrentData->item(row, CURRENT_SPEC)->setText(tr(QString::number(specIndex)));
 
     // Create the curve data
     const bool logScale(false), distribution(false);
     QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(specIndex), logScale, distribution);
-
-    // Check the spectrum index is in range
-    int numSpec = static_cast<int>(workspace->getNumberHistograms());
-    if(specIndex >= numSpec)
-    {
-      g_log.debug() << "Workspace " << workspaceName.toStdString() << ", spectrum index out of range.";
-      continue;
-    }
 
     // Detach the old curve from the plot if it exists
     if(m_curves.contains(workspaceName))
@@ -203,6 +234,42 @@ void DataComparison::plotWorkspaces()
 
   // Update the plot
   m_plot->replot();
+
+  // Set the max value for global spectrum spin box
+  m_uiForm.sbSpectrum->setMaximum(maxGlobalSpecIndex);
+  m_uiForm.sbSpectrum->setSuffix(" / " + QString::number(maxGlobalSpecIndex));
+}
+
+
+/**
+ * Normalises the spectrum index offsets in the data table to zero.
+ */
+void DataComparison::normaliseSpectraOffsets()
+{
+  m_uiForm.twCurrentData->blockSignals(true);
+
+  //TODO
+
+  m_uiForm.twCurrentData->blockSignals(false);
+}
+
+
+/**
+ * Handles data being changed in the current data table.
+ *
+ * @param row Row that was changed
+ * @param column Column that was changed
+ */
+void DataComparison::handleCellChanged(int row, int column)
+{
+  UNUSED_ARG(row);
+
+  // Update the spectra plots if the offsets change
+  if(column == SPEC_OFFSET)
+  {
+    normaliseSpectraOffsets();
+    plotWorkspaces();
+  }
 }
 
 
