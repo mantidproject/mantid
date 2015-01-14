@@ -43,14 +43,6 @@
            <property name="autoLoad" stdset="0">
             <bool>true</bool>
            </property>
-           <property name="loadLabelText" stdset="0">
-            <string/>
-           </property>
-           <property name="fileBrowserSuffixes" stdset="0">
-            <stringlist>
-             <string>.nxs</string>
-            </stringlist>
-           </property>
            <property name="showLoad" stdset="0">
             <bool>false</bool>
            </property>
@@ -79,12 +71,15 @@
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
          <item row="0" column="0" colspan="2">
-          <widget class="QTableWidget" name="tableWidget">
+          <widget class="QTableWidget" name="twCurrentData">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="columnCount">
+             <number>3</number>
            </property>
           </widget>
          </item>
@@ -117,22 +112,29 @@
          <string>Tools</string>
         </property>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="2" column="0">
+         <item row="0" column="0">
+          <widget class="QLabel" name="lbSpectrum">
+           <property name="text">
+            <string>Spectrum:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QSpinBox" name="sbSpectrum"/>
+         </item>
+         <item row="1" column="0">
           <widget class="QPushButton" name="pbDiffSelected">
            <property name="text">
             <string>Diff Selected</string>
            </property>
           </widget>
          </item>
-         <item row="2" column="1">
+         <item row="1" column="1">
           <widget class="QPushButton" name="pbClearDiff">
            <property name="text">
             <string>Clear Diff</string>
            </property>
           </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QSpinBox" name="sbSpectrum"/>
          </item>
         </layout>
        </widget>
