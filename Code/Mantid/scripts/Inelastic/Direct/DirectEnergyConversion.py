@@ -1021,37 +1021,6 @@ class DirectEnergyConversion(object):
 
         return mtd[ws_name]
 
-    def get_monitors_ws(self,data_ws,method,mon_number=None):
-        """ get pointer to a workspace containing monitors. 
-
-           Explores different ways of finding monitor workspace in Mantid and returns the python pointer to the
-           workspace which contains monitors.
-        """
-
-
-        if mon_number is None:
-            if method == 'monitor-2':
-               mon_spectr_num=int(self.prop_man.mon2_norm_spec)
-            else:
-               mon_spectr_num=int(self.prop_man.mon1_norm_spec)
-        else:
-               mon_spectr_num=mon_number
-
-        monWS_name = data_ws.getName()+'_monitors'
-        if monWS_name in mtd:
-               mon_ws = mtd[monWS_name];
-        else:
-            # get pointer to the workspace
-            mon_ws=data_ws;
-
-            # get the index of the monitor spectra
-            ws_index= mon_ws.getIndexFromSpectrumNumber(mon_spectr_num);
-            # create monitor workspace consisting of single index
-            mon_ws = ExtractSingleSpectrum(InputWorkspace=data_ws,OutputWorkspace=monWS_name,WorkspaceIndex=ws_index);
-
-        mon_index = mon_ws.getIndexFromSpectrumNumber(mon_spectr_num);
-        return (mon_ws,mon_index);
-
 
 
     def normalise(self, data_ws, result_name, method, range_offset=0.0,mon_number=None):
@@ -1202,11 +1171,11 @@ class DirectEnergyConversion(object):
                     #
         
         self.setup_instrument_properties(result_ws)
-        # TODO: is it possible to have spectra_to_monitors_list defined and monitors loaded with workspace? then all below will fail miserably. 
-        spec_to_mon =  propman.spectra_to_monitors_list;
-        if monitor_ws and spec_to_mon :
-            for specID in spec_to_mon:
-                result_ws,monitor_ws=self.copy_spectrum2monitors(result_ws,monitor_ws,specID);
+        ## TODO: is it possible to have spectra_to_monitors_list defined and monitors loaded with workspace? then all below will fail miserably. 
+        #spec_to_mon =  propman.spectra_to_monitors_list;
+        #if monitor_ws and spec_to_mon :
+        #    for specID in spec_to_mon:
+        #        result_ws,monitor_ws=self.copy_spectrum2monitors(result_ws,monitor_ws,specID);
 
         return (result_ws,monitor_ws)
 
@@ -1249,51 +1218,6 @@ class DirectEnergyConversion(object):
 
 
         return (data_ws,monitor_ws)
-
-    @staticmethod
-    def copy_spectrum2monitors(wsName,monWSName,spectraID):
-       """
-        this routine copies a spectrum form workspace to monitor workspace and rebins it according to monitor workspace binning
-
-        @param wsName    -- the name of event workspace which detector is considered as monitor or Mantid pointer to this workspace
-        @param monWSName -- the name of histogram workspace with monitors where one needs to place the detector's spectra or Mantid pointer to this workspace
-        @param spectraID -- the ID of the spectra to copy.
-
-         TODO: As extract single spectrum works only with WorkspaceIndex, we have to assume that WorkspaceIndex=spectraID-1;
-         this is not always correct, so it is better to change ExtractSingleSpectrum to accept workspaceID
-       """
-       if isinstance(wsName,str):
-           ws = mtd[wsName]
-       else:
-           ws = wsName;
-       if isinstance(monWSName,str):
-            monWS = mtd[monWSName];
-       else:
-           monWS = monWSName;
-       # ----------------------------
-       try:
-           ws_index = monWS.getIndexFromSpectrumNumber(spectraID)
-           # Spectra is already in the monitor workspace
-           return (ws,monWS)
-       except:
-           ws_index = ws.getIndexFromSpectrumNumber(spectraID)
-
-
-
-       #
-       x_param = monWS.readX(0);
-       bins = [x_param[0],x_param[1]-x_param[0],x_param[-1]];
-       ExtractSingleSpectrum(InputWorkspace=ws,OutputWorkspace='tmp_mon',WorkspaceIndex=ws_index)
-       Rebin(InputWorkspace='tmp_mon',OutputWorkspace='tmp_mon',Params=bins,PreserveEvents='0')
-       # should be vice versa but Conjoin invalidate ws pointers and hopefully nothing could happen with workspace during conjoining
-       #AddSampleLog(Workspace=monWS,LogName=done_log_name,LogText=str(ws_index),LogType='Number');
-       mon_ws_name = monWS.getName();
-       ConjoinWorkspaces(InputWorkspace1=monWS,InputWorkspace2='tmp_mon')
-       monWS=mtd[mon_ws_name]
-
-       if 'tmp_mon' in mtd:
-           DeleteWorkspace(WorkspaceName='tmp_mon');
-       return (ws,monWS);
 
     @property 
     def prop_man(self):

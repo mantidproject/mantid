@@ -11,8 +11,8 @@ class RunDescriptor(PropDescriptor):
     # the host class referencing contained all instantiated descriptors. 
     # Descriptors methods rely on it to work (e.g. to extract file loader preferences) 
     # so it has to be set up manually by PropertyManager __init__ method
-    __holder_class__=None
-    logger = None
+    _holder=None
+    _logger = None
 
     def __init__(self,ws_preffix,DocString=None): 
         """ """
@@ -28,9 +28,6 @@ class RunDescriptor(PropDescriptor):
         if not DocString is None:
             self.__doc__ = DocString
 
-        if RunDescriptor.__holder_class__:
-            logger = RunDescriptor.__holder_class__.log()
-
     def __get__(self,instance,owner=None):
         """ return current run number""" 
         if instance is None:
@@ -45,7 +42,7 @@ class RunDescriptor(PropDescriptor):
            self._run_ext     = None
            return
        if isinstance(value, api.Workspace):
-           self._run_number = value.getRunNuber()
+           self._run_number = value.getRunNumber()
            self._run_ws_name= value.name()
            return
 
@@ -73,7 +70,7 @@ class RunDescriptor(PropDescriptor):
         if self._run_ext:
             return self._run_ext
         else: # return IDF default
-            return RunDescriptor.__holder_class__.data_file_ext
+            return RunDescriptor._holder.data_file_ext
 
     def set_file_ext(self,val):
         """ set non-default file extension """
@@ -89,11 +86,11 @@ class RunDescriptor(PropDescriptor):
     def find_file(self,run_num = None):
         """Use Mantid to search for the given run. """
 
-        inst_name = RunDescriptor.__holder_class__.short_inst_name
+        inst_name = RunDescriptor._holder.short_inst_name
         if run_num:
             run_num_str = str(run_num)
         else:
-            run_num_str = str(self.__get__(RunDescriptor.__holder_class__))
+            run_num_str = str(self.__get__(RunDescriptor._holder))
         #
         file_hint =inst_name + run_num_str + self.get_file_ext()
         try:
@@ -102,12 +99,14 @@ class RunDescriptor(PropDescriptor):
             message = 'Cannot find file matching hint {0} on current search paths ' \
                       'for instrument {1}'.format(file_hint,inst_name)
 
-            logger(message,'warning')
+            RunDescriptor._logger(message,'warning')
             return 'ERROR:find_file '+message
 
     def get_workspace(self):
         """ Method returns workspace correspondent to current run number(s)
-            and loads this workspace if necessary 
+            and loads this workspace if it has not been loaded
+
+            Returns Mantid pointer to the workspace, corresponding to this run number
         """ 
         if not self._run_ws_name:
            return None
@@ -116,29 +115,57 @@ class RunDescriptor(PropDescriptor):
            return mtd[self._run_ws_name]
         else:
            if self._run_number:
-               inst_name   = RunDescriptor.__holder_class__.short_inst_name
-               calibration = RunDescriptor.__holder_class__.det_cal_file
-               return self.load_run(inst_name, calibration,False, RunDescriptor.__holder_class__.load_monitors_with_workspace)
+               inst_name   = RunDescriptor._holder.short_inst_name
+               calibration = RunDescriptor._holder.det_cal_file
+               return self.load_run(inst_name, calibration,False, RunDescriptor._holder.load_monitors_with_workspace)
            else:
               return None
 
+    def get_monitors_ws(self):
+        """ get pointer to a workspace containing monitors. 
+
+           Explores different ways of finding monitor workspace in Mantid and returns the python pointer to the
+           workspace which contains monitors.
+
+
+        """
+
+        data_ws = self.get_workspace()
+
+        monWS_name = self.get_ws_name()+'_monitors'
+        if monWS_name in mtd:
+            mon_ws = mtd[monWS_name]
+            monitors_separate = True
+        else:
+            mon_ws = data_ws
+            monitors_separate = False
+
+        spec_to_mon =   RunDescriptor._holder.spectra_to_monitors_list
+        if monitors_separate and spec_to_mon :
+            for specID in spec_to_mon:
+                mon_ws=self.copy_spectrum2monitors(data_ws,mon_ws,specID);
+
+        return mon_ws
+
     def get_ws_name(self):
         """ return workspace name. If ws name is not defined, build it first and set up as target ws name
-
         """ 
 
         if self._run_ws_name:
             return self._run_ws_name
 
-        if RunDescriptor.__holder_class__:
-            instr_name = RunDescriptor.__holder_class__.short_inst_name
+        if RunDescriptor._holder:
+            instr_name = RunDescriptor._holder.short_inst_name
         else:
             instr_name = '_test_instrument'
 
-        if not RunDescriptor.__holder_class__.sum_runs:
-            ws_name = common.create_resultname(self._run_number,instr_name+self._ws_preffix)
+        suffix = '' # not implemented
+        if RunDescriptor._holder.sum_runs:
+            ws_name = "NotImplemented" 
         else:
-            ws_name = common.create_resultname(self._run_number,instr_name+self._ws_preffix,'-sum')
+            ws_name  =  '{0}{1}{2:0>#6d}{3}'.format(instr_name,self._ws_preffix,self._run_number,suffix)
+
+
         self._run_ws_name = ws_name
 
         return ws_name
@@ -153,17 +180,22 @@ class RunDescriptor(PropDescriptor):
         ws_name = self.get_ws_name()
 
         if ws_name in mtd and not(force):
-            RunDescriptor.logger("{0} already loaded as workspace.".format(self._run_ws_name),'notice')
+            RunDescriptor._logger("{0} already loaded as workspace.".format(self._run_ws_name),'notice')
             loaded_ws = mtd[ws_name]
         else:
             # If it doesn't exists as a workspace assume we have to try and load a file
             data_file = self.find_file()
             if data_file[0:4] == 'ERROR':
-                raise IOError(data_file)           
+                raise IOError(data_file)
+                       
+            format = self.get_file_ext()
+            if format =='.raw' and load_with_workspace:
+               mon_load_option = 'Include'
+            else:
+               mon_load_option =str(int(load_with_workspace))
 
-
-            Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = str(int(load_with_workspace)))
-            RunDescriptor.logger("Loaded {0}".format(data_file),'notice')
+            Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = mon_load_option)
+            RunDescriptor._logger("Loaded {0}".format(data_file),'notice')
             loaded_ws = mtd[ws_name]
 
         ######## Now we have the workspace
@@ -182,17 +214,54 @@ class RunDescriptor(PropDescriptor):
             return # already calibrated
 
         if type(calibration) == str : # It can be only a file (got it from calibration property)
-            RunDescriptor.logger('load_data: Moving detectors to positions specified in cal file {0}'.format(calibration),'debug')
+            RunDescriptor._logger('load_data: Moving detectors to positions specified in cal file {0}'.format(calibration),'debug')
             # Pull in pressures, thicknesses & update from cal file
             LoadDetectorInfo(Workspace=loaded_ws, DataFilename=calibration, RelocateDets=True)
             AddSampleLog(Workspace=loaded_ws,LogName="calibrated",LogText=str(calibration))
         elif isinstance(calibration, api.Workspace):
-            logger('load_data: Copying detectors positions from workspace {0}: '.format(calibration.name()),'debug')
+            RunDescriptor._logger('load_data: Copying detectors positions from workspace {0}: '.format(calibration.name()),'debug')
             CopyInstrumentParameters(InputWorkspace=calibration,OutputWorkspace=loaded_ws)
             AddSampleLog(Workspace=loaded_ws,LogName="calibrated",LogText=str(calibration))
+
+    @staticmethod
+    def copy_spectrum2monitors(data_ws,mon_ws,spectraID):
+       """
+        this routine copies a spectrum form workspace to monitor workspace and rebins it according to monitor workspace binning
+
+        @param data_ws  -- the  event workspace which detector is considered as monitor or Mantid pointer to this workspace
+        @param mon_ws   -- the  histogram workspace with monitors where one needs to place the detector's spectra 
+        @param spectraID-- the ID of the spectra to copy.
+
+       """
+ 
+       # ----------------------------
+       try:
+           ws_index = mon_ws.getIndexFromSpectrumNumber(spectraID)
+           # Spectra is already in the monitor workspace
+           return mon_ws
+       except:
+           ws_index = data_ws.getIndexFromSpectrumNumber(spectraID)
+
+       #
+       x_param = mon_ws.readX(0);
+       bins = [x_param[0],x_param[1]-x_param[0],x_param[-1]];
+       ExtractSingleSpectrum(InputWorkspace=data_ws,OutputWorkspace='tmp_mon',WorkspaceIndex=ws_index)
+       Rebin(InputWorkspace='tmp_mon',OutputWorkspace='tmp_mon',Params=bins,PreserveEvents='0')
+       # should be vice versa but Conjoin invalidate ws pointers and hopefully nothing could happen with workspace during conjoining
+       #AddSampleLog(Workspace=monWS,LogName=done_log_name,LogText=str(ws_index),LogType='Number')
+       mon_ws_name = mon_ws.getName();
+       ConjoinWorkspaces(InputWorkspace1=mon_ws,InputWorkspace2='tmp_mon')
+       mon_ws =mtd[mon_ws_name]
+
+       if 'tmp_mon' in mtd:
+           DeleteWorkspace(WorkspaceName='tmp_mon')
+       return mon_ws
+
   
 #-------------------------------------------------------------------------------------------------------------------------------
 class RunDescriptorDependent(RunDescriptor):
+    """ A RunDescriptor class dependent on another RunDescriptor"""
+
     def __init__(self,host_run,ws_preffix,DocString=None):
         RunDescriptor.__init__(self,ws_preffix,DocString)
         self._host = host_run

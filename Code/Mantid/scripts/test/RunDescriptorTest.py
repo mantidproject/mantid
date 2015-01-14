@@ -115,8 +115,25 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertTrue(isinstance(ws, api.Workspace))
         self.assertEqual(ws.name(), PropertyManager.sample_run.get_ws_name())
 
-
+        mon_ws = PropertyManager.sample_run.get_monitors_ws()
+        self.assertTrue(isinstance(mon_ws, api.Workspace))
+        self.assertEqual(mon_ws.name(),ws.name()) 
     
+    def test_copy_spectra2monitors(self):
+        propman  = self.prop_man
+        run_ws = CreateSampleWorkspace( Function='Multiple Peaks', WorkspaceType = 'Event',NumBanks=1, BankPixelWidth=5, NumEvents=100)
+        run_ws_monitors = CreateSampleWorkspace( Function='Multiple Peaks', WorkspaceType = 'Histogram',NumBanks=1, BankPixelWidth=1, NumEvents=100)
+        self.assertEqual(run_ws_monitors.getNumberHistograms(),1)
+
+
+        propman.monovan_run = run_ws
+        propman.spectra_to_monitors_list = 3
+
+        mon_ws = PropertyManager.monovan_run.get_monitors_ws()
+        self.assertTrue(isinstance(mon_ws, api.Workspace))
+        self.assertEqual(mon_ws.getNumberHistograms(),2)
+        self.assertEqual(mon_ws.getIndexFromSpectrumNumber(3),1)
+
 
 
 if __name__=="__main__":

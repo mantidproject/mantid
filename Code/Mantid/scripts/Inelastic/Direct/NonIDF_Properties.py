@@ -46,8 +46,8 @@ class NonIDF_Properties(object):
         self._set_instrument_and_facility(Instrument,run_workspace)
 
         # set up descriptors holder class reference
-        RunDescriptor.__holder_class__ = self
-        RunDescriptor.logger   = self.log
+        RunDescriptor._holder = self
+        RunDescriptor._logger = self.log
   
     #end
     #-----------------------------------------------------------------------------
