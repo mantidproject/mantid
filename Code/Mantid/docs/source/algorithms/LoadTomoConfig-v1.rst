@@ -9,9 +9,11 @@
 Description
 -----------
 
-This algorithm reads a tomographic reconstruction parameter (configuration) file and
-stores the configuration in a `MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`_. The data in
-the file is expected... 
+This algorithm reads a tomographic reconstruction parameter
+(configuration) file and stores the configuration in a `TableWorkspace
+<http://www.mantidproject.org/TableWorkspace>`_. The file is expected
+to follow the following format... The workspace produced has one row
+for every plugin found in the input file, and four columns...
 
 Usage
 -----
