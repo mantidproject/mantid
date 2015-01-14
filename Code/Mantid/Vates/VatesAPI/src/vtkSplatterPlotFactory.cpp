@@ -541,7 +541,13 @@ namespace VATES
 
     // Set the instrument
     m_instrument = m_metaDataExtractor->extractInstrument(m_workspace);
-    double* range = dataSet->GetScalarRange();
+    double* range = NULL;
+
+    if (dataSet)
+    {
+      range = dataSet->GetScalarRange();
+    }
+
     if (range)
     {
       m_minValue = range[0];
