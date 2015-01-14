@@ -60,7 +60,7 @@ find_library ( OPENCASCADE_LIB_TKGEOMBASE
                  NAMES TKGeomBase
 )
 
-find_library ( OPENCASCADE_LIB_TKGEOMAlgo
+find_library ( OPENCASCADE_LIB_TKGEOMALGO
                  NAMES TKGeomAlgo
 )
 
