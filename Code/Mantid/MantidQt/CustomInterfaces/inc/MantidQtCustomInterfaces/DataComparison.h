@@ -45,6 +45,15 @@ namespace CustomInterfaces
     void clearDiff();
 
   private:
+    /// Enumeration for column index
+    enum Column
+    {
+      COLOUR,
+      WORKSPACE_NAME,
+      SPEC_OFFSET,
+      CURRENT_SPEC
+    };
+
     /// Initialize the layout
     virtual void initLayout();
 

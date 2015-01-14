@@ -53,9 +53,13 @@ void DataComparison::initLayout()
   connect(m_uiForm.pbDiffSelected, SIGNAL(clicked()), this, SLOT(diffSelected()));
   connect(m_uiForm.pbClearDiff, SIGNAL(clicked()), this, SLOT(clearDiff()));
 
+  // Replot spectra when the spectrum index is changed
+  connect(m_uiForm.sbSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(plotWorkspaces()));
+
   // Add headers to data table
   QStringList headerLabels;
-  headerLabels << "Workspace" << "Offset" << "Colour";
+  headerLabels << "Colour" << "Workspace" << "Offset" << "Spec.";
+  m_uiForm.twCurrentData->setColumnCount(headerLabels.size());
   m_uiForm.twCurrentData->setHorizontalHeaderLabels(headerLabels);
 
   // Select entire rows when a cell is selected
@@ -80,12 +84,22 @@ void DataComparison::addData()
   // Insert the workspace name
   QTableWidgetItem *wsNameItem = new QTableWidgetItem(tr(dataName));
   wsNameItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-  m_uiForm.twCurrentData->setItem(currentRows, 0, wsNameItem);
+  m_uiForm.twCurrentData->setItem(currentRows, WORKSPACE_NAME, wsNameItem);
+
+  // Insert the colour
+  QTableWidgetItem *colourItem = new QTableWidgetItem(tr(""));
+  colourItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+  m_uiForm.twCurrentData->setItem(currentRows, COLOUR, colourItem);
 
   // Insert the spectra offset
   QTableWidgetItem *offsetItem = new QTableWidgetItem(tr("0"));
   offsetItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable);
-  m_uiForm.twCurrentData->setItem(currentRows, 1, offsetItem);
+  m_uiForm.twCurrentData->setItem(currentRows, SPEC_OFFSET, offsetItem);
+
+  // Insert the current displayed spectra
+  QTableWidgetItem *currentSpecItem = new QTableWidgetItem(tr(""));
+  currentSpecItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+  m_uiForm.twCurrentData->setItem(currentRows, CURRENT_SPEC, currentSpecItem);
 
   // Fit columns
   m_uiForm.twCurrentData->resizeColumnsToContents();
@@ -100,12 +114,15 @@ void DataComparison::addData()
  */
 void DataComparison::removeSelectedData()
 {
-  QList<QTableWidgetItem *> items = m_uiForm.twCurrentData->selectedItems();
-  for(auto it = items.begin(); it != items.end(); ++it)
+  QList<QTableWidgetItem *> selectedItems = m_uiForm.twCurrentData->selectedItems();
+
+  while(!selectedItems.isEmpty())
   {
+    // Get the row number of the item
+    int row = selectedItems[0]->row();
+
     // Get workspace name
-    int row = m_uiForm.twCurrentData->row(*it);
-    QString workspaceName = m_uiForm.twCurrentData->item(row, 0)->text();
+    QString workspaceName = m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
 
     // Remove from data tabel
     m_uiForm.twCurrentData->removeRow(row);
@@ -114,9 +131,11 @@ void DataComparison::removeSelectedData()
     if(m_curves.contains(workspaceName))
       m_curves[workspaceName]->attach(NULL);
 
-    // Replot the workspaces
-    plotWorkspaces();
+    selectedItems = m_uiForm.twCurrentData->selectedItems();
   }
+
+  // Replot the workspaces
+  plotWorkspaces();
 }
 
 
@@ -129,7 +148,7 @@ void DataComparison::removeAllData()
   for(int row = 0; row < numRows; row++)
   {
     // Get workspace name
-    QString workspaceName = m_uiForm.twCurrentData->item(0, 0)->text();
+    QString workspaceName = m_uiForm.twCurrentData->item(0, WORKSPACE_NAME)->text();
 
     // Remove from data tabel
     m_uiForm.twCurrentData->removeRow(0);
@@ -155,7 +174,7 @@ void DataComparison::plotWorkspaces()
     int specIndex = 0;  //TODO
 
     // Get workspace
-    QString workspaceName = m_uiForm.twCurrentData->item(row, 0)->text();
+    QString workspaceName = m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
     MatrixWorkspace_const_sptr workspace =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
 
