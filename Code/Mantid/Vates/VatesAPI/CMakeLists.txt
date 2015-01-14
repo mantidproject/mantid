@@ -5,7 +5,6 @@ project( VatesAPI )
 
 set( SRC_FILES 
 src/ADSWorkspaceProvider.cpp
-src/Clipper.cpp
 src/Common.cpp
 src/DimensionPresenter.cpp
 src/EventNexusLoadingPresenter.cpp
@@ -50,7 +49,6 @@ src/SQWLoadingPresenter.cpp
 
 set( INC_FILES 
 inc/MantidVatesAPI/ADSWorkspaceProvider.h
-inc/MantidVatesAPI/Clipper.h
 inc/MantidVatesAPI/Common.h
 inc/MantidVatesAPI/DimensionPresenter.h
 inc/MantidVatesAPI/DimensionView.h

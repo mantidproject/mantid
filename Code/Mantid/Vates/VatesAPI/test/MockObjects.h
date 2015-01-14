@@ -13,7 +13,6 @@
 #include "MantidKernel/UnitLabel.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidVatesAPI/MDLoadingView.h"
-#include "MantidVatesAPI/Clipper.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/MDLoadingView.h"
@@ -142,21 +141,6 @@ public:
   MOCK_CONST_METHOD0(getLoadInMemory, bool());
   MOCK_METHOD2(updateAlgorithmProgress, void(double, const std::string&));
   ~MockMDLoadingView(){}
-};
-
-class MockClipper: public Mantid::VATES::Clipper
-{
-public:
-  MOCK_METHOD1(SetInput, void(vtkDataSet* in_ds));
-  MOCK_METHOD1(SetClipFunction, void(vtkImplicitFunction* func));
-  MOCK_METHOD1(SetInsideOut, void(bool insideout));
-  MOCK_METHOD1(SetRemoveWholeCells, void(bool removeWholeCells));
-  MOCK_METHOD1(SetOutput, void(vtkUnstructuredGrid* out_ds));
-  MOCK_METHOD0(Update, void());
-  MOCK_METHOD0(Delete,void());
-  MOCK_METHOD0(GetOutput, vtkDataSet*());
-  MOCK_METHOD0(die, void());
-  virtual ~MockClipper(){}
 };
 
 class MockWorkspaceProvider : public Mantid::VATES::WorkspaceProvider
