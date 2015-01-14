@@ -57,6 +57,12 @@ void DataComparison::initLayout()
   QStringList headerLabels;
   headerLabels << "Workspace" << "Offset" << "Colour";
   m_uiForm.twCurrentData->setHorizontalHeaderLabels(headerLabels);
+
+  // Select entire rows when a cell is selected
+  m_uiForm.twCurrentData->setSelectionBehavior(QAbstractItemView::SelectRows);
+
+  // Fit columns
+  m_uiForm.twCurrentData->resizeColumnsToContents();
 }
 
 
@@ -78,9 +84,13 @@ void DataComparison::addData()
 
   // Insert the spectra offset
   QTableWidgetItem *offsetItem = new QTableWidgetItem(tr("0"));
-  offsetItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsEditable);
+  offsetItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable);
   m_uiForm.twCurrentData->setItem(currentRows, 1, offsetItem);
 
+  // Fit columns
+  m_uiForm.twCurrentData->resizeColumnsToContents();
+
+  // Replot the workspaces
   plotWorkspaces();
 }
 
@@ -104,6 +114,7 @@ void DataComparison::removeSelectedData()
     if(m_curves.contains(workspaceName))
       m_curves[workspaceName]->attach(NULL);
 
+    // Replot the workspaces
     plotWorkspaces();
   }
 }
@@ -127,11 +138,15 @@ void DataComparison::removeAllData()
     if(m_curves.contains(workspaceName))
       m_curves[workspaceName]->attach(NULL);
 
+    // Replot the workspaces
     plotWorkspaces();
   }
 }
 
 
+/**
+ * Replots the currently loaded workspaces.
+ */
 void DataComparison::plotWorkspaces()
 {
   int numRows = m_uiForm.twCurrentData->rowCount();
@@ -167,6 +182,7 @@ void DataComparison::plotWorkspaces()
     m_curves[workspaceName] = curve;
   }
 
+  // Update the plot
   m_plot->replot();
 }
 
