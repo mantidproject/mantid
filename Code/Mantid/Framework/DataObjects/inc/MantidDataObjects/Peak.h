@@ -39,7 +39,11 @@ public:
   Peak(Geometry::Instrument_const_sptr m_inst, double scattering,
        double m_Wavelength);
 
+  /// Copy constructor
+  Peak(const Peak& other);
+
   // Construct a peak from a reference to the interface
+
   explicit Peak(const API::IPeak &ipeak);
   virtual ~Peak();
 
@@ -116,7 +120,19 @@ public:
 
   double getValueByColName(const std::string &name) const;
 
+  /// Get the peak shape.
+  const PeakShape& getPeakShape();
+
+  /// Set the PeakShape
+  void setPeakShape(PeakShape* shape);
+
+  /// Assignment
+  Peak& operator=(const Peak& other);
+
 private:
+
+
+
   /// Shared pointer to the instrument (for calculating some values )
   Geometry::Instrument_const_sptr m_inst;
 
@@ -188,7 +204,7 @@ private:
   std::set<int> m_detIDs;
 
   /// Peak shape
-  //boost::scoped_ptr<PeakShape> m_peakShape;
+  boost::scoped_ptr<const PeakShape> m_peakShape;
 };
 
 } // namespace Mantid

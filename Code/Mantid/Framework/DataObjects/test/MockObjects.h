@@ -17,6 +17,21 @@ class MockPeakShapeFactory : public PeakShapeFactory {
   virtual ~MockPeakShapeFactory() {}
 };
 
+
+class MockPeakShape : public PeakShape
+{
+public:
+
+    MOCK_CONST_METHOD0(frame, Mantid::API::SpecialCoordinateSystem() );
+    MOCK_CONST_METHOD0(toJSON, std::string() );
+    MOCK_CONST_METHOD0(clone, PeakShape*() );
+    MOCK_CONST_METHOD0(algorithmName, std::string() );
+    MOCK_CONST_METHOD0(algorithmVersion, int() ) ;
+    MOCK_CONST_METHOD0(shapeName, std::string() );
+
+    virtual ~MockPeakShape() {}
+};
+
 }
 }
 
