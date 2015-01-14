@@ -5,6 +5,7 @@
 
 #include <QDesktopServices>
 #include <QMessageBox>
+#include <QPainter>
 #include <QSettings>
 #include <QUrl>
 
@@ -73,7 +74,7 @@ void FirstTimeSetup::initLayout()
   connect(m_uiForm.chkAllowUsageData, SIGNAL(stateChanged (int)), this, SLOT(allowUsageDataStateChanged(int)));
 
   QString stlyeName = QApplication::style()->metaObject()->className();
-  if(stlyeName!="QWindowsVistaStyle")
+  if((stlyeName=="QMotifStyle") || (stlyeName=="QCDEStyle"))
   {
     //add stylesheet formatting for other environemnts
     QString ss =  this->styleSheet();
@@ -90,8 +91,8 @@ void FirstTimeSetup::initLayout()
   }
 }
 
-void FirstTimeSetup::confirm()
-{
+
+void FirstTimeSetup::confirm() {
   Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
   std::string filename = config.getUserFilename();
   config.setString("default.facility", m_uiForm.cbFacility->currentText().toStdString());

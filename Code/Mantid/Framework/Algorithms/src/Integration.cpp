@@ -28,8 +28,7 @@ using namespace DataObjects;
  */
 void Integration::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<HistogramValidator>()),
+      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
       "The input workspace to integrate.");
   declareProperty(
       new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
@@ -254,6 +253,7 @@ void Integration::exec() {
  */
 MatrixWorkspace_const_sptr Integration::getInputWorkspace() {
   MatrixWorkspace_sptr temp = getProperty("InputWorkspace");
+
   if (temp->id() == "RebinnedOutput") {
     // Clean the input workspace in the RebinnedOutput case for nan's and
     // inf's in order to treat the data correctly later.
@@ -268,6 +268,19 @@ MatrixWorkspace_const_sptr Integration::getInputWorkspace() {
     alg->executeAsChildAlg();
     temp = alg->getProperty("OutputWorkspace");
   }
+
+  // To integrate point data it will be converted to histograms
+  if ( !temp->isHistogramData() )
+  {
+    auto alg = this->createChildAlgorithm("ConvertToHistogram");
+    alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", temp);
+    std::string outName = "_" + temp->getName() + "_histogram";
+    alg->setProperty("OutputWorkspace", outName);
+    alg->executeAsChildAlg();
+    temp = alg->getProperty("OutputWorkspace");
+    temp->isDistribution(true);
+  }
+
   return temp;
 }
 

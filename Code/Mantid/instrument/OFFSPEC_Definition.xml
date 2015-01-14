@@ -27,10 +27,10 @@
   </component>
   <type name="source" is="Source"/>
    
-  <component type="sampleholder">
+  <component type="some-surface-holder">
     <location x="0.0" y="0.0" z="0.0" />
   </component>
-  <type name="sampleholder" is="SamplePos"/>
+  <type name="some-surface-holder" is="SamplePos"/>
   
   <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
   
@@ -97,7 +97,7 @@
   </component>
 
   <type name="DetectorBench">
-   <component type="HeDetector">
+   <component type="point-detector">
     <!-- <location z="3.2" />  -->
      <location z="3.19" /> 
    </component>   
@@ -110,7 +110,7 @@
    </component>
   </type>
 
-  <type name="HeDetector" is="detector">
+  <type name="point-detector" is="detector">
     <cylinder id="shape">
       <centre-of-bottom-base x="-0.05" y="0.0" z="0.0" />
       <axis x="1.0" y="0.0" z="0.0" /> 

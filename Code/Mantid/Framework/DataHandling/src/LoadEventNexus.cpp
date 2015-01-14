@@ -2670,16 +2670,16 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
   file.closeData();
 }
 
-/** Load information of the sample. It is valid only for ISIS it get the
-*information from
-*  the group isis_vms_compat.
+/**
+* Load information of the sample. It is valid only for ISIS it get the
+* information from the group isis_vms_compat.
 *
-*   If it does not find this group, it assumes that there is nothing to do.
-*   But, if the information is there, but not in the way it was expected, it
-*will log the occurrence.
+* If it does not find this group, it assumes that there is nothing to do.
+* But, if the information is there, but not in the way it was expected, it
+* will log the occurrence.
 *
-* @note: It does essentially the same thing of the method:
-*LoadISISNexus2::loadSampleData
+* @note: It does essentially the same thing of the
+* method: LoadISISNexus2::loadSampleData
 *
 * @param file : handle to the nexus file
 * @param WS : pointer to the workspace
