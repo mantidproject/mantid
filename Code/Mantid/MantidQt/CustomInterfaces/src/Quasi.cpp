@@ -2,12 +2,15 @@
 #include "MantidQtCustomInterfaces/Quasi.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
+using namespace Mantid::API;
+
 namespace MantidQt
 {
 	namespace CustomInterfaces
 	{
 		Quasi::Quasi(QWidget * parent) :
-			IndirectBayesTab(parent)
+			IndirectBayesTab(parent),
+      m_previewSpec(0)
 		{
 			m_uiForm.setupUi(parent);
 
@@ -54,7 +57,11 @@ namespace MantidQt
 			//Connect the data selector for the sample to the mini plot
 			connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
 
+      // Connect the progrm selector to its handler
 			connect(m_uiForm.cbProgram, SIGNAL(currentIndexChanged(int)), this, SLOT(handleProgramChange(int)));
+
+      // Connect preview spectrum spinner to handler
+      connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this, SLOT(previewSpecChanged(int)));
 		}
 
 		/**
@@ -126,8 +133,6 @@ namespace MantidQt
 		 */
 		void Quasi::run()
 		{
-      using namespace Mantid::API;
-
 			// Using 1/0 instead of True/False for compatibility with underlying Fortran code
 			// in some places
 			QString verbose("False");
@@ -146,9 +151,6 @@ namespace MantidQt
 
 			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
 			QString resName = m_uiForm.dsResolution->getCurrentDataName();
-
-      // Should be either "red", "sqw" or "res"
-      QString resType = resName.right(3);
 
 			QString program = m_uiForm.cbProgram->currentText();
 
@@ -201,6 +203,33 @@ namespace MantidQt
 
 			runPythonScript(pyInput);
 
+      updateMiniPlot();
+		}
+
+    /**
+     * Updates the data and fit curves on the mini plot.
+     */
+    void Quasi::updateMiniPlot()
+    {
+      // Update sample plot
+      if(!m_uiForm.dsSample->isValid())
+        return;
+
+      QString sampleName = m_uiForm.dsSample->getCurrentDataName();
+			plotMiniPlot(sampleName, m_previewSpec, "QuasiPlot", "RawPlotCurve");
+
+      // Update fit plot
+			QString program = m_uiForm.cbProgram->currentText();
+			if(program == "Lorentzians")
+				program = "QL";
+			else
+				program = "QSe";
+
+			QString resName = m_uiForm.dsResolution->getCurrentDataName();
+
+      // Should be either "red", "sqw" or "res"
+      QString resType = resName.right(3);
+
       // Get the correct workspace name based on the type of resolution file
       if(program == "QL")
       {
@@ -210,9 +239,12 @@ namespace MantidQt
           program += "d";
       }
 
-      // Update mini plot
-      QString outWsName = sampleName.left(sampleName.size() - 3) + program + "_Workspace_0";
+      QString outWsName = sampleName.left(sampleName.size() - 3) + program + "_Workspace_" + QString::number(m_previewSpec);
+      if(!AnalysisDataService::Instance().doesExist(outWsName.toStdString()))
+        return;
+
       MatrixWorkspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName.toStdString());
+
       TextAxis* axis = dynamic_cast<TextAxis*>(outputWorkspace->getAxis(1));
 
       for(size_t histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++)
@@ -233,7 +265,7 @@ namespace MantidQt
       }
 
       replot("QuasiPlot");
-		}
+    }
 
 		/**
 		 * Plots the loaded file to the miniplot and sets the guides
@@ -243,7 +275,12 @@ namespace MantidQt
 		 */
 		void Quasi::handleSampleInputReady(const QString& filename)
 		{
-			plotMiniPlot(filename, 0, "QuasiPlot", "RawPlotCurve");
+      MatrixWorkspace_sptr inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(filename.toStdString());
+      int numHist = static_cast<int>(inWs->getNumberHistograms()) - 1;
+      m_uiForm.spPreviewSpectrum->setMaximum(numHist);
+      removeAllCurves();
+      replot("QuasiPlot");
+      updateMiniPlot();
 			std::pair<double,double> range = getCurveRange("RawPlotCurve");
 			setMiniPlotGuides("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
 			setPlotRange("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
@@ -306,5 +343,17 @@ namespace MantidQt
     			break;
     	}
     }
+
+    /**
+     * Handles setting a new preview spectrum on the preview plot.
+     *
+     * @param value Spectrum index
+     */
+    void Quasi::previewSpecChanged(int value)
+    {
+      m_previewSpec = value;
+      updateMiniPlot();
+    }
+
 	} // namespace CustomInterfaces
 } // namespace MantidQt
