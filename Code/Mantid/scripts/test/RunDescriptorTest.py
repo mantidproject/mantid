@@ -17,7 +17,7 @@ from Direct.RunDescriptor   import RunDescriptor
 class RunDescriptorTest(unittest.TestCase):
 
     def __init__(self, methodName):
-        self.prop_man = PropertyManager("MAR");
+        self.prop_man = PropertyManager("MAR")
         return super(RunDescriptorTest, self).__init__(methodName)
 
     def setUp(self):

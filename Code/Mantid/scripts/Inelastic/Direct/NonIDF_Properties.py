@@ -168,7 +168,7 @@ class NonIDF_Properties(object):
         object.__setattr__(self,'_facility',facility_)
         object.__setattr__(self,'_short_instr_name',new_name)
 
-
+ 
 
     def log(self, msg,level="notice"):
         """Send a log message to the location defined
@@ -180,7 +180,6 @@ class NonIDF_Properties(object):
         # TODO: reconcile this with Mantid.
            if lev <= self._current_log_level:
               print msg
-
 
 
 

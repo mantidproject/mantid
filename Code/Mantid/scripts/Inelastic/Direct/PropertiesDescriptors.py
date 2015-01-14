@@ -228,7 +228,9 @@ class DetCalFile(PropDescriptor):
   
 
        if isinstance(val,int):
-          file_name= common.find_file(val)
+          #if val in instance.all_run_numbers: TODO: retrieve workspace from run numbers
+          file_hint = str(val)
+          file_name= FileFinder.findRuns(file_hint)[0]
           self._det_cal_file = file_name
           return
 

@@ -19,6 +19,8 @@ class RunDescriptor(PropDescriptor):
         # Run number 
         self._run_number  = None
         # Extension of the file to load data from
+        # 
+        self._run_file_path = ''
         self._run_ext     = None
         # Workspace name which corresponds to the run 
         self._run_ws_name = None
@@ -53,14 +55,17 @@ class RunDescriptor(PropDescriptor):
               self._run_number = ws.getRunNumber()
               return 
           else:
-              self._run_number = parse_run_number_string(value) # TODO: parser      
+              run_num,file_path,fext = prop_helpers.parse_run_number_string(value) # TODO: parser  
+              self._run_number = run_num
+              if len(fext) > 0:
+                  self._run_ext = fext
        elif isinstance(value,list):
            self._run_number = value
        else:
            self._run_number = int(value)
 
        self._run_ws_name = None
-       self._run_ws_name = self.get_ws_name()
+       self.get_ws_name()
 
 
     def get_file_ext(self):
@@ -92,15 +97,27 @@ class RunDescriptor(PropDescriptor):
         else:
             run_num_str = str(self.__get__(RunDescriptor._holder))
         #
-        file_hint =inst_name + run_num_str + self.get_file_ext()
-        try:
-            return FileFinder.findRuns(file_hint)[0]
-        except RuntimeError:
-            message = 'Cannot find file matching hint {0} on current search paths ' \
-                      'for instrument {1}'.format(file_hint,inst_name)
+        old_ext = self.get_file_ext()
+        file_hint =inst_name + run_num_str + old_ext
+        if len(self._run_file_path)>0:
+            file_hint = self._run_file_path+file_hint
+            if os.path.exists(file_hint):
+                return file_hint
 
-            RunDescriptor._logger(message,'warning')
-            return 'ERROR:find_file '+message
+        try:
+            file = FileFinder.findRuns(file_hint)[0]
+            fname,fex=os.path.splitext(file)
+            self._run_ext = fex
+            if old_ext != fex:
+                message='Cannot find file with extension {0} but find file {1} instead'.format(old_ext,file)
+                RunDescriptor._logger(message,'notice')
+            return file
+        except RuntimeError:
+             message = 'Cannot find file matching hint {0} on current search paths ' \
+                       'for instrument {1}'.format(file_hint,inst_name)
+
+             RunDescriptor._logger(message,'warning')
+             return 'ERROR:find_file: '+message
 
     def get_workspace(self):
         """ Method returns workspace correspondent to current run number(s)
@@ -116,8 +133,14 @@ class RunDescriptor(PropDescriptor):
         else:
            if self._run_number:
                inst_name   = RunDescriptor._holder.short_inst_name
+               changed_prop = RunDescriptor._holder.getChangedProperties()
+               if 'det_cal_file' in changed_prop:
+                   use_workspace_calibration = False
+               else:
+                   use_workspace_calibration = True
+
                calibration = RunDescriptor._holder.det_cal_file
-               return self.load_run(inst_name, calibration,False, RunDescriptor._holder.load_monitors_with_workspace)
+               return self.load_run(inst_name, calibration,False, RunDescriptor._holder.load_monitors_with_workspace,use_workspace_calibration)
            else:
               return None
 
@@ -171,7 +194,7 @@ class RunDescriptor(PropDescriptor):
         return ws_name
 
 
-    def load_run(self,inst_name, calibration=None, force=False, load_with_workspace=False):
+    def load_run(self,inst_name, calibration=None, force=False, load_mon_with_workspace=False,use_ws_calibration=True):
         """Loads run into the given workspace.
 
            If force is true then the file is loaded regardless of whether  its workspace exists already
@@ -180,7 +203,7 @@ class RunDescriptor(PropDescriptor):
         ws_name = self.get_ws_name()
 
         if ws_name in mtd and not(force):
-            RunDescriptor._logger("{0} already loaded as workspace.".format(self._run_ws_name),'notice')
+            RunDescriptor._logger("{0} already loaded as workspace.".format(self._run_ws_name),'information')
             loaded_ws = mtd[ws_name]
         else:
             # If it doesn't exists as a workspace assume we have to try and load a file
@@ -189,39 +212,70 @@ class RunDescriptor(PropDescriptor):
                 raise IOError(data_file)
                        
             format = self.get_file_ext()
-            if format =='.raw' and load_with_workspace:
-               mon_load_option = 'Include'
+            if load_mon_with_workspace:
+                   mon_load_option = 'Include'
             else:
-               mon_load_option =str(int(load_with_workspace))
+                   mon_load_option = 'Separate'
+            #
+            try: # Hack LoadEventNexus does not understand Separate at the moment and throws
+                Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = mon_load_option)
+            except ValueError:
+                #mon_load_option =str(int(load_mon_with_workspace))
+                Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = '1')
 
-            Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = mon_load_option)
-            RunDescriptor._logger("Loaded {0}".format(data_file),'notice')
+
+            RunDescriptor._logger("Loaded {0}".format(data_file),'information')
             loaded_ws = mtd[ws_name]
 
         ######## Now we have the workspace
-        self.apply_calibration(loaded_ws,calibration)
+        self.apply_calibration(loaded_ws,calibration,use_ws_calibration)
+        loaded_ws = mtd[ws_name]
         return loaded_ws
 
-    def apply_calibration(self,loaded_ws,calibration=None):
-        """  If calibration is present, apply it to the workspace """
+    def apply_calibration(self,loaded_ws,calibration=None,use_ws_calibration=True):
+        """  If calibration is present, apply it to the workspace 
+        
+             use_ws_calibration -- if true, retrieve workspace calibration option, stored with workspace and try to use it
+        """
 
-        if not calibration:
-            return
+        if not (calibration or use_ws_calibration):
+            return 
         if not isinstance(loaded_ws, api.Workspace):
            raise RuntimeError(' Calibration can be applied to a workspace only and got object of type {0}'.format(type(loaded_ws)))
         
         if loaded_ws.run().hasProperty("calibrated"):
             return # already calibrated
 
-        if type(calibration) == str : # It can be only a file (got it from calibration property)
-            RunDescriptor._logger('load_data: Moving detectors to positions specified in cal file {0}'.format(calibration),'debug')
+        ws_calibration = calibration
+        if use_ws_calibration:
+            try:
+                ws_calibration = prop_helpers.get_default_parameter(loaded_ws.getInstrument(),'det_cal_file')
+                if ws_calibration is None:
+                    ws_calibration = calibration
+                if isinstance(ws_calibration,str) and ws_calibration.lower() == 'none':
+                    ws_calibration = calibration
+                if ws_calibration :
+                    test_name = ws_calibration
+                    ws_calibration = FileFinder.getFullPath(ws_calibration)
+                    if len(ws_calibration) == 0:
+                       raise RuntimeError('Can not find defined in run {0} calibration file {1}\n'\
+                                          'Define det_cal_file reduction parameter properly'.format(loaded_ws.name(),test_name))
+                    RunDescriptor._logger('*** load_data: Calibrating data using workspace defined calibration file: {0}'.format(ws_calibration),'notice')
+            except KeyError: # no det_cal_file defined in workspace
+                if calibration:
+                    ws_calibration = calibration
+                else:
+                    return
+
+        if type(ws_calibration) == str : # It can be only a file (got it from calibration property)
+            RunDescriptor._logger('load_data: Moving detectors to positions specified in cal file {0}'.format(ws_calibration),'debug')
             # Pull in pressures, thicknesses & update from cal file
-            LoadDetectorInfo(Workspace=loaded_ws, DataFilename=calibration, RelocateDets=True)
-            AddSampleLog(Workspace=loaded_ws,LogName="calibrated",LogText=str(calibration))
-        elif isinstance(calibration, api.Workspace):
-            RunDescriptor._logger('load_data: Copying detectors positions from workspace {0}: '.format(calibration.name()),'debug')
-            CopyInstrumentParameters(InputWorkspace=calibration,OutputWorkspace=loaded_ws)
-            AddSampleLog(Workspace=loaded_ws,LogName="calibrated",LogText=str(calibration))
+            LoadDetectorInfo(Workspace=loaded_ws, DataFilename=ws_calibration, RelocateDets=True)
+            AddSampleLog(Workspace=loaded_ws,LogName="calibrated",LogText=str(ws_calibration))
+        elif isinstance(ws_calibration, api.Workspace):
+            RunDescriptor._logger('load_data: Copying detectors positions from workspace {0}: '.format(ws_calibration.name()),'debug')
+            CopyInstrumentParameters(InputWorkspace=ws_calibration,OutputWorkspace=loaded_ws)
+            AddSampleLog(Workspace=loaded_ws,LogName="calibrated",LogText=str(ws_calibration))
 
     @staticmethod
     def copy_spectrum2monitors(data_ws,mon_ws,spectraID):

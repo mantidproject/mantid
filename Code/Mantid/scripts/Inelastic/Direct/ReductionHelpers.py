@@ -301,3 +301,7 @@ def check_instrument_name(old_name,new_name):
     config['default.instrument'] = full_name
     return (new_name,full_name,facility)
 
+
+def parse_run_file_name(filename):
+    """ Parses run file name to obtain run number, path if possible, """
+    raise NotImplementedError("not yet implemented") 
