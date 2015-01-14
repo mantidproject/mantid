@@ -4,7 +4,7 @@
 
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
-#include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
+#include "MantidVatesAPI/VatesKnowledgeSerializer.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
@@ -142,7 +142,7 @@ namespace Mantid
       vtkFieldData* outputFD = vtkFieldData::New();
       
       //Serialize metadata
-      RebinningKnowledgeSerializer serializer(LocationNotRequired);
+      VatesKnowledgeSerializer serializer(LocationNotRequired);
       serializer.setWorkspaceName(wsName);
       serializer.setGeometryXML(xmlBuilder.create());
       serializer.setImplicitFunction( Mantid::Geometry::MDImplicitFunction_sptr(new Mantid::Geometry::NullImplicitFunction()));

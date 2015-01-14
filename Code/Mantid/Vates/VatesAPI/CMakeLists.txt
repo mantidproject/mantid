@@ -22,12 +22,12 @@ src/MedianAndBelowThresholdRange.cpp
 src/MetadataToFieldData.cpp
 src/NoThresholdRange.cpp
 src/ProgressAction.cpp
-src/RebinningKnowledgeSerializer.cpp
 src/SynchronisingGeometryPresenter.cpp
 src/TimeStepToTimeStep.cpp
 src/TimeToTimeStep.cpp
 src/UserDefinedThresholdRange.cpp
 src/VatesXMLDefinitions.cpp
+src/VatesKnowledgeSerializer.cpp
 src/vtkDataSetFactory.cpp
 src/vtkDataSetToGeometry.cpp
 src/vtkDataSetToImplicitFunction.cpp
@@ -74,14 +74,14 @@ inc/MantidVatesAPI/IMDDimensionComparitor.h
 inc/MantidVatesAPI/MetadataToFieldData.h
 inc/MantidVatesAPI/NoThresholdRange.h
 inc/MantidVatesAPI/ProgressAction.h
-inc/MantidVatesAPI/RebinningKnowledgeSerializer.h
 inc/MantidVatesAPI/SQWLoadingPresenter.h
 inc/MantidVatesAPI/SynchronisingGeometryPresenter.h
 inc/MantidVatesAPI/ThresholdRange.h
 inc/MantidVatesAPI/TimeStepToTimeStep.h
 inc/MantidVatesAPI/TimeToTimeStep.h
 inc/MantidVatesAPI/UserDefinedThresholdRange.h
-inc/MantidVatesAPI/VatesXMLDefinitions.h 
+inc/MantidVatesAPI/VatesXMLDefinitions.h
+inc/MantidVatesAPI/VatesKnowledgeSerializer.h
 inc/MantidVatesAPI/vtkDataSetFactory.h
 inc/MantidVatesAPI/vtkDataSetToGeometry.h
 inc/MantidVatesAPI/vtkDataSetToImplicitFunction.h
@@ -130,7 +130,6 @@ test/MDHWInMemoryLoadingPresenterTest.h
 test/MDHWLoadingPresenterTest.h
 test/MDHWNexusLoadingPresenterTest.h
 test/MetadataToFieldDataTest.h
-test/RebinningKnowledgeSerializerTest.h
 test/SQWLoadingPresenterTest.h
 test/SynchronisingGeometryPresenterTest.h
 test/TimeStepToTimeStepTest.h
@@ -139,6 +138,7 @@ test/UserDefinedThresholdRangeTest.h
 test/MedianAndBelowThresholdRangeTest.h
 test/NoThresholdRangeTest.h
 test/IgnoreZerosThresholdRangeTest.h
+test/VatesKnowledgeSerializerTest.h
 test/vtkDataSetToScaledDataSetTest.h
 test/vtkDataSetToNonOrthogonalDataSetTest.h
 )

@@ -5,7 +5,7 @@
 #include "MantidGeometry/MDGeometry/MDPlaneImplicitFunction.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidQtFactory/WidgetFactory.h"
-#include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
+#include "MantidVatesAPI/VatesKnowledgeSerializer.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
@@ -223,7 +223,7 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
   origin[2] = sliceOffsetOnAxis * orient[2];
 
   // Create the XML holder
-  VATES::RebinningKnowledgeSerializer rks(VATES::LocationNotRequired);
+  VATES::VatesKnowledgeSerializer rks(VATES::LocationNotRequired);
   rks.setWorkspaceName(wsName.toStdString());
   rks.setGeometryXML(geomXML);
 
