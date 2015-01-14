@@ -86,15 +86,19 @@ void DataComparison::addData()
   int currentRows = m_uiForm.twCurrentData->rowCount();
   m_uiForm.twCurrentData->insertRow(currentRows);
 
+  // Insert the colour selector
+  QComboBox *colourCombo = new QComboBox();
+  colourCombo->addItem("Black", QVariant(Qt::black));
+  colourCombo->addItem("Red", QVariant(Qt::red));
+  colourCombo->addItem("Green", QVariant(Qt::green));
+  colourCombo->addItem("Blue", QVariant(Qt::blue));
+  connect(colourCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(plotWorkspaces()));
+  m_uiForm.twCurrentData->setCellWidget(currentRows, COLOUR, colourCombo);
+
   // Insert the workspace name
   QTableWidgetItem *wsNameItem = new QTableWidgetItem(tr(dataName));
   wsNameItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
   m_uiForm.twCurrentData->setItem(currentRows, WORKSPACE_NAME, wsNameItem);
-
-  // Insert the colour
-  QTableWidgetItem *colourItem = new QTableWidgetItem(tr(""));
-  colourItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-  m_uiForm.twCurrentData->setItem(currentRows, COLOUR, colourItem);
 
   // Insert the spectra offset
   QTableWidgetItem *offsetItem = new QTableWidgetItem(tr("0"));
@@ -225,9 +229,13 @@ void DataComparison::plotWorkspaces()
     if(m_curves.contains(workspaceName))
       m_curves[workspaceName]->attach(NULL);
 
+    QComboBox *colourSelector = dynamic_cast<QComboBox *>(m_uiForm.twCurrentData->cellWidget(row, COLOUR));
+    QColor curveColour = colourSelector->itemData(colourSelector->currentIndex()).value<QColor>();
+
     // Create a new curve and attach it to the plot
     boost::shared_ptr<QwtPlotCurve> curve(new QwtPlotCurve);
     curve->setData(wsData);
+    curve->setPen(curveColour);
     curve->attach(m_plot);
     m_curves[workspaceName] = curve;
   }
