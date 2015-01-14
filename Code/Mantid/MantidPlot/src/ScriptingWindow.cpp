@@ -126,7 +126,8 @@ void ScriptingWindow::readSettings()
   m_manager->m_globalZoomLevel = settings.value("ZoomLevel",0).toInt();
   m_toggleFolding->setChecked(settings.value("CodeFolding", false).toBool());
   m_toggleWhitespace->setChecked(settings.value("ShowWhitespace", false).toBool());
-  
+
+  m_manager->m_showWhitespace = m_toggleWhitespace->isChecked();
   m_manager->m_replaceTabs = settings.value("ReplaceTabs", true ).toBool();
   m_manager->m_tabWhitespaceCount = settings.value("TabWhitespaceCount", 4).toInt();
   m_manager->m_fontFamily = settings.value("ScriptFontFamily","").toString();
