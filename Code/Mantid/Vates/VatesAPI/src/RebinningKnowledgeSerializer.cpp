@@ -5,7 +5,7 @@
 #include <boost/format.hpp>
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
-#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/VatesXMLDefinitions.h"
 
 using Mantid::Geometry::MDGeometryXMLDefinitions;
 namespace Mantid
