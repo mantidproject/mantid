@@ -12,6 +12,8 @@
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
+#include <qwt_plot_panner.h>
+#include <qwt_plot_zoomer.h>
 
 
 namespace MantidQt
@@ -49,6 +51,10 @@ namespace CustomInterfaces
     void updatePlot();
     /// Handles creating and plotting a diff worksapce
     void plotDiffWorkspace();
+    /// Toggle the pan plot tool
+    void togglePan(bool enabled);
+    /// Toggle the zoom plot tool
+    void toggleZoom(bool enabled);
 
   private:
     /// Enumeration for column index
@@ -73,6 +79,10 @@ namespace CustomInterfaces
 
     // The plot object
     QwtPlot *m_plot;
+    // Plot zoom tool
+    QwtPlotZoomer *m_zoomTool;
+    // Plot pan tool
+    QwtPlotPanner *m_panTool;
     // Curves shown on plot, indexed by workspace name
     QMap<QString, boost::shared_ptr<QwtPlotCurve>> m_curves;
 

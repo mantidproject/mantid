@@ -43,6 +43,13 @@ void DataComparison::initLayout()
 {
   m_uiForm.setupUi(this);
 
+  m_zoomTool = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft,
+      QwtPicker::DragSelection | QwtPicker::CornerToCorner, QwtPicker::AlwaysOff, m_plot->canvas());
+  m_zoomTool->setEnabled(false);
+
+  m_panTool = new QwtPlotPanner(m_plot->canvas());
+  m_panTool->setEnabled(false);
+
   // Add the plot to the UI
   m_plot->setCanvasBackground(Qt::white);
   m_uiForm.loPlot->addWidget(m_plot);
@@ -55,6 +62,9 @@ void DataComparison::initLayout()
 
   connect(m_uiForm.pbDiffSelected, SIGNAL(clicked()), this, SLOT(diffSelected()));
   connect(m_uiForm.pbClearDiff, SIGNAL(clicked()), this, SLOT(clearDiff()));
+
+  connect(m_uiForm.pbPan, SIGNAL(toggled(bool)), this, SLOT(togglePan(bool)));
+  connect(m_uiForm.pbZoom, SIGNAL(toggled(bool)), this, SLOT(toggleZoom(bool)));
 
   // Replot spectra when the spectrum index is changed
   connect(m_uiForm.sbSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotWorkspaces()));
@@ -468,7 +478,7 @@ void DataComparison::diffSelected()
   // Check there is the correct number of selected items
   if(selectedRows.size() != 2)
   {
-    g_log.error() << "Need to have only two workspaces selected for diff (have "
+    g_log.error() << "Need to have exactly 2 workspaces selected for diff (have "
                   << selectedRows.size() << ")" << std::endl;
     return;
   }
@@ -495,4 +505,38 @@ void DataComparison::clearDiff()
 
   // Update the plot
   plotWorkspaces();
+}
+
+
+/**
+ * Toggles the pan plot tool.
+ *
+ * @param enabled If the tool should be enabled
+ */
+void DataComparison::togglePan(bool enabled)
+{
+  // First disbale the zoom tool
+  if(enabled && m_uiForm.pbZoom->isChecked())
+  {
+    m_uiForm.pbZoom->setChecked(false);
+  }
+
+  m_panTool->setEnabled(enabled);
+}
+
+
+/**
+ * Toggles the zoom plot tool.
+ *
+ * @param enabled If the tool should be enabled
+ */
+void DataComparison::toggleZoom(bool enabled)
+{
+  // First disbale the pan tool
+  if(enabled && m_uiForm.pbPan->isChecked())
+  {
+    m_uiForm.pbPan->setChecked(false);
+  }
+
+  m_zoomTool->setEnabled(enabled);
 }
