@@ -28,23 +28,22 @@ Usage
 
    import math
    # Create an input workspace with two spectra
-   datax = [(i-50)/100. for i in range(1,100)]
-   datay1 = [ math.cos(2*3.14159*3*(50-i)/100.) for i in range(1,99) ]
-   datay2 = [ math.sin(2*3.14159*3*(50-i)/100.) for i in range(1,99) ]
+   datax = [i/100. for i in range(1,300)]
+   datay1 = [ math.cos(2*3.14159*i/100.) for i in range(1,299) ]
+   datay2 = [ math.sin(2*3.14159*i/100.) for i in range(1,299) ]
    datay = datay1 + datay2
    input = CreateWorkspace(dataX=datax, dataY=datay,Nspec=2)
    # Compute polarization in RRF
-   output = RRFMuon(input,196,0)
-   # Print some values
-   print output.readY(0)[49]
-   print output.readY(1)[49]
+   output = RRFMuon(input,1.0,0)
+   print("%.1f" % output.readY(0)[0])
+   print("%.1f" % output.readY(1)[0])
 
 Output:
 
 .. testoutput:: ExRRF
 
    1.0
-   0.0
+   -0.0
 
 
 .. categories::

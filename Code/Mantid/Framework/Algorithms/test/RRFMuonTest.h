@@ -72,7 +72,7 @@ public:
     // Set Values
     TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("InputWorkspace", ws) );
     TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("OutputWorkspace", "outputWs") );
-    TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("Frequency", "197") );
+    TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("Frequency", "1") );
     TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("Phase", "0") );
     // Execute
     TS_ASSERT_THROWS_NOTHING(rrfMuon.execute());
@@ -90,12 +90,12 @@ public:
     // The input frequency is close to the precession frequency, so:
     // The real part of the RRF polarization should be close to 1 for all X values
     // The imaginary part should be close to 0 for all X values
-    TS_ASSERT_DELTA( ows->readY(0)[ 0], 1, 0.001 );
-    TS_ASSERT_DELTA( ows->readY(0)[49], 1, 0.001 );
-    TS_ASSERT_DELTA( ows->readY(0)[99], 1, 0.001 );
-    TS_ASSERT_DELTA( ows->readY(1)[ 0], 0, 0.001 );
-    TS_ASSERT_DELTA( ows->readY(1)[49], 0, 0.001 );
-    TS_ASSERT_DELTA( ows->readY(1)[99], 0, 0.001 );
+    TS_ASSERT_DELTA( ows->readY(0)[  0], 1, 0.001 );
+    TS_ASSERT_DELTA( ows->readY(0)[100], 1, 0.001 );
+    TS_ASSERT_DELTA( ows->readY(0)[200], 1, 0.001 );
+    TS_ASSERT_DELTA( ows->readY(1)[  0], 0, 0.001 );
+    TS_ASSERT_DELTA( ows->readY(1)[100], 0, 0.001 );
+    TS_ASSERT_DELTA( ows->readY(1)[200], 0, 0.001 );
   }
 
 private:
@@ -103,17 +103,17 @@ private:
 
   MatrixWorkspace_sptr createDummyWorkspace()
   {
-    int nBins = 100;
+    int nBins = 300;
     double pi = 3.14159;
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 2, nBins+1, nBins);
 
     for (int i=0; i<nBins; i++)
     {
-      double x = (i-50.)/nBins;
+      double x = i/static_cast<int>(nBins);
       ws->dataX(0)[i] = x;
-      ws->dataY(0)[i] = cos(-2*pi*3*x);
+      ws->dataY(0)[i] = cos(2*pi*x);
       ws->dataX(1)[i] = x;
-      ws->dataY(1)[i] = sin(-2*pi*3*x);
+      ws->dataY(1)[i] = sin(2*pi*x);
     }
 
     ws->dataX(0)[nBins] = nBins;
