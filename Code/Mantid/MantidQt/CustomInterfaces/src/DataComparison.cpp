@@ -189,6 +189,12 @@ void DataComparison::removeSelectedData()
     // Get workspace name
     QString workspaceName = m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
 
+    if(m_diffWorkspaceNames.first == workspaceName ||
+       m_diffWorkspaceNames.second == workspaceName)
+    {
+      clearDiff();
+    }
+
     // Remove from data tabel
     m_uiForm.twCurrentData->removeRow(row);
 
@@ -209,6 +215,8 @@ void DataComparison::removeSelectedData()
  */
 void DataComparison::removeAllData()
 {
+  clearDiff();
+
   int numRows = m_uiForm.twCurrentData->rowCount();
   for(int row = 0; row < numRows; row++)
   {
@@ -356,10 +364,7 @@ void DataComparison::plotDiffWorkspace()
 {
   // Detach old curve
   if(m_diffCurve != NULL)
-  {
-    g_log.notice("removed curve");
     m_diffCurve->attach(NULL);
-  }
 
   // Do nothing if there are not two workspaces
   if(m_diffWorkspaceNames.first.isEmpty() || m_diffWorkspaceNames.second.isEmpty())
@@ -422,6 +427,11 @@ void DataComparison::plotDiffWorkspace()
   curve->setPen(QColor(Qt::green));
   curve->attach(m_plot);
   m_diffCurve = curve;
+
+  // Set info message
+  QString infoMessage = m_diffWorkspaceNames.first + "(" + QString::number(ws1Spec) + ") - "
+                      + m_diffWorkspaceNames.second + "(" + QString::number(ws2Spec) + ")";
+  m_uiForm.lbDiffInfo->setText(infoMessage);
 }
 
 
@@ -466,6 +476,9 @@ void DataComparison::diffSelected()
  */
 void DataComparison::clearDiff()
 {
+  // Clear the info message
+  m_uiForm.lbDiffInfo->setText("No current diff.");
+
   // Remove the recorded diff workspace names
   m_diffWorkspaceNames = qMakePair(QString(), QString());
 
