@@ -3,6 +3,7 @@
 //----------------------
 #include "MantidQtCustomInterfaces/DataComparison.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 
 
@@ -30,7 +31,9 @@ using namespace Mantid::API;
 ///Constructor
 DataComparison::DataComparison(QWidget *parent) :
   UserSubWindow(parent),
-  m_plot(new QwtPlot(parent))
+  m_plot(new QwtPlot(parent)),
+  m_diffCurve(NULL),
+  m_diffWorkspaceNames(qMakePair(QString(), QString()))
 {
 }
 
@@ -292,6 +295,9 @@ void DataComparison::plotWorkspaces()
     m_curves[workspaceName] = curve;
   }
 
+  // Plot the diff
+  plotDiffWorkspace();
+
   // Update the plot
   m_plot->replot();
 
@@ -344,23 +350,125 @@ void DataComparison::updatePlot()
 
 
 /**
- * Creates a diff workspace of the two currently selected workspaces in the table
- * and plots it on the plot.
+ * Handles creating a diff of two workspaces and plotting it.
+ */
+void DataComparison::plotDiffWorkspace()
+{
+  // Detach old curve
+  if(m_diffCurve != NULL)
+  {
+    g_log.notice("removed curve");
+    m_diffCurve->attach(NULL);
+  }
+
+  // Do nothing if there are not two workspaces
+  if(m_diffWorkspaceNames.first.isEmpty() || m_diffWorkspaceNames.second.isEmpty())
+    return;
+
+  // Get pointers to the workspaces to be diffed
+  MatrixWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      m_diffWorkspaceNames.first.toStdString());
+  MatrixWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      m_diffWorkspaceNames.second.toStdString());
+
+  int ws1Spec = 0;
+  int ws2Spec = 0;
+
+  // Get the current spectrum for each workspace
+  int numRows = m_uiForm.twCurrentData->rowCount();
+  for(int row = 0; row < numRows; row++)
+  {
+    QString workspaceName = m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
+
+    if(workspaceName == m_diffWorkspaceNames.first)
+      ws1Spec = m_uiForm.twCurrentData->item(row, CURRENT_SPEC)->text().toInt();
+    if(workspaceName == m_diffWorkspaceNames.second)
+      ws2Spec = m_uiForm.twCurrentData->item(row, CURRENT_SPEC)->text().toInt();
+  }
+
+  // Extract the current spectrum for both workspaces
+  IAlgorithm_sptr extractWs1Alg = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+  extractWs1Alg->setChild(true);
+  extractWs1Alg->initialize();
+  extractWs1Alg->setProperty("InputWorkspace", ws1);
+  extractWs1Alg->setProperty("OutputWorkspace", "__ws1_spec");
+  extractWs1Alg->setProperty("WorkspaceIndex", ws1Spec);
+  extractWs1Alg->execute();
+  MatrixWorkspace_sptr ws1SpecWs = extractWs1Alg->getProperty("OutputWorkspace");
+
+  IAlgorithm_sptr extractWs2Alg = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+  extractWs2Alg->setChild(true);
+  extractWs2Alg->initialize();
+  extractWs2Alg->setProperty("InputWorkspace", ws2);
+  extractWs2Alg->setProperty("OutputWorkspace", "__ws2_spec");
+  extractWs2Alg->setProperty("WorkspaceIndex", ws2Spec);
+  extractWs2Alg->execute();
+  MatrixWorkspace_sptr ws2SpecWs = extractWs2Alg->getProperty("OutputWorkspace");
+
+  // Subtract the two extracted spectra
+  IAlgorithm_sptr minusAlg = AlgorithmManager::Instance().create("Minus");
+  minusAlg->setChild(true);
+  minusAlg->initialize();
+  minusAlg->setProperty("LHSWorkspace", ws1SpecWs);
+  minusAlg->setProperty("RHSWorkspace", ws2SpecWs);
+  minusAlg->setProperty("OutputWorkspace", "__diff");
+  minusAlg->execute();
+  MatrixWorkspace_sptr diffWorkspace = minusAlg->getProperty("OutputWorkspace");
+
+  // Create curve and add to plot
+  QwtWorkspaceSpectrumData wsData(*diffWorkspace, 0, false, false);
+  boost::shared_ptr<QwtPlotCurve> curve(new QwtPlotCurve);
+  curve->setData(wsData);
+  curve->setPen(QColor(Qt::green));
+  curve->attach(m_plot);
+  m_diffCurve = curve;
+}
+
+
+/**
+ * Configures a diff of the two currently selected workspaces in the table to be plotted
+ * when plotWorkspaces is called.
  *
  * Does nothing if there are not 2 workspaces selected.
  */
 void DataComparison::diffSelected()
 {
-  //TODO
+  QList<QTableWidgetItem *> selectedItems = m_uiForm.twCurrentData->selectedItems();
+  QList<int> selectedRows;
+
+  // Generate a list of selected row numbers
+  for(auto it = selectedItems.begin(); it != selectedItems.end(); ++it)
+  {
+    int row = (*it)->row();
+    if(!selectedRows.contains(row))
+      selectedRows << (*it)->row();
+  }
+
+  // Check there is the correct number of selected items
+  if(selectedRows.size() != 2)
+  {
+    g_log.error() << "Need to have only two workspaces selected for diff (have "
+                  << selectedRows.size() << ")" << std::endl;
+    return;
+  }
+
+  // Record the workspace names
+  m_diffWorkspaceNames = qMakePair(m_uiForm.twCurrentData->item(selectedRows[0], WORKSPACE_NAME)->text(),
+                                   m_uiForm.twCurrentData->item(selectedRows[1], WORKSPACE_NAME)->text());
+
+  // Update the plot
+  plotWorkspaces();
 }
 
 
 /**
- * Removes the diff workspace form the plot.
- *
- * Does not remove it from ADS.
+ * Removes the configured diff.
  */
 void DataComparison::clearDiff()
 {
-  //TODO
+  // Remove the recorded diff workspace names
+  m_diffWorkspaceNames = qMakePair(QString(), QString());
+
+  // Update the plot
+  plotWorkspaces();
 }
