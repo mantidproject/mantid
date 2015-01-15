@@ -4,7 +4,7 @@ New Python command line interface for plotting in Mantid (a la matplotlib)
 
 The idea behind this new module is to provide a simpler, more
 homogeneous command line interface (CLI) to the Mantid plotting
-functionality. This new interface is meant to resemble MatPlotLib as
+functionality. This new interface is meant to resemble matplotlib as
 far as possible, and to provide a more manageable, limited number of
 plot options.
 
@@ -140,7 +140,7 @@ or, alternatively, you can use the plot_bin command:
     plot_bin(ws, [1, 5, 7, 100], linewidth=4, linestyle=':')
 
 Plotting MD workspaces
----------------------
+----------------------
 
 Similarly, to plot MD workspaces you can use the keyword 'tool' with
 the value 'plot_md', like this:
@@ -1338,37 +1338,38 @@ def plot_spectrum(workspaces, indices, *args, **kwargs):
 
 
 def plot(*args, **kwargs):
-    """Plot the data in various forms depending on what arguments are passed.  Currently supported
-       inputs: arrays (as Python lists or numpy arrays) and workspaces (by name or workspace objects).
+    """
+    Plot the data in various forms depending on what arguments are passed.  Currently supported
+    inputs: arrays (as Python lists or numpy arrays) and workspaces (by name or workspace objects).
 
-        @param args :: curve data and options
-        @param kwargs :: plot line options
+    @param args :: curve data and options
+    @param kwargs :: plot line options
 
-        Returns :: the list of curves included in the plot
+    Returns :: the list of curves included in the plot
 
-        args can take different forms depending on what you plot. You can plot:
-        - a python list or array (x) for example like this:
-            plot(x)
-        - a workspace (ws) for example like this:
-            plot(ws, [100,101])  # this will plot spectra 100 and 101
-        - a list of workspaces (ws, ws2, ws3, etc.) for example like this:
-            plot([ws, ws2, ws3], [100,101])
-        - workspaces identified by their names:
-            plot(['HRP39182', 'MAR11060.nxs'], [100,101])
+    args can take different forms depending on what you plot. You can plot:
 
-        You can also pass matplotlib/pyplot style strings as arguments, for example:
-        - plot(x, '-.')
+    * a python list or array (x) for example like this: plot(x)
 
-        As keyword arguments (kwargs) you can specify multiple
-        parameters, for example: linewidth, linestyle, marker, color.
+    * a workspace (ws) for example like this: plot(ws, [100,101])  # this will plot spectra 100 and 101
 
-        An important keyword argument is tool. At the moment the
-        following values are supported:
-        - plot_spectrum  (default for workspaces)
-        - plot_bin
-        - plot_md
+    * a list of workspaces (ws, ws2, ws3, etc.) for example like this: plot([ws, ws2, ws3], [100,101])
 
-        Please see the documentation of this module (use help()) for more details.
+    * workspaces identified by their names: plot(['HRP39182', 'MAR11060.nxs'], [100,101])
+
+    You can also pass matplotlib/pyplot style strings as arguments, for example: plot(x, '-.')
+
+    As keyword arguments (kwargs) you can specify multiple
+    parameters, for example: linewidth, linestyle, marker, color.
+
+    An important keyword argument is tool. At the moment the
+    following values are supported:
+
+    * plot_spectrum  (default for workspaces)
+    * plot_bin
+    * plot_md
+
+    Please see the documentation of this module (use help()) for more details.
 
     """
     nargs = len(args)

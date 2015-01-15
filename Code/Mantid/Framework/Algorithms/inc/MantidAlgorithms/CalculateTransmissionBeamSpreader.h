@@ -7,39 +7,51 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
-/** Calculates the transmission correction, as a function of wavelength, for a SANS
+namespace Mantid {
+namespace Algorithms {
+/** Calculates the transmission correction, as a function of wavelength, for a
+   SANS
     instrument. The beam-spreader method is used.
-   
+
     Required Properties:
     <UL>
-    <LI> SampleSpreaderRunWorkspace  - The workspace containing the sample beam-spreader run. </LI>
-    <LI> DirectSpreaderRunWorkspace  - The workspace containing the direct beam-spreader run. </LI>
-    <LI> SampleScatterRunWorkspace   - The workspace containing the sample scattering run. </LI>
-    <LI> DirectScatterRunWorkspace   - The workspace containing the direct beam scattering run. </LI>
-    <LI> SpreaderTransmissionValue   - Transmission coefficient of the beam spreader. </LI>
-    <LI> SpreaderTransmissionError   - Uncertainty on the transmission coefficient of the beam spreader. </LI>
-    <LI> IncidentBeamMonitor         - The UDET of the incident beam monitor. </LI>
+    <LI> SampleSpreaderRunWorkspace  - The workspace containing the sample
+   beam-spreader run. </LI>
+    <LI> DirectSpreaderRunWorkspace  - The workspace containing the direct
+   beam-spreader run. </LI>
+    <LI> SampleScatterRunWorkspace   - The workspace containing the sample
+   scattering run. </LI>
+    <LI> DirectScatterRunWorkspace   - The workspace containing the direct beam
+   scattering run. </LI>
+    <LI> SpreaderTransmissionValue   - Transmission coefficient of the beam
+   spreader. </LI>
+    <LI> SpreaderTransmissionError   - Uncertainty on the transmission
+   coefficient of the beam spreader. </LI>
+    <LI> IncidentBeamMonitor         - The UDET of the incident beam monitor.
+   </LI>
     <LI> OutputWorkspace             - The fitted transmission correction. </LI>
     </UL>
 
     Optional Properties:
     <UL>
-    <LI> MinWavelength       - The minimum wavelength for the fit (Default: 2.2 Angstroms). </LI>
-    <LI> MaxWavelength       - The maximum wavelength for the fit (Default: 10 Angstroms). </LI>
-    <LI> FitMethod           - Whether to fit to the log of the transmission curve (the default) or directly (i.e. linearly). </LI>
-    <LI> OutputUnfittedData  - If true (false is the default), will output an additional workspace
-                               called [OutputWorkspace]_unfitted containing the unfitted transmission
+    <LI> MinWavelength       - The minimum wavelength for the fit (Default: 2.2
+   Angstroms). </LI>
+    <LI> MaxWavelength       - The maximum wavelength for the fit (Default: 10
+   Angstroms). </LI>
+    <LI> FitMethod           - Whether to fit to the log of the transmission
+   curve (the default) or directly (i.e. linearly). </LI>
+    <LI> OutputUnfittedData  - If true (false is the default), will output an
+   additional workspace
+                               called [OutputWorkspace]_unfitted containing the
+   unfitted transmission
                                correction. </LI>
     </UL>
 
     @author Mathieu Doucet, ORNL
     @date 28/07/2010
 
-    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
+   Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -59,39 +71,44 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CalculateTransmissionBeamSpreader : public API::Algorithm
-{
+class DLLExport CalculateTransmissionBeamSpreader : public API::Algorithm {
 public:
   /// Constructor
   CalculateTransmissionBeamSpreader();
   /// Virtual destructor
   virtual ~CalculateTransmissionBeamSpreader();
   /// Algorithm's name
-  virtual const std::string name() const { return "CalculateTransmissionBeamSpreader"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Calculates the sample transmission using the beam spreader (aka glass carbon) method.";}
+  virtual const std::string name() const {
+    return "CalculateTransmissionBeamSpreader";
+  }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Calculates the sample transmission using the beam spreader (aka "
+           "glass carbon) method.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "SANS;CorrectionFunctions\\TransmissionCorrections"; }
+  virtual const std::string category() const {
+    return "SANS;CorrectionFunctions\\TransmissionCorrections";
+  }
 
 private:
-  
   /// Initialisation code
   void init();
   /// Execution code
   void exec();
 
   /// Pull out a single spectrum from a 2D workspace
-  API::MatrixWorkspace_sptr extractSpectrum(API::MatrixWorkspace_sptr WS, const size_t index);
+  API::MatrixWorkspace_sptr extractSpectrum(API::MatrixWorkspace_sptr WS,
+                                            const size_t index);
   /// Call the Linear fitting algorithm as a child algorithm
   API::MatrixWorkspace_sptr fitToData(API::MatrixWorkspace_sptr WS);
   /// Sum the total detector, excluding masked pixels and monitors
   API::MatrixWorkspace_sptr sumSpectra(API::MatrixWorkspace_sptr WS);
 
-
-  bool logFit; ///< If true, will take log of transmission curve before fitting 
+  bool logFit; ///< If true, will take log of transmission curve before fitting
 };
 
 } // namespace Algorithm

@@ -7,17 +7,16 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace.h"
 
-namespace Mantid
-{
-namespace CurveFitting
-{
+namespace Mantid {
+namespace CurveFitting {
 
 /** SplineBackground
 
     @author Roman Tolchenov
     @date 09/10/2009
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -37,22 +36,25 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport SplineBackground : public API::Algorithm
-{
+class DLLExport SplineBackground : public API::Algorithm {
 public:
   /// Default constructor
-  SplineBackground() : API::Algorithm() {};
+  SplineBackground() : API::Algorithm(){};
   /// Destructor
-  virtual ~SplineBackground() {};
+  virtual ~SplineBackground(){};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SplineBackground";}
+  virtual const std::string name() const { return "SplineBackground"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1;}
+  virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Optimization;CorrectionFunctions\\BackgroundCorrections";}
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Fit spectra background using b-splines.";}
-  
+  virtual const std::string category() const {
+    return "Optimization;CorrectionFunctions\\BackgroundCorrections";
+  }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Fit spectra background using b-splines.";
+  }
+
 private:
   // Overridden Algorithm methods
   void init();

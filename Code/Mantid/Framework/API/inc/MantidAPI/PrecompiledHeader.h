@@ -30,8 +30,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
 
-//Poco
+// Poco
 #include <Poco/XML/XML.h>
 #include <Poco/DOM/DOMParser.h>
 
-#endif //MANTID_API_PRECOMPILED_HEADER_H_
+#endif // MANTID_API_PRECOMPILED_HEADER_H_

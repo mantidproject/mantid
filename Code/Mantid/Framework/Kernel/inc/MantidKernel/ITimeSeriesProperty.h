@@ -3,20 +3,19 @@
 
 #include <vector>
 
-namespace Mantid
-{
-namespace Kernel
-{
-  //---------------------------------------------------------------------------
-  // Forward Declarations
-  //---------------------------------------------------------------------------
-  class DateAndTime;
-  class SplittingInterval;
-  class TimeInterval;
+namespace Mantid {
+namespace Kernel {
+//---------------------------------------------------------------------------
+// Forward Declarations
+//---------------------------------------------------------------------------
+class DateAndTime;
+class SplittingInterval;
+class TimeInterval;
 
 /** A non-templated interface to a TimeSeriesProperty.
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -33,15 +32,19 @@ namespace Kernel
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-class ITimeSeriesProperty
-{
+class ITimeSeriesProperty {
 public:
   /// Fill a TimeSplitterType that will filter the events by matching
-  virtual void makeFilterByValue(std::vector<SplittingInterval>& split, double min, double max, double TimeTolerance, bool centre=true) const = 0;
+  virtual void makeFilterByValue(std::vector<SplittingInterval> &split,
+                                 double min, double max, double TimeTolerance,
+                                 bool centre = true) const = 0;
   /// Make sure an existing filter covers the full time range given
-  virtual void expandFilterToRange(std::vector<SplittingInterval>& split, double min, double max, const TimeInterval & range) const = 0;
+  virtual void expandFilterToRange(std::vector<SplittingInterval> &split,
+                                   double min, double max,
+                                   const TimeInterval &range) const = 0;
   /// Calculate the time-weighted average of a property in a filtered range
-  virtual double averageValueInFilter(const std::vector<SplittingInterval>& filter) const = 0;
+  virtual double
+  averageValueInFilter(const std::vector<SplittingInterval> &filter) const = 0;
   /// Return the time series's times as a vector<DateAndTime>
   virtual std::vector<DateAndTime> timesAsVector() const = 0;
   /// Returns the real size of the time series property map:

@@ -4,7 +4,8 @@
 /*  A system-wide file to contain, e.g., useful system-dependent macros
     for suppressing compiler warnings.
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -20,45 +21,45 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 /**
  * This is a collection of macros for turning compiler warnings off
- * in a controlled manner. The work is based on 
+ * in a controlled manner. The work is based on
  * http://dbp-consulting.com/tutorials/SuppressingGCCWarnings.html
  */
 // Currently this is only defined for gcc
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
-  // how to use a pragma in a macro
-  #define PRAGMA(x) _Pragma(#x)
+// how to use a pragma in a macro
+#define PRAGMA(x) _Pragma(#x)
 
-  // convenience for getting gcc version
-  #define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 \
-                       + __GNUC_PATCHLEVEL__)
+// convenience for getting gcc version
+#define GCC_VERSION                                                            \
+  (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 
-  // things to make the macros clearer
-  #define GCC_DIAG_STR(s) #s
-  #define GCC_DIAG_JOINSTR(x,y) GCC_DIAG_STR(x ## y)
-  #define GCC_DIAG_DO_PRAGMA(x) _Pragma (#x)
-  #define GCC_DIAG_PRAGMA(x) GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
+// things to make the macros clearer
+#define GCC_DIAG_STR(s) #s
+#define GCC_DIAG_JOINSTR(x, y) GCC_DIAG_STR(x##y)
+#define GCC_DIAG_DO_PRAGMA(x) _Pragma(#x)
+#define GCC_DIAG_PRAGMA(x) GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
 
-
-  // define macros for turning the warning suppression on/off
-  #if GCC_VERSION >= 40600 // 4.6.0
-    #define GCC_DIAG_OFF(x) GCC_DIAG_PRAGMA(push) \
-                         GCC_DIAG_PRAGMA(ignored GCC_DIAG_JOINSTR(-W,x))
-    #define GCC_DIAG_ON(x) GCC_DIAG_PRAGMA(pop)
-  #else
-    #define GCC_DIAG_OFF(x) GCC_DIAG_PRAGMA(ignored GCC_DIAG_JOINSTR(-W,x))
-    #define GCC_DIAG_ON(x)  GCC_DIAG_PRAGMA(warning GCC_DIAG_JOINSTR(-W,x))
-  #endif
+// define macros for turning the warning suppression on/off
+#if GCC_VERSION >= 40600 // 4.6.0
+#define GCC_DIAG_OFF(x)                                                        \
+  GCC_DIAG_PRAGMA(push)                                                        \
+  GCC_DIAG_PRAGMA(ignored GCC_DIAG_JOINSTR(-W, x))
+#define GCC_DIAG_ON(x) GCC_DIAG_PRAGMA(pop)
+#else
+#define GCC_DIAG_OFF(x) GCC_DIAG_PRAGMA(ignored GCC_DIAG_JOINSTR(-W, x))
+#define GCC_DIAG_ON(x) GCC_DIAG_PRAGMA(warning GCC_DIAG_JOINSTR(-W, x))
+#endif
 
 #else // anything else - does nothing
-  #define GCC_DIAG_OFF(x)
-  #define GCC_DIAG_ON(x)
+#define GCC_DIAG_OFF(x)
+#define GCC_DIAG_ON(x)
 #endif
 
 #endif /*MANTID_KERNEL_WARNINGSUPPRESSIONS_H_*/

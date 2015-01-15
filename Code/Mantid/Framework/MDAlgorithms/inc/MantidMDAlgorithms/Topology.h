@@ -8,56 +8,52 @@
 #include <vector>
 #include "MantidKernel/System.h"
 
-namespace Mantid
-{
-    
-    namespace API
-    {
-        class Point3D;
-    }
+namespace Mantid {
 
-    namespace API
-    {
-        /**
+namespace API {
+class Point3D;
+}
 
-        Abstract type represents topology for visualisation.
+namespace API {
+/**
 
-        @author Owen Arnold, Tessella plc
-        @date 27/10/2010
+Abstract type represents topology for visualisation.
 
-        Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+@author Owen Arnold, Tessella plc
+@date 27/10/2010
 
-        This file is part of Mantid.
+Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
-        Mantid is free software; you can redistribute it and/or modify
-        it under the terms of the GNU General Public License as published by
-        the Free Software Foundation; either version 3 of the License, or
-        (at your option) any later version.
+This file is part of Mantid.
 
-        Mantid is distributed in the hope that it will be useful,
-        but WITHOUT ANY WARRANTY; without even the implied warranty of
-        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-        GNU General Public License for more details.
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
 
-        You should have received a copy of the GNU General Public License
-        along with this program.  If not, see <http://www.gnu.org/licenses/>.
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-        File change history is stored at: <https://github.com/mantidproject/mantid>
-        Code Documentation is available at: <http://doxygen.mantidproject.org>
-        */
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-        class DLLExport Topology
-        {
+File change history is stored at: <https://github.com/mantidproject/mantid>
+Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 
-        public:
+class DLLExport Topology {
 
-            virtual void applyOrdering(Mantid::API::Point3D** unOrderedPoints) const = 0;
+public:
+  virtual void applyOrdering(Mantid::API::Point3D **unOrderedPoints) const = 0;
 
-            virtual std::string getName() const = 0;
+  virtual std::string getName() const = 0;
 
-            virtual std::string toXMLString() const = 0;
-        };
-    }
+  virtual std::string toXMLString() const = 0;
+};
+}
 }
 
 #endif

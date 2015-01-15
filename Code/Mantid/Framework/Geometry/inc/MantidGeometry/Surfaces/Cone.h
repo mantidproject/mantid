@@ -4,11 +4,9 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
 
-namespace Mantid
-{
+namespace Mantid {
 
-namespace Geometry 
-{
+namespace Geometry {
 /**
   \class Cone
   \brief Holds a cone in vector form
@@ -20,87 +18,86 @@ namespace Geometry
   a vector from that point (unit) and a radius.
   and an angle.
 
-  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
-        
+
   Mantid is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
   (at your option) any later version.
-  
+
   Mantid is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  
+
   File change history is stored at: <https://github.com/mantidproject/mantid>
 
 */
 
+class MANTID_GEOMETRY_DLL Cone : public Quadratic {
+private:
+  Kernel::V3D Centre; ///< Kernel::V3D for centre
+  Kernel::V3D Normal; ///< Normal
+  double alpha;       ///< Angle (degrees)
+  double cangle;      ///< Cos(angle)
 
-class MANTID_GEOMETRY_DLL Cone : public Quadratic
-{
- private:
+  void rotate(const Kernel::Matrix<double> &);
+  void displace(const Kernel::V3D &);
 
-  Kernel::V3D Centre;        ///< Kernel::V3D for centre
-  Kernel::V3D Normal;        ///< Normal
-  double alpha;                  ///< Angle (degrees)
-  double cangle;                 ///< Cos(angle)
-  
-  void rotate(const Kernel::Matrix<double>&);
-  void displace(const Kernel::V3D&);
-
- public:
-
+public:
   /// Public identifer
-  virtual std::string className() const { return "Cone"; }  
+  virtual std::string className() const { return "Cone"; }
 
   Cone();
-  Cone(const Cone&);
-  Cone* clone() const;
-  Cone& operator=(const Cone&);
-  int operator==(const Cone&) const;
+  Cone(const Cone &);
+  Cone *clone() const;
+  Cone &operator=(const Cone &);
+  int operator==(const Cone &) const;
   ~Cone();
-  
-        ///Calculate if the point R is within the cone (return -1) or outside (return 1)
-  int side(const Kernel::V3D& R) const;
-        /// Calculate if the point R is on the cone(1=on the surface, 0=not)
-  int onSurface(const Kernel::V3D& R) const;
 
-   /// Accept visitor for line calculation
-  virtual void acceptVisitor(BaseVisit& A) const
-  {  A.Accept(*this); }
+  /// Calculate if the point R is within the cone (return -1) or outside (return
+  /// 1)
+  int side(const Kernel::V3D &R) const;
+  /// Calculate if the point R is on the cone(1=on the surface, 0=not)
+  int onSurface(const Kernel::V3D &R) const;
+
+  /// Accept visitor for line calculation
+  virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }
 
   /// Return centre point
-  Kernel::V3D getCentre() const { return Centre; }              
+  Kernel::V3D getCentre() const { return Centre; }
   /// Central normal
-  Kernel::V3D getNormal() const { return Normal; }       
+  Kernel::V3D getNormal() const { return Normal; }
   /// Edge Angle
-  double getCosAngle() const { return cangle; } 
-  ///This method returns the distance of the point from the cone
-  double distance(const Kernel::V3D&) const;   
+  double getCosAngle() const { return cangle; }
+  /// This method returns the distance of the point from the cone
+  double distance(const Kernel::V3D &) const;
 
-  ///This method sets the cone surface using the input string in MCNPx format
-  int setSurface(const std::string&);
-  ///This method sets the centre of the cone
-  void setCentre(const Kernel::V3D&);              
-  ///This method sets the cone normal
-  void setNorm(const Kernel::V3D&);
-  ///This method sets the angle of the cone
-  void setAngle(double const);  
-  ///This method sets the tan angle which will be converted to cos used for MCNPX format
+  /// This method sets the cone surface using the input string in MCNPx format
+  int setSurface(const std::string &);
+  /// This method sets the centre of the cone
+  void setCentre(const Kernel::V3D &);
+  /// This method sets the cone normal
+  void setNorm(const Kernel::V3D &);
+  /// This method sets the angle of the cone
+  void setAngle(double const);
+  /// This method sets the tan angle which will be converted to cos used for
+  /// MCNPX format
   void setTanAngle(double const);
-  ///This method generates the quadratic equation for cone
+  /// This method generates the quadratic equation for cone
   void setBaseEqn();
-  ///This method will write the cone equation in MCNP geometry format
-  void write(std::ostream&) const;
+  /// This method will write the cone equation in MCNP geometry format
+  void write(std::ostream &) const;
 
-  ///This will get the bounding box for the cone
-  void getBoundingBox(double& xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);   
+  /// This will get the bounding box for the cone
+  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
+                      double &ymin, double &zmin);
 
   /// The number of slices to approximate a cone
   static int g_nslices;
@@ -108,8 +105,8 @@ class MANTID_GEOMETRY_DLL Cone : public Quadratic
   static int g_nstacks;
 };
 
-}  // NAMESPACE MonteCarlo
+} // NAMESPACE MonteCarlo
 
-}  // NAMESPACE Mantid
+} // NAMESPACE Mantid
 
 #endif

@@ -23,62 +23,59 @@
 #include <boost/lexical_cast.hpp>
 
 #include <sstream>
-#include <iostream> 
+#include <iostream>
 
-namespace Mantid
-{
-namespace API
-{
-    using namespace Geometry;
+namespace Mantid {
+namespace API {
+using namespace Geometry;
 
-    /// init logger
-    Kernel::Logger IFunction1D::g_log("IFunction1D");
+/// init logger
+Kernel::Logger IFunction1D::g_log("IFunction1D");
 
-    void IFunction1D::function(const FunctionDomain& domain, FunctionValues& values) const
-    {
-      const FunctionDomain1D* d1d = dynamic_cast<const FunctionDomain1D*>(&domain);
-      if (!d1d)
-      {
-        throw std::invalid_argument("Unexpected domain in IFunction1D");
-      }
-      function1D(values.getPointerToCalculated(0), d1d->getPointerAt(0), d1d->size());
-    }
+void IFunction1D::function(const FunctionDomain &domain,
+                           FunctionValues &values) const {
+  const FunctionDomain1D *d1d = dynamic_cast<const FunctionDomain1D *>(&domain);
+  if (!d1d) {
+    throw std::invalid_argument("Unexpected domain in IFunction1D");
+  }
+  function1D(values.getPointerToCalculated(0), d1d->getPointerAt(0),
+             d1d->size());
+}
 
-    void IFunction1D::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian)
-    {
-      const FunctionDomain1D* d1d = dynamic_cast<const FunctionDomain1D*>(&domain);
-      if (!d1d)
-      {
-        throw std::invalid_argument("Unexpected domain in IFunction1D");
-      }
-      functionDeriv1D(&jacobian, d1d->getPointerAt(0), d1d->size());
-    }
+void IFunction1D::functionDeriv(const FunctionDomain &domain,
+                                Jacobian &jacobian) {
+  const FunctionDomain1D *d1d = dynamic_cast<const FunctionDomain1D *>(&domain);
+  if (!d1d) {
+    throw std::invalid_argument("Unexpected domain in IFunction1D");
+  }
+  functionDeriv1D(&jacobian, d1d->getPointerAt(0), d1d->size());
+}
 
-    void IFunction1D::derivative(const FunctionDomain& domain, FunctionValues& values,
-        const size_t order) const
-    {
-      const FunctionDomain1D* d1d = dynamic_cast<const FunctionDomain1D*>(&domain);
-      if (!d1d)
-      {
-        throw std::invalid_argument("Unexpected domain in IFunction1D");
-      }
+void IFunction1D::derivative(const FunctionDomain &domain,
+                             FunctionValues &values, const size_t order) const {
+  const FunctionDomain1D *d1d = dynamic_cast<const FunctionDomain1D *>(&domain);
+  if (!d1d) {
+    throw std::invalid_argument("Unexpected domain in IFunction1D");
+  }
 
-      derivative1D(values.getPointerToCalculated(0), d1d->getPointerAt(0), d1d->size(), order);
-    }
+  derivative1D(values.getPointerToCalculated(0), d1d->getPointerAt(0),
+               d1d->size(), order);
+}
 
-    void IFunction1D::derivative1D(double* out, const double* xValues, size_t nData, const size_t order) const
-    {
-        UNUSED_ARG(out);
-        UNUSED_ARG(xValues);
-        UNUSED_ARG(nData);
-        UNUSED_ARG(order);
-        throw Kernel::Exception::NotImplementedError("Derivative is not implemented for this function.");
-    }
+void IFunction1D::derivative1D(double *out, const double *xValues, size_t nData,
+                               const size_t order) const {
+  UNUSED_ARG(out);
+  UNUSED_ARG(xValues);
+  UNUSED_ARG(nData);
+  UNUSED_ARG(order);
+  throw Kernel::Exception::NotImplementedError(
+      "Derivative is not implemented for this function.");
+}
 
-    void IFunction1D::functionDeriv1D(Jacobian* jacobian, const double* xValues, const size_t nData)
-    {
-  FunctionDomain1DView domain(xValues,nData);
-  this->calNumericalDeriv(domain,*jacobian);
+void IFunction1D::functionDeriv1D(Jacobian *jacobian, const double *xValues,
+                                  const size_t nData) {
+  FunctionDomain1DView domain(xValues, nData);
+  this->calNumericalDeriv(domain, *jacobian);
 }
 
 } // namespace API
