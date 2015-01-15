@@ -45,8 +45,8 @@ namespace CustomInterfaces
     void clearDiff();
     /// Handles replotting workspace spectra
     void plotWorkspaces();
-    /// Handle data in the table being changed
-    void handleCellChanged(int row, int column);
+    /// Handles updating the plot
+    void updatePlot();
 
   private:
     /// Enumeration for column index

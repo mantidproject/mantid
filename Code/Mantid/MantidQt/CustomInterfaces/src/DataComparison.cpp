@@ -56,9 +56,6 @@ void DataComparison::initLayout()
   // Replot spectra when the spectrum index is changed
   connect(m_uiForm.sbSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotWorkspaces()));
 
-  // Handle data in the table being changed
-  connect(m_uiForm.twCurrentData, SIGNAL(cellChanged(int, int)), this, SLOT(handleCellChanged(int, int)));
-
   // Add headers to data table
   QStringList headerLabels;
   headerLabels << "Colour" << "Workspace" << "Offset" << "Spec.";
@@ -113,9 +110,10 @@ void DataComparison::addData()
   m_uiForm.twCurrentData->setItem(currentRows, WORKSPACE_NAME, wsNameItem);
 
   // Insert the spectra offset
-  QTableWidgetItem *offsetItem = new QTableWidgetItem(tr("0"));
-  offsetItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable);
-  m_uiForm.twCurrentData->setItem(currentRows, SPEC_OFFSET, offsetItem);
+  QSpinBox *offsetSpin = new QSpinBox();
+  offsetSpin->setMinimum(0);
+  connect(offsetSpin, SIGNAL(valueChanged(int)), this, SLOT(updatePlot()));
+  m_uiForm.twCurrentData->setCellWidget(currentRows, SPEC_OFFSET, offsetSpin);
 
   // Insert the current displayed spectra
   QTableWidgetItem *currentSpecItem = new QTableWidgetItem(tr("n/a"));
@@ -158,8 +156,7 @@ void DataComparison::removeSelectedData()
   }
 
   // Replot the workspaces
-  normaliseSpectraOffsets();
-  plotWorkspaces();
+  updatePlot();
 }
 
 
@@ -205,7 +202,8 @@ void DataComparison::plotWorkspaces()
     int numSpec = static_cast<int>(workspace->getNumberHistograms());
 
     // Calculate spectrum number
-    int specOffset = m_uiForm.twCurrentData->item(row, SPEC_OFFSET)->text().toInt();
+    QSpinBox *specOffsetSpin = dynamic_cast<QSpinBox *>(m_uiForm.twCurrentData->cellWidget(row, SPEC_OFFSET));
+    int specOffset = specOffsetSpin->value();
     int specIndex = globalSpecIndex - specOffset;
     g_log.debug() << "Spectrum index for workspace " << workspaceName.toStdString()
                   << " is " << specIndex << ", with offset " << specOffset << std::endl;
@@ -275,7 +273,8 @@ void DataComparison::normaliseSpectraOffsets()
   // Find the lowest offset in the data table
   for(int row = 0; row < numRows; row++)
   {
-    int specOffset = m_uiForm.twCurrentData->item(row, SPEC_OFFSET)->text().toInt();
+    QSpinBox *specOffsetSpin = dynamic_cast<QSpinBox *>(m_uiForm.twCurrentData->cellWidget(row, SPEC_OFFSET));
+    int specOffset = specOffsetSpin->value();
     if(specOffset < lowestOffset)
       lowestOffset = specOffset;
   }
@@ -283,9 +282,10 @@ void DataComparison::normaliseSpectraOffsets()
   // Subtract the loest offset from all offsets to ensure at least one offset is zero
   for(int row = 0; row < numRows; row++)
   {
-    int specOffset = m_uiForm.twCurrentData->item(row, SPEC_OFFSET)->text().toInt();
+    QSpinBox *specOffsetSpin = dynamic_cast<QSpinBox *>(m_uiForm.twCurrentData->cellWidget(row, SPEC_OFFSET));
+    int specOffset = specOffsetSpin->value();
     specOffset -= lowestOffset;
-    m_uiForm.twCurrentData->item(row, SPEC_OFFSET)->setText(tr(QString::number(specOffset)));
+    specOffsetSpin->setValue(specOffset);
   }
 
   m_uiForm.twCurrentData->blockSignals(false);
@@ -293,21 +293,12 @@ void DataComparison::normaliseSpectraOffsets()
 
 
 /**
- * Handles data being changed in the current data table.
- *
- * @param row Row that was changed
- * @param column Column that was changed
+ * Handles updating the plot, i.e. normalising offsets and replotting spectra.
  */
-void DataComparison::handleCellChanged(int row, int column)
+void DataComparison::updatePlot()
 {
-  UNUSED_ARG(row);
-
-  // Update the spectra plots if the offsets change
-  if(column == SPEC_OFFSET)
-  {
-    normaliseSpectraOffsets();
-    plotWorkspaces();
-  }
+  normaliseSpectraOffsets();
+  plotWorkspaces();
 }
 
 
