@@ -11,7 +11,8 @@
 namespace Mantid {
 namespace Geometry {
 
-/** SpaceGroup :
+/**
+    @class SpaceGroup
 
     A class for representing space groups, inheriting from Group.
 
@@ -24,14 +25,13 @@ namespace Geometry {
     SpaceGroup may for example be used to generate all equivalent positions
     within the unit cell:
 
-      SpaceGroup_const_sptr someGroup;
+        SpaceGroup_const_sptr group;
 
-      V3D position(0.13, 0.54, 0.38);
-      std::vector<V3D> equivalents =
-   someGroup->getEquivalentPositions(position);
+        V3D position(0.13, 0.54, 0.38);
+        std::vector<V3D> equivalents = group->getEquivalentPositions(position);
 
-    The class should not be instantiated directly, see SpaceGroupFactory
-   instead.
+    The class should not be instantiated directly, see SpaceGroupFactoryImpl
+    instead.
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 03/10/2014

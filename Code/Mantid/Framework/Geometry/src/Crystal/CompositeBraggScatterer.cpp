@@ -143,11 +143,9 @@ void CompositeBraggScatterer::propagatePropertyToScatterer(
  * Synchronize properties with scatterer members
  *
  * This method synchronizes the properties of CompositeBraggScatterer with the
- *properties
- * of the contained BraggScatterer instances. It adds new properties if required
- * and removed properties that are no longer used (for example because the
- *member that
- * introduced the property has been removed).
+ * properties of the contained BraggScatterer instances. It adds new properties
+ * if required and removed properties that are no longer used (for example
+ * because the member that introduced the property has been removed).
  */
 void CompositeBraggScatterer::redeclareProperties() {
   std::map<std::string, size_t> propertyUseCount = getPropertyCountMap();
