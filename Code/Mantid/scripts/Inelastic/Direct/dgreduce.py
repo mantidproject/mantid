@@ -129,13 +129,13 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 
     """
     global Reducer
-    if Reducer is None or Reducer.prop_man.instrument is None:
+    if Reducer is None or Reducer.instrument is None:
         raise ValueError("instrument has not been defined, call setup(instrument_name) first.")
 # --------------------------------------------------------------------------------------------------------
 #    Deal with mandatory parameters for this and may be some top level procedures
 # --------------------------------------------------------------------------------------------------------
     if sample_run:
-        Reducer.prop_man.sample_run = sample_run
+        Reducer.sample_run = sample_run
     try:
          n,r=funcreturns.lhs_info('both')
          wksp_out=r[0]
@@ -241,13 +241,15 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
     kwargs['sample_rmm']         = samp_rmm
 
     if sample_run:
-        Reducer.prop_man.sample_run = sample_run
+        Reducer.sample_run = sample_run
     try:
         n,r=funcreturns.lhs_info('both')
         results_name=r[0]
 
     except:
-        results_name = Reducer.prop_man.get_sample_ws_name();
+        results_name = Reducer.prop_man.get_sample_ws_name()
+    if wb_for_run == wb_for_monovanadium: # wb_for_monovanadium property does not accept duplicated workspace
+        wb_for_monovanadium = None        # if this value is none, it is constructed to be equal to wb_for_run
 
     wksp_out = arb_units(wb_for_run,sample_run,ei_guess,rebin,map_file,monovan_run,wb_for_monovanadium,**kwargs)
 

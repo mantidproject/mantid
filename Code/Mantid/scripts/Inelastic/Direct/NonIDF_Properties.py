@@ -65,13 +65,17 @@ class NonIDF_Properties(object):
     #
     van_rmm = VanadiumRMM()
     # Run descriptors
-    sample_run = RunDescriptor("_RUN","Run ID (number) to convert to energy or list of the such run numbers")
-    wb_run     = RunDescriptor("_WB","Run ID (number) for vanadium run used in detectors calibration")
-    monovan_run = RunDescriptor("_MONO","Run ID (number) for monochromatic vanadium used in absolute units normalization ")
-    wb_for_monovan_run = RunDescriptorDependent(wb_run,"_MONOWB",""" white beam run used to calculate monovanadium integrals.\n If not explicitly set, white beam for processing run is used instead """)
+    sample_run  = RunDescriptor("SR_","Run ID (number) to convert to energy or list of the such run numbers")
+    wb_run      = RunDescriptor("WB_","Run ID (number) for vanadium run used in detectors calibration")
+    monovan_run = RunDescriptor("MV_","Run ID (number) for monochromatic vanadium used in absolute units normalization ")
+
+    mask_run    = RunDescriptorDependent(sample_run,"MSK_"," Run used to find masks.\n If not explicitly set, sample_run is used""")
+    wb_for_monovan_run = RunDescriptorDependent(wb_run,"MV_WB_"," white beam run used to calculate monovanadium integrals.\n If not explicitly set, white beam for processing run is used")
     # TODO: do something about it.  Second white is explicitly used in
     # diagnostics but not accessed at all
-    seclond_white  = RunDescriptor("Second white beam currently unused in the  workflow. Should it be used for Monovan Diagnostics?") 
+    second_white  = RunDescriptor("Second white beam currently unused in the  workflow despite being referred to in Diagnostics. Should it be used for Monovan Diagnostics?") 
+    # 
+    _tmp_run     = RunDescriptor("_TMP","Property used for storing intermediate run data during reduction")
     #-----------------------------------------------------------------------------------
     def getDefaultParameterValue(self,par_name):
         """ method to get default parameter value, specified in IDF """

@@ -13,61 +13,132 @@ class RunDescriptor(PropDescriptor):
     # so it has to be set up manually by PropertyManager __init__ method
     _holder=None
     _logger = None
-
-    def __init__(self,ws_preffix,DocString=None): 
+#--------------------------------------------------------------------------------------------------------------------
+    def __init__(self,prop_name,DocString=None): 
         """ """
         # Run number 
         self._run_number  = None
         # Extension of the file to load data from
         # 
+        self._prop_name = prop_name
         self._run_file_path = ''
         self._run_ext     = None
         # Workspace name which corresponds to the run 
-        self._run_ws_name = None
+        self._ws_name = None
         # String used to identify the workspace related to this property w.r.t. other workspaces
-        self._ws_preffix  = ws_preffix
+        self._ws_cname  = ''
+        self._ws_suffix   = ''
         #
         if not DocString is None:
             self.__doc__ = DocString
-
-    def __get__(self,instance,owner=None):
-        """ return current run number""" 
-        if instance is None:
+#--------------------------------------------------------------------------------------------------------------------
+    def __get__(self,instance=None,owner=None):
+       """ return current run number or workspace if it is loaded""" 
+       if instance is None:
            return self
-        return self._run_number 
-
+       if self._ws_name and self._ws_name in mtd:
+           return mtd[self._ws_name]
+       else:
+           return self._run_number 
+#--------------------------------------------------------------------------------------------------------------------
     def __set__(self,instance,value):
        """ Set up Run number from any source """
+       # 
+       old_ws_name = self._ws_name
+       def clear_old_ws(new_name):
+           if old_ws_name:
+             if new_name != old_ws_name:
+                if old_ws_name in mtd:
+                   DeleteWorkspace(old_ws_name)
+                old_mon_ws = old_ws_name+'_monitors'
+                if old_mon_ws  in mtd:
+                    DeleteWorkspace(old_mon_ws)
+
+                self._run_ext     = None
+                self._run_file_path = ''
+       #end
        if value == None: # clear current run number
-           self._run_number = None
-           self._run_ws_name = None
-           self._run_ext     = None
+           self._run_number  = None
+           self._ws_name     = None
+           self._ws_cname    = ''
+           self._ws_suffix   = ''   
+           clear_old_ws(self._ws_name)
            return
        if isinstance(value, api.Workspace):
            self._run_number = value.getRunNumber()
-           self._run_ws_name= value.name()
+           ws_name = value.name()
+           self._split_ws_name(ws_name)
+           self.synchronize_ws(value)
+           clear_old_ws(self._ws_name)
            return
 
        if isinstance(value,str): # it may be run number as string or it may be a workspace name
-          if value in mtd: # workspace
-              self._run_ws_name = value
+          if value in mtd: # workspace name
               ws = mtd[value]
-              self._run_number = ws.getRunNumber()
-              return 
+              self.__set__(instance,ws)
+              return
           else:
-              run_num,file_path,fext = prop_helpers.parse_run_number_string(value) # TODO: parser  
-              self._run_number = run_num
+              run_num,file_path,fext = prop_helpers.parse_run_number_string(value,self._instr_name()) # TODO: parser  
+              self._run_number    = run_num
+              self._run_file_path = file_path
+
               if len(fext) > 0:
                   self._run_ext = fext
+
        elif isinstance(value,list):
            self._run_number = value
        else:
            self._run_number = int(value)
+           self._ws_cname  = ''
 
-       self._run_ws_name = None
-       self.get_ws_name()
+       self._ws_name = None
+       new_name = self.get_ws_name()
+       clear_old_ws(new_name )
+#--------------------------------------------------------------------------------------------------------------------    
+    def run_number(self):
+        """ Return run number regardless of workspace is loaded or not"""
+        if self._ws_name and self._ws_name in mtd:
+            ws = mtd[self._ws_name]
+            return ws.getRunNumber()
+        else:
+            return self._run_number 
 
+#--------------------------------------------------------------------------------------------------------------------    
+    def set_action_suffix(self,suffix=None):
+        """ method to set part of the workspace name, which indicate some action performed over this workspace
+            
+            e.g.: default suffix of a loaded workspace is 'RAW' but we can set it to SPE to show that conversion to 
+            energy will be performed for this workspace.
 
+            method returns the name of the workspace is will have with this suffix
+        """
+        if suffix:
+            self._ws_suffix = suffix
+        else: # return to default
+            self._ws_suffix=''
+        return self._build_ws_name()
+#--------------------------------------------------------------------------------------------------------------------
+    def synchronize_ws(self,workspace):
+        """ Synchronize workspace name (after workspace may have changed due to algorithm) 
+            with internal run holder name
+
+            TODO: This method should be automatically invoked by an algorithm decorator
+        """ 
+        new_name = self._build_ws_name()
+        old_name = workspace.name()
+        if new_name != old_name:
+            if new_name in mtd:
+               DeleteWorkspace(new_name)
+            RenameWorkspace(InputWorkspace=old_name,OutputWorkspace=new_name)
+
+            old_mon_name = old_name+'_monitors'
+            new_mon_name = new_name+'_monitors'
+            if new_mon_name in mtd:
+               DeleteWorkspace(new_mon_name)
+            if old_mon_name in mtd:
+               RenameWorkspace(InputWorkspace=old_mon_name,OutputWorkspace=new_mon_name)
+        self._ws_name = new_name
+#--------------------------------------------------------------------------------------------------------------------    
     def get_file_ext(self):
         """ Method returns current file extension for file to load workspace from 
             e.g. .raw or .nxs extension
@@ -76,7 +147,7 @@ class RunDescriptor(PropDescriptor):
             return self._run_ext
         else: # return IDF default
             return RunDescriptor._holder.data_file_ext
-
+#--------------------------------------------------------------------------------------------------------------------
     def set_file_ext(self,val):
         """ set non-default file extension """
         if isinstance(val,str):
@@ -87,7 +158,7 @@ class RunDescriptor(PropDescriptor):
             self._run_ext = value
         else:
             raise AttributeError('Source file extension can be only a string')
-
+#--------------------------------------------------------------------------------------------------------------------
     def find_file(self,run_num = None):
         """Use Mantid to search for the given run. """
 
@@ -111,6 +182,7 @@ class RunDescriptor(PropDescriptor):
             if old_ext != fex:
                 message='Cannot find file with extension {0} but find file {1} instead'.format(old_ext,file)
                 RunDescriptor._logger(message,'notice')
+            self.__run_file_path = os.path.dirname(fname)
             return file
         except RuntimeError:
              message = 'Cannot find file matching hint {0} on current search paths ' \
@@ -118,18 +190,18 @@ class RunDescriptor(PropDescriptor):
 
              RunDescriptor._logger(message,'warning')
              return 'ERROR:find_file: '+message
-
+#--------------------------------------------------------------------------------------------------------------------
     def get_workspace(self):
         """ Method returns workspace correspondent to current run number(s)
             and loads this workspace if it has not been loaded
 
             Returns Mantid pointer to the workspace, corresponding to this run number
         """ 
-        if not self._run_ws_name:
+        if not self._ws_name:
            return None
 
-        if self._run_ws_name in mtd:
-           return mtd[self._run_ws_name]
+        if self._ws_name in mtd:
+           return mtd[self._ws_name]
         else:
            if self._run_number:
                inst_name   = RunDescriptor._holder.short_inst_name
@@ -143,16 +215,19 @@ class RunDescriptor(PropDescriptor):
                return self.load_run(inst_name, calibration,False, RunDescriptor._holder.load_monitors_with_workspace,use_workspace_calibration)
            else:
               return None
-
-    def get_monitors_ws(self):
+#--------------------------------------------------------------------------------------------------------------------
+    def get_ws_clone(self,clone_name='ws_clone'):
+        """ Get unbounded clone of existing Run workspace """
+        ws = self.get_workspace()
+        CloneWorkspace(InputWorkspace=ws,OutputWorkspace=clone_name)
+        return mtd[clone_name]
+#--------------------------------------------------------------------------------------------------------------------
+    def get_monitors_ws(self,monitor_ID = None):
         """ get pointer to a workspace containing monitors. 
 
            Explores different ways of finding monitor workspace in Mantid and returns the python pointer to the
            workspace which contains monitors.
-
-
         """
-
         data_ws = self.get_workspace()
 
         monWS_name = self.get_ws_name()+'_monitors'
@@ -166,44 +241,46 @@ class RunDescriptor(PropDescriptor):
         spec_to_mon =   RunDescriptor._holder.spectra_to_monitors_list
         if monitors_separate and spec_to_mon :
             for specID in spec_to_mon:
-                mon_ws=self.copy_spectrum2monitors(data_ws,mon_ws,specID);
+                mon_ws=self.copy_spectrum2monitors(data_ws,mon_ws,specID)
+
+        if monitor_ID:
+           try:
+               ws_index = mon_ws.getIndexFromSpectrumNumber(monitor_ID) 
+           except: # 
+               mon_ws = None
+        #else: #TODO: get list of monitors and verify that they are indeed in monitor workspace
 
         return mon_ws
-
+#--------------------------------------------------------------------------------------------------------------------
     def get_ws_name(self):
         """ return workspace name. If ws name is not defined, build it first and set up as target ws name
         """ 
 
-        if self._run_ws_name:
-            return self._run_ws_name
-
-        if RunDescriptor._holder:
-            instr_name = RunDescriptor._holder.short_inst_name
-        else:
-            instr_name = '_test_instrument'
-
-        suffix = '' # not implemented
-        if RunDescriptor._holder.sum_runs:
-            ws_name = "NotImplemented" 
-        else:
-            ws_name  =  '{0}{1}{2:0>#6d}{3}'.format(instr_name,self._ws_preffix,self._run_number,suffix)
+        if self._ws_name:
+            if self._ws_name in mtd:
+                return self._ws_name
+            else:
+                raise RuntimeError('Getting workspace name {0} for undefined workspace. Run get_workspace first'.format(self._ws_name)) 
 
 
-        self._run_ws_name = ws_name
 
-        return ws_name
-
-
+        self._ws_name = self._build_ws_name()
+        return self._ws_name
+#--------------------------------------------------------------------------------------------------------------------
     def load_run(self,inst_name, calibration=None, force=False, load_mon_with_workspace=False,use_ws_calibration=True):
         """Loads run into the given workspace.
 
            If force is true then the file is loaded regardless of whether  its workspace exists already
         """
         # If a workspace with this name exists, then assume it is to be used in place of a file
-        ws_name = self.get_ws_name()
+        try:
+            ws_name = self.get_ws_name()
+        except RuntimeError:
+            self._ws_name=None
+            ws_name = self.get_ws_name()
 
         if ws_name in mtd and not(force):
-            RunDescriptor._logger("{0} already loaded as workspace.".format(self._run_ws_name),'information')
+            RunDescriptor._logger("{0} already loaded as workspace.".format(self._ws_name),'information')
             loaded_ws = mtd[ws_name]
         else:
             # If it doesn't exists as a workspace assume we have to try and load a file
@@ -231,7 +308,7 @@ class RunDescriptor(PropDescriptor):
         self.apply_calibration(loaded_ws,calibration,use_ws_calibration)
         loaded_ws = mtd[ws_name]
         return loaded_ws
-
+#--------------------------------------------------------------------------------------------------------------------
     def apply_calibration(self,loaded_ws,calibration=None,use_ws_calibration=True):
         """  If calibration is present, apply it to the workspace 
         
@@ -276,7 +353,7 @@ class RunDescriptor(PropDescriptor):
             RunDescriptor._logger('load_data: Copying detectors positions from workspace {0}: '.format(ws_calibration.name()),'debug')
             CopyInstrumentParameters(InputWorkspace=ws_calibration,OutputWorkspace=loaded_ws)
             AddSampleLog(Workspace=loaded_ws,LogName="calibrated",LogText=str(ws_calibration))
-
+#--------------------------------------------------------------------------------------------------------------------
     @staticmethod
     def copy_spectrum2monitors(data_ws,mon_ws,spectraID):
        """
@@ -310,8 +387,50 @@ class RunDescriptor(PropDescriptor):
        if 'tmp_mon' in mtd:
            DeleteWorkspace(WorkspaceName='tmp_mon')
        return mon_ws
+#--------------------------------------------------------------------------------------------------------------------
+    def _build_ws_name(self):
 
-  
+        instr_name  = self._instr_name()
+
+        if RunDescriptor._holder.sum_runs:
+            ws_name = "NotImplemented" 
+        else:
+            if self._run_number:
+                ws_name  =  '{0}{1}{2}{3:0>#6d}{4}'.format(self._prop_name,instr_name,self._ws_cname,self._run_number,self._ws_suffix)
+            else:
+                ws_name = '{0}{1}{2}'.format(self._prop_name,self._ws_cname,self._ws_suffix)
+
+        return ws_name 
+    @staticmethod
+    def rremove(thestr, trailing):
+        thelen = len(trailing)
+        if thestr[-thelen:] == trailing:
+            return thestr[:-thelen]
+        return thestr
+    def _split_ws_name(self,ws_name):
+        """ Method to split existing workspace name 
+            into parts, in such a way that _build_name would restore the same name
+        """
+        # Remove suffix
+        name = self.rremove(ws_name,self._ws_suffix)
+        # remove _prop_name:
+        name= name.replace(self._prop_name,'',1)
+        if self._run_number:
+            instr_name  = self._instr_name()
+            strnum = '{0}{1:0>#6d}'.format(instr_name,self._run_number)
+            self._ws_cname = self.rremove(name,strnum)
+        else:
+            self._ws_cname = name
+    def _instr_name(self):
+       if RunDescriptor._holder:
+            instr_name = RunDescriptor._holder.short_inst_name
+       else:
+            instr_name = '_test_instrument'
+       return instr_name 
+
+
+#-------------------------------------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------------------------------------------  
 #-------------------------------------------------------------------------------------------------------------------------------
 class RunDescriptorDependent(RunDescriptor):
     """ A RunDescriptor class dependent on another RunDescriptor"""
@@ -323,10 +442,11 @@ class RunDescriptorDependent(RunDescriptor):
 
     def __get__(self,instance,owner=None):
        """ return dependent run number which is host run number if this one has not been set or this run number if it was""" 
-       if instance is None:
-           return self
        if self._this_run_defined:
-          return self._run_number
+             if instance is None:
+                 return self
+             else:
+                return super(RunDescriptorDependent,self).__get__(instance)
        else:
           return self._host.__get__(instance,owner)
 
@@ -337,9 +457,11 @@ class RunDescriptorDependent(RunDescriptor):
         self._this_run_defined = True
         super(RunDescriptorDependent,self).__set__(instance,value)
 
-    def get_workspace(self):
-        """ overloaded get workspace method """ 
-        if self._this_run_defined:
-            self.get_workspace()
-        else:
-            self._host.get_workspace()
+    #def __del__(self):
+    #    # destructor removes bounded workspace 
+    #    # Probably better not to at current approach
+    #    if self._ws_name in mtd:
+    #        DeleteWorkspace(self._ws_name)
+    #    object.__del__(self)
+
+  

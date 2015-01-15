@@ -64,20 +64,6 @@ class PropertyManager(NonIDF_Properties):
     """
 
     #-----------------------------------------------------------------------------------
-    @property
-    def mask_run(self):
-        """ run used to get masks to remove unreliable spectra
-
-           Usually it is sample run but separate run may be used 
-        """
-        if self._mask_run:
-            return self._mask_run
-        else:
-            return self._sample_run
-    @mask_run.setter
-    def mask_run(self,value):
-       object.__setattr__(self,'_mask_run',value)
-    #-----------------------------------------------------------------------------------
 
     def __init__(self,Instrument,instr_run=None):
         #

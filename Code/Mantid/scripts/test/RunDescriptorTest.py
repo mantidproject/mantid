@@ -48,7 +48,7 @@ class RunDescriptorTest(unittest.TestCase):
 
         run_ws = CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=100)
         propman.sample_run = 'run_ws'
-        self.assertEqual(propman.sample_run,0)
+        self.assertEqual(PropertyManager.sample_run.run_number(),0)
 
         stor_ws = PropertyManager.sample_run.get_workspace()
         rez = CheckWorkspacesMatch(Workspace1=run_ws,Workspace2=stor_ws)
@@ -84,6 +84,7 @@ class RunDescriptorTest(unittest.TestCase):
         testFile1=os.path.normpath(test_dir+'MAR101111.nxs')
         testFile2=os.path.normpath(test_dir+'MAR101111.raw')
 
+        # create two test files to check search for appropriate extension
         f=open(testFile1,'w')
         f.write('aaaaaa');
         f.close()
@@ -94,6 +95,8 @@ class RunDescriptorTest(unittest.TestCase):
 
 
         propman.sample_run = 101111
+        PropertyManager.sample_run.set_file_ext('nxs')
+
         file=PropertyManager.sample_run.find_file()
         self.assertEqual(testFile1,os.path.normpath(file))
         PropertyManager.sample_run.set_file_ext('.raw')
@@ -133,6 +136,36 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertTrue(isinstance(mon_ws, api.Workspace))
         self.assertEqual(mon_ws.getNumberHistograms(),2)
         self.assertEqual(mon_ws.getIndexFromSpectrumNumber(3),1)
+
+    def test_ws_name(self):
+        run_ws = CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=100)
+        propman  = self.prop_man
+        propman.sample_run = run_ws
+
+        self.assertEqual(PropertyManager.sample_run.get_ws_name(),'SR_run_ws')
+        ws = PropertyManager.sample_run.get_workspace()
+        self.assertEqual(ws.name(),'SR_run_ws')
+
+        propman.sample_run = ws
+        self.assertEqual(PropertyManager.sample_run.get_ws_name(),'SR_run_ws')
+        self.assertTrue('SR_run_ws' in mtd)
+
+        propman.sample_run = 11001
+        self.assertFalse('SR_run_ws' in mtd)
+
+        propman.load_monitors_with_workspace = False
+        ws = PropertyManager.sample_run.get_workspace()
+        ws_name = ws.name()
+        self.assertEqual(PropertyManager.sample_run.get_ws_name(),ws_name)
+        self.assertTrue(ws_name in mtd)
+        self.assertTrue(ws_name+'_monitors' in mtd)
+
+        propman.sample_run = ws
+        self.assertEqual(PropertyManager.sample_run.get_ws_name(),ws_name)
+        self.assertTrue(ws_name in mtd)
+
+        ws1 = PropertyManager.sample_run.get_workspace()
+        self.assertEqual(ws1.name(),ws_name)
 
 
 

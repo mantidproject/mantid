@@ -57,12 +57,12 @@
 </parameter>
 
 <!-- Monitor used to estimate total current on the sample. while normalizing by monitor 1.  -->
-<parameter name="norm-mon1-spec">
+<parameter name="norm-mon1-spec"  type="int">
   <value val="1"/>
 </parameter>
 
 <!-- Monitor after chopper used to estimate total current on the sample, if normalization is done on monitor 2  -->
-<parameter name="norm-mon2-spec">
+<parameter name="norm-mon2-spec"  type="int">
     <value val="2"/>
 </parameter>
 
