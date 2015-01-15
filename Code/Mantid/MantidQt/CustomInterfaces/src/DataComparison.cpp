@@ -85,6 +85,7 @@ void DataComparison::addData()
 
   // Insert the colour selector
   QComboBox *colourCombo = new QComboBox();
+  // Add colours
   colourCombo->addItem("Black", QVariant(Qt::black));
   colourCombo->addItem("Red", QVariant(Qt::red));
   colourCombo->addItem("Green", QVariant(Qt::green));
@@ -101,7 +102,11 @@ void DataComparison::addData()
   colourCombo->addItem("Dark Magenta", QVariant(Qt::darkMagenta));
   colourCombo->addItem("Dark Yellow", QVariant(Qt::darkYellow));
   colourCombo->addItem("Dark Gray", QVariant(Qt::darkGray));
+  // Set the initial colour
+  colourCombo->setCurrentIndex(getInitialColourIndex());
+  // Update plots when colour changed
   connect(colourCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(plotWorkspaces()));
+  // Add widget to table
   m_uiForm.twCurrentData->setCellWidget(currentRows, COLOUR, colourCombo);
 
   // Insert the workspace name
@@ -112,6 +117,7 @@ void DataComparison::addData()
   // Insert the spectra offset
   QSpinBox *offsetSpin = new QSpinBox();
   offsetSpin->setMinimum(0);
+  offsetSpin->setMaximum(INT_MAX);
   connect(offsetSpin, SIGNAL(valueChanged(int)), this, SLOT(updatePlot()));
   m_uiForm.twCurrentData->setCellWidget(currentRows, SPEC_OFFSET, offsetSpin);
 
@@ -127,6 +133,41 @@ void DataComparison::addData()
 
   // Replot the workspaces
   plotWorkspaces();
+}
+
+
+/**
+ * Gets a colour as an index for the combo box for a new workspace.
+ * Looks for the lowest unused index, if all colours are used then returns 0.
+ *
+ * @return An index to set for the conbo box
+ */
+int DataComparison::getInitialColourIndex()
+{
+  int numRows = m_uiForm.twCurrentData->rowCount();
+
+  // Just use the first colour if this is the first row
+  if(numRows <= 1)
+    return 0;
+
+  // Build a list of used colours
+  QList<int> usedColours;
+  for(int row = 0; row < numRows - 1; row++)
+  {
+    QComboBox *colourSelector = dynamic_cast<QComboBox *>(m_uiForm.twCurrentData->cellWidget(row, COLOUR));
+    int index = colourSelector->currentIndex();
+    usedColours << index;
+  }
+
+  // Find the smallest unused colour
+  int numColours = dynamic_cast<QComboBox *>(m_uiForm.twCurrentData->cellWidget(0, COLOUR))->count();
+  for(int i = 0; i < numColours; i++)
+  {
+    if(!usedColours.contains(i))
+      return i;
+  }
+
+  return 0;
 }
 
 
