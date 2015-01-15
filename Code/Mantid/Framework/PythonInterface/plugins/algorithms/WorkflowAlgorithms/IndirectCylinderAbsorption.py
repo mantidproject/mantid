@@ -1,6 +1,6 @@
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode
-from mantid.kernel import Direction
+from mantid.kernel import StringMandatoryValidator, Direction, logger
 
 
 class IndirectCylinderAbsorption(DataProcessorAlgorithm):
@@ -15,24 +15,27 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
-                             doc="Sample workspace.")
+                             doc='Sample workspace.')
 
         self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '', optional=PropertyMode.Optional,
                                                      direction=Direction.Input),
-                             doc="Name for the input Can workspace.")
+                             doc='Container workspace.')
 
         self.declareProperty(name='CanScaleFactor', defaultValue=1.0, doc='Scale factor to multiply can data')
-        self.declareProperty(name='ChemicalFormula', defaultValue='', doc='Chemical formula')
+
+        self.declareProperty(name='ChemicalFormula', defaultValue='', validator=StringMandatoryValidator(),
+                             doc='Chemical formula')
+
         self.declareProperty(name='SampleRadius', defaultValue=0.0, doc='Sample radius')
         self.declareProperty(name='SampleNumberDensity', defaultValue=0.1, doc='Sample number density')
         self.declareProperty(name='Plot', defaultValue=False, doc='Plot options')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
-                             doc="The output corrected workspace.")
+                             doc='The output corrected workspace.')
 
         self.declareProperty(MatrixWorkspaceProperty('CorrectionsWorkspace', '', direction=Direction.Output,
                                                      optional=PropertyMode.Optional),
-                             doc="The corrections workspace for scattering and absorptions in sample.")
+                             doc='The corrections workspace for scattering and absorptions in sample.')
 
 
     def PyExec(self):
@@ -64,10 +67,12 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                          Target='Wavelength', EMode='Indirect', EFixed=efixed)
 
             if self._can_scale != 1.0:
+                logger.information('Scaling can by: ' + str(self._can_scale))
                 Scale(InputWorkspace=can_wave_ws, OutputWorkspace=can_wave_ws, Factor=self._can_scale, Operation='Multiply')
 
             Minus(LHSWorkspace=sample_wave_ws, RHSWorkspace=can_wave_ws, OutputWorkspace=sample_wave_ws)
             DeleteWorkspace(can_wave_ws)
+
             plot_list.append(self._can_ws)
 
         Divide(LHSWorkspace=sample_wave_ws, RHSWorkspace=self._ass_ws, OutputWorkspace=sample_wave_ws)

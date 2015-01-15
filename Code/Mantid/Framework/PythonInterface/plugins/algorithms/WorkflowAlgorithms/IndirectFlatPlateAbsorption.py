@@ -3,14 +3,14 @@ from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspace
 from mantid.kernel import StringMandatoryValidator, Direction, logger
 
 
-class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
+class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
 
     def category(self):
         return "Workflow\\Inelastic;Workflow\\MIDAS;PythonAlgorithms;CorrectionFunctions\\AbsorptionCorrections"
 
 
     def summary(self):
-        return "Calculates indirect absorption corrections for an annulus sample shape."
+        return "Calculates indirect absorption corrections for a flat sample shape."
 
 
     def PyInit(self):
@@ -26,12 +26,11 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='ChemicalFormula', defaultValue='', validator=StringMandatoryValidator(),
                              doc='Chemical formula')
 
-        self.declareProperty(name='CanInnerRadius', defaultValue=0.0, doc='Sample radius')
-        self.declareProperty(name='SampleInnerRadius', defaultValue=0.0, doc='Sample radius')
-        self.declareProperty(name='SampleOuterRadius', defaultValue=0.0, doc='Sample radius')
-        self.declareProperty(name='CanOuterRadius', defaultValue=0.0, doc='Sample radius')
+        self.declareProperty(name='SampleHeight', defaultValue=0.0, doc='Sample height')
+        self.declareProperty(name='SampleWidth', defaultValue=0.0, doc='Sample width')
+        self.declareProperty(name='SampleThickness', defaultValue=0.0, doc='Sample thickness')
+        self.declareProperty(name='ElementSize', defaultValue=0.1, doc='Element size in mm')
         self.declareProperty(name='SampleNumberDensity', defaultValue=0.1, doc='Sample number density')
-        self.declareProperty(name='Events', defaultValue=5000, doc='Number of neutron events')
         self.declareProperty(name='Plot', defaultValue=False, doc='Plot options')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
@@ -41,36 +40,33 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='The corrections workspace for scattering and absorptions in sample.')
 
-
     def PyExec(self):
         from IndirectCommon import getEfixed, addSampleLogs
 
         self._setup()
-
-        efixed = getEfixed(self._sample_ws_name)
+        efixed = getEfixed(self._sample_ws)
 
         sample_wave_ws = '__sam_wave'
-        ConvertUnits(InputWorkspace=self._sample_ws_name, OutputWorkspace=sample_wave_ws,
+        ConvertUnits(InputWorkspace=self._sample_ws, OutputWorkspace=sample_wave_ws,
                      Target='Wavelength', EMode='Indirect', EFixed=efixed)
 
-        sample_thickness = self._sample_outer_radius - self._sample_inner_radius
+        SetSampleMaterial(sample_wave_ws, ChemicalFormula=self._chemical_formula, SampleNumberDensity=self._number_density)
 
-        AnnularRingAbsorption(InputWorkspace=sample_wave_ws,
-                              OutputWorkspace=self._ass_ws,
-                              SampleHeight=3.0,
-                              SampleThickness=sample_thickness,
-                              CanInnerRadius=self._can_inner_radius,
-                              CanOuterRadius=self._can_outer_radius,
-                              SampleChemicalFormula=self._chemical_formula,
-                              SampleNumberDensity=self._number_density,
-                              NumberOfWavelengthPoints=10,
-                              EventsPerPoint=self._events)
+        FlatPlateAbsorption(InputWorkspace=sample_wave_ws,
+                            OutputWorkspace=self._ass_ws,
+                            SampleHeight=self._sample_height,
+                            SampleWidth=self._sample_width,
+                            SampleThickness=self._sample_thichness,
+                            ElementSize=self._element_size,
+                            EMode='Indirect',
+                            EFixed=efixed,
+                            NumberOfWavelengthPoints=10)
 
-        plot_list = [self._output_ws, self._sample_ws_name]
+        plot_list = [self._output_ws, self._sample_ws]
 
-        if self._can_ws_name is not None:
+        if self._can_ws is not None:
             can_wave_ws = '__can_wave'
-            ConvertUnits(InputWorkspace=self._can_ws_name, OutputWorkspace=can_wave_ws,
+            ConvertUnits(InputWorkspace=self._can_ws, OutputWorkspace=can_wave_ws,
                          Target='Wavelength', EMode='Indirect', EFixed=efixed)
 
             if self._can_scale != 1.0:
@@ -80,25 +76,25 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
             Minus(LHSWorkspace=sample_wave_ws, RHSWorkspace=can_wave_ws, OutputWorkspace=sample_wave_ws)
             DeleteWorkspace(can_wave_ws)
 
-            plot_list.append(self._can_ws_name)
+            plot_list.append(self._can_ws)
 
         Divide(LHSWorkspace=sample_wave_ws, RHSWorkspace=self._ass_ws, OutputWorkspace=sample_wave_ws)
-        ConvertUnits(InputWorkspace=sample_wave_ws, OutputWorkspace=self._output_ws, Target='DeltaE',
-                     EMode='Indirect', EFixed=efixed)
+        ConvertUnits(InputWorkspace=sample_wave_ws, OutputWorkspace=self._output_ws,
+                     Target='DeltaE', EMode='Indirect', EFixed=efixed)
         DeleteWorkspace(sample_wave_ws)
 
-        sample_logs = {'sample_shape': 'annulus',
-                       'sample_filename': self._sample_ws_name,
-                       'sample_inner': self._sample_inner_radius,
-                       'sample_outer': self._sample_outer_radius,
-                       'can_inner': self._can_inner_radius,
-                       'can_outer': self._can_outer_radius}
+        sample_logs = {'sample_shape': 'flatplate',
+                       'sample_filename': self._sample_ws,
+                       'sample_height': self._sample_height,
+                       'sample_width': self._sample_width,
+                       'sample_thickness': self._sample_thichness,
+                       'element_size': self._element_size}
         addSampleLogs(self._ass_ws, sample_logs)
         addSampleLogs(self._output_ws, sample_logs)
 
-        if self._can_ws_name is not None:
-            AddSampleLog(Workspace=self._ass_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
-            AddSampleLog(Workspace=self._output_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
+        if self._can_ws is not None:
+            AddSampleLog(Workspace=self._ass_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws))
+            AddSampleLog(Workspace=self._output_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws))
             AddSampleLog(Workspace=self._ass_ws, LogName='can_scale', LogType='String', LogText=str(self._can_scale))
             AddSampleLog(Workspace=self._output_ws, LogName='can_scale', LogType='String', LogText=str(self._can_scale))
 
@@ -121,15 +117,14 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         Get algorithm properties.
         """
 
-        self._sample_ws_name = self.getPropertyValue('SampleWorkspace')
+        self._sample_ws = self.getPropertyValue('SampleWorkspace')
         self._can_scale = self.getProperty('CanScaleFactor').value
         self._chemical_formula = self.getPropertyValue('ChemicalFormula')
         self._number_density = self.getProperty('SampleNumberDensity').value
-        self._can_inner_radius = self.getProperty('CanInnerRadius').value
-        self._sample_inner_radius = self.getProperty('SampleInnerRadius').value
-        self._sample_outer_radius = self.getProperty('SampleOuterRadius').value
-        self._can_outer_radius = self.getProperty('CanOuterRadius').value
-        self._events = self.getProperty('Events').value
+        self._sample_height = self.getProperty('SampleHeight').value
+        self._sample_width = self.getProperty('SampleWidth').value
+        self._sample_thichness = self.getProperty('SampleThickness').value
+        self._element_size = self.getProperty('ElementSize').value
         self._plot = self.getProperty('Plot').value
         self._output_ws = self.getPropertyValue('OutputWorkspace')
 
@@ -137,10 +132,10 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         if self._ass_ws == '':
             self._ass_ws = '__ass'
 
-        self._can_ws_name = self.getPropertyValue('CanWorkspace')
-        if self._can_ws_name == '':
-            self._can_ws_name = None
+        self._can_ws = self.getPropertyValue('CanWorkspace')
+        if self._can_ws == '':
+            self._can_ws = None
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(IndirectAnnulusAbsorption)
+AlgorithmFactory.subscribe(IndirectFlatPlateAbsorption)
