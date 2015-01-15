@@ -19,6 +19,7 @@
 #include <QToolBar>
 #include <QActionGroup>
 #include <QSplitter>
+#include <QSettings>
 
 #include <boost/make_shared.hpp>
 #include <qwt_plot_curve.h>
@@ -563,6 +564,7 @@ MultiDatasetFit::MultiDatasetFit(QWidget *parent)
 
 MultiDatasetFit::~MultiDatasetFit()
 {
+  saveSettings();
   m_plotController->clear();
 }
 
@@ -617,6 +619,8 @@ void MultiDatasetFit::initLayout()
   m_uiForm.dataTable->installEventFilter( this );
 
   showInfo( "Add some data, define fitting function" );
+
+  loadSettings();
 }
 
 void MultiDatasetFit::createPlotToolbar()
@@ -848,10 +852,6 @@ void MultiDatasetFit::fit()
     fit->setPropertyValue("InputWorkspace", getWorkspaceName(0));
     fit->setProperty("WorkspaceIndex", getWorkspaceIndex(0));
 
-    m_outputWorkspaceName = "out";
-    fit->setPropertyValue("Output",m_outputWorkspaceName);
-    m_outputWorkspaceName += "_Workspace";
-
     int n = getNumberOfSpectra();
     for(int ispec = 1; ispec < n; ++ispec)
     {
@@ -859,6 +859,17 @@ void MultiDatasetFit::fit()
       fit->setPropertyValue( "InputWorkspace_" + suffix, getWorkspaceName(ispec) );
       fit->setProperty( "WorkspaceIndex_" + suffix, getWorkspaceIndex(ispec) );
     }
+
+    m_fitOptionsBrowser->copyPropertiesToAlgorithm(*fit);
+
+    m_outputWorkspaceName = m_fitOptionsBrowser->getProperty("Output").toStdString();
+    if ( m_outputWorkspaceName.empty() )
+    {
+      m_outputWorkspaceName = "out";
+      fit->setPropertyValue("Output",m_outputWorkspaceName);
+      m_fitOptionsBrowser->setProperty("Output","out");
+    }
+    m_outputWorkspaceName += "_Workspace";
 
     m_fitRunner.reset( new API::AlgorithmRunner() );
     connect( m_fitRunner.get(),SIGNAL(algorithmComplete(bool)), this, SLOT(finishFit(bool)), Qt::QueuedConnection );
@@ -1127,6 +1138,21 @@ void MultiDatasetFit::removeDataSets( std::vector<int>& rows )
   }
   emit dataTableUpdated();
 }
+
+void MultiDatasetFit::loadSettings()
+{
+  QSettings settings;
+  settings.beginGroup("Mantid/MultiDatasetFit");
+  m_fitOptionsBrowser->loadSettings( settings );
+}
+
+void MultiDatasetFit::saveSettings() const
+{
+  QSettings settings;
+  settings.beginGroup("Mantid/MultiDatasetFit");
+  m_fitOptionsBrowser->saveSettings( settings );
+}
+
 
 /*==========================================================================================*/
 } // CustomInterfaces

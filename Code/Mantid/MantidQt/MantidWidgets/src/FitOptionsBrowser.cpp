@@ -29,6 +29,7 @@
 
 #include <QVBoxLayout>
 #include <QMessageBox>
+#include <QSettings>
 
 namespace MantidQt
 {
@@ -73,7 +74,7 @@ void FitOptionsBrowser::createBrowser()
   QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(this);
   QtEnumEditorFactory *comboBoxFactory = new QtEnumEditorFactory(this);
 
-  m_browser = new QtTreePropertyBrowser(NULL);
+  m_browser = new QtTreePropertyBrowser(NULL, QStringList(), false);
   // assign factories to property managers
   m_browser->setFactoryForManager(m_stringManager, lineEditFactory);
   m_browser->setFactoryForManager(m_doubleManager, doubleEditorFactory);
@@ -85,6 +86,8 @@ void FitOptionsBrowser::createBrowser()
   //connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
 
   connect(m_enumManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(enumChanged(QtProperty*)));
+
+  // Fill in getter and setter maps
 }
 
 /**
@@ -92,6 +95,16 @@ void FitOptionsBrowser::createBrowser()
  */
 void FitOptionsBrowser::createProperties()
 {
+  // Create MaxIterations property
+  m_maxIterations = m_intManager->addProperty("Max Iterations");
+  {
+    m_intManager->setValue(m_maxIterations,500);
+    m_intManager->setMinimum(m_maxIterations,0);
+    m_browser->addProperty(m_maxIterations);
+
+    addProperty("MaxIterations", &FitOptionsBrowser::getMaxIterations, &FitOptionsBrowser::setMaxIterations);
+  }
+
   // Set up the minimizer property.
   //
   // Create the enclosing group property. This group contains
@@ -113,8 +126,15 @@ void FitOptionsBrowser::createProperties()
       minimizers << QString::fromStdString(*it);
     }
     m_enumManager->setEnumNames(m_minimizer,minimizers);
+    int i = m_enumManager->enumNames(m_minimizer).indexOf("Levenberg-Marquardt");
+    if ( i >= 0 )
+    {
+      m_enumManager->setValue(m_minimizer,i);
+    }
 
     m_browser->addProperty(m_minimizerGroup);
+
+    addProperty("Minimizer", &FitOptionsBrowser::getMinimizer, &FitOptionsBrowser::setMinimizer);
   }
 
   // Create cost function property
@@ -133,8 +153,33 @@ void FitOptionsBrowser::createProperties()
     m_enumManager->setEnumNames(m_costFunction,costFunctions);
 
     m_browser->addProperty(m_costFunction);
+
+    addProperty("CostFunction", &FitOptionsBrowser::getCostFunction, &FitOptionsBrowser::setCostFunction);
+  }
+
+  // Create Output property
+  m_output = m_stringManager->addProperty("Output");
+  {
+    m_browser->addProperty(m_output);
+    addProperty("Output", &FitOptionsBrowser::getOutput, &FitOptionsBrowser::setOutput);
+  }
+
+  // Create Ignore property
+  m_ignoreInvalidData = m_boolManager->addProperty("Ignore Invalid Data");
+  {
+    m_browser->addProperty(m_ignoreInvalidData);
+    addProperty("IgnoreInvalidData", &FitOptionsBrowser::getIgnoreInvalidData, &FitOptionsBrowser::setIgnoreInvalidData);
   }
 }
+
+void FitOptionsBrowser::addProperty(const QString& name, 
+  QString (FitOptionsBrowser::*getter)()const, 
+  void (FitOptionsBrowser::*setter)(const QString&))
+{
+  m_getters[name] = getter;
+  m_setters[name] = setter;
+}
+
 
 /** Create a double property and set some settings
  * @param name :: The name of the new property
@@ -259,6 +304,203 @@ QtProperty* FitOptionsBrowser::createPropertyProperty(Mantid::Kernel::Property* 
 
     return prop;
 }
+
+/**
+ * Copy values of the properties to an algorithm.
+ * @param fit :: An instance of the Fit algorithm.
+ */
+void FitOptionsBrowser::copyPropertiesToAlgorithm(Mantid::API::IAlgorithm& fit) const
+{
+    for(auto p = m_getters.constBegin(); p != m_getters.constEnd(); ++p)
+    {
+      auto f = p.value();
+      fit.setPropertyValue( p.key().toStdString(), (this->*f)().toStdString() );
+    }
+}
+
+/**
+ * Get a string representation of a Fit's property value.
+ * @param name :: The name of a Fit's property.
+ */
+QString FitOptionsBrowser::getProperty(const QString& name) const
+{
+  if ( !m_getters.contains(name) )
+  {
+    throw std::runtime_error("Property " + name.toStdString() + " isn't supported by the browser.");
+  }
+  auto f = m_getters[name];
+  return (this->*f)();
+}
+
+void FitOptionsBrowser::setProperty(const QString& name, const QString& value)
+{
+  if ( !m_getters.contains(name) )
+  {
+    throw std::runtime_error("Property " + name.toStdString() + " isn't supported by the browser.");
+  }
+  auto f = m_setters[name];
+  (this->*f)(value);
+}
+
+/**
+ * Get the value of the Minimizer property.
+ */
+QString FitOptionsBrowser::getMinimizer() const
+{
+  int i = m_enumManager->value(m_minimizer);
+  QString minimStr = m_enumManager->enumNames(m_minimizer)[i];
+
+  auto subProperties = m_minimizerGroup->subProperties();
+  if ( subProperties.size() > 1 )
+  {
+    foreach(QtProperty* prop, subProperties)
+    {
+      if ( prop == m_minimizer ) continue;
+      if ( prop->propertyManager() == m_stringManager )
+      {
+        QString value = m_stringManager->value(prop);
+        if ( !value.isEmpty() )
+        {
+          minimStr += "," + prop->propertyName() + "=" + value;
+        }
+      }
+      else
+      {
+        minimStr += "," + prop->propertyName() + "=";
+        if ( prop->propertyManager() == m_intManager )
+        {
+          minimStr += QString::number( m_intManager->value(prop) );
+        }
+        else if ( prop->propertyManager() == m_doubleManager )
+        {
+          minimStr += QString::number( m_doubleManager->value(prop) );
+        }
+        else if ( prop->propertyManager() == m_boolManager )
+        {
+          minimStr += QString::number( m_boolManager->value(prop) );
+        }
+        else
+        {
+          throw std::runtime_error("The fit browser doesn't support the type of minimizer's property " + prop->propertyName().toStdString() );
+        }
+      }
+    } // foreach
+  }
+  return minimStr;
+}
+
+/**
+ * Set new value to the Minimizer property.
+ * @param value :: The new value.
+ */
+void FitOptionsBrowser::setMinimizer(const QString& value)
+{
+  QStringList terms = value.split(',');
+  int i = m_enumManager->enumNames(m_minimizer).indexOf(terms[0]);
+  m_enumManager->setValue(m_minimizer,i);
+}
+
+/**
+ * Get the value of the CostFunction property.
+ */
+QString FitOptionsBrowser::getCostFunction() const
+{
+  int i = m_enumManager->value(m_costFunction);
+  return m_enumManager->enumNames(m_costFunction)[i];
+}
+
+/**
+ * Set new value to the CostFunction property.
+ * @param value :: The new value.
+ */
+void FitOptionsBrowser::setCostFunction(const QString& value)
+{
+  int i = m_enumManager->enumNames(m_costFunction).indexOf(value);
+  m_enumManager->setValue(m_costFunction,i);
+}
+
+/**
+ * Get the value of the MaxIterations property.
+ */
+QString FitOptionsBrowser::getMaxIterations() const
+{
+  return QString::number(m_intManager->value(m_maxIterations));
+}
+
+/**
+ * Set new value to the MaxIterations property.
+ * @param value :: The new value.
+ */
+void FitOptionsBrowser::setMaxIterations(const QString& value)
+{
+  m_intManager->setValue(m_maxIterations,value.toInt());
+}
+
+/**
+ * Get the value of the Output property.
+ */
+QString FitOptionsBrowser::getOutput() const
+{
+  return m_stringManager->value(m_output);
+}
+
+/**
+ * Set new value to the Output property.
+ * @param value :: The new value.
+ */
+void FitOptionsBrowser::setOutput(const QString& value)
+{
+  m_stringManager->setValue(m_output,value);
+}
+
+/**
+ * Get the value of the IgnoreInvalidData property.
+ */
+QString FitOptionsBrowser::getIgnoreInvalidData() const
+{
+  return QString::number(m_boolManager->value(m_ignoreInvalidData));
+}
+
+/**
+ * Set new value to the IgnoreInvalidData property.
+ * @param value :: The new value.
+ */
+void FitOptionsBrowser::setIgnoreInvalidData(const QString& value)
+{
+  bool boolValue = (value == "1") || (value == "true");
+  m_boolManager->setValue( m_ignoreInvalidData, boolValue );
+}
+
+/**
+ * Save the last property values in settings.
+ * @param settings :: A QSettings instance provided by the user of this class.
+ */
+void FitOptionsBrowser::saveSettings(QSettings& settings) const
+{
+  for(auto p = m_getters.constBegin(); p != m_getters.constEnd(); ++p)
+  {
+    auto f = p.value();
+    settings.setValue( p.key(), (this->*f)() );
+  }
+}
+
+/**
+ * Load property values from settings.
+ * @param settings :: A QSettings instance provided by the user of this class.
+ */
+void FitOptionsBrowser::loadSettings(const QSettings& settings)
+{
+  for(auto p = m_setters.constBegin(); p != m_setters.constEnd(); ++p)
+  {
+    QString value = settings.value( p.key() ).toString();
+    if ( !value.isEmpty() )
+    {
+      auto f = p.value();
+      (this->*f)( value );
+    }
+  }
+}
+
 
 } // MantidWidgets
 } // MantidQt

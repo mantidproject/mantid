@@ -152,7 +152,7 @@ class QtTreePropertyBrowserPrivate
 
 public:
     QtTreePropertyBrowserPrivate();
-    void init(QWidget *parent, const QStringList &options);
+    void init(QWidget *parent, const QStringList &options, bool darkTopLevel);
 
     void propertyInserted(QtBrowserItem *index, QtBrowserItem *afterIndex);
     void propertyRemoved(QtBrowserItem *index);
@@ -210,7 +210,7 @@ class QtPropertyEditorView : public QTreeWidget
 {
     Q_OBJECT
 public:
-    QtPropertyEditorView(QWidget *parent = 0);
+    QtPropertyEditorView(QWidget *parent, bool darkTopLevel);
 
     void setEditorPrivate(QtTreePropertyBrowserPrivate *editorPrivate)
         { m_editorPrivate = editorPrivate; }
@@ -225,11 +225,13 @@ protected:
 
 private:
     QtTreePropertyBrowserPrivate *m_editorPrivate;
+    bool m_darkTopLevel;
 };
 
-QtPropertyEditorView::QtPropertyEditorView(QWidget *parent) :
+QtPropertyEditorView::QtPropertyEditorView(QWidget *parent, bool darkTopLevel) :
     QTreeWidget(parent),
-    m_editorPrivate(0)
+    m_editorPrivate(0),
+    m_darkTopLevel(darkTopLevel)
 {
     connect(header(), SIGNAL(sectionDoubleClicked(int)), this, SLOT(resizeColumnToContents(int)));
 }
@@ -249,7 +251,7 @@ void QtPropertyEditorView::drawRow(QPainter *painter, const QStyleOptionViewItem
         opt.palette.setColor(QPalette::AlternateBase, c);
     } else {
         QColor c = m_editorPrivate->calculatedBackgroundColor(m_editorPrivate->indexToBrowserItem(index));
-        if (index.parent() == QModelIndex())
+        if (index.parent() == QModelIndex() && m_darkTopLevel)
         {
           c = option.palette.color(QPalette::Mid);
         }
@@ -563,11 +565,11 @@ static QIcon drawIndicatorIcon(const QPalette &palette, QStyle *style)
     return rc;
 }
 
-void QtTreePropertyBrowserPrivate::init(QWidget *parent, const QStringList &options)
+void QtTreePropertyBrowserPrivate::init(QWidget *parent, const QStringList &options, bool darkTopLevel)
 {
     QHBoxLayout *layout = new QHBoxLayout(parent);
     layout->setMargin(0);
-    m_treeWidget = new QtPropertyEditorView(parent);
+    m_treeWidget = new QtPropertyEditorView(parent,darkTopLevel);
     m_treeWidget->setEditorPrivate(this);
     m_treeWidget->setIconSize(QSize(18, 18));
     layout->addWidget(m_treeWidget);
@@ -877,13 +879,13 @@ void QtTreePropertyBrowserPrivate::editItem(QtBrowserItem *browserItem)
 /**
     Creates a property browser with the given \a parent.
 */
-QtTreePropertyBrowser::QtTreePropertyBrowser(QWidget *parent, const QStringList &options)
+QtTreePropertyBrowser::QtTreePropertyBrowser(QWidget *parent, const QStringList &options, bool darkTopLevel)
     : QtAbstractPropertyBrowser(parent)
 {
     d_ptr = new QtTreePropertyBrowserPrivate;
     d_ptr->q_ptr = this;
 
-    d_ptr->init(this,options);
+    d_ptr->init(this,options,darkTopLevel);
     connect(this, SIGNAL(currentItemChanged(QtBrowserItem*)), this, SLOT(slotCurrentBrowserItemChanged(QtBrowserItem*)));
 }
 
