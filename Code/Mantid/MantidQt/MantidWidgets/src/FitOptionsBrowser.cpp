@@ -332,6 +332,11 @@ QString FitOptionsBrowser::getProperty(const QString& name) const
   return (this->*f)();
 }
 
+/**
+ * Set a new value to a Fit's property.
+ * @param name :: The name of a Fit's property.
+ * @param value :: The new value as a string.
+ */
 void FitOptionsBrowser::setProperty(const QString& name, const QString& value)
 {
   if ( !m_getters.contains(name) )

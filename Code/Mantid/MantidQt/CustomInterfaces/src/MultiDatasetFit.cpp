@@ -10,6 +10,7 @@
 #include "MantidAPI/ParameterTie.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/Exception.h"
 
 #include "qtpropertybrowser.h"
 
@@ -201,11 +202,18 @@ DatasetPlotData::DatasetPlotData(const QString& wsName, int wsIndex, const QStri
   Mantid::API::MatrixWorkspace_sptr outputWS;
   if ( !outputWSName.isEmpty() )
   {
-    outputWS = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>( outputWSName.toStdString() );
-    if ( !outputWS )
+    std::string stdOutputWSName = outputWSName.toStdString();
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist(stdOutputWSName) )
     {
-      QString mess = QString("Workspace %1 either doesn't exist or isn't a MatrixWorkspace").arg(outputWSName);
-      throw std::runtime_error( mess.toStdString() );
+      try
+      {
+        outputWS = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>( stdOutputWSName );
+      }
+      catch ( Mantid::Kernel::Exception::NotFoundError& )
+      {
+        QString mess = QString("Workspace %1 either doesn't exist or isn't a MatrixWorkspace").arg(outputWSName);
+        throw std::runtime_error( mess.toStdString() );
+      }
     }
   }
 
@@ -418,8 +426,9 @@ void PlotController::plotDataSet(int index)
       auto value = boost::make_shared<DatasetPlotData>( wsName, wsIndex, outputWorkspaceName );
       m_plotData.insert(index, value );
     }
-    catch(...)
+    catch(std::exception& e)
     {
+      QMessageBox::critical(owner(),"MantidPlot - Error",e.what());
       clear();
       owner()->checkDataSets();
       m_plot->replot();
@@ -965,12 +974,19 @@ void MultiDatasetFit::reset()
   m_localParameterValues.clear();
 }
 
-void MultiDatasetFit::finishFit(bool)
+/**
+ * Slot called on completion of the Fit algorithm.
+ * @param error :: Set to true if Fit finishes with an error.
+ */
+void MultiDatasetFit::finishFit(bool error)
 {
-  m_plotController->clear();
-  m_plotController->update();
-  Mantid::API::IFunction_sptr fun = m_fitRunner->getAlgorithm()->getProperty("Function");
-  updateParameters( *fun );
+  if ( !error )
+  {
+    m_plotController->clear();
+    m_plotController->update();
+    Mantid::API::IFunction_sptr fun = m_fitRunner->getAlgorithm()->getProperty("Function");
+    updateParameters( *fun );
+  }
 }
 
 /**
