@@ -13,6 +13,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 
@@ -59,8 +60,11 @@ void SortHKL::init() {
   declareProperty("OutputChi2", 0.0, "Chi-square is available as output",
                   Direction::Output);
   declareProperty(new WorkspaceProperty<ITableWorkspace>(
-                      "StatisticsTable", "StaticticsTable", Direction::Output),
+                      "StatisticsTable", "StatisticsTable", Direction::Output),
                   "An output table workspace for the statistics of the peaks.");
+  declareProperty(new PropertyWithValue<std::string>("RowName", "Overall", Direction::Input), "name of row");
+  declareProperty("Append", false, "Append to output table workspace if true.\n"
+                                       "If false, new output table workspace (default).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -74,23 +78,31 @@ void SortHKL::exec() {
   if (peaksW != InPeaksW)
     peaksW = InPeaksW->clone();
 
-  // Init a table workspace
-  DataObjects::TableWorkspace_sptr tablews =
-      boost::shared_ptr<DataObjects::TableWorkspace>(
-          new DataObjects::TableWorkspace());
-  tablews->addColumn("str", "Resolution Shell");
-  tablews->addColumn("int", "No. of Unique Reflections");
-  tablews->addColumn("double", "Resolution Min");
-  tablews->addColumn("double", "Resolution Max");
-  tablews->addColumn("double", "Multiplicity");
-  tablews->addColumn("double", "Mean ((I)/sd(I))");
-  tablews->addColumn("double", "Rmerge");
-  tablews->addColumn("double", "Rpim");
-  tablews->addColumn("double", "Data Completeness");
+  // Init or append to a table workspace
+  bool append = getProperty("Append");
+  TableWorkspace_sptr tablews;
+  const  std::string tableName= getProperty("StatisticsTable");
+  if (append && AnalysisDataService::Instance().doesExist(tableName)) {
+    tablews = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(tableName);
+  }
+  else{
+    tablews =boost::shared_ptr<TableWorkspace>(
+            new TableWorkspace());
+    tablews->addColumn("str", "Resolution Shell");
+    tablews->addColumn("int", "No. of Unique Reflections");
+    tablews->addColumn("double", "Resolution Min");
+    tablews->addColumn("double", "Resolution Max");
+    tablews->addColumn("double", "Multiplicity");
+    tablews->addColumn("double", "Mean ((I)/sd(I))");
+    tablews->addColumn("double", "Rmerge");
+    tablews->addColumn("double", "Rpim");
+    tablews->addColumn("double", "Data Completeness");
+  }
 
   // append to the table workspace
   API::TableRow newrow = tablews->appendRow();
-  newrow << "Overall";
+  std::string name = getProperty("RowName");
+  newrow << name;
 
   int NumberPeaks = peaksW->getNumberPeaks();
   for (int i = 0; i < NumberPeaks; i++) {
@@ -254,6 +266,7 @@ void SortHKL::exec() {
   setProperty("OutputWorkspace", peaksW);
   setProperty("OutputChi2", Chisq);
   setProperty("StatisticsTable", tablews);
+  AnalysisDataService::Instance().addOrReplace(tableName, tablews);
 }
 void SortHKL::Outliers(std::vector<double> &data, std::vector<double> &sig2) {
   std::vector<double> Zscore = getZscore(data);
