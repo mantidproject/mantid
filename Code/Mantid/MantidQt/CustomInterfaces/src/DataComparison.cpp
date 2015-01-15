@@ -384,11 +384,22 @@ void DataComparison::plotDiffWorkspace()
   for(int row = 0; row < numRows; row++)
   {
     QString workspaceName = m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
+    QString currentSpecName = m_uiForm.twCurrentData->item(row, CURRENT_SPEC)->text();
+    bool ok;
 
     if(workspaceName == m_diffWorkspaceNames.first)
-      ws1Spec = m_uiForm.twCurrentData->item(row, CURRENT_SPEC)->text().toInt();
+      ws1Spec = currentSpecName.toInt(&ok);
     if(workspaceName == m_diffWorkspaceNames.second)
-      ws2Spec = m_uiForm.twCurrentData->item(row, CURRENT_SPEC)->text().toInt();
+      ws2Spec = currentSpecName.toInt(&ok);
+
+    // Check that the spectra are not out of range
+    if(!ok)
+    {
+      // Set info message
+      QString infoMessage = workspaceName + ": Index out of range.";
+      m_uiForm.lbDiffInfo->setText(infoMessage);
+      return;
+    }
   }
 
   // Extract the current spectrum for both workspaces
