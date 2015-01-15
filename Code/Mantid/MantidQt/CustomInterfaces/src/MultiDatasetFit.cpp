@@ -624,6 +624,7 @@ void MultiDatasetFit::initLayout()
 
   // filters
   m_functionBrowser->installEventFilter( this );
+  m_fitOptionsBrowser->installEventFilter( this );
   m_uiForm.plot->installEventFilter( this );
   m_uiForm.dataTable->installEventFilter( this );
 
@@ -1054,6 +1055,10 @@ bool MultiDatasetFit::eventFilter(QObject *widget, QEvent *evn)
     {
       showFunctionBrowserInfo();
     }
+    else if ( qobject_cast<QObject*>( m_fitOptionsBrowser ) == widget )
+    {
+      showFitOptionsBrowserInfo();
+    }
     else if ( qobject_cast<QObject*>( m_uiForm.plot ) == widget )
     {
       showPlotInfo();
@@ -1083,6 +1088,14 @@ void MultiDatasetFit::showFunctionBrowserInfo()
   {
     showInfo( "Use context menu to add a function." );
   }
+}
+
+/**
+ * Show info about the Fit options browser.
+ */
+void MultiDatasetFit::showFitOptionsBrowserInfo()
+{
+  showInfo( "Set Fit properties." );
 }
 
 /**

@@ -112,6 +112,7 @@ private:
   void showInfo(const QString& text);
   bool eventFilter(QObject *widget, QEvent *evn);
   void showFunctionBrowserInfo();
+  void showFitOptionsBrowserInfo();
   void showTableInfo();
   void removeDataSets(std::vector<int>& rows);
   void loadSettings();
