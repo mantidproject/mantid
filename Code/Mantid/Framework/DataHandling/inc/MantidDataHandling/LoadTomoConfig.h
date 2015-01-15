@@ -2,6 +2,7 @@
 #define MANTID_DATAHANDLING_LOADTOMOCONFIG_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace NeXus {
   class File;
@@ -45,7 +46,8 @@ public:
   virtual const std::string name() const { return "LoadTomoConfig"; }
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
-    return "Load configuration parameters from a tomographic reconstruction parameter file.";
+    return "Load configuration parameters from a tomographic "
+      "reconstruction parameter file.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
@@ -61,8 +63,13 @@ private:
   /// Implement abstract Algorithm methods
   void exec();
 
-  // C++ nexus file handle
-  ::NeXus::File *m_file;
+  // do the real loading
+  Mantid::API::ITableWorkspace_sptr loadFile(std::string& fname,
+                                             std::string& wsName);
+
+  // open file safely and carefully checking potential issues
+  bool checkOpenFile(std::string fname,
+                     boost::shared_ptr<::NeXus::File> &f);
 };
 
 } // namespace DataHandling
