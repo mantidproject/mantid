@@ -18,6 +18,7 @@ endif ()
 
 # If building as a stand-alone project, call our common setup script
 if ( NOT COMMONSETUP_DONE )
+  enable_testing()
   include ( CommonSetup )
 endif ()
 
