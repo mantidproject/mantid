@@ -4,6 +4,10 @@ from mantid.simpleapi import *
 import os
 
 
+_str_or_none = lambda s: s if s != '' else None
+_elems_or_none = lambda l: l if len(l) != 0 else None
+
+
 class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
     def category(self):
@@ -75,8 +79,20 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             self._process_monitor_efficiency(ws_name)
             self._scale_monitor(ws_name)
 
-            # TODO: Background removal
-            # TODO: Apply calibration
+            # Do background removal if a range was provided
+            if self._background_range is not None:
+                ConvertToDistribution(Workspace=ws_name)
+                CalculateFlatBackground(InputWorkspace=ws_name, OutputWorkspace=ws_name,
+                                        StartX=self._background_range[0],
+                                        EndX=self._background_range[1],
+                                        Mode='Mean')
+                ConvertFromDistribution(Workspace=ws_name)
+
+            # Divide by the calibration workspace if one was provided
+            if self._calibration_ws is not None:
+                Divide(LHSWorkspace=ws_name,
+                       RHSWorkspace=self._calibration_ws,
+                       Output_workspace=ws_name)
 
             # Scale detector data by monitor intensities
             monitor_ws_name = ws_name + '_mon'
@@ -110,41 +126,88 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         """
         issues = dict()
 
-        # TODO
+        # Validate the instrument configuration by checking if a parameter file exists
+        instrument_name = self.getPropertyValue('Instrument')
+        analyser = self.getPropertyValue('Analyser')
+        reflection = self.getPropertyValue('Reflection')
+
+        ipf_filename = os.path.join(config['instrumentDefinition.directory'],
+                                    instrument_name + '_' + analyser + '_' + reflection + '_Parameters.xml')
+
+        if not os.path.exists(ipf_filename):
+            error_message = 'Invalid instrument configuration'
+            issues['Instrument'] = error_message
+            issues['Analyser'] = error_message
+            issues['Reflection'] = error_message
+
+        # Validate spectra range
+        spectra_range = self.getProperty('DetectorRange').value
+        if len(spectra_range) != 2:
+            issues['DetectorRange'] = 'Range must contain exactly two items'
+        elif spectra_range[0] > spectra_range[1]:
+            issues['DetectorRange'] = 'Range must be in format: lower,upper'
+
+        # Validate background range
+        background_range = _elems_or_none(self.getProperty('BackgroundRange').value)
+        if background_range is not None:
+            if len(background_range) != 2:
+                issues['BackgroundRange'] = 'Range must contain exactly two items'
+            elif background_range[0] > background_range[1]:
+                issues['BackgroundRange'] = 'Range must be in format: lower,upper'
+
+        # Validate grouping method
+        grouping_method = self.getPropertyValue('GroupingMethod')
+        grouping_ws = _str_or_none(self.getPropertyValue('GroupingWorkspace'))
+        grouping_map_file = _str_or_none(self.getPropertyValue('MapFile'))
+
+        if grouping_method == 'Workspace' and grouping_ws is None:
+            issues['GroupingWorkspace'] = 'Must select a grouping workspace for current GroupingWorkspace'
+
+        if grouping_method == 'Map File' and grouping_map_file is None:
+            issues['MapFile'] = 'Must provide a map file for current GroupingMethod'
 
         return issues
 
 
     def _setup(self):
         """
-        Gets and algorithm properties.
+        Gets algorithm properties.
         """
 
+        # Get properties
         self._data_files = self.getProperty('InputFiles').value
         self._sum_files = self.getProperty('SumFiles').value
-        self._calib_ws_name = self.getPropertyValue('CalibrationWorkspace')
+        self._calibration_ws = _str_or_none(self.getPropertyValue('CalibrationWorkspace'))
 
         self._instrument_name = self.getPropertyValue('Instrument')
         self._analyser = self.getPropertyValue('Analyser')
         self._reflection = self.getPropertyValue('Reflection')
 
         self._spectra_range = self.getProperty('DetectorRange').value
-        self._background_range = self.getProperty('BackgroundRange').value
-        self._rebin_string = self.getPropertyValue('RebinString')
+        self._background_range = _elems_or_none(self.getProperty('BackgroundRange').value)
+        self._rebin_string = _str_or_none(self.getPropertyValue('RebinString'))
         self._detailed_balance = self.getProperty('DetailedBalance').value
         self._scale_factor = self.getProperty('ScaleFactor').value
         self._fold_multiple_frames = self.getProperty('FoldMultipleFrames').value
 
         self._grouping_method = self.getPropertyValue('GroupingMethod')
-        self._grouping_ws = self.getPropertyValue('GroupingWorkspace')
-        self._grouping_map_file = self.getPropertyValue('MapFile')
+        self._grouping_ws = _str_or_none(self.getPropertyValue('GroupingWorkspace'))
+        self._grouping_map_file = _str_or_none(self.getPropertyValue('MapFile'))
 
         self._plot_type = self.getPropertyValue('Plot')
         self._output_ws = self.getPropertyValue('OutputWorkspace')
 
+        # Get the IPF filename
         self._ipf_filename = os.path.join(config['instrumentDefinition.directory'],
                                           self._instrument_name + '_' + self._analyser + '_' + self._reflection + '_Parameters.xml')
         logger.information('Instrument parameter file: %s' % self._ipf_filename)
+
+        # Warn when grouping options are to be ignored
+        if self._grouping_method != 'Workspace' and self._grouping_ws is not None:
+            logger.warning('GroupingWorkspace will be ignored by selected GroupingMethod')
+
+        if self._grouping_method != 'Map File' and self._grouping_map_file is not None:
+            logger.warning('MapFile will be ignored by selected GroupingMethod')
 
         # The list of workspaces being processed
         self._workspace_names = []
