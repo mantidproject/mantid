@@ -95,8 +95,16 @@ bool LoadTomoConfig::checkOpenFile(std::string fname,
 
 /**
  * Loads a tomography parameterization file into a newly created table
- * workspace.
+ * workspace. The file must have the following syntax:
  *
+ * <NXentry name="entry1">
+ *   <NXsubentry name="processing">
+ *     <NXdata name="id">
+ *       <values id="ID VALUE" params="..." name="..." cite="...">
+ *       </values>
+ *     </NXdata>
+ *   </NXsubentry>
+ * </NXentry>
  * @param fname name of the parameterization file
  * @param wsName name of workspace where to load the file data
  *
@@ -164,10 +172,10 @@ ITableWorkspace_sptr LoadTomoConfig::loadFile(std::string& fname,
     std::string name = "";
     std::string cite = "";
     try {
-      id = f->getStrData();
-      params = f->getStrData();
-      name = f->getStrData();
-      cite = f->getStrData();
+      id = f->getStrData(); // f->readData<std::string>("id", id)
+      params = f->getStrData(); // f->readData<std::string>("params", params)
+      name = f->getStrData(); // f->readData<std::string>("name", name)
+      cite = f->getStrData(); // f->readData<std::string>("cite", cite)
     } catch(::NeXus::Exception &e) {
       // permissive, just error message but carry on
       g_log.warning() << "Failed to read some fields in tomographic "
