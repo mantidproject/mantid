@@ -167,6 +167,20 @@ class RunDescriptorTest(unittest.TestCase):
         ws1 = PropertyManager.sample_run.get_workspace()
         self.assertEqual(ws1.name(),ws_name)
 
+        # if no workspace is available, attempt to get workspace name fails
+        DeleteWorkspace(ws_name)
+        self.assertRaises(RuntimeError,PropertyManager.sample_run.get_ws_name)
+
+        propman.sample_run = None
+        self.assertFalse(ws_name+'_monitors' in mtd)
+        # name of empty property workspace 
+        self.assertEqual(PropertyManager.sample_run.get_ws_name(),'SR_')
+
+
+        # TODO: implement sum
+        #propman.sum_runs = 3
+        #ws_name = propman.get_sample_ws_name();
+        #self.assertEqual(ws_name,'MARI000000_spe-sum')
 
 
 if __name__=="__main__":

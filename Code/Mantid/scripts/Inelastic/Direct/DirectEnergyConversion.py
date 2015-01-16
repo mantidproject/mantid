@@ -234,10 +234,11 @@ class DirectEnergyConversion(object):
                 diag_params['sample_run'] = diag_sample
 
             # Set up the background integrals for diagnostic purposes
-            result_ws=diag_sample.get_workspace()
-            result_ws        = self.normalise(result_ws, result_ws.name(), self.normalise_method)
+            result_ws        = self.normalise(diag_sample, None, self.normalise_method)
             # remember the current workspace state 
             diag_sample.synchronize_ws(result_ws)
+
+            result_ws=diag_sample.get_workspace()
 
             bkgd_range = self.background_test_range
             background_int = Integration(result_ws,
@@ -588,12 +589,8 @@ class DirectEnergyConversion(object):
           wksp_out = self.get_sample_ws_name()
 
 
-      # Process old legacy parameters which are easy to re-define in dgreduce rather then transfer through Mantid
-      #TODO: (verify)
-      #program_args = process_legacy_parameters(**kwargs)
 
-
-      # inform user on what parameters have changed 
+      # inform user on what parameters have changed from script or gui
       self.prop_man.log_changed_values('notice');
       prop_man = self.prop_man
       #process complex parameters
@@ -664,7 +661,7 @@ class DirectEnergyConversion(object):
                     if not self.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better solution for that.
                         prop_man.log("======== Run diagnose for monochromatic vanadium run ===========",'notice');
 
-                        masking2 = self.diagnose(self.wb_for_monovan_run,self.monovan_run,
+                        masking2 = self.diagnose(PropertyManager.wb_for_monovan_run,PropertyManager.monovan_run,
                                          second_white = None,print_diag_results=True)
                         masking +=  masking2
                         DeleteWorkspace(masking2)
@@ -1084,7 +1081,7 @@ class DirectEnergyConversion(object):
                 mon_index = int(self.mon1_norm_spec)
 
 
-            output=NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
+            output=NormaliseToMonitor(InputWorkspace=data_ws, MonitorWorkspace=mon_ws, MonitorID=mon_index,
                                    IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)#,
 # debug line:                                   NormalizationFactorWSName='NormMonWS'+data_ws.getName())
         elif method == 'monitor-2':
@@ -1101,12 +1098,12 @@ class DirectEnergyConversion(object):
                 mon_index = int(self.mon2_norm_spec)
 
             # Normalize to monitor 2
-            output=NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
+            output=NormaliseToMonitor(InputWorkspace=data_ws, MonitorWorkspace=mon_ws, MonitorID=mon_index,
                                    IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True)
 # debug line:                      IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True,NormalizationFactorWSName='NormMonWS'+data_ws.getName())
 
         elif method == 'current':
-            NormaliseByCurrent(InputWorkspace=data_ws, OutputWorkspace=result_name)
+            NormaliseByCurrent(InputWorkspace=data_ws)
             output = mtd[result_name]
         else:
             raise RuntimeError('Normalization scheme ' + reference + ' not found. It must be one of monitor-1, monitor-2, current, or none')
@@ -1287,7 +1284,7 @@ class DirectEnergyConversion(object):
         object.__setattr__(self,'_descriptors',[])
         object.__setattr__(self,'_propMan',None)
             #
-        object.__setattr__(self,'_keep_wb_workspace',False)
+        object.__setattr__(self,'_keep_wb_workspace',True)
         object.__setattr__(self,'_do_ISIS_normalization',True)
         object.__setattr__(self,'_spectra_masks',None)
 

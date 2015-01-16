@@ -117,18 +117,19 @@ class SaveFileName(PropDescriptor):
                 name = instance.short_inst_name 
             else:
                 name = '_EMPTY'
-            try:
-                sr = instance.sample_run
-            except:
+
+            sr = owner.sample_run.run_number()
+            if not sr:
                 sr = 0
             try:
                 name +='{0:0<5}Ei{1:<4.2f}meV'.format(sr,instance.incident_energy)
                 if instance.sum_runs:
                     name +='sum'
-                if instance.monovan_run:
+                if owner.monovan_run.run_number():
                     name +='_Abs'
             except:
                 name = None
+        name = name.replace('.','d')
         return name
 
     def __set__(self,instance,value):

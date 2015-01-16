@@ -253,7 +253,7 @@ class RunDescriptor(PropDescriptor):
         return mon_ws
 #--------------------------------------------------------------------------------------------------------------------
     def get_ws_name(self):
-        """ return workspace name. If ws name is not defined, build it first and set up as target ws name
+        """ return workspace name. If ws name is not defined, build it first and set up as the target ws name
         """ 
 
         if self._ws_name:

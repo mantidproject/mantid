@@ -5,7 +5,7 @@ from mantid import api
 import unittest
 import inspect
 import numpy as np
-import sys
+import sys,copy
 from Direct.PropertyManager import PropertyManager
 
 
@@ -203,8 +203,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(200,propman.ei_mon_spectra[1])
 
 
-
-
     def test_set_get_mono_range(self):
         # TODO : A lot of changes and tests here for mono_range
         propman = self.prop_man
@@ -365,21 +363,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman.background_test_range = [1000,2000];
         bkg_test_range = propman.background_test_range;
         self.assertEqual(bkg_test_range,[1000,2000])
-
-    def test_get_sample_ws_name(self):
-        propman = self.prop_man
-
-        # no workspace name if sample is not defined. 
-        self.assertRaises(KeyError,propman.get_sample_ws_name)
-
-        propman.sample_run = 0;
-        ws_name = propman.get_sample_ws_name();
-        self.assertEqual(ws_name,'MARI000000_spe')
-
-        propman.sum_runs = 3
-        ws_name = propman.get_sample_ws_name();
-        self.assertEqual(ws_name,'MARI000000_spe-sum')
-
 
     def test_check_monovan_changed(self):
          propman = self.prop_man 
@@ -591,9 +574,12 @@ class DirectPropertyManagerTest(unittest.TestCase):
        propman = self.prop_man
 
        propman.incident_energy = 10
+       propman.sample_run = 0
+       propman.monovan_run = None 
+
 
        name = propman.save_file_name
-       self.assertEqual(name,'MAR00000Ei10.00meV')
+       self.assertEqual(name,'MAR00000Ei10d00meV')
 
     def test_log_to_Mantid(self):
         propman = self.prop_man
