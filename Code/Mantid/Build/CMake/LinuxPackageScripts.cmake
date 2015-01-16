@@ -94,10 +94,12 @@ set ( POST_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/postrm )
 
 if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedora" ) # RHEL/Fedora
   if ( "${UNIX_CODENAME}" MATCHES "Santiago" ) # el6
-    set ( WRAPPER_COMMAND "scl enable mantidlibs" )
+    set ( WRAPPER_PREFIX "scl enable mantidlibs \"" )
+    set ( WRAPPER_POSTFIX "\"" )
     set ( EXTRA_LDPATH "/usr/lib64/paraview" )
   else()
-    set ( WRAPPER_COMMAND "eval" )
+    set ( WRAPPER_PREFIX "" )
+    set ( WRAPPER_POSTFIX "" )
   endif()
 
   if ( NOT MPI_BUILD )
@@ -116,7 +118,8 @@ if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedor
     set ( CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE ${POST_UNINSTALL_FILE} )
   endif()
 elseif ( "${UNIX_DIST}" MATCHES "Ubuntu" )
-  set ( WRAPPER_COMMAND "eval" )
+  set ( WRAPPER_PREFIX "" )
+  set ( WRAPPER_POSTFIX "" )
 
   if ( NOT MPI_BUILD )
     configure_file ( ${CMAKE_MODULE_PATH}/Packaging/deb/scripts/deb_pre_inst.in
