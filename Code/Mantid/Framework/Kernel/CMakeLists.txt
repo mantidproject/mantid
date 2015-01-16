@@ -423,7 +423,7 @@ configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp.in
 
 # This needs to be done as a 2-step process for it to work for VS builds
 # First the part that turns relative into absolute paths in the properties file
-set ( MANTID_ROOT ${CMAKE_SOURCE_DIR} )
+set ( MANTID_ROOT ${CMAKE_SOURCE_DIR}/Code/Mantid )
 # This keeps things working for people building just the framework project
 if ( ${CMAKE_PROJECT_NAME} STREQUAL "MantidFramework" )
   set ( MANTID_ROOT ${CMAKE_SOURCE_DIR}/.. )
