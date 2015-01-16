@@ -159,7 +159,7 @@ test/vtkDataSetToScaledDataSetTest.h
 test/vtkDataSetToNonOrthogonalDataSetTest.h
 )
 
-include_directories( inc )
+include_directories( inc ../../Framework/MDEvents/inc )
 
 set( SRC_UNITY_IGNORE_FILES )
 if( UNITY_BUILD )
