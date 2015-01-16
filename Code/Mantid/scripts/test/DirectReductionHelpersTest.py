@@ -1,5 +1,5 @@
 import os
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_10803/bin/Release;"+os.environ["PATH"]
+os.environ["PATH"] = r"c:/Mantid/Code/builds/br_10803/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -483,6 +483,22 @@ class DirectReductionHelpersTest(unittest.TestCase):
 
         prop = getattr(test_class,'some_descriptor')
         self.assertEqual(prop.get_helper(),'using helper')
+
+    def test_split_file_name(self):
+        fpath,nums,fext = helpers.parse_run_file_name('MER10100.nxs')
+
+        self.assertEqual(fpath,'')
+        self.assertEqual(nums,10100)
+        self.assertEqual(fext,'.nxs')
+        fpath,nums,fext = helpers.parse_run_file_name('c:/somepath/MER1011,MER10100.nxs')
+        self.assertEqual(len(nums),2)
+        self.assertEqual(nums[0],1011)
+        self.assertEqual(nums[1],10100)
+        self.assertEqual(fpath[0],'c:/somepath')
+        self.assertEqual(fpath[1],'')
+
+        fpath,nums,fext = helpers.parse_run_file_name('c:/somepath/MER1011:MER1014.nxs,1046')
+        self.assertEqual(len(nums),5)
 
 
         

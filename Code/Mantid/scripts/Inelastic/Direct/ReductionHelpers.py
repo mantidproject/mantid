@@ -1,4 +1,5 @@
 from mantid import config
+import os
 
 """
 Set of functions to assist with processing instrument parameters relevant to reduction. 
@@ -301,7 +302,66 @@ def check_instrument_name(old_name,new_name):
     config['default.instrument'] = full_name
     return (new_name,full_name,facility)
 
+def parse_single_name(filename):
+    """ Process single run name into """
+    filepath,fname = os.path.split(filename)
+    if ':' in fname:
+       fl,fr=fname.split(':')
+       path1,ind1,ext1=parse_single_name(fl)
+       path2,ind2,ext2=parse_single_name(fr)
+       if ind1>ind2:
+           raise ValueError('Invalid file number defined using colon : left run number {0} has to be large then right {1}'.format(ind1,ind2))
+       number = range(ind1[0],ind2[0]+1)
+       if len(filepath)>0:
+          filepath=[filepath]*len(number)
+       else:
+          filepath=path1*len(number)
+       if len(ext2[0])>0:
+           fext = ext2*len(number)
+       else:
+           fext = ext1*len(number)
 
-def parse_run_file_name(filename):
-    """ Parses run file name to obtain run number, path if possible, """
-    raise NotImplementedError("not yet implemented") 
+       return (filepath,number,fext)
+        
+
+    fname,fext  = os.path.splitext(fname)
+    fnumber = filter(lambda x: x.isdigit(), fname)
+    if len(fnumber) == 0:
+        number = 0
+    else:
+        number = int(fnumber)
+    return ([filepath],[number],[fext])
+    
+
+def parse_run_file_name(run_string):
+    """ Parses run file name to obtain run number, path if possible, and file extension if any present in the string"""
+    if not isinstance(run_string,str):
+        raise ValueError("REDUCTION_HELPER:parse_run_file_name -- input has to be a string")
+
+    runs = run_string.split(',')
+    filepath = []
+    filenum  = []
+    fext     = []
+    anExt    = ''
+    for run in runs:
+        path,ind,ext1 = parse_single_name(run)
+        filepath+=path
+        filenum+=ind
+        fext+=ext1
+
+    non_empty = filter(lambda x: len(x) >0, fext)
+    if len(non_empty)>0:
+        anExt = non_empty[-1]
+        for i,val in enumerate(fext):
+            if len(val) == 0:
+                fext[i] = anExt
+
+    if len(filenum) == 1:
+        filepath = filepath[0]
+        filenum  = filenum[0]
+        fext     = fext[0]
+    # extensions should be either all the same or all defined
+    return (filepath,filenum,fext)
+
+    
+
