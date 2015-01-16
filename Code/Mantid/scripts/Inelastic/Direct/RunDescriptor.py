@@ -28,6 +28,7 @@ class RunDescriptor(PropDescriptor):
         # String used to identify the workspace related to this property w.r.t. other workspaces
         self._ws_cname  = ''
         self._ws_suffix   = ''
+        self._sum_runs = None
         #
         if not DocString is None:
             self.__doc__ = DocString
@@ -45,31 +46,23 @@ class RunDescriptor(PropDescriptor):
        """ Set up Run number from any source """
        # 
        old_ws_name = self._ws_name
-       def clear_old_ws(new_name):
-           if old_ws_name:
-             if new_name != old_ws_name:
-                if old_ws_name in mtd:
-                   DeleteWorkspace(old_ws_name)
-                old_mon_ws = old_ws_name+'_monitors'
-                if old_mon_ws  in mtd:
-                    DeleteWorkspace(old_mon_ws)
-
-                self._run_ext     = None
-                self._run_file_path = ''
        #end
        if value == None: # clear current run number
            self._run_number  = None
            self._ws_name     = None
            self._ws_cname    = ''
            self._ws_suffix   = ''   
-           clear_old_ws(self._ws_name)
+           self._clear_old_ws(old_ws_name,self._ws_name)
            return
        if isinstance(value, api.Workspace):
-           self._run_number = value.getRunNumber()
-           ws_name = value.name()
-           self._split_ws_name(ws_name)
-           self.synchronize_ws(value)
-           clear_old_ws(self._ws_name)
+           if 'Sum'  in value.getRun():
+               pass # TODO: not implemented
+           else:
+                self._run_number = value.getRunNumber()
+                ws_name = value.name()
+                self._split_ws_name(ws_name)
+                self.synchronize_ws(value)
+                self._clear_old_ws(old_ws_name,self._ws_name)
            return
 
        if isinstance(value,str): # it may be run number as string or it may be a workspace name
@@ -78,22 +71,27 @@ class RunDescriptor(PropDescriptor):
               self.__set__(instance,ws)
               return
           else:
-              run_num,file_path,fext = prop_helpers.parse_run_number_string(value,self._instr_name()) # TODO: parser  
-              self._run_number    = run_num
-              self._run_file_path = file_path
+              file_path,run_num,fext = prop_helpers.parse_run_number_string(value,self._instr_name())
+              if isinstance(run_num,list):
+                  self._sum_runs=(file_path,run_num,fext)
+                  self._run_number=0
+              else:
+                self._run_number    = run_num
+                self._run_file_path = file_path
 
-              if len(fext) > 0:
-                  self._run_ext = fext
+                if len(fext) > 0:
+                      self._run_ext = fext
 
        elif isinstance(value,list):
-           self._run_number = value
+           self._run_number = 0 
+           self._sum_runs=(['']*len(value),value,['']*len(value))
        else:
            self._run_number = int(value)
            self._ws_cname  = ''
 
        self._ws_name = None
        new_name = self.get_ws_name()
-       clear_old_ws(new_name )
+       self._clear_old_ws(old_ws_name,new_name)
 #--------------------------------------------------------------------------------------------------------------------    
     def run_number(self):
         """ Return run number regardless of workspace is loaded or not"""
@@ -232,6 +230,11 @@ class RunDescriptor(PropDescriptor):
         """ Get unbounded clone of existing Run workspace """
         ws = self.get_workspace()
         CloneWorkspace(InputWorkspace=ws,OutputWorkspace=clone_name)
+        mon_ws_name  = self.get_ws_name()+'_monitors'
+        if mon_ws_name in mtd:
+            cl_mon_name = clone_name+'_monitors'
+            CloneWorkspace(InputWorkspace=mon_ws_name,OutputWorkspace=cl_mon_name)
+
         return mtd[clone_name]
 #--------------------------------------------------------------------------------------------------------------------
     def get_monitors_ws(self,monitor_ID = None):
@@ -300,7 +303,6 @@ class RunDescriptor(PropDescriptor):
             if data_file[0:4] == 'ERROR':
                 raise IOError(data_file)
                        
-            format = self.get_file_ext()
             if load_mon_with_workspace:
                    mon_load_option = 'Include'
             else:
@@ -441,6 +443,19 @@ class RunDescriptor(PropDescriptor):
        else:
             instr_name = '_test_instrument'
        return instr_name 
+
+    def _clear_old_ws(self,old_ws_name,new_name):
+         if old_ws_name:
+             if new_name != old_ws_name:
+                if old_ws_name in mtd:
+                   DeleteWorkspace(old_ws_name)
+                old_mon_ws = old_ws_name+'_monitors'
+                if old_mon_ws  in mtd:
+                    DeleteWorkspace(old_mon_ws)
+
+                self._run_ext     = None
+                self._run_file_path = ''
+                self._sum_runs = None
 
 
 #-------------------------------------------------------------------------------------------------------------------------------

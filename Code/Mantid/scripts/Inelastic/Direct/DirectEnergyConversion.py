@@ -332,7 +332,7 @@ class DirectEnergyConversion(object):
 
         # Normalize
         self.__in_white_normalization = True;
-        white_ws = self.normalise(run, new_ws_name,self.normalise_method,0.0,mon_number)
+        white_ws = self.normalise(run, None,self.normalise_method,0.0,mon_number)
         self.__in_white_normalization = False;
 
         # Units conversion
@@ -675,49 +675,49 @@ class DirectEnergyConversion(object):
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
 #  Diagnostics here 
 # --------------------------------------------------------------------------------------------------------
-     # diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
-      if not masks_done:
-        prop_man.log("======== Run diagnose for sample run ===========================",'notice');
-        masking = self.diagnose(PropertyManager.wb_run,PropertyManager.mask_run,
-                                second_white=None,print_diag_results=True)
-        if prop_man.use_hard_mask_only:
-            header = "*** Hard mask file applied to workspace with {0:d} spectra masked {1:d} spectra"
-        else:
-            header = "*** Diagnostics processed workspace with {0:d} spectra and masked {1:d} bad spectra"
+     ## diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
+     # if not masks_done:
+     #   prop_man.log("======== Run diagnose for sample run ===========================",'notice');
+     #   masking = self.diagnose(PropertyManager.wb_run,PropertyManager.mask_run,
+     #                           second_white=None,print_diag_results=True)
+     #   if prop_man.use_hard_mask_only:
+     #       header = "*** Hard mask file applied to workspace with {0:d} spectra masked {1:d} spectra"
+     #   else:
+     #       header = "*** Diagnostics processed workspace with {0:d} spectra and masked {1:d} bad spectra"
 
 
-        # diagnose absolute units:
-        if self.monovan_run != None :
-            if self.mono_correction_factor == None :
-                if self.use_sam_msk_on_monovan == True:
-                    prop_man.log('  Applying sample run mask to mono van')
-                else:
-                    if not self.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better solution for that.
-                        prop_man.log("======== Run diagnose for monochromatic vanadium run ===========",'notice');
+     #   # diagnose absolute units:
+     #   if self.monovan_run != None :
+     #       if self.mono_correction_factor == None :
+     #           if self.use_sam_msk_on_monovan == True:
+     #               prop_man.log('  Applying sample run mask to mono van')
+     #           else:
+     #               if not self.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better solution for that.
+     #                   prop_man.log("======== Run diagnose for monochromatic vanadium run ===========",'notice');
 
-                        masking2 = self.diagnose(PropertyManager.wb_for_monovan_run,PropertyManager.monovan_run,
-                                         second_white = None,print_diag_results=True)
-                        masking +=  masking2
-                        DeleteWorkspace(masking2)
+     #                   masking2 = self.diagnose(PropertyManager.wb_for_monovan_run,PropertyManager.monovan_run,
+     #                                    second_white = None,print_diag_results=True)
+     #                   masking +=  masking2
+     #                   DeleteWorkspace(masking2)
 
 
-            else: # if Reducer.mono_correction_factor != None :
-                pass
-        # Very important statement propagating masks for further usage in convert_to_energy. 
-        # This property is also directly accessible from GUI.
-        self.spectra_masks=masking
-         # save mask if it does not exist and has been already loaded
-         #if Reducer.save_and_reuse_masks and not masks_done:
-         #    SaveMask(InputWorkspace=masking,OutputFile = mask_file_name,GroupedDetectors=True)
-      else:
-          header = '*** Using stored mask file for workspace with  {0} spectra and {1} masked spectra'
-          masking=self.spectra_masks
+     #       else: # if Reducer.mono_correction_factor != None :
+     #           pass
+     #   # Very important statement propagating masks for further usage in convert_to_energy. 
+     #   # This property is also directly accessible from GUI.
+     #   self.spectra_masks=masking
+     #    # save mask if it does not exist and has been already loaded
+     #    #if Reducer.save_and_reuse_masks and not masks_done:
+     #    #    SaveMask(InputWorkspace=masking,OutputFile = mask_file_name,GroupedDetectors=True)
+     # else:
+     #     header = '*** Using stored mask file for workspace with  {0} spectra and {1} masked spectra'
+     #     masking=self.spectra_masks
  
-      # estimate and report the number of failing detectors
-      failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)
-      nMaskedSpectra = len(failed_sp_list)
-      # this tells turkey in case of hard mask only but everything else semens work fine
-      prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice');
+     # # estimate and report the number of failing detectors
+     # failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)
+     # nMaskedSpectra = len(failed_sp_list)
+     # # this tells turkey in case of hard mask only but everything else semens work fine
+     # prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice');
 
       #Run the conversion first on the sample
       deltaE_wkspace_sample = self.mono_sample(PropertyManager.sample_run,self.incident_energy,PropertyManager.wb_run,
@@ -1048,9 +1048,9 @@ class DirectEnergyConversion(object):
         ScaleX(InputWorkspace=data_ws,OutputWorkspace=resultws_name,Operation="Add",Factor=-mon1_peak,
                InstrumentParameter="DelayTime",Combine=True)
 
-        # monitor 1 is before chopper
-        mon1_ID = self.mon1_norm_spec
-        mon1_det = monitor_ws.getDetector(mon1_ID)
+        # monitor 1 is before chopper    
+        spec_num = monitor_ws.getIndexFromSpectrumNumber(int(self.mon1_norm_spec)) 
+        mon1_det = monitor_ws.getDetector(spec_num )
         mon1_pos = mon1_det.getPos()
         src_name = data_ws.getInstrument().getSource().getName()
         MoveInstrumentComponent(Workspace=resultws_name,ComponentName= src_name, X=mon1_pos.getX(), Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
@@ -1083,7 +1083,7 @@ class DirectEnergyConversion(object):
         data_ws = run.get_workspace()
 
         if not result_name:
-            result_name = run.set_action_suffix('_normalized')
+           result_name = run.set_action_suffix('_normalized')
             
 
         # Make sure we don't call this twice
@@ -1091,7 +1091,8 @@ class DirectEnergyConversion(object):
         if done_log in data_ws.getRun() or method is None:
             if data_ws.name() != result_name:
                 RenameWorkspace(InputWorkspace=data_ws, OutputWorkspace=result_name)
-                #CloneWorkspace(InputWorkspace=data_ws, OutputWorkspace=result_name)
+                #CloneWorkspace(InputWorkspace=data_ws, OutputWorkspace=result_name) ???
+                data_ws = mtd[result_name]
             run.synchronize_ws(data_ws)
            
             output = mtd[result_name]
@@ -1118,9 +1119,9 @@ class DirectEnergyConversion(object):
                 mon_index = int(self.mon1_norm_spec)
 
 
-            output=NormaliseToMonitor(InputWorkspace=data_ws, MonitorWorkspace=mon_ws, MonitorID=mon_index,
+            NormaliseToMonitor(InputWorkspace=data_ws,OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
                                    IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)#,
-# debug line:                                   NormalizationFactorWSName='NormMonWS'+data_ws.getName())
+# debug line:                      NormalizationFactorWSName='NormMonWS'+data_ws.getName())
         elif method == 'monitor-2':
             # TODO:!!!
             # Found TOF range, correspondent to incident energy monitor peak;
@@ -1135,17 +1136,17 @@ class DirectEnergyConversion(object):
                 mon_index = int(self.mon2_norm_spec)
 
             # Normalize to monitor 2
-            output=NormaliseToMonitor(InputWorkspace=data_ws, MonitorWorkspace=mon_ws, MonitorID=mon_index,
+            NormaliseToMonitor(InputWorkspace=data_ws,OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
                                    IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True)
 # debug line:                      IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True,NormalizationFactorWSName='NormMonWS'+data_ws.getName())
 
         elif method == 'current':
-            NormaliseByCurrent(InputWorkspace=data_ws)
-            output = mtd[result_name]
+            NormaliseByCurrent(InputWorkspace=data_ws,OutputWorkspace=result_name)
         else:
             raise RuntimeError('Normalization scheme ' + reference + ' not found. It must be one of monitor-1, monitor-2, current, or none')
 
         # Add a log to the workspace to say that the normalization has been done
+        output = mtd[result_name]
         AddSampleLog(Workspace=output, LogName=done_log,LogText=method)
         run.synchronize_ws(output)
         return output
