@@ -675,49 +675,49 @@ class DirectEnergyConversion(object):
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
 #  Diagnostics here 
 # --------------------------------------------------------------------------------------------------------
-     ## diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
-     # if not masks_done:
-     #   prop_man.log("======== Run diagnose for sample run ===========================",'notice');
-     #   masking = self.diagnose(PropertyManager.wb_run,PropertyManager.mask_run,
-     #                           second_white=None,print_diag_results=True)
-     #   if prop_man.use_hard_mask_only:
-     #       header = "*** Hard mask file applied to workspace with {0:d} spectra masked {1:d} spectra"
-     #   else:
-     #       header = "*** Diagnostics processed workspace with {0:d} spectra and masked {1:d} bad spectra"
+     # diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
+      if not masks_done:
+        prop_man.log("======== Run diagnose for sample run ===========================",'notice');
+        masking = self.diagnose(PropertyManager.wb_run,PropertyManager.mask_run,
+                                second_white=None,print_diag_results=True)
+        if prop_man.use_hard_mask_only:
+            header = "*** Hard mask file applied to workspace with {0:d} spectra masked {1:d} spectra"
+        else:
+            header = "*** Diagnostics processed workspace with {0:d} spectra and masked {1:d} bad spectra"
 
 
-     #   # diagnose absolute units:
-     #   if self.monovan_run != None :
-     #       if self.mono_correction_factor == None :
-     #           if self.use_sam_msk_on_monovan == True:
-     #               prop_man.log('  Applying sample run mask to mono van')
-     #           else:
-     #               if not self.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better solution for that.
-     #                   prop_man.log("======== Run diagnose for monochromatic vanadium run ===========",'notice');
+        # diagnose absolute units:
+        if self.monovan_run != None :
+            if self.mono_correction_factor == None :
+                if self.use_sam_msk_on_monovan == True:
+                    prop_man.log('  Applying sample run mask to mono van')
+                else:
+                    if not self.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better solution for that.
+                        prop_man.log("======== Run diagnose for monochromatic vanadium run ===========",'notice');
 
-     #                   masking2 = self.diagnose(PropertyManager.wb_for_monovan_run,PropertyManager.monovan_run,
-     #                                    second_white = None,print_diag_results=True)
-     #                   masking +=  masking2
-     #                   DeleteWorkspace(masking2)
+                        masking2 = self.diagnose(PropertyManager.wb_for_monovan_run,PropertyManager.monovan_run,
+                                         second_white = None,print_diag_results=True)
+                        masking +=  masking2
+                        DeleteWorkspace(masking2)
 
 
-     #       else: # if Reducer.mono_correction_factor != None :
-     #           pass
-     #   # Very important statement propagating masks for further usage in convert_to_energy. 
-     #   # This property is also directly accessible from GUI.
-     #   self.spectra_masks=masking
-     #    # save mask if it does not exist and has been already loaded
-     #    #if Reducer.save_and_reuse_masks and not masks_done:
-     #    #    SaveMask(InputWorkspace=masking,OutputFile = mask_file_name,GroupedDetectors=True)
-     # else:
-     #     header = '*** Using stored mask file for workspace with  {0} spectra and {1} masked spectra'
-     #     masking=self.spectra_masks
+            else: # if Reducer.mono_correction_factor != None :
+                pass
+        # Very important statement propagating masks for further usage in convert_to_energy. 
+        # This property is also directly accessible from GUI.
+        self.spectra_masks=masking
+         # save mask if it does not exist and has been already loaded
+         #if Reducer.save_and_reuse_masks and not masks_done:
+         #    SaveMask(InputWorkspace=masking,OutputFile = mask_file_name,GroupedDetectors=True)
+      else:
+          header = '*** Using stored mask file for workspace with  {0} spectra and {1} masked spectra'
+          masking=self.spectra_masks
  
-     # # estimate and report the number of failing detectors
-     # failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)
-     # nMaskedSpectra = len(failed_sp_list)
-     # # this tells turkey in case of hard mask only but everything else semens work fine
-     # prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice');
+      # estimate and report the number of failing detectors
+      failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)
+      nMaskedSpectra = len(failed_sp_list)
+      # this tells turkey in case of hard mask only but everything else semens work fine
+      prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice');
 
       #Run the conversion first on the sample
       deltaE_wkspace_sample = self.mono_sample(PropertyManager.sample_run,self.incident_energy,PropertyManager.wb_run,
