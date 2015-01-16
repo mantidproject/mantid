@@ -50,6 +50,29 @@ first spectum will line up to relative to the spectrum selection spin box. At
 least one offset value must be zero (this is set check for automatically after
 an offset value has been changed).
 
+View
+----
+
+.. interface:: Data Comparison
+  :widget: gbView
+  :align: right
+
+The view section contains a set of tools for manipulating the plot and selecting
+spectra to plot via the *Spectrum* spin box, this is shown as the current
+spectra index out of the maximum spectra index after the offsets are applied.
+
+The *Pan* and *Zoom* buttons are usd to enable and disable the pan and zoom
+tools; pan allows you to drag the plot area to show a specific section of the
+curves, zoom allows you to select a section of the curves to zoom in on and
+reset the zoom level by right clicking on the plot, when either tool is selected
+you can use the scroll wheel to change the zoom level when the mouse is over the
+plot area.
+
+The *Maintain Zoom Level* option is used to keep the same pan and zoom settings
+when switching between spectra and adding new data, when this is disabled the
+plot will automatically be resized such that all curves are visible on the plot.
+This can also be done manually by clicking the *Reset View* button.
+
 Diff
 ----
 
