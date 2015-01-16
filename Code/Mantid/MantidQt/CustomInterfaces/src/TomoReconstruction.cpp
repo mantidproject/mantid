@@ -19,6 +19,47 @@ namespace MantidQt
   }
 }
 
+class OwnTreeWidgetItem : public QTreeWidgetItem
+{
+public:
+  OwnTreeWidgetItem(QTreeWidgetItem *parent, QTreeWidgetItem *logicalParent = NULL,
+                    const std::string key = ""):
+    QTreeWidgetItem(parent)
+  {
+    m_rootParent = logicalParent;
+    m_key=key;
+  }
+
+  OwnTreeWidgetItem(QStringList list, QTreeWidgetItem *logicalParent = NULL, const std::string key = ""):
+    QTreeWidgetItem(list)
+  {
+    m_rootParent = logicalParent;
+    m_key=key;
+  }
+
+  OwnTreeWidgetItem(QTreeWidgetItem *parent, QStringList list, QTreeWidgetItem *logicalParent = NULL,
+                    const std::string key = ""):
+    QTreeWidgetItem(parent, list)
+  {
+    m_rootParent = logicalParent;
+    m_key=key;
+  }
+
+  QTreeWidgetItem* getRootParent()
+  {
+    return m_rootParent;
+  }
+
+  std::string getKey()
+  {
+    return m_key;
+  }
+
+private:
+  QTreeWidgetItem* m_rootParent;
+  std::string m_key;
+};
+
 using namespace MantidQt::CustomInterfaces;
 
 size_t TomoReconstruction::nameSeqNo = 0;
@@ -58,7 +99,8 @@ void TomoReconstruction::initLayout()
   // Lists/trees
   connect(m_uiForm.listAvailablePlugins, SIGNAL(itemSelectionChanged()), this, SLOT(availablePluginSelected()));  
   connect(m_uiForm.treeCurrentPlugins, SIGNAL(itemSelectionChanged()), this, SLOT(currentPluginSelected())); 
-  connect(m_uiForm.treeCurrentPlugins, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(expandedItem(QTreeWidgetItem*))); 
+  connect(m_uiForm.treeCurrentPlugins, SIGNAL(itemExpanded(QTreeWidgetItem*)), this,
+          SLOT(expandedItem(QTreeWidgetItem*)));
   
   // Buttons    
   connect(m_uiForm.btnTransfer, SIGNAL(released()), this, SLOT(transferClicked()));  
@@ -80,7 +122,8 @@ void TomoReconstruction::loadSettings()
 
 void TomoReconstruction::loadAvailablePlugins()
 {
-  // TODO:: load actual plugins - creating a couple of test choices for now (should fetch from remote api when implemented)
+  // TODO:: load actual plugins -
+  // creating a couple of test choices for now (should fetch from remote api when implemented)
   // - Should also verify the param string is valid json when setting
   // Create plugin tables
  
@@ -343,9 +386,9 @@ QString TomoReconstruction::tableWSToString(ITableWorkspace_sptr table)
   std::stringstream msg;
   TableRow row = table->getFirstRow();
   msg << "ID: " << 
-    table->cell<std::string>(0,0) << "\nParams: " << 
-    table->cell<std::string>(0,1) << "\nName: " << 
-    table->cell<std::string>(0,2) << "\nCite: " << 
+    table->cell<std::string>(0,0) << std::endl << "Params: " <<
+    table->cell<std::string>(0,1) << std::endl << "Name: " <<
+    table->cell<std::string>(0,2) << std::endl << "Cite: " <<
     table->cell<std::string>(0,3);
   return QString::fromStdString(msg.str());
 }
@@ -399,11 +442,11 @@ std::string TomoReconstruction::createUniqueNameHidden()
 // Creates a treewidget item for a table workspace
 void TomoReconstruction::createPluginTreeEntry(Mantid::API::ITableWorkspace_sptr table)
 { 
-  QStringList idStr, paramsStr, nameStr, citeStr;
+  QStringList idStr, nameStr, citeStr, paramsStr;
   idStr.push_back(QString::fromStdString("ID: " + table->cell<std::string>(0,0)));
-  paramsStr.push_back(QString::fromStdString("Params:"));
   nameStr.push_back(QString::fromStdString("Name: " + table->cell<std::string>(0,2)));
   citeStr.push_back(QString::fromStdString("Cite: " + table->cell<std::string>(0,3)));
+  paramsStr.push_back(QString::fromStdString("Params:"));
 
   // Setup editable tree items
   QList<QTreeWidgetItem*> items;
@@ -412,13 +455,10 @@ void TomoReconstruction::createPluginTreeEntry(Mantid::API::ITableWorkspace_sptr
 
   // Add to the tree list. Adding now to build hierarchy for later setItemWidget call
   items.push_back(new OwnTreeWidgetItem(pluginBaseItem, idStr, pluginBaseItem));
-  items.push_back(pluginParamsItem);
   items.push_back(new OwnTreeWidgetItem(pluginBaseItem, nameStr, pluginBaseItem));
   items.push_back(new OwnTreeWidgetItem(pluginBaseItem, citeStr, pluginBaseItem));
+  items.push_back(pluginParamsItem);
 
-  pluginBaseItem->addChildren(items);
-  m_uiForm.treeCurrentPlugins->addTopLevelItem(pluginBaseItem);
-  
   // Params will be a json string which needs splitting into child tree items [key/value]
   ::Json::Value root;
   std::string json = table->cell<std::string>(0,1);
@@ -459,4 +499,7 @@ void TomoReconstruction::createPluginTreeEntry(Mantid::API::ITableWorkspace_sptr
       m_uiForm.treeCurrentPlugins->setItemWidget(container,0,w);
     }     
   }  
+
+  pluginBaseItem->addChildren(items);
+  m_uiForm.treeCurrentPlugins->addTopLevelItem(pluginBaseItem);
 }

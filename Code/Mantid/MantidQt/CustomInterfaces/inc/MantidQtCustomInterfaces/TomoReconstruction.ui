@@ -17,12 +17,15 @@
    <layout class="QGridLayout" name="gridLayout_4">
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabMain">
+      <property name="toolTip">
+       <string/>
+      </property>
       <property name="currentIndex">
        <number>0</number>
       </property>
       <widget class="QWidget" name="editParamTab">
        <attribute name="title">
-        <string>Edit Parameters</string>
+        <string>Parameters</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout">
         <property name="spacing">
@@ -331,6 +334,10 @@
                      <horstretch>1</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
+                   </property>
+                   <property name="toolTip">
+                    <string>Here you can modify the parameters of the plugins.
+Double-click on them to modify their values.</string>
                    </property>
                    <column>
                     <property name="text">

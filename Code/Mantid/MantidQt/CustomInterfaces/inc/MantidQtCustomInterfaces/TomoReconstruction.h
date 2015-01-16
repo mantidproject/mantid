@@ -19,10 +19,12 @@ namespace MantidQt
   namespace CustomInterfaces
   {
     /**
-
+    Tomographic reconstruction GUI. Interface for editing parameters and
+    running jobs.
     @author John R Hill, STFC
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD
+    Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -53,7 +55,7 @@ namespace MantidQt
       /// Destructor
       ~TomoReconstruction() {}
       /// Interface name
-      static std::string name() { return "Tomography Reconstruction"; }
+      static std::string name() { return "Tomographic Reconstruction"; }
       /// This interface's categories.
       static QString categoryInfo() { return "Diffraction"; }
       /// Setup tab UI
@@ -92,18 +94,5 @@ namespace MantidQt
     };
   }
 }
-
-class OwnTreeWidgetItem : public QTreeWidgetItem
-{  
-public:
-  OwnTreeWidgetItem( QTreeWidgetItem *parent, QTreeWidgetItem *logicalParent = NULL, const std::string key = "") : QTreeWidgetItem(parent) { m_rootParent = logicalParent; m_key=key; }
-  OwnTreeWidgetItem( QStringList list, QTreeWidgetItem *logicalParent = NULL, const std::string key = "") : QTreeWidgetItem(list) { m_rootParent = logicalParent; m_key=key; }
-  OwnTreeWidgetItem( QTreeWidgetItem *parent, QStringList list, QTreeWidgetItem *logicalParent = NULL, const std::string key = "") : QTreeWidgetItem(parent, list) { m_rootParent = logicalParent; m_key=key; }
-  QTreeWidgetItem* getRootParent(){ return m_rootParent; }
-  std::string getKey() { return m_key; }
-private:
-  QTreeWidgetItem* m_rootParent;
-  std::string m_key;
-};
 
 #endif
