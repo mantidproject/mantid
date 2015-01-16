@@ -125,6 +125,11 @@ void SortHKL::exec() {
       peaksW->removePeak(i);
   }
   NumberPeaks = peaksW->getNumberPeaks();
+  if (NumberPeaks == 0)
+  {
+    g_log.error() << "Number of peaks should not be 0 for SortHKL.\n";
+    return;
+  }
   int equivalent = 0;
   for (int i = 0; i < NumberPeaks; i++) {
     V3D hkl1 = peaks[i].getHKL();

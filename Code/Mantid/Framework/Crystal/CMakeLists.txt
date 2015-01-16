@@ -202,6 +202,7 @@ set ( TEST_FILES
 	ShowPossibleCellsTest.h
 	SortHKLTest.h
 	SortPeaksWorkspaceTest.h
+	StatisticsOfPeaksWorkspaceTest.h
 	TransformHKLTest.h
 )
 
