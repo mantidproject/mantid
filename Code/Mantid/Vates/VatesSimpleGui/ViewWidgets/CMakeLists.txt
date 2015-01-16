@@ -64,7 +64,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/MantidQt/API/inc
   ${CMAKE_SOURCE_DIR}/MantidQt/MantidWidgets/inc
   ${CMAKE_SOURCE_DIR}/MantidQt/SliceViewer/inc
-  ${CMAKE_BINARY_DIR}/MantidQt/SliceViewer
+  ${CMAKE_BINARY_DIR}/Code/Mantid/MantidQt/SliceViewer
   ${CMAKE_SOURCE_DIR}/MantidQt/Factory/inc
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets

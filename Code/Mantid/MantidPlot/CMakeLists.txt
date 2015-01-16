@@ -804,9 +804,9 @@ include_directories ( ../MantidQt/SliceViewer/inc )
 include_directories ( ../MantidQt/SpectrumViewer/inc )
 include_directories ( ../MantidQt/Factory/inc )
 # ui_ files end up in these places
-include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/API )
-include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/MantidWidgets )
-include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/SliceViewer )
+include_directories ( ${CMAKE_BINARY_DIR}/Code/Mantid/MantidQt/API )
+include_directories ( ${CMAKE_BINARY_DIR}/Code/Mantid/MantidQt/MantidWidgets )
+include_directories ( ${CMAKE_BINARY_DIR}/Code/Mantid/MantidQt/SliceViewer )
 
 
 ###########################################################################
