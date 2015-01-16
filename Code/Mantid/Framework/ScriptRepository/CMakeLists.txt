@@ -19,7 +19,7 @@ add_subdirectory ( test )
 # Set the name of the generated library
 set_target_properties ( ScriptRepository PROPERTIES OUTPUT_NAME MantidScriptRepository 
                         COMPILE_DEFINITIONS IN_MANTID_SCRIPTREPO
-                        INSTALL_RPATH "@loader_path/../contents/MacOS/")
+                        INSTALL_RPATH "@loader_path/../Contents/MacOS/")
 
 set_property (TARGET ScriptRepository PROPERTY FOLDER "MantidFramework")
 

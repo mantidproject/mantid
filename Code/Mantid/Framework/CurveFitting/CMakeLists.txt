@@ -318,7 +318,7 @@ add_library ( CurveFitting ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( CurveFitting PROPERTIES OUTPUT_NAME MantidCurveFitting 
                                      COMPILE_DEFINITIONS IN_MANTID_CURVEFITTING
-                                     INSTALL_RPATH "@loader_path/../contents/MacOS/")
+                                     INSTALL_RPATH "@loader_path/../Contents/MacOS/")
 # Add to the 'Framework' group in VS
 set_property ( TARGET CurveFitting PROPERTY FOLDER "MantidFramework" )
 

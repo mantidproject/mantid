@@ -324,7 +324,8 @@ add_library ( CustomInterfaces ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 # Set the name of the generated library
 set_target_properties ( CustomInterfaces PROPERTIES OUTPUT_NAME MantidQtCustomInterfaces
-                                                    COMPILE_DEFINITIONS IN_MANTIDQT_CUSTOMINTERFACES )
+                                                    COMPILE_DEFINITIONS IN_MANTIDQT_CUSTOMINTERFACES 
+						    INSTALL_RPATH "@loader_path/../../../Contents/MacOS/")
 
 find_Package(Threads)
 

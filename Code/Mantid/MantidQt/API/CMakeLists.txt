@@ -120,7 +120,8 @@ qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 enable_precompiled_headers( inc/MantidQtAPI/PrecompiledHeader.h ALL_SRC )
 add_library ( MantidQtAPI ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
-set_target_properties ( MantidQtAPI PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_API )
+set_target_properties ( MantidQtAPI PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_API 
+                                               INSTALL_RPATH "@loader_path/../MacOS")
 
 target_link_libraries ( MantidQtAPI ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 

@@ -82,7 +82,7 @@ add_library ( ICat ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( ICat PROPERTIES OUTPUT_NAME MantidICat 
                                         COMPILE_DEFINITIONS IN_MANTID_ICAT 
-                                        INSTALL_RPATH "@loader_path/../contents/MacOS/")
+                                        INSTALL_RPATH "@loader_path/../Contents/MacOS/")
 # Add to the 'Framework' group in VS
 set_property ( TARGET ICat PROPERTY FOLDER "MantidFramework" )
 

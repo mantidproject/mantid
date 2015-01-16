@@ -20,7 +20,7 @@ add_library ( ISISLiveData ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( ISISLiveData PROPERTIES OUTPUT_NAME MantidISISLiveData 
                                                 COMPILE_DEFINITIONS IN_MANTID_ISISLIVEDATA 
-                                                INSTALL_RPATH "@loader_path/../contents/MacOS/")
+                                                INSTALL_RPATH "@loader_path/../Contents/MacOS/")
 # Add to the 'Framework' group in VS
 set_property ( TARGET ISISLiveData PROPERTY FOLDER "MantidFramework" )
 
