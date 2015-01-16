@@ -378,9 +378,12 @@ void PoldiFitPeaks1D2::exec() {
 
   PoldiPeakCollection_sptr fittedPeaksNew = fitPeaks(m_peaks);
   PoldiPeakCollection_sptr fittedPeaksOld = m_peaks;
-  while (fittedPeaksNew->peakCount() < fittedPeaksOld->peakCount()) {
+
+  int i = 0;
+  while (fittedPeaksNew->peakCount() < fittedPeaksOld->peakCount() || i < 1) {
     fittedPeaksOld = fittedPeaksNew;
     fittedPeaksNew = fitPeaks(fittedPeaksOld);
+    ++i;
   }
 
   setProperty("OutputWorkspace", m_peaks->asTableWorkspace());
