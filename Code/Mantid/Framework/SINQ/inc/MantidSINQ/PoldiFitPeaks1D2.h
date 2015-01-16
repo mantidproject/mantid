@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace Poldi {
 /// Helper class for refining peaks with overlapping ranges
-class RefinedRange {
+class MANTID_SINQ_DLL RefinedRange {
 public:
   RefinedRange(const PoldiPeak_sptr &peak, double fwhmMultiples);
   RefinedRange(double xStart, double xEnd,
@@ -49,7 +49,7 @@ private:
 
 typedef boost::shared_ptr<RefinedRange> RefinedRange_sptr;
 
-bool operator<(const RefinedRange_sptr &lhs, const RefinedRange_sptr &rhs);
+bool MANTID_SINQ_DLL operator<(const RefinedRange_sptr &lhs, const RefinedRange_sptr &rhs);
 
 /** PoldiFitPeaks1D2 :
 
