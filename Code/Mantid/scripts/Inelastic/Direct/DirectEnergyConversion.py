@@ -185,7 +185,7 @@ class DirectEnergyConversion(object):
         white = self.get_run_descriptor(white)
 
         # return all diagnostics parameters
-        diag_params = self.prop_man.get_diagnostics_parameters();
+        diag_params = self.prop_man.get_diagnostics_parameters()
 
         ## if input parameter is workspace rather then run, we want to keep it
         #self._keep_wb_workspace = False
@@ -240,6 +240,7 @@ class DirectEnergyConversion(object):
 
             result_ws=diag_sample.get_workspace()
 
+            #>>> here result workspace is being processed -- not touching result ws
             bkgd_range = self.background_test_range
             background_int = Integration(result_ws,
                                          RangeLower=bkgd_range[0],RangeUpper=bkgd_range[1],
@@ -278,6 +279,25 @@ class DirectEnergyConversion(object):
         return diag_mask
 
 
+    def _build_white_tag(self,masking_wksp,map_file):
+
+        if masking_wksp:
+            n_spectra = masking_wksp.getNumberHistograms()
+            n_masked = 0
+            for i in xrange(n_spectra):
+                if masking_wksp.readY(i)[0] >0.99 : # spectrum is masked
+                    n_masked=n_masked +1
+        else:
+            n_masked = 0
+        if map_file:
+            map_tag = os.path.basename(map_file)
+        else:
+            map_tag = ''
+        low,upp=self.wb_integr_range
+        white_tag='MaskedWith:{0}sp_MappedBy:{1}_NormBy:{2}_IntergatedIn:{3:0>10.2f}:{4:0>10.2f}'.format(n_masked,map_tag,self.normalise_method,low,upp)
+
+        return white_tag
+
     def do_white(self, run, spectra_masks=None, map_file=None,mon_number=None):
         """
         Create the workspace, which each spectra containing the correspondent white beam integral (single value)
@@ -287,16 +307,29 @@ class DirectEnergyConversion(object):
         and is used to remove the influence of this efficiency to the different detectors.
         """
         run = self.get_run_descriptor(run)
-
         white_ws = run.get_workspace()
+        # This both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
+        done_Log = 'DET_EFFICIENCY_calculated'
+
         # set action suffix and check if such workspace is already present
         new_ws_name = run.set_action_suffix('_norm_white')
+
+        # Check if the work has been already done
         if new_ws_name in mtd:
-            if self._keep_wb_workspace:
-                return
+            targ_ws = mtd[new_ws_name]
+            if done_Log in targ_ws.getRun():
+                old_log_val=targ_ws.getRun().getLogData(done_Log).value
+                done_log_VAL = self._build_white_tag(spectra_masks,map_file)
+                if old_log_val == done_log_VAL:
+                    run.synchronize_ws(targ_ws)
+                    return mtd[new_ws_name]
+                else:
+                    DeleteWorkspace(Workspace=new_ws_name)
             else:
                 DeleteWorkspace(Workspace=new_ws_name)
         #end 
+        done_log_VAL = self._build_white_tag(spectra_masks,map_file)
+
         # Normalize
         self.__in_white_normalization = True;
         white_ws = self.normalise(run, new_ws_name,self.normalise_method,0.0,mon_number)
@@ -306,10 +339,10 @@ class DirectEnergyConversion(object):
         white_ws = ConvertUnits(InputWorkspace=white_ws,OutputWorkspace=new_ws_name, Target= "Energy", AlignBins=0)
         self.prop_man.log("do_white: finished converting Units",'information')
         run.synchronize_ws(white_ws)
-        # This both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
         low,upp=self.wb_integr_range
         if low > upp:
             raise ValueError("White beam integration range is inconsistent. low=%d, upp=%d" % (low,upp))
+
         delta = 2.0*(upp - low)
         white_ws = Rebin(InputWorkspace=white_ws,OutputWorkspace=new_ws_name, Params=[low, delta, upp])
         # Why aren't we doing this...
@@ -320,6 +353,7 @@ class DirectEnergyConversion(object):
 
         # White beam scale factor
         white_ws *= self.wb_scale_factor
+        AddSampleLog(white_ws,LogName = done_Log,LogText=done_log_VAL,LogType='String')
         run.synchronize_ws(white_ws)
         return white_ws
 
@@ -584,9 +618,9 @@ class DirectEnergyConversion(object):
       # output workspace name.
       try:
           n,r=funcreturns.lhs_info('both')
-          wksp_out=r[0]
+          out_ws_name=r[0]
       except:
-          wksp_out = self.get_sample_ws_name()
+          out_ws_name = None
 
 
 
@@ -699,8 +733,8 @@ class DirectEnergyConversion(object):
 
 
       results_name = deltaE_wkspace_sample.name();
-      if results_name != wksp_out:
-         RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=wksp_out)
+      if out_ws_name and results_name != out_ws_name:
+         RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
 
 
       ei= (deltaE_wkspace_sample.getRun().getLogData("Ei").value)
@@ -800,7 +834,7 @@ class DirectEnergyConversion(object):
 
             # convert to monovanadium to energy
             deltaE_wkspace_monovan  = self.mono_sample(monovan_run,ei_guess,wb_mono,
-                                                      prop_man.monovan_mapfile,self.spectra_masks)
+                                                      self.monovan_mapfile,self.spectra_masks)
             #deltaE_wkspace_monovan = self.convert_to_energy(monovan_run, ei_guess, wb_mono)
 
 
@@ -1056,9 +1090,12 @@ class DirectEnergyConversion(object):
         done_log = "DirectInelasticReductionNormalisedBy"
         if done_log in data_ws.getRun() or method is None:
             if data_ws.name() != result_name:
-                CloneWorkspace(InputWorkspace=data_ws, OutputWorkspace=result_name)
+                RenameWorkspace(InputWorkspace=data_ws, OutputWorkspace=result_name)
+                #CloneWorkspace(InputWorkspace=data_ws, OutputWorkspace=result_name)
+            run.synchronize_ws(data_ws)
+           
             output = mtd[result_name]
-            return output;
+            return output
 
         method = method.lower()
 
@@ -1208,45 +1245,6 @@ class DirectEnergyConversion(object):
 
         return (result_ws,monitor_ws)
 
-    @staticmethod
-    def check_monitor_ws(data_ws,monitor_ws,ei_mon_spectra):
-        """ Check if monitors spectra are indeed located in monitor workspace and if not, try to 
-            find them in data workspace
-
-            return tuple of workspaces, with first is data and second -- monitors workspace pointers
-            both can point to the same workspace if monitors and data are located in the same workspace
-
-            Raise if can not found monitors in any workspace 
-        """ 
-
-        if isinstance(monitor_ws,str):
-            monitor_ws = mtd[monitor_ws]
-        if isinstance(data_ws,str): 
-            data_ws = mtd[data_ws]
-        for nspec in ei_mon_spectra:
-            # in case it is list of strings
-            nsp = int(nspec)
-            try:
-                # check if the spectra with correspondent number is present in the workspace
-                nsp = monitor_ws.getIndexFromSpectrumNumber(nspec);
-            except RuntimeError as err:
-                mon_ws = data_ws.getName()+'_monitors'
-                try:
-                    monitor_ws = mtd[mon_ws];
-                except:
-                    monitor_ws=data_ws
-                # no spectra in data workspace
-
-                try:
-                    # check if the spectra with correspondent number is present in the data workspace
-                    nsp = monitor_ws.getIndexFromSpectrumNumber(nspec);
-                except RuntimeError as err:
-                    print "**** ERROR while attempting to get spectra {0} from workspace: {1}, error: {2} ".format(nsp,monitor_ws.getName(), err)
-                    raise
-            #end No spectra in initial monitor ws
-
-
-        return (data_ws,monitor_ws)
 
     @property 
     def prop_man(self):

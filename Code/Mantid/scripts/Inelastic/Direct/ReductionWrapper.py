@@ -89,7 +89,7 @@ def MainProperties(main_prop_definition):
         properties = main_prop_definition(*args)
         #print "in decorator: ",properties
         host = args[0];
-        host._main_properties=properties;
+        host._main_properties=properties
         host.iliad_prop.set_input_parameters(**properties);
         return properties
 

@@ -191,6 +191,17 @@ class RunDescriptor(PropDescriptor):
              RunDescriptor._logger(message,'warning')
              return 'ERROR:find_file: '+message
 #--------------------------------------------------------------------------------------------------------------------
+    @staticmethod
+    def _check_claibration_source():
+         """ if user have not specified calibration as input to the script, 
+             try to retrieve calibration stored in file with run properties"""
+         changed_prop = RunDescriptor._holder.getChangedProperties()
+         if 'det_cal_file' in changed_prop:
+              use_workspace_calibration = False
+         else:
+              use_workspace_calibration = True
+         return use_workspace_calibration
+
     def get_workspace(self):
         """ Method returns workspace correspondent to current run number(s)
             and loads this workspace if it has not been loaded
@@ -201,18 +212,19 @@ class RunDescriptor(PropDescriptor):
            return None
 
         if self._ws_name in mtd:
-           return mtd[self._ws_name]
+            ws = mtd[self._ws_name]
+            if ws.run().hasProperty("calibrated"):
+                return ws # already calibrated
+            else:
+               prefer_ws_calibration = self._check_claibration_source()
+               self.apply_calibration(ws,RunDescriptor._holder.det_cal_file,prefer_ws_calibration)
+               return ws
         else:
            if self._run_number:
+               prefer_ws_calibration = self._check_claibration_source()
                inst_name   = RunDescriptor._holder.short_inst_name
-               changed_prop = RunDescriptor._holder.getChangedProperties()
-               if 'det_cal_file' in changed_prop:
-                   use_workspace_calibration = False
-               else:
-                   use_workspace_calibration = True
-
                calibration = RunDescriptor._holder.det_cal_file
-               return self.load_run(inst_name, calibration,False, RunDescriptor._holder.load_monitors_with_workspace,use_workspace_calibration)
+               return self.load_run(inst_name, calibration,False, RunDescriptor._holder.load_monitors_with_workspace,prefer_ws_calibration)
            else:
               return None
 #--------------------------------------------------------------------------------------------------------------------
@@ -312,7 +324,8 @@ class RunDescriptor(PropDescriptor):
     def apply_calibration(self,loaded_ws,calibration=None,use_ws_calibration=True):
         """  If calibration is present, apply it to the workspace 
         
-             use_ws_calibration -- if true, retrieve workspace calibration option, stored with workspace and try to use it
+             use_ws_calibration -- if true, retrieve workspace property, which defines 
+             calibration option (e.g. det_cal_file used a while ago) and try to use it
         """
 
         if not (calibration or use_ws_calibration):
@@ -417,8 +430,9 @@ class RunDescriptor(PropDescriptor):
         name= name.replace(self._prop_name,'',1)
         if self._run_number:
             instr_name  = self._instr_name()
-            strnum = '{0}{1:0>#6d}'.format(instr_name,self._run_number)
-            self._ws_cname = self.rremove(name,strnum)
+            name= name.replace(instr_name,'',1)
+            self._ws_cname = filter(lambda c: not c.isdigit(), name)
+
         else:
             self._ws_cname = name
     def _instr_name(self):
