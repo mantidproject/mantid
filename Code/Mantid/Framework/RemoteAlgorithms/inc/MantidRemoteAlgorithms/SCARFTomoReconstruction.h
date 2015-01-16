@@ -7,7 +7,7 @@ namespace Mantid {
 namespace RemoteAlgorithms {
 /***
     Algorithm to initiate, query about, or cancel a tomographic
-    reconstruction on SCARF at RAL.
+    reconstruction on the SCARF computer cluster at RAL.
     The algorithm can be used to send different commands to the job
     queue, for example: start a reconstruction job, retrieve
     information about a job or to cancel jobs.
