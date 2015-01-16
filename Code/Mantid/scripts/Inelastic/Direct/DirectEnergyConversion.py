@@ -543,7 +543,7 @@ class DirectEnergyConversion(object):
            self._do_mono_SNS(run,result_name,ei_guess,
                          white_run, map_file, spectra_masks, Tzero)
 
-        prop_man = self.prop_man;
+        prop_man = self.prop_man
         #######################
         # Ki/Kf Scaling...
         if prop_man.apply_kikf_correction:
@@ -695,8 +695,10 @@ class DirectEnergyConversion(object):
  
       # calculate absolute units integral and apply it to the workspace
       if self.monovan_run != None or self.mono_correction_factor != None :
-         deltaE_wkspace_sample = self.apply_absolute_normalization(deltaE_wkspace_sample,self.monovan_run,\
-                                      self.incident_energy,self.wb_for_monovan_run)
+         deltaE_wkspace_sample = self.apply_absolute_normalization(deltaE_wkspace_sample,PropertyManager.monovan_run,\
+                                                                   self.incident_energy,PropertyManager.wb_for_monovan_run)
+      # ensure that the sample_run name is intact with workspace
+      PropertyManager.sample_run.synchronize_ws(deltaE_wkspace_sample)
 
 
       results_name = deltaE_wkspace_sample.name();
@@ -710,8 +712,6 @@ class DirectEnergyConversion(object):
       end_time=time.time()
       prop_man.log("*** Elapsed time = {0} sec".format(end_time-start_time),'notice');
 
-      if mtd.doesExist('_wksp.spe-white')==True:
-        DeleteWorkspace(Workspace='_wksp.spe-white')
     # Hack for multirep mode?
 #    if mtd.doesExist('hard_mask_ws') == True:
  #       DeleteWorkspace(Workspace='hard_mask_ws')
@@ -720,10 +720,9 @@ class DirectEnergyConversion(object):
       self.calculate_rotation(deltaE_wkspace_sample)
       #
       self.save_results(deltaE_wkspace_sample)
+      #
       # Currently clear masks unconditionally TODO: cash masks with appropriate precautions
       self.spectra_masks = None
-      # Clear loaded raw data to free up memory --TODO: does not think it works now
-      common.clear_loaded_data()
 
 
       return deltaE_wkspace_sample
@@ -777,7 +776,7 @@ class DirectEnergyConversion(object):
         return accumulator;
 
 
-    def apply_absolute_normalization(self,deltaE_wkspace_sample,monovan_run=None,ei_guess=None,wb_mono=None):
+    def apply_absolute_normalization(self,sample_ws,monovan_run=None,ei_guess=None,wb_mono=None):
         """  Function applies absolute normalization factor to the target workspace
              and calculates this factor if necessary
 
@@ -797,21 +796,15 @@ class DirectEnergyConversion(object):
             prop_man.log('*** Using supplied workspace correction factor                           ******','notice')
             abs_norm_factor_is='provided'
         else:
-            mvir=prop_man.monovan_integr_range;
+            mvir=prop_man.monovan_integr_range
             prop_man.log('*** Evaluating the integral from the monovan run and calculate the correction factor ******','notice')
             prop_man.log('    Using absolute units vanadium integration range : [{0:8f}:{1:8f}]         ******'.format(mvir[0],mvir[1]),'notice')
             abs_norm_factor_is = 'calculated'
-        #
-            result_ws_name = common.create_resultname(monovan_run,prop_man.instr_name)
-            # check the case when the sample is monovanadium itself (for testing purposes)
-            if result_ws_name == deltaE_wkspace_sample.name() :
-                deltaE_wkspace_monovan = CloneWorkspace(InputWorkspace=deltaE_wkspace_sample,OutputWorkspace=result_ws_name+'-monovan');
-                deltaE_wkspace_monovan=self.remap(deltaE_wkspace_monovan,None,prop_man.monovan_mapfile)
-            else:
-                # convert to monovanadium to energy
-                deltaE_wkspace_monovan  = self.mono_sample(monovan_run,ei_guess,wb_mono,
-                                               prop_man.monovan_mapfile,self.spectra_masks)
-                #deltaE_wkspace_monovan = self.convert_to_energy(monovan_run, ei_guess, wb_mono)
+
+            # convert to monovanadium to energy
+            deltaE_wkspace_monovan  = self.mono_sample(monovan_run,ei_guess,wb_mono,
+                                                      prop_man.monovan_mapfile,self.spectra_masks)
+            #deltaE_wkspace_monovan = self.convert_to_energy(monovan_run, ei_guess, wb_mono)
 
 
             ei_monovan = deltaE_wkspace_monovan.getRun().getLogData("Ei").value
@@ -827,10 +820,9 @@ class DirectEnergyConversion(object):
         prop_man.log('*** Using {0} value : {1} of absolute units correction factor (TGP)'.format(abs_norm_factor_is,absnorm_factor),'notice')
         prop_man.log('*******************************************************************************************','notice')
 
-        deltaE_wkspace_sample = deltaE_wkspace_sample/absnorm_factor;
+        sample_ws = sample_ws/absnorm_factor
 
-
-        return deltaE_wkspace_sample
+        return sample_ws
     def get_abs_normalization_factor(self,deltaE_wkspaceName,ei_monovan):
         """get absolute normalization factor for monochromatic vanadium
 
@@ -1011,7 +1003,7 @@ class DirectEnergyConversion(object):
         self.incident_energy = ei
         # copy incident energy obtained on monitor workspace to detectors workspace
         data_ws = data_run.get_workspace()
-        if data_ws != monitor_ws:
+        if data_ws.name() != monitor_ws.name():
             AddSampleLog(Workspace=data_ws,LogName='Ei',LogText=str(ei),LogType='Number')
             # if monitors are separated from the input workspace, we need to move them too as this is what happening when monitors are integrated into workspace
             result_mon_name=resultws_name+'_monitors'
@@ -1025,8 +1017,9 @@ class DirectEnergyConversion(object):
         ScaleX(InputWorkspace=data_ws,OutputWorkspace=resultws_name,Operation="Add",Factor=-mon1_peak,
                InstrumentParameter="DelayTime",Combine=True)
 
-        mon1_index = self.ei_mon1_spec
-        mon1_det = monitor_ws.getDetector(mon1_index)
+        # monitor 1 is before chopper
+        mon1_ID = self.mon1_norm_spec
+        mon1_det = monitor_ws.getDetector(mon1_ID)
         mon1_pos = mon1_det.getPos()
         src_name = data_ws.getInstrument().getSource().getName()
         MoveInstrumentComponent(Workspace=resultws_name,ComponentName= src_name, X=mon1_pos.getX(), Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
@@ -1039,7 +1032,7 @@ class DirectEnergyConversion(object):
         """
         Mask and group detectors based on input parameters
         """
-        ws_name = result_ws.getName();
+        ws_name = result_ws.getName()
         if not spec_masks is None:
             MaskDetectors(Workspace=ws_name, MaskedWorkspace=spec_masks)
         if not map_file is None:
@@ -1091,7 +1084,7 @@ class DirectEnergyConversion(object):
                 mon_index = int(self.mon1_norm_spec)
 
 
-            output=NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorWorkspaceIndex=mon_index,
+            output=NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
                                    IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)#,
 # debug line:                                   NormalizationFactorWSName='NormMonWS'+data_ws.getName())
         elif method == 'monitor-2':
@@ -1108,7 +1101,7 @@ class DirectEnergyConversion(object):
                 mon_index = int(self.mon2_norm_spec)
 
             # Normalize to monitor 2
-            output=NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorWorkspaceIndex=mon_index,
+            output=NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
                                    IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True)
 # debug line:                      IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True,NormalizationFactorWSName='NormMonWS'+data_ws.getName())
 
