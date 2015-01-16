@@ -366,7 +366,9 @@ enable_precompiled_headers( inc/MantidGeometry/PrecompiledHeader.h SRC_FILES )
 add_library ( Geometry ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
 set_target_properties ( Geometry PROPERTIES OUTPUT_NAME MantidGeometry 
-                                            COMPILE_DEFINITIONS IN_MANTID_GEOMETRY )
+                                            COMPILE_DEFINITIONS IN_MANTID_GEOMETRY 
+                                            INSTALL_RPATH "@loader_path/../MacOS")
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 

@@ -1035,12 +1035,14 @@ foreach(PY_FILE ${IPY_FILES} )
 endforeach()
 install ( FILES ${CONFIG_RESET_SCRIPT} DESTINATION ${BIN_DIR} )
 
-if ( APPLE )
-  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake
-                   @ONLY
-  )
-
-  install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake )
-endif ()
-
+#if ( APPLE )
+#  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in
+#                   ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake
+#                   @ONLY
+#  )
+#
+#  install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake )
+#endif ()
+message ("cmake install prefix: ${CMAKE_INSTALL_PREFIX}")
+install ( FILES  make_package.rb DESTINATION MantidPlot.app/ )
+install( CODE "execute_process(COMMAND \"chmod + x MantidPlot.app/make_package.rb\" )")

@@ -75,7 +75,8 @@ if(WIN32)
 	endif ()
 elseif ( APPLE )
 	# Mac: and in .so on the Mac, with no "lib" prefix either
-  	set_target_properties ( mantidqtpython PROPERTIES PREFIX "" SUFFIX .so )
+  	set_target_properties ( mantidqtpython PROPERTIES PREFIX "" SUFFIX .so 
+                                               INSTALL_RPATH "@loader_path/../MacOS")
 else ()
 	# Linux: needs to NOT have the usual "lib" prefix. 
 	set_target_properties( mantidqtpython PROPERTIES PREFIX "" )

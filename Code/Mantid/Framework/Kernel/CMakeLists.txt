@@ -377,7 +377,9 @@ enable_precompiled_headers ( inc/MantidKernel/PrecompiledHeader.h SRC_FILES )
 add_library ( Kernel ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
 set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel
-                                          COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1" )
+                                          COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1" 
+                                          INSTALL_RPATH "@loader_path/../MacOS")
+
 
 # Add to the 'Framework' group in VS
 set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )

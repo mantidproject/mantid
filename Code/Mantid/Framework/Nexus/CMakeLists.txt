@@ -20,7 +20,9 @@ add_definitions ( -DIN_NEXUS_CPP_LIBRARY )
 add_library ( Nexus ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( Nexus PROPERTIES OUTPUT_NAME MantidNexus 
-                                         COMPILE_DEFINITIONS IN_MANTID_NEXUS )
+                                         COMPILE_DEFINITIONS IN_MANTID_NEXUS 
+                                         INSTALL_RPATH "@loader_path/../MacOS")
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET Nexus PROPERTY FOLDER "MantidFramework" )
 

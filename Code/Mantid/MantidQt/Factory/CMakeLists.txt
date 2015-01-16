@@ -39,6 +39,8 @@ add_definitions ( -DIN_MANTIDQT_FACTORY )
 # This creates the target library
 add_library ( MantidQtFactory ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
+set_target_properties ( MantidQtFactory PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+
 # ... and links to other required libs
 target_link_libraries ( MantidQtFactory MantidQtAPI MantidQtSliceViewer ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 

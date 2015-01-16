@@ -182,7 +182,9 @@ enable_precompiled_headers( inc/MantidMDEvents/PrecompiledHeader.h SRC_FILES )
 add_library ( MDEvents ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( MDEvents PROPERTIES OUTPUT_NAME MantidMDEvents 
-                                                 COMPILE_DEFINITIONS IN_MANTID_MDEVENT )
+                                                 COMPILE_DEFINITIONS IN_MANTID_MDEVENT 
+                                                 INSTALL_RPATH "@loader_path/../MacOS")
+
 # Intensive use of templated libaries can cause large objects to be generated. These require
 # an additional flag in MSVC.
 if ( MSVC )
