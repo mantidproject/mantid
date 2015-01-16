@@ -3,7 +3,7 @@
 
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
-
+#include "MantidVatesSimpleGuiQtWidgets/RebinDialog.h"
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 
 #include <QPointer>
@@ -185,6 +185,11 @@ signals:
    * @param state Whether or not to enable to view mode buttons.
    */
   void setViewsStatus(ModeControlWidget::Views view, bool state);
+  /**
+   * Signal to perform a possible rebin.
+   * @param rebinDialog Pointer to a rebin dialog
+   */
+  void rebin(RebinDialog* rebinDialog);
 
 private:
   Q_DISABLE_COPY(ViewBase)

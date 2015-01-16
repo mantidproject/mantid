@@ -5,6 +5,7 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiQtWidgets/AxisInformation.h
   inc/MantidVatesSimpleGuiQtWidgets/GeometryParser.h
   inc/MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h
+  inc/MantidVatesSimpleGuiQtWidgets/RebinDialog.h
   inc/MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h
   inc/MantidVatesSimpleGuiQtWidgets/WidgetDllOption.h
 )
@@ -13,12 +14,14 @@ set( SOURCE_FILES
   src/AxisInformation.cpp
   src/GeometryParser.cpp
   src/ModeControlWidget.cpp
+  src/RebinDialog.cpp
   src/RotationPointDialog.cpp
 )
 
 # These are the headers to be preprocessed using Qt's moc preprocessor.
 qt4_wrap_cpp( MOC_SOURCES
   inc/MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h
+  inc/MantidVatesSimpleGuiQtWidgets/RebinDialog.h
   inc/MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h
 )
 
@@ -29,6 +32,7 @@ qt4_add_resources( RES_FILES icons/QtWidgetsIcons.qrc )
 # Qt's ui file processor.
 qt4_wrap_ui( UI_BUILT_SOURCES
   inc/MantidVatesSimpleGuiQtWidgets/ModeControlWidget.ui
+  inc/MantidVatesSimpleGuiQtWidgets/RebinDialog.ui
   inc/MantidVatesSimpleGuiQtWidgets/RotationPointDialog.ui
 )
 

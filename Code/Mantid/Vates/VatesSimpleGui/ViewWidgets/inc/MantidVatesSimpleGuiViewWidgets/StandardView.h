@@ -11,12 +11,14 @@
 class pqPipelineSource;
 class pqRenderView;
 
+
 namespace Mantid
 {
 namespace Vates
 {
 namespace SimpleGui
 {
+class RebinDialog;
 /**
  *
  This class represents the initial view for the main program. It is meant to
@@ -70,6 +72,8 @@ public:
   void updateUI();
   /// @see ViewBase::updateView()
   void updateView();
+  /// @see ViewBase::closeSubWindows
+  void closeSubWindows();
 
 protected slots:
   /// Add a slice to the current dataset.
@@ -78,6 +82,8 @@ protected slots:
   void onRenderDone();
   /// Invoke the ScaleWorkspace on the current dataset.
   void onScaleButtonClicked();
+  /// Invoke the rebin dialog 
+  void onRebinButtonClicked();
 
 private:
   Q_DISABLE_COPY(StandardView)
@@ -86,6 +92,7 @@ private:
   QPointer<pqPipelineSource> scaler; ///< Holder for the ScaleWorkspace
   Ui::StandardView ui; ///< The standard view's UI form
   QPointer<pqRenderView> view; ///< The main view
+  RebinDialog* m_rebinDialog; ///< Handle to the rebin dialog.
 };
 
 } // SimpleGui

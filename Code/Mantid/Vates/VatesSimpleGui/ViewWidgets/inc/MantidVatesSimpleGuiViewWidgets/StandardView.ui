@@ -29,6 +29,16 @@
        </property>
       </spacer>
      </item>
+    <item>
+      <widget class="QPushButton" name="rebinButton">
+        <property name="toolTip">
+          <string>Invoke plugin to rebin the current dataset.</string>
+        </property>
+        <property name="text">
+          <string>Rebin</string>
+        </property>
+      </widget>
+    </item>
      <item>
       <widget class="QPushButton" name="scaleButton">
        <property name="toolTip">

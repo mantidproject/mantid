@@ -1,5 +1,5 @@
 #include "MantidVatesSimpleGuiViewWidgets/StandardView.h"
-
+#include "MantidVatesSimpleGuiQtWidgets/RebinDialog.h"
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -36,10 +36,14 @@ namespace SimpleGui
  * buttons and creates the rendering view.
  * @param parent the parent widget for the standard view
  */
-StandardView::StandardView(QWidget *parent) : ViewBase(parent)
+  StandardView::StandardView(QWidget *parent) : ViewBase(parent), m_rebinDialog(NULL)
 {
   this->ui.setupUi(this);
   this->cameraReset = false;
+
+  // Set the rebin button to open a rebin dialog
+  QObject::connect(this->ui.rebinButton, SIGNAL(clicked()),
+                   this, SLOT(onRebinButtonClicked()));
 
   // Set the cut button to create a slice on the data
   QObject::connect(this->ui.cutButton, SIGNAL(clicked()), this,
@@ -117,6 +121,18 @@ void StandardView::onScaleButtonClicked()
                                        this->getPvActiveSrc());
 }
 
+void StandardView::onRebinButtonClicked()
+{
+  // Open the Rebin dialog
+  if (NULL == this->m_rebinDialog)
+  {
+    this->m_rebinDialog = new RebinDialog(this);
+  }
+
+  emit rebin(m_rebinDialog);
+  this->m_rebinDialog->show();
+}
+
 /**
  * This function is responsible for calling resetCamera if the internal
  * variable cameraReset has been set to true.
@@ -156,6 +172,11 @@ void StandardView::updateUI()
 void StandardView::updateView()
 {
   this->cameraReset = true;
+}
+
+void StandardView::closeSubWindows()
+{
+
 }
 
 } // SimpleGui

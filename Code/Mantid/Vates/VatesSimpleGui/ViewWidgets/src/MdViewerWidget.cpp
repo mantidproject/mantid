@@ -448,6 +448,20 @@ void MdViewerWidget::setParaViewComponentsForView()
                    SIGNAL(toggled(bool)),
                    this->currentView,
                    SLOT(onParallelProjection(bool)));
+
+  // Start listening to a rebinning event
+  QObject::connect(this->currentView, SIGNAL(rebin(RebinDialog*)),
+                   this, SLOT(onRebin(RebinDialog*)), Qt::UniqueConnection); 
+}
+
+/**
+ * Reaction for a rebin event
+ */
+void MdViewerWidget::onRebin(RebinDialog* rebinDialog)
+{
+  m_rebinManager.connectDialog(rebinDialog);
+
+  m_rebinManager.sendUpdate();
 }
 
 /**

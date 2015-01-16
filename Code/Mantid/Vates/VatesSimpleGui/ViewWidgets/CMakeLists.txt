@@ -7,6 +7,7 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
+  inc/MantidVatesSimpleGuiViewWidgets/RebinManager.h
   inc/MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h
@@ -21,6 +22,7 @@ set( SOURCE_FILES
   src/ColorUpdater.cpp
   src/MdViewerWidget.cpp
   src/MultisliceView.cpp
+  src/RebinManager.cpp
   src/SaveScreenshotReaction.cpp
   src/StandardView.cpp
   src/SplatterPlotView.cpp
@@ -35,6 +37,7 @@ qt4_wrap_cpp( MOC_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
+  inc/MantidVatesSimpleGuiViewWidgets/RebinManager.h
   inc/MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h

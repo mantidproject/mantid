@@ -3,6 +3,7 @@
 
 #include "ui_MdViewerWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "MantidVatesSimpleGuiViewWidgets/RebinManager.h"
 
 #include "MantidQtAPI/VatesViewerInterface.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
@@ -31,7 +32,7 @@ namespace SimpleGui
 class RotationPointDialog;
 class SaveScreenshotReaction;
 class ViewBase;
-
+class RebinDialog;
 /**
  *
   This class represents the central widget for handling VATES visualization
@@ -101,6 +102,8 @@ protected slots:
   void renderingDone();
   /// Execute view switch.
   void switchViews(ModeControlWidget::Views v);
+  /// On rebin 
+  void onRebin(RebinDialog* rebinDialog);
 
 protected:
   /// Handle workspace preDeletion tasks.
@@ -127,7 +130,7 @@ private:
   pqViewSettingsReaction *viewSettings; ///< Holder for the view settings reaction
   bool viewSwitched;
   ModeControlWidget::Views initialView; ///< Holds the initial view
-
+  RebinManager m_rebinManager; ///<Holds the rebin manager
 
   /// Check the environmental variables.
   void checkEnvSetup();
