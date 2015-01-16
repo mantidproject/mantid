@@ -6,17 +6,11 @@
 namespace Mantid {
 namespace RemoteAlgorithms {
 /***
-    Algorithm to initiate a tomographic reconstruction on SCARF at RAL.
-    The algorithm can also be used to to retrieve information about a
-   reconstruction job or to cancel it.
-
-    Input Properties:
-    <UL>
-    <LI> ComputeResource  - The name of the compute resource that will execute
-   the job </LI>
-    <LI> UserName         - User name on the compute resource </LI>
-    <LI> Password         - Password for the compute resource </LI>
-    </UL>
+    Algorithm to initiate, query about, or cancel a tomographic
+    reconstruction on SCARF at RAL.
+    The algorithm can be used to send different commands to the job
+    queue, for example: start a reconstruction job, retrieve
+    information about a job or to cancel jobs.
 
     Output Properties: None.
     If the authentication is successfull, a cookie is received that is stored
@@ -55,7 +49,8 @@ public:
   virtual const std::string name() const { return "SCARFTomoReconstruction"; }
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
-    return "Perform a tomographic reconstruction action on SCARF at RAL";
+    return "Perform a tomographic reconstruction action on the SCARF computer "
+      "cluster at RAL";
   }
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -67,7 +62,11 @@ private:
   /// Execution code
   void exec();
 
-  // ***********
+  /// methods to process reconstruction job commands
+  void doCreate();
+  void doStatus();
+  void doCancel();
+
   // Member vars
   std::string m_userName;
   std::string m_password;
