@@ -5,15 +5,8 @@
 #include "QFileDialog"
 #include "QMessageBox"
 
-#include <boost/uuid/uuid.hpp>            
-#include <boost/uuid/uuid_io.hpp>
-
-#include <nexus/NeXusException.hpp>
-#include <nexus/NeXusFile.hpp>
-
-#include <algorithm>
+#include <boost/lexical_cast.hpp>
 #include <jsoncpp/json/json.h>
-#include <Poco/File.h>
 
 using namespace Mantid::API;
 
@@ -28,17 +21,24 @@ namespace MantidQt
 
 using namespace MantidQt::CustomInterfaces;
 
+size_t TomoReconstruction::nameSeqNo = 0;
 
 TomoReconstruction::TomoReconstruction(QWidget *parent) : UserSubWindow(parent)
 {
   m_currentParamPath = "";
-  m_rng = boost::uuids::random_generator();
 }
 
 void TomoReconstruction::initLayout()
 {
   // TODO: should split the tabs out into their own files
   m_uiForm.setupUi(this);  
+
+  // geometry, etc. niceties
+  // on the left (just plugin names) 1/2, right: 2/3
+  QList<int> sizes;
+  sizes.push_back(100);
+  sizes.push_back(200);
+  m_uiForm.splitterPlugins->setSizes(sizes);
 
   // Setup Parameter editor tab  
   loadAvailablePlugins();
@@ -100,7 +100,8 @@ void TomoReconstruction::loadAvailablePlugins()
   refreshAvailablePluginListUI();
 }
 
-// Reloads the GUI list of available plugins from the data object :: Populating only through this ensures correct indexing.
+// Reloads the GUI list of available plugins from the data object ::
+// Populating only through this ensures correct indexing.
 void TomoReconstruction::refreshAvailablePluginListUI()
 {
   // Table WS structure, id/params/name/cite
@@ -112,7 +113,8 @@ void TomoReconstruction::refreshAvailablePluginListUI()
   }
 }
 
-// Reloads the GUI list of current plugins from the data object :: Populating only through this ensures correct indexing.
+// Reloads the GUI list of current plugins from the data object ::
+// Populating only through this ensures correct indexing.
 void TomoReconstruction::refreshCurrentPluginListUI()
 {
   // Table WS structure, id/params/name/cite
@@ -256,25 +258,19 @@ void TomoReconstruction::removeClicked()
 
 void TomoReconstruction::menuOpenClicked()
 { 
-  QString s = QFileDialog::getOpenFileName(0,"Open file",QDir::currentPath(),
+  QString s = QFileDialog::getOpenFileName(0, "Open file", QDir::currentPath(),
                                            "NeXus files (*.nxs);;All files (*.*)",
                                            new QString("NeXus files (*.nxs)"));
   std::string returned = s.toStdString();
   if(returned != "")
-  {    
-    if(!Poco::File(returned).exists())
-    {
-      // File not found, alert and return 
-      QMessageBox::information(this, tr("Unable to open file"), "The selected file doesn't exist.");
-      return;
-    }
-    
+  {
     bool opening = true;
     
     if(m_currPlugins.size() > 0)
     {
-      QMessageBox::StandardButton reply = QMessageBox::question(this, 
-          "Open file confirmation", "Opening the configuration file will clear the current list.\nWould you like to continue?",
+      QMessageBox::StandardButton reply = QMessageBox::question(this,
+          "Open file confirmation", "Opening the configuration file will clear the current list."
+                                                                "\nWould you like to continue?",
           QMessageBox::Yes|QMessageBox::No);
       if (reply == QMessageBox::No) 
       {
@@ -287,7 +283,7 @@ void TomoReconstruction::menuOpenClicked()
       loadTomoConfig(returned, m_currPlugins);
 
       m_currentParamPath = returned;
-      refreshCurrentPluginListUI();  
+      refreshCurrentPluginListUI();
     }
   }
 }
@@ -299,7 +295,7 @@ void TomoReconstruction::menuSaveClicked()
     menuSaveAsClicked();
     return;
   }
-  
+
   if(m_currPlugins.size() != 0)
   {
     std::string csvWorkspaceNames = "";
@@ -324,7 +320,8 @@ void TomoReconstruction::menuSaveClicked()
   else
   {
     // Alert that the plugin list is empty
-    QMessageBox::information(this, tr("Unable to save file"), "The current plugin list is empty, please add one or more to the list.");
+    QMessageBox::information(this, tr("Unable to save file"),
+                             "The current plugin list is empty, please add one or more to the list.");
   }
 }
 
@@ -354,80 +351,47 @@ QString TomoReconstruction::tableWSToString(ITableWorkspace_sptr table)
 }
 
 /// Load a tomo config file into the current plugin list, overwriting it.
-void TomoReconstruction::loadTomoConfig(std::string &filePath, std::vector<Mantid::API::ITableWorkspace_sptr> &currentPlugins)
+/// Uses the algorithm LoadTomoConfig
+void TomoReconstruction::loadTomoConfig(std::string &filePath,
+                                        std::vector<Mantid::API::ITableWorkspace_sptr> &currentPlugins)
 {
-  // TODO: update with finalised config file structure
-  Poco::File file(filePath);
-  if(file.exists())
-  {
-    // Create the file handle
-    NXhandle fileHandle;
-    NXstatus status = NXopen(filePath.c_str(), NXACC_READ, &fileHandle);
-      
-    if(status==NX_ERROR)
-      throw std::runtime_error("Unable to open file.");   
- 
-    // Clear the previous plugin list and remove any ADS entries
-    for(auto it = currentPlugins.begin(); it!=currentPlugins.end();++it)
-    {
-      ITableWorkspace_sptr curr = boost::dynamic_pointer_cast<ITableWorkspace>((*it));
-      if(AnalysisDataService::Instance().doesExist(curr->getName()))
-      {
-        AnalysisDataService::Instance().remove(curr->getName());
-      }
-    }
-    currentPlugins.clear();
-
-    ::NeXus::File nxFile(fileHandle);    
-   
-    nxFile.openPath("/entry1/processing");
-    std::map<std::string,std::string> plugins = nxFile.getEntries();
-    for(auto it = plugins.begin(); it != plugins.end(); it++) 
-    {
-      // Create a new plugin table object and read the file information in to it.
-      nxFile.openGroup(it->first,"NXsubentry");
-
-      auto plug = Mantid::API::WorkspaceFactory::Instance().createTable();
-
-      plug->addColumns("str","name",4);
-      Mantid::API::TableRow plug1row = plug->appendRow();
-
-      // Column info order is [ID / Params {as json string} / name {description} / citation info]
-      std::string id, params, name, cite;
-      nxFile.readData<std::string>("id", id);
-      nxFile.readData<std::string>("params", params);
-      nxFile.readData<std::string>("name", name);
-      nxFile.readData<std::string>("cite", cite);
-
-      plug1row << id << params << name << cite;      
-
-      // Creates a hidden ws entry (with name) in the ADS
-      AnalysisDataService::Instance().add(createUniqueNameHidden(), plug);
-      currentPlugins.push_back(plug);    
-
-      nxFile.closeGroup();
-    }
-    
-    nxFile.close();
+  // try to load tomo reconstruction parametereization file
+  auto alg = Algorithm::fromString("LoadTomoConfig");
+  alg->initialize();
+  alg->setPropertyValue("Filename", filePath);
+  alg->setPropertyValue("OutputWorkspaces", createUniqueNameHidden());
+  try {
+    alg->execute();
+  } catch(std::runtime_error& e) {
+    throw std::runtime_error(std::string("Error when trying to save tomographic reconstruction parameter file: ")
+                             + e.what());
   }
-  else
+
+  // Clear the plugin list and remove any item in the ADS entries
+  for(auto it = currentPlugins.begin(); it!=currentPlugins.end();++it)
   {
-    // Alert invalid path
-    QMessageBox::information(this, tr("Unable to open file"), "The selected file doesn't exist.");
+    ITableWorkspace_sptr curr = boost::dynamic_pointer_cast<ITableWorkspace>((*it));
+    if(AnalysisDataService::Instance().doesExist(curr->getName()))
+    {
+      AnalysisDataService::Instance().remove(curr->getName());
+    }
   }
+  currentPlugins.clear();
+
+  // new processing plugins list
+  ITableWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
+  currentPlugins.push_back(ws);
 }
 
-// Find a unique name for the table ws with a __ prefix to indicate it should be hidden
+// Build a unique (and hidden) name for the table ws
 std::string TomoReconstruction::createUniqueNameHidden()
 {
   std::string name;
-
   do 
-  { 
-    boost::uuids::uuid rndUuid = m_rng();    
-    name = "__TomoConfigTableWS_" +  boost::uuids::to_string(rndUuid);
-  } 
-  while( AnalysisDataService::Instance().doesExist(name) );
+  {
+    // with __ prefix => hidden
+    name = "__TomoConfigTableWS_Seq_" +  boost::lexical_cast<std::string>(nameSeqNo++);
+  } while(AnalysisDataService::Instance().doesExist(name));
 
   return name;
 }
@@ -474,7 +438,8 @@ void TomoReconstruction::createPluginTreeEntry(Mantid::API::ITableWorkspace_sptr
       QLabel* label1 = new QLabel(QString::fromStdString((*it) + ": ")); 
 
       QTreeWidget *paramContainerTree = new QTreeWidget(w);    
-      connect(paramContainerTree, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(paramValModified(QTreeWidgetItem*,int))); 
+      connect(paramContainerTree, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this,
+              SLOT(paramValModified(QTreeWidgetItem*,int)));
       paramContainerTree->setHeaderHidden(true);
       paramContainerTree->setIndentation(0);
       

@@ -88,7 +88,7 @@ namespace MantidQt
       std::vector<Mantid::API::ITableWorkspace_sptr> m_availPlugins;
       std::vector<Mantid::API::ITableWorkspace_sptr> m_currPlugins;
       std::string m_currentParamPath;
-      boost::uuids::random_generator m_rng;
+      static size_t nameSeqNo;
     };
   }
 }

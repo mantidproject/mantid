@@ -6,16 +6,16 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1026</width>
-    <height>781</height>
+    <width>996</width>
+    <height>713</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>IMAT Reconstruction</string>
+   <string>IMAT Tomographic Reconstruction</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_4">
-    <item>
+   <layout class="QGridLayout" name="gridLayout_4">
+    <item row="0" column="0">
      <widget class="QTabWidget" name="tabMain">
       <property name="currentIndex">
        <number>0</number>
@@ -66,7 +66,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QSplitter" name="splitter">
+              <widget class="QSplitter" name="splitterPlugins">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
@@ -144,6 +144,12 @@
                       </property>
                       <property name="text">
                        <string>→</string>
+                      </property>
+                      <property name="autoDefault">
+                       <bool>false</bool>
+                      </property>
+                      <property name="default">
+                       <bool>false</bool>
                       </property>
                       <property name="flat">
                        <bool>true</bool>
@@ -227,7 +233,7 @@
                        </font>
                       </property>
                       <property name="text">
-                       <string>Current File:</string>
+                       <string>Current Parameters</string>
                       </property>
                      </widget>
                     </item>
@@ -320,6 +326,12 @@
                  </item>
                  <item>
                   <widget class="QTreeWidget" name="treeCurrentPlugins">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                     <horstretch>1</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
                    <column>
                     <property name="text">
                      <string notr="true">1</string>
@@ -329,6 +341,12 @@
                  </item>
                  <item>
                   <widget class="QTextBrowser" name="currentPluginDesc">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                     <horstretch>1</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
                    <property name="maximumSize">
                     <size>
                      <width>16777215</width>
@@ -359,7 +377,7 @@
         <item>
          <widget class="QGroupBox" name="groupBox">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -367,7 +385,7 @@
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>250</height>
+            <height>40</height>
            </size>
           </property>
           <property name="title">
@@ -628,6 +646,19 @@
           <zorder>groupBox_4</zorder>
           <zorder>frame</zorder>
          </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </widget>
