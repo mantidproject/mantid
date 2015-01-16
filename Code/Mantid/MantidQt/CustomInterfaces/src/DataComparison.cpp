@@ -50,6 +50,9 @@ void DataComparison::initLayout()
   m_panTool = new QwtPlotPanner(m_plot->canvas());
   m_panTool->setEnabled(false);
 
+  m_magnifyTool = new QwtPlotMagnifier(m_plot->canvas());
+  m_magnifyTool->setEnabled(false);
+
   // Add the plot to the UI
   m_plot->setCanvasBackground(Qt::white);
   m_uiForm.loPlot->addWidget(m_plot);
@@ -65,9 +68,10 @@ void DataComparison::initLayout()
 
   connect(m_uiForm.pbPan, SIGNAL(toggled(bool)), this, SLOT(togglePan(bool)));
   connect(m_uiForm.pbZoom, SIGNAL(toggled(bool)), this, SLOT(toggleZoom(bool)));
+  connect(m_uiForm.pbResetView, SIGNAL(clicked()), this, SLOT(resetView()));
 
   // Replot spectra when the spectrum index is changed
-  connect(m_uiForm.sbSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotWorkspaces()));
+  connect(m_uiForm.sbSpectrum, SIGNAL(valueChanged(int)), this, SLOT(spectrumIndexChanged()));
 
   // Add headers to data table
   QStringList headerLabels;
@@ -131,7 +135,7 @@ void DataComparison::addData()
   QSpinBox *offsetSpin = new QSpinBox();
   offsetSpin->setMinimum(0);
   offsetSpin->setMaximum(INT_MAX);
-  connect(offsetSpin, SIGNAL(valueChanged(int)), this, SLOT(updatePlot()));
+  connect(offsetSpin, SIGNAL(valueChanged(int)), this, SLOT(spectrumIndexChanged()));
   m_uiForm.twCurrentData->setCellWidget(currentRows, SPEC_OFFSET, offsetSpin);
 
   // Insert the current displayed spectra
@@ -242,7 +246,7 @@ void DataComparison::removeAllData()
   }
 
   // Replot the workspaces
-  plotWorkspaces();
+  spectrumIndexChanged();
 }
 
 
@@ -364,6 +368,20 @@ void DataComparison::updatePlot()
 {
   normaliseSpectraOffsets();
   plotWorkspaces();
+}
+
+
+/**
+ * Handles a spectrum index or offset being modified.
+ */
+void DataComparison::spectrumIndexChanged()
+{
+  normaliseSpectraOffsets();
+  plotWorkspaces();
+
+  bool maintainZoom = m_uiForm.cbMaintainZoom->isChecked();
+  if(!maintainZoom)
+    resetView();
 }
 
 
@@ -517,11 +535,12 @@ void DataComparison::togglePan(bool enabled)
 {
   // First disbale the zoom tool
   if(enabled && m_uiForm.pbZoom->isChecked())
-  {
     m_uiForm.pbZoom->setChecked(false);
-  }
+
+  g_log.debug() << "Pan tool enabled: " << enabled << std::endl;
 
   m_panTool->setEnabled(enabled);
+  m_magnifyTool->setEnabled(enabled);
 }
 
 
@@ -534,9 +553,26 @@ void DataComparison::toggleZoom(bool enabled)
 {
   // First disbale the pan tool
   if(enabled && m_uiForm.pbPan->isChecked())
-  {
     m_uiForm.pbPan->setChecked(false);
-  }
+
+  g_log.debug() << "Zoom tool enabled: " << enabled << std::endl;
 
   m_zoomTool->setEnabled(enabled);
+  m_magnifyTool->setEnabled(enabled);
+}
+
+
+/**
+ * Rests the zoom level to fit all curves on the plot.
+ */
+void DataComparison::resetView()
+{
+  g_log.debug("Reset plot view");
+
+  // Auto scale the axis
+  m_plot->setAxisAutoScale(QwtPlot::xBottom);
+  m_plot->setAxisAutoScale(QwtPlot::yLeft);
+
+  // Set this as the default zoom level
+  m_zoomTool->setZoomBase(true);
 }

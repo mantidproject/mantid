@@ -12,6 +12,7 @@
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
+#include <qwt_plot_magnifier.h>
 #include <qwt_plot_panner.h>
 #include <qwt_plot_zoomer.h>
 
@@ -49,12 +50,16 @@ namespace CustomInterfaces
     void plotWorkspaces();
     /// Handles updating the plot
     void updatePlot();
+    /// Handles updating th eplot after a spectum index is changed
+    void spectrumIndexChanged();
     /// Handles creating and plotting a diff worksapce
     void plotDiffWorkspace();
     /// Toggle the pan plot tool
     void togglePan(bool enabled);
     /// Toggle the zoom plot tool
     void toggleZoom(bool enabled);
+    /// Resets the zoom level to show all curves
+    void resetView();
 
   private:
     /// Enumeration for column index
@@ -79,12 +84,15 @@ namespace CustomInterfaces
 
     // The plot object
     QwtPlot *m_plot;
+    // Curves shown on plot, indexed by workspace name
+    QMap<QString, boost::shared_ptr<QwtPlotCurve>> m_curves;
+
     // Plot zoom tool
     QwtPlotZoomer *m_zoomTool;
     // Plot pan tool
     QwtPlotPanner *m_panTool;
-    // Curves shown on plot, indexed by workspace name
-    QMap<QString, boost::shared_ptr<QwtPlotCurve>> m_curves;
+    // Plot magnify tool
+    QwtPlotMagnifier *m_magnifyTool;
 
     boost::shared_ptr<QwtPlotCurve> m_diffCurve;
     // The two workspaces that are currently being diffed
