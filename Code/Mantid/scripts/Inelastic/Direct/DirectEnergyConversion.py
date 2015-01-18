@@ -233,7 +233,7 @@ class DirectEnergyConversion(object):
                 diag_params['sample_run'] = diag_sample
 
             # Set up the background integrals for diagnostic purposes
-            result_ws        = self.normalise(diag_sample, None, self.normalise_method)
+            result_ws        = self.normalise(diag_sample, self.normalise_method)
             # remember the current workspace state 
             diag_sample.synchronize_ws(result_ws)
 
@@ -313,7 +313,7 @@ class DirectEnergyConversion(object):
 
         # Normalize
         self.__in_white_normalization = True;
-        white_ws = self.normalise(run, None,self.normalise_method,0.0,mon_number)
+        white_ws = self.normalise(run, self.normalise_method,0.0,mon_number)
         self.__in_white_normalization = False;
         new_ws_name = run.set_action_suffix('_norm_white')
 
@@ -488,14 +488,14 @@ class DirectEnergyConversion(object):
 
         # Normalize using the chosen method
         # This should be done as soon as possible after loading and usually happens at diag. Here just in case if diag was bypassed
-        self.normalise(mtd[result_name], result_name, propman.normalise_method, range_offset=bin_offset)
+        norm_ws=self.normalise(mtd[result_name], propman.normalise_method, range_offset=bin_offset)
 
 
 
         # This next line will fail the SystemTests
         #ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct', EFixed=ei_value)
         # But this one passes...
-        ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
+        ConvertUnits(InputWorkspace=norm_ws,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
         propman.log("_do_mono: finished ConvertUnits for : "+result_name)
 
 
@@ -537,7 +537,10 @@ class DirectEnergyConversion(object):
 
 
         # Normalize using the chosen method+group
-        self.normalise(data_run, result_name, self.normalise_method, range_offset=bin_offset)
+        norm_ws=self.normalise(data_run, self.normalise_method, range_offset=bin_offset)
+        # normalized workspace can go out with different name, so here we reinforce one  expected here
+        result_name = data_run.set_action_suffix('_spe')
+        data_run.synchronize_ws(norm_ws)
 
 
 
@@ -613,7 +616,7 @@ class DirectEnergyConversion(object):
       self.prop_man.set_input_parameters_ignore_nan(wb_run=wb_run,sample_run=sample_run,incident_energy=ei_guess,
                                            energy_bins=rebin,map_file=map_file,monovan_run=monovan_run,wb_for_monovan_run=wb_for_monovan_run)
       # 
-      self.prop_man.set_input_parameters(**kwargs);
+      self.prop_man.set_input_parameters(**kwargs)
 
       # output workspace name.
       try:
@@ -1075,27 +1078,22 @@ class DirectEnergyConversion(object):
 
 
 
-    def normalise(self, run, result_name, method, range_offset=0.0,mon_index=None):
+    def normalise(self, run, method, range_offset=0.0,mon_index=None):
         """
         Apply normalization using specified source
         """
         run = self.get_run_descriptor(run)
 
         data_ws = run.get_workspace()
+        old_name = data_ws.name()
 
-        if not result_name:
-           result_name = run.set_action_suffix('_normalized')
+        result_name = run.set_action_suffix('_normalized')
             
 
         # Make sure we don't call this twice
         done_log = "DirectInelasticReductionNormalisedBy"
         if done_log in data_ws.getRun() or method is None:
-            if data_ws.name() != result_name:
-                RenameWorkspace(InputWorkspace=data_ws, OutputWorkspace=result_name)
-                #CloneWorkspace(InputWorkspace=data_ws, OutputWorkspace=result_name) ???
-                data_ws = mtd[result_name]
             run.synchronize_ws(data_ws)
-           
             output = mtd[result_name]
             return output
 
@@ -1120,7 +1118,7 @@ class DirectEnergyConversion(object):
                 mon_index = int(self.mon1_norm_spec)
 
 
-            NormaliseToMonitor(InputWorkspace=data_ws,OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
+            NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
                                    IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)#,
 # debug line:                      NormalizationFactorWSName='NormMonWS'+data_ws.getName())
         elif method == 'monitor-2':
@@ -1137,17 +1135,17 @@ class DirectEnergyConversion(object):
                 mon_index = int(self.mon2_norm_spec)
 
             # Normalize to monitor 2
-            NormaliseToMonitor(InputWorkspace=data_ws,OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
+            NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
                                    IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True)
 # debug line:                      IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True,NormalizationFactorWSName='NormMonWS'+data_ws.getName())
 
         elif method == 'current':
-            NormaliseByCurrent(InputWorkspace=data_ws,OutputWorkspace=result_name)
+            NormaliseByCurrent(InputWorkspace=old_name,OutputWorkspace=old_name)
         else:
             raise RuntimeError('Normalization scheme ' + reference + ' not found. It must be one of monitor-1, monitor-2, current, or none')
 
         # Add a log to the workspace to say that the normalization has been done
-        output = mtd[result_name]
+        output = mtd[old_name]
         AddSampleLog(Workspace=output, LogName=done_log,LogText=method)
         run.synchronize_ws(output)
         return output

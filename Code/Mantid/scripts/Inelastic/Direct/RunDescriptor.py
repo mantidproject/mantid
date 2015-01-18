@@ -299,7 +299,6 @@ class RunDescriptor(PropDescriptor):
 
         if ws_name in mtd and not(force):
             RunDescriptor._logger("{0} already loaded as workspace.".format(self._ws_name),'information')
-            loaded_ws = mtd[ws_name]
         else:
             # If it doesn't exists as a workspace assume we have to try and load a file
             data_file = self.find_file()
@@ -319,11 +318,11 @@ class RunDescriptor(PropDescriptor):
 
 
             RunDescriptor._logger("Loaded {0}".format(data_file),'information')
-            loaded_ws = mtd[ws_name]
+        #end
 
+        loaded_ws = mtd[ws_name]
         ######## Now we have the workspace
         self.apply_calibration(loaded_ws,calibration,use_ws_calibration)
-        loaded_ws = mtd[ws_name]
         return loaded_ws
 #--------------------------------------------------------------------------------------------------------------------
     def apply_calibration(self,loaded_ws,calibration=None,use_ws_calibration=True):
