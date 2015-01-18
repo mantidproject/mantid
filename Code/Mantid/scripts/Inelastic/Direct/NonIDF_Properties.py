@@ -48,7 +48,16 @@ class NonIDF_Properties(object):
         # set up descriptors holder class reference
         RunDescriptor._holder = self
         RunDescriptor._logger = self.log
-  
+        # Initiate class-level properties to defaults 
+        super(NonIDF_Properties,self).__setattr__('sample_run',None)
+        super(NonIDF_Properties,self).__setattr__('wb_run',None)
+        super(NonIDF_Properties,self).__setattr__('monovan_run',None)
+
+        super(NonIDF_Properties,self).__setattr__('mask_run',None)
+        super(NonIDF_Properties,self).__setattr__('wb_for_monovan_run',None)
+        super(NonIDF_Properties,self).__setattr__('second_white',None)
+        super(NonIDF_Properties,self).__setattr__('_tmp_run',None)
+
     #end
     #-----------------------------------------------------------------------------
     # Complex properties with personal descriptors

@@ -71,7 +71,7 @@ class RunDescriptor(PropDescriptor):
               self.__set__(instance,ws)
               return
           else:
-              file_path,run_num,fext = prop_helpers.parse_run_number_string(value,self._instr_name())
+              file_path,run_num,fext = prop_helpers.parse_run_file_name(value)
               if isinstance(run_num,list):
                   self._sum_runs=(file_path,run_num,fext)
                   self._run_number=0
@@ -80,7 +80,7 @@ class RunDescriptor(PropDescriptor):
                 self._run_file_path = file_path
 
                 if len(fext) > 0:
-                      self._run_ext = fext
+                      self._run_ext = fext.lower()
 
        elif isinstance(value,list):
            self._run_number = 0 

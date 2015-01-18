@@ -139,7 +139,7 @@ def iliad(main):
             input_file=None
             output_directory=None
 
-        use_web_variables= False;
+        use_web_variables= False
         if host._web_var and output_directory:
             use_web_variables = True;
             config.appendDataSearchDir(str(output_directory))

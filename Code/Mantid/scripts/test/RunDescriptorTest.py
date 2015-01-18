@@ -1,5 +1,5 @@
 import os
-os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -38,7 +38,7 @@ class RunDescriptorTest(unittest.TestCase):
 
  
     def test_descr_basic(self):
-        propman  = self.prop_man
+        propman  = PropertyManager('MAR')
 
         self.assertTrue(propman.sample_run is None)
         self.assertTrue(PropertyManager.sample_run.get_workspace() is None)
@@ -181,6 +181,16 @@ class RunDescriptorTest(unittest.TestCase):
         #propman.sum_runs = 3
         #ws_name = propman.get_sample_ws_name();
         #self.assertEqual(ws_name,'MARI000000_spe-sum')
+
+
+        
+    def test_assign_fname(self):
+        propman  = self.prop_man
+        propman.sample_run = 'MAR11001.RAW'
+
+        self.assertEqual(PropertyManager.sample_run.run_number(),11001)
+        self.assertEqual(PropertyManager.sample_run._run_ext,'.raw')
+
 
 
 if __name__=="__main__":
