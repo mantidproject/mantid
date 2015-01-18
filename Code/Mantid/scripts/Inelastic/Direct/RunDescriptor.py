@@ -116,12 +116,15 @@ class RunDescriptor(PropDescriptor):
             self._ws_suffix=''
         return self._build_ws_name()
 #--------------------------------------------------------------------------------------------------------------------
-    def synchronize_ws(self,workspace):
+    def synchronize_ws(self,workspace=None):
         """ Synchronize workspace name (after workspace may have changed due to algorithm) 
             with internal run holder name
 
             TODO: This method should be automatically invoked by an algorithm decorator
         """ 
+        if not workspace:
+            workspace=mtd[self._ws_name]
+
         new_name = self._build_ws_name()
         old_name = workspace.name()
         if new_name != old_name:

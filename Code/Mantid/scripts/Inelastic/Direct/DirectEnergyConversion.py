@@ -218,8 +218,7 @@ class DirectEnergyConversion(object):
             return diag_mask
 
         # Get the white beam vanadium integrals
-        white_ws = white.get_ws_clone('first_white')
-        whiteintegrals = self.do_white(white_ws, None, None,None) # No grouping yet
+        whiteintegrals = self.do_white(white, None, None,None) # No grouping yet
         if self.second_white:
             second_white = self.second_white
             other_whiteintegrals = self.do_white(PropertyManager.second_white, None, None,None) # No grouping yet
@@ -279,33 +278,15 @@ class DirectEnergyConversion(object):
         return diag_mask
 
 
-    def _build_white_tag(self,masking_wksp,map_file):
+    def _build_white_tag(self):
 
-        if masking_wksp:
-            n_spectra = masking_wksp.getNumberHistograms()
-            n_masked = 0
-            for i in xrange(n_spectra):
-                if masking_wksp.readY(i)[0] >0.99 : # spectrum is masked
-                    n_masked=n_masked +1
-        else:
-            n_masked = 0
-        if map_file:
-            map_tag = os.path.basename(map_file)
-        else:
-            map_tag = ''
         low,upp=self.wb_integr_range
-        white_tag='MaskedWith:{0}sp_MappedBy:{1}_NormBy:{2}_IntergatedIn:{3:0>10.2f}:{4:0>10.2f}'.format(n_masked,map_tag,self.normalise_method,low,upp)
+        white_tag='NormBy:{0}_IntergatedIn:{1:0>10.2f}:{2:0>10.2f}'.format(self.normalise_method,low,upp)
 
         return white_tag
 
-    def do_white(self, run, spectra_masks=None, map_file=None,mon_number=None):
-        """
-        Create the workspace, which each spectra containing the correspondent white beam integral (single value)
-
-        These integrals are used as estimate for detector efficiency in wide range of energies
-        (rather the detector electronic's efficiency as the geuger counters are very different in efficiency)
-        and is used to remove the influence of this efficiency to the different detectors.
-        """
+    def _get_wb_inegrals(self,run,mon_number = None):
+        """ """
         run = self.get_run_descriptor(run)
         white_ws = run.get_workspace()
         # This both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
@@ -319,7 +300,7 @@ class DirectEnergyConversion(object):
             targ_ws = mtd[new_ws_name]
             if done_Log in targ_ws.getRun():
                 old_log_val=targ_ws.getRun().getLogData(done_Log).value
-                done_log_VAL = self._build_white_tag(spectra_masks,map_file)
+                done_log_VAL = self._build_white_tag()
                 if old_log_val == done_log_VAL:
                     run.synchronize_ws(targ_ws)
                     return mtd[new_ws_name]
@@ -328,33 +309,50 @@ class DirectEnergyConversion(object):
             else:
                 DeleteWorkspace(Workspace=new_ws_name)
         #end 
-        done_log_VAL = self._build_white_tag(spectra_masks,map_file)
+        done_log_VAL = self._build_white_tag()
 
         # Normalize
         self.__in_white_normalization = True;
         white_ws = self.normalise(run, None,self.normalise_method,0.0,mon_number)
         self.__in_white_normalization = False;
+        new_ws_name = run.set_action_suffix('_norm_white')
 
         # Units conversion
-        white_ws = ConvertUnits(InputWorkspace=white_ws,OutputWorkspace=new_ws_name, Target= "Energy", AlignBins=0)
+        ConvertUnits(InputWorkspace=white_ws,OutputWorkspace=new_ws_name, Target= "Energy", AlignBins=0)
         self.prop_man.log("do_white: finished converting Units",'information')
-        run.synchronize_ws(white_ws)
+
         low,upp=self.wb_integr_range
         if low > upp:
             raise ValueError("White beam integration range is inconsistent. low=%d, upp=%d" % (low,upp))
 
         delta = 2.0*(upp - low)
-        white_ws = Rebin(InputWorkspace=white_ws,OutputWorkspace=new_ws_name, Params=[low, delta, upp])
+        white_ws = Rebin(InputWorkspace=new_ws_name,OutputWorkspace=new_ws_name, Params=[low, delta, upp])
         # Why aren't we doing this...
         #Integration(white_ws, white_ws, RangeLower=low, RangeUpper=upp)
+        AddSampleLog(white_ws,LogName = done_Log,LogText=done_log_VAL,LogType='String')
+        run.synchronize_ws(white_ws)
+        if self._keep_wb_workspace:
+            result = run.get_ws_clone()
+        else:
+            result = run.get_workspace()
+        return result
 
+
+    def do_white(self, run, spectra_masks=None, map_file=None,mon_number=None):
+        """
+        Create the workspace, which each spectra containing the correspondent white beam integral (single value)
+
+        These integrals are used as estimate for detector efficiency in wide range of energies
+        (rather the detector electronic's efficiency as the geuger counters are very different in efficiency)
+        and is used to remove the influence of this efficiency to the different detectors.
+        """
+        white_ws = self._get_wb_inegrals(run)
+        # Masks may change in different runs
         # Masking and grouping
         white_ws = self.remap(white_ws, spectra_masks, map_file)
 
         # White beam scale factor
         white_ws *= self.wb_scale_factor
-        AddSampleLog(white_ws,LogName = done_Log,LogText=done_log_VAL,LogType='String')
-        run.synchronize_ws(white_ws)
         return white_ws
 
     def mono_sample(self, mono_run, ei_guess, white_run=None, map_file=None,
@@ -366,13 +364,9 @@ class DirectEnergyConversion(object):
         if white_run:
             white_run = self.get_run_descriptor(white_run)
 
-        mono_ws = mono_run.get_workspace()
-        # set action suffix and check if such workspace is already present
-        result_name = mono_run.set_action_suffix('_spe')
 
-        mono_s=self._do_mono(mono_run, result_name, ei_guess,
+        mono_s=self._do_mono(mono_run, ei_guess,
                              white_run, map_file, spectra_masks, Tzero)
-        mono_run.synchronize_ws(mono_s)
         return mono_s
 
 
@@ -517,27 +511,29 @@ class DirectEnergyConversion(object):
         ############
         return
 
-    def _do_mono_ISIS(self, data_run, result_name, ei_guess,
+    def _do_mono_ISIS(self, data_run, ei_guess,
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
 
         # Do ISIS stuff for Ei
         # Both are these should be run properties really
 
 
-        ei_value, mon1_peak = self.get_ei(data_run,result_name, ei_guess)
+        ei_value, mon1_peak = self.get_ei(data_run, ei_guess)
         self.incident_energy = ei_value
+
 
         # As we've shifted the TOF so that mon1 is at t=0.0 we need to account for this in CalculateFlatBackground and normalization
         bin_offset = -mon1_peak
+        result_name = data_run.set_action_suffix('_spe')
 
         if self.check_background == True:
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined such region
             result_ws = data_run.get_workspace()
             bkgd_range = self.bkgd_range;
-            CalculateFlatBackground(InputWorkspace=result_ws,OutputWorkspace=result_name,
+            CalculateFlatBackground(InputWorkspace=result_ws,OutputWorkspace=result_ws,
                                     StartX= bkgd_range[0] + bin_offset,EndX= bkgd_range[1] + bin_offset,
                                      WorkspaceIndexList= '',Mode= 'Mean',SkipMonitors='1')
-            data_run.synchronize_ws(mtd[result_name])
+            data_run.synchronize_ws(result_ws)
 
 
         # Normalize using the chosen method+group
@@ -552,7 +548,7 @@ class DirectEnergyConversion(object):
         self.prop_man.log("_do_mono: finished ConvertUnits for : "+result_name,'information')
 
 
-        energy_bins = self.energy_bins;
+        energy_bins = self.energy_bins
         if energy_bins:
             Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= energy_bins,PreserveEvents=False)
 
@@ -564,7 +560,7 @@ class DirectEnergyConversion(object):
 
         return
 
-    def _do_mono(self, run, result_name, ei_guess,
+    def _do_mono(self, run,  ei_guess,
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
         """
         Convert units of a given workspace to deltaE, including possible
@@ -572,13 +568,16 @@ class DirectEnergyConversion(object):
         """
 
         if (self._do_ISIS_normalization):
-           self._do_mono_ISIS(run,result_name,ei_guess,
+           self._do_mono_ISIS(run,ei_guess,
                                white_run, map_file, spectra_masks, Tzero)
         else:
-           self._do_mono_SNS(run,result_name,ei_guess,
+          result_name = run.set_action_suffix('_spe')
+          self._do_mono_SNS(run,result_name,ei_guess,
                          white_run, map_file, spectra_masks, Tzero)
+          run.synchronize_ws()
 
         prop_man = self.prop_man
+        result_name = run.get_ws_name()
         #######################
         # Ki/Kf Scaling...
         if prop_man.apply_kikf_correction:
@@ -600,6 +599,7 @@ class DirectEnergyConversion(object):
         if white_run is not None:
             white_ws = self.do_white(white_run, spectra_masks, map_file,None)
             result_ws /= white_ws
+            DeleteWorkspace(white_ws)
 
         # Overall scale factor
         result_ws *= prop_man.scale_factor
@@ -717,7 +717,7 @@ class DirectEnergyConversion(object):
       failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)
       nMaskedSpectra = len(failed_sp_list)
       # this tells turkey in case of hard mask only but everything else semens work fine
-      prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice');
+      prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice')
 
       #Run the conversion first on the sample
       deltaE_wkspace_sample = self.mono_sample(PropertyManager.sample_run,self.incident_energy,PropertyManager.wb_run,
@@ -1003,7 +1003,7 @@ class DirectEnergyConversion(object):
            motor_rotation = float('nan')
         self.prop_man.psi = motor_rotation+motor_offset
         
-    def get_ei(self, data_run, resultws_name, ei_guess):
+    def get_ei(self, data_run, ei_guess):
         """
         Calculate incident energy of neutrons and the time of the of the
         peak in the monitor spectrum
@@ -1015,11 +1015,13 @@ class DirectEnergyConversion(object):
         """
         data_run = self.get_run_descriptor(data_run)
 
-
         fix_ei = self.fix_ei
         ei_mon_spectra = self.ei_mon_spectra
 
+        data_ws = data_run.get_workspace()
         monitor_ws = data_run.get_monitors_ws()
+        data_run.set_action_suffix('_shifted')
+
         ##-------------------------------------------------------------
         ## check if monitors are in the main workspace or provided separately
         #data_ws,monitors_ws = self.check_monitor_ws(data_ws,monitors_ws,ei_mon_spectra);
@@ -1033,23 +1035,22 @@ class DirectEnergyConversion(object):
         # Store found incident energy in the class itself
         self.incident_energy = ei
         # copy incident energy obtained on monitor workspace to detectors workspace
-        data_ws = data_run.get_workspace()
         if data_ws.name() != monitor_ws.name():
             AddSampleLog(Workspace=data_ws,LogName='Ei',LogText=str(ei),LogType='Number')
             # if monitors are separated from the input workspace, we need to move them too as this is what happening when monitors are integrated into workspace
-            result_mon_name=resultws_name+'_monitors'
+            result_mon_name=monitor_ws.name()
             ScaleX(InputWorkspace=monitor_ws,OutputWorkspace=result_mon_name,Operation="Add",Factor=-mon1_peak,
                    InstrumentParameter="DelayTime",Combine=True)
             monitor_ws = mtd[result_mon_name]
 
 
-
+        resultws_name = data_ws.name()
         # Adjust the TOF such that the first monitor peak is at t=0
         ScaleX(InputWorkspace=data_ws,OutputWorkspace=resultws_name,Operation="Add",Factor=-mon1_peak,
                InstrumentParameter="DelayTime",Combine=True)
 
-        # monitor 1 is before chopper    
-        spec_num = monitor_ws.getIndexFromSpectrumNumber(int(self.mon1_norm_spec)) 
+        # shift to monitor used to calculate energy transfer    
+        spec_num = monitor_ws.getIndexFromSpectrumNumber(int(ei_mon_spectra[0])) 
         mon1_det = monitor_ws.getDetector(spec_num )
         mon1_pos = mon1_det.getPos()
         src_name = data_ws.getInstrument().getSource().getName()
@@ -1324,7 +1325,7 @@ class DirectEnergyConversion(object):
         Initialize the private attributes of the class and the nullify the attributes which expected to be always set-up from a calling script
         """
         # Internal properties and keys
-        self._keep_wb_workspace = False;
+        self._keep_wb_workspace = True # for the time being. May be auto-calculated later but should it? 
         self._do_ISIS_normalization = True;
         self.spectra_masks = None;
 
@@ -1333,29 +1334,29 @@ class DirectEnergyConversion(object):
         # formats available for saving. As the reducer has to have a method to process one of this, it is private property
         if not hasattr(self,'_propMan') or self._propMan is None:
             if isinstance(instr,PropertyManager):
-                self._propMan  = instr;
+                self._propMan  = instr
             else:
-                self._propMan = PropertyManager(instr);
+                self._propMan = PropertyManager(instr)
         else:
-            old_name = self._propMan.instrument.getName();
+            old_name = self._propMan.instrument.getName()
             if isinstance(instr,geometry._geometry.Instrument):
-                new_name = self._propMan.instrument.getName();
+                new_name = self._propMan.instrument.getName()
             elif isinstance(instr,PropertyManager):
                 new_name = instr.instr_name;
             else:
                 new_name = instr
             #end if
             if old_name != new_name or reload_instrument:
-                self._propMan = PropertyManager(new_name);
+                self._propMan = PropertyManager(new_name)
             #end if
         #
 
     def setup_instrument_properties(self, workspace = None,reload_instrument=False):
         if workspace != None:
-            instrument = workspace.getInstrument();
-            name      = instrument.getName();
+            instrument = workspace.getInstrument()
+            name      = instrument.getName()
             if name != self.prop_man.instr_name:
-               self.prop_man = PropertyManager(name,workspace);
+               self.prop_man = PropertyManager(name,workspace)
 
 
     def check_abs_norm_defaults_changed(self,changed_param_list) :
