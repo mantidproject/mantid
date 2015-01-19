@@ -34,79 +34,76 @@ class EnginXFitPeaks(PythonAlgorithm):
 
     def PyExec(self):
     	# Get expected peaks in TOF for the detector
-    	expectedPeaksTof = self._expectedPeaksInTOF()
-      
-    	# FindPeaks will returned a list of peaks sorted by the centre found. Sort the peaks as well,
-    	# so we can match them with fitted centres later.
-    	expectedPeaksTof = sorted(expectedPeaksTof)
-    	expectedPeaksD = self._readInExpectedPeaks()
-    	#expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
+        expectedPeaksTof = self._expectedPeaksInTOF()
+        # FindPeaks will returned a list of peaks sorted by the centre found. Sort the peaks as well,
+        # so we can match them with fitted centres later.
+        expectedPeaksTof = sorted(expectedPeaksTof)
+        expectedPeaksD = self._readInExpectedPeaks()
+        #expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
      
       
-    	# Find approximate peak positions, asumming Gaussian shapes
-    	findPeaksAlg = self.createChildAlgorithm('FindPeaks')
-    	findPeaksAlg.setProperty('InputWorkspace', self.getProperty("InputWorkspace").value)
-    	findPeaksAlg.setProperty('PeakPositions', expectedPeaksTof)
-    	findPeaksAlg.setProperty('PeakFunction', 'Gaussian')
-    	findPeaksAlg.setProperty('WorkspaceIndex', self.getProperty("WorkspaceIndex").value)
-    	findPeaksAlg.execute()
-    	foundPeaks = findPeaksAlg.getProperty('PeaksList').value
+        # Find approximate peak positions, asumming Gaussian shapes
+        findPeaksAlg = self.createChildAlgorithm('FindPeaks')
+        findPeaksAlg.setProperty('InputWorkspace', self.getProperty("InputWorkspace").value)
+        findPeaksAlg.setProperty('PeakPositions', expectedPeaksTof)
+        findPeaksAlg.setProperty('PeakFunction', 'Gaussian')
+        findPeaksAlg.setProperty('WorkspaceIndex', self.getProperty("WorkspaceIndex").value)
+        findPeaksAlg.execute()
+        foundPeaks = findPeaksAlg.getProperty('PeaksList').value
 
-    	if (foundPeaks.rowCount() < len(expectedPeaksTof)):
-    		raise Exception("Some peaks were not found")
+        if (foundPeaks.rowCount() < len(expectedPeaksTof)):
+            raise Exception("Some peaks were not found")
 
-    	fittedPeaks = self._createFittedPeaksTable()
+        fittedPeaks = self._createFittedPeaksTable()
 
-    	for i in range(foundPeaks.rowCount()):
+        for i in range(foundPeaks.rowCount()):
+            row = foundPeaks.row(i)
+            # Peak parameters estimated by FindPeaks
+            centre = row['centre']
+            width = row['width']
+            height = row['height']
 
-    		row = foundPeaks.row(i)
+            # Sigma value of the peak, assuming Gaussian shape
+            sigma = width / (2 * math.sqrt(2 * math.log(2)))
 
-    		# Peak parameters estimated by FindPeaks
-    		centre = row['centre']
-    		width = row['width']
-    		height = row['height']
+            # Approximate peak intensity, assuming Gaussian shape
+            intensity = height * sigma * math.sqrt(2 * math.pi)
 
-    		# Sigma value of the peak, assuming Gaussian shape
-    		sigma = width / (2 * math.sqrt(2 * math.log(2)))
+            peak = FunctionFactory.createFunction("BackToBackExponential")
+            peak.setParameter('X0', centre)
+            peak.setParameter('S', sigma)
+            peak.setParameter('I', intensity)
 
-    		# Approximate peak intensity, assuming Gaussian shape
-    		intensity = height * sigma * math.sqrt(2 * math.pi)
+            # Magic numbers
+            COEF_LEFT = 2
+            COEF_RIGHT = 3
 
-    		peak = FunctionFactory.createFunction("BackToBackExponential")
-    		peak.setParameter('X0', centre)
-    		peak.setParameter('S', sigma)
-    		peak.setParameter('I', intensity)
+            # Try to predict a fit window for the peak
+            xMin = centre - (width * COEF_LEFT)
+            xMax = centre + (width * COEF_RIGHT)
 
-    		# Magic numbers
-    		COEF_LEFT = 2
-    		COEF_RIGHT = 3
+            # Fit using predicted window and a proper function with approximated initital values
+            fitAlg = self.createChildAlgorithm('Fit')
+            fitAlg.setProperty('Function', 'name=LinearBackground;' + str(peak))
+            fitAlg.setProperty('InputWorkspace', self.getProperty("InputWorkspace").value)
+            fitAlg.setProperty('WorkspaceIndex', self.getProperty("WorkspaceIndex").value)
+            fitAlg.setProperty('StartX', xMin)
+            fitAlg.setProperty('EndX', xMax)
+            fitAlg.setProperty('CreateOutput', True)
+            fitAlg.execute()
+            paramTable = fitAlg.getProperty('OutputParameters').value
 
-    		# Try to predict a fit window for the peak
-    		xMin = centre - (width * COEF_LEFT)
-    		xMax = centre + (width * COEF_RIGHT)
+            fittedParams = {}
+            fittedParams['dSpacing'] = expectedPeaksD[i]
+            fittedParams['Chi'] = fitAlg.getProperty('OutputChi2overDoF').value
+            self._addParametersToMap(fittedParams, paramTable)
 
-    		# Fit using predicted window and a proper function with approximated initital values
-    		fitAlg = self.createChildAlgorithm('Fit')
-    		fitAlg.setProperty('Function', 'name=LinearBackground;' + str(peak))
-    		fitAlg.setProperty('InputWorkspace', self.getProperty("InputWorkspace").value)
-    		fitAlg.setProperty('WorkspaceIndex', self.getProperty("WorkspaceIndex").value)
-    		fitAlg.setProperty('StartX', xMin)
-    		fitAlg.setProperty('EndX', xMax)
-    		fitAlg.setProperty('CreateOutput', True)
-    		fitAlg.execute()
-    		paramTable = fitAlg.getProperty('OutputParameters').value
+            fittedPeaks.addRow(fittedParams)
 
-    		fittedParams = {}
-    		fittedParams['dSpacing'] = expectedPeaksD[i]
-    		fittedParams['Chi'] = fitAlg.getProperty('OutputChi2overDoF').value
-    		self._addParametersToMap(fittedParams, paramTable)
+        (difc, zero) = self._fitDSpacingToTOF(fittedPeaks)
 
-    		fittedPeaks.addRow(fittedParams)
-
-    	(difc, zero) = self._fitDSpacingToTOF(fittedPeaks)
-
-    	self.setProperty('Difc', difc)
-    	self.setProperty('Zero', zero)
+        self.setProperty('Difc', difc)
+        self.setProperty('Zero', zero)
 
     def _readInExpectedPeaks(self):
       readInArray = []
@@ -203,16 +200,16 @@ class EnginXFitPeaks(PythonAlgorithm):
     	return table
 
     def _addParametersToMap(self, paramMap, paramTable):
-    	""" Reads parameters from the Fit Parameter table, and add their values and errors to the map
-    	"""
-    	for i in range(paramTable.rowCount() - 1): # Skip the last (fit goodness) row
-    		row = paramTable.row(i)
+        """ Reads parameters from the Fit Parameter table, and add their values and errors to the map
+        """
+        for i in range(paramTable.rowCount() - 1): # Skip the last (fit goodness) row
+            row = paramTable.row(i)
 
-    		# Get local func. param name. E.g., not f1.A0, but just A0
-    	 	name = (row['Name'].rpartition('.'))[2]
+            # Get local func. param name. E.g., not f1.A0, but just A0
+            name = (row['Name'].rpartition('.'))[2]
 
-    	 	paramMap[name] = row['Value']
-    	 	paramMap[name + '_Err'] = row['Error']
+            paramMap[name] = row['Value']
+            paramMap[name + '_Err'] = row['Error']
 
 
 AlgorithmFactory.subscribe(EnginXFitPeaks)
