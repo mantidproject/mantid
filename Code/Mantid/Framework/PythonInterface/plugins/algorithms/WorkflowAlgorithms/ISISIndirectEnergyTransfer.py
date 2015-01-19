@@ -99,13 +99,14 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 masked_detectors = self._identify_bad_detectors(ws_name)
 
                 monitor_ws_name = ws_name + '_mon'
-                ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target='Wavelength', EMode='Indirect')
-                ConvertUnits(InputWorkspace=monitor_ws_name, OutputWorkspace=monitor_ws_name, Target='Wavelength')
 
                 # Process monitor
-                self._unwrap_monitor(ws_name)
+                if not self._unwrap_monitor(ws_name):
+                    ConvertUnits(InputWorkspace=monitor_ws_name, OutputWorkspace=monitor_ws_name, Target='Wavelength', EMode='Indirect')
+
                 self._process_monitor_efficiency(ws_name)
                 self._scale_monitor(ws_name)
+
 
                 # Do background removal if a range was provided
                 if self._background_range is not None:
@@ -123,6 +124,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                            OutputWorkspace=ws_name)
 
                 # Scale detector data by monitor intensities
+                ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target='Wavelength', EMode='Indirect')
                 RebinToWorkspace(WorkspaceToRebin=ws_name, WorkspaceToMatch=monitor_ws_name, OutputWorkspace=ws_name)
                 Divide(LHSWorkspace=ws_name, RHSWorkspace=monitor_ws_name, OutputWorkspace=ws_name)
 
@@ -404,6 +406,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         Unwrap monitor if required based on value of Workflow.UnwrapMonitor parameter
 
         @param ws_name Name of workspace
+        @return True if the monitor was unwrapped
         """
 
         monitor_ws_name = ws_name + '_mon'
@@ -418,6 +421,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             elif unwrap == 'BaseOnTimeRegime':
                 mon_time = mtd[monitor_ws_name].readX(0)[0]
                 det_time = mtd[ws_name].readX(0)[0]
+                logger.notice(str(mon_time) + " " + str(det_time))
                 should_unwrap = mon_time == det_time
             else:
                 should_unwrap = False
@@ -429,7 +433,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         if should_unwrap:
             sample = instrument.getSample()
-            sample_to_source = sample.getPos() - instrumentSource().getPos()
+            sample_to_source = sample.getPos() - instrument.getSource().getPos()
             radius = mtd[ws_name].getDetector(0).getDistance(sample)
             z_dist = sample_to_source.getZ()
             l_ref = z_dist + radius
@@ -448,6 +452,8 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 FFTSmooth(InputWorkspace=monitor_ws_name, OutputWorkspace=monitor_ws_name, WorkspaceIndex=0)
             except ValueError:
                 raise ValueError('Uneven bin widths are not supported.')
+
+        return should_unwrap
 
 
     def _process_monitor_efficiency(self, ws_name):
