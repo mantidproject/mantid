@@ -5,6 +5,7 @@ import os
 
 
 _str_or_none = lambda s: s if s != '' else None
+_float_or_none = lambda i: float(i) if i != '' else None
 _elems_or_none = lambda l: l if len(l) != 0 else None
 
 
@@ -42,7 +43,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty(name='BackgroundRange'),
                              doc='')
         self.declareProperty(name='RebinString', defaultValue='', doc='Rebin string parameters')
-        self.declareProperty(name='DetailedBalance', defaultValue=-1.0, doc='')
+        self.declareProperty(name='DetailedBalance', defaultValue='', doc='')
         self.declareProperty(name='ScaleFactor', defaultValue=1.0, doc='')
         self.declareProperty(name='FoldMultipleFrames', defaultValue=False, doc='')
 
@@ -92,7 +93,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             if self._calibration_ws is not None:
                 Divide(LHSWorkspace=ws_name,
                        RHSWorkspace=self._calibration_ws,
-                       Output_workspace=ws_name)
+                       OutputWorkspace=ws_name)
 
             # Scale detector data by monitor intensities
             monitor_ws_name = ws_name + '_mon'
@@ -103,10 +104,27 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             # Remove the no longer needed monitor workspace
             DeleteWorkspace(monitor_ws_name)
 
-            # TODO: Convert to energy
-            # TODO: Detailed balance
-            # TODO: Scale
-            # TODO: Group spectra
+            # Convert to energy
+            ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target='DeltaE', EMode='Indirect')
+            CorrectKiKf(InputWorkspace=ws_name, OutputWorkspace=ws_name, EMode='Indirect')
+            if self._rebin_string is not None:
+                Rebin(InputWorkspaces=ws_name, OutputWorkspace=ws_name, Params=self._rebin_string)
+            # TODO: Handle multiple framed data
+
+            # Detailed balance
+            if self._detailed_balance is not None:
+                corr_factor = 11.606 / (2 * self._detailed_balance)
+                ExponentialCorrection(InputWorkspaces=ws_name, OutputWorkspace=ws_name,
+                                      C0=1.0, C1=corr_factor, Operation='Multiply')
+
+            # Scale
+            if self._scale_factor != 1.0:
+                Scale(InputWorkspaces=ws_name, OutputWorkspace=ws_name,
+                      Factor=self._scale_factor, Operation='Multiply')
+
+            # Group spectra
+            self._group_spectra(ws_name, masked_detectors)
+
             # TODO: Fold
 
         # Rename output workspaces
@@ -189,7 +207,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self._spectra_range = self.getProperty('DetectorRange').value
         self._background_range = _elems_or_none(self.getProperty('BackgroundRange').value)
         self._rebin_string = _str_or_none(self.getPropertyValue('RebinString'))
-        self._detailed_balance = self.getProperty('DetailedBalance').value
+        self._detailed_balance = _float_or_none(self.getPropertyValue('DetailedBalance'))
         self._scale_factor = self.getProperty('ScaleFactor').value
         self._fold_multiple_frames = self.getProperty('FoldMultipleFrames').value
 
@@ -434,7 +452,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         instrument = mtd[ws_name].getInstrument()
 
         # If grouping as per he IPF is desired
-        if self._grouping_policy == 'IPF':
+        if self._grouping_method == 'IPF':
             # Get the grouping method from the parameter file
             try:
                 grouping_method = instrument.getStringParameter('Workflow.GroupingMethod')[0]
@@ -443,7 +461,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         else:
             # Otherwise use the value of GroupingPolicy
-            grouping_method = self._grouping_policy
+            grouping_method = self._grouping_method
 
         logger.information('Grouping method for workspace %s is %s' % (ws_name, grouping_method))
 
