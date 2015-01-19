@@ -20,7 +20,7 @@
    <Leak_within_nexus_library>
    Memcheck:Leak
    ...
-   fun:nxigetnextattr_
+   ...
    fun:_ZN5NeXus4File11getNextAttrEv
    fun:_ZN5NeXus4File7hasAttrERKSs
    fun:_ZN6Mantid3API13PropertyNexus12loadPropertyEPN5NeXus4FileERKSs
