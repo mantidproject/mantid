@@ -6,15 +6,13 @@
 #include "MantidSINQ/DllConfig.h"
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
 
-
-namespace Mantid
-{
-namespace Poldi
-{
+namespace Mantid {
+namespace Poldi {
 
 /** PoldiBasicChopper :
 
-    Implementation of PoldiAbstractChopper that models the currently installed device.
+    Implementation of PoldiAbstractChopper that models the currently installed
+   device.
     Probably this will never change (tm), but just in case...
 
         @author Michael Wedel, Paul Scherrer Institut - SINQ
@@ -40,49 +38,48 @@ namespace Poldi
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class MANTID_SINQ_DLL PoldiBasicChopper : public PoldiAbstractChopper
-{
+class MANTID_SINQ_DLL PoldiBasicChopper : public PoldiAbstractChopper {
 public:
-    PoldiBasicChopper();
-    ~PoldiBasicChopper() { }
+  PoldiBasicChopper();
+  ~PoldiBasicChopper() {}
 
-    void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument);
+  void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument);
 
-    void setRotationSpeed(double rotationSpeed);
+  void setRotationSpeed(double rotationSpeed);
 
-    const std::vector<double>& slitPositions();
-    const std::vector<double>& slitTimes();
+  const std::vector<double> &slitPositions();
+  const std::vector<double> &slitTimes();
 
-    double rotationSpeed();
-    double cycleTime();
-    double zeroOffset();
+  double rotationSpeed();
+  double cycleTime();
+  double zeroOffset();
 
-    double distanceFromSample();
+  double distanceFromSample();
 
 protected:
-    void initializeFixedParameters(std::vector<double> slitPositions, double distanceFromSample, double t0, double t0const);
-    void initializeVariableParameters(double rotationSpeed);
+  void initializeFixedParameters(std::vector<double> slitPositions,
+                                 double distanceFromSample, double t0,
+                                 double t0const);
+  void initializeVariableParameters(double rotationSpeed);
 
-    double slitPositionToTimeFraction(double slitPosition);
+  double slitPositionToTimeFraction(double slitPosition);
 
-    // fixed parameters
-    std::vector<double> m_slitPositions;
-    double m_distanceFromSample;
+  // fixed parameters
+  std::vector<double> m_slitPositions;
+  double m_distanceFromSample;
 
-    double m_rawt0;
-    double m_rawt0const;
+  double m_rawt0;
+  double m_rawt0const;
 
-    // parameters that depend on rotation speed
-    std::vector<double> m_slitTimes;
+  // parameters that depend on rotation speed
+  std::vector<double> m_slitTimes;
 
-    double m_rotationSpeed;
-    double m_cycleTime;
-    double m_zeroOffset;
-    
+  double m_rotationSpeed;
+  double m_cycleTime;
+  double m_zeroOffset;
 };
-
 
 } // namespace Poldi
 } // namespace Mantid
 
-#endif  /* MANTID_SINQ_POLDIBASICCHOPPER_H_ */
+#endif /* MANTID_SINQ_POLDIBASICCHOPPER_H_ */

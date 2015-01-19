@@ -1,15 +1,17 @@
 #ifndef I_MDDIMENSION_H
 #define I_MDDIMENSION_H
 
-
-/** The class discribes one dimension of multidimensional dataset representing an ortogonal dimension and linear axis. 
+/** The class discribes one dimension of multidimensional dataset representing
+an ortogonal dimension and linear axis.
 *
-*   Abstract type for a multi dimensional dimension. Gives a read-only layer to the concrete implementation.
+*   Abstract type for a multi dimensional dimension. Gives a read-only layer to
+the concrete implementation.
 
     @author Owen Arnold, RAL ISIS
     @date 12/11/2010
 
-    Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -32,15 +34,13 @@
 
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
-namespace Mantid
-{
-  namespace Geometry
+namespace Mantid {
+namespace Geometry {
+/*  IMDDimension::~IMDDimension()
   {
-  /*  IMDDimension::~IMDDimension()
-    {
-      
-    }*/
-  }
+
+  }*/
+}
 }
 
 #endif

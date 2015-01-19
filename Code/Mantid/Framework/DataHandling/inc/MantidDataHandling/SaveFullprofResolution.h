@@ -5,95 +5,95 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
-namespace Mantid
-{
-namespace DataHandling
-{
+namespace Mantid {
+namespace DataHandling {
 
-  /** SaveFullprofResolution : TODO: DESCRIPTION
-    
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+/** SaveFullprofResolution : TODO: DESCRIPTION
 
-    This file is part of Mantid.
+  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport SaveFullprofResolution : public API::Algorithm
-  {
-  public:
-    SaveFullprofResolution();
-    virtual ~SaveFullprofResolution();
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    /// Algorithm's name
-    virtual const std::string name() const { return "SaveFullprofResolution"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Save a Table workspace, which contains peak profile parameters' values, to a Fullprof resolution (.irf) file.";}
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport SaveFullprofResolution : public API::Algorithm {
+public:
+  SaveFullprofResolution();
+  virtual ~SaveFullprofResolution();
 
-    /// Algorithm's version
-    virtual int version() const { return (1); }
-    /// Algorithm's category for identification
-    virtual const std::string category() const { return "Diffraction;DataHandling\\Text"; }
+  /// Algorithm's name
+  virtual const std::string name() const { return "SaveFullprofResolution"; }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Save a Table workspace, which contains peak profile parameters' "
+           "values, to a Fullprof resolution (.irf) file.";
+  }
 
-  private:
-    
-    /// Initialisation code
-    void init();
-    /// Execution code
-    void exec();
+  /// Algorithm's version
+  virtual int version() const { return (1); }
+  /// Algorithm's category for identification
+  virtual const std::string category() const {
+    return "Diffraction;DataHandling\\Text";
+  }
 
-    ///Write the header information
+private:
+  /// Initialisation code
+  void init();
+  /// Execution code
+  void exec();
 
-    /// Process properties
-    void processProperties();
+  /// Write the header information
 
-    /// Write out string for profile 10 .irf file
-    std::string toProf10IrfString();
+  /// Process properties
+  void processProperties();
 
-    /// Write out string for profile 9 .irf file
-    std::string toProf9IrfString();
+  /// Write out string for profile 10 .irf file
+  std::string toProf10IrfString();
 
-    /// Parse input workspace to map of parameters
-    void parseTableWorkspace();
+  /// Write out string for profile 9 .irf file
+  std::string toProf9IrfString();
 
-    /// Check wether a profile parameter map has the parameter
-    bool has_key(std::map<std::string, double> profmap, std::string key);
+  /// Parse input workspace to map of parameters
+  void parseTableWorkspace();
 
-    /// Map containing the name of value of each parameter required by .irf file
-    std::map<std::string, double> m_profileParamMap;
+  /// Check wether a profile parameter map has the parameter
+  bool has_key(std::map<std::string, double> profmap, std::string key);
 
-    /// Input table workspace
-    DataObjects::TableWorkspace_sptr m_profileTableWS;
+  /// Map containing the name of value of each parameter required by .irf file
+  std::map<std::string, double> m_profileParamMap;
 
-    /// Output Irf file name
-    std::string m_outIrfFilename;
+  /// Input table workspace
+  DataObjects::TableWorkspace_sptr m_profileTableWS;
 
-    /// Bank to write
-    int m_bankID;
+  /// Output Irf file name
+  std::string m_outIrfFilename;
 
-    /// Profile number
-    int m_fpProfileNumber;
+  /// Bank to write
+  int m_bankID;
 
-    /// Append to existing file
-    bool m_append;
-    
-  };
+  /// Profile number
+  int m_fpProfileNumber;
 
+  /// Append to existing file
+  bool m_append;
+};
 
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_SAVEFullprofRESOLUTION_H_ */
+#endif /* MANTID_DATAHANDLING_SAVEFullprofRESOLUTION_H_ */

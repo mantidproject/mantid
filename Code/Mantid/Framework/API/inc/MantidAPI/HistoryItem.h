@@ -7,19 +7,19 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/WorkspaceHistory.h"
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 
 /** @class HistoryView
 
-    This class wraps an algorithm history pointer to add additional functionality when creating a HistoryView.
+    This class wraps an algorithm history pointer to add additional
+   functionality when creating a HistoryView.
 
     @author Samuel Jackson, ISIS, RAL
     @date 21/01/2008
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -40,19 +40,21 @@ namespace API
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-
-class MANTID_API_DLL HistoryItem
-{
+class MANTID_API_DLL HistoryItem {
 public:
   HistoryItem(AlgorithmHistory_const_sptr algHist);
-  HistoryItem(const HistoryItem& A);
-  virtual ~HistoryItem() {};
+  HistoryItem(const HistoryItem &A);
+  virtual ~HistoryItem(){};
 
   bool isUnrolled() const { return m_unrolled; }
   void unrolled(bool unrolled) { m_unrolled = unrolled; }
-  AlgorithmHistory_const_sptr getAlgorithmHistory() const { return m_algorithmHistory; }
-  size_t numberOfChildren() const { return m_algorithmHistory->childHistorySize(); }
-  HistoryItem& operator=(const HistoryItem& A);
+  AlgorithmHistory_const_sptr getAlgorithmHistory() const {
+    return m_algorithmHistory;
+  }
+  size_t numberOfChildren() const {
+    return m_algorithmHistory->childHistorySize();
+  }
+  HistoryItem &operator=(const HistoryItem &A);
 
 private:
   AlgorithmHistory_const_sptr m_algorithmHistory;

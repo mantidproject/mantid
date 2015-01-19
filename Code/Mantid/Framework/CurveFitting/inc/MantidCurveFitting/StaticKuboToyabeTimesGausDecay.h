@@ -4,55 +4,54 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
 
-namespace Mantid
-{
-namespace CurveFitting
-{
+namespace Mantid {
+namespace CurveFitting {
 
-  /** 
-    StaticKuboToyabeTimesGausDecay fitting function.
+/**
+  StaticKuboToyabeTimesGausDecay fitting function.
 
-    Represents multiplication of two other fitting functions: StaticKuboToyabe and GausDecay.
-    
-    @author Arturs Bekasovs
-    @date 27/09/2013 
-    
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Represents multiplication of two other fitting functions: StaticKuboToyabe and
+  GausDecay.
 
-    This file is part of Mantid.
+  @author Arturs Bekasovs
+  @date 27/09/2013
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This file is part of Mantid.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport StaticKuboToyabeTimesGausDecay : public API::ParamFunction, public API::IFunction1D
-  {
-  public:
-    std::string name()const {return "StaticKuboToyabeTimesGausDecay";}
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    virtual const std::string category() const { return "Muon";}
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  protected:
-    virtual void function1D(double* out, const double* xValues, const size_t nData)const;
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport StaticKuboToyabeTimesGausDecay : public API::ParamFunction,
+                                                 public API::IFunction1D {
+public:
+  std::string name() const { return "StaticKuboToyabeTimesGausDecay"; }
 
-    virtual void init(); 
-    
-  };
+  virtual const std::string category() const { return "Muon"; }
 
+protected:
+  virtual void function1D(double *out, const double *xValues,
+                          const size_t nData) const;
+
+  virtual void init();
+};
 
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif  /* MANTID_CURVEFITTING_STATICKUBOTOYABETIMESGAUSDECAY_H_ */
+#endif /* MANTID_CURVEFITTING_STATICKUBOTOYABETIMESGAUSDECAY_H_ */

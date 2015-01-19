@@ -6,17 +6,15 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidAPI/ICatalog.h"
 
-namespace Mantid
-{
-  namespace ICat
-  {
-    class CatalogAlgorithmHelper
-    {
-      public:
-        /// Obtain the error message returned by the IDS.
-        const std::string getIDSError(Poco::Net::HTTPResponse::HTTPStatus &HTTPStatus, std::istream& responseStream);
-    };
-  }
+namespace Mantid {
+namespace ICat {
+class CatalogAlgorithmHelper {
+public:
+  /// Obtain the error message returned by the IDS.
+  const std::string getIDSError(Poco::Net::HTTPResponse::HTTPStatus &HTTPStatus,
+                                std::istream &responseStream);
+};
+}
 }
 
 #endif

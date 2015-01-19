@@ -29,6 +29,7 @@
 #include <iostream>
 #include <QApplication>
 #include <QBitmap>
+#include <QFontDatabase>
 #include <QSplashScreen>
 #include <QMessageBox>
 #include <QDir>
@@ -202,6 +203,11 @@ int main( int argc, char ** argv )
     mw->restoreApplicationGeometry();
     mw->parseCommandLineArguments(args);
     app.processEvents();
+
+    //register a couple of fonts
+    QFontDatabase::addApplicationFont(":/fonts/MontserratAlternates-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/fonts/OpenSans-Regular.ttf");
+
     splash.finish(mw);
 
     app.connect( &app, SIGNAL(lastWindowClosed()), mw, SLOT(exitWithPresetCode()) );

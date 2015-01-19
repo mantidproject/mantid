@@ -42,36 +42,37 @@ namespace Poldi {
 
 class MANTID_SINQ_DLL PoldiDGrid {
 public:
-    PoldiDGrid(boost::shared_ptr<PoldiAbstractDetector> detector = boost::shared_ptr<PoldiAbstractDetector>(),
-               boost::shared_ptr<PoldiAbstractChopper> chopper = boost::shared_ptr<PoldiAbstractChopper>(),
-               double deltaT = 0.0,
-               std::pair<double, double> wavelengthRange = std::pair<double, double>());
-    ~PoldiDGrid() { }
+  PoldiDGrid(boost::shared_ptr<PoldiAbstractDetector> detector =
+                 boost::shared_ptr<PoldiAbstractDetector>(),
+             boost::shared_ptr<PoldiAbstractChopper> chopper =
+                 boost::shared_ptr<PoldiAbstractChopper>(),
+             double deltaT = 0.0, std::pair<double, double> wavelengthRange =
+                                      std::pair<double, double>());
+  ~PoldiDGrid() {}
 
-    void setDetector(boost::shared_ptr<PoldiAbstractDetector> newDetector);
-    void setChopper(boost::shared_ptr<PoldiAbstractChopper> newChopper);
-    void setDeltaT(double newDeltaT);
-    void setWavelengthRange(std::pair<double, double> wavelengthRange);
+  void setDetector(boost::shared_ptr<PoldiAbstractDetector> newDetector);
+  void setChopper(boost::shared_ptr<PoldiAbstractChopper> newChopper);
+  void setDeltaT(double newDeltaT);
+  void setWavelengthRange(std::pair<double, double> wavelengthRange);
 
-    double deltaD();
-    std::vector<double> grid();
+  double deltaD();
+  std::vector<double> grid();
 
 protected:
-    std::pair<int, int> calculateDRange();
-    double calculateDeltaD();
-    void createGrid();
+  std::pair<int, int> calculateDRange();
+  double calculateDeltaD();
+  void createGrid();
 
-    boost::shared_ptr<PoldiAbstractDetector> m_detector;
-    boost::shared_ptr<PoldiAbstractChopper> m_chopper;
-    double m_deltaT;
-    std::pair<double, double> m_wavelengthRange;
+  boost::shared_ptr<PoldiAbstractDetector> m_detector;
+  boost::shared_ptr<PoldiAbstractChopper> m_chopper;
+  double m_deltaT;
+  std::pair<double, double> m_wavelengthRange;
 
-    std::pair<int, int> m_dRangeAsMultiples;
-    double m_deltaD;
-    std::vector<double> m_dgrid;
+  std::pair<int, int> m_dRangeAsMultiples;
+  double m_deltaD;
+  std::vector<double> m_dgrid;
 
-    bool m_hasCachedCalculation;
-
+  bool m_hasCachedCalculation;
 };
 }
 }

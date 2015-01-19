@@ -7,19 +7,18 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/ProgressBase.h"
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 class Algorithm;
 
-/** 
+/**
  Helper class for reporting progress from algorithms.
 
  @author Roman Tolchenov, Tessella Support Services plc
  @date 06/02/2009
 
- Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -39,23 +38,21 @@ class Algorithm;
  File change history is stored at: <https://github.com/mantidproject/mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_API_DLL Progress : public Mantid::Kernel::ProgressBase
-{
+class MANTID_API_DLL Progress : public Mantid::Kernel::ProgressBase {
 public:
   Progress();
-  Progress(Algorithm* alg,double start,double end, int numSteps);
-  Progress(Algorithm* alg,double start,double end, int64_t numSteps);
-  Progress(Algorithm* alg,double start,double end, size_t numSteps);
+  Progress(Algorithm *alg, double start, double end, int numSteps);
+  Progress(Algorithm *alg, double start, double end, int64_t numSteps);
+  Progress(Algorithm *alg, double start, double end, size_t numSteps);
   virtual ~Progress();
 
-  void doReport(const std::string& msg = "");
+  void doReport(const std::string &msg = "");
   bool hasCancellationBeenRequested() const;
 
 private:
   /// Owning algorithm
-  Algorithm* const m_alg;
-  Progress& operator=(const Progress&);
-
+  Algorithm *const m_alg;
+  Progress &operator=(const Progress &);
 };
 
 } // namespace API

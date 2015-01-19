@@ -4,6 +4,7 @@
 #include "ui_ModeControlWidget.h"
 #include "MantidVatesSimpleGuiQtWidgets/WidgetDllOption.h"
 
+#include <map>
 #include <QWidget>
 
 namespace Mantid
@@ -58,13 +59,22 @@ public:
 public slots:
   /// Enable/disable a specific view button.
   void enableViewButton(ModeControlWidget::Views mode, bool state);
+
   /**
    * Enable/disable all view buttons, except standard.
    * @param state whether or not to enable the buttons
+   * @param initialView The initial view.
    */
-  void enableViewButtons(bool state);
+  void enableViewButtons(ModeControlWidget::Views initialView, bool state);
+
   /// Expose the standard view button.
   void setToStandardView();
+
+  /// Switch to a selected view.
+  void setToSelectedView(ModeControlWidget::Views view);
+
+  /// Convert a string into an enum
+  ModeControlWidget::Views getViewFromString(std::string view);
 
 signals:
   /**
@@ -97,6 +107,7 @@ protected slots:
 
 private:
   Ui::ModeControlWidgetClass ui; ///< The mode control widget's UI form
+  std::map<std::string, Views> mapFromStringToView; //< Holds the mapping from the a string to an associated enum
 };
 
 }

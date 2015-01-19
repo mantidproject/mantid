@@ -247,8 +247,8 @@ namespace IDA
       pyInput += "canws = '" + canWs + "'\n";
 
       //can absoprtion and scattering x section.
-      QString canScatteringXSec = uiForm().absp_lesamsigs->text();
-      QString canAbsorptionXSec = uiForm().absp_lesamsiga->text();
+      QString canScatteringXSec = uiForm().absp_lecansigs->text();
+      QString canAbsorptionXSec = uiForm().absp_lecansiga->text();
 
       if ( canScatteringXSec.isEmpty() ) { canScatteringXSec = "0.0"; }
       if ( canAbsorptionXSec.isEmpty() ) { canAbsorptionXSec = "0.0"; }

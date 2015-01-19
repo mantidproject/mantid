@@ -1,37 +1,3 @@
-""" Class defines the interface for Direct inelastic reduction with properties 
-    present in Instrument_Properties.xml file
-
-    The class is written to provide the following functionality. 
-
-    1) Properties are initiated from Instrument_Properties.xml file as defaults. 
-    2) Attempt to access property, not present in this file throws. 
-    3) Attempt to create property not present in this file throws. 
-    4) A standard behavior is defined for the most of the properties (get/set appropriate value) when there is number of 
-       overloaded properties, which support more complex behavior using specially written attribute-classes. 
-    5) Changes to the properties are recorded and list of changed properties is available on request
-
-
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-"""
-
 from mantid.simpleapi import *
 from mantid import api
 from mantid import geometry
@@ -107,40 +73,69 @@ class MapMaskFile(object):
            fileName, fileExtension = os.path.splitext(value)
            if (not fileExtension):
                value=value+self._file_ext;
-        else:
-            if self._field_name=='hard_mask_file':
-                if instance.use_hard_mask_only:
-                    instance.run_diagnostics = False;
-            
+           
         prop_helpers.gen_setter(instance.__dict__,self._field_name,value);
 #end MapMaskFile
 
-class HardMaskOnly(object):
+class HardMaskPlus(prop_helpers.ComplexProperty):
+    """ Legacy HardMaskPlus class which sets up hard_mask_file to file and use_hard_mask_only to True""" 
+    def __init__(self):
+        prop_helpers.ComplexProperty.__init__(self,['hard_mask_file','use_hard_mask_only','run_diagnostics'])
+    def __get__(self,instance,type=None):
+         return prop_helpers.gen_getter(instance.__dict__,'hard_mask_file');
+
+    def __set__(self,instance,value):
+        if value != None:
+           fileName, fileExtension = os.path.splitext(value)
+           if (not fileExtension):
+               value=value+'.msk';
+           prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[value,False,True])
+        else:
+           prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[None,True,False])
+
+
+
+class HardMaskOnly(prop_helpers.ComplexProperty):
     """ Sets diagnostics algorithm to use hard mask file provided and to disable all other diagnostics routines
 
         It controls two options, where the first one is use_hard_mask_only=True/False, controls diagnostics algorithm
         and another one: hard_mask_file provides file for masking.         
     """
+    def __init__(self):
+        prop_helpers.ComplexProperty.__init__(self,['hard_mask_file','use_hard_mask_only','run_diagnostics'])
+
     def __get__(self,instance,type=None):
           return prop_helpers.gen_getter(instance.__dict__,'use_hard_mask_only');
     def __set__(self,instance,value):
         if value is None:
-            prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',False);
+            use_hard_mask_only = False
+            hard_mask_file     = None
+            run_diagnostics    = True
+            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[hard_mask_file,use_hard_mask_only,run_diagnostics])
         elif isinstance(value,bool):
-            prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',value);
+            use_hard_mask_only = False
+            hard_mask_file     = instance.hard_mask_file
+            run_diagnostics    = instance.run_diagnostics
+            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[hard_mask_file,use_hard_mask_only,run_diagnostics])
         elif isinstance(value,str):
             if value.lower() in ['true','yes']:
-                prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',True);
+                use_hard_mask_only = True
+                hard_mask_file     = instance.hard_mask_file
             elif value.lower() in ['false','no']:
-                prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',False);
+                use_hard_mask_only = False
+                hard_mask_file     = instance.hard_mask_file
             else: # it is probably a hard mask file provided:
-                prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',True);
                 instance.hard_mask_file = value;
-            #end
-        #end
+                use_hard_mask_only = True
+                hard_mask_file     = instance.hard_mask_file
 
-        if not(value) and instance.hard_mask_file is None:
-            instance.run_diagnostics = False;
+            # if no hard mask file is there and use_hard_mask_only is True, diagnostics should not run
+            if instance.use_hard_mask_only and hard_mask_file is None:
+               run_diagnostics = False
+            else:
+               run_diagnostics = True
+            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[hard_mask_file,use_hard_mask_only,run_diagnostics])
+        #end
 #end HardMaskOnly
 
 class MonovanIntegrationRange(prop_helpers.ComplexProperty):
@@ -205,8 +200,6 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
                 raise KeyError("monovan_integr_range has to be list of two values, "\
                     "defining min/max values of integration range or None to use relative to incident energy limits")
             prop_helpers.ComplexProperty.__set__(self,tDict,value)
-
- 
 #end MonovanIntegrationRange
 
 
@@ -281,21 +274,29 @@ class SaveFormat(object):
             prop_helpers.gen_setter(instance.__dict__,'save_format',set());
             return
 
-        # check string, if it is empty, clear save format, if not -- continue
+        # check string
         if isinstance(value,str):
-            if value[:1] == '.':
-                value = value[1:];
+            value = value.strip('[]().')
+            subformats = value.split(',')
+            if len(subformats)>1:
+                self.__set__(instance,subformats)
+                return
+            else:
+                value = subformats[0]      
 
-            if not(value in SaveFormat.save_formats):
-                instance.log("Trying to set saving in unknown format: \""+str(value)+"\" No saving will occur for this format")
-                return 
-        elif isinstance(value,list) or isinstance(value,set):
-            # set single default save format recursively
-             for val in value:
+                if not(value  in SaveFormat.save_formats):
+                    instance.log("Trying to set saving in unknown format: \""+str(value)+"\" No saving will occur for this format")
+                    return
+        else: 
+            try:
+                 # set single default save format recursively
+                 for val in value:
                     self.__set__(instance,val);
-             return;
-        else:
-            raise KeyError(' Attempting to set unknown saving format type. Allowed values can be spe, nxspe or nxs');
+                 return;
+            except:    
+               raise KeyError(' Attempting to set unknown saving format {0} of type {1}. Allowed values can be spe, nxspe or nxs'\
+                   .format(value,type(value)));
+        #end if different types
         if instance.__dict__['save_format'] is None:
             ts = set();
             ts.add(value)
@@ -370,20 +371,53 @@ class BackbgroundTestRange(object):
 #-----------------------------------------------------------------------------------------
 
 class DirectPropertyManager(DirectReductionProperties):
-    """Class provides interface to all reduction properties, present in IDF
+    """ Class defines the interface for Direct inelastic reduction with properties 
+        present in Instrument_Properties.xml file
 
-       These properties are responsible for fine turning up of the reduction
+        These properties are responsible for fine turning up of the reduction
 
-       Supported properties in IDF can be simple (prop[name]=value e.g. 
-       prop['vanadium_mass']=30.5 
+        Supported properties in IDF can be simple (prop[name]=value e.g. 
+        prop['vanadium_mass']=30.5 
        
-       or complex 
-       where prop[name_complex_prop] value is equal [prop[name_1],prop[name_2]]
-       e.g. time interval used in normalization on monitor 1:
-       prop[norm_mon_integration_range] = [prop['norm-mon1-min'],prop['norm-mon1-max']]
-       prop['norm-mon1-min']=1000,prop['norm-mon1-max']=2000
+        or complex 
+        where prop[name_complex_prop] value is equal [prop[name_1],prop[name_2]]
+        e.g. time interval used in normalization on monitor 1:
+        prop[norm_mon_integration_range] = [prop['norm-mon1-min'],prop['norm-mon1-max']]
+        prop['norm-mon1-min']=1000,prop['norm-mon1-max']=2000
 
-       properties which values described by more complex function have to have Descriptors. 
+        There are properties which provide even more complex functionality. These properties have their own Descriptors. 
+
+    
+        The class is written to provide the following functionality. 
+
+        1) Properties are initiated from Instrument_Properties.xml file as defaults. 
+        2) Attempt to access property, not present in this file throws. 
+        3) Attempt to create property not present in this file throws. 
+        4) A standard behavior is defined for the most of the properties (get/set appropriate value) when there is number of 
+           overloaded properties, which support more complex behavior using specially written attribute-classes. 
+        5) Changes to the properties are recorded and list of changed properties is available on request
+
+
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://github.com/mantidproject/mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+
     """
 
     _class_wrapper ='_DirectPropertyManager__';
@@ -568,27 +602,28 @@ class DirectPropertyManager(DirectReductionProperties):
 #              Overloaded setters/getters
 #----------------------------------------------------------------------------------
     #
-    van_rmm = VanadiumRMM();
+    van_rmm = VanadiumRMM()
     #
-    det_cal_file    = DetCalFile();
+    det_cal_file    = DetCalFile()
     #
-    map_file        = MapMaskFile('map_file','.map',"Spectra to detector mapping file for the sample run");
+    map_file        = MapMaskFile('map_file','.map',"Spectra to detector mapping file for the sample run")
     #
-    monovan_mapfile = MapMaskFile('monovan_mapfile','.map',"Spectra to detector mapping file for the monovanadium integrals calculation");
+    monovan_mapfile = MapMaskFile('monovan_mapfile','.map',"Spectra to detector mapping file for the monovanadium integrals calculation")
     #
-    hard_mask_file  = MapMaskFile('hard_mask_file','.msk',"Hard mask file");
+    hard_mask_file  = MapMaskFile('hard_mask_file','.msk',"Hard mask file")
     #
-    monovan_integr_range     = MonovanIntegrationRange();
+    monovan_integr_range     = MonovanIntegrationRange()
     #
-    spectra_to_monitors_list = SpectraToMonitorsList();
+    spectra_to_monitors_list = SpectraToMonitorsList()
     # 
-    save_format = SaveFormat();
+    save_format = SaveFormat()
     #
-    use_hard_mask_only = HardMaskOnly();
+    hardmaskOnly = HardMaskOnly()
+    hardmaskPlus = HardMaskPlus()
     #
-    diag_spectra = DiagSpectra();
+    diag_spectra = DiagSpectra()
     #
-    background_test_range = BackbgroundTestRange();
+    background_test_range = BackbgroundTestRange()
 
 #----------------------------------------------------------------------------------------------------------------
     def getChangedProperties(self):
@@ -607,14 +642,7 @@ class DirectPropertyManager(DirectReductionProperties):
             return True
         else:
             return False
-
-    def get_sample_ws_name(self):
-        """ build and return sample workspace name """ 
-        if not self.sum_runs:
-            return common.create_resultname(self.sample_run,self.instr_name);
-        else:
-            return common.create_resultname(self.sample_run,self.instr_name,'-sum');
-   
+  
     def set_input_parameters_ignore_nan(self,**kwargs):
         """ Like similar method set_input_parameters this one is used to 
             set changed parameters from dictionary of parameters. 
@@ -650,7 +678,7 @@ class DirectPropertyManager(DirectReductionProperties):
                            'van_out_lo':0.01, 'van_out_hi':100., 'van_lo':0.1, 'van_hi':1.5, 'van_sig':0.0, 'variation':1.1,\
                            'bleed_test':False,'bleed_pixels':0,'bleed_maxrate':0,\
                            'hard_mask_file':None,'use_hard_mask_only':False,'background_test_range':None,\
-                           'instr_name':''}
+                           'instr_name':'','print_diag_results':True}
         result = {};
 
         for key,val in diag_param_list.iteritems():
@@ -684,6 +712,18 @@ class DirectPropertyManager(DirectReductionProperties):
         old_changes  = self.getChangedProperties()
         self.setChangedProperties(set())
 
+        # find all changes, present in the old changes list
+        existing_changes = old_changes.copy()
+        for change in old_changes:
+            dependencies = None
+            try:
+                prop = self.__class__.__dict__[change]
+                dependencies = prop.dependencies()
+            except:
+                pass
+            if dependencies:
+                 existing_changes.update(dependencies)
+
         param_list = prop_helpers.get_default_idf_param_list(pInstrument)
         param_list =  self._convert_params_to_properties(param_list,False)
 
@@ -716,12 +756,12 @@ class DirectPropertyManager(DirectReductionProperties):
                # is complex property changed through its dependent properties?
                dependent_prop = val.dependencies()
                replace_old_value = True
-               if public_name in old_changes:
+               if public_name in existing_changes:
                    replace_old_value = False
 
                if replace_old_value: # may be property have changed through its dependencies
                     for prop_name in dependent_prop:
-                        if  prop_name in old_changes:
+                        if  prop_name in existing_changes:
                             replace_old_value =False
                             break
                #
@@ -738,7 +778,7 @@ class DirectPropertyManager(DirectReductionProperties):
                        pass
             # simple property
             else: 
-                if public_name in old_changes:
+                if public_name in existing_changes:
                     continue
                 else: 
                    old_val = getattr(self,name);

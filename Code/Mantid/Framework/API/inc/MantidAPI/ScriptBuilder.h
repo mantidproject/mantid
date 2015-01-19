@@ -12,10 +12,8 @@
 
 #include <sstream>
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 
 /** @class ScriptBuilder
 
@@ -24,7 +22,8 @@ namespace API
     @author Samuel Jackson, ISIS, RAL
     @date 21/01/2008
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -45,21 +44,26 @@ namespace API
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-
-class MANTID_API_DLL ScriptBuilder
-{
+class MANTID_API_DLL ScriptBuilder {
 public:
-  ScriptBuilder(boost::shared_ptr<HistoryView> view, std::string versionSpecificity = "old");
-  virtual ~ScriptBuilder() {};
+  ScriptBuilder(boost::shared_ptr<HistoryView> view,
+                std::string versionSpecificity = "old");
+  virtual ~ScriptBuilder(){};
 
   /// build a python script from the history view
   const std::string build();
-  
+
 private:
-  void writeHistoryToStream(std::ostringstream& os, std::vector<HistoryItem>::const_iterator& iter, int depth = 1);
-  void buildChildren(std::ostringstream& os, std::vector<HistoryItem>::const_iterator& iter, int depth = 1);
-  const std::string buildAlgorithmString(AlgorithmHistory_const_sptr algHistory);
-  const std::string buildPropertyString(Mantid::Kernel::PropertyHistory_const_sptr propHistory);
+  void writeHistoryToStream(std::ostringstream &os,
+                            std::vector<HistoryItem>::const_iterator &iter,
+                            int depth = 1);
+  void buildChildren(std::ostringstream &os,
+                     std::vector<HistoryItem>::const_iterator &iter,
+                     int depth = 1);
+  const std::string
+  buildAlgorithmString(AlgorithmHistory_const_sptr algHistory);
+  const std::string
+  buildPropertyString(Mantid::Kernel::PropertyHistory_const_sptr propHistory);
 
   const std::vector<HistoryItem> m_historyItems;
   std::string m_output;

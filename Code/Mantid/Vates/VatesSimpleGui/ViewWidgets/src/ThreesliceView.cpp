@@ -39,17 +39,23 @@ namespace
   /// Static logger
   Kernel::Logger g_log("ThreeSliceView");
 }
+
+
 ThreeSliceView::ThreeSliceView(QWidget *parent) : ViewBase(parent)
 {
   this->ui.setupUi(this);
 
-  // We need to load the QuadView.dll plugin. The Windows system requires the full
+  // We need to load the QuadView plugin
+  QString quadViewLibrary;
+#ifdef Q_OS_WIN32
+  // Windows requires the full
   // path information. The DLL is located in the apropriate executeable path of paraview.
   const Poco::Path paraviewPath(Mantid::Kernel::ConfigService::Instance().getParaViewPath());
-
   Poco::Path quadViewFullPath(paraviewPath, QUADVIEW_LIBRARY.toStdString());
-
-  QString quadViewLibrary(quadViewFullPath.toString().c_str());
+  quadViewLibrary = quadViewFullPath.toString().c_str();
+#else
+  quadViewLibrary = QUADVIEW_LIBRARY;
+#endif
 
   // Need to load plugin
   pqPluginManager* pm = pqApplicationCore::instance()->getPluginManager();
@@ -57,7 +63,7 @@ ThreeSliceView::ThreeSliceView(QWidget *parent) : ViewBase(parent)
   pm->loadExtension(pqActiveObjects::instance().activeServer(),
                     quadViewLibrary, &error, false);
 
-  g_log.debug() << "Loading QuadView.dll from " << quadViewLibrary.toStdString() << "\n";
+  g_log.debug() << "Loading QuadView library from " << quadViewLibrary.toStdString() << "\n";
 
   this->mainView = this->createRenderView(this->ui.mainRenderFrame,
                                           QString("pqQuadView"));
