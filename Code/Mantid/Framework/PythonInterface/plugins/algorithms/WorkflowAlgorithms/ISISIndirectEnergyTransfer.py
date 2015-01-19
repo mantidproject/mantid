@@ -2,6 +2,8 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 import os
+import string
+import numpy as np
 
 
 _str_or_none = lambda s: s if s != '' else None
@@ -71,61 +73,97 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self._setup()
         self._load_files()
 
-        for ws_name in self._workspace_names:
-            masked_detectors = self._identify_bad_detectors(ws_name)
+        for c_ws_name in self._workspace_names:
+            is_multi_frame = isinstance(mtd[c_ws_name], WorkspaceGroup)
 
-            # Process monitor
-            self._unwrap_monitor(ws_name)
-            ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target='Wavelength', EMode='Elastic')
-            self._process_monitor_efficiency(ws_name)
-            self._scale_monitor(ws_name)
+            # Get list of workspaces
+            if is_multi_frame:
+                workspaces = mtd[c_ws_name].getNames()
+            else:
+                workspaces = [c_ws_name]
 
-            # Do background removal if a range was provided
-            if self._background_range is not None:
-                ConvertToDistribution(Workspace=ws_name)
-                CalculateFlatBackground(InputWorkspace=ws_name, OutputWorkspace=ws_name,
-                                        StartX=self._background_range[0],
-                                        EndX=self._background_range[1],
-                                        Mode='Mean')
-                ConvertFromDistribution(Workspace=ws_name)
+            # Process rebinning for framed data
+            if self._rebin_string is not None and is_multi_frame:
+                rebin_string_comp = self._rebin_string.split(',')
+                if len(rebin_string_comp) >= 5:
+                    rebin_string_2 = ','.join(rebin_string_comp[2:])
+                else:
+                    rebin_string_2 = self._rebin_string
 
-            # Divide by the calibration workspace if one was provided
-            if self._calibration_ws is not None:
-                Divide(LHSWorkspace=ws_name,
-                       RHSWorkspace=self._calibration_ws,
-                       OutputWorkspace=ws_name)
+                bin_counts = [mtd[ws].blocksize() for ws in mtd[c_ws_name].getNames()]
+                num_bins = np.amax(bin_counts)
 
-            # Scale detector data by monitor intensities
-            monitor_ws_name = ws_name + '_mon'
-            ConvertUnits(InputWorkspace=monitor_ws_name, OutputWorkspace=monitor_ws_name, Target='Wavelength', EMode='Elastic')
-            RebinToWorkspace(WorkspaceToRebin=ws_name, WorkspaceToMatch=monitor_ws_name, OutputWorkspace=ws_name)
-            Divide(LHSWorkspace=ws_name, RHSWorkspace=monitor_ws_name, OutputWorkspace=ws_name)
+            # Process workspaces
+            for ws_name in workspaces:
+                masked_detectors = self._identify_bad_detectors(ws_name)
 
-            # Remove the no longer needed monitor workspace
-            DeleteWorkspace(monitor_ws_name)
+                monitor_ws_name = ws_name + '_mon'
+                ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target='Wavelength', EMode='Indirect')
+                ConvertUnits(InputWorkspace=monitor_ws_name, OutputWorkspace=monitor_ws_name, Target='Wavelength')
 
-            # Convert to energy
-            ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target='DeltaE', EMode='Indirect')
-            CorrectKiKf(InputWorkspace=ws_name, OutputWorkspace=ws_name, EMode='Indirect')
-            if self._rebin_string is not None:
-                Rebin(InputWorkspaces=ws_name, OutputWorkspace=ws_name, Params=self._rebin_string)
-            # TODO: Handle multiple framed data
+                # Process monitor
+                self._unwrap_monitor(ws_name)
+                self._process_monitor_efficiency(ws_name)
+                self._scale_monitor(ws_name)
 
-            # Detailed balance
-            if self._detailed_balance is not None:
-                corr_factor = 11.606 / (2 * self._detailed_balance)
-                ExponentialCorrection(InputWorkspaces=ws_name, OutputWorkspace=ws_name,
-                                      C0=1.0, C1=corr_factor, Operation='Multiply')
+                # Do background removal if a range was provided
+                if self._background_range is not None:
+                    ConvertToDistribution(Workspace=ws_name)
+                    CalculateFlatBackground(InputWorkspace=ws_name, OutputWorkspace=ws_name,
+                                            StartX=self._background_range[0],
+                                            EndX=self._background_range[1],
+                                            Mode='Mean')
+                    ConvertFromDistribution(Workspace=ws_name)
 
-            # Scale
-            if self._scale_factor != 1.0:
-                Scale(InputWorkspaces=ws_name, OutputWorkspace=ws_name,
-                      Factor=self._scale_factor, Operation='Multiply')
+                # Divide by the calibration workspace if one was provided
+                if self._calibration_ws is not None:
+                    Divide(LHSWorkspace=ws_name,
+                           RHSWorkspace=self._calibration_ws,
+                           OutputWorkspace=ws_name)
 
-            # Group spectra
-            self._group_spectra(ws_name, masked_detectors)
+                # Scale detector data by monitor intensities
+                RebinToWorkspace(WorkspaceToRebin=ws_name, WorkspaceToMatch=monitor_ws_name, OutputWorkspace=ws_name)
+                Divide(LHSWorkspace=ws_name, RHSWorkspace=monitor_ws_name, OutputWorkspace=ws_name)
 
-            # TODO: Fold
+                # Remove the no longer needed monitor workspace
+                DeleteWorkspace(monitor_ws_name)
+
+                # Convert to energy
+                ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target='DeltaE', EMode='Indirect')
+                CorrectKiKf(InputWorkspace=ws_name, OutputWorkspace=ws_name, EMode='Indirect')
+
+                # Handle rebinning of regular data
+                if self._rebin_string is not None and not is_multi_frame:
+                    Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=self._rebin_string)
+                else:
+                    try:
+                        RebinToWorkspace(WorkspaceToRebin=ws_name, WorkspaceToMatch=ws_name, OutputWorkspace=ws_name)
+                    except RuntimeError:
+                        logger.warning('Rebinning failed, will try to continue anyway.')
+
+                # Handle rebinning of multiple framed data
+                if self._rebin_string is not None and is_multi_frame:
+                    if mtd[ws_name].blocksize() == num_bins:
+                        Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=self._rebin_string)
+                    else:
+                        Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=rebin_string_2)
+
+                # Detailed balance
+                if self._detailed_balance is not None:
+                    corr_factor = 11.606 / (2 * self._detailed_balance)
+                    ExponentialCorrection(InputWorkspaces=ws_name, OutputWorkspace=ws_name,
+                                          C0=1.0, C1=corr_factor, Operation='Multiply')
+
+                # Scale
+                if self._scale_factor != 1.0:
+                    Scale(InputWorkspaces=ws_name, OutputWorkspace=ws_name,
+                          Factor=self._scale_factor, Operation='Multiply')
+
+                # Group spectra
+                self._group_spectra(ws_name, masked_detectors)
+
+            if self._fold_multiple_frames and is_multi_frame:
+                self._fold_chopped(c_ws_name)
 
         # Rename output workspaces
         output_workspace_names = [self._rename_workspace(ws_name) for ws_name in self._workspace_names]
@@ -257,15 +295,34 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             monitor_index = int(instrument.getNumberParameter('Workflow.Monitor1-SpectrumNumber')[0])
             logger.debug('Workspace %s monitor 1 spectrum number :%d' % (ws_name, monitor_index))
 
-            # Get the monitor spectrum
-            monitor_ws_name = ws_name + '_mon'
-            ExtractSingleSpectrum(InputWorkspace=ws_name, OutputWorkspace=monitor_ws_name,
-                                  WorkspaceIndex=monitor_index)
+            # Chop data if required
+            try:
+                chop_threshold = mtd[ws_name].getInstrument().getNumberParameter('Workflow.ChopDataIfGreaterThan')[0]
+                num_bins = mtd[ws_name].blocksize()
+                need_chop =  num_bins > chop_threshold
+            except IndexError:
+                need_chop = False
+            logger.information('Workspace %s need data chop: %s' % (ws_name, str(need_chop)))
 
-            # Crop to the detectors required
-            CropWorkspace(InputWorkspace=ws_name, OutputWorkspace=ws_name,
-                          StartWorkspaceIndex=self._spectra_range[0] - 1,
-                          EndWorkspaceIndex=self._spectra_range[1] - 1)
+            workspaces = [ws_name]
+            if need_chop:
+                ChopData(InputWorkspace=ws_name, OutputWorkspace=ws_name, MonitorWorkspaceIndex=monitor_index,
+                         IntegrationRangeLower=5000.0, IntegrationRangeUpper=10000.0, NChops=5)
+                workspaces = mtd[ws_name].getNames()
+
+            for chop_ws_name in workspaces:
+                # Get the monitor spectrum
+                monitor_ws_name = chop_ws_name + '_mon'
+                ExtractSingleSpectrum(InputWorkspace=chop_ws_name, OutputWorkspace=monitor_ws_name,
+                                      WorkspaceIndex=monitor_index)
+
+                # Crop to the detectors required
+                CropWorkspace(InputWorkspace=chop_ws_name, OutputWorkspace=chop_ws_name,
+                              StartWorkspaceIndex=self._spectra_range[0] - 1,
+                              EndWorkspaceIndex=self._spectra_range[1] - 1)
+
+            if need_chop and self._sum_files:
+                self._fold_chopped(ws_name)
 
         # Sum files if needed
         if self._sum_files:
@@ -369,11 +426,9 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         logger.debug('Need to unwrap monitor for %s: %s' % (ws_name, str(should_unwrap)))
 
-        if not should_unwrap:
-            return
-        else:
+        if should_unwrap:
             sample = instrument.getSample()
-            sample_to_source = sample.getPos() - instrument.getSource().getPos()
+            sample_to_source = sample.getPos() - instrumentSource().getPos()
             radius = mtd[ws_name].getDetector(0).getDistance(sample)
             z_dist = sample_to_source.getZ()
             l_ref = z_dist + radius
@@ -505,6 +560,46 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, ws_name))
 
 
+    def _fold_chopped(self, ws_name):
+        """
+        Folds multiple frames of a data set into one workspace.
+
+        @param ws_name Name of the group to fold
+        """
+
+        workspaces = mtd[ws_name].getNames()
+        merged_ws = ws_name + '_merged'
+        MergeRuns(InputWorkspaces=','.join(workspaces), OutputWorkspace=merged_ws)
+
+        scaling_ws = '__scaling_ws'
+        unit = mtd[ws_name].getItem(0).getAxis(0).getUnit().unitID()
+
+        ranges = []
+        for ws in mtd[ws_name].getNames():
+            x_min = mtd[ws].dataX(0)[0]
+            x_max = mtd[ws].dataX(0)[-1]
+            ranges.append((x_min, x_max))
+            DeleteWorkspace(Workspace=ws)
+
+        data_x = mtd[merged_ws].readX(0)
+        data_y = []
+        data_e = []
+
+        for i in range(0, mtd[merged_ws].blocksize()):
+            y_val = 0.0
+            for rng in ranges:
+                if data_x[i] >= rng[0] and data_x[i] <= rng[1]:
+                    y_val += 1.0
+
+            data_y.append(y_val)
+            data_e.append(0.0)
+
+        CreateWorkspace(OutputWorkspace=scaling_ws, DataX=data_x, DataY=data_y, DataE=data_e, UnitX=unit)
+
+        Divide(LHSWorkspace=merged_ws, RHSWorkspace=scaling_ws, OutputWorkspace=ws_name)
+        DeleteWorkspace(Workspace=merged_ws)
+        DeleteWorkspace(Workspace=scaling_ws)
+
     def _rename_workspace(self, ws_name):
         """
         Renames a worksapce according to the naming policy in the Workflow.NamingConvention parameter.
@@ -513,8 +608,15 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         @return New name of workspace
         """
 
+        is_multi_frame = isinstance(mtd[ws_name], WorkspaceGroup)
+
+        # Get the instrument
+        if is_multi_frame:
+            instrument = mtd[ws_name].getItem(0).getInstrument()
+        else:
+            instrument = mtd[ws_name].getInstrument()
+
         # Get the naming convention parameter form the parameter file
-        instrument = mtd[ws_name].getInstrument()
         try:
             convention = instrument.getStringParameter('Workflow.NamingConvention')[0]
         except IndexError:
@@ -522,7 +624,11 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             convention = 'RunTitle'
         logger.information('Naming convention for workspace %s is %s' % (ws_name, convention))
 
-        run_number = mtd[ws_name].getRun()['run_number'].value
+        # Get run number
+        if is_multi_frame:
+            run_number = mtd[ws_name].getItem(0).getRun()['run_number'].value
+        else:
+            run_number = mtd[ws_name].getRun()['run_number'].value
         logger.information('Run number for workspace %s is %s' % (ws_name, run_number))
 
         inst_name = instrument.getName()
@@ -534,7 +640,13 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 pass
         logger.information('Short name for instrument %s is %s' % (inst_name, short_inst_name))
 
-        run_title = mtd[ws_name].getRun()['run_number'].value
+        # Get run title
+        if is_multi_frame:
+            run_title = mtd[ws_name].getItem(0).getRun()['run_title'].value.strip()
+        else:
+            run_title = mtd[ws_name].getRun()['run_title'].value.strip()
+        logger.information('Run title for workspace %s is %s' % (ws_name, run_title))
+
         if self._sum_files:
             multi_run_marker = '_multi'
         else:
@@ -545,7 +657,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         elif convention == 'RunTitle':
             valid = "-_.() %s%s" % (string.ascii_letters, string.digits)
-            formatted_title = ''.join(c for c in run_title in c in valid)
+            formatted_title = ''.join([c for c in run_title if c in valid])
             new_name = '%s%s%s-%s' % (short_inst_name.lower(), run_number, multi_run_marker, formatted_title)
 
         elif convention == 'AnalyserReflection':
