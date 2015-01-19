@@ -59,7 +59,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         # Output properties
         self.declareProperty(name='Plot', defaultValue='None', doc='Type of plot to output after reduction',
-                             validator=StringListValidator(['None', 'Spectra', 'Contour']))
+                             validator=StringListValidator(['None', 'Spectra', 'Contour', 'Both']))
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                              direction=Direction.Output),
@@ -117,7 +117,10 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         self.setProperty('OutputWorkspace', self._output_ws)
 
-        # TODO: Plot
+        # Plot result workspaces
+        if self._plot_type != 'None':
+            for ws_name in output_workspace_names:
+                self._plot_workspace(ws_name)
 
 
     def validateInputs(self):
@@ -540,6 +543,27 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         RenameWorkspace(InputWorkspace=ws_name, OutputWorkspace=new_name)
         return new_name
+
+
+    def _plot_workspace(self, ws_name):
+        """
+        Plot a given workspace based on the Plot property.
+
+        @param ws_name Name of workspace to plot
+        """
+
+        if self._plot_type == 'Spectra' or self._plot_type == 'Both':
+            from mantidplot import plotSpectrum
+            num_spectra = mtd[ws_name].getNumberHistograms()
+            try:
+                plotSpectrum(ws_name, range(0, num_spectra))
+            except RuntimeError:
+                logger.notice('Spectrum plotting canceled by user')
+
+        if self._plot_type == 'Contour' or self._plot_type == 'Both':
+            from mantidplot import importMatrixWorkspace
+            plot_workspace = importMatrixWorkspace(ws_name)
+            plot_workspace.plotGraph2D()
 
 
 # Register algorithm with Mantid
