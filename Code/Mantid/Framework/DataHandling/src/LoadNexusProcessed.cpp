@@ -1141,7 +1141,6 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
  * @param mtd_entry Nexus entry for "mantid_workspace_..."
  * @param xlength bins in the "X" axis (xbins)
  * @param workspaceType Takes values like "Workspace2D", "RebinnedOutput", etc.
- * @param total_specs actual number of spectra to load (filtering by min/max/list)
  *
  * @return workspace object containing loaded data
  */
@@ -1931,11 +1930,11 @@ LoadNexusProcessed::checkOptionalProperties(const std::size_t numberofspectra) {
  *
  * @param numberofspectra :: count of spectra found in the file being loaded
  *
- * @param calculate_filtered_list :: process SpectrumList and SpectrumMin/Max
- *                                   and save resulting explicit list of
- *                                   spectra indices into a vector data
- *                                   member, presently used only when loading
- *                                   into event_workspace
+ * @param gen_filtered_list :: process SpectrumList and SpectrumMin/Max
+ *                             and save resulting explicit list of
+ *                             spectra indices into a vector data
+ *                             member, presently used only when loading
+ *                             into event_workspace
  *
  * @return the size of a workspace
  */
