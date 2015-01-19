@@ -175,7 +175,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         # Plot result workspaces
         if self._plot_type != 'None':
-            for ws_name in output_workspace_names:
+            for ws_name in mtd[self._output_ws].getNames():
                 self._plot_workspace(ws_name)
 
 
