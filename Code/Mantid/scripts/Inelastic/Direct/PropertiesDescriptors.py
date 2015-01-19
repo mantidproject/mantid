@@ -567,7 +567,7 @@ class BackbgroundTestRange(PropDescriptor):
        if self._background_test_range:
             return self._background_test_range  
        else:
-            return instance.bkgd_range;
+            return instance.bkgd_range
 
     def __set__(self,instance,value):
         if value is None:

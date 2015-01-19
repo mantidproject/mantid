@@ -124,6 +124,15 @@ class RunDescriptor(PropDescriptor):
             return ws.getRunNumber()
         else:
             return self._run_number 
+#--------------------------------------------------------------------------------------------------------------------    
+    def is_monws_separate(self):
+        """ """
+        mon_ws = self.get_monitors_ws()
+        name   = mon_ws.name()
+        if name.endswith('_monitors'):
+            return True
+        else:
+            return False
 
 #--------------------------------------------------------------------------------------------------------------------    
     def set_action_suffix(self,suffix=None):

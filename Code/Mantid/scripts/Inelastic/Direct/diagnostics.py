@@ -12,7 +12,6 @@ from mantid.simpleapi import *
 from mantid.kernel.funcreturns import lhs_info
 import os
 import Direct.RunDescriptor as RunDescriptor
-import CommonFunctions as common
 # Reference to reducer used if necessary for working with run descriptors (in diagnostics)
 __Reducer__ = None
 
@@ -328,12 +327,9 @@ def do_bleed_test(sample_run, max_framerate, ignored_pixels):
         data_ws    = sample_run.get_workspace() # this will load data if necessary 
         ws_name    = sample_run.get_ws_name()+'_bleed'
     else: 
-        try: # may be sample run is already a run descriptor despite __Reducer__ have not been exposed
-            data_ws    = sample_run.get_workspace() # this will load data if necessary 
-            ws_name    = sample_run.get_ws_name()+'_bleed'
-        except:
-            # legacy operation
-            data_ws = common.load_run(config['default.instrument'],sample_run)
+        # may be sample run is already a run descriptor despite __Reducer__ have not been exposed
+        data_ws    = sample_run.get_workspace() # this will load data if necessary 
+        ws_name    = sample_run.get_ws_name()+'_bleed'
 
     if max_framerate is None:
         max_framerate = float(data_ws.getInstrument().getNumberParameter('max-tube-framerate')[0])

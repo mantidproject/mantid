@@ -220,7 +220,7 @@ def gen_getter(keyval_dict,key):
 
     a_val= keyval_dict[name];
     if isinstance(a_val,ComplexProperty):
-        return a_val.__get__(keyval_dict);
+        return a_val.__get__(keyval_dict)
     else:
         return a_val
     #end

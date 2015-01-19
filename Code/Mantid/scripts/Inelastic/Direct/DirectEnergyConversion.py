@@ -212,6 +212,7 @@ class DirectEnergyConversion(object):
                 diag_mask= LoadMask(Instrument=self.instr_name,InputFile=self.hard_mask_file,
                                OutputWorkspace='hard_mask_ws')
                 MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
+                DeleteWorkspace(diag_mask)
                 diag_mask,masked_list = ExtractMask(InputWorkspace=white_data)
                 DeleteWorkspace(Workspace='white_ws_clone')
 
@@ -319,9 +320,10 @@ class DirectEnergyConversion(object):
         white_ws = self.normalise(run, self.normalise_method,0.0,mon_number)
         self.__in_white_normalization = False;
         new_ws_name = run.set_action_suffix('_norm_white')
+        old_name = white_ws.name()
 
         # Units conversion
-        ConvertUnits(InputWorkspace=white_ws,OutputWorkspace=new_ws_name, Target= "Energy", AlignBins=0)
+        ConvertUnits(InputWorkspace=old_name,OutputWorkspace=old_name, Target= "Energy", AlignBins=0)
         self.prop_man.log("do_white: finished converting Units",'information')
 
         low,upp=self.wb_integr_range
@@ -329,7 +331,7 @@ class DirectEnergyConversion(object):
             raise ValueError("White beam integration range is inconsistent. low=%d, upp=%d" % (low,upp))
 
         delta = 2.0*(upp - low)
-        white_ws = Rebin(InputWorkspace=new_ws_name,OutputWorkspace=new_ws_name, Params=[low, delta, upp])
+        white_ws = Rebin(InputWorkspace=old_name,OutputWorkspace=old_name, Params=[low, delta, upp])
         # Why aren't we doing this...
         #Integration(white_ws, white_ws, RangeLower=low, RangeUpper=upp)
         AddSampleLog(white_ws,LogName = done_Log,LogText=done_log_VAL,LogType='String')
@@ -669,7 +671,7 @@ class DirectEnergyConversion(object):
 
 
 
-      masking = None;
+      masking = None
       masks_done=False
       if not prop_man.run_diagnostics:
           header="*** Diagnostics including hard masking is skipped "
@@ -720,9 +722,8 @@ class DirectEnergyConversion(object):
           masking=self.spectra_masks
  
       # estimate and report the number of failing detectors
-      failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)
-      nMaskedSpectra = len(failed_sp_list)
-      # this tells turkey in case of hard mask only but everything else semens work fine
+      failed_sp_list,nMaskedSpectra  = get_failed_spectra_list_from_masks(masking)
+      nSpectra = masking.getNumberHistograms()
       prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice')
 
       #Run the conversion first on the sample
@@ -978,6 +979,7 @@ class DirectEnergyConversion(object):
 
         data_ws = data_run.get_workspace()
         monitor_ws = data_run.get_monitors_ws()
+        separate_monitors = data_run.is_monws_separate()
         data_run.set_action_suffix('_shifted')
 
         ##-------------------------------------------------------------
@@ -993,7 +995,7 @@ class DirectEnergyConversion(object):
         # Store found incident energy in the class itself
         self.incident_energy = ei
         # copy incident energy obtained on monitor workspace to detectors workspace
-        if data_ws.name() != monitor_ws.name():
+        if separate_monitors:
             AddSampleLog(Workspace=data_ws,LogName='Ei',LogText=str(ei),LogType='Number')
             # if monitors are separated from the input workspace, we need to move them too as this is what happening when monitors are integrated into workspace
             result_mon_name=monitor_ws.name()
@@ -1013,6 +1015,9 @@ class DirectEnergyConversion(object):
         mon1_pos = mon1_det.getPos()
         src_name = data_ws.getInstrument().getSource().getName()
         MoveInstrumentComponent(Workspace=resultws_name,ComponentName= src_name, X=mon1_pos.getX(), Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
+        #
+        if separate_monitors:
+           MoveInstrumentComponent(Workspace=result_mon_name,ComponentName= src_name, X=mon1_pos.getX(), Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
 
         data_run.synchronize_ws(mtd[resultws_name])
         return ei, mon1_peak
@@ -1074,23 +1079,30 @@ class DirectEnergyConversion(object):
 
 
             NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
-                                   IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)#,
+                                   IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)
 # debug line:                      NormalizationFactorWSName='NormMonWS'+data_ws.getName())
         elif method == 'monitor-2':
-            # TODO:!!!
-            # Found TOF range, correspondent to incident energy monitor peak;
-            ei = self.prop_man.incident_energy;
-            x=[0.8*ei,ei,1.2*ei]
-            y=[1]*2;
-            range_ws=CreateWorkspace(DataX=x,DataY=y,UnitX='Energy',ParentWorkspace=mon_ws)
-            range_ws=ConvertUnits(InputWorkspace=range_ws,Target='TOF',EMode='Elastic')
-            x=range_ws.dataX(0)
-
-            if not mon_index:
+           if not mon_index:
                 mon_index = int(self.mon2_norm_spec)
+           # TODO:  -- separate and test this !!!
+           # Found TOF range, correspondent to incident energy monitor peak
+           ExtractSingleSpectrum(InputWorkspace=mon_ws, OutputWorkspace='_mon2_norm_range_ws', WorkspaceIndex=mon_index)
+           ei = self.incident_energy
+           x=[0.8*ei,ei,1.2*ei]
+           y=[1]*2
+           range_ws_name = '_mon2_int_range_ws'
+           CreateWorkspace(OutputWorkspace=range_ws_name,DataX=x,DataY=y,UnitX='Energy',ParentWorkspace='_mon2_norm_range_ws')
+           ConvertUnits(InputWorkspace=range_ws_name,OutputWorkspace=range_ws_name,Target='TOF',EMode='Elastic')
 
-            # Normalize to monitor 2
-            NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
+           # Range is already on shifted workspace so should not use time offset?
+           range_ws = mtd[range_ws_name]
+           x=range_ws.dataX(0)
+
+           DeleteWorkspace('_mon2_norm_range_ws')
+           DeleteWorkspace(range_ws_name)
+ 
+           # Normalize to monitor 2
+           NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
                                    IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True)
 # debug line:                      IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True,NormalizationFactorWSName='NormMonWS'+data_ws.getName())
 
@@ -1151,54 +1163,6 @@ class DirectEnergyConversion(object):
                    break
                 if case(): # default, could also just omit condition or 'if True'
                    prop_man.log("Unknown file format {0} requested to save results. No saving performed this format".format(file_format));
-
-    #-------------------------------------------------------------------------------
-    def load_data(self, runs,new_ws_name=None,keep_previous_ws=False):
-        """
-        Load a run or list of runs. If a list of runs is given then
-        they are summed into one.
-        """
-
-        # this can be a workspace too
-        propman = self.prop_man;
-        calibration = propman.det_cal_file;
-        monitors_inWS=propman.load_monitors_with_workspace
-
-        result_ws = common.load_runs(propman.instr_name, runs, calibration=calibration, sum=True,load_with_workspace=monitors_inWS)
-
-        mon_WsName = result_ws.getName()+'_monitors'
-        if mon_WsName in mtd  and not monitors_inWS:
-            monitor_ws = mtd[mon_WsName];
-        else:
-            if monitors_inWS:
-                monitor_ws = result_ws;
-            else:
-                monitor_ws = None;
-
-        old_result = result_ws;
-        if new_ws_name != None :
-            mon_WsName = new_ws_name+'_monitors'
-            if keep_previous_ws:
-                result_ws = CloneWorkspace(InputWorkspace = result_ws,OutputWorkspace = new_ws_name)
-                if monitor_ws and monitor_ws != old_result:
-                    monitor_ws = CloneWorkspace(InputWorkspace = monitor_ws,OutputWorkspace = mon_WsName)
-            else:
-                result_ws = RenameWorkspace(InputWorkspace=result_ws,OutputWorkspace=new_ws_name)
-                if monitor_ws:
-                    if monitor_ws== old_result:
-                        monitor_ws= result_ws;
-                    else:
-                        monitor_ws=RenameWorkspace(InputWorkspace=monitor_ws,OutputWorkspace=mon_WsName)
-                    #
-        
-        self.setup_instrument_properties(result_ws)
-        ## TODO: is it possible to have spectra_to_monitors_list defined and monitors loaded with workspace? then all below will fail miserably. 
-        #spec_to_mon =  propman.spectra_to_monitors_list;
-        #if monitor_ws and spec_to_mon :
-        #    for specID in spec_to_mon:
-        #        result_ws,monitor_ws=self.copy_spectrum2monitors(result_ws,monitor_ws,specID);
-
-        return (result_ws,monitor_ws)
 
 
     @property 
@@ -1343,26 +1307,23 @@ class DirectEnergyConversion(object):
 
 
 
-def get_failed_spectra_list_from_masks(masking_wksp):
+def get_failed_spectra_list_from_masks(masked_wksp):
     """Compile a list of spectra numbers that are marked as
        masked in the masking workspace
 
     Input:
      masking_workspace -  A special masking workspace containing masking data
     """
-    if type(masking_wksp) == str:
-        masking_wksp = mtd[masking_wksp]
+    masking_wksp,sp_list=ExtractMask(masked_wksp)
+    DeleteWorkspace(masking_wksp)
+
 
     failed_spectra = []
     if masking_wksp is None:
        return (failed_spectra,0);
 
-    n_spectra = masking_wksp.getNumberHistograms()
-    for i in xrange(n_spectra):
-        if masking_wksp.readY(i)[0] >0.99 : # spectrum is masked
-            failed_spectra.append(masking_wksp.getSpectrum(i).getSpectrumNo())
-
-    return (failed_spectra,n_spectra)
+    n_spectra = len(sp_list)
+    return (sp_list.tolist(),n_spectra)
 
 
 #-----------------------------------------------------------------
