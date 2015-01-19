@@ -90,7 +90,7 @@ def MainProperties(main_prop_definition):
         #print "in decorator: ",properties
         host = args[0];
         host._main_properties=properties
-        host.iliad_prop.set_input_parameters(**properties);
+        host.iliad_prop.set_input_parameters(**properties)
         return properties
 
     return main_prop_wrapper
@@ -101,8 +101,8 @@ def AdvancedProperties(adv_prop_definition):
         properties = adv_prop_definition(*args)
         #print "in decorator: ",properties
         host = args[0];
-        host._advanced_properties=properties;
-        host.iliad_prop.set_input_parameters(**properties);
+        host._advanced_properties=properties
+        host.iliad_prop.set_input_parameters(**properties)
         return properties
 
     return advanced_prop_wrapper

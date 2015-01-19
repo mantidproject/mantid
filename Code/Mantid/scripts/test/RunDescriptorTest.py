@@ -176,11 +176,35 @@ class RunDescriptorTest(unittest.TestCase):
         # name of empty property workspace 
         self.assertEqual(PropertyManager.sample_run.get_ws_name(),'SR_')
 
+    def test_sum_runs(self):
+        propman  = self.prop_man
+        propman.sample_run = [11001,11001]
+        ws = PropertyManager.sample_run.get_workspace()
+        self.assertEqual(ws.name(),'SR_MAR011001')
 
-        # TODO: implement sum
-        #propman.sum_runs = 3
-        #ws_name = propman.get_sample_ws_name();
-        #self.assertEqual(ws_name,'MARI000000_spe-sum')
+
+        propman.sum_runs = True
+        propman.sample_run = [11001,11001]
+        ws = PropertyManager.sample_run.get_workspace()
+        self.assertEqual(ws.name(),'SR_MAR011001SumOf2')
+        ws_name = PropertyManager.sample_run.get_ws_name()
+        self.assertEqual(ws.name(),ws_name)
+
+        propman.sample_run = "MAR11001.raw,11001.nxs,MAR11001.raw"
+        self.assertFalse('SR_MAR011001SumOf2' in mtd)
+        ws = PropertyManager.sample_run.get_workspace()
+        self.assertEqual(ws.name(),'SR_MAR011001SumOf3')
+        ws_name = PropertyManager.sample_run.get_ws_name()
+        self.assertEqual(ws.name(),ws_name)
+
+        propman.sum_runs = 2
+        propman.sample_run = "/home/my_path/MAR11001.raw,c:/somewhere/11001.nxs,MAR11001.raw"
+        self.assertFalse('SR_MAR011001SumOf3' in mtd)
+        self.assertFalse('SR_MAR011001SumOf2' in mtd)
+        ws = PropertyManager.sample_run.get_workspace()
+        self.assertEqual(ws.name(),'SR_MAR011001SumOf2')
+        ws_name = PropertyManager.sample_run.get_ws_name()
+        self.assertEqual(ws.name(),ws_name)
 
 
         

@@ -28,7 +28,7 @@ class RunDescriptor(PropDescriptor):
         # String used to identify the workspace related to this property w.r.t. other workspaces
         self._ws_cname  = ''
         self._ws_suffix   = ''
-        self._sum_runs = None
+        self._runs_to_add = None
         #
         if not DocString is None:
             self.__doc__ = DocString
@@ -43,9 +43,10 @@ class RunDescriptor(PropDescriptor):
            return self._run_number 
 #--------------------------------------------------------------------------------------------------------------------
     def __set__(self,instance,value):
-       """ Set up Run number from any source """
+       """ Set up Run number and define workspace name from any source """
        # 
        old_ws_name = self._ws_name
+       clear_add_list=True
        #end
        if value == None: # clear current run number
            self._run_number  = None
@@ -55,7 +56,7 @@ class RunDescriptor(PropDescriptor):
            self._clear_old_ws(old_ws_name,self._ws_name)
            return
        if isinstance(value, api.Workspace):
-           if 'Sum'  in value.getRun():
+           if 'SumOfRuns:'  in value.getRun():
                pass # TODO: not implemented
            else:
                 self._run_number = value.getRunNumber()
@@ -72,26 +73,49 @@ class RunDescriptor(PropDescriptor):
               return
           else:
               file_path,run_num,fext = prop_helpers.parse_run_file_name(value)
-              if isinstance(run_num,list):
-                  self._sum_runs=(file_path,run_num,fext)
-                  self._run_number=0
-              else:
-                self._run_number    = run_num
-                self._run_file_path = file_path
 
-                if len(fext) > 0:
-                      self._run_ext = fext.lower()
+              if isinstance(run_num,list):
+                  self.__set__(instance,run_num)
+                  n_to_add = len(self._runs_to_add[1])
+                  self._runs_to_add=(file_path[:n_to_add],run_num[:n_to_add],fext[:n_to_add])
+                  main_fext = fext[0].lower()
+                  clear_add_list=False
+              else:
+                  self._run_number    = run_num
+                  self._run_file_path = file_path
+                  main_fext     = fext.lower()
+                  clear_add_list=True
+
+              if len(main_fext)>0:
+                    self._run_ext = main_fext
+              else:
+                    self._run_ext = None
+
 
        elif isinstance(value,list):
-           self._run_number = 0 
-           self._sum_runs=(['']*len(value),value,['']*len(value))
+           if isinstance(instance.sum_runs,bool) and instance.sum_runs:
+                self._run_number = value[0]
+                self._runs_to_add=([""]*len(value),value,[""]*len(value))
+                clear_add_list = False
+           elif(isinstance(instance.sum_runs,int) and instance.sum_runs>0):
+               num_2sum = instance.sum_runs
+               if num_2sum > len(value):
+                   raise ValueError("Requested to sum {0} runs but provided the list of only {1} runs".format(num_2sum,len(value)))
+               sublist  = value[0:num_2sum]
+
+               self._run_number = value[0]
+               self._runs_to_add=([""]*num_2sum,sublist,[""]*num_2sum)
+               clear_add_list = False
+           else:
+               self._run_number = value[0]
+               clear_add_list = True
+
        else:
            self._run_number = int(value)
-           self._ws_cname  = ''
 
+       self._ws_cname  = ''
        self._ws_name = None
-       new_name = self.get_ws_name()
-       self._clear_old_ws(old_ws_name,new_name)
+       self._clear_old_ws(old_ws_name,None,clear_add_list)
 #--------------------------------------------------------------------------------------------------------------------    
     def run_number(self):
         """ Return run number regardless of workspace is loaded or not"""
@@ -103,14 +127,19 @@ class RunDescriptor(PropDescriptor):
 
 #--------------------------------------------------------------------------------------------------------------------    
     def set_action_suffix(self,suffix=None):
-        """ method to set part of the workspace name, which indicate some action performed over this workspace
+        """ method to set part of the workspace name, which indicate some action performed over this workspace           
             
             e.g.: default suffix of a loaded workspace is 'RAW' but we can set it to SPE to show that conversion to 
             energy will be performed for this workspace.
 
-            method returns the name of the workspace is will have with this suffix
+            method returns the name of the workspace is will have with this suffix. Algorithms would later  
+            work on the initial workspace and modify it in-place or to produce workspace with new name (depending if one 
+            wants to keep initial workspace)
+            synchronize_ws(ws_pointer) then should synchronize workspace and its name.
 
-            Should be always used together with synchronize_ws to ensue one can always get workspace from its name
+            TODO: This method should be automatically invoked by an algorithm decorator
+            Until implemented, one have to ensure that it is correctly used together with synchronize_ws
+            to ensue one can always get workspace from its name
         """
         if suffix:
             self._ws_suffix = suffix
@@ -123,8 +152,9 @@ class RunDescriptor(PropDescriptor):
             with internal run holder name. Accounts for the situation when 
 
             TODO: This method should be automatically invoked by an algorithm decorator
-            Until it is implemented, one have to ensure that it is used together with 
-            set_action_suffix
+            Until implemented, one have to ensure that it is correctly used together with 
+            set_action_suffix to ensue one can always get expected workspace from its name
+            outside of a method visibility 
         """ 
         if not workspace:
             workspace=mtd[self._ws_name]
@@ -164,21 +194,35 @@ class RunDescriptor(PropDescriptor):
         else:
             raise AttributeError('Source file extension can be only a string')
 #--------------------------------------------------------------------------------------------------------------------
-    def find_file(self,run_num = None):
+    def find_file(self,run_num = None,filePath=None,fileExt=None,**kwargs):
         """Use Mantid to search for the given run. """
 
         inst_name = RunDescriptor._holder.short_inst_name
         if run_num:
             run_num_str = str(run_num)
         else:
-            run_num_str = str(self.__get__(RunDescriptor._holder))
+            run_num_str = str(self.run_number())
         #
-        old_ext = self.get_file_ext()
-        file_hint =inst_name + run_num_str + old_ext
-        if len(self._run_file_path)>0:
-            file_hint = self._run_file_path+file_hint
-            if os.path.exists(file_hint):
-                return file_hint
+        if 'file_hint' in kwargs:
+            file_hint = kwargs['file_hint']
+            fname,old_ext=os.path.splitext(file_hint)
+            if len(old_ext) == 0:
+                old_ext = self.get_file_ext()
+        else:
+            if fileExt:
+               old_ext = fileExt
+            else:
+               old_ext = self.get_file_ext()
+
+            file_hint =inst_name + run_num_str + old_ext
+            if not filePath:
+                filePath = self._run_file_path
+            if os.path.exists(filePath):
+                file_hint = os.path.join(filePath,file_hint)
+        if os.path.exists(file_hint):
+            return file_hint
+        else:
+            fp,file_hint=os.path.split(file_hint)
 
         try:
             file = FileFinder.findRuns(file_hint)[0]
@@ -187,7 +231,7 @@ class RunDescriptor(PropDescriptor):
             if old_ext != fex:
                 message='Cannot find file with extension {0} but find file {1} instead'.format(old_ext,file)
                 RunDescriptor._logger(message,'notice')
-            self.__run_file_path = os.path.dirname(fname)
+            self._run_file_path = os.path.dirname(fname)
             return file
         except RuntimeError:
              message = 'Cannot find file matching hint {0} on current search paths ' \
@@ -214,7 +258,8 @@ class RunDescriptor(PropDescriptor):
             Returns Mantid pointer to the workspace, corresponding to this run number
         """ 
         if not self._ws_name:
-           return None
+           self._ws_name = self._build_ws_name()
+
 
         if self._ws_name in mtd:
             ws = mtd[self._ws_name]
@@ -229,7 +274,43 @@ class RunDescriptor(PropDescriptor):
                prefer_ws_calibration = self._check_claibration_source()
                inst_name   = RunDescriptor._holder.short_inst_name
                calibration = RunDescriptor._holder.det_cal_file
-               return self.load_run(inst_name, calibration,False, RunDescriptor._holder.load_monitors_with_workspace,prefer_ws_calibration)
+               if not self._runs_to_add:
+                   ws = self.load_run(inst_name, calibration,False, RunDescriptor._holder.load_monitors_with_workspace,prefer_ws_calibration)
+               else: # Sum runs
+                   file_guess,run_list,fext = self._runs_to_add
+
+                   RunDescriptor._logger("*** Summing multiple runs            ****",'notice')
+                   RunDescriptor._logger("*** Loading run N: {0} ".format(self._run_number),'notice')
+                   mon_with_ws = RunDescriptor._holder.load_monitors_with_workspace
+                   ws = self.load_run(inst_name, None,False,mon_with_ws,False,file_guess[0],fext[0])
+                   sum_ws_name = ws.name()
+                   sum_mon_name = sum_ws_name+'_monitors'
+
+                   AddedRunNumbers = str(self.run_number())
+                   numTerms = len(run_list)
+                   for ind,run_num in enumerate(run_list[1:]):
+                       RunDescriptor._logger("*** Adding  run N: {0} ".format(run_num),'notice')
+
+                       term_name = '{0}_ADDITIVE_#{1}/{2}'.format(inst_name,ind+2,numTerms)#
+                       file_h    = os.path.join(file_guess[ind+1],'{0}{1}{2}'.format(inst_name,run_num,fext[ind+1]))
+
+                       wsp       =  self.load_run(inst_name, None,False, mon_with_ws,False,file_hint=file_h,ws_name = term_name)
+
+                       wsp_name = wsp.name()
+                       Plus(LHSWorkspace=sum_ws_name,RHSWorkspace=wsp_name,OutputWorkspace=sum_ws_name,ClearRHSWorkspace=True)
+                       AddedRunNumbers+=',{0}'.format(run_num)
+                       if not mon_with_ws:
+                          Plus(LHSWorkspace=sum_mon_name,RHSWorkspace=wsp_name+'_monitors',OutputWorkspace=sum_mon_name,ClearRHSWorkspace=True)
+                   RunDescriptor._logger("*** Summing multiple runs  completed ****",'notice')
+
+                   ws = mtd[sum_ws_name]
+                   self.synchronize_ws(ws)
+
+                   self.apply_calibration(ws,calibration,prefer_ws_calibration)
+
+                   AddSampleLog(Workspace=sum_ws_name,LogName = 'SumOfRuns:',LogText=AddedRunNumbers,LogType='String')
+
+               return ws
            else:
               return None
 #--------------------------------------------------------------------------------------------------------------------
@@ -289,23 +370,27 @@ class RunDescriptor(PropDescriptor):
         self._ws_name = self._build_ws_name()
         return self._ws_name
 #--------------------------------------------------------------------------------------------------------------------
-    def load_run(self,inst_name, calibration=None, force=False, load_mon_with_workspace=False,use_ws_calibration=True):
+    def load_run(self,inst_name, calibration=None, force=False, load_mon_with_workspace=False,use_ws_calibration=True,\
+                 filePath=None,fileExt=None,**kwargs):
         """Loads run into the given workspace.
 
            If force is true then the file is loaded regardless of whether  its workspace exists already
         """
         # If a workspace with this name exists, then assume it is to be used in place of a file
-        try:
-            ws_name = self.get_ws_name()
-        except RuntimeError:
-            self._ws_name=None
-            ws_name = self.get_ws_name()
-
+        if 'ws_name' in kwargs:
+            ws_name = kwargs['ws_name']
+        else:
+            try:
+                ws_name = self.get_ws_name()
+            except RuntimeError:
+                self._ws_name=None
+                ws_name = self.get_ws_name()
+        #-----------------------------------
         if ws_name in mtd and not(force):
-            RunDescriptor._logger("{0} already loaded as workspace.".format(self._ws_name),'information')
+            RunDescriptor._logger("{0} already loaded as workspace.".format(ws_name),'information')
         else:
             # If it doesn't exists as a workspace assume we have to try and load a file
-            data_file = self.find_file()
+            data_file = self.find_file(None,filePath,fileExt,**kwargs)
             if data_file[0:4] == 'ERROR':
                 raise IOError(data_file)
                        
@@ -409,17 +494,22 @@ class RunDescriptor(PropDescriptor):
            DeleteWorkspace(WorkspaceName='tmp_mon')
        return mon_ws
 #--------------------------------------------------------------------------------------------------------------------
+    def _sum_ext(self):
+        if self._runs_to_add:
+            sum_ext= "SumOf{0}".format(len(self._runs_to_add[1]))
+        else:
+            sum_ext = ''
+        return sum_ext
+
     def _build_ws_name(self):
 
         instr_name  = self._instr_name()
 
-        if RunDescriptor._holder.sum_runs:
-            ws_name = "NotImplemented" 
+        sum_ext = self._sum_ext()
+        if self._run_number:
+            ws_name  =  '{0}{1}{2}{3:0>#6d}{4}{5}'.format(self._prop_name,instr_name,self._ws_cname,self._run_number,sum_ext,self._ws_suffix)
         else:
-            if self._run_number:
-                ws_name  =  '{0}{1}{2}{3:0>#6d}{4}'.format(self._prop_name,instr_name,self._ws_cname,self._run_number,self._ws_suffix)
-            else:
-                ws_name = '{0}{1}{2}'.format(self._prop_name,self._ws_cname,self._ws_suffix)
+            ws_name = '{0}{1}{2}{3}'.format(self._prop_name,self._ws_cname,sum_ext,self._ws_suffix)
 
         return ws_name 
     @staticmethod
@@ -434,6 +524,9 @@ class RunDescriptor(PropDescriptor):
         """
         # Remove suffix
         name = self.rremove(ws_name,self._ws_suffix)
+        sumExt = self._sum_ext()
+        if len(sumExt)>0:
+            name = self.rremove(ws_name,sumExt)
         # remove _prop_name:
         name= name.replace(self._prop_name,'',1)
         if self._run_number:
@@ -450,7 +543,7 @@ class RunDescriptor(PropDescriptor):
             instr_name = '_test_instrument'
        return instr_name 
 
-    def _clear_old_ws(self,old_ws_name,new_name):
+    def _clear_old_ws(self,old_ws_name,new_name,clear_runs_to_add=True):
          if old_ws_name:
              if new_name != old_ws_name:
                 if old_ws_name in mtd:
@@ -461,7 +554,8 @@ class RunDescriptor(PropDescriptor):
 
                 self._run_ext     = None
                 self._run_file_path = ''
-                self._sum_runs = None
+                if clear_runs_to_add:
+                    self._runs_to_add = None
 
 
 #-------------------------------------------------------------------------------------------------------------------------------

@@ -150,7 +150,7 @@ class PropertyManager(NonIDF_Properties):
         if name0 in self.__subst_dict:
             name = self.__subst_dict[name0]
         else:
-            name =name0;
+            name =name0
         #end
 
         # replace common substitutions for string value
@@ -159,7 +159,7 @@ class PropertyManager(NonIDF_Properties):
            if (val1 == 'none' or len(val1) == 0):
               val = None;
            if val1 == 'default':
-              val = self.getDefaultParameterValue(name0);
+              val = self.getDefaultParameterValue(name0)
            # boolean property?
            if val1 in ['true','yes']:
                val = True
@@ -168,16 +168,16 @@ class PropertyManager(NonIDF_Properties):
 
 
         if type(val) is list and len(val) == 0:
-            val = None;
+            val = None
               
         # set property value:
         if name in self.__descriptors:
            super(PropertyManager,self).__setattr__(name,val)
         else:
-           other_prop=prop_helpers.gen_setter(self.__dict__,name,val);
+           other_prop=prop_helpers.gen_setter(self.__dict__,name,val)
 
         # record the fact that the property have changed
-        self.__changed_properties.add(name);
+        self.__changed_properties.add(name)
 
    # ----------------------------
     def __getattr__(self,name):
@@ -253,9 +253,18 @@ class PropertyManager(NonIDF_Properties):
             set data from a function with a list of given parameters (*args vrt **kwargs),
             with some parameters missing.
         """   
+        # if sum is in parameters one needs to set it first 
+        if 'sum_runs' in kwargs and not (kwargs['sum_runs'] is None):
+            self.sum_runs = kwargs['sum_runs']
+            del kwargs['sum_runs']
+        if 'sum' in kwargs and not (kwargs['sum'] is None):
+            self.sum_runs = kwargs['sum']
+            del kwargs['sum']
+
+
         for par_name,value in kwargs.items() :
             if not(value is None):
-                setattr(self,par_name,value);
+                setattr(self,par_name,value)
 
 
 
@@ -263,6 +272,14 @@ class PropertyManager(NonIDF_Properties):
         """ Set input properties from a dictionary of parameters
 
         """
+        # if sum is in parameters one needs to set it first 
+        if 'sum_runs' in kwargs :
+            self.sum_runs = kwargs['sum_runs']
+            del kwargs['sum_runs']
+        if 'sum' in kwargs :
+            self.sum_runs = kwargs['sum']
+            del kwargs['sum']
+
 
         for par_name,value in kwargs.items() :
             setattr(self,par_name,value);
