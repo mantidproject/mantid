@@ -325,12 +325,12 @@ def do_bleed_test(sample_run, max_framerate, ignored_pixels):
     # Load the sample run
     if __Reducer__: #  Try to use generic loader which would work with files or workspaces alike
         sample_run = __Reducer__.get_run_descriptor(sample_run)
-        data_ws         = sample_run.get_workspace() # this will load data if necessary 
-        ws_name    = sample_run.get_ws_name()
+        data_ws    = sample_run.get_workspace() # this will load data if necessary 
+        ws_name    = sample_run.get_ws_name()+'_bleed'
     else: 
-        try: # may be sample run is already a run descriptor
+        try: # may be sample run is already a run descriptor despite __Reducer__ have not been exposed
             data_ws    = sample_run.get_workspace() # this will load data if necessary 
-            ws_name    = sample_run.get_ws_name()
+            ws_name    = sample_run.get_ws_name()+'_bleed'
         except:
             # legacy operation
             data_ws = common.load_run(config['default.instrument'],sample_run)
