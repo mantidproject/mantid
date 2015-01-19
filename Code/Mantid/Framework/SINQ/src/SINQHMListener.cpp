@@ -27,10 +27,10 @@ using namespace Poco::XML;
 
 DECLARE_LISTENER(SINQHMListener)
 
-SINQHMListener::SINQHMListener(): ILiveListener(), httpcon(), response()
 SINQHMListener::SINQHMListener() : ILiveListener(), httpcon(), response() {
   connected = false;
   dimDirty = true;
+  rank = 0;
 }
 
 SINQHMListener::~SINQHMListener() {}
