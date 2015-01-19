@@ -298,8 +298,8 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             # Chop data if required
             try:
                 chop_threshold = mtd[ws_name].getInstrument().getNumberParameter('Workflow.ChopDataIfGreaterThan')[0]
-                num_bins = mtd[ws_name].blocksize()
-                need_chop =  num_bins > chop_threshold
+                x_max = mtd[ws_name].readX(0)[-1]
+                need_chop =  x_max > chop_threshold
             except IndexError:
                 need_chop = False
             logger.information('Workspace %s need data chop: %s' % (ws_name, str(need_chop)))
