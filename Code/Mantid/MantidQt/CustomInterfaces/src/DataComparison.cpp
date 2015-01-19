@@ -32,7 +32,6 @@ using namespace Mantid::API;
 DataComparison::DataComparison(QWidget *parent) :
   UserSubWindow(parent),
   m_plot(new QwtPlot(parent)),
-  m_diffCurve(NULL),
   m_diffWorkspaceNames(qMakePair(QString(), QString()))
 {
 }
