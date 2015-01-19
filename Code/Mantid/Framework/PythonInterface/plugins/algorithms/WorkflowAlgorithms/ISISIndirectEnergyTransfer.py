@@ -32,22 +32,23 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                              direction=Direction.Input, optional=PropertyMode.Optional), doc='Workspace contining calibration data')
 
         # Instrument configuration properties
-        self.declareProperty(name='Instrument', defaultValue='', doc='Instrument used during run',
+        self.declareProperty(name='Instrument', defaultValue='', doc='Instrument used during run.',
                              validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA', 'TFXA']))
-        self.declareProperty(name='Analyser', defaultValue='', doc='Analyser used during run',
+        self.declareProperty(name='Analyser', defaultValue='', doc='Analyser bank used during run.',
                              validator=StringListValidator(['graphite', 'mica', 'fmica']))
-        self.declareProperty(name='Reflection', defaultValue='', doc='Reflection used during run',
+        self.declareProperty(name='Reflection', defaultValue='', doc='Reflection number for instrument setup during run.',
                              validator=StringListValidator(['002', '004', '006']))
 
-        self.declareProperty(IntArrayProperty(name='DetectorRange', values=[0, 1],
+        self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1],
                              validator=IntArrayMandatoryValidator()),
-                             doc='Comma separated range of detectors to use')
+                             doc='Comma separated range of spectra number to use.')
         self.declareProperty(FloatArrayProperty(name='BackgroundRange'),
-                             doc='')
-        self.declareProperty(name='RebinString', defaultValue='', doc='Rebin string parameters')
+                             doc='Range of background to subtact from raw data in time of flight.')
+        self.declareProperty(name='RebinString', defaultValue='', doc='Rebin string parameters.')
         self.declareProperty(name='DetailedBalance', defaultValue='', doc='')
-        self.declareProperty(name='ScaleFactor', defaultValue=1.0, doc='')
-        self.declareProperty(name='FoldMultipleFrames', defaultValue=False, doc='')
+        self.declareProperty(name='ScaleFactor', defaultValue=1.0, doc='Factor by which to scale result.')
+        self.declareProperty(name='FoldMultipleFrames', defaultValue=False,
+                             doc='Folds multiple framed data sets into a single workspace.')
 
         # Spectra grouping options
         self.declareProperty(name='GroupingMethod', defaultValue='Individual',
@@ -61,12 +62,12 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                              doc='Workspace containing spectra grouping.')
 
         # Output properties
-        self.declareProperty(name='Plot', defaultValue='None', doc='Type of plot to output after reduction',
+        self.declareProperty(name='Plot', defaultValue='None', doc='Type of plot to output after reduction.',
                              validator=StringListValidator(['None', 'Spectra', 'Contour', 'Both']))
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                              direction=Direction.Output),
-                             doc='Workspace group for the resulting workspaces')
+                             doc='Workspace group for the resulting workspaces.')
 
 
     def PyExec(self):
@@ -200,11 +201,11 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             issues['Reflection'] = error_message
 
         # Validate spectra range
-        spectra_range = self.getProperty('DetectorRange').value
+        spectra_range = self.getProperty('SpectraRange').value
         if len(spectra_range) != 2:
-            issues['DetectorRange'] = 'Range must contain exactly two items'
+            issues['SpectraRange'] = 'Range must contain exactly two items'
         elif spectra_range[0] > spectra_range[1]:
-            issues['DetectorRange'] = 'Range must be in format: lower,upper'
+            issues['SpectraRange'] = 'Range must be in format: lower,upper'
 
         # Validate background range
         background_range = _elems_or_none(self.getProperty('BackgroundRange').value)
@@ -242,7 +243,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self._analyser = self.getPropertyValue('Analyser')
         self._reflection = self.getPropertyValue('Reflection')
 
-        self._spectra_range = self.getProperty('DetectorRange').value
+        self._spectra_range = self.getProperty('SpectraRange').value
         self._background_range = _elems_or_none(self.getProperty('BackgroundRange').value)
         self._rebin_string = _str_or_none(self.getPropertyValue('RebinString'))
         self._detailed_balance = _float_or_none(self.getPropertyValue('DetailedBalance'))
