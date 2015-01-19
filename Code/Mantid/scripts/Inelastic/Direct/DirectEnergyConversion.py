@@ -765,54 +765,6 @@ class DirectEnergyConversion(object):
       return deltaE_wkspace_sample
 
   
-#----------------------------------------------------------------------------------
-#                        Reduction steps
-#----------------------------------------------------------------------------------
-    def sum_files(self, accumulator, files):
-        """ Custom sum for multiple runs
-
-            Left for compatibility as internal summation had some unspecified problems.
-
-            TODO: Should be replaced by internal procedure
-            TODO: Monitors are not summed together here. 
-            TODO: Should we allow to add to existing accumulator?
-        """
-        prop_man = self.prop_man
-        instr_name = prop_man.instr_name;
-        accum_name = accumulator
-        if isinstance(accum_name,api.Workspace): # it is actually workspace and is in Mantid
-            accum_name  = accumulator.name()
-        if accum_name  in mtd:
-            DeleteWorkspace(Workspace=accum_name)     
-
-
-        load_mon_with_ws = prop_man.load_monitors_with_workspace;
-        prop_man.log("****************************************************************",'notice');
-        prop_man.log("*** Summing multiple runs",'notice')
-        if type(files) == list:
-             #tmp_suffix = '_plus_tmp'
-
-            for filename in files:
-               temp = common.load_run(instr_name,filename, force=False,load_with_workspace = load_mon_with_ws)
-
-               if accum_name in mtd: # add current workspace to the existing one
-                  accumulator = mtd[accum_name]
-                  accumulator+=  temp
-                  DeleteWorkspace(Workspace=temp)
-                  prop_man.log("*** Added run: {0} to workspace: {1}".format(filename,accum_name),'notice')
-               else:
-                   accumulator=RenameWorkspace(InputWorkspace=temp,OutputWorkspace=accum_name)
-                   prop_man.log("*** Summing multiple runs: created output workspace: {0} from run {1}".format(accum_name,filename),'notice')
-
-            return accumulator
-        else:
-            temp = common.load_run(instr_name,files, force=False,load_with_workspace = load_mon_with_ws)
-            accumulator=RenameWorkspace(InputWorkspace=temp,OutputWorkspace=accum_name)
-        prop_man.log("****************************************************************",'notice');
-
-        return accumulator;
-
-
     def apply_absolute_normalization(self,sample_ws,monovan_run=None,ei_guess=None,wb_mono=None):
         """  Function applies absolute normalization factor to the target workspace
              and calculates this factor if necessary
