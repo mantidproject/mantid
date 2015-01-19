@@ -707,7 +707,7 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
   boost::shared_array<int64_t> indices = indices_data.sharedBuffer();
   // Create all the event lists
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int64_t j = 0; j < static_cast<int_64_t>(m_filtered_spec_idxs.size()); j++) {
+  for (int64_t j = 0; j < static_cast<int64_t>(m_filtered_spec_idxs.size()); j++) {
     PARALLEL_START_INTERUPT_REGION
     size_t wi = m_filtered_spec_idxs[j] - 1;
     int64_t index_start = indices[wi];
