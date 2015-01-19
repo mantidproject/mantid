@@ -106,32 +106,39 @@ class EnginXFitPeaks(PythonAlgorithm):
         self.setProperty('Zero', zero)
 
     def _readInExpectedPeaks(self):
-      readInArray = []
-      exPeakArray = []
-      updateFileName = self.getPropertyValue("ExpectedPeaksFromFile")
-      if updateFileName != "":
-        with open(updateFileName) as f:
-          for line in f:
-            readInArray.append([float(x) for x in line.split(',')])
-        for a in readInArray:
-          for b in a:
-            exPeakArray.append(b)
-        if exPeakArray == []:
-          print "File could not be read. Defaults being used."
-          expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
-        else: 
-          print "using file"
-          expectedPeaksD = sorted(exPeakArray)
-      else:
-        if (self.getProperty('ExpectedPeaks').value) != [0.9, 1.6]:
-          print "using manually entered numbers"
-          expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)          
+        readInArray = []
+        exPeakArray = []
+        updateFileName = self.getPropertyValue("ExpectedPeaksFromFile")
+        if updateFileName != "":
+            with open(updateFileName) as f:
+                for line in f:
+                    readInArray.append([float(x) for x in line.split(',')])
+            for a in readInArray:
+                for b in a:
+                    exPeakArray.append(b)
+            if exPeakArray == []:
+                print "File could not be read. Defaults being used."
+                expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
+            else: 
+                print "using file"
+                expectedPeaksD = sorted(exPeakArray)
         else:
-          print "using defaults" 
-          expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
-          
-       
-      return expectedPeaksD
+            expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
+            if self._isDefault((self.getProperty('ExpectedPeaks').value), ([0.6, 1.9])):         
+                print "using defaults"          
+            else:
+                print "using manually entered numbers"  
+        return expectedPeaksD
+
+    def _isDefault (self, enteredPeaks, defaultPeaks):
+        x = 0  
+        if len(enteredPeaks) == len(defaultPeaks):
+            while x < len(defaultPeaks):
+                if enteredPeaks[x] != defaultPeaks[x]:
+                    return False
+                x+=1
+        return True
+
 
     def _fitDSpacingToTOF(self, fittedPeaksTable):
     	""" Fits a linear background to the dSpacing <-> TOF relationship and returns fitted difc
