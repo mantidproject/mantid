@@ -217,6 +217,7 @@ class DirectEnergyConversion(object):
 
             return diag_mask
 
+
         # Get the white beam vanadium integrals
         whiteintegrals = self.do_white(white, None, None,None) # No grouping yet
         if self.second_white:
@@ -224,12 +225,14 @@ class DirectEnergyConversion(object):
             other_whiteintegrals = self.do_white(PropertyManager.second_white, None, None,None) # No grouping yet
             self.second_white = other_whiteintegrals;
 
-
         # Get the background/total counts from the sample run if present
         if diag_sample: 
+
             diag_sample = self.get_run_descriptor(diag_sample)
             # If the bleed test is requested then we need to pass in the sample_run as well
             if self.bleed_test:
+                # initiate reference to reducer to be able to work with Run Descriptors
+                diagnostics.__Reducer__ = self
                 diag_params['sample_run'] = diag_sample
 
             # Set up the background integrals for diagnostic purposes

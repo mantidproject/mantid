@@ -10,10 +10,13 @@ masking and also passed to MaskDetectors to match masking there.
 """
 from mantid.simpleapi import *
 from mantid.kernel.funcreturns import lhs_info
-import CommonFunctions as common
 import os
+import Direct.RunDescriptor as RunDescriptor
+import CommonFunctions as common
+# Reference to reducer used if necessary for working with run descriptors (in diagnostics)
+__Reducer__ = None
 
-def diagnose(white_int, **kwargs):
+def diagnose(white_int,**kwargs):
     """
         Run diagnostics on the provided workspaces.
 
@@ -317,9 +320,20 @@ def do_bleed_test(sample_run, max_framerate, ignored_pixels):
     max_framerate - The maximum allowed framerate in a tube. If None, the instrument defaults are used.
     ignored_pixels - The number of central pixels to ignore. If None, the instrument defaults are used.
     """
+    # NOTE: it was deployed on loaded workspace and now it works on normalized workspace. Is this acceptable?
     logger.notice('Running PSD bleed test')
     # Load the sample run
-    data_ws = common.load_run(config['default.instrument'],sample_run)
+    if __Reducer__: #  Try to use generic loader which would work with files or workspaces alike
+        sample_run = __Reducer__.get_run_descriptor(sample_run)
+        data_ws         = sample_run.get_workspace() # this will load data if necessary 
+        ws_name    = sample_run.get_ws_name()
+    else: 
+        try: # may be sample run is already a run descriptor
+            data_ws    = sample_run.get_workspace() # this will load data if necessary 
+            ws_name    = sample_run.get_ws_name()
+        except:
+            # legacy operation
+            data_ws = common.load_run(config['default.instrument'],sample_run)
 
     if max_framerate is None:
         max_framerate = float(data_ws.getInstrument().getNumberParameter('max-tube-framerate')[0])

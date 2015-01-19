@@ -109,6 +109,8 @@ class RunDescriptor(PropDescriptor):
             energy will be performed for this workspace.
 
             method returns the name of the workspace is will have with this suffix
+
+            Should be always used together with synchronize_ws to ensue one can always get workspace from its name
         """
         if suffix:
             self._ws_suffix = suffix
@@ -118,9 +120,11 @@ class RunDescriptor(PropDescriptor):
 #--------------------------------------------------------------------------------------------------------------------
     def synchronize_ws(self,workspace=None):
         """ Synchronize workspace name (after workspace may have changed due to algorithm) 
-            with internal run holder name
+            with internal run holder name. Accounts for the situation when 
 
             TODO: This method should be automatically invoked by an algorithm decorator
+            Until it is implemented, one have to ensure that it is used together with 
+            set_action_suffix
         """ 
         if not workspace:
             workspace=mtd[self._ws_name]
