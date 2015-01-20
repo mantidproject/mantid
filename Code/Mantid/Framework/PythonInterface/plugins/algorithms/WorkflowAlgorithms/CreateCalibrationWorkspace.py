@@ -99,14 +99,13 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
             calib_ws_name = runs[0]
 
         CalculateFlatBackground(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name,
-                StartX=self._back_range[0], EndX=self._back_range[1], Mode='Mean')
+                                StartX=self._back_range[0], EndX=self._back_range[1], Mode='Mean')
 
-        # TODO: Replace
-        from inelastic_indirect_reduction_steps import NormaliseToUnityStep
-        ntu = NormaliseToUnityStep()
-        ntu.set_factor(self._intensity_scale)
-        ntu.set_peak_range(self._peak_range[0], self._peak_range[1])
-        ntu.execute(None, calib_ws_name)
+        Integration(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name,
+                    RangeLower=self._peak_range[0], RangeUpper= self._peak_range[1])
+
+        Scale(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name,
+              Factor=self._intensity_scale, Operation='Multiply')
 
         RenameWorkspace(InputWorkspace=calib_ws_name, OutputWorkspace=self._out_ws)
 
