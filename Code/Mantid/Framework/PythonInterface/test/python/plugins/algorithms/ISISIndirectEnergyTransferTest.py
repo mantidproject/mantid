@@ -14,7 +14,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                                         Instrument='IRIS',
                                         Analyser='graphite',
                                         Reflection='002',
-                                        DetectorRange=[3, 53])
+                                        SpectraRange=[3, 53])
 
 
     def test_instrument_validation_failure(self):
@@ -27,7 +27,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                                             Instrument='IRIS',
                                             Analyser='graphite',
                                             Reflection='006',
-                                            DetectorRange=[3, 53])
+                                            SpectraRange=[3, 53])
 
 
     def test_group_workspace_validation_failure(self):
@@ -41,7 +41,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                                             Instrument='IRIS',
                                             Analyser='graphite',
                                             Reflection='002',
-                                            DetectorRange=[3, 53],
+                                            SpectraRange=[3, 53],
                                             GroupingMethod='Workspace')
 
 
