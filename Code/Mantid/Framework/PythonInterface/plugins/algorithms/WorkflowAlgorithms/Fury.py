@@ -191,7 +191,7 @@ class Fury(PythonAlgorithm):
         from IndirectCommon import CheckHistZero, CheckHistSame, CheckAnalysers
 
         # Process resolution data
-        CheckAnalysers(self._sample, self._resolution, True)
+        CheckAnalysers(self._sample, self._resolution)
         num_res_hist = CheckHistZero(self._resolution)[0]
         if num_res_hist > 1:
             CheckHistSame(self._sample, 'Sample', self._resolution, 'Resolution')

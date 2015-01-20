@@ -269,8 +269,6 @@ namespace IDA
         "canws = None\n";
     }
 
-    pyInput += "verbose = True\n";
-
     if ( uiForm().absp_ckSave->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";
 
@@ -282,7 +280,7 @@ namespace IDA
       "plotOpt = '" + uiForm().absp_cbPlotOutput->currentText() + "'\n"
       "sampleFormula = " + sampleFormula + "\n"
       "canFormula = " + canFormula + "\n"
-      "print IndirectAbsCor.AbsRunFeeder(inputws, canws, geom, ncan, size, avar, density, beam, sampleFormula, canFormula, sigs, siga, plot_opt=plotOpt, save=save, verbose=verbose)\n";
+      "print IndirectAbsCor.AbsRunFeeder(inputws, canws, geom, ncan, size, avar, density, beam, sampleFormula, canFormula, sigs, siga, plot_opt=plotOpt, save=save)\n";
 
     QString pyOutput = runPythonCode(pyInput);
 

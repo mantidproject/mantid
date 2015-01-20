@@ -116,7 +116,7 @@ namespace MantidQt
 
         pyInput += "from IndirectNeutron import "+pyFunc+"\n";
         pyInput += pyFunc + "('"+instrument+"','"+filename+"','"+analyser+"','"+reflection+"',"+rejectZero+","+useMap+",'"+mapPath+"'"
-                        ",True,'"+plot+"',"+save+")";
+                        ",'"+plot+"',"+save+")";
 
       }
       runPythonScript(pyInput);

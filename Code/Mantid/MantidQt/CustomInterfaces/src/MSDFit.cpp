@@ -75,8 +75,6 @@ namespace IDA
     "specMax = " + uiForm().msd_spSpectraMax->text() + "\n"
     "input = '" + uiForm().msd_dsSampleInput->getCurrentDataName() + "'\n";
 
-    pyInput += "verbose = True\n";
-
     if ( uiForm().msd_ckPlot->isChecked() ) pyInput += "plot = True\n";
     else pyInput += "plot = False\n";
 
@@ -84,7 +82,7 @@ namespace IDA
     else pyInput += "save = False\n";
 
     pyInput +=
-      "msdfit(input, startX, endX, spec_min=specMin, spec_max=specMax, Save=save, Verbose=verbose, Plot=plot)\n";
+      "msdfit(input, startX, endX, spec_min=specMin, spec_max=specMax, Save=save, Plot=plot)\n";
 
     QString pyOutput = runPythonCode(pyInput);
     UNUSED_ARG(pyOutput);
@@ -107,10 +105,8 @@ namespace IDA
       "specMax = " + uiForm().msd_spPlotSpectrum->text() + "\n"
       "input = '" + uiForm().msd_dsSampleInput->getCurrentDataName() + "'\n";
 
-    pyInput += "verbose = True\n";
-
     pyInput +=
-      "output = msdfit(input, startX, endX, spec_min=specMin, spec_max=specMax, Save=False, Verbose=verbose, Plot=False)\n"
+      "output = msdfit(input, startX, endX, spec_min=specMin, spec_max=specMax, Save=False, Plot=False)\n"
       "print output \n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();

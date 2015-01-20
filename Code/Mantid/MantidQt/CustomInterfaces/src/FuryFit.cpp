@@ -164,11 +164,11 @@ namespace IDA
 
     if( !constrainBeta )
     {
-      pyInput += "furyfitSeq(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot, Verbose=True)\n";
+      pyInput += "furyfitSeq(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot)\n";
     }
     else
     {
-      pyInput += "furyfitMult(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot, Verbose=True)\n";
+      pyInput += "furyfitMult(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot)\n";
     }
 
     QString pyOutput = runPythonCode(pyInput);

@@ -17,7 +17,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  ApplyCorr::ApplyCorr(QWidget * parent) : 
+  ApplyCorr::ApplyCorr(QWidget * parent) :
     IDATab(parent)
   {
   }
@@ -187,7 +187,7 @@ namespace IDA
         return;
       }
     }
-    
+
     QString ScalingFactor = "1.0\n";
     QString ScaleOrNot = "False\n";
 
@@ -195,14 +195,12 @@ namespace IDA
 
     if ( uiForm().abscor_ckScaleMultiplier->isChecked() )
     {
-      ScalingFactor = uiForm().abscor_leScaleMultiplier->text();  
+      ScalingFactor = uiForm().abscor_leScaleMultiplier->text();
       ScaleOrNot = "True\n";
     }
 
     pyInput += "scale = " + ScaleOrNot + "\n";
-    pyInput += "scaleFactor = " + ScalingFactor + "\n";  
-
-    pyInput += "verbose = True\n";
+    pyInput += "scaleFactor = " + ScalingFactor + "\n";
 
     if ( uiForm().abscor_ckSave->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";
@@ -220,9 +218,9 @@ namespace IDA
     {
       plotResult = "Both";
     }
-    
+
     pyInput += "plotResult = '" + plotResult + "'\n";
-    pyInput += "print abscorFeeder(sample, container, geom, useCor, corrections, Verbose=verbose, RebinCan=rebin_can, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult)\n";
+    pyInput += "print abscorFeeder(sample, container, geom, useCor, corrections, RebinCan=rebin_can, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
 
@@ -241,7 +239,7 @@ namespace IDA
   {
     QString message = "The sample and can energy ranges do not match, this is not recommended."
         "\n\n Click OK to rebin the can to match the sample and continue or Cancel to abort applying corrections.";
-    QMessageBox::StandardButton reply = QMessageBox::warning(m_parentWidget, "Energy Ranges Do Not Match", 
+    QMessageBox::StandardButton reply = QMessageBox::warning(m_parentWidget, "Energy Ranges Do Not Match",
                                                              message, QMessageBox::Ok|QMessageBox::Cancel);
     return (reply == QMessageBox::Ok);
   }
@@ -279,7 +277,7 @@ namespace IDA
 
   /**
    * Handles when the type of geometry changes
-   * 
+   *
    * Updates the file extension to search for
    */
   void ApplyCorr::handleGeometryChange(int index)
@@ -301,7 +299,7 @@ namespace IDA
         break;
     }
   }
-  
+
   /**
    * Replots the preview plot.
    *

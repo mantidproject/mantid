@@ -91,7 +91,7 @@ def GetResNorm(resnormWS,ngrp):
     xsc=PadArray(xscale,51)
     return dtn,xsc
 
-def ReadNormFile(readRes,resnormWS,nsam,Verbose):            # get norm & scale values
+def ReadNormFile(readRes,resnormWS,nsam):            # get norm & scale values
     if readRes:                   # use ResNorm file option=o_res
     	Xin = mtd[resnormWS+'_Intensity'].readX(0)
     	nrm = len(Xin)						# no. points from length of x array
@@ -110,14 +110,13 @@ def ReadNormFile(readRes,resnormWS,nsam,Verbose):            # get norm & scale 
     return dtn,xsc
 
 #Reads in a width ASCII file
-def ReadWidthFile(readWidth,widthFile,numSampleGroups,Verbose):
+def ReadWidthFile(readWidth,widthFile,numSampleGroups):
     widthY = []
     widthE = []
 
     if readWidth:
 
-    	if Verbose:
-    		logger.notice('Width file is ' + widthFile)
+        logger.information('Width file is ' + widthFile)
 
     	# read ascii based width file
     	try:
@@ -152,7 +151,7 @@ def ReadWidthFile(readWidth,widthFile,numSampleGroups,Verbose):
     return widthY, widthE
 
 # QLines programs
-def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot,Save):
+def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Plot,Save):
     StartTime(program)
 
     #expand fit options
@@ -181,11 +180,10 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 
     nbin,nrbin = nbins[0], nbins[1]
 
-    if Verbose:
-    	logger.notice('Sample is ' + samWS)
-    	logger.notice('Resolution is ' + resWS)
+    logger.information('Sample is ' + samWS)
+    logger.information('Resolution is ' + resWS)
 
-    CheckAnalysers(samWS,resWS,Verbose)
+    CheckAnalysers(samWS,resWS)
     efix = getEfixed(samWS)
     theta, Q = GetThetaQ(samWS)
 
@@ -211,21 +209,19 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
     	else:
     		raise ValueError('Stretched Exp ONLY works with RES file')
 
-    if Verbose:
-    	logger.notice('Version is ' +prog)
-    	logger.notice(' Number of spectra = '+str(nsam))
-    	logger.notice(' Erange : '+str(erange[0])+' to '+str(erange[1]))
+    logger.information('Version is ' +prog)
+    logger.information(' Number of spectra = '+str(nsam))
+    logger.information(' Erange : '+str(erange[0])+' to '+str(erange[1]))
 
-    Wy,We = ReadWidthFile(width,wfile,totalNoSam,Verbose)
-    dtn,xsc = ReadNormFile(resnorm,resnormWS,totalNoSam,Verbose)
+    Wy,We = ReadWidthFile(width,wfile,totalNoSam)
+    dtn,xsc = ReadNormFile(resnorm,resnormWS,totalNoSam)
 
     fname = samWS[:-4] + '_'+ prog
     probWS = fname + '_Prob'
     fitWS = fname + '_Fit'
     datWS = fname + '_Data'
     wrks=os.path.join(workdir, samWS[:-4])
-    if Verbose:
-    	logger.notice(' lptfile : '+wrks+'_'+prog+'.lpt')
+    logger.information(' lptfile : '+wrks+'_'+prog+'.lpt')
     lwrk=len(wrks)
     wrks.ljust(140,' ')
     wrkr=resWS
@@ -247,8 +243,7 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 
     group = ''
     for m in range(0,nsam):
-    	if Verbose:
-    		logger.notice('Group ' +str(m)+ ' at angle '+ str(theta[m]))
+        logger.information('Group ' +str(m)+ ' at angle '+ str(theta[m]))
     	nsp = m+1
     	nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(samWS,m,erange,nbin)
     	Ndat = nout[0]
@@ -268,15 +263,13 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
     											   Xdat,Xb,Yb,Wy,We,dtn,xsc,
     											   wrks,wrkr,lwrk)
     		message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])+' '+str(yprob[2])+' '+str(yprob[3])
-    		if Verbose:
-    			logger.notice(message)
+            logger.information(message)
     	if prog == 'QLd':
     		nd,xout,yout,eout,yfit,yprob=QLd.qldata(numb,Xv,Yv,Ev,reals,fitOp,
     												Xdat,Xb,Yb,Eb,Wy,We,
     												wrks,wrkr,lwrk)
     		message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])+' '+str(yprob[2])+' '+str(yprob[3])
-    		if Verbose:
-    			logger.notice(message)
+            logger.information(message)
     	if prog == 'QSe':
     		nd,xout,yout,eout,yfit,yprob=Qse.qlstexp(numb,Xv,Yv,Ev,reals,fitOp,
     												Xdat,Xb,Yb,Wy,We,dtn,xsc,
@@ -362,9 +355,8 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
     	SaveNexusProcessed(InputWorkspace=fitWS, Filename=fit_path)
     	out_path = os.path.join(workdir, outWS+'.nxs')					# path name for nxs file
     	SaveNexusProcessed(InputWorkspace=outWS, Filename=out_path)
-    	if Verbose:
-    		logger.notice('Output fit file created : ' + fit_path)
-    		logger.notice('Output paramter file created : ' + out_path)
+        logger.information('Output fit file created : ' + fit_path)
+        logger.information('Output paramter file created : ' + out_path)
 
     EndTime(program)
 
@@ -620,7 +612,7 @@ def C2Se(sname):
     nhist += 1
     Vaxis.append('f1.Beta')
 
-    logger.notice('Vaxis=' + str(Vaxis))
+    logger.information('Vaxis=' + str(Vaxis))
     CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
     	UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
     return outWS
@@ -677,7 +669,7 @@ def CheckBetSig(nbs):
 
     return Nbet,Nsig
 
-def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
+def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Plot,Save):
     StartTime('Quest')
     #expand fit options
     elastic, background, width, resnorm = Fit
@@ -702,10 +694,9 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
     array_len = 4096                           # length of array in Fortran
     CheckXrange(erange,'Energy')
     nbin,nrbin = nbins[0],nbins[1]
-    if Verbose:
-    	logger.notice('Sample is ' + samWS)
-    	logger.notice('Resolution is ' + resWS)
-    CheckAnalysers(samWS,resWS,Verbose)
+    logger.information('Sample is ' + samWS)
+    logger.information('Resolution is ' + resWS)
+    CheckAnalysers(samWS,resWS)
     nsam,ntc = CheckHistZero(samWS)
 
     if Loop != True:
@@ -718,14 +709,12 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
     	prog = 'Qst'                        # res file
     else:
     	raise ValueError('Stretched Exp ONLY works with RES file')
-    if Verbose:
-    	logger.notice(' Number of spectra = '+str(nsam))
-    	logger.notice(' Erange : '+str(erange[0])+' to '+str(erange[1]))
+    logger.information(' Number of spectra = '+str(nsam))
+    logger.information(' Erange : '+str(erange[0])+' to '+str(erange[1]))
 
     fname = samWS[:-4] + '_'+ prog
     wrks=os.path.join(workdir, samWS[:-4])
-    if Verbose:
-    	logger.notice(' lptfile : ' + wrks +'_Qst.lpt')
+    logger.information(' lptfile : ' + wrks +'_Qst.lpt')
     lwrk=len(wrks)
     wrks.ljust(140,' ')
     wrkr=resWS
@@ -737,8 +726,7 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
     rscl = 1.0
     Qaxis = ''
     for m in range(0,nsam):
-    	if Verbose:
-    		logger.notice('Group ' +str(m)+ ' at angle '+ str(theta[m]))
+        logger.information('Group ' +str(m)+ ' at angle '+ str(theta[m]))
     	nsp = m+1
     	nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(samWS,m,erange,nbin)
     	Ndat = nout[0]
@@ -826,9 +814,8 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
     	cpath = os.path.join(workdir,contour_workspace+'.nxs')
     	SaveNexusProcessed(InputWorkspace=contour_workspace, Filename=cpath)
 
-    	if Verbose:
-    		logger.notice('Output file for Fit : ' + fpath)
-    		logger.notice('Output file for Contours : ' + cpath)
+        logger.information('Output file for Fit : ' + fpath)
+        logger.information('Output file for Contours : ' + cpath)
 
     if (Plot != 'None' and Loop == True):
     	QuestPlot(fname,Plot)
@@ -854,14 +841,14 @@ def QuestPlot(inputWS,Plot):
     	beta_plot=mp.importMatrixWorkspace(inputWS+'_Beta').plotGraph2D()
 
 # ResNorm programs
-def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot='None',Save=False):
+def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
     StartTime('ResNorm')
 
     workdir = getDefaultWorkingDirectory()
 
     array_len = 4096                                    # length of Fortran array
     CheckXrange(erange,'Energy')
-    CheckAnalysers(vname,rname,Verbose)
+    CheckAnalysers(vname,rname)
     nvan,ntc = CheckHistZero(vname)
     theta,Q = GetThetaQ(vname)
     efix = getEfixed(vname)
@@ -873,9 +860,8 @@ def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot='None',Save=False):
     Imin = nout[1]
     Imax = nout[2]
     wrks=os.path.join(workdir, vname[:-4])
-    if Verbose:
-    	logger.notice(' Number of spectra = '+str(nvan))
-    	logger.notice(' lptfile : ' + wrks +'_resnrm.lpt')
+    logger.information(' Number of spectra = '+str(nvan))
+    logger.information(' lptfile : ' + wrks +'_resnrm.lpt')
     lwrk=len(wrks)
     wrks.ljust(140,' ')                              # pad for fioxed Fortran length
     wrkr=rname
@@ -888,17 +874,15 @@ def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot='None',Save=False):
     ePar = np.zeros(nvan)
     fname = vname[:-4]
     for m in range(0,nvan):
-    	if Verbose:
-    		logger.notice('Group ' +str(m)+ ' at angle '+ str(theta[m]))
+        logger.information('Group ' +str(m)+ ' at angle '+ str(theta[m]))
     	ntc,Xv,Yv,Ev = GetXYE(vname,m,array_len)
     	nsp = m+1
     	numb = [nvan, nsp, ntc, Ndat, nbin, Imin, Imax, Nb]
     	reals = [efix, theta[0], rscl, bnorm]
     	nd,xout,yout,eout,yfit,pfit=resnorm.resnorm(numb,Xv,Yv,Ev,reals,
     								Xdat,Xb,Yb,wrks,wrkr,lwrk)
-    	if Verbose:
-    		message = ' Fit paras : '+str(pfit[0])+' '+str(pfit[1])
-    		logger.notice(message)
+        message = ' Fit paras : '+str(pfit[0])+' '+str(pfit[1])
+        logger.information(message)
     	dataX = xout[:nd]
     	dataX = np.append(dataX,2*xout[nd-1]-xout[nd-2])
     	if m == 0:
@@ -947,9 +931,8 @@ def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot='None',Save=False):
     	fit_path = os.path.join(workdir,resnorm_fit_workspace+'.nxs')
     	SaveNexusProcessed(InputWorkspace=resnorm_fit_workspace, Filename=fit_path)
 
-    	if Verbose:
-    		logger.notice('Parameter file created : ' + par_path)
-    		logger.notice('Fit file created : ' + fit_path)
+        logger.information('Parameter file created : ' + par_path)
+        logger.information('Fit file created : ' + fit_path)
 
     if (Plot != 'None'):
     	ResNormPlot(fname,Plot)

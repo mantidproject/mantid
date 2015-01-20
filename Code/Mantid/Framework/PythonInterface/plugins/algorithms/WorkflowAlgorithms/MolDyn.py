@@ -475,7 +475,7 @@ class MolDyn(PythonAlgorithm):
             refl = '4'
 
         InstrParas(self._out_ws, instr, ana, refl)
-        efixed = RunParas(self._out_ws, instr, name, name, True)
+        efixed = RunParas(self._out_ws, instr, name, name)
         logger.information('Qmax = ' + str(Qmax) + ' ; efixed = ' + str(efixed))
         pi4 = 4.0 * math.pi
         wave = 1.8 * math.sqrt(25.2429 / efixed)
@@ -485,7 +485,7 @@ class MolDyn(PythonAlgorithm):
             ang = 2.0 * math.degrees(math.asin(qw))
             theta.append(ang)
 
-        ChangeAngles(self._out_ws, instr, theta, True)
+        ChangeAngles(self._out_ws, instr, theta)
 
 
     def _create_res_ws(self, num_sample_hist):

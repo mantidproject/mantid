@@ -197,7 +197,7 @@ namespace IDA
     pyInput +=
       "bg = '" + bgType + "'\n"
       "ftype = '" + fitType + "'\n"
-      "confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, convolve, Verbose=True, Plot=plot, Save=save)\n";
+      "confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, convolve, Plot=plot, Save=save)\n";
 
     QString pyOutput = runPythonCode(pyInput);
 
