@@ -97,7 +97,6 @@ namespace MantidQt
       using namespace Mantid::API;
 
 			QString save("False");
-			QString verbose("False");
 
 			QString elasticPeak("False");
 			QString sequence("False");
@@ -129,12 +128,11 @@ namespace MantidQt
 			nBins = "[" + nBins + ", 1]";
 
 			//Output options
-			if(m_uiForm.chkVerbose->isChecked()) { verbose = "True"; }
 			if(m_uiForm.chkSave->isChecked()) { save = "True"; }
 			QString plot = m_uiForm.cbPlot->currentText();
 
 			pyInput += "QuestRun('"+sampleName+"','"+resName+"',"+betaSig+","+eRange+","+nBins+","+fitOps+","+sequence+","
-										" Save="+save+", Plot='"+plot+"', Verbose="+verbose+")\n";
+										" Save="+save+", Plot='"+plot+"', Verbose=True)\n";
 
 			runPythonScript(pyInput);
 		}

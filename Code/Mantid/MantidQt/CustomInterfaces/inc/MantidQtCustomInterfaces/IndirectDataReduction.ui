@@ -1379,13 +1379,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_7">
             <item>
-             <widget class="QCheckBox" name="cal_ckVerbose">
-              <property name="text">
-               <string>Verbose</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <spacer name="horizontalSpacer_34">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -1558,16 +1551,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
          <layout class="QVBoxLayout" name="verticalLayout_30">
           <item>
            <layout class="QHBoxLayout" name="loDiagnosticsOutputOptions">
-            <item>
-             <widget class="QCheckBox" name="slice_ckVerbose">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="text">
-               <string>Verbose</string>
-              </property>
-             </widget>
-            </item>
             <item>
              <spacer name="horizontalSpacer_20">
               <property name="orientation">
@@ -1769,16 +1752,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_44">
             <item>
-             <widget class="QCheckBox" name="trans_ckVerbose">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="text">
-               <string>Verbose</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <spacer name="horizontalSpacer_17">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -1924,16 +1897,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
           <property name="margin">
            <number>6</number>
           </property>
-          <item>
-           <widget class="QCheckBox" name="symm_ckVerbose">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="text">
-             <string>Verbose</string>
-            </property>
-           </widget>
-          </item>
           <item>
            <spacer name="horizontalSpacer_24">
             <property name="orientation">
@@ -2371,13 +2334,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_43">
             <item>
-             <widget class="QCheckBox" name="sqw_ckVerbose">
-              <property name="text">
-               <string>Verbose</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <spacer name="horizontalSpacer_30">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -2641,13 +2597,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_42">
             <item>
-             <widget class="QCheckBox" name="moment_ckVerbose">
-              <property name="text">
-               <string>Verbose</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <spacer name="horizontalSpacer_31">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -2860,10 +2809,8 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>cal_ckRES</tabstop>
   <tabstop>cal_ckPlotResult</tabstop>
   <tabstop>slice_inputFile</tabstop>
-  <tabstop>slice_ckVerbose</tabstop>
   <tabstop>slice_ckPlot</tabstop>
   <tabstop>slice_ckSave</tabstop>
-  <tabstop>trans_ckVerbose</tabstop>
   <tabstop>trans_ckPlot</tabstop>
   <tabstop>trans_ckSave</tabstop>
   <tabstop>sqw_cbRebinType</tabstop>
@@ -2874,11 +2821,9 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>sqw_leELow</tabstop>
   <tabstop>sqw_leEWidth</tabstop>
   <tabstop>sqw_leEHigh</tabstop>
-  <tabstop>sqw_ckVerbose</tabstop>
   <tabstop>sqw_cbPlotType</tabstop>
   <tabstop>sqw_ckSave</tabstop>
   <tabstop>pbManageDirectories</tabstop>
-  <tabstop>cal_ckVerbose</tabstop>
   <tabstop>cal_ckSave</tabstop>
  </tabstops>
  <resources/>

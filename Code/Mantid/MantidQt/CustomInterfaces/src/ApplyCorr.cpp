@@ -202,9 +202,7 @@ namespace IDA
     pyInput += "scale = " + ScaleOrNot + "\n";
     pyInput += "scaleFactor = " + ScalingFactor + "\n";  
 
-
-    if ( uiForm().abscor_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-    else pyInput += "verbose = False\n";
+    pyInput += "verbose = True\n";
 
     if ( uiForm().abscor_ckSave->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";

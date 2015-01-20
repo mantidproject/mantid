@@ -269,9 +269,7 @@ namespace IDA
         "canws = None\n";
     }
 
-    //Output options
-    if ( uiForm().absp_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-    else pyInput += "verbose = False\n";
+    pyInput += "verbose = True\n";
 
     if ( uiForm().absp_ckSave->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";

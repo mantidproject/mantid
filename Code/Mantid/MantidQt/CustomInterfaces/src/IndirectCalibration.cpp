@@ -261,7 +261,6 @@ namespace CustomInterfaces
       resAlg->setProperty("BackgroundRange", background.toStdString());
       resAlg->setProperty("ScaleFactor", m_uiForm.cal_leIntensityScaleMultiplier->text().toDouble());
       resAlg->setProperty("Smooth", m_uiForm.cal_ckSmooth->isChecked());
-      resAlg->setProperty("Verbose", m_uiForm.cal_ckVerbose->isChecked());
       resAlg->setProperty("Plot", m_uiForm.cal_ckPlotResult->isChecked());
       resAlg->setProperty("Save", m_uiForm.cal_ckSave->isChecked());
 

@@ -113,16 +113,6 @@
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QCheckBox" name="chkVerbose">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="text">
-           <string>Verbose</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <spacer name="horizontalSpacer_17">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -193,7 +183,6 @@
         </item>
        </layout>
        <zorder>chkSave</zorder>
-       <zorder>chkVerbose</zorder>
        <zorder>lblPlot</zorder>
        <zorder>cbPlot</zorder>
       </widget>

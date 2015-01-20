@@ -93,7 +93,6 @@ namespace CustomInterfaces
     double eMax = m_dblManager->value(m_properties["EMax"]);
 
     bool plot = m_uiForm.moment_ckPlot->isChecked();
-    bool verbose = m_uiForm.moment_ckVerbose->isChecked();
     bool save = m_uiForm.moment_ckSave->isChecked();
 
     if(!scaleString.isEmpty())
@@ -108,7 +107,7 @@ namespace CustomInterfaces
     momentsAlg->setProperty("EnergyMin", eMin);
     momentsAlg->setProperty("EnergyMax", eMax);
     momentsAlg->setProperty("Plot", plot);
-    momentsAlg->setProperty("Verbose", verbose);
+    momentsAlg->setProperty("Verbose", true);
     momentsAlg->setProperty("Save", save);
     momentsAlg->setProperty("OutputWorkspace", outputWorkspaceName);
 
@@ -217,8 +216,6 @@ namespace CustomInterfaces
     double eMin = m_dblManager->value(m_properties["EMin"]);
     double eMax = m_dblManager->value(m_properties["EMax"]);
 
-    bool verbose = m_uiForm.moment_ckVerbose->isChecked();
-
     if(!scaleString.isEmpty())
       scale = scaleString.toDouble();
 
@@ -231,7 +228,7 @@ namespace CustomInterfaces
     momentsAlg->setProperty("EnergyMin", eMin);
     momentsAlg->setProperty("EnergyMax", eMax);
     momentsAlg->setProperty("Plot", false);
-    momentsAlg->setProperty("Verbose", verbose);
+    momentsAlg->setProperty("Verbose", false);
     momentsAlg->setProperty("Save", false);
     momentsAlg->setProperty("OutputWorkspace", outputWorkspaceName);
 

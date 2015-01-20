@@ -52,7 +52,6 @@ namespace CustomInterfaces
     transAlg->setProperty("CanWorkspace", canWsName.toStdString());
     transAlg->setProperty("OutputWorkspace", outWsName.toStdString());
 
-    transAlg->setProperty("Verbose", m_uiForm.trans_ckVerbose->isChecked());
     transAlg->setProperty("Plot", m_uiForm.trans_ckPlot->isChecked());
     transAlg->setProperty("Save", m_uiForm.trans_ckSave->isChecked());
 
@@ -96,7 +95,6 @@ namespace CustomInterfaces
     transAlg->setProperty("CanWorkspace", canWsName.toStdString());
     transAlg->setProperty("OutputWorkspace", outWsName.toStdString());
 
-    transAlg->setProperty("Verbose", m_uiForm.trans_ckVerbose->isChecked());
     transAlg->setProperty("Plot", false);
     transAlg->setProperty("Save", false);
 

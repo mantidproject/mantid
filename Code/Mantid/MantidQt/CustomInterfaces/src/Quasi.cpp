@@ -130,7 +130,6 @@ namespace MantidQt
 
 			// Using 1/0 instead of True/False for compatibility with underlying Fortran code
 			// in some places
-			QString verbose("False");
 			QString save("False");
 			QString elasticPeak("False");
 			QString sequence("False");
@@ -191,13 +190,12 @@ namespace MantidQt
 			QString nBins = "[" + sampleBins + "," + resBins + "]";
 
 			// Output options
-			if(m_uiForm.chkVerbose->isChecked()) { verbose = "True"; }
 			if(m_uiForm.chkSave->isChecked()) { save = "True"; }
 			QString plot = m_uiForm.cbPlot->currentText();
 
 			pyInput += "QLRun('"+program+"','"+sampleName+"','"+resName+"','"+resNormFile+"',"+eRange+","
 										" "+nBins+","+fitOps+",'"+fixedWidthFile+"',"+sequence+", "
-										" Save="+save+", Plot='"+plot+"', Verbose="+verbose+")\n";
+										" Save="+save+", Plot='"+plot+"', Verbose=True)\n";
 
 			runPythonScript(pyInput);
 

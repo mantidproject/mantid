@@ -76,7 +76,6 @@ namespace MantidQt
 		 */
 		void ResNorm::run() 
 		{
-			QString verbose("False");
 			QString save("False");
 
 			QString pyInput = 
@@ -95,12 +94,11 @@ namespace MantidQt
 			QString nBin = m_properties["VanBinning"]->valueText();
 
 			// get output options
-			if(m_uiForm.chkVerbose->isChecked()){ verbose = "True"; }
 			if(m_uiForm.chkSave->isChecked()){ save ="True"; }
 			QString plot = m_uiForm.cbPlot->currentText();
 
 			pyInput += "ResNormRun('"+VanName+"', '"+ResName+"', "+ERange+", "+nBin+","
-										" Save="+save+", Plot='"+plot+"', Verbose="+verbose+")\n";
+										" Save="+save+", Plot='"+plot+"', Verbose=True)\n";
 
 			runPythonScript(pyInput);
 		}

@@ -59,7 +59,6 @@ namespace MantidQt
      */
     void IndirectLoadILL::run()
     {
-      QString verbose("False");
       QString plot("False");
       QString save("None");
 
@@ -80,7 +79,6 @@ namespace MantidQt
       if(m_uiForm.chkRejectZero->isChecked()){ rejectZero ="True"; }
 
       //output options
-      if(m_uiForm.chkVerbose->isChecked()){ verbose = "True"; }
       if(m_uiForm.chkSave->isChecked()){ save = "True"; }
       plot = m_uiForm.cbPlot->currentText();
 
@@ -118,7 +116,7 @@ namespace MantidQt
 
         pyInput += "from IndirectNeutron import "+pyFunc+"\n";
         pyInput += pyFunc + "('"+instrument+"','"+filename+"','"+analyser+"','"+reflection+"',"+rejectZero+","+useMap+",'"+mapPath+"'"
-                        ","+verbose+",'"+plot+"',"+save+")";
+                        ",True,'"+plot+"',"+save+")";
 
       }
       runPythonScript(pyInput);
