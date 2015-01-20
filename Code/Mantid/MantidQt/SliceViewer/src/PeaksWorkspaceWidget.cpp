@@ -254,7 +254,8 @@ void PeaksWorkspaceWidget::workspaceUpdate(
   // Set at new representation for the model.
   static_cast<QPeaksTableModel*>(this->ui.tblPeaks->model())->setPeaksWorkspace(m_ws);
   // Update the display name of the workspace.
-  this->ui.lblWorkspaceName->setText(m_ws->getName().c_str());
+  m_nameText = m_ws->getName().c_str();
+  this->ui.lblWorkspaceName->setText(m_nameText);
 }
 
 } // namespace

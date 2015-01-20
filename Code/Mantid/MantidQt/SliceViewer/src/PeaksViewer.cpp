@@ -246,7 +246,8 @@ void PeaksViewer::updatePeaksWorkspace(
 
   for (int i = 0; i < children.size(); ++i) {
     PeaksWorkspaceWidget *candidateWidget = children.at(i);
-    if (candidateWidget->getWSName() == toName) {
+    const std::string candidateName = candidateWidget->getWSName();
+    if (candidateName == toName) {
       // We have the right widget to update. Swap the workspace and redraw the
       // table
       candidateWidget->workspaceUpdate(toWorkspace);
