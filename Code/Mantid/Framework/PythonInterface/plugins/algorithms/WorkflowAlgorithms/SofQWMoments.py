@@ -20,7 +20,6 @@ class SofQWMoments(DataProcessorAlgorithm):
     	self.declareProperty(name='EnergyMin', defaultValue=-0.5, doc='Minimum energy for fit. Default=-0.5')
     	self.declareProperty(name='EnergyMax', defaultValue=0.5, doc='Maximum energy for fit. Default=0.5')
     	self.declareProperty(name='Scale', defaultValue=1.0, doc='Scale factor to multiply y(Q,w). Default=1.0')
-    	self.declareProperty(name='Verbose', defaultValue=False, doc='Switch Verbose Off/On')
     	self.declareProperty(name='Plot', defaultValue=False, doc='Switch Plot Off/On')
     	self.declareProperty(name='Save', defaultValue=False, doc='Switch Save result to nxs file Off/On')
 
@@ -36,16 +35,13 @@ class SofQWMoments(DataProcessorAlgorithm):
     	emax = self.getProperty('EnergyMax').value
     	erange = [emin, emax]
 
-    	Verbose = self.getProperty('Verbose').value
     	Plot = self.getProperty('Plot').value
     	Save = self.getProperty('Save').value
 
     	StartTime('SofQWMoments')
     	num_spectra,num_w = CheckHistZero(sample_workspace)
 
-    	if Verbose:
-    		text = 'Sample %s has %d Q values & %d w values' % (sample_workspace, num_spectra, num_w)
-    		logger.notice(text)
+        logger.information('Sample %s has %d Q values & %d w values' % (sample_workspace, num_spectra, num_w))
 
     	x = np.asarray(mtd[sample_workspace].readX(0))
     	CheckElimits(erange,x)
@@ -53,13 +49,11 @@ class SofQWMoments(DataProcessorAlgorithm):
     	samWS = '__temp_sqw_moments_cropped'
     	CropWorkspace(InputWorkspace=sample_workspace, OutputWorkspace=samWS, XMin=erange[0], XMax=erange[1])
 
-    	if Verbose:
-    	    logger.notice('Energy range is %f to %f' % (erange[0], erange[1]))
+        logger.information('Energy range is %f to %f' % (erange[0], erange[1]))
 
     	if factor > 0.0:
     	    Scale(InputWorkspace=samWS, OutputWorkspace=samWS, Factor=factor, Operation='Multiply')
-    	    if Verbose:
-    	        logger.notice('y(q,w) scaled by %f' % factor)
+            logger.information('y(q,w) scaled by %f' % factor)
 
     	#calculate delta x
     	ConvertToPointData(InputWorkspace=samWS, OutputWorkspace=samWS)
@@ -112,8 +106,7 @@ class SofQWMoments(DataProcessorAlgorithm):
     		workdir = getDefaultWorkingDirectory()
     		opath = os.path.join(workdir,output_workspace+'.nxs')
     		SaveNexusProcessed(InputWorkspace=output_workspace, Filename=opath)
-    		if Verbose:
-    			logger.notice('Output file : ' + opath)
+            logger.information('Output file : ' + opath)
 
     	if Plot:
     	    self._plot_moments(output_workspace)
