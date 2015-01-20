@@ -168,7 +168,7 @@ if ( ENABLE_CPACK )
     include ( CPackCommon )
 
     # Mac package settings
-    set ( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/Installers/WinInstaller/License.txt )
+    set ( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/Installers/WinInstaller/License.txt )
 
     IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
       include ( CPackLinuxSetup )

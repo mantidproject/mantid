@@ -61,11 +61,11 @@ qt4_add_resources( RES_FILES icons/ViewWidgetsIcons.qrc )
 # Setup the include locations.
 include_directories(
   inc
-  ${CMAKE_SOURCE_DIR}/MantidQt/API/inc
-  ${CMAKE_SOURCE_DIR}/MantidQt/MantidWidgets/inc
-  ${CMAKE_SOURCE_DIR}/MantidQt/SliceViewer/inc
+  ${CMAKE_SOURCE_DIR}/Code/Mantid/MantidQt/API/inc
+  ${CMAKE_SOURCE_DIR}/Code/Mantid/MantidQt/MantidWidgets/inc
+  ${CMAKE_SOURCE_DIR}/Code/Mantid/MantidQt/SliceViewer/inc
   ${CMAKE_BINARY_DIR}/Code/Mantid/MantidQt/SliceViewer
-  ${CMAKE_SOURCE_DIR}/MantidQt/Factory/inc
+  ${CMAKE_SOURCE_DIR}/Code/Mantid/MantidQt/Factory/inc
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets
   ${QWT_INCLUDE_DIR}

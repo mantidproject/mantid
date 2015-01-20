@@ -5,7 +5,7 @@ set( PROJECT_NAME VatesSimpleGui )
 # Setup the include locations.
 include_directories(
   inc
-  ${CMAKE_SOURCE_DIR}/MantidQt/API/inc
+  ${CMAKE_SOURCE_DIR}/Code/Mantid/MantidQt/API/inc
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets
   ${CMAKE_CURRENT_BINARY_DIR}/../ViewWidgets
@@ -50,8 +50,7 @@ if( SQUISH_FOUND )
   set( SQUISH_AUT_PATH $<TARGET_FILE_DIR:${SQUISH_AUT}> )
 
   # Need to set environmental variables next
-  set( auto_test_dir ${CMAKE_SOURCE_DIR} )
-  string( REGEX REPLACE "Code/Mantid" "Test/AutoTestData" auto_test_dir ${auto_test_dir} )
+  set( auto_test_dir ${CMAKE_SOURCE_DIR}/Test/AutoTestData )
   set( SQUISH_ENV_VARS
     PV_PLUGIN_PATH=$<TARGET_FILE_DIR:${SQUISH_AUT}>/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}
     MANTID_AUTOTEST_DATA=${auto_test_dir}

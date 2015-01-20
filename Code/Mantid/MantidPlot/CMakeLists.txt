@@ -822,7 +822,7 @@ if( WIN32 )
 endif( WIN32 )
 
 if ( APPLE )
-  set ( MANTID_RC_FILE ${CMAKE_SOURCE_DIR}/Images/MantidPlot.icns )
+  set ( MANTID_RC_FILE ${CMAKE_SOURCE_DIR}/Code/Mantid/Images/MantidPlot.icns )
   set_source_files_properties(MANTID_RC_FILE PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 endif ()
 
