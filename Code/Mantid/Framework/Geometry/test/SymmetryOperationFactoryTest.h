@@ -129,6 +129,42 @@ public:
             SymmetryOperationFactory::Instance().subscribeSymOp(*it);
         }
     }
+
+    void testSymmetryElement()
+    {
+        SymmetryOperation twoFoldY = SymmetryOperationFactory::Instance().createSymOp("x-y,x,z+1/6");
+
+        size_t k = twoFoldY.order();
+        IntMatrix sumMatrix(3, 3, true);
+        for(size_t i = (k - 1); i > 0; --i) {
+            std::cout << i << std::endl;
+            sumMatrix += (twoFoldY^i).matrix();
+        }
+
+        V3R vector = twoFoldY.vector();
+
+        V3R screw = (sumMatrix * vector) / k;
+
+        std::cout << screw << std::endl;
+
+        IntMatrix matrix = twoFoldY.matrix();
+        std::vector<int> vect = matrix;
+        std::vector<double> dvec(vect.size());
+        for(size_t i = 0; i < vect.size(); ++i) {
+            dvec[i] = static_cast<double>(vect[i]);
+        }
+
+        DblMatrix dblMatrix(dvec);
+
+        DblMatrix eigenValues;
+        DblMatrix eigenVectors;
+
+        dblMatrix.averSymmetric();
+        dblMatrix.Diagonalise(eigenVectors, eigenValues);
+        std::cout << eigenValues << std::endl;
+        std::cout << eigenVectors << std::endl;
+
+    }
 };
 
 
