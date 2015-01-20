@@ -131,8 +131,7 @@ class Fury(PythonAlgorithm):
                              % (analyserName, instrument))
                 resolution = instrument.getNumberParameter('resolution')[0]
 
-            if self._verbose:
-                logger.information('Got resolution from IPF: %f' % resolution)
+            logger.information('Got resolution from IPF: %f' % resolution)
 
         except (AttributeError, IndexError):
             resolution = 0.0175
@@ -192,7 +191,7 @@ class Fury(PythonAlgorithm):
         from IndirectCommon import CheckHistZero, CheckHistSame, CheckAnalysers
 
         # Process resolution data
-        CheckAnalysers(self._sample, self._resolution, self._verbose)
+        CheckAnalysers(self._sample, self._resolution, True)
         num_res_hist = CheckHistZero(self._resolution)[0]
         if num_res_hist > 1:
             CheckHistSame(self._sample, 'Sample', self._resolution, 'Resolution')
