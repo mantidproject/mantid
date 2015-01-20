@@ -296,6 +296,7 @@ void PredictPeaks::exec() {
       wlMin = 0.0;
       wlMax = 1e10;
 
+      // cppcheck-suppress syntaxError
       PRAGMA_OMP(parallel for schedule(dynamic, 1) )
       for (int i = 0; i < static_cast<int>(HKLPeaksWorkspace->getNumberPeaks()); ++i) {
         PARALLEL_START_INTERUPT_REGION
