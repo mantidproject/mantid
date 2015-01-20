@@ -48,7 +48,7 @@ ENDIF()
 IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
   if ( NOT THIRD_PARTY )
-    set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/Third_Party" )
+    set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/Code/Third_Party" )
   endif ()
 
   # Print out where we think we are looking for 3rd party stuff
