@@ -101,8 +101,19 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
         CalculateFlatBackground(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name,
                                 StartX=self._back_range[0], EndX=self._back_range[1], Mode='Mean')
 
+        number_historgrams = mtd[calib_ws_name].getNumberHistograms()
+        ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=calib_ws_name, OutputWorkspace='__temp_ws_mask')
+        DeleteWorkspace(ws_mask)
+
         Integration(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name,
-                    RangeLower=self._peak_range[0], RangeUpper= self._peak_range[1])
+                    RangeLower=self._peak_range[0], RangeUpper=self._peak_range[1])
+
+        temp_sum = SumSpectra(InputWorkspace=calib_ws_name, OutputWorkspace='__temp_sum')
+        total = temp_sum.readY(0)[0]
+        DeleteWorkspace(temp_sum)
+
+        if self._intensity_scale is None:
+            self._intensity_scale = 1 / (total / (number_historgrams - num_zero_spectra))
 
         Scale(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name,
               Factor=self._intensity_scale, Operation='Multiply')
