@@ -37,28 +37,28 @@ namespace IDA
     m_elwTree->setFactoryForManager(m_blnManager, qtCheckBoxFactory());
 
     // Create Properties
-    m_properties["R1S"] = m_dblManager->addProperty("Start");
-    m_dblManager->setDecimals(m_properties["R1S"], NUM_DECIMALS);
-    m_properties["R1E"] = m_dblManager->addProperty("End");
-    m_dblManager->setDecimals(m_properties["R1E"], NUM_DECIMALS);
-    m_properties["R2S"] = m_dblManager->addProperty("Start");
-    m_dblManager->setDecimals(m_properties["R2S"], NUM_DECIMALS);
-    m_properties["R2E"] = m_dblManager->addProperty("End");
-    m_dblManager->setDecimals(m_properties["R2E"], NUM_DECIMALS);
+    m_properties["IntegrationStart"] = m_dblManager->addProperty("Start");
+    m_dblManager->setDecimals(m_properties["IntegrationStart"], NUM_DECIMALS);
+    m_properties["IntegrationEnd"] = m_dblManager->addProperty("End");
+    m_dblManager->setDecimals(m_properties["IntegrationEnd"], NUM_DECIMALS);
+    m_properties["BackgroundStart"] = m_dblManager->addProperty("Start");
+    m_dblManager->setDecimals(m_properties["BackgroundStart"], NUM_DECIMALS);
+    m_properties["BackgroundEnd"] = m_dblManager->addProperty("End");
+    m_dblManager->setDecimals(m_properties["BackgroundEnd"], NUM_DECIMALS);
 
-    m_properties["UseTwoRanges"] = m_blnManager->addProperty("Use Two Ranges");
+    m_properties["BackgroundSubtraction"] = m_blnManager->addProperty("Background Subtraction");
     m_properties["Normalise"] = m_blnManager->addProperty("Normalise to Lowest Temp");
 
-    m_properties["Range1"] = m_grpManager->addProperty("Range One");
-    m_properties["Range1"]->addSubProperty(m_properties["R1S"]);
-    m_properties["Range1"]->addSubProperty(m_properties["R1E"]);
-    m_properties["Range2"] = m_grpManager->addProperty("Range Two");
-    m_properties["Range2"]->addSubProperty(m_properties["R2S"]);
-    m_properties["Range2"]->addSubProperty(m_properties["R2E"]);
+    m_properties["IntegrationRange"] = m_grpManager->addProperty("Integration Range");
+    m_properties["IntegrationRange"]->addSubProperty(m_properties["IntegrationStart"]);
+    m_properties["IntegrationRange"]->addSubProperty(m_properties["IntegrationEnd"]);
+    m_properties["BackgroundRange"] = m_grpManager->addProperty("Background Range");
+    m_properties["BackgroundRange"]->addSubProperty(m_properties["BackgroundStart"]);
+    m_properties["BackgroundRange"]->addSubProperty(m_properties["BackgroundEnd"]);
 
-    m_elwTree->addProperty(m_properties["Range1"]);
-    m_elwTree->addProperty(m_properties["UseTwoRanges"]);
-    m_elwTree->addProperty(m_properties["Range2"]);
+    m_elwTree->addProperty(m_properties["IntegrationRange"]);
+    m_elwTree->addProperty(m_properties["BackgroundSubtraction"]);
+    m_elwTree->addProperty(m_properties["BackgroundRange"]);
     m_elwTree->addProperty(m_properties["Normalise"]);
 
     // Create Slice Plot Widget for Range Selection
@@ -69,33 +69,33 @@ namespace IDA
     m_plots["ElwinPlot"]->setCanvasBackground(Qt::white);
     // We always want one range selector... the second one can be controlled from
     // within the elwinTwoRanges(bool state) function
-    m_rangeSelectors["ElwinRange1"] = new MantidWidgets::RangeSelector(m_plots["ElwinPlot"]);
-    connect(m_rangeSelectors["ElwinRange1"], SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
-    connect(m_rangeSelectors["ElwinRange1"], SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
+    m_rangeSelectors["ElwinIntegrationRange"] = new MantidWidgets::RangeSelector(m_plots["ElwinPlot"]);
+    connect(m_rangeSelectors["ElwinIntegrationRange"], SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
+    connect(m_rangeSelectors["ElwinIntegrationRange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
     // create the second range
-    m_rangeSelectors["ElwinRange2"] = new MantidWidgets::RangeSelector(m_plots["ElwinPlot"]);
-    m_rangeSelectors["ElwinRange2"]->setColour(Qt::darkGreen); // dark green for background
-    connect(m_rangeSelectors["ElwinRange1"], SIGNAL(rangeChanged(double, double)), m_rangeSelectors["ElwinRange2"], SLOT(setRange(double, double)));
-    connect(m_rangeSelectors["ElwinRange2"], SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
-    connect(m_rangeSelectors["ElwinRange2"], SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
-    m_rangeSelectors["ElwinRange2"]->setRange(m_rangeSelectors["ElwinRange1"]->getRange());
+    m_rangeSelectors["ElwinBackgroundRange"] = new MantidWidgets::RangeSelector(m_plots["ElwinPlot"]);
+    m_rangeSelectors["ElwinBackgroundRange"]->setColour(Qt::darkGreen); // dark green for background
+    connect(m_rangeSelectors["ElwinIntegrationRange"], SIGNAL(rangeChanged(double, double)), m_rangeSelectors["ElwinBackgroundRange"], SLOT(setRange(double, double)));
+    connect(m_rangeSelectors["ElwinBackgroundRange"], SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
+    connect(m_rangeSelectors["ElwinBackgroundRange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
+    m_rangeSelectors["ElwinBackgroundRange"]->setRange(m_rangeSelectors["ElwinIntegrationRange"]->getRange());
     // Refresh the plot window
     replot("ElwinPlot");
 
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
     connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(twoRanges(QtProperty*, bool)));
-    twoRanges(m_properties["UseTwoRanges"], false);
+    twoRanges(m_properties["BackgroundSubtraction"], false);
 
     connect(uiForm().elwin_inputFile, SIGNAL(filesFound()), this, SLOT(newInputFiles()));
     connect(uiForm().elwin_cbPreviewFile, SIGNAL(currentIndexChanged(int)), this, SLOT(newPreviewFileSelected(int)));
     connect(uiForm().elwin_spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
 
     // Set any default values
-    m_dblManager->setValue(m_properties["R1S"], -0.02);
-    m_dblManager->setValue(m_properties["R1E"], 0.02);
+    m_dblManager->setValue(m_properties["IntegrationStart"], -0.02);
+    m_dblManager->setValue(m_properties["IntegrationEnd"], 0.02);
 
-    m_dblManager->setValue(m_properties["R2S"], -0.24);
-    m_dblManager->setValue(m_properties["R2E"], -0.22);
+    m_dblManager->setValue(m_properties["BackgroundStart"], -0.24);
+    m_dblManager->setValue(m_properties["BackgroundEnd"], -0.22);
   }
 
   void Elwin::run()
@@ -152,13 +152,13 @@ namespace IDA
 
     elwinMultAlg->setProperty("SampleEnvironmentLogName", uiForm().leLogName->text().toStdString());
 
-    elwinMultAlg->setProperty("Range1Start", m_dblManager->value(m_properties["R1S"]));
-    elwinMultAlg->setProperty("Range1End", m_dblManager->value(m_properties["R1E"]));
+    elwinMultAlg->setProperty("Range1Start", m_dblManager->value(m_properties["IntegrationStart"]));
+    elwinMultAlg->setProperty("Range1End", m_dblManager->value(m_properties["IntegrationEnd"]));
 
-    if(m_blnManager->value(m_properties["UseTwoRanges"]))
+    if(m_blnManager->value(m_properties["BackgroundSubtraction"]))
     {
-      elwinMultAlg->setProperty("Range2Start", boost::lexical_cast<std::string>(m_dblManager->value(m_properties["R1S"])));
-      elwinMultAlg->setProperty("Range2End", boost::lexical_cast<std::string>(m_dblManager->value(m_properties["R1E"])));
+      elwinMultAlg->setProperty("Range2Start", boost::lexical_cast<std::string>(m_dblManager->value(m_properties["IntegrationStart"])));
+      elwinMultAlg->setProperty("Range2End", boost::lexical_cast<std::string>(m_dblManager->value(m_properties["IntegrationEnd"])));
     }
 
     if(m_blnManager->value(m_properties["Normalise"]))
@@ -218,13 +218,13 @@ namespace IDA
 
     uiv.checkMWRunFilesIsValid("Input", uiForm().elwin_inputFile);
 
-    auto rangeOne = std::make_pair(m_dblManager->value(m_properties["R1S"]), m_dblManager->value(m_properties["R1E"]));
+    auto rangeOne = std::make_pair(m_dblManager->value(m_properties["IntegrationStart"]), m_dblManager->value(m_properties["IntegrationEnd"]));
     uiv.checkValidRange("Range One", rangeOne);
 
-    bool useTwoRanges = m_blnManager->value(m_properties["UseTwoRanges"]);
+    bool useTwoRanges = m_blnManager->value(m_properties["BackgroundSubtraction"]);
     if( useTwoRanges )
     {
-      auto rangeTwo = std::make_pair(m_dblManager->value(m_properties["R2S"]), m_dblManager->value(m_properties["R2E"]));
+      auto rangeTwo = std::make_pair(m_dblManager->value(m_properties["BackgroundStart"]), m_dblManager->value(m_properties["BackgroundEnd"]));
       uiv.checkValidRange("Range Two", rangeTwo);
       uiv.checkRangesDontOverlap(rangeOne, rangeTwo);
     }
@@ -254,11 +254,11 @@ namespace IDA
       if(params.size() > 0)
       {
         double res = params[0];
-        m_dblManager->setValue(m_properties["R1S"], -res);
-        m_dblManager->setValue(m_properties["R1E"], res);
+        m_dblManager->setValue(m_properties["IntegrationStart"], -res);
+        m_dblManager->setValue(m_properties["IntegrationEnd"], res);
 
-        m_dblManager->setValue(m_properties["R2S"], -10*res);
-        m_dblManager->setValue(m_properties["R2E"], -9*res);
+        m_dblManager->setValue(m_properties["BackgroundStart"], -10*res);
+        m_dblManager->setValue(m_properties["BackgroundEnd"], -9*res);
       }
     }
   }
@@ -365,7 +365,7 @@ namespace IDA
     try
     {
       const std::pair<double, double> range = getCurveRange("ElwinDataCurve");
-      m_rangeSelectors["ElwinRange1"]->setRange(range.first, range.second);
+      m_rangeSelectors["ElwinIntegrationRange"]->setRange(range.first, range.second);
       replot("ElwinPlot");
     }
     catch(std::invalid_argument & exc)
@@ -376,42 +376,42 @@ namespace IDA
 
   void Elwin::twoRanges(QtProperty* prop, bool val)
   {
-    if(prop == m_properties["UseTwoRanges"])
-      m_rangeSelectors["ElwinRange2"]->setVisible(val);
+    if(prop == m_properties["BackgroundSubtraction"])
+      m_rangeSelectors["ElwinBackgroundRange"]->setVisible(val);
   }
 
   void Elwin::minChanged(double val)
   {
     MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
-    if ( from == m_rangeSelectors["ElwinRange1"] )
+    if ( from == m_rangeSelectors["ElwinIntegrationRange"] )
     {
-      m_dblManager->setValue(m_properties["R1S"], val);
+      m_dblManager->setValue(m_properties["IntegrationStart"], val);
     }
-    else if ( from == m_rangeSelectors["ElwinRange2"] )
+    else if ( from == m_rangeSelectors["ElwinBackgroundRange"] )
     {
-      m_dblManager->setValue(m_properties["R2S"], val);
+      m_dblManager->setValue(m_properties["BackgroundStart"], val);
     }
   }
 
   void Elwin::maxChanged(double val)
   {
     MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
-    if ( from == m_rangeSelectors["ElwinRange1"] )
+    if ( from == m_rangeSelectors["ElwinIntegrationRange"] )
     {
-      m_dblManager->setValue(m_properties["R1E"], val);
+      m_dblManager->setValue(m_properties["IntegrationEnd"], val);
     }
-    else if ( from == m_rangeSelectors["ElwinRange2"] )
+    else if ( from == m_rangeSelectors["ElwinBackgroundRange"] )
     {
-      m_dblManager->setValue(m_properties["R2E"], val);
+      m_dblManager->setValue(m_properties["BackgroundEnd"], val);
     }
   }
 
   void Elwin::updateRS(QtProperty* prop, double val)
   {
-    if ( prop == m_properties["R1S"] ) m_rangeSelectors["ElwinRange1"]->setMinimum(val);
-    else if ( prop == m_properties["R1E"] ) m_rangeSelectors["ElwinRange1"]->setMaximum(val);
-    else if ( prop == m_properties["R2S"] ) m_rangeSelectors["ElwinRange2"]->setMinimum(val);
-    else if ( prop == m_properties["R2E"] ) m_rangeSelectors["ElwinRange2"]->setMaximum(val);
+    if ( prop == m_properties["IntegrationStart"] ) m_rangeSelectors["ElwinIntegrationRange"]->setMinimum(val);
+    else if ( prop == m_properties["IntegrationEnd"] ) m_rangeSelectors["ElwinIntegrationRange"]->setMaximum(val);
+    else if ( prop == m_properties["BackgroundStart"] ) m_rangeSelectors["ElwinBackgroundRange"]->setMinimum(val);
+    else if ( prop == m_properties["BackgroundEnd"] ) m_rangeSelectors["ElwinBackgroundRange"]->setMaximum(val);
   }
 } // namespace IDA
 } // namespace CustomInterfaces
