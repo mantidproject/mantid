@@ -15,19 +15,19 @@ parameters (configuration). The parameters are taken from a list of
 data in every workspace is expected to have four columns, with each
 row specifying one plugin...
 
-Usage
------
-
-**Example**
-
-.. testcode:: SaveTomoConfig
-
-    # TODO
-
-Output:
-
-.. testoutput:: SaveTomoConfig
-
-   # TODO
-
+#Usage
+#-----
+#
+#**Example**
+#
+#.. testcode:: SaveTomoConfig
+#
+#    # TODO
+#
+#Output:
+#
+#.. testoutput:: SaveTomoConfig
+#
+#   # TODO
+#
 .. categories::
