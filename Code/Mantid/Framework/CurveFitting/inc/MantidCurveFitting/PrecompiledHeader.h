@@ -5,4 +5,4 @@
 #include <string>
 #include <set>
 
-#endif //MANTID_CURVEFITTING_PRECOMPILEDHEADER_H_
+#endif // MANTID_CURVEFITTING_PRECOMPILEDHEADER_H_

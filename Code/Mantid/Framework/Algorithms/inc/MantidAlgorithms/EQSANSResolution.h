@@ -6,17 +6,16 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/TOFSANSResolution.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /**
 
     Computes the resolution on EQSANS data
     Required Properties:
     <UL>
     <LI> InputWorkspace    - The data in units of wavelength. </LI>
-    <LI> OutputWorkspace   - The workspace in which to store the result histogram. </LI>
+    <LI> OutputWorkspace   - The workspace in which to store the result
+   histogram. </LI>
     </UL>
 
     Optional Properties:
@@ -34,8 +33,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport EQSANSResolution : public Algorithms::TOFSANSResolution
-{
+class DLLExport EQSANSResolution : public Algorithms::TOFSANSResolution {
 public:
   /// (Empty) Constructor
   EQSANSResolution() : Algorithms::TOFSANSResolution() {}
@@ -43,8 +41,10 @@ public:
   virtual ~EQSANSResolution() {}
   /// Algorithm's name
   virtual const std::string name() const { return "EQSANSResolution"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Calculate the Q resolution for EQSANS data.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Calculate the Q resolution for EQSANS data.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -52,14 +52,12 @@ public:
   virtual const std::string category() const { return "SANS"; }
 
 private:
-  
   /// Initialisation code
-  //void init();
+  // void init();
   /// Execution code
-  //void exec();
+  // void exec();
   /// Return the TOF resolution for a particular wavelength
   virtual double getTOFResolution(double wl);
-
 };
 
 } // namespace Algorithms

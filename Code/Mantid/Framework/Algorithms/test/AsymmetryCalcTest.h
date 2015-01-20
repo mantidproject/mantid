@@ -76,6 +76,7 @@ public:
 
     //Use a range as cxxtest seems to complain about the accuracy
     TS_ASSERT_DELTA(outputWS->dataY(0)[100],0.2965,0.005);
+    TS_ASSERT( !outputWS->isHistogramData() );
   }
 
   void test_single_spectra()
@@ -99,6 +100,7 @@ public:
       TS_ASSERT_EQUALS( outputWS->readY(0)[0], -0.5 ); // == (1 - 3)/(1 + 3)
       TS_ASSERT_EQUALS( outputWS->readY(0)[6], -0.5 ); // == (1 - 3)/(1 + 3)
       TS_ASSERT_EQUALS( outputWS->readY(0)[9], -0.5 ); // == (1 - 3)/(1 + 3)
+      TS_ASSERT( !outputWS->isHistogramData() );
   }
 
   void test_yUnitLabel()

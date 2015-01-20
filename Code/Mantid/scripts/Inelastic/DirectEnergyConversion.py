@@ -627,7 +627,10 @@ class DirectEnergyConversion(object):
         prop_man.log("======== Run diagnose for sample run ===========================",'notice');
         masking = self.diagnose(prop_man.wb_run,prop_man.mask_run,
                                 second_white=None,print_diag_results=True)
-        header = "*** Diagnostics processed workspace with {0:d} spectra and masked {1:d} bad spectra"
+        if prop_man.use_hard_mask_only:
+            header = "*** Hard mask file applied to workspace with {0:d} spectra masked {1:d} spectra"
+        else:
+            header = "*** Diagnostics processed workspace with {0:d} spectra and masked {1:d} bad spectra"
 
 
         # diagnose absolute units:
@@ -654,7 +657,8 @@ class DirectEnergyConversion(object):
          #if Reducer.save_and_reuse_masks and not masks_done:
          #    SaveMask(InputWorkspace=masking,OutputFile = mask_file_name,GroupedDetectors=True)
       else:
-         masking=self.spectra_masks
+          header = '*** Using stored mask file for workspace with  {0} spectra and {1} masked spectra'
+          masking=self.spectra_masks
  
       # estimate and report the number of failing detectors
       failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)
@@ -915,10 +919,10 @@ class DirectEnergyConversion(object):
                "--------> Monovan Integration range : min={1}, max={2} (meV)\n"\
                "--------> Summed:  {3} spectra with total signal: {4} and error: {5}\n"\
                "--------> Dropped: {6} zero spectra\n"\
-               "--------> Using  mBarn/sR*fu normalization factor = {7} resulting in:"\
+               "--------> Using  mBarn/sR*fu normalization factor = {7} resulting in:\n"\
                "--------> Abs norm factors: LibISIS: {8}\n"\
                "--------> Abs norm factors: Sigma^2: {9}\n"\
-               "--------> Abs norm factors: Poisson: {10}"\
+               "--------> Abs norm factors: Poisson: {10}\n"\
                "--------> Abs norm factors: TGP    : {11}\n"\
                .format(deltaE_wkspaceName,minmax[0],minmax[1],nhist,sum(signal),sum(error),izerc,scale_factor,
                           norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
@@ -1132,7 +1136,6 @@ class DirectEnergyConversion(object):
             pass
 
         prop_man =self.prop_man 
-        formats = prop_man.save_format
          
         save_file,ext = os.path.splitext(save_file)
         if len(ext)>1:

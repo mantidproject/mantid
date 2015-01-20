@@ -7,12 +7,14 @@ namespace Crystal * PeakHKLOffsets.h
 *      Author: ruth
 */
 /**
-Shows integer offsets  for each peak of their h,k and l values, along with max offset and run number and detector number
+Shows integer offsets  for each peak of their h,k and l values, along with max
+offset and run number and detector number
 
 @author Ruth Mikkelson, SNS, ORNL
 @date 05/13/2013
 
-Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 
@@ -35,47 +37,34 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef SHOWPEAKHKLOFFSETS_H_
 #define SHOWPEAKHKLOFFSETS_H_
 
-
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-  namespace Crystal
-  {
-    class DLLExport ShowPeakHKLOffsets  : public API::Algorithm
-    {
-    public:
-      ShowPeakHKLOffsets();
-      virtual ~ShowPeakHKLOffsets();
+namespace Mantid {
+namespace Crystal {
+class DLLExport ShowPeakHKLOffsets : public API::Algorithm {
+public:
+  ShowPeakHKLOffsets();
+  virtual ~ShowPeakHKLOffsets();
 
-      virtual const std::string name() const
-      {
-        return "ShowPeakHKLOffsets";
-      };
+  virtual const std::string name() const { return "ShowPeakHKLOffsets"; };
 
-      ///Summary of algorithms purpose
-      virtual const std::string summary() const {return " Histograms, scatter plots, etc. of this data could be useful to detect calibration problems";}
-
-      virtual  int version() const
-      {
-        return 1;
-      };
-
-      const std::string category() const
-      { return "Crystal";
-      };
-
-    private:
-
-
-      void init();
-
-      void exec();
-    };
-
-
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return " Histograms, scatter plots, etc. of this data could be useful to "
+           "detect calibration problems";
   }
+
+  virtual int version() const { return 1; };
+
+  const std::string category() const { return "Crystal"; };
+
+private:
+  void init();
+
+  void exec();
+};
+}
 }
 
 #endif /* ShowPeakHKLOffsets_H_ */
