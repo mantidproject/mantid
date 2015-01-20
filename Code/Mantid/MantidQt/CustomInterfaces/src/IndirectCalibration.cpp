@@ -207,7 +207,7 @@ namespace CustomInterfaces
       QString scale = m_uiForm.cal_leIntensityScaleMultiplier->text();
       if(scale.isEmpty())
         scale = "1.0";
-      calibrationAlg->setProperty("ScaleFactor", scale.toStdString());
+      calibrationAlg->setProperty("ScaleFactor", scale.toDouble());
     }
 
     m_batchAlgoRunner->addAlgorithm(calibrationAlg);
@@ -259,11 +259,18 @@ namespace CustomInterfaces
       resAlg->setProperty("RebinParam", rebinString.toStdString());
       resAlg->setProperty("DetectorRange", resDetectorRange.toStdString());
       resAlg->setProperty("BackgroundRange", background.toStdString());
-      resAlg->setProperty("ScaleFactor", m_uiForm.cal_leIntensityScaleMultiplier->text().toDouble());
       resAlg->setProperty("Smooth", m_uiForm.cal_ckSmooth->isChecked());
       resAlg->setProperty("Verbose", m_uiForm.cal_ckVerbose->isChecked());
       resAlg->setProperty("Plot", m_uiForm.cal_ckPlotResult->isChecked());
       resAlg->setProperty("Save", m_uiForm.cal_ckSave->isChecked());
+
+      if(m_uiForm.cal_ckResScale->isChecked())
+      {
+        QString scale = m_uiForm.cal_leResScale->text();
+        if(scale.isEmpty())
+          scale = "1.0";
+        resAlg->setProperty("ScaleFactor", scale.toDouble());
+      }
 
       m_batchAlgoRunner->addAlgorithm(resAlg);
 

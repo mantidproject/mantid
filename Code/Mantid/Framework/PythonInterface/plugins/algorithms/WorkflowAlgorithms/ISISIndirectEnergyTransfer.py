@@ -255,6 +255,12 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self._plot_type = self.getPropertyValue('Plot')
         self._output_ws = self.getPropertyValue('OutputWorkspace')
 
+        # Disable sum files if there is only one file
+        if len(self._data_files) == 1:
+            if self._sum_files:
+                logger.warning('SumFiles disabled when only one input file is provided.')
+            self._sum_files = False
+
         # Get the IPF filename
         self._ipf_filename = os.path.join(config['instrumentDefinition.directory'],
                                           self._instrument_name + '_' + self._analyser + '_' + self._reflection + '_Parameters.xml')

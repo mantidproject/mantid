@@ -10,33 +10,37 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
 
+
     def summary(self):
         return 'Creates a calibration workspace from a White-Beam Vanadium run.'
 
+
     def PyInit(self):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
-                             doc='Comma separated list of input files')
-
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
-                             doc='Output workspace for calibration data')
+                             doc='Comma separated list of input files.')
 
         self.declareProperty(IntArrayProperty(name='DetectorRange', values=[0, 1],
                              validator=IntArrayMandatoryValidator()),
-                             doc='Range of detectors')
+                             doc='Range of detectors.')
 
         self.declareProperty(FloatArrayProperty(name='PeakRange', values=[0.0, 100.0],
                              validator=FloatArrayMandatoryValidator()),
-                             doc='')
+                             doc='Time of flight range over the peak.')
 
         self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0.0, 1000.0],
                              validator=FloatArrayMandatoryValidator()),
-                             doc='')
+                             doc='Time of flight range over the background.')
 
         self.declareProperty(name='ScaleFactor', defaultValue=1.0,
-                             doc='')
+                             doc='Factor by which to scale the result.')
 
-        self.declareProperty(name='Plot', defaultValue=False, doc='Plot the calibration data')
+        self.declareProperty(name='Plot', defaultValue=False,
+                             doc='Plot the calibration data as a spectra plot.')
+
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
+                             direction=Direction.Output),
+                             doc='Output workspace for calibration data.')
+
 
     def validateInputs(self):
         """
@@ -49,6 +53,7 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
         issues['BackgroundRange'] = self._validate_range('BackgroundRange')
 
         return issues
+
 
     def _validate_range(self, property_name):
         """
@@ -67,12 +72,11 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
 
         return None
 
+
     def PyExec(self):
         from mantid import logger
-        from IndirectCommon import StartTime, EndTime
 
         self._setup()
-        StartTime('CreateCalibrationWorkspace')
 
         runs = []
         for in_file in self._input_files:
@@ -97,6 +101,7 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
         CalculateFlatBackground(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name,
                 StartX=self._back_range[0], EndX=self._back_range[1], Mode='Mean')
 
+        # TODO: Replace
         from inelastic_indirect_reduction_steps import NormaliseToUnityStep
         ntu = NormaliseToUnityStep()
         ntu.set_factor(self._intensity_scale)
@@ -113,7 +118,6 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
         self.setProperty('OutputWorkspace', self._out_ws)
         self._post_process()
 
-        EndTime('CreateCalibrationWorkspace')
 
     def _setup(self):
         """
@@ -133,6 +137,7 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
 
         self._plot = self.getProperty('Plot').value
 
+
     def _post_process(self):
         """
         Handles adding logs and plotting.
@@ -149,6 +154,7 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
         if self._plot:
             from mantidplot import plotBin
             plotBin(mtd[self._out_ws], 0)
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CreateCalibrationWorkspace)
