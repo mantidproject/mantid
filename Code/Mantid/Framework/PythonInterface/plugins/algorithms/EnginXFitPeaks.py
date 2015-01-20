@@ -21,7 +21,7 @@ class EnginXFitPeaks(PythonAlgorithm):
     	self.declareProperty("WorkspaceIndex", 0,
     		"Index of the spectra to fit peaks in")
 
-    	self.declareProperty(FloatArrayProperty("ExpectedPeaks", [0.6, 1.9]),
+    	self.declareProperty(FloatArrayProperty("ExpectedPeaks", (self._getDefaultPeaks())),
     		"A list of dSpacing values to be translated into TOF to find expected peaks.")
     	
     	self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",action=FileAction.OptionalLoad,extensions = [".csv"]),"Load from file a list of dSpacing values to be translated into TOF to find expected peaks.")
@@ -124,7 +124,7 @@ class EnginXFitPeaks(PythonAlgorithm):
                 expectedPeaksD = sorted(exPeakArray)
         else:
             expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
-            if self._isDefault((self.getProperty('ExpectedPeaks').value), ([0.6, 1.9])):         
+            if self._isDefault((self.getProperty('ExpectedPeaks').value), (self._getDefaultPeaks())):         
                 print "using defaults"          
             else:
                 print "using manually entered numbers"  
@@ -136,9 +136,14 @@ class EnginXFitPeaks(PythonAlgorithm):
             while x < len(defaultPeaks):
                 if enteredPeaks[x] != defaultPeaks[x]:
                     return False
-                x+=1
-        return True
+                else:
+                    x+=1
+                    return True
+                     
 
+    def _getDefaultPeaks(self):
+        defaultPeak = [3.1243, 2.7057, 1.9132,1.6316, 1.5621, 1.3529, 1.2415,1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, 0.8556, 0.8252, 0.8158, 0.7811]
+        return defaultPeak
 
     def _fitDSpacingToTOF(self, fittedPeaksTable):
     	""" Fits a linear background to the dSpacing <-> TOF relationship and returns fitted difc
