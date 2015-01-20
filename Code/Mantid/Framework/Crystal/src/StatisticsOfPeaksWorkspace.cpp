@@ -152,6 +152,7 @@ void StatisticsOfPeaksWorkspace::exec() {
 /** Perform SortHKL on the output workspaces
  *
  * @param ws :: any PeaksWorkspace
+ * @runName :: string to put in statistics table
  */
 void StatisticsOfPeaksWorkspace::doSortHKL(Mantid::API::Workspace_sptr ws, std::string runName){
   std::string pointGroup = getPropertyValue("PointGroup");
