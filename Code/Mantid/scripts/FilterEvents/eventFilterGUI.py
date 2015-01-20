@@ -75,7 +75,7 @@ class MyPopErrorMsg(QWidget):
 class MainWindow(QtGui.QMainWindow): 
     """ Class of Main Window (top)
 
-    Move to ui.setupUI
+    Copy to ui.setupUI
 
     # Version 3.0 + Import for Ui_MainWindow.py
         from MplFigureCanvas import Qt4MplCanvas 
@@ -852,6 +852,10 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.label_timeAvgValue.hide() 
         self.ui.label_freq.hide()
         self.ui.label_freqValue.hide()
+
+        # Hide 'log name' above the graphic view
+        self.ui.label_logname.hide()
+        self.ui.label_lognamevalue.hide()
 
         # Set dataws to class variable
         self._dataWS = dataws 
