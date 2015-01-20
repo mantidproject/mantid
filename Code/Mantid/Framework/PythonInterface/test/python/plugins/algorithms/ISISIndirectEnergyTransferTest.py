@@ -16,6 +16,9 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                                         Reflection='002',
                                         SpectraRange=[3, 53])
 
+        self.assertTrue(isinstance(ws, WorkspaceGroup), 'Result workspace should be a workspace group.')
+        self.assertEqual(ws.getNames()[0], 'IRS26176_graphite002_red')
+
 
     def test_instrument_validation_failure(self):
         """

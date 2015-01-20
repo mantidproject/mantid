@@ -9,14 +9,15 @@
 Description
 -----------
 
-Performs a reduction for an inelastic indirect geometry instrument.
+Performs a reduction from raw time of flight to energy transfer for an inelastic
+indirect geometry instrument at ISIS.
 
 Usage
 -----
 
 .. include:: ../usagedata-note.txt
 
-**Example - IRIS energy conversion:**
+**Example - IRIS energy conversion**
 
 .. testcode:: ExIRISReduction
 
@@ -25,8 +26,7 @@ Usage
       Instrument='IRIS',
       Analyser='graphite',
       Reflection='002',
-      DetectorRange=[3, 53],
-      SaveFormats=['nxs'])
+      SpectraRange=[3, 53])
 
    reduction_workspace_names = mtd['IndirectReductions'].getNames()
 
