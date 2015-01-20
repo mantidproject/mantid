@@ -133,12 +133,10 @@ void SortHKL::exec() {
   int equivalent = 0;
   for (int i = 0; i < NumberPeaks; i++) {
     V3D hkl1 = peaks[i].getHKL();
-    //std::string bank1 = peaks[i].getBankName();
     bool found = false;
     for (int j = i + 1; j < NumberPeaks; j++) {
       V3D hkl2 = peaks[j].getHKL();
-      //std::string bank2 = peaks[j].getBankName();
-      if (pointGroup->isEquivalent(hkl1, hkl2) ) { //&& bank1.compare(bank2) == 0) {
+      if (pointGroup->isEquivalent(hkl1, hkl2) ) {
         peaks[j].setHKL(hkl1);
         found = true;
       }
@@ -154,24 +152,27 @@ void SortHKL::exec() {
   newrow << unique << peaks[0].getWavelength()
          << peaks[NumberPeaks - 1].getWavelength();
 
-  API::IAlgorithm_sptr predictAlg = createChildAlgorithm("PredictPeaks");
-  predictAlg->setProperty("InputWorkspace", InPeaksW);
-  predictAlg->setPropertyValue("OutputWorkspace", "predictedPeaks");
-  predictAlg->setProperty("WavelengthMin", peaks[0].getWavelength());
-  predictAlg->setProperty("WavelengthMax",
-                          peaks[NumberPeaks - 1].getWavelength());
-  // Sort by dspacing
-  criteria.push_back(std::pair<std::string, bool>("dspacing", true));
-  peaksW->sort(criteria);
-  predictAlg->setProperty("MinDSpacing", peaks[0].getDSpacing());
-  predictAlg->executeAsChildAlg();
-  PeaksWorkspace_sptr predictedWksp =
-      predictAlg->getProperty("OutputWorkspace");
-  int predictedPeaks = predictedWksp->getNumberPeaks();
+  int predictedPeaks = 0;
+  if (name.substr(0,4) != "bank")
+  {
+    API::IAlgorithm_sptr predictAlg = createChildAlgorithm("PredictPeaks");
+    predictAlg->setProperty("InputWorkspace", InPeaksW);
+    predictAlg->setPropertyValue("OutputWorkspace", "predictedPeaks");
+    predictAlg->setProperty("WavelengthMin", peaks[0].getWavelength());
+    predictAlg->setProperty("WavelengthMax",
+                            peaks[NumberPeaks - 1].getWavelength());
+    // Sort by dspacing
+    criteria.push_back(std::pair<std::string, bool>("dspacing", true));
+    peaksW->sort(criteria);
+    predictAlg->setProperty("MinDSpacing", peaks[0].getDSpacing());
+    predictAlg->executeAsChildAlg();
+    PeaksWorkspace_sptr predictedWksp =
+        predictAlg->getProperty("OutputWorkspace");
+    predictedPeaks = predictedWksp->getNumberPeaks();
+  }
 
   criteria.clear();
-  // Sort by bank and then HKL
-  // criteria.push_back( std::pair<std::string, bool>("BankName", true) );
+  // Sort by HKL
   criteria.push_back(std::pair<std::string, bool>("H", true));
   criteria.push_back(std::pair<std::string, bool>("K", true));
   criteria.push_back(std::pair<std::string, bool>("L", true));
@@ -189,18 +190,15 @@ void SortHKL::exec() {
   std::vector<int> peakno;
   double rSum = 0, rpSum = 0, f2Sum = 0;
   V3D hkl1;
-  //std::string bank1;
   for (int i = 1; i < NumberPeaks; i++) {
     hkl1 = peaks[i - 1].getHKL();
-    //bank1 = peaks[i - 1].getBankName();
     if (i == 1) {
       peakno.push_back(0);
       data.push_back(peaks[i - 1].getIntensity());
       sig2.push_back(std::pow(peaks[i - 1].getSigmaIntensity(), 2));
     }
     V3D hkl2 = peaks[i].getHKL();
-    //std::string bank2 = peaks[i].getBankName();
-    if (hkl1 == hkl2) { // && bank1.compare(bank2) == 0) {
+    if (hkl1 == hkl2) {
       peakno.push_back(i);
       data.push_back(peaks[i].getIntensity());
       sig2.push_back(std::pow(peaks[i].getSigmaIntensity(), 2));
@@ -249,7 +247,6 @@ void SortHKL::exec() {
       data.clear();
       sig2.clear();
       hkl1 = hkl2;
-      //bank1 = bank2;
       peakno.push_back(i);
       data.push_back(peaks[i].getIntensity());
       sig2.push_back(std::pow(peaks[i].getSigmaIntensity(), 2));

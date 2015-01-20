@@ -193,10 +193,7 @@ void PredictPeaks::exec() {
   // We must sort the peaks
     std::vector<std::pair<std::string, bool>> criteria;
     criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
-    criteria.push_back(std::pair<std::string, bool>("BankName", true));
-    criteria.push_back(std::pair<std::string, bool>("h", true));
-    criteria.push_back(std::pair<std::string, bool>("k", true));
-    criteria.push_back(std::pair<std::string, bool>("l", true));
+    //criteria.push_back(std::pair<std::string, bool>("BankName", true));
     peaksWS->sort(criteria);
     inWS = peaksWS;
     for (int i = 0; i < static_cast<int>(peaksWS->getNumberPeaks()); ++i) {
@@ -299,7 +296,7 @@ void PredictPeaks::exec() {
       wlMin = 0.0;
       wlMax = 1e10;
 
-      PRAGMA_OMP(parallel for schedule(dynamic, 1) ) //PARALLEL_FOR1(HKLPeaksWorkspace)
+      PRAGMA_OMP(parallel for schedule(dynamic, 1) )
       for (int i = 0; i < static_cast<int>(HKLPeaksWorkspace->getNumberPeaks());
            ++i) {
         PARALLEL_START_INTERUPT_REGION
@@ -357,7 +354,7 @@ void PredictPeaks::exec() {
       Progress prog(this, 0.0, 1.0, numHKLs);
       prog.setNotifyStep(0.01);
 
-      PRAGMA_OMP(parallel for schedule(dynamic, 1) ) //PARALLEL_FOR1(pw)
+      PRAGMA_OMP(parallel for schedule(dynamic, 1) )
       for (int h = (int)hklMin[0]; h <= (int)hklMax[0]; h++) {
         PARALLEL_START_INTERUPT_REGION
         for (int k = (int)hklMin[1]; k <= (int)hklMax[1]; k++) {
