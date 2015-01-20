@@ -49,9 +49,7 @@ public:
   enum ToolType {Zoom,PixelSelect,TubeSelect,PeakSelect,PeakErase, DrawEllipse, DrawRectangle, EditShape};
 
   InstrumentWindowPickTab(InstrumentWindow* instrWindow);
-  void updatePick(int detid);
   bool canUpdateTouchedDetector()const;
-  void mouseLeftInstrmentDisplay();
   void initSurface();
   void saveSettings(QSettings& settings) const;
   void loadSettings(const QSettings& settings);
@@ -138,6 +136,7 @@ public:
   ComponentInfoController(InstrumentWindowPickTab *tab, InstrumentActor* instrActor, QTextEdit* infoDisplay);
 public slots:
   void displayInfo(size_t pickID);
+  void clear();
 private:
   QString displayDetectorInfo(Mantid::detid_t detid);
   QString displayNonDetectorInfo(Mantid::Geometry::ComponentID compID);

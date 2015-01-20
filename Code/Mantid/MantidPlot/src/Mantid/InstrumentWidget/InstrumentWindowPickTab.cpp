@@ -357,15 +357,6 @@ void InstrumentWindowPickTab::integrateTimeBins()
 }
 
 /**
- * Update the tab to display info for a new detector.
- * @param detid :: ID of the new detector.
- */
-void InstrumentWindowPickTab::updatePick(int detid)
-{
-  //updateSelectionInfo(detid); // Also calls updatePlot
-}
-
-/**
  * Set the selection type according to which tool button is checked.
  */
 void InstrumentWindowPickTab::setSelectionType()
@@ -535,17 +526,6 @@ void InstrumentWindowPickTab::changedIntegrationRange(double,double)
     {
         updatePlotMultipleDetectors();
     }
-  }
-}
-
-/**
- * Clears the miniplot if mouse leaves the instrument display and Peak selection isn't on.
- */
-void InstrumentWindowPickTab::mouseLeftInstrmentDisplay()
-{
-  if (m_selectionType < ErasePeak)
-  {
-    updatePick(-1);
   }
 }
 
@@ -756,7 +736,7 @@ void ComponentInfoController::displayInfo(size_t pickID)
   }
   else
   {
-    m_selectionInfoDisplay->clear();
+    clear();
   }
   // display info about peak overlays
   text += getPeakOverlayInfo();
@@ -767,7 +747,7 @@ void ComponentInfoController::displayInfo(size_t pickID)
   }
   else
   {
-      m_selectionInfoDisplay->clear();
+      clear();
   }
 }
 
@@ -779,7 +759,7 @@ QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid)
 {
   if ( m_instrWindowBlocked ) 
   {
-    m_selectionInfoDisplay->clear();
+    clear();
     return "";
   }
 
@@ -913,6 +893,14 @@ QString ComponentInfoController::getPeakOverlayInfo()
         text += "Peaks:\n" + overlays.join("\n") + "\n";
     }
     return text;
+}
+
+/**
+ * Clear the information display.
+ */
+void ComponentInfoController::clear()
+{
+  m_selectionInfoDisplay->clear();
 }
 
 //=====================================================================================//
