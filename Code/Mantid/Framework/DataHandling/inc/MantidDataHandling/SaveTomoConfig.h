@@ -67,7 +67,7 @@ private:
   void exec();
 
   // Number of info entries to read from the input table workspaces
-  int m_pluginInfoCount;
+  unsigned int m_pluginInfoCount;
 };
 
 } // namespace DataHandling
