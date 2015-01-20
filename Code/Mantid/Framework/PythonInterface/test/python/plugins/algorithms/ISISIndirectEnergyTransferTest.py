@@ -45,20 +45,5 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                                             GroupingMethod='Workspace')
 
 
-    def test_group_file_validation_failure(self):
-        """
-        Tests that validation fails when Map File is selected as the GroupingMethod
-        but no file is provided.
-        """
-
-        with self.assertRaises(RuntimeError):
-            ws = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.raw'],
-                                            Instrument='IRIS',
-                                            Analyser='graphite',
-                                            Reflection='002',
-                                            DetectorRange=[3, 53],
-                                            GroupingMethod='Map File')
-
-
 if __name__ == '__main__':
     unittest.main()

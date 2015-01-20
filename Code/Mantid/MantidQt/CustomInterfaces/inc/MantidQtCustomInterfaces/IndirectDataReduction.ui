@@ -204,13 +204,6 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QCheckBox" name="ckLoadLogs">
-                    <property name="text">
-                     <string>Load Logs</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
                    <widget class="QCheckBox" name="ckUseCalib">
                     <property name="toolTip">
                      <string>Use calibration file to adjust for detector efficiency.</string>
@@ -255,7 +248,7 @@
                   </property>
                   <item>
                    <property name="text">
-                    <string>Default</string>
+                    <string>IPF</string>
                    </property>
                   </item>
                   <item>
@@ -1057,6 +1050,11 @@ p, li { white-space: pre-wrap; }
               <item>
                <property name="text">
                 <string>Contour</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Both</string>
                </property>
               </item>
              </widget>
@@ -2841,7 +2839,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>cbInst</tabstop>
   <tabstop>ind_runFiles</tabstop>
   <tabstop>ind_calibFile</tabstop>
-  <tabstop>ckLoadLogs</tabstop>
   <tabstop>ind_mapFile</tabstop>
   <tabstop>ckDetailedBalance</tabstop>
   <tabstop>leDetailedBalance</tabstop>

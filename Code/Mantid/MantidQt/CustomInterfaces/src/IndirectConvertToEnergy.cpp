@@ -95,7 +95,7 @@ namespace CustomInterfaces
   {
     using MantidQt::API::BatchAlgorithmRunner;
 
-    IAlgorithm_sptr reductionAlg = AlgorithmManager::Instance().create("InelasticIndirectReduction", -1);
+    IAlgorithm_sptr reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
     reductionAlg->initialize();
     BatchAlgorithmRunner::AlgorithmRuntimeProps reductionRuntimeProps;
 
@@ -107,7 +107,6 @@ namespace CustomInterfaces
     reductionAlg->setProperty("InputFiles", files.toStdString());
 
     reductionAlg->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
-    reductionAlg->setProperty("LoadLogs", m_uiForm.ckLoadLogs->isChecked());
 
     // If using a calibration file, load it
     if(m_uiForm.ckUseCalib->isChecked())
@@ -129,7 +128,7 @@ namespace CustomInterfaces
     std::vector<long> detectorRange;
     detectorRange.push_back(m_uiForm.leSpectraMin->text().toInt());
     detectorRange.push_back(m_uiForm.leSpectraMax->text().toInt());
-    reductionAlg->setProperty("DetectorRange", detectorRange);
+    reductionAlg->setProperty("SpectraRange", detectorRange);
 
     if(m_bgRemoval)
     {
@@ -157,32 +156,22 @@ namespace CustomInterfaces
     if(m_uiForm.ckScaleMultiplier->isChecked())
       reductionAlg->setProperty("ScaleFactor", m_uiForm.leScaleMultiplier->text().toDouble());
 
-    if(m_uiForm.cbMappingOptions->currentText() != "Default")
-    {
-      QString grouping = createMapFile(m_uiForm.cbMappingOptions->currentText());
-      reductionAlg->setProperty("Grouping", grouping.toStdString());
-    }
+    QPair<QString, QString> grouping = createMapFile(m_uiForm.cbMappingOptions->currentText());
+    reductionAlg->setProperty("GroupingMethod", grouping.first.toStdString());
 
-    reductionAlg->setProperty("Fold", m_uiForm.ckFold->isChecked());
-    reductionAlg->setProperty("SaveCM1", m_uiForm.ckCm1Units->isChecked());
-    reductionAlg->setProperty("SaveFormats", getSaveFormats());
+    if(grouping.first == "Workspace")
+      reductionRuntimeProps["GroupingWorkspace"] = grouping.second.toStdString();
+    else if(grouping.second == "File")
+      reductionAlg->setProperty("MapFile", grouping.second.toStdString());
 
+    reductionAlg->setProperty("FoldMultipleFrames", m_uiForm.ckFold->isChecked());
+    reductionAlg->setProperty("Plot", m_uiForm.ind_cbPlotOutput->currentText().toStdString());
     reductionAlg->setProperty("OutputWorkspace", "IndirectEnergyTransfer_Workspaces");
 
-    // Plot Output options
-    switch(m_uiForm.ind_cbPlotOutput->currentIndex())
-    {
-      case 0: // "None"
-        break;
-      case 1: // "Spectra"
-        reductionAlg->setProperty("Plot", "spectra");
-        break;
-      case 2: // "Contour"
-        reductionAlg->setProperty("Plot", "contour");
-        break;
-    }
-
     m_batchAlgoRunner->addAlgorithm(reductionAlg, reductionRuntimeProps);
+
+    // TODO: Convert to wavenumber and save
+
     m_batchAlgoRunner->executeBatchAsync();
 
     // Set output workspace name for Python export
@@ -426,17 +415,11 @@ namespace CustomInterfaces
   void IndirectConvertToEnergy::mappingOptionSelected(const QString& groupType)
   {
     if ( groupType == "File" )
-    {
       m_uiForm.swMapping->setCurrentIndex(0);
-    }
     else if ( groupType == "Groups" )
-    {
       m_uiForm.swMapping->setCurrentIndex(1);
-    }
-    else if ( groupType == "All" || groupType == "Individual" || groupType == "Default" )
-    {
+    else
       m_uiForm.swMapping->setCurrentIndex(2);
-    }
   }
 
   /**
@@ -533,10 +516,10 @@ namespace CustomInterfaces
 
   /**
    * This function creates the mapping/grouping file for the data analysis.
-   * @param groupType :: Type of grouping (All, Group, Indiviual)
+   * @param groupType :: Type of grouping (All, Group, Individual)
    * @return path to mapping file, or an empty string if file could not be created.
    */
-  QString IndirectConvertToEnergy::createMapFile(const QString& groupType)
+  QPair<QString, QString> IndirectConvertToEnergy::createMapFile(const QString& groupType)
   {
     QString specRange = m_uiForm.leSpectraMin->text() + "," + m_uiForm.leSpectraMax->text();
 
@@ -544,10 +527,9 @@ namespace CustomInterfaces
     {
       QString groupFile = m_uiForm.ind_mapFile->getFirstFilename();
       if(groupFile == "")
-      {
         emit showMessageBox("You must enter a path to the .map file.");
-      }
-      return groupFile;
+
+      return qMakePair(QString("File"), groupFile);
     }
     else if(groupType == "Groups")
     {
@@ -563,12 +545,12 @@ namespace CustomInterfaces
 
       m_batchAlgoRunner->addAlgorithm(groupingAlg);
 
-      return groupWS;
+      return qMakePair(QString("Workspace"), groupWS);
     }
     else
     {
       // Catch All and Individual
-      return groupType;
+      return qMakePair(groupType, QString());
     }
   }
 

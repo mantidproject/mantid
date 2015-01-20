@@ -52,7 +52,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         # Spectra grouping options
         self.declareProperty(name='GroupingMethod', defaultValue='Individual',
-                             validator=StringListValidator(['Individual', 'All', 'Map File', 'Workspace', 'IPF']),
+                             validator=StringListValidator(['Individual', 'All', 'File', 'Workspace', 'IPF']),
                              doc='Method used to group spectra.')
         self.declareProperty(WorkspaceProperty('GroupingWorkspace', '',
                              direction=Direction.Input, optional=PropertyMode.Optional),
@@ -220,13 +220,9 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         # Validate grouping method
         grouping_method = self.getPropertyValue('GroupingMethod')
         grouping_ws = _str_or_none(self.getPropertyValue('GroupingWorkspace'))
-        grouping_map_file = _str_or_none(self.getPropertyValue('MapFile'))
 
         if grouping_method == 'Workspace' and grouping_ws is None:
             issues['GroupingWorkspace'] = 'Must select a grouping workspace for current GroupingWorkspace'
-
-        if grouping_method == 'Map File' and grouping_map_file is None:
-            issues['MapFile'] = 'Must provide a map file for current GroupingMethod'
 
         return issues
 
@@ -268,7 +264,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         if self._grouping_method != 'Workspace' and self._grouping_ws is not None:
             logger.warning('GroupingWorkspace will be ignored by selected GroupingMethod')
 
-        if self._grouping_method != 'Map File' and self._grouping_map_file is not None:
+        if self._grouping_method != 'File' and self._grouping_map_file is not None:
             logger.warning('MapFile will be ignored by selected GroupingMethod')
 
         # The list of workspaces being processed
@@ -519,7 +515,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             try:
                 grouping_method = instrument.getStringParameter('Workflow.GroupingMethod')[0]
             except IndexError:
-                grouping_method = 'All'
+                grouping_method = 'Individual'
 
         else:
             # Otherwise use the value of GroupingPolicy
@@ -542,10 +538,13 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         elif grouping_method == 'File':
             # Get the filename for the grouping file
-            try:
-                grouping_file = instrument.getStringParameter('Workflow.GroupingFile')[0]
-            except IndexError:
-                raise RuntimeError('IPF requests grouping using file but does not specify a filename')
+            if self._grouping_map_file is not None:
+                grouping_file = self._grouping_map_file
+            else:
+                try:
+                    grouping_file = instrument.getStringParameter('Workflow.GroupingFile')[0]
+                except IndexError:
+                    raise RuntimeError('Cannot get grouping file from properties or IPF.')
 
             # If the file is not found assume it is in the grouping files directory
             if not os.path.isfile(grouping_file):
@@ -553,7 +552,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
             # If it is still not found just give up
             if not os.path.isfile(grouping_file):
-                raise RuntimeError('Cannot find grouping file %s' % grouping_file)
+                raise RuntimeError('Cannot find grouping file: %s' % (grouping_file))
 
             # Mask detectors if required
             if len(masked_detectors) > 0:
@@ -562,6 +561,11 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             # Apply the grouping
             GroupDetectors(InputWorkspace=ws_name, OutputWorkspace=ws_name, Behaviour='Average',
                            MapFile=grouping_file)
+
+        elif grouping_method == 'Workspace':
+            # Apply the grouping
+            GroupDetectors(InputWorkspace=ws_name, OutputWorkspace=ws_name, Behaviour='Average',
+                           CopyGroupingFromWorkspace=self._grouping_ws)
 
         else:
             raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, ws_name))
@@ -697,7 +701,8 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             except RuntimeError:
                 logger.notice('Spectrum plotting canceled by user')
 
-        if self._plot_type == 'Contour' or self._plot_type == 'Both':
+        can_plot_contour = mtd[ws_name].getNumberHistograms() > 1
+        if (self._plot_type == 'Contour' or self._plot_type == 'Both') and can_plot_contour:
             from mantidplot import importMatrixWorkspace
             plot_workspace = importMatrixWorkspace(ws_name)
             plot_workspace.plotGraph2D()
