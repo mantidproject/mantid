@@ -9,10 +9,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/ScopedWorkspace.h"
 
-#include "QTreeWidgetItem"
-#include <boost/uuid/uuid_generators.hpp> 
-
-class OwnTreeWidgetItem;
+class QTreeWidgetItem;
 
 namespace MantidQt
 {
