@@ -138,8 +138,9 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 CorrectKiKf(InputWorkspace=ws_name, OutputWorkspace=ws_name, EMode='Indirect')
 
                 # Handle rebinning of regular data
-                if self._rebin_string is not None and not is_multi_frame:
-                    Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=self._rebin_string)
+                if self._rebin_string is not None:
+                    if not is_multi_frame:
+                        Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=self._rebin_string)
                 else:
                     try:
                         RebinToWorkspace(WorkspaceToRebin=ws_name, WorkspaceToMatch=ws_name, OutputWorkspace=ws_name)
