@@ -6,6 +6,12 @@
 #include <QInputDialog>
 
 using namespace Mantid::API;
+using MantidQt::API::BatchAlgorithmRunner;
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("IndirectConvertToEnergy");
+}
 
 namespace MantidQt
 {
@@ -64,8 +70,6 @@ namespace CustomInterfaces
     connect(m_uiForm.entryRebinWidth, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
     connect(m_uiForm.entryRebinHigh, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
 
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
-
     // Update UI widgets to show default values
     mappingOptionSelected(m_uiForm.cbMappingOptions->currentText());
     rebinEntryToggle(m_uiForm.rebin_ckDNR->isChecked());
@@ -93,7 +97,7 @@ namespace CustomInterfaces
 
   void IndirectConvertToEnergy::run()
   {
-    using MantidQt::API::BatchAlgorithmRunner;
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
     IAlgorithm_sptr reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
     reductionAlg->initialize();
@@ -172,13 +176,7 @@ namespace CustomInterfaces
     reductionAlg->setProperty("OutputWorkspace", "IndirectEnergyTransfer_Workspaces");
 
     m_batchAlgoRunner->addAlgorithm(reductionAlg, reductionRuntimeProps);
-
-    // TODO: Save
-
     m_batchAlgoRunner->executeBatchAsync();
-
-    // Set output workspace name for Python export
-    m_pythonExportWsName = "IndirectInergyTransfer_Workspaces";
   }
 
   /**
@@ -194,15 +192,124 @@ namespace CustomInterfaces
       return;
 
     WorkspaceGroup_sptr energyTransferOutputGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IndirectEnergyTransfer_Workspaces");
+    std::vector<std::string> resultNames = energyTransferOutputGroup->getNames();
     if(energyTransferOutputGroup->size() == 0)
       return;
-
-    // Set workspace for Python export as the first result workspace
-    m_pythonExportWsName = energyTransferOutputGroup->getNames()[0];
 
     // Ungroup the output workspace
     energyTransferOutputGroup->removeAll();
     AnalysisDataService::Instance().remove("IndirectEnergyTransfer_Workspaces");
+
+    // Set workspace for Python export as the first result workspace
+    m_pythonExportWsName = resultNames[0];
+
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+
+    // Set up save algorithms
+    for(auto it = resultNames.begin(); it != resultNames.end(); ++it)
+    {
+      std::string wsName = *it;
+
+      if(m_uiForm.save_ckNexus->isChecked())
+      {
+        IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexusProcessed");
+        saveAlg->initialize();
+        saveAlg->setProperty("InputWorkspace", wsName);
+        saveAlg->setProperty("Filename", wsName + ".nxs");
+        m_batchAlgoRunner->addAlgorithm(saveAlg);
+      }
+
+      if(m_uiForm.save_ckSPE->isChecked())
+      {
+        IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveSPE");
+        saveAlg->initialize();
+        saveAlg->setProperty("InputWorkspace", wsName);
+        saveAlg->setProperty("Filename", wsName + ".spe");
+        m_batchAlgoRunner->addAlgorithm(saveAlg);
+      }
+
+      if(m_uiForm.save_ckNxSPE->isChecked())
+      {
+        IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNXSPE");
+        saveAlg->initialize();
+        saveAlg->setProperty("InputWorkspace", wsName);
+        saveAlg->setProperty("Filename", wsName + ".nxspe");
+        m_batchAlgoRunner->addAlgorithm(saveAlg);
+      }
+
+      if(m_uiForm.save_ckAscii->isChecked())
+      {
+        IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveAscii", 1);
+        saveAlg->initialize();
+        saveAlg->setProperty("InputWorkspace", wsName);
+        saveAlg->setProperty("Filename", wsName + ".dat");
+        m_batchAlgoRunner->addAlgorithm(saveAlg);
+      }
+
+      if(m_uiForm.save_ckAclimax->isChecked())
+      {
+        // Rebin
+        IAlgorithm_sptr rebinAlg = AlgorithmManager::Instance().create("Rebin");
+        rebinAlg->initialize();
+        rebinAlg->setProperty("InputWorkspace", wsName);
+
+        if(m_uiForm.ckCm1Units->isChecked())
+          rebinAlg->setProperty("Params", "24, -0.005, 4000");
+        else
+          rebinAlg->setProperty("Params", "3, -0.05, 500");
+
+        rebinAlg->setProperty("OutputWorkspace", wsName + "_aclimax");
+        m_batchAlgoRunner->addAlgorithm(rebinAlg);
+
+        BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromRebin;
+
+        // Save
+        IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveAscii");
+        saveAlg->initialize();
+        saveAlg->setProperty("InputWorkspace", wsName);
+        saveAlg->setProperty("Filename", wsName + "_aclimax.dat");
+        inputFromRebin["InputWorkspace"] = wsName + "_aclimax";
+        m_batchAlgoRunner->addAlgorithm(saveAlg, inputFromRebin);
+
+        // Remove rebinned workspace
+        IAlgorithm_sptr deleteAlg = AlgorithmManager::Instance().create("DeleteWorkspace");
+        deleteAlg->initialize();
+        inputFromRebin.clear();
+        inputFromRebin["Workspace"] = wsName + "_aclimax";
+        m_batchAlgoRunner->addAlgorithm(deleteAlg, inputFromRebin);
+      }
+
+      if(m_uiForm.save_ckDaveGrp->isChecked())
+      {
+        // Rebin
+        IAlgorithm_sptr convertAlg = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
+        convertAlg->initialize();
+        convertAlg->setProperty("InputWorkspace", wsName);
+        convertAlg->setProperty("Target", "ElasticQ");
+        convertAlg->setProperty("EMode", "Indirect");
+        convertAlg->setProperty("OutputWorkspace", wsName + "_elastic_q");
+        m_batchAlgoRunner->addAlgorithm(convertAlg);
+
+        BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromConvert;
+
+        // Save
+        IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveDaveGrp");
+        saveAlg->initialize();
+        saveAlg->setProperty("InputWorkspace", wsName);
+        saveAlg->setProperty("Filename", wsName + ".grp");
+        inputFromConvert["InputWorkspace"] = wsName + "_elastic_q";
+        m_batchAlgoRunner->addAlgorithm(saveAlg, inputFromConvert);
+
+        // Remove converted workspace
+        IAlgorithm_sptr deleteAlg = AlgorithmManager::Instance().create("DeleteWorkspace");
+        deleteAlg->initialize();
+        inputFromConvert.clear();
+        inputFromConvert["Workspace"] = wsName + "_elastic_q";
+        m_batchAlgoRunner->addAlgorithm(deleteAlg, inputFromConvert);
+      }
+    }
+
+    m_batchAlgoRunner->executeBatchAsync();
   }
 
   bool IndirectConvertToEnergy::validate()
@@ -555,32 +662,6 @@ namespace CustomInterfaces
       // Catch All and Individual
       return qMakePair(groupType, QString());
     }
-  }
-
-  /**
-   * Converts the checkbox selection to a comma delimited list of save formats for the
-   * InelasticIndirectReduction algorithm.
-   *
-   * @return A vector of save formats
-   */
-  std::vector<std::string> IndirectConvertToEnergy::getSaveFormats()
-  {
-    std::vector<std::string> fileFormats;
-
-    if ( m_uiForm.save_ckNexus->isChecked() )
-      fileFormats.push_back("nxs");
-    if ( m_uiForm.save_ckSPE->isChecked() )
-      fileFormats.push_back("spe");
-    if ( m_uiForm.save_ckNxSPE->isChecked() )
-      fileFormats.push_back("nxspe");
-    if ( m_uiForm.save_ckAscii->isChecked() )
-      fileFormats.push_back("ascii");
-    if ( m_uiForm.save_ckAclimax->isChecked() )
-      fileFormats.push_back("aclimax");
-    if ( m_uiForm.save_ckDaveGrp->isChecked() )
-      fileFormats.push_back("davegrp");
-
-    return fileFormats;
   }
 
   /**
