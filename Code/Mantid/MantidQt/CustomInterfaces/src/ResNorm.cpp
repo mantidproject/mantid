@@ -202,7 +202,7 @@ namespace MantidQt
     /**
      * Sets a new preview spectrum for the mini plot.
      *
-     * @parm value Spectrum index
+     * @param value Spectrum index
      */
     void ResNorm::previewSpecChanged(int value)
     {
