@@ -47,7 +47,7 @@ namespace MantidQt
      * File change history is stored at: <https://github.com/mantidproject/mantid>.
      * Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class UserInputValidator
+    class DLLExport UserInputValidator
     {
     public:
       /// Default Constructor.
