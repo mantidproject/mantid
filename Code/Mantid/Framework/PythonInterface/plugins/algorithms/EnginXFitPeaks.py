@@ -123,22 +123,7 @@ class EnginXFitPeaks(PythonAlgorithm):
                 expectedPeaksD = sorted(exPeakArray)
         else:
             expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
-            if self._isDefault((self.getProperty('ExpectedPeaks').value), (self._getDefaultPeaks())):         
-                print "using defaults"          
-            else:
-                print "using manually entered numbers"  
-        return expectedPeaksD
-
-    def _isDefault (self, enteredPeaks, defaultPeaks):
-        """ Checks if manually entered numbers or defaults are used """
-        x = 0  
-        if len(enteredPeaks) == len(defaultPeaks):
-            while x < len(defaultPeaks):
-                if enteredPeaks[x] != defaultPeaks[x]:
-                    return False
-                else:
-                    x+=1
-            return True                
+        return expectedPeaksD              
 
     def _getDefaultPeaks(self):
         """ Gets default peaks for EnginX algorithm. Values from CeO2 """
