@@ -64,7 +64,7 @@ void SCARFTomoReconstruction::exec() {
   } catch(std::runtime_error& e) {
     g_log.error() << "To run this algorithm you need to give a valid SCARF "
       "username and password." << std::endl;
-    throw e;
+    throw;
   }
   m_operation = getPropertyValue("Operation");
 
@@ -89,7 +89,7 @@ void SCARFTomoReconstruction::doCreate() {
     g_log.error() << "You did not specify the remote path to the NXTomo file "
       "which is required to create a new reconstruction job. Please provide "
       "a valid path on the SCARF cluster" << std::endl;
-    throw e;
+    throw;
   }
 
   try {
@@ -98,7 +98,7 @@ void SCARFTomoReconstruction::doCreate() {
     g_log.error() << "You did not specify a the path to the parameter file "
       "which is required to create a new reconstruction job. Please provide "
       "a valid tomography reconstruction parameter file" << std::endl;
-    throw e;
+    throw;
   }
 
   // TODO: create
@@ -113,7 +113,7 @@ void SCARFTomoReconstruction::doStatus() {
   } catch(std::runtime_error& e) {
     g_log.error() << "You did not specify a JobID which is required "
       "to query its status." << std::endl;
-    throw e;
+    throw;
   }
 
   progress(0, "Starting tomographic reconstruction job...");
@@ -129,7 +129,7 @@ void SCARFTomoReconstruction::doCancel() {
   } catch(std::runtime_error& e) {
     g_log.error() << "You did not specify a JobID which is required "
       "to cancel a job." << std::endl;
-    throw e;
+    throw;
   }
 
   progress(0, "Cancelling tomographic reconstruction job...");
