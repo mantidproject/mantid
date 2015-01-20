@@ -39,8 +39,6 @@ class EnginXFitPeaks(PythonAlgorithm):
         # so we can match them with fitted centres later.
         expectedPeaksTof = sorted(expectedPeaksTof)
         expectedPeaksD = self._readInExpectedPeaks()
-        #expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
-     
       
         # Find approximate peak positions, asumming Gaussian shapes
         findPeaksAlg = self.createChildAlgorithm('FindPeaks')
@@ -106,6 +104,7 @@ class EnginXFitPeaks(PythonAlgorithm):
         self.setProperty('Zero', zero)
 
     def _readInExpectedPeaks(self):
+        """ Reads in expected peaks from the .csv file """
         readInArray = []
         exPeakArray = []
         updateFileName = self.getPropertyValue("ExpectedPeaksFromFile")
@@ -131,6 +130,7 @@ class EnginXFitPeaks(PythonAlgorithm):
         return expectedPeaksD
 
     def _isDefault (self, enteredPeaks, defaultPeaks):
+        """ Checks if manually entered numbers or defaults are used """
         x = 0  
         if len(enteredPeaks) == len(defaultPeaks):
             while x < len(defaultPeaks):
@@ -138,11 +138,11 @@ class EnginXFitPeaks(PythonAlgorithm):
                     return False
                 else:
                     x+=1
-                    return True
-                     
+            return True                
 
     def _getDefaultPeaks(self):
-        defaultPeak = [3.1243, 2.7057, 1.9132,1.6316, 1.5621, 1.3529, 1.2415,1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, 0.8556, 0.8252, 0.8158, 0.7811]
+        """ Gets default peaks for EnginX algorithm. Values from CeO2 """
+        defaultPeak = [3.1243, 2.7057, 1.9132, 1.6316, 1.5621, 1.3529, 1.2415, 1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, 0.8556, 0.8252, 0.8158, 0.7811]   
         return defaultPeak
 
     def _fitDSpacingToTOF(self, fittedPeaksTable):
