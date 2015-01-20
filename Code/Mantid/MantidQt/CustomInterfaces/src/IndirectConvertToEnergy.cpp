@@ -156,6 +156,9 @@ namespace CustomInterfaces
     if(m_uiForm.ckScaleMultiplier->isChecked())
       reductionAlg->setProperty("ScaleFactor", m_uiForm.leScaleMultiplier->text().toDouble());
 
+    if(m_uiForm.ckCm1Units->isChecked())
+      reductionAlg->setProperty("UnitX", "DeltaE_inWavenumber");
+
     QPair<QString, QString> grouping = createMapFile(m_uiForm.cbMappingOptions->currentText());
     reductionAlg->setProperty("GroupingMethod", grouping.first.toStdString());
 
@@ -170,7 +173,7 @@ namespace CustomInterfaces
 
     m_batchAlgoRunner->addAlgorithm(reductionAlg, reductionRuntimeProps);
 
-    // TODO: Convert to wavenumber and save
+    // TODO: Save
 
     m_batchAlgoRunner->executeBatchAsync();
 

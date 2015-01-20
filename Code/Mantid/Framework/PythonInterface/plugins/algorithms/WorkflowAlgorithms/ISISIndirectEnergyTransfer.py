@@ -62,6 +62,8 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                              doc='Workspace containing spectra grouping.')
 
         # Output properties
+        self.declareProperty(name='UnitX', defaultValue='DeltaE', doc='X axis units for the result workspace.',
+                             validator=StringListValidator(['DeltaE', 'DeltaE_inWavenumber']))
         self.declareProperty(name='Plot', defaultValue='None', doc='Type of plot to output after reduction.',
                              validator=StringListValidator(['None', 'Spectra', 'Contour', 'Both']))
 
@@ -165,6 +167,11 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 # Group spectra
                 self._group_spectra(ws_name, masked_detectors)
 
+                # Convert to output units if needed
+                if self._output_x_units != 'DeltaE':
+                    ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name,
+                                 EMode='Indirect', Target=self._output_x_units)
+
             if self._fold_multiple_frames and is_multi_frame:
                 self._fold_chopped(c_ws_name)
 
@@ -252,6 +259,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self._grouping_ws = _str_or_none(self.getPropertyValue('GroupingWorkspace'))
         self._grouping_map_file = _str_or_none(self.getPropertyValue('MapFile'))
 
+        self._output_x_units = self.getPropertyValue('UnitX')
         self._plot_type = self.getPropertyValue('Plot')
         self._output_ws = self.getPropertyValue('OutputWorkspace')
 
