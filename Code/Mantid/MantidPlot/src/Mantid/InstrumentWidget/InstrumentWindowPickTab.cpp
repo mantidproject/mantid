@@ -717,7 +717,8 @@ void InstrumentWindowPickTab::savePlotToWorkspace()
 
 /**
  * Create and setup iteself.
- * @param parent :: QObject parent.
+ * @param tab :: QObject parent - the tab.
+ * @param instrActor :: A pointer to the InstrumentActor instance.
  * @param infoDisplay :: Widget on which to display the information.
  */
 ComponentInfoController::ComponentInfoController(InstrumentWindowPickTab *tab, InstrumentActor* instrActor, QTextEdit* infoDisplay):
@@ -937,7 +938,7 @@ DetectorPlotController::DetectorPlotController(InstrumentWindowPickTab *tab, Ins
 /**
  * Update the miniplot for a selected detector. The curve data depend on the 
  * plot type.
- * @param detid :: ID of detector to use to update the plot.
+ * @param pickID :: A pick ID of an instrument component.
  */
 void DetectorPlotController::setPlotData(size_t pickID)
 {
@@ -999,7 +1000,6 @@ void DetectorPlotController::setPlotData(QList<int> detIDs)
 
 /**
  * Update the miniplot for a selected detector.
- * @param detid :: ID of detector to use to update the plot.
  */
 void DetectorPlotController::updatePlot()
 {

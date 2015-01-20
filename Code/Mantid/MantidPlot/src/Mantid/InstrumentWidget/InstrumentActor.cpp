@@ -732,7 +732,7 @@ size_t InstrumentActor::pushBackDetid(Mantid::detid_t id)const
 /** Add a non-detector component ID to the pick list (m_nonDetIDs)
  *
  * @param actor :: ObjComponentActor for the component added.
- * @param id :: component ID to add.
+ * @param compID :: component ID to add.
  */
 void InstrumentActor::pushBackNonDetid(ObjComponentActor* actor, Mantid::Geometry::ComponentID compID)const
 {
