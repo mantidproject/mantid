@@ -1375,14 +1375,14 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
                                    true);
     }
 
-    // Make sure you have a non-NULL m_allBanksPulseTimes
-    if (m_allBanksPulseTimes == NULL) {
-      std::vector<DateAndTime> temp;
-      // m_allBanksPulseTimes = new BankPulseTimes(temp);
-      m_allBanksPulseTimes = boost::make_shared<BankPulseTimes>(temp);
-    }
-
     logs_loaded_correctly = true;
+  }
+
+  // Make sure you have a non-NULL m_allBanksPulseTimes
+  if (m_allBanksPulseTimes == NULL) {
+    std::vector<DateAndTime> temp;
+    // m_allBanksPulseTimes = new BankPulseTimes(temp);
+    m_allBanksPulseTimes = boost::make_shared<BankPulseTimes>(temp);
   }
 
   if (!instrument_loaded_correctly) {
