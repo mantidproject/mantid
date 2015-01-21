@@ -397,8 +397,12 @@ enable_precompiled_headers( inc/MantidAPI/PrecompiledHeader.h SRC_FILES )
 add_library ( API ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( API PROPERTIES OUTPUT_NAME MantidAPI 
-                                       COMPILE_DEFINITIONS IN_MANTID_API 
-                                       INSTALL_RPATH "@loader_path/../MacOS")
+                                       COMPILE_DEFINITIONS IN_MANTID_API )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( API PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif ()
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 

@@ -94,8 +94,11 @@ enable_precompiled_headers( inc/MantidDataObjects/PrecompiledHeader.h SRC_FILES 
 add_library ( DataObjects ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( DataObjects PROPERTIES OUTPUT_NAME MantidDataObjects 
-                                               COMPILE_DEFINITIONS IN_MANTID_DATAOBJECTS 
-                                               INSTALL_RPATH "@loader_path/../MacOS")
+                                               COMPILE_DEFINITIONS IN_MANTID_DATAOBJECTS )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( DataObjects PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif ()
                                                
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataObjects PROPERTY FOLDER "MantidFramework" )

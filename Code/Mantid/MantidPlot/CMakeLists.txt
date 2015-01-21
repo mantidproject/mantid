@@ -903,8 +903,10 @@ target_link_libraries ( MantidPlot
 )
 # Plugin dependencies
 add_dependencies( MantidPlot mantidqtpython )
-set_target_properties(MantidPlot PROPERTIES INSTALL_RPATH "@executable_path/")
 
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties(MantidPlot PROPERTIES INSTALL_RPATH "@executable_path/")
+endif ()
 
 ###########################################################################
 # Custom Info.plist file for OS X
@@ -1035,21 +1037,18 @@ foreach(PY_FILE ${IPY_FILES} )
 endforeach()
 install ( FILES ${CONFIG_RESET_SCRIPT} DESTINATION ${BIN_DIR} )
 
-#if ( APPLE )
-#  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in
-#                   ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake
-#                   @ONLY
-#  )
-#
-#  install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake )
-#endif ()
-message ("cmake install prefix: ${CMAKE_INSTALL_PREFIX}")
-install ( FILES  make_package.rb DESTINATION MantidPlot.app/ )
-configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixMavericksBundle.cmake.in
-                 ${CMAKE_CURRENT_BINARY_DIR}/FixMavericksBundle.cmake
-                 @ONLY
-               )
-install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixMavericksBundle.cmake )
+if ( APPLE )
+  if (OSX_VERSION VERSION_LESS 10.9)
+    configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake
+                   @ONLY )
 
-#install( CODE "execute_process(COMMAND \"chmod + x  \${CMAKE_INSTALL_PREFIX}/MantidPlot.app/make_package.rb\" )")
-
+    install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake )
+  else ()
+    install ( FILES  make_package.rb DESTINATION MantidPlot.app/ )
+    configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixMavericksBundle.cmake.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/FixMavericksBundle.cmake
+                   @ONLY )
+    install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixMavericksBundle.cmake )
+  endif ()
+endif ()
