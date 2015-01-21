@@ -35,8 +35,6 @@ PeaksWorkspaceWidget::PeaksWorkspaceWidget(
   connect(ui.btnRemove, SIGNAL(clicked()), this,
           SLOT(onRemoveWorkspaceClicked()));
   connect(ui.btnHide, SIGNAL(clicked()), this, SLOT(onToggleHideInPlot()));
-  connect(ui.tblPeaks, SIGNAL(clicked(const QModelIndex &)), this,
-          SLOT(onTableClicked(const QModelIndex &)));
 
   // Override the styles for the colour buttons, because with some inherited
   // styles, the button background colour will be hidden.
@@ -51,6 +49,10 @@ PeaksWorkspaceWidget::PeaksWorkspaceWidget(
 
   // Populate controls with data.
   populate();
+
+  QItemSelectionModel* selectionModel = ui.tblPeaks->selectionModel();
+  connect(selectionModel, SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(onCurrentChanged(QModelIndex, QModelIndex)));
+
 }
 
 std::set<QString> PeaksWorkspaceWidget::getShownColumns() {
@@ -180,16 +182,6 @@ void PeaksWorkspaceWidget::onToggleHideInPlot() {
 }
 
 /**
-Event handler for handling the user seleting a row in the table.
-@param index : Index selected.
-*/
-void PeaksWorkspaceWidget::onTableClicked(const QModelIndex &index) {
-  if (index.isValid()) {
-    emit zoomToPeak(this->m_ws, index.row());
-  }
-}
-
-/**
  * Handler for sorting of the peaks workspace.
  * @param columnToSortBy
  * @param sortAscending
@@ -232,19 +224,35 @@ void PeaksWorkspaceWidget::setShowBackground(bool showBackground) {
   ui.ckShowBackground->setChecked(showBackground);
 }
 
+/**
+ * @brief Handler for hiding/showing the peaks
+ * @param isHidden : true to hide
+ */
 void PeaksWorkspaceWidget::setHidden(bool isHidden) {
   ui.btnHide->setChecked(isHidden);
 }
 
+/**
+ * @brief Set the selected peak
+ * @param index : index to set as selected
+ */
 void PeaksWorkspaceWidget::setSelectedPeak(int index) {
   ui.tblPeaks->clearSelection();
   ui.tblPeaks->setCurrentIndex(ui.tblPeaks->model()->index(index, 0));
 }
 
+/**
+ * @brief PeaksWorkspaceWidget::getWSName
+ * @return return the workspace name
+ */
 std::string PeaksWorkspaceWidget::getWSName() const {
   return m_nameText.toStdString();
 }
 
+/**
+ * @brief PeaksWorkspaceWidget::workspaceUpdate
+ * @param ws : Workspace to redisplay with
+ */
 void PeaksWorkspaceWidget::workspaceUpdate(
     Mantid::API::IPeaksWorkspace_const_sptr ws) {
   // Only if we provide a peaks workspace for replacement.
@@ -256,6 +264,17 @@ void PeaksWorkspaceWidget::workspaceUpdate(
   // Update the display name of the workspace.
   m_nameText = m_ws->getName().c_str();
   this->ui.lblWorkspaceName->setText(m_nameText);
+}
+
+/**
+ * @brief PeaksWorkspaceWidget::onCurrentChanged
+ * @param index : Index of the table newly selected
+ */
+void PeaksWorkspaceWidget::onCurrentChanged(QModelIndex index, QModelIndex)
+{
+    if (index.isValid()) {
+      emit zoomToPeak(this->m_ws, index.row());
+    }
 }
 
 } // namespace
