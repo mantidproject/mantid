@@ -103,9 +103,6 @@ endif()
 # Mac-specific installation setup
 ###########################################################################
 
-set(CMAKE_MACOSX_RPATH 1)
-
-#set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR};${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR} )
 set ( CMAKE_INSTALL_PREFIX "" )
 set ( CPACK_PACKAGE_EXECUTABLES MantidPlot )
 set ( INBUNDLE MantidPlot.app/ )
@@ -123,18 +120,21 @@ set ( PVPLUGINS_DIR MantidPlot.app/pvplugins )
 set ( PVPLUGINS_SUBDIR pvplugins ) # Need to tidy these things up!
 
 if (OSX_VERSION VERSION_LESS 10.9)
+ set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR};${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR} )
  set ( PYQT4_PYTHONPATH /Library/Python/${PY_VER}/site-packages/PyQt4 )
  set ( SITEPACKAGES /Library/Python/${PY_VER}/site-packages )
 else()
+ set(CMAKE_MACOSX_RPATH 1)
  # Assume we are using homebrew for now
- # set Deployment target to 10.9
- #set ( CMAKE_OSX_SYSROOT /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk )
- #set ( CMAKE_OSX_ARCHITECTURES x86_64 )
- #set ( CMAKE_OSX_DEPLOYMENT_TARGET 10.9 )
- #set ( PYQT4_PYTHONPATH /usr/local/lib/python${PY_VER}/site-packages/PyQt4 )
- set  ( PYQT4_PYTHONPATH /usr/local/Cellar/pyqt/4.11.3/lib/python${PY_VER}/site-packages/PyQt4 )
- #set ( SITEPACKAGES /usr/local/lib/python${PY_VER}/site-packages )
- set  ( SITEPACKAGES /usr/local/Cellar/sip/4.16.5/lib/python${PY_VER}/site-packages )
+ # Follow symlinks
+ set ( PYQT4_PATH /usr/local/lib/python${PY_VER}/site-packages/PyQt4 )
+ execute_process(COMMAND readlink ${PYQT4_PATH} OUTPUT_VARIABLE PYQT4_SYMLINK)
+ set  ( PYQT4_PYTHONPATH {PYQT4_PATH}/${PYQT_SYMLINK} )
+
+ set ( SITEPACKAGES_PATH /usr/local/lib/python${PY_VER}/site-packages )
+ execute_process(COMMAND readlink ${SITEPACKAGES_PATH} OUTPUT_VARIABLE SITEPACKAGES_SYMLINK)
+ set  ( SITEPACKAGES ${SITEPACKAGES_PATH}/${SITEPACKAGES_SYMLINK} )
+
  # use homebrew OpenSSL package
  set ( OPENSSL_ROOT_DIR /usr/local/opt/openssl )
 endif()
@@ -162,19 +162,22 @@ endif ()
 
 install ( DIRECTORY ${PYQT4_PYTHONPATH}/uic DESTINATION ${BIN_DIR}/PyQt4 )
 
-# Python packages in Third_Party need copying to build directory and the final package
-#file ( GLOB THIRDPARTY_PYTHON_PACKAGES ${CMAKE_LIBRARY_PATH}/Python/* )
-#foreach ( PYPACKAGE ${THIRDPARTY_PYTHON_PACKAGES} )
-#  if ( IS_DIRECTORY ${PYPACKAGE} )
-#    install ( DIRECTORY ${PYPACKAGE} DESTINATION ${BIN_DIR} USE_SOURCE_PERMISSIONS )
-#  else()
-#    install ( FILES ${PYPACKAGE} DESTINATION ${BIN_DIR} )
-#  endif()
-#  file ( COPY ${PYPACKAGE} DESTINATION ${PROJECT_BINARY_DIR}/bin )
-#endforeach( PYPACKAGE )
+# done as part of packaging step in 10.9+ builds.
+if (OSX_VERSION VERSION_LESS 10.9)
+  # Python packages in Third_Party need copying to build directory and the final package
+  file ( GLOB THIRDPARTY_PYTHON_PACKAGES ${CMAKE_LIBRARY_PATH}/Python/* )
+  foreach ( PYPACKAGE ${THIRDPARTY_PYTHON_PACKAGES} )
+    if ( IS_DIRECTORY ${PYPACKAGE} )
+      install ( DIRECTORY ${PYPACKAGE} DESTINATION ${BIN_DIR} USE_SOURCE_PERMISSIONS )
+    else()
+      install ( FILES ${PYPACKAGE} DESTINATION ${BIN_DIR} )
+    endif()
+    file ( COPY ${PYPACKAGE} DESTINATION ${PROJECT_BINARY_DIR}/bin )
+  endforeach( PYPACKAGE )
+endif ()
 
-#install ( DIRECTORY ${QT_PLUGINS_DIR}/imageformats DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
-#install ( DIRECTORY ${QT_PLUGINS_DIR}/sqldrivers DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
+install ( DIRECTORY ${QT_PLUGINS_DIR}/imageformats DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
+install ( DIRECTORY ${QT_PLUGINS_DIR}/sqldrivers DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
 
 install ( FILES ${CMAKE_SOURCE_DIR}/Images/MantidPlot.icns
                 ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/qt.conf
