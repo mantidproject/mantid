@@ -126,13 +126,17 @@ if (OSX_VERSION VERSION_LESS 10.9)
 else()
  set(CMAKE_MACOSX_RPATH 1)
  # Assume we are using homebrew for now
- # Follow symlinks
+ # Follow symlinks so cmake copies the file
  set ( PYQT4_PATH /usr/local/lib/python${PY_VER}/site-packages/PyQt4 )
- execute_process(COMMAND readlink ${PYQT4_PATH} OUTPUT_VARIABLE PYQT4_SYMLINK)
- set  ( PYQT4_PYTHONPATH {PYQT4_PATH}/${PYQT_SYMLINK} )
+ execute_process(COMMAND readlink ${PYQT4_PATH}/Qt.so OUTPUT_VARIABLE PYQT4_SYMLINK_Qtso)
+ string(FIND ${PYQT4_SYMLINK_Qtso} "Qt.so" STOPPOS)
+ string(SUBSTRING ${PYQT4_SYMLINK_Qtso} 0 ${STOPPOS} PYQT4_SYMLINK)
+ set  ( PYQT4_PYTHONPATH ${PYQT4_PATH}/${PYQT4_SYMLINK} )
 
  set ( SITEPACKAGES_PATH /usr/local/lib/python${PY_VER}/site-packages )
- execute_process(COMMAND readlink ${SITEPACKAGES_PATH} OUTPUT_VARIABLE SITEPACKAGES_SYMLINK)
+ execute_process(COMMAND readlink ${SITEPACKAGES_PATH}/sip.so OUTPUT_VARIABLE SITEPACKAGES_SYMLINK_sipso)
+ string(FIND ${SITEPACKAGES_SYMLINK_sipso} "sip.so" STOPPOS)
+ string(SUBSTRING ${SITEPACKAGES_SYMLINK_sipso} 0 ${STOPPOS} SITEPACKAGES_SYMLINK)
  set  ( SITEPACKAGES ${SITEPACKAGES_PATH}/${SITEPACKAGES_SYMLINK} )
 
  # use homebrew OpenSSL package
