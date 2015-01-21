@@ -157,7 +157,6 @@ protected:
   /** @name Protected methods */
   //@{
   void setColor(int index,bool picking)const;
-  void showPickedDetector();
   void calcAssemblies(const Mantid::Geometry::IComponent * comp,const QRectF& compRect);
   void cacheAllAssemblies();
   void createPeakShapes(const QRect& viewport)const;
