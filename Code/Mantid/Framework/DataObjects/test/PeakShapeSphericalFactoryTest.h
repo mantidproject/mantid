@@ -1,6 +1,10 @@
 #ifndef MANTID_DATAOBJECTS_PEAKSHAPESPHERICALFACTORYTEST_H_
 #define MANTID_DATAOBJECTS_PEAKSHAPESPHERICALFACTORYTEST_H_
 
+#ifdef _WIN32
+#pragma warning(disable : 4251)
+#endif
+
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <jsoncpp/json/json.h>

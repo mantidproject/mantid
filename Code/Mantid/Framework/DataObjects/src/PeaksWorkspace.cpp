@@ -762,7 +762,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   file->openData(name);
 
   char *toNexus = new char[maxShapeJSONLength * np];
-  for (int ii = 0; ii < np; ii++) {
+  for (size_t ii = 0; ii < np; ii++) {
     std::string rowStr = shapes[ii];
     for (size_t ic = 0; ic < rowStr.size(); ic++)
       toNexus[ii * maxShapeJSONLength + ic] = rowStr[ic];

@@ -1,6 +1,10 @@
 #ifndef MANTID_DATAOBJECTS_PEAKSHAPESPHERICALTEST_H_
 #define MANTID_DATAOBJECTS_PEAKSHAPESPHERICALTEST_H_
 
+#ifdef _WIN32
+#pragma warning(disable : 4251)
+#endif
+
 #include <cxxtest/TestSuite.h>
 #include <jsoncpp/json/json.h>
 
@@ -108,6 +112,7 @@ public:
     Json::Reader reader;
     Json::Value output;
     TSM_ASSERT("Should parse as JSON", reader.parse(json, output));
+
 
     TS_ASSERT_EQUALS(algorithmName, output["algorithm_name"].asString());
     TS_ASSERT_EQUALS(algorithmVersion, output["algorithm_version"].asInt());
