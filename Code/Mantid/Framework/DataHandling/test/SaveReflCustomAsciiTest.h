@@ -221,11 +221,13 @@ public:
   }
 
 private:
-  void headingsTests(std::ifstream &in, std::string &fullline) {
+  void headingsTests(std::ifstream &in, std::string &fullline,
+                     bool propertiesLogs = false) {
     getline(in, fullline);
     getline(in, fullline);
   }
-  void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false) {
+  void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false,
+                bool createLogs = false) {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(1, 10);
     AnalysisDataService::Instance().addOrReplace(m_name, ws);
     // Check if any of X, Y or E should be zeroed to check for divide by zero or
