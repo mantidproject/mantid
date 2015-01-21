@@ -100,7 +100,7 @@ def AdvancedProperties(adv_prop_definition):
     def advanced_prop_wrapper(*args):
         properties = adv_prop_definition(*args)
         #print "in decorator: ",properties
-        host = args[0];
+        host = args[0]
         host._advanced_properties=properties
         host.iliad_prop.set_input_parameters(**properties)
         return properties

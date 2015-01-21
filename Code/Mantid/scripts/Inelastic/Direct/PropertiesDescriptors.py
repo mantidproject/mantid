@@ -174,9 +174,9 @@ class VanadiumRMM(PropDescriptor):
     def __get__(self,instance,owner=None):
         """ return rmm for vanadium """
 
-        return 50.9415;
+        return 50.9415
     def __set__(self,instance,value):
-        raise AttributeError("Can not change vanadium rmm");
+        raise AttributeError("Can not change vanadium rmm")
 #end VanadiumRMM
 #-----------------------------------------------------------------------------------------
 # END Descriptors for NonIDF_Properties class

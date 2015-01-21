@@ -272,7 +272,8 @@ class PropertyManager(NonIDF_Properties):
         """ Set input properties from a dictionary of parameters
 
         """
-        # if sum is in parameters one needs to set it first 
+        # if sum is in parameters one needs to set it first to interpret
+        #  
         if 'sum_runs' in kwargs :
             self.sum_runs = kwargs['sum_runs']
             del kwargs['sum_runs']
@@ -282,9 +283,9 @@ class PropertyManager(NonIDF_Properties):
 
 
         for par_name,value in kwargs.items() :
-            setattr(self,par_name,value);
+            setattr(self,par_name,value)
 
-        return self.getChangedProperties();
+        return self.getChangedProperties()
 
     def get_diagnostics_parameters(self):
         """ Return the dictionary of the properties used in diagnostics with their values defined in IDF

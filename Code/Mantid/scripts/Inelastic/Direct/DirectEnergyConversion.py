@@ -805,7 +805,7 @@ class DirectEnergyConversion(object):
 
             prop_man.log('*** Absolute correction factor(s): S^2: {0:10.4f}\n*** LibISIS: {1:10.4f} Poisson: {2:10.4f}  TGP: {3:10.4f} '\
                 .format(anf_LibISIS,anf_SS2,anf_Puas,anf_TGP),'notice')
-            absnorm_factor = anf_TGP;
+            absnorm_factor = anf_TGP
         #end
         prop_man.log('*** Using {0} value : {1} of absolute units correction factor (TGP)'.format(abs_norm_factor_is,absnorm_factor),'notice')
         prop_man.log('*******************************************************************************************','notice')
@@ -1144,25 +1144,25 @@ class DirectEnergyConversion(object):
          
         save_file,ext = os.path.splitext(save_file)
         if len(ext)>1:
-            formats.add(ext[1:]);
+            formats.add(ext[1:])
 
 
         for file_format  in formats:
             for case in common.switch(file_format):
                 if case('nxspe'):
-                   filename = save_file +'.nxspe';
+                   filename = save_file +'.nxspe'
                    SaveNXSPE(InputWorkspace=workspace,Filename= filename, KiOverKfScaling=prop_man.apply_kikf_correction,psi=prop_man.psi)
                    break
                 if case('spe'):
-                   filename = save_file +'.spe';
+                   filename = save_file +'.spe'
                    SaveSPE(InputWorkspace=workspace,Filename= filename)
                    break
                 if case('nxs'):
-                   filename = save_file +'.nxs';
+                   filename = save_file +'.nxs'
                    SaveNexus(InputWorkspace=workspace,Filename= filename)
                    break
                 if case(): # default, could also just omit condition or 'if True'
-                   prop_man.log("Unknown file format {0} requested to save results. No saving performed this format".format(file_format));
+                   prop_man.log("Unknown file format {0} requested to save results. No saving performed this format".format(file_format))
 
 
     @property 
