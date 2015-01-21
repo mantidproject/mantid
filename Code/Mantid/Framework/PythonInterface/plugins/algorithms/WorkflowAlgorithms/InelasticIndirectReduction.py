@@ -69,6 +69,10 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
 
         reducer.set_instrument_name(self._instrument)
         reducer.set_parameter_file(self._param_file)
+        try:
+            reducer.set_output_path(config["defaultsave.directory"])
+        except RuntimeError:
+            pass # Use default
 
         for data_file in self._data_files:
             reducer.append_data_file(data_file)

@@ -15,7 +15,12 @@ namespace Geometry {
 
 typedef std::complex<double> StructureFactor;
 
-/** BraggScatterer
+class BraggScatterer;
+
+typedef boost::shared_ptr<BraggScatterer> BraggScatterer_sptr;
+
+/**
+    @class BraggScatterer
 
     BraggScatterer is a general interface for representing scatterers
     in the unit cell of a periodic structure. Since there are many possibilities
@@ -60,11 +65,6 @@ typedef std::complex<double> StructureFactor;
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-
-class BraggScatterer;
-
-typedef boost::shared_ptr<BraggScatterer> BraggScatterer_sptr;
-
 class MANTID_GEOMETRY_DLL BraggScatterer : public Kernel::PropertyManager {
 public:
   BraggScatterer();
