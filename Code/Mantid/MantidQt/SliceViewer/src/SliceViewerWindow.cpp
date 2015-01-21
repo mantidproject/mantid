@@ -263,7 +263,7 @@ void SliceViewerWindow::showLineViewer(bool visible) {
 //------------------------------------------------------------------------------------------------
 /** Show or hide the LineViewer widget (on the right of the SliceViewer)
  *
- * @param visible :: True to show the LineViewer widget.
+ * @param visible :: True to show the PeaksViewer widget.
  */
 void SliceViewerWindow::showPeaksViewer(bool visible) {
   int peaksViewerWidth = m_peaksViewer->width();
@@ -279,8 +279,6 @@ void SliceViewerWindow::showPeaksViewer(bool visible) {
     // Expand the window to include the peaks viewer.
     int w = this->width() + peaksViewerWidth + 2;
     m_peaksViewer->setVisible(true);
-    // Give the peaksviewer the proxy presenter it needs.
-    m_peaksViewer->setPresenter(m_slicer->getPeaksPresenter());
 
     // If the right splitter was hidden, show it
     QList<int> sizes = m_splitter->sizes();
@@ -307,6 +305,8 @@ void SliceViewerWindow::showPeaksViewer(bool visible) {
     // Toggle the visibility of the liner
     m_peaksViewer->setVisible(visible);
   }
+  // Give the peaksviewer the proxy presenter it needs.
+  m_peaksViewer->setPresenter(m_slicer->getPeaksPresenter());
   this->setUpdatesEnabled(true);
 }
 
