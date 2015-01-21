@@ -5,19 +5,18 @@
 
 #include "MantidKernel/DllConfig.h"
 
-namespace Mantid
-{
-namespace Kernel
-{
+namespace Mantid {
+namespace Kernel {
 
 /** @class LibraryWrapper LibraryWrapper.h Kernel/LibraryWrapperr.h
 
  Class for wrapping a shared library.
- 
+
  @author ISIS, STFC
  @date 10/01/2008
- 
- Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+
+ Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -37,25 +36,24 @@ namespace Kernel
  File change history is stored at: <https://github.com/mantidproject/mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_KERNEL_DLL LibraryWrapper
-{
+class MANTID_KERNEL_DLL LibraryWrapper {
 public:
-	LibraryWrapper();
-	virtual ~LibraryWrapper();
+  LibraryWrapper();
+  virtual ~LibraryWrapper();
 
-	//Returns true if DLL is opened or already open
-	bool OpenLibrary(const std::string&);
+  // Returns true if DLL is opened or already open
+  bool OpenLibrary(const std::string &);
 
-	bool OpenLibrary(const std::string&, const std::string&);
+  bool OpenLibrary(const std::string &, const std::string &);
 
 private:
-	/** An untyped pointer to the loaded library.
-	 * This is created and deleted by this class.
-	 **/
-	void* module;
+  /** An untyped pointer to the loaded library.
+   * This is created and deleted by this class.
+   **/
+  void *module;
 };
 
 } // namespace Kernel
 } // namespace Mantid
 
-#endif //MANTID_KERNEL_LIBRARY_WRAPPER_H_
+#endif // MANTID_KERNEL_LIBRARY_WRAPPER_H_

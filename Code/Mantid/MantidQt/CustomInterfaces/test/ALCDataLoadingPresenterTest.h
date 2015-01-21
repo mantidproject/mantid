@@ -118,9 +118,9 @@ public:
     ON_CALL(*m_view, calculationType()).WillByDefault(Return("Differential"));
 
     EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size,3),
-                                            QwtDataY(0, 187.718, 1E-3),
-                                            QwtDataY(1, 148.618, 1E-3),
-                                            QwtDataY(2, 154.959, 1E-3))));
+                                            QwtDataY(0, 3.00349, 1E-3),
+                                            QwtDataY(1, 2.3779, 1E-3),
+                                            QwtDataY(2, 2.47935, 1E-3))));
 
     m_view->requestLoading();
   }

@@ -9,10 +9,8 @@
 #include <string>
 #include <vector>
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
@@ -23,7 +21,8 @@ class MatrixWorkspace;
     @author Roman Tolchenov, Tessella plc
     @date 05/07/2010
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -43,36 +42,38 @@ class MatrixWorkspace;
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL NumericAxis: public Axis
-{
+class MANTID_API_DLL NumericAxis : public Axis {
 public:
   /// Find the index of the value in the given set of edges
-  static size_t indexOfValue(const double value, const std::vector<double> & edges);
+  static size_t indexOfValue(const double value,
+                             const std::vector<double> &edges);
 
-  NumericAxis(const std::size_t& length);
-  NumericAxis(const std::vector<double>& centres);
-  virtual ~NumericAxis(){}
+  NumericAxis(const std::size_t &length);
+  NumericAxis(const std::vector<double> &centres);
+  virtual ~NumericAxis() {}
 
-  virtual Axis* clone(const MatrixWorkspace* const parentWorkspace);
-  virtual Axis* clone(const std::size_t length, const MatrixWorkspace* const parentWorkspace);
-  ///Is the axis numeric - always true for this class
-  virtual bool isNumeric() const{return true;}
-  virtual std::size_t length() const{return m_values.size();}
+  virtual Axis *clone(const MatrixWorkspace *const parentWorkspace);
+  virtual Axis *clone(const std::size_t length,
+                      const MatrixWorkspace *const parentWorkspace);
+  /// Is the axis numeric - always true for this class
+  virtual bool isNumeric() const { return true; }
+  virtual std::size_t length() const { return m_values.size(); }
   /// Get a value at the specified index
-  virtual double operator()(const std::size_t& index, const std::size_t& verticalIndex = 0) const;
+  virtual double operator()(const std::size_t &index,
+                            const std::size_t &verticalIndex = 0) const;
   /// Set the value at a specific index
-  virtual void setValue(const std::size_t& index, const double& value);
+  virtual void setValue(const std::size_t &index, const double &value);
   size_t indexOfValue(const double value) const;
-  virtual bool operator==(const Axis&) const;
-  std::string label(const std::size_t& index)const;
+  virtual bool operator==(const Axis &) const;
+  std::string label(const std::size_t &index) const;
   /// Create bin boundaries from the point values
   virtual std::vector<double> createBinBoundaries() const;
   /// Return a const reference to the values
-  const std::vector<double> & getValues() const;
-   /// returns min value defined on axis
-  double getMin()const{return m_values.front() ; }
-   /// returns max value defined on axis
-  double getMax()const{return m_values.back(); }
+  const std::vector<double> &getValues() const;
+  /// returns min value defined on axis
+  double getMin() const { return m_values.front(); }
+  /// returns max value defined on axis
+  double getMax() const { return m_values.back(); }
 
 protected:
   /// Default constructor
@@ -83,9 +84,10 @@ protected:
 
 private:
   /// Private, undefined copy assignment operator
-  const NumericAxis& operator=(const NumericAxis&);
+  const NumericAxis &operator=(const NumericAxis &);
 
-  /// A vector holding the edge values, computed from the distance between values
+  /// A vector holding the edge values, computed from the distance between
+  /// values
   std::vector<double> m_edges;
 };
 

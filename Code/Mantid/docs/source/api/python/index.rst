@@ -18,10 +18,19 @@ Reference
 
 Changes between version 1.0 and 2.0 of the API are described :ref:`here <pythonapi-changes>`.
 
+
 .. toctree::
    :hidden:
 
    changes
+
+Future plotting interface
+-------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   mantidplot.future.pyplot <mantidplot/future/pyplot/index>
 
 Techniques
 ----------

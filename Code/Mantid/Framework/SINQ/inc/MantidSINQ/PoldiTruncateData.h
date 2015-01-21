@@ -6,10 +6,8 @@
 
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
 
-namespace Mantid
-{
-namespace Poldi
-{
+namespace Mantid {
+namespace Poldi {
 
 /** PoldiTruncateData :
 
@@ -47,54 +45,57 @@ namespace Poldi
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-class DLLExport PoldiTruncateData  : public API::Algorithm
-{
+class DLLExport PoldiTruncateData : public API::Algorithm {
 public:
-    PoldiTruncateData();
-    virtual ~PoldiTruncateData() {}
-    
-    virtual const std::string name() const { return "PoldiTruncateData"; }
-    virtual int version() const;
-    virtual const std::string category() const;
-    virtual const std::string summary() const;
+  PoldiTruncateData();
+  virtual ~PoldiTruncateData() {}
 
-    size_t getCalculatedBinCount();
-    size_t getActualBinCount();
+  virtual const std::string name() const { return "PoldiTruncateData"; }
+  virtual int version() const;
+  virtual const std::string category() const;
+  virtual const std::string summary() const;
+
+  size_t getCalculatedBinCount();
+  size_t getActualBinCount();
 
 protected:
-    void setChopperFromWorkspace(API::MatrixWorkspace_const_sptr workspace);
-    void setChopper(PoldiAbstractChopper_sptr chopper);
+  void setChopperFromWorkspace(API::MatrixWorkspace_const_sptr workspace);
+  void setChopper(PoldiAbstractChopper_sptr chopper);
 
-    void setTimeBinWidthFromWorkspace(API::MatrixWorkspace_const_sptr workspace);
-    void setTimeBinWidth(double timeBinWidth);
-    void setActualBinCount(size_t actualBinCount);
+  void setTimeBinWidthFromWorkspace(API::MatrixWorkspace_const_sptr workspace);
+  void setTimeBinWidth(double timeBinWidth);
+  void setActualBinCount(size_t actualBinCount);
 
-    double getMaximumTimeValue(size_t calculatedBinCount);
-    double getMinimumExtraTimeValue(size_t calculatedBinCount);
+  double getMaximumTimeValue(size_t calculatedBinCount);
+  double getMinimumExtraTimeValue(size_t calculatedBinCount);
 
-    API::MatrixWorkspace_sptr getCroppedWorkspace(API::MatrixWorkspace_sptr workspace);
-    API::MatrixWorkspace_sptr getExtraCountsWorkspace(API::MatrixWorkspace_sptr workspace);
+  API::MatrixWorkspace_sptr
+  getCroppedWorkspace(API::MatrixWorkspace_sptr workspace);
+  API::MatrixWorkspace_sptr
+  getExtraCountsWorkspace(API::MatrixWorkspace_sptr workspace);
 
-    API::MatrixWorkspace_sptr getWorkspaceBelowX(API::MatrixWorkspace_sptr workspace, double x);
-    API::MatrixWorkspace_sptr getWorkspaceAboveX(API::MatrixWorkspace_sptr workspace, double x);
+  API::MatrixWorkspace_sptr
+  getWorkspaceBelowX(API::MatrixWorkspace_sptr workspace, double x);
+  API::MatrixWorkspace_sptr
+  getWorkspaceAboveX(API::MatrixWorkspace_sptr workspace, double x);
 
-    API::Algorithm_sptr getCropAlgorithmForWorkspace(API::MatrixWorkspace_sptr workspace);
-    API::MatrixWorkspace_sptr getOutputWorkspace(API::Algorithm_sptr algorithm);
+  API::Algorithm_sptr
+  getCropAlgorithmForWorkspace(API::MatrixWorkspace_sptr workspace);
+  API::MatrixWorkspace_sptr getOutputWorkspace(API::Algorithm_sptr algorithm);
 
-    API::MatrixWorkspace_sptr getSummedSpectra(API::MatrixWorkspace_sptr workspace);
+  API::MatrixWorkspace_sptr
+  getSummedSpectra(API::MatrixWorkspace_sptr workspace);
 
-    PoldiAbstractChopper_sptr m_chopper;
-    double m_timeBinWidth;
-    size_t m_actualBinCount;
+  PoldiAbstractChopper_sptr m_chopper;
+  double m_timeBinWidth;
+  size_t m_actualBinCount;
 
 private:
-    void init();
-    void exec();
-
+  void init();
+  void exec();
 };
-
 
 } // namespace SINQ
 } // namespace Mantid
 
-#endif  /* MANTID_SINQ_POLDITRUNCATEDATA_H_ */
+#endif /* MANTID_SINQ_POLDITRUNCATEDATA_H_ */

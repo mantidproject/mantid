@@ -7,56 +7,51 @@
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-namespace Mantid
-{
-namespace DataHandling
-{
-  // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(CreateSampleShape)
-  
+namespace Mantid {
+namespace DataHandling {
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(CreateSampleShape)
 
-  using namespace Mantid::DataHandling;
-  using namespace Mantid::API;
+using namespace Mantid::DataHandling;
+using namespace Mantid::API;
 
-  /**
-   * Initialize the algorithm
-   */
-  void CreateSampleShape::init()
-  {
-    using namespace Mantid::Kernel;
-    declareProperty(
-        new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
-        "The workspace with which to associate the sample ");
-    declareProperty("ShapeXML","", boost::make_shared<MandatoryValidator<std::string> >(),
-        "The XML that describes the shape" );
+/**
+ * Initialize the algorithm
+ */
+void CreateSampleShape::init() {
+  using namespace Mantid::Kernel;
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
+                                                         Direction::Input),
+                  "The workspace with which to associate the sample ");
+  declareProperty("ShapeXML", "",
+                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  "The XML that describes the shape");
+}
+
+/**
+ * Execute the algorithm
+ */
+void CreateSampleShape::exec() {
+  // Get the input workspace
+  MatrixWorkspace_sptr workspace = getProperty("InputWorkspace");
+  // Get the XML definition
+  std::string shapeXML = getProperty("ShapeXML");
+  Geometry::ShapeFactory sFactory;
+  // Create the object
+  boost::shared_ptr<Geometry::Object> shape_sptr =
+      sFactory.createShape(shapeXML);
+  // Check it's valid and attach it to the workspace sample
+  if (shape_sptr->hasValidShape()) {
+    workspace->mutableSample().setShape(*shape_sptr);
+  } else {
+    g_log.warning() << "Object has invalid shape. TopRule = "
+                    << shape_sptr->topRule() << ", number of surfaces = "
+                    << shape_sptr->getSurfacePtr().size() << "\n";
+    throw std::runtime_error(
+        "Shape object is invalid, cannot attach it to workspace.");
   }
-
-  /**
-   * Execute the algorithm
-   */
-  void CreateSampleShape::exec()
-  {
-    // Get the input workspace
-    MatrixWorkspace_sptr workspace = getProperty("InputWorkspace");
-    // Get the XML definition
-    std::string shapeXML = getProperty("ShapeXML");
-    Geometry::ShapeFactory sFactory;
-    // Create the object
-    boost::shared_ptr<Geometry::Object> shape_sptr = sFactory.createShape(shapeXML);
-    // Check it's valid and attach it to the workspace sample
-    if( shape_sptr->hasValidShape() )
-    {
-      workspace->mutableSample().setShape(*shape_sptr);
-    }
-    else
-    {
-      g_log.warning() << "Object has invalid shape. TopRule = " << shape_sptr->topRule()
-              << ", number of surfaces = " << shape_sptr->getSurfacePtr().size() << "\n";
-      throw std::runtime_error("Shape object is invalid, cannot attach it to workspace.");
-    }
-    // Done!
-    progress(1);
-  }
-
+  // Done!
+  progress(1);
+}
 }
 }

@@ -8,16 +8,17 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid
-{
-namespace WorkflowAlgorithms
-{
+namespace Mantid {
+namespace WorkflowAlgorithms {
 /**
 
-    Determine the wavelength from the TOF in the beam monitor histogram.  The algorithm has to modify
-    TOF values to correct for the fact that T_0 is not properly recorded by the DAS.
+    Determine the wavelength from the TOF in the beam monitor histogram.  The
+   algorithm has to modify
+    TOF values to correct for the fact that T_0 is not properly recorded by the
+   DAS.
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -40,14 +41,14 @@ namespace WorkflowAlgorithms
 // Pulse widge (micro sec per angstrom)
 const double PULSEWIDTH = 20.0;
 // Chopper phase offset (micro sec)
-const double CHOPPER_PHASE_OFFSET[2][4]= {{9507.,9471.,9829.7,9584.3},{19024.,18820.,19714.,19360.}};
+const double CHOPPER_PHASE_OFFSET[2][4] = {{9507., 9471., 9829.7, 9584.3},
+                                           {19024., 18820., 19714., 19360.}};
 // Chopper angles (degree)
-const double CHOPPER_ANGLE[4] = {129.605,179.989,230.010,230.007};
+const double CHOPPER_ANGLE[4] = {129.605, 179.989, 230.010, 230.007};
 // Chopper location (mm)
-const double CHOPPER_LOCATION[4] = {5700.,7800.,9497.,9507.};
+const double CHOPPER_LOCATION[4] = {5700., 7800., 9497., 9507.};
 
-class DLLExport EQSANSMonitorTOF : public API::Algorithm
-{
+class DLLExport EQSANSMonitorTOF : public API::Algorithm {
 public:
   /// (Empty) Constructor
   EQSANSMonitorTOF() : API::Algorithm() {}
@@ -55,8 +56,11 @@ public:
   virtual ~EQSANSMonitorTOF() {}
   /// Algorithm's name
   virtual const std::string name() const { return "EQSANSMonitorTOF"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Converts the TOF into a wavelength for the beam monitor. This algorithm needs to be run once on every data set.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Converts the TOF into a wavelength for the beam monitor. This "
+           "algorithm needs to be run once on every data set.";
+  }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -69,7 +73,8 @@ private:
   void exec();
 
   /// Compute TOF offset
-  double getTofOffset(API::MatrixWorkspace_const_sptr inputWS, bool frame_skipping, double source_to_monitor);
+  double getTofOffset(API::MatrixWorkspace_const_sptr inputWS,
+                      bool frame_skipping, double source_to_monitor);
 };
 
 } // namespace Algorithms

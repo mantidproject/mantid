@@ -14,14 +14,16 @@ namespace Algorithms {
  Required Properties:
  <UL>
  <LI> InputWorkspace - The name of the Workspace to take as input </LI>
- <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
+ <LI> OutputWorkspace - The name of the workspace in which to store the result
+ </LI>
  </UL>
 
 
  @author Ricardo Ferraz Leal
  @date 30/01/2013
 
- Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -41,33 +43,26 @@ namespace Algorithms {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport CorrectFlightPaths: public API::Algorithm {
+class DLLExport CorrectFlightPaths : public API::Algorithm {
 public:
   /// Default constructor
   CorrectFlightPaths();
   /// Destructor
-  virtual ~CorrectFlightPaths() {
-  }
-  ;
+  virtual ~CorrectFlightPaths(){};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const {
-    return "CorrectFlightPaths";
-  }
-  ///Summary of algorithms purpose
+  virtual const std::string name() const { return "CorrectFlightPaths"; }
+  /// Summary of algorithms purpose
   virtual const std::string summary() const {
     return "Used to correct flight paths in 2D shaped detectors.";
   }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const {
-    return 1;
-  }
+  virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const {
     return "Inelastic;CorrectionFunctions";
   }
 
 private:
-
   // Overridden Algorithm methods
   void init();
   void exec();
@@ -86,7 +81,6 @@ private:
 
   double m_l2;
   double m_wavelength;
-
 };
 
 } // namespace Algorithm

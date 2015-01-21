@@ -40,28 +40,26 @@ namespace Poldi {
 
 class MANTID_SINQ_DLL MillerIndicesIO {
 public:
-    static std::string toString(const MillerIndices &millerIndices)
-    {
-        return (boost::format("%i %i %i") % millerIndices.h() % millerIndices.k() % millerIndices.l()).str();
+  static std::string toString(const MillerIndices &millerIndices) {
+    return (boost::format("%i %i %i") % millerIndices.h() % millerIndices.k() %
+            millerIndices.l()).str();
+  }
+
+  static MillerIndices fromString(const std::string &millerIncidesString) {
+    std::vector<std::string> substrings;
+    boost::split(substrings, millerIncidesString, boost::is_any_of(" "));
+
+    std::vector<int> indices(substrings.size());
+    for (size_t i = 0; i < substrings.size(); ++i) {
+      indices[i] = boost::lexical_cast<int>(substrings[i]);
     }
 
-    static MillerIndices fromString(const std::string &millerIncidesString)
-    {
-        std::vector<std::string> substrings;
-        boost::split(substrings, millerIncidesString, boost::is_any_of(" "));
-
-        std::vector<int> indices(substrings.size());
-        for(size_t i = 0; i < substrings.size(); ++i) {
-            indices[i] = boost::lexical_cast<int>(substrings[i]);
-        }
-
-        return MillerIndices(indices);
-    }
+    return MillerIndices(indices);
+  }
 
 private:
-    MillerIndicesIO() {}
+  MillerIndicesIO() {}
 };
-
 }
 }
 

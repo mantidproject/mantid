@@ -3,6 +3,7 @@
 ##
 set ( TEST_PY_FILES
   BoundingBoxTest.py
+  GoniometerTest.py
   IComponentTest.py
   InstrumentTest.py
   ObjectTest.py

@@ -9,17 +9,16 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidCurveFitting/GSLFunctions.h"
 
-namespace Mantid
-{
-namespace CurveFitting
-{
+namespace Mantid {
+namespace CurveFitting {
 /** Implementing Levenberg-Marquardt by wrapping the IFuncMinimizer interface
     around the GSL implementation of this algorithm.
 
     @author Anders Markvardsen, ISIS, RAL
     @date 11/12/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -39,8 +38,7 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LevenbergMarquardtMinimizer : public API::IFuncMinimizer
-{
+class DLLExport LevenbergMarquardtMinimizer : public API::IFuncMinimizer {
 public:
   /// constructor and destructor
   ~LevenbergMarquardtMinimizer();
@@ -48,18 +46,18 @@ public:
 
   /// Overloading base class methods
   /// Name of the minimizer.
-  std::string name() const {return "Levenberg-Marquardt";}
+  std::string name() const { return "Levenberg-Marquardt"; }
 
   /// Initialize minimizer, i.e. pass a function to minimize.
-  virtual void initialize(API::ICostFunction_sptr function,size_t maxIterations = 0);
+  virtual void initialize(API::ICostFunction_sptr function,
+                          size_t maxIterations = 0);
   /// Do one iteration.
   virtual bool iterate(size_t);
   /// Return current value of the cost function
   virtual double costFunctionVal();
 
-
 private:
-  void calCovarianceMatrix(double epsrel, gsl_matrix * covar);
+  void calCovarianceMatrix(double epsrel, gsl_matrix *covar);
   int hasConverged();
 
   /// GSL data container
@@ -80,7 +78,6 @@ private:
   /// Relative error required for parameters
   double m_relError;
 };
-
 
 } // namespace CurveFitting
 } // namespace Mantid

@@ -6,10 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Workspace.h"
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 /** An interface that is implemented by WorkspaceProperty.
     Used for non templated workspace operations.
 
@@ -17,7 +15,8 @@ namespace API
     @author Russell Taylor, Tessella Support Services plc
     @date 11/12/2007
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -37,8 +36,7 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IWorkspaceProperty
-{
+class IWorkspaceProperty {
 public:
   /// Store a workspace into the AnalysisDataService
   virtual bool store() = 0;

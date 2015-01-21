@@ -15,19 +15,18 @@
 //----------------------------------------------------------------------
 class Workspace2D_sptr;
 
-
-namespace Mantid
-{
-namespace Poldi
-{
+namespace Mantid {
+namespace Poldi {
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
 
-// N.B. PoldiPeakDetection2 is used to detecte peaks on the carrelated Poldi data
+// N.B. PoldiPeakDetection2 is used to detecte peaks on the carrelated Poldi
+// data
 /** @class PoldiPeakDetection2 PoldiPeakDetection2.h Poldi/PoldiPeakDetection2.h
 
-    Part of the Poldi scripts set, used to to detecte peaks on the carrelated Poldi data
+    Part of the Poldi scripts set, used to to detecte peaks on the carrelated
+   Poldi data
 
     @author Christophe Le Bourlot, Paul Scherrer Institut - SINQ
     @date 05/06/2013
@@ -49,59 +48,57 @@ namespace Poldi
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    File change history is stored at:
+   <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at <http://doxygen.mantidproject.org>
 */
-class MANTID_SINQ_DLL PoldiPeakDetection2 : public API::Algorithm
-{
+class MANTID_SINQ_DLL PoldiPeakDetection2 : public API::Algorithm {
 public:
-	/// Default constructor
-	PoldiPeakDetection2(){};
-	/// Destructor
-	virtual ~PoldiPeakDetection2() {}
-	/// Algorithm's name for identification overriding a virtual method
-	virtual const std::string name() const { return "PoldiPeakDetection"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Peak detection used on a diffractogram, with peak refinement thru a peak fit with a gaussian function.";}
+  /// Default constructor
+  PoldiPeakDetection2(){};
+  /// Destructor
+  virtual ~PoldiPeakDetection2() {}
+  /// Algorithm's name for identification overriding a virtual method
+  virtual const std::string name() const { return "PoldiPeakDetection"; }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Peak detection used on a diffractogram, with peak refinement thru "
+           "a peak fit with a gaussian function.";
+  }
 
-	/// Algorithm's version for identification overriding a virtual method
-	virtual int version() const { return 2; }
-	/// Algorithm's category for identification overriding a virtual method
-    virtual const std::string category() const { return "SINQ\\Poldi\\Obsolete"; }
-
+  /// Algorithm's version for identification overriding a virtual method
+  virtual int version() const { return 2; }
+  /// Algorithm's category for identification overriding a virtual method
+  virtual const std::string category() const { return "SINQ\\Poldi\\Obsolete"; }
 
 protected:
-	/// Overwrites Algorithm method
-	void exec();
+  /// Overwrites Algorithm method
+  void exec();
 
 private:
-	/// Overwrites Algorithm method.
-	void init();
+  /// Overwrites Algorithm method.
+  void init();
 
-	// return the min between two integer
-	inline size_t min(size_t a, size_t b){return (a<b)?a:b;}
-	// return the max between two integer
-	inline size_t max(size_t a, size_t b){return (a>b)?a:b;}
+  // return the min between two integer
+  inline size_t min(size_t a, size_t b) { return (a < b) ? a : b; }
+  // return the max between two integer
+  inline size_t max(size_t a, size_t b) { return (a > b) ? a : b; }
 
-	// return the index of maximal intensity
-	int getIndexOfMax();
+  // return the index of maximal intensity
+  int getIndexOfMax();
 
-	// copy from ..... algorithm
-	// do the fit of one single peak
-	bool doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws, int workspaceindex,
-	                       double& center, double& sigma, double& height,
-                           double xmin, double xmax);
+  // copy from ..... algorithm
+  // do the fit of one single peak
+  bool doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
+                         int workspaceindex, double &center, double &sigma,
+                         double &height, double xmin, double xmax);
 
-
-	// the output workspace to store the correlated function
-	DataObjects::Workspace2D_sptr ws_auto_corr ;
-	// number of x channel of the correlated function (in the d-space)
-	size_t nb_d_channel;
-	// table of dead wires not to take into account
-	std::vector<bool> table_dead_wires;
-
-
-
+  // the output workspace to store the correlated function
+  DataObjects::Workspace2D_sptr ws_auto_corr;
+  // number of x channel of the correlated function (in the d-space)
+  size_t nb_d_channel;
+  // table of dead wires not to take into account
+  std::vector<bool> table_dead_wires;
 };
 
 } // namespace Poldi

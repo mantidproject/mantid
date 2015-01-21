@@ -15,17 +15,16 @@
 #include <stdlib.h>
 #include <cctype>
 
-namespace Mantid
-{
-namespace Kernel
-{
-/** 
+namespace Mantid {
+namespace Kernel {
+/**
  Provide interpolation over a series of points.
- 
+
  @author Anders Markvardsen, ISIS, RAL
  @date 9/3/2010
 
- Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -41,20 +40,19 @@ namespace Kernel
 
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
  File change history is stored at: <https://github.com/mantidproject/mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_KERNEL_DLL Interpolation
-{
+class MANTID_KERNEL_DLL Interpolation {
 private:
-  ///internal storage of x values
+  /// internal storage of x values
   std::vector<double> m_x;
-  ///internal storage of y values
+  /// internal storage of y values
   std::vector<double> m_y;
 
   /// method used for doing the interpolation
-  std::string m_method; 
+  std::string m_method;
 
   /// unit of x-axis
   Unit_sptr m_xUnit;
@@ -63,31 +61,31 @@ private:
   Unit_sptr m_yUnit;
 
 protected:
-  size_t findIndexOfNextLargerValue(const std::vector<double> &data, double key, size_t range_start, size_t range_end) const;
+  size_t findIndexOfNextLargerValue(const std::vector<double> &data, double key,
+                                    size_t range_start, size_t range_end) const;
 
 public:
-
   /// Constructor default to linear interpolation and x-unit set to TOF
   Interpolation();
-  virtual ~Interpolation() { }
+  virtual ~Interpolation() {}
 
   /// add data point
-  void addPoint(const double& xx, const double& yy);
+  void addPoint(const double &xx, const double &yy);
 
   /// get interpolated value at location at
-  double value(const double& at) const;
+  double value(const double &at) const;
 
   /// set interpolation method
-  void setMethod(const std::string& method) { m_method=method; }
+  void setMethod(const std::string &method) { m_method = method; }
 
   /// get interpolation method
   std::string getMethod() const { return m_method; };
 
   /// set x-axis unit
-  void setXUnit(const std::string& unit);
+  void setXUnit(const std::string &unit);
 
   /// set y-axis unit
-  void setYUnit(const std::string& unit);
+  void setYUnit(const std::string &unit);
 
   /// get x-axis unit
   Unit_sptr getXUnit() const { return m_xUnit; };
@@ -96,18 +94,19 @@ public:
   Unit_sptr getYUnit() const { return m_yUnit; };
 
   /// return false if no data has been added
-  bool containData() const { return m_x.size() ? true : false;}
+  bool containData() const { return m_x.size() ? true : false; }
 
   /// Prints object to stream
-  void printSelf(std::ostream& os) const;
+  void printSelf(std::ostream &os) const;
 
   /// Clear interpolation values
   void resetData();
 };
 
 // defining operator << and >>
-MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const Interpolation& );
-MANTID_KERNEL_DLL std::istream& operator>>(std::istream&, Interpolation&);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
+                                           const Interpolation &);
+MANTID_KERNEL_DLL std::istream &operator>>(std::istream &, Interpolation &);
 
 } // namespace Kernel
 } // namespace Mantid

@@ -4,14 +4,13 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 
 /** GeneratePythonScript : TODO: DESCRIPTION
 
-  An Algorithm to generate a Python script file to reproduce the history of a workspace.
+  An Algorithm to generate a Python script file to reproduce the history of a
+  workspace.
 
   Properties:
   <ul>
@@ -22,7 +21,8 @@ namespace Algorithms
   @author Peter G Parker, ISIS, RAL
   @date 2011-09-13
 
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -42,30 +42,30 @@ namespace Algorithms
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport GeneratePythonScript : public API::Algorithm
-{
+class DLLExport GeneratePythonScript : public API::Algorithm {
 public:
   GeneratePythonScript() : Mantid::API::Algorithm() {}
   virtual ~GeneratePythonScript() {}
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "GeneratePythonScript";};
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "An Algorithm to generate a Python script file to reproduce the history of a workspace.";}
+  virtual const std::string name() const { return "GeneratePythonScript"; };
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "An Algorithm to generate a Python script file to reproduce the "
+           "history of a workspace.";
+  }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1;};
+  virtual int version() const { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Utility\\Development";}
+  virtual const std::string category() const { return "Utility\\Development"; }
 
 protected:
-  
   /// Initialise the properties
   void init();
   /// Run the algorithm
   void exec();
 };
-
 
 } // namespace Algorithms
 } // namespace Mantid

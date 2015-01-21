@@ -72,7 +72,7 @@ set ( SRC_FILES
 	src/ProductLinearExp.cpp
 	src/ProductQuadraticExp.cpp
 	src/Quadratic.cpp
-	src/RefinePowderInstrumentParameters.cpp
+	#src/RefinePowderInstrumentParameters.cpp
 	src/RefinePowderInstrumentParameters3.cpp
 	src/ReflectivityMulf.cpp
 	src/Resolution.cpp
@@ -181,7 +181,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ProductLinearExp.h
 	inc/MantidCurveFitting/ProductQuadraticExp.h
 	inc/MantidCurveFitting/Quadratic.h
-	inc/MantidCurveFitting/RefinePowderInstrumentParameters.h
+	#inc/MantidCurveFitting/RefinePowderInstrumentParameters.h
 	inc/MantidCurveFitting/RefinePowderInstrumentParameters3.h
 	inc/MantidCurveFitting/ReflectivityMulf.h
 	inc/MantidCurveFitting/Resolution.h

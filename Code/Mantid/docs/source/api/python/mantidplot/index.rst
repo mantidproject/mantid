@@ -72,3 +72,11 @@ This package defines the Python interface to the MantidPlot application. For fra
    waterfallPlot.rst
    windows.rst
    workspace.rst
+
+Submodules
+##########
+
+.. toctree::
+   :maxdepth: 1
+
+   future/index

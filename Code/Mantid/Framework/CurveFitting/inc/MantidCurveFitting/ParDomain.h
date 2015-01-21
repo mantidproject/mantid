@@ -7,16 +7,16 @@
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/SeqDomain.h"
 
-namespace Mantid
-{
-namespace CurveFitting
-{
-/** 
-    An implementation of SeqDomain for parallel cost function and derivatives computation.
+namespace Mantid {
+namespace CurveFitting {
+/**
+    An implementation of SeqDomain for parallel cost function and derivatives
+   computation.
 
     @author Roman Tolchenov, Tessella plc
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -36,16 +36,20 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_CURVEFITTING_DLL ParDomain: public SeqDomain
-{
+class MANTID_CURVEFITTING_DLL ParDomain : public SeqDomain {
 public:
-  ParDomain():SeqDomain(){}
+  ParDomain() : SeqDomain() {}
   /// Create and return i-th domain and i-th values, (i-1)th domain is released.
-  virtual void getDomainAndValues(size_t i, API::FunctionDomain_sptr& domain, API::FunctionValues_sptr& values) const;
+  virtual void getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain,
+                                  API::FunctionValues_sptr &values) const;
   /// Calculate the value of a least squares cost function
-  virtual void leastSquaresVal(const CostFuncLeastSquares& leastSquares);
-  /// Calculate the value, first and second derivatives of a least squares cost function
-  virtual void leastSquaresValDerivHessian(const CostFuncLeastSquares& leastSquares, bool evalFunction, bool evalDeriv, bool evalHessian);
+  virtual void leastSquaresVal(const CostFuncLeastSquares &leastSquares);
+  /// Calculate the value, first and second derivatives of a least squares cost
+  /// function
+  virtual void
+  leastSquaresValDerivHessian(const CostFuncLeastSquares &leastSquares,
+                              bool evalFunction, bool evalDeriv,
+                              bool evalHessian);
 };
 
 } // namespace CurveFitting

@@ -10,28 +10,34 @@
 
 namespace mpi = boost::mpi;
 
-namespace Mantid
-{
-namespace MPIAlgorithms
-{
+namespace Mantid {
+namespace MPIAlgorithms {
 /** GatherWorkspaces be viewed as ConjoinWorkspaces for MPI.
-    It stitches together the input workspaces provided by each of the processes into
+    It stitches together the input workspaces provided by each of the processes
+   into
     a single workspace in the root process.
 
-    The spectra in the output workspace will be ordered by the rank of the input processes.
+    The spectra in the output workspace will be ordered by the rank of the input
+   processes.
     It is up to the caller to ensure this results in the required ordering.
-    Furthermore, there are all sorts of things that ought to be consistent for this
-    algorithm to make sense (e.g. the instrument). The general philosophy, though, is to
-    leave the responsibility for this to the user and only check the vital things (i.e. that
+    Furthermore, there are all sorts of things that ought to be consistent for
+   this
+    algorithm to make sense (e.g. the instrument). The general philosophy,
+   though, is to
+    leave the responsibility for this to the user and only check the vital
+   things (i.e. that
     the number of bins is consistent).
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace - The name of the separate workspaces (must be the same for all processes).</LI>
-    <LI> OutputWorkspace - The name of the output workspace. Will only be created by the root process.</LI>
+    <LI> InputWorkspace - The name of the separate workspaces (must be the same
+   for all processes).</LI>
+    <LI> OutputWorkspace - The name of the output workspace. Will only be
+   created by the root process.</LI>
     </UL>
 
-    Copyright &copy; 2011-2 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2011-2 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -51,8 +57,7 @@ namespace MPIAlgorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class GatherWorkspaces : public API::Algorithm
-{
+class GatherWorkspaces : public API::Algorithm {
 public:
   /// (Empty) Constructor
   GatherWorkspaces() : API::Algorithm() {}
@@ -63,18 +68,16 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// @copydoc Algorithm::summary
-  virtual const std::string summary() const
-  {
-    return "Stitches together the input workspaces provided by each of the processes into a single workspace.";
+  virtual const std::string summary() const {
+    return "Stitches together the input workspaces provided by each of the "
+           "processes into a single workspace.";
   }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "MPI"; }
 
-
 private:
   void init();
   void exec();
-
 
   void execEvent();
   API::MatrixWorkspace_sptr inputWorkspace;
@@ -84,7 +87,6 @@ private:
   int hist;
   std::size_t numBins;
   mpi::communicator included;
-
 };
 
 } // namespace MPIAlgorithms

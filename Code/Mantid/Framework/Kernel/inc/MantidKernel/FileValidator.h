@@ -7,19 +7,18 @@
 #include "MantidKernel/TypedValidator.h"
 #include <vector>
 
-namespace Mantid
-{
-namespace Kernel
-{
+namespace Mantid {
+namespace Kernel {
 
-bool has_ending(const std::string &value, const std::string & ending);
+bool has_ending(const std::string &value, const std::string &ending);
 
 /** FileValidator is a validator that checks that a filepath is valid.
 
     @author Matt Clarke, ISIS.
     @date 25/06/2008
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -39,10 +38,11 @@ bool has_ending(const std::string &value, const std::string & ending);
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_KERNEL_DLL FileValidator : public TypedValidator<std::string>
-{
+class MANTID_KERNEL_DLL FileValidator : public TypedValidator<std::string> {
 public:
-  explicit FileValidator(const std::vector<std::string>& extensions=std::vector<std::string>(), bool testFileExists = true, bool testCanWrite=false);
+  explicit FileValidator(
+      const std::vector<std::string> &extensions = std::vector<std::string>(),
+      bool testFileExists = true, bool testCanWrite = false);
   virtual ~FileValidator();
   virtual std::vector<std::string> allowedValues() const;
   IValidator_sptr clone() const;
@@ -54,7 +54,7 @@ protected:
   bool m_testExist;
   /// Flag indicating whether to test for the file being writable
   bool m_testCanWrite;
-  
+
 private:
   virtual std::string checkValidity(const std::string &value) const;
   bool endswith(const std::string &value) const;

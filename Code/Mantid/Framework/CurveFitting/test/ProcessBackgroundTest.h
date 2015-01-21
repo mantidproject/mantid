@@ -176,11 +176,11 @@ public:
    */
   void test_SimpleBackgroundGeneration()
   {
-    // 1. Create Workspace2D
+    // Create Workspace2D
     DataObjects::Workspace2D_sptr dataws
         = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
         (API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1000, 1000));
-    for (size_t i = 0; i < 10; ++i)
+    for (size_t i = 0; i < 1000; ++i)
     {
       dataws->dataX(0)[i] = double(i);
       dataws->dataY(0)[i] = double(i)*double(i);
@@ -195,7 +195,7 @@ public:
     bkgdpts.push_back(695.450);
     bkgdpts.push_back(893.790);
 
-    // 2. Prepare algorithm
+    // Prepare algorithm
     ProcessBackground alg;
     alg.initialize();
 

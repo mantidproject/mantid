@@ -1,7 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_LOADILLASCIIHELPER_H_
 #define MANTID_MDALGORITHMS_LOADILLASCIIHELPER_H_
 
- #include "MantidMDAlgorithms/DllConfig.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 #include <iostream>
 #include <fstream>
@@ -19,7 +19,8 @@ namespace MDAlgorithms {
  For more details on data format, please see:
  <http://www.ill.eu/instruments-support/computing-for-science/data-analysis/raw-data/>
 
- Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -42,49 +43,55 @@ namespace MDAlgorithms {
 
 class ILLParser {
 public:
-	ILLParser(const std::string &filename);
-	virtual ~ILLParser();
-	void parse();
-	void showHeader();
-	std::string getInstrumentName();
+  ILLParser(const std::string &filename);
+  virtual ~ILLParser();
+  void parse();
+  void showHeader();
+  std::string getInstrumentName();
 
-	// Those are large vectors: returning references => no copy constructors
-	// std::vector< std::vector<int> > & getSpectraList() {return spectraList;}
-	// std::vector<std::map<std::string, std::string> > & getSpectraHeaderList() {return spectraHeaders;}
-	// No difference in running times :(
+  // Those are large vectors: returning references => no copy constructors
+  // std::vector< std::vector<int> > & getSpectraList() {return spectraList;}
+  // std::vector<std::map<std::string, std::string> > & getSpectraHeaderList()
+  // {return spectraHeaders;}
+  // No difference in running times :(
 
-	std::vector< std::vector<int> > getSpectraList() const {return spectraList;}
-	std::vector<std::map<std::string, std::string> > getSpectraHeaderList() const {return spectraHeaders;}
+  std::vector<std::vector<int>> getSpectraList() const { return spectraList; }
+  std::vector<std::map<std::string, std::string>> getSpectraHeaderList() const {
+    return spectraHeaders;
+  }
 
-	template<typename T> T getValueFromHeader(const std::string &);
-	template<typename T> T getValue(const std::string &, const std::map<std::string, std::string> &);
+  template <typename T> T getValueFromHeader(const std::string &);
+  template <typename T>
+  T getValue(const std::string &, const std::map<std::string, std::string> &);
+
 private:
-	void parseFieldR();
-	void parseFieldA();
-	void parseFieldNumeric(std::map<std::string, std::string> &header,
-			int fieldWith);
-	std::vector<int> parseFieldISpec(int fieldWith = intWith);
+  void parseFieldR();
+  void parseFieldA();
+  void parseFieldNumeric(std::map<std::string, std::string> &header,
+                         int fieldWith);
+  std::vector<int> parseFieldISpec(int fieldWith = intWith);
 
-	void startParseSpectra();
-	std::vector<std::string> splitLineInFixedWithFields(const std::string &s,
-			int fieldWidth, int lineWitdh = lineWith);
+  void startParseSpectra();
+  std::vector<std::string> splitLineInFixedWithFields(const std::string &s,
+                                                      int fieldWidth,
+                                                      int lineWitdh = lineWith);
 
-	template<typename T> T evaluate(std::string field);
+  template <typename T> T evaluate(std::string field);
 
-	static const int lineWith = 80;
-	static const int intWith = 8;
-	static const int floatWith = 16;
+  static const int lineWith = 80;
+  static const int intWith = 8;
+  static const int floatWith = 16;
 
-	std::ifstream fin;
-	// Not great, but to date there's 3 containers:
-	std::map<std::string, std::string> header; // file global header
-	std::vector<std::map<std::string, std::string> > spectraHeaders; // list with every spectrum header
-	std::vector<std::vector<int> > spectraList; // same size list but with spectra contents
-
+  std::ifstream fin;
+  // Not great, but to date there's 3 containers:
+  std::map<std::string, std::string> header; // file global header
+  std::vector<std::map<std::string, std::string>>
+      spectraHeaders; // list with every spectrum header
+  std::vector<std::vector<int>>
+      spectraList; // same size list but with spectra contents
 };
-
 }
 // namespace MDAlgorithms
-}// namespace Mantid
+} // namespace Mantid
 
-#endif  /* MANTID_MDALGORITHMS_LOADILLASCIIHELPER_H_ */
+#endif /* MANTID_MDALGORITHMS_LOADILLASCIIHELPER_H_ */
