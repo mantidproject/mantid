@@ -1385,7 +1385,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     m_allBanksPulseTimes = boost::make_shared<BankPulseTimes>(temp);
   }
 
-  if (!instrument_loaded_correctly) {
+  if (true /*!instrument_loaded_correctly*/) {
     // Load the instrument (if not loaded before)
     prog->report("Loading instrument");
     instrument_loaded_correctly =
