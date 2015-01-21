@@ -268,6 +268,7 @@ set ( TEST_FILES
 	MuonAnalysisHelperTest.h
 	ReflLegacyTransferStrategyTest.h
 	ReflMainViewPresenterTest.h
+  UserInputValidatorTest.h
 )
 
 include_directories ( inc )

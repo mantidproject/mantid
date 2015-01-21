@@ -10,13 +10,14 @@
 
 namespace Mantid {
 namespace Geometry {
-/** PointGroupFactory
+/**
+  @class PointGroupFactory
 
   A factory for point groups. Point group objects can be constructed by
   supplying the Hermann-Mauguin-symbol like this:
 
       PointGroup_sptr cubic =
-  PointGroupFactory::Instance().createPointgroup("m-3m");
+          PointGroupFactory::Instance().createPointgroup("m-3m");
 
   Furthermore it's possible to query available point groups, either all
   available

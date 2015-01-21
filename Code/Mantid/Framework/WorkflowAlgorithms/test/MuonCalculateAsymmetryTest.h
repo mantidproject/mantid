@@ -7,7 +7,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidWorkflowAlgorithms/MuonCalculateAsymmetry.h"
 
-
 using Mantid::WorkflowAlgorithms::MuonCalculateAsymmetry;
 
 using namespace Mantid::Kernel;
@@ -239,8 +238,8 @@ public:
       TS_ASSERT_DELTA( ws->readY(0)[1], 0.778, 0.001 );
       TS_ASSERT_DELTA( ws->readY(0)[2], 0.714, 0.001 );
 
-      TS_ASSERT_EQUALS( ws->readX(0)[0], 1 );
-      TS_ASSERT_EQUALS( ws->readX(0)[1], 2 );
+      TS_ASSERT_EQUALS( ws->readX(0)[0], 1.5 );
+      TS_ASSERT_EQUALS( ws->readX(0)[1], 2.5 );
       TS_ASSERT_EQUALS( ws->readX(0)[2], 3 );
 
       TS_ASSERT_DELTA( ws->readE(0)[0], 0.475, 0.01 );
