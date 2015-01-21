@@ -1045,4 +1045,11 @@ install ( FILES ${CONFIG_RESET_SCRIPT} DESTINATION ${BIN_DIR} )
 #endif ()
 message ("cmake install prefix: ${CMAKE_INSTALL_PREFIX}")
 install ( FILES  make_package.rb DESTINATION MantidPlot.app/ )
-install( CODE "execute_process(COMMAND \"chmod + x  \${CMAKE_INSTALL_PREFIX}/MantidPlot.app/make_package.rb\" )")
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixMavericksBundle.cmake.in
+                 ${CMAKE_CURRENT_BINARY_DIR}/FixMavericksBundle.cmake
+                 @ONLY
+               )
+install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixMavericksBundle.cmake )
+
+#install( CODE "execute_process(COMMAND \"chmod + x  \${CMAKE_INSTALL_PREFIX}/MantidPlot.app/make_package.rb\" )")
+

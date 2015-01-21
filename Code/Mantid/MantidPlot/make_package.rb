@@ -136,20 +136,32 @@ end
 `install_name_tool -change /usr/local/lib/QtXml.framework/Versions/4/QtXml @loader_path/../../Frameworks/QtXml.framework/Versions/4/QtXml Contents/MacOS/PyQt4/QtXml.so`
 `install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtXml.so`
 
+`cp -r /Library/Python/2.7/site-packages/sphinx Contents/MacOS/`
+`cp -r /Library/Python/2.7/site-packages/sphinx_bootstrap_theme Contents/MacOS/`
+`cp -r /Library/Python/2.7/site-packages/IPython Contents/MacOS/`
+`cp -r /Library/Python/2.7/site-packages/zmq Contents/MacOS/`
+`cp -r /Library/Python/2.7/site-packages/pygments Contents/MacOS/`
 
-#filenames = ["plugins/qtplugins/mantid/libMantidQtCustomDialogs.dylib","plugins/qtplugins/mantid/libMantidQtCustomInterfaces.dylib"]
-#filenames.each do |filename|
-#  `install_name_tool -change @executable_path/../Contents/Frameworks/QtSql.framework/Versions/4/QtSql @loader_path/../../../Frameworks/QtSql.framework/Versions/4/QtSql #{filename}` 
-#  `install_name_tool -change @executable_path/../Contents/Frameworks/Qt3Support.framework/Versions/4/Qt3Support @loader_path/../../../Frameworks/Qt3Support.framework/Versions/4/Qt3Support #{filename}`
-#  `install_name_tool -change @executable_path/../Contents/Frameworks/QtOpenGL.framework/Versions/4/QtOpenGL @loader_path/../../../Frameworks/QtOpenGL.framework/Versions/4/QtOpenGL #{filename}`
-#  `install_name_tool -change @executable_path/../Contents/Frameworks/QtSvg.framework/Versions/4/QtSvg @loader_path/../../../Frameworks/QtSvg.framework/Versions/4/QtSvg #{filename}`
-#  `install_name_tool -change @executable_path/../Contents/Frameworks/QtHelp.framework/Versions/4/QtHelp @loader_path/../../../Frameworks/QtHelp.framework/Versions/4/QtHelp #{filename}`
-#  `install_name_tool -change @executable_path/../Contents/Frameworks/QtWebKit.framework/Versions/4/QtWebKit @loader_path/../../../Frameworks/QtWebKit.framework/Versions/4/QtWebKit #{filename}`
-#  `install_name_tool -change @executable_path/../Contents/Frameworks/QtGui.framework/Versions/4/QtGui @loader_path/../../../Frameworks/QtGui.framework/Versions/4/QtGui #{filename}`
-#  `install_name_tool -change @executable_path/../Contents/Frameworks/QtXml.framework/Versions/4/QtXml @loader_path/../../../Frameworks/QtXml.framework/Versions/4/QtXml #{filename}`
-#  `install_name_tool -change @executable_path/../Contents/Frameworks/QtNetwork.framework/Versions/4/QtNetwork @loader_path/../../../Frameworks/QtNetwork.framework/Versions/4/QtNetwork #{filename}` 
-#  `install_name_tool -change @executable_path/../Contents/Frameworks/QtCore.framework/Versions/4/QtCore @loader_path/../../../Frameworks/QtCore.framework/Versions/4/QtCore #{filename}`
-#end 
+#add other dependencies found in current package
+#currently missing epics
+
+`cp /Library/Python/2.7/site-packages/gnureadline.so Contents/MacOS/`
+`cp /Library/Python/2.7/site-packages/readline.py Contents/MacOS/`
+`cp /Library/Python/2.7/site-packages/readline.pyc Contents/MacOS/`
+`cp /Library/Python/2.7/site-packages/pyparsing.py Contents/MacOS/`
+`cp /Library/Python/2.7/site-packages/pyparsing.pyc Contents/MacOS/`
+`cp -r /Library/Python/2.7/site-packages/_markerlib/ Contents/MacOS/`
+`cp -r /Library/Python/2.7/site-packages/backports Contents/MacOS/`
+`cp -r /Library/Python/2.7/site-packages/certifi Contents/MacOS/`
+`cp -r /Library/Python/2.7/site-packages/tornado Contents/MacOS/`
+`cp -r /Library/Python/2.7/site-packages/markupsafe Contents/MacOS/`
+`cp -r /Library/Python/2.7/site-packages/jinja2 Contents/MacOS/`
+`cp -r /usr/local/lib/python2.7/site-packages/nxs Contents/MacOS/`
+`rm Contents/MacOS/nxs/*.pyc`
+`cp -r /Library/Python/2.7/site-packages/psutil Contents/MacOS/`
+`mkdir Contents/MacOS/bin`
+`cp -r /usr/local/bin/ipython Contents/MacOS/bin/`
+
 search_patterns.each do |pattern|
   Dir[pattern].each do |library|
     dependencies = `otool -L #{library}`
