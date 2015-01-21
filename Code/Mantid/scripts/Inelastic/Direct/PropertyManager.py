@@ -290,19 +290,19 @@ class PropertyManager(NonIDF_Properties):
     def get_used_monitors_list(self):
         """ Method returns list of monitors ID used during reduction """ 
 
-        used_mon=[]
+        used_mon=set()
         for case in common.switch(self.normalise_method):
             if case('monitor-1'):
-                used_mon = used_mon.append(self.mon1_norm_spec)
+                used_mon.add(self.mon1_norm_spec)
                 break
             if case('monitor-2'):
-                used_mon = used_mon.append(self.mon2_norm_spec)
+                used_mon.add(self.mon2_norm_spec)
                 break
             if case(): # default, could also just omit condition or 'if True'
                pass
 
-        used_mon.append(self.ei_mon1_spec)
-        used_mon.append(self.ei_mon2_spec)
+        used_mon.add(self.ei_mon1_spec)
+        used_mon.add(self.ei_mon2_spec)
 
         return used_mon
 

@@ -710,8 +710,20 @@ class DirectPropertyManagerTest(unittest.TestCase):
        
         #TODO: this one is not completed. Multirep mode to come
 
+    def test_monitors_list(self):
+        propman = self.prop_man
+        mons = propman.get_used_monitors_list()
+        self.assertEqual(len(mons),3)
 
-    
+        propman.normalise_method = None
+        mons = propman.get_used_monitors_list()
+        self.assertEqual(len(mons),2)
+
+        propman.normalise_method = 'monitor-2'
+        mons = propman.get_used_monitors_list()
+        self.assertEqual(len(mons),2)
+
+
 
 if __name__=="__main__":
     unittest.main()

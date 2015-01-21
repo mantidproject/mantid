@@ -1,5 +1,5 @@
 import os, sys
-os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -255,6 +255,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
 
 
+
+      
 
 
 
