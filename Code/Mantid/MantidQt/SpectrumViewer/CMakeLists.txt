@@ -78,8 +78,9 @@ add_definitions ( -DIN_MANTIDQT_SPECTRUMVIEWER )
 # This creates the target library
 add_library ( MantidQtSpectrumViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
-set_target_properties ( MantidQtSpectrumViewer PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
-
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( MantidQtSpectrumViewer PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif ()
 # ... and links to other required libs
 target_link_libraries ( MantidQtSpectrumViewer
                         MantidQtAPI MantidWidgets ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )

@@ -63,7 +63,8 @@ search_patterns.each do |pattern|
       library_filenames.each do |filename|
         basename = File.basename(filename)
         if dependency.include? basename
-          `install_name_tool -change #{filename} @rpath/#{basename} #{library}`
+         currentname = dependency.strip.split(" ") 
+          `install_name_tool -change #{currentname[0]} @rpath/#{basename} #{library}`
         end
       end
     end

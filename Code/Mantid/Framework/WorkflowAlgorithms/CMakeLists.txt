@@ -98,8 +98,12 @@ enable_precompiled_headers( inc/MantidWorkflowAlgorithms/PrecompiledHeader.h SRC
 # Add the target for this directory
 add_library ( WorkflowAlgorithms ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( WorkflowAlgorithms PROPERTIES OUTPUT_NAME MantidWorkflowAlgorithms 
-                                                      INSTALL_RPATH "@loader_path/../Contents/MacOS/")
+set_target_properties ( WorkflowAlgorithms PROPERTIES OUTPUT_NAME MantidWorkflowAlgorithms )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( WorkflowAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+endif ()
+ 
 # Add to the 'Framework' group in VS
 set_property ( TARGET WorkflowAlgorithms PROPERTY FOLDER "MantidFramework" )
 

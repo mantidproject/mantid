@@ -144,7 +144,9 @@ add_definitions ( -DIN_MANTIDQT_SLICEVIEWER )
 # This creates the target library
 add_library ( MantidQtSliceViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
-set_target_properties ( MantidQtSliceViewer PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( MantidQtSliceViewer PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif ()
 
 # ... and links to other required libs
 target_link_libraries ( MantidQtSliceViewer MantidQtAPI MantidWidgets ${QT_LIBRARIES} ${QWT_LIBRARIES} )
