@@ -3,13 +3,14 @@
 
 require 'pathname'
 
+#filenames with path for all shared libraries used by MantidPlot and its dependencies.
 library_filenames = ["/usr/local/lib/libboost_regex-mt.dylib",
                      "/usr/local/lib/libboost_date_time-mt.dylib",
                      "/usr/local/lib/libboost_python-mt.dylib",
                      "/usr/local/lib/libgsl.0.dylib",
                      "/usr/local/lib/libgslcblas.0.dylib",
                      "/usr/local/lib/libjsoncpp.dylib",
-		     "/usr/local/lib/libmuparser.2.dylib",
+                     "/usr/local/lib/libmuparser.2.dylib",
                      "/usr/local/lib/libNeXus.0.dylib",
                      "/usr/local/lib/libNeXusCPP.0.dylib",
                      "/usr/local/lib/libPocoFoundation.17.dylib",
@@ -22,20 +23,20 @@ library_filenames = ["/usr/local/lib/libboost_regex-mt.dylib",
                      "/usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib",
                      "/usr/local/lib/libTKernel.9.dylib",
                      "/usr/local/lib/libTKBO.9.dylib",
-	             "/usr/local/lib/libTKernel.9.dylib", 
-	             "/usr/local/lib/libTKBO.9.dylib", 
-	             "/usr/local/lib/libTKPrim.9.dylib", 
-	             "/usr/local/lib/libTKMesh.9.dylib", 
-	             "/usr/local/lib/libTKBRep.9.dylib",
-                     "/usr/local/lib/libTKGeomAlgo.9.dylib", 
-	             "/usr/local/lib/libTKTopAlgo.9.dylib", 
-	             "/usr/local/lib/libTKMath.9.dylib", 
-	             "/usr/local/lib/libTKG2d.9.dylib",
-	             "/usr/local/lib/libTKG3d.9.dylib", 
-	             "/usr/local/lib/libTKGeomBase.9.dylib",
-	             "/usr/local/lib/libqwt.5.dylib",
-	             "/usr/local/lib/libqwtplot3d.0.dylib",
-	             "/usr/local/lib/libqscintilla2.11.dylib",
+                     "/usr/local/lib/libTKernel.9.dylib",
+                     "/usr/local/lib/libTKBO.9.dylib",
+                     "/usr/local/lib/libTKPrim.9.dylib",
+                     "/usr/local/lib/libTKMesh.9.dylib",
+                     "/usr/local/lib/libTKBRep.9.dylib",
+                     "/usr/local/lib/libTKGeomAlgo.9.dylib",
+                     "/usr/local/lib/libTKTopAlgo.9.dylib",
+                     "/usr/local/lib/libTKMath.9.dylib",
+                     "/usr/local/lib/libTKG2d.9.dylib",
+                     "/usr/local/lib/libTKG3d.9.dylib",
+                     "/usr/local/lib/libTKGeomBase.9.dylib",
+                     "/usr/local/lib/libqwt.5.dylib",
+                     "/usr/local/lib/libqwtplot3d.0.dylib",
+                     "/usr/local/lib/libqscintilla2.11.dylib",
                      "/usr/local/lib/libmxml.dylib",
                      "/usr/local/lib/libhdf5.9.dylib",
                      "/usr/local/lib/libhdf5_hl.9.dylib",
@@ -45,6 +46,7 @@ library_filenames = ["/usr/local/lib/libboost_regex-mt.dylib",
                      "/usr/local/lib/libjpeg.8.dylib"
 ]
 
+#This copies the libraries over, then changes permissions and the id from /usr/local/lib to @rpath
 library_filenames.each do |filename|
   basename = File.basename(filename)
   `cp #{filename} Contents/MacOS/`
@@ -52,28 +54,15 @@ library_filenames.each do |filename|
   `install_name_tool -id @rpath/#{basename} Contents/MacOS/#{basename}`
 end
 
-library_filenames.push("/usr/local/Cellar/poco/1.4.7p1/lib/libPocoFoundation.17.dylib")
-library_filenames.push("/usr/local/Cellar/openssl/1.0.1k/lib/libcrypto.1.0.0.dylib")
-library_filenames.push("/usr/local/Cellar/poco/1.4.7p1/lib/libPocoNet.17.dylib")
-library_filenames.push("/usr/local/Cellar/poco/1.4.7p1/lib/libPocoCrypto.17.dylib")
-library_filenames.push("/usr/local/Cellar/poco/1.4.7p1/lib/libPocoUtil.17.dylib")
-library_filenames.push("/usr/local/Cellar/hdf4/4.2.10/lib/libdf.4.2.10.dylib")
-library_filenames.push("/usr/local/Cellar/hdf5/1.8.14/lib/libhdf5.9.dylib")
-library_filenames.push("/usr/local/Cellar/nexusformat/4.3.3/lib/libNeXus.0.dylib")
-library_filenames.push("/usr/local/Cellar/poco/1.4.7p1/lib/libPocoXML.17.dylib")
-
-
+#use install_name_tool to change dependencies form /usr/local to libraries in the package. 
 search_patterns = ["**/*.dylib","**/*.so","**/MantidPlot"]
 search_patterns.each do |pattern|
   Dir[pattern].each do |library|
-    p "library: #{library}"
     dependencies = `otool -L #{library}`
     dependencies.split("\n").each do |dependency|
       library_filenames.each do |filename|
-        if dependency.include? filename
-          basename = File.basename(filename)
-          #p filename 
-          #p basename
+        basename = File.basename(filename)
+        if dependency.include? basename
           `install_name_tool -change #{filename} @rpath/#{basename} #{library}`
         end
       end
@@ -81,8 +70,10 @@ search_patterns.each do |pattern|
   end
 end
 
+#We'll use macdeployqt to fix qt dependencies. 
 `macdeployqt ../MantidPlot.app`
 
+#fix remaining QT linking issues
 `install_name_tool -change /usr/local/lib/Qt3Support.framework/Versions/4/Qt3Support @loader_path/../Frameworks/Qt3Support.framework/Versions/4/Qt3Support Contents/MacOS/mantidqtpython.so` 
 `install_name_tool -change /usr/local/lib/QtOpenGL.framework/Versions/4/QtOpenGL @loader_path/../Frameworks/QtOpenGL.framework/Versions/4/QtOpenGL Contents/MacOS/mantidqtpython.so`
 `install_name_tool -change /usr/local/lib/QtSvg.framework/Versions/4/QtSvg @loader_path/../Frameworks/QtSvg.framework/Versions/4/QtSvg Contents/MacOS/mantidqtpython.so`
@@ -106,16 +97,17 @@ end
 
 `install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/libqscintilla2.11.dylib`
 
+#change id of all PyQt4 libraries
 pyqt4_patterns = ["**/PyQt4/*.so"]
 pyqt4_patterns.each do |pattern|
   Dir[pattern].each do |library|
-    p "library: #{library}"
     basename =  File.basename(library)
     `chmod +w Contents/MacOS/PyQt4/#{basename}`  
     `install_name_tool -id @rpath/#{basename} Contents/MacOS/PyQt4/#{basename}`
   end
 end
 
+#fix PyQt4 and Qt4 linking issues
 `install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtCore.so`
 
 `install_name_tool -change /usr/local/lib/QtGui.framework/Versions/4/QtGui @loader_path/../../Frameworks/QtGui.framework/Versions/4/QtGui Contents/MacOS/PyQt4/QtGui.so`
@@ -136,6 +128,7 @@ end
 `install_name_tool -change /usr/local/lib/QtXml.framework/Versions/4/QtXml @loader_path/../../Frameworks/QtXml.framework/Versions/4/QtXml Contents/MacOS/PyQt4/QtXml.so`
 `install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtXml.so`
 
+#Copy over python libraries not included with OSX. 
 `cp -r /Library/Python/2.7/site-packages/sphinx Contents/MacOS/`
 `cp -r /Library/Python/2.7/site-packages/sphinx_bootstrap_theme Contents/MacOS/`
 `cp -r /Library/Python/2.7/site-packages/IPython Contents/MacOS/`
@@ -144,7 +137,6 @@ end
 
 #add other dependencies found in current package
 #currently missing epics
-
 `cp /Library/Python/2.7/site-packages/gnureadline.so Contents/MacOS/`
 `cp /Library/Python/2.7/site-packages/readline.py Contents/MacOS/`
 `cp /Library/Python/2.7/site-packages/readline.pyc Contents/MacOS/`
@@ -157,20 +149,20 @@ end
 `cp -r /Library/Python/2.7/site-packages/markupsafe Contents/MacOS/`
 `cp -r /Library/Python/2.7/site-packages/jinja2 Contents/MacOS/`
 `cp -r /usr/local/lib/python2.7/site-packages/nxs Contents/MacOS/`
-`rm Contents/MacOS/nxs/*.pyc`
 `cp -r /Library/Python/2.7/site-packages/psutil Contents/MacOS/`
 `mkdir Contents/MacOS/bin`
-`cp -r /usr/local/bin/ipython Contents/MacOS/bin/`
+`cp /usr/local/bin/ipython Contents/MacOS/bin/`
 
+# current .pyc files have permissions issues. These files are recreated by CPack.
+`rm Contents/MacOS/nxs/*.pyc`
+
+#Lastly check for any libraries in the package linking against homebrew libraries.
 search_patterns.each do |pattern|
   Dir[pattern].each do |library|
     dependencies = `otool -L #{library}`
     dependencies.split("\n").each do |dependency|
       if dependency.include? "/usr/local/"
          p "issue with library: #{library} linked against: #{dependency}"
-      end
-      if dependency.include? "libhdf5.9.dylib"
-         p "checkout #{library} #{dependency.strip}"
       end
     end
   end
