@@ -495,7 +495,7 @@ class RunDescriptor(PropDescriptor):
        Rebin(InputWorkspace='tmp_mon',OutputWorkspace='tmp_mon',Params=bins,PreserveEvents='0')
        # should be vice versa but Conjoin invalidate ws pointers and hopefully nothing could happen with workspace during conjoining
        #AddSampleLog(Workspace=monWS,LogName=done_log_name,LogText=str(ws_index),LogType='Number')
-       mon_ws_name = mon_ws.getName();
+       mon_ws_name = mon_ws.getName()
        ConjoinWorkspaces(InputWorkspace1=mon_ws,InputWorkspace2='tmp_mon')
        mon_ws =mtd[mon_ws_name]
 

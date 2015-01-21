@@ -994,8 +994,8 @@ class DirectEnergyConversion(object):
 
         # Store found incident energy in the class itself
         self.incident_energy = ei
-        # copy incident energy obtained on monitor workspace to detectors workspace
         if separate_monitors:
+            # copy incident energy obtained on monitor workspace to detectors workspace
             AddSampleLog(Workspace=data_ws,LogName='Ei',LogText=str(ei),LogType='Number')
             # if monitors are separated from the input workspace, we need to move them too as this is what happening when monitors are integrated into workspace
             result_mon_name=monitor_ws.name()
@@ -1084,27 +1084,16 @@ class DirectEnergyConversion(object):
         elif method == 'monitor-2':
            if not mon_index:
                 mon_index = int(self.mon2_norm_spec)
-           # TODO:  -- separate and test this !!!
+
            # Found TOF range, correspondent to incident energy monitor peak
-           ExtractSingleSpectrum(InputWorkspace=mon_ws, OutputWorkspace='_mon2_norm_range_ws', WorkspaceIndex=mon_index)
            ei = self.incident_energy
-           x=[0.8*ei,ei,1.2*ei]
-           y=[1]*2
-           range_ws_name = '_mon2_int_range_ws'
-           CreateWorkspace(OutputWorkspace=range_ws_name,DataX=x,DataY=y,UnitX='Energy',ParentWorkspace='_mon2_norm_range_ws')
-           ConvertUnits(InputWorkspace=range_ws_name,OutputWorkspace=range_ws_name,Target='TOF',EMode='Elastic')
-
-           # Range is already on shifted workspace so should not use time offset?
-           range_ws = mtd[range_ws_name]
-           x=range_ws.dataX(0)
-
-           DeleteWorkspace('_mon2_norm_range_ws')
-           DeleteWorkspace(range_ws_name)
+           energy_list=[0.8*ei,ei,1.2*ei]
+           TOF_range = self.find_TOF_for_to_energies(mon_ws,energy_list,[mon_index])
  
            # Normalize to monitor 2
            NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
-                                   IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True)
-# debug line:                      IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True,NormalizationFactorWSName='NormMonWS'+data_ws.getName())
+                              IntegrationRangeMin=TOF_range[0], IntegrationRangeMax=TOF_range[2],IncludePartialBins=True)
+# debug line:                 IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True,NormalizationFactorWSName='NormMonWS'+data_ws.getName())
 
         elif method == 'current':
             NormaliseByCurrent(InputWorkspace=old_name,OutputWorkspace=old_name)
@@ -1116,6 +1105,37 @@ class DirectEnergyConversion(object):
         AddSampleLog(Workspace=output, LogName=done_log,LogText=method)
         run.synchronize_ws(output)
         return output
+
+    @staticmethod
+    def get_TOF_for_to_energies(workspace,energy_list,detID_list):
+        """ Method to find what TOF range corresponds to given energy range             
+           for given workspace and detectors.
+
+           Input:
+           workspace    pointer to workspace with instrument attached. 
+           energy_list  the list of input energies to process
+           detID_list   list of detectors to find 
+
+           Returns: 
+        """ 
+        template_ws_name  = '_energy_range_ws'
+        range_ws_name = '_TOF_range_ws'
+        y = [1]*(len(energy_list)-1)
+        TOF_range=[]
+        for detID in detID_list:
+            ind = workspace.getIndexFromSpectrumNumber(detID)
+            ExtractSingleSpectrum(InputWorkspace=workspace, OutputWorkspace=template_ws_name, WorkspaceIndex=ind)
+            CreateWorkspace(OutputWorkspace=range_ws_name,NSpec = 1,DataX=energy_list,DataY=y,UnitX='Energy',ParentWorkspace=template_ws_name)
+            range_ws=ConvertUnits(InputWorkspace=range_ws_name,OutputWorkspace=range_ws_name,Target='TOF',EMode='Elastic')
+            x=range_ws.dataX(0)
+            TOF_range.append(x.tolist())
+
+        #DeleteWorkspace(template_ws_name)
+        #DeleteWorkspace(range_ws_name)
+        if len(detID_list) == 1:
+            TOF_range = TOF_range[0]
+
+        return TOF_range
 
     def save_results(self, workspace, save_file=None, formats = None):
         """

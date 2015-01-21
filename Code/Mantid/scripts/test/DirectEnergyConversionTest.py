@@ -1,5 +1,5 @@
 import os, sys
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -208,6 +208,54 @@ class DirectEnergyConversionTest(unittest.TestCase):
     ##    tReducer.initialise("MAP")
 
     ##    tReducet.di
+    def test_energy_to_TOF_range(self):
+
+        ws = Load(Filename='MAR11001.raw',LoadMonitors='Include')
+        
+        en_range = [0.8*13,13,1.2*13]
+        detIDs=[1,2,3,10]
+        red = DirectEnergyConversion()
+        TRange = red.get_TOF_for_to_energies(ws,en_range,detIDs)
+        for ind,detID in enumerate(detIDs):
+            tof = TRange[ind]
+            y = [1]*(len(tof)-1)
+            ind = ws.getIndexFromSpectrumNumber(detID)
+            ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace='_ws_template', WorkspaceIndex=ind)
+            CreateWorkspace(OutputWorkspace='TOF_WS',NSpec = 1,DataX=tof,DataY=y,UnitX='TOF',ParentWorkspace='_ws_template')
+            EnWs=ConvertUnits(InputWorkspace='TOF_WS',Target='Energy',EMode='Elastic')
+
+            eni = EnWs.dataX(0)
+            for samp,rez in zip(eni,en_range): self.assertAlmostEqual(samp,rez)
+
+        # Now Test shifted:
+        ei,mon1_peak,mon1_index,tzero = GetEi(InputWorkspace=ws, Monitor1Spec=int(2), Monitor2Spec=int(3),EnergyEstimate=13)
+        ScaleX(InputWorkspace='ws',OutputWorkspace='ws',Operation="Add",Factor=-mon1_peak,InstrumentParameter="DelayTime",Combine=True)
+        ws = mtd['ws']
+
+        mon1_det = ws.getDetector(1)
+        mon1_pos = mon1_det.getPos()
+        src_name = ws.getInstrument().getSource().getName()
+        MoveInstrumentComponent(Workspace='ws',ComponentName= src_name, X=mon1_pos.getX(), Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
+
+        # Does not work for monitor 2 as it has been moved to mon2 position and there all tof =0
+        detIDs=[1,3,10]
+        TRange1 = red.get_TOF_for_to_energies(ws,en_range,detIDs)
+
+        for ind,detID in enumerate(detIDs):
+            tof = TRange1[ind]
+            y = [1]*(len(tof)-1)
+            ind = ws.getIndexFromSpectrumNumber(detID)
+            ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace='_ws_template', WorkspaceIndex=ind)
+            CreateWorkspace(OutputWorkspace='TOF_WS',NSpec = 1,DataX=tof,DataY=y,UnitX='TOF',ParentWorkspace='_ws_template')
+            EnWs=ConvertUnits(InputWorkspace='TOF_WS',Target='Energy',EMode='Elastic')
+
+            eni = EnWs.dataX(0)
+            for samp,rez in zip(eni,en_range): self.assertAlmostEqual(samp,rez)
+
+
+
+
+
 
 
 if __name__=="__main__":
