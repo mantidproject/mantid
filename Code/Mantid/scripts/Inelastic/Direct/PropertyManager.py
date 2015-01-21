@@ -108,7 +108,7 @@ class PropertyManager(NonIDF_Properties):
 
         # build and use substitution dictionary
         if 'synonims' in param_list :
-            synonyms_string  = param_list['synonims'];
+            synonyms_string  = param_list['synonims']
             if detine_subst_dict:
                 object.__setattr__(self,subst_name,prop_helpers.build_subst_dictionary(synonyms_string))
             #end
@@ -144,7 +144,7 @@ class PropertyManager(NonIDF_Properties):
         # Let's set private properties directly. Normally, nobody should try 
         # to set them through PropertyManager interface
         #if name0[:2]=='_P':
-        #    self.__dict__[name0] = val;
+        #    self.__dict__[name0] = val
         #    return
         ##end
         if name0 in self.__subst_dict:
@@ -157,7 +157,7 @@ class PropertyManager(NonIDF_Properties):
         if type(val) is str :
            val1 = val.lower()
            if (val1 == 'none' or len(val1) == 0):
-              val = None;
+              val = None
            if val1 == 'default':
               val = self.getDefaultParameterValue(name0)
            # boolean property?
@@ -233,7 +233,7 @@ class PropertyManager(NonIDF_Properties):
         """ Method to clear changed properties list""" 
         if isinstance(value,set):
             decor_prop = '_'+type(self).__name__+'__changed_properties'
-            self.__dict__[decor_prop] =value;
+            self.__dict__[decor_prop] =value
         else:
             raise KeyError("Changed properties can be initialized by appropriate properties set only")
 
@@ -287,6 +287,26 @@ class PropertyManager(NonIDF_Properties):
 
         return self.getChangedProperties()
 
+    def get_used_monitors_list(self):
+        """ Method returns list of monitors ID used during reduction """ 
+
+        used_mon=[]
+        for case in common.switch(self.normalise_method):
+            if case('monitor-1'):
+                used_mon = used_mon.append(self.mon1_norm_spec)
+                break
+            if case('monitor-2'):
+                used_mon = used_mon.append(self.mon2_norm_spec)
+                break
+            if case(): # default, could also just omit condition or 'if True'
+               pass
+
+        used_mon.append(self.ei_mon1_spec)
+        used_mon.append(self.ei_mon2_spec)
+
+        return used_mon
+
+
     def get_diagnostics_parameters(self):
         """ Return the dictionary of the properties used in diagnostics with their values defined in IDF
             
@@ -298,15 +318,15 @@ class PropertyManager(NonIDF_Properties):
                            'bleed_test':False,'bleed_pixels':0,'bleed_maxrate':0,\
                            'hard_mask_file':None,'use_hard_mask_only':False,'background_test_range':None,\
                            'instr_name':'','print_diag_results':True}
-        result = {};
+        result = {}
 
         for key,val in diag_param_list.iteritems():
             try:
-                result[key] = getattr(self,key);
+                result[key] = getattr(self,key)
             except KeyError: 
                 self.log('--- Diagnostics property {0} is not found in instrument properties. Default value: {1} is used instead \n'.format(key,value),'warning')
   
-        return result;
+        return result
 
     def update_defaults_from_instrument(self,pInstrument,ignore_changes=False):
         """ Method used to update default parameters from the same instrument (with different parameters).
@@ -423,16 +443,16 @@ class PropertyManager(NonIDF_Properties):
         if n>0:
             return all_changes
         else:
-            return None;
+            return None
     #end
 
     def _check_file_exist(self,file_name):
-        file_path = FileFinder.getFullPath(file);
+        file_path = FileFinder.getFullPath(file)
         if len(file_path) == 0:
             try:
                 file_path = common.find_file(file)
             except:
-                file_path ='';
+                file_path =''
 
 
     def _check_necessary_files(self,monovan_run):
@@ -446,7 +466,7 @@ class PropertyManager(NonIDF_Properties):
             for prop in files_list :
                 file = getattr(self,prop)
                 if not (file is None) and isinstance(file,str):
-                    file_path = self._check_file_exist(file);
+                    file_path = self._check_file_exist(file)
                     if len(file_path)==0:
                        self.log(" Can not find file ""{0}"" for property: {1} ".format(file,prop),'error')
                        file_missing=True
@@ -466,12 +486,12 @@ class PropertyManager(NonIDF_Properties):
 
         # list of the parameters which should usually be changed by user and if not, user should be warn about it.
         momovan_properties=['sample_mass','sample_rmm','monovan_run']
-        changed_prop = self.getChangedProperties();
-        non_changed = [];
+        changed_prop = self.getChangedProperties()
+        non_changed = []
         for property in momovan_properties:
             if not property in changed_prop:
                 non_changed.append(property)
-        return non_changed;
+        return non_changed
 
     #
     def log_changed_values(self,log_level='notice',display_header=True,already_changed=set()):
@@ -486,9 +506,9 @@ class PropertyManager(NonIDF_Properties):
         # we may want to run absolute units normalization and this function has been called with monovan run or helper procedure
         if self.monovan_run != None :
             # check if mono-vanadium is provided as multiple files list or just put in brackets occasionally
-            self.log("****************************************************************",'notice');
+            self.log("****************************************************************",'notice')
             self.log('*** Output will be in absolute units of mb/str/mev/fu','notice')
-            non_changed = self._check_monovan_par_changed();
+            non_changed = self._check_monovan_par_changed()
             if len(non_changed) > 0:
                 for prop in non_changed:
                     value = getattr(self,prop)
@@ -502,27 +522,27 @@ class PropertyManager(NonIDF_Properties):
         self.log("*** Provisional Incident energy: {0:>12.3f} mEv".format(self.incident_energy),log_level)
       #end display_header
 
-      self.log("****************************************************************",log_level);
-      changed_Keys= self.getChangedProperties();
+      self.log("****************************************************************",log_level)
+      changed_Keys= self.getChangedProperties()
       for key in changed_Keys:
           if key in already_changed:
               continue
-          val = getattr(self,key);
+          val = getattr(self,key)
           self.log("  Value of : {0:<25} is set to : {1:<20} ".format(key,val),log_level)
 
       if not display_header:
           return
 
       save_dir = config.getString('defaultsave.directory')
-      self.log("****************************************************************",log_level);
+      self.log("****************************************************************",log_level)
       if self.monovan_run != None and not('van_mass' in changed_Keys):                           # This output is 
          self.log("*** Monochromatic vanadium mass used : {0} ".format(self.van_mass),log_level) # Adroja request from may 2014
       #
-      self.log("*** By default results are saved into: {0}".format(save_dir),log_level);
-      self.log("*** Output will be normalized to {0}".format(self.normalise_method),log_level);
+      self.log("*** By default results are saved into: {0}".format(save_dir),log_level)
+      self.log("*** Output will be normalized to {0}".format(self.normalise_method),log_level)
       if  self.map_file == None:
             self.log('*** one2one map selected',log_level)
-      self.log("****************************************************************",log_level);
+      self.log("****************************************************************",log_level)
 
 
     #def help(self,keyword=None) :
@@ -530,7 +550,7 @@ class PropertyManager(NonIDF_Properties):
 
     #       if provided without arguments it returns the list of the parameters available
     #    """
-    #    raise KeyError(' Help for this class is not yet implemented: see {0}_Parameter.xml in the file for the parameters description'.format());
+    #    raise KeyError(' Help for this class is not yet implemented: see {0}_Parameter.xml in the file for the parameters description'.format())
 
 if __name__=="__main__":
     pass
