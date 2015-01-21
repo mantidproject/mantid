@@ -179,8 +179,6 @@
 #include <boost/scoped_ptr.hpp>
 
 //Mantid
-#include "ScriptingWindow.h"
-
 #include "Mantid/MantidUI.h"
 #include "Mantid/MantidAbout.h"
 #include "Mantid/PeakPickerTool.h"
@@ -11845,6 +11843,27 @@ void ApplicationWindow::createActions()
   actionShowLog = logWindow->toggleViewAction();
   actionShowLog->setIcon(getQPixmap("log_xpm"));
 
+
+#ifdef SCRIPTING_PYTHON
+  actionShowScriptWindow = new QAction(getQPixmap("python_xpm"), tr("Toggle &Script Window"), this);
+#ifdef __APPLE__
+  actionShowScriptWindow->setShortcut(tr("Ctrl+3")); // F3 is used by the window manager on Mac
+#else
+  actionShowScriptWindow->setShortcut(tr("F3"));
+#endif
+  actionShowScriptWindow->setToggleAction(true);
+  connect(actionShowScriptWindow, SIGNAL(activated()), this, SLOT(showScriptWindow()));
+
+  actionShowScriptInterpreter = new QAction(getQPixmap("python_xpm"), tr("Toggle Script &Interpreter"), this);
+#ifdef __APPLE__
+  actionShowScriptInterpreter->setShortcut(tr("Ctrl+4")); // F4 is used by the window manager on Mac
+#else
+  actionShowScriptInterpreter->setShortcut(tr("F4"));
+#endif
+  actionShowScriptInterpreter->setToggleAction(true);
+  connect(actionShowScriptInterpreter, SIGNAL(activated()), this, SLOT(showScriptInterpreter()));
+#endif
+
   actionAddLayer = new QAction(QIcon(getQPixmap("newLayer_xpm")), tr("Add La&yer"), this);
   actionAddLayer->setShortcut( tr("Alt+L") );
   connect(actionAddLayer, SIGNAL(activated()), this, SLOT(addLayer()));
@@ -12423,38 +12442,6 @@ void ApplicationWindow::createActions()
 
   actionAskHelp = new QAction(tr("Ask for Help"), this);
   connect(actionAskHelp, SIGNAL(triggered()), this, SLOT(showBugTracker()));
-
-  //actionDownloadManual = new QAction(tr("Download &Manual"), this); // Mantid change
-  //connect(actionDownloadManual, SIGNAL(activated()), this, SLOT(downloadManual())); // Mantid change
-
-  //actionTranslations = new QAction(tr("&Translations"), this); // Mantid change
-  //connect(actionTranslations, SIGNAL(activated()), this, SLOT(downloadTranslation())); // Mantid change
-
-  //actionDonate = new QAction(tr("Make a &Donation"), this); // Mantid change
-  //connect(actionDonate, SIGNAL(activated()), this, SLOT(showDonationsPage())); // Mantid change
-
-  // 	actionTechnicalSupport = new QAction(tr("Technical &Support"), this); // Mantid change
-  // 	connect(actionTechnicalSupport, SIGNAL(activated()), this, SLOT(showSupportPage())); // Mantid change
-
-#ifdef SCRIPTING_PYTHON
-  actionShowScriptWindow = new QAction(getQPixmap("python_xpm"), tr("Toggle &Script Window"), this);
-#ifdef __APPLE__
-  actionShowScriptWindow->setShortcut(tr("Ctrl+3")); // F3 is used by the window manager on Mac
-#else
-  actionShowScriptWindow->setShortcut(tr("F3"));
-#endif
-  actionShowScriptWindow->setToggleAction(true);
-  connect(actionShowScriptWindow, SIGNAL(activated()), this, SLOT(showScriptWindow()));
-
-  actionShowScriptInterpreter = new QAction(getQPixmap("python_xpm"), tr("Toggle Script &Interpreter"), this);
-#ifdef __APPLE__
-  actionShowScriptInterpreter->setShortcut(tr("Ctrl+4")); // F4 is used by the window manager on Mac
-#else
-  actionShowScriptInterpreter->setShortcut(tr("F4"));
-#endif
-  actionShowScriptInterpreter->setToggleAction(true);
-  connect(actionShowScriptInterpreter, SIGNAL(activated()), this, SLOT(showScriptInterpreter()));
-#endif
 
   actionShowCurvePlotDialog = new QAction(tr("&Plot details..."), this);
   connect(actionShowCurvePlotDialog, SIGNAL(activated()), this, SLOT(showCurvePlotDialog()));
@@ -15117,6 +15104,9 @@ void ApplicationWindow::showScriptWindow(bool forceVisible, bool quitting)
     connect(scriptingWindow, SIGNAL(hideMe()), this, SLOT(saveScriptWindowGeometry()));
     connect(scriptingWindow, SIGNAL(hideMe()), this, SLOT(showScriptWindow()));
     connect(scriptingWindow, SIGNAL(chooseScriptingLanguage()), this, SLOT(showScriptingLangDialog()));
+    // keep toolbar button status in sync with this window visibility
+    connect(scriptingWindow, SIGNAL(closeMe()), actionShowScriptWindow, SLOT(toggle()));
+    connect(scriptingWindow, SIGNAL(hideMe()), actionShowScriptWindow, SLOT(toggle()));
   }
 
   if( forceVisible || scriptingWindow->isMinimized() || !scriptingWindow->isVisible() )
