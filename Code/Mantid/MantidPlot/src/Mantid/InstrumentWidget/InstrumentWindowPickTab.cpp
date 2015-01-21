@@ -1077,6 +1077,11 @@ void DetectorPlotController::plotTubeSums(int detid)
 {
   std::vector<double> x,y;
   prepareDataForSumsPlot(detid,x,y);
+  if ( x.empty() || y.empty() )
+  {
+    clear();
+    return;
+  }
   Mantid::Geometry::IDetector_const_sptr det = m_instrActor->getInstrument()->getDetector(detid);
   boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
   QString label = QString::fromStdString(parent->getName()) + " (" + QString::number(detid) + ") Sum"; 
