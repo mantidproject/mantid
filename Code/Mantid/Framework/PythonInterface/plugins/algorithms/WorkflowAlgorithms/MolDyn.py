@@ -126,16 +126,20 @@ class MolDyn(PythonAlgorithm):
         # Do setup
         self._setup()
 
-        # Load data file
-        data, name, ext = self._load_file()
+        try:
+            # Load data file
+            data, name, ext = self._load_file()
 
-        # Run nMOLDYN import
-        if ext == 'cdl':
-            self._cdl_import(data, name)
-        elif ext == 'dat':
-            self._ascii_import(data, name)
-        else:
-            raise RuntimeError('Unrecognised file format: %s' % ext)
+            # Run nMOLDYN import
+            if ext == 'cdl':
+                self._cdl_import(data, name)
+            elif ext == 'dat':
+                self._ascii_import(data, name)
+            else:
+                raise RuntimeError('Unrecognised file format: %s' % ext)
+
+        except Exception as ex:
+            logger.error('Error parsing file %s, error is: %s' % (self._sam_path, str(ex)))
 
         # Do processing specific to workspaces in energy
         if isinstance(mtd[self._out_ws], WorkspaceGroup):
