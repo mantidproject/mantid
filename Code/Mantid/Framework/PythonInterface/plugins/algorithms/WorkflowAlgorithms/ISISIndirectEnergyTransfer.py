@@ -96,15 +96,15 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 bin_counts = [mtd[ws].blocksize() for ws in mtd[c_ws_name].getNames()]
                 num_bins = np.amax(bin_counts)
 
+            masked_detectors = self._identify_bad_detectors(workspaces[0])
+
             # Process workspaces
             for ws_name in workspaces:
-                masked_detectors = self._identify_bad_detectors(ws_name)
-
                 monitor_ws_name = ws_name + '_mon'
 
                 # Process monitor
                 if not self._unwrap_monitor(ws_name):
-                    ConvertUnits(InputWorkspace=monitor_ws_name, OutputWorkspace=monitor_ws_name, Target='Wavelength', EMode='Indirect')
+                    ConvertUnits(InputWorkspace=monitor_ws_name, OutputWorkspace=monitor_ws_name, Target='Wavelength', EMode='Elastic')
 
                 self._process_monitor_efficiency(ws_name)
                 self._scale_monitor(ws_name)
