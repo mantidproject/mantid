@@ -45,8 +45,8 @@ Usage
 
 .. testcode:: ExLoadHB2AData
 
-  LoadSPICEAscii(Filename="HB2A_exp0231_scan0001.dat", 
-        IntSampleLogNames="Sum of Counts, scan, mode, experiment_number",
+  LoadSpiceAscii(Filename="HB2A_exp0231_scan0001.dat", 
+        IntegerSampleLogNames="Sum of Counts, scan, mode, experiment_number",
         FloatSampleLogNames="samplemosaic, preset_value, Full Width Half-Maximum, Center of Mass", 
         OutputWorkspace="HB2A_0231_0001_Data", 
         RunInfoWorkspace="HB2A_0231_Info")
@@ -71,7 +71,7 @@ Output:
 
   Number of measuring points = 61
   Number of columns in data workspace = 70
-  Number of run information = 35
+  Number of run information = 34
   Sum of Counts = 1944923
   Center of Mass = 9.00076 +/- 0.00921
 
