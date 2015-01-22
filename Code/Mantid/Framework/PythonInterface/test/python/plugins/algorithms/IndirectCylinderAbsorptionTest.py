@@ -38,7 +38,7 @@ class IndirectCylinderAbsorptionTest(unittest.TestCase):
         self._test_workspaces(corrected, ass)
 
 
-    def test_sample_and_can_scaling(self):
+    def test_sample_and_can_subtraction(self):
         """
         Tests corrections for the sample and simple container subtraction.
         """
@@ -48,6 +48,24 @@ class IndirectCylinderAbsorptionTest(unittest.TestCase):
 
         corrected, ass = IndirectCylinderAbsorption(SampleWorkspace=red_ws,
                                                     CanWorkspace=can_ws,
+                                                    ChemicalFormula='H2-O',
+                                                    SampleRadius=0.2)
+
+        self._test_workspaces(corrected, ass)
+
+
+    def test_sample_and_can_subtraction_with_scale(self):
+        """
+        Tests corrections for the sample and simple container subtraction
+        with can scale.
+        """
+
+        can_ws = LoadNexusProcessed(Filename='irs26173_graphite002_red.nxs')
+        red_ws = LoadNexusProcessed(Filename='irs26176_graphite002_red.nxs')
+
+        corrected, ass = IndirectCylinderAbsorption(SampleWorkspace=red_ws,
+                                                    CanWorkspace=can_ws,
+                                                    CanScaleFactor=0.8,
                                                     ChemicalFormula='H2-O',
                                                     SampleRadius=0.2)
 

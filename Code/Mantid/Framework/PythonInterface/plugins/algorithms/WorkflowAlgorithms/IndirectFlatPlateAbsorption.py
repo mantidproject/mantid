@@ -6,7 +6,7 @@ from mantid.kernel import StringMandatoryValidator, Direction, logger
 class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
 
     def category(self):
-        return "Workflow\\Inelastic;Workflow\\MIDAS;PythonAlgorithms;CorrectionFunctions\\AbsorptionCorrections"
+        return "Workflow\\Inelastic;PythonAlgorithms;CorrectionFunctions\\AbsorptionCorrections"
 
 
     def summary(self):

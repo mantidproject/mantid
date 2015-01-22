@@ -21,11 +21,14 @@ Usage
 
 **Example - Sample corrections for IRIS:**
 
-.. testcode:: SampleCorrectionsOnly
+.. testcode:: SampleCorrectionsWithCanSubtraction
 
   red_ws = LoadNexusProcessed(Filename='irs26176_graphite002_red.nxs')
+  can_ws = LoadNexusProcessed(Filename='irs26173_graphite002_red.nxs')
 
   corrected, ass = IndirectCylinderAbsorption(SampleWorkspace=red_ws,
+                                              CanWorkspace=can_ws,
+                                              CanScaleFactor=0.8,
                                               ChemicalFormula='H2-O',
                                               SampleRadius=0.2)
 
@@ -36,16 +39,17 @@ Usage
         % (ass.YUnitLabel(), ass.getAxis(0).getUnit().caption()))
 
 
-.. testcleanup:: SampleCorrectionsOnly
+.. testcleanup:: SampleCorrectionsWithCanSubtraction
 
    DeleteWorkspace(red_ws)
+   DeleteWorkspace(can_ws)
    DeleteWorkspace(corrected)
    DeleteWorkspace(ass)
 
 **Output:**
 
 
-.. testoutput:: SampleCorrectionsOnly
+.. testoutput:: SampleCorrectionsWithCanSubtraction
 
   Corrected workspace is intensity against Energy transfer
   Corrections workspace is Attenuation factor against Wavelength
