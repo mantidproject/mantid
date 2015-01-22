@@ -1,5 +1,5 @@
 Name:           mantid-developer
-Version:        1.7
+Version:        1.8
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -9,6 +9,7 @@ License:        GPL
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %{?fc20:Requires: rpmfusion-nonfree-release}
+Requires: clang
 Requires: cmake-gui >= 2.8.12
 Requires: boost-devel
 %{?el6:Requires: epel-release}
