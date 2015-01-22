@@ -391,8 +391,7 @@ LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
     g_log.debug() << "Trying to add property " << title << " with value "
                   << strvalue << "\n";
 
-    if (std::find(floatlognamelist.begin(), floatlognamelist.end(), title) !=
-        floatlognamelist.end()) {
+    if (std::binary_search(floatlognamelist.begin(), floatlognamelist.end(), title)){
       // Case as a double property
       bool adderrorvalue = false;
       double value, error;
@@ -418,13 +417,11 @@ LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
         tss << title << ".error";
         addProperty<double>(infows, tss.str(), error);
       }
-    } else if (std::find(intlognamelist.begin(), intlognamelist.end(), title) !=
-               intlognamelist.end()) {
+    } else if (std::binary_search(intlognamelist.begin(), intlognamelist.end(), title)) {
       // It is an integer log
       addProperty<int>(infows, title, atoi(strvalue.c_str()));
     } else if (!ignoreunlisted ||
-               std::find(strlognamelist.begin(), strlognamelist.end(), title) !=
-                   strlognamelist.end()) {
+               std::binary_search(strlognamelist.begin(), strlognamelist.end(), title)) {
       // It is a string log or it is not defined but not ignored either
       addProperty<std::string>(infows, title, strvalue);
     }

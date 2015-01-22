@@ -73,7 +73,7 @@ public:
 
     // Run start
     std::string runstart = infows->run().getProperty("run_start")->value();
-    TS_ASSERT_EQUALS(runstart, "2012-08-13T13:07:33");
+    TS_ASSERT_EQUALS(runstart, "2012-08-13T11:57:33");
 
     // Run end
     std::string runend = infows->run().getProperty("runend")->value();
