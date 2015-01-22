@@ -187,7 +187,6 @@ void FitOptionsBrowser::addProperty(const QString& name,
 
 /** Create a double property and set some settings
  * @param name :: The name of the new property
- * @param manager :: The current property manager
  * @return Pointer to the created property
  */
 QtProperty* FitOptionsBrowser::addDoubleProperty(const QString& name)
