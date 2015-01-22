@@ -318,20 +318,7 @@ class DirectEnergyConversion(object):
       #TODO:
       # Reducer.check_necessary_files(monovan_run)
 
-      #TODO:
-      ## Here was summation in dgreduce.
-      #if (np.size(self.sample_run)) > 1 and self.sum_runs:
-      #  #this sums the runs together before passing the summed file to the
-      #  rest of the reduction
-      #  #this circumvents the inbuilt method of summing which fails to sum the
-      #  files for diag
-      #  # TODO: --check out if internal summation works -- it does not.
-      #  Should be fixed.  Old summation meanwhile
-
-      #  sum_name=self.instr_name+str(self.sample_run[0])+'-sum'
-      #  sample_run =self.sum_files(sum_name, self.sample_run)
-      #  common.apply_calibration(self.instr_name,sample_run,self.det_cal_file)
-
+  
       sample_ws = PropertyManager.sample_run.get_workspace()
 
       # Update reduction properties which may change in the workspace but have
@@ -831,9 +818,6 @@ class DirectEnergyConversion(object):
         object.__setattr__(self,'_mon2_norm_time_range',None)
         object.__setattr__(self,'_debug_mode',False)
 
-
-
-
         all_methods = dir(self)
         # define list of all existing properties, which have descriptors
         object.__setattr__(self,'_descriptors',extract_non_system_names(all_methods))
@@ -916,7 +900,7 @@ class DirectEnergyConversion(object):
             if key not in changed_param_list :
                 value = getattr(self,key)
                 message = '\n***WARNING!: Absolute units reduction parameter : '+key + ' has its default value: '+str(value)+\
-                          '\n             This may need to change for correct absolute units'
+                          '\n             This may need to change to get correct absolute units'
                 n_warnings += 1
                 self.log(message,'warning')
 
@@ -963,8 +947,6 @@ class DirectEnergyConversion(object):
             # convert to monovanadium to energy
             deltaE_wkspace_monovan = self.mono_sample(monovan_run,ei_guess,wb_mono,
                                                       self.monovan_mapfile,self.spectra_masks)
-            #deltaE_wkspace_monovan = self.convert_to_energy(monovan_run,
-            #ei_guess, wb_mono)
 
 
             ei_monovan = deltaE_wkspace_monovan.getRun().getLogData("Ei").value
@@ -975,6 +957,7 @@ class DirectEnergyConversion(object):
 
             prop_man.log('*** Absolute correction factor(s): S^2: {0:10.4f}\n*** LibISIS: {1:10.4f} Poisson: {2:10.4f}  TGP: {3:10.4f} '\
                 .format(anf_LibISIS,anf_SS2,anf_Puas,anf_TGP),'notice')
+            prop_man.log('*** If these numbers are substantially different, you are doing something incorrectly.  ***','notice')
             absnorm_factor = anf_TGP
         #end
         prop_man.log('*** Using {0} value : {1} of absolute units correction factor (TGP)'.format(abs_norm_factor_is,absnorm_factor),'notice')
@@ -1112,8 +1095,9 @@ class DirectEnergyConversion(object):
            log_value = log_value + log1_value
            propman.log(log_value,'error')
         else:
-           DeleteWorkspace(Workspace=deltaE_wkspaceName)
-           DeleteWorkspace(Workspace=data_ws)
+            if not self._debug_mode:
+                DeleteWorkspace(Workspace=deltaE_wkspaceName)
+                DeleteWorkspace(Workspace=data_ws)
         return (norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
 #-------------------------------------------------------------------------------
 
