@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit.h"
 #include "MantidQtMantidWidgets/FunctionBrowser.h"
+#include "MantidQtMantidWidgets/RangeSelector.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -316,10 +317,14 @@ QwtDoubleRect DatasetPlotData::boundingRect() const
 /*                                PlotController                                            */
 /*==========================================================================================*/
 
-PlotController::PlotController(MultiDatasetFit *parent,QwtPlot *plot, QTableWidget *table, QComboBox *plotSelector, QPushButton *prev, QPushButton *next):
+PlotController::PlotController(MultiDatasetFit *parent, 
+                               QwtPlot *plot, 
+                               QTableWidget *table, 
+                               QComboBox *plotSelector, 
+                               QPushButton *prev, 
+                               QPushButton *next):
   QObject(parent),m_plot(plot),m_table(table),m_plotSelector(plotSelector),m_prevPlot(prev),m_nextPlot(next),m_currentIndex(-1)
 {
-  connect(parent,SIGNAL(dataTableUpdated()),this,SLOT(tableUpdated()));
   connect(prev,SIGNAL(clicked()),this,SLOT(prevPlot()));
   connect(next,SIGNAL(clicked()),this,SLOT(nextPlot()));
   connect(plotSelector,SIGNAL(currentIndexChanged(int)),this,SLOT(plotDataSet(int)));
@@ -332,6 +337,13 @@ PlotController::PlotController(MultiDatasetFit *parent,QwtPlot *plot, QTableWidg
 
   m_magnifier = new QwtPlotMagnifier( plot->canvas() );
   m_magnifier->setEnabled( false );
+
+  auto rangeSelector = new MantidWidgets::RangeSelector(m_plot);
+  rangeSelector->setRange( -1e30, 1e30 );
+
+  rangeSelector->setMinimum(10);
+  rangeSelector->setMaximum(990);
+  
 }
 
 PlotController::~PlotController()
@@ -581,11 +593,13 @@ void MultiDatasetFit::initLayout()
 
   m_uiForm.btnRemove->setEnabled( false );
 
-  connect(m_uiForm.btnAddWorkspace,SIGNAL(clicked()),this,SLOT(addWorkspace()));
-  connect(m_uiForm.btnRemove,SIGNAL(clicked()),this,SLOT(removeSelectedSpectra()));
-  connect(m_uiForm.dataTable,SIGNAL(itemSelectionChanged()), this,SLOT(workspaceSelectionChanged()));
   connect(m_uiForm.btnFit,SIGNAL(clicked()),this,SLOT(fit()));
-  connect(this,SIGNAL(dataTableUpdated()),this,SLOT(reset()));
+
+  m_dataController = new DataController(this, m_uiForm.dataTable);
+  connect(m_dataController,SIGNAL(dataTableUpdated()),this,SLOT(reset()));
+  connect(m_dataController,SIGNAL(hasSelection(bool)),  m_uiForm.btnRemove, SLOT(setEnabled(bool)));
+  connect(m_uiForm.btnAddWorkspace,SIGNAL(clicked()),m_dataController,SLOT(addWorkspace()));
+  connect(m_uiForm.btnRemove,SIGNAL(clicked()),m_dataController,SLOT(removeSelectedSpectra()));
 
   m_plotController = new PlotController(this,
                                         m_uiForm.plot,
@@ -593,6 +607,7 @@ void MultiDatasetFit::initLayout()
                                         m_uiForm.cbPlotSelector,
                                         m_uiForm.btnPrev,
                                         m_uiForm.btnNext);
+  connect(m_dataController,SIGNAL(dataTableUpdated()),m_plotController,SLOT(tableUpdated()));
   connect(m_plotController,SIGNAL(currentIndexChanged(int)),this,SLOT(updateLocalParameters(int)));
 
   m_functionBrowser = new MantidQt::MantidWidgets::FunctionBrowser(NULL, true);
@@ -633,82 +648,6 @@ void MultiDatasetFit::createPlotToolbar()
   toolBar->addActions(group->actions());
 
   m_uiForm.horizontalLayout->insertWidget(3,toolBar);
-}
-
-/**
- * Show a dialog to select a workspace.
- */
-void MultiDatasetFit::addWorkspace()
-{
-  AddWorkspaceDialog dialog(this);
-  if ( dialog.exec() == QDialog::Accepted )
-  {
-    QString wsName = dialog.workspaceName().stripWhiteSpace();
-    // if name is empty assume that there are no workspaces in the ADS
-    if ( wsName.isEmpty() ) return;
-    if ( Mantid::API::AnalysisDataService::Instance().doesExist( wsName.toStdString()) )
-    {
-      auto indices = dialog.workspaceIndices();
-      for(auto i = indices.begin(); i != indices.end(); ++i)
-      {
-        addWorkspaceSpectrum( wsName, *i );
-      }
-      emit dataTableUpdated();
-    }
-    else
-    {
-      QMessageBox::warning(this,"MantidPlot - Warning",QString("Workspace \"%1\" doesn't exist.").arg(wsName));
-    }
-  }
-}
-
-/**
- * Add a spectrum from a workspace to the table.
- * @param wsName :: Name of a workspace.
- * @param wsIndex :: Index of a spectrum in the workspace (workspace index).
- */
-void MultiDatasetFit::addWorkspaceSpectrum(const QString &wsName, int wsIndex)
-{
-  int row = m_uiForm.dataTable->rowCount();
-  m_uiForm.dataTable->insertRow(row);
-
-  auto cell = new QTableWidgetItem( wsName );
-  m_uiForm.dataTable->setItem( row, wsColumn, cell );
-  cell = new QTableWidgetItem( QString::number(wsIndex) );
-  m_uiForm.dataTable->setItem( row, wsIndexColumn, cell );
-}
-
-/**
- * Slot. Called when selection in the data table changes.
- */
-void MultiDatasetFit::workspaceSelectionChanged()
-{
-  auto selection = m_uiForm.dataTable->selectionModel();
-  bool enableRemoveButton = selection->hasSelection();
-  if ( enableRemoveButton )
-  {
-    enableRemoveButton = selection->selectedRows().size() > 0;
-  }
-
-  m_uiForm.btnRemove->setEnabled( enableRemoveButton );
-}
-
-/**
- * Slot. Called when "Remove" button is pressed.
- */
-void MultiDatasetFit::removeSelectedSpectra()
-{
-  auto ranges = m_uiForm.dataTable->selectedRanges();
-  if ( ranges.isEmpty() ) return;
-  std::vector<int> rows;
-  for(auto range = ranges.begin(); range != ranges.end(); ++range)
-  {
-    for(int row = range->topRow(); row <= range->bottomRow(); ++row)
-    {
-      rows.push_back( row );
-    }
-  }
-  removeDataSets( rows );
 }
 
 /**
@@ -876,7 +815,7 @@ void MultiDatasetFit::fit()
  */
 std::string MultiDatasetFit::getWorkspaceName(int i) const
 {
-  return m_uiForm.dataTable->item(i, wsColumn)->text().toStdString();
+  return m_dataController->getWorkspaceName(i);
 }
 
 /**
@@ -885,7 +824,7 @@ std::string MultiDatasetFit::getWorkspaceName(int i) const
  */
 int MultiDatasetFit::getWorkspaceIndex(int i) const
 {
-  return m_uiForm.dataTable->item(i, wsIndexColumn)->text().toInt();
+  return m_dataController->getWorkspaceIndex(i);
 }
 
 /**
@@ -893,7 +832,7 @@ int MultiDatasetFit::getWorkspaceIndex(int i) const
  */
 int MultiDatasetFit::getNumberOfSpectra() const
 {
-  return m_uiForm.dataTable->rowCount();
+  return m_dataController->getNumberOfSpectra();
 }
 
 /**
@@ -1085,6 +1024,111 @@ void MultiDatasetFit::showTableInfo()
  */
 void MultiDatasetFit::checkDataSets()
 {
+  m_dataController->checkDataSets();
+}
+
+/*==========================================================================================*/
+/*                                    DataController                                        */
+/*==========================================================================================*/
+
+DataController::DataController(MultiDatasetFit *parent, QTableWidget *dataTable):
+  m_dataTable(dataTable)
+{
+  connect(dataTable,SIGNAL(itemSelectionChanged()), this,SLOT(workspaceSelectionChanged()));
+}
+
+/**
+ * Show a dialog to select a workspace.
+ */
+void DataController::addWorkspace()
+{
+  AddWorkspaceDialog dialog(owner());
+  if ( dialog.exec() == QDialog::Accepted )
+  {
+    QString wsName = dialog.workspaceName().stripWhiteSpace();
+    // if name is empty assume that there are no workspaces in the ADS
+    if ( wsName.isEmpty() ) return;
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist( wsName.toStdString()) )
+    {
+      auto indices = dialog.workspaceIndices();
+      for(auto i = indices.begin(); i != indices.end(); ++i)
+      {
+        addWorkspaceSpectrum( wsName, *i );
+      }
+      emit dataTableUpdated();
+    }
+    else
+    {
+      QMessageBox::warning(owner(),"MantidPlot - Warning",QString("Workspace \"%1\" doesn't exist.").arg(wsName));
+    }
+  }
+}
+
+/**
+ * Add a spectrum from a workspace to the table.
+ * @param wsName :: Name of a workspace.
+ * @param wsIndex :: Index of a spectrum in the workspace (workspace index).
+ */
+void DataController::addWorkspaceSpectrum(const QString &wsName, int wsIndex)
+{
+  int row = m_dataTable->rowCount();
+  m_dataTable->insertRow(row);
+
+  auto cell = new QTableWidgetItem( wsName );
+  m_dataTable->setItem( row, wsColumn, cell );
+  cell = new QTableWidgetItem( QString::number(wsIndex) );
+  m_dataTable->setItem( row, wsIndexColumn, cell );
+}
+
+/**
+ * Slot. Called when selection in the data table changes.
+ */
+void DataController::workspaceSelectionChanged()
+{
+  auto selection = m_dataTable->selectionModel();
+  bool enableRemoveButton = selection->hasSelection();
+  if ( enableRemoveButton )
+  {
+    enableRemoveButton = selection->selectedRows().size() > 0;
+  }
+
+  emit hasSelection(enableRemoveButton);
+}
+
+/**
+ * Slot. Called when "Remove" button is pressed.
+ */
+void DataController::removeSelectedSpectra()
+{
+  auto ranges = m_dataTable->selectedRanges();
+  if ( ranges.isEmpty() ) return;
+  std::vector<int> rows;
+  for(auto range = ranges.begin(); range != ranges.end(); ++range)
+  {
+    for(int row = range->topRow(); row <= range->bottomRow(); ++row)
+    {
+      rows.push_back( row );
+    }
+  }
+  removeDataSets( rows );
+}
+
+void DataController::removeDataSets( std::vector<int>& rows )
+{
+  if ( rows.empty() ) return;
+  std::sort( rows.begin(), rows.end() );
+  for(auto row = rows.rbegin(); row != rows.rend(); ++row)
+  {
+    m_dataTable->removeRow( *row );
+  }
+  emit dataTableUpdated();
+}
+
+/**
+ * Check that the data sets in the table are valid and remove invalid ones.
+ */
+void DataController::checkDataSets()
+{
   std::vector<int> rows;
   int nrows = getNumberOfSpectra();
   auto& ADS = Mantid::API::AnalysisDataService::Instance();
@@ -1108,17 +1152,32 @@ void MultiDatasetFit::checkDataSets()
   removeDataSets( rows );
 }
 
-void MultiDatasetFit::removeDataSets( std::vector<int>& rows )
+/**
+ * Get the workspace name of the i-th spectrum.
+ * @param i :: Index of a spectrum in the data table.
+ */
+std::string DataController::getWorkspaceName(int i) const
 {
-  if ( rows.empty() ) return;
-  std::sort( rows.begin(), rows.end() );
-  for(auto row = rows.rbegin(); row != rows.rend(); ++row)
-  {
-    m_uiForm.dataTable->removeRow( *row );
-  }
-  emit dataTableUpdated();
+  return m_dataTable->item(i, wsColumn)->text().toStdString();
 }
 
-/*==========================================================================================*/
+/**
+ * Get the workspace index of the i-th spectrum.
+ * @param i :: Index of a spectrum in the data table.
+ */
+int DataController::getWorkspaceIndex(int i) const
+{
+  return m_dataTable->item(i, wsIndexColumn)->text().toInt();
+}
+
+/**
+ * Get the number of spectra to fit to.
+ */
+int DataController::getNumberOfSpectra() const
+{
+  return m_dataTable->rowCount();
+}
+
+
 } // CustomInterfaces
 } // MantidQt
