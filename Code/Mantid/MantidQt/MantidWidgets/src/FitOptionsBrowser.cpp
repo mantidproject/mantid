@@ -4,6 +4,8 @@
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IWorkspaceProperty.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
