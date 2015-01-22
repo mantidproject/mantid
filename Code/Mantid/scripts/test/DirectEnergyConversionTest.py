@@ -1,5 +1,5 @@
 import os, sys
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -215,7 +215,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         en_range = [0.8*13,13,1.2*13]
         detIDs=[1,2,3,10]
         red = DirectEnergyConversion()
-        TRange = red.get_TOF_for_to_energies(ws,en_range,detIDs)
+        TRange = red.get_TOF_for_energies(ws,en_range,detIDs)
         for ind,detID in enumerate(detIDs):
             tof = TRange[ind]
             y = [1]*(len(tof)-1)
@@ -239,7 +239,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         # Does not work for monitor 2 as it has been moved to mon2 position and there all tof =0
         detIDs=[1,3,10]
-        TRange1 = red.get_TOF_for_to_energies(ws,en_range,detIDs)
+        TRange1 = red.get_TOF_for_energies(ws,en_range,detIDs)
 
         for ind,detID in enumerate(detIDs):
             tof = TRange1[ind]

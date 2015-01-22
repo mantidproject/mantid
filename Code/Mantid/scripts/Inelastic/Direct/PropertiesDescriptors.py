@@ -193,9 +193,15 @@ class VanadiumRMM(PropDescriptor):
 class mon2NormalizationEnergyRange(PropDescriptor):
     """ Energy range to integrate signal on monitor 2 when normalized by this monitor 
         
-        This property returns the energy range 
+        This class contains relative range of energies in which the monitor-2 signal should 
+        be integrated, and returns the energy range for integration according to 
+        formula: range = [min_range*ei,max_range*ei] where ei is incident monitor energy
+
+        To find actual integration ranges one should convert these values into TOF (or 
+        convert monitor signal to energy)
     """ 
     def __init__(self):
+        # default range
         self._relative_range = [0.8,1.2]
 
 
@@ -208,14 +214,16 @@ class mon2NormalizationEnergyRange(PropDescriptor):
     def __set__(self,instance,val):
        """ set detector calibration file using various formats """ 
        if isinstance(val,list):
-           self._relative_range=self._check_range(val)
+           self._relative_range=self._check_range(val,instance)
        elif isinstance(val,str):
            val = self._parce_string2list(val)
            self.__set__(instance,val)
        else:
            raise KeyError('mon2_norm_energy_range needs to be initialized by two values.\n'
                           'Trying to assign value {0} of unknown type {1}'.format(val,type(val)))
-    def _check_range(val):
+    #
+    def _check_range(self,val,instance):
+        """ method to check if list of values acceptable as ranges """
         if len(val) != 2:
             raise KeyError('mon2_normalization_energy_range can be initialized by list of two values only. Got {0} values'.format(len(val)))
         val1 = float(val[0])
@@ -236,9 +244,14 @@ class mon2NormalizationEnergyRange(PropDescriptor):
             instance.log(message,'warning')
 
         return [val1,val2]
-    def _parce_strin2list(val):
-        pass
+    #
+    def _parce_string2list(self,val):
+        """ method splits input string containing comma into list of strings"""
+        value = val.strip('[]()')
+        val   = value.split(',')
+        return val
 
+#-----------------------------------------------------------------------------------------
 class PropertyFromRange(PropDescriptor):
     """ Descriptor for property, which can have one value from a list of values """
     def __init__(self,availible_values,default_value):

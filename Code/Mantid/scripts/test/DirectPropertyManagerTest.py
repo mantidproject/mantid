@@ -1,5 +1,5 @@
 import os
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -723,6 +723,39 @@ class DirectPropertyManagerTest(unittest.TestCase):
         mons = propman.get_used_monitors_list()
         self.assertEqual(len(mons),2)
 
+    def test_mon2_integration_range(self):
+        propman = self.prop_man
+        propman.incident_energy = 10
+        range = propman.mon2_norm_energy_range
+
+        # check defaults
+        self.assertAlmostEqual(range[0],8.)
+        self.assertAlmostEqual(range[1],12.)
+
+        propman.mon2_norm_energy_range=[0.7,1.3]
+        range = propman.mon2_norm_energy_range
+        self.assertAlmostEqual(range[0],7.)
+        self.assertAlmostEqual(range[1],13.)
+
+        propman.mon2_norm_energy_range='[0.5,1.5]'
+        range = propman.mon2_norm_energy_range
+        self.assertAlmostEqual(range[0],5.)
+        self.assertAlmostEqual(range[1],15.)
+
+        propman.mon2_norm_energy_range='0.6,1.4'
+        range = propman.mon2_norm_energy_range
+        self.assertAlmostEqual(range[0],6.)
+        self.assertAlmostEqual(range[1],14.)
+
+
+        self.assertRaises(KeyError,setattr,propman,'mon2_norm_energy_range',10)
+        self.assertRaises(KeyError,setattr,propman,'mon2_norm_energy_range','[0.95,1.05,4]')
+        self.assertRaises(KeyError,setattr,propman,'mon2_norm_energy_range','[0.05,0.9]')
+
+        propman.mon2_norm_energy_range='0.95,1.05'
+        range = propman.mon2_norm_energy_range
+        self.assertAlmostEqual(range[0],9.5)
+        self.assertAlmostEqual(range[1],10.5)
 
 
 if __name__=="__main__":

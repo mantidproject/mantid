@@ -127,7 +127,7 @@ class DirectEnergyConversion(object):
 
       hardmaskOnly=Filename :load a hardmask and use as only mask
     """
-
+#-------------------------------------------------------------------------------
     def diagnose(self, white,diag_sample=None,**kwargs):
         """
             Run diagnostics on the provided workspaces.
@@ -181,7 +181,8 @@ class DirectEnergyConversion(object):
 
         # modify properties using input arguments
         self.prop_man.set_input_parameters(**kwargs)
-        # obtain proper run descriptor in case it is not a run descriptor but something else
+        # obtain proper run descriptor in case it is not a run descriptor but
+        # something else
         white = self.get_run_descriptor(white)
 
         # return all diagnostics parameters
@@ -195,21 +196,25 @@ class DirectEnergyConversion(object):
         #    self._keep_wb_workspace = True
 
              
-        # TODO: primitive cache is used here. Improve
+        # TODO: primitive cache is used here.  Improve
         if self.use_hard_mask_only:
             if mtd.doesExist('hard_mask_ws'):
                 diag_mask = mtd['hard_mask_ws']
             else: # build hard mask
-                # in this peculiar way we can obtain working mask which accounts for initial data grouping in the data file.
-                # SNS or 1 to 1 maps may probably avoid this stuff and can load masks directly
+                # in this peculiar way we can obtain working mask which
+                                 # accounts for initial data grouping in the data file.
+                                 # SNS or 1 to 1 maps may probably avoid this stuff and can load
+                                 # masks directly
                 white_data = white.get_ws_clone('white_ws_clone')
-                #whitews_name = common.create_resultname(white, suffix='-white')
+                #whitews_name = common.create_resultname(white,
+                #suffix='-white')
                 #if whitews_name in mtd:
                 #    DeleteWorkspace(Workspace=whitews_name)
                 ## Load
-                #white_data,mon_ws = self.load_data(white,whitews_name,self._keep_wb_workspace)
+                #white_data,mon_ws =
+                #self.load_data(white,whitews_name,self._keep_wb_workspace)
 
-                diag_mask= LoadMask(Instrument=self.instr_name,InputFile=self.hard_mask_file,
+                diag_mask = LoadMask(Instrument=self.instr_name,InputFile=self.hard_mask_file,
                                OutputWorkspace='hard_mask_ws')
                 MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
                 DeleteWorkspace(diag_mask)
@@ -230,20 +235,19 @@ class DirectEnergyConversion(object):
         if diag_sample: 
 
             diag_sample = self.get_run_descriptor(diag_sample)
-            # If the bleed test is requested then we need to pass in the sample_run as well
+            # If the bleed test is requested then we need to pass in the
+            # sample_run as well
             if self.bleed_test:
-                # initiate reference to reducer to be able to work with Run Descriptors
+                # initiate reference to reducer to be able to work with Run
+                # Descriptors
                 diagnostics.__Reducer__ = self
                 diag_params['sample_run'] = diag_sample
 
             # Set up the background integrals for diagnostic purposes
-            result_ws        = self.normalise(diag_sample, self.normalise_method)
-            # remember the current workspace state 
-            diag_sample.synchronize_ws(result_ws)
+            result_ws = self.normalise(diag_sample, self.normalise_method)
 
-            result_ws=diag_sample.get_workspace()
-
-            #>>> here result workspace is being processed -- not touching result ws
+            #>>> here result workspace is being processed -- not touching
+            #result ws
             bkgd_range = self.background_test_range
             background_int = Integration(result_ws,
                                          RangeLower=bkgd_range[0],RangeUpper=bkgd_range[1],
@@ -259,13 +263,13 @@ class DirectEnergyConversion(object):
 
         # Check how we should run diag
         diag_spectra_blocks = self.diag_spectra
-        if diag_spectra_blocks  is None:
+        if diag_spectra_blocks is None:
             # Do the whole lot at once
             diagnostics.diagnose(whiteintegrals, **diag_params)
         else:
             for index, bank in enumerate(diag_spectra_blocks):
                 diag_params['start_index'] = bank[0] - 1
-                diag_params['end_index']   = bank[1] - 1
+                diag_params['end_index'] = bank[1] - 1
                 diagnostics.diagnose(whiteintegrals, **diag_params)
 
         if 'sample_counts' in diag_params:
@@ -281,67 +285,168 @@ class DirectEnergyConversion(object):
         #self.spectra_masks = diag_mask
         return diag_mask
 
+#-------------------------------------------------------------------------------
+    def convert_to_energy(self,wb_run=None,sample_run=None,ei_guess=None,rebin=None,map_file=None,monovan_run=None,wb_for_monovan_run=None,**kwargs):
+      """ One step conversion of run into workspace containing information about energy transfer
 
-    def _build_white_tag(self):
+      """ 
+      # Support for old reduction interface:
+      self.prop_man.set_input_parameters_ignore_nan(wb_run=wb_run,sample_run=sample_run,incident_energy=ei_guess,
+                                           energy_bins=rebin,map_file=map_file,monovan_run=monovan_run,wb_for_monovan_run=wb_for_monovan_run)
+      #
+      self.prop_man.set_input_parameters(**kwargs)
 
-        low,upp=self.wb_integr_range
-        white_tag='NormBy:{0}_IntergatedIn:{1:0>10.2f}:{2:0>10.2f}'.format(self.normalise_method,low,upp)
+      # output workspace name.
+      try:
+          n,r = funcreturns.lhs_info('both')
+          out_ws_name = r[0]
+      except:
+          out_ws_name = None
 
-        return white_tag
 
-    def _get_wb_inegrals(self,run,mon_number = None):
-        """ """
-        run = self.get_run_descriptor(run)
-        white_ws = run.get_workspace()
-        # This both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
-        done_Log = 'DET_EFFICIENCY_calculated'
 
-        # set action suffix and check if such workspace is already present
-        new_ws_name = run.set_action_suffix('_norm_white')
+      # inform user on what parameters have changed from script or gui
+      self.prop_man.log_changed_values('notice')
+      prop_man = self.prop_man
+      #process complex parameters
 
-        # Check if the work has been already done
-        if new_ws_name in mtd:
-            targ_ws = mtd[new_ws_name]
-            if done_Log in targ_ws.getRun():
-                old_log_val=targ_ws.getRun().getLogData(done_Log).value
-                done_log_VAL = self._build_white_tag()
-                if old_log_val == done_log_VAL:
-                    run.synchronize_ws(targ_ws)
-                    return mtd[new_ws_name]
-                else:
-                    DeleteWorkspace(Workspace=new_ws_name)
-            else:
-                DeleteWorkspace(Workspace=new_ws_name)
-        #end 
-        done_log_VAL = self._build_white_tag()
+      start_time = time.time()
+      # defaults can be None too, but can be a file
 
-        # Normalize
-        self.__in_white_normalization = True
-        white_ws = self.normalise(run, self.normalise_method,0.0,mon_number)
-        self.__in_white_normalization = False
-        new_ws_name = run.set_action_suffix('_norm_white')
-        old_name = white_ws.name()
+     # check if reducer can find all non-run files necessary for the reduction
+     # before starting long run.
+      #TODO:
+      # Reducer.check_necessary_files(monovan_run)
 
-        # Units conversion
-        ConvertUnits(InputWorkspace=old_name,OutputWorkspace=old_name, Target= "Energy", AlignBins=0)
-        self.prop_man.log("do_white: finished converting Units",'information')
+      #TODO:
+      ## Here was summation in dgreduce.
+      #if (np.size(self.sample_run)) > 1 and self.sum_runs:
+      #  #this sums the runs together before passing the summed file to the
+      #  rest of the reduction
+      #  #this circumvents the inbuilt method of summing which fails to sum the
+      #  files for diag
+      #  # TODO: --check out if internal summation works -- it does not.
+      #  Should be fixed.  Old summation meanwhile
 
-        low,upp=self.wb_integr_range
-        if low > upp:
-            raise ValueError("White beam integration range is inconsistent. low=%d, upp=%d" % (low,upp))
+      #  sum_name=self.instr_name+str(self.sample_run[0])+'-sum'
+      #  sample_run =self.sum_files(sum_name, self.sample_run)
+      #  common.apply_calibration(self.instr_name,sample_run,self.det_cal_file)
 
-        delta = 2.0*(upp - low)
-        white_ws = Rebin(InputWorkspace=old_name,OutputWorkspace=old_name, Params=[low, delta, upp])
-        # Why aren't we doing this...
-        #Integration(white_ws, white_ws, RangeLower=low, RangeUpper=upp)
-        AddSampleLog(white_ws,LogName = done_Log,LogText=done_log_VAL,LogType='String')
-        run.synchronize_ws(white_ws)
-        if self._keep_wb_workspace:
-            result = run.get_ws_clone()
+      sample_ws = PropertyManager.sample_run.get_workspace()
+
+      # Update reduction properties which may change in the workspace but have
+      # not been modified from input parameters.
+      # E.g.  detector number have changed
+      oldChanges = self.prop_man.getChangedProperties()
+      allChanges = self.prop_man.update_defaults_from_instrument(sample_ws.getInstrument())
+      workspace_defined_prop = allChanges.difference(oldChanges)
+      if len(workspace_defined_prop) > 0:
+          prop_man.log("****************************************************************")
+          prop_man.log('*** Sample run {0} properties change default reduction properties: '.format(PropertyManager.sample_run.get_ws_name()))
+          prop_man.log_changed_values('notice',False,oldChanges)
+          prop_man.log("****************************************************************")
+
+
+
+
+      masking = None
+      masks_done = False
+      if not prop_man.run_diagnostics:
+          header = "*** Diagnostics including hard masking is skipped "
+          masks_done = True
+      #if Reducer.save_and_reuse_masks :
+      # SAVE AND REUSE MASKS
+      if self.spectra_masks:
+         masks_done = True
+#-------------------------------------------------------------------------------------------------------------------------------------------------------
+#  Diagnostics here
+# --------------------------------------------------------------------------------------------------------
+     # diag the sample and detector vanadium.  It will deal with hard mask only
+     # if it is set that way
+      if not masks_done:
+        prop_man.log("======== Run diagnose for sample run ===========================",'notice')
+        masking = self.diagnose(PropertyManager.wb_run,PropertyManager.mask_run,
+                                second_white=None,print_diag_results=True)
+        if prop_man.use_hard_mask_only:
+            header = "*** Hard mask file applied to workspace with {0:d} spectra masked {1:d} spectra"
         else:
-            result = run.get_workspace()
-        return result
+            header = "*** Diagnostics processed workspace with {0:d} spectra and masked {1:d} bad spectra"
 
+
+        # diagnose absolute units:
+        if self.monovan_run != None :
+            if self.mono_correction_factor == None :
+                if self.use_sam_msk_on_monovan == True:
+                    prop_man.log('  Applying sample run mask to mono van')
+                else:
+                    if not self.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace
+                                                     # Should be better solution for that.
+                        prop_man.log("======== Run diagnose for monochromatic vanadium run ===========",'notice')
+
+                        masking2 = self.diagnose(PropertyManager.wb_for_monovan_run,PropertyManager.monovan_run,
+                                         second_white = None,print_diag_results=True)
+                        masking +=  masking2
+                        DeleteWorkspace(masking2)
+
+
+            else: # if Reducer.mono_correction_factor != None :
+                pass
+        # Very important statement propagating masks for further usage in
+        # convert_to_energy.
+        # This property is also directly accessible from GUI.
+        self.spectra_masks = masking
+         # save mask if it does not exist and has been already loaded
+         #if Reducer.save_and_reuse_masks and not masks_done:
+         #    SaveMask(InputWorkspace=masking,OutputFile =
+         #    mask_file_name,GroupedDetectors=True)
+      else:
+          header = '*** Using stored mask file for workspace with  {0} spectra and {1} masked spectra'
+          masking = self.spectra_masks
+ 
+      # estimate and report the number of failing detectors
+      failed_sp_list,nMaskedSpectra = get_failed_spectra_list_from_masks(masking)
+      nSpectra = masking.getNumberHistograms()
+      prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice')
+
+      #Run the conversion first on the sample
+      deltaE_wkspace_sample = self.mono_sample(PropertyManager.sample_run,self.incident_energy,PropertyManager.wb_run,
+                                               self.map_file,masking)
+
+ 
+      # calculate absolute units integral and apply it to the workspace
+      if self.monovan_run != None or self.mono_correction_factor != None :
+         deltaE_wkspace_sample = self.apply_absolute_normalization(deltaE_wkspace_sample,PropertyManager.monovan_run,\
+                                                                   self.incident_energy,PropertyManager.wb_for_monovan_run)
+      # ensure that the sample_run name is intact with workspace
+      PropertyManager.sample_run.synchronize_ws(deltaE_wkspace_sample)
+
+
+      results_name = deltaE_wkspace_sample.name()
+      if out_ws_name and results_name != out_ws_name:
+         RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
+
+
+      ei = (deltaE_wkspace_sample.getRun().getLogData("Ei").value)
+      prop_man.log("*** Incident energy found for sample run: {0} meV".format(ei),'notice')
+
+      end_time = time.time()
+      prop_man.log("*** Elapsed time = {0} sec".format(end_time - start_time),'notice')
+
+    # Hack for multirep mode?
+#    if mtd.doesExist('hard_mask_ws') == True:
+ #       DeleteWorkspace(Workspace='hard_mask_ws')
+
+      # SNS or GUI motor stuff
+      self.calculate_rotation(deltaE_wkspace_sample)
+      #
+      self.save_results(deltaE_wkspace_sample)
+      #
+      # Currently clear masks unconditionally TODO: cash masks with appropriate
+      # precautions
+      self.spectra_masks = None
+
+
+      return deltaE_wkspace_sample
 
     def do_white(self, run, spectra_masks=None, map_file=None,mon_number=None):
         """
@@ -370,572 +475,10 @@ class DirectEnergyConversion(object):
             white_run = self.get_run_descriptor(white_run)
 
 
-        mono_s=self._do_mono(mono_run, ei_guess,
+        mono_s = self._do_mono(mono_run, ei_guess,
                              white_run, map_file, spectra_masks, Tzero)
         return mono_s
 
-
-# -------------------------------------------------------------------------------------------
-#         This actually does the conversion for the mono-sample and mono-vanadium runs
-#
-# -------------------------------------------------------------------------------------------
-    def _do_mono_SNS(self, data_ws, result_name, ei_guess,
-                 white_run=None, map_file=None, spectra_masks=None, Tzero=None):
-
-        # Special load monitor stuff.
-        propman = self.prop_man
-        if (propman.instr_name == "CNCS" or propman.instr_name == "HYSPEC"):
-            propman.fix_ei = True
-            ei_value = ei_guess
-            if (propman.instr_name == "HYSPEC"):
-                Tzero=4.0 + 107.0 / (1+math.pow((ei_value/31.0),3.0))
-                propman.log("Determined T0 of %s for HYSPEC" % str(Tzero))
-            if (Tzero is None):
-                tzero = (0.1982*(1+ei_value)**(-0.84098))*1000.0
-            else:
-                tzero = Tzero
-            # apply T0 shift
-            ScaleX(InputWorkspace=data_ws,OutputWorkspace=result_name,Operation="Add",Factor=-tzero)
-            mon1_peak = 0.0
-        elif (propman.instr_name == "ARCS" or propman.instr_name == "SEQUOIA"):
-            if 'Filename' in data_ws.getRun(): mono_run = data_ws.getRun()['Filename'].value
-            else: raise RuntimeError('Cannot load monitors for event reduction. Unable to determine Filename from mono workspace, it should have been added as a run log.')
-
-            propman.log("mono_run = %s (%s)" % (mono_run,type(mono_run)),'debug')
-
-            if mono_run.endswith("_event.nxs"):
-                monitor_ws=LoadNexusMonitors(Filename=mono_run)
-            elif mono_run.endswith("_event.dat"):
-                InfoFilename = mono_run.replace("_neutron_event.dat", "_runinfo.xml")
-                monitor_ws=LoadPreNexusMonitors(RunInfoFilename=InfoFilename)
-
-            argi = {}
-            argi['Monitor1Spec']=int(propman.ei_mon_spectra[0])
-            argi['Monitor2Spec']=int(propman.ei_mon_spectra[1])
-            argi['EnergyEstimate']=ei_guess
-            argi['FixEi'] =propman.fix_ei
-            if hasattr(self, 'ei_mon_peak_search_range'):
-                argi['PeakSearchRange']=self.ei_mon_peak_search_range
-
-            try:
-                ei_calc,firstmon_peak,firstmon_index,TzeroCalculated = \
-                    GetEi(InputWorkspace=monitor_ws,**argi)
-            except:
-                propman.log("Error in GetEi. Using entered values.")
-                #monitor_ws.getRun()['Ei'] = ei_value
-                ei_value = ei_guess
-                AddSampleLog(Workspace=monitor_ws,LogName= 'Ei',LogText= ei_value,LogType= "Number")
-                ei_calc = None
-                TzeroCalculated = Tzero
-
-            # Set the tzero to be the calculated value
-            if (TzeroCalculated is None):
-                tzero = 0.0
-            else:
-                tzero = TzeroCalculated
-
-            # If we are fixing, then use the guess if given
-            if (propman.fix_ei):
-                ei_value = ei_guess
-                # If a Tzero has been entered, use it, if we are fixing.
-                if (Tzero is not None):
-                    tzero = Tzero
-            else:
-                if (ei_calc is not None):
-                    ei_value = ei_calc
-                else:
-                    ei_value = ei_guess
-
-            mon1_peak = 0.0
-            # apply T0 shift
-            ScaleX(InputWorkspace=data_ws,OutputWorkspace= result_name,Operation="Add",Factor=-tzero)
-        else:
-            # Do ISIS stuff for Ei
-            # Both are these should be run properties really
-            ei_value, mon1_peak = self.get_ei(data_ws,monitor_ws, result_name, ei_guess)
-        self.prop_man.incident_energy = ei_value
-
-        # As we've shifted the TOF so that mon1 is at t=0.0 we need to account for this in CalculateFlatBackground and normalisation
-        bin_offset = -mon1_peak
-
-        # For event mode, we are going to histogram in energy first, then go back to TOF
-        if propman.check_background== True:
-           # Extract the time range for the background determination before we throw it away
-           background_bins = "%s,%s,%s" % (propman.bkgd_range[0] + bin_offset, (propman.bkgd_range[1]-propman.bkgd_range[0]), propman.bkgd_range[1] + bin_offset)
-           Rebin(InputWorkspace=result_name,OutputWorkspace= "background_origin_ws",Params=background_bins)
-
-        # Convert to Et
-        ConvertUnits(InputWorkspace=result_name,OutputWorkspace= "_tmp_energy_ws", Target="DeltaE",EMode="Direct", EFixed=ei_value)
-        RenameWorkspace(InputWorkspace="_tmp_energy_ws",OutputWorkspace= result_name)
-        # Histogram
-        Rebin(InputWorkspace=result_name,OutputWorkspace= "_tmp_rebin_ws",Params= propman.energy_bins, PreserveEvents=False)
-        RenameWorkspace(InputWorkspace="_tmp_rebin_ws",OutputWorkspace= result_name)
-        # Convert back to TOF
-        ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="TOF",EMode="Direct", EFixed=ei_value)
-
-        if propman.check_background == True:
-            # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined such region
-            ConvertToDistribution(Workspace=result_name)
-
-            CalculateFlatBackground(InputWorkspace="background_origin_ws",OutputWorkspace= "background_ws",
-                               StartX= propman.bkgd_range[0] + bin_offset,EndX= propman.bkgd_range[1] + bin_offset,
-                               WorkspaceIndexList= '',Mode= 'Mean',OutputMode= 'Return Background')
-            # Delete the raw data background region workspace
-            DeleteWorkspace("background_origin_ws")
-            # Convert to distribution to make it compatible with the data workspace (result_name).
-            ConvertToDistribution(Workspace="background_ws")
-            # Subtract the background
-            Minus(LHSWorkspace=result_name,RHSWorkspace= "background_ws",OutputWorkspace=result_name)
-             # Delete the determined background
-            DeleteWorkspace("background_ws")
-
-            ConvertFromDistribution(Workspace=result_name)
-
-        # Normalize using the chosen method
-        # This should be done as soon as possible after loading and usually happens at diag. Here just in case if diag was bypassed
-        norm_ws=self.normalise(mtd[result_name], propman.normalise_method, range_offset=bin_offset)
-
-
-
-        # This next line will fail the SystemTests
-        #ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct', EFixed=ei_value)
-        # But this one passes...
-        ConvertUnits(InputWorkspace=norm_ws,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
-        propman.log("_do_mono: finished ConvertUnits for : "+result_name)
-
-
-
-        if propman.energy_bins :
-            Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= propman.energy_bins,PreserveEvents=False)
-
-        if propman.apply_detector_eff:
-           # Need to be in lambda for detector efficiency correction
-            ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="Wavelength", EMode="Direct", EFixed=ei_value)
-            He3TubeEfficiency(InputWorkspace=result_name,OutputWorkspace=result_name)
-            ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="DeltaE",EMode='Direct', EFixed=ei_value)
-        ############
-        return
-
-    def _do_mono_ISIS(self, data_run, ei_guess,
-                 white_run=None, map_file=None, spectra_masks=None, Tzero=None):
-
-        # Do ISIS stuff for Ei
-        # Both are these should be run properties really
-
-
-        ei_value, mon1_peak = self.get_ei(data_run, ei_guess)
-        self.incident_energy = ei_value
-
-
-        # As we've shifted the TOF so that mon1 is at t=0.0 we need to account for this in CalculateFlatBackground and normalization
-        bin_offset = -mon1_peak
-        result_name = data_run.set_action_suffix('_spe')
-
-        if self.check_background == True:
-            # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined such region
-            result_ws = data_run.get_workspace()
-            bkgd_range = self.bkgd_range
-            CalculateFlatBackground(InputWorkspace=result_ws,OutputWorkspace=result_ws,
-                                    StartX= bkgd_range[0] + bin_offset,EndX= bkgd_range[1] + bin_offset,
-                                     WorkspaceIndexList= '',Mode= 'Mean',SkipMonitors='1')
-            data_run.synchronize_ws(result_ws)
-
-
-        # Normalize using the chosen method+group
-        norm_ws=self.normalise(data_run, self.normalise_method, range_offset=bin_offset)
-        # normalized workspace can go out with different name, so here we reinforce one  expected here
-        result_name = data_run.set_action_suffix('_spe')
-        data_run.synchronize_ws(norm_ws)
-
-
-
-        # This next line will fail the SystemTests
-        #ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct', EFixed=ei_value)
-        # But this one passes...
-        ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
-        self.prop_man.log("_do_mono: finished ConvertUnits for : "+result_name,'information')
-
-
-        energy_bins = self.energy_bins
-        if energy_bins:
-            Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= energy_bins,PreserveEvents=False)
-
-        if self.apply_detector_eff:
-           DetectorEfficiencyCor(InputWorkspace=result_name,OutputWorkspace=result_name)
-           self.prop_man.log("_do_mono: finished DetectorEfficiencyCor for : "+result_name,'information')
-        #############
-        data_run.synchronize_ws(mtd[result_name])
-
-        return
-
-    def _do_mono(self, run,  ei_guess,
-                 white_run=None, map_file=None, spectra_masks=None, Tzero=None):
-        """
-        Convert units of a given workspace to deltaE, including possible
-        normalization to a white-beam vanadium run.
-        """
-
-        if (self._do_ISIS_reduction):
-           self._do_mono_ISIS(run,ei_guess,
-                               white_run, map_file, spectra_masks, Tzero)
-        else:
-          result_name = run.set_action_suffix('_spe')
-          self._do_mono_SNS(run,result_name,ei_guess,
-                         white_run, map_file, spectra_masks, Tzero)
-          run.synchronize_ws()
-
-        prop_man = self.prop_man
-        result_name = run.get_ws_name()
-        #######################
-        # Ki/Kf Scaling...
-        if prop_man.apply_kikf_correction:
-            prop_man.log('Start Applying ki/kf corrections to the workspace : '+result_name,'information')
-            CorrectKiKf(InputWorkspace=result_name,OutputWorkspace= result_name, EMode='Direct')
-            prop_man.log('finished applying ki/kf corrections for : '+result_name,'information')
-
-        # Make sure that our binning is consistent
-        if prop_man.energy_bins:
-            Rebin(InputWorkspace=result_name,OutputWorkspace= result_name,Params= prop_man.energy_bins)
-
-        # Masking and grouping
-        result_ws = mtd[result_name]
-        result_ws = self.remap(result_ws, spectra_masks, map_file)
-
-
-        ConvertToDistribution(Workspace=result_ws)
-        # White beam correction
-        if white_run is not None:
-            white_ws = self.do_white(white_run, spectra_masks, map_file,None)
-            result_ws /= white_ws
-            DeleteWorkspace(white_ws)
-
-        # Overall scale factor
-        result_ws *= prop_man.scale_factor
-        return result_ws
-
-    def convert_to_energy(self,wb_run=None,sample_run=None,ei_guess=None,rebin=None,map_file=None,monovan_run=None,wb_for_monovan_run=None,**kwargs):
-      """ One step conversion of run into workspace containing information about energy transfer
-
-      """ 
-      # Support for old reduction interface:
-      self.prop_man.set_input_parameters_ignore_nan(wb_run=wb_run,sample_run=sample_run,incident_energy=ei_guess,
-                                           energy_bins=rebin,map_file=map_file,monovan_run=monovan_run,wb_for_monovan_run=wb_for_monovan_run)
-      # 
-      self.prop_man.set_input_parameters(**kwargs)
-
-      # output workspace name.
-      try:
-          n,r=funcreturns.lhs_info('both')
-          out_ws_name=r[0]
-      except:
-          out_ws_name = None
-
-
-
-      # inform user on what parameters have changed from script or gui
-      self.prop_man.log_changed_values('notice')
-      prop_man = self.prop_man
-      #process complex parameters
-
-      start_time=time.time()
-      # defaults can be None too, but can be a file
-
-     # check if reducer can find all non-run files necessary for the reduction before starting long run.
-      #TODO:
-      # Reducer.check_necessary_files(monovan_run)
-
-      #TODO:
-      ## Here was summation in dgreduce. 
-      #if (np.size(self.sample_run)) > 1 and self.sum_runs:
-      #  #this sums the runs together before passing the summed file to the rest of the reduction
-      #  #this circumvents the inbuilt method of summing which fails to sum the files for diag
-      #  # TODO: --check out if internal summation works -- it does not. Should be fixed. Old summation meanwhile
-
-      #  sum_name=self.instr_name+str(self.sample_run[0])+'-sum'
-      #  sample_run =self.sum_files(sum_name, self.sample_run)
-      #  common.apply_calibration(self.instr_name,sample_run,self.det_cal_file)
-
-      sample_ws = PropertyManager.sample_run.get_workspace()
-
-      # Update reduction properties which may change in the workspace but have not been modified from input parameters. 
-      # E.g. detector number have changed 
-      oldChanges = self.prop_man.getChangedProperties()
-      allChanges  =self.prop_man.update_defaults_from_instrument(sample_ws.getInstrument())
-      workspace_defined_prop=allChanges.difference(oldChanges)
-      if len(workspace_defined_prop)>0:
-          prop_man.log("****************************************************************")
-          prop_man.log('*** Sample run {0} properties change default reduction properties: '.format(PropertyManager.sample_run.get_ws_name()))
-          prop_man.log_changed_values('notice',False,oldChanges)
-          prop_man.log("****************************************************************")
-
-
-
-
-      masking = None
-      masks_done=False
-      if not prop_man.run_diagnostics:
-          header="*** Diagnostics including hard masking is skipped "
-          masks_done = True
-      #if Reducer.save_and_reuse_masks :
-      # SAVE AND REUSE MASKS
-      if self.spectra_masks:
-         masks_done=True
-#-------------------------------------------------------------------------------------------------------------------------------------------------------
-#  Diagnostics here 
-# --------------------------------------------------------------------------------------------------------
-     # diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
-      if not masks_done:
-        prop_man.log("======== Run diagnose for sample run ===========================",'notice')
-        masking = self.diagnose(PropertyManager.wb_run,PropertyManager.mask_run,
-                                second_white=None,print_diag_results=True)
-        if prop_man.use_hard_mask_only:
-            header = "*** Hard mask file applied to workspace with {0:d} spectra masked {1:d} spectra"
-        else:
-            header = "*** Diagnostics processed workspace with {0:d} spectra and masked {1:d} bad spectra"
-
-
-        # diagnose absolute units:
-        if self.monovan_run != None :
-            if self.mono_correction_factor == None :
-                if self.use_sam_msk_on_monovan == True:
-                    prop_man.log('  Applying sample run mask to mono van')
-                else:
-                    if not self.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better solution for that.
-                        prop_man.log("======== Run diagnose for monochromatic vanadium run ===========",'notice')
-
-                        masking2 = self.diagnose(PropertyManager.wb_for_monovan_run,PropertyManager.monovan_run,
-                                         second_white = None,print_diag_results=True)
-                        masking +=  masking2
-                        DeleteWorkspace(masking2)
-
-
-            else: # if Reducer.mono_correction_factor != None :
-                pass
-        # Very important statement propagating masks for further usage in convert_to_energy. 
-        # This property is also directly accessible from GUI.
-        self.spectra_masks=masking
-         # save mask if it does not exist and has been already loaded
-         #if Reducer.save_and_reuse_masks and not masks_done:
-         #    SaveMask(InputWorkspace=masking,OutputFile = mask_file_name,GroupedDetectors=True)
-      else:
-          header = '*** Using stored mask file for workspace with  {0} spectra and {1} masked spectra'
-          masking=self.spectra_masks
- 
-      # estimate and report the number of failing detectors
-      failed_sp_list,nMaskedSpectra  = get_failed_spectra_list_from_masks(masking)
-      nSpectra = masking.getNumberHistograms()
-      prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice')
-
-      #Run the conversion first on the sample
-      deltaE_wkspace_sample = self.mono_sample(PropertyManager.sample_run,self.incident_energy,PropertyManager.wb_run,
-                                               self.map_file,masking)
-
- 
-      # calculate absolute units integral and apply it to the workspace
-      if self.monovan_run != None or self.mono_correction_factor != None :
-         deltaE_wkspace_sample = self.apply_absolute_normalization(deltaE_wkspace_sample,PropertyManager.monovan_run,\
-                                                                   self.incident_energy,PropertyManager.wb_for_monovan_run)
-      # ensure that the sample_run name is intact with workspace
-      PropertyManager.sample_run.synchronize_ws(deltaE_wkspace_sample)
-
-
-      results_name = deltaE_wkspace_sample.name()
-      if out_ws_name and results_name != out_ws_name:
-         RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
-
-
-      ei= (deltaE_wkspace_sample.getRun().getLogData("Ei").value)
-      prop_man.log("*** Incident energy found for sample run: {0} meV".format(ei),'notice')
-
-      end_time=time.time()
-      prop_man.log("*** Elapsed time = {0} sec".format(end_time-start_time),'notice')
-
-    # Hack for multirep mode?
-#    if mtd.doesExist('hard_mask_ws') == True:
- #       DeleteWorkspace(Workspace='hard_mask_ws')
-
-      # SNS or GUI motor stuff
-      self.calculate_rotation(deltaE_wkspace_sample)
-      #
-      self.save_results(deltaE_wkspace_sample)
-      #
-      # Currently clear masks unconditionally TODO: cash masks with appropriate precautions
-      self.spectra_masks = None
-
-
-      return deltaE_wkspace_sample
-
-  
-    def apply_absolute_normalization(self,sample_ws,monovan_run=None,ei_guess=None,wb_mono=None):
-        """  Function applies absolute normalization factor to the target workspace
-             and calculates this factor if necessary
-
-            Inputs:
-            Reducer           --    properly initialized class which performs reduction
-            deltaE_wkspace_sample-- the workspace which should be modified
-            monovan_run          -- run number for monochromatic vanadium sample at current energy
-            ei_guess             -- estimated neutrons incident energy
-            wb_mono              -- white bean vanadium run number.
-        """
-        # Old interface support
-        prop_man = self.prop_man
-        prop_man.log('*** Running absolute units corrections ****************************************************','notice')
-
-        if prop_man.mono_correction_factor:
-            absnorm_factor=float(prop_man.mono_correction_factor)
-            prop_man.log('*** Using supplied workspace correction factor                           ******','notice')
-            abs_norm_factor_is='provided'
-        else:
-            mvir=prop_man.monovan_integr_range
-            prop_man.log('*** Evaluating the integral from the monovan run and calculate the correction factor ******','notice')
-            prop_man.log('    Using absolute units vanadium integration range : [{0:8f}:{1:8f}]         ******'.format(mvir[0],mvir[1]),'notice')
-            abs_norm_factor_is = 'calculated'
-
-            # convert to monovanadium to energy
-            deltaE_wkspace_monovan  = self.mono_sample(monovan_run,ei_guess,wb_mono,
-                                                      self.monovan_mapfile,self.spectra_masks)
-            #deltaE_wkspace_monovan = self.convert_to_energy(monovan_run, ei_guess, wb_mono)
-
-
-            ei_monovan = deltaE_wkspace_monovan.getRun().getLogData("Ei").value
-            prop_man.log('    Incident energy found for monovanadium run: '+str(ei_monovan)+' meV','notice')
-
-
-            (anf_LibISIS,anf_SS2,anf_Puas,anf_TGP) = self.get_abs_normalization_factor(deltaE_wkspace_monovan.getName(),ei_monovan)
-
-            prop_man.log('*** Absolute correction factor(s): S^2: {0:10.4f}\n*** LibISIS: {1:10.4f} Poisson: {2:10.4f}  TGP: {3:10.4f} '\
-                .format(anf_LibISIS,anf_SS2,anf_Puas,anf_TGP),'notice')
-            absnorm_factor = anf_TGP
-        #end
-        prop_man.log('*** Using {0} value : {1} of absolute units correction factor (TGP)'.format(abs_norm_factor_is,absnorm_factor),'notice')
-        prop_man.log('*******************************************************************************************','notice')
-
-        sample_ws = sample_ws/absnorm_factor
-
-        return sample_ws
-    def get_abs_normalization_factor(self,deltaE_wkspaceName,ei_monovan):
-        """get absolute normalization factor for monochromatic vanadium
-
-          Inputs:
-          @param: deltaE_wkspace  -- the name (string) of monovan workspace, converted to energy
-          @param: ei_monovan      -- monovan sample incident energy
-
-          @returns the value of monovan absolute normalization factor.
-                   deletes monovan workspace (deltaE_wkspace) if abs norm factor was calculated successfully
-
-          Detailed explanation:
-          The algorithm takes the monochromatic vanadium workspace normalized by WB vanadium and calculates
-          average modified monochromatic vanadium (MV) integral considering that the efficiency of detectors
-          are different and accounted for by dividing each MV value by corresponding WBV value,
-          the signal on a detector has poison distribution and the error for a detector is the square
-          root of correspondent signal on a detector.
-          Error for WBV considered negligibly small wrt. the error on MV
-         """
-
-        propman = self.prop_man
-        van_mass=propman.van_mass
-        # list of two number  representing the minimal (ei_monovan[0])
-        # and the maximal (ei_monovan[1]) energy to integrate the spectra
-        minmax = propman.monovan_integr_range
-
-
-        data_ws=Integration(InputWorkspace=deltaE_wkspaceName,OutputWorkspace='van_int',RangeLower=minmax[0],RangeUpper=minmax[1],IncludePartialBins='1')
- 
-        nhist = data_ws.getNumberHistograms()
-        # extract wb integrals for combined spectra
-        signal=[]
-        error =[]
-        izerc=0
-        for i in range(nhist):
-           try:
-             det = data_ws.getDetector(i)
-           except Exception:
-             continue
-           if det.isMasked():
-             continue
-           sig = data_ws.readY(i)[0]
-           err = data_ws.readE(i)[0]
-           if sig != sig:     #ignore NaN (hopefully it will mean mask some day)
-               continue
-           if ((err<=0) or (sig<=0)):   # count Inf and negative||zero readings. Presence of this indicates that something went wrong
-              izerc+=1
-              continue
-
-           signal.append(sig) 
-           error.append(err)
-        #---------------- Loop finished
-
-        norm_factor={}
-        # Various prior probabilities.
-        #-------------------------------------------------------------------------
-        # Guess which minimizes the value sum(n_i-n)^2/Sigma_i -- this what Libisis had
-        signal_sum = sum(map(lambda s,e: s/e,signal,error))
-        weight_sum = sum(map(lambda e: 1./e, error))
-        norm_factor['LibISIS']=signal_sum/weight_sum
-        #-------------------------------------------------------------------------
-        # Guess which minimizes the value sum(n_i-n)^2/Sigma_i^2
-        signal_sum = sum(map(lambda s,e: s/(e*e),signal,error))
-        weight_sum = sum(map(lambda e: 1./(e*e), error))
-        norm_factor['SigSq']=signal_sum/weight_sum
-        #-------------------------------------------------------------------------
-        # Guess which assumes Poisson distribution with Err=Sqrt(signal) and calculates
-        # the function: N_avrg = 1/(DetEfficiency_avrg^-1)*sum(n_i*DetEfficiency_i^-1)
-        # where the DetEfficiency = WB_signal_i/WB_average WB_signal_i is the White Beam Vanadium
-        # signal on i-th detector and the WB_average -- average WB vanadium signal.
-        # n_i is the modified signal
-        signal_sum = sum(map(lambda e: e*e,error))
-        weight_sum = sum(map(lambda s,e: e*e/s,signal,error))
-        if( weight_sum==0.0):
-            prop_man.log("WB integral has been calculated incorrectly, look at van_int workspace: {0}".format(deltaE_wkspaceName),'error')
-            raise ArithmeticError("Division by 0 weight when calculating WB integrals from workspace {0}".format(deltaE_wkspaceName))
-        norm_factor['Poisson']=signal_sum/weight_sum
-        #-------------------------------------------------------------------------
-        # Guess which estimates value sum(n_i^2/Sigma_i^2)/sum(n_i/Sigma_i^2) TGP suggestion from 12-2012
-        signal_sum = sum(map(lambda s,e: s*s/(e*e),signal,error))
-        weight_sum = sum(map(lambda s,e: s/(e*e),signal,error))
-        if( weight_sum==0.0):
-            prop_man.log("WB integral has been calculated incorrectly, look at van_int workspace: {0}".format(deltaE_wkspaceName),'error')
-            raise ArithmeticError("Division by 0 weight when calculating WB integrals from workspace {0}".format(deltaE_wkspaceName))
-        norm_factor['TGP']=signal_sum/weight_sum
-        #
-        #
-        #integral_monovan=signal_sum /(wbVan_sum)
-        van_multiplier = (float(propman.van_rmm)/float(van_mass))
-        if ei_monovan >= 210.0:
-            xsection = 421  # vanadium cross-section in mBarn/sR (402 mBarn/Sr) (!!!modified to fit high energy limit?!!!)
-        else: # old textbook cross-section for vanadium for ei=20mEv
-            xsection = 400 + (ei_monovan/10)
-        sample_multiplier = (float(propman.sample_mass)/float(propman.sample_rmm))
-
-        scale_factor = van_multiplier*sample_multiplier/xsection
-
-        for type,val in norm_factor.iteritems():
-            norm_factor[type] = val*scale_factor
-
-        # check for NaN
-        if (norm_factor['LibISIS']!=norm_factor['LibISIS'])|(izerc!=0):    # It is an error, print diagnostics:
-           if (norm_factor['LibISIS'] !=norm_factor['LibISIS']):
-               log_value = '\n--------> Absolute normalization factor is NaN <----------------------------------------------\n'
-           else:
-               log_value ='\n--------> Warning, Monovanadium has zero spectra <--------------------------------------------\n'
-               log1_value = \
-               "--------> Processing workspace: {0}\n"\
-               "--------> Monovan Integration range : min={1}, max={2} (meV)\n"\
-               "--------> Summed:  {3} spectra with total signal: {4} and error: {5}\n"\
-               "--------> Dropped: {6} zero spectra\n"\
-               "--------> Using  mBarn/sR*fu normalization factor = {7} resulting in:\n"\
-               "--------> Abs norm factors: LibISIS: {8}\n"\
-               "--------> Abs norm factors: Sigma^2: {9}\n"\
-               "--------> Abs norm factors: Poisson: {10}\n"\
-               "--------> Abs norm factors: TGP    : {11}\n"\
-               .format(deltaE_wkspaceName,minmax[0],minmax[1],nhist,sum(signal),sum(error),izerc,scale_factor,
-                          norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
-           log_value = log_value+log1_value
-           propman.log(log_value,'error')
-        else:
-           DeleteWorkspace(Workspace=deltaE_wkspaceName)
-           DeleteWorkspace(Workspace=data_ws)
-        return (norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
 #-------------------------------------------------------------------------------
     def calculate_rotation(self,sample_wkspace,motor=None, offset=None):
         """calculate psi from sample environment motor and offset
@@ -945,7 +488,7 @@ class DirectEnergyConversion(object):
 
         self.prop_man.set_input_parameters_ignore_nan(motor_name=motor,offset=offset)
         motor = self.prop_man.motor_name
-        offset= self.prop_man.motor_offset
+        offset = self.prop_man.motor_offset
 
         #
         if (offset is None):
@@ -956,15 +499,15 @@ class DirectEnergyConversion(object):
         if motor:
         # Check if motor name exists
             if sample_wkspace.getRun().hasProperty(motor):
-                motor_rotation=sample_wkspace.getRun()[motor].value[0]
+                motor_rotation = sample_wkspace.getRun()[motor].value[0]
                 self.prop_man.log("Motor {0} rotation is {1}".format(motor,motor_rotation))
             else:
                 self.prop_man.log("Could not find such sample environment log. Will use psi=motor_offset")
-                motor_rotation=0
+                motor_rotation = 0
         else:
            motor_rotation = float('nan')
-        self.prop_man.psi = motor_rotation+motor_offset
-        
+        self.prop_man.psi = motor_rotation + motor_offset
+#-------------------------------------------------------------------------------        
     def get_ei(self, data_run, ei_guess):
         """
         Calculate incident energy of neutrons and the time of the of the
@@ -987,7 +530,8 @@ class DirectEnergyConversion(object):
 
         ##-------------------------------------------------------------
         ## check if monitors are in the main workspace or provided separately
-        #data_ws,monitors_ws = self.check_monitor_ws(data_ws,monitors_ws,ei_mon_spectra)
+        #data_ws,monitors_ws =
+        #self.check_monitor_ws(data_ws,monitors_ws,ei_mon_spectra)
         ##------------------------------------------------
 
         # Calculate the incident energy
@@ -997,17 +541,21 @@ class DirectEnergyConversion(object):
 
         # Store found incident energy in the class itself
         self.incident_energy = ei
-        if self.prop_man.normalise_method =='monitor-2':
-           # monitor-2 normalization ranges have to be identified before the instrument is shifted
-           #Find TOF range, correspondent to incident energy monitor peak 
+        if self.prop_man.normalise_method == 'monitor-2':
+           # monitor-2 normalization ranges have to be identified before the
+           # instrument is shifted in case it is shifted to this monitor (usual case)
+           #Find TOF range, correspondent to incident energy monitor peak
            energy_rage = self.mon2_norm_energy_range
-           self._mon2_norm_time_range = self.find_TOF_for_to_energies(mon_ws,energy_rage,[self.mon2_norm_spec])
+           self._mon2_norm_time_range = self.get_TOF_for_energies(monitor_ws,energy_rage,[self.mon2_norm_spec],self._debug_mode)
         #end
         if separate_monitors:
-            # copy incident energy obtained on monitor workspace to detectors workspace
+            # copy incident energy obtained on monitor workspace to detectors
+            # workspace
             AddSampleLog(Workspace=data_ws,LogName='Ei',LogText=str(ei),LogType='Number')
-            # if monitors are separated from the input workspace, we need to move them too as this is what happening when monitors are integrated into workspace
-            result_mon_name=monitor_ws.name()
+            # if monitors are separated from the input workspace, we need to
+            # move them too as this is what happening when monitors are
+            # integrated into workspace
+            result_mon_name = monitor_ws.name()
             ScaleX(InputWorkspace=monitor_ws,OutputWorkspace=result_mon_name,Operation="Add",Factor=-mon1_peak,
                    InstrumentParameter="DelayTime",Combine=True)
             monitor_ws = mtd[result_mon_name]
@@ -1018,9 +566,9 @@ class DirectEnergyConversion(object):
         ScaleX(InputWorkspace=data_ws,OutputWorkspace=resultws_name,Operation="Add",Factor=-mon1_peak,
                InstrumentParameter="DelayTime",Combine=True)
 
-        # shift to monitor used to calculate energy transfer    
+        # shift to monitor used to calculate energy transfer
         spec_num = monitor_ws.getIndexFromSpectrumNumber(int(ei_mon_spectra[0])) 
-        mon1_det = monitor_ws.getDetector(spec_num )
+        mon1_det = monitor_ws.getDetector(spec_num)
         mon1_pos = mon1_det.getPos()
         src_name = data_ws.getInstrument().getSource().getName()
         MoveInstrumentComponent(Workspace=resultws_name,ComponentName= src_name, X=mon1_pos.getX(), Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
@@ -1031,7 +579,7 @@ class DirectEnergyConversion(object):
         data_run.synchronize_ws(mtd[resultws_name])
         return ei, mon1_peak
 
-  
+#-------------------------------------------------------------------------------  
     def remap(self, result_ws, spec_masks, map_file):
         """
         Mask and group detectors based on input parameters
@@ -1044,9 +592,7 @@ class DirectEnergyConversion(object):
                                        MapFile= map_file, KeepUngroupedSpectra=0, Behaviour='Average')
 
         return mtd[ws_name]
-
-
-
+#-------------------------------------------------------------------------------
     def normalise(self, run, method, range_offset=0.0,mon_index=None):
         """
         Apply normalization using specified source
@@ -1057,7 +603,7 @@ class DirectEnergyConversion(object):
         old_name = data_ws.name()
 
         result_name = run.set_action_suffix('_normalized')
-            
+
 
         # Make sure we don't call this twice
         done_log = "DirectInelasticReductionNormalisedBy"
@@ -1066,70 +612,100 @@ class DirectEnergyConversion(object):
             output = mtd[result_name]
             return output
 
+
         method = method.lower()
+        for case in common.switch(method):
+            if case('monitor-1'):
+               self._normalize_to_monitor1(run,old_name, range_offset,mon_index)
+               break
+            if case('monitor-2'):
+               self._normalize_to_monitor2(run,old_name, range_offset,mon_index)
+               break
+            if case('current'):
+                NormaliseByCurrent(InputWorkspace=old_name,OutputWorkspace=old_name)
+                break
+            if case(): # default
+               raise RuntimeError('Normalization method {0} not found. It must be one of monitor-1, monitor-2, current, or None'.format(method))
+        #endCase
 
 
-        if method[:7] == 'monitor': # 'monitor-1' or 'monitor-2' :
-            # get monitor's workspace
-            mon_ws = run.get_monitors_ws(mon_index)
-            if not mon_ws: # no monitors
-              if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not have monitors
-                   method = 'current'
-              else:
-                   raise RuntimeError('Normalise by {0} :: Workspace {1} for run {2} does not have monitors in it'\
-                       .format(method,run.get_ws_name(),run.__get__()))
-
-        if method == 'monitor-1':
-            range = self.norm_mon_integration_range
-            range_min = range[0] + range_offset
-            range_max = range[1] + range_offset
-            if not mon_index:
-                mon_index = int(self.mon1_norm_spec)
-
-
-            NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
-                                   IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)
-# debug line:                      NormalizationFactorWSName='NormMonWS'+data_ws.getName())
-        elif method == 'monitor-2':
-           if not mon_index:
-                mon_index = int(self.mon2_norm_spec)
-
-        if self.prop_man.normalise_method =='monitor-2':
-           #Find TOF range, correspondent to incident energy monitor peak 
-           if self._mon2_norm_time_range:
-               range = self._mon2_norm_time_range
-               range_min = range[0]+range_offset
-               range_max = range[1]+range_offset
-               self._mon2_norm_time_range=None
-           else:
-               mon_ws_name = mon_ws.name()
-               if mon_ws_name.find('_shifted') != -1:
-                   # monitor-2 normalization ranges have to be identified before the instrument is shifted
-                   raise RuntimeError("Instrument have been shifted but no time range has been identified. Monitor-2 normalization can not be performed ") 
-               else:
-                   energy_rage = self.mon2_norm_energy_range
-                   TOF_range   = self.find_TOF_for_to_energies(mon_ws,energy_rage,[mon_index])
-                   range_min   = TOF_range[0]
-                   range_max   = TOF_range[1]
-
-           # Normalize to monitor 2
-           NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
-                              IntegrationRangeMin=range_min, IntegrationRangeMax=range_max,IncludePartialBins=True)
-# debug line:                 IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True,NormalizationFactorWSName='NormMonWS'+data_ws.getName())
-
-        elif method == 'current':
-            NormaliseByCurrent(InputWorkspace=old_name,OutputWorkspace=old_name)
-        else:
-            raise RuntimeError('Normalization scheme ' + reference + ' not found. It must be one of monitor-1, monitor-2, current, or none')
-
-        # Add a log to the workspace to say that the normalization has been done
+        # Add a log to the workspace to say that the normalization has been
+        # done
         output = mtd[old_name]
         AddSampleLog(Workspace=output, LogName=done_log,LogText=method)
         run.synchronize_ws(output)
         return output
+    #
+    def _normalize_to_monitor1(self,run,old_name,range_offset=0.0,mon_index=None):
+        """ Helper method implementing  normalize_to_monitor1 """ 
+        if not mon_index:
+           mon_index = int(self.mon1_norm_spec)
 
+        # get monitor's workspace
+        mon_ws = run.get_monitors_ws(mon_index)
+        if not mon_ws: # no monitors
+           if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not
+                                             # have monitors
+              self.normalise(run,'current',range_offset,mon_index)
+           else:
+              raise RuntimeError('Normalise by monitor-1:: Workspace {0} for run {1} does not have monitors in it'\
+                   .format(run.get_ws_name(),run.__get__()))
+
+        range = self.norm_mon_integration_range
+        range_min = float(range[0] + range_offset)
+        range_max = float(range[1] + range_offset)
+        if self._debug_mode:
+           kwargs = {'NormalizationFactorWSName':'NormMonWS' + data_ws.getName()}
+        else:
+           kwargs = {}
+        NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
+                           IntegrationRangeMin=range_min, IntegrationRangeMax=range_max,IncludePartialBins=True,**kwargs)
+    #
+    def _normalize_to_monitor2(self,run,old_name, range_offset=0.0,mon_index=None):
+        """ Helper method implementing  normalize_to_monitor_2 """ 
+
+        if not mon_index:
+           mon_index = int(self.mon2_norm_spec)
+
+        # get monitor's workspace
+        mon_ws = run.get_monitors_ws(mon_index)
+        if not mon_ws: # no monitors
+           if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not
+                                             # have monitors
+              self.normalise(run,'current',range_offset,mon_index)
+           else:
+              raise RuntimeError('Normalise by monitor-2:: Workspace {0} for run {1} does not have monitors in it'\
+                   .format(run.get_ws_name(),run.__get__()))
+        #Find TOF range, correspondent to incident energy monitor peak
+        if self._mon2_norm_time_range:
+           range = self._mon2_norm_time_range
+           range_min = range[0] + range_offset
+           range_max = range[1] + range_offset
+           self._mon2_norm_time_range = None
+        else:
+           mon_ws_name = mon_ws.name()
+           if mon_ws_name.find('_shifted') != -1:
+             # monitor-2 normalization ranges have to be identified before the instrument is shifted
+             raise RuntimeError("Instrument have been shifted but no time range has been identified. Monitor-2 normalization can not be performed ") 
+           else:
+              energy_rage = self.mon2_norm_energy_range
+              TOF_range = self.get_TOF_for_energies(mon_ws,energy_rage,[mon_index],self._debug_mode)
+              range_min = TOF_range[0]
+              range_max = TOF_range[1]
+        #
+        if self._debug_mode:
+           kwargs = {'NormalizationFactorWSName':'NormMonWS' + mon_ws.getName()}
+        else:
+           kwargs = {}
+
+       # Normalize to monitor 2
+        NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
+                           IntegrationRangeMin=range_min, IntegrationRangeMax=range_max,IncludePartialBins=True,**kwargs)
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+    #
     @staticmethod
-    def get_TOF_for_to_energies(workspace,energy_list,detID_list):
+    def get_TOF_for_energies(workspace,energy_list,detID_list,debug_mode=False):
         """ Method to find what TOF range corresponds to given energy range             
            for given workspace and detectors.
 
@@ -1140,20 +716,22 @@ class DirectEnergyConversion(object):
 
            Returns: 
         """ 
-        template_ws_name  = '_energy_range_ws'
+        template_ws_name = '_energy_range_ws'
         range_ws_name = '_TOF_range_ws'
-        y = [1]*(len(energy_list)-1)
-        TOF_range=[]
+        y = [1] * (len(energy_list) - 1)
+        TOF_range = []
         for detID in detID_list:
             ind = workspace.getIndexFromSpectrumNumber(detID)
             ExtractSingleSpectrum(InputWorkspace=workspace, OutputWorkspace=template_ws_name, WorkspaceIndex=ind)
             CreateWorkspace(OutputWorkspace=range_ws_name,NSpec = 1,DataX=energy_list,DataY=y,UnitX='Energy',ParentWorkspace=template_ws_name)
-            range_ws=ConvertUnits(InputWorkspace=range_ws_name,OutputWorkspace=range_ws_name,Target='TOF',EMode='Elastic')
-            x=range_ws.dataX(0)
+            range_ws = ConvertUnits(InputWorkspace=range_ws_name,OutputWorkspace=range_ws_name,Target='TOF',EMode='Elastic')
+            x = range_ws.dataX(0)
             TOF_range.append(x.tolist())
 
-        #DeleteWorkspace(template_ws_name)
-        #DeleteWorkspace(range_ws_name)
+        if not debug_mode:
+            DeleteWorkspace(template_ws_name)
+            DeleteWorkspace(range_ws_name)
+        #
         if len(detID_list) == 1:
             TOF_range = TOF_range[0]
 
@@ -1251,6 +829,7 @@ class DirectEnergyConversion(object):
         object.__setattr__(self,'_spectra_masks',None)
         # if normalized by monitor-2, range have to be established before shifting the instrument
         object.__setattr__(self,'_mon2_norm_time_range',None)
+        object.__setattr__(self,'_debug_mode',False)
 
 
 
@@ -1284,9 +863,7 @@ class DirectEnergyConversion(object):
                 object.__setattr__(self,attr_name,attr_value)
             else:
                 setattr(self._propMan,attr_name,attr_value)
-            
-
- 
+          
     def initialise(self, instr,reload_instrument=False):
         """
         Initialize the private attributes of the class and the nullify the attributes which expected
@@ -1297,6 +874,7 @@ class DirectEnergyConversion(object):
         self._do_ISIS_reduction = True
         # if normalized by monitor-2, range have to be established before shifting the instrument
         self._mon2_norm_time_range=None
+        self._debug_mode = False
         self.spectra_masks = None
 
 
@@ -1355,11 +933,509 @@ class DirectEnergyConversion(object):
           return tRun
        else:
            return run
+    #
+#-------------------------------------------------------------------------------  
+    def apply_absolute_normalization(self,sample_ws,monovan_run=None,ei_guess=None,wb_mono=None):
+        """  Function applies absolute normalization factor to the target workspace
+             and calculates this factor if necessary
+
+            Inputs:
+            Reducer           --    properly initialized class which performs reduction
+            deltaE_wkspace_sample-- the workspace which should be modified
+            monovan_run          -- run number for monochromatic vanadium sample at current energy
+            ei_guess             -- estimated neutrons incident energy
+            wb_mono              -- white bean vanadium run number.
+        """
+        # Old interface support
+        prop_man = self.prop_man
+        prop_man.log('*** Running absolute units corrections ****************************************************','notice')
+
+        if prop_man.mono_correction_factor:
+            absnorm_factor = float(prop_man.mono_correction_factor)
+            prop_man.log('*** Using supplied workspace correction factor                           ******','notice')
+            abs_norm_factor_is = 'provided'
+        else:
+            mvir = prop_man.monovan_integr_range
+            prop_man.log('*** Evaluating the integral from the monovan run and calculate the correction factor ******','notice')
+            prop_man.log('    Using absolute units vanadium integration range : [{0:8f}:{1:8f}]         ******'.format(mvir[0],mvir[1]),'notice')
+            abs_norm_factor_is = 'calculated'
+
+            # convert to monovanadium to energy
+            deltaE_wkspace_monovan = self.mono_sample(monovan_run,ei_guess,wb_mono,
+                                                      self.monovan_mapfile,self.spectra_masks)
+            #deltaE_wkspace_monovan = self.convert_to_energy(monovan_run,
+            #ei_guess, wb_mono)
 
 
-    def _get_mon2_normalizetion_range(self):
-        return TOF_range
+            ei_monovan = deltaE_wkspace_monovan.getRun().getLogData("Ei").value
+            prop_man.log('    Incident energy found for monovanadium run: ' + str(ei_monovan) + ' meV','notice')
 
+
+            (anf_LibISIS,anf_SS2,anf_Puas,anf_TGP) = self.get_abs_normalization_factor(deltaE_wkspace_monovan.getName(),ei_monovan)
+
+            prop_man.log('*** Absolute correction factor(s): S^2: {0:10.4f}\n*** LibISIS: {1:10.4f} Poisson: {2:10.4f}  TGP: {3:10.4f} '\
+                .format(anf_LibISIS,anf_SS2,anf_Puas,anf_TGP),'notice')
+            absnorm_factor = anf_TGP
+        #end
+        prop_man.log('*** Using {0} value : {1} of absolute units correction factor (TGP)'.format(abs_norm_factor_is,absnorm_factor),'notice')
+        prop_man.log('*******************************************************************************************','notice')
+
+        sample_ws = sample_ws / absnorm_factor
+
+        return sample_ws
+#------------------------------------------------------------------------------- 
+    def get_abs_normalization_factor(self,deltaE_wkspaceName,ei_monovan):
+        """get absolute normalization factor for monochromatic vanadium
+
+          Inputs:
+          @param: deltaE_wkspace  -- the name (string) of monovan workspace, converted to energy
+          @param: ei_monovan      -- monovan sample incident energy
+
+          @returns the value of monovan absolute normalization factor.
+                   deletes monovan workspace (deltaE_wkspace) if abs norm factor was calculated successfully
+
+          Detailed explanation:
+          The algorithm takes the monochromatic vanadium workspace normalized by WB vanadium and calculates
+          average modified monochromatic vanadium (MV) integral considering that the efficiency of detectors
+          are different and accounted for by dividing each MV value by corresponding WBV value,
+          the signal on a detector has poison distribution and the error for a detector is the square
+          root of correspondent signal on a detector.
+          Error for WBV considered negligibly small wrt. the error on MV
+         """
+
+        propman = self.prop_man
+        van_mass = propman.van_mass
+        # list of two number representing the minimal (ei_monovan[0])
+        # and the maximal (ei_monovan[1]) energy to integrate the spectra
+        minmax = propman.monovan_integr_range
+
+
+        data_ws = Integration(InputWorkspace=deltaE_wkspaceName,OutputWorkspace='van_int',RangeLower=minmax[0],RangeUpper=minmax[1],IncludePartialBins='1')
+ 
+        nhist = data_ws.getNumberHistograms()
+        # extract wb integrals for combined spectra
+        signal = []
+        error = []
+        izerc = 0
+        for i in range(nhist):
+           try:
+             det = data_ws.getDetector(i)
+           except Exception:
+             continue
+           if det.isMasked():
+             continue
+           sig = data_ws.readY(i)[0]
+           err = data_ws.readE(i)[0]
+           if sig != sig:     #ignore NaN (hopefully it will mean mask some day)
+               continue
+           if ((err <= 0) or (sig <= 0)):   # count Inf and negative||zero readings.  Presence of this indicates that
+                                            # something went wrong
+              izerc+=1
+              continue
+
+           signal.append(sig) 
+           error.append(err)
+        #---------------- Loop finished
+
+        norm_factor = {}
+        # Various prior probabilities.
+        #-------------------------------------------------------------------------
+        # Guess which minimizes the value sum(n_i-n)^2/Sigma_i -- this what
+        # Libisis had
+        signal_sum = sum(map(lambda s,e: s / e,signal,error))
+        weight_sum = sum(map(lambda e: 1. / e, error))
+        norm_factor['LibISIS'] = signal_sum / weight_sum
+        #-------------------------------------------------------------------------
+        # Guess which minimizes the value sum(n_i-n)^2/Sigma_i^2
+        signal_sum = sum(map(lambda s,e: s / (e * e),signal,error))
+        weight_sum = sum(map(lambda e: 1. / (e * e), error))
+        norm_factor['SigSq'] = signal_sum / weight_sum
+        #-------------------------------------------------------------------------
+        # Guess which assumes Poisson distribution with Err=Sqrt(signal) and
+        # calculates
+        # the function: N_avrg =
+        # 1/(DetEfficiency_avrg^-1)*sum(n_i*DetEfficiency_i^-1)
+        # where the DetEfficiency = WB_signal_i/WB_average WB_signal_i is the
+        # White Beam Vanadium
+        # signal on i-th detector and the WB_average -- average WB vanadium
+        # signal.
+        # n_i is the modified signal
+        signal_sum = sum(map(lambda e: e * e,error))
+        weight_sum = sum(map(lambda s,e: e * e / s,signal,error))
+        if(weight_sum == 0.0):
+            prop_man.log("WB integral has been calculated incorrectly, look at van_int workspace: {0}".format(deltaE_wkspaceName),'error')
+            raise ArithmeticError("Division by 0 weight when calculating WB integrals from workspace {0}".format(deltaE_wkspaceName))
+        norm_factor['Poisson'] = signal_sum / weight_sum
+        #-------------------------------------------------------------------------
+        # Guess which estimates value sum(n_i^2/Sigma_i^2)/sum(n_i/Sigma_i^2)
+        # TGP suggestion from 12-2012
+        signal_sum = sum(map(lambda s,e: s * s / (e * e),signal,error))
+        weight_sum = sum(map(lambda s,e: s / (e * e),signal,error))
+        if(weight_sum == 0.0):
+            prop_man.log("WB integral has been calculated incorrectly, look at van_int workspace: {0}".format(deltaE_wkspaceName),'error')
+            raise ArithmeticError("Division by 0 weight when calculating WB integrals from workspace {0}".format(deltaE_wkspaceName))
+        norm_factor['TGP'] = signal_sum / weight_sum
+        #
+        #
+        #integral_monovan=signal_sum /(wbVan_sum)
+        van_multiplier = (float(propman.van_rmm) / float(van_mass))
+        if ei_monovan >= 210.0:
+            xsection = 421  # vanadium cross-section in mBarn/sR (402 mBarn/Sr) (!!!modified to fit high
+                            # energy limit?!!!)
+        else: # old textbook cross-section for vanadium for ei=20mEv
+            xsection = 400 + (ei_monovan / 10)
+        sample_multiplier = (float(propman.sample_mass) / float(propman.sample_rmm))
+
+        scale_factor = van_multiplier * sample_multiplier / xsection
+
+        for type,val in norm_factor.iteritems():
+            norm_factor[type] = val * scale_factor
+
+        # check for NaN
+        if (norm_factor['LibISIS'] != norm_factor['LibISIS']) | (izerc != 0):    # It is an error, print diagnostics:
+           if (norm_factor['LibISIS'] != norm_factor['LibISIS']):
+               log_value = '\n--------> Absolute normalization factor is NaN <----------------------------------------------\n'
+           else:
+               log_value = '\n--------> Warning, Monovanadium has zero spectra <--------------------------------------------\n'
+               log1_value = \
+               "--------> Processing workspace: {0}\n"\
+               "--------> Monovan Integration range : min={1}, max={2} (meV)\n"\
+               "--------> Summed:  {3} spectra with total signal: {4} and error: {5}\n"\
+               "--------> Dropped: {6} zero spectra\n"\
+               "--------> Using  mBarn/sR*fu normalization factor = {7} resulting in:\n"\
+               "--------> Abs norm factors: LibISIS: {8}\n"\
+               "--------> Abs norm factors: Sigma^2: {9}\n"\
+               "--------> Abs norm factors: Poisson: {10}\n"\
+               "--------> Abs norm factors: TGP    : {11}\n"\
+               .format(deltaE_wkspaceName,minmax[0],minmax[1],nhist,sum(signal),sum(error),izerc,scale_factor,
+                          norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
+           log_value = log_value + log1_value
+           propman.log(log_value,'error')
+        else:
+           DeleteWorkspace(Workspace=deltaE_wkspaceName)
+           DeleteWorkspace(Workspace=data_ws)
+        return (norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
+#-------------------------------------------------------------------------------
+
+    def _build_white_tag(self):
+        """ build tag indicating wb-integration ranges """ 
+        low,upp=self.wb_integr_range
+        white_tag='NormBy:{0}_IntergatedIn:{1:0>10.2f}:{2:0>10.2f}'.format(self.normalise_method,low,upp)
+        return white_tag
+
+# -------------------------------------------------------------------------------------------
+#         This actually does the conversion for the mono-sample and
+#         mono-vanadium runs
+#
+# -------------------------------------------------------------------------------------------
+    def _do_mono_SNS(self, data_ws, result_name, ei_guess,
+                 white_run=None, map_file=None, spectra_masks=None, Tzero=None):
+
+        # Special load monitor stuff.
+        propman = self.prop_man
+        if (propman.instr_name == "CNCS" or propman.instr_name == "HYSPEC"):
+            propman.fix_ei = True
+            ei_value = ei_guess
+            if (propman.instr_name == "HYSPEC"):
+                Tzero = 4.0 + 107.0 / (1 + math.pow((ei_value / 31.0),3.0))
+                propman.log("Determined T0 of %s for HYSPEC" % str(Tzero))
+            if (Tzero is None):
+                tzero = (0.1982 * (1 + ei_value) ** (-0.84098)) * 1000.0
+            else:
+                tzero = Tzero
+            # apply T0 shift
+            ScaleX(InputWorkspace=data_ws,OutputWorkspace=result_name,Operation="Add",Factor=-tzero)
+            mon1_peak = 0.0
+        elif (propman.instr_name == "ARCS" or propman.instr_name == "SEQUOIA"):
+            if 'Filename' in data_ws.getRun(): mono_run = data_ws.getRun()['Filename'].value
+            else: raise RuntimeError('Cannot load monitors for event reduction. Unable to determine Filename from mono workspace, it should have been added as a run log.')
+
+            propman.log("mono_run = %s (%s)" % (mono_run,type(mono_run)),'debug')
+
+            if mono_run.endswith("_event.nxs"):
+                monitor_ws = LoadNexusMonitors(Filename=mono_run)
+            elif mono_run.endswith("_event.dat"):
+                InfoFilename = mono_run.replace("_neutron_event.dat", "_runinfo.xml")
+                monitor_ws = LoadPreNexusMonitors(RunInfoFilename=InfoFilename)
+
+            argi = {}
+            argi['Monitor1Spec'] = int(propman.ei_mon_spectra[0])
+            argi['Monitor2Spec'] = int(propman.ei_mon_spectra[1])
+            argi['EnergyEstimate'] = ei_guess
+            argi['FixEi'] = propman.fix_ei
+            if hasattr(self, 'ei_mon_peak_search_range'):
+                argi['PeakSearchRange'] = self.ei_mon_peak_search_range
+
+            try:
+                ei_calc,firstmon_peak,firstmon_index,TzeroCalculated = \
+                    GetEi(InputWorkspace=monitor_ws,**argi)
+            except:
+                propman.log("Error in GetEi. Using entered values.")
+                #monitor_ws.getRun()['Ei'] = ei_value
+                ei_value = ei_guess
+                AddSampleLog(Workspace=monitor_ws,LogName= 'Ei',LogText= ei_value,LogType= "Number")
+                ei_calc = None
+                TzeroCalculated = Tzero
+
+            # Set the tzero to be the calculated value
+            if (TzeroCalculated is None):
+                tzero = 0.0
+            else:
+                tzero = TzeroCalculated
+
+            # If we are fixing, then use the guess if given
+            if (propman.fix_ei):
+                ei_value = ei_guess
+                # If a Tzero has been entered, use it, if we are fixing.
+                if (Tzero is not None):
+                    tzero = Tzero
+            else:
+                if (ei_calc is not None):
+                    ei_value = ei_calc
+                else:
+                    ei_value = ei_guess
+
+            mon1_peak = 0.0
+            # apply T0 shift
+            ScaleX(InputWorkspace=data_ws,OutputWorkspace= result_name,Operation="Add",Factor=-tzero)
+        else:
+            # Do ISIS stuff for Ei
+            # Both are these should be run properties really
+            ei_value, mon1_peak = self.get_ei(data_ws,monitor_ws, result_name, ei_guess)
+        self.prop_man.incident_energy = ei_value
+
+        # As we've shifted the TOF so that mon1 is at t=0.0 we need to account
+        # for this in CalculateFlatBackground and normalisation
+        bin_offset = -mon1_peak
+
+        # For event mode, we are going to histogram in energy first, then go
+        # back to TOF
+        if propman.check_background == True:
+           # Extract the time range for the background determination before we
+           # throw it away
+           background_bins = "%s,%s,%s" % (propman.bkgd_range[0] + bin_offset, (propman.bkgd_range[1] - propman.bkgd_range[0]), propman.bkgd_range[1] + bin_offset)
+           Rebin(InputWorkspace=result_name,OutputWorkspace= "background_origin_ws",Params=background_bins)
+
+        # Convert to Et
+        ConvertUnits(InputWorkspace=result_name,OutputWorkspace= "_tmp_energy_ws", Target="DeltaE",EMode="Direct", EFixed=ei_value)
+        RenameWorkspace(InputWorkspace="_tmp_energy_ws",OutputWorkspace= result_name)
+        # Histogram
+        Rebin(InputWorkspace=result_name,OutputWorkspace= "_tmp_rebin_ws",Params= propman.energy_bins, PreserveEvents=False)
+        RenameWorkspace(InputWorkspace="_tmp_rebin_ws",OutputWorkspace= result_name)
+        # Convert back to TOF
+        ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="TOF",EMode="Direct", EFixed=ei_value)
+
+        if propman.check_background == True:
+            # Remove the count rate seen in the regions of the histograms
+            # defined as the background regions, if the user defined such
+            # region
+            ConvertToDistribution(Workspace=result_name)
+
+            CalculateFlatBackground(InputWorkspace="background_origin_ws",OutputWorkspace= "background_ws",
+                               StartX= propman.bkgd_range[0] + bin_offset,EndX= propman.bkgd_range[1] + bin_offset,
+                               WorkspaceIndexList= '',Mode= 'Mean',OutputMode= 'Return Background')
+            # Delete the raw data background region workspace
+            DeleteWorkspace("background_origin_ws")
+            # Convert to distribution to make it compatible with the data
+            # workspace (result_name).
+            ConvertToDistribution(Workspace="background_ws")
+            # Subtract the background
+            Minus(LHSWorkspace=result_name,RHSWorkspace= "background_ws",OutputWorkspace=result_name)
+             # Delete the determined background
+            DeleteWorkspace("background_ws")
+
+            ConvertFromDistribution(Workspace=result_name)
+
+        # Normalize using the chosen method
+        # This should be done as soon as possible after loading and usually
+        # happens at diag.  Here just in case if diag was bypassed
+        norm_ws = self.normalise(mtd[result_name], propman.normalise_method, range_offset=bin_offset)
+
+
+
+        # This next line will fail the SystemTests
+        #ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct',
+        #EFixed=ei_value)
+        # But this one passes...
+        ConvertUnits(InputWorkspace=norm_ws,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
+        propman.log("_do_mono: finished ConvertUnits for : " + result_name)
+
+
+
+        if propman.energy_bins :
+            Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= propman.energy_bins,PreserveEvents=False)
+
+        if propman.apply_detector_eff:
+           # Need to be in lambda for detector efficiency correction
+            ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="Wavelength", EMode="Direct", EFixed=ei_value)
+            He3TubeEfficiency(InputWorkspace=result_name,OutputWorkspace=result_name)
+            ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="DeltaE",EMode='Direct', EFixed=ei_value)
+        ############
+        return
+#-------------------------------------------------------------------------------
+    def _do_mono_ISIS(self, data_run, ei_guess,
+                 white_run=None, map_file=None, spectra_masks=None, Tzero=None):
+
+        # Do ISIS stuff for Ei
+        # Both are these should be run properties really
+
+
+        ei_value, mon1_peak = self.get_ei(data_run, ei_guess)
+        self.incident_energy = ei_value
+
+
+        # As we've shifted the TOF so that mon1 is at t=0.0 we need to account
+        # for this in CalculateFlatBackground and normalization
+        bin_offset = -mon1_peak
+        result_name = data_run.set_action_suffix('_spe')
+
+        if self.check_background == True:
+            # Remove the count rate seen in the regions of the histograms
+            # defined as the background regions, if the user defined such
+            # region
+            result_ws = data_run.get_workspace()
+            bkgd_range = self.bkgd_range
+            CalculateFlatBackground(InputWorkspace=result_ws,OutputWorkspace=result_ws,
+                                    StartX= bkgd_range[0] + bin_offset,EndX= bkgd_range[1] + bin_offset,
+                                     WorkspaceIndexList= '',Mode= 'Mean',SkipMonitors='1')
+            data_run.synchronize_ws(result_ws)
+
+
+        # Normalize using the chosen method+group
+        norm_ws = self.normalise(data_run, self.normalise_method, range_offset=bin_offset)
+        # normalized workspace can go out with different name, so here we
+        # reinforce one expected here
+        result_name = data_run.set_action_suffix('_spe')
+        data_run.synchronize_ws(norm_ws)
+
+
+
+        # This next line will fail the SystemTests
+        #ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct',
+        #EFixed=ei_value)
+        # But this one passes...
+        ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
+        self.prop_man.log("_do_mono: finished ConvertUnits for : " + result_name,'information')
+
+
+        energy_bins = self.energy_bins
+        if energy_bins:
+            Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= energy_bins,PreserveEvents=False)
+
+        if self.apply_detector_eff:
+           DetectorEfficiencyCor(InputWorkspace=result_name,OutputWorkspace=result_name)
+           self.prop_man.log("_do_mono: finished DetectorEfficiencyCor for : " + result_name,'information')
+        #############
+        data_run.synchronize_ws(mtd[result_name])
+
+        return
+#-------------------------------------------------------------------------------
+    def _do_mono(self, run,  ei_guess,
+                 white_run=None, map_file=None, spectra_masks=None, Tzero=None):
+        """
+        Convert units of a given workspace to deltaE, including possible
+        normalization to a white-beam vanadium run.
+        """
+
+        if (self._do_ISIS_reduction):
+           self._do_mono_ISIS(run,ei_guess,
+                               white_run, map_file, spectra_masks, Tzero)
+        else:
+          result_name = run.set_action_suffix('_spe')
+          self._do_mono_SNS(run,result_name,ei_guess,
+                         white_run, map_file, spectra_masks, Tzero)
+          run.synchronize_ws()
+
+        prop_man = self.prop_man
+        result_name = run.get_ws_name()
+        #######################
+        # Ki/Kf Scaling...
+        if prop_man.apply_kikf_correction:
+            prop_man.log('Start Applying ki/kf corrections to the workspace : ' + result_name,'information')
+            CorrectKiKf(InputWorkspace=result_name,OutputWorkspace= result_name, EMode='Direct')
+            prop_man.log('finished applying ki/kf corrections for : ' + result_name,'information')
+
+        # Make sure that our binning is consistent
+        if prop_man.energy_bins:
+            Rebin(InputWorkspace=result_name,OutputWorkspace= result_name,Params= prop_man.energy_bins)
+
+        # Masking and grouping
+        result_ws = mtd[result_name]
+        result_ws = self.remap(result_ws, spectra_masks, map_file)
+
+
+        ConvertToDistribution(Workspace=result_ws)
+        # White beam correction
+        if white_run is not None:
+            white_ws = self.do_white(white_run, spectra_masks, map_file,None)
+            result_ws /= white_ws
+            DeleteWorkspace(white_ws)
+
+        # Overall scale factor
+        result_ws *= prop_man.scale_factor
+        return result_ws
+#-------------------------------------------------------------------------------
+    def _get_wb_inegrals(self,run,mon_number=None):
+        """ """
+        run = self.get_run_descriptor(run)
+        white_ws = run.get_workspace()
+        # This both integrates the workspace into one bin spectra and sets up
+        # common bin boundaries for all spectra
+        done_Log = 'DET_EFFICIENCY_calculated'
+
+        # set action suffix and check if such workspace is already present
+        new_ws_name = run.set_action_suffix('_norm_white')
+
+        # Check if the work has been already done
+        if new_ws_name in mtd:
+            targ_ws = mtd[new_ws_name]
+            if done_Log in targ_ws.getRun():
+                old_log_val = targ_ws.getRun().getLogData(done_Log).value
+                done_log_VAL = self._build_white_tag()
+                if old_log_val == done_log_VAL:
+                   run.synchronize_ws(targ_ws)
+                   if self._keep_wb_workspace:
+                        result = run.get_ws_clone()
+                   else:
+                        result = run.get_workspace()
+                   return result 
+                else:
+                    DeleteWorkspace(Workspace=new_ws_name)
+            else:
+                DeleteWorkspace(Workspace=new_ws_name)
+        #end
+        done_log_VAL = self._build_white_tag()
+
+        # Normalize
+        self.__in_white_normalization = True
+        white_ws = self.normalise(run, self.normalise_method,0.0,mon_number)
+        self.__in_white_normalization = False
+        new_ws_name = run.set_action_suffix('_norm_white')
+        old_name = white_ws.name()
+
+        # Units conversion
+        ConvertUnits(InputWorkspace=old_name,OutputWorkspace=old_name, Target= "Energy", AlignBins=0)
+        self.prop_man.log("do_white: finished converting Units",'information')
+
+        low,upp = self.wb_integr_range
+        if low > upp:
+            raise ValueError("White beam integration range is inconsistent. low=%d, upp=%d" % (low,upp))
+
+        delta = 2.0 * (upp - low)
+        white_ws = Rebin(InputWorkspace=old_name,OutputWorkspace=old_name, Params=[low, delta, upp])
+        # Why aren't we doing this...
+        #Integration(white_ws, white_ws, RangeLower=low, RangeUpper=upp)
+        AddSampleLog(white_ws,LogName = done_Log,LogText=done_log_VAL,LogType='String')
+        run.synchronize_ws(white_ws)
+        if self._keep_wb_workspace:
+            result = run.get_ws_clone()
+        else:
+            result = run.get_workspace()
+        return result
+
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 def get_failed_spectra_list_from_masks(masked_wksp):
     """Compile a list of spectra numbers that are marked as

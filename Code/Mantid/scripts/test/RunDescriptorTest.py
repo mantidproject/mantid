@@ -215,7 +215,6 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertEqual(PropertyManager.sample_run.run_number(),11001)
         self.assertEqual(PropertyManager.sample_run._run_ext,'.raw')
 
-
-
+ 
 if __name__=="__main__":
     unittest.main()
