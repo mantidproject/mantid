@@ -53,8 +53,7 @@ IndirectDataReduction::IndirectDataReduction(QWidget *parent) :
   m_instrument(""),
   m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
   m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
-  m_changeObserver(*this, &IndirectDataReduction::handleDirectoryChange),
-  m_instWorkspace(NULL)
+  m_changeObserver(*this, &IndirectDataReduction::handleDirectoryChange)
 {
   // Signals to report load instrument algo result
   connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(instrumentLoadingDone(bool)));
