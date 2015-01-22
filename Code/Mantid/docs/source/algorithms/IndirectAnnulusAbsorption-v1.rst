@@ -19,6 +19,8 @@ attenuation factor for absorption and scattering in the sample.
 Usage
 -----
 
+.. include:: ../usagedata-note.txt
+
 **Example - Sample corrections for IRIS:**
 
 .. testcode:: SampleCorrectionsWithCanSubtraction
