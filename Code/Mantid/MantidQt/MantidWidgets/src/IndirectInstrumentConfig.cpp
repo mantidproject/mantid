@@ -229,7 +229,7 @@ namespace MantidQt
      * Sets the currently displayed analyser, providing that the name given
      * exists in the list currently displayed.
      *
-     * @param instrumentName Name of analyser to display
+     * @param analyserName Name of analyser to display
      */
     void IndirectInstrumentConfig::setAnalyser(const QString & analyserName)
     {
@@ -262,7 +262,7 @@ namespace MantidQt
      * Sets the currently displayed reflection, providing that the name given
      * exists in the list currently displayed.
      *
-     * @param instrumentName Name of reflection to display
+     * @param reflectionName Name of reflection to display
      */
     void IndirectInstrumentConfig::setReflection(const QString & reflectionName)
     {
