@@ -66,9 +66,9 @@ namespace DataHandling
 
     /// Create run information workspace
     API::MatrixWorkspace_sptr createRunInfoWS(std::map<std::string, std::string> runinfodict,
-                                              std::vector<std::string> floatlognamelist,
-                                              std::vector<std::string> intlognamelist,
-                                              std::vector<std::string> strlognamelist,
+                                              std::vector<std::string> &floatlognamelist,
+                                              std::vector<std::string> &intlognamelist,
+                                              std::vector<std::string> &strlognamelist,
                                               bool ignoreunlisted);
 
     /// Convert input date string to mantid date string
