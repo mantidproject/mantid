@@ -98,6 +98,16 @@ end
 
 `install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/libqscintilla2.11.dylib`
 
+#change id of all Qt4 imageformats libraries
+qt4_patterns = ["**/imageformats/*.dylib"]
+qt4_patterns.each do |pattern|
+  Dir[pattern].each do |library|
+    basename =  File.basename(library)
+    `chmod +w Contents/Frameworks/plugins/imageformats/#{basename}`
+    `install_name_tool -id @rpath/#{basename} Contents/Frameworks/plugins/imageformats/#{basename}`
+  end
+end
+
 #change id of all PyQt4 libraries
 pyqt4_patterns = ["**/PyQt4/*.so"]
 pyqt4_patterns.each do |pattern|
