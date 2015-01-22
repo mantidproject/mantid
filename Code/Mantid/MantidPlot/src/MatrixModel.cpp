@@ -805,14 +805,18 @@ bool MatrixModel::muParserCalculate(int startRow, int endRow, int startCol, int 
 	connect(mup, SIGNAL(error(const QString&,const QString&,int)), scriptEnv, SIGNAL(error(const QString&,const QString&,int)));
 	connect(mup, SIGNAL(print(const QString&)), scriptEnv, SIGNAL(print(const QString&)));
 
-	if (endRow < 0)
-		endRow = d_rows - 1;
-	if (endCol < 0)
-		endCol = d_cols - 1;
-    if (endCol >= d_cols)
-		setColumnCount(endCol + 1);
-	if (endRow >= d_rows)
-        setRowCount(endRow + 1);
+  if (endRow < 0)
+    endRow = d_rows - 1;
+  if (endCol < 0)
+    endCol = d_cols - 1;
+
+  if (!canResize(endRow-startRow+1,endCol-startCol+1))
+    return false;
+
+  if (endCol >= d_cols)
+    setColumnCount(endCol + 1);
+  if (endRow >= d_rows)
+    setRowCount(endRow + 1);
 
 	double dx = d_matrix->dx();
 	double dy = d_matrix->dy();

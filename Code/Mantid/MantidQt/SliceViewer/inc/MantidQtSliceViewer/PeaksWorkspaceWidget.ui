@@ -50,6 +50,9 @@
        <property name="alternatingRowColors">
         <bool>true</bool>
        </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::SingleSelection</enum>
+       </property>
        <property name="selectionBehavior">
         <enum>QAbstractItemView::SelectRows</enum>
        </property>
@@ -74,7 +77,16 @@
      <item>
       <widget class="QFrame" name="infoFrame">
        <layout class="QVBoxLayout" name="verticalLayout_4">
-        <property name="margin">
+        <property name="leftMargin">
+         <number>1</number>
+        </property>
+        <property name="topMargin">
+         <number>1</number>
+        </property>
+        <property name="rightMargin">
+         <number>1</number>
+        </property>
+        <property name="bottomMargin">
          <number>1</number>
         </property>
         <item>

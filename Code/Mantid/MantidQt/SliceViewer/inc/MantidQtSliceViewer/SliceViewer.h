@@ -28,7 +28,18 @@
 #include <vector>
 #include "MantidAPI/Algorithm.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
+#include <boost/shared_ptr.hpp>
 
+class QDragEnterEvent;
+class QDropEvent;
+
+namespace Mantid
+{
+namespace API
+{
+ class IPeaksWorkspace;
+}
+}
 namespace MantidQt
 {
 namespace SliceViewer
@@ -105,6 +116,9 @@ public:
   virtual void zoomToRectangle(const PeakBoundingBox& box);
   virtual void resetView();
 
+  /* Methods associated with workspace observers. Driven by SliceViewerWindow */
+  void peakWorkspaceChanged(const std::string& wsName, boost::shared_ptr<Mantid::API::IPeaksWorkspace>& changedPeaksWS);
+
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed
   void changedShownDim(size_t dimX, size_t dimY);
@@ -167,6 +181,10 @@ public slots:
 
   // Peaks overlay
   void peakOverlay_toggled(bool);
+
+protected:
+  void dragEnterEvent(QDragEnterEvent *e);
+  void dropEvent(QDropEvent *e);
 
 private:
   void loadSettings();
@@ -309,6 +327,7 @@ private:
 
   /// Object for choosing a PeakTransformFactory based on the workspace type.
   Mantid::API::PeakTransformSelector m_peakTransformSelector;
+
 };
 
 } // namespace SliceViewer

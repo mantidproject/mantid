@@ -14,11 +14,8 @@
 #include "DllOption.h"
 #include "MantidKernel/VMD.h"
 
-namespace MantidQt
-{
-namespace SliceViewer
-{
-
+namespace MantidQt {
+namespace SliceViewer {
 
 /** A window that contains a SliceViewer and a LineViewer widget,
  * linked together.
@@ -26,16 +23,18 @@ namespace SliceViewer
  * @author Janik Zikovsky
  * @date October 13, 2011
  */
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewerWindow : public QMainWindow, public MantidQt::API::WorkspaceObserver
-{
-    Q_OBJECT
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewerWindow
+    : public QMainWindow,
+      public MantidQt::API::WorkspaceObserver {
+  Q_OBJECT
 
 public:
-  SliceViewerWindow(const QString& wsName, const QString& label = QString() , Qt::WFlags f=0);
+  SliceViewerWindow(const QString &wsName, const QString &label = QString(),
+                    Qt::WFlags f = 0);
   ~SliceViewerWindow();
-  MantidQt::SliceViewer::SliceViewer* getSlicer();
-  MantidQt::SliceViewer::LineViewer* getLiner();
-  const QString& getLabel() const;
+  MantidQt::SliceViewer::SliceViewer *getSlicer();
+  MantidQt::SliceViewer::LineViewer *getLiner();
+  const QString &getLabel() const;
 
 private:
   void setLineViewerValues(QPointF start2D, QPointF end2D, double width);
@@ -60,21 +59,23 @@ protected slots:
   void showPeaksViewer(bool);
 
 protected:
-  void preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
-  void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
-  void resizeEvent(QResizeEvent * event);
+  void preDeleteHandle(const std::string &wsName,
+                       const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void afterReplaceHandle(const std::string &wsName,
+                          const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void resizeEvent(QResizeEvent *event);
 
   /// The SliceViewer
-  MantidQt::SliceViewer::SliceViewer * m_slicer;
+  MantidQt::SliceViewer::SliceViewer *m_slicer;
 
   /// The LineViewer
-  MantidQt::SliceViewer::LineViewer * m_liner;
-  
+  MantidQt::SliceViewer::LineViewer *m_liner;
+
   /// The PeaksViewer
-  MantidQt::SliceViewer::PeaksViewer * m_peaksViewer;
+  MantidQt::SliceViewer::PeaksViewer *m_peaksViewer;
 
   /// Horizontal splitter between slice viewer and LineViewer
-  QSplitter * m_splitter;
+  QSplitter *m_splitter;
 
   /// Workspace being looked at
   Mantid::API::IMDWorkspace_sptr m_ws;
@@ -94,9 +95,7 @@ protected:
   int m_desiredWidth;
 };
 
-
-}//namespace SliceViewer
-}//namespace MantidQt
-
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif // SLICEVIEWERWINDOW_H

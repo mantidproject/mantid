@@ -53,8 +53,8 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor):
   setInputController(PickSingleMode, pickController);
   setInputController(PickTubeMode, pickController);
   setInputController(AddPeakMode, pickController);
-  connect(pickController,SIGNAL(pickPointAt(int,int)),this,SLOT(pickDetectorAt(int,int)));
-  connect(pickController,SIGNAL(touchPointAt(int,int)),this,SLOT(touchDetectorAt(int,int)));
+  connect(pickController,SIGNAL(pickPointAt(int,int)),this,SLOT(pickComponentAt(int,int)));
+  connect(pickController,SIGNAL(touchPointAt(int,int)),this,SLOT(touchComponentAt(int,int)));
 
   // create and connect the mask drawing input controller
   InputControllerDrawShape* drawController = new InputControllerDrawShape(this);
@@ -446,20 +446,15 @@ void ProjectionSurface::setInteractionMode(int mode)
   */
 int ProjectionSurface::getDetectorID(int x, int y)const
 {
-  if (!m_pickImage) return -7;
-  if (!m_pickImage->valid(x,y)) return -1;
-  QRgb pixel = m_pickImage->pixel(x,y);
-  return getDetectorID((unsigned char)qRed(pixel),(unsigned char)qGreen(pixel),(unsigned char)qBlue(pixel));
+  size_t pickID = getPickID( x, y );
+  return m_instrActor->getDetID( pickID );
 }
 
 //------------------------------------------------------------------------------
 boost::shared_ptr<const Mantid::Geometry::IDetector> ProjectionSurface::getDetector(int x, int y)const
 {
-  if (!m_pickImage || !m_pickImage->valid(x,y)) return boost::shared_ptr<const Mantid::Geometry::IDetector>();
-  QRgb pixel = m_pickImage->pixel(x,y);
-  int index = getDetectorIndex((unsigned char)qRed(pixel),(unsigned char)qGreen(pixel),(unsigned char)qBlue(pixel));
-  if ( index >= 0 ) return m_instrActor->getDetector(index);
-  return boost::shared_ptr<const Mantid::Geometry::IDetector>();
+  size_t pickID = getPickID( x, y );
+  return m_instrActor->getDetector( pickID );
 }
 
 /**
@@ -493,13 +488,8 @@ QString ProjectionSurface::getInfoText() const
  */
 Mantid::Kernel::V3D ProjectionSurface::getDetectorPos(int x, int y) const
 {
-  if (!m_pickImage || !m_pickImage->valid(x,y)) return V3D();
-  QRgb pixel = m_pickImage->pixel(x,y);
-  int index = getDetectorIndex((unsigned char)qRed(pixel),(unsigned char)qGreen(pixel),(unsigned char)qBlue(pixel));
-  if ( index >= 0 )
-    return m_instrActor->getDetPos(index);
-  else
-      return V3D();
+  size_t pickID = getPickID( x, y );
+  return m_instrActor->getDetPos( pickID );
 }
 
 /**
@@ -516,24 +506,11 @@ bool ProjectionSurface::canShowContextMenu() const
 }
 
 //------------------------------------------------------------------------------
-int ProjectionSurface::getDetectorIndex(unsigned char r,unsigned char g,unsigned char b)const
+size_t ProjectionSurface::getPickID(int x, int y)const
 {
-  size_t index = GLActor::decodePickColor(r,g,b);
-  if (index > m_instrActor->ndetectors())
-  {
-    return -1;
-  }
-  else
-  {
-    return int(index);
-  }
-}
-
-int ProjectionSurface::getDetectorID(unsigned char r,unsigned char g,unsigned char b)const
-{
-  int index = getDetectorIndex(r,g,b);
-  if (index < 0) return index;
-  return m_instrActor->getDetID(index);
+    if (!m_pickImage || !m_pickImage->valid(x,y)) return -1;
+    QRgb pixel = m_pickImage->pixel(x,y);
+    return GLActor::decodePickColor(pixel);
 }
 
 /**
@@ -728,16 +705,16 @@ void ProjectionSurface::selectMultipleMasks(const QRect &rect)
 /**
   * Pick a detector at a pointe on the screen.
   */
-void ProjectionSurface::pickDetectorAt(int x, int y)
+void ProjectionSurface::pickComponentAt(int x, int y)
 {
-    int id = getDetectorID( x, y );
-    emit singleDetectorPicked(id);
+    size_t pickID = getPickID( x, y );
+    emit singleComponentPicked(pickID);
 }
 
-void ProjectionSurface::touchDetectorAt(int x, int y)
+void ProjectionSurface::touchComponentAt(int x, int y)
 {
-    int id = getDetectorID( x, y );
-    emit singleDetectorTouched(id);
+    size_t pickID = getPickID( x, y );
+    emit singleComponentTouched(pickID);
 }
 
 void ProjectionSurface::erasePeaks(const QRect &rect)
