@@ -253,10 +253,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
             for samp,rez in zip(eni,en_range): self.assertAlmostEqual(samp,rez)
 
 
-
-
-
-      
+     
 
 
 

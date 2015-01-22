@@ -54,8 +54,8 @@ class PropertyManager(NonIDF_Properties):
            This is why any new descriptor should never place a key with its name in __dict__. Current design automatically remove IDF name 
            from __dict__ if a descriptor with such name exist, so further development should support this behavior.
 
-        5) In many places (descriptors, RunDescriptor itself), PropertyManager assumed to be a singleton. 
-           If this changes, careful refactoring may be needed
+        5) In many places (descriptors, RunDescriptor itself), PropertyManager assumed to be a singleton, so most Descriptors are defined on a  
+           class level. If this changes, careful refactoring will be necessary
 
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -219,6 +219,8 @@ class PropertyManager(NonIDF_Properties):
     hardmaskPlus = HardMaskPlus()
     #
     diag_spectra = DiagSpectra()
+    #
+    mon2_norm_energy_range = mon2NormalizationEnergyRange()
     #
     background_test_range = BackbgroundTestRange()
     # Properties with allowed value

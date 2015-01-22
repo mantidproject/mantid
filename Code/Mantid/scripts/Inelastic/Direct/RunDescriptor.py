@@ -489,8 +489,8 @@ class RunDescriptor(PropDescriptor):
            ws_index = data_ws.getIndexFromSpectrumNumber(spectraID)
 
        #
-       x_param = mon_ws.readX(0);
-       bins = [x_param[0],x_param[1]-x_param[0],x_param[-1]];
+       x_param = mon_ws.readX(0)
+       bins = [x_param[0],x_param[1]-x_param[0],x_param[-1]]
        ExtractSingleSpectrum(InputWorkspace=data_ws,OutputWorkspace='tmp_mon',WorkspaceIndex=ws_index)
        Rebin(InputWorkspace='tmp_mon',OutputWorkspace='tmp_mon',Params=bins,PreserveEvents='0')
        # should be vice versa but Conjoin invalidate ws pointers and hopefully nothing could happen with workspace during conjoining
@@ -553,8 +553,9 @@ class RunDescriptor(PropDescriptor):
        return instr_name 
 
     def _clear_old_ws(self,old_ws_name,new_name,clear_runs_to_add=True):
-         if old_ws_name:
-             if new_name != old_ws_name:
+        """ helper method used in __set__. When new data (run or wod)  """
+        if old_ws_name:
+           if new_name != old_ws_name:
                 if old_ws_name in mtd:
                    DeleteWorkspace(old_ws_name)
                 old_mon_ws = old_ws_name+'_monitors'
