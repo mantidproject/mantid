@@ -379,6 +379,23 @@ void ConcretePeaksPresenter::setShown(const bool shown) {
 bool ConcretePeaksPresenter::isHidden() const { return m_isHidden; }
 
 /**
+ * Determine if the contents of the other presenter are different from this one.
+ * @param other
+ * @return
+ */
+bool ConcretePeaksPresenter::contentsDifferent(const PeaksPresenter *  other) const
+{
+    const SetPeaksWorkspaces otherWorkspaces =
+        other->presentedWorkspaces();
+
+    // Look for this workspace in the others workspace list.
+    auto iterator = otherWorkspaces.find(this->m_peaksWS);
+
+    const bool different = (iterator == otherWorkspaces.end());
+    return different;
+}
+
+/**
  @param peakIndex: index into contained peaks workspace.
  @return the bounding box corresponding to the peakIndex.
  */

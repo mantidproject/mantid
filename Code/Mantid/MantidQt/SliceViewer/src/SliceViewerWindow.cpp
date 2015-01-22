@@ -292,7 +292,9 @@ void SliceViewerWindow::showPeaksViewer(bool visible) {
     int w =
         this->width() - (m_peaksViewer->width() + m_splitter->handleWidth());
     if (m_peaksViewer->width() > 0)
+    {
       m_lastPeaksViewerWidth = m_peaksViewer->width();
+    }
     m_peaksViewer->hide();
     // Save this value for resizing with the single shot timer
     m_desiredWidth = w;

@@ -86,9 +86,41 @@ CompositePeaksPresenter::isLabelOfFreeAxis(const std::string &label) const {
 Clear all peaks
 */
 void CompositePeaksPresenter::clear() {
-  m_subjects.clear();
-  PeakPalette temp;
-  m_palette = temp;
+  if (!m_subjects.empty()) {
+    m_subjects.clear();
+    this->m_zoomablePlottingWidget->detach();
+    PeakPalette temp;
+    m_palette = temp;
+  }
+}
+
+/**
+ * @brief Determine wheter the workspace contents is different with another
+ * presenter.
+ * @param other
+ * @return
+ */
+bool CompositePeaksPresenter::contentsDifferent(
+    PeaksPresenter const *const other) const {
+  /*
+   What we are doing here is looking through all workspaces associated with the
+   incoming presenter
+   and seeing if ANY of the exising subjects of this composite is already
+   presenting one of these workspaces.
+   ONLY if there is no intesection between the two sets will we allow addition.
+   */
+  const SetPeaksWorkspaces otherWorkspaces = other->presentedWorkspaces();
+  const SetPeaksWorkspaces existingWorkspaces = this->presentedWorkspaces();
+
+  SetPeaksWorkspaces difference;
+  std::set_difference(existingWorkspaces.begin(), existingWorkspaces.end(),
+                      otherWorkspaces.begin(), otherWorkspaces.end(),
+                      std::inserter(difference, difference.end()));
+
+  // Is the candidate set the same as the difference set (i.e. no intesection)
+  // and also non-zero in size
+  const bool different = (difference.size() == existingWorkspaces.size());
+  return different;
 }
 
 /**
@@ -101,8 +133,12 @@ void CompositePeaksPresenter::addPeaksPresenter(PeaksPresenter_sptr presenter) {
                                 "simultaneously displayed is 10.");
   }
 
+  // Look for the same presenter added twice.
   auto result_it = std::find(m_subjects.begin(), m_subjects.end(), presenter);
-  if (result_it == m_subjects.end()) {
+
+  // Only add a peaks presenter if the contents are different. The presenter may
+  // be different, but manage the same workspace set.
+  if (result_it == m_subjects.end() && presenter->contentsDifferent(this)) {
     m_subjects.push_back(presenter);
     presenter->registerOwningPresenter(this);
   }
@@ -280,6 +316,9 @@ void CompositePeaksPresenter::remove(
   if (iterator != m_subjects.end()) {
     m_subjects.erase(iterator);
   }
+  if (m_subjects.empty()) {
+    this->m_zoomablePlottingWidget->detach();
+  }
 }
 
 /**
@@ -448,7 +487,7 @@ CompositePeaksPresenter::getPresenterIteratorFromName(const QString &name) {
 }
 
 /**
- * Get the peaks presenter correspoinding to a peaks workspace name.
+ * Get the peaks presenter corresponding to a peaks workspace name.
  * @param name
  * @return Peaks presenter.
  */
