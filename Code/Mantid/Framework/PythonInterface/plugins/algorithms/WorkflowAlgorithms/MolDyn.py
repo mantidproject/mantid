@@ -139,7 +139,8 @@ class MolDyn(PythonAlgorithm):
                 raise RuntimeError('Unrecognised file format: %s' % ext)
 
         except Exception as ex:
-            logger.error('Error parsing file %s, error is: %s' % (self._sam_path, str(ex)))
+            logger.error('Error parsing file %s' % (self._sam_path))
+            logger.debug('Error is: %s' % (str(ex)))
 
         # Do processing specific to workspaces in energy
         if isinstance(mtd[self._out_ws], WorkspaceGroup):
