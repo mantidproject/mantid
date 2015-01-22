@@ -15,9 +15,9 @@ set ( TEST_PY_FILES
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
   GetEiT0atSNSTest.py
-  IndirectAnnulusAbsorptionTest.py
-  IndirectCylinderAbsorptionTest.py
-  IndirectFlatPlateAbsorptionTest.py
+  #  IndirectAnnulusAbsorptionTest.py
+  #  IndirectCylinderAbsorptionTest.py
+  #  IndirectFlatPlateAbsorptionTest.py
   IndirectILLReductionTest.py
   InelasticIndirectReductionTest.py
   IndirectTransmissionTest.py

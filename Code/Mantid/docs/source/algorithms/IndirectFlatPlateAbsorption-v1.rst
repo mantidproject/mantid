@@ -21,42 +21,42 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-**Example - Sample corrections for IRIS:**
+.. **Example - Sample corrections for IRIS:**
 
-.. testcode:: SampleCorrectionsWithCanSubtraction
+.. .. testcode:: SampleCorrectionsWithCanSubtraction
 
-  red_ws = LoadNexusProcessed(Filename='irs26176_graphite002_red.nxs')
-  can_ws = LoadNexusProcessed(Filename='irs26173_graphite002_red.nxs')
+..   red_ws = LoadNexusProcessed(Filename='irs26176_graphite002_red.nxs')
+..   can_ws = LoadNexusProcessed(Filename='irs26173_graphite002_red.nxs')
 
-  corrected, ass = IndirectFlatPlateAbsorption(SampleWorkspace=red_ws,
-                                               CanWorkspace=can_ws,
-                                               CanScaleFactor=0.8,
-                                               ChemicalFormula='H2-O',
-                                               SampleHeight=1,
-                                               SampleWidth=1,
-                                               SampleThickness=1,
-                                               ElementSize=1)
+..   corrected, ass = IndirectFlatPlateAbsorption(SampleWorkspace=red_ws,
+..                                                CanWorkspace=can_ws,
+..                                                CanScaleFactor=0.8,
+..                                                ChemicalFormula='H2-O',
+..                                                SampleHeight=1,
+..                                                SampleWidth=1,
+..                                                SampleThickness=1,
+..                                                ElementSize=1)
 
-  print ('Corrected workspace is intensity against %s'
-        % (corrected.getAxis(0).getUnit().caption()))
+..   print ('Corrected workspace is intensity against %s'
+..         % (corrected.getAxis(0).getUnit().caption()))
 
-  print ('Corrections workspace is %s against %s'
-        % (ass.YUnitLabel(), ass.getAxis(0).getUnit().caption()))
-
-
-.. testcleanup:: SampleCorrectionsWithCanSubtraction
-
-   DeleteWorkspace(red_ws)
-   DeleteWorkspace(can_ws)
-   DeleteWorkspace(corrected)
-   DeleteWorkspace(ass)
-
-**Output:**
+..   print ('Corrections workspace is %s against %s'
+..         % (ass.YUnitLabel(), ass.getAxis(0).getUnit().caption()))
 
 
-.. testoutput:: SampleCorrectionsWithCanSubtraction
+.. .. testcleanup:: SampleCorrectionsWithCanSubtraction
 
-  Corrected workspace is intensity against Energy transfer
-  Corrections workspace is Attenuation factor against Wavelength
+..    DeleteWorkspace(red_ws)
+..    DeleteWorkspace(can_ws)
+..    DeleteWorkspace(corrected)
+..    DeleteWorkspace(ass)
+
+.. **Output:**
+
+
+.. .. testoutput:: SampleCorrectionsWithCanSubtraction
+
+..   Corrected workspace is intensity against Energy transfer
+..   Corrections workspace is Attenuation factor against Wavelength
 
 .. categories::
