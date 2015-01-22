@@ -19,6 +19,10 @@ class QSettings;
 
 namespace Mantid
 {
+namespace Kernel
+{
+  class Property;
+}
 namespace API
 {
   class IAlgorithm;

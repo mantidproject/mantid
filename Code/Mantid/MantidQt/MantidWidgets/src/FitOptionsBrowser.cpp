@@ -3,6 +3,7 @@
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/CostFunctionFactory.h"
+#include "MantidAPI/IAlgorithm.h"
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
@@ -30,6 +31,7 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QSettings>
+#include <limits>
 
 namespace MantidQt
 {
@@ -190,7 +192,7 @@ QtProperty* FitOptionsBrowser::addDoubleProperty(const QString& name)
 {
   QtProperty* prop = m_doubleManager->addProperty(name);
   m_doubleManager->setDecimals(prop,m_decimals);
-  m_doubleManager->setRange(prop,-DBL_MAX,DBL_MAX);
+  m_doubleManager->setRange(prop,-std::numeric_limits<double>::max(),std::numeric_limits<double>::max());
   return prop;
 }
 
