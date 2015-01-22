@@ -335,47 +335,106 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                               StartWorkspaceIndex=self._spectra_range[0] - 1,
                               EndWorkspaceIndex=self._spectra_range[1] - 1)
 
-            if need_chop and self._sum_files:
-                self._fold_chopped(ws_name)
+            if need_chop:
+                self._chopped_data = True
+
+        logger.information('Loaded workspace names: %s' % (str(self._workspace_names)))
+        logger.information('Chopped data: %s' % (str(self._chopped_data)))
 
         # Sum files if needed
         if self._sum_files:
-            # Use the first workspace name as the result of summation
-            summed_detector_ws_name = self._workspace_names[0]
-            summed_monitor_ws_name = self._workspace_names[0] + '_mon'
+            if self._chopped_data:
+                self._sum_chopped_runs()
+            else:
+                self._sum_regular_runs()
 
-            # Get a list of the run numbers for the original data
-            run_numbers = ','.join([str(mtd[ws_name].getRunNumber()) for ws_name in self._workspace_names])
+        logger.information('Summed workspace names: %s' % (str(self._workspace_names)))
 
-            # Generate lists of the detector and monitor workspaces
-            detector_workspaces = ','.join(self._workspace_names)
-            monitor_workspaces = ','.join([ws_name + '_mon' for ws_name in self._workspace_names])
 
-            # Merge the raw workspaces
-            MergeRuns(InputWorkspaces=detector_workspaces, OutputWorkspace=summed_detector_ws_name)
-            MergeRuns(InputWorkspaces=monitor_workspaces, OutputWorkspace=summed_monitor_ws_name)
+    def _sum_regular_runs(self):
+        """
+        Sum runs with single workspace data.
+        """
 
-            # Delete old workspaces
-            for idx in range(1, len(self._workspace_names)):
-                DeleteWorkspace(self._workspace_names[idx])
-                DeleteWorkspace(self._workspace_names[idx] + '_mon')
+        # Use the first workspace name as the result of summation
+        summed_detector_ws_name = self._workspace_names[0]
+        summed_monitor_ws_name = self._workspace_names[0] + '_mon'
 
-            # Derive the scale factor based on number of merged workspaces
-            scale_factor = 1.0 / len(self._workspace_names)
-            logger.information('Scale factor for summed workspaces: %f' % scale_factor)
+        # Get a list of the run numbers for the original data
+        run_numbers = ','.join([str(mtd[ws_name].getRunNumber()) for ws_name in self._workspace_names])
 
-            # Scale the new detector and monitor workspaces
-            Scale(InputWorkspace=summed_detector_ws_name, OutputWorkspace=summed_detector_ws_name,
-                  Factor=scale_factor)
-            Scale(InputWorkspace=summed_monitor_ws_name, OutputWorkspace=summed_monitor_ws_name,
-                  Factor=scale_factor)
+        # Generate lists of the detector and monitor workspaces
+        detector_workspaces = ','.join(self._workspace_names)
+        monitor_workspaces = ','.join([ws_name + '_mon' for ws_name in self._workspace_names])
 
-            # Add the list of run numbers to the result workspace as a sample log
-            AddSampleLog(Workspace=summed_detector_ws_name, LogName='multi_run_numbers',
-                         LogType='String', LogText=run_numbers)
+        # Merge the raw workspaces
+        MergeRuns(InputWorkspaces=detector_workspaces, OutputWorkspace=summed_detector_ws_name)
+        MergeRuns(InputWorkspaces=monitor_workspaces, OutputWorkspace=summed_monitor_ws_name)
 
-            # Only have the one workspace now
-            self._workspace_names = [summed_detector_ws_name]
+        # Delete old workspaces
+        for idx in range(1, len(self._workspace_names)):
+            DeleteWorkspace(self._workspace_names[idx])
+            DeleteWorkspace(self._workspace_names[idx] + '_mon')
+
+        # Derive the scale factor based on number of merged workspaces
+        scale_factor = 1.0 / len(self._workspace_names)
+        logger.information('Scale factor for summed workspaces: %f' % scale_factor)
+
+        # Scale the new detector and monitor workspaces
+        Scale(InputWorkspace=summed_detector_ws_name, OutputWorkspace=summed_detector_ws_name,
+              Factor=scale_factor)
+        Scale(InputWorkspace=summed_monitor_ws_name, OutputWorkspace=summed_monitor_ws_name,
+              Factor=scale_factor)
+
+        # Add the list of run numbers to the result workspace as a sample log
+        AddSampleLog(Workspace=summed_detector_ws_name, LogName='multi_run_numbers',
+                     LogType='String', LogText=run_numbers)
+
+        # Only have the one workspace now
+        self._workspace_names = [summed_detector_ws_name]
+
+
+    def _sum_chopped_runs(self):
+        """
+        Sum runs with chopped data.
+        """
+
+        try:
+            num_merges = len(mtd[self._workspace_names[0]].getNames())
+        except:
+            raise RuntimeError('Not all runs have been chapped, cannot sum.')
+
+        merges = list()
+
+        # Generate a list of workspaces to be merged
+        for idx in range(0, num_merges):
+            merges.append({'detector':list(), 'monitor':list()})
+
+            for ws_name in self._workspace_names:
+                detector_ws_name = mtd[ws_name].getNames()[idx]
+                monitor_ws_name = detector_ws_name + '_mon'
+
+                merges[idx]['detector'].append(detector_ws_name)
+                merges[idx]['monitor'].append(monitor_ws_name)
+
+        for merge in merges:
+            # Merge the chopped run segments
+            MergeRuns(InputWorkspaces=','.join(merge['detector']), OutputWorkspace=merge['detector'][0])
+            MergeRuns(InputWorkspaces=','.join(merge['monitor']), OutputWorkspace=merge['monitor'][0])
+
+            # Scale the merged runs
+            merge_size = len(merge['detector'])
+            factor = 1.0 / merge_size
+            Scale(InputWorkspace=merge['detector'][0], OutputWorkspace=merge['detector'][0], Factor=factor, Operation='Multiply')
+            Scale(InputWorkspace=merge['monitor'][0], OutputWorkspace=merge['monitor'][0], Factor=factor, Operation='Multiply')
+
+            # Remove the old workspaces
+            for idx in range(1, merge_size):
+                DeleteWorkspace(merge['detector'][idx])
+                DeleteWorkspace(merge['monitor'][idx])
+
+        # Only have the one workspace now
+        self._workspace_names = [self._workspace_names[0]]
 
 
     def _identify_bad_detectors(self, ws_name):
