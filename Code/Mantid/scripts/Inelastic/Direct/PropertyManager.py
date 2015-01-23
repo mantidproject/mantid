@@ -129,7 +129,7 @@ class PropertyManager(NonIDF_Properties):
         class_decor = '_'+type(self).__name__+'__'
 
         result = {}
-        for key,val  in prop_dict.iteritems():
+        for key,val in prop_dict.iteritems():
             new_key = class_decor+key
             object.__setattr__(self,new_key,val)
 

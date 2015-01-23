@@ -278,13 +278,17 @@ class DirectEnergyConversion(object):
         return diag_mask
 
 #-------------------------------------------------------------------------------
-    def convert_to_energy(self,wb_run=None,sample_run=None,ei_guess=None,rebin=None,map_file=None,monovan_run=None,wb_for_monovan_run=None,**kwargs):
+    def convert_to_energy(self,wb_run=None,sample_run=None,ei_guess=None,rebin=None,map_file=None,
+                          monovan_run=None,wb_for_monovan_run=None,**kwargs):
       """ One step conversion of run into workspace containing information about energy transfer
 
       """ 
+      # Clear information about sample runs, processed previously.
+      PropertyManager.sample_run.set_action_suffix('')
       # Support for old reduction interface:
-      self.prop_man.set_input_parameters_ignore_nan(wb_run=wb_run,sample_run=sample_run,incident_energy=ei_guess,
-                                           energy_bins=rebin,map_file=map_file,monovan_run=monovan_run,wb_for_monovan_run=wb_for_monovan_run)
+      self.prop_man.set_input_parameters_ignore_nan\
+           (wb_run=wb_run,sample_run=sample_run,incident_energy=ei_guess,energy_bins=rebin,
+            map_file=map_file,monovan_run=monovan_run,wb_for_monovan_run=wb_for_monovan_run)
       #
       self.prop_man.set_input_parameters(**kwargs)
 
@@ -326,10 +330,10 @@ class DirectEnergyConversion(object):
       workspace_defined_prop = allChanges.difference(oldChanges)
       if len(workspace_defined_prop) > 0:
           prop_man.log("****************************************************************")
-          prop_man.log('*** Sample run {0} properties change default reduction properties: '.format(PropertyManager.sample_run.get_ws_name()))
+          prop_man.log('*** Sample run {0} properties change default reduction properties: '.\
+                   format(PropertyManager.sample_run.get_ws_name()))
           prop_man.log_changed_values('notice',False,oldChanges)
           prop_man.log("****************************************************************")
-
 
 
 
@@ -342,9 +346,9 @@ class DirectEnergyConversion(object):
       # SAVE AND REUSE MASKS
       if self.spectra_masks:
          masks_done = True
-#-------------------------------------------------------------------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------------
 #  Diagnostics here
-# --------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------
      # diag the sample and detector vanadium.  It will deal with hard mask only
      # if it is set that way
       if not masks_done:
@@ -428,7 +432,7 @@ class DirectEnergyConversion(object):
       # Currently clear masks unconditionally TODO: cash masks with appropriate
       # precautions
       self.spectra_masks = None
-
+      self.prop_man.sample_run = None # clean up memory about sample run
 
       return deltaE_wkspace_sample
 
@@ -663,7 +667,7 @@ class DirectEnergyConversion(object):
               new_name = run.get_ws_name()
               return ('current',new_name)
            else:
-              raise RuntimeError('Normalise by monitor-2:: Workspace {0} for run {1} does not have monitors in it'\
+              raise RuntimeError('Normalize by monitor-2:: Workspace {0} for run {1} does not have monitors in it'\
                    .format(run.get_ws_name(),run.__get__()))
         #Find TOF range, correspondent to incident energy monitor peak
         if self._mon2_norm_time_range:
@@ -830,7 +834,8 @@ class DirectEnergyConversion(object):
         #end
 
     def __getattr__(self,attr_name):
-       """  overloaded to return values of properties non-existing in the class dictionary from the property manager class except this
+       """  overloaded to return values of properties non-existing in the class dictionary 
+            from the property manager class except this
             property already have descriptor in self class
        """ 
        if attr_name in self._descriptors:
@@ -1180,7 +1185,7 @@ class DirectEnergyConversion(object):
         self.prop_man.incident_energy = ei_value
 
         # As we've shifted the TOF so that mon1 is at t=0.0 we need to account
-        # for this in CalculateFlatBackground and normalisation
+        # for this in CalculateFlatBackground and normalization
         bin_offset = -mon1_peak
 
         # For event mode, we are going to histogram in energy first, then go
@@ -1283,12 +1288,7 @@ class DirectEnergyConversion(object):
         result_name = data_run.set_action_suffix('_spe')
         data_run.synchronize_ws(norm_ws)
 
-
-
-        # This next line will fail the SystemTests
-        #ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct',
-        #EFixed=ei_value)
-        # But this one passes...
+        #
         ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
         self.prop_man.log("_do_mono: finished ConvertUnits for : " + result_name,'information')
 

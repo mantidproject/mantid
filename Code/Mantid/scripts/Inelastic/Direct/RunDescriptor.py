@@ -238,7 +238,8 @@ class RunDescriptor(PropDescriptor):
             fname,fex=os.path.splitext(file)
             self._run_ext = fex
             if old_ext != fex:
-                message='Cannot find file with extension {0} but find file {1} instead'.format(old_ext,file)
+                message='   Cannot find file with extension {0}.\n'\
+                        '   Find file {1} instead'.format(old_ext,file)
                 RunDescriptor._logger(message,'notice')
             self._run_file_path = os.path.dirname(fname)
             return file
