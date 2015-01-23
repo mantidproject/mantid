@@ -24,9 +24,21 @@ namespace MantidQt
 			/// Load default settings into the interface
 			void loadSettings(const QSettings& settings);
 
+    private slots:
+      void dosAlgoComplete(bool error);
+      void handleFileChange();
+      void ionLoadComplete(bool error);
+
+      void addAllIons();
+      void removeAllIons();
+      void addSelectedIons();
+      void removeSelectedIons();
+
 		private:
 			/// The ui form
 			Ui::DensityOfStates m_uiForm;
+      /// Name of output workspace
+      QString m_outputWsName;
 
 		};
 	} // namespace CustomInterfaces

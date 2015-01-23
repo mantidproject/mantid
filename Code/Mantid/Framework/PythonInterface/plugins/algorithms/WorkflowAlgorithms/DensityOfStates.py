@@ -7,7 +7,7 @@ import re
 import os.path
 import math
 
-class DensityOfStates(DataProcessorAlgorithm):
+class DensityOfStates(PythonAlgorithm):
 
     def summary(self):
         return "Calculates phonon densities of states, Raman and IR spectrum."
