@@ -266,7 +266,7 @@ public:
           if (have_weight) {
             double weight = static_cast<double>(event_weight[i]);
             double errorSq = weight * weight;
-            std::vector<Mantid::DataObjects::WeightedEvent> *eventVector =
+            LoadEventNexus::WeightedEventVector_pt eventVector =
                 alg->weightedEventVectors[detId];
             // NULL eventVector indicates a bad spectrum lookup
             if (eventVector) {
@@ -934,9 +934,9 @@ private:
 */
 LoadEventNexus::LoadEventNexus()
     : IFileLoader<Kernel::NexusDescriptor>(),
-    instrument_loaded_correctly(false),
     discarded_events(0),
-    logs_loaded_correctly(false),
+    m_instrument_loaded_correctly(false),
+    m_logs_loaded_correctly(false),
     event_id_is_spec(false) {}
 
 //----------------------------------------------------------------------------------------------
@@ -1337,12 +1337,13 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
 
 //-----------------------------------------------------------------------------
 /**
-* Load events from the file
+* Load events from the file.
 * @param prog :: A pointer to the progress reporting object
 * @param monitors :: If true the events from the monitors are loaded and not the
 * main banks
 *
-* This also loads the instrument, but only if it has not been loaded before.
+* This also loads the instrument, but only if it has not been set in the workspace
+* being used as input (WS data member). Same applies to the logs.
 */
 void LoadEventNexus::loadEvents(API::Progress *const prog,
                                 const bool monitors) {
@@ -1356,11 +1357,12 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Initialize the counter of bad TOFs
   bad_tofs = 0;
 
-  if (!logs_loaded_correctly) {
+  if (!m_logs_loaded_correctly) {
     if (loadlogs) {
       prog->doReport("Loading DAS logs");
       m_allBanksPulseTimes = runLoadNexusLogs(m_filename, WS, *this, true);
       run_start = WS->getFirstPulseTime();
+      m_logs_loaded_correctly = true;
     } else {
       g_log.information() << "Skipping the loading of sample logs!\n"
                           << "Reading the start time directly from /"
@@ -1374,8 +1376,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       WS->mutableRun().addProperty("run_start", run_start.toISO8601String(),
                                    true);
     }
-
-    logs_loaded_correctly = true;
   }
 
   // Make sure you have a non-NULL m_allBanksPulseTimes
@@ -1385,13 +1385,13 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     m_allBanksPulseTimes = boost::make_shared<BankPulseTimes>(temp);
   }
 
-  if (true /*!instrument_loaded_correctly*/) {
+  if (!WS->getInstrument() || !m_instrument_loaded_correctly) {
     // Load the instrument (if not loaded before)
     prog->report("Loading instrument");
-    instrument_loaded_correctly =
+    m_instrument_loaded_correctly =
       loadInstrument(m_filename, WS, m_top_entry_name, this);
 
-    if (!instrument_loaded_correctly)
+    if (!m_instrument_loaded_correctly)
       throw std::runtime_error(
         "Instrument was not initialized correctly! Loading cannot continue.");
   }
@@ -2269,8 +2269,36 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
                                       // object-level workspace ptr
     // add filename
     WS->mutableRun().addProperty("Filename", m_filename);
+
+    // Re-use instrument, which has probably been loaded into the data
+    // workspace (this happens in the first call to loadEvents() (inside
+    // LoadEventNexuss::exec()). The second call to loadEvents(), immediately
+    // below, can re-use it.
+    if (m_instrument_loaded_correctly) {
+      WS->setInstrument(dataWS->getInstrument());
+      g_log.information() << "Instrument data copied into monitors workspace "
+        " from the data workspace." << std::endl;
+    }
+
     // Perform the load (only events from monitor)
     loadEvents(prog, true);
+
+    // and re-use log entries (but only after loading metadata in loadEvents()
+    // this is not strictly needed for the load to work (like the instrument is)
+    // so it can be done after loadEvents, and it doesn't throw
+    if (m_logs_loaded_correctly) {
+      g_log.information() << "Copying log data into monitors workspace from the "
+                          << "data workspace." << std::endl;
+      try {
+        copyLogs(dataWS, WS);
+        g_log.information() << "Log data copied." << std::endl;
+      } catch(std::runtime_error&) {
+        g_log.error() << "Could not copy log data into monitors workspace. Some "
+          " logs may be wrong and/or missing in the output "
+          "monitors workspace." << std::endl;
+      }
+    }
+
     std::string mon_wsname = this->getProperty("OutputWorkspace");
     mon_wsname.append("_monitors");
     this->declareProperty(
@@ -2759,7 +2787,8 @@ void LoadEventNexus::filterDuringPause(API::MatrixWorkspace_sptr workspace) {
 * @param alg :: Handle of the algorithm
 * @param returnpulsetimes :: flag to return shared pointer for BankPulseTimes,
 *otherwise NULL.
-* @return true if successful
+*
+* @return Pulse times given in the DAS logs
 */
 boost::shared_ptr<BankPulseTimes>
 LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename,
@@ -2893,6 +2922,27 @@ void LoadEventNexus::createSpectraList(int32_t min, int32_t max) {
         throw std::invalid_argument("Inconsistent range property: some of the "
                                     "selected spectra correspond to monitors.");
       }
+    }
+  }
+}
+
+/**
+ * Copy all logData properties from the 'from' workspace to the 'to'
+ * workspace. Does not use CopyLogs as a child algorithm (this is a
+ * simple copy and the workspace is not yet in the ADS).
+ *
+ * @param from source of log entries
+ * @param to workspace where to add the log entries
+ */
+void LoadEventNexus::copyLogs(const EventWorkspace_sptr& from,
+                                  EventWorkspace_sptr& to)
+{
+  // from the logs, get all the properties that don't overwrite any
+  // prop. already set in the sink workspace (like 'filename').
+  auto props = from->mutableRun().getLogData();
+  for (size_t j=0; j<props.size(); j++) {
+    if (!to->mutableRun().hasProperty(props[j]->name())) {
+      to->mutableRun().addLogData(props[j]->clone());
     }
   }
 }
