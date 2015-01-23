@@ -7,34 +7,24 @@
 #include "MantidKernel/System.h"
 
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
-//#include "MantidMDAlgorithms/UpParameter.h"
-//#include "MantidMDAlgorithms/PerpendicularParameter.h"
-//#include "MantidMDAlgorithms/NormalParameter.h"
-//#include "MantidMDAlgorithms/OriginParameter.h"
-
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/NodeFilter.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
 
 #include <boost/algorithm/string.hpp>
 
-
-namespace Mantid
-{
-namespace MDAlgorithms
-{
+namespace Poco {
+namespace DOM {
+class Element;
+}
+}
+namespace Mantid {
+namespace MDAlgorithms {
 /**
 
  XML parser for vector value (3 elements) parameter types.
 
  @author Owen Arnold, Tessella plc
  @date 02/11/2011
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -54,92 +44,87 @@ namespace MDAlgorithms
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-template<class VectorValueParameterType>
-class DLLExport Vector3DParameterParser: public Mantid::API::ImplicitFunctionParameterParser
-{
+template <class VectorValueParameterType>
+class DLLExport Vector3DParameterParser
+    : public Mantid::API::ImplicitFunctionParameterParser {
 public:
   Vector3DParameterParser();
 
-  VectorValueParameterType* parseVectorParameter(std::string value);
+  VectorValueParameterType *parseVectorParameter(std::string value);
 
-  Mantid::API::ImplicitFunctionParameter* createParameter(Poco::XML::Element* parameterElement);
+  Mantid::API::ImplicitFunctionParameter *
+  createParameter(Poco::XML::Element *parameterElement);
 
-  void setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser* paramParser);
+  void
+  setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser *paramParser);
 
   ~Vector3DParameterParser();
 };
 
 ////////////////////////////////////////////////////////////////////
 
-template<typename VectorValueParameterType>
-Vector3DParameterParser<VectorValueParameterType>::Vector3DParameterParser()
-{
-}
+template <typename VectorValueParameterType>
+Vector3DParameterParser<VectorValueParameterType>::Vector3DParameterParser() {}
 
-template<typename VectorValueParameterType>
-VectorValueParameterType* Vector3DParameterParser<VectorValueParameterType>::parseVectorParameter(
-    std::string value)
-{
+template <typename VectorValueParameterType>
+VectorValueParameterType *
+Vector3DParameterParser<VectorValueParameterType>::parseVectorParameter(
+    std::string value) {
   std::vector<std::string> strs;
   boost::split(strs, value, boost::is_any_of(","));
 
   double nx, ny, nz;
-  try
-  {
+  try {
     nx = atof(strs.at(0).c_str());
     ny = atof(strs.at(1).c_str());
     nz = atof(strs.at(2).c_str());
-  } catch (std::exception& ex)
-  {
-    std::string message = std::string(ex.what()) + " Failed to parse "
-        + VectorValueParameterType::parameterName() + " value: " + value;
+  } catch (std::exception &ex) {
+    std::string message = std::string(ex.what()) + " Failed to parse " +
+                          VectorValueParameterType::parameterName() +
+                          " value: " + value;
     throw std::invalid_argument(message.c_str());
   }
   return new VectorValueParameterType(nx, ny, nz);
 }
 
-template<typename VectorValueParameterType>
-Mantid::API::ImplicitFunctionParameter* Vector3DParameterParser<VectorValueParameterType>::createParameter(
-    Poco::XML::Element* parameterElement)
-{
+template <typename VectorValueParameterType>
+Mantid::API::ImplicitFunctionParameter *
+Vector3DParameterParser<VectorValueParameterType>::createParameter(
+    Poco::XML::Element *parameterElement) {
   std::string typeName = parameterElement->getChildElement("Type")->innerText();
-  if (VectorValueParameterType::parameterName() != typeName)
-  {
+  if (VectorValueParameterType::parameterName() != typeName) {
     return m_successor->createParameter(parameterElement);
-  }
-  else
-  {
-    std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
+  } else {
+    std::string sParameterValue =
+        parameterElement->getChildElement("Value")->innerText();
     return parseVectorParameter(sParameterValue);
   }
 }
 
-template<typename VectorValueParameterType>
+template <typename VectorValueParameterType>
 void Vector3DParameterParser<VectorValueParameterType>::setSuccessorParser(
-    Mantid::API::ImplicitFunctionParameterParser* paramParser)
-{
+    Mantid::API::ImplicitFunctionParameterParser *paramParser) {
   Mantid::API::ImplicitFunctionParameterParser::SuccessorType temp(paramParser);
   m_successor.swap(temp);
 }
 
-template<typename VectorValueParameterType>
-Vector3DParameterParser<VectorValueParameterType>::~Vector3DParameterParser()
-{
-}
+template <typename VectorValueParameterType>
+Vector3DParameterParser<VectorValueParameterType>::~Vector3DParameterParser() {}
 
-//Declare types based on this template.
+// Declare types based on this template.
 
 /// Parses Origin Parameters
-//typedef Vector3DParameterParser<OriginParameter> OriginParameterParser;
+// typedef Vector3DParameterParser<OriginParameter> OriginParameterParser;
 
 /// Parses Normal Parameters
-//typedef Vector3DParameterParser<NormalParameter> NormalParameterParser;
+// typedef Vector3DParameterParser<NormalParameter> NormalParameterParser;
 
 /// Parses Up Parameters
-//typedef Vector3DParameterParser<UpParameter> UpParameterParser;
+// typedef Vector3DParameterParser<UpParameter> UpParameterParser;
 
 /// Parses Perpendicular Parameters
-//typedef Vector3DParameterParser<PerpendicularParameter> PerpendicularParameterParser;
+// typedef Vector3DParameterParser<PerpendicularParameter>
+// PerpendicularParameterParser;
 }
 }
 

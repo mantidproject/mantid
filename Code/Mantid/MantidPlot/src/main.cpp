@@ -28,6 +28,8 @@
  ***************************************************************************/
 #include <iostream>
 #include <QApplication>
+#include <QBitmap>
+#include <QFontDatabase>
 #include <QSplashScreen>
 #include <QMessageBox>
 #include <QDir>
@@ -129,15 +131,6 @@ If you want to contribute code, please read the notes on \ref style "coding styl
   - For indentations, tabs are preferred because they allow everyone to choose the indentation depth for him/herself.
 */
 
-class WaitThread:public QThread
-{
-public:
-    void run()
-    {
-        sleep(1);
-    }
-};
-
 int main( int argc, char ** argv )
 {
   // First, look for command-line arguments that we want to deal with before launching anything
@@ -189,27 +182,32 @@ int main( int argc, char ** argv )
   QStringList args = app.arguments();
   args.removeFirst(); // remove application name
 
-  WaitThread t;
   try
   {
-    t.start();
+    // Splash
     QPixmap pixmap;
-    if (!pixmap.load(":/MantidSplashScreen.png")) QMessageBox::warning(0,"","Couldn't load splashscreen");
-    QSplashScreen splash(pixmap);
+    if (!pixmap.load(":/MantidSplashScreen.png")) std::cerr << "Couldn't load splashscreen\n";
+    QSplashScreen splash(pixmap, Qt::WindowStaysOnTopHint);
     const QString releaseDateTime(Mantid::Kernel::MantidVersion::releaseDate());
     const QString versionInfo(Mantid::Kernel::MantidVersion::version());
     splash.showMessage("Release: " + releaseDateTime + " (Version " + versionInfo + ")", Qt::AlignLeft | Qt::AlignBottom);
+    splash.setMask(pixmap.createMaskFromColor(QColor(Qt::transparent)));
     splash.show();
+    // If we take too long to get to the event loop then box starts out gray so ensure
+    // it is painted before doing any heavy lifting like the ApplicationWindow init
+    splash.repaint();
     app.processEvents();
 
-    bool factorySettings = false;
-    if (args.contains("-d") || args.contains("--default-settings"))
-      factorySettings = true;
-
+    const bool factorySettings = (args.contains("-d") || args.contains("--default-settings"));
     ApplicationWindow *mw = new ApplicationWindow(factorySettings, args);
     mw->restoreApplicationGeometry();
     mw->parseCommandLineArguments(args);
-    t.wait();
+    app.processEvents();
+
+    //register a couple of fonts
+    QFontDatabase::addApplicationFont(":/fonts/MontserratAlternates-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/fonts/OpenSans-Regular.ttf");
+
     splash.finish(mw);
 
     app.connect( &app, SIGNAL(lastWindowClosed()), mw, SLOT(exitWithPresetCode()) );
@@ -218,15 +216,11 @@ int main( int argc, char ** argv )
   }
   catch(std::exception& e)
   {
-    if (t.isRunning())  t.quit();
-
     QMessageBox::critical(0,"Mantid - Error",
       QString("An unhandled exception has been caught. MantidPlot will have to close. Details:\n\n")+e.what());
   }
   catch(...)
   {
-    if (t.isRunning())  t.quit();
-
     QMessageBox::critical(0,"Mantid - Error",
       "An unhandled exception has been caught. MantidPlot will have to close.");
   }

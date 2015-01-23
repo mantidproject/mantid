@@ -8,11 +8,13 @@
 #include <qwt_plot_canvas.h>
 #include <qwt_compat.h>
 #include <qwt_plot_zoomer.h>
+#include <qwt_scale_widget.h>
 
 #include <QFontMetrics>
 #include <QMouseEvent>
 #include <QContextMenuEvent>
 #include <QPainter>
+#include <QFont>
 
 #include <iostream>
 #include <cmath>
@@ -20,11 +22,13 @@
 OneCurvePlot::OneCurvePlot(QWidget* parent):
 QwtPlot(parent),m_curve(NULL),m_xUnits("")
 {
-  setAxisFont(QwtPlot::xBottom, parent->font());
-  setAxisFont(QwtPlot::yLeft, parent->font());
+  QFont font = parent->font();
+  setAxisFont(QwtPlot::xBottom, font);
+  setAxisFont(QwtPlot::yLeft, font);
+  QwtText dummyText;
+  dummyText.setFont(font);
+  setAxisTitle(xBottom,dummyText);
   canvas()->setCursor(Qt::ArrowCursor);
-  //setMouseTracking(true);
-  //canvas()->setMouseTracking(true);
   setContextMenuPolicy(Qt::DefaultContextMenu);
   m_zoomer = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft,
       QwtPicker::DragSelection | QwtPicker::CornerToCorner, QwtPicker::AlwaysOff, canvas());
@@ -52,7 +56,7 @@ OneCurvePlot::~OneCurvePlot()
   */
 void OneCurvePlot::setXScale(double from, double to)
 {
-  QFontMetrics fm(this->font());
+  QFontMetrics fm(axisFont(QwtPlot::xBottom));
   int n = from != 0.0 ? abs(static_cast<int>(floor(log10(fabs(from))))) : 0;
   int n1 = to != 0.0 ? abs(static_cast<int>(floor(log10(fabs(to))))) : 0;
   if (n1 > n) n = n1;
@@ -61,6 +65,7 @@ void OneCurvePlot::setXScale(double from, double to)
   int labelWidth = n * fm.width("0");
   // calculate number of major ticks
   int nMajorTicks = this->width() / labelWidth;
+  if ( nMajorTicks > 6 ) nMajorTicks = 6;
   // try creating a scale
   const QwtScaleDiv div = axisScaleEngine(QwtPlot::xBottom)->divideScale(from,to,nMajorTicks,nMajorTicks);
   // Major ticks are placed at round numbers so the first or last tick could be missing making
@@ -223,6 +228,7 @@ void OneCurvePlot::setData(const double* x,const double* y,int dataSize,const st
     if (yy > to) to = yy;
   }
   setYScale(from,to);
+  this->setAxisTitle(xBottom,QString::fromStdString(m_xUnits));
 }
 
 /**

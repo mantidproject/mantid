@@ -3,10 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/ArrayProperty.h"
 
-namespace Mantid
-{
-namespace Kernel
-{
+namespace Mantid {
+namespace Kernel {
 
 /// @cond
 
@@ -16,7 +14,7 @@ template DLLExport class ArrayProperty<size_t>;
 template DLLExport class ArrayProperty<double>;
 template DLLExport class ArrayProperty<std::string>;
 
-template DLLExport class ArrayProperty<std::vector<std::string> >;
+template DLLExport class ArrayProperty<std::vector<std::string>>;
 
 /// @endcond
 

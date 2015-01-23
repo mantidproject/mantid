@@ -3,16 +3,15 @@
 
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** An example algorithm iterating over a workspace.
 
     @author Roman Tolchenov, ISIS, RAL
     @date 02/05/2008
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -32,26 +31,25 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class WorkspaceAlgorithm : public API::Algorithm
-{
+class WorkspaceAlgorithm : public API::Algorithm {
 public:
-  ///no arg constructor
+  /// no arg constructor
   WorkspaceAlgorithm() : API::Algorithm() {}
-  ///virtual destructor
+  /// virtual destructor
   virtual ~WorkspaceAlgorithm() {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "WorkspaceAlgorithm";}
+  virtual const std::string name() const { return "WorkspaceAlgorithm"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1);}
+  virtual int version() const { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Examples";}
+  virtual const std::string category() const { return "Examples"; }
   // Algorithm's summary. Overriding a virtual method.
   virtual const std::string summary() const { return "Example summary text."; }
 
 private:
-  ///Initialisation code
+  /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
 };
 
@@ -59,4 +57,3 @@ private:
 } // namespace Mantid
 
 #endif /*USER_ALGORITHMS_WORKSPACEALGORITHM_H_*/
-

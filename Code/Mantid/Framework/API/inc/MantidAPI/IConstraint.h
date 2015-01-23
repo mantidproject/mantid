@@ -7,20 +7,19 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ParameterReference.h"
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
-  class Expression;
+class Expression;
 /** An interface to a constraint.
 
     @author Anders Markvardsen, ISIS, RAL
     @date 12/11/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -40,16 +39,16 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL IConstraint: public ParameterReference
-{
+class MANTID_API_DLL IConstraint : public ParameterReference {
 public:
   /// Default constructor
-  IConstraint():ParameterReference() {}
+  IConstraint() : ParameterReference() {}
   /// Virtual destructor
   virtual ~IConstraint() {}
 
   /// Initialize the constraint from an expression
-  virtual void initialize(IFunction* fun, const Expression& expr, bool isDefault = false) = 0;
+  virtual void initialize(IFunction *fun, const Expression &expr,
+                          bool isDefault = false) = 0;
 
   /// Returns a penalty number which is bigger than or equal to zero
   /// If zero it means that the constraint is not penalized. If larger
@@ -66,25 +65,25 @@ public:
   /// Set the parameters of IFitFunction to satisfy constraint. For example
   /// for a BoundaryConstraint this if param value less than lower boundary
   /// it is set to that value and vice versa for if the param value is larger
-  /// than the upper boundary value. 
+  /// than the upper boundary value.
   virtual void setParamToSatisfyConstraint() = 0;
 
   /// set the penalty factor for the constraint
-  /// Set panelty factor. The larger the number to thigter the constraint. This number
+  /// Set panelty factor. The larger the number to thigter the constraint. This
+  /// number
   /// must be set to a number larger than zero
   /// @param c :: the penalt factor
-  virtual void setPenaltyFactor(const double& c) = 0;   
+  virtual void setPenaltyFactor(const double &c) = 0;
 
   /// get the penalty factor for the constraint
-  virtual double getPenaltyFactor()const = 0;   
+  virtual double getPenaltyFactor() const = 0;
 
-  /// Return the string that can be used in this->initialize() to recreate this constraint
-  virtual std::string asString()const = 0;
+  /// Return the string that can be used in this->initialize() to recreate this
+  /// constraint
+  virtual std::string asString() const = 0;
 };
-
 
 } // namespace API
 } // namespace Mantid
-
 
 #endif /*MANTID_API_ICONSTRAINT_H_*/

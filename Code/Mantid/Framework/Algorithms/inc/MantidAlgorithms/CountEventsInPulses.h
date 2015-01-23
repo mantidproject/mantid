@@ -5,84 +5,85 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 
-  /** CountEventsInPulses : TODO: DESCRIPTION
-    
-    @date 2012-03-27
+/** CountEventsInPulses : TODO: DESCRIPTION
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  @date 2012-03-27
 
-    This file is part of Mantid.
+  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport CountEventsInPulses : public API::Algorithm
-  {
-  public:
-    CountEventsInPulses();
-    virtual ~CountEventsInPulses();
-    
-    virtual const std::string name() const {return "CountEventsInPulses"; }
-    virtual int version() const {return 1; }
-    virtual const std::string category() const {return "Utility"; }
-    virtual const std::string summary() const {return "Counts the number of events in pulses.";}
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  private:
-    /// Properties definition
-    void init();
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport CountEventsInPulses : public API::Algorithm {
+public:
+  CountEventsInPulses();
+  virtual ~CountEventsInPulses();
 
-    /// Main executation body
-    void exec();
+  virtual const std::string name() const { return "CountEventsInPulses"; }
+  virtual int version() const { return 1; }
+  virtual const std::string category() const { return "Utility"; }
+  virtual const std::string summary() const {
+    return "Counts the number of events in pulses.";
+  }
 
-    /// Create an EventWorkspace from input EventWorkspace
-    DataObjects::EventWorkspace_sptr createEventWorkspace(DataObjects::EventWorkspace_const_sptr parentws, bool sumspectrum);
+private:
+  /// Properties definition
+  void init();
 
-    /// Count events (main algorithm)
-    void convertEvents(DataObjects::EventWorkspace_sptr outWS, bool sumspectra);
+  /// Main executation body
+  void exec();
 
-    /// Rebin workspace
-    void rebin(DataObjects::EventWorkspace_sptr outputWS);
+  /// Create an EventWorkspace from input EventWorkspace
+  DataObjects::EventWorkspace_sptr
+  createEventWorkspace(DataObjects::EventWorkspace_const_sptr parentws,
+                       bool sumspectrum);
 
-    /// Compress events
-    DataObjects::EventWorkspace_sptr compressEvents(DataObjects::EventWorkspace_sptr inputws, double tolerance);
+  /// Count events (main algorithm)
+  void convertEvents(DataObjects::EventWorkspace_sptr outWS, bool sumspectra);
 
-    DataObjects::EventWorkspace_const_sptr inpWS;
-    std::vector<double> mTimesInSecond; // Full size time in second
-    std::vector<Kernel::DateAndTime> mBinTimes; // Time with pulses binned
+  /// Rebin workspace
+  void rebin(DataObjects::EventWorkspace_sptr outputWS);
 
-    /// Sum spectra or not
-    bool mSumSpectra;
+  /// Compress events
+  DataObjects::EventWorkspace_sptr
+  compressEvents(DataObjects::EventWorkspace_sptr inputws, double tolerance);
 
-    double mUnitFactor;
+  DataObjects::EventWorkspace_const_sptr inpWS;
+  std::vector<double> mTimesInSecond;         // Full size time in second
+  std::vector<Kernel::DateAndTime> mBinTimes; // Time with pulses binned
 
-    /// Average length of pulse in unit of second
-    double mPulseLength;
+  /// Sum spectra or not
+  bool mSumSpectra;
 
-    /// Bin size for future rebinning
-    double mBinSize;
+  double mUnitFactor;
 
-  };
+  /// Average length of pulse in unit of second
+  double mPulseLength;
 
+  /// Bin size for future rebinning
+  double mBinSize;
+};
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_COUNTEVENTSINPULSES_H_ */
+#endif /* MANTID_ALGORITHMS_COUNTEVENTSINPULSES_H_ */

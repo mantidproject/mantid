@@ -8,13 +8,12 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** Filters events in an EventWorkspace using values in a SampleLog.
 
-    Copyright &copy; 2010-2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2010-2012 ISIS Rutherford Appleton Laboratory, NScD Oak
+   Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -34,26 +33,29 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport FilterByLogValue : public API::Algorithm
-{
+class DLLExport FilterByLogValue : public API::Algorithm {
 public:
   FilterByLogValue();
   virtual ~FilterByLogValue();
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FilterByLogValue";};
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Filter out events from an EventWorkspace based on a sample log value satisfying filter criteria.";}
+  virtual const std::string name() const { return "FilterByLogValue"; };
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Filter out events from an EventWorkspace based on a sample log "
+           "value satisfying filter criteria.";
+  }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1;};
+  virtual int version() const { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Events\\EventFiltering";}
+  virtual const std::string category() const {
+    return "Events\\EventFiltering";
+  }
 
   std::map<std::string, std::string> validateInputs();
 
 private:
-  
   // Implement abstract Algorithm methods
   void init();
   void exec();
@@ -63,5 +65,3 @@ private:
 } // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_FILTERBYLOGVALUE_H_ */
-
-

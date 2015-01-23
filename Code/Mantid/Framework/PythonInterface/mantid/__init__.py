@@ -16,10 +16,12 @@ algorithms and data objects that are:
       Implementing Algorithms, Virtual Instrument Geometry.
 
 """
+from __future__ import absolute_import
+
 ###############################################################################
 # Check the current Python version is correct
 ###############################################################################
-import pyversion
+from . import pyversion
 
 ###############################################################################
 # Define the api version
@@ -66,15 +68,15 @@ if _os.path.exists(_os.path.join(_bindir, 'Mantid.properties')):
 ###############################################################################
 # Ensure the sub package C libraries are loaded
 ###############################################################################
-import kernel
-import geometry
-import api
+import mantid.kernel as kernel
+import mantid.geometry as geometry
+import mantid.api as api
 
 ###############################################################################
-# Make the aliases form each module accessible in a the mantid namspace
+# Make the aliases from each module accessible in a the mantid namspace
 ###############################################################################
-from kernel._aliases import *
-from api._aliases import *
+from mantid.kernel._aliases import *
+from mantid.api._aliases import *
 
 ###############################################################################
 # Make the version string accessible in the standard way
@@ -94,9 +96,8 @@ __version__ = kernel.version_str()
 # to the simple import mechanism then plugins that are loaded later cannot
 # be seen by the earlier ones (chicken & the egg essentially).
 ################################################################################
-import simpleapi as _simpleapi
-from kernel import plugins as _plugins
-
+from . import simpleapi as _simpleapi
+from mantid.kernel import plugins as _plugins
 
 _plugins_key = 'python.plugins.directories'
 _user_key = 'user.%s' % _plugins_key

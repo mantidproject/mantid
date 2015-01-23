@@ -13,52 +13,57 @@
 #include <vector>
 #include "MantidKernel/BoundedValidator.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSDirectBeamScaling)
-
 
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 
-void SANSDirectBeamScaling::init()
-{
+void SANSDirectBeamScaling::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
+                                          Direction::Input, wsValidator));
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty("AttenuatorTransmission", 1.0, mustBePositive, "Attenuator transmission for empty direct beam.");
-  declareProperty("AttenuatorTransmissionError", 0.0, mustBePositive, "Uncertainty in attenuator transmission.");
-  declareProperty("BeamRadius", 0.03, mustBePositive, "Radius of the beam stop [m].");
+  declareProperty("AttenuatorTransmission", 1.0, mustBePositive,
+                  "Attenuator transmission for empty direct beam.");
+  declareProperty("AttenuatorTransmissionError", 0.0, mustBePositive,
+                  "Uncertainty in attenuator transmission.");
+  declareProperty("BeamRadius", 0.03, mustBePositive,
+                  "Radius of the beam stop [m].");
 
   // Source aperture radius in meters
   declareProperty("SourceApertureRadius", 0.04, mustBePositive,
-      "Source aperture to be used if it is not found in the instrument parameters [m].");
+                  "Source aperture to be used if it is not found in the "
+                  "instrument parameters [m].");
 
   // Sample aperture radius in meters
   declareProperty("SampleApertureRadius", 0.008, mustBePositive,
-      "Sample aperture to be used if it is not found in the instrument parameters [m].");
+                  "Sample aperture to be used if it is not found in the "
+                  "instrument parameters [m].");
 
   // Detector ID of the monitor
-  auto zeroOrMore = boost::make_shared<BoundedValidator<int> >();
+  auto zeroOrMore = boost::make_shared<BoundedValidator<int>>();
   zeroOrMore->setLower(0);
-  declareProperty("BeamMonitor",1,zeroOrMore,"The UDET of the incident beam monitor.");
+  declareProperty("BeamMonitor", 1, zeroOrMore,
+                  "The UDET of the incident beam monitor.");
 
-  declareProperty(new ArrayProperty<double>("ScaleFactor", boost::make_shared<NullValidator>(), Direction::Output),
-      "Scale factor value and uncertainty [n/(monitor count)/(cm^2)/steradian].");
+  declareProperty(new ArrayProperty<double>("ScaleFactor",
+                                            boost::make_shared<NullValidator>(),
+                                            Direction::Output),
+                  "Scale factor value and uncertainty [n/(monitor "
+                  "count)/(cm^2)/steradian].");
 }
 
-void SANSDirectBeamScaling::exec()
-{
+void SANSDirectBeamScaling::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   const double beamRadius = getProperty("BeamRadius");
   const double attTrans = getProperty("AttenuatorTransmission");
@@ -69,22 +74,22 @@ void SANSDirectBeamScaling::exec()
   std::vector<size_t> index;
   udet.push_back(getProperty("BeamMonitor"));
   // Convert UDETs to workspace indices
-  inputWS->getIndicesFromDetectorIDs(udet,index);
-  if (index.empty())
-  {
+  inputWS->getIndicesFromDetectorIDs(udet, index);
+  if (index.empty()) {
     g_log.debug() << "inputWS->getIndicesFromDetectorIDs() returned empty\n";
-    throw std::invalid_argument("Could not find the incident beam monitor spectra\n");
+    throw std::invalid_argument(
+        "Could not find the incident beam monitor spectra\n");
   }
 
   const int64_t numHists = inputWS->getNumberHistograms();
-  Progress progress(this,0.0,1.0,numHists);
+  Progress progress(this, 0.0, 1.0, numHists);
 
   // Number of X bins
   const int64_t xLength = inputWS->readY(0).size();
 
   // Monitor counts
   double monitor = 0.0;
-  const MantidVec& MonIn = inputWS->readY(index[0]);
+  const MantidVec &MonIn = inputWS->readY(index[0]);
   for (int64_t j = 0; j < xLength; j++)
     monitor += MonIn[j];
 
@@ -96,21 +101,23 @@ void SANSDirectBeamScaling::exec()
   // Sample-detector distance for the contributing pixels
   double sdd = 0.0;
 
-  for (int64_t i = 0; i < int64_t(numHists); ++i)
-  {
+  for (int64_t i = 0; i < int64_t(numHists); ++i) {
     IDetector_const_sptr det;
     try {
       det = inputWS->getDetector(i);
-    } catch (Exception::NotFoundError&) {
-      g_log.warning() << "Spectrum index " << i << " has no detector assigned to it - discarding" << std::endl;
+    } catch (Exception::NotFoundError &) {
+      g_log.warning() << "Spectrum index " << i
+                      << " has no detector assigned to it - discarding"
+                      << std::endl;
       continue;
     }
 
     // Skip if we have a monitor or if the detector is masked.
-    if ( det->isMonitor() || det->isMasked() ) continue;
+    if (det->isMonitor() || det->isMasked())
+      continue;
 
-    const MantidVec& YIn = inputWS->readY(i);
-    const MantidVec& EIn = inputWS->readE(i);
+    const MantidVec &YIn = inputWS->readY(i);
+    const MantidVec &EIn = inputWS->readE(i);
 
     // Sum up all the counts
     V3D pos = det->getPos() - V3D(sourcePos.X(), sourcePos.Y(), 0.0);
@@ -118,10 +125,9 @@ void SANSDirectBeamScaling::exec()
     pos.setZ(0.0);
     if (pos.norm() <= beamRadius) {
       // Correct data for all X bins
-      for (int64_t j = 0; j < xLength; j++)
-      {
+      for (int64_t j = 0; j < xLength; j++) {
         counts += YIn[j];
-        error += EIn[j]*EIn[j];
+        error += EIn[j] * EIn[j];
       }
       nPixels += 1;
       sdd += pixelDistance;
@@ -129,7 +135,7 @@ void SANSDirectBeamScaling::exec()
     progress.report("Absolute Scaling");
   }
   // Get the average SDD for the counted pixels, and transform to mm.
-  sdd = sdd/nPixels*1000.0;
+  sdd = sdd / nPixels * 1000.0;
   error = std::sqrt(error);
 
   // Transform from m to mm
@@ -138,18 +144,21 @@ void SANSDirectBeamScaling::exec()
   // Transform from m to mm
   double sampleAperture = getProperty("SampleApertureRadius");
   sampleAperture *= 1000.0;
-  //TODO: replace this by some meaningful value
+  // TODO: replace this by some meaningful value
   const double KCG2FluxPerMon_SUGAR = 1.0;
 
   // Solid angle correction scale in 1/(cm^2)/steradian
-  double solidAngleCorrScale = sdd/(M_PI*sourceAperture*sampleAperture);
-  solidAngleCorrScale = solidAngleCorrScale*solidAngleCorrScale*100.0;
+  double solidAngleCorrScale = sdd / (M_PI * sourceAperture * sampleAperture);
+  solidAngleCorrScale = solidAngleCorrScale * solidAngleCorrScale * 100.0;
 
   // Scaling factor in n/(monitor count)/(cm^2)/steradian
-  double scale = counts/monitor*solidAngleCorrScale/KCG2FluxPerMon_SUGAR;
-  double scaleErr = std::abs(error/monitor)*solidAngleCorrScale/KCG2FluxPerMon_SUGAR;
+  double scale = counts / monitor * solidAngleCorrScale / KCG2FluxPerMon_SUGAR;
+  double scaleErr =
+      std::abs(error / monitor) * solidAngleCorrScale / KCG2FluxPerMon_SUGAR;
 
-  scaleErr = std::abs(scale/attTrans)*sqrt( (scaleErr/scale)*(scaleErr/scale) +(attTransErr/attTrans)*(attTransErr/attTrans) );
+  scaleErr = std::abs(scale / attTrans) *
+             sqrt((scaleErr / scale) * (scaleErr / scale) +
+                  (attTransErr / attTrans) * (attTransErr / attTrans));
   scale /= attTrans;
 
   std::vector<double> output;

@@ -23,6 +23,7 @@ private:
 private slots:
   void confirm();
   void cancel();
+  void allowUsageDataStateChanged(int);
 
   void openReleaseNotes();
   void openSampleDatasets();
@@ -34,9 +35,9 @@ private slots:
   void facilitySelected(const QString& facility);
   void openManageUserDirectories();
 
+
 private:
   Ui::FirstTimeSetup m_uiForm;
-
 };
 
 #endif

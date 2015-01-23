@@ -8,18 +8,17 @@
 #include "MantidKernel/FileValidator.h"
 #include <vector>
 
-namespace Mantid
-{
-namespace Kernel
-{
+namespace Mantid {
+namespace Kernel {
 
-
-/** DirectoryValidator is a validator that checks that a directory path is valid.
+/** DirectoryValidator is a validator that checks that a directory path is
+   valid.
 
     @author Janik Zikovsky, SNS
     @date Nov 12, 2010
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -39,8 +38,7 @@ namespace Kernel
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_KERNEL_DLL DirectoryValidator : public FileValidator
-{
+class MANTID_KERNEL_DLL DirectoryValidator : public FileValidator {
 public:
   explicit DirectoryValidator(bool testDirectoryExists = true);
   virtual ~DirectoryValidator();

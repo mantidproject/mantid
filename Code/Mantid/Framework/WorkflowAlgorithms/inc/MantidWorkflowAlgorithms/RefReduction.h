@@ -8,14 +8,13 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
-namespace Mantid
-{
-namespace WorkflowAlgorithms
-{
+namespace Mantid {
+namespace WorkflowAlgorithms {
 /**
     Data reduction for reflectometry
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -36,8 +35,7 @@ namespace WorkflowAlgorithms
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport RefReduction : public API::Algorithm
-{
+class DLLExport RefReduction : public API::Algorithm {
 public:
   /// (Empty) Constructor
   RefReduction() : API::Algorithm() {}
@@ -45,19 +43,22 @@ public:
   virtual ~RefReduction() {}
   /// Algorithm's name
   virtual const std::string name() const { return "RefReduction"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Data reduction for reflectometry.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Data reduction for reflectometry.";
+  }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Workflow\\Reflectometry"; }
+  virtual const std::string category() const {
+    return "Workflow\\Reflectometry";
+  }
 
 private:
   /// Initialisation code
   void init();
   /// Execution code
   void exec();
-
 
   static const std::string PolStateOffOff;
   static const std::string PolStateOnOff;
@@ -74,15 +75,14 @@ private:
   API::MatrixWorkspace_sptr processData(const std::string polarization);
   API::MatrixWorkspace_sptr processNormalization();
   API::IEventWorkspace_sptr loadData(const std::string dataRun,
-      const std::string polarization);
+                                     const std::string polarization);
   double calculateAngleREFM(API::MatrixWorkspace_sptr workspace);
   double calculateAngleREFL(API::MatrixWorkspace_sptr workspace);
   API::MatrixWorkspace_sptr subtractBackground(API::MatrixWorkspace_sptr dataWS,
-      API::MatrixWorkspace_sptr rawWS,
-      int peakMin, int peakMax, int bckMin, int bckMax,
-      int lowResMin, int lowResMax);
-
-
+                                               API::MatrixWorkspace_sptr rawWS,
+                                               int peakMin, int peakMax,
+                                               int bckMin, int bckMax,
+                                               int lowResMin, int lowResMax);
 };
 
 } // namespace Algorithms

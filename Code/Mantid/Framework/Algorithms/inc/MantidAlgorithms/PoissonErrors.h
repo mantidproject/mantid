@@ -6,25 +6,29 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/BinaryOperation.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
-/** Takes a Data workspace and an original counts workspace input and updates the 
-    error values in the data workspace to be the same fractionally as the counts workspace.
-    The number of histograms, the binning and units of the two workspaces must match.
+namespace Mantid {
+namespace Algorithms {
+/** Takes a Data workspace and an original counts workspace input and updates
+   the
+    error values in the data workspace to be the same fractionally as the counts
+   workspace.
+    The number of histograms, the binning and units of the two workspaces must
+   match.
 
     Required Properties:
     <UL>
     <LI> InputWorkspace - The name of the Workspace2D to take as input</LI>
-    <LI> CountsWorkspace - The name of the workspace that contains the original counts </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
+    <LI> CountsWorkspace - The name of the workspace that contains the original
+   counts </LI>
+    <LI> OutputWorkspace - The name of the workspace in which to store the
+   result </LI>
     </UL>
 
     @author Nick Draper, Tessella Support Services plc
     @date 03/02/2009
 
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -44,38 +48,47 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport PoissonErrors : public BinaryOperation
-{
+class DLLExport PoissonErrors : public BinaryOperation {
 public:
   /// Default constructor
-  PoissonErrors() : BinaryOperation() {};
+  PoissonErrors() : BinaryOperation(){};
   /// Destructor
-  virtual ~PoissonErrors() {};
+  virtual ~PoissonErrors(){};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "PoissonErrors";}
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Calculates the gaussian approxiamtion of Poisson error based on a matching workspace containing the original counts.";}
+  virtual const std::string name() const { return "PoissonErrors"; }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Calculates the gaussian approxiamtion of Poisson error based on a "
+           "matching workspace containing the original counts.";
+  }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1);}
+  virtual int version() const { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "SANS;Arithmetic\\Errors";}
+  virtual const std::string category() const {
+    return "SANS;Arithmetic\\Errors";
+  }
 
 private:
-  
   // Overridden BinaryOperation methods
-  void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
-                              const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut);
-  void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
-                              const double rhsY, const double rhsE, MantidVec& YOut, MantidVec& EOut);
-  virtual std::string checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
-  
+  void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
+                              const MantidVec &lhsE, const MantidVec &rhsY,
+                              const MantidVec &rhsE, MantidVec &YOut,
+                              MantidVec &EOut);
+  void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
+                              const MantidVec &lhsE, const double rhsY,
+                              const double rhsE, MantidVec &YOut,
+                              MantidVec &EOut);
+  virtual std::string
+  checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                         const API::MatrixWorkspace_const_sptr rhs) const;
+
   /// The name of the first input workspace property for BinaryOperation
-  virtual std::string inputPropName1() const { return "InputWorkspace";}
+  virtual std::string inputPropName1() const { return "InputWorkspace"; }
   /// The name of the second input workspace property for BinaryOperation
-  virtual std::string inputPropName2() const { return "CountsWorkspace";}
+  virtual std::string inputPropName2() const { return "CountsWorkspace"; }
   /// The name of the output workspace property for BinaryOperation
-  virtual std::string outputPropName() const { return "OutputWorkspace";}
+  virtual std::string outputPropName() const { return "OutputWorkspace"; }
 };
 
 } // namespace Algorithm
