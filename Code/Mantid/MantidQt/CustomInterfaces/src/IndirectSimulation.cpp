@@ -1,5 +1,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
+#include "MantidQtCustomInterfaces/DensityOfStates.h"
 #include "MantidQtCustomInterfaces/IndirectSimulation.h"
 #include "MantidQtCustomInterfaces/IndirectMolDyn.h"
 #include "MantidQtCustomInterfaces/IndirectSassena.h"
@@ -37,6 +38,7 @@ void IndirectSimulation::initLayout()
 	// Insert each tab into the interface on creation
 	m_simulationTabs.insert(std::make_pair(MOLDYN, new IndirectMolDyn(m_uiForm.IndirectSimulationTabs->widget(MOLDYN))));
 	m_simulationTabs.insert(std::make_pair(SASSENA, new IndirectSassena(m_uiForm.IndirectSimulationTabs->widget(SASSENA))));
+	m_simulationTabs.insert(std::make_pair(DOS, new DensityOfStates(m_uiForm.IndirectSimulationTabs->widget(DOS))));
 
 	// Connect each tab to the actions available in this GUI
 	std::map<unsigned int, IndirectSimulationTab*>::iterator iter;

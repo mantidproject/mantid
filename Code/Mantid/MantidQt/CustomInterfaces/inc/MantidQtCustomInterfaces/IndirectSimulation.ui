@@ -36,6 +36,11 @@
        <string>Sassena</string>
       </attribute>
      </widget>
+     <widget class="QWidget" name="dos">
+      <attribute name="title">
+       <string>DensityOfStates</string>
+      </attribute>
+     </widget>
     </widget>
    </item>
    <item>

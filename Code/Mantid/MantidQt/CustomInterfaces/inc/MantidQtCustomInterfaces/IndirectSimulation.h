@@ -53,6 +53,7 @@ namespace MantidQt
 			{
 				MOLDYN,
         SASSENA,
+        DOS
 			};
 
     public: // public constructor, destructor and functions
