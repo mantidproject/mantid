@@ -29,7 +29,7 @@ class IndirectAnnulusAbsorptionTest(unittest.TestCase):
         Tests corrections for the sample only.
         """
 
-        red_ws = LoadNexusProcessed(Filename='irs26176_graphite002_red.nxs')
+        red_ws = LoadNexusProcessed(Filename='UsageData/irs26176_graphite002_red.nxs')
 
         corrected, ass = IndirectAnnulusAbsorption(SampleWorkspace=red_ws,
                                                    ChemicalFormula='H2-O',
@@ -47,8 +47,8 @@ class IndirectAnnulusAbsorptionTest(unittest.TestCase):
         Tests corrections for the sample and simple container subtraction.
         """
 
-        can_ws = LoadNexusProcessed(Filename='irs26173_graphite002_red.nxs')
-        red_ws = LoadNexusProcessed(Filename='irs26176_graphite002_red.nxs')
+        can_ws = LoadNexusProcessed(Filename='UsageData/irs26173_graphite002_red.nxs')
+        red_ws = LoadNexusProcessed(Filename='UsageData/irs26176_graphite002_red.nxs')
 
         corrected, ass = IndirectAnnulusAbsorption(SampleWorkspace=red_ws,
                                                    CanWorkspace=can_ws,
@@ -68,8 +68,8 @@ class IndirectAnnulusAbsorptionTest(unittest.TestCase):
         with can scale.
         """
 
-        can_ws = LoadNexusProcessed(Filename='irs26173_graphite002_red.nxs')
-        red_ws = LoadNexusProcessed(Filename='irs26176_graphite002_red.nxs')
+        can_ws = LoadNexusProcessed(Filename='UsageData/irs26173_graphite002_red.nxs')
+        red_ws = LoadNexusProcessed(Filename='UsageData/irs26176_graphite002_red.nxs')
 
         corrected, ass = IndirectAnnulusAbsorption(SampleWorkspace=red_ws,
                                                    CanWorkspace=can_ws,
