@@ -79,7 +79,7 @@
 <!-- Monitor after chopper used to estimate total current on the sample, if normalization is done on monitor 2  -->
 <parameter name="norm-mon2-spec"  type="int">
     <value val="69634"/>
-/parameter>
+</parameter>
 <!-- Relative energy range (wrt. to the incident energy) in which monitor 2 signal is present and the integration to 
      caluclate monitor-2 current occurs   -->
 <parameter name="mon2_norm_energy_range" type = "string">
