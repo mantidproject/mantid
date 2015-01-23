@@ -72,6 +72,8 @@ namespace CustomInterfaces
 
     /// Initialize the layout
     virtual void initLayout();
+    /// Adds a workspace to the data table
+    void addDataItem(Mantid::API::Workspace_const_sptr ws);
     /// Normalises spectra offsets in table
     void normaliseSpectraOffsets();
     /// Gets an initial curve colour for a new workspace

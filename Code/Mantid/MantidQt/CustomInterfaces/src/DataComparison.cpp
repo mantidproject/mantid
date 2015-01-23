@@ -95,13 +95,58 @@ void DataComparison::initLayout()
  */
 void DataComparison::addData()
 {
-  QString dataName = m_uiForm.dsData->getCurrentDataName();
+  const QString dataName = m_uiForm.dsData->getCurrentDataName();
 
   // Do nothing if the data is not found
   if(!AnalysisDataService::Instance().doesExist(dataName.toStdString()))
     return;
 
+  // Get the workspace
+  Workspace_const_sptr ws = AnalysisDataService::Instance().retrieveWS<Workspace>(dataName.toStdString());
+  WorkspaceGroup_const_sptr wsGroup = boost::dynamic_pointer_cast<const WorkspaceGroup>(ws);
+
   m_uiForm.twCurrentData->blockSignals(true);
+
+  // If this is a WorkspaceGroup then add all items
+  if(wsGroup != NULL)
+  {
+    size_t numWs = wsGroup->size();
+    for(size_t wsIdx = 0; wsIdx < numWs; wsIdx++)
+    {
+      addDataItem(wsGroup->getItem(wsIdx));
+    }
+  }
+  // Otherwise just add the single workspace
+  else
+  {
+    addDataItem(ws);
+  }
+
+  m_uiForm.twCurrentData->blockSignals(false);
+
+  // Fit columns
+  m_uiForm.twCurrentData->resizeColumnsToContents();
+
+  // Replot the workspaces
+  plotWorkspaces();
+}
+
+
+/**
+ * Adds a MatrixWorkspace by name to the data table.
+ *
+ * @param wsName Name of workspace to add.
+ */
+void DataComparison::addDataItem(Workspace_const_sptr ws)
+{
+  MatrixWorkspace_const_sptr matrixWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+  if(!matrixWs)
+  {
+    g_log.error() << "Workspace is of incorrect type!" << std::endl;
+    return;
+  }
+
+  QString wsName = QString::fromStdString(matrixWs->name());
 
   // Append a new row to the data table
   int currentRows = m_uiForm.twCurrentData->rowCount();
@@ -134,7 +179,7 @@ void DataComparison::addData()
   m_uiForm.twCurrentData->setCellWidget(currentRows, COLOUR, colourCombo);
 
   // Insert the workspace name
-  QTableWidgetItem *wsNameItem = new QTableWidgetItem(tr(dataName));
+  QTableWidgetItem *wsNameItem = new QTableWidgetItem(tr(wsName));
   wsNameItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
   m_uiForm.twCurrentData->setItem(currentRows, WORKSPACE_NAME, wsNameItem);
 
@@ -149,14 +194,6 @@ void DataComparison::addData()
   QTableWidgetItem *currentSpecItem = new QTableWidgetItem(tr("n/a"));
   currentSpecItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
   m_uiForm.twCurrentData->setItem(currentRows, CURRENT_SPEC, currentSpecItem);
-
-  m_uiForm.twCurrentData->blockSignals(false);
-
-  // Fit columns
-  m_uiForm.twCurrentData->resizeColumnsToContents();
-
-  // Replot the workspaces
-  plotWorkspaces();
 }
 
 
