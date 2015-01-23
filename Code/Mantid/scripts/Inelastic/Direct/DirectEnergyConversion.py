@@ -623,7 +623,7 @@ class DirectEnergyConversion(object):
 
         # Add a log to the workspace to say that the normalization has been
         # done
-        output = mtd[old_name]
+        output = mtd[old_ws_name]
         AddSampleLog(Workspace=output, LogName=done_log,LogText=method)
         run.synchronize_ws(output)
         return output
@@ -647,7 +647,7 @@ class DirectEnergyConversion(object):
         range_min = float(range[0] + range_offset)
         range_max = float(range[1] + range_offset)
         if self._debug_mode:
-           kwargs = {'NormalizationFactorWSName':'NormMonWS' + data_ws.getName()}
+           kwargs = {'NormFactorWS':'NormMon1_WS' + data_ws.getName()}
         else:
            kwargs = {}
         NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
@@ -686,7 +686,7 @@ class DirectEnergyConversion(object):
               range_max = TOF_range[1]
         #
         if self._debug_mode:
-           kwargs = {'NormalizationFactorWSName':'NormMonWS' + mon_ws.getName()}
+           kwargs = {'NormFactorWS':'NormMon2_WS' + mon_ws.getName()}
         else:
            kwargs = {}
 
