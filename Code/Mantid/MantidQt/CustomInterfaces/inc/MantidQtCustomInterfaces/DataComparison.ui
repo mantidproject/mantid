@@ -46,12 +46,22 @@
            <property name="showLoad" stdset="0">
             <bool>false</bool>
            </property>
+           <property name="toolTip">
+             <string>
+               Used to select a workspace to add to the comparison.
+             </string>
+           </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="pbAddData">
            <property name="text">
             <string>Add Data</string>
+           </property>
+           <property name="toolTip">
+             <string>
+               Adds the workspace selected to the comparison.
+             </string>
            </property>
           </widget>
          </item>
@@ -85,12 +95,22 @@
            <property name="text">
             <string>Remove All Data</string>
            </property>
+           <property name="toolTip">
+             <string>
+               Removes all workspaces from the comparison.
+             </string>
+           </property>
           </widget>
          </item>
          <item row="1" column="1">
           <widget class="QPushButton" name="pbRemoveSelectedData">
            <property name="text">
             <string>Remove Selected Data</string>
+           </property>
+           <property name="toolTip">
+             <string>
+               Removes the selected workspaces from the comparison.
+             </string>
            </property>
           </widget>
          </item>
@@ -117,6 +137,11 @@
            <property name="checkable">
             <bool>true</bool>
            </property>
+           <property name="toolTip">
+             <string>
+               Toggles the panning tool.
+             </string>
+           </property>
           </widget>
          </item>
          <item row="0" column="1">
@@ -134,12 +159,24 @@
            <property name="text">
             <string>Reset View</string>
            </property>
+           <property name="toolTip">
+             <string>
+               Resets the plot to the default xoom level and panning position
+               such that all spectra are visible on the plot.
+             </string>
+           </property>
           </widget>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="lbSpectrum">
            <property name="text">
             <string>Spectrum:</string>
+           </property>
+           <property name="toolTip">
+             <string>
+               Used to select the spectrum index to plot, indexed from the
+               workspace with offset 0.
+             </string>
            </property>
           </widget>
          </item>
@@ -190,12 +227,23 @@
            <property name="text">
             <string>Diff Selected</string>
            </property>
+           <property name="toolTip">
+             <string>
+               Plots a difference curve for the two currently selected
+               workspaces in the data table as a green line on the plot..
+             </string>
+           </property>
           </widget>
          </item>
          <item row="0" column="1">
           <widget class="QPushButton" name="pbClearDiff">
            <property name="text">
             <string>Clear Diff</string>
+           </property>
+           <property name="toolTip">
+             <string>
+               Removes the current difference curve.
+             </string>
            </property>
           </widget>
          </item>
