@@ -20,7 +20,7 @@
    <value val="one2one_125.map"/>
 </parameter>
 
-!-- Prefered extension of the data files obtained from DAE, e.g. what to prefer if two 
+<!-- Prefered extension of the data files obtained from DAE, e.g. what to prefer if two 
      files with the same name and different extension are found
  -->
 <parameter name="data_file_ext" type="string">
