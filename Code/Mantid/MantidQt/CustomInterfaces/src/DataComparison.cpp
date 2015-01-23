@@ -135,7 +135,7 @@ void DataComparison::addData()
 /**
  * Adds a MatrixWorkspace by name to the data table.
  *
- * @param wsName Name of workspace to add.
+ * @param ws Pointer to workspace to add.
  */
 void DataComparison::addDataItem(Workspace_const_sptr ws)
 {
@@ -668,7 +668,7 @@ void DataComparison::resetView()
  * @param wsName Name of the workspace being deleted
  * @param ws Pointer to the workspace
  */
-void DataComparison::preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+void DataComparison::preDeleteHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
   UNUSED_ARG(ws);
   QString oldWsName = QString::fromStdString(wsName);
@@ -731,9 +731,9 @@ void DataComparison::renameHandle(const std::string &oldName, const std::string 
  * Handle replotting after a workspace has been changed.
  *
  * @param wsName Name of changed workspace
- * @ws Pointer to changed workspace
+ * @param ws Pointer to changed workspace
  */
-void DataComparison::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+void DataComparison::afterReplaceHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
   UNUSED_ARG(wsName);
   UNUSED_ARG(ws);

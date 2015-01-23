@@ -15,7 +15,9 @@ multiple :ref:`MatrixWorkspace <MatrixWorkspace>` (either pre loaded into
 Mantid or loaded via the interface its self) using a preview plot.
 
 Note that data in this plot is not normalised to bin width as it is by default
-in Mantid plot windows.
+in Mantid plot windows, to reduce plotting artefacts you may want to consider
+running :ref:`ConvertToDistribution <algm-ConvertToDistribution>` prior to
+loading the data into the UI.
 
 Add Data
 --------
@@ -27,6 +29,9 @@ Add Data
 This allows new data to be added to the comparison, this can be added by either
 selecting a :ref:`MatrixWorkspace <MatrixWorkspace>` alrady loaded into Mantid
 or by selecting a file to load.
+
+Alternatively you can select a :ref:`WorkspaceGroup <WorkspaceGroup>` to load
+it's contents into the UI.
 
 Once the data has been selected the *Add Data* button can be used to add it to
 the comparison, this will add a curve to the preview plot and assign it the next
@@ -96,7 +101,13 @@ shown, however the diff will continue to function once both workspaces can be
 displayed again.
 
 The diff workspace is created by running :ref:`ExtractSignleSpectrum
-<algm-ExtractSingleSpectrum>` on the two data workspaces and then using
-:ref:`Minus <algm-Minus>` to calculate the difference.
+<algm-ExtractSingleSpectrum>` on the two data workspaces, the second of which is
+then rebinned to match the binning of the first using :ref:`RebinToWorkspace
+<algm-RebinToWorkspace>` and then using :ref:`Minus <algm-Minus>` to calculate
+the difference.
+
+Note that if the two diffed workspaces have different binning, then the second
+one selected will be rebinned to match the first before the diff is created.
+This will not modify the data in the otiginal workspace.
 
 .. categories:: Interfaces General
