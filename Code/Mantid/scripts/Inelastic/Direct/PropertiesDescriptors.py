@@ -20,6 +20,7 @@ class PropDescriptor(object):
     def dependencies(self):
         """ returns the list of other properties names, this property depends on""" 
         return []
+
 # end PropDescriptor
 #-----------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------
@@ -28,7 +29,7 @@ class PropDescriptor(object):
 class IncidentEnergy(PropDescriptor):
     """ descriptor for incident energy or range of incident energies to be processed """
     def __init__(self): 
-        self._incident_energy = None
+        self._incident_energy = 0
         pass
     def __get__(self,instance,owner=None):
         """ return  incident energy or list of incident energies """ 
@@ -40,24 +41,24 @@ class IncidentEnergy(PropDescriptor):
        """ Set up incident energy or range of energies in various formats """
        if value != None:
           if isinstance(value,str):
-             en_list = str.split(value,',');
+             en_list = str.split(value,',')
              if len(en_list)>1:                 
-                rez = [];
+                rez = []
                 for en_str in en_list:
-                    val = float(en_str);
+                    val = float(en_str)
                     rez.append(val)
-                self._incident_energy=rez;
+                self._incident_energy=rez
              else:
-               self._incident_energy =float(value);
+               self._incident_energy =float(value)
           else:
             if isinstance(value,list):
-                rez = [];
+                rez = []
                 for val in value:
-                    en_val = float(val);
+                    en_val = float(val)
                     if en_val<=0:
-                        raise KeyError("Incident energy has to be positive, but is: {0} ".format(en_val));
+                        raise KeyError("Incident energy has to be positive, but is: {0} ".format(en_val))
                     else:
-                        rez.append(en_val);
+                        rez.append(en_val)
                 self._incident_energy = rez
             else:
                 self._incident_energy = float(value)
@@ -90,13 +91,13 @@ class EnergyBins(PropDescriptor):
     def __set__(self,instance,values):
        if values != None:
           if isinstance(values,str):
-             lst = str.split(values,',');
-             nBlocks = len(lst);
+             lst = str.split(values,',')
+             nBlocks = len(lst)
              for i in xrange(0,nBlocks,3):
                 value = [float(lst[i]),float(lst[i+1]),float(lst[i+2])]
           else:
-              value = values;
-              nBlocks = len(value);
+              value = values
+              nBlocks = len(value)
           if nBlocks%3 != 0:
                raise KeyError("Energy_bin value has to be either list of n-blocks of 3 number each or string representation of this list with numbers separated by commas")
        else:
@@ -147,16 +148,16 @@ class InstrumentDependentProp(PropDescriptor):
         which are undefined if no instrument is defined
     """
     def __init__(self,prop_name):
-        self._prop_name = prop_name;
+        self._prop_name = prop_name
     def __get__(self,instance,owner=None):
 
          if instance is None:
            return self
 
          if instance._pInstrument is None:
-            raise KeyError("Attempt to use uninitialized property manager");
+            raise KeyError("Attempt to use uninitialized property manager")
          else:
-            return getattr(instance,self._prop_name);
+            return getattr(instance,self._prop_name)
     def __set__(self,instance,values):
         raise AttributeError("Property {0} can not be assigned".format(self._prop_name))
 #end InstrumentDependentProp
@@ -302,7 +303,7 @@ class DetCalFile(PropDescriptor):
           self._det_cal_file = file_name
           return
 
-       raise NameError('Detector calibration file name can be a workspace name present in Mantid or string describing an file name');
+       raise NameError('Detector calibration file name can be a workspace name present in Mantid or string describing an file name')
     #if  Reducer.det_cal_file != None :
     #    if isinstance(Reducer.det_cal_file,str) and not Reducer.det_cal_file in mtd : # it is a file
     #        Reducer.log('Setting detector calibration file to '+Reducer.det_cal_file)
@@ -315,10 +316,10 @@ class DetCalFile(PropDescriptor):
 class MapMaskFile(PropDescriptor):
     """ common method to wrap around an auxiliary file name """
     def __init__(self,file_ext,doc_string=None):
-        self._file_name=None;
-        self._file_ext  =file_ext;
+        self._file_name=None
+        self._file_ext  =file_ext
         if not(doc_string is None):
-            self.__doc__ = doc_string;
+            self.__doc__ = doc_string
 
     def __get__(self,instance,type=None):
         if instance is None:
@@ -331,7 +332,7 @@ class MapMaskFile(PropDescriptor):
            fileName, fileExtension = os.path.splitext(value)
            if (not fileExtension):
                value=value+self._file_ext
-        self._file_name=value;
+        self._file_name=value
   
 #end MapMaskFile
 #-----------------------------------------------------------------------------------------
@@ -373,7 +374,7 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
         if instance is None:
            return self
 
-        return prop_helpers.gen_getter(instance.__dict__,'use_hard_mask_only');
+        return prop_helpers.gen_getter(instance.__dict__,'use_hard_mask_only')
     def __set__(self,instance,value):
         if value is None:
             use_hard_mask_only = False
@@ -436,10 +437,10 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
 
         if self._rel_range: # relative range
             if ei is None:
-                raise AttributeError('Attempted to obtain relative to ei monovan integration range, but incident energy has not been set');
+                raise AttributeError('Attempted to obtain relative to ei monovan integration range, but incident energy has not been set')
             rel_range = prop_helpers.ComplexProperty.__get__(self,tDict)
             if isinstance(ei,list):
-                range = dict();
+                range = dict()
                 for en in ei:
                     range[en] = [rel_range[0]*en,rel_range[1]*en]
             else:
@@ -464,10 +465,10 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
 
             if isinstance(value,str):
                 values = value.split(',')
-                result = [];
+                result = []
                 for val in values :
-                    result.append(int(val));
-                value = result;
+                    result.append(int(val))
+                value = result
             if len(value) != 2:
                 raise KeyError("monovan_integr_range has to be list of two values, "\
                     "defining min/max values of integration range or None to use relative to incident energy limits")
@@ -504,23 +505,23 @@ class SpectraToMonitorsList(PropDescriptor):
 
        if isinstance(spectra_list,str):
             if spectra_list.lower() is 'none':
-                result = None;
+                result = None
             else:
                 spectra = spectra_list.split(',')
-                result = [];
+                result = []
                 for spectum in spectra :
                     result.append(int(spectum))
 
        else:
             if isinstance(spectra_list,list):
                 if len(spectra_list) == 0:
-                    result=None;
+                    result=None
                 else:
-                    result=[];
+                    result=[]
                     for i in range(0,len(spectra_list)):
                         result.append(int(spectra_list[i]))
             else:
-                result =[int(spectra_list)];
+                result =[int(spectra_list)]
        return result
 #end SpectraToMonitorsList
 #-----------------------------------------------------------------------------------------

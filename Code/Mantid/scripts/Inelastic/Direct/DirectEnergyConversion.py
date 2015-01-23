@@ -302,17 +302,12 @@ class DirectEnergyConversion(object):
 
 
       # inform user on what parameters have changed from script or gui
+      # if monovan present, check if abs_norm_ parameters  are set
       self.prop_man.log_changed_values('notice')
       prop_man = self.prop_man
       #process complex parameters
 
       start_time = time.time()
-
-      if self.prop_man.monovan_run: # absolute units reduction is requested
-          # check all parameters absolute reduction requested have been set. 
-          # If not, warn used about it
-          self.prop_man.check_abs_norm_defaults_changed()
-      #end check changes
 
      # check if reducer can find all non-run files necessary for the reduction
      # before starting long run.
@@ -950,7 +945,7 @@ class DirectEnergyConversion(object):
 
             prop_man.log('*** Absolute correction factor(s): S^2: {0:10.4f}\n*** LibISIS: {1:10.4f} Poisson: {2:10.4f}  TGP: {3:10.4f} '\
                 .format(anf_LibISIS,anf_SS2,anf_Puas,anf_TGP),'notice')
-            prop_man.log('*** If these numbers are substantially different, you are doing something incorrectly.  ***','notice')
+            prop_man.log('*** If these factors are substantially different, something is wrong                    ***','notice')
             absnorm_factor = anf_TGP
         #end
         prop_man.log('*** Using {0} value : {1} of absolute units correction factor (TGP)'.format(abs_norm_factor_is,absnorm_factor),'notice')

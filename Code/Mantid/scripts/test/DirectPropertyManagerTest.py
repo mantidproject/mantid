@@ -228,7 +228,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue(propman.load_monitors_with_workspace)
 
 
-
     def test_get_default_parameter_val(self):
         propman = self.prop_man
         param = propman.getDefaultParameterValue('map_file')
@@ -289,8 +288,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue('nxspe' in formats)
         self.assertTrue('spe' in formats)
 
-
-
     def test_allowed_values(self):
 
         propman = self.prop_man
@@ -348,6 +345,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(len(spectra),4)
         self.assertEqual(spectra[0],(1,17280))
         self.assertEqual(spectra[3],(32257,41472))
+  
     def test_get_diagnostics_parameters(self):
         propman = self.prop_man
 
@@ -369,16 +367,12 @@ class DirectPropertyManagerTest(unittest.TestCase):
          
          non_changed = propman._check_monovan_par_changed()
          # nothing have changed initially 
-         self.assertEqual(len(non_changed),3)
-
-         propman.incident_energy = 10
-         propman.monovan_run = 139000
-
-         non_changed = propman._check_monovan_par_changed()
          self.assertEqual(len(non_changed),2)
-         propman.sample_mass = 1
+
+         propman.monovan_run = 102
          propman.log_changed_values()
 
+         propman.sample_mass = 1
          non_changed = propman._check_monovan_par_changed()
          self.assertEqual(len(non_changed),1)
          propman.sample_rmm = 200
@@ -387,8 +381,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
 
          propman.log_changed_values()
-
-
+  
     def test_set_defailts_from_instrument(self) :
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=100)
 
@@ -446,15 +439,20 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(propman.ParaPara,'Val2')
         self.assertEqual(propman.BaseParam2,'Val2')
 
+        propman.sample_run = ws
+        # assume we get workspace with different instrument parameters
         SetInstrumentParameter(ws,ParameterName="Param1",Value="addParam1:addParam2",ParameterType="String")
         SetInstrumentParameter(ws,ParameterName="BaseParam1",Value="OtherVal1",ParameterType="String")
         SetInstrumentParameter(ws,ParameterName="BaseParam2",Value="OtherVal2",ParameterType="String")
         SetInstrumentParameter(ws,ParameterName="addParam1",Value="Ignore1",ParameterType="String")
         SetInstrumentParameter(ws,ParameterName="addParam2",Value="Ignore2",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="mask_run",Value="None",ParameterType="String")
 
+        old_changes = propman.getChangedProperties()
 
         changed_prop = propman.update_defaults_from_instrument(ws.getInstrument())
 
+        self.assertEqual(len(changed_prop),4)
         #property have been changed from GUI and changes from instrument are ignored
         SampleResult = ['OtherVal1','OtherVal2']
         cVal = propman.Param1
@@ -464,8 +462,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(propman.ParaPara,'OtherVal2')
         self.assertEqual(propman.BaseParam2,'OtherVal2')
         
-        self.assertEquals(propman.BaseParam1,"OtherVal1")
-       
+        self.assertEquals(propman.BaseParam1,"OtherVal1")     
 
     def test_set_all_defaults_from_instrument(self) :
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
@@ -652,17 +649,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue(propman1.run_diagnostics)
 
 
-    def test_default_wb_par_changed_warnings(self):
-         propman = self.prop_man
-
-         self.assertEqual(2,propman.check_abs_norm_defaults_changed())
-
-         propman.sample_rmm = 1
-         self.assertEqual(1,propman.check_abs_norm_defaults_changed())
-
-         propman.sample_mass = 10
-         self.assertEqual(0,propman.check_abs_norm_defaults_changed())        
-
+ 
     #def test_do_white(self) :
     #    tReducer = self.reducer
     #    monovan = 1000

@@ -380,14 +380,24 @@ class PropertyManager(NonIDF_Properties):
                    self.log("property {0} have not been found in existing IDF. Ignoring this property"\
                        .format(key),'warning')
                    continue
+                if isinstance(new_val,api.Workspace) and isinstance(cur_val,api.Workspace):
+                # do simplified workspace comparison which is appropriate here 
+                  if new_val.name() == cur_val.name() and \
+                     new_val.getNumberHistograms() == cur_val.getNumberHistograms() and \
+                     new_val.getNEvents() == cur_val.getNEvents() and \
+                     new_val.getAxis(0).getUnit().unitID() == cur_val.getAxis(0).getUnit().unitID():
+                        new_val =1; cur_val = 1
+                   #
+                #end
                 if new_val != cur_val:
-                  changed_descriptors.add(key)
-                  try:
-                      dependencies = getattr(PropertyManager,key).dependencies()
-                  except:
-                      dependencies = []
+                   changed_descriptors.add(key)
+                # dependencies removed either properties are equal or not
+                try:
+                     dependencies = getattr(PropertyManager,key).dependencies()
+                except:
+                     dependencies = []
 
-                  for dep_name in dependencies:
+                for dep_name in dependencies:
                     if dep_name in sorted_param:
                        del sorted_param[dep_name]
         #end loop
@@ -416,13 +426,14 @@ class PropertyManager(NonIDF_Properties):
 
                 if prop_new_val !=cur_val :
                    setattr(self,public_name,prop_new_val)
-                   try:
-                        dependencies = val.dependencies()
-                   except:
-                        dependencies =[]
-                   for dep_name in dependencies:
-                      # delete dependent properties not to deal with them again
-                      del sorted_param[dep_name]
+                # Dependencies removed either properties are equal or not
+                try:
+                     dependencies = val.dependencies()
+                except:
+                     dependencies =[]
+                for dep_name in dependencies:
+                    # delete dependent properties not to deal with them again
+                    del sorted_param[dep_name]
         #end
 
 
@@ -447,26 +458,6 @@ class PropertyManager(NonIDF_Properties):
         else:
             return None
     #end
-
-    def check_abs_norm_defaults_changed(self,changed_param_list=None) :
-        """ Method checks if the parameters necessary to be set for correct absolute 
-            units reduction were indeed changed from defaults
-
-            If not changed, warn users about it
-        """
-        if not changed_param_list:
-            changed_param_list = self.getChangedProperties()
-        n_warnings =0
-        for key in self._abs_units_par_to_change:
-            if key not in changed_param_list :
-                value = getattr(self,key)
-                message = '\n***WARNING!: Absolute units reduction parameter : {0} has its default value: {1}'.format(key,value)+\
-                          '\n             This may need to change to get correct absolute units'
-                n_warnings += 1
-                self.log(message,'warning')
-
-
-        return n_warnings
 
     def _check_file_exist(self,file_name):
         file_path = FileFinder.getFullPath(file)
@@ -507,7 +498,7 @@ class PropertyManager(NonIDF_Properties):
         """ method verifies, if properties necessary for monovanadium reduction have indeed been changed  from defaults """
 
         # list of the parameters which should usually be changed by user and if not, user should be warn about it.
-        momovan_properties=['sample_mass','sample_rmm','monovan_run']
+        momovan_properties=['sample_mass','sample_rmm']
         changed_prop = self.getChangedProperties()
         non_changed = []
         for property in momovan_properties:
@@ -534,7 +525,7 @@ class PropertyManager(NonIDF_Properties):
             if len(non_changed) > 0:
                 for prop in non_changed:
                     value = getattr(self,prop)
-                    message = "\n***WARNING!: Absolute units reduction parameter : {0} has its default value: {1}"\
+                    message = "\n***WARNING!: Abs units norm. parameter : {0} not changed from default val: {1}"\
                               "\n             This may need to change for correct absolute units reduction\n"
 
                     self.log(message.format(prop,value),'warning')

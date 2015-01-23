@@ -42,10 +42,7 @@ class NonIDF_Properties(object):
         object.__setattr__(self,'_motor_offset',0)
 
         object.__setattr__(self,'_save_file_name',None)
-        # list of parameters, which have to change for absolute uints 
-        # reduction working correctly
-        object.__setattr__(self,'_abs_units_par_to_change',['sample_mass','sample_rmm'])
- 
+   
         self._set_instrument_and_facility(Instrument,run_workspace)
 
         # set up descriptors holder class reference
