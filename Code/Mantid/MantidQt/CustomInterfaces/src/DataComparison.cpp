@@ -93,6 +93,10 @@ void DataComparison::addData()
 {
   QString dataName = m_uiForm.dsData->getCurrentDataName();
 
+  // Do nothing if the data is not found
+  if(!AnalysisDataService::Instance().doesExist(dataName.toStdString()))
+    return;
+
   m_uiForm.twCurrentData->blockSignals(true);
 
   // Append a new row to the data table
