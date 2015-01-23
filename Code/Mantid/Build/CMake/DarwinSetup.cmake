@@ -126,6 +126,10 @@ if (OSX_VERSION VERSION_LESS 10.9)
 else()
  set(CMAKE_MACOSX_RPATH 1)
  # Assume we are using homebrew for now
+ # set Deployment target to 10.8
+ set ( CMAKE_OSX_SYSROOT /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk )
+ set ( CMAKE_OSX_ARCHITECTURES x86_64 )
+ set ( CMAKE_OSX_DEPLOYMENT_TARGET 10.8 )
  # Follow symlinks so cmake copies the file
  set ( PYQT4_PATH /usr/local/lib/python${PY_VER}/site-packages/PyQt4 )
  execute_process(COMMAND readlink ${PYQT4_PATH}/Qt.so OUTPUT_VARIABLE PYQT4_SYMLINK_Qtso)
