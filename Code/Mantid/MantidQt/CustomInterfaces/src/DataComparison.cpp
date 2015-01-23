@@ -31,9 +31,13 @@ using namespace Mantid::API;
 ///Constructor
 DataComparison::DataComparison(QWidget *parent) :
   UserSubWindow(parent),
+  WorkspaceObserver(),
   m_plot(new QwtPlot(parent)),
   m_diffWorkspaceNames(qMakePair(QString(), QString()))
 {
+  observeAfterReplace();
+  observeRename();
+  observePreDelete();
 }
 
 
@@ -589,4 +593,85 @@ void DataComparison::resetView()
 
   // Set this as the default zoom level
   m_zoomTool->setZoomBase(true);
+}
+
+
+/**
+ * Handles removing a workspace when it is deleted from ADS.
+ *
+ * @param wsName Name of the workspace being deleted
+ * @param ws Pointer to the workspace
+ */
+void DataComparison::preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+{
+  UNUSED_ARG(ws);
+  QString oldWsName = QString::fromStdString(wsName);
+
+  // Find the row in the data table for the workspace
+  int numRows = m_uiForm.twCurrentData->rowCount();
+  for(int row = 0; row < numRows; row++)
+  {
+    // Remove the row
+    QString workspaceName = m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
+    if(workspaceName == oldWsName)
+    {
+      m_uiForm.twCurrentData->removeRow(row);
+      break;
+    }
+  }
+
+  // Detach the old curve from the plot if it exists
+  if(m_curves.contains(oldWsName))
+    m_curves[oldWsName]->attach(NULL);
+
+  // Update the plot
+  plotWorkspaces();
+}
+
+
+/**
+ * Handle a workspace being renamed.
+ *
+ * @param oldName Old name for the workspace
+ * @param newName New name for the workspace
+ */
+void DataComparison::renameHandle(const std::string &oldName, const std::string &newName)
+{
+  QString oldWsName = QString::fromStdString(oldName);
+
+  // Find the row in the data table for the workspace
+  int numRows = m_uiForm.twCurrentData->rowCount();
+  for(int row = 0; row < numRows; row++)
+  {
+    // Rename the workspace in the data table
+    QString workspaceName = m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
+    if(workspaceName == oldWsName)
+    {
+      m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->setText(QString::fromStdString(newName));
+      break;
+    }
+  }
+
+  // Detach the old curve from the plot if it exists
+  if(m_curves.contains(oldWsName))
+    m_curves[oldWsName]->attach(NULL);
+
+  // Update the plot
+  plotWorkspaces();
+}
+
+
+/**
+ * Handle replotting after a workspace has been changed.
+ *
+ * @param wsName Name of changed workspace
+ * @ws Pointer to changed workspace
+ */
+void DataComparison::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+{
+  UNUSED_ARG(wsName);
+  UNUSED_ARG(ws);
+
+  // Update the plot
+  plotWorkspaces();
 }
