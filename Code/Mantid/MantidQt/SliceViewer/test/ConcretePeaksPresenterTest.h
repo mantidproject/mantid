@@ -682,6 +682,51 @@ public:
       TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
   }
 
+  void test_contentsDifferent_different()
+  {
+      ConcretePeaksPresenter_sptr a = createStandardBuild(2).create();
+      ConcretePeaksPresenter_sptr b = createStandardBuild(2).create();
+
+      TSM_ASSERT("Each presenter has it's own unique peaks workspace", a->contentsDifferent(b.get()));
+      TSM_ASSERT("Each presenter has it's own unique peaks workspace", b->contentsDifferent(a.get()));
+  }
+
+  void test_contentsDifferent_same()
+  {
+      ConcretePeaksPresenterBuilder builder = createStandardBuild();
+      // Set a common peaks workspace.
+      builder.withPeaksWorkspace(WorkspaceCreationHelper::createPeaksWorkspace());
+
+      ConcretePeaksPresenter_sptr a = builder.create();
+      ConcretePeaksPresenter_sptr b = builder.create();
+
+      TSM_ASSERT("Each presenter uses the same peaks workspace", !a->contentsDifferent(b.get()));
+      TSM_ASSERT("Each presenter uses the same peaks peaks workspace", !b->contentsDifferent(a.get()));
+  }
+
+  void test_contentsDifferent_mixed()
+  {
+      auto a = WorkspaceCreationHelper::createPeaksWorkspace();
+      auto b = WorkspaceCreationHelper::createPeaksWorkspace();
+      auto c = WorkspaceCreationHelper::createPeaksWorkspace();
+
+      // We are creating another comparison peaks presenter, which will deliver a set of peaks workspaces.
+      auto other = boost::make_shared<MockPeaksPresenter>();
+      SetPeaksWorkspaces result;
+      result.insert(a);
+      result.insert(b);
+      result.insert(c);
+      EXPECT_CALL(*other, presentedWorkspaces() ).WillRepeatedly(Return(result));
+
+      ConcretePeaksPresenterBuilder builder = createStandardBuild();
+      // Set a peaks workspace.
+      builder.withPeaksWorkspace(c);
+      ConcretePeaksPresenter_sptr presenter = builder.create();
+
+      TSM_ASSERT("Presenter is managing one of these workspaces already", !presenter->contentsDifferent(other.get()));
+
+  }
+
 
 };
 

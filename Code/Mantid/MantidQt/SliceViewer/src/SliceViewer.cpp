@@ -1,6 +1,13 @@
-#include "MantidAPI/AnalysisDataService.h"
+#include <iomanip>
+#include <iosfwd>
+#include <iostream>
+#include <limits>
+#include <sstream>
+#include <vector>
+#include <boost/make_shared.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
+
 #include "MantidAPI/CoordTransform.h"
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/PeakTransformHKL.h"
@@ -9,19 +16,19 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidKernel/DataService.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/VMD.h"
-#include "MantidQtAPI/QwtRasterDataMD.h"
+#include "MantidKernel/ReadLock.h"
+#include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/SignalRange.h"
+#include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/CustomTools.h"
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
-#include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/SnapToGridDialog.h"
 #include "MantidQtSliceViewer/XYLimitsDialog.h"
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
@@ -34,51 +41,14 @@
 #include "MantidQtSliceViewer/PeaksViewerOverlayDialog.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactorySelector.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
-#include "qmainwindow.h"
-#include "qmenubar.h"
-#include <iomanip>
-#include <iosfwd>
-#include <iostream>
-#include <limits>
+
+#include <qwt_plot_panner.h>
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/DOMWriter.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/Exception.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include <qfiledialog.h>
-#include <qmenu.h>
-#include <QtGui/qaction.h>
-#include <qwt_color_map.h>
-#include <qwt_picker_machine.h>
-#include <qwt_plot_magnifier.h>
-#include <qwt_plot_panner.h>
-#include <qwt_plot_picker.h>
-#include <qwt_plot_spectrogram.h>
-#include <qwt_plot_zoomer.h>
-#include <qwt_plot.h>
-#include <qwt_scale_engine.h>
-#include <qwt_scale_map.h>
-#include <sstream>
-#include <vector>
-#include <boost/make_shared.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/ReadLock.h"
-#include "MantidQtMantidWidgets/SafeQwtPlot.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
-#include "MantidQtAPI/FileDialogHandler.h"
-#include "MantidQtAPI/PlotAxis.h"
-#include <QDragEnterEvent>
-#include <QDropEvent>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -146,9 +116,6 @@ SliceViewer::SliceViewer(QWidget *parent)
                    SLOT(rebinParamsChanged()));
   QObject::connect(ui.btnAutoRebin, SIGNAL(toggled(bool)), this,
                    SLOT(autoRebin_toggled(bool)));
-  QObject::connect(ui.btnPeakOverlay, SIGNAL(toggled(bool)), this,
-                   SLOT(peakOverlay_toggled(bool)));
-
   // ----------- Other signals ----------------
   QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this,
                    SLOT(loadColorMapSlot()));
@@ -333,13 +300,6 @@ void SliceViewer::initMenus() {
 
   m_menuView->addSeparator();
 
-  action = new QAction(QPixmap(), "Peak Overlay", this);
-  m_syncPeakOverlay = new SyncedCheckboxes(action, ui.btnPeakOverlay, false);
-  connect(action, SIGNAL(toggled(bool)), this, SLOT(peakOverlay_toggled(bool)));
-  m_menuView->addAction(action);
-
-  m_menuView->addSeparator();
-
   QActionGroup *group = new QActionGroup(this);
 
   action = new QAction(QPixmap(), "No Normalization", this);
@@ -440,7 +400,7 @@ void SliceViewer::initMenus() {
   connect(action, SIGNAL(triggered()), this,
           SLOT(onPeaksViewerOverlayOptions()));
   m_menuPeaks->addAction(action);
-  action = new QAction(QPixmap(), "&Visable Columns", this);
+  action = new QAction(QPixmap(), "&Visible Columns", this);
   connect(action, SIGNAL(triggered()), this,
           SIGNAL(peaksTableColumnOptions())); // just re-emit
   m_menuPeaks->addAction(action);
@@ -1745,8 +1705,9 @@ QwtDoubleInterval SliceViewer::getYLimits() const {
 void SliceViewer::openFromXML(const QString &xml) {
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
-  Poco::XML::Document *pDoc;
-  try {
+  Poco::AutoPtr<Poco::XML::Document> pDoc;
+  try
+  {
     pDoc = pParser.parseString(xml.toStdString());
   } catch (Poco::Exception &exc) {
     throw std::runtime_error(
@@ -1837,18 +1798,18 @@ void SliceViewer::openFromXML(const QString &xml) {
   int timeDim = dimMap[3];
 
   // ------- Read the plane function ------------
-  Poco::XML::Element *func = pRootElem->getChildElement("Function");
+  Poco::XML::Element* func = pRootElem->getChildElement("Function");
   if (!func)
     throw std::runtime_error(
         "SliceViewer::openFromXML(): No Function element.");
-  Poco::XML::Element *paramlist = func->getChildElement("ParameterList");
+  Poco::XML::Element* paramlist = func->getChildElement("ParameterList");
   if (!paramlist)
     throw std::runtime_error(
         "SliceViewer::openFromXML(): No ParameterList element.");
 
-  NodeList *params = paramlist->getElementsByTagName("Parameter");
-  NodeList *paramvals;
-  Node *param;
+  Poco::AutoPtr<NodeList> params = paramlist->getElementsByTagName("Parameter");
+  Poco::AutoPtr<NodeList> paramvals;
+  Node * param;
   if (!params || params->length() < 2)
     throw std::runtime_error("SliceViewer::openFromXML(): Too few parameters.");
 
@@ -2144,42 +2105,11 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
   updatePeakOverlaySliderWidget();
   emit showPeaksViewer(true);
   m_menuPeaks->setEnabled(true);
+  // Depresses the button without raising the clicked event
+  this->ui.btnPeakOverlay->setChecked(true);
   return m_proxyPeaksPresenter.get();
 }
 
-/**
-Event handler for selection/de-selection of peak overlays.
-
-Allow user to choose a suitable input peaks workspace
-Create a factory for fabricating new views 'PeakOverlays'
-Create a proper peaks presenter to manage the views and bind them against the
-PeaksWorkspace and the SliceViewer
-Update the views with the current slice point. to ensure they are shown.
-
-@param checked : True if peak overlay option is checked.
-*/
-void SliceViewer::peakOverlay_toggled(bool checked) {
-  if (checked) {
-    MantidQt::MantidWidgets::SelectWorkspacesDialog dlg(this, "PeaksWorkspace");
-    int ret = dlg.exec();
-    if (ret == QDialog::Accepted) {
-      QStringList list = dlg.getSelectedNames();
-      if (!list.isEmpty()) {
-        // Fetch the correct Peak Overlay Transform Factory;
-        setPeaksWorkspaces(list);
-      } else {
-        // No PeaksWorkspace to choose.
-        disablePeakOverlays();
-      }
-    } else {
-      // PeaksWorkspace selection dialog canceled.
-      disablePeakOverlays();
-    }
-  } else {
-    // Toggle peaks overlays to disabled.
-    disablePeakOverlays();
-  }
-}
 
 /**
 Obtain the reference to a new PeakOverlay slider widget if necessary.
@@ -2239,7 +2169,7 @@ void SliceViewer::enablePeakOverlaysIfAppropriate() {
     enablePeakOverlays =
         m_peakTransformSelector.hasFactoryForTransform(xDim, yDim);
   }
-  m_syncPeakOverlay->setEnabled(enablePeakOverlays);
+
   if (!enablePeakOverlays) {
     ui.btnPeakOverlay->setChecked(false); // Don't leave the button depressed.
     m_peaksPresenter->clear();            // Reset the presenter
@@ -2277,6 +2207,14 @@ void SliceViewer::zoomToRectangle(const PeakBoundingBox &boundingBox) {
  * Reset the original view.
  */
 void SliceViewer::resetView() { this->resetZoom(); }
+
+/**
+ * @brief Detach this sliceviewer from the peaksviewer
+ */
+void SliceViewer::detach()
+{
+    this->disablePeakOverlays();
+}
 
 void SliceViewer::peakWorkspaceChanged(
     const std::string &wsName,
@@ -2323,8 +2261,6 @@ void SliceViewer::dropEvent(QDropEvent *e) {
     if(!wsNames.empty()){
         // Show these peaks workspaces
         this->setPeaksWorkspaces(wsNames);
-        // Depresses the button without raising the clicked event
-        this->ui.btnPeakOverlay->setDown(true);
     }
 }
 }

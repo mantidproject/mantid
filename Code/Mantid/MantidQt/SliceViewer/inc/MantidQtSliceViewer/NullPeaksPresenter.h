@@ -43,12 +43,13 @@ public:
   virtual double getPeakSizeOnProjection() const { return 0; }
   virtual double getPeakSizeIntoProjection() const { return 0; }
   virtual bool getShowBackground() const { return false; }
-  virtual void registerOwningPresenter(UpdateableOnDemand *){};
-  virtual void zoomToPeak(const int){};
+  virtual void registerOwningPresenter(UpdateableOnDemand *){}
+  virtual void zoomToPeak(const int){}
   virtual bool isHidden() const { return true; }
   virtual void reInitialize(
       boost::shared_ptr<Mantid::API::IPeaksWorkspace> ) { /*Do nothing*/
   }
+  virtual bool contentsDifferent(const PeaksPresenter * ) const { return true; }
 };
 }
 }

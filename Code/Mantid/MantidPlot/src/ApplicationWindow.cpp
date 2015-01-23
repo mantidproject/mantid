@@ -388,6 +388,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
 
   actionSaveFile=NULL;
   actionSaveProject=NULL;
+  actionSaveProjectAs=NULL;
   folders = new FolderListView(this);
   folders->header()->setClickEnabled( false );
   folders->addColumn( tr("Folder") );
@@ -6076,12 +6077,11 @@ void ApplicationWindow::savetoNexusFile()
 {
   QString filter = tr("Mantid Files")+" (*.nxs *.nx5 *.xml);;";
   QString selectedFilter;
-  QString fileDir=MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  if(fileDir.isEmpty())
-  {fileDir="C\\Mantid\\Test\\Nexus";
-  }
-  QString fileName = MantidQt::API::FileDialogHandler::getSaveFileName(this, tr("Save File As"), fileDir, filter, &selectedFilter);
-  if ( !fileName.isEmpty() ){
+  QString fileDir = MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  QString fileName =
+    MantidQt::API::FileDialogHandler::getSaveFileName(this, tr("Save File As"), fileDir, filter, &selectedFilter);
+  if ( !fileName.isEmpty() )
+  {
     std::string wsName;
     MdiSubWindow *w = activeWindow();
     if(w)
@@ -6089,10 +6089,15 @@ void ApplicationWindow::savetoNexusFile()
       if(w->isA("MantidMatrix"))
       {
         wsName=dynamic_cast<MantidMatrix*>(w)->getWorkspaceName();
+
       }
-      if(w->isA("MantidTable"))
+      else if(w->isA("MantidTable"))
       {
         wsName=dynamic_cast<MantidTable*>(w)->getWorkspaceName();
+      }
+      else
+      {
+        throw std::runtime_error("Invalid input for SaveNexus, you cannot save this type of object as a NeXus file");
       }
     }
     else
@@ -6105,7 +6110,6 @@ void ApplicationWindow::savetoNexusFile()
     }
 
     savedatainNexusFormat(wsName,fileName.toStdString());
-
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(fileName).absoluteDir().path());
     updateRecentFilesList(fileName);
   }
@@ -7081,11 +7085,38 @@ void ApplicationWindow::showGeneralPlotDialog()
   if (!plot)
     return;
 
-  if (plot->isA("MultiLayer") && dynamic_cast<MultiLayer*>(plot)->layers())
-    showPlotDialog();
-  else if (plot->isA("Graph3D")){
+  if (plot->isA("MultiLayer"))
+  {
+    // do the dynamic_casts inside a try/c, as there may be issues with the plots
+    // (source data/table/matrix has been removed/closed, etc.)
+    MultiLayer* ml;
+    try
+    {
+      ml = dynamic_cast<MultiLayer*>(plot);
+    }
+    catch(std::runtime_error& )
+    {
+      g_log.error() << "Failed to open general plot dialog for multi layer plot";
+      return;
+    }
+    if (ml->layers())
+      showPlotDialog();
+  }
+  else if (plot->isA("Graph3D"))
+  {
     QDialog* gd = showScaleDialog();
-    dynamic_cast<Plot3DDialog*>(gd)->showGeneralTab();
+    Plot3DDialog* plot3D;
+    try
+    {
+      plot3D = dynamic_cast<Plot3DDialog*>(gd);
+    }
+    catch(std::runtime_error& )
+    {
+      g_log.error() << "Failed to open general plot dialog for 3D plot";
+      return;
+    }
+    if(plot3D)
+      plot3D->showGeneralTab();
   }
 }
 
@@ -7096,10 +7127,36 @@ void ApplicationWindow::showAxisDialog()
     return;
 
   QDialog* gd = showScaleDialog();
-  if (gd && plot->isA("MultiLayer") && dynamic_cast<MultiLayer*>(plot)->layers())
-    dynamic_cast<AxesDialog*>(gd)->showAxesPage();
+  if (gd && plot->isA("MultiLayer"))
+  {
+    MultiLayer* ml;
+    try
+    {
+      ml = dynamic_cast<MultiLayer*>(plot);
+    }
+    catch(std::runtime_error& )
+    {
+      g_log.error() << "Failed to open axis dialog for multi layer plot";
+      return;
+    }
+    if (ml && ml->layers())
+      dynamic_cast<AxesDialog*>(gd)->showAxesPage();
+  }
   else if (gd && plot->isA("Graph3D"))
-    dynamic_cast<Plot3DDialog*>(gd)->showAxisTab();
+  {
+    Plot3DDialog* p3d;
+    try
+    {
+      p3d = dynamic_cast<Plot3DDialog*>(gd);
+    }
+    catch(std::runtime_error& )
+    {
+      g_log.error() << "Failed to open axis dialog for multi layer plot";
+      return;
+    }
+    if (p3d)
+      p3d->showAxisTab();
+  }
 }
 
 void ApplicationWindow::showGridDialog()
@@ -7116,7 +7173,17 @@ QDialog* ApplicationWindow::showScaleDialog()
     return 0;
 
   if (w->isA("MultiLayer")){
-    if (dynamic_cast<MultiLayer*>(w)->isEmpty())
+    MultiLayer* ml;
+    try
+    {
+      ml = dynamic_cast<MultiLayer*>(w);
+    }
+    catch(std::runtime_error& )
+    {
+      g_log.error() << "Failed to open scale dialog for multi layer plot";
+      return 0;
+    }
+    if (!ml || ml->isEmpty())
       return 0;
 
     Graph* g = dynamic_cast<MultiLayer*>(w)->activeGraph();
@@ -9146,7 +9213,7 @@ void ApplicationWindow::fileMenuAboutToShow()
 
   fileMenu->insertSeparator();
   fileMenu->addAction(actionSaveProjectAs);
-  //fileMenu->insertSeparator();
+
   saveMenu=fileMenu->addMenu(tr("&Save"));
   saveMenu->addAction(actionSaveFile);
   saveMenu->addAction(actionSaveProject);
@@ -9453,13 +9520,18 @@ void ApplicationWindow::newProject()
   resultsLog->clear();
   setWindowTitle(tr("MantidPlot - untitled"));//Mantid
   projectname = "untitled";
+
+  if(actionSaveProject)
+    actionSaveProject->setEnabled(false);
 }
 
 void ApplicationWindow::savedProject()
 {
   QCoreApplication::processEvents();
-  if(actionSaveFile) actionSaveFile->setEnabled(false);
-  if(actionSaveProject)actionSaveProject->setEnabled(false);
+  if(actionSaveFile)
+    actionSaveFile->setEnabled(false);
+  if(actionSaveProject)
+    actionSaveProject->setEnabled(false);
   saved = true;
 
   Folder *f = projectFolder();
@@ -9479,8 +9551,12 @@ void ApplicationWindow::modifiedProject()
 {
   if (saved == false)
     return;
-  if(actionSaveFile) actionSaveFile->setEnabled(true);
-  if(actionSaveProject)actionSaveProject->setEnabled(true);
+  // enable actionSaveProject, but not actionSaveFile (which is Save Nexus and doesn't
+  // seem to make sense for qti objects (graphs, tables, matrices, notes, etc.)
+  if(actionSaveProject)
+    actionSaveProject->setEnabled(true);
+  if(actionSaveProjectAs)
+    actionSaveProjectAs->setEnabled(true);
   saved = false;
 }
 
@@ -11808,8 +11884,9 @@ void ApplicationWindow::createActions()
   actionImportImage = new QAction(tr("Import I&mage..."), this);
   connect(actionImportImage, SIGNAL(activated()), this, SLOT(importImage()));
 
-  actionSaveProjectAs = new QAction(tr("Save Project &As..."), this);
+  actionSaveProjectAs = new QAction(QIcon(":/SaveProject16x16.png"), tr("Save Project &As..."), this);
   connect(actionSaveProjectAs, SIGNAL(activated()), this, SLOT(saveProjectAs()));
+  actionSaveProjectAs->setEnabled(false);
 
   actionSaveNote = new QAction(tr("Save Note As..."), this);
   connect(actionSaveNote, SIGNAL(activated()), this, SLOT(saveNoteAs()));
@@ -12618,15 +12695,15 @@ void ApplicationWindow::translateActionsStrings()
   actionImportImage->setMenuText(tr("Import I&mage..."));
 
   actionSaveFile->setMenuText(tr("&Nexus"));
-  actionSaveFile->setToolTip(tr("Save nexus file"));
+  actionSaveFile->setToolTip(tr("Save as NeXus file"));
   actionSaveFile->setShortcut(tr("Ctrl+S"));
 
   actionSaveProject->setMenuText(tr("&Project"));
   actionSaveProject->setToolTip(tr("Save Mantid Project"));
   actionSaveProject->setShortcut(tr("Ctrl+Shift+S"));
 
-
   actionSaveProjectAs->setMenuText(tr("Save Project &As..."));
+  actionSaveProjectAs->setToolTip(tr("Save Mantid Project using a different name or path"));
 
   actionLoad->setMenuText(tr("&Import ASCII..."));
   actionLoad->setToolTip(tr("Import data file(s)"));
@@ -16285,8 +16362,6 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer* w)
  */
 void ApplicationWindow::savedatainNexusFormat(const std::string& wsName,const std::string& fileName)
 {
-  //std::string s=workingDir.toStdString()+wsName+".nxs";
-  // std::string fileName(s);
   if(fileName.empty()) return ;
   try
   {
@@ -16300,6 +16375,7 @@ void ApplicationWindow::savedatainNexusFormat(const std::string& wsName,const st
 void ApplicationWindow::enableSaveNexus(const QString &wsName)
 {
   if (actionSaveFile) actionSaveFile->setEnabled(true);
+
   m_nexusInputWSName=wsName;
 }
 
