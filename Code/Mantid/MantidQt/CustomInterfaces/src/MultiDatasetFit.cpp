@@ -24,6 +24,7 @@
 #include <qwt_plot_zoomer.h>
 #include <qwt_plot_panner.h>
 #include <qwt_plot_magnifier.h>
+#include <qwt_scale_div.h>
 #include <Poco/ActiveResult.h>
 
 #include <vector>
@@ -32,6 +33,8 @@
 namespace{
   const int wsColumn = 0;
   const int wsIndexColumn = 1;
+  QColor rangeSelectorDisabledColor(Qt::lightGray);
+  QColor rangeSelectorEnabledColor(Qt::blue);
 }
 
 namespace MantidQt
@@ -333,22 +336,39 @@ PlotController::PlotController(MultiDatasetFit *parent,
       QwtPicker::DragSelection | QwtPicker::CornerToCorner, QwtPicker::AlwaysOff, plot->canvas());
 
   m_panner = new QwtPlotPanner( plot->canvas() );
-  m_panner->setEnabled(false);
 
   m_magnifier = new QwtPlotMagnifier( plot->canvas() );
-  m_magnifier->setEnabled( false );
 
-  auto rangeSelector = new MantidWidgets::RangeSelector(m_plot);
-  rangeSelector->setRange( -1e30, 1e30 );
+  m_rangeSelector = new MantidWidgets::RangeSelector(m_plot);
+  m_rangeSelector->setRange( -1e30, 1e30 );
+  m_rangeSelector->setMinimum(10);
+  m_rangeSelector->setMaximum(990);
 
-  rangeSelector->setMinimum(10);
-  rangeSelector->setMaximum(990);
+  disableAllTools();
+
+  m_plot->canvas()->installEventFilter(this);
   
 }
 
 PlotController::~PlotController()
 {
   m_plotData.clear();
+}
+
+bool PlotController::eventFilter(QObject *widget, QEvent *evn)
+{
+  if ( evn->type() == QEvent::MouseButtonDblClick )
+  {
+    if ( isRangeSelectorEnabled() )
+    {
+      resetRange();
+    }
+    else if ( isZoomEnabled() )
+    {
+      zoomToRange();
+    }
+  }
+  return false;
 }
 
 /**
@@ -479,22 +499,75 @@ void PlotController::update()
   plotDataSet( m_currentIndex );
 }
 
-void PlotController::enableZoom()
+/**
+ * Reset the fitting range to the current limits on the x axis.
+ */
+void PlotController::resetRange()
 {
-  m_zoomer->setEnabled(true);
+  m_rangeSelector->setMinimum( m_plot->axisScaleDiv(QwtPlot::xBottom)->lowerBound() );
+  m_rangeSelector->setMaximum( m_plot->axisScaleDiv(QwtPlot::xBottom)->upperBound() );
+}
+
+/**
+ * Set zooming to the current fitting range.
+ */
+void PlotController::zoomToRange()
+{
+  QwtDoubleRect rect = m_zoomer->zoomRect();
+  rect.setX( m_rangeSelector->getMinimum() );
+  rect.setRight( m_rangeSelector->getMaximum() );
+  m_zoomer->zoom( rect );
+}
+
+/**
+ * Disable all plot tools. It is a helper method 
+ * to simplify switchig between tools.
+ */
+void PlotController::disableAllTools()
+{
+  m_zoomer->setEnabled(false);
   m_panner->setEnabled(false);
   m_magnifier->setEnabled(false);
-  m_plot->canvas()->setCursor(QCursor(Qt::CrossCursor));
+  m_rangeSelector->setEnabled(false);
+  m_rangeSelector->setColour(rangeSelectorDisabledColor);
+}
+
+template<class Tool>
+void PlotController::enableTool(Tool* tool, int cursor)
+{
+  disableAllTools();
+  tool->setEnabled(true);
+  m_plot->canvas()->setCursor(QCursor(static_cast<Qt::CursorShape>(cursor)));
+  m_plot->replot();
   owner()->showPlotInfo();
 }
 
+
+/**
+ * Enable zooming tool.
+ */
+void PlotController::enableZoom()
+{
+  enableTool(m_zoomer,Qt::CrossCursor);
+}
+
+/**
+ * Enable panning tool.
+ */
 void PlotController::enablePan()
 {
-  m_zoomer->setEnabled(false);
-  m_panner->setEnabled(true);
+  enableTool(m_panner,Qt::pointingHandCursor);
   m_magnifier->setEnabled(true);
-  m_plot->canvas()->setCursor(Qt::pointingHandCursor);
-  owner()->showPlotInfo();
+}
+
+/**
+ * Enable range selector tool.
+ */
+void PlotController::enableRange()
+{
+  enableTool(m_rangeSelector,Qt::pointingHandCursor);
+  m_rangeSelector->setColour(rangeSelectorEnabledColor);
+  m_plot->replot();
 }
 
 bool PlotController::isZoomEnabled() const
@@ -505,6 +578,11 @@ bool PlotController::isZoomEnabled() const
 bool PlotController::isPanEnabled() const
 {
   return m_panner->isEnabled();
+}
+
+bool PlotController::isRangeSelectorEnabled() const
+{
+  return m_rangeSelector->isEnabled();
 }
 
 /*==========================================================================================*/
@@ -622,6 +700,7 @@ void MultiDatasetFit::initLayout()
   m_uiForm.plot->installEventFilter( this );
   m_uiForm.dataTable->installEventFilter( this );
 
+  m_plotController->enableZoom();
   showInfo( "Add some data, define fitting function" );
 }
 
@@ -643,6 +722,13 @@ void MultiDatasetFit::createPlotToolbar()
   action->setCheckable(true);
   action->setToolTip("Panning tool");
   connect(action,SIGNAL(triggered()),m_plotController,SLOT(enablePan()));
+  group->addAction(action);
+
+  action = new QAction(this);
+  action->setIcon(QIcon(":/MultiDatasetFit/icons/range.png"));
+  action->setCheckable(true);
+  action->setToolTip("Set fitting range");
+  connect(action,SIGNAL(triggered()),m_plotController,SLOT(enableRange()));
   group->addAction(action);
 
   toolBar->addActions(group->actions());
@@ -1002,6 +1088,10 @@ void MultiDatasetFit::showPlotInfo()
   else if ( m_plotController->isPanEnabled() )
   {
     text += "Click and drag to move. Use mouse wheel to zoom in and out.";
+  }
+  else if ( m_plotController->isRangeSelectorEnabled() )
+  {
+    text += "Drag the vertical dashed lines to adjust the fitting range.";
   }
   
   showInfo( text );

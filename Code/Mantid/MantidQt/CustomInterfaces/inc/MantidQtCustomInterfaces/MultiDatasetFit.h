@@ -37,6 +37,7 @@ namespace MantidQt
 namespace MantidWidgets
 {
   class FunctionBrowser;
+  class RangeSelector;
 }
 
 namespace API
@@ -164,11 +165,13 @@ public:
   int getCurrentIndex() const {return m_currentIndex;}
   bool isZoomEnabled() const;
   bool isPanEnabled() const;
+  bool isRangeSelectorEnabled() const;
 signals:
   void currentIndexChanged(int);
 public slots:
   void enableZoom();
   void enablePan();
+  void enableRange();
 private slots:
   void tableUpdated();
   void prevPlot();
@@ -176,14 +179,27 @@ private slots:
   void plotDataSet(int);
 private:
   MultiDatasetFit *owner() const {return static_cast<MultiDatasetFit*>(parent());}
+  void disableAllTools();
+  template<class Tool>
+  void enableTool(Tool* tool, int cursor);
+  bool eventFilter(QObject *widget, QEvent *evn);
+  void resetRange();
+  void zoomToRange();
+
   /// The plot widget
   QwtPlot *m_plot;
+
+  ///@name Plot tools
+  ///@{
   /// The zoomer
   QwtPlotZoomer *m_zoomer;
   /// The panner
   QwtPlotPanner *m_panner;
   /// The magnifier
   QwtPlotMagnifier *m_magnifier;
+  /// The fitting range selector
+  MantidWidgets::RangeSelector* m_rangeSelector;
+  ///@}
 
   /// The workspace table
   QTableWidget *m_table;
