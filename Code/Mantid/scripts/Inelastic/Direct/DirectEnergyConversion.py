@@ -188,15 +188,7 @@ class DirectEnergyConversion(object):
         # return all diagnostics parameters
         diag_params = self.prop_man.get_diagnostics_parameters()
 
-        ## if input parameter is workspace rather then run, we want to keep it
-        #self._keep_wb_workspace = False
-        #if isinstance(white,str) and white in mtd:
-        # self._keep_wb_workspace = True
-        #if isinstance(white,api.Workspace) : # it is workspace itself
-        #    self._keep_wb_workspace = True
-
              
-        # TODO: primitive cache is used here.  Improve
         if self.use_hard_mask_only:
             if mtd.doesExist('hard_mask_ws'):
                 diag_mask = mtd['hard_mask_ws']
@@ -608,10 +600,10 @@ class DirectEnergyConversion(object):
         method = method.lower()
         for case in common.switch(method):
             if case('monitor-1'):
-               self._normalize_to_monitor1(run,old_ws_name, range_offset,mon_index)
+               method,old_ws_name = self._normalize_to_monitor1(run,old_ws_name, range_offset,mon_index)
                break
             if case('monitor-2'):
-               self._normalize_to_monitor2(run,old_ws_name, range_offset,mon_index)
+               method,old_ws_name = self._normalize_to_monitor2(run,old_ws_name, range_offset,mon_index)
                break
             if case('current'):
                 NormaliseByCurrent(InputWorkspace=old_ws_name,OutputWorkspace=old_ws_name)
@@ -639,6 +631,8 @@ class DirectEnergyConversion(object):
            if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not
                                              # have monitors
               self.normalise(run,'current',range_offset,mon_index)
+              new_name = run.get_ws_name()
+              return ('current',new_name)
            else:
               raise RuntimeError('Normalise by monitor-1:: Workspace {0} for run {1} does not have monitors in it'\
                    .format(run.get_ws_name(),run.__get__()))
@@ -652,6 +646,7 @@ class DirectEnergyConversion(object):
            kwargs = {}
         NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
                            IntegrationRangeMin=range_min, IntegrationRangeMax=range_max,IncludePartialBins=True,**kwargs)
+        return ('monitor-1',old_name)
     #
     def _normalize_to_monitor2(self,run,old_name, range_offset=0.0,mon_index=None):
         """ Helper method implementing  normalize_to_monitor_2 """ 
@@ -665,6 +660,8 @@ class DirectEnergyConversion(object):
            if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not
                                              # have monitors
               self.normalise(run,'current',range_offset,mon_index)
+              new_name = run.get_ws_name()
+              return ('current',new_name)
            else:
               raise RuntimeError('Normalise by monitor-2:: Workspace {0} for run {1} does not have monitors in it'\
                    .format(run.get_ws_name(),run.__get__()))
@@ -693,6 +690,7 @@ class DirectEnergyConversion(object):
        # Normalize to monitor 2
         NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
                            IntegrationRangeMin=range_min, IntegrationRangeMax=range_max,IncludePartialBins=True,**kwargs)
+        return ('monitor-2',old_name)
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
     #
