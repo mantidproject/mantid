@@ -89,10 +89,6 @@ void LoadGSASInstrumentFile::exec() {
     }
   }
 
-  // Get function type
-  // Initially we assume Ikeda Carpenter PV
-  int nProf = 9;
-
   size_t numBanks = getNumberOfBanks(lines);
   g_log.debug() << numBanks << "banks in file \n";
 
@@ -121,7 +117,7 @@ void LoadGSASInstrumentFile::exec() {
     g_log.debug() << "Parse bank " << bankid << " of total " << numBanks
                   << ".\n";
     map<string, double> parammap;
-    parseBank(parammap, lines, bankid, bankStartIndex[bankid - 1], nProf);
+    parseBank(parammap, lines, bankid, bankStartIndex[bankid - 1]);
     bankparammap.insert(make_pair(bankid, parammap));
     g_log.debug() << "Bank starts at line" << bankStartIndex[i] + 1 << "\n";
   }
@@ -250,83 +246,72 @@ void LoadGSASInstrumentFile::scanBanks(const std::vector<std::string> &lines,
 * @param parammap :: [output] parameter name and value map
 * @param lines :: [input] vector of lines from .irf file;
 * @param bankid :: [input] ID of the bank to get parsed
-* @param startlineindex :: [input] index of the first line of the bank in vector
-* of lines
-* @param profNumber :: [input] index of the profile number
-*/
-void LoadGSASInstrumentFile::parseBank(std::map<std::string, double> &parammap,
-                                       const std::vector<std::string> &lines,
-                                       size_t bankid, size_t startlineindex,
-                                       int profNumber) {
-  parammap["NPROF"] = profNumber; // Add numerical code for function as
-                                  // LoadFullprofResolution does.
-
-  // We ignore the first three INS lines of the bank, then read 15 parameters
-  // from the next four INS lines.
-  size_t currentLineIndex = findINSLine(lines, startlineindex);
-  size_t start = 15;
-  // ignore 1st line
-  currentLineIndex = findINSLine(lines, currentLineIndex + 1);
-  // ignore 2nd line
-  currentLineIndex = findINSLine(lines, currentLineIndex + 1);
-  // ignore 3rd line
-  currentLineIndex = findINSLine(lines, currentLineIndex + 1);
-  // process 4th line
-  std::istringstream paramLine4;
+* @param startlineindex :: [input] index of the first line of the bank in vector of lines
+*/  
+void LoadGSASInstrumentFile::parseBank(std::map<std::string, double>& parammap, const std::vector<std::string>& lines, size_t bankid, size_t startlineindex)
+{
   double param1, param2, param3, param4;
-  paramLine4.str(lines[currentLineIndex].substr(start));
-  paramLine4 >> param1 >> param2 >> param3 >> param4;
+
+  // We ignore the first lines of the bank
+  // The first useful line starts with "INS  nPRCF", where n is the bank number
+  // From this line we get the profile function and number of parameters
+  size_t currentLineIndex = findINSPRCFLine(lines, startlineindex,param1,param2,param3,param4);
+
+  parammap["NPROF"] = param2;
+
+  // Ikeda-Carpenter PV
+  // Then read 15 parameters from the next four INS lines.
+  currentLineIndex = findINSPRCFLine(lines, currentLineIndex+1,param1,param2,param3,param4);
   parammap["Alph0"] = param1;
   parammap["Alph1"] = param2;
   parammap["Beta0"] = param3;
   parammap["Beta1"] = param4; // Kappa
 
-  currentLineIndex = findINSLine(lines, currentLineIndex + 1);
-  // process 5th line
-  std::istringstream paramLine5;
-  double param5, param6, param7, param8;
-  paramLine5.str(lines[currentLineIndex].substr(start));
-  paramLine5 >> param5 >> param6 >> param7 >> param8;
-  parammap["Sig0"] = param5;
-  parammap["Sig1"] = param6;
-  parammap["Sig2"] = param7;
-  parammap["Gam0"] = param8;
+  currentLineIndex = findINSPRCFLine(lines, currentLineIndex+1,param1,param2,param3,param4);
+  parammap["Sig0"] = param1;
+  parammap["Sig1"] = param2;
+  parammap["Sig2"] = param3;
+  parammap["Gam0"] = param4;
 
-  currentLineIndex = findINSLine(lines, currentLineIndex + 1);
-  // process 6th line
-  std::istringstream paramLine6;
-  double param9, param10, param11, param12;
-  paramLine6.str(lines[currentLineIndex].substr(start));
-  paramLine6 >> param9 >> param10 >> param11 >> param12;
-  parammap["Gam1"] = param9;
-  parammap["Gam2"] = param10;
-  if (param11 != 0.0) {
+  currentLineIndex = findINSPRCFLine(lines, currentLineIndex+1,param1,param2,param3,param4);
+  parammap["Gam1"] = param1;
+  parammap["Gam2"] = param2;
+  if( param3 != 0.0)
+  {
     g_log.warning() << "Bank" << bankid << "stec not 0, but " << param3;
   }
-  if (param12 != 0.0) {
+  if( param4 != 0.0)
+  {
     g_log.warning() << "Bank" << bankid << "ptec not 0, but " << param4;
   }
 
-  // ignore 7th line
 }
 
 //----------------------------------------------------------------------------------------------
-/** Get next INS line of .prm file at or after given line index
+/** Get next INS line of .prm file at or after given line index 
 * @param lines :: [input] vector of lines from .irf file;
 * @param lineIndex :: [input] index of line to search from
+* @param param1 :: [output] first parameter in line
+* @param param2 :: [output] second parameter in line
+* @param param3 :: [output] third parameter in line
+* @param param4 :: [output] fourth parameter in line
 * @return line index for INS file
 * @throw end of file error
-*/
-size_t
-LoadGSASInstrumentFile::findINSLine(const std::vector<std::string> &lines,
-                                    size_t lineIndex) {
-  for (size_t i = lineIndex; i < lines.size(); ++i) {
+*/ 
+size_t LoadGSASInstrumentFile::findINSPRCFLine(const std::vector<std::string>& lines, size_t lineIndex, double& param1, double& param2, double& param3, double& param4)
+{
+  for (size_t i = lineIndex; i < lines.size(); ++i)
+  {
     string line = lines[i];
-    if (line.substr(0, 3) == "INS")
+    if( (line.substr(0,3) == "INS") && (line.substr(6,4) == "PRCF") )
+    {
+      std::istringstream paramLine;
+      paramLine.str( lines[i].substr(15) );
+      paramLine >> param1 >> param2 >> param3 >> param4;
       return i;
-  }
-  throw std::runtime_error(
-      "Unexpected end of file reached while searching for INS line. \n");
+    }
+  } 
+  throw std::runtime_error("Unexpected end of file reached while searching for INS line. \n");
 }
 
 //----------------------------------------------------------------------------------------------
