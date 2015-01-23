@@ -139,10 +139,18 @@ void DataComparison::addData()
  */
 void DataComparison::addDataItem(Workspace_const_sptr ws)
 {
+  // Check that the workspace is the correct type
   MatrixWorkspace_const_sptr matrixWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
   if(!matrixWs)
   {
-    g_log.error() << "Workspace is of incorrect type!" << std::endl;
+    g_log.error() << "Workspace " << ws->name() << "is of incorrect type!" << std::endl;
+    return;
+  }
+
+  // Check that the workspace does not already exist in the comparison
+  if(containsWorkspace(matrixWs))
+  {
+    g_log.information() << "Workspace " << matrixWs->name() << " already shown in comparison." << std::endl;
     return;
   }
 
@@ -194,6 +202,27 @@ void DataComparison::addDataItem(Workspace_const_sptr ws)
   QTableWidgetItem *currentSpecItem = new QTableWidgetItem(tr("n/a"));
   currentSpecItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
   m_uiForm.twCurrentData->setItem(currentRows, CURRENT_SPEC, currentSpecItem);
+}
+
+
+/**
+ * Determines if a given workspace is currently shown in the UI.
+ *
+ * @param ws Pointer to the workspace
+ */
+bool DataComparison::containsWorkspace(MatrixWorkspace_const_sptr ws)
+{
+  QString testWsName = QString::fromStdString(ws->name());
+
+  int numRows = m_uiForm.twCurrentData->rowCount();
+  for(int row = 0; row < numRows; row++)
+  {
+    QString workspaceName = m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
+    if(workspaceName == testWsName)
+      return true;
+  }
+
+  return false;
 }
 
 

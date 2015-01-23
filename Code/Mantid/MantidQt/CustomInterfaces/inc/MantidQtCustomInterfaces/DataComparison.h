@@ -34,6 +34,9 @@ namespace CustomInterfaces
     /// Default Constructor
     DataComparison(QWidget *parent = 0);
 
+    /// Tests if a workspace is shown in the UI
+    bool containsWorkspace(Mantid::API::MatrixWorkspace_const_sptr ws);
+
   private slots:
     /// Add selected data to plot
     void addData();
