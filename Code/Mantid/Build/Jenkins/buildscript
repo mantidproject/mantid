@@ -21,6 +21,11 @@ if [[ ${JOB_NAME} == *clang* ]]; then
   clang --version
   export CC=clang
   export CXX=clang++
+  GCCVERSION=`grep 'GCC_COMPILER_VERSION' $WORKSPACE/build/CMakeCache.txt` 
+  if [[ ${GCCVERSION} != "" ]]; then 
+    # Removing the build directory entirely guarantees clang is used.
+    rm -rf $WORKSPACE/build
+  fi 
 fi
 
 ###############################################################################
