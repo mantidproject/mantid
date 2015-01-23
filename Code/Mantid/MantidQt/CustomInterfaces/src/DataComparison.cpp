@@ -452,12 +452,23 @@ void DataComparison::plotDiffWorkspace()
   extractWs2Alg->execute();
   MatrixWorkspace_sptr ws2SpecWs = extractWs2Alg->getProperty("OutputWorkspace");
 
+  // Rebin the second workspace to the first
+  // (needed for identical binning for Minus algorithm)
+  IAlgorithm_sptr rebinAlg = AlgorithmManager::Instance().create("RebinToWorkspace");
+  rebinAlg->setChild(true);
+  rebinAlg->initialize();
+  rebinAlg->setProperty("WorkspaceToRebin", ws2SpecWs);
+  rebinAlg->setProperty("WorkspaceToMatch", ws1SpecWs);
+  rebinAlg->setProperty("OutputWorkspace", "__ws2_spec_rebin");
+  rebinAlg->execute();
+  MatrixWorkspace_sptr rebinnedWs2SpecWs = rebinAlg->getProperty("OutputWorkspace");
+
   // Subtract the two extracted spectra
   IAlgorithm_sptr minusAlg = AlgorithmManager::Instance().create("Minus");
   minusAlg->setChild(true);
   minusAlg->initialize();
   minusAlg->setProperty("LHSWorkspace", ws1SpecWs);
-  minusAlg->setProperty("RHSWorkspace", ws2SpecWs);
+  minusAlg->setProperty("RHSWorkspace", rebinnedWs2SpecWs);
   minusAlg->setProperty("OutputWorkspace", "__diff");
   minusAlg->execute();
   MatrixWorkspace_sptr diffWorkspace = minusAlg->getProperty("OutputWorkspace");

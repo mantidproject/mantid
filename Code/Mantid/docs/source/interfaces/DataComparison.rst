@@ -14,6 +14,9 @@ The data comparison interface provides a method of comparing the spectra of
 multiple :ref:`MatrixWorkspace <MatrixWorkspace>` (either pre loaded into
 Mantid or loaded via the interface its self) using a preview plot.
 
+Note that data in this plot is not normalised to bin width as it is by default
+in Mantid plot windows.
+
 Add Data
 --------
 
