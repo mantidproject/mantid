@@ -116,9 +116,6 @@ SliceViewer::SliceViewer(QWidget *parent)
                    SLOT(rebinParamsChanged()));
   QObject::connect(ui.btnAutoRebin, SIGNAL(toggled(bool)), this,
                    SLOT(autoRebin_toggled(bool)));
-  QObject::connect(ui.btnPeakOverlay, SIGNAL(toggled(bool)), this,
-                   SLOT(peakOverlay_toggled(bool)));
-
   // ----------- Other signals ----------------
   QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this,
                    SLOT(loadColorMapSlot()));
@@ -303,13 +300,6 @@ void SliceViewer::initMenus() {
 
   m_menuView->addSeparator();
 
-  action = new QAction(QPixmap(), "Peak Overlay", this);
-  m_syncPeakOverlay = new SyncedCheckboxes(action, ui.btnPeakOverlay, false);
-  connect(action, SIGNAL(toggled(bool)), this, SLOT(peakOverlay_toggled(bool)));
-  m_menuView->addAction(action);
-
-  m_menuView->addSeparator();
-
   QActionGroup *group = new QActionGroup(this);
 
   action = new QAction(QPixmap(), "No Normalization", this);
@@ -410,7 +400,7 @@ void SliceViewer::initMenus() {
   connect(action, SIGNAL(triggered()), this,
           SLOT(onPeaksViewerOverlayOptions()));
   m_menuPeaks->addAction(action);
-  action = new QAction(QPixmap(), "&Visable Columns", this);
+  action = new QAction(QPixmap(), "&Visible Columns", this);
   connect(action, SIGNAL(triggered()), this,
           SIGNAL(peaksTableColumnOptions())); // just re-emit
   m_menuPeaks->addAction(action);
@@ -2115,42 +2105,11 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
   updatePeakOverlaySliderWidget();
   emit showPeaksViewer(true);
   m_menuPeaks->setEnabled(true);
+  // Depresses the button without raising the clicked event
+  this->ui.btnPeakOverlay->setChecked(true);
   return m_proxyPeaksPresenter.get();
 }
 
-/**
-Event handler for selection/de-selection of peak overlays.
-
-Allow user to choose a suitable input peaks workspace
-Create a factory for fabricating new views 'PeakOverlays'
-Create a proper peaks presenter to manage the views and bind them against the
-PeaksWorkspace and the SliceViewer
-Update the views with the current slice point. to ensure they are shown.
-
-@param checked : True if peak overlay option is checked.
-*/
-void SliceViewer::peakOverlay_toggled(bool checked) {
-  if (checked) {
-    MantidQt::MantidWidgets::SelectWorkspacesDialog dlg(this, "PeaksWorkspace");
-    int ret = dlg.exec();
-    if (ret == QDialog::Accepted) {
-      QStringList list = dlg.getSelectedNames();
-      if (!list.isEmpty()) {
-        // Fetch the correct Peak Overlay Transform Factory;
-        setPeaksWorkspaces(list);
-      } else {
-        // No PeaksWorkspace to choose.
-        disablePeakOverlays();
-      }
-    } else {
-      // PeaksWorkspace selection dialog canceled.
-      disablePeakOverlays();
-    }
-  } else {
-    // Toggle peaks overlays to disabled.
-    disablePeakOverlays();
-  }
-}
 
 /**
 Obtain the reference to a new PeakOverlay slider widget if necessary.
@@ -2210,7 +2169,7 @@ void SliceViewer::enablePeakOverlaysIfAppropriate() {
     enablePeakOverlays =
         m_peakTransformSelector.hasFactoryForTransform(xDim, yDim);
   }
-  m_syncPeakOverlay->setEnabled(enablePeakOverlays);
+
   if (!enablePeakOverlays) {
     ui.btnPeakOverlay->setChecked(false); // Don't leave the button depressed.
     m_peaksPresenter->clear();            // Reset the presenter
@@ -2248,6 +2207,14 @@ void SliceViewer::zoomToRectangle(const PeakBoundingBox &boundingBox) {
  * Reset the original view.
  */
 void SliceViewer::resetView() { this->resetZoom(); }
+
+/**
+ * @brief Detach this sliceviewer from the peaksviewer
+ */
+void SliceViewer::detach()
+{
+    this->disablePeakOverlays();
+}
 
 void SliceViewer::peakWorkspaceChanged(
     const std::string &wsName,
@@ -2294,8 +2261,6 @@ void SliceViewer::dropEvent(QDropEvent *e) {
     if(!wsNames.empty()){
         // Show these peaks workspaces
         this->setPeaksWorkspaces(wsNames);
-        // Depresses the button without raising the clicked event
-        this->ui.btnPeakOverlay->setDown(true);
     }
 }
 }

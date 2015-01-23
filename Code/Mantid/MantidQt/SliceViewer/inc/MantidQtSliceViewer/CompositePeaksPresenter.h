@@ -139,7 +139,8 @@ public:
   void notifyWorkspaceChanged(
       const std::string &wsName,
       boost::shared_ptr<Mantid::API::IPeaksWorkspace> &changedPeaksWS);
-
+  /// Determine if the presenter contents are different.
+  bool contentsDifferent(PeaksPresenter const * other) const;
 private:
   /// Updateable on demand method.
   void updatePeaksWorkspace(

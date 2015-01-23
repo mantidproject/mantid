@@ -32,6 +32,7 @@ namespace
   public:
     MOCK_METHOD1(zoomToRectangle, void(const PeakBoundingBox&));
     MOCK_METHOD0(resetView, void());
+    MOCK_METHOD0(detach, void());
     virtual ~MockZoomablePeaksView(){}
   };
 
@@ -62,6 +63,8 @@ namespace
     MOCK_METHOD1(zoomToPeak, void(const int));
     MOCK_CONST_METHOD0(isHidden, bool());
     MOCK_METHOD1(reInitialize, void(boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS));
+    MOCK_CONST_METHOD1(contentsDifferent,
+          bool(const PeaksPresenter*  other));
     virtual ~MockPeaksPresenter(){}
   };
 

@@ -171,7 +171,6 @@ Handler for removing a workspace from the plotting tools.
 */
 void PeaksWorkspaceWidget::onRemoveWorkspaceClicked() {
   emit removeWorkspace(this->m_ws);
-  this->hide();
 }
 
 /**

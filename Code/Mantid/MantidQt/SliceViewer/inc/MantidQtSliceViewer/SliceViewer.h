@@ -115,6 +115,7 @@ public:
   /* -- Methods from implementation of ZoomablePeaksView. --*/
   virtual void zoomToRectangle(const PeakBoundingBox& box);
   virtual void resetView();
+  virtual void detach();
 
   /* Methods associated with workspace observers. Driven by SliceViewerWindow */
   void peakWorkspaceChanged(const std::string& wsName, boost::shared_ptr<Mantid::API::IPeaksWorkspace>& changedPeaksWS);
@@ -178,9 +179,6 @@ public slots:
   // Dynamic rebinning
   void rebinParamsChanged();
   void dynamicRebinComplete(bool error);
-
-  // Peaks overlay
-  void peakOverlay_toggled(bool);
 
 protected:
   void dragEnterEvent(QDragEnterEvent *e);
@@ -297,7 +295,7 @@ private:
 
   /// Synced menu/buttons
   MantidQt::API::SyncedCheckboxes *m_syncLineMode, *m_syncSnapToGrid,
-    *m_syncRebinMode, *m_syncRebinLock, *m_syncPeakOverlay, *m_syncAutoRebin;
+    *m_syncRebinMode, *m_syncRebinLock, *m_syncAutoRebin;
 
   /// Cached double for infinity
   double m_inf;
