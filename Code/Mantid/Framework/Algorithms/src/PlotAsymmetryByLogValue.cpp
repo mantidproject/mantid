@@ -138,7 +138,7 @@ void PlotAsymmetryByLogValue::exec() {
   m_backward_list = getProperty("BackwardSpectra");
   m_autogroup = (m_forward_list.size() == 0 && m_backward_list.size() == 0);
   // Get log value
-  m_logName = getProperty("LogValue");
+  m_logName = getPropertyValue("LogValue");
   // Get green and red periods
   int red = getProperty("Red");
   int green = getProperty("Green");
