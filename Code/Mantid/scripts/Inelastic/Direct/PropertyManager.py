@@ -448,6 +448,26 @@ class PropertyManager(NonIDF_Properties):
             return None
     #end
 
+    def check_abs_norm_defaults_changed(self,changed_param_list=None) :
+        """ Method checks if the parameters necessary to be set for correct absolute 
+            units reduction were indeed changed from defaults
+
+            If not changed, warn users about it
+        """
+        if not changed_param_list:
+            changed_param_list = self.getChangedProperties()
+        n_warnings =0
+        for key in self._abs_units_par_to_change:
+            if key not in changed_param_list :
+                value = getattr(self,key)
+                message = '\n***WARNING!: Absolute units reduction parameter : {0} has its default value: {1}'.format(key,value)+\
+                          '\n             This may need to change to get correct absolute units'
+                n_warnings += 1
+                self.log(message,'warning')
+
+
+        return n_warnings
+
     def _check_file_exist(self,file_name):
         file_path = FileFinder.getFullPath(file)
         if len(file_path) == 0:

@@ -311,7 +311,12 @@ class DirectEnergyConversion(object):
       #process complex parameters
 
       start_time = time.time()
-      # defaults can be None too, but can be a file
+
+      if self.prop_man.monovan_run: # absolute units reduction is requested
+          # check all parameters absolute reduction requested have been set. 
+          # If not, warn used about it
+          self.prop_man.check_abs_norm_defaults_changed()
+      #end check changes
 
      # check if reducer can find all non-run files necessary for the reduction
      # before starting long run.
@@ -587,7 +592,7 @@ class DirectEnergyConversion(object):
         run = self.get_run_descriptor(run)
 
         data_ws = run.get_workspace()
-        old_name = data_ws.name()
+        old_ws_name = data_ws.name()
 
         result_name = run.set_action_suffix('_normalized')
 
@@ -603,13 +608,13 @@ class DirectEnergyConversion(object):
         method = method.lower()
         for case in common.switch(method):
             if case('monitor-1'):
-               self._normalize_to_monitor1(run,old_name, range_offset,mon_index)
+               self._normalize_to_monitor1(run,old_ws_name, range_offset,mon_index)
                break
             if case('monitor-2'):
-               self._normalize_to_monitor2(run,old_name, range_offset,mon_index)
+               self._normalize_to_monitor2(run,old_ws_name, range_offset,mon_index)
                break
             if case('current'):
-                NormaliseByCurrent(InputWorkspace=old_name,OutputWorkspace=old_name)
+                NormaliseByCurrent(InputWorkspace=old_ws_name,OutputWorkspace=old_ws_name)
                 break
             if case(): # default
                raise RuntimeError('Normalization method {0} not found. It must be one of monitor-1, monitor-2, current, or None'.format(method))
@@ -890,26 +895,11 @@ class DirectEnergyConversion(object):
             if name != self.prop_man.instr_name:
                self.prop_man = PropertyManager(name,workspace)
 
-
-    def check_abs_norm_defaults_changed(self,changed_param_list) :
-        """ Method checks if the parameters mentioned as need to changed were indeed changed from defaults
-            If not changed, warn users about it
-        """
-        n_warnings =0
-        for key in self.__abs_units_par_to_change:
-            if key not in changed_param_list :
-                value = getattr(self,key)
-                message = '\n***WARNING!: Absolute units reduction parameter : '+key + ' has its default value: '+str(value)+\
-                          '\n             This may need to change to get correct absolute units'
-                n_warnings += 1
-                self.log(message,'warning')
-
-
-        return n_warnings
-
-
+                
     def get_run_descriptor(self,run):
-       """ Spawn temporary run descriptor for input data given in different format
+       """ Spawn temporary run descriptor for input data given in format,
+           different from run descriptor. Return existing run descriptor, 
+           if it is what provided.
        """
        if not isinstance(run,RunDescriptor):
           tRun = copy.copy(PropertyManager._tmp_run)
@@ -1115,6 +1105,9 @@ class DirectEnergyConversion(object):
     def _do_mono_SNS(self, data_ws, result_name, ei_guess,
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
 
+        raise NotImplementedError("Despite it may work, it have not been modified or verified and is probably wrong")
+
+        #
         # Special load monitor stuff.
         propman = self.prop_man
         if (propman.instr_name == "CNCS" or propman.instr_name == "HYSPEC"):
