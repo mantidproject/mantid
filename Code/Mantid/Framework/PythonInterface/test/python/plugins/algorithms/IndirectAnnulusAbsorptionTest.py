@@ -5,6 +5,17 @@ from mantid.api import *
 
 class IndirectAnnulusAbsorptionTest(unittest.TestCase):
 
+    def setUp(self):
+        """
+        Loads the reduced container and sample files.
+        """
+
+        can_ws = LoadNexusProcessed(Filename='UsageData/irs26173_graphite002_red.nxs')
+        red_ws = LoadNexusProcessed(Filename='UsageData/irs26176_graphite002_red.nxs')
+
+        self._can_ws = can_ws
+        self._red_ws = red_ws
+
 
     def _test_workspaces(self, corrected, ass):
         """
@@ -29,9 +40,7 @@ class IndirectAnnulusAbsorptionTest(unittest.TestCase):
         Tests corrections for the sample only.
         """
 
-        red_ws = LoadNexusProcessed(Filename='UsageData/irs26176_graphite002_red.nxs')
-
-        corrected, ass = IndirectAnnulusAbsorption(SampleWorkspace=red_ws,
+        corrected, ass = IndirectAnnulusAbsorption(SampleWorkspace=self._red_ws,
                                                    ChemicalFormula='H2-O',
                                                    CanInnerRadius=0.2,
                                                    SampleInnerRadius=0.15,
@@ -47,11 +56,8 @@ class IndirectAnnulusAbsorptionTest(unittest.TestCase):
         Tests corrections for the sample and simple container subtraction.
         """
 
-        can_ws = LoadNexusProcessed(Filename='UsageData/irs26173_graphite002_red.nxs')
-        red_ws = LoadNexusProcessed(Filename='UsageData/irs26176_graphite002_red.nxs')
-
-        corrected, ass = IndirectAnnulusAbsorption(SampleWorkspace=red_ws,
-                                                   CanWorkspace=can_ws,
+        corrected, ass = IndirectAnnulusAbsorption(SampleWorkspace=self._red_ws,
+                                                   CanWorkspace=self._can_ws,
                                                    ChemicalFormula='H2-O',
                                                    CanInnerRadius=0.2,
                                                    SampleInnerRadius=0.15,
@@ -68,11 +74,8 @@ class IndirectAnnulusAbsorptionTest(unittest.TestCase):
         with can scale.
         """
 
-        can_ws = LoadNexusProcessed(Filename='UsageData/irs26173_graphite002_red.nxs')
-        red_ws = LoadNexusProcessed(Filename='UsageData/irs26176_graphite002_red.nxs')
-
-        corrected, ass = IndirectAnnulusAbsorption(SampleWorkspace=red_ws,
-                                                   CanWorkspace=can_ws,
+        corrected, ass = IndirectAnnulusAbsorption(SampleWorkspace=self._red_ws,
+                                                   CanWorkspace=self._can_ws,
                                                    CanScaleFactor=0.8,
                                                    ChemicalFormula='H2-O',
                                                    CanInnerRadius=0.2,
