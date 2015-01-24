@@ -7,13 +7,12 @@
 #include "MantidKernel/DllConfig.h"
 #include <string>
 
-namespace Mantid
-{
-namespace Kernel
-{
+namespace Mantid {
+namespace Kernel {
 /** Class containing static methods to return the ParaView version number.
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -33,13 +32,13 @@ namespace Kernel
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_KERNEL_DLL ParaViewVersion
-{
+class MANTID_KERNEL_DLL ParaViewVersion {
 public:
-  static std::string targetVersion();     ///< The version number major.minor
+  static std::string targetVersion(); ///< The version number major.minor
 
 private:
-  ParaViewVersion(); ///< Private, unimplemented constructor. Not a class that can be instantiated.
+  ParaViewVersion(); ///< Private, unimplemented constructor. Not a class that
+  /// can be instantiated.
 };
 
 } // namespace Kernel

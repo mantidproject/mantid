@@ -46,6 +46,7 @@ namespace MantidQt
       virtual ~PeakOverlayMultiSphereFactory();
       virtual boost::shared_ptr<PeakOverlayView> createView(Mantid::API::PeakTransform_const_sptr transform) const;
       virtual int FOM() const;
+      virtual void swapPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace>& peaksWS);
     };
   }
 }

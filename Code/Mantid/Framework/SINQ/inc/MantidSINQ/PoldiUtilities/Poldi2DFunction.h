@@ -6,10 +6,8 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IFunction1DSpectrum.h"
 
-namespace Mantid
-{
-namespace Poldi
-{
+namespace Mantid {
+namespace Poldi {
 
 /** Poldi2DFunction :
 
@@ -40,24 +38,27 @@ namespace Poldi
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class MANTID_SINQ_DLL Poldi2DFunction : virtual public API::IFunction1DSpectrum, virtual public API::CompositeFunction
-{
+class MANTID_SINQ_DLL Poldi2DFunction : virtual public API::IFunction1DSpectrum,
+                                        virtual public API::CompositeFunction {
 public:
-    Poldi2DFunction();
-    virtual ~Poldi2DFunction() {}
+  Poldi2DFunction();
+  virtual ~Poldi2DFunction() {}
 
-    virtual void function(const API::FunctionDomain &domain, API::FunctionValues &values) const;
-    virtual void functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian);
-    
-    virtual void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain, API::FunctionValues &values) const;
+  virtual void function(const API::FunctionDomain &domain,
+                        API::FunctionValues &values) const;
+  virtual void functionDeriv(const API::FunctionDomain &domain,
+                             API::Jacobian &jacobian);
 
-    void iterationFinished();
+  virtual void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
+                                  API::FunctionValues &values) const;
+
+  void iterationFinished();
+
 private:
-    size_t m_iteration;
+  size_t m_iteration;
 };
-
 
 } // namespace SINQ
 } // namespace Mantid
 
-#endif  /* MANTID_SINQ_POLDI2DFUNCTION_H_ */
+#endif /* MANTID_SINQ_POLDI2DFUNCTION_H_ */

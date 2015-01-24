@@ -6,10 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** Takes the name of a group workspace as input and ungroups the workspaces.
 
     Required Property:
@@ -20,7 +18,8 @@ namespace Algorithms
     @author Sofia Antony
     @date 21/07/2009
 
-    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
+   Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -40,30 +39,31 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport UnGroupWorkspace : public API::Algorithm
-{
+class DLLExport UnGroupWorkspace : public API::Algorithm {
 public:
   /// Default constructor
-  UnGroupWorkspace() : API::Algorithm() {};
+  UnGroupWorkspace() : API::Algorithm(){};
   /// Destructor
-  virtual ~UnGroupWorkspace() {};
+  virtual ~UnGroupWorkspace(){};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "UnGroupWorkspace";}
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Takes a group workspace as input and ungroups the workspace.";}
+  virtual const std::string name() const { return "UnGroupWorkspace"; }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Takes a group workspace as input and ungroups the workspace.";
+  }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1;}
+  virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Grouping;Utility\\Workspaces";}
-  
+  virtual const std::string category() const {
+    return "Transforms\\Grouping;Utility\\Workspaces";
+  }
+
 private:
-  
- /// Overridden Init method
+  /// Overridden Init method
   void init();
   /// overridden execute method
   void exec();
-
 };
 
 } // namespace Algorithm

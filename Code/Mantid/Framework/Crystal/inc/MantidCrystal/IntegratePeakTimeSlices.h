@@ -21,18 +21,18 @@
 #include "MantidKernel/V3D.h"
 #include "MantidAPI/IAlgorithm.h"
 
-namespace Mantid
-{
-namespace Crystal
-{
+namespace Mantid {
+namespace Crystal {
 /**
- Integrates each time slice using the BivariateNormal formula, adding the results to the
+ Integrates each time slice using the BivariateNormal formula, adding the
+ results to the
  peak object
 
  @author Ruth Mikkelson, SNS, ORNL
  @date 06/06/2011
 
- Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -53,264 +53,205 @@ namespace Crystal
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-  class DataModeHandler
-  {
-  public:
+class DataModeHandler {
+public:
+  DataModeHandler() { init(); }
 
-     DataModeHandler()
-     {
-      init();
-     }
+  DataModeHandler(const DataModeHandler &handler);
+  DataModeHandler(double baseRCRadius, double lastRCRadius, double lastRow,
+                  double lastCol, double CellWidth, double CellHeight,
+                  bool CalcVariance, int MinCol, int MaxCol, int MinRow,
+                  int MaxRow) {
+    init();
+    this->baseRCRadius = baseRCRadius;
+    this->lastRCRadius = lastRCRadius;
+    this->lastRow = lastRow;
+    this->lastCol = lastCol;
+    this->CellWidth = CellWidth;
+    this->CellHeight = CellHeight;
+    this->CalcVariance = CalcVariance;
+    this->MaxCol = MaxCol;
+    this->MaxRow = MaxRow;
+    this->MinCol = MinCol;
+    this->MinRow = MinRow;
+  }
 
-     DataModeHandler( const DataModeHandler &handler);
-     DataModeHandler(double baseRCRadius, double lastRCRadius,
-            double lastRow, double lastCol, double CellWidth, double CellHeight,
-            bool CalcVariance, int MinCol,int MaxCol, int MinRow,int MaxRow)
-     {
-       init();
-       this->baseRCRadius=baseRCRadius;
-       this->lastRCRadius=lastRCRadius;
-       this->lastRow=lastRow;
-       this->lastCol=lastCol;
-       this->CellWidth = CellWidth;
-       this->CellHeight = CellHeight;
-       this->CalcVariance = CalcVariance;
-       this->MaxCol = MaxCol;
-       this->MaxRow = MaxRow;
-       this->MinCol = MinCol;
-       this->MinRow = MinRow;
-     }
+  void setTime(double time) { this->time = time; }
 
-     void setTime( double time )
-     {
-          this->time=time;
-     }
+  // Returns true if "Edge Peak" otherwise returns false
+  bool setStatBase(std::vector<double> const &StatBase);
 
-     //Returns true if "Edge Peak" otherwise returns false
-     bool setStatBase(std::vector<double> const &StatBase );
+  bool isEdgePeak(const double *params, int nparams);
 
-     bool isEdgePeak( const double* params, int nparams);
+  void setHeightHalfWidthInfo(Mantid::MantidVecPtr &xvals,
+                              Mantid::MantidVecPtr &yvals,
+                              Mantid::MantidVecPtr &counts);
 
+  void setCurrentRadius(double radius) { currentRadius = radius; }
+  void setCurrentCenter(const Kernel::V3D newCenter) {
+    Kernel::V3D XX(newCenter);
+    currentPosition = XX;
+  }
 
-     void setHeightHalfWidthInfo( Mantid::MantidVecPtr &xvals,
-         Mantid::MantidVecPtr &yvals,Mantid::MantidVecPtr &counts);
+  double getCurrentRadius() { return currentRadius; }
+  Kernel::V3D getCurrentCenter() { return currentPosition; }
+  void updateEdgeXsize(double newsize) {
+    if (EdgeX < 0)
 
-     void setCurrentRadius( double radius)
-     {
-       currentRadius = radius;
-     }
-     void setCurrentCenter(const Kernel::V3D newCenter)
-     {
-       Kernel::V3D XX( newCenter);
-       currentPosition = XX;
-     }
+      EdgeX = newsize;
 
-     double getCurrentRadius( )
-     {
-       return currentRadius ;
-     }
-     Kernel::V3D getCurrentCenter( )
-     {
-       return currentPosition;
-     }
-     void updateEdgeXsize( double newsize)
-     {
-       if(EdgeX < 0)
+    else if (newsize < EdgeX)
 
-          EdgeX = newsize;
+      EdgeX = newsize;
+  }
 
-        else if( newsize < EdgeX)
+  void updateEdgeYsize(double newsize) {
+    if (EdgeY < 0)
 
-         EdgeX = newsize;
-     }
+      EdgeY = newsize;
 
-     void updateEdgeYsize( double newsize)
-     {
-       if(EdgeY < 0)
+    else if (newsize < EdgeY)
 
-          EdgeY = newsize;
+      EdgeY = newsize;
+  }
 
-        else if( newsize < EdgeY)
+  void CalcVariancesFromData(double background, double row, double col,
+                             double &Varx, double &Vary, double &Varxy,
+                             std::vector<double> &ParameterValues);
 
-         EdgeY = newsize;
+  bool IsEnoughData(const double *ParameterValues, Kernel::Logger &);
 
-     }
+  double getNewRCRadius();
 
-     void CalcVariancesFromData( double background,  double row,
-                           double col, double &Varx, double &Vary, double &Varxy,
-                           std::vector<double>&ParameterValues);
+  double getInitBackground() { return back_calc; }
 
-     bool IsEnoughData(const double *ParameterValues, Kernel::Logger& );
+  double getInitRow() { return row_calc; }
 
-     double getNewRCRadius();
+  double getInitCol() { return col_calc; }
 
-     double getInitBackground()
-     {
-       return back_calc;
-     }
+  double getInitIntensity() { return Intensity_calc; }
 
-     double getInitRow()
-     {
-       return row_calc;
-     }
+  double getInitVarx() { return Vx_calc; }
 
-     double getInitCol()
-     {
-       return col_calc;
-     }
+  double getInitVary() { return Vy_calc; }
 
-     double getInitIntensity()
-     {
-       return Intensity_calc;
-     }
+  double getInitVarxy() { return Vxy_calc; }
 
-     double getInitVarx()
-     {
-       return Vx_calc;
-     }
+  std::string CalcConstraints(std::vector<std::pair<double, double>> &Bounds,
+                              bool CalcVariances);
+  std::string getTies() { return ""; }
 
-     double getInitVary()
-     {
-       return Vy_calc;
-     }
+  bool CalcVariances();
 
-     double getInitVarxy()
-     {
-       return Vxy_calc;
-     }
+  std::vector<double> GetParams(double background);
 
-     std::string CalcConstraints(std::vector< std::pair<double,double> > & Bounds,
-                                                          bool CalcVariances );
-     std::string getTies()
-     {
-       return "";
-     }
+  double StatBaseVals(int index) {
+    if (index < 0 || index >= (int)StatBase.size())
+      return 0.0;
+    return StatBase[index];
+  }
 
-     bool CalcVariances( );
+  double CalcISAWIntensity(const double *params);
 
-     std::vector<double>GetParams( double background);
+  double CalcISAWIntensityVariance(const double *params, const double *errs,
+                                   double chiSqOvDOF);
 
-     double StatBaseVals( int index)
-     {
-       if( index < 0 || index >= (int)StatBase.size() )
-         return 0.0;
-       return StatBase[index];
-     }
+  /**
+   * For Edge Peaks
+   */
+  double CalcSampleIntensityMultiplier(const double *params) const;
 
-     double CalcISAWIntensity( const double* params) ;
+  /**
+   * Returns init values with background and variances replaced by arguments.
+   *Varxy=0
+   *
+   */
+  std::vector<double> InitValues(double Varx, double Vary, double b);
+  double baseRCRadius;
+  double lastRCRadius;
+  double HalfWidthAtHalfHeightRadius;
+  double calcNewRCRadius;
 
-     double CalcISAWIntensityVariance(  const double* params, const double* errs, double chiSqOvDOF) ;
+  double lastRow;
+  int MinRow, MaxRow;
+  double lastCol;
+  int MinCol, MaxCol;
+  double time;
+  double CellWidth;
+  double CellHeight;
 
-     /**
-      * For Edge Peaks
-      */
-     double CalcSampleIntensityMultiplier( const double* params) const;
+  double VarxHW, VaryHW;
+  double currentRadius;
+  Kernel::V3D currentPosition;
+  std::vector<double> StatBase;
 
-     /**
-      * Returns init values with background and variances replaced by arguments.  Varxy=0
-      *
-      */
-     std::vector<double> InitValues( double Varx,double Vary,double b);
-     double baseRCRadius;
-     double lastRCRadius;
-     double HalfWidthAtHalfHeightRadius;
-     double calcNewRCRadius;
+  double EdgeX, EdgeY;
+  double lastISAWIntensity, lastISAWVariance;
+  bool CalcVariance;
+  bool case4; // if true result of successful merge of dir =1 chan=0 and chan=1
+  double back_calc, Intensity_calc, row_calc, col_calc, Vx_calc, Vy_calc,
+      Vxy_calc;
 
-     double lastRow;
-     int MinRow,MaxRow;
-     double lastCol;
-     int MinCol,MaxCol;
-     double time;
-     double CellWidth;
-     double CellHeight;
+private:
+  void init() {
+    baseRCRadius = -1;
+    lastRCRadius = -1;
+    lastRow = -1;
+    lastCol = -1;
+    EdgeX = EdgeY = -1;
+    calcNewRCRadius = -1;
+    MaxRow = -1;
+    MaxCol = -1;
+    MinRow = -1;
+    MinCol = -1;
+    time = -1;
+    CalcVariance = true;
+    CellWidth = CellHeight = 0;
+    currentRadius = -1;
+    lastISAWIntensity = -1;
+    lastISAWVariance = -1;
+    currentPosition = Kernel::V3D();
+    HalfWidthAtHalfHeightRadius = -1;
+    case4 = false;
 
-     double VarxHW, VaryHW;
-     double currentRadius;
-     Kernel::V3D   currentPosition;
-     std::vector<double> StatBase;
+    VarxHW = -1;
+    VaryHW = -1;
+    back_calc = Intensity_calc = row_calc = col_calc = Vx_calc = Vy_calc =
+        Vxy_calc = -1;
+  }
+};
 
-     double EdgeX,EdgeY;
-     double lastISAWIntensity, lastISAWVariance;
-     bool CalcVariance;
-     bool case4;//if true result of successful merge of dir =1 chan=0 and chan=1
-     double back_calc,
-            Intensity_calc,
-            row_calc,
-            col_calc,
-            Vx_calc,
-            Vy_calc,
-            Vxy_calc;
-
-  private:
-     void init()
-      {
-        baseRCRadius = -1;
-        lastRCRadius = -1;
-        lastRow = -1;
-        lastCol = -1;
-        EdgeX = EdgeY = -1;
-        calcNewRCRadius = -1;
-        MaxRow = -1;
-        MaxCol = -1;
-        MinRow = -1;
-        MinCol = -1;
-        time = -1;
-        CalcVariance = true;
-        CellWidth = CellHeight = 0;
-        currentRadius = -1;
-        lastISAWIntensity = -1;
-        lastISAWVariance = -1;
-        currentPosition = Kernel::V3D();
-        HalfWidthAtHalfHeightRadius = -1;
-        case4 = false;
-
-        VarxHW = -1;
-        VaryHW = -1;
-        back_calc = Intensity_calc = row_calc =
-            col_calc = Vx_calc = Vy_calc = Vxy_calc = -1;
-      }
-  };
-
-class DLLExport IntegratePeakTimeSlices:  public Mantid::API::Algorithm
-{
+class DLLExport IntegratePeakTimeSlices : public Mantid::API::Algorithm {
 public:
   /// Default constructor
   IntegratePeakTimeSlices();
-  
-  /// Destructor
- virtual  ~IntegratePeakTimeSlices();
- 
-  /// Algorithm's name for identification overriding a virtual method
- virtual const std::string name() const 
- {
-    return "IntegratePeakTimeSlices";
- }
- 
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "The algorithm uses CurveFitting::BivariateNormal for fitting a time slice";}
 
- 
-  /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const 
- {
-     return 1;
- }
-  
-  /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const
-  {
-    return "Crystal";
+  /// Destructor
+  virtual ~IntegratePeakTimeSlices();
+
+  /// Algorithm's name for identification overriding a virtual method
+  virtual const std::string name() const { return "IntegratePeakTimeSlices"; }
+
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "The algorithm uses CurveFitting::BivariateNormal for fitting a "
+           "time slice";
   }
 
+  /// Algorithm's version for identification overriding a virtual method
+  virtual int version() const { return 1; }
+
+  /// Algorithm's category for identification overriding a virtual method
+  virtual const std::string category() const { return "Crystal"; }
+
 private:
-
-
   void init();
   void exec();
 
-
-  Mantid::API::MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace, the data set
-  Mantid::DataObjects::TableWorkspace_sptr outputW; ///< A pointer to the output workspace
+  Mantid::API::MatrixWorkspace_sptr
+      inputW; ///< A pointer to the input workspace, the data set
+  Mantid::DataObjects::TableWorkspace_sptr
+      outputW; ///< A pointer to the output workspace
 
   bool EdgePeak;
 
@@ -318,121 +259,95 @@ private:
 
   std::string ParameterNames[7];
 
-  boost::shared_ptr<DataModeHandler> AttributeValues ;
-  double ParameterValues[7] ;
+  boost::shared_ptr<DataModeHandler> AttributeValues;
+  double ParameterValues[7];
 
   Mantid::detid2index_map wi_to_detid_map;
 
-  int*                     NeighborIDs;//Stores IDs of nearest neighbors
-  double R0 ;  ///<for Weak Peaks, these can be set using info from close
+  int *NeighborIDs; // Stores IDs of nearest neighbors
+  double R0;        ///<for Weak Peaks, these can be set using info from close
 
-  Kernel::V3D  center;  ///< for Describing the Plane at the Peak
-  Kernel::V3D  xvec;    ///< for Describing the Plane at the Peak
-  Kernel::V3D yvec;     ///< for Describing the Plane at the Peak
-  double ROW;           ///< for Describing the Row(or 0) describing the center of the  Peak
-  double COL;           ///< for Describing the Column(or 0) describing the center of the  Peak
-  double CellWidth;     ///< for Describing the Plane at the Peak
-  double CellHeight;     ///< for Describing the Plane at the Peak
+  Kernel::V3D center; ///< for Describing the Plane at the Peak
+  Kernel::V3D xvec;   ///< for Describing the Plane at the Peak
+  Kernel::V3D yvec;   ///< for Describing the Plane at the Peak
+  double
+      ROW; ///< for Describing the Row(or 0) describing the center of the  Peak
+  double COL; ///< for Describing the Column(or 0) describing the center of the
+  /// Peak
+  double CellWidth;  ///< for Describing the Plane at the Peak
+  double CellHeight; ///< for Describing the Plane at the Peak
   int NROWS;
   int NCOLS;
 
-  void SetUpData( API::MatrixWorkspace_sptr          & Data,
-                  API::MatrixWorkspace_const_sptr    const & inpWkSpace,
-                  boost::shared_ptr< Geometry::IComponent> comp,
-                  const int                       chanMin,
-                  const int                       chanMax,
-                  double                          CentX,
-                  double                          CentY,
-                  Kernel::V3D                     &CentNghbr,
+  void SetUpData(API::MatrixWorkspace_sptr &Data,
+                 API::MatrixWorkspace_const_sptr const &inpWkSpace,
+                 boost::shared_ptr<Geometry::IComponent> comp,
+                 const int chanMin, const int chanMax, double CentX,
+                 double CentY, Kernel::V3D &CentNghbr,
 
-                  double                        &neighborRadius,//from CentDet
-                  double                         Radius,
-                  std::string                    &spec_idList);
+                 double &neighborRadius, // from CentDet
+                 double Radius, std::string &spec_idList);
 
+  bool getNeighborPixIDs(boost::shared_ptr<Geometry::IComponent> comp,
+                         Kernel::V3D &Center, double &Radius, int *&ArryofID);
 
+  int CalculateTimeChannelSpan(API::IPeak const &peak, const double dQ,
+                               Mantid::MantidVec const &X, const int specNum,
+                               int &Centerchan);
 
+  double CalculatePositionSpan(API::IPeak const &peak, const double dQ);
 
-  bool getNeighborPixIDs( boost::shared_ptr< Geometry::IComponent> comp,
-                          Kernel::V3D                             &Center,
-                          double                                  &Radius,
-                          int*                                    &ArryofID);
+  void InitializeColumnNamesInTableWorkspace(
+      DataObjects::TableWorkspace_sptr &TabWS);
 
-  int  CalculateTimeChannelSpan( API::IPeak     const & peak,
-                                 const double                  dQ,
-                                 Mantid::MantidVec      const& X,
-                                 const int                     specNum,
-                                 int                         & Centerchan);
+  /// Prepares the data for futher analysis adding meta data and marking data on
+  /// the edges of detectors
+  void SetUpData1(API::MatrixWorkspace_sptr &Data,
+                  API::MatrixWorkspace_const_sptr const &inpWkSpace,
+                  const int chanMin, const int chanMax, double Radius,
+                  Kernel::V3D CentPos, std::string &spec_idList
 
-  double CalculatePositionSpan(  API::IPeak const &peak,
-                                 const double             dQ );
-
-  void InitializeColumnNamesInTableWorkspace( DataObjects::TableWorkspace_sptr &TabWS) ;
-
-  ///Prepares the data for futher analysis adding meta data and marking data on the edges of detectors
-  void SetUpData1( API::MatrixWorkspace_sptr      &Data,
-                   API::MatrixWorkspace_const_sptr     const &inpWkSpace,
-                   const int                       chanMin,
-                   const int                       chanMax,
-                   double                         Radius,
-                   Kernel::V3D                    CentPos ,
-                   std::string                    &spec_idList
-
-                   ) ;
+                  );
 
   /**
    *  Tests several starting points in the Marquardt algorithm then calls Fit.
    */
-  void PreFit(API::MatrixWorkspace_sptr &Data,double &chisq, bool &done,
-        std::vector<std::string>&names, std::vector<double>&params,
-        std::vector<double>&errs,double lastRow,double lastCol,double neighborRadius);
+  void PreFit(API::MatrixWorkspace_sptr &Data, double &chisq, bool &done,
+              std::vector<std::string> &names, std::vector<double> &params,
+              std::vector<double> &errs, double lastRow, double lastCol,
+              double neighborRadius);
 
+  void Fit(API::MatrixWorkspace_sptr &Data, double &chisq, bool &done,
+           std::vector<std::string> &names, std::vector<double> &params,
+           std::vector<double> &errs, double lastRow, double lastCol,
+           double neighborRadius);
 
-  void Fit(API::MatrixWorkspace_sptr &Data,double &chisq, bool &done,
-        std::vector<std::string>&names, std::vector<double>&params,
-        std::vector<double>&errs,
-        double lastRow,double lastCol,double neighborRadius);
+  std::string CalculateFunctionProperty_Fit();
 
-  std::string CalculateFunctionProperty_Fit(  ) ;
+  bool isGoodFit(std::vector<double> const &params,
+                 std::vector<double> const &errs,
+                 std::vector<std::string> const &names, double chisq);
+  // returns last row added
+  int UpdateOutputWS(DataObjects::TableWorkspace_sptr &TabWS, const int dir,
+                     const double chan, std::vector<double> const &params,
+                     std::vector<double> const &errs,
+                     std::vector<std::string> const &names, const double chisq,
+                     const double time, std::string spec_idList);
 
-  bool isGoodFit( std::vector<double >              const & params,
-                  std::vector<double >              const & errs,
-                  std::vector<std::string >         const &names,
-                  double                                   chisq
-                ) ;
-  //returns last row added
-  int UpdateOutputWS( DataObjects::TableWorkspace_sptr         &TabWS,
-                       const int                                  dir,
-                       const double                                  chan,
-                       std::vector<double >                 const &params,
-                       std::vector<double >                 const &errs,
-                       std::vector<std::string>             const &names,
-                       const double                               chisq,
-                       const double                              time,
-                       std::string                         spec_idList) ;
+  void updatePeakInformation(std::vector<double> const &params,
+                             std::vector<double> const &errs,
+                             std::vector<std::string> const &names,
+                             double &TotVariance, double &TotIntensity,
+                             double const TotSliceIntensity,
+                             double const TotSliceVariance,
+                             double const chisqdivDOF, const int ncelss);
 
+  void updateStats(const double intensity, const double variance,
+                   const double row, const double col,
+                   std::vector<double> &StatBase);
 
-  void updatePeakInformation( std::vector<double >     const &params,
-                              std::vector<double >     const &errs,
-                              std::vector<std::string >const &names,
-                              double                        &TotVariance,
-                              double                        &TotIntensity,
-                              double const                   TotSliceIntensity,
-                              double const                   TotSliceVariance,
-                              double const                   chisqdivDOF,
-                              const int                      ncelss) ;
-
-
-  void updateStats( const double          intensity,
-                    const double          variance,
-                    const double          row,
-                    const double          col,
-                    std::vector<double> & StatBase );
-
-
-  int find( std::string              const &oneName,
-            std::vector<std::string> const &nameList);
-
-
+  int find(std::string const &oneName,
+           std::vector<std::string> const &nameList);
 
   double CalculateIsawIntegrateError(const double background,
                                      const double backError,
@@ -440,21 +355,19 @@ private:
                                      const double TotIntensity,
                                      const int ncells);
 
-  void FindPlane( Kernel::V3D & center,  Kernel::V3D & xvec,    Kernel::V3D& yvec,
-                  double &ROW,          double &COL,    int &NROWS,
-                  int & NCOLS,        double &pixWidthx,
-                  double&pixHeighty,   API::IPeak const &peak) const;
+  void FindPlane(Kernel::V3D &center, Kernel::V3D &xvec, Kernel::V3D &yvec,
+                 double &ROW, double &COL, int &NROWS, int &NCOLS,
+                 double &pixWidthx, double &pixHeighty,
+                 API::IPeak const &peak) const;
 
-  int find( Mantid::MantidVec const & X,
-            const double              time);
+  int find(Mantid::MantidVec const &X, const double time);
 
-  //returns true if Neighborhood list is changed
-  bool updateNeighbors( boost::shared_ptr< Geometry::IComponent> &comp,
-      Kernel:: V3D CentPos, Kernel::V3D oldCenter,double NewRadius, double &neighborRadius);
+  // returns true if Neighborhood list is changed
+  bool updateNeighbors(boost::shared_ptr<Geometry::IComponent> &comp,
+                       Kernel::V3D CentPos, Kernel::V3D oldCenter,
+                       double NewRadius, double &neighborRadius);
 
-
-
-  bool    debug;
+  bool debug;
 };
 } // namespace Crystal
 } // namespace Mantid

@@ -10,22 +10,21 @@
 //----------------------------------------------------------------------
 // Forward Declaration
 //----------------------------------------------------------------------
-namespace ICat3
-{
-  class ICATPortBindingProxy;
+namespace ICat3 {
+class ICATPortBindingProxy;
 }
 
-namespace Mantid
-{
-namespace ICat
-{
+namespace Mantid {
+namespace ICat {
 
-/** CErrorHandling class responsible for handling errors in Mantid-ICat Algorithms.
+/** CErrorHandling class responsible for handling errors in Mantid-ICat
+   Algorithms.
     This algorithm  gives the datsets for a given investigations record
 
-    @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
+    @author Sofia Antony, ISIS Rutherford Appleton Laboratory
     @date 07/07/2010
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -45,36 +44,35 @@ namespace ICat
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class CErrorHandling
-{
+class CErrorHandling {
 public:
   /// Constructor
   CErrorHandling();
   /// Destructor
   ~CErrorHandling();
 
-  /** This method throws the error string returned by gsoap to mantid upper layer
+  /** This method throws the error string returned by gsoap to mantid upper
+   * layer
    *  @param icat ICat proxy object
    */
-  static void throwErrorMessages(ICat3::ICATPortBindingProxy& icat);
+  static void throwErrorMessages(ICat3::ICATPortBindingProxy &icat);
 };
 
 /** a class for Throwing Session exception in Catalog module
  */
-class SessionException: public std::runtime_error
-{
+class SessionException : public std::runtime_error {
 private:
   /// error string
   std::string m_error;
+
 public:
   /// constructor
-  SessionException(const std::string& error);
-  ///destructor
+  SessionException(const std::string &error);
+  /// destructor
   ~SessionException() throw() {}
-  ///return the error message
-  const char* what() const throw();
+  /// return the error message
+  const char *what() const throw();
 };
-
 }
 }
 #endif

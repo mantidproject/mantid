@@ -73,7 +73,7 @@ Whitebeam run number or file name or workspace
       bleed_maxrate   - If the bleed test is on then this is the maximum framerate allowed in a tube
       bleed_pixels    - If the bleed test is on then this is the number of pixels ignored within the
                        bleed test diagnostic
-      print_results - If True then the results are printed to the screen
+      print_diag_results - If True then the results are printed to the screen
 
       diag_remove_ero =True, False (default):Diag zero counts in background range
       bleed=True , turn bleed correction on and off on by default for Merlin and LET
@@ -166,7 +166,6 @@ class DirectEnergyConversion(object):
               bleed_maxrate - If the bleed test is on then this is the maximum framerate allowed in a tube
               bleed_pixels - If the bleed test is on then this is the number of pixels ignored within the
                              bleed test diagnostic
-              print_results - If True then the results are printed to the screen
         """
         lhs_names = funcreturns.lhs_info('names')
         if len(lhs_names) > 0:
@@ -305,23 +304,6 @@ class DirectEnergyConversion(object):
         # White beam scale factor
         white_ws *= propman.wb_scale_factor
         return white_ws
-
-    def mono_van(self, mono_van, ei_guess, white_run=None, map_file=None,
-                 spectra_masks=None, result_name=None, Tzero=None):
-        """Convert a mono vanadium run to DeltaE.
-        If multiple run files are passed to this function, they are summed into a run and then processed
-        """
-        # Load data
-        sample_data,mon_ws = self.load_data(mono_van)
-        # Create the result name if necessary
-        if result_name is None:
-           result_name = common.create_resultname(mono_van)
-
-        monovan = self._do_mono(sample_data, sample_data, result_name, ei_guess,
-                                white_run, map_file, spectra_masks, Tzero)
-        # Normalize by vanadium sample weight
-        monovan /= float(self.van_mass)/float(self.van_rmm)
-        return monovan
 
     def mono_sample(self, mono_run, ei_guess, white_run=None, map_file=None,
                     spectra_masks=None, result_name=None, Tzero=None):
@@ -564,7 +546,7 @@ class DirectEnergyConversion(object):
         result_ws *= prop_man.scale_factor
         return result_ws
 
-    def convert_to_energy_transfer(self,wb_run=None,sample_run=None,ei_guess=None,rebin=None,map_file=None,monovan_run=None,wb_for_monovan_run=None,**kwargs):
+    def convert_to_energy(self,wb_run=None,sample_run=None,ei_guess=None,rebin=None,map_file=None,monovan_run=None,wb_for_monovan_run=None,**kwargs):
       """ One step conversion of run into workspace containing information about energy transfer
 
       """ 
@@ -635,15 +617,20 @@ class DirectEnergyConversion(object):
           masks_done = True;
       #if Reducer.save_and_reuse_masks :
       # SAVE AND REUSE MASKS
+      if self.spectra_masks:
+         masks_done=True
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
 #  Diagnostics here 
 # --------------------------------------------------------------------------------------------------------
      # diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
       if not masks_done:
-        prop_man.log("######## Run diagnose for sample run ###########################",'notice');
+        prop_man.log("======== Run diagnose for sample run ===========================",'notice');
         masking = self.diagnose(prop_man.wb_run,prop_man.mask_run,
-                                second_white=None,print_results=True)
-        header = "*** Diagnostics processed workspace with {0:d} spectra and masked {1:d} bad spectra"
+                                second_white=None,print_diag_results=True)
+        if prop_man.use_hard_mask_only:
+            header = "*** Hard mask file applied to workspace with {0:d} spectra masked {1:d} spectra"
+        else:
+            header = "*** Diagnostics processed workspace with {0:d} spectra and masked {1:d} bad spectra"
 
 
         # diagnose absolute units:
@@ -653,23 +640,26 @@ class DirectEnergyConversion(object):
                     prop_man.log('  Applying sample run mask to mono van')
                 else:
                     if not prop_man.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better solution for that.
-                        prop_man.log("######## Run diagnose for monochromatic vanadium run ###########",'notice');
+                        prop_man.log("======== Run diagnose for monochromatic vanadium run ===========",'notice');
 
                         masking2 = self.diagnose(prop_man.wb_for_monovan_run,prop_man.monovan_run,
-                                         second_white = None,print_results=True)
+                                         second_white = None,print_diag_results=True)
                         masking +=  masking2
                         DeleteWorkspace(masking2)
 
 
             else: # if Reducer.mono_correction_factor != None :
                 pass
-
-      # save mask if it does not exist and has been already loaded
-      #if Reducer.save_and_reuse_masks and not masks_done:
-      #    SaveMask(InputWorkspace=masking,OutputFile = mask_file_name,GroupedDetectors=True)
-
-      # Very important statement propagating masks for further usage in convert_to_energy
-      self.spectra_masks=masking
+        # Very important statement propagating masks for further usage in convert_to_energy. 
+        # This property is also directly accessible from GUI.
+        self.spectra_masks=masking
+         # save mask if it does not exist and has been already loaded
+         #if Reducer.save_and_reuse_masks and not masks_done:
+         #    SaveMask(InputWorkspace=masking,OutputFile = mask_file_name,GroupedDetectors=True)
+      else:
+          header = '*** Using stored mask file for workspace with  {0} spectra and {1} masked spectra'
+          masking=self.spectra_masks
+ 
       # estimate and report the number of failing detectors
       failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)
       nMaskedSpectra = len(failed_sp_list)
@@ -677,8 +667,6 @@ class DirectEnergyConversion(object):
       prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice');
 
       #Run the conversion first on the sample
-      #result_name = 
-      #deltaE_wkspace_sample = self.convert_to_energy(prop_man.sample_run,prop_man.incident_energy,prop_man.wb_run)
       deltaE_wkspace_sample = self.mono_sample(sample_run,prop_man.incident_energy,prop_man.wb_run,
                                                prop_man.map_file,masking)
 
@@ -705,6 +693,16 @@ class DirectEnergyConversion(object):
     # Hack for multirep mode?
 #    if mtd.doesExist('hard_mask_ws') == True:
  #       DeleteWorkspace(Workspace='hard_mask_ws')
+
+      # SNS or GUI motor stuff
+      self.calculate_rotation(deltaE_wkspace_sample)
+      #
+      self.save_results(deltaE_wkspace_sample)
+      # Currently clear masks unconditionally TODO: cash masks with appropriate precautions
+      self.spectra_masks = None
+      # Clear loaded raw data to free up memory --TODO: does not think it works now
+      common.clear_loaded_data()
+
 
       return deltaE_wkspace_sample
 
@@ -921,10 +919,10 @@ class DirectEnergyConversion(object):
                "--------> Monovan Integration range : min={1}, max={2} (meV)\n"\
                "--------> Summed:  {3} spectra with total signal: {4} and error: {5}\n"\
                "--------> Dropped: {6} zero spectra\n"\
-               "--------> Using  mBarn/sR*fu normalization factor = {7} resulting in:"\
+               "--------> Using  mBarn/sR*fu normalization factor = {7} resulting in:\n"\
                "--------> Abs norm factors: LibISIS: {8}\n"\
                "--------> Abs norm factors: Sigma^2: {9}\n"\
-               "--------> Abs norm factors: Poisson: {10}"\
+               "--------> Abs norm factors: Poisson: {10}\n"\
                "--------> Abs norm factors: TGP    : {11}\n"\
                .format(deltaE_wkspaceName,minmax[0],minmax[1],nhist,sum(signal),sum(error),izerc,scale_factor,
                           norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
@@ -935,64 +933,31 @@ class DirectEnergyConversion(object):
            DeleteWorkspace(Workspace=data_ws)
         return (norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
 #-------------------------------------------------------------------------------
+    def calculate_rotation(self,sample_wkspace,motor=None, offset=None):
+        """calculate psi from sample environment motor and offset """
 
+        self.prop_man.set_input_parameters_ignore_nan(motor_name=motor,offset=offset)
+        motor = self.prop_man.motor_name
+        offset= self.prop_man.motor_offset
 
-    def convert_to_energy(self, mono_run, ei, white_run=None, mono_van=None,\
-                          abs_ei=None, abs_white_run=None, save_path=None, Tzero=None, \
-                          motor=None, offset=None):
-        """
-        One-shot function to convert the given runs to energy
-        """
+        #
+        if (offset is None):
+            motor_offset = float('nan')
+        else:
+            motor_offset = float(offset)
 
-        self.prop_man.incident_energy = ei;      
-        prop_man = self.prop_man;
-        prop_man.set_input_parameters_ignore_nan(sample_run=mono_run,
-                                                 wb_run = white_run,monovan_run=mono_van,
-                                                 wb_for_monovan_run =abs_white_run);   # note not-supported second ei for monovan
-
-        # Figure out what to call the workspace
-        result_name = mono_run
-        if not result_name is None:
-            result_name = common.create_resultname(mono_run,prop_man.instr_name)
-
-        # Main run file conversion
-        sample_wkspace = self.mono_sample(mono_run, ei, white_run, prop_man.map_file,
-                                          self.spectra_masks, result_name, Tzero)
-        #if not norm_factor is None:
-        #    sample_wkspace /= norm_factor
+        if motor:
+        # Check if motor name exists
+            if sample_wkspace.getRun().hasProperty(motor):
+                motor_rotation=sample_wkspace.getRun()[motor].value[0]
+                self.prop_man.log("Motor {0} rotation is {1}".format(motor,motor_rotation))
+            else:
+                self.prop_man.log("Could not find such sample environment log. Will use psi=motor_offset")
+                motor_rotation=0
+        else:
+           motor_rotation = float('nan')
+        self.prop_man.psi = motor_rotation+motor_offset
         
-        #calculate psi from sample environment motor and offset
-
-        #if prop_man.facility == 'ISIS' :
-        #    default_offset=float('NaN')
-        #    if not (motor is None) and sample_wkspace.getRun().hasProperty(motor):
-        #        default_offset = 0
-        #else:
-        #    default_offset=0
-
-        #if (offset is None):
-        #      self.motor_offset = default_offset
-        #else:
-        #     self.motor_offset = float(offset)
-
-        #self.motor=0
-        #if not (motor is None):
-        ## Check if motor name exists
-        #    if sample_wkspace.getRun().hasProperty(motor):
-        #        self.motor=sample_wkspace.getRun()[motor].value[0]
-        #        self.log("Motor value is %s" % self.motor)
-        #    else:
-        #        self.log("Could not find such sample environment log. Will use psi=offset")
-        #self.psi = self.motor+self.motor_offset
-
-        # Save then finish
-        self.save_results(sample_wkspace, save_path)
-        # Clear loaded raw data to free up memory
-        common.clear_loaded_data()
-
-        return sample_wkspace
-
-
     def get_ei(self, data_ws,monitors_ws, resultws_name, ei_guess):
         """
         Calculate incident energy of neutrons and the time of the of the
@@ -1039,47 +1004,7 @@ class DirectEnergyConversion(object):
         MoveInstrumentComponent(Workspace=resultws_name,ComponentName= src_name, X=mon1_pos.getX(), Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
         return ei, mon1_peak
 
-    @staticmethod
-    def check_monitor_ws(data_ws,monitor_ws,ei_mon_spectra):
-        """ Check if monitors spectra are indeed located in monitor workspace and if not, try to 
-            find them in data workspace
-
-            return tuple of workspaces, with first is data and second -- monitors workspace pointers
-            both can point to the same workspace if monitors and data are located in the same workspace
-
-            Raise if can not found monitors in any workspace 
-        """ 
-
-        if isinstance(monitor_ws,str):
-            monitor_ws = mtd[monitor_ws]
-        if isinstance(data_ws,str): 
-            data_ws = mtd[data_ws]
-        for nspec in ei_mon_spectra:
-            # in case it is list of strings
-            nsp = int(nspec)
-            try:
-                # check if the spectra with correspondent number is present in the workspace
-                nsp = monitor_ws.getIndexFromSpectrumNumber(nspec);
-            except RuntimeError as err:
-                mon_ws = data_ws.getName()+'_monitors'
-                try:
-                    monitor_ws = mtd[mon_ws];
-                except:
-                    monitor_ws=data_ws
-                # no spectra in data workspace
-
-                try:
-                    # check if the spectra with correspondent number is present in the data workspace
-                    nsp = monitor_ws.getIndexFromSpectrumNumber(nspec);
-                except RuntimeError as err:
-                    print "**** ERROR while attempting to get spectra {0} from workspace: {1}, error: {2} ".format(nsp,monitor_ws.getName(), err)
-                    raise
-            #end No spectra in initial monitor ws
-
-
-        return (data_ws,monitor_ws)
-
-
+  
     def remap(self, result_ws, spec_masks, map_file):
         """
         Mask and group detectors based on input parameters
@@ -1192,6 +1117,15 @@ class DirectEnergyConversion(object):
         Save the result workspace to the specified filename using the list of formats specified in
         formats. If formats is None then the default list is used
         """
+        if formats:
+           # clear up existing save formats as one is defined in parameters
+            self.prop_man.save_format=None
+
+        self.prop_man.set_input_parameters_ignore_nan(save_file_name=save_file,save_format=formats)
+
+        #TODO: deal with this. This all should be incorporated in sample_run
+        save_file = self.prop_man.save_file_name
+        formats   = self.prop_man.save_format
         if save_file is None:
             save_file = workspace.getName()
         elif os.path.isdir(save_file):
@@ -1201,17 +1135,8 @@ class DirectEnergyConversion(object):
         else:
             pass
 
-        prop_man = self.prop_man;
-        if not(formats is None):
-            # clear up existing save formats
-            prop_man.save_format=None;
-            # parse & set up new save formats 
-            prop_man.save_format = formats;
-
-        formats = prop_man.save_format;
-
-
-          
+        prop_man =self.prop_man 
+         
         save_file,ext = os.path.splitext(save_file)
         if len(ext)>1:
             formats.add(ext[1:]);
@@ -1220,19 +1145,19 @@ class DirectEnergyConversion(object):
         for file_format  in formats:
             for case in switch(file_format):
                 if case('nxspe'):
-                    filename = save_file +'.nxspe';
-                    SaveNXSPE(InputWorkspace=workspace,Filename= filename, KiOverKfScaling=prop_man.apply_kikf_correction,psi=prop_man.psi)
-                    break
+                   filename = save_file +'.nxspe';
+                   SaveNXSPE(InputWorkspace=workspace,Filename= filename, KiOverKfScaling=prop_man.apply_kikf_correction,psi=prop_man.psi)
+                   break
                 if case('spe'):
-                    filename = save_file +'.spe';
-                    SaveSPE(InputWorkspace=workspace,Filename= filename)
-                    break
+                   filename = save_file +'.spe';
+                   SaveSPE(InputWorkspace=workspace,Filename= filename)
+                   break
                 if case('nxs'):
-                    filename = save_file +'.nxs';
-                    SaveNexus(InputWorkspace=workspace,Filename= filename)
-                    break
+                   filename = save_file +'.nxs';
+                   SaveNexus(InputWorkspace=workspace,Filename= filename)
+                   break
                 if case(): # default, could also just omit condition or 'if True'
-                    prop_man.log("Unknown file format {0} requested to save results. No saving performed this format".format(file_format));
+                   prop_man.log("Unknown file format {0} requested to save results. No saving performed this format".format(file_format));
 
     #-------------------------------------------------------------------------------
     def load_data(self, runs,new_ws_name=None,keep_previous_ws=False):
@@ -1281,6 +1206,46 @@ class DirectEnergyConversion(object):
                 result_ws,monitor_ws=self.copy_spectrum2monitors(result_ws,monitor_ws,specID);
 
         return (result_ws,monitor_ws)
+
+    @staticmethod
+    def check_monitor_ws(data_ws,monitor_ws,ei_mon_spectra):
+        """ Check if monitors spectra are indeed located in monitor workspace and if not, try to 
+            find them in data workspace
+
+            return tuple of workspaces, with first is data and second -- monitors workspace pointers
+            both can point to the same workspace if monitors and data are located in the same workspace
+
+            Raise if can not found monitors in any workspace 
+        """ 
+
+        if isinstance(monitor_ws,str):
+            monitor_ws = mtd[monitor_ws]
+        if isinstance(data_ws,str): 
+            data_ws = mtd[data_ws]
+        for nspec in ei_mon_spectra:
+            # in case it is list of strings
+            nsp = int(nspec)
+            try:
+                # check if the spectra with correspondent number is present in the workspace
+                nsp = monitor_ws.getIndexFromSpectrumNumber(nspec);
+            except RuntimeError as err:
+                mon_ws = data_ws.getName()+'_monitors'
+                try:
+                    monitor_ws = mtd[mon_ws];
+                except:
+                    monitor_ws=data_ws
+                # no spectra in data workspace
+
+                try:
+                    # check if the spectra with correspondent number is present in the data workspace
+                    nsp = monitor_ws.getIndexFromSpectrumNumber(nspec);
+                except RuntimeError as err:
+                    print "**** ERROR while attempting to get spectra {0} from workspace: {1}, error: {2} ".format(nsp,monitor_ws.getName(), err)
+                    raise
+            #end No spectra in initial monitor ws
+
+
+        return (data_ws,monitor_ws)
 
     @staticmethod
     def copy_spectrum2monitors(wsName,monWSName,spectraID):
@@ -1346,15 +1311,15 @@ class DirectEnergyConversion(object):
         """
         Constructor
         """
-        # Internal properties and keys
-        self._keep_wb_workspace = False;
-        self._do_ISIS_normalization = True;
-        self.spectra_masks = None;
-
         if instr_name:
             self.initialise(instr_name,reload_instrument);
         else:
             self._propMan = None;
+            #
+            self._keep_wb_workspace = False;
+            self._do_ISIS_normalization = True;
+            self.spectra_masks = None;
+        #end
 
  
     def initialise(self, instr,reload_instrument=False):

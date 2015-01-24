@@ -3,18 +3,20 @@
 
 #include "MantidKernel/TypedValidator.h"
 
-namespace Mantid
-{
-namespace Kernel
-{
-/** DateValidator is a validator that validates date, format of valid date is  "DD/MM/YYYY"
-    At present, this validator is only available for properties of type std::string
-    This class has written for validating  start and end dates of  ICat interface.
+namespace Mantid {
+namespace Kernel {
+/** DateValidator is a validator that validates date, format of valid date is
+   "DD/MM/YYYY"
+    At present, this validator is only available for properties of type
+   std::string
+    This class has written for validating  start and end dates of  ICat
+   interface.
 
     @author Sofia Antony, STFC Rutherford Appleton Laboratory
     @date 03/09/2010
- 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -34,8 +36,7 @@ namespace Kernel
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_KERNEL_DLL DateValidator : public TypedValidator<std::string>
-{
+class MANTID_KERNEL_DLL DateValidator : public TypedValidator<std::string> {
 public:
   /// Default constructor
   DateValidator();
@@ -46,9 +47,8 @@ public:
 
 private:
   /// Checks the value is valid
-  std::string checkValidity(const std::string& value) const;
+  std::string checkValidity(const std::string &value) const;
 };
-
 }
 }
 
