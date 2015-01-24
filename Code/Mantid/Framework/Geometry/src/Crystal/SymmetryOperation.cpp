@@ -129,25 +129,24 @@ SymmetryOperation SymmetryOperation::inverse() const {
 }
 
 /// Returns the symmetry operation, applied to itself (exponent) times.
-SymmetryOperation SymmetryOperation::operator ^(size_t exponent) const
-{
-    // If the exponent is 1, no calculations are necessary.
-    if(exponent == 1) {
-        return SymmetryOperation(*this);
-    }
+SymmetryOperation SymmetryOperation::operator^(size_t exponent) const {
+  // If the exponent is 1, no calculations are necessary.
+  if (exponent == 1) {
+    return SymmetryOperation(*this);
+  }
 
-    SymmetryOperation op;
+  SymmetryOperation op;
 
-    // The same for 0, which means identity in every case.
-    if(exponent == 0) {
-        return op;
-    }
-
-    for(size_t i = 0; i < exponent; ++i) {
-        op = (*this) * op;
-    }
-
+  // The same for 0, which means identity in every case.
+  if (exponent == 0) {
     return op;
+  }
+
+  for (size_t i = 0; i < exponent; ++i) {
+    op = (*this) * op;
+  }
+
+  return op;
 }
 
 /// Returns true if matrix and vector are equal
