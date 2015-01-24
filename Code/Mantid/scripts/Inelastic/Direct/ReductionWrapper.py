@@ -17,18 +17,33 @@ class ReductionWrapper(object):
     """ 
     def __init__(self,instrumentName,web_var=None):
       """ sets properties defaults for the instrument with Name"""
-      self.iliad_prop = PropertyManager(instrumentName)
+      #self.iliad_prop = PropertyManager(instrumentName)
       # the variables which are set up from the main properties
       self._main_properties=[]
       # the variables which are set up from the advanced properties.
       self._advanced_properties=[]
-      # The variables which are set up from web interface. 
-      self._web_var = web_var
+      # The variables which are set up from web interface or to be exported to 
+      # web interface
+      if web_var: 
+        self._run_from_web = True
+        self._web_var_stor = web_var
+      else:
+        self._run_from_web = False
+        self._web_var_stor = object()
+      # Initialize reduced for given instrument
+      self._reducer = DirectEnergyConversion(instrumentName)
 
-    def export_changed_values(self,FileName='reduce_vars.py'):
-        """ Method to write changed simple and advanced properties into dictionary, to process by 
-            web reduction interface
+    def save_web_variables(self,FileName=None):
+        """ Method to write simple and advanced properties and help 
+            information  into dictionary, to use by web reduction
+            interface
+
+            If no file is provided, reduce_var.py file will be written 
+            to 
+
         """
+        if not FileName:
+            FileName = 'reduce_vars.py'
        
         f=open(FileName,'w')
         f.write("standard_vars = {\n")
@@ -86,11 +101,13 @@ class ReductionWrapper(object):
 def MainProperties(main_prop_definition):
     """ Decorator stores properties dedicated as main and sets these properties as input to reduction parameters.""" 
     def main_prop_wrapper(*args):
+        # execute decorated function
         properties = main_prop_definition(*args)
         #print "in decorator: ",properties
         host = args[0]
-        host._main_properties=properties
-        host.iliad_prop.set_input_parameters(**properties)
+        if not host._run_from_web: # property run locally
+            host._web_var_stor.main_prop =properties
+            host._reducer.prop_man.set_input_parameters(**properties)
         return properties
 
     return main_prop_wrapper
@@ -101,18 +118,12 @@ def AdvancedProperties(adv_prop_definition):
         properties = adv_prop_definition(*args)
         #print "in decorator: ",properties
         host = args[0]
-        host._advanced_properties=properties
-        host.iliad_prop.set_input_parameters(**properties)
+        if not host._run_from_web: # property run locally
+            host._web_var_stor.adv_prop =properties
+            host._reducer.prop_man.set_input_parameters(**properties)
         return properties
 
     return advanced_prop_wrapper
-
-def using_web_data(self):
-    if self._web_var:
-        return True
-    else:
-        return False
-
 
 
 def iliad(main):
@@ -147,7 +158,7 @@ def iliad(main):
             host.iliad_prop.set_input_parameters(**web_vars)
             host.iliad_prop.sample_run = input_file
 
-        rez = main(*args)
+        rez = run_reducer(*args)
         # prohibit returning workspace to web services. 
         if use_web_variables and not isinstance(rez,str):
             rez=""
