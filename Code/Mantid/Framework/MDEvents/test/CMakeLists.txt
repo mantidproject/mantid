@@ -21,6 +21,8 @@ if ( CXXTEST_FOUND )
   endif ()
   
   add_dependencies ( FrameworkTests MDEventsTest )
+  # Test data
+  add_dependencies ( MDEventsTest StandardTestData )
   
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET MDEventsTest PROPERTY FOLDER "UnitTests" )
