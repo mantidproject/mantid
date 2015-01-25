@@ -96,6 +96,8 @@ namespace CustomInterfaces
     void replot(const QString& plotID);
     /// Function to remove a curve from a plot
     void removeCurve(const QString& curveID);
+    /// Function to remove all curves from plots
+    void removeAllCurves();
 
     /// Function to get the range of the curve displayed on the mini plot
     std::pair<double, double> getCurveRange(const QString& plotID);

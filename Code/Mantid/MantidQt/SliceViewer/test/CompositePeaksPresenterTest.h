@@ -24,6 +24,7 @@ private:
   public:
     void zoomToRectangle(const PeakBoundingBox&){}
     void resetView(){}
+    void detach(){}
     virtual ~FakeZoomablePeaksView(){}
   };
 
@@ -58,7 +59,11 @@ public:
   {
     CompositePeaksPresenter presenter(&_fakeZoomableView);
     const size_t initialSize = presenter.size();
-    presenter.addPeaksPresenter( boost::make_shared<NiceMock<MockPeaksPresenter> >() );
+
+    auto candidate = boost::make_shared<NiceMock<MockPeaksPresenter> >();
+    EXPECT_CALL(*candidate, contentsDifferent(_)).WillOnce(Return(true));
+
+    presenter.addPeaksPresenter( candidate );
     TSM_ASSERT_EQUALS("Expected one item to be added.", initialSize + 1, presenter.size());
   }
 
@@ -67,6 +72,7 @@ public:
     CompositePeaksPresenter presenter(&_fakeZoomableView);
     const size_t initialSize = presenter.size();
     auto presenterToAdd = boost::make_shared<NiceMock<MockPeaksPresenter> >();
+    EXPECT_CALL(*presenterToAdd, contentsDifferent(_)).WillRepeatedly(Return(true));
     presenter.addPeaksPresenter( presenterToAdd );
     presenter.addPeaksPresenter( presenterToAdd ); // Try to add it again.
     TSM_ASSERT_EQUALS("Should not be able to add the same item more than once.", initialSize + 1, presenter.size());
@@ -74,10 +80,18 @@ public:
 
   void test_clear()
   {
-    CompositePeaksPresenter composite(&_fakeZoomableView);
+    NiceMock<MockZoomablePeaksView> mockZoomableView;
+    EXPECT_CALL(mockZoomableView, detach()).Times(1); // Should detach itself when no nested presenters are present.
+
+    CompositePeaksPresenter composite(&mockZoomableView);
     const size_t initialSize = composite.size();
-    composite.addPeaksPresenter( boost::make_shared<NiceMock<MockPeaksPresenter> >() ); // Add one subject
-    composite.addPeaksPresenter( boost::make_shared<NiceMock<MockPeaksPresenter> >() ); // Add another subject
+    auto a = boost::make_shared<NiceMock<MockPeaksPresenter> >();
+    EXPECT_CALL(*a, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allow us to add the subject
+    auto b = boost::make_shared<NiceMock<MockPeaksPresenter> >();
+    EXPECT_CALL(*b, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add the subject
+
+    composite.addPeaksPresenter(a); // Add one subject
+    composite.addPeaksPresenter(b); // Add another subject
 
     composite.clear();
 
@@ -92,6 +106,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(composite.updateWithSlicePoint(region));
     TS_ASSERT_EQUALS(expected.changeShownDim(), composite.changeShownDim());
     TS_ASSERT_EQUALS(expected.isLabelOfFreeAxis("") , composite.isLabelOfFreeAxis(""));
+    TSM_ASSERT("Should have detached upon clear", Mock::VerifyAndClearExpectations(&mockZoomableView));
   }
 
   /**
@@ -117,12 +132,15 @@ public:
   {
     MockPeaksPresenter* mockPresenter = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter(mockPresenter);
+    EXPECT_CALL(*mockPresenter, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
+
     EXPECT_CALL(*mockPresenter, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*mockPresenter, updateWithSlicePoint(_)).Times(1); // Expect the method on the default to be called.
 
     // Create the composite.
     CompositePeaksPresenter composite(&_fakeZoomableView);
     // add the subject presenter.
+
     composite.addPeaksPresenter(presenter);
     // Call the method on the composite.
     PeakBoundingBox region;
@@ -146,6 +164,7 @@ public:
   {
     MockPeaksPresenter* mockPresenter = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter(mockPresenter);
+    EXPECT_CALL(*mockPresenter, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
     EXPECT_CALL(*mockPresenter, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*mockPresenter, getTransformName()).Times(1).WillOnce(Return("")); 
 
@@ -181,6 +200,8 @@ public:
   {
     MockPeaksPresenter* mockPresenter = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter(mockPresenter);
+    EXPECT_CALL(*mockPresenter, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
+
     EXPECT_CALL(*mockPresenter, update()).Times(1); // Expect the method on the default to be called.
     EXPECT_CALL(*mockPresenter, registerOwningPresenter(_)).Times(AtLeast(1));
 
@@ -199,6 +220,7 @@ public:
     //One nested presenter
     SetPeaksWorkspaces setA;
     MockPeaksPresenter* pA = new MockPeaksPresenter;
+    EXPECT_CALL(*pA, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
     PeaksPresenter_sptr A(pA);
     EXPECT_CALL(*pA, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pA, presentedWorkspaces()).WillOnce(Return(setA)); 
@@ -206,6 +228,7 @@ public:
     //Another nested presenter
     SetPeaksWorkspaces setB;
     MockPeaksPresenter* pB = new MockPeaksPresenter;
+    EXPECT_CALL(*pB, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
     PeaksPresenter_sptr B(pB);
     EXPECT_CALL(*pB, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pB, presentedWorkspaces()).WillOnce(Return(setB)); 
@@ -232,6 +255,8 @@ public:
     
     MockPeaksPresenter* A = new NiceMock<MockPeaksPresenter>();
     MockPeaksPresenter* B = new NiceMock<MockPeaksPresenter>();
+    EXPECT_CALL(*A, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
+    EXPECT_CALL(*B, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
     PeaksPresenter_sptr subjectA(A);
     PeaksPresenter_sptr subjectB(B);
 
@@ -250,6 +275,8 @@ public:
     // if one subject FAIL, composite should FAIL.
     EXPECT_CALL(*A, changeShownDim()).WillOnce(Return(PASS));
     EXPECT_CALL(*B, changeShownDim()).WillOnce(Return(FAIL));
+    EXPECT_CALL(*A, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
+    EXPECT_CALL(*B, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
 
     composite.addPeaksPresenter(subjectA);
     composite.addPeaksPresenter(subjectB);
@@ -262,6 +289,8 @@ public:
     // if subjects both PASS, composite should PASS.
     EXPECT_CALL(*A, changeShownDim()).WillOnce(Return(PASS));
     EXPECT_CALL(*B, changeShownDim()).WillOnce(Return(PASS));
+    EXPECT_CALL(*A, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
+    EXPECT_CALL(*B, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
 
     composite.addPeaksPresenter(subjectA);
     composite.addPeaksPresenter(subjectB);
@@ -280,6 +309,8 @@ public:
     
     MockPeaksPresenter* A = new NiceMock<MockPeaksPresenter>();
     MockPeaksPresenter* B = new NiceMock<MockPeaksPresenter>();
+    EXPECT_CALL(*A, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
+    EXPECT_CALL(*B, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
     PeaksPresenter_sptr subjectA(A);
     PeaksPresenter_sptr subjectB(B);
 
@@ -298,6 +329,8 @@ public:
     // if one subject FAIL, composite should FAIL.
     EXPECT_CALL(*A, isLabelOfFreeAxis(_)).WillOnce(Return(PASS));
     EXPECT_CALL(*B, isLabelOfFreeAxis(_)).WillOnce(Return(FAIL));
+    EXPECT_CALL(*A, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
+    EXPECT_CALL(*B, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
 
     composite.addPeaksPresenter(subjectA);
     composite.addPeaksPresenter(subjectB);
@@ -310,6 +343,8 @@ public:
     // if subjects both PASS, composite should PASS.
     EXPECT_CALL(*A, isLabelOfFreeAxis(_)).WillOnce(Return(PASS));
     EXPECT_CALL(*B, isLabelOfFreeAxis(_)).WillOnce(Return(PASS));
+    EXPECT_CALL(*A, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
+    EXPECT_CALL(*B, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
 
     composite.addPeaksPresenter(subjectA);
     composite.addPeaksPresenter(subjectB);
@@ -326,10 +361,15 @@ public:
     const int limit = 10;
     for(int i = 0; i < limit; ++i)
     {
-     TS_ASSERT_THROWS_NOTHING(presenter.addPeaksPresenter( boost::make_shared<NiceMock<MockPeaksPresenter> >()));
+     auto subject = boost::make_shared<NiceMock<MockPeaksPresenter> >();
+     EXPECT_CALL(*subject, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
+     TS_ASSERT_THROWS_NOTHING(presenter.addPeaksPresenter(subject));
     }
+
+
     // Add a peaksWS beyond the limit of allowed number of peaksWS.
-    TS_ASSERT_THROWS(presenter.addPeaksPresenter( boost::make_shared<NiceMock<MockPeaksPresenter> >()), std::invalid_argument&);
+
+    TS_ASSERT_THROWS(presenter.addPeaksPresenter(boost::make_shared<NiceMock<MockPeaksPresenter> >()), std::invalid_argument&);
   }
 
   void test_default_palette()
@@ -358,6 +398,7 @@ public:
 
     // Set a background colour on the composite.
     CompositePeaksPresenter composite(&_fakeZoomableView);
+    EXPECT_CALL(*pSubject, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
     composite.addPeaksPresenter(subject);
     composite.setBackgroundColour(peaksWS, newColour);
 
@@ -385,6 +426,7 @@ public:
 
     // Set a background colour on the composite.
     CompositePeaksPresenter composite(&_fakeZoomableView);
+    EXPECT_CALL(*pSubject, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
     composite.addPeaksPresenter(subject);
     composite.setForegroundColour(peaksWS, newColour);
 
@@ -401,7 +443,7 @@ public:
     // Create a subject presenter that will be deleted.
     auto A = new NiceMock<DyingMockPeaksPresenter>();
     // Create a subject presenter that won't be deleted.
-    auto B = new NiceMock<MockPeaksPresenter>();
+    auto B = new NiceMock<DyingMockPeaksPresenter>();
 
     {
       // Create some input peaks workspaces.
@@ -411,7 +453,7 @@ public:
 
       IPeaksWorkspace_sptr peaksWS_B = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>(); 
       SetPeaksWorkspaces setB;
-      setA.insert(peaksWS_B);
+      setB.insert(peaksWS_B);
 
       PeaksPresenter_sptr subjectA(A);
       EXPECT_CALL(*A, presentedWorkspaces()).WillRepeatedly(Return(setA));
@@ -419,20 +461,33 @@ public:
 
       PeaksPresenter_sptr subjectB(B);
       EXPECT_CALL(*B, presentedWorkspaces()).WillRepeatedly(Return(setB));
+      EXPECT_CALL(*B, die()).Times(1); // This will be called on destruction, because we will foreably remove this presenter!
 
-      // Set a background colour on the composite.
-      CompositePeaksPresenter composite(&_fakeZoomableView);
+      MockZoomablePeaksView mockZoomablePeaksView;
+
+      // Create the composite
+      CompositePeaksPresenter composite(&mockZoomablePeaksView);
+      EXPECT_CALL(*A, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
+      EXPECT_CALL(*B, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
       composite.addPeaksPresenter(subjectA);
       composite.addPeaksPresenter(subjectB);
 
       const size_t preRemovalSize = composite.size(); // benchmark the current size.
 
-      /// Remove one of the presenters via its workspace.
+      // Remove one of the presenters via its workspace.
       composite.remove(peaksWS_A);
 
-      const size_t postRemovalSize = composite.size();
+      TSM_ASSERT_EQUALS("A presenter should have been removed.",preRemovalSize, composite.size() + 1);
 
-      TSM_ASSERT_EQUALS("A presenter should have been removed.",preRemovalSize, postRemovalSize + 1);
+      // Expect the composite to detach itself when everything is removed.
+      EXPECT_CALL(mockZoomablePeaksView, detach()).Times(1);
+
+      // Remove the other presenter via its workspace.
+      composite.remove(peaksWS_B);
+
+      TSM_ASSERT_EQUALS("A presenter should have been removed.",preRemovalSize, composite.size() + 2);
+
+      TSM_ASSERT("Composite should have detached itself", Mock::VerifyAndClearExpectations(&mockZoomablePeaksView));
     }
     // Check that the correct presenter has been removed.
     TS_ASSERT(Mock::VerifyAndClearExpectations(A));
@@ -448,6 +503,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(composite.remove(peaksWorkspace));
   }
 
+
   void do_test_setShown(bool expectedToShow)
   {
     // Prepare subject objects.
@@ -462,6 +518,7 @@ public:
 
     // Create the composite and add the test presenter.
     CompositePeaksPresenter composite(&_fakeZoomableView);
+    EXPECT_CALL(*pSubject, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
     composite.addPeaksPresenter(subject);
 
     // execute setshown(...)
@@ -545,6 +602,7 @@ public:
 
     // Create the composite and add the test presenter.
     CompositePeaksPresenter composite(&mockZoomableView);
+    EXPECT_CALL(*pSubject, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
     composite.addPeaksPresenter(subject);
 
     composite.zoomToPeak(peaksWS, peakIndex);
@@ -563,6 +621,7 @@ public:
     EXPECT_CALL(*pSubject, setPeakSizeOnProjection(fraction)).Times(1);
 
     CompositePeaksPresenter composite(&_fakeZoomableView);
+    EXPECT_CALL(*pSubject, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
     composite.addPeaksPresenter(subject);
     composite.setPeakSizeOnProjection(fraction);
 
@@ -579,6 +638,7 @@ public:
     EXPECT_CALL(*pSubject, setPeakSizeIntoProjection(fraction)).Times(1);
 
     CompositePeaksPresenter composite(&_fakeZoomableView);
+    EXPECT_CALL(*pSubject, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
     composite.addPeaksPresenter(subject);
     composite.setPeakSizeIntoProjection(fraction);
 
@@ -617,6 +677,7 @@ public:
     EXPECT_CALL(*pSubject, getPeakSizeOnProjection()).WillOnce(Return(1));
 
     CompositePeaksPresenter composite(&_fakeZoomableView);
+    EXPECT_CALL(*pSubject, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
     composite.addPeaksPresenter(subject);
     TS_ASSERT_EQUALS(1, composite.getPeakSizeOnProjection())
 
@@ -631,6 +692,7 @@ public:
     EXPECT_CALL(*pSubject, getPeakSizeIntoProjection()).WillOnce(Return(1));
 
     CompositePeaksPresenter composite(&_fakeZoomableView);
+    EXPECT_CALL(*pSubject, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
     composite.addPeaksPresenter(subject);
     TS_ASSERT_EQUALS(1, composite.getPeakSizeIntoProjection())
 
@@ -673,6 +735,7 @@ public:
 
     // Create the composite.
     CompositePeaksPresenter composite(&_fakeZoomableView);
+    EXPECT_CALL(*pPresenter, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
     composite.addPeaksPresenter(presenter);
 
     // Now perform searches
@@ -716,6 +779,8 @@ public:
 
     // Create the composite.
     CompositePeaksPresenter composite(&_fakeZoomableView);
+    EXPECT_CALL(*pPresenter1, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
+    EXPECT_CALL(*pPresenter2, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
     composite.addPeaksPresenter(presenter1);
     composite.addPeaksPresenter(presenter2);
 
@@ -773,6 +838,8 @@ public:
 
       // Create the composite.
       CompositePeaksPresenter composite(&_fakeZoomableView);
+      EXPECT_CALL(*pPresenter1, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
+      EXPECT_CALL(*pPresenter2, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
       composite.addPeaksPresenter(presenter1);
       composite.addPeaksPresenter(presenter2);
 
@@ -837,6 +904,8 @@ public:
 
       // Create the composite.
       CompositePeaksPresenter composite(&_fakeZoomableView);
+      EXPECT_CALL(*pPresenter1, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
+      EXPECT_CALL(*pPresenter2, contentsDifferent(_)).WillRepeatedly(Return(true)); // Allows us to add to composite
       composite.addPeaksPresenter(presenter1);
       composite.addPeaksPresenter(presenter2);
 

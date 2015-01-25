@@ -1,12 +1,15 @@
 #include "MantidQtCustomInterfaces/ResNorm.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
+using namespace Mantid::API;
+
 namespace MantidQt
 {
 	namespace CustomInterfaces
 	{
-		ResNorm::ResNorm(QWidget * parent) : 
-			IndirectBayesTab(parent)
+		ResNorm::ResNorm(QWidget * parent) :
+			IndirectBayesTab(parent),
+      m_previewSpec(0)
 		{
 			m_uiForm.setupUi(parent);
 
@@ -28,7 +31,7 @@ namespace MantidQt
 			m_properties["EMin"] = m_dblManager->addProperty("EMin");
 			m_properties["EMax"] = m_dblManager->addProperty("EMax");
 			m_properties["VanBinning"] = m_dblManager->addProperty("Van Binning");
-			
+
 			m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
 			m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
 			m_dblManager->setDecimals(m_properties["VanBinning"], INT_DECIMALS);
@@ -43,6 +46,9 @@ namespace MantidQt
 
 			// Connect data selector to handler method
 			connect(m_uiForm.dsVanadium, SIGNAL(dataReady(const QString&)), this, SLOT(handleVanadiumInputReady(const QString&)));
+
+      // Connect the preview spectrum selector
+      connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this, SLOT(previewSpecChanged(int)));
 		}
 
     void ResNorm::setup()
@@ -51,7 +57,7 @@ namespace MantidQt
 
 		/**
 		 * Validate the form to check the program can be run
-		 * 
+		 *
 		 * @return :: Whether the form was valid
 		 */
 		bool ResNorm::validate()
@@ -74,12 +80,12 @@ namespace MantidQt
 		 * Collect the settings on the GUI and build a python
 		 * script that runs ResNorm
 		 */
-		void ResNorm::run() 
+		void ResNorm::run()
 		{
 			QString verbose("False");
 			QString save("False");
 
-			QString pyInput = 
+			QString pyInput =
 				"from IndirectBayes import ResNormRun\n";
 
 			// get the file names
@@ -103,12 +109,18 @@ namespace MantidQt
 										" Save="+save+", Plot='"+plot+"', Verbose="+verbose+")\n";
 
 			runPythonScript(pyInput);
+
+      // Plot the fit curve
+      plotMiniPlot("Fit", m_previewSpec, "ResNormPlot", "ResNormFitCurve");
+      m_curves["ResNormFitCurve"]->setPen(QColor(Qt::red));
+
+      replot("ResNormPlot");
 		}
 
 		/**
 		 * Set the data selectors to use the default save directory
 		 * when browsing for input files.
-		 *  
+		 *
      * @param settings :: The current settings
 		 */
 		void ResNorm::loadSettings(const QSettings& settings)
@@ -120,14 +132,17 @@ namespace MantidQt
 		/**
 		 * Plots the loaded file to the miniplot and sets the guides
 		 * and the range
-		 * 
+		 *
 		 * @param filename :: The name of the workspace to plot
 		 */
 		void ResNorm::handleVanadiumInputReady(const QString& filename)
 		{
-			plotMiniPlot(filename, 0, "ResNormPlot", "RawPlotCurve");
+			plotMiniPlot(filename, m_previewSpec, "ResNormPlot", "RawPlotCurve");
 			std::pair<double,double> res;
 			std::pair<double,double> range = getCurveRange("RawPlotCurve");
+
+      MatrixWorkspace_sptr vanWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(filename.toStdString());
+      m_uiForm.spPreviewSpectrum->setMaximum(static_cast<int>(vanWs->getNumberHistograms()) - 1);
 
 			//Use the values from the instrument parameter file if we can
 			if(getInstrumentResolution(filename, res))
@@ -163,7 +178,7 @@ namespace MantidQt
 		 */
     void ResNorm::maxValueChanged(double max)
     {
-			m_dblManager->setValue(m_properties["EMax"], max);	
+			m_dblManager->setValue(m_properties["EMax"], max);
     }
 
 		/**
@@ -183,5 +198,27 @@ namespace MantidQt
     		updateUpperGuide(m_rangeSelectors["ResNormERange"], m_properties["EMin"], m_properties["EMax"], val);
 			}
     }
+
+    /**
+     * Sets a new preview spectrum for the mini plot.
+     *
+     * @param value Spectrum index
+     */
+    void ResNorm::previewSpecChanged(int value)
+    {
+      m_previewSpec = value;
+
+      if(m_uiForm.dsVanadium->isValid())
+  			plotMiniPlot(m_uiForm.dsVanadium->getCurrentDataName(), m_previewSpec, "ResNormPlot", "RawPlotCurve");
+
+      if(AnalysisDataService::Instance().doesExist("Fit"))
+      {
+        plotMiniPlot("Fit", m_previewSpec, "ResNormPlot", "ResNormFitCurve");
+        m_curves["ResNormFitCurve"]->setPen(QColor(Qt::red));
+      }
+
+      replot("ResNormPlot");
+    }
+
 	} // namespace CustomInterfaces
 } // namespace MantidQt

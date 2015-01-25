@@ -52,6 +52,8 @@ namespace SliceViewer
     int m_originalTableWidth;
     /// Workspace name.
     QString m_nameText;
+    /// Current index changed - overrriden
+
 
   private slots:
       void onBackgroundColourClicked();
@@ -59,8 +61,8 @@ namespace SliceViewer
       void onShowBackgroundChanged(bool);
       void onRemoveWorkspaceClicked();
       void onToggleHideInPlot();
-      void onTableClicked(const QModelIndex&);
       void onPeaksSorted(const std::string&, const bool);
+      void onCurrentChanged(QModelIndex, QModelIndex);
   };
 
 } //namespace

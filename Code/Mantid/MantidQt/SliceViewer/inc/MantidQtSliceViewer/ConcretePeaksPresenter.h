@@ -56,6 +56,7 @@ public:
   virtual QColor getForegroundColor() const;
   virtual void zoomToPeak(const int index);
   virtual bool isHidden() const;
+  virtual bool contentsDifferent(PeaksPresenter const *  other) const;
 
 private:
   /// Peak overlay view.

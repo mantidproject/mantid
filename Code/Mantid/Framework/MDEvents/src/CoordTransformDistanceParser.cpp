@@ -3,15 +3,6 @@
 #include "MantidAPI/VectorParameterParser.h"
 #include "MantidAPI/SingleValueParameterParser.h"
 
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/NodeFilter.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-
 namespace Mantid {
 namespace MDEvents {
 /// Constructor
@@ -53,7 +44,7 @@ Mantid::API::CoordTransform *CoordTransformDistanceParser::createTransform(
 
   Element *paramListElement =
       coordTransElement->getChildElement("ParameterList");
-  Poco::XML::NodeList *parameters =
+  Poco::AutoPtr<Poco::XML::NodeList> parameters =
       paramListElement->getElementsByTagName("Parameter");
 
   // Parse the in dimension parameter.

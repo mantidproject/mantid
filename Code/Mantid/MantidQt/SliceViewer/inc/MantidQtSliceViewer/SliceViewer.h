@@ -26,11 +26,12 @@
 #include <qwt_raster_data.h>
 #include <qwt_scale_widget.h>
 #include <vector>
-#include <Poco/NObserver.h>
 #include "MantidAPI/Algorithm.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include <boost/shared_ptr.hpp>
 
+class QDragEnterEvent;
+class QDropEvent;
 
 namespace Mantid
 {
@@ -114,6 +115,7 @@ public:
   /* -- Methods from implementation of ZoomablePeaksView. --*/
   virtual void zoomToRectangle(const PeakBoundingBox& box);
   virtual void resetView();
+  virtual void detach();
 
   /* Methods associated with workspace observers. Driven by SliceViewerWindow */
   void peakWorkspaceChanged(const std::string& wsName, boost::shared_ptr<Mantid::API::IPeaksWorkspace>& changedPeaksWS);
@@ -178,8 +180,9 @@ public slots:
   void rebinParamsChanged();
   void dynamicRebinComplete(bool error);
 
-  // Peaks overlay
-  void peakOverlay_toggled(bool);
+protected:
+  void dragEnterEvent(QDragEnterEvent *e);
+  void dropEvent(QDropEvent *e);
 
 private:
   void loadSettings();
@@ -292,7 +295,7 @@ private:
 
   /// Synced menu/buttons
   MantidQt::API::SyncedCheckboxes *m_syncLineMode, *m_syncSnapToGrid,
-    *m_syncRebinMode, *m_syncRebinLock, *m_syncPeakOverlay, *m_syncAutoRebin;
+    *m_syncRebinMode, *m_syncRebinLock, *m_syncAutoRebin;
 
   /// Cached double for infinity
   double m_inf;
@@ -322,6 +325,7 @@ private:
 
   /// Object for choosing a PeakTransformFactory based on the workspace type.
   Mantid::API::PeakTransformSelector m_peakTransformSelector;
+
 };
 
 } // namespace SliceViewer
