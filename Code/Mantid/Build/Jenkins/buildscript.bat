@@ -7,8 +7,23 @@
 :: BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each slave.
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" --version 
+"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" --version
 echo %sha1%
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Find the repository directory. Look for the first directory that contains
+:: a .git subdirectory. This assumes that there is only one repository cloned
+:: underneath the WORKSPACE directory. Can be overridden by setting
+:: the MANTID_REPO_DIR variable
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+if "%MANTID_REPO_DIR%"=="" (
+  for /f %%F in ('dir /ad /b/s .git') do (
+    set MANTID_REPO_DIR=%%~dpF
+    goto :loopend
+  )
+)
+:: Break out for loop
+:loopend
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check the required build configuration
@@ -26,34 +41,37 @@ if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Get or update the third party dependencies
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-cd %WORKSPACE%\Code
+cd %MANTID_REPO_DIR%\Code
 call fetch_Third_Party win64
 cd %WORKSPACE%
 
-set PATH=%WORKSPACE%\Code\Third_Party\lib\win64;%WORKSPACE%\Code\Third_Party\lib\win64\Python27;%PARAVIEW_DIR%\bin\%BUILD_CONFIG%;%PATH%
+set PATH=%MANTID_REPO_DIR%\Code\Third_Party\lib\win64;%MANTID_REPO_DIR%\Code\Third_Party\lib\win64\Python27;%PARAVIEW_DIR%\bin\%BUILD_CONFIG%;%PATH%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check whether this is a clean build (must have 'clean' in the job name)
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Set the build directory
+set BUILD_DIR=%WORKSPACE%\build
+
 set PACKAGE_DOCS=
 if "%JOB_NAME%"=="%JOB_NAME:clean=%" (
     set CLEANBUILD=no
 ) else  (
     set CLEANBUILD=yes
     set PACKAGE_DOCS=-DPACKAGE_DOCS=True
-    rmdir /S /Q build
+    rmdir /S /Q %BUILD_DIR%
 )
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the build directory if it doesn't exist
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-md %WORKSPACE%\build
-cd %WORKSPACE%\build
+md %BUILD_DIR%
+cd %BUILD_DIR%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" -G "Visual Studio 11 Win64" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_DIR% -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_DOCS% ..\
+"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" -G "Visual Studio 11 Win64" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_DIR% -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_DOCS% %MANTID_REPO_DIR%
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
