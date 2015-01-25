@@ -1,8 +1,0 @@
-Instrument parameter file: NOMAD_11_22_11.prm
-1 2 15
-2 2 31
-3 2 67
-4 2 122
-5 2 154
-6 2 7
-L1 19.5
