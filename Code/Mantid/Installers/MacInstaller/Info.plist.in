@@ -12,7 +12,7 @@
 	<key>CFBundleExecutable</key>
 	<string>MantidPlot</string>
 	<key>CFBundleGetInfoString</key>
-	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@MtdVersion_WC_LAST_CHANGED_REV@</string>
+	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@</string>
 	<key>CFBundleIconFile</key>
 	<string>MantidPlot.icns</string>
 	<key>CFBundleIdentifier</key>
@@ -20,17 +20,17 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleLongVersionString</key>
-	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@MtdVersion_WC_LAST_CHANGED_REV@</string>
+	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@</string>
 	<key>CFBundleName</key>
 	<string>MantidPlot</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@MtdVersion_WC_LAST_CHANGED_REV@</string>
+	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@MtdVersion_WC_LAST_CHANGED_REV@</string>
+	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@</string>
 	<key>CSResourcesFileMapped</key>
 	<true/>
 	<key>LSRequiresCarbon</key>

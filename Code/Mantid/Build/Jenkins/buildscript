@@ -15,16 +15,30 @@
 cmake --version
 echo "SHA1=${sha1}"
 
+# Find the repository directory. Look for the first directory that contains
+# a .git subdirectory. This assumes that there is only one repository cloned
+# underneath the WORKSPACE directory. Can be overridden by setting
+# the MANTID_REPO_DIR variable
+###############################################################################
+if [ -z "$MANTID_REPO_DIR" ]; then
+  MANTID_REPO_DIR=$(dirname $(find $WORKSPACE -type d -name ".git" -print0))
+fi
+echo "MANTID_REPO_DIR=${MANTID_REPO_DIR}"
+
+###############################################################################
+# Set the build directory
+BUILD_DIR=$WORKSPACE/build
+
 if [[ ${JOB_NAME} == *clang* ]]; then
   # Assuming we are using the clang compiler
   echo "Using clang/llvm compiler."
   clang --version
   export CC=clang
   export CXX=clang++
-  COMPILERFILEPATH=`grep 'CMAKE_CXX_COMPILER:FILEPATH' $WORKSPACE/build/CMakeCache.txt` 
+  COMPILERFILEPATH=`grep 'CMAKE_CXX_COMPILER:FILEPATH' $BUILD_DIR/CMakeCache.txt` 
   if [[ $COMPILERFILEPATH != *clang++* ]]; then 
     # Removing the build directory entirely guarantees clang is used.
-    rm -rf $WORKSPACE/build
+    rm -rf $BUILD_DIR
   fi 
 fi
 
@@ -33,12 +47,12 @@ fi
 ###############################################################################
 if [[ $(uname) == 'Darwin' ]] && [[ ${JOB_NAME} != *clang* ]]; then
   # Assuming we are using the Intel compiler
-  cd $WORKSPACE/Code
+  cd $MANTID_REPO_DIR/Code
   ./fetch_Third_Party.sh
-  cd $WORKSPACE
+  cd $MANTID_REPO_DIR
   # Setup environment variables
   source /opt/intel/bin/iccvars.sh intel64
-  export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$WORKSPACE/Code/Third_Party/lib/mac64:/Library/Frameworks
+  export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$MANTID_REPO_DIR/Code/Third_Party/lib/mac64:/Library/Frameworks
   # Make sure we pick up the Intel compiler
   export CC=icc
   export CXX=icpc
@@ -52,7 +66,7 @@ fi
 if [[ ${JOB_NAME} == *clean* ]]; then
   CLEANBUILD=true
   # Removing the build directory entirely guarantees a completely clean build
-  rm -rf $WORKSPACE/build
+  rm -rf $BUILD_DIR
 
   # Set some variables relating to the linux packages created from clean builds
   if [[ $(uname) != 'Darwin' ]]; then
@@ -83,8 +97,8 @@ fi
 ###############################################################################
 # Create the build directory if it doesn't exist
 ###############################################################################
-[ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
-cd $WORKSPACE/build
+[ -d $BUILD_DIR ] || mkdir $BUILD_DIR
+cd $BUILD_DIR
 
 ###############################################################################
 ## Check the required build configuration
@@ -100,7 +114,7 @@ fi
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DDOCS_HTML=ON ${PACKAGINGVARS} ../Code/Mantid"
+$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DDOCS_HTML=ON ${PACKAGINGVARS} ${MANTID_REPO_DIR}"
 
 ###############################################################################
 # Coverity build should exit early

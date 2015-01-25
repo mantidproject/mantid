@@ -763,12 +763,12 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 # Internal icon links
 ###########################################################################
 
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Images/images.qrc )
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Images//fonts/fonts.qrc )
+qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Code/Mantid/Images/images.qrc )
+qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Code/Mantid/Images/fonts/fonts.qrc )
 qt4_add_resources ( RES_FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/icons.qrc )
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/MantidQt/SliceViewer/icons/SliceViewerIcons.qrc )
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/MantidQt/CustomInterfaces/icons/CustomInterfacesIcons.qrc )
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Vates/VatesSimpleGui/ViewWidgets/icons/ViewWidgetsIcons.qrc )
+qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Code/Mantid/MantidQt/SliceViewer/icons/SliceViewerIcons.qrc )
+qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Code/Mantid/MantidQt/CustomInterfaces/icons/CustomInterfacesIcons.qrc )
+qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Code/Mantid/Vates/VatesSimpleGui/ViewWidgets/icons/ViewWidgetsIcons.qrc )
 
 ###########################################################################
 # Add the dependencies
@@ -804,9 +804,9 @@ include_directories ( ../MantidQt/SliceViewer/inc )
 include_directories ( ../MantidQt/SpectrumViewer/inc )
 include_directories ( ../MantidQt/Factory/inc )
 # ui_ files end up in these places
-include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/API )
-include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/MantidWidgets )
-include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/SliceViewer )
+include_directories ( ${CMAKE_BINARY_DIR}/Code/Mantid/MantidQt/API )
+include_directories ( ${CMAKE_BINARY_DIR}/Code/Mantid/MantidQt/MantidWidgets )
+include_directories ( ${CMAKE_BINARY_DIR}/Code/Mantid/MantidQt/SliceViewer )
 
 
 ###########################################################################
@@ -822,7 +822,7 @@ if( WIN32 )
 endif( WIN32 )
 
 if ( APPLE )
-  set ( MANTID_RC_FILE ${CMAKE_SOURCE_DIR}/Images/MantidPlot.icns )
+  set ( MANTID_RC_FILE ${CMAKE_SOURCE_DIR}/Code/Mantid/Images/MantidPlot.icns )
   set_source_files_properties(MANTID_RC_FILE PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 endif ()
 

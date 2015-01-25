@@ -6,7 +6,7 @@
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = @CMAKE_PROJECT_NAME@
 PROJECT_NUMBER         = 
-OUTPUT_DIRECTORY       = @CMAKE_CURRENT_BINARY_DIR@/../../doxygen
+OUTPUT_DIRECTORY       = @CMAKE_BINARY_DIR@/doxygen
 CREATE_SUBDIRS         = YES
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
@@ -163,7 +163,7 @@ EXCLUDE_SYMBOLS        =
 EXAMPLE_PATH           = 
 EXAMPLE_PATTERNS       = 
 EXAMPLE_RECURSIVE      = NO
-IMAGE_PATH             = @CMAKE_CURRENT_BINARY_DIR@/../../doxygen/html/
+IMAGE_PATH             = @CMAKE_BINARY_DIR@/doxygen/html/
 INPUT_FILTER           = 
 FILTER_PATTERNS        = 
 FILTER_SOURCE_FILES    = NO
@@ -259,7 +259,7 @@ PERLMOD_MAKEVAR_PREFIX =
 # Configuration options related to the qtcreator output
 #---------------------------------------------------------------------------
 GENERATE_QHP           = @GENERATE_QHELP@
-QCH_FILE               = "@CMAKE_CURRENT_BINARY_DIR@/../../doxygen/mantid.qch"
+QCH_FILE               = "@CMAKE_BINARY_DIR@/doxygen/mantid.qch"
 QHP_NAMESPACE          = "mantidproject.org"
 QHP_VIRTUAL_FOLDER     = "mantidQtHelp"
 QHG_LOCATION           = @QHELP_EXECUTABLE@

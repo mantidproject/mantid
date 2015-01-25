@@ -46,7 +46,7 @@ def runTests(classname):
     if src is None:
         runner = unittest.TextTestRunner()
     else:
-        sys.path.append( os.path.join(src, "TestingTools/unittest-xml-reporting/src") )
+        sys.path.append( os.path.join(src, "Code/Mantid/TestingTools/unittest-xml-reporting/src") )
         import xmlrunner
         runner = xmlrunner.XMLTestRunner(output='Testing')
 
