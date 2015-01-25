@@ -92,23 +92,20 @@ set ( NOT_GIT_REPO "Not" )
 
 find_package ( Git )
 if ( GIT_FOUND )
-  # Get the last revision
-  execute_process ( COMMAND ${GIT_EXECUTABLE} describe --long
-                    OUTPUT_VARIABLE GIT_DESCRIBE
+  # Get the commit sha1
+  execute_process ( COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%h
+                    OUTPUT_VARIABLE GIT_LOG
                     ERROR_VARIABLE NOT_GIT_REPO
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
+
   if ( NOT NOT_GIT_REPO ) # i.e This is a git repository!
-    # Remove the tag name part
-    string ( REGEX MATCH "[-](.*)" MtdVersion_WC_LAST_CHANGED_REV ${GIT_DESCRIBE} )
-    # Extract the SHA1 part (with a 'g' prefix which stands for 'git')
-    # N.B. The variable comes back from 'git describe' with a line feed on the end, so we need to lose that
-    string ( REGEX MATCH "(g.*)[^\n]" MtdVersion_WC_LAST_CHANGED_SHA ${MtdVersion_WC_LAST_CHANGED_REV} )
+    # Prefix commit sha with "g" like git describe
+    set ( MtdVersion_WC_LAST_CHANGED_SHA "g${GIT_LOG}" )
 
     # Get the date of the last commit
     execute_process ( COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%cD OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_DATE 
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    )
+                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} )
     string ( SUBSTRING ${MtdVersion_WC_LAST_CHANGED_DATE} 0 16 MtdVersion_WC_LAST_CHANGED_DATE )
 
     execute_process ( COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%H
@@ -209,11 +206,10 @@ endif()
 
 ###########################################################################
 # Include the file that contains the version number
-# This must come after the git describe business above because it can be
-# used to override the patch version number (MtdVersion_WC_LAST_CHANGED_REV)
+# This must come after the git business above because it can be
+# used to override the patch version number
 ###########################################################################
 include ( VersionNumber )
-
 
 ###########################################################################
 # Look for OpenMP and set compiler flags if found
