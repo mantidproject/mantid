@@ -313,9 +313,9 @@ if ( CXXTEST_FOUND OR PYUNITTEST_FOUND )
 # mechanism
 get_filename_component ( EXTERNALDATATEST_SOURCE_DIR ${PROJECT_SOURCE_DIR} ABSOLUTE )
 file( GLOB_RECURSE doctest_content_links
-  RELATIVE "${EXTERNALDATATEST_SOURCE_DIR}" "Test/Data/DocTest/*.md5" )
+  RELATIVE "${EXTERNALDATATEST_SOURCE_DIR}" "Testing/Data/DocTest/*.md5" )
 file( GLOB_RECURSE unittest_content_links
-  RELATIVE "${EXTERNALDATATEST_SOURCE_DIR}" "Test/Data/UnitTest/*.md5" )
+  RELATIVE "${EXTERNALDATATEST_SOURCE_DIR}" "Testing/Data/UnitTest/*.md5" )
 set ( content_links "${doctest_content_links};${unittest_content_links}" )
 foreach(link ${content_links})
   string( REGEX REPLACE "\\.md5$" "" link ${link} )
