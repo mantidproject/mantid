@@ -1,5 +1,5 @@
 import os,sys
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 
 from mantid.simpleapi import *
 from mantid import api
@@ -28,7 +28,7 @@ class ReductionWrapperTest(unittest.TestCase):
         pass
 
     def test_default_fails(self):
-        red=ReductionWrapper('MAR');
+        red=ReductionWrapper('MAR')
 
 
         self.assertRaises(NotImplementedError,red.def_main_properties)
@@ -38,33 +38,33 @@ class ReductionWrapperTest(unittest.TestCase):
 
  
     def test_export_advanced_values(self):
-        red = ReduceMARI();
+        red = ReduceMARI()
 
-        main_prop=red.def_main_properties();
-        adv_prop=red.def_advanced_properties();
+        main_prop=red.def_main_properties()
+        adv_prop=red.def_advanced_properties()
 
 
         # see what have changed and what have changed as advanced properties. 
-        all_changed_prop = red.iliad_prop.getChangedProperties();
+        all_changed_prop = red.iliad_prop.getChangedProperties()
 
-        self.assertEqual(set(main_prop.keys()+adv_prop.keys()),all_changed_prop);
+        self.assertEqual(set(main_prop.keys()+adv_prop.keys()),all_changed_prop)
 
-        test_dir = config['defaultsave.directory'];
-        file = os.path.join(test_dir,'reduce_vars.py');
-        red.export_changed_values(file);
-        self.assertTrue(os.path.isfile(file));
+        test_dir = config['defaultsave.directory']
+        file = os.path.join(test_dir,'reduce_vars.py')
+        red.export_changed_values(file)
+        self.assertTrue(os.path.isfile(file))
 
         # restore saved parameters.
-        sys.path.insert(0,test_dir);
+        sys.path.insert(0,test_dir)
 
         import reduce_vars as rv
 
-        self.assertEqual(rv.standard_vars,main_prop);
-        self.assertEqual(rv.advanced_vars,adv_prop);
+        self.assertEqual(rv.standard_vars,main_prop)
+        self.assertEqual(rv.advanced_vars,adv_prop)
 
 
 
-        os.remove(file);
+        os.remove(file)
         fbase,fext = os.path.splitext(file)
         fcomp = fbase+'.pyc'
         if os.path.isfile(fcomp):

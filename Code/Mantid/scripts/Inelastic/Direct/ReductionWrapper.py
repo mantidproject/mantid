@@ -15,21 +15,24 @@ class ReductionWrapper(object):
         using the same interface and the same run file placed in different 
         locations.
     """ 
+    def var_holder(object):
+        """ A simple wrapper class to keep web variables"""
+        def __init__(self):
+            pass
+
     def __init__(self,instrumentName,web_var=None):
-      """ sets properties defaults for the instrument with Name"""
-      #self.iliad_prop = PropertyManager(instrumentName)
-      # the variables which are set up from the main properties
-      self._main_properties=[]
-      # the variables which are set up from the advanced properties.
-      self._advanced_properties=[]
-      # The variables which are set up from web interface or to be exported to 
+      """ sets properties defaults for the instrument with Name 
+          and define if wrapper runs from web services or not
+      """
+
+       # The variables which are set up from web interface or to be exported to 
       # web interface
       if web_var: 
         self._run_from_web = True
-        self._web_var_stor = web_var
+        self._wvs = web_var
       else:
         self._run_from_web = False
-        self._web_var_stor = object()
+        self._wvs = ReductionWrapper.var_holder
       # Initialize reduced for given instrument
       self._reducer = DirectEnergyConversion(instrumentName)
 
@@ -91,7 +94,7 @@ class ReductionWrapper(object):
 
         raise NotImplementedError('def_advanced_properties  has to be implemented')
     @abstractmethod
-    def main(self,input_file=None,output_directory=None):
+    def reduce(self,input_file=None,output_directory=None):
         """ The method which performs all main reduction operations. 
 
         """ 
@@ -102,12 +105,12 @@ def MainProperties(main_prop_definition):
     """ Decorator stores properties dedicated as main and sets these properties as input to reduction parameters.""" 
     def main_prop_wrapper(*args):
         # execute decorated function
-        properties = main_prop_definition(*args)
+        prop_dict = main_prop_definition(*args)
         #print "in decorator: ",properties
         host = args[0]
         if not host._run_from_web: # property run locally
-            host._web_var_stor.main_prop =properties
-            host._reducer.prop_man.set_input_parameters(**properties)
+            host._wvs.standard_vars = prop_dict
+            host._reducer.prop_man.set_input_parameters(**prop_dict)
         return properties
 
     return main_prop_wrapper
@@ -115,26 +118,21 @@ def MainProperties(main_prop_definition):
 def AdvancedProperties(adv_prop_definition):
     """ Decorator stores properties decided to be advanced and sets these properties as input for reduction parameters """ 
     def advanced_prop_wrapper(*args):
-        properties = adv_prop_definition(*args)
+        prop_dict = adv_prop_definition(*args)
         #print "in decorator: ",properties
         host = args[0]
         if not host._run_from_web: # property run locally
-            host._web_var_stor.adv_prop =properties
-            host._reducer.prop_man.set_input_parameters(**properties)
+            host._wvs.advanced_vars =prop_dict
+            host._reducer.prop_man.set_input_parameters(**prop_dict)
         return properties
 
     return advanced_prop_wrapper
 
 
 def iliad(main):
-    """ This decorator wraps around main procedure, tries to identify if the procedure is run from web services or 
-        from Mantid directly and sets up web-modified variables as input for reduction if it runs from web services. 
-
-        The procedure to identify web services presence is simplified and contains two checks: 
-        1) file reduce_vars.py is present and has been imported by reduction script as web_vars 
-        2) the method, this decorators frames, is called with arguments, where second argument defines output directory for reduction data
-           (this variable is present and not empty)
-
+    """ This decorator wraps around main procedure and switch input from 
+        web variables to properties or vise versa depending on web variables
+        presence
     """
     def iliad_wrapper(*args):
         #seq = inspect.stack()
@@ -149,18 +147,22 @@ def iliad(main):
         else:
             input_file=None
             output_directory=None
+        # add input file folder to data search directory if file has it
+        if input_file:
+           data_path = os.path.dirname(input_file)
+           try:
+               config.appendDataSearchDir(str(output_directory))
+           except: # if mantid is not available, this should ignore config
+               pass
 
-        use_web_variables= False
-        if host._web_var and output_directory:
-            use_web_variables = True
-            config.appendDataSearchDir(str(output_directory))
-            web_vars = dict(host._web_var.standard_vars.items()+host._web_var.advanced_vars.items())
+        if host._run_from_web:
+            web_vars = dict(host._web_var.standard_vars.items()+host._web_var.standard_vars.items())
             host.iliad_prop.set_input_parameters(**web_vars)
             host.iliad_prop.sample_run = input_file
 
         rez = run_reducer(*args)
         # prohibit returning workspace to web services. 
-        if use_web_variables and not isinstance(rez,str):
+        if host._run_from_web and not isinstance(rez,str):
             rez=""
         return rez
 
