@@ -13,7 +13,8 @@
 namespace Mantid {
 namespace Geometry {
 
-/** Group :
+/**
+    @class Group
 
     The class Group represents a set of symmetry operations (or
     symmetry group). It can be constructed by providing a vector
@@ -42,49 +43,42 @@ namespace Geometry {
     components of V3D are mapped onto the interval [0, 1).
 
     Two groups A and B can be combined by a multiplication operation, provided
-   by
-    the corresponding overloaded operator:
+    by the corresponding overloaded operator:
 
-      Group A, B;
-      Group C = A * B
+        Group A, B;
+        Group C = A * B
 
     In this operation each element of A is multiplied with each element of B
     and from the resulting list a new group is constructed. For better
-   illustration,
-    an example is provided. Group A has two symmetry operations: identity
-   ("x,y,z")
-    and inversion ("-x,-y,-z"). Group B also consists of two operations:
-    identity ("x,y,z") and a rotation around the y-axis ("-x,y,-z"). In terms
-    of symmetry elements, the groups are defined like this:
+    illustration, an example is provided. Group A has two symmetry operations:
+    identity ("x,y,z") and inversion ("-x,-y,-z"). Group B also consists of
+    two operations: identity ("x,y,z") and a rotation around the y-axis
+    ("-x,y,-z"). In terms of symmetry elements, the groups are defined like so:
 
         A := { 1, -1 }; B := { 1, 2 [010] }
 
     The following table shows all multiplications that are carried out and their
-    results (for multiplication of symmetry operations see SymmetryOperation):
-                             A
-                 |    x,y,z    -x,-y,-z
-         --------+------------------------
-           x,y,z |    x,y,z    -x,-y,-z
-       B         |
-         -x,y,-z |  -x,y,-z      x,-y,z
+    results (for multiplication of symmetry operations see SymmetryOperation)
+
+                   |    x,y,z   |  -x,-y,-z
+          -------- | ---------- | -----------
+            x,y,z  |    x,y,z   |  -x,-y,-z
+          -x,y,-z  |  -x,y,-z   |    x,-y,z
 
     The resulting group contains the three elements of A and B (1, -1, 2 [010]),
     but also one new element that is the result of multiplying "x,y,z" and
-   "-x,y,-z",
-    which is "x,-y,z" - the operation resulting from a mirror plane
-   perpendicular
-    to the y-axis. In fact, this example demonstrated how the combination of
-    two crystallographic point groups (see PointGroup documentation and wiki)
-    "-1" and "2" results in a new point group "2/m".
+    "-x,y,-z", which is "x,-y,z" - the operation resulting from a mirror plane
+    perpendicular to the y-axis. In fact, this example demonstrated how the
+    combination of two crystallographic point groups (see PointGroup
+    documentation and wiki) "-1" and "2" results in a new point group "2/m".
 
     Most of the time it's not required to use Group directly, there are several
     sub-classes that implement different behavior (CenteringGroup, CyclicGroup,
     ProductOfCyclicGroups) and are easier to handle. For construction there is a
-   simple
-    "factory function", that works for all Group-based classes which provide a
-    string-based constructor:
+    simple "factory function", that works for all Group-based classes which
+    provide a string-based constructor:
 
-      Group_const_sptr group = GroupFactory::create<CyclicGroup>("-x,-y,-z");
+        Group_const_sptr group = GroupFactory::create<CyclicGroup>("-x,-y,-z");
 
     However, the most useful sub-class is SpaceGroup, which comes with its
     own factory. For detailed information about the respective sub-classes,

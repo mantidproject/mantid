@@ -15,28 +15,35 @@
 cmake --version
 echo "SHA1=${sha1}"
 
+if [[ ${JOB_NAME} == *clang* ]]; then
+  # Assuming we are using the clang compiler
+  echo "Using clang/llvm compiler."
+  clang --version
+  export CC=clang
+  export CXX=clang++
+  COMPILERFILEPATH=`grep 'CMAKE_CXX_COMPILER:FILEPATH' $WORKSPACE/build/CMakeCache.txt` 
+  if [[ $COMPILERFILEPATH != *clang++* ]]; then 
+    # Removing the build directory entirely guarantees clang is used.
+    rm -rf $WORKSPACE/build
+  fi 
+fi
+
 ###############################################################################
-# OS X setup steps
+# OS X 10.8 setup steps
 ###############################################################################
-if [[ $(uname) == 'Darwin' ]]; then
-  if [[ ${JOB_NAME} == *clang* ]]; then
-    # Assuming we are using the clang compiler
-    echo "Using clang/llvm compiler."
-    clang --version
-  else
-    # Assuming we are using the Intel compiler
-    cd $WORKSPACE/Code
-    ./fetch_Third_Party.sh
-    cd $WORKSPACE
-    # Setup environment variables
-    source /opt/intel/bin/iccvars.sh intel64
-    export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$WORKSPACE/Code/Third_Party/lib/mac64:/Library/Frameworks
-    # Make sure we pick up the Intel compiler
-    export CC=icc
-    export CXX=icpc
-    echo "Using Intel compiler."
-    icpc --version
-  fi
+if [[ $(uname) == 'Darwin' ]] && [[ ${JOB_NAME} != *clang* ]]; then
+  # Assuming we are using the Intel compiler
+  cd $WORKSPACE/Code
+  ./fetch_Third_Party.sh
+  cd $WORKSPACE
+  # Setup environment variables
+  source /opt/intel/bin/iccvars.sh intel64
+  export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$WORKSPACE/Code/Third_Party/lib/mac64:/Library/Frameworks
+  # Make sure we pick up the Intel compiler
+  export CC=icc
+  export CXX=icpc
+  echo "Using Intel compiler."
+  icpc --version
 fi
 
 ###############################################################################
