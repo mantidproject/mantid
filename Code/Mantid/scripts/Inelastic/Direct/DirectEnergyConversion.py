@@ -283,8 +283,6 @@ class DirectEnergyConversion(object):
       """ One step conversion of run into workspace containing information about energy transfer
 
       """ 
-      # Clear information about sample runs, processed previously.
-      PropertyManager.sample_run.set_action_suffix('')
       # Support for old reduction interface:
       self.prop_man.set_input_parameters_ignore_nan\
            (wb_run=wb_run,sample_run=sample_run,incident_energy=ei_guess,energy_bins=rebin,

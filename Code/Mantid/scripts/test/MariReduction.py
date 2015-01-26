@@ -43,13 +43,12 @@ class ReduceMARI(ReductionWrapper):
 #-------------------------------------------------------------------------------------------------#
    @iliad
    def reduce(self,input_file=None,output_directory=None):
-      """ Method executes reduction over single file"""
+      """ Method executes reduction over single file
 
-      ws = red.convert_to_energy(None,input_file)
+          Overload only if custom reduction is needed
+      """
+      ws = ReductionWrapper.reduce(input_file,output_directory)
       #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
-
-      #when run from web service, return additional path for web server to copy
-      #data to"
       return ws
 
    def __init__(self,web_var=None):
@@ -58,7 +57,7 @@ class ReduceMARI(ReductionWrapper):
 #-------------------------------------------------------------------------------------------------#
 #-------------------------------------------------------------------------------------------------#
 #-------------------------------------------------------------------------------------------------#
-def main(input_file,output_directory):
+def main(input_file=None,output_directory=None):
     """ This method is used to run code from web service
         and should not be touched unless you change the name of the
         particular ReductionWrapper class (e.g. ReduceMARI here)
@@ -67,7 +66,7 @@ def main(input_file,output_directory):
     """
     # note web variables initialization 
     rd = ReduceMARI(web_var)
-    rd.main(input_file,output_directory)
+    rd.reduce(input_file,output_directory)
     
     # Define folder for web service to copy results to
     output_folder = ''
@@ -99,9 +98,9 @@ if __name__ == "__main__":
      rd.def_main_properties()
 
      # uncomment rows below to save web variables to use in web services.
-     run_dir = os.path.dirname(os.path.realpath(__file__))
-     file = os.path.join(run_dir,'reduce_vars.py')
-     rd.save_web_variables(file)
+     #run_dir = os.path.dirname(os.path.realpath(__file__))
+     #file = os.path.join(run_dir,'reduce_vars.py')
+     #rd.save_web_variables(file)
 
-     rd.main() 
+     rd.reduce() 
 

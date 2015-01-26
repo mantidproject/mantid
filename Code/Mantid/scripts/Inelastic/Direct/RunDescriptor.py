@@ -202,6 +202,36 @@ class RunDescriptor(PropDescriptor):
             self._run_ext = value
         else:
             raise AttributeError('Source file extension can be only a string')
+
+    def file_hint(self,run_num_str,filePath=None,fileExt=None,**kwargs):
+        """ procedure to provide run file guess name from run properties
+         
+            main purpose -- to support customized order of file extensions
+        """ 
+
+        inst_name = RunDescriptor._holder.short_inst_name
+        if 'file_hint' in kwargs:
+            hint = kwargs['file_hint']
+            fname,old_ext=os.path.splitext(file_hint)
+            if len(old_ext) == 0:
+                old_ext = self.get_file_ext()
+        else:
+            if fileExt:
+               old_ext = fileExt
+            else:
+               old_ext = self.get_file_ext()
+
+            hint =inst_name + run_num_str + old_ext
+            if not filePath:
+                filePath = self._run_file_path
+            if os.path.exists(filePath):
+                hint = os.path.join(filePath,hint)
+        if os.path.exists(hint):
+            return hint,old_ext
+        else:
+            fp,hint=os.path.split(hint)
+        return hint,old_ext
+
 #--------------------------------------------------------------------------------------------------------------------
     def find_file(self,run_num = None,filePath=None,fileExt=None,**kwargs):
         """Use Mantid to search for the given run. """
@@ -212,26 +242,7 @@ class RunDescriptor(PropDescriptor):
         else:
             run_num_str = str(self.run_number())
         #
-        if 'file_hint' in kwargs:
-            file_hint = kwargs['file_hint']
-            fname,old_ext=os.path.splitext(file_hint)
-            if len(old_ext) == 0:
-                old_ext = self.get_file_ext()
-        else:
-            if fileExt:
-               old_ext = fileExt
-            else:
-               old_ext = self.get_file_ext()
-
-            file_hint =inst_name + run_num_str + old_ext
-            if not filePath:
-                filePath = self._run_file_path
-            if os.path.exists(filePath):
-                file_hint = os.path.join(filePath,file_hint)
-        if os.path.exists(file_hint):
-            return file_hint
-        else:
-            fp,file_hint=os.path.split(file_hint)
+        file_hint,old_ext = self.file_hint(run_num_str,filePath,fileExt,**kwargs)
 
         try:
             file = FileFinder.findRuns(file_hint)[0]
@@ -573,7 +584,10 @@ class RunDescriptor(PropDescriptor):
 #-------------------------------------------------------------------------------------------------------------------------------  
 #-------------------------------------------------------------------------------------------------------------------------------
 class RunDescriptorDependent(RunDescriptor):
-    """ A RunDescriptor class dependent on another RunDescriptor"""
+    """ Simple RunDescriptor class dependent on another RunDescriptor,
+        providing the host descriptor if current descriptor value is not defined
+        or usual descriptor functionality if somebody sets current descriptor up   
+    """
 
     def __init__(self,host_run,ws_preffix,DocString=None):
         RunDescriptor.__init__(self,ws_preffix,DocString)
