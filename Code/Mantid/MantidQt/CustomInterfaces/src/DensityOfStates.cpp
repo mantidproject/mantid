@@ -93,6 +93,11 @@ namespace MantidQt
       {
         dosAlgo->setProperty("SpectrumType", "DOS");
 
+        bool crossSectionScale = m_uiForm.ckCrossSectionScale->isChecked();
+        QString crossSectionScaleType = m_uiForm.cbCrossSectionScale->currentText();
+        if(crossSectionScale)
+          dosAlgo->setProperty("ScaleByCrossSection", crossSectionScaleType.toStdString());
+
         bool sumContributions = m_uiForm.ckSumContributions->isChecked();
         dosAlgo->setProperty("SumContributions", sumContributions);
 
