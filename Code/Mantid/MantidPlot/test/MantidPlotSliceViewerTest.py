@@ -161,9 +161,6 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
 
         # Set the Foreground Colour
         peaksPresenter.setForegroundColor(QtGui.QColor(255, 0, 0, 255))
-        
-        # Check that it responds to changed workspaces
-        RenameWorkspace('pw',OutputWorkspace='pw_renamed')
 
         # Zoom in on peak.
         peaksPresenter.zoomToPeak(0)
