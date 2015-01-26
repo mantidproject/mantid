@@ -137,6 +137,7 @@ set ( SRC_FILES
 	src/SavePHX.cpp
 	src/SaveParameterFile.cpp
 	src/SaveRKH.cpp
+	src/SaveReflCustomAscii.cpp
 	src/SaveReflTBL.cpp
 	src/SaveReflThreeColumnAscii.cpp
 	src/SaveSPE.cpp
@@ -282,6 +283,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SavePHX.h
 	inc/MantidDataHandling/SaveParameterFile.h
 	inc/MantidDataHandling/SaveRKH.h
+	inc/MantidDataHandling/SaveReflCustomAscii.h
 	inc/MantidDataHandling/SaveReflTBL.h
 	inc/MantidDataHandling/SaveReflThreeColumnAscii.h
 	inc/MantidDataHandling/SaveSPE.h
@@ -422,6 +424,7 @@ set ( TEST_FILES
 	SavePHXTest.h
 	SaveParameterFileTest.h
 	SaveRKHTest.h
+	SaveReflCustomAsciiTest.h
 	SaveReflTBLTest.h
 	SaveReflThreeColumnAsciiTest.h
 	SaveSPETest.h
