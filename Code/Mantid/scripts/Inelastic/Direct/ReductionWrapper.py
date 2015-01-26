@@ -1,7 +1,7 @@
 from mantid.simpleapi import *
 from mantid import config
 
-from PropertyManager import PropertyManager;
+from PropertyManager import PropertyManager
 # this import is used by children
 from Direct.DirectEnergyConversion import DirectEnergyConversion
 #import inspect
@@ -19,11 +19,11 @@ class ReductionWrapper(object):
       """ sets properties defaults for the instrument with Name"""
       self.iliad_prop = PropertyManager(instrumentName)
       # the variables which are set up from the main properties
-      self._main_properties=[];
+      self._main_properties=[]
       # the variables which are set up from the advanced properties.
-      self._advanced_properties=[];
+      self._advanced_properties=[]
       # The variables which are set up from web interface. 
-      self._web_var = web_var;
+      self._web_var = web_var
 
     def export_changed_values(self,FileName='reduce_vars.py'):
         """ Method to write changed simple and advanced properties into dictionary, to process by 
@@ -38,7 +38,7 @@ class ReductionWrapper(object):
                       row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
                   else:
                       row = "{0}\'{1}\':{2}".format(str_wrapper,key,val)
-                  f.write(row);
+                  f.write(row)
                   str_wrapper=',\n         '
         f.write("\n}\nadvanced_vars={\n")
 
@@ -48,10 +48,10 @@ class ReductionWrapper(object):
                       row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
                   else:
                       row = "{0}\'{1}\':{2}".format(str_wrapper,key,val)
-                  f.write(row);
+                  f.write(row)
                   str_wrapper=',\n        '
         f.write("\n}\n")
-        f.close();
+        f.close()
 
 
     @abstractmethod
@@ -88,9 +88,9 @@ def MainProperties(main_prop_definition):
     def main_prop_wrapper(*args):
         properties = main_prop_definition(*args)
         #print "in decorator: ",properties
-        host = args[0];
-        host._main_properties=properties;
-        host.iliad_prop.set_input_parameters(**properties);
+        host = args[0]
+        host._main_properties=properties
+        host.iliad_prop.set_input_parameters(**properties)
         return properties
 
     return main_prop_wrapper
@@ -100,18 +100,18 @@ def AdvancedProperties(adv_prop_definition):
     def advanced_prop_wrapper(*args):
         properties = adv_prop_definition(*args)
         #print "in decorator: ",properties
-        host = args[0];
-        host._advanced_properties=properties;
-        host.iliad_prop.set_input_parameters(**properties);
+        host = args[0]
+        host._advanced_properties=properties
+        host.iliad_prop.set_input_parameters(**properties)
         return properties
 
     return advanced_prop_wrapper
 
 def using_web_data(self):
     if self._web_var:
-        return True;
+        return True
     else:
-        return False;
+        return False
 
 
 
@@ -126,32 +126,32 @@ def iliad(main):
 
     """
     def iliad_wrapper(*args):
-        #seq = inspect.stack();
+        #seq = inspect.stack()
 
-        host = args[0];
+        host = args[0]
         if len(args)>1:
-            input_file = args[1];
+            input_file = args[1]
             if len(args)>2:
-                output_directory = args[2];
+                output_directory = args[2]
             else:
                 output_directory =None
         else:
             input_file=None
             output_directory=None
 
-        use_web_variables= False;
+        use_web_variables= False
         if host._web_var and output_directory:
-            use_web_variables = True;
+            use_web_variables = True
             config.appendDataSearchDir(str(output_directory))
-            web_vars = dict(host._web_var.standard_vars.items()+host._web_var.advanced_vars.items());
-            host.iliad_prop.set_input_parameters(**web_vars);
-            host.iliad_prop.sample_run = input_file;
+            web_vars = dict(host._web_var.standard_vars.items()+host._web_var.advanced_vars.items())
+            host.iliad_prop.set_input_parameters(**web_vars)
+            host.iliad_prop.sample_run = input_file
 
         rez = main(*args)
         # prohibit returning workspace to web services. 
         if use_web_variables and not isinstance(rez,str):
-            rez="";
-        return rez;
+            rez=""
+        return rez
 
     return iliad_wrapper
     

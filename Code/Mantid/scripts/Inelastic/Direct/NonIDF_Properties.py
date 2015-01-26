@@ -1,4 +1,5 @@
 from PropertiesDescriptors import *
+from RunDescriptor import RunDescriptor,RunDescriptorDependent
 
 
 class NonIDF_Properties(object):
@@ -26,11 +27,8 @@ class NonIDF_Properties(object):
                        deployed in reduction
         """
         #
-        object.__setattr__(self,'_sample_run',run_workspace)
-        object.__setattr__(self,'_wb_run',None)
-
-        object.__setattr__(self,'_monovan_run',None)
-        object.__setattr__(self,'_wb_for_monovan_run',None)
+        if not(run_workspace is None):
+            object.__setattr__(self,'sample_run',run_workspace)
 
         # Helper properties, defining logging options
         object.__setattr__(self,'_log_level','notice')
@@ -43,27 +41,24 @@ class NonIDF_Properties(object):
         object.__setattr__(self,'_motor_name',None)
         object.__setattr__(self,'_motor_offset',0)
 
-
-        object.__setattr__(self,'_second_white',None)
-
         object.__setattr__(self,'_save_file_name',None)
- 
+   
         self._set_instrument_and_facility(Instrument,run_workspace)
-  
+
+        # set up descriptors holder class reference
+        RunDescriptor._holder = self
+        RunDescriptor._logger = self.log
+        # Initiate class-level properties to defaults 
+        super(NonIDF_Properties,self).__setattr__('sample_run',None)
+        super(NonIDF_Properties,self).__setattr__('wb_run',None)
+        super(NonIDF_Properties,self).__setattr__('monovan_run',None)
+
+        super(NonIDF_Properties,self).__setattr__('mask_run',None)
+        super(NonIDF_Properties,self).__setattr__('wb_for_monovan_run',None)
+        super(NonIDF_Properties,self).__setattr__('second_white',None)
+        super(NonIDF_Properties,self).__setattr__('_tmp_run',None)
+
     #end
-    def get_sample_ws_name(self):
-        """ build and return sample workspace name 
-
-            See similar property save_file_name TODO: (leave only one)
-        """ 
-        if not self.sum_runs:
-            return common.create_resultname(self.sample_run,self.instr_name)
-        else:
-            return common.create_resultname(self.sample_run,self.instr_name,'-sum')
-
-    def getDefaultParameterValue(self,par_name):
-        """ method to get default parameter value, specified in IDF """
-        return prop_helpers.get_default_parameter(self.instrument,par_name)
     #-----------------------------------------------------------------------------
     # Complex properties with personal descriptors
     #-----------------------------------------------------------------------------
@@ -78,7 +73,22 @@ class NonIDF_Properties(object):
     facility = InstrumentDependentProp('_facility')
     #
     van_rmm = VanadiumRMM()
+    # Run descriptors
+    sample_run  = RunDescriptor("SR_","Run ID (number) to convert to energy or list of the such run numbers")
+    wb_run      = RunDescriptor("WB_","Run ID (number) for vanadium run used in detectors calibration")
+    monovan_run = RunDescriptor("MV_","Run ID (number) for monochromatic vanadium used in absolute units normalization ")
+
+    mask_run    = RunDescriptorDependent(sample_run,"MSK_"," Run used to find masks.\n If not explicitly set, sample_run is used""")
+    wb_for_monovan_run = RunDescriptorDependent(wb_run,"MV_WB_"," white beam run used to calculate monovanadium integrals.\n If not explicitly set, white beam for processing run is used")
+    # TODO: do something about it.  Second white is explicitly used in
+    # diagnostics but not accessed at all
+    second_white  = RunDescriptor("Second white beam currently unused in the  workflow despite being referred to in Diagnostics. Should it be used for Monovan Diagnostics?") 
+    # 
+    _tmp_run     = RunDescriptor("_TMP","Property used for storing intermediate run data during reduction")
     #-----------------------------------------------------------------------------------
+    def getDefaultParameterValue(self,par_name):
+        """ method to get default parameter value, specified in IDF """
+        return prop_helpers.get_default_parameter(self.instrument,par_name)
     @property
     def instrument(self):
         if self._pInstrument is None:
@@ -86,18 +96,6 @@ class NonIDF_Properties(object):
         else: 
             return self._pInstrument
     #
-    #-----------------------------------------------------------------------------------
-    # TODO: do something about it.  Second white is explicitly used in
-    # diagnostics.
-    @property 
-    def seclond_white(self):
-        """ Second white beam currently unused in the  workflow """
-        return self._second_white
-    @seclond_white.setter 
-    def seclond_white(self,value):
-        """ Second white beam currently unused in the  workflow """
-        pass
-        #return self._second_white;
     #-----------------------------------------------------------------------------------
     #TODO: do something about it
     @property
@@ -108,59 +106,6 @@ class NonIDF_Properties(object):
     def print_diag_results(self,value):
         pass
     #-----------------------------------------------------------------------------------
-    @property
-    #-----------------------------------------------------------------------------------
-    def sample_run(self):
-        """ run number to process or list of the run numbers """
-        if self._sample_run is None:
-            raise KeyError("Sample run has not been defined")
-        return self._sample_run
-
-    @sample_run.setter
-    def sample_run(self,value):
-        """ sets a run number to process or list of run numbers """
-        object.__setattr__(self,'_sample_run',value)
-    #-----------------------------------------------------------------------------------
-    @property
-    def wb_run(self):
-        if self._wb_run is None:
-            raise KeyError("White beam run has not been defined")
-        return self._wb_run
-    @wb_run.setter
-    def wb_run(self,value):
-        object.__setattr__(self,'_wb_run',value)
-
-    #-----------------------------------------------------------------------------------
-    @property 
-    def monovan_run(self): 
-        """ run ID (number or workspace) for monochromatic vanadium used in absolute units normalization """
-        return self._monovan_run
-
-    @monovan_run.setter
-    def monovan_run(self,value): 
-        """ run ID (number or workspace) for monochromatic vanadium used in normalization """
-        object.__setattr__(self,'_monovan_run',value)
-    #-----------------------------------------------------------------------------------
-    @property 
-    def wb_for_monovan_run(self):
-        """ white beam  run used for calculating monovanadium integrals. 
-            If not explicitly set, white beam for processing run is used instead
-        """
-        if self._wb_for_monovan_run:
-            return self._wb_for_monovan_run
-        else:
-            return self._wb_run
-
-    @wb_for_monovan_run.setter
-    def wb_for_monovan_run(self,value): 
-        """ run number for monochromatic vanadium used in normalization """
-        if value == self._wb_run:
-            object.__setattr__(self,'_wb_for_monovan_run',None)
-        else:
-            object.__setattr__(self,'_wb_for_monovan_run',value)
-
-    #-----------------------------------------------------------------------------------
- 
     # -----------------------------------------------------------------------------
     @property
     def log_to_mantid(self):
@@ -194,6 +139,7 @@ class NonIDF_Properties(object):
     @motor_offset.setter
     def motor_offset(self,val):
         object.__setattr__(self,'_motor_offset',val)
+
     # -----------------------------------------------------------------------------
     # Service properties (used by class itself)
     #
@@ -236,7 +182,7 @@ class NonIDF_Properties(object):
         object.__setattr__(self,'_facility',facility_)
         object.__setattr__(self,'_short_instr_name',new_name)
 
-
+ 
 
     def log(self, msg,level="notice"):
         """Send a log message to the location defined
@@ -248,7 +194,6 @@ class NonIDF_Properties(object):
         # TODO: reconcile this with Mantid.
            if lev <= self._current_log_level:
               print msg
-
 
 
 

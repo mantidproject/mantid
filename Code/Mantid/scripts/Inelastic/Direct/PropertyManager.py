@@ -54,26 +54,15 @@ class PropertyManager(NonIDF_Properties):
            This is why any new descriptor should never place a key with its name in __dict__. Current design automatically remove IDF name 
            from __dict__ if a descriptor with such name exist, so further development should support this behavior.
 
+        5) In many places (descriptors, RunDescriptor itself), PropertyManager assumed to be a singleton, so most Descriptors are defined on a  
+           class level. If this changes, careful refactoring will be necessary
+
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid and is distributed under GPL
     """
 
-    #-----------------------------------------------------------------------------------
-    @property
-    def mask_run(self):
-        """ run used to get masks to remove unreliable spectra
-
-           Usually it is sample run but separate run may be used 
-        """
-        if self._mask_run:
-            return self._mask_run
-        else:
-            return self._sample_run
-    @mask_run.setter
-    def mask_run(self,value):
-       object.__setattr__(self,'_mask_run',value)
     #-----------------------------------------------------------------------------------
 
     def __init__(self,Instrument,instr_run=None):
@@ -119,7 +108,7 @@ class PropertyManager(NonIDF_Properties):
 
         # build and use substitution dictionary
         if 'synonims' in param_list :
-            synonyms_string  = param_list['synonims'];
+            synonyms_string  = param_list['synonims']
             if detine_subst_dict:
                 object.__setattr__(self,subst_name,prop_helpers.build_subst_dictionary(synonyms_string))
             #end
@@ -140,7 +129,7 @@ class PropertyManager(NonIDF_Properties):
         class_decor = '_'+type(self).__name__+'__'
 
         result = {}
-        for key,val  in prop_dict.iteritems():
+        for key,val in prop_dict.iteritems():
             new_key = class_decor+key
             object.__setattr__(self,new_key,val)
 
@@ -155,22 +144,22 @@ class PropertyManager(NonIDF_Properties):
         # Let's set private properties directly. Normally, nobody should try 
         # to set them through PropertyManager interface
         #if name0[:2]=='_P':
-        #    self.__dict__[name0] = val;
+        #    self.__dict__[name0] = val
         #    return
         ##end
         if name0 in self.__subst_dict:
             name = self.__subst_dict[name0]
         else:
-            name =name0;
+            name =name0
         #end
 
         # replace common substitutions for string value
         if type(val) is str :
            val1 = val.lower()
            if (val1 == 'none' or len(val1) == 0):
-              val = None;
+              val = None
            if val1 == 'default':
-              val = self.getDefaultParameterValue(name0);
+              val = self.getDefaultParameterValue(name0)
            # boolean property?
            if val1 in ['true','yes']:
                val = True
@@ -179,16 +168,16 @@ class PropertyManager(NonIDF_Properties):
 
 
         if type(val) is list and len(val) == 0:
-            val = None;
+            val = None
               
         # set property value:
         if name in self.__descriptors:
            super(PropertyManager,self).__setattr__(name,val)
         else:
-           other_prop=prop_helpers.gen_setter(self.__dict__,name,val);
+           other_prop=prop_helpers.gen_setter(self.__dict__,name,val)
 
         # record the fact that the property have changed
-        self.__changed_properties.add(name);
+        self.__changed_properties.add(name)
 
    # ----------------------------
     def __getattr__(self,name):
@@ -231,6 +220,8 @@ class PropertyManager(NonIDF_Properties):
     #
     diag_spectra = DiagSpectra()
     #
+    mon2_norm_energy_range = mon2NormalizationEnergyRange()
+    #
     background_test_range = BackbgroundTestRange()
     # Properties with allowed value
     normalise_method= PropertyFromRange([None,'monitor-1','monitor-2','current'],'current')
@@ -244,7 +235,7 @@ class PropertyManager(NonIDF_Properties):
         """ Method to clear changed properties list""" 
         if isinstance(value,set):
             decor_prop = '_'+type(self).__name__+'__changed_properties'
-            self.__dict__[decor_prop] =value;
+            self.__dict__[decor_prop] =value
         else:
             raise KeyError("Changed properties can be initialized by appropriate properties set only")
 
@@ -264,9 +255,18 @@ class PropertyManager(NonIDF_Properties):
             set data from a function with a list of given parameters (*args vrt **kwargs),
             with some parameters missing.
         """   
+        # if sum is in parameters one needs to set it first 
+        if 'sum_runs' in kwargs and not (kwargs['sum_runs'] is None):
+            self.sum_runs = kwargs['sum_runs']
+            del kwargs['sum_runs']
+        if 'sum' in kwargs and not (kwargs['sum'] is None):
+            self.sum_runs = kwargs['sum']
+            del kwargs['sum']
+
+
         for par_name,value in kwargs.items() :
             if not(value is None):
-                setattr(self,par_name,value);
+                setattr(self,par_name,value)
 
 
 
@@ -274,11 +274,40 @@ class PropertyManager(NonIDF_Properties):
         """ Set input properties from a dictionary of parameters
 
         """
+        # if sum is in parameters one needs to set it first to interpret
+        #  
+        if 'sum_runs' in kwargs :
+            self.sum_runs = kwargs['sum_runs']
+            del kwargs['sum_runs']
+        if 'sum' in kwargs :
+            self.sum_runs = kwargs['sum']
+            del kwargs['sum']
+
 
         for par_name,value in kwargs.items() :
-            setattr(self,par_name,value);
+            setattr(self,par_name,value)
 
-        return self.getChangedProperties();
+        return self.getChangedProperties()
+
+    def get_used_monitors_list(self):
+        """ Method returns list of monitors ID used during reduction """ 
+
+        used_mon=set()
+        for case in common.switch(self.normalise_method):
+            if case('monitor-1'):
+                used_mon.add(self.mon1_norm_spec)
+                break
+            if case('monitor-2'):
+                used_mon.add(self.mon2_norm_spec)
+                break
+            if case(): # default, could also just omit condition or 'if True'
+               pass
+
+        used_mon.add(self.ei_mon1_spec)
+        used_mon.add(self.ei_mon2_spec)
+
+        return used_mon
+
 
     def get_diagnostics_parameters(self):
         """ Return the dictionary of the properties used in diagnostics with their values defined in IDF
@@ -291,15 +320,15 @@ class PropertyManager(NonIDF_Properties):
                            'bleed_test':False,'bleed_pixels':0,'bleed_maxrate':0,\
                            'hard_mask_file':None,'use_hard_mask_only':False,'background_test_range':None,\
                            'instr_name':'','print_diag_results':True}
-        result = {};
+        result = {}
 
         for key,val in diag_param_list.iteritems():
             try:
-                result[key] = getattr(self,key);
+                result[key] = getattr(self,key)
             except KeyError: 
                 self.log('--- Diagnostics property {0} is not found in instrument properties. Default value: {1} is used instead \n'.format(key,value),'warning')
   
-        return result;
+        return result
 
     def update_defaults_from_instrument(self,pInstrument,ignore_changes=False):
         """ Method used to update default parameters from the same instrument (with different parameters).
@@ -321,9 +350,8 @@ class PropertyManager(NonIDF_Properties):
                      "*** This only works if both instruments have the same reduction properties!"\
                       .format(self.instr_name,pInstrument.getName()),'warning')
 
-        # Retrieve the properties, changed or set from interface earlier
+        # Retrieve the properties, changed from interface earlier
         old_changes_list  = self.getChangedProperties()
-        self.setChangedProperties(set())
         # record all changes, present in the old changes list
         old_changes={}
         for prop_name in old_changes_list:
@@ -332,66 +360,87 @@ class PropertyManager(NonIDF_Properties):
  
         param_list = prop_helpers.get_default_idf_param_list(pInstrument)
         param_list,descr_dict =  self._convert_params_to_properties(param_list,False,self.__descriptors)
+        # clear record about previous changes
+        self.setChangedProperties(set())
 
         #sort parameters to have complex properties (with underscore _) first    
         sorted_param =  OrderedDict(sorted(param_list.items(),key=lambda x : ord((x[0][0]).lower())))
 
         # Walk through descriptors list and set their values 
         # Assignment to descriptors should accept the form, descriptor is written in IDF
-        for key,new_val in descr_dict.iteritems():
-            try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains 
+        changed_descriptors = set()
+        for key,val in descr_dict.iteritems():
+            if not (key in old_changes_list):
+                try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains 
                    # properties, not present in recent IDF.
                   cur_val = getattr(self,key)
-            except:
+                  setattr(self,key,val)
+                  new_val = getattr(self,key)
+                except:
                    self.log("property {0} have not been found in existing IDF. Ignoring this property"\
                        .format(key),'warning')
                    continue
-            if new_val != cur_val:
-              setattr(self,key,new_val)
-              try:
-                  dependencies = getattr(PropertyManager,key).dependencies()
-              except:
-                  dependencies = []
+                if isinstance(new_val,api.Workspace) and isinstance(cur_val,api.Workspace):
+                # do simplified workspace comparison which is appropriate here 
+                  if new_val.name() == cur_val.name() and \
+                     new_val.getNumberHistograms() == cur_val.getNumberHistograms() and \
+                     new_val.getNEvents() == cur_val.getNEvents() and \
+                     new_val.getAxis(0).getUnit().unitID() == cur_val.getAxis(0).getUnit().unitID():
+                        new_val =1; cur_val = 1
+                   #
+                #end
+                if new_val != cur_val:
+                   changed_descriptors.add(key)
+                # dependencies removed either properties are equal or not
+                try:
+                     dependencies = getattr(PropertyManager,key).dependencies()
+                except:
+                     dependencies = []
 
-              for dep_name in dependencies:
-                if dep_name in sorted_param:
-                   del sorted_param[dep_name]
+                for dep_name in dependencies:
+                    if dep_name in sorted_param:
+                       del sorted_param[dep_name]
         #end loop
+        # clear record about all changes and store only changed descriptors list
+        self.setChangedProperties(changed_descriptors)
 
         # Walk through the complex properties first and then through simple properties
         for key,val in sorted_param.iteritems():
-            # complex properties change through their dependencies so we are setting them first
-            if isinstance(val,prop_helpers.ComplexProperty):
-                public_name = key[1:]
-                prop_new_val = val.__get__(param_list)
-            else:
-                # no complex properties left so we have simple key-value pairs
-                public_name = key
-                prop_new_val = val
+            if not(key in old_changes_list):
+                # complex properties change through their dependencies so we are setting them first
+                if isinstance(val,prop_helpers.ComplexProperty):
+                    public_name = key[1:]
+                    prop_new_val = val.__get__(param_list)
+                else:
+                    # no complex properties left so we have simple key-value pairs
+                    public_name = key
+                    prop_new_val = val
 
-            try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains 
-                # properties, not present in recent IDF.
-                 cur_val = getattr(self,public_name)
-            except:
-                self.log("property {0} have not been found in existing IDF. Ignoring this property"\
-                    .format(public_name),'warning')
-                continue
+                try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains 
+                    # properties, not present in recent IDF.
+                     cur_val = getattr(self,public_name)
+                except:
+                    self.log("property {0} have not been found in existing IDF. Ignoring this property"\
+                        .format(public_name),'warning')
+                    continue
 
-            if prop_new_val !=cur_val :
-               setattr(self,public_name,prop_new_val)
-               try:
-                    dependencies = val.dependencies()
-               except:
-                   dependencies =[]
-               for dep_name in dependencies:
-                  # delete dependent properties not to deal with them again
-                  del sorted_param[dep_name]
+                if prop_new_val !=cur_val :
+                   setattr(self,public_name,prop_new_val)
+                # Dependencies removed either properties are equal or not
+                try:
+                     dependencies = val.dependencies()
+                except:
+                     dependencies =[]
+                for dep_name in dependencies:
+                    # delete dependent properties not to deal with them again
+                    del sorted_param[dep_name]
         #end
 
 
         new_changes_list  = self.getChangedProperties()
         self.setChangedProperties(set())
-        # set back all changes stored earlier and may be overwritten by new IDF
+        # set back all changes stored earlier and may be overwritten by new IDF 
+        # (this is just to be sure -- should not change anything as we do not set properties changed)
         for key,val in old_changes.iteritems():
             setattr(self,key,val)
      
@@ -407,16 +456,16 @@ class PropertyManager(NonIDF_Properties):
         if n>0:
             return all_changes
         else:
-            return None;
+            return None
     #end
 
     def _check_file_exist(self,file_name):
-        file_path = FileFinder.getFullPath(file);
+        file_path = FileFinder.getFullPath(file)
         if len(file_path) == 0:
             try:
                 file_path = common.find_file(file)
             except:
-                file_path ='';
+                file_path =''
 
 
     def _check_necessary_files(self,monovan_run):
@@ -430,7 +479,7 @@ class PropertyManager(NonIDF_Properties):
             for prop in files_list :
                 file = getattr(self,prop)
                 if not (file is None) and isinstance(file,str):
-                    file_path = self._check_file_exist(file);
+                    file_path = self._check_file_exist(file)
                     if len(file_path)==0:
                        self.log(" Can not find file ""{0}"" for property: {1} ".format(file,prop),'error')
                        file_missing=True
@@ -449,13 +498,13 @@ class PropertyManager(NonIDF_Properties):
         """ method verifies, if properties necessary for monovanadium reduction have indeed been changed  from defaults """
 
         # list of the parameters which should usually be changed by user and if not, user should be warn about it.
-        momovan_properties=['sample_mass','sample_rmm','monovan_run']
-        changed_prop = self.getChangedProperties();
-        non_changed = [];
+        momovan_properties=['sample_mass','sample_rmm']
+        changed_prop = self.getChangedProperties()
+        non_changed = []
         for property in momovan_properties:
             if not property in changed_prop:
                 non_changed.append(property)
-        return non_changed;
+        return non_changed
 
     #
     def log_changed_values(self,log_level='notice',display_header=True,already_changed=set()):
@@ -470,13 +519,13 @@ class PropertyManager(NonIDF_Properties):
         # we may want to run absolute units normalization and this function has been called with monovan run or helper procedure
         if self.monovan_run != None :
             # check if mono-vanadium is provided as multiple files list or just put in brackets occasionally
-            self.log("****************************************************************",'notice');
+            self.log("****************************************************************",'notice')
             self.log('*** Output will be in absolute units of mb/str/mev/fu','notice')
-            non_changed = self._check_monovan_par_changed();
+            non_changed = self._check_monovan_par_changed()
             if len(non_changed) > 0:
                 for prop in non_changed:
                     value = getattr(self,prop)
-                    message = "\n***WARNING!: Absolute units reduction parameter : {0} has its default value: {1}"\
+                    message = "\n***WARNING!: Abs units norm. parameter : {0} not changed from default val: {1}"\
                               "\n             This may need to change for correct absolute units reduction\n"
 
                     self.log(message.format(prop,value),'warning')
@@ -486,27 +535,27 @@ class PropertyManager(NonIDF_Properties):
         self.log("*** Provisional Incident energy: {0:>12.3f} mEv".format(self.incident_energy),log_level)
       #end display_header
 
-      self.log("****************************************************************",log_level);
-      changed_Keys= self.getChangedProperties();
+      self.log("****************************************************************",log_level)
+      changed_Keys= self.getChangedProperties()
       for key in changed_Keys:
           if key in already_changed:
               continue
-          val = getattr(self,key);
+          val = getattr(self,key)
           self.log("  Value of : {0:<25} is set to : {1:<20} ".format(key,val),log_level)
 
       if not display_header:
           return
 
       save_dir = config.getString('defaultsave.directory')
-      self.log("****************************************************************",log_level);
+      self.log("****************************************************************",log_level)
       if self.monovan_run != None and not('van_mass' in changed_Keys):                           # This output is 
          self.log("*** Monochromatic vanadium mass used : {0} ".format(self.van_mass),log_level) # Adroja request from may 2014
       #
-      self.log("*** By default results are saved into: {0}".format(save_dir),log_level);
-      self.log("*** Output will be normalized to {0}".format(self.normalise_method),log_level);
+      self.log("*** By default results are saved into: {0}".format(save_dir),log_level)
+      self.log("*** Output will be normalized to {0}".format(self.normalise_method),log_level)
       if  self.map_file == None:
             self.log('*** one2one map selected',log_level)
-      self.log("****************************************************************",log_level);
+      self.log("****************************************************************",log_level)
 
 
     #def help(self,keyword=None) :
@@ -514,7 +563,7 @@ class PropertyManager(NonIDF_Properties):
 
     #       if provided without arguments it returns the list of the parameters available
     #    """
-    #    raise KeyError(' Help for this class is not yet implemented: see {0}_Parameter.xml in the file for the parameters description'.format());
+    #    raise KeyError(' Help for this class is not yet implemented: see {0}_Parameter.xml in the file for the parameters description'.format())
 
 if __name__=="__main__":
     pass
