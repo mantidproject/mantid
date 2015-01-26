@@ -1,43 +1,76 @@
-"""
-Conversion class defined for conversion to deltaE for
-'direct' inelastic geometry instruments
+from mantid.simpleapi import *
+from mantid.kernel import funcreturns
+from mantid import api
+from mantid import geometry
 
-The class defines various methods to allow users to convert their
-files to DeltaE.
+import time as time
+import glob,sys,os.path,math
+import numpy as np
 
-            Usage:
->>red = DirectEnergyConversion('InstrumentName')
-and then: 
->>red.convert_to_energy_transfer(wb_run,sample_run,ei_guess,rebin)
-or
->>red.convert_to_energy_transfer(wb_run,sample_run,ei_guess,rebin,**arguments)
-or
->>red.convert_to_energy_transfer(wb_run,sample_run,ei_guess,rebin,mapfile,**arguments)
-or
->>red.convert_to_energy_transfer(wb_run   
-Whitebeam run number or file name or workspace
-       sample_run  sample run number or file name or workspace
-                ei_guess    Ei guess
-                rebin       Rebin parameters
-                mapfile     Mapfile -- if absent/'default' the defaults from IDF are used
-                monovan_run If present will do the absolute units normalization. Number of additional parameters
-                            specified in **kwargs is usually requested for this. If they are absent, program uses defaults,
-                            but the defaults (e.g. sample_mass or sample_rmm ) are usually incorrect for a particular run.
-                arguments   The dictionary containing additional keyword arguments.
-                            The list of allowed additional arguments is defined in InstrName_Parameters.xml file, located in
-                            MantidPlot->View->Preferences->Mantid->Directories->Parameter Definitions
+import CommonFunctions as common
+import diagnostics
+from PropertyManager import PropertyManager;
 
-        with run numbers as input:
-       >>red.convert_to_energy_transfer(1000,10001,80,[-10,.1,70])  # will run on default instrument
 
-       >>red.convert_to_energy_transfer(1000,10001,80,[-10,.1,70],'mari_res', additional keywords as required)
+def setup_reducer(inst_name,reload_instrument=False):
+    """
+    Given an instrument name or prefix this sets up a converter
+    object for the reduction
+    """
+    try:
+        return DirectEnergyConversion(inst_name,reload_instrument)
+    except RuntimeError, exc:
+        raise RuntimeError('Unknown instrument "%s" or wrong IDF file for this instrument, cannot continue' % inst_name)
 
-       >>red.convert_to_energy_transfer(1000,10001,80,'-10,.1,70','mari_res',fixei=True)
 
-       A detector calibration file must be specified if running the reduction with workspaces as input
-       namely:
-       >>w2=cred.onvert_to_energy_transfer('wb_wksp','run_wksp',ei,rebin_params,mapfile,det_cal_file=cal_file
-               ,diag_remove_zero=False,norm_method='current')
+class DirectEnergyConversion(object):
+    """
+    Performs a convert to energy assuming the provided instrument is an direct inelastic geometry instruments
+
+
+    The class defines various methods to allow users to convert their
+    files to Energy transfer
+
+    Usage:
+    >>red = DirectEnergyConversion('InstrumentName')
+      and then: 
+    >>red.convert_to_energy(wb_run,sample_run,ei_guess,rebin)
+      or
+    >>red.convert_to_energy(wb_run,sample_run,ei_guess,rebin,**arguments)
+      or
+    >>red.convert_to_energy(wb_run,sample_run,ei_guess,rebin,mapfile,**arguments)
+      or
+    >>red.prop_man.sample_run = run number
+    >>red.prop_man.wb_run     = Whitebeam 
+    >>red.prop_man.incident_energy = energy guess
+    >>red.prop_man.energy_bins = [min_val,step,max_val]
+    >>red.convert_to_energy()
+
+    Where:
+    Whitebeam run number or file name or workspace
+    sample_run  sample run number or file name or workspace
+    ei_guess    suggested value for incident energy of neutrons in direct inelastic instrument
+    energy_bins energy binning requested for resulting spe workspace. 
+    mapfile     Mapfile -- if absent/'default' the defaults from IDF are used
+    monovan_run If present will do the absolute units normalization. Number of additional parameters
+                specified in **kwargs is usually requested for this. If they are absent, program uses defaults,
+                but the defaults (e.g. sample_mass or sample_rmm ) are usually incorrect for a particular run.
+    arguments   The dictionary containing additional keyword arguments.
+                The list of allowed additional arguments is defined in InstrName_Parameters.xml file, located in
+                MantidPlot->View->Preferences->Mantid->Directories->Parameter Definitions
+
+    Usage examples:
+    with run numbers as input:
+    >>red.convert_to_energy(1000,10001,80,[-10,.1,70])  # will run on default instrument
+
+    >>red.convert_to_energy(1000,10001,80,[-10,.1,70],'mari_res', additional keywords as required)
+
+    >>red.convert_to_energy(1000,10001,80,'-10,.1,70','mari_res',fixei=True)
+
+    A detector calibration file must be specified if running the reduction with workspaces as input
+    namely:
+    >>w2=cred.onvert_to_energy_transfer('wb_wksp','run_wksp',ei,rebin_params,mapfile,det_cal_file=cal_file
+                                        ,diag_remove_zero=False,norm_method='current')
 
 
      All available keywords are provided in InstName_Parameters.xml file
@@ -90,36 +123,6 @@ Whitebeam run number or file name or workspace
       hardmaskPlus=Filename :load a hardmarkfile and apply together with diag mask
 
       hardmaskOnly=Filename :load a hardmask and use as only mask
-"""
-
-
-from mantid.simpleapi import *
-from mantid.kernel import funcreturns
-from mantid import api
-from mantid import geometry
-
-import time as time
-import glob,sys,os.path,math
-import numpy as np
-
-import CommonFunctions as common
-import diagnostics
-from DirectPropertyManager import DirectPropertyManager;
-
-def setup_reducer(inst_name,reload_instrument=False):
-    """
-    Given an instrument name or prefix this sets up a converter
-    object for the reduction
-    """
-    try:
-        return DirectEnergyConversion(inst_name,reload_instrument)
-    except RuntimeError, exc:
-        raise RuntimeError('Unknown instrument "%s" or wrong IDF file for this instrument, cannot continue' % inst_name)
-
-
-class DirectEnergyConversion(object):
-    """
-    Performs a convert to energy assuming the provided instrument is an elastic instrument
     """
 
     def diagnose(self, white,diag_sample=None,**kwargs):
@@ -231,7 +234,7 @@ class DirectEnergyConversion(object):
                                          RangeLower=bkgd_range[0],RangeUpper=bkgd_range[1],
                                          IncludePartialBins=True)
             total_counts = Integration(result_ws, IncludePartialBins=True)
-            background_int = ConvertUnits(background_int, "Energy", AlignBins=0)
+            background_int = ConvertUnits(background_int, Target="Energy",EMode='Elastic', AlignBins=0)
             prop_man.log("Diagnose: finished convertUnits ",'information')
 
             background_int *= prop_man.scale_factor;
@@ -1143,7 +1146,7 @@ class DirectEnergyConversion(object):
 
 
         for file_format  in formats:
-            for case in switch(file_format):
+            for case in common.switch(file_format):
                 if case('nxspe'):
                    filename = save_file +'.nxspe';
                    SaveNXSPE(InputWorkspace=workspace,Filename= filename, KiOverKfScaling=prop_man.apply_kikf_correction,psi=prop_man.psi)
@@ -1299,10 +1302,10 @@ class DirectEnergyConversion(object):
     @prop_man.setter
     def prop_man(self,value):
         """ Assign new instance of direct property manager to provide DirectEnergyConversion parameters """
-        if isinstance(value,DirectPropertyManager):
+        if isinstance(value,PropertyManager):
             self._propMan = value;
         else:
-            raise KeyError("Property manager can be initialized by an instance of DirectProperyManager only")
+            raise KeyError("Property manager can be initialized by an instance of ProperyManager only")
     #---------------------------------------------------------------------------
     # Behind the scenes stuff
     #---------------------------------------------------------------------------
@@ -1335,21 +1338,21 @@ class DirectEnergyConversion(object):
         # Instrument and default parameter setup
         # formats available for saving. As the reducer has to have a method to process one of this, it is private property
         if not hasattr(self,'_propMan') or self._propMan is None:
-            if isinstance(instr,DirectPropertyManager):
+            if isinstance(instr,PropertyManager):
                 self._propMan  = instr;
             else:
-                self._propMan = DirectPropertyManager(instr);
+                self._propMan = PropertyManager(instr);
         else:
             old_name = self._propMan.instrument.getName();
             if isinstance(instr,geometry._geometry.Instrument):
                 new_name = self._propMan.instrument.getName();
-            elif isinstance(instr,DirectPropertyManager):
+            elif isinstance(instr,PropertyManager):
                 new_name = instr.instr_name;
             else:
                 new_name = instr
             #end if
             if old_name != new_name or reload_instrument:
-                self._propMan = DirectPropertyManager(new_name);
+                self._propMan = PropertyManager(new_name);
             #end if
         #
 
@@ -1358,7 +1361,7 @@ class DirectEnergyConversion(object):
             instrument = workspace.getInstrument();
             name      = instrument.getName();
             if name != self.prop_man.instr_name:
-               self.prop_man = DirectPropertyManager(name,workspace);
+               self.prop_man = PropertyManager(name,workspace);
 
 
     def check_abs_norm_defaults_changed(self,changed_param_list) :
@@ -1379,28 +1382,8 @@ class DirectEnergyConversion(object):
 
 
  
-  
 
-class switch(object):
-    """ Helper class providing nice switch statement""" 
-    def __init__(self, value):
-        self.value = value
-        self.fall = False
 
-    def __iter__(self):
-        """Return the match method once, then stop"""
-        yield self.match
-        raise StopIteration
-    
-    def match(self, *args):
-        """Indicate whether or not to enter a case suite"""
-        if self.fall or not args:
-            return True
-        elif self.value in args: # changed for v1.5, see below
-            self.fall = True
-            return True
-        else:
-            return False
 
 def get_failed_spectra_list_from_masks(masking_wksp):
     """Compile a list of spectra numbers that are marked as
