@@ -486,15 +486,22 @@ void DataComparison::plotDiffWorkspace()
   {
     QString workspaceName = m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
     QString currentSpecName = m_uiForm.twCurrentData->item(row, CURRENT_SPEC)->text();
-    bool ok;
+    bool ok = false;
+    bool found = false;
 
     if(workspaceName == m_diffWorkspaceNames.first)
+    {
       ws1Spec = currentSpecName.toInt(&ok);
+      found = true;
+    }
     if(workspaceName == m_diffWorkspaceNames.second)
+    {
       ws2Spec = currentSpecName.toInt(&ok);
+      found = true;
+    }
 
     // Check that the spectra are not out of range
-    if(!ok)
+    if(!ok && found)
     {
       // Set info message
       QString infoMessage = workspaceName + ": Index out of range.";
