@@ -168,6 +168,7 @@ test/vtkDataSetToNonOrthogonalDataSetTest.h
 )
 
 include_directories( inc )
+include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
 
 set( SRC_UNITY_IGNORE_FILES )
 if( UNITY_BUILD )
@@ -192,6 +193,7 @@ ${MANTID_SUBPROJECT_LIBS}
 vtkCommonCore
 vtkCommonDataModel
 vtkIOLegacy
+${QWT_LIBRARIES}
 )
 
 # Create test file projects

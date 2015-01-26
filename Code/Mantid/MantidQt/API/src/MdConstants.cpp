@@ -10,7 +10,7 @@ namespace MantidQt
 
     MdConstants::~MdConstants(){};
 
-    const double MdConstants::getColorScaleStandardMax() const
+    double MdConstants::getColorScaleStandardMax()
     {
       return m_colorScaleStandardMax;
     }

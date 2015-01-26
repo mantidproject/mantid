@@ -17,6 +17,7 @@
 #include <vtkSMProxy.h>
 #include <vtkSMDoubleVectorProperty.h>
 
+#include <cfloat>
 #include <QPair>
 #include "MantidQtAPI/MdSettings.h"
 

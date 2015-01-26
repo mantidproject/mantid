@@ -5,7 +5,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
-#include "MantidVatesAPI/MetadataExtractorUtils.h"
+#include "MantidVatesAPI/MetaDataExtractorUtils.h"
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"

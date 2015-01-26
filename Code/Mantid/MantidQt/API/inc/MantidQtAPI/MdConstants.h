@@ -42,11 +42,11 @@ namespace MantidQt
 
         ~MdConstants();
 
-        const double getColorScaleStandardMax() const;
+        double getColorScaleStandardMax();
 
       private:
 
-        const double m_colorScaleStandardMax;
+        double m_colorScaleStandardMax;
     };
   }
 }

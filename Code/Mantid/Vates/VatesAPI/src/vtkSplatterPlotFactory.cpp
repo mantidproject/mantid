@@ -21,7 +21,7 @@
 
 #include <algorithm>
 #include <boost/math/special_functions/fpclassify.hpp>
-#include "qwt/qwt_double_interval.h"
+#include <qwt_double_interval.h>
 
 using namespace Mantid::API;
 using namespace Mantid::MDEvents;
