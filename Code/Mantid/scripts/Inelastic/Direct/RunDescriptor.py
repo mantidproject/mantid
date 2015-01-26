@@ -212,7 +212,7 @@ class RunDescriptor(PropDescriptor):
         inst_name = RunDescriptor._holder.short_inst_name
         if 'file_hint' in kwargs:
             hint = kwargs['file_hint']
-            fname,old_ext=os.path.splitext(file_hint)
+            fname,old_ext=os.path.splitext(hint)
             if len(old_ext) == 0:
                 old_ext = self.get_file_ext()
         else:

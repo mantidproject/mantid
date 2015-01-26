@@ -1,5 +1,6 @@
 from mantid.simpleapi import *
 from mantid import config
+from mantid.kernel import funcreturns
 
 from PropertyManager import PropertyManager
 # this import is used by children
@@ -166,7 +167,6 @@ class ReductionWrapper(object):
             Wrap it into @iliad wrapper to switch input for 
             reduction properties between script and web variables
         """ 
-
         if input_file:
            self.reducer.sample_run = input_file
 
@@ -227,6 +227,12 @@ def iliad(reduce):
     """
     def iliad_wrapper(*args):
         #seq = inspect.stack()
+        # output workspace name.
+        try:
+            n,r = funcreturns.lhs_info('both')
+            out_ws_name = r[0]
+        except:
+            out_ws_name = None
 
         host = args[0]
         if len(args)>1:
@@ -255,11 +261,16 @@ def iliad(reduce):
         else:
             pass # we should set already set up variables using 
 
-
+ 
         rez = reduce(*args)
+
         # prohibit returning workspace to web services. 
         if host._run_from_web and not isinstance(rez,str):
             rez=""
+        else:
+          if out_ws_name and rez.name() != out_ws_name :
+              rez=RenameWorkspace(InputWorkspace=rez,OutputWorkspace=out_ws_name)
+             
         return rez
 
     return iliad_wrapper
