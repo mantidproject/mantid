@@ -225,7 +225,9 @@ private:
                      bool propertiesLogs = false) {
     getline(in, fullline);
     getline(in, fullline);
-    propertiesLogs = false;
+    if (propertiesLogs) {
+    } else {
+    };
   }
   void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false,
                 bool createLogs = false) {
@@ -250,6 +252,11 @@ private:
       ws->dataE(0) = m_data0;
     } else {
       ws->dataE(0) = m_dataE;
+    }
+    if (createLogs) {
+      ws->dataX(0) = m_data0;
+    } else {
+      ws->dataX(0) = m_dataX;
     }
   }
   void cleanupafterwards() {
