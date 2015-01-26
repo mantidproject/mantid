@@ -40,7 +40,7 @@ class MetaDataExtractorUtilsTest : public CxxTest::TestSuite
     void testShouldExtractMinAndMaxFromWorkspaceForMDHisto()
     {
       // Arrange
-      Mantid::MDEvents::MDHistoWorkspace_sptr histoWorkspace = makeFakeMDHistoWorkspace(1.0, 4, 5, 1.3, 0.1,"MD_HISTO_WS");
+      Mantid::MDEvents::MDHistoWorkspace_sptr histoWorkspace = makeFakeMDHistoWorkspace(1.0, 4);
 
       // Act
       MetaDataExtractorUtils extractor;
