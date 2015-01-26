@@ -186,8 +186,8 @@ namespace CustomInterfaces
     QString backgroundRange = m_properties["CalBackMin"]->valueText() + "," + m_properties["CalBackMax"]->valueText();
 
     QFileInfo firstFileInfo(firstFile);
-    QString outputWorkspaceNameStem = firstFileInfo.baseName() + "_" + m_uiForm.cbAnalyser->currentText()
-      + m_uiForm.cbReflection->currentText();
+    QString outputWorkspaceNameStem = firstFileInfo.baseName() + "_" + m_uiForm.iicInstrumentConfiguration->getAnalyserName()
+      + m_uiForm.iicInstrumentConfiguration->getReflectionName();
 
     QString calibrationWsName = outputWorkspaceNameStem + "_calib";
 
@@ -253,9 +253,9 @@ namespace CustomInterfaces
 
       resAlg->setProperty("InputFiles", filenames.toStdString());
       resAlg->setProperty("OutputWorkspace", resolutionWsName.toStdString());
-      resAlg->setProperty("Instrument", m_uiForm.cbInst->currentText().toStdString());
-      resAlg->setProperty("Analyser", m_uiForm.cbAnalyser->currentText().toStdString());
-      resAlg->setProperty("Reflection", m_uiForm.cbReflection->currentText().toStdString());
+      resAlg->setProperty("Instrument", m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString());
+      resAlg->setProperty("Analyser", m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString());
+      resAlg->setProperty("Reflection", m_uiForm.iicInstrumentConfiguration->getReflectionName().toStdString());
       resAlg->setProperty("RebinParam", rebinString.toStdString());
       resAlg->setProperty("DetectorRange", resDetectorRange.toStdString());
       resAlg->setProperty("BackgroundRange", background.toStdString());
@@ -281,7 +281,7 @@ namespace CustomInterfaces
 
     QString firstFile = m_uiForm.cal_leRunNo->getFirstFilename();
     QFileInfo firstFileInfo(firstFile);
-    QString calFileName = firstFileInfo.baseName() + "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_calib.nxs";
+    QString calFileName = firstFileInfo.baseName() + "_" + m_uiForm.iicInstrumentConfiguration->getAnalyserName() + m_uiForm.iicInstrumentConfiguration->getReflectionName() + "_calib.nxs";
 
     m_uiForm.ind_calibFile->setFileTextWithSearch(calFileName);
     m_uiForm.ckUseCalib->setChecked(true);
@@ -427,9 +427,9 @@ namespace CustomInterfaces
 
     IAlgorithm_sptr reductionAlg = AlgorithmManager::Instance().create("InelasticIndirectReduction");
     reductionAlg->initialize();
-    reductionAlg->setProperty("Instrument", m_uiForm.cbInst->currentText().toStdString());
-    reductionAlg->setProperty("Analyser", m_uiForm.cbAnalyser->currentText().toStdString());
-    reductionAlg->setProperty("Reflection", m_uiForm.cbReflection->currentText().toStdString());
+    reductionAlg->setProperty("Instrument", m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString());
+    reductionAlg->setProperty("Analyser", m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString());
+    reductionAlg->setProperty("Reflection", m_uiForm.iicInstrumentConfiguration->getReflectionName().toStdString());
     reductionAlg->setProperty("InputFiles", files.toStdString());
     reductionAlg->setProperty("OutputWorkspace", "__IndirectCalibration_reduction");
     reductionAlg->setProperty("DetectorRange", detRange.toStdString());
