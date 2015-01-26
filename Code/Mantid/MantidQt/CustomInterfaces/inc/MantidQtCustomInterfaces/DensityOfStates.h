@@ -29,11 +29,6 @@ namespace MantidQt
       void handleFileChange();
       void ionLoadComplete(bool error);
 
-      void addAllIons();
-      void removeAllIons();
-      void addSelectedIons();
-      void removeSelectedIons();
-
 		private:
 			/// The ui form
 			Ui::DensityOfStates m_uiForm;

@@ -1,5 +1,7 @@
 #include "MantidQtCustomInterfaces/DensityOfStates.h"
 
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
+
 #include <QFileInfo>
 #include <QString>
 
@@ -22,13 +24,7 @@ namespace MantidQt
 
       connect(m_uiForm.mwInputFile, SIGNAL(filesFound()), this, SLOT(handleFileChange()));
 
-      connect(m_uiForm.pbAddIons, SIGNAL(clicked()), this, SLOT(addSelectedIons()));
-      connect(m_uiForm.pbAddAllIons, SIGNAL(clicked()), this, SLOT(addAllIons()));
-      connect(m_uiForm.pbRemoveIons, SIGNAL(clicked()), this, SLOT(removeSelectedIons()));
-      connect(m_uiForm.pbRemoveAllIons, SIGNAL(clicked()), this, SLOT(removeAllIons()));
-
-      m_uiForm.lwAllIons->setSelectionMode(QAbstractItemView::MultiSelection);
-      m_uiForm.lwSelectedIons->setSelectionMode(QAbstractItemView::MultiSelection);
+      m_uiForm.lwIons->setSelectionMode(QAbstractItemView::MultiSelection);
 		}
 
 
@@ -44,8 +40,17 @@ namespace MantidQt
      */
 		bool DensityOfStates::validate()
 		{
-      //TODO
-      return true;
+      UserInputValidator uiv;
+
+      QString specType = m_uiForm.cbSpectrumType->currentText();
+      auto items = m_uiForm.lwIons->selectedItems();
+      if(specType == "DensityOfStates" && items.size() < 1)
+        uiv.addErrorMessage("Must select at least one ion for DensityOfStates.");
+
+      if(!uiv.isAllInputValid())
+        emit showMessageBox(uiv.generateErrorMessage());
+
+      return uiv.isAllInputValid();
 		}
 
 
@@ -86,9 +91,16 @@ namespace MantidQt
       // Set spectrum type specific properties
       if(specType == "DensityOfStates")
       {
-        //TODO
-
         dosAlgo->setProperty("SpectrumType", "DOS");
+
+        bool sumContributions = m_uiForm.ckSumContributions->isChecked();
+        dosAlgo->setProperty("SumContributions", sumContributions);
+
+        std::vector<std::string> selectedIons;
+        auto items = m_uiForm.lwIons->selectedItems();
+        for(auto it = items.begin(); it != items.end(); ++it)
+          selectedIons.push_back((*it)->text().toStdString());
+        dosAlgo->setProperty("Ions", selectedIons);
       }
       else if(specType == "IR")
       {
@@ -96,10 +108,10 @@ namespace MantidQt
       }
       else if(specType == "Raman")
       {
+        dosAlgo->setProperty("SpectrumType", "Raman_Active");
+
         double temperature = m_uiForm.spTemperature->value();
         dosAlgo->setProperty("Temperature", temperature);
-
-        dosAlgo->setProperty("SpectrumType", "Raman_Active");
       }
 
       m_batchAlgoRunner->addAlgorithm(dosAlgo);
@@ -160,65 +172,12 @@ namespace MantidQt
       Column_sptr ionColumn = ionTable->getColumn("Ion");
       size_t numIons = ionColumn->size();
 
-      m_uiForm.lwAllIons->clear();
-      m_uiForm.lwSelectedIons->clear();
+      m_uiForm.lwIons->clear();
 
       for(size_t ion = 0; ion < numIons; ion++)
       {
         const std::string ionName = ionColumn->cell<std::string>(ion);
-        m_uiForm.lwAllIons->addItem(QString::fromStdString(ionName));
-      }
-    }
-
-
-    /**
-     * Handle adding all ions from the list of available ions
-     * to the list of selected ions.
-     */
-    void DensityOfStates::addAllIons()
-    {
-      m_uiForm.lwAllIons->selectAll();
-      addSelectedIons();
-    }
-
-
-    /**
-     * Handle removing all ions from the list of selected ions.
-     */
-    void DensityOfStates::removeAllIons()
-    {
-      m_uiForm.lwSelectedIons->selectAll();
-      removeSelectedIons();
-    }
-
-
-    /**
-     * Handle adding selected ions from the list of available ions
-     * to the list of selected ions.
-     */
-    void DensityOfStates::addSelectedIons()
-    {
-      auto items = m_uiForm.lwAllIons->selectedItems();
-
-      for(auto it = items.begin(); it != items.end(); ++it)
-      {
-        m_uiForm.lwSelectedIons->addItem((*it)->text());
-        m_uiForm.lwAllIons->takeItem(m_uiForm.lwAllIons->row(*it));
-      }
-    }
-
-
-    /**
-     * Handle removing selected ions from the list of selected ions.
-     */
-    void DensityOfStates::removeSelectedIons()
-    {
-      auto items = m_uiForm.lwSelectedIons->selectedItems();
-
-      for(auto it = items.begin(); it != items.end(); ++it)
-      {
-        m_uiForm.lwAllIons->addItem((*it)->text());
-        m_uiForm.lwSelectedIons->takeItem(m_uiForm.lwSelectedIons->row(*it));
+        m_uiForm.lwIons->addItem(QString::fromStdString(ionName));
       }
     }
 
