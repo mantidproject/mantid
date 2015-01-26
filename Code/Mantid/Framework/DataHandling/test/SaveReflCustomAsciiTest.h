@@ -254,9 +254,7 @@ private:
       ws->dataE(0) = m_dataE;
     }
     if (createLogs) {
-      ws->dataX(0) = m_data0;
     } else {
-      ws->dataX(0) = m_dataX;
     }
   }
   void cleanupafterwards() {
