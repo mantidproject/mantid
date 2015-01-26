@@ -26,6 +26,9 @@ namespace MantidQt
       connect(m_uiForm.pbAddAllIons, SIGNAL(clicked()), this, SLOT(addAllIons()));
       connect(m_uiForm.pbRemoveIons, SIGNAL(clicked()), this, SLOT(removeSelectedIons()));
       connect(m_uiForm.pbRemoveAllIons, SIGNAL(clicked()), this, SLOT(removeAllIons()));
+
+      m_uiForm.lwAllIons->setSelectionMode(QAbstractItemView::MultiSelection);
+      m_uiForm.lwSelectedIons->setSelectionMode(QAbstractItemView::MultiSelection);
 		}
 
 
@@ -198,7 +201,10 @@ namespace MantidQt
       auto items = m_uiForm.lwAllIons->selectedItems();
 
       for(auto it = items.begin(); it != items.end(); ++it)
-        m_uiForm.lwSelectedIons->addItem(*it);
+      {
+        m_uiForm.lwSelectedIons->addItem((*it)->text());
+        m_uiForm.lwAllIons->takeItem(m_uiForm.lwAllIons->row(*it));
+      }
     }
 
 
@@ -210,7 +216,10 @@ namespace MantidQt
       auto items = m_uiForm.lwSelectedIons->selectedItems();
 
       for(auto it = items.begin(); it != items.end(); ++it)
-        m_uiForm.lwAllIons->addItem(*it);
+      {
+        m_uiForm.lwAllIons->addItem((*it)->text());
+        m_uiForm.lwSelectedIons->takeItem(m_uiForm.lwSelectedIons->row(*it));
+      }
     }
 
 
