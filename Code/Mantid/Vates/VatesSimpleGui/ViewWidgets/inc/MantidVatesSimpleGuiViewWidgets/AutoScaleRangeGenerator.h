@@ -97,7 +97,7 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS  AutoScaleRangeGenerator
    * @param minValueBuffer A reference to a min value.
    * @param maxValueBuffer A reference to a max value.
    */
-    void AutoScaleRangeGenerator::setMinBufferAndMaxBuffer(pqPipelineSource* source, double& minValue, double& maxValue);
+    void setMinBufferAndMaxBuffer(pqPipelineSource* source, double& minValue, double& maxValue);
 
     /// Md constants
     MantidQt::API::MdConstants m_mdConstants;
