@@ -3,7 +3,7 @@
 
 #ifdef _WIN32
 // Disabling Json warnings regarding non-export of Json::Reader and Json::Writer
-#pragma warning(disable : 4275)
+#pragma warning(disable : 4251)
 #endif
 
 
