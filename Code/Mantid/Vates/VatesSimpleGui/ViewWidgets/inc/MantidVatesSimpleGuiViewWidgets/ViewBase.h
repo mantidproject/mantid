@@ -200,7 +200,7 @@ protected:
   /**
    * Set the color scale for auto color scaling.
    */
-  void ViewBase::setAutoColorScale();
+  void setAutoColorScale();
 
 private:
   Q_DISABLE_COPY(ViewBase)
