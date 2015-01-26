@@ -3,7 +3,6 @@
 
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
-#include "MantidVatesSimpleGuiQtWidgets/RebinDialog.h"
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 
 #include <QPointer>
@@ -111,9 +110,13 @@ public:
   /// Set the current color scale state
   virtual void setColorScaleState(ColorSelectionWidget *cs);
   /// Create source for plugin mode.
-  virtual void setPluginSource(QString pluginName, QString wsName);
+  virtual pqPipelineSource* setPluginSource(QString pluginName, QString wsName);
   /// Determines if source has timesteps (4D).
   virtual bool srcHasTimeSteps(pqPipelineSource *src);
+  /// Sets the splatterplot button to the desired visibility.
+  virtual void setSplatterplot(bool visibility);
+  /// Sets the standard veiw button to the desired visibility.
+  virtual void setStandard(bool visibility);
 
   /// Enumeration for Cartesian coordinates
   enum Direction {X, Y, Z};
@@ -181,15 +184,19 @@ signals:
   void setViewStatus(ModeControlWidget::Views mode, bool state);
   /**
    * Signal to set the status of the view mode buttons.
-	 * @param view The initial view.
+   * @param view The initial view.
    * @param state Whether or not to enable to view mode buttons.
    */
   void setViewsStatus(ModeControlWidget::Views view, bool state);
   /**
    * Signal to perform a possible rebin.
-   * @param rebinDialog Pointer to a rebin dialog
    */
-  void rebin(RebinDialog* rebinDialog);
+  void rebin();
+   /**
+   * Signal to perform a possible unbin on a sources which has been
+   * rebinned in the VSI.
+   */
+  void unbin();
 
 private:
   Q_DISABLE_COPY(ViewBase)

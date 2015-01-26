@@ -1,5 +1,4 @@
 #include "MantidVatesSimpleGuiViewWidgets/StandardView.h"
-#include "MantidVatesSimpleGuiQtWidgets/RebinDialog.h"
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -36,14 +35,20 @@ namespace SimpleGui
  * buttons and creates the rendering view.
  * @param parent the parent widget for the standard view
  */
-  StandardView::StandardView(QWidget *parent) : ViewBase(parent), m_rebinDialog(NULL)
+  StandardView::StandardView(QWidget *parent) : ViewBase(parent)
 {
   this->ui.setupUi(this);
   this->cameraReset = false;
 
   // Set the rebin button to open a rebin dialog
   QObject::connect(this->ui.rebinButton, SIGNAL(clicked()),
-                   this, SLOT(onRebinButtonClicked()));
+                   this, SIGNAL(rebin()), Qt::QueuedConnection);
+
+  // Set the unbinbutton to remove the rebinning on a workspace
+  // which was binned in the VSI
+  QObject::connect(this->ui.unbinButton, SIGNAL(clicked()),
+                   this, SIGNAL(unbin()), Qt::QueuedConnection);
+
 
   // Set the cut button to create a slice on the data
   QObject::connect(this->ui.cutButton, SIGNAL(clicked()), this,
@@ -84,8 +89,14 @@ void StandardView::render()
   }
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
+  if (this->isMDHistoWorkspace(this->origSrc))
+  {
+    this->ui.rebinButton->setEnabled(false);
+  }
+
   if (this->isPeaksWorkspace(this->origSrc))
   {
+    this->ui.rebinButton->setEnabled(false);
     this->ui.cutButton->setEnabled(false);
   }
 
@@ -119,18 +130,6 @@ void StandardView::onScaleButtonClicked()
   this->scaler = builder->createFilter("filters",
                                        "MantidParaViewScaleWorkspace",
                                        this->getPvActiveSrc());
-}
-
-void StandardView::onRebinButtonClicked()
-{
-  // Open the Rebin dialog
-  if (NULL == this->m_rebinDialog)
-  {
-    this->m_rebinDialog = new RebinDialog(this);
-  }
-
-  emit rebin(m_rebinDialog);
-  this->m_rebinDialog->show();
 }
 
 /**

@@ -30,9 +30,12 @@
 #include <pqObjectInspectorWidget.h>
 #include <pqParaViewBehaviors.h>
 #include <pqPipelineSource.h>
+#include <pqPipelineFilter.h>
 #include <pqPVApplicationCore.h>
 #include <pqRenderView.h>
 #include <pqSettings.h>
+#include <pqServer.h>
+#include <pqServerManagerModel.h>
 #include <pqStatusBar.h>
 #include <pqViewSettingsReaction.h>
 #include <vtkSMDoubleVectorProperty.h>
@@ -122,8 +125,9 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
 
   this->internalSetup(true);
 
-  // Create the mapping from the measurement technique to the view
-
+  // Connect the temporary sources manager
+  QObject::connect(&m_temporarySourcesManager, SIGNAL(switchSourcesFromEventToHisto(std::string, std::string)),
+                   this, SLOT(onSwitchSourcesFromEventToHisto(std::string, std::string)));
 }
 
 /**
@@ -450,18 +454,164 @@ void MdViewerWidget::setParaViewComponentsForView()
                    SLOT(onParallelProjection(bool)));
 
   // Start listening to a rebinning event
-  QObject::connect(this->currentView, SIGNAL(rebin(RebinDialog*)),
-                   this, SLOT(onRebin(RebinDialog*)), Qt::UniqueConnection); 
+  QObject::connect(this->currentView, SIGNAL(rebin()),
+                   this, SLOT(onRebin()), Qt::UniqueConnection);
+
+  // Start listening to an unbinning event
+  QObject::connect(this->currentView, SIGNAL(unbin()),
+                   this, SLOT(onUnbin()), Qt::UniqueConnection);
+
 }
 
 /**
  * Reaction for a rebin event
  */
-void MdViewerWidget::onRebin(RebinDialog* rebinDialog)
+void MdViewerWidget::onRebin()
 {
-  m_rebinManager.connectDialog(rebinDialog);
+  pqPipelineSource* source = pqActiveObjects::instance().activeSource();
 
-  m_rebinManager.sendUpdate();
+  std::string inputWorkspaceName;
+  std::string outputWorkspaceName;
+
+  m_temporarySourcesManager.checkSource(source, inputWorkspaceName, outputWorkspaceName);
+
+  m_rebinManager.showDialog(inputWorkspaceName, outputWorkspaceName);
+}
+
+/**
+ * Switch a source from an MDEvent source to a temporary MDHisto source.
+ * @param histoWorkspaceName The name of the temporary histo workspace.
+ * @param eventWorkspaceName The name of the event workspace.
+ */
+void MdViewerWidget::onSwitchSourcesFromEventToHisto(std::string histoWorkspaceName, std::string eventWorkspaceName)
+{
+  // Create a new MDHisto source and display it
+  renderTemporaryWorkspace(histoWorkspaceName); 
+
+  // Repipe the filters to the temporary source
+  try
+  {
+    m_temporarySourcesManager.repipeTemporarySource(histoWorkspaceName, eventWorkspaceName);
+  }
+  catch (const std::runtime_error& error)
+  {
+    g_log.warning() << error.what();
+  }
+
+  // Remove the MDEvent source
+  deleteSpecificSource(eventWorkspaceName);
+
+  // Set the splatterplot button explicitly
+  this->currentView->setSplatterplot(true);
+}
+
+
+/**
+ * Creates and renders a temporary workspace source 
+ * @param temporaryWorkspaceName The name of the temporary workspace
+ */
+void MdViewerWidget::renderTemporaryWorkspace(const std::string temporaryWorkspaceName)
+{
+  // Load a new source plugin
+  QString sourcePlugin = "MDHW Source";
+  pqPipelineSource* newTemporarySource = this->currentView->setPluginSource(sourcePlugin, QString::fromStdString(temporaryWorkspaceName));
+
+  m_temporarySourcesManager.registerTemporarySource(newTemporarySource);
+
+  this->renderAndFinalSetup();
+}
+
+/**
+ * Creates and renders back to the original source 
+ * @param originalWorkspaceName The name of the original workspace
+ */
+void MdViewerWidget::renderOriginalWorkspace(const std::string originalWorkspaceName)
+{
+  // Load a new source plugin
+  QString sourcePlugin = "MDEW Source";
+  this->currentView->setPluginSource(sourcePlugin, QString::fromStdString(originalWorkspaceName));
+
+  this->renderAndFinalSetup();
+}
+
+
+/**
+ * Gets triggered by an unbin event. It removes the rebinning on a workspace
+ * which has been rebinned from within the VSI.
+ */
+void MdViewerWidget::onUnbin()
+{
+  // Force the removal of the rebinning
+  pqPipelineSource *activeSource = pqActiveObjects::instance().activeSource();
+
+  removeRebinning(activeSource, true);
+}
+
+/**
+ * Remove the rebinning.
+ * @param source The pipeline source for which the rebinning will be removed.
+ * @param forced If it should be removed under all circumstances.
+ * @param view If switched, to which view is it being switched
+ */
+void MdViewerWidget::removeRebinning(pqPipelineSource* source, bool forced, ModeControlWidget::Views view)
+{
+  if (forced || view == ModeControlWidget::SPLATTERPLOT)
+  {
+    std::string originalWorkspaceName;
+    std::string temporaryWorkspaceName;
+    m_temporarySourcesManager.getStoredWorkspaceNames(source, originalWorkspaceName, temporaryWorkspaceName);
+
+    // If there is nothing to remove then we are done
+    if (originalWorkspaceName.empty() || temporaryWorkspaceName.empty())
+    {
+      return;
+    }
+
+    // Create the original source
+    renderOriginalWorkspace(originalWorkspaceName);
+
+    // Repipe the filters to the original source
+    try
+    {
+      m_temporarySourcesManager.repipeOriginalSource(temporaryWorkspaceName, originalWorkspaceName);
+    }
+    catch (const std::runtime_error& error)
+    {
+      g_log.warning() << error.what();
+    }
+
+    // Remove the MDHisto source
+    deleteSpecificSource(temporaryWorkspaceName);
+
+    // Set the buttons correctly if we switch to splatterplot
+    if ( view == ModeControlWidget::SPLATTERPLOT)
+    {
+      this->currentView->setSplatterplot(false);
+      this->currentView->setStandard(true);
+    }
+  }
+}
+
+/**
+ * Remove rebinning from all rebinned sources
+ * @param view The view mode.
+ */
+void MdViewerWidget::removeAllRebinning(ModeControlWidget::Views view)
+{
+  // Iterate over all temporary sources and remove them
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
+
+  for (QList<pqPipelineSource *>::Iterator source = sources.begin(); source != sources.end(); ++source)
+  {
+    const QString srcProxyName = (*source)->getProxy()->GetXMLGroup();
+
+    if (srcProxyName == QString("sources"))
+    {
+      removeRebinning(*source, false, view);
+    }
+  }
 }
 
 /**
@@ -746,13 +896,6 @@ void MdViewerWidget::checkForUpdates()
   }
   vtkSMProxy *proxy = src->getProxy();
 
-  if (strcmp(proxy->GetXMLName(), "MDEWRebinningCutter") == 0)
-  {
-    this->currentView->onAutoScale();
-    this->currentView->updateAnimationControls();
-    this->currentView->updateView();
-    this->currentView->updateUI();
-  }
   if (QString(proxy->GetXMLName()).contains("Threshold"))
   {
     this->ui.colorSelectionWidget->enableControls(true);
@@ -775,6 +918,7 @@ void MdViewerWidget::checkForUpdates()
  */
 void MdViewerWidget::switchViews(ModeControlWidget::Views v)
 {
+  this->removeAllRebinning(v);
   this->viewSwitched = true;
   this->currentView->closeSubWindows();
   this->disconnectDialogs();
@@ -1104,6 +1248,40 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
       }
     }
     emit this->requestClose();
+  }
+}
+
+/**
+ * Delete a specific source and all of its filters. This assumes a linear filter system
+ * @param workspaceName The workspaceName associated with the source which is to be deleted
+ */
+void MdViewerWidget::deleteSpecificSource(std::string workspaceName)
+{
+  pqPipelineSource *source = this->currentView->hasWorkspace(workspaceName.c_str());
+  if (NULL != source)
+  {
+    // Go to the end of the source and work your way back
+    pqPipelineSource* tempSource = source;
+    
+    while ((tempSource->getAllConsumers()).size() > 0)
+    {
+      tempSource = tempSource->getConsumer(0);
+    }
+
+    // Now delete all filters and the source
+    pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+
+    // Crawl up to the source level 
+    pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(tempSource);
+
+    while (filter)
+    {
+      source = filter->getInput(0);
+      builder->destroy(filter);
+      filter = qobject_cast<pqPipelineFilter*>(source);
+    }
+
+    builder->destroy(source);
   }
 }
 

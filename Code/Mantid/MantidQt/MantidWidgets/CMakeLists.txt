@@ -14,7 +14,7 @@ set ( SRC_FILES
 	src/FunctionBrowser.cpp
 	src/HintingLineEdit.cpp
 	src/InstrumentSelector.cpp
-        src/MantidHelpWindow.cpp
+  src/MantidHelpWindow.cpp
 	src/MWDiag.cpp
 	src/MWRunFiles.cpp
 	src/MessageDisplay.cpp
@@ -32,6 +32,7 @@ set ( SRC_FILES
 	src/SelectFunctionDialog.cpp
 	src/SelectWorkspacesDialog.cpp
 	src/SequentialFitDialog.cpp
+  src/SlicingAlgorithmDialog.cpp
 	src/StringDialogEditor.cpp
 	src/StringEditorFactory.cpp
 	src/UserFunctionDialog.cpp
@@ -78,6 +79,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/SelectFunctionDialog.h
     inc/MantidQtMantidWidgets/SelectWorkspacesDialog.h
     inc/MantidQtMantidWidgets/SequentialFitDialog.h
+    inc/MantidQtMantidWidgets/SlicingAlgorithmDialog.h
     inc/MantidQtMantidWidgets/StringDialogEditor.h
     inc/MantidQtMantidWidgets/StringEditorFactory.h
     inc/MantidQtMantidWidgets/UserFunctionDialog.h
@@ -108,6 +110,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/RenameParDialog.ui
     inc/MantidQtMantidWidgets/SelectFunctionDialog.ui
     inc/MantidQtMantidWidgets/SequentialFitDialog.ui
+    inc/MantidQtMantidWidgets/SlicingAlgorithmDialog.ui
     inc/MantidQtMantidWidgets/UserFunctionDialog.ui
     inc/MantidQtMantidWidgets/pqHelpWindow.ui
 )
@@ -125,7 +128,6 @@ find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)
 include(${QT_USE_FILE})
 
 include_directories ( ../../QtPropertyBrowser/src )
-
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )

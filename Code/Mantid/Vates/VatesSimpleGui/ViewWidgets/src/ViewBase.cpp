@@ -258,7 +258,7 @@ pqPipelineRepresentation *ViewBase::getPvActiveRep()
  * @param pluginName name of the ParaView plugin
  * @param wsName name of the Mantid workspace to pass to the plugin
  */
-void ViewBase::setPluginSource(QString pluginName, QString wsName)
+pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
 {
   // Create the source from the plugin
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
@@ -274,6 +274,8 @@ void ViewBase::setPluginSource(QString pluginName, QString wsName)
   srcProxy->Modified();
   srcProxy->UpdatePipelineInformation();
   src->updatePipeline();
+
+  return src;
 }
 
 /**
@@ -307,6 +309,24 @@ void ViewBase::checkView(ModeControlWidget::Views initialView)
   {
     emit this->setViewsStatus(initialView, true);
   }
+}
+
+/**
+ * This metod sets the status of the splatterplot button explictly to a desired value
+ * @param visiblity The state of the the splatterplot view button.
+ */
+void ViewBase::setSplatterplot(bool visibility)
+{
+    emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, visibility);
+}
+
+/**
+ * This metod sets the status of the standard view button explictly to a desired value
+ * @param visiblity The state of the the standard view button.
+ */
+void ViewBase::setStandard(bool visibility)
+{
+    emit this->setViewStatus(ModeControlWidget::STANDARD, visibility);
 }
 
 /**

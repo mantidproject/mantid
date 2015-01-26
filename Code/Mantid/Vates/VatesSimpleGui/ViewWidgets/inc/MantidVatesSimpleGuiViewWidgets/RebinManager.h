@@ -2,9 +2,15 @@
 #define REBINMANAGER_H_
 
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
-#include <QObject>
-#include <vector>
-#include <QStringList>
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidQtAPI/AlgorithmDialog.h"
+#include "MantidQtMantidWidgets/SlicingAlgorithmDialog.h"
+
+#include <pqPipelineSource.h>
+#include <QWidget>
+
 
 namespace Mantid
 {
@@ -12,8 +18,6 @@ namespace Mantid
   {
     namespace SimpleGui
     {
-      class RebinDialog;
-
       /**
        *
        This class coordinates the rebinning of a workspace and updates the pipeline and view to make the changes of the 
@@ -41,26 +45,34 @@ namespace Mantid
        File change history is stored at: <https://github.com/mantidproject/mantid>
        Code Documentation is available at: <http://doxygen.mantidproject.org>
        */
-      class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS RebinManager :public QObject
+      class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS RebinManager : public QWidget
       {
         Q_OBJECT
         public:
-          RebinManager(QObject* parent = 0);
+          RebinManager(QWidget* parent = 0);
 
           ~RebinManager();
 
-          void sendUpdate();
-
-          void connectDialog(RebinDialog* rebinDialog);
-
-        signals:
-          void udpateDialog(QStringList algorithms,std::vector<QString> binNames, std::vector<int> bins);
-
-        public slots:
-          void onPerformRebinning(QString algorithm,std::vector<QString> binNames, std::vector<int> bins);
+          void showDialog(std::string inputWorkspace, std::string outputWorkspace);
 
         private:
-          RebinDialog* m_rebinDialog;
+          MantidQt::API::AlgorithmDialog* createDialog(Mantid::API::IAlgorithm_sptr algorithm, std::string inputWorkspace, std::string outputWorkspace);
+
+          void getPresetsForBinMD( std::string inputWorkspace, std::string outputWorkspace, QHash<QString, QString>& presets);
+
+          void setAxisDimensions(MantidQt::MantidWidgets::BinMDDialog* dialog,  std::string inputWorkspace);
+
+          Mantid::API::IMDEventWorkspace_sptr getWorkspace(std::string workspaceName);
+
+          Mantid::API::IAlgorithm_sptr createAlgorithm(const QString& algName, int version);
+
+          Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace> m_adsWorkspaceProvider;
+
+          int m_binMdVersion;
+          QString m_binMdName;
+          QString m_lblInputWorkspace;
+          QString m_lblOutputWorkspace;
+          size_t m_binCutOffValue;
       };
 
     } // SimpleGui

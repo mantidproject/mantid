@@ -4,6 +4,7 @@
 #include "ui_MdViewerWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidVatesSimpleGuiViewWidgets/RebinManager.h"
+#include "MantidVatesSimpleGuiViewWidgets/SourcesManager.h"
 
 #include "MantidQtAPI/VatesViewerInterface.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
@@ -103,7 +104,11 @@ protected slots:
   /// Execute view switch.
   void switchViews(ModeControlWidget::Views v);
   /// On rebin 
-  void onRebin(RebinDialog* rebinDialog);
+  void onRebin();
+  /// On  unbin
+  void onUnbin();
+  /// On switching an MDEvent source to a temporary MDHisto source.
+  void onSwitchSourcesFromEventToHisto(std::string histoWorkspaceName, std::string eventWorkspaceName);
 
 protected:
   /// Handle workspace preDeletion tasks.
@@ -131,6 +136,7 @@ private:
   bool viewSwitched;
   ModeControlWidget::Views initialView; ///< Holds the initial view
   RebinManager m_rebinManager; ///<Holds the rebin manager
+  SourcesManager m_temporarySourcesManager; ///<Holds the sources manager
 
   /// Check the environmental variables.
   void checkEnvSetup();
@@ -178,6 +184,16 @@ private:
   bool checkIfTechniqueContainsKeyword(const std::set<std::string>& techniques, const std::string& keyword) const;
   /// Reset the current view to the appropriate initial view.
   void resetCurrentView(int workspaceType, const std::string& instrumentName);
+  /// Render temporary workspace
+  void renderTemporaryWorkspace(const std::string temporaryWorkspaceName); 
+  /// Render the original workspace
+  void renderOriginalWorkspace(const std::string originalWorkspaceName);
+  /// Delete a specific workspace
+  void deleteSpecificSource(std::string workspaceName);
+  /// Remove the rebinning when switching views or otherwise.
+  void removeRebinning(pqPipelineSource* source, bool forced, ModeControlWidget::Views view = ModeControlWidget::STANDARD);
+  /// Remove all rebinned sources
+  void removeAllRebinning(ModeControlWidget::Views view);
 };
 
 } // SimpleGui
