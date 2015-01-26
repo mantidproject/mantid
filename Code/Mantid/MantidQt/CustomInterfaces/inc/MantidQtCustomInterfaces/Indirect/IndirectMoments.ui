@@ -7,19 +7,244 @@
     <x>0</x>
     <y>0</y>
     <width>444</width>
-    <height>251</height>
+    <height>288</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-
-
+  <layout class="QVBoxLayout" name="moment_verticalLayout_27">
+   <item>
+    <widget class="QGroupBox" name="gbInput">
+     <property name="title">
+      <string>Input</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsInput" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="loadLabelText" stdset="0">
+         <string>Plot Input</string>
+        </property>
+        <property name="workspaceSuffixes" stdset="0">
+         <stringlist>
+          <string>_sqw</string>
+         </stringlist>
+        </property>
+        <property name="fileBrowserSuffixes" stdset="0">
+         <stringlist>
+          <string>_sqw.nxs</string>
+         </stringlist>
+        </property>
+        <property name="showLoad" stdset="0">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="loScale">
+        <item>
+         <widget class="QCheckBox" name="ckScale">
+          <property name="text">
+           <string>Scale By:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="spScale">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximum">
+           <double>999.990000000000009</double>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Expanding</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbOptions">
+     <property name="title">
+      <string>Options</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_21">
+      <item>
+       <layout class="QHBoxLayout" name="properties"/>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="plotRaw"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbPreview">
+     <property name="title">
+      <string>Preview</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_1">
+      <property name="margin">
+       <number>6</number>
+      </property>
+      <item>
+       <layout class="QVBoxLayout" name="plotPreview"/>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="loPlotLegend">
+        <item>
+         <widget class="QLabel" name="lbM0">
+          <property name="styleSheet">
+           <string notr="true">color: green;</string>
+          </property>
+          <property name="text">
+           <string>M0</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lbM2">
+          <property name="styleSheet">
+           <string notr="true">color: black;</string>
+          </property>
+          <property name="text">
+           <string>M2</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lbM4">
+          <property name="styleSheet">
+           <string notr="true">color: red;</string>
+          </property>
+          <property name="text">
+           <string>M4</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_0">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbOutput">
+     <property name="title">
+      <string>Output</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QCheckBox" name="ckVerbose">
+        <property name="text">
+         <string>Verbose</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_0">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="ckPlot">
+        <property name="text">
+         <string>Plot</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_1">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="ckSave">
+        <property name="text">
+         <string>Save</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::DataSelector</class>
+   <extends>QWidget</extends>
+   <header>mantidqt::mantidwidgets::dataselector.h</header>
+  </customwidget>
  </customwidgets>
- <tabstops>
- </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>ckScale</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spScale</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>60</x>
+     <y>45</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>139</x>
+     <y>46</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
