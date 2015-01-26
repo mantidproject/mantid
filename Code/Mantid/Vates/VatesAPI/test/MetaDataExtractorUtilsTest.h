@@ -8,7 +8,7 @@
 #include <gtest/gtest.h> 
 #include "MockObjects.h"
 
-#include "qwt/qwt_double_interval.h"
+#include <qwt_double_interval.h>
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidAPI/FileFinder.h"
 #include "boost/pointer_cast.hpp"
