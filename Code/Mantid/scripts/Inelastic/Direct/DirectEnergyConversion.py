@@ -9,7 +9,8 @@ import numpy as np
 
 import CommonFunctions as common
 import diagnostics
-from PropertyManager import PropertyManager;
+from PropertyManager import PropertyManager
+from ReductionHelpers import extract_non_system_names
 
 
 def setup_reducer(inst_name,reload_instrument=False):
@@ -564,7 +565,7 @@ class DirectEnergyConversion(object):
           n,r=funcreturns.lhs_info('both')
           wksp_out=r[0]
       except:
-          wksp_out = self.prop_man.get_sample_ws_name();
+          wksp_out = self.get_sample_ws_name();
 
 
       # Process old legacy parameters which are easy to re-define in dgreduce rather then transfer through Mantid
@@ -574,9 +575,8 @@ class DirectEnergyConversion(object):
 
       # inform user on what parameters have changed 
       self.prop_man.log_changed_values('notice');
-      #process complex parameters
-
       prop_man = self.prop_man
+      #process complex parameters
 
       start_time=time.time()
       # defaults can be None too, but can be a file
@@ -587,16 +587,16 @@ class DirectEnergyConversion(object):
 
 
       # Here was summation in dgreduce. 
-      if (np.size(self.prop_man.sample_run)) > 1 and self.prop_man.sum_runs:
+      if (np.size(self.sample_run)) > 1 and self.sum_runs:
         #this sums the runs together before passing the summed file to the rest of the reduction
         #this circumvents the inbuilt method of summing which fails to sum the files for diag
         # TODO: --check out if internal summation works -- it does not. Should be fixed. Old summation meanwhile
 
-        sum_name=self.prop_man.instr_name+str(self.prop_man.sample_run[0])+'-sum'
-        sample_run =self.sum_files(sum_name, self.prop_man.sample_run)
-        common.apply_calibration(self.prop_man.instr_name,sample_run,self.prop_man.det_cal_file)
+        sum_name=self.instr_name+str(self.sample_run[0])+'-sum'
+        sample_run =self.sum_files(sum_name, self.sample_run)
+        common.apply_calibration(self.instr_name,sample_run,self.det_cal_file)
       else:
-        sample_run,sample_monitors = self.load_data(self.prop_man.sample_run)
+        sample_run,sample_monitors = self.load_data(self.sample_run)
 
       # Update reduction properties which may change in the workspace but have not been modified from input parameters. 
       # E.g. detector number have changed 
@@ -609,7 +609,7 @@ class DirectEnergyConversion(object):
           prop_man.log_changed_values('notice',False,oldChanges)
           prop_man.log("****************************************************************")
 
-      self.prop_man.sample_run = sample_run
+      self.sample_run = sample_run
 
 
 
@@ -628,7 +628,7 @@ class DirectEnergyConversion(object):
      # diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
       if not masks_done:
         prop_man.log("======== Run diagnose for sample run ===========================",'notice');
-        masking = self.diagnose(prop_man.wb_run,prop_man.mask_run,
+        masking = self.diagnose(self.wb_run,self.mask_run,
                                 second_white=None,print_diag_results=True)
         if prop_man.use_hard_mask_only:
             header = "*** Hard mask file applied to workspace with {0:d} spectra masked {1:d} spectra"
@@ -637,15 +637,15 @@ class DirectEnergyConversion(object):
 
 
         # diagnose absolute units:
-        if prop_man.monovan_run != None :
-            if prop_man.mono_correction_factor == None :
-                if prop_man.use_sam_msk_on_monovan == True:
+        if self.monovan_run != None :
+            if self.mono_correction_factor == None :
+                if self.use_sam_msk_on_monovan == True:
                     prop_man.log('  Applying sample run mask to mono van')
                 else:
-                    if not prop_man.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better solution for that.
+                    if not self.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better solution for that.
                         prop_man.log("======== Run diagnose for monochromatic vanadium run ===========",'notice');
 
-                        masking2 = self.diagnose(prop_man.wb_for_monovan_run,prop_man.monovan_run,
+                        masking2 = self.diagnose(self.wb_for_monovan_run,self.monovan_run,
                                          second_white = None,print_diag_results=True)
                         masking +=  masking2
                         DeleteWorkspace(masking2)
@@ -670,14 +670,14 @@ class DirectEnergyConversion(object):
       prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice');
 
       #Run the conversion first on the sample
-      deltaE_wkspace_sample = self.mono_sample(sample_run,prop_man.incident_energy,prop_man.wb_run,
-                                               prop_man.map_file,masking)
+      deltaE_wkspace_sample = self.mono_sample(sample_run,self.incident_energy,self.wb_run,
+                                               self.map_file,masking)
 
  
       # calculate absolute units integral and apply it to the workspace
-      if prop_man.monovan_run != None or prop_man.mono_correction_factor != None :
-         deltaE_wkspace_sample = self.apply_absolute_normalization(deltaE_wkspace_sample,prop_man.monovan_run,\
-                                      prop_man.incident_energy,prop_man.wb_for_monovan_run)
+      if self.monovan_run != None or self.mono_correction_factor != None :
+         deltaE_wkspace_sample = self.apply_absolute_normalization(deltaE_wkspace_sample,self.monovan_run,\
+                                      self.incident_energy,self.wb_for_monovan_run)
 
 
       results_name = deltaE_wkspace_sample.name();
@@ -1298,14 +1298,28 @@ class DirectEnergyConversion(object):
     @property 
     def prop_man(self):
         """ Return property manager containing DirectEnergyConversion parameters """
-        return self._propMan;
+        return self._propMan
     @prop_man.setter
     def prop_man(self,value):
         """ Assign new instance of direct property manager to provide DirectEnergyConversion parameters """
         if isinstance(value,PropertyManager):
-            self._propMan = value;
+            self._propMan = value
         else:
             raise KeyError("Property manager can be initialized by an instance of ProperyManager only")
+    @property
+    def spectra_masks(self):
+        """ check if spectra masks are defined """ 
+        if hasattr(self,'_spectra_masks'):
+            return self._spectra_masks
+        else:
+            return None
+
+    @spectra_masks.setter
+    def spectra_masks(self,value):
+        """ set up spectra masks """ 
+        self._spectra_masks = value
+
+
     #---------------------------------------------------------------------------
     # Behind the scenes stuff
     #---------------------------------------------------------------------------
@@ -1314,6 +1328,10 @@ class DirectEnergyConversion(object):
         """
         Constructor
         """
+        all_methods = dir(self)
+        # define list of all existing properties, which have descriptors
+        object.__setattr__(self,'_descriptors',extract_non_system_names(all_methods))
+
         if instr_name:
             self.initialise(instr_name,reload_instrument);
         else:
@@ -1321,8 +1339,30 @@ class DirectEnergyConversion(object):
             #
             self._keep_wb_workspace = False;
             self._do_ISIS_normalization = True;
-            self.spectra_masks = None;
+            self._spectra_masks = None;
         #end
+
+    def __getattr__(self,attr_name):
+       """  overloaded to return values of properties non-existing in the class dictionary from the property manager class except this
+            property already have descriptor in self class
+       """ 
+       if attr_name in self._descriptors:
+          return object.__getattr__(self,attr_name)
+       else:
+          return getattr(self._propMan,attr_name)
+
+    def __setattr__(self,attr_name,attr_value):
+        """ overloaded to prohibit adding non-starting with _properties to the class instance
+            and add all other properties to property manager except this property already have descriptor
+        """
+        if attr_name[0] == '_':
+            object.__setattr__(self,attr_name,attr_value)
+        else:
+            if attr_name in self._descriptors:
+                object.__setattr__(self,attr_name,attr_value)
+            else:
+                setattr(self._propMan,attr_name,attr_value)
+            
 
  
     def initialise(self, instr,reload_instrument=False):

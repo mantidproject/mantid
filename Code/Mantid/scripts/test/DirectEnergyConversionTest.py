@@ -123,6 +123,32 @@ class DirectEnergyConversionTest(unittest.TestCase):
         white_ws = tReducer.do_white(wb_ws, None, None,None)
         self.assertTrue(white_ws)
 
+    def test_get_set_attributes(self):
+        tReducer = self.reducer
+
+        # prohibit accessing non-existing property
+        self.assertRaises(KeyError,getattr,tReducer,'non_existing_property')
+        self.assertRaises(KeyError,setattr,tReducer,'non_existing_property',1000)
+        self.assertRaises(KeyError,getattr,tReducer,'non_existing_property')
+
+        # allow simple creation of a system property
+        self.assertRaises(KeyError,getattr,tReducer,'_new_system_property')
+        setattr(tReducer,'_new_system_property',True)
+        self.assertTrue(tReducer._new_system_property)
+
+        # direct and indirect access to prop_man properties
+
+        #sample run has not been defined
+        self.assertRaises(KeyError,getattr,tReducer,'sample_run')
+        prop_man = tReducer.prop_man
+        self.assertRaises(KeyError,getattr,prop_man,'sample_run')
+        # define sample run
+        tReducer.sample_run =10234
+        self.assertEqual(tReducer.sample_run,10234)
+        self.assertEqual(tReducer.prop_man.sample_run,10234)
+
+
+
     def test_get_abs_normalization_factor(self) :
         mono_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000,XUnit='DeltaE',XMin=-5,XMax=15,BinWidth=0.1,function='Flat background')
         LoadInstrument(mono_ws,InstrumentName='MARI')
@@ -171,7 +197,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         #abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,samp_mass,ei_guess,rebin,map_file='default',monovan_mapfile='default',**kwargs):
         ws = dgreduce.abs_units(wb_ws,run_ws,None,wb_ws,10,100,8.8,[-10,0.1,7],None,None,**par)
         self.assertTrue(isinstance(ws,api.MatrixWorkspace))
-
+    
 
 
     ##def test_diag_call(self):

@@ -116,7 +116,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_set_spectra_to_mon(self):
         propman = self.prop_man
 
-        self.assertTrue(propman.spectra_to_monitors_list is None);
+        self.assertTrue(propman.spectra_to_monitors_list is None)
 
         propman.spectra_to_monitors_list = 35;
         self.assertTrue(isinstance(propman.spectra_to_monitors_list,list));
@@ -306,6 +306,10 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(propman.normalise_method, 'current')
 
         self.assertRaises(KeyError,setattr,propman,'normalise_method','unsupported');
+
+        # Only direct method is supported
+        self.assertEqual(propman.deltaE_mode, 'direct')
+        self.assertRaises(KeyError,setattr,propman,'deltaE_mode','unsupported');
 
     def test_ki_kf(self):
         propman = self.prop_man
@@ -538,9 +542,9 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         changed_prop=propman.update_defaults_from_instrument( ws.getInstrument())
 
-        self.assertEqual(len(changed_prop),1)
+        self.assertEqual(len(changed_prop),2)
         bkgd_range = propman.bkgd_range
-        self.assertAlmostEqual(bkgd_range[0],mari_bkgd_range[0])
+        self.assertAlmostEqual(bkgd_range[0],100)
         self.assertAlmostEqual(bkgd_range[1],40)
 
     def test_monovan_integration_range(self):
@@ -636,7 +640,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(propman1.hard_mask_file,'a_hard_mask_file.msk')
         self.assertTrue(propman1.run_diagnostics)
         changed_prop=propman1.getChangedProperties()
-        self.assertEqual(len(changed_prop),1)
+        self.assertEqual(len(changed_prop),2)
 
 
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
@@ -647,10 +651,21 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         # verify if changed properties list does not change anything
         changed_prop=propman1.update_defaults_from_instrument( ws.getInstrument())
-        self.assertEqual(len(changed_prop),1)
+        self.assertEqual(len(changed_prop),4)
         self.assertFalse(propman1.use_hard_mask_only)
         self.assertEqual(propman1.hard_mask_file,'a_hard_mask_file.msk')
         self.assertTrue(propman1.run_diagnostics)
+
+        propman1.setChangedProperties(set())
+        propman1.hardmaskOnly = 'more_hard_mask_file'
+
+        # verify if changed properties list does not change anything
+        changed_prop=propman1.update_defaults_from_instrument( ws.getInstrument())
+        self.assertTrue(propman1.use_hard_mask_only)
+        self.assertEqual(propman1.hard_mask_file,'more_hard_mask_file.msk')
+        self.assertTrue(propman1.run_diagnostics)
+
+
 #def test_default_warnings(self):
     #    tReducer = self.reducer
 
