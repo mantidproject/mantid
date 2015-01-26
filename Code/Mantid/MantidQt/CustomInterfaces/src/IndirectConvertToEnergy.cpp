@@ -86,9 +86,6 @@ namespace CustomInterfaces
   {
     detailedBalanceCheck(m_uiForm.ckDetailedBalance->isChecked());
     scaleMultiplierCheck(m_uiForm.ckScaleMultiplier->isChecked());
-
-    // Load the default instrument parameters
-    setInstrumentDefault();
   }
 
   void IndirectConvertToEnergy::run()
@@ -99,9 +96,9 @@ namespace CustomInterfaces
     reductionAlg->initialize();
     BatchAlgorithmRunner::AlgorithmRuntimeProps reductionRuntimeProps;
 
-    reductionAlg->setProperty("Instrument", m_uiForm.cbInst->currentText().toStdString());
-    reductionAlg->setProperty("Analyser", m_uiForm.cbAnalyser->currentText().toStdString());
-    reductionAlg->setProperty("Reflection", m_uiForm.cbReflection->currentText().toStdString());
+    reductionAlg->setProperty("Instrument", m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString());
+    reductionAlg->setProperty("Analyser", m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString());
+    reductionAlg->setProperty("Reflection", m_uiForm.iicInstrumentConfiguration->getReflectionName().toStdString());
 
     QString files = m_uiForm.ind_runFiles->getFilenames().join(",");
     reductionAlg->setProperty("InputFiles", files.toStdString());
@@ -557,8 +554,8 @@ namespace CustomInterfaces
       groupingAlg->initialize();
 
       groupingAlg->setProperty("FixedGroupCount", m_uiForm.leNoGroups->text().toInt());
-      groupingAlg->setProperty("InstrumentName", m_uiForm.cbInst->currentText().toStdString());
-      groupingAlg->setProperty("ComponentName", m_uiForm.cbAnalyser->currentText().toStdString());
+      groupingAlg->setProperty("InstrumentName", m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString());
+      groupingAlg->setProperty("ComponentName", m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString());
       groupingAlg->setProperty("OutputWorkspace", groupWS.toStdString());
 
       m_batchAlgoRunner->addAlgorithm(groupingAlg);

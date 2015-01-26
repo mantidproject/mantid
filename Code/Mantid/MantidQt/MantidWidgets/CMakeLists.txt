@@ -14,6 +14,7 @@ set ( SRC_FILES
 	src/FunctionBrowser.cpp
 	src/HintingLineEdit.cpp
 	src/InstrumentSelector.cpp
+  src/IndirectInstrumentConfig.cpp
         src/MantidHelpWindow.cpp
 	src/MWDiag.cpp
 	src/MWRunFiles.cpp
@@ -58,6 +59,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/CatalogSearch.h
     inc/MantidQtMantidWidgets/CatalogSelector.h
     inc/MantidQtMantidWidgets/InstrumentSelector.h
+    inc/MantidQtMantidWidgets/IndirectInstrumentConfig.h
     inc/MantidQtMantidWidgets/MantidHelpWindow.h
     inc/MantidQtMantidWidgets/MessageDisplay.h
     inc/MantidQtMantidWidgets/MultifitSetupDialog.h
@@ -100,6 +102,7 @@ set ( UI_FILES
 	  inc/MantidQtMantidWidgets/DataSelector.ui
     inc/MantidQtMantidWidgets/CatalogSearch.ui
     inc/MantidQtMantidWidgets/CatalogSelector.ui
+    inc/MantidQtMantidWidgets/IndirectInstrumentConfig.ui
     inc/MantidQtMantidWidgets/MWDiag.ui
     inc/MantidQtMantidWidgets/MWRunFiles.ui
     inc/MantidQtMantidWidgets/MultifitSetupDialog.ui

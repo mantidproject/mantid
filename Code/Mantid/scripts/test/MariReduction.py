@@ -1,10 +1,10 @@
 """ Sample MARI reduction scrip used in testing ReductionWrapper """ 
 
-from ReductionWrapper import *
+from Direct.ReductionWrapper import *
 try:
-    import reduce_vars as rv
+    import reduce_vars as web_var
 except:
-    rv = None
+    web_var = None
 
 
 
@@ -52,7 +52,7 @@ class ReduceMARI(ReductionWrapper):
        return ws
    def __init__(self):
        """ sets properties defaults for the instrument with Name"""
-       ReductionWrapper.__init__(self,'MAR',rv)
+       ReductionWrapper.__init__(self,'MAR',web_var)
 
 
 if __name__=="__main__":

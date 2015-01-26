@@ -327,6 +327,9 @@ void MdViewerWidget::removeProxyTabWidgetConnections()
 {
   QObject::disconnect(&pqActiveObjects::instance(), 0,
                       this->ui.propertiesPanel, 0);
+  this->ui.propertiesPanel->setRepresentation(NULL);
+  this->ui.propertiesPanel->setView(NULL);
+  this->ui.propertiesPanel->setOutputPort(NULL);
 }
 
 /**
@@ -386,6 +389,10 @@ void MdViewerWidget::setParaViewComponentsForView()
                    this->ui.propertiesPanel, SLOT(setRepresentation(pqRepresentation*)));
   QObject::connect(activeObjects, SIGNAL(viewChanged(pqView*)),
                    this->ui.propertiesPanel, SLOT(setView(pqView*)));
+
+  this->ui.propertiesPanel->setOutputPort(activeObjects->activePort());
+  this->ui.propertiesPanel->setView(this->currentView->getView());
+  this->ui.propertiesPanel->setRepresentation(activeObjects->activeRepresentation());
 
   QObject::connect(this->currentView,
                    SIGNAL(triggerAccept()),

@@ -32,6 +32,7 @@ namespace
   public:
     MOCK_METHOD1(zoomToRectangle, void(const PeakBoundingBox&));
     MOCK_METHOD0(resetView, void());
+    MOCK_METHOD0(detach, void());
     virtual ~MockZoomablePeaksView(){}
   };
 
@@ -61,6 +62,9 @@ namespace
     MOCK_CONST_METHOD0(getShowBackground, bool());
     MOCK_METHOD1(zoomToPeak, void(const int));
     MOCK_CONST_METHOD0(isHidden, bool());
+    MOCK_METHOD1(reInitialize, void(boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS));
+    MOCK_CONST_METHOD1(contentsDifferent,
+          bool(const PeaksPresenter*  other));
     virtual ~MockPeaksPresenter(){}
   };
 
@@ -143,6 +147,7 @@ class MockPeakTransformFactory : public PeakTransformFactory
     MOCK_CONST_METHOD0(getPlotYLabel, std::string());
     MOCK_METHOD0(updateView, void());
     MOCK_CONST_METHOD0(FOM, int());
+    MOCK_METHOD1(swapPeaksWorkspace, void(boost::shared_ptr<Mantid::API::IPeaksWorkspace>&));
   };
   
   

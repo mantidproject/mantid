@@ -60,12 +60,53 @@ IndirectDiffractionReduction::~IndirectDiffractionReduction()
 }
 
 /**
+ * Sets up UI components and Qt signal/slot connections.
+ */
+void IndirectDiffractionReduction::initLayout()
+{
+  m_uiForm.setupUi(this);
+
+  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
+  connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(demonRun()));
+
+  connect(m_uiForm.iicInstrumentConfiguration, SIGNAL(instrumentConfigurationUpdated(const QString &, const QString &, const QString &)),
+          this, SLOT(instrumentSelected(const QString &, const QString &, const QString &)));
+
+  // Update run button based on state of raw files field
+  connect(m_uiForm.dem_rawFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(runFilesChanged()));
+  connect(m_uiForm.dem_rawFiles, SIGNAL(findingFiles()), this, SLOT(runFilesFinding()));
+  connect(m_uiForm.dem_rawFiles, SIGNAL(fileFindingFinished()), this, SLOT(runFilesFound()));
+
+  m_valInt = new QIntValidator(this);
+  m_valDbl = new QDoubleValidator(this);
+
+  m_uiForm.set_leSpecMin->setValidator(m_valInt);
+  m_uiForm.set_leSpecMax->setValidator(m_valInt);
+
+  m_uiForm.leRebinStart->setValidator(m_valDbl);
+  m_uiForm.leRebinWidth->setValidator(m_valDbl);
+  m_uiForm.leRebinEnd->setValidator(m_valDbl);
+
+  // Update the list of plot options when individual grouping is toggled
+  connect(m_uiForm.ckIndividualGrouping, SIGNAL(stateChanged(int)), this, SLOT(individualGroupingToggled(int)));
+
+  // Set initial layout based on instrument
+  m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
+
+  loadSettings();
+
+  // Update invalid rebinning markers
+  validateRebin();
+}
+
+/**
  * Runs a diffraction reduction when the user clieks Run.
  */
 void IndirectDiffractionReduction::demonRun()
 {
-  QString instName = m_uiForm.cbInst->currentText();
-  QString mode = m_uiForm.cbReflection->currentText();
+  QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
+  QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
 
   if(instName == "OSIRIS" && mode == "diffonly")
   {
@@ -115,8 +156,8 @@ void IndirectDiffractionReduction::plotResults(bool error)
     AnalysisDataService::Instance().remove("IndirectDiffraction_Workspaces");
   }
 
-  QString instName = m_uiForm.cbInst->currentText();
-  QString mode = m_uiForm.cbReflection->currentText();
+  QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
+  QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
 
   QString plotType = m_uiForm.cbPlotType->currentText();
 
@@ -277,29 +318,26 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction()
  */
 MatrixWorkspace_sptr IndirectDiffractionReduction::loadInstrument(std::string instrumentName, std::string reflection)
 {
-  std::string instWorkspaceName = "__empty_" + instrumentName;
   std::string idfPath = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
 
-  if(!AnalysisDataService::Instance().doesExist(instWorkspaceName))
-  {
-    std::string parameterFilename = idfPath + instrumentName + "_Definition.xml";
-    IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
-    loadAlg->initialize();
-    loadAlg->setProperty("Filename", parameterFilename);
-    loadAlg->setProperty("OutputWorkspace", instWorkspaceName);
-    loadAlg->execute();
-  }
-
-  MatrixWorkspace_sptr instWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(instWorkspaceName);
+  std::string parameterFilename = idfPath + instrumentName + "_Definition.xml";
+  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  loadAlg->setChild(true);
+  loadAlg->initialize();
+  loadAlg->setProperty("Filename", parameterFilename);
+  loadAlg->setProperty("OutputWorkspace", "__InDiff_Inst");
+  loadAlg->execute();
+  MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
 
   // Load parameter file if a reflection was given
   if(!reflection.empty())
   {
     std::string ipfFilename = idfPath + instrumentName + "_diffraction_" + reflection + "_Parameters.xml";
     IAlgorithm_sptr loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
+    loadParamAlg->setChild(true);
     loadParamAlg->initialize();
     loadParamAlg->setProperty("Filename", ipfFilename);
-    loadParamAlg->setProperty("Workspace", instWorkspaceName);
+    loadParamAlg->setProperty("Workspace", instWorkspace);
     loadParamAlg->execute();
   }
 
@@ -307,42 +345,18 @@ MatrixWorkspace_sptr IndirectDiffractionReduction::loadInstrument(std::string in
 }
 
 /**
- * Handles loading an instrument and reflections when an instruiment is selected form the drop down.
+ * Handles setting default spectra range when an instrument configuration is selected.
+ *
+ * @param instrumentName Name of selected instrument
+ * @param analyserName Name of selected analyser (should always be "diffraction")
+ * @param reflectionName Name of diffraction mode selected
  */
-void IndirectDiffractionReduction::instrumentSelected(int)
+void IndirectDiffractionReduction::instrumentSelected(const QString & instrumentName, const QString & analyserName,
+    const QString & reflectionName)
 {
-  // If the interface is not shown, do not go looking for parameter files, etc.
-  if(!m_uiForm.cbInst->isVisible())
-    return;
+  UNUSED_ARG(analyserName);
 
-  std::string instrumentName = m_uiForm.cbInst->currentText().toStdString();
-  MatrixWorkspace_sptr instWorkspace = loadInstrument(instrumentName);
-  Instrument_const_sptr instrument = instWorkspace->getInstrument();
-
-  std::vector<std::string> analysers;
-  boost::split(analysers, instrument->getStringParameter("refl-diffraction")[0], boost::is_any_of(","));
-
-  m_uiForm.cbReflection->blockSignals(true);
-  m_uiForm.cbReflection->clear();
-
-  for(auto it = analysers.begin(); it != analysers.end(); ++it)
-  {
-    std::string reflection = *it;
-    m_uiForm.cbReflection->addItem(QString::fromStdString(reflection));
-  }
-
-  reflectionSelected(m_uiForm.cbReflection->currentIndex());
-  m_uiForm.cbReflection->blockSignals(false);
-}
-
-/**
- * Handles setting default spectra range when a reflection is slected from the drop down.
- */
-void IndirectDiffractionReduction::reflectionSelected(int)
-{
-  std::string instrumentName = m_uiForm.cbInst->currentText().toStdString();
-  std::string reflection = m_uiForm.cbReflection->currentText().toStdString();
-  MatrixWorkspace_sptr instWorkspace = loadInstrument(instrumentName, reflection);
+  MatrixWorkspace_sptr instWorkspace = loadInstrument(instrumentName.toStdString(), reflectionName.toStdString());
   Instrument_const_sptr instrument = instWorkspace->getInstrument();
 
   // Get default spectra range
@@ -364,7 +378,7 @@ void IndirectDiffractionReduction::reflectionSelected(int)
     m_uiForm.swVanadium->setCurrentIndex(1);
 
   // Hide options that the current instrument config cannot process
-  if(instrumentName == "OSIRIS" && reflection == "diffonly")
+  if(instrumentName == "OSIRIS" && reflectionName == "diffonly")
   {
     // Disable individual grouping
     m_uiForm.ckIndividualGrouping->setToolTip("OSIRIS cannot group detectors individually in diffonly mode");
@@ -407,47 +421,8 @@ void IndirectDiffractionReduction::help()
   MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Indirect_Diffraction"));
 }
 
-/**
- * Sets up UI components and Qt signal/slot connections.
- */
-void IndirectDiffractionReduction::initLayout()
-{
-  m_uiForm.setupUi(this);
-
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(demonRun()));
-
-  connect(m_uiForm.cbInst, SIGNAL(currentIndexChanged(int)), this, SLOT(instrumentSelected(int)));
-  connect(m_uiForm.cbReflection, SIGNAL(currentIndexChanged(int)), this, SLOT(reflectionSelected(int)));
-
-  // Update run button based on state of raw files field
-  connect(m_uiForm.dem_rawFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(runFilesChanged()));
-  connect(m_uiForm.dem_rawFiles, SIGNAL(findingFiles()), this, SLOT(runFilesFinding()));
-  connect(m_uiForm.dem_rawFiles, SIGNAL(fileFindingFinished()), this, SLOT(runFilesFound()));
-
-  m_valInt = new QIntValidator(this);
-  m_valDbl = new QDoubleValidator(this);
-
-  m_uiForm.set_leSpecMin->setValidator(m_valInt);
-  m_uiForm.set_leSpecMax->setValidator(m_valInt);
-
-  m_uiForm.leRebinStart->setValidator(m_valDbl);
-  m_uiForm.leRebinWidth->setValidator(m_valDbl);
-  m_uiForm.leRebinEnd->setValidator(m_valDbl);
-
-  // Update the list of plot options when individual grouping is toggled
-  connect(m_uiForm.ckIndividualGrouping, SIGNAL(stateChanged(int)), this, SLOT(individualGroupingToggled(int)));
-
-  loadSettings();
-
-  // Update invalid rebinning markers
-  validateRebin();
-}
-
 void IndirectDiffractionReduction::initLocalPython()
 {
-  instrumentSelected(0);
 }
 
 void IndirectDiffractionReduction::loadSettings()

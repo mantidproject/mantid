@@ -62,7 +62,7 @@ namespace CustomInterfaces
   bool IndirectTransmission::validate()
   {
     // Check if we have an appropriate instrument
-    QString currentInst = m_uiForm.cbInst->currentText();
+    QString currentInst = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
     if(currentInst != "IRIS" && currentInst != "OSIRIS")
       return false;
 

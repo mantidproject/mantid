@@ -10,8 +10,8 @@ set ( SRC_FILES
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
-	src/DownloadInstrument.cpp
 	src/DownloadFile.cpp
+	src/DownloadInstrument.cpp
 	src/ExtractMonitorWorkspace.cpp
 	src/FilterEventsByLogValuePreNexus.cpp
 	src/FindDetectorsInShape.cpp
@@ -94,6 +94,7 @@ set ( SRC_FILES
 	src/LoadSassena.cpp
 	src/LoadSpec.cpp
 	src/LoadSpice2D.cpp
+	src/LoadSpiceAscii.cpp
 	src/LoadTOFRawNexus.cpp
 	src/LoadVulcanCalFile.cpp
 	src/MaskDetectors.cpp
@@ -159,8 +160,8 @@ set ( INC_FILES
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
-	inc/MantidDataHandling/DownloadInstrument.h
 	inc/MantidDataHandling/DownloadFile.h
+	inc/MantidDataHandling/DownloadInstrument.h
 	inc/MantidDataHandling/ExtractMonitorWorkspace.h
 	inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
@@ -238,6 +239,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSassena.h
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
+	inc/MantidDataHandling/LoadSpiceAscii.h
 	inc/MantidDataHandling/LoadTOFRawNexus.h
 	inc/MantidDataHandling/LoadVulcanCalFile.h
 	inc/MantidDataHandling/MaskDetectors.h
@@ -307,8 +309,8 @@ set ( TEST_FILES
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h
-	DownloadInstrumentTest.h
 	DownloadFileTest.h
+	DownloadInstrumentTest.h
 	ExtractMonitorWorkspaceTest.h
 	FilterEventsByLogValuePreNexusTest.h
 	FindDetectorsInShapeTest.h
@@ -377,6 +379,7 @@ set ( TEST_FILES
 	LoadSassenaTest.h
 	LoadSaveAsciiTest.h
 	LoadSpice2dTest.h
+	LoadSpiceAsciiTest.h
 	LoadTOFRawNexusTest.h
 	LoadTest.h
 	LoadVulcanCalFileTest.h

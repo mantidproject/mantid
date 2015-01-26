@@ -172,12 +172,13 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite
     auto pMockTransform = new NiceMock<MockPeakTransform>;
     PeakTransform_sptr mockTransform(pMockTransform);
     EXPECT_CALL(*pMockTransform, transformPeak(_)).WillRepeatedly(Return(V3D()));
+    EXPECT_CALL(*pMockTransform, getFriendlyName()).WillRepeatedly(Return("Q (lab frame)"));
 
     // Create a mock transform factory.
     auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
     PeakTransformFactory_sptr peakTransformFactory(pMockTransformFactory);
-    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(mockTransform));
-    EXPECT_CALL(*pMockTransformFactory, createTransform(_,_)).WillOnce(Return(mockTransform));
+    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillRepeatedly(Return(mockTransform));
+    EXPECT_CALL(*pMockTransformFactory, createTransform(_,_)).WillRepeatedly(Return(mockTransform));
 
     // Create and return a configurable builder.
     ConcretePeaksPresenterBuilder builder;
@@ -642,6 +643,88 @@ public:
     TS_ASSERT_EQUALS(occupancyIntoView, concretePresenter->getPeakSizeIntoProjection()); 
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
+  }
+
+  void test_reInitalize()
+  {
+      const int nPeaks = 3;
+
+      // Create a mock view object/product that will be returned by the mock factory.
+
+      auto pMockView = new NiceMock<MockPeakOverlayView>;
+      auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
+
+      // Create a widget factory mock
+      auto pMockViewFactory = new MockPeakOverlayFactory;
+      PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
+      EXPECT_CALL(*pMockViewFactory, createView(_)).WillOnce(Return(mockView));
+      EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
+      EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
+
+      auto presenterBuilder = createStandardBuild(nPeaks); // Creates a default Concrete presenter product.
+      presenterBuilder.withViewFactory(mockViewFactory); // Change the view factories to deliver the expected ViewFactory mock object
+      auto concretePresenter = presenterBuilder.create();
+      presenterBuilder.withViewFactory(mockViewFactory);
+
+      // We now create a new peaks workspace
+      const double radius = 1;
+      auto newPeaksWorkspace = createPeaksWorkspace(nPeaks+1, radius);
+
+      // We expect the peaks workspace object to be swapped.
+      EXPECT_CALL(*pMockViewFactory, swapPeaksWorkspace(_)).Times(1);
+      // We expect that createViews will be called again, because we'll have to create new representations for each peak
+      EXPECT_CALL(*pMockViewFactory, createView(_)).WillOnce(Return(mockView));
+
+      // We force this concrete presenter to take a new peaks workspace to represent
+      concretePresenter->reInitialize(newPeaksWorkspace);
+
+      TS_ASSERT(Mock::VerifyAndClearExpectations(pMockViewFactory));
+      TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
+  }
+
+  void test_contentsDifferent_different()
+  {
+      ConcretePeaksPresenter_sptr a = createStandardBuild(2).create();
+      ConcretePeaksPresenter_sptr b = createStandardBuild(2).create();
+
+      TSM_ASSERT("Each presenter has it's own unique peaks workspace", a->contentsDifferent(b.get()));
+      TSM_ASSERT("Each presenter has it's own unique peaks workspace", b->contentsDifferent(a.get()));
+  }
+
+  void test_contentsDifferent_same()
+  {
+      ConcretePeaksPresenterBuilder builder = createStandardBuild();
+      // Set a common peaks workspace.
+      builder.withPeaksWorkspace(WorkspaceCreationHelper::createPeaksWorkspace());
+
+      ConcretePeaksPresenter_sptr a = builder.create();
+      ConcretePeaksPresenter_sptr b = builder.create();
+
+      TSM_ASSERT("Each presenter uses the same peaks workspace", !a->contentsDifferent(b.get()));
+      TSM_ASSERT("Each presenter uses the same peaks peaks workspace", !b->contentsDifferent(a.get()));
+  }
+
+  void test_contentsDifferent_mixed()
+  {
+      auto a = WorkspaceCreationHelper::createPeaksWorkspace();
+      auto b = WorkspaceCreationHelper::createPeaksWorkspace();
+      auto c = WorkspaceCreationHelper::createPeaksWorkspace();
+
+      // We are creating another comparison peaks presenter, which will deliver a set of peaks workspaces.
+      auto other = boost::make_shared<MockPeaksPresenter>();
+      SetPeaksWorkspaces result;
+      result.insert(a);
+      result.insert(b);
+      result.insert(c);
+      EXPECT_CALL(*other, presentedWorkspaces() ).WillRepeatedly(Return(result));
+
+      ConcretePeaksPresenterBuilder builder = createStandardBuild();
+      // Set a peaks workspace.
+      builder.withPeaksWorkspace(c);
+      ConcretePeaksPresenter_sptr presenter = builder.create();
+
+      TSM_ASSERT("Presenter is managing one of these workspaces already", !presenter->contentsDifferent(other.get()));
+
   }
 
 
