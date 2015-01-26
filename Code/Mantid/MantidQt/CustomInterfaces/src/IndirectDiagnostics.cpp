@@ -135,7 +135,8 @@ namespace CustomInterfaces
 
   void IndirectDiagnostics::run()
   {
-    QString suffix = "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_slice";
+    QString suffix = "_" + m_uiForm.iicInstrumentConfiguration->getAnalyserName()
+                     + m_uiForm.iicInstrumentConfiguration->getReflectionName() + "_slice";
     QString filenames = m_uiForm.slice_inputFile->getFilenames().join(",");
 
     std::vector<long> spectraRange;
@@ -345,7 +346,8 @@ namespace CustomInterfaces
    */
   void IndirectDiagnostics::updatePreviewPlot()
   {
-    QString suffix = "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_slice";
+    QString suffix = "_" + m_uiForm.iicInstrumentConfiguration->getAnalyserName()
+                     + m_uiForm.iicInstrumentConfiguration->getReflectionName() + "_slice";
     QString filenames = m_uiForm.slice_inputFile->getFilenames().join(",");
 
     std::vector<long> spectraRange;

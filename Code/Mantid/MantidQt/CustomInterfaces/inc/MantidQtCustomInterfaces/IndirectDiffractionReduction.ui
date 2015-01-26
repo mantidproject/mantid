@@ -22,7 +22,7 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_6">
        <item>
-        <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInst">
+        <widget class="MantidQt::MantidWidgets::IndirectInstrumentConfig" name="iicInstrumentConfiguration">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -35,35 +35,19 @@
            <string>TOF Indirect Geometry Diffraction</string>
           </stringlist>
          </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+         <property name="disabledInstruments" stdset="0">
+          <stringlist>
+           <string>TFXA</string>
+          </stringlist>
          </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
+         <property name="facility" stdset="0">
+          <string>ISIS</string>
          </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QLabel" name="set_lbReflection">
-         <property name="text">
-          <string>Reflection</string>
+         <property name="forceDiffraction" stdset="0">
+          <bool>true</bool>
          </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="cbReflection">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+         <property name="showInstrumentLabel" stdset="0">
+          <bool>false</bool>
          </property>
         </widget>
        </item>
@@ -466,9 +450,9 @@
    <header>MantidQtMantidWidgets/MWRunFiles.h</header>
   </customwidget>
   <customwidget>
-   <class>MantidQt::MantidWidgets::InstrumentSelector</class>
+   <class>MantidQt::MantidWidgets::IndirectInstrumentConfig</class>
    <extends>QComboBox</extends>
-   <header>MantidQtMantidWidgets/InstrumentSelector.h</header>
+   <header>MantidQtMantidWidgets/IndirectInstrumentConfig.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
