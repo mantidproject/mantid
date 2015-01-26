@@ -49,7 +49,8 @@ class ExportExperimentLog(PythonAlgorithm):
         self.declareProperty(overrideprop, "List of paired strings as log title and value to override values from workspace.")
 
         # Time zone
-        timezones = ["UTC", "America/New_York"]
+        timezones = ["UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London", "GMT+0",
+            "Europe/Paris", "Europe/Copenhagen"]
         self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones))
 
 

@@ -42,7 +42,9 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         self.declareProperty("Header", "", "String in the header file.")
 
         # Time zone
-        timezones = ["America/New_York", "UTC"]
+        timezones = ["UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London", "GMT+0",
+                "Europe/Paris", "Europe/Copenhagen"]
+
         self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones))
 
         # Log time tolerance

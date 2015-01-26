@@ -9,6 +9,22 @@
 Description
 -----------
 
+Algorithm 'LoadSampleLogsToCSVFile' exports a specified set of sample logs
+, which are stored in a MatrixWorkspace, to a CSV file.
+
+Each entry of each exported sample log will be an individual entry in the
+output CSV file,
+except in the situation that two entries with time stamps within time tolerance.
+
+
+Time Zone
+---------
+
+The time stamps of sample logs are recorded as UTC time.
+Some users wants to see the exported sample log as the neutron facility's local time.
+So the input property 'TimeZone' is for this purpose.
+
+
 Header file
 -----------
 
