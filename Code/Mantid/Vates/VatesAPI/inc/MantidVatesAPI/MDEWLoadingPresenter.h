@@ -64,10 +64,6 @@ namespace Mantid
       MDLoadingView* m_view;
       Mantid::Geometry::MDGeometryBuilderXML<Mantid::Geometry::NoDimensionPolicy> xmlBuilder;
 
-      boost::scoped_ptr<MetadataJsonManager> m_metadataJsonManager;
-      boost::scoped_ptr<MetaDataExtractorUtils> m_metaDataExtractor;
-      boost::scoped_ptr<VatesConfigurations> m_vatesConfigurations;
-
       Mantid::Geometry::IMDDimension_sptr tDimension;
 
       std::vector<std::string> axisLabels;
@@ -80,6 +76,10 @@ namespace Mantid
       size_t m_recursionDepth;
       bool m_loadInMemory;
       bool m_firstLoad;
+
+      boost::scoped_ptr<MetadataJsonManager> m_metadataJsonManager;
+      boost::scoped_ptr<MetaDataExtractorUtils> m_metaDataExtractor;
+      boost::scoped_ptr<VatesConfigurations> m_vatesConfigurations;
     };
   }
 }

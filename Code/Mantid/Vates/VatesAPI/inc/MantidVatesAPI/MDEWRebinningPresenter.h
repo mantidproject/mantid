@@ -129,12 +129,12 @@ namespace Mantid
       bool m_bOutputHistogramWS;
       /// Tag for the rebinned workspace
       static const std::string rb_tag;
+      /// Store for the instrument
+      mutable std::string m_instrument;
       /// Pointer to the manager for json metadata
       boost::scoped_ptr<MetadataJsonManager> m_metadataJsonManager;
       /// Pointer to the vates configuration object
       boost::scoped_ptr<VatesConfigurations> m_vatesConfigurations;
-      /// Store for the instrument
-      mutable std::string m_instrument;
     };
   }
 }

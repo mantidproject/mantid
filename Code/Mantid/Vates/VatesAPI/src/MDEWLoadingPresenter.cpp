@@ -28,8 +28,8 @@ namespace Mantid
     m_recursionDepth(0),
     m_loadInMemory(false),
     m_firstLoad(true),
-    m_metaDataExtractor(new MetaDataExtractorUtils()),
     m_metadataJsonManager(new MetadataJsonManager()),
+    m_metaDataExtractor(new MetaDataExtractorUtils()),
     m_vatesConfigurations(new VatesConfigurations())
     {
       Mantid::API::FrameworkManager::Instance();

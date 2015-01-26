@@ -695,7 +695,7 @@ bool ViewBase::hasWorkspaceType(const QString &wsTypeName)
  * @param source The pipeleine source assoicated with the call.
  * @param representation The representation associatied with the call 
  */
-void ViewBase::onVisibilityChanged(pqPipelineSource *source, pqDataRepresentation *representation)
+void ViewBase::onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)
 {
   // Reset the colorscale if it is set to autoscale
   if (colorUpdater.isAutoScale())

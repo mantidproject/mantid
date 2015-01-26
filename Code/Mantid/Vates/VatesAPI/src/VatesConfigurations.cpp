@@ -31,7 +31,7 @@ namespace Mantid
 	 */
 	  
 
-    VatesConfigurations::VatesConfigurations() :metaDataId("VATES_Metadata_Json"), maxRecursionDepth(10000)
+    VatesConfigurations::VatesConfigurations() : maxRecursionDepth(10000),metaDataId("VATES_Metadata_Json")
     {
     }
 

@@ -1135,8 +1135,6 @@ void MdViewerWidget::setVisibilityListener()
   QList<pqPipelineSource *> sources;
   sources = smModel->findItems<pqPipelineSource *>(server);
 
-  pqView* activeView = pqActiveObjects::instance().activeView();
-
   // Attach the visibilityChanged signal for all sources.
   for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
   {

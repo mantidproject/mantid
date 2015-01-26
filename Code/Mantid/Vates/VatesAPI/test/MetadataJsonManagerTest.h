@@ -1,10 +1,17 @@
 #ifndef METADATA_JSON_MANAGER_TEST
 #define METADATA_JSON_MANAGER_TEST
 
+#ifdef _WIN32
+// Disabling Json warnings regarding non-export of Json::Reader and Json::Writer
+#pragma warning(disable : 4275)
+#endif
+
+
 #include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include <string>
-#include "jsoncpp/json/reader.h"
+#include <jsoncpp/json/reader.h>
+
 
 using Mantid::VATES::MetadataJsonManager;
 

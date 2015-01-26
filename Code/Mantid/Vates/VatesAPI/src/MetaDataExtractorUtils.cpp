@@ -7,6 +7,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "boost/pointer_cast.hpp"
+#include <cfloat>
 
 namespace Mantid
 {
