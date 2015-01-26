@@ -43,7 +43,7 @@ namespace SimpleGui
  * Default constructor.
  * @param parent the parent widget for the view
  */
-ViewBase::ViewBase(QWidget *parent) : QWidget(parent)
+ViewBase::ViewBase(QWidget *parent) : QWidget(parent), m_temporaryWorkspaceIdentifier("tempvsi")
 {
 }
 
@@ -599,6 +599,43 @@ bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src)
     wsType = src->getSMName();
   }
   return wsType.contains("MDHistoWorkspace");
+}
+
+/**
+ * This function checks if a pqPipelineSource is a temporary MDHistoWorkspace.
+ * @return true if the source is a MDHistoWorkspace
+ */
+bool ViewBase::isTemporaryMDHistoWorkspace(pqPipelineSource *src)
+{
+  if (NULL == src)
+  {
+    return false;
+  }
+  QString wsType(vtkSMPropertyHelper(src->getProxy(),
+                                     "WorkspaceTypeName", true).GetAsString());
+
+  if (wsType.isEmpty())
+  {
+    wsType = src->getSMName();
+  }
+  
+  if (!wsType.contains("MDHistoWorkspace"))
+  {
+    return false;
+  }
+
+  QString wsName(vtkSMPropertyHelper(src->getProxy(),
+                                    "WorkspaceName", true).GetAsString());
+
+  if (wsName.contains(m_temporaryWorkspaceIdentifier))
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+
 }
 
 /**

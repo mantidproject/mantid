@@ -95,6 +95,8 @@ public:
   virtual bool hasWorkspaceType(const QString &wsTypeName);
   /// Check if file/workspace is a MDHistoWorkspace.
   virtual bool isMDHistoWorkspace(pqPipelineSource *src);
+  /// Check if file/workspace is a temporary MDHistoWorkspace
+  virtual bool isTemporaryMDHistoWorkspace(pqPipelineSource* src);
   /// Check if file/workspace is a Peaks one.
   virtual bool isPeaksWorkspace(pqPipelineSource *src);
   /// Prints properties for given source.
@@ -211,6 +213,8 @@ private:
   void handleTimeInfo(vtkSMDoubleVectorProperty *dvp);
 
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
+
+  QString m_temporaryWorkspaceIdentifier;
 };
 
 }

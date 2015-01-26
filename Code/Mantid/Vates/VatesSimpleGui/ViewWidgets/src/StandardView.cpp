@@ -89,7 +89,7 @@ void StandardView::render()
   }
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
-  if (this->isMDHistoWorkspace(this->origSrc))
+  if (this->isMDHistoWorkspace(this->origSrc) && !isTemporaryMDHistoWorkspace(this->origSrc))
   {
     this->ui.rebinButton->setEnabled(false);
   }
