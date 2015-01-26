@@ -228,17 +228,31 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.ui
+               inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.ui
+               inc/MantidQtCustomInterfaces/Indirect/CalcCorr.ui
+               inc/MantidQtCustomInterfaces/Indirect/ConvFit.ui
+               inc/MantidQtCustomInterfaces/Indirect/Elwin.ui
+               inc/MantidQtCustomInterfaces/Indirect/Fury.ui
+               inc/MantidQtCustomInterfaces/Indirect/FuryFit.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.ui
+               inc/MantidQtCustomInterfaces/Indirect/IndirectCalibration.ui
+               inc/MantidQtCustomInterfaces/Indirect/IndirectConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectDataAnalysis.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectDataReduction.ui
+               inc/MantidQtCustomInterfaces/Indirect/IndirectDiagnostics.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectDiffractionReduction.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectLoadILL.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectMolDyn.ui
+               inc/MantidQtCustomInterfaces/Indirect/IndirectMoments.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectSassena.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectSimulation.ui
+               inc/MantidQtCustomInterfaces/Indirect/IndirectSqw.ui
+               inc/MantidQtCustomInterfaces/Indirect/IndirectSymmetrise.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectTools.ui
+               inc/MantidQtCustomInterfaces/Indirect/IndirectTransmission.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectTransmissionCalc.ui
                inc/MantidQtCustomInterfaces/Indirect/JumpFit.ui
+               inc/MantidQtCustomInterfaces/Indirect/MSDFit.ui
                inc/MantidQtCustomInterfaces/MultiDatasetFit.ui
                inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.ui
                inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingView.ui
