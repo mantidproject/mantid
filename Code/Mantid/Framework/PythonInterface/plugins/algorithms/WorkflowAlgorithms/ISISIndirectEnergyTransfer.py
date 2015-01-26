@@ -313,13 +313,13 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             try:
                 chop_threshold = mtd[ws_name].getInstrument().getNumberParameter('Workflow.ChopDataIfGreaterThan')[0]
                 x_max = mtd[ws_name].readX(0)[-1]
-                need_chop =  x_max > chop_threshold
+                self._chopped_data =  x_max > chop_threshold
             except IndexError:
-                need_chop = False
-            logger.information('Workspace %s need data chop: %s' % (ws_name, str(need_chop)))
+                self._chopped_data = False
+            logger.information('Workspace %s need data chop: %s' % (ws_name, str(self._chopped_data)))
 
             workspaces = [ws_name]
-            if need_chop:
+            if self._chopped_data:
                 ChopData(InputWorkspace=ws_name, OutputWorkspace=ws_name, MonitorWorkspaceIndex=monitor_index,
                          IntegrationRangeLower=5000.0, IntegrationRangeUpper=10000.0, NChops=5)
                 workspaces = mtd[ws_name].getNames()
@@ -334,9 +334,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 CropWorkspace(InputWorkspace=chop_ws_name, OutputWorkspace=chop_ws_name,
                               StartWorkspaceIndex=self._spectra_range[0] - 1,
                               EndWorkspaceIndex=self._spectra_range[1] - 1)
-
-            if need_chop:
-                self._chopped_data = True
 
         logger.information('Loaded workspace names: %s' % (str(self._workspace_names)))
         logger.information('Chopped data: %s' % (str(self._chopped_data)))
