@@ -114,7 +114,6 @@ void LoadGSASInstrumentFile::exec() {
     }
   }
 
-    int nProf = 2;
   size_t numBanks = getNumberOfBanks(lines);
   g_log.debug() << numBanks << "banks in file \n";
 
