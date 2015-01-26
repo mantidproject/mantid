@@ -29,9 +29,9 @@ public:
   ~IndirectDiffractionReduction();
 
 public slots:
+  void instrumentSelected(const QString & instrumentName, const QString & analyserName,
+      const QString & reflectionName);
   void demonRun();
-  void instrumentSelected(int);
-  void reflectionSelected(int);
   void openDirectoryDialog();
   void help();
   void plotResults(bool error);

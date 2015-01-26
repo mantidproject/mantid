@@ -109,6 +109,7 @@ public:
     alg.isInitialized();
     alg.setChild(true);
     alg.setPropertyValue("OutputWorkspace", "Anon");
+    alg.setPropertyValue("OutputWorkspaceDeriv", "AnonDeriv");
 
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("DerivOrder", order));
 

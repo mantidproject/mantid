@@ -90,88 +90,12 @@ namespace CustomInterfaces
    */
   std::map<QString, QString> IndirectDataReductionTab::getInstrumentDetails()
   {
-    std::map<QString, QString> instDetails;
+    IndirectDataReduction* parentIDR = dynamic_cast<IndirectDataReduction*>(m_parentWidget);
 
-    // Get instrument configuration
-    std::string instrumentName = m_uiForm.cbInst->currentText().toStdString();
-    std::string analyser = m_uiForm.cbAnalyser->currentText().toStdString();
-    std::string reflection = m_uiForm.cbReflection->currentText().toStdString();
+    if(parentIDR == NULL)
+      throw std::runtime_error("IndirectDataReductionTab must be a child of IndirectDataReduction");
 
-    instDetails["instrument"] = QString::fromStdString(instrumentName);
-    instDetails["analyser"] = QString::fromStdString(analyser);
-    instDetails["reflection"] = QString::fromStdString(reflection);
-
-    // List of values to get from IPF
-    std::vector<std::string> ipfElements;
-    ipfElements.push_back("analysis-type");
-    ipfElements.push_back("spectra-min");
-    ipfElements.push_back("spectra-max");
-    ipfElements.push_back("efixed-val");
-    ipfElements.push_back("peak-start");
-    ipfElements.push_back("peak-end");
-    ipfElements.push_back("back-start");
-    ipfElements.push_back("back-end");
-    ipfElements.push_back("rebin-default");
-    ipfElements.push_back("cm-1-convert-choice");
-    ipfElements.push_back("save-ascii-choice");
-
-    // Get the instrument workspace
-    MatrixWorkspace_sptr instWorkspace = loadInstrumentIfNotExist(instrumentName, analyser, reflection);
-
-    // In the IRIS IPF there is no fmica component
-    if(instrumentName == "IRIS" && analyser == "fmica")
-      analyser = "mica";
-
-    // Get the instrument
-    auto instrument = instWorkspace->getInstrument();
-    if(instrument == NULL)
-      return instDetails;
-
-    // Get the analyser component
-    auto component = instrument->getComponentByName(analyser);
-
-    // For each parameter we want to get
-    for(auto it = ipfElements.begin(); it != ipfElements.end(); ++it)
-    {
-      try
-      {
-        std::string key = *it;
-
-        QString value = getInstrumentParameterFrom(instrument, key);
-
-        if(value.isEmpty() && component != NULL)
-          QString value = getInstrumentParameterFrom(component, key);
-
-        instDetails[QString::fromStdString(key)] = value;
-      }
-      // In the case that the parameter does not exist
-      catch(Mantid::Kernel::Exception::NotFoundError &nfe)
-      {
-        UNUSED_ARG(nfe);
-        g_log.warning() << "Could not find parameter " << *it << " in instrument " << instrumentName << std::endl;
-      }
-    }
-
-    return instDetails;
-  }
-
-  QString IndirectDataReductionTab::getInstrumentParameterFrom(Mantid::Geometry::IComponent_const_sptr comp, std::string param)
-  {
-    QString value;
-
-    if(!comp->hasParameter(param))
-      return "";
-
-    // Determine it's type and call the corresponding get function
-    std::string paramType = comp->getParameterType(param);
-
-    if(paramType == "string")
-      value = QString::fromStdString(comp->getStringParameter(param)[0]);
-
-    if(paramType == "double")
-      value = QString::number(comp->getNumberParameter(param)[0]);
-
-    return value;
+    return parentIDR->getInstrumentDetails();
   }
 
   /**
@@ -188,11 +112,11 @@ namespace CustomInterfaces
   {
     // Get any unset parameters
     if(instName.isEmpty())
-      instName = m_uiForm.cbInst->currentText();
+      instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
     if(analyser.isEmpty())
-      analyser = m_uiForm.cbAnalyser->currentText();
+      analyser = m_uiForm.iicInstrumentConfiguration->getAnalyserName();
     if(reflection.isEmpty())
-      reflection = m_uiForm.cbReflection->currentText();
+      reflection = m_uiForm.iicInstrumentConfiguration->getReflectionName();
 
     std::map<std::string, double> ranges;
 
@@ -225,6 +149,7 @@ namespace CustomInterfaces
     std::vector<double> e(4, 0);
 
     IAlgorithm_sptr createWsAlg = AlgorithmManager::Instance().create("CreateWorkspace");
+    createWsAlg->setChild(true);
     createWsAlg->initialize();
     createWsAlg->setProperty("OutputWorkspace", "__energy");
     createWsAlg->setProperty("DataX", x);
@@ -233,28 +158,34 @@ namespace CustomInterfaces
     createWsAlg->setProperty("Nspec", 1);
     createWsAlg->setProperty("UnitX", "DeltaE");
     createWsAlg->execute();
+    MatrixWorkspace_sptr energyWs = createWsAlg->getProperty("OutputWorkspace");
 
     IAlgorithm_sptr convertHistAlg = AlgorithmManager::Instance().create("ConvertToHistogram");
+    convertHistAlg->setChild(true);
     convertHistAlg->initialize();
-    convertHistAlg->setProperty("InputWorkspace", "__energy");
+    convertHistAlg->setProperty("InputWorkspace", energyWs);
     convertHistAlg->setProperty("OutputWorkspace", "__energy");
     convertHistAlg->execute();
+    energyWs = convertHistAlg->getProperty("OutputWorkspace");
 
     IAlgorithm_sptr loadInstAlg = AlgorithmManager::Instance().create("LoadInstrument");
+    loadInstAlg->setChild(true);
     loadInstAlg->initialize();
-    loadInstAlg->setProperty("Workspace", "__energy");
+    loadInstAlg->setProperty("Workspace", energyWs);
     loadInstAlg->setProperty("InstrumentName", instName.toStdString());
     loadInstAlg->execute();
+    energyWs = loadInstAlg->getProperty("Workspace");
 
     QString ipfFilename = instName + "_" + analyser + "_" + reflection + "_Parameters.xml";
 
     IAlgorithm_sptr loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
+    loadParamAlg->setChild(true);
     loadParamAlg->initialize();
-    loadParamAlg->setProperty("Workspace", "__energy");
+    loadParamAlg->setProperty("Workspace", energyWs);
     loadParamAlg->setProperty("Filename", ipfFilename.toStdString());
     loadParamAlg->execute();
+    energyWs = loadParamAlg->getProperty("Workspace");
 
-    auto energyWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__energy");
     double efixed = energyWs->getInstrument()->getNumberParameter("efixed-val")[0];
 
     auto spectrum = energyWs->getSpectrum(0);
@@ -263,15 +194,15 @@ namespace CustomInterfaces
     spectrum->addDetectorID(3);
 
     IAlgorithm_sptr convUnitsAlg = AlgorithmManager::Instance().create("ConvertUnits");
+    convUnitsAlg->setChild(true);
     convUnitsAlg->initialize();
-    convUnitsAlg->setProperty("InputWorkspace", "__energy");
+    convUnitsAlg->setProperty("InputWorkspace", energyWs);
     convUnitsAlg->setProperty("OutputWorkspace", "__tof");
     convUnitsAlg->setProperty("Target", "TOF");
     convUnitsAlg->setProperty("EMode", "Indirect");
     convUnitsAlg->setProperty("EFixed", efixed);
     convUnitsAlg->execute();
-
-    auto tofWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__tof");
+    MatrixWorkspace_sptr tofWs = convUnitsAlg->getProperty("OutputWorkspace");
 
     std::vector<double> tofData = tofWs->readX(0);
     ranges["peak-start-tof"] = tofData[0];
