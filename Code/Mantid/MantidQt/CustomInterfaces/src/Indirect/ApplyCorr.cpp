@@ -57,30 +57,8 @@ namespace IDA
     m_uiForm.spPreviewSpec->setMaximum(static_cast<int>(sampleWs->getNumberHistograms()) - 1);
   }
 
-  bool ApplyCorr::validateScaleInput()
-  {
-    bool valid = true;
-    int dummyPos = 0;
-
-    // scale multiplier
-    QString scaleMultiplierText = m_uiForm.spCanScale->text();
-    QValidator::State fieldState = m_uiForm.spCanScale->validator()->validate(scaleMultiplierText, dummyPos);
-
-    if ( m_uiForm.ckScaleMultiplier->isChecked() && fieldState != QValidator::Acceptable )
-    {
-      valid = false;
-    }
-
-    return valid;
-  }
-
   void ApplyCorr::run()
   {
-    if ( ! validateScaleInput() )
-    {
-      return;
-    }
-
     QString geom = m_uiForm.cbGeometry->currentText();
     if ( geom == "Flat" )
     {
@@ -160,9 +138,9 @@ namespace IDA
     QString ScalingFactor = "1.0\n";
     QString ScaleOrNot = "False\n";
 
-    pyInput += m_uiForm.ckScaleMultiplier->isChecked() ? "True\n" : "False\n";
+    pyInput += m_uiForm.ckScaleCan->isChecked() ? "True\n" : "False\n";
 
-    if ( m_uiForm.ckScaleMultiplier->isChecked() )
+    if ( m_uiForm.ckScaleCan->isChecked() )
     {
       ScalingFactor = m_uiForm.spCanScale->text();
       ScaleOrNot = "True\n";

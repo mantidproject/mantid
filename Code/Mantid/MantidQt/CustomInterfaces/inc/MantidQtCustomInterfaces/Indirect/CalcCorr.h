@@ -1,7 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_CALCCORR_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_CALCCORR_H_
 
-#include "ui_CalcCorr.ui"
+#include "ui_CalcCorr.h"
 #include "IDATab.h"
 
 namespace MantidQt

@@ -34,10 +34,10 @@ namespace IDA
   void Fury::setup()
   {
     m_furTree = new QtTreePropertyBrowser();
-    m_uiForm.TreeSpace->addWidget(m_furTree);
+    m_uiForm.properties->addWidget(m_furTree);
 
     m_plots["FuryPlot"] = new QwtPlot(m_parentWidget);
-    m_uiForm.PlotSpace->addWidget(m_plots["FuryPlot"]);
+    m_uiForm.plot->addWidget(m_plots["FuryPlot"]);
     m_plots["FuryPlot"]->setCanvasBackground(Qt::white);
     m_plots["FuryPlot"]->setAxisFont(QwtPlot::xBottom, m_parentWidget->font());
     m_plots["FuryPlot"]->setAxisFont(QwtPlot::yLeft, m_parentWidget->font());
@@ -73,7 +73,7 @@ namespace IDA
 
     m_dblManager->setValue(m_properties["SampleBinning"], 10);
 
-    m_furTree->setFactoryForManager(m_dblManager, doubleEditorFactory());
+    m_furTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
     m_rangeSelectors["FuryRange"] = new MantidQt::MantidWidgets::RangeSelector(m_plots["FuryPlot"]);
 
@@ -82,7 +82,7 @@ namespace IDA
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePropertyValues(QtProperty*, double)));
     connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput(const QString&)));
-    connect(m_uiForm.dsResInput, SIGNAL(dataReady(const QString&)), this, SLOT(calculateBinning()));
+    connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString&)), this, SLOT(calculateBinning()));
   }
 
   void Fury::run()
@@ -92,7 +92,7 @@ namespace IDA
     calculateBinning();
 
     QString wsName = m_uiForm.dsInput->getCurrentDataName();
-    QString resName = m_uiForm.dsResInput->getCurrentDataName();
+    QString resName = m_uiForm.dsResolution->getCurrentDataName();
 
     double energyMin = m_dblManager->value(m_properties["ELow"]);
     double energyMax = m_dblManager->value(m_properties["EHigh"]);
@@ -135,7 +135,7 @@ namespace IDA
     UserInputValidator uiv;
 
     uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsInput);
-    uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResInput);
+    uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
     QString message = uiv.generateErrorMessage();
     showMessageBox(message);
@@ -191,7 +191,7 @@ namespace IDA
     disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePropertyValues(QtProperty*, double)));
 
     QString wsName = m_uiForm.dsInput->getCurrentDataName();
-    QString resName = m_uiForm.dsResInput->getCurrentDataName();
+    QString resName = m_uiForm.dsResolution->getCurrentDataName();
     if(wsName.isEmpty() || resName.isEmpty())
       return;
 
@@ -245,7 +245,7 @@ namespace IDA
   void Fury::loadSettings(const QSettings & settings)
   {
     m_uiForm.dsInput->readSettings(settings.group());
-    m_uiForm.dsResInput->readSettings(settings.group());
+    m_uiForm.dsResolution->readSettings(settings.group());
   }
 
   void Fury::plotInput(const QString& wsname)

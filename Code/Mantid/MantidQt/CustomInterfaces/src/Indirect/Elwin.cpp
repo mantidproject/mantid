@@ -35,8 +35,8 @@ namespace IDA
     m_uiForm.properties->addWidget(m_elwTree);
 
     // Editor Factories
-    m_elwTree->setFactoryForManager(m_dblManager, doubleEditorFactory());
-    m_elwTree->setFactoryForManager(m_blnManager, qtCheckBoxFactory());
+    m_elwTree->setFactoryForManager(m_dblManager, m_dblEdFac);
+    m_elwTree->setFactoryForManager(m_blnManager, m_blnEdFac);
 
     // Create Properties
     m_properties["IntegrationStart"] = m_dblManager->addProperty("Start");

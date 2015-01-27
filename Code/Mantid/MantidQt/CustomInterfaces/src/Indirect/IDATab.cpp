@@ -5,6 +5,7 @@
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
+#include <QSettings>
 #include <QString>
 
 using namespace Mantid::API;
@@ -21,9 +22,14 @@ namespace IDA
    * @param parent :: the parent widget (an IndirectDataAnalysis object).
    */
   IDATab::IDATab(QWidget * parent) : IndirectTab(parent),
+    m_dblEdFac(NULL), m_blnEdFac(NULL),
     m_parent(NULL)
   {
     m_parent = dynamic_cast<IndirectDataAnalysis*>(parent);
+
+    // Create Editor Factories
+    m_dblEdFac = new DoubleEditorFactory(this);
+    m_blnEdFac = new QtCheckBoxFactory(this);
   }
 
   /**
@@ -78,22 +84,6 @@ namespace IDA
     {
       throw std::runtime_error("IDATab: One of the operands is an invalid MatrixWorkspace pointer");
     }
-  }
-
-  /**
-   * @returns a handle to the DoubleEditorFactory object stored in the IndirectDataAnalysis class.
-   */
-  DoubleEditorFactory * IDATab::doubleEditorFactory()
-  {
-    return m_parent->m_dblEdFac;
-  }
-
-  /**
-   * @returns a handle to the QtCheckBoxFactory object stored in the IndirectDataAnalysis class.
-   */
-  QtCheckBoxFactory * IDATab::qtCheckBoxFactory()
-  {
-    return m_parent->m_blnEdFac;
   }
 
 } // namespace IDA

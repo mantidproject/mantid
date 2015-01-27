@@ -8,6 +8,7 @@
 
 class QwtPlotCurve;
 class QwtPlot;
+class QSettings;
 class QString;
 
 namespace MantidQt
@@ -69,10 +70,10 @@ namespace IDA
     bool checkWorkspaceBinningMatches(Mantid::API::MatrixWorkspace_const_sptr left,
                                       Mantid::API::MatrixWorkspace_const_sptr right);
 
-    /// Returns a handle to the DoubleEditorFactory object stored in the IndirectDataAnalysis class.
-    DoubleEditorFactory * doubleEditorFactory();
-    /// Returns a handle to the QtCheckBoxFactory object stored in the IndirectDataAnalysis class.
-    QtCheckBoxFactory * qtCheckBoxFactory();
+    /// DoubleEditorFactory
+    DoubleEditorFactory* m_dblEdFac;
+    /// QtCheckBoxFactory
+    QtCheckBoxFactory* m_blnEdFac;
 
   protected slots:
     /// Slot that can be called when a user eidts an input.

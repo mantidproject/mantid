@@ -21,7 +21,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_11">
       <item row="1" column="1">
-       <widget class="MantidQt::MantidWidgets::DataSelector" name="absp_dsCanInput" native="true">
+       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsCanInput" native="true">
         <property name="enabled">
          <bool>false</bool>
         </property>
@@ -52,14 +52,14 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QCheckBox" name="absp_ckUseCan">
+       <widget class="QCheckBox" name="ckUseCan">
         <property name="text">
          <string>Use Can:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="MantidQt::MantidWidgets::DataSelector" name="absp_dsSampleInput" native="true">
+       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSampleInput" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -111,7 +111,7 @@
       <item>
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="0" column="0">
-         <widget class="QLabel" name="absp_lbSampleShape">
+         <widget class="QLabel" name="lbSampleShape">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -124,7 +124,7 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QComboBox" name="absp_cbShape">
+         <widget class="QComboBox" name="cbShape">
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -144,21 +144,21 @@
          </widget>
         </item>
         <item row="3" column="0">
-         <widget class="QLabel" name="absp_lbWidth">
+         <widget class="QLabel" name="lbWidth">
           <property name="text">
            <string>Beam Width:</string>
           </property>
          </widget>
         </item>
         <item row="2" column="1">
-         <widget class="QLineEdit" name="absp_leavar">
+         <widget class="QLineEdit" name="leavar">
           <property name="text">
            <string/>
           </property>
          </widget>
         </item>
         <item row="2" column="0">
-         <widget class="QLabel" name="absp_lbAvar">
+         <widget class="QLabel" name="lbAvar">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -171,7 +171,7 @@
          </widget>
         </item>
         <item row="2" column="2">
-         <widget class="QLabel" name="absp_valAvar">
+         <widget class="QLabel" name="valAvar">
           <property name="styleSheet">
            <string notr="true">color: rgb(255, 0, 0);</string>
           </property>
@@ -181,14 +181,14 @@
          </widget>
         </item>
         <item row="3" column="1">
-         <widget class="QLineEdit" name="absp_lewidth">
+         <widget class="QLineEdit" name="lewidth">
           <property name="text">
            <string/>
           </property>
          </widget>
         </item>
         <item row="3" column="2">
-         <widget class="QLabel" name="absp_valWidth">
+         <widget class="QLabel" name="valWidth">
           <property name="styleSheet">
            <string notr="true">color: rgb(255, 0, 0);</string>
           </property>
@@ -198,7 +198,7 @@
          </widget>
         </item>
         <item row="1" column="0" colspan="3">
-         <widget class="QStackedWidget" name="absp_swShapeDetails">
+         <widget class="QStackedWidget" name="swShapeDetails">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -211,7 +211,7 @@
           <property name="currentIndex">
            <number>0</number>
           </property>
-          <widget class="QWidget" name="absp_page_Flat">
+          <widget class="QWidget" name="page_Flat">
            <layout class="QVBoxLayout" name="verticalLayout_4">
             <property name="margin">
              <number>0</number>
@@ -219,7 +219,7 @@
             <item>
              <layout class="QGridLayout" name="gridLayout_5_thickness" columnminimumwidth="97,0,0,0,0,0,0,0,0">
               <item row="0" column="2">
-               <widget class="QLabel" name="absp_valts">
+               <widget class="QLabel" name="valts">
                 <property name="styleSheet">
                  <string notr="true">color: rgb(255, 0, 0);</string>
                 </property>
@@ -229,7 +229,7 @@
                </widget>
               </item>
               <item row="0" column="5">
-               <widget class="QLabel" name="absp_valtc1">
+               <widget class="QLabel" name="valtc1">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
@@ -254,7 +254,7 @@
                </widget>
               </item>
               <item row="0" column="8">
-               <widget class="QLabel" name="absp_valtc2">
+               <widget class="QLabel" name="valtc2">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
@@ -279,7 +279,7 @@
                </widget>
               </item>
               <item row="0" column="7">
-               <widget class="QLineEdit" name="absp_letc2">
+               <widget class="QLineEdit" name="letc2">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
@@ -295,7 +295,7 @@
                </widget>
               </item>
               <item row="0" column="6">
-               <widget class="QLabel" name="absp_lbtc2">
+               <widget class="QLabel" name="lbtc2">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
@@ -305,7 +305,7 @@
                </widget>
               </item>
               <item row="0" column="3">
-               <widget class="QLabel" name="absp_lbtc1">
+               <widget class="QLabel" name="lbtc1">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
@@ -315,14 +315,14 @@
                </widget>
               </item>
               <item row="0" column="0">
-               <widget class="QLabel" name="absp_lbts">
+               <widget class="QLabel" name="lbts">
                 <property name="text">
                  <string>Thickness:</string>
                 </property>
                </widget>
               </item>
               <item row="0" column="4">
-               <widget class="QLineEdit" name="absp_letc1">
+               <widget class="QLineEdit" name="letc1">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
@@ -338,7 +338,7 @@
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QLineEdit" name="absp_lets">
+               <widget class="QLineEdit" name="lets">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -354,29 +354,29 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="absp_pageCylinder">
-           <layout class="QVBoxLayout" name="absp_cylinder_layout">
+          <widget class="QWidget" name="pageCylinder">
+           <layout class="QVBoxLayout" name="cylinder_layout">
             <property name="margin">
              <number>0</number>
             </property>
             <item>
              <layout class="QGridLayout" name="gridLayout_3" columnminimumwidth="0,97,0,0,0,0,0,0,0,0">
               <item row="0" column="1">
-               <widget class="QLabel" name="absp_lbR1">
+               <widget class="QLabel" name="lbR1">
                 <property name="text">
                  <string>Radius 1:</string>
                 </property>
                </widget>
               </item>
               <item row="0" column="4">
-               <widget class="QLabel" name="absp_lbR2">
+               <widget class="QLabel" name="lbR2">
                 <property name="text">
                  <string>Radius 2:</string>
                 </property>
                </widget>
               </item>
               <item row="0" column="8">
-               <widget class="QLineEdit" name="absp_ler3">
+               <widget class="QLineEdit" name="ler3">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
@@ -386,7 +386,7 @@
                </widget>
               </item>
               <item row="0" column="6">
-               <widget class="QLabel" name="absp_valR2">
+               <widget class="QLabel" name="valR2">
                 <property name="styleSheet">
                  <string notr="true">color: rgb(255, 0, 0);</string>
                 </property>
@@ -396,7 +396,7 @@
                </widget>
               </item>
               <item row="0" column="3">
-               <widget class="QLabel" name="absp_valR1">
+               <widget class="QLabel" name="valR1">
                 <property name="styleSheet">
                  <string notr="true">color: rgb(255, 0, 0);</string>
                 </property>
@@ -406,7 +406,7 @@
                </widget>
               </item>
               <item row="0" column="2">
-               <widget class="QLineEdit" name="absp_ler1">
+               <widget class="QLineEdit" name="ler1">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -419,7 +419,7 @@
                </widget>
               </item>
               <item row="0" column="9">
-               <widget class="QLabel" name="absp_valR3">
+               <widget class="QLabel" name="valR3">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
@@ -444,7 +444,7 @@
                </widget>
               </item>
               <item row="0" column="7">
-               <widget class="QLabel" name="absp_lbR3">
+               <widget class="QLabel" name="lbR3">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
@@ -454,7 +454,7 @@
                </widget>
               </item>
               <item row="0" column="5">
-               <widget class="QLineEdit" name="absp_ler2">
+               <widget class="QLineEdit" name="ler2">
                 <property name="text">
                  <string/>
                 </property>
@@ -486,7 +486,7 @@
       <item>
        <layout class="QGridLayout" name="gridLayout_9" columnminimumwidth="0,0,0,0,0,9">
         <item row="0" column="0">
-         <widget class="QLabel" name="absp_lbsamden">
+         <widget class="QLabel" name="lbsamden">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -512,7 +512,7 @@
          </widget>
         </item>
         <item row="1" column="4" colspan="2">
-         <widget class="QStackedWidget" name="absp_swSampleInputType">
+         <widget class="QStackedWidget" name="swSampleInputType">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -536,35 +536,35 @@
             <item>
              <layout class="QGridLayout" name="gridLayout_8" columnminimumwidth="0,0,0,0,0,9">
               <item row="0" column="4">
-               <widget class="QLineEdit" name="absp_lesamsiga">
+               <widget class="QLineEdit" name="lesamsiga">
                 <property name="text">
                  <string/>
                 </property>
                </widget>
               </item>
               <item row="0" column="0">
-               <widget class="QLabel" name="absp_lbsamsigs">
+               <widget class="QLabel" name="lbsamsigs">
                 <property name="text">
                  <string>Scattering cross-section:</string>
                 </property>
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QLineEdit" name="absp_lesamsigs">
+               <widget class="QLineEdit" name="lesamsigs">
                 <property name="text">
                  <string/>
                 </property>
                </widget>
               </item>
               <item row="0" column="3">
-               <widget class="QLabel" name="absp_lbsamsiga">
+               <widget class="QLabel" name="lbsamsiga">
                 <property name="text">
                  <string>Absorption cross-section:</string>
                 </property>
                </widget>
               </item>
               <item row="0" column="2">
-               <widget class="QLabel" name="absp_valSamsigs">
+               <widget class="QLabel" name="valSamsigs">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                   <horstretch>0</horstretch>
@@ -580,7 +580,7 @@
                </widget>
               </item>
               <item row="0" column="5">
-               <widget class="QLabel" name="absp_valSamsiga">
+               <widget class="QLabel" name="valSamsiga">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                   <horstretch>0</horstretch>
@@ -613,14 +613,14 @@
             <item>
              <layout class="QGridLayout" name="gridLayout_12" columnminimumwidth="0,9">
               <item row="0" column="0">
-               <widget class="QLineEdit" name="absp_leSampleFormula">
+               <widget class="QLineEdit" name="leSampleFormula">
                 <property name="text">
                  <string/>
                 </property>
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QLabel" name="absp_valSampleFormula">
+               <widget class="QLabel" name="valSampleFormula">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                   <horstretch>0</horstretch>
@@ -642,7 +642,7 @@
          </widget>
         </item>
         <item row="0" column="5">
-         <widget class="QLabel" name="absp_valSamden">
+         <widget class="QLabel" name="valSamden">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -658,14 +658,14 @@
          </widget>
         </item>
         <item row="0" column="1" colspan="4">
-         <widget class="QLineEdit" name="absp_lesamden">
+         <widget class="QLineEdit" name="lesamden">
           <property name="text">
            <string/>
           </property>
          </widget>
         </item>
         <item row="1" column="1" colspan="3">
-         <widget class="QComboBox" name="absp_cbSampleInputType">
+         <widget class="QComboBox" name="cbSampleInputType">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -707,7 +707,7 @@
       <item>
        <layout class="QGridLayout" name="gridLayout_6" columnminimumwidth="0,0,0,0,9">
         <item row="0" column="0">
-         <widget class="QLabel" name="absp_lbCanden">
+         <widget class="QLabel" name="lbCanden">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -720,7 +720,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="absp_lblInputType">
+         <widget class="QLabel" name="lblInputType">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -733,7 +733,7 @@
          </widget>
         </item>
         <item row="1" column="3" colspan="2">
-         <widget class="QStackedWidget" name="absp_swCanInputType">
+         <widget class="QStackedWidget" name="swCanInputType">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -763,7 +763,7 @@
             <item>
              <layout class="QGridLayout" name="gridLayout_7" columnminimumwidth="0,0,0,0,0,0,9">
               <item row="0" column="0">
-               <widget class="QLabel" name="absp_lbCansigs">
+               <widget class="QLabel" name="lbCansigs">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
@@ -779,7 +779,7 @@
                </widget>
               </item>
               <item row="0" column="1" colspan="2">
-               <widget class="QLineEdit" name="absp_lecansigs">
+               <widget class="QLineEdit" name="lecansigs">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
@@ -789,7 +789,7 @@
                </widget>
               </item>
               <item row="0" column="3">
-               <widget class="QLabel" name="absp_valCansigs">
+               <widget class="QLabel" name="valCansigs">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -811,14 +811,14 @@
                </widget>
               </item>
               <item row="0" column="5">
-               <widget class="QLineEdit" name="absp_lecansiga">
+               <widget class="QLineEdit" name="lecansiga">
                 <property name="text">
                  <string/>
                 </property>
                </widget>
               </item>
               <item row="0" column="6">
-               <widget class="QLabel" name="absp_valCansiga">
+               <widget class="QLabel" name="valCansiga">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -834,7 +834,7 @@
                </widget>
               </item>
               <item row="0" column="4">
-               <widget class="QLabel" name="absp_lbCansiga">
+               <widget class="QLabel" name="lbCansiga">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -864,10 +864,10 @@
             <item>
              <layout class="QGridLayout" name="gridLayout_10" columnminimumwidth="0,9">
               <item row="0" column="0">
-               <widget class="QLineEdit" name="absp_leCanFormula"/>
+               <widget class="QLineEdit" name="leCanFormula"/>
               </item>
               <item row="0" column="1">
-               <widget class="QLabel" name="absp_valCanFormula">
+               <widget class="QLabel" name="valCanFormula">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -889,7 +889,7 @@
          </widget>
         </item>
         <item row="0" column="4">
-         <widget class="QLabel" name="absp_valCanden">
+         <widget class="QLabel" name="valCanden">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -908,14 +908,14 @@
          </widget>
         </item>
         <item row="0" column="1" colspan="3">
-         <widget class="QLineEdit" name="absp_lecanden">
+         <widget class="QLineEdit" name="lecanden">
           <property name="text">
            <string/>
           </property>
          </widget>
         </item>
         <item row="1" column="1" colspan="2">
-         <widget class="QComboBox" name="absp_cbCanInputType">
+         <widget class="QComboBox" name="cbCanInputType">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -954,7 +954,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
-         <widget class="QCheckBox" name="absp_ckVerbose">
+         <widget class="QCheckBox" name="ckVerbose">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -983,7 +983,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLabel" name="absp_lbPlotOutput">
+         <widget class="QLabel" name="lbPlotOutput">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -996,7 +996,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="absp_cbPlotOutput">
+         <widget class="QComboBox" name="cbPlotOutput">
           <item>
            <property name="text">
             <string>None</string>
@@ -1033,7 +1033,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QCheckBox" name="absp_ckSave">
+         <widget class="QCheckBox" name="ckSave">
           <property name="text">
            <string>Save Result</string>
           </property>

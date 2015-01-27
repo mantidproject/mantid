@@ -36,19 +36,20 @@ namespace IDA
   IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent) :
     UserSubWindow(parent),
     m_valInt(NULL), m_valDbl(NULL),
-    m_dblEdFac(NULL), m_blnEdFac(NULL),
     m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange)
   {
+    m_uiForm.setupUi(this);
+
     // Allows us to get a handle on a tab using an enum, for example "m_tabs[ELWIN]".
     // All tabs MUST appear here to be shown in interface.
     // We make the assumption that each map key corresponds to the order in which the tabs appear.
-    m_tabs.insert(std::make_pair(ELWIN,      new Elwin(this)));
-    m_tabs.insert(std::make_pair(MSD_FIT,    new MSDFit(this)));
-    m_tabs.insert(std::make_pair(FURY,       new Fury(this)));
-    m_tabs.insert(std::make_pair(FURY_FIT,   new FuryFit(this)));
-    m_tabs.insert(std::make_pair(CONV_FIT,   new ConvFit(this)));
-    m_tabs.insert(std::make_pair(CALC_CORR,  new CalcCorr(this)));
-    m_tabs.insert(std::make_pair(APPLY_CORR, new ApplyCorr(this)));
+    m_tabs.insert(std::make_pair(ELWIN,      new Elwin(m_uiForm.twIDATabs->widget(ELWIN))));
+    m_tabs.insert(std::make_pair(MSD_FIT,    new MSDFit(m_uiForm.twIDATabs->widget(MSD_FIT))));
+    m_tabs.insert(std::make_pair(FURY,       new Fury(m_uiForm.twIDATabs->widget(FURY))));
+    m_tabs.insert(std::make_pair(FURY_FIT,   new FuryFit(m_uiForm.twIDATabs->widget(FURY_FIT))));
+    m_tabs.insert(std::make_pair(CONV_FIT,   new ConvFit(m_uiForm.twIDATabs->widget(CONV_FIT))));
+    m_tabs.insert(std::make_pair(CALC_CORR,  new CalcCorr(m_uiForm.twIDATabs->widget(CALC_CORR))));
+    m_tabs.insert(std::make_pair(APPLY_CORR, new ApplyCorr(m_uiForm.twIDATabs->widget(APPLY_CORR))));
   }
 
   /**
@@ -76,15 +77,9 @@ namespace IDA
    * Initialised the layout of the interface.  MUST be called.
    */
   void IndirectDataAnalysis::initLayout()
-  { 
-    m_uiForm.setupUi(this);
-
+  {
     // Connect Poco Notification Observer
     Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
-
-    // Create Editor Factories
-    m_dblEdFac = new DoubleEditorFactory(this);
-    m_blnEdFac = new QtCheckBoxFactory(this);
 
     // Set up all tabs
     for(auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab)
@@ -121,7 +116,7 @@ namespace IDA
 
     settings.beginGroup(settingsGroup + "ProcessedFiles");
     settings.setValue("last_directory", saveDir);
-    
+
     // Load each tab's settings.
     auto tab = m_tabs.begin();
     for( ; tab != m_tabs.end(); ++tab )
@@ -135,7 +130,7 @@ namespace IDA
    */
   void IndirectDataAnalysis::run()
   {
-    const unsigned int currentTab = m_uiForm.tabWidget->currentIndex();
+    const unsigned int currentTab = m_uiForm.twIDATabs->currentIndex();
     m_tabs[currentTab]->runTab();
   }
 
@@ -154,7 +149,7 @@ namespace IDA
    */
   void IndirectDataAnalysis::help()
   {
-    unsigned int currentTab = m_uiForm.tabWidget->currentIndex();
+    unsigned int currentTab = m_uiForm.twIDATabs->currentIndex();
     QString url = m_tabs[currentTab]->tabHelpURL();
     QDesktopServices::openUrl(QUrl(url));
   }
@@ -164,14 +159,14 @@ namespace IDA
    */
   void IndirectDataAnalysis::exportTabPython()
   {
-    unsigned int currentTab = m_uiForm.tabWidget->currentIndex();
+    unsigned int currentTab = m_uiForm.twIDATabs->currentIndex();
     m_tabs[currentTab]->exportPythonScript();
   }
 
   /**
    * Slot to wrap the protected showInformationBox method defined
    * in UserSubWindow and provide access to composed tabs.
-   * 
+   *
    * @param message The message to display in the message box
    */
   void IndirectDataAnalysis::showMessageBox(const QString& message)

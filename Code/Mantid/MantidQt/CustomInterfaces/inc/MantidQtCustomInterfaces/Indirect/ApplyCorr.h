@@ -32,7 +32,6 @@ namespace IDA
     virtual bool validate();
     virtual void loadSettings(const QSettings & settings);
     virtual QString helpURL() {return "AbsCor";}
-    bool validateScaleInput(); ///< validate input for Scale option.
     /// ask the user if they wish to rebin the can
     bool requireCanRebin();
 
@@ -40,8 +39,6 @@ namespace IDA
     /// Pointer to the result workspace (for plotting)
     Mantid::API::MatrixWorkspace_sptr outputWs;
 
-  private slots:
-    void scaleMultiplierCheck(bool state); ///< handle checking/unchecking of "Scale: Multiply Container by"
   };
 } // namespace IDA
 } // namespace CustomInterfaces

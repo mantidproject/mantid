@@ -34,7 +34,7 @@ namespace IDA
     m_msdTree = new QtTreePropertyBrowser();
     m_uiForm.properties->addWidget(m_msdTree);
 
-    m_msdTree->setFactoryForManager(m_dblManager, doubleEditorFactory());
+    m_msdTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
     m_properties["Start"] = m_dblManager->addProperty("StartX");
     m_dblManager->setDecimals(m_properties["Start"], NUM_DECIMALS);
@@ -59,7 +59,7 @@ namespace IDA
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
 
     connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(newDataLoaded(const QString&)));
-    connect(m_uiForm.pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
+    connect(m_uiForm.pbSingleFit, SIGNAL(clicked()), this, SLOT(singleFit()));
     connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
 
     connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this, SLOT(specMinChanged(int)));

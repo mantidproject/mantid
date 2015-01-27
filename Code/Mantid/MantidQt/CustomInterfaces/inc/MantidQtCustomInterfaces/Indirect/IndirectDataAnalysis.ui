@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTabWidget" name="tabWidget">
+    <widget class="QTabWidget" name="twIDATabs">
      <property name="enabled">
       <bool>true</bool>
      </property>
@@ -162,7 +162,7 @@
  </widget>
  <customwidgets/>
  <tabstops>
-  <tabstop>tabWidget</tabstop>
+  <tabstop>twIDATabs</tabstop>
   <tabstop>pbHelp</tabstop>
   <tabstop>pbRun</tabstop>
   <tabstop>pbManageDirs</tabstop>

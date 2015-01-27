@@ -47,8 +47,8 @@ namespace IDA
     m_uiForm.properties->addWidget(m_cfTree);
 
     // add factories to managers
-    m_cfTree->setFactoryForManager(m_blnManager, qtCheckBoxFactory());
-    m_cfTree->setFactoryForManager(m_dblManager, doubleEditorFactory());
+    m_cfTree->setFactoryForManager(m_blnManager, m_blnEdFac);
+    m_cfTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
     // Create Plot Widget
     m_plots["ConvFitPlot"] = new QwtPlot(m_parentWidget);
@@ -132,7 +132,7 @@ namespace IDA
 
     connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
     connect(m_uiForm.cbBackground, SIGNAL(currentIndexChanged(int)), this, SLOT(bgTypeSelection(int)));
-    connect(m_uiForm.pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
+    connect(m_uiForm.pbSingleFit, SIGNAL(clicked()), this, SLOT(singleFit()));
 
     // Context menu
     m_cfTree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -179,7 +179,7 @@ namespace IDA
       "ties = " + ties + "\n"
       "specMin = " + specMin + "\n"
       "specMax = " + specMax + "\n"
-      "save = " + (m_uiForm.ckSaveSeq->isChecked() ? "True\n" : "False\n");
+      "save = " + (m_uiForm.ckSave->isChecked() ? "True\n" : "False\n");
 
     if ( m_blnManager->value(m_properties["Convolve"]) ) pyInput += "convolve = True\n";
     else pyInput += "convolve = False\n";

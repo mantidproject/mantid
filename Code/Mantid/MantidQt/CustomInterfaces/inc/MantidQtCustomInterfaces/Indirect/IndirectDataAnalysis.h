@@ -36,10 +36,10 @@ namespace IDA
 
   // Number of decimal places in property browsers.
   static const unsigned int NUM_DECIMALS = 6;
-    
+
   // Forward Declaration
   class IDATab;
-    
+
   /**
    * The IndirectDataAnalysis class is the main class that handles the interface and controls
    * its tabs.
@@ -93,11 +93,6 @@ namespace IDA
     QIntValidator* m_valInt;
     /// Double validator
     QDoubleValidator* m_valDbl;
-
-    /// DoubleEditorFactory
-    DoubleEditorFactory* m_dblEdFac;
-    /// QtCheckBoxFactory
-    QtCheckBoxFactory* m_blnEdFac;
 
     /// Change Observer for ConfigService (monitors user directories)
     Poco::NObserver<IndirectDataAnalysis, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;

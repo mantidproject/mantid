@@ -67,8 +67,8 @@ namespace IDA
     // setupTreePropertyBrowser
     m_ffRangeManager = new QtDoublePropertyManager(m_parentWidget);
 
-    m_ffTree->setFactoryForManager(m_dblManager, doubleEditorFactory());
-    m_ffTree->setFactoryForManager(m_ffRangeManager, doubleEditorFactory());
+    m_ffTree->setFactoryForManager(m_dblManager, m_dblEdFac);
+    m_ffTree->setFactoryForManager(m_ffRangeManager, m_dblEdFac);
 
     m_properties["StartX"] = m_ffRangeManager->addProperty("StartX");
     m_ffRangeManager->setDecimals(m_properties["StartX"], NUM_DECIMALS);
@@ -152,7 +152,7 @@ namespace IDA
       "ftype = '"   + fitTypeString() + "'\n"
       "startx = " + m_properties["StartX"]->valueText() + "\n"
       "endx = " + m_properties["EndX"]->valueText() + "\n"
-      "plot = '" + m_uiForm.cbPlotOutput->currentText() + "'\n"
+      "plot = '" + m_uiForm.cbPlotType->currentText() + "'\n"
       "spec_min = " + specMin + "\n"
       "spec_max = " + specMax + "\n"
       "spec_max = None\n";
@@ -163,7 +163,7 @@ namespace IDA
     if ( m_uiForm.ckVerbose->isChecked() ) pyInput += "verbose = True\n";
     else pyInput += "verbose = False\n";
 
-    if ( m_uiForm.ckSaveSeq->isChecked() ) pyInput += "save = True\n";
+    if ( m_uiForm.ckSave->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";
 
     if( !constrainBeta )
@@ -355,22 +355,22 @@ namespace IDA
       m_ffTree->addProperty(m_properties["Exponential1"]);
 
       //remove option to plot beta
-      m_uiForm.cbPlotOutput->removeItem(4);
+      m_uiForm.cbPlotType->removeItem(4);
       break;
     case 1:
       m_ffTree->addProperty(m_properties["Exponential1"]);
       m_ffTree->addProperty(m_properties["Exponential2"]);
 
       //remove option to plot beta
-      m_uiForm.cbPlotOutput->removeItem(4);
+      m_uiForm.cbPlotType->removeItem(4);
       break;
     case 2:
       m_ffTree->addProperty(m_properties["StretchedExp"]);
 
       //add option to plot beta
-      if(m_uiForm.cbPlotOutput->count() == 4)
+      if(m_uiForm.cbPlotType->count() == 4)
       {
-        m_uiForm.cbPlotOutput->addItem("Beta");
+        m_uiForm.cbPlotType->addItem("Beta");
       }
 
       break;
@@ -379,9 +379,9 @@ namespace IDA
       m_ffTree->addProperty(m_properties["StretchedExp"]);
 
       //add option to plot beta
-      if(m_uiForm.cbPlotOutput->count() == 4)
+      if(m_uiForm.cbPlotType->count() == 4)
       {
-        m_uiForm.cbPlotOutput->addItem("Beta");
+        m_uiForm.cbPlotType->addItem("Beta");
       }
 
       break;
