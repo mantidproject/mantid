@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_CONVFIT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_CONVFIT_H_
 
+#include "ui_ConvFit.h"
 #include "IDATab.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -57,12 +58,14 @@ namespace IDA
     QString fitTypeString() const;
     QString backgroundString() const;
 
+    Ui::ConvFit m_uiForm;
     QtStringPropertyManager* m_stringManager;
     QtTreePropertyBrowser* m_cfTree;
     QMap<QtProperty*, QtProperty*> m_fixedProps;
     boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_cfInputWS;
     QString m_cfInputWSName;
     bool m_confitResFileType;
+
   };
 } // namespace IDA
 } // namespace CustomInterfaces

@@ -66,13 +66,8 @@ namespace IDA
     /// Function to run a string as python code
     void runPythonScript(const QString& pyInput);
     /// Check the binning between two workspaces match
-    bool checkWorkspaceBinningMatches(Mantid::API::MatrixWorkspace_const_sptr left, 
+    bool checkWorkspaceBinningMatches(Mantid::API::MatrixWorkspace_const_sptr left,
                                       Mantid::API::MatrixWorkspace_const_sptr right);
-
-    /// Returns a handle to the UI form object stored in the IndirectDataAnalysis class.
-    Ui::IndirectDataAnalysis & uiForm();
-    /// Returns a const handle to the UI form object stored in the IndirectDataAnalysis class.
-    const Ui::IndirectDataAnalysis & uiForm() const;
 
     /// Returns a handle to the DoubleEditorFactory object stored in the IndirectDataAnalysis class.
     DoubleEditorFactory * doubleEditorFactory();

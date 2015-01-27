@@ -25,13 +25,14 @@ namespace IDA
   MSDFit::MSDFit(QWidget * parent) : IDATab(parent),
     m_currentWsName(""), m_msdTree(NULL)
   {
+    m_uiForm.setupUi(parent);
   }
 
   void MSDFit::setup()
   {
     // Tree Browser
     m_msdTree = new QtTreePropertyBrowser();
-    uiForm().msd_properties->addWidget(m_msdTree);
+    m_uiForm.properties->addWidget(m_msdTree);
 
     m_msdTree->setFactoryForManager(m_dblManager, doubleEditorFactory());
 
@@ -44,7 +45,7 @@ namespace IDA
     m_msdTree->addProperty(m_properties["End"]);
 
     m_plots["MSDPlot"] = new QwtPlot(m_parentWidget);
-    uiForm().msd_plot->addWidget(m_plots["MSDPlot"]);
+    m_uiForm.plot->addWidget(m_plots["MSDPlot"]);
 
     // Cosmetics
     m_plots["MSDPlot"]->setAxisFont(QwtPlot::xBottom, m_parentWidget->font());
@@ -57,12 +58,12 @@ namespace IDA
     connect(m_rangeSelectors["MSDRange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
 
-    connect(uiForm().msd_dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(newDataLoaded(const QString&)));
-    connect(uiForm().msd_pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
-    connect(uiForm().msd_spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
+    connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(newDataLoaded(const QString&)));
+    connect(m_uiForm.pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
+    connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
 
-    connect(uiForm().msd_spSpectraMin, SIGNAL(valueChanged(int)), this, SLOT(specMinChanged(int)));
-    connect(uiForm().msd_spSpectraMax, SIGNAL(valueChanged(int)), this, SLOT(specMaxChanged(int)));
+    connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this, SLOT(specMinChanged(int)));
+    connect(m_uiForm.spSpectraMax, SIGNAL(valueChanged(int)), this, SLOT(specMaxChanged(int)));
   }
 
   void MSDFit::run()
@@ -71,17 +72,17 @@ namespace IDA
     "from IndirectDataAnalysis import msdfit\n"
     "startX = " + QString::number(m_dblManager->value(m_properties["Start"])) +"\n"
     "endX = " + QString::number(m_dblManager->value(m_properties["End"])) +"\n"
-    "specMin = " + uiForm().msd_spSpectraMin->text() + "\n"
-    "specMax = " + uiForm().msd_spSpectraMax->text() + "\n"
-    "input = '" + uiForm().msd_dsSampleInput->getCurrentDataName() + "'\n";
+    "specMin = " + m_uiForm.spSpectraMin->text() + "\n"
+    "specMax = " + m_uiForm.spSpectraMax->text() + "\n"
+    "input = '" + m_uiForm.dsSampleInput->getCurrentDataName() + "'\n";
 
-    if ( uiForm().msd_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+    if ( m_uiForm.ckVerbose->isChecked() ) pyInput += "verbose = True\n";
     else pyInput += "verbose = False\n";
 
-    if ( uiForm().msd_ckPlot->isChecked() ) pyInput += "plot = True\n";
+    if ( m_uiForm.ckPlot->isChecked() ) pyInput += "plot = True\n";
     else pyInput += "plot = False\n";
 
-    if ( uiForm().msd_ckSave->isChecked() ) pyInput += "save = True\n";
+    if ( m_uiForm.ckSave->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";
 
     pyInput +=
@@ -91,7 +92,7 @@ namespace IDA
     UNUSED_ARG(pyOutput);
 
     // Set the result workspace for Python script export
-    QString dataName = uiForm().msd_dsSampleInput->getCurrentDataName();
+    QString dataName = m_uiForm.dsSampleInput->getCurrentDataName();
     m_pythonExportWsName = dataName.left(dataName.lastIndexOf("_")).toStdString() + "_msd";
   }
 
@@ -104,11 +105,11 @@ namespace IDA
       "from IndirectDataAnalysis import msdfit\n"
       "startX = " + QString::number(m_dblManager->value(m_properties["Start"])) +"\n"
       "endX = " + QString::number(m_dblManager->value(m_properties["End"])) +"\n"
-      "specMin = " + uiForm().msd_spPlotSpectrum->text() + "\n"
-      "specMax = " + uiForm().msd_spPlotSpectrum->text() + "\n"
-      "input = '" + uiForm().msd_dsSampleInput->getCurrentDataName() + "'\n";
+      "specMin = " + m_uiForm.spPlotSpectrum->text() + "\n"
+      "specMax = " + m_uiForm.spPlotSpectrum->text() + "\n"
+      "input = '" + m_uiForm.dsSampleInput->getCurrentDataName() + "'\n";
 
-    if ( uiForm().msd_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+    if ( m_uiForm.ckVerbose->isChecked() ) pyInput += "verbose = True\n";
     else pyInput += "verbose = False\n";
 
     pyInput +=
@@ -123,13 +124,13 @@ namespace IDA
   {
     UserInputValidator uiv;
 
-    uiv.checkDataSelectorIsValid("Sample input", uiForm().msd_dsSampleInput);
+    uiv.checkDataSelectorIsValid("Sample input", m_uiForm.dsSampleInput);
 
     auto range = std::make_pair(m_dblManager->value(m_properties["Start"]), m_dblManager->value(m_properties["End"]));
     uiv.checkValidRange("a range", range);
 
-    int specMin = uiForm().msd_spSpectraMin->value();
-    int specMax = uiForm().msd_spSpectraMax->value();
+    int specMin = m_uiForm.spSpectraMin->value();
+    int specMax = m_uiForm.spSpectraMax->value();
     auto specRange = std::make_pair(specMin, specMax+1);
     uiv.checkValidRange("spectrum range", specRange);
 
@@ -141,7 +142,7 @@ namespace IDA
 
   void MSDFit::loadSettings(const QSettings & settings)
   {
-    uiForm().msd_dsSampleInput->readSettings(settings.group());
+    m_uiForm.dsSampleInput->readSettings(settings.group());
   }
 
   void MSDFit::plotFit(QString wsName)
@@ -170,23 +171,23 @@ namespace IDA
     auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsName.toStdString());
     int maxSpecIndex = static_cast<int>(ws->getNumberHistograms()) - 1;
 
-    uiForm().msd_spPlotSpectrum->setMaximum(maxSpecIndex);
-    uiForm().msd_spPlotSpectrum->setMinimum(0);
-    uiForm().msd_spPlotSpectrum->setValue(0);
+    m_uiForm.spPlotSpectrum->setMaximum(maxSpecIndex);
+    m_uiForm.spPlotSpectrum->setMinimum(0);
+    m_uiForm.spPlotSpectrum->setValue(0);
 
-    uiForm().msd_spSpectraMin->setMaximum(maxSpecIndex);
-    uiForm().msd_spSpectraMin->setMinimum(0);
+    m_uiForm.spSpectraMin->setMaximum(maxSpecIndex);
+    m_uiForm.spSpectraMin->setMinimum(0);
 
-    uiForm().msd_spSpectraMax->setMaximum(maxSpecIndex);
-    uiForm().msd_spSpectraMax->setMinimum(0);
-    uiForm().msd_spSpectraMax->setValue(maxSpecIndex);
+    m_uiForm.spSpectraMax->setMaximum(maxSpecIndex);
+    m_uiForm.spSpectraMax->setMinimum(0);
+    m_uiForm.spSpectraMax->setValue(maxSpecIndex);
 
     plotInput();
   }
 
   void MSDFit::plotInput()
   {
-    QString wsname = uiForm().msd_dsSampleInput->getCurrentDataName();
+    QString wsname = m_uiForm.dsSampleInput->getCurrentDataName();
 
     if(!AnalysisDataService::Instance().doesExist(wsname.toStdString()))
     {
@@ -196,7 +197,7 @@ namespace IDA
 
     auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsname.toStdString());
 
-    int wsIndex = uiForm().msd_spPlotSpectrum->value();
+    int wsIndex = m_uiForm.spPlotSpectrum->value();
     plotMiniPlot(ws, wsIndex, "MSDPlot", "MSDDataCurve");
 
     try
@@ -228,7 +229,7 @@ namespace IDA
    */
   void MSDFit::specMinChanged(int value)
   {
-    uiForm().msd_spSpectraMax->setMinimum(value);
+    m_uiForm.spSpectraMax->setMinimum(value);
   }
 
   /**
@@ -240,7 +241,7 @@ namespace IDA
    */
   void MSDFit::specMaxChanged(int value)
   {
-    uiForm().msd_spSpectraMin->setMaximum(value);
+    m_uiForm.spSpectraMin->setMaximum(value);
   }
 
   void MSDFit::minChanged(double val)

@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_MSDFIT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_MSDFIT_H_
 
+#include "ui_MSDFit.h"
 #include "IDATab.h"
 
 namespace MantidQt
@@ -35,6 +36,7 @@ namespace IDA
     void updateRS(QtProperty* prop, double val);
 
   private:
+    Ui::MSDFit m_uiForm;
     QString m_currentWsName;
     QtTreePropertyBrowser* m_msdTree;
 

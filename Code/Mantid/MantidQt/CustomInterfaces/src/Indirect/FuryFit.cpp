@@ -37,6 +37,7 @@ namespace IDA
     m_ffInputWSName(),
     m_ties()
   {
+    m_uiForm.setupUi(parent);
   }
 
   void FuryFit::setup()
@@ -44,13 +45,13 @@ namespace IDA
     m_stringManager = new QtStringPropertyManager(m_parentWidget);
 
     m_ffTree = new QtTreePropertyBrowser(m_parentWidget);
-    uiForm().furyfit_properties->addWidget(m_ffTree);
+    m_uiForm.properties->addWidget(m_ffTree);
 
     // Setup FuryFit Plot Window
     m_plots["FuryFitPlot"] = new QwtPlot(m_parentWidget);
     m_plots["FuryFitPlot"]->setAxisFont(QwtPlot::xBottom, m_parentWidget->font());
     m_plots["FuryFitPlot"]->setAxisFont(QwtPlot::yLeft, m_parentWidget->font());
-    uiForm().furyfit_vlPlot->addWidget(m_plots["FuryFitPlot"]);
+    m_uiForm.vlPlot->addWidget(m_plots["FuryFitPlot"]);
     m_plots["FuryFitPlot"]->setCanvasBackground(QColor(255,255,255));
 
     m_rangeSelectors["FuryFitRange"] = new MantidQt::MantidWidgets::RangeSelector(m_plots["FuryFitPlot"]);
@@ -99,22 +100,22 @@ namespace IDA
     m_dblManager->setMinimum(m_properties["StretchedExp.Intensity"], 0);
     m_dblManager->setMaximum(m_properties["StretchedExp.Intensity"], 1);
 
-    typeSelection(uiForm().furyfit_cbFitType->currentIndex());
+    typeSelection(m_uiForm.cbFitType->currentIndex());
 
     // Connect to PlotGuess checkbox
     connect(m_dblManager, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(plotGuess(QtProperty*)));
 
     // Signal/slot ui connections
-    connect(uiForm().furyfit_dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(newDataLoaded(const QString&)));
-    connect(uiForm().furyfit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
-    connect(uiForm().furyfit_pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
+    connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(newDataLoaded(const QString&)));
+    connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
+    connect(m_uiForm.pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
 
-    connect(uiForm().furyfit_dsSampleInput, SIGNAL(filesFound()), this, SLOT(plotInput()));
+    connect(m_uiForm.dsSampleInput, SIGNAL(filesFound()), this, SLOT(plotInput()));
 
-    connect(uiForm().furyfit_spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
+    connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
 
-    connect(uiForm().furyfit_spSpectraMin, SIGNAL(valueChanged(int)), this, SLOT(specMinChanged(int)));
-    connect(uiForm().furyfit_spSpectraMax, SIGNAL(valueChanged(int)), this, SLOT(specMaxChanged(int)));
+    connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this, SLOT(specMinChanged(int)));
+    connect(m_uiForm.spSpectraMax, SIGNAL(valueChanged(int)), this, SLOT(specMaxChanged(int)));
 
     // Set a custom handler for the QTreePropertyBrowser's ContextMenu event
     m_ffTree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -128,8 +129,8 @@ namespace IDA
       return;
     }
 
-    const bool constrainBeta = uiForm().furyfit_ckConstrainBeta->isChecked();
-    const bool constrainIntens = uiForm().furyfit_ckConstrainIntensities->isChecked();
+    const bool constrainBeta = m_uiForm.ckConstrainBeta->isChecked();
+    const bool constrainIntens = m_uiForm.ckConstrainIntensities->isChecked();
     CompositeFunction_sptr func = createFunction();
     func->tie("f0.A1", "0");
 
@@ -142,8 +143,8 @@ namespace IDA
 
     std::string function = std::string(func->asString());
     QString fitType = fitTypeString();
-    QString specMin = uiForm().furyfit_spSpectraMin->text();
-    QString specMax = uiForm().furyfit_spSpectraMax->text();
+    QString specMin = m_uiForm.spSpectraMin->text();
+    QString specMax = m_uiForm.spSpectraMax->text();
 
     QString pyInput = "from IndirectDataAnalysis import furyfitSeq, furyfitMult\n"
       "input = '" + m_ffInputWSName + "'\n"
@@ -151,7 +152,7 @@ namespace IDA
       "ftype = '"   + fitTypeString() + "'\n"
       "startx = " + m_properties["StartX"]->valueText() + "\n"
       "endx = " + m_properties["EndX"]->valueText() + "\n"
-      "plot = '" + uiForm().furyfit_cbPlotOutput->currentText() + "'\n"
+      "plot = '" + m_uiForm.cbPlotOutput->currentText() + "'\n"
       "spec_min = " + specMin + "\n"
       "spec_max = " + specMax + "\n"
       "spec_max = None\n";
@@ -159,10 +160,10 @@ namespace IDA
     if (constrainIntens) pyInput += "constrain_intens = True \n";
     else pyInput += "constrain_intens = False \n";
 
-    if ( uiForm().furyfit_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+    if ( m_uiForm.ckVerbose->isChecked() ) pyInput += "verbose = True\n";
     else pyInput += "verbose = False\n";
 
-    if ( uiForm().furyfit_ckSaveSeq->isChecked() ) pyInput += "save = True\n";
+    if ( m_uiForm.ckSaveSeq->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";
 
     if( !constrainBeta )
@@ -186,7 +187,7 @@ namespace IDA
   {
     UserInputValidator uiv;
 
-    uiv.checkDataSelectorIsValid("Sample", uiForm().furyfit_dsSampleInput);
+    uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
 
     auto range = std::make_pair(m_ffRangeManager->value(m_properties["StartX"]), m_ffRangeManager->value(m_properties["EndX"]));
     uiv.checkValidRange("Ranges", range);
@@ -199,7 +200,7 @@ namespace IDA
 
   void FuryFit::loadSettings(const QSettings & settings)
   {
-    uiForm().furyfit_dsSampleInput->readSettings(settings.group());
+    m_uiForm.dsSampleInput->readSettings(settings.group());
   }
 
   /**
@@ -216,16 +217,16 @@ namespace IDA
 
     int maxSpecIndex = static_cast<int>(m_ffInputWS->getNumberHistograms()) - 1;
 
-    uiForm().furyfit_spPlotSpectrum->setMaximum(maxSpecIndex);
-    uiForm().furyfit_spPlotSpectrum->setMinimum(0);
-    uiForm().furyfit_spPlotSpectrum->setValue(0);
+    m_uiForm.spPlotSpectrum->setMaximum(maxSpecIndex);
+    m_uiForm.spPlotSpectrum->setMinimum(0);
+    m_uiForm.spPlotSpectrum->setValue(0);
 
-    uiForm().furyfit_spSpectraMin->setMaximum(maxSpecIndex);
-    uiForm().furyfit_spSpectraMin->setMinimum(0);
+    m_uiForm.spSpectraMin->setMaximum(maxSpecIndex);
+    m_uiForm.spSpectraMin->setMinimum(0);
 
-    uiForm().furyfit_spSpectraMax->setMaximum(maxSpecIndex);
-    uiForm().furyfit_spSpectraMax->setMinimum(0);
-    uiForm().furyfit_spSpectraMax->setValue(maxSpecIndex);
+    m_uiForm.spSpectraMax->setMaximum(maxSpecIndex);
+    m_uiForm.spSpectraMax->setMinimum(0);
+    m_uiForm.spSpectraMax->setValue(maxSpecIndex);
 
     plotInput();
   }
@@ -234,7 +235,7 @@ namespace IDA
   {
     CompositeFunction_sptr result( new CompositeFunction );
     QString fname;
-    const int fitType = uiForm().furyfit_cbFitType->currentIndex();
+    const int fitType = m_uiForm.cbFitType->currentIndex();
 
     IFunction_sptr func = FunctionFactory::Instance().createFunction("LinearBackground");
     func->setParameter("A0", m_ffRangeManager->value(m_properties["BackgroundA0"]));
@@ -318,7 +319,7 @@ namespace IDA
 
   QString FuryFit::fitTypeString() const
   {
-    switch ( uiForm().furyfit_cbFitType->currentIndex() )
+    switch ( m_uiForm.cbFitType->currentIndex() )
     {
     case 0:
       return "1E_s";
@@ -342,10 +343,10 @@ namespace IDA
     m_ffTree->addProperty(m_properties["LinearBackground"]);
 
     //option should only be available with a single stretched exponential
-    uiForm().furyfit_ckConstrainBeta->setEnabled((index == 2));
-    if (!uiForm().furyfit_ckConstrainBeta->isEnabled())
+    m_uiForm.ckConstrainBeta->setEnabled((index == 2));
+    if (!m_uiForm.ckConstrainBeta->isEnabled())
     {
-      uiForm().furyfit_ckConstrainBeta->setChecked(false);
+      m_uiForm.ckConstrainBeta->setChecked(false);
     }
 
     switch ( index )
@@ -354,22 +355,22 @@ namespace IDA
       m_ffTree->addProperty(m_properties["Exponential1"]);
 
       //remove option to plot beta
-      uiForm().furyfit_cbPlotOutput->removeItem(4);
+      m_uiForm.cbPlotOutput->removeItem(4);
       break;
     case 1:
       m_ffTree->addProperty(m_properties["Exponential1"]);
       m_ffTree->addProperty(m_properties["Exponential2"]);
 
       //remove option to plot beta
-      uiForm().furyfit_cbPlotOutput->removeItem(4);
+      m_uiForm.cbPlotOutput->removeItem(4);
       break;
     case 2:
       m_ffTree->addProperty(m_properties["StretchedExp"]);
 
       //add option to plot beta
-      if(uiForm().furyfit_cbPlotOutput->count() == 4)
+      if(m_uiForm.cbPlotOutput->count() == 4)
       {
-        uiForm().furyfit_cbPlotOutput->addItem("Beta");
+        m_uiForm.cbPlotOutput->addItem("Beta");
       }
 
       break;
@@ -378,9 +379,9 @@ namespace IDA
       m_ffTree->addProperty(m_properties["StretchedExp"]);
 
       //add option to plot beta
-      if(uiForm().furyfit_cbPlotOutput->count() == 4)
+      if(m_uiForm.cbPlotOutput->count() == 4)
       {
-        uiForm().furyfit_cbPlotOutput->addItem("Beta");
+        m_uiForm.cbPlotOutput->addItem("Beta");
       }
 
       break;
@@ -397,7 +398,7 @@ namespace IDA
       return;
     }
 
-    int specNo = uiForm().furyfit_spPlotSpectrum->value();
+    int specNo = m_uiForm.spPlotSpectrum->value();
     plotMiniPlot(m_ffInputWS, specNo, "FuryFitPlot", "FF_DataCurve");
 
     try
@@ -448,7 +449,7 @@ namespace IDA
    */
   void FuryFit::specMinChanged(int value)
   {
-    uiForm().furyfit_spSpectraMax->setMinimum(value);
+    m_uiForm.spSpectraMax->setMinimum(value);
   }
 
   /**
@@ -460,7 +461,7 @@ namespace IDA
    */
   void FuryFit::specMaxChanged(int value)
   {
-    uiForm().furyfit_spSpectraMin->setMaximum(value);
+    m_uiForm.spSpectraMin->setMaximum(value);
   }
 
   void FuryFit::xMinSelected(double val)
@@ -514,7 +515,7 @@ namespace IDA
     std::string paramName = "f1.Intensity";
     size_t index = func->parameterIndex(paramName);
 
-    switch ( uiForm().furyfit_cbFitType->currentIndex() )
+    switch ( m_uiForm.cbFitType->currentIndex() )
     {
     case 0: // 1 Exp
     case 2: // 1 Str
@@ -553,8 +554,8 @@ namespace IDA
     // First create the function
     auto function = createFunction();
 
-    const int fitType = uiForm().furyfit_cbFitType->currentIndex();
-    if ( uiForm().furyfit_ckConstrainIntensities->isChecked() )
+    const int fitType = m_uiForm.cbFitType->currentIndex();
+    if ( m_uiForm.ckConstrainIntensities->isChecked() )
     {
       switch ( fitType )
       {
@@ -581,7 +582,7 @@ namespace IDA
     QString pyInput = "from IndirectCommon import getWSprefix\nprint getWSprefix('%1')\n";
     pyInput = pyInput.arg(m_ffInputWSName);
     QString outputNm = runPythonCode(pyInput).trimmed();
-    outputNm += QString("fury_") + ftype + uiForm().furyfit_spPlotSpectrum->text();
+    outputNm += QString("fury_") + ftype + m_uiForm.spPlotSpectrum->text();
     std::string output = outputNm.toStdString();
 
     // Create the Fit Algorithm
@@ -589,7 +590,7 @@ namespace IDA
     alg->initialize();
     alg->setPropertyValue("Function", function->asString());
     alg->setPropertyValue("InputWorkspace", m_ffInputWSName.toStdString());
-    alg->setProperty("WorkspaceIndex", uiForm().furyfit_spPlotSpectrum->text().toInt());
+    alg->setProperty("WorkspaceIndex", m_uiForm.spPlotSpectrum->text().toInt());
     alg->setProperty("StartX", m_ffRangeManager->value(m_properties["StartX"]));
     alg->setProperty("EndX", m_ffRangeManager->value(m_properties["EndX"]));
     alg->setProperty("Ties", m_ties.toStdString());

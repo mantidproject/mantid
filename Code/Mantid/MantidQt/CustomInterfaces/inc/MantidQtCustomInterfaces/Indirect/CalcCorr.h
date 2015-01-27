@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_CALCCORR_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_CALCCORR_H_
 
+#include "ui_CalcCorr.ui"
 #include "IDATab.h"
 
 namespace MantidQt
@@ -30,8 +31,10 @@ namespace IDA
     void getBeamWidthFromWorkspace(const QString& wsname);
 
   private:
+    Ui::CalcCorr m_uiForm;
     QDoubleValidator * m_dblVal;
     QDoubleValidator * m_posDblVal;
+
   };
 } // namespace IDA
 } // namespace CustomInterfaces

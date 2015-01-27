@@ -19,7 +19,7 @@
      <property name="title">
       <string>Input</string>
      </property>
-     <layout class="QGridLayout" name="fury_layoutFiles">
+     <layout class="QGridLayout" name="layoutFiles">
       <item row="2" column="0">
        <widget class="QLabel" name="lbResolution">
         <property name="sizePolicy">
@@ -185,7 +185,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
-   <header>mantidqt::mantidwidgets::dataselector.h</header>
+   <header>MantidQtMantidWidgets/DataSelector.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -21,16 +21,18 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  Elwin::Elwin(QWidget * parent) : IDATab(parent),
+  Elwin::Elwin(QWidget * parent) :
+    IDATab(parent),
     m_elwTree(NULL)
   {
+    m_uiForm.setupUi(parent);
   }
 
   void Elwin::setup()
   {
     // Create QtTreePropertyBrowser object
     m_elwTree = new QtTreePropertyBrowser();
-    uiForm().elwin_properties->addWidget(m_elwTree);
+    m_uiForm.properties->addWidget(m_elwTree);
 
     // Editor Factories
     m_elwTree->setFactoryForManager(m_dblManager, doubleEditorFactory());
@@ -65,7 +67,7 @@ namespace IDA
     m_plots["ElwinPlot"] = new QwtPlot(m_parentWidget);
     m_plots["ElwinPlot"]->setAxisFont(QwtPlot::xBottom, m_parentWidget->font());
     m_plots["ElwinPlot"]->setAxisFont(QwtPlot::yLeft, m_parentWidget->font());
-    uiForm().elwin_plot->addWidget(m_plots["ElwinPlot"]);
+    m_uiForm.plot->addWidget(m_plots["ElwinPlot"]);
     m_plots["ElwinPlot"]->setCanvasBackground(Qt::white);
     // We always want one range selector... the second one can be controlled from
     // within the elwinTwoRanges(bool state) function
@@ -86,9 +88,9 @@ namespace IDA
     connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(twoRanges(QtProperty*, bool)));
     twoRanges(m_properties["BackgroundSubtraction"], false);
 
-    connect(uiForm().elwin_inputFile, SIGNAL(filesFound()), this, SLOT(newInputFiles()));
-    connect(uiForm().elwin_cbPreviewFile, SIGNAL(currentIndexChanged(int)), this, SLOT(newPreviewFileSelected(int)));
-    connect(uiForm().elwin_spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
+    connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(newInputFiles()));
+    connect(m_uiForm.cbPreviewFile, SIGNAL(currentIndexChanged(int)), this, SLOT(newPreviewFileSelected(int)));
+    connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
 
     // Set any default values
     m_dblManager->setValue(m_properties["IntegrationStart"], -0.02);
@@ -100,7 +102,7 @@ namespace IDA
 
   void Elwin::run()
   {
-    QStringList inputFilenames = uiForm().elwin_inputFile->getFilenames();
+    QStringList inputFilenames = m_uiForm.dsInputFiles->getFilenames();
     inputFilenames.sort();
 
     // Get workspace names
@@ -144,13 +146,13 @@ namespace IDA
     IAlgorithm_sptr elwinMultAlg = AlgorithmManager::Instance().create("ElasticWindowMultiple");
     elwinMultAlg->initialize();
 
-    elwinMultAlg->setProperty("Plot", uiForm().elwin_ckPlot->isChecked());
+    elwinMultAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
 
     elwinMultAlg->setProperty("OutputInQ", qWorkspace.toStdString());
     elwinMultAlg->setProperty("OutputInQSquared", qSquaredWorkspace.toStdString());
     elwinMultAlg->setProperty("OutputELF", elfWorkspace.toStdString());
 
-    elwinMultAlg->setProperty("SampleEnvironmentLogName", uiForm().leLogName->text().toStdString());
+    elwinMultAlg->setProperty("SampleEnvironmentLogName", m_uiForm.leLogName->text().toStdString());
 
     elwinMultAlg->setProperty("Range1Start", m_dblManager->value(m_properties["IntegrationStart"]));
     elwinMultAlg->setProperty("Range1End", m_dblManager->value(m_properties["IntegrationEnd"]));
@@ -172,7 +174,7 @@ namespace IDA
     m_batchAlgoRunner->addAlgorithm(elwinMultAlg, elwinInputProps);
 
     // Configure Save algorithms
-    if(uiForm().elwin_ckSave->isChecked())
+    if(m_uiForm.ckSave->isChecked())
     {
       addSaveAlgorithm(qWorkspace);
       addSaveAlgorithm(qSquaredWorkspace);
@@ -216,7 +218,7 @@ namespace IDA
   {
     UserInputValidator uiv;
 
-    uiv.checkMWRunFilesIsValid("Input", uiForm().elwin_inputFile);
+    uiv.checkMWRunFilesIsValid("Input", m_uiForm.dsInputFiles);
 
     auto rangeOne = std::make_pair(m_dblManager->value(m_properties["IntegrationStart"]), m_dblManager->value(m_properties["IntegrationEnd"]));
     uiv.checkValidRange("Range One", rangeOne);
@@ -237,7 +239,7 @@ namespace IDA
 
   void Elwin::loadSettings(const QSettings & settings)
   {
-    uiForm().elwin_inputFile->readSettings(settings.group());
+    m_uiForm.dsInputFiles->readSettings(settings.group());
   }
 
   void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws)
@@ -274,7 +276,7 @@ namespace IDA
       logName = QString::fromStdString(log[0]);
     }
 
-    uiForm().leLogName->setText(logName);
+    m_uiForm.leLogName->setText(logName);
   }
 
   /**
@@ -285,10 +287,10 @@ namespace IDA
   void Elwin::newInputFiles()
   {
     // Clear the existing list of files
-    uiForm().elwin_cbPreviewFile->clear();
+    m_uiForm.cbPreviewFile->clear();
 
     // Populate the combo box with the filenames
-    QStringList filenames = uiForm().elwin_inputFile->getFilenames();
+    QStringList filenames = m_uiForm.dsInputFiles->getFilenames();
     for(auto it = filenames.begin(); it != filenames.end(); ++it)
     {
       QString rawFilename = *it;
@@ -296,11 +298,11 @@ namespace IDA
       QString sampleName = inputFileInfo.baseName();
 
       // Add the item using the base filename as the display string and the raw filename as the data value
-      uiForm().elwin_cbPreviewFile->addItem(sampleName, rawFilename);
+      m_uiForm.cbPreviewFile->addItem(sampleName, rawFilename);
     }
 
     // Default to the first file
-    uiForm().elwin_cbPreviewFile->setCurrentIndex(0);
+    m_uiForm.cbPreviewFile->setCurrentIndex(0);
   }
 
   /**
@@ -312,8 +314,8 @@ namespace IDA
    */
   void Elwin::newPreviewFileSelected(int index)
   {
-    QString wsName = uiForm().elwin_cbPreviewFile->itemText(index);
-    QString filename = uiForm().elwin_cbPreviewFile->itemData(index).toString();
+    QString wsName = m_uiForm.cbPreviewFile->itemText(index);
+    QString filename = m_uiForm.cbPreviewFile->itemData(index).toString();
 
     // Ignore empty filenames (can happen when new files are loaded and the widget is being populated)
     if(filename.isEmpty())
@@ -328,8 +330,8 @@ namespace IDA
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
     int numHist = static_cast<int>(ws->getNumberHistograms()) - 1;
 
-    uiForm().elwin_spPreviewSpec->setMaximum(numHist);
-    uiForm().elwin_spPreviewSpec->setValue(0);
+    m_uiForm.spPreviewSpec->setMaximum(numHist);
+    m_uiForm.spPreviewSpec->setValue(0);
 
     plotInput();
   }
@@ -339,7 +341,7 @@ namespace IDA
    */
   void Elwin::plotInput()
   {
-    QString wsName = uiForm().elwin_cbPreviewFile->currentText();
+    QString wsName = m_uiForm.cbPreviewFile->currentText();
 
     if(!AnalysisDataService::Instance().doesExist(wsName.toStdString()))
     {
@@ -355,7 +357,7 @@ namespace IDA
       return;
     }
 
-    int specNo = uiForm().elwin_spPreviewSpec->value();
+    int specNo = m_uiForm.spPreviewSpec->value();
 
     setDefaultResolution(ws);
     setDefaultSampleLog(ws);

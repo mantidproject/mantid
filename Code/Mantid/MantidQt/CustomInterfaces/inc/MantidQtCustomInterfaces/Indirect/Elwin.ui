@@ -21,7 +21,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_16">
       <item>
-       <widget class="MantidQt::MantidWidgets::MWRunFiles" name="elwin_inputFile" native="true">
+       <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dsInputFiles" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -51,21 +51,21 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_7">
      <item>
-      <layout class="QVBoxLayout" name="elwin_properties"/>
+      <layout class="QVBoxLayout" name="properties"/>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="elwin_loPlotAndOptions">
+      <layout class="QVBoxLayout" name="loPlotAndOptions">
        <item>
-        <layout class="QHBoxLayout" name="elwin_loPreviewSelection">
+        <layout class="QHBoxLayout" name="loPreviewSelection">
          <item>
-          <widget class="QLabel" name="elwin_lbPreviewFile">
+          <widget class="QLabel" name="lbPreviewFile">
            <property name="text">
             <string>Preview file:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="elwin_cbPreviewFile">
+          <widget class="QComboBox" name="cbPreviewFile">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -75,14 +75,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="elwin_lbPreviewSpec">
+          <widget class="QLabel" name="lbPreviewSpec">
            <property name="text">
             <string>Spectrum:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="elwin_spPreviewSpec">
+          <widget class="QSpinBox" name="spPreviewSpec">
            <property name="maximum">
             <number>0</number>
            </property>
@@ -91,7 +91,7 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="elwin_plot"/>
+        <layout class="QHBoxLayout" name="plot"/>
        </item>
       </layout>
      </item>
@@ -183,7 +183,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>mantidqt::mantidwidgets::mwrunfiles.h</header>
+   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

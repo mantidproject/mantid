@@ -28,15 +28,16 @@ namespace IDA
     m_furTree(NULL),
     m_furyResFileType()
   {
+    m_uiForm.setupUi(parent);
   }
 
   void Fury::setup()
   {
     m_furTree = new QtTreePropertyBrowser();
-    uiForm().fury_TreeSpace->addWidget(m_furTree);
+    m_uiForm.TreeSpace->addWidget(m_furTree);
 
     m_plots["FuryPlot"] = new QwtPlot(m_parentWidget);
-    uiForm().fury_PlotSpace->addWidget(m_plots["FuryPlot"]);
+    m_uiForm.PlotSpace->addWidget(m_plots["FuryPlot"]);
     m_plots["FuryPlot"]->setCanvasBackground(Qt::white);
     m_plots["FuryPlot"]->setAxisFont(QwtPlot::xBottom, m_parentWidget->font());
     m_plots["FuryPlot"]->setAxisFont(QwtPlot::yLeft, m_parentWidget->font());
@@ -80,8 +81,8 @@ namespace IDA
     connect(m_rangeSelectors["FuryRange"], SIGNAL(selectionChangedLazy(double, double)), this, SLOT(rsRangeChangedLazy(double, double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePropertyValues(QtProperty*, double)));
-    connect(uiForm().fury_dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput(const QString&)));
-    connect(uiForm().fury_dsResInput, SIGNAL(dataReady(const QString&)), this, SLOT(calculateBinning()));
+    connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput(const QString&)));
+    connect(m_uiForm.dsResInput, SIGNAL(dataReady(const QString&)), this, SLOT(calculateBinning()));
   }
 
   void Fury::run()
@@ -90,16 +91,16 @@ namespace IDA
 
     calculateBinning();
 
-    QString wsName = uiForm().fury_dsInput->getCurrentDataName();
-    QString resName = uiForm().fury_dsResInput->getCurrentDataName();
+    QString wsName = m_uiForm.dsInput->getCurrentDataName();
+    QString resName = m_uiForm.dsResInput->getCurrentDataName();
 
     double energyMin = m_dblManager->value(m_properties["ELow"]);
     double energyMax = m_dblManager->value(m_properties["EHigh"]);
     long numBins = static_cast<long>(m_dblManager->value(m_properties["SampleBinning"]));
 
-    bool plot = uiForm().fury_ckPlot->isChecked();
-    bool verbose = uiForm().fury_ckVerbose->isChecked();
-    bool save = uiForm().fury_ckSave->isChecked();
+    bool plot = m_uiForm.ckPlot->isChecked();
+    bool verbose = m_uiForm.ckVerbose->isChecked();
+    bool save = m_uiForm.ckSave->isChecked();
 
     IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("Fury", -1);
     furyAlg->initialize();
@@ -119,7 +120,7 @@ namespace IDA
     runAlgorithm(furyAlg);
 
     // Set the result workspace for Python script export
-    QString sampleName = uiForm().fury_dsInput->getCurrentDataName();
+    QString sampleName = m_uiForm.dsInput->getCurrentDataName();
     m_pythonExportWsName = sampleName.left(sampleName.lastIndexOf("_")).toStdString() + "_iqt";
   }
 
@@ -133,8 +134,8 @@ namespace IDA
   {
     UserInputValidator uiv;
 
-    uiv.checkDataSelectorIsValid("Sample", uiForm().fury_dsInput);
-    uiv.checkDataSelectorIsValid("Resolution", uiForm().fury_dsResInput);
+    uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsInput);
+    uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResInput);
 
     QString message = uiv.generateErrorMessage();
     showMessageBox(message);
@@ -189,8 +190,8 @@ namespace IDA
 
     disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePropertyValues(QtProperty*, double)));
 
-    QString wsName = uiForm().fury_dsInput->getCurrentDataName();
-    QString resName = uiForm().fury_dsResInput->getCurrentDataName();
+    QString wsName = m_uiForm.dsInput->getCurrentDataName();
+    QString resName = m_uiForm.dsResInput->getCurrentDataName();
     if(wsName.isEmpty() || resName.isEmpty())
       return;
 
@@ -200,7 +201,7 @@ namespace IDA
     if(numBins == 0)
       return;
 
-    bool verbose = uiForm().fury_ckVerbose->isChecked();
+    bool verbose = m_uiForm.ckVerbose->isChecked();
 
     IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("Fury");
     furyAlg->initialize();
@@ -243,8 +244,8 @@ namespace IDA
 
   void Fury::loadSettings(const QSettings & settings)
   {
-    uiForm().fury_dsInput->readSettings(settings.group());
-    uiForm().fury_dsResInput->readSettings(settings.group());
+    m_uiForm.dsInput->readSettings(settings.group());
+    m_uiForm.dsResInput->readSettings(settings.group());
   }
 
   void Fury::plotInput(const QString& wsname)

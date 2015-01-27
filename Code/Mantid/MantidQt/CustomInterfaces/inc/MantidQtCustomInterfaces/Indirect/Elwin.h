@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_ELWIN_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_ELWIN_H_
 
+#include "ui_Elwin.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtCustomInterfaces/Indirect/IDATab.h"
 
@@ -37,6 +38,8 @@ namespace IDA
 
   private:
     void addSaveAlgorithm(QString workspaceName, QString filename="");
+
+    Ui::Elwin m_uiForm;
     QtTreePropertyBrowser* m_elwTree;
 
   };

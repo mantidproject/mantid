@@ -2,6 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_APPLYCORR_H_
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "ui_ApplyCorr.h"
 #include "IDATab.h"
 
 namespace MantidQt
@@ -34,6 +35,8 @@ namespace IDA
     bool validateScaleInput(); ///< validate input for Scale option.
     /// ask the user if they wish to rebin the can
     bool requireCanRebin();
+
+    Ui::ApplyCorr m_uiForm;
     /// Pointer to the result workspace (for plotting)
     Mantid::API::MatrixWorkspace_sptr outputWs;
 

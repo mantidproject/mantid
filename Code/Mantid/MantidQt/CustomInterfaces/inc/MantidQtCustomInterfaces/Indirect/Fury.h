@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_FURY_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_FURY_H_
 
+#include "ui_Fury.h"
 #include "IDATab.h"
 
 namespace MantidQt
@@ -29,8 +30,9 @@ namespace IDA
     void updateRS(QtProperty* prop, double val);
     void updatePropertyValues(QtProperty* prop, double val);
     void calculateBinning();
-      
+
   private:
+    Ui::Fury m_uiForm;
     QtTreePropertyBrowser* m_furTree;
     bool m_furyResFileType;
 

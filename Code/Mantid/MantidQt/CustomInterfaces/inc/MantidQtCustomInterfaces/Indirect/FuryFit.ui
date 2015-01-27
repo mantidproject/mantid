@@ -19,7 +19,7 @@
      <property name="title">
       <string>Input</string>
      </property>
-     <layout class="QHBoxLayout" name="furyfit_layoutInput">
+     <layout class="QHBoxLayout" name="layoutInput">
       <item>
        <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSampleInput" native="true">
         <property name="sizePolicy">
@@ -52,11 +52,11 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_25">
      <item>
-      <layout class="QVBoxLayout" name="furyfit_vlTreeProp">
+      <layout class="QVBoxLayout" name="vlTreeProp">
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_8">
          <item>
-          <widget class="QLabel" name="furyfit_lbFitType">
+          <widget class="QLabel" name="lbFitType">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
              <horstretch>0</horstretch>
@@ -69,7 +69,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="furyfit_cbFitType">
+          <widget class="QComboBox" name="cbFitType">
            <item>
             <property name="text">
              <string>1 Exponential</string>
@@ -97,7 +97,7 @@
        <item>
         <layout class="QGridLayout" name="gridLayout_5">
          <item row="0" column="1">
-          <widget class="QCheckBox" name="furyfit_ckPlotGuess">
+          <widget class="QCheckBox" name="ckPlotGuess">
            <property name="text">
             <string>Plot Guess</string>
            </property>
@@ -107,7 +107,7 @@
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QCheckBox" name="furyfit_ckConstrainIntensities">
+          <widget class="QCheckBox" name="ckConstrainIntensities">
            <property name="text">
             <string>Constrain Intensities</string>
            </property>
@@ -117,7 +117,7 @@
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QCheckBox" name="furyfit_ckConstrainBeta">
+          <widget class="QCheckBox" name="ckConstrainBeta">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -129,26 +129,26 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="furyfit_properties"/>
+        <layout class="QHBoxLayout" name="properties"/>
        </item>
       </layout>
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
-        <layout class="QVBoxLayout" name="furyfit_vlPlot"/>
+        <layout class="QVBoxLayout" name="vlPlot"/>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="furyfit_gpLegend">
+        <layout class="QHBoxLayout" name="gpLegend">
          <item>
-          <widget class="QPushButton" name="furyfit_pbSingle">
+          <widget class="QPushButton" name="pbSingle">
            <property name="text">
             <string>Fit Single Spectrum</string>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="furyfit_spLegendSpace">
+          <spacer name="spLegendSpace">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -161,14 +161,14 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLabel" name="furyfit_lbLegendSample">
+          <widget class="QLabel" name="lbLegendSample">
            <property name="text">
             <string>Sample</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="furyfit_lbLegendFit">
+          <widget class="QLabel" name="lbLegendFit">
            <property name="styleSheet">
             <string notr="true">color: rgb(255, 0, 0);</string>
            </property>
@@ -182,14 +182,14 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_27">
          <item>
-          <widget class="QLabel" name="furyfit_lbSpectra">
+          <widget class="QLabel" name="lbSpectra">
            <property name="text">
             <string>Plot Spectrum:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="furyfit_spPlotSpectrum">
+          <widget class="QSpinBox" name="spPlotSpectrum">
            <property name="minimum">
             <number>0</number>
            </property>
@@ -219,7 +219,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="furyfit_spSpectraMin">
+          <widget class="QSpinBox" name="spSpectraMin">
            <property name="minimum">
             <number>0</number>
            </property>
@@ -236,7 +236,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="furyfit_spSpectraMax">
+          <widget class="QSpinBox" name="spSpectraMax">
            <property name="minimum">
             <number>0</number>
            </property>
@@ -345,7 +345,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
-   <header>mantidqt::mantidwidgets::dataselector.h</header>
+   <header>MantidQtMantidWidgets/DataSelector.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

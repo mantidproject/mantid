@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_FURYFIT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_FURYFIT_H_
 
+#include "ui_FuryFit.h"
 #include "IDATab.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -61,6 +62,7 @@ namespace IDA
     QString fitTypeString() const;
     void constrainIntensities(Mantid::API::CompositeFunction_sptr func);
 
+    Ui::FuryFit m_uiForm;
     QtStringPropertyManager* m_stringManager;
     QtTreePropertyBrowser* m_ffTree; ///< FuryFit Property Browser
     QtDoublePropertyManager* m_ffRangeManager; ///< StartX and EndX for FuryFit
