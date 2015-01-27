@@ -32,8 +32,6 @@ namespace CustomInterfaces
     connect(m_uiForm.pbBackgroundRemoval, SIGNAL(clicked()), this, SLOT(backgroundClicked()));
     // Plots raw input data when user clicks Plot Time
     connect(m_uiForm.pbPlotTime, SIGNAL(clicked()), this, SLOT(plotRaw()));
-    // Handles a calibration file being selected
-    connect(m_uiForm.dsCalibrationFile, SIGNAL(fileTextChanged(const QString &)), this, SLOT(calibFileChanged(const QString &)));
     // Shows message on run buton when user is inputting a run number
     connect(m_uiForm.dsRunFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
     // Shows message on run button when Mantid is finding the file for a given run number
@@ -68,7 +66,6 @@ namespace CustomInterfaces
 
     IAlgorithm_sptr reductionAlg = AlgorithmManager::Instance().create("InelasticIndirectReduction", -1);
     reductionAlg->initialize();
-    BatchAlgorithmRunner::AlgorithmRuntimeProps reductionRuntimeProps;
 
     reductionAlg->setProperty("Instrument", getInstrumentConfiguration()->getInstrumentName().toStdString());
     reductionAlg->setProperty("Analyser", getInstrumentConfiguration()->getAnalyserName().toStdString());
@@ -80,21 +77,10 @@ namespace CustomInterfaces
     reductionAlg->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
     reductionAlg->setProperty("LoadLogs", m_uiForm.ckLoadLogs->isChecked());
 
-    // If using a calibration file, load it
     if(m_uiForm.ckUseCalib->isChecked())
     {
-      QString calibFilename = m_uiForm.dsCalibrationFile->getFirstFilename();
-
-      QFileInfo fi(calibFilename);
-      std::string calibWorkspaceName = fi.baseName().toStdString();
-
-      IAlgorithm_sptr calibLoadAlg = AlgorithmManager::Instance().create("LoadNexus", -1);
-      calibLoadAlg->initialize();
-      calibLoadAlg->setProperty("Filename", calibFilename.toStdString());
-      calibLoadAlg->setProperty("OutputWorkspace", calibWorkspaceName);
-      m_batchAlgoRunner->addAlgorithm(calibLoadAlg);
-
-      reductionRuntimeProps["CalibrationWorkspace"] = calibWorkspaceName;
+      QString calibWorkspaceName = m_uiForm.dsCalibrationFile->getCurrentDataName();
+      reductionAlg->setProperty("CalibrationWorkspace", calibWorkspaceName.toStdString());
     }
 
     std::vector<long> detectorRange;
@@ -153,7 +139,7 @@ namespace CustomInterfaces
         break;
     }
 
-    m_batchAlgoRunner->addAlgorithm(reductionAlg, reductionRuntimeProps);
+    m_batchAlgoRunner->addAlgorithm(reductionAlg);
     m_batchAlgoRunner->executeBatchAsync();
 
     // Set output workspace name for Python export
@@ -228,8 +214,16 @@ namespace CustomInterfaces
       return;
     }
 
-    m_uiForm.spSpectraMin->setValue(instDetails["spectra-min"].toInt());
-    m_uiForm.spSpectraMax->setValue(instDetails["spectra-max"].toInt());
+    int specMin = instDetails["spectra-min"].toInt();
+    int specMax = instDetails["spectra-max"].toInt();
+
+    m_uiForm.spSpectraMin->setMinimum(specMin);
+    m_uiForm.spSpectraMin->setMaximum(specMax);
+    m_uiForm.spSpectraMin->setValue(specMin);
+
+    m_uiForm.spSpectraMax->setMinimum(specMin);
+    m_uiForm.spSpectraMax->setMaximum(specMax);
+    m_uiForm.spSpectraMax->setValue(specMax);
 
     if(!instDetails["efixed-val"].isEmpty())
       m_uiForm.leEfixed->setText(instDetails["efixed-val"]);
@@ -501,18 +495,6 @@ namespace CustomInterfaces
 
     std::string pyInput = "from mantidplot import plotSpectrum\nplotSpectrum('" + name + "_grp', 0)\n";
     m_pythonRunner.runPythonCode(QString::fromStdString(pyInput));
-  }
-
-  /**
-   * Controls the ckUseCalib checkbox to automatically check it when a user inputs a file from clicking on 'browse'.
-   * @param calib :: path to calib file
-   */
-  void IndirectConvertToEnergy::calibFileChanged(const QString & calib)
-  {
-    if(calib.isEmpty())
-      m_uiForm.ckUseCalib->setChecked(false);
-    else
-      m_uiForm.ckUseCalib->setChecked(true);
   }
 
   /**

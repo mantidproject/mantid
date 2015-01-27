@@ -54,7 +54,6 @@ namespace CustomInterfaces
     void backgroundClicked(); ///< handles showing and hiding m_backgroundDialog
     void backgroundRemoval(); ///< handles data from BG
     void plotRaw(); ///< plot raw data from instrument
-    void calibFileChanged(const QString & calib); ///< sets m_uiForm.ckUseCalib to appropriate value
     void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
     void pbRunFinding();  //< Called when the FileFinder starts finding the files.
     void pbRunFinished(); //< Called when the FileFinder has finished finding the files.

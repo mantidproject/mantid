@@ -57,32 +57,27 @@
                </widget>
               </item>
               <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dsCalibrationFile" native="true">
+               <widget class="MantidQt::MantidWidgets::DataSelector" name="dsCalibrationFile" native="true">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                   <horstretch>0</horstretch>
-                  <verstretch>41</verstretch>
+                  <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
-                <property name="findRunFiles" stdset="0">
-                 <bool>false</bool>
-                </property>
-                <property name="label" stdset="0">
-                 <string>Calibration File</string>
-                </property>
-                <property name="multipleFiles" stdset="0">
-                 <bool>false</bool>
-                </property>
-                <property name="optional" stdset="0">
+                <property name="autoLoad" stdset="0">
                  <bool>true</bool>
                 </property>
-                <property name="fileExtensions" stdset="0">
-                 <stringlist>
-                  <string>_calib.nxs</string>
-                 </stringlist>
+                <property name="showLoad" stdset="0">
+                 <bool>false</bool>
+                </property>
+                <property name="workspaceSuffixes" stdset="0">
+                 <string>_calib</string>
+                </property>
+                <property name="fileBrowserSuffixes" stdset="0">
+                 <string>_calib.nxs</string>
                 </property>
                </widget>
               </item>
@@ -346,6 +341,9 @@
         <property name="maximum">
          <double>999.990000000000009</double>
         </property>
+        <property name="singleStep">
+         <double>10.000000000000000</double>
+        </property>
         <property name="value">
          <double>300.000000000000000</double>
         </property>
@@ -371,6 +369,12 @@
         </property>
         <property name="maximum">
          <double>99.989999999999995</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
         </property>
        </widget>
       </item>
@@ -429,7 +433,7 @@
       <item>
        <widget class="QSpinBox" name="spSpectraMin">
         <property name="maximum">
-         <number>9999</number>
+         <number>0</number>
         </property>
        </widget>
       </item>
@@ -456,7 +460,7 @@
       <item>
        <widget class="QSpinBox" name="spSpectraMax">
         <property name="maximum">
-         <number>9999</number>
+         <number>0</number>
         </property>
        </widget>
       </item>
@@ -898,6 +902,11 @@ Later steps in the process (saving, renaming) will not be done.</string>
    <class>MantidQt::MantidWidgets::MWRunFiles</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::DataSelector</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/DataSelector.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
