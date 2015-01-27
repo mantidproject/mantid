@@ -48,13 +48,13 @@ namespace Mantid
         /**
           * Get the minimum, maximum pair from the workspace
           * @param workspace A pointer to the workspace
-          * @return A pair of minimum and maximum values.
+          * @returns A pair of minimum and maximum values.
           */
         QwtDoubleInterval getMinAndMax(Mantid::API::IMDWorkspace_sptr workspace);
 
         /**
           * Extracts the instrument from the workspace.
-          * @param A pointer to a workspace.
+          * @param workspace A pointer to a workspace.
           * @returns The instrument. 
           */
         std::string extractInstrument(Mantid::API::IMDWorkspace_sptr workspace);
@@ -63,7 +63,7 @@ namespace Mantid
           /**
           * Get the range of data values from an MD iterator
           * @param it Iterator for a general MD workspace.
-          * @retunrs A maximum and minimum pair.
+          * @returns A maximum and minimum pair.
           */
         QwtDoubleInterval getRange(Mantid::API::IMDIterator* it);
 
