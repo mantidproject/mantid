@@ -23,9 +23,11 @@ namespace CustomInterfaces
   IndirectDiagnostics::IndirectDiagnostics(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
       IndirectDataReductionTab(uiForm, parent), m_lastDiagFilename("")
   {
+    m_uiForm.setupUi(parent);
+
     // Property Tree
     m_propTrees["SlicePropTree"] = new QtTreePropertyBrowser();
-    m_uiForm.slice_properties->addWidget(m_propTrees["SlicePropTree"]);
+    m_uiForm.properties->addWidget(m_propTrees["SlicePropTree"]);
 
     // Editor Factories
     DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
@@ -71,7 +73,7 @@ namespace CustomInterfaces
     m_plots["SlicePlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
     m_plots["SlicePlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
     m_plots["SlicePlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.slice_plot->addWidget(m_plots["SlicePlot"]);
+    m_uiForm.plotRaw->addWidget(m_plots["SlicePlot"]);
 
     // Setup second range
     m_rangeSelectors["SliceBackground"]->setColour(Qt::darkGreen); // Dark green for background
@@ -85,7 +87,7 @@ namespace CustomInterfaces
     m_plots["SlicePreviewPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
     m_plots["SlicePreviewPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
     m_plots["SlicePreviewPlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.slice_plotPreview->addWidget(m_plots["SlicePreviewPlot"]);
+    m_uiForm.plotPreview->addWidget(m_plots["SlicePreviewPlot"]);
     m_plots["SlicePreviewPlot"]->replot();
 
     // SIGNAL/SLOT CONNECTIONS
@@ -102,23 +104,23 @@ namespace CustomInterfaces
     // Enable/disable second range options when checkbox is toggled
     connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(sliceTwoRanges(QtProperty*, bool)));
     // Enables/disables calibration file selection when user toggles Use Calibratin File checkbox
-    connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
+    connect(m_uiForm.ckUseCalibration, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
 
     // Plot slice miniplot when file has finished loading
-    connect(m_uiForm.slice_inputFile, SIGNAL(filesFound()), this, SLOT(slicePlotRaw()));
+    connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(slicePlotRaw()));
     // Shows message on run buton when user is inputting a run number
-    connect(m_uiForm.slice_inputFile, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
+    connect(m_uiForm.dsInputFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
     // Shows message on run button when Mantid is finding the file for a given run number
-    connect(m_uiForm.slice_inputFile, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
+    connect(m_uiForm.dsInputFiles, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
     // Reverts run button back to normal when file finding has finished
-    connect(m_uiForm.slice_inputFile, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
+    connect(m_uiForm.dsInputFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
 
     // Update preview plot when slice algorithm completes
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(sliceAlgDone(bool)));
 
     // Set default UI state
     sliceTwoRanges(0, false);
-    m_uiForm.slice_ckUseCalib->setChecked(false);
+    m_uiForm.ckUseCalibration->setChecked(false);
     sliceCalib(false);
   }
 
@@ -135,9 +137,9 @@ namespace CustomInterfaces
 
   void IndirectDiagnostics::run()
   {
-    QString suffix = "_" + m_uiForm.iicInstrumentConfiguration->getAnalyserName()
-                     + m_uiForm.iicInstrumentConfiguration->getReflectionName() + "_slice";
-    QString filenames = m_uiForm.slice_inputFile->getFilenames().join(",");
+    QString suffix = "_slice"; //"_" + m_uiForm.iicInstrumentConfiguration->getAnalyserName() TODO
+                     //+ m_uiForm.iicInstrumentConfiguration->getReflectionName() + "_slice";
+    QString filenames = m_uiForm.dsInputFiles->getFilenames().join(",");
 
     std::vector<long> spectraRange;
     spectraRange.push_back(static_cast<long>(m_dblManager->value(m_properties["SpecMin"])));
@@ -153,15 +155,15 @@ namespace CustomInterfaces
     sliceAlg->setProperty("InputFiles", filenames.toStdString());
     sliceAlg->setProperty("SpectraRange", spectraRange);
     sliceAlg->setProperty("PeakRange", peakRange);
-    sliceAlg->setProperty("Verbose", m_uiForm.slice_ckVerbose->isChecked());
-    sliceAlg->setProperty("Plot", m_uiForm.slice_ckPlot->isChecked());
-    sliceAlg->setProperty("Save", m_uiForm.slice_ckSave->isChecked());
+    sliceAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
+    sliceAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
+    sliceAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
     sliceAlg->setProperty("OutputNameSuffix", suffix.toStdString());
     sliceAlg->setProperty("OutputWorkspace", "IndirectDiagnostics_Workspaces");
 
-    if(m_uiForm.slice_ckUseCalib->isChecked())
+    if(m_uiForm.ckUseCalibration->isChecked())
     {
-      QString calibWsName = m_uiForm.slice_dsCalibFile->getCurrentDataName();
+      QString calibWsName = m_uiForm.dsCalibration->getCurrentDataName();
       sliceAlg->setProperty("CalibrationWorkspace", calibWsName.toStdString());
     }
 
@@ -181,9 +183,9 @@ namespace CustomInterfaces
     UserInputValidator uiv;
 
     // Check raw input
-    uiv.checkMWRunFilesIsValid("Input", m_uiForm.slice_inputFile);
-    if(m_uiForm.slice_ckUseCalib->isChecked())
-      uiv.checkMWRunFilesIsValid("Calibration", m_uiForm.slice_inputFile);
+    uiv.checkMWRunFilesIsValid("Input", m_uiForm.dsInputFiles);
+    if(m_uiForm.ckUseCalibration->isChecked())
+      uiv.checkMWRunFilesIsValid("Calibration", m_uiForm.dsInputFiles);
 
     // Check peak range
     auto rangeOne = std::make_pair(m_dblManager->value(m_properties["PeakStart"]), m_dblManager->value(m_properties["PeakEnd"]));
@@ -239,7 +241,7 @@ namespace CustomInterfaces
    */
   void IndirectDiagnostics::slicePlotRaw()
   {
-    QString filename = m_uiForm.slice_inputFile->getFirstFilename();
+    QString filename = m_uiForm.dsInputFiles->getFirstFilename();
 
     // Only update if we have a different file
     if(filename == m_lastDiagFilename)
@@ -252,7 +254,7 @@ namespace CustomInterfaces
 
     setDefaultInstDetails();
 
-    if ( m_uiForm.slice_inputFile->isValid() )
+    if ( m_uiForm.dsInputFiles->isValid() )
     {
       QFileInfo fi(filename);
       QString wsname = fi.baseName();
@@ -308,7 +310,7 @@ namespace CustomInterfaces
    */
   void IndirectDiagnostics::sliceCalib(bool state)
   {
-    m_uiForm.slice_dsCalibFile->setEnabled(state);
+    m_uiForm.dsCalibration->setEnabled(state);
   }
 
   void IndirectDiagnostics::rangeSelectorDropped(double min, double max)
@@ -346,9 +348,9 @@ namespace CustomInterfaces
    */
   void IndirectDiagnostics::updatePreviewPlot()
   {
-    QString suffix = "_" + m_uiForm.iicInstrumentConfiguration->getAnalyserName()
-                     + m_uiForm.iicInstrumentConfiguration->getReflectionName() + "_slice";
-    QString filenames = m_uiForm.slice_inputFile->getFilenames().join(",");
+    QString suffix = "_slice"; //"_" + m_uiForm.iicInstrumentConfiguration->getAnalyserName()
+                     //+ m_uiForm.iicInstrumentConfiguration->getReflectionName() + "_slice"; TODO
+    QString filenames = m_uiForm.dsInputFiles->getFilenames().join(",");
 
     std::vector<long> spectraRange;
     spectraRange.push_back(static_cast<long>(m_dblManager->value(m_properties["SpecMin"])));
@@ -364,15 +366,15 @@ namespace CustomInterfaces
     sliceAlg->setProperty("InputFiles", filenames.toStdString());
     sliceAlg->setProperty("SpectraRange", spectraRange);
     sliceAlg->setProperty("PeakRange", peakRange);
-    sliceAlg->setProperty("Verbose", m_uiForm.slice_ckVerbose->isChecked());
+    sliceAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
     sliceAlg->setProperty("Plot", false);
     sliceAlg->setProperty("Save", false);
     sliceAlg->setProperty("OutputNameSuffix", suffix.toStdString());
     sliceAlg->setProperty("OutputWorkspace", "IndirectDiagnostics_Workspaces");
 
-    if(m_uiForm.slice_ckUseCalib->isChecked())
+    if(m_uiForm.ckUseCalibration->isChecked())
     {
-      QString calibWsName = m_uiForm.slice_dsCalibFile->getCurrentDataName();
+      QString calibWsName = m_uiForm.dsCalibration->getCurrentDataName();
       sliceAlg->setProperty("CalibrationWorkspace", calibWsName.toStdString());
     }
 
@@ -399,7 +401,7 @@ namespace CustomInterfaces
     if(error)
       return;
 
-    QStringList filenames = m_uiForm.slice_inputFile->getFilenames();
+    QStringList filenames = m_uiForm.dsInputFiles->getFilenames();
     if(filenames.size() < 1)
       return;
 
@@ -446,7 +448,7 @@ namespace CustomInterfaces
   void IndirectDiagnostics::pbRunFinding()
   {
     emit updateRunButton(false, "Finding files...", "Searchig for data files for the run numbers entered...");
-    m_uiForm.slice_inputFile->setEnabled(false);
+    m_uiForm.dsInputFiles->setEnabled(false);
   }
 
   /**
@@ -454,7 +456,7 @@ namespace CustomInterfaces
    */
   void IndirectDiagnostics::pbRunFinished()
   {
-    if(!m_uiForm.slice_inputFile->isValid())
+    if(!m_uiForm.dsInputFiles->isValid())
     {
       emit updateRunButton(false, "Invalid Run(s)", "Cannot find data files for some of the run numbers enetered.");
     }
@@ -463,7 +465,7 @@ namespace CustomInterfaces
       emit updateRunButton();
     }
 
-    m_uiForm.slice_inputFile->setEnabled(true);
+    m_uiForm.dsInputFiles->setEnabled(true);
   }
 
 } // namespace CustomInterfaces

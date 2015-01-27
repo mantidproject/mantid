@@ -17,17 +17,10 @@ namespace CustomInterfaces
   IndirectConvertToEnergy::IndirectConvertToEnergy(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
       IndirectDataReductionTab(uiForm, parent), m_backgroundDialog(NULL), m_bgRemoval(false)
   {
+    m_uiForm.setupUi(parent);
+
     // Add validators to UI form
-    m_uiForm.leScaleMultiplier->setValidator(m_valPosDbl);
     m_uiForm.leNoGroups->setValidator(m_valInt);
-    m_uiForm.leDetailedBalance->setValidator(m_valPosDbl);
-
-    m_uiForm.leSpectraMin->setValidator(m_valInt);
-    m_uiForm.leSpectraMax->setValidator(m_valInt);
-
-    m_uiForm.entryRebinLow->setValidator(m_valDbl);
-    m_uiForm.entryRebinWidth->setValidator(m_valDbl);
-    m_uiForm.entryRebinHigh->setValidator(m_valDbl);
 
     // SIGNAL/SLOT CONNECTIONS
     // Update instrument information when a new instrument config is selected
@@ -35,40 +28,22 @@ namespace CustomInterfaces
     // Shows required mapping option UI widgets when a new mapping option is selected from drop down
     connect(m_uiForm.cbMappingOptions, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(mappingOptionSelected(const QString&)));
     // Shows background removal dialog when user clicks Background Removal
-    connect(m_uiForm.pbBack_2, SIGNAL(clicked()), this, SLOT(backgroundClicked()));
+    connect(m_uiForm.pbBackgroundRemoval, SIGNAL(clicked()), this, SLOT(backgroundClicked()));
     // Plots raw input data when user clicks Plot Time
-    connect(m_uiForm.pbPlotRaw, SIGNAL(clicked()), this, SLOT(plotRaw()));
-    // Enables/disables rebin options when user toggles Do Not Rebin checkbox
-    connect(m_uiForm.rebin_ckDNR, SIGNAL(toggled(bool)), this, SLOT(rebinEntryToggle(bool)));
-    // Enables/disables detail balance option when user toggle Detailed Balance checkbox
-    connect(m_uiForm.ckDetailedBalance, SIGNAL(toggled(bool)), this, SLOT(detailedBalanceCheck(bool)));
-    // Enables/disables scale multiply option when user toggles Scale checkbox
-    connect(m_uiForm.ckScaleMultiplier, SIGNAL(toggled(bool)), this, SLOT(scaleMultiplierCheck(bool)));
+    connect(m_uiForm.pbPlotTime, SIGNAL(clicked()), this, SLOT(plotRaw()));
     connect(m_uiForm.ind_calibFile, SIGNAL(fileTextChanged(const QString &)), this, SLOT(calibFileChanged(const QString &)));
-    // Enables/disables calibration file options when user toggles Use Calib File checkbox
-    connect(m_uiForm.ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(useCalib(bool)));
-    // Displays correct UI widgets for selected rebin type when changed via Rebin Steps drop down
-    connect(m_uiForm.comboRebinType, SIGNAL(currentIndexChanged(int)), m_uiForm.swIndRebin, SLOT(setCurrentIndex(int)));
     // Shows message on run buton when user is inputting a run number
     connect(m_uiForm.ind_runFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
     // Shows message on run button when Mantid is finding the file for a given run number
     connect(m_uiForm.ind_runFiles, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
     // Reverts run button back to normal when file finding has finished
     connect(m_uiForm.ind_runFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
-    // Perform validation when editing an option
-    connect(m_uiForm.leDetailedBalance, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
-    connect(m_uiForm.leScaleMultiplier, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
-    connect(m_uiForm.leSpectraMin, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
-    connect(m_uiForm.leSpectraMax, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
-    connect(m_uiForm.entryRebinLow, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
-    connect(m_uiForm.entryRebinWidth, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
-    connect(m_uiForm.entryRebinHigh, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
 
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
     // Update UI widgets to show default values
     mappingOptionSelected(m_uiForm.cbMappingOptions->currentText());
-    rebinEntryToggle(m_uiForm.rebin_ckDNR->isChecked());
+    rebinEntryToggle(m_uiForm.ckDoNotRebin->isChecked());
     backgroundRemoval();
 
     // Validate to remove invalid markers
@@ -124,8 +99,8 @@ namespace CustomInterfaces
     }
 
     std::vector<long> detectorRange;
-    detectorRange.push_back(m_uiForm.leSpectraMin->text().toInt());
-    detectorRange.push_back(m_uiForm.leSpectraMax->text().toInt());
+    detectorRange.push_back(m_uiForm.spSpectraMin->value());
+    detectorRange.push_back(m_uiForm.spSpectraMax->value());
     reductionAlg->setProperty("DetectorRange", detectorRange);
 
     if(m_bgRemoval)
@@ -137,22 +112,22 @@ namespace CustomInterfaces
       reductionAlg->setProperty("BackgroundRange", backgroundRange);
     }
 
-    if(!m_uiForm.rebin_ckDNR->isChecked())
+    if(!m_uiForm.ckDoNotRebin->isChecked())
     {
       QString rebin;
-      if(m_uiForm.comboRebinType->currentIndex() == 0)
-        rebin = m_uiForm.entryRebinLow->text() + "," + m_uiForm.entryRebinWidth->text() + "," + m_uiForm.entryRebinHigh->text();
+      if(m_uiForm.cbRebinType->currentIndex() == 0)
+        rebin = m_uiForm.spRebinLow->text() + "," + m_uiForm.spRebinWidth->text() + "," + m_uiForm.spRebinHigh->text();
       else
-        rebin = m_uiForm.entryRebinString->text();
+        rebin = m_uiForm.leRebinString->text();
 
       reductionAlg->setProperty("RebinString", rebin.toStdString());
     }
 
     if(m_uiForm.ckDetailedBalance->isChecked())
-      reductionAlg->setProperty("DetailedBalance", m_uiForm.leDetailedBalance->text().toDouble());
+      reductionAlg->setProperty("DetailedBalance", m_uiForm.spDetailedBalance->value());
 
     if(m_uiForm.ckScaleMultiplier->isChecked())
-      reductionAlg->setProperty("ScaleFactor", m_uiForm.leScaleMultiplier->text().toDouble());
+      reductionAlg->setProperty("ScaleFactor", m_uiForm.spScaleMultiplier->value());
 
     if(m_uiForm.cbMappingOptions->currentText() != "Default")
     {
@@ -167,7 +142,7 @@ namespace CustomInterfaces
     reductionAlg->setProperty("OutputWorkspace", "IndirectEnergyTransfer_Workspaces");
 
     // Plot Output options
-    switch(m_uiForm.ind_cbPlotOutput->currentIndex())
+    switch(m_uiForm.cbPlotType->currentIndex())
     {
       case 0: // "None"
         break;
@@ -214,24 +189,20 @@ namespace CustomInterfaces
   {
     bool valid = true;
 
-    // run files input
-    if ( ! m_uiForm.ind_runFiles->isValid() )
-    {
+    // Run files input
+    if(!m_uiForm.ind_runFiles->isValid())
       valid = false;
-    }
 
-    // calib file input
-    if ( m_uiForm.ckUseCalib->isChecked() && !m_uiForm.ind_calibFile->isValid() )
-    {
+    // Calibration file input
+    if(m_uiForm.ckUseCalib->isChecked() && !m_uiForm.ind_calibFile->isValid())
       valid = false;
-    }
 
-    // mapping selection
-    if (
-        ( m_uiForm.cbMappingOptions->currentText() == "Groups" && m_uiForm.leNoGroups->text() == "" )
-        ||
-        ( m_uiForm.cbMappingOptions->currentText() == "File" && ! m_uiForm.ind_mapFile->isValid() )
-       )
+    // Mapping selection
+    if(
+       (m_uiForm.cbMappingOptions->currentText() == "Groups" && m_uiForm.leNoGroups->text() == "")
+       ||
+       (m_uiForm.cbMappingOptions->currentText() == "File" && ! m_uiForm.ind_mapFile->isValid())
+      )
     {
       valid = false;
       m_uiForm.valNoGroups->setText("*");
@@ -239,112 +210,6 @@ namespace CustomInterfaces
     else
     {
       m_uiForm.valNoGroups->setText("");
-    }
-
-    int dummyPos = 0;
-
-    QString text = m_uiForm.leDetailedBalance->text();
-    QValidator::State fieldState = m_uiForm.leDetailedBalance->validator()->validate(text, dummyPos);
-
-    // detailed balance
-    if ( m_uiForm.ckDetailedBalance->isChecked() && fieldState != QValidator::Acceptable )
-    {
-      valid = false;
-      m_uiForm.valDetailedBalance->setText("*");
-    }
-    else
-    {
-      m_uiForm.valDetailedBalance->setText("");
-    }
-
-    int dummyPos2 = 0;
-
-    // scale multiplier
-    QString scaleMultiplierText = m_uiForm.leScaleMultiplier->text();
-    QValidator::State fieldState2 = m_uiForm.leScaleMultiplier->validator()->validate(scaleMultiplierText, dummyPos2);
-
-    if ( m_uiForm.ckScaleMultiplier->isChecked() && fieldState2 != QValidator::Acceptable )
-    {
-      valid = false;
-      m_uiForm.valScaleMultiplier->setText("*");
-    }
-    else
-    {
-      m_uiForm.valScaleMultiplier->setText("");
-    }
-
-    // SpectraMin/SpectraMax
-    const QString specMin = m_uiForm.leSpectraMin->text();
-    const QString specMax = m_uiForm.leSpectraMax->text();
-
-    if (specMin.isEmpty() || specMax.isEmpty() ||
-        (specMin.toDouble() < 1 || specMax.toDouble() < 1) ||
-        (specMin.toDouble() > specMax.toDouble()))
-    {
-      valid = false;
-      m_uiForm.valSpectraMin->setText("*");
-      m_uiForm.valSpectraMax->setText("*");
-    }
-    else
-    {
-      m_uiForm.valSpectraMin->setText("");
-      m_uiForm.valSpectraMax->setText("");
-    }
-
-    if ( ! m_uiForm.rebin_ckDNR->isChecked() )
-    {
-      if ( m_uiForm.comboRebinType->currentIndex() == 0 )
-      {
-        if ( m_uiForm.entryRebinLow->text() == "" )
-        {
-          valid = false;
-          m_uiForm.valELow->setText("*");
-        }
-        else
-        {
-          m_uiForm.valELow->setText("");
-        }
-
-        if ( m_uiForm.entryRebinWidth->text() == "" )
-        {
-          valid = false;
-          m_uiForm.valEWidth->setText("*");
-        }
-        else
-        {
-          m_uiForm.valEWidth->setText("");
-        }
-
-        if ( m_uiForm.entryRebinHigh->text() == "" )
-        {
-          valid = false;
-          m_uiForm.valEHigh->setText("*");
-        }
-        else
-        {
-          m_uiForm.valEHigh->setText("");
-        }
-
-        if ( m_uiForm.entryRebinLow->text().toDouble() > m_uiForm.entryRebinHigh->text().toDouble() )
-        {
-          valid = false;
-          m_uiForm.valELow->setText("*");
-          m_uiForm.valEHigh->setText("*");
-        }
-      }
-      else
-      {
-        if ( m_uiForm.entryRebinString->text() == "" )
-        {
-          valid = false;
-        }
-      }
-    }
-    else
-    {
-      m_uiForm.valELow->setText("");
-      m_uiForm.valEWidth->setText("");
-      m_uiForm.valEHigh->setText("");
     }
 
     return valid;
@@ -356,10 +221,6 @@ namespace CustomInterfaces
    */
   void IndirectConvertToEnergy::setInstrumentDefault()
   {
-    m_uiForm.leSpectraMin->clear();
-    m_uiForm.leSpectraMax->clear();
-    m_uiForm.leEfixed->clear();
-
     std::map<QString, QString> instDetails = getInstrumentDetails();
 
     if(instDetails["spectra-min"].isEmpty() || instDetails["spectra-max"].isEmpty())
@@ -368,8 +229,8 @@ namespace CustomInterfaces
       return;
     }
 
-    m_uiForm.leSpectraMin->setText(instDetails["spectra-min"]);
-    m_uiForm.leSpectraMax->setText(instDetails["spectra-max"]);
+    m_uiForm.spSpectraMin->setValue(instDetails["spectra-min"].toInt());
+    m_uiForm.spSpectraMax->setValue(instDetails["spectra-max"].toInt());
 
     if(!instDetails["efixed-val"].isEmpty())
       m_uiForm.leEfixed->setText(instDetails["efixed-val"]);
@@ -379,28 +240,28 @@ namespace CustomInterfaces
     // Default rebinning parameters can be set in instrument parameter file
     if(!instDetails["rebin-default"].isEmpty())
     {
-      m_uiForm.entryRebinString->setText(instDetails["rebin-default"]);
-      m_uiForm.rebin_ckDNR->setChecked(false);
+      m_uiForm.leRebinString->setText(instDetails["rebin-default"]);
+      m_uiForm.ckDoNotRebin->setChecked(false);
       QStringList rbp = instDetails["rebin-default"].split(",", QString::SkipEmptyParts);
       if ( rbp.size() == 3 )
       {
-        m_uiForm.entryRebinLow->setText(rbp[0]);
-        m_uiForm.entryRebinWidth->setText(rbp[1]);
-        m_uiForm.entryRebinHigh->setText(rbp[2]);
-        m_uiForm.comboRebinType->setCurrentIndex(0);
+        m_uiForm.spRebinLow->setValue(rbp[0].toDouble());
+        m_uiForm.spRebinWidth->setValue(rbp[1].toDouble());
+        m_uiForm.spRebinHigh->setValue(rbp[2].toDouble());
+        m_uiForm.cbRebinType->setCurrentIndex(0);
       }
       else
       {
-        m_uiForm.comboRebinType->setCurrentIndex(1);
+        m_uiForm.cbRebinType->setCurrentIndex(1);
       }
     }
     else
     {
-      m_uiForm.rebin_ckDNR->setChecked(true);
-      m_uiForm.entryRebinLow->setText("");
-      m_uiForm.entryRebinWidth->setText("");
-      m_uiForm.entryRebinHigh->setText("");
-      m_uiForm.entryRebinString->setText("");
+      m_uiForm.ckDoNotRebin->setChecked(true);
+      m_uiForm.spRebinLow->setValue(0.0);
+      m_uiForm.spRebinWidth->setValue(0.0);
+      m_uiForm.spRebinHigh->setValue(0.0);
+      m_uiForm.leRebinString->setText("");
     }
 
     if(!instDetails["cm-1-convert-choice"].isEmpty())
@@ -412,7 +273,7 @@ namespace CustomInterfaces
     if(!instDetails["save-ascii-choice"].isEmpty())
     {
       bool defaultOptions = instDetails["save-ascii-choice"] == "true";
-      m_uiForm.save_ckAscii->setChecked(defaultOptions);
+      m_uiForm.ckSaveASCII->setChecked(defaultOptions);
     }
   }
 
@@ -462,70 +323,9 @@ namespace CustomInterfaces
       m_bgRemoval = m_backgroundDialog->removeBackground();
 
     if(m_bgRemoval)
-      m_uiForm.pbBack_2->setText("Background Removal (On)");
+      m_uiForm.pbBackgroundRemoval->setText("Background Removal (On)");
     else
-      m_uiForm.pbBack_2->setText("Background Removal (Off)");
-  }
-
-  /**
-   * This function will disable the necessary elements of the interface when the user selects "Do Not Rebin"
-   * and enable them again when this is de-selected.
-   *
-   * @param state :: whether the "Do Not Rebin" checkbox is checked
-   */
-  void IndirectConvertToEnergy::rebinEntryToggle(bool state)
-  {
-    //Determine value for single rebin field
-    QString val;
-    if(state)
-      val = " ";
-    else
-      val = "*";
-
-    //Rebin mode selection
-    m_uiForm.comboRebinType->setEnabled(!state);
-    m_uiForm.labelRebinSteps->setEnabled(!state);
-
-    //Single rebin text entry
-    m_uiForm.labelRebinLow->setEnabled( !state );
-    m_uiForm.labelRebinWidth->setEnabled( !state );
-    m_uiForm.labelRebinHigh->setEnabled( !state );
-    m_uiForm.entryRebinLow->setEnabled( !state );
-    m_uiForm.entryRebinWidth->setEnabled( !state );
-    m_uiForm.entryRebinHigh->setEnabled( !state );
-
-    //Rebin required markers
-    m_uiForm.valELow->setEnabled(!state);
-    m_uiForm.valELow->setText(val);
-    m_uiForm.valEWidth->setEnabled(!state);
-    m_uiForm.valEWidth->setText(val);
-    m_uiForm.valEHigh->setEnabled(!state);
-    m_uiForm.valEHigh->setText(val);
-
-    //Rebin string entry
-    m_uiForm.entryRebinString->setEnabled(!state);
-    m_uiForm.labelRebinString->setEnabled(!state);
-  }
-
-  /**
-   * Disables/enables the relevant parts of the UI when user checks/unchecks the Detailed Balance
-   * ckDetailedBalance checkbox.
-   * @param state :: state of the checkbox
-   */
-  void IndirectConvertToEnergy::detailedBalanceCheck(bool state)
-  {
-    m_uiForm.leDetailedBalance->setEnabled(state);
-    m_uiForm.lbDBKelvin->setEnabled(state);
-  }
-
-  /**
-   * Disables/enables the relevant parts of the UI when user checks/unchecks the 'Multiplication Factor (Scale):'
-   * ckScaleMultiplier checkbox.
-   * @param state :: state of the checkbox
-   */
-  void IndirectConvertToEnergy::scaleMultiplierCheck(bool state)
-  {
-    m_uiForm.leScaleMultiplier->setEnabled(state);
+      m_uiForm.pbBackgroundRemoval->setText("Background Removal (Off)");
   }
 
   /**
@@ -535,7 +335,7 @@ namespace CustomInterfaces
    */
   QString IndirectConvertToEnergy::createMapFile(const QString& groupType)
   {
-    QString specRange = m_uiForm.leSpectraMin->text() + "," + m_uiForm.leSpectraMax->text();
+    QString specRange = m_uiForm.spSpectraMin->text() + "," + m_uiForm.spSpectraMax->text();
 
     if(groupType == "File")
     {
@@ -579,17 +379,17 @@ namespace CustomInterfaces
   {
     std::vector<std::string> fileFormats;
 
-    if ( m_uiForm.save_ckNexus->isChecked() )
+    if ( m_uiForm.ckSaveNexus->isChecked() )
       fileFormats.push_back("nxs");
-    if ( m_uiForm.save_ckSPE->isChecked() )
+    if ( m_uiForm.ckSaveSPE->isChecked() )
       fileFormats.push_back("spe");
-    if ( m_uiForm.save_ckNxSPE->isChecked() )
+    if ( m_uiForm.ckSaveNXSPE->isChecked() )
       fileFormats.push_back("nxspe");
-    if ( m_uiForm.save_ckAscii->isChecked() )
+    if ( m_uiForm.ckSaveASCII->isChecked() )
       fileFormats.push_back("ascii");
-    if ( m_uiForm.save_ckAclimax->isChecked() )
+    if ( m_uiForm.ckSaveAclimax->isChecked() )
       fileFormats.push_back("aclimax");
-    if ( m_uiForm.save_ckDaveGrp->isChecked() )
+    if ( m_uiForm.ckSaveDaveGrp->isChecked() )
       fileFormats.push_back("davegrp");
 
     return fileFormats;
@@ -609,7 +409,7 @@ namespace CustomInterfaces
     }
 
     bool ok;
-    QString spectraRange = QInputDialog::getText(0, "Insert Spectra Ranges", "Range: ", QLineEdit::Normal, m_uiForm.leSpectraMin->text() +"-"+ m_uiForm.leSpectraMax->text(), &ok);
+    QString spectraRange = QInputDialog::getText(0, "Insert Spectra Ranges", "Range: ", QLineEdit::Normal, m_uiForm.spSpectraMin->text() +"-"+ m_uiForm.spSpectraMax->text(), &ok);
 
     if(!ok || spectraRange.isEmpty())
       return;

@@ -238,7 +238,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>mantidqt::mantidwidgets::mwrunfiles.h</header>
+   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

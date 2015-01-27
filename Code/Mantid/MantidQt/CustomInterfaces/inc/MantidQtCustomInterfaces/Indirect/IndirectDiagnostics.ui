@@ -23,7 +23,7 @@
       <item>
        <layout class="QHBoxLayout" name="loInputFiles">
         <item>
-         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfInputFiles" native="true">
+         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dsInputFiles" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -189,12 +189,12 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>mantidqt::mantidwidgets::mwrunfiles.h</header>
+   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
-   <header>mantidqt::mantidwidgets::dataselector.h</header>
+   <header>MantidQtMantidWidgets/DataSelector.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTDIAGNOSTICS_H_
 
 #include "IndirectDataReductionTab.h"
-
+#include "ui_IndirectDiagnostics.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 
@@ -79,6 +79,7 @@ namespace CustomInterfaces
     void pbRunFinished(); //< Called when the FileFinder has finished finding the files.
 
   private:
+    Ui::IndirectDiagnostics m_uiForm;
     QString m_lastDiagFilename;
 
   };

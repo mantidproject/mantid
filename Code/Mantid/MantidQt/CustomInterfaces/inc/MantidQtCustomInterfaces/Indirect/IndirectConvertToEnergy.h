@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTCONVERTTOENERGY_H_
 
 #include "IndirectDataReductionTab.h"
-
+#include "ui_IndirectConvertToEnergy.h"
 #include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/Background.h"
 
@@ -65,6 +65,8 @@ namespace CustomInterfaces
     void plotRawComplete(bool error); //< Called when the Plot Raw algorithmm chain completes
 
   private:
+    Ui::IndirectConvertToEnergy m_uiForm;
+
     Background *m_backgroundDialog; ///< background removal dialog
     bool m_bgRemoval; ///< whether user has set values for BG removal
 

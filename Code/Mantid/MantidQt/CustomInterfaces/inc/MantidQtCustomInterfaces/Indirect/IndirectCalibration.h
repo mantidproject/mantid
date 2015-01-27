@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTCALIBRATION_H_
 
 #include "IndirectDataReductionTab.h"
-
+#include "ui_IndirectCalibration.h"
 #include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
@@ -56,8 +56,6 @@ namespace CustomInterfaces
     void calUpdateRS(QtProperty*, double);
     void calSetDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws);
     void resCheck(bool state); ///< handles checking/unchecking of "Create RES File" checkbox
-    void intensityScaleMultiplierCheck(bool state); /// Toggle the intensity scale multiplier box
-    void calibValidateIntensity(const QString & text); /// Check that the scale multiplier is valid
     void setDefaultInstDetails();
     void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
     void pbRunFinding();  //< Called when the FileFinder starts finding the files.
@@ -66,6 +64,7 @@ namespace CustomInterfaces
   private:
     void createRESfile(const QString& file);
 
+    Ui::IndirectCalibration m_uiForm;
     QString m_lastCalPlotFilename;
 
   };

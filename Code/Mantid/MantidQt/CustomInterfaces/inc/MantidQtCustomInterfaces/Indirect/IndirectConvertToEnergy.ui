@@ -481,12 +481,12 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QCheckBox" name="ckRebin">
+         <widget class="QCheckBox" name="ckDoNotRebin">
           <property name="toolTip">
            <string>Do not perform rebinning step on this data.</string>
           </property>
           <property name="text">
-           <string>Rebin</string>
+           <string>Do Not Rebin</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -815,7 +815,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="cbPlotOutput">
+         <widget class="QComboBox" name="cbPlotType">
           <item>
            <property name="text">
             <string>None</string>
@@ -881,16 +881,16 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <customwidget>
    <class>MantidQt::MantidWidgets::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>mantidqt::mantidwidgets::mwrunfiles.h</header>
+   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
  <connections>
   <connection>
-   <sender>ckRebin</sender>
+   <sender>ckDoNotRebin</sender>
    <signal>toggled(bool)</signal>
    <receiver>cbRebinType</receiver>
-   <slot>setEnabled(bool)</slot>
+   <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>69</x>
@@ -903,10 +903,10 @@ Later steps in the process (saving, renaming) will not be done.</string>
    </hints>
   </connection>
   <connection>
-   <sender>ckRebin</sender>
+   <sender>ckDoNotRebin</sender>
    <signal>toggled(bool)</signal>
    <receiver>leRebinString</receiver>
-   <slot>setEnabled(bool)</slot>
+   <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>46</x>
@@ -967,10 +967,10 @@ Later steps in the process (saving, renaming) will not be done.</string>
    </hints>
   </connection>
   <connection>
-   <sender>ckRebin</sender>
+   <sender>ckDoNotRebin</sender>
    <signal>toggled(bool)</signal>
    <receiver>spRebinLow</receiver>
-   <slot>setEnabled(bool)</slot>
+   <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>46</x>
@@ -983,10 +983,10 @@ Later steps in the process (saving, renaming) will not be done.</string>
    </hints>
   </connection>
   <connection>
-   <sender>ckRebin</sender>
+   <sender>ckDoNotRebin</sender>
    <signal>toggled(bool)</signal>
    <receiver>spRebinWidth</receiver>
-   <slot>setEnabled(bool)</slot>
+   <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>46</x>
@@ -999,10 +999,10 @@ Later steps in the process (saving, renaming) will not be done.</string>
    </hints>
   </connection>
   <connection>
-   <sender>ckRebin</sender>
+   <sender>ckDoNotRebin</sender>
    <signal>toggled(bool)</signal>
    <receiver>lbRebinHigh</receiver>
-   <slot>setEnabled(bool)</slot>
+   <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>46</x>
