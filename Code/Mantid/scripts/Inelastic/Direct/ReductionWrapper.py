@@ -40,7 +40,21 @@ class ReductionWrapper(object):
         self._wvs = ReductionWrapper.var_holder()
       # Initialize reduced for given instrument
       self.reducer = DirectEnergyConversion(instrumentName)
+
+      self._validation_fname=None
 #
+    def get_validation_file_name(self,ReferenceFile=None):
+      """ function provides name of the file with mantid
+          workspace reduced earlier and which should be validated 
+          against results of current reduction
+
+          Should be overloaded to return real file name for particular
+          reduction
+      """ 
+      if ReferenceFile:
+          self._validation_fname = ReferenceFile
+      return self._validation_fname
+
     @property
     def wait_for_file(self):
         """ If this variable set to positive value, this value
@@ -99,7 +113,7 @@ class ReductionWrapper(object):
         """ 
         return None
 #
-    def validate_result(self,Error=1.e-3,ToleranceRelErr=True):
+    def validate_result(self,BuildSampleWSIfNotPresent=False,Error=1.e-3,ToleranceRelErr=True):
         """ Method validates results of the reduction against reference file provided
             by get_validation_file_name() method 
             
@@ -112,9 +126,12 @@ class ReductionWrapper(object):
 
         validation_file = self.get_validation_file_name()
         if not validation_file:
-           return True,'No validation defined'
-        
-        sample = Load(validation_file)
+           Build_validation =True
+           if not BuildSampleWSIfNotPresent:             
+              return True,'No validation defined'            
+        else:
+            sample = Load(validation_file)
+            Build_validation = False
 
         # just in case, to be sure
         current_web_state = self._run_from_web
@@ -125,9 +142,17 @@ class ReductionWrapper(object):
         #
         self.def_advanced_properties()
         self.def_main_properties()
+        self.reducer.prop_man.save_format=None
+
         reduced = self.reduce()
 
-        result = CheckWorkspacesMatch(Workspace1=sample,Workspace2=reduced,
+        if Build_validation:
+            result_name = self.reducer.prop_man.save_file_name
+            self.reducer.prop_man.log("*** Saving validation file with name: {0}.nxs".format(result_name),'notice')
+            SaveNexus(result,Filename=result_name+'.nxs')
+            return True,'Created validation file {0}.nxs'.format(result_name)
+        else:
+            result = CheckWorkspacesMatch(Workspace1=sample,Workspace2=reduced,
                                       Tolerance=Error,CheckSample=False,
                                       CheckInstrument=False,ToleranceRelErr=ToleranceRelErr)
 
@@ -173,13 +198,13 @@ class ReductionWrapper(object):
 
         timeToWait = self._wait_for_file
         if timeToWait:
-            file = PropertyManager.sample_run.find_file()
-            while len(file)==0:
+            file = PropertyManager.sample_run.find_file(be_quet=True)
+            while file.find('ERROR:')>=0:
                 file_hint,fext = PropertyManager.sample_run.file_hint()
-                self.reduced.prop_man.log("*** Waiting {0}sec for file {1} to appear on the data search path"\
+                self.reducer.prop_man.log("*** Waiting {0} sec for file {1} to appear on the data search path"\
                     .format(timeToWait,file_hint),'notice')
                 Pause(timeToWait)
-                file = PropertyManager.sample_run.find_file()
+                file = PropertyManager.sample_run.find_file(be_quet=True)
             ws = self.reducer.convert_to_energy(None,input_file)
 
         else:

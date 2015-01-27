@@ -203,11 +203,14 @@ class RunDescriptor(PropDescriptor):
         else:
             raise AttributeError('Source file extension can be only a string')
 
-    def file_hint(self,run_num_str,filePath=None,fileExt=None,**kwargs):
+    def file_hint(self,run_num_str=None,filePath=None,fileExt=None,**kwargs):
         """ procedure to provide run file guess name from run properties
          
             main purpose -- to support customized order of file extensions
         """ 
+        if not run_num_str:
+           run_num_str = str(self.run_number())
+
 
         inst_name = RunDescriptor._holder.short_inst_name
         if 'file_hint' in kwargs:
@@ -257,8 +260,8 @@ class RunDescriptor(PropDescriptor):
         except RuntimeError:
              message = 'Cannot find file matching hint {0} on current search paths ' \
                        'for instrument {1}'.format(file_hint,inst_name)
-
-             RunDescriptor._logger(message,'warning')
+             if not ('be_quet' in kwargs):
+                RunDescriptor._logger(message,'warning')
              return 'ERROR:find_file: '+message
 #--------------------------------------------------------------------------------------------------------------------
     @staticmethod
