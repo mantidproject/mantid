@@ -6,7 +6,7 @@ from mantid.kernel import StringMandatoryValidator, Direction, logger
 class IndirectCylinderAbsorption(DataProcessorAlgorithm):
 
     def category(self):
-        return "Workflow\\Inelastic;PythonAlgorithms;CorrectionFunctions\\AbsorptionCorrections"
+        return "Workflow\\Inelastic;PythonAlgorithms;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
 
 
     def summary(self):
