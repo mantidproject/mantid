@@ -19,6 +19,9 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.classic.changed.connect(self.printUB)
         self.matrix=MatrixUBInputWidget.MatrixUBInputWidget(self.ol)
         self.layout().addWidget(self.matrix)
+        self.matrix.UBmodel.changed.connect(self.printUB)
+        self.matrix.UBmodel.changed.connect(self.classic.updateOL)
+        self.classic.changed.connect(self.matrix.UBmodel.updateOL)
         
     @QtCore.pyqtSlot(mantid.geometry.OrientedLattice)
     def printUB(self,ol):

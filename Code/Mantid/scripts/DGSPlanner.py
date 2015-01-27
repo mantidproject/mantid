@@ -8,9 +8,12 @@ def qapp():
     else: 
         app = QtGui.QApplication(sys.argv) 
     return app
- 
-app = qapp()
-
-planner = DGSPlannerGUI.MainWindow() #the main ui class in this file is called MainWindow
-planner.show()
-app.exec_()
+    
+if __name__ == '__main__': 
+    app = qapp()
+    planner = DGSPlannerGUI.DGSPlannerGUI()
+    planner.show()
+    try: #check if started from within mantidplot
+        import mantidplot
+    except:
+        sys.exit(app.exec_()) 

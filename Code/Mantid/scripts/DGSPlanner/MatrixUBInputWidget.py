@@ -2,6 +2,12 @@ from PyQt4 import QtCore, QtGui
 import sys
 import mantid
 from ValidateOL import ValidateUB
+try:
+    from PyQt4.QtCore import QString
+except ImportError:
+    QString = type("")
+
+
 class UBTableModel(QtCore.QAbstractTableModel):
     
     changed=QtCore.pyqtSignal(mantid.geometry.OrientedLattice) 
@@ -25,11 +31,11 @@ class UBTableModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.EditRole:
             row = index.row()
             column = index.column()
-            return QtCore.QString(format(self.__UB[row][column],'.4f'))              
+            return QString(format(self.__UB[row][column],'.4f'))              
         elif role == QtCore.Qt.DisplayRole:
             row = index.row()
             column = index.column()
-            value = QtCore.QString(format(self.__UB[row][column],'.4f'))
+            value = QString(format(self.__UB[row][column],'.4f'))
             return value
         elif role == QtCore.Qt.BackgroundRole:
             if ValidateUB(self.__UB):
@@ -41,24 +47,33 @@ class UBTableModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.EditRole:            
             row = index.row()
             column = index.column()
-            val,ok = value.toFloat()
-            if ok:
-                self.__UB[row][column]=val
-                self.dataChanged.emit(index, index)
-                if ValidateUB(self.__UB):
-                    self.__lattice.setUB(self.__UB)    
-                    self.sendSignal()   
-                    return True
+            try:
+                val=value.toFloat()[0] #QVariant
+            except:
+                val=float(value) #string
+            self.__UB[row][column]=val
+            self.dataChanged.emit(index, index)
+            if ValidateUB(self.__UB):
+                self.__lattice.setUB(self.__UB)    
+                self.sendSignal()   
+                return True
         return False
     
     def sendSignal(self):
         self.changed.emit(self.__lattice)
         
+    def updateOL(self,ol):
+        self.ol=ol
+        self.beginResetModel()
+        self.__lattice=self.ol
+        self.__UB=self.ol.getUB().copy()
+        self.endResetModel()        
+        
 class MatrixUBInputWidget(QtGui.QWidget):
     def __init__(self,ol,parent=None):
         super(MatrixUBInputWidget,self).__init__(parent)
         self.setLayout(QtGui.QVBoxLayout())
-        self._tableView = QtGui.QTableView()
+        self._tableView = QtGui.QTableView(self)
         self._tableView.horizontalHeader().hide()
         self._tableView.verticalHeader().hide()
         self._tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
@@ -68,10 +83,19 @@ class MatrixUBInputWidget(QtGui.QWidget):
         self.layout().addWidget(self._tableView)
         self.layout().addWidget(self.LoadIsawUBButton)
         self.ol=ol
-        UBmodel = UBTableModel(self.ol)
-        self._tableView.setModel(UBmodel)
-
-
+        self.UBmodel = UBTableModel(self.ol,self)
+        self._tableView.setModel(self.UBmodel)
+        self._tableView.update()
+        
+    def updateOL(self,ol):
+        print "received"
+        self.ol=ol
+        self.UBmodel.beginResetModel()
+        self.UBmodel.__lattice=self.ol
+        self.UBmodel.__UB=self.ol.getUB().copy()
+        self.UBmodel.endResetModel()
+        self._tableView.update()
+        
 if __name__ == '__main__':
     
     app = QtGui.QApplication(sys.argv)        

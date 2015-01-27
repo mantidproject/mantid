@@ -3,7 +3,11 @@ import sys
 import mantid
 import numpy
 from ValidateOL import ValidateOL
-
+try:
+    from PyQt4.QtCore import QString
+except ImportError:
+    QString = type("")
+    
 class ClassicUBInputWidget(QtGui.QWidget): 
     #signal when lattice is changed and valid
     changed=QtCore.pyqtSignal(mantid.geometry.OrientedLattice)   
@@ -18,20 +22,7 @@ class ClassicUBInputWidget(QtGui.QWidget):
             self.ol=ol
         else:
             self.ol=mantid.geometry.OrientedLattice()  
-        self.latt_a=self.ol.a()
-        self.latt_b=self.ol.b()
-        self.latt_c=self.ol.c()
-        self.latt_alpha=self.ol.alpha()
-        self.latt_beta=self.ol.beta()
-        self.latt_gamma=self.ol.gamma()
-        uvec=self.ol.getuVector()
-        self.latt_ux=uvec.X()
-        self.latt_uy=uvec.Y()
-        self.latt_uz=uvec.Z()      
-        vvec=self.ol.getvVector()
-        self.latt_vx=vvec.X()
-        self.latt_vy=vvec.Y()
-        self.latt_vz=vvec.Z()
+
         #labels
         self._labela=QtGui.QLabel('a')
         self._labelb=QtGui.QLabel('b')
@@ -97,8 +88,9 @@ class ClassicUBInputWidget(QtGui.QWidget):
         grid.addWidget(self._editvy,3,3)
         grid.addWidget(self._labelvz,3,4,QtCore.Qt.AlignRight)
         grid.addWidget(self._editvz,3,5) 
-        #update the GUI
-        self.updateGui()
+        
+        #update oriented lattice and gui
+        self.updateOL(self.ol)
         #connections
         self._edita.textEdited.connect(self.check_state_latt)
         self._editb.textEdited.connect(self.check_state_latt)
@@ -114,18 +106,18 @@ class ClassicUBInputWidget(QtGui.QWidget):
         self._editvz.textEdited.connect(self.check_state_orientation)       
         
     def updateGui(self):
-        self._edita.setText(QtCore.QString(format(self.latt_a,'.5f')))   
-        self._editb.setText(QtCore.QString(format(self.latt_b,'.5f'))) 
-        self._editc.setText(QtCore.QString(format(self.latt_c,'.5f')))  
-        self._editalpha.setText(QtCore.QString(format(self.latt_alpha,'.5f')))   
-        self._editbeta.setText(QtCore.QString(format(self.latt_beta,'.5f'))) 
-        self._editgamma.setText(QtCore.QString(format(self.latt_gamma,'.5f')))
-        self._editux.setText(QtCore.QString(format(self.latt_ux,'.5f')))   
-        self._edituy.setText(QtCore.QString(format(self.latt_uy,'.5f'))) 
-        self._edituz.setText(QtCore.QString(format(self.latt_uz,'.5f')))        
-        self._editvx.setText(QtCore.QString(format(self.latt_vx,'.5f')))   
-        self._editvy.setText(QtCore.QString(format(self.latt_vy,'.5f'))) 
-        self._editvz.setText(QtCore.QString(format(self.latt_vz,'.5f')))   
+        self._edita.setText(QString(format(self.latt_a,'.5f')))   
+        self._editb.setText(QString(format(self.latt_b,'.5f'))) 
+        self._editc.setText(QString(format(self.latt_c,'.5f')))  
+        self._editalpha.setText(QString(format(self.latt_alpha,'.5f')))   
+        self._editbeta.setText(QString(format(self.latt_beta,'.5f'))) 
+        self._editgamma.setText(QString(format(self.latt_gamma,'.5f')))
+        self._editux.setText(QString(format(self.latt_ux,'.5f')))   
+        self._edituy.setText(QString(format(self.latt_uy,'.5f'))) 
+        self._edituz.setText(QString(format(self.latt_uz,'.5f')))        
+        self._editvx.setText(QString(format(self.latt_vx,'.5f')))   
+        self._editvy.setText(QString(format(self.latt_vy,'.5f'))) 
+        self._editvz.setText(QString(format(self.latt_vz,'.5f')))   
         
     def check_state_orientation(self, *args, **kwargs):  
         edits=[self._editux,self._edituy,self._edituz,self._editvx,self._editvy,self._editvz]
@@ -186,6 +178,24 @@ class ClassicUBInputWidget(QtGui.QWidget):
         self.ol=mantid.geometry.OrientedLattice(self.latt_a,self.latt_b,self.latt_c,self.latt_alpha,self.latt_beta,self.latt_gamma)
         self.ol.setUFromVectors(uvec,vvec)
         self.changed.emit(self.ol)
+        
+    def updateOL(self,ol):
+        self.latt_a=ol.a()
+        self.latt_b=ol.b()
+        self.latt_c=ol.c()
+        self.latt_alpha=ol.alpha()
+        self.latt_beta=ol.beta()
+        self.latt_gamma=ol.gamma()
+        uvec=ol.getuVector()
+        self.latt_ux=uvec.X()
+        self.latt_uy=uvec.Y()
+        self.latt_uz=uvec.Z()      
+        vvec=ol.getvVector()
+        self.latt_vx=vvec.X()
+        self.latt_vy=vvec.Y()
+        self.latt_vz=vvec.Z()
+        #update the GUI
+        self.updateGui()
         
 if __name__=='__main__':
     app=QtGui.QApplication(sys.argv)
