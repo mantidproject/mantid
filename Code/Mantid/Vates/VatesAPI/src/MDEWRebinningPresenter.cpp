@@ -513,14 +513,14 @@ namespace Mantid
 
     /**
      * Get the minimum value of the data range.
-     * @retruns The maximum value of the data range.
+     * @returns The maximum value of the data range.
      */
     double MDEWRebinningPresenter::getMinValue() const
     {
       return this->m_metadataJsonManager->getMinValue();
     }
 
-    /**
+    /**getM
      * Get the instrument associated with the workspace
      * @returns The instrument 
      */

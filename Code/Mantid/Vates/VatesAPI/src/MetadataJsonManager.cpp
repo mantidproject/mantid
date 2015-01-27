@@ -35,7 +35,7 @@ namespace Mantid
 
     /**
      * Read in the serialized JSON data and opulate the JSON container
-     * @param serialzedJson The serialized JSON string.
+     * @param serializedJson The serialized JSON string.
      */
     void MetadataJsonManager::readInSerializedJson(std::string serializedJson)
     {

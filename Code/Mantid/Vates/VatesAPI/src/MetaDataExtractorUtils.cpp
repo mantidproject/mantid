@@ -31,7 +31,7 @@ namespace Mantid
      * Extract the instrument information from the workspace. If there 
      * is more than one instrument involved, then extract the first instrument
      * from the list.
-     * @param workspace A shared pointer to the workspace.
+     * @param workspace Shared pointer to the workspace.
      * @returns The instrument name or an empty string. 
      */
     std::string MetaDataExtractorUtils::extractInstrument(Mantid::API::IMDWorkspace_sptr workspace)
@@ -75,7 +75,7 @@ namespace Mantid
 
     /**
      * Set the minimum and maximum of the workspace data. Code essentially copied from SignalRange.cpp
-     * @param histWs A reference to an IMD workspace
+     * @param workspace Rreference to an IMD workspace
      * @returns The minimum and maximum value of the workspace dataset.
      */
     QwtDoubleInterval MetaDataExtractorUtils::getMinAndMax(Mantid::API::IMDWorkspace_sptr workspace)
@@ -146,7 +146,7 @@ namespace Mantid
     /**
      * Get the range of a workspace dataset for a single iterator. Code the same as in SignalRange.cpp
      * @param it :: IMDIterator of what to find
-     * @return the min/max range, or INFINITY if not found
+     * @returns the min/max range, or INFINITY if not found
      */
     QwtDoubleInterval MetaDataExtractorUtils::getRange(Mantid::API::IMDIterator * it)
     {

@@ -182,7 +182,7 @@ void ColorUpdater::updateLookupTable(pqDataRepresentation* representation)
 
 /**
  * React to changing the log scale option
- * @param The state to which the log scale is being changed.
+ * @param state The state to which the log scale is being changed.
  */
 void ColorUpdater::logScale(int state)
 {

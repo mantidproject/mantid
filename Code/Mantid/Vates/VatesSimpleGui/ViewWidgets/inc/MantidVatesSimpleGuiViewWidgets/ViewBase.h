@@ -192,7 +192,7 @@ signals:
   void setViewsStatus(ModeControlWidget::Views view, bool state);
   /**
    * Singal to tell other elements that the log scale was altered programatically
-   * @param State flag wheter or not to enable the 
+   * @param state flag wheter or not to enable the 
    */
   void setLogScale(bool state);
 

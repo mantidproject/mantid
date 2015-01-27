@@ -66,7 +66,7 @@ namespace SimpleGui
 
   /**
    * Get the auto color scale which depends on the mode setting.
-   * @retruns A VsiColorScale data structure which contains information 
+   * @returns A VsiColorScale data structure which contains information 
    *          regarding the min and max value as well as if the log 
    *          scale is being used.
    */
@@ -182,8 +182,8 @@ namespace SimpleGui
    * we have to encounter a source with the desired properties. 
    * Note that this assumes a unique source.
    * @param source A pointer to a source.
-   * @param minValueBuffer A reference to a min value buffer.
-   * @param maxValueBuffer A reference to a max value buffer.
+   * @param minValue A reference to a min value buffer.
+   * @param maxValue A reference to a max value buffer.
    */
   void AutoScaleRangeGenerator::setMinBufferAndMaxBuffer(pqPipelineSource* source, double& minValue, double& maxValue)
   {

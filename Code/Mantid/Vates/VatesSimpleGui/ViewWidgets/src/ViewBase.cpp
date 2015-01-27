@@ -184,7 +184,7 @@ void ViewBase::onColorScaleChange(double min, double max)
 
 /**
  * This function sets logarithmic color scaling on the data.
- * @param state flag to determine whether or not to use log color scaling
+ * @param state Flag to determine whether or not to use log color scaling
  */
 void ViewBase::onLogScale(int state)
 {
@@ -204,7 +204,7 @@ void ViewBase::setColorScaleState(ColorSelectionWidget *cs)
 /**
  * This function checks the current state from the color updater and
  * processes the necessary color changes.
- * @param A pointer to the colorscale widget.
+ * @param colorScale A pointer to the colorscale widget.
  */
 void ViewBase::setColorsForView(ColorSelectionWidget *colorScale)
 {
