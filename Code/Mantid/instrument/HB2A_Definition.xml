@@ -1,123 +1,109 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- For help on the notation used to specify an Instrument Definition File see http://www.mantidproject.org/IDF -->
-<instrument  xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd" name="HB2A" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2014-12-28 14:18:50">
-  <defaults>                                                                   
-    <length unit="meter" />                                                    
-    <angle unit="degree" />                                                    
-    <reference-frame>                                                          
-      <!-- The z-axis is set parallel to and in the direction of the beam. the 
-             y-axis points up and the coordinate system is right handed. -->   
-      <along-beam axis="z" />                                                  
-      <pointing-up axis="y" />                                                 
-      <handedness val="right" />                                               
-    </reference-frame>                                                         
-  </defaults>                                                                  
-  <!-- Source position -->                  
-  <component type="moderator">              
-    <location z="-2.00000" />                  
-  </component>                              
-  <type name="moderator" is="Source"></type>
-  <!-- Sample position -->                      
-  <component type="sample-position">            
-    <location y="0.0" x="0.0" z="0.0" />        
-  </component>                                  
-  <type name="sample-position" is="SamplePos" />
-  <!-- Detector list def -->                    
-  <idlist idname="detectors">                   
-    <id start="1" end="44" />                   
-  </idlist>                                     
-  <component type="detectors" idlist="detectors">
-    <location />                                 
-  </component>                                   
-  <!-- Detector Banks -->                       
-  <type name="detectors">                       
-    <component type="bank_uniq">                
-    <location>                                  
-      <parameter name="r-position">             
-        <value val="0"/>                        
-      </parameter>                              
-      <parameter name="t-position">             
-        <logfile id="rotangle"  eq="15.000000+value"/> 
-        <!--  <value val="90"/> -->             
-      </parameter>                              
-      <parameter name="p-position">             
-        <value val="0"/>                        
-      </parameter>                              
-      <parameter name="rotx">                   
-        <value val="0"/>                        
-      </parameter>                              
-      <parameter name="roty">                   
-        <logfile id="rotangle"  eq="0.0+value"/>
-        <!--   <value val="90"/> -->            
-      </parameter>                              
-      <parameter name="rotz">                   
-        <value val="0"/>                        
-      </parameter>                              
-    </location>                                 
-    </component>                                
-  </type>                                       
-  <!-- Definition of the unique existent bank (made of tubes) -->
-  <type name="bank_uniq">                                        
-    <component type="standard_tube">                             
-      <location r="2.000000" t="0.000000" name="tube_1" />     
-      <location r="2.000000" t="2.642000" name="tube_2" />     
-      <location r="2.000000" t="5.291000" name="tube_3" />     
-      <location r="2.000000" t="8.049000" name="tube_4" />     
-      <location r="2.000000" t="10.797000" name="tube_5" />     
-      <location r="2.000000" t="13.507000" name="tube_6" />     
-      <location r="2.000000" t="16.147000" name="tube_7" />     
-      <location r="2.000000" t="18.835000" name="tube_8" />     
-      <location r="2.000000" t="21.575000" name="tube_9" />     
-      <location r="2.000000" t="24.258000" name="tube_10" />     
-      <location r="2.000000" t="27.008000" name="tube_11" />     
-      <location r="2.000000" t="29.636000" name="tube_12" />     
-      <location r="2.000000" t="32.331000" name="tube_13" />     
-      <location r="2.000000" t="34.980000" name="tube_14" />     
-      <location r="2.000000" t="37.775000" name="tube_15" />     
-      <location r="2.000000" t="40.424000" name="tube_16" />     
-      <location r="2.000000" t="43.135000" name="tube_17" />     
-      <location r="2.000000" t="45.865000" name="tube_18" />     
-      <location r="2.000000" t="48.571000" name="tube_19" />     
-      <location r="2.000000" t="51.236000" name="tube_20" />     
-      <location r="2.000000" t="53.962000" name="tube_21" />     
-      <location r="2.000000" t="56.649000" name="tube_22" />     
-      <location r="2.000000" t="59.321000" name="tube_23" />     
-      <location r="2.000000" t="62.026000" name="tube_24" />     
-      <location r="2.000000" t="64.683000" name="tube_25" />     
-      <location r="2.000000" t="67.382000" name="tube_26" />     
-      <location r="2.000000" t="70.139000" name="tube_27" />     
-      <location r="2.000000" t="72.794000" name="tube_28" />     
-      <location r="2.000000" t="75.514000" name="tube_29" />     
-      <location r="2.000000" t="78.223000" name="tube_30" />     
-      <location r="2.000000" t="80.931000" name="tube_31" />     
-      <location r="2.000000" t="83.571000" name="tube_32" />     
-      <location r="2.000000" t="86.281000" name="tube_33" />     
-      <location r="2.000000" t="88.931000" name="tube_34" />     
-      <location r="2.000000" t="91.659000" name="tube_35" />     
-      <location r="2.000000" t="94.324000" name="tube_36" />     
-      <location r="2.000000" t="97.069000" name="tube_37" />     
-      <location r="2.000000" t="99.779000" name="tube_38" />     
-      <location r="2.000000" t="102.469000" name="tube_39" />     
-      <location r="2.000000" t="105.149000" name="tube_40" />     
-      <location r="2.000000" t="107.786000" name="tube_41" />     
-      <location r="2.000000" t="110.511000" name="tube_42" />     
-      <location r="2.000000" t="113.210000" name="tube_43" />     
-      <location r="2.000000" t="115.835000" name="tube_44" />     
-    </component>                                                 
-  </type>                                                        
-  <!-- Definition of standard_tube -->                 
-  <type name="standard_tube" outline="yes">            
-    <component type="standard_pixel">                  
-      <location y="0.00" />                            
-    </component>                                       
-  </type>                                              
-  <type name="standard_pixel" is="detector">           
-    <cylinder id="shape">                              
-      <centre-of-bottom-base x="0.0" y="0.0" z="0.0" />
-      <axis x="0.0" y="1.0" z="0.0" />                 
-      <radius val="0.00127" />                         
-      <height val=".0114341328125" />                  
-    </cylinder>                                        
-    <algebra val="shape" />                            
-  </type>                                              
+<?xml version='1.0' encoding='ASCII'?>
+<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2015-01-27 14:19:51.059873" name="HB2A" valid-from="2015-01-22 00:00:00" valid-to="2100-01-31 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd">
+  <!--Created by Wenduo Zhou-->
+  <!--SOURCE AND SAMPLE POSITION-->
+  <component type="moderator">
+    <location z="-2.0"/>
+  </component>
+  <type is="Source" name="moderator"/>
+  <component type="sample-position">
+    <location x="0.0" y="0.0" z="0.0"/>
+  </component>
+  <type is="SamplePos" name="sample-position"/>
+  <!--Detector list def-->
+  <idlist idname="detectors">
+    <id end="44" start="1" step="1"/>
+  </idlist>
+  <component idlist="detectors" type="detectors">
+    <location/>
+  </component>
+  <!--Detector Banks-->
+  <type name="detectors">
+    <component type="bank_uniq">
+      <location>
+        <parameter name="r-position">
+          <value val="0."/>
+        </parameter>
+        <parameter name="t-position">
+          <logfile eq="value+0.0" id="rotangle"/>
+        </parameter>
+        <parameter name="p-position">
+          <value val="0."/>
+        </parameter>
+        <parameter name="rotx">
+          <value val="0."/>
+        </parameter>
+        <parameter name="roty">
+          <logfile eq="value+0.0" id="rotangle"/>
+        </parameter>
+        <parameter name="rotz">
+          <value val="0."/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+  <!--Definition of the unique existent bank (made of tubes)-->
+  <type name="bank_uniq">
+    <component type="standard_tube">
+      <location name="tube_1" p="0.0" r="2.00" t="0.0"/>
+      <location name="tube_2" p="0.0" r="2.00" t="2.642"/>
+      <location name="tube_3" p="0.0" r="2.00" t="5.291"/>
+      <location name="tube_4" p="0.0" r="2.00" t="8.049"/>
+      <location name="tube_5" p="0.0" r="2.00" t="10.797"/>
+      <location name="tube_6" p="0.0" r="2.00" t="13.507"/>
+      <location name="tube_7" p="0.0" r="2.00" t="16.147"/>
+      <location name="tube_8" p="0.0" r="2.00" t="18.835"/>
+      <location name="tube_9" p="0.0" r="2.00" t="21.575"/>
+      <location name="tube_10" p="0.0" r="2.00" t="24.258"/>
+      <location name="tube_11" p="0.0" r="2.00" t="27.008"/>
+      <location name="tube_12" p="0.0" r="2.00" t="29.636"/>
+      <location name="tube_13" p="0.0" r="2.00" t="32.331"/>
+      <location name="tube_14" p="0.0" r="2.00" t="34.98"/>
+      <location name="tube_15" p="0.0" r="2.00" t="37.775"/>
+      <location name="tube_16" p="0.0" r="2.00" t="40.424"/>
+      <location name="tube_17" p="0.0" r="2.00" t="43.135"/>
+      <location name="tube_18" p="0.0" r="2.00" t="45.865"/>
+      <location name="tube_19" p="0.0" r="2.00" t="48.571"/>
+      <location name="tube_20" p="0.0" r="2.00" t="51.236"/>
+      <location name="tube_21" p="0.0" r="2.00" t="53.962"/>
+      <location name="tube_22" p="0.0" r="2.00" t="56.649"/>
+      <location name="tube_23" p="0.0" r="2.00" t="59.321"/>
+      <location name="tube_24" p="0.0" r="2.00" t="62.026"/>
+      <location name="tube_25" p="0.0" r="2.00" t="64.683"/>
+      <location name="tube_26" p="0.0" r="2.00" t="67.382"/>
+      <location name="tube_27" p="0.0" r="2.00" t="70.139"/>
+      <location name="tube_28" p="0.0" r="2.00" t="72.794"/>
+      <location name="tube_29" p="0.0" r="2.00" t="75.514"/>
+      <location name="tube_30" p="0.0" r="2.00" t="78.223"/>
+      <location name="tube_31" p="0.0" r="2.00" t="80.931"/>
+      <location name="tube_32" p="0.0" r="2.00" t="83.571"/>
+      <location name="tube_33" p="0.0" r="2.00" t="86.281"/>
+      <location name="tube_34" p="0.0" r="2.00" t="88.931"/>
+      <location name="tube_35" p="0.0" r="2.00" t="91.659"/>
+      <location name="tube_36" p="0.0" r="2.00" t="94.324"/>
+      <location name="tube_37" p="0.0" r="2.00" t="97.069"/>
+      <location name="tube_38" p="0.0" r="2.00" t="99.779"/>
+      <location name="tube_39" p="0.0" r="2.00" t="102.469"/>
+      <location name="tube_40" p="0.0" r="2.00" t="105.149"/>
+      <location name="tube_41" p="0.0" r="2.00" t="107.786"/>
+      <location name="tube_42" p="0.0" r="2.00" t="110.511"/>
+      <location name="tube_43" p="0.0" r="2.00" t="113.21"/>
+      <location name="tube_44" p="0.0" r="2.00" t="115.835"/>
+    </component>
+  </type>
+  <!--Definition of standard_tube-->
+  <type name="standard_tube" outline="yes">
+    <component type="standard_pixel">
+      <location x="0" y="0" z="0"/>
+    </component>
+  </type>
+  <type is="detector" name="standard_pixel">
+    <cylinder id="shape">
+      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+      <axis x="0.0" y="1.0" z="0.0"/>
+      <radius val="0.00127"/>
+      <height val="0.0114341328125"/>
+    </cylinder>
+    <algebra val="shape"/>
+  </type>
 </instrument>
