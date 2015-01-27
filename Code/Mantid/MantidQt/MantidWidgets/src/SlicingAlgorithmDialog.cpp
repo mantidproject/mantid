@@ -1,4 +1,4 @@
-#include "MantidQtCustomDialogs/SlicingAlgorithmDialog.h"
+#include "MantidQtMantidWidgets/SlicingAlgorithmDialog.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"

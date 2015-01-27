@@ -32,7 +32,8 @@ set ( SRC_FILES
 	src/ScriptEditor.cpp
 	src/SelectFunctionDialog.cpp
 	src/SelectWorkspacesDialog.cpp
-	src/SequentialFitDialog.cpp
+        src/SequentialFitDialog.cpp
+	src/SlicingAlgorithmDialog.cpp
 	src/StringDialogEditor.cpp
 	src/StringEditorFactory.cpp
 	src/UserFunctionDialog.cpp
@@ -80,6 +81,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/SelectFunctionDialog.h
     inc/MantidQtMantidWidgets/SelectWorkspacesDialog.h
     inc/MantidQtMantidWidgets/SequentialFitDialog.h
+    inc/MantidQtMantidWidgets/SlicingAlgorithmDialog.h
     inc/MantidQtMantidWidgets/StringDialogEditor.h
     inc/MantidQtMantidWidgets/StringEditorFactory.h
     inc/MantidQtMantidWidgets/UserFunctionDialog.h
@@ -111,6 +113,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/RenameParDialog.ui
     inc/MantidQtMantidWidgets/SelectFunctionDialog.ui
     inc/MantidQtMantidWidgets/SequentialFitDialog.ui
+    inc/MantidQtMantidWidgets/SlicingAlgorithmDialog.ui
     inc/MantidQtMantidWidgets/UserFunctionDialog.ui
     inc/MantidQtMantidWidgets/pqHelpWindow.ui
 )
