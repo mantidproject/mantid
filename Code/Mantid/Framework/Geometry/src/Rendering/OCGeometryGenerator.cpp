@@ -10,6 +10,13 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
+// the following were previously defined in Poco/Platform_POSIX.h 
+#ifdef GCC_DIAG_ON 
+#undef GCC_DIAG_ON
+#endif
+#ifdef GCC_DIAG_OFF
+#undef GCC_DIAG_OFF
+#endif
 #include "MantidKernel/WarningSuppressions.h"
 #include <climits> // Needed for g++4.4 on Mac with OpenCASCADE 6.3.0
 #include <cmath>

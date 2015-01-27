@@ -5,13 +5,21 @@
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDGridBox.h"
 #include <boost/math/special_functions/round.hpp>
 #include <ostream>
 #include "MantidKernel/Strings.h"
+
+// the following were previously defined in Poco/Platform_POSIX.h 
+#ifdef GCC_DIAG_ON 
+#undef GCC_DIAG_ON
+#endif
+#ifdef GCC_DIAG_OFF
+#undef GCC_DIAG_OFF
+#endif
+#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
