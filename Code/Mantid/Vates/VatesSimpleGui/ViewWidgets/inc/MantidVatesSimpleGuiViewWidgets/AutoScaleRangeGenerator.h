@@ -94,8 +94,8 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS  AutoScaleRangeGenerator
    * Extract the min and max values of a source. If we are dealing with a filter which does not
    * have the information then look upstream for the information
    * @param source A pointer to a source
-   * @param minValueBuffer A reference to a min value.
-   * @param maxValueBuffer A reference to a max value.
+   * @param minValue A reference to a min value.
+   * @param maxValue A reference to a max value.
    */
     void setMinBufferAndMaxBuffer(pqPipelineSource* source, double& minValue, double& maxValue);
 
