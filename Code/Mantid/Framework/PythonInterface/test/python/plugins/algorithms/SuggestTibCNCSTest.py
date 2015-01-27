@@ -18,7 +18,7 @@ class SuggestTibCNCSTest(unittest.TestCase):
     def test_someresult(self):
         for en in numpy.arange(1.,30.,0.1):
             result=mantid.simpleapi.SuggestTibCNCS(en)
-            self.assertGreater(result[1]-result[0],1000.)
+            self.assertTrue(result[1]-result[0]>1000.)
 
 if __name__=="__main__":
     unittest.main()
