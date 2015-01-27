@@ -267,7 +267,10 @@ def iliad(reduce):
         # prohibit returning workspace to web services. 
         if host._run_from_web and not isinstance(rez,str):
             rez=""
-        else:
+        else:         
+          if isinstance(rez,list):
+              # multirep run, just return as it is
+              return rez
           if out_ws_name and rez.name() != out_ws_name :
               rez=RenameWorkspace(InputWorkspace=rez,OutputWorkspace=out_ws_name)
              
