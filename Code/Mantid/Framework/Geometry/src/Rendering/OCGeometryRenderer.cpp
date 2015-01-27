@@ -3,13 +3,6 @@
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
-// the following were previously defined in Poco/Platform_POSIX.h 
-#ifdef GCC_DIAG_ON 
-#undef GCC_DIAG_ON
-#endif
-#ifdef GCC_DIAG_OFF
-#undef GCC_DIAG_OFF
-#endif
 #include "MantidKernel/WarningSuppressions.h"
 #include <climits>
 

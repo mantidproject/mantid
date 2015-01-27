@@ -11,13 +11,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
-// the following were previously defined in Poco/Platform_POSIX.h 
-#ifdef GCC_DIAG_ON 
-#undef GCC_DIAG_ON
-#endif
-#ifdef GCC_DIAG_OFF
-#undef GCC_DIAG_OFF
-#endif
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidGeometry/Instrument.h"
 

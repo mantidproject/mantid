@@ -1,6 +1,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileLoaderRegistry.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
 
 #include <boost/python/class.hpp>
@@ -11,15 +12,6 @@
 // Python frameobject. This is under the boost includes so that boost will have done the
 // include of Python.h which it ensures is done correctly
 #include <frameobject.h>
-
-// the following were previously defined in Poco/Platform_POSIX.h 
-#ifdef GCC_DIAG_ON 
-#undef GCC_DIAG_ON
-#endif
-#ifdef GCC_DIAG_OFF
-#undef GCC_DIAG_OFF
-#endif
-#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid::API;
 using namespace boost::python;

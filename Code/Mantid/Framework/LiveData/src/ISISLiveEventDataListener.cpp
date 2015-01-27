@@ -9,13 +9,6 @@
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-// the following were previously defined in Poco/Platform_POSIX.h 
-#ifdef GCC_DIAG_ON 
-#undef GCC_DIAG_ON
-#endif
-#ifdef GCC_DIAG_OFF
-#undef GCC_DIAG_OFF
-#endif
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/UnitFactory.h"
 
