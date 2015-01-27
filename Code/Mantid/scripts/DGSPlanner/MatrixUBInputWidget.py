@@ -55,6 +55,7 @@ class UBTableModel(QtCore.QAbstractTableModel):
                 val=float(value) #string
             self.__UB[row][column]=val
             self.dataChanged.emit(index, index)
+            print self.__UB
             if ValidateUB(self.__UB):
                 self.__lattice.setUB(self.__UB)    
                 self.sendSignal()   
@@ -88,15 +89,21 @@ class MatrixUBInputWidget(QtGui.QWidget):
         self.UBmodel = UBTableModel(self.ol,self)
         self._tableView.setModel(self.UBmodel)
         self._tableView.update()
+        self.LoadIsawUBButton.clicked.connect(self.loadIsawUBDialog)
         
-    def updateOL(self,ol):
-        print "received"
-        self.ol=ol
-        self.UBmodel.beginResetModel()
-        self.UBmodel.__lattice=self.ol
-        self.UBmodel.__UB=self.ol.getUB().copy()
-        self.UBmodel.endResetModel()
-        self._tableView.update()
+    def loadIsawUBDialog(self):
+        try:
+            fname = QtGui.QFileDialog.getOpenFileName(self, 'Open ISAW UB file',filter=QString('Mat file (*.mat);;All Files (*)'))
+            __tempws=mantid.simpleapi.CreateSingleValuedWorkspace(0.)
+            mantid.simpleapi.LoadIsawUB(__tempws,str(fname))
+            ol=mantid.geometry.OrientedLattice(__tempws.sample().getOrientedLattice())
+            ol.setU(__tempws.sample().getOrientedLattice().getU())
+            self.UBmodel.updateOL(ol)
+            self.UBmodel.sendSignal()
+            mantid.simpleapi.DeleteWorkspace(__tempws)
+        except:
+            mantid.logger.error("Could not open the file, or not a valid UB matrix")
+                
         
 if __name__ == '__main__':
     
