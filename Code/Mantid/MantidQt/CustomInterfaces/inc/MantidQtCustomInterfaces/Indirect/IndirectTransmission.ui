@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>469</width>
-    <height>227</height>
+    <width>514</width>
+    <height>360</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -93,6 +93,12 @@
    </item>
    <item>
     <widget class="QGroupBox" name="gbPreview">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>200</height>
+      </size>
+     </property>
      <property name="title">
       <string>Preview</string>
      </property>
