@@ -10,6 +10,7 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectCalibration.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectConvertToEnergy.h"
+#include "MantidQtCustomInterfaces/Indirect/IndirectDataReductionTab.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectDiagnostics.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectMoments.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectSqw.h"
@@ -135,14 +136,13 @@ void IndirectDataReduction::initLayout()
   updateRunButton(false, "Loading UI", "Initialising user interface components...");
 
   // Create the tabs
-  //TODO
-  /* m_tabs["Energy Transfer"] = new IndirectConvertToEnergy(m_uiForm, m_uiForm.twIDRTabs->widget(0)); */
-  /* m_tabs["Calibration"] = new IndirectCalibration(m_uiForm, m_uiForm.twIDRTabs->widget(1)); */
-  /* m_tabs["Diagnostics"] = new IndirectDiagnostics(m_uiForm, m_uiForm.twIDRTabs->widget(2)); */
-  /* m_tabs["Transmission"] = new IndirectTransmission(m_uiForm, m_uiForm.twIDRTabs->widget(3)); */
-  /* m_tabs["Symmetrise"] = new IndirectSymmetrise(m_uiForm, m_uiForm.twIDRTabs->widget(4)); */
-  /* m_tabs["S(Q, w)"] = new IndirectSqw(m_uiForm, m_uiForm.twIDRTabs->widget(5)); */
-  /* m_tabs["Moments"] = new IndirectMoments(m_uiForm, m_uiForm.twIDRTabs->widget(6)); */
+  m_tabs["Energy Transfer"] = new IndirectConvertToEnergy(this, m_uiForm.twIDRTabs->widget(0));
+  m_tabs["Calibration"] = new IndirectCalibration(this, m_uiForm.twIDRTabs->widget(1));
+  m_tabs["Diagnostics"] = new IndirectDiagnostics(this, m_uiForm.twIDRTabs->widget(2));
+  m_tabs["Transmission"] = new IndirectTransmission(this, m_uiForm.twIDRTabs->widget(3));
+  m_tabs["Symmetrise"] = new IndirectSymmetrise(this, m_uiForm.twIDRTabs->widget(4));
+  m_tabs["S(Q, w)"] = new IndirectSqw(this, m_uiForm.twIDRTabs->widget(5));
+  m_tabs["Moments"] = new IndirectMoments(this, m_uiForm.twIDRTabs->widget(6));
 
   // Connect "?" (Help) Button
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));

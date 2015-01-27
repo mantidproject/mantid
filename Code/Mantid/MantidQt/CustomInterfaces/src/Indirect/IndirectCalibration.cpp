@@ -21,8 +21,9 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  IndirectCalibration::IndirectCalibration(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
-      IndirectDataReductionTab(uiForm, parent), m_lastCalPlotFilename("")
+  IndirectCalibration::IndirectCalibration(IndirectDataReduction * idrUI, QWidget * parent) :
+    IndirectDataReductionTab(idrUI, parent),
+    m_lastCalPlotFilename("")
   {
     m_uiForm.setupUi(parent);
 
@@ -177,8 +178,8 @@ namespace CustomInterfaces
     QString backgroundRange = m_properties["CalBackMin"]->valueText() + "," + m_properties["CalBackMax"]->valueText();
 
     QFileInfo firstFileInfo(firstFile);
-    QString outputWorkspaceNameStem = "IRS"; //firstFileInfo.baseName() + "_" + m_uiForm.iicInstrumentConfiguration->getAnalyserName()
-//      + m_uiForm.iicInstrumentConfiguration->getReflectionName(); TODO
+    QString outputWorkspaceNameStem = firstFileInfo.baseName() + "_" + getInstrumentConfiguration()->getAnalyserName()
+                                      + getInstrumentConfiguration()->getReflectionName();
 
     QString calibrationWsName = outputWorkspaceNameStem + "_calib";
 
@@ -240,12 +241,11 @@ namespace CustomInterfaces
       Mantid::API::IAlgorithm_sptr resAlg = Mantid::API::AlgorithmManager::Instance().create("IndirectResolution", -1);
       resAlg->initialize();
 
-      //TODO
       resAlg->setProperty("InputFiles", filenames.toStdString());
       resAlg->setProperty("OutputWorkspace", resolutionWsName.toStdString());
-      resAlg->setProperty("Instrument", "IRIS"); //m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString());
-      resAlg->setProperty("Analyser", "graphite"); //m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString());
-      resAlg->setProperty("Reflection", "002"); //m_uiForm.iicInstrumentConfiguration->getReflectionName().toStdString());
+      resAlg->setProperty("Instrument", getInstrumentConfiguration()->getInstrumentName().toStdString());
+      resAlg->setProperty("Analyser", getInstrumentConfiguration()->getAnalyserName().toStdString());
+      resAlg->setProperty("Reflection", getInstrumentConfiguration()->getReflectionName().toStdString());
       resAlg->setProperty("RebinParam", rebinString.toStdString());
       resAlg->setProperty("DetectorRange", resDetectorRange.toStdString());
       resAlg->setProperty("BackgroundRange", background.toStdString());
@@ -402,14 +402,13 @@ namespace CustomInterfaces
     QFileInfo fi(m_uiForm.leRunNo->getFirstFilename());
 
     QString detRange = QString::number(m_dblManager->value(m_properties["ResSpecMin"])) + ","
-        + QString::number(m_dblManager->value(m_properties["ResSpecMax"]));
+                     + QString::number(m_dblManager->value(m_properties["ResSpecMax"]));
 
-    //TODO
     IAlgorithm_sptr reductionAlg = AlgorithmManager::Instance().create("InelasticIndirectReduction");
     reductionAlg->initialize();
-    reductionAlg->setProperty("Instrument", "IRIS"); //m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString());
-    reductionAlg->setProperty("Analyser", "graphite"); //m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString());
-    reductionAlg->setProperty("Reflection", "002"); //m_uiForm.iicInstrumentConfiguration->getReflectionName().toStdString());
+    reductionAlg->setProperty("Instrument", getInstrumentConfiguration()->getInstrumentName().toStdString());
+    reductionAlg->setProperty("Analyser", getInstrumentConfiguration()->getAnalyserName().toStdString());
+    reductionAlg->setProperty("Reflection", getInstrumentConfiguration()->getReflectionName().toStdString());
     reductionAlg->setProperty("InputFiles", files.toStdString());
     reductionAlg->setProperty("OutputWorkspace", "__IndirectCalibration_reduction");
     reductionAlg->setProperty("DetectorRange", detRange.toStdString());

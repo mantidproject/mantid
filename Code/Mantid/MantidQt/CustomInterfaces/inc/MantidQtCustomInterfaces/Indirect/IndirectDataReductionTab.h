@@ -8,8 +8,9 @@
 #include "MantidQtAPI/BatchAlgorithmRunner.h"
 #include "MantidQtAPI/PythonRunner.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
-#include "IndirectDataReduction.h"
+#include "MantidQtMantidWidgets/IndirectInstrumentConfig.h"
 #include "IndirectTab.h"
+#include "IndirectDataReduction.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include <QDoubleValidator>
@@ -74,20 +75,11 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
-    IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QObject * parent = 0);
+    IndirectDataReductionTab(IndirectDataReduction * idrUI, QObject * parent = 0);
     virtual ~IndirectDataReductionTab();
 
   public slots:
     void runTab();
-
-  protected:
-    Mantid::API::MatrixWorkspace_sptr loadInstrumentIfNotExist(std::string instrumentName, std::string analyser="", std::string reflection="");
-    /// Function to get details about the instrumet from a given workspace
-    std::map<QString, QString> getInstrumentDetails();
-
-    std::map<std::string, double> getRangesFromInstrument(QString instName = "", QString analyser = "", QString reflection = "");
-
-    Ui::IndirectDataReduction m_uiForm;
 
   signals:
     /// Update the Run button on the IDR main window
@@ -95,11 +87,20 @@ namespace CustomInterfaces
     /// Emitted when the instrument setup is changed
     void newInstrumentConfiguration();
 
-  private:
-    bool m_tabRunning;
+  protected:
+    Mantid::API::MatrixWorkspace_sptr loadInstrumentIfNotExist(std::string instrumentName, std::string analyser="", std::string reflection="");
+    /// Function to get details about the instrumet from a given workspace
+    std::map<QString, QString> getInstrumentDetails();
+    std::map<std::string, double> getRangesFromInstrument(QString instName = "", QString analyser = "", QString reflection = "");
+    /// Get the instrument config widget
+    MantidWidgets::IndirectInstrumentConfig *getInstrumentConfiguration();
 
   private slots:
     void tabExecutionComplete(bool error);
+
+  private:
+    IndirectDataReduction *m_idrUI;
+    bool m_tabRunning;
 
   };
 } // namespace CustomInterfaces

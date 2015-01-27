@@ -40,7 +40,7 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
-    IndirectSqw(Ui::IndirectDataReduction& uiForm, QWidget * parent = 0);
+    IndirectSqw(IndirectDataReduction * idrUI, QWidget * parent = 0);
     virtual ~IndirectSqw();
 
     virtual void setup();

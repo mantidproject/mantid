@@ -40,7 +40,7 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
-    IndirectConvertToEnergy(Ui::IndirectDataReduction& uiForm, QWidget * parent = 0);
+    IndirectConvertToEnergy(IndirectDataReduction * idrUI, QWidget * parent = 0);
     virtual ~IndirectConvertToEnergy();
 
     virtual void setup();
@@ -53,11 +53,7 @@ namespace CustomInterfaces
     void mappingOptionSelected(const QString& groupType); ///< change ui to display appropriate options
     void backgroundClicked(); ///< handles showing and hiding m_backgroundDialog
     void backgroundRemoval(); ///< handles data from BG
-    void rebinEntryToggle(bool state); ///< handle checking/unchecking of "Do Not Rebin"
-    void detailedBalanceCheck(bool state); ///< handle checking/unchecking of "Detailed Balance"
-    void scaleMultiplierCheck(bool state); ///< handle checking/unchecking of "Scale: Multiply by"
     void plotRaw(); ///< plot raw data from instrument
-    void useCalib(bool state); ///< whether to use calib file
     void calibFileChanged(const QString & calib); ///< sets m_uiForm.ckUseCalib to appropriate value
     void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
     void pbRunFinding();  //< Called when the FileFinder starts finding the files.

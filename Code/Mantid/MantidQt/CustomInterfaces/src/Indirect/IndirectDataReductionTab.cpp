@@ -19,8 +19,8 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  IndirectDataReductionTab::IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QObject* parent) : IndirectTab(parent),
-      m_uiForm(uiForm)
+  IndirectDataReductionTab::IndirectDataReductionTab(IndirectDataReduction *idrUI, QObject *parent) :
+    IndirectTab(parent), m_idrUI(idrUI)
   {
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
   }
@@ -75,12 +75,7 @@ namespace CustomInterfaces
   Mantid::API::MatrixWorkspace_sptr IndirectDataReductionTab::loadInstrumentIfNotExist(std::string instrumentName,
       std::string analyser, std::string reflection)
   {
-    IndirectDataReduction* parentIDR = dynamic_cast<IndirectDataReduction*>(m_parentWidget);
-
-    if(parentIDR == NULL)
-      throw std::runtime_error("IndirectDataReductionTab must be a child of IndirectDataReduction");
-
-    return parentIDR->loadInstrumentIfNotExist(instrumentName, analyser, reflection);
+    return m_idrUI->loadInstrumentIfNotExist(instrumentName, analyser, reflection);
   }
 
   /**
@@ -90,12 +85,17 @@ namespace CustomInterfaces
    */
   std::map<QString, QString> IndirectDataReductionTab::getInstrumentDetails()
   {
-    IndirectDataReduction* parentIDR = dynamic_cast<IndirectDataReduction*>(m_parentWidget);
+    return m_idrUI->getInstrumentDetails();
+  }
 
-    if(parentIDR == NULL)
-      throw std::runtime_error("IndirectDataReductionTab must be a child of IndirectDataReduction");
-
-    return parentIDR->getInstrumentDetails();
+  /**
+   * Returns a pointer to the instrument configuration widget common to all tabs.
+   *
+   * @return Instrument config widget
+   */
+  MantidWidgets::IndirectInstrumentConfig *IndirectDataReductionTab::getInstrumentConfiguration()
+  {
+    return m_idrUI->m_uiForm.iicInstrumentConfiguration;
   }
 
   /**
@@ -112,11 +112,11 @@ namespace CustomInterfaces
   {
     // Get any unset parameters
     if(instName.isEmpty())
-      instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
+      instName = getInstrumentConfiguration()->getInstrumentName();
     if(analyser.isEmpty())
-      analyser = m_uiForm.iicInstrumentConfiguration->getAnalyserName();
+      analyser = getInstrumentConfiguration()->getAnalyserName();
     if(reflection.isEmpty())
-      reflection = m_uiForm.iicInstrumentConfiguration->getReflectionName();
+      reflection = getInstrumentConfiguration()->getReflectionName();
 
     std::map<std::string, double> ranges;
 

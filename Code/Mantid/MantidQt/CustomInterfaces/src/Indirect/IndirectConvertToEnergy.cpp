@@ -14,8 +14,9 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  IndirectConvertToEnergy::IndirectConvertToEnergy(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
-      IndirectDataReductionTab(uiForm, parent), m_backgroundDialog(NULL), m_bgRemoval(false)
+  IndirectConvertToEnergy::IndirectConvertToEnergy(IndirectDataReduction * idrUI, QWidget * parent) :
+      IndirectDataReductionTab(idrUI, parent),
+      m_backgroundDialog(NULL), m_bgRemoval(false)
   {
     m_uiForm.setupUi(parent);
 
@@ -31,19 +32,19 @@ namespace CustomInterfaces
     connect(m_uiForm.pbBackgroundRemoval, SIGNAL(clicked()), this, SLOT(backgroundClicked()));
     // Plots raw input data when user clicks Plot Time
     connect(m_uiForm.pbPlotTime, SIGNAL(clicked()), this, SLOT(plotRaw()));
-    connect(m_uiForm.ind_calibFile, SIGNAL(fileTextChanged(const QString &)), this, SLOT(calibFileChanged(const QString &)));
+    // Handles a calibration file being selected
+    connect(m_uiForm.dsCalibrationFile, SIGNAL(fileTextChanged(const QString &)), this, SLOT(calibFileChanged(const QString &)));
     // Shows message on run buton when user is inputting a run number
-    connect(m_uiForm.ind_runFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
+    connect(m_uiForm.dsRunFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
     // Shows message on run button when Mantid is finding the file for a given run number
-    connect(m_uiForm.ind_runFiles, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
+    connect(m_uiForm.dsRunFiles, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
     // Reverts run button back to normal when file finding has finished
-    connect(m_uiForm.ind_runFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
+    connect(m_uiForm.dsRunFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
 
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
     // Update UI widgets to show default values
     mappingOptionSelected(m_uiForm.cbMappingOptions->currentText());
-    rebinEntryToggle(m_uiForm.ckDoNotRebin->isChecked());
     backgroundRemoval();
 
     // Validate to remove invalid markers
@@ -59,8 +60,6 @@ namespace CustomInterfaces
 
   void IndirectConvertToEnergy::setup()
   {
-    detailedBalanceCheck(m_uiForm.ckDetailedBalance->isChecked());
-    scaleMultiplierCheck(m_uiForm.ckScaleMultiplier->isChecked());
   }
 
   void IndirectConvertToEnergy::run()
@@ -71,11 +70,11 @@ namespace CustomInterfaces
     reductionAlg->initialize();
     BatchAlgorithmRunner::AlgorithmRuntimeProps reductionRuntimeProps;
 
-    reductionAlg->setProperty("Instrument", m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString());
-    reductionAlg->setProperty("Analyser", m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString());
-    reductionAlg->setProperty("Reflection", m_uiForm.iicInstrumentConfiguration->getReflectionName().toStdString());
+    reductionAlg->setProperty("Instrument", getInstrumentConfiguration()->getInstrumentName().toStdString());
+    reductionAlg->setProperty("Analyser", getInstrumentConfiguration()->getAnalyserName().toStdString());
+    reductionAlg->setProperty("Reflection", getInstrumentConfiguration()->getReflectionName().toStdString());
 
-    QString files = m_uiForm.ind_runFiles->getFilenames().join(",");
+    QString files = m_uiForm.dsRunFiles->getFilenames().join(",");
     reductionAlg->setProperty("InputFiles", files.toStdString());
 
     reductionAlg->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
@@ -84,7 +83,7 @@ namespace CustomInterfaces
     // If using a calibration file, load it
     if(m_uiForm.ckUseCalib->isChecked())
     {
-      QString calibFilename = m_uiForm.ind_calibFile->getFirstFilename();
+      QString calibFilename = m_uiForm.dsCalibrationFile->getFirstFilename();
 
       QFileInfo fi(calibFilename);
       std::string calibWorkspaceName = fi.baseName().toStdString();
@@ -105,7 +104,7 @@ namespace CustomInterfaces
 
     if(m_bgRemoval)
     {
-      QPair<double,double> background = m_backgroundDialog->getRange();
+      QPair<double, double> background = m_backgroundDialog->getRange();
       std::vector<double> backgroundRange;
       backgroundRange.push_back(background.first);
       backgroundRange.push_back(background.second);
@@ -190,18 +189,18 @@ namespace CustomInterfaces
     bool valid = true;
 
     // Run files input
-    if(!m_uiForm.ind_runFiles->isValid())
+    if(!m_uiForm.dsRunFiles->isValid())
       valid = false;
 
     // Calibration file input
-    if(m_uiForm.ckUseCalib->isChecked() && !m_uiForm.ind_calibFile->isValid())
+    if(m_uiForm.ckUseCalib->isChecked() && !m_uiForm.dsCalibrationFile->isValid())
       valid = false;
 
     // Mapping selection
     if(
        (m_uiForm.cbMappingOptions->currentText() == "Groups" && m_uiForm.leNoGroups->text() == "")
        ||
-       (m_uiForm.cbMappingOptions->currentText() == "File" && ! m_uiForm.ind_mapFile->isValid())
+       (m_uiForm.cbMappingOptions->currentText() == "File" && ! m_uiForm.dsMapFile->isValid())
       )
     {
       valid = false;
@@ -339,7 +338,7 @@ namespace CustomInterfaces
 
     if(groupType == "File")
     {
-      QString groupFile = m_uiForm.ind_mapFile->getFirstFilename();
+      QString groupFile = m_uiForm.dsMapFile->getFirstFilename();
       if(groupFile == "")
       {
         emit showMessageBox("You must enter a path to the .map file.");
@@ -354,8 +353,8 @@ namespace CustomInterfaces
       groupingAlg->initialize();
 
       groupingAlg->setProperty("FixedGroupCount", m_uiForm.leNoGroups->text().toInt());
-      groupingAlg->setProperty("InstrumentName", m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString());
-      groupingAlg->setProperty("ComponentName", m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString());
+      groupingAlg->setProperty("InstrumentName", getInstrumentConfiguration()->getInstrumentName().toStdString());
+      groupingAlg->setProperty("ComponentName", getInstrumentConfiguration()->getAnalyserName().toStdString());
       groupingAlg->setProperty("OutputWorkspace", groupWS.toStdString());
 
       m_batchAlgoRunner->addAlgorithm(groupingAlg);
@@ -402,7 +401,7 @@ namespace CustomInterfaces
   {
     using MantidQt::API::BatchAlgorithmRunner;
 
-    if(!m_uiForm.ind_runFiles->isValid())
+    if(!m_uiForm.dsRunFiles->isValid())
     {
       emit showMessageBox("You must select a run file.");
       return;
@@ -429,7 +428,7 @@ namespace CustomInterfaces
     else
       detectorRange.push_back(specList[1].toInt() + 1);
 
-    QString rawFile = m_uiForm.ind_runFiles->getFirstFilename();
+    QString rawFile = m_uiForm.dsRunFiles->getFirstFilename();
     QFileInfo rawFileInfo(rawFile);
     std::string name = rawFileInfo.baseName().toStdString();
 
@@ -496,18 +495,12 @@ namespace CustomInterfaces
     if(error)
       return;
 
-    QString rawFile = m_uiForm.ind_runFiles->getFirstFilename();
+    QString rawFile = m_uiForm.dsRunFiles->getFirstFilename();
     QFileInfo rawFileInfo(rawFile);
     std::string name = rawFileInfo.baseName().toStdString();
 
     std::string pyInput = "from mantidplot import plotSpectrum\nplotSpectrum('" + name + "_grp', 0)\n";
     m_pythonRunner.runPythonCode(QString::fromStdString(pyInput));
-  }
-
-  void IndirectConvertToEnergy::useCalib(bool state)
-  {
-    m_uiForm.ind_calibFile->isOptional(!state);
-    m_uiForm.ind_calibFile->setEnabled(state);
   }
 
   /**
@@ -536,7 +529,7 @@ namespace CustomInterfaces
   void IndirectConvertToEnergy::pbRunFinding()
   {
     emit updateRunButton(false, "Finding files...", "Searchig for data files for the run numbers entered...");
-    m_uiForm.ind_runFiles->setEnabled(false);
+    m_uiForm.dsRunFiles->setEnabled(false);
   }
 
   /**
@@ -544,7 +537,7 @@ namespace CustomInterfaces
    */
   void IndirectConvertToEnergy::pbRunFinished()
   {
-    if(!m_uiForm.ind_runFiles->isValid())
+    if(!m_uiForm.dsRunFiles->isValid())
     {
       emit updateRunButton(false, "Invalid Run(s)", "Cannot find data files for some of the run numbers enetered.");
     }
@@ -553,7 +546,7 @@ namespace CustomInterfaces
       emit updateRunButton();
     }
 
-    m_uiForm.ind_runFiles->setEnabled(true);
+    m_uiForm.dsRunFiles->setEnabled(true);
   }
 
 } // namespace CustomInterfaces

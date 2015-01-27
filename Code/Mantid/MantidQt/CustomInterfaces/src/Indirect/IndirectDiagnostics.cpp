@@ -20,8 +20,9 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  IndirectDiagnostics::IndirectDiagnostics(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
-      IndirectDataReductionTab(uiForm, parent), m_lastDiagFilename("")
+  IndirectDiagnostics::IndirectDiagnostics(IndirectDataReduction * idrUI, QWidget * parent) :
+    IndirectDataReductionTab(idrUI, parent),
+    m_lastDiagFilename("")
   {
     m_uiForm.setupUi(parent);
 
@@ -137,8 +138,8 @@ namespace CustomInterfaces
 
   void IndirectDiagnostics::run()
   {
-    QString suffix = "_slice"; //"_" + m_uiForm.iicInstrumentConfiguration->getAnalyserName() TODO
-                     //+ m_uiForm.iicInstrumentConfiguration->getReflectionName() + "_slice";
+    QString suffix = "_" + getInstrumentConfiguration()->getAnalyserName()
+                     + getInstrumentConfiguration()->getReflectionName() + "_slice";
     QString filenames = m_uiForm.dsInputFiles->getFilenames().join(",");
 
     std::vector<long> spectraRange;
@@ -348,8 +349,8 @@ namespace CustomInterfaces
    */
   void IndirectDiagnostics::updatePreviewPlot()
   {
-    QString suffix = "_slice"; //"_" + m_uiForm.iicInstrumentConfiguration->getAnalyserName()
-                     //+ m_uiForm.iicInstrumentConfiguration->getReflectionName() + "_slice"; TODO
+    QString suffix = getInstrumentConfiguration()->getAnalyserName()
+                     + getInstrumentConfiguration()->getReflectionName() + "_slice";
     QString filenames = m_uiForm.dsInputFiles->getFilenames().join(",");
 
     std::vector<long> spectraRange;

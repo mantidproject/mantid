@@ -44,7 +44,7 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
-    IndirectTransmission(Ui::IndirectDataReduction& uiForm, QWidget * parent = 0);
+    IndirectTransmission(IndirectDataReduction * idrUI, QWidget * parent = 0);
     virtual ~IndirectTransmission();
 
     virtual void setup();

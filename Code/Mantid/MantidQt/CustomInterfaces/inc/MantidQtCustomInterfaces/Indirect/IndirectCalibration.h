@@ -40,7 +40,7 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
-    IndirectCalibration(Ui::IndirectDataReduction& uiForm, QWidget * parent = 0);
+    IndirectCalibration(IndirectDataReduction * idrUI, QWidget * parent = 0);
     virtual ~IndirectCalibration();
 
     virtual void setup();

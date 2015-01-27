@@ -14,8 +14,8 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  IndirectSqw::IndirectSqw(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
-      IndirectDataReductionTab(uiForm, parent)
+  IndirectSqw::IndirectSqw(IndirectDataReduction * idrUI, QWidget * parent) :
+    IndirectDataReductionTab(idrUI, parent)
   {
     m_uiForm.setupUi(parent);
 

@@ -15,7 +15,8 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  IndirectMoments::IndirectMoments(Ui::IndirectDataReduction& uiForm, QWidget * parent) : IndirectDataReductionTab(uiForm, parent)
+  IndirectMoments::IndirectMoments(IndirectDataReduction * idrUI, QWidget * parent) :
+    IndirectDataReductionTab(idrUI, parent)
   {
     m_uiForm.setupUi(parent);
 

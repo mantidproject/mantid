@@ -12,8 +12,8 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  IndirectTransmission::IndirectTransmission(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
-      IndirectDataReductionTab(uiForm, parent)
+  IndirectTransmission::IndirectTransmission(IndirectDataReduction * idrUI, QWidget * parent) :
+    IndirectDataReductionTab(idrUI, parent)
   {
     m_uiForm.setupUi(parent);
 
@@ -64,7 +64,7 @@ namespace CustomInterfaces
   bool IndirectTransmission::validate()
   {
     // Check if we have an appropriate instrument
-    QString currentInst = "IRIS"; //m_uiForm.iicInstrumentConfiguration->getInstrumentName(); TODO
+    QString currentInst = getInstrumentConfiguration()->getInstrumentName();
     if(currentInst != "IRIS" && currentInst != "OSIRIS")
       return false;
 

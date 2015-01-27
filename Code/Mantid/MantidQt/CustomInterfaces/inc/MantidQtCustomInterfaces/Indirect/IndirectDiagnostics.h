@@ -58,7 +58,7 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
-    IndirectDiagnostics(Ui::IndirectDataReduction& uiForm, QWidget * parent = 0);
+    IndirectDiagnostics(IndirectDataReduction * idrUI, QWidget * parent = 0);
     virtual ~IndirectDiagnostics();
 
     virtual void setup();

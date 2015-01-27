@@ -41,7 +41,7 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_6">
               <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_runFiles" native="true">
+               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dsRunFiles" native="true">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -57,7 +57,7 @@
                </widget>
               </item>
               <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_calibFile" native="true">
+               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dsCalibrationFile" native="true">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
@@ -183,12 +183,12 @@
                <number>0</number>
               </property>
               <property name="currentIndex">
-               <number>0</number>
+               <number>2</number>
               </property>
-              <widget class="QWidget" name="page_11">
+              <widget class="QWidget" name="pgMapFile">
                <layout class="QHBoxLayout" name="horizontalLayout_5">
                 <item>
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_mapFile" native="true">
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dsMapFile" native="true">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -216,7 +216,7 @@
                 </item>
                </layout>
               </widget>
-              <widget class="QWidget" name="page_12">
+              <widget class="QWidget" name="pgMappingGroups">
                <layout class="QHBoxLayout" name="horizontalLayout_26">
                 <item>
                  <widget class="QLabel" name="lbNoGroups">
@@ -260,7 +260,7 @@
                 </item>
                </layout>
               </widget>
-              <widget class="QWidget" name="pgMapping_blank"/>
+              <widget class="QWidget" name="pgMappingBlank"/>
              </widget>
             </item>
            </layout>
@@ -519,6 +519,9 @@
         </item>
         <item>
          <widget class="QComboBox" name="cbRebinType">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -567,6 +570,9 @@
               </item>
               <item>
                <widget class="QDoubleSpinBox" name="spRebinLow">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="minimum">
                  <double>-999.990000000000009</double>
                 </property>
@@ -607,6 +613,9 @@
               </item>
               <item>
                <widget class="QDoubleSpinBox" name="spRebinWidth">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="minimum">
                  <double>-999.990000000000009</double>
                 </property>
@@ -647,6 +656,9 @@
               </item>
               <item>
                <widget class="QDoubleSpinBox" name="spRebinHigh">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="minimum">
                  <double>-999.990000000000009</double>
                 </property>
@@ -685,7 +697,11 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="leRebinString"/>
+             <widget class="QLineEdit" name="leRebinString">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
@@ -1001,7 +1017,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <connection>
    <sender>ckDoNotRebin</sender>
    <signal>toggled(bool)</signal>
-   <receiver>lbRebinHigh</receiver>
+   <receiver>spRebinHigh</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -1009,8 +1025,24 @@ Later steps in the process (saving, renaming) will not be done.</string>
      <y>371</y>
     </hint>
     <hint type="destinationlabel">
-     <x>465</x>
-     <y>406</y>
+     <x>527</x>
+     <y>405</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCalib</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>dsCalibrationFile</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>441</x>
+     <y>98</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>159</x>
+     <y>86</y>
     </hint>
    </hints>
   </connection>

@@ -59,7 +59,7 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
-    IndirectSymmetrise(Ui::IndirectDataReduction& uiForm, QWidget * parent = 0);
+    IndirectSymmetrise(IndirectDataReduction * idrUI, QWidget * parent = 0);
     virtual ~IndirectSymmetrise();
 
     virtual void setup();
