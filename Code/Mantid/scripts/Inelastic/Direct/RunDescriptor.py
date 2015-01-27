@@ -372,8 +372,14 @@ class RunDescriptor(PropDescriptor):
                ws_index = mon_ws.getIndexFromSpectrumNumber(monitor_ID) 
            except: # 
                mon_ws = None
-        #else: #TODO: get list of monitors and verify that they are indeed in monitor workspace
-
+        else: 
+            mon_list = self._holder.get_used_monitors_list()
+            for monID in mon_list:
+                try:
+                    ws_ind = mon_ws.getIndexFromSpectrumNumber(int(monID))
+                except:
+                   mon_ws = None
+                   break
         return mon_ws
 #--------------------------------------------------------------------------------------------------------------------
     def get_ws_name(self):
@@ -412,7 +418,7 @@ class RunDescriptor(PropDescriptor):
         else:
             # If it doesn't exists as a workspace assume we have to try and load a file
             data_file = self.find_file(None,filePath,fileExt,**kwargs)
-            if data_file[0:4] == 'ERROR':
+            if data_file.find('ERROR')>-1:
                 raise IOError(data_file)
                        
             if load_mon_with_workspace:

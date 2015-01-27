@@ -125,8 +125,8 @@ class RunDescriptorTest(unittest.TestCase):
     def test_copy_spectra2monitors(self):
         propman  = self.prop_man
         run_ws = CreateSampleWorkspace( Function='Multiple Peaks', WorkspaceType = 'Event',NumBanks=1, BankPixelWidth=5, NumEvents=100)
-        run_ws_monitors = CreateSampleWorkspace( Function='Multiple Peaks', WorkspaceType = 'Histogram',NumBanks=1, BankPixelWidth=1, NumEvents=100)
-        self.assertEqual(run_ws_monitors.getNumberHistograms(),1)
+        run_ws_monitors = CreateSampleWorkspace( Function='Multiple Peaks', WorkspaceType = 'Histogram',NumBanks=2, BankPixelWidth=1, NumEvents=100)
+        self.assertEqual(run_ws_monitors.getNumberHistograms(),2)
 
 
         propman.monovan_run = run_ws
@@ -134,8 +134,8 @@ class RunDescriptorTest(unittest.TestCase):
 
         mon_ws = PropertyManager.monovan_run.get_monitors_ws()
         self.assertTrue(isinstance(mon_ws, api.Workspace))
-        self.assertEqual(mon_ws.getNumberHistograms(),2)
-        self.assertEqual(mon_ws.getIndexFromSpectrumNumber(3),1)
+        self.assertEqual(mon_ws.getNumberHistograms(),3)
+        self.assertEqual(mon_ws.getIndexFromSpectrumNumber(3),2)
 
     def test_ws_name(self):
         run_ws = CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=100)

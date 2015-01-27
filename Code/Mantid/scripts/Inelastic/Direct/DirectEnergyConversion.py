@@ -217,10 +217,10 @@ class DirectEnergyConversion(object):
 
 
         # Get the white beam vanadium integrals
-        whiteintegrals = self.do_white(white, None, None,None) # No grouping yet
+        whiteintegrals = self.do_white(white, None, None) # No grouping yet
         if self.second_white:
             second_white = self.second_white
-            other_whiteintegrals = self.do_white(PropertyManager.second_white, None, None,None) # No grouping yet
+            other_whiteintegrals = self.do_white(PropertyManager.second_white, None, None) # No grouping yet
             self.second_white = other_whiteintegrals
 
         # Get the background/total counts from the sample run if present
@@ -429,7 +429,7 @@ class DirectEnergyConversion(object):
 
       return deltaE_wkspace_sample
 
-    def do_white(self, run, spectra_masks=None, map_file=None,mon_number=None):
+    def do_white(self, run, spectra_masks=None, map_file=None):
         """
         Create the workspace, which each spectra containing the correspondent white beam integral (single value)
 
@@ -574,7 +574,7 @@ class DirectEnergyConversion(object):
 
         return mtd[ws_name]
 #-------------------------------------------------------------------------------
-    def normalise(self, run, method, range_offset=0.0,mon_index=None):
+    def normalise(self, run, method, range_offset=0.0):
         """
         Apply normalization using specified source
         """
@@ -593,14 +593,13 @@ class DirectEnergyConversion(object):
             output = mtd[result_name]
             return output
 
-
         method = method.lower()
         for case in common.switch(method):
             if case('monitor-1'):
-               method,old_ws_name = self._normalize_to_monitor1(run,old_ws_name, range_offset,mon_index)
+               method,old_ws_name = self._normalize_to_monitor1(run,old_ws_name, range_offset)
                break
             if case('monitor-2'):
-               method,old_ws_name = self._normalize_to_monitor2(run,old_ws_name, range_offset,mon_index)
+               method,old_ws_name = self._normalize_to_monitor2(run,old_ws_name, range_offset)
                break
             if case('current'):
                 NormaliseByCurrent(InputWorkspace=old_ws_name,OutputWorkspace=old_ws_name)
@@ -617,22 +616,21 @@ class DirectEnergyConversion(object):
         run.synchronize_ws(output)
         return output
     #
-    def _normalize_to_monitor1(self,run,old_name,range_offset=0.0,mon_index=None):
+    def _normalize_to_monitor1(self,run,old_name,range_offset=0.0):
         """ Helper method implementing  normalize_to_monitor1 """ 
-        if not mon_index:
-           mon_index = int(self.mon1_norm_spec)
 
         # get monitor's workspace
-        mon_ws = run.get_monitors_ws(mon_index)
+        mon_ws = run.get_monitors_ws()
         if not mon_ws: # no monitors
            if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not
                                              # have monitors
-              self.normalise(run,'current',range_offset,mon_index)
+              self.normalise(run,'current',range_offset)
               new_name = run.get_ws_name()
               return ('current',new_name)
            else:
               raise RuntimeError('Normalise by monitor-1:: Workspace {0} for run {1} does not have monitors in it'\
                    .format(run.get_ws_name(),run.__get__()))
+
 
         range = self.norm_mon_integration_range
         range_min = float(range[0] + range_offset)
@@ -641,27 +639,47 @@ class DirectEnergyConversion(object):
            kwargs = {'NormFactorWS':'NormMon1_WS' + data_ws.getName()}
         else:
            kwargs = {}
-        NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
-                           IntegrationRangeMin=range_min, IntegrationRangeMax=range_max,IncludePartialBins=True,**kwargs)
+        separate_monitors = run.is_monws_separate()
+        mon_spect = self.prop_man.mon1_norm_spec
+        if separate_monitors:
+            kwargs['MonitorWorkspace']     = mon_ws
+            kwargs['MonitorWorkspaceIndex']= int(mon_ws.getIndexFromSpectrumNumber(int(mon_spect)))
+        else:
+            kwargs['MonitorSpectrum']= int(mon_spect) # shame TODO: change algorithm
+
+
+        NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, IntegrationRangeMin=range_min, 
+                           IntegrationRangeMax=range_max,IncludePartialBins=True,**kwargs)
         return ('monitor-1',old_name)
     #
-    def _normalize_to_monitor2(self,run,old_name, range_offset=0.0,mon_index=None):
+    def _normalize_to_monitor2(self,run,old_name, range_offset=0.0):
         """ Helper method implementing  normalize_to_monitor_2 """ 
 
-        if not mon_index:
-           mon_index = int(self.mon2_norm_spec)
-
         # get monitor's workspace
-        mon_ws = run.get_monitors_ws(mon_index)
+        mon_ws = run.get_monitors_ws()
         if not mon_ws: # no monitors
            if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not
                                              # have monitors
-              self.normalise(run,'current',range_offset,mon_index)
+              self.normalise(run,'current',range_offset)
               new_name = run.get_ws_name()
               return ('current',new_name)
            else:
               raise RuntimeError('Normalize by monitor-2:: Workspace {0} for run {1} does not have monitors in it'\
                    .format(run.get_ws_name(),run.__get__()))
+        #
+        if self._debug_mode:
+           kwargs = {'NormFactorWS':'NormMon2_WS' + mon_ws.getName()}
+        else:
+           kwargs = {}
+        separate_monitors = run.is_monws_separate()
+        mon_spect = self.prop_man.mon2_norm_spec
+        mon_index = int(mon_ws.getIndexFromSpectrumNumber(mon_spect))
+        if separate_monitors:
+            kwargs['MonitorWorkspace']     =   mon_ws
+            kwargs['MonitorWorkspaceIndex'] =  mon_index
+        else:
+            kwargs['MonitorSpectrum']       =   mon_spect
+
         #Find TOF range, correspondent to incident energy monitor peak
         if self._mon2_norm_time_range:
            range = self._mon2_norm_time_range
@@ -675,24 +693,20 @@ class DirectEnergyConversion(object):
              raise RuntimeError("Instrument have been shifted but no time range has been identified. Monitor-2 normalization can not be performed ") 
            else:
               energy_rage = self.mon2_norm_energy_range
-              TOF_range = self.get_TOF_for_energies(mon_ws,energy_rage,[mon_index],self._debug_mode)
+              TOF_range = self.get_TOF_for_energies(mon_ws,energy_rage,[mon_spect],self._debug_mode)
               range_min = TOF_range[0]
               range_max = TOF_range[1]
         #
-        if self._debug_mode:
-           kwargs = {'NormFactorWS':'NormMon2_WS' + mon_ws.getName()}
-        else:
-           kwargs = {}
 
        # Normalize to monitor 2
-        NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, MonitorWorkspace=mon_ws, MonitorID=mon_index,
-                           IntegrationRangeMin=range_min, IntegrationRangeMax=range_max,IncludePartialBins=True,**kwargs)
+        NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name,IntegrationRangeMin=range_min, 
+                           IntegrationRangeMax=range_max,IncludePartialBins=True,**kwargs)
         return ('monitor-2',old_name)
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
     #
     @staticmethod
-    def get_TOF_for_energies(workspace,energy_list,detID_list,debug_mode=False):
+    def get_TOF_for_energies(workspace,energy_list,specID_list,debug_mode=False):
         """ Method to find what TOF range corresponds to given energy range             
            for given workspace and detectors.
 
@@ -707,8 +721,8 @@ class DirectEnergyConversion(object):
         range_ws_name = '_TOF_range_ws'
         y = [1] * (len(energy_list) - 1)
         TOF_range = []
-        for detID in detID_list:
-            ind = workspace.getIndexFromSpectrumNumber(detID)
+        for specID in specID_list:
+            ind = workspace.getIndexFromSpectrumNumber(specID)
             ExtractSingleSpectrum(InputWorkspace=workspace, OutputWorkspace=template_ws_name, WorkspaceIndex=ind)
             CreateWorkspace(OutputWorkspace=range_ws_name,NSpec = 1,DataX=energy_list,DataY=y,UnitX='Energy',ParentWorkspace=template_ws_name)
             range_ws = ConvertUnits(InputWorkspace=range_ws_name,OutputWorkspace=range_ws_name,Target='TOF',EMode='Elastic')
@@ -719,7 +733,7 @@ class DirectEnergyConversion(object):
             DeleteWorkspace(template_ws_name)
             DeleteWorkspace(range_ws_name)
         #
-        if len(detID_list) == 1:
+        if len(specID_list) == 1:
             TOF_range = TOF_range[0]
 
         return TOF_range
@@ -1100,150 +1114,8 @@ class DirectEnergyConversion(object):
 # -------------------------------------------------------------------------------------------
     def _do_mono_SNS(self, data_ws, result_name, ei_guess,
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
-
-        raise NotImplementedError("Despite it may work, it have not been modified or verified and is probably wrong")
-
-        #
-        # Special load monitor stuff.
-        propman = self.prop_man
-        if (propman.instr_name == "CNCS" or propman.instr_name == "HYSPEC"):
-            propman.fix_ei = True
-            ei_value = ei_guess
-            if (propman.instr_name == "HYSPEC"):
-                Tzero = 4.0 + 107.0 / (1 + math.pow((ei_value / 31.0),3.0))
-                propman.log("Determined T0 of %s for HYSPEC" % str(Tzero))
-            if (Tzero is None):
-                tzero = (0.1982 * (1 + ei_value) ** (-0.84098)) * 1000.0
-            else:
-                tzero = Tzero
-            # apply T0 shift
-            ScaleX(InputWorkspace=data_ws,OutputWorkspace=result_name,Operation="Add",Factor=-tzero)
-            mon1_peak = 0.0
-        elif (propman.instr_name == "ARCS" or propman.instr_name == "SEQUOIA"):
-            if 'Filename' in data_ws.getRun(): mono_run = data_ws.getRun()['Filename'].value
-            else: raise RuntimeError('Cannot load monitors for event reduction. Unable to determine Filename from mono workspace, it should have been added as a run log.')
-
-            propman.log("mono_run = %s (%s)" % (mono_run,type(mono_run)),'debug')
-
-            if mono_run.endswith("_event.nxs"):
-                monitor_ws = LoadNexusMonitors(Filename=mono_run)
-            elif mono_run.endswith("_event.dat"):
-                InfoFilename = mono_run.replace("_neutron_event.dat", "_runinfo.xml")
-                monitor_ws = LoadPreNexusMonitors(RunInfoFilename=InfoFilename)
-
-            argi = {}
-            argi['Monitor1Spec'] = int(propman.ei_mon_spectra[0])
-            argi['Monitor2Spec'] = int(propman.ei_mon_spectra[1])
-            argi['EnergyEstimate'] = ei_guess
-            argi['FixEi'] = propman.fix_ei
-            if hasattr(self, 'ei_mon_peak_search_range'):
-                argi['PeakSearchRange'] = self.ei_mon_peak_search_range
-
-            try:
-                ei_calc,firstmon_peak,firstmon_index,TzeroCalculated = \
-                    GetEi(InputWorkspace=monitor_ws,**argi)
-            except:
-                propman.log("Error in GetEi. Using entered values.")
-                #monitor_ws.getRun()['Ei'] = ei_value
-                ei_value = ei_guess
-                AddSampleLog(Workspace=monitor_ws,LogName= 'Ei',LogText= ei_value,LogType= "Number")
-                ei_calc = None
-                TzeroCalculated = Tzero
-
-            # Set the tzero to be the calculated value
-            if (TzeroCalculated is None):
-                tzero = 0.0
-            else:
-                tzero = TzeroCalculated
-
-            # If we are fixing, then use the guess if given
-            if (propman.fix_ei):
-                ei_value = ei_guess
-                # If a Tzero has been entered, use it, if we are fixing.
-                if (Tzero is not None):
-                    tzero = Tzero
-            else:
-                if (ei_calc is not None):
-                    ei_value = ei_calc
-                else:
-                    ei_value = ei_guess
-
-            mon1_peak = 0.0
-            # apply T0 shift
-            ScaleX(InputWorkspace=data_ws,OutputWorkspace= result_name,Operation="Add",Factor=-tzero)
-        else:
-            # Do ISIS stuff for Ei
-            # Both are these should be run properties really
-            ei_value, mon1_peak = self.get_ei(data_ws,monitor_ws, result_name, ei_guess)
-        self.prop_man.incident_energy = ei_value
-
-        # As we've shifted the TOF so that mon1 is at t=0.0 we need to account
-        # for this in CalculateFlatBackground and normalization
-        bin_offset = -mon1_peak
-
-        # For event mode, we are going to histogram in energy first, then go
-        # back to TOF
-        if propman.check_background == True:
-           # Extract the time range for the background determination before we
-           # throw it away
-           background_bins = "%s,%s,%s" % (propman.bkgd_range[0] + bin_offset, (propman.bkgd_range[1] - propman.bkgd_range[0]), propman.bkgd_range[1] + bin_offset)
-           Rebin(InputWorkspace=result_name,OutputWorkspace= "background_origin_ws",Params=background_bins)
-
-        # Convert to Et
-        ConvertUnits(InputWorkspace=result_name,OutputWorkspace= "_tmp_energy_ws", Target="DeltaE",EMode="Direct", EFixed=ei_value)
-        RenameWorkspace(InputWorkspace="_tmp_energy_ws",OutputWorkspace= result_name)
-        # Histogram
-        Rebin(InputWorkspace=result_name,OutputWorkspace= "_tmp_rebin_ws",Params= propman.energy_bins, PreserveEvents=False)
-        RenameWorkspace(InputWorkspace="_tmp_rebin_ws",OutputWorkspace= result_name)
-        # Convert back to TOF
-        ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="TOF",EMode="Direct", EFixed=ei_value)
-
-        if propman.check_background == True:
-            # Remove the count rate seen in the regions of the histograms
-            # defined as the background regions, if the user defined such
-            # region
-            ConvertToDistribution(Workspace=result_name)
-
-            CalculateFlatBackground(InputWorkspace="background_origin_ws",OutputWorkspace= "background_ws",
-                               StartX= propman.bkgd_range[0] + bin_offset,EndX= propman.bkgd_range[1] + bin_offset,
-                               WorkspaceIndexList= '',Mode= 'Mean',OutputMode= 'Return Background')
-            # Delete the raw data background region workspace
-            DeleteWorkspace("background_origin_ws")
-            # Convert to distribution to make it compatible with the data
-            # workspace (result_name).
-            ConvertToDistribution(Workspace="background_ws")
-            # Subtract the background
-            Minus(LHSWorkspace=result_name,RHSWorkspace= "background_ws",OutputWorkspace=result_name)
-             # Delete the determined background
-            DeleteWorkspace("background_ws")
-
-            ConvertFromDistribution(Workspace=result_name)
-
-        # Normalize using the chosen method
-        # This should be done as soon as possible after loading and usually
-        # happens at diag.  Here just in case if diag was bypassed
-        norm_ws = self.normalise(mtd[result_name], propman.normalise_method, range_offset=bin_offset)
-
-
-
-        # This next line will fail the SystemTests
-        #ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct',
-        #EFixed=ei_value)
-        # But this one passes...
-        ConvertUnits(InputWorkspace=norm_ws,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
-        propman.log("_do_mono: finished ConvertUnits for : " + result_name)
-
-
-
-        if propman.energy_bins :
-            Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= propman.energy_bins,PreserveEvents=False)
-
-        if propman.apply_detector_eff:
-           # Need to be in lambda for detector efficiency correction
-            ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="Wavelength", EMode="Direct", EFixed=ei_value)
-            He3TubeEfficiency(InputWorkspace=result_name,OutputWorkspace=result_name)
-            ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="DeltaE",EMode='Direct', EFixed=ei_value)
-        ############
+        # does not work -- retrieve from repo and fix
+        raise NotImplementedError("Non currently implemented. Retrieve from repository if necessary")
         return
 #-------------------------------------------------------------------------------
     def _do_mono_ISIS(self, data_run, ei_guess,
@@ -1335,7 +1207,7 @@ class DirectEnergyConversion(object):
         ConvertToDistribution(Workspace=result_ws)
         # White beam correction
         if white_run is not None:
-            white_ws = self.do_white(white_run, spectra_masks, map_file,None)
+            white_ws = self.do_white(white_run, spectra_masks, map_file)
             result_ws /= white_ws
             DeleteWorkspace(white_ws)
 
@@ -1343,7 +1215,7 @@ class DirectEnergyConversion(object):
         result_ws *= prop_man.scale_factor
         return result_ws
 #-------------------------------------------------------------------------------
-    def _get_wb_inegrals(self,run,mon_number=None):
+    def _get_wb_inegrals(self,run):
         """ """
         run = self.get_run_descriptor(run)
         white_ws = run.get_workspace()
@@ -1376,7 +1248,7 @@ class DirectEnergyConversion(object):
 
         # Normalize
         self.__in_white_normalization = True
-        white_ws = self.normalise(run, self.normalise_method,0.0,mon_number)
+        white_ws = self.normalise(run, self.normalise_method,0.0)
         self.__in_white_normalization = False
         new_ws_name = run.set_action_suffix('_norm_white')
         old_name = white_ws.name()
