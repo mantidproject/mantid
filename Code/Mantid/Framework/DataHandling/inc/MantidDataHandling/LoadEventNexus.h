@@ -112,6 +112,7 @@ public:
   static void loadEntryMetadata(const std::string &nexusfilename,
                                 Mantid::API::MatrixWorkspace_sptr WS,
                                 const std::string &entry_name);
+
   /// Load instrument from Nexus file if possible, else from IDF spacified by
   /// Nexus file
   static bool loadInstrument(const std::string &nexusfilename,
@@ -218,6 +219,7 @@ public:
 
   /// name of top level NXentry to use
   std::string m_top_entry_name;
+  ::NeXus::File *m_file;
 
   /// whether or not to launch multiple ProcessBankData jobs per bank
   bool splitProcessing;
@@ -262,12 +264,11 @@ private:
                           const std::string &entry_name);
 
   /// ISIS specific methods for dealing with wide events
-  static void loadTimeOfFlight(const std::string &nexusfilename,
-                               DataObjects::EventWorkspace_sptr WS,
-                               const std::string &entry_name,
-                               const std::string &classType);
+  void loadTimeOfFlight(DataObjects::EventWorkspace_sptr WS,
+                        const std::string &entry_name,
+                        const std::string &classType);
 
-  static void loadTimeOfFlightData(::NeXus::File &file,
+  void loadTimeOfFlightData(::NeXus::File &file,
                                    DataObjects::EventWorkspace_sptr WS,
                                    const std::string &binsName,
                                    size_t start_wi = 0, size_t end_wi = 0);
@@ -283,6 +284,9 @@ private:
   /// to re-use (copy) logs from data workspace to monitors, etc. workspace
   void copyLogs(const DataObjects::EventWorkspace_sptr& from,
                     DataObjects::EventWorkspace_sptr& to);
+
+  /// to open the nexus file with specific exception handling/message
+  void safeOpenFile(const std::string fname);
 
   /// Was the instrument loaded?
   bool m_instrument_loaded_correctly;
