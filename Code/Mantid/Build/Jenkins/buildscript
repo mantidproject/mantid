@@ -21,7 +21,7 @@ if [[ ${JOB_NAME} == *clang* ]]; then
   clang --version
   export CC=clang
   export CXX=clang++
-  COMPILERFILEPATH=`grep 'CMAKE_CXX_COMPILER:FILEPATH' $WORKSPACE/build/CMakeCache.txt` 
+  COMPILERFILEPATH=`grep 'CMAKE_CXX_COMPILER:FILEPATH' $WORKSPACE/build/CMakeCache.txt 2>/dev/null` 
   if [[ $COMPILERFILEPATH != *clang++* ]]; then 
     # Removing the build directory entirely guarantees clang is used.
     rm -rf $WORKSPACE/build
