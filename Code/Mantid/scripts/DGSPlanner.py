@@ -17,3 +17,4 @@ if __name__ == '__main__':
         import mantidplot
     except:
         sys.exit(app.exec_()) 
+

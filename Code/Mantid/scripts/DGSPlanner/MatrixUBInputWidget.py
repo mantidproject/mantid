@@ -36,6 +36,7 @@ class UBTableModel(QtCore.QAbstractTableModel):
             row = index.row()
             column = index.column()
             value = QString(format(self.__UB[row][column],'.4f'))
+
             return value
         elif role == QtCore.Qt.BackgroundRole:
             if ValidateUB(self.__UB):
@@ -47,6 +48,7 @@ class UBTableModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.EditRole:            
             row = index.row()
             column = index.column()
+
             try:
                 val=value.toFloat()[0] #QVariant
             except:

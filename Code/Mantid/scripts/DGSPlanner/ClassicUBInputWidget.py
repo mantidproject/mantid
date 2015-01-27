@@ -8,6 +8,7 @@ try:
 except ImportError:
     QString = type("")
     
+
 class ClassicUBInputWidget(QtGui.QWidget): 
     #signal when lattice is changed and valid
     changed=QtCore.pyqtSignal(mantid.geometry.OrientedLattice)   
@@ -22,7 +23,6 @@ class ClassicUBInputWidget(QtGui.QWidget):
             self.ol=ol
         else:
             self.ol=mantid.geometry.OrientedLattice()  
-
         #labels
         self._labela=QtGui.QLabel('a')
         self._labelb=QtGui.QLabel('b')
@@ -88,9 +88,9 @@ class ClassicUBInputWidget(QtGui.QWidget):
         grid.addWidget(self._editvy,3,3)
         grid.addWidget(self._labelvz,3,4,QtCore.Qt.AlignRight)
         grid.addWidget(self._editvz,3,5) 
-        
         #update oriented lattice and gui
         self.updateOL(self.ol)
+
         #connections
         self._edita.textEdited.connect(self.check_state_latt)
         self._editb.textEdited.connect(self.check_state_latt)
@@ -118,6 +118,7 @@ class ClassicUBInputWidget(QtGui.QWidget):
         self._editvx.setText(QString(format(self.latt_vx,'.5f')))   
         self._editvy.setText(QString(format(self.latt_vy,'.5f'))) 
         self._editvz.setText(QString(format(self.latt_vz,'.5f')))   
+
         
     def check_state_orientation(self, *args, **kwargs):  
         edits=[self._editux,self._edituy,self._edituz,self._editvx,self._editvy,self._editvz]
@@ -178,7 +179,7 @@ class ClassicUBInputWidget(QtGui.QWidget):
         self.ol=mantid.geometry.OrientedLattice(self.latt_a,self.latt_b,self.latt_c,self.latt_alpha,self.latt_beta,self.latt_gamma)
         self.ol.setUFromVectors(uvec,vvec)
         self.changed.emit(self.ol)
-        
+
     def updateOL(self,ol):
         self.latt_a=ol.a()
         self.latt_b=ol.b()
