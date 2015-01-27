@@ -72,7 +72,7 @@ class DirectEnergyConversion(object):
 
     A detector calibration file must be specified if running the reduction with workspaces as input
     namely:
-    >>w2=cred.onvert_to_energy_transfer('wb_wksp','run_wksp',ei,rebin_params,mapfile,det_cal_file=cal_file
+    >>w2=cred.onvert_to_energy('wb_wksp','run_wksp',ei,rebin_params,mapfile,det_cal_file=cal_file
                                         ,diag_remove_zero=False,norm_method='current')
 
 
@@ -790,6 +790,7 @@ class DirectEnergyConversion(object):
     def prop_man(self):
         """ Return property manager containing DirectEnergyConversion parameters """
         return self._propMan
+
     @prop_man.setter
     def prop_man(self,value):
         """ Assign new instance of direct property manager to provide DirectEnergyConversion parameters """

@@ -127,8 +127,9 @@ class ReductionWrapper(object):
         self.def_main_properties()
         reduced = self.reduce()
 
-        result = CheckWorkspaceMatch(Workspace1=sample,Workspace2=reduced,Tolerance=Error,CheckSampe=False,
-                                     ChceckInstrument=False,ToleranceRelErr=ToleranceRelErr)
+        result = CheckWorkspacesMatch(Workspace1=sample,Workspace2=reduced,
+                                      Tolerance=Error,CheckSample=False,
+                                      CheckInstrument=False,ToleranceRelErr=ToleranceRelErr)
 
         self.wait_for_file = current_wait_state
         self._run_from_web = current_web_state 
