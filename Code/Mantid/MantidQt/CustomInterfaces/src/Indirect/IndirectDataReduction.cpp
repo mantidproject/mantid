@@ -79,8 +79,8 @@ IndirectDataReduction::~IndirectDataReduction()
 void IndirectDataReduction::helpClicked()
 {
 
-  QString tabName = m_uiForm.tabWidget->tabText(
-      m_uiForm.tabWidget->currentIndex());
+  QString tabName = m_uiForm.twIDRTabs->tabText(
+      m_uiForm.twIDRTabs->currentIndex());
 
   QString url = "http://www.mantidproject.org/Indirect:";
 
@@ -108,7 +108,7 @@ void IndirectDataReduction::helpClicked()
  */
 void IndirectDataReduction::exportTabPython()
 {
-  QString tabName = m_uiForm.tabWidget->tabText(m_uiForm.tabWidget->currentIndex());
+  QString tabName = m_uiForm.twIDRTabs->tabText(m_uiForm.twIDRTabs->currentIndex());
   m_tabs[tabName]->exportPythonScript();
 }
 
@@ -119,7 +119,7 @@ void IndirectDataReduction::exportTabPython()
  */
 void IndirectDataReduction::runClicked()
 {
-  QString tabName = m_uiForm.tabWidget->tabText(m_uiForm.tabWidget->currentIndex());
+  QString tabName = m_uiForm.twIDRTabs->tabText(m_uiForm.twIDRTabs->currentIndex());
   m_tabs[tabName]->runTab();
 }
 
@@ -135,13 +135,14 @@ void IndirectDataReduction::initLayout()
   updateRunButton(false, "Loading UI", "Initialising user interface components...");
 
   // Create the tabs
-  m_tabs["Energy Transfer"] = new IndirectConvertToEnergy(m_uiForm, this);
-  m_tabs["Calibration"] = new IndirectCalibration(m_uiForm, this);
-  m_tabs["Diagnostics"] = new IndirectDiagnostics(m_uiForm, this);
-  m_tabs["Transmission"] = new IndirectTransmission(m_uiForm, this);
-  m_tabs["Symmetrise"] = new IndirectSymmetrise(m_uiForm, this);
-  m_tabs["S(Q, w)"] = new IndirectSqw(m_uiForm, this);
-  m_tabs["Moments"] = new IndirectMoments(m_uiForm, this);
+  //TODO
+  /* m_tabs["Energy Transfer"] = new IndirectConvertToEnergy(m_uiForm, m_uiForm.twIDRTabs->widget(0)); */
+  /* m_tabs["Calibration"] = new IndirectCalibration(m_uiForm, m_uiForm.twIDRTabs->widget(1)); */
+  /* m_tabs["Diagnostics"] = new IndirectDiagnostics(m_uiForm, m_uiForm.twIDRTabs->widget(2)); */
+  /* m_tabs["Transmission"] = new IndirectTransmission(m_uiForm, m_uiForm.twIDRTabs->widget(3)); */
+  /* m_tabs["Symmetrise"] = new IndirectSymmetrise(m_uiForm, m_uiForm.twIDRTabs->widget(4)); */
+  /* m_tabs["S(Q, w)"] = new IndirectSqw(m_uiForm, m_uiForm.twIDRTabs->widget(5)); */
+  /* m_tabs["Moments"] = new IndirectMoments(m_uiForm, m_uiForm.twIDRTabs->widget(6)); */
 
   // Connect "?" (Help) Button
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
@@ -153,7 +154,7 @@ void IndirectDataReduction::initLayout()
   connect(m_uiForm.pbManageDirectories, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
 
   // Reset the Run button state when the tab is changed
-  connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(updateRunButton()));
+  connect(m_uiForm.twIDRTabs, SIGNAL(currentChanged(int)), this, SLOT(updateRunButton()));
 
   // Connect tab signals and run any setup code
   for(auto it = m_tabs.begin(); it != m_tabs.end(); ++it)
@@ -401,21 +402,22 @@ void IndirectDataReduction::readSettings()
   QSettings settings;
 
   // Load settings for MWRunFile widgets
-  settings.beginGroup(m_settingsGroup + "DataFiles");
-  settings.setValue("last_directory", m_dataDir);
-  m_uiForm.ind_runFiles->readSettings(settings.group());
-  m_uiForm.cal_leRunNo->readSettings(settings.group());
-  m_uiForm.slice_inputFile->readSettings(settings.group());
-  settings.endGroup();
+  //TODO
+  /* settings.beginGroup(m_settingsGroup + "DataFiles"); */
+  /* settings.setValue("last_directory", m_dataDir); */
+  /* m_uiForm.ind_runFiles->readSettings(settings.group()); */
+  /* m_uiForm.cal_leRunNo->readSettings(settings.group()); */
+  /* m_uiForm.slice_inputFile->readSettings(settings.group()); */
+  /* settings.endGroup(); */
 
-  settings.beginGroup(m_settingsGroup + "ProcessedFiles");
-  settings.setValue("last_directory", m_saveDir);
-  m_uiForm.ind_calibFile->readSettings(settings.group());
-  m_uiForm.ind_mapFile->readSettings(settings.group());
-  m_uiForm.slice_dsCalibFile->readSettings(settings.group());
-  m_uiForm.moment_dsInput->readSettings(settings.group());
-  m_uiForm.sqw_dsSampleInput->readSettings(settings.group());
-  settings.endGroup();
+  /* settings.beginGroup(m_settingsGroup + "ProcessedFiles"); */
+  /* settings.setValue("last_directory", m_saveDir); */
+  /* m_uiForm.ind_calibFile->readSettings(settings.group()); */
+  /* m_uiForm.ind_mapFile->readSettings(settings.group()); */
+  /* m_uiForm.slice_dsCalibFile->readSettings(settings.group()); */
+  /* m_uiForm.moment_dsInput->readSettings(settings.group()); */
+  /* m_uiForm.sqw_dsSampleInput->readSettings(settings.group()); */
+  /* settings.endGroup(); */
 
   // Load the last used instrument
   settings.beginGroup(m_settingsGroup);

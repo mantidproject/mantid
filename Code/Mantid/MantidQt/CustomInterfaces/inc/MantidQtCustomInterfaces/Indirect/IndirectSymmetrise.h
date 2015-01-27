@@ -3,6 +3,7 @@
 
 #include "IndirectDataReductionTab.h"
 
+#include "ui_IndirectSymmetrise.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 
@@ -75,6 +76,9 @@ namespace CustomInterfaces
     void previewAlgDone(bool error);
     void xRangeMaxChanged(double value);
     void xRangeMinChanged(double value);
+
+  private:
+    Ui::IndirectSymmetrise m_uiForm;
 
   };
 } // namespace CustomInterfaces

@@ -3,6 +3,7 @@
 
 #include "IndirectDataReductionTab.h"
 
+#include "ui_IndirectMoments.h"
 #include "MantidKernel/System.h"
 
 #include <QFont>
@@ -12,7 +13,7 @@ namespace MantidQt
 namespace CustomInterfaces
 {
   /** IndirectMoments : TODO: DESCRIPTION
-    
+
 
     @author Samuel Jackson
     @date 13/08/2013
@@ -60,6 +61,9 @@ namespace CustomInterfaces
     void updatePreviewPlot(QString workspaceName = "");
     /// Called when the algorithm completes to update preview plot
     void momentsAlgComplete(bool error);
+
+  private:
+    Ui::IndirectMoments m_uiForm;
 
   };
 } // namespace CustomInterfaces

@@ -3,6 +3,7 @@
 
 #include "IndirectDataReductionTab.h"
 
+#include "ui_IndirectSqw.h"
 #include "MantidKernel/System.h"
 
 namespace MantidQt
@@ -47,9 +48,11 @@ namespace CustomInterfaces
     virtual bool validate();
 
   private slots:
-    void energyRebinToggle(bool state);
     void plotContour();
     void sqwAlgDone(bool error);
+
+  private:
+    Ui::IndirectSqw m_uiForm;
 
   };
 } // namespace CustomInterfaces

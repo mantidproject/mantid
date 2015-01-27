@@ -24,14 +24,16 @@ namespace CustomInterfaces
   IndirectSymmetrise::IndirectSymmetrise(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
       IndirectDataReductionTab(uiForm, parent)
   {
+    m_uiForm.setupUi(parent);
+
     int numDecimals = 6;
 
     // Property Trees
     m_propTrees["SymmPropTree"] = new QtTreePropertyBrowser();
-    m_uiForm.symm_properties->addWidget(m_propTrees["SymmPropTree"]);
+    m_uiForm.properties->addWidget(m_propTrees["SymmPropTree"]);
 
     m_propTrees["SymmPVPropTree"] = new QtTreePropertyBrowser();
-    m_uiForm.symm_previewProperties->addWidget(m_propTrees["SymmPVPropTree"]);
+    m_uiForm.propertiesPreview->addWidget(m_propTrees["SymmPVPropTree"]);
 
     // Editor Factories
     DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
@@ -74,7 +76,7 @@ namespace CustomInterfaces
     m_plots["SymmRawPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
     m_plots["SymmRawPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
     m_plots["SymmRawPlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.symm_plot->addWidget(m_plots["SymmRawPlot"]);
+    m_uiForm.plotRaw->addWidget(m_plots["SymmRawPlot"]);
 
     // Indicators for Y value at each EMin position
     m_rangeSelectors["NegativeEMinYPos"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"],
@@ -108,7 +110,7 @@ namespace CustomInterfaces
     m_plots["SymmPreviewPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
     m_plots["SymmPreviewPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
     m_plots["SymmPreviewPlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.symm_previewPlot->addWidget(m_plots["SymmPreviewPlot"]);
+    m_uiForm.plotPreview->addWidget(m_plots["SymmPreviewPlot"]);
 
     // Indicators for negative and positive X range values on X axis
     m_rangeSelectors["NegativeE_PV"] = new MantidWidgets::RangeSelector(m_plots["SymmPreviewPlot"],
@@ -135,9 +137,9 @@ namespace CustomInterfaces
     // Plot a new spectrum when the user changes the value of the preview spectrum
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(replotNewSpectrum(QtProperty*, double)));
     // Plot miniplot when file has finished loading
-    connect(m_uiForm.symm_dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotRawInput(const QString&)));
+    connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotRawInput(const QString&)));
     // Preview symmetrise
-    connect(m_uiForm.symm_previewButton, SIGNAL(clicked()), this, SLOT(preview()));
+    connect(m_uiForm.pbPreview, SIGNAL(clicked()), this, SLOT(preview()));
     // X range selectors
     connect(m_rangeSelectors["PositiveE_Raw"], SIGNAL(minValueChanged(double)), this, SLOT(xRangeMinChanged(double)));
     connect(m_rangeSelectors["PositiveE_Raw"], SIGNAL(maxValueChanged(double)), this, SLOT(xRangeMaxChanged(double)));
@@ -168,7 +170,7 @@ namespace CustomInterfaces
   bool IndirectSymmetrise::validate()
   {
     // Check for a valid input file
-    if(!m_uiForm.symm_dsInput->isValid())
+    if(!m_uiForm.dsInput->isValid())
       return false;
 
     // EMin and EMax must be positive
@@ -182,12 +184,12 @@ namespace CustomInterfaces
 
   void IndirectSymmetrise::run()
   {
-    QString workspaceName = m_uiForm.symm_dsInput->getCurrentDataName();
+    QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
     QString outputWorkspaceName = workspaceName.left(workspaceName.length() - 4) + "_sym" + workspaceName.right(4);
 
-    bool plot = m_uiForm.symm_ckPlot->isChecked();
-    bool verbose = m_uiForm.symm_ckVerbose->isChecked();
-    bool save = m_uiForm.symm_ckSave->isChecked();
+    bool plot = m_uiForm.ckPlot->isChecked();
+    bool verbose = m_uiForm.ckVerbose->isChecked();
+    bool save = m_uiForm.ckSave->isChecked();
 
     double e_min = m_dblManager->value(m_properties["EMin"]);
     double e_max = m_dblManager->value(m_properties["EMax"]);
@@ -246,10 +248,10 @@ namespace CustomInterfaces
    */
   void IndirectSymmetrise::updateMiniPlots()
   {
-    if(!m_uiForm.symm_dsInput->isValid())
+    if(!m_uiForm.dsInput->isValid())
       return;
 
-    QString workspaceName = m_uiForm.symm_dsInput->getCurrentDataName();
+    QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
     int spectrumNumber = static_cast<int>(m_dblManager->value(m_properties["PreviewSpec"]));
 
     Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
@@ -293,7 +295,7 @@ namespace CustomInterfaces
     if(prop == m_properties["PreviewSpec"])
     {
       // Get the range of possible spectra numbers
-      QString workspaceName = m_uiForm.symm_dsInput->getCurrentDataName();
+      QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
       MatrixWorkspace_sptr sampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
       int minSpectrumRange = sampleWS->getSpectrum(0)->getSpectrumNo();
       int maxSpectrumRange = sampleWS->getSpectrum(sampleWS->getNumberHistograms()-1)->getSpectrumNo();
@@ -384,11 +386,11 @@ namespace CustomInterfaces
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(previewAlgDone(bool)));
 
     // Do nothing if no data has been laoded
-    QString workspaceName = m_uiForm.symm_dsInput->getCurrentDataName();
+    QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
     if(workspaceName.isEmpty())
       return;
 
-    bool verbose = m_uiForm.symm_ckVerbose->isChecked();
+    bool verbose = m_uiForm.ckVerbose->isChecked();
     double e_min = m_dblManager->value(m_properties["EMin"]);
     double e_max = m_dblManager->value(m_properties["EMax"]);
     long spectrumNumber = static_cast<long>(m_dblManager->value(m_properties["PreviewSpec"]));
@@ -420,7 +422,7 @@ namespace CustomInterfaces
     if(error)
       return;
 
-    QString workspaceName = m_uiForm.symm_dsInput->getCurrentDataName();
+    QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
     int spectrumNumber = static_cast<int>(m_dblManager->value(m_properties["PreviewSpec"]));
 
     MatrixWorkspace_sptr sampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());

@@ -412,7 +412,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="bcPlotType">
+       <widget class="QComboBox" name="cbPlotType">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -471,7 +471,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
-   <header>mantidqt::mantidwidgets::dataselector.h</header>
+   <header>MantidQtMantidWidgets/DataSelector.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

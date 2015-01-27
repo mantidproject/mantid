@@ -15,17 +15,19 @@ namespace CustomInterfaces
   IndirectTransmission::IndirectTransmission(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
       IndirectDataReductionTab(uiForm, parent)
   {
+    m_uiForm.setupUi(parent);
+
     // Preview plot
     m_plots["PreviewPlot"] = new QwtPlot(m_parentWidget);
     m_plots["PreviewPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
     m_plots["PreviewPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
     m_plots["PreviewPlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.trans_plotPreview->addWidget(m_plots["PreviewPlot"]);
+    m_uiForm.plotPreview->addWidget(m_plots["PreviewPlot"]);
 
     // Update the preview plot when the algorithm is complete
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(transAlgDone(bool)));
-    connect(m_uiForm.trans_dsSampleInput, SIGNAL(dataReady(QString)), this, SLOT(dataLoaded()));
-    connect(m_uiForm.trans_dsCanInput, SIGNAL(dataReady(QString)), this, SLOT(dataLoaded()));
+    connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(QString)), this, SLOT(dataLoaded()));
+    connect(m_uiForm.dsCanInput, SIGNAL(dataReady(QString)), this, SLOT(dataLoaded()));
   }
 
   //----------------------------------------------------------------------------------------------
@@ -41,8 +43,8 @@ namespace CustomInterfaces
 
   void IndirectTransmission::run()
   {
-    QString sampleWsName = m_uiForm.trans_dsSampleInput->getCurrentDataName();
-    QString canWsName = m_uiForm.trans_dsCanInput->getCurrentDataName();
+    QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
+    QString canWsName = m_uiForm.dsCanInput->getCurrentDataName();
     QString outWsName = sampleWsName + "_trans";
 
     IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTransmissionMonitor", -1);
@@ -52,9 +54,9 @@ namespace CustomInterfaces
     transAlg->setProperty("CanWorkspace", canWsName.toStdString());
     transAlg->setProperty("OutputWorkspace", outWsName.toStdString());
 
-    transAlg->setProperty("Verbose", m_uiForm.trans_ckVerbose->isChecked());
-    transAlg->setProperty("Plot", m_uiForm.trans_ckPlot->isChecked());
-    transAlg->setProperty("Save", m_uiForm.trans_ckSave->isChecked());
+    transAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
+    transAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
+    transAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
 
     runAlgorithm(transAlg);
   }
@@ -62,16 +64,16 @@ namespace CustomInterfaces
   bool IndirectTransmission::validate()
   {
     // Check if we have an appropriate instrument
-    QString currentInst = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
+    QString currentInst = "IRIS"; //m_uiForm.iicInstrumentConfiguration->getInstrumentName(); TODO
     if(currentInst != "IRIS" && currentInst != "OSIRIS")
       return false;
 
     // Check for an invalid sample input
-    if(!m_uiForm.trans_dsSampleInput->isValid())
+    if(!m_uiForm.dsSampleInput->isValid())
       return false;
 
     // Check for an invalid can input
-    if(!m_uiForm.trans_dsCanInput->isValid())
+    if(!m_uiForm.dsCanInput->isValid())
       return false;
 
     return true;
@@ -85,8 +87,8 @@ namespace CustomInterfaces
 
   void IndirectTransmission::previewPlot()
   {
-    QString sampleWsName = m_uiForm.trans_dsSampleInput->getCurrentDataName();
-    QString canWsName = m_uiForm.trans_dsCanInput->getCurrentDataName();
+    QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
+    QString canWsName = m_uiForm.dsCanInput->getCurrentDataName();
     QString outWsName = sampleWsName + "_trans";
 
     IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTransmissionMonitor", -1);
@@ -96,7 +98,7 @@ namespace CustomInterfaces
     transAlg->setProperty("CanWorkspace", canWsName.toStdString());
     transAlg->setProperty("OutputWorkspace", outWsName.toStdString());
 
-    transAlg->setProperty("Verbose", m_uiForm.trans_ckVerbose->isChecked());
+    transAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
     transAlg->setProperty("Plot", false);
     transAlg->setProperty("Save", false);
 
@@ -111,7 +113,7 @@ namespace CustomInterfaces
     if(error)
       return;
 
-    QString sampleWsName = m_uiForm.trans_dsSampleInput->getCurrentDataName();
+    QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
     QString outWsName = sampleWsName + "_trans";
 
     WorkspaceGroup_sptr resultWsGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outWsName.toStdString());

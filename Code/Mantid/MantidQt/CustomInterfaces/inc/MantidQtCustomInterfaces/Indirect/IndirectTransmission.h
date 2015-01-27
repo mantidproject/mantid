@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_INDIRECTTRANSMISSION_H_
 
 #include "IndirectDataReductionTab.h"
+#include "ui_IndirectTransmission.h"
 #include "MantidKernel/System.h"
 
 
@@ -9,7 +10,10 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  /** IndirectTransmission : TODO: DESCRIPTION
+  /** IndirectTransmission
+
+    Provides the UI interface to the IndirectTransmissionMonitor algorithm to calculate
+    sample transmission using a sample and container raw run file.
 
 
     @author Samuel Jackson
@@ -51,6 +55,10 @@ namespace CustomInterfaces
     void dataLoaded();
     void previewPlot();
     void transAlgDone(bool error);
+
+  private:
+    Ui::IndirectTransmission m_uiForm;
+
   };
 
 } // namespace CustomInterfaces

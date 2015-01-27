@@ -17,6 +17,8 @@ namespace CustomInterfaces
    */
   IndirectMoments::IndirectMoments(Ui::IndirectDataReduction& uiForm, QWidget * parent) : IndirectDataReductionTab(uiForm, parent)
   {
+    m_uiForm.setupUi(parent);
+
     const unsigned int NUM_DECIMALS = 6;
 
     // RAW PLOT
@@ -31,7 +33,7 @@ namespace CustomInterfaces
     m_plots["MomentsPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
 
     // Add plot to UI
-    m_uiForm.moment_plotSpace->addWidget(m_plots["MomentsPlot"]);
+    m_uiForm.plotRaw->addWidget(m_plots["MomentsPlot"]);
 
     // PREVIEW PLOT
     m_plots["MomentsPreviewPlot"] = new QwtPlot(m_parentWidget);
@@ -42,12 +44,12 @@ namespace CustomInterfaces
     m_plots["MomentsPreviewPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
 
     // Add plot to UI
-    m_uiForm.moment_plotPreview->addWidget(m_plots["MomentsPreviewPlot"]);
+    m_uiForm.plotPreview->addWidget(m_plots["MomentsPreviewPlot"]);
 
     // PROPERTY TREE
     m_propTrees["MomentsPropTree"] = new QtTreePropertyBrowser();
     m_propTrees["MomentsPropTree"]->setFactoryForManager(m_dblManager, m_dblEdFac);
-    m_uiForm.moment_treeSpace->addWidget(m_propTrees["MomentsPropTree"]);
+    m_uiForm.properties->addWidget(m_propTrees["MomentsPropTree"]);
     m_properties["EMin"] = m_dblManager->addProperty("EMin");
     m_properties["EMax"] = m_dblManager->addProperty("EMax");
 
@@ -57,19 +59,13 @@ namespace CustomInterfaces
     m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
     m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
 
-    m_uiForm.moment_leScale->setValidator(new QDoubleValidator());
-
-    connect(m_uiForm.moment_dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
-    connect(m_uiForm.moment_ckScale, SIGNAL(toggled(bool)), m_uiForm.moment_leScale, SLOT(setEnabled(bool)));
-    connect(m_uiForm.moment_ckScale, SIGNAL(toggled(bool)), m_uiForm.moment_validScale, SLOT(setVisible(bool)));
+    connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
 
     connect(m_rangeSelectors["MomentsRangeSelector"], SIGNAL(selectionChangedLazy(double, double)), this, SLOT(rangeChanged(double, double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateProperties(QtProperty*, double)));
 
     // Update the preview plot when the algorithm completes
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(momentsAlgComplete(bool)));
-
-    m_uiForm.moment_validScale->setStyleSheet("QLabel { color : #aa0000; }");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -85,32 +81,30 @@ namespace CustomInterfaces
 
   void IndirectMoments::run()
   {
-    QString workspaceName = m_uiForm.moment_dsInput->getCurrentDataName();
+    QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
     QString outputName = workspaceName.left(workspaceName.length() - 4);
-    QString scaleString = m_uiForm.moment_leScale->text();
-    double scale = 1.0;
+    double scale = m_uiForm.spScale->value();
     double eMin = m_dblManager->value(m_properties["EMin"]);
     double eMax = m_dblManager->value(m_properties["EMax"]);
 
-    bool plot = m_uiForm.moment_ckPlot->isChecked();
-    bool verbose = m_uiForm.moment_ckVerbose->isChecked();
-    bool save = m_uiForm.moment_ckSave->isChecked();
-
-    if(!scaleString.isEmpty())
-      scale = scaleString.toDouble();
+    bool plot = m_uiForm.ckPlot->isChecked();
+    bool verbose = m_uiForm.ckVerbose->isChecked();
+    bool save = m_uiForm.ckSave->isChecked();
 
     std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
 
     IAlgorithm_sptr momentsAlg = AlgorithmManager::Instance().create("SofQWMoments", -1);
     momentsAlg->initialize();
     momentsAlg->setProperty("Sample", workspaceName.toStdString());
-    momentsAlg->setProperty("Scale", scale);
     momentsAlg->setProperty("EnergyMin", eMin);
     momentsAlg->setProperty("EnergyMax", eMax);
     momentsAlg->setProperty("Plot", plot);
     momentsAlg->setProperty("Verbose", verbose);
     momentsAlg->setProperty("Save", save);
     momentsAlg->setProperty("OutputWorkspace", outputWorkspaceName);
+
+    if(m_uiForm.ckScale->isChecked())
+      momentsAlg->setProperty("Scale", scale);
 
     // Set the workspace name for Python script export
     m_pythonExportWsName = outputWorkspaceName + "_M0";
@@ -123,10 +117,7 @@ namespace CustomInterfaces
   {
     UserInputValidator uiv;
 
-    uiv.checkDataSelectorIsValid("Sample input", m_uiForm.moment_dsInput);
-
-    if (m_uiForm.moment_ckScale->isChecked())
-      uiv.checkFieldIsValid("A valid scale must be supplied.\n", m_uiForm.moment_leScale, m_uiForm.moment_validScale);
+    uiv.checkDataSelectorIsValid("Sample input", m_uiForm.dsInput);
 
     QString msg = uiv.generateErrorMessage();
     if (!msg.isEmpty())
@@ -209,31 +200,29 @@ namespace CustomInterfaces
   void IndirectMoments::updatePreviewPlot(QString workspaceName)
   {
     if(workspaceName.isEmpty())
-      workspaceName = m_uiForm.moment_dsInput->getCurrentDataName();
+      workspaceName = m_uiForm.dsInput->getCurrentDataName();
 
     QString outputName = workspaceName.left(workspaceName.length() - 4);
-    QString scaleString = m_uiForm.moment_leScale->text();
-    double scale = 1.0;
+    double scale = m_uiForm.spScale->value();
     double eMin = m_dblManager->value(m_properties["EMin"]);
     double eMax = m_dblManager->value(m_properties["EMax"]);
 
-    bool verbose = m_uiForm.moment_ckVerbose->isChecked();
-
-    if(!scaleString.isEmpty())
-      scale = scaleString.toDouble();
+    bool verbose = m_uiForm.ckVerbose->isChecked();
 
     std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
 
     IAlgorithm_sptr momentsAlg = AlgorithmManager::Instance().create("SofQWMoments");
     momentsAlg->initialize();
     momentsAlg->setProperty("Sample", workspaceName.toStdString());
-    momentsAlg->setProperty("Scale", scale);
     momentsAlg->setProperty("EnergyMin", eMin);
     momentsAlg->setProperty("EnergyMax", eMax);
     momentsAlg->setProperty("Plot", false);
     momentsAlg->setProperty("Verbose", verbose);
     momentsAlg->setProperty("Save", false);
     momentsAlg->setProperty("OutputWorkspace", outputWorkspaceName);
+
+    if(m_uiForm.ckScale->isChecked())
+      momentsAlg->setProperty("Scale", scale);
 
     // Make sure there are no other algorithms in the queue.
     // It seems to be possible to have the selctionChangedLazy signal fire multiple times
@@ -252,7 +241,7 @@ namespace CustomInterfaces
     if(error)
       return;
 
-    QString workspaceName = m_uiForm.moment_dsInput->getCurrentDataName();
+    QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
     QString outputName = workspaceName.left(workspaceName.length() - 4);
     std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
 

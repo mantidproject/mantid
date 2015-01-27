@@ -17,9 +17,9 @@ namespace CustomInterfaces
   IndirectSqw::IndirectSqw(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
       IndirectDataReductionTab(uiForm, parent)
   {
-    connect(m_uiForm.sqw_ckRebinE, SIGNAL(toggled(bool)), this, SLOT(energyRebinToggle(bool)));
-    connect(m_uiForm.sqw_dsSampleInput, SIGNAL(loadClicked()), this, SLOT(plotContour()));
+    m_uiForm.setupUi(parent);
 
+    connect(m_uiForm.dsSampleInput, SIGNAL(loadClicked()), this, SLOT(plotContour()));
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(sqwAlgDone(bool)));
   }
 
@@ -40,14 +40,14 @@ namespace CustomInterfaces
     UserInputValidator uiv;
 
     // Validate the data selector
-    uiv.checkDataSelectorIsValid("Sample", m_uiForm.sqw_dsSampleInput);
+    uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
 
     // Validate Q binning
-    uiv.checkBins(m_uiForm.sqw_spQLow->value(), m_uiForm.sqw_spQWidth->value(), m_uiForm.sqw_spQHigh->value(), tolerance);
+    uiv.checkBins(m_uiForm.spQLow->value(), m_uiForm.spQWidth->value(), m_uiForm.spQHigh->value(), tolerance);
 
     // If selected, validate energy binning
-    if(m_uiForm.sqw_ckRebinE->isChecked())
-      uiv.checkBins(m_uiForm.sqw_spELow->value(), m_uiForm.sqw_spEWidth->value(), m_uiForm.sqw_spEHigh->value(), tolerance);
+    if(m_uiForm.ckRebinInEnergy->isChecked())
+      uiv.checkBins(m_uiForm.spELow->value(), m_uiForm.spEWidth->value(), m_uiForm.spEHigh->value(), tolerance);
 
     QString errorMessage = uiv.generateErrorMessage();
 
@@ -60,19 +60,19 @@ namespace CustomInterfaces
 
   void IndirectSqw::run()
   {
-    QString sampleWsName = m_uiForm.sqw_dsSampleInput->getCurrentDataName();
+    QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
     QString sqwWsName = sampleWsName.left(sampleWsName.length() - 4) + "_sqw";
     QString eRebinWsName = sampleWsName.left(sampleWsName.length() - 4) + "_r";
 
-    QString rebinString = m_uiForm.sqw_spQLow->text() + "," + m_uiForm.sqw_spQWidth->text() +
-      "," + m_uiForm.sqw_spQHigh->text();
+    QString rebinString = m_uiForm.spQLow->text() + "," + m_uiForm.spQWidth->text() +
+      "," + m_uiForm.spQHigh->text();
 
     // Rebin in energy
-    bool rebinInEnergy = m_uiForm.sqw_ckRebinE->isChecked();
+    bool rebinInEnergy = m_uiForm.ckRebinInEnergy->isChecked();
     if(rebinInEnergy)
     {
-      QString eRebinString = m_uiForm.sqw_spELow->text() + "," + m_uiForm.sqw_spEWidth->text() +
-                             "," + m_uiForm.sqw_spEHigh->text();
+      QString eRebinString = m_uiForm.spELow->text() + "," + m_uiForm.spEWidth->text() +
+                             "," + m_uiForm.spEHigh->text();
 
       IAlgorithm_sptr energyRebinAlg = AlgorithmManager::Instance().create("Rebin");
       energyRebinAlg->initialize();
@@ -88,7 +88,7 @@ namespace CustomInterfaces
     QString eFixed = getInstrumentDetails()["efixed-val"];
 
     IAlgorithm_sptr sqwAlg;
-    QString rebinType = m_uiForm.sqw_cbRebinType->currentText();
+    QString rebinType = m_uiForm.cbRebinType->currentText();
 
     if(rebinType == "Parallelepiped (SofQW2)")
       sqwAlg = AlgorithmManager::Instance().create("SofQW2");
@@ -125,7 +125,7 @@ namespace CustomInterfaces
     m_batchAlgoRunner->addAlgorithm(sampleLogAlg, inputToAddSampleLogProps);
 
     // Save S(Q, w) workspace
-    if(m_uiForm.sqw_ckSave->isChecked())
+    if(m_uiForm.ckSave->isChecked())
     {
       QString saveFilename = sqwWsName + ".nxs";
 
@@ -157,11 +157,11 @@ namespace CustomInterfaces
       return;
 
     // Get the workspace name
-    QString sampleWsName = m_uiForm.sqw_dsSampleInput->getCurrentDataName();
+    QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
     QString sqwWsName = sampleWsName.left(sampleWsName.length() - 4) + "_sqw";
 
     QString pyInput = "sqw_ws = '" + sqwWsName + "'\n";
-    QString plotType = m_uiForm.sqw_cbPlotType->currentText();
+    QString plotType = m_uiForm.cbPlotType->currentText();
 
     if(plotType == "Contour")
     {
@@ -179,30 +179,15 @@ namespace CustomInterfaces
   }
 
   /**
-   * Enabled/disables the rebin in energy UI widgets
-   *
-   * @param state :: True to enable RiE UI, false to disable
-   */
-  void IndirectSqw::energyRebinToggle(bool state)
-  {
-    m_uiForm.sqw_spELow->setEnabled(state);
-    m_uiForm.sqw_spEWidth->setEnabled(state);
-    m_uiForm.sqw_spEHigh->setEnabled(state);
-    m_uiForm.sqw_lbELow->setEnabled(state);
-    m_uiForm.sqw_lbEWidth->setEnabled(state);
-    m_uiForm.sqw_lbEHigh->setEnabled(state);
-  }
-
-  /**
    * Handles the Plot Input button
    *
    * Creates a colour 2D plot of the data
    */
   void IndirectSqw::plotContour()
   {
-    if(m_uiForm.sqw_dsSampleInput->isValid())
+    if(m_uiForm.dsSampleInput->isValid())
     {
-      QString sampleWsName = m_uiForm.sqw_dsSampleInput->getCurrentDataName();
+      QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
 
       QString convertedWsName = sampleWsName.left(sampleWsName.length() - 4) + "_rqw";
 
