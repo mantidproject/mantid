@@ -1,4 +1,5 @@
 #include "MantidQtMantidWidgets/SlitCalculator.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include <math.h>
 
 namespace MantidQt
@@ -26,8 +27,18 @@ namespace MantidQt
       const double angle = ui.spinAngle->value();
 
       //Calculate values
-      const double s1 = 2 * (s1s2 + s2sa) * tan(res * angle * M_PI / 180) - footprint * sin(angle * M_PI / 180);
-      const double s2 = s1s2 * (footprint * sin(angle * M_PI / 180) + s1) / (s1s2 + s2sa) - s1;
+      Mantid::API::IAlgorithm_sptr algSlit = Mantid::API::AlgorithmManager::Instance().create("CalculateSlits");
+      algSlit->initialize();
+      algSlit->setChild(true);
+      algSlit->setProperty("Slit1Slit2", s1s2);
+      algSlit->setProperty("Slit2SA", s2sa);
+      algSlit->setProperty("Resolution", res);
+      algSlit->setProperty("Footprint", footprint);
+      algSlit->setProperty("Angle", angle);
+      algSlit->execute();
+
+      const double s1 = algSlit->getProperty("Slit1");
+      const double s2 = algSlit->getProperty("Slit2");
 
       //Update output
       ui.slit1Text->setText(QString::number(s1,'f',3));
