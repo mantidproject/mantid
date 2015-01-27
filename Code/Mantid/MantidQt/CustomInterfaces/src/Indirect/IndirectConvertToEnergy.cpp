@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/Indirect/IndirectConvertToEnergy.h"
 
 #include "MantidQtCustomInterfaces/Background.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include <QFileInfo>
 #include <QInputDialog>
@@ -20,9 +21,6 @@ namespace CustomInterfaces
   {
     m_uiForm.setupUi(parent);
 
-    // Add validators to UI form
-    m_uiForm.leNoGroups->setValidator(m_valInt);
-
     // SIGNAL/SLOT CONNECTIONS
     // Update instrument information when a new instrument config is selected
     connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setInstrumentDefault()));
@@ -32,14 +30,20 @@ namespace CustomInterfaces
     connect(m_uiForm.pbBackgroundRemoval, SIGNAL(clicked()), this, SLOT(backgroundClicked()));
     // Plots raw input data when user clicks Plot Time
     connect(m_uiForm.pbPlotTime, SIGNAL(clicked()), this, SLOT(plotRaw()));
-    // Shows message on run buton when user is inputting a run number
+    // Shows message on run button when user is inputting a run number
     connect(m_uiForm.dsRunFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
     // Shows message on run button when Mantid is finding the file for a given run number
     connect(m_uiForm.dsRunFiles, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
     // Reverts run button back to normal when file finding has finished
     connect(m_uiForm.dsRunFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
-
+    // Handle algorithm completion
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+
+    // Re-validate when certain inputs are changed
+    connect(m_uiForm.spRebinLow, SIGNAL(valueChanged(double)), this, SLOT(validate()));
+    connect(m_uiForm.spRebinWidth, SIGNAL(valueChanged(double)), this, SLOT(validate()));
+    connect(m_uiForm.spRebinHigh, SIGNAL(valueChanged(double)), this, SLOT(validate()));
+    connect(m_uiForm.leRebinString, SIGNAL(textChanged(const QString &)), this, SLOT(validate()));
 
     // Update UI widgets to show default values
     mappingOptionSelected(m_uiForm.cbMappingOptions->currentText());
@@ -56,9 +60,54 @@ namespace CustomInterfaces
   {
   }
 
+
   void IndirectConvertToEnergy::setup()
   {
   }
+
+
+  bool IndirectConvertToEnergy::validate()
+  {
+    UserInputValidator uiv;
+
+    // Run files input
+    if(!m_uiForm.dsRunFiles->isValid())
+      uiv.addErrorMessage("Run file range is invalid.");
+
+    // Calibration file input
+    if(m_uiForm.ckUseCalib->isChecked() && !m_uiForm.dsCalibrationFile->isValid())
+      uiv.addErrorMessage("Calibration file/workspace is invalid.");
+
+    // Mapping file
+    if((m_uiForm.cbMappingOptions->currentText() == "File") && (!m_uiForm.dsMapFile->isValid()))
+      uiv.addErrorMessage("Mapping file is invalid.");
+
+    // Rebinning
+    if(!m_uiForm.ckDoNotRebin->isChecked())
+    {
+      if(m_uiForm.cbRebinType->currentText() == "Single")
+      {
+        bool rebinValid = !uiv.checkBins(m_uiForm.spRebinLow->value(), m_uiForm.spRebinWidth->value(), m_uiForm.spRebinHigh->value());
+        m_uiForm.valRebinLow->setVisible(rebinValid);
+        m_uiForm.valRebinWidth->setVisible(rebinValid);
+        m_uiForm.valRebinHigh->setVisible(rebinValid);
+      }
+      else
+      {
+        uiv.checkFieldIsNotEmpty("Rebin string", m_uiForm.leRebinString, m_uiForm.valRebinString);
+      }
+    }
+    else
+    {
+      m_uiForm.valRebinLow->setVisible(false);
+      m_uiForm.valRebinWidth->setVisible(false);
+      m_uiForm.valRebinHigh->setVisible(false);
+      m_uiForm.valRebinString->setVisible(false);
+    }
+
+    return uiv.isAllInputValid();
+  }
+
 
   void IndirectConvertToEnergy::run()
   {
@@ -141,10 +190,8 @@ namespace CustomInterfaces
 
     m_batchAlgoRunner->addAlgorithm(reductionAlg);
     m_batchAlgoRunner->executeBatchAsync();
-
-    // Set output workspace name for Python export
-    m_pythonExportWsName = "IndirectInergyTransfer_Workspaces";
   }
+
 
   /**
    * Handles completion of the algorithm.
@@ -168,36 +215,6 @@ namespace CustomInterfaces
     // Ungroup the output workspace
     energyTransferOutputGroup->removeAll();
     AnalysisDataService::Instance().remove("IndirectEnergyTransfer_Workspaces");
-  }
-
-  bool IndirectConvertToEnergy::validate()
-  {
-    bool valid = true;
-
-    // Run files input
-    if(!m_uiForm.dsRunFiles->isValid())
-      valid = false;
-
-    // Calibration file input
-    if(m_uiForm.ckUseCalib->isChecked() && !m_uiForm.dsCalibrationFile->isValid())
-      valid = false;
-
-    // Mapping selection
-    if(
-       (m_uiForm.cbMappingOptions->currentText() == "Groups" && m_uiForm.leNoGroups->text() == "")
-       ||
-       (m_uiForm.cbMappingOptions->currentText() == "File" && ! m_uiForm.dsMapFile->isValid())
-      )
-    {
-      valid = false;
-      m_uiForm.valNoGroups->setText("*");
-    }
-    else
-    {
-      m_uiForm.valNoGroups->setText("");
-    }
-
-    return valid;
   }
 
 
@@ -346,7 +363,7 @@ namespace CustomInterfaces
       IAlgorithm_sptr groupingAlg = AlgorithmManager::Instance().create("CreateGroupingWorkspace");
       groupingAlg->initialize();
 
-      groupingAlg->setProperty("FixedGroupCount", m_uiForm.leNoGroups->text().toInt());
+      groupingAlg->setProperty("FixedGroupCount", m_uiForm.spNumberGroups->value());
       groupingAlg->setProperty("InstrumentName", getInstrumentConfiguration()->getInstrumentName().toStdString());
       groupingAlg->setProperty("ComponentName", getInstrumentConfiguration()->getAnalyserName().toStdString());
       groupingAlg->setProperty("OutputWorkspace", groupWS.toStdString());

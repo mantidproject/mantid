@@ -45,6 +45,8 @@ namespace CustomInterfaces
 
     virtual void setup();
     virtual void run();
+
+  public slots:
     virtual bool validate();
 
   private slots:
