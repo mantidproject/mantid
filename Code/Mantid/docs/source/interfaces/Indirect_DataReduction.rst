@@ -84,8 +84,8 @@ Background Removal
   Allows removal of a background given a time-of-flight range.
 
 Plot Time
-  Can be used to create a time plot of a specific spectra range (or single
-  spectrum).
+  When clicked create a time plot of the spectra range defined in the Spectra
+  Min and Spectra Max selectors.
 
 Detailed Balance
   Gives the option to perform an exponential correction on the data once it has
