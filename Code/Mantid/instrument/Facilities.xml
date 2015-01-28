@@ -611,6 +611,7 @@
   <instrument name="DNS">
     <technique>Neutron Spectroscopy</technique> 
     <technique>Reactor Direct Geometry Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
     <technique>Neutron Diffraction</technique>
     <technique>Single Crystal Diffraction</technique>
   </instrument>
