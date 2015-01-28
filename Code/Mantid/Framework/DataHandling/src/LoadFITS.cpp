@@ -80,7 +80,9 @@ void LoadFITS::init() {
   declareProperty(
       new PropertyWithValue<int>("ImageKey", -1, Kernel::Direction::Input),
       "Image type to set these files as. 0=data image, 1=flat field, 2=open "
-      "field, -1=use the value from FITS header.");
+      "field, -1=use the value from FITS header. At present, if this is not "
+      "specified and an IMAGEKEY entry is not found in the FITS header, the "
+      "loader will show an error message and stop.");
 
   declareProperty(new PropertyWithValue<string>(BIT_DEPTH_NAME, "BITPIX",
                                                 Kernel::Direction::Input),
