@@ -18,14 +18,10 @@ using Poco::BinaryReader;
 
 namespace {
 static const std::string BIT_DEPTH_NAME = "BitDepthName";
-static const std::string AXIS_NAMES_NAME = "AxisNames";
-
-static const std::string HEADER_MAP_NAME = "HeaderMapFile";
-
-// for specific use in tomography
-static const std::string IMAGE_KEY_NAME = "ImageKeyName";
 static const std::string ROTATION_NAME = "RotationName";
-static const std::string INTENSITY_NAME = "IntensityName";
+static const std::string AXIS_NAMES_NAME = "AxisNames";
+static const std::string IMAGE_KEY_NAME = "ImageKeyName";
+static const std::string HEADER_MAP_NAME = "HeaderMapFile";
 
 /**
 * Used with find_if to check a string isn't a fits file (by checking extension)
@@ -394,7 +390,7 @@ Workspace2D_sptr LoadFITS::addWorkspace(const FITSInfo &fileInfo,
        ++it) {
     ws->mutableRun().removeLogData("_" + it->first, true);
     ws->mutableRun().addLogData(
-        new PropertyWithValue<string>("_" + it->first, it->second));
+        new PropertyWithValue<string>("_FITS:" + it->first, it->second));
   }
 
   // Add rotational data to log. Clear first from copied WS
