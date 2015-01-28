@@ -53,8 +53,6 @@ namespace CustomInterfaces
     void algorithmComplete(bool error);
     void setInstrumentDefault(); ///< Sets default parameters for current instrument
     void mappingOptionSelected(const QString& groupType); ///< change ui to display appropriate options
-    void backgroundClicked(); ///< handles showing and hiding m_backgroundDialog
-    void backgroundRemoval(); ///< handles data from BG
     void plotRaw(); ///< plot raw data from instrument
     void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
     void pbRunFinding();  //< Called when the FileFinder starts finding the files.
@@ -63,9 +61,6 @@ namespace CustomInterfaces
 
   private:
     Ui::IndirectConvertToEnergy m_uiForm;
-
-    Background *m_backgroundDialog; ///< background removal dialog
-    bool m_bgRemoval; ///< whether user has set values for BG removal
 
     QString createMapFile(const QString& groupType); ///< create the mapping file with which to group results
     std::vector<std::string> getSaveFormats(); ///< get a vector of save formats

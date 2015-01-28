@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>601</width>
-    <height>532</height>
+    <width>611</width>
+    <height>629</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -104,144 +104,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="loGroupingOptions">
-        <property name="spacing">
-         <number>6</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="lbMapping">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="layoutDirection">
-           <enum>Qt::LeftToRight</enum>
-          </property>
-          <property name="text">
-           <string>Grouping</string>
-          </property>
-          <property name="buddy">
-           <cstring>cbMappingOptions</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="cbMappingOptions">
-          <property name="toolTip">
-           <string>Select type of detector grouping to apply.</string>
-          </property>
-          <item>
-           <property name="text">
-            <string>Default</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Individual</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Groups</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>All</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>File</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item>
-         <widget class="QStackedWidget" name="swMapping">
-          <property name="lineWidth">
-           <number>0</number>
-          </property>
-          <property name="currentIndex">
-           <number>2</number>
-          </property>
-          <widget class="QWidget" name="pgMapFile">
-           <layout class="QHBoxLayout" name="horizontalLayout_5">
-            <item>
-             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dsMapFile" native="true">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>41</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="findRunFiles" stdset="0">
-               <bool>false</bool>
-              </property>
-              <property name="label" stdset="0">
-               <string/>
-              </property>
-              <property name="multipleFiles" stdset="0">
-               <bool>false</bool>
-              </property>
-              <property name="algorithmAndProperty" stdset="0">
-               <string/>
-              </property>
-              <property name="fileExtensions" stdset="0">
-               <stringlist>
-                <string>.map</string>
-               </stringlist>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="pgMappingGroups">
-           <layout class="QHBoxLayout" name="horizontalLayout_26">
-            <item>
-             <widget class="QLabel" name="lbNoGroups">
-              <property name="text">
-               <string>Number of Groups: </string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSpinBox" name="spNumberGroups"/>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_5">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="pgMappingBlank"/>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
        <layout class="QHBoxLayout" name="loInputActionButtons">
-        <item>
-         <widget class="QPushButton" name="pbBackgroundRemoval">
-          <property name="toolTip">
-           <string>Remove a range of background value.</string>
-          </property>
-          <property name="text">
-           <string>Background Removal</string>
-          </property>
-         </widget>
-        </item>
         <item>
          <spacer name="horizontalSpacer_4">
           <property name="orientation">
@@ -266,6 +129,75 @@
          </widget>
         </item>
        </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbBackgroundRemoval">
+     <property name="title">
+      <string>Background Removal (ToF)</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QCheckBox" name="ckBackgroundRemoval">
+        <property name="text">
+         <string>Background Removal</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="lbBackgroundStart">
+        <property name="text">
+         <string>Start:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spBackgroundStart">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="suffix">
+         <string> uS</string>
+        </property>
+        <property name="maximum">
+         <number>999999</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lbBackgroundEnd">
+        <property name="text">
+         <string>End:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spBackgroundEnd">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="suffix">
+         <string> uS</string>
+        </property>
+        <property name="maximum">
+         <number>999999</number>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -687,6 +619,135 @@
     </widget>
    </item>
    <item>
+    <widget class="QGroupBox" name="gbGrouping">
+     <property name="title">
+      <string>Detector Grouping</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item>
+       <widget class="QLabel" name="lbGroupingMode">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="text">
+         <string>Mode:</string>
+        </property>
+        <property name="buddy">
+         <cstring>cbGroupingOptions</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbGroupingOptions">
+        <property name="toolTip">
+         <string>Select type of detector grouping to apply.</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Default</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Individual</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Groups</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>All</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>File</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QStackedWidget" name="swGrouping">
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="currentIndex">
+         <number>2</number>
+        </property>
+        <widget class="QWidget" name="pgMapFile">
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dsMapFile" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>41</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="findRunFiles" stdset="0">
+             <bool>false</bool>
+            </property>
+            <property name="label" stdset="0">
+             <string/>
+            </property>
+            <property name="multipleFiles" stdset="0">
+             <bool>false</bool>
+            </property>
+            <property name="algorithmAndProperty" stdset="0">
+             <string/>
+            </property>
+            <property name="fileExtensions" stdset="0">
+             <stringlist>
+              <string>.map</string>
+             </stringlist>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="pgMappingGroups">
+         <layout class="QHBoxLayout" name="horizontalLayout_26">
+          <item>
+           <widget class="QLabel" name="lbNoGroups">
+            <property name="text">
+             <string>Number of Groups: </string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spNumberGroups"/>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="pgMappingBlank"/>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="gbOutput">
      <property name="title">
       <string>Output</string>
@@ -776,19 +837,6 @@
            <string>DaveGrp</string>
           </property>
          </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_10">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
         </item>
        </layout>
       </item>
@@ -1022,6 +1070,38 @@ Later steps in the process (saving, renaming) will not be done.</string>
     <hint type="destinationlabel">
      <x>159</x>
      <y>86</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckBackgroundRemoval</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spBackgroundStart</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>96</x>
+     <y>237</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>238</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckBackgroundRemoval</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spBackgroundEnd</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>96</x>
+     <y>237</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>554</x>
+     <y>238</y>
     </hint>
    </hints>
   </connection>

@@ -16,8 +16,7 @@ namespace CustomInterfaces
   /** Constructor
    */
   IndirectConvertToEnergy::IndirectConvertToEnergy(IndirectDataReduction * idrUI, QWidget * parent) :
-      IndirectDataReductionTab(idrUI, parent),
-      m_backgroundDialog(NULL), m_bgRemoval(false)
+      IndirectDataReductionTab(idrUI, parent)
   {
     m_uiForm.setupUi(parent);
 
@@ -25,9 +24,7 @@ namespace CustomInterfaces
     // Update instrument information when a new instrument config is selected
     connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setInstrumentDefault()));
     // Shows required mapping option UI widgets when a new mapping option is selected from drop down
-    connect(m_uiForm.cbMappingOptions, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(mappingOptionSelected(const QString&)));
-    // Shows background removal dialog when user clicks Background Removal
-    connect(m_uiForm.pbBackgroundRemoval, SIGNAL(clicked()), this, SLOT(backgroundClicked()));
+    connect(m_uiForm.cbGroupingOptions, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(mappingOptionSelected(const QString&)));
     // Plots raw input data when user clicks Plot Time
     connect(m_uiForm.pbPlotTime, SIGNAL(clicked()), this, SLOT(plotRaw()));
     // Shows message on run button when user is inputting a run number
@@ -46,8 +43,7 @@ namespace CustomInterfaces
     connect(m_uiForm.leRebinString, SIGNAL(textChanged(const QString &)), this, SLOT(validate()));
 
     // Update UI widgets to show default values
-    mappingOptionSelected(m_uiForm.cbMappingOptions->currentText());
-    backgroundRemoval();
+    mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());
 
     // Validate to remove invalid markers
     validateTab();
@@ -79,7 +75,7 @@ namespace CustomInterfaces
       uiv.addErrorMessage("Calibration file/workspace is invalid.");
 
     // Mapping file
-    if((m_uiForm.cbMappingOptions->currentText() == "File") && (!m_uiForm.dsMapFile->isValid()))
+    if((m_uiForm.cbGroupingOptions->currentText() == "File") && (!m_uiForm.dsMapFile->isValid()))
       uiv.addErrorMessage("Mapping file is invalid.");
 
     // Rebinning
@@ -137,12 +133,11 @@ namespace CustomInterfaces
     detectorRange.push_back(m_uiForm.spSpectraMax->value());
     reductionAlg->setProperty("DetectorRange", detectorRange);
 
-    if(m_bgRemoval)
+    if(m_uiForm.ckBackgroundRemoval->isChecked())
     {
-      QPair<double, double> background = m_backgroundDialog->getRange();
       std::vector<double> backgroundRange;
-      backgroundRange.push_back(background.first);
-      backgroundRange.push_back(background.second);
+      backgroundRange.push_back(m_uiForm.spBackgroundStart->value());
+      backgroundRange.push_back(m_uiForm.spBackgroundEnd->value());
       reductionAlg->setProperty("BackgroundRange", backgroundRange);
     }
 
@@ -163,9 +158,9 @@ namespace CustomInterfaces
     if(m_uiForm.ckScaleMultiplier->isChecked())
       reductionAlg->setProperty("ScaleFactor", m_uiForm.spScaleMultiplier->value());
 
-    if(m_uiForm.cbMappingOptions->currentText() != "Default")
+    if(m_uiForm.cbGroupingOptions->currentText() != "Default")
     {
-      QString grouping = createMapFile(m_uiForm.cbMappingOptions->currentText());
+      QString grouping = createMapFile(m_uiForm.cbGroupingOptions->currentText());
       reductionAlg->setProperty("Grouping", grouping.toStdString());
     }
 
@@ -288,54 +283,23 @@ namespace CustomInterfaces
   }
 
   /**
-   * This function runs when the user makes a selection on the cbMappingOptions QComboBox.
+   * This function runs when the user makes a selection on the cbGroupingOptions QComboBox.
    * @param groupType :: Value of selection made by user.
    */
   void IndirectConvertToEnergy::mappingOptionSelected(const QString& groupType)
   {
     if ( groupType == "File" )
     {
-      m_uiForm.swMapping->setCurrentIndex(0);
+      m_uiForm.swGrouping->setCurrentIndex(0);
     }
     else if ( groupType == "Groups" )
     {
-      m_uiForm.swMapping->setCurrentIndex(1);
+      m_uiForm.swGrouping->setCurrentIndex(1);
     }
     else if ( groupType == "All" || groupType == "Individual" || groupType == "Default" )
     {
-      m_uiForm.swMapping->setCurrentIndex(2);
+      m_uiForm.swGrouping->setCurrentIndex(2);
     }
-  }
-
-  /**
-   * This function is called when the user clicks on the Background Removal button. It
-   * displays the Background Removal dialog, initialising it if it hasn't been already.
-   */
-  void IndirectConvertToEnergy::backgroundClicked()
-  {
-    if(!m_backgroundDialog)
-    {
-      m_backgroundDialog = new Background(m_parentWidget);
-      connect(m_backgroundDialog, SIGNAL(accepted()), this, SLOT(backgroundRemoval()));
-      connect(m_backgroundDialog, SIGNAL(rejected()), this, SLOT(backgroundRemoval()));
-    }
-    m_backgroundDialog->show();
-  }
-
-  /**
-   * Slot called when m_backgroundDialog is closed. Assesses whether user desires background removal.
-   * Can be called before m_backgroundDialog even exists, for the purposes of setting the button to
-   * it's initial (default) value.
-   */
-  void IndirectConvertToEnergy::backgroundRemoval()
-  {
-    if(m_backgroundDialog != NULL)
-      m_bgRemoval = m_backgroundDialog->removeBackground();
-
-    if(m_bgRemoval)
-      m_uiForm.pbBackgroundRemoval->setText("Background Removal (On)");
-    else
-      m_uiForm.pbBackgroundRemoval->setText("Background Removal (Off)");
   }
 
   /**
@@ -454,16 +418,18 @@ namespace CustomInterfaces
     BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromLoad;
     inputFromLoad["InputWorkspace"] = name;
 
-    if(m_bgRemoval)
+    if(m_uiForm.ckBackgroundRemoval->isChecked())
     {
-      QPair<double, double> range = m_backgroundDialog->getRange();
+      std::vector<double> range;
+      range.push_back(m_uiForm.spBackgroundStart->value());
+      range.push_back(m_uiForm.spBackgroundEnd->value());
 
       IAlgorithm_sptr calcBackAlg = AlgorithmManager::Instance().create("CalculateFlatBackground");
       calcBackAlg->initialize();
       calcBackAlg->setProperty("OutputWorkspace", name + "_bg");
       calcBackAlg->setProperty("Mode", "Mean");
-      calcBackAlg->setProperty("StartX", range.first);
-      calcBackAlg->setProperty("EndX", range.second);
+      calcBackAlg->setProperty("StartX", range[0]);
+      calcBackAlg->setProperty("EndX", range[1]);
       m_batchAlgoRunner->addAlgorithm(calcBackAlg, inputFromLoad);
 
       BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromCalcBG;
