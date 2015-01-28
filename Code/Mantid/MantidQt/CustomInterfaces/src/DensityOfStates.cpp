@@ -6,6 +6,7 @@
 #include <QString>
 
 using namespace Mantid::API;
+using MantidQt::API::BatchAlgorithmRunner;
 
 namespace
 {
@@ -129,7 +130,19 @@ namespace MantidQt
 
       m_batchAlgoRunner->addAlgorithm(dosAlgo);
 
-      //TODO: Saving
+      // Setup save algorithm if needed
+      if(m_uiForm.ckSave->isChecked())
+      {
+        BatchAlgorithmRunner::AlgorithmRuntimeProps saveProps;
+        saveProps["InputWorkspace"] = m_outputWsName.toStdString();
+
+        QString filename = m_outputWsName + ".nxs";
+
+        IAlgorithm_sptr saveAlgo = AlgorithmManager::Instance().create("SaveNexusProcessed");
+        saveAlgo->setProperty("Filename", filename.toStdString());
+
+        m_batchAlgoRunner->addAlgorithm(saveAlgo, saveProps);
+      }
 
       connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(dosAlgoComplete(bool)));
       m_batchAlgoRunner->executeBatchAsync();
