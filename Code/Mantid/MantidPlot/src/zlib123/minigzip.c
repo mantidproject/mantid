@@ -50,6 +50,10 @@
 #  include <unix.h> /* for fileno */
 #endif
 
+#ifndef OF
+#define OF(args) args
+#define
+
 #ifndef WIN32 /* unlink already in stdio.h for WIN32 */
   extern int unlink OF((const char *));
 #else
