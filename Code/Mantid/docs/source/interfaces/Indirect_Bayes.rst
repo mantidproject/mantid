@@ -79,7 +79,7 @@ Quasi
 .. interface:: Bayes
   :widget: Quasi
 
-The model that is being fitted is that of a &delta;-function (elastic component)
+The model that is being fitted is that of a :math:`\delta`-function (elastic component)
 of amplitude :math:`A(0)` and Lorentzians of amplitude :math:`A(j)` and HWHM
 :math:`W(j)` where :math:`j=1,2,3`. The whole function is then convolved with
 the resolution function. The -function and Lorentzians are intrinsically
@@ -97,7 +97,7 @@ ResNorm.
 For a Stretched Exponential, the choice of several Lorentzians is replaced with
 a single function with the shape : :math:`\psi\beta(x) \Leftrightarrow
 exp[-2\pi(\sigma k)\beta]`. This, in the energy to time FT transformation, is
-:math:`\psi\beta(E) \Leftrightarrow exp[-(t/\tau)\beta]`. So :math:`/sigma` is
+:math:`\psi\beta(E) \Leftrightarrow exp[-(t/\tau)\beta]`. So :math:`\sigma` is
 identified with :math:`(2\pi)\beta\hbar/\tau` .  The model that is fitted is
 that of an elastic component and the stretched exponential and the program gives
 the best estimate for the :math:`\beta` parameter and the width for each group
