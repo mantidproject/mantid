@@ -1,13 +1,13 @@
 set ( SRC_FILES
+  src/DataComparison.cpp
+	src/DirectConvertToEnergy.cpp
+	src/Homer.cpp
 	src/Indirect/ApplyCorr.cpp
 	src/Indirect/CalcCorr.cpp
 	src/Indirect/ConvFit.cpp
-  src/DataComparison.cpp
-	src/DirectConvertToEnergy.cpp
 	src/Indirect/Elwin.cpp
 	src/Indirect/Fury.cpp
 	src/Indirect/FuryFit.cpp
-	src/Homer.cpp
 	src/Indirect/IDATab.cpp
   src/Indirect/IndirectBayes.cpp
 	src/Indirect/IndirectBayesTab.cpp
@@ -33,6 +33,9 @@ set ( SRC_FILES
   src/Indirect/IndirectTransmissionCalc.cpp
 	src/Indirect/JumpFit.cpp
 	src/Indirect/MSDFit.cpp
+	src/Indirect/Quasi.cpp
+	src/Indirect/ResNorm.cpp
+	src/Indirect/Stretch.cpp
 	src/MantidEV.cpp
 	src/MantidEVWorker.cpp
     src/MultiDatasetFit.cpp
@@ -55,19 +58,16 @@ set ( SRC_FILES
 	src/QReflTableModel.cpp
 	src/QtReflMainView.cpp
 	src/QtReflOptionsDialog.cpp
-	src/Indirect/Quasi.cpp
 	src/ReflCatalogSearcher.cpp
 	src/ReflLegacyTransferStrategy.cpp
 	src/ReflMainViewPresenter.cpp
 	src/ReflSearchModel.cpp
-	src/Indirect/ResNorm.cpp
 	src/SANSAddFiles.cpp
 	src/SANSDiagnostics.cpp
 	src/SANSEventSlicing.cpp
 	src/SANSPlotSpecial.cpp
 	src/SANSRunWindow.cpp
 	src/StepScan.cpp
-	src/Indirect/Stretch.cpp
 	src/UserInputValidator.cpp
 	src/background.cpp
 	src/deltaECalc.cpp
@@ -75,18 +75,18 @@ set ( SRC_FILES
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
-	inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.h
 	inc/MantidQtCustomInterfaces/Background.h
-	inc/MantidQtCustomInterfaces/Indirect/CalcCorr.h
-	inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
   inc/MantidQtCustomInterfaces/DataComparison.h
 	inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/DllConfig.h
+	inc/MantidQtCustomInterfaces/Homer.h
+	inc/MantidQtCustomInterfaces/Indirect/IDATab.h
+	inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.h
+	inc/MantidQtCustomInterfaces/Indirect/CalcCorr.h
+	inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
 	inc/MantidQtCustomInterfaces/Indirect/Elwin.h
 	inc/MantidQtCustomInterfaces/Indirect/Fury.h
 	inc/MantidQtCustomInterfaces/Indirect/FuryFit.h
-	inc/MantidQtCustomInterfaces/Homer.h
-	inc/MantidQtCustomInterfaces/Indirect/IDATab.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectBayesTab.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectCalibration.h
@@ -109,10 +109,13 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Indirect/IndirectTools.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectToolsTab.h
   inc/MantidQtCustomInterfaces/Indirect/IndirectTab.h
-	inc/MantidQtCustomInterfaces/IReflPresenter.h
-	inc/MantidQtCustomInterfaces/IReflSearcher.h
 	inc/MantidQtCustomInterfaces/Indirect/JumpFit.h
 	inc/MantidQtCustomInterfaces/Indirect/MSDFit.h
+	inc/MantidQtCustomInterfaces/Indirect/Quasi.h
+	inc/MantidQtCustomInterfaces/Indirect/ResNorm.h
+	inc/MantidQtCustomInterfaces/Indirect/Stretch.h
+	inc/MantidQtCustomInterfaces/IReflPresenter.h
+	inc/MantidQtCustomInterfaces/IReflSearcher.h
 	inc/MantidQtCustomInterfaces/MantidEV.h
 	inc/MantidQtCustomInterfaces/MantidEVWorker.h
 	inc/MantidQtCustomInterfaces/MultiDatasetFit.h
@@ -146,15 +149,12 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/QReflTableModel.h
 	inc/MantidQtCustomInterfaces/QtReflMainView.h
 	inc/MantidQtCustomInterfaces/QtReflOptionsDialog.h
-	inc/MantidQtCustomInterfaces/Indirect/Quasi.h
-	inc/MantidQtCustomInterfaces/Indirect/ResNorm.h
 	inc/MantidQtCustomInterfaces/SANSAddFiles.h
 	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
 	inc/MantidQtCustomInterfaces/SANSEventSlicing.h
 	inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
 	inc/MantidQtCustomInterfaces/SANSRunWindow.h
 	inc/MantidQtCustomInterfaces/StepScan.h
-	inc/MantidQtCustomInterfaces/Indirect/Stretch.h
 	inc/MantidQtCustomInterfaces/Updateable.h
 	inc/MantidQtCustomInterfaces/UserInputValidator.h
 	inc/MantidQtCustomInterfaces/deltaECalc.h
@@ -163,16 +163,16 @@ set ( INC_FILES
 set ( SRC_UNITY_IGNORE_FILES )
 
 set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
+                inc/MantidQtCustomInterfaces/DataComparison.h
+                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
+                inc/MantidQtCustomInterfaces/Homer.h
+                inc/MantidQtCustomInterfaces/Indirect/IDATab.h
                 inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.h
                 inc/MantidQtCustomInterfaces/Indirect/CalcCorr.h
                 inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
-                inc/MantidQtCustomInterfaces/DataComparison.h
-                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/Indirect/Elwin.h
                 inc/MantidQtCustomInterfaces/Indirect/Fury.h
                 inc/MantidQtCustomInterfaces/Indirect/FuryFit.h
-                inc/MantidQtCustomInterfaces/Homer.h
-                inc/MantidQtCustomInterfaces/Indirect/IDATab.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectBayesTab.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectCalibration.h
@@ -197,6 +197,9 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectTab.h
                 inc/MantidQtCustomInterfaces/Indirect/JumpFit.h
                 inc/MantidQtCustomInterfaces/Indirect/MSDFit.h
+                inc/MantidQtCustomInterfaces/Indirect/Quasi.h
+                inc/MantidQtCustomInterfaces/Indirect/ResNorm.h
+                inc/MantidQtCustomInterfaces/Indirect/Stretch.h
                 inc/MantidQtCustomInterfaces/MultiDatasetFit.h
                 inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h
                 inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.h
@@ -217,14 +220,11 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/QReflTableModel.h
                 inc/MantidQtCustomInterfaces/QtReflMainView.h
                 inc/MantidQtCustomInterfaces/QtReflOptionsDialog.h
-                inc/MantidQtCustomInterfaces/Indirect/Quasi.h
-                inc/MantidQtCustomInterfaces/Indirect/ResNorm.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSEventSlicing.h              
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
-                inc/MantidQtCustomInterfaces/Indirect/Stretch.h
                 inc/MantidQtCustomInterfaces/MantidEV.h
                 inc/MantidQtCustomInterfaces/StepScan.h
 )
