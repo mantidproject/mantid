@@ -153,7 +153,7 @@ Single
 ######
 
 .. interface:: Data Reduction
-  :widget: pageRebinSingle
+  :widget: pgSingleRebin
 
 In this mode only a single binning range is defined as  a range and width.
 
@@ -161,7 +161,7 @@ Multiple
 ########
 
 .. interface:: Data Reduction
-  :widget: pageRebinString
+  :widget: pgMultipleRebin
 
 In this mode multiple binning ranges can be defined using he rebin string syntax
 used by the :ref:`Rebin <algm-Rebin>` algorithm.
@@ -237,7 +237,7 @@ Diagnostics
 -----------
 
 .. interface:: Data Reduction
-  :widget: tabTimeSlice
+  :widget: tabDiagnostics
 
 This tab allows you to perform an integration on a raw file over a specified
 time of flight range, and is equivalent to the Slice functionality found in
@@ -318,7 +318,7 @@ Symmetrise
 ----------
 
 .. interface:: Data Reduction
-  :widget: tabSymmetrise
+  :widget: tabSymmertrise
 
 This tab allows you to take an asymmetric reduced file and symmetrise it about
 the Y axis.

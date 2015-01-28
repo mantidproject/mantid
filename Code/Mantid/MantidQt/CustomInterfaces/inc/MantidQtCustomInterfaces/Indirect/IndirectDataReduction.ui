@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>700</width>
-    <height>500</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -89,8 +89,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>656</width>
-             <height>346</height>
+             <width>100</width>
+             <height>100</height>
             </rect>
            </property>
           </widget>
@@ -113,8 +113,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>96</width>
-             <height>26</height>
+             <width>100</width>
+             <height>100</height>
             </rect>
            </property>
           </widget>
@@ -137,8 +137,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>96</width>
-             <height>26</height>
+             <width>100</width>
+             <height>100</height>
             </rect>
            </property>
           </widget>
@@ -161,8 +161,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>96</width>
-             <height>26</height>
+             <width>100</width>
+             <height>100</height>
             </rect>
            </property>
           </widget>
@@ -185,8 +185,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>96</width>
-             <height>26</height>
+             <width>100</width>
+             <height>100</height>
             </rect>
            </property>
           </widget>
@@ -209,8 +209,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>96</width>
-             <height>26</height>
+             <width>100</width>
+             <height>100</height>
             </rect>
            </property>
           </widget>
@@ -233,8 +233,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>96</width>
-             <height>26</height>
+             <width>100</width>
+             <height>100</height>
             </rect>
            </property>
           </widget>
