@@ -108,12 +108,12 @@ class ReductionWrapper(object):
         f.close()
 
 #
-    def get_validation_file_name(self):
-        """ Define file used as sample to ensure reduction validity            
-        """ 
-        return None
-#
-    def validate_result(self,BuildSampleWSIfNotPresent=False,Error=1.e-3,ToleranceRelErr=True):
+#   
+    def validate_result(self,build_validation=False,Error=1.e-3,ToleranceRelErr=True):
+        """ Overload this using build_or_validate_result to have possibility to run or validate result """ 
+        return True
+
+    def build_or_validate_result(self,sample_run,validationFile,build_validation=False,Error=1.e-3,ToleranceRelErr=True):
         """ Method validates results of the reduction against reference file provided
             by get_validation_file_name() method 
             
@@ -124,14 +124,12 @@ class ReductionWrapper(object):
             equivalent to the workspace, stored in the reference file. 
         """
 
-        validation_file = self.get_validation_file_name()
-        if not validation_file:
-           Build_validation =True
-           if not BuildSampleWSIfNotPresent:             
-              return True,'No validation defined'            
-        else:
-            sample = Load(validation_file)
-            Build_validation = False
+        if not build_validation:
+           if validationFile:
+              sample = Load(validationFile)
+           else:
+              build_validation=True
+
 
         # just in case, to be sure
         current_web_state = self._run_from_web
@@ -142,12 +140,17 @@ class ReductionWrapper(object):
         #
         self.def_advanced_properties()
         self.def_main_properties()
+        #
+        self.reducer.sample_run = sample_run
         self.reducer.prop_man.save_format=None
 
         reduced = self.reduce()
 
-        if Build_validation:
-            result_name = self.reducer.prop_man.save_file_name
+        if build_validation:
+            if validationFile:
+               result_name = os.parh.splitext(validationFile)[0]
+            else:
+               result_name = self.reducer.prop_man.save_file_name
             self.reducer.prop_man.log("*** Saving validation file with name: {0}.nxs".format(result_name),'notice')
             SaveNexus(result,Filename=result_name+'.nxs')
             return True,'Created validation file {0}.nxs'.format(result_name)
@@ -271,11 +274,12 @@ def iliad(reduce):
             input_file=None
             output_directory=None
         # add input file folder to data search directory if file has it
-        if input_file:
+        if input_file and isinstance(input_file,str):
            data_path = os.path.dirname(input_file)
            if len(data_path)>0:
               try:               
                  config.appendDataSearchDir(str(data_path))
+                 args[1] = os.path.basename(input_file)
               except: # if mantid is not available, this should ignore config
                  pass
         if output_directory:

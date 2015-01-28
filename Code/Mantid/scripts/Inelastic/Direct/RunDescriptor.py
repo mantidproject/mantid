@@ -65,6 +65,8 @@ class RunDescriptor(PropDescriptor):
            self._ws_name = None
            self._ws_cname = ''
            self._ws_suffix = '' 
+           # only one RunDescriptor can be summed under current approach. 
+           # To disentangle one run descriptor from another -- set up binding
            self._bind_to_sum = False
            self._clear_old_ws(old_ws_name,self._ws_name,clear_fext)
            RunDescriptor._PropMan.sum_runs.clear_sum()
@@ -125,7 +127,7 @@ class RunDescriptor(PropDescriptor):
        else:
            clear_fext = True
            self._run_number = int(value)
-           if instance and instance.sum_runs:
+           if self._bind_to_sum and instance and instance.sum_runs:
               num2_sum = RunDescriptor._PropMan.sum_runs.set_last_ind2sum(self._run_number)                     
               if num2_sum == 0:
                 self._bind_to_sum = False

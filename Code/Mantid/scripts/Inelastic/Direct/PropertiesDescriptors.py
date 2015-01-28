@@ -51,7 +51,6 @@ class SumRuns(PropDescriptor):
     def __get__(self,instance,holder_class):
        if not self._holder:
            self._holder = holder_class
-
        if instance is None:
            return self
        return self._sum_runs
