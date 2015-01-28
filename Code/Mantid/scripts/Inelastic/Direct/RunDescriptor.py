@@ -32,7 +32,7 @@ class RunDescriptor(PropDescriptor):
                                     # other workspaces
         self._ws_cname = ''
         self._ws_suffix = ''
-        self._bind_with_sum=False
+        self._bind_to_sum = False
 
         #
         if not DocString is None:
@@ -65,7 +65,7 @@ class RunDescriptor(PropDescriptor):
            self._ws_name = None
            self._ws_cname = ''
            self._ws_suffix = '' 
-           self._bind_with_sum = False
+           self._bind_to_sum = False
            self._clear_old_ws(old_ws_name,self._ws_name,clear_fext)
            RunDescriptor._PropMan.sum_runs.clear_sum()
            return
@@ -79,7 +79,7 @@ class RunDescriptor(PropDescriptor):
                 self._split_ws_name(ws_name)
                 self.synchronize_ws(value)
                 self._clear_old_ws(old_ws_name,self._ws_name,clear_fext)
-                self._bind_with_sum = False
+                self._bind_to_sum = False
                 RunDescriptor._PropMan.sum_runs.clear_sum()
                 return
            #return
@@ -94,17 +94,15 @@ class RunDescriptor(PropDescriptor):
 
               if isinstance(run_num,list):
                   RunDescriptor._PropMan.sum_runs.set_list2add(run_num,file_path,fext)
-                  self._bind_with_sum = True
+                  self._bind_to_sum = True
                   if instance.sum_runs:
                      last_run_ind = RunDescriptor._PropMan.sum_runs.get_last_ind2sum()
                      main_fext = fext[last_run_ind].lower()
                      self._run_file_path = file_path[last_run_ind].lower()
               else:
+                  self.__set__(instance,run_num)
                   self._run_file_path = file_path
                   main_fext = fext.lower()
-                  self._run_number = int(run_num)
-                  if instance.sum_runs:
-                     RunDescriptor._PropMan.sum_runs.set_last_ind2sum(self._run_number)                     
                   
               #
               if len(main_fext) > 0:
@@ -113,7 +111,10 @@ class RunDescriptor(PropDescriptor):
                  self._run_ext = None
               clear_fext = False
        elif isinstance(value,list):
-           self._bind_with_sum = True
+           if len(value) == 1:
+               self.__set__(instance,value[0])
+               return
+           self._bind_to_sum = True
            RunDescriptor._PropMan.sum_runs.set_list2add(value)
            if instance.sum_runs:
                 last_run_ind = RunDescriptor._PropMan.sum_runs.get_last_ind2sum()
@@ -122,10 +123,13 @@ class RunDescriptor(PropDescriptor):
                self._run_number = value[0]
            clear_fext = True
        else:
-           self._run_number = int(value)
            clear_fext = True
+           self._run_number = int(value)
            if instance and instance.sum_runs:
-              RunDescriptor._PropMan.sum_runs.set_last_ind2sum(self._run_number)                     
+              num2_sum = RunDescriptor._PropMan.sum_runs.set_last_ind2sum(self._run_number)                     
+              if num2_sum == 0:
+                self._bind_to_sum = False
+                instance.sum_runs = False
 
 
        self._ws_cname = ''
@@ -148,7 +152,18 @@ class RunDescriptor(PropDescriptor):
             return True
         else:
             return False
-
+#--------------------------------------------------------------------------------------------------------------------
+    def get_run_list(self):
+        """ Returns list of the files, assigned to current property """
+        current_run = self.run_number()
+        if self._bind_to_sum:
+            runs = RunDescriptor._PropMan.sum_runs.get_runs()
+            if current_run in runs:
+                return runs
+            else:
+                return [current_run]
+        else:
+           return [current_run]
 #--------------------------------------------------------------------------------------------------------------------
     def set_action_suffix(self,suffix=None):
         """ method to set part of the workspace name, which indicate some action performed over this workspace           
@@ -252,7 +267,7 @@ class RunDescriptor(PropDescriptor):
                prefer_ws_calibration = self._check_claibration_source()
                inst_name = RunDescriptor._holder.short_inst_name
                calibration = RunDescriptor._holder.det_cal_file
-               if self._bind_with_sum and RunDescriptor._holder.sum_runs : # Sum runs
+               if self._bind_to_sum and RunDescriptor._holder.sum_runs : # Sum runs
                    ws = RunDescriptor._PropMan.sum_runs.load_and_sum_runs(inst_name,RunDescriptor._holder.load_monitors_with_workspace)
                else: # load current workspace
                    ws = self.load_run(inst_name, calibration,False, RunDescriptor._holder.load_monitors_with_workspace,prefer_ws_calibration)
