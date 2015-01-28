@@ -7,7 +7,6 @@ namespace MantidQt
 {
 	namespace CustomInterfaces
 	{
-
     //----------------------------------------------------------------------------------------------
     /** Constructor
      */
@@ -20,16 +19,6 @@ namespace MantidQt
      */
     IndirectSimulationTab::~IndirectSimulationTab()
     {
-    }
-
-    /**
-     * Method to build a URL to the appropriate page on the wiki for this tab.
-     *
-     * @return The URL to the wiki page
-     */
-    QString IndirectSimulationTab::tabHelpURL()
-    {
-      return "http://www.mantidproject.org/IndirectSimualtion:" + help();
     }
 
   }

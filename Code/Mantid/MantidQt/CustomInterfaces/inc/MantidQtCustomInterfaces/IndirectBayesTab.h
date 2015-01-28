@@ -81,11 +81,7 @@ namespace MantidQt
 			IndirectBayesTab(QWidget * parent = 0);
 			~IndirectBayesTab();
 
-			/// Returns a URL for the wiki help page for this interface
-			QString tabHelpURL();
-
 			/// Base methods implemented in derived classes
-			virtual QString help() = 0;
 			virtual void loadSettings(const QSettings& settings) = 0;
 
 		signals:

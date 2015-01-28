@@ -16,7 +16,6 @@ namespace MantidQt
 			Stretch(QWidget * parent = 0);
 
 			// Inherited methods from IndirectBayesTab
-			QString help() { return "Stretch"; };
       void setup();
 			bool validate();
 			void run();

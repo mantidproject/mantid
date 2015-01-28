@@ -6,7 +6,6 @@ from mantid.simpleapi import *
 from mantid import api
 from mantid.kernel import funcreturns
 
-import unittest
 
 # the class which is responsible for data reduction
 global Reducer
@@ -40,17 +39,6 @@ def setup(instname=None,reload=False):
                return  # has been already defined
 
     Reducer = DRC.setup_reducer(instname,reload)
-
-def help(keyword=None) :
-    """function returns help on reduction parameters.
-
-       Returns the list of the parameters available if provided without arguments
-       or the description and the default value for the key requested
-    """
-    if Reducer == None:
-        raise ValueError("Reducer has not been defined, call setup(instrument_name) first.")
-
-    Reducer.help(keyword)
 
 
 def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=None,second_wb=None,**kwargs):
@@ -141,13 +129,13 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 
     """
     global Reducer
-    if Reducer is None or Reducer.prop_man.instrument is None:
+    if Reducer is None or Reducer.instrument is None:
         raise ValueError("instrument has not been defined, call setup(instrument_name) first.")
 # --------------------------------------------------------------------------------------------------------
 #    Deal with mandatory parameters for this and may be some top level procedures
 # --------------------------------------------------------------------------------------------------------
     if sample_run:
-        Reducer.prop_man.sample_run = sample_run
+        Reducer.sample_run = sample_run
     try:
          n,r=funcreturns.lhs_info('both')
          wksp_out=r[0]
@@ -253,13 +241,15 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
     kwargs['sample_rmm']         = samp_rmm
 
     if sample_run:
-        Reducer.prop_man.sample_run = sample_run
+        Reducer.sample_run = sample_run
     try:
         n,r=funcreturns.lhs_info('both')
         results_name=r[0]
 
     except:
-        results_name = Reducer.prop_man.get_sample_ws_name();
+        results_name = Reducer.prop_man.get_sample_ws_name()
+    if wb_for_run == wb_for_monovanadium: # wb_for_monovanadium property does not accept duplicated workspace
+        wb_for_monovanadium = None        # if this value is none, it is constructed to be equal to wb_for_run
 
     wksp_out = arb_units(wb_for_run,sample_run,ei_guess,rebin,map_file,monovan_run,wb_for_monovanadium,**kwargs)
 
@@ -268,79 +258,6 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
         RenameWorkspace(InputWorkspace=wksp_out,OutputWorkspace=results_name)
 
     return wksp_out
-
-
-
-
-
-def process_legacy_parameters(**kwargs) :
-    """ The method to deal with old parameters which have logi c different from default and easy to process using
-        subprogram. All other parameters just copied to output
-    """
-    params = dict();
-    for key,value in kwargs.iteritems():
-        if key == 'hardmaskOnly': # legacy key defines other mask file here
-            params["hard_mask_file"] = value;
-            params["use_hard_mask_only"] = True;
-        elif key == 'hardmaskPlus': # legacy key defines other mask file here
-            params["hard_mask_file"] = value;
-            params["use_hard_mask_only"] = False;
-        else:
-            params[key]=value;
-
-    # Check all possible ways to define hard mask file:
-    if 'hard_mask_file' in params and not params['hard_mask_file'] is None:
-        if type(params['hard_mask_file']) == str and params['hard_mask_file']=="None":
-            params['hard_mask_file'] = None;
-        elif type(params['hard_mask_file']) == bool:
-           if  params['hard_mask_file']:
-               raise  TypeError("hard_mask_file has to be a file name or None. It can not be boolean True")
-           else:
-               params['hard_mask_file'] = None;
-        elif len(params['hard_mask_file']) == 0:
-             params['hard_mask_file'] = None;
-
-
-    return params
-
-
-
-
-def sum_files(inst_name, accumulator, files):
-    """ Custom sum for multiple runs
-
-        Left for compatibility as internal summation had some unspecified problems.
-        Will go in a future
-    """
-    accum_name = accumulator
-    if isinstance(accum_name,api.Workspace): # it is actually workspace
-        accum_name  = accumulator.name()
-
-
-    if type(files) == list:
-         #tmp_suffix = '_plus_tmp'
-
-         for filename in files:
-              print 'Summing run ',filename,' to workspace ',accumulator
-              temp = common.load_run(inst_name,filename, force=False,load_with_workspace=Reducer.load_monitors_with_workspace)
-
-              if accum_name in mtd: # add current workspace to the existing one
-                  if not isinstance(accumulator,api.Workspace):
-                      accumulator = mtd[accum_name]
-                  accumulator+=  temp
-                  DeleteWorkspace(Workspace=temp)
-              else:
-                   print 'Create output workspace: '
-                   accumulator=RenameWorkspace(InputWorkspace=temp,OutputWorkspace=accum_name)
-
-         return accumulator
-    else:
-        temp = common.load_run(inst_name,files, force=False,load_with_workspace=Reducer.load_monitors_with_workspace)
-        accumulator=RenameWorkspace(InputWorkspace=temp,OutputWorkspace=accum_name)
-        return accumulator;
-
-
-
 
 
 

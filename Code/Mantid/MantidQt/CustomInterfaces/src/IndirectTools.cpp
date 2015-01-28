@@ -1,4 +1,5 @@
 #include "MantidKernel/ConfigService.h"
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/IndirectTools.h"
 #include "MantidQtCustomInterfaces/IndirectTransmissionCalc.h"
@@ -119,9 +120,7 @@ void IndirectTools::runClicked()
  */
 void IndirectTools::helpClicked()
 {
-	int tabIndex = m_uiForm.IndirectToolsTabs->currentIndex();
-	QString url = m_tabs[tabIndex]->tabHelpURL();
-	QDesktopServices::openUrl(QUrl(url));
+  MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Indirect_Tools"));
 }
 
 /**

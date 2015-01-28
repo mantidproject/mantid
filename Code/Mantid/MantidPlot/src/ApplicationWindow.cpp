@@ -7085,11 +7085,38 @@ void ApplicationWindow::showGeneralPlotDialog()
   if (!plot)
     return;
 
-  if (plot->isA("MultiLayer") && dynamic_cast<MultiLayer*>(plot)->layers())
-    showPlotDialog();
-  else if (plot->isA("Graph3D")){
+  if (plot->isA("MultiLayer"))
+  {
+    // do the dynamic_casts inside a try/c, as there may be issues with the plots
+    // (source data/table/matrix has been removed/closed, etc.)
+    MultiLayer* ml;
+    try
+    {
+      ml = dynamic_cast<MultiLayer*>(plot);
+    }
+    catch(std::runtime_error& )
+    {
+      g_log.error() << "Failed to open general plot dialog for multi layer plot";
+      return;
+    }
+    if (ml->layers())
+      showPlotDialog();
+  }
+  else if (plot->isA("Graph3D"))
+  {
     QDialog* gd = showScaleDialog();
-    dynamic_cast<Plot3DDialog*>(gd)->showGeneralTab();
+    Plot3DDialog* plot3D;
+    try
+    {
+      plot3D = dynamic_cast<Plot3DDialog*>(gd);
+    }
+    catch(std::runtime_error& )
+    {
+      g_log.error() << "Failed to open general plot dialog for 3D plot";
+      return;
+    }
+    if(plot3D)
+      plot3D->showGeneralTab();
   }
 }
 
@@ -7100,10 +7127,36 @@ void ApplicationWindow::showAxisDialog()
     return;
 
   QDialog* gd = showScaleDialog();
-  if (gd && plot->isA("MultiLayer") && dynamic_cast<MultiLayer*>(plot)->layers())
-    dynamic_cast<AxesDialog*>(gd)->showAxesPage();
+  if (gd && plot->isA("MultiLayer"))
+  {
+    MultiLayer* ml;
+    try
+    {
+      ml = dynamic_cast<MultiLayer*>(plot);
+    }
+    catch(std::runtime_error& )
+    {
+      g_log.error() << "Failed to open axis dialog for multi layer plot";
+      return;
+    }
+    if (ml && ml->layers())
+      dynamic_cast<AxesDialog*>(gd)->showAxesPage();
+  }
   else if (gd && plot->isA("Graph3D"))
-    dynamic_cast<Plot3DDialog*>(gd)->showAxisTab();
+  {
+    Plot3DDialog* p3d;
+    try
+    {
+      p3d = dynamic_cast<Plot3DDialog*>(gd);
+    }
+    catch(std::runtime_error& )
+    {
+      g_log.error() << "Failed to open axis dialog for multi layer plot";
+      return;
+    }
+    if (p3d)
+      p3d->showAxisTab();
+  }
 }
 
 void ApplicationWindow::showGridDialog()
@@ -7120,7 +7173,17 @@ QDialog* ApplicationWindow::showScaleDialog()
     return 0;
 
   if (w->isA("MultiLayer")){
-    if (dynamic_cast<MultiLayer*>(w)->isEmpty())
+    MultiLayer* ml;
+    try
+    {
+      ml = dynamic_cast<MultiLayer*>(w);
+    }
+    catch(std::runtime_error& )
+    {
+      g_log.error() << "Failed to open scale dialog for multi layer plot";
+      return 0;
+    }
+    if (!ml || ml->isEmpty())
       return 0;
 
     Graph* g = dynamic_cast<MultiLayer*>(w)->activeGraph();

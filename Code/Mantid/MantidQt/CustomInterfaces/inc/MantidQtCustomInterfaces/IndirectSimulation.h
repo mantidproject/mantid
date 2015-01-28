@@ -71,7 +71,7 @@ namespace MantidQt
     private slots:
       /// Slot for clicking on the run button
       void runClicked();
-      /// Slot for clicking on the hlep button
+      /// Slot for clicking on the help button
       void helpClicked();
       /// Slot for clicking on the manage directories button
       void manageUserDirectories();
