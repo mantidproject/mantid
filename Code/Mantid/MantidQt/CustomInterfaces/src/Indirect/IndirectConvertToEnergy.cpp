@@ -33,8 +33,6 @@ namespace CustomInterfaces
     connect(m_uiForm.dsRunFiles, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
     // Reverts run button back to normal when file finding has finished
     connect(m_uiForm.dsRunFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
-    // Handle algorithm completion
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
     // Re-validate when certain inputs are changed
     connect(m_uiForm.spRebinLow, SIGNAL(valueChanged(double)), this, SLOT(validate()));
@@ -184,6 +182,9 @@ namespace CustomInterfaces
     }
 
     m_batchAlgoRunner->addAlgorithm(reductionAlg);
+
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
     m_batchAlgoRunner->executeBatchAsync();
   }
 
@@ -197,6 +198,8 @@ namespace CustomInterfaces
    */
   void IndirectConvertToEnergy::algorithmComplete(bool error)
   {
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+
     if(error)
       return;
 
@@ -382,26 +385,9 @@ namespace CustomInterfaces
       return;
     }
 
-    bool ok;
-    QString spectraRange = QInputDialog::getText(0, "Insert Spectra Ranges", "Range: ", QLineEdit::Normal, m_uiForm.spSpectraMin->text() +"-"+ m_uiForm.spSpectraMax->text(), &ok);
-
-    if(!ok || spectraRange.isEmpty())
-      return;
-
-    QStringList specList = spectraRange.split("-");
-    if(specList.size() != 2)
-    {
-      emit showMessageBox("Invalid input. Must be of form <SpecMin>-<SpecMax>");
-      return;
-    }
-
     std::vector<int> detectorRange;
-    detectorRange.push_back(specList[0].toInt());
-
-    if(specList.size() == 1)
-      detectorRange.push_back(specList[0].toInt() + 1);
-    else
-      detectorRange.push_back(specList[1].toInt() + 1);
+    detectorRange.push_back(m_uiForm.spSpectraMin->value());
+    detectorRange.push_back(m_uiForm.spSpectraMax->value());
 
     QString rawFile = m_uiForm.dsRunFiles->getFirstFilename();
     QFileInfo rawFileInfo(rawFile);
@@ -411,8 +397,8 @@ namespace CustomInterfaces
     loadAlg->initialize();
     loadAlg->setProperty("Filename", rawFile.toStdString());
     loadAlg->setProperty("OutputWorkspace", name);
-    loadAlg->setProperty("SpectrumMin", specList[0].toStdString());
-    loadAlg->setProperty("SpectrumMax", specList[1].toStdString());
+    loadAlg->setProperty("SpectrumMin", detectorRange[0]);
+    loadAlg->setProperty("SpectrumMax", detectorRange[1]);
     m_batchAlgoRunner->addAlgorithm(loadAlg);
 
     BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromLoad;
@@ -456,6 +442,7 @@ namespace CustomInterfaces
       m_batchAlgoRunner->addAlgorithm(rawGroupAlg, inputFromLoad);
     }
 
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
     m_batchAlgoRunner->executeBatchAsync();
   }
