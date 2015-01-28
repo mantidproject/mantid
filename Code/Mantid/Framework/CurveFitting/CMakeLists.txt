@@ -29,6 +29,7 @@ set ( SRC_FILES
 	src/DerivMinimizer.cpp
 	src/DiffRotDiscreteCircle.cpp
 	src/DiffSphere.cpp
+	src/DynamicKuboToyabe.cpp
 	src/EndErfc.cpp
 	src/ExpDecay.cpp
 	src/ExpDecayMuon.cpp
@@ -135,6 +136,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/DiffRotDiscreteCircle.h
 	inc/MantidCurveFitting/DiffSphere.h
 	inc/MantidCurveFitting/DllConfig.h
+	inc/MantidCurveFitting/DynamicKuboToyabe.h
 	inc/MantidCurveFitting/EndErfc.h
 	inc/MantidCurveFitting/ExpDecay.h
 	inc/MantidCurveFitting/ExpDecayMuon.h
