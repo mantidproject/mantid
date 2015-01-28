@@ -1,4 +1,5 @@
 #include "MantidKernel/ConfigService.h"
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectSimulation.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectMolDyn.h"
@@ -120,9 +121,7 @@ void IndirectSimulation::runClicked()
  */
 void IndirectSimulation::helpClicked()
 {
-	int tabIndex = m_uiForm.IndirectSimulationTabs->currentIndex();
-	QString url = m_simulationTabs[tabIndex]->tabHelpURL();
-	QDesktopServices::openUrl(QUrl(url));
+  MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Indirect_Simulation"));
 }
 
 /**

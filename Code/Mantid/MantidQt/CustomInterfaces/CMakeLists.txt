@@ -2,6 +2,7 @@ set ( SRC_FILES
 	src/Indirect/ApplyCorr.cpp
 	src/Indirect/CalcCorr.cpp
 	src/Indirect/ConvFit.cpp
+  src/DataComparison.cpp
 	src/DirectConvertToEnergy.cpp
 	src/Indirect/Elwin.cpp
 	src/Indirect/Fury.cpp
@@ -78,6 +79,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Background.h
 	inc/MantidQtCustomInterfaces/Indirect/CalcCorr.h
 	inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
+  inc/MantidQtCustomInterfaces/DataComparison.h
 	inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/DllConfig.h
 	inc/MantidQtCustomInterfaces/Indirect/Elwin.h
@@ -164,6 +166,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.h
                 inc/MantidQtCustomInterfaces/Indirect/CalcCorr.h
                 inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
+                inc/MantidQtCustomInterfaces/DataComparison.h
                 inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/Indirect/Elwin.h
                 inc/MantidQtCustomInterfaces/Indirect/Fury.h
@@ -227,6 +230,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
+               inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.ui
                inc/MantidQtCustomInterfaces/Indirect/CalcCorr.ui

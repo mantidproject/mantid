@@ -31,16 +31,6 @@ namespace MantidQt
     }
 
     /**
-     * Method to build a URL to the appropriate page on the wiki for this tab.
-     *
-     * @return The URL to the wiki page
-     */
-    QString IndirectBayesTab::tabHelpURL()
-    {
-      return "http://www.mantidproject.org/IndirectBayes:" + help();
-    }
-
-    /**
      * Emits a signal to run a python script using the method in the parent
      * UserSubWindow
      *

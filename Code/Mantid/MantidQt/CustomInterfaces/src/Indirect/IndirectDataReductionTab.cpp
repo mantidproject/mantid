@@ -176,7 +176,8 @@ namespace CustomInterfaces
     loadInstAlg->execute();
     energyWs = loadInstAlg->getProperty("Workspace");
 
-    QString ipfFilename = instName + "_" + analyser + "_" + reflection + "_Parameters.xml";
+    std::string idfDirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
+    QString ipfFilename = QString::fromStdString(idfDirectory) + instName + "_" + analyser + "_" + reflection + "_Parameters.xml";
 
     IAlgorithm_sptr loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
     loadParamAlg->setChild(true);

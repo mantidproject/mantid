@@ -3,6 +3,7 @@
 //----------------------
 #include "MantidQtCustomInterfaces/Indirect/IndirectDiffractionReduction.h"
 
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Logger.h"
@@ -417,8 +418,7 @@ void IndirectDiffractionReduction::openDirectoryDialog()
  */
 void IndirectDiffractionReduction::help()
 {
-  QString url = "http://www.mantidproject.org/Indirect_Diffraction_Reduction";
-  QDesktopServices::openUrl(QUrl(url));
+  MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Indirect_Diffraction"));
 }
 
 void IndirectDiffractionReduction::initLocalPython()

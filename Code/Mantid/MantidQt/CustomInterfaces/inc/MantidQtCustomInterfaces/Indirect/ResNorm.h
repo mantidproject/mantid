@@ -16,7 +16,6 @@ namespace MantidQt
 			ResNorm(QWidget * parent = 0);
 
 			// Inherited methods from IndirectBayesTab
-			QString help() { return "ResNorm"; };
       void setup();
 			bool validate();
 			void run();

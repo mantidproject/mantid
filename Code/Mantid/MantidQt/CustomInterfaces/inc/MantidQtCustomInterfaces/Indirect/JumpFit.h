@@ -16,7 +16,6 @@ namespace MantidQt
 			JumpFit(QWidget * parent = 0);
 
 			// Inherited methods from IndirectBayesTab
-			QString help() { return "JumpFit"; };
       void setup();
 			bool validate();
 			void run();

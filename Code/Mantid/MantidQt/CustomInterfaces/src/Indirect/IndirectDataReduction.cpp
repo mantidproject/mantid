@@ -7,6 +7,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectCalibration.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectConvertToEnergy.h"
@@ -79,28 +80,7 @@ IndirectDataReduction::~IndirectDataReduction()
  */
 void IndirectDataReduction::helpClicked()
 {
-
-  QString tabName = m_uiForm.twIDRTabs->tabText(
-      m_uiForm.twIDRTabs->currentIndex());
-
-  QString url = "http://www.mantidproject.org/Indirect:";
-
-  if ( tabName == "Energy Transfer" )
-    url += "EnergyTransfer";
-  else if ( tabName == "Calibration" )
-    url += "Calibration";
-  else if ( tabName == "Diagnostics" )
-    url += "Diagnostics";
-  else if (tabName == "Symmetrise")
-    url += "Symmetrise";
-  else if ( tabName == "S(Q, w)" )
-    url += "SofQW";
-  else if (tabName == "Transmission")
-    url += "Transmission";
-  else if (tabName == "Moments")
-    url += "Moments";
-
-  QDesktopServices::openUrl(QUrl(url));
+  MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Indirect_DataReduction"));
 }
 
 

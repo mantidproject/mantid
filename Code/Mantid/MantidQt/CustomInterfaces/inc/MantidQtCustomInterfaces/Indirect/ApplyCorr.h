@@ -31,7 +31,6 @@ namespace IDA
     virtual void run();
     virtual bool validate();
     virtual void loadSettings(const QSettings & settings);
-    virtual QString helpURL() {return "AbsCor";}
     /// ask the user if they wish to rebin the can
     bool requireCanRebin();
 

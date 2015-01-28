@@ -15,8 +15,6 @@ namespace MantidQt
 		public:
 			IndirectMolDyn(QWidget * parent = 0);
 
-			QString help() { return "IndirectMolDyn"; };
-
 			// Inherited methods from IndirectTab
       void setup();
 			bool validate();
