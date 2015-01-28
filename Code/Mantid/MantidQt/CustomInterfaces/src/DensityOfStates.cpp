@@ -42,11 +42,18 @@ namespace MantidQt
 		{
       UserInputValidator uiv;
 
+      // Ensure there are ions selected when using DensityOfStates sectrum with .phonon file
+      QString filename = m_uiForm.mwInputFile->getFirstFilename();
+      QFileInfo fileInfo(filename);
+      bool canDoPartialDoS = fileInfo.suffix() == "phonon";
+
       QString specType = m_uiForm.cbSpectrumType->currentText();
       auto items = m_uiForm.lwIons->selectedItems();
-      if(specType == "DensityOfStates" && items.size() < 1)
+
+      if(specType == "DensityOfStates" && canDoPartialDoS && items.size() < 1)
         uiv.addErrorMessage("Must select at least one ion for DensityOfStates.");
 
+      // Give error message when there are errors
       if(!uiv.isAllInputValid())
         emit showMessageBox(uiv.generateErrorMessage());
 
@@ -64,8 +71,9 @@ namespace MantidQt
 
       QString filename = m_uiForm.mwInputFile->getFirstFilename();
       QFileInfo inputFileInfo(filename);
-      m_outputWsName = inputFileInfo.baseName();
       QString specType = m_uiForm.cbSpectrumType->currentText();
+
+      m_outputWsName = inputFileInfo.baseName() + "_" + specType;
 
       // Set common properties
       dosAlgo->setProperty("File", filename.toStdString());
@@ -121,7 +129,8 @@ namespace MantidQt
 
       m_batchAlgoRunner->addAlgorithm(dosAlgo);
 
-      disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(ionLoadComplete(bool)));
+      //TODO: Saving
+
       connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(dosAlgoComplete(bool)));
       m_batchAlgoRunner->executeBatchAsync();
 		}
@@ -134,10 +143,19 @@ namespace MantidQt
      */
     void DensityOfStates::dosAlgoComplete(bool error)
     {
+      disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(dosAlgoComplete(bool)));
+
       if(error)
         return;
 
-      //TODO: plotting/saving
+      // Handle spectra plotting
+      if(m_uiForm.ckPlot->isChecked())
+      {
+        QString pyInput = "from mantidplot import plotSpectrum, plot2D\n"
+                          "plotSpectrum('" + m_outputWsName + "', 0)\n";
+
+        runPythonCode(pyInput);
+      }
     }
 
 
@@ -148,17 +166,38 @@ namespace MantidQt
     {
       QString filename = m_uiForm.mwInputFile->getFirstFilename();
 
-      IAlgorithm_sptr ionTableAlgo = AlgorithmManager::Instance().create("DensityOfStates");
-      ionTableAlgo->initialize();
-      ionTableAlgo->setProperty("File", filename.toStdString());
-      ionTableAlgo->setProperty("SpectrumType", "IonTable");
-      ionTableAlgo->setProperty("OutputWorkspace", "__dos_ions");
+      // Check if we have a .phonon file
+      QFileInfo fileInfo(filename);
+      bool canDoPartialDoS = fileInfo.suffix() == "phonon";
 
-      m_batchAlgoRunner->addAlgorithm(ionTableAlgo);
+      // Need a .phonon file for ion contributions
+      if(canDoPartialDoS)
+      {
+        // Load the ion table to populate the list of ions
+        IAlgorithm_sptr ionTableAlgo = AlgorithmManager::Instance().create("DensityOfStates");
+        ionTableAlgo->initialize();
+        ionTableAlgo->setProperty("File", filename.toStdString());
+        ionTableAlgo->setProperty("SpectrumType", "IonTable");
+        ionTableAlgo->setProperty("OutputWorkspace", "__dos_ions");
 
-      disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(dosAlgoComplete(bool)));
-      connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(ionLoadComplete(bool)));
-      m_batchAlgoRunner->executeBatchAsync();
+        m_batchAlgoRunner->addAlgorithm(ionTableAlgo);
+
+        connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(ionLoadComplete(bool)));
+        m_batchAlgoRunner->executeBatchAsync();
+      }
+      else
+      {
+        m_uiForm.lwIons->clear();
+        m_uiForm.ckSumContributions->setChecked(false);
+        m_uiForm.ckCrossSectionScale->setChecked(false);
+      }
+
+      // Enable partial DOS related optons when they can be used
+      m_uiForm.lwIons->setEnabled(canDoPartialDoS);
+      m_uiForm.pbSelectAllIons->setEnabled(canDoPartialDoS);
+      m_uiForm.pbDeselectAllIons->setEnabled(canDoPartialDoS);
+      m_uiForm.ckSumContributions->setEnabled(canDoPartialDoS);
+      m_uiForm.ckCrossSectionScale->setEnabled(canDoPartialDoS);
     }
 
 
@@ -170,20 +209,28 @@ namespace MantidQt
      */
     void DensityOfStates::ionLoadComplete(bool error)
     {
+      disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(ionLoadComplete(bool)));
+
       if(error)
         g_log.error("Could not get a list of ions from .phonon file");
 
+      // Get the list of ions from algorithm
       ITableWorkspace_sptr ionTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("__dos_ions");
       Column_sptr ionColumn = ionTable->getColumn("Ion");
       size_t numIons = ionColumn->size();
 
+      // Remove old ions
       m_uiForm.lwIons->clear();
 
+      // Add ions to list
       for(size_t ion = 0; ion < numIons; ion++)
       {
         const std::string ionName = ionColumn->cell<std::string>(ion);
         m_uiForm.lwIons->addItem(QString::fromStdString(ionName));
       }
+
+      // Select all ions by default
+      m_uiForm.lwIons->selectAll();
     }
 
 
