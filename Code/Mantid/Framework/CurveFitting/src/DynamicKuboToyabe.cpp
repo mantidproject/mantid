@@ -238,6 +238,12 @@ void DynamicKuboToyabe::setActiveParameter(size_t i, double value) {
 
   setParameter( i, fabs(value), false);
 
+  if (parameterName(i)=="Nu"){
+    if (value<1e-10){
+      setParameter(i,0,false);
+    }
+  }
+
 }
 
 } // namespace CurveFitting
