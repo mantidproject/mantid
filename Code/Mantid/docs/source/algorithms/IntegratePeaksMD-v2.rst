@@ -16,8 +16,8 @@ Similar algorithms
 ##################
 
 See :ref:`algm-IntegrateEllipsoids` for a ways of integrating peaks from data collected in
-`EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_.
-
+`EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_. :ref:`algm-PeakIntensityVsRadius`
+is meant to help determine an appropriate value for `PeakRadius`.
 
 Inputs
 ######
