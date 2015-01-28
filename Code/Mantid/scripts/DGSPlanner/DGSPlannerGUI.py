@@ -1,5 +1,6 @@
 import ClassicUBInputWidget
 import MatrixUBInputWidget
+import InstrumentSetupWidget
 from PyQt4 import QtCore, QtGui
 import sys
 import mantid
@@ -13,16 +14,20 @@ class DGSPlannerGUI(QtGui.QWidget):
             self.ol=ol
         else:
             self.ol=mantid.geometry.OrientedLattice()  
+        self.instrumentWidget=InstrumentSetupWidget.InstrumentSetupWidget(self) 
+        self.setLayout(QtGui.QVBoxLayout())
+        self.layout().addWidget(self.instrumentWidget)
+        self.ublayout=QtGui.QHBoxLayout()
         self.classic=ClassicUBInputWidget.ClassicUBInputWidget(self.ol)
-        self.setLayout(QtGui.QHBoxLayout())
-        self.layout().addWidget(self.classic)
+        self.ublayout.addWidget(self.classic)
         self.classic.changed.connect(self.printUB)
         self.matrix=MatrixUBInputWidget.MatrixUBInputWidget(self.ol)
-        self.layout().addWidget(self.matrix)
+        self.ublayout.addStretch(1)
+        self.ublayout.addWidget(self.matrix)
         self.matrix.UBmodel.changed.connect(self.printUB)
         self.matrix.UBmodel.changed.connect(self.classic.updateOL)
         self.classic.changed.connect(self.matrix.UBmodel.updateOL)
-
+        self.layout().addLayout(self.ublayout)
         
     @QtCore.pyqtSlot(mantid.geometry.OrientedLattice)
     def printUB(self,ol):

@@ -89,7 +89,12 @@ class MatrixUBInputWidget(QtGui.QWidget):
         self.UBmodel = UBTableModel(self.ol,self)
         self._tableView.setModel(self.UBmodel)
         self._tableView.update()
+        self._tableView.setMinimumSize(self._tableView.sizeHintForColumn(0)*6, self._tableView.sizeHintForRow(0)*6)
+        self._tableView.setMaximumSize(self._tableView.sizeHintForColumn(0)*6, self._tableView.sizeHintForRow(0)*6)
         self.LoadIsawUBButton.clicked.connect(self.loadIsawUBDialog)
+        self.LoadIsawUBButton.setMinimumSize(self._tableView.sizeHintForColumn(0)*6, self._tableView.sizeHintForRow(0)*1.5)
+        self.LoadIsawUBButton.setMaximumSize(self._tableView.sizeHintForColumn(0)*6, self._tableView.sizeHintForRow(0)*1.5)
+        self.layout().addStretch(1)
         
     def loadIsawUBDialog(self):
         try:
