@@ -36,10 +36,10 @@ DECLARE_FUNCTION(DynamicKuboToyabe)
 //
 void DynamicKuboToyabe::init()
 {
-  declareParameter("Asym", 0.2);
-  declareParameter("Delta", 0.2);
-  declareParameter("Field",0.0);
-  declareParameter("Nu",0.0);
+  declareParameter("Asym",  0.2, "Amplitude at time 0");
+  declareParameter("Delta", 0.2, "Local field");
+  declareParameter("Field", 0.0, "External field");
+  declareParameter("Nu",    0.0, "Hopping rate");
   //declareParameter("EndX",15);
 }
 
@@ -197,13 +197,11 @@ void DynamicKuboToyabe::function1D(double* out, const double* xValues, const siz
 
   // Non-zero hopping rate
 	else {
-
     const int n = 1000;
     const double stepsize = fabs(xValues[nData-1]/n);
     // do{stepsizeTemp=stepsizeTemp/10;nTemp=nTemp*10; }while (xValues[0]<stepsizeTemp);
     //make sure stepsize is smaller than spacing between xValues.
     std::vector<double> funcG(n);
-
     for (int i = 0; i < n; i++) {
 
       double Integral=0.0;
@@ -216,7 +214,8 @@ void DynamicKuboToyabe::function1D(double* out, const double* xValues, const siz
 
 		for (size_t i = 0; i < nData; i++) {
 			double a =xValues[i]/stepsize;
-			out[i] = A*(funcG.at(int(a)-1));
+      a = a<nData ? a : a-1;
+      out[i] = A*(funcG.at(int(a)));
 		}
 
    } // else hopping rate != 0
