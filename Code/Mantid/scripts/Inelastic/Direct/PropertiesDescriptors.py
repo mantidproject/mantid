@@ -25,7 +25,158 @@ class PropDescriptor(object):
 #-----------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------
+class SumRuns(PropDescriptor):
+    """ Boolean property specifies if list of files provided as input for sample_run property 
+        should be summed. 
 
+        It also specifies various auxiliary operations, defined for summing runs, so property 
+        is deeply entangled with  the sample_run property
+    """ 
+    def __init__(self,sample_run_prop):
+        # internal reference to sample run property
+        self._sample_run = sample_run_prop
+        # class containing this property
+        self._holder = None
+        #
+        self._last_ind2sum = -1
+        self._sum_runs = False
+        self._run_numbers =[]
+        self._file_guess  =[]
+        self._fext        =[]
+
+
+    #
+    def __get__(self,instance,holder_class):
+       if not self._holder:
+           self._holder = holder_class
+
+       if instance is None:
+           return self
+       return self._sum_runs
+    #
+    def __set__(self,instance,value):
+        if not self._holder:
+          from PropertyManager import PropertyManager
+          self._holder = PropertyManager
+        
+        old_value = self._sum_runs
+        if isinstance(value,bool):
+            self._sum_runs = value
+            self._last_ind2sum = -1
+        elif isinstance(value,int):
+            if value>0:
+               self._last_ind2sum = int(value)-1
+               self._sum_runs = True
+            else:
+               self._last_ind2sum = -1
+               self._sum_runs = False
+        else:
+            self._sum_runs = bool(value)
+            self._last_ind2sum = -1
+        #
+        if old_value != self._sum_runs:
+            if len(self._run_numbers) > 0 and self._sum_runs:
+               # clear previous state of sample_run
+               ind = self.get_last_ind2sum()
+               self._sample_run.__set__(None,self._run_numbers[ind])
+    #
+    def set_list2add(self,runs_to_add,fnames=None,fext=None):
+       """ Set run numbers to add together with possible file guess-es """
+       if not isinstance(runs_to_add,list):
+           raise KeyError('Can only set list of run numbers to add')
+       runs = []
+       for item in runs_to_add:
+           runs.append(int(item))
+       self._run_numbers =runs
+       if fnames:
+          self._file_guess = fnames
+       if len(self._file_guess) != len(self._run_numbers):
+           self._file_guess = ['']*len(self._run_numbers)
+
+       if fext:
+         self._fext = fext
+       if len(self._fext) != len(self._run_numbers):
+          self._fext       = ['']*len(self._run_numbers)
+    #
+    def clear_sum(self):
+        """ clear all defined summation""" 
+        # if last_to_sum is -1, sum all run list provided
+        self._last_ind2sum = -1
+        self._sum_runs = False
+        self._run_numbers =[]
+        self._file_guess  =[]
+        self._fext        =[]
+    #
+    def get_last_ind2sum(self):
+        """ get last run number contributing to sum""" 
+        if self._last_ind2sum > 0:
+           return self._last_ind2sum
+        else:
+           return len(self._run_numbers)-1
+    #
+    def set_last_ind2sum(self,run_number):
+        """ check and set last number, contributing to summation 
+            if this number is out of summation range, clear the summation
+        """
+        run_number =int(run_number)
+        if run_number in self._run_numbers:
+            self._last_ind2sum = self._run_numbers.index(run_number)
+        else:
+            self.clear_sum()
+    #
+    def load_and_sum_runs(self,inst_name,monitors_with_ws):
+
+        logger = lambda mess : (getattr(getattr(self,'_holder'),'log')(self._sample_run._holder,mess))
+        logger("*** Summing multiple runs            ****")
+
+        num_to_load = len(self._run_numbers)
+        if self._last_ind2sum > 0 and self._last_ind2sum<num_to_load:
+            num_to_load  = self._last_ind2sum 
+        logger("*** Loading #{0}/{1}, run N: {2} ".format(1,num_to_load,self._run_numbers[0]))
+
+
+        file_h = os.path.join(self._file_guess[0],'{0}{1}{2}'.format(inst_name, self._run_numbers[0],self._fext[0]))
+        ws = self._sample_run.load_file(inst_name,'Summ',False,monitors_with_ws,False,file_hint=file_h)
+
+        sum_ws_name = ws.name()
+        sum_mon_name = sum_ws_name + '_monitors'
+        AddedRunNumbers = str(self._sample_run.run_number())
+
+        for ind,run_num in enumerate(self._run_numbers[1:num_to_load]):
+
+           file_h = os.path.join(self._file_guess[ind + 1],'{0}{1}{2}'.format(inst_name,run_num,self._fext[ind + 1]))
+           logger("*** Adding  #{0}/{1}, run N: {2} ".format(ind+2,num_to_load,run_num))
+           term_name = '{0}_ADDITIVE_#{1}/{2}'.format(inst_name,ind + 2,num_to_load)#
+
+           wsp = self._sample_run.load_file(inst_name,term_name,False,monitors_with_ws,False,file_hint=file_h)
+
+           wsp_name = wsp.name()
+           wsp_mon_name = wsp_name + '_monitors'
+           Plus(LHSWorkspace=sum_ws_name,RHSWorkspace=wsp_name,OutputWorkspace=sum_ws_name,ClearRHSWorkspace=True)
+           AddedRunNumbers+=',{0}'.format(run_num)
+           if not monitors_with_ws:
+              Plus(LHSWorkspace=sum_mon_name,RHSWorkspace=wsp_mon_name,OutputWorkspace=sum_mon_name,ClearRHSWorkspace=True)
+           if wsp_name in mtd:
+               DeleteWorkspace(wsp_name)
+           if wsp_mon_name in mtd:
+               DeleteWorkspace(wsp_mon_name)
+
+        logger("*** Summing multiple runs  completed ****")
+
+        AddSampleLog(Workspace=sum_ws_name,LogName = 'SumOfRuns:',LogText=AddedRunNumbers,LogType='String')
+        ws = mtd[sum_ws_name]
+        return ws
+    #
+    def sum_ext(self):        
+        if self._sum_runs:
+            last = self.get_last_ind2sum()
+            sum_ext= "SumOf{0}".format(len(self._run_numbers[:last+1]))
+        else:
+            sum_ext = ''
+        return sum_ext
+
+#--------------------------------------------------------------------------------------------------------------------
 class IncidentEnergy(PropDescriptor):
     """ descriptor for incident energy or range of incident energies to be processed """
     def __init__(self): 
