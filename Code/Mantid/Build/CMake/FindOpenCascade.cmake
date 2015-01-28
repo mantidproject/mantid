@@ -18,50 +18,61 @@ if ( WIN32 )
   add_definitions ( -DWNT )
 endif ( WIN32 )
 
-set ( OC_REDHAT_RPM /opt/OpenCASCADE/lib64 )
+find_path ( OPENCASCADE_LIBRARY_DIR libTKernel.so PATHS
+                /opt/OpenCASCADE/lib64
+                $ENV{CASROOT}/lib64
+                /opt/OpenCASCADE/lib
+                $ENV{CASROOT}/lib
+                /opt/OpenCASCADE/lib32
+                $ENV{CASROOT}/lib32
+)
+
 find_library ( OPENCASCADE_LIB_TKERNEL
                  NAMES TKernel
-                 PATHS ${OC_REDHAT_RPM}         
+                 PATHS ${OPENCASCADE_LIBRARY_DIR}
 )
 find_library ( OPENCASCADE_LIB_TKBO
                  NAMES TKBO
-                 PATHS ${OC_REDHAT_RPM}         
+                 PATHS ${OPENCASCADE_LIBRARY_DIR}
 )
 find_library ( OPENCASCADE_LIB_TKPRIM
                  NAMES TKPrim
-                 PATHS ${OC_REDHAT_RPM}         
+                 PATHS ${OPENCASCADE_LIBRARY_DIR}
 )
 find_library ( OPENCASCADE_LIB_TKMESH
                  NAMES TKMesh
-                 PATHS ${OC_REDHAT_RPM}         
+                 PATHS ${OPENCASCADE_LIBRARY_DIR}
 )
 find_library ( OPENCASCADE_LIB_TKBREP
                  NAMES TKBRep
-                 PATHS ${OC_REDHAT_RPM}         
+                 PATHS ${OPENCASCADE_LIBRARY_DIR}
 )
 find_library ( OPENCASCADE_LIB_TKTOPALGO
                  NAMES TKTopAlgo
-                 PATHS ${OC_REDHAT_RPM}         
+                 PATHS ${OPENCASCADE_LIBRARY_DIR}
 )
 find_library ( OPENCASCADE_LIB_TKMATH
                  NAMES TKMath
-                 PATHS ${OC_REDHAT_RPM}         
+                 PATHS ${OPENCASCADE_LIBRARY_DIR}
 )
 find_library ( OPENCASCADE_LIB_TKG2D
                  NAMES TKG2d
-                 PATHS ${OC_REDHAT_RPM}         
+                 PATHS ${OPENCASCADE_LIBRARY_DIR}
 )
 
 find_library ( OPENCASCADE_LIB_TKG3D
                  NAMES TKG3d
+                 PATHS ${OPENCASCADE_LIBRARY_DIR}
 )
 
 find_library ( OPENCASCADE_LIB_TKGEOMBASE
                  NAMES TKGeomBase
+                 PATHS ${OPENCASCADE_LIBRARY_DIR}
 )
 
 find_library ( OPENCASCADE_LIB_TKGEOMAlgo
                  NAMES TKGeomAlgo
+                 PATHS ${OPENCASCADE_LIBRARY_DIR}
 )
 
 set ( OPENCASCADE_LIBRARIES
@@ -83,7 +94,7 @@ set ( OPENCASCADE_LIBRARIES
 include ( FindPackageHandleStandardArgs )
 find_package_handle_standard_args( OpenCascade DEFAULT_MSG OPENCASCADE_LIBRARIES OPENCASCADE_INCLUDE_DIR )
 
-mark_as_advanced ( OPENCASCADE_INCLUDE_DIR
+mark_as_advanced ( OPENCASCADE_INCLUDE_DIR OPENCASCADE_LIBRARY_DIR
                    OPENCASCADE_LIB_TKERNEL OPENCASCADE_LIB_TKBO 
                    OPENCASCADE_LIB_TKPRIM OPENCASCADE_LIB_TKMESH
                    OPENCASCADE_LIB_TKBREP OPENCASCADE_LIB_TKTOPALGO 
