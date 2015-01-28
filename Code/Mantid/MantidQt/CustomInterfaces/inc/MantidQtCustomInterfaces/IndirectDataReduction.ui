@@ -674,7 +674,7 @@ p, li { white-space: pre-wrap; }
                   <property name="currentIndex">
                    <number>0</number>
                   </property>
-                  <widget class="QWidget" name="page_17">
+                  <widget class="QWidget" name="pageRebinSingle">
                    <layout class="QVBoxLayout" name="verticalLayout_16">
                     <property name="spacing">
                      <number>0</number>
@@ -819,7 +819,19 @@ p, li { white-space: pre-wrap; }
                     </item>
                    </layout>
                   </widget>
-                  <widget class="QWidget" name="page_18">
+                  <widget class="QWidget" name="pageRebinString">
+                   <property name="minimumSize">
+                    <size>
+                     <width>200</width>
+                     <height>25</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>1000000</width>
+                     <height>30</height>
+                    </size>
+                   </property>
                    <layout class="QHBoxLayout" name="horizontalLayout_28">
                     <property name="spacing">
                      <number>0</number>
@@ -1787,7 +1799,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabSymmertrise">
+     <widget class="QWidget" name="tabSymmetrise">
       <attribute name="title">
        <string>Symmetrise</string>
       </attribute>

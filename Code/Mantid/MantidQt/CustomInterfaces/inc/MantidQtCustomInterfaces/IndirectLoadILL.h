@@ -20,9 +20,6 @@ namespace MantidQt
 		public:
 			IndirectLoadILL(QWidget * parent = 0);
 
-			// Inherited methods from IndirectToolsTab
-			QString help() { return "LoadILL"; };
-
 			/// Load default settings into the interface
 			void loadSettings(const QSettings& settings);
 
