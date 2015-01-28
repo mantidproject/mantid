@@ -1,15 +1,13 @@
 from mantid.simpleapi import *
 from mantid.kernel import funcreturns
-from mantid import api
 from mantid import geometry
 
 import time as time
-import glob,sys,os.path,math
-import numpy as np
+import os.path
 import copy
 
-import CommonFunctions as common
-import diagnostics
+import Direct.CommonFunctions  as common
+import Direct.diagnostics      as diagnostics
 from Direct.PropertyManager  import PropertyManager
 from Direct.RunDescriptor    import RunDescriptor
 from Direct.ReductionHelpers import extract_non_system_names
@@ -22,14 +20,14 @@ def setup_reducer(inst_name,reload_instrument=False):
     """
     try:
         return DirectEnergyConversion(inst_name,reload_instrument)
-    except RuntimeError, exc:
+    except RuntimeError:
         raise RuntimeError('Unknown instrument "%s" or wrong IDF file for this instrument, cannot continue' % inst_name)
 
 
 class DirectEnergyConversion(object):
     """
-    Performs a convert to energy assuming the provided instrument is an direct inelastic geometry instruments
-
+    Performs a convert to energy assuming the provided instrument is 
+    an direct inelastic geometry instrument
 
     The class defines various methods to allow users to convert their
     files to Energy transfer
@@ -56,10 +54,12 @@ class DirectEnergyConversion(object):
     energy_bins energy binning requested for resulting spe workspace. 
     mapfile     Mapfile -- if absent/'default' the defaults from IDF are used
     monovan_run If present will do the absolute units normalization. Number of additional parameters
-                specified in **kwargs is usually requested for this. If they are absent, program uses defaults,
-                but the defaults (e.g. sample_mass or sample_rmm ) are usually incorrect for a particular run.
+                specified in **kwargs is usually requested for this. If they are absent,
+                program uses defaults, but the defaults (e.g. sample_mass or sample_rmm )
+                are usually incorrect for a particular run.
     arguments   The dictionary containing additional keyword arguments.
-                The list of allowed additional arguments is defined in InstrName_Parameters.xml file, located in
+                The list of allowed additional arguments is defined in InstrName_Parameters.xml 
+                file, located in:
                 MantidPlot->View->Preferences->Mantid->Directories->Parameter Definitions
 
     Usage examples:
@@ -78,162 +78,157 @@ class DirectEnergyConversion(object):
 
      All available keywords are provided in InstName_Parameters.xml file
 
-     Some samples are:
-     norm_method =[monitor-1],[monitor-2][Current]
-     background  =False , True
-     fixei       =False , True
-    save_format =['.spe'],['.nxspe'],'none'
-    detector_van_range          =[20,40] in mev
+   Some samples are:
+   norm_method =[monitor-1],[monitor-2][Current]
+   background  =False , True
+   fixei       =False , True
+   save_format =['.spe'],['.nxspe'],'none'
+   detector_van_range          =[20,40] in mev
 
-    bkgd_range  =[15000,19000]  :integration range for background tests
+   bkgd_range  =[15000,19000]  :integration range for background tests
 
-      second_white     - If provided an additional set of tests is performed on this. (default = None)
-      hardmaskPlus     - A file specifying those spectra that should be masked without testing (default=None)
-      tiny             - Minimum threshold for acceptance (default = 1e-10)
-      large            - Maximum threshold for acceptance (default = 1e10)
-      bkgd_range       - A list of two numbers indicating the background range (default=instrument defaults)
-      diag_van_median_rate_limit_lo      - Lower bound defining outliers as fraction of median value (default = 0.01)
-      diag_van_median_rate_limit_hi      - Upper bound defining outliers as fraction of median value (default = 100.)
-      diag_van_median_sigma_lo           - Fraction of median to consider counting low for the white beam diag (default = 0.1)
-      diag_van_median_sigma_hi           - Fraction of median to consider counting high for the white beam diag (default = 1.5)
-      diag_van_sig  - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the
-                    difference with respect to the median value must also exceed this number of error bars (default=0.0)
-      diag_remove_zero                - If true then zeroes in the vanadium data will count as failed (default = True)
-      diag_samp_samp_median_sigma_lo  - Fraction of median to consider counting low for the white beam diag (default = 0)
-      diag_samp_samp_median_sigma_hi  - Fraction of median to consider counting high for the white beam diag (default = 2.0)
-      diag_samp_sig                   - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the
-                                        difference with respect to the median value must also exceed this number of error bars (default=3.3)
-      variation       -The number of medians the ratio of the first/second white beam can deviate from
+   second_white     - If provided an additional set of tests is performed on this. 
+                         (default = None)
+   hardmaskPlus     - A file specifying those spectra that should be masked
+                         without testing (default=None)
+   tiny             - Minimum threshold for acceptance (default = 1e-10)
+   large            - Maximum threshold for acceptance (default = 1e10)
+   bkgd_range       - A list of two numbers indicating the background range 
+                         (default=instrument defaults)
+   diag_van_median_rate_limit_lo  - Lower bound defining outliers as fraction of median value (default = 0.01)
+   diag_van_median_rate_limit_hi  - Upper bound defining outliers as fraction of median value (default = 100.)
+   diag_van_median_sigma_lo       - Fraction of median to consider counting low for the white beam diag (default = 0.1)
+   diag_van_median_sigma_hi       - Fraction of median to consider counting high for the white beam diag (default = 1.5)
+   diag_van_sig  - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the
+                   difference with respect to the median value must also exceed this number of error bars (default=0.0)
+   diag_remove_zero                - If true then zeroes in the vanadium data will count as failed (default = True)
+   diag_samp_samp_median_sigma_lo  - Fraction of median to consider counting low for the white beam diag (default = 0)
+   diag_samp_samp_median_sigma_hi  - Fraction of median to consider counting high for the white beam diag (default = 2.0)
+   diag_samp_sig        - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the
+                          difference with respect to the median value must also exceed this number of
+                          error bars (default=3.3)
+   variation       - The number of medians the ratio of the first/second white beam can deviate from
                      the average by (default=1.1)
-      bleed_test      - If true then the CreatePSDBleedMask algorithm is run
-      bleed_maxrate   - If the bleed test is on then this is the maximum framerate allowed in a tube
-      bleed_pixels    - If the bleed test is on then this is the number of pixels ignored within the
+   bleed_test      - If true then the CreatePSDBleedMask algorithm is run
+   bleed_maxrate   - If the bleed test is on then this is the maximum framerate allowed in a tube
+   bleed_pixels    - If the bleed test is on then this is the number of pixels ignored within the
                        bleed test diagnostic
-      print_diag_results - If True then the results are printed to the screen
+   print_diag_results - If True then the results are printed to the screen
 
-      diag_remove_ero =True, False (default):Diag zero counts in background range
-      bleed=True , turn bleed correction on and off on by default for Merlin and LET
+   diag_remove_ero =True, False (default):Diag zero counts in background range
+   bleed=True , turn bleed correction on and off on by default for Merlin and LET
 
-      sum =True,False(default) , sum multiple files
+   sum =True,False(default) , sum multiple files
 
-      det_cal_file= a valid detector block file and path or a raw file. Setting this
+   det_cal_file= a valid detector block file and path or a raw file. Setting this
                   will use the detector calibraion from the specified file NOT the
                   input raw file
-      mask_run = RunNumber to use for diag instead of the input run number
+   mask_run = RunNumber to use for diag instead of the input run number
 
-      one2one =True, False :Reduction will not use a mapping file
+   one2one =True, False :Reduction will not use a mapping file
 
-      hardmaskPlus=Filename :load a hardmarkfile and apply together with diag mask
+   hardmaskPlus=Filename :load a hardmarkfile and apply together with diag mask
 
-      hardmaskOnly=Filename :load a hardmask and use as only mask
-    """
+   hardmaskOnly=Filename :load a hardmask and use as only mask
+   """
 #-------------------------------------------------------------------------------
     def diagnose(self, white,diag_sample=None,**kwargs):
-        """
-            Run diagnostics on the provided workspaces.
+      """ run diagnostics on the provided workspaces.
 
-            This method does some additional processing before moving on to the diagnostics:
-              1) Computes the white beam integrals, converting to energy
-              2) Computes the background integral using the instrument defined range
-              3) Computes a total count from the sample
+     this method does some additional processing before moving on to the diagnostics:
+      1) Computes the white beam integrals, converting to energy
+      2) Computes the background integral using the instrument defined range
+      3) Computes a total count from the sample
 
-            These inputs are passed to the diagnostics functions
+     these inputs are passed to the diagnostics functions
 
-            Required inputs:
+     required inputs:
 
-              white  - A workspace, run number or filepath of a white beam run. A workspace is assumed to
-                       have simple been loaded and nothing else.
+      white  - A workspace, run number or filepath of a white beam run. A workspace is assumed to
+               have simple been loaded and nothing else.
 
-            Optional inputs:
-              diag_sample - A workspace, run number or filepath of additional (sample) run used for diagnostics.
-                            A workspace is assumed to have simple been loaded and nothing else. (default = None)
+     optional inputs:
 
-              second_white - If provided an additional set of tests is performed on this. (default = None)
-              hard_mask    - A file specifying those spectra that should be masked without testing (default=None)
+      diag_sample - A workspace, run number or filepath of additional (sample) run used for diagnostics.
+                    A workspace is assumed to have simple been loaded and nothing else. (default = None)
 
-              # IDF-based diagnostics parameters:
-              tiny        - Minimum threshold for acceptance (default = 1e-10)
-              huge        - Maximum threshold for acceptance (default = 1e10)
-              background_test_range - A list of two numbers indicating the background range (default=instrument defaults)
-              van_out_lo  - Lower bound defining outliers as fraction of median value (default = 0.01)
-              van_out_hi  - Upper bound defining outliers as fraction of median value (default = 100.)
-              van_lo      - Fraction of median to consider counting low for the white beam diag (default = 0.1)
-              van_hi      - Fraction of median to consider counting high for the white beam diag (default = 1.5)
-              van_sig  - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
-                          "difference with respect to the median value must also exceed this number of error bars (default=0.0)
-              samp_zero    - If true then zeros in the vanadium data will count as failed (default = True)
-              samp_lo      - Fraction of median to consider counting low for the white beam diag (default = 0)
-              samp_hi      - Fraction of median to consider counting high for the white beam diag (default = 2.0)
-              samp_sig  - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
-                          "difference with respect to the median value must also exceed this number of error bars (default=3.3)
-              variation  - The number of medians the ratio of the first/second white beam can deviate from
-                           the average by (default=1.1)
-              bleed_test - If true then the CreatePSDBleedMask algorithm is run
-              bleed_maxrate - If the bleed test is on then this is the maximum framerate allowed in a tube
-              bleed_pixels - If the bleed test is on then this is the number of pixels ignored within the
-                             bleed test diagnostic
-        """
-        lhs_names = funcreturns.lhs_info('names')
-        if len(lhs_names) > 0:
-            var_name = lhs_names[0]
-        else:
-            var_name = "diag_mask"
+      second_white - If provided an additional set of tests is performed on this. (default = None)
+      hard_mask    - A file specifying those spectra that should be masked without testing (default=None)
 
-        # modify properties using input arguments
-        self.prop_man.set_input_parameters(**kwargs)
-        # obtain proper run descriptor in case it is not a run descriptor but
-        # something else
-        white = self.get_run_descriptor(white)
+      # IDF-based diagnostics parameters:
+      tiny        - Minimum threshold for acceptance (default = 1e-10)
+      huge        - Maximum threshold for acceptance (default = 1e10)
+      background_test_range - A list of two numbers indicating the background range (default=instrument defaults)
+      van_out_lo  - Lower bound defining outliers as fraction of median value (default = 0.01)
+      van_out_hi  - Upper bound defining outliers as fraction of median value (default = 100.)
+      van_lo      - Fraction of median to consider counting low for the white beam diag (default = 0.1)
+      van_hi      - Fraction of median to consider counting high for the white beam diag (default = 1.5)
+      van_sig  - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
+                  "difference with respect to the median value must also exceed this number of error bars (default=0.0)
+      samp_zero    - If true then zeros in the vanadium data will count as failed (default = True)
+      samp_lo      - Fraction of median to consider counting low for the white beam diag (default = 0)
+      samp_hi      - Fraction of median to consider counting high for the white beam diag (default = 2.0)
+      samp_sig  - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
+                  "difference with respect to the median value must also exceed this number of error bars (default=3.3)
+      variation  - The number of medians the ratio of the first/second white beam can deviate from
+                   the average by (default=1.1)
+      bleed_test - If true then the CreatePSDBleedMask algorithm is run
+      bleed_maxrate - If the bleed test is on then this is the maximum framerate allowed in a tube
+      bleed_pixels - If the bleed test is on then this is the number of pixels ignored within the
+                     bleed test diagnostic
+      """
+      lhs_names = funcreturns.lhs_info('names')
+      if len(lhs_names) > 0:
+          var_name = lhs_names[0]
+      else:
+          var_name = "diag_mask"
 
-        # return all diagnostics parameters
-        diag_params = self.prop_man.get_diagnostics_parameters()
+      # modify properties using input arguments
+      self.prop_man.set_input_parameters(**kwargs)
+      # obtain proper run descriptor in case it is not a run descriptor but
+      # something else
+      white = self.get_run_descriptor(white)
 
-             
-        if self.use_hard_mask_only:
-            if mtd.doesExist('hard_mask_ws'):
-                diag_mask = mtd['hard_mask_ws']
-            else: # build hard mask
-                # in this peculiar way we can obtain working mask which
-                                 # accounts for initial data grouping in the data file.
-                                 # SNS or 1 to 1 maps may probably avoid this stuff and can load
-                                 # masks directly
-                white_data = white.get_ws_clone('white_ws_clone')
-                #whitews_name = common.create_resultname(white,
-                #suffix='-white')
-                #if whitews_name in mtd:
-                #    DeleteWorkspace(Workspace=whitews_name)
-                ## Load
-                #white_data,mon_ws =
-                #self.load_data(white,whitews_name,self._keep_wb_workspace)
+      # return all diagnostics parameters
+      diag_params = self.prop_man.get_diagnostics_parameters()
 
-                diag_mask = LoadMask(Instrument=self.instr_name,InputFile=self.hard_mask_file,
+      if self.use_hard_mask_only:
+         if mtd.doesExist('hard_mask_ws'):
+            diag_mask = mtd['hard_mask_ws']
+         else: # build hard mask
+               # in this peculiar way we can obtain working mask which
+               # accounts for initial data grouping in the
+               # data file. SNS or 1 to 1 maps may probably avoid this
+               # stuff and can load masks directly
+            white_data = white.get_ws_clone('white_ws_clone')
+
+            diag_mask = LoadMask(Instrument=self.instr_name,InputFile=self.hard_mask_file,
                                OutputWorkspace='hard_mask_ws')
-                MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
-                DeleteWorkspace(diag_mask)
-                diag_mask,masked_list = ExtractMask(InputWorkspace=white_data)
-                DeleteWorkspace(Workspace='white_ws_clone')
+            MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
+            DeleteWorkspace(diag_mask)
+            diag_mask,masked_list = ExtractMask(InputWorkspace=white_data)
+            DeleteWorkspace(Workspace='white_ws_clone')
 
-            return diag_mask
+         return diag_mask
 
 
-        # Get the white beam vanadium integrals
-        whiteintegrals = self.do_white(white, None, None) # No grouping yet
-        if self.second_white:
-            second_white = self.second_white
-            other_whiteintegrals = self.do_white(PropertyManager.second_white, None, None) # No grouping yet
-            self.second_white = other_whiteintegrals
+      # Get the white beam vanadium integrals
+      whiteintegrals = self.do_white(white, None, None) # No grouping yet
+      if self.second_white:
+         second_white = self.second_white
+         other_whiteintegrals = self.do_white(PropertyManager.second_white, None, None) # No grouping yet
+         self.second_white = other_whiteintegrals
 
-        # Get the background/total counts from the sample run if present
-        if diag_sample: 
-
-            diag_sample = self.get_run_descriptor(diag_sample)
-            # If the bleed test is requested then we need to pass in the
-            # sample_run as well
-            if self.bleed_test:
-                # initiate reference to reducer to be able to work with Run
-                # Descriptors
-                diagnostics.__Reducer__ = self
-                diag_params['sample_run'] = diag_sample
+      # Get the background/total counts from the sample run if present
+      if diag_sample: 
+         diag_sample = self.get_run_descriptor(diag_sample)
+         # If the bleed test is requested then we need to pass in the
+         # sample_run as well
+         if self.bleed_test:
+            # initiate reference to reducer to be able to work with Run
+            # Descriptors
+            diagnostics.__Reducer__ = self
+            diag_params['sample_run'] = diag_sample
 
             # Set up the background integrals for diagnostic purposes
             result_ws = self.normalise(diag_sample, self.normalise_method)
@@ -253,29 +248,29 @@ class DirectEnergyConversion(object):
             diag_params['background_int'] = background_int
             diag_params['sample_counts'] = total_counts
 
-        # Check how we should run diag
-        diag_spectra_blocks = self.diag_spectra
-        if diag_spectra_blocks is None:
-            # Do the whole lot at once
-            diagnostics.diagnose(whiteintegrals, **diag_params)
-        else:
-            for index, bank in enumerate(diag_spectra_blocks):
-                diag_params['start_index'] = bank[0] - 1
-                diag_params['end_index'] = bank[1] - 1
-                diagnostics.diagnose(whiteintegrals, **diag_params)
+      # Check how we should run diag
+      diag_spectra_blocks = self.diag_spectra
+      if diag_spectra_blocks is None:
+         # Do the whole lot at once
+         diagnostics.diagnose(whiteintegrals, **diag_params)
+      else:
+         for index, bank in enumerate(diag_spectra_blocks):
+             diag_params['start_index'] = bank[0] - 1
+             diag_params['end_index'] = bank[1] - 1
+             diagnostics.diagnose(whiteintegrals, **diag_params)
 
-        if 'sample_counts' in diag_params:
-            DeleteWorkspace(Workspace='background_int')
-            DeleteWorkspace(Workspace='total_counts')
-        if 'second_white' in diag_params:
-            DeleteWorkspace(Workspace=diag_params['second_white'])
+      if 'sample_counts' in diag_params:
+          DeleteWorkspace(Workspace='background_int')
+          DeleteWorkspace(Workspace='total_counts')
+      if 'second_white' in diag_params:
+           DeleteWorkspace(Workspace=diag_params['second_white'])
         # Extract a mask workspace
-        diag_mask, det_ids = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=var_name)
+      diag_mask, det_ids = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=var_name)
 
-        DeleteWorkspace(Workspace=whiteintegrals)
-        #TODO do we need this?
-        #self.spectra_masks = diag_mask
-        return diag_mask
+      DeleteWorkspace(Workspace=whiteintegrals)
+      #TODO do we need this?
+      #self.spectra_masks = diag_mask
+      return diag_mask
 
 #-------------------------------------------------------------------------------
     def convert_to_energy(self,wb_run=None,sample_run=None,ei_guess=None,rebin=None,map_file=None,
@@ -300,7 +295,7 @@ class DirectEnergyConversion(object):
 
 
       # inform user on what parameters have changed from script or gui
-      # if monovan present, check if abs_norm_ parameters  are set
+      # if monovan present, check if abs_norm_ parameters are set
       self.prop_man.log_changed_values('notice')
       prop_man = self.prop_man
       #process complex parameters
@@ -361,7 +356,8 @@ class DirectEnergyConversion(object):
                     prop_man.log('  Applying sample run mask to mono van')
                 else:
                     if not self.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace
-                                                     # Should be better solution for that.
+                                                     # Should be better
+                                                                                                         # solution for that.
                         prop_man.log("======== Run diagnose for monochromatic vanadium run ===========",'notice')
 
                         masking2 = self.diagnose(PropertyManager.wb_for_monovan_run,PropertyManager.monovan_run,
@@ -488,7 +484,7 @@ class DirectEnergyConversion(object):
         else:
            motor_rotation = float('nan')
         self.prop_man.psi = motor_rotation + motor_offset
-#-------------------------------------------------------------------------------        
+#-------------------------------------------------------------------------------
     def get_ei(self, data_run, ei_guess):
         """
         Calculate incident energy of neutrons and the time of the of the
@@ -524,7 +520,8 @@ class DirectEnergyConversion(object):
         self.incident_energy = ei
         if self.prop_man.normalise_method == 'monitor-2':
            # monitor-2 normalization ranges have to be identified before the
-           # instrument is shifted in case it is shifted to this monitor (usual case)
+           # instrument is shifted in case it is shifted to this monitor (usual
+           # case)
            #Find TOF range, correspondent to incident energy monitor peak
            energy_rage = self.mon2_norm_energy_range
            self._mon2_norm_time_range = self.get_TOF_for_energies(monitor_ws,energy_rage,[self.mon2_norm_spec],self._debug_mode)
@@ -560,7 +557,7 @@ class DirectEnergyConversion(object):
         data_run.synchronize_ws(mtd[resultws_name])
         return ei, mon1_peak
 
-#-------------------------------------------------------------------------------  
+#-------------------------------------------------------------------------------
     def remap(self, result_ws, spec_masks, map_file):
         """
         Mask and group detectors based on input parameters
@@ -642,10 +639,10 @@ class DirectEnergyConversion(object):
         separate_monitors = run.is_monws_separate()
         mon_spect = self.prop_man.mon1_norm_spec
         if separate_monitors:
-            kwargs['MonitorWorkspace']     = mon_ws
-            kwargs['MonitorWorkspaceIndex']= int(mon_ws.getIndexFromSpectrumNumber(int(mon_spect)))
+            kwargs['MonitorWorkspace'] = mon_ws
+            kwargs['MonitorWorkspaceIndex'] = int(mon_ws.getIndexFromSpectrumNumber(int(mon_spect)))
         else:
-            kwargs['MonitorSpectrum']= int(mon_spect) # shame TODO: change algorithm
+            kwargs['MonitorSpectrum'] = int(mon_spect) # shame TODO: change algorithm
 
 
         NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, IntegrationRangeMin=range_min, 
@@ -675,10 +672,10 @@ class DirectEnergyConversion(object):
         mon_spect = self.prop_man.mon2_norm_spec
         mon_index = int(mon_ws.getIndexFromSpectrumNumber(mon_spect))
         if separate_monitors:
-            kwargs['MonitorWorkspace']     =   mon_ws
-            kwargs['MonitorWorkspaceIndex'] =  mon_index
+            kwargs['MonitorWorkspace'] = mon_ws
+            kwargs['MonitorWorkspaceIndex'] = mon_index
         else:
-            kwargs['MonitorSpectrum']       =   mon_spect
+            kwargs['MonitorSpectrum'] = mon_spect
 
         #Find TOF range, correspondent to incident energy monitor peak
         if self._mon2_norm_time_range:
@@ -689,7 +686,8 @@ class DirectEnergyConversion(object):
         else:
            mon_ws_name = mon_ws.name()
            if mon_ws_name.find('_shifted') != -1:
-             # monitor-2 normalization ranges have to be identified before the instrument is shifted
+             # monitor-2 normalization ranges have to be identified before the
+             # instrument is shifted
              raise RuntimeError("Instrument have been shifted but no time range has been identified. Monitor-2 normalization can not be performed ") 
            else:
               energy_rage = self.mon2_norm_energy_range
@@ -738,20 +736,20 @@ class DirectEnergyConversion(object):
 
         return TOF_range
 
-    def save_results(self, workspace, save_file=None, formats = None):
+    def save_results(self, workspace, save_file=None, formats=None):
         """
         Save the result workspace to the specified filename using the list of formats specified in
         formats. If formats is None then the default list is used
         """
         if formats:
            # clear up existing save formats as one is defined in parameters
-            self.prop_man.save_format=None
+            self.prop_man.save_format = None
 
         self.prop_man.set_input_parameters_ignore_nan(save_file_name=save_file,save_format=formats)
 
-        #TODO: deal with this. This all should be incorporated in sample_run
+        #TODO: deal with this.  This all should be incorporated in sample_run
         save_file = self.prop_man.save_file_name
-        formats   = self.prop_man.save_format
+        formats = self.prop_man.save_format
         if save_file is None:
             save_file = workspace.getName()
         elif os.path.isdir(save_file):
@@ -761,25 +759,25 @@ class DirectEnergyConversion(object):
         else:
             pass
 
-        prop_man =self.prop_man 
+        prop_man = self.prop_man 
          
         save_file,ext = os.path.splitext(save_file)
-        if len(ext)>1:
+        if len(ext) > 1:
             formats.add(ext[1:])
 
 
         for file_format  in formats:
             for case in common.switch(file_format):
                 if case('nxspe'):
-                   filename = save_file +'.nxspe'
+                   filename = save_file + '.nxspe'
                    SaveNXSPE(InputWorkspace=workspace,Filename= filename, KiOverKfScaling=prop_man.apply_kikf_correction,psi=prop_man.psi)
                    break
                 if case('spe'):
-                   filename = save_file +'.spe'
+                   filename = save_file + '.spe'
                    SaveSPE(InputWorkspace=workspace,Filename= filename)
                    break
                 if case('nxs'):
-                   filename = save_file +'.nxs'
+                   filename = save_file + '.nxs'
                    SaveNexus(InputWorkspace=workspace,Filename= filename)
                    break
                 if case(): # default, could also just omit condition or 'if True'
@@ -829,7 +827,8 @@ class DirectEnergyConversion(object):
         object.__setattr__(self,'_keep_wb_workspace',True)
         object.__setattr__(self,'_do_ISIS_reduction',True)
         object.__setattr__(self,'_spectra_masks',None)
-        # if normalized by monitor-2, range have to be established before shifting the instrument
+        # if normalized by monitor-2, range have to be established before
+        # shifting the instrument
         object.__setattr__(self,'_mon2_norm_time_range',None)
         object.__setattr__(self,'_debug_mode',False)
 
@@ -870,19 +869,21 @@ class DirectEnergyConversion(object):
         to be always set-up from a calling script
         """
         # Internal properties and keys
-        self._keep_wb_workspace = True # for the time being. May be auto-calculated later but should it? 
+        self._keep_wb_workspace = True # for the time being.  May be auto-calculated later but should it?
         self._do_ISIS_reduction = True
-        # if normalized by monitor-2, range have to be established before shifting the instrument
-        self._mon2_norm_time_range=None
+        # if normalized by monitor-2, range have to be established before
+        # shifting the instrument
+        self._mon2_norm_time_range = None
         self._debug_mode = False
         self.spectra_masks = None
 
 
         # Instrument and default parameter setup
-        # formats available for saving. As the reducer has to have a method to process one of this, it is private property
+        # formats available for saving.  As the reducer has to have a method to
+        # process one of this, it is private property
         if not hasattr(self,'_propMan') or self._propMan is None:
             if isinstance(instr,PropertyManager):
-                self._propMan  = instr
+                self._propMan = instr
             else:
                 self._propMan = PropertyManager(instr)
         else:
@@ -899,10 +900,10 @@ class DirectEnergyConversion(object):
             #end if
         #
 
-    def setup_instrument_properties(self, workspace = None,reload_instrument=False):
+    def setup_instrument_properties(self, workspace=None,reload_instrument=False):
         if workspace != None:
             instrument = workspace.getInstrument()
-            name      = instrument.getName()
+            name = instrument.getName()
             if name != self.prop_man.instr_name:
                self.prop_man = PropertyManager(name,workspace)
 
@@ -919,7 +920,7 @@ class DirectEnergyConversion(object):
        else:
            return run
     #
-#-------------------------------------------------------------------------------  
+#-------------------------------------------------------------------------------
     def apply_absolute_normalization(self,sample_ws,monovan_run=None,ei_guess=None,wb_mono=None):
         """  Function applies absolute normalization factor to the target workspace
              and calculates this factor if necessary
@@ -967,7 +968,7 @@ class DirectEnergyConversion(object):
         sample_ws = sample_ws / absnorm_factor
 
         return sample_ws
-#------------------------------------------------------------------------------- 
+#-------------------------------------------------------------------------------
     def get_abs_normalization_factor(self,deltaE_wkspaceName,ei_monovan):
         """get absolute normalization factor for monochromatic vanadium
 
@@ -1104,8 +1105,8 @@ class DirectEnergyConversion(object):
 
     def _build_white_tag(self):
         """ build tag indicating wb-integration ranges """ 
-        low,upp=self.wb_integr_range
-        white_tag='NormBy:{0}_IntergatedIn:{1:0>10.2f}:{2:0>10.2f}'.format(self.normalise_method,low,upp)
+        low,upp = self.wb_integr_range
+        white_tag = 'NormBy:{0}_IntergatedIn:{1:0>10.2f}:{2:0>10.2f}'.format(self.normalise_method,low,upp)
         return white_tag
 
 # -------------------------------------------------------------------------------------------
@@ -1277,7 +1278,6 @@ class DirectEnergyConversion(object):
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-
 def get_failed_spectra_list_from_masks(masked_wksp):
     """Compile a list of spectra numbers that are marked as
        masked in the masking workspace
@@ -1291,7 +1291,7 @@ def get_failed_spectra_list_from_masks(masked_wksp):
     if masked_wksp is None:
        return (failed_spectra,0)
 
-    masking_wksp,sp_list=ExtractMask(masked_wksp)
+    masking_wksp,sp_list = ExtractMask(masked_wksp)
     DeleteWorkspace(masking_wksp)
 
     n_spectra = len(sp_list)
@@ -1299,6 +1299,6 @@ def get_failed_spectra_list_from_masks(masked_wksp):
 
 
 #-----------------------------------------------------------------
-if __name__=="__main__":
+if __name__ == "__main__":
     pass
     #unittest.main()
