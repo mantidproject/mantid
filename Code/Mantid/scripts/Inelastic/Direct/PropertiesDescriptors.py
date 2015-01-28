@@ -1,16 +1,15 @@
-""" File contains collection of Descriptors used to define complex properties in NonIDF_Properties and PropertyManager classes """ 
+""" File contains collection of Descriptors used to define complex
+    properties in NonIDF_Properties and PropertyManager classes 
+""" 
 
+import os
 from mantid.simpleapi import *
 from mantid import api
 from mantid.simpleapi import *
-from mantid import geometry
 from mantid import config
-from mantid.kernel import funcreturns
 
-import ReductionHelpers as prop_helpers
-
-import CommonFunctions as common
-import os
+import Direct.ReductionHelpers as prop_helpers
+import Direct.CommonFunctions as common
 
 #-----------------------------------------------------------------------------------------
 # Descriptors, providing overloads for complex properties in NonIDF_Properties
@@ -19,7 +18,7 @@ import os
 class PropDescriptor(object):
     """ Class provides common custom interface for property descriptors """
     def dependencies(self):
-        """ returns the list of other properties names, this property depends on""" 
+        """ Returns the list of other properties names, this property depends on""" 
         return []
 
 # end PropDescriptor
@@ -57,7 +56,7 @@ class SumRuns(PropDescriptor):
     #
     def __set__(self,instance,value):
         if not self._holder:
-          from PropertyManager import PropertyManager
+          from Direct.PropertyManager import PropertyManager
           self._holder = PropertyManager
         
         old_value = self._sum_runs
@@ -82,7 +81,7 @@ class SumRuns(PropDescriptor):
                self._sample_run.__set__(None,self._run_numbers[ind])
     #
     def set_list2add(self,runs_to_add,fnames=None,fext=None):
-       """ Set run numbers to add together with possible file guess-es """
+       """Set run numbers to add together with possible file guess-es """
        if not isinstance(runs_to_add,list):
            raise KeyError('Can only set list of run numbers to add')
        runs = []
@@ -100,7 +99,7 @@ class SumRuns(PropDescriptor):
           self._fext = [''] * len(self._run_numbers)
     #
     def clear_sum(self):
-        """ clear all defined summation""" 
+        """Clear all defined summation""" 
         # if last_to_sum is -1, sum all run list provided
         self._last_ind2sum = -1
         self._sum_runs = False
@@ -109,15 +108,15 @@ class SumRuns(PropDescriptor):
         self._fext = []
     #
     def get_last_ind2sum(self):
-        """ get last run number contributing to sum""" 
+        """Get last run number contributing to sum""" 
         if self._last_ind2sum > 0:
            return self._last_ind2sum
         else:
            return len(self._run_numbers) - 1
     #
     def set_last_ind2sum(self,run_number):
-        """ check and set last number, contributing to summation 
-            if this number is out of summation range, clear the summation
+        """Check and set last number, contributing to summation 
+           if this number is out of summation range, clear the summation
         """
         run_number = int(run_number)
         if run_number in self._run_numbers:
@@ -128,7 +127,7 @@ class SumRuns(PropDescriptor):
             return 0
     #
     def get_run_list2sum(self):
-        """ get run numbers of the files to be summed together """ 
+        """Get run numbers of the files to be summed together """ 
         num_to_load = len(self._run_numbers)
         if self._last_ind2sum > 0 and self._last_ind2sum < num_to_load:
             num_to_load = self._last_ind2sum 
@@ -136,17 +135,22 @@ class SumRuns(PropDescriptor):
 
     #
     def load_and_sum_runs(self,inst_name,monitors_with_ws):
+        """ Load multiple runs and sum them together """ 
 
-        logger = lambda mess : (getattr(getattr(self,'_holder'),'log')(self._sample_run._holder,mess))
+        logger = lambda mess : (getattr(getattr(self,'_holder'),'log')\
+                               (self._sample_run._holder,mess))
         logger("*** Summing multiple runs            ****")
 
         runs_to_load = self.get_run_list2sum()
         num_to_load = len(runs_to_load)
-        logger("*** Loading #{0}/{1}, run N: {2} ".format(1,num_to_load,self._run_numbers[0]))
+        logger("*** Loading #{0}/{1}, run N: {2} ".\
+               format(1,num_to_load,self._run_numbers[0]))
 
 
-        file_h = os.path.join(self._file_guess[0],'{0}{1}{2}'.format(inst_name,runs_to_load[0],self._fext[0]))
-        ws = self._sample_run.load_file(inst_name,'Summ',False,monitors_with_ws,False,file_hint=file_h)
+        file_h = os.path.join(self._file_guess[0],'{0}{1}{2}'.\
+                 format(inst_name,runs_to_load[0],self._fext[0]))
+        ws = self._sample_run.load_file(inst_name,'Summ',False,monitors_with_ws,
+                                        False,file_hint=file_h)
 
         sum_ws_name = ws.name()
         sum_mon_name = sum_ws_name + '_monitors'
@@ -154,26 +158,31 @@ class SumRuns(PropDescriptor):
 
         for ind,run_num in enumerate(runs_to_load[1:num_to_load]):
 
-           file_h = os.path.join(self._file_guess[ind + 1],'{0}{1}{2}'.format(inst_name,run_num,self._fext[ind + 1]))
-           logger("*** Adding  #{0}/{1}, run N: {2} ".format(ind + 2,num_to_load,run_num))
+           file_h = os.path.join(self._file_guess[ind + 1],'{0}{1}{2}'.\
+                          format(inst_name,run_num,self._fext[ind + 1]))
+           logger("*** Adding  #{0}/{1}, run N: {2} ".\
+                   format(ind + 2,num_to_load,run_num))
            term_name = '{0}_ADDITIVE_#{1}/{2}'.format(inst_name,ind + 2,num_to_load)#
 
-           wsp = self._sample_run.load_file(inst_name,term_name,False,monitors_with_ws,False,file_hint=file_h)
+           wsp = self._sample_run.load_file(inst_name,term_name,False,
+                                            monitors_with_ws,False,file_hint=file_h)
 
            wsp_name = wsp.name()
            wsp_mon_name = wsp_name + '_monitors'
-           Plus(LHSWorkspace=sum_ws_name,RHSWorkspace=wsp_name,OutputWorkspace=sum_ws_name,ClearRHSWorkspace=True)
+           Plus(LHSWorkspace=sum_ws_name,RHSWorkspace=wsp_name,
+                OutputWorkspace=sum_ws_name,ClearRHSWorkspace=True)
            AddedRunNumbers+=',{0}'.format(run_num)
            if not monitors_with_ws:
-              Plus(LHSWorkspace=sum_mon_name,RHSWorkspace=wsp_mon_name,OutputWorkspace=sum_mon_name,ClearRHSWorkspace=True)
+              Plus(LHSWorkspace=sum_mon_name,RHSWorkspace=wsp_mon_name,
+                   OutputWorkspace=sum_mon_name,ClearRHSWorkspace=True)
            if wsp_name in mtd:
                DeleteWorkspace(wsp_name)
            if wsp_mon_name in mtd:
                DeleteWorkspace(wsp_mon_name)
-
         logger("*** Summing multiple runs  completed ****")
 
-        AddSampleLog(Workspace=sum_ws_name,LogName = 'SumOfRuns:',LogText=AddedRunNumbers,LogType='String')
+        AddSampleLog(Workspace=sum_ws_name,LogName = 'SumOfRuns:',
+                     LogText=AddedRunNumbers,LogType='String')
         ws = mtd[sum_ws_name]
         return ws
     #
