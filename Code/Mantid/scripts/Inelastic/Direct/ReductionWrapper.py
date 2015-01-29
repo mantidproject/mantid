@@ -148,11 +148,11 @@ class ReductionWrapper(object):
 
         if build_validation:
             if validationFile:
-               result_name = os.parh.splitext(validationFile)[0]
+               result_name = os.path.splitext(validationFile)[0]
             else:
                result_name = self.reducer.prop_man.save_file_name
             self.reducer.prop_man.log("*** Saving validation file with name: {0}.nxs".format(result_name),'notice')
-            SaveNexus(result,Filename=result_name+'.nxs')
+            SaveNexus(reduced,Filename=result_name+'.nxs')
             return True,'Created validation file {0}.nxs'.format(result_name)
         else:
             result = CheckWorkspacesMatch(Workspace1=sample,Workspace2=reduced,
