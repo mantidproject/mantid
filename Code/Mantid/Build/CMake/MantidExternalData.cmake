@@ -27,5 +27,5 @@ set(ExternalData_URL_TEMPLATES "" CACHE STRING
 file:///var/bigharddrive/%(algo)/%(hash)")
 mark_as_advanced(ExternalData_URL_TEMPLATES)
 list(APPEND ExternalData_URL_TEMPLATES
-  "file://insertrealservershere.org/%(algo)/%(hash)"
+  "http://198.74.56.37/ftp/external-data/%(algo)/%(hash)"
 )
