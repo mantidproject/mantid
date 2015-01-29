@@ -385,10 +385,11 @@ Workspace2D_sptr LoadFITS::addWorkspace(const FITSInfo &fileInfo,
   // set data
   readFileToWorkspace(ws, fileInfo, imageY, imageE, bufferAny);
 
-  // Add all header info to log.
+  // Add all header info to log. The important entries (BITPIX, etc.) have
+  // already been processed as they require.
   for (auto it = fileInfo.headerKeys.begin(); it != fileInfo.headerKeys.end();
        ++it) {
-    ws->mutableRun().removeLogData("_" + it->first, true);
+    ws->mutableRun().removeLogData("_FITS:" + it->first, true);
     ws->mutableRun().addLogData(
         new PropertyWithValue<string>("_FITS:" + it->first, it->second));
   }
