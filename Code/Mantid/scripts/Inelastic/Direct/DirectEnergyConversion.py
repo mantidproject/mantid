@@ -230,23 +230,24 @@ class DirectEnergyConversion(object):
             diagnostics.__Reducer__ = self
             diag_params['sample_run'] = diag_sample
 
-            # Set up the background integrals for diagnostic purposes
-            result_ws = self.normalise(diag_sample, self.normalise_method)
+         # Set up the background integrals for diagnostic purposes
+         result_ws = self.normalise(diag_sample, self.normalise_method)
 
-            #>>> here result workspace is being processed -- not touching
-            #result ws
-            bkgd_range = self.background_test_range
-            background_int = Integration(result_ws,
-                                         RangeLower=bkgd_range[0],RangeUpper=bkgd_range[1],
-                                         IncludePartialBins=True)
-            total_counts = Integration(result_ws, IncludePartialBins=True)
-            background_int = ConvertUnits(background_int, Target="Energy",EMode='Elastic', AlignBins=0)
-            self.prop_man.log("Diagnose: finished convertUnits ",'information')
+         #>>> here result workspace is being processed -- not touching
+         #result ws
+         bkgd_range = self.background_test_range
+         background_int = Integration(result_ws,
+                           RangeLower=bkgd_range[0],RangeUpper=bkgd_range[1],
+                           IncludePartialBins=True)
+         total_counts = Integration(result_ws, IncludePartialBins=True)
+         background_int = ConvertUnits(background_int, Target="Energy",EMode='Elastic', AlignBins=0)
+         self.prop_man.log("Diagnose: finished convertUnits ",'information')
 
-            background_int *= self.scale_factor
-            diagnostics.normalise_background(background_int, whiteintegrals, diag_params.get('second_white',None))
-            diag_params['background_int'] = background_int
-            diag_params['sample_counts'] = total_counts
+         background_int *= self.scale_factor
+         diagnostics.normalise_background(background_int, whiteintegrals,
+                                           diag_params.get('second_white',None))
+         diag_params['background_int'] = background_int
+         diag_params['sample_counts'] = total_counts
 
       # Check how we should run diag
       diag_spectra_blocks = self.diag_spectra
@@ -355,9 +356,9 @@ class DirectEnergyConversion(object):
                 if self.use_sam_msk_on_monovan == True:
                     prop_man.log('  Applying sample run mask to mono van')
                 else:
-                    if not self.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace
-                                                     # Should be better
-                                                                                                         # solution for that.
+                    if not self.use_hard_mask_only : # in this case the masking2 is different but 
+                                                     #points to the same workspace
+                                                     # Should be better solution for that.
                         prop_man.log("======== Run diagnose for monochromatic vanadium run ===========",'notice')
 
                         masking2 = self.diagnose(PropertyManager.wb_for_monovan_run,PropertyManager.monovan_run,
@@ -513,7 +514,8 @@ class DirectEnergyConversion(object):
 
         # Calculate the incident energy
         ei,mon1_peak,mon1_index,tzero = \
-            GetEi(InputWorkspace=monitor_ws, Monitor1Spec=int(ei_mon_spectra[0]), Monitor2Spec=int(ei_mon_spectra[1]),
+            GetEi(InputWorkspace=monitor_ws, Monitor1Spec=int(ei_mon_spectra[0]),
+                  Monitor2Spec=int(ei_mon_spectra[1]),
                   EnergyEstimate=ei_guess,FixEi=fix_ei)
 
         # Store found incident energy in the class itself
@@ -524,7 +526,8 @@ class DirectEnergyConversion(object):
            # case)
            #Find TOF range, correspondent to incident energy monitor peak
            energy_rage = self.mon2_norm_energy_range
-           self._mon2_norm_time_range = self.get_TOF_for_energies(monitor_ws,energy_rage,[self.mon2_norm_spec],self._debug_mode)
+           self._mon2_norm_time_range = self.get_TOF_for_energies(monitor_ws,energy_rage,
+                                                                 [self.mon2_norm_spec],self._debug_mode)
         #end
         if separate_monitors:
             # copy incident energy obtained on monitor workspace to detectors
