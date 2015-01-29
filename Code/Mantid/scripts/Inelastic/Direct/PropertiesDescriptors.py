@@ -4,9 +4,8 @@
 
 import os
 from mantid.simpleapi import *
-from mantid import api
-from mantid.simpleapi import *
-from mantid import config
+from mantid.kernel import funcreturns
+from mantid import api,geometry,config
 
 import Direct.ReductionHelpers as prop_helpers
 import Direct.CommonFunctions as common
