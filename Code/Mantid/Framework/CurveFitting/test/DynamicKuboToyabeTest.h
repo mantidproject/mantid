@@ -4,102 +4,120 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/DynamicKuboToyabe.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidCurveFitting/LinearBackground.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
-#include "MantidCurveFitting/Fit.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/FunctionFactory.h"
+#include "MantidCurveFitting/StaticKuboToyabe.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionValues.h"
+//#include "MantidAPI/CompositeFunction.h"
+//#include "MantidCurveFitting/LinearBackground.h"
+//#include "MantidCurveFitting/BoundaryConstraint.h"
+//#include "MantidCurveFitting/Fit.h"
+//#include "MantidKernel/UnitFactory.h"
+//#include "MantidAPI/AnalysisDataService.h"
+//#include "MantidAPI/WorkspaceFactory.h"
+//#include "MantidAPI/Algorithm.h"
+//#include "MantidDataObjects/Workspace2D.h"
+//#include "MantidKernel/Exception.h"
+//#include "MantidAPI/FunctionFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
-using namespace Mantid::DataObjects;
+//using namespace Mantid::DataObjects;
 
 
 class DynamicKuboToyabeTest : public CxxTest::TestSuite
 {
 public:
 
-  void getMockData(Mantid::MantidVec& y, Mantid::MantidVec& e)
+  void testZFZNDKTFunction()
   {
-    // Calculated with A = 0.24 and Delta = 0.16 on an Excel spreadsheet
-    y[0] = 0.24;
-    y[1] = 0.233921146;
-    y[2] = 0.216447929;
-    y[3] = 0.189737312;
-    y[4] = 0.156970237;
-    y[5] = 0.121826185;
-    y[6] = 0.08791249;
-    y[7] = 0.058260598;
-    y[8] = 0.034976545;
-    y[9] = 0.019090369;
+    // Test Dynamic Kubo Toyabe (DKT) for Zero Field (ZF) and Zero Nu (ZN)
+    // Function values must match exactly values from the Static Kubo Toyabe
+    const double asym = 1.0;
+    const double delta = 0.39;
+    const double field = 0;
+    const double nu = 0.0;
 
-    for (int i = 0; i <10; i++)
+    DynamicKuboToyabe dkt; 
+    dkt.initialize();
+    dkt.setParameter("Asym", asym);
+    dkt.setParameter("Delta",delta );
+    dkt.setParameter("Field",field);
+    dkt.setParameter("Nu",   nu);
+
+    StaticKuboToyabe skt;
+    skt.initialize();
+    skt.setParameter("A", asym);
+    skt.setParameter("Delta", delta);
+
+    // define 1d domain of 10 points in interval [0,10]
+    Mantid::API::FunctionDomain1DVector x(0,10,10);
+    Mantid::API::FunctionValues y1(x);
+    Mantid::API::FunctionValues y2(x);
+
+    dkt.function(x,y1);
+    skt.function(x,y2);
+
+    for(size_t i = 0; i < x.size(); ++i)
     {
-      e[i] = 0.01;
+      TS_ASSERT_DELTA( y1[i], y2[i], 1e-6 );
     }
-
   }
 
-  void testAgainstMockData()
+  void testZFDKTFunction()
   {
-    Fit alg2;
-    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-    TS_ASSERT( alg2.isInitialized() );
+    // Test Dynamic Kubo Toyabe (DKT) for Zero Field (ZF) (non-zero Nu)
+    const double asym = 1.0;
+    const double delta = 0.39;
+    const double field = 0;
+    const double nu = 1.0;
 
-    // create mock data to test against
-    std::string wsName = "DynamicKuboToyabeData";
-    int histogramNumber = 1;
-    int timechannels = 10;
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-    for (int i = 0; i < 10; i++) ws2D->dataX(0)[i] = i;
-    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
-    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
-    getMockData(y, e);
+    DynamicKuboToyabe dkt; 
+    dkt.initialize();
+    dkt.setParameter("Asym", asym);
+    dkt.setParameter("Delta",delta );
+    dkt.setParameter("Field",field);
+    dkt.setParameter("Nu",   nu);
 
-    //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
+    // define 1d domain of 5 points in interval [0,5]
+    Mantid::API::FunctionDomain1DVector x(0,5,5);
+    Mantid::API::FunctionValues y(x);
 
-    // set up fitting function
-//    DynamicKuboToyabe fn;
-    std::string fnString = "name=DynamicKuboToyabe,ties=(Field=0,Nu=0);";
-    IFunction_sptr fn = FunctionFactory::Instance().createInitialized(fnString);
+    dkt.function(x,y);
 
-    //alg2.setFunction(fn);
-    TS_ASSERT_THROWS_NOTHING(alg2.setProperty("Function",fnString));
+    TS_ASSERT_DELTA( y[0], 1.000000, 0.000001);
+    TS_ASSERT_DELTA( y[1], 0.849898, 0.000001);
+    TS_ASSERT_DELTA( y[2], 0.621963, 0.000001);
+    TS_ASSERT_DELTA( y[3], 0.443612, 0.000001);
+    TS_ASSERT_DELTA( y[4], 0.317374, 0.000001);
+  }
 
-    // Set which spectrum to fit against and initial starting values
-    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("InputWorkspace", wsName));
-    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("WorkspaceIndex","0"));
-    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("StartX","0"));
-    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("EndX","17"));
+  void testDKTFunction()
+  {
+    // Test Dynamic Kubo Toyabe (DKT) (non-zero Field, non-zero Nu)
+    const double asym = 1.0;
+    const double delta = 0.39;
+    const double field = 0.1;
+    const double nu = 0.5;
 
-    fn->applyTies();
-    // execute fit
-   TS_ASSERT_THROWS_NOTHING(
-      TS_ASSERT( alg2.execute() )
-    )
+    DynamicKuboToyabe dkt; 
+    dkt.initialize();
+    dkt.setParameter("Asym", asym);
+    dkt.setParameter("Delta",delta );
+    dkt.setParameter("Field",field);
+    dkt.setParameter("Nu",   nu);
 
-    TS_ASSERT( alg2.isExecuted() );
+    // define 1d domain of 5 points in interval [0,5]
+    Mantid::API::FunctionDomain1DVector x(0,5,5);
+    Mantid::API::FunctionValues y(x);
 
-    auto out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
-    TS_ASSERT_DELTA( out->getParameter("Asym"),  0.238 ,0.001);
-    TS_ASSERT_DELTA( out->getParameter("Delta"), 0.157 ,0.001);
+    dkt.function(x,y);
 
-    // check its categories
-    const std::vector<std::string> categories = out->categories();
-    TS_ASSERT( categories.size() == 1 );
-    TS_ASSERT( categories[0] == "Muon" );
-
-    AnalysisDataService::Instance().remove(wsName);
-
+    TS_ASSERT_DELTA( y[0], 1.000000, 0.000001);
+    TS_ASSERT_DELTA( y[1], 0.816422, 0.000001);
+    TS_ASSERT_DELTA( y[2], 0.503185, 0.000001);
+    TS_ASSERT_DELTA( y[3], 0.274738, 0.000001);
+    TS_ASSERT_DELTA( y[4], 0.152792, 0.000001);
   }
 
 
