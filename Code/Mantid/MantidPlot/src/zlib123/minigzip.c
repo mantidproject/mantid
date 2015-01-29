@@ -50,9 +50,14 @@
 #  include <unix.h> /* for fileno */
 #endif
 
+/* New versions of zlib use _Z_OF rather than OF */
 #ifndef OF
-#define OF(args) args
-#define
+#  ifdef _Z_OF
+#    define OF _Z_OF
+#  else
+#    define OF(args) args
+#  endif
+#endif
 
 #ifndef WIN32 /* unlink already in stdio.h for WIN32 */
   extern int unlink OF((const char *));
