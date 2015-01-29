@@ -76,12 +76,10 @@ private:
                  std::vector<size_t> &bankStartIndex);
 
   /// Parse bank in file to a map
-  void parseBank(std::map<std::string, double> &parammap,
-                 const std::vector<std::string> &lines, size_t bankid,
-                 size_t startlineindex, int nProf);
+  void parseBank(std::map<std::string, double>& parammap, const std::vector<std::string>& lines, size_t bankid, size_t startlineindex);
 
   /// Find first INS line at or after lineIndex
-  size_t findINSLine(const std::vector<std::string> &lines, size_t lineIndex);
+  size_t findINSPRCFLine(const std::vector<std::string>& lines, size_t lineIndex, double& param1, double& param2, double& param3, double& param4);
 
   /// Generate output workspace
   DataObjects::TableWorkspace_sptr genTableWorkspace(

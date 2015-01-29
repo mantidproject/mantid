@@ -771,8 +771,8 @@ void Homer::setIDFValues(const QString &)
 
   // Fill in default values for tab
   QString param_defs = 
-    "from DirectPropertyManager import DirectPropertyManager\n"
-    "prop_man = DirectPropertyManager('%1')\n"
+    "from Direct.PropertyManager import PropertyManager\n"
+    "prop_man = PropertyManager('%1')\n"
     "prop_man.incident_energy = 1\n"
     "int_range = prop_man.monovan_integr_range\n"
     "bkg_rane = prop_man.bkgd_range\n";
