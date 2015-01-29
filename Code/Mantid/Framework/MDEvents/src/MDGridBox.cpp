@@ -68,7 +68,16 @@ template <typename MDE, size_t nd> void MDGridBox<MDE, nd>::initGridBox() {
 
   // How many is it split?
   for (size_t d = 0; d < nd; d++)
-    split[d] = this->m_BoxController->getSplitInto(d);
+  {
+    if (getDepth() == 0)
+    {
+      split[d] = 3;
+    }
+    else 
+    {
+      split[d] = this->m_BoxController->getSplitInto(d);
+    }
+  }
 
   // Compute sizes etc.
   size_t tot = computeSizesFromSplit();
@@ -92,7 +101,16 @@ TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> *box)
 
   // How many is it split?
   for (size_t d = 0; d < nd; d++)
-    split[d] = this->m_BoxController->getSplitInto(d);
+  {
+    if (getDepth() == 0)
+    {
+      split[d] = 3;
+    }
+    else 
+    {
+      split[d] = this->m_BoxController->getSplitInto(d);
+    }
+  }
 
   // Compute sizes etc.
   size_t tot = computeSizesFromSplit();

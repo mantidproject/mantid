@@ -257,7 +257,21 @@ public:
       m_numMDBoxes[depth]--;
     }
     m_numMDGridBoxes[depth]++;
-    m_numMDBoxes[depth + 1] += m_numSplit;
+
+    if (depth == 0)
+    {
+      size_t numSplitLevel0 = 1;
+      for (size_t dim = 0; dim < nd; dim ++)
+      {
+        numSplitLevel0 *= 3;
+      }
+
+      m_numMDBoxes[depth + 1] += numSplitLevel0;
+    }
+    else
+    {
+      m_numMDBoxes[depth + 1] += m_numSplit;
+    }
     m_mutexNumMDBoxes.unlock();
   }
 
