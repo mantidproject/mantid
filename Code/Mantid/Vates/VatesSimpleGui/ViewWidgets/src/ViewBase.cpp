@@ -737,6 +737,14 @@ bool ViewBase::hasWorkspaceType(const QString &wsTypeName)
   return hasWsType;
 }
 
+
+/**
+ * This function reacts to a destroyed source.
+ */
+void ViewBase::onSourceDestroyed()
+{
+}
+
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid

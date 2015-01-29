@@ -88,6 +88,7 @@
 #include <QModelIndex>
 #include <QUrl>
 #include <QWidget>
+#include <QMessageBox>
 
 #include <iostream>
 #include <vector>
@@ -116,7 +117,7 @@ REGISTER_VATESGUI(MdViewerWidget)
  */
 MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   dataLoader(NULL), hiddenView(NULL), lodAction(NULL), screenShot(NULL), viewLayout(NULL),
-  viewSettings(NULL)
+  viewSettings(NULL), m_temporaryWorkspaceIdentifier("_tempvsi")
 {
   // Calling workspace observer functions.
   observeAfterReplace();
@@ -207,6 +208,13 @@ void MdViewerWidget::setupUiAndConnections()
                    SIGNAL(clicked()),
                    this,
                    SLOT(onRotationPoint()));
+
+  // Connect the temporary sources manager
+  QObject::connect(&m_temporarySourcesManager,
+                   SIGNAL(triggerAcceptForNewFilters()),
+                   this->ui.propertiesPanel,
+                   SLOT(apply()));
+
 }
 
 /**
@@ -515,7 +523,7 @@ void MdViewerWidget::renderTemporaryWorkspace(const std::string temporaryWorkspa
   // Load a new source plugin
   QString sourcePlugin = "MDHW Source";
   pqPipelineSource* newTemporarySource = this->currentView->setPluginSource(sourcePlugin, QString::fromStdString(temporaryWorkspaceName));
-
+  pqActiveObjects::instance().setActiveSource(newTemporarySource);
   m_temporarySourcesManager.registerTemporarySource(newTemporarySource);
 
   this->renderAndFinalSetup();
@@ -561,9 +569,16 @@ void MdViewerWidget::removeRebinning(pqPipelineSource* source, bool forced, Mode
     std::string temporaryWorkspaceName;
     m_temporarySourcesManager.getStoredWorkspaceNames(source, originalWorkspaceName, temporaryWorkspaceName);
 
-    // If there is nothing to remove then we are done
+    // If the active source has not been rebinned, then send a reminder to the user that only rebinned sources 
+    // can be unbinned
     if (originalWorkspaceName.empty() || temporaryWorkspaceName.empty())
     {
+      if (forced == true)
+      {
+          QMessageBox::warning(this, QApplication::tr("Unbin Warning"),
+                      QApplication::tr("You cannot unbin a source which has not be rebinned. \n "\
+                      "To unbin, select a rebinned source and \n press the unbin button again"));
+      }
       return;
     }
 
@@ -660,6 +675,14 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
   else
   {
     sourcePlugin = "MDEW Source";
+  }
+
+  // Make sure that we are not loading a temporary vsi workspace.
+  if (workspaceName.contains(m_temporaryWorkspaceIdentifier))
+  {
+    QMessageBox::information(this, QApplication::tr("Loading Source Warning"),
+                             QApplication::tr("You cannot laod a temporary vsi source. \n "\
+                                              "Please select another source."));
   }
 
   // Load a new source plugin
@@ -880,6 +903,7 @@ void MdViewerWidget::renderAndFinalSetup()
   this->currentView->setColorsForView();
   this->currentView->checkView(this->initialView);
   this->currentView->updateAnimationControls();
+  this->setDestroyedListener();
 }
 
 /**
@@ -942,6 +966,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->currentView->checkViewOnSwitch();
   this->updateAppState();
   this->initialView = v; 
+  this->setDestroyedListener();
 }
 
 /**
@@ -1282,6 +1307,23 @@ void MdViewerWidget::deleteSpecificSource(std::string workspaceName)
     }
 
     builder->destroy(source);
+  }
+}
+
+/**
+* Set the listener for when sources are being destroyed
+*/
+void MdViewerWidget::setDestroyedListener()
+{
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
+
+  // Attach the destroyd signal of all sources to the viewbase.
+  for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
+  {
+  QObject::connect((*source), SIGNAL(destroyed()),
+                    this->currentView, SLOT(onSourceDestroyed()), Qt::UniqueConnection);
   }
 }
 

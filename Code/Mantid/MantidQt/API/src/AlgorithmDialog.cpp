@@ -263,6 +263,16 @@ void AlgorithmDialog::storePropertyValue(const QString & name, const QString & v
   m_propertyValueMap.insert(name, value);
 }
 
+//-------------------------------------------------------------------------------------------------
+/**
+ * Removes a property (name,value) pair to the stored map
+ */
+void AlgorithmDialog::removePropertyValue(const QString & name)
+{
+  if( name.isEmpty() ) return;
+  m_propertyValueMap.remove(name);
+}
+
 
 //-------------------------------------------------------------------------------------------------
 /** Show the validators for all the properties */

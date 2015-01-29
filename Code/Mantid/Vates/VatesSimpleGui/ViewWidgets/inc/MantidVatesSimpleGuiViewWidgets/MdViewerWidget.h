@@ -11,6 +11,7 @@
 
 #include <QPointer>
 #include <QWidget>
+#include <QString>
 
 class pqLoadDataReaction;
 class pqPipelineSource;
@@ -137,6 +138,7 @@ private:
   ModeControlWidget::Views initialView; ///< Holds the initial view
   RebinManager m_rebinManager; ///<Holds the rebin manager
   SourcesManager m_temporarySourcesManager; ///<Holds the sources manager
+  QString m_temporaryWorkspaceIdentifier; ///< Holds the identifier for temporary workspaces
 
   /// Check the environmental variables.
   void checkEnvSetup();
@@ -194,6 +196,8 @@ private:
   void removeRebinning(pqPipelineSource* source, bool forced, ModeControlWidget::Views view = ModeControlWidget::STANDARD);
   /// Remove all rebinned sources
   void removeAllRebinning(ModeControlWidget::Views view);
+  /// Sets a listener for when sources are being destroyed
+  void setDestroyedListener();
 };
 
 } // SimpleGui

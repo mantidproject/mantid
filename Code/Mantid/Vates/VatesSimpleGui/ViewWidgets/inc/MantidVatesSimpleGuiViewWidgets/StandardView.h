@@ -74,6 +74,10 @@ public:
   /// @see ViewBase::closeSubWindows
   void closeSubWindows();
 
+public slots:
+  /// React when the visibility of a representation changes
+  void onSourceDestroyed();
+
 protected slots:
   /// Add a slice to the current dataset.
   void onCutButtonClicked();
@@ -89,6 +93,9 @@ private:
   QPointer<pqPipelineSource> scaler; ///< Holder for the ScaleWorkspace
   Ui::StandardView ui; ///< The standard view's UI form
   QPointer<pqRenderView> view; ///< The main view
+
+  /// Set the rebin and unbin button visibility
+  void setRebinAndUnbinButtons();
 };
 
 } // SimpleGui

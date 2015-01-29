@@ -9,6 +9,7 @@
 
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
+#include <pqObjectBuilder.h>
 #include <pqPipelineFilter.h>
 #include <pqPipelineSource.h>
 #include <pqServer.h>
@@ -17,7 +18,8 @@
 #include <pqServerManagerModel.h>
 #include <vtkSMSourceProxy.h>
 #include <vtkSMProxy.h>
-
+#include <vtkSMPropertyIterator.h>
+#include <vtkSMDoubleVectorProperty.h>
 #include <QList>
 
 #include <Poco/ActiveResult.h>
@@ -171,18 +173,22 @@ namespace Mantid
           throw std::runtime_error("VSI error: There is no filter in the pipeline.");
         }
 
+        // We can rebuild the pipeline by either creating it from scratch or by changing the lowest level source
+#if 1
+        // Rebuild pipeline
+        rebuildPipeline(src1, src2);
+
+        // Render the active view to make the changes visible.
+        pqActiveObjects::instance().activeView()->render();
+#else
         vtkSMPropertyHelper(filter->getProxy(), "Input").Set(src2->getProxy());
 
-        // Update the pipeline
-        vtkSMProxy* proxy = filter->getProxy();
-        proxy->UpdateVTKObjects();
-        proxy->UpdatePropertyInformation();
-        filter->updateHelperProxies();
-        filter->updatePipeline();
+        // Update the pipeline from the end
+        updateRebuiltPipeline(filter);
 
         // Set the visibility of the source. Paraview doesn't automatically set it to false, so we need to force it.
         setSourceVisibility(src2, false);
-
+#endif
         // Render the active view to make the changes visible.
         pqActiveObjects::instance().activeView()->render();
       }
@@ -312,7 +318,6 @@ namespace Mantid
       /**
        * Stop keeping tabs on the specific workspace pair
        * @param temporaryWorspace The name of the temporary workspace.
-       * @param originalWorksapce The name of the original workspace.
        */
       void SourcesManager::untrackWorkspaces(std::string temporaryWorkspace)
       {
@@ -409,6 +414,96 @@ namespace Mantid
           untrackWorkspaces(workspaceName);
        }
 
+        /**
+        * Update the newly created pipeline from the last filter onwards
+        * @param filter The filter after the source
+        */
+        void SourcesManager::updateRebuiltPipeline(pqPipelineFilter* filter)
+        {
+          // Crawl down the pipeline to the last filter
+          while (filter->getNumberOfConsumers() > 0)
+          {
+            filter = qobject_cast<pqPipelineFilter*>(filter->getConsumer(0));
+
+            if (!filter)
+            {
+              throw std::runtime_error("VSI error: There is no filter in the pipeline.");
+            }
+
+            filter->updatePipeline();
+            filter->updateHelperProxies();
+
+            vtkSMProxy* proxy = filter->getProxy();
+            proxy->UpdateVTKObjects();
+            proxy->UpdatePropertyInformation();
+          }
+        }
+
+        /**
+         * Rebuild the pipeline for the new source
+         * @param source1 The old source.
+         * @param source2 The new source.
+         */
+        void SourcesManager::rebuildPipeline(pqPipelineSource* source1, pqPipelineSource* source2)
+        {
+          // Step through all the filters in old pipeline and reproduce them
+          pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+          pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(source1->getConsumer(0));
+
+          while(filter)
+          {
+            vtkSMProxy* proxy = filter->getProxy();
+
+            if (QString(proxy->GetXMLName()).contains("ScaleWorkspace"))
+            {
+              // Build the source
+              pqPipelineSource* newPipelineElement = builder->createFilter("filters","MantidParaViewScaleWorkspace", source2);
+
+              pqPipelineFilter* newFilter = qobject_cast<pqPipelineFilter*>(newPipelineElement);
+
+              copyProperties(filter, newFilter);
+
+              // Replace values
+
+              // Apply
+              emit triggerAcceptForNewFilters();
+
+              if (filter->getNumberOfConsumers() > 0)
+              {
+                filter = qobject_cast<pqPipelineFilter*>(filter->getConsumer(0));
+              }
+              else 
+              {
+                filter = NULL;
+              }
+            } else if(0==1)
+            {
+
+            }
+          }
+        }
+
+        /**
+         * Copy the properties of the old filter to the new filter.
+         * @param filter1 The old filter.
+         * @param filter2 The new filter.
+         */
+        void SourcesManager::copyProperties(pqPipelineFilter* filter1, pqPipelineFilter* filter2)
+        {
+          vtkSMPropertyIterator *it = filter1->getProxy()->NewPropertyIterator();
+
+          while (!it->IsAtEnd())
+          {
+            std::string key(it->GetKey());
+            vtkSMProperty* propertyFilter1 = it->GetProperty();
+            if (key != "Input")
+            {
+              filter2->getProxy()->GetProperty(key.c_str())->Copy(propertyFilter1);
+            }
+
+            it->Next();
+          }
+        }
     }
   }
 }

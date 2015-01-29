@@ -149,6 +149,8 @@ public slots:
   virtual void updateUI();
   /// Provide updates to View
   virtual void updateView();
+  /// React when the visibility of a representation changes
+  virtual void onSourceDestroyed();
 
 signals:
   /**

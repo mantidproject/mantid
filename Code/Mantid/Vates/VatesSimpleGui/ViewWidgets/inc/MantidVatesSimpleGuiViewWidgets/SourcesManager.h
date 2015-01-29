@@ -62,11 +62,14 @@ namespace Mantid
         signals:
           void switchSourcesFromEventToHisto(std::string histoWorkspaceName, std::string eventWorkspaceName);
 
+          void triggerAcceptForNewFilters();
         protected:
           void addHandle(const std::string &workspaceName, const boost::shared_ptr<Mantid::API::Workspace> workspace);
 
         private slots:
           void onTemporarySourceDestroyed();
+
+          void setSourceVisibility(pqPipelineSource* source, bool visibile);
 
         private:
           std::map<std::string, std::string> m_eventWorkspaceToHistoWorkspace; ///< Holds the mapping from the Event workspace name to the temporary Histo workspace name
@@ -79,7 +82,7 @@ namespace Mantid
 
           void swapSources(std::string source1, std::string source2);
 
-          void setSourceVisibility(pqPipelineSource* source, bool visibile);
+          void rebuildPipeline(pqPipelineSource* source1, pqPipelineSource* source2);
 
           void processMDHistoWorkspace(std::string& inputWorkspace, std::string& outputWorkspace, std::string workspaceName);
 
@@ -92,6 +95,10 @@ namespace Mantid
           void removeTemporaryWorkspace(std::string temporaryWorkspace);
 
           void compareToSources(std::string workspaceName);
+
+          void updateRebuiltPipeline(pqPipelineFilter* filter);
+
+          void copyProperties(pqPipelineFilter* filter1, pqPipelineFilter* filter2);
       };
 
     } // SimpleGui

@@ -145,6 +145,9 @@ protected:
   /// Adds a property (name,value) pair to the stored map
   void storePropertyValue(const QString & name, const QString & value);
 
+  /// Removes a property (name, value) pair from the stored map
+  void removePropertyValue(const QString & name);
+
   /// Set properties on this algorithm by pulling values from the tied widgets
   bool setPropertyValues(const QStringList & skipList = QStringList());
   bool setPropertyValue(const QString pName, bool validateOthers);

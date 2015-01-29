@@ -11,6 +11,8 @@
 #include <pqPipelineRepresentation.h>
 #include <pqPipelineSource.h>
 #include <pqRenderView.h>
+#include <pqServerManagerModel.h>
+#include <pqServer.h>
 #include <vtkDataObject.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
@@ -89,14 +91,10 @@ void StandardView::render()
   }
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
-  if (this->isMDHistoWorkspace(this->origSrc) && !isTemporaryMDHistoWorkspace(this->origSrc))
-  {
-    this->ui.rebinButton->setEnabled(false);
-  }
+  setRebinAndUnbinButtons();
 
   if (this->isPeaksWorkspace(this->origSrc))
   {
-    this->ui.rebinButton->setEnabled(false);
     this->ui.cutButton->setEnabled(false);
   }
 
@@ -175,8 +173,68 @@ void StandardView::updateView()
 
 void StandardView::closeSubWindows()
 {
-
 }
+
+/**
+ * This function reacts to a destroyed source.
+ */
+void StandardView::onSourceDestroyed()
+{
+  setRebinAndUnbinButtons();
+}
+
+/**
+ * Check if the rebin and unbin buttons should be visible
+ * Note that for a rebin button to be visible there may be no
+ * MDHisto workspaces present, yet temporary MDHisto workspaces are
+ * allowed.
+ */
+void StandardView::setRebinAndUnbinButtons()
+{
+  int numberOfTemporaryMDHistoWorkspaces = 0;
+  int numberOfTrueMDHistoWorkspaces = 0;
+  int numberOfPeakWorkspaces = 0;
+
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
+
+  for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
+  {
+    if (isTemporaryMDHistoWorkspace(*source))
+    {
+      numberOfTemporaryMDHistoWorkspaces++;
+    } else if (isMDHistoWorkspace(*source))
+    {
+      numberOfTrueMDHistoWorkspaces++;
+    }
+    else if (isPeaksWorkspace(*source))
+    {
+      numberOfPeakWorkspaces++;
+    }
+  }
+
+  // If there are any true MDHisto workspaces then the rebin button should be disabled
+  if (numberOfTrueMDHistoWorkspaces > 0 || numberOfPeakWorkspaces > 0)
+  {
+    this->ui.rebinButton->setEnabled(false);
+  }
+  else 
+  {
+    this->ui.rebinButton->setEnabled(true);
+  }
+
+  // If there are no temporary MD Histo workspaces the button should be disabled.
+  if (numberOfTemporaryMDHistoWorkspaces == 0)
+  {
+    this->ui.unbinButton->setEnabled(false);
+  }
+  else
+  {
+    this->ui.unbinButton->setEnabled(true);
+  }
+}
+
 
 } // SimpleGui
 } // Vates
