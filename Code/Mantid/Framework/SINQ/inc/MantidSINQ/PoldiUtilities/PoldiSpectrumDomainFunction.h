@@ -17,6 +17,45 @@
 namespace Mantid {
 namespace Poldi {
 
+struct MANTID_SINQ_DLL Poldi2DHelper {
+  void setChopperSlitOffsets(double distance, double sinTheta, double deltaD,
+                             const std::vector<double> &offsets) {
+    dFractionalOffsets.clear();
+    dOffsets.clear();
+
+    for (auto it = offsets.begin(); it != offsets.end(); ++it) {
+      double dEquivalent = Conversions::TOFtoD(*it, distance, sinTheta);
+      double rounded = floor(dEquivalent / deltaD + 0.5);
+      dOffsets.push_back(static_cast<int>(rounded));
+      dFractionalOffsets.push_back(dEquivalent - rounded * deltaD);
+    }
+  }
+
+  void setDomain(double dMin, double dMax, double deltaD) {
+      int dMinN = static_cast<int>(dMin / deltaD);
+      int dMaxN = static_cast<int>(dMax / deltaD);
+
+      std::vector<double> current;
+      current.reserve(dMaxN - dMinN);
+
+      for(int i = dMinN; i <= dMaxN; ++i) {
+          current.push_back(static_cast<double>(i + 0.5) * deltaD);
+      }
+
+      domain = boost::make_shared<API::FunctionDomain1DVector>(current);
+  }
+
+  std::vector<double> dFractionalOffsets;
+  std::vector<int> dOffsets;
+
+  API::FunctionDomain1D_sptr domain;
+
+  double deltaD;
+  int minTOFN;
+};
+
+typedef boost::shared_ptr<Poldi2DHelper> Poldi2DHelper_sptr;
+
 /** PoldiSpectrumDomainFunction : TODO: DESCRIPTION
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -74,6 +113,8 @@ protected:
   double m_deltaT;
 
   PoldiTimeTransformer_sptr m_timeTransformer;
+
+  std::vector<Poldi2DHelper_sptr> m_2dHelpers;
 };
 
 } // namespace Poldi

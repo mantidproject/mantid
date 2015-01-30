@@ -110,8 +110,9 @@ public:
         function.setParameter("Fwhm", 0.0027446316797104233);
         function.setParameter("Centre", 1.1086444);
 
-        function.initializeInstrumentParameters(m_instrument);
         function.m_deltaT = 3.0;
+        function.initializeInstrumentParameters(m_instrument);
+
 
         std::vector<double> xvalues(500, 1.0);
 
@@ -156,8 +157,8 @@ public:
         function->setParameter("Fwhm", 0.0027446316797104233);
         function->setParameter("Centre", 1.1086444);
 
-        function->initializeInstrumentParameters(m_instrument);
         function->m_deltaT = 3.0;
+        function->initializeInstrumentParameters(m_instrument);
 
         TS_ASSERT_EQUALS(function->getParameter(2), 1.1086444);
 
