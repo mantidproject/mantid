@@ -239,7 +239,6 @@ set ( TEST_FILES
 	DeltaFunctionTest.h
 	DiffRotDiscreteCircleTest.h
 	DiffSphereTest.h
-	DynamicKuboToyabeTest.h
 	EndErfcTest.h
 	ExpDecayMuonTest.h
 	ExpDecayOscTest.h
