@@ -7,22 +7,10 @@
 #include "MantidCurveFitting/StaticKuboToyabe.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
-//#include "MantidAPI/CompositeFunction.h"
-//#include "MantidCurveFitting/LinearBackground.h"
-//#include "MantidCurveFitting/BoundaryConstraint.h"
-//#include "MantidCurveFitting/Fit.h"
-//#include "MantidKernel/UnitFactory.h"
-//#include "MantidAPI/AnalysisDataService.h"
-//#include "MantidAPI/WorkspaceFactory.h"
-//#include "MantidAPI/Algorithm.h"
-//#include "MantidDataObjects/Workspace2D.h"
-//#include "MantidKernel/Exception.h"
-//#include "MantidAPI/FunctionFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
-//using namespace Mantid::DataObjects;
 
 
 class DynamicKuboToyabeTest : public CxxTest::TestSuite
