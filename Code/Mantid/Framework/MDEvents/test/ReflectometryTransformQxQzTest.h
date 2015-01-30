@@ -1,9 +1,8 @@
 #ifndef MANTID_MDEVENTS_REFLECTOMETRYTRANFORMQXQZTEST_H_
 #define MANTID_MDEVENTS_REFLECTOMETRYTRANFORMQXQZTEST_H_
 
-#define PI 3.14159265
-
 #include <cxxtest/TestSuite.h>
+#include <cmath>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include <iostream>
@@ -100,13 +99,13 @@ public:
 
   void test_calculate_Qx()
   {
-    //Set up calculation so that it collapses down to 2*PI/wavelength by setting initial theta to PI/2 and final theta to zero
+    //Set up calculation so that it collapses down to 2*M_PI/wavelength by setting initial theta to M_PI/2 and final theta to zero
     CalculateReflectometryQx calculator(90);
     double qx;
     const double wavelength = 0.1;
     TS_ASSERT_THROWS_NOTHING(calculator.setThetaFinal(0));
     TS_ASSERT_THROWS_NOTHING(qx = calculator.execute(wavelength));
-    TS_ASSERT_DELTA(2*PI/wavelength, qx, 0.0001);
+    TS_ASSERT_DELTA(2*M_PI/wavelength, qx, 0.0001);
   }
 
   void test_recalculate_Qx()
@@ -118,7 +117,7 @@ public:
 
     //Now reset the final theta and should be able to re-execute
     calculator.setThetaFinal(90);
-    TS_ASSERT_DELTA(-2*PI/wavelength, calculator.execute(wavelength), 0.0001);
+    TS_ASSERT_DELTA(-2*M_PI/wavelength, calculator.execute(wavelength), 0.0001);
   }
 
   //---- End Tests for Qx Calculator ---- //
@@ -127,13 +126,13 @@ public:
 
   void test_calculate_Qz()
   {
-    //Set up calculation so that it collapses down to 2*PI/wavelength 
+    //Set up calculation so that it collapses down to 2*M_PI/wavelength 
     CalculateReflectometryQz calculator(0);
     double qx;
     const double wavelength = 0.1;
     TS_ASSERT_THROWS_NOTHING(calculator.setThetaFinal(90));
     TS_ASSERT_THROWS_NOTHING(qx = calculator.execute(wavelength));
-    TS_ASSERT_DELTA(2*PI/wavelength, qx, 0.0001);
+    TS_ASSERT_DELTA(2*M_PI/wavelength, qx, 0.0001);
   }
 
   void test_recalculate_Qz()
@@ -141,11 +140,11 @@ public:
     CalculateReflectometryQz calculator(90);
     calculator.setThetaFinal(90);
     const double wavelength = 0.1;
-    TS_ASSERT_DELTA(2*(2*PI/wavelength), calculator.execute(wavelength), 0.001);
+    TS_ASSERT_DELTA(2*(2*M_PI/wavelength), calculator.execute(wavelength), 0.001);
 
     //Now reset the final theta and should be able to re-execute
     calculator.setThetaFinal(0);
-    TS_ASSERT_DELTA(2*PI/wavelength, calculator.execute(wavelength), 0.001);
+    TS_ASSERT_DELTA(2*M_PI/wavelength, calculator.execute(wavelength), 0.001);
   }
 
   //---- End Tests for Qz Calculator ---- //
