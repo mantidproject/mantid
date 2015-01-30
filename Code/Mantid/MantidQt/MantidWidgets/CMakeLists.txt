@@ -11,6 +11,7 @@ set ( SRC_FILES
 	src/FindReplaceDialog.cpp
 	src/FitPropertyBrowser.cpp
 	src/FormulaDialogEditor.cpp
+	src/FitOptionsBrowser.cpp
 	src/FunctionBrowser.cpp
 	src/HintingLineEdit.cpp
 	src/InstrumentSelector.cpp
@@ -54,6 +55,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/FindReplaceDialog.h
     inc/MantidQtMantidWidgets/FindDialog.h
     inc/MantidQtMantidWidgets/FitPropertyBrowser.h
+    inc/MantidQtMantidWidgets/FitOptionsBrowser.h
     inc/MantidQtMantidWidgets/FunctionBrowser.h
     inc/MantidQtMantidWidgets/HintingLineEdit.h
     inc/MantidQtMantidWidgets/CatalogSearch.h
