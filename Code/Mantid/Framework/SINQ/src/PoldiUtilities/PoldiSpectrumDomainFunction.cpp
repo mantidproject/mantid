@@ -68,112 +68,60 @@ void PoldiSpectrumDomainFunction::function1DSpectrum(
 
   double centre = getParameter("Centre");
 
-
-  //std::cout << centre << " " << fwhm << std::endl;
-
   Poldi2DHelper_sptr helper = m_2dHelpers[index];
 
-  if(helper) {
-      double area = getParameter("Area");
-      //double areaT = area;
-          //m_timeTransformer->timeTransformedIntensity(area, centre, index);
+  if (helper) {
+    double area = getParameter("Area");
 
-  double dWidth = 2.0 * fwhm;
-  double dCalcMin = centre - dWidth;
-  int dWidthN = std::min(50, std::max(10, 2 * static_cast<int>(dWidth / helper->deltaD) + 1));
+    double dWidth = 2.0 * fwhm;
+    double dCalcMin = centre - dWidth;
+    int dWidthN = std::min(
+        50, std::max(10, 2 * static_cast<int>(dWidth / helper->deltaD) + 1));
 
-  //std::cout << dWidth / helper->deltaD << std::endl;
+    const double *domainBeginPointer = 0;
+    int pos = 0;
 
-  const double *domainBeginPointer = 0;
-  int pos = 0;
-
-  for(size_t i = 0; i < helper->domain->size(); ++i) {
-      if((*(helper->domain))[i] >= dCalcMin) {
-          pos = static_cast<int>(i + 1);
-          domainBeginPointer = helper->domain->getPointerAt(i + 1);
-          break;
+    for (size_t i = 0; i < helper->domain->size(); ++i) {
+      if ((*(helper->domain))[i] >= dCalcMin) {
+        pos = static_cast<int>(i + 1);
+        domainBeginPointer = helper->domain->getPointerAt(i + 1);
+        break;
       }
-  }
+    }
 
-  //std::cout << centre << " " << index << " " << fwhm << " " << dWidthN << std::endl;
-
-  if(domainBeginPointer == 0) {
+    if (domainBeginPointer == 0) {
       throw std::runtime_error("Cannot find d-value in domain.");
-  }
+    }
 
-  if(dWidthN < 0) {
+    if (dWidthN < 0) {
       throw std::runtime_error("dWidth < 0");
-  }
-  //API::FunctionDomain1DView smallDomain(domainBeginPointer, dWidthN);
+    }
 
-  std::vector<double> smallDomain(dWidthN);
-  for(size_t i = 0; i < dWidthN; ++i) {
+    std::vector<double> smallDomain(dWidthN);
+    for (size_t i = 0; i < dWidthN; ++i) {
       smallDomain[i] = (*(helper->domain))[pos + i];
-      //std::cout << smallDomain[i] << std::endl;
-  }
+    }
 
-  std::vector<double> factors(dWidthN);
+    std::vector<double> factors(dWidthN);
 
-  for(size_t i = 0; i < factors.size(); ++i) {
-      factors[i] = m_timeTransformer->detectorElementIntensity(smallDomain[i], index);
-  }
+    for (size_t i = 0; i < factors.size(); ++i) {
+      factors[i] =
+          m_timeTransformer->detectorElementIntensity(smallDomain[i], index);
+    }
 
-  size_t baseOffset = static_cast<size_t>(pos + helper->minTOFN);
+    size_t baseOffset = static_cast<size_t>(pos + helper->minTOFN);
 
-  for(size_t i = 0; i < helper->dOffsets.size(); ++i) {
+    for (size_t i = 0; i < helper->dOffsets.size(); ++i) {
       double newD = centre + helper->dFractionalOffsets[i];
-      //std::cout << "D " << i << ": " << centre << " " << newD << std::endl;
-      //std::cout << "OFFSET " << i << ": " << (pos + helper->dOffsets[i] + helper->minTOFN) % 500 << std::endl;
       size_t offset = static_cast<size_t>(helper->dOffsets[i]) + baseOffset;
 
-
-      for(size_t j = 0; j < smallDomain.size(); ++j) {
-          //std::cout << j << " " << smallDomain[j] << " " << actualFunction(smallDomain[j], newD, sigma, areaT) * factors[i] << std::endl;
-          values.addToCalculated((offset + j) % domainSize, actualFunction(smallDomain[j], newD, sigma, area) * factors[i]);
+      for (size_t j = 0; j < smallDomain.size(); ++j) {
+        values.addToCalculated(
+            (offset + j) % domainSize,
+            actualFunction(smallDomain[j], newD, sigma, area) * factors[j]);
       }
-
-      //std::cout << i << " " << actualFunction(smallDomain[0], newD, sigma, areaT) * factors[i] / (actualFunction(smallDomain[smallDomain.size() - 1], newD, sigma, areaT) * factors.back()) << std::endl;
-  }
-  }
-
-  /*
-  double fwhm = getParameter("Fwhm");
-  double fwhmT = m_timeTransformer->dToTOF(fwhm);
-  double fwhmChannel = fwhmT / m_deltaT;
-  double sigmaChannel = fwhmChannel / (2.0 * sqrt(2.0 * log(2.0)));
-
-  double centre = getParameter("Centre");
-  double centreT = m_timeTransformer->timeTransformedCentre(centre, index);
-
-  double area = getParameter("Area");
-  double areaT =
-      m_timeTransformer->timeTransformedIntensity(area, centre, index);
-  */
-
-  /* Once all the factors are all there, the calculation needs to be
-   * performed with one offset per chopper slit.
-  for (size_t o = 0; o < m_chopperSlitOffsets.size(); ++o) {
-    double centreTOffset = centreT + m_chopperSlitOffsets[o];
-    double centreTOffsetChannel = centreTOffset / m_deltaT;
-
-    int centreChannel = static_cast<int>(centreTOffsetChannel);
-    int widthChannels = std::max(2, static_cast<int>(fwhmChannel * 2.0));
-
-    for (int i = centreChannel - widthChannels;
-         i <= centreChannel + widthChannels; ++i) {
-      int cleanChannel = i % domainSize;
-      if (cleanChannel < 0) {
-        cleanChannel += domainSize;
-      }
-
-      double xValue = static_cast<double>(i) + 0.5;
-
-      values.addToCalculated(
-          cleanChannel,
-          actualFunction(xValue, centreTOffsetChannel, sigmaChannel, areaT));
     }
   }
-  */
 }
 
 void
@@ -194,29 +142,25 @@ PoldiSpectrumDomainFunction::poldiFunction1D(const std::vector<int> &indices,
   int offset = static_cast<int>(domain[0] / deltaD + 0.5);
 
   for (auto index = indices.begin(); index != indices.end(); ++index) {
-      std::vector<double> factors(domain.size());
+    std::vector<double> factors(domain.size());
 
-      for(size_t i = 0; i < factors.size(); ++i) {
-          factors[i] = m_timeTransformer->detectorElementIntensity(domain[i], static_cast<size_t>(*index));
-      }
+    for (size_t i = 0; i < factors.size(); ++i) {
+      factors[i] = m_timeTransformer->detectorElementIntensity(
+          domain[i], static_cast<size_t>(*index));
+    }
     double fwhmT = m_timeTransformer->timeTransformedWidth(fwhm, *index);
     double fwhmChannel = fwhmT / m_deltaT;
     double sigma = fwhm / (2.0 * sqrt(2.0 * log(2.0)));
-    double sigmaChannel = fwhmChannel / (2.0 * sqrt(2.0 * log(2.0)));
-    int widthChannels = std::max(2, static_cast<int>(fwhmChannel * 2.0));
-
-    double areaT = m_timeTransformer->timeTransformedIntensity(
-        area, centre, static_cast<size_t>(*index));
+    int widthChannels = std::min(
+        50, std::max(10, 2 * static_cast<int>(fwhmChannel) + 1));
 
     for (int i = centreChannel - widthChannels;
          i <= centreChannel + widthChannels; ++i) {
-      double xValue = static_cast<double>(i);
 
-      values.addToCalculated(i - offset, 8.0 * actualFunction(domain[i - offset], centre, sigma, area) * factors[i - offset]);
-//      values.addToCalculated(
-//          i - offset,
-//          actualFunction(xValue, centreTOffsetChannel, sigmaChannel, areaT) *
-//              static_cast<double>(m_chopperSlitOffsets.size()));
+      values.addToCalculated(
+          i - offset,
+          8.0 * actualFunction(domain[i - offset], centre, sigma, area) *
+              factors[i - offset]);
     }
   }
 }
@@ -262,15 +206,14 @@ void PoldiSpectrumDomainFunction::initializeInstrumentParameters(
   m_timeTransformer = boost::make_shared<PoldiTimeTransformer>(poldiInstrument);
   m_chopperSlitOffsets = getChopperSlitOffsets(poldiInstrument->chopper());
 
-  if(!poldiInstrument) {
-      throw std::runtime_error("No valid POLDI instrument.");
+  if (!poldiInstrument) {
+    throw std::runtime_error("No valid POLDI instrument.");
   }
 
   m_2dHelpers.clear();
 
   PoldiAbstractDetector_sptr detector = poldiInstrument->detector();
   PoldiAbstractChopper_sptr chopper = poldiInstrument->chopper();
-
 
   std::pair<double, double> qLimits = detector->qLimits(1.1, 5.0);
 
@@ -279,7 +222,8 @@ void PoldiSpectrumDomainFunction::initializeInstrumentParameters(
 
   for (int i = 0; i < static_cast<int>(detector->elementCount()); ++i) {
     double sinTheta = sin(detector->twoTheta(i) / 2.0);
-    double distance = detector->distanceFromSample(i) + chopper->distanceFromSample();
+    double distance =
+        detector->distanceFromSample(i) + chopper->distanceFromSample();
     double deltaD = Conversions::TOFtoD(m_deltaT, distance, sinTheta);
 
     Poldi2DHelper_sptr curr = boost::make_shared<Poldi2DHelper>();
@@ -287,7 +231,8 @@ void PoldiSpectrumDomainFunction::initializeInstrumentParameters(
                                 m_chopperSlitOffsets);
     curr->setDomain(dMin, dMax, deltaD);
     curr->deltaD = deltaD;
-    curr->minTOFN = static_cast<int>(Conversions::dtoTOF(dMin, distance, sinTheta) / m_deltaT);
+    curr->minTOFN = static_cast<int>(
+        Conversions::dtoTOF(dMin, distance, sinTheta) / m_deltaT);
 
     m_2dHelpers.push_back(curr);
   }
