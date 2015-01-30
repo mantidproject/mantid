@@ -348,6 +348,7 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.log_binning_radio.setChecked(state.log_binning)
         self._summary.align_check.setEnabled(state.log_binning)
         self._summary.align_check.setChecked(state.align_log_with_decades)
+        self._summary.error_weighting_check.setChecked(state.error_weighting)
         
         self._summary.n_wedges_edit.setText(str(state.n_wedges))
         self._summary.wedge_angle_edit.setText(str(state.wedge_angle))
@@ -426,6 +427,7 @@ class SANSInstrumentWidget(BaseWidget):
         m.n_sub_pix = util._check_and_get_int_line_edit(self._summary.n_sub_pix_edit)
         m.log_binning = self._summary.log_binning_radio.isChecked()
         m.align_log_with_decades = self._summary.align_check.isChecked()
+        m.error_weighting = self._summary.error_weighting_check.isChecked()
 
         m.n_wedges = util._check_and_get_int_line_edit(self._summary.n_wedges_edit)
         m.wedge_angle = util._check_and_get_float_line_edit(self._summary.wedge_angle_edit)
