@@ -3,8 +3,7 @@ from mantid.kernel import funcreturns
 from mantid import geometry
 
 import time as time
-import os.path
-import copy
+import os.path, copy
 
 import Direct.CommonFunctions  as common
 import Direct.diagnostics      as diagnostics
@@ -320,7 +319,7 @@ class DirectEnergyConversion(object):
       if len(workspace_defined_prop) > 0:
           prop_man.log("****************************************************************")
           prop_man.log('*** Sample run {0} properties change default reduction properties: '.\
-                   format(PropertyManager.sample_run.get_ws_name()))
+                       format(PropertyManager.sample_run.get_ws_name()))
           prop_man.log_changed_values('notice',False,oldChanges)
           prop_man.log("****************************************************************")
 
@@ -552,10 +551,12 @@ class DirectEnergyConversion(object):
         mon1_det = monitor_ws.getDetector(spec_num)
         mon1_pos = mon1_det.getPos()
         src_name = data_ws.getInstrument().getSource().getName()
-        MoveInstrumentComponent(Workspace=resultws_name,ComponentName= src_name, X=mon1_pos.getX(), Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
+        MoveInstrumentComponent(Workspace=resultws_name,ComponentName= src_name, X=mon1_pos.getX(), 
+                                Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
         #
         if separate_monitors:
-           MoveInstrumentComponent(Workspace=result_mon_name,ComponentName= src_name, X=mon1_pos.getX(), Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
+           MoveInstrumentComponent(Workspace=result_mon_name,ComponentName= src_name, X=mon1_pos.getX(),
+                                   Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
 
         data_run.synchronize_ws(mtd[resultws_name])
         return ei, mon1_peak
@@ -834,6 +835,8 @@ class DirectEnergyConversion(object):
         # shifting the instrument
         object.__setattr__(self,'_mon2_norm_time_range',None)
         object.__setattr__(self,'_debug_mode',False)
+        # method used in debug mode and requesting 
+        object.__setattr__(self,'_do_early_rebinning',False)
 
         all_methods = dir(self)
         # define list of all existing properties, which have descriptors
@@ -1104,14 +1107,6 @@ class DirectEnergyConversion(object):
                 DeleteWorkspace(Workspace=deltaE_wkspaceName)
                 DeleteWorkspace(Workspace=data_ws)
         return (norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
-#-------------------------------------------------------------------------------
-
-    def _build_white_tag(self):
-        """ build tag indicating wb-integration ranges """ 
-        low,upp = self.wb_integr_range
-        white_tag = 'NormBy:{0}_IntergatedIn:{1:0>10.2f}:{2:0>10.2f}'.format(self.normalise_method,low,upp)
-        return white_tag
-
 # -------------------------------------------------------------------------------------------
 #         This actually does the conversion for the mono-sample and
 #         mono-vanadium runs
@@ -1120,7 +1115,8 @@ class DirectEnergyConversion(object):
     def _do_mono_SNS(self, data_ws, result_name, ei_guess,
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
         # does not work -- retrieve from repo and fix
-        raise NotImplementedError("Non currently implemented. Retrieve from repository if necessary")
+        raise NotImplementedError("Non currently implemented. Retrieve from repository"
+                                  " if necessary and fix")
         return
 #-------------------------------------------------------------------------------
     def _do_mono_ISIS(self, data_run, ei_guess,
@@ -1277,6 +1273,12 @@ class DirectEnergyConversion(object):
         else:
             result = run.get_workspace()
         return result
+#-------------------------------------------------------------------------------
+    def _build_white_tag(self):
+        """ build tag indicating wb-integration ranges """ 
+        low,upp = self.wb_integr_range
+        white_tag = 'NormBy:{0}_IntergatedIn:{1:0>10.2f}:{2:0>10.2f}'.format(self.normalise_method,low,upp)
+        return white_tag
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------

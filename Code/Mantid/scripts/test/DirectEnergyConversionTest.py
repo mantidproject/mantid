@@ -1,5 +1,5 @@
 import os, sys
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -251,6 +251,41 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
             eni = EnWs.dataX(0)
             for samp,rez in zip(eni,en_range): self.assertAlmostEqual(samp,rez)
+
+    def test_late_rebinning(self):
+        run_ws = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=10, BankPixelWidth=4, NumEvents=10000)
+        LoadInstrument(run_ws,InstrumentName='MARI')
+        #mono_ws = CloneWorkspace(run_ws)
+        wb_ws   = CloneWorkspace(run_ws)
+        tReducer = DirectEnergyConversion(run_ws.getInstrument())
+#un_ws = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=10, BankPixelWidth=4, NumEvents=10000)
+#    ...: LoadInstrument(run_ws,InstrumentName='MARI')
+#    ...: 
+#Out[15]: array([1, 2, 3])
+
+#In [16]: run_ws = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=10, BankPixelWidth=4, NumEvents=10000)
+#    ...: LoadInstrument(run_ws,InstrumentName='MARI')
+#    ...: bws = Rebin(run_ws,Params='0,100,20000')
+#    ...: 
+
+#In [17]: ews=ConvertUnits(bws,'Energy','Elastic')
+
+#In [18]: tws = CreateSampleWorkspace( Function='Multiple Peaks',NumBanks=10, BankPixelWidth=4, NumEvents=10000,XUnit='Energy',XMin=-10,xMax=20,BinWidth=0.1)
+
+#In [19]: LoadInstrument(tws,InstrumentName='MARI')
+#Out[19]: array([1, 2, 3])
+
+#In [20]: etws=ConvertUnits(tws,'TOF','Elastic')
+
+#In [21]: mon_ws = CreateSampleWorkspace( Function='Multiple Peaks',NumBanks=3, BankPixelWidth=1, NumEvents=10000,XUnit='Energy',XMin=-10,xMax=20,BinWidth=0.1)
+
+#In [22]: LoadInsturment(mon_ws,InstrumentName='MARI')
+
+        #ref_ws = Rebin(
+
+        mono_s = tRedcucet._do_mono(mono_run, ei_guess,
+                             white_run, map_file, spectra_masks, Tzero)
+
 
 
      
