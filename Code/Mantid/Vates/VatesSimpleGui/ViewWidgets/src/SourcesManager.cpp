@@ -177,9 +177,6 @@ namespace Mantid
 #if 1
         // Rebuild pipeline
         rebuildPipeline(src1, src2);
-
-        // Render the active view to make the changes visible.
-        pqActiveObjects::instance().activeView()->render();
 #else
         vtkSMPropertyHelper(filter->getProxy(), "Input").Set(src2->getProxy());
 
@@ -450,35 +447,38 @@ namespace Mantid
           pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
           pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(source1->getConsumer(0));
 
+          vtkSMProxy* proxy = NULL;
+          pqPipelineSource* newPipelineElement = NULL;
+          pqPipelineFilter* newFilter = NULL;
+
           while(filter)
           {
-            vtkSMProxy* proxy = filter->getProxy();
+            proxy = filter->getProxy();
 
             if (QString(proxy->GetXMLName()).contains("ScaleWorkspace"))
             {
               // Build the source
-              pqPipelineSource* newPipelineElement = builder->createFilter("filters","MantidParaViewScaleWorkspace", source2);
-
-              pqPipelineFilter* newFilter = qobject_cast<pqPipelineFilter*>(newPipelineElement);
-
-              copyProperties(filter, newFilter);
-
-              // Replace values
-
-              // Apply
-              emit triggerAcceptForNewFilters();
-
-              if (filter->getNumberOfConsumers() > 0)
-              {
-                filter = qobject_cast<pqPipelineFilter*>(filter->getConsumer(0));
-              }
-              else 
-              {
-                filter = NULL;
-              }
-            } else if(0==1)
+              newPipelineElement = builder->createFilter("filters","MantidParaViewScaleWorkspace", source2);
+            } else if (QString(proxy->GetXMLName()).contains("Cut"))
             {
+              newPipelineElement = builder->createFilter("filters", "Cut", source2);
+            }
 
+            newFilter = qobject_cast<pqPipelineFilter*>(newPipelineElement);
+
+            // Bad proxies in ParaView have caused issues for Cut filters. If this 
+            // happens, we remove the filter.
+            copyProperties(filter, newFilter);
+
+            emit triggerAcceptForNewFilters();
+
+            if (filter->getNumberOfConsumers() > 0)
+            {
+              filter = qobject_cast<pqPipelineFilter*>(filter->getConsumer(0));
+            }
+            else 
+            {
+              filter = NULL;
             }
           }
         }

@@ -507,7 +507,7 @@ void MdViewerWidget::onSwitchSourcesFromEventToHisto(std::string histoWorkspaceN
   }
 
   // Remove the MDEvent source
-  deleteSpecificSource(eventWorkspaceName);
+  //deleteSpecificSource(eventWorkspaceName);
 
   // Set the splatterplot button explicitly
   this->currentView->setSplatterplot(true);
@@ -1301,12 +1301,12 @@ void MdViewerWidget::deleteSpecificSource(std::string workspaceName)
 
     while (filter)
     {
-      source = filter->getInput(0);
+      tempSource = filter->getInput(0);
       builder->destroy(filter);
-      filter = qobject_cast<pqPipelineFilter*>(source);
+      filter = qobject_cast<pqPipelineFilter*>(tempSource);
     }
 
-    builder->destroy(source);
+    builder->destroy(tempSource);
   }
 }
 
