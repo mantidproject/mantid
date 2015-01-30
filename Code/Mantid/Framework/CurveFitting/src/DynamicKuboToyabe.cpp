@@ -4,9 +4,7 @@
 #include "MantidCurveFitting/DynamicKuboToyabe.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/FunctionFactory.h"
-#include <cmath>
 #include <vector>
-//#include <boost/math/special_functions/fpclassify.hpp> // TODO Remove
 
 #define EPS 1e-6
 #define JMAX 14
@@ -22,7 +20,6 @@ namespace CurveFitting
 
 using namespace Kernel;
 using namespace API;
-using namespace boost::math;
 
 DECLARE_FUNCTION(DynamicKuboToyabe)
 
