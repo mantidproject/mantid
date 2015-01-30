@@ -30,7 +30,6 @@ Requires: poco-devel
 Requires: PyQt4-devel
 Requires: python-devel
 Requires: python-ipython >= 1.1
-Conflicts: python-ipython >= 2.0
 Requires: python-pip
 Requires: python-sphinx
 Requires: qscintilla-devel
@@ -86,6 +85,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Fri Jan 30 2015 Stuart Campbell <campbellsi@ornl.gov>
+- Removed conflicting specification for ipython 2.x
+
 * Wed Aug 13 2014 Peter Peterson <petersonpf@ornl.gov>
 - Merged all three distribution spec files into one
 
