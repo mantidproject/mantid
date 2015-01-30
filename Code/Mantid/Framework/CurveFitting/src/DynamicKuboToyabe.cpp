@@ -48,7 +48,6 @@ double midpnt(double func(const double, const double, const double),
 	const double a, const double b, const int n, const double g, const double w0) {
 // quote & modified from numerical recipe 2nd edtion (page147)	
 	
-	static double s;
 
 	if (n==1) {
     double s1 = (b-a)*func(0.5*(a+b),g,w0);
@@ -68,6 +67,7 @@ double midpnt(double func(const double, const double, const double),
 			sum += func(x,g,w0);
 			x += del;
 		}
+    static double s;
 		s=(s+(b-a)*sum/tnm)/3.0;
 		return s;
 	}
@@ -75,12 +75,13 @@ double midpnt(double func(const double, const double, const double),
 
 void polint (double xa[], double ya[], int n, double x, double& y, double& dy) {
 	int i, m, ns = 1;
-  double den, dif, dift, ho, hp, w;
+  double dif;
 
   dif = fabs(x-xa[1]);
   std::vector<double> c(n+1);
   std::vector<double> d(n+1);
 	for (i=1;i<=n;i++){
+    double dift;
 		if((dift=fabs(x-xa[i]))<dif) {
 			ns=i;
 			dif=dift;
@@ -91,6 +92,7 @@ void polint (double xa[], double ya[], int n, double x, double& y, double& dy) {
 	y=ya[ns--];
 	for (m=1;m<n;m++) {
 		for (i=1;i<=n-m;i++) {
+      double den, ho, hp, w;
 			ho=xa[i]-x;
 			hp=xa[i+m]-x;
 			w=c[i+1]-d[i];
