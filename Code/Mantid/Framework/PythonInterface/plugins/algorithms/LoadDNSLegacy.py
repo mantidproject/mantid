@@ -55,6 +55,13 @@ class LoadDNSLegacy(PythonAlgorithm):
         run = __temporary_workspace__.mutableRun()
         run.setStartAndEndTime(DateAndTime(metadata.start_time), DateAndTime(metadata.end_time))
 
+        # rotate the detector bank to the proper position
+        api.RotateInstrumentComponent(__temporary_workspace__, "bank0", X=0,Y=1,Z=0, Angle=metadata.deterota)
+        
+        # add sample log Ei
+        Ei = getEnergy(metadata.wavelength)
+        api.AddSampleLog(__temporary_workspace__, 'Ei', LogText=str(Ei), LogType='Number')
+
         self.setProperty("OutputWorkspace", __temporary_workspace__)
         self.log().debug('LoadDNSLegacy: OK')
         api.DeleteWorkspace(__temporary_workspace__)
