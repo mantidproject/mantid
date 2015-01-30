@@ -170,7 +170,7 @@ void ColorUpdater::updateLookupTable(pqDataRepresentation* representation)
     // Need to set a lookup table lock here. This does not affect setScalarRange, 
     // but blocks setWholeScalarRange which gets called by ParaView overrides our
     // setting when a workspace is loaded for the first time.
-    lookupTable->setScalarRangeLock(TRUE);
+    lookupTable->setScalarRangeLock(true);
 
     representation->getProxy()->UpdateVTKObjects();
     representation->renderViewEventually();

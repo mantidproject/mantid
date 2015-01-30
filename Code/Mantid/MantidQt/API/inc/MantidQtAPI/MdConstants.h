@@ -44,9 +44,12 @@ namespace MantidQt
 
         double getColorScaleStandardMax();
 
+        double getLogScaleDefaultValue();
+
       private:
 
-        double m_colorScaleStandardMax;
+        const double m_colorScaleStandardMax;
+        const double m_logScaleDefaultValue;
     };
   }
 }
