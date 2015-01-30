@@ -48,10 +48,11 @@ double midpnt(double func(const double, const double, const double),
 	const double a, const double b, const int n, const double g, const double w0) {
 // quote & modified from numerical recipe 2nd edtion (page147)	
 	
+  static double s;
 
 	if (n==1) {
-    double s1 = (b-a)*func(0.5*(a+b),g,w0);
-    return (s1);
+    s = (b-a)*func(0.5*(a+b),g,w0);
+    return (s);
 	} else {
 		double x, tnm, sum, del, ddel;
 		int it, j;
@@ -67,7 +68,6 @@ double midpnt(double func(const double, const double, const double),
 			sum += func(x,g,w0);
 			x += del;
 		}
-    static double s;
 		s=(s+(b-a)*sum/tnm)/3.0;
 		return s;
 	}
@@ -114,8 +114,8 @@ double integrate (double func(const double, const double, const double),
 	int j;
 	double ss,dss;
 	double h[JMAXP+1], s[JMAXP];
-	
-	h[0] = 1.0;
+
+	h[1] = 1.0;
 	for (j=1; j<= JMAX; j++) {
 		s[j]=midpnt(func,a,b,j,g,w0);
 		if (j >= K) {

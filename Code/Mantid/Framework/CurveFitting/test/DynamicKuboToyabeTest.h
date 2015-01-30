@@ -80,7 +80,35 @@ public:
     TS_ASSERT_DELTA( y[4], 0.317374, 0.000001);
   }
 
-  void xtestDKTFunction()
+  void testZNDKTFunction()
+  {
+    // Test Dynamic Kubo Toyabe (DKT) for non-zero Field and Zero Nu (ZN)
+    const double asym = 1.0;
+    const double delta = 0.39;
+    const double field = 0.1;
+    const double nu = 0.0;
+
+    DynamicKuboToyabe dkt; 
+    dkt.initialize();
+    dkt.setParameter("Asym", asym);
+    dkt.setParameter("Delta",delta );
+    dkt.setParameter("Field",field);
+    dkt.setParameter("Nu",   nu);
+
+    // define 1d domain of 5 points in interval [0,5]
+    Mantid::API::FunctionDomain1DVector x(0,5,5);
+    Mantid::API::FunctionValues y(x);
+
+    TS_ASSERT_THROWS_NOTHING(dkt.function(x,y));
+
+    TS_ASSERT_DELTA( y[0], 1.000000, 0.000001);
+    TS_ASSERT_DELTA( y[1], 0.784636, 0.000001);
+    TS_ASSERT_DELTA( y[2], 0.353978, 0.000001);
+    TS_ASSERT_DELTA( y[3], 0.073286, 0.000001);
+    TS_ASSERT_DELTA( y[4], 0.055052, 0.000001);
+  }
+
+  void testDKTFunction()
   {
     // Test Dynamic Kubo Toyabe (DKT) (non-zero Field, non-zero Nu)
     const double asym = 1.0;
@@ -102,10 +130,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(dkt.function(x,y));
 
     TS_ASSERT_DELTA( y[0], 1.000000, 0.000001);
-    TS_ASSERT_DELTA( y[1], 0.816422, 0.000001);
-    TS_ASSERT_DELTA( y[2], 0.503185, 0.000001);
-    TS_ASSERT_DELTA( y[3], 0.274738, 0.000001);
-    TS_ASSERT_DELTA( y[4], 0.152792, 0.000001);
+    TS_ASSERT_DELTA( y[1], 0.822498, 0.000001);
+    TS_ASSERT_DELTA( y[2], 0.518536, 0.000001);
+    TS_ASSERT_DELTA( y[3], 0.295988, 0.000001);
+    TS_ASSERT_DELTA( y[4], 0.175489, 0.000001);
   }
 
 
