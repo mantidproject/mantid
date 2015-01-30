@@ -13,6 +13,7 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidCurveFitting/Gaussian.h"
 #include "MantidCurveFitting/FitMW.h"
+#include "MantidCurveFitting/Jacobian.h"
 
 using ::testing::Return;
 
@@ -106,9 +107,9 @@ public:
     {
         TestablePoldiSpectrumDomainFunction function;
         function.initialize();
-        function.setParameter("Area", 1.9854805);
-        function.setParameter("Fwhm", 0.0027446316797104233);
-        function.setParameter("Centre", 1.1086444);
+        function.setParameter("Height", 679.59369981039407842726);//1.9854805);
+        function.setParameter("Sigma", 0.0027446316797104233 / (2.0 * sqrt(2.0 * log(2.0))));
+        function.setParameter("PeakCentre", 1.1086444);
 
         function.m_deltaT = 3.0;
         function.initializeInstrumentParameters(m_instrument);
@@ -149,23 +150,71 @@ public:
         }
     }
 
+    void testFunctionDeriv()
+    {
+        TestablePoldiSpectrumDomainFunction function;
+        function.initialize();
+        function.setParameter("Height", 679.59369981039407842726);//1.9854805);
+        function.setParameter("Sigma", 0.0027446316797104233 / (2.0 * sqrt(2.0 * log(2.0))));
+        function.setParameter("PeakCentre", 1.1086444);
+
+        function.m_deltaT = 3.0;
+        function.initializeInstrumentParameters(m_instrument);
+
+
+        std::vector<double> xvalues(500, 1.0);
+
+        FunctionDomain1DSpectrum domain(342, xvalues);
+        TS_ASSERT_EQUALS(domain.getWorkspaceIndex(), 342);
+        Mantid::CurveFitting::Jacobian jacobian(500, 3);
+
+        function.functionDeriv(domain, jacobian);
+
+
+
+        std::vector<double> reference;
+        reference.push_back(0.214381692355321);
+        reference.push_back(1.4396533098854);
+        reference.push_back(7.69011673999647);
+        reference.push_back(32.6747845396612);
+        reference.push_back(110.432605589092);
+        reference.push_back(296.883931458002);
+        reference.push_back(634.864220660384);
+        reference.push_back(1079.89069118744);
+        reference.push_back(1461.11207069126);
+        reference.push_back(1572.50503614829);
+        reference.push_back(1346.18685763306);
+        reference.push_back(916.691981263516);
+        reference.push_back(496.502218342172);
+        reference.push_back(213.861997764049);
+        reference.push_back(73.2741206547921);
+        reference.push_back(19.9697293956518);
+        reference.push_back(4.32910692237627);
+        reference.push_back(0.746498624291666);
+        reference.push_back(0.102391587633906);
+
+        for(size_t i = 0; i < reference.size(); ++i) {
+            //TS_ASSERT_DELTA(values[479 + i] / reference[i], 1.0, 1e-14);
+        }
+    }
+
     void testAccessThroughBasePointer()
     {
         TestablePoldiSpectrumDomainFunction *function = new TestablePoldiSpectrumDomainFunction();
         function->initialize();
-        function->setParameter("Area", 1.9854805);
-        function->setParameter("Fwhm", 0.0027446316797104233);
-        function->setParameter("Centre", 1.1086444);
+        function->setParameter("Height", 1.9854805);
+        function->setParameter("Sigma", 0.0027446316797104233 / (2.0 * sqrt(2.0 * log(2.0))));
+        function->setParameter("PeakCentre", 1.1086444);
 
         function->m_deltaT = 3.0;
         function->initializeInstrumentParameters(m_instrument);
 
-        TS_ASSERT_EQUALS(function->getParameter(2), 1.1086444);
+        TS_ASSERT_EQUALS(function->getParameter("PeakCentre"), 1.1086444);
 
         MultiDomainFunction *mdf = new MultiDomainFunction();
         mdf->addFunction(IFunction_sptr(dynamic_cast<IFunction *>(function)));
 
-        TS_ASSERT_EQUALS(static_cast<IFunction*>(mdf)->getParameter(2), 1.1086444);
+        TS_ASSERT_EQUALS(static_cast<IFunction*>(mdf)->getParameter("f0.PeakCentre"), 1.1086444);
     }
 
    /*

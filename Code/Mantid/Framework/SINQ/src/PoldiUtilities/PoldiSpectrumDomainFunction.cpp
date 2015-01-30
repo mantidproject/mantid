@@ -6,6 +6,7 @@
 #include <stdexcept>
 
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidCurveFitting/Jacobian.h"
 
 namespace Mantid {
 namespace Poldi {
@@ -17,7 +18,7 @@ DECLARE_FUNCTION(PoldiSpectrumDomainFunction)
 
 PoldiSpectrumDomainFunction::PoldiSpectrumDomainFunction()
     : ParamFunction(), m_chopperSlitOffsets(), m_deltaT(0.0),
-      m_timeTransformer(), m_2dHelpers() {}
+      m_timeTransformer(), m_2dHelpers(), m_profileFunction() {}
 
 /**
  * Sets the workspace and initializes helper data
@@ -57,57 +58,29 @@ void PoldiSpectrumDomainFunction::function1DSpectrum(
   values.zeroCalculated();
 
   size_t index = domain.getWorkspaceIndex();
-  int domainSize = static_cast<int>(domain.size());
-
-  /* Parameters are given in d, but need to be processed in arrival time.
-   * This section performs the conversions. They depend on several factors
-   * terminated by the position in the detector, so the index is stored.
-   */
-  double fwhm = getParameter("Fwhm");
-  double sigma = fwhm / (2.0 * sqrt(2.0 * log(2.0)));
-
-  double centre = getParameter("Centre");
-
   Poldi2DHelper_sptr helper = m_2dHelpers[index];
 
   if (helper) {
-    double area = getParameter("Area");
+    int domainSize = static_cast<int>(domain.size());
+
+    double fwhm = m_profileFunction->fwhm();
+    double centre = m_profileFunction->centre();
 
     double dWidth = 2.0 * fwhm;
     double dCalcMin = centre - dWidth;
-    int dWidthN = std::min(
-        50, std::max(10, 2 * static_cast<int>(dWidth / helper->deltaD) + 1));
+    size_t dWidthN = static_cast<size_t>(std::min(
+        50, std::max(10, 2 * static_cast<int>(dWidth / helper->deltaD) + 1)));
 
-    const double *domainBeginPointer = 0;
     int pos = 0;
 
     for (size_t i = 0; i < helper->domain->size(); ++i) {
       if ((*(helper->domain))[i] >= dCalcMin) {
         pos = static_cast<int>(i + 1);
-        domainBeginPointer = helper->domain->getPointerAt(i + 1);
         break;
       }
     }
 
-    if (domainBeginPointer == 0) {
-      throw std::runtime_error("Cannot find d-value in domain.");
-    }
-
-    if (dWidthN < 0) {
-      throw std::runtime_error("dWidth < 0");
-    }
-
-    std::vector<double> smallDomain(dWidthN);
-    for (size_t i = 0; i < dWidthN; ++i) {
-      smallDomain[i] = (*(helper->domain))[pos + i];
-    }
-
-    std::vector<double> factors(dWidthN);
-
-    for (size_t i = 0; i < factors.size(); ++i) {
-      factors[i] =
-          m_timeTransformer->detectorElementIntensity(smallDomain[i], index);
-    }
+    std::vector<double> localOut(dWidthN, 0.0);
 
     size_t baseOffset = static_cast<size_t>(pos + helper->minTOFN);
 
@@ -115,13 +88,75 @@ void PoldiSpectrumDomainFunction::function1DSpectrum(
       double newD = centre + helper->dFractionalOffsets[i];
       size_t offset = static_cast<size_t>(helper->dOffsets[i]) + baseOffset;
 
-      for (size_t j = 0; j < smallDomain.size(); ++j) {
-        values.addToCalculated(
-            (offset + j) % domainSize,
-            actualFunction(smallDomain[j], newD, sigma, area) * factors[j]);
+      m_profileFunction->setCentre(newD);
+      m_profileFunction->functionLocal(
+          &localOut[0], helper->domain->getPointerAt(pos), dWidthN);
+
+      for (size_t j = 0; j < dWidthN; ++j) {
+        values.setCalculated((offset + j) % domainSize, localOut[j] * helper->factors[pos + j]);
+      }
+    }
+
+    m_profileFunction->setCentre(centre);
+  }
+}
+
+void PoldiSpectrumDomainFunction::functionDeriv1DSpectrum(
+    const FunctionDomain1DSpectrum &domain, Jacobian &jacobian) {
+
+  /*
+size_t index = domain.getWorkspaceIndex();
+Poldi2DHelper_sptr helper = m_2dHelpers[index];
+
+if (helper) {
+  int domainSize = static_cast<int>(domain.size());
+
+  double fwhm = m_profileFunction->fwhm();
+  double centre = m_profileFunction->centre();
+
+  double dWidth = 2.0 * fwhm;
+  double dCalcMin = centre - dWidth;
+  size_t dWidthN = static_cast<size_t>(std::min(
+      50, std::max(10, 2 * static_cast<int>(dWidth / helper->deltaD) + 1)));
+
+  int pos = 0;
+
+  for (size_t i = 0; i < helper->domain->size(); ++i) {
+    if ((*(helper->domain))[i] >= dCalcMin) {
+      pos = static_cast<int>(i + 1);
+      break;
+    }
+  }
+
+  size_t np = m_profileFunction->nParams();
+
+  CurveFitting::Jacobian smallJ(dWidthN, np);
+
+  size_t baseOffset = static_cast<size_t>(pos + helper->minTOFN);
+
+  for (size_t i = 0; i < helper->dOffsets.size(); ++i) {
+    double newD = centre + helper->dFractionalOffsets[i];
+    size_t offset = static_cast<size_t>(helper->dOffsets[i]) + baseOffset;
+
+    m_profileFunction->setCentre(newD);
+
+    m_profileFunction->functionDerivLocal(
+        &smallJ, helper->domain->getPointerAt(pos), dWidthN);
+
+    for (size_t j = 0; j < dWidthN; ++j) {
+      size_t off = (offset + j) % domainSize;
+      for (size_t p = 0; p < np; ++p) {
+        jacobian.set(off, p,
+                     smallJ.get(j, p) * helper->factors[pos + j]);
       }
     }
   }
+
+  m_profileFunction->setCentre(centre);
+
+}
+*/
+  calNumericalDeriv(domain, jacobian);
 }
 
 void
@@ -129,49 +164,83 @@ PoldiSpectrumDomainFunction::poldiFunction1D(const std::vector<int> &indices,
                                              const FunctionDomain1D &domain,
                                              FunctionValues &values) const {
 
-  double deltaD = domain[1] - domain[0];
+  /*
+double deltaD = domain[1] - domain[0];
 
-  double fwhm = getParameter("Fwhm");
+double fwhm = getParameter("Fwhm");
 
-  double centre = getParameter("Centre");
-  double area = getParameter("Area");
+double centre = getParameter("Centre");
+double area = getParameter("Area");
 
-  double centreTOffsetChannel = centre / deltaD;
-  int centreChannel = static_cast<int>(centreTOffsetChannel);
+double centreTOffsetChannel = centre / deltaD;
+int centreChannel = static_cast<int>(centreTOffsetChannel);
 
-  int offset = static_cast<int>(domain[0] / deltaD + 0.5);
+int offset = static_cast<int>(domain[0] / deltaD + 0.5);
 
-  for (auto index = indices.begin(); index != indices.end(); ++index) {
-    std::vector<double> factors(domain.size());
+for (auto index = indices.begin(); index != indices.end(); ++index) {
+  std::vector<double> factors(domain.size());
 
-    for (size_t i = 0; i < factors.size(); ++i) {
-      factors[i] = m_timeTransformer->detectorElementIntensity(
-          domain[i], static_cast<size_t>(*index));
-    }
-    double fwhmT = m_timeTransformer->timeTransformedWidth(fwhm, *index);
-    double fwhmChannel = fwhmT / m_deltaT;
-    double sigma = fwhm / (2.0 * sqrt(2.0 * log(2.0)));
-    int widthChannels = std::min(
-        50, std::max(10, 2 * static_cast<int>(fwhmChannel) + 1));
-
-    for (int i = centreChannel - widthChannels;
-         i <= centreChannel + widthChannels; ++i) {
-
-      values.addToCalculated(
-          i - offset,
-          8.0 * actualFunction(domain[i - offset], centre, sigma, area) *
-              factors[i - offset]);
-    }
+  for (size_t i = 0; i < factors.size(); ++i) {
+    factors[i] = m_timeTransformer->detectorElementIntensity(
+        domain[i], static_cast<size_t>(*index));
   }
+  double fwhmT = m_timeTransformer->timeTransformedWidth(fwhm, *index);
+  double fwhmChannel = fwhmT / m_deltaT;
+  double sigma = fwhm / (2.0 * sqrt(2.0 * log(2.0)));
+  int widthChannels =
+      std::min(50, std::max(10, 2 * static_cast<int>(fwhmChannel) + 1));
+
+  for (int i = centreChannel - widthChannels;
+       i <= centreChannel + widthChannels; ++i) {
+
+    values.addToCalculated(
+        i - offset,
+        8.0 * actualFunction(domain[i - offset], centre, sigma, area) *
+            factors[i - offset]);
+  }
+}
+*/
+}
+
+void PoldiSpectrumDomainFunction::setActiveParameter(size_t i, double value) {
+  m_profileFunction->setActiveParameter(i, value);
+}
+
+double PoldiSpectrumDomainFunction::activeParameter(size_t i) const {
+  return m_profileFunction->activeParameter(i);
+}
+
+void PoldiSpectrumDomainFunction::setParameter(size_t i, const double &value,
+                                               bool explicitlySet) {
+  m_profileFunction->setParameter(i, value, explicitlySet);
+}
+
+void PoldiSpectrumDomainFunction::setParameter(const std::string &name,
+                                               const double &value,
+                                               bool explicitlySet) {
+  m_profileFunction->setParameter(name, value, explicitlySet);
+}
+
+double PoldiSpectrumDomainFunction::getParameter(size_t i) const {
+  return m_profileFunction->getParameter(i);
+}
+
+double
+PoldiSpectrumDomainFunction::getParameter(const std::string &name) const {
+  return m_profileFunction->getParameter(name);
 }
 
 /**
  * Initializes function parameters
  */
 void PoldiSpectrumDomainFunction::init() {
-  declareParameter("Area", 1.0);
-  declareParameter("Fwhm", 1.0);
-  declareParameter("Centre", 0.0);
+  m_profileFunction = boost::dynamic_pointer_cast<IPeakFunction>(
+      FunctionFactory::Instance().createFunction("Gaussian"));
+
+  std::vector<std::string> params = m_profileFunction->getParameterNames();
+  for (auto p = params.begin(); p != params.end(); ++p) {
+    declareParameter(*p);
+  }
 }
 
 /**
@@ -233,6 +302,7 @@ void PoldiSpectrumDomainFunction::initializeInstrumentParameters(
     curr->deltaD = deltaD;
     curr->minTOFN = static_cast<int>(
         Conversions::dtoTOF(dMin, distance, sinTheta) / m_deltaT);
+    curr->setFactors(m_timeTransformer, static_cast<size_t>(i));
 
     m_2dHelpers.push_back(curr);
   }

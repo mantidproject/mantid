@@ -133,15 +133,15 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
             poldi2DFunction->getFunction(i));
 
     if (peakFunction) {
-      size_t dIndex = peakFunction->parameterIndex("Centre");
+      size_t dIndex = peakFunction->parameterIndex("PeakCentre");
       UncertainValue d(peakFunction->getParameter(dIndex),
                        peakFunction->getError(dIndex));
 
-      size_t iIndex = peakFunction->parameterIndex("Area");
+      size_t iIndex = peakFunction->parameterIndex("Height");
       UncertainValue intensity(peakFunction->getParameter(iIndex),
                                peakFunction->getError(iIndex));
 
-      size_t fIndex = peakFunction->parameterIndex("Fwhm");
+      size_t fIndex = peakFunction->parameterIndex("Sigma");
       UncertainValue fwhm(peakFunction->getParameter(fIndex),
                           peakFunction->getError(fIndex));
 
@@ -176,9 +176,10 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(
 
     IFunction_sptr peakFunction = FunctionFactory::Instance().createFunction(
         "PoldiSpectrumDomainFunction");
-    peakFunction->setParameter("Area", peak->intensity());
-    peakFunction->setParameter("Fwhm", peak->fwhm(PoldiPeak::AbsoluteD));
-    peakFunction->setParameter("Centre", peak->d());
+    peakFunction->setParameter("Height", peak->intensity());
+    peakFunction->setParameter("Sigma", peak->fwhm(PoldiPeak::AbsoluteD) /
+                                            (2.0 * sqrt(2.0 * log(2.0))));
+    peakFunction->setParameter("PeakCentre", peak->d());
 
     mdFunction->addFunction(peakFunction);
   }
@@ -210,6 +211,11 @@ void PoldiFitPeaks2D::exec() {
   IAlgorithm_sptr fitAlgorithm = calculateSpectrum(peakCollection, ws);
 
   IFunction_sptr fitFunction = getFunction(fitAlgorithm);
+
+  for (size_t i = 0; i < fitFunction->nParams(); ++i) {
+    std::cout << fitFunction->parameterName(i) << " "
+              << fitFunction->getParameter(i) << std::endl;
+  }
 
   MatrixWorkspace_sptr outWs1D = get1DSpectrum(fitFunction, ws);
 
@@ -278,6 +284,11 @@ IAlgorithm_sptr PoldiFitPeaks2D::calculateSpectrum(
 
   Poldi2DFunction_sptr mdFunction =
       getFunctionFromPeakCollection(normalizedPeakCollection);
+
+  for (size_t i = 0; i < mdFunction->nParams(); ++i) {
+    std::cout << mdFunction->parameterName(i) << " "
+              << mdFunction->getParameter(i) << std::endl;
+  }
 
   addBackgroundTerms(mdFunction);
 
@@ -551,18 +562,12 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getIntegratedPeakCollection(
   for (size_t i = 0; i < rawPeakCollection->peakCount(); ++i) {
     PoldiPeak_sptr peak = rawPeakCollection->peak(i);
 
-    /* The integration is performed in time dimension,
-     * so the fwhm needs to be transformed.
-     */
-    double fwhmTime =
-        m_timeTransformer->dToTOF(peak->fwhm(PoldiPeak::AbsoluteD));
-
     IPeakFunction_sptr profileFunction =
         boost::dynamic_pointer_cast<IPeakFunction>(
             FunctionFactory::Instance().createFunction(
                 rawPeakCollection->getProfileFunctionName()));
     profileFunction->setHeight(peak->intensity());
-    profileFunction->setFwhm(fwhmTime);
+    profileFunction->setFwhm(peak->fwhm(PoldiPeak::AbsoluteD));
 
     /* Because the integration is running from -inf to inf, it is necessary
      * to set the centre to 0. Otherwise the transformation performed by
@@ -584,7 +589,7 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getIntegratedPeakCollection(
      * behavior is kept
      * for now.
      */
-    integratedPeak->setIntensity(UncertainValue(integration.result / m_deltaT));
+    integratedPeak->setIntensity(UncertainValue(integration.result));
     integratedPeakCollection->addPeak(integratedPeak);
   }
 
@@ -623,7 +628,9 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getNormalizedPeakCollection(
         m_timeTransformer->calculatedTotalIntensity(peak->d());
 
     PoldiPeak_sptr normalizedPeak = peak->clone();
-    normalizedPeak->setIntensity(peak->intensity() / calculatedIntensity);
+    normalizedPeak->setIntensity(peak->intensity() / calculatedIntensity * 400);
+
+    std::cout << normalizedPeak->intensity() << std::endl;
 
     normalizedPeakCollection->addPeak(normalizedPeak);
   }

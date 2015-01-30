@@ -7,6 +7,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include <string>
 
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidSINQ/PoldiUtilities/IPoldiFunction1D.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h"
@@ -32,23 +33,36 @@ struct MANTID_SINQ_DLL Poldi2DHelper {
   }
 
   void setDomain(double dMin, double dMax, double deltaD) {
-      int dMinN = static_cast<int>(dMin / deltaD);
-      int dMaxN = static_cast<int>(dMax / deltaD);
+    int dMinN = static_cast<int>(dMin / deltaD);
+    int dMaxN = static_cast<int>(dMax / deltaD);
 
-      std::vector<double> current;
-      current.reserve(dMaxN - dMinN);
+    std::vector<double> current;
+    current.reserve(dMaxN - dMinN);
 
-      for(int i = dMinN; i <= dMaxN; ++i) {
-          current.push_back(static_cast<double>(i + 0.5) * deltaD);
+    for (int i = dMinN; i <= dMaxN; ++i) {
+      current.push_back(static_cast<double>(i + 0.5) * deltaD);
+    }
+
+    domain = boost::make_shared<API::FunctionDomain1DVector>(current);
+  }
+
+  void setFactors(const PoldiTimeTransformer_sptr &timeTransformer,
+                  size_t index) {
+    factors.clear();
+    if (domain && timeTransformer) {
+      factors.reserve(domain->size());
+      for (size_t i = 0; i < domain->size(); ++i) {
+        factors.push_back(
+            timeTransformer->detectorElementIntensity((*domain)[i], index));
       }
-
-      domain = boost::make_shared<API::FunctionDomain1DVector>(current);
+    }
   }
 
   std::vector<double> dFractionalOffsets;
   std::vector<int> dOffsets;
 
   API::FunctionDomain1D_sptr domain;
+  std::vector<double> factors;
 
   double deltaD;
   int minTOFN;
@@ -94,9 +108,22 @@ public:
   virtual void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
                                   API::FunctionValues &values) const;
 
+  virtual void
+  functionDeriv1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
+                          API::Jacobian &jacobian);
+
   void poldiFunction1D(const std::vector<int> &indices,
                        const API::FunctionDomain1D &domain,
                        API::FunctionValues &values) const;
+
+  virtual void setActiveParameter(size_t i, double value);
+  virtual double activeParameter(size_t i) const;
+
+  virtual void setParameter(size_t i, const double &value, bool explicitlySet = true);
+  virtual void setParameter(const std::string &name, const double &value,
+                            bool explicitlySet = true);
+  virtual double getParameter(size_t i) const;
+  virtual double getParameter(const std::string &name) const;
 
 protected:
   virtual void init();
@@ -115,6 +142,8 @@ protected:
   PoldiTimeTransformer_sptr m_timeTransformer;
 
   std::vector<Poldi2DHelper_sptr> m_2dHelpers;
+
+  API::IPeakFunction_sptr m_profileFunction;
 };
 
 } // namespace Poldi
