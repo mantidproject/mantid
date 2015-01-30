@@ -4,8 +4,8 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="TOPAZ" valid-from   ="2014-08-01 00:00:01"
-              valid-to     ="2014-12-31 23:59:59"
+ name="TOPAZ" valid-from   ="2015-01-01 00:00:01"
+              valid-to     ="2100-12-31 23:59:59"
 		      last-modified="2015-01-28 10:45:00">
   <!--Created by Vickie Lynch-->
   <!--Modified by Vickie Lynch using the TOPAZ.py script from the Translation Service calibration/geometry/ code. -->
@@ -199,13 +199,6 @@
 <location r="0.425000" t="23.905622" p="137.140855" name="bank49" rot="177.410228" axis-x="0" axis-y="1" axis-z="0">
   <rot val="47.178655">
     <rot val="-22.073524" axis-x="0" axis-y="1" axis-z="0" />
-  </rot>
-</location>
-</component> 
-<component type="panel" idstart="3801088" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.455000" t="74.807731" p="146.694071" name="bank58" rot="135.919796" axis-x="0" axis-y="1" axis-z="0">
-  <rot val="53.154399">
-    <rot val="-41.466968" axis-x="0" axis-y="1" axis-z="0" />
   </rot>
 </location>
 </component> 
