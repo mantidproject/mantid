@@ -305,7 +305,6 @@ endif()
 # External Data for testing
 ###########################################################################
 if ( CXXTEST_FOUND OR PYUNITTEST_FOUND )
- include ( ExternalData )
  include ( MantidExternalData )
 
 # None of our tests reference files directly as arguments so we have to manually

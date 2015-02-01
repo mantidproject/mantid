@@ -3,22 +3,28 @@
 ################################################################################
 include(ExternalData)
 
-if(NOT ExternalData_OBJECT_STORES)
-  # Use ExternalData_OBJECT_STORES from environment as default.
-  set(ExternalData_OBJECT_STORES_DEFAULT "")
-  if(DEFINED "ENV{ExternalData_OBJECT_STORES}")
-    file(TO_CMAKE_PATH "$ENV{ExternalData_OBJECT_STORES}" ExternalData_OBJECT_STORES_DEFAULT)
-  endif()
+if(NOT MANTID_DATA_STORE)
+  # Select a default in the home directory
+  set(MANTID_DATA_STORE_DEFAULT "$ENV{HOME}/MantidExternalData")
 endif()
 
-set(ExternalData_OBJECT_STORES "${ExternalData_OBJECT_STORES_DEFAULT}" CACHE STRING
-  "Semicolon-separated list of local directories holding data objects")
-mark_as_advanced(ExternalData_OBJECT_STORES)
-if(NOT ExternalData_OBJECT_STORES)
-  set(ExternalData_OBJECT_STORES "${CMAKE_BINARY_DIR}/ExternalData/Objects")
-  file(MAKE_DIRECTORY "${ExternalData_OBJECT_STORES}")
+# Provide users with an option to select a local object store,
+# starting with the above-selected default.
+set(MANTID_DATA_STORE "${MANTID_DATA_STORE_DEFAULT}" CACHE PATH
+  "Local directory holding ExternalData objects in the layout %(algo)/%(hash).")
+mark_as_advanced(MANTID_DATA_STORE)
+
+if(NOT MANTID_DATA_STORE)
+  message(FATAL_ERROR "MANTID_DATA_STORE not set. It is required for external data")
 endif()
 
+# Tell ExternalData module about selected object stores.
+list(APPEND ExternalData_OBJECT_STORES
+  # Store selected by Mantid-specific configuration above.
+  ${MANTID_DATA_STORE}
+)
+
+# Default binary root to build directory
 set(ExternalData_BINARY_ROOT ${CMAKE_BINARY_DIR}/ExternalData CACHE STRING
   "A directory holding the links (copies on windows) to the real content files.")
 
@@ -29,3 +35,4 @@ mark_as_advanced(ExternalData_URL_TEMPLATES)
 list(APPEND ExternalData_URL_TEMPLATES
   "http://198.74.56.37/ftp/external-data/%(algo)/%(hash)"
 )
+
