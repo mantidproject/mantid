@@ -421,6 +421,8 @@ IMDEventWorkspace_sptr LoadHFIRPDData::convertToMDEventWS(
         myfile << detPos.Y() << " ";
         myfile << detPos.Z() << " ";
         // Add a new dimension as event time
+        /// TODO - Need to find out the duration of the run!
+        relruntime += 30;
         myfile << relruntime << " ";
         myfile << std::endl;
       }
