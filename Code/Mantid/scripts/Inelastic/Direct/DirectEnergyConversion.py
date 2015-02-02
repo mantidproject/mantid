@@ -533,12 +533,12 @@ class DirectEnergyConversion(object):
             # workspace
             AddSampleLog(Workspace=data_ws,LogName='Ei',LogText=str(ei),LogType='Number')
             # if monitors are separated from the input workspace, we need to
-            # move them too as this is what happening when monitors are
-            # integrated into workspace
-            result_mon_name = monitor_ws.name()
-            ScaleX(InputWorkspace=monitor_ws,OutputWorkspace=result_mon_name,Operation="Add",Factor=-mon1_peak,
-                   InstrumentParameter="DelayTime",Combine=True)
-            monitor_ws = mtd[result_mon_name]
+            ## move them too as this is what happening when monitors are
+            ## integrated into workspace
+            #result_mon_name = monitor_ws.name() # Do we ever need monitors after this point?  
+            #ScaleX(InputWorkspace=monitor_ws,OutputWorkspace=result_mon_name,Operation="Add",Factor=-mon1_peak,
+            #       InstrumentParameter="DelayTime",Combine=True)
+            #monitor_ws = mtd[result_mon_name]
 
 
         resultws_name = data_ws.name()
@@ -554,9 +554,9 @@ class DirectEnergyConversion(object):
         MoveInstrumentComponent(Workspace=resultws_name,ComponentName= src_name, X=mon1_pos.getX(), 
                                 Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
         #
-        if separate_monitors:
-           MoveInstrumentComponent(Workspace=result_mon_name,ComponentName= src_name, X=mon1_pos.getX(),
-                                   Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
+        #if separate_monitors:
+        #   MoveInstrumentComponent(Workspace=result_mon_name,ComponentName= src_name, X=mon1_pos.getX(),
+        #                           Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
 
         data_run.synchronize_ws(mtd[resultws_name])
         return ei, mon1_peak
@@ -682,22 +682,29 @@ class DirectEnergyConversion(object):
             kwargs['MonitorSpectrum'] = mon_spect
 
         #Find TOF range, correspondent to incident energy monitor peak
-        if self._mon2_norm_time_range:
-           range = self._mon2_norm_time_range
-           range_min = range[0] + range_offset
-           range_max = range[1] + range_offset
-           self._mon2_norm_time_range = None
+        if separate_monitors:
+            energy_rage = self.mon2_norm_energy_range
+            TOF_range = self.get_TOF_for_energies(mon_ws,energy_rage,[mon_spect],self._debug_mode)
+            range_min = TOF_range[0]
+            range_max = TOF_range[1]
         else:
-           mon_ws_name = mon_ws.name()
-           if mon_ws_name.find('_shifted') != -1:
-             # monitor-2 normalization ranges have to be identified before the
-             # instrument is shifted
-             raise RuntimeError("Instrument have been shifted but no time range has been identified. Monitor-2 normalization can not be performed ") 
-           else:
-              energy_rage = self.mon2_norm_energy_range
-              TOF_range = self.get_TOF_for_energies(mon_ws,energy_rage,[mon_spect],self._debug_mode)
-              range_min = TOF_range[0]
-              range_max = TOF_range[1]
+            if self._mon2_norm_time_range:
+               range = self._mon2_norm_time_range
+               range_min = range[0] + range_offset
+               range_max = range[1] + range_offset
+               self._mon2_norm_time_range = None
+            else:
+               mon_ws_name = mon_ws.name()
+               if mon_ws_name.find('_shifted') != -1:
+                 # monitor-2 normalization ranges have to be identified before the
+                 # instrument is shifted
+                 raise RuntimeError("Instrument have been shifted but no time range has been identified. Monitor-2 normalization can not be performed ") 
+               else:
+                 # instrument and workspace shifted, so TOF will be calculated wrt shifted instrument
+                 energy_rage = self.mon2_norm_energy_range
+                 TOF_range = self.get_TOF_for_energies(mon_ws,energy_rage,[mon_spect],self._debug_mode)
+                 range_min = TOF_range[0]
+                 range_max = TOF_range[1]
         #
 
        # Normalize to monitor 2
