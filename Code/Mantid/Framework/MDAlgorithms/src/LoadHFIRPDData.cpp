@@ -288,12 +288,13 @@ MatrixWorkspace_sptr LoadHFIRPDData::loadRunToMatrixWS(
 
 //----------------------------------------------------------------------------------------------
 /** Read table workspace's column information
- * @brief LoadHFIRPDD::readTableInfo
+ * @brief LoadHFIRPDData::readTableInfo
  * @param tablews
  * @param ipt
  * @param irotangle
  * @param itime
  * @param anodelist
+ * @param sampleindexlist
  */
 void
 LoadHFIRPDData::readTableInfo(TableWorkspace_const_sptr tablews, size_t &ipt,
@@ -614,9 +615,10 @@ void LoadHFIRPDData::appendSampleLogs(
 
 //---------------------------------------------------------------------------------
 /** Append Experiment Info
- * @brief LoadHFIRPDD::addExperimentInfos
- * @param mdwd
+ * @brief LoadHFIRPDData::addExperimentInfos
+ * @param mdws
  * @param vec_ws2d
+ * @param init_runnumber
  */
 void LoadHFIRPDData::addExperimentInfos(
     API::IMDEventWorkspace_sptr mdws,
