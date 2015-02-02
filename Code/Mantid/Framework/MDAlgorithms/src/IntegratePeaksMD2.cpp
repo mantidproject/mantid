@@ -18,6 +18,7 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/Progress.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_integration.h>
 #include <fstream>
@@ -263,7 +264,14 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // 5-10% speedup.  Perhaps is should just be removed permanantly, but for
   // now it is commented out to avoid the seg faults.  Refs #5533
   // PRAGMA_OMP(parallel for schedule(dynamic, 10) )
-  for (int i = 0; i < peakWS->getNumberPeaks(); ++i) {
+   // Initialize progress reporting
+  int nPeaks = peakWS->getNumberPeaks();
+  Progress *m_progress = new Progress(this, 0., 1., nPeaks);
+  for (int i = 0; i < nPeaks; ++i) {
+    if (this->getCancel())
+      break; // User cancellation
+    m_progress->report();
+
     // Get a direct ref to that peak.
     IPeak &p = peakWS->getPeak(i);
 
