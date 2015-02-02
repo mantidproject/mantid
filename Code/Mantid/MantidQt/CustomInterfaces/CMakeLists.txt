@@ -257,21 +257,21 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectTransmissionCalc.ui
                inc/MantidQtCustomInterfaces/Indirect/JumpFit.ui
                inc/MantidQtCustomInterfaces/Indirect/MSDFit.ui
+               inc/MantidQtCustomInterfaces/Indirect/Quasi.ui
+               inc/MantidQtCustomInterfaces/Indirect/ResNorm.ui
+               inc/MantidQtCustomInterfaces/Indirect/Stretch.ui
                inc/MantidQtCustomInterfaces/MultiDatasetFit.ui
                inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.ui
                inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingView.ui
                inc/MantidQtCustomInterfaces/Muon/ALCInterface.ui
                inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingView.ui
                inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.ui
-               inc/MantidQtCustomInterfaces/Indirect/Quasi.ui
                inc/MantidQtCustomInterfaces/ReflMainWidget.ui
                inc/MantidQtCustomInterfaces/ReflOptionsDialog.ui
                inc/MantidQtCustomInterfaces/ReflWindow.ui
-               inc/MantidQtCustomInterfaces/Indirect/ResNorm.ui
                inc/MantidQtCustomInterfaces/SANSPlotSpecial.ui
                inc/MantidQtCustomInterfaces/SANSRunWindow.ui  
                inc/MantidQtCustomInterfaces/SANSEventSlicing.ui
-               inc/MantidQtCustomInterfaces/Indirect/Stretch.ui
                inc/MantidQtCustomInterfaces/MantidEV.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
 			   inc/MantidQtCustomInterfaces/EditLocalParameterDialog.ui
