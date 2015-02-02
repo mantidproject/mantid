@@ -1,8 +1,8 @@
 .. _func-DynamicKuboToyabe:
 
-================
+=================
 DynamicKuboToyabe
-================
+=================
 
 .. index:: DynamicKuboToyabe
 
