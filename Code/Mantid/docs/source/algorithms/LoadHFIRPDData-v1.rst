@@ -46,6 +46,17 @@ One MDEventWorkspace stores the detectors' counts;
 and the other one stores the monitor counts. 
 
 
+Sample Logs
+###########
+
+** TODO : Add this section about how the algorithm treats **
+
+Temporary MD File
+#################
+
+** TODO : write how the MD file is build and read in **
+
+
 Workflow
 --------
 

@@ -69,11 +69,14 @@ public:
     TS_ASSERT_EQUALS(detids.size(), 44);
   }
 
+  /** TODO - Add comments
+   * @brief test_LoadHB2AData
+   */
   void test_LoadHB2AData() {
-    // This is the solution of stage 1. Stage 2 will be different
     LoadSpiceAscii spcloader;
     spcloader.initialize();
 
+    /// TODO - Add comments
     TS_ASSERT_THROWS_NOTHING(
         spcloader.setProperty("Filename", "HB2A_exp0231_scan0001.dat"));
     TS_ASSERT_THROWS_NOTHING(
@@ -84,7 +87,6 @@ public:
         "DateAndTimeLog", "date,MM/DD/YYYY,time,HH:MM:SS AM"));
     TS_ASSERT_THROWS_NOTHING(
         spcloader.setProperty("IgnoreUnlistedLogs", false));
-
     spcloader.execute();
 
     ITableWorkspace_sptr datatablews =
@@ -92,15 +94,16 @@ public:
             AnalysisDataService::Instance().retrieve("DataTable"));
     TS_ASSERT(datatablews);
 
+    /// TODO - Add comments
     MatrixWorkspace_sptr parentlogws =
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("LogParentWS"));
     TS_ASSERT(parentlogws);
 
+    /// TODO - Add comments
     LoadHFIRPDData loader;
     loader.initialize();
 
-    // loader.setPropertyValue("Filename", "HB2A_exp0231_scan0001.dat");
     loader.setProperty("InputWorkspace", datatablews);
     loader.setProperty("ParentWorkspace", parentlogws);
     loader.setProperty("Instrument", "HB2A");
@@ -123,11 +126,25 @@ public:
     IMDIterator *mditer = mdws->createIterator();
     TS_ASSERT_EQUALS(mditer->getNumEvents(), 44 * 61);
 
+    double y0 = mditer->getInnerSignal(0);
+    double yl = mditer->getInnerSignal(44 * 61-1);
+
+    uint16_t run0 = mditer->getInnerRunIndex(0);
+
+
+    // Detector position
+    /// TODO - Explain more on this test
     Mantid::coord_t lastx = mditer->getInnerPosition(44 * 61 - 1, 0);
     TS_ASSERT_DELTA(lastx, 1.57956, 0.0001);
 
+    // Experiment infor???
     ExperimentInfo_const_sptr expinfo = mdws->getExperimentInfo(0);
     TS_ASSERT(expinfo);
+
+    /// TODO : how to deal with it?  Choose some sample logs?
+
+    /// TODO :: Is there any good test for time?
+
   }
 };
 

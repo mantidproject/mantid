@@ -559,6 +559,7 @@ IMDEventWorkspace_sptr LoadHFIRPDData::createMonitorMDWorkspace(
   return workspace;
 }
 
+//---
 /**
  * @brief LoadHFIRPDD::appendSampleLogs
  * @param mdws
