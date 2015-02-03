@@ -104,7 +104,7 @@ void IntegratePeaksMD2::init() {
   declareProperty("AdaptiveQRadius", false,
                   "Default is false.   If true, all input radii are multiplied "
                   "by the magnitude of Q at the peak center so each peak has a "
-                  "different integration radius.");
+                  "different integration radius.  Q includes the 2*pi factor.");
 
   declareProperty("Cylinder", false,
                   "Default is sphere.  Use next five parameters for cylinder.");
