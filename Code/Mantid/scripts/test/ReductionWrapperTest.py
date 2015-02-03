@@ -1,9 +1,12 @@
+import os,sys
+#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+
 from mantid.simpleapi import *
 from mantid import api
 
-from ReductionWrapper import *
+from Direct.ReductionWrapper import ReductionWrapper
 from MariReduction import ReduceMARI
-import os,sys
+
 
 #
 import unittest

@@ -1,4 +1,5 @@
 from mantid import config
+import os
 
 """
 Set of functions to assist with processing instrument parameters relevant to reduction. 
@@ -10,18 +11,28 @@ class ComplexProperty(object):
  
     def __get__(self,spec_dict,owner=None):
         """ return complex properties list """
-        #if not isinstance(spec_dict,dict):
-        #    spec_dict = spec_dict.__dict__
+        if spec_dict is None:
+            # access to property methods
+            return self
+
+        if not isinstance(spec_dict,dict):
+            spec_dict = spec_dict.__dict__
         rez = list()
         for key in self._other_prop:
             rez.append(spec_dict[key]);
         return rez;
-    def __set__(self,spec_dict,value):
-        if len(value) != len(self._other_prop):
+    def __set__(self,instance,value):
+        try:
+            lv = len(value)
+        except:
+            raise KeyError("Complex property values can be assigned only by list of other values");
+        if lv != len(self._other_prop):
             raise KeyError("Complex property values can be set equal to the same length values list");
 
-        #if not isinstance(spec_dict,dict):
-        #    spec_dict = spec_dict.__dict__
+        if isinstance(instance,dict):
+            spec_dict  = instance
+        else:
+            spec_dict = instance.__dict__
          
         #changed_prop=[];
         for key,val in zip(self._other_prop,value):
@@ -29,13 +40,13 @@ class ComplexProperty(object):
                 #changed_prop.append(key);
         #return changed_prop;
     def dependencies(self):
-        """ returns the list of properties names, this property depends on"""
+        """ returns the list of other properties names, this property depends on"""
         return self._other_prop
 
     def len(self):
         """ returns the number of properties, this property depends on"""
 
-        return len(self._other_prop);
+        return len(self._other_prop)
 #end ComplexProperty
 
 
@@ -74,11 +85,11 @@ def get_default_idf_param_list(pInstrument,synonims_list=None):
         par_list[name] = get_default_parameter(pInstrument,name);
 
 
-    return par_list;
+    return par_list
 
 
 
-def build_properties_dict(param_map,synonims,preffix='') :
+def build_properties_dict(param_map,synonims,descr_list=[]) :
     """ function builds the properties list from the properties strings obtained from Insturment_Parameters.xml file
               
        The properties, which have simple values are added to dictionary in the form:
@@ -91,23 +102,27 @@ def build_properties_dict(param_map,synonims,preffix='') :
 
     """ 
     # dictionary used for substituting composite keys.
-    prelim_dict = dict();
+    prelim_dict = dict()
 
     for name in param_map:
        if name in synonims:
-          final_name = preffix+str(synonims[name]);
+          final_name = str(synonims[name])
        else:
-          final_name = preffix+str(name)
-       prelim_dict[final_name]=None;
+          final_name = str(name)
+       prelim_dict[final_name]=None
 
-    param_keys = prelim_dict.keys();
-    properties_dict = dict();
+    param_keys = prelim_dict.keys()
+    properties_dict = dict()
+    descr_dict = dict()
 
     for name,val in param_map.items() :
         if name in synonims:
-            final_name = preffix+str(synonims[name]);
+            final_name = str(synonims[name])
         else:
-            final_name = preffix+str(name)
+            final_name = str(name)
+        is_descriptor = False
+        if final_name in descr_list:
+            is_descriptor = True
 
         if isinstance(val,str):  
                val = val.strip()
@@ -115,26 +130,35 @@ def build_properties_dict(param_map,synonims,preffix='') :
                n_keys = len(keys_candidates)
                #
                if n_keys>1 : # this is the property we want to modify
-                   result=list();
+                   result=list()
                    for key in keys_candidates :
                        if key in synonims:
-                           rkey = preffix+str(synonims[key]);
+                           rkey = str(synonims[key])
                        else:
-                           rkey = preffix+str(key);
+                           rkey = str(key)
                        if rkey in param_keys:
-                          result.append(rkey);
+                          result.append(rkey)
                        else:
-                          raise KeyError('Substitution key : {0} is not in the list of allowed keys'.format(rkey));
-                   properties_dict['_'+final_name]=ComplexProperty(result)
+                          raise KeyError('Substitution key : {0} is not in the list of allowed keys'.format(rkey))
+                   if is_descriptor:
+                       descr_dict[final_name] = result
+                   else:
+                      properties_dict['_'+final_name]=ComplexProperty(result)
                else:
-                   properties_dict[final_name] =keys_candidates[0];
+                   if is_descriptor:
+                       descr_dict[final_name] = keys_candidates[0]
+                   else:
+                       properties_dict[final_name] =keys_candidates[0]
         else:
-            properties_dict[final_name]=val;
+           if is_descriptor:
+                descr_dict[final_name] = val
+           else:
+                properties_dict[final_name]=val
 
-    return properties_dict
+    return (properties_dict,descr_dict)
 
 
-def extract_non_system_names(names_list,prefix='__'):
+def extract_non_system_names(names_list,prefix='_'):
     """ The function processes the input list and returns 
         the list with names which do not have the system framing (leading __)                  
     """
@@ -178,7 +202,7 @@ def build_subst_dictionary(synonims_list=None) :
                 kkk = keys[i].strip();
                 rez[kkk]=keys[0].strip()
 
-    return rez;
+    return rez
 
 def gen_getter(keyval_dict,key):
     """ function returns value from dictionary with substitution 
@@ -196,7 +220,7 @@ def gen_getter(keyval_dict,key):
 
     a_val= keyval_dict[name];
     if isinstance(a_val,ComplexProperty):
-        return a_val.__get__(keyval_dict);
+        return a_val.__get__(keyval_dict)
     else:
         return a_val
     #end
@@ -276,5 +300,68 @@ def check_instrument_name(old_name,new_name):
     facility = str(config.getFacility())
 
     config['default.instrument'] = full_name
-    return (new_name,full_name,facility);
+    return (new_name,full_name,facility)
+
+def parse_single_name(filename):
+    """ Process single run name into """
+    filepath,fname = os.path.split(filename)
+    if ':' in fname:
+       fl,fr=fname.split(':')
+       path1,ind1,ext1=parse_single_name(fl)
+       path2,ind2,ext2=parse_single_name(fr)
+       if ind1>ind2:
+           raise ValueError('Invalid file number defined using colon : left run number {0} has to be large then right {1}'.format(ind1,ind2))
+       number = range(ind1[0],ind2[0]+1)
+       if len(filepath)>0:
+          filepath=[filepath]*len(number)
+       else:
+          filepath=path1*len(number)
+       if len(ext2[0])>0:
+           fext = ext2*len(number)
+       else:
+           fext = ext1*len(number)
+
+       return (filepath,number,fext)
+        
+
+    fname,fext  = os.path.splitext(fname)
+    fnumber = filter(lambda x: x.isdigit(), fname)
+    if len(fnumber) == 0:
+        number = 0
+    else:
+        number = int(fnumber)
+    return ([filepath],[number],[fext])
+    
+
+def parse_run_file_name(run_string):
+    """ Parses run file name to obtain run number, path if possible, and file extension if any present in the string"""
+    if not isinstance(run_string,str):
+        raise ValueError("REDUCTION_HELPER:parse_run_file_name -- input has to be a string")
+
+    runs = run_string.split(',')
+    filepath = []
+    filenum  = []
+    fext     = []
+    anExt    = ''
+    for run in runs:
+        path,ind,ext1 = parse_single_name(run)
+        filepath+=path
+        filenum+=ind
+        fext+=ext1
+
+    non_empty = filter(lambda x: len(x) >0, fext)
+    if len(non_empty)>0:
+        anExt = non_empty[-1]
+        for i,val in enumerate(fext):
+            if len(val) == 0:
+                fext[i] = anExt
+
+    if len(filenum) == 1:
+        filepath = filepath[0]
+        filenum  = filenum[0]
+        fext     = fext[0]
+    # extensions should be either all the same or all defined
+    return (filepath,filenum,fext)
+
+    
 

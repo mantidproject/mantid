@@ -2,12 +2,15 @@
 #include "MantidQtCustomInterfaces/Quasi.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
+using namespace Mantid::API;
+
 namespace MantidQt
 {
 	namespace CustomInterfaces
 	{
-		Quasi::Quasi(QWidget * parent) : 
-			IndirectBayesTab(parent)
+		Quasi::Quasi(QWidget * parent) :
+			IndirectBayesTab(parent),
+      m_previewSpec(0)
 		{
 			m_uiForm.setupUi(parent);
 
@@ -30,7 +33,7 @@ namespace MantidQt
 			m_properties["EMax"] = m_dblManager->addProperty("EMax");
 			m_properties["SampleBinning"] = m_dblManager->addProperty("Sample Binning");
 			m_properties["ResBinning"] = m_dblManager->addProperty("Resolution Binning");
-			
+
 			m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
 			m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
 			m_dblManager->setDecimals(m_properties["SampleBinning"], INT_DECIMALS);
@@ -54,13 +57,17 @@ namespace MantidQt
 			//Connect the data selector for the sample to the mini plot
 			connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
 
+      // Connect the progrm selector to its handler
 			connect(m_uiForm.cbProgram, SIGNAL(currentIndexChanged(int)), this, SLOT(handleProgramChange(int)));
+
+      // Connect preview spectrum spinner to handler
+      connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this, SLOT(previewSpecChanged(int)));
 		}
 
 		/**
 		 * Set the data selectors to use the default save directory
 		 * when browsing for input files.
-		 *  
+		 *
      * @param settings :: The current settings
 		 */
 		void Quasi::loadSettings(const QSettings& settings)
@@ -77,7 +84,7 @@ namespace MantidQt
 
 		/**
 		 * Validate the form to check the program can be run
-		 * 
+		 *
 		 * @return :: Whether the form was valid
 		 */
 		bool Quasi::validate()
@@ -85,7 +92,7 @@ namespace MantidQt
 			UserInputValidator uiv;
 			uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
 			uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
-			
+
 			//check that the ResNorm file is valid if we are using it
 			if(m_uiForm.chkUseResNorm->isChecked())
 			{
@@ -124,10 +131,8 @@ namespace MantidQt
 		 * Collect the settings on the GUI and build a python
 		 * script that runs Quasi
 		 */
-		void Quasi::run() 
+		void Quasi::run()
 		{
-      using namespace Mantid::API;
-
 			// Using 1/0 instead of True/False for compatibility with underlying Fortran code
 			// in some places
 			QString verbose("False");
@@ -141,14 +146,11 @@ namespace MantidQt
 			QString useResNorm("False");
 			QString resNormFile("");
 
-			QString pyInput = 
+			QString pyInput =
 				"from IndirectBayes import QLRun\n";
 
 			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
 			QString resName = m_uiForm.dsResolution->getCurrentDataName();
-
-      // Should be either "red", "sqw" or "res"
-      QString resType = resName.right(3);
 
 			QString program = m_uiForm.cbProgram->currentText();
 
@@ -167,8 +169,8 @@ namespace MantidQt
 			if(m_uiForm.chkElasticPeak->isChecked()) { elasticPeak = "True"; }
 			if(m_uiForm.chkSequentialFit->isChecked()) { sequence = "True"; }
 
-			if(m_uiForm.chkFixWidth->isChecked()) 
-			{ 
+			if(m_uiForm.chkFixWidth->isChecked())
+			{
 				fixedWidth = "True";
 				fixedWidthFile = m_uiForm.mwFixWidthDat->getFirstFilename();
 			}
@@ -201,6 +203,33 @@ namespace MantidQt
 
 			runPythonScript(pyInput);
 
+      updateMiniPlot();
+		}
+
+    /**
+     * Updates the data and fit curves on the mini plot.
+     */
+    void Quasi::updateMiniPlot()
+    {
+      // Update sample plot
+      if(!m_uiForm.dsSample->isValid())
+        return;
+
+      QString sampleName = m_uiForm.dsSample->getCurrentDataName();
+			plotMiniPlot(sampleName, m_previewSpec, "QuasiPlot", "RawPlotCurve");
+
+      // Update fit plot
+			QString program = m_uiForm.cbProgram->currentText();
+			if(program == "Lorentzians")
+				program = "QL";
+			else
+				program = "QSe";
+
+			QString resName = m_uiForm.dsResolution->getCurrentDataName();
+
+      // Should be either "red", "sqw" or "res"
+      QString resType = resName.right(3);
+
       // Get the correct workspace name based on the type of resolution file
       if(program == "QL")
       {
@@ -210,9 +239,12 @@ namespace MantidQt
           program += "d";
       }
 
-      // Update mini plot
-      QString outWsName = sampleName.left(sampleName.size() - 3) + program + "_Workspace_0";
+      QString outWsName = sampleName.left(sampleName.size() - 3) + program + "_Workspace_" + QString::number(m_previewSpec);
+      if(!AnalysisDataService::Instance().doesExist(outWsName.toStdString()))
+        return;
+
       MatrixWorkspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName.toStdString());
+
       TextAxis* axis = dynamic_cast<TextAxis*>(outputWorkspace->getAxis(1));
 
       for(size_t histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++)
@@ -231,19 +263,24 @@ namespace MantidQt
           m_curves[specName]->setPen(QColor(Qt::green));
         }
       }
-  
+
       replot("QuasiPlot");
-		}
+    }
 
 		/**
 		 * Plots the loaded file to the miniplot and sets the guides
 		 * and the range
-		 * 
+		 *
 		 * @param filename :: The name of the workspace to plot
 		 */
 		void Quasi::handleSampleInputReady(const QString& filename)
 		{
-			plotMiniPlot(filename, 0, "QuasiPlot", "RawPlotCurve");
+      MatrixWorkspace_sptr inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(filename.toStdString());
+      int numHist = static_cast<int>(inWs->getNumberHistograms()) - 1;
+      m_uiForm.spPreviewSpectrum->setMaximum(numHist);
+      removeAllCurves();
+      replot("QuasiPlot");
+      updateMiniPlot();
 			std::pair<double,double> range = getCurveRange("RawPlotCurve");
 			setMiniPlotGuides("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
 			setPlotRange("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
@@ -266,7 +303,7 @@ namespace MantidQt
 		 */
     void Quasi::maxValueChanged(double max)
     {
-			m_dblManager->setValue(m_properties["EMax"], max);	
+			m_dblManager->setValue(m_properties["EMax"], max);
     }
 
 		/**
@@ -306,5 +343,17 @@ namespace MantidQt
     			break;
     	}
     }
+
+    /**
+     * Handles setting a new preview spectrum on the preview plot.
+     *
+     * @param value Spectrum index
+     */
+    void Quasi::previewSpecChanged(int value)
+    {
+      m_previewSpec = value;
+      updateMiniPlot();
+    }
+
 	} // namespace CustomInterfaces
 } // namespace MantidQt

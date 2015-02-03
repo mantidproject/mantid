@@ -51,10 +51,6 @@ namespace CustomInterfaces
     void plotContour();
     void sqwAlgDone(bool error);
 
-  private:
-    bool validateQRebin();
-    bool validateEnergyRebin();
-
   };
 } // namespace CustomInterfaces
 } // namespace Mantid

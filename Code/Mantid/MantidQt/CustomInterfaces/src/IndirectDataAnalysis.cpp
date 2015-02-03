@@ -12,6 +12,7 @@
 #include "MantidQtCustomInterfaces/CalcCorr.h"
 #include "MantidQtCustomInterfaces/ApplyCorr.h"
 
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -154,9 +155,7 @@ namespace IDA
    */
   void IndirectDataAnalysis::help()
   {
-    unsigned int currentTab = m_uiForm.tabWidget->currentIndex();
-    QString url = m_tabs[currentTab]->tabHelpURL();
-    QDesktopServices::openUrl(QUrl(url));
+    MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Indirect_DataAnalysis"));
   }
 
   /**

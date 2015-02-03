@@ -42,6 +42,8 @@ namespace MantidQt
       virtual void zoomToRectangle(const PeakBoundingBox&) = 0;
       /// Zoom out
       virtual void resetView() = 0;
+      /// Detach
+      virtual void detach() = 0;
       /// Destructor
       virtual ~ZoomablePeaksView(){ }
     };
