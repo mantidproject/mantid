@@ -176,8 +176,8 @@ void LoadBBY::exec() {
           mask[s0 + (size_t)y] = false;
       }
       else { // if (offset < 0)
-        for (int y = HISTO_BINS_Y + offset; y != HISTO_BINS_Y; y++)
-          mask[s0 + (size_t)y] = false;
+        for (size_t y = HISTO_BINS_Y + offset; y != HISTO_BINS_Y; y++)
+          mask[s0 + y] = false;
       }
     }
   }
