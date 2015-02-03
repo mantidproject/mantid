@@ -50,11 +50,14 @@ Sample Logs
 ###########
 
 ** TODO : Add this section about how the algorithm treats **
+FIXME *** TODO *** : Do not make a long list of time series property for run 1.
+BUT assign the relevant sample values to each ExperimentInfo of each run
+Only make the properties in the ParentWorkspace to Sample log of run 0???
 
 Temporary MD File
 #################
 
-** TODO : write how the MD file is build and read in **
+*** TODO : write how the MD file is build and read in **
 
 
 Workflow
@@ -73,30 +76,35 @@ Usage
 
 .. testcode:: ExLoadHB2ADataToMD
 
-  LoadSpiceAscii(Filename="HB2A_exp0231_scan0001.dat", 
+  # create table workspace and parent log workspace
+  LoadSpiceAscii(Filename='HB2A_exp0231_scan0001.dat', 
         IntegerSampleLogNames="Sum of Counts, scan, mode, experiment_number",
         FloatSampleLogNames="samplemosaic, preset_value, Full Width Half-Maximum, Center of Mass", 
-        OutputWorkspace="HB2A_0231_0001_Data", 
-        RunInfoWorkspace="HB2A_0231_Info")
-  datatbws = mtd['HB2A_0231_0001_Data'] 
-  infows = mtd['HB2A_0231_Info']
+        DateAndTimeLog='date,MM/DD/YYYY,time,HH:MM:SS AM', 
+        OutputWorkspace='Exp0231DataTable', 
+        RunInfoWorkspace='Exp0231ParentWS')
 
-  LoadHFIRPDData()
+  # load for HB2A 
+  LoadHFIRPDData(InputWorkspace='Exp0231DataTable', 
+        ParentWorkspace='Exp0231ParentWS', 
+        OutputWorkspace='Exp0231DataMD', 
+        OutputMonitorWorkspace='Exp0231MonitorMD')
 
+  # output
+  datamdws = mtd["Exp0231DataMD"]
+  print "Number of events = %d" % (datamdws.getNEvents())
 
 .. testcleanup:: ExLoadHB2ADataToMD
 
-  DeleteWorkspace(infows)
-  DeleteWorkspace(datatbws)
+  DeleteWorkspace('Exp0231DataTable')
+  DeleteWorkspace('Exp0231ParentWS')
+  DeleteWorkspace('Exp0231DataMD')
+  DeleteWorkspace('Exp0231MonitorMD')
 
 Output:
 
 .. testoutput:: ExLoadHB2ADataToMD
 
-  Number of measuring points = 61
-  Number of columns in data workspace = 70
-  Number of run information = 34
-  Sum of Counts = 1944923
-  Center of Mass = 9.00076 +/- 0.00921
+  Number of events = 2684
 
 .. categories::

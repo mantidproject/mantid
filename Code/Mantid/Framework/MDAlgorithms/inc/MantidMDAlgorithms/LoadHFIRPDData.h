@@ -70,8 +70,7 @@ private:
 
   /// Convert to MD workspaces
   API::IMDEventWorkspace_sptr
-  convertToMDEventWS(const std::vector<API::MatrixWorkspace_sptr> &vec_ws2d,
-                     const std::vector<double> &vectimes);
+  convertToMDEventWS(const std::vector<API::MatrixWorkspace_sptr> &vec_ws2d);
 
   /// Parse data table workspace to a vector of matrix workspaces
   std::vector<API::MatrixWorkspace_sptr>
@@ -93,7 +92,6 @@ private:
   /// Return sample logs
   void parseSampleLogs(DataObjects::TableWorkspace_sptr tablews,
                        const std::map<std::string, size_t> &indexlist,
-                       size_t ipt,
                        std::map<std::string, std::vector<double> > &logvecmap);
 
   /// Load one run (one pt.) to a matrix workspace
