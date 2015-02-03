@@ -127,13 +127,14 @@ public:
     TS_ASSERT_EQUALS(mditer->getNumEvents(), 44 * 61);
 
     double y0 = mditer->getInnerSignal(0);
+    TS_ASSERT_DELTA(y0, 125.0, 0.1);
     double yl = mditer->getInnerSignal(44 * 61-1);
+    TS_ASSERT_DELTA(yl, 76.0, 0.1);
 
     uint16_t run0 = mditer->getInnerRunIndex(0);
+    TS_ASSERT_EQUALS(run0, 1);
 
-
-    // Detector position
-    /// TODO - Explain more on this test
+    // Verify the last detector's position on X-axis
     Mantid::coord_t lastx = mditer->getInnerPosition(44 * 61 - 1, 0);
     TS_ASSERT_DELTA(lastx, 1.57956, 0.0001);
 

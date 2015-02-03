@@ -19,12 +19,12 @@ using namespace Mantid::DataObjects;
 
 DECLARE_ALGORITHM(LoadHFIRPDData)
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Constructor
  */
 LoadHFIRPDData::LoadHFIRPDData() : m_instrumentName(""), m_numSpec(0) {}
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Destructor
  */
 LoadHFIRPDData::~LoadHFIRPDData() {}
@@ -61,13 +61,8 @@ void LoadHFIRPDData::init() {
 /** Exec
  */
 void LoadHFIRPDData::exec() {
-  /** Stage 2
-  // Process inputs
-  std::string spiceFileName = getProperty("Filename");
 
-  // Load SPICE data
-  m_dataTableWS = loadSpiceData(spiceFileName);
-  */
+  // Process inputs
   m_dataTableWS = getProperty("InputWorkspace");
   MatrixWorkspace_const_sptr parentWS = getProperty("ParentWorkspace");
 
@@ -94,11 +89,11 @@ void LoadHFIRPDData::exec() {
   std::vector<MatrixWorkspace_sptr> vec_ws2d = convertToWorkspaces(
       m_dataTableWS, parentWS, runstart, logvecmap, vectimes);
 
-  g_log.notice() << "[DB] Convert to workspaces done!"
-                 << "\n";
-
   // Convert to MD workspaces
-  IMDEventWorkspace_sptr m_mdEventWS = convertToMDEventWS(vec_ws2d);
+  g_log.debug("About to converting to workspaces done!");
+  std::vector<double> &vecrunduration = logvecmap["time"];
+  IMDEventWorkspace_sptr m_mdEventWS =
+      convertToMDEventWS(vec_ws2d, vecrunduration);
   IMDEventWorkspace_sptr mdMonitorWS =
       createMonitorMDWorkspace(vec_ws2d, logvecmap);
 
@@ -110,38 +105,8 @@ void LoadHFIRPDData::exec() {
   appendSampleLogs(m_mdEventWS, logvecmap, vectimes);
 
   // Set property
-  g_log.notice() << "[DB] Check point!"
-                 << "\n";
   setProperty("OutputWorkspace", m_mdEventWS);
   setProperty("OutputMonitorWorkspace", mdMonitorWS);
-}
-
-//----------------------------------------------------------------------------------------------
-/** Load data by call
- */
-TableWorkspace_sptr
-LoadHFIRPDData::loadSpiceData(const std::string &spicefilename) {
-  const std::string tempoutws = "_tempoutdatatablews";
-  const std::string tempinfows = "_tempinfomatrixws";
-
-  IAlgorithm_sptr loader =
-      this->createChildAlgorithm("LoadSPICEAscii", 0, 5, true);
-
-  loader->initialize();
-  loader->setProperty("Filename", spicefilename);
-  loader->setPropertyValue("OutputWorkspace", tempoutws);
-  loader->setPropertyValue("RunInfoWorkspace", tempinfows);
-  loader->executeAsChildAlg();
-
-  TableWorkspace_sptr tempdatatablews = loader->getProperty("OutputWorkspace");
-  if (tempdatatablews)
-    g_log.notice() << "[DB] data table contains " << tempdatatablews->rowCount()
-                   << " lines."
-                   << "\n";
-  else
-    g_log.notice("No table workspace is returned.");
-
-  return tempdatatablews;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -157,8 +122,6 @@ std::vector<MatrixWorkspace_sptr> LoadHFIRPDData::convertToWorkspaces(
   std::vector<std::pair<size_t, size_t> > anodelist;
   std::map<std::string, size_t> sampleindexlist;
   readTableInfo(tablews, ipt, irotangle, itime, anodelist, sampleindexlist);
-  g_log.notice() << "[DB] Check point 1: Number of anodelist = "
-                 << anodelist.size() << "\n";
   m_numSpec = anodelist.size();
 
   // Load data
@@ -177,13 +140,13 @@ std::vector<MatrixWorkspace_sptr> LoadHFIRPDData::convertToWorkspaces(
   // MDWorkspace
   parseSampleLogs(tablews, sampleindexlist, ipt, logvecmap);
 
-  g_log.notice() << "[DB] Number of matrix workspaces in vector = "
-                 << vecws.size() << "\n";
+  g_log.debug() << "Number of matrix workspaces in vector = " << vecws.size()
+                << "\n";
   return vecws;
 }
 
 //------------------------------------------------------------------------------------------------
-/**
+/** Parse sample logs from table workspace and return with a set of vectors
  * @brief LoadHFIRPDD::parseSampleLogs
  * @param tablews
  * @param indexlist
@@ -202,8 +165,7 @@ void LoadHFIRPDData::parseSampleLogs(
     std::string logname = indexiter->first;
     size_t icol = indexiter->second;
 
-    g_log.notice() << "[DB] "
-                   << " About to parse log " << logname << "\n";
+    g_log.debug() << " Parsing log " << logname << "\n";
 
     std::vector<double> logvec(numrows);
     for (size_t ir = 0; ir < numrows; ++ir) {
@@ -235,8 +197,6 @@ MatrixWorkspace_sptr LoadHFIRPDData::loadRunToMatrixWS(
     MatrixWorkspace_const_sptr parentws, Kernel::DateAndTime runstart,
     size_t irotangle, size_t itime,
     const std::vector<std::pair<size_t, size_t> > anodelist, double &duration) {
-  g_log.notice() << "[DB] m_numSpec = " << m_numSpec
-                 << ", Instrument name = " << m_instrumentName << ". \n";
   // New workspace from parent workspace
   MatrixWorkspace_sptr tempws =
       WorkspaceFactory::Instance().create(parentws, m_numSpec, 2, 1);
@@ -253,8 +213,8 @@ MatrixWorkspace_sptr LoadHFIRPDData::loadRunToMatrixWS(
       new TimeSeriesProperty<std::string>("run_start");
   proprunstart->addValue(runstart, runstart.toISO8601String());
 
-  g_log.notice() << "[DB] Trying to set run start to "
-                 << runstart.toISO8601String() << "\n";
+  g_log.debug() << "Run " << irow << ": set run start to "
+                << runstart.toISO8601String() << "\n";
   if (tempws->run().hasProperty("run_start")) {
     g_log.error() << "Temp workspace exists run_start as "
                   << tempws->run().getProperty("run_start")->value() << "\n";
@@ -358,34 +318,29 @@ LoadHFIRPDData::readTableInfo(TableWorkspace_const_sptr tablews, size_t &ipt,
 }
 
 //----------------------------------------------------------------------------------------------
-/**
- * @brief LoadHFIRPDD::createParentWorkspace
- * @param numspec
+
+/** Convert to MD Event workspace
+ * @brief LoadHFIRPDData::convertToMDEventWS
+ * @param vec_ws2d
  * @return
  */
-API::MatrixWorkspace_sptr LoadHFIRPDData::createParentWorkspace(size_t numspec) {
-  // TODO - This method might be deleted
-
-  MatrixWorkspace_sptr tempws =
-      WorkspaceFactory::Instance().create("Workspace2D", numspec, 2, 1);
-
-  // FIXME - Need unit
-
-  // TODO - Load property from
-
-  return tempws;
-}
-
-//----------------------------------------------------------------------------------------------
-/** Convert to MD Event workspace
- */
 IMDEventWorkspace_sptr LoadHFIRPDData::convertToMDEventWS(
-    const std::vector<MatrixWorkspace_sptr> vec_ws2d) {
+    const std::vector<MatrixWorkspace_sptr> &vec_ws2d,
+    const std::vector<double> &vectimes) {
+  // Check whether input is valid
+  if (vec_ws2d.size() != vectimes.size()) {
+    std::stringstream ess;
+    ess << "Method convertToMDEventWS: input vec_ws2d "
+        << "(" << vec_ws2d.size() << ") should have same size as vectimes ("
+        << vectimes.size() << ").";
+    throw std::runtime_error(ess.str());
+  }
+
   // Write the lsit of workspacs to a file to be loaded to an MD workspace
   Poco::TemporaryFile tmpFile;
   std::string tempFileName = tmpFile.path();
-  g_log.notice() << "[DB] "
-                 << "Temp MD Event file = " << tempFileName << "\n";
+  g_log.debug() << "Creating temporary MD Event file = " << tempFileName
+                << "\n";
 
   // Construct a file
   std::ofstream myfile;
@@ -423,7 +378,7 @@ IMDEventWorkspace_sptr LoadHFIRPDData::convertToMDEventWS(
         myfile << detPos.Z() << " ";
         // Add a new dimension as event time
         /// TODO - Need to find out the duration of the run!
-        relruntime += 30;
+        relruntime += vectimes[pos];
         myfile << relruntime << " ";
         myfile << std::endl;
       }
@@ -464,7 +419,8 @@ IMDEventWorkspace_sptr LoadHFIRPDData::convertToMDEventWS(
   return workspace;
 }
 
-/**
+//-----------------------------------------------------------------------------------------------
+/** Create an MDWorkspace for monitoring counts.
  * @brief LoadHFIRPDD::createMonitorMDWorkspace
  * @param vec_ws2d
  * @param logvecmap
@@ -476,8 +432,8 @@ IMDEventWorkspace_sptr LoadHFIRPDData::createMonitorMDWorkspace(
   // Write the lsit of workspacs to a file to be loaded to an MD workspace
   Poco::TemporaryFile tmpFile;
   std::string tempFileName = tmpFile.path();
-  g_log.notice() << "[DB] "
-                 << "Temp MD Event file = " << tempFileName << "\n";
+  g_log.debug() << "Creating temporary MD Event file for monitor counts = "
+                << tempFileName << "\n";
 
   // Construct a file
   std::ofstream myfile;
@@ -562,8 +518,8 @@ IMDEventWorkspace_sptr LoadHFIRPDData::createMonitorMDWorkspace(
   return workspace;
 }
 
-//---
-/**
+//-----------------------------------------------------------------------------------------------
+/** Create sample logs for MD workspace
  * @brief LoadHFIRPDD::appendSampleLogs
  * @param mdws
  * @param logvecmap
