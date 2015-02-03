@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, re
 import numpy as np
 import datetime
 
@@ -71,21 +71,21 @@ class DNSdata:
 
             # parse each block 
             # parse block 0 (header)
-            # [TODO:] rewrite to get rid of dependence on parse
-            res = parse("# DNS Data userid={userid},exp={exp_id},file={run_number},sample={sample_name}", blocks[0])
-            # [TODO:] raise exception on the wrong file format
-            #if not res:
-            #    print "Wrong file format."
-            #    sys.exit()
-            self.run_number = res['run_number']
-            self.experiment_number = res['exp_id']
-            self.sample_name = res['sample_name']
-            self.userid = res['userid']
+            res = parse_header(blocks[0])
+            #[TODO:]
+            #if not res: raise Exception "wrong file format" else 
+            try:
+                self.run_number = res['file']
+                self.experiment_number = res['exp']
+                self.sample_name = res['sample']
+                self.userid = res['userid']
+            except:
+                raise ValueError("The file %s does not contain valid DNS data format." % filename)
             
             # parse block 1 (general information)
             b1splitted = map(str.strip, blocks[1].split('#'))
             b1rest = [el for el in b1splitted] # otherwise unexpected behaviour due to the removed lines
-            
+            #[TODO:] get rid of parse 
             for line in b1splitted:
                 res = parse('User: {user_name}', line)
                 if res:
@@ -183,7 +183,16 @@ class DNSdata:
             self.start_time = datetime.datetime.strptime(b7splitted[5], sinfmt).strftime(outfmt)
             self.end_time = datetime.datetime.strptime(b7splitted[6], einfmt).strftime(outfmt)
 
-
+def parse_header(h):
+    """
+    parses the header string and returns the parsed dictionary
+    """
+    d = {}
+    regexp=re.compile("(\w+)=(\w+)")
+    result=regexp.finditer(h)
+    for r in result:
+        d[r.groups()[0]] = r.groups()[1]
+    return d
 
 
 if __name__== '__main__':
