@@ -148,10 +148,9 @@ std::vector<MatrixWorkspace_sptr> LoadHFIRPDData::convertToWorkspaces(
 
 //------------------------------------------------------------------------------------------------
 /** Parse sample logs from table workspace and return with a set of vectors
- * @brief LoadHFIRPDD::parseSampleLogs
+ * @brief LoadHFIRPDData::parseSampleLogs
  * @param tablews
  * @param indexlist
- * @param ipt :: index for Pt. which will be not be written
  * @param logvecmap
  */
 void LoadHFIRPDData::parseSampleLogs(
@@ -347,9 +346,9 @@ IMDEventWorkspace_sptr LoadHFIRPDData::convertToMDEventWS(
             "coords" << std::endl;
   myfile << "MDEVENTS" << std::endl;
 
-  double relruntime = 0;
-
   if (vec_ws2d.size() > 0) {
+    double relruntime = 0;
+
     Progress progress(this, 0, 1, vec_ws2d.size());
     size_t detindex = 0;
     for (auto it = vec_ws2d.begin(); it < vec_ws2d.end(); ++it) {
@@ -389,6 +388,10 @@ IMDEventWorkspace_sptr LoadHFIRPDData::convertToMDEventWS(
       progress.report("Creating MD WS");
     }
     myfile.close();
+  }
+  else
+  {
+    throw std::runtime_error("There is no MatrixWorkspace to construct MDWorkspace.");
   }
 
   // Import to MD Workspace
@@ -440,9 +443,9 @@ IMDEventWorkspace_sptr LoadHFIRPDData::createMonitorMDWorkspace(
             "coords" << std::endl;
   myfile << "MDEVENTS" << std::endl;
 
-  double relruntime = 0;
-
   if (vec_ws2d.size() > 0) {
+    double relruntime = 0;
+
     Progress progress(this, 0, 1, vec_ws2d.size());
     size_t detindex = 0;
     for (auto it = vec_ws2d.begin(); it < vec_ws2d.end(); ++it) {
@@ -492,6 +495,10 @@ IMDEventWorkspace_sptr LoadHFIRPDData::createMonitorMDWorkspace(
       progress.report("Creating MD WS");
     }
     myfile.close();
+  }
+  else
+  {
+    throw std::runtime_error("There is no MatrixWorkspace to construct MDWorkspace.");
   }
 
   // Import to MD Workspace
