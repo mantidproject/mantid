@@ -56,7 +56,7 @@ public:
     for (size_t i = 0; i < output->getNumberHistograms(); i++)
       sum += output->readY(i)[0];
     sum *= 1.0e22;
-    TS_ASSERT_DELTA(sum / 1.0E27,0.9981,0.0001); 
+    TS_ASSERT_DELTA(sum / 1.0E27,2.0,0.0001); 
   
   }
 
