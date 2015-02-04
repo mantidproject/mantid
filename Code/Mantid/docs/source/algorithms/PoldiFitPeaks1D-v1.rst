@@ -29,7 +29,7 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-The following small usage example performs a peak fit on the sample data already used in :ref:`algm-PoldiAutoCorrelation` and :ref:`algm-PoldiPeakSearch`. After the fit, the plots can be viewed and 
+The following small usage example performs a peak fit on the sample data already used in :ref:`algm-PoldiAutoCorrelation` and :ref:`algm-PoldiPeakSearch`. After the fit, the plots can be viewed and used to visually judge the quality of the fits.
 
 .. testcode:: ExSiliconPeakFit
 
