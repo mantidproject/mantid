@@ -85,9 +85,9 @@ private:
 
   /// Read parameter information from table workspace
   void readTableInfo(DataObjects::TableWorkspace_const_sptr tablews,
-                     size_t &ipt, size_t &irotangle, size_t &itime,
+                     size_t &irotangle, size_t &itime,
                      std::vector<std::pair<size_t, size_t> > &anodelist,
-                     std::map<std::string, size_t> &sampleindexlist);
+                     std::map<std::string, size_t> &samplenameindexmap);
 
   /// Return sample logs
   void parseSampleLogs(DataObjects::TableWorkspace_sptr tablews,
@@ -117,12 +117,7 @@ private:
   /// Create an MDWorkspace for monitor counts
   API::IMDEventWorkspace_sptr createMonitorMDWorkspace(
       const std::vector<API::MatrixWorkspace_sptr> vec_ws2d,
-      const std::map<std::string, std::vector<double> > logvecmap);
-
-  /// File name
-  std::string m_spiceFilename;
-
-  DataObjects::TableWorkspace_sptr m_dataTableWS;
+      const std::vector<double> &vecmonitor);
 
   /// Name of instrument
   std::string m_instrumentName;

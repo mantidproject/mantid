@@ -25,12 +25,14 @@ public:
   static LoadHFIRPDDataTest *createSuite() { return new LoadHFIRPDDataTest(); }
   static void destroySuite(LoadHFIRPDDataTest *suite) { delete suite; }
 
+  //-----------------------------------------------------------------------------------------------------
   void test_Init() {
     LoadHFIRPDData loader;
     loader.initialize();
     TS_ASSERT(loader.isInitialized());
   }
 
+  //-----------------------------------------------------------------------------------------------------
   /** Test loading HB2A's IDF file
    * @brief test_HB2BIDF
    */
@@ -69,14 +71,15 @@ public:
     TS_ASSERT_EQUALS(detids.size(), 44);
   }
 
-  /** TODO - Add comments
+  //-----------------------------------------------------------------------------------------------------
+  /** Test to load HB2A's SPICE data to MDWorkspaces
    * @brief test_LoadHB2AData
    */
   void test_LoadHB2AData() {
     LoadSpiceAscii spcloader;
     spcloader.initialize();
 
-    /// TODO - Add comments
+    // Load HB2A spice file
     TS_ASSERT_THROWS_NOTHING(
         spcloader.setProperty("Filename", "HB2A_exp0231_scan0001.dat"));
     TS_ASSERT_THROWS_NOTHING(
@@ -89,18 +92,18 @@ public:
         spcloader.setProperty("IgnoreUnlistedLogs", false));
     spcloader.execute();
 
+    // Retrieve the workspaces as the inputs of LoadHFIRPDData
     ITableWorkspace_sptr datatablews =
         boost::dynamic_pointer_cast<ITableWorkspace>(
             AnalysisDataService::Instance().retrieve("DataTable"));
     TS_ASSERT(datatablews);
 
-    /// TODO - Add comments
     MatrixWorkspace_sptr parentlogws =
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("LogParentWS"));
     TS_ASSERT(parentlogws);
 
-    /// TODO - Add comments
+    // Set up LoadHFIRPDData
     LoadHFIRPDData loader;
     loader.initialize();
 
@@ -138,14 +141,19 @@ public:
     Mantid::coord_t lastx = mditer->getInnerPosition(44 * 61 - 1, 0);
     TS_ASSERT_DELTA(lastx, 1.57956, 0.0001);
 
-    // Experiment infor???
-    ExperimentInfo_const_sptr expinfo = mdws->getExperimentInfo(0);
-    TS_ASSERT(expinfo);
+    // Experiment information
+    /// FIXME - This is wrong! why 62?  where the +1 comes from?
+    uint16_t numexpinfo = mdws->getNumExperimentInfo();
+    // TS_ASSERT_EQUALS(numexpinfo, 61);
 
-    /// TODO : how to deal with it?  Choose some sample logs?
+    ExperimentInfo_const_sptr expinfo0 = mdws->getExperimentInfo(0);
+    TS_ASSERT(expinfo0);
+    TS_ASSERT_EQUALS(expinfo0->getRunNumber(), 1);
 
-    /// TODO :: Is there any good test for time?
-
+    /// FIXME - Run number is not right!
+    ExperimentInfo_const_sptr expinfo61 = mdws->getExperimentInfo(61);
+    TS_ASSERT(expinfo61);
+    TS_ASSERT_EQUALS(expinfo61->getRunNumber(), 124);
   }
 };
 

@@ -6,6 +6,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/ListValidator.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <Poco/TemporaryFile.h>
@@ -44,10 +45,30 @@ void LoadHFIRPDData::init() {
 
   declareProperty("RunStart", "", "Run start time");
 
-  /// TODO - Need to give out a list for input instrument
-  declareProperty("Instrument", "HB2A", "Instrument to be loaded. ");
+  /// TODO - Add HB2B as it is implemented in future
+  std::vector<std::string> allowedinstruments;
+  allowedinstruments.push_back("HB2A");
+  auto instrumentvalidator =
+      boost::make_shared<ListValidator<std::string> >(allowedinstruments);
+  declareProperty("Instrument", "HB2A", instrumentvalidator,
+                  "Instrument to be loaded. ");
 
-  /// Add a property for log name of duration, default as "time"
+  declareProperty("DetectorPrefix", "anode",
+                  "Prefix of the name for detectors. ");
+
+  declareProperty("RunNumberName", "Pt.",
+                  "Log name for run number/measurement point.");
+
+  declareProperty(
+      "RotationAngleLogName", "2theta",
+      "Log name for rotation angle as the 2theta value of detector 0.");
+
+  declareProperty(
+      "MonitorCountsLogName", "monitor",
+      "Name of the sample log to record monitor counts of each run.");
+
+  declareProperty("DurationLogName", "time",
+                  "Name of the sample log to record the duration of each run.");
 
   declareProperty("InitRunNumber", 1, "Starting value for run number.");
 
@@ -66,9 +87,8 @@ void LoadHFIRPDData::init() {
 void LoadHFIRPDData::exec() {
 
   // Process inputs
-  m_dataTableWS = getProperty("InputWorkspace");
+  DataObjects::TableWorkspace_sptr dataTableWS = getProperty("InputWorkspace");
   MatrixWorkspace_const_sptr parentWS = getProperty("ParentWorkspace");
-
   m_instrumentName = getPropertyValue("Instrument");
 
   // Check whether parent workspace has run start
@@ -89,14 +109,15 @@ void LoadHFIRPDData::exec() {
   // Convert table workspace to a list of 2D workspaces
   std::map<std::string, std::vector<double> > logvecmap;
   std::vector<Kernel::DateAndTime> vectimes;
-  std::vector<MatrixWorkspace_sptr> vec_ws2d = convertToWorkspaces(
-      m_dataTableWS, parentWS, runstart, logvecmap, vectimes);
+  std::vector<MatrixWorkspace_sptr> vec_ws2d =
+      convertToWorkspaces(dataTableWS, parentWS, runstart, logvecmap, vectimes);
 
   // Convert to MD workspaces
   g_log.debug("About to converting to workspaces done!");
   IMDEventWorkspace_sptr m_mdEventWS = convertToMDEventWS(vec_ws2d);
+  std::string monitorlogname = getProperty("MonitorCountsLogName");
   IMDEventWorkspace_sptr mdMonitorWS =
-      createMonitorMDWorkspace(vec_ws2d, logvecmap);
+      createMonitorMDWorkspace(vec_ws2d, logvecmap[monitorlogname]);
 
   // Add experiment info for each run and sample log to the first experiment
   // info object
@@ -112,6 +133,13 @@ void LoadHFIRPDData::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** Convert runs/pts from table workspace to a list of workspace 2D
+ * @brief LoadHFIRPDData::convertToWorkspaces
+ * @param tablews
+ * @param parentws
+ * @param runstart
+ * @param logvecmap
+ * @param vectimes
+ * @return
  */
 std::vector<MatrixWorkspace_sptr> LoadHFIRPDData::convertToWorkspaces(
     DataObjects::TableWorkspace_sptr tablews,
@@ -119,10 +147,10 @@ std::vector<MatrixWorkspace_sptr> LoadHFIRPDData::convertToWorkspaces(
     std::map<std::string, std::vector<double> > &logvecmap,
     std::vector<Kernel::DateAndTime> &vectimes) {
   // Get table workspace's column information
-  size_t ipt, irotangle, itime;
+  size_t irotangle, itime;
   std::vector<std::pair<size_t, size_t> > anodelist;
   std::map<std::string, size_t> sampleindexlist;
-  readTableInfo(tablews, ipt, irotangle, itime, anodelist, sampleindexlist);
+  readTableInfo(tablews, irotangle, itime, anodelist, sampleindexlist);
   m_numSpec = anodelist.size();
 
   // Load data
@@ -130,10 +158,10 @@ std::vector<MatrixWorkspace_sptr> LoadHFIRPDData::convertToWorkspaces(
   std::vector<MatrixWorkspace_sptr> vecws(numws);
   double duration = 0;
   vectimes.resize(numws);
-  for (size_t i = 0; i < numws; ++i) {
-    vecws[i] = loadRunToMatrixWS(tablews, i, parentws, runstart, irotangle,
-                                 itime, anodelist, duration);
-    vectimes[i] = runstart;
+  for (size_t irow = 0; irow < numws; ++irow) {
+    vecws[irow] = loadRunToMatrixWS(tablews, irow, parentws, runstart,
+                                    irotangle, itime, anodelist, duration);
+    vectimes[irow] = runstart;
     runstart += static_cast<int64_t>(duration * 1.0E9);
   }
 
@@ -258,60 +286,68 @@ MatrixWorkspace_sptr LoadHFIRPDData::loadRunToMatrixWS(
  * @param anodelist
  * @param sampleindexlist
  */
-void
-LoadHFIRPDData::readTableInfo(TableWorkspace_const_sptr tablews, size_t &ipt,
-                           size_t &irotangle, size_t &itime,
-                           std::vector<std::pair<size_t, size_t> > &anodelist,
-                           std::map<std::string, size_t> &sampleindexlist) {
-  // Init
-  bool bfPt = false;
-  bool bfRotAngle = false;
-  bool bfTime = false;
+void LoadHFIRPDData::readTableInfo(
+    TableWorkspace_const_sptr tablews, size_t &irotangle, size_t &itime,
+    std::vector<std::pair<size_t, size_t> > &anodelist,
+    std::map<std::string, size_t> &samplenameindexmap) {
 
+  // Get detectors' names and other sample names
+  std::string anodelogprefix = getProperty("DetectorPrefix");
   const std::vector<std::string> &colnames = tablews->getColumnNames();
-
   for (size_t icol = 0; icol < colnames.size(); ++icol) {
     const std::string &colname = colnames[icol];
 
-    if (boost::starts_with(colname, "anode")) {
+    if (boost::starts_with(colname, anodelogprefix)) {
       // anode
       std::vector<std::string> terms;
-      boost::split(terms, colname, boost::is_any_of("anode"));
+      boost::split(terms, colname, boost::is_any_of(anodelogprefix));
       size_t anodeid = static_cast<size_t>(atoi(terms.back().c_str()));
       anodelist.push_back(std::make_pair(anodeid, icol));
     } else {
-      sampleindexlist.insert(std::make_pair(colname, icol));
+      samplenameindexmap.insert(std::make_pair(colname, icol));
+    }
+  } // ENDFOR (icol)
+
+  // Check detectors' names
+  if (anodelist.size() == 0) {
+    std::stringstream errss;
+    errss << "There is no log name starting with " << anodelogprefix
+          << " for detector. ";
+    throw std::runtime_error(errss.str());
+  }
+
+  // Find out other essential sample log names
+  std::map<std::string, size_t>::iterator mapiter;
+
+  std::string ptname = getProperty("RunNumberName");                 // "Pt."
+  std::string monitorlogname = getProperty("MonitorCountsLogName");  //"monitor"
+  std::string durationlogname = getProperty("DurationLogName");      //"time"
+  std::string rotanglelogname = getProperty("RotationAngleLogName"); // "2theta"
+
+  std::vector<std::string> lognames;
+  lognames.push_back(ptname);
+  lognames.push_back(monitorlogname);
+  lognames.push_back(durationlogname);
+  lognames.push_back(rotanglelogname);
+
+  std::vector<size_t> ilognames(lognames.size());
+
+  for (size_t i = 0; i < lognames.size(); ++i) {
+    const std::string &logname = lognames[i];
+    mapiter = samplenameindexmap.find(logname);
+    if (mapiter != samplenameindexmap.end()) {
+      ilognames[i] = mapiter->second;
+    } else {
+      std::stringstream ess;
+      ess << "Essential log name " << logname
+          << " cannot be found in data table workspace.";
+      throw std::runtime_error(ess.str());
     }
   }
 
-  // Find out
-  std::map<std::string, size_t>::iterator mapiter;
-
-  // Pt.
-  mapiter = sampleindexlist.find("Pt.");
-  if (mapiter != sampleindexlist.end()) {
-    ipt = mapiter->second;
-    bfPt = true;
-  }
-
-  // 2theta_zero
-  mapiter = sampleindexlist.find("2theta");
-  if (mapiter != sampleindexlist.end()) {
-    irotangle = mapiter->second;
-    bfRotAngle = true;
-  }
-
-  // time
-  mapiter = sampleindexlist.find("time");
-  if (mapiter != sampleindexlist.end()) {
-    itime = mapiter->second;
-    bfTime = true;
-  }
-
-  if (!(bfTime && bfPt && bfRotAngle)) {
-    throw std::runtime_error(
-        "At least 1 of these 3 is not found: Pt., 2theta, time");
-  }
+  // Retrieve the vector index
+  itime = ilognames[2];
+  irotangle = ilognames[3];
 
   // Sort out anode id index list;
   std::sort(anodelist.begin(), anodelist.end());
@@ -419,12 +455,12 @@ IMDEventWorkspace_sptr LoadHFIRPDData::convertToMDEventWS(
 /** Create an MDWorkspace for monitoring counts.
  * @brief LoadHFIRPDD::createMonitorMDWorkspace
  * @param vec_ws2d
- * @param logvecmap
+ * @param vecmonitor
  * @return
  */
 IMDEventWorkspace_sptr LoadHFIRPDData::createMonitorMDWorkspace(
     const std::vector<MatrixWorkspace_sptr> vec_ws2d,
-    const std::map<std::string, std::vector<double> > logvecmap) {
+    const std::vector<double> &vecmonitor) {
   // Write the lsit of workspacs to a file to be loaded to an MD workspace
   Poco::TemporaryFile tmpFile;
   std::string tempFileName = tmpFile.path();
@@ -452,13 +488,7 @@ IMDEventWorkspace_sptr LoadHFIRPDData::createMonitorMDWorkspace(
       std::size_t pos = std::distance(vec_ws2d.begin(), it);
       API::MatrixWorkspace_sptr thisWorkspace = *it;
 
-      std::map<std::string, std::vector<double> >::const_iterator fiter;
-      /// TODO - 'monitor' should be given by user
-      fiter = logvecmap.find("monitor");
-      if (fiter == logvecmap.end())
-        throw std::runtime_error(
-            "Unable to find log 'monitor' in input workspace.");
-      double signal = fiter->second[static_cast<size_t>(it - vec_ws2d.begin())];
+      double signal = vecmonitor[static_cast<size_t>(it - vec_ws2d.begin())];
 
       std::size_t nHist = thisWorkspace->getNumberHistograms();
       for (std::size_t i = 0; i < nHist; ++i) {
