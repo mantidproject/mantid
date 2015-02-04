@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_SASSENAFFTTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <cmath> #TODO HARDCODED INSTRUMENT
+#include <cmath>
 #include "MantidAlgorithms/SassenaFFT.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/SaveAscii.h"
