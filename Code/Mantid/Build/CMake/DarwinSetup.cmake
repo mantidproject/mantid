@@ -43,7 +43,7 @@ message (STATUS "Operating System: Mac OS X ${OSX_VERSION} (${OSX_CODENAME})")
 ###########################################################################
 
 # Only use Third_Party for OS X older than Mavericks (10.9)
-#if (OSX_VERSION VERSION_LESS 10.9)
+if (OSX_VERSION VERSION_LESS 10.9)
   message ( STATUS "Using Third_Party.")
 
   set ( CMAKE_INCLUDE_PATH "${THIRD_PARTY}/include" )
@@ -51,9 +51,9 @@ message (STATUS "Operating System: Mac OS X ${OSX_VERSION} (${OSX_CODENAME})")
 
   set ( CMAKE_LIBRARY_PATH "${THIRD_PARTY}/lib/mac64" )
   set ( BOOST_LIBRARYDIR  "${THIRD_PARTY}/lib/mac64" )
-#else()
-#  message ( STATUS "OS X Mavericks - Not using Mantid Third_Party libraries.")
-#endif()
+else()
+  message ( STATUS "OS X Mavericks - Not using Mantid Third_Party libraries.")
+endif()
 
 # Enable the use of the -isystem flag to mark headers in Third_Party as system headers
 set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
