@@ -15,7 +15,7 @@ Reducer = None
 #DRC=reload(DRC)
 def getReducer():
     # needed on Linux to adhere to correct reference return
-    global Reducer;
+    global Reducer
     return Reducer
 
 def setup(instname=None,reload=False):
@@ -33,7 +33,7 @@ def setup(instname=None,reload=False):
 
 
     if not (Reducer is None) :
-        old_name=Reducer.prop_man.instr_name;
+        old_name=Reducer.prop_man.instr_name
         if  old_name.upper()[0:3] == instname.upper()[0:3] :
             if not reload :
                return  # has been already defined
@@ -140,11 +140,11 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
          n,r=funcreturns.lhs_info('both')
          wksp_out=r[0]
     except:
-         wksp_out = Reducer.prop_man.get_sample_ws_name();
+         wksp_out = Reducer.prop_man.get_sample_ws_name()
     #
     res = Reducer.convert_to_energy(wb_run,sample_run,ei_guess,rebin,map_file,monovan_run,second_wb,**kwargs)
     #
-    results_name = res.name();
+    results_name = res.name()
     if results_name != wksp_out:
         RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=wksp_out)
 
