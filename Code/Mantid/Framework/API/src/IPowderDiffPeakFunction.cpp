@@ -10,7 +10,6 @@
 #include <cmath>
 
 const double IGNOREDCHANGE = 1.0E-9;
-const double PI = 3.14159265358979323846264338327950288419716939937510582;
 
 namespace Mantid {
 namespace API {
@@ -271,7 +270,7 @@ std::complex<double> E1(std::complex<double> z) {
     exp_e1 = exp_e1 * exp(-z);
     if (rz < 0.0 && fabs(imag(z)) < 1.0E-10) {
       std::complex<double> u(0.0, 1.0);
-      exp_e1 = exp_e1 - (PI * u);
+      exp_e1 = exp_e1 - (M_PI * u);
     }
   }
 
