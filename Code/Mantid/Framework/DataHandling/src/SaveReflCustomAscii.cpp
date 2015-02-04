@@ -21,6 +21,7 @@ void SaveReflCustomAscii::extraProps() {
   declareProperty(
       "WriteDeltaQ", false,
       "If true, the error on DeltaQ will be written as the fourth column.");
+  declareProperty("Subtitle", false, "If true, subtitle added to header.");
 }
 
 /** virtual method to add information to the file before the data
@@ -28,21 +29,24 @@ void SaveReflCustomAscii::extraProps() {
  */
 void SaveReflCustomAscii::extraHeaders(std::ofstream &file) {
   auto samp = m_ws->run();
-  // std::string subtitle;
+  bool subtitle = getProperty("Subtitle");
+  std::string subtitleEntry;
   std::string title = getProperty("Title");
-  /*try
-  {
-    subtitle = samp.getLogData("run_title")->value();
-  }
-  catch (Kernel::Exception::NotFoundError &)
-  {
-    subtitle = "";
-  }*/
 
   if (title != "") // if is toggled
   {
     file << "#" << title << std::endl;
   }
+
+  if (subtitle) {
+    try {
+      subtitleEntry = samp.getLogData("run_title")->value();
+    } catch (Kernel::Exception::NotFoundError &) {
+      subtitleEntry = "";
+    }
+  }
+
+  file << "#" << subtitleEntry << std::endl;
 
   const std::vector<std::string> logList = getProperty("LogList");
   /// logs
@@ -56,8 +60,8 @@ void SaveReflCustomAscii::extraHeaders(std::ofstream &file) {
 void SaveReflCustomAscii::data(std::ofstream &file,
                                const std::vector<double> &XData,
                                bool exportDeltaQ) {
-
-  AsciiPointBase::data(file, XData, getProperty("WriteDeltaQ"));
+  exportDeltaQ = getProperty("WriteDeltaQ");
+  AsciiPointBase::data(file, XData, exportDeltaQ);
 }
 
 } // namespace DataHandling

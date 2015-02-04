@@ -16,7 +16,6 @@ namespace MantidQt
 			ResNorm(QWidget * parent = 0);
 
 			// Inherited methods from IndirectBayesTab
-			QString help() { return "ResNorm"; };
       void setup();
 			bool validate();
 			void run();
@@ -32,10 +31,13 @@ namespace MantidQt
 			void maxValueChanged(double max);
 			/// Slot to update the guides when the range properties change
 			void updateProperties(QtProperty* prop, double val);
+      /// Slot to handle the preview spectrum being changed
+      void previewSpecChanged(int value);
 
 		private:
-			
-			//The ui form
+      /// Current preview spectrum
+      int m_previewSpec;
+			/// The ui form
 			Ui::ResNorm m_uiForm;
 
 		};

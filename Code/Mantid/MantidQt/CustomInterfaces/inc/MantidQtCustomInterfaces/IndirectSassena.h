@@ -15,8 +15,6 @@ namespace MantidQt
 		public:
 			IndirectSassena(QWidget * parent = 0);
 
-			QString help() { return "IndirectSassena"; };
-
       void setup();
 			bool validate();
 			void run();

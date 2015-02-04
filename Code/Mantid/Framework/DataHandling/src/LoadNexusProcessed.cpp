@@ -30,6 +30,9 @@
 #include <Poco/StringTokenizer.h>
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidDataObjects/PeakNoShapeFactory.h"
+#include "MantidDataObjects/PeakShapeSphericalFactory.h"
+#include "MantidDataObjects/PeakShape.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -1114,9 +1117,37 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         peakWS->getPeak(r).setGoniometerMatrix(gm);
       }
     }
+
+    if (!str.compare("column_16")) {
+      // Read shape information
+      using namespace Mantid::DataObjects;
+
+      PeakShapeFactory_sptr peakFactory = boost::make_shared<PeakShapeSphericalFactory>();
+      peakFactory->setSuccessor(boost::make_shared<PeakNoShapeFactory>());
+
+      NXInfo info = nx_tw.getDataSetInfo(str.c_str());
+      NXChar data = nx_tw.openNXChar(str.c_str());
+
+      const int maxShapeJSONLength = info.dims[1];
+      data.load();
+      for (int r = 0; r < numberPeaks; r++) {
+
+        // iR = peak row number
+        auto startPoint = data() + (maxShapeJSONLength * r);
+        std::string shapeJSON(startPoint, startPoint + maxShapeJSONLength);
+        boost::trim_right(shapeJSON);
+
+        // Make the shape
+        PeakShape* peakShape = peakFactory->create(shapeJSON);
+
+        // Set the shape
+        peakWS->getPeak(r).setPeakShape(peakShape);
+
+      }
+    }
   }
 
-  return boost::static_pointer_cast<API::Workspace>(peakWS);
+return boost::static_pointer_cast<API::Workspace>(peakWS);
 }
 
 //-------------------------------------------------------------------------------------------------

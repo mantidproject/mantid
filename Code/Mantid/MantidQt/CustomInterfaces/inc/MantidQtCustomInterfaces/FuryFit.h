@@ -34,7 +34,6 @@ namespace IDA
     virtual void run();
     virtual bool validate();
     virtual void loadSettings(const QSettings & settings);
-    virtual QString helpURL() {return "FuryFit";}
 
   private slots:
     void typeSelection(int index);
