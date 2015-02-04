@@ -20,7 +20,7 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="resNorm">
+     <widget class="QWidget" name="ResNorm">
       <attribute name="title">
        <string>ResNorm</string>
       </attribute>

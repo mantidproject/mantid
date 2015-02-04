@@ -56,6 +56,8 @@ public:
   virtual void showConcept(const std::string &name);
   virtual void showConcept(const QString &name);
   virtual void showFitFunction(const std::string &name=std::string());
+  virtual void showCustomInterface(const std::string &name);
+  virtual void showCustomInterface(const QString &name);
 
 public slots:
   /// Perform any clean up on main window shutdown
