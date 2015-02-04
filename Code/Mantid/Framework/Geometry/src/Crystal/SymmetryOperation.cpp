@@ -19,12 +19,10 @@ SymmetryOperation::SymmetryOperation()
  * Construct a symmetry operation from a Jones faithful representation
  *
  * This method invokes SymmetryOperationSymbolParser and tries to parse the
- *supplied string.
- * Please not that parsing this string is not very efficient. If you have to
- *create the same
- * operations very often, use SymmetryOperationFactory, which works with the
- *copy constructor
- * - it's orders of magnitude faster.
+ * supplied string. Please not that parsing this string is not very efficient.
+ * If you have to create the same operations very often, use
+ * SymmetryOperationFactory, which works with the copy constructor - it's orders
+ * of magnitude faster.
  *
  * @param identifier :: Jones faithful representation of a symmetry operation
  */
@@ -214,10 +212,9 @@ SymmetryOperation::getOrderFromMatrix(const Kernel::IntMatrix &matrix) const {
  * Wraps a V3R to the interval (0, 1]
  *
  * For certain crystallographic calculations it is necessary to constrain
- *fractional
- * coordinates to the unit cell, for example to generate all atomic positions
- * in the cell. In this context, the fractional coordinate -0.45 is equal to
- * "0.55 of the next cell", so it's transformed to 0.55.
+ * fractional coordinates to the unit cell, for example to generate all
+ * atomic positions in the cell. In this context, the fractional coordinate
+ * -0.45 is equal to "0.55 of the next cell", so it's transformed to 0.55.
  *
  * @param vector :: Input vector with arbitrary numbers.
  * @return Vector with components on the interval (0, 1]

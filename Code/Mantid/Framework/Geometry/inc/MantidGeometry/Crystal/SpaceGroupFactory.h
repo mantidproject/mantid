@@ -14,7 +14,8 @@ namespace Geometry {
 bool MANTID_GEOMETRY_DLL
     isValidGeneratorString(const std::string &generatorString);
 
-/** AbstractSpaceGroupGenerator
+/**
+ * @class AbstractSpaceGroupGenerator
  *
  * AbstractSpaceGroupGenerator is used by SpaceGroupFactory to delay
  * (possibly costly) construction of space group prototype objects until
@@ -86,7 +87,8 @@ protected:
   Group_const_sptr generateGroup() const;
 };
 
-/** SpaceGroupFactory
+/**
+  @class SpaceGroupFactory
 
   This factory is used to create space group objects. Each space group
   should be created only once, which is why the factory works with

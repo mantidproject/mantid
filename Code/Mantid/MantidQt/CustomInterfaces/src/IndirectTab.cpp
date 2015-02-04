@@ -222,9 +222,23 @@ namespace CustomInterfaces
     if(m_curves[curveID] == NULL)
       return;
 
-    m_curves[curveID]->attach(0);
+    m_curves[curveID]->attach(NULL);
     delete m_curves[curveID];
     m_curves[curveID] = NULL;
+  }
+
+  /**
+   * Removes all curves from their plots.
+   */
+  void IndirectTab::removeAllCurves()
+  {
+    for(auto it = m_curves.begin(); it != m_curves.end(); ++it)
+    {
+      it->second->attach(NULL);
+      delete it->second;
+    }
+
+    m_curves.clear();
   }
 
   /**

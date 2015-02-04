@@ -9,8 +9,7 @@ namespace Geometry {
  * This constructor creates a space group with the symmetry operations contained
  * in the Group-parameter and assigns the given number and symbol.
  *
- * @param itNumber :: Space group number according to International Tables for
- *Crystallography A
+ * @param itNumber :: Space group number (ITA)
  * @param hmSymbol :: Herman-Mauguin symbol for the space group
  * @param group :: Group that contains all symmetry operations (including
  *centering).

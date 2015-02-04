@@ -57,8 +57,8 @@ double IsotropicAtomBraggScatterer::getU() const { return getProperty("U"); }
  * Calculates the structure factor
  *
  * This method calculates the structure factor, taking into account
- *contributions from all
- * atoms on the stored position _and all symmetrically equivalent_.
+ * contributions from all atoms on the stored position
+ * _and all symmetrically equivalent_.
  * For details, please refer to the class documentation in the header file.
  *
  * @param hkl :: HKL for which the structure factor should be calculated

@@ -8,16 +8,12 @@ namespace Geometry {
  * Creates an initialized instance of the desired scatterer class
  *
  * This method tries to construct an instance of the class specified by the
- *"name"-parameter.
- * If it is not found, an exception is thrown (see DynamicFactory::create).
- *Otherwise,
- * the object is initialized. If the second argument is not empty, it is
- *expected
- * to contain a semi-colon separated list of "name=value"-pairs. These pairs
- *need to be
+ * "name"-parameter. If it is not found, an exception is thrown
+ * (see DynamicFactory::create). Otherwise, the object is initialized.
+ * If the second argument is not empty, it is expected to contain a semi-colon
+ * separated list of "name=value"-pairs. These pairs need to be
  * valid input for assigning properties of the created scatterer. See the
- *example in
- * the general class documentation.
+ * example in the general class documentation.
  *
  * @param name :: Class name to construct.
  * @param properties :: Semi-colon separated "name=value"-pairs.

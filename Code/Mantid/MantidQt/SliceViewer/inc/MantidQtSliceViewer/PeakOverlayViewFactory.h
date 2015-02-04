@@ -13,6 +13,7 @@ namespace Mantid
   {
     // Forward dec.
     class IPeak;
+    class IPeaksWorkspace;
   }
 }
 
@@ -59,11 +60,14 @@ namespace MantidQt
       virtual std::string getPlotYLabel() const = 0;
       /// Get the Figure Of Merit for this factory
       virtual int FOM() const = 0;
+      /// Same factory settings for a different peaks workspace
+      virtual void swapPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace>& peaksWS) = 0;
     };
 
     /// Factory Shared Pointer typedef.
     typedef boost::shared_ptr<PeakOverlayViewFactory> PeakOverlayViewFactory_sptr;
   }
 }
+
 
 #endif /* MANTID_SLICEVIEWER_PEAKOVERLAY_VIEW_FACTORY_H_ */
