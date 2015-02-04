@@ -16,10 +16,14 @@
 #include <pqServerManagerModel.h>
 #include <vtkSMPropertyHelper.h>
 #include <pqServerManagerModel.h>
+#include <pqUndoStack.h>
 #include <vtkSMSourceProxy.h>
 #include <vtkSMProxy.h>
 #include <vtkSMPropertyIterator.h>
 #include <vtkSMDoubleVectorProperty.h>
+#include <vtkSMInputProperty.h>
+#include <vtkSMProxyProperty.h>
+#include <vtkSMProxyListDomain.h>
 #include <QList>
 
 #include <Poco/ActiveResult.h>
@@ -159,18 +163,12 @@ namespace Mantid
           throw std::runtime_error("VSI error: Either the original or temporary source don't seem to exist.");
         }
 
+        // Check that both sources contain non-empty data sets
+
         // Check if the original source has a filter if such then repipe otherwise we are done
         if ((src1->getAllConsumers()).size() <= 0)
         {
           return;
-        }
-
-        // Cast to the filter and reset the connection
-        pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(src1->getConsumer(0));
-
-        if (!filter)
-        {
-          throw std::runtime_error("VSI error: There is no filter in the pipeline.");
         }
 
         // We can rebuild the pipeline by either creating it from scratch or by changing the lowest level source
@@ -444,43 +442,50 @@ namespace Mantid
         void SourcesManager::rebuildPipeline(pqPipelineSource* source1, pqPipelineSource* source2)
         {
           // Step through all the filters in old pipeline and reproduce them
-          pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-          pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(source1->getConsumer(0));
+          pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+          pqPipelineFilter* filter1 = qobject_cast<pqPipelineFilter*>(source1->getConsumer(0));
 
-          vtkSMProxy* proxy = NULL;
+          vtkSMProxy* proxy1 = NULL;
           pqPipelineSource* newPipelineElement = NULL;
           pqPipelineFilter* newFilter = NULL;
 
-          while(filter)
-          {
-            proxy = filter->getProxy();
+          pqPipelineSource* endOfSource2Pipeline = source2;
 
-            if (QString(proxy->GetXMLName()).contains("ScaleWorkspace"))
+          while(filter1)
+          {
+            proxy1 = filter1->getProxy();
+
+            // Move source2 to its end.
+            int numConsumer = endOfSource2Pipeline->getNumberOfConsumers() ;
+            while (endOfSource2Pipeline->getNumberOfConsumers() > 0)
+            {
+             endOfSource2Pipeline = endOfSource2Pipeline->getConsumer(0);
+            }
+
+            if (QString(proxy1->GetXMLName()).contains("ScaleWorkspace"))
             {
               // Build the source
-              newPipelineElement = builder->createFilter("filters","MantidParaViewScaleWorkspace", source2);
-            } else if (QString(proxy->GetXMLName()).contains("Cut"))
+              newPipelineElement = builder->createFilter("filters","MantidParaViewScaleWorkspace", endOfSource2Pipeline);
+            } else if (QString(proxy1->GetXMLName()).contains("Cut"))
             {
-              newPipelineElement = builder->createFilter("filters", "Cut", source2);
+              newPipelineElement = builder->createFilter("filters", "Cut", endOfSource2Pipeline);
             }
 
             newFilter = qobject_cast<pqPipelineFilter*>(newPipelineElement);
 
-            // Bad proxies in ParaView have caused issues for Cut filters. If this 
-            // happens, we remove the filter.
-            copyProperties(filter, newFilter);
+            // Copy the properties from the old filter to the new filter.
+            copyProperties(filter1, newFilter);
 
-            emit triggerAcceptForNewFilters();
-
-            if (filter->getNumberOfConsumers() > 0)
+            if (filter1->getNumberOfConsumers() > 0)
             {
-              filter = qobject_cast<pqPipelineFilter*>(filter->getConsumer(0));
+              filter1 = qobject_cast<pqPipelineFilter*>(filter1->getConsumer(0));
             }
             else 
             {
-              filter = NULL;
+              filter1 = NULL;
             }
           }
+          emit triggerAcceptForNewFilters();
         }
 
         /**
@@ -490,18 +495,86 @@ namespace Mantid
          */
         void SourcesManager::copyProperties(pqPipelineFilter* filter1, pqPipelineFilter* filter2)
         {
-          vtkSMPropertyIterator *it = filter1->getProxy()->NewPropertyIterator();
+          vtkSMProxy* proxy1 = filter1->getProxy();
+          vtkSMProxy* proxy2 = filter2->getProxy();
 
-          while (!it->IsAtEnd())
+          copySafe(proxy2, proxy1);
+        }
+
+        /**
+         * This method is taken from a newer version of pqCopyReaction, which contains a bug fix 
+         * for copying CutFilter properties. This is the correct way to copy proxy properties.
+         * @param dest Destination proxy.
+         * @param source Source proxy.
+         */
+        void SourcesManager::copySafe(vtkSMProxy* dest, vtkSMProxy* source)
+        {
+          if (dest && source)
           {
-            std::string key(it->GetKey());
-            vtkSMProperty* propertyFilter1 = it->GetProperty();
-            if (key != "Input")
+          BEGIN_UNDO_SET("Copy Properties");
+          dest->Copy(source, "vtkSMProxyProperty");
+
+            // handle proxy properties.
+            vtkSMPropertyIterator* destIter = dest->NewPropertyIterator();
+            for (destIter->Begin(); !destIter->IsAtEnd(); destIter->Next())
             {
-              filter2->getProxy()->GetProperty(key.c_str())->Copy(propertyFilter1);
+              if (vtkSMInputProperty::SafeDownCast(destIter->GetProperty()))
+              {
+              // skip input properties.
+              continue;
+              }
+
+              vtkSMProxyProperty* destPP =  vtkSMProxyProperty::SafeDownCast(destIter->GetProperty());
+              vtkSMProxyProperty* srcPP = vtkSMProxyProperty::SafeDownCast(source->GetProperty(destIter->GetKey()));
+
+              if (!destPP || !srcPP || srcPP->GetNumberOfProxies() > 1)
+              {
+              // skip non-proxy properties since those were already copied.
+              continue;
+              }
+
+              vtkSMProxyListDomain* destPLD = vtkSMProxyListDomain::SafeDownCast(destPP->FindDomain("vtkSMProxyListDomain"));
+              vtkSMProxyListDomain* srcPLD = vtkSMProxyListDomain::SafeDownCast(srcPP->FindDomain("vtkSMProxyListDomain"));
+
+              if (!destPLD || !srcPLD)
+              {
+                // we copy proxy properties that have proxy list domains.
+                continue;
+              }
+
+              if (srcPP->GetNumberOfProxies() == 0)
+              {
+                destPP->SetNumberOfProxies(0);
+                continue;
+              }
+
+              vtkSMProxy* srcValue = srcPP->GetProxy(0);
+              vtkSMProxy* destValue = NULL;
+
+              // find srcValue type in destPLD and that's the proxy to use as destValue.
+              for (unsigned int cc=0; srcValue != NULL && cc < destPLD->GetNumberOfProxyTypes(); cc++)
+              {
+                if (srcValue->GetXMLName() && destPLD->GetProxyName(cc) &&
+                    strcmp(srcValue->GetXMLName(), destPLD->GetProxyName(cc)) == 0 &&
+                    srcValue->GetXMLGroup() && destPLD->GetProxyGroup(cc) &&
+                    strcmp(srcValue->GetXMLGroup(), destPLD->GetProxyGroup(cc)) == 0)
+                {
+                  destValue = destPLD->GetProxy(cc);
+                  break;
+                }
+              }
+
+              if (destValue)
+              {
+                Q_ASSERT(srcValue != NULL);
+                copySafe(destValue, srcValue);
+                destPP->SetProxy(0, destValue);
+              }
             }
 
-            it->Next();
+            destIter->Delete();
+            dest->UpdateVTKObjects();
+            END_UNDO_SET();
           }
         }
     }

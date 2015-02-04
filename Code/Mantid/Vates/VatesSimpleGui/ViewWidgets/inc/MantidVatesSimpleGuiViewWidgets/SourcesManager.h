@@ -5,8 +5,12 @@
 #include "MantidQtAPI/WorkspaceObserver.h"
 
 #include <pqPipelineSource.h>
+#include <pqPipelineFilter.h>
+#include <vtkSMProxy.h>
+
 #include <QWidget>
 #include <map>
+#include <string>
 
 namespace Mantid
 {
@@ -99,6 +103,8 @@ namespace Mantid
           void updateRebuiltPipeline(pqPipelineFilter* filter);
 
           void copyProperties(pqPipelineFilter* filter1, pqPipelineFilter* filter2);
+
+          static void copySafe(vtkSMProxy* dest, vtkSMProxy* source);
       };
 
     } // SimpleGui
