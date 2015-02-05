@@ -45,6 +45,14 @@ void SymmetryElementInversion::setInversionPoint(const V3R &inversionPoint) {
 
 SymmetryElementWithAxis::SymmetryElementWithAxis() : SymmetryElement() {}
 
+void SymmetryElementWithAxis::setAxis(const V3R &axis) {
+  if (axis == V3R(0, 0, 0)) {
+    throw std::invalid_argument("Axis cannot be 0.");
+  }
+
+  m_axis = axis;
+}
+
 V3R SymmetryElementWithAxis::determineTranslation(
     const SymmetryOperation &operation) const {
 

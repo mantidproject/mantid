@@ -86,6 +86,10 @@ public:
 protected:
   SymmetryElementWithAxis();
 
+  void setAxis(const V3R &axis);
+  void setTranslation(const V3R &translation) { m_translation = translation; }
+  void setFixPoint(const V3R &fixPoint) { m_fixPoint = fixPoint; }
+
   V3R determineTranslation(const SymmetryOperation &operation) const;
   V3R determineAxis(const Kernel::IntMatrix &matrix) const;
   V3R determineFixPoint(const Kernel::IntMatrix &matrix,

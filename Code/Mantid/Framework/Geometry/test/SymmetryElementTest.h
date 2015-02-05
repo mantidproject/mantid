@@ -68,8 +68,47 @@ public:
     TS_ASSERT_THROWS(inversionElement.init(mirrorZ), std::invalid_argument);
   }
 
+  void testSymmetryElementWithAxisSetAxis() {
+    MockSymmetryElementWithAxis element;
+
+    V3R invalidAxis(0, 0, 0);
+    TS_ASSERT_THROWS(element.setAxis(invalidAxis), std::invalid_argument);
+
+    V3R validAxis(1, 0, 0);
+    TS_ASSERT_THROWS_NOTHING(element.setAxis(validAxis));
+
+    TS_ASSERT_EQUALS(element.getAxis(), validAxis);
+  }
+
+  void testSymmetryElementWithAxisSetTranslation()
+  {
+      MockSymmetryElementWithAxis element;
+
+      V3R validAxis(1, 0, 0);
+      TS_ASSERT_THROWS_NOTHING(element.setTranslation(validAxis));
+
+      TS_ASSERT_EQUALS(element.getTranslation(), validAxis);
+  }
+
+  void testSymmetryElementWithAxisSetFixPoint()
+  {
+      MockSymmetryElementWithAxis element;
+
+      V3R validAxis(1, 0, 0);
+      TS_ASSERT_THROWS_NOTHING(element.setFixPoint(validAxis));
+
+      TS_ASSERT_EQUALS(element.getFixPoint(), validAxis);
+  }
+
 private:
   class MockSymmetryElement : public SymmetryElement {
+    friend class SymmetryElementTest;
+
+  public:
+    MOCK_METHOD1(init, void(const SymmetryOperation &operation));
+  };
+
+  class MockSymmetryElementWithAxis : public SymmetryElementWithAxis {
     friend class SymmetryElementTest;
 
   public:
