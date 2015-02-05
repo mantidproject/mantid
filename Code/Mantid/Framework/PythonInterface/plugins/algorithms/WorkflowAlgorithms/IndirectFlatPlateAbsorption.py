@@ -1,5 +1,5 @@
 from mantid.simpleapi import *
-from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode
+from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress
 from mantid.kernel import StringMandatoryValidator, Direction, logger
 
 
@@ -26,9 +26,9 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='ChemicalFormula', defaultValue='', validator=StringMandatoryValidator(),
                              doc='Chemical formula')
 
-        self.declareProperty(name='SampleHeight', defaultValue=0.0, doc='Sample height')
-        self.declareProperty(name='SampleWidth', defaultValue=0.0, doc='Sample width')
-        self.declareProperty(name='SampleThickness', defaultValue=0.0, doc='Sample thickness')
+        self.declareProperty(name='SampleHeight', defaultValue=1.0, doc='Sample height')
+        self.declareProperty(name='SampleWidth', defaultValue=1.0, doc='Sample width')
+        self.declareProperty(name='SampleThickness', defaultValue=0.1, doc='Sample thickness')
         self.declareProperty(name='ElementSize', defaultValue=0.1, doc='Element size in mm')
         self.declareProperty(name='SampleNumberDensity', defaultValue=0.1, doc='Sample number density')
         self.declareProperty(name='Plot', defaultValue=False, doc='Plot options')
@@ -44,6 +44,14 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         from IndirectCommon import getEfixed, addSampleLogs
 
         self._setup()
+
+        # Set up progress reporting
+        n_prog_reports = 4
+        if self._can_ws is not None:
+            n_prog_reports += 2
+        prog_reporter = Progress(self, 0.0, 1.0, n_prog_reports)
+
+        prog_reporter.report('Processing sample')
         efixed = getEfixed(self._sample_ws)
 
         sample_wave_ws = '__sam_wave'
@@ -52,6 +60,7 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
 
         SetSampleMaterial(sample_wave_ws, ChemicalFormula=self._chemical_formula, SampleNumberDensity=self._number_density)
 
+        prog_reporter.report('Calculating sample corrections')
         FlatPlateAbsorption(InputWorkspace=sample_wave_ws,
                             OutputWorkspace=self._ass_ws,
                             SampleHeight=self._sample_height,
@@ -65,6 +74,7 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         plot_list = [self._output_ws, self._sample_ws]
 
         if self._can_ws is not None:
+            prog_reporter.report('Processing can')
             can_wave_ws = '__can_wave'
             ConvertUnits(InputWorkspace=self._can_ws, OutputWorkspace=can_wave_ws,
                          Target='Wavelength', EMode='Indirect', EFixed=efixed)
@@ -73,16 +83,19 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                 logger.information('Scaling can by: ' + str(self._can_scale))
                 Scale(InputWorkspace=can_wave_ws, OutputWorkspace=can_wave_ws, Factor=self._can_scale, Operation='Multiply')
 
+            prog_reporter.report('Applying can corrections')
             Minus(LHSWorkspace=sample_wave_ws, RHSWorkspace=can_wave_ws, OutputWorkspace=sample_wave_ws)
             DeleteWorkspace(can_wave_ws)
 
             plot_list.append(self._can_ws)
 
+        prog_reporter.report('Applying corrections')
         Divide(LHSWorkspace=sample_wave_ws, RHSWorkspace=self._ass_ws, OutputWorkspace=sample_wave_ws)
         ConvertUnits(InputWorkspace=sample_wave_ws, OutputWorkspace=self._output_ws,
                      Target='DeltaE', EMode='Indirect', EFixed=efixed)
         DeleteWorkspace(sample_wave_ws)
 
+        prog_reporter.report('Recording sample logs')
         sample_logs = {'sample_shape': 'flatplate',
                        'sample_filename': self._sample_ws,
                        'sample_height': self._sample_height,
@@ -107,6 +120,7 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
             self.setProperty('CorrectionsWorkspace', self._ass_ws)
 
         if self._plot:
+            prog_reporter.report('Plotting')
             from IndirectImport import import_mantidplot
             mantid_plot = import_mantidplot()
             mantid_plot.plotSpectrum(plot_list, 0)
