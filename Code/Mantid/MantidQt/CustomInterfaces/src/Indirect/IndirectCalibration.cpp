@@ -165,8 +165,6 @@ namespace CustomInterfaces
 
   void IndirectCalibration::run()
   {
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmsComplete(bool)));
-
     // Get properties
     QString firstFile = m_uiForm.leRunNo->getFirstFilename();
     QString filenames = m_uiForm.leRunNo->getFilenames().join(",");
@@ -224,10 +222,6 @@ namespace CustomInterfaces
     {
       QString resolutionWsName = outputWorkspaceNameStem + "_res";
 
-      QString scaleFactor("1.0");
-      if(m_uiForm.ckResolutionScale->isChecked() && !m_uiForm.spResolutionScale->text().isEmpty())
-        scaleFactor = m_uiForm.spResolutionScale->text();
-
       QString resDetectorRange = QString::number(m_dblManager->value(m_properties["ResSpecMin"])) + ","
           + QString::number(m_dblManager->value(m_properties["ResSpecMax"]));
 
@@ -249,11 +243,13 @@ namespace CustomInterfaces
       resAlg->setProperty("RebinParam", rebinString.toStdString());
       resAlg->setProperty("DetectorRange", resDetectorRange.toStdString());
       resAlg->setProperty("BackgroundRange", background.toStdString());
-      resAlg->setProperty("ScaleFactor", m_uiForm.spScale->value());
       resAlg->setProperty("Smooth", m_uiForm.ckSmoothResolution->isChecked());
       resAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
       resAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
       resAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
+
+      if(m_uiForm.ckResolutionScale->isChecked())
+        resAlg->setProperty("ScaleFactor", m_uiForm.spScale->value());
 
       m_batchAlgoRunner->addAlgorithm(resAlg);
 
@@ -262,21 +258,6 @@ namespace CustomInterfaces
     }
 
     m_batchAlgoRunner->executeBatchAsync();
-  }
-
-  void IndirectCalibration::algorithmsComplete(bool error)
-  {
-    if(error)
-      return;
-
-    QString firstFile = m_uiForm.leRunNo->getFirstFilename();
-    QFileInfo firstFileInfo(firstFile);
-    /* QString calFileName = firstFileInfo.baseName() + "_" + m_uiForm.iicInstrumentConfiguration->getAnalyserName() + m_uiForm.iicInstrumentConfiguration->getReflectionName() + "_calib.nxs"; */
-
-    /* m_uiForm.ind_calibFile->setFileTextWithSearch(calFileName); */
-    /* m_uiForm.ckUseCalib->setChecked(true); */
-
-    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmsComplete(bool)));
   }
 
   bool IndirectCalibration::validate()
