@@ -17,6 +17,10 @@
 #include <Poco/File.h>
 #include <boost/lexical_cast.hpp>
 #include "MantidGeometry/IDTypes.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidDataObjects/PeakShapeSpherical.h"
+#include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
@@ -773,6 +777,43 @@ public:
     }
 
     AnalysisDataService::Instance().remove(wsName);
+  }
+
+  void test_peaks_workspace_with_shape_format()
+  {
+      LoadNexusProcessed loadAlg;
+      loadAlg.setChild(true);
+      loadAlg.initialize();
+      loadAlg.setPropertyValue("Filename", "SingleCrystalPeakTable.nxs");
+      loadAlg.setPropertyValue("OutputWorkspace", "dummy");
+      loadAlg.execute();
+
+      Workspace_sptr ws = loadAlg.getProperty("OutputWorkspace");
+      auto peakWS = boost::dynamic_pointer_cast<Mantid::DataObjects::PeaksWorkspace>(ws);
+      TS_ASSERT(peakWS);
+
+      TS_ASSERT_EQUALS(3, peakWS->getNumberPeaks());
+      // In this peaks workspace one of the peaks has been marked as spherically integrated.
+      TS_ASSERT_EQUALS("spherical", peakWS->getPeak(0).getPeakShape().shapeName());
+      TS_ASSERT_EQUALS("none", peakWS->getPeak(1).getPeakShape().shapeName());
+      TS_ASSERT_EQUALS("none", peakWS->getPeak(2).getPeakShape().shapeName());
+  }
+
+  /* The nexus format for this type of workspace has a legacy format with no shape information
+   * We should still be able to load that */
+  void test_peaks_workspace_no_shape_format()
+  {
+      LoadNexusProcessed loadAlg;
+      loadAlg.setChild(true);
+      loadAlg.initialize();
+      loadAlg.setPropertyValue("Filename", "SingleCrystalPeakTableLegacy.nxs");
+      loadAlg.setPropertyValue("OutputWorkspace", "dummy");
+      loadAlg.execute();
+
+      Workspace_sptr ws = loadAlg.getProperty("OutputWorkspace");
+      auto peakWS = boost::dynamic_pointer_cast<Mantid::DataObjects::PeaksWorkspace>(ws);
+      TS_ASSERT(peakWS);
+
   }
 
   void testTableWorkspace_vectorColumn()

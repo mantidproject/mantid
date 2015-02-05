@@ -55,8 +55,6 @@ namespace IDA
 
     /// Loads the tab's settings.
     void loadTabSettings(const QSettings & settings);
-    /// Returns the URL of the Mantid Wiki webpage for the tab.
-    QString tabHelpURL();
 
   signals:
 		/// Send signal to parent window to show a message box to user
@@ -93,8 +91,6 @@ namespace IDA
 
     /// Overidden by child class.
     virtual void loadSettings(const QSettings & settings) = 0;
-    /// Overidden by child class.
-    virtual QString helpURL() = 0;
 
     /// A pointer to the parent (friend) IndirectDataAnalysis object.
     IndirectDataAnalysis * m_parent;

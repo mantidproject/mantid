@@ -39,18 +39,6 @@ namespace IDA
   }
 
   /**
-   * Sets up the tab.
-   *
-   * Calls overridden version of helpURL() in child class.
-   *
-   * @returns a QString containing the URL of the Mantid Wiki web page for the tab.
-   */
-  QString IDATab::tabHelpURL()
-  { 
-    return "http://www.mantidproject.org/IDA:" + helpURL();
-  }
-
-  /**
    * Slot that can be called when a user edits an input.
    */
   void IDATab::inputChanged()

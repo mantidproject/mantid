@@ -1581,7 +1581,25 @@
               <property name="currentIndex">
                <number>0</number>
               </property>
-              <widget class="QWidget" name="absp_page_Flat">
+              <widget class="QWidget" name="absp_pageFlat">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>200</width>
+                 <height>25</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>1000000</width>
+                 <height>30</height>
+                </size>
+               </property>
                <layout class="QVBoxLayout" name="verticalLayout_4">
                 <property name="margin">
                  <number>0</number>
@@ -1725,6 +1743,24 @@
                </layout>
               </widget>
               <widget class="QWidget" name="absp_pageCylinder">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>200</width>
+                 <height>25</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>1000000</width>
+                 <height>30</height>
+                </size>
+               </property>
                <layout class="QVBoxLayout" name="absp_cylinder_layout">
                 <property name="margin">
                  <number>0</number>

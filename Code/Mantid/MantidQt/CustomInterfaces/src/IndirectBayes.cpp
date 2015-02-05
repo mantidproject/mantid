@@ -1,3 +1,4 @@
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/IndirectBayes.h"
 #include "MantidQtCustomInterfaces/JumpFit.h"
@@ -121,9 +122,7 @@ void IndirectBayes::runClicked()
  */
 void IndirectBayes::helpClicked()
 {
-	int tabIndex = m_uiForm.indirectBayesTabs->currentIndex();
-	QString url = m_bayesTabs[tabIndex]->tabHelpURL();
-	QDesktopServices::openUrl(QUrl(url));
+  MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Indirect_Bayes"));
 }
 
 /**

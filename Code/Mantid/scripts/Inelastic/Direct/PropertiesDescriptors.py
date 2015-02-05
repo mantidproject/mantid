@@ -1,92 +1,280 @@
-""" File contains collection of Descriptors used to define complex properties in NonIDF_Properties and PropertyManager classes """ 
+""" File contains collection of Descriptors used to define complex
+    properties in NonIDF_Properties and PropertyManager classes 
+""" 
 
-from mantid.simpleapi import *
-from mantid import api
-from mantid.simpleapi import *
-from mantid import geometry
-from mantid import config
-from mantid.kernel import funcreturns
-
-import ReductionHelpers as prop_helpers
-
-import CommonFunctions as common
 import os
+from mantid.simpleapi import *
+from mantid.kernel import funcreturns
+from mantid import api,geometry,config
+
+import Direct.ReductionHelpers as prop_helpers
+import Direct.CommonFunctions as common
 
 #-----------------------------------------------------------------------------------------
-# Descriptors, providing overloads for complex properties in NonIDF_Properties class
+# Descriptors, providing overloads for complex properties in NonIDF_Properties
+# class
 #-----------------------------------------------------------------------------------------
-class IncidentEnergy(object):
+class PropDescriptor(object):
+    """ Class provides common custom interface for property descriptors """
+    def dependencies(self):
+        """ Returns the list of other properties names, this property depends on""" 
+        return []
+
+# end PropDescriptor
+#-----------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------
+class SumRuns(PropDescriptor):
+    """ Boolean property specifies if list of files provided as input for sample_run property 
+        should be summed. 
+
+        It also specifies various auxiliary operations, defined for summing runs, so property 
+        is deeply entangled with  the sample_run property
+    """ 
+    def __init__(self,sample_run_prop):
+        # internal reference to sample run property
+        self._sample_run = sample_run_prop
+        # class containing this property
+        self._holder = None
+        #
+        self._last_ind2sum = -1
+        self._sum_runs = False
+        self._run_numbers = []
+        self._file_guess = []
+        self._fext = []
+
+
+    #
+    def __get__(self,instance,holder_class):
+       if not self._holder:
+           self._holder = holder_class
+       if instance is None:
+           return self
+       return self._sum_runs
+    #
+    def __set__(self,instance,value):
+        if not self._holder:
+          from Direct.PropertyManager import PropertyManager
+          self._holder = PropertyManager
+        
+        old_value = self._sum_runs
+        if isinstance(value,bool):
+            self._sum_runs = value
+            self._last_ind2sum = -1
+        elif isinstance(value,int):
+            if value > 0:
+               self._last_ind2sum = int(value) - 1
+               self._sum_runs = True
+            else:
+               self._last_ind2sum = -1
+               self._sum_runs = False
+        else:
+            self._sum_runs = bool(value)
+            self._last_ind2sum = -1
+        #
+        if old_value != self._sum_runs:
+            if len(self._run_numbers) > 0 and self._sum_runs:
+               # clear previous state of sample_run
+               ind = self.get_last_ind2sum()
+               self._sample_run.__set__(None,self._run_numbers[ind])
+    #
+    def set_list2add(self,runs_to_add,fnames=None,fext=None):
+       """Set run numbers to add together with possible file guess-es """
+       if not isinstance(runs_to_add,list):
+           raise KeyError('Can only set list of run numbers to add')
+       runs = []
+       for item in runs_to_add:
+           runs.append(int(item))
+       self._run_numbers = runs
+       if fnames:
+          self._file_guess = fnames
+       if len(self._file_guess) != len(self._run_numbers):
+           self._file_guess = [''] * len(self._run_numbers)
+
+       if fext:
+         self._fext = fext
+       if len(self._fext) != len(self._run_numbers):
+          self._fext = [''] * len(self._run_numbers)
+    #
+    def clear_sum(self):
+        """Clear all defined summation""" 
+        # if last_to_sum is -1, sum all run list provided
+        self._last_ind2sum = -1
+        self._sum_runs = False
+        self._run_numbers = []
+        self._file_guess = []
+        self._fext = []
+    #
+    def get_last_ind2sum(self):
+        """Get last run number contributing to sum""" 
+        if self._last_ind2sum > 0:
+           return self._last_ind2sum
+        else:
+           return len(self._run_numbers) - 1
+    #
+    def set_last_ind2sum(self,run_number):
+        """Check and set last number, contributing to summation 
+           if this number is out of summation range, clear the summation
+        """
+        run_number = int(run_number)
+        if run_number in self._run_numbers:
+            self._last_ind2sum = self._run_numbers.index(run_number) + 1
+            return self._last_ind2sum
+        else:
+            self.clear_sum()
+            return 0
+    #
+    def get_run_list2sum(self):
+        """Get run numbers of the files to be summed together """ 
+        num_to_load = len(self._run_numbers)
+        if self._last_ind2sum > 0 and self._last_ind2sum < num_to_load:
+            num_to_load = self._last_ind2sum 
+        return self._run_numbers[:num_to_load]
+
+    #
+    def load_and_sum_runs(self,inst_name,monitors_with_ws):
+        """ Load multiple runs and sum them together """ 
+
+        logger = lambda mess : (getattr(getattr(self,'_holder'),'log')\
+                               (self._sample_run._holder,mess))
+        logger("*** Summing multiple runs            ****")
+
+        runs_to_load = self.get_run_list2sum()
+        num_to_load = len(runs_to_load)
+        logger("*** Loading #{0}/{1}, run N: {2} ".\
+               format(1,num_to_load,self._run_numbers[0]))
+
+
+        file_h = os.path.join(self._file_guess[0],'{0}{1}{2}'.\
+                 format(inst_name,runs_to_load[0],self._fext[0]))
+        ws = self._sample_run.load_file(inst_name,'Summ',False,monitors_with_ws,
+                                        False,file_hint=file_h)
+
+        sum_ws_name = ws.name()
+        sum_mon_name = sum_ws_name + '_monitors'
+        AddedRunNumbers = str(self._sample_run.run_number())
+
+        for ind,run_num in enumerate(runs_to_load[1:num_to_load]):
+
+           file_h = os.path.join(self._file_guess[ind + 1],'{0}{1}{2}'.\
+                          format(inst_name,run_num,self._fext[ind + 1]))
+           logger("*** Adding  #{0}/{1}, run N: {2} ".\
+                   format(ind + 2,num_to_load,run_num))
+           term_name = '{0}_ADDITIVE_#{1}/{2}'.format(inst_name,ind + 2,num_to_load)#
+
+           wsp = self._sample_run.load_file(inst_name,term_name,False,
+                                            monitors_with_ws,False,file_hint=file_h)
+
+           wsp_name = wsp.name()
+           wsp_mon_name = wsp_name + '_monitors'
+           Plus(LHSWorkspace=sum_ws_name,RHSWorkspace=wsp_name,
+                OutputWorkspace=sum_ws_name,ClearRHSWorkspace=True)
+           AddedRunNumbers+=',{0}'.format(run_num)
+           if not monitors_with_ws:
+              Plus(LHSWorkspace=sum_mon_name,RHSWorkspace=wsp_mon_name,
+                   OutputWorkspace=sum_mon_name,ClearRHSWorkspace=True)
+           if wsp_name in mtd:
+               DeleteWorkspace(wsp_name)
+           if wsp_mon_name in mtd:
+               DeleteWorkspace(wsp_mon_name)
+        logger("*** Summing multiple runs  completed ****")
+
+        AddSampleLog(Workspace=sum_ws_name,LogName = 'SumOfRuns:',
+                     LogText=AddedRunNumbers,LogType='String')
+        ws = mtd[sum_ws_name]
+        return ws
+    #
+    def sum_ext(self):        
+        if self._sum_runs:
+            last = self.get_last_ind2sum()
+            sum_ext = "SumOf{0}".format(len(self._run_numbers[:last + 1]))
+        else:
+            sum_ext = ''
+        return sum_ext
+    #
+    def get_runs(self):
+        return self._run_numbers
+#--------------------------------------------------------------------------------------------------------------------
+class IncidentEnergy(PropDescriptor):
     """ descriptor for incident energy or range of incident energies to be processed """
     def __init__(self): 
+        self._incident_energy = 0
         pass
     def __get__(self,instance,owner=None):
         """ return  incident energy or list of incident energies """ 
-        return instance._incident_energy;
+        if instance is None:
+           return self
+
+        return self._incident_energy 
     def __set__(self,instance,value):
        """ Set up incident energy or range of energies in various formats """
        if value != None:
           if isinstance(value,str):
-             en_list = str.split(value,',');
-             if len(en_list)>1:                 
-                rez = [];
+             en_list = str.split(value,',')
+             if len(en_list) > 1:                 
+                rez = []
                 for en_str in en_list:
-                    val = float(en_str);
+                    val = float(en_str)
                     rez.append(val)
-                instance._incident_energy=rez;
+                self._incident_energy = rez
              else:
-               instance._incident_energy=float(value);
+               self._incident_energy = float(value)
           else:
             if isinstance(value,list):
-                rez = [];
+                rez = []
                 for val in value:
-                    en_val = float(val);
-                    if en_val<=0:
-                        raise KeyError("Incident energy has to be positive, but is: {0} ".format(en_val));
+                    en_val = float(val)
+                    if en_val <= 0:
+                        raise KeyError("Incident energy has to be positive, but is: {0} ".format(en_val))
                     else:
-                        rez.append(en_val);
-
-                object.__setattr__(instance,'_incident_energy',rez);
+                        rez.append(en_val)
+                self._incident_energy = rez
             else:
-               object.__setattr__(instance,'_incident_energy',float(value));
+                self._incident_energy = float(value)
        else:
          raise KeyError("Incident energy have to be positive number of list of positive numbers. Got None")
        
-       # 
-       inc_en=instance._incident_energy
+       #
+       inc_en = self._incident_energy
        if isinstance(inc_en,list):
            for en in inc_en:
-               if en<= 0:
-                 raise KeyError("Incident energy have to be positive number of list of positive numbers."+
-                           " For input argument {0} got negative value {1}".format(value,en))     
+               if en <= 0:
+                 raise KeyError("Incident energy have to be positive number of list of positive numbers." + " For input argument {0} got negative value {1}".format(value,en))     
        else:
-         if inc_en<= 0:
-            raise KeyError("Incident energy have to be positive number of list of positive numbers."+
-                           " For value {0} got negative {1}".format(value,inc_en))
+         if inc_en <= 0:
+            raise KeyError("Incident energy have to be positive number of list of positive numbers." + " For value {0} got negative {1}".format(value,inc_en))
 # end IncidentEnergy
-class EnergyBins(object):
+#-----------------------------------------------------------------------------------------
+class EnergyBins(PropDescriptor):
     """ Property provides various energy bin possibilities """
+    def __init__(self):
+        self._energy_bins = None
     def __get__(self,instance,owner=None):
         """ binning range for the result of convertToenergy procedure or list of such ranges """
-        return instance._energy_bins
+        if instance is None:
+           return self
+        return self._energy_bins
 
     def __set__(self,instance,values):
        if values != None:
           if isinstance(values,str):
-             lst = str.split(values,',');
-             nBlocks = len(lst);
+             lst = str.split(values,',')
+             nBlocks = len(lst)
              for i in xrange(0,nBlocks,3):
-                value = [float(lst[i]),float(lst[i+1]),float(lst[i+2])]
+                value = [float(lst[i]),float(lst[i + 1]),float(lst[i + 2])]
           else:
-              value = values;
-              nBlocks = len(value);
-          if nBlocks%3 != 0:
+              value = values
+              nBlocks = len(value)
+          if nBlocks % 3 != 0:
                raise KeyError("Energy_bin value has to be either list of n-blocks of 3 number each or string representation of this list with numbers separated by commas")
        else:
           value = None              
        #TODO: implement single value settings according to rebin
-       object.__setattr__(instance,'_energy_bins',value);
+       self._energy_bins = value
 #end EnergyBins
-class SaveFileName(object):
+#-----------------------------------------------------------------------------------------
+class SaveFileName(PropDescriptor):
     """ Property defines default file name to save result to
 
         See similar property get_sample_ws_name TODO: (leave only one)
@@ -94,6 +282,9 @@ class SaveFileName(object):
     def __init__(self,Name=None):
        self._file_name = Name
     def __get__(self,instance,owner=None):
+
+        if instance is None:
+           return self
         if self._file_name:
             return self._file_name
         else:
@@ -101,73 +292,166 @@ class SaveFileName(object):
                 name = instance.short_inst_name 
             else:
                 name = '_EMPTY'
-            try:
-                sr = instance.sample_run
-            except:
+
+            sr = owner.sample_run.run_number()
+            if not sr:
                 sr = 0
             try:
                 name +='{0:0<5}Ei{1:<4.2f}meV'.format(sr,instance.incident_energy)
                 if instance.sum_runs:
                     name +='sum'
-                if instance.monovan_run:
+                if owner.monovan_run.run_number():
                     name +='_Abs'
             except:
                 name = None
+        name = name.replace('.','d')
         return name
 
     def __set__(self,instance,value):
         self._file_name = value
 #end SaveFileName
-
-#
-class InstrumentDependentProp(object):
+#-----------------------------------------------------------------------------------------
+class InstrumentDependentProp(PropDescriptor):
     """ Generic property describing some aspects of instrument (e.g. name, short name etc), 
         which are undefined if no instrument is defined
     """
     def __init__(self,prop_name):
-        self._prop_name = prop_name;
+        self._prop_name = prop_name
     def __get__(self,instance,owner=None):
+
+         if instance is None:
+           return self
+
          if instance._pInstrument is None:
-            raise KeyError("Attempt to use uninitialized property manager");
+            raise KeyError("Attempt to use uninitialized property manager")
          else:
-            return getattr(instance,self._prop_name);
+            return getattr(instance,self._prop_name)
     def __set__(self,instance,values):
         raise AttributeError("Property {0} can not be assigned".format(self._prop_name))
 #end InstrumentDependentProp
-
+#-----------------------------------------------------------------------------------------
 def check_ei_bin_consistent(ei,binning_range):
     """ function verifies if the energy binning is consistent with incident energies """ 
     if isinstance(ei,list):
         for en in ei:
             range = binning_range[en]
-            if range[2]>en:
+            if range[2] > en:
                 return (False,'Max rebin range {0:f} exceeds incident energy {1:f}'.format(range[2],en))
     else:
-        if binning_range[2]>ei:
+        if binning_range[2] > ei:
             return (False,'Max rebin range {0:f} exceeds incident energy {1:f}'.format(binning_range[2],ei))
 
     return (True,'')
+#-----------------------------------------------------------------------------------------
+class VanadiumRMM(PropDescriptor):
+    """ define constant static rmm for vanadium """ 
+    def __get__(self,instance,owner=None):
+        """ return rmm for vanadium """
 
+        return 50.9415
+    def __set__(self,instance,value):
+        raise AttributeError("Can not change vanadium rmm")
+#end VanadiumRMM
 #-----------------------------------------------------------------------------------------
 # END Descriptors for NonIDF_Properties class
 #-----------------------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------------------
-# Descriptors, providing overloads for some complex properties in PropertyManager
+# Descriptors, providing overloads for some complex properties in
+# PropertyManager
 #-----------------------------------------------------------------------------------------
-class VanadiumRMM(object):
-    """ define constant static rmm for vanadium """ 
-    def __get__(self,instance,owner=None):
-        """ return rmm for vanadium """
-        return 50.9415;
-    def __set__(self,instance,value):
-        raise AttributeError("Can not change vanadium rmm");
-#end VanadiumRMM
-#
-class DetCalFile(object):
-    """ property describes various sources for the detector calibration file """
+class mon2NormalizationEnergyRange(PropDescriptor):
+    """ Energy range to integrate signal on monitor 2 when normalized by this monitor 
+        
+        This class contains relative range of energies in which the monitor-2 signal should 
+        be integrated, and returns the energy range for integration according to 
+        formula: range = [min_range*ei,max_range*ei] where ei is incident monitor energy
+
+        To find actual integration ranges one should convert these values into TOF (or 
+        convert monitor signal to energy)
+    """ 
+    def __init__(self):
+        # default range
+        self._relative_range = [0.8,1.2]
+
+
     def __get__(self,instance,owner):
-          return prop_helpers.gen_getter(instance.__dict__,'det_cal_file');
+       """ Return actual energy range from internal relative range and incident energy """
+       if instance is None:
+           return self
+       return [self._relative_range[0] * instance.incident_energy,self._relative_range[1] * instance.incident_energy]
+
+    def __set__(self,instance,val):
+       """ set detector calibration file using various formats """ 
+       if isinstance(val,list):
+           self._relative_range = self._check_range(val,instance)
+       elif isinstance(val,str):
+           val = self._parce_string2list(val)
+           self.__set__(instance,val)
+       else:
+           raise KeyError('mon2_norm_energy_range needs to be initialized by two values.\n'
+                          'Trying to assign value {0} of unknown type {1}'.format(val,type(val)))
+    #
+    def _check_range(self,val,instance):
+        """ method to check if list of values acceptable as ranges """
+        if len(val) != 2:
+            raise KeyError('mon2_normalization_energy_range can be initialized by list of two values only. Got {0} values'.format(len(val)))
+        val1 = float(val[0])
+        if val1 < 0.1 or val1 > 0.9:
+            message = "Lower mon2_norm_energy_range describes lower limit of energy to integrate neutron signal after the chopper.\n"\
+                      "The limit is defined as (this value)*incident_energy. Are you sure you want to set this_value to {0}?\n".format(val1)
+            if val1 > 1:
+                raise KeyError(message)
+            else:
+                instance.log(message,'warning')
+        val2 = float(val[1])
+        if val2 < 1.1 or val2 > 1.9:
+           message = "Upper mon2_norm_energy_range describes upper limit of energy to integrate neutron signal after the chopper.\n"\
+                     "The limit is defined as (this value)*incident_energy. Are you sure you want to set this_value to {0}?\n".format(val2)
+           if val2 < 1:
+               raise KeyError(message)
+           else:
+            instance.log(message,'warning')
+
+        return [val1,val2]
+    #
+    def _parce_string2list(self,val):
+        """ method splits input string containing comma into list of strings"""
+        value = val.strip('[]()')
+        val = value.split(',')
+        return val
+
+#-----------------------------------------------------------------------------------------
+class PropertyFromRange(PropDescriptor):
+    """ Descriptor for property, which can have one value from a list of values """
+    def __init__(self,availible_values,default_value):
+        self._availible_values = availible_values
+        self.__set__(None,default_value)
+
+    def __get__(self,instance,owner):
+        """ Return current value for the property with range of values. """
+        if instance is None:
+           return self
+        return self._current_value
+
+    def __set__(self,instance,val):
+       """ set detector calibration file using various formats """ 
+       if val in self._availible_values:
+           self._current_value = val
+       else:
+           raise KeyError(' Property can not have value {0}'.format(val))
+
+#-----------------------------------------------------------------------------------------
+class DetCalFile(PropDescriptor):
+    """ property describes various sources for the detector calibration file """
+    def __init__(self):
+        self._det_cal_file = None
+
+    def __get__(self,instance,owner):
+        if instance is None:
+           return self
+
+        return self._det_cal_file
 
     def __set__(self,instance,val):
        """ set detector calibration file using various formats """ 
@@ -176,85 +460,81 @@ class DetCalFile(object):
        # nothing provided or workspace provided or filename probably provided
           if str(val) in mtd:
                 # workspace name provided
-                val = mtd[str(val)];
-          prop_helpers.gen_setter(instance.__dict__,'det_cal_file',val)
+                val = mtd[str(val)]
+          self._det_cal_file = val
           return
   
 
        if isinstance(val,int):
-          file_name= common.find_file(val);
-          prop_helpers.gen_setter(instance.__dict__,'det_cal_file',file_name);
-          return;
+          #if val in instance.all_run_numbers: TODO: retrieve workspace from
+          #run numbers
+          file_hint = str(val)
+          file_name = FileFinder.findRuns(file_hint)[0]
+          self._det_cal_file = file_name
+          return
 
-       raise NameError('Detector calibration file name can be a workspace name present in Mantid or string describing an file name');
-    #if  Reducer.det_cal_file != None :
-    #    if isinstance(Reducer.det_cal_file,str) and not Reducer.det_cal_file in mtd : # it is a file
-    #        Reducer.log('Setting detector calibration file to '+Reducer.det_cal_file)
+       raise NameError('Detector calibration file name can be a workspace name present in Mantid or string describing an file name')
+    #if Reducer.det_cal_file != None :
+    #    if isinstance(Reducer.det_cal_file,str) and not Reducer.det_cal_file
+    #    in mtd : # it is a file
+    #        Reducer.log('Setting detector calibration file to
+    #        '+Reducer.det_cal_file)
     #    else:
-    #       Reducer.log('Setting detector calibration to {0}, which is probably a workspace '.format(str(Reducer.det_cal_file)))
+    #       Reducer.log('Setting detector calibration to {0}, which is probably
+    #       a workspace '.format(str(Reducer.det_cal_file)))
     #else:
-    #    Reducer.log('Setting detector calibration to detector block info from '+str(sample_run))
+    #    Reducer.log('Setting detector calibration to detector block info from
+    #    '+str(sample_run))
 #end DetCalFile
-
-#
-class MapMaskFile(object):
+#-----------------------------------------------------------------------------------------
+class MapMaskFile(PropDescriptor):
     """ common method to wrap around an auxiliary file name """
-    def __init__(self,field_name,file_ext,doc_string=None):
-        self._field_name=field_name;
-        self._file_ext  =file_ext;
+    def __init__(self,file_ext,doc_string=None):
+        self._file_name = None
+        self._file_ext = file_ext
         if not(doc_string is None):
-            self.__doc__ = doc_string;
+            self.__doc__ = doc_string
 
     def __get__(self,instance,type=None):
-          return prop_helpers.gen_getter(instance.__dict__,self._field_name);
+        if instance is None:
+           return self
+
+        return self._file_name
 
     def __set__(self,instance,value):
         if value != None:
            fileName, fileExtension = os.path.splitext(value)
            if (not fileExtension):
-               value=value+self._file_ext;
-           
-        prop_helpers.gen_setter(instance.__dict__,self._field_name,value);
+               value = value + self._file_ext
+        self._file_name = value
+  
 #end MapMaskFile
-#
-class MapMaskFile(object):
-    """ common method to wrap around an auxiliary file name """
-    def __init__(self,field_name,file_ext,doc_string=None):
-        self._field_name=field_name;
-        self._file_ext  =file_ext;
-        if not(doc_string is None):
-            self.__doc__ = doc_string;
-
-    def __get__(self,instance,type=None):
-          return prop_helpers.gen_getter(instance.__dict__,self._field_name);
-
-    def __set__(self,instance,value):
-        if value != None:
-           fileName, fileExtension = os.path.splitext(value)
-           if (not fileExtension):
-               value=value+self._file_ext;
-           
-        prop_helpers.gen_setter(instance.__dict__,self._field_name,value);
-#end MapMaskFile
-
+#-----------------------------------------------------------------------------------------
 class HardMaskPlus(prop_helpers.ComplexProperty):
     """ Legacy HardMaskPlus class which sets up hard_mask_file to file and use_hard_mask_only to True""" 
     def __init__(self):
-        prop_helpers.ComplexProperty.__init__(self,['hard_mask_file','use_hard_mask_only','run_diagnostics'])
+        prop_helpers.ComplexProperty.__init__(self,['use_hard_mask_only','run_diagnostics'])
     def __get__(self,instance,type=None):
-         return prop_helpers.gen_getter(instance.__dict__,'hard_mask_file');
+        if instance is None:
+           return self
+
+        return instance.hard_mask_file
 
     def __set__(self,instance,value):
         if value != None:
            fileName, fileExtension = os.path.splitext(value)
            if (not fileExtension):
-               value=value+'.msk';
-           prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[value,False,True])
+               value = value + '.msk'
+           instance.hard_mask_file = value
+           prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[False,True])
         else:
-           prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[None,True,False])
-
-
-
+           prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[True,False])
+        try:
+             del instance.__changed_properties['hardmaskOnly']
+        except:
+           pass
+ 
+#-----------------------------------------------------------------------------------------
 class HardMaskOnly(prop_helpers.ComplexProperty):
     """ Sets diagnostics algorithm to use hard mask file provided and to disable all other diagnostics routines
 
@@ -262,42 +542,45 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
         and another one: hard_mask_file provides file for masking.         
     """
     def __init__(self):
-        prop_helpers.ComplexProperty.__init__(self,['hard_mask_file','use_hard_mask_only','run_diagnostics'])
+        prop_helpers.ComplexProperty.__init__(self,['use_hard_mask_only','run_diagnostics'])
 
     def __get__(self,instance,type=None):
-          return prop_helpers.gen_getter(instance.__dict__,'use_hard_mask_only');
+        if instance is None:
+           return self
+
+        return prop_helpers.gen_getter(instance.__dict__,'use_hard_mask_only')
     def __set__(self,instance,value):
         if value is None:
             use_hard_mask_only = False
-            hard_mask_file     = None
-            run_diagnostics    = True
-            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[hard_mask_file,use_hard_mask_only,run_diagnostics])
-        elif isinstance(value,bool):
-            use_hard_mask_only = False
-            hard_mask_file     = instance.hard_mask_file
-            run_diagnostics    = instance.run_diagnostics
-            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[hard_mask_file,use_hard_mask_only,run_diagnostics])
+            instance.hard_mask_file = None
+            hard_mask_file = None
+        elif isinstance(value,bool) or isinstance(value,int):
+            use_hard_mask_only = bool(value)
+            hard_mask_file = instance.hard_mask_file
         elif isinstance(value,str):
             if value.lower() in ['true','yes']:
                 use_hard_mask_only = True
-                hard_mask_file     = instance.hard_mask_file
             elif value.lower() in ['false','no']:
                 use_hard_mask_only = False
-                hard_mask_file     = instance.hard_mask_file
             else: # it is probably a hard mask file provided:
-                instance.hard_mask_file = value;
+                instance.hard_mask_file = value             
                 use_hard_mask_only = True
-                hard_mask_file     = instance.hard_mask_file
-
-            # if no hard mask file is there and use_hard_mask_only is True, diagnostics should not run
-            if instance.use_hard_mask_only and hard_mask_file is None:
-               run_diagnostics = False
-            else:
-               run_diagnostics = True
-            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[hard_mask_file,use_hard_mask_only,run_diagnostics])
+            hard_mask_file = instance.hard_mask_file
         #end
-#end HardMaskOnly
 
+        # if no hard mask file is there and use_hard_mask_only is True,
+        # diagnostics should not run
+        if use_hard_mask_only and hard_mask_file is None:
+            run_diagnostics = False
+        else:
+            run_diagnostics = True
+        prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[use_hard_mask_only,run_diagnostics])
+        try:
+             del instance.__changed_properties['hardmaskPlus']
+        except:
+           pass 
+#end HardMaskOnly
+#-----------------------------------------------------------------------------------------
 class MonovanIntegrationRange(prop_helpers.ComplexProperty):
     """ integration range for monochromatic vanadium 
 
@@ -307,14 +590,18 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
     """
     def __init__(self,DepType=None):
         if DepType:
-            self._rel_range=False
+            self._rel_range = False
             prop_helpers.ComplexProperty.__init__(self,['monovan_lo_value','monovan_hi_value'])
         else:
-            self._rel_range=True 
+            self._rel_range = True 
             prop_helpers.ComplexProperty.__init__(self,['monovan_lo_frac','monovan_hi_frac'])
         pass
 
     def __get__(self,instance,type=None):
+
+        if instance is None:
+           return self
+
         if isinstance(instance,dict):
                 ei = 1
                 tDict = instance
@@ -324,14 +611,14 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
 
         if self._rel_range: # relative range
             if ei is None:
-                raise AttributeError('Attempted to obtain relative to ei monovan integration range, but incident energy has not been set');
+                raise AttributeError('Attempted to obtain relative to ei monovan integration range, but incident energy has not been set')
             rel_range = prop_helpers.ComplexProperty.__get__(self,tDict)
             if isinstance(ei,list):
-                range = dict();
+                range = dict()
                 for en in ei:
-                    range[en] = [rel_range[0]*en,rel_range[1]*en]
+                    range[en] = [rel_range[0] * en,rel_range[1] * en]
             else:
-                range = [rel_range[0]*ei,rel_range[1]*ei]
+                range = [rel_range[0] * ei,rel_range[1] * ei]
             return range
         else: # absolute range
             return prop_helpers.ComplexProperty.__get__(self,tDict)
@@ -344,26 +631,25 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
         if value is None:
             if (not self._rel_range):
                 self._rel_range = True
-                self._other_prop =['monovan_lo_frac','monovan_hi_frac']
+                self._other_prop = ['monovan_lo_frac','monovan_hi_frac']
         else:
             if self._rel_range:
                self._rel_range = False
-               self._other_prop =['monovan_lo_value','monovan_hi_value']
+               self._other_prop = ['monovan_lo_value','monovan_hi_value']
 
             if isinstance(value,str):
                 values = value.split(',')
-                result = [];
+                result = []
                 for val in values :
-                    result.append(int(val));
-                value = result;
+                    result.append(int(val))
+                value = result
             if len(value) != 2:
                 raise KeyError("monovan_integr_range has to be list of two values, "\
                     "defining min/max values of integration range or None to use relative to incident energy limits")
             prop_helpers.ComplexProperty.__set__(self,tDict,value)
 #end MonovanIntegrationRange
-
-
-class SpectraToMonitorsList(object):
+#-----------------------------------------------------------------------------------------
+class SpectraToMonitorsList(PropDescriptor):
    """ property describes list of spectra, used as monitors to estimate incident energy
        in a direct scattering experiment. 
 
@@ -373,159 +659,165 @@ class SpectraToMonitorsList(object):
        Written to work with old IDF too, where this property is absent.
    """ 
    def __init__(self):
-       pass
+       self._spectra_to_monitors_list = None
+
 
    def __get__(self,instance,type=None):
-       try:
-           return  prop_helpers.gen_getter(instance.__dict__,'spectra_to_monitors_list');
-       except KeyError:
-           return None
+       if instance is None:
+           return self
+       return self._spectra_to_monitors_list
+
    def __set__(self,instance,spectra_list):
         """ Sets copy spectra to monitors variable as a list of monitors using different forms of input """
-        result = self.convert_to_list(spectra_list);
-        prop_helpers.gen_setter(instance.__dict__,'spectra_to_monitors_list',result);
-        return;
-   def convert_to_list(self,spectra_list):
+        self._spectra_to_monitors_list = self._convert_to_list(spectra_list)
+
+   def _convert_to_list(self,spectra_list):
        """ convert any spectra_list representation into a list """ 
        if spectra_list is None:
             return None
 
        if isinstance(spectra_list,str):
             if spectra_list.lower() is 'none':
-                result = None;
+                result = None
             else:
-                spectra = spectra_list.split(',');
-                result = [];
+                spectra = spectra_list.split(',')
+                result = []
                 for spectum in spectra :
-                    result.append(int(spectum));
+                    result.append(int(spectum))
 
        else:
             if isinstance(spectra_list,list):
                 if len(spectra_list) == 0:
-                    result=None;
+                    result = None
                 else:
-                    result=[];
+                    result = []
                     for i in range(0,len(spectra_list)):
-                        result.append(int(spectra_list[i]));
+                        result.append(int(spectra_list[i]))
             else:
-                result =[int(spectra_list)];
+                result = [int(spectra_list)]
        return result
 #end SpectraToMonitorsList
-
-class SaveFormat(object):
+#-----------------------------------------------------------------------------------------
+class SaveFormat(PropDescriptor):
    # formats available for saving the data
-   save_formats = ['spe','nxspe','nxs'];
+   save_formats = ['spe','nxspe','nxs']
+   def __init__(self):
+       self._save_format = set()
 
    def __get__(self,instance,type=None):
-        formats=  prop_helpers.gen_getter(instance.__dict__,'save_format');
-        if formats is None:
-            return set();
-        else:
-            return formats;
+        if instance is None:
+           return self
+
+        return self._save_format
 
    def __set__(self,instance,value):
         """ user can clear save formats by setting save_format=None or save_format = [] or save_format=''
             if empty string or empty list is provided as part of the list, all save_format-s set up earlier are cleared"""
 
-        # clear format by using None 
+        # clear format by using None
         if value is None:
-            prop_helpers.gen_setter(instance.__dict__,'save_format',set());
+            self._save_format = set()
             return
 
         # check string
         if isinstance(value,str):
             value = value.strip('[]().')
             subformats = value.split(',')
-            if len(subformats)>1:
+            if len(subformats) > 1:
                 self.__set__(instance,subformats)
                 return
             else:
                 value = subformats[0]      
 
-                if not(value  in SaveFormat.save_formats):
-                    instance.log("Trying to set saving in unknown format: \""+str(value)+"\" No saving will occur for this format")
+                if not(value in SaveFormat.save_formats):
+                    instance.log("Trying to set saving in unknown format: \"" + str(value) + "\" No saving will occur for this format")
                     return
         else: 
             try:
                  # set single default save format recursively
                  for val in value:
-                    self.__set__(instance,val);
-                 return;
+                    self.__set__(instance,val)
+                 return
             except:    
                raise KeyError(' Attempting to set unknown saving format {0} of type {1}. Allowed values can be spe, nxspe or nxs'\
-                   .format(value,type(value)));
+                   .format(value,type(value)))
         #end if different types
-        if instance.__dict__['save_format'] is None:
-            ts = set();
-            ts.add(value)
-            instance.__dict__['save_format'] = ts;
-        else:
-            instance.__dict__['save_format'].add(value);
+        self._save_format.add(value)
 #end SaveFormat
-
-class DiagSpectra(object):
+#-----------------------------------------------------------------------------------------
+class DiagSpectra(PropDescriptor):
     """ class describes spectra list which should be used in diagnostics 
 
         consist of tuples list where each tuple are the numbers 
         indicating first-last spectra in the group.
         if None, all spectra are used in diagnostics
 
-        TODO: not fully completed, a setter does not verify string and non-string values
     """
+    def __init__(self):
+        self._diag_spectra = None
+
     def __get__(self,instance,type=None):
-       sp_string = prop_helpers.gen_getter(instance.__dict__,'diag_spectra');
-       if sp_string:
-            return self.__process_spectra_list(sp_string);
-       else:
-            return None
+        if instance is None:
+           return self
+
+        return self._diag_spectra
 
     def __set__(self,instance,spectra_list):
-            prop_helpers.gen_setter(instance.__dict__,'diag_spectra',spectra_list);
+        self._diag_spectra = self._process_spectra_list(spectra_list)
 
-    def __process_spectra_list(self,specta_sring):
+    def _process_spectra_list(self,specta_sring):
         """ process IDF description of the spectra string """
-        if specta_sring.lower() in ['none','no']:
+        if specta_sring is None:
             return None
+        if isinstance(specta_sring,str):
+            if specta_sring.lower() in ['none','no']:
+                return None
+            else:
+                banks = specta_sring.split(";")
+                bank_spectra = []
+                for b in banks:
+                    token = b.split(",")  # b = "(,)"
+                    if len(token) != 2:
+                        raise ValueError("Invalid bank spectra specification in diagnostics properties %s" % specta_sring)
+                    start = int(token[0].lstrip('('))
+                    end = int(token[1].rstrip(')'))
+                    bank_spectra.append((start,end))
+            return bank_spectra
         else:
-            banks = specta_sring.split(";")
-            bank_spectra = []
-            for b in banks:
-                token = b.split(",")  # b = "(,)"
-                if len(token) != 2:
-                    raise ValueError("Invalid bank spectra specification in diagnostics properties %s" % specta_sring)
-                start = int(token[0].lstrip('('))
-                end = int(token[1].rstrip(')'))
-                bank_spectra.append((start,end))
-        return bank_spectra;
+            raise ValueError("Spectra For diagnostics can be a string inthe form (num1,num2);(num3,num4) etc. or None")
 #end class DiagSpectra
-
-class BackbgroundTestRange(object):
+#-----------------------------------------------------------------------------------------
+class BackbgroundTestRange(PropDescriptor):
     """ The TOF range used in diagnostics to reject high background spectra. 
 
         Usually it is the same range as the TOF range used to remove 
         background (usually in powders) though it may be set up separately.        
     """
+    def __init__(self):
+        self._background_test_range = None
+
     def __get__(self,instance,type=None):
-       range = prop_helpers.gen_getter(instance.__dict__,'_background_test_range');
-       if range  :
-            return range 
+       if instance is None:
+           return self
+
+       if self._background_test_range:
+            return self._background_test_range  
        else:
-            return instance.bkgd_range;
+            return instance.bkgd_range
 
     def __set__(self,instance,value):
         if value is None:
-           range = prop_helpers.gen_setter(instance.__dict__,'_background_test_range',None);
+           self._background_test_range = None
            return
         if isinstance(value,str):
             value = str.split(value,',')
         if len(value) != 2:
             raise ValueError("background test range can be set to a 2 element list of floats")
-
-        range = prop_helpers.gen_setter(instance.__dict__,'_background_test_range',[float(value[0]),float(value[1])]);
+        self._background_test_range = [float(value[0]),float(value[1])]
 #end BackbgroundTestRange
 
 #-----------------------------------------------------------------------------------------
-# END Descriptors, property manager itself
+# END Descriptors for PropertyManager itself
 #-----------------------------------------------------------------------------------------
 
 
