@@ -660,7 +660,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
    
    
     def test_set_energy_bins_and_ei(self):
-        #TODO  modify and verify the energy bins for range of energies
         propman = self.prop_man
 
         propman.energy_bins='-30,3,10'

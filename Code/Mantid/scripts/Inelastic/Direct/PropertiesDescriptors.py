@@ -197,10 +197,18 @@ class SumRuns(PropDescriptor):
         return self._run_numbers
 #--------------------------------------------------------------------------------------------------------------------
 class IncidentEnergy(PropDescriptor):
-    """ descriptor for incident energy or range of incident energies to be processed """
+    """ Property for incident energy or range of incident energies to be processed 
+
+        Set it up to list of values (even with single value i.e. prop_man.incident_energy=[10]) 
+        if the energy_bins property value to be treated as relative energy ranges.
+
+        Set it up to single value (e.g. prop_man.incident_energy=10) to treat energy energy_bins 
+        as absolute energy values
+    """
     def __init__(self): 
         self._incident_energy = 0
-        pass
+        self._num_energies = 1
+        self._current_en = 0
     def __get__(self,instance,owner=None):
         """ return  incident energy or list of incident energies """ 
         if instance is None:
@@ -211,6 +219,11 @@ class IncidentEnergy(PropDescriptor):
        """ Set up incident energy or range of energies in various formats """
        if value != None:
           if isinstance(value,str):
+             if value.find('[') > -1:
+                energy_list = True
+                value = value.translate(None, '[]').strip()
+             else:
+                energy_list = False
              en_list = str.split(value,',')
              if len(en_list) > 1:                 
                 rez = []
@@ -219,7 +232,10 @@ class IncidentEnergy(PropDescriptor):
                     rez.append(val)
                 self._incident_energy = rez
              else:
-               self._incident_energy = float(value)
+                 if energy_list:
+                    self._incident_energy = [float(value)]
+                 else:
+                   self._incident_energy = float(value)
           else:
             if isinstance(value,list):
                 rez = []
@@ -238,23 +254,79 @@ class IncidentEnergy(PropDescriptor):
        #
        inc_en = self._incident_energy
        if isinstance(inc_en,list):
+           self._num_energies = len(inc_en)
            for en in inc_en:
                if en <= 0:
                  raise KeyError("Incident energy have to be positive number of list of positive numbers." + " For input argument {0} got negative value {1}".format(value,en))     
        else:
          if inc_en <= 0:
             raise KeyError("Incident energy have to be positive number of list of positive numbers." + " For value {0} got negative {1}".format(value,inc_en))
+   
+    def multirep_mode(self):
+        """ return true if energy is defined as list of energies and false otherwise """ 
+        if isinstance(self._incident_energy,list):
+            return True
+        else:
+            return False
+
+    def get_current(self):
+        """ Return current energy out of range of energies""" 
+        if isinstance(self._incident_energy,list):
+            return self._incident_energy[self._current_en]
+        else:
+            return self._incident_energy
+    # energies iterator
+    def __iter__(self):
+        self._current_en = 0
+        return self
+
+    def next(self): # Python 3: def __next__(self)
+        if self._current_en >= self._num_energies:
+            raise StopIteration
+        else:
+           self._current_en += 1
+           if isinstance(self._incident_energy,list):           
+               return self._incident_energy[self._current_en - 1]
+           else:
+               return self._incident_energy
+
 # end IncidentEnergy
 #-----------------------------------------------------------------------------------------
 class EnergyBins(PropDescriptor):
-    """ Property provides various energy bin possibilities """
-    def __init__(self):
+    """ Energy binning, requested for final converted to energy transfer workspace. 
+
+        Provide it in the form:
+        [min_energy,step,max_energy] if energy to process (incident_energy property ) 
+        has a single value
+        or 
+        [min_rel_enrgy,rel_step,max_rel_energy] where rel_energy is relative energy
+        if energy(ies) to process are list of energies. The list of energies can 
+        consist of single value  (e.g. prop_man.incident_energy=[100])
+
+    """
+    def __init__(self,IncidentEnergyProp):
+        self._incident_energy = IncidentEnergyProp
         self._energy_bins = None
+        # how close you are ready to rebin w.r.t.  the incident energy
+        self._range = 0.999999
     def __get__(self,instance,owner=None):
         """ binning range for the result of convertToenergy procedure or list of such ranges """
         if instance is None:
            return self
-        return self._energy_bins
+        if self._incident_energy.multirep_mode: # Relative energy
+            if self._energy_bins:
+                if self._energy_bins[2] > self._range:
+                   instance.log("*** WARNING! Got energy_bins specified as absolute values in multirep mode.\n"\
+                                "             Will normalize these values by max value and treat as relative values ",
+                                "warning")
+                   mult = self._incident_energy.get_current() * self._range / self._energy_bins[2]
+                   rez = (self._energy_bins[0] * mult ,self._energy_bins[1] * mult,self._energy_bins[2] * mult)
+                else:
+                   mult = self._incident_energy.get_current()
+                   rez = (self._energy_bins[0] * mult ,self._energy_bins[1] * mult,self._energy_bins[2] * mult)
+                return rez
+        else: # Absolute energy ranges
+           return self._energy_bins
 
     def __set__(self,instance,values):
        if values != None:
@@ -262,15 +334,23 @@ class EnergyBins(PropDescriptor):
              lst = str.split(values,',')
              nBlocks = len(lst)
              for i in xrange(0,nBlocks,3):
-                value = [float(lst[i]),float(lst[i + 1]),float(lst[i + 2])]
+                value = (float(lst[i]),float(lst[i + 1]),float(lst[i + 2]))
           else:
               value = values
-              nBlocks = len(value)
-          if nBlocks % 3 != 0:
-               raise KeyError("Energy_bin value has to be either list of n-blocks of 3 number each or string representation of this list with numbers separated by commas")
+              if len(value) != 3:
+                raise KeyError("Energy_bin value has to be a tuple of 3 elements or string of 3 comma-separated numbers")           
+              if isinstance(value,list):
+                  value = (value[0],value[1],value[2])
+          # Let's not support list of multiple absolute energy bins for the
+          # time being
+          # nBlocks = len(value)
+          #if nBlocks % 3 != 0:
+          #     raise KeyError("Energy_bin value has to be either list of
+          #     n-blocks of 3 number each or string representation of this list
+          #     with numbers separated by commas")
        else:
           value = None              
-       #TODO: implement single value settings according to rebin
+       #TODO: implement single value settings according to rebin?
        self._energy_bins = value
 #end EnergyBins
 #-----------------------------------------------------------------------------------------
@@ -582,7 +662,8 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
 #end HardMaskOnly
 #-----------------------------------------------------------------------------------------
 class MonovanIntegrationRange(prop_helpers.ComplexProperty):
-    """ integration range for monochromatic vanadium 
+    """ integration range for monochromatic vanadium. The final integral is used to estimate
+         relative detector's efficiency
 
         Defined either directly or as the function of the incident energy(s)
 

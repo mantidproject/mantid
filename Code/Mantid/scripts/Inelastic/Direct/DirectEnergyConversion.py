@@ -1163,9 +1163,9 @@ class DirectEnergyConversion(object):
                 CalculateFlatBackground(InputWorkspace=result_ws,OutputWorkspace=result_ws,
                                         StartX= bkg_range_min,EndX= bkg_range_max,
                                         WorkspaceIndexList= '',Mode= 'Mean',SkipMonitors='1')
-                data_run.synchronize_ws(result_ws)
         else:
             bkgr_ws = None
+        data_run.synchronize_ws(result_ws)
 
 
         # Normalize using the chosen method+group
@@ -1190,9 +1190,9 @@ class DirectEnergyConversion(object):
                  DeleteWorkspace(bkgr_ws)
         else:
             pass # TODO: investigate way of removing background from event workspace if we want result to be an event workspace
-            # what to do with event workspace having negative events? will further algorithms work with this properly?
+            # what to do with event workspace having negative events? will further algorithms work with these events ?
 
-        if self.apply_detector_eff and energy_bins: # Decector efficiency should work on event workspace too?
+        if self.apply_detector_eff and energy_bins: #should detector efficiency work on event workspace too? At the moment it is not
            DetectorEfficiencyCor(InputWorkspace=result_name,OutputWorkspace=result_name)
            self.prop_man.log("_do_mono: finished DetectorEfficiencyCor for : " + result_name,'information')
         #############
