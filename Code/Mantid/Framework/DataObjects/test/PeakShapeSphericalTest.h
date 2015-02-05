@@ -96,7 +96,8 @@ public:
     TS_ASSERT_EQUALS(a.algorithmName(), clone->algorithmName());
     TS_ASSERT_EQUALS(a.algorithmVersion(), clone->algorithmVersion());
     TS_ASSERT_DIFFERS(clone, &a);
-  }
+    delete clone;  
+}
 
   void test_toJSON() {
     const double radius = 2;
