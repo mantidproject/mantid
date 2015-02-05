@@ -13,7 +13,7 @@ class VesuvioResolution(PythonAlgorithm):
         return 'Calculates the resolution function for VESUVIO'
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty(name='Sample',
+        self.declareProperty(WorkspaceProperty(name='Workspace',
                                                defaultValue='',
                                                direction=Direction.Input),
                              doc='Sample workspace')
@@ -59,7 +59,7 @@ class VesuvioResolution(PythonAlgorithm):
 
 
     def PyExec(self):
-        sample_ws = self.getProperty('Sample').value
+        sample_ws = self.getProperty('Workspace').value
         out_ws_tof = self.getPropertyValue('OutputWorkspaceTOF')
         out_ws_ysp = self.getPropertyValue('OutputWorkspaceYSpace')
         self._spectrum_index = self.getProperty('SpectraIndex').value
