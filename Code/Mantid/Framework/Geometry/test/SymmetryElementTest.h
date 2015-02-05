@@ -80,24 +80,46 @@ public:
     TS_ASSERT_EQUALS(element.getAxis(), validAxis);
   }
 
-  void testSymmetryElementWithAxisSetTranslation()
-  {
-      MockSymmetryElementWithAxis element;
+  void testSymmetryElementWithAxisSetTranslation() {
+    MockSymmetryElementWithAxis element;
 
-      V3R validAxis(1, 0, 0);
-      TS_ASSERT_THROWS_NOTHING(element.setTranslation(validAxis));
+    V3R validAxis(1, 0, 0);
+    TS_ASSERT_THROWS_NOTHING(element.setTranslation(validAxis));
 
-      TS_ASSERT_EQUALS(element.getTranslation(), validAxis);
+    TS_ASSERT_EQUALS(element.getTranslation(), validAxis);
   }
 
-  void testSymmetryElementWithAxisSetFixPoint()
-  {
-      MockSymmetryElementWithAxis element;
+  void testSymmetryElementWithAxisSetFixPoint() {
+    MockSymmetryElementWithAxis element;
 
-      V3R validAxis(1, 0, 0);
-      TS_ASSERT_THROWS_NOTHING(element.setFixPoint(validAxis));
+    V3R validAxis(1, 0, 0);
+    TS_ASSERT_THROWS_NOTHING(element.setFixPoint(validAxis));
 
-      TS_ASSERT_EQUALS(element.getFixPoint(), validAxis);
+    TS_ASSERT_EQUALS(element.getFixPoint(), validAxis);
+  }
+
+  void testSymmetryElementWithAxisDetermineTranslation() {
+    MockSymmetryElementWithAxis element;
+
+    V3R screwVectorOneHalf = V3R(0, 0, 1) / 2;
+    SymmetryOperation twoOneScrew("-x,-y,z+1/2");
+    TS_ASSERT_EQUALS(element.determineTranslation(twoOneScrew),
+                     screwVectorOneHalf);
+
+    V3R screwVectorOneThird = V3R(0, 0, 1) / 3;
+    SymmetryOperation threeOneScrew("-y,x-y,z+1/3");
+    TS_ASSERT_EQUALS(element.determineTranslation(threeOneScrew),
+                     screwVectorOneThird);
+
+    V3R screwVectorTwoThirds = V3R(0, 0, 2) / 3;
+    SymmetryOperation threeTwoScrew("-y,x-y,z+2/3");
+    TS_ASSERT_EQUALS(element.determineTranslation(threeTwoScrew),
+                     screwVectorTwoThirds);
+
+    V3R glideVectorC = V3R(0, 0, 1) / 2;
+    SymmetryOperation glidePlaneC("x,-y,z+1/2");
+    TS_ASSERT_EQUALS(element.determineTranslation(glidePlaneC),
+                     glideVectorC);
   }
 
 private:
