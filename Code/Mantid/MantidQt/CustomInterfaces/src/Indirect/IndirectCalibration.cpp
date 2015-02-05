@@ -150,6 +150,8 @@ namespace CustomInterfaces
 
     // Nudge resCheck to ensure res range selectors are only shown when Create RES file is checked
     resCheck(m_uiForm.ckCreateResolution->isChecked());
+
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   }
 
   //----------------------------------------------------------------------------------------------
@@ -232,32 +234,66 @@ namespace CustomInterfaces
       QString background = QString::number(m_dblManager->value(m_properties["ResStart"])) + ","
           + QString::number(m_dblManager->value(m_properties["ResEnd"]));
 
+      bool smooth = m_uiForm.ckSmoothResolution->isChecked();
+
       Mantid::API::IAlgorithm_sptr resAlg = Mantid::API::AlgorithmManager::Instance().create("IndirectResolution", -1);
       resAlg->initialize();
 
       resAlg->setProperty("InputFiles", filenames.toStdString());
-      resAlg->setProperty("OutputWorkspace", resolutionWsName.toStdString());
       resAlg->setProperty("Instrument", getInstrumentConfiguration()->getInstrumentName().toStdString());
       resAlg->setProperty("Analyser", getInstrumentConfiguration()->getAnalyserName().toStdString());
       resAlg->setProperty("Reflection", getInstrumentConfiguration()->getReflectionName().toStdString());
       resAlg->setProperty("RebinParam", rebinString.toStdString());
       resAlg->setProperty("DetectorRange", resDetectorRange.toStdString());
       resAlg->setProperty("BackgroundRange", background.toStdString());
-      resAlg->setProperty("Smooth", m_uiForm.ckSmoothResolution->isChecked());
       resAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
-      resAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
       resAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
 
       if(m_uiForm.ckResolutionScale->isChecked())
         resAlg->setProperty("ScaleFactor", m_uiForm.spScale->value());
 
+      if(smooth)
+      {
+        resAlg->setProperty("OutputWorkspace", resolutionWsName.toStdString() + "_pre_smooth");
+      }
+      else
+      {
+        resAlg->setProperty("OutputWorkspace", resolutionWsName.toStdString());
+        resAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
+      }
+
       m_batchAlgoRunner->addAlgorithm(resAlg);
+
+      if(smooth)
+      {
+        Mantid::API::IAlgorithm_sptr smoothAlg = Mantid::API::AlgorithmManager::Instance().create("WienerSmooth");
+        smoothAlg->initialize();
+        smoothAlg->setProperty("OutputWorkspace", resolutionWsName.toStdString());
+
+        BatchAlgorithmRunner::AlgorithmRuntimeProps smoothAlgInputProps;
+        smoothAlgInputProps["InputWorkspace"] = resolutionWsName.toStdString() + "_pre_smooth";
+
+        m_batchAlgoRunner->addAlgorithm(smoothAlg, smoothAlgInputProps);
+      }
 
       // When creating resolution file take the resolution workspace as the result
       m_pythonExportWsName = resolutionWsName.toStdString();
     }
 
     m_batchAlgoRunner->executeBatchAsync();
+  }
+
+  void IndirectCalibration::algorithmComplete(bool error)
+  {
+    if(error)
+      return;
+
+    // Plot the smoothed workspace if required
+    if(m_uiForm.ckSmoothResolution->isChecked() && m_uiForm.ckPlot->isChecked())
+    {
+      std::string pyInput = "from mantidplot import plotSpectrum\nplotSpectrum(['" + m_pythonExportWsName + "', '" + m_pythonExportWsName + "_pre_smooth'], 0)\n";
+      m_pythonRunner.runPythonCode(QString::fromStdString(pyInput));
+    }
   }
 
   bool IndirectCalibration::validate()
