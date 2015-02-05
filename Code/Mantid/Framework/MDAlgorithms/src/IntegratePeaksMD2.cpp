@@ -266,11 +266,11 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // PRAGMA_OMP(parallel for schedule(dynamic, 10) )
    // Initialize progress reporting
   int nPeaks = peakWS->getNumberPeaks();
-  Progress *m_progress = new Progress(this, 0., 1., nPeaks);
+  Progress progress(this, 0., 1., nPeaks);
   for (int i = 0; i < nPeaks; ++i) {
     if (this->getCancel())
       break; // User cancellation
-    m_progress->report();
+    progress.report();
 
     // Get a direct ref to that peak.
     IPeak &p = peakWS->getPeak(i);
