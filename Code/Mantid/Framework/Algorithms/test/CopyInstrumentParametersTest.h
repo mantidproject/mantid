@@ -19,6 +19,7 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include <cmath>
 #include <stdexcept>
 
 
@@ -227,7 +228,7 @@ public:
      for(size_t i=0;i<n_detectors;i++)
      {
        IComponent_const_sptr det =instrument->getDetector(static_cast<Mantid::detid_t>(i+1));
-       Geometry::ComponentHelper::moveComponent(*det, *pmap, V3D(sin(3.1415926*double(i)),cos(3.1415926*double(i/500)),7), Absolute );
+       Geometry::ComponentHelper::moveComponent(*det, *pmap, V3D(sin(M_PI*double(i)),cos(M_PI*double(i/500)),7), Absolute );
      }
 
      // Create output workspace with another parameterized instrument and put into data store
@@ -285,8 +286,8 @@ public:
        int id = deto1->getID();
        V3D newPos1 = deto1->getPos();
        TS_ASSERT_EQUALS( id, i+1);
-       TS_ASSERT_DELTA( newPos1.X() ,sin(3.1415926*double(i)), 0.0001);
-       TS_ASSERT_DELTA( newPos1.Y() ,cos(3.1415926*double(i/500)), 0.0001);
+       TS_ASSERT_DELTA( newPos1.X() ,sin(M_PI*double(i)), 0.0001);
+       TS_ASSERT_DELTA( newPos1.Y() ,cos(M_PI*double(i/500)), 0.0001);
        TS_ASSERT_DELTA( newPos1.Z() , 7, 1.e-6);
 
      }

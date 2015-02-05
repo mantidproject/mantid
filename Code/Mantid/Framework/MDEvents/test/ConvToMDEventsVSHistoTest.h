@@ -2,6 +2,7 @@
 #define CONVERT2_MDEVENTS_METHODS_TEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <cmath>
 
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -215,13 +216,13 @@ logProvider(100)
    API::FrameworkManager::Instance();
 
    std::vector<double> L2(5,5);
-   std::vector<double> polar(5,(30./180.)*3.1415926);
+   std::vector<double> polar(5,(30./180.)*M_PI);
    polar[0]=0;
    std::vector<double> azimutal(5,0);
-   azimutal[1]=(45./180.)*3.1415936;
-   azimutal[2]=(90./180.)*3.1415936;
-   azimutal[3]=(135./180.)*3.1415936;
-   azimutal[4]=(180./180.)*3.1415936;
+   azimutal[1]=(45./180.)*M_PI;
+   azimutal[2]=(90./180.)*M_PI;
+   azimutal[3]=(135./180.)*M_PI;
+   azimutal[4]=(180./180.)*M_PI;
 
    int numBins=10;
    ws2D =WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimutal,numBins,-1,3,3);

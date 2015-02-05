@@ -2,6 +2,8 @@
 #define SLICE_VIEWER_NULLPEAKSPRESENTER_TEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MockObjects.h"
+#include <gmock/gmock.h>
 #include "MantidQtSliceViewer/NullPeaksPresenter.h"
 
 using namespace MantidQt::SliceViewer;
@@ -110,6 +112,13 @@ public:
   {
     NullPeaksPresenter presenter;
     TS_ASSERT_EQUALS(0, presenter.getPeakSizeIntoProjection());
+  }
+
+  void test_contentsDifferent()
+  {
+      NullPeaksPresenter presenter;
+      MockPeaksPresenter other;
+      TS_ASSERT(presenter.contentsDifferent(&other));
   }
 
 };

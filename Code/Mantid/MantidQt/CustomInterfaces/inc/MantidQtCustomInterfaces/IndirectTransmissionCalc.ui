@@ -23,58 +23,31 @@
        </property>
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
-         <widget class="QLabel" name="lblInstrument">
+         <widget class="MantidQt::MantidWidgets::IndirectInstrumentConfig" name="iicInstrumentConfiguration">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="text">
-           <string>Instrument: </string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInstrument">
           <property name="techniques" stdset="0">
            <stringlist>
             <string>TOF Indirect Geometry Spectroscopy</string>
            </stringlist>
           </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="lblAnalyser">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+          <property name="disabledInstruments" stdset="0">
+           <stringlist>
+            <string>TOSCA</string>
+            <string>TFXA</string>
+           </stringlist>
           </property>
-          <property name="text">
-           <string>Analyser:</string>
+          <property name="enableDiffraction" stdset="0">
+           <bool>false</bool>
           </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QComboBox" name="cbAnalyser"/>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="lblReflection">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Reflection:</string>
+          <property name="showInstrumentLabel" stdset="0">
+           <bool>false</bool>
           </property>
          </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QComboBox" name="cbReflection"/>
         </item>
        </layout>
       </widget>
@@ -125,7 +98,7 @@
         <item row="1" column="1">
          <widget class="QDoubleSpinBox" name="spNumberDensity">
           <property name="suffix">
-           <string> atoms/A^3</string>
+           <string> atoms/Å^3</string>
           </property>
           <property name="maximum">
            <double>10000.000000000000000</double>
@@ -200,6 +173,11 @@
    <class>MantidQt::MantidWidgets::InstrumentSelector</class>
    <extends>QComboBox</extends>
    <header>MantidQtMantidWidgets/InstrumentSelector.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::IndirectInstrumentConfig</class>
+   <extends>QComboBox</extends>
+   <header>MantidQtMantidWidgets/IndirectInstrumentConfig.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

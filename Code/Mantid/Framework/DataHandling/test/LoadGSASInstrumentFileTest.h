@@ -263,6 +263,7 @@ public:
       ofile << "INS  1 ICONS    746.96     -0.24      3.04                                     \n";
       ofile << "INS  1BNKPAR    2.3696      9.39      0.00    .00000     .3000    1    1       \n";
       ofile << "INS  1I ITYP    0    1.000     25.000       2                                  \n";
+      ofile << "INS  1I HEAD   TIC 8983 on HRPD                                                \n";
       ofile << "INS  1PRCF      2   15   0.00100                                               \n";
       ofile << "COMM The next 15 parameters as in wiki page CreateIkedaCarpenterParametersGSAS \n";
       ofile << "INS  1PRCF 1   0.000000E+00   0.210000E+00   0.317927E+02   0.514205E+02       \n";

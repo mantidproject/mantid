@@ -16,7 +16,6 @@ namespace MantidQt
 			Quasi(QWidget * parent = 0);
 
 			// Inherited methods from IndirectBayesTab
-			QString help() { return "Quasi"; };
       void setup();
 			bool validate();
 			void run();
@@ -34,10 +33,15 @@ namespace MantidQt
 			void handleSampleInputReady(const QString& filename);
 			/// slot to handle when the user changes the program to be used
 			void handleProgramChange(int index);
+      /// Slot to handle setting a new preview spectrum
+      void previewSpecChanged(int value);
+      /// Handles updating spectra in mini plot
+      void updateMiniPlot();
 
 		private:
-			
-			//The ui form
+			/// Current preview spectrum
+      int m_previewSpec;
+			/// The ui form
 			Ui::Quasi m_uiForm;
 
 		};

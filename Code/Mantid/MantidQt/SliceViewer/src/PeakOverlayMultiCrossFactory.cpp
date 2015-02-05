@@ -56,7 +56,12 @@ namespace MantidQt
 
     int PeakOverlayMultiCrossFactory::FOM() const
     {
-      return 1; 
+        return 1;
+    }
+
+    void PeakOverlayMultiCrossFactory::swapPeaksWorkspace(boost::shared_ptr<IPeaksWorkspace> &peaksWS)
+    {
+        m_peaksWS = peaksWS;
     }
   }
 }
