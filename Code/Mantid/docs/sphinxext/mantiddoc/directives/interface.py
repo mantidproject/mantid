@@ -13,7 +13,7 @@ class InterfaceDirective(BaseDirective):
     """
 
     required_arguments, optional_arguments = 1, 0
-    option_spec = {"widget" : str, "align" : str}
+    option_spec = {"widget":str, "align":str, "width":int}
 
     def run(self):
         """
@@ -31,8 +31,9 @@ class InterfaceDirective(BaseDirective):
         """
         Called by Sphinx when the ..interface:: directive is encountered
         """
-        picture = self._create_screenshot(widget_name = self.options.get("widget", None))
-        self._insert_screenshot_link(picture, align = self.options.get("align", None))
+        picture = self._create_screenshot(widget_name=self.options.get("widget", None))
+        self._insert_screenshot_link(picture, align=self.options.get("align", None),
+                                     width=self.options.get("width", None))
         return []
 
     def interface_name(self):
@@ -67,7 +68,7 @@ class InterfaceDirective(BaseDirective):
 
         return picture
 
-    def _insert_screenshot_link(self, picture, align = None):
+    def _insert_screenshot_link(self, picture, align=None, width=None):
         """
         Outputs an image link with a custom :class: style. The filename is
         extracted from the path given and then a relative link to the
@@ -77,11 +78,13 @@ class InterfaceDirective(BaseDirective):
         Args:
           picture (Screenshot): A Screenshot object
           align: The alignment to use, None for block, "left" or "right" for flowing
+          width: The width to use (in pixels, defaults to width of screenshot)
         """
         env = self.state.document.settings.env
         format_str = ".. figure:: %s\n"\
                      "   :class: screenshot\n"\
                      "   :width: %dpx"
+
         if align != None:
             format_str += "\n   :align: " + align
 
@@ -92,8 +95,10 @@ class InterfaceDirective(BaseDirective):
         # is located.
         if picture:
             screenshots_dir, filename = os.path.split(picture.imgpath)
-            # Find the width of the image
-            width, height = picture.width, picture.height
+
+            if width is None:
+                # No width provided, use screenshot width
+                width = picture.width
 
             # relative path to image
             rel_path = os.path.relpath(screenshots_dir, env.srcdir)

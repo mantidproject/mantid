@@ -518,7 +518,7 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 set ( TEST_FILES
-	#	CalMuonDeadTimeTest.h
+	CalMuonDeadTimeTest.h
 	# CountEventsInPulsesTest.h
 	# UpdatePeakParameterTableTest.h
 	AddLogDerivativeTest.h
