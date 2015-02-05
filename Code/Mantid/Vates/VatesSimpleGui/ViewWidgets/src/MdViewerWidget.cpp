@@ -127,8 +127,8 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   this->internalSetup(true);
 
   // Connect the temporary sources manager
-  QObject::connect(&m_temporarySourcesManager, SIGNAL(switchSourcesFromEventToHisto(std::string, std::string)),
-                   this, SLOT(onSwitchSourcesFromEventToHisto(std::string, std::string)));
+  QObject::connect(&m_temporarySourcesManager, SIGNAL(switchSources(std::string, std::string)),
+                   this, SLOT(onSwitchSoures(std::string, std::string)));
 }
 
 /**
@@ -462,8 +462,8 @@ void MdViewerWidget::setParaViewComponentsForView()
                    SLOT(onParallelProjection(bool)));
 
   // Start listening to a rebinning event
-  QObject::connect(this->currentView, SIGNAL(rebin()),
-                   this, SLOT(onRebin()), Qt::UniqueConnection);
+  QObject::connect(this->currentView, SIGNAL(rebin(std::string)),
+                   this, SLOT(onRebin(std::string)), Qt::UniqueConnection);
 
   // Start listening to an unbinning event
   QObject::connect(this->currentView, SIGNAL(unbin()),
@@ -473,56 +473,58 @@ void MdViewerWidget::setParaViewComponentsForView()
 
 /**
  * Reaction for a rebin event
+ * @param algorithmType The type of rebinning algorithm
  */
-void MdViewerWidget::onRebin()
+void MdViewerWidget::onRebin(std::string algorithmType)
 {
   pqPipelineSource* source = pqActiveObjects::instance().activeSource();
 
   std::string inputWorkspaceName;
   std::string outputWorkspaceName;
 
-  m_temporarySourcesManager.checkSource(source, inputWorkspaceName, outputWorkspaceName);
-
-  m_rebinManager.showDialog(inputWorkspaceName, outputWorkspaceName);
+  m_temporarySourcesManager.checkSource(source, inputWorkspaceName, outputWorkspaceName, algorithmType);
+  m_rebinManager.showDialog(inputWorkspaceName, outputWorkspaceName, algorithmType);
 }
 
 /**
- * Switch a source from an MDEvent source to a temporary MDHisto source.
- * @param histoWorkspaceName The name of the temporary histo workspace.
- * @param eventWorkspaceName The name of the event workspace.
+ * Switch a source.
+ * @param temporaryWorkspaceName The name of the temporary  workspace.
+ * @param sourceType The type of the source.
  */
-void MdViewerWidget::onSwitchSourcesFromEventToHisto(std::string histoWorkspaceName, std::string eventWorkspaceName)
+void MdViewerWidget::onSwitchSoures(std::string temporaryWorkspaceName, std::string sourceType)
 {
   // Create a new MDHisto source and display it
-  renderTemporaryWorkspace(histoWorkspaceName); 
+  renderTemporaryWorkspace(temporaryWorkspaceName, sourceType); 
 
-  // Repipe the filters to the temporary source
   try
   {
-    m_temporarySourcesManager.repipeTemporarySource(histoWorkspaceName, eventWorkspaceName);
+    std::string sourceToBeDeleted;
+
+    // Repipe the filters to the temporary source
+    m_temporarySourcesManager.repipeTemporarySource(temporaryWorkspaceName, sourceToBeDeleted);
+
+    // Remove the original source
+    deleteSpecificSource(sourceToBeDeleted);
+
+    // Set the splatterplot button explicitly
+    this->currentView->setSplatterplot(true);
   }
   catch (const std::runtime_error& error)
   {
     g_log.warning() << error.what();
   }
-
-  // Remove the MDEvent source
-  deleteSpecificSource(eventWorkspaceName);
-
-  // Set the splatterplot button explicitly
-  this->currentView->setSplatterplot(true);
 }
 
 
 /**
  * Creates and renders a temporary workspace source 
- * @param temporaryWorkspaceName The name of the temporary workspace
+ * @param temporaryWorkspaceName The name of the temporary workspace.
+ * @param sourceType The name of the source plugin. 
  */
-void MdViewerWidget::renderTemporaryWorkspace(const std::string temporaryWorkspaceName)
+void MdViewerWidget::renderTemporaryWorkspace(const std::string temporaryWorkspaceName, std::string sourceType)
 {
   // Load a new source plugin
-  QString sourcePlugin = "MDHW Source";
-  pqPipelineSource* newTemporarySource = this->currentView->setPluginSource(sourcePlugin, QString::fromStdString(temporaryWorkspaceName));
+  pqPipelineSource* newTemporarySource = this->currentView->setPluginSource(QString::fromStdString(sourceType), QString::fromStdString(temporaryWorkspaceName));
   pqActiveObjects::instance().setActiveSource(newTemporarySource);
   m_temporarySourcesManager.registerTemporarySource(newTemporarySource);
 

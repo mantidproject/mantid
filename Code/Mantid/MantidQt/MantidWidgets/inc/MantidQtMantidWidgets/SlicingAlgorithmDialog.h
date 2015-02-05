@@ -38,6 +38,12 @@ public:
   /// Destructor
   ~SlicingAlgorithmDialog();
 
+  // Customisation for the VSI
+  void customiseLayoutForVsi(std::string initialWorkspace);
+
+  ///Reset the aligned dim values for the VSI
+  void resestAlignedDimProperty(size_t index, QString propertyValue);
+
 protected:
 
   /// view
@@ -143,10 +149,6 @@ public:
   }
   ~BinMDDialog(){}
   void customiseInitLayout();
-
-  void customiseLayoutForVsi(std::string inputWorkspace);
-
-  void resestAlignedDimProperty(size_t index, QString propertyValue);
 };
 
 }

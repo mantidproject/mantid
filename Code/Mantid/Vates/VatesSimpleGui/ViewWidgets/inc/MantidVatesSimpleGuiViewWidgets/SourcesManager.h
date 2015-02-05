@@ -53,9 +53,9 @@ namespace Mantid
 
           ~SourcesManager();
 
-          void checkSource(pqPipelineSource* source, std::string& inputWorkspace, std::string& outputWorkspace);
+          void checkSource(pqPipelineSource* source, std::string& inputWorkspace, std::string& outputWorkspace,  std::string algorithmType);
 
-          void repipeTemporarySource(std::string temporarySource, std::string originalSource);
+          void repipeTemporarySource(std::string temporarySource, std::string& sourceToBeDeleted);
 
           void repipeOriginalSource(std::string temporarySource, std::string originalSource);
 
@@ -64,7 +64,7 @@ namespace Mantid
           void registerTemporarySource(pqPipelineSource* source);
 
         signals:
-          void switchSourcesFromEventToHisto(std::string histoWorkspaceName, std::string eventWorkspaceName);
+          void switchSources(std::string temporaryWorkspaceName,  std::string sourceType);
 
           void triggerAcceptForNewFilters();
         protected:
@@ -73,12 +73,12 @@ namespace Mantid
         private slots:
           void onTemporarySourceDestroyed();
 
-          void setSourceVisibility(pqPipelineSource* source, bool visibile);
-
         private:
-          std::map<std::string, std::string> m_eventWorkspaceToHistoWorkspace; ///< Holds the mapping from the Event workspace name to the temporary Histo workspace name
+          std::map<std::string, std::string> m_originalWorkspaceToTemporaryWorkspace; ///< Holds the mapping from the original source to the temporary source
 
-          std::map<std::string, std::string> m_histoWorkspaceToEventWorkspace; ///< Holds the mapping from temporary  Histo workspace name to the Event workspace name
+          std::map<std::string, std::string> m_temporaryWorkspaceToOriginalWorkspace; ///< Holds the mapping from the temporary source to the original source
+
+          std::map<std::string, std::string> m_temporaryWorkspaceToTemporaryWorkspace; ///< Holds information from a temporary source to another temproary source which replaces it.
 
           std::string m_tempPostfix;
 
@@ -88,9 +88,7 @@ namespace Mantid
 
           void rebuildPipeline(pqPipelineSource* source1, pqPipelineSource* source2);
 
-          void processMDHistoWorkspace(std::string& inputWorkspace, std::string& outputWorkspace, std::string workspaceName);
-
-          void processMDEventWorkspace(std::string& inputWorkspace, std::string& outputWorkspace, std::string workspaceName);
+          void processWorkspaceNames(std::string& inputWorkspace, std::string& outputWorkspace, std::string workspaceName, std::string algorithmType);
 
           void removeUnusedTemporaryWorkspaces();
 
@@ -100,11 +98,11 @@ namespace Mantid
 
           void compareToSources(std::string workspaceName);
 
-          void updateRebuiltPipeline(pqPipelineFilter* filter);
-
           void copyProperties(pqPipelineFilter* filter1, pqPipelineFilter* filter2);
 
           static void copySafe(vtkSMProxy* dest, vtkSMProxy* source);
+
+          void getWorkspaceInfo(pqPipelineSource* source, std::string& workspaceName, std::string& workSpaceType);
       };
 
     } // SimpleGui

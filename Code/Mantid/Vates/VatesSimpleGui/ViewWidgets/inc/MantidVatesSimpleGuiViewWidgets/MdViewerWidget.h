@@ -105,11 +105,11 @@ protected slots:
   /// Execute view switch.
   void switchViews(ModeControlWidget::Views v);
   /// On rebin 
-  void onRebin();
+  void onRebin(std::string algorithmType);
   /// On  unbin
   void onUnbin();
   /// On switching an MDEvent source to a temporary MDHisto source.
-  void onSwitchSourcesFromEventToHisto(std::string histoWorkspaceName, std::string eventWorkspaceName);
+  void onSwitchSoures(std::string temporaryWorkspaceName, std::string sourceType);
 
 protected:
   /// Handle workspace preDeletion tasks.
@@ -187,7 +187,7 @@ private:
   /// Reset the current view to the appropriate initial view.
   void resetCurrentView(int workspaceType, const std::string& instrumentName);
   /// Render temporary workspace
-  void renderTemporaryWorkspace(const std::string temporaryWorkspaceName); 
+  void renderTemporaryWorkspace(const std::string temporaryWorkspaceName, std::string sourceType); 
   /// Render the original workspace
   void renderOriginalWorkspace(const std::string originalWorkspaceName);
   /// Delete a specific workspace

@@ -30,19 +30,21 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="rebinButton">
+      <widget class="QToolButton" name="rebinToolButton">
        <property name="toolTip">
-        <string>Invoke plugin to rebin the current dataset.</string>
+        <string>Select a rebin algorithm for MDEvent data</string>
        </property>
        <property name="text">
         <string>Rebin</string>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="unbinButton">
-       <property name="text">
-        <string>Unbin</string>
+       <property name="toolButtonStyle">
+        <enum>Qt::ToolButtonTextBesideIcon</enum>
+       </property>
+       <property name="autoRaise">
+        <bool>false</bool>
+       </property>
+       <property name="arrowType">
+        <enum>Qt::NoArrow</enum>
        </property>
       </widget>
      </item>

@@ -95,8 +95,8 @@ public:
   virtual bool hasWorkspaceType(const QString &wsTypeName);
   /// Check if file/workspace is a MDHistoWorkspace.
   virtual bool isMDHistoWorkspace(pqPipelineSource *src);
-  /// Check if file/workspace is a temporary MDHistoWorkspace
-  virtual bool isTemporaryMDHistoWorkspace(pqPipelineSource* src);
+  /// Check if file/workspace is a temporary workspace
+  virtual bool isTemporaryWorkspace(pqPipelineSource* src);
   /// Check if file/workspace is a Peaks one.
   virtual bool isPeaksWorkspace(pqPipelineSource *src);
   /// Prints properties for given source.
@@ -194,8 +194,9 @@ signals:
   void setViewsStatus(ModeControlWidget::Views view, bool state);
   /**
    * Signal to perform a possible rebin.
+   * @param algorithmType The type of rebinning algorithm.
    */
-  void rebin();
+  void rebin(std::string algorithmType);
    /**
    * Signal to perform a possible unbin on a sources which has been
    * rebinned in the VSI.

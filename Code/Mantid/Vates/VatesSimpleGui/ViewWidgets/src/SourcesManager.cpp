@@ -3,6 +3,7 @@
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/Logger.h"
 
 #include "boost/shared_ptr.hpp"
@@ -61,9 +62,26 @@ namespace Mantid
        */
       void SourcesManager::addHandle(const std::string &workspaceName, Mantid::API::Workspace_sptr workspace)
       {
-        if (m_histoWorkspaceToEventWorkspace.count(workspaceName) > 0)
+        if (m_temporaryWorkspaceToOriginalWorkspace.count(workspaceName) > 0 || m_temporaryWorkspaceToTemporaryWorkspace.count(workspaceName) > 0)
         {
-          emit switchSourcesFromEventToHisto(workspaceName, m_histoWorkspaceToEventWorkspace[workspaceName]);
+          std::string sourceType;
+          Mantid::API::IMDEventWorkspace_sptr eventWorkspace = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(workspace);
+          Mantid::API::IMDHistoWorkspace_sptr histoWorkspace = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(workspace);
+
+          if(eventWorkspace)
+          {
+            sourceType = "MDEW Source";
+          }
+          else if(histoWorkspace)
+          {
+            sourceType = "MDHW Source";
+          }
+          else
+          {
+            return;
+          }
+
+          emit switchSources(workspaceName, sourceType);
         }
       }
 
@@ -72,8 +90,31 @@ namespace Mantid
        * @param source The pipeline source.
        * @param inputWorkspace Reference for the name of the input workspace.
        * @param outputWorkspace Reference for the name of the output workspace.
+       * @param algorithmType The type of the algorithm which will be used to create the temporary source.
        */
-      void SourcesManager::checkSource(pqPipelineSource* source, std::string& inputWorkspace, std::string& outputWorkspace)
+      void SourcesManager::checkSource(pqPipelineSource* source, std::string& inputWorkspace, std::string& outputWorkspace, std::string algorithmType)
+      {
+        std::string workspaceName;
+        std::string workspaceType;
+
+        getWorkspaceInfo(source, workspaceName, workspaceType);
+
+        bool isHistoWorkspace = workspaceType.find("MDHistoWorkspace")!=std::string::npos;
+        bool isEventWorkspace = workspaceType.find("MDEventWorkspace")!=std::string::npos;
+
+        // Check if it is a Histo or Event workspace, if it is neither, then don't do anything
+        if (isHistoWorkspace || isEventWorkspace)
+        {
+          processWorkspaceNames(inputWorkspace, outputWorkspace, workspaceName, algorithmType);
+        }
+      }
+
+      /**
+       * Get workspace name and type
+       * @param workspaceName Reference to workspace name.
+       * @param workspaceType Reference to workspace type.
+       */
+      void SourcesManager::getWorkspaceInfo(pqPipelineSource* source, std::string& workspaceName, std::string& workspaceType)
       {
         // Make sure that the input source exists. Note that this can happen when there is no active view
         if (!source)
@@ -106,35 +147,46 @@ namespace Mantid
         }
 
         // Check if the source has an underlying event workspace or histo workspace
-        std::string workspaceName(vtkSMPropertyHelper(source->getProxy(),
-                                                      "WorkspaceName", true).GetAsString());
+        workspaceName = vtkSMPropertyHelper(source->getProxy(), "WorkspaceName", true).GetAsString();
 
-        QString workspaceType(vtkSMPropertyHelper(source->getProxy(),
-                                                  "WorkspaceTypeName", true).GetAsString());
+        workspaceType = vtkSMPropertyHelper(source->getProxy(), "WorkspaceTypeName", true).GetAsString();
 
-        bool isHistoWorkspace = workspaceType.contains("MDHistoWorkspace");
-        bool isEventWorkspace = workspaceType.contains("MDEventWorkspace");
-
-        // Check if it is a Histo or Event workspace, if it is neither, then don't do anything
-        if (isHistoWorkspace)
-        {
-          processMDHistoWorkspace(inputWorkspace, outputWorkspace, workspaceName);
-        }
-        else if (isEventWorkspace)
-        {
-          processMDEventWorkspace(inputWorkspace, outputWorkspace, workspaceName);
-        }
       }
 
       /**
        * Creates the pipeline for the temporary source.
        * @param temporarySource The name of the temporary source.
-       * @param originalSource The name of the original source.
+       * @param sourceToBeDeleted The name of the sources which needs to be removed from the pipeline browser.
        */
-      void SourcesManager::repipeTemporarySource(std::string temporarySource, std::string originalSource)
+      void SourcesManager::repipeTemporarySource(std::string temporarySource, std::string& sourceToBeDeleted)
       {
-        // Swap source from original source to temporary source
-        swapSources(originalSource, temporarySource);
+        // We need to check if the source from which we receive our filters is the original source or 
+        // a temporary source.
+        if (m_temporaryWorkspaceToTemporaryWorkspace.count(temporarySource) == 0)
+        {
+          std::string originalSource = m_temporaryWorkspaceToOriginalWorkspace[temporarySource];
+
+          // Swap with the original source
+          swapSources(originalSource, temporarySource);
+
+          sourceToBeDeleted = originalSource;
+        }
+        else
+        {
+          std::string oldTemporarySource = m_temporaryWorkspaceToTemporaryWorkspace[temporarySource];
+          std::string originalSource = m_temporaryWorkspaceToOriginalWorkspace[oldTemporarySource];
+
+          // Swap with the other temporary source
+          swapSources(oldTemporarySource, temporarySource);
+          
+          sourceToBeDeleted = oldTemporarySource;
+
+          m_originalWorkspaceToTemporaryWorkspace.insert(std::pair<std::string, std::string>(originalSource, temporarySource));
+          m_temporaryWorkspaceToOriginalWorkspace.insert(std::pair<std::string, std::string>(temporarySource, originalSource));
+
+          // Unregister the connection between the two temporary sources.
+          m_temporaryWorkspaceToTemporaryWorkspace.erase(temporarySource);
+        }
       }
 
       /**
@@ -146,6 +198,9 @@ namespace Mantid
       {
         // Swap source from temporary source to original source.
         swapSources(temporarySource, originalSource);
+
+        m_originalWorkspaceToTemporaryWorkspace.erase(originalSource);
+        m_temporaryWorkspaceToOriginalWorkspace.erase(temporarySource);
       }
 
       /**
@@ -172,24 +227,16 @@ namespace Mantid
         }
 
         // We can rebuild the pipeline by either creating it from scratch or by changing the lowest level source
-#if 1
+
         // Rebuild pipeline
         rebuildPipeline(src1, src2);
-#else
-        vtkSMPropertyHelper(filter->getProxy(), "Input").Set(src2->getProxy());
 
-        // Update the pipeline from the end
-        updateRebuiltPipeline(filter);
-
-        // Set the visibility of the source. Paraview doesn't automatically set it to false, so we need to force it.
-        setSourceVisibility(src2, false);
-#endif
         // Render the active view to make the changes visible.
         pqActiveObjects::instance().activeView()->render();
       }
 
       /**
-       * Removes the temporary source and reverts to the original source
+       * Get the stored workspace names assoicated with a source.
        * @param source The name of the source.
        * @param originalWorkspaceName The name of the original workspace.
        * @param temporaryWorkspaceName The name of the temporary workspace.
@@ -201,47 +248,21 @@ namespace Mantid
           return;
         }
 
-        // Get to the underlying source
-        std::string originalSource;
-        std::string temporarySource; // not really used here
-        checkSource(source, originalSource, temporarySource);
+        // Get the underlying workspace name and type
+        std::string workspaceName;
+        std::string workspaceType;
+        getWorkspaceInfo(source, workspaceName, workspaceType);
 
-        // Make sure that the sources exist
-        pqPipelineSource* tempsrc = getSourceForWorkspace(temporarySource);
-
-        if (!tempsrc)
+        // The input can either be a temporary source or a 
+        if (m_temporaryWorkspaceToOriginalWorkspace.count(workspaceName) > 0)
         {
-          return;
+          originalWorkspaceName = m_temporaryWorkspaceToOriginalWorkspace[workspaceName];
+          temporaryWorkspaceName = workspaceName;
+        } else if (m_originalWorkspaceToTemporaryWorkspace.count(workspaceName) > 0)
+        {
+          originalWorkspaceName = workspaceName;
+          temporaryWorkspaceName = m_originalWorkspaceToTemporaryWorkspace[workspaceName];
         }
-
-        // The input source can be either an MDEvent source or an MDHisto source.
-        if (m_histoWorkspaceToEventWorkspace.count(originalSource) > 0)
-        {
-          originalWorkspaceName = m_histoWorkspaceToEventWorkspace[originalSource];
-          temporaryWorkspaceName = originalSource;
-        } else if (m_eventWorkspaceToHistoWorkspace.count(originalSource) > 0)
-        {
-
-          originalWorkspaceName = originalSource;
-          temporaryWorkspaceName = m_eventWorkspaceToHistoWorkspace[originalSource];
-        }
-      }
-
-      /**
-       * Set the visibility of the underlying source
-       * @param source The source which is to be manipulated.
-       * @param visible The state of the source's visibility.
-       */
-      void SourcesManager::setSourceVisibility(pqPipelineSource* source, bool visible)
-      {
-        pqRepresentation* representation = qobject_cast<pqRepresentation* >(source->getRepresentation(pqActiveObjects::instance().activeView()));
-
-        if(!representation)
-        {
-          throw std::runtime_error("VSI error: Casting to pqRepresentation failed.");
-        }
-
-        representation->setVisible(visible);
       }
 
       /**
@@ -278,36 +299,43 @@ namespace Mantid
       }
 
       /**
-       * If sources which are derived of temporary MDHisto workspaces, the input workpspace is the 
-       * original MDEvent workspace and the output is the temporary MDHisto workspace.
+       * Process the workspaces names for the original source and the input source
        * @param inputWorkspace Reference to the input workpspace.
        * @param outputWorkspace Reference to the output workspace.
        * @param workspaceName The name of the workspace of the current source.
+       * @param algorithmType The algorithm which creates the temporary source.
        */
-      void SourcesManager::processMDHistoWorkspace(std::string& inputWorkspace, std::string& outputWorkspace, std::string workspaceName)
+      void SourcesManager::processWorkspaceNames(std::string& inputWorkspace, std::string& outputWorkspace, std::string workspaceName, std::string algorithmType)
       {
-        if (m_histoWorkspaceToEventWorkspace.count(workspaceName) > 0)
+        // If the workspace is the original workspace
+        if (workspaceName.find(m_tempPostfix) == std::string::npos)
         {
-          inputWorkspace = m_histoWorkspaceToEventWorkspace[workspaceName];
-          outputWorkspace = workspaceName;
+          inputWorkspace = workspaceName;
+          outputWorkspace = workspaceName + algorithmType + m_tempPostfix;
+
+          // Record the workspace
+          m_originalWorkspaceToTemporaryWorkspace.insert(std::pair<std::string, std::string>(inputWorkspace, outputWorkspace));
+          m_temporaryWorkspaceToOriginalWorkspace.insert(std::pair<std::string, std::string>(outputWorkspace, inputWorkspace));
+        } // If the workspace is temporary and was created with the same algorithm as the currently selected one.
+        else if (workspaceName.find(algorithmType) != std::string::npos) 
+        {
+          if (m_temporaryWorkspaceToOriginalWorkspace.count(workspaceName) > 0)
+          {
+            inputWorkspace = m_temporaryWorkspaceToOriginalWorkspace[workspaceName];
+            outputWorkspace = workspaceName;
+          }
         }
-      }
+        else // If the workspace is temporary but was not created with the same algorithm as the currently selected one.
+        {
+          if (m_temporaryWorkspaceToOriginalWorkspace.count(workspaceName) > 0)
+          {
+            inputWorkspace = m_temporaryWorkspaceToOriginalWorkspace[workspaceName];
+            outputWorkspace = inputWorkspace + algorithmType + m_tempPostfix;
 
-      /**
-       * If sources which are derived of temporary MDHisto workspaces, the input workpspace is the 
-       * original MDEvent workspace and the output is the temporary MDHisto workspace.
-       * @param inputWorkspace Reference to the input workpspace.
-       * @param outputWorkspace Reference to the output workspace.
-       * @param workspaceName The name of the workspace of the current source.
-       */
-      void SourcesManager::processMDEventWorkspace(std::string& inputWorkspace, std::string& outputWorkspace, std::string workspaceName)
-      {
-        inputWorkspace = workspaceName;
-        outputWorkspace = workspaceName + m_tempPostfix;
-
-        // Record the workspace
-        m_eventWorkspaceToHistoWorkspace.insert(std::pair<std::string, std::string>(inputWorkspace, outputWorkspace));
-        m_histoWorkspaceToEventWorkspace.insert(std::pair<std::string, std::string>(outputWorkspace, inputWorkspace));
+            // Map the new temporary workspace name to the old temporary workspace name
+            m_temporaryWorkspaceToTemporaryWorkspace.insert(std::pair<std::string, std::string>(outputWorkspace, workspaceName));
+          }
+        }
       }
 
       /**
@@ -316,23 +344,18 @@ namespace Mantid
        */
       void SourcesManager::untrackWorkspaces(std::string temporaryWorkspace)
       {
-        std::string originalWorkspace = m_histoWorkspaceToEventWorkspace[temporaryWorkspace];
+        std::string originalWorkspace = m_temporaryWorkspaceToOriginalWorkspace[temporaryWorkspace];
 
-        m_histoWorkspaceToEventWorkspace.erase(temporaryWorkspace);
-        m_eventWorkspaceToHistoWorkspace.erase(originalWorkspace);
-      }
-
-      /**
-       * Removes the temporary workspace from memory.
-       * @param temporaryWorkspace The name of the temporary workspace.
-       */
-      void SourcesManager::removeTemporaryWorkspace(std::string temporaryWorkspace)
-      {
-        Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace> adsWorkspaceProvider;
-
-        if (adsWorkspaceProvider.canProvideWorkspace(temporaryWorkspace))
+        // Remove the mapping ofthe temporary workspace to the original workspace.
+        if (m_temporaryWorkspaceToOriginalWorkspace.count(temporaryWorkspace) > 0)
         {
-          adsWorkspaceProvider.disposeWorkspace(temporaryWorkspace);
+          m_temporaryWorkspaceToOriginalWorkspace.erase(temporaryWorkspace);
+        }
+
+        // Remove the mapping of the original workspace to the temporary workspace, if the mapping is still intact.
+        if (m_originalWorkspaceToTemporaryWorkspace.count(originalWorkspace) > 0 && m_originalWorkspaceToTemporaryWorkspace[originalWorkspace] == temporaryWorkspace)
+        {
+          m_originalWorkspaceToTemporaryWorkspace.erase(originalWorkspace);
         }
       }
 
@@ -410,27 +433,21 @@ namespace Mantid
        }
 
         /**
-        * Update the newly created pipeline from the last filter onwards
-        * @param filter The filter after the source
-        */
-        void SourcesManager::updateRebuiltPipeline(pqPipelineFilter* filter)
+         * Removes the temporary workspace from memory.
+         * @param temporaryWorkspace The name of the temporary workspace.
+         */
+        void SourcesManager::removeTemporaryWorkspace(std::string temporaryWorkspace)
         {
-          // Crawl down the pipeline to the last filter
-          while (filter->getNumberOfConsumers() > 0)
+          Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace> adsHistoWorkspaceProvider;
+          Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace> adsEventWorkspaceProvider;
+
+          if (adsHistoWorkspaceProvider.canProvideWorkspace(temporaryWorkspace))
           {
-            filter = qobject_cast<pqPipelineFilter*>(filter->getConsumer(0));
-
-            if (!filter)
-            {
-              throw std::runtime_error("VSI error: There is no filter in the pipeline.");
-            }
-
-            filter->updatePipeline();
-            filter->updateHelperProxies();
-
-            vtkSMProxy* proxy = filter->getProxy();
-            proxy->UpdateVTKObjects();
-            proxy->UpdatePropertyInformation();
+            adsHistoWorkspaceProvider.disposeWorkspace(temporaryWorkspace);
+          }
+          else if (adsEventWorkspaceProvider.canProvideWorkspace(temporaryWorkspace))
+          {
+            adsEventWorkspaceProvider.disposeWorkspace(temporaryWorkspace);
           }
         }
 

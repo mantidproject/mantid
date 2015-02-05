@@ -22,6 +22,8 @@
 #endif
 
 #include <QHBoxLayout>
+#include <QAction>
+#include <QMenu>
 #include <QMessageBox>
 #include <QString>
 
@@ -37,20 +39,16 @@ namespace SimpleGui
  * buttons and creates the rendering view.
  * @param parent the parent widget for the standard view
  */
-  StandardView::StandardView(QWidget *parent) : ViewBase(parent)
+  StandardView::StandardView(QWidget *parent) : ViewBase(parent),m_binMDAction(NULL),
+                                                                 m_sliceMDAction(NULL),
+                                                                 m_cutMDAction(NULL),
+                                                                 m_unbinAction(NULL)
 {
   this->ui.setupUi(this);
   this->cameraReset = false;
 
-  // Set the rebin button to open a rebin dialog
-  QObject::connect(this->ui.rebinButton, SIGNAL(clicked()),
-                   this, SIGNAL(rebin()), Qt::QueuedConnection);
-
-  // Set the unbinbutton to remove the rebinning on a workspace
-  // which was binned in the VSI
-  QObject::connect(this->ui.unbinButton, SIGNAL(clicked()),
-                   this, SIGNAL(unbin()), Qt::QueuedConnection);
-
+  // Set up the buttons
+  setupViewButtons();
 
   // Set the cut button to create a slice on the data
   QObject::connect(this->ui.cutButton, SIGNAL(clicked()), this,
@@ -68,6 +66,49 @@ namespace SimpleGui
 
 StandardView::~StandardView()
 {
+}
+
+void StandardView::setupViewButtons()
+{
+  // Populate the rebin button
+  QMenu* rebinMenu = new QMenu(this->ui.rebinToolButton);
+
+  m_binMDAction = new QAction("BinMD", rebinMenu);
+  m_binMDAction->setIconVisibleInMenu(false);
+  
+  m_sliceMDAction = new QAction("SliceMD", rebinMenu);
+  m_sliceMDAction->setIconVisibleInMenu(false);
+
+  m_cutMDAction = new QAction("CutMD", rebinMenu);
+  m_cutMDAction->setIconVisibleInMenu(false);
+
+  m_unbinAction = new QAction("Unbin", rebinMenu);
+  m_unbinAction->setIconVisibleInMenu(false);
+
+  rebinMenu->addAction(m_binMDAction);
+  rebinMenu->addAction(m_sliceMDAction);
+  rebinMenu->addAction(m_cutMDAction);
+  rebinMenu->addAction(m_unbinAction);
+
+  this->ui.rebinToolButton->setPopupMode(QToolButton::InstantPopup);
+  this->ui.rebinToolButton->setMenu(rebinMenu);
+
+  QObject::connect(m_binMDAction, SIGNAL(triggered()),
+                   this, SLOT(onBinMD()), Qt::QueuedConnection);
+  QObject::connect(m_sliceMDAction, SIGNAL(triggered()),
+                   this, SLOT(onSliceMD()), Qt::QueuedConnection);
+  QObject::connect(m_cutMDAction, SIGNAL(triggered()),
+                   this, SLOT(onCutMD()), Qt::QueuedConnection);
+  // Set the unbinbutton to remove the rebinning on a workspace
+  // which was binned in the VSI
+  QObject::connect(m_unbinAction, SIGNAL(triggered()),
+                   this, SIGNAL(unbin()), Qt::QueuedConnection);
+
+
+  // Populate the slice button
+
+  // Populate the cut button
+
 }
 
 void StandardView::destroyView()
@@ -191,7 +232,7 @@ void StandardView::onSourceDestroyed()
  */
 void StandardView::setRebinAndUnbinButtons()
 {
-  int numberOfTemporaryMDHistoWorkspaces = 0;
+  int numberOfTemporaryWorkspaces = 0;
   int numberOfTrueMDHistoWorkspaces = 0;
   int numberOfPeakWorkspaces = 0;
 
@@ -201,9 +242,9 @@ void StandardView::setRebinAndUnbinButtons()
 
   for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
   {
-    if (isTemporaryMDHistoWorkspace(*source))
+    if (isTemporaryWorkspace(*source))
     {
-      numberOfTemporaryMDHistoWorkspaces++;
+      numberOfTemporaryWorkspaces++;
     } else if (isMDHistoWorkspace(*source))
     {
       numberOfTrueMDHistoWorkspaces++;
@@ -217,24 +258,52 @@ void StandardView::setRebinAndUnbinButtons()
   // If there are any true MDHisto workspaces then the rebin button should be disabled
   if (numberOfTrueMDHistoWorkspaces > 0 || numberOfPeakWorkspaces > 0)
   {
-    this->ui.rebinButton->setEnabled(false);
+    this->m_binMDAction->setEnabled(false);
+    this->m_sliceMDAction->setEnabled(false);
+    this->m_cutMDAction->setEnabled(false);
   }
   else 
   {
-    this->ui.rebinButton->setEnabled(true);
+    this->m_binMDAction->setEnabled(true);
+    this->m_sliceMDAction->setEnabled(true);
+    this->m_cutMDAction->setEnabled(true);
   }
 
-  // If there are no temporary MD Histo workspaces the button should be disabled.
-  if (numberOfTemporaryMDHistoWorkspaces == 0)
+  // If there are no temporary workspaces the button should be disabled.
+  if (numberOfTemporaryWorkspaces == 0)
   {
-    this->ui.unbinButton->setEnabled(false);
+    this->m_unbinAction->setEnabled(false);
   }
   else
   {
-    this->ui.unbinButton->setEnabled(true);
+    this->m_unbinAction->setEnabled(true);
   }
 }
 
+
+/**
+ * Reacts to the user selecting the BinMD algorithm
+ */ 
+void StandardView::onBinMD()
+{
+  emit rebin("BinMD");
+}
+
+/**
+ * Reacts to the user selecting the SliceMD algorithm
+ */ 
+void StandardView::onSliceMD()
+{
+  emit rebin("SliceMD");
+}
+
+/**
+ * Reacts to the user selecting the CutMD algorithm
+ */ 
+void StandardView::onCutMD()
+{
+  emit rebin("CutMD");
+}
 
 } // SimpleGui
 } // Vates

@@ -10,7 +10,7 @@
 
 class pqPipelineSource;
 class pqRenderView;
-
+class QAction;
 
 namespace Mantid
 {
@@ -85,6 +85,12 @@ protected slots:
   void onRenderDone();
   /// Invoke the ScaleWorkspace on the current dataset.
   void onScaleButtonClicked();
+  /// On BinMD button clicked
+  void onBinMD();
+  /// On SliceMD button clicked
+  void onSliceMD();
+  /// On CutMD button clicked
+  void onCutMD();
 
 private:
   Q_DISABLE_COPY(StandardView)
@@ -96,6 +102,13 @@ private:
 
   /// Set the rebin and unbin button visibility
   void setRebinAndUnbinButtons();
+  /// Set up the buttons
+  void setupViewButtons();
+
+  QAction* m_binMDAction;
+  QAction* m_sliceMDAction;
+  QAction* m_cutMDAction;
+  QAction* m_unbinAction;
 };
 
 } // SimpleGui

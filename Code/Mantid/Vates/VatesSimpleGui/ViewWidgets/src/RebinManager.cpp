@@ -53,8 +53,9 @@ namespace Mantid
        * Show a Bin MD dialog for rebinning in the VSI
        * @param inputWorkspace The name of the input workspace.
        * @param outputWorkspace The name of the output workspace.
+       * @param algorithmType The type of algorithm which is to be used for rebinning.
        */
-      void RebinManager::showDialog(std::string inputWorkspace, std::string outputWorkspace)
+      void RebinManager::showDialog(std::string inputWorkspace, std::string outputWorkspace, std::string algorithmType)
       {
         if (inputWorkspace.empty() || outputWorkspace.empty())
         {
@@ -62,14 +63,14 @@ namespace Mantid
         }
 
         // Create the algorithm
-        Mantid::API::IAlgorithm_sptr algorithm = createAlgorithm(m_binMdName, m_binMdVersion);
+        Mantid::API::IAlgorithm_sptr algorithm = createAlgorithm(algorithmType, 1);
 
         if (!algorithm)
         {
           return;
         }
 
-        MantidQt::API::AlgorithmDialog* rebinDialog = createDialog(algorithm, inputWorkspace, outputWorkspace);
+        MantidQt::API::AlgorithmDialog* rebinDialog = createDialog(algorithm, inputWorkspace, outputWorkspace, algorithmType);
 
         rebinDialog->show();
         rebinDialog->raise();
@@ -105,16 +106,16 @@ namespace Mantid
        * @param version The version of the algorithm
        * @returns A pointer to the newly created algorithm.
        */
-      Mantid::API::IAlgorithm_sptr RebinManager::createAlgorithm(const QString& algorithmName, int version)
+      Mantid::API::IAlgorithm_sptr RebinManager::createAlgorithm(const std::string& algorithmName, int version)
       {
         Mantid::API::IAlgorithm_sptr alg;
         try
         {
-          alg = Mantid::API::AlgorithmManager::Instance().create(algorithmName.toStdString(),version);
+          alg = Mantid::API::AlgorithmManager::Instance().create(algorithmName,version);
         }
         catch(...)
         {
-          g_log.warning() << "Error: " << algorithmName.toStdString() << " was not created. Version number is " << version;
+          g_log.warning() << "Error: " << algorithmName << " was not created. Version number is " << version;
         }
         return alg;
       }
@@ -126,18 +127,38 @@ namespace Mantid
        * @param outputWorkspace The name of the output workspace.
        * @returns The algorithm dialog
        */
-      MantidQt::API::AlgorithmDialog* RebinManager::createDialog( Mantid::API::IAlgorithm_sptr algorithm, std::string inputWorkspace, std::string outputWorkspace)
+      MantidQt::API::AlgorithmDialog* RebinManager::createDialog(Mantid::API::IAlgorithm_sptr algorithm,
+                                                                 std::string inputWorkspace,
+                                                                 std::string outputWorkspace,
+                                                                 std::string algorithmType)
       {
-         QHash<QString, QString> presets;
-         getPresetsForBinMD(inputWorkspace, outputWorkspace, presets);
-
-        //Check if a workspace is selected in the dock and set this as a preference for the input workspace
+        QHash<QString, QString> presets;
+       //Check if a workspace is selected in the dock and set this as a preference for the input workspace
         //This is an optional message displayed at the top of the GUI.
         QString optional_msg(algorithm->summary().c_str());
 
+        MantidQt::API::AlgorithmDialog* dialog = NULL;
 
-        MantidQt::MantidWidgets::BinMDDialog* dialog = new MantidQt::MantidWidgets::BinMDDialog(this);
-                // The parent so that the dialog appears on top of it
+        // Set the correct algorithm dialog
+        if (algorithmType == "BinMD")
+        {
+          dialog = new MantidQt::MantidWidgets::BinMDDialog(this);
+          getPresetsForSliceMDAlgorithmDialog(inputWorkspace, outputWorkspace, presets);
+        }
+        else if (algorithmType == "SliceMD")
+        {
+          dialog = new MantidQt::MantidWidgets::SliceMDDialog(this);
+          getPresetsForSliceMDAlgorithmDialog(inputWorkspace, outputWorkspace, presets);
+        } else if (algorithmType == "CutMD")
+        {
+
+        } else
+        {
+
+          return dialog;
+        }
+
+        // The parent so that the dialog appears on top of it
         dialog->setParent(this);
         dialog->setAttribute(Qt::WA_DeleteOnClose, true);
 
@@ -147,28 +168,45 @@ namespace Mantid
         flags |= Qt::WindowContextHelpButtonHint;
         dialog->setWindowFlags(flags);
 
-        // Set the content
         dialog->setAlgorithm(algorithm);
         dialog->setPresetValues(presets);
         dialog->setOptionalMessage(QString(algorithm->summary().c_str()));
 
-        // Setup the layout
-        dialog->initializeLayout();
-        dialog->customiseLayoutForVsi(inputWorkspace);
+        MantidQt::MantidWidgets::BinMDDialog * binDialog = dynamic_cast<MantidQt::MantidWidgets::BinMDDialog *>(dialog);
+        MantidQt::MantidWidgets::SliceMDDialog * sliceDialog = dynamic_cast<MantidQt::MantidWidgets::SliceMDDialog *>(dialog);
 
-        // Setup the values of the axis dimensions
-        setAxisDimensions(dialog, inputWorkspace);
+
+        if (binDialog)
+        {
+          binDialog->initializeLayout();
+          binDialog->customiseLayoutForVsi(inputWorkspace);
+
+          // Setup the values of the axis dimensions
+          setAxisDimensions(binDialog, inputWorkspace);
+        }
+        else if (sliceDialog)
+        {
+          sliceDialog->initializeLayout();
+          sliceDialog->customiseLayoutForVsi(inputWorkspace);
+
+         // Setup the values of the axis dimensions
+          setAxisDimensions(sliceDialog, inputWorkspace);
+        }
+        else if (0==1)
+        {
+
+        }
 
         return dialog;
       }
 
       /**
-       * Determine the preset values 
-       * @param inputWorkspace The name of the input workspace.
-       * @param outputWorkspace The name of the output workspace.
-       * @param presets A container for the preset values.
-       */
-      void RebinManager::getPresetsForBinMD(std::string inputWorkspace, std::string outputWorkspace, QHash<QString, QString>& presets)
+        * Determine the preset values 
+        * @param inputWorkspace The name of the input workspace.
+        * @param outputWorkspace The name of the output workspace.
+        * @param presets A container for the preset values.
+        */
+      void RebinManager::getPresetsForSliceMDAlgorithmDialog(std::string inputWorkspace, std::string outputWorkspace, QHash<QString, QString>& presets)
       {
         // Set the input workspace
         presets.insert(QString(m_lblInputWorkspace),QString::fromStdString(inputWorkspace));
@@ -178,11 +216,11 @@ namespace Mantid
       }
 
       /**
-       * Resets the aligned dimensions properties
-       * @param dialog A pointer to the BinMD dialog
+       * Resets the aligned dimensions properties in a SlicingAlgorithmDialog.
+       * @param dialog A pointer to the SliceMDDialog
        * @param inputWorkspace The name of the input workspace.
        */
-      void RebinManager::setAxisDimensions(MantidQt::MantidWidgets::BinMDDialog* dialog, std::string inputWorkspace)
+      void RebinManager::setAxisDimensions(MantidQt::MantidWidgets::SlicingAlgorithmDialog* dialog, std::string inputWorkspace)
       {
         Mantid::API::IMDEventWorkspace_sptr  eventWorkspace = getWorkspace(inputWorkspace);
 
@@ -200,7 +238,7 @@ namespace Mantid
 
           // Check the bins size
           QString newNumberOfBins;
-          if (numberOfBins < m_binCutOffValue)
+          if (numberOfBins < m_binCutOffValue && index < 3)
           {
             newNumberOfBins = QString::number(static_cast<unsigned long long>(m_binCutOffValue));
           }
@@ -209,9 +247,9 @@ namespace Mantid
             newNumberOfBins = QString::number(static_cast<unsigned long long>(numberOfBins));
           }
 
-          // If Id exists use it as the identifier otherwise use the name 
+          // Set the name
           std::string identifier;
-          if (dimensionId.empty())
+          if (!name.empty())
           {
             identifier = name;
           }

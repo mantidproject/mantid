@@ -53,18 +53,18 @@ namespace Mantid
 
           ~RebinManager();
 
-          void showDialog(std::string inputWorkspace, std::string outputWorkspace);
+          void showDialog(std::string inputWorkspace, std::string outputWorkspace, std::string algorithmType);
 
         private:
-          MantidQt::API::AlgorithmDialog* createDialog(Mantid::API::IAlgorithm_sptr algorithm, std::string inputWorkspace, std::string outputWorkspace);
+          MantidQt::API::AlgorithmDialog* createDialog(Mantid::API::IAlgorithm_sptr algorithm, std::string inputWorkspace, std::string outputWorkspace, std::string algorithmType);
 
-          void getPresetsForBinMD( std::string inputWorkspace, std::string outputWorkspace, QHash<QString, QString>& presets);
+          void getPresetsForSliceMDAlgorithmDialog( std::string inputWorkspace, std::string outputWorkspace, QHash<QString, QString>& presets);
 
-          void setAxisDimensions(MantidQt::MantidWidgets::BinMDDialog* dialog,  std::string inputWorkspace);
+          void setAxisDimensions(MantidQt::MantidWidgets::SlicingAlgorithmDialog* dialog,  std::string inputWorkspace);
 
           Mantid::API::IMDEventWorkspace_sptr getWorkspace(std::string workspaceName);
 
-          Mantid::API::IAlgorithm_sptr createAlgorithm(const QString& algName, int version);
+          Mantid::API::IAlgorithm_sptr createAlgorithm(const std::string& algName, int version);
 
           Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace> m_adsWorkspaceProvider;
 
