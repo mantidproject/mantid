@@ -276,6 +276,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         # Run Mono
         tReducer = DirectEnergyConversion(run.getInstrument())
+        tReducer.energy_bins =  [-20,0.2,60]
         ei_guess = 67.
         mono_s = tReducer.mono_sample(run, ei_guess,wb_ws)
 

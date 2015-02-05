@@ -1192,7 +1192,7 @@ class DirectEnergyConversion(object):
             pass # TODO: investigate way of removing background from event workspace if we want result to be an event workspace
             # what to do with event workspace having negative events? will further algorithms work with this properly?
 
-        if self.apply_detector_eff and energy_bins:
+        if self.apply_detector_eff and energy_bins: # Decector efficiency should work on event workspace too?
            DetectorEfficiencyCor(InputWorkspace=result_name,OutputWorkspace=result_name)
            self.prop_man.log("_do_mono: finished DetectorEfficiencyCor for : " + result_name,'information')
         #############
@@ -1247,8 +1247,8 @@ class DirectEnergyConversion(object):
         result_ws = mtd[result_name]
         result_ws = self.remap(result_ws, spectra_masks, map_file)
 
-
-        ConvertToDistribution(Workspace=result_ws)
+        if prop_man.energy_bins: # It should already be a distribution. 
+            ConvertToDistribution(Workspace=result_ws)
         # White beam correction
         if white_run is not None:
             white_ws = self.do_white(white_run, spectra_masks, map_file)
