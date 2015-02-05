@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/DensityOfStates.h"
+#include "MantidQtCustomInterfaces/Indirect/DensityOfStates.h"
 
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
