@@ -304,16 +304,11 @@ void PlotAsymmetryByLogValue::exec() {
 */
 void PlotAsymmetryByLogValue::loadCorrectionsFromFile (Workspace_sptr &customDeadTimes, std::string deadTimeFile )
 {
-  try{
-    IAlgorithm_sptr loadDeadTimes = createChildAlgorithm("LoadNexusProcessed");
-    loadDeadTimes->setPropertyValue("Filename", deadTimeFile);
-    loadDeadTimes->setProperty("OutputWorkspace", customDeadTimes);
-    loadDeadTimes->executeAsChildAlg();
-    customDeadTimes = loadDeadTimes->getProperty("OutputWorkspace");
-  }
-  catch (...){
-    throw std::runtime_error("Unable to load corrections from specified file\n");
-  }
+  IAlgorithm_sptr loadDeadTimes = createChildAlgorithm("LoadNexusProcessed");
+  loadDeadTimes->setPropertyValue("Filename", deadTimeFile);
+  loadDeadTimes->setProperty("OutputWorkspace", customDeadTimes);
+  loadDeadTimes->executeAsChildAlg();
+  customDeadTimes = loadDeadTimes->getProperty("OutputWorkspace");
 }
 /**  Populate output workspace with results
 *   @param outWS :: [input/output] Output workspace to populate
@@ -397,24 +392,17 @@ void PlotAsymmetryByLogValue::applyDeadtimeCorr (Workspace_sptr &loadedWs, Works
   ScopedWorkspace ws(loadedWs);
   ScopedWorkspace dt(deadTimes);
 
-  try
-  {
-    IAlgorithm_sptr applyCorr = AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
-    applyCorr->setLogging(false);
-    applyCorr->setRethrows(true);
-    applyCorr->setPropertyValue("InputWorkspace", ws.name());
-    applyCorr->setPropertyValue("OutputWorkspace", ws.name());
-    applyCorr->setProperty("DeadTimeTable", dt.name());
-    applyCorr->execute();
-    // Workspace should've been replaced in the ADS by ApplyDeadTimeCorr, so
-    // need to
-    // re-assign it
-    loadedWs = ws.retrieve();
-  }
-  catch (...)
-  {
-    throw std::runtime_error("Unable to apply corrections\n");
-  }
+  IAlgorithm_sptr applyCorr = AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
+  applyCorr->setLogging(false);
+  applyCorr->setRethrows(true);
+  applyCorr->setPropertyValue("InputWorkspace", ws.name());
+  applyCorr->setPropertyValue("OutputWorkspace", ws.name());
+  applyCorr->setProperty("DeadTimeTable", dt.name());
+  applyCorr->execute();
+  // Workspace should've been replaced in the ADS by ApplyDeadTimeCorr, so
+  // need to
+  // re-assign it
+  loadedWs = ws.retrieve();
 }
 
 /**  Group detectors from specified file
@@ -429,23 +417,16 @@ void PlotAsymmetryByLogValue::groupDetectors (Workspace_sptr &loadedWs, Workspac
   ScopedWorkspace grouping(loadedDetGrouping);
   ScopedWorkspace outWS;
 
-  try 
-  {
-    IAlgorithm_sptr applyGrouping = AlgorithmManager::Instance().create("MuonGroupDetectors");
-    applyGrouping->setLogging(false);
-    applyGrouping->setRethrows(true);
+  IAlgorithm_sptr applyGrouping = AlgorithmManager::Instance().create("MuonGroupDetectors");
+  applyGrouping->setLogging(false);
+  applyGrouping->setRethrows(true);
 
-    applyGrouping->setPropertyValue("InputWorkspace", inWS.name());
-    applyGrouping->setPropertyValue("DetectorGroupingTable", grouping.name());
-    applyGrouping->setPropertyValue("OutputWorkspace", outWS.name());
-    applyGrouping->execute();
+  applyGrouping->setPropertyValue("InputWorkspace", inWS.name());
+  applyGrouping->setPropertyValue("DetectorGroupingTable", grouping.name());
+  applyGrouping->setPropertyValue("OutputWorkspace", outWS.name());
+  applyGrouping->execute();
 
-    loadedWs = outWS.retrieve();
-  } 
-  catch (...) 
-  {
-    throw std::runtime_error("Unable to group detectors.\n\nPlease specify grouping manually.");
-  }
+  loadedWs = outWS.retrieve();
 }
 /**  Calculate the integral asymmetry for a workspace.
 *   The calculation is done by MuonAsymmetryCalc and SimpleIntegration
