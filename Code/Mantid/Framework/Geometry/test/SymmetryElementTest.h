@@ -118,8 +118,42 @@ public:
 
     V3R glideVectorC = V3R(0, 0, 1) / 2;
     SymmetryOperation glidePlaneC("x,-y,z+1/2");
-    TS_ASSERT_EQUALS(element.determineTranslation(glidePlaneC),
-                     glideVectorC);
+    TS_ASSERT_EQUALS(element.determineTranslation(glidePlaneC), glideVectorC);
+  }
+
+  void testGetGSLMatrix() {
+    IntMatrix mantidMatrix(3, 3, true);
+    gsl_matrix *matrix = getGSLMatrix(mantidMatrix);
+
+    TS_ASSERT(matrix);
+    TS_ASSERT_EQUALS(matrix->size1, mantidMatrix.numRows());
+    TS_ASSERT_EQUALS(matrix->size2, mantidMatrix.numCols());
+
+    for (size_t r = 0; r < mantidMatrix.numRows(); ++r) {
+      for (size_t c = 0; c < mantidMatrix.numCols(); ++c) {
+        TS_ASSERT_EQUALS(gsl_matrix_get(matrix, r, c), mantidMatrix[r][c]);
+      }
+    }
+
+    gsl_matrix_free(matrix);
+  }
+
+  void testGetGSLIdentityMatrix() {
+    gsl_matrix *matrix = getGSLIdentityMatrix(3, 3);
+
+    TS_ASSERT_EQUALS(matrix->size1, 3);
+    TS_ASSERT_EQUALS(matrix->size2, 3);
+
+    gsl_matrix_free(matrix);
+  }
+
+  void testSymmetryElementWithAxisDetermineAxis() {
+    MockSymmetryElementWithAxis element;
+
+    V3R rotationAxisZ = V3R(0, 0, 1);
+    SymmetryOperation twoFoldRotationZ("-x,-y,z");
+    TS_ASSERT_EQUALS(element.determineAxis(twoFoldRotationZ.matrix()),
+                     rotationAxisZ);
   }
 
 private:

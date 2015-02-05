@@ -7,6 +7,7 @@
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
 
 #include <boost/shared_ptr.hpp>
+#include <gsl/gsl_matrix.h>
 
 namespace Mantid {
 namespace Geometry {
@@ -116,6 +117,9 @@ class MANTID_GEOMETRY_DLL SymmetryElementMirror
 
   void init(const SymmetryOperation &operation);
 };
+
+MANTID_GEOMETRY_DLL gsl_matrix *getGSLMatrix(const Kernel::IntMatrix &matrix);
+MANTID_GEOMETRY_DLL gsl_matrix *getGSLIdentityMatrix(size_t rows, size_t cols);
 
 } // namespace Geometry
 } // namespace Mantid

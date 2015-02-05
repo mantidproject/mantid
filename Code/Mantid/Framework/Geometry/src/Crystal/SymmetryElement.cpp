@@ -1,6 +1,8 @@
 #include "MantidGeometry/Crystal/SymmetryElement.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
+#include <gsl/gsl_eigen.h>
+
 namespace Mantid {
 namespace Geometry {
 SymmetryElement::SymmetryElement() : m_hmSymbol() {}
@@ -66,10 +68,37 @@ V3R SymmetryElementWithAxis::determineTranslation(
          RationalNumber(1, static_cast<int>(operation.order()));
 }
 
+gsl_matrix *getGSLMatrix(const Kernel::IntMatrix &matrix) {
+  gsl_matrix *gslMatrix = gsl_matrix_alloc(matrix.numRows(), matrix.numCols());
+
+  for (size_t r = 0; r < matrix.numRows(); ++r) {
+    for (size_t c = 0; c < matrix.numCols(); ++c) {
+      gsl_matrix_set(gslMatrix, r, c, static_cast<double>(matrix[r][c]));
+    }
+  }
+
+  return gslMatrix;
+}
+
+gsl_matrix *getGSLIdentityMatrix(size_t rows, size_t cols) {
+  gsl_matrix *gslMatrix = gsl_matrix_alloc(rows, cols);
+
+  gsl_matrix_set_identity(gslMatrix);
+
+  return gslMatrix;
+}
+
 V3R
 SymmetryElementWithAxis::determineAxis(const Kernel::IntMatrix &matrix) const {
-  UNUSED_ARG(matrix);
-  // Solve Eigenvalue problem Wu = sign(det) * u
+  gsl_matrix *eigenMatrix = getGSLMatrix(matrix);
+  gsl_matrix *identityMatrix =
+      getGSLIdentityMatrix(matrix.numRows(), matrix.numCols());
+
+  gsl_eigen_gen_workspace *eigenWs = gsl_eigen_gen_alloc(matrix.numRows());
+
+  gsl_matrix_free(eigenMatrix);
+  gsl_matrix_free(identityMatrix);
+  gsl_eigen_gen_free(eigenWs);
 
   return V3R(0, 0, 0);
 }
