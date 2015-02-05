@@ -13,6 +13,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/PeakNoShapeFactory.h"
+#include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
