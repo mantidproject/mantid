@@ -5,6 +5,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -354,6 +355,32 @@ public:
     TS_ASSERT_EQUALS(backgroundOutterRadius, actualBackgroundOutterRadius);
     TS_ASSERT_EQUALS(backgroundInnerRadius, actualBackgroundInnerRadius);
     TS_ASSERT(outWS->hasIntegratedPeaks());
+  }
+
+  void test_writes_out_peak_shape()
+  {
+    createMDEW();
+    const double peakRadius = 2;
+    const double backgroundOuterRadius = 3;
+    const double backgroundInnerRadius = 2.5;
+
+    doRun(peakRadius, backgroundOuterRadius, "OutWS", backgroundInnerRadius);
+
+    PeaksWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
+
+    // Get a peak.
+    IPeak& iPeak = outWS->getPeak(0);
+    Peak * const peak = dynamic_cast<Peak*>(&iPeak);
+    TS_ASSERT(peak);
+    // Get the peak's shape
+    const PeakShape& shape = peak->getPeakShape();
+    PeakShapeSpherical const * const sphericalShape = dynamic_cast<PeakShapeSpherical*>(const_cast<PeakShape*>(&shape));
+    TSM_ASSERT("Wrong sort of peak", sphericalShape);
+
+    // Check the shape is what we expect
+    TS_ASSERT_EQUALS(peakRadius, sphericalShape->radius());
+    TS_ASSERT_EQUALS(backgroundOuterRadius, sphericalShape->backgroundOuterRadius().get());
+    TS_ASSERT_EQUALS(backgroundInnerRadius, sphericalShape->backgroundInnerRadius().get());
   }
 
 };

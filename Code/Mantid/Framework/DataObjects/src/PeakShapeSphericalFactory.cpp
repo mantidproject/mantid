@@ -38,8 +38,21 @@ PeakShape *PeakShapeSphericalFactory::create(const std::string &source) const {
           static_cast<SpecialCoordinateSystem>(root["frame"].asInt()));
       const double radius(root["radius"].asDouble());
 
-      product = new PeakShapeSpherical(radius, frame, algorithmName,
-                                       algorithmVersion);
+      if (!root["background_outer_radius"].empty() &&
+          !root["background_inner_radius"].empty()) {
+        const double backgroundOuterRadius(
+            root["background_outer_radius"].asDouble());
+        const double backgroundInnerRadius(
+            root["background_inner_radius"].asDouble());
+        product = new PeakShapeSpherical(radius, backgroundInnerRadius, backgroundOuterRadius, frame, algorithmName,
+                                         algorithmVersion);
+      }
+
+      else {
+
+        product = new PeakShapeSpherical(radius, frame, algorithmName,
+                                         algorithmVersion);
+      }
     } else {
       if (m_successor) {
         product = m_successor->create(source);

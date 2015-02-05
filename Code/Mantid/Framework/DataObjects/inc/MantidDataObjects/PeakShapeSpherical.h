@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/PeakShapeBase.h"
 #include "MantidAPI/SpecialCoordinateSystem.h"
+#include <boost/optional.hpp>
 #include <string>
 
 namespace Mantid {
@@ -39,6 +40,11 @@ public:
                      API::SpecialCoordinateSystem frame,
                      std::string algorithmName = std::string(),
                      int algorithmVersion = -1);
+  /// Constructor
+  PeakShapeSpherical(const double &peakRadius, const double& peakInnerRadius, const double& peakOuterRadius,
+                     API::SpecialCoordinateSystem frame,
+                     std::string algorithmName = std::string(),
+                     int algorithmVersion = -1);
   /// Destructor
   virtual ~PeakShapeSpherical();
   /// Copy constructor
@@ -55,10 +61,18 @@ public:
   bool operator==(const PeakShapeSpherical &other) const;
   /// Peak radius
   double radius() const;
+  /// Peak outer background radius
+  boost::optional<double> backgroundOuterRadius() const;
+  /// Peak inner background radius
+  boost::optional<double> backgroundInnerRadius() const;
 
 private:
   /// Peak radius
   double m_radius;
+  /// Background outer radius
+  boost::optional<double> m_backgroundOuterRadius;
+  /// Background inner radius;
+  boost::optional<double> m_backgroundInnerRadius;
 };
 
 } // namespace DataObjects

@@ -361,6 +361,7 @@ set ( TEST_FILES
 	SampleTest.h
 	ScopedWorkspaceTest.h
 	ScriptBuilderTest.h
+        SpecialCoordinateSystemTest.h
 	SpectraAxisTest.h
 	SpectrumDetectorMappingTest.h
 	TextAxisTest.h

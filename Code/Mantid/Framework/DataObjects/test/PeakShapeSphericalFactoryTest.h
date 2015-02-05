@@ -93,6 +93,30 @@ public:
     TS_ASSERT_EQUALS(sourceShape, *sphericalShapeProduct);
     delete productShape;
   }
+
+  void test_create_with_multiple_radii()
+  {
+      const double radius = 2;
+      const double backgroundInnerRadius = 3;
+      const double backgroundOuterRadius = 4;
+      const SpecialCoordinateSystem frame = HKL;
+      const std::string algorithmName = "foo";
+      const int algorithmVersion = 3;
+
+      // Make a source shape with background outer and inner radius
+      PeakShapeSpherical sourceShape(radius, backgroundInnerRadius, backgroundOuterRadius, frame, algorithmName,
+                                     algorithmVersion);
+
+      PeakShapeSphericalFactory factory;
+      PeakShape *productShape = factory.create(sourceShape.toJSON());
+
+      PeakShapeSpherical *sphericalShapeProduct =
+          dynamic_cast<PeakShapeSpherical *>(productShape);
+      TS_ASSERT(sphericalShapeProduct);
+
+      TS_ASSERT_EQUALS(sourceShape, *sphericalShapeProduct);
+      delete productShape;
+  }
 };
 
 #endif /* MANTID_DATAOBJECTS_PEAKSHAPESPHERICALFACTORYTEST_H_ */

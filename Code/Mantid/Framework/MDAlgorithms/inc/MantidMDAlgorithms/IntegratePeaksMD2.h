@@ -56,7 +56,7 @@ private:
 
   /// Check if peaks overlap
   void checkOverlap(int i, Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
-                    int CoordinatesToUse, double radius);
+                    Mantid::API::SpecialCoordinateSystem CoordinatesToUse, double radius);
 };
 
 } // namespace Mantid
