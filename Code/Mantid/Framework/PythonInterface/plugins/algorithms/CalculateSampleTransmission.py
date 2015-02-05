@@ -32,6 +32,20 @@ class CalculateSampleTransmission(PythonAlgorithm):
                              doc='Outputs the sample transmission over the wavelength range as a function of wavelength.')
 
 
+    def validateInputs(self):
+        issues = dict()
+
+        density = self.getProperty('NumberDensity').value
+        if(density < 0.0):
+            issues['NumberDensity'] = 'NumberDensity must be positive'
+
+        thickness = self.getProperty('Thickness').value
+        if(thickness < 0.0):
+            issues['Thickness'] = 'Thickness must be positive'
+
+        return issues
+
+
     def PyExec(self):
         self._setup()
 
@@ -75,7 +89,7 @@ class CalculateSampleTransmission(PythonAlgorithm):
         Calculates transmission and scattering at a given wavelength.
 
         @param wavelength Wavelength at which to calculate (in Angstrom)
-        @return Tuple of transmission and scattering
+        @return Tuple of transmission and scattering percentages
         """
 
         material = mtd[self._output_ws].mutableSample().getMaterial()

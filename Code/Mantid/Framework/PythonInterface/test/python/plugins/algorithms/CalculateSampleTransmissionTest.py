@@ -8,7 +8,7 @@ class CalculateSampleTransmissionTest(unittest.TestCase):
 
     def test_sample_transmission_calculation(self):
         """
-        Test a transmission calculation using IRIS, graphite, 002.
+        Test a basic transmission calculation.
         """
 
         # Using water sample
@@ -28,6 +28,36 @@ class CalculateSampleTransmissionTest(unittest.TestCase):
 
         np.testing.assert_array_almost_equal(trans, expected_trans, decimal=4)
         np.testing.assert_array_almost_equal(scatt, expected_scatt, decimal=4)
+
+
+    def test_validate_density(self):
+        """
+        Tests validation on NumberDensity property.
+        """
+
+        # Using water sample
+        formula = "H2-O"
+        density = -0.1
+        thickness = 0.1
+
+        self.assertRaises(RuntimeError, CalculateSampleTransmission,
+                          WavelengthRange='5.0,0.2,7.0', ChemicalFormula=formula,
+                          NumberDensity=density, Thickness=thickness)
+
+
+    def test_validate_thickness(self):
+        """
+        Tests validation on Thickness property.
+        """
+
+        # Using water sample
+        formula = "H2-O"
+        density = 0.1
+        thickness = -0.1
+
+        self.assertRaises(RuntimeError, CalculateSampleTransmission,
+                          WavelengthRange='5.0,0.2,7.0', ChemicalFormula=formula,
+                          NumberDensity=density, Thickness=thickness)
 
 
 if __name__=="__main__":
