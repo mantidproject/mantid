@@ -1192,7 +1192,7 @@ class DirectEnergyConversion(object):
             pass # TODO: investigate way of removing background from event workspace if we want result to be an event workspace
             # what to do with event workspace having negative events? will further algorithms work with this properly?
 
-        if self.apply_detector_eff:
+        if self.apply_detector_eff and energy_bins:
            DetectorEfficiencyCor(InputWorkspace=result_name,OutputWorkspace=result_name)
            self.prop_man.log("_do_mono: finished DetectorEfficiencyCor for : " + result_name,'information')
         #############

@@ -270,6 +270,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         wb_ws   = Rebin(run,Params=[tMin,1,tMax],PreserveEvents=False)
         # References used to test against ordinary reduction
         ref_ws = Rebin(run,Params=str(tMin)+',1,'+str(tMax))
+        ref_ws_monitors = CloneWorkspace('run_monitors')
         # just in case, wb should work without clone too. 
         wb_clone = CloneWorkspace(wb_ws)
 
@@ -281,6 +282,9 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         #
         mono_ref = tReducer.mono_sample(ref_ws, ei_guess,wb_clone)
+
+        rez = CheckWorkspacesMatch(mono_s,mono_ref)
+        self.assertEqual(rez,'Success!')
 
 
 
