@@ -1,5 +1,5 @@
 import os, sys
-os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -256,20 +256,21 @@ class DirectEnergyConversionTest(unittest.TestCase):
             for samp,rez in zip(eni,en_range): self.assertAlmostEqual(samp,rez)
 
     def test_late_rebinning(self):
-        run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, NumEvents=10000, XUnit='Energy',
-                                                     XMin=10, XMax=200, BinWidth=0.1)
+        run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, NumEvents=100000, XUnit='Energy',
+                                                     XMin=3, XMax=200, BinWidth=0.1)
         LoadInstrument(run_monitors,InstrumentName='MARI')
         ConvertUnits(InputWorkspace='run_monitors', OutputWorkspace='run_monitors', Target='TOF')
         run_monitors = mtd['run_monitors']
         tof = run_monitors.dataX(3)
         tMin = tof[0]
         tMax = tof[-1]
-        run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=10, BankPixelWidth=1, NumEvents=10000,
+        run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1, NumEvents=100000,
                                     XUnit='TOF',xMin=tMin,xMax=tMax)
         LoadInstrument(run,InstrumentName='MARI')
         wb_ws   = Rebin(run,Params=[tMin,1,tMax],PreserveEvents=False)
+
         # References used to test against ordinary reduction
-        ref_ws = Rebin(run,Params=str(tMin)+',1,'+str(tMax))
+        ref_ws = Rebin(run,Params=[tMin,1,tMax],PreserveEvents=False)
         ref_ws_monitors = CloneWorkspace('run_monitors')
         # just in case, wb should work without clone too. 
         wb_clone = CloneWorkspace(wb_ws)
