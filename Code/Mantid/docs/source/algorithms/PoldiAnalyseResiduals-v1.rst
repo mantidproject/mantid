@@ -40,7 +40,10 @@ The following example shows how to calculate the residuals following a fit perfo
                                     Version=1)
 
     # Fit peaks to original 2D data
-    fit_result_Si_2D = PoldiFitPeaks2D(data_Si, PoldiPeakWorkspace="peaks_Si_1D", MaximumIterations=100, RefinedPoldiPeakWorkspace="peaks_Si_2D")
+    fit_result_Si_2D = PoldiFitPeaks2D(data_Si,
+				    PoldiPeakWorkspace="peaks_Si_1D", MaximumIterations=100,
+				    RefinedPoldiPeakWorkspace="peaks_Si_2D",
+				    Calculated1DSpectrum="fit_result_Si_1D")
 
     # Calculate residuals
     residuals_Si = PoldiAnalyseResiduals(MeasuredCountData=data_Si, FittedCountData="fit_result_Si_2D", MaxIterations=5)
