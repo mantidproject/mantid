@@ -46,13 +46,46 @@ One MDEventWorkspace stores the detectors' counts;
 and the other one stores the monitor counts. 
 
 
+Apply MDWorkspaces to HFIR powder diffractometer experiment
+-----------------------------------------------------------
+
+Run
+###
+
+In an HFIR powder diffractometer scan, one measurement is made at a certain rotational angle. 
+Such one meaurement constains 44 detectors' counts, instrument setup (such as rotation angle) and
+sample environment logs.  
+As it is translated to MDWorkspace, such a measurement constitutes a {\it run}. 
+
+
+Essential logs for building MDWorkspace
+#######################################
+
+There are a few sample logs that are essential to create the MDWorkspaces for the HFIR powder diffractometers.
+The algorithm allows the user to specify these logs
+
+* Rotation angle to determine the :math:`2\theta` for detector 0. The default is '2theta';
+* Prefix of the logs for detectors.  The default is 'anode'.  In present HB2A's SPICE file, the detectors are labelled as 'anode1', 'anode2', and etc;
+* Monitor counts for each measurement.  The default is 'monitor';
+* Duration of each measurement.  The default is 'time'. 
+
+
 Sample Logs
 ###########
 
-** TODO : Add this section about how the algorithm treats **
-FIXME *** TODO *** : Do not make a long list of time series property for run 1.
-BUT assign the relevant sample values to each ExperimentInfo of each run
-Only make the properties in the ParentWorkspace to Sample log of run 0???
+Sample logs will be written to the ExperimentInfo for each run.  
+There are N+1 ExperimentInfo in the MDWorkspace that stores
+the detectors' counts.  
+
+The first N ExperimentInfo are for the N measurements.  
+The sample logs's value measured of that data point will be recorded in the corresponding 
+ExperimentInfo.  
+Hence each of these N ExperimentInfo will contains a set of sample logs, each of which
+contains only one log entry. 
+
+The last one, i.e., ExperimentInfo[N], contains the combined sample logs from all the runs. 
+Hence for an experiment with N runs. 
+
 
 Temporary MD File
 #################
