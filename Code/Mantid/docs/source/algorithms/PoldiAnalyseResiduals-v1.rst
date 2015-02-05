@@ -36,9 +36,8 @@ The following example shows how to calculate the residuals following a fit perfo
     DeleteTableRows(TableWorkspace=peaks_Si_raw, Rows="12-20")
 
     peaks_Si_1D = PoldiFitPeaks1D(correlation_Si, FwhmMultiples=4, PoldiPeakTable="peaks_Si_raw",
-                                    ResultTableWorkspace = "result_table_Si",
-                                    FitCharacteristicsWorkspace = "raw_fit_results_Si",
-                                    FitPlotsWorkspace = "fit_plots_Si")
+                                    FitPlotsWorkspace = "fit_plots_Si",
+                                    Version=1)
 
     # Fit peaks to original 2D data
     fit_result_Si_2D = PoldiFitPeaks2D(data_Si, PoldiPeakWorkspace="peaks_Si_1D", MaximumIterations=100, RefinedPoldiPeakWorkspace="peaks_Si_2D")

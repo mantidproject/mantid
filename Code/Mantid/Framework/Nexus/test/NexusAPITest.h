@@ -15,6 +15,7 @@
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidNexusCPP/NeXusException.hpp"
 
+#include <cmath>
 #include <Poco/File.h>
 #include <iostream>
 #include <string>
@@ -135,7 +136,7 @@ public:
     // add some attributes
     file.putAttr("ch_attribute", "NeXus");
     file.putAttr("i4_attribute", 42);
-    file.putAttr("r4_attribute", 3.14159265);
+    file.putAttr("r4_attribute", M_PI);
 
     // set up for creating a link
     NXlink link = file.getDataID();

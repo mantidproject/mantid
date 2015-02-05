@@ -2,6 +2,7 @@
 #define EXPDECAYOSCTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <cmath>
 
 #include "MantidCurveFitting/ExpDecayOsc.h"
 #include "MantidCurveFitting/Fit.h"
@@ -102,7 +103,7 @@ public:
     TS_ASSERT_DELTA( out->getParameter("A"), 5 ,0.01);
     TS_ASSERT_DELTA( out->getParameter("Lambda"), 1/3.0 ,0.01);
     TS_ASSERT_DELTA( out->getParameter("Frequency"), 1/8.0 ,0.01);  // Period of 8
-    TS_ASSERT_DELTA( out->getParameter("Phi"), 3.1415926536/4.0 ,0.01);  // 45 degrees
+    TS_ASSERT_DELTA( out->getParameter("Phi"), M_PI_4 ,0.01);  // 45 degrees
 
     // check it categories
     const std::vector<std::string> categories = out->categories();

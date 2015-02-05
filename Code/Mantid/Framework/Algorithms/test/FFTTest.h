@@ -1,6 +1,7 @@
 #ifndef FFT_TEST_H_
 #define FFT_TEST_H_
 
+#include <cmath>
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/FFT.h"
@@ -20,7 +21,7 @@ public:
   static FFTTest *createSuite() { return new FFTTest(); }
   static void destroySuite( FFTTest *suite ) { delete suite; }
 
-  FFTTest():dX(0.2),PI(3.1415926535897932384626433832795),h(sqrt(PI/3)),a(PI*PI/3)
+  FFTTest():dX(0.2),h(sqrt(M_PI/3)),a(M_PI*M_PI/3)
   {
   }
   ~FFTTest()
@@ -446,7 +447,6 @@ private:
   }
 
   const double dX;
-    const double PI;
     const double h;
     const double a;
 };
