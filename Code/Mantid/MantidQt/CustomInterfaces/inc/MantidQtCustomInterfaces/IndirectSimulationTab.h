@@ -48,10 +48,6 @@ namespace MantidQt
 			IndirectSimulationTab(QWidget * parent = 0);
 			~IndirectSimulationTab();
 
-			/// Returns a URL for the wiki help page for this interface
-			QString tabHelpURL();
-
-			virtual QString help() = 0;
 			virtual void loadSettings(const QSettings& settings) = 0;
 
 		};

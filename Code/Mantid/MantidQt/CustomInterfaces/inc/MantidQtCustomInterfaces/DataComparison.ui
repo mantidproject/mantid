@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DataComparison</class>
+ <widget class="QMainWindow" name="DataComparison">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>900</width>
+    <height>550</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Data Comparison</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <layout class="QVBoxLayout" name="loPlot"/>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="loOptions">
+      <item>
+       <widget class="QGroupBox" name="gbAddData">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="title">
+         <string>Add Data</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="dsData" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="autoLoad" stdset="0">
+            <bool>true</bool>
+           </property>
+           <property name="showLoad" stdset="0">
+            <bool>false</bool>
+           </property>
+           <property name="toolTip">
+             <string>
+               Used to select a workspace to add to the comparison.
+             </string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbAddData">
+           <property name="text">
+            <string>Add Data</string>
+           </property>
+           <property name="toolTip">
+             <string>
+               Adds the workspace selected to the comparison.
+             </string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="gbCurrentData">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="title">
+         <string>Data</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0" colspan="2">
+          <widget class="QTableWidget" name="twCurrentData">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="pbRemoveAllData">
+           <property name="text">
+            <string>Remove All Data</string>
+           </property>
+           <property name="toolTip">
+             <string>
+               Removes all workspaces from the comparison.
+             </string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QPushButton" name="pbRemoveSelectedData">
+           <property name="text">
+            <string>Remove Selected Data</string>
+           </property>
+           <property name="toolTip">
+             <string>
+               Removes the selected workspaces from the comparison.
+             </string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="gbView">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="title">
+         <string>View</string>
+        </property>
+        <layout class="QGridLayout" name="loView">
+         <item row="0" column="0">
+          <widget class="QPushButton" name="pbPan">
+           <property name="text">
+            <string>Pan</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="toolTip">
+             <string>
+               Toggles the panning tool.
+             </string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QPushButton" name="pbZoom">
+           <property name="text">
+            <string>Zoom</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QPushButton" name="pbResetView">
+           <property name="text">
+            <string>Reset View</string>
+           </property>
+           <property name="toolTip">
+             <string>
+               Resets the plot to the default xoom level and panning position
+               such that all spectra are visible on the plot.
+             </string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="lbSpectrum">
+           <property name="text">
+            <string>Spectrum:</string>
+           </property>
+           <property name="toolTip">
+             <string>
+               Used to select the spectrum index to plot, indexed from the
+               workspace with offset 0.
+             </string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QSpinBox" name="sbSpectrum">
+           <property name="suffix">
+            <string> / 0</string>
+           </property>
+           <property name="maximum">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QCheckBox" name="cbMaintainZoom">
+           <property name="text">
+            <string>Maintain Zoom Level</string>
+           </property>
+           <property name="toolTip">
+             <string>
+               If checked will not change the zoom level when the spectrum
+               index or offset is changed or a new data set is added,
+               otherwise zoom level is reset to show all curves.
+             </string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="gbDiff">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="title">
+         <string>Diff</string>
+        </property>
+        <layout class="QGridLayout" name="loDiff">
+         <item row="0" column="0">
+          <widget class="QPushButton" name="pbDiffSelected">
+           <property name="text">
+            <string>Diff Selected</string>
+           </property>
+           <property name="toolTip">
+             <string>
+               Plots a difference curve for the two currently selected
+               workspaces in the data table as a green line on the plot..
+             </string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QPushButton" name="pbClearDiff">
+           <property name="text">
+            <string>Clear Diff</string>
+           </property>
+           <property name="toolTip">
+             <string>
+               Removes the current difference curve.
+             </string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0" colspan="2">
+          <widget class="QLabel" name="lbDiffInfo">
+           <property name="text">
+            <string>No current diff.</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::DataSelector</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/DataSelector.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

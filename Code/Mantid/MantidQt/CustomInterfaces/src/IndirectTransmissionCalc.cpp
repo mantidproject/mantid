@@ -33,6 +33,9 @@ namespace MantidQt
      */
     void IndirectTransmissionCalc::setup()
     {
+      QRegExp chemicalFormulaRegex("[A-Za-z0-9\\-\\(\\)]*");
+      QValidator *chemicalFormulaValidator = new QRegExpValidator(chemicalFormulaRegex, this);
+      m_uiForm.leChemicalFormula->setValidator(chemicalFormulaValidator);
     }
 
 
@@ -85,7 +88,10 @@ namespace MantidQt
     void IndirectTransmissionCalc::algorithmComplete(bool error)
     {
       if(error)
+      {
+        emit showMessageBox("Failed to execute IndirectTransmission algorithm.\nSee Results Log for details.");
         return;
+      }
 
       std::string instrumentName = m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString();
       std::string outWsName = instrumentName + "_transmission";

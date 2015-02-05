@@ -63,7 +63,9 @@ struct Sqrt
  */
 InstrumentWindowPickTab::InstrumentWindowPickTab(InstrumentWindow* instrWindow):
 InstrumentWindowTab(instrWindow),
-m_freezePlot(false)
+m_freezePlot(false),
+m_tubeXUnitsCache(0),
+m_plotTypeCache(0)
 {
 
   // connect to InstrumentWindow signals
@@ -918,6 +920,7 @@ DetectorPlotController::DetectorPlotController(InstrumentWindowPickTab *tab, Ins
   m_plot(plot),
   m_plotType(Single),
   m_enabled(true),
+  m_tubeXUnits(DETECTOR_ID),
   m_currentDetID(-1)
 {
   connect(m_plot,SIGNAL(clickedAt(double,double)),this,SLOT(addPeak(double,double)));
@@ -1077,6 +1080,11 @@ void DetectorPlotController::plotTubeSums(int detid)
 {
   std::vector<double> x,y;
   prepareDataForSumsPlot(detid,x,y);
+  if ( x.empty() || y.empty() )
+  {
+    clear();
+    return;
+  }
   Mantid::Geometry::IDetector_const_sptr det = m_instrActor->getInstrument()->getDetector(detid);
   boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
   QString label = QString::fromStdString(parent->getName()) + " (" + QString::number(detid) + ") Sum"; 
@@ -1464,6 +1472,7 @@ void DetectorPlotController::savePlotToWorkspace()
   // call CreateWorkspace algorithm. Created worksapce will have name "Curves"
   if (!X.empty())
   {
+    if ( nbins == 0 ) nbins = 1;
     E.resize(Y.size(),1.0);
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmFactory::Instance().create("CreateWorkspace",-1);
     alg->initialize();
@@ -1529,7 +1538,8 @@ QString DetectorPlotController::getTubeXUnitsName() const
   case LENGTH: return "Length";
   case PHI: return "Phi";
   case OUT_OF_PLANE_ANGLE: return "Out of plane angle";
-  default: return "Detector ID";
+  default:
+    break;
   }
   return "Detector ID";
 }
