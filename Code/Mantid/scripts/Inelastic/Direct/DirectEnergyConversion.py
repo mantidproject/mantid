@@ -1,6 +1,7 @@
 from mantid.simpleapi import *
 from mantid.kernel import funcreturns
 from mantid import geometry
+from mantid import api
 
 import time as time
 import os.path, copy
@@ -418,10 +419,15 @@ class DirectEnergyConversion(object):
       #
       self.save_results(deltaE_wkspace_sample)
       #
+      # CLEAN-up (may be worth to do in separate procedure)
       # Currently clear masks unconditionally TODO: cash masks with appropriate
       # precautions
       self.spectra_masks = None
-      self.prop_man.sample_run = None # clean up memory about sample run
+      self.prop_man.sample_run = None # clean up memory of the sample run
+
+      if self._multirep_mode and ('bkgr_ws' in mtd):
+         DeleteWorkspace(bkgr_ws)
+
 
       return deltaE_wkspace_sample
 
@@ -565,7 +571,7 @@ class DirectEnergyConversion(object):
 
         return mtd[ws_name]
 #-------------------------------------------------------------------------------
-    def normalise(self, run, method, range_offset=0.0):
+    def normalise(self, run, method, range_offset=0.0,external_monitors_ws=None):
         """
         Apply normalization using specified source
         """
@@ -587,10 +593,10 @@ class DirectEnergyConversion(object):
         method = method.lower()
         for case in common.switch(method):
             if case('monitor-1'):
-               method,old_ws_name = self._normalize_to_monitor1(run,old_ws_name, range_offset)
+               method,old_ws_name = self._normalize_to_monitor1(run,old_ws_name, range_offset,external_monitors_ws)
                break
             if case('monitor-2'):
-               method,old_ws_name = self._normalize_to_monitor2(run,old_ws_name, range_offset)
+               method,old_ws_name = self._normalize_to_monitor2(run,old_ws_name, range_offset,external_monitors_ws)
                break
             if case('current'):
                 NormaliseByCurrent(InputWorkspace=old_ws_name,OutputWorkspace=old_ws_name)
@@ -607,11 +613,17 @@ class DirectEnergyConversion(object):
         run.synchronize_ws(output)
         return output
     #
-    def _normalize_to_monitor1(self,run,old_name,range_offset=0.0):
+    def _normalize_to_monitor1(self,run,old_name,range_offset=0.0,external_monitor_ws=None):
         """ Helper method implementing  normalize_to_monitor1 """ 
 
         # get monitor's workspace
-        mon_ws = run.get_monitors_ws()
+        separate_monitors = run.is_monws_separate()
+        if external_monitor_ws:
+           separate_monitors=True
+           mon_ws = external_monitor_ws
+        else:
+           mon_ws = run.get_monitors_ws()
+
         if not mon_ws: # no monitors
            if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not
                                              # have monitors
@@ -624,30 +636,40 @@ class DirectEnergyConversion(object):
 
 
         range = self.norm_mon_integration_range
-        range_min = float(range[0] + range_offset)
-        range_max = float(range[1] + range_offset)
         if self._debug_mode:
            kwargs = {'NormFactorWS':'NormMon1_WS' + data_ws.getName()}
         else:
            kwargs = {}
-        separate_monitors = run.is_monws_separate()
+
         mon_spect = self.prop_man.mon1_norm_spec
         if separate_monitors:
             kwargs['MonitorWorkspace'] = mon_ws
             kwargs['MonitorWorkspaceIndex'] = int(mon_ws.getIndexFromSpectrumNumber(int(mon_spect)))
+            range_min = float(range[0])
+            range_max = float(range[1])
         else:
             kwargs['MonitorSpectrum'] = int(mon_spect) # shame TODO: change algorithm
+            range_min = float(range[0] + range_offset)
+            range_max = float(range[1] + range_offset)
+
 
 
         NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, IntegrationRangeMin=range_min, 
                            IntegrationRangeMax=range_max,IncludePartialBins=True,**kwargs)
         return ('monitor-1',old_name)
     #
-    def _normalize_to_monitor2(self,run,old_name, range_offset=0.0):
+    def _normalize_to_monitor2(self,run,old_name, range_offset=0.0,external_monitor_ws=None):
         """ Helper method implementing  normalize_to_monitor_2 """ 
 
-        # get monitor's workspace
-        mon_ws = run.get_monitors_ws()
+      # get monitor's workspace
+        separate_monitors = run.is_monws_separate()
+        if external_monitor_ws:
+           separate_monitors=True
+           mon_ws = external_monitor_ws
+        else:
+           mon_ws = run.get_monitors_ws()
+
+ 
         if not mon_ws: # no monitors
            if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not
                                              # have monitors
@@ -662,7 +684,7 @@ class DirectEnergyConversion(object):
            kwargs = {'NormFactorWS':'NormMon2_WS' + mon_ws.getName()}
         else:
            kwargs = {}
-        separate_monitors = run.is_monws_separate()
+
         mon_spect = self.prop_man.mon2_norm_spec
         mon_index = int(mon_ws.getIndexFromSpectrumNumber(mon_spect))
         if separate_monitors:
@@ -817,7 +839,7 @@ class DirectEnergyConversion(object):
         """
         object.__setattr__(self,'_descriptors',[])
         object.__setattr__(self,'_propMan',None)
-        #
+        # Debug parameter. Usually True unless investigating a problem
         object.__setattr__(self,'_keep_wb_workspace',True)
         object.__setattr__(self,'_do_ISIS_reduction',True)
         object.__setattr__(self,'_spectra_masks',None)
@@ -825,8 +847,12 @@ class DirectEnergyConversion(object):
         # shifting the instrument
         object.__setattr__(self,'_mon2_norm_time_range',None)
         object.__setattr__(self,'_debug_mode',False)
-        # method used in debug mode and requesting 
+        # method used in debug mode and requesting event workspace to be rebinned first 
         object.__setattr__(self,'_do_early_rebinning',False)
+        # internal parameter, specifying work in multirep mode. If True, some 
+        # auxiliary workspaces should not be deleted until used for each workspace
+        # processed
+        object.__setattr__(self,'_multirep_mode',False)
 
         all_methods = dir(self)
         # define list of all existing properties, which have descriptors
@@ -1113,9 +1139,6 @@ class DirectEnergyConversion(object):
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
 
         # Do ISIS stuff for Ei
-        # Both are these should be run properties really
-
-
         ei_value, mon1_peak = self.get_ei(data_run, ei_guess)
         self.incident_energy = ei_value
 
@@ -1131,10 +1154,18 @@ class DirectEnergyConversion(object):
             # region
             result_ws = data_run.get_workspace()
             bkgd_range = self.bkgd_range
-            CalculateFlatBackground(InputWorkspace=result_ws,OutputWorkspace=result_ws,
-                                    StartX= bkgd_range[0] + bin_offset,EndX= bkgd_range[1] + bin_offset,
-                                     WorkspaceIndexList= '',Mode= 'Mean',SkipMonitors='1')
-            data_run.synchronize_ws(result_ws)
+            bkg_range_min = bkgd_range[0]+bin_offset
+            bkg_range_max = bkgd_range[1]+bin_offset
+            if isinstance(result_ws,api.IEventWorkspace):
+                bkgr_ws=self._find_or_build_bkgr_ws(result_ws,bkg_range_min,bkg_range_max)
+            else:
+                bkgr_ws = None
+                CalculateFlatBackground(InputWorkspace=result_ws,OutputWorkspace=result_ws,
+                                        StartX= bkg_range_min,EndX= bkg_range_max,
+                                        WorkspaceIndexList= '',Mode= 'Mean',SkipMonitors='1')
+                data_run.synchronize_ws(result_ws)
+        else:
+            bkgr_ws = None
 
 
         # Normalize using the chosen method+group
@@ -1148,10 +1179,18 @@ class DirectEnergyConversion(object):
         ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
         self.prop_man.log("_do_mono: finished ConvertUnits for : " + result_name,'information')
 
-
         energy_bins = self.energy_bins
         if energy_bins:
-            Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= energy_bins,PreserveEvents=False)
+           Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= energy_bins,PreserveEvents=False)
+           if bkgr_ws: # remove background after converting units and rebinning
+              monitors_ws = data_run.get_monitors_ws()
+              bkgr_ws = self.normalise(bkgr_ws, self.normalise_method, bin_offset,monitors_ws)
+              RemoveBackground(InputWorkspace=result_name,OutputWorkspace=result_name,BkgWorkspace=bkgr_ws,EMode='Direct')
+              if not self._multirep_mode:
+                 DeleteWorkspace(bkgr_ws)
+        else:
+            pass # TODO: investigate way of removing background from event workspace if we want result to be an event workspace
+            # what to do with event workspace having negative events? will further algorithms work with this properly?
 
         if self.apply_detector_eff:
            DetectorEfficiencyCor(InputWorkspace=result_name,OutputWorkspace=result_name)
@@ -1159,7 +1198,21 @@ class DirectEnergyConversion(object):
         #############
         data_run.synchronize_ws(mtd[result_name])
 
-        return
+        return 
+#-------------------------------------------------------------------------------
+    def _find_or_build_bkgr_ws(self,result_ws,bkg_range_min=None,bkg_range_max=None):
+        """ Method calculates  background workspace or restore workspace with 
+            the same name as the one produced by this method from ADS
+        """ 
+        if not bkg_range_min or not bkg_range_max:
+            bkg_range_min,bkg_range_max = self.bkgd_range
+
+        if 'bkgr_ws' in mtd: # has to have specific name for this all working
+             bkgr_ws = mtd['bkgr_ws']
+        else:
+             bkgr_ws = Rebin(result_ws,Params=[bkg_range_min,(bkg_range_max-bkg_range_min)*1.001,bkg_range_max],PreserveEvents=False)
+
+        return bkgr_ws
 #-------------------------------------------------------------------------------
     def _do_mono(self, run,  ei_guess,
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
@@ -1170,7 +1223,7 @@ class DirectEnergyConversion(object):
 
         if (self._do_ISIS_reduction):
            self._do_mono_ISIS(run,ei_guess,
-                               white_run, map_file, spectra_masks, Tzero)
+                              white_run, map_file, spectra_masks, Tzero)
         else:
           result_name = run.set_action_suffix('_spe')
           self._do_mono_SNS(run,result_name,ei_guess,
@@ -1188,7 +1241,7 @@ class DirectEnergyConversion(object):
 
         # Make sure that our binning is consistent
         if prop_man.energy_bins:
-            Rebin(InputWorkspace=result_name,OutputWorkspace= result_name,Params= prop_man.energy_bins)
+           Rebin(InputWorkspace=result_name,OutputWorkspace= result_name,Params= prop_man.energy_bins)
 
         # Masking and grouping
         result_ws = mtd[result_name]

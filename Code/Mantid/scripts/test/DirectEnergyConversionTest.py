@@ -22,6 +22,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         if self.reducer == None or type(self.reducer) != type(DirectEnergyConversion):
             self.reducer = DirectEnergyConversion("MAR")
     def tearDown(self):
+        api.AnalysisDataService.clear()
         pass
 
    #def test_build_coupled_keys_dict_simple(self):
@@ -114,6 +115,9 @@ class DirectEnergyConversionTest(unittest.TestCase):
         mask_workspace=tReducer.diagnose(wb_ws)
         self.assertTrue(mask_workspace)
 
+        api.AnalysisDataService.clear()
+
+
     def test_do_white_wb(self) :
         wb_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000)
         #LoadParameterFile(Workspace=wb_ws,ParameterXML = used_parameters)
@@ -150,7 +154,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertEqual(tReducer.prop_man.sample_run,10234)
 
 
-
     def test_get_abs_normalization_factor(self) :
         mono_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000,XUnit='DeltaE',XMin=-5,XMax=15,BinWidth=0.1,function='Flat background')
         LoadInstrument(mono_ws,InstrumentName='MARI')
@@ -177,6 +180,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertAlmostEqual(nf2,nf3)
         self.assertAlmostEqual(nf3,nf4)
 
+
     def test_dgreduce_works(self):
         """ Test for old interface """
         run_ws = CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=10000)
@@ -200,8 +204,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         ws = dgreduce.abs_units(wb_ws,run_ws,None,wb_ws,10,100,8.8,[-10,0.1,7],None,None,**par)
         self.assertTrue(isinstance(ws,api.MatrixWorkspace))
     
-
-
+  
     ##def test_diag_call(self):
     ##    tReducer = self.reducer
     ##    # should do nothing as already initialized above, but if not will initiate the instrument
@@ -264,15 +267,21 @@ class DirectEnergyConversionTest(unittest.TestCase):
         run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=10, BankPixelWidth=1, NumEvents=10000,
                                     XUnit='TOF',xMin=tMin,xMax=tMax)
         LoadInstrument(run,InstrumentName='MARI')
-        wb_ws   = CloneWorkspace(run)
+        wb_ws   = Rebin(run,Params=[tMin,1,tMax],PreserveEvents=False)
+        # References used to test against ordinary reduction
+        ref_ws = Rebin(run,Params=str(tMin)+',1,'+str(tMax))
         # just in case, wb should work without clone too. 
         wb_clone = CloneWorkspace(wb_ws)
-        ref_ws = Rebin(run,Params=str(tMin)+',1,'+str(tMax))
 
         # Run Mono
         tReducer = DirectEnergyConversion(run.getInstrument())
         ei_guess = 67.
         mono_s = tReducer.mono_sample(run, ei_guess,wb_ws)
+
+
+        #
+        mono_ref = tReducer.mono_sample(ref_ws, ei_guess,wb_clone)
+
 
 
 
