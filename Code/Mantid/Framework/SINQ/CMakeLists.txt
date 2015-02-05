@@ -18,6 +18,7 @@ set ( SRC_FILES
 	src/PoldiPeakSummary.cpp
 	src/PoldiRemoveDeadWires.cpp
 	src/PoldiTruncateData.cpp
+	src/PoldiUtilities/IPoldiFunction1D.cpp
 	src/PoldiUtilities/MillerIndices.cpp
         src/PoldiUtilities/PeakFunctionIntegrator.cpp
 	src/PoldiUtilities/Poldi2DFunction.cpp
@@ -36,6 +37,7 @@ set ( SRC_FILES
 	src/PoldiUtilities/PoldiResidualCorrelationCore.cpp
         src/PoldiUtilities/PoldiSpectrumDomainFunction.cpp
         src/PoldiUtilities/PoldiSourceSpectrum.cpp
+	src/PoldiUtilities/PoldiSpectrumConstantBackground.cpp
 	src/PoldiUtilities/PoldiSpectrumLinearBackground.cpp
 	src/PoldiUtilities/PoldiTimeTransformer.cpp
 	src/PoldiUtilities/UncertainValue.cpp
@@ -66,6 +68,7 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiPeakSummary.h
 	inc/MantidSINQ/PoldiRemoveDeadWires.h
 	inc/MantidSINQ/PoldiTruncateData.h
+	inc/MantidSINQ/PoldiUtilities/IPoldiFunction1D.h
 	inc/MantidSINQ/PoldiUtilities/MillerIndices.h
 	inc/MantidSINQ/PoldiUtilities/MillerIndicesIO.h
         inc/MantidSINQ/PoldiUtilities/PeakFunctionIntegrator.h
@@ -86,6 +89,7 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiUtilities/PoldiPeak.h
 	inc/MantidSINQ/PoldiUtilities/PoldiPeakCollection.h
 	inc/MantidSINQ/PoldiUtilities/PoldiResidualCorrelationCore.h
+	inc/MantidSINQ/PoldiUtilities/PoldiSpectrumConstantBackground.h
         inc/MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h
 	inc/MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h
 	inc/MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h
@@ -128,6 +132,7 @@ set ( TEST_FILES
 	PoldiResidualCorrelationCoreTest.h
         PoldiSourceSpectrumTest.h
         PoldiSpectrumDomainFunctionTest.h
+	PoldiSpectrumConstantBackgroundTest.h
 	PoldiSpectrumLinearBackgroundTest.h
 	PoldiTimeTransformerTest.h
 	PoldiTruncateDataTest.h
@@ -148,9 +153,9 @@ set_target_properties ( SINQ PROPERTIES OUTPUT_NAME MantidSINQ
 # Add to the 'Framework' group in VS
 set_property ( TARGET SINQ PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( inc ../MDEvents/inc )
+include_directories ( inc ../MDEvents/inc ../CurveFitting/inc )
 
-target_link_libraries ( SINQ ${MANTIDLIBS} MDEvents )
+target_link_libraries ( SINQ ${MANTIDLIBS} MDEvents CurveFitting )
 
 # Add the unit tests directory
 add_subdirectory ( test )
