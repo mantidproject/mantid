@@ -167,9 +167,10 @@ public:
                      rotationAxisxyZ);
 
     V3R rotoInversionAxisxYz = V3R(-1, 1, -1);
-    SymmetryOperation threeFoldRationm1m("-z,x,y");
-    TS_ASSERT_EQUALS(element.determineAxis(threeFoldRationm1m.matrix()),
-                     rotoInversionAxisxYz);
+    SymmetryOperation threeFoldRotoInversionm1mPlus("-z,x,y");
+    TS_ASSERT_EQUALS(
+        element.determineAxis(threeFoldRotoInversionm1mPlus.matrix()),
+        rotoInversionAxisxYz);
 
     V3R rotationAxis2xx0 = V3R(2, 1, 0);
     SymmetryOperation twoFoldRotationHex210("x,x-y,-z");
