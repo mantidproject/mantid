@@ -183,6 +183,59 @@ public:
                      rotationAxisx2x0);
   }
 
+  void testSymmetryElementRotationDetermineRotationSense() {
+    TestableSymmetryElementRotation element;
+
+    // Test case 1: 3 [-1 1 -1] (Positive/Negative) in orthogonal system
+    SymmetryOperation threeFoldRotoInversionm1mPlus("-z,x,y");
+    V3R rotationAxism1m =
+        element.determineAxis(threeFoldRotoInversionm1mPlus.matrix());
+    TS_ASSERT_EQUALS(element.determineRotationSense(
+                         threeFoldRotoInversionm1mPlus, rotationAxism1m),
+                     SymmetryElementRotation::Positive);
+
+    SymmetryOperation threeFoldRotoInversionm1mMinus("y,z,-x");
+    V3R rotationAxism1m2 =
+        element.determineAxis(threeFoldRotoInversionm1mPlus.matrix());
+
+    TS_ASSERT_EQUALS(rotationAxism1m, rotationAxism1m2);
+
+    TS_ASSERT_EQUALS(element.determineRotationSense(
+                         threeFoldRotoInversionm1mMinus, rotationAxism1m2),
+                     SymmetryElementRotation::Negative);
+
+    // Test case 2: 6 [0 0 1] (Positive/Negative) in hexagonal system
+    SymmetryOperation sixFoldRotationZPlus("x-y,x,z");
+    V3R rotationAxisZ =
+        element.determineAxis(sixFoldRotationZPlus.matrix());
+    TS_ASSERT_EQUALS(element.determineRotationSense(
+                         sixFoldRotationZPlus, rotationAxisZ),
+                     SymmetryElementRotation::Positive);
+
+    SymmetryOperation sixFoldRotationZMinus("y,y-x,z");
+    V3R rotationAxisZ2 =
+        element.determineAxis(sixFoldRotationZMinus.matrix());
+
+    TS_ASSERT_EQUALS(rotationAxisZ, rotationAxisZ2);
+
+    TS_ASSERT_EQUALS(element.determineRotationSense(
+                         sixFoldRotationZMinus, rotationAxisZ2),
+                     SymmetryElementRotation::Negative);
+  }
+
+  void xtestSymmetryElementWithAxisSpaceGroup() {
+    MockSymmetryElementWithAxis element;
+
+    SpaceGroup_const_sptr sg =
+        SpaceGroupFactory::Instance().createSpaceGroup("P m -3");
+
+    std::vector<SymmetryOperation> ops = sg->getSymmetryOperations();
+    for (auto it = ops.begin(); it != ops.end(); ++it) {
+      std::cout << (*it).identifier() << ": " << (*it).order() << " "
+                << element.determineAxis((*it).matrix()) << std::endl;
+    }
+  }
+
 private:
   class MockSymmetryElement : public SymmetryElement {
     friend class SymmetryElementTest;
@@ -196,6 +249,10 @@ private:
 
   public:
     MOCK_METHOD1(init, void(const SymmetryOperation &operation));
+  };
+
+  class TestableSymmetryElementRotation : public SymmetryElementRotation {
+    friend class SymmetryElementTest;
   };
 };
 

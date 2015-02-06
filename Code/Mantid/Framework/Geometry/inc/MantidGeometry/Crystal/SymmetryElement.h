@@ -99,10 +99,27 @@ protected:
 class MANTID_GEOMETRY_DLL SymmetryElementRotation
     : public SymmetryElementWithAxis {
 public:
+  enum RotationSense {
+    Positive,
+    Negative
+  };
+
   SymmetryElementRotation();
   ~SymmetryElementRotation() {}
 
+  RotationSense getRotationSense() const { return m_rotationSense; }
+
   void init(const SymmetryOperation &operation);
+
+protected:
+  void setRotationSense(const RotationSense &rotationSense) {
+    m_rotationSense = rotationSense;
+  }
+
+  RotationSense determineRotationSense(const SymmetryOperation &operation,
+                                       const V3R &rotationAxis) const;
+
+  RotationSense m_rotationSense;
 };
 
 class MANTID_GEOMETRY_DLL SymmetryElementMirror

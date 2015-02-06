@@ -152,6 +152,29 @@ void SymmetryElementRotation::init(const SymmetryOperation &operation) {
   UNUSED_ARG(operation);
 }
 
+SymmetryElementRotation::RotationSense
+SymmetryElementRotation::determineRotationSense(
+    const SymmetryOperation &operation, const V3R &rotationAxis) const {
+
+  Kernel::V3D pointOnAxis1 = rotationAxis;
+  Kernel::V3D pointOnAxis2 = rotationAxis * 2;
+  Kernel::V3D pointOffAxis = rotationAxis + Kernel::V3D(2.1, 5.05, -1.1);
+  Kernel::V3D generatedPoint = operation * pointOffAxis;
+
+  Kernel::DblMatrix matrix(3, 3, false);
+  matrix.setColumn(0, pointOnAxis2 - pointOnAxis1);
+  matrix.setColumn(1, pointOffAxis - pointOnAxis1);
+  matrix.setColumn(2, generatedPoint - pointOnAxis1);
+
+  double determinant = matrix.determinant() * operation.matrix().determinant();
+
+  if(determinant < 0) {
+      return Negative;
+  } else {
+      return Positive;
+  }
+}
+
 SymmetryElementMirror::SymmetryElementMirror() : SymmetryElementWithAxis() {}
 
 void SymmetryElementMirror::init(const SymmetryOperation &operation) {
