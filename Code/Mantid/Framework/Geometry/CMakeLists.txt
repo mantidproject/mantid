@@ -292,6 +292,7 @@ set ( TEST_FILES
 	PointGroupTest.h
 	PolygonEdgeTest.h
 	ProductOfCyclicGroupsTest.h
+	ProjectionTest.h
 	QuadrilateralTest.h
 	RectangularDetectorPixelTest.h
 	RectangularDetectorTest.h
