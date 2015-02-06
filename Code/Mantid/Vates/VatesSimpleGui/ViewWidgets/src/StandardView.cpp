@@ -82,7 +82,7 @@ void StandardView::setupViewButtons()
   m_cutMDAction = new QAction("CutMD", rebinMenu);
   m_cutMDAction->setIconVisibleInMenu(false);
 
-  m_unbinAction = new QAction("Unbin", rebinMenu);
+  m_unbinAction = new QAction("Remove Rebinning", rebinMenu);
   m_unbinAction->setIconVisibleInMenu(false);
 
   rebinMenu->addAction(m_binMDAction);
@@ -266,7 +266,7 @@ void StandardView::setRebinAndUnbinButtons()
   {
     this->m_binMDAction->setEnabled(true);
     this->m_sliceMDAction->setEnabled(true);
-    this->m_cutMDAction->setEnabled(true);
+    this->m_cutMDAction->setEnabled(false);
   }
 
   // If there are no temporary workspaces the button should be disabled.

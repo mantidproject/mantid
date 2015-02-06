@@ -31,6 +31,18 @@
      </item>
      <item>
       <widget class="QToolButton" name="rebinToolButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>75</width>
+         <height>23</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>Select a rebin algorithm for MDEvent data</string>
        </property>
