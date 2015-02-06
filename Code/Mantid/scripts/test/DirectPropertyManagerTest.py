@@ -592,6 +592,11 @@ class DirectPropertyManagerTest(unittest.TestCase):
         ic=0
         for en in PropertyManager.incident_energy:
             self.assertAlmostEqual(en,eng[ic])
+            ei_stored = PropertyManager.incident_energy.get_current()
+            self.assertAlmostEqual(en,ei_stored)
+
+            PropertyManager.incident_energy.set_current(en)
+
             bins = propman.energy_bins
             self.assertAlmostEqual(bins[0],-2*eng[ic])
             self.assertAlmostEqual(bins[1],0.1*eng[ic])

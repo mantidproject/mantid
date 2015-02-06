@@ -387,14 +387,15 @@ class DirectEnergyConversion(object):
       prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice')
 
       #Run the conversion first on the sample
-      deltaE_wkspace_sample = self.mono_sample(PropertyManager.sample_run,self.incident_energy,PropertyManager.wb_run,
+      ei = PropertyManager.incident_energy.get_current()
+      deltaE_wkspace_sample = self.mono_sample(PropertyManager.sample_run,ei,PropertyManager.wb_run,
                                                self.map_file,masking)
 
  
       # calculate absolute units integral and apply it to the workspace
       if self.monovan_run != None or self.mono_correction_factor != None :
          deltaE_wkspace_sample = self.apply_absolute_normalization(deltaE_wkspace_sample,PropertyManager.monovan_run,\
-                                                                   self.incident_energy,PropertyManager.wb_for_monovan_run)
+                                                                   ei,PropertyManager.wb_for_monovan_run)
       # ensure that the sample_run name is intact with workspace
       PropertyManager.sample_run.synchronize_ws(deltaE_wkspace_sample)
 
@@ -522,9 +523,10 @@ class DirectEnergyConversion(object):
             GetEi(InputWorkspace=monitor_ws, Monitor1Spec=int(ei_mon_spectra[0]),
                   Monitor2Spec=int(ei_mon_spectra[1]),
                   EnergyEstimate=ei_guess,FixEi=fix_ei)
+        # modify current energy estimate and store it in properties for the future
+        PropertyManager.incident_energy.set_current(ei)
 
         # Store found incident energy in the class itself
-        self.incident_energy = ei
         if self.prop_man.normalise_method == 'monitor-2' and not separate_monitors:
            # monitor-2 normalization ranges have to be identified before the
            # instrument is shifted in case it is shifted to this monitor (usual
@@ -1140,7 +1142,8 @@ class DirectEnergyConversion(object):
 
         # Do ISIS stuff for Ei
         ei_value, mon1_peak = self.get_ei(data_run, ei_guess)
-        self.incident_energy = ei_value
+        PropertyManager.incident_energy.set_current(ei_value)
+
 
 
         # As we've shifted the TOF so that mon1 is at t=0.0 we need to account
