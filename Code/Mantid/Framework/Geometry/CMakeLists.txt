@@ -1,16 +1,16 @@
 set ( SRC_FILES
 	src/ComponentParser.cpp
-        src/Crystal/BraggScatterer.cpp
-        src/Crystal/BraggScattererFactory.cpp
+	src/Crystal/BraggScatterer.cpp
+	src/Crystal/BraggScattererFactory.cpp
 	src/Crystal/BraggScattererInCrystalStructure.cpp
 	src/Crystal/CenteringGroup.cpp
-        src/Crystal/CompositeBraggScatterer.cpp
+	src/Crystal/CompositeBraggScatterer.cpp
 	src/Crystal/ConventionalCell.cpp
 	src/Crystal/CrystalStructure.cpp
 	src/Crystal/CyclicGroup.cpp
 	src/Crystal/Group.cpp
 	src/Crystal/IndexingUtils.cpp
-        src/Crystal/IsotropicAtomBraggScatterer.cpp
+	src/Crystal/IsotropicAtomBraggScatterer.cpp
 	src/Crystal/NiggliCell.cpp
 	src/Crystal/OrientedLattice.cpp
 	src/Crystal/PointGroup.cpp
@@ -116,17 +116,17 @@ set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
         
 set ( INC_FILES
 	inc/MantidGeometry/ComponentParser.h
-        inc/MantidGeometry/Crystal/BraggScatterer.h
-        inc/MantidGeometry/Crystal/BraggScattererFactory.h
+	inc/MantidGeometry/Crystal/BraggScatterer.h
+	inc/MantidGeometry/Crystal/BraggScattererFactory.h
 	inc/MantidGeometry/Crystal/BraggScattererInCrystalStructure.h
 	inc/MantidGeometry/Crystal/CenteringGroup.h
-        inc/MantidGeometry/Crystal/CompositeBraggScatterer.h
+	inc/MantidGeometry/Crystal/CompositeBraggScatterer.h
 	inc/MantidGeometry/Crystal/ConventionalCell.h
 	inc/MantidGeometry/Crystal/CrystalStructure.h
 	inc/MantidGeometry/Crystal/CyclicGroup.h
 	inc/MantidGeometry/Crystal/Group.h
 	inc/MantidGeometry/Crystal/IndexingUtils.h
-        inc/MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h
+	inc/MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h
 	inc/MantidGeometry/Crystal/NiggliCell.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
 	inc/MantidGeometry/Crystal/PointGroup.h
@@ -228,15 +228,15 @@ set ( TEST_FILES
 	AlgebraTest.h
 	BnIdTest.h
 	BoundingBoxTest.h
-        BraggScattererFactoryTest.h
-        BraggScattererInCrystalStructureTest.h
-        BraggScattererTest.h
+	BraggScattererFactoryTest.h
+	BraggScattererInCrystalStructureTest.h
+	BraggScattererTest.h
 	CenteringGroupTest.h
 	CompAssemblyTest.h
 	ComponentHelperTest.h
 	ComponentParserTest.h
 	ComponentTest.h
-        CompositeBraggScattererTest.h
+	CompositeBraggScattererTest.h
 	CompositeImplicitFunctionTest.h
 	ConeTest.h
 	ConventionalCellTest.h
@@ -257,7 +257,7 @@ set ( TEST_FILES
 	InstrumentDefinitionParserTest.h
 	InstrumentRayTracerTest.h
 	InstrumentTest.h
-        IsotropicAtomBraggScattererTest.h
+	IsotropicAtomBraggScattererTest.h
 	LaszloIntersectionTest.h
 	LineIntersectVisitTest.h
 	LineTest.h
