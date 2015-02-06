@@ -6,12 +6,11 @@
 
 #include "MantidKernel/ConfigService.h"
 
+#include <cmath>
 #include <gsl/gsl_sf_erf.h>
 #include <boost/lexical_cast.hpp>
 
-const double PI = 3.14159265358979323846264338327950288419716939937510582;
 const double PEAKRANGE = 5.0;
-const double TWO_OVER_PI = 2. / PI;
 const double NEG_DBL_MAX = -1. * DBL_MAX;
 
 using namespace std;
@@ -572,7 +571,7 @@ double ThermalNeutronBk2BkExpConvPVoigt::calOmega(
     std::complex<double> q(-beta * x, beta * SQRT_H_5);
     double omega2a = imag(exp(p) * Mantid::API::E1(p));
     double omega2b = imag(exp(q) * Mantid::API::E1(q));
-    omega2 = -1.0 * N * eta * (omega2a + omega2b) * TWO_OVER_PI;
+    omega2 = -1.0 * N * eta * (omega2a + omega2b) * M_2_PI;
   }
   const double omega = omega1 + omega2;
 
@@ -713,7 +712,7 @@ std::complex<double> E1X(std::complex<double> z)
     if (rz < 0.0 && fabs(imag(z)) < 1.0E-10 )
     {
       complex<double> u(0.0, 1.0);
-      exp_e1 = exp_e1 - (PI * u);
+      exp_e1 = exp_e1 - (M_PI * u);
     }
   }
 

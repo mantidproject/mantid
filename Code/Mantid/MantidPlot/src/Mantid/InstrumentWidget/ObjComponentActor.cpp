@@ -21,14 +21,12 @@ ObjComponentActor::ObjComponentActor(const InstrumentActor& instrActor,Mantid::G
   IDetector_const_sptr det = getDetector();
   if (det)
   {
-    size_t pickID = instrActor.push_back_detid(det->getID());
+    size_t pickID = instrActor.pushBackDetid(det->getID());
     m_pickColor = makePickColor(pickID);
   }
   else
   {
-    // default pick colour invisible to picking tools
-    m_pickColor = GLColor();
-    // by default non-
+    instrActor.pushBackNonDetid(this,compID);
   }
 }
 

@@ -32,7 +32,6 @@ class ExportExperimentLogTest(unittest.TestCase):
         # Locate file
         outfilename = alg_test.getProperty("OutputFilename").value
         try:
-            print "Output file is %s. " % (outfilename)
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
@@ -66,8 +65,7 @@ class ExportExperimentLogTest(unittest.TestCase):
         v4 = float(terms[4])
         self.assertAlmostEqual(avgpcharge, v4)
 
-        #
-        # # Remove generated files
+        # Remove generated files
         os.remove(outfilename)
         AnalysisDataService.remove("TestMatrixWS")
 
@@ -626,6 +624,76 @@ class ExportExperimentLogTest(unittest.TestCase):
         AnalysisDataService.remove("TestMatrixWS1")
         AnalysisDataService.remove("TestMatrixWS2")
         AnalysisDataService.remove("TestMatrixWS3")
+
+        return
+
+    def test_exportFileUTC(self):
+        """ Test to export logs without header file
+        """
+        # Generate the matrix workspace with some logs
+        ws = self.createTestWorkspace()
+        AnalysisDataService.addOrReplace("TestMatrixWS", ws)
+
+        # Test algorithm
+        alg_test = run_algorithm("ExportExperimentLog",
+            InputWorkspace = "TestMatrixWS",
+            OutputFilename = "TestRecord001utc.txt",
+            SampleLogNames = ["run_number", "duration", "run_start", "proton_charge", "proton_charge", "proton_charge"],
+            SampleLogTitles = ["RUN", "Duration", "StartTime", "ProtonCharge", "MinPCharge", "MeanPCharge"],
+            SampleLogOperation = [None, None, "time", "sum", "min", "average"],
+            TimeZone = 'UTC',
+            FileMode = "new")
+
+        # Validate
+        self.assertTrue(alg_test.isExecuted())
+
+        # Locate file
+        outfilename = alg_test.getProperty("OutputFilename").value
+        try:
+            print "Output file is %s. " % (outfilename)
+            ifile = open(outfilename)
+            lines = ifile.readlines()
+            ifile.close()
+        except IOError as err:
+            print "Unable to open file %s. " % (outfilename)
+            self.assertTrue(False)
+            return
+
+        # Last line cannot be empty, i.e., before EOF '\n' is not allowed
+        lastline = lines[-1]
+        self.assertTrue(len(lastline.strip()) > 0)
+
+        # Number of lines
+        self.assertEquals(len(lines), 2)
+
+        # Check line
+        firstdataline = lines[1]
+        terms = firstdataline.strip().split("\t")
+        self.assertEquals(len(terms), 6)
+
+        # Get property
+        runstarttime = ws.run().getProperty("run_start").value
+        pchargelog = ws.getRun().getProperty("proton_charge").value
+        sumpcharge = numpy.sum(pchargelog)
+        minpcharge = numpy.min(pchargelog)
+        avgpcharge = numpy.average(pchargelog)
+
+        # run start time
+        v2 = str(terms[2])
+        self.assertEqual(runstarttime, v2.split("UTC")[0].strip())
+
+        v3 = float(terms[3])
+        self.assertAlmostEqual(sumpcharge, v3)
+
+        v4 = float(terms[4])
+        self.assertAlmostEqual(minpcharge, v4)
+
+        v5 = float(terms[5])
+        self.assertAlmostEqual(avgpcharge, v5)
+
+        # Remove generated files
+        # os.remove(outfilename)
+        AnalysisDataService.remove("TestMatrixWS")
 
         return
 

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1026</width>
+    <width>1053</width>
     <height>1152</height>
    </rect>
   </property>
@@ -60,7 +60,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1026</width>
+        <width>1053</width>
         <height>1152</height>
        </rect>
       </property>
@@ -789,22 +789,29 @@ in each direction and will create 9 sub-pixels.</string>
              </widget>
             </item>
             <item>
+             <widget class="QCheckBox" name="error_weighting_check">
+              <property name="text">
+               <string>Error weighting</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QCheckBox" name="log_binning_radio">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
               <property name="minimumSize">
                <size>
-                <width>120</width>
+                <width>0</width>
                 <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>120</width>
+                <width>16777215</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -822,14 +829,14 @@ in each direction and will create 9 sub-pixels.</string>
             <item>
              <widget class="QCheckBox" name="align_check">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
               <property name="minimumSize">
                <size>
-                <width>160</width>
+                <width>0</width>
                 <height>0</height>
                </size>
               </property>
