@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
@@ -14,6 +15,7 @@
 #include "MantidMDEvents/UnitsConversionHelper.h"
 #include "MantidMDEvents/Integrate3DEvents.h"
 #include "MantidMDEvents/IntegrateEllipsoids.h"
+
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -258,11 +260,12 @@ void IntegrateEllipsoids::exec() {
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
       V3D peak_q(peaks[i].getQLabFrame());
       std::vector<double> axes_radii;
-      integrator.ellipseIntegrateEvents(peak_q, specify_size, peak_radius,
+      auto shape = integrator.ellipseIntegrateEvents(peak_q, specify_size, peak_radius,
                                         back_inner_radius, back_outer_radius,
                                         axes_radii, inti, sigi);
       peaks[i].setIntensity(inti);
       peaks[i].setSigmaIntensity(sigi);
+      peaks[i].setPeakShape(shape);
       if (axes_radii.size() == 3) {
         g_log.notice()
             << "Radii of three axes of ellipsoid for integrating peak " << i

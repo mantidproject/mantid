@@ -8,7 +8,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/PeakShape.h"
-#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace DataObjects {
@@ -126,6 +126,9 @@ public:
   /// Set the PeakShape
   void setPeakShape(PeakShape* shape);
 
+  /// Set the PeakShape
+  void setPeakShape(PeakShape_const_sptr shape);
+
   /// Assignment
   Peak& operator=(const Peak& other);
 
@@ -204,7 +207,7 @@ private:
   std::set<int> m_detIDs;
 
   /// Peak shape
-  boost::scoped_ptr<const PeakShape> m_peakShape;
+  PeakShape_const_sptr m_peakShape;
 };
 
 } // namespace Mantid

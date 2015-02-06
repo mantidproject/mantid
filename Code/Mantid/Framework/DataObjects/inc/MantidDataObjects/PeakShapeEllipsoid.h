@@ -79,6 +79,9 @@ namespace DataObjects
 
   };
 
+  typedef boost::shared_ptr<PeakShapeEllipsoid> PeakShapeEllipsoid_sptr;
+  typedef boost::shared_ptr<const PeakShapeEllipsoid> PeakShapeEllipsoid_const_sptr;
+
 
 } // namespace DataObjects
 } // namespace Mantid

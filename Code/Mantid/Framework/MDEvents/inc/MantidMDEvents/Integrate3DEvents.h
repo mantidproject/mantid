@@ -3,11 +3,16 @@
 
 #include <vector>
 #include <boost/unordered_map.hpp>
-
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
 
 namespace Mantid {
+
+namespace DataObjects
+{
+class PeakShape;
+class PeakShapeEllipsoid;
+}
 namespace MDEvents {
 
 /**
@@ -64,7 +69,7 @@ public:
   void addEvents(std::vector<V3D> const &event_qs);
 
   /// Find the net integrated intensity of a peak, using ellipsoidal volumes
-  void ellipseIntegrateEvents(V3D const &peak_q, bool specify_size,
+  boost::shared_ptr<const Mantid::DataObjects::PeakShape> ellipseIntegrateEvents(V3D const &peak_q, bool specify_size,
                               double peak_radius, double back_inner_radius,
                               double back_outer_radius,
                               std::vector<double> &axes_radii, double &inti,
@@ -98,7 +103,7 @@ private:
   void addEvent(V3D event_Q);
 
   /// Find the net integrated intensity of a list of Q's using ellipsoids
-  void ellipseIntegrateEvents(
+  boost::shared_ptr<const Mantid::DataObjects::PeakShapeEllipsoid> ellipseIntegrateEvents(
       std::vector<V3D> const &ev_list, std::vector<V3D> const &directions,
       std::vector<double> const &sigmas, bool specify_size, double peak_radius,
       double back_inner_radius, double back_outer_radius,

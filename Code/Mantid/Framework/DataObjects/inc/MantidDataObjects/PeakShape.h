@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/SpecialCoordinateSystem.h"
 #include <string>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace DataObjects {
@@ -48,6 +49,9 @@ public:
   /// Destructor
   virtual ~PeakShape() {}
 };
+
+typedef boost::shared_ptr<PeakShape> PeakShape_sptr;
+typedef boost::shared_ptr<const PeakShape> PeakShape_const_sptr;
 
 } // namespace DataObjects
 } // namespace Mantid

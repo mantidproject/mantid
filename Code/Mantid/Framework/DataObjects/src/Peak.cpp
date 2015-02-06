@@ -831,7 +831,13 @@ const PeakShape &Peak::getPeakShape() { return *this->m_peakShape; }
  * @brief Set the peak shape
  * @param shape : Desired shape
  */
-void Peak::setPeakShape(PeakShape *shape) { this->m_peakShape.reset(shape); }
+void Peak::setPeakShape(PeakShape *shape) { this->m_peakShape = PeakShape_const_sptr(shape); }
+
+/**
+ * @brief Set the peak shape
+ * @param shape : Desired shape
+ */
+void Peak::setPeakShape(PeakShape_const_sptr shape) { this->m_peakShape = shape; }
 
 /**
  * @brief Assignement operator overload
