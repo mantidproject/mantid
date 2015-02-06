@@ -65,6 +65,8 @@ public:
   boost::optional<double> backgroundOuterRadius() const;
   /// Peak inner background radius
   boost::optional<double> backgroundInnerRadius() const;
+  /// Non-instance shape name
+  static const std::string sphereShapeName();
 
 private:
   /// Peak radius

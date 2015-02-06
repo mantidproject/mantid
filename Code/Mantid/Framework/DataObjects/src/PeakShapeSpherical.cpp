@@ -106,7 +106,7 @@ PeakShapeSpherical *PeakShapeSpherical::clone() const {
   return new PeakShapeSpherical(*this);
 }
 
-std::string PeakShapeSpherical::shapeName() const { return "spherical"; }
+std::string PeakShapeSpherical::shapeName() const { return sphereShapeName() ; }
 
 bool PeakShapeSpherical::operator==(const PeakShapeSpherical &other) const {
   return PeakShapeBase::operator==(other) && other.radius() == this->radius() &&
@@ -135,7 +135,16 @@ boost::optional<double> PeakShapeSpherical::backgroundOuterRadius() const {
  * @return boost optional inner radius.
  */
 boost::optional<double> PeakShapeSpherical::backgroundInnerRadius() const {
-  return m_backgroundInnerRadius;
+    return m_backgroundInnerRadius;
+}
+
+/**
+ * @brief PeakShapeSpherical::sphereShapeName
+ * @return Spherical shape name for this type.
+ */
+const std::string PeakShapeSpherical::sphereShapeName()
+{
+    return "spherical";
 }
 
 } // namespace DataObjects

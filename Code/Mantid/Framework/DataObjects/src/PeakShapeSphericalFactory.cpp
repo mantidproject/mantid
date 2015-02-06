@@ -30,7 +30,7 @@ PeakShape *PeakShapeSphericalFactory::create(const std::string &source) const {
   PeakShape *product = NULL;
   if (reader.parse(source, root)) {
     const std::string shape = root["shape"].asString();
-    if (shape == "spherical") {
+    if (shape == PeakShapeSpherical::sphereShapeName()) {
 
       const std::string algorithmName(root["algorithm_name"].asString());
       const int algorithmVersion(root["algorithm_version"].asInt());
