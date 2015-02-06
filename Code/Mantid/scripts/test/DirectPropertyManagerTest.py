@@ -649,7 +649,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertAlmostEqual(bkgd_range[1],40)
 
 
-
     def test_monovan_integration_range(self):
        propman = self.prop_man
 
@@ -829,6 +828,24 @@ class DirectPropertyManagerTest(unittest.TestCase):
         range = propman.mon2_norm_energy_range
         self.assertAlmostEqual(range[0],9.5)
         self.assertAlmostEqual(range[1],10.5)
+
+
+    def test_multirep_tof_specta_list(self):
+        propman = self.prop_man
+        sp = propman.multirep_tof_specta_list
+        self.assertTrue(len(sp)==2)
+        self.assertEqual(sp[0],5)
+
+        propman.multirep_tof_specta_list='10'
+        sp = propman.multirep_tof_specta_list
+        self.assertTrue(len(sp)==1)
+        self.assertEqual(sp[0],10)
+
+        propman.multirep_tof_specta_list='10,11,13,15'
+        sp = propman.multirep_tof_specta_list
+        self.assertTrue(len(sp)==4)
+        self.assertEqual(sp[3],15)
+
 
 
 if __name__=="__main__":

@@ -942,6 +942,39 @@ class BackbgroundTestRange(PropDescriptor):
             raise ValueError("background test range can be set to a 2 element list of floats")
         self._background_test_range = [float(value[0]),float(value[1])]
 #end BackbgroundTestRange
+#-----------------------------------------------------------------------------------------
+class MultirepTOFSpectraList(PropDescriptor):
+    """ property describes list of spectra numbers, used to identify 
+        TOF range corresponding to the particular energy range 
+
+        Usually it is list of two numbers, specifying monitors which are 
+        closest and furthest from the sample 
+    """
+    def __init__(self):
+        self._spectra_list = None
+
+    def __get__(self,instance,type=None):
+       if instance is None:
+           return self
+
+       return self._spectra_list
+
+    def __set__(self,instance,value):
+        if value is None:
+           self._spectra_list = None
+           return
+        if isinstance(value,str):
+            value = str.split(value,',')
+            self.__set__(instance,value)
+            return
+        if isinstance(value, list):
+           rez =[]
+           for val in value:
+               rez.append(int(val))
+        else:
+            rez = [int(value)]
+        self._spectra_list=rez
+
 
 #-----------------------------------------------------------------------------------------
 # END Descriptors for PropertyManager itself

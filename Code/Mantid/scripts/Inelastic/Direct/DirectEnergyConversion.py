@@ -386,27 +386,32 @@ class DirectEnergyConversion(object):
       nSpectra = masking.getNumberHistograms()
       prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice')
 
-      #Run the conversion first on the sample
-      ei = PropertyManager.incident_energy.get_current()
-      deltaE_wkspace_sample = self.mono_sample(PropertyManager.sample_run,ei,PropertyManager.wb_run,
-                                               self.map_file,masking)
-
+      # SNS or GUI motor stuff
+      self.calculate_rotation(PropertyManager.sample_run.get_workspace())
  
-      # calculate absolute units integral and apply it to the workspace
-      if self.monovan_run != None or self.mono_correction_factor != None :
-         deltaE_wkspace_sample = self.apply_absolute_normalization(deltaE_wkspace_sample,PropertyManager.monovan_run,\
-                                                                   ei,PropertyManager.wb_for_monovan_run)
-      # ensure that the sample_run name is intact with workspace
-      PropertyManager.sample_run.synchronize_ws(deltaE_wkspace_sample)
+      for ei_guess in PropertyManager.incident_energy:
+         #Run the conversion first on the sample
+         deltaE_wkspace_sample = self.mono_sample(PropertyManager.sample_run,ei_guess,PropertyManager.wb_run,
+                                               self.map_file,masking)
+ 
+         # calculate absolute units integral and apply it to the workspace
+         if self.monovan_run != None or self.mono_correction_factor != None :
+            deltaE_wkspace_sample = self.apply_absolute_normalization(deltaE_wkspace_sample,PropertyManager.monovan_run,\
+                                                                      ei_guess,PropertyManager.wb_for_monovan_run)
+         # ensure that the sample_run name is intact with workspace
+         PropertyManager.sample_run.synchronize_ws(deltaE_wkspace_sample)
+         # 
+         ei = (deltaE_wkspace_sample.getRun().getLogData("Ei").value)
+         prop_man.log("*** Incident energy found for sample run: {0} meV".format(ei),'notice')
+         #
+         self.save_results(deltaE_wkspace_sample)
+
+
 
 
       results_name = deltaE_wkspace_sample.name()
       if out_ws_name and results_name != out_ws_name:
          RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
-
-
-      ei = (deltaE_wkspace_sample.getRun().getLogData("Ei").value)
-      prop_man.log("*** Incident energy found for sample run: {0} meV".format(ei),'notice')
 
       end_time = time.time()
       prop_man.log("*** Elapsed time = {0} sec".format(end_time - start_time),'notice')
@@ -415,10 +420,6 @@ class DirectEnergyConversion(object):
 #    if mtd.doesExist('hard_mask_ws') == True:
  #       DeleteWorkspace(Workspace='hard_mask_ws')
 
-      # SNS or GUI motor stuff
-      self.calculate_rotation(deltaE_wkspace_sample)
-      #
-      self.save_results(deltaE_wkspace_sample)
       #
       # CLEAN-up (may be worth to do in separate procedure)
       # Currently clear masks unconditionally TODO: cash masks with appropriate

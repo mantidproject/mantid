@@ -226,6 +226,8 @@ class PropertyManager(NonIDF_Properties):
     # Properties with allowed value
     normalise_method= PropertyFromRange([None,'monitor-1','monitor-2','current'],'current')
     deltaE_mode     = PropertyFromRange(['direct'],'direct') # other modes should not be considered here
+    # 
+    multirep_tof_specta_list=MultirepTOFSpectraList()
 #----------------------------------------------------------------------------------------------------------------
     def getChangedProperties(self):
         """ method returns set of the properties changed from defaults """
