@@ -34,7 +34,7 @@ public:
         "SplitInto", "5", "SplitThreshold", "20", "MaxRecursionDepth", "15", "OutputWorkspace", "MDEWS");
 
     // Give it an instrument
-    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 100.0, 0.05);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 100, 0.05);
     IMDEventWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
         ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("MDEWS"));
