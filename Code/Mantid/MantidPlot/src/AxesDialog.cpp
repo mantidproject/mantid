@@ -42,6 +42,8 @@ Description          : General plot options dialog
 #include "ScaleDraw.h"
 #include <float.h>
 
+#include <cmath>
+
 #include "MantidKernel/Logger.h"
 
 #include <QCheckBox>
@@ -620,10 +622,6 @@ static const char* image7_data[] = { "32 32 4 1", "# c #000000", "b c #bfbfbf",
   "...########################aa...", "....#.#.#.#.#.#.#.#.#.#.#.#.....",
   "....#.#.#.#.#.#.#.#.#.#.#.#.....", "........#.....#.....#.....#.....",
   "................................" };
-
-#ifndef M_PI
-#define M_PI	3.141592653589793238462643
-#endif
 
 namespace
 {

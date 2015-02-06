@@ -121,7 +121,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         tReducer = DirectEnergyConversion(wb_ws.getInstrument())
 
-        white_ws = tReducer.do_white(wb_ws, None, None,None)
+        white_ws = tReducer.do_white(wb_ws, None, None)
         self.assertTrue(white_ws)
  
 

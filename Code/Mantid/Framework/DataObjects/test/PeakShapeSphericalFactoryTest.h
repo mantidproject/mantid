@@ -91,6 +91,7 @@ public:
     TS_ASSERT(sphericalShapeProduct);
 
     TS_ASSERT_EQUALS(sourceShape, *sphericalShapeProduct);
+    delete productShape;
   }
 };
 

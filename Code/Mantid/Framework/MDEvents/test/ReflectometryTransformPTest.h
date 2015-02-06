@@ -1,9 +1,8 @@
 #ifndef MANTID_MDEVENTS_REFLECTOMETRYTRANSFORMPTEST_H_
 #define MANTID_MDEVENTS_REFLECTOMETRYTRANSFORMPTEST_H_
 
-#define PI 3.14159265
-
 #include <cxxtest/TestSuite.h>
+#include <cmath>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include <iostream>
@@ -103,11 +102,11 @@ public:
 
     CalculateReflectometryDiffP B(90);
     B.setThetaFinal(0);
-    TS_ASSERT_DELTA(2*PI/wavelength, B.execute(wavelength), 0.0001);
+    TS_ASSERT_DELTA(2*M_PI/wavelength, B.execute(wavelength), 0.0001);
 
     CalculateReflectometryDiffP C(0);
     C.setThetaFinal(90);
-    TS_ASSERT_DELTA(-2*PI/wavelength, C.execute(wavelength), 0.0001);
+    TS_ASSERT_DELTA(-2*M_PI/wavelength, C.execute(wavelength), 0.0001);
 
     CalculateReflectometryDiffP D(90);
     D.setThetaFinal(90);
@@ -124,15 +123,15 @@ public:
 
     CalculateReflectometrySumP B(90);
     B.setThetaFinal(0);
-    TS_ASSERT_DELTA(2*PI/wavelength, B.execute(wavelength), 0.0001);
+    TS_ASSERT_DELTA(2*M_PI/wavelength, B.execute(wavelength), 0.0001);
 
     CalculateReflectometrySumP C(0);
     C.setThetaFinal(90);
-    TS_ASSERT_DELTA(2*PI/wavelength, C.execute(wavelength), 0.0001);
+    TS_ASSERT_DELTA(2*M_PI/wavelength, C.execute(wavelength), 0.0001);
 
     CalculateReflectometrySumP D(90);
     D.setThetaFinal(90);
-    TS_ASSERT_DELTA(4*PI/wavelength, D.execute(wavelength), 0.0001);
+    TS_ASSERT_DELTA(4*M_PI/wavelength, D.execute(wavelength), 0.0001);
   }
 
 };

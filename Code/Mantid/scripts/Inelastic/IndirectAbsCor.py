@@ -2,10 +2,6 @@
 ## Handle selection of .pyd files for absorption corrections
 import platform, sys
 from IndirectImport import *
-if is_supported_f2py_platform():
-    cylabs = import_f2py("cylabs")
-else:
-    unsupported_message()
 
 from IndirectCommon import *
 from mantid.simpleapi import *
@@ -138,6 +134,14 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
 
     #initially set errors to zero
     eZero = np.zeros(nw)
+
+    # F2Py only needed for cylinder
+    if geom == 'cyl':
+        if is_supported_f2py_platform():
+            cylabs = import_f2py("cylabs")
+        else:
+            unsupported_message()
+            return
 
     for n in range(ndet):
         #geometry is flat

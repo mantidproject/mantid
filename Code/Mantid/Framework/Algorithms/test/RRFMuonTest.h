@@ -5,6 +5,7 @@
 #include "MantidAlgorithms/RRFMuon.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/Workspace.h"
+#include <cmath>
 #include <Poco/File.h>
 #include <stdexcept>
 
@@ -104,16 +105,15 @@ private:
   MatrixWorkspace_sptr createDummyWorkspace()
   {
     int nBins = 300;
-    double pi = 3.14159;
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 2, nBins+1, nBins);
 
     for (int i=0; i<nBins; i++)
     {
       double x = i/static_cast<int>(nBins);
       ws->dataX(0)[i] = x;
-      ws->dataY(0)[i] = cos(2*pi*x);
+      ws->dataY(0)[i] = cos(2*M_PI*x);
       ws->dataX(1)[i] = x;
-      ws->dataY(1)[i] = sin(2*pi*x);
+      ws->dataY(1)[i] = sin(2*M_PI*x);
     }
 
     ws->dataX(0)[nBins] = nBins;
