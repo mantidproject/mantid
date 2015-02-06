@@ -36,6 +36,12 @@ namespace Geometry {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+/// The units for a given dimension
+enum ProjectionUnit {
+  RLU,    // r.l.u
+  INV_ANG // inverse angstroms
+};
+
 class DLLExport Projection {
 public:
   /// Default constructor builds with two dimensions
@@ -62,14 +68,18 @@ public:
   float getOffset(size_t nd);
   /// Retrieves the axis vector for the given dimension
   VMD getAxis(size_t nd);
+  /// Retrives the unit of the given dimension
+  ProjectionUnit getUnit(size_t nd);
   /// Set the offset for a given dimension
   void setOffset(size_t nd, float offset);
   /// Set the axis vector for a given dimension
   void setAxis(size_t nd, VMD axis);
-
+  /// Set the unit for a given dimension
+  void setUnit(size_t nd, ProjectionUnit unit);
+  /// Retrives the number of dimensions
   size_t getNumDims() const { return m_nd; }
 
-  // We're guaranteed to have at least 2 axis
+  // We're guaranteed to have at least 2 axes
   VMD &U() { return m_dimensions[0]; }
   VMD &V() { return m_dimensions[1]; }
   VMD &W() {
@@ -86,6 +96,8 @@ protected:
   VMD *m_dimensions;
   /// A vector of the offsets for each dimension
   float *m_offsets;
+  /// A vector of the units for each dimension
+  ProjectionUnit *m_units;
 };
 
 } // namespace Geometry

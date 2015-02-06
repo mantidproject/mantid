@@ -15,6 +15,7 @@ public:
     TS_ASSERT_EQUALS(p.getNumDims(), 2);
     TS_ASSERT_EQUALS(p.getOffset(0), 0.0);
     TS_ASSERT_EQUALS(p.getAxis(0).getNumDims(), 2);
+    TS_ASSERT_EQUALS(p.getUnit(0), RLU);
   }
 
   void test_ndim_constructor() {
@@ -49,8 +50,10 @@ public:
   }
 
   void test_throw_invalid_dimension_constructor() {
-    TS_ASSERT_THROWS_ANYTHING(Projection(0));
     TS_ASSERT_THROWS_ANYTHING(Projection(-1));
+    TS_ASSERT_THROWS_ANYTHING(Projection(0));
+    TS_ASSERT_THROWS_ANYTHING(Projection(1));
+    TS_ASSERT_THROWS_NOTHING(Projection(2));
   }
 
   void test_throw_out_of_range_access() {
@@ -62,6 +65,10 @@ public:
     TS_ASSERT_THROWS_ANYTHING(p.getAxis(-1));
     TS_ASSERT_THROWS_NOTHING(p.getAxis(2));
     TS_ASSERT_THROWS_ANYTHING(p.getAxis(3));
+
+    TS_ASSERT_THROWS_ANYTHING(p.getUnit(-1));
+    TS_ASSERT_THROWS_NOTHING(p.getUnit(2));
+    TS_ASSERT_THROWS_ANYTHING(p.getUnit(3));
   }
 
   void test_copy_constructor() {
@@ -69,12 +76,16 @@ public:
     VMD v(1, 1, 0);
     VMD w(0, 0, 1);
     Projection p(u, v, w);
+    p.setUnit(0, RLU);
+    p.setUnit(1, INV_ANG);
 
     Projection q(p);
 
     TS_ASSERT_EQUALS(q.getAxis(0), u);
     TS_ASSERT_EQUALS(q.getAxis(1), v);
     TS_ASSERT_EQUALS(q.getAxis(2), w);
+    TS_ASSERT_EQUALS(q.getUnit(0), RLU);
+    TS_ASSERT_EQUALS(q.getUnit(1), INV_ANG);
   }
 
   void test_assign() {
@@ -114,6 +125,15 @@ public:
     TS_ASSERT_EQUALS(p.getAxis(2), VMD(7,8,8));
   }
 
+  void test_setUnit() {
+    Projection p(3);
+    p.setUnit(0, INV_ANG);
+    p.setUnit(1, RLU);
+    p.setUnit(2, INV_ANG);
+    TS_ASSERT_EQUALS(p.getUnit(0), INV_ANG);
+    TS_ASSERT_EQUALS(p.getUnit(1), RLU);
+    TS_ASSERT_EQUALS(p.getUnit(2), INV_ANG);
+  }
 };
 
 #endif /* MANTID_GEOMETRY_PROJECTIONTEST_H_ */
