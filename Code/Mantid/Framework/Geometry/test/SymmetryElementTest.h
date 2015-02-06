@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "MantidGeometry/Crystal/SymmetryElement.h"
+#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -151,9 +152,44 @@ public:
     MockSymmetryElementWithAxis element;
 
     V3R rotationAxisZ = V3R(0, 0, 1);
-    SymmetryOperation twoFoldRotationZ("-x,-y,z");
-    TS_ASSERT_EQUALS(element.determineAxis(twoFoldRotationZ.matrix()),
+    SymmetryOperation fourFoldRotoInversionZ("y,-x,-z");
+    TS_ASSERT_EQUALS(element.determineAxis(fourFoldRotoInversionZ.matrix()),
                      rotationAxisZ);
+
+    SymmetryOperation sixFoldRotationZ("-y,x-y,z");
+    TS_ASSERT_EQUALS(element.determineAxis(sixFoldRotationZ.matrix()),
+                     rotationAxisZ);
+
+    V3R rotationAxisY = V3R(0, 1, 0);
+    SymmetryOperation glideMirrorCY("x,-y,z+1/2");
+    TS_ASSERT_EQUALS(element.determineAxis(glideMirrorCY.matrix()),
+                     rotationAxisY);
+
+    V3R rotationAxisXYZ = V3R(1, 1, 1);
+    SymmetryOperation threeFoldRation111("z,x,y");
+    TS_ASSERT_EQUALS(element.determineAxis(threeFoldRation111.matrix()),
+                     rotationAxisXYZ);
+
+    V3R rotationAxisxyZ = V3R(1, -1, -1);
+    SymmetryOperation threeFoldRationmm1("-z,-x,y");
+    TS_ASSERT_EQUALS(element.determineAxis(threeFoldRationmm1.matrix()),
+                     rotationAxisxyZ);
+
+    V3R rotoInversionAxisxYz = V3R(-1, 1, -1);
+    SymmetryOperation threeFoldRationm1m("-z,x,y");
+    TS_ASSERT_EQUALS(element.determineAxis(threeFoldRationm1m.matrix()),
+                     rotoInversionAxisxYz);
+
+    V3R rotationAxis2xx0 = V3R(2, 1, 0);
+    SymmetryOperation twoFoldRotationHex210("x,x-y,-z");
+    TS_ASSERT_EQUALS(element.determineAxis(twoFoldRotationHex210.matrix()),
+                     rotationAxis2xx0);
+
+
+    V3R rotationAxisx2x0 = V3R(1, 2, 0);
+    SymmetryOperation twoFoldRotationHex120("y-x,y,-z");
+    TS_ASSERT_EQUALS(element.determineAxis(twoFoldRotationHex120.matrix()),
+                     rotationAxisx2x0);
   }
 
 private:

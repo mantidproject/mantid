@@ -2,6 +2,7 @@
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
 #include <gsl/gsl_eigen.h>
+#include <gsl/gsl_complex_math.h>
 
 namespace Mantid {
 namespace Geometry {
@@ -94,13 +95,54 @@ SymmetryElementWithAxis::determineAxis(const Kernel::IntMatrix &matrix) const {
   gsl_matrix *identityMatrix =
       getGSLIdentityMatrix(matrix.numRows(), matrix.numCols());
 
-  gsl_eigen_gen_workspace *eigenWs = gsl_eigen_gen_alloc(matrix.numRows());
+  gsl_eigen_genv_workspace *eigenWs = gsl_eigen_genv_alloc(matrix.numRows());
+
+  gsl_vector_complex *alpha = gsl_vector_complex_alloc(3);
+  gsl_vector *beta = gsl_vector_alloc(3);
+  gsl_matrix_complex *eigenVectors = gsl_matrix_complex_alloc(3, 3);
+
+  gsl_eigen_genv(eigenMatrix, identityMatrix, alpha, beta, eigenVectors,
+                 eigenWs);
+
+  double determinant = matrix.determinant();
+
+  std::vector<double> eigenVector(3, 0.0);
+
+  for (size_t i = 0; i < matrix.numCols(); ++i) {
+    double eigenValue = GSL_REAL(gsl_complex_div_real(
+        gsl_vector_complex_get(alpha, i), gsl_vector_get(beta, i)));
+
+    if (fabs(eigenValue - determinant) < 1e-9) {
+      for (size_t j = 0; j < matrix.numRows(); ++j) {
+        double element = GSL_REAL(gsl_matrix_complex_get(eigenVectors, j, i));
+
+        eigenVector[j] = element;
+      }
+    }
+  }
 
   gsl_matrix_free(eigenMatrix);
   gsl_matrix_free(identityMatrix);
-  gsl_eigen_gen_free(eigenWs);
+  gsl_eigen_genv_free(eigenWs);
+  gsl_vector_complex_free(alpha);
+  gsl_vector_free(beta);
+  gsl_matrix_complex_free(eigenVectors);
 
-  return V3R(0, 0, 0);
+  double min = 1.0;
+  for (size_t i = 0; i < eigenVector.size(); ++i) {
+    double absoluteValue = fabs(eigenVector[i]);
+    if (absoluteValue != 0.0 &&
+        (eigenVector[i] < min && (absoluteValue - fabs(min)) < 1e-9)) {
+      min = eigenVector[i];
+    }
+  }
+
+  V3R axis;
+  for (size_t i = 0; i < eigenVector.size(); ++i) {
+    axis[i] = static_cast<int>(round(eigenVector[i] / min));
+  }
+
+  return axis;
 }
 
 V3R SymmetryElementWithAxis::determineFixPoint(const Kernel::IntMatrix &matrix,
