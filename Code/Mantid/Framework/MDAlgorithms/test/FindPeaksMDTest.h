@@ -191,8 +191,8 @@ public:
     const auto & detIDs1 = peak1.getContributingDetIDs();
     TS_ASSERT_EQUALS(7, detIDs1.size());
 
-    const Mantid::DataObjects::Peak & peak2 = peaks[1];
-    const auto & detIDs2 = peak2.getContributingDetIDs();
+    //const Mantid::DataObjects::Peak & peak2 = peaks[1];
+    //const auto & detIDs2 = peak2.getContributingDetIDs();
     //TS_ASSERT_EQUALS(0, detIDs2.size());
 
     AnalysisDataService::Instance().remove("peaksFound");

@@ -259,8 +259,9 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (ws->getNumExperimentInfo() == 0)
     throw std::runtime_error(
         "No instrument was found in the MDEventWorkspace. Cannot find peaks.");
-  for (uint16_t i = 0; i < ws->getNumExperimentInfo(); i++) {
-    ExperimentInfo_sptr ei = ws->getExperimentInfo(i);
+
+  for (uint16_t iexp = 0; iexp < ws->getNumExperimentInfo(); iexp++) {
+    ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
     this->readExperimentInfo(ei, boost::dynamic_pointer_cast<IMDWorkspace>(ws));
     // Copy the instrument, sample, run to the peaks workspace.
     peakWS->copyExperimentInfoFrom(ei.get());
@@ -436,8 +437,9 @@ void FindPeaksMD::findPeaksHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws) {
   if (ws->getNumExperimentInfo() == 0)
     throw std::runtime_error(
         "No instrument was found in the workspace. Cannot find peaks.");
-  for (uint16_t i = 0; i < ws->getNumExperimentInfo(); i++) {
-    ExperimentInfo_sptr ei = ws->getExperimentInfo(i);
+
+  for (uint16_t iexp = 0; iexp < ws->getNumExperimentInfo(); iexp++) {
+    ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
     this->readExperimentInfo(ei, boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 
     // Copy the instrument, sample, run to the peaks workspace.
