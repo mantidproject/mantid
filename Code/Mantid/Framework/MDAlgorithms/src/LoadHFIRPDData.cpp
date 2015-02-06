@@ -586,17 +586,19 @@ void LoadHFIRPDData::appendSampleLogs(
   // Add run_start to each ExperimentInfo
   for (size_t i = 0; i < vectimes.size(); ++i) {
     Kernel::DateAndTime runstart = vectimes[i];
-    mdws->getExperimentInfo(i)->mutableRun().addLogData(
+    mdws->getExperimentInfo(static_cast<uint16_t>(i))->mutableRun().addLogData(
         new PropertyWithValue<std::string>("run_start",
                                            runstart.toFormattedString()));
   }
-  mdws->getExperimentInfo(vectimes.size())->mutableRun().addLogData(
-      new PropertyWithValue<std::string>("run_start",
-                                         vectimes[0].toFormattedString()));
+  mdws->getExperimentInfo(static_cast<uint16_t>(vectimes.size()))
+      ->mutableRun()
+      .addLogData(new PropertyWithValue<std::string>(
+           "run_start", vectimes[0].toFormattedString()));
 
   // Add sample logs
   // get hold of last experiment info
-  ExperimentInfo_sptr eilast = mdws->getExperimentInfo(numexpinfo - 1);
+  ExperimentInfo_sptr eilast =
+      mdws->getExperimentInfo(static_cast<uint16_t>(numexpinfo - 1));
 
   for (miter = logvecmap.begin(); miter != logvecmap.end(); ++miter) {
     std::string logname = miter->first;
@@ -613,7 +615,7 @@ void LoadHFIRPDData::appendSampleLogs(
     }
 
     // For N single value experiment info
-    for (size_t i = 0; i < veclogval.size(); ++i) {
+    for (uint16_t i = 0; i < static_cast<uint16_t>(veclogval.size()); ++i) {
       // get ExperimentInfo
       ExperimentInfo_sptr tmpei = mdws->getExperimentInfo(i);
       // check run number matches
