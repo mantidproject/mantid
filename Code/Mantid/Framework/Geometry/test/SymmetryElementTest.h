@@ -7,6 +7,7 @@
 
 #include "MantidGeometry/Crystal/SymmetryElement.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -206,33 +207,49 @@ public:
 
     // Test case 2: 6 [0 0 1] (Positive/Negative) in hexagonal system
     SymmetryOperation sixFoldRotationZPlus("x-y,x,z");
-    V3R rotationAxisZ =
-        element.determineAxis(sixFoldRotationZPlus.matrix());
-    TS_ASSERT_EQUALS(element.determineRotationSense(
-                         sixFoldRotationZPlus, rotationAxisZ),
-                     SymmetryElementRotation::Positive);
+    V3R rotationAxisZ = element.determineAxis(sixFoldRotationZPlus.matrix());
+    TS_ASSERT_EQUALS(
+        element.determineRotationSense(sixFoldRotationZPlus, rotationAxisZ),
+        SymmetryElementRotation::Positive);
 
     SymmetryOperation sixFoldRotationZMinus("y,y-x,z");
-    V3R rotationAxisZ2 =
-        element.determineAxis(sixFoldRotationZMinus.matrix());
+    V3R rotationAxisZ2 = element.determineAxis(sixFoldRotationZMinus.matrix());
 
     TS_ASSERT_EQUALS(rotationAxisZ, rotationAxisZ2);
 
-    TS_ASSERT_EQUALS(element.determineRotationSense(
-                         sixFoldRotationZMinus, rotationAxisZ2),
-                     SymmetryElementRotation::Negative);
+    TS_ASSERT_EQUALS(
+        element.determineRotationSense(sixFoldRotationZMinus, rotationAxisZ2),
+        SymmetryElementRotation::Negative);
   }
 
-  void xtestSymmetryElementWithAxisSpaceGroup() {
-    MockSymmetryElementWithAxis element;
+  void testSymmetryElementRotationDetermineSymbol() {
+    TestableSymmetryElementRotation element;
+
+    SymmetryOperation sixFoldRotationZMinus("y,y-x,z");
+
+    std::cout << element.determineSymbol(sixFoldRotationZMinus) << std::endl;
+  }
+
+  void testSymmetryElementWithAxisSpaceGroup() {
+    TestableSymmetryElementRotation element;
 
     SpaceGroup_const_sptr sg =
         SpaceGroupFactory::Instance().createSpaceGroup("P m -3");
 
+    PointGroup_sptr pg =
+        PointGroupFactory::Instance().createPointGroupFromSpaceGroupSymbol(
+            sg->hmSymbol());
+
     std::vector<SymmetryOperation> ops = sg->getSymmetryOperations();
     for (auto it = ops.begin(); it != ops.end(); ++it) {
+      V3R axis = element.determineAxis((*it).matrix());
+      SymmetryElementRotation::RotationSense sense =
+          element.determineRotationSense(*it, axis);
       std::cout << (*it).identifier() << ": " << (*it).order() << " "
-                << element.determineAxis((*it).matrix()) << std::endl;
+                << pg->getReflectionFamily(axis) << " "
+                << element.determineSymbol(*it)
+                << (sense == SymmetryElementRotation::Positive ? "+" : "-")
+                << std::endl;
     }
   }
 

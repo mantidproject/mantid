@@ -3,6 +3,7 @@
 
 #include <gsl/gsl_eigen.h>
 #include <gsl/gsl_complex_math.h>
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -149,7 +150,14 @@ SymmetryElementRotation::SymmetryElementRotation()
     : SymmetryElementWithAxis() {}
 
 void SymmetryElementRotation::init(const SymmetryOperation &operation) {
-  UNUSED_ARG(operation);
+  int determinant = operation.matrix().determinant();
+  int trace = operation.matrix().Trace();
+
+  if (isNotRotation(determinant, trace)) {
+    throw std::invalid_argument(
+        "SymmetryOperation " + operation.identifier() +
+        " cannot be used to construct SymmetryElementRotation.");
+  }
 }
 
 SymmetryElementRotation::RotationSense
@@ -168,11 +176,56 @@ SymmetryElementRotation::determineRotationSense(
 
   double determinant = matrix.determinant() * operation.matrix().determinant();
 
-  if(determinant < 0) {
-      return Negative;
+  if (determinant < 0) {
+    return Negative;
   } else {
-      return Positive;
+    return Positive;
   }
+}
+
+bool SymmetryElementRotation::isNotRotation(int determinant, int trace) const {
+  // It's an inversion or identity
+  if (abs(trace) == 3) {
+    return true;
+  }
+
+  // It's a mirror
+  if (trace == 1 && determinant == -1) {
+    return true;
+  }
+
+  return false;
+}
+
+std::string SymmetryElementRotation::determineSymbol(
+    const SymmetryOperation &operation) const {
+
+  const Kernel::IntMatrix &matrix = operation.matrix();
+
+  int trace = matrix.Trace();
+  int determinant = matrix.determinant();
+
+  if (trace == 0 && determinant == -1) {
+    return "-3";
+  }
+
+  std::string symbol;
+
+  if (determinant < 0) {
+    symbol += "-";
+  }
+
+  symbol += boost::lexical_cast<std::string>(operation.order());
+
+  int translation =
+      static_cast<int>(static_cast<double>(operation.order()) *
+                       Kernel::V3D(determineTranslation(operation)).norm());
+
+  if (translation != 0) {
+    symbol += boost::lexical_cast<std::string>(translation);
+  }
+
+  return symbol;
 }
 
 SymmetryElementMirror::SymmetryElementMirror() : SymmetryElementWithAxis() {}

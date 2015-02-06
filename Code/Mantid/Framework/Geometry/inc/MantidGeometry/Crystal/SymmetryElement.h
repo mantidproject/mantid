@@ -119,6 +119,9 @@ protected:
   RotationSense determineRotationSense(const SymmetryOperation &operation,
                                        const V3R &rotationAxis) const;
 
+  bool isNotRotation(int determinant, int trace) const;
+  std::string determineSymbol(const SymmetryOperation &operation) const;
+
   RotationSense m_rotationSense;
 };
 
