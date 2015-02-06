@@ -59,13 +59,13 @@ public:
   /// Destructor
   virtual ~Projection();
   /// Retrieves the offset for the given dimension
-  float &getOffset(size_t nd);
+  float getOffset(size_t nd);
   /// Retrieves the axis vector for the given dimension
-  VMD &getAxis(size_t nd);
-
-  VMD &U() { return getAxis(0); }
-  VMD &V() { return getAxis(1); }
-  VMD &W() { return getAxis(2); }
+  VMD getAxis(size_t nd);
+  /// Set the offset for a given dimension
+  void setOffset(size_t nd, float offset);
+  /// Set the axis vector for a given dimension
+  void setAxis(size_t nd, VMD axis);
 
   size_t getNumDims() const { return m_nd; }
 

@@ -107,18 +107,32 @@ Projection::~Projection() {
   delete[] m_offsets;
 }
 
-float &Projection::getOffset(size_t nd) {
+float Projection::getOffset(size_t nd) {
   if (nd >= m_nd)
     throw std::invalid_argument("given axis out of range");
   else
     return m_offsets[nd];
 }
 
-VMD &Projection::getAxis(size_t nd) {
+VMD Projection::getAxis(size_t nd) {
   if (nd >= m_nd)
     throw std::invalid_argument("given axis out of range");
   else
     return m_dimensions[nd];
+}
+
+void Projection::setOffset(size_t nd, float offset) {
+  if (nd >= m_nd)
+    throw std::invalid_argument("given axis out of range");
+  else
+    m_offsets[nd] = offset;
+}
+
+void Projection::setAxis(size_t nd, VMD axis) {
+  if (nd >= m_nd)
+    throw std::invalid_argument("given axis out of range");
+  else
+    m_dimensions[nd] = axis;
 }
 
 } //Geometry
