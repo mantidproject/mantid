@@ -145,14 +145,6 @@ SymmetryElementWithAxis::determineAxis(const Kernel::IntMatrix &matrix) const {
   return axis;
 }
 
-V3R SymmetryElementWithAxis::determineFixPoint(const Kernel::IntMatrix &matrix,
-                                               const V3R &vector) const {
-  UNUSED_ARG(matrix);
-  UNUSED_ARG(vector);
-
-  return V3R(0, 0, 0);
-}
-
 SymmetryElementRotation::SymmetryElementRotation()
     : SymmetryElementWithAxis() {}
 

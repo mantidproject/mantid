@@ -90,15 +90,6 @@ public:
     TS_ASSERT_EQUALS(element.getTranslation(), validAxis);
   }
 
-  void testSymmetryElementWithAxisSetFixPoint() {
-    MockSymmetryElementWithAxis element;
-
-    V3R validAxis(1, 0, 0);
-    TS_ASSERT_THROWS_NOTHING(element.setFixPoint(validAxis));
-
-    TS_ASSERT_EQUALS(element.getFixPoint(), validAxis);
-  }
-
   void testSymmetryElementWithAxisDetermineTranslation() {
     MockSymmetryElementWithAxis element;
 
@@ -184,7 +175,6 @@ public:
     SymmetryOperation twoFoldRotationHex210("x,x-y,-z");
     TS_ASSERT_EQUALS(element.determineAxis(twoFoldRotationHex210.matrix()),
                      rotationAxis2xx0);
-
 
     V3R rotationAxisx2x0 = V3R(1, 2, 0);
     SymmetryOperation twoFoldRotationHex120("y-x,y,-z");
