@@ -6,14 +6,16 @@ namespace Geometry
 {
 
 Projection::Projection()
-    : m_nd(1), m_dimensions(new VMD[m_nd]), m_offsets(new float[m_nd]) {
+    : m_nd(2), m_dimensions(new VMD[m_nd]), m_offsets(new float[m_nd]) {
   m_dimensions[0] = VMD(m_nd);
+  m_dimensions[1] = VMD(m_nd);
   m_offsets[0] = 0.0;
+  m_offsets[1] = 0.0;
 }
 
 Projection::Projection(size_t nd) : m_nd(nd) {
-  if (m_nd <= 0)
-    throw std::invalid_argument("nd must be > 0");
+  if (m_nd <= 1)
+    throw std::invalid_argument("nd must be > 1");
 
   m_dimensions = new VMD[m_nd];
   m_offsets = new float[m_nd];

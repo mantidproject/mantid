@@ -38,7 +38,7 @@ namespace Geometry {
 
 class DLLExport Projection {
 public:
-  /// Default constructor builds with one dimension
+  /// Default constructor builds with two dimensions
   Projection();
   /// Constructor specifying the number of dimensions
   Projection(size_t nd);
