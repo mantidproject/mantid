@@ -7,30 +7,35 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** Takes a workspace as input and sums each spectrum contained within
     it, storing the result as a workspace of spectra with one Y & E value
     and two X values indicating the range which the integration covers.
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace - The name of the workspace to take as input. Must be a histogram. </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
+    <LI> InputWorkspace - The name of the workspace to take as input. Must be a
+   histogram. </LI>
+    <LI> OutputWorkspace - The name of the workspace in which to store the
+   result </LI>
     </UL>
 
     Optional Properties (assume that you count from zero):
     <UL>
     <LI> Range_lower - The X value to integrate from (default 0)</LI>
     <LI> Range_upper - The X value to integrate to (default max)</LI>
-    <LI> StartWorkspaceIndex - Workspace index number to integrate from (default 0)</LI>
-    <LI> EndWorkspaceIndex - Workspace index number to integrate to (default max)</LI>
-    <LI> IncludePartialBins - If true then partial bins from the beginning and end of the input range are also included in the integration (default false)</LI>
+    <LI> StartWorkspaceIndex - Workspace index number to integrate from (default
+   0)</LI>
+    <LI> EndWorkspaceIndex - Workspace index number to integrate to (default
+   max)</LI>
+    <LI> IncludePartialBins - If true then partial bins from the beginning and
+   end of the input range are also included in the integration (default
+   false)</LI>
     </UL>
 
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
+   Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -50,25 +55,29 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport Integration : public API::Algorithm
-{
+class DLLExport Integration : public API::Algorithm {
 public:
   /// Default constructor
-  Integration() : API::Algorithm() {};
+  Integration() : API::Algorithm(){};
   /// Destructor
-  virtual ~Integration() {};
+  virtual ~Integration(){};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "Integration";}
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Integration takes a 2D workspace or an EventWorkspace as input and sums the data values. Optionally, the range summed can be restricted in either dimension.";}
+  virtual const std::string name() const { return "Integration"; }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Integration takes a 2D workspace or an EventWorkspace as input and "
+           "sums the data values. Optionally, the range summed can be "
+           "restricted in either dimension.";
+  }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1);}
+  virtual int version() const { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Arithmetic;Transforms\\Rebin";}
+  virtual const std::string category() const {
+    return "Arithmetic;Transforms\\Rebin";
+  }
 
 private:
-  
   // Overridden Algorithm methods
   void init();
   void exec();
@@ -76,7 +85,8 @@ private:
   /// Get the input workspace
   API::MatrixWorkspace_const_sptr getInputWorkspace();
   /// Create the outputworkspace
-  API::MatrixWorkspace_sptr getOutputWorkspace(API::MatrixWorkspace_const_sptr inWS);
+  API::MatrixWorkspace_sptr
+  getOutputWorkspace(API::MatrixWorkspace_const_sptr inWS);
 
   /// Input event workspace
   DataObjects::EventWorkspace_const_sptr inputEventWS;
@@ -91,7 +101,6 @@ private:
   int m_MaxSpec;
   /// Flag for including partial bins
   bool m_IncPartBins;
-
 };
 
 } // namespace Algorithm

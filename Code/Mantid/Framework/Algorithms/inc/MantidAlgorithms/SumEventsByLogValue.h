@@ -9,79 +9,83 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
-  /** 
-    Produces a table or single spectrum workspace containing the total summed events in the workspace
-    as a function of a specified log.
-    
-    Copyright &copy; 2012-3 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+namespace Mantid {
+namespace Algorithms {
+/**
+  Produces a table or single spectrum workspace containing the total summed
+  events in the workspace
+  as a function of a specified log.
 
-    This file is part of Mantid.
+  Copyright &copy; 2012-3 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport SumEventsByLogValue : public API::Algorithm
-  {
-  public:
-    SumEventsByLogValue();
-    virtual ~SumEventsByLogValue();
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    /// Algorithm's name for identification overriding a virtual method
-    virtual const std::string name() const { return "SumEventsByLogValue";}
-    /// Algorithm's version for identification overriding a virtual method
-    virtual int version() const { return (1);}
-    /// Algorithm's category for identification overriding a virtual method
-    virtual const std::string category() const { return "Events";}
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const
-    {
-      return "Produces a single spectrum workspace containing the "
-          "total summed events in the workspace as a function of a specified log.";
-    }
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport SumEventsByLogValue : public API::Algorithm {
+public:
+  SumEventsByLogValue();
+  virtual ~SumEventsByLogValue();
 
-    std::map<std::string, std::string> validateInputs();
+  /// Algorithm's name for identification overriding a virtual method
+  virtual const std::string name() const { return "SumEventsByLogValue"; }
+  /// Algorithm's version for identification overriding a virtual method
+  virtual int version() const { return (1); }
+  /// Algorithm's category for identification overriding a virtual method
+  virtual const std::string category() const { return "Events"; }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Produces a single spectrum workspace containing the "
+           "total summed events in the workspace as a function of a specified "
+           "log.";
+  }
 
-  private:
-    void init();
-    void exec();
+  std::map<std::string, std::string> validateInputs();
 
-    void createTableOutput(const Kernel::TimeSeriesProperty<int> * log);
+private:
+  void init();
+  void exec();
 
-    template <typename T>
-    void createBinnedOutput(const Kernel::TimeSeriesProperty<T> * log);
+  void createTableOutput(const Kernel::TimeSeriesProperty<int> *log);
 
-    void filterEventList(const API::IEventList& eventList, const int minVal, const int maxVal,
-        const Kernel::TimeSeriesProperty<int> * log, std::vector<int>& Y);
-    void addMonitorCounts(API::ITableWorkspace_sptr outputWorkspace,
-        const Kernel::TimeSeriesProperty<int> * log, const int minVal, const int maxVal);
-    std::vector<std::pair<std::string,const Kernel::ITimeSeriesProperty * >> getNumberSeriesLogs();
-    double sumProtonCharge(const Kernel::TimeSeriesProperty<double> * protonChargeLog,
-        const Kernel::TimeSplitterType& filter);
+  template <typename T>
+  void createBinnedOutput(const Kernel::TimeSeriesProperty<T> *log);
 
-    DataObjects::EventWorkspace_const_sptr m_inputWorkspace; ///< The input workspace
-    std::string m_logName;                                   ///< The name of the log to sum against
-    std::vector<double> m_binningParams;                     ///< The optional binning parameters
-  };
+  void filterEventList(const API::IEventList &eventList, const int minVal,
+                       const int maxVal,
+                       const Kernel::TimeSeriesProperty<int> *log,
+                       std::vector<int> &Y);
+  void addMonitorCounts(API::ITableWorkspace_sptr outputWorkspace,
+                        const Kernel::TimeSeriesProperty<int> *log,
+                        const int minVal, const int maxVal);
+  std::vector<std::pair<std::string, const Kernel::ITimeSeriesProperty *>>
+  getNumberSeriesLogs();
+  double
+  sumProtonCharge(const Kernel::TimeSeriesProperty<double> *protonChargeLog,
+                  const Kernel::TimeSplitterType &filter);
 
+  DataObjects::EventWorkspace_const_sptr
+      m_inputWorkspace;                ///< The input workspace
+  std::string m_logName;               ///< The name of the log to sum against
+  std::vector<double> m_binningParams; ///< The optional binning parameters
+};
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_SUMEVENTSBYLOGVALUE_H_ */
+#endif /* MANTID_ALGORITHMS_SUMEVENTSBYLOGVALUE_H_ */

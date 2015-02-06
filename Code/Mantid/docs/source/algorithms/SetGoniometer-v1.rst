@@ -35,7 +35,7 @@ pointing along the beam, and Axis2 tied to "phi", pointing vertically
 upward.
 
 SetGoniometer(w,"Universal") is the same as
-SetGoniometer(w,Axis0="omega,0,1,0,1",Axis1="chi,0,0,1,1",Axis1="phi,0,1,0,1")
+SetGoniometer(w,Axis0="omega,0,1,0,1",Axis1="chi,0,0,1,1",Axis2="phi,0,1,0,1")
 
 
 

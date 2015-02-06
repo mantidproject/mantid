@@ -6,63 +6,64 @@
 #include "MantidDataObjects/TableWorkspace.h"
 
 #ifdef _MSC_VER
-  #pragma warning( disable: 4250 ) // Disable warning regarding inheritance via dominance
+#pragma warning(                                                               \
+    disable : 4250) // Disable warning regarding inheritance via dominance
 #endif
 
-namespace Mantid
-{
-namespace DataObjects
-{
+namespace Mantid {
+namespace DataObjects {
 
-  /** SplittersWorkspace : A TableWorkspace to contain TimeSplitters.
-    It will be used as an input for FilterEvents, which is the ultimate method for event filtering.
-    There can be various algorithms to generate an object like this.
+/** SplittersWorkspace : A TableWorkspace to contain TimeSplitters.
+  It will be used as an input for FilterEvents, which is the ultimate method for
+  event filtering.
+  There can be various algorithms to generate an object like this.
 
-    A SplittersWorkspace contains 3 columns as int64, int64 and int32 to denote
-    (1) splitter start time (2) splitter end time and (3) group workspace index
-    
-    @date 2012-04-03
+  A SplittersWorkspace contains 3 columns as int64, int64 and int32 to denote
+  (1) splitter start time (2) splitter end time and (3) group workspace index
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  @date 2012-04-03
 
-    This file is part of Mantid.
+  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport SplittersWorkspace : virtual public DataObjects::TableWorkspace, virtual public API::ISplittersWorkspace
-  {
-  public:
-    SplittersWorkspace();
-    virtual ~SplittersWorkspace();
-    
-    void addSplitter(Kernel::SplittingInterval splitter);
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    Kernel::SplittingInterval getSplitter(size_t index);
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport SplittersWorkspace : virtual public DataObjects::TableWorkspace,
+                                     virtual public API::ISplittersWorkspace {
+public:
+  SplittersWorkspace();
+  virtual ~SplittersWorkspace();
 
-    size_t getNumberSplitters() const;
+  void addSplitter(Kernel::SplittingInterval splitter);
 
-    bool removeSplitter(size_t);
+  Kernel::SplittingInterval getSplitter(size_t index);
 
-  };
+  size_t getNumberSplitters() const;
 
-  typedef boost::shared_ptr<SplittersWorkspace> SplittersWorkspace_sptr;
-  typedef boost::shared_ptr<const SplittersWorkspace> SplittersWorkspace_const_sptr;
+  bool removeSplitter(size_t);
+};
+
+typedef boost::shared_ptr<SplittersWorkspace> SplittersWorkspace_sptr;
+typedef boost::shared_ptr<const SplittersWorkspace>
+    SplittersWorkspace_const_sptr;
 
 } // namespace DataObjects
 } // namespace Mantid
 
-#endif  /* MANTID_DATAOBJECTS_SPLITTERSWORKSPACE_H_ */
+#endif /* MANTID_DATAOBJECTS_SPLITTERSWORKSPACE_H_ */

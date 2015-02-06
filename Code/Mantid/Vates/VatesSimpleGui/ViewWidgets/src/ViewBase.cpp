@@ -290,21 +290,22 @@ pqPipelineSource *ViewBase::getPvActiveSrc()
  * This function sets the status for the view mode control buttons. This
  * implementation looks at the original source for a view. Views may override
  * this function to provide alternate checks.
+ * @param initialView The initial view.
  */
-void ViewBase::checkView()
+void ViewBase::checkView(ModeControlWidget::Views initialView)
 {
   if (this->isMDHistoWorkspace(this->origSrc))
   {
-    emit this->setViewsStatus(true);
+    emit this->setViewsStatus(initialView, true);
     emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, false);
   }
   else if (this->isPeaksWorkspace(this->origSrc))
   {
-    emit this->setViewsStatus(false);
+    emit this->setViewsStatus(initialView, false);
   }
   else
   {
-    emit this->setViewsStatus(true);
+    emit this->setViewsStatus(initialView, true);
   }
 }
 

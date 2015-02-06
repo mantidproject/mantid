@@ -47,6 +47,7 @@ class AdvancedSetupScript(BaseScriptElement):
     removepropmppulsewidth = 50.0
     maxchunksize = ""
     filterbadpulses = 95.
+    bkgdsmoothpars = ""
     stripvanadiumpeaks = True
     vanadiumfwhm = ""
     vanadiumpeaktol = ""
@@ -81,6 +82,7 @@ class AdvancedSetupScript(BaseScriptElement):
         self.parnamelist.append("VanadiumPeakTol")
         self.parnamelist.append("VanadiumSmoothParams")
         self.parnamelist.append("FilterBadPulses")
+        self.parnamelist.append("BackgroundSmoothParams")
         self.parnamelist.append("PushDataPositive")
         self.parnamelist.append("Extension")
         self.parnamelist.append("PreserveEvents")
@@ -125,6 +127,7 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["RemovePromptPulseWidth"] = self.removepropmppulsewidth
         pardict["MaxChunkSize"] = self.maxchunksize
         pardict["FilterBadPulses"] = self.filterbadpulses
+        pardict["BackgroundSmoothParams"] = self.bkgdsmoothpars
         pardict["PushDataPositive"] = self.pushdatapositive
         pardict["StripVanadiumPeaks"] = self.stripvanadiumpeaks
         pardict["VanadiumFWHM"] = self.vanadiumfwhm
@@ -187,6 +190,10 @@ class AdvancedSetupScript(BaseScriptElement):
             self.filterbadpulses = getFloatElement(instrument_dom,
                     "filterbadpulses", AdvancedSetupScript.filterbadpulses)
 
+            self.bkgdsmoothpars = BaseScriptElement.getStringElement(instrument_dom,
+                "bkgdsmoothpars", default=AdvancedSetupScript.bkgdsmoothpars)
+
+
             self.pushdatapositive = BaseScriptElement.getStringElement(instrument_dom,
                     "pushdatapositive", default=AdvancedSetupScript.pushdatapositive)
 
@@ -226,6 +233,7 @@ class AdvancedSetupScript(BaseScriptElement):
         self.removepropmppulsewidth = AdvancedSetupScript.removepropmppulsewidth
         self.maxchunksize           = AdvancedSetupScript.maxchunksize
         self.filterbadpulses        = AdvancedSetupScript.filterbadpulses
+        self.bkgdsmoothpars         = AdvancedSetupScript.bkgdsmoothpars
         self.stripvanadiumpeaks     = AdvancedSetupScript.stripvanadiumpeaks
         self.vanadiumfwhm           = AdvancedSetupScript.vanadiumfwhm
         self.vanadiumpeaktol        = AdvancedSetupScript.vanadiumpeaktol

@@ -12,6 +12,9 @@ Description
 Calculates phonon densities of states, Raman and IR spectrum from the
 output of CASTEP code obtained in the form of .phonon and .castep files.
 
+If the IonTable spectrum type is used then the output workspace will be
+a table workspace containing each ion that is present in a .phonon file.
+
 Usage
 -----
 
@@ -19,7 +22,7 @@ Usage
 
 .. testcode:: ExDensityOfStatesSimple
 
-    #loading the same data from a castep and phonon file
+    # Loading the same data from a castep and phonon file
     phonon_ws = DensityOfStates(File='squaricn.phonon')
     castep_ws = DensityOfStates(File='squaricn.castep')
 
@@ -62,5 +65,21 @@ Output:
 .. testoutput:: ExDensityOfStatesPartialSummed
 
     Success!
+
+**Example - Getting the list of ions in a phonon file:**
+
+.. testcode:: ExDensityOfStatesIonTable
+
+    ion_ws = DensityOfStates(File='squaricn.phonon', SpectrumType='IonTable')
+    for i in range (0, ion_ws.rowCount()):
+        print ion_ws.row(i)['Ion']
+
+Output:
+
+.. testoutput:: ExDensityOfStatesIonTable
+
+    H
+    C
+    O
 
 .. categories::

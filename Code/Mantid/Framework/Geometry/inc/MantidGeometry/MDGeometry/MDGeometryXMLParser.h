@@ -5,115 +5,110 @@
 #include "MantidGeometry/DllConfig.h"
 #include <string>
 
-namespace Mantid
-{
-  namespace Geometry
-  {
- 
- /** @class MDGeometryXMLParser 
+namespace Mantid {
+namespace Geometry {
 
- Handles the extraction of dimensions from a xml xml string to determine how mappings have been formed. 
+/** @class MDGeometryXMLParser
 
- @author Owen Arnold, Tessella Support Services plc
- @date 17/05/2011
+Handles the extraction of dimensions from a xml xml string to determine how
+mappings have been formed.
 
- Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+@author Owen Arnold, Tessella Support Services plc
+@date 17/05/2011
 
- This file is part of Mantid.
+Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
+This file is part of Mantid.
 
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
 
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
- File change history is stored at: <https://github.com/mantidproject/mantid>.
- Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
-    class MANTID_GEOMETRY_DLL MDGeometryXMLParser
-    {
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    private:
+File change history is stored at: <https://github.com/mantidproject/mantid>.
+Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class MANTID_GEOMETRY_DLL MDGeometryXMLParser {
 
-      bool m_executed;
+private:
+  bool m_executed;
 
-      std::string m_rootNodeName;
+  std::string m_rootNodeName;
 
-      Mantid::Geometry::VecIMDDimension_sptr m_vecNonMappedDims;
+  Mantid::Geometry::VecIMDDimension_sptr m_vecNonMappedDims;
 
-      Mantid::Geometry::VecIMDDimension_sptr m_vecAllDims;
+  Mantid::Geometry::VecIMDDimension_sptr m_vecAllDims;
 
-      Mantid::Geometry::IMDDimension_sptr m_xDimension;
+  Mantid::Geometry::IMDDimension_sptr m_xDimension;
 
-      Mantid::Geometry::IMDDimension_sptr m_yDimension;
+  Mantid::Geometry::IMDDimension_sptr m_yDimension;
 
-      Mantid::Geometry::IMDDimension_sptr m_zDimension;
+  Mantid::Geometry::IMDDimension_sptr m_zDimension;
 
-      Mantid::Geometry::IMDDimension_sptr m_tDimension;
+  Mantid::Geometry::IMDDimension_sptr m_tDimension;
 
-      void validate() const;
+  void validate() const;
 
-    protected:
+protected:
+  std::string m_xmlToProcess;
 
-      std::string m_xmlToProcess;
+  MDGeometryXMLParser();
 
-      MDGeometryXMLParser();
+public:
+  explicit MDGeometryXMLParser(const std::string &xmlToProcess);
 
-    public:
+  virtual ~MDGeometryXMLParser();
 
-      explicit MDGeometryXMLParser(const std::string& xmlToProcess);
+  virtual void execute();
 
-      virtual ~MDGeometryXMLParser();
+  Mantid::Geometry::IMDDimension_sptr getXDimension() const;
 
-      virtual void execute();
+  Mantid::Geometry::IMDDimension_sptr getYDimension() const;
 
-      Mantid::Geometry::IMDDimension_sptr getXDimension() const;
+  Mantid::Geometry::IMDDimension_sptr getZDimension() const;
 
-      Mantid::Geometry::IMDDimension_sptr getYDimension() const;
+  Mantid::Geometry::IMDDimension_sptr getTDimension() const;
 
-      Mantid::Geometry::IMDDimension_sptr getZDimension() const;
+  Mantid::Geometry::VecIMDDimension_sptr getNonMappedDimensions() const;
 
-      Mantid::Geometry::IMDDimension_sptr getTDimension() const;
+  Mantid::Geometry::VecIMDDimension_sptr getNonIntegratedDimensions() const;
 
-      Mantid::Geometry::VecIMDDimension_sptr getNonMappedDimensions() const;
+  Mantid::Geometry::VecIMDDimension_sptr getIntegratedDimensions() const;
 
-      Mantid::Geometry::VecIMDDimension_sptr getNonIntegratedDimensions() const;
+  Mantid::Geometry::VecIMDDimension_sptr getAllDimensions() const;
 
-      Mantid::Geometry::VecIMDDimension_sptr getIntegratedDimensions() const;
+  bool hasXDimension() const;
 
-      Mantid::Geometry::VecIMDDimension_sptr getAllDimensions() const;
+  bool hasYDimension() const;
 
-      bool hasXDimension() const;
+  bool hasZDimension() const;
 
-      bool hasYDimension() const;
+  bool hasTDimension() const;
 
-      bool hasZDimension() const;
+  bool isXDimension(Mantid::Geometry::IMDDimension_sptr) const;
 
-      bool hasTDimension() const;
+  bool isYDimension(Mantid::Geometry::IMDDimension_sptr) const;
 
-      bool isXDimension(Mantid::Geometry::IMDDimension_sptr) const;
+  bool isZDimension(Mantid::Geometry::IMDDimension_sptr) const;
 
-      bool isYDimension(Mantid::Geometry::IMDDimension_sptr) const;
+  bool isTDimension(Mantid::Geometry::IMDDimension_sptr) const;
 
-      bool isZDimension(Mantid::Geometry::IMDDimension_sptr) const;
+  void SetRootNodeCheck(std::string elementName);
 
-      bool isTDimension(Mantid::Geometry::IMDDimension_sptr) const;
+  MDGeometryXMLParser &operator=(const MDGeometryXMLParser &);
 
-      void SetRootNodeCheck(std::string elementName);
-
-      MDGeometryXMLParser& operator=(const MDGeometryXMLParser&);
-      
-      MDGeometryXMLParser(const MDGeometryXMLParser&);
-
-    };
-  }
+  MDGeometryXMLParser(const MDGeometryXMLParser &);
+};
+}
 }
 
 #endif

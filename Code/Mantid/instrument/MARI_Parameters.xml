@@ -21,7 +21,9 @@
    <value val="mari_res2012"/>
 </parameter>
 
-<!-- Extension of the data files obtained from DAE -->
+<!-- Prefered extension of the data files obtained from DAE, e.g. what to prefer if two 
+     files with the same name and different extension are found
+ -->
 <parameter name="data_file_ext" type="string">
    <value val=".raw"/>
 </parameter>
@@ -38,7 +40,8 @@
 
 
 
-<!-- RunNumber to use for diag instead of the input run number if none - use input run -->
+<!-- RunNumber to use for diag instead of the input run number if none - use input run 
+     if yes, will probably change from command line-->
 <parameter name="mask_run" type="string">
    <value val="None"/>
 </parameter>
@@ -56,16 +59,10 @@
     <value val="monitor-1"/>
 </parameter>
 
-<!-- Monitor used to estimate total current on the sample. while normalizing by monitor 1.  -->
-<parameter name="norm-mon1-spec">
+<!-- Monitor used to estimate total current on the sample while normalizing by monitor 1.  -->
+<parameter name="norm-mon1-spec" >
   <value val="1"/>
 </parameter>
-
-<!-- Monitor after chopper used to estimate total current on the sample, if normalization is done on monitor 2  -->
-<parameter name="norm-mon2-spec">
-    <value val="2"/>
-</parameter>
-
 <!-- Time interval used for integration to estimate current on the sample 
     This interval is usually taken around the monitor peak-->
 <parameter name="norm-mon1-min">
@@ -76,6 +73,16 @@
 </parameter>
 <parameter name="norm_mon_integration_range"  type="string">
   <value val="norm-mon1-min:norm-mon1-max"/>
+</parameter>
+
+<!-- Monitor after chopper used to estimate total current on the sample, if normalization is done on monitor 2  -->
+<parameter name="norm-mon2-spec"  type = "int" >
+    <value val="2"/>
+</parameter>
+<!-- Relative energy range (wrt. to the incident energy) in which monitor 2 signal is present and the integration to 
+     caluclate monitor-2 current occurs   -->
+<parameter name="mon2_norm_energy_range" type = "string">
+    <value val="0.8,1.2"/>
 </parameter>
 
 <!-- Usually one wants to avoid loading monitors together with data except in special cases. One of this cases is 
@@ -112,7 +119,7 @@
 </parameter>
 
 <!-- by default getEi looks for peaks within (1+-0.1)*TOF_GUES range where TOF_GUES is evaluated on the basis of ei guess.
-    If the peaks are wery narrow, or there are a lot of them very close to each other, 
+    If the peaks are very narrow, or there are a lot of them very close to each other, 
     this value can be reduced. For example, such situation happens on MARI for very high incident energies.
  -->
 <parameter name="ei_mon_peak_search_range">
@@ -194,7 +201,7 @@
   difference with respect to the median value must also exceed this number of error bars (default=3.3)
 -->  
 <parameter name="diag_samp_sig">
-  <value val="3"/>
+  <value val="3."/>
 </parameter>
 
 <!-- Lower bound defining outliers as fraction of median value (v_out_lo)-->
@@ -395,10 +402,9 @@
        monovan_integr_range=abs_units_van_range;
        monovan_lo_value = monovan-integr-min;
        monovan_hi_value = monovan-integr-max;       
-       use_hard_mask_only=hardmaskOnly;
        bkgd_range = background_range;
        background_test_range = diag_background_test_range;
-       hard_mask_file=hard_mask  =hardmaskPlus;       
+       hard_mask_file=hard_mask;
        van_out_lo = diag_van_median_rate_limit_lo=diag_van_out_lo;
        van_out_hi = diag_van_median_rate_limit_hi=diag_van_out_hi;
        van_lo     = diag_van_median_sigma_lo=diag_van_lo;

@@ -4,12 +4,10 @@
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1DSpectrum.h"
+#include "MantidSINQ/PoldiUtilities/IPoldiFunction1D.h"
 
-
-namespace Mantid
-{
-namespace Poldi
-{
+namespace Mantid {
+namespace Poldi {
 
 /** PoldiSpectrumLinearBackground :
 
@@ -44,23 +42,36 @@ namespace Poldi
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class MANTID_SINQ_DLL PoldiSpectrumLinearBackground : virtual public API::ParamFunction, virtual public API::IFunction1DSpectrum
-{
+class MANTID_SINQ_DLL PoldiSpectrumLinearBackground
+    : virtual public API::ParamFunction,
+      virtual public API::IFunction1DSpectrum,
+      public IPoldiFunction1D {
 public:
-    PoldiSpectrumLinearBackground();
-    virtual ~PoldiSpectrumLinearBackground() {}
+  PoldiSpectrumLinearBackground();
+  virtual ~PoldiSpectrumLinearBackground() {}
 
-    virtual std::string name() const { return "PoldiSpectrumLinearBackground"; }
+  virtual std::string name() const { return "PoldiSpectrumLinearBackground"; }
 
-    virtual void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain, API::FunctionValues &values) const;
-    virtual void functionDeriv1DSpectrum(const API::FunctionDomain1DSpectrum &domain, API::Jacobian &jacobian);
-    
+  virtual void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
+  size_t getTimeBinCount() const;
+
+  virtual void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
+                                  API::FunctionValues &values) const;
+  virtual void
+  functionDeriv1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
+                          API::Jacobian &jacobian);
+
+  virtual void poldiFunction1D(const std::vector<int> &indices,
+                               const API::FunctionDomain1D &domain,
+                               API::FunctionValues &values) const;
+
 protected:
-    void init();
-};
+  void init();
 
+  size_t m_timeBinCount;
+};
 
 } // namespace Poldi
 } // namespace Mantid
 
-#endif  /* MANTID_SINQ_POLDISPECTRUMLINEARBACKGROUND_H_ */
+#endif /* MANTID_SINQ_POLDISPECTRUMLINEARBACKGROUND_H_ */

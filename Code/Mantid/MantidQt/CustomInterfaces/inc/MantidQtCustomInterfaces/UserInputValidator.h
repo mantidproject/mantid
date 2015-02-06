@@ -47,35 +47,37 @@ namespace MantidQt
      * File change history is stored at: <https://github.com/mantidproject/mantid>.
      * Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class UserInputValidator
+    class DLLExport UserInputValidator
     {
     public:
       /// Default Constructor.
       UserInputValidator();
 
       /// Check that the given QLineEdit field is not empty.
-      void checkFieldIsNotEmpty(const QString & name, QLineEdit * field, QLabel * errorLabel);
+      bool checkFieldIsNotEmpty(const QString & name, QLineEdit * field, QLabel * errorLabel);
       /// Check that the given QLineEdit field is valid as per any validators it might have.
-      void checkFieldIsValid(const QString & errorMessage, QLineEdit * field, QLabel * errorLabel);
+      bool checkFieldIsValid(const QString & errorMessage, QLineEdit * field, QLabel * errorLabel);
       /// Check that the given WorkspaceSelector is not empty.
-      void checkWorkspaceSelectorIsNotEmpty(const QString & name, WorkspaceSelector * workspaceSelector);
+      bool checkWorkspaceSelectorIsNotEmpty(const QString & name, WorkspaceSelector * workspaceSelector);
       /// Check that the given MWRunFiles widget has valid files.
-      void checkMWRunFilesIsValid(const QString & name, MWRunFiles * widget);
+      bool checkMWRunFilesIsValid(const QString & name, MWRunFiles * widget);
       /// Check that the given DataSelector widget has valid input.
-      void checkDataSelectorIsValid(const QString & name, DataSelector * widget);
+      bool checkDataSelectorIsValid(const QString & name, DataSelector * widget);
       /// Check that the given start and end range is valid.
-      void checkValidRange(const QString & name, std::pair<double, double> range);
+      bool checkValidRange(const QString & name, std::pair<double, double> range);
       /// Check that the given ranges dont overlap.
-      void checkRangesDontOverlap(std::pair<double, double> rangeA, std::pair<double, double> rangeB);
+      bool checkRangesDontOverlap(std::pair<double, double> rangeA, std::pair<double, double> rangeB);
       /// Check that the given "outer" range completely encloses the given "inner" range.
-      void checkRangeIsEnclosed(const QString & outerName, std::pair<double, double> outer, const QString & innerName, std::pair<double, double> inner);
+      bool checkRangeIsEnclosed(const QString & outerName, std::pair<double, double> outer, const QString & innerName, std::pair<double, double> inner);
       /// Check that the given range can be split evenly into bins of the given width.
-      void checkBins(double lower, double binWidth, double upper, double tolerance = 0.00000001);
+      bool checkBins(double lower, double binWidth, double upper, double tolerance = 0.00000001);
       /// Add a custom error message to the list.
       void addErrorMessage(const QString & message);
 
       /// Returns an error message which contains all the error messages raised by the check functions.
       QString generateErrorMessage();
+      /// Checks to see if all input is valid
+      bool isAllInputValid();
 
     private:
       /// Any raised error messages.

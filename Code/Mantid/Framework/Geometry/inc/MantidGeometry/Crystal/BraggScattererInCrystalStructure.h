@@ -6,12 +6,11 @@
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidGeometry/Crystal/SpaceGroup.h"
 
-namespace Mantid
-{
-namespace Geometry
-{
+namespace Mantid {
+namespace Geometry {
 
-/** BraggScattererInCrystalStructure
+/**
+    @class BraggScattererInCrystalStructure
 
     This class provides an extension of BraggScatterer, suitable
     for scatterers that are part of a crystal structure. Information about
@@ -45,43 +44,45 @@ namespace Geometry
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-
-class MANTID_GEOMETRY_DLL BraggScattererInCrystalStructure : public BraggScatterer
-{
+class MANTID_GEOMETRY_DLL BraggScattererInCrystalStructure
+    : public BraggScatterer {
 public:
-    BraggScattererInCrystalStructure();
-    virtual ~BraggScattererInCrystalStructure() { }
+  BraggScattererInCrystalStructure();
+  virtual ~BraggScattererInCrystalStructure() {}
 
-    Kernel::V3D getPosition() const;
-    std::vector<Kernel::V3D> getEquivalentPositions() const;
-    UnitCell getCell() const;
-    SpaceGroup_const_sptr getSpaceGroup() const;
+  Kernel::V3D getPosition() const;
+  std::vector<Kernel::V3D> getEquivalentPositions() const;
+  UnitCell getCell() const;
+  SpaceGroup_const_sptr getSpaceGroup() const;
 
 protected:
-    virtual void afterPropertySet(const std::string &propertyName);
+  virtual void afterPropertySet(const std::string &propertyName);
 
-    /// This method should be re-implemented by subclasses for additional parameter processing.
-    virtual void afterScattererPropertySet(const std::string &) { }
+  /// This method should be re-implemented by subclasses for additional
+  /// parameter processing.
+  virtual void afterScattererPropertySet(const std::string &) {}
 
-    /// This method should be implemented by subclasses for declaring additional properties.
-    virtual void declareScattererProperties() { }
+  /// This method should be implemented by subclasses for declaring additional
+  /// properties.
+  virtual void declareScattererProperties() {}
 
-    virtual void setPosition(const Kernel::V3D &position);
-    virtual void setCell(const UnitCell &cell);
-    virtual void setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
+  virtual void setPosition(const Kernel::V3D &position);
+  virtual void setCell(const UnitCell &cell);
+  virtual void setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
 
-    virtual void declareProperties();
+  virtual void declareProperties();
 
-    void recalculateEquivalentPositions();
+  void recalculateEquivalentPositions();
 
-    Kernel::V3D m_position;
-    std::vector<Kernel::V3D> m_equivalentPositions;
+  Kernel::V3D m_position;
+  std::vector<Kernel::V3D> m_equivalentPositions;
 
-    UnitCell m_cell;
-    SpaceGroup_const_sptr m_spaceGroup;
+  UnitCell m_cell;
+  SpaceGroup_const_sptr m_spaceGroup;
 };
 
-typedef boost::shared_ptr<BraggScattererInCrystalStructure> BraggScattererInCrystalStructure_sptr;
+typedef boost::shared_ptr<BraggScattererInCrystalStructure>
+    BraggScattererInCrystalStructure_sptr;
 
 /**
  * Helper class for validating unit cell strings.
@@ -90,14 +91,14 @@ typedef boost::shared_ptr<BraggScattererInCrystalStructure> BraggScattererInCrys
  * possibly floating point numbers. It's required for the unit cell string
  * property.
  */
-class MANTID_GEOMETRY_DLL UnitCellStringValidator : public Kernel::TypedValidator<std::string>
-{
+class MANTID_GEOMETRY_DLL UnitCellStringValidator
+    : public Kernel::TypedValidator<std::string> {
 protected:
-    Kernel::IValidator_sptr clone() const;
-    virtual std::string checkValidity(const std::string &unitCellString) const;
+  Kernel::IValidator_sptr clone() const;
+  virtual std::string checkValidity(const std::string &unitCellString) const;
 };
 
 } // namespace Geometry
 } // namespace Mantid
 
-#endif  /* MANTID_GEOMETRY_BRAGGSCATTERERINCRYSTALSTRUCTURE_H_ */
+#endif /* MANTID_GEOMETRY_BRAGGSCATTERERINCRYSTALSTRUCTURE_H_ */

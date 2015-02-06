@@ -6,9 +6,9 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidAPI/Algorithm.h"
 
-//STL
+// STL
 #include <vector>
 #include <map>
 #include <cmath>
 
-#endif //MANTID_MDEVENTS_PRECOMPILEDHEADER_H_
+#endif // MANTID_MDEVENTS_PRECOMPILEDHEADER_H_

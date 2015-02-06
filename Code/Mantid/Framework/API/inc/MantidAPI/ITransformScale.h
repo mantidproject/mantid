@@ -5,23 +5,23 @@
 // Includes
 //----------------------------------------------------------------------
 #ifndef Q_MOC_RUN
-# include <boost/shared_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #endif
 
 #include <vector>
 
 #include "MantidAPI/DllConfig.h"
 
-namespace Mantid
-{
-namespace API
-{
-/*Base class  representing a scaling transformation acting on a one-dimensional grid domain
+namespace Mantid {
+namespace API {
+/*Base class  representing a scaling transformation acting on a one-dimensional
+  grid domain
 
   @author Jose Borreguero
   @date Aug/28/2012
 
-  Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -42,15 +42,14 @@ namespace API
   Code Documentation is available at: <http://doxygen.mantidproject.org>.
 */
 
-class MANTID_API_DLL ITransformScale
-{
+class MANTID_API_DLL ITransformScale {
 public:
-  ITransformScale() {};
+  ITransformScale(){};
   /// Virtual destructor needed for an abstract class
-  virtual ~ITransformScale() {};
+  virtual ~ITransformScale(){};
   virtual const std::string name() const { return "ITransformScale"; }
   /// The scaling transformation. Define in derived classes
-  virtual void transform( std::vector<double> &gd ) = 0;
+  virtual void transform(std::vector<double> &gd) = 0;
 }; // class ITransformScale
 
 /// typedef for a shared pointer
@@ -59,13 +58,12 @@ typedef boost::shared_ptr<ITransformScale> ITransformScale_sptr;
 } // namespace API
 } // namespace Mantid
 
-
-#define DECLARE_TRANSFORMSCALE(classname) \
-  namespace { \
-  Mantid::Kernel::RegistrationHelper register_trs_##classname( \
-  ((Mantid::API::TransformScaleFactory::Instance().subscribe<classname>(#classname)) \
-  , 0)); \
+#define DECLARE_TRANSFORMSCALE(classname)                                      \
+  namespace {                                                                  \
+  Mantid::Kernel::RegistrationHelper register_trs_##classname(                 \
+      ((Mantid::API::TransformScaleFactory::Instance().subscribe<classname>(   \
+           #classname)),                                                       \
+       0));                                                                    \
   }
-
 
 #endif /*MANTID_API_ITRANSFORMSCALE_H_*/

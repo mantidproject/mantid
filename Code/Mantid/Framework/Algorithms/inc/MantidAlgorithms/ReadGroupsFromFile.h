@@ -9,41 +9,49 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-
-namespace Mantid
-{
-namespace Algorithms
-{
-/** Read a diffraction calibration file (*.cal) and an instrument name, and output a 2D workspace
+namespace Mantid {
+namespace Algorithms {
+/** Read a diffraction calibration file (*.cal) and an instrument name, and
+ output a 2D workspace
  * containing on the Y-axis the values of the Group each detector belongs to.
- * This is used to visualise the grouping scheme for powder diffractometers, where a large number of detectors
- * are grouped together. The output 2D workspace can be visualize using the show instrument method.
+ * This is used to visualise the grouping scheme for powder diffractometers,
+ where a large number of detectors
+ * are grouped together. The output 2D workspace can be visualize using the show
+ instrument method.
  * The format of the *.cal file is as follows:
  *
- *   # Format: 
+ *   # Format:
  *   number   UDET offset  select  group
  *   0        611  0.0000000  1    0
  *   1        612  0.0000000  1    0
  *   2        601  0.0000000  0    0
  *   3        602  0.0000000  0    0
  *   4        621  0.0000000  1    0
- *   The first column is simply an index, the second is a UDET identifier for the detector,
- *   the third column corresponds to an offset in Deltad/d (not applied, usually applied using
- *   the AlignDetectors algorithm). The forth column is a flag to indicate whether the detector
- *   is selected. The fifth column indicates the group this detector belongs to (number >=1),
+ *   The first column is simply an index, the second is a UDET identifier for
+ the detector,
+ *   the third column corresponds to an offset in Deltad/d (not applied, usually
+ applied using
+ *   the AlignDetectors algorithm). The forth column is a flag to indicate
+ whether the detector
+ *   is selected. The fifth column indicates the group this detector belongs to
+ (number >=1),
  *   zero is not considered as a group.
  *   Required Properties:
  *   <UL>
- *   <LI> InstrumentName   - The name of the instrument. Needs to be present in the store </LI>
+ *   <LI> InstrumentName   - The name of the instrument. Needs to be present in
+ the store </LI>
  *   <LI> GroupingFilename - The name of the output file (*.cal extension) </LI>
- *   <LI> ShowUnselected   - Option (true or false) to consider unselected detectors in the cal file </LI>
- *   <LI> OuputWorkspace   - The name of the output 2D Workspace containing the group information </LI>
+ *   <LI> ShowUnselected   - Option (true or false) to consider unselected
+ detectors in the cal file </LI>
+ *   <LI> OuputWorkspace   - The name of the output 2D Workspace containing the
+ group information </LI>
  *   </UL>
 
     @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
     @date 09/03/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -63,8 +71,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ReadGroupsFromFile : public API::Algorithm
-{
+class DLLExport ReadGroupsFromFile : public API::Algorithm {
 public:
   /// (Empty) Constructor
   ReadGroupsFromFile();
@@ -72,8 +79,16 @@ public:
   virtual ~ReadGroupsFromFile() {}
   /// Algorithm's name
   virtual const std::string name() const { return "ReadGroupsFromFile"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Read a diffraction calibration file (*.cal) or an XML grouping file (*.xml) and an instrument name, and output a 2D workspace containing on the Y-axis the values of the Group each detector belongs to.  This is used to visualise the grouping scheme for powder diffractometers, where a large number of detectors are grouped together. The output 2D workspace can be visualize using the show instrument method.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Read a diffraction calibration file (*.cal) or an XML grouping "
+           "file (*.xml) and an instrument name, and output a 2D workspace "
+           "containing on the Y-axis the values of the Group each detector "
+           "belongs to.  This is used to visualise the grouping scheme for "
+           "powder diffractometers, where a large number of detectors are "
+           "grouped together. The output 2D workspace can be visualize using "
+           "the show instrument method.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -81,22 +96,26 @@ public:
   virtual const std::string category() const { return "Diffraction"; }
 
 private:
-  /// Map containing the detector entries found in the *.cal file. The key is the udet number, the value of is a pair of <group,selected>.
-  typedef boost::unordered_map<int,std::pair<int,int> > calmap;
+  /// Map containing the detector entries found in the *.cal file. The key is
+  /// the udet number, the value of is a pair of <group,selected>.
+  typedef boost::unordered_map<int, std::pair<int, int>> calmap;
   /// Initialisation code
   void init();
   /// Execution code
   void exec();
   /// Read a grouping file and construct the calibration map
-  void readGroupingFile(const std::string& filename);
+  void readGroupingFile(const std::string &filename);
   /// Read an XML Grouping File
-  void readXMLGroupingFile(const std::string& filename);
+  void readXMLGroupingFile(const std::string &filename);
   /// Child Algorithm to Load the associated empty instrument
-  /// @param instrument_xml_name :: The instrument xml name including extension(.xml or .XML) but no path
+  /// @param instrument_xml_name :: The instrument xml name including
+  /// extension(.xml or .XML) but no path
   /// this is determine by the mantid instrument.directory
   /// @return Shared pointer to the 2D workspace
-  DataObjects::Workspace2D_sptr loadEmptyInstrument(const std::string& instrument_xml_name);
-  /// Calibration map containing the detector entries found in the *.cal file. The key is the udet number, the value of is a pair of <group,selected>.
+  DataObjects::Workspace2D_sptr
+  loadEmptyInstrument(const std::string &instrument_xml_name);
+  /// Calibration map containing the detector entries found in the *.cal file.
+  /// The key is the udet number, the value of is a pair of <group,selected>.
   calmap calibration;
 };
 

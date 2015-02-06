@@ -85,17 +85,17 @@ void MWDiag::setSumState(bool checked)
 
 
 /**
- * Get an instrument pointer for the name instrument
- */
+* Get an instrument pointer for the name instrument
+*/
 Instrument_const_sptr MWDiag::getInstrument(const QString & name)
 {
   std::string ws_name = "__empty_" + name.toStdString();
-  
+
   AnalysisDataServiceImpl& dataStore = AnalysisDataService::Instance();
   if( !dataStore.doesExist(ws_name) )
   {
     QString pyInput =
-      "from DirectEnergyConversion import setup_reducer\n"
+      "from Direct.DirectEnergyConversion import setup_reducer\n"
       "setup_reducer('%1')";
     pyInput = pyInput.arg(QString::fromStdString(ws_name));
     runPythonCode(pyInput);
@@ -106,7 +106,7 @@ Instrument_const_sptr MWDiag::getInstrument(const QString & name)
   }
   MatrixWorkspace_sptr inst_ws = 
     boost::dynamic_pointer_cast<MatrixWorkspace>(dataStore.retrieve(ws_name));
-  
+
   return inst_ws->getInstrument();
 }
 
@@ -128,9 +128,9 @@ QString MWDiag::getSetting(const QString & settingName, boost::shared_ptr<const 
       {
         std::vector<bool> vl = instrument->getBoolParameter(parName);
         if (vl[0])
-            value = "1";
+          value = "1";
         else
-            value = "0";
+          value = "0";
         break;
       }
     case('i'):
@@ -176,14 +176,14 @@ void MWDiag::saveDefaults()
 
   m_prevSets.setValue("significance", m_designWidg.leSignificance->text());
   m_prevSets.setValue("no solid", m_designWidg.ckAngles->isChecked());
-  
+
   m_prevSets.setValue("high abs", m_designWidg.leHighAbs->text());
   m_prevSets.setValue("low abs", m_designWidg.leLowAbs->text());
   m_prevSets.setValue("high median", m_designWidg.leHighMed->text());
   m_prevSets.setValue("low median", m_designWidg.leLowMed->text());
-  
+
   m_prevSets.setValue("variation", m_designWidg.leVariation->text());
-  
+
   m_prevSets.setValue("test background", m_designWidg.ckDoBack->isChecked());
   m_prevSets.setValue("back criteria", m_designWidg.leAcceptance->text());
   m_prevSets.setValue("no zero background",
@@ -199,21 +199,21 @@ void MWDiag::setupToolTips()
   m_designWidg.lbOFile->setToolTip(oFileToolTip);
   m_designWidg.leOFile->setToolTip(oFileToolTip);
   m_designWidg.pbOFile->setToolTip(oFileToolTip);
-  
+
   QString significanceToolTip =
     "Spectra with integrated counts within this number of standard deviations from\n"
-    "the median will not be labelled bad (sets property SignificanceTest when\n"
+    "the median will not be labeled bad (sets property SignificanceTest when\n"
     "MedianDetectorTest is run)";
   m_designWidg.leSignificance->setToolTip(significanceToolTip);
   m_designWidg.lbSignificance->setToolTip(significanceToolTip);
   m_designWidg.ckAngles->setToolTip("Not yet implemented");
-//-------------------------------------------------------------------------------------------------
+  //-------------------------------------------------------------------------------------------------
   QString highAbsSetTool =
     "Reject any spectrum that contains more than this number of counts in total\n"
     "(sets property HighThreshold when FindDetectorsOutsideLimits is run)";
   m_designWidg.leHighAbs->setToolTip(highAbsSetTool);
   m_designWidg.lbHighAbs->setToolTip(highAbsSetTool);
-  
+
   QString lowAbsSetTool =
     "Reject any spectrum that contains less than this number of counts in total\n"
     "(sets property LowThreshold when FindDetectorsOutsideLimits is run)";
@@ -235,9 +235,9 @@ void MWDiag::setupToolTips()
   m_designWidg.lbLowMed->setToolTip(lowMedToolTip);
 
   QString variationToolTip = 
-    "When comparing equilivient spectra in the two white beam vanadiums reject any\n"
+    "When comparing equivalent spectra in the two white beam vanadiums reject any\n"
     "whose the total number of counts varies by more than this multiple of the\n"
-    "medain variation (sets property Variation when DetectorEfficiencyVariation is\n"
+    "median variation (sets property Variation when DetectorEfficiencyVariation is\n"
     "is run)";
   m_designWidg.leVariation->setToolTip(variationToolTip);
   m_designWidg.lbVariation->setToolTip(variationToolTip);
@@ -269,7 +269,7 @@ void MWDiag::connectSignals(const QWidget * const parentInterface)
   signalMapper->setMapping(m_designWidg.pbOFile, QString("OutputFile"));
   connect(m_designWidg.pbOFile, SIGNAL(clicked()), signalMapper, SLOT(map()));  
   connect(signalMapper, SIGNAL(mapped(const QString &)),
-         this, SLOT(browseClicked(const QString &)));
+    this, SLOT(browseClicked(const QString &)));
 
   // signals connected to the interface that this form is on
   if ( parentInterface != NULL )
@@ -278,12 +278,12 @@ void MWDiag::connectSignals(const QWidget * const parentInterface)
     connect(parentInterface, SIGNAL(MWDiag_updateWBV(const QString&)),
       m_designWidg.white_file, SLOT(setFileTextWithSearch(const QString&)));
     connect(parentInterface, SIGNAL(MWDiag_updateTOFs(const double &, const double &)),
-          this, SLOT(updateTOFs(const double &, const double &)));
+      this, SLOT(updateTOFs(const double &, const double &)));
     connect(m_designWidg.leStartTime, SIGNAL(editingFinished()), this, SLOT(TOFUpd()));
     connect(m_designWidg.leEndTime, SIGNAL(editingFinished()), this, SLOT(TOFUpd()));
 
     connect(parentInterface, SIGNAL(MWDiag_sendRuns(const QStringList&)),
-    this, SLOT(specifyRuns(const QStringList &)));
+      this, SLOT(specifyRuns(const QStringList &)));
   }
 }
 void MWDiag::setUpValidators()
@@ -301,12 +301,12 @@ void MWDiag::setUpValidators()
 }
 
 /**
- * Returns true if the input on the form is valid, false otherwise
- */
+* Returns true if the input on the form is valid, false otherwise
+*/
 bool MWDiag::isInputValid() const
 {
   bool valid(m_designWidg.maskFileFinder->isValid());
-  
+
   valid &= m_designWidg.white_file->isValid();
   valid &= m_designWidg.white_file_2->isValid();
 
@@ -330,7 +330,7 @@ void MWDiag::browseClicked(const QString &buttonDis)
     extensions << "msk";
     toSave = true;
   }
-  
+
   QString filepath = openFileDialog(toSave, extensions);
   if( filepath.isEmpty() ) return;
   QWidget *focus = QApplication::focusWidget();
@@ -347,8 +347,8 @@ void MWDiag::browseClicked(const QString &buttonDis)
 }
 
 /**
- * Create a diagnostic script from the given
- */
+* Create a diagnostic script from the given
+*/
 QString MWDiag::createDiagnosticScript() const
 {
   // Be nice and explicit so that this is as easy as possible to read later
@@ -370,7 +370,7 @@ QString MWDiag::createDiagnosticScript() const
       }
       else
       {
-       throw std::runtime_error("Diagnostic interface does not support multiple mono files without summing. ");
+        throw std::runtime_error("Diagnostic interface does not support multiple mono files without summing. ");
       }
     }
   }
@@ -396,18 +396,17 @@ QString MWDiag::createDiagnosticScript() const
   QString bleed_pixels = m_designWidg.ignored_pixels->text();
 
   QString diagCall =
-    "from DirectEnergyConversion import setup_reducer\n"
+    "from Direct.DirectEnergyConversion import setup_reducer\n"
     "from mantid import config\n"
     "reducer = setup_reducer(config['default.instrument'])\n"
-    "reducer._to_stdout = False\n"
+    "reducer.prop_man.log_to_mantid = True\n"
     "diag_total_mask = reducer.diagnose(";
-  
+
   if( m_designWidg.ckDoBack->isChecked() )
   {
     // Do the background check so we need all fields
     diagCall += 
-      whiteBeam + ","
-      "sample=" + sampleRun + ","
+      whiteBeam + "," + sampleRun + ","
       "samp_zero=" + removeZeroes + ","
       "tiny=" + lowCounts + ","
       "huge=" + highCounts + ","
@@ -431,7 +430,7 @@ QString MWDiag::createDiagnosticScript() const
       "samp_sig=" + significance + ","
       "hard_mask=" + hard_mask_file;
   }
-  
+
   // Bleed correction
   if( m_designWidg.bleed_group->isChecked() )
   {
@@ -446,14 +445,14 @@ QString MWDiag::createDiagnosticScript() const
   }
 
   // Print results argument and Closing  argument bracket
-  diagCall += ", print_results=True)\n";
+  diagCall += ", print_diag_results=True)\n";
 
   return diagCall;
 }
 
 /**
- * Show the test result dialog
- */
+* Show the test result dialog
+*/
 void MWDiag::showTestResults(const QString & testSummary) const
 {
   if( !m_dispDialog )
@@ -462,7 +461,7 @@ void MWDiag::showTestResults(const QString & testSummary) const
     connect(m_dispDialog, SIGNAL(runAsPythonScript(const QString&, bool)), this,
       SIGNAL(runAsPythonScript(const QString&, bool)));
   }
-  
+
   m_dispDialog->updateResults(testSummary);
   m_dispDialog->show();
 }
@@ -478,8 +477,8 @@ void MWDiag::closeDialog()
 }
 
 /**
- *
- */
+*
+*/
 QString MWDiag::openFileDialog(const bool save, const QStringList &exts)
 {
   QString filter;
@@ -498,20 +497,20 @@ QString MWDiag::openFileDialog(const bool save, const QStringList &exts)
   if( save )
   {
     filename = FileDialogHandler::getSaveFileName(this, "Save file",
-          m_prevSets.value("save file dir", "").toString(), filter);
-        if( ! filename.isEmpty() )
-        {
-          m_prevSets.setValue("save file dir", QFileInfo(filename).absoluteDir().path());
-        }
+      m_prevSets.value("save file dir", "").toString(), filter);
+    if( ! filename.isEmpty() )
+    {
+      m_prevSets.setValue("save file dir", QFileInfo(filename).absoluteDir().path());
+    }
   }
   else
   {
     filename = QFileDialog::getOpenFileName(this, "Open file",
-          m_prevSets.value("load file dir", "").toString(), filter);
-        if( ! filename.isEmpty() )
-        {
-          m_prevSets.setValue("load file dir", QFileInfo(filename).absoluteDir().path());
-        }
+      m_prevSets.value("load file dir", "").toString(), filter);
+    if( ! filename.isEmpty() )
+    {
+      m_prevSets.setValue("load file dir", QFileInfo(filename).absoluteDir().path());
+    }
   }
   return filename;
 } 
@@ -560,7 +559,7 @@ void MWDiag::updateTOFs(const double &start, const double &end)
   if ( ! m_TOFChanged ) 
   {
     m_designWidg.leStartTime->setText(QString::number(start));
-  m_designWidg.leEndTime->setText(QString::number(end));
+    m_designWidg.leEndTime->setText(QString::number(end));
   }
 }
 /** This slot sets m_monoFiles based on the array that is

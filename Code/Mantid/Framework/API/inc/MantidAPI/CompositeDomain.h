@@ -9,16 +9,16 @@
 
 #include <stdexcept>
 
-namespace Mantid
-{
-namespace API
-{
-/** Base class for a composite domain. A composite domain consists of a set of domains.
+namespace Mantid {
+namespace API {
+/** Base class for a composite domain. A composite domain consists of a set of
+   domains.
 
     @author Roman Tolchenov, Tessella plc
     @date 15/11/2011
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -38,13 +38,12 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL CompositeDomain: public FunctionDomain
-{
+class MANTID_API_DLL CompositeDomain : public FunctionDomain {
 public:
   /// Return the number of parts in the domain
-  virtual size_t getNParts() const  = 0;
+  virtual size_t getNParts() const = 0;
   /// Return i-th domain
-  virtual const FunctionDomain& getDomain(size_t i) const = 0;
+  virtual const FunctionDomain &getDomain(size_t i) const = 0;
 };
 
 } // namespace API

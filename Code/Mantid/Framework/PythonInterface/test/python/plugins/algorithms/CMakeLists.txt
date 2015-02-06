@@ -48,7 +48,6 @@ set ( TEST_PY_FILES
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
   PoldiMergeTest.py
-  LoadSPICEAsciiTest.py
   VesuvioResolutionTest.py
 )
 

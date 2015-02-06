@@ -7,29 +7,26 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 
-namespace Mantid
-{
-namespace PhysicalConstants
-{
+namespace Mantid {
+namespace PhysicalConstants {
 
 using std::string;
 
+Atom::Atom(const std::string &symbol, const uint16_t z, const uint16_t a,
+           const double abundance, const double mass, const double density)
+    : symbol(symbol), z_number(z), a_number(a), abundance(abundance),
+      mass(mass), mass_density(density),
+      number_density(density * N_A * 1.e-24 /
+                     mass), // Convert from cm^-3 to Angstroms^-3
+      neutron(
+          getNeutronNoExceptions(z, a)) /// Get the corresponding neutronic atom
+{}
 
-
-Atom::Atom(const std::string& symbol, const uint16_t z, const uint16_t a,
-           const double abundance, const double mass, const double density) :
-           symbol(symbol), z_number(z), a_number(a), abundance(abundance),
-           mass(mass), mass_density(density),
-	   number_density(density * N_A * 1.e-24/ mass),  // Convert from cm^-3 to Angstroms^-3
-	   neutron(getNeutronNoExceptions(z, a))   /// Get the corresponding neutronic atom
-{
-}
-
-Atom::Atom(const Atom& other):
-    symbol(other.symbol), z_number(other.z_number), a_number(other.a_number),
-    abundance(other.abundance), mass(other.mass), mass_density(other.mass_density),
-    number_density(other.number_density), neutron(getNeutronNoExceptions(other.z_number, other.a_number))
-  {}
+Atom::Atom(const Atom &other)
+    : symbol(other.symbol), z_number(other.z_number), a_number(other.a_number),
+      abundance(other.abundance), mass(other.mass),
+      mass_density(other.mass_density), number_density(other.number_density),
+      neutron(getNeutronNoExceptions(other.z_number, other.a_number)) {}
 
 // ---------- START DO NOT EDIT AREA----------
 /// \cond
@@ -2882,302 +2879,273 @@ static const Atom Cm252("Cm", 96, 252, 0.000000, 252.084870, 13.7881238611);
 
 /// All of the atoms in a single array so it can be searched.
 static Atom ATOMS[] = {
-H, H1, H2, H3, H4, H5, H6, He, He3, He4,
-He5, He6, He7, He8, He9, He10, Li, Li4, Li5, Li6,
-Li7, Li8, Li9, Li10, Li11, Li12, Be, Be5, Be6, Be7,
-Be8, Be9, Be10, Be11, Be12, Be13, Be14, B, B7, B8,
-B9, B10, B11, B12, B13, B14, B15, B16, B17, B18,
-B19, C, C8, C9, C10, C11, C12, C13, C14, C15,
-C16, C17, C18, C19, C20, C21, C22, N, N10, N11,
-N12, N13, N14, N15, N16, N17, N18, N19, N20, N21,
-N22, N23, N24, O, O12, O13, O14, O15, O16, O17,
-O18, O19, O20, O21, O22, O23, O24, O25, O26, F,
-F14, F15, F16, F17, F18, F19, F20, F21, F22, F23,
-F24, F25, F26, F27, F28, F29, Ne, Ne32, Ne16, Ne17,
-Ne18, Ne19, Ne20, Ne21, Ne22, Ne23, Ne24, Ne25, Ne26, Ne27,
-Ne28, Ne29, Ne30, Ne31, Na, Na32, Na33, Na34, Na35, Na18,
-Na19, Na20, Na21, Na22, Na23, Na24, Na25, Na26, Na27, Na28,
-Na29, Na30, Na31, Mg, Mg32, Mg33, Mg34, Mg35, Mg36, Mg37,
-Mg20, Mg21, Mg22, Mg23, Mg24, Mg25, Mg26, Mg27, Mg28, Mg29,
-Mg30, Mg31, Al, Al32, Al33, Al34, Al35, Al36, Al37, Al38,
-Al39, Al21, Al22, Al23, Al24, Al25, Al26, Al27, Al28, Al29,
-Al30, Al31, Si, Si32, Si33, Si34, Si35, Si36, Si37, Si38,
-Si39, Si40, Si41, Si42, Si22, Si23, Si24, Si25, Si26, Si27,
-Si28, Si29, Si30, Si31, P, P24, P25, P26, P27, P28,
-P29, P30, P31, P32, P33, P34, P35, P36, P37, P38,
-P39, P40, P41, P42, P43, P44, P45, P46, S, S26,
-S27, S28, S29, S30, S31, S32, S33, S34, S35, S36,
-S37, S38, S39, S40, S41, S42, S43, S44, S45, S46,
-S47, S48, S49, Cl, Cl28, Cl29, Cl30, Cl31, Cl32, Cl33,
-Cl34, Cl35, Cl36, Cl37, Cl38, Cl39, Cl40, Cl41, Cl42, Cl43,
-Cl44, Cl45, Cl46, Cl47, Cl48, Cl49, Cl50, Cl51, Ar, Ar30,
-Ar31, Ar32, Ar33, Ar34, Ar35, Ar36, Ar37, Ar38, Ar39, Ar40,
-Ar41, Ar42, Ar43, Ar44, Ar45, Ar46, Ar47, Ar48, Ar49, Ar50,
-Ar51, Ar52, Ar53, K, K32, K33, K34, K35, K36, K37,
-K38, K39, K40, K41, K42, K43, K44, K45, K46, K47,
-K48, K49, K50, K51, K52, K53, K54, K55, Ca, Ca34,
-Ca35, Ca36, Ca37, Ca38, Ca39, Ca40, Ca41, Ca42, Ca43, Ca44,
-Ca45, Ca46, Ca47, Ca48, Ca49, Ca50, Ca51, Ca52, Ca53, Ca54,
-Ca55, Ca56, Ca57, Sc, Sc36, Sc37, Sc38, Sc39, Sc40, Sc41,
-Sc42, Sc43, Sc44, Sc45, Sc46, Sc47, Sc48, Sc49, Sc50, Sc51,
-Sc52, Sc53, Sc54, Sc55, Sc56, Sc57, Sc58, Sc59, Ti, Ti38,
-Ti39, Ti40, Ti41, Ti42, Ti43, Ti44, Ti45, Ti46, Ti47, Ti48,
-Ti49, Ti50, Ti51, Ti52, Ti53, Ti54, Ti55, Ti56, Ti57, Ti58,
-Ti59, Ti60, Ti61, V, V40, V41, V42, V43, V44, V45,
-V46, V47, V48, V49, V50, V51, V52, V53, V54, V55,
-V56, V57, V58, V59, V60, V61, V62, V63, Cr, Cr42,
-Cr43, Cr44, Cr45, Cr46, Cr47, Cr48, Cr49, Cr50, Cr51, Cr52,
-Cr53, Cr54, Cr55, Cr56, Cr57, Cr58, Cr59, Cr60, Cr61, Cr62,
-Cr63, Cr64, Cr65, Mn, Mn44, Mn45, Mn46, Mn47, Mn48, Mn49,
-Mn50, Mn51, Mn52, Mn53, Mn54, Mn55, Mn56, Mn57, Mn58, Mn59,
-Mn60, Mn61, Mn62, Mn63, Mn64, Mn65, Mn66, Mn67, Fe, Fe45,
-Fe46, Fe47, Fe48, Fe49, Fe50, Fe51, Fe52, Fe53, Fe54, Fe55,
-Fe56, Fe57, Fe58, Fe59, Fe60, Fe61, Fe62, Fe63, Fe64, Fe65,
-Fe66, Fe67, Fe68, Fe69, Co, Co48, Co49, Co50, Co51, Co52,
-Co53, Co54, Co55, Co56, Co57, Co58, Co59, Co60, Co61, Co62,
-Co63, Co64, Co65, Co66, Co67, Co68, Co69, Co70, Co71, Co72,
-Ni, Ni50, Ni51, Ni52, Ni53, Ni54, Ni55, Ni56, Ni57, Ni58,
-Ni59, Ni60, Ni61, Ni62, Ni63, Ni64, Ni65, Ni66, Ni67, Ni68,
-Ni69, Ni70, Ni71, Ni72, Ni73, Ni74, Ni75, Ni76, Ni77, Ni78,
-Cu, Cu52, Cu53, Cu54, Cu55, Cu56, Cu57, Cu58, Cu59, Cu60,
-Cu61, Cu62, Cu63, Cu64, Cu65, Cu66, Cu67, Cu68, Cu69, Cu70,
-Cu71, Cu72, Cu73, Cu74, Cu75, Cu76, Cu77, Cu78, Cu79, Cu80,
-Zn, Zn54, Zn55, Zn56, Zn57, Zn58, Zn59, Zn60, Zn61, Zn62,
-Zn63, Zn64, Zn65, Zn66, Zn67, Zn68, Zn69, Zn70, Zn71, Zn72,
-Zn73, Zn74, Zn75, Zn76, Zn77, Zn78, Zn79, Zn80, Zn81, Zn82,
-Ga, Ga56, Ga57, Ga58, Ga59, Ga60, Ga61, Ga62, Ga63, Ga64,
-Ga65, Ga66, Ga67, Ga68, Ga69, Ga70, Ga71, Ga72, Ga73, Ga74,
-Ga75, Ga76, Ga77, Ga78, Ga79, Ga80, Ga81, Ga82, Ga83, Ga84,
-Ge, Ge58, Ge59, Ge60, Ge61, Ge62, Ge63, Ge64, Ge65, Ge66,
-Ge67, Ge68, Ge69, Ge70, Ge71, Ge72, Ge73, Ge74, Ge75, Ge76,
-Ge77, Ge78, Ge79, Ge80, Ge81, Ge82, Ge83, Ge84, Ge85, Ge86,
-As, As60, As61, As62, As63, As64, As65, As66, As67, As68,
-As69, As70, As71, As72, As73, As74, As75, As76, As77, As78,
-As79, As80, As81, As82, As83, As84, As85, As86, As87, As88,
-As89, Se, Se65, Se66, Se67, Se68, Se69, Se70, Se71, Se72,
-Se73, Se74, Se75, Se76, Se77, Se78, Se79, Se80, Se81, Se82,
-Se83, Se84, Se85, Se86, Se87, Se88, Se89, Se90, Se91, Se92,
-Br, Br67, Br68, Br69, Br70, Br71, Br72, Br73, Br74, Br75,
-Br76, Br77, Br78, Br79, Br80, Br81, Br82, Br83, Br84, Br85,
-Br86, Br87, Br88, Br89, Br90, Br91, Br92, Br93, Br94, Kr,
-Kr69, Kr70, Kr71, Kr72, Kr73, Kr74, Kr75, Kr76, Kr77, Kr78,
-Kr79, Kr80, Kr81, Kr82, Kr83, Kr84, Kr85, Kr86, Kr87, Kr88,
-Kr89, Kr90, Kr91, Kr92, Kr93, Kr94, Kr95, Kr96, Kr97, Rb,
-Rb71, Rb72, Rb73, Rb74, Rb75, Rb76, Rb77, Rb78, Rb79, Rb80,
-Rb81, Rb82, Rb83, Rb84, Rb85, Rb86, Rb87, Rb88, Rb89, Rb90,
-Rb91, Rb92, Rb93, Rb94, Rb95, Rb96, Rb97, Rb98, Rb99, Rb100,
-Rb101, Rb102, Sr, Sr73, Sr74, Sr75, Sr76, Sr77, Sr78, Sr79,
-Sr80, Sr81, Sr82, Sr83, Sr84, Sr85, Sr86, Sr87, Sr88, Sr89,
-Sr90, Sr91, Sr92, Sr93, Sr94, Sr95, Sr96, Sr97, Sr98, Sr99,
-Sr100, Sr101, Sr102, Sr103, Sr104, Y, Y77, Y78, Y79, Y80,
-Y81, Y82, Y83, Y84, Y85, Y86, Y87, Y88, Y89, Y90,
-Y91, Y92, Y93, Y94, Y95, Y96, Y97, Y98, Y99, Y100,
-Y101, Y102, Y103, Y104, Y105, Y106, Zr, Zr79, Zr80, Zr81,
-Zr82, Zr83, Zr84, Zr85, Zr86, Zr87, Zr88, Zr89, Zr90, Zr91,
-Zr92, Zr93, Zr94, Zr95, Zr96, Zr97, Zr98, Zr99, Zr100, Zr101,
-Zr102, Zr103, Zr104, Zr105, Zr106, Zr107, Zr108, Nb, Nb81, Nb82,
-Nb83, Nb84, Nb85, Nb86, Nb87, Nb88, Nb89, Nb90, Nb91, Nb92,
-Nb93, Nb94, Nb95, Nb96, Nb97, Nb98, Nb99, Nb100, Nb101, Nb102,
-Nb103, Nb104, Nb105, Nb106, Nb107, Nb108, Nb109, Nb110, Mo, Mo83,
-Mo84, Mo85, Mo86, Mo87, Mo88, Mo89, Mo90, Mo91, Mo92, Mo93,
-Mo94, Mo95, Mo96, Mo97, Mo98, Mo99, Mo100, Mo101, Mo102, Mo103,
-Mo104, Mo105, Mo106, Mo107, Mo108, Mo109, Mo110, Mo111, Mo112, Mo113,
-Tc, Tc85, Tc86, Tc87, Tc88, Tc89, Tc90, Tc91, Tc92, Tc93,
-Tc94, Tc95, Tc96, Tc97, Tc98, Tc99, Tc100, Tc101, Tc102, Tc103,
-Tc104, Tc105, Tc106, Tc107, Tc108, Tc109, Tc110, Tc111, Tc112, Tc113,
-Tc114, Tc115, Ru, Ru87, Ru88, Ru89, Ru90, Ru91, Ru92, Ru93,
-Ru94, Ru95, Ru96, Ru97, Ru98, Ru99, Ru100, Ru101, Ru102, Ru103,
-Ru104, Ru105, Ru106, Ru107, Ru108, Ru109, Ru110, Ru111, Ru112, Ru113,
-Ru114, Ru115, Ru116, Ru117, Ru118, Rh, Rh89, Rh90, Rh91, Rh92,
-Rh93, Rh94, Rh95, Rh96, Rh97, Rh98, Rh99, Rh100, Rh101, Rh102,
-Rh103, Rh104, Rh105, Rh106, Rh107, Rh108, Rh109, Rh110, Rh111, Rh112,
-Rh113, Rh114, Rh115, Rh116, Rh117, Rh118, Rh119, Rh120, Rh121, Pd,
-Pd91, Pd92, Pd93, Pd94, Pd95, Pd96, Pd97, Pd98, Pd99, Pd100,
-Pd101, Pd102, Pd103, Pd104, Pd105, Pd106, Pd107, Pd108, Pd109, Pd110,
-Pd111, Pd112, Pd113, Pd114, Pd115, Pd116, Pd117, Pd118, Pd119, Pd120,
-Pd121, Pd122, Pd123, Ag, Ag94, Ag95, Ag96, Ag97, Ag98, Ag99,
-Ag100, Ag101, Ag102, Ag103, Ag104, Ag105, Ag106, Ag107, Ag108, Ag109,
-Ag110, Ag111, Ag112, Ag113, Ag114, Ag115, Ag116, Ag117, Ag118, Ag119,
-Ag120, Ag121, Ag122, Ag123, Ag124, Ag125, Ag126, Ag127, Cd, Cd128,
-Cd129, Cd130, Cd96, Cd97, Cd98, Cd99, Cd100, Cd101, Cd102, Cd103,
-Cd104, Cd105, Cd106, Cd107, Cd108, Cd109, Cd110, Cd111, Cd112, Cd113,
-Cd114, Cd115, Cd116, Cd117, Cd118, Cd119, Cd120, Cd121, Cd122, Cd123,
-Cd124, Cd125, Cd126, Cd127, In, In128, In129, In130, In131, In132,
-In133, In134, In98, In99, In100, In101, In102, In103, In104, In105,
-In106, In107, In108, In109, In110, In111, In112, In113, In114, In115,
-In116, In117, In118, In119, In120, In121, In122, In123, In124, In125,
-In126, In127, Sn, Sn128, Sn129, Sn130, Sn131, Sn132, Sn133, Sn134,
-Sn135, Sn136, Sn137, Sn100, Sn101, Sn102, Sn103, Sn104, Sn105, Sn106,
-Sn107, Sn108, Sn109, Sn110, Sn111, Sn112, Sn113, Sn114, Sn115, Sn116,
-Sn117, Sn118, Sn119, Sn120, Sn121, Sn122, Sn123, Sn124, Sn125, Sn126,
-Sn127, Sb, Sb128, Sb129, Sb130, Sb131, Sb132, Sb133, Sb134, Sb135,
-Sb136, Sb137, Sb138, Sb139, Sb103, Sb104, Sb105, Sb106, Sb107, Sb108,
-Sb109, Sb110, Sb111, Sb112, Sb113, Sb114, Sb115, Sb116, Sb117, Sb118,
-Sb119, Sb120, Sb121, Sb122, Sb123, Sb124, Sb125, Sb126, Sb127, Te,
-Te128, Te129, Te130, Te131, Te132, Te133, Te134, Te135, Te136, Te137,
-Te138, Te139, Te140, Te141, Te142, Te106, Te107, Te108, Te109, Te110,
-Te111, Te112, Te113, Te114, Te115, Te116, Te117, Te118, Te119, Te120,
-Te121, Te122, Te123, Te124, Te125, Te126, Te127, I, I128, I129,
-I130, I131, I132, I133, I134, I135, I136, I137, I138, I139,
-I140, I141, I142, I143, I144, I108, I109, I110, I111, I112,
-I113, I114, I115, I116, I117, I118, I119, I120, I121, I122,
-I123, I124, I125, I126, I127, Xe, Xe128, Xe129, Xe130, Xe131,
-Xe132, Xe133, Xe134, Xe135, Xe136, Xe137, Xe138, Xe139, Xe140, Xe141,
-Xe142, Xe143, Xe144, Xe145, Xe146, Xe147, Xe110, Xe111, Xe112, Xe113,
-Xe114, Xe115, Xe116, Xe117, Xe118, Xe119, Xe120, Xe121, Xe122, Xe123,
-Xe124, Xe125, Xe126, Xe127, Cs, Cs128, Cs129, Cs130, Cs131, Cs132,
-Cs133, Cs134, Cs135, Cs136, Cs137, Cs138, Cs139, Cs140, Cs141, Cs142,
-Cs143, Cs144, Cs145, Cs146, Cs147, Cs148, Cs149, Cs150, Cs151, Cs112,
-Cs113, Cs114, Cs115, Cs116, Cs117, Cs118, Cs119, Cs120, Cs121, Cs122,
-Cs123, Cs124, Cs125, Cs126, Cs127, Ba, Ba128, Ba129, Ba130, Ba131,
-Ba132, Ba133, Ba134, Ba135, Ba136, Ba137, Ba138, Ba139, Ba140, Ba141,
-Ba142, Ba143, Ba144, Ba145, Ba146, Ba147, Ba148, Ba149, Ba150, Ba151,
-Ba152, Ba153, Ba114, Ba115, Ba116, Ba117, Ba118, Ba119, Ba120, Ba121,
-Ba122, Ba123, Ba124, Ba125, Ba126, Ba127, La, La128, La129, La130,
-La131, La132, La133, La134, La135, La136, La137, La138, La139, La140,
-La141, La142, La143, La144, La145, La146, La147, La148, La149, La150,
-La151, La152, La153, La154, La155, La117, La118, La119, La120, La121,
-La122, La123, La124, La125, La126, La127, Ce, Ce128, Ce129, Ce130,
-Ce131, Ce132, Ce133, Ce134, Ce135, Ce136, Ce137, Ce138, Ce139, Ce140,
-Ce141, Ce142, Ce143, Ce144, Ce145, Ce146, Ce147, Ce148, Ce149, Ce150,
-Ce151, Ce152, Ce153, Ce154, Ce155, Ce156, Ce157, Ce119, Ce120, Ce121,
-Ce122, Ce123, Ce124, Ce125, Ce126, Ce127, Pr, Pr128, Pr129, Pr130,
-Pr131, Pr132, Pr133, Pr134, Pr135, Pr136, Pr137, Pr138, Pr139, Pr140,
-Pr141, Pr142, Pr143, Pr144, Pr145, Pr146, Pr147, Pr148, Pr149, Pr150,
-Pr151, Pr152, Pr153, Pr154, Pr155, Pr156, Pr157, Pr158, Pr159, Pr121,
-Pr122, Pr123, Pr124, Pr125, Pr126, Pr127, Nd, Nd128, Nd129, Nd130,
-Nd131, Nd132, Nd133, Nd134, Nd135, Nd136, Nd137, Nd138, Nd139, Nd140,
-Nd141, Nd142, Nd143, Nd144, Nd145, Nd146, Nd147, Nd148, Nd149, Nd150,
-Nd151, Nd152, Nd153, Nd154, Nd155, Nd156, Nd157, Nd158, Nd159, Nd160,
-Nd161, Nd126, Nd127, Pm, Pm128, Pm129, Pm130, Pm131, Pm132, Pm133,
-Pm134, Pm135, Pm136, Pm137, Pm138, Pm139, Pm140, Pm141, Pm142, Pm143,
-Pm144, Pm145, Pm146, Pm147, Pm148, Pm149, Pm150, Pm151, Pm152, Pm153,
-Pm154, Pm155, Pm156, Pm157, Pm158, Pm159, Pm160, Pm161, Pm162, Pm163,
-Sm, Sm130, Sm131, Sm132, Sm133, Sm134, Sm135, Sm136, Sm137, Sm138,
-Sm139, Sm140, Sm141, Sm142, Sm143, Sm144, Sm145, Sm146, Sm147, Sm148,
-Sm149, Sm150, Sm151, Sm152, Sm153, Sm154, Sm155, Sm156, Sm157, Sm158,
-Sm159, Sm160, Sm161, Sm162, Sm163, Sm164, Sm165, Eu, Eu132, Eu133,
-Eu134, Eu135, Eu136, Eu137, Eu138, Eu139, Eu140, Eu141, Eu142, Eu143,
-Eu144, Eu145, Eu146, Eu147, Eu148, Eu149, Eu150, Eu151, Eu152, Eu153,
-Eu154, Eu155, Eu156, Eu157, Eu158, Eu159, Eu160, Eu161, Eu162, Eu163,
-Eu164, Eu165, Eu166, Eu167, Gd, Gd136, Gd137, Gd138, Gd139, Gd140,
-Gd141, Gd142, Gd143, Gd144, Gd145, Gd146, Gd147, Gd148, Gd149, Gd150,
-Gd151, Gd152, Gd153, Gd154, Gd155, Gd156, Gd157, Gd158, Gd159, Gd160,
-Gd161, Gd162, Gd163, Gd164, Gd165, Gd166, Gd167, Gd168, Gd169, Tb,
-Tb138, Tb139, Tb140, Tb141, Tb142, Tb143, Tb144, Tb145, Tb146, Tb147,
-Tb148, Tb149, Tb150, Tb151, Tb152, Tb153, Tb154, Tb155, Tb156, Tb157,
-Tb158, Tb159, Tb160, Tb161, Tb162, Tb163, Tb164, Tb165, Tb166, Tb167,
-Tb168, Tb169, Tb170, Tb171, Dy, Dy140, Dy141, Dy142, Dy143, Dy144,
-Dy145, Dy146, Dy147, Dy148, Dy149, Dy150, Dy151, Dy152, Dy153, Dy154,
-Dy155, Dy156, Dy157, Dy158, Dy159, Dy160, Dy161, Dy162, Dy163, Dy164,
-Dy165, Dy166, Dy167, Dy168, Dy169, Dy170, Dy171, Dy172, Dy173, Ho,
-Ho142, Ho143, Ho144, Ho145, Ho146, Ho147, Ho148, Ho149, Ho150, Ho151,
-Ho152, Ho153, Ho154, Ho155, Ho156, Ho157, Ho158, Ho159, Ho160, Ho161,
-Ho162, Ho163, Ho164, Ho165, Ho166, Ho167, Ho168, Ho169, Ho170, Ho171,
-Ho172, Ho173, Ho174, Ho175, Er, Er144, Er145, Er146, Er147, Er148,
-Er149, Er150, Er151, Er152, Er153, Er154, Er155, Er156, Er157, Er158,
-Er159, Er160, Er161, Er162, Er163, Er164, Er165, Er166, Er167, Er168,
-Er169, Er170, Er171, Er172, Er173, Er174, Er175, Er176, Er177, Tm,
-Tm146, Tm147, Tm148, Tm149, Tm150, Tm151, Tm152, Tm153, Tm154, Tm155,
-Tm156, Tm157, Tm158, Tm159, Tm160, Tm161, Tm162, Tm163, Tm164, Tm165,
-Tm166, Tm167, Tm168, Tm169, Tm170, Tm171, Tm172, Tm173, Tm174, Tm175,
-Tm176, Tm177, Tm178, Tm179, Yb, Yb148, Yb149, Yb150, Yb151, Yb152,
-Yb153, Yb154, Yb155, Yb156, Yb157, Yb158, Yb159, Yb160, Yb161, Yb162,
-Yb163, Yb164, Yb165, Yb166, Yb167, Yb168, Yb169, Yb170, Yb171, Yb172,
-Yb173, Yb174, Yb175, Yb176, Yb177, Yb178, Yb179, Yb180, Yb181, Lu,
-Lu150, Lu151, Lu152, Lu153, Lu154, Lu155, Lu156, Lu157, Lu158, Lu159,
-Lu160, Lu161, Lu162, Lu163, Lu164, Lu165, Lu166, Lu167, Lu168, Lu169,
-Lu170, Lu171, Lu172, Lu173, Lu174, Lu175, Lu176, Lu177, Lu178, Lu179,
-Lu180, Lu181, Lu182, Lu183, Lu184, Hf, Hf154, Hf155, Hf156, Hf157,
-Hf158, Hf159, Hf160, Hf161, Hf162, Hf163, Hf164, Hf165, Hf166, Hf167,
-Hf168, Hf169, Hf170, Hf171, Hf172, Hf173, Hf174, Hf175, Hf176, Hf177,
-Hf178, Hf179, Hf180, Hf181, Hf182, Hf183, Hf184, Hf185, Hf186, Ta,
-Ta156, Ta157, Ta158, Ta159, Ta160, Ta161, Ta162, Ta163, Ta164, Ta165,
-Ta166, Ta167, Ta168, Ta169, Ta170, Ta171, Ta172, Ta173, Ta174, Ta175,
-Ta176, Ta177, Ta178, Ta179, Ta180, Ta181, Ta182, Ta183, Ta184, Ta185,
-Ta186, Ta187, Ta188, W, W158, W159, W160, W161, W162, W163,
-W164, W165, W166, W167, W168, W169, W170, W171, W172, W173,
-W174, W175, W176, W177, W178, W179, W180, W181, W182, W183,
-W184, W185, W186, W187, W188, W189, W190, Re, Re160, Re161,
-Re162, Re163, Re164, Re165, Re166, Re167, Re168, Re169, Re170, Re171,
-Re172, Re173, Re174, Re175, Re176, Re177, Re178, Re179, Re180, Re181,
-Re182, Re183, Re184, Re185, Re186, Re187, Re188, Re189, Re190, Re191,
-Re192, Os, Os162, Os163, Os164, Os165, Os166, Os167, Os168, Os169,
-Os170, Os171, Os172, Os173, Os174, Os175, Os176, Os177, Os178, Os179,
-Os180, Os181, Os182, Os183, Os184, Os185, Os186, Os187, Os188, Os189,
-Os190, Os191, Os192, Os193, Os194, Os195, Os196, Ir, Ir165, Ir166,
-Ir167, Ir168, Ir169, Ir170, Ir171, Ir172, Ir173, Ir174, Ir175, Ir176,
-Ir177, Ir178, Ir179, Ir180, Ir181, Ir182, Ir183, Ir184, Ir185, Ir186,
-Ir187, Ir188, Ir189, Ir190, Ir191, Ir192, Ir193, Ir194, Ir195, Ir196,
-Ir197, Ir198, Ir199, Pt, Pt168, Pt169, Pt170, Pt171, Pt172, Pt173,
-Pt174, Pt175, Pt176, Pt177, Pt178, Pt179, Pt180, Pt181, Pt182, Pt183,
-Pt184, Pt185, Pt186, Pt187, Pt188, Pt189, Pt190, Pt191, Pt192, Pt193,
-Pt194, Pt195, Pt196, Pt197, Pt198, Pt199, Pt200, Pt201, Pt202, Au,
-Au171, Au172, Au173, Au174, Au175, Au176, Au177, Au178, Au179, Au180,
-Au181, Au182, Au183, Au184, Au185, Au186, Au187, Au188, Au189, Au190,
-Au191, Au192, Au193, Au194, Au195, Au196, Au197, Au198, Au199, Au200,
-Au201, Au202, Au203, Au204, Au205, Hg, Hg175, Hg176, Hg177, Hg178,
-Hg179, Hg180, Hg181, Hg182, Hg183, Hg184, Hg185, Hg186, Hg187, Hg188,
-Hg189, Hg190, Hg191, Hg192, Hg193, Hg194, Hg195, Hg196, Hg197, Hg198,
-Hg199, Hg200, Hg201, Hg202, Hg203, Hg204, Hg205, Hg206, Hg207, Hg208,
-Tl, Tl177, Tl178, Tl179, Tl180, Tl181, Tl182, Tl183, Tl184, Tl185,
-Tl186, Tl187, Tl188, Tl189, Tl190, Tl191, Tl192, Tl193, Tl194, Tl195,
-Tl196, Tl197, Tl198, Tl199, Tl200, Tl201, Tl202, Tl203, Tl204, Tl205,
-Tl206, Tl207, Tl208, Tl209, Tl210, Pb, Pb181, Pb182, Pb183, Pb184,
-Pb185, Pb186, Pb187, Pb188, Pb189, Pb190, Pb191, Pb192, Pb193, Pb194,
-Pb195, Pb196, Pb197, Pb198, Pb199, Pb200, Pb201, Pb202, Pb203, Pb204,
-Pb205, Pb206, Pb207, Pb208, Pb209, Pb210, Pb211, Pb212, Pb213, Pb214,
-Bi, Bi185, Bi186, Bi187, Bi188, Bi189, Bi190, Bi191, Bi192, Bi193,
-Bi194, Bi195, Bi196, Bi197, Bi198, Bi199, Bi200, Bi201, Bi202, Bi203,
-Bi204, Bi205, Bi206, Bi207, Bi208, Bi209, Bi210, Bi211, Bi212, Bi213,
-Bi214, Bi215, Bi216, Po, Po190, Po191, Po192, Po193, Po194, Po195,
-Po196, Po197, Po198, Po199, Po200, Po201, Po202, Po203, Po204, Po205,
-Po206, Po207, Po208, Po209, Po210, Po211, Po212, Po213, Po214, Po215,
-Po216, Po217, Po218, At, At193, At194, At195, At196, At197, At198,
-At199, At200, At201, At202, At203, At204, At205, At206, At207, At208,
-At209, At210, At211, At212, At213, At214, At215, At216, At217, At218,
-At219, At220, At221, At222, At223, Rn, Rn196, Rn197, Rn198, Rn199,
-Rn200, Rn201, Rn202, Rn203, Rn204, Rn205, Rn206, Rn207, Rn208, Rn209,
-Rn210, Rn211, Rn212, Rn213, Rn214, Rn215, Rn216, Rn217, Rn218, Rn219,
-Rn220, Rn221, Rn222, Rn223, Rn224, Rn225, Rn226, Rn227, Rn228, Fr,
-Fr200, Fr201, Fr202, Fr203, Fr204, Fr205, Fr206, Fr207, Fr208, Fr209,
-Fr210, Fr211, Fr212, Fr213, Fr214, Fr215, Fr216, Fr217, Fr218, Fr219,
-Fr220, Fr221, Fr222, Fr223, Fr224, Fr225, Fr226, Fr227, Fr228, Fr229,
-Fr230, Fr231, Fr232, Ra, Ra203, Ra204, Ra205, Ra206, Ra207, Ra208,
-Ra209, Ra210, Ra211, Ra212, Ra213, Ra214, Ra215, Ra216, Ra217, Ra218,
-Ra219, Ra220, Ra221, Ra222, Ra223, Ra224, Ra225, Ra226, Ra227, Ra228,
-Ra229, Ra230, Ra231, Ra232, Ra233, Ra234, Ac, Ac207, Ac208, Ac209,
-Ac210, Ac211, Ac212, Ac213, Ac214, Ac215, Ac216, Ac217, Ac218, Ac219,
-Ac220, Ac221, Ac222, Ac223, Ac224, Ac225, Ac226, Ac227, Ac228, Ac229,
-Ac230, Ac231, Ac232, Ac233, Ac234, Ac235, Ac236, Th, Th210, Th211,
-Th212, Th213, Th214, Th215, Th216, Th217, Th218, Th219, Th220, Th221,
-Th222, Th223, Th224, Th225, Th226, Th227, Th228, Th229, Th230, Th231,
-Th232, Th233, Th234, Th235, Th236, Th237, Th238, Pa, Pa213, Pa214,
-Pa215, Pa216, Pa217, Pa218, Pa219, Pa220, Pa221, Pa222, Pa223, Pa224,
-Pa225, Pa226, Pa227, Pa228, Pa229, Pa230, Pa231, Pa232, Pa233, Pa234,
-Pa235, Pa236, Pa237, Pa238, Pa239, Pa240, U, U218, U219, U220,
-U221, U222, U223, U224, U225, U226, U227, U228, U229, U230,
-U231, U232, U233, U234, U235, U236, U237, U238, U239, U240,
-U241, U242, Np, Np225, Np226, Np227, Np228, Np229, Np230, Np231,
-Np232, Np233, Np234, Np235, Np236, Np237, Np238, Np239, Np240, Np241,
-Np242, Np243, Np244, Pu, Pu228, Pu229, Pu230, Pu231, Pu232, Pu233,
-Pu234, Pu235, Pu236, Pu237, Pu238, Pu239, Pu240, Pu241, Pu242, Pu243,
-Pu244, Pu245, Pu246, Pu247, Am, Am231, Am232, Am233, Am234, Am235,
-Am236, Am237, Am238, Am239, Am240, Am241, Am242, Am243, Am244, Am245,
-Am246, Am247, Am248, Am249, Cm, Cm233, Cm234, Cm235, Cm236, Cm237,
-Cm238, Cm239, Cm240, Cm241, Cm242, Cm243, Cm244, Cm245, Cm246, Cm247,
-Cm248, Cm249, Cm250, Cm251, Cm252
-};
+    H,     H1,    H2,    H3,    H4,    H5,    H6,    He,    He3,   He4,   He5,
+    He6,   He7,   He8,   He9,   He10,  Li,    Li4,   Li5,   Li6,   Li7,   Li8,
+    Li9,   Li10,  Li11,  Li12,  Be,    Be5,   Be6,   Be7,   Be8,   Be9,   Be10,
+    Be11,  Be12,  Be13,  Be14,  B,     B7,    B8,    B9,    B10,   B11,   B12,
+    B13,   B14,   B15,   B16,   B17,   B18,   B19,   C,     C8,    C9,    C10,
+    C11,   C12,   C13,   C14,   C15,   C16,   C17,   C18,   C19,   C20,   C21,
+    C22,   N,     N10,   N11,   N12,   N13,   N14,   N15,   N16,   N17,   N18,
+    N19,   N20,   N21,   N22,   N23,   N24,   O,     O12,   O13,   O14,   O15,
+    O16,   O17,   O18,   O19,   O20,   O21,   O22,   O23,   O24,   O25,   O26,
+    F,     F14,   F15,   F16,   F17,   F18,   F19,   F20,   F21,   F22,   F23,
+    F24,   F25,   F26,   F27,   F28,   F29,   Ne,    Ne32,  Ne16,  Ne17,  Ne18,
+    Ne19,  Ne20,  Ne21,  Ne22,  Ne23,  Ne24,  Ne25,  Ne26,  Ne27,  Ne28,  Ne29,
+    Ne30,  Ne31,  Na,    Na32,  Na33,  Na34,  Na35,  Na18,  Na19,  Na20,  Na21,
+    Na22,  Na23,  Na24,  Na25,  Na26,  Na27,  Na28,  Na29,  Na30,  Na31,  Mg,
+    Mg32,  Mg33,  Mg34,  Mg35,  Mg36,  Mg37,  Mg20,  Mg21,  Mg22,  Mg23,  Mg24,
+    Mg25,  Mg26,  Mg27,  Mg28,  Mg29,  Mg30,  Mg31,  Al,    Al32,  Al33,  Al34,
+    Al35,  Al36,  Al37,  Al38,  Al39,  Al21,  Al22,  Al23,  Al24,  Al25,  Al26,
+    Al27,  Al28,  Al29,  Al30,  Al31,  Si,    Si32,  Si33,  Si34,  Si35,  Si36,
+    Si37,  Si38,  Si39,  Si40,  Si41,  Si42,  Si22,  Si23,  Si24,  Si25,  Si26,
+    Si27,  Si28,  Si29,  Si30,  Si31,  P,     P24,   P25,   P26,   P27,   P28,
+    P29,   P30,   P31,   P32,   P33,   P34,   P35,   P36,   P37,   P38,   P39,
+    P40,   P41,   P42,   P43,   P44,   P45,   P46,   S,     S26,   S27,   S28,
+    S29,   S30,   S31,   S32,   S33,   S34,   S35,   S36,   S37,   S38,   S39,
+    S40,   S41,   S42,   S43,   S44,   S45,   S46,   S47,   S48,   S49,   Cl,
+    Cl28,  Cl29,  Cl30,  Cl31,  Cl32,  Cl33,  Cl34,  Cl35,  Cl36,  Cl37,  Cl38,
+    Cl39,  Cl40,  Cl41,  Cl42,  Cl43,  Cl44,  Cl45,  Cl46,  Cl47,  Cl48,  Cl49,
+    Cl50,  Cl51,  Ar,    Ar30,  Ar31,  Ar32,  Ar33,  Ar34,  Ar35,  Ar36,  Ar37,
+    Ar38,  Ar39,  Ar40,  Ar41,  Ar42,  Ar43,  Ar44,  Ar45,  Ar46,  Ar47,  Ar48,
+    Ar49,  Ar50,  Ar51,  Ar52,  Ar53,  K,     K32,   K33,   K34,   K35,   K36,
+    K37,   K38,   K39,   K40,   K41,   K42,   K43,   K44,   K45,   K46,   K47,
+    K48,   K49,   K50,   K51,   K52,   K53,   K54,   K55,   Ca,    Ca34,  Ca35,
+    Ca36,  Ca37,  Ca38,  Ca39,  Ca40,  Ca41,  Ca42,  Ca43,  Ca44,  Ca45,  Ca46,
+    Ca47,  Ca48,  Ca49,  Ca50,  Ca51,  Ca52,  Ca53,  Ca54,  Ca55,  Ca56,  Ca57,
+    Sc,    Sc36,  Sc37,  Sc38,  Sc39,  Sc40,  Sc41,  Sc42,  Sc43,  Sc44,  Sc45,
+    Sc46,  Sc47,  Sc48,  Sc49,  Sc50,  Sc51,  Sc52,  Sc53,  Sc54,  Sc55,  Sc56,
+    Sc57,  Sc58,  Sc59,  Ti,    Ti38,  Ti39,  Ti40,  Ti41,  Ti42,  Ti43,  Ti44,
+    Ti45,  Ti46,  Ti47,  Ti48,  Ti49,  Ti50,  Ti51,  Ti52,  Ti53,  Ti54,  Ti55,
+    Ti56,  Ti57,  Ti58,  Ti59,  Ti60,  Ti61,  V,     V40,   V41,   V42,   V43,
+    V44,   V45,   V46,   V47,   V48,   V49,   V50,   V51,   V52,   V53,   V54,
+    V55,   V56,   V57,   V58,   V59,   V60,   V61,   V62,   V63,   Cr,    Cr42,
+    Cr43,  Cr44,  Cr45,  Cr46,  Cr47,  Cr48,  Cr49,  Cr50,  Cr51,  Cr52,  Cr53,
+    Cr54,  Cr55,  Cr56,  Cr57,  Cr58,  Cr59,  Cr60,  Cr61,  Cr62,  Cr63,  Cr64,
+    Cr65,  Mn,    Mn44,  Mn45,  Mn46,  Mn47,  Mn48,  Mn49,  Mn50,  Mn51,  Mn52,
+    Mn53,  Mn54,  Mn55,  Mn56,  Mn57,  Mn58,  Mn59,  Mn60,  Mn61,  Mn62,  Mn63,
+    Mn64,  Mn65,  Mn66,  Mn67,  Fe,    Fe45,  Fe46,  Fe47,  Fe48,  Fe49,  Fe50,
+    Fe51,  Fe52,  Fe53,  Fe54,  Fe55,  Fe56,  Fe57,  Fe58,  Fe59,  Fe60,  Fe61,
+    Fe62,  Fe63,  Fe64,  Fe65,  Fe66,  Fe67,  Fe68,  Fe69,  Co,    Co48,  Co49,
+    Co50,  Co51,  Co52,  Co53,  Co54,  Co55,  Co56,  Co57,  Co58,  Co59,  Co60,
+    Co61,  Co62,  Co63,  Co64,  Co65,  Co66,  Co67,  Co68,  Co69,  Co70,  Co71,
+    Co72,  Ni,    Ni50,  Ni51,  Ni52,  Ni53,  Ni54,  Ni55,  Ni56,  Ni57,  Ni58,
+    Ni59,  Ni60,  Ni61,  Ni62,  Ni63,  Ni64,  Ni65,  Ni66,  Ni67,  Ni68,  Ni69,
+    Ni70,  Ni71,  Ni72,  Ni73,  Ni74,  Ni75,  Ni76,  Ni77,  Ni78,  Cu,    Cu52,
+    Cu53,  Cu54,  Cu55,  Cu56,  Cu57,  Cu58,  Cu59,  Cu60,  Cu61,  Cu62,  Cu63,
+    Cu64,  Cu65,  Cu66,  Cu67,  Cu68,  Cu69,  Cu70,  Cu71,  Cu72,  Cu73,  Cu74,
+    Cu75,  Cu76,  Cu77,  Cu78,  Cu79,  Cu80,  Zn,    Zn54,  Zn55,  Zn56,  Zn57,
+    Zn58,  Zn59,  Zn60,  Zn61,  Zn62,  Zn63,  Zn64,  Zn65,  Zn66,  Zn67,  Zn68,
+    Zn69,  Zn70,  Zn71,  Zn72,  Zn73,  Zn74,  Zn75,  Zn76,  Zn77,  Zn78,  Zn79,
+    Zn80,  Zn81,  Zn82,  Ga,    Ga56,  Ga57,  Ga58,  Ga59,  Ga60,  Ga61,  Ga62,
+    Ga63,  Ga64,  Ga65,  Ga66,  Ga67,  Ga68,  Ga69,  Ga70,  Ga71,  Ga72,  Ga73,
+    Ga74,  Ga75,  Ga76,  Ga77,  Ga78,  Ga79,  Ga80,  Ga81,  Ga82,  Ga83,  Ga84,
+    Ge,    Ge58,  Ge59,  Ge60,  Ge61,  Ge62,  Ge63,  Ge64,  Ge65,  Ge66,  Ge67,
+    Ge68,  Ge69,  Ge70,  Ge71,  Ge72,  Ge73,  Ge74,  Ge75,  Ge76,  Ge77,  Ge78,
+    Ge79,  Ge80,  Ge81,  Ge82,  Ge83,  Ge84,  Ge85,  Ge86,  As,    As60,  As61,
+    As62,  As63,  As64,  As65,  As66,  As67,  As68,  As69,  As70,  As71,  As72,
+    As73,  As74,  As75,  As76,  As77,  As78,  As79,  As80,  As81,  As82,  As83,
+    As84,  As85,  As86,  As87,  As88,  As89,  Se,    Se65,  Se66,  Se67,  Se68,
+    Se69,  Se70,  Se71,  Se72,  Se73,  Se74,  Se75,  Se76,  Se77,  Se78,  Se79,
+    Se80,  Se81,  Se82,  Se83,  Se84,  Se85,  Se86,  Se87,  Se88,  Se89,  Se90,
+    Se91,  Se92,  Br,    Br67,  Br68,  Br69,  Br70,  Br71,  Br72,  Br73,  Br74,
+    Br75,  Br76,  Br77,  Br78,  Br79,  Br80,  Br81,  Br82,  Br83,  Br84,  Br85,
+    Br86,  Br87,  Br88,  Br89,  Br90,  Br91,  Br92,  Br93,  Br94,  Kr,    Kr69,
+    Kr70,  Kr71,  Kr72,  Kr73,  Kr74,  Kr75,  Kr76,  Kr77,  Kr78,  Kr79,  Kr80,
+    Kr81,  Kr82,  Kr83,  Kr84,  Kr85,  Kr86,  Kr87,  Kr88,  Kr89,  Kr90,  Kr91,
+    Kr92,  Kr93,  Kr94,  Kr95,  Kr96,  Kr97,  Rb,    Rb71,  Rb72,  Rb73,  Rb74,
+    Rb75,  Rb76,  Rb77,  Rb78,  Rb79,  Rb80,  Rb81,  Rb82,  Rb83,  Rb84,  Rb85,
+    Rb86,  Rb87,  Rb88,  Rb89,  Rb90,  Rb91,  Rb92,  Rb93,  Rb94,  Rb95,  Rb96,
+    Rb97,  Rb98,  Rb99,  Rb100, Rb101, Rb102, Sr,    Sr73,  Sr74,  Sr75,  Sr76,
+    Sr77,  Sr78,  Sr79,  Sr80,  Sr81,  Sr82,  Sr83,  Sr84,  Sr85,  Sr86,  Sr87,
+    Sr88,  Sr89,  Sr90,  Sr91,  Sr92,  Sr93,  Sr94,  Sr95,  Sr96,  Sr97,  Sr98,
+    Sr99,  Sr100, Sr101, Sr102, Sr103, Sr104, Y,     Y77,   Y78,   Y79,   Y80,
+    Y81,   Y82,   Y83,   Y84,   Y85,   Y86,   Y87,   Y88,   Y89,   Y90,   Y91,
+    Y92,   Y93,   Y94,   Y95,   Y96,   Y97,   Y98,   Y99,   Y100,  Y101,  Y102,
+    Y103,  Y104,  Y105,  Y106,  Zr,    Zr79,  Zr80,  Zr81,  Zr82,  Zr83,  Zr84,
+    Zr85,  Zr86,  Zr87,  Zr88,  Zr89,  Zr90,  Zr91,  Zr92,  Zr93,  Zr94,  Zr95,
+    Zr96,  Zr97,  Zr98,  Zr99,  Zr100, Zr101, Zr102, Zr103, Zr104, Zr105, Zr106,
+    Zr107, Zr108, Nb,    Nb81,  Nb82,  Nb83,  Nb84,  Nb85,  Nb86,  Nb87,  Nb88,
+    Nb89,  Nb90,  Nb91,  Nb92,  Nb93,  Nb94,  Nb95,  Nb96,  Nb97,  Nb98,  Nb99,
+    Nb100, Nb101, Nb102, Nb103, Nb104, Nb105, Nb106, Nb107, Nb108, Nb109, Nb110,
+    Mo,    Mo83,  Mo84,  Mo85,  Mo86,  Mo87,  Mo88,  Mo89,  Mo90,  Mo91,  Mo92,
+    Mo93,  Mo94,  Mo95,  Mo96,  Mo97,  Mo98,  Mo99,  Mo100, Mo101, Mo102, Mo103,
+    Mo104, Mo105, Mo106, Mo107, Mo108, Mo109, Mo110, Mo111, Mo112, Mo113, Tc,
+    Tc85,  Tc86,  Tc87,  Tc88,  Tc89,  Tc90,  Tc91,  Tc92,  Tc93,  Tc94,  Tc95,
+    Tc96,  Tc97,  Tc98,  Tc99,  Tc100, Tc101, Tc102, Tc103, Tc104, Tc105, Tc106,
+    Tc107, Tc108, Tc109, Tc110, Tc111, Tc112, Tc113, Tc114, Tc115, Ru,    Ru87,
+    Ru88,  Ru89,  Ru90,  Ru91,  Ru92,  Ru93,  Ru94,  Ru95,  Ru96,  Ru97,  Ru98,
+    Ru99,  Ru100, Ru101, Ru102, Ru103, Ru104, Ru105, Ru106, Ru107, Ru108, Ru109,
+    Ru110, Ru111, Ru112, Ru113, Ru114, Ru115, Ru116, Ru117, Ru118, Rh,    Rh89,
+    Rh90,  Rh91,  Rh92,  Rh93,  Rh94,  Rh95,  Rh96,  Rh97,  Rh98,  Rh99,  Rh100,
+    Rh101, Rh102, Rh103, Rh104, Rh105, Rh106, Rh107, Rh108, Rh109, Rh110, Rh111,
+    Rh112, Rh113, Rh114, Rh115, Rh116, Rh117, Rh118, Rh119, Rh120, Rh121, Pd,
+    Pd91,  Pd92,  Pd93,  Pd94,  Pd95,  Pd96,  Pd97,  Pd98,  Pd99,  Pd100, Pd101,
+    Pd102, Pd103, Pd104, Pd105, Pd106, Pd107, Pd108, Pd109, Pd110, Pd111, Pd112,
+    Pd113, Pd114, Pd115, Pd116, Pd117, Pd118, Pd119, Pd120, Pd121, Pd122, Pd123,
+    Ag,    Ag94,  Ag95,  Ag96,  Ag97,  Ag98,  Ag99,  Ag100, Ag101, Ag102, Ag103,
+    Ag104, Ag105, Ag106, Ag107, Ag108, Ag109, Ag110, Ag111, Ag112, Ag113, Ag114,
+    Ag115, Ag116, Ag117, Ag118, Ag119, Ag120, Ag121, Ag122, Ag123, Ag124, Ag125,
+    Ag126, Ag127, Cd,    Cd128, Cd129, Cd130, Cd96,  Cd97,  Cd98,  Cd99,  Cd100,
+    Cd101, Cd102, Cd103, Cd104, Cd105, Cd106, Cd107, Cd108, Cd109, Cd110, Cd111,
+    Cd112, Cd113, Cd114, Cd115, Cd116, Cd117, Cd118, Cd119, Cd120, Cd121, Cd122,
+    Cd123, Cd124, Cd125, Cd126, Cd127, In,    In128, In129, In130, In131, In132,
+    In133, In134, In98,  In99,  In100, In101, In102, In103, In104, In105, In106,
+    In107, In108, In109, In110, In111, In112, In113, In114, In115, In116, In117,
+    In118, In119, In120, In121, In122, In123, In124, In125, In126, In127, Sn,
+    Sn128, Sn129, Sn130, Sn131, Sn132, Sn133, Sn134, Sn135, Sn136, Sn137, Sn100,
+    Sn101, Sn102, Sn103, Sn104, Sn105, Sn106, Sn107, Sn108, Sn109, Sn110, Sn111,
+    Sn112, Sn113, Sn114, Sn115, Sn116, Sn117, Sn118, Sn119, Sn120, Sn121, Sn122,
+    Sn123, Sn124, Sn125, Sn126, Sn127, Sb,    Sb128, Sb129, Sb130, Sb131, Sb132,
+    Sb133, Sb134, Sb135, Sb136, Sb137, Sb138, Sb139, Sb103, Sb104, Sb105, Sb106,
+    Sb107, Sb108, Sb109, Sb110, Sb111, Sb112, Sb113, Sb114, Sb115, Sb116, Sb117,
+    Sb118, Sb119, Sb120, Sb121, Sb122, Sb123, Sb124, Sb125, Sb126, Sb127, Te,
+    Te128, Te129, Te130, Te131, Te132, Te133, Te134, Te135, Te136, Te137, Te138,
+    Te139, Te140, Te141, Te142, Te106, Te107, Te108, Te109, Te110, Te111, Te112,
+    Te113, Te114, Te115, Te116, Te117, Te118, Te119, Te120, Te121, Te122, Te123,
+    Te124, Te125, Te126, Te127, I,     I128,  I129,  I130,  I131,  I132,  I133,
+    I134,  I135,  I136,  I137,  I138,  I139,  I140,  I141,  I142,  I143,  I144,
+    I108,  I109,  I110,  I111,  I112,  I113,  I114,  I115,  I116,  I117,  I118,
+    I119,  I120,  I121,  I122,  I123,  I124,  I125,  I126,  I127,  Xe,    Xe128,
+    Xe129, Xe130, Xe131, Xe132, Xe133, Xe134, Xe135, Xe136, Xe137, Xe138, Xe139,
+    Xe140, Xe141, Xe142, Xe143, Xe144, Xe145, Xe146, Xe147, Xe110, Xe111, Xe112,
+    Xe113, Xe114, Xe115, Xe116, Xe117, Xe118, Xe119, Xe120, Xe121, Xe122, Xe123,
+    Xe124, Xe125, Xe126, Xe127, Cs,    Cs128, Cs129, Cs130, Cs131, Cs132, Cs133,
+    Cs134, Cs135, Cs136, Cs137, Cs138, Cs139, Cs140, Cs141, Cs142, Cs143, Cs144,
+    Cs145, Cs146, Cs147, Cs148, Cs149, Cs150, Cs151, Cs112, Cs113, Cs114, Cs115,
+    Cs116, Cs117, Cs118, Cs119, Cs120, Cs121, Cs122, Cs123, Cs124, Cs125, Cs126,
+    Cs127, Ba,    Ba128, Ba129, Ba130, Ba131, Ba132, Ba133, Ba134, Ba135, Ba136,
+    Ba137, Ba138, Ba139, Ba140, Ba141, Ba142, Ba143, Ba144, Ba145, Ba146, Ba147,
+    Ba148, Ba149, Ba150, Ba151, Ba152, Ba153, Ba114, Ba115, Ba116, Ba117, Ba118,
+    Ba119, Ba120, Ba121, Ba122, Ba123, Ba124, Ba125, Ba126, Ba127, La,    La128,
+    La129, La130, La131, La132, La133, La134, La135, La136, La137, La138, La139,
+    La140, La141, La142, La143, La144, La145, La146, La147, La148, La149, La150,
+    La151, La152, La153, La154, La155, La117, La118, La119, La120, La121, La122,
+    La123, La124, La125, La126, La127, Ce,    Ce128, Ce129, Ce130, Ce131, Ce132,
+    Ce133, Ce134, Ce135, Ce136, Ce137, Ce138, Ce139, Ce140, Ce141, Ce142, Ce143,
+    Ce144, Ce145, Ce146, Ce147, Ce148, Ce149, Ce150, Ce151, Ce152, Ce153, Ce154,
+    Ce155, Ce156, Ce157, Ce119, Ce120, Ce121, Ce122, Ce123, Ce124, Ce125, Ce126,
+    Ce127, Pr,    Pr128, Pr129, Pr130, Pr131, Pr132, Pr133, Pr134, Pr135, Pr136,
+    Pr137, Pr138, Pr139, Pr140, Pr141, Pr142, Pr143, Pr144, Pr145, Pr146, Pr147,
+    Pr148, Pr149, Pr150, Pr151, Pr152, Pr153, Pr154, Pr155, Pr156, Pr157, Pr158,
+    Pr159, Pr121, Pr122, Pr123, Pr124, Pr125, Pr126, Pr127, Nd,    Nd128, Nd129,
+    Nd130, Nd131, Nd132, Nd133, Nd134, Nd135, Nd136, Nd137, Nd138, Nd139, Nd140,
+    Nd141, Nd142, Nd143, Nd144, Nd145, Nd146, Nd147, Nd148, Nd149, Nd150, Nd151,
+    Nd152, Nd153, Nd154, Nd155, Nd156, Nd157, Nd158, Nd159, Nd160, Nd161, Nd126,
+    Nd127, Pm,    Pm128, Pm129, Pm130, Pm131, Pm132, Pm133, Pm134, Pm135, Pm136,
+    Pm137, Pm138, Pm139, Pm140, Pm141, Pm142, Pm143, Pm144, Pm145, Pm146, Pm147,
+    Pm148, Pm149, Pm150, Pm151, Pm152, Pm153, Pm154, Pm155, Pm156, Pm157, Pm158,
+    Pm159, Pm160, Pm161, Pm162, Pm163, Sm,    Sm130, Sm131, Sm132, Sm133, Sm134,
+    Sm135, Sm136, Sm137, Sm138, Sm139, Sm140, Sm141, Sm142, Sm143, Sm144, Sm145,
+    Sm146, Sm147, Sm148, Sm149, Sm150, Sm151, Sm152, Sm153, Sm154, Sm155, Sm156,
+    Sm157, Sm158, Sm159, Sm160, Sm161, Sm162, Sm163, Sm164, Sm165, Eu,    Eu132,
+    Eu133, Eu134, Eu135, Eu136, Eu137, Eu138, Eu139, Eu140, Eu141, Eu142, Eu143,
+    Eu144, Eu145, Eu146, Eu147, Eu148, Eu149, Eu150, Eu151, Eu152, Eu153, Eu154,
+    Eu155, Eu156, Eu157, Eu158, Eu159, Eu160, Eu161, Eu162, Eu163, Eu164, Eu165,
+    Eu166, Eu167, Gd,    Gd136, Gd137, Gd138, Gd139, Gd140, Gd141, Gd142, Gd143,
+    Gd144, Gd145, Gd146, Gd147, Gd148, Gd149, Gd150, Gd151, Gd152, Gd153, Gd154,
+    Gd155, Gd156, Gd157, Gd158, Gd159, Gd160, Gd161, Gd162, Gd163, Gd164, Gd165,
+    Gd166, Gd167, Gd168, Gd169, Tb,    Tb138, Tb139, Tb140, Tb141, Tb142, Tb143,
+    Tb144, Tb145, Tb146, Tb147, Tb148, Tb149, Tb150, Tb151, Tb152, Tb153, Tb154,
+    Tb155, Tb156, Tb157, Tb158, Tb159, Tb160, Tb161, Tb162, Tb163, Tb164, Tb165,
+    Tb166, Tb167, Tb168, Tb169, Tb170, Tb171, Dy,    Dy140, Dy141, Dy142, Dy143,
+    Dy144, Dy145, Dy146, Dy147, Dy148, Dy149, Dy150, Dy151, Dy152, Dy153, Dy154,
+    Dy155, Dy156, Dy157, Dy158, Dy159, Dy160, Dy161, Dy162, Dy163, Dy164, Dy165,
+    Dy166, Dy167, Dy168, Dy169, Dy170, Dy171, Dy172, Dy173, Ho,    Ho142, Ho143,
+    Ho144, Ho145, Ho146, Ho147, Ho148, Ho149, Ho150, Ho151, Ho152, Ho153, Ho154,
+    Ho155, Ho156, Ho157, Ho158, Ho159, Ho160, Ho161, Ho162, Ho163, Ho164, Ho165,
+    Ho166, Ho167, Ho168, Ho169, Ho170, Ho171, Ho172, Ho173, Ho174, Ho175, Er,
+    Er144, Er145, Er146, Er147, Er148, Er149, Er150, Er151, Er152, Er153, Er154,
+    Er155, Er156, Er157, Er158, Er159, Er160, Er161, Er162, Er163, Er164, Er165,
+    Er166, Er167, Er168, Er169, Er170, Er171, Er172, Er173, Er174, Er175, Er176,
+    Er177, Tm,    Tm146, Tm147, Tm148, Tm149, Tm150, Tm151, Tm152, Tm153, Tm154,
+    Tm155, Tm156, Tm157, Tm158, Tm159, Tm160, Tm161, Tm162, Tm163, Tm164, Tm165,
+    Tm166, Tm167, Tm168, Tm169, Tm170, Tm171, Tm172, Tm173, Tm174, Tm175, Tm176,
+    Tm177, Tm178, Tm179, Yb,    Yb148, Yb149, Yb150, Yb151, Yb152, Yb153, Yb154,
+    Yb155, Yb156, Yb157, Yb158, Yb159, Yb160, Yb161, Yb162, Yb163, Yb164, Yb165,
+    Yb166, Yb167, Yb168, Yb169, Yb170, Yb171, Yb172, Yb173, Yb174, Yb175, Yb176,
+    Yb177, Yb178, Yb179, Yb180, Yb181, Lu,    Lu150, Lu151, Lu152, Lu153, Lu154,
+    Lu155, Lu156, Lu157, Lu158, Lu159, Lu160, Lu161, Lu162, Lu163, Lu164, Lu165,
+    Lu166, Lu167, Lu168, Lu169, Lu170, Lu171, Lu172, Lu173, Lu174, Lu175, Lu176,
+    Lu177, Lu178, Lu179, Lu180, Lu181, Lu182, Lu183, Lu184, Hf,    Hf154, Hf155,
+    Hf156, Hf157, Hf158, Hf159, Hf160, Hf161, Hf162, Hf163, Hf164, Hf165, Hf166,
+    Hf167, Hf168, Hf169, Hf170, Hf171, Hf172, Hf173, Hf174, Hf175, Hf176, Hf177,
+    Hf178, Hf179, Hf180, Hf181, Hf182, Hf183, Hf184, Hf185, Hf186, Ta,    Ta156,
+    Ta157, Ta158, Ta159, Ta160, Ta161, Ta162, Ta163, Ta164, Ta165, Ta166, Ta167,
+    Ta168, Ta169, Ta170, Ta171, Ta172, Ta173, Ta174, Ta175, Ta176, Ta177, Ta178,
+    Ta179, Ta180, Ta181, Ta182, Ta183, Ta184, Ta185, Ta186, Ta187, Ta188, W,
+    W158,  W159,  W160,  W161,  W162,  W163,  W164,  W165,  W166,  W167,  W168,
+    W169,  W170,  W171,  W172,  W173,  W174,  W175,  W176,  W177,  W178,  W179,
+    W180,  W181,  W182,  W183,  W184,  W185,  W186,  W187,  W188,  W189,  W190,
+    Re,    Re160, Re161, Re162, Re163, Re164, Re165, Re166, Re167, Re168, Re169,
+    Re170, Re171, Re172, Re173, Re174, Re175, Re176, Re177, Re178, Re179, Re180,
+    Re181, Re182, Re183, Re184, Re185, Re186, Re187, Re188, Re189, Re190, Re191,
+    Re192, Os,    Os162, Os163, Os164, Os165, Os166, Os167, Os168, Os169, Os170,
+    Os171, Os172, Os173, Os174, Os175, Os176, Os177, Os178, Os179, Os180, Os181,
+    Os182, Os183, Os184, Os185, Os186, Os187, Os188, Os189, Os190, Os191, Os192,
+    Os193, Os194, Os195, Os196, Ir,    Ir165, Ir166, Ir167, Ir168, Ir169, Ir170,
+    Ir171, Ir172, Ir173, Ir174, Ir175, Ir176, Ir177, Ir178, Ir179, Ir180, Ir181,
+    Ir182, Ir183, Ir184, Ir185, Ir186, Ir187, Ir188, Ir189, Ir190, Ir191, Ir192,
+    Ir193, Ir194, Ir195, Ir196, Ir197, Ir198, Ir199, Pt,    Pt168, Pt169, Pt170,
+    Pt171, Pt172, Pt173, Pt174, Pt175, Pt176, Pt177, Pt178, Pt179, Pt180, Pt181,
+    Pt182, Pt183, Pt184, Pt185, Pt186, Pt187, Pt188, Pt189, Pt190, Pt191, Pt192,
+    Pt193, Pt194, Pt195, Pt196, Pt197, Pt198, Pt199, Pt200, Pt201, Pt202, Au,
+    Au171, Au172, Au173, Au174, Au175, Au176, Au177, Au178, Au179, Au180, Au181,
+    Au182, Au183, Au184, Au185, Au186, Au187, Au188, Au189, Au190, Au191, Au192,
+    Au193, Au194, Au195, Au196, Au197, Au198, Au199, Au200, Au201, Au202, Au203,
+    Au204, Au205, Hg,    Hg175, Hg176, Hg177, Hg178, Hg179, Hg180, Hg181, Hg182,
+    Hg183, Hg184, Hg185, Hg186, Hg187, Hg188, Hg189, Hg190, Hg191, Hg192, Hg193,
+    Hg194, Hg195, Hg196, Hg197, Hg198, Hg199, Hg200, Hg201, Hg202, Hg203, Hg204,
+    Hg205, Hg206, Hg207, Hg208, Tl,    Tl177, Tl178, Tl179, Tl180, Tl181, Tl182,
+    Tl183, Tl184, Tl185, Tl186, Tl187, Tl188, Tl189, Tl190, Tl191, Tl192, Tl193,
+    Tl194, Tl195, Tl196, Tl197, Tl198, Tl199, Tl200, Tl201, Tl202, Tl203, Tl204,
+    Tl205, Tl206, Tl207, Tl208, Tl209, Tl210, Pb,    Pb181, Pb182, Pb183, Pb184,
+    Pb185, Pb186, Pb187, Pb188, Pb189, Pb190, Pb191, Pb192, Pb193, Pb194, Pb195,
+    Pb196, Pb197, Pb198, Pb199, Pb200, Pb201, Pb202, Pb203, Pb204, Pb205, Pb206,
+    Pb207, Pb208, Pb209, Pb210, Pb211, Pb212, Pb213, Pb214, Bi,    Bi185, Bi186,
+    Bi187, Bi188, Bi189, Bi190, Bi191, Bi192, Bi193, Bi194, Bi195, Bi196, Bi197,
+    Bi198, Bi199, Bi200, Bi201, Bi202, Bi203, Bi204, Bi205, Bi206, Bi207, Bi208,
+    Bi209, Bi210, Bi211, Bi212, Bi213, Bi214, Bi215, Bi216, Po,    Po190, Po191,
+    Po192, Po193, Po194, Po195, Po196, Po197, Po198, Po199, Po200, Po201, Po202,
+    Po203, Po204, Po205, Po206, Po207, Po208, Po209, Po210, Po211, Po212, Po213,
+    Po214, Po215, Po216, Po217, Po218, At,    At193, At194, At195, At196, At197,
+    At198, At199, At200, At201, At202, At203, At204, At205, At206, At207, At208,
+    At209, At210, At211, At212, At213, At214, At215, At216, At217, At218, At219,
+    At220, At221, At222, At223, Rn,    Rn196, Rn197, Rn198, Rn199, Rn200, Rn201,
+    Rn202, Rn203, Rn204, Rn205, Rn206, Rn207, Rn208, Rn209, Rn210, Rn211, Rn212,
+    Rn213, Rn214, Rn215, Rn216, Rn217, Rn218, Rn219, Rn220, Rn221, Rn222, Rn223,
+    Rn224, Rn225, Rn226, Rn227, Rn228, Fr,    Fr200, Fr201, Fr202, Fr203, Fr204,
+    Fr205, Fr206, Fr207, Fr208, Fr209, Fr210, Fr211, Fr212, Fr213, Fr214, Fr215,
+    Fr216, Fr217, Fr218, Fr219, Fr220, Fr221, Fr222, Fr223, Fr224, Fr225, Fr226,
+    Fr227, Fr228, Fr229, Fr230, Fr231, Fr232, Ra,    Ra203, Ra204, Ra205, Ra206,
+    Ra207, Ra208, Ra209, Ra210, Ra211, Ra212, Ra213, Ra214, Ra215, Ra216, Ra217,
+    Ra218, Ra219, Ra220, Ra221, Ra222, Ra223, Ra224, Ra225, Ra226, Ra227, Ra228,
+    Ra229, Ra230, Ra231, Ra232, Ra233, Ra234, Ac,    Ac207, Ac208, Ac209, Ac210,
+    Ac211, Ac212, Ac213, Ac214, Ac215, Ac216, Ac217, Ac218, Ac219, Ac220, Ac221,
+    Ac222, Ac223, Ac224, Ac225, Ac226, Ac227, Ac228, Ac229, Ac230, Ac231, Ac232,
+    Ac233, Ac234, Ac235, Ac236, Th,    Th210, Th211, Th212, Th213, Th214, Th215,
+    Th216, Th217, Th218, Th219, Th220, Th221, Th222, Th223, Th224, Th225, Th226,
+    Th227, Th228, Th229, Th230, Th231, Th232, Th233, Th234, Th235, Th236, Th237,
+    Th238, Pa,    Pa213, Pa214, Pa215, Pa216, Pa217, Pa218, Pa219, Pa220, Pa221,
+    Pa222, Pa223, Pa224, Pa225, Pa226, Pa227, Pa228, Pa229, Pa230, Pa231, Pa232,
+    Pa233, Pa234, Pa235, Pa236, Pa237, Pa238, Pa239, Pa240, U,     U218,  U219,
+    U220,  U221,  U222,  U223,  U224,  U225,  U226,  U227,  U228,  U229,  U230,
+    U231,  U232,  U233,  U234,  U235,  U236,  U237,  U238,  U239,  U240,  U241,
+    U242,  Np,    Np225, Np226, Np227, Np228, Np229, Np230, Np231, Np232, Np233,
+    Np234, Np235, Np236, Np237, Np238, Np239, Np240, Np241, Np242, Np243, Np244,
+    Pu,    Pu228, Pu229, Pu230, Pu231, Pu232, Pu233, Pu234, Pu235, Pu236, Pu237,
+    Pu238, Pu239, Pu240, Pu241, Pu242, Pu243, Pu244, Pu245, Pu246, Pu247, Am,
+    Am231, Am232, Am233, Am234, Am235, Am236, Am237, Am238, Am239, Am240, Am241,
+    Am242, Am243, Am244, Am245, Am246, Am247, Am248, Am249, Cm,    Cm233, Cm234,
+    Cm235, Cm236, Cm237, Cm238, Cm239, Cm240, Cm241, Cm242, Cm243, Cm244, Cm245,
+    Cm246, Cm247, Cm248, Cm249, Cm250, Cm251, Cm252};
 
 /** The total number of atoms in the array. */
 static const size_t NUM_ATOMS = 2845;
 
 // ---------- END DO NOT EDIT AREA----------
 
-
 /// Check if two atoms are not valid.
-bool AtomEqualsWithNaN(const double left, const double right)
-{
+bool AtomEqualsWithNaN(const double left, const double right) {
   if (left == right)
     return true;
   if ((boost::math::isnan)(left) && (boost::math::isnan)(right))
@@ -3185,8 +3153,7 @@ bool AtomEqualsWithNaN(const double left, const double right)
   return false;
 }
 
-bool operator==(const Atom& left, const Atom & right)
-{
+bool operator==(const Atom &left, const Atom &right) {
   if (&left == &right)
     return true;
 
@@ -3208,13 +3175,11 @@ bool operator==(const Atom& left, const Atom & right)
   // passes all of the tests
   return true;
 }
-bool operator!=(const Atom& left, const Atom & right)
-{
+bool operator!=(const Atom &left, const Atom &right) {
   return !(left == right);
 }
 
-std::ostream& operator<<(std::ostream& out, const Atom &atom)
-{
+std::ostream &operator<<(std::ostream &out, const Atom &atom) {
   out << atom.symbol;
   if (atom.a_number != 0)
     out << atom.a_number;
@@ -3222,12 +3187,10 @@ std::ostream& operator<<(std::ostream& out, const Atom &atom)
 }
 
 /// Compare two atoms
-bool compareAtoms(const Atom &left, const Atom &right)
-{
+bool compareAtoms(const Atom &left, const Atom &right) {
   if (left.z_number == right.z_number) {
     return (left.a_number < right.a_number);
-  }
-  else {
+  } else {
     return (left.z_number < right.z_number);
   }
 }
@@ -3237,16 +3200,16 @@ bool compareAtoms(const Atom &left, const Atom &right)
  * @param a_number :: Mass number of the atom to get
  * @return The atom corresponding to the given Z and A
  */
-Atom getAtom(const uint16_t z_number, const uint16_t a_number)
-{
+Atom getAtom(const uint16_t z_number, const uint16_t a_number) {
   Atom temp("junk", z_number, a_number, NAN, NAN, NAN);
 
-  Atom *result = std::lower_bound(&(ATOMS[0]), &(ATOMS[NUM_ATOMS]), temp, compareAtoms);
-  if (result == &(ATOMS[NUM_ATOMS]) || result->z_number != z_number
-      || result->a_number != a_number)
-  {
+  Atom *result =
+      std::lower_bound(&(ATOMS[0]), &(ATOMS[NUM_ATOMS]), temp, compareAtoms);
+  if (result == &(ATOMS[NUM_ATOMS]) || result->z_number != z_number ||
+      result->a_number != a_number) {
     std::stringstream msg;
-    msg << "Failed to find an atom with z=" << z_number << " and a=" << a_number;
+    msg << "Failed to find an atom with z=" << z_number
+        << " and a=" << a_number;
     throw std::runtime_error(msg.str());
   }
 
@@ -3258,8 +3221,7 @@ Atom getAtom(const uint16_t z_number, const uint16_t a_number)
  * @param a_number :: Mass number of the atom to get
  * @return The atom corresponding to the given symbol and A
  */
-Atom getAtom(const std::string& symbol, const uint16_t a_number)
-{
+Atom getAtom(const std::string &symbol, const uint16_t a_number) {
   // special cases for aliases
   if (symbol.compare("D") == 0)
     return H2;
@@ -3277,10 +3239,10 @@ Atom getAtom(const std::string& symbol, const uint16_t a_number)
 
   // fail loudly
   std::stringstream msg;
-  msg << "Failed to find an atom with symbol=" << symbol << " and a=" << a_number;
+  msg << "Failed to find an atom with symbol=" << symbol
+      << " and a=" << a_number;
   throw std::runtime_error(msg.str());
 }
 
 } // namespace PhysicalConstants
 } // namespace Mantid
-

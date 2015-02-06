@@ -26,9 +26,10 @@ set ( SRC_FILES
 	src/SANSBeamFluxCorrection.cpp
 	src/SANSSensitivityCorrection.cpp
 	src/SANSSolidAngleCorrection.cpp
+	src/SendUsage.cpp
 	src/SetupEQSANSReduction.cpp
-	src/SetupILLD33Reduction.cpp
 	src/SetupHFIRReduction.cpp
+	src/SetupILLD33Reduction.cpp
 	src/StepScan.cpp
 	src/WorkflowAlgorithmHelpers.cpp
 )
@@ -65,9 +66,10 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/SANSBeamFluxCorrection.h
 	inc/MantidWorkflowAlgorithms/SANSSensitivityCorrection.h
 	inc/MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h
+	inc/MantidWorkflowAlgorithms/SendUsage.h
 	inc/MantidWorkflowAlgorithms/SetupEQSANSReduction.h
-	inc/MantidWorkflowAlgorithms/SetupILLD33Reduction.h
 	inc/MantidWorkflowAlgorithms/SetupHFIRReduction.h
+	inc/MantidWorkflowAlgorithms/SetupILLD33Reduction.h
 	inc/MantidWorkflowAlgorithms/StepScan.h
 	inc/MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h
 )
@@ -76,6 +78,7 @@ set ( TEST_FILES
 	MuonCalculateAsymmetryTest.h
 	MuonLoadTest.h
 	SANSSolidAngleCorrectionTest.h
+	SendUsageTest.h
 	StepScanTest.h
 )
 

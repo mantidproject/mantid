@@ -7,49 +7,40 @@
 #include "MantidKernel/TypedValidator.h"
 #include <vector>
 
-namespace Mantid
-{
-namespace Kernel
-{
-  namespace Detail
-  {
-    /// Forward declare checking function
-    template<typename T>
-    DLLExport bool checkIsEmpty(const T &);
+namespace Mantid {
+namespace Kernel {
+namespace Detail {
+/// Forward declare checking function
+template <typename T> DLLExport bool checkIsEmpty(const T &);
 
-    /// Specialization for any vector type
-    template<typename T>
-    bool checkIsEmpty(const std::vector<T> & value)
-    {
-      return value.empty();
-    }
+/// Specialization for any vector type
+template <typename T> bool checkIsEmpty(const std::vector<T> &value) {
+  return value.empty();
+}
 
-    /// Defines the concept of emptiness
-    template<typename T>
-    struct IsEmpty
-    {
-      /**
-       * Returns true if the value is considered empty
-       * @param value: to be checked
-       * @return
-       */
-      static bool check(const T & value)
-      {
-        return checkIsEmpty(value);
-      }
-    };
-  }
+/// Defines the concept of emptiness
+template <typename T> struct IsEmpty {
+  /**
+   * Returns true if the value is considered empty
+   * @param value: to be checked
+   * @return
+   */
+  static bool check(const T &value) { return checkIsEmpty(value); }
+};
+}
 
 /** @class MandatoryValidator MandatoryValidator.h Kernel/MandatoryValidator.h
 
     Validator to check that a property is not left empty.
-    MandatoryValidator is a validator that requires a string to be set to a non-blank value
+    MandatoryValidator is a validator that requires a string to be set to a
+   non-blank value
     or a vector (i.e. ArrayProperty) is not empty.
 
     @author Nick Draper, Tessella Support Services plc
     @date 28/11/2007
 
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -69,11 +60,12 @@ namespace Kernel
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template<typename TYPE>
-class DLLExport MandatoryValidator : public TypedValidator<TYPE>
-{
+template <typename TYPE>
+class DLLExport MandatoryValidator : public TypedValidator<TYPE> {
 public:
-  IValidator_sptr clone() const { return boost::make_shared<MandatoryValidator>(); }
+  IValidator_sptr clone() const {
+    return boost::make_shared<MandatoryValidator>();
+  }
 
 private:
   /**
@@ -81,10 +73,11 @@ private:
    *  @param value :: the string to test
    *  @return "A value must be entered for this parameter" if empty or ""
    */
-  std::string checkValidity(const TYPE& value) const
-  {
-    if(Detail::IsEmpty<TYPE>::check(value)) return "A value must be entered for this parameter";
-    else return "";
+  std::string checkValidity(const TYPE &value) const {
+    if (Detail::IsEmpty<TYPE>::check(value))
+      return "A value must be entered for this parameter";
+    else
+      return "";
   }
 };
 
