@@ -453,6 +453,10 @@ void MonteCarloAbsorption::initCaches() {
   m_numVolumeElements = m_blocks.size();
   g_log.debug() << "Sample + container divided into " << m_numVolumeElements
                 << " blocks.";
+  if (m_numVolumeElements == 0) {
+    g_log.error() << "No blocks intersect with the sample + container.\n";
+    throw std::runtime_error("No intersection with sample + container.");
+  }
   if (m_numVolumeElements == numPossibleVolElements)
     g_log.debug("\n");
   else
