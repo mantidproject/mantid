@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<detector-masking default="notuse">
- <group type="use">
-    <detids>1,2,17,32</detids>
-    <component>bank123</component>
-    <component>bank124</component>
- </group> 
-</detector-masking>

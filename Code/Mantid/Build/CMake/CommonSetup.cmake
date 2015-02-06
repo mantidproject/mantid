@@ -302,6 +302,34 @@ else()
 endif()
 
 ###########################################################################
+# External Data for testing
+###########################################################################
+if ( CXXTEST_FOUND OR PYUNITTEST_FOUND )
+ include ( MantidExternalData )
+
+# None of our tests reference files directly as arguments so we have to manually
+# call ExternalData_Expand_Arguments to register the files with the ExternalData
+# mechanism
+get_filename_component ( EXTERNALDATATEST_SOURCE_DIR ${PROJECT_SOURCE_DIR} ABSOLUTE )
+file( GLOB_RECURSE doctest_content_links
+  RELATIVE "${EXTERNALDATATEST_SOURCE_DIR}" "Testing/Data/DocTest/*.md5" )
+file( GLOB_RECURSE unittest_content_links
+  RELATIVE "${EXTERNALDATATEST_SOURCE_DIR}" "Testing/Data/UnitTest/*.md5" )
+set ( content_links "${doctest_content_links};${unittest_content_links}" )
+foreach(link ${content_links})
+  string( REGEX REPLACE "\\.md5$" "" link ${link} )
+  ExternalData_Expand_Arguments( StandardTestData
+    link_location
+    DATA{${link}}
+    )
+endforeach()
+
+# Create target to download data from the StandardTestData group.  This must come after
+# all tests have been added that reference the group, so we put it last.
+ExternalData_Add_Target(StandardTestData) 
+endif()
+
+###########################################################################
 # Set a flag to indicate that this script has been called
 ###########################################################################
 
