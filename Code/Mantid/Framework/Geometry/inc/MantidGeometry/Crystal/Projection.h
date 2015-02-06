@@ -69,6 +69,16 @@ public:
 
   size_t getNumDims() const { return m_nd; }
 
+  // We're guaranteed to have at least 2 axis
+  VMD &U() { return m_dimensions[0]; }
+  VMD &V() { return m_dimensions[1]; }
+  VMD &W() {
+    if (m_nd >= 3)
+      return m_dimensions[2];
+    else
+      throw std::invalid_argument("invalid axis");
+  }
+
 protected:
   /// Number of dimensions
   size_t m_nd;
