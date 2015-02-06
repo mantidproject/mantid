@@ -4,7 +4,7 @@ from mantid import geometry
 from mantid import api
 
 import time as time
-import os.path, copy
+import os.path, copy,math
 
 import Direct.CommonFunctions  as common
 import Direct.diagnostics      as diagnostics
@@ -535,7 +535,7 @@ class DirectEnergyConversion(object):
            #Find TOF range, correspondent to incident energy monitor peak
            energy_rage = self.mon2_norm_energy_range
            self._mon2_norm_time_range = self.get_TOF_for_energies(monitor_ws,energy_rage,
-                                                                 [self.mon2_norm_spec],self._debug_mode)
+                                                                 [self.mon2_norm_spec],None,self._debug_mode)
         #end
         if separate_monitors:
             # copy incident energy obtained on monitor workspace to detectors
@@ -711,7 +711,7 @@ class DirectEnergyConversion(object):
            else:
               # instrument and workspace shifted, so TOF will be calculated wrt shifted instrument
               energy_rage = self.mon2_norm_energy_range
-              TOF_range = self.get_TOF_for_energies(mon_ws,energy_rage,[mon_spect],self._debug_mode)
+              TOF_range = self.get_TOF_for_energies(mon_ws,energy_rage,[mon_spect],None,self._debug_mode)
               range_min = TOF_range[0]
               range_max = TOF_range[1]
 
@@ -734,18 +734,35 @@ class DirectEnergyConversion(object):
             return (xMin,dX,xMax)
         else:
             eMin,dE,eMax = self.prop_man.energy_bins
+            ei      = PropertyManager.incident_energy.get_current()
             en_list = [eMin,eMin+dE,eMax-dE,eMax]
-            TOF_range = DirectEnergyConversion.get_TOF_for_energies(workspace,en_list,spectra_id)
-            tof_min = min(TOF_range)
-            tof_max = max(TOF_range)
-            dt = abs(TOF_range[2:]-TOF_range[:-2])
-            dt = filter(lambda x: x <1.e-3, dt)
-            t_step = min(dt)
+            TOF_range = DirectEnergyConversion.get_TOF_for_energies(workspace,en_list,spectra_id,ei)
 
+
+            def process_block(tof_range):
+                tof_range = filter(lambda x: not(math.isnan(x)), tof_range)
+                dt = map(lambda x,y : abs(x-y),tof_range[1:],tof_range[:-1])
+                t_step =min(dt)
+                tof_min = min(tof_range)
+                tof_max = max(tof_range)
+                return (tof_min,t_step,tof_max)
+
+
+            nBlocks = len(spectra_id)
+            if nBlocks > 1:
+               tof_min,t_step,tof_max = process_block(TOF_range[0])
+               for ind in xrange(1,nBlocks):
+                   tof_min1,t_step1,tof_max1 = process_block(TOF_range[ind])
+                   tof_min=min(tof_min,tof_min1)
+                   tof_max=max(tof_max,tof_max1)
+                   t_step =min(t_step,t_step1)
+            else:
+               tof_min,t_step,tof_max = process_block(TOF_range)
+            #end
             return (tof_min,t_step,tof_max)
     #
     @staticmethod
-    def get_TOF_for_energies(workspace,energy_list,specID_list,debug_mode=False):
+    def get_TOF_for_energies(workspace,energy_list,specID_list,ei=None,debug_mode=False):
         """ Method to find what TOF range corresponds to given energy range             
            for given workspace and detectors.
 
@@ -753,8 +770,11 @@ class DirectEnergyConversion(object):
            workspace    pointer to workspace with instrument attached. 
            energy_list  the list of input energies to process
            detID_list   list of detectors to find 
+           ei           incident energy. If present, TOF range is calculated in direct mode, 
+                        if not -- elastic mode
 
            Returns: 
+           list of TOF corresponding to input energies list. 
         """ 
         template_ws_name = '_energy_range_ws'
         range_ws_name = '_TOF_range_ws'
@@ -763,8 +783,12 @@ class DirectEnergyConversion(object):
         for specID in specID_list:
             ind = workspace.getIndexFromSpectrumNumber(specID)
             ExtractSingleSpectrum(InputWorkspace=workspace, OutputWorkspace=template_ws_name, WorkspaceIndex=ind)
-            CreateWorkspace(OutputWorkspace=range_ws_name,NSpec = 1,DataX=energy_list,DataY=y,UnitX='Energy',ParentWorkspace=template_ws_name)
-            range_ws = ConvertUnits(InputWorkspace=range_ws_name,OutputWorkspace=range_ws_name,Target='TOF',EMode='Elastic')
+            if ei:
+                CreateWorkspace(OutputWorkspace=range_ws_name,NSpec = 1,DataX=energy_list,DataY=y,UnitX='DeltaE',ParentWorkspace=template_ws_name)
+                range_ws = ConvertUnits(InputWorkspace=range_ws_name,OutputWorkspace=range_ws_name,Target='TOF',EMode='Direct',EFixed=ei)
+            else:
+                CreateWorkspace(OutputWorkspace=range_ws_name,NSpec = 1,DataX=energy_list,DataY=y,UnitX='Energy',ParentWorkspace=template_ws_name)
+                range_ws = ConvertUnits(InputWorkspace=range_ws_name,OutputWorkspace=range_ws_name,Target='TOF',EMode='Elastic')
             x = range_ws.dataX(0)
             TOF_range.append(x.tolist())
 

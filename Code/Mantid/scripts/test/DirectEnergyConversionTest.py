@@ -289,9 +289,42 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertEqual(rez,'Success!')
 
 
+    def test_tof_range(self):
 
 
-     
+
+        run=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=6, BankPixelWidth=1, NumEvents=10, XUnit='DeltaE',
+                                                     XMin=-20, XMax=65, BinWidth=0.2)
+        LoadInstrument(run,InstrumentName='MARI')
+
+        red = DirectEnergyConversion(run.getInstrument())
+
+        red.prop_man.incident_energy = 67
+        red.prop_man.energy_bins =  [-20,0.2,65]
+        red.prop_man.multirep_tof_specta_list = [5,5]
+
+        tof_range = red.find_tof_range_for_multirep(run)
+
+        self.assertEqual(len(tof_range),3)
+
+        run_tof = ConvertUnits(run,Target='TOF',EMode='Direct',EFixed=67.)
+        x = run_tof.readX(4)
+        dx=abs(x[1:]-x[:-1])
+        xMin = min(x)
+        xMax = max(x)
+        dt   = min(dx)
+
+        self.assertAlmostEqual(tof_range[0],xMin)
+        self.assertAlmostEqual(tof_range[1],dt)
+        self.assertAlmostEqual(tof_range[2],xMax)
+
+        # check another working mode
+        red.prop_man.multirep_tof_specta_list = 5
+        tof_range1 = red.find_tof_range_for_multirep(run)
+
+        self.assertAlmostEqual(tof_range[0],tof_range1[0])
+        self.assertAlmostEqual(tof_range[1],tof_range1[1])
+        self.assertAlmostEqual(tof_range[2],tof_range1[2])
 
 
 
