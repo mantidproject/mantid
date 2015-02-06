@@ -35,22 +35,6 @@ public:
     TS_ASSERT_THROWS(factory.create(""), std::invalid_argument &);
   }
 
-  void test_invalid_json_with_successor() {
-    using namespace testing;
-
-    // We expect it to try to use the deletate factory. If it cannot process the
-    // json.
-    MockPeakShapeFactory *delegate = new MockPeakShapeFactory;
-    EXPECT_CALL(*delegate, create(_)).Times(1);
-
-    PeakShapeSphericalFactory factory;
-    factory.setSuccessor(PeakShapeFactory_const_sptr(delegate));
-    // Run create with empty JSON.
-    factory.create("");
-
-    TS_ASSERT(Mock::VerifyAndClearExpectations(delegate));
-  }
-
   void test_use_successor_when_different_shape_found() {
     using namespace testing;
 

@@ -44,8 +44,9 @@ PeakShape *PeakShapeSphericalFactory::create(const std::string &source) const {
             root["background_outer_radius"].asDouble());
         const double backgroundInnerRadius(
             root["background_inner_radius"].asDouble());
-        product = new PeakShapeSpherical(radius, backgroundInnerRadius, backgroundOuterRadius, frame, algorithmName,
-                                         algorithmVersion);
+        product = new PeakShapeSpherical(radius, backgroundInnerRadius,
+                                         backgroundOuterRadius, frame,
+                                         algorithmName, algorithmVersion);
       }
 
       else {
@@ -64,17 +65,17 @@ PeakShape *PeakShapeSphericalFactory::create(const std::string &source) const {
     }
 
   } else {
-    if (m_successor) {
-      product = m_successor->create(source);
-    } else {
-      throw std::invalid_argument("PeakShapeSphericalFactory:: Source JSON for "
-                                  "the peak shape is not valid: " +
-                                  source);
-    }
+    throw std::invalid_argument("PeakShapeSphericalFactory:: Source JSON for "
+                                "the peak shape is not valid: " +
+                                source);
   }
   return product;
 }
 
+/**
+ * @brief Set successor
+ * @param successorFactory : successor
+ */
 void PeakShapeSphericalFactory::setSuccessor(
     PeakShapeFactory_const_sptr successorFactory) {
   m_successor = successorFactory;

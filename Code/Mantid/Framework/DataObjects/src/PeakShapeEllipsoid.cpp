@@ -99,7 +99,12 @@ PeakShape *PeakShapeEllipsoid::clone() const {
   return new PeakShapeEllipsoid(*this);
 }
 
-std::string PeakShapeEllipsoid::shapeName() const { return "ellipsoid"; }
+std::string PeakShapeEllipsoid::shapeName() const { return PeakShapeEllipsoid::ellipsoidShapeName(); }
+
+const std::string PeakShapeEllipsoid::ellipsoidShapeName()
+{
+    return "ellipsoid";
+}
 
 } // namespace DataObjects
 } // namespace Mantid

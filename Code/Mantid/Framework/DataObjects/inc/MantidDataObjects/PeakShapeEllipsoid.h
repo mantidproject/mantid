@@ -64,6 +64,8 @@ namespace DataObjects
     /// Get the peak shape
     std::string shapeName() const;
 
+    static const std::string ellipsoidShapeName();
+
   private:
     /// principle axis
     std::vector<Mantid::Kernel::V3D> m_directions;
