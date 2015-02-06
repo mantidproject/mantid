@@ -16,6 +16,7 @@ set ( SRC_FILES
 	src/Crystal/PointGroup.cpp
 	src/Crystal/PointGroupFactory.cpp
 	src/Crystal/ProductOfCyclicGroups.cpp
+	src/Crystal/Projection.cpp
 	src/Crystal/ReducedCell.cpp
 	src/Crystal/ReflectionCondition.cpp
 	src/Crystal/ScalarUtils.cpp
