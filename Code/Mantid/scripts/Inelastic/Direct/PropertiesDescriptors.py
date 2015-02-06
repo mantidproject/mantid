@@ -775,6 +775,7 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
                     "defining min/max values of integration range or None to use relative to incident energy limits")
             prop_helpers.ComplexProperty.__set__(self,tDict,value)
 #end MonovanIntegrationRange
+
 #-----------------------------------------------------------------------------------------
 class SpectraToMonitorsList(PropDescriptor):
    """ property describes list of spectra, used as monitors to estimate incident energy
@@ -824,6 +825,7 @@ class SpectraToMonitorsList(PropDescriptor):
                 result = [int(spectra_list)]
        return result
 #end SpectraToMonitorsList
+
 #-----------------------------------------------------------------------------------------
 class SaveFormat(PropDescriptor):
    # formats available for saving the data
@@ -871,6 +873,7 @@ class SaveFormat(PropDescriptor):
         #end if different types
         self._save_format.add(value)
 #end SaveFormat
+
 #-----------------------------------------------------------------------------------------
 class DiagSpectra(PropDescriptor):
     """ class describes spectra list which should be used in diagnostics 
@@ -913,6 +916,7 @@ class DiagSpectra(PropDescriptor):
         else:
             raise ValueError("Spectra For diagnostics can be a string inthe form (num1,num2);(num3,num4) etc. or None")
 #end class DiagSpectra
+
 #-----------------------------------------------------------------------------------------
 class BackbgroundTestRange(PropDescriptor):
     """ The TOF range used in diagnostics to reject high background spectra. 
@@ -942,6 +946,7 @@ class BackbgroundTestRange(PropDescriptor):
             raise ValueError("background test range can be set to a 2 element list of floats")
         self._background_test_range = [float(value[0]),float(value[1])]
 #end BackbgroundTestRange
+
 #-----------------------------------------------------------------------------------------
 class MultirepTOFSpectraList(PropDescriptor):
     """ property describes list of spectra numbers, used to identify 
@@ -974,7 +979,7 @@ class MultirepTOFSpectraList(PropDescriptor):
         else:
             rez = [int(value)]
         self._spectra_list=rez
-
+#end MultirepTOFSpectraList
 
 #-----------------------------------------------------------------------------------------
 # END Descriptors for PropertyManager itself

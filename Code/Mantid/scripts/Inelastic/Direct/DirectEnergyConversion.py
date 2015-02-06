@@ -721,6 +721,28 @@ class DirectEnergyConversion(object):
         return ('monitor-2',old_name)
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
+    def find_tof_range_for_multirep(self,workspace):
+        """ Find range of tof-s (and time bin size) corresponding to the 
+            energy range requested
+        """ 
+        spectra_id = self.prop_man.multirep_tof_specta_list
+        if not spectra_id:
+            x = workspace.readX(0)
+            xMin=min(x)
+            xMax=max(x)
+            dX = min(abs(x[2:]-x[:-2]))
+            return (xMin,dX,xMax)
+        else:
+            eMin,dE,eMax = self.prop_man.energy_bins
+            en_list = [eMin,eMin+dE,eMax-dE,eMax]
+            TOF_range = DirectEnergyConversion.get_TOF_for_energies(workspace,en_list,spectra_id)
+            tof_min = min(TOF_range)
+            tof_max = max(TOF_range)
+            dt = abs(TOF_range[2:]-TOF_range[:-2])
+            dt = filter(lambda x: x <1.e-3, dt)
+            t_step = min(dt)
+
+            return (tof_min,t_step,tof_max)
     #
     @staticmethod
     def get_TOF_for_energies(workspace,energy_list,specID_list,debug_mode=False):
