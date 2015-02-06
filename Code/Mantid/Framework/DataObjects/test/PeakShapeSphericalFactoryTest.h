@@ -68,7 +68,7 @@ public:
                                    algorithmVersion);
 
     PeakShapeSphericalFactory factory;
-    PeakShape *productShape = factory.create(sourceShape.toJSON());
+    Mantid::Geometry::PeakShape *productShape = factory.create(sourceShape.toJSON());
 
     PeakShapeSpherical *sphericalShapeProduct =
         dynamic_cast<PeakShapeSpherical *>(productShape);
@@ -92,7 +92,7 @@ public:
                                      algorithmVersion);
 
       PeakShapeSphericalFactory factory;
-      PeakShape *productShape = factory.create(sourceShape.toJSON());
+      Mantid::Geometry::PeakShape *productShape = factory.create(sourceShape.toJSON());
 
       PeakShapeSpherical *sphericalShapeProduct =
           dynamic_cast<PeakShapeSpherical *>(productShape);

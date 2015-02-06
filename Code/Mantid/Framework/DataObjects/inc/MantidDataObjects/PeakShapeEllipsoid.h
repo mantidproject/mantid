@@ -60,7 +60,7 @@ namespace DataObjects
     /// PeakShape interface
     std::string toJSON() const;
     /// Clone ellipsoid
-    PeakShape *clone() const;
+    PeakShapeEllipsoid *clone() const;
     /// Get the peak shape
     std::string shapeName() const;
 

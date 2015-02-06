@@ -9,7 +9,7 @@ namespace Mantid
 namespace DataObjects
 {
 
-  /** PeakShapeEllipsoidFactory : TODO: DESCRIPTION
+  /** PeakShapeEllipsoidFactory : Create ellipsoid peak shapes
 
     Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
@@ -39,7 +39,7 @@ namespace DataObjects
        
     // PeakShapeFactory interface
 
-    PeakShape *create(const std::string &source) const;
+    Mantid::Geometry::PeakShape *create(const std::string &source) const;
     void setSuccessor(boost::shared_ptr<const PeakShapeFactory> successorFactory);
 
   private:

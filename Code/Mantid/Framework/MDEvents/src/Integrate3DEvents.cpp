@@ -108,7 +108,7 @@ void Integrate3DEvents::addEvents(std::vector<V3D> const &event_qs) {
  *                            of the net integrated intensity
  *
  */
-PeakShape_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
+Mantid::Geometry::PeakShape_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
     V3D const &peak_q, bool specify_size, double peak_radius,
     double back_inner_radius, double back_outer_radius,
     std::vector<double> &axes_radii, double &inti, double &sigi) {

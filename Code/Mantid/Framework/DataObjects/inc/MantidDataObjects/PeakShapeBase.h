@@ -2,7 +2,7 @@
 #define MANTID_DATAOBJECTS_PEAKSHAPEBASE_H_
 
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/PeakShape.h"
+#include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidAPI/SpecialCoordinateSystem.h"
 #include <string>
 
@@ -37,7 +37,7 @@ namespace DataObjects {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PeakShapeBase : public PeakShape {
+class DLLExport PeakShapeBase : public Mantid::Geometry::PeakShape {
 
 public:
   /// Constructor

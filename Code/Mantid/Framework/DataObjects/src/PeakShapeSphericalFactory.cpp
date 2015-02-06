@@ -24,10 +24,10 @@ PeakShapeSphericalFactory::~PeakShapeSphericalFactory() {}
  * @param source : Source JSON
  * @return PeakShape object
  */
-PeakShape *PeakShapeSphericalFactory::create(const std::string &source) const {
+Mantid::Geometry::PeakShape *PeakShapeSphericalFactory::create(const std::string &source) const {
   Json::Reader reader;
   Json::Value root;
-  PeakShape *product = NULL;
+  Mantid::Geometry::PeakShape *product = NULL;
   if (reader.parse(source, root)) {
     const std::string shape = root["shape"].asString();
     if (shape == PeakShapeSpherical::sphereShapeName()) {

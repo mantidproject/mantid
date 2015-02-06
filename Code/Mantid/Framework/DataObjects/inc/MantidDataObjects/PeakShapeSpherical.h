@@ -71,10 +71,10 @@ public:
 private:
   /// Peak radius
   double m_radius;
-  /// Background outer radius
-  boost::optional<double> m_backgroundOuterRadius;
   /// Background inner radius;
   boost::optional<double> m_backgroundInnerRadius;
+  /// Background outer radius
+  boost::optional<double> m_backgroundOuterRadius;
 };
 
 } // namespace DataObjects

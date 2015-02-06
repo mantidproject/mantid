@@ -7,7 +7,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/PeakShape.h"
+#include "MantidGeometry/Crystal/PeakShape.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
@@ -121,13 +121,13 @@ public:
   double getValueByColName(const std::string &name) const;
 
   /// Get the peak shape.
-  const PeakShape& getPeakShape();
+  const Mantid::Geometry::PeakShape& getPeakShape();
 
   /// Set the PeakShape
-  void setPeakShape(PeakShape* shape);
+  void setPeakShape(Mantid::Geometry::PeakShape* shape);
 
   /// Set the PeakShape
-  void setPeakShape(PeakShape_const_sptr shape);
+  void setPeakShape(Mantid::Geometry::PeakShape_const_sptr shape);
 
   /// Assignment
   Peak& operator=(const Peak& other);
@@ -207,7 +207,7 @@ private:
   std::set<int> m_detIDs;
 
   /// Peak shape
-  PeakShape_const_sptr m_peakShape;
+  Mantid::Geometry::PeakShape_const_sptr m_peakShape;
 };
 
 } // namespace Mantid

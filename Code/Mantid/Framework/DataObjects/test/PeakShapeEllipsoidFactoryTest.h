@@ -79,7 +79,7 @@ public:
                                    algorithmVersion);
 
     PeakShapeEllipsoidFactory factory;
-    PeakShape *productShape = factory.create(sourceShape.toJSON());
+    Mantid::Geometry::PeakShape *productShape = factory.create(sourceShape.toJSON());
 
     PeakShapeEllipsoid *ellipsoidShapeProduct =
         dynamic_cast<PeakShapeEllipsoid *>(productShape);

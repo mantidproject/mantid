@@ -2,7 +2,7 @@
 #define MANTID_DATAOBJECTS_NOSHAPE_H_
 
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/PeakShapeBase.h"
+#include "MantidGeometry/Crystal/PeakShape.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -30,7 +30,7 @@ namespace DataObjects {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport NoShape : public PeakShape {
+class DLLExport NoShape : public Mantid::Geometry::PeakShape {
 
 public:
     /// Constructor

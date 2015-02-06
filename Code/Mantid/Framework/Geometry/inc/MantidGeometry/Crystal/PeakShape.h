@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAOBJECTS_PEAKSHAPE_H_
-#define MANTID_DATAOBJECTS_PEAKSHAPE_H_
+#ifndef MANTID_GEOMETRY_PEAKSHAPE_H_
+#define MANTID_GEOMETRY_PEAKSHAPE_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/SpecialCoordinateSystem.h"
@@ -7,7 +7,7 @@
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
-namespace DataObjects {
+namespace Geometry {
 
 /** PeakShape : Abstract type to describes the shape of a peak.
 
@@ -53,7 +53,7 @@ public:
 typedef boost::shared_ptr<PeakShape> PeakShape_sptr;
 typedef boost::shared_ptr<const PeakShape> PeakShape_const_sptr;
 
-} // namespace DataObjects
+} // namespace Geometry
 } // namespace Mantid
 
-#endif /* MANTID_DATAOBJECTS_PEAKSHAPE_H_ */
+#endif /* MANTID_GEOMETRY_PEAKSHAPE_H_ */

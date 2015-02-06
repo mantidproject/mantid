@@ -33,7 +33,6 @@
 #include "MantidDataObjects/PeakNoShapeFactory.h"
 #include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeakShapeEllipsoidFactory.h"
-#include "MantidDataObjects/PeakShape.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -1143,7 +1142,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         boost::trim_right(shapeJSON);
 
         // Make the shape
-        PeakShape* peakShape = peakFactoryEllipsoid->create(shapeJSON);
+        Mantid::Geometry::PeakShape* peakShape = peakFactoryEllipsoid->create(shapeJSON);
 
         // Set the shape
         peakWS->getPeak(i).setPeakShape(peakShape);

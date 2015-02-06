@@ -19,6 +19,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 
 namespace Mantid {
@@ -260,7 +261,7 @@ void IntegrateEllipsoids::exec() {
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
       V3D peak_q(peaks[i].getQLabFrame());
       std::vector<double> axes_radii;
-      auto shape = integrator.ellipseIntegrateEvents(peak_q, specify_size, peak_radius,
+      Mantid::Geometry::PeakShape_const_sptr shape = integrator.ellipseIntegrateEvents(peak_q, specify_size, peak_radius,
                                         back_inner_radius, back_outer_radius,
                                         axes_radii, inti, sigi);
       peaks[i].setIntensity(inti);

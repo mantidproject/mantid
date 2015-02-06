@@ -26,10 +26,10 @@ PeakShapeEllipsoidFactory::~PeakShapeEllipsoidFactory() {}
  * @param source : source JSON
  * @return PeakShape via this factory or it's successors
  */
-PeakShape *PeakShapeEllipsoidFactory::create(const std::string &source) const {
+Mantid::Geometry::PeakShape *PeakShapeEllipsoidFactory::create(const std::string &source) const {
   Json::Reader reader;
   Json::Value root;
-  PeakShape *product = NULL;
+  Mantid::Geometry::PeakShape *product = NULL;
   if (reader.parse(source, root)) {
     const std::string shape = root["shape"].asString();
     if (shape == PeakShapeEllipsoid::ellipsoidShapeName()) {

@@ -51,7 +51,6 @@ set ( INC_FILES
 	inc/MantidDataObjects/Peak.h
 	inc/MantidDataObjects/PeakColumn.h
 	inc/MantidDataObjects/PeakNoShapeFactory.h
-	inc/MantidDataObjects/PeakShape.h
 	inc/MantidDataObjects/PeakShapeBase.h
 	inc/MantidDataObjects/PeakShapeEllipsoid.h
 	inc/MantidDataObjects/PeakShapeEllipsoidFactory.h

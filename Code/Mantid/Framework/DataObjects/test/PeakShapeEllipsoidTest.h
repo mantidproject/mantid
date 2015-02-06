@@ -60,8 +60,6 @@ public:
     const MantidVec abcOuterRadii = list_of(8)(9)(10);
     const MantidVec bad_abcOuterRadii = list_of(8)(9)(10)(11);
     const SpecialCoordinateSystem frame = HKL;
-    const std::string algorithmName = "foo";
-    const int algorithmVersion = 3;
 
     TSM_ASSERT_THROWS("Should throw, bad directions",
                       PeakShapeEllipsoid(bad_directions, abcRadii,
@@ -129,9 +127,6 @@ public:
   }
 
   void test_shape_name() {
-
-    const double radius = 1;
-    const SpecialCoordinateSystem frame = HKL;
 
     // Construct it.
     PeakShapeEllipsoid shape(list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))

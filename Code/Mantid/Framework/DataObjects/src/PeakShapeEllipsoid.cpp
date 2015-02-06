@@ -95,7 +95,7 @@ std::string PeakShapeEllipsoid::toJSON() const {
   return writer.write(root);
 }
 
-PeakShape *PeakShapeEllipsoid::clone() const {
+PeakShapeEllipsoid* PeakShapeEllipsoid::clone() const {
   return new PeakShapeEllipsoid(*this);
 }
 
