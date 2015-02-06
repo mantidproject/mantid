@@ -563,23 +563,41 @@ void LoadHFIRPDData::appendSampleLogs(
     IMDEventWorkspace_sptr mdws,
     const std::map<std::string, std::vector<double> > &logvecmap,
     const std::vector<Kernel::DateAndTime> &vectimes) {
-
-  /// FIXME *** TODO *** : Do not make a long list of time series property for
-  /// run 1.
-  /// BUT assign the relevant sample values to each ExperimentInfo of each run
-  /// Only make the properties in the ParentWorkspace to Sample log of run 0???
-
   // Check!
   size_t numexpinfo = mdws->getNumExperimentInfo();
   if (numexpinfo == 0)
     throw std::runtime_error(
         "There is no ExperimentInfo defined for MDWorkspace. "
         "It is impossible to add any log!");
-
-  // Process the sample logs for MD workspace
-  ExperimentInfo_sptr ei = mdws->getExperimentInfo(0);
+  else if (numexpinfo != vectimes.size() + 1)
+    throw std::runtime_error(
+        "The number of ExperimentInfo should be 1 more than "
+        "the length of vector of time, i.e., number of matrix workspaces.");
 
   std::map<std::string, std::vector<double> >::const_iterator miter;
+
+  // get runnumber vector
+  std::string runnumlogname = getProperty("RunNumberName");
+  miter = logvecmap.find(runnumlogname);
+  if (miter == logvecmap.end())
+    throw std::runtime_error("Impossible not to find Pt. in log vec map.");
+  const std::vector<double> &vecrunno = miter->second;
+
+  // Add run_start to each ExperimentInfo
+  for (size_t i = 0; i < vectimes.size(); ++i) {
+    Kernel::DateAndTime runstart = vectimes[i];
+    mdws->getExperimentInfo(i)->mutableRun().addLogData(
+        new PropertyWithValue<std::string>("run_start",
+                                           runstart.toFormattedString()));
+  }
+  mdws->getExperimentInfo(vectimes.size())->mutableRun().addLogData(
+      new PropertyWithValue<std::string>("run_start",
+                                         vectimes[0].toFormattedString()));
+
+  // Add sample logs
+  // get hold of last experiment info
+  ExperimentInfo_sptr eilast = mdws->getExperimentInfo(numexpinfo - 1);
+
   for (miter = logvecmap.begin(); miter != logvecmap.end(); ++miter) {
     std::string logname = miter->first;
     const std::vector<double> &veclogval = miter->second;
@@ -594,23 +612,36 @@ void LoadHFIRPDData::appendSampleLogs(
       continue;
     }
 
+    // For N single value experiment info
+    for (size_t i = 0; i < veclogval.size(); ++i) {
+      // get ExperimentInfo
+      ExperimentInfo_sptr tmpei = mdws->getExperimentInfo(i);
+      // check run number matches
+      int runnumber =
+          atoi(tmpei->run().getProperty("run_number")->value().c_str());
+      if (runnumber != static_cast<int>(vecrunno[i]))
+        throw std::runtime_error("Run number does not match to Pt. value.");
+      // add property
+      tmpei->mutableRun().addLogData(
+          new PropertyWithValue<double>(logname, veclogval[i]));
+    }
+
     // Create a new log
     TimeSeriesProperty<double> *templog =
         new TimeSeriesProperty<double>(logname);
     templog->addValues(vectimes, veclogval);
 
     // Add log to experiment info
-    ei->mutableRun().addLogData(templog);
-  }
+    eilast->mutableRun().addLogData(templog);
 
-  // MD workspace add experimental information
-  mdws->addExperimentInfo(ei);
+    // Add log value to each ExperimentInfo for the first N
+  }
 
   return;
 }
 
 //---------------------------------------------------------------------------------
-/** Append Experiment Info
+/** Add Experiment Info to the MDWorkspace.  Add 1+N ExperimentInfo
  * @brief LoadHFIRPDData::addExperimentInfos
  * @param mdws
  * @param vec_ws2d
@@ -620,6 +651,7 @@ void LoadHFIRPDData::addExperimentInfos(
     API::IMDEventWorkspace_sptr mdws,
     const std::vector<API::MatrixWorkspace_sptr> vec_ws2d,
     const int &init_runnumber) {
+  // Add N experiment info as there are N measurment points
   for (size_t i = 0; i < vec_ws2d.size(); ++i) {
     // Create an ExperimentInfo object
     ExperimentInfo_sptr tmp_expinfo = boost::make_shared<ExperimentInfo>();
@@ -632,6 +664,12 @@ void LoadHFIRPDData::addExperimentInfos(
     // Add ExperimentInfo to workspace
     mdws->addExperimentInfo(tmp_expinfo);
   }
+
+  // Add one additional in order to contain the combined sample logs
+  ExperimentInfo_sptr combine_expinfo = boost::make_shared<ExperimentInfo>();
+  combine_expinfo->mutableRun().addProperty(
+      new PropertyWithValue<int>("run_number", init_runnumber - 1));
+  mdws->addExperimentInfo(combine_expinfo);
 
   return;
 }

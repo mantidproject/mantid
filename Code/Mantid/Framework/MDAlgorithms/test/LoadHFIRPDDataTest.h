@@ -10,6 +10,8 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using Mantid::MDAlgorithms::LoadHFIRPDData;
 using Mantid::DataHandling::LoadInstrument;
@@ -17,6 +19,7 @@ using Mantid::DataHandling::LoadSpiceAscii;
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Kernel;
 
 class LoadHFIRPDDataTest : public CxxTest::TestSuite {
 public:
@@ -142,18 +145,53 @@ public:
     TS_ASSERT_DELTA(lastx, 1.57956, 0.0001);
 
     // Experiment information
-    /// FIXME - This is wrong! why 62?  where the +1 comes from?
     uint16_t numexpinfo = mdws->getNumExperimentInfo();
-    // TS_ASSERT_EQUALS(numexpinfo, 61);
+    TS_ASSERT_EQUALS(numexpinfo, 61 + 1);
 
+    // Check run number
     ExperimentInfo_const_sptr expinfo0 = mdws->getExperimentInfo(0);
     TS_ASSERT(expinfo0);
     TS_ASSERT_EQUALS(expinfo0->getRunNumber(), 1);
 
-    /// FIXME - Run number is not right!
     ExperimentInfo_const_sptr expinfo61 = mdws->getExperimentInfo(61);
     TS_ASSERT(expinfo61);
-    TS_ASSERT_EQUALS(expinfo61->getRunNumber(), 124);
+    TS_ASSERT_EQUALS(expinfo61->getRunNumber(), 0);
+
+    // Check log and comparing with run_start
+    Mantid::Kernel::Property *tempa = expinfo61->run().getProperty("temp_a");
+    TS_ASSERT(tempa);
+    Mantid::Kernel::TimeSeriesProperty<double> *timeseriestempa =
+        dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(tempa);
+    TS_ASSERT(timeseriestempa);
+
+    std::vector<DateAndTime> times = timeseriestempa->timesAsVector();
+    TS_ASSERT_EQUALS(times.size(), 61);
+    DateAndTime time0 = times[0];
+    TS_ASSERT_EQUALS(time0.toFormattedString(), "2012-Aug-13 11:57:33");
+    DateAndTime time1 = times[1];
+    TS_ASSERT_EQUALS(time1.toFormattedString(), "2012-Aug-13 11:58:03");
+
+    // Examine Monitor MDWorkspace
+    IMDWorkspace_const_sptr monmdws = boost::dynamic_pointer_cast<IMDWorkspace>(
+        AnalysisDataService::Instance().retrieve("MonitorMDW"));
+
+    // Check the IMDEvent workspace generated
+    numevents = monmdws->getNEvents();
+    TS_ASSERT_EQUALS(numevents, 44 * 61);
+
+    mditer = monmdws->createIterator();
+    TS_ASSERT_EQUALS(mditer->getNumEvents(), 44 * 61);
+
+    y0 = mditer->getInnerSignal(0);
+    TS_ASSERT_DELTA(y0, 31964.000, 0.1);
+    yl = mditer->getInnerSignal(44 * 61 - 1);
+    TS_ASSERT_DELTA(yl, 31968.0, 0.1);
+
+    // Remove workspaces
+    AnalysisDataService::Instance().remove("DataTable");
+    AnalysisDataService::Instance().remove("LogParentWS");
+    AnalysisDataService::Instance().remove("HB2A_MD");
+    AnalysisDataService::Instance().remove("MonitorMDW");
   }
 };
 
