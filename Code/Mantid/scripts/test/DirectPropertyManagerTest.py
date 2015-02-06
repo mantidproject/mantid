@@ -44,7 +44,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         self.assertRaises(KeyError,getattr,propman,'non_existing_property')
 
-
     def test_set_non_default_wrong_value(self):
         propman = self.prop_man
         # should do nothing as already initialized above
@@ -484,6 +483,123 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(ei_spec[0],65542)
         self.assertEqual(ei_spec[1],5506)
 
+    def test_set_energy_bins_and_ei(self):
+
+        propman = self.prop_man
+
+        propman.incident_energy =20
+        self.assertFalse(PropertyManager.incident_energy.multirep_mode())
+        propman.energy_bins='-30,3,10'
+
+        bins = propman.energy_bins
+        self.assertAlmostEqual(bins[0],-30)
+        self.assertAlmostEqual(bins[1],3)
+        self.assertAlmostEqual(bins[2],10)
+
+        propman.incident_energy =100.01
+        propman.energy_bins=[-20,4,100]
+        bins = propman.energy_bins
+        self.assertAlmostEqual(bins[0],-20)
+        self.assertAlmostEqual(bins[1],4)
+        self.assertAlmostEqual(bins[2],100)
+
+
+
+        propman.incident_energy=10
+        self.assertAlmostEqual(propman.incident_energy,10)
+        bins = propman.energy_bins
+        self.assertAlmostEqual(bins[0],-20*9.9999/100)
+        self.assertAlmostEqual(bins[1],4*9.9999/100)
+        self.assertAlmostEqual(bins[2],9.9999)
+
+
+        ei = [20,30]
+        propman.incident_energy=ei
+        got_ei = propman.incident_energy
+        for ind,en in enumerate(got_ei):
+            self.assertAlmostEqual(en,ei[ind])
+        self.assertTrue(PropertyManager.incident_energy.multirep_mode())
+        bins = propman.energy_bins
+        self.assertAlmostEqual(bins[0],-20*20*0.99999/100)
+        self.assertAlmostEqual(bins[1],4*20*0.99999/100)
+        self.assertAlmostEqual(bins[2],20*0.99999)
+
+        propman.energy_bins=[-2,0.1,0.8]
+        bins = propman.energy_bins
+        self.assertAlmostEqual(bins[0],-20*2)
+        self.assertAlmostEqual(bins[1],20*0.1)
+        self.assertAlmostEqual(bins[2],20*0.8)
+
+
+        propman.incident_energy='20,30'
+        self.assertTrue(PropertyManager.incident_energy.multirep_mode())
+
+        got_ei = propman.incident_energy
+        for ind,en in enumerate(got_ei):
+            self.assertAlmostEqual(en,ei[ind])
+
+
+        propman.energy_bins = None
+        self.assertFalse(propman.energy_bins)
+       
+
+    def test_multirep_ei_iterate_over(self):
+        propman = self.prop_man
+        propman.incident_energy=20
+        propman.energy_bins=[-2,0.1,0.8]
+        self.assertFalse(PropertyManager.incident_energy.multirep_mode())
+
+        ic=0
+        for en in PropertyManager.incident_energy:
+            ic+=1
+            self.assertAlmostEqual(en,20)
+            bins = propman.energy_bins
+            self.assertAlmostEqual(bins[0],-2)
+            self.assertAlmostEqual(bins[1],0.1)
+            self.assertAlmostEqual(bins[2],0.8)
+
+        self.assertEqual(ic,1)
+
+        propman.incident_energy=[20]
+        propman.energy_bins=[-2,0.1,0.8]
+        self.assertTrue(PropertyManager.incident_energy.multirep_mode())
+
+        ic=0
+        for en in PropertyManager.incident_energy:
+            ic+=1
+            self.assertAlmostEqual(en,20)
+            bins = propman.energy_bins
+            self.assertAlmostEqual(bins[0],-2*20)
+            self.assertAlmostEqual(bins[1],0.1*20)
+            self.assertAlmostEqual(bins[2],0.8*20)
+
+        self.assertEqual(ic,1)
+
+        eng=[20,40,60]
+        propman.incident_energy=eng
+        propman.energy_bins=[-2,0.1,0.8]
+        self.assertTrue(PropertyManager.incident_energy.multirep_mode())
+        ic=0
+        for en in PropertyManager.incident_energy:
+            self.assertAlmostEqual(en,eng[ic])
+            bins = propman.energy_bins
+            self.assertAlmostEqual(bins[0],-2*en)
+            self.assertAlmostEqual(bins[1],0.1*en)
+            self.assertAlmostEqual(bins[2],0.8*en)
+            ic+=1
+        self.assertEqual(ic,3)
+        # 
+        ic=0
+        for en in PropertyManager.incident_energy:
+            self.assertAlmostEqual(en,eng[ic])
+            bins = propman.energy_bins
+            self.assertAlmostEqual(bins[0],-2*eng[ic])
+            self.assertAlmostEqual(bins[1],0.1*eng[ic])
+            self.assertAlmostEqual(bins[2],0.8*eng[ic])
+            ic+=1
+        self.assertEqual(ic,3)
+
+
     def test_ignore_complex_defailts_changes_fom_instrument(self) :
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
 
@@ -526,6 +642,8 @@ class DirectPropertyManagerTest(unittest.TestCase):
         bkgd_range = propman.bkgd_range
         self.assertAlmostEqual(bkgd_range[0],100)
         self.assertAlmostEqual(bkgd_range[1],40)
+
+
 
     def test_monovan_integration_range(self):
        propman = self.prop_man
@@ -659,41 +777,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
    
    
-    def test_set_energy_bins_and_ei(self):
-        propman = self.prop_man
-
-        propman.energy_bins='-30,3,10'
-        bins = propman.energy_bins
-        self.assertAlmostEqual(bins[0],-30)
-        self.assertAlmostEqual(bins[1],3)
-        self.assertAlmostEqual(bins[2],10)
-
-
-        propman.energy_bins=[-20,4,100]
-        bins = propman.energy_bins
-        self.assertAlmostEqual(bins[0],-20)
-        self.assertAlmostEqual(bins[1],4)
-        self.assertAlmostEqual(bins[2],100)
-
-
-        propman.incident_energy=10
-        self.assertAlmostEqual(propman.incident_energy,10)
-        ei = [20,30]
-        propman.incident_energy=ei
-        got_ei = propman.incident_energy
-        for ind,en in enumerate(got_ei):
-            self.assertAlmostEqual(en,ei[ind])
-
-        propman.incident_energy='20,30'
-        got_ei = propman.incident_energy
-        for ind,en in enumerate(got_ei):
-            self.assertAlmostEqual(en,ei[ind])
-
-
-        propman.energy_bins = None
-        self.assertFalse(propman.energy_bins)
-       
-        #TODO: this one is not completed. Multirep mode to come
 
     def test_monitors_list(self):
         propman = self.prop_man

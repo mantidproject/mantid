@@ -208,7 +208,7 @@ class IncidentEnergy(PropDescriptor):
     def __init__(self): 
         self._incident_energy = 0
         self._num_energies = 1
-        self._current_en = 0
+        self._cur_iter_en = 0
     def __get__(self,instance,owner=None):
         """ return  incident energy or list of incident energies """ 
         if instance is None:
@@ -259,8 +259,10 @@ class IncidentEnergy(PropDescriptor):
                if en <= 0:
                  raise KeyError("Incident energy have to be positive number of list of positive numbers." + " For input argument {0} got negative value {1}".format(value,en))     
        else:
+         self._num_energies = 1
          if inc_en <= 0:
             raise KeyError("Incident energy have to be positive number of list of positive numbers." + " For value {0} got negative {1}".format(value,inc_en))
+       self._cur_iter_en = 0
    
     def multirep_mode(self):
         """ return true if energy is defined as list of energies and false otherwise """ 
@@ -272,23 +274,42 @@ class IncidentEnergy(PropDescriptor):
     def get_current(self):
         """ Return current energy out of range of energies""" 
         if isinstance(self._incident_energy,list):
-            return self._incident_energy[self._current_en]
+            ind = self._cur_iter_en-1
+            if ind<0:
+                ind = 0
+            return self._incident_energy[ind]
         else:
             return self._incident_energy
-    # energies iterator
+    #
+    def set_current(self,value):
+        """ set current energy value (used in multirep mode) to 
+            
+        """
+        if isinstance(self._incident_energy,list):
+            ind = self._cur_iter_en-1
+            if ind<0:
+                ind = 0
+            self._incident_energy[ind] = value
+        else:
+            self._incident_energy = value
+
+
     def __iter__(self):
-        self._current_en = 0
+        """ iterator over energy range, initializing iterations over energies """
+        self._cur_iter_en = 0
         return self
 
     def next(self): # Python 3: def __next__(self)
-        if self._current_en >= self._num_energies:
-            raise StopIteration
-        else:
-           self._current_en += 1
-           if isinstance(self._incident_energy,list):           
-               return self._incident_energy[self._current_en - 1]
+        """ part of iterator """ 
+        if self._cur_iter_en < self._num_energies:
+           ind = self._cur_iter_en
+           self._cur_iter_en += 1
+           if isinstance(self._incident_energy,list):
+               return self._incident_energy[ind]
            else:
                return self._incident_energy
+        else:
+           raise StopIteration
 
 # end IncidentEnergy
 #-----------------------------------------------------------------------------------------
@@ -308,39 +329,50 @@ class EnergyBins(PropDescriptor):
         self._incident_energy = IncidentEnergyProp
         self._energy_bins = None
         # how close you are ready to rebin w.r.t.  the incident energy
-        self._range = 0.999999
+        self._range = 0.99999
+
     def __get__(self,instance,owner=None):
         """ binning range for the result of convertToenergy procedure or list of such ranges """
         if instance is None:
            return self
-        if self._incident_energy.multirep_mode: # Relative energy
+        if self._incident_energy.multirep_mode(): # Relative energy
+            ei = self._incident_energy.get_current()
             if self._energy_bins:
-                if self._energy_bins[2] > self._range:
+                if self.is_range_valid():
+                   rez = self._calc_relative_range(ei)
+
+                else:
                    instance.log("*** WARNING! Got energy_bins specified as absolute values in multirep mode.\n"\
                                 "             Will normalize these values by max value and treat as relative values ",
                                 "warning")
-                   mult = self._incident_energy.get_current() * self._range / self._energy_bins[2]
-                   rez = (self._energy_bins[0] * mult ,self._energy_bins[1] * mult,self._energy_bins[2] * mult)
-                else:
-                   mult = self._incident_energy.get_current()
-                   rez = (self._energy_bins[0] * mult ,self._energy_bins[1] * mult,self._energy_bins[2] * mult)
+                   mult = self._range / self._energy_bins[2]
+                   rez = self._calc_relative_range(ei,mult)
                 return rez
+            else:
+               return None
         else: # Absolute energy ranges
-           return self._energy_bins
+           if self.is_range_valid():
+              return self._energy_bins
+           else:
+              instance.log("*** WARNING! Requested maximum binning range exceeds incident energy!\n"\
+                           "             Will normalize binning range by max value and treat as relative range",
+                                "warning")
+              mult = self._range / self._energy_bins[2]
+              ei = self._incident_energy.get_current()
+              return self._calc_relative_range(ei,mult)
 
     def __set__(self,instance,values):
        if values != None:
           if isinstance(values,str):
-             lst = str.split(values,',')
-             nBlocks = len(lst)
-             for i in xrange(0,nBlocks,3):
-                value = (float(lst[i]),float(lst[i + 1]),float(lst[i + 2]))
+             values = values.translate(None, '[]').strip()
+             lst = values.split(',')
+             self.__set__(instance,lst)
+             return
           else:
               value = values
               if len(value) != 3:
                 raise KeyError("Energy_bin value has to be a tuple of 3 elements or string of 3 comma-separated numbers")           
-              if isinstance(value,list):
-                  value = (value[0],value[1],value[2])
+              value = (float(value[0]),float(value[1]),float(value[2]))
           # Let's not support list of multiple absolute energy bins for the
           # time being
           # nBlocks = len(value)
@@ -352,6 +384,20 @@ class EnergyBins(PropDescriptor):
           value = None              
        #TODO: implement single value settings according to rebin?
        self._energy_bins = value
+
+    def is_range_valid(self):
+        """Method verifies if binning range is consistent with incident energy """ 
+        if self._incident_energy.multirep_mode():
+            return (self._energy_bins[2] < self._range)
+        else:
+            return (self._energy_bins[2] < self._incident_energy.get_current())
+
+    def _calc_relative_range(self,ei,range_mult=1):
+        """ """ 
+        mult = range_mult * ei
+        return (self._energy_bins[0] * mult ,self._energy_bins[1] * mult,self._energy_bins[2] * mult)
+
+
 #end EnergyBins
 #-----------------------------------------------------------------------------------------
 class SaveFileName(PropDescriptor):

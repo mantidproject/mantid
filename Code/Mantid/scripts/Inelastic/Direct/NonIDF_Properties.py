@@ -64,7 +64,7 @@ class NonIDF_Properties(object):
     #-----------------------------------------------------------------------------
     incident_energy = IncidentEnergy()
     #
-    energy_bins = EnergyBins(IncidentEnergyProp)
+    energy_bins = EnergyBins(incident_energy)
     #
     save_file_name = SaveFileName()
     #
