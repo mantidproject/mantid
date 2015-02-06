@@ -62,7 +62,7 @@ void testInit(){
     TS_ASSERT_THROWS_NOTHING( pAlg->initialize() )
     TS_ASSERT( pAlg->isInitialized() )
 
-    TSM_ASSERT_EQUALS("algorithm should have 21 properties",21,(size_t)(pAlg->getProperties().size()));
+    TSM_ASSERT_EQUALS("algorithm should have 22 properties",22,(size_t)(pAlg->getProperties().size()));
 }
 
 
