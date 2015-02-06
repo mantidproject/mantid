@@ -149,7 +149,11 @@ class RunDescriptor(PropDescriptor):
     def is_monws_separate(self):
         """ """
         mon_ws = self.get_monitors_ws()
-        name = mon_ws.name()
+        if mon_ws:
+            name = mon_ws.name()
+        else:
+            return False
+
         if name.endswith('_monitors'):
             return True
         else:

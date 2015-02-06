@@ -651,7 +651,7 @@ class DirectEnergyConversion(object):
             range_min = float(range[0])
             range_max = float(range[1])
         else:
-            kwargs['MonitorSpectrum'] = int(mon_spect) # shame TODO: change algorithm
+            kwargs['MonitorSpectrum'] = int(mon_spect) # shame TODO: change c++ algorithm, which need float monitor ID
             range_min = float(range[0] + range_offset)
             range_max = float(range[1] + range_offset)
 
