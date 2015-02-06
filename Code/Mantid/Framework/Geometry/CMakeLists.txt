@@ -132,6 +132,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/PointGroup.h
 	inc/MantidGeometry/Crystal/PointGroupFactory.h
 	inc/MantidGeometry/Crystal/ProductOfCyclicGroups.h
+	inc/MantidGeometry/Crystal/Projection.h
 	inc/MantidGeometry/Crystal/ReducedCell.h
 	inc/MantidGeometry/Crystal/ReflectionCondition.h
 	inc/MantidGeometry/Crystal/ScalarUtils.h
