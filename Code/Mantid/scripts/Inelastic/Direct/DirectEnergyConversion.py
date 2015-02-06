@@ -383,20 +383,55 @@ class DirectEnergyConversion(object):
  
       # estimate and report the number of failing detectors
       failed_sp_list,nMaskedSpectra = get_failed_spectra_list_from_masks(masking)
-      nSpectra = masking.getNumberHistograms()
+      if masking:
+         nSpectra = masking.getNumberHistograms()
+      else:
+         nSpectra=0
       prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice')
 
+#--------------------------------------------------------------------------------------------------
+#  now reduction
+#--------------------------------------------------------------------------------------------------
       # SNS or GUI motor stuff
       self.calculate_rotation(PropertyManager.sample_run.get_workspace())
+      #
+      calculate_abs_units = (self.monovan_run != None and self.mono_correction_factor == None)
+
+      if PropertyManager.incident_energy.multirep_mode():
+         self._multirep_mode = True
+         ws_base = None
+         mono_ws_base = None
+         num_ei_cuts = len(self.incident_energy)
+         if self.check_background:
+            # find the count rate seen in the regions of the histograms
+            # defined as the background regions, if the user defined such
+            # region
+            ws_base = PropertyManager.sample_run.get_workspace()
+            bkgd_range = self.bkgd_range
+            bkgr_ws=self._find_or_build_bkgr_ws(ws_base,bkgd_range[0],bkgd_range[1])
+      else:
+         self._multirep_mode = False
+         num_ei_cuts   = 0
  
+      cut_ind = 0
       for ei_guess in PropertyManager.incident_energy:
+         cut_ind +=1
+         #---------------
+         if self._multirep_mode:
+            tof_range = self.find_tof_range_for_multirep(ws_base)
+            ws_base= PropertyManager.sample_run.chop_ws_part(ws_base,tof_range,self._do_early_rebinning,cut_ind,num_ei_cuts)
+         #---------------
+
          #Run the conversion first on the sample
          deltaE_wkspace_sample = self.mono_sample(PropertyManager.sample_run,ei_guess,PropertyManager.wb_run,
-                                               self.map_file,masking)
+                                                  self.map_file,masking)
  
          # calculate absolute units integral and apply it to the workspace
          if self.monovan_run != None or self.mono_correction_factor != None :
-            deltaE_wkspace_sample = self.apply_absolute_normalization(deltaE_wkspace_sample,PropertyManager.monovan_run,\
+            if self._multirep_mode and calculate_abs_units:
+               mono_ws_base= PropertyManager.monovan_run.chop_ws_part(mono_ws_base,tof_range,self._do_early_rebinning,
+                                                                      cut_ind,num_ei_cuts)
+            deltaE_wkspace_sample = self.apply_absolute_normalization(deltaE_wkspace_sample,PropertyManager.monovan_run,
                                                                       ei_guess,PropertyManager.wb_for_monovan_run)
          # ensure that the sample_run name is intact with workspace
          PropertyManager.sample_run.synchronize_ws(deltaE_wkspace_sample)
@@ -408,9 +443,8 @@ class DirectEnergyConversion(object):
 
 
 
-
       results_name = deltaE_wkspace_sample.name()
-      if out_ws_name and results_name != out_ws_name:
+      if out_ws_name and results_name != out_ws_name and not(self._multirep_mode):
          RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
 
       end_time = time.time()
@@ -725,6 +759,9 @@ class DirectEnergyConversion(object):
         """ Find range of tof-s (and time bin size) corresponding to the 
             energy range requested
         """ 
+        if not workspace:
+           workspace = self.sample_run.get_workspace()
+
         spectra_id = self.prop_man.multirep_tof_specta_list
         if not spectra_id:
             x = workspace.readX(0)

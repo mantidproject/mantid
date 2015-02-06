@@ -76,10 +76,7 @@ class RunDescriptor(PropDescriptor):
                # TODO: not implemented
 
            #else:
-                self._run_number = value.getRunNumber()
-                ws_name = value.name()
-                self._split_ws_name(ws_name)
-                self.synchronize_ws(value)
+                self._set_source_ws(value)
                 self._clear_old_ws(old_ws_name,self._ws_name,clear_fext)
                 self._bind_to_sum = False
                 RunDescriptor._PropMan.sum_runs.clear_sum()
@@ -296,6 +293,34 @@ class RunDescriptor(PropDescriptor):
             CloneWorkspace(InputWorkspace=mon_ws_name,OutputWorkspace=cl_mon_name)
 
         return mtd[clone_name]
+#--------------------------------------------------------------------------------------------------------------------
+    def _set_ws_as_source(value):
+        """ assign all parts of the run if input value is workspace """
+        self._run_number = value.getRunNumber()
+        ws_name = value.name()
+        self._split_ws_name(ws_name)
+        self.synchronize_ws(value)
+
+#--------------------------------------------------------------------------------------------------------------------
+    def chop_ws_part(self,origin,tof_range,rebin,chunk_num,n_chunks):
+        """ chop part of the original workspace and sets it up as new original. 
+            Return the old one""" 
+        if not(origin):
+           origin = self.get_workspace()
+        origin_name = origin.name()
+        if chunk_num == n_chungs:
+           target_name = origin_name
+        else:
+           target_name = '#{0}/{1}_'.format(chunk_num,n_chunks)+origin_name
+
+        if rebin: # debug and compatibility mode with old reduction
+           Rebin(origin_name,OutputWorkspace=target_name,Params=[tof_range[0],tof_range[1],tof_range[2]],PreserveEvents=False)
+        else:
+           CropWorkspace(origin,OutputWorkspace=target_name,XMin=tof_range[0],XMax=tof_range[2])
+
+        self._set_ws_as_source(mtd[target_name])
+        return mtd[origin_name]
+
 #--------------------------------------------------------------------------------------------------------------------
     def get_monitors_ws(self,monitor_ID=None):
         """ get pointer to a workspace containing monitors. 
@@ -581,6 +606,7 @@ class RunDescriptor(PropDescriptor):
 
         else:
             self._ws_cname = name
+    #
     def _instr_name(self):
        if RunDescriptor._holder:
             instr_name = RunDescriptor._holder.short_inst_name

@@ -1,5 +1,5 @@
 import os, sys
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -291,8 +291,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
     def test_tof_range(self):
 
-
-
         run=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=6, BankPixelWidth=1, NumEvents=10, XUnit='DeltaE',
                                                      XMin=-20, XMax=65, BinWidth=0.2)
         LoadInstrument(run,InstrumentName='MARI')
@@ -325,6 +323,27 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertAlmostEqual(tof_range[0],tof_range1[0])
         self.assertAlmostEqual(tof_range[1],tof_range1[1])
         self.assertAlmostEqual(tof_range[2],tof_range1[2])
+
+    def test_multirep_mode(self):
+        # create test workspace
+        run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, NumEvents=100000, XUnit='Energy',
+                                                     XMin=3, XMax=200, BinWidth=0.1)
+        LoadInstrument(run_monitors,InstrumentName='MARI')
+        ConvertUnits(InputWorkspace='run_monitors', OutputWorkspace='run_monitors', Target='TOF')
+        run_monitors = mtd['run_monitors']
+        tof = run_monitors.dataX(3)
+        tMin = tof[0]
+        tMax = tof[-1]
+        run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1, NumEvents=100000,
+                                    XUnit='TOF',xMin=tMin,xMax=tMax)
+        LoadInstrument(run,InstrumentName='MARI')
+        wb_ws   = Rebin(run,Params=[tMin,1,tMax],PreserveEvents=False)
+
+        # Run multirep
+        tReducer = DirectEnergyConversion(run.getInstrument())
+        tReducer.prop_man.run_diagnostics=False
+
+        result = tReducer.convert_to_energy(wb_ws,run,[67.,122.],[-2,0.02,0.8])
 
 
 
