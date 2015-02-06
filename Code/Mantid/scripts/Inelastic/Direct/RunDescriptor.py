@@ -76,7 +76,7 @@ class RunDescriptor(PropDescriptor):
                # TODO: not implemented
 
            #else:
-                self._set_source_ws(value)
+                self._set_ws_as_source(value)
                 self._clear_old_ws(old_ws_name,self._ws_name,clear_fext)
                 self._bind_to_sum = False
                 RunDescriptor._PropMan.sum_runs.clear_sum()
@@ -294,7 +294,7 @@ class RunDescriptor(PropDescriptor):
 
         return mtd[clone_name]
 #--------------------------------------------------------------------------------------------------------------------
-    def _set_ws_as_source(value):
+    def _set_ws_as_source(self,value):
         """ assign all parts of the run if input value is workspace """
         self._run_number = value.getRunNumber()
         ws_name = value.name()
