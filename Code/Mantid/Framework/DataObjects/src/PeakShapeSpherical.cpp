@@ -56,8 +56,8 @@ PeakShapeSpherical::~PeakShapeSpherical() {}
  */
 PeakShapeSpherical::PeakShapeSpherical(const PeakShapeSpherical &other)
     : PeakShapeBase(other), m_radius(other.radius()),
-      m_backgroundOuterRadius(other.backgroundOuterRadius()),
-      m_backgroundInnerRadius(other.backgroundInnerRadius()) {}
+      m_backgroundInnerRadius(other.backgroundInnerRadius()),
+      m_backgroundOuterRadius(other.backgroundOuterRadius()){}
 
 /**
  * @brief Assignment operator
