@@ -64,7 +64,18 @@ def main(sysarg):
 
     # Run
     import sphinx
-    sys.exit(sphinx.main(argv))
+    # IPython monkey patches the RegexLexer.get_tokens_unprocessed method and
+    # causes Sphinx to fall over. We need to put it back while processing
+    # the documentation
+    from pygments.lexer import RegexLexer
+    # Reverse monkeypatch using unpatched function stored in mantid_ipython_widget!
+    RegexLexer.get_tokens_unprocessed = RegexLexer.get_tokens_unprocessed_unpatched
+    try:
+        return_value = sphinx.main(argv)
+    finally:
+        from IPython.qt.console import pygments_highlighter
+        RegexLexer.get_tokens_unprocessed = pygments_highlighter.get_tokens_unprocessed
+    sys.exit(return_value)
 
 #-----------------------------------------------------------------------------------------------
 
