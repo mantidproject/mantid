@@ -18,7 +18,7 @@ class VesuvioResolution(PythonAlgorithm):
                                                direction=Direction.Input),
                              doc='Sample workspace')
 
-        self.declareProperty(name='SpectraIndex', defaultValue=0,
+        self.declareProperty(name='SpectrumIndex', defaultValue=0,
                              doc='Spectra index to use for resolution')
 
         self.declareProperty(name='Mass', defaultValue=100.0,
@@ -44,6 +44,12 @@ class VesuvioResolution(PythonAlgorithm):
 
         issues = dict()
 
+        sample_ws = self.getProperty('Workspace').value
+        spectrum_index = self.getProperty('SpectrumIndex').value
+
+        if spectrum_index > sample_ws.getNumberHistograms() - 1:
+            issues['SpectrumIndex'] = 'Spectrum index is out of range'
+
         out_ws_tof = self.getPropertyValue('OutputWorkspaceTOF')
         out_ws_ysp = self.getPropertyValue('OutputWorkspaceYSpace')
 
@@ -62,7 +68,7 @@ class VesuvioResolution(PythonAlgorithm):
         sample_ws = self.getProperty('Workspace').value
         out_ws_tof = self.getPropertyValue('OutputWorkspaceTOF')
         out_ws_ysp = self.getPropertyValue('OutputWorkspaceYSpace')
-        self._spectrum_index = self.getProperty('SpectraIndex').value
+        self._spectrum_index = self.getProperty('SpectrumIndex').value
         self._mass = self.getProperty('Mass').value
 
         output_tof = (out_ws_tof != '')
@@ -82,7 +88,6 @@ class VesuvioResolution(PythonAlgorithm):
             y_space_conv.setProperty('Mass', self._mass)
             y_space_conv.execute()
 
-            # TODO: Should not need this to be in ADS
             res_ysp = self._calculate_resolution(mtd['__yspace_sample'], out_ws_ysp)
             self.setProperty('OutputWorkspaceYSpace', res_ysp)
             DeleteWorkspace('__yspace_sample')
