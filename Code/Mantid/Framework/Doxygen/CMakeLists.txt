@@ -49,6 +49,8 @@ if(DOXYGEN_FOUND)
                      ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Mantid.doxyfile
 		     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 		     COMMENT "Generating API documentation with Doxygen" VERBATIM
-		     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Mantid.doxyfile ${CMAKE_CURRENT_BINARY_DIR}/../../doxygen/html/Mantid_Logo_Transparent.png
+         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Mantid.doxyfile
+                 ${CMAKE_CURRENT_BINARY_DIR}/../../doxygen/html/Mantid_Logo_Transparent.png
+                 ${CMAKE_CURRENT_SOURCE_DIR}/doxy_header.html
 		   )
 endif(DOXYGEN_FOUND)
