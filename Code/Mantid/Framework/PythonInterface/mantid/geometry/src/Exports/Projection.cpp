@@ -22,8 +22,17 @@ void export_Projection()
     .def("setOffset", &Projection::setOffset, "Sets the offset for the given dimension", args("dimension", "offset"))
     .def("setAxis", &Projection::setAxis, "Sets the axis for the given dimension", args("dimension", "axis"))
     .def("setUnit", &Projection::setUnit, "Sets the unit for the given dimension", args("dimension", "unit"))
-    .def("U", &Projection::U, "Returns a reference to the U axis", return_internal_reference<>())
-    .def("V", &Projection::V, "Returns a reference to the V axis", return_internal_reference<>())
-    .def("W", &Projection::W, "Returns a reference to the W axis", return_internal_reference<>())
+    .add_property("u",
+        make_function(&Projection::U, return_internal_reference<>(), boost::mpl::vector2<VMD&, Projection&>()),
+        make_function(boost::bind(&Projection::setAxis, _1, 0, _2), default_call_policies(), boost::mpl::vector3<void, Projection&, VMD>())
+    )
+    .add_property("v",
+        make_function(&Projection::V, return_internal_reference<>(), boost::mpl::vector2<VMD&, Projection&>()),
+        make_function(boost::bind(&Projection::setAxis, _1, 1, _2), default_call_policies(), boost::mpl::vector3<void, Projection&, VMD>())
+    )
+    .add_property("w",
+        make_function(&Projection::W, return_internal_reference<>(), boost::mpl::vector2<VMD&, Projection&>()),
+        make_function(boost::bind(&Projection::setAxis, _1, 2, _2), default_call_policies(), boost::mpl::vector3<void, Projection&, VMD>())
+    )
     ;
 }
