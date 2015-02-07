@@ -409,6 +409,7 @@ class DirectEnergyConversion(object):
             ws_base = PropertyManager.sample_run.get_workspace()
             bkgd_range = self.bkgd_range
             bkgr_ws=self._find_or_build_bkgr_ws(ws_base,bkgd_range[0],bkgd_range[1])
+         result = []
       else:
          self._multirep_mode = False
          num_ei_cuts   = 0
@@ -440,12 +441,21 @@ class DirectEnergyConversion(object):
          prop_man.log("*** Incident energy found for sample run: {0} meV".format(ei),'notice')
          #
          self.save_results(deltaE_wkspace_sample)
+         if out_ws_name: 
+            if self._multirep_mode: 
+               result.append(deltaE_wkspace_sample)
+         else: # delete workspace if no output is requested
+            self.sample_run=None
 
 
 
       results_name = deltaE_wkspace_sample.name()
-      if out_ws_name and results_name != out_ws_name and not(self._multirep_mode):
-         RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
+      if out_ws_name and not(self._multirep_mode):
+         if results_name != out_ws_name:
+             RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
+         result = mtd[out_ws_name]
+      else:
+        pass
 
       end_time = time.time()
       prop_man.log("*** Elapsed time = {0} sec".format(end_time - start_time),'notice')
@@ -459,13 +469,13 @@ class DirectEnergyConversion(object):
       # Currently clear masks unconditionally TODO: cash masks with appropriate
       # precautions
       self.spectra_masks = None
-      self.prop_man.sample_run = None # clean up memory of the sample run
+      self.prop_man.wb_run = None # clean up memory of the sample run
 
       if self._multirep_mode and ('bkgr_ws' in mtd):
          DeleteWorkspace(bkgr_ws)
 
 
-      return deltaE_wkspace_sample
+      return result
 
     def do_white(self, run, spectra_masks=None, map_file=None):
         """

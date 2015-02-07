@@ -58,6 +58,10 @@ class NonIDF_Properties(object):
         super(NonIDF_Properties,self).__setattr__('second_white',None)
         super(NonIDF_Properties,self).__setattr__('_tmp_run',None)
 
+        non_rec_prop=['energy_bins']
+        super(NonIDF_Properties,self).__setattr__('_non_recordable_prop',non_rec_prop)
+
+
     #end
     #-----------------------------------------------------------------------------
     # Complex properties with personal descriptors

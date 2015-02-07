@@ -423,14 +423,15 @@ class SaveFileName(PropDescriptor):
             if not sr:
                 sr = 0
             try:
-                name +='{0:0<5}Ei{1:<4.2f}meV'.format(sr,instance.incident_energy)
+                ei = owner.incident_energy.get_current()
+                name +='{0:0<5}Ei{1:<4.2f}meV'.format(sr,ei)
                 if instance.sum_runs:
                     name +='sum'
                 if owner.monovan_run.run_number():
                     name +='_Abs'
+                name = name.replace('.','d')
             except:
                 name = None
-        name = name.replace('.','d')
         return name
 
     def __set__(self,instance,value):

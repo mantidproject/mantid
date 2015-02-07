@@ -177,7 +177,8 @@ class PropertyManager(NonIDF_Properties):
            other_prop=prop_helpers.gen_setter(self.__dict__,name,val)
 
         # record the fact that the property have changed
-        self.__changed_properties.add(name)
+        if not(name in self._non_recordable_prop):
+            self.__changed_properties.add(name)
 
    # ----------------------------
     def __getattr__(self,name):

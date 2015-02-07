@@ -342,8 +342,13 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # Run multirep
         tReducer = DirectEnergyConversion(run.getInstrument())
         tReducer.prop_man.run_diagnostics=False
+        tReducer.hard_mask_file=None
+        tReducer.map_file=None
+        tReducer.save_format=None
 
-      #  result = tReducer.convert_to_energy(wb_ws,run,[67.,122.],[-2,0.02,0.8])
+        result = tReducer.convert_to_energy(wb_ws,run,[67.,122.],[-2,0.02,0.8])
+
+        self.assertEqual(len(result),2)
 
 
 
