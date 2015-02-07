@@ -1252,6 +1252,7 @@ class DirectEnergyConversion(object):
                                         WorkspaceIndexList= '',Mode= 'Mean',SkipMonitors='1')
         else:
             bkgr_ws = None
+            result_ws = data_run.get_workspace()
         data_run.synchronize_ws(result_ws)
 
 
