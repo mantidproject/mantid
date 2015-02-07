@@ -388,9 +388,9 @@ class EnergyBins(PropDescriptor):
     def is_range_valid(self):
         """Method verifies if binning range is consistent with incident energy """ 
         if self._incident_energy.multirep_mode():
-            return (self._energy_bins[2] < self._range)
+            return (self._energy_bins[2] <= self._range)
         else:
-            return (self._energy_bins[2] < self._incident_energy.get_current())
+            return (self._energy_bins[2] <= self._incident_energy.get_current())
 
     def _calc_relative_range(self,ei,range_mult=1):
         """ """ 
