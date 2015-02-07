@@ -3,6 +3,7 @@
 
 from mantid.simpleapi import *
 from PropertiesDescriptors import *
+import re
 
 
 class RunDescriptor(PropDescriptor):
@@ -42,9 +43,9 @@ class RunDescriptor(PropDescriptor):
        """ return current run number or workspace if it is loaded""" 
        if not RunDescriptor._PropMan:
           RunDescriptor._PropMan = owner
-
        if instance is None:
            return self
+
        if self._ws_name and self._ws_name in mtd:
            return mtd[self._ws_name]
        else:
@@ -284,7 +285,7 @@ class RunDescriptor(PropDescriptor):
               return None
 #--------------------------------------------------------------------------------------------------------------------
     def get_ws_clone(self,clone_name='ws_clone'):
-        """ Get unbounded clone of existing Run workspace """
+        """ Get unbounded clone of eisting Run workspace """
         ws = self.get_workspace()
         CloneWorkspace(InputWorkspace=ws,OutputWorkspace=clone_name)
         mon_ws_name = self.get_ws_name() + '_monitors'
@@ -304,22 +305,35 @@ class RunDescriptor(PropDescriptor):
 #--------------------------------------------------------------------------------------------------------------------
     def chop_ws_part(self,origin,tof_range,rebin,chunk_num,n_chunks):
         """ chop part of the original workspace and sets it up as new original. 
-            Return the old one""" 
+            Return the old one """ 
         if not(origin):
            origin = self.get_workspace()
+
         origin_name = origin.name()
-        if chunk_num == n_chungs:
-           target_name = origin_name
+        target_name = '#{0}/{1}#'.format(chunk_num,n_chunks)+origin_name
+        if chunk_num == n_chunks:
+           RenameWorkspace(InputWorkspace=origin_name,OutputWorkspace=target_name)
+           if self.is_monws_separate():
+              mon_ws=self.get_monitors_ws()
+              RenameWorkspace(InputWorkspace=mon_ws,OutputWorkspace=target_name+'_monitors')
+           origin_name = target_name
+           origin_invalidated=True
         else:
-           target_name = '#{0}/{1}_'.format(chunk_num,n_chunks)+origin_name
+           if self.is_monws_separate():
+              mon_ws=self.get_monitors_ws()
+              CloneWorkspace(InputWorkspace=mon_ws,OutputWorkspace=target_name+'_monitors')
+           origin_invalidated=False
 
         if rebin: # debug and compatibility mode with old reduction
            Rebin(origin_name,OutputWorkspace=target_name,Params=[tof_range[0],tof_range[1],tof_range[2]],PreserveEvents=False)
         else:
-           CropWorkspace(origin,OutputWorkspace=target_name,XMin=tof_range[0],XMax=tof_range[2])
+           CropWorkspace(origin_name,OutputWorkspace=target_name,XMin=tof_range[0],XMax=tof_range[2])
 
         self._set_ws_as_source(mtd[target_name])
-        return mtd[origin_name]
+        if origin_invalidated:
+            return self.get_workspace()
+        else:
+            return origin
 
 #--------------------------------------------------------------------------------------------------------------------
     def get_monitors_ws(self,monitor_ID=None):
@@ -599,13 +613,20 @@ class RunDescriptor(PropDescriptor):
             name = self.rremove(ws_name,sumExt)
         # remove _prop_name:
         name = name.replace(self._prop_name,'',1)
+
+        try:
+           part_ind = re.search('#(.+?)#', name).group(0)
+           name     =name.replace(part_ind,'',1)
+        except AttributeError:
+           part_ind=''
+
         if self._run_number:
             instr_name = self._instr_name()
             name = name.replace(instr_name,'',1)
-            self._ws_cname = filter(lambda c: not c.isdigit(), name)
+            self._ws_cname = part_ind+filter(lambda c: not c.isdigit(), name)
 
         else:
-            self._ws_cname = name
+            self._ws_cname = part_ind+name
     #
     def _instr_name(self):
        if RunDescriptor._holder:
