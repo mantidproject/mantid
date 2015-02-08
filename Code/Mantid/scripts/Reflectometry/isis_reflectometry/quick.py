@@ -189,10 +189,9 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
             sample2detector=detLocation-sampleLocation    # metres
             source=inst.getSource()
             beamPos = sampleLocation - source.getPos()
-            PI = 3.1415926535
             theta = groupGet(str(_sample_ws),'samp','theta')
             if not theta:
-                theta = inst.getComponentByName(detector_component_name).getTwoTheta(sampleLocation, beamPos)*180.0/PI/2.0
+                theta = inst.getComponentByName(detector_component_name).getTwoTheta(sampleLocation, beamPos)*180.0/math.pi/2.0
             print "Det location: ", detLocation, "Calculated theta = ",theta
             if correct_positions:  # detector is not in correct place
                 # Get detector angle theta from NeXuS

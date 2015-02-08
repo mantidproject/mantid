@@ -34,7 +34,7 @@ def CalcW0(nq,dq,disp,coeff):
     return Q,w0,e0
 
 def CalcSqw(q0,nw2,nel,dw,w0):
-    PKHT=1.0/3.14159265
+    PKHT=1.0/math.pi
     xSqw = []
     ySqw = []
     eSqw = []

@@ -48,7 +48,7 @@ class NonIDF_Properties(object):
         # set up descriptors holder class reference
         RunDescriptor._holder = self
         RunDescriptor._logger = self.log
-        # Initiate class-level properties to defaults 
+        # Initiate class-level properties to defaults (Each constructor clears class-level properties?)
         super(NonIDF_Properties,self).__setattr__('sample_run',None)
         super(NonIDF_Properties,self).__setattr__('wb_run',None)
         super(NonIDF_Properties,self).__setattr__('monovan_run',None)
@@ -85,6 +85,8 @@ class NonIDF_Properties(object):
     second_white  = RunDescriptor("Second white beam currently unused in the  workflow despite being referred to in Diagnostics. Should it be used for Monovan Diagnostics?") 
     # 
     _tmp_run     = RunDescriptor("_TMP","Property used for storing intermediate run data during reduction")
+    # property responsible for summing runs
+    sum_runs = SumRuns(sample_run)
     #-----------------------------------------------------------------------------------
     def getDefaultParameterValue(self,par_name):
         """ method to get default parameter value, specified in IDF """
