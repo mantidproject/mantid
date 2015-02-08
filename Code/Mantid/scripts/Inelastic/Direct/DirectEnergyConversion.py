@@ -406,9 +406,11 @@ class DirectEnergyConversion(object):
             # find the count rate seen in the regions of the histograms
             # defined as the background regions, if the user defined such
             # region
-            ws_base = PropertyManager.sample_run.get_workspace()
-            bkgd_range = self.bkgd_range
-            bkgr_ws=self._find_or_build_bkgr_ws(ws_base,bkgd_range[0],bkgd_range[1])
+            #TODO: 999 Due to workspace/instrument shift this is not yet implemented (should it?)
+            #ws_base = PropertyManager.sample_run.get_workspace()
+            #bkgd_range = self.bkgd_range
+            #bkgr_ws=self._find_or_build_bkgr_ws(ws_base,bkgd_range[0],bkgd_range[1])
+            pass
          result = []
       else:
          self._multirep_mode = False
@@ -438,6 +440,8 @@ class DirectEnergyConversion(object):
          PropertyManager.sample_run.synchronize_ws(deltaE_wkspace_sample)
          # 
          ei = (deltaE_wkspace_sample.getRun().getLogData("Ei").value)
+         PropertyManager.incident_energy.set_current(ei)
+
          prop_man.log("*** Incident energy found for sample run: {0} meV".format(ei),'notice')
          #
          self.save_results(deltaE_wkspace_sample)
@@ -569,7 +573,7 @@ class DirectEnergyConversion(object):
                   Monitor2Spec=int(ei_mon_spectra[1]),
                   EnergyEstimate=ei_guess,FixEi=fix_ei)
         # modify current energy estimate and store it in properties for the future
-        PropertyManager.incident_energy.set_current(ei)
+        #PropertyManager.incident_energy.set_current(ei)
 
         # Store found incident energy in the class itself
         if self.prop_man.normalise_method == 'monitor-2' and not separate_monitors:
@@ -770,7 +774,7 @@ class DirectEnergyConversion(object):
             energy range requested
         """ 
         if not workspace:
-           workspace = self.sample_run.get_workspace()
+           workspace = PropertyManager.sample_run.get_workspace()
 
         spectra_id = self.prop_man.multirep_tof_specta_list
         if not spectra_id:
@@ -1236,7 +1240,6 @@ class DirectEnergyConversion(object):
 
         # Do ISIS stuff for Ei
         ei_value, mon1_peak = self.get_ei(data_run, ei_guess)
-        PropertyManager.incident_energy.set_current(ei_value)
 
 
 
@@ -1254,7 +1257,7 @@ class DirectEnergyConversion(object):
             bkg_range_min = bkgd_range[0]+bin_offset
             bkg_range_max = bkgd_range[1]+bin_offset
             if isinstance(result_ws,api.IEventWorkspace):
-                bkgr_ws=self._find_or_build_bkgr_ws(result_ws,bkg_range_min,bkg_range_max)
+                bkgr_ws=self._find_or_build_bkgr_ws(result_ws,bkg_range_min,bkg_range_max,bin_offset)
             else:
                 bkgr_ws = None
                 CalculateFlatBackground(InputWorkspace=result_ws,OutputWorkspace=result_ws,
@@ -1284,7 +1287,8 @@ class DirectEnergyConversion(object):
               monitors_ws = data_run.get_monitors_ws()
               bkgr_ws = self.normalise(bkgr_ws, self.normalise_method, bin_offset,monitors_ws)
               RemoveBackground(InputWorkspace=result_name,OutputWorkspace=result_name,BkgWorkspace=bkgr_ws,EMode='Direct')
-              if not self._multirep_mode:
+              #TODO: 999 if background is cashed, deletion should be conditional
+              if not self._multirep_mode and False:
                  DeleteWorkspace(bkgr_ws)
         else:
             pass # TODO: investigate way of removing background from event workspace if we want result to be an event workspace
@@ -1298,17 +1302,20 @@ class DirectEnergyConversion(object):
 
         return 
 #-------------------------------------------------------------------------------
-    def _find_or_build_bkgr_ws(self,result_ws,bkg_range_min=None,bkg_range_max=None):
+    def _find_or_build_bkgr_ws(self,result_ws,bkg_range_min=None,bkg_range_max=None,time_shift=0):
         """ Method calculates  background workspace or restore workspace with 
             the same name as the one produced by this method from ADS
         """ 
         if not bkg_range_min or not bkg_range_max:
             bkg_range_min,bkg_range_max = self.bkgd_range
 
-        if 'bkgr_ws' in mtd: # has to have specific name for this all working
-             bkgr_ws = mtd['bkgr_ws']
-        else:
-             bkgr_ws = Rebin(result_ws,Params=[bkg_range_min,(bkg_range_max-bkg_range_min)*1.001,bkg_range_max],PreserveEvents=False)
+        ##TODO: 999 Due to the time shift and the instrument moving, cashed br ws is not yet implemented
+        #if 'bkgr_ws' in mtd: # has to have specific name for this all working
+        #     bkgr_ws = mtd['bkgr_ws']
+        #else:
+        #     bkgr_ws = Rebin(result_ws,Params=[bkg_range_min,(bkg_range_max-bkg_range_min)*1.001,bkg_range_max],PreserveEvents=False)
+        bkgr_ws = Rebin(result_ws,Params=[bkg_range_min,(bkg_range_max-bkg_range_min)*1.001,bkg_range_max],PreserveEvents=False)
+
 
         return bkgr_ws
 #-------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 import os, sys
-os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -349,6 +349,21 @@ class DirectEnergyConversionTest(unittest.TestCase):
         result = tReducer.convert_to_energy(wb_ws,run,[67.,122.],[-2,0.02,0.8])
 
         self.assertEqual(len(result),2)
+
+        ws1=result[0]
+        self.assertEqual(ws1.getAxis(0).getUnit().unitID(),'DeltaE')
+        x = ws1.readX(0)
+        self.assertAlmostEqual(x[0],-2*67.)
+        self.assertAlmostEqual(x[-1],0.8*67.)
+
+        ws2=result[1]
+        self.assertEqual(ws2.getAxis(0).getUnit().unitID(),'DeltaE')
+        x = ws2.readX(0)
+        self.assertAlmostEqual(x[0],-2*122.)
+        self.assertAlmostEqual(x[-1],0.8*122.)
+
+
+
 
 
 
