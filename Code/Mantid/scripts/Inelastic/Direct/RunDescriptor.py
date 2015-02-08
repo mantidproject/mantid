@@ -299,6 +299,7 @@ class RunDescriptor(PropDescriptor):
         """ assign all parts of the run if input value is workspace """
         self._run_number = value.getRunNumber()
         ws_name = value.name()
+        self._ws_suffix=''
         self._split_ws_name(ws_name)
         self.synchronize_ws(value)
 

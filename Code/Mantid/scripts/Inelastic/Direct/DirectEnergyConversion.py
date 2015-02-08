@@ -473,7 +473,7 @@ class DirectEnergyConversion(object):
       # Currently clear masks unconditionally TODO: cash masks with appropriate
       # precautions
       self.spectra_masks = None
-      self.prop_man.wb_run = None # clean up memory of the sample run
+      #self.prop_man.wb_run = None # clean up memory of the wb run (only in case of file based wb)
 
       if self._multirep_mode and ('bkgr_ws' in mtd):
          DeleteWorkspace(bkgr_ws)

@@ -337,6 +337,11 @@ class DirectEnergyConversionTest(unittest.TestCase):
         run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1, NumEvents=100000,
                                     XUnit='TOF',xMin=tMin,xMax=tMax)
         LoadInstrument(run,InstrumentName='MARI')
+
+        # do second 
+        run2 = CloneWorkspace(run)
+        run2_monitors = CloneWorkspace(run_monitors)
+
         wb_ws   = Rebin(run,Params=[tMin,1,tMax],PreserveEvents=False)
 
         # Run multirep
@@ -361,6 +366,20 @@ class DirectEnergyConversionTest(unittest.TestCase):
         x = ws2.readX(0)
         self.assertAlmostEqual(x[0],-2*122.)
         self.assertAlmostEqual(x[-1],0.8*122.)
+
+        # test another ws
+        # rename samples from previous workspace to avoid deleting them on current run
+        for ind,item in enumerate(result):
+            result[ind]=RenameWorkspace(item,OutputWorkspace='SampleRez#'+str(ind))
+        # 
+        result2 = tReducer.convert_to_energy(None,run2,[67.,122.],[-2,0.02,0.8])
+
+        rez = CheckWorkspacesMatch(result[0],result2[0])
+        self.assertEqual(rez,'Success!')
+        rez = CheckWorkspacesMatch(result[1],result2[1])
+        self.assertEqual(rez,'Success!')
+
+
 
 
 
