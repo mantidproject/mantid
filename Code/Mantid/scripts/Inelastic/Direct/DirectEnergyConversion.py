@@ -780,8 +780,8 @@ class DirectEnergyConversion(object):
             dX = min(abs(x[2:]-x[:-2]))
             return (xMin,dX,xMax)
         else:
-            eMin,dE,eMax = self.prop_man.energy_bins
-            ei      = PropertyManager.incident_energy.get_current()
+            eMin,dE,eMax = PropertyManager.energy_bins.get_abs_range(self.prop_man)
+            ei           = PropertyManager.incident_energy.get_current()
             en_list = [eMin,eMin+dE,eMax-dE,eMax]
             TOF_range = DirectEnergyConversion.get_TOF_for_energies(workspace,en_list,spectra_id,ei)
 
@@ -1277,7 +1277,7 @@ class DirectEnergyConversion(object):
         ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
         self.prop_man.log("_do_mono: finished ConvertUnits for : " + result_name,'information')
 
-        energy_bins = self.energy_bins
+        energy_bins = PropertyManager.energy_bins.get_abs_range(self.prop_man)
         if energy_bins:
            Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= energy_bins,PreserveEvents=False)
            if bkgr_ws: # remove background after converting units and rebinning
@@ -1339,7 +1339,8 @@ class DirectEnergyConversion(object):
 
         # Make sure that our binning is consistent
         if prop_man.energy_bins:
-           Rebin(InputWorkspace=result_name,OutputWorkspace= result_name,Params= prop_man.energy_bins)
+           bins = PropertyManager.energy_bins.get_abs_range(prop_man)
+           Rebin(InputWorkspace=result_name,OutputWorkspace= result_name,Params=bins)
 
         # Masking and grouping
         result_ws = mtd[result_name]

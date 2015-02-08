@@ -496,9 +496,19 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertAlmostEqual(bins[1],3)
         self.assertAlmostEqual(bins[2],10)
 
+        bins = PropertyManager.energy_bins.get_abs_range(propman)
+        self.assertAlmostEqual(bins[0],-30)
+        self.assertAlmostEqual(bins[1],3)
+        self.assertAlmostEqual(bins[2],10)
+
+
         propman.incident_energy =100.01
         propman.energy_bins=[-20,4,100]
         bins = propman.energy_bins
+        self.assertAlmostEqual(bins[0],-20)
+        self.assertAlmostEqual(bins[1],4)
+        self.assertAlmostEqual(bins[2],100)
+        bins = PropertyManager.energy_bins.get_abs_range(propman)
         self.assertAlmostEqual(bins[0],-20)
         self.assertAlmostEqual(bins[1],4)
         self.assertAlmostEqual(bins[2],100)
@@ -507,7 +517,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         propman.incident_energy=10
         self.assertAlmostEqual(propman.incident_energy,10)
-        bins = propman.energy_bins
+        bins = PropertyManager.energy_bins.get_abs_range(propman)
         self.assertAlmostEqual(bins[0],-20*9.9999/100)
         self.assertAlmostEqual(bins[1],4*9.9999/100)
         self.assertAlmostEqual(bins[2],9.9999)
@@ -519,13 +529,19 @@ class DirectPropertyManagerTest(unittest.TestCase):
         for ind,en in enumerate(got_ei):
             self.assertAlmostEqual(en,ei[ind])
         self.assertTrue(PropertyManager.incident_energy.multirep_mode())
-        bins = propman.energy_bins
+        bins = PropertyManager.energy_bins.get_abs_range(propman)
+
         self.assertAlmostEqual(bins[0],-20*20*0.99999/100)
         self.assertAlmostEqual(bins[1],4*20*0.99999/100)
         self.assertAlmostEqual(bins[2],20*0.99999)
 
         propman.energy_bins=[-2,0.1,0.8]
         bins = propman.energy_bins
+        self.assertAlmostEqual(bins[0],-2)
+        self.assertAlmostEqual(bins[1],0.1)
+        self.assertAlmostEqual(bins[2],0.8)
+
+        bins = PropertyManager.energy_bins.get_abs_range(propman)
         self.assertAlmostEqual(bins[0],-20*2)
         self.assertAlmostEqual(bins[1],20*0.1)
         self.assertAlmostEqual(bins[2],20*0.8)
@@ -558,6 +574,12 @@ class DirectPropertyManagerTest(unittest.TestCase):
             self.assertAlmostEqual(bins[1],0.1)
             self.assertAlmostEqual(bins[2],0.8)
 
+            bins = PropertyManager.energy_bins.get_abs_range(propman)
+            self.assertAlmostEqual(bins[0],-2)
+            self.assertAlmostEqual(bins[1],0.1)
+            self.assertAlmostEqual(bins[2],0.8)
+
+
         self.assertEqual(ic,1)
 
         propman.incident_energy=[20]
@@ -568,7 +590,14 @@ class DirectPropertyManagerTest(unittest.TestCase):
         for en in PropertyManager.incident_energy:
             ic+=1
             self.assertAlmostEqual(en,20)
+
             bins = propman.energy_bins
+            self.assertAlmostEqual(bins[0],-2)
+            self.assertAlmostEqual(bins[1],0.1)
+            self.assertAlmostEqual(bins[2],0.8)
+
+            bins = PropertyManager.energy_bins.get_abs_range(propman)
+
             self.assertAlmostEqual(bins[0],-2*20)
             self.assertAlmostEqual(bins[1],0.1*20)
             self.assertAlmostEqual(bins[2],0.8*20)
@@ -582,7 +611,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         ic=0
         for en in PropertyManager.incident_energy:
             self.assertAlmostEqual(en,eng[ic])
-            bins = propman.energy_bins
+            bins = PropertyManager.energy_bins.get_abs_range(propman)
             self.assertAlmostEqual(bins[0],-2*en)
             self.assertAlmostEqual(bins[1],0.1*en)
             self.assertAlmostEqual(bins[2],0.8*en)
@@ -597,7 +626,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
             PropertyManager.incident_energy.set_current(en)
 
-            bins = propman.energy_bins
+            bins = PropertyManager.energy_bins.get_abs_range(propman)
             self.assertAlmostEqual(bins[0],-2*eng[ic])
             self.assertAlmostEqual(bins[1],0.1*eng[ic])
             self.assertAlmostEqual(bins[2],0.8*eng[ic])

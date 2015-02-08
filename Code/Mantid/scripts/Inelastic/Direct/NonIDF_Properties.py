@@ -58,11 +58,18 @@ class NonIDF_Properties(object):
         super(NonIDF_Properties,self).__setattr__('second_white',None)
         super(NonIDF_Properties,self).__setattr__('_tmp_run',None)
 
-        non_rec_prop=['energy_bins']
-        super(NonIDF_Properties,self).__setattr__('_non_recordable_prop',non_rec_prop)
-
 
     #end
+    def log(self, msg,level="notice"):
+        """Send a log message to the location defined
+        """
+        lev,logger = NonIDF_Properties.log_options[level]
+        if self._log_to_mantid:
+            logger(msg)
+        else:
+        # TODO: reconcile this with Mantid.
+           if lev <= self._current_log_level:
+              print msg
     #-----------------------------------------------------------------------------
     # Complex properties with personal descriptors
     #-----------------------------------------------------------------------------
@@ -190,16 +197,6 @@ class NonIDF_Properties(object):
 
  
 
-    def log(self, msg,level="notice"):
-        """Send a log message to the location defined
-        """
-        lev,logger = NonIDF_Properties.log_options[level]
-        if self._log_to_mantid:
-            logger(msg)
-        else:
-        # TODO: reconcile this with Mantid.
-           if lev <= self._current_log_level:
-              print msg
 
 
 

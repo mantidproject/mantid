@@ -335,31 +335,8 @@ class EnergyBins(PropDescriptor):
         """ binning range for the result of convertToenergy procedure or list of such ranges """
         if instance is None:
            return self
-        if self._incident_energy.multirep_mode(): # Relative energy
-            ei = self._incident_energy.get_current()
-            if self._energy_bins:
-                if self.is_range_valid():
-                   rez = self._calc_relative_range(ei)
+        return self._energy_bins
 
-                else:
-                   instance.log("*** WARNING! Got energy_bins specified as absolute values in multirep mode.\n"\
-                                "             Will normalize these values by max value and treat as relative values ",
-                                "warning")
-                   mult = self._range / self._energy_bins[2]
-                   rez = self._calc_relative_range(ei,mult)
-                return rez
-            else:
-               return None
-        else: # Absolute energy ranges
-           if self.is_range_valid():
-              return self._energy_bins
-           else:
-              instance.log("*** WARNING! Requested maximum binning range exceeds incident energy!\n"\
-                           "             Will normalize binning range by max value and treat as relative range",
-                                "warning")
-              mult = self._range / self._energy_bins[2]
-              ei = self._incident_energy.get_current()
-              return self._calc_relative_range(ei,mult)
 
     def __set__(self,instance,values):
        if values != None:
@@ -384,6 +361,37 @@ class EnergyBins(PropDescriptor):
           value = None              
        #TODO: implement single value settings according to rebin?
        self._energy_bins = value
+
+    def get_abs_range(self,instance=None):
+        """ return energies related to incident energies either as 
+            
+        """
+        if self._incident_energy.multirep_mode(): # Relative energy
+            ei = self._incident_energy.get_current()
+            if self._energy_bins:
+                if self.is_range_valid():
+                   rez = self._calc_relative_range(ei)
+                else:
+                   if instance:
+                    instance.log("*** WARNING! Got energy_bins specified as absolute values in multirep mode.\n"\
+                                "             Will normalize these values by max value and treat as relative values ",
+                                "warning")
+                   mult = self._range / self._energy_bins[2]
+                   rez = self._calc_relative_range(ei,mult)
+                return rez
+            else:
+               return None
+        else: # Absolute energy ranges
+           if self.is_range_valid():
+              return self._energy_bins
+           else:
+            if instance:
+             instance.log("*** WARNING! Requested maximum binning range exceeds incident energy!\n"\
+                           "             Will normalize binning range by max value and treat as relative range",
+                                "warning")
+             mult = self._range / self._energy_bins[2]
+             ei = self._incident_energy.get_current()
+             return self._calc_relative_range(ei,mult)
 
     def is_range_valid(self):
         """Method verifies if binning range is consistent with incident energy """ 
