@@ -1,5 +1,5 @@
 from mantid.simpleapi import *
-from mantid import config
+from mantid import config,api
 from mantid.kernel import funcreturns
 
 from PropertyManager import PropertyManager
@@ -126,7 +126,11 @@ class ReductionWrapper(object):
 
         if not build_validation:
            if validationFile:
-              sample = Load(validationFile)
+              if isinstance(validationFile,api.Workspace):
+                 sample = validationFile
+                 validationFile = sample.name()
+              else:
+                 sample = Load(validationFile)
            else:
               build_validation=True
 

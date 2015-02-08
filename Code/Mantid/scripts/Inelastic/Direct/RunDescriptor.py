@@ -313,9 +313,12 @@ class RunDescriptor(PropDescriptor):
         origin_name = origin.name()
         target_name = '#{0}/{1}#'.format(chunk_num,n_chunks)+origin_name
         if chunk_num == n_chunks:
+           try:
+              mon_ws = mtd[origin_name+'_monitors']
+           except:
+              mon_ws = None
            RenameWorkspace(InputWorkspace=origin_name,OutputWorkspace=target_name)
-           if self.is_monws_separate():
-              mon_ws=self.get_monitors_ws()
+           if mon_ws:
               RenameWorkspace(InputWorkspace=mon_ws,OutputWorkspace=target_name+'_monitors')
            origin_name = target_name
            origin_invalidated=True

@@ -733,7 +733,7 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
             prop_helpers.ComplexProperty.__init__(self,['monovan_lo_frac','monovan_hi_frac'])
         pass
 
-    def __get__(self,instance,type=None):
+    def __get__(self,instance,owner):
 
         if instance is None:
            return self
@@ -742,19 +742,14 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
                 ei = 1
                 tDict = instance
         else:
-                ei = instance.incident_energy
+                ei = owner.incident_energy.get_current()
                 tDict = instance.__dict__
 
         if self._rel_range: # relative range
             if ei is None:
                 raise AttributeError('Attempted to obtain relative to ei monovan integration range, but incident energy has not been set')
             rel_range = prop_helpers.ComplexProperty.__get__(self,tDict)
-            if isinstance(ei,list):
-                range = dict()
-                for en in ei:
-                    range[en] = [rel_range[0] * en,rel_range[1] * en]
-            else:
-                range = [rel_range[0] * ei,rel_range[1] * ei]
+            range = [rel_range[0] * ei,rel_range[1] * ei]
             return range
         else: # absolute range
             return prop_helpers.ComplexProperty.__get__(self,tDict)
