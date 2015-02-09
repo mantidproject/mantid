@@ -15,6 +15,7 @@
 #include "MantidMDEvents/UnitsConversionHelper.h"
 #include "MantidMDEvents/Integrate3DEvents.h"
 #include "MantidMDEvents/IntegrateEllipsoids.h"
+#include "MantidKernel/Statistics.h"
 
 
 using namespace Mantid::API;
@@ -110,6 +111,15 @@ void IntegrateEllipsoids::init() {
                                             Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' integrated intensities.");
+
+  declareProperty("CutoffIsigI", EMPTY_DBL() , mustBePositive,
+                  "Cuttoff for I/sig(i) when finding mean of half-length of "
+                  "major radius in first pass when SpecifySize is false."
+                   "Default is no second pass.");
+
+  declareProperty("NumSigmas", 3,
+                  "Number of sigmas to add to mean of half-length of "
+                  "major radius for second pass when SpecifySize is false.");
 }
 
 //---------------------------------------------------------------------
@@ -136,6 +146,8 @@ void IntegrateEllipsoids::exec() {
     peak_ws = in_peak_ws->clone();
   }
   double radius = getProperty("RegionRadius");
+  int numSigmas = getProperty("NumSigmas");
+  double cutoffIsigI = getProperty("CutoffIsigI");
   bool specify_size = getProperty("SpecifySize");
   double peak_radius = getProperty("PeakSize");
   double back_inner_radius = getProperty("BackgroundInnerSize");
@@ -256,6 +268,7 @@ void IntegrateEllipsoids::exec() {
 
   double inti;
   double sigi;
+  std::vector<double> r1,r2,r3;
   for (size_t i = 0; i < n_peaks; i++) {
     V3D hkl(peaks[i].getH(), peaks[i].getK(), peaks[i].getL());
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
@@ -268,6 +281,12 @@ void IntegrateEllipsoids::exec() {
       peaks[i].setSigmaIntensity(sigi);
       peaks[i].setPeakShape(shape);
       if (axes_radii.size() == 3) {
+        if (inti/sigi > cutoffIsigI && !specify_size)
+        {
+        r1.push_back(axes_radii[0]);
+        r2.push_back(axes_radii[1]);
+        r3.push_back(axes_radii[2]);
+        }
         g_log.notice()
             << "Radii of three axes of ellipsoid for integrating peak " << i
             << " = ";
@@ -281,7 +300,60 @@ void IntegrateEllipsoids::exec() {
       peaks[i].setSigmaIntensity(0.0);
     }
   }
+  if (r1.size() > 1 && !specify_size)
+  {
+    Statistics stats = getStatistics(r1);
+    g_log.notice() << "r1: "
+        << " mean " << stats.mean
+        << " standard_deviation " << stats.standard_deviation
+        << " minimum " << stats.minimum
+        << " maximum " << stats.maximum
+        << " median " << stats.median << "\n";
+    stats = getStatistics(r2);
+    g_log.notice() << "r2: "
+        << " mean " << stats.mean
+        << " standard_deviation " << stats.standard_deviation
+        << " minimum " << stats.minimum
+        << " maximum " << stats.maximum
+        << " median " << stats.median << "\n";
+    stats = getStatistics(r3);
+    g_log.notice() << "r3: "
+        << " mean " << stats.mean
+        << " standard_deviation " << stats.standard_deviation
+        << " minimum " << stats.minimum
+        << " maximum " << stats.maximum
+        << " median " << stats.median << "\n";
+    specify_size=true;
+    peak_radius = stats.mean + numSigmas * stats.standard_deviation;
+    back_inner_radius = peak_radius;
+    back_outer_radius = peak_radius * 1.25992105; // A factor of 2 ^ (1/3) will make the background
+    // shell volume equal to the peak region volume.
+    for (size_t i = 0; i < n_peaks; i++) {
+      V3D hkl(peaks[i].getH(), peaks[i].getK(), peaks[i].getL());
+      if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
+        V3D peak_q(peaks[i].getQLabFrame());
+        std::vector<double> axes_radii;
+        integrator.ellipseIntegrateEvents(peak_q, specify_size, peak_radius,
+                                          back_inner_radius, back_outer_radius,
+                                          axes_radii, inti, sigi);
+        peaks[i].setIntensity(inti);
+        peaks[i].setSigmaIntensity(sigi);
+        if (axes_radii.size() == 3) {
+          g_log.notice()
+              << "Radii of three axes of ellipsoid for integrating peak " << i
+              << " = ";
+          for (int i3 = 0; i3 < 3; i3++) {
+            g_log.notice() << axes_radii[i3] << "  ";
+          }
+          g_log.notice() << std::endl;
+        }
+      } else {
+        peaks[i].setIntensity(0.0);
+        peaks[i].setSigmaIntensity(0.0);
+      }
+    }
 
+  }
   // This flag is used by the PeaksWorkspace to evaluate whether it has been
   // integrated.
   peak_ws->mutableRun().addProperty("PeaksIntegrated", 1, true);

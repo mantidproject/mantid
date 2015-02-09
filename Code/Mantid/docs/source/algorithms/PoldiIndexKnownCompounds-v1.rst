@@ -41,8 +41,7 @@ The following example extracts peaks from the correlation spectrum of a Silicon 
 
     PoldiFitPeaks1D(InputWorkspace = correlated_6904, FwhmMultiples = 4.0,
                     PeakFunction = "Gaussian", PoldiPeakTable = peaks_6904,
-                    OutputWorkspace = "peaks_refined_6904", ResultTableWorkspace = "result_table_6904",
-                    FitCharacteristicsWorkspace = "raw_fit_results_6904",
+                    OutputWorkspace = "peaks_refined_6904",
                     FitPlotsWorkspace = "fit_plots_6904")
 
     # Create theoretical reflections for Silicon

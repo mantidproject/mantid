@@ -6,6 +6,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 
+#include <cmath>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -66,9 +68,9 @@ void RayTracerTester::exec() {
   Progress prog(this, 0.3, 1.0, NumAzimuth);
   for (int iaz = 0; iaz < NumAzimuth; iaz++) {
     prog.report();
-    double az = double(iaz) * 3.14159 * 2.0 / double(NumAzimuth);
+    double az = double(iaz) * M_PI * 2.0 / double(NumAzimuth);
     for (int iz = 0; iz < NumZenith; iz++) {
-      double zen = double(iz) * 3.14159 * 1.0 / double(NumZenith);
+      double zen = double(iz) * M_PI / double(NumZenith);
       double x = cos(az);
       double z = sin(az);
       double y = cos(zen);

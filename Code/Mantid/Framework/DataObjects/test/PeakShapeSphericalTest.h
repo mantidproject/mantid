@@ -136,7 +136,8 @@ public:
     TS_ASSERT_EQUALS(a.backgroundInnerRadius(), clone->backgroundInnerRadius().get());
     TS_ASSERT_EQUALS(a.backgroundOuterRadius(), clone->backgroundOuterRadius().get());
     TS_ASSERT_DIFFERS(clone, &a);
-  }
+    delete clone;  
+}
 
   void test_toJSON() {
     const double radius = 2;

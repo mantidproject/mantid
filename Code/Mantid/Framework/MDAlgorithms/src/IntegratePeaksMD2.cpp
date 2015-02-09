@@ -20,6 +20,7 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/Progress.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_integration.h>
 #include <fstream>
@@ -105,7 +106,7 @@ void IntegratePeaksMD2::init() {
   declareProperty("AdaptiveQRadius", false,
                   "Default is false.   If true, all input radii are multiplied "
                   "by the magnitude of Q at the peak center so each peak has a "
-                  "different integration radius.");
+                  "different integration radius.  Q includes the 2*pi factor.");
 
   declareProperty("Cylinder", false,
                   "Default is sphere.  Use next five parameters for cylinder.");
@@ -265,7 +266,14 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // 5-10% speedup.  Perhaps is should just be removed permanantly, but for
   // now it is commented out to avoid the seg faults.  Refs #5533
   // PRAGMA_OMP(parallel for schedule(dynamic, 10) )
-  for (int i = 0; i < peakWS->getNumberPeaks(); ++i) {
+   // Initialize progress reporting
+  int nPeaks = peakWS->getNumberPeaks();
+  Progress progress(this, 0., 1., nPeaks);
+  for (int i = 0; i < nPeaks; ++i) {
+    if (this->getCancel())
+      break; // User cancellation
+    progress.report();
+
     // Get a direct ref to that peak.
     IPeak &p = peakWS->getPeak(i);
 

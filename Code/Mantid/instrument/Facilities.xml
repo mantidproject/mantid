@@ -606,6 +606,23 @@
   </instrument>
 </facility>
 
+<!--  Facility MLZ (FRMII) (Germany) -->
+<facility name="MLZ" FileExtensions=".nxs,.d_dat">
+  <instrument name="DNS">
+    <technique>Neutron Spectroscopy</technique> 
+    <technique>Reactor Direct Geometry Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+    <technique>Neutron Diffraction</technique>
+    <technique>Single Crystal Diffraction</technique>
+  </instrument>
+
+  <instrument name="TOFTOF">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Direct Geometry Spectroscopy</technique>
+    <technique>Time-of-flight Spectroscopy</technique>
+  </instrument>
+</facility>
+
 <!--  Test Facility to allow example usage of Live listeners against "Fake" instrument sources -->
 <facility name="TEST_LIVE" FileExtensions=".nxs,.raw">
   <instrument name="ISIS_Histogram">
