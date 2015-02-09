@@ -5036,11 +5036,6 @@ void ApplicationWindow::readSettings()
   /* ------------- end group General ------------------- */
 
   settings.beginGroup("/UserFunctions");
-  if (100*maj_version + 10*min_version + patch_version == 91 &&
-      settings.contains("/FitFunctions")){
-    saveFitFunctions(settings.value("/FitFunctions").toStringList());
-    settings.remove("/FitFunctions");
-  }
   surfaceFunc = settings.value("/SurfaceFunctions").toStringList();
   xFunctions = settings.value("/xFunctions").toStringList();
   yFunctions = settings.value("/yFunctions").toStringList();
