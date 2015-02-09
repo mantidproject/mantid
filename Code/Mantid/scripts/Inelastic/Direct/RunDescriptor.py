@@ -77,12 +77,14 @@ class RunDescriptor(PropDescriptor):
                # TODO: not implemented
 
            #else:
+           if self._ws_name != value.name():
                 self._set_ws_as_source(value)
                 self._clear_old_ws(old_ws_name,self._ws_name,clear_fext)
                 self._bind_to_sum = False
                 RunDescriptor._PropMan.sum_runs.clear_sum()
                 return
-           #return
+           else: # it is just reassigning the same workspace to itself
+             return
 
        if isinstance(value,str): # it may be run number as string or it may be a workspace name
           if value in mtd: # workspace name
@@ -588,6 +590,17 @@ class RunDescriptor(PropDescriptor):
            DeleteWorkspace(WorkspaceName='tmp_mon')
        return mon_ws
 #--------------------------------------------------------------------------------------------------------------------
+    def clear_monitors(self):
+        """ method removes monitor workspace form analysis data service if it is there 
+        
+            (assuming it is not needed any more)
+        """
+        monWS_name = self._ws_name + '_monitors'
+        if monWS_name in mtd:
+            DeleteWorkspace(monWS_name)
+
+#--------------------------------------------------------------------------------------------------------------------
+
     def _build_ws_name(self):
 
         instr_name = self._instr_name()

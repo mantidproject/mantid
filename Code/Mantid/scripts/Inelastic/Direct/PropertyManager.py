@@ -355,12 +355,28 @@ class PropertyManager(NonIDF_Properties):
         # Retrieve the properties, changed from interface earlier
         old_changes_list  = self.getChangedProperties()
         # record all changes, present in the old changes list
-        old_changes={}
+        old_changes=OrderedDict()
         for prop_name in old_changes_list:
             old_changes[prop_name] = getattr(self,prop_name)
 
  
         param_list = prop_helpers.get_default_idf_param_list(pInstrument)
+        # remove old changes which are not related to IDF (not to reapply it again)
+        for prop_name in old_changes:
+            if not prop_name in param_list:
+               try:
+                     dependencies = getattr(PropertyManager,prop_name).dependencies()
+               except:
+                     dependencies = []
+               modified = False
+               for name in dependencies:
+                   if name in param_list:
+                      modified = True
+                      break
+               if not modified:
+                  del old_changes[prop_name]
+        #end
+
         param_list,descr_dict =  self._convert_params_to_properties(param_list,False,self.__descriptors)
         # clear record about previous changes
         self.setChangedProperties(set())
@@ -451,6 +467,7 @@ class PropertyManager(NonIDF_Properties):
             self.setChangedProperties(old_changes_list)
             all_changes = old_changes
         else:
+            new_changes_list=new_changes_list.union(old_changes_list)
             all_changes = old_changes_list.union(new_changes_list)
             self.setChangedProperties(all_changes)
 

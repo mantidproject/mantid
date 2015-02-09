@@ -164,6 +164,18 @@ class RunDescriptorTest(unittest.TestCase):
 
         ws1 = PropertyManager.sample_run.get_workspace()
         self.assertEqual(ws1.name(),ws_name)
+        #
+        PropertyManager.sample_run.set_action_suffix('_modified')
+        PropertyManager.sample_run.synchronize_ws(ws1)
+
+        ws1 = PropertyManager.sample_run.get_workspace()
+        self.assertTrue(str.find(ws1.name(),'_modified')>0)
+
+        propman.sample_run = ws1
+        self.assertEqual(ws1.name(),PropertyManager.sample_run._ws_name)
+
+        ws_name = PropertyManager.sample_run.get_ws_name()
+
 
         # if no workspace is available, attempt to get workspace name fails
         DeleteWorkspace(ws_name)
@@ -173,6 +185,8 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertFalse(ws_name+'_monitors' in mtd)
         # name of empty property workspace 
         self.assertEqual(PropertyManager.sample_run.get_ws_name(),'SR_')
+
+
 
     def test_sum_runs(self):
         propman  = self.prop_man

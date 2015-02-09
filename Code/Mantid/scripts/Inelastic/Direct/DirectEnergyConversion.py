@@ -501,7 +501,7 @@ class DirectEnergyConversion(object):
     def mono_sample(self, mono_run, ei_guess, white_run=None, map_file=None,
                     spectra_masks=None, result_name=None, Tzero=None):
         """Convert a mono-chromatic sample run to DeltaE.
-        If multiple run files are passed to this function, they are summed into a run and then processed
+
         """
         mono_run = self.get_run_descriptor(mono_run)
         if white_run:
@@ -510,6 +510,8 @@ class DirectEnergyConversion(object):
 
         mono_s = self._do_mono(mono_run, ei_guess,
                              white_run, map_file, spectra_masks, Tzero)
+        # at this stage we would never need monitors for this workspace if they were actually there
+        mono_run.clear_monitors()
         return mono_s
 
 #-------------------------------------------------------------------------------
@@ -1288,7 +1290,7 @@ class DirectEnergyConversion(object):
               bkgr_ws = self.normalise(bkgr_ws, self.normalise_method, bin_offset,monitors_ws)
               RemoveBackground(InputWorkspace=result_name,OutputWorkspace=result_name,BkgWorkspace=bkgr_ws,EMode='Direct')
               #TODO: 999 if background is cashed, deletion should be conditional
-              if not self._multirep_mode and False:
+              if not self._multirep_mode or True:
                  DeleteWorkspace(bkgr_ws)
         else:
             pass # TODO: investigate way of removing background from event workspace if we want result to be an event workspace

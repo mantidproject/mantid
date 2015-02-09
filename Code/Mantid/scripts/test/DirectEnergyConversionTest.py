@@ -394,11 +394,16 @@ class DirectEnergyConversionTest(unittest.TestCase):
                                     XUnit='TOF',xMin=tMin,xMax=tMax)
         LoadInstrument(run,InstrumentName='MARI')
 
-        # do second 
+        # build "monovanadium"
         mono = CloneWorkspace(run)
         mono_monitors = CloneWorkspace(run_monitors)
 
+        # build "White-beam"
         wb_ws   = Rebin(run,Params=[tMin,1,tMax],PreserveEvents=False)
+
+        # build "second run" to ensure repeated execution
+        run2 = CloneWorkspace(run)
+        run2_monitors = CloneWorkspace(run_monitors)
 
         # Run multirep
         tReducer = DirectEnergyConversion(run.getInstrument())
@@ -428,17 +433,17 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertAlmostEqual(x[0],-2*122.)
         self.assertAlmostEqual(x[-1],0.8*122.)
 
-        ## test another ws
-        ## rename samples from previous workspace to avoid deleting them on current run
-        #for ind,item in enumerate(result):
-        #    result[ind]=RenameWorkspace(item,OutputWorkspace='SampleRez#'+str(ind))
-        ## 
-        #result2 = tReducer.convert_to_energy(None,run2,[67.,122.],[-2,0.02,0.8])
+        # test another ws
+        # rename samples from previous workspace to avoid deleting them on current run
+        for ind,item in enumerate(result):
+            result[ind]=RenameWorkspace(item,OutputWorkspace='SampleRez#'+str(ind))
+        # 
+        result2 = tReducer.convert_to_energy(None,run2)
 
-        #rez = CheckWorkspacesMatch(result[0],result2[0])
-        #self.assertEqual(rez,'Success!')
-        #rez = CheckWorkspacesMatch(result[1],result2[1])
-        #self.assertEqual(rez,'Success!')
+        rez = CheckWorkspacesMatch(result[0],result2[0])
+        self.assertEqual(rez,'Success!')
+        rez = CheckWorkspacesMatch(result[1],result2[1])
+        self.assertEqual(rez,'Success!')
 
 
 
