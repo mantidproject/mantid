@@ -75,6 +75,13 @@ must have an extension as ".csv". If a user gives the name of a log
 file, which is in csv format, does not have an extension as .csv, the
 algorithm will correct it automatically.
 
+Time Zone
+---------
+
+The time stamps of sample logs are recorded as UTC time.
+Some users wants to see the exported sample log as the neutron facility's local time.
+So the input property 'TimeZone' is for this purpose.
+
 Usage
 -----
 

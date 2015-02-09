@@ -185,7 +185,7 @@ if ( ENABLE_CPACK )
       message ( STATUS " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 
       # rhel requirements
-      set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,nexus-python,gsl,glibc,qwtplot3d-qt4,muParser,numpy" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus >= 4.3.1,nexus-python >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy" )
       # OCE
       set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization")
       # Qwt is qwt5-qt4 in RHEL7

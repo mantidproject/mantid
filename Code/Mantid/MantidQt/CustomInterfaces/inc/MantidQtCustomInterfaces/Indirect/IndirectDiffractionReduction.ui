@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>IndirectDiffractionReduction</class>
+ <widget class="QMainWindow" name="IndirectDiffractionReduction">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>495</width>
+    <height>500</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Indirect Diffraction</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QGroupBox" name="gbInstrument">
+      <property name="title">
+       <string>Instrument</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_6">
+       <item>
+        <widget class="MantidQt::MantidWidgets::IndirectInstrumentConfig" name="iicInstrumentConfiguration">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="techniques" stdset="0">
+          <stringlist>
+           <string>TOF Indirect Geometry Spectroscopy</string>
+           <string>TOF Indirect Geometry Diffraction</string>
+          </stringlist>
+         </property>
+         <property name="disabledInstruments" stdset="0">
+          <stringlist>
+           <string>TFXA</string>
+          </stringlist>
+         </property>
+         <property name="facility" stdset="0">
+          <string>ISIS</string>
+         </property>
+         <property name="forceDiffraction" stdset="0">
+          <bool>true</bool>
+         </property>
+         <property name="showInstrumentLabel" stdset="0">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="gbInput">
+      <property name="title">
+       <string>Input</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <property name="margin">
+        <number>6</number>
+       </property>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dem_rawFiles" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>41</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="label" stdset="0">
+            <string>Run Numbers</string>
+           </property>
+           <property name="multipleFiles" stdset="0">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="dem_ckSumFiles">
+           <property name="text">
+            <string>Sum Files</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_11">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Spectra Min</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="set_leSpecMin"/>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Spectra Max</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="set_leSpecMax"/>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QStackedWidget" name="swVanadium">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="pageCalibration">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="margin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QGroupBox" name="gbCalibration">
+          <property name="title">
+           <string>Calibration</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout">
+           <property name="margin">
+            <number>6</number>
+           </property>
+           <item>
+            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dem_calFile" native="true">
+             <property name="label" stdset="0">
+              <string>Cal File</string>
+             </property>
+             <property name="multipleFiles" stdset="0">
+              <bool>false</bool>
+             </property>
+             <property name="optional" stdset="0">
+              <bool>false</bool>
+             </property>
+             <property name="fileExtensions" stdset="0">
+              <stringlist>
+               <string>.cal</string>
+              </stringlist>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dem_vanadiumFile" native="true">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="label" stdset="0">
+              <string>Vanadium Runs</string>
+             </property>
+             <property name="multipleFiles" stdset="0">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="pageDSpaceRebin">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <property name="margin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QGroupBox" name="gbRebin">
+          <property name="title">
+           <string>Rebin in D-Spacing (optional)</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_7">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="margin">
+            <number>6</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="lbRebinStart">
+             <property name="text">
+              <string>Start:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="leRebinStart"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="valRebinStart">
+             <property name="styleSheet">
+              <string notr="true">color: rgb(170, 0, 0);</string>
+             </property>
+             <property name="text">
+              <string>*</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="lbRebinWidth">
+             <property name="text">
+              <string>Width:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="leRebinWidth"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="valRebinWidth">
+             <property name="styleSheet">
+              <string notr="true">color: rgb(170, 0, 0);</string>
+             </property>
+             <property name="text">
+              <string>*</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="lbRebinEnd">
+             <property name="text">
+              <string>End:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="leRebinEnd"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="valRebinEnd">
+             <property name="styleSheet">
+              <string notr="true">color: rgb(170, 0, 0);</string>
+             </property>
+             <property name="text">
+              <string>*</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="gbGeneralOptions">
+      <property name="title">
+       <string>Options</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QCheckBox" name="ckIndividualGrouping">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When enabled spectra are not grouped and the output workspace will contain one spectrum per detector.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Use Individual Grouping</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="gbOutput">
+      <property name="title">
+       <string>Output</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="margin">
+        <number>6</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="lbPlotType">
+         <property name="text">
+          <string>Plot Type:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="cbPlotType">
+         <item>
+          <property name="text">
+           <string>None</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Spectra</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="gbSave">
+      <property name="toolTip">
+       <string>Select which file formats the data should be saved in.</string>
+      </property>
+      <property name="title">
+       <string>Save Formats</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <property name="margin">
+        <number>6</number>
+       </property>
+       <item>
+        <widget class="QCheckBox" name="ckGSS">
+         <property name="text">
+          <string>GSS</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="ckNexus">
+         <property name="text">
+          <string>Nexus</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="ckAscii">
+         <property name="text">
+          <string>ASCII (DAT)</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_10">
+      <item>
+       <widget class="QPushButton" name="pbHelp">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>?</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_14">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbRun">
+        <property name="text">
+         <string>Run</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_11">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbManageDirs">
+        <property name="text">
+         <string>Manage Directories</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::IndirectInstrumentConfig</class>
+   <extends>QComboBox</extends>
+   <header>MantidQtMantidWidgets/IndirectInstrumentConfig.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

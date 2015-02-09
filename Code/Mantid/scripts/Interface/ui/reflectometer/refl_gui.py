@@ -71,7 +71,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.__group_tof_workspaces_key = "group_tof_workspaces"
 
         #Setup instrument options with defaults assigned.
-        self.instrument_list = ['INTER', 'SURF', 'CRISP', 'POLREF']
+        self.instrument_list = ['INTER', 'SURF', 'CRISP', 'POLREF', 'OFFSPEC']
         self.polarisation_instruments = ['CRISP', 'POLREF']
         self.polarisation_options = {'None' : PolarisationCorrection.NONE, '1-PNR' : PolarisationCorrection.PNR, '2-PA' : PolarisationCorrection.PA }
 

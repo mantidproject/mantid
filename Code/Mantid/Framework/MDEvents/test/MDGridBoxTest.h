@@ -25,6 +25,7 @@
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
+#include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <map>
@@ -1670,7 +1671,7 @@ public:
   void test_sphereIntegrate_inTheMiddle()
   {
     coord_t center[3] = {2.5, 2.5, 2.5};
-    do_test_sphereIntegrate(center, 1.0, (1e6/125)*(4.0*3.14159/3.0), 2000.0);
+    do_test_sphereIntegrate(center, 1.0, (1e6/125)*(4.0*M_PI/3.0), 2000.0);
   }
 
   /** Huge sphere containing all within */
@@ -1733,7 +1734,7 @@ public:
   void test_sphereCentroid_inTheMiddle()
   {
     coord_t center[3] = {2.5, 2.5, 2.5};
-    do_test_sphereCentroid(center, 1.0, (1e6/125)*(4.0*3.14159/3.0), 2000);
+    do_test_sphereCentroid(center, 1.0, (1e6/125)*(4.0*M_PI/3.0), 2000);
   }
 
   /** Huge sphere containing all within */
