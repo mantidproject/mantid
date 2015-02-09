@@ -2438,7 +2438,10 @@ void ApplicationWindow::change3DData(const QString& colName)
   if (!w)
     return;
 
-  dynamic_cast<Graph3D*>(w)->changeDataColumn(table(colName), colName);
+  auto g3d = dynamic_cast<Graph3D*>(w);
+  if (g3d)
+    g3d->changeDataColumn(table(colName), colName);
+
   emit modified();
 }
 
