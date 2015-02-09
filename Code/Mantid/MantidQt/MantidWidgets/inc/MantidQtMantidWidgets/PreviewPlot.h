@@ -6,6 +6,9 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 
+#include <QActionGroup>
+#include <QMenu>
+
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_magnifier.h>
@@ -85,6 +88,9 @@ namespace MantidWidgets
     void removeSpectrum(const QString & wsName);
 
   public slots:
+    void togglePanTool(bool enabled);
+    void toggleZoomTool(bool enabled);
+    void resetView();
     void resizeX();
     void clear();
     void replot();
@@ -94,6 +100,10 @@ namespace MantidWidgets
     void handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
 
     void removeCurve(QwtPlotCurve *curve);
+
+  private slots:
+    void showContextMenu(QPoint position);
+    void handleViewToolSelect(bool checked);
 
   private:
     /// Poco Observers for ADS Notifications
@@ -117,6 +127,10 @@ namespace MantidWidgets
     QwtPlotMagnifier *m_magnifyTool;
     QwtPlotPanner *m_panTool;
     QwtPlotZoomer *m_zoomTool;
+
+    /// Context menu items
+    QMenu *m_contextMenu;
+    QActionGroup *m_plotToolGroup;
 
   };
 

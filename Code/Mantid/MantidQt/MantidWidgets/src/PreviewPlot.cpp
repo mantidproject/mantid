@@ -11,6 +11,7 @@
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
 
+#include <QAction>
 #include <QBrush>
 #include <QHBoxLayout>
 
@@ -28,7 +29,8 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent)
   m_replaceObserver(*this, &PreviewPlot::handleReplaceEvent),
   m_init(init), m_allowPan(false), m_allowZoom(false),
   m_plot(NULL), m_curves(),
-  m_magnifyTool(NULL), m_panTool(NULL), m_zoomTool(NULL)
+  m_magnifyTool(NULL), m_panTool(NULL), m_zoomTool(NULL),
+  m_contextMenu(new QMenu(this))
 {
   if(init)
   {
@@ -45,6 +47,54 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent)
 
     this->setLayout(mainLayout);
   }
+
+  // Setup plot manipulation tools
+  m_zoomTool = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft,
+      QwtPicker::DragSelection | QwtPicker::CornerToCorner, QwtPicker::AlwaysOff, m_plot->canvas());
+  m_zoomTool->setEnabled(false);
+
+  m_panTool = new QwtPlotPanner(m_plot->canvas());
+  m_panTool->setEnabled(false);
+
+  m_magnifyTool = new QwtPlotMagnifier(m_plot->canvas());
+  m_magnifyTool->setMouseButton(Qt::NoButton);
+  m_magnifyTool->setEnabled(false);
+
+  // Handle showing the context menu
+  m_plot->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(m_plot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
+  connect(m_contextMenu, SIGNAL(aboutToHide()), this, SLOT(contextMenuHide()));
+
+  // Create the plot tool list for context menu
+  QMenu *viewToolMenu = new QMenu(m_contextMenu);
+  m_plotToolGroup = new QActionGroup(m_contextMenu);
+  m_plotToolGroup->setExclusive(true);
+
+  QStringList plotTools;
+  plotTools << "None" << "Pan" << "Zoom";
+
+  for(auto it = plotTools.begin(); it != plotTools.end(); ++it)
+  {
+    QAction *toolAction = new QAction(*it, viewToolMenu);
+    toolAction->setCheckable(true);
+    connect(toolAction, SIGNAL(toggled(bool)), this, SLOT(handleViewToolSelect(bool)));
+
+    // Add to the menu and action group
+    m_plotToolGroup->addAction(toolAction);
+    viewToolMenu->addAction(toolAction);
+
+    // None is selected by default
+    toolAction->setChecked(*it == "None");
+  }
+
+  QAction *viewToolAction = new QAction("View Tool", this);
+  viewToolAction->setMenu(viewToolMenu);
+  m_contextMenu->addAction(viewToolAction);
+
+  // Create the reset plot view option
+  QAction *resetPlotAction = new QAction("Reset Plot", m_contextMenu);
+  connect(resetPlotAction, SIGNAL(triggered()), this, SLOT(resetView()));
+  m_contextMenu->addAction(resetPlotAction);
 }
 
 
@@ -199,8 +249,6 @@ QPair<double, double> PreviewPlot::getCurveRange(const QString & wsName)
 void PreviewPlot::addSpectrum(const MatrixWorkspace_const_sptr ws, const size_t specIndex,
     const QColor & curveColour)
 {
-  using Mantid::MantidVec;
-
   // Check the spectrum index is in range
   if(specIndex >= ws->getNumberHistograms())
     throw std::runtime_error("Workspace index is out of range, cannot plot.");
@@ -288,6 +336,52 @@ void PreviewPlot::removeSpectrum(const QString & wsName)
 
 
 /**
+ * Toggles the pan plot tool.
+ *
+ * @param enabled If the tool should be enabled
+ */
+void PreviewPlot::togglePanTool(bool enabled)
+{
+  // First disbale the zoom tool
+  if(enabled && m_zoomTool->isEnabled())
+    m_zoomTool->setEnabled(false);
+
+  m_panTool->setEnabled(enabled);
+  m_magnifyTool->setEnabled(enabled);
+}
+
+
+/**
+ * Toggles the zoom plot tool.
+ *
+ * @param enabled If the tool should be enabled
+ */
+void PreviewPlot::toggleZoomTool(bool enabled)
+{
+  // First disbale the pan tool
+  if(enabled && m_panTool->isEnabled())
+    m_panTool->setEnabled(false);
+
+  m_zoomTool->setEnabled(enabled);
+  m_magnifyTool->setEnabled(enabled);
+}
+
+
+/**
+ * Resets the view to a sensible default.
+ */
+void PreviewPlot::resetView()
+{
+  // Auto scale the axis
+  m_plot->setAxisAutoScale(QwtPlot::xBottom);
+  m_plot->setAxisAutoScale(QwtPlot::yLeft);
+
+  // Set this as the default zoom level
+  m_zoomTool->setZoomBase(true);
+}
+
+
+/**
  * Resizes the X axis scale range to exactly fir the curves currently
  * plotted on it.
  */
@@ -330,7 +424,6 @@ void PreviewPlot::clear()
  */
 void PreviewPlot::replot()
 {
-  //TODO: replot curves?
   m_plot->replot();
 }
 
@@ -363,4 +456,47 @@ void PreviewPlot::removeCurve(QwtPlotCurve * curve)
   // Delete it
   delete curve;
   curve = NULL;
+}
+
+
+/**
+ * Handles displaying the context menu when a user right clicks on the plot.
+ *
+ * @param position Position at which to show menu
+ */
+void PreviewPlot::showContextMenu(QPoint position)
+{
+  // Show the context menu
+  m_contextMenu->popup(m_plot->mapToGlobal(position));
+}
+
+
+/**
+ * Handles the view tool being selected from the context menu.
+ *
+ * @param checked If the option was checked
+ */
+void PreviewPlot::handleViewToolSelect(bool checked)
+{
+  if(!checked)
+    return;
+
+  QAction *selectedPlotType = m_plotToolGroup->checkedAction();
+  if(!selectedPlotType)
+    return;
+
+  QString selectedTool = selectedPlotType->text();
+  if(selectedTool == "None")
+  {
+    togglePanTool(false);
+    toggleZoomTool(false);
+  }
+  else if(selectedTool == "Pan")
+  {
+    togglePanTool(true);
+  }
+  else if(selectedTool == "Zoom")
+  {
+    toggleZoomTool(true);
+  }
 }
