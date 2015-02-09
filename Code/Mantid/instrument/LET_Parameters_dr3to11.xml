@@ -102,7 +102,7 @@
 <!-- First spectra number (monitor number) to use when measuring incident energy
     Should be spectra with well defined energy peak -->
 <parameter name="ei-mon1-spec"  type="int">
-  <value val="40966"/>
+  <value val="73734"/>
 </parameter>
 <!-- Second spectra number (monitor number) to use when measuring incident energy
      Should be spectra with well defined energy peak -->
