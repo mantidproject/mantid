@@ -1,10 +1,46 @@
 #include "MantidGeometry/Crystal/Projection.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include <boost/bind.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
 
+using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace boost::python;
+
+namespace
+{
+  ITableWorkspace_sptr toWorkspace(Projection& p)
+  {
+    if(p.getNumDims() > 3)
+      throw std::runtime_error("Only 2 or 3 dimensional projections can be converted to a workspace.");
+
+    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
+    auto colU = ws->addColumn("double", "u");
+    auto colV = ws->addColumn("double", "v");
+
+    if(p.getNumDims() == 3)
+      auto colW = ws->addColumn("double", "w");
+
+    auto colOffset = ws->addColumn("double", "offsets");
+    auto colType = ws->addColumn("str", "type");
+
+    //Outer loop traverses rows
+    for(size_t i = 0; i < p.getNumDims(); ++i)
+    {
+      TableRow row = ws->appendRow();
+
+      //Inner loop traverses columns
+      for(size_t j = 0; j < p.getNumDims(); ++j)
+        row << static_cast<double>(p.getAxis(j)[i]);
+
+      row << static_cast<double>(p.getOffset(i));
+      row << (p.getUnit(i) == RLU ? "r" : "a");
+    }
+    return ws;
+  }
+}
 
 void export_Projection()
 {
@@ -34,5 +70,6 @@ void export_Projection()
         make_function(&Projection::W, return_internal_reference<>(), boost::mpl::vector2<VMD&, Projection&>()),
         make_function(boost::bind(&Projection::setAxis, _1, 2, _2), default_call_policies(), boost::mpl::vector3<void, Projection&, VMD>())
     )
+    .def("toWorkspace", toWorkspace, "Create a TableWorkspace representing the projection")
     ;
 }
