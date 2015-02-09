@@ -53,8 +53,6 @@ namespace MantidWidgets
     Q_OBJECT
 
     Q_PROPERTY(QColor canvasColour READ canvasColour WRITE setCanvasColour)
-    Q_PROPERTY(bool allowPan READ allowPan WRITE setAllowPan)
-    Q_PROPERTY(bool allowZoom READ allowZoom WRITE setAllowZoom)
     Q_PROPERTY(bool showLegend READ legendIsShown WRITE showLegend)
 
   public:
@@ -63,12 +61,6 @@ namespace MantidWidgets
 
     QColor canvasColour();
     void setCanvasColour(const QColor & colour);
-
-    bool allowPan();
-    void setAllowPan(bool allow);
-
-    bool allowZoom();
-    void setAllowZoom(bool allow);
 
     bool legendIsShown();
 
@@ -112,10 +104,6 @@ namespace MantidWidgets
 
     /// If the widget was initialised
     bool m_init;
-
-    /// If the plot manipulation tools are allowed
-    bool m_allowPan;
-    bool m_allowZoom;
 
     /// The plot its self
     friend class RangeSelector;

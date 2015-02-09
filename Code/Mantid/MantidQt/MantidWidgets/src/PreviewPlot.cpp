@@ -29,8 +29,7 @@ namespace
 PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent),
   m_removeObserver(*this, &PreviewPlot::handleRemoveEvent),
   m_replaceObserver(*this, &PreviewPlot::handleReplaceEvent),
-  m_init(init), m_allowPan(false), m_allowZoom(false),
-  m_plot(NULL), m_curves(),
+  m_init(init), m_plot(NULL), m_curves(),
   m_magnifyTool(NULL), m_panTool(NULL), m_zoomTool(NULL),
   m_contextMenu(new QMenu(this))
 {
@@ -150,50 +149,6 @@ void PreviewPlot::setCanvasColour(const QColor & colour)
 {
   if(m_plot)
     m_plot->setCanvasBackground(QBrush(colour));
-}
-
-
-/**
- * Checks to see if the option to use the pan tool is enabled.
- *
- * @return True if tool is allowed
- */
-bool PreviewPlot::allowPan()
-{
-  return m_allowPan;
-}
-
-
-/**
- * Enables or disables the option to use the pan tool on the plot.
- *
- * @param allow If tool should be allowed
- */
-void PreviewPlot::setAllowPan(bool allow)
-{
-  m_allowPan = allow;
-}
-
-
-/**
- * Checks to see if the option to use the zoom tool is enabled.
- *
- * @return True if tool is allowed
- */
-bool PreviewPlot::allowZoom()
-{
-  return m_allowZoom;
-}
-
-
-/**
- * Enables or disables the option to use the zoom tool on the plot.
- *
- * @param allow If tool should be allowed
- */
-void PreviewPlot::setAllowZoom(bool allow)
-{
-  m_allowZoom = allow;
 }
 
 
