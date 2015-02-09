@@ -4598,7 +4598,9 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& filename, const
   QFile file(filename);
   QFileInfo fileInfo(filename);
 
-  file.open(QIODevice::ReadOnly);
+  if(!file.open(QIODevice::ReadOnly))
+    throw std::runtime_error("Couldn't open project file");
+
   QTextStream fileTS(&file);
   fileTS.setEncoding(QTextStream::UnicodeUTF8);
 
