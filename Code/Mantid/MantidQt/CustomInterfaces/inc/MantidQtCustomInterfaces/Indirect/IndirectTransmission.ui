@@ -104,11 +104,15 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_18">
       <item>
-       <layout class="QVBoxLayout" name="plotPreview">
-        <property name="sizeConstraint">
-         <enum>QLayout::SetMinimumSize</enum>
+       <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlot" native="true">
+        <property name="canvasColour" stdset="0">
+         <color>
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
+         </color>
         </property>
-       </layout>
+       </widget>
       </item>
       <item>
        <layout class="QHBoxLayout" name="loPreviewLegend">
@@ -223,6 +227,12 @@
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/DataSelector.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::PreviewPlot</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/PreviewPlot.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

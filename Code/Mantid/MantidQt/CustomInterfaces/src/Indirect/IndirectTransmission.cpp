@@ -17,12 +17,6 @@ namespace CustomInterfaces
   {
     m_uiForm.setupUi(parent);
 
-    // Preview plot
-    // TODO: Move to UI file
-    m_plot = new MantidWidgets::PreviewPlot(m_parentWidget);
-    m_plot->setCanvasColour(Qt::white);
-    m_uiForm.plotPreview->addWidget(m_plot);
-
     // Update the preview plot when the algorithm is complete
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(transAlgDone(bool)));
     connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(QString)), this, SLOT(dataLoaded()));
@@ -122,11 +116,11 @@ namespace CustomInterfaces
       return;
 
     // Do plotting
-    m_plot->clear();
-    m_plot->addSpectrum(QString::fromStdString(resultWsNames[0]), 0, Qt::red);
-    m_plot->addSpectrum(QString::fromStdString(resultWsNames[1]), 0, Qt::black);
-    m_plot->addSpectrum(QString::fromStdString(resultWsNames[2]), 0, Qt::green);
-    m_plot->resizeX();
+    m_uiForm.ppPlot->clear();
+    m_uiForm.ppPlot->addSpectrum(QString::fromStdString(resultWsNames[0]), 0, Qt::red);
+    m_uiForm.ppPlot->addSpectrum(QString::fromStdString(resultWsNames[1]), 0, Qt::black);
+    m_uiForm.ppPlot->addSpectrum(QString::fromStdString(resultWsNames[2]), 0, Qt::green);
+    m_uiForm.ppPlot->resizeX();
   }
 
 } // namespace CustomInterfaces

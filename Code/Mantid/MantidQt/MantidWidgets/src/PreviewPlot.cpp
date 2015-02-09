@@ -63,7 +63,6 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent)
   // Handle showing the context menu
   m_plot->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_plot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
-  connect(m_contextMenu, SIGNAL(aboutToHide()), this, SLOT(contextMenuHide()));
 
   // Create the plot tool list for context menu
   QMenu *viewToolMenu = new QMenu(m_contextMenu);

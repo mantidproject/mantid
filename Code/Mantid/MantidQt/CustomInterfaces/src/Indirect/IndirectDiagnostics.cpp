@@ -83,14 +83,6 @@ namespace CustomInterfaces
     // Refresh the plot window
     m_plots["SlicePlot"]->replot();
 
-    // Preview plot
-    m_plots["SlicePreviewPlot"] = new QwtPlot(m_parentWidget);
-    m_plots["SlicePreviewPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-    m_plots["SlicePreviewPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-    m_plots["SlicePreviewPlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.plotPreview->addWidget(m_plots["SlicePreviewPlot"]);
-    m_plots["SlicePreviewPlot"]->replot();
-
     // SIGNAL/SLOT CONNECTIONS
 
     // Update instrument information when a new instrument config is selected
@@ -424,11 +416,9 @@ namespace CustomInterfaces
     m_pythonExportWsName = sliceWs->getName();
 
     // Plot result spectrum
-    plotMiniPlot(sliceWs, 0, "SlicePreviewPlot", "SlicePreviewCurve");
-
-    // Set X range to data range
-    setXAxisToCurve("SlicePreviewPlot", "SlicePreviewCurve");
-    m_plots["SlicePreviewPlot"]->replot();
+    m_uiForm.ppSlicePreview->clear();
+    m_uiForm.ppSlicePreview->addSpectrum(sliceWs, 0);
+    m_uiForm.ppSlicePreview->resizeX();
 
     // Ungroup the output workspace
     sliceOutputGroup->removeAll();

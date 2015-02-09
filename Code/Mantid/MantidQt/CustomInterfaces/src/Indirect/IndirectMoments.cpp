@@ -36,17 +36,6 @@ namespace CustomInterfaces
     // Add plot to UI
     m_uiForm.plotRaw->addWidget(m_plots["MomentsPlot"]);
 
-    // PREVIEW PLOT
-    m_plots["MomentsPreviewPlot"] = new QwtPlot(m_parentWidget);
-
-    // Initilise plot
-    m_plots["MomentsPreviewPlot"]->setCanvasBackground(Qt::white);
-    m_plots["MomentsPreviewPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-    m_plots["MomentsPreviewPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-
-    // Add plot to UI
-    m_uiForm.plotPreview->addWidget(m_plots["MomentsPreviewPlot"]);
-
     // PROPERTY TREE
     m_propTrees["MomentsPropTree"] = new QtTreePropertyBrowser();
     m_propTrees["MomentsPropTree"]->setFactoryForManager(m_dblManager, m_dblEdFac);
@@ -253,16 +242,11 @@ namespace CustomInterfaces
       return;
 
     // Plot each spectrum
-    plotMiniPlot(QString::fromStdString(resultWsNames[0]), 0, "MomentsPreviewPlot", "Moments_M0");
-    plotMiniPlot(QString::fromStdString(resultWsNames[2]), 0, "MomentsPreviewPlot", "Moments_M2");
-    plotMiniPlot(QString::fromStdString(resultWsNames[3]), 0, "MomentsPreviewPlot", "Moments_M4");
-
-    // Colour plots as close to plot output as possible
-    m_curves["Moments_M0"]->setPen(QColor(Qt::green));
-    m_curves["Moments_M2"]->setPen(QColor(Qt::black));
-    m_curves["Moments_M4"]->setPen(QColor(Qt::red));
-
-    m_plots["MomentsPreviewPlot"]->replot();
+    m_uiForm.ppMomentsPreview->clear();
+    m_uiForm.ppMomentsPreview->addSpectrum(QString::fromStdString(resultWsNames[0]), 0, Qt::green);
+    m_uiForm.ppMomentsPreview->addSpectrum(QString::fromStdString(resultWsNames[2]), 0, Qt::black);
+    m_uiForm.ppMomentsPreview->addSpectrum(QString::fromStdString(resultWsNames[3]), 0, Qt::red);
+    m_uiForm.ppMomentsPreview->resizeX();
   }
 
 } // namespace CustomInterfaces
