@@ -4,6 +4,7 @@
 #include "IndirectDataReductionTab.h"
 #include "ui_IndirectTransmission.h"
 #include "MantidKernel/System.h"
+#include "MantidQtMantidWidgets/PreviewPlot.h"
 
 
 namespace MantidQt
@@ -58,6 +59,7 @@ namespace CustomInterfaces
 
   private:
     Ui::IndirectTransmission m_uiForm;
+    MantidWidgets::PreviewPlot *m_plot;
 
   };
 

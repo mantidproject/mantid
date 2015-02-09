@@ -54,6 +54,13 @@ namespace MantidWidgets
     Q_PROPERTY(bool allowZoom READ allowZoom WRITE setAllowZoom)
 
   public:
+    enum ScaleType
+    {
+      LINEAR,
+      LOGARITHMIC,
+      X_SQUARED
+    };
+
     PreviewPlot(QWidget *parent = NULL, bool init = true);
     virtual ~PreviewPlot();
 
@@ -66,17 +73,20 @@ namespace MantidWidgets
     bool allowZoom();
     void setAllowZoom(bool allow);
 
-    void addSpectra(Mantid::API::MatrixWorkspace_sptr ws, int specIndex = 0);
-    void addSpectra(const QString & wsName, int specIndex = 0);
+    void addSpectrum(const Mantid::API::MatrixWorkspace_const_sptr ws, const size_t specIndex = 0, const QColor & curveColour = QColor());
+    void addSpectrum(const QString & wsName, const size_t specIndex = 0, const QColor & curveColour = QColor());
 
-    void removeSpectra(Mantid::API::MatrixWorkspace_sptr ws);
-    void removeSpectra(const QString & wsName);
+    void removeSpectrum(const Mantid::API::MatrixWorkspace_const_sptr ws);
+    void removeSpectrum(const QString & wsName);
 
+  public slots:
     void replot();
 
   private:
     void handleRemoveEvent(Mantid::API::WorkspacePreDeleteNotification_ptr pNf);
     void handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
+
+    void removeCurve(QwtPlotCurve *curve);
 
   private:
     /// Poco Observers for ADS Notifications
@@ -94,7 +104,7 @@ namespace MantidWidgets
     QwtPlot *m_plot;
 
     /// Map of workspaces to plot curves
-    QMap<Mantid::API::MatrixWorkspace_sptr, QwtPlotCurve> m_curves;
+    QMap<Mantid::API::MatrixWorkspace_const_sptr, QwtPlotCurve *> m_curves;
 
     /// Plot manipulation tools
     QwtPlotMagnifier *m_magnifyTool;

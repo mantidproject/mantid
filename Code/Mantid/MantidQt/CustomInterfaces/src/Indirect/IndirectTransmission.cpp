@@ -2,8 +2,6 @@
 
 #include <QFileInfo>
 
-#include "MantidQtMantidWidgets/PreviewPlot.h"
-
 using namespace Mantid::API;
 
 namespace MantidQt
@@ -27,10 +25,10 @@ namespace CustomInterfaces
     /* m_uiForm.plotPreview->addWidget(m_plots["PreviewPlot"]); */
 
     //TODO
-    MantidWidgets::PreviewPlot *plot = new MantidWidgets::PreviewPlot(m_parentWidget);
-    plot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    plot->setCanvasColour(Qt::white);
-    m_uiForm.plotPreview->addWidget(plot);
+    m_plot = new MantidWidgets::PreviewPlot(m_parentWidget);
+    m_plot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_plot->setCanvasColour(Qt::white);
+    m_uiForm.plotPreview->addWidget(m_plot);
 
     // Update the preview plot when the algorithm is complete
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(transAlgDone(bool)));
@@ -131,18 +129,18 @@ namespace CustomInterfaces
       return;
 
     // Plot each spectrum
-    plotMiniPlot(QString::fromStdString(resultWsNames[0]), 0, "PreviewPlot", "SamCurve");
-    plotMiniPlot(QString::fromStdString(resultWsNames[1]), 0, "PreviewPlot", "CanCurve");
-    plotMiniPlot(QString::fromStdString(resultWsNames[2]), 0, "PreviewPlot", "TransCurve");
+    m_plot->addSpectrum(QString::fromStdString(resultWsNames[0]), 0, Qt::red); //, "PreviewPlot", "SamCurve");
+    m_plot->addSpectrum(QString::fromStdString(resultWsNames[1]), 0, Qt::black); //, "PreviewPlot", "CanCurve");
+    m_plot->addSpectrum(QString::fromStdString(resultWsNames[2]), 0, Qt::green); //, "PreviewPlot", "TransCurve");
 
     // Colour plots as per plot option
-    m_curves["SamCurve"]->setPen(QColor(Qt::red));
-    m_curves["CanCurve"]->setPen(QColor(Qt::black));
-    m_curves["TransCurve"]->setPen(QColor(Qt::green));
+    /* m_curves["SamCurve"]->setPen(QColor(Qt::red)); */
+    /* m_curves["CanCurve"]->setPen(QColor(Qt::black)); */
+    /* m_curves["TransCurve"]->setPen(QColor(Qt::green)); */
 
     // Set X range to data range
-    setXAxisToCurve("PreviewPlot", "TransCurve");
-    m_plots["PreviewPlot"]->replot();
+    /* setXAxisToCurve("PreviewPlot", "TransCurve"); */
+    /* m_plots["PreviewPlot"]->replot(); */
   }
 
 } // namespace CustomInterfaces
