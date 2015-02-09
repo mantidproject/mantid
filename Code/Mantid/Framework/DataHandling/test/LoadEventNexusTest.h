@@ -183,7 +183,6 @@ public:
 
     }
 
-
   }
 
   void test_TOF_filtered_loading()
@@ -220,33 +219,131 @@ public:
 
   void test_partial_spectra_loading()
   {
-    const std::string wsName = "test_partial_spectra_loading";
-		std::vector<int32_t> specList;
-		specList.push_back(13);
-		specList.push_back(16);
-		specList.push_back(21);
-		specList.push_back(28);
+    std::string wsName = "test_partial_spectra_loading_SpectrumList";
+    std::vector<int32_t> specList;
+    specList.push_back(13);
+    specList.push_back(16);
+    specList.push_back(21);
+    specList.push_back(28);
 
+    // A) test SpectrumList
     LoadEventNexus ld;
     ld.initialize();
     ld.setPropertyValue("OutputWorkspace", wsName);
     ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
-		ld.setProperty("SpectrumList", specList);
+    ld.setProperty("SpectrumList", specList);
     ld.setProperty<bool>("LoadLogs", false); // Time-saver
 
     TS_ASSERT( ld.execute() );
 
     auto outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName); 
 
-    TSM_ASSERT("The number of spectra in the workspace should be equal to the spectra filtered", outWs->getNumberHistograms()==specList.size());
+    TSM_ASSERT("The number of spectra in the workspace should be equal to the spectra filtered",
+               outWs->getNumberHistograms()==specList.size());
     TSM_ASSERT("Some spectra were not found in the workspace", outWs->getSpectrum(0)->getSpectrumNo()==13);
     TSM_ASSERT("Some spectra were not found in the workspace", outWs->getSpectrum(1)->getSpectrumNo()==16);
     TSM_ASSERT("Some spectra were not found in the workspace", outWs->getSpectrum(2)->getSpectrumNo()==21);
     TSM_ASSERT("Some spectra were not found in the workspace", outWs->getSpectrum(3)->getSpectrumNo()==28);
 
+    // B) test SpectrumMin and SpectrumMax
+    wsName = "test_partial_spectra_loading_SpectrumMin_SpectrumMax";
+    const size_t specMin = 10;
+    const size_t specMax = 29;
+    LoadEventNexus ldMinMax;
+    ldMinMax.initialize();
+    ldMinMax.setPropertyValue("OutputWorkspace", wsName);
+    ldMinMax.setPropertyValue("Filename","CNCS_7860_event.nxs");
+    ldMinMax.setProperty<int>("SpectrumMin", specMin);
+    ldMinMax.setProperty<int>("SpectrumMax", specMax);
+    ldMinMax.setProperty<bool>("LoadLogs", false); // Time-saver
+
+    TS_ASSERT( ldMinMax.execute() );
+
+    outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
+
+    // check number and indices of spectra
+    const size_t numSpecs = specMax - specMin +1;
+    TS_ASSERT_EQUALS(outWs->getNumberHistograms(), numSpecs);
+    for (size_t specIdx=0; specIdx < numSpecs; specIdx++) {
+      TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx)->getSpectrumNo(),
+                       static_cast<int>(specMin+specIdx));
+    }
+
+    // C) test SpectrumList + SpectrumMin and SpectrumMax
+    // This will make: 17, 20, 21, 22, 23
+    wsSpecFilterAndEventMonitors =
+      "test_partial_spectra_loading_SpectrumList_SpectrumMin_SpectrumMax";
+    const size_t sMin = 20;
+    const size_t sMax = 22;
+    specList.clear();
+    specList.push_back(17);
+
+    LoadEventNexus ldLMM;
+    ldLMM.initialize();
+    ldLMM.setPropertyValue("OutputWorkspace", wsSpecFilterAndEventMonitors);
+    ldLMM.setPropertyValue("Filename","CNCS_7860_event.nxs");
+    ldLMM.setProperty("SpectrumList", specList);
+    ldLMM.setProperty<int>("SpectrumMin", sMin);
+    ldLMM.setProperty<int>("SpectrumMax", sMax);
+    ldLMM.setProperty<bool>("LoadLogs", false); // Time-saver
+    // Note: this is done here to avoid additional loads
+    // This will produce a workspace with suffix _monitors, that is used below
+    // in test_MonitorsAsEvents
+    ldLMM.setProperty<bool>("LoadMonitors", true);
+    ldLMM.setProperty<bool>("MonitorsAsEvents", true);
+
+    TS_ASSERT( ldLMM.execute() );
+
+    outWs =
+      AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsSpecFilterAndEventMonitors);
+
+    // check number and indices of spectra
+    const size_t n = sMax - sMin + 1;  // this n is the 20...22, excluding '17'
+    TS_ASSERT_EQUALS(outWs->getNumberHistograms(), n+1); // +1 is the '17'
+    // 17 should come from SpectrumList
+    TS_ASSERT_EQUALS(outWs->getSpectrum(0)->getSpectrumNo(), 17);
+    // and then sMin(20)...sMax(22)
+    for (size_t specIdx=0; specIdx < n; specIdx++) {
+      TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx+1)->getSpectrumNo(),
+                       static_cast<int>(sMin+specIdx));
+    }
   }
 
-	void test_Load_And_CompressEvents()
+  void test_MonitorsAsEvents()
+  {
+    // Re-uses the workspace loaded in the last test to save a load execution
+    // This is a very simple test for performance issues. There's no real event
+    // data, so this just check that the algorithm creates a consistent output
+    // (monitors) event workspace. Real/intensive testing happens in system tests.
+    const std::string& mon_outws_name = wsSpecFilterAndEventMonitors + "_monitors";
+    auto & ads = AnalysisDataService::Instance();
+
+    // Valid workspace and it is an event workspace
+    EventWorkspace_sptr monWS = ads.retrieveWS<EventWorkspace>(mon_outws_name);
+    TS_ASSERT(monWS);
+    TS_ASSERT_EQUALS(monWS->getTitle(), "test after manual intervention");
+
+    // Check link data --> monitor workspaces
+    TS_ASSERT_EQUALS(monWS,
+                     ads.retrieveWS<MatrixWorkspace>(wsSpecFilterAndEventMonitors)->monitorWorkspace());
+
+    // Check basic event props / data
+    TS_ASSERT_EQUALS(monWS->getNumberHistograms(), 4);
+    TS_ASSERT_EQUALS(monWS->getNEvents(), 4);
+    TS_ASSERT_EQUALS(monWS->getNumberEvents(), 0);
+    TS_ASSERT_EQUALS(monWS->isHistogramData(), true);
+    TS_ASSERT_EQUALS(monWS->blocksize(), 1);
+
+    TS_ASSERT_EQUALS(monWS->readX(0).size(), 2);
+    TS_ASSERT_DELTA(monWS->readX(0)[0], 0, 1e-6 );
+    TS_ASSERT_DELTA(monWS->readX(0)[1], 0, 1e-6 );
+    TS_ASSERT_EQUALS(monWS->readY(0).size(), 1 );
+    TS_ASSERT_DELTA(monWS->readY(0)[0], 0, 1e-6 );
+    TS_ASSERT_EQUALS(monWS->readE(0).size(), 1 );
+    TS_ASSERT_DELTA(monWS->readE(0)[0], 0, 1e-6 );
+  }
+
+  void test_Load_And_CompressEvents()
   {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
@@ -514,6 +611,8 @@ public:
     TS_ASSERT_EQUALS(WS->getEventList(26798).getWeightedEvents()[0].tof(), 1476.0);
   }
 
+private:
+  std::string wsSpecFilterAndEventMonitors;
 };
 
 //------------------------------------------------------------------------------

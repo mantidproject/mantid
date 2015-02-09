@@ -12,7 +12,6 @@ set ( SRC_FILES src/CatalogPublishDialog.cpp
                 src/MantidGLWidget.cpp
                 src/PlotAsymmetryByLogValueDialog.cpp
                 src/SampleShapeHelpers.cpp
-                src/SlicingAlgorithmDialog.cpp
                 src/SmoothNeighboursDialog.cpp
                 src/SortTableWorkspaceDialog.cpp
 )
@@ -34,7 +33,6 @@ set ( MOC_FILES inc/MantidQtCustomDialogs/CatalogPublishDialog.h
                 inc/MantidQtCustomDialogs/MantidGLWidget.h
                 inc/MantidQtCustomDialogs/PlotAsymmetryByLogValueDialog.h
                 inc/MantidQtCustomDialogs/SampleShapeHelpers.h
-                inc/MantidQtCustomDialogs/SlicingAlgorithmDialog.h
                 inc/MantidQtCustomDialogs/SmoothNeighboursDialog.h
                 inc/MantidQtCustomDialogs/SortTableWorkspaceDialog.h
 )
@@ -53,7 +51,6 @@ set ( UI_FILES inc/MantidQtCustomDialogs/CatalogPublishDialog.ui
                inc/MantidQtCustomDialogs/LoadDialog.ui
                inc/MantidQtCustomDialogs/LoadInstrumentDialog.ui              
                inc/MantidQtCustomDialogs/StartLiveDataDialog.ui
-               inc/MantidQtCustomDialogs/SlicingAlgorithmDialog.ui
                inc/MantidQtCustomDialogs/FitDialog.ui
                inc/MantidQtCustomDialogs/SortTableWorkspaceDialog.ui
 )

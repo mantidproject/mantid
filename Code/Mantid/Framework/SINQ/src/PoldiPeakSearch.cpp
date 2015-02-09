@@ -33,8 +33,7 @@ using namespace DataObjects;
 PoldiPeakSearch::PoldiPeakSearch()
     : API::Algorithm(), m_minimumDistance(0), m_doubleMinimumDistance(0),
       m_minimumPeakHeight(0.0), m_maximumPeakNumber(0),
-      m_recursionAbsoluteBegin(), m_recursionAbsoluteEnd(),
-      m_recursionBordersInitialized(false), m_peaks(new PoldiPeakCollection()) {
+      m_peaks(new PoldiPeakCollection()) {
 }
 
 /** Sums the counts of neighboring d-values
@@ -102,9 +101,6 @@ MantidVec PoldiPeakSearch::getNeighborSums(MantidVec correlationCounts) const {
 std::list<MantidVec::const_iterator>
 PoldiPeakSearch::findPeaks(MantidVec::const_iterator begin,
                            MantidVec::const_iterator end) {
-  // These borders need to be known for handling the edges correctly in the
-  // recursion
-  setRecursionAbsoluteBorders(begin, end);
 
   std::list<MantidVec::const_iterator> rawPeaks =
       findPeaksRecursive(begin, end);
@@ -154,67 +150,20 @@ PoldiPeakSearch::findPeaksRecursive(MantidVec::const_iterator begin,
   peaks.push_back(maxInRange);
 
   // ...and perform same search on sub-list left of maximum...
-  MantidVec::const_iterator leftBegin = getLeftRangeBegin(begin);
-  if (std::distance(leftBegin, maxInRange) > m_minimumDistance) {
+  if (std::distance(begin, maxInRange) > m_minimumDistance) {
     std::list<MantidVec::const_iterator> leftBranchPeaks =
-        findPeaksRecursive(leftBegin, maxInRange - m_minimumDistance);
+        findPeaksRecursive(begin, maxInRange - m_minimumDistance);
     peaks.insert(peaks.end(), leftBranchPeaks.begin(), leftBranchPeaks.end());
   }
 
   // ...and right of maximum
-  MantidVec::const_iterator rightEnd = getRightRangeEnd(end);
-  if (std::distance(maxInRange + 1, rightEnd) > m_minimumDistance) {
+  if (std::distance(maxInRange + 1, end) > m_minimumDistance) {
     std::list<MantidVec::const_iterator> rightBranchPeaks =
-        findPeaksRecursive(maxInRange + 1 + m_minimumDistance, rightEnd);
+        findPeaksRecursive(maxInRange + 1 + m_minimumDistance, end);
     peaks.insert(peaks.end(), rightBranchPeaks.begin(), rightBranchPeaks.end());
   }
 
   return peaks;
-}
-
-/** Returns starting iterator for "left" half of sub-range
-  *
-  * This method "cleans" the begin-iterator for use in a sub-range during the
-  *recursion. Without this,
-  * considerable parts at the vector beginning would not be searched.
-  *
-  * @param begin :: Raw begin-iterator of "left" recursion sub-range.
-  * @returns Corrected begin-iterator for "left" recursion sub-range.
-  */
-MantidVec::const_iterator
-PoldiPeakSearch::getLeftRangeBegin(MantidVec::const_iterator begin) const {
-  /* The edges of the searched range require special treatment. Without this
-   *sanitation,
-   * each recursion step that includes the leftmost sublist would chop off
-   *m_minimumDistance
-   * elements from the beginning, so the index is compared to the range's
-   *absolute start.
-   *
-   * Exactly the same considerations are valid for the rightmost sublist.
-   */
-  if (!m_recursionBordersInitialized || begin != m_recursionAbsoluteBegin) {
-    return begin + m_minimumDistance;
-  }
-
-  return begin;
-}
-
-/** Returns end iterator for "right" half of sub-range
-  *
-  * This method "cleans" the end-iterator for use in a sub-range during the
-  *recursion. Without this,
-  * considerable parts at the vector end would not be searched.
-  *
-  * @param end :: Raw end-iterator of "right" recursion sub-range.
-  * @returns Corrected end-iterator for "right" recursion sub-range.
-  */
-MantidVec::const_iterator
-PoldiPeakSearch::getRightRangeEnd(MantidVec::const_iterator end) const {
-  if (!m_recursionBordersInitialized || end != m_recursionAbsoluteEnd) {
-    return end - m_minimumDistance;
-  }
-
-  return end;
 }
 
 /** Maps peak position iterators from one vector to another
@@ -533,15 +482,6 @@ void PoldiPeakSearch::setMinimumPeakHeight(double newMinimumPeakHeight) {
 
 void PoldiPeakSearch::setMaximumPeakNumber(int newMaximumPeakNumber) {
   m_maximumPeakNumber = newMaximumPeakNumber;
-}
-
-void
-PoldiPeakSearch::setRecursionAbsoluteBorders(MantidVec::const_iterator begin,
-                                             MantidVec::const_iterator end) {
-  m_recursionAbsoluteBegin = begin;
-  m_recursionAbsoluteEnd = end;
-
-  m_recursionBordersInitialized = true;
 }
 
 bool

@@ -39,6 +39,7 @@ class ReductionOptions(BaseScriptElement):
     n_sub_pix = 1
     log_binning = False
     align_log_with_decades = True
+    error_weighting = False
     
     # Wedges
     n_wedges = 2
@@ -123,6 +124,7 @@ class ReductionOptions(BaseScriptElement):
         # Q binning
         script += "AzimuthalAverage(n_bins=%g, n_subpix=%g, log_binning=%s" % (self.n_q_bins, self.n_sub_pix, str(self.log_binning))
         if self.align_log_with_decades: script += ", align_log_with_decades=%s" % str(self.align_log_with_decades)
+        if self.error_weighting: script += ", error_weighting=%s" % str(self.error_weighting)
         script += ")\n"
         
         # If we align we decades, use more points for I(qx,qy)
@@ -191,6 +193,7 @@ class ReductionOptions(BaseScriptElement):
         xml += "  <n_sub_pix>%g</n_sub_pix>\n" % self.n_sub_pix
         xml += "  <log_binning>%s</log_binning>\n" % str(self.log_binning)
         xml += "  <align_log_with_decades>%s</align_log_with_decades>\n" % str(self.align_log_with_decades)
+        xml += "  <error_weighting>%s</error_weighting>\n" % str(self.error_weighting)
 
         xml += "  <n_wedges>%g</n_wedges>\n" % self.n_wedges
         xml += "  <wedge_angle>%g</wedge_angle>\n" % self.wedge_angle
@@ -283,6 +286,8 @@ class ReductionOptions(BaseScriptElement):
                                                                  default = ReductionOptions.log_binning)
         self.align_log_with_decades = BaseScriptElement.getBoolElement(instrument_dom, "align_log_with_decades",
                                                                        default = ReductionOptions.align_log_with_decades)
+        self.error_weighting = BaseScriptElement.getBoolElement(instrument_dom, "error_weighting",
+                                                                default = ReductionOptions.error_weighting)
 
         self.n_wedges = BaseScriptElement.getIntElement(instrument_dom, "n_wedges",
                                                         default=ReductionOptions.n_wedges)
@@ -369,6 +374,7 @@ class ReductionOptions(BaseScriptElement):
         self.n_sub_pix = BaseScriptElement.getPropertyValue(alg, "NumberOfSubpixels", default=ReductionOptions.n_sub_pix)
         self.log_binning = BaseScriptElement.getPropertyValue(alg, "IQLogBinning", default = ReductionOptions.log_binning)
         self.align_log_with_decades = BaseScriptElement.getPropertyValue(alg, "IQAlignLogWithDecades", default = ReductionOptions.align_log_with_decades)
+        self.error_weighting = BaseScriptElement.getPropertyValue(alg, "ErrorWeighting", default = ReductionOptions.error_weighting)
 
         self.n_wedges = BaseScriptElement.getPropertyValue(alg, "NumberOfWedges", default=ReductionOptions.n_wedges)
         self.wedge_angle = BaseScriptElement.getPropertyValue(alg, "WedgeAngle", default=ReductionOptions.wedge_angle)
@@ -445,6 +451,7 @@ class ReductionOptions(BaseScriptElement):
         self.n_sub_pix = ReductionOptions.n_sub_pix
         self.log_binning = ReductionOptions.log_binning
         self.align_log_with_decades = ReductionOptions.align_log_with_decades
+        self.error_weighting = ReductionOptions.error_weighting
         
         self.n_wedges = ReductionOptions.n_wedges
         self.wedge_angle = ReductionOptions.wedge_angle

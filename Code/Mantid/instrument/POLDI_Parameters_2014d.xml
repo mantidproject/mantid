@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument="POLDI" valid-from="2014-09-08 00:00:00">
+<parameter-file instrument="POLDI" valid-from="2014-09-07 00:00:00">
     
     <component-link name="chopper">
         <parameter name="t0" type="number">
             <value val="-0.0079" />
         </parameter>
         <parameter name="t0_const" type="number">
-            <value val="-22.0" />
+            <value val="-17.74" />
         </parameter>
     </component-link>
     
@@ -15,7 +15,7 @@
             <value val="91.12" />
         </parameter>
         <parameter name="x">
-            <value val="-0.8322" />
+            <value val="-0.8352" />
         </parameter>
         <parameter name="y">
             <value val="-0.91" />

@@ -93,7 +93,7 @@ class SuggestTibCNCS(PythonAlgorithm):
         if itpulse.overlap(Interval(tinf,tinf)):
             #if the prompt pulse overlaps with t_inf move the upper part one frame down
             intervalList.append(Interval(itpulse.min,tinf))
-            intervalList.append(Interval(tinf-frame,itpulse.max+tinf-frame))
+            intervalList.append(Interval(tinf-frame,itpulse.max-frame))
         else:
             if tinf<itpulse.min:
                 itpulse=Interval(itpulse.min-frame,itpulse.max-frame)

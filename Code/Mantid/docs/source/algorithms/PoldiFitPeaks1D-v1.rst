@@ -29,7 +29,7 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-The following small usage example performs a peak fit on the sample data already used in :ref:`algm-PoldiAutoCorrelation` and :ref:`algm-PoldiPeakSearch`. After the fit, the plots can be viewed and 
+The following small usage example performs a peak fit on the sample data already used in :ref:`algm-PoldiAutoCorrelation` and :ref:`algm-PoldiPeakSearch`. After the fit, the plots can be viewed and used to visually judge the quality of the fits.
 
 .. testcode:: ExSiliconPeakFit
 
@@ -43,9 +43,9 @@ The following small usage example performs a peak fit on the sample data already
     
     PoldiFitPeaks1D(InputWorkspace = correlated_6904, FwhmMultiples = 4.0,
                     PeakFunction = "Gaussian", PoldiPeakTable = peaks_6904,
-                    OutputWorkspace = "peaks_refined_6904", ResultTableWorkspace = "result_table_6904",
-                    FitCharacteristicsWorkspace = "raw_fit_results_6904",
-                    FitPlotsWorkspace = "fit_plots_6904")
+                    OutputWorkspace = "peaks_refined_6904",
+                    FitPlotsWorkspace = "fit_plots_6904",
+                    Version=1)
                     
     print "There are", mtd['fit_plots_6904'].getNumberOfEntries(), "plots available for inspection."
     
