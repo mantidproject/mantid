@@ -55,15 +55,9 @@ namespace MantidWidgets
     Q_PROPERTY(QColor canvasColour READ canvasColour WRITE setCanvasColour)
     Q_PROPERTY(bool allowPan READ allowPan WRITE setAllowPan)
     Q_PROPERTY(bool allowZoom READ allowZoom WRITE setAllowZoom)
+    Q_PROPERTY(bool showLegend READ legendIsShown WRITE showLegend)
 
   public:
-    enum ScaleType
-    {
-      LINEAR,
-      LOGARITHMIC,
-      X_SQUARED
-    };
-
     PreviewPlot(QWidget *parent = NULL, bool init = true);
     virtual ~PreviewPlot();
 
@@ -75,6 +69,8 @@ namespace MantidWidgets
 
     bool allowZoom();
     void setAllowZoom(bool allow);
+
+    bool legendIsShown();
 
     void setAxisRange(QPair<double, double> range, int axisID = QwtPlot::xBottom);
 
@@ -88,6 +84,7 @@ namespace MantidWidgets
     void removeSpectrum(const QString & wsName);
 
   public slots:
+    void showLegend(bool show);
     void togglePanTool(bool enabled);
     void toggleZoomTool(bool enabled);
     void resetView();
@@ -101,9 +98,12 @@ namespace MantidWidgets
 
     void removeCurve(QwtPlotCurve *curve);
 
+    QList<QAction *> addOptionsToMenus(QString menuName, QActionGroup *group, QStringList items, QString defaultItem);
+
   private slots:
     void showContextMenu(QPoint position);
-    void handleViewToolSelect(bool checked);
+    void handleViewToolSelect();
+    void handleAxisTypeSelect();
 
   private:
     /// Poco Observers for ADS Notifications
@@ -132,6 +132,8 @@ namespace MantidWidgets
     /// Context menu items
     QMenu *m_contextMenu;
     QActionGroup *m_plotToolGroup;
+    QActionGroup *m_xAxisTypeGroup;
+    QActionGroup *m_yAxisTypeGroup;
 
   };
 

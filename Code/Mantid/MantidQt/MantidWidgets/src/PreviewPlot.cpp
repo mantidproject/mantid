@@ -15,6 +15,8 @@
 #include <QBrush>
 #include <QHBoxLayout>
 
+#include <qwt_scale_engine.h>
+
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 
@@ -65,35 +67,48 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent)
   connect(m_plot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
 
   // Create the plot tool list for context menu
-  QMenu *viewToolMenu = new QMenu(m_contextMenu);
   m_plotToolGroup = new QActionGroup(m_contextMenu);
   m_plotToolGroup->setExclusive(true);
 
   QStringList plotTools;
   plotTools << "None" << "Pan" << "Zoom";
-
-  for(auto it = plotTools.begin(); it != plotTools.end(); ++it)
-  {
-    QAction *toolAction = new QAction(*it, viewToolMenu);
-    toolAction->setCheckable(true);
-    connect(toolAction, SIGNAL(toggled(bool)), this, SLOT(handleViewToolSelect(bool)));
-
-    // Add to the menu and action group
-    m_plotToolGroup->addAction(toolAction);
-    viewToolMenu->addAction(toolAction);
-
-    // None is selected by default
-    toolAction->setChecked(*it == "None");
-  }
-
-  QAction *viewToolAction = new QAction("View Tool", this);
-  viewToolAction->setMenu(viewToolMenu);
-  m_contextMenu->addAction(viewToolAction);
+  QList<QAction *> plotToolActions = addOptionsToMenus("Plot Tools", m_plotToolGroup, plotTools, "None");
+  for(auto it = plotToolActions.begin(); it != plotToolActions.end(); ++it)
+    connect(*it, SIGNAL(triggered()), this, SLOT(handleViewToolSelect()));
 
   // Create the reset plot view option
   QAction *resetPlotAction = new QAction("Reset Plot", m_contextMenu);
   connect(resetPlotAction, SIGNAL(triggered()), this, SLOT(resetView()));
   m_contextMenu->addAction(resetPlotAction);
+
+  m_contextMenu->addSeparator();
+
+  // Create the X axis type list for context menu
+  m_xAxisTypeGroup = new QActionGroup(m_contextMenu);
+  m_xAxisTypeGroup->setExclusive(true);
+
+  QStringList xAxisTypes;
+  xAxisTypes << "Linear" << "Logarithmic" << "Squared";
+  QList<QAction *> xAxisTypeActions = addOptionsToMenus("X Axis", m_xAxisTypeGroup, xAxisTypes, "Linear");
+  for(auto it = xAxisTypeActions.begin(); it != xAxisTypeActions.end(); ++it)
+    connect(*it, SIGNAL(triggered()), this, SLOT(handleAxisTypeSelect()));
+
+  // Create the X axis type list for context menu
+  m_yAxisTypeGroup = new QActionGroup(m_contextMenu);
+  m_yAxisTypeGroup->setExclusive(true);
+
+  QStringList yAxisTypes;
+  yAxisTypes << "Linear" << "Logarithmic";
+  QList<QAction *> yAxisTypeActions = addOptionsToMenus("Y Axis", m_yAxisTypeGroup, yAxisTypes, "Linear");
+  for(auto it = yAxisTypeActions.begin(); it != yAxisTypeActions.end(); ++it)
+    connect(*it, SIGNAL(triggered()), this, SLOT(handleAxisTypeSelect()));
+
+  m_contextMenu->addSeparator();
+
+  // Create the show legend option
+  QAction *showLegendAction = new QAction("Show Legend", m_contextMenu);
+  connect(showLegendAction, SIGNAL(toggled(bool)), this, SLOT(showLegend(bool)));
+  m_contextMenu->addAction(showLegendAction);
 }
 
 
@@ -179,6 +194,17 @@ bool PreviewPlot::allowZoom()
 void PreviewPlot::setAllowZoom(bool allow)
 {
   m_allowZoom = allow;
+}
+
+
+/**
+ * Checks to see if the plot legend is visible.
+ *
+ * @returns True if the legend is shown
+ */
+bool PreviewPlot::legendIsShown()
+{
+  return false;
 }
 
 
@@ -335,6 +361,17 @@ void PreviewPlot::removeSpectrum(const QString & wsName)
 
 
 /**
+ * Shows or hides the plot legend.
+ *
+ * @param show If the legend should be shown
+ */
+void PreviewPlot::showLegend(bool show)
+{
+  //TODO
+}
+
+
+/**
  * Toggles the pan plot tool.
  *
  * @param enabled If the tool should be enabled
@@ -459,6 +496,40 @@ void PreviewPlot::removeCurve(QwtPlotCurve * curve)
 
 
 /**
+ * Helper function for adding a set of items to an exclusive menu oon the context menu.
+ *
+ * @param menuName Name of sub menu
+ * @param group Pointer to ActionGroup
+ * @param items List of item names
+ * @param defaultItem Default item name
+ * @return List of Actions added
+ */
+QList<QAction *> PreviewPlot::addOptionsToMenus(QString menuName, QActionGroup *group, QStringList items, QString defaultItem)
+{
+  QMenu *menu = new QMenu(m_contextMenu);
+
+  for(auto it = items.begin(); it != items.end(); ++it)
+  {
+    QAction *action = new QAction(*it, menu);
+    action->setCheckable(true);
+
+    // Add to the menu and action group
+    group->addAction(action);
+    menu->addAction(action);
+
+    // Select default
+    action->setChecked(*it == defaultItem);
+  }
+
+  QAction *menuAction = new QAction(menuName, this);
+  menuAction->setMenu(menu);
+  m_contextMenu->addAction(menuAction);
+
+  return group->actions();
+}
+
+
+/**
  * Handles displaying the context menu when a user right clicks on the plot.
  *
  * @param position Position at which to show menu
@@ -472,14 +543,9 @@ void PreviewPlot::showContextMenu(QPoint position)
 
 /**
  * Handles the view tool being selected from the context menu.
- *
- * @param checked If the option was checked
  */
-void PreviewPlot::handleViewToolSelect(bool checked)
+void PreviewPlot::handleViewToolSelect()
 {
-  if(!checked)
-    return;
-
   QAction *selectedPlotType = m_plotToolGroup->checkedAction();
   if(!selectedPlotType)
     return;
@@ -498,4 +564,43 @@ void PreviewPlot::handleViewToolSelect(bool checked)
   {
     toggleZoomTool(true);
   }
+}
+
+
+/**
+ * Handles a change in the plot axis type.
+ */
+void PreviewPlot::handleAxisTypeSelect()
+{
+  QString xAxisType("Linear");
+  QString yAxisType("Linear");
+
+  QAction *selectedXAxisType = m_xAxisTypeGroup->checkedAction();
+  if(selectedXAxisType)
+    xAxisType = selectedXAxisType->text();
+
+  QAction *selectedYAxisType = m_yAxisTypeGroup->checkedAction();
+  if(selectedYAxisType)
+    yAxisType = selectedYAxisType->text();
+
+  QwtScaleEngine *xEngine = NULL;
+  QwtScaleEngine *yEngine = NULL;
+
+  if(xAxisType == "Linear")
+    xEngine = new QwtLinearScaleEngine();
+  else if(xAxisType == "Logarithmic")
+    xEngine = new QwtLog10ScaleEngine();
+
+  if(yAxisType == "Linear")
+    yEngine = new QwtLinearScaleEngine();
+  else if(yAxisType == "Logarithmic")
+    yEngine = new QwtLog10ScaleEngine();
+
+  if(xEngine)
+    m_plot->setAxisScaleEngine(QwtPlot::xBottom, xEngine);
+
+  if(yEngine)
+    m_plot->setAxisScaleEngine(QwtPlot::yLeft, yEngine);
+
+  m_plot->replot();
 }
