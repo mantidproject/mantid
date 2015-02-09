@@ -7,12 +7,25 @@
 
 using namespace MantidQt::MantidWidgets;
 
-RangeSelector::RangeSelector(QwtPlot* plot, SelectType type, 
-			     bool visible, bool infoOnly) 
-  : QwtPlotPicker(plot->canvas()), m_type(type), m_min(0.0),m_max(0.0), m_lower(0.0), 
-    m_higher(0.0), m_canvas(plot->canvas()), m_plot(plot),m_mrkMin(NULL), m_mrkMax(NULL),
-    m_minChanging(false), m_maxChanging(false),m_infoOnly(infoOnly), m_visible(visible),
+RangeSelector::RangeSelector(QwtPlot* plot, SelectType type, bool visible, bool infoOnly)
+  : QwtPlotPicker(plot->canvas()), m_type(type), m_min(0.0) ,m_max(0.0), m_lower(0.0),
+    m_higher(0.0), m_canvas(plot->canvas()), m_plot(plot), m_mrkMin(NULL), m_mrkMax(NULL),
+    m_minChanging(false), m_maxChanging(false), m_infoOnly(infoOnly), m_visible(visible),
     m_pen(NULL), m_movCursor()
+{
+  init();
+}
+
+RangeSelector::RangeSelector(PreviewPlot* plot, SelectType type, bool visible, bool infoOnly)
+  : QwtPlotPicker(plot->m_plot->canvas()), m_type(type), m_min(0.0) ,m_max(0.0), m_lower(0.0),
+    m_higher(0.0), m_canvas(plot->m_plot->canvas()), m_plot(plot->m_plot), m_mrkMin(NULL), m_mrkMax(NULL),
+    m_minChanging(false), m_maxChanging(false), m_infoOnly(infoOnly), m_visible(visible),
+    m_pen(NULL), m_movCursor()
+{
+  init();
+}
+
+void RangeSelector::init()
 {
   m_canvas->installEventFilter(this);
 
@@ -22,7 +35,7 @@ RangeSelector::RangeSelector(QwtPlot* plot, SelectType type,
   m_mrkMax = new QwtPlotMarker();
 
   QwtPlotMarker::LineStyle lineStyle;
-  
+
   switch ( m_type )
   {
   case XMINMAX:

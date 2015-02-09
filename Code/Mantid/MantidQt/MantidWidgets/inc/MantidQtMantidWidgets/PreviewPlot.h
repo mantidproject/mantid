@@ -118,6 +118,7 @@ namespace MantidWidgets
     bool m_allowZoom;
 
     /// The plot its self
+    friend class RangeSelector;
     QwtPlot *m_plot;
 
     /// Map of workspaces to plot curves

@@ -67,21 +67,12 @@ namespace CustomInterfaces
     m_propTrees["SlicePropTree"]->addProperty(m_properties["Range2"]);
 
     // Slice plot
-    m_plots["SlicePlot"] = new QwtPlot(m_parentWidget);
-    m_rangeSelectors["SlicePeak"] = new MantidWidgets::RangeSelector(m_plots["SlicePlot"]);
-    m_rangeSelectors["SliceBackground"] = new MantidWidgets::RangeSelector(m_plots["SlicePlot"]);
-
-    m_plots["SlicePlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-    m_plots["SlicePlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-    m_plots["SlicePlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.plotRaw->addWidget(m_plots["SlicePlot"]);
+    m_rangeSelectors["SlicePeak"] = new MantidWidgets::RangeSelector(m_uiForm.ppRawPlot);
+    m_rangeSelectors["SliceBackground"] = new MantidWidgets::RangeSelector(m_uiForm.ppRawPlot);
 
     // Setup second range
     m_rangeSelectors["SliceBackground"]->setColour(Qt::darkGreen); // Dark green for background
     m_rangeSelectors["SliceBackground"]->setRange(m_rangeSelectors["SlicePeak"]->getRange());
-
-    // Refresh the plot window
-    m_plots["SlicePlot"]->replot();
 
     // SIGNAL/SLOT CONNECTIONS
 
@@ -267,13 +258,13 @@ namespace CustomInterfaces
       const Mantid::MantidVec & dataX = input->readX(0);
       std::pair<double, double> range(dataX.front(), dataX.back());
 
-      plotMiniPlot(input, 0, "SlicePlot");
-      setXAxisToCurve("SlicePlot", "SlicePlot");
+      m_uiForm.ppRawPlot->clear();
+      m_uiForm.ppRawPlot->addSpectrum(input, 0);
 
       setPlotRange("SlicePeak", m_properties["PeakStart"], m_properties["PeakEnd"], range);
       setPlotRange("SliceBackground", m_properties["BackgroundStart"], m_properties["BackgroundEnd"], range);
 
-      replot("SlicePlot");
+      m_uiForm.ppRawPlot->resizeX();
     }
     else
     {
