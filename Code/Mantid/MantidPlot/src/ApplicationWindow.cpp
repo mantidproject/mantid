@@ -8413,15 +8413,17 @@ void ApplicationWindow::cutSelection()
   if (!m)
     return;
 
-  if (m->inherits("Table"))
-    dynamic_cast<Table*>(m)->cutSelection();
-  else if (m->isA("Matrix"))
-    dynamic_cast<Matrix*>(m)->cutSelection();
-  else if(m->isA("MultiLayer")){
-    MultiLayer* plot = dynamic_cast<MultiLayer*>(m);
-    if (!plot || plot->layers() == 0)
-      return;
+  auto t = dynamic_cast<Table*>(m);
+  auto mat = dynamic_cast<Matrix*>(m);
+  auto plot = dynamic_cast<MultiLayer*>(m);
+  auto note = dynamic_cast<Note*>(m);
 
+  if(t)
+    t->cutSelection();
+  else if (mat)
+    mat->cutSelection();
+  else if (plot && plot->layers())
+  {
     Graph* g = dynamic_cast<Graph*>(plot->activeGraph());
     if (!g)
       return;
@@ -8434,8 +8436,8 @@ void ApplicationWindow::cutSelection()
       g->removeMarker();
     }
   }
-  else if (m->isA("Note"))
-    dynamic_cast<Note*>(m)->editor()->cut();
+  else if (note)
+    note->editor()->cut();
 
   emit modified();
 }
