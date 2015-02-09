@@ -1008,18 +1008,20 @@ class MonoCorrectionFactor(PropDescriptor):
        return self._cor_factor
 
     def __set__(self,instance,value):
-       if value is None:
-          self._cor_factor = None
-          self.cashed_values={}
-          return
        self._cor_factor = value
     # 
-    def set_val_to_cash(self,mono_int_range,value):
+    def set_val_to_cash(self,instance,value):
         """ """ 
+        mono_int_range = instance.monovan_integr_range
         cash_id = self._build_cash_val_id(mono_int_range)
         self.cashed_values[cash_id] = value
+        # tell property manager that mono_correction_factor has been modified
+        # to avoid automatic resetting this property from any workspace 
+        cp = getattr(instance,'_PropertyManager__changed_properties')
+        cp.add('mono_correction_factor')
 
-    def get_val_from_cash(self,mono_int_range):
+    def get_val_from_cash(self,instance):
+        mono_int_range = instance.monovan_integr_range
         cash_id = self._build_cash_val_id(mono_int_range)
         if cash_id in self.cashed_values:
            return self.cashed_values[cash_id]
@@ -1027,6 +1029,10 @@ class MonoCorrectionFactor(PropDescriptor):
            return None
         
     def set_cash_mono_run_number(self,new_value):
+        if new_value is None:
+           self.cashed_values={}
+           self._mono_run_number = None
+           return
         if self._mono_run_number != int(new_value):
            self.cashed_values={}
            self._mono_run_number = int(new_value)

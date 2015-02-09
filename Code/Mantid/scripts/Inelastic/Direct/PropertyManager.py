@@ -366,7 +366,7 @@ class PropertyManager(NonIDF_Properties):
         param_list = prop_helpers.get_default_idf_param_list(pInstrument)
         # remove old changes which are not related to IDF (not to reapply it again)
         for prop_name in old_changes:
-            if not prop_name in param_list:
+            if not (prop_name in param_list):
                try:
                      dependencies = getattr(PropertyManager,prop_name).dependencies()
                except:
@@ -421,6 +421,8 @@ class PropertyManager(NonIDF_Properties):
                 for dep_name in dependencies:
                     if dep_name in sorted_param:
                        del sorted_param[dep_name]
+            else: # remove property from old changes list not to reapply it again?
+                pass
         #end loop
         # clear record about all changes and store only changed descriptors list
         self.setChangedProperties(changed_descriptors)

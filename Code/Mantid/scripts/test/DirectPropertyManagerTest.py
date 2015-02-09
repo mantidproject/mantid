@@ -878,6 +878,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_mono_correction_factor(self):
         propman = self.prop_man
         propman.incident_energy=[10,20]
+        #propman.m
 
         PropertyManager.mono_correction_factor.set_cash_mono_run_number(11015)
 
@@ -886,17 +887,17 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman.mono_correction_factor = 66.
         self.assertAlmostEqual(propman.mono_correction_factor,66)
 
-        self.assertTrue(PropertyManager.mono_correction_factor.get_val_from_cash([10.,20.]) is None)
-        PropertyManager.mono_correction_factor.set_val_to_cash([10.,20.],100)
-        self.assertAlmostEqual(PropertyManager.mono_correction_factor.get_val_from_cash([10.,20.]),100)
+        self.assertTrue(PropertyManager.mono_correction_factor.get_val_from_cash(propman) is None)
+        PropertyManager.mono_correction_factor.set_val_to_cash(propman,100)
+        self.assertAlmostEqual(PropertyManager.mono_correction_factor.get_val_from_cash(propman),100)
 
         PropertyManager.incident_energy.next()
-        self.assertTrue(PropertyManager.mono_correction_factor.get_val_from_cash([10.,20.]) is None)
-        PropertyManager.mono_correction_factor.set_val_to_cash([10.,20.],50)
-        self.assertAlmostEqual(PropertyManager.mono_correction_factor.get_val_from_cash([10.,20.]),50)
+        self.assertTrue(PropertyManager.mono_correction_factor.get_val_from_cash(propman) is None)
+        PropertyManager.mono_correction_factor.set_val_to_cash(propman,50)
+        self.assertAlmostEqual(PropertyManager.mono_correction_factor.get_val_from_cash(propman),50)
 
         PropertyManager.mono_correction_factor.set_cash_mono_run_number(11060)
-        self.assertTrue(PropertyManager.mono_correction_factor.get_val_from_cash([10.,20.]) is None)
+        self.assertTrue(PropertyManager.mono_correction_factor.get_val_from_cash(propman) is None)
 
 if __name__=="__main__":
     unittest.main()

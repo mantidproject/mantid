@@ -395,7 +395,7 @@ class DirectEnergyConversion(object):
       # SNS or GUI motor stuff
       self.calculate_rotation(PropertyManager.sample_run.get_workspace())
       # 
-      if self.monovan_run:
+      if self.monovan_run != None:
          MonovanCashNum=PropertyManager.monovan_run.run_number()
          if self.mono_correction_factor:
             calculate_abs_units = False # correction factor given, so no calculations
@@ -404,6 +404,7 @@ class DirectEnergyConversion(object):
       else:
           MonovanCashNum=None
           calculate_abs_units = False
+      PropertyManager.mono_correction_factor.set_cash_mono_run_number(MonovanCashNum)
 
 
       if PropertyManager.incident_energy.multirep_mode():
@@ -425,7 +426,7 @@ class DirectEnergyConversion(object):
          self._multirep_mode = False
          num_ei_cuts   = 0
  
-      cut_ind = 0
+      cut_ind = 0 # do not do enumerate if it generates all sequence -- code below 
       for ei_guess in PropertyManager.incident_energy:
          cut_ind +=1
          #---------------
@@ -435,35 +436,46 @@ class DirectEnergyConversion(object):
          #---------------
 
          #Run the conversion first on the sample
-         deltaE_wkspace_sample = self.mono_sample(PropertyManager.sample_run,ei_guess,PropertyManager.wb_run,
-                                                  self.map_file,masking)
+         deltaE_ws_sample = self.mono_sample(PropertyManager.sample_run,ei_guess,PropertyManager.wb_run,
+                                             self.map_file,masking)
  
          # calculate absolute units integral and apply it to the workspace
-         if self.monovan_run != None or self.mono_correction_factor != None :
-            if self._multirep_mode and calculate_abs_units:
-               mono_ws_base= PropertyManager.monovan_run.chop_ws_part(mono_ws_base,tof_range,self._do_early_rebinning,
-                                                                      cut_ind,num_ei_cuts)
-            deltaE_wkspace_sample = self.apply_absolute_normalization(deltaE_wkspace_sample,PropertyManager.monovan_run,
+         cashed_mono_int = PropertyManager.mono_correction_factor.get_val_from_cash(prop_man)
+         if MonovanCashNum != None or self.mono_correction_factor or cashed_mono_int :
+            if self.mono_correction_factor:
+                deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,
                                                                       ei_guess,PropertyManager.wb_for_monovan_run)
+            elif cashed_mono_int:
+                self.mono_correction_factor = cashed_mono_int
+                deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,
+                                                                      ei_guess,PropertyManager.wb_for_monovan_run)
+                self.mono_correction_factor=None
+            else:
+                if self._multirep_mode and calculate_abs_units:
+                   mono_ws_base= PropertyManager.monovan_run.chop_ws_part(mono_ws_base,tof_range,self._do_early_rebinning,
+                                                                          cut_ind,num_ei_cuts)
+                deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,
+                                                                      ei_guess,PropertyManager.wb_for_monovan_run)
+
          # ensure that the sample_run name is intact with workspace
-         PropertyManager.sample_run.synchronize_ws(deltaE_wkspace_sample)
+         PropertyManager.sample_run.synchronize_ws(deltaE_ws_sample)
          # 
-         ei = (deltaE_wkspace_sample.getRun().getLogData("Ei").value)
+         ei = (deltaE_ws_sample.getRun().getLogData("Ei").value)
          # PropertyManager.incident_energy.set_current(ei) # let's not do it -- this makes subsequent calls to this method depend on 
          #                                                 # previous calls
 
          prop_man.log("*** Incident energy found for sample run: {0} meV".format(ei),'notice')
          #
-         self.save_results(deltaE_wkspace_sample)
+         self.save_results(deltaE_ws_sample)
          if out_ws_name: 
             if self._multirep_mode: 
-               result.append(deltaE_wkspace_sample)
+               result.append(deltaE_ws_sample)
          else: # delete workspace if no output is requested
             self.sample_run=None
 
 
 
-      results_name = deltaE_wkspace_sample.name()
+      results_name = deltaE_ws_sample.name()
       if out_ws_name and not(self._multirep_mode):
          if results_name != out_ws_name:
              RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
@@ -1095,6 +1107,12 @@ class DirectEnergyConversion(object):
                 .format(anf_LibISIS,anf_SS2,anf_Puas,anf_TGP),'notice')
             prop_man.log('*** If these factors are substantially different, something is wrong                    ***','notice')
             absnorm_factor = anf_TGP
+            # Store the factor for further usage
+            PropertyManager.mono_correction_factor.set_val_to_cash(prop_man,anf_TGP)
+            # reset current monovan run to run number (if it makes sense) -- workspace is not good for further processing any more
+            mono_run_num = PropertyManager.monovan_run.run_number()
+            prop_man.monovan_run = None # delete everything from memory
+            prop_man.monovan_run = mono_run_num 
         #end
         prop_man.log('*** Using {0} value : {1} of absolute units correction factor (TGP)'.format(abs_norm_factor_is,absnorm_factor),'notice')
         prop_man.log('*******************************************************************************************','notice')
