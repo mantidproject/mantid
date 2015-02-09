@@ -918,7 +918,7 @@ class DirectEnergyConversion(object):
             for case in common.switch(file_format):
                 if case('nxspe'):
                    filename = save_file + '.nxspe'
-                   name_supported=nameorig.replace('/','of')
+                   name_supported=name_orig.replace('/','of')
                    RenameWorkspace(InputWorkspace=name_orig,OutputWorkspace=name_supported)
                    SaveNXSPE(InputWorkspace=name_supported,Filename= filename, KiOverKfScaling=prop_man.apply_kikf_correction,psi=prop_man.psi)
                    RenameWorkspace(InputWorkspace=name_supported,OutputWorkspace=name_orig)
