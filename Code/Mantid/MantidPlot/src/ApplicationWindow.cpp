@@ -8432,8 +8432,9 @@ void ApplicationWindow::cutSelection()
       return;
 
     if (g->activeTool()){
-      if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector)
-        dynamic_cast<RangeSelectorTool*>(g->activeTool())->cutSelection();
+      auto rst = dynamic_cast<RangeSelectorTool*>(g->activeTool());
+      if (rst)
+        rst->cutSelection();
     } else {
       copyMarker();
       g->removeMarker();
