@@ -10,7 +10,8 @@ Description
 -----------
 
 This algorithm is to load HFIR Spice powder diffraction data to MDWorkspaces. 
-HB2A and HB2B are the two instruments supported by this algorithm. 
+HB2A is the only one instrument supported by this algorithm. 
+HB2A will be supported in future. 
 
 
 Format of SPICE data file
