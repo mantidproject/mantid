@@ -11,6 +11,7 @@
 #include <jsoncpp/json/json.h>
 
 using Mantid::DataObjects::PeakShapeEllipsoid;
+using Mantid::Kernel::SpecialCoordinateSystem;
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace boost::assign;

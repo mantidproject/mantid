@@ -10,7 +10,7 @@
 
 #include "MantidAPI/PeakTransform.h"
 #include "MantidAPI/PeakTransformFactory.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/PeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
 #include <boost/regex.hpp>
 #include <gmock/gmock.h>
@@ -156,6 +156,7 @@ namespace
       Mantid::Kernel::V3D());
     MOCK_CONST_METHOD0(getDetectorPositionNoCheck,
           Mantid::Kernel::V3D());
+    MOCK_METHOD0(getPeakShape, const Mantid::Geometry::PeakShape&());
   };
 
 

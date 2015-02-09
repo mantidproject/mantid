@@ -8,7 +8,7 @@ using namespace boost::python;
 
 void export_PeakShape()
 {
-  register_ptr_to_python<PeakShape*>();
+  register_ptr_to_python<Mantid::Geometry::PeakShape_sptr>();
 
   class_<PeakShape, boost::noncopyable>("PeakShape", no_init)
     .def("toJSON", &PeakShape::toJSON, "Serialize object to JSON")
