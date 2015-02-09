@@ -6520,10 +6520,12 @@ void ApplicationWindow::exportASCII(const QString& tableName, const QString& sep
     asciiDirPath = fi.dirPath(true);
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    if (w->inherits("Table"))
-      dynamic_cast<Table*>(w)->exportASCII(fname, sep, colNames, colComments, expSelection);
-    else if (w->isA("Matrix"))
-      (dynamic_cast<Matrix*>(w))->exportASCII(fname, sep, expSelection);
+    auto t = dynamic_cast<Table*>(w);
+    auto m = dynamic_cast<Matrix*>(w);
+    if (t)
+      t->exportASCII(fname, sep, colNames, colComments, expSelection);
+    else if (m)
+      m->exportASCII(fname, sep, expSelection);
     else if (w->isA("MantidMatrix"))
     {
       //call save ascii
