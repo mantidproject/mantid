@@ -913,12 +913,15 @@ class DirectEnergyConversion(object):
         if len(ext) > 1:
             formats.add(ext[1:])
 
-
+        name_orig = workspace.name()
         for file_format  in formats:
             for case in common.switch(file_format):
                 if case('nxspe'):
                    filename = save_file + '.nxspe'
-                   SaveNXSPE(InputWorkspace=workspace,Filename= filename, KiOverKfScaling=prop_man.apply_kikf_correction,psi=prop_man.psi)
+                   name_supported=nameorig.replace('/','of')
+                   RenameWorkspace(InputWorkspace=name_orig,OutputWorkspace=name_supported)
+                   SaveNXSPE(InputWorkspace=name_supported,Filename= filename, KiOverKfScaling=prop_man.apply_kikf_correction,psi=prop_man.psi)
+                   RenameWorkspace(InputWorkspace=name_supported,OutputWorkspace=name_orig)
                    break
                 if case('spe'):
                    filename = save_file + '.spe'
