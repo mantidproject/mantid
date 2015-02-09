@@ -15155,10 +15155,12 @@ void ApplicationWindow::goToColumn()
     if ( !ok )
       return;
 
-    if (w->inherits("Table"))
-      dynamic_cast<Table*>(w)->goToColumn(col);
-    else if (w->isA("Matrix"))
-      (dynamic_cast<Matrix*>(w))->goToColumn(col);
+    auto t = dynamic_cast<Table*>(w);
+    auto m = dynamic_cast<Matrix*>(w);
+    if (t)
+      t->goToColumn(col);
+    else if (m)
+      m->goToColumn(col);
   }
 }
 
