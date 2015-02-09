@@ -590,6 +590,9 @@ class DirectEnergyConversion(object):
 
         data_ws = data_run.get_workspace()
         monitor_ws = data_run.get_monitors_ws()
+        if not monitor_ws:
+           raise RuntimeError("Can not find monitors workspace for workspace {0}, run N{1}".\
+                 format(data_ws.name(),data_ws.getRunNumber()))
         separate_monitors = data_run.is_monws_separate()
         data_run.set_action_suffix('_shifted')
 
