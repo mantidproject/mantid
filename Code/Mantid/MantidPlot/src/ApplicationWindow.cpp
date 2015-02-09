@@ -7099,7 +7099,7 @@ void ApplicationWindow::showGeneralPlotDialog()
       g_log.error() << "Failed to open general plot dialog for multi layer plot";
       return;
     }
-    if (ml->layers())
+    if (ml && ml->layers())
       showPlotDialog();
   }
   else if (plot->isA("Graph3D"))
