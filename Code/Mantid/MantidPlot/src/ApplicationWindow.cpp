@@ -5805,7 +5805,11 @@ void ApplicationWindow::exportLayer()
   if (!w)
     return;
 
-  Graph* g = dynamic_cast<MultiLayer*>(w)->activeGraph();
+  auto ml = dynamic_cast<MultiLayer*>(w);
+  if(!ml)
+    return;
+
+  Graph* g = ml->activeGraph();
   if (!g)
     return;
 
