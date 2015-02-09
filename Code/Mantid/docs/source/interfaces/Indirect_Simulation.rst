@@ -125,7 +125,7 @@ Zero Threshold
   Frequencies below this threshold will be ignored.
 
 Scale
-  Optionally apply scaling by a given fatcor to the output spectra.
+  Optionally apply scaling by a given factor to the output spectra.
 
 DensityOfStates
 ~~~~~~~~~~~~~~~

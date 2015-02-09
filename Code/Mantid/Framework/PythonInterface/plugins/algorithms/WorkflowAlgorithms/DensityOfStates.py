@@ -35,7 +35,7 @@ class DensityOfStates(PythonAlgorithm):
         self.declareProperty(name='BinWidth', defaultValue=1.0,
             doc='Set histogram resolution for binning (eV or cm**-1). Default is 1')
 
-        self.declareProperty(name='Temperature', defaultValue=300,
+        self.declareProperty(name='Temperature', defaultValue=300.0,
             doc='Temperature to use (in raman spectrum modelling). Default is 300')
 
         self.declareProperty(name='ZeroThreshold', defaultValue=3.0,
