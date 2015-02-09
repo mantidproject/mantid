@@ -2,10 +2,12 @@
 #define MANTID_DATAOBJECTS_PEAKTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MockObjects.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include <iostream>
 #include <iomanip>
+#include <gmock/gmock.h>
 
 #include "MantidDataObjects/Peak.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -110,9 +112,9 @@ public:
     TS_ASSERT_EQUALS(p.getL(), p2.getL());
     TS_ASSERT_EQUALS(p.getGoniometerMatrix(), p2.getGoniometerMatrix());
     TS_ASSERT_EQUALS(p.getRunNumber(), p2.getRunNumber());
-    TS_ASSERT_EQUALS(p.getDetector(), p2.getDetector())
-    TS_ASSERT_EQUALS(p.getInstrument(), p2.getInstrument())
-
+    TS_ASSERT_EQUALS(p.getDetector(), p2.getDetector());
+    TS_ASSERT_EQUALS(p.getInstrument(), p2.getInstrument());
+    TS_ASSERT_EQUALS(p.getPeakShape().shapeName(), p2.getPeakShape().shapeName());
     check_Contributing_Detectors(p2, std::vector<int>(1, 10102));
   }
 
@@ -350,6 +352,29 @@ public:
     TSM_ASSERT_THROWS_NOTHING("Nothing wrong here, detector is valid", p.getDetectorPosition());
     p.setQLabFrame(V3D(1,1,1), 1); // This sets the detector pointer to null and detector id to -1;
     TSM_ASSERT_THROWS("Detector is not valid", p.getDetectorPosition(), Mantid::Kernel::Exception::NullPointerException&);
+  }
+
+  void test_get_peak_shape_default()
+  {
+      Peak peak;
+      const PeakShape& integratedShape = peak.getPeakShape();
+      TS_ASSERT_EQUALS("none", integratedShape.shapeName());
+  }
+
+  void test_set_peak_shape()
+  {
+      using namespace testing;
+
+      Peak peak;
+
+      MockPeakShape* replacementShape = new MockPeakShape;
+      EXPECT_CALL(*replacementShape, shapeName()).Times(1);
+      peak.setPeakShape(replacementShape);
+
+      const PeakShape& currentShape = peak.getPeakShape();
+      currentShape.shapeName();
+
+      TS_ASSERT(Mock::VerifyAndClearExpectations(replacementShape));
   }
 
 private:

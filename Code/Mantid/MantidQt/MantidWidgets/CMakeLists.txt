@@ -11,9 +11,11 @@ set ( SRC_FILES
 	src/FindReplaceDialog.cpp
 	src/FitPropertyBrowser.cpp
 	src/FormulaDialogEditor.cpp
+	src/FitOptionsBrowser.cpp
 	src/FunctionBrowser.cpp
 	src/HintingLineEdit.cpp
 	src/InstrumentSelector.cpp
+  src/IndirectInstrumentConfig.cpp
         src/MantidHelpWindow.cpp
 	src/MWDiag.cpp
 	src/MWRunFiles.cpp
@@ -31,7 +33,8 @@ set ( SRC_FILES
 	src/ScriptEditor.cpp
 	src/SelectFunctionDialog.cpp
 	src/SelectWorkspacesDialog.cpp
-	src/SequentialFitDialog.cpp
+        src/SequentialFitDialog.cpp
+	src/SlicingAlgorithmDialog.cpp
 	src/StringDialogEditor.cpp
 	src/StringEditorFactory.cpp
 	src/UserFunctionDialog.cpp
@@ -53,11 +56,13 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/FindReplaceDialog.h
     inc/MantidQtMantidWidgets/FindDialog.h
     inc/MantidQtMantidWidgets/FitPropertyBrowser.h
+    inc/MantidQtMantidWidgets/FitOptionsBrowser.h
     inc/MantidQtMantidWidgets/FunctionBrowser.h
     inc/MantidQtMantidWidgets/HintingLineEdit.h
     inc/MantidQtMantidWidgets/CatalogSearch.h
     inc/MantidQtMantidWidgets/CatalogSelector.h
     inc/MantidQtMantidWidgets/InstrumentSelector.h
+    inc/MantidQtMantidWidgets/IndirectInstrumentConfig.h
     inc/MantidQtMantidWidgets/MantidHelpWindow.h
     inc/MantidQtMantidWidgets/MessageDisplay.h
     inc/MantidQtMantidWidgets/MultifitSetupDialog.h
@@ -78,6 +83,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/SelectFunctionDialog.h
     inc/MantidQtMantidWidgets/SelectWorkspacesDialog.h
     inc/MantidQtMantidWidgets/SequentialFitDialog.h
+    inc/MantidQtMantidWidgets/SlicingAlgorithmDialog.h
     inc/MantidQtMantidWidgets/StringDialogEditor.h
     inc/MantidQtMantidWidgets/StringEditorFactory.h
     inc/MantidQtMantidWidgets/UserFunctionDialog.h
@@ -100,6 +106,7 @@ set ( UI_FILES
 	  inc/MantidQtMantidWidgets/DataSelector.ui
     inc/MantidQtMantidWidgets/CatalogSearch.ui
     inc/MantidQtMantidWidgets/CatalogSelector.ui
+    inc/MantidQtMantidWidgets/IndirectInstrumentConfig.ui
     inc/MantidQtMantidWidgets/MWDiag.ui
     inc/MantidQtMantidWidgets/MWRunFiles.ui
     inc/MantidQtMantidWidgets/MultifitSetupDialog.ui
@@ -108,6 +115,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/RenameParDialog.ui
     inc/MantidQtMantidWidgets/SelectFunctionDialog.ui
     inc/MantidQtMantidWidgets/SequentialFitDialog.ui
+    inc/MantidQtMantidWidgets/SlicingAlgorithmDialog.ui
     inc/MantidQtMantidWidgets/UserFunctionDialog.ui
     inc/MantidQtMantidWidgets/pqHelpWindow.ui
 )

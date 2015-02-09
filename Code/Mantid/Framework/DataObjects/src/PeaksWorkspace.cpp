@@ -583,8 +583,10 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   std::vector<double> TOF(np);
   std::vector<int> runNumber(np);
   std::vector<double> goniometerMatrix(9 * np);
+  std::vector<std::string> shapes(np);
 
   // Populate column vectors from Peak Workspace
+  size_t maxShapeJSONLength = 0;
   for (size_t i = 0; i < np; i++) {
     Peak p = peaks[i];
     detectorID[i] = p.getDetectorID();
@@ -613,12 +615,18 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
       goniometerMatrix[9 * i + 7] = gm[1][2];
       goniometerMatrix[9 * i + 8] = gm[2][2];
     }
-    // etc.
+    const std::string shapeJSON = p.getPeakShape().toJSON();
+    shapes[i] = shapeJSON;
+    if(shapeJSON.size() > maxShapeJSONLength)
+    {
+        maxShapeJSONLength = shapeJSON.size();
+    }
   }
 
   // Start Peaks Workspace in Nexus File
-  std::string specifyInteger = "An integer";
-  std::string specifyDouble = "A double";
+  const std::string specifyInteger = "An integer";
+  const std::string specifyDouble = "A double";
+  const std::string specifyString = "A string";
   file->makeGroup("peaks_workspace", "NXentry",
                   true); // For when peaksWorkspace can be loaded
 
@@ -744,6 +752,32 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   file->putAttr("interpret_as", "A matrix of 3x3 doubles");
   file->putAttr("units", "Not known"); // Units may need changing when known
   file->closeData();
+
+  // Shape
+  std::vector<int64_t> dims;
+  dims.push_back(np);
+  dims.push_back(static_cast<int>(maxShapeJSONLength));
+  const std::string name = "column_16";
+  file->makeData(name, NeXus::CHAR, dims, false);
+  file->openData(name);
+
+  char *toNexus = new char[maxShapeJSONLength * np];
+  for (size_t ii = 0; ii < np; ii++) {
+    std::string rowStr = shapes[ii];
+    for (size_t ic = 0; ic < rowStr.size(); ic++)
+      toNexus[ii * maxShapeJSONLength + ic] = rowStr[ic];
+    for (size_t ic = rowStr.size(); ic < static_cast<size_t>(maxShapeJSONLength); ic++)
+      toNexus[ii * maxShapeJSONLength + ic] = ' ';
+  }
+
+  file->putData((void *)(toNexus));
+
+  delete[] toNexus;
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->putAttr("name", "Shape");
+  file->putAttr("interpret_as", specifyString);
+  file->closeData();
+
 
   // QLab & QSample are calculated and do not need to be saved
 

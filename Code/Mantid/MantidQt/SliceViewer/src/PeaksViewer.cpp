@@ -297,6 +297,35 @@ bool PeaksViewer::removePeaksWorkspace(
   return somethingToRemove;
 }
 
+bool PeaksViewer::removePeaksWorkspace(const
+    std::string& toRemove) {
+  bool somethingToRemove = false;
+
+  if (m_presenter) {
+
+    QList<PeaksWorkspaceWidget *> children =
+        qFindChildren<PeaksWorkspaceWidget *>(this);
+
+    for (int i = 0; i < children.size(); ++i) {
+      PeaksWorkspaceWidget *candidateWidget = children.at(i);
+      const std::string candidateWorkspaceName =
+          candidateWidget->getWSName();
+      somethingToRemove = (candidateWorkspaceName == toRemove);
+      if (somethingToRemove) {
+        // We have the right widget to update. Workspace is the same, just
+        // redraw
+        // the table.
+        candidateWidget->hide();
+        children.removeAt(i);
+        m_presenter->remove(candidateWidget->getPeaksWorkspace());
+        break;
+      }
+    }
+
+  }
+  return somethingToRemove;
+}
+
 /**
  * Slot called when the user wants to see the dialog for selecting
  * what columns are visible in the tables of peaks.

@@ -42,7 +42,9 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         self.declareProperty("Header", "", "String in the header file.")
 
         # Time zone
-        timezones = ["America/New_York"]
+        timezones = ["UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London", "GMT+0",
+                "Europe/Paris", "Europe/Copenhagen"]
+
         self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones))
 
         # Log time tolerance
@@ -404,7 +406,8 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         """ Write the header file for a LoadFrame
         """
         # Construct 3 lines of the header file
-        line0 = "Test date: %s" % (str(testdatetime))
+        testdatetime_mk = DateAndTime(testdatetime)
+        line0 = "Test date: %s (%.6f) Time Zone: %s" % (str(testdatetime), float(testdatetime_mk.totalNanoseconds())/1.0E9, self._timezone)
         line1 = "Test description: %s" % (description)
         line2 = self._headercontent
 
@@ -436,7 +439,12 @@ def getLocalTimeShiftInSecond(utctime, localtimezone, logger = None):
 
     if logger:
         logger.information("Input UTC time = %s" % (str(utctime)))
+    
+    # Return early if local time zone is UTC
+    if localtimezone == "UTC":
+        return 0
 
+    # Find out difference in time zone
     from_zone = tz.gettz('UTC')
     to_zone = tz.gettz(localtimezone)
 
@@ -444,7 +452,10 @@ def getLocalTimeShiftInSecond(utctime, localtimezone, logger = None):
     if logger:
         logger.information("About to convert time string: %s" % t1str)
     try:
-        utc = datetime.strptime(t1str, '%Y-%m-%dT%H:%M:%S')
+        if t1str.count("T") == 1: 
+            utc = datetime.strptime(t1str, '%Y-%m-%dT%H:%M:%S')
+        else:
+            utc = datetime.strptime(t1str, '%Y-%m-%d %H:%M:%S')
     except ValueError as err:
         raise err
 

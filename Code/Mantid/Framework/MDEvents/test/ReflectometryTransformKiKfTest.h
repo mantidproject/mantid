@@ -1,9 +1,8 @@
 #ifndef MANTID_MDEVENTS_REFLECTOMETRYTRANSFORMKIKFTEST_H_
 #define MANTID_MDEVENTS_REFLECTOMETRYTRANSFORMKIKFTEST_H_
 
-#define PI 3.14159265
-
 #include <cxxtest/TestSuite.h>
+#include <cmath>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include <iostream>
@@ -103,11 +102,11 @@ public:
 
     //Sine 90 = 1
     CalculateReflectometryK B(90);
-    TS_ASSERT_DELTA(2*PI/wavelength, B.execute(wavelength), 0.0001);
+    TS_ASSERT_DELTA(2*M_PI/wavelength, B.execute(wavelength), 0.0001);
 
     //Sine 270 = -1
     CalculateReflectometryK C(270);
-    TS_ASSERT_DELTA(-2*PI/wavelength, C.execute(wavelength), 0.0001);
+    TS_ASSERT_DELTA(-2*M_PI/wavelength, C.execute(wavelength), 0.0001);
   }
 
   void test_recalculate_k()
@@ -115,10 +114,10 @@ public:
     const double wavelength = 1;
 
     CalculateReflectometryK A(90);
-    TS_ASSERT_DELTA(2*PI/wavelength, A.execute(wavelength), 0.0001);
+    TS_ASSERT_DELTA(2*M_PI/wavelength, A.execute(wavelength), 0.0001);
 
     //Now re-execute on the same calculation object.
-    TS_ASSERT_DELTA(PI/wavelength, A.execute(2*wavelength), 0.0001);
+    TS_ASSERT_DELTA(M_PI/wavelength, A.execute(2*wavelength), 0.0001);
   }
 
 

@@ -36,9 +36,11 @@ public:
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace);
   bool removePeaksWorkspace(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toRemove);
+  bool removePeaksWorkspace(const std::string &toRemove);
   void hide();
   ~PeaksViewer();
   bool hasThingsToShow() const;
+
 public slots:
   void onPeakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
   void onBackgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr,

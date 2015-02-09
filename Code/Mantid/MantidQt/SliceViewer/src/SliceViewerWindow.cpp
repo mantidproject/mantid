@@ -50,6 +50,7 @@ SliceViewerWindow::SliceViewerWindow(const QString &wsName,
   observeAfterReplace();
   observePreDelete();
   observeADSClear();
+  observeRename();
 
   // Set up the window
   m_label = label;
@@ -171,7 +172,7 @@ const QString &SliceViewerWindow::getLabel() const { return m_label; }
 //------------------------------------------------------------------------------------------------
 void SliceViewerWindow::resizeEvent(QResizeEvent * /*event*/) {
   //  if (m_liner->isVisible())
-  //    m_lastLinerWidth = m_liner->width();
+    //    m_lastLinerWidth = m_liner->width();
 }
 
 //------------------------------------------------------------------------------------------------
@@ -403,16 +404,34 @@ void SliceViewerWindow::preDeleteHandle(
         boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(ws);
     if (expired_peaks_ws) {
       // Delegate the deletion/removal issue to the slicer
-      if (m_peaksViewer->removePeaksWorkspace(expired_peaks_ws)) {
-        // Hide the area for the peaks viewer if all peaks workspaces have been
-        // removed.
-        if (!m_peaksViewer->hasThingsToShow()) {
-          this->showPeaksViewer(false);
-        }
-      }
+      m_peaksViewer->removePeaksWorkspace(expired_peaks_ws);
     }
   }
 }
+
+//------------------------------------------------------------------------------------------------
+/**
+ * @brief After replace handle
+ * @param oldName
+ * @param newName
+ */
+void SliceViewerWindow::renameHandle(const std::string &oldName,
+                                     const std::string &newName) {
+
+  if (oldName == m_wsName) {
+      IMDWorkspace_sptr new_md_ws = boost::dynamic_pointer_cast<IMDWorkspace>(
+                  AnalysisDataService::Instance().retrieve(newName));
+    if (new_md_ws) {
+      m_ws = new_md_ws;
+      emit needToUpdate();
+    }
+
+  } else {
+        // Remove any legacy workspace widgets + presenters bearing the old name. Remember, naming is a deep copy process. So the old name is the only reference we have.
+        m_peaksViewer->removePeaksWorkspace(oldName);
+  }
+}
+
 
 //------------------------------------------------------------------------------------------------
 /** Signal that the workspace being looked at was just replaced with a different
@@ -436,5 +455,6 @@ void SliceViewerWindow::afterReplaceHandle(
     }
   }
 }
+
 } // namespace SliceViewer
 } // namespace MantidQt
