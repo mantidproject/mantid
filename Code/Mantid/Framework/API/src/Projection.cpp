@@ -1,7 +1,7 @@
-#include "MantidGeometry/Crystal/Projection.h"
+#include "MantidAPI/Projection.h"
 
 namespace Mantid {
-namespace Geometry {
+namespace API {
 
 Projection::Projection()
     : m_nd(2), m_dimensions(new VMD[m_nd]), m_offsets(new float[m_nd]),
@@ -173,5 +173,5 @@ void Projection::setUnit(size_t nd, ProjectionUnit unit) {
     m_units[nd] = unit;
 }
 
-} // Geometry
+} // API
 } // Mantid

@@ -21,7 +21,7 @@ Usage
 
 .. testcode:: Example4D
 
-   from mantid.geometry import Projection
+   from mantid.api import Projection
    from mantid.kernel import VMD
 
    to_cut = CreateMDWorkspace(Dimensions=4, Extents=[-1,1,-1,1,-1,1,-10,10], Names="H,K,L,E", Units="U,U,U,V")

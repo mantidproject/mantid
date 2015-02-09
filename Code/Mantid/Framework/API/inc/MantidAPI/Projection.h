@@ -1,5 +1,5 @@
-#ifndef MANTID_GEOMETRY_PROJECTION_H_
-#define MANTID_GEOMETRY_PROJECTION_H_
+#ifndef MANTID_API_PROJECTION_H_
+#define MANTID_API_PROJECTION_H_
 
 #include "MantidKernel/VMD.h"
 #include <stdexcept>
@@ -7,7 +7,7 @@
 using namespace Mantid::Kernel;
 
 namespace Mantid {
-namespace Geometry {
+namespace API {
 
 /** Simple projection class for multiple dimensions (i.e. > 3).
 
@@ -100,7 +100,7 @@ protected:
   ProjectionUnit *m_units;
 };
 
-} // namespace Geometry
+} // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_GEOMETRY_PROJECTION_H_*/
+#endif /*MANTID_API_PROJECTION_H_*/

@@ -1,4 +1,4 @@
-#include "MantidGeometry/Crystal/Projection.h"
+#include "MantidAPI/Projection.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include <boost/bind.hpp>
@@ -6,7 +6,7 @@
 #include <boost/python/copy_non_const_reference.hpp>
 
 using namespace Mantid::API;
-using namespace Mantid::Geometry;
+using namespace Mantid::API;
 using namespace boost::python;
 
 namespace

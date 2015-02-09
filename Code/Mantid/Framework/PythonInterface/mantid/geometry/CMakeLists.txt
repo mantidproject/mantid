@@ -26,7 +26,6 @@ set ( EXPORT_FILES
   src/Exports/Object.cpp
   src/Exports/PointGroup.cpp
   src/Exports/PointGroupFactory.cpp
-  src/Exports/Projection.cpp
   src/Exports/SpaceGroup.cpp
   src/Exports/SpaceGroupFactory.cpp
   src/Exports/SymmetryOperation.cpp

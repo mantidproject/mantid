@@ -1,12 +1,12 @@
-#ifndef MANTID_GEOMETRY_PROJECTIONTEST_H_
-#define MANTID_GEOMETRY_PROJECTIONTEST_H_
+#ifndef MANTID_API_PROJECTIONTEST_H_
+#define MANTID_API_PROJECTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Crystal/Projection.h"
+#include "MantidAPI/Projection.h"
 
 using namespace Mantid;
-using namespace Mantid::Geometry;
+using namespace Mantid::API;
 
 class ProjectionTest : public CxxTest::TestSuite {
 public:
@@ -136,4 +136,4 @@ public:
   }
 };
 
-#endif /* MANTID_GEOMETRY_PROJECTIONTEST_H_ */
+#endif /* MANTID_API_PROJECTIONTEST_H_ */
