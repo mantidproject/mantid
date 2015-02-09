@@ -4623,6 +4623,9 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& filename, const
 
   //rename project folder item
   FolderListItem *item = dynamic_cast<FolderListItem *>(folders->firstChild());
+  if(!item)
+    throw std::runtime_error("Couldn't retrieve folder list items.");
+
   item->setText(0, fileInfo.baseName());
   item->folder()->setObjectName(fileInfo.baseName());
 
