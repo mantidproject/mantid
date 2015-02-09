@@ -3793,6 +3793,9 @@ void ApplicationWindow::addErrorBars()
     return;
 
   MultiLayer* plot = dynamic_cast<MultiLayer*>(w);
+  if (!plot)
+    return;
+
   if (plot->isEmpty()){
     QMessageBox::warning(this,tr("MantidPlot - Warning"),//Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"
