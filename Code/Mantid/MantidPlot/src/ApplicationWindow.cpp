@@ -2726,9 +2726,8 @@ Matrix* ApplicationWindow::importImage(const QString& fileName)
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
   MdiSubWindow *w = activeWindow(MatrixWindow);
-  Matrix* m = NULL;
-  if (w){
-    m = dynamic_cast<Matrix*>(w);
+  Matrix* m = dynamic_cast<Matrix*>(w);
+  if (m){
     m->importImage(fn);
   } else {
     m = new Matrix(scriptingEnv(), image, "", this);
