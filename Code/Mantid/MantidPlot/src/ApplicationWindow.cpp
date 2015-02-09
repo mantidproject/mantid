@@ -1586,7 +1586,8 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
       format->addAction(actionShowAxisDialog);
       format->addAction(actionShowTitleDialog);
 
-      if (dynamic_cast<Graph3D*>(w)->coordStyle() == Qwt3D::NOCOORD)
+      auto g3d = dynamic_cast<Graph3D*>(w);
+      if (g3d && g3d->coordStyle() == Qwt3D::NOCOORD)
         actionShowAxisDialog->setEnabled(false);
 
       format->addSeparator();
