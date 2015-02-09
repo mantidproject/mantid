@@ -5743,6 +5743,8 @@ void ApplicationWindow::exportGraph()
   Graph3D *plot3D = 0;
   if(w->isA("MultiLayer")){
     plot2D = dynamic_cast<MultiLayer*>(w);
+    if (!plot2D)
+      return;
     if (plot2D->isEmpty()){
       QMessageBox::critical(this, tr("MantidPlot - Export Error"),//Mantid
           tr("<h4>There are no plot layers available in this window!</h4>"));
