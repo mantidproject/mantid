@@ -985,6 +985,25 @@ class MultirepTOFSpectraList(PropDescriptor):
         self._spectra_list=rez
 #end MultirepTOFSpectraList
 
+class MonoCorrectionFactor(PropDescriptor):
+    def __init__(self,ei_prop,monovan_run):
+        self._cor_factor = None
+        self._ei_prop = ei_prop
+        self._mono_run = monovan_run
+
+    def __get__(self,instance,type=None):
+       if instance is None:
+           return self
+
+       return self._cor_factor
+
+    def __set__(self,instance,value):
+       if value is None:
+          self._cor_factor = None
+          return
+       self._cor_factor = value
+
+
 #-----------------------------------------------------------------------------------------
 # END Descriptors for PropertyManager itself
 #-----------------------------------------------------------------------------------------

@@ -228,6 +228,9 @@ class PropertyManager(NonIDF_Properties):
     deltaE_mode     = PropertyFromRange(['direct'],'direct') # other modes should not be considered here
     # 
     multirep_tof_specta_list=MultirepTOFSpectraList()
+    #
+    mono_correction_factor = MonoCorrectionFactor(NonIDF_Properties.incident_energy,NonIDF_Properties.monovan_run)
+
 #----------------------------------------------------------------------------------------------------------------
     def getChangedProperties(self):
         """ method returns set of the properties changed from defaults """

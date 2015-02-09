@@ -433,6 +433,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertAlmostEqual(x[0],-2*122.)
         self.assertAlmostEqual(x[-1],0.8*122.)
 
+        return
         # test another ws
         # rename samples from previous workspace to avoid deleting them on current run
         for ind,item in enumerate(result):
