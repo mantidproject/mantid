@@ -80,18 +80,17 @@ void PoldiSpectrumConstantBackground::setParameter(size_t i,
   }
 }
 
-double PoldiSpectrumConstantBackground::getParameter(const std::string &name) const
-{
-    return ParamFunction::getParameter(name);
+double
+PoldiSpectrumConstantBackground::getParameter(const std::string &name) const {
+  return ParamFunction::getParameter(name);
 }
 
-double PoldiSpectrumConstantBackground::getParameter(size_t i) const
-{
-    if(m_flatBackground) {
-        return m_flatBackground->getParameter(i);
-    }
+double PoldiSpectrumConstantBackground::getParameter(size_t i) const {
+  if (m_flatBackground) {
+    return m_flatBackground->getParameter(i);
+  }
 
-    return 0;
+  return 0;
 }
 
 void PoldiSpectrumConstantBackground::init() {
