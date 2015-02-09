@@ -150,6 +150,11 @@ add_library ( SINQ ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
 set_target_properties ( SINQ PROPERTIES OUTPUT_NAME MantidSINQ 
                                         COMPILE_DEFINITIONS "IN_MANTID_SINQ" )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( SINQ PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+endif () 
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET SINQ PROPERTY FOLDER "MantidFramework" )
 
