@@ -3,79 +3,89 @@
 
 require 'pathname'
 
+lib_dir = Pathname.new("/usr/local/lib")
+openssl_dir = Pathname.new("/usr/local/opt/openssl/lib")
+
 #filenames with path for all shared libraries used by MantidPlot and its dependencies.
-library_filenames = ["/usr/local/lib/libboost_regex-mt.dylib",
-                     "/usr/local/lib/libboost_date_time-mt.dylib",
-                     "/usr/local/lib/libboost_python-mt.dylib",
-                     "/usr/local/lib/libgsl.0.dylib",
-                     "/usr/local/lib/libgslcblas.0.dylib",
-                     "/usr/local/lib/libjsoncpp.dylib",
-                     "/usr/local/lib/libmuparser.2.dylib",
-                     "/usr/local/lib/libNeXus.0.dylib",
-                     "/usr/local/lib/libNeXusCPP.0.dylib",
-                     "/usr/local/lib/libPocoFoundation.17.dylib",
-                     "/usr/local/lib/libPocoUtil.17.dylib",
-                     "/usr/local/lib/libPocoXML.17.dylib",
-                     "/usr/local/lib/libPocoNet.17.dylib",
-                     "/usr/local/lib/libPocoCrypto.17.dylib",
-                     "/usr/local/lib/libPocoNetSSL.17.dylib",
-                     "/usr/local/opt/openssl/lib/libssl.1.0.0.dylib",
-                     "/usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib",
-                     "/usr/local/lib/libTKernel.9.dylib",
-                     "/usr/local/lib/libTKBO.9.dylib",
-                     "/usr/local/lib/libTKernel.9.dylib",
-                     "/usr/local/lib/libTKBO.9.dylib",
-                     "/usr/local/lib/libTKPrim.9.dylib",
-                     "/usr/local/lib/libTKMesh.9.dylib",
-                     "/usr/local/lib/libTKBRep.9.dylib",
-                     "/usr/local/lib/libTKGeomAlgo.9.dylib",
-                     "/usr/local/lib/libTKTopAlgo.9.dylib",
-                     "/usr/local/lib/libTKMath.9.dylib",
-                     "/usr/local/lib/libTKG2d.9.dylib",
-                     "/usr/local/lib/libTKG3d.9.dylib",
-                     "/usr/local/lib/libTKGeomBase.9.dylib",
-                     "/usr/local/lib/libqwt.5.dylib",
-                     "/usr/local/lib/libqwtplot3d.0.dylib",
-                     "/usr/local/lib/libqscintilla2.11.dylib",
-                     "/usr/local/lib/libmxml.dylib",
-                     "/usr/local/lib/libhdf5.9.dylib",
-                     "/usr/local/lib/libhdf5_hl.9.dylib",
-                     "/usr/local/lib/libmfhdf.4.2.10.dylib",
-                     "/usr/local/lib/libdf.4.2.10.dylib",
-                     "/usr/local/lib/libsz.2.dylib",
-                     "/usr/local/lib/libjpeg.8.dylib"
-]
+library_filenames = ["libboost_regex-mt.dylib",
+                     "libboost_date_time-mt.dylib",
+                     "libboost_python-mt.dylib",
+                     "libgsl.dylib",
+                     "libgslcblas.dylib",
+                     "libjsoncpp.dylib",
+                     "libmuparser.dylib",
+                     "libNeXus.dylib",
+                     "libNeXusCPP.dylib",
+                     "libPocoFoundation.dylib",
+                     "libPocoUtil.dylib",
+                     "libPocoXML.dylib",
+                     "libPocoNet.dylib",
+                     "libPocoCrypto.dylib",
+                     "libPocoNetSSL.dylib",
+                     "libTKernel.dylib",
+                     "libTKBO.dylib",
+                     "libTKernel.dylib",
+                     "libTKBO.dylib",
+                     "libTKPrim.dylib",
+                     "libTKMesh.dylib",
+                     "libTKBRep.dylib",
+                     "libTKGeomAlgo.dylib",
+                     "libTKTopAlgo.dylib",
+                     "libTKMath.dylib",
+                     "libTKG2d.dylib",
+                     "libTKG3d.dylib",
+                     "libTKGeomBase.dylib",
+                     "libqwt.dylib",
+                     "libqwtplot3d.dylib",
+                     "libqscintilla2.dylib",
+                     "libmxml.dylib",
+                     "libhdf5.dylib",
+                     "libhdf5_hl.dylib",
+                     "libmfhdf.dylib",
+                     "libdf.dylib",
+                     "libsz.dylib",
+                     "libjpeg.dylib",
+                     "libssl.dylib",
+                     "libcrypto.dylib"]
 
 #This copies the libraries over, then changes permissions and the id from /usr/local/lib to @rpath
 library_filenames.each do |filename|
-  basename = File.basename(filename)
-  `cp #{filename} Contents/MacOS/`
-  `chmod +w Contents/MacOS/#{basename}`
-  `install_name_tool -id @rpath/#{basename} Contents/MacOS/#{basename}`
+    if filename.include? "libssl.dylib"
+        `cp #{openssl_dir+filename} Contents/MacOS/`
+    elsif  filename.include? "libcrypto.dylib"
+        `cp #{openssl_dir+filename} Contents/MacOS/`
+    else
+        `cp #{lib_dir+filename} Contents/MacOS/`
+    end
+    `chmod +w Contents/MacOS/#{filename}`
+    `install_name_tool -id @rpath/#{filename} Contents/MacOS/#{filename}`
 end
 
-#use install_name_tool to change dependencies form /usr/local to libraries in the package. 
+#use install_name_tool to change dependencies form /usr/local to libraries in the package.
 search_patterns = ["**/*.dylib","**/*.so","**/MantidPlot"]
 search_patterns.each do |pattern|
-  Dir[pattern].each do |library|
-    dependencies = `otool -L #{library}`
-    dependencies.split("\n").each do |dependency|
-      library_filenames.each do |filename|
-        basename = File.basename(filename)
-        if dependency.include? basename
-         currentname = dependency.strip.split(" ") 
-          `install_name_tool -change #{currentname[0]} @rpath/#{basename} #{library}`
+    Dir[pattern].each do |library|
+        dependencies = `otool -L #{library}`
+        dependencies.split("\n").each do |dependency|
+            currentname = dependency.strip.split(" ")
+            name_split_on_slash = currentname[0].strip.split("/")
+            name_split_on_period = name_split_on_slash[-1].split(".")
+            prefix = name_split_on_period[0]+"."
+            library_filenames.each do |filename|
+                basename = File.basename(filename,"dylib")
+                if prefix == basename
+                    `install_name_tool -change #{currentname[0]} @rpath/#{basename+"dylib"} #{library}`
+                end
+            end
         end
-      end
     end
-  end
 end
 
-#We'll use macdeployqt to fix qt dependencies. 
+#We'll use macdeployqt to fix qt dependencies.
 `macdeployqt ../MantidPlot.app`
 
 #fix remaining QT linking issues
-`install_name_tool -change /usr/local/lib/Qt3Support.framework/Versions/4/Qt3Support @loader_path/../Frameworks/Qt3Support.framework/Versions/4/Qt3Support Contents/MacOS/mantidqtpython.so` 
+`install_name_tool -change /usr/local/lib/Qt3Support.framework/Versions/4/Qt3Support @loader_path/../Frameworks/Qt3Support.framework/Versions/4/Qt3Support Contents/MacOS/mantidqtpython.so`
 `install_name_tool -change /usr/local/lib/QtOpenGL.framework/Versions/4/QtOpenGL @loader_path/../Frameworks/QtOpenGL.framework/Versions/4/QtOpenGL Contents/MacOS/mantidqtpython.so`
 `install_name_tool -change /usr/local/lib/QtSvg.framework/Versions/4/QtSvg @loader_path/../Frameworks/QtSvg.framework/Versions/4/QtSvg Contents/MacOS/mantidqtpython.so`
 `install_name_tool -change /usr/local/lib/QtGui.framework/Versions/4/QtGui @loader_path/../Frameworks/QtGui.framework/Versions/4/QtGui Contents/MacOS/mantidqtpython.so`
@@ -86,17 +96,17 @@ end
 `install_name_tool -change /usr/local/lib/QtHelp.framework/Versions/4/QtHelp @loader_path/../Frameworks/QtHelp.framework/Versions/4/QtHelp  Contents/MacOS/mantidqtpython.so`
 `install_name_tool -change /usr/local/lib/QtWebKit.framework/Versions/4/QtWebKit @loader_path/../Frameworks/QtWebKit.framework/Versions/4/QtWebKit Contents/MacOS/mantidqtpython.so`
 
-`install_name_tool -change /usr/local/lib/QtOpenGL.framework/Versions/4/QtOpenGL @loader_path/../Frameworks/QtOpenGL.framework/Versions/4/QtOpenGL Contents/MacOS/libqwtplot3d.0.dylib`
-`install_name_tool -change /usr/local/lib/QtGui.framework/Versions/4/QtGui @loader_path/../Frameworks/QtGui.framework/Versions/4/QtGui Contents/MacOS/libqwtplot3d.0.dylib`
-`install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/libqwtplot3d.0.dylib`
+`install_name_tool -change /usr/local/lib/QtOpenGL.framework/Versions/4/QtOpenGL @loader_path/../Frameworks/QtOpenGL.framework/Versions/4/QtOpenGL Contents/MacOS/libqwtplot3d.dylib`
+`install_name_tool -change /usr/local/lib/QtGui.framework/Versions/4/QtGui @loader_path/../Frameworks/QtGui.framework/Versions/4/QtGui Contents/MacOS/libqwtplot3d.dylib`
+`install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/libqwtplot3d.dylib`
 
-`install_name_tool -change /usr/local/lib/QtGui.framework/Versions/4/QtGui @loader_path/../Frameworks/QtGui.framework/Versions/4/QtGui Contents/MacOS/libqwt.5.dylib`
-`install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/libqwt.5.dylib`
+`install_name_tool -change /usr/local/lib/QtGui.framework/Versions/4/QtGui @loader_path/../Frameworks/QtGui.framework/Versions/4/QtGui Contents/MacOS/libqwt.dylib`
+`install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/libqwt.dylib`
 
-`install_name_tool -change /usr/local/lib/QtGui.framework/Versions/4/QtGui @loader_path/../Frameworks/QtGui.framework/Versions/4/QtGui Contents/MacOS/libqscintilla2.11.dylib`
-`install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/libqscintilla2.11.dylib`
+`install_name_tool -change /usr/local/lib/QtGui.framework/Versions/4/QtGui @loader_path/../Frameworks/QtGui.framework/Versions/4/QtGui Contents/MacOS/libqscintilla2.dylib`
+`install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/libqscintilla2.dylib`
 
-`install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/libqscintilla2.11.dylib`
+`install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/libqscintilla2.dylib`
 `install_name_tool -id @rpath/libqsqlite.dylib Contents/Frameworks/plugins/sqldrivers/libqsqlite.dylib`
 
 #change id of all Qt4 imageformats libraries
@@ -179,4 +189,3 @@ search_patterns.each do |pattern|
     end
   end
 end
-
