@@ -9675,8 +9675,15 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 
 void ApplicationWindow::customEvent(QEvent *e)
 {
+  if(!e)
+    return;
+
   if (e->type() == SCRIPTING_CHANGE_EVENT)
-    scriptingChangeEvent(dynamic_cast<ScriptingChangeEvent*>(e));
+  {
+    auto se = dynamic_cast<ScriptingChangeEvent*>(e);
+    if(se)
+      scriptingChangeEvent(se);
+  }
 }
 
 void ApplicationWindow::deleteSelectedItems()
