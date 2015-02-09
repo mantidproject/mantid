@@ -14621,7 +14621,11 @@ bool ApplicationWindow::deleteFolder(Folder *f)
     Folder *parent = projectFolder();
     if (currentFolder()){
       if (currentFolder()->parent())
-        parent = dynamic_cast<Folder*>(currentFolder()->parent());
+      {
+        auto newParent = dynamic_cast<Folder*>(currentFolder()->parent());
+        if(newParent)
+          parent = newParent;
+      }
     }
 
     folders->blockSignals(true);
