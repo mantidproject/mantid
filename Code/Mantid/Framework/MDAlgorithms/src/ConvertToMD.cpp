@@ -469,7 +469,7 @@ API::IMDEventWorkspace_sptr ConvertToMD::createNewMDWorkspace(
   this->setBoxController(bc, m_InWS2D->getInstrument());
 
   // Check if the user want sto force an initial split or not
-  bool initialSplittingChecked = true;//this->getProperty("InitialSplitting");
+  bool initialSplittingChecked = this->getProperty("InitialSplitting");
 
   if (!initialSplittingChecked)
   {
@@ -524,7 +524,7 @@ void ConvertToMD::performInitialSplitting(API::IMDEventWorkspace_sptr spws, Mant
   // Revert changes on the box controller
   for (size_t dim = 0; dim < bc->getNDims(); ++dim)
   {
-    bc->setSplitInto(splitBuffer[static_cast<int>(initialSplitSetting)]);
+    bc->setSplitInto(splitBuffer[dim]);
   }
 }
 
