@@ -61,6 +61,9 @@ public:
   void setParameter(const std::string &name, const double &value, bool explicitlySet = true);
   void setParameter(size_t i, const double &value, bool explicitlySet = true);
 
+  double getParameter(const std::string &name) const;
+  double getParameter(size_t i) const;
+
 protected:
   void init();
 
