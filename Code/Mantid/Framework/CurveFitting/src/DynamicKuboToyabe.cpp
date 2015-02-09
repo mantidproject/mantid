@@ -137,36 +137,20 @@ double f1(const double x, const double G, const double w0) {
 }
 
 // Zero Field Kubo Toyabe relaxation function
-double ZFKT (double q){
+double ZFKT (const double x, const double G){
 
+  const double q = G*G*x*x;
   return (0.3333333333 + 0.6666666667*exp(-0.5*q)*(1-q));
 }
 
-// Relaxation function
-double gz (const double x, const double G, const double F) 
+// Non-Zero field Kubo Toyabe relaxation function
+double HKT (const double x, const double G, const double F) 
 {
-	double w0 = 2.0*3.1415926536*0.01355342*F;
-	const double q = G*G*x*x;
-	
-	if (w0 == 0.0) {
-    // Zero field
-		return (ZFKT(q)); 
-	}
-	else {
-    // Non-zero field
-
-    if (F>2.0*G) { 
-      w0 = 2*3.1415926*0.01355342*F ;
-    } else { 
-      w0 =2*3.1415926*0.01355342*2.0*G; 
-    }
-			
-		double p = G*G/(w0*w0);
-		double HKT = 1.0-2.0*p*(1-exp(-q/2.0)*cos(w0*x))+2.0*p*p*w0*integrate(f1,0.0,x,G,w0);
-		if (F>2.0*G) {return (HKT);} 
-		else {return (ZFKT(q)+ (F/2.0/G)*(HKT-ZFKT(q)));}	 
-		
-   }
+  const double w0 = 2.0*3.1415926536*0.01355342*F;
+  const double q = G*G*x*x;
+  const double p = G*G/(w0*w0);
+  double hkt = 1.0-2.0*p*(1-exp(-q/2.0)*cos(w0*x))+2.0*p*p*w0*integrate(f1,0.0,x,G,w0);
+  return hkt;
 }
 
 // Dynamic Kubo Toyabe function
@@ -180,54 +164,104 @@ void DynamicKuboToyabe::function1D(double* out, const double* xValues, const siz
 
   // Zero hopping rate
 	if (v == 0.0) {
-		for (size_t i = 0; i < nData; i++) {
-			out[i] = A*gz(xValues[i],G,F);
-		}
+
+    // Zero external field
+    if ( F == 0.0 ){
+      for (size_t i = 0; i < nData; i++) {
+        out[i] = A*ZFKT(xValues[i],G);
+      }
+    }
+    // Non-zero external field
+    else{
+      for (size_t i = 0; i < nData; i++) {
+        out[i] = A*HKT(xValues[i],G,F);
+      }
+    }
 	} 
 
   // Non-zero hopping rate
 	else {
 
     // Make sure stepsize is smaller than spacing between xValues
-    int n = 1000;
+    //int n = 1000;
     //while (n<nData) {
     //   n=n*2; 
     //}
-    const double stepsize = fabs(xValues[nData-1]/n);
+    const double stepsize = (xValues[1]-xValues[0])/4.;
+    int n=int(ceil((xValues[nData-1])/stepsize))+1;
 
     std::vector<double> funcG(n);
 
+    double efac1=exp(-v*stepsize); // survival prob for step
+    double efac2=(1.0-efac1);      // hop prob ~ hoprate*step
+
     // Mark's implementation
-    for (int i = 0; i < n; i++) {
+    if ( F == 0.0 ){
+    // Zero field
 
-      double efac1=exp(-v*stepsize); // survival prob for step
-      double efac2=(1.0-efac1);      // hop prob ~ hoprate*step
+      for (int i = 0; i < n; i++) {
 
-      funcG[0]=gz(0,G,F);
-      funcG[1]=gz(stepsize,G,F);
+        funcG[0]=ZFKT(0,G);
+        funcG[1]=ZFKT(stepsize,G);
 
-      for(i=1; i<n; i++) {
-        double gdi=gz(i*stepsize,G,F);
-        for(int j=1; j<i; j++) {
-          gdi= gdi*efac1 + funcG[j]*gz((i-j)*stepsize,G,F)*efac2;
+        for(i=1; i<n; i++) {
+          double gdi=ZFKT(i*stepsize,G);
+          for(int j=1; j<i; j++) {
+            gdi= gdi*efac1 + funcG[j]*ZFKT((i-j)*stepsize,G)*efac2;
+          }
+          funcG[i]=gdi;
         }
-        funcG[i]=gdi;
       }
+    } else {
+
+      // Non-zero field
+
+      for (int i = 0; i < n; i++) {
+
+        funcG[0]=HKT(0,G,F);
+        funcG[1]=HKT(stepsize,G,F);
+
+        for(i=1; i<n; i++) {
+          double gdi=HKT(i*stepsize,G,F);
+          for(int j=1; j<i; j++) {
+            gdi= gdi*efac1 + funcG[j]*HKT((i-j)*stepsize,G,F)*efac2;
+          }
+          funcG[i]=gdi;
+        }
+      }
+    
     }
 
-    //for (int i = 0; i < n; i++) {
-    //  double Integral=0.0;
-    //  for (int c = 1; c <= i; c++) {
-    //    Integral= gz(c*stepsize,G,F)*exp(-v*c*stepsize)*funcG[i-c]*(stepsize) + Integral; 
-    //  }
-    //  funcG[i] = (gz(i*stepsize,G,F)*exp(-v*i*stepsize) + v*Integral);
-    //}
+  //  //for (int i = 0; i < n; i++) {
+  //  //  double Integral=0.0;
+  //  //  for (int c = 1; c <= i; c++) {
+  //  //    Integral= gz(c*stepsize,G,F)*exp(-v*c*stepsize)*funcG[i-c]*(stepsize) + Integral; 
+  //  //  }
+  //  //  funcG[i] = (gz(i*stepsize,G,F)*exp(-v*i*stepsize) + v*Integral);
+  //  //}
 
 		for (size_t i = 0; i < nData; i++) {
-			double a =xValues[i]/stepsize;
-      a = a<nData ? a : a-1;
-      out[i] = A*(funcG.at(int(a)));
+
+      if (xValues[i]<0){
+        out[i] = A;
+
+      } else {
+
+        if(xValues[i]<stepsize*(n-1)) {
+
+          int j=int(floor(xValues[i]/stepsize));
+          double fdiv=(xValues[i]-j*stepsize)/stepsize;
+          out[i]=A*(funcG[j]*(1-fdiv)+funcG[j+1]*fdiv);
+        } else {
+
+          // off end, approximate exponential
+          double fdiv=(xValues[i]-(stepsize*(n-1)))/stepsize;
+          double efac1=funcG[n-1]/funcG[n-2];
+          out[i]=A*funcG[n-1]*pow(efac1,fdiv);
+        }
+      }
 		}
+
 
    } // else hopping rate != 0
 
