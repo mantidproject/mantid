@@ -31,7 +31,7 @@ public:
     const MantidVec abcRadii = list_of(2)(3)(4);
     const MantidVec abcInnerRadii = list_of(5)(6)(7);
     const MantidVec abcOuterRadii = list_of(8)(9)(10);
-    const SpecialCoordinateSystem frame = HKL;
+    const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
 
@@ -59,7 +59,7 @@ public:
     const MantidVec bad_abcInnerRadii = list_of(5)(6);
     const MantidVec abcOuterRadii = list_of(8)(9)(10);
     const MantidVec bad_abcOuterRadii = list_of(8)(9)(10)(11);
-    const SpecialCoordinateSystem frame = HKL;
+    const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
 
     TSM_ASSERT_THROWS("Should throw, bad directions",
                       PeakShapeEllipsoid(bad_directions, abcRadii,
@@ -86,7 +86,7 @@ public:
     const MantidVec abcRadii = list_of(2)(3)(4);
     const MantidVec abcInnerRadii = list_of(5)(6)(7);
     const MantidVec abcOuterRadii = list_of(8)(9)(10);
-    const SpecialCoordinateSystem frame = HKL;
+    const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
 
@@ -108,7 +108,7 @@ public:
     PeakShapeEllipsoid a(list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
                              .convert_to_container<std::vector<V3D>>(),
                          list_of(2)(3)(4), list_of(5)(6)(7), list_of(8)(9)(10),
-                         HKL, "foo", 1);
+                         Mantid::Kernel::HKL, "foo", 1);
 
     PeakShapeEllipsoid b(list_of(V3D(0, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
                              .convert_to_container<std::vector<V3D>>(),
@@ -132,7 +132,7 @@ public:
     PeakShapeEllipsoid shape(list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
                                  .convert_to_container<std::vector<V3D>>(),
                              list_of(2)(3)(4), list_of(5)(6)(7),
-                             list_of(8)(9)(10), HKL, "foo", 1);
+                             list_of(8)(9)(10), Mantid::Kernel::HKL, "foo", 1);
 
     TS_ASSERT_EQUALS("ellipsoid", shape.shapeName());
   }
@@ -144,7 +144,7 @@ public:
       const MantidVec abcRadii = list_of(2)(3)(4);
       const MantidVec abcInnerRadii = list_of(5)(6)(7);
       const MantidVec abcOuterRadii = list_of(8)(9)(10);
-      const SpecialCoordinateSystem frame = HKL;
+      const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
       const std::string algorithmName = "foo";
       const int algorithmVersion = 3;
 

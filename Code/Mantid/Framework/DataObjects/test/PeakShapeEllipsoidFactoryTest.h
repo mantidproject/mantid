@@ -22,6 +22,7 @@ using namespace Mantid;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace boost::assign;
+using Mantid::Kernel::SpecialCoordinateSystem;
 
 class PeakShapeEllipsoidFactoryTest : public CxxTest::TestSuite {
 public:
