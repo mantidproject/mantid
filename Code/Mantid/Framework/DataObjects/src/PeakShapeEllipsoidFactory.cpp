@@ -1,12 +1,11 @@
 #include "MantidDataObjects/PeakShapeEllipsoidFactory.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
-#include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 
 #include <jsoncpp/json/json.h>
 #include <stdexcept>
 
 using namespace Mantid::Kernel;
-using namespace Mantid::API;
 
 namespace Mantid {
 namespace DataObjects {

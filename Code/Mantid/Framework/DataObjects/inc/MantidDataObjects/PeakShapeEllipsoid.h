@@ -37,7 +37,7 @@ namespace DataObjects
   {
   public:
     /// Constructor
-    PeakShapeEllipsoid(std::vector<Mantid::Kernel::V3D> directions, std::vector<double> abcRadius, std::vector<double> abcBackgroundInnerRadius, std::vector<double>  abcBackgroundOuterRadius, API::SpecialCoordinateSystem frame,
+    PeakShapeEllipsoid(std::vector<Mantid::Kernel::V3D> directions, std::vector<double> abcRadius, std::vector<double> abcBackgroundInnerRadius, std::vector<double>  abcBackgroundOuterRadius, Kernel::SpecialCoordinateSystem frame,
                        std::string algorithmName = std::string(),
                        int algorithmVersion = -1);
     /// Copy constructor

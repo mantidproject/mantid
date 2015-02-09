@@ -13,7 +13,6 @@
 using Mantid::DataObjects::PeakShapeEllipsoid;
 using namespace Mantid;
 using namespace Mantid::Kernel;
-using namespace Mantid::API;
 using namespace boost::assign;
 
 class PeakShapeEllipsoidTest : public CxxTest::TestSuite {

@@ -12,6 +12,7 @@
 #include <boost/regex.hpp>
 
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 using Mantid::Geometry::IMDDimension_const_sptr;
 
 namespace MantidQt {
@@ -27,13 +28,13 @@ Mantid::Kernel::Logger g_log("PeaksPresenter");
  * @return coordinate system as a string
  */
 std::string
-coordinateToString(Mantid::API::SpecialCoordinateSystem coordSystem) {
+coordinateToString(Mantid::Kernel::SpecialCoordinateSystem coordSystem) {
   switch (coordSystem) {
-  case Mantid::API::QLab:
+  case Mantid::Kernel::QLab:
     return "QLab";
-  case Mantid::API::QSample:
+  case Mantid::Kernel::QSample:
     return "QSample";
-  case Mantid::API::HKL:
+  case Mantid::Kernel::HKL:
     return "HKL";
   default:
     return "Unknown";

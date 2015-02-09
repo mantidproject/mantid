@@ -54,9 +54,9 @@ PeakTransformQSample::transformPeak(const Mantid::API::IPeak &peak) const {
 /**
  * @return Special coordinate system associated with this type of transform.
  */
-Mantid::API::SpecialCoordinateSystem
+Mantid::Kernel::SpecialCoordinateSystem
 PeakTransformQSample::getCoordinateSystem() const {
-  return Mantid::API::QSample;
+  return Mantid::Kernel::QSample;
 }
 }
 }

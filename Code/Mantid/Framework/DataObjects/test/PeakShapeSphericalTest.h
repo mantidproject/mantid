@@ -10,10 +10,9 @@
 
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 
 using Mantid::DataObjects::PeakShapeSpherical;
-using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 class PeakShapeSphericalTest : public CxxTest::TestSuite {

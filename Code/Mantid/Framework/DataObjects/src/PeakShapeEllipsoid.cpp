@@ -9,7 +9,7 @@ PeakShapeEllipsoid::PeakShapeEllipsoid(
     std::vector<Kernel::V3D> directions, std::vector<double> abcRadii,
     std::vector<double> abcRadiiBackgroundInner,
     std::vector<double> abcRadiiBackgroundOuter,
-    API::SpecialCoordinateSystem frame, std::string algorithmName,
+    Kernel::SpecialCoordinateSystem frame, std::string algorithmName,
     int algorithmVersion)
     : PeakShapeBase(frame, algorithmName, algorithmVersion),
       m_directions(directions), m_abc_radii(abcRadii),

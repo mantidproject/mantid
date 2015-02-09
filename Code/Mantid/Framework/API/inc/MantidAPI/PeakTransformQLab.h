@@ -31,7 +31,7 @@ public:
   /// Get the transform friendly name.
   virtual std::string getFriendlyName() const { return name(); }
   /// Getter for the special coordinate representation of this transform type.
-  Mantid::API::SpecialCoordinateSystem getCoordinateSystem() const;
+  Mantid::Kernel::SpecialCoordinateSystem getCoordinateSystem() const;
 };
 
 /// Typedef a factory for type of PeaksTransform.

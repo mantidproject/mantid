@@ -1,10 +1,10 @@
-#ifndef MANTID_API_SPECIALCOORDINATESYSTEMTEST
-#define MANTID_API_SPECIALCOORDINATESYSTEMTEST
+#ifndef MANTID_KERNEL_SPECIALCOORDINATESYSTEMTEST
+#define MANTID_KERNEL_SPECIALCOORDINATESYSTEMTEST
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 
-using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 /*
  * We are testing the enum because the order of the elements in the enum is critical. There are various places in the codebase where the

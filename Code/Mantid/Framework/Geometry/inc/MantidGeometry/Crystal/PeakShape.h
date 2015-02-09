@@ -2,7 +2,7 @@
 #define MANTID_GEOMETRY_PEAKSHAPE_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include <string>
 #include <boost/shared_ptr.hpp>
 
@@ -35,7 +35,7 @@ namespace Geometry {
 class DLLExport PeakShape {
 public:
   /// Coordinte frame used upon creation
-  virtual Mantid::API::SpecialCoordinateSystem frame() const = 0;
+  virtual Mantid::Kernel::SpecialCoordinateSystem frame() const = 0;
   /// Serialize
   virtual std::string toJSON() const = 0;
   /// Deep copy this

@@ -3,6 +3,7 @@
 
 #include "MantidMDEvents/MDWSDescription.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/Exception.h"
 #include <cxxtest/TestSuite.h>
 
@@ -129,12 +130,12 @@ public:
   void test_defaultCoordinateSystem()
   {
     MDWSDescription description;
-    TS_ASSERT_EQUALS(Mantid::API::None, description.getCoordinateSystem());
+    TS_ASSERT_EQUALS(Mantid::Kernel::None, description.getCoordinateSystem());
   }
 
   void test_setCoordinateSystem()
   {
-    using namespace Mantid::API;
+    using namespace Mantid::Kernel;
     const SpecialCoordinateSystem expectedResult = QSample;
 
     MDWSDescription description;

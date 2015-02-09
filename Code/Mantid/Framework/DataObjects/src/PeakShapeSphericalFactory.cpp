@@ -1,13 +1,13 @@
 #include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
-#include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include <jsoncpp/json/json.h>
 #include <MantidKernel/VMD.h>
 
 namespace Mantid {
 namespace DataObjects {
 
-using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor

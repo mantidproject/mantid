@@ -13,7 +13,7 @@
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MockObjects.h"
 
 #include "MantidDataObjects/PeakShapeEllipsoidFactory.h"
@@ -21,7 +21,6 @@
 using namespace Mantid;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
-using namespace Mantid::API;
 using namespace boost::assign;
 
 class PeakShapeEllipsoidFactoryTest : public CxxTest::TestSuite {

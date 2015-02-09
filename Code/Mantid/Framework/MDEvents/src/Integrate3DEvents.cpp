@@ -455,7 +455,7 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
   sigi = sqrt(peak_w_back + ratio * ratio * backgrd);
 
   // Make the shape and return it.
-  return boost::make_shared<const PeakShapeEllipsoid>(directions, abcRadii, abcBackgroundInnerRadii, abcBackgroundOuterRadii, Mantid::API::QLab, "IntegrateEllipsoids");
+  return boost::make_shared<const PeakShapeEllipsoid>(directions, abcRadii, abcBackgroundInnerRadii, abcBackgroundOuterRadii, Mantid::Kernel::QLab, "IntegrateEllipsoids");
 }
 
 } // namespace MDEvents

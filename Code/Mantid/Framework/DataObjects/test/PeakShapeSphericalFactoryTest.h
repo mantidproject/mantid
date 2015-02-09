@@ -12,12 +12,11 @@
 #include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidKernel/VMD.h"
-#include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MockObjects.h"
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
-using namespace Mantid::API;
 
 class PeakShapeSphericalFactoryTest : public CxxTest::TestSuite {
 public:

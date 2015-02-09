@@ -272,7 +272,6 @@ set ( INC_FILES
 	inc/MantidAPI/ScriptRepositoryFactory.h
 	inc/MantidAPI/SingleValueParameter.h
 	inc/MantidAPI/SingleValueParameterParser.h
-	inc/MantidAPI/SpecialCoordinateSystem.h
 	inc/MantidAPI/SpectraAxis.h
 	inc/MantidAPI/SpectrumDetectorMapping.h
 	inc/MantidAPI/TableRow.h
@@ -361,7 +360,6 @@ set ( TEST_FILES
 	SampleTest.h
 	ScopedWorkspaceTest.h
 	ScriptBuilderTest.h
-        SpecialCoordinateSystemTest.h
 	SpectraAxisTest.h
 	SpectrumDetectorMappingTest.h
 	TextAxisTest.h

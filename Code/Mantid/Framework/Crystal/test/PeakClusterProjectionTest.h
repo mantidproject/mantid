@@ -33,7 +33,7 @@ private:
   IPeaksWorkspace_sptr create_peaks_WS(Instrument_sptr inst) const
   {
     PeaksWorkspace* pPeaksWS = new PeaksWorkspace();
-    pPeaksWS->setCoordinateSystem(Mantid::API::HKL);
+    pPeaksWS->setCoordinateSystem(Mantid::Kernel::HKL);
     IPeaksWorkspace_sptr peakWS(pPeaksWS);
     peakWS->setInstrument(inst);
     return peakWS;
@@ -98,7 +98,7 @@ public:
   void test_throws_if_mdws_has_no_coordinate_system()
   {
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 3, 1);
-    inWS->setCoordinateSystem(None);
+    inWS->setCoordinateSystem(Mantid::Kernel::None);
 
     TSM_ASSERT_THROWS("Must have a known coordinate system", PeakClusterProjection object(inWS),
         std::invalid_argument&);
@@ -107,7 +107,7 @@ public:
   void test_throws_if_mdws_is_less_than_three_dimensional()
   {
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 2, 1);
-    inWS->setCoordinateSystem(Mantid::API::HKL);
+    inWS->setCoordinateSystem(Mantid::Kernel::HKL);
 
     TSM_ASSERT_THROWS("Must be +3 dimensional", PeakClusterProjection object(inWS),
         std::invalid_argument&);

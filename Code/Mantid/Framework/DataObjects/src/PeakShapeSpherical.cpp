@@ -13,7 +13,7 @@ namespace DataObjects {
  * @param algorithmVersion : Algorithm version used for the integration
  */
 PeakShapeSpherical::PeakShapeSpherical(const double &peakRadius,
-                                       API::SpecialCoordinateSystem frame,
+                                       Kernel::SpecialCoordinateSystem frame,
                                        std::string algorithmName,
                                        int algorithmVersion)
     : PeakShapeBase(frame, algorithmName, algorithmVersion),
@@ -31,7 +31,7 @@ PeakShapeSpherical::PeakShapeSpherical(const double &peakRadius,
 PeakShapeSpherical::PeakShapeSpherical(const double &peakRadius,
                                        const double &peakInnerRadius,
                                        const double &peakOuterRadius,
-                                       API::SpecialCoordinateSystem frame,
+                                       Kernel::SpecialCoordinateSystem frame,
                                        std::string algorithmName,
                                        int algorithmVersion)
     : PeakShapeBase(frame, algorithmName, algorithmVersion),

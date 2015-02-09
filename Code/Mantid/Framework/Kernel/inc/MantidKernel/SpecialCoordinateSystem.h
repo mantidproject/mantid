@@ -1,8 +1,8 @@
-#ifndef MANTID_MDALGORITHMS_SpecialCoordinateSystem_H_
-#define MANTID_MDALGORITHMS_SpecialCoordinateSystem_H_
+#ifndef MANTID_KERNEL_SpecialCoordinateSystem_H_
+#define MANTID_KERNEL_SpecialCoordinateSystem_H_
 
 namespace Mantid {
-namespace API {
+namespace Kernel {
 /**
  * Special coordinate systems for Q3D.
  */

@@ -133,7 +133,7 @@ public:
 
     MDEventWorkspace3Lean::sptr mdews =
         AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("IntegratePeaksMD2Test_MDEWS");
-    mdews->setCoordinateSystem(Mantid::API::HKL);
+    mdews->setCoordinateSystem(Mantid::Kernel::HKL);
     TS_ASSERT_EQUALS( mdews->getNPoints(), 3000);
     TS_ASSERT_DELTA( mdews->getBox()->getSignal(), 3000.0, 1e-2);
 
@@ -429,7 +429,7 @@ public:
 
     MDEventWorkspace3Lean::sptr mdews =
         AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("IntegratePeaksMD2Test_MDEWS");
-    mdews->setCoordinateSystem(Mantid::API::HKL);
+    mdews->setCoordinateSystem(Mantid::Kernel::HKL);
 
 
     // Make a fake instrument - doesn't matter, we won't use it really

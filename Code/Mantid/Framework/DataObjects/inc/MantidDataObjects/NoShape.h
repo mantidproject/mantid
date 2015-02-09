@@ -48,7 +48,7 @@ public:
     /// Return the shape name
     std::string shapeName() const;
     /// Get the coordinate frame
-    API::SpecialCoordinateSystem frame() const;
+    Kernel::SpecialCoordinateSystem frame() const;
 };
 
 } // namespace DataObjects

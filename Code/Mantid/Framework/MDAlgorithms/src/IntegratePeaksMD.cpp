@@ -168,17 +168,17 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   /// Value of the CoordinatesToUse property.
   std::string CoordinatesToUseStr = getPropertyValue("CoordinatesToUse");
-  API::SpecialCoordinateSystem CoordinatesToUse = ws->getSpecialCoordinateSystem();
+  Kernel::SpecialCoordinateSystem CoordinatesToUse = ws->getSpecialCoordinateSystem();
   g_log.warning() << " Warning" << CoordinatesToUse << std::endl;
-  if (CoordinatesToUse == API::QLab && CoordinatesToUseStr != "Q (lab frame)")
+  if (CoordinatesToUse == Kernel::QLab && CoordinatesToUseStr != "Q (lab frame)")
     g_log.warning() << "Warning: used Q (lab frame) coordinates for MD "
                        "workspace, not CoordinatesToUse from input "
                     << std::endl;
-  else if (CoordinatesToUse == API::QSample && CoordinatesToUseStr != "Q (sample frame)")
+  else if (CoordinatesToUse == Kernel::QSample && CoordinatesToUseStr != "Q (sample frame)")
     g_log.warning() << "Warning: used Q (sample frame) coordinates for MD "
                        "workspace, not CoordinatesToUse from input "
                     << std::endl;
-  else if (CoordinatesToUse == API::HKL && CoordinatesToUseStr != "HKL")
+  else if (CoordinatesToUse == Kernel::HKL && CoordinatesToUseStr != "HKL")
     g_log.warning() << "Warning: used HKL coordinates for MD workspace, not "
                        "CoordinatesToUse from input " << std::endl;
 
@@ -277,11 +277,11 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
     // Get the peak center as a position in the dimensions of the workspace
     V3D pos;
-    if (CoordinatesToUse == API::QLab) //"Q (lab frame)"
+    if (CoordinatesToUse == Kernel::QLab) //"Q (lab frame)"
       pos = p.getQLabFrame();
-    else if (CoordinatesToUse == API::QSample) //"Q (sample frame)"
+    else if (CoordinatesToUse == Kernel::QSample) //"Q (sample frame)"
       pos = p.getQSampleFrame();
-    else if (CoordinatesToUse == API::HKL) //"HKL"
+    else if (CoordinatesToUse == Kernel::HKL) //"HKL"
       pos = p.getHKL();
 
     // Get the instrument and its detectors
