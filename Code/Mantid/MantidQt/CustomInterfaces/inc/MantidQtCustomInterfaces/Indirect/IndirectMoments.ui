@@ -96,7 +96,15 @@
        <layout class="QHBoxLayout" name="properties"/>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="plotRaw"/>
+       <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppRawPlot" native="true">
+        <property name="canvasColour" stdset="0">
+         <color>
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
+         </color>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

@@ -23,18 +23,8 @@ namespace CustomInterfaces
     const unsigned int NUM_DECIMALS = 6;
 
     // RAW PLOT
-    m_plots["MomentsPlot"] = new QwtPlot(m_parentWidget);
-    /* m_curves["MomentsPlotCurve"] = new QwtPlotCurve(); */
-    m_rangeSelectors["MomentsRangeSelector"] = new MantidWidgets::RangeSelector(m_plots["MomentsPlot"]);
+    m_rangeSelectors["MomentsRangeSelector"] = new MantidWidgets::RangeSelector(m_uiForm.ppRawPlot);
     m_rangeSelectors["MomentsRangeSelector"]->setInfoOnly(false);
-
-    // Initilise plot
-    m_plots["MomentsPlot"]->setCanvasBackground(Qt::white);
-    m_plots["MomentsPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-    m_plots["MomentsPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-
-    // Add plot to UI
-    m_uiForm.plotRaw->addWidget(m_plots["MomentsPlot"]);
 
     // PROPERTY TREE
     m_propTrees["MomentsPropTree"] = new QtTreePropertyBrowser();
@@ -123,8 +113,10 @@ namespace CustomInterfaces
   {
     disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateProperties(QtProperty*, double)));
 
-    plotMiniPlot(filename, 0, "MomentsPlot", "MomentsPlotCurve");
-    std::pair<double,double> range = getCurveRange("MomentsPlotCurve");
+    m_uiForm.ppRawPlot->clear();
+    m_uiForm.ppRawPlot->addSpectrum(filename, 0);
+    QPair<double, double> curveRange = m_uiForm.ppRawPlot->getCurveRange(filename);
+    std::pair<double, double> range = std::make_pair(curveRange.first, curveRange.second);
     setMiniPlotGuides("MomentsRangeSelector", m_properties["EMin"], m_properties["EMax"], range);
     setPlotRange("MomentsRangeSelector", m_properties["EMin"], m_properties["EMax"], range);
 
