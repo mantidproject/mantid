@@ -339,11 +339,14 @@ void Integrate3DEvents::addEvent(V3D event_Q) {
   if (hkl_key == 0) // don't keep events associated with 0,0,0
     return;
 
-  V3D peak_q = peak_qs[hkl_key];
-  if (!peak_q.nullVector()) {
-    event_Q = event_Q - peak_q;
-    if (event_Q.norm() < radius) {
-      event_lists[hkl_key].push_back(event_Q);
+  auto peak_it = peak_qs.find(hkl_key);
+  if (peak_it != peak_qs.end())
+  {
+    if (!peak_it->second.nullVector()) {
+      event_Q = event_Q - peak_it->second;
+      if (event_Q.norm() < radius) {
+        event_lists[hkl_key].push_back(event_Q);
+      }
     }
   }
 }
