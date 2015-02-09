@@ -90,6 +90,17 @@ void PreviewPlot::setCanvasColour(const QColor & colour)
 
 
 /**
+ * Checks to see if the option to use the pan tool is enabled.
+ *
+ * @return True if tool is allowed
+ */
+bool PreviewPlot::allowPan()
+{
+  return m_allowPan;
+}
+
+
+/**
  * Enables or disables the option to use the pan tool on the plot.
  *
  * @param allow If tool should be allowed
@@ -101,13 +112,13 @@ void PreviewPlot::setAllowPan(bool allow)
 
 
 /**
- * Checks to see if the option to use the pan tool is enabled.
+ * Checks to see if the option to use the zoom tool is enabled.
  *
  * @return True if tool is allowed
  */
-bool PreviewPlot::allowPan()
+bool PreviewPlot::allowZoom()
 {
-  return m_allowPan;
+  return m_allowZoom;
 }
 
 
@@ -123,13 +134,58 @@ void PreviewPlot::setAllowZoom(bool allow)
 
 
 /**
- * Checks to see if the option to use the zoom tool is enabled.
+ * Sets the range of the given axis scale to a given range.
  *
- * @return True if tool is allowed
+ * @param range Pair of values for range
+ * @param axisID ID of axis
  */
-bool PreviewPlot::allowZoom()
+void PreviewPlot::setAxisRange(QPair<double, double> range, int axisID)
 {
-  return m_allowZoom;
+  if(range.first > range.second)
+    throw std::runtime_error("Supplied range is invalid.");
+
+  m_plot->setAxisScale(axisID, range.first, range.second);
+  replot();
+}
+
+
+/**
+ * Gets the X range of a curve given a pointer to the workspace.
+ *
+ * @param ws Pointer to workspace
+ */
+QPair<double, double> PreviewPlot::getCurveRange(const Mantid::API::MatrixWorkspace_const_sptr ws)
+{
+  if(!m_curves.contains(ws))
+    throw std::runtime_error("Workspace not on preview plot.");
+
+  size_t numPoints = m_curves[ws]->data().size();
+
+  if(numPoints < 2)
+    return qMakePair(0.0, 0.0);
+
+  double low = m_curves[ws]->data().x(0);
+  double high = m_curves[ws]->data().x(numPoints - 1);
+
+  return qMakePair(low, high);
+}
+
+
+/**
+ * Gets the X range of a curve given its name.
+ *
+ * @param wsName Name of workspace
+ */
+QPair<double, double> PreviewPlot::getCurveRange(const QString & wsName)
+{
+  // Try to get a pointer from the name
+  std::string wsNameStr = wsName.toStdString();
+  auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsName.toStdString());
+
+  if(!ws)
+    throw std::runtime_error(wsNameStr + " is not a MatrixWorkspace, not supported by PreviewPlot.");
+
+  return getCurveRange(ws);
 }
 
 
@@ -147,19 +203,11 @@ void PreviewPlot::addSpectrum(const MatrixWorkspace_const_sptr ws, const size_t 
 
   // Check the spectrum index is in range
   if(specIndex >= ws->getNumberHistograms())
-  {
-    g_log.error() << "Workspace index is out of range, cannot plot."
-                  << std::endl;
-    return;
-  }
+    throw std::runtime_error("Workspace index is out of range, cannot plot.");
 
   // Check the X axis is large enough
   if(ws->readX(0).size() < 2)
-  {
-    g_log.error() << "X axis is too small to generate a histogram plot."
-                  << std::endl;
-    return;
-  }
+    throw std::runtime_error("X axis is too small to generate a histogram plot.");
 
   // Create the plot data
   const bool logScale(false), distribution(false);
@@ -195,12 +243,7 @@ void PreviewPlot::addSpectrum(const QString & wsName, const size_t specIndex,
   auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsName.toStdString());
 
   if(!ws)
-  {
-    g_log.error() << wsNameStr
-                  << " is not a MatrixWorkspace, not supported by PreviewPlot."
-                  << std::endl;
-    return;
-  }
+    throw std::runtime_error(wsNameStr + " is not a MatrixWorkspace, not supported by PreviewPlot.");
 
   addSpectrum(ws, specIndex, curveColour);
 }
@@ -238,14 +281,47 @@ void PreviewPlot::removeSpectrum(const QString & wsName)
   auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsNameStr);
 
   if(!ws)
-  {
-    g_log.error() << wsNameStr
-                  << " is not a MatrixWorkspace, not supported by PreviewPlot."
-                  << std::endl;
-    return;
-  }
+    throw std::runtime_error(wsNameStr + " is not a MatrixWorkspace, not supported by PreviewPlot.");
 
   removeSpectrum(ws);
+}
+
+
+/**
+ * Resizes the X axis scale range to exactly fir the curves currently
+ * plotted on it.
+ */
+void PreviewPlot::resizeX()
+{
+  double low = DBL_MAX;
+  double high = DBL_MIN;
+
+  for(auto it = m_curves.begin(); it != m_curves.end(); ++it)
+  {
+    auto range = getCurveRange(it.key());
+
+    if(range.first < low)
+      low = range.first;
+
+    if(range.second > high)
+      high = range.second;
+  }
+
+  setAxisRange(qMakePair(low, high), QwtPlot::xBottom);
+}
+
+
+/**
+ * Removes all curves from the plot.
+ */
+void PreviewPlot::clear()
+{
+  for(auto it = m_curves.begin(); it != m_curves.end(); ++it)
+    removeCurve(it.value());
+
+  m_curves.clear();
+
+  replot();
 }
 
 
@@ -255,7 +331,6 @@ void PreviewPlot::removeSpectrum(const QString & wsName)
 void PreviewPlot::replot()
 {
   //TODO: replot curves?
-
   m_plot->replot();
 }
 

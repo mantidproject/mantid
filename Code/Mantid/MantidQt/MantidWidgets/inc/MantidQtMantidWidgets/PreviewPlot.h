@@ -73,6 +73,11 @@ namespace MantidWidgets
     bool allowZoom();
     void setAllowZoom(bool allow);
 
+    void setAxisRange(QPair<double, double> range, int axisID = QwtPlot::xBottom);
+
+    QPair<double, double> getCurveRange(const Mantid::API::MatrixWorkspace_const_sptr ws);
+    QPair<double, double> getCurveRange(const QString & wsName);
+
     void addSpectrum(const Mantid::API::MatrixWorkspace_const_sptr ws, const size_t specIndex = 0, const QColor & curveColour = QColor());
     void addSpectrum(const QString & wsName, const size_t specIndex = 0, const QColor & curveColour = QColor());
 
@@ -80,6 +85,8 @@ namespace MantidWidgets
     void removeSpectrum(const QString & wsName);
 
   public slots:
+    void resizeX();
+    void clear();
     void replot();
 
   private:
