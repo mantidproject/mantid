@@ -308,7 +308,7 @@ class DirectEnergyConversion(object):
       #TODO:
       # Reducer.check_necessary_files(monovan_run)
 
-  
+      PropertyManager.sample_run.set_action_suffix('')
       sample_ws = PropertyManager.sample_run.get_workspace()
 
       # Update reduction properties which may change in the workspace but have
