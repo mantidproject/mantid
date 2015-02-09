@@ -6300,7 +6300,7 @@ QStringList ApplicationWindow::columnsList(Table::PlotDesignation plotType)
       continue;
 
     Table *t = dynamic_cast<Table*>(w);
-    for (int i=0; i < t->numCols(); i++)
+    for (int i=0; t && i < t->numCols(); i++)
     {
       if (t->colPlotDesignation(i) == plotType || plotType == Table::All)
         list << QString(t->objectName()) + "_" + t->colLabel(i);
