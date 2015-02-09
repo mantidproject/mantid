@@ -11716,8 +11716,10 @@ void ApplicationWindow::disableTools()
 
   QList<MdiSubWindow *> windows = windowsList();
   foreach(MdiSubWindow *w, windows){
-    if (w->isA("MultiLayer")){
-      QList<Graph *> layers = dynamic_cast<MultiLayer*>(w)->layersList();
+    auto ml = dynamic_cast<MultiLayer*>(w);
+    if (ml)
+    {
+      QList<Graph *> layers = ml->layersList();
       foreach(Graph *g, layers)
       g->disableTools();
     }
