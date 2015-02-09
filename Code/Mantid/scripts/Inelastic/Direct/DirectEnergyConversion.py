@@ -426,13 +426,21 @@ class DirectEnergyConversion(object):
          self._multirep_mode = False
          num_ei_cuts   = 0
  
-      cut_ind = 0 # do not do enumerate if it generates all sequence -- code below 
+      cut_ind = 0 # do not do enumerate if it generates all sequence at once
+      #  -- code below uses current energy state from PropertyManager.incident_energy
       for ei_guess in PropertyManager.incident_energy:
          cut_ind +=1
          #---------------
          if self._multirep_mode:
             tof_range = self.find_tof_range_for_multirep(ws_base)
+            # Temporary (nasty) hack to calculate background
+            if self.check_background:
+               bkg_range = self.prop_man.bkgd_range
+               tof_range =(tof_range[0],tof_range[1],max(tof_range[2],bkg_range[1]))
+
             ws_base= PropertyManager.sample_run.chop_ws_part(ws_base,tof_range,self._do_early_rebinning,cut_ind,num_ei_cuts)
+            prop_man.log("*** Processing multirep chunk: #{0}/{1} for provisional energy: {2} meV".format(cut_ind,num_ei_cuts,ei_guess),'notice')
+
          #---------------
 
          #Run the conversion first on the sample
