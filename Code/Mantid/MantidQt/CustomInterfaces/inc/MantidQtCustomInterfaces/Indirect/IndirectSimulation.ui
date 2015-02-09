@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>445</width>
-    <height>450</height>
+    <width>500</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,6 +34,11 @@
      <widget class="QWidget" name="sassena">
       <attribute name="title">
        <string>Sassena</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="dos">
+      <attribute name="title">
+       <string>DensityOfStates</string>
       </attribute>
      </widget>
     </widget>

@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/Indirect/ApplyCorr.cpp
 	src/Indirect/CalcCorr.cpp
 	src/Indirect/ConvFit.cpp
+  src/Indirect/DensityOfStates.cpp
 	src/Indirect/Elwin.cpp
 	src/Indirect/Fury.cpp
 	src/Indirect/FuryFit.cpp
@@ -84,6 +85,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.h
 	inc/MantidQtCustomInterfaces/Indirect/CalcCorr.h
 	inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
+  inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.h
 	inc/MantidQtCustomInterfaces/Indirect/Elwin.h
 	inc/MantidQtCustomInterfaces/Indirect/Fury.h
 	inc/MantidQtCustomInterfaces/Indirect/FuryFit.h
@@ -170,6 +172,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.h
                 inc/MantidQtCustomInterfaces/Indirect/CalcCorr.h
                 inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
+                inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.h
                 inc/MantidQtCustomInterfaces/Indirect/Elwin.h
                 inc/MantidQtCustomInterfaces/Indirect/Fury.h
                 inc/MantidQtCustomInterfaces/Indirect/FuryFit.h
@@ -235,6 +238,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
                inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.ui
                inc/MantidQtCustomInterfaces/Indirect/CalcCorr.ui
                inc/MantidQtCustomInterfaces/Indirect/ConvFit.ui
+               inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.ui
                inc/MantidQtCustomInterfaces/Indirect/Elwin.ui
                inc/MantidQtCustomInterfaces/Indirect/Fury.ui
                inc/MantidQtCustomInterfaces/Indirect/FuryFit.ui
