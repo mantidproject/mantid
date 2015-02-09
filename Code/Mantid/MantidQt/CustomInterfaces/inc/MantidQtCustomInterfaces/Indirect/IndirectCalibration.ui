@@ -108,7 +108,15 @@
        <layout class="QVBoxLayout" name="propertiesCalibration"/>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="plotCalibration"/>
+       <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppCalibration" native="true">
+        <property name="canvasColour" stdset="0">
+         <color>
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
+         </color>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -168,7 +176,15 @@
        </layout>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="plotResolution"/>
+       <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppResolution" native="true">
+        <property name="canvasColour" stdset="0">
+         <color>
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
+         </color>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -239,6 +255,12 @@
    <class>MantidQt::MantidWidgets::MWRunFiles</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::PreviewPlot</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/PreviewPlot.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>
