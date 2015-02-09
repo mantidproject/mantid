@@ -2,6 +2,8 @@
 
 #include <QFileInfo>
 
+#include "MantidQtMantidWidgets/PreviewPlot.h"
+
 using namespace Mantid::API;
 
 namespace MantidQt
@@ -18,11 +20,17 @@ namespace CustomInterfaces
     m_uiForm.setupUi(parent);
 
     // Preview plot
-    m_plots["PreviewPlot"] = new QwtPlot(m_parentWidget);
+    m_plots["PreviewPlot"] = new QwtPlot(0); //m_parentWidget);
     m_plots["PreviewPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
     m_plots["PreviewPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
     m_plots["PreviewPlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.plotPreview->addWidget(m_plots["PreviewPlot"]);
+    /* m_uiForm.plotPreview->addWidget(m_plots["PreviewPlot"]); */
+
+    //TODO
+    MantidWidgets::PreviewPlot *plot = new MantidWidgets::PreviewPlot(m_parentWidget);
+    plot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    plot->setCanvasColour(Qt::white);
+    m_uiForm.plotPreview->addWidget(plot);
 
     // Update the preview plot when the algorithm is complete
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(transAlgDone(bool)));

@@ -40,6 +40,7 @@ set ( SRC_FILES
 	src/UserFunctionDialog.cpp
 	src/WorkspaceEditorFactory.cpp
 	src/WorkspaceSelector.cpp
+  src/PreviewPlot.cpp
         src/pqHelpWindow.cxx
 	src/pythonCalc.cpp
 	src/LineEditWithClear.cpp
@@ -72,6 +73,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/MWRunFiles.h
     inc/MantidQtMantidWidgets/PeakPicker.h
     inc/MantidQtMantidWidgets/pqHelpWindow.h
+    inc/MantidQtMantidWidgets/PreviewPlot.h
     inc/MantidQtMantidWidgets/PropertyHandler.h
     inc/MantidQtMantidWidgets/ProcessingAlgoWidget.h
     inc/MantidQtMantidWidgets/pythonCalc.h
