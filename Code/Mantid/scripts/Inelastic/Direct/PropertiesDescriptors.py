@@ -274,9 +274,7 @@ class IncidentEnergy(PropDescriptor):
     def get_current(self):
         """ Return current energy out of range of energies""" 
         if isinstance(self._incident_energy,list):
-            ind = self._cur_iter_en-1
-            if ind<0:
-                ind = 0
+            ind = self._cur_iter_en
             return self._incident_energy[ind]
         else:
             return self._incident_energy
@@ -286,24 +284,22 @@ class IncidentEnergy(PropDescriptor):
             
         """
         if isinstance(self._incident_energy,list):
-            ind = self._cur_iter_en-1
-            if ind<0:
-                ind = 0
-            self._incident_energy[ind] = value
+            ind = self._cur_iter_en
+            self._incident_energy[ind]=value
         else:
             self._incident_energy = value
 
 
     def __iter__(self):
         """ iterator over energy range, initializing iterations over energies """
-        self._cur_iter_en = 0
+        self._cur_iter_en = -1
         return self
 
     def next(self): # Python 3: def __next__(self)
         """ part of iterator """ 
-        if self._cur_iter_en < self._num_energies:
-           ind = self._cur_iter_en
-           self._cur_iter_en += 1
+        self._cur_iter_en += 1
+        ind = self._cur_iter_en
+        if ind  < self._num_energies:
            if isinstance(self._incident_energy,list):
                return self._incident_energy[ind]
            else:
@@ -718,7 +714,7 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
 #-----------------------------------------------------------------------------------------
 class MonovanIntegrationRange(prop_helpers.ComplexProperty):
     """ integration range for monochromatic vanadium. The final integral is used to estimate
-         relative detector's efficiency
+        relative detector's efficiency
 
         Defined either directly or as the function of the incident energy(s)
 
@@ -986,10 +982,24 @@ class MultirepTOFSpectraList(PropDescriptor):
 #end MultirepTOFSpectraList
 
 class MonoCorrectionFactor(PropDescriptor):
-    def __init__(self,ei_prop,monovan_run):
+    """ property contains correction factor, used to convert 
+        experimental scattering cross-section into absolute 
+        units ( mb/str/mev/fu) 
+
+        There are independent two sources for this factor: 
+        1) if user explicitly specifies correction value. 
+           This value then will be applied to all subsequent runs 
+           without any checks if the correction is appropriate
+        2) set/get cashed value correspondent to current monovan 
+           run number, incident energy and integration range.
+           This value is cashed at first run and reapplied if 
+           no changes to the values it depends on were identified
+    """ 
+    def __init__(self,ei_prop):
         self._cor_factor = None
+        self._mono_run_number=None
         self._ei_prop = ei_prop
-        self._mono_run = monovan_run
+        self.cashed_values={}
 
     def __get__(self,instance,type=None):
        if instance is None:
@@ -1000,8 +1010,32 @@ class MonoCorrectionFactor(PropDescriptor):
     def __set__(self,instance,value):
        if value is None:
           self._cor_factor = None
+          self.cashed_values={}
           return
        self._cor_factor = value
+    # 
+    def set_val_to_cash(self,mono_int_range,value):
+        """ """ 
+        cash_id = self._build_cash_val_id(mono_int_range)
+        self.cashed_values[cash_id] = value
+
+    def get_val_from_cash(self,mono_int_range):
+        cash_id = self._build_cash_val_id(mono_int_range)
+        if cash_id in self.cashed_values:
+           return self.cashed_values[cash_id]
+        else:
+           return None
+        
+    def set_cash_mono_run_number(self,new_value):
+        if self._mono_run_number != int(new_value):
+           self.cashed_values={}
+           self._mono_run_number = int(new_value)
+
+    def _build_cash_val_id(self,mono_int_range):
+       ei = self._ei_prop.get_current()
+       cash_id = "Ei={0:0>9.4e}:Int({1:0>9.4e}:{2:0>9.5e}):Run{3}".\
+           format(ei,mono_int_range[0],mono_int_range[1],self._mono_run_number)
+       return cash_id
 
 
 #-----------------------------------------------------------------------------------------

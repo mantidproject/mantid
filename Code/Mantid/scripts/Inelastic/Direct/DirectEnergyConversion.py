@@ -394,8 +394,17 @@ class DirectEnergyConversion(object):
 #--------------------------------------------------------------------------------------------------
       # SNS or GUI motor stuff
       self.calculate_rotation(PropertyManager.sample_run.get_workspace())
-      #
-      calculate_abs_units = (self.monovan_run != None and self.mono_correction_factor == None)
+      # 
+      if self.monovan_run:
+         MonovanCashNum=PropertyManager.monovan_run.run_number()
+         if self.mono_correction_factor:
+            calculate_abs_units = False # correction factor given, so no calculations
+         else:
+            calculate_abs_units = True
+      else:
+          MonovanCashNum=None
+          calculate_abs_units = False
+
 
       if PropertyManager.incident_energy.multirep_mode():
          self._multirep_mode = True
@@ -440,7 +449,8 @@ class DirectEnergyConversion(object):
          PropertyManager.sample_run.synchronize_ws(deltaE_wkspace_sample)
          # 
          ei = (deltaE_wkspace_sample.getRun().getLogData("Ei").value)
-         PropertyManager.incident_energy.set_current(ei)
+         # PropertyManager.incident_energy.set_current(ei) # let's not do it -- this makes subsequent calls to this method depend on 
+         #                                                 # previous calls
 
          prop_man.log("*** Incident energy found for sample run: {0} meV".format(ei),'notice')
          #

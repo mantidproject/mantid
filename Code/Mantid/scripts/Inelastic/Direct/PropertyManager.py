@@ -229,7 +229,7 @@ class PropertyManager(NonIDF_Properties):
     # 
     multirep_tof_specta_list=MultirepTOFSpectraList()
     #
-    mono_correction_factor = MonoCorrectionFactor(NonIDF_Properties.incident_energy,NonIDF_Properties.monovan_run)
+    mono_correction_factor = MonoCorrectionFactor(NonIDF_Properties.incident_energy)
 
 #----------------------------------------------------------------------------------------------------------------
     def getChangedProperties(self):

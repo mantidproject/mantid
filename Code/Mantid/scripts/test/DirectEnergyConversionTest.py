@@ -1,5 +1,5 @@
 import os, sys
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -433,7 +433,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertAlmostEqual(x[0],-2*122.)
         self.assertAlmostEqual(x[-1],0.8*122.)
 
-        return
         # test another ws
         # rename samples from previous workspace to avoid deleting them on current run
         for ind,item in enumerate(result):
