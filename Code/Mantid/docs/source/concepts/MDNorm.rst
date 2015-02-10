@@ -33,7 +33,7 @@ data, add together the norms, and then divide
     \frac{d\sigma}{d\Omega}=\frac{\sum_i N_i}{\sum_i \Phi_i \times d\Omega_i}
   
 The summation index :math:`i` represents every detector and sample orientation 
-or repeated measurement that contribute to the scatering in the desired region 
+or repeated measurement that contribute to the scattering in the desired region 
 of the reciprocal space. 
 In a similar fashion, for inelastic scattering, the double
 differential cross section must be written as:
