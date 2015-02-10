@@ -9,8 +9,8 @@ namespace RemoteAlgorithms {
     Algorithm to initiate, query about, or cancel a tomographic
     reconstruction on the SCARF computer cluster at RAL.
     The algorithm can be used to send different commands to the job
-    queue, for example: start a reconstruction job, retrieve
-    information about a job or to cancel jobs.
+    queue, for example: log in, log out, start a reconstruction job,
+    retrieve information about a job or to cancel jobs.
 
     Output Properties: None.
     If the authentication is successfull, a cookie is received that is stored
@@ -41,39 +41,64 @@ namespace RemoteAlgorithms {
 
 class SCARFTomoReconstruction : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  SCARFTomoReconstruction() : Mantid::API::Algorithm() {}
+  /// Constructor
+  SCARFTomoReconstruction();
   /// Virtual destructor
   virtual ~SCARFTomoReconstruction() {}
   /// Algorithm's name
   virtual const std::string name() const { return "SCARFTomoReconstruction"; }
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
-    return "Perform a tomographic reconstruction action on the SCARF computer "
-      "cluster at RAL";
+    return "Perform a control action on tomographic reconstruction jobs, on "
+      "the SCARF computer cluster at RAL, STFC (http://www.scarf.rl.ac.uk/)";
   }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Remote"; }
 
+protected:
+  /// methods to process reconstruction job commands
+  virtual void doLogin(std::string &username, std::string &password);
+  virtual void doLogout(std::string &username);
+  virtual void doSubmit();
+  virtual void doQueryStatus();
+  virtual void doCancel();
+
 private:
   void init();
   /// Execution code
   void exec();
 
-  /// methods to process reconstruction job commands
-  void doCreate();
-  void doStatus();
-  void doCancel();
 
-  // Member vars
-  std::string m_userName;
-  std::string m_password;
-  std::string m_operation;
-  std::string m_nxTomoPath;
+  class Action {
+  public:
+  typedef enum {LOGIN=0, LOGOUT, SUBMIT, QUERYSTATUS, CANCEL, UNDEF} Type;
+  };
+
+  // helper methods
+  Action::Type getAction();
+
+  Action::Type m_action;
+
   std::string m_jobID;
+  std::string m_nxTomoPath;
   std::string m_parameterPath;
+  std::string m_outputPath;
+
+  // HTTP specifics for SCARF (IBM LSF PAC)
+  static std::string m_acceptType;
+
+  // cookie obtained after logging in
+  struct Token {
+    Token(std::string& u, std::string& t): m_url(u), m_token_str(t) {};
+    std::string m_url;
+    std::string m_token_str;
+  };
+  typedef std::pair<const std::string, SCARFTomoReconstruction::Token> UsernameToken;
+
+  // store for username-token pairs
+  static std::map<std::string, Token> m_tokenStash;
 };
 
 } // end namespace RemoteAlgorithms

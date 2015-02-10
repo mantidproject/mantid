@@ -1,8 +1,13 @@
 #include "MantidRemoteAlgorithms/SCARFTomoReconstruction.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MaskedProperty.h"
+#include "MantidKernel/RemoteJobManager.h"
+#include "MantidRemoteAlgorithms/SimpleJSON.h"
+
+#include "MantidKernel/InternetHelper.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {
@@ -12,13 +17,26 @@ DECLARE_ALGORITHM(SCARFTomoReconstruction)
 
 using namespace Mantid::Kernel;
 
+std::map<std::string, SCARFTomoReconstruction::Token>
+    SCARFTomoReconstruction::m_tokenStash;
+
+std::string SCARFTomoReconstruction::m_acceptType =
+    "text/plain,application/xml,text/xml";
+
+SCARFTomoReconstruction::SCARFTomoReconstruction():
+  Mantid::API::Algorithm(),
+  m_action(), m_jobID(), m_nxTomoPath(), m_parameterPath(), m_outputPath()
+{ }
+
 void SCARFTomoReconstruction::init() {
   auto requireValue = boost::make_shared<MandatoryValidator<std::string>>();
 
   std::vector<std::string> reconstOps;
-  reconstOps.push_back("CreateJob");
+  reconstOps.push_back("LogIn");
+  reconstOps.push_back("LogOut");
+  reconstOps.push_back("SubmitJob");
   reconstOps.push_back("JobStatus");
-  reconstOps.push_back("JobCancel");
+  reconstOps.push_back("CancelJob");
   auto listValue = boost::make_shared<StringListValidator>(reconstOps);
 
   std::vector<std::string> exts;
@@ -35,7 +53,7 @@ void SCARFTomoReconstruction::init() {
                   "The password for the user");
 
   // Operation to perform : Update description as enum changes
-  declareProperty("Operation", "", listValue, "Choose the operation to perform "
+  declareProperty("Action", "", listValue, "Choose the operation to perform "
                                               "on SCARF; "
                                               "[CreateJob,JobStatus,JobCancel]",
                   Direction::Input);
@@ -57,30 +75,158 @@ void SCARFTomoReconstruction::init() {
                   "Parameter file for the reconstruction job");
 }
 
-void SCARFTomoReconstruction::exec() {
-  try {
-    m_userName = getPropertyValue("UserName");
-    m_password = getPropertyValue("Password");
-  } catch(std::runtime_error& /*e*/) {
-    g_log.error() << "To run this algorithm you need to give a valid SCARF "
-      "username and password." << std::endl;
-    throw;
+// gets action code in m_action, if input argument is valid
+SCARFTomoReconstruction::Action::Type SCARFTomoReconstruction::getAction()
+{
+  std::string par = getPropertyValue("Action");
+  Action::Type act = Action::UNDEF;
+  if (par == "LogIn") {
+    act = Action::LOGIN;
+  } else if (par == "LogOut") {
+    act = Action::LOGOUT;
+  } else if (par == "SubmitJob") {
+    act = Action::SUBMIT;
+  } else if (par == "JobStatus") {
+    act = Action::QUERYSTATUS;
+  } else if (par == "CancelJob") {
+    act = Action::CANCEL;
+  } else {
+    g_log.error() << "Unknown action specified: '" <<
+      m_action << "', ignoring it.";
   }
-  m_operation = getPropertyValue("Operation");
+  return act;
+}
 
+/**
+ * Execute algorithm: check what action/command has to be run and call
+ * specific methods.
+ *
+ * The implementation of the more specific methods is based on:
+ * Mantid::Kernel::InternetHelper and Mantid::RemoteAlgorithms::SimpleJSON?
+ */
+void SCARFTomoReconstruction::exec() {
+
+  m_action = getAction();
 
   g_log.information("Running SCARFTomoReconstruction");
 
-  if (m_operation == "CreateJob") {
-    doCreate();
-  } else if (m_operation == "JobStatus") {
-    doStatus();
-  } else if (m_operation == "JobCancel") {
+  if (Action::LOGIN == m_action) {
+    std::string username, password;
+    try {
+      username = getPropertyValue("UserName");
+      password = getPropertyValue("Password");
+    } catch(std::runtime_error& /*e*/) {
+      g_log.error() << "To log in using this algorithm you need to give a "
+        "valid SCARF username and password." << std::endl;
+      throw;
+    }
+    doLogin(username, password);
+  } else if (Action::LOGOUT == m_action) {
+    std::string username;
+    try {
+      username = getPropertyValue("UserName");
+    } catch(std::runtime_error& /*e*/) {
+      g_log.error() << "To log out using this algorithm you need to give a "
+        "valid SCARF username." << std::endl;
+      throw;
+    }
+    doLogout(username);
+  } else if (Action::SUBMIT == m_action) {
+    doSubmit();
+  } else if (Action::QUERYSTATUS == m_action) {
+    doQueryStatus();
+  } else if (Action::CANCEL == m_action) {
     doCancel();
   }
 }
 
-void SCARFTomoReconstruction::doCreate() {
+/**
+ * Log into SCARF. If it goes well, it will produce a token that can
+ * be reused for a while in subsequent queries. Internally it relies
+ * on the InternetHelper to send an HTTP request and obtain the
+ * response.
+ *
+ * @param username normally an STFC federal ID
+ * @param passwork user password
+ */
+void SCARFTomoReconstruction::doLogin(std::string &username,
+                                      std::string &password) {
+  // log into "https://portal.scarf.rl.ac.uk/cgi-bin/token.py";
+
+  const std::string SCARFComputeResource = "SCARF@STFC";
+  // this should go away and obtained from 'computeResourceInfo' (like
+  // a very simple InstrumentInfo) or similar. What we need here is
+  // computeResourceInfo::baseURL()
+  const std::string SCARFLoginBaseURL = "https://portal.scarf.rl.ac.uk/";
+  const std::string SCARFLoginPath = "/cgi-bin/token.py";
+
+  std::vector<std::string> res = ConfigService::Instance().getFacility().
+    computeResources();
+  auto it = std::find(res.begin(), res.end(), SCARFComputeResource);
+  if (res.end() == it)
+    throw std::runtime_error(std::string("Failed to find a compute resource "
+                               "for " +  SCARFComputeResource + " (facility: " +
+                               ConfigService::Instance().getFacility().name() +
+                               ")."));
+
+  g_log.debug() << "Sending HTTP GET request to: " << SCARFLoginBaseURL +
+    SCARFLoginPath << std::endl;
+  InternetHelper session;
+  std::string httpsURL = SCARFLoginBaseURL + SCARFLoginPath + "?username=" +
+    username + "&password=" + password;
+
+  std::stringstream ss;
+  int respCode = session.sendRequest(httpsURL, ss);
+  std::string resp = ss.str();
+  g_log.debug() << "Got HTTP code " << respCode << ", response: " <<
+    resp << std::endl;
+  // We would check (Poco::Net::HTTPResponse::HTTP_OK == respCode) but the SCARF
+  // login script (token.py) seems to return 200 whatever happens. So this is
+  // the way to know if authentication succeeded:
+  const std::string expectedSubstr = "https://portal.scarf.rl.ac.uk";
+  if (resp.find(expectedSubstr) != std::string::npos) {
+    // it went fine, stash cookie/token which looks like this (2 lines):
+    // https://portal.scarf.rl.ac.uk:8443/platform/
+    // scarf362"2015-02-10T18:50:00Z"Mv2ncX8Z0TpH0lZHxMyXNVCb7ucT6jHNOx...
+    std::string url, token_str;
+    std::getline(ss, url);
+    std::getline(ss, token_str);
+    // insert in the token stash
+    UsernameToken tok(username, Token(url, token_str));
+    m_tokenStash.insert(tok); // the password is never stored
+    g_log.notice() << "Got authentication token. You are now logged into "
+                   << SCARFComputeResource << std::endl;
+  } else {
+    throw std::runtime_error("Login failed. Please check your username and "
+                             "password");
+  }
+}
+
+/**
+ * Log out from SCARF. In practice, it trashes the cookie (if we were
+ * successfully logged in).
+ */
+void SCARFTomoReconstruction::doLogout(std::string &username) {
+
+  auto it = m_tokenStash.find(username);
+  if (m_tokenStash.end() == it) {
+    throw std::runtime_error("Logout failed. You do not seem to be logged in. "
+                             "I do not remember this username. Please check your "
+                             "username.");
+  }
+
+  // TODO
+  const std::string logoutPath = "platform/webservice/pacclient/logout/";
+  // needs headers = {'Content-Type': 'text/plain', 'Cookie': token, 'Accept': ACCEPT_TYPE}`
+  // ACCEPT_TYPE='text/plain,application/xml,text/xml'
+}
+
+/**
+ * Submits a job to SCARF. The different ways jobs could be submitted
+ * (supported toolkits, LSF PAC submission forms, launcher scripts,
+ * supported options, etc.) are not well defined at the moment.
+ */
+void SCARFTomoReconstruction::doSubmit() {
   progress(0, "Starting tomographic reconstruction job...");
 
   try {
@@ -107,7 +253,11 @@ void SCARFTomoReconstruction::doCreate() {
   progress(1.0, "Job created.");
 }
 
-void SCARFTomoReconstruction::doStatus() {
+/**
+ * Query the status of jobs running (if successful will return info on
+ * jobs running for our user)
+ */
+void SCARFTomoReconstruction::doQueryStatus() {
   try {
     m_jobID = getPropertyValue("JobID");
   } catch(std::runtime_error& /*e*/) {
@@ -123,6 +273,9 @@ void SCARFTomoReconstruction::doStatus() {
   progress(1.0, "Job created.");
 }
 
+/**
+ * Cancel a submitted job, identified by its ID in the job queue.
+ */
 void SCARFTomoReconstruction::doCancel() {
   try {
     m_jobID = getPropertyValue("JobID");
