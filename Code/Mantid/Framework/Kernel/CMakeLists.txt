@@ -214,6 +214,7 @@ set ( INC_FILES
 	inc/MantidKernel/RemoteJobManager.h
 	inc/MantidKernel/SingletonHolder.h
 	inc/MantidKernel/SobolSequence.h
+        inc/MantidKernel/SpecialCoordinateSystem.h
 	inc/MantidKernel/StartsWithValidator.h
 	inc/MantidKernel/Statistics.h
 	inc/MantidKernel/StdoutChannel.h
@@ -327,7 +328,8 @@ set ( TEST_FILES
 	RegexStringsTest.h
 	SLSQPMinimizerTest.h
 	SobolSequenceTest.h
-	StartsWithValidatorTest.h
+	SpecialCoordinateSystemTest.h
+        StartsWithValidatorTest.h
 	StatisticsTest.h
 	StdoutChannelTest.h
 	StringsTest.h

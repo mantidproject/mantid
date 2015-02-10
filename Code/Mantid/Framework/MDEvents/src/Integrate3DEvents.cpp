@@ -2,8 +2,11 @@
 #include <iostream>
 #include <fstream>
 #include <boost/math/special_functions/round.hpp>
-
+#include <boost/make_shared.hpp>
+#include "MantidDataObjects/NoShape.h"
+#include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidMDEvents/Integrate3DEvents.h"
+
 
 extern "C" {
 #include <stdio.h>
@@ -12,6 +15,7 @@ extern "C" {
 #include <gsl/gsl_eigen.h>
 }
 
+using namespace Mantid::DataObjects;
 namespace Mantid {
 namespace MDEvents {
 
@@ -104,7 +108,7 @@ void Integrate3DEvents::addEvents(std::vector<V3D> const &event_qs) {
  *                            of the net integrated intensity
  *
  */
-void Integrate3DEvents::ellipseIntegrateEvents(
+Mantid::Geometry::PeakShape_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
     V3D const &peak_q, bool specify_size, double peak_radius,
     double back_inner_radius, double back_outer_radius,
     std::vector<double> &axes_radii, double &inti, double &sigi) {
@@ -113,14 +117,14 @@ void Integrate3DEvents::ellipseIntegrateEvents(
 
   int64_t hkl_key = getHklKey(peak_q);
   if (hkl_key == 0) {
-    return;
+    return boost::make_shared<NoShape>();
   }
 
   std::vector<V3D> &some_events = event_lists[hkl_key];
 
   if (some_events.size() < 3) // if there are not enough events to
   {                           // find covariance matrix, return
-    return;
+    return boost::make_shared<NoShape>();
   }
 
   DblMatrix cov_matrix(3, 3);
@@ -145,10 +149,10 @@ void Integrate3DEvents::ellipseIntegrateEvents(
 
   if (invalid_peak) // if data collapses to a line or
   {                 // to a plane, the volume of the
-    return;         // ellipsoids will be zero.
+    return boost::make_shared<NoShape>();         // ellipsoids will be zero.
   }
 
-  ellipseIntegrateEvents(some_events, eigen_vectors, sigmas, specify_size,
+  return ellipseIntegrateEvents(some_events, eigen_vectors, sigmas, specify_size,
                          peak_radius, back_inner_radius, back_outer_radius,
                          axes_radii, inti, sigi);
 }
@@ -383,7 +387,7 @@ void Integrate3DEvents::addEvent(V3D event_Q) {
  *                            of the net integrated intensity
  *
  */
-void Integrate3DEvents::ellipseIntegrateEvents(
+PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
     std::vector<V3D> const &ev_list, std::vector<V3D> const &directions,
     std::vector<double> const &sigmas, bool specify_size, double peak_radius,
     double back_inner_radius, double back_outer_radius,
@@ -428,16 +432,19 @@ void Integrate3DEvents::ellipseIntegrateEvents(
   for (int i = 0; i < 3; i++) {
     axes_radii.push_back(r3 * sigmas[i]);
   }
+  auto abcBackgroundOuterRadii = axes_radii;
   double back2 = numInEllipsoid(ev_list, directions, axes_radii);
 
   for (int i = 0; i < 3; i++) {
     axes_radii[i] = r2 * sigmas[i];
   }
+  auto abcBackgroundInnerRadii = axes_radii;
   double back1 = numInEllipsoid(ev_list, directions, axes_radii);
 
   for (int i = 0; i < 3; i++) {
     axes_radii[i] = r1 * sigmas[i];
   }
+  auto abcRadii = axes_radii;
   double peak_w_back = numInEllipsoid(ev_list, directions, axes_radii);
 
   double backgrd = back2 - back1;
@@ -446,6 +453,9 @@ void Integrate3DEvents::ellipseIntegrateEvents(
 
   inti = peak_w_back - ratio * backgrd;
   sigi = sqrt(peak_w_back + ratio * ratio * backgrd);
+
+  // Make the shape and return it.
+  return boost::make_shared<const PeakShapeEllipsoid>(directions, abcRadii, abcBackgroundInnerRadii, abcBackgroundOuterRadii, Mantid::Kernel::QLab, "IntegrateEllipsoids");
 }
 
 } // namespace MDEvents

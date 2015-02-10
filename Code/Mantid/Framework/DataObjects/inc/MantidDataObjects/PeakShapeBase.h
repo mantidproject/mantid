@@ -2,8 +2,8 @@
 #define MANTID_DATAOBJECTS_PEAKSHAPEBASE_H_
 
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/PeakShape.h"
-#include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidGeometry/Crystal/PeakShape.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include <string>
 
 namespace Json {
@@ -37,17 +37,17 @@ namespace DataObjects {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PeakShapeBase : public PeakShape {
+class DLLExport PeakShapeBase : public Mantid::Geometry::PeakShape {
 
 public:
   /// Constructor
-  PeakShapeBase(API::SpecialCoordinateSystem frame,
+  PeakShapeBase(Kernel::SpecialCoordinateSystem frame,
                 std::string algorithmName = std::string(),
                 int algorithmVersion = -1);
   /// Destructor
   virtual ~PeakShapeBase();
   /// Get the coordinate frame
-  API::SpecialCoordinateSystem frame() const;
+  Kernel::SpecialCoordinateSystem frame() const;
   /// Get the name of the algorithm used to make this shape
   std::string algorithmName() const;
   /// Get the version of the algorithm used to make this shape
@@ -61,7 +61,7 @@ protected:
   PeakShapeBase &operator=(const PeakShapeBase &other);
 
   /// Special coordinate system
-  Mantid::API::SpecialCoordinateSystem m_frame;
+  Mantid::Kernel::SpecialCoordinateSystem m_frame;
 
   /// Generating algorithm name
   std::string m_algorithmName;
