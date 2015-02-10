@@ -173,7 +173,7 @@ Usage
 
   # load for HB2A 
   ConvertSpiceDataToRealSpace(InputWorkspace='Exp0231DataTable', 
-        ParentWorkspace='Exp0231ParentWS', 
+        RunInfoWorkspace='Exp0231ParentWS', 
         OutputWorkspace='Exp0231DataMD', 
         OutputMonitorWorkspace='Exp0231MonitorMD')
 

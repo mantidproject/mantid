@@ -39,7 +39,9 @@ public:
   virtual ~ConvertSpiceDataToRealSpace();
 
   /// Algorithm's name
-  virtual const std::string name() const { return "ConvertSpiceDataToRealSpace"; }
+  virtual const std::string name() const {
+    return "ConvertSpiceDataToRealSpace";
+  }
 
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
@@ -126,4 +128,4 @@ private:
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif  /* MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACE_H_ */
+#endif /* MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACE_H_ */

@@ -23,7 +23,8 @@ DECLARE_ALGORITHM(ConvertSpiceDataToRealSpace)
 //------------------------------------------------------------------------------------------------
 /** Constructor
  */
-ConvertSpiceDataToRealSpace::ConvertSpiceDataToRealSpace() : m_instrumentName(""), m_numSpec(0) {}
+ConvertSpiceDataToRealSpace::ConvertSpiceDataToRealSpace()
+    : m_instrumentName(""), m_numSpec(0) {}
 
 //------------------------------------------------------------------------------------------------
 /** Destructor
@@ -38,7 +39,7 @@ void ConvertSpiceDataToRealSpace::init() {
                                                         Direction::Input),
                   "Input table workspace for data.");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("ParentWorkspace", "",
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("RunInfoWorkspace", "",
                                                          Direction::Input),
                   "Input matrix workspace containing sample logs.  "
                   "It can be the RunInfoWorkspace output from LoadSpiceAscii. "
@@ -47,7 +48,7 @@ void ConvertSpiceDataToRealSpace::init() {
   declareProperty("RunStart", "",
                   "User specified run start time of the experiment "
                   "in case that the run start time is not specified in the "
-                  "input ParentWorkspace.");
+                  "input RunInfoWorkspace.");
 
   /// TODO - Add HB2B as it is implemented in future
   std::vector<std::string> allowedinstruments;
@@ -90,7 +91,7 @@ void ConvertSpiceDataToRealSpace::exec() {
 
   // Process inputs
   DataObjects::TableWorkspace_sptr dataTableWS = getProperty("InputWorkspace");
-  MatrixWorkspace_const_sptr parentWS = getProperty("ParentWorkspace");
+  MatrixWorkspace_const_sptr parentWS = getProperty("RunInfoWorkspace");
   m_instrumentName = getPropertyValue("Instrument");
 
   // Check whether parent workspace has run start
@@ -143,7 +144,8 @@ void ConvertSpiceDataToRealSpace::exec() {
  * @param vectimes
  * @return
  */
-std::vector<MatrixWorkspace_sptr> ConvertSpiceDataToRealSpace::convertToWorkspaces(
+std::vector<MatrixWorkspace_sptr>
+ConvertSpiceDataToRealSpace::convertToWorkspaces(
     DataObjects::TableWorkspace_sptr tablews,
     API::MatrixWorkspace_const_sptr parentws, Kernel::DateAndTime runstart,
     std::map<std::string, std::vector<double> > &logvecmap,
@@ -419,10 +421,9 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::convertToMDEventWS(
       progress.report("Creating MD WS");
     }
     myfile.close();
-  }
-  else
-  {
-    throw std::runtime_error("There is no MatrixWorkspace to construct MDWorkspace.");
+  } else {
+    throw std::runtime_error(
+        "There is no MatrixWorkspace to construct MDWorkspace.");
   }
 
   // Import to MD Workspace
@@ -506,10 +507,9 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
       progress.report("Creating MD WS");
     }
     myfile.close();
-  }
-  else
-  {
-    throw std::runtime_error("There is no MatrixWorkspace to construct MDWorkspace.");
+  } else {
+    throw std::runtime_error(
+        "There is no MatrixWorkspace to construct MDWorkspace.");
   }
 
   // Import to MD Workspace

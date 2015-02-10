@@ -25,8 +25,12 @@ class ConvertSpiceDataToRealSpaceTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertSpiceDataToRealSpaceTest *createSuite() { return new ConvertSpiceDataToRealSpaceTest(); }
-  static void destroySuite(ConvertSpiceDataToRealSpaceTest *suite) { delete suite; }
+  static ConvertSpiceDataToRealSpaceTest *createSuite() {
+    return new ConvertSpiceDataToRealSpaceTest();
+  }
+  static void destroySuite(ConvertSpiceDataToRealSpaceTest *suite) {
+    delete suite;
+  }
 
   //-----------------------------------------------------------------------------------------------------
   void test_Init() {
@@ -111,7 +115,7 @@ public:
     loader.initialize();
 
     loader.setProperty("InputWorkspace", datatablews);
-    loader.setProperty("ParentWorkspace", parentlogws);
+    loader.setProperty("RunInfoWorkspace", parentlogws);
     loader.setProperty("Instrument", "HB2A");
     loader.setPropertyValue("OutputWorkspace", "HB2A_MD");
     loader.setPropertyValue("OutputMonitorWorkspace", "MonitorMDW");
@@ -134,7 +138,7 @@ public:
 
     double y0 = mditer->getInnerSignal(0);
     TS_ASSERT_DELTA(y0, 125.0, 0.1);
-    double yl = mditer->getInnerSignal(44 * 61-1);
+    double yl = mditer->getInnerSignal(44 * 61 - 1);
     TS_ASSERT_DELTA(yl, 76.0, 0.1);
 
     // Detector ID
@@ -237,6 +241,5 @@ public:
     AnalysisDataService::Instance().remove("MonitorMDW");
   }
 };
-
 
 #endif /* MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACETEST_H_ */
