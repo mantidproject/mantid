@@ -39,7 +39,7 @@ void RRFMuon::init()
   unitOptions.push_back("Mrad/s");
   declareProperty("Frequency units", "MHz",
                   boost::make_shared<StringListValidator>(unitOptions),
-                  "The energy mode (default: elastic)");
+                  "The frequency units");
 
   declareProperty(new PropertyWithValue<double>("Phase", 0, Direction::Input), 
     "Phase accounting for any misalignment of the counters");
