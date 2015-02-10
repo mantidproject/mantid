@@ -49,7 +49,7 @@ const std::string CalculateSlits::summary() const {
 void CalculateSlits::init() {
   declareProperty("Slit1Slit2", Mantid::EMPTY_DBL(),
       "Distance between slit 1 and slit 2 in mm");
-  declareProperty("Slit2SA", Mantid::EMPTY_DBL(), "Unknown distance in mm");
+  declareProperty("Slit2SA", Mantid::EMPTY_DBL(), "Offset in the beam direction in mm");
   declareProperty("Resolution", Mantid::EMPTY_DBL(), "Resolution");
   declareProperty("Footprint", Mantid::EMPTY_DBL(), "Footprint in mm");
   declareProperty("Angle", Mantid::EMPTY_DBL(), "Angle in degrees");
