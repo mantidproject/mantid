@@ -390,8 +390,6 @@ IMDEventWorkspace_sptr LoadHFIRPDData::convertToMDEventWS(
   myfile << "MDEVENTS" << std::endl;
 
   if (vec_ws2d.size() > 0) {
-    double relruntime = 0;
-
     Progress progress(this, 0, 1, vec_ws2d.size());
     size_t detindex = 0;
     for (auto it = vec_ws2d.begin(); it < vec_ws2d.end(); ++it) {
@@ -476,8 +474,6 @@ IMDEventWorkspace_sptr LoadHFIRPDData::createMonitorMDWorkspace(
   myfile << "MDEVENTS" << std::endl;
 
   if (vec_ws2d.size() > 0) {
-    double relruntime = 0;
-
     Progress progress(this, 0, 1, vec_ws2d.size());
     size_t detindex = 0;
     for (auto it = vec_ws2d.begin(); it < vec_ws2d.end(); ++it) {
