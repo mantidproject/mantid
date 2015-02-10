@@ -51,8 +51,8 @@ if [[ $(uname) == 'Darwin' ]] && [[ ${JOB_NAME} != *clang* ]]; then
 fi
 
 ###############################################################################
-# Set up the location for local object store outside of the build and source
-# tree, which can be shared by multiple builds.
+# Set up the location for the local object store outside of the build and
+# source tree, which can be shared by multiple builds.
 # It defaults to the parent directory of the workspace but can be overridden
 # by setting the MANTID_DATA_STORE environment variable.
 ###############################################################################
