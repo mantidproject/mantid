@@ -39,6 +39,28 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_save_formats(self):
         tReducer = self.reducer
 
+        files = ['save_formats_test_file.spe','save_formats_test_file.nxspe'
+                 'save_formats_test_file','save_formats_test_file.nxs']
+
+        def clean_up(file_list):
+            for file in file_list:
+                file = FileFinder.getFullPath(file)
+                if len(file) > 0:
+                    os.remove(file)
+
+        def verify_absent(file_list):
+            for file in file_list:
+                file = FileFinder.getFullPath(file)
+                self.assertTrue(len(file)==0)
+
+        def verify_present_and_delete(file_list):
+            for file in file_list:
+                file = FileFinder.getFullPath(file)
+                self.assertTrue(len(file)>0)
+                os.remove(file)
+
+        clean_up(files)
+        tReducer.prop_man.save_format=''
 
         tws =CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, NumEvents=10, XUnit='DeltaE', XMin=-10, XMax=10, BinWidth=0.1)
 
@@ -47,14 +69,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # do nothing
         tReducer.save_results(tws,'save_formats_test_file')
         #
-        file = FileFinder.getFullPath('save_formats_test_file.spe')
-        self.assertTrue(len(file)==0)
-        file = FileFinder.getFullPath('save_formats_test_file.nxspe')
-        self.assertTrue(len(file)==0)
-        file = FileFinder.getFullPath('save_formats_test_file')
-        self.assertTrue(len(file)==0)
-        file = FileFinder.getFullPath('save_formats_test_file.nxs')
-        self.assertTrue(len(file)==0)
+        verify_absent(files)
 
 
 
@@ -64,15 +79,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         tReducer.save_results(tws,'save_formats_test_file.tt')
 
-        file = FileFinder.getFullPath('save_formats_test_file.spe')
-        self.assertTrue(len(file)>0)
-        os.remove(file)
-        file = FileFinder.getFullPath('save_formats_test_file.nxspe')
-        self.assertTrue(len(file)>0)
-        os.remove(file)
-        file = FileFinder.getFullPath('save_formats_test_file.nxs')
-        self.assertTrue(len(file)>0)
-        os.remove(file)
+        files = ['save_formats_test_file.spe','save_formats_test_file.nxspe','save_formats_test_file.nxs']
+        verify_present_and_delete(files)
 
         tReducer.prop_man.save_format=None
         # do nothing
@@ -82,9 +90,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         # save file with given extension on direct request:
         tReducer.save_results(tws,'save_formats_test_file.nxs')
-        file = FileFinder.getFullPath('save_formats_test_file.nxs')
-        self.assertTrue(len(file)>0)
-        os.remove(file)
+        verify_present_and_delete(['save_formats_test_file.nxs'])
 
         tReducer.prop_man.save_format=[]
         # do nothing
@@ -95,12 +101,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         # save files with extensions on request
         tReducer.save_results(tws,'save_formats_test_file',['nxs','.nxspe'])
-        file = FileFinder.getFullPath('save_formats_test_file.nxs')
-        self.assertTrue(len(file)>0)
-        os.remove(file)
-        file = FileFinder.getFullPath('save_formats_test_file.nxspe')
-        self.assertTrue(len(file)>0)
-        os.remove(file)
+        verify_present_and_delete(['save_formats_test_file.nxspe','save_formats_test_file.nxs'])
 
         # this is strange feature.
         self.assertTrue(len(tReducer.prop_man.save_format) ==2)
