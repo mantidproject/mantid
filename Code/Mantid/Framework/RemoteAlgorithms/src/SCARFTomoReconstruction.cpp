@@ -198,7 +198,7 @@ void SCARFTomoReconstruction::doLogin(std::string &username,
                    << SCARFComputeResource << std::endl;
   } else {
     throw std::runtime_error("Login failed. Please check your username and "
-                             "password");
+                             "password.");
   }
 }
 
@@ -215,10 +215,32 @@ void SCARFTomoReconstruction::doLogout(std::string &username) {
                              "username.");
   }
 
-  // TODO
-  const std::string logoutPath = "platform/webservice/pacclient/logout/";
-  // needs headers = {'Content-Type': 'text/plain', 'Cookie': token, 'Accept': ACCEPT_TYPE}`
-  // ACCEPT_TYPE='text/plain,application/xml,text/xml'
+  // logout query, needs headers = {'Content-Type': 'text/plain', 'Cookie': token,
+  //    'Accept': 'text/plain,application/xml,text/xml'}
+  const std::string logoutPath = "webservice/pacclient/logout/";
+  const std::string baseURL = it->second.m_url;
+  const std::string token = it->second.m_token_str;
+
+  InternetHelper session;
+  std::string httpsURL = baseURL + logoutPath;
+  g_log.debug() << "Sending HTTP GET request to: " << httpsURL << std::endl;
+  std::stringstream ss;
+  InternetHelper::StringToStringMap headers;
+  headers.insert(std::pair<std::string, std::string>("Content-Type",
+                                                     "text/plain"));
+  headers.insert(std::pair<std::string, std::string>("Cookie", token));
+  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  //headers.insert(std::pair<"Cookie", token>);
+  //headers.insert(std::pair<"Accept", m_acceptType>);
+  int code = session.sendRequest(httpsURL, ss, headers);
+  std::string resp = ss.str();
+  g_log.debug() << "Got HTTP code " << code << ", response: " <<  resp << std::endl;
+  if (Poco::Net::HTTPResponse::HTTP_OK == code) {
+    g_log.notice() << "Logged out with response: " << resp;
+  } else {
+    throw std::runtime_error("Failed to logout from the web service at: " +
+                             httpsURL + ". Please check your username.");
+  }
 }
 
 /**
