@@ -55,7 +55,7 @@ add raw data together, add monitors together, and only then divide.
    To correctly account for the statistical significance of the measurement
    always carry around separately the raw data and the normalization.
 
-Detector trajectories in reciprocal space for syngle crystal experiments
+Detector trajectories in reciprocal space for single crystal experiments
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    
 For direct geometry inelastic scattering, for any given experiment, all the incident
