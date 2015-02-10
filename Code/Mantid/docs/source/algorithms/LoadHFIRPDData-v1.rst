@@ -13,6 +13,35 @@ This algorithm is to load HFIR Spice powder diffraction data to MDWorkspaces.
 HB2A is the only one instrument supported by this algorithm. 
 HB2A will be supported in future. 
 
+Inputs
+######
+
+There are two input Workspaces that are required for this algoriths.  
+Both of them stores the data from a SPICE file. 
+
+One is a TableWorkspace that stores the data, including detectors' counts
+and sample environment logs' value, measured per data points. 
+The other is a MatrixWorkspace that stores the sample logs,
+and serves the parent MatrixWorkspace for all temporary MatrixWorkspaces 
+that are created during the algorithm's execution. 
+
+These two workspaces can be obtained by executing algorithm LoasSpiceAscii. 
+
+
+Outputs
+#######
+
+Two MDEventWorkspaces will be output from this algorith. 
+
+One MDWorkspaces stores the experimental data. 
+Each MDEvent is a data point measured on one detector. 
+Thus if in the experiment, M detectors moves N times, then
+there will be total :math:`M \times N` MDEvents. 
+It also stores the sample environment logs values in its ExperimentInfo. 
+
+The other MDWorkspaces stores the monitor counts of each detector
+at each measurement. 
+
 
 Format of SPICE data file
 #########################
@@ -34,17 +63,11 @@ Powder diffractometers rotates its detectors to achieve the coverage
 and resolution. 
 Hence the output of of a run should include all the measurements. 
 
-MDEventWorkspac is the best solution to combine all the measurements
+MDEventWorkspace is the best solution to combine all the measurements
 to a single workspace and 
 keep all the information for future reduction. 
 
 
-Output Worskpaces
-#################
-
-Two MDEventWorkspaces will be output from this algorithm. 
-One MDEventWorkspace stores the detectors' counts;
-and the other one stores the monitor counts. 
 
 
 Apply MDWorkspaces to HFIR powder diffractometer experiment
@@ -91,7 +114,37 @@ Hence for an experiment with N runs.
 Temporary MD File
 #################
 
-*** TODO : write how the MD file is build and read in **
+In this algorithm, the MDEvnetWorkspaces are created by loading from a temporary MD file,
+which is generated from a set of MatrixWorkspaces. 
+Each MatrixWorkspace stores the data for one individual measurement. 
+
+The format of the MD files are like ::
+
+  DIMENSIONS
+  x X m 100
+  y Y m 100
+  z Z m 100
+  # Signal, Error, RunId, DetectorId, coord1, coord2, ... to end of coords
+  MDEVENTS
+  125 1 1 1 0.209057 0 1.98904 
+  133 1 1 2 0.30052 0 1.97729 
+  114 1 1 3 0.391584 0 1.96129 
+  130 1 1 4 0.485503 0 1.94018 
+  143 1 1 5 0.577963 0 1.91467 
+  135 1 1 6 0.667844 0 1.8852 
+  120 1 1 7 0.753968 0 1.85244 
+  115 1 1 8 0.840013 0 1.81504 
+  145 1 1 9 0.925819 0 1.77281 
+  117 1 1 10 1.00779 0 1.72753 
+  105 1 1 11 1.08951 0 1.67719 
+  102 1 1 12 1.16527 0 1.62547 
+  108 1 1 13 1.24041 0 1.56888 
+  110 1 1 14 1.31159 0 1.50988 
+  ... ...
+
+ 
+If there are N detectors of the instruments and M measurements in total,
+then there will be :math:`M\times N` MDEvents listed in the MD file. 
 
 
 Workflow

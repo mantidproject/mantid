@@ -80,12 +80,9 @@ private:
                       std::map<std::string, std::vector<double> > &logvecmap,
                       std::vector<Kernel::DateAndTime> &vectimes);
 
-  /// Create parent workspace
-  API::MatrixWorkspace_sptr createParentWorkspace(size_t numspec);
-
   /// Read parameter information from table workspace
   void readTableInfo(DataObjects::TableWorkspace_const_sptr tablews,
-                     size_t &irotangle, size_t &itime,
+                     size_t &ipt, size_t &irotangle, size_t &itime,
                      std::vector<std::pair<size_t, size_t> > &anodelist,
                      std::map<std::string, size_t> &samplenameindexmap);
 
@@ -98,15 +95,15 @@ private:
   API::MatrixWorkspace_sptr
   loadRunToMatrixWS(DataObjects::TableWorkspace_sptr tablews, size_t irow,
                     API::MatrixWorkspace_const_sptr parentws,
-                    Kernel::DateAndTime runstart, size_t irotangle,
+                    Kernel::DateAndTime runstart, size_t ipt, size_t irotangle,
                     size_t itime,
                     const std::vector<std::pair<size_t, size_t> > anodelist,
                     double &duration);
 
   /// Append Experiment Info
-  void addExperimentInfos(API::IMDEventWorkspace_sptr mdws,
-                          const std::vector<API::MatrixWorkspace_sptr> vec_ws2d,
-                          const int &init_runnumber);
+  void
+  addExperimentInfos(API::IMDEventWorkspace_sptr mdws,
+                     const std::vector<API::MatrixWorkspace_sptr> vec_ws2d);
 
   /// Append sample logs to MD workspace
   void

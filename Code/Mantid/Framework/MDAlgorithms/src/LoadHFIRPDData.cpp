@@ -40,10 +40,14 @@ void LoadHFIRPDData::init() {
 
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("ParentWorkspace", "",
                                                          Direction::Input),
-                  "Input matrix workspace serving as parent workspace "
-                  "containing sample logs.");
+                  "Input matrix workspace containing sample logs.  "
+                  "It can be the RunInfoWorkspace output from LoadSpiceAscii. "
+                  "It serves as parent workspace in the algorithm.");
 
-  declareProperty("RunStart", "", "Run start time");
+  declareProperty("RunStart", "",
+                  "User specified run start time of the experiment "
+                  "in case that the run start time is not specified in the "
+                  "input ParentWorkspace.");
 
   /// TODO - Add HB2B as it is implemented in future
   std::vector<std::string> allowedinstruments;
@@ -69,8 +73,6 @@ void LoadHFIRPDData::init() {
 
   declareProperty("DurationLogName", "time",
                   "Name of the sample log to record the duration of each run.");
-
-  declareProperty("InitRunNumber", 1, "Starting value for run number.");
 
   declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
                       "OutputWorkspace", "", Direction::Output),
@@ -101,8 +103,9 @@ void LoadHFIRPDData::exec() {
     std::string runstartstr = getProperty("RunStart");
     // raise exception if user does not give a proper run start
     if (runstartstr.size() == 0)
-      throw std::runtime_error("Run-start time is not defined either in "
-                               "input parent workspace or given by user.");
+      g_log.warning("Run-start time is not defined either in "
+                    "input parent workspace or given by user. 1990-01-01 "
+                    "00:00:00 is used");
     runstart = DateAndTime(runstartstr);
   }
 
@@ -121,9 +124,8 @@ void LoadHFIRPDData::exec() {
 
   // Add experiment info for each run and sample log to the first experiment
   // info object
-  int initrunnumber = getProperty("InitRunNumber");
-  addExperimentInfos(m_mdEventWS, vec_ws2d, initrunnumber);
-  addExperimentInfos(mdMonitorWS, vec_ws2d, initrunnumber);
+  addExperimentInfos(m_mdEventWS, vec_ws2d);
+  addExperimentInfos(mdMonitorWS, vec_ws2d);
   appendSampleLogs(m_mdEventWS, logvecmap, vectimes);
 
   // Set property
@@ -147,10 +149,10 @@ std::vector<MatrixWorkspace_sptr> LoadHFIRPDData::convertToWorkspaces(
     std::map<std::string, std::vector<double> > &logvecmap,
     std::vector<Kernel::DateAndTime> &vectimes) {
   // Get table workspace's column information
-  size_t irotangle, itime;
+  size_t ipt, irotangle, itime;
   std::vector<std::pair<size_t, size_t> > anodelist;
   std::map<std::string, size_t> sampleindexlist;
-  readTableInfo(tablews, irotangle, itime, anodelist, sampleindexlist);
+  readTableInfo(tablews, ipt, irotangle, itime, anodelist, sampleindexlist);
   m_numSpec = anodelist.size();
 
   // Load data
@@ -159,7 +161,7 @@ std::vector<MatrixWorkspace_sptr> LoadHFIRPDData::convertToWorkspaces(
   double duration = 0;
   vectimes.resize(numws);
   for (size_t irow = 0; irow < numws; ++irow) {
-    vecws[irow] = loadRunToMatrixWS(tablews, irow, parentws, runstart,
+    vecws[irow] = loadRunToMatrixWS(tablews, irow, parentws, runstart, ipt,
                                     irotangle, itime, anodelist, duration);
     vectimes[irow] = runstart;
     runstart += static_cast<int64_t>(duration * 1.0E9);
@@ -223,13 +225,13 @@ void LoadHFIRPDData::parseSampleLogs(
 MatrixWorkspace_sptr LoadHFIRPDData::loadRunToMatrixWS(
     DataObjects::TableWorkspace_sptr tablews, size_t irow,
     MatrixWorkspace_const_sptr parentws, Kernel::DateAndTime runstart,
-    size_t irotangle, size_t itime,
+    size_t ipt, size_t irotangle, size_t itime,
     const std::vector<std::pair<size_t, size_t> > anodelist, double &duration) {
   // New workspace from parent workspace
   MatrixWorkspace_sptr tempws =
       WorkspaceFactory::Instance().create(parentws, m_numSpec, 2, 1);
 
-  // Set up angle and time
+  // Set up angle, time and run number
   double twotheta = tablews->cell<double>(irow, irotangle);
   TimeSeriesProperty<double> *prop2theta =
       new TimeSeriesProperty<double>("rotangle");
@@ -251,6 +253,10 @@ MatrixWorkspace_sptr LoadHFIRPDData::loadRunToMatrixWS(
     tempws->mutableRun().removeProperty("run_start");
   }
   tempws->mutableRun().addProperty(proprunstart);
+
+  int pt = tablews->cell<int>(irow, ipt);
+  tempws->mutableRun().addProperty(
+      new PropertyWithValue<int>("run_number", pt));
 
   // Load instrument
   IAlgorithm_sptr instloader = this->createChildAlgorithm("LoadInstrument");
@@ -287,8 +293,8 @@ MatrixWorkspace_sptr LoadHFIRPDData::loadRunToMatrixWS(
  * @param sampleindexlist
  */
 void LoadHFIRPDData::readTableInfo(
-    TableWorkspace_const_sptr tablews, size_t &irotangle, size_t &itime,
-    std::vector<std::pair<size_t, size_t> > &anodelist,
+    TableWorkspace_const_sptr tablews, size_t &ipt, size_t &irotangle,
+    size_t &itime, std::vector<std::pair<size_t, size_t> > &anodelist,
     std::map<std::string, size_t> &samplenameindexmap) {
 
   // Get detectors' names and other sample names
@@ -346,6 +352,7 @@ void LoadHFIRPDData::readTableInfo(
   }
 
   // Retrieve the vector index
+  ipt = ilognames[0];
   itime = ilognames[2];
   irotangle = ilognames[3];
 
@@ -377,8 +384,7 @@ IMDEventWorkspace_sptr LoadHFIRPDData::convertToMDEventWS(
   myfile << "x X m 100" << std::endl;
   myfile << "y Y m 100" << std::endl;
   myfile << "z Z m 100" << std::endl;
-  myfile << "t T s 100" << std::endl;
-  myfile << "# Signal, Error, DetectorId, RunId, coord1, coord2, ... to end of "
+  myfile << "# Signal, Error, RunId, DetectorId, coord1, coord2, ... to end of "
             "coords" << std::endl;
   myfile << "MDEVENTS" << std::endl;
 
@@ -388,8 +394,9 @@ IMDEventWorkspace_sptr LoadHFIRPDData::convertToMDEventWS(
     Progress progress(this, 0, 1, vec_ws2d.size());
     size_t detindex = 0;
     for (auto it = vec_ws2d.begin(); it < vec_ws2d.end(); ++it) {
-      std::size_t pos = std::distance(vec_ws2d.begin(), it);
       API::MatrixWorkspace_sptr thisWorkspace = *it;
+      int runnumber =
+          atoi(thisWorkspace->run().getProperty("run_number")->value().c_str());
 
       std::size_t nHist = thisWorkspace->getNumberHistograms();
       for (std::size_t i = 0; i < nHist; ++i) {
@@ -398,22 +405,17 @@ IMDEventWorkspace_sptr LoadHFIRPDData::convertToMDEventWS(
         const MantidVec &error = thisWorkspace->readE(i);
         myfile << signal[0] << " ";
         myfile << error[0] << " ";
+        myfile << runnumber << " ";
         myfile << det->getID() + detindex << " ";
-        myfile << pos << " ";
         Kernel::V3D detPos = det->getPos();
         myfile << detPos.X() << " ";
         myfile << detPos.Y() << " ";
         myfile << detPos.Z() << " ";
-        // Add a new dimension as event time
-        myfile << relruntime << " ";
         myfile << std::endl;
       }
 
       // Increment on detector IDs
-      if (nHist < 100)
-        detindex += 100;
-      else
-        detindex += nHist;
+      detindex += nHist;
 
       // Run time increment by time
       /// Must make 'time' be specified by user.  A validity check is required
@@ -474,8 +476,7 @@ IMDEventWorkspace_sptr LoadHFIRPDData::createMonitorMDWorkspace(
   myfile << "x X m 100" << std::endl;
   myfile << "y Y m 100" << std::endl;
   myfile << "z Z m 100" << std::endl;
-  myfile << "t T s 100" << std::endl;
-  myfile << "# Signal, Error, DetectorId, RunId, coord1, coord2, ... to end of "
+  myfile << "# Signal, Error, RunId, coord1, DetectorId, coord2, ... to end of "
             "coords" << std::endl;
   myfile << "MDEVENTS" << std::endl;
 
@@ -485,8 +486,9 @@ IMDEventWorkspace_sptr LoadHFIRPDData::createMonitorMDWorkspace(
     Progress progress(this, 0, 1, vec_ws2d.size());
     size_t detindex = 0;
     for (auto it = vec_ws2d.begin(); it < vec_ws2d.end(); ++it) {
-      std::size_t pos = std::distance(vec_ws2d.begin(), it);
       API::MatrixWorkspace_sptr thisWorkspace = *it;
+      int runnumber =
+          atoi(thisWorkspace->run().getProperty("run_number")->value().c_str());
 
       double signal = vecmonitor[static_cast<size_t>(it - vec_ws2d.begin())];
 
@@ -498,23 +500,17 @@ IMDEventWorkspace_sptr LoadHFIRPDData::createMonitorMDWorkspace(
         const MantidVec &error = thisWorkspace->readE(i);
         myfile << signal << " ";
         myfile << error[0] << " ";
+        myfile << runnumber << " ";
         myfile << det->getID() + detindex << " ";
-        myfile << pos << " ";
         Kernel::V3D detPos = det->getPos();
         myfile << detPos.X() << " ";
         myfile << detPos.Y() << " ";
         myfile << detPos.Z() << " ";
-        // Add a new dimension as event time.  Value is not important for
-        // monitor workspace
-        myfile << relruntime << " ";
         myfile << std::endl;
       }
 
       // Increment on detector IDs
-      if (nHist < 100)
-        detindex += 100;
-      else
-        detindex += nHist;
+      detindex += nHist;
 
       // Run time increment by time
       /// Must make 'time' be specified by user.  A validity check is required
@@ -651,8 +647,7 @@ void LoadHFIRPDData::appendSampleLogs(
  */
 void LoadHFIRPDData::addExperimentInfos(
     API::IMDEventWorkspace_sptr mdws,
-    const std::vector<API::MatrixWorkspace_sptr> vec_ws2d,
-    const int &init_runnumber) {
+    const std::vector<API::MatrixWorkspace_sptr> vec_ws2d) {
   // Add N experiment info as there are N measurment points
   for (size_t i = 0; i < vec_ws2d.size(); ++i) {
     // Create an ExperimentInfo object
@@ -660,8 +655,10 @@ void LoadHFIRPDData::addExperimentInfos(
     Geometry::Instrument_const_sptr tmp_inst = vec_ws2d[i]->getInstrument();
     tmp_expinfo->setInstrument(tmp_inst);
 
-    tmp_expinfo->mutableRun().addProperty(new PropertyWithValue<int>(
-        "run_number", static_cast<int>(i) + init_runnumber));
+    int runnumber =
+        atoi(vec_ws2d[i]->run().getProperty("run_number")->value().c_str());
+    tmp_expinfo->mutableRun().addProperty(
+        new PropertyWithValue<int>("run_number", runnumber));
 
     // Add ExperimentInfo to workspace
     mdws->addExperimentInfo(tmp_expinfo);
@@ -670,7 +667,7 @@ void LoadHFIRPDData::addExperimentInfos(
   // Add one additional in order to contain the combined sample logs
   ExperimentInfo_sptr combine_expinfo = boost::make_shared<ExperimentInfo>();
   combine_expinfo->mutableRun().addProperty(
-      new PropertyWithValue<int>("run_number", init_runnumber - 1));
+      new PropertyWithValue<int>("run_number", -1));
   mdws->addExperimentInfo(combine_expinfo);
 
   return;
