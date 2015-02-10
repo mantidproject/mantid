@@ -237,10 +237,10 @@ namespace CustomInterfaces
     // Plot the spectrum chosen by the user
     size_t spectrumIndex = input->getIndexFromSpectrumNumber(spectrumNumber);
     m_uiForm.ppRawPlot->clear();
-    m_uiForm.ppRawPlot->addSpectrum(input, spectrumIndex);
+    m_uiForm.ppRawPlot->addSpectrum("Raw", input, spectrumIndex);
 
     // Match X axis range on preview plot
-    m_uiForm.ppPreviewPlot->setAxisRange(m_uiForm.ppRawPlot->getCurveRange(workspaceName), QwtPlot::xBottom);
+    m_uiForm.ppPreviewPlot->setAxisRange(m_uiForm.ppRawPlot->getCurveRange(input), QwtPlot::xBottom);
     m_uiForm.ppPreviewPlot->replot();
   }
 
@@ -411,7 +411,7 @@ namespace CustomInterfaces
     // Plot preview plot
     size_t spectrumIndex = symmWS->getIndexFromSpectrumNumber(spectrumNumber);
     m_uiForm.ppPreviewPlot->clear();
-    m_uiForm.ppPreviewPlot->addSpectrum("__Symmetrise_temp", spectrumIndex);
+    m_uiForm.ppPreviewPlot->addSpectrum("Symmetrised", "__Symmetrise_temp", spectrumIndex);
 
     // Don't want this to trigger when the algorithm is run for all spectra
     disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(previewAlgDone(bool)));

@@ -259,7 +259,7 @@ namespace CustomInterfaces
       std::pair<double, double> range(dataX.front(), dataX.back());
 
       m_uiForm.ppRawPlot->clear();
-      m_uiForm.ppRawPlot->addSpectrum(input, 0);
+      m_uiForm.ppRawPlot->addSpectrum("Raw", input, 0);
 
       setPlotRange("SlicePeak", m_properties["PeakStart"], m_properties["PeakEnd"], range);
       setPlotRange("SliceBackground", m_properties["BackgroundStart"], m_properties["BackgroundEnd"], range);
@@ -408,7 +408,7 @@ namespace CustomInterfaces
 
     // Plot result spectrum
     m_uiForm.ppSlicePreview->clear();
-    m_uiForm.ppSlicePreview->addSpectrum(sliceWs, 0);
+    m_uiForm.ppSlicePreview->addSpectrum("Slice", sliceWs, 0);
     m_uiForm.ppSlicePreview->resizeX();
 
     // Ungroup the output workspace

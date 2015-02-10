@@ -13,7 +13,8 @@
 
 #include <QAction>
 #include <QBrush>
-#include <QHBoxLayout>
+#include <QPalette>
+#include <QVBoxLayout>
 
 #include <qwt_scale_engine.h>
 
@@ -29,9 +30,9 @@ namespace
 PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent),
   m_removeObserver(*this, &PreviewPlot::handleRemoveEvent),
   m_replaceObserver(*this, &PreviewPlot::handleReplaceEvent),
-  m_init(init), m_plot(NULL), m_curves(),
+  m_init(init), m_legendShown(false), m_plot(new QwtPlot(this)), m_curves(),
   m_magnifyTool(NULL), m_panTool(NULL), m_zoomTool(NULL),
-  m_contextMenu(new QMenu(this))
+  m_contextMenu(new QMenu(this)), m_legendLayout(NULL)
 {
   if(init)
   {
@@ -39,12 +40,15 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent)
     ads.notificationCenter.addObserver(m_removeObserver);
     ads.notificationCenter.addObserver(m_replaceObserver);
 
-    QHBoxLayout *mainLayout = new QHBoxLayout(this);
+    QBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->setSizeConstraint(QLayout::SetNoConstraint);
 
-    m_plot = new QwtPlot(this);
     m_plot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     mainLayout->addWidget(m_plot);
+
+    m_legendLayout = new QHBoxLayout(mainLayout);
+    m_legendLayout->addStretch();
+    mainLayout->addItem(m_legendLayout);
 
     this->setLayout(mainLayout);
   }
@@ -106,6 +110,7 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent)
 
   // Create the show legend option
   QAction *showLegendAction = new QAction("Show Legend", m_contextMenu);
+  showLegendAction->setCheckable(true);
   connect(showLegendAction, SIGNAL(toggled(bool)), this, SLOT(showLegend(bool)));
   m_contextMenu->addAction(showLegendAction);
 }
@@ -159,7 +164,7 @@ void PreviewPlot::setCanvasColour(const QColor & colour)
  */
 bool PreviewPlot::legendIsShown()
 {
-  return false;
+  return m_legendShown;
 }
 
 
@@ -189,13 +194,13 @@ QPair<double, double> PreviewPlot::getCurveRange(const Mantid::API::MatrixWorksp
   if(!m_curves.contains(ws))
     throw std::runtime_error("Workspace not on preview plot.");
 
-  size_t numPoints = m_curves[ws]->data().size();
+  size_t numPoints = m_curves[ws].first->data().size();
 
   if(numPoints < 2)
     return qMakePair(0.0, 0.0);
 
-  double low = m_curves[ws]->data().x(0);
-  double high = m_curves[ws]->data().x(numPoints - 1);
+  double low = m_curves[ws].first->data().x(0);
+  double high = m_curves[ws].first->data().x(numPoints - 1);
 
   return qMakePair(low, high);
 }
@@ -222,12 +227,13 @@ QPair<double, double> PreviewPlot::getCurveRange(const QString & wsName)
 /**
  * Adds a workspace to the preview plot given a pointer to it.
  *
+ * @param curveName Name of curve
  * @param wsName Name of workspace in ADS
- * @param specIndex Spectrrum index to plot
+ * @param specIndex Spectrum index to plot
  * @param curveColour Colour of curve to plot
  */
-void PreviewPlot::addSpectrum(const MatrixWorkspace_const_sptr ws, const size_t specIndex,
-    const QColor & curveColour)
+void PreviewPlot::addSpectrum(const QString & curveName, const MatrixWorkspace_const_sptr ws,
+    const size_t specIndex, const QColor & curveColour)
 {
   // Check the spectrum index is in range
   if(specIndex >= ws->getNumberHistograms())
@@ -243,13 +249,23 @@ void PreviewPlot::addSpectrum(const MatrixWorkspace_const_sptr ws, const size_t 
 
   // Remove any existing curves
   if(m_curves.contains(ws))
-    removeCurve(m_curves[ws]);
+    removeCurve(m_curves[ws].first);
 
   // Create the new curve
-  m_curves[ws] = new QwtPlotCurve();
-  m_curves[ws]->setData(wsData);
-  m_curves[ws]->setPen(curveColour);
-  m_curves[ws]->attach(m_plot);
+  QwtPlotCurve *curve = new QwtPlotCurve();
+  curve->setData(wsData);
+  curve->setPen(curveColour);
+  curve->attach(m_plot);
+
+  // Create the curve label
+  QLabel *label = new QLabel(curveName, this);
+  QPalette palette = label->palette();
+  palette.setColor(label->foregroundRole(), curveColour);
+  label->setPalette(palette);
+  label->setVisible(m_legendShown);
+  m_legendLayout->addWidget(label);
+
+  m_curves[ws] = qMakePair(curve, label);
 
   // Replot
   m_plot->replot();
@@ -259,12 +275,13 @@ void PreviewPlot::addSpectrum(const MatrixWorkspace_const_sptr ws, const size_t 
 /**
  * Adds a workspace to the preview plot given its name.
  *
+ * @param curveName Name of curve
  * @param wsName Name of workspace in ADS
- * @param specIndex Spectrrum index to plot
+ * @param specIndex Spectrum index to plot
  * @param curveColour Colour of curve to plot
  */
-void PreviewPlot::addSpectrum(const QString & wsName, const size_t specIndex,
-    const QColor & curveColour)
+void PreviewPlot::addSpectrum(const QString & curveName, const QString & wsName,
+    const size_t specIndex, const QColor & curveColour)
 {
   // Try to get a pointer from the name
   std::string wsNameStr = wsName.toStdString();
@@ -273,7 +290,7 @@ void PreviewPlot::addSpectrum(const QString & wsName, const size_t specIndex,
   if(!ws)
     throw std::runtime_error(wsNameStr + " is not a MatrixWorkspace, not supported by PreviewPlot.");
 
-  addSpectrum(ws, specIndex, curveColour);
+  addSpectrum(curveName, ws, specIndex, curveColour);
 }
 
 
@@ -284,9 +301,12 @@ void PreviewPlot::addSpectrum(const QString & wsName, const size_t specIndex,
  */
 void PreviewPlot::removeSpectrum(const MatrixWorkspace_const_sptr ws)
 {
-  // Remove the curve object
+  // Remove the curve object and legend label
   if(m_curves.contains(ws))
-    removeCurve(m_curves[ws]);
+  {
+    removeCurve(m_curves[ws].first);
+    m_legendLayout->removeWidget(m_curves[ws].second);
+  }
 
   // Get the curve from the map
   auto it = m_curves.find(ws);
@@ -322,7 +342,10 @@ void PreviewPlot::removeSpectrum(const QString & wsName)
  */
 void PreviewPlot::showLegend(bool show)
 {
-  //TODO
+  m_legendShown = show;
+
+  for(auto it = m_curves.begin(); it != m_curves.end(); ++it)
+    it.value().second->setVisible(show);
 }
 
 
@@ -402,7 +425,10 @@ void PreviewPlot::resizeX()
 void PreviewPlot::clear()
 {
   for(auto it = m_curves.begin(); it != m_curves.end(); ++it)
-    removeCurve(it.value());
+  {
+    removeCurve(it.value().first);
+    m_legendLayout->removeWidget(it.value().second);
+  }
 
   m_curves.clear();
 

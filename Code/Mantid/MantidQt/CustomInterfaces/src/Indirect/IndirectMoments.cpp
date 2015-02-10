@@ -114,7 +114,7 @@ namespace CustomInterfaces
     disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateProperties(QtProperty*, double)));
 
     m_uiForm.ppRawPlot->clear();
-    m_uiForm.ppRawPlot->addSpectrum(filename, 0);
+    m_uiForm.ppRawPlot->addSpectrum("Raw", filename, 0);
     QPair<double, double> curveRange = m_uiForm.ppRawPlot->getCurveRange(filename);
     std::pair<double, double> range = std::make_pair(curveRange.first, curveRange.second);
     setMiniPlotGuides("MomentsRangeSelector", m_properties["EMin"], m_properties["EMax"], range);
@@ -235,9 +235,9 @@ namespace CustomInterfaces
 
     // Plot each spectrum
     m_uiForm.ppMomentsPreview->clear();
-    m_uiForm.ppMomentsPreview->addSpectrum(QString::fromStdString(resultWsNames[0]), 0, Qt::green);
-    m_uiForm.ppMomentsPreview->addSpectrum(QString::fromStdString(resultWsNames[2]), 0, Qt::black);
-    m_uiForm.ppMomentsPreview->addSpectrum(QString::fromStdString(resultWsNames[3]), 0, Qt::red);
+    m_uiForm.ppMomentsPreview->addSpectrum("M0", QString::fromStdString(resultWsNames[0]), 0, Qt::green);
+    m_uiForm.ppMomentsPreview->addSpectrum("M1", QString::fromStdString(resultWsNames[2]), 0, Qt::black);
+    m_uiForm.ppMomentsPreview->addSpectrum("M2", QString::fromStdString(resultWsNames[3]), 0, Qt::red);
     m_uiForm.ppMomentsPreview->resizeX();
   }
 

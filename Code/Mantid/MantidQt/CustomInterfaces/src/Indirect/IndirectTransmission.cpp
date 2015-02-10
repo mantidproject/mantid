@@ -117,9 +117,9 @@ namespace CustomInterfaces
 
     // Do plotting
     m_uiForm.ppPlot->clear();
-    m_uiForm.ppPlot->addSpectrum(QString::fromStdString(resultWsNames[0]), 0, Qt::red);
-    m_uiForm.ppPlot->addSpectrum(QString::fromStdString(resultWsNames[1]), 0, Qt::black);
-    m_uiForm.ppPlot->addSpectrum(QString::fromStdString(resultWsNames[2]), 0, Qt::green);
+    m_uiForm.ppPlot->addSpectrum("Can", QString::fromStdString(resultWsNames[0]), 0, Qt::red);
+    m_uiForm.ppPlot->addSpectrum("Sample", QString::fromStdString(resultWsNames[1]), 0, Qt::black);
+    m_uiForm.ppPlot->addSpectrum("Transmission", QString::fromStdString(resultWsNames[2]), 0, Qt::green);
     m_uiForm.ppPlot->resizeX();
   }
 

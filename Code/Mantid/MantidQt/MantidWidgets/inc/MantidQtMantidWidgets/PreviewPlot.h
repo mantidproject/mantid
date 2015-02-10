@@ -7,6 +7,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <QActionGroup>
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QMenu>
 
 #include <qwt_plot.h>
@@ -69,8 +71,8 @@ namespace MantidWidgets
     QPair<double, double> getCurveRange(const Mantid::API::MatrixWorkspace_const_sptr ws);
     QPair<double, double> getCurveRange(const QString & wsName);
 
-    void addSpectrum(const Mantid::API::MatrixWorkspace_const_sptr ws, const size_t specIndex = 0, const QColor & curveColour = QColor());
-    void addSpectrum(const QString & wsName, const size_t specIndex = 0, const QColor & curveColour = QColor());
+    void addSpectrum(const QString & curveName, const Mantid::API::MatrixWorkspace_const_sptr ws, const size_t specIndex = 0, const QColor & curveColour = QColor());
+    void addSpectrum(const QString & curveName, const QString & wsName, const size_t specIndex = 0, const QColor & curveColour = QColor());
 
     void removeSpectrum(const Mantid::API::MatrixWorkspace_const_sptr ws);
     void removeSpectrum(const QString & wsName);
@@ -105,12 +107,15 @@ namespace MantidWidgets
     /// If the widget was initialised
     bool m_init;
 
+    /// If the curve legend is shown
+    bool m_legendShown;
+
     /// The plot its self
     friend class RangeSelector;
     QwtPlot *m_plot;
 
-    /// Map of workspaces to plot curves
-    QMap<Mantid::API::MatrixWorkspace_const_sptr, QwtPlotCurve *> m_curves;
+    /// Map of curve key to plot curves and curve label
+    QMap<Mantid::API::MatrixWorkspace_const_sptr, QPair<QwtPlotCurve *, QLabel *>> m_curves;
 
     /// Plot manipulation tools
     QwtPlotMagnifier *m_magnifyTool;
@@ -122,6 +127,9 @@ namespace MantidWidgets
     QActionGroup *m_plotToolGroup;
     QActionGroup *m_xAxisTypeGroup;
     QActionGroup *m_yAxisTypeGroup;
+
+    /// Layout for plot legend
+    QHBoxLayout *m_legendLayout;
 
   };
 

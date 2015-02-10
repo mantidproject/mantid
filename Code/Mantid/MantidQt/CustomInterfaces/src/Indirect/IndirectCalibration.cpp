@@ -361,7 +361,7 @@ namespace CustomInterfaces
     std::pair<double, double> range(dataX.front(), dataX.back());
 
     m_uiForm.ppCalibration->clear();
-    m_uiForm.ppCalibration->addSpectrum(input, 0);
+    m_uiForm.ppCalibration->addSpectrum("Raw", input, 0);
     m_uiForm.ppCalibration->resizeX();
 
     setPlotRange("CalPeak", m_properties["CalELow"], m_properties["CalEHigh"], range);
@@ -427,7 +427,7 @@ namespace CustomInterfaces
     setPlotRange("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], range);
 
     m_uiForm.ppResolution->clear();
-    m_uiForm.ppResolution->addSpectrum(energyWs, 0);
+    m_uiForm.ppResolution->addSpectrum("Energy", energyWs, 0);
     m_uiForm.ppResolution->resizeX();
 
     calSetDefaultResolution(energyWs);
