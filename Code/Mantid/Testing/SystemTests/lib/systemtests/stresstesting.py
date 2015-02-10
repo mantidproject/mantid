@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/systemtests>.
 '''
-
 import sys
 import os
 import types
@@ -37,6 +36,9 @@ import inspect
 import abc
 import numpy
 import unittest
+
+# Path to this file
+THIS_MODULE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 #########################################################################
 # The base test class.
@@ -485,11 +487,6 @@ class TextResultReporter(ResultReporter):
 from xmlreporter import XmlResultReporter
 
 #########################################################################
-# A class to report results via email
-#########################################################################
-from emailreporter import EmailResultReporter
-
-#########################################################################
 # A base class for a TestRunner
 #########################################################################
 class PythonTestRunner(object):
@@ -508,10 +505,7 @@ class PythonTestRunner(object):
         self._mtdpy_header = ''
         self._test_dir = ''
         # Get the path that this module resides in so that the tests know about it
-        self._framework_path = ''
-        for p in sys.path:
-            if 'Framework' in p:
-                self._framework_path =  os.path.abspath(p).replace('\\','/')
+        self._framework_path = THIS_MODULE_PATH
         # A string to prefix the code with
         self._code_prefix = ''
         self._using_escape = need_escaping
@@ -523,7 +517,7 @@ class PythonTestRunner(object):
         raise NotImplementedError('"commandString(self)" should be overridden in a derived class')
 
     def setMantidDir(self, mtdheader_dir):
-        # Store the path to MantidPythonAPI
+        # Store the path to mantid module
         self._mtdpy_header = os.path.abspath(mtdheader_dir).replace('\\','/')
 
     def setTestDir(self, test_dir):
@@ -875,6 +869,7 @@ class TestManager(object):
 class MantidFrameworkConfig:
 
     def __init__(self, mantidDir=None, sourceDir=None,
+                 data_dirs="", save_dir = "",
                  loglevel='information', archivesearch=False):
         # force the environment variable
         if mantidDir is not None:
@@ -900,16 +895,31 @@ class MantidFrameworkConfig:
         sys.path.insert(0,self.__locateTestsDir())
 
         # setup the rest of the magic directories
-        parentDir = os.path.split(self.__sourceDir)[0]
-        self.__saveDir = os.path.join(parentDir, "logs/").replace('\\','/')
-        self.__dataDirs = [os.path.join(parentDir, "SystemTests"),
-                os.path.join(parentDir, "SystemTests/AnalysisTests/ReferenceResults"),
-                os.path.join(parentDir, "Data"),
-                os.path.join(parentDir, "Data/LOQ"),
-                os.path.join(parentDir, "Data/SANS2D"),
-                os.path.join(parentDir, "Data/PEARL"),
-                self.__saveDir
-                ]
+        self.__saveDir = save_dir
+        if not os.path.exists(save_dir):
+            print "Making directory %s to save results" % save_dir
+            os.mkdir(save_dir)
+
+        else:
+            if not os.path.isdir(save_dir):
+                raise RuntimeError("%s is not a directory" % save_dir)
+
+        # assume a string is already semicolon-seaprated
+        if type(data_dirs) == str:
+            self.__dataDirs = data_dirs
+            self.__dataDirs += ";%s" % self.__saveDir
+        else:
+            data_path = ""
+            data_dirs.append(self.__saveDir)
+            for direc in data_dirs:
+                if not os.path.exists(direc):
+                    raise RuntimeError('Directory ' + direc + ' was not found.')
+                search_dir = direc.replace('\\','/')
+                if not search_dir.endswith('/'):
+                    search_dir += '/'
+                    data_path += search_dir + ';'
+            #endfor
+            self.__dataDirs = data_path
 
         # set the log level
         self.__loglevel = loglevel
@@ -928,31 +938,15 @@ class MantidFrameworkConfig:
             raise RuntimeError("Failed to find source directory")
 
     def __locateTestsDir(self):
-        loc = os.path.join(self.__sourceDir, '../SystemTests/AnalysisTests')
+        loc = os.path.join(self.__sourceDir, "..", "..", "tests", "analysis")
         loc = os.path.abspath(loc)
         if os.path.isdir(loc):
             return loc
         else:
-            raise RuntimeError("'%s' is not a directory (AnalysisTests)" % loc)
+            raise RuntimeError("Expected the analysis tests directory at '%s' but it is not a directory " % loc)
 
-    def __getDataDirs(self):
-        # get the file of the python script
-        testDir = os.path.split(self.__sourceDir)[0]
-
-        # add things to the data search path
-        dirs =[]
-        dirs.append(os.path.join(testDir, "Data"))
-        dirs.append(os.path.join(testDir, "Data/LOQ"))
-        dirs.append(os.path.join(testDir, "Data/SANS2D"))
-        dirs.append(os.path.join(testDir, "Data/PEARL"))
-        dirs.append(os.path.join(testDir, "SystemTests"))
-        dirs.append(os.path.join(testDir, \
-                                 "SystemTests/AnalysisTests/ReferenceResults"))
-        dirs.append(os.path.abspath(os.getenv("MANTIDPATH")))
-
-        dirs = [os.path.normpath(item) for item in dirs]
-
-        return dirs
+    def __getDataDirsAsString(self):
+        return self._dataDirs
 
     def __moveFile(self, src, dst):
         if os.path.exists(src):
@@ -968,12 +962,6 @@ class MantidFrameworkConfig:
     testDir = property(lambda self: self.__testDir)
 
     def config(self):
-        if not os.path.exists(self.__saveDir):
-            print "Making directory %s to save results" % self.__saveDir
-            os.mkdir(self.__saveDir)
-        else:
-            if not os.path.isdir(self.__saveDir):
-                raise RuntimeError("%s is not a directory" % self.__saveDir)
 
         # Start mantid
         import mantid
@@ -991,15 +979,7 @@ class MantidFrameworkConfig:
         # Up the log level so that failures can give useful information
         config['logging.loggers.root.level'] = self.__loglevel
         # Set the correct search path
-        data_path = ''
-        for dir in self.__dataDirs:
-            if not os.path.exists(dir):
-                raise RuntimeError('Directory ' + dir + ' was not found.')
-            search_dir = dir.replace('\\','/')
-            if not search_dir.endswith('/'):
-                search_dir += '/'
-                data_path += search_dir + ';'
-        config['datasearch.directories'] = data_path
+        config['datasearch.directories'] = self.__dataDirs
 
         # Save path
         config['defaultsave.directory'] = self.__saveDir

@@ -147,6 +147,9 @@ add_subdirectory ( scripts )
 
 add_subdirectory ( docs )
 
+# System tests
+add_subdirectory ( Testing/SystemTests/scripts )
+
 ###########################################################################
 # Installation settings
 ###########################################################################

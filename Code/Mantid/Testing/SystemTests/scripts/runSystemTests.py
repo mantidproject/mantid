@@ -3,7 +3,10 @@
 import os
 # set up the command line options
 VERSION = "1.1"
-DEFAULT_FRAMEWORK_LOC = os.path.dirname(os.path.realpath(__file__)) + "/../StressTestFramework"
+PYFILE_PATH = os.path.dirname(os.path.realpath(__file__))
+DEFAULT_FRAMEWORK_LOC = os.path.realpath(os.path.join(PYFILE_PATH, "..","lib","systemtests"))
+DATA_DIRS_LIST_PATH = os.path.join(PYFILE_PATH, "datasearch-directories.txt")
+SAVE_DIR_LIST_PATH = os.path.join(PYFILE_PATH, "defaultsave-directory.txt")
 
 info = []
 info.append("This program will configure mantid run all of the system tests located in")
@@ -36,6 +39,10 @@ parser.add_option("-l", "--loglevel", dest="loglevel",
                   help="Set the log level for test running: [" + ', '.join(loglevelChoices) + "]")
 parser.add_option("", "--showskipped", dest="showskipped", action="store_true",
                   help="List the skipped tests.")
+parser.add_option("-d", "--datapaths", dest="datapaths",
+                  help="A semicolon-separated list of directories to search for data")
+parser.add_option("-s", "--savedir", dest="savedir",
+                  help="A directory to use for the Mantid save path")
 parser.add_option("", "--archivesearch", dest="archivesearch", action="store_true",
                   help="Turn on archive search for file finder.")
 parser.set_defaults(frameworkLoc=DEFAULT_FRAMEWORK_LOC, mantidpath=None, makeprop=True,
@@ -80,7 +87,19 @@ if path_var:
   os.environ[path_var] = mantid_module_path + os.pathsep + os.environ.get(path_var, "")
 
 # Configure mantid
+# Parse files containing the search and save directories, unless otherwise given
+data_paths = options.datapaths
+if data_paths is None or data_paths == "":
+  with open(DATA_DIRS_LIST_PATH, 'r') as f_handle:
+    data_paths = f_handle.read().strip()
+
+save_dir = options.savedir
+if save_dir is None or save_dir == "":
+  with open(SAVE_DIR_LIST_PATH, 'r') as f_handle:
+    save_dir = f_handle.read().strip()
+# Configure properties file
 mtdconf = stresstesting.MantidFrameworkConfig(mantid_module_path, loglevel=options.loglevel,
+                                              data_dirs=data_paths, save_dir=save_dir,
                                               archivesearch=options.archivesearch)
 if options.makeprop:
   mtdconf.config()
@@ -100,7 +119,7 @@ xml_report = open(os.path.join(mtdconf.saveDir, "SystemTestsReport.xml"),'w')
 xml_report.write(reporter.getResults())
 xml_report.close()
 
-# put the configuratoin back to its original state
+# put the configuration back to its original state
 if options.makeprop:
   mtdconf.restoreconfig()
 
