@@ -5,9 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_fft_complex.h>
-
+#include "MantidKernel/ListValidator.h"
 namespace Mantid
 {
   namespace Algorithms
@@ -60,15 +58,8 @@ namespace Mantid
       void init();
       /// Run the algorithm
       void exec();
-
-      /// Frequency of the oscillations
-      double m_freq;
-      /// Phase accounting for any misalignment of the counters
-      double m_phase;
-      /// Number of data points per histogram
-      size_t m_nData;
-      /// Number of histograms
-      size_t m_nHisto;
+      /// Get conversion factor from frequency units to input workspace units
+      double unitConversionFactor(std::string uin, std::string uuser);
     };
 
   } // namespace Algorithms

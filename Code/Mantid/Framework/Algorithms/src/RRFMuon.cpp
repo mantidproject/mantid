@@ -2,8 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/RRFMuon.h"
-#include "MantidKernel/ArrayProperty.h"
-#include <boost/shared_array.hpp>
+
 
 #define REAL(z,i) ((z)[2*(i)])
 #define IMAG(z,i) ((z)[2*(i)+1])
@@ -34,6 +33,14 @@ void RRFMuon::init()
   declareProperty(new PropertyWithValue<double>("Frequency", 0, Direction::Input), 
     "Frequency of the oscillations");
 
+  std::vector<std::string> unitOptions;
+  unitOptions.push_back("MHz");
+  unitOptions.push_back("Gauss");
+  unitOptions.push_back("Mrad/s");
+  declareProperty("Frequency units", "MHz",
+                  boost::make_shared<StringListValidator>(unitOptions),
+                  "The energy mode (default: elastic)");
+
   declareProperty(new PropertyWithValue<double>("Phase", 0, Direction::Input), 
     "Phase accounting for any misalignment of the counters");
 
@@ -47,33 +54,37 @@ void RRFMuon::exec()
 	// Get input workspace containing polarization in the lab-frame
   API::MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
   // Get frequency
-  m_freq = getProperty("Frequency");
+  double freq = getProperty("Frequency");
+  // Get units
+  std::string units = getProperty("Frequency units");
+  // Convert frequency to input workspace X units
+  double factor = unitConversionFactor(inputWs->getAxis(0)->unit()->label().ascii(),units);
   // Get phase
-  m_phase = getProperty("Phase");
+  double phase = getProperty("Phase");
   // Get number of histograms
-  m_nHisto = inputWs->getNumberHistograms();
-  if ( m_nHisto != 2 )
+  size_t nHisto = inputWs->getNumberHistograms();
+  if ( nHisto != 2 )
   {
     throw std::runtime_error("Invalid number of spectra in input workspace");
   }
   // Set number of data points
-  m_nData = inputWs->blocksize();
+  size_t nData = inputWs->blocksize();
 
   // Compute the RRF polarization
-  const double twoPiFreq = 2. * M_PI * m_freq;
+  const double twoPiFreq = 2. * M_PI * freq * factor;
   MantidVec time  = inputWs->readX(0); // X axis: time
   MantidVec labRe = inputWs->readY(0); // Lab-frame polarization (real part)
   MantidVec labIm = inputWs->readY(1); // Lab-frame polarization (imaginary part)
-  MantidVec rrfRe(m_nData), rrfIm(m_nData); // Rotating Reference frame (RRF) polarizations
-  for (size_t t=0; t<m_nData; t++)
+  MantidVec rrfRe(nData), rrfIm(nData); // Rotating Reference frame (RRF) polarizations
+  for (size_t t=0; t<nData; t++)
   {
-    rrfRe [t] =  labRe [t] * cos(twoPiFreq * time[t] + m_phase) + labIm [t] * sin(twoPiFreq * time[t] + m_phase);
-    rrfIm [t] = -labRe [t] * sin(twoPiFreq * time[t] + m_phase) + labIm [t] * cos(twoPiFreq * time[t] + m_phase);
+    rrfRe [t] =  labRe [t] * cos(twoPiFreq * time[t] + phase) + labIm [t] * sin(twoPiFreq * time[t] + phase);
+    rrfIm [t] = -labRe [t] * sin(twoPiFreq * time[t] + phase) + labIm [t] * cos(twoPiFreq * time[t] + phase);
   }
 
   // Create output workspace to put results into
   API::MatrixWorkspace_sptr outputWs = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-    API::WorkspaceFactory::Instance().create("Workspace2D", m_nHisto, m_nData+1, m_nData));
+    API::WorkspaceFactory::Instance().create("Workspace2D", nHisto, nData+1, nData));
   outputWs->getAxis(0)->unit() = inputWs->getAxis(0)->unit();
 
   // Put results into output workspace
@@ -91,6 +102,31 @@ void RRFMuon::exec()
 
 }
 
+/** Gets factor to convert frequency units to input workspace units
+ *  @param uin :: [input] input workspace units
+ *  @param uuser :: [input] units selected by user
+ */
+double RRFMuon::unitConversionFactor(std::string uin, std::string uuser){
+
+  if ( (uin == "microsecond" ) ){
+
+    if ( uuser == "MHz" ) {
+      return 1.0;
+    } else if ( uuser == "Gauss" ) {
+      std::cout << "FACTOR " << 2.0*M_PI*0.0001 << std::endl;
+      return 2.0*M_PI*135.538817*0.0001;
+    } else if ( uuser == "Mrad/s" ) {
+      std::cout << "FACTOR " << 2.0*M_PI << std::endl;
+      return 2.0*M_PI;
+    } else {
+      throw std::runtime_error("Could not find units");
+    }
+
+  } else {
+    throw std::runtime_error("X units must be in microseconds");
+  }
+
+}
 
 }
 }
