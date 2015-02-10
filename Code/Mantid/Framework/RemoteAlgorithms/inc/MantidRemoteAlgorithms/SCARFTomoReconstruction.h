@@ -10,7 +10,7 @@ namespace RemoteAlgorithms {
     reconstruction on the SCARF computer cluster at RAL.
     The algorithm can be used to send different commands to the job
     queue, for example: log in, log out, start a reconstruction job,
-    retrieve information about a job or to cancel jobs.
+    retrieve information about jobs or to cancel a job.
 
     Output Properties: None.
     If the authentication is successfull, a cookie is received that is stored
@@ -58,18 +58,26 @@ public:
   virtual const std::string category() const { return "Remote"; }
 
 protected:
-  /// methods to process reconstruction job commands
-  virtual void doLogin(std::string &username, std::string &password);
-  virtual void doLogout(std::string &username);
-  virtual void doSubmit();
-  virtual void doQueryStatus();
-  virtual void doCancel();
+  /// different methods (HTTP requests) to process reconstruction job commands
+  virtual void doLogin(const std::string &username, const std::string &password);
+  virtual void doLogout(const std::string &username);
+  virtual void doSubmit(const std::string &username);
+  virtual void doQueryStatus(const std::string &username);
+  virtual void doCancel(const std::string &username);
 
 private:
   void init();
   /// Execution code
   void exec();
 
+  // helper for the submit request
+  std::string buildSubmitBody(const std::string &appName,
+                              const std::string &boundary,
+                              const std::string &inputFiles,
+                              const std::string &inputArgs);
+  // lower level helper to encode parameters
+  void encodeParam(std::string &body, const std::string &boundary,
+                   const std::string &paramName, const std::string &paramVal);
 
   class Action {
   public:
@@ -79,12 +87,16 @@ private:
   // helper methods
   Action::Type getAction();
 
+  // options passed to the algorithm
   Action::Type m_action;
 
   std::string m_jobID;
   std::string m_nxTomoPath;
   std::string m_parameterPath;
   std::string m_outputPath;
+
+  // resource name
+  static const std::string m_SCARFComputeResource;
 
   // HTTP specifics for SCARF (IBM LSF PAC)
   static std::string m_acceptType;
