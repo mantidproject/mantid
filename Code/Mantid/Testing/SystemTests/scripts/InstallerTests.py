@@ -81,7 +81,7 @@ os.environ["MANTIDPATH"] = mantidPlotDir
 try:
     # Keep hold of the version that was run
     version = run(installer.mantidPlotPath + ' -v')
-    version_tested = open('version_tested.log','w')
+    version_tested = open(os.path.join(output_dir,'version_tested.log'),'w')
     if version and len(version) > 0:
         version_tested.write(version)
     version_tested.close()
