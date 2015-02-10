@@ -1,3 +1,5 @@
+"""Finds a package, installs it and runs the tests against it.
+"""
 import os
 import sys
 import platform
@@ -8,15 +10,11 @@ from getopt import getopt
 from mantidinstaller import (createScriptLog, log, stop, failure, scriptfailure, 
                              get_installer, run)
 
-'''
-
-This script copies Mantid installer for the system it is running on from the build server,
-installs it, runs system tests and produces an xml report file SystemTestsReport.xml
-
-'''
+THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
+SAVE_DIR_LIST_PATH = os.path.join(THIS_MODULE_DIR, "defaultsave-directory.txt")
 
 try:
-    opt, argv = getopt(sys.argv[1:],'nohvR:l:')
+    opt, argv = getopt(sys.argv[1:],'d:nohvR:l:')
 except:
     opt = [('-h','')]
 
@@ -24,6 +22,7 @@ if ('-h','') in opt:
     print "Usage: %s [OPTIONS]" % os.path.basename(sys.argv[0])
     print
     print "Valid options are:"
+    print "       -d Directory to look for packages. Defaults to current working directory"
     print "       -n Run tests without installing Mantid (it must be already installed)"
     print "       -o Output to the screen instead of log files"
     print "       -h Display the usage"
@@ -35,6 +34,7 @@ doInstall = True
 test_regex = None
 out2stdout = False
 log_level = 'notice'
+package_dir = os.getcwd()
 for option, arg in opt:
     if option == '-n':
         doInstall = False
@@ -44,18 +44,20 @@ for option, arg in opt:
         test_regex = arg
     if option == '-l' and arg != "":
         log_level = arg
+    if option == '-d' and arg != "":
+        package_dir = arg
 
-# The log file for this script
-parentDir = os.path.abspath('..').replace('\\','/')
-if not os.path.exists(parentDir + '/logs'):
-    os.mkdir(parentDir + '/logs')
+# Log to the configured default save directory
+with open(SAVE_DIR_LIST_PATH, 'r') as f_handle:
+    output_dir = f_handle.read().strip()
 
-createScriptLog(parentDir + '/logs/TestScript.log')
-testRunLogPath = parentDir + '/logs/testsRun.log'
-testRunErrPath = parentDir + '/logs/testsRun.err'
+createScriptLog(os.path.join(output_dir, "TestScript.log"))
+testRunLogPath = os.path.join(output_dir, "test_output.log")
+testRunErrPath = os.path.join(output_dir, "test_errors.log")
 
 log('Starting system tests')
-installer = get_installer(doInstall)
+log('Searching for packages in ' + package_dir)
+installer = get_installer(package_dir, doInstall)
 
 # Install the found package
 if doInstall:
@@ -89,17 +91,18 @@ except Exception, err:
 try:
     # Now get the revision number/git commit ID (remove the leading 'g' that isn't part of it)
     revision = run(installer.mantidPlotPath + ' -r').lstrip('g')
-    revision_tested = open('revision_tested.log','w')
+    revision_tested = open(os.path.join(output_dir, 'revision_tested.log'), 'w')
     if revision and len(version) > 0:
         revision_tested.write(revision)
     revision_tested.close()
 except Exception, err:
     scriptfailure('Revision test failed: '+str(err), installer)
 
-log("Running system tests. Log files are: logs/testsRun.log and logs/testsRun.err")
+log("Running system tests. Log files are: '%s' and '%s'" % (testRunLogPath,testRunErrPath))
 try:
     # Pick the correct Mantid along with the bundled python on windows
-    run_test_cmd = "%s %s/runSystemTests.py --loglevel=%s --mantidpath=%s" % (installer.python_cmd, os.path.dirname(os.path.realpath(__file__)), log_level, mantidPlotDir)
+    run_test_cmd = "%s %s/runSystemTests.py --loglevel=%s --mantidpath=%s" % \
+                (installer.python_cmd, THIS_MODULE_DIR, log_level, mantidPlotDir)
     if test_regex is not None:
         run_test_cmd += " -R " + test_regex
     if out2stdout:

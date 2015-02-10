@@ -38,7 +38,7 @@ import numpy
 import unittest
 
 # Path to this file
-THIS_MODULE_PATH = os.path.dirname(os.path.realpath(__file__))
+THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 #########################################################################
 # The base test class.
@@ -505,7 +505,7 @@ class PythonTestRunner(object):
         self._mtdpy_header = ''
         self._test_dir = ''
         # Get the path that this module resides in so that the tests know about it
-        self._framework_path = THIS_MODULE_PATH
+        self._framework_path = THIS_MODULE_DIR
         # A string to prefix the code with
         self._code_prefix = ''
         self._using_escape = need_escaping

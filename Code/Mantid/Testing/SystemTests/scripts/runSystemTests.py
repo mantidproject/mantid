@@ -3,14 +3,14 @@
 import os
 # set up the command line options
 VERSION = "1.1"
-PYFILE_PATH = os.path.dirname(os.path.realpath(__file__))
-DEFAULT_FRAMEWORK_LOC = os.path.realpath(os.path.join(PYFILE_PATH, "..","lib","systemtests"))
-DATA_DIRS_LIST_PATH = os.path.join(PYFILE_PATH, "datasearch-directories.txt")
-SAVE_DIR_LIST_PATH = os.path.join(PYFILE_PATH, "defaultsave-directory.txt")
+THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
+DEFAULT_FRAMEWORK_LOC = os.path.realpath(os.path.join(THIS_MODULE_DIR, "..","lib","systemtests"))
+DATA_DIRS_LIST_PATH = os.path.join(THIS_MODULE_DIR, "datasearch-directories.txt")
+SAVE_DIR_LIST_PATH = os.path.join(THIS_MODULE_DIR, "defaultsave-directory.txt")
 
 info = []
 info.append("This program will configure mantid run all of the system tests located in")
-info.append("the 'SystemTests/AnalysisTests' directory and log the results in 'logs/'.")
+info.append("the 'tests/analysis' directory.")
 info.append("This program will create a temporary 'Mantid.user.properties' file which")
 info.append("it will rename to 'Mantid.user.properties.systest' upon completion. The")
 info.append("current version of the code does not print to stdout while the test is")
