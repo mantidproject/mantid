@@ -1,5 +1,5 @@
 import os
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -633,6 +633,21 @@ class DirectPropertyManagerTest(unittest.TestCase):
             ic+=1
         self.assertEqual(ic,3)
 
+    #def test_incident_energy_custom_enum(self):
+    ###### Custom enum does not work
+    #    propman = self.prop_man
+    #    en_source = [20,40,80]
+    #    propman.incident_energy=en_source
+    #    propman.energy_bins=[-2,0.1,0.8]
+    #    self.assertTrue(PropertyManager.incident_energy.multirep_mode())
+
+    #    ic=0
+    #    for ind,en in enumerate(PropertyManager.incident_energy):
+    #        ic+=1
+    #        self.assertAlmostEqual(en,en_source[ind])
+    #        en_internal = PropertyManager.incident_energy.get_current()
+    #        self.assertAlmostEqual(en_internal,en_source[ind])
+    #        self.assertEqual(ind,ic-1)
 
     def test_ignore_complex_defailts_changes_fom_instrument(self) :
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
