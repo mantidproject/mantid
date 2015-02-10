@@ -10,8 +10,8 @@
 
 #include "MantidAPI/PeakTransform.h"
 #include "MantidAPI/PeakTransformFactory.h"
-#include "MantidAPI/PeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include <boost/regex.hpp>
 #include <gmock/gmock.h>
 
