@@ -317,6 +317,12 @@ bool V3R::operator==(int other) const {
 /// Returns true if any component is different from the integer.
 bool V3R::operator!=(int other) const { return !(this->operator==(other)); }
 
+/// Returns a V3R with absolute components.
+V3R V3R::getPositiveVector() const
+{
+    return V3R(boost::abs(m_x), boost::abs(m_y), boost::abs(m_z));
+}
+
 /// Performs a matrix multiplication v' = M * v, throws
 /// Kernel::Exception::MisMatch<size_t> if M does not have exactly 3 columns.
 V3R operator*(const Kernel::IntMatrix &lhs, const V3R &rhs) {

@@ -118,6 +118,8 @@ public:
   bool operator==(int other) const;
   bool operator!=(int other) const;
 
+  V3R getPositiveVector() const;
+
 protected:
   RationalNumber m_x;
   RationalNumber m_y;
