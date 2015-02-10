@@ -45,7 +45,7 @@ namespace Mantid
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "RRFMuon";}
       ///Summary of algorithm's purpose
-      virtual const std::string summary() const {return "Calculate Muon polarization in the rotating reference frame (RRF).";}
+      virtual const std::string summary() const {return "Calculate Muon asymmetry in the rotating reference frame (RRF).";}
 
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;}
