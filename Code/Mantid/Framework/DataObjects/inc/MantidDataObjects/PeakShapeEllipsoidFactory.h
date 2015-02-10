@@ -1,20 +1,15 @@
-#ifndef MANTID_DATAOBJECTS_PEAKNOSHAPEFACTORY_H_
-#define MANTID_DATAOBJECTS_PEAKNOSHAPEFACTORY_H_
+#ifndef MANTID_DATAOBJECTS_PEAKSHAPEELLIPSOIDFACTORY_H_
+#define MANTID_DATAOBJECTS_PEAKSHAPEELLIPSOIDFACTORY_H_
 
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/PeakShapeFactory.h"
-
+#include "PeakShapeFactory.h"
 
 namespace Mantid
 {
-namespace Geometry
-{
-// Forward declaration
-class PeakShape;
-}
 namespace DataObjects
 {
-  /** PeakNoShapeFactory : Factory method for types of NoShape
+
+  /** PeakShapeEllipsoidFactory : Create ellipsoid peak shapes
 
     Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
@@ -36,23 +31,24 @@ namespace DataObjects
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport PeakNoShapeFactory  : public PeakShapeFactory
+  class DLLExport PeakShapeEllipsoidFactory : public PeakShapeFactory
   {
   public:
-    // Constructor
-    PeakNoShapeFactory();
-    // Destructor
-    virtual ~PeakNoShapeFactory();
-    // Factory method
-    Mantid::Geometry::PeakShape *create(const std::string &source) const;
-    // Set successor. No shape will not delegate.
-    void setSuccessor(boost::shared_ptr<const PeakShapeFactory> successorFactory);
-  private:
+    PeakShapeEllipsoidFactory();
+    virtual ~PeakShapeEllipsoidFactory();
+       
+    // PeakShapeFactory interface
 
+    Mantid::Geometry::PeakShape *create(const std::string &source) const;
+    void setSuccessor(boost::shared_ptr<const PeakShapeFactory> successorFactory);
+
+  private:
+    /// Successor factory
+    PeakShapeFactory_const_sptr m_successor;
   };
 
 
 } // namespace DataObjects
 } // namespace Mantid
 
-#endif  /* MANTID_DATAOBJECTS_PEAKNOSHAPEFACTORY_H_ */
+#endif  /* MANTID_DATAOBJECTS_PEAKSHAPEELLIPSOIDFACTORY_H_ */

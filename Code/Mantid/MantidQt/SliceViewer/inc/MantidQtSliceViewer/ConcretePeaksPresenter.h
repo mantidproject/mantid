@@ -6,7 +6,7 @@
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -18,7 +18,7 @@ typedef std::vector<boost::shared_ptr<PeakOverlayView>> VecPeakOverlayView;
 
 /// Coordinate System Enum to String.
 std::string DLLExport
-    coordinateToString(Mantid::API::SpecialCoordinateSystem coordSystem);
+    coordinateToString(Mantid::Kernel::SpecialCoordinateSystem coordSystem);
 
 /*---------------------------------------------------------
 ConcretePeaksPresenter

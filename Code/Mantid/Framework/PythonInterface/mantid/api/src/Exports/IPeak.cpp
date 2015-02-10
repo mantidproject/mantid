@@ -5,6 +5,13 @@
 using Mantid::API::IPeak;
 using namespace boost::python;
 
+namespace {
+Mantid::Geometry::PeakShape_sptr getPeakShape(IPeak& peak) {
+    // Use clone to make a copy of the PeakShape.
+    return Mantid::Geometry::PeakShape_sptr(peak.getPeakShape().clone());
+}
+}
+
 void export_IPeak()
 {
   register_ptr_to_python<IPeak*>();
@@ -53,6 +60,7 @@ void export_IPeak()
     .def("getDetPos", &IPeak::getDetPos, "Return the detector position vector")
     .def("getL1", &IPeak::getL1, "Return the L1 flight path length (source to sample), in meters. ")
     .def("getL2", &IPeak::getL2, "Return the L2 flight path length (sample to detector), in meters.")
+    .def("getPeakShape", getPeakShape, "Get the peak shape")
     ;
 }
 
