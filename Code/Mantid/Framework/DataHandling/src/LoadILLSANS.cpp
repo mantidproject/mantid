@@ -3,6 +3,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <cmath>
 #include <limits>
 #include <numeric> // std::accumulate
 
@@ -585,7 +586,7 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
  */
 double LoadILLSANS::calculateQ(const double lambda,
                                const double twoTheta) const {
-  return (4 * 3.1415936 * std::sin(twoTheta * (3.1415936 / 180) / 2)) /
+  return (4 * M_PI * std::sin(twoTheta * (M_PI / 180) / 2)) /
          (lambda);
 }
 

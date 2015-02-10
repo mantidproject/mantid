@@ -232,7 +232,7 @@ void Goniometer::recalculateR() {
   Quat QGlobal, QCurrent;
 
   for (it = motors.begin(); it < motors.end(); ++it) {
-    double ang = (*it).angle;
+    double ang = (*it).angle*(*it).sense;
     if ((*it).angleunit == angRadians)
       ang *= rad2deg;
     QCurrent = Quat(ang, (*it).rotationaxis);

@@ -11,6 +11,7 @@ set ( SRC_FILES
 	src/FindReplaceDialog.cpp
 	src/FitPropertyBrowser.cpp
 	src/FormulaDialogEditor.cpp
+	src/FitOptionsBrowser.cpp
 	src/FunctionBrowser.cpp
 	src/HintingLineEdit.cpp
 	src/InstrumentSelector.cpp
@@ -33,6 +34,7 @@ set ( SRC_FILES
 	src/SelectFunctionDialog.cpp
 	src/SelectWorkspacesDialog.cpp
 	src/SequentialFitDialog.cpp
+	src/SlicingAlgorithmDialog.cpp
 	src/SlitCalculator.cpp
 	src/StringDialogEditor.cpp
 	src/StringEditorFactory.cpp
@@ -55,6 +57,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/FindReplaceDialog.h
     inc/MantidQtMantidWidgets/FindDialog.h
     inc/MantidQtMantidWidgets/FitPropertyBrowser.h
+    inc/MantidQtMantidWidgets/FitOptionsBrowser.h
     inc/MantidQtMantidWidgets/FunctionBrowser.h
     inc/MantidQtMantidWidgets/HintingLineEdit.h
     inc/MantidQtMantidWidgets/CatalogSearch.h
@@ -81,6 +84,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/SelectFunctionDialog.h
     inc/MantidQtMantidWidgets/SelectWorkspacesDialog.h
     inc/MantidQtMantidWidgets/SequentialFitDialog.h
+    inc/MantidQtMantidWidgets/SlicingAlgorithmDialog.h
     inc/MantidQtMantidWidgets/SlitCalculator.h
     inc/MantidQtMantidWidgets/StringDialogEditor.h
     inc/MantidQtMantidWidgets/StringEditorFactory.h
@@ -113,6 +117,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/RenameParDialog.ui
     inc/MantidQtMantidWidgets/SelectFunctionDialog.ui
     inc/MantidQtMantidWidgets/SequentialFitDialog.ui
+    inc/MantidQtMantidWidgets/SlicingAlgorithmDialog.ui
     inc/MantidQtMantidWidgets/SlitCalculator.ui
     inc/MantidQtMantidWidgets/UserFunctionDialog.ui
     inc/MantidQtMantidWidgets/pqHelpWindow.ui

@@ -1,6 +1,8 @@
 #ifndef MANTID_MDEVENTS_REFLECTOMETRYTRANSFORMP_H_
 #define MANTID_MDEVENTS_REFLECTOMETRYTRANSFORMP_H_
 
+#include <cmath>
+
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/ReflectometryTransform.h"
 
@@ -12,20 +14,17 @@ class CalculateReflectometryPBase: Base class for p-type transforms.
 */
 class CalculateReflectometryPBase {
 protected:
-  const double to_radians_factor;
-  const double two_pi;
   double m_sinThetaInitial;
   double m_sinThetaFinal;
 
-  CalculateReflectometryPBase(const double &thetaIncident)
-      : to_radians_factor(3.14159265 / 180), two_pi(6.28318531) {
-    m_sinThetaInitial = sin(to_radians_factor * thetaIncident);
+  CalculateReflectometryPBase(const double &thetaIncident) {
+    m_sinThetaInitial = sin(M_PI / 180.0 * thetaIncident);
   }
   ~CalculateReflectometryPBase() {}
 
 public:
   void setThetaFinal(const double &thetaFinal) {
-    m_sinThetaFinal = sin(to_radians_factor * thetaFinal);
+    m_sinThetaFinal = sin(M_PI / 180.0 * thetaFinal);
   }
 };
 
@@ -38,7 +37,7 @@ public:
       : CalculateReflectometryPBase(thetaInitial) {}
   ~CalculateReflectometryDiffP(){};
   double execute(const double &wavelength) {
-    double wavenumber = two_pi / wavelength;
+    double wavenumber = 2 * M_PI / wavelength;
     double ki = wavenumber * m_sinThetaInitial;
     double kf = wavenumber * m_sinThetaFinal;
     return ki - kf;
@@ -54,7 +53,7 @@ public:
       : CalculateReflectometryPBase(thetaInitial) {}
   ~CalculateReflectometrySumP(){};
   double execute(const double &wavelength) {
-    double wavenumber = two_pi / wavelength;
+    double wavenumber = 2 * M_PI / wavelength;
     double ki = wavenumber * m_sinThetaInitial;
     double kf = wavenumber * m_sinThetaFinal;
     return ki + kf;

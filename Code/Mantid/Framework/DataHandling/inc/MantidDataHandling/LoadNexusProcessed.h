@@ -9,7 +9,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include "MantidNexus/NexusClasses.h"
-#include <nexus/NeXusFile.hpp>
+
+namespace NeXus {
+  class File;
+}
 
 namespace Mantid {
 
@@ -129,6 +132,13 @@ private:
                                            Mantid::NeXus::NXDouble &xbins,
                                            const double &progressStart,
                                            const double &progressRange);
+  API::MatrixWorkspace_sptr loadNonEventEntry(Mantid::NeXus::NXData &wksp_cls,
+                                              Mantid::NeXus::NXDouble &xbins,
+                                              const double &progressStart,
+                                              const double &progressRange,
+                                              const Mantid::NeXus::NXEntry &mtd_entry,
+                                              const int xlength,
+                                              std::string &workspaceType);
 
   /// Read the data from the sample group
   void readSampleGroup(Mantid::NeXus::NXEntry &mtd_entry,
@@ -182,7 +192,8 @@ private:
   void checkOptionalProperties(const std::size_t numberofspectra);
 
   /// calculates the workspace size
-  std::size_t calculateWorkspacesize(const std::size_t numberofspectra);
+  std::size_t calculateWorkspaceSize(const std::size_t numberofspectra,
+                                     bool gen_filtered_list=false);
 
   /// Accellerated multiperiod loading
   Mantid::API::Workspace_sptr doAccelleratedMultiPeriodLoading(
@@ -201,12 +212,17 @@ private:
   bool m_list;
   /// Flag set if interval of spectra to write is set
   bool m_interval;
-  /// The value of the spectrum_list property
-  std::vector<int64_t> m_spec_list;
+
   /// The value of the spectrum_min property
   int64_t m_spec_min;
   /// The value of the spectrum_max property
   int64_t m_spec_max;
+
+  /// The value of the spectrum_list property
+  std::vector<int64_t> m_spec_list;
+  /// list of spectra filtered by min/max/list, currently
+  /// used only when loading data into event_workspace
+  std::vector<int64_t> m_filtered_spec_idxs;
 
   // C++ interface to the NXS file
   ::NeXus::File *m_cppFile;
