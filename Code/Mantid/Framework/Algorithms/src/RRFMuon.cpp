@@ -113,10 +113,8 @@ double RRFMuon::unitConversionFactor(std::string uin, std::string uuser){
     if ( uuser == "MHz" ) {
       return 1.0;
     } else if ( uuser == "Gauss" ) {
-      std::cout << "FACTOR " << 2.0*M_PI*0.0001 << std::endl;
       return 2.0*M_PI*135.538817*0.0001;
     } else if ( uuser == "Mrad/s" ) {
-      std::cout << "FACTOR " << 2.0*M_PI << std::endl;
       return 2.0*M_PI;
     } else {
       throw std::runtime_error("Could not find units");
