@@ -38,11 +38,10 @@ Integrate3DEvents::Integrate3DEvents(std::vector<V3D> const &peak_q_list,
   this->radius = radius;
 
   int64_t hkl_key;
-  for (size_t i = 0; i < peak_q_list.size(); i++) {
-    hkl_key = getHklKey(peak_q_list[i]);
-
+  for (auto it = peak_q_list.begin(); it != peak_q_list.end(); ++it) {
+    hkl_key = getHklKey(*it);
     if (hkl_key != 0) // only save if hkl != (0,0,0)
-      peak_qs[hkl_key] = peak_q_list[i];
+      peak_qs[hkl_key] = *it;
   }
 }
 
@@ -343,11 +342,14 @@ void Integrate3DEvents::addEvent(V3D event_Q) {
   if (hkl_key == 0) // don't keep events associated with 0,0,0
     return;
 
-  V3D peak_q = peak_qs[hkl_key];
-  if (!peak_q.nullVector()) {
-    event_Q = event_Q - peak_q;
-    if (event_Q.norm() < radius) {
-      event_lists[hkl_key].push_back(event_Q);
+  auto peak_it = peak_qs.find(hkl_key);
+  if (peak_it != peak_qs.end())
+  {
+    if (!peak_it->second.nullVector()) {
+      event_Q = event_Q - peak_it->second;
+      if (event_Q.norm() < radius) {
+        event_lists[hkl_key].push_back(event_Q);
+      }
     }
   }
 }

@@ -1586,7 +1586,8 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
       format->addAction(actionShowAxisDialog);
       format->addAction(actionShowTitleDialog);
 
-      if (dynamic_cast<Graph3D*>(w)->coordStyle() == Qwt3D::NOCOORD)
+      auto g3d = dynamic_cast<Graph3D*>(w);
+      if (g3d && g3d->coordStyle() == Qwt3D::NOCOORD)
         actionShowAxisDialog->setEnabled(false);
 
       format->addSeparator();
@@ -2437,7 +2438,10 @@ void ApplicationWindow::change3DData(const QString& colName)
   if (!w)
     return;
 
-  dynamic_cast<Graph3D*>(w)->changeDataColumn(table(colName), colName);
+  auto g3d = dynamic_cast<Graph3D*>(w);
+  if (g3d)
+    g3d->changeDataColumn(table(colName), colName);
+
   emit modified();
 }
 
@@ -2725,9 +2729,8 @@ Matrix* ApplicationWindow::importImage(const QString& fileName)
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
   MdiSubWindow *w = activeWindow(MatrixWindow);
-  Matrix* m = NULL;
-  if (w){
-    m = dynamic_cast<Matrix*>(w);
+  Matrix* m = dynamic_cast<Matrix*>(w);
+  if (m){
     m->importImage(fn);
   } else {
     m = new Matrix(scriptingEnv(), image, "", this);
@@ -3793,6 +3796,9 @@ void ApplicationWindow::addErrorBars()
     return;
 
   MultiLayer* plot = dynamic_cast<MultiLayer*>(w);
+  if (!plot)
+    return;
+
   if (plot->isEmpty()){
     QMessageBox::warning(this,tr("MantidPlot - Warning"),//Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"
@@ -4372,6 +4378,8 @@ void ApplicationWindow::importASCII(const QStringList& files, int import_mode, c
 
     if (w->inherits("Table")){
       Table *t = dynamic_cast<Table*>(w);
+      if (!t)
+        return;
       t->importASCII(files[0], local_column_separator, local_ignored_lines, local_rename_columns,
           local_strip_spaces, local_simplify_spaces, local_import_comments,
           local_comment_string, import_read_only, Table::Overwrite, endLineChar);
@@ -4380,6 +4388,8 @@ void ApplicationWindow::importASCII(const QStringList& files, int import_mode, c
       t->notifyChanges();
     } else if (w->isA("Matrix")){
       Matrix *m = dynamic_cast<Matrix*>(w);
+      if (!m)
+        return;
       m->importASCII(files[0], local_column_separator, local_ignored_lines,
           local_strip_spaces, local_simplify_spaces, local_comment_string,
           Matrix::Overwrite, local_separators, endLineChar);
@@ -4598,7 +4608,9 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& filename, const
   QFile file(filename);
   QFileInfo fileInfo(filename);
 
-  file.open(QIODevice::ReadOnly);
+  if(!file.open(QIODevice::ReadOnly))
+    throw std::runtime_error("Couldn't open project file");
+
   QTextStream fileTS(&file);
   fileTS.setEncoding(QTextStream::UnicodeUTF8);
 
@@ -4621,6 +4633,9 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& filename, const
 
   //rename project folder item
   FolderListItem *item = dynamic_cast<FolderListItem *>(folders->firstChild());
+  if(!item)
+    throw std::runtime_error("Couldn't retrieve folder list items.");
+
   item->setText(0, fileInfo.baseName());
   item->folder()->setObjectName(fileInfo.baseName());
 
@@ -5031,11 +5046,6 @@ void ApplicationWindow::readSettings()
   /* ------------- end group General ------------------- */
 
   settings.beginGroup("/UserFunctions");
-  if (100*maj_version + 10*min_version + patch_version == 91 &&
-      settings.contains("/FitFunctions")){
-    saveFitFunctions(settings.value("/FitFunctions").toStringList());
-    settings.remove("/FitFunctions");
-  }
   surfaceFunc = settings.value("/SurfaceFunctions").toStringList();
   xFunctions = settings.value("/xFunctions").toStringList();
   yFunctions = settings.value("/yFunctions").toStringList();
@@ -5742,6 +5752,8 @@ void ApplicationWindow::exportGraph()
   Graph3D *plot3D = 0;
   if(w->isA("MultiLayer")){
     plot2D = dynamic_cast<MultiLayer*>(w);
+    if (!plot2D)
+      return;
     if (plot2D->isEmpty()){
       QMessageBox::critical(this, tr("MantidPlot - Export Error"),//Mantid
           tr("<h4>There are no plot layers available in this window!</h4>"));
@@ -5804,7 +5816,11 @@ void ApplicationWindow::exportLayer()
   if (!w)
     return;
 
-  Graph* g = dynamic_cast<MultiLayer*>(w)->activeGraph();
+  auto ml = dynamic_cast<MultiLayer*>(w);
+  if(!ml)
+    return;
+
+  Graph* g = ml->activeGraph();
   if (!g)
     return;
 
@@ -6299,7 +6315,7 @@ QStringList ApplicationWindow::columnsList(Table::PlotDesignation plotType)
       continue;
 
     Table *t = dynamic_cast<Table*>(w);
-    for (int i=0; i < t->numCols(); i++)
+    for (int i=0; t && i < t->numCols(); i++)
     {
       if (t->colPlotDesignation(i) == plotType || plotType == Table::All)
         list << QString(t->objectName()) + "_" + t->colLabel(i);
@@ -6519,10 +6535,12 @@ void ApplicationWindow::exportASCII(const QString& tableName, const QString& sep
     asciiDirPath = fi.dirPath(true);
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    if (w->inherits("Table"))
-      dynamic_cast<Table*>(w)->exportASCII(fname, sep, colNames, colComments, expSelection);
-    else if (w->isA("Matrix"))
-      (dynamic_cast<Matrix*>(w))->exportASCII(fname, sep, expSelection);
+    auto t = dynamic_cast<Table*>(w);
+    auto m = dynamic_cast<Matrix*>(w);
+    if (t)
+      t->exportASCII(fname, sep, colNames, colComments, expSelection);
+    else if (m)
+      m->exportASCII(fname, sep, expSelection);
     else if (w->isA("MantidMatrix"))
     {
       //call save ascii
@@ -7099,7 +7117,7 @@ void ApplicationWindow::showGeneralPlotDialog()
       g_log.error() << "Failed to open general plot dialog for multi layer plot";
       return;
     }
-    if (ml->layers())
+    if (ml && ml->layers())
       showPlotDialog();
   }
   else if (plot->isA("Graph3D"))
@@ -8398,29 +8416,32 @@ void ApplicationWindow::cutSelection()
   if (!m)
     return;
 
-  if (m->inherits("Table"))
-    dynamic_cast<Table*>(m)->cutSelection();
-  else if (m->isA("Matrix"))
-    dynamic_cast<Matrix*>(m)->cutSelection();
-  else if(m->isA("MultiLayer")){
-    MultiLayer* plot = dynamic_cast<MultiLayer*>(m);
-    if (!plot || plot->layers() == 0)
-      return;
+  auto t = dynamic_cast<Table*>(m);
+  auto mat = dynamic_cast<Matrix*>(m);
+  auto plot = dynamic_cast<MultiLayer*>(m);
+  auto note = dynamic_cast<Note*>(m);
 
+  if(t)
+    t->cutSelection();
+  else if (mat)
+    mat->cutSelection();
+  else if (plot && plot->layers())
+  {
     Graph* g = dynamic_cast<Graph*>(plot->activeGraph());
     if (!g)
       return;
 
     if (g->activeTool()){
-      if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector)
-        dynamic_cast<RangeSelectorTool*>(g->activeTool())->cutSelection();
+      auto rst = dynamic_cast<RangeSelectorTool*>(g->activeTool());
+      if (rst)
+        rst->cutSelection();
     } else {
       copyMarker();
       g->removeMarker();
     }
   }
-  else if (m->isA("Note"))
-    dynamic_cast<Note*>(m)->editor()->cut();
+  else if (note)
+    note->editor()->cut();
 
   emit modified();
 }
@@ -8696,6 +8717,9 @@ void ApplicationWindow::hideWindow(MdiSubWindow* w)
 void ApplicationWindow::hideWindow()
 {
   WindowListItem *it = dynamic_cast<WindowListItem*>(lv->currentItem());
+  if(!it)
+    return;
+
   MdiSubWindow *w = it->window();
   if (!w)
     return;
@@ -9671,8 +9695,15 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 
 void ApplicationWindow::customEvent(QEvent *e)
 {
+  if(!e)
+    return;
+
   if (e->type() == SCRIPTING_CHANGE_EVENT)
-    scriptingChangeEvent(dynamic_cast<ScriptingChangeEvent*>(e));
+  {
+    auto se = dynamic_cast<ScriptingChangeEvent*>(e);
+    if(se)
+      scriptingChangeEvent(se);
+  }
 }
 
 void ApplicationWindow::deleteSelectedItems()
@@ -11573,10 +11604,13 @@ void ApplicationWindow::analyzeCurve(Graph *g, Analysis operation, const QString
     QwtPlotCurve* c = g->curve(curveTitle);
     if (c){
       ScaleEngine *se = dynamic_cast<ScaleEngine *>(g->plotWidget()->axisScaleEngine(c->xAxis()));
-      if(se->type() == QwtScaleTransformation::Log10)
-        fitter = new LogisticFit (this, g);
-      else
-        fitter = new SigmoidalFit (this, g);
+      if(se)
+      {
+        if(se->type() == QwtScaleTransformation::Log10)
+          fitter = new LogisticFit (this, g);
+        else
+          fitter = new SigmoidalFit (this, g);
+      }
     }
   }
   break;
@@ -11682,8 +11716,10 @@ void ApplicationWindow::disableTools()
 
   QList<MdiSubWindow *> windows = windowsList();
   foreach(MdiSubWindow *w, windows){
-    if (w->isA("MultiLayer")){
-      QList<Graph *> layers = dynamic_cast<MultiLayer*>(w)->layersList();
+    auto ml = dynamic_cast<MultiLayer*>(w);
+    if (ml)
+    {
+      QList<Graph *> layers = ml->layersList();
       foreach(Graph *g, layers)
       g->disableTools();
     }
@@ -14587,7 +14623,11 @@ bool ApplicationWindow::deleteFolder(Folder *f)
     Folder *parent = projectFolder();
     if (currentFolder()){
       if (currentFolder()->parent())
-        parent = dynamic_cast<Folder*>(currentFolder()->parent());
+      {
+        auto newParent = dynamic_cast<Folder*>(currentFolder()->parent());
+        if(newParent)
+          parent = newParent;
+      }
     }
 
     folders->blockSignals(true);
@@ -15154,10 +15194,12 @@ void ApplicationWindow::goToColumn()
     if ( !ok )
       return;
 
-    if (w->inherits("Table"))
-      dynamic_cast<Table*>(w)->goToColumn(col);
-    else if (w->isA("Matrix"))
-      (dynamic_cast<Matrix*>(w))->goToColumn(col);
+    auto t = dynamic_cast<Table*>(w);
+    auto m = dynamic_cast<Matrix*>(w);
+    if (t)
+      t->goToColumn(col);
+    else if (m)
+      m->goToColumn(col);
   }
 }
 
