@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/CentroidPeaksMD2.cpp
 	src/CloneMDWorkspace.cpp
 	src/CompareMDWorkspaces.cpp
+	src/ConvertSpiceDataToRealSpace.cpp
 	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToDiffractionMDWorkspace.cpp
 	src/ConvertToDiffractionMDWorkspace2.cpp
@@ -35,7 +36,6 @@ set ( SRC_FILES
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
 	src/LessThanMD.cpp
-	src/LoadHFIRPDData.cpp
 	src/LoadILLAscii.cpp
 	src/LoadILLAsciiHelper.cpp
 	src/LoadMD.cpp
@@ -95,6 +95,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CentroidPeaksMD2.h
 	inc/MantidMDAlgorithms/CloneMDWorkspace.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
+	inc/MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h
 	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace2.h
@@ -120,7 +121,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
 	inc/MantidMDAlgorithms/LessThanMD.h
-	inc/MantidMDAlgorithms/LoadHFIRPDData.h
 	inc/MantidMDAlgorithms/LoadILLAscii.h
 	inc/MantidMDAlgorithms/LoadILLAsciiHelper.h
 	inc/MantidMDAlgorithms/LoadMD.h
@@ -181,6 +181,7 @@ set ( TEST_FILES
 	CloneMDWorkspaceTest.h
 	CompareMDWorkspacesTest.h
 	ConvertEventsToMDTest.h
+	ConvertSpiceDataToRealSpaceTest.h
 	ConvertToDetectorFaceMDTest.h
 	ConvertToDiffractionMDWorkspace2Test.h
 	ConvertToDiffractionMDWorkspaceTest.h
@@ -206,7 +207,6 @@ set ( TEST_FILES
 	InvalidParameterParserTest.h
 	InvalidParameterTest.h
 	LessThanMDTest.h
-	LoadHFIRPDDataTest.h
 	LoadMDTest.h
 	LoadSQWTest.h
 	LogarithmMDTest.h

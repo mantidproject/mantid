@@ -1,4 +1,4 @@
-#include "MantidMDAlgorithms/LoadHFIRPDData.h"
+#include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
 
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FileProperty.h"
@@ -18,22 +18,22 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 
-DECLARE_ALGORITHM(LoadHFIRPDData)
+DECLARE_ALGORITHM(ConvertSpiceDataToRealSpace)
 
 //------------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadHFIRPDData::LoadHFIRPDData() : m_instrumentName(""), m_numSpec(0) {}
+ConvertSpiceDataToRealSpace::ConvertSpiceDataToRealSpace() : m_instrumentName(""), m_numSpec(0) {}
 
 //------------------------------------------------------------------------------------------------
 /** Destructor
  */
-LoadHFIRPDData::~LoadHFIRPDData() {}
+ConvertSpiceDataToRealSpace::~ConvertSpiceDataToRealSpace() {}
 
 //----------------------------------------------------------------------------------------------
 /** Init
  */
-void LoadHFIRPDData::init() {
+void ConvertSpiceDataToRealSpace::init() {
   declareProperty(new WorkspaceProperty<TableWorkspace>("InputWorkspace", "",
                                                         Direction::Input),
                   "Input table workspace for data.");
@@ -86,7 +86,7 @@ void LoadHFIRPDData::init() {
 //----------------------------------------------------------------------------------------------
 /** Exec
  */
-void LoadHFIRPDData::exec() {
+void ConvertSpiceDataToRealSpace::exec() {
 
   // Process inputs
   DataObjects::TableWorkspace_sptr dataTableWS = getProperty("InputWorkspace");
@@ -135,7 +135,7 @@ void LoadHFIRPDData::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** Convert runs/pts from table workspace to a list of workspace 2D
- * @brief LoadHFIRPDData::convertToWorkspaces
+ * @brief ConvertSpiceDataToRealSpace::convertToWorkspaces
  * @param tablews
  * @param parentws
  * @param runstart
@@ -143,7 +143,7 @@ void LoadHFIRPDData::exec() {
  * @param vectimes
  * @return
  */
-std::vector<MatrixWorkspace_sptr> LoadHFIRPDData::convertToWorkspaces(
+std::vector<MatrixWorkspace_sptr> ConvertSpiceDataToRealSpace::convertToWorkspaces(
     DataObjects::TableWorkspace_sptr tablews,
     API::MatrixWorkspace_const_sptr parentws, Kernel::DateAndTime runstart,
     std::map<std::string, std::vector<double> > &logvecmap,
@@ -178,12 +178,12 @@ std::vector<MatrixWorkspace_sptr> LoadHFIRPDData::convertToWorkspaces(
 
 //------------------------------------------------------------------------------------------------
 /** Parse sample logs from table workspace and return with a set of vectors
- * @brief LoadHFIRPDData::parseSampleLogs
+ * @brief ConvertSpiceDataToRealSpace::parseSampleLogs
  * @param tablews
  * @param indexlist
  * @param logvecmap
  */
-void LoadHFIRPDData::parseSampleLogs(
+void ConvertSpiceDataToRealSpace::parseSampleLogs(
     DataObjects::TableWorkspace_sptr tablews,
     const std::map<std::string, size_t> &indexlist,
     std::map<std::string, std::vector<double> > &logvecmap) {
@@ -211,7 +211,7 @@ void LoadHFIRPDData::parseSampleLogs(
 
 //----------------------------------------------------------------------------------------------
 /** Load one run of data to a new workspace
- * @brief LoadHFIRPDData::loadRunToMatrixWS
+ * @brief ConvertSpiceDataToRealSpace::loadRunToMatrixWS
  * @param tablews
  * @param irow
  * @param parentws
@@ -223,7 +223,7 @@ void LoadHFIRPDData::parseSampleLogs(
  * @param duration
  * @return
  */
-MatrixWorkspace_sptr LoadHFIRPDData::loadRunToMatrixWS(
+MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
     DataObjects::TableWorkspace_sptr tablews, size_t irow,
     MatrixWorkspace_const_sptr parentws, Kernel::DateAndTime runstart,
     size_t ipt, size_t irotangle, size_t itime,
@@ -285,7 +285,7 @@ MatrixWorkspace_sptr LoadHFIRPDData::loadRunToMatrixWS(
 
 //----------------------------------------------------------------------------------------------
 /** Read table workspace's column information
- * @brief LoadHFIRPDData::readTableInfo
+ * @brief ConvertSpiceDataToRealSpace::readTableInfo
  * @param tablews
  * @param ipt
  * @param irotangle
@@ -293,7 +293,7 @@ MatrixWorkspace_sptr LoadHFIRPDData::loadRunToMatrixWS(
  * @param anodelist
  * @param samplenameindexmap
  */
-void LoadHFIRPDData::readTableInfo(
+void ConvertSpiceDataToRealSpace::readTableInfo(
     TableWorkspace_const_sptr tablews, size_t &ipt, size_t &irotangle,
     size_t &itime, std::vector<std::pair<size_t, size_t> > &anodelist,
     std::map<std::string, size_t> &samplenameindexmap) {
@@ -366,11 +366,11 @@ void LoadHFIRPDData::readTableInfo(
 //----------------------------------------------------------------------------------------------
 
 /** Convert to MD Event workspace
- * @brief LoadHFIRPDData::convertToMDEventWS
+ * @brief ConvertSpiceDataToRealSpace::convertToMDEventWS
  * @param vec_ws2d
  * @return
  */
-IMDEventWorkspace_sptr LoadHFIRPDData::convertToMDEventWS(
+IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::convertToMDEventWS(
     const std::vector<MatrixWorkspace_sptr> &vec_ws2d) {
   // Write the lsit of workspacs to a file to be loaded to an MD workspace
   Poco::TemporaryFile tmpFile;
@@ -453,7 +453,7 @@ IMDEventWorkspace_sptr LoadHFIRPDData::convertToMDEventWS(
  * @param vecmonitor
  * @return
  */
-IMDEventWorkspace_sptr LoadHFIRPDData::createMonitorMDWorkspace(
+IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
     const std::vector<MatrixWorkspace_sptr> vec_ws2d,
     const std::vector<double> &vecmonitor) {
   // Write the lsit of workspacs to a file to be loaded to an MD workspace
@@ -540,7 +540,7 @@ IMDEventWorkspace_sptr LoadHFIRPDData::createMonitorMDWorkspace(
  * @param logvecmap
  * @param vectimes
  */
-void LoadHFIRPDData::appendSampleLogs(
+void ConvertSpiceDataToRealSpace::appendSampleLogs(
     IMDEventWorkspace_sptr mdws,
     const std::map<std::string, std::vector<double> > &logvecmap,
     const std::vector<Kernel::DateAndTime> &vectimes) {
@@ -625,11 +625,11 @@ void LoadHFIRPDData::appendSampleLogs(
 
 //---------------------------------------------------------------------------------
 /** Add Experiment Info to the MDWorkspace.  Add 1+N ExperimentInfo
- * @brief LoadHFIRPDData::addExperimentInfos
+ * @brief ConvertSpiceDataToRealSpace::addExperimentInfos
  * @param mdws
  * @param vec_ws2d
  */
-void LoadHFIRPDData::addExperimentInfos(
+void ConvertSpiceDataToRealSpace::addExperimentInfos(
     API::IMDEventWorkspace_sptr mdws,
     const std::vector<API::MatrixWorkspace_sptr> vec_ws2d) {
   // Add N experiment info as there are N measurment points

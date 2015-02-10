@@ -1,5 +1,5 @@
-#ifndef MANTID_MDALGORITHMS_LOADHFIRPDDATA_H_
-#define MANTID_MDALGORITHMS_LOADHFIRPDDATA_H_
+#ifndef MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACE_H_
+#define MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACE_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -33,13 +33,13 @@ namespace MDAlgorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LoadHFIRPDData : public API::Algorithm {
+class DLLExport ConvertSpiceDataToRealSpace : public API::Algorithm {
 public:
-  LoadHFIRPDData();
-  virtual ~LoadHFIRPDData();
+  ConvertSpiceDataToRealSpace();
+  virtual ~ConvertSpiceDataToRealSpace();
 
   /// Algorithm's name
-  virtual const std::string name() const { return "LoadHFIRPDData"; }
+  virtual const std::string name() const { return "ConvertSpiceDataToRealSpace"; }
 
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
@@ -126,4 +126,4 @@ private:
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif  /* MANTID_MDALGORITHMS_LOADHFIRPDDATA_H_ */
+#endif  /* MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACE_H_ */

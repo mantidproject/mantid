@@ -150,7 +150,7 @@ then there will be :math:`M\times N` MDEvents listed in the MD file.
 Workflow
 --------
 
-The 2 input workspaces of algorithm LoadHFIRPDData are the output of 
+The 2 input workspaces of algorithm ConvertSpiceDataToRealSpace are the output of 
 algorithm LoadSpiceAscii. 
 Therefore, in order to load an HB2A or HB2B data from a SPICE file, 
 LoadSpiceAscii should be called first. 
@@ -172,7 +172,7 @@ Usage
         RunInfoWorkspace='Exp0231ParentWS')
 
   # load for HB2A 
-  LoadHFIRPDData(InputWorkspace='Exp0231DataTable', 
+  ConvertSpiceDataToRealSpace(InputWorkspace='Exp0231DataTable', 
         ParentWorkspace='Exp0231ParentWS', 
         OutputWorkspace='Exp0231DataMD', 
         OutputMonitorWorkspace='Exp0231MonitorMD')

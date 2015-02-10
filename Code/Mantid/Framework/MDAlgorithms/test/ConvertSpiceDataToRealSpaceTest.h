@@ -1,9 +1,9 @@
-#ifndef MANTID_MDALGORITHMS_LOADHFIRPDDATATEST_H_
-#define MANTID_MDALGORITHMS_LOADHFIRPDDATATEST_H_
+#ifndef MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACETEST_H_
+#define MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/LoadHFIRPDData.h"
+#include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
 #include "MantidDataHandling/LoadSpiceAscii.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -13,7 +13,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-using Mantid::MDAlgorithms::LoadHFIRPDData;
+using Mantid::MDAlgorithms::ConvertSpiceDataToRealSpace;
 using Mantid::DataHandling::LoadInstrument;
 using Mantid::DataHandling::LoadSpiceAscii;
 
@@ -21,16 +21,16 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 
-class LoadHFIRPDDataTest : public CxxTest::TestSuite {
+class ConvertSpiceDataToRealSpaceTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadHFIRPDDataTest *createSuite() { return new LoadHFIRPDDataTest(); }
-  static void destroySuite(LoadHFIRPDDataTest *suite) { delete suite; }
+  static ConvertSpiceDataToRealSpaceTest *createSuite() { return new ConvertSpiceDataToRealSpaceTest(); }
+  static void destroySuite(ConvertSpiceDataToRealSpaceTest *suite) { delete suite; }
 
   //-----------------------------------------------------------------------------------------------------
   void test_Init() {
-    LoadHFIRPDData loader;
+    ConvertSpiceDataToRealSpace loader;
     loader.initialize();
     TS_ASSERT(loader.isInitialized());
   }
@@ -95,7 +95,7 @@ public:
         spcloader.setProperty("IgnoreUnlistedLogs", false));
     spcloader.execute();
 
-    // Retrieve the workspaces as the inputs of LoadHFIRPDData
+    // Retrieve the workspaces as the inputs of ConvertSpiceDataToRealSpace
     ITableWorkspace_sptr datatablews =
         boost::dynamic_pointer_cast<ITableWorkspace>(
             AnalysisDataService::Instance().retrieve("DataTable"));
@@ -106,8 +106,8 @@ public:
             AnalysisDataService::Instance().retrieve("LogParentWS"));
     TS_ASSERT(parentlogws);
 
-    // Set up LoadHFIRPDData
-    LoadHFIRPDData loader;
+    // Set up ConvertSpiceDataToRealSpace
+    ConvertSpiceDataToRealSpace loader;
     loader.initialize();
 
     loader.setProperty("InputWorkspace", datatablews);
@@ -239,4 +239,4 @@ public:
 };
 
 
-#endif /* MANTID_MDALGORITHMS_LOADHFIRPDDATATEST_H_ */
+#endif /* MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACETEST_H_ */
