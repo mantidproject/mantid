@@ -36,7 +36,7 @@ using namespace MantidQt::MantidWidgets;
  */
 FindFilesThread::FindFilesThread(QObject *parent) :
   QThread(parent), m_error(), m_filenames(), m_valueForProperty(), m_text(),
-  m_algorithm(), m_property(), m_isForRunFiles(), m_isOptional()
+  m_algorithm(), m_property(), m_isForRunFiles(), m_isOptional(), m_defaultInstrumentName()
 {
 }
 
@@ -48,11 +48,12 @@ FindFilesThread::FindFilesThread(QObject *parent) :
  * @param isOptional        :: whether or not the files are optional.
  * @param algorithmProperty :: the algorithm and property to use as an alternative to FileFinder.  Optional.
  */
-void FindFilesThread::set(QString text, bool isForRunFiles, bool isOptional, const QString & algorithmProperty)
+void FindFilesThread::set(QString text, bool isForRunFiles, bool isOptional, const QString & defaultInstrumentName, const QString & algorithmProperty)
 {
   m_text = text.trimmed().toStdString();
   m_isForRunFiles = isForRunFiles;
   m_isOptional = isOptional;
+  m_defaultInstrumentName = defaultInstrumentName;
 
   QStringList elements = algorithmProperty.split("|");
 
@@ -102,7 +103,7 @@ void FindFilesThread::run()
     // Else if we are loading run files, then use findRuns.
     else if( m_isForRunFiles )
     {
-      m_filenames = fileSearcher.findRuns(m_text);
+      m_filenames = fileSearcher.findRuns(m_text, m_defaultInstrumentName.toStdString());
       m_valueForProperty = "";
       for(auto cit = m_filenames.begin(); cit != m_filenames.end(); ++cit)
       {
@@ -700,6 +701,33 @@ void MWRunFiles::setLiveAlgorithm(const IAlgorithm_sptr& monitorLiveData)
   m_monitorLiveData = monitorLiveData;
 }
 
+/**
+ * Gets the instrument currently set by the override property.
+ *
+ * If no override is set then the instrument set by default instrument configurtion
+ * option will be used and this function returns an empty string.
+ *
+ * @return Name of instrument, empty if not set
+ */
+QString MWRunFiles::getInstrumentOverride()
+{
+  return m_defaultInstrumentName;
+}
+
+/**
+ * Sets an instrument to fix the widget to.
+ *
+ * If an instrument name is geven then the widget will only look for files for that
+ * instrument, providing na empty string will remove this restriction and will search
+ * using the default instrument.
+ *
+ * @param instName Name of instrument, empty to disable override
+ */
+void MWRunFiles::setInstrumentOverride(const QString & instName)
+{
+  m_defaultInstrumentName = instName;
+}
+
 /** 
 * Set the file text.  This is different to setText in that it emits findFiles, as well
 * changing the state of the text box widget to "modified = true" which is a prerequisite
@@ -741,7 +769,7 @@ void MWRunFiles::findFiles()
 
     emit findingFiles();
     // Set the values for the thread, and start it running.
-    m_thread->set(m_uiForm.fileEditor->text(), isForRunFiles(), this->isOptional(), m_algorithmProperty);
+    m_thread->set(m_uiForm.fileEditor->text(), isForRunFiles(), this->isOptional(), m_defaultInstrumentName, m_algorithmProperty);
     m_thread->start();
   }
   else

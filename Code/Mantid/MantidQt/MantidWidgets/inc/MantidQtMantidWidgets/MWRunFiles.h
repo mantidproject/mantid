@@ -29,7 +29,7 @@ namespace MantidQt
       /// Constructor.
       FindFilesThread(QObject *parent = NULL);
       /// Set the various file-finding values / options.
-      void set(QString text, bool isForRunFiles, bool isOptional, const QString & algorithmProperty = "");
+      void set(QString text, bool isForRunFiles, bool isOptional, const QString & defaultInstrumentName = "", const QString & algorithmProperty = "");
 
       /// Returns the error string.  Empty if no error was caught.
       std::string error() const { return m_error; }
@@ -60,6 +60,7 @@ namespace MantidQt
       QString m_property;
       bool m_isForRunFiles;
       bool m_isOptional;
+      QString m_defaultInstrumentName;
     };
 
     /** 
@@ -104,9 +105,12 @@ namespace MantidQt
       Q_PROPERTY(QStringList fileExtensions READ getFileExtensions WRITE setFileExtensions)
       Q_PROPERTY(bool extsAsSingleOption READ extsAsSingleOption WRITE extsAsSingleOption)
       Q_PROPERTY(LiveButtonOpts liveButton READ liveButtonState WRITE liveButtonState)
+      Q_PROPERTY(QString instrumentOverride READ getInstrumentOverride WRITE setInstrumentOverride)
       Q_ENUMS(ButtonOpts)
       Q_ENUMS(LiveButtonOpts)
+
       friend class DataSelector;
+
     public:
       /// options for bringing up the load file dialog
       enum ButtonOpts
@@ -189,6 +193,10 @@ namespace MantidQt
       void setNumberOfEntries(int number);
       /// Inform the widget of a running instance of MonitorLiveData to be used in stopLiveListener()
       void setLiveAlgorithm(const boost::shared_ptr<Mantid::API::IAlgorithm>& monitorLiveData);
+      /// Gets the instrument currently fixed to
+      QString getInstrumentOverride();
+      /// Overrides the value of default instrument
+      void setInstrumentOverride(const QString & instName);
 
     signals:
       /// Emitted when the file text changes
@@ -281,6 +289,8 @@ namespace MantidQt
       QString m_fileFilter;
       /// Thread to allow asynchronous finding of files.
       FindFilesThread * m_thread;
+
+      QString m_defaultInstrumentName;
     };
   }
 }
