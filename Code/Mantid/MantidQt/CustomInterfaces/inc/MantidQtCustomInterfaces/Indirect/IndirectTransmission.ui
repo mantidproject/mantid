@@ -112,51 +112,10 @@
           <blue>255</blue>
          </color>
         </property>
+        <property name="showLegend" stdset="0">
+         <bool>true</bool>
+        </property>
        </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="loPreviewLegend">
-        <item>
-         <spacer name="horizontalSpacer_0">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLabel" name="lbPlotSample">
-          <property name="styleSheet">
-           <string notr="true">color: rgb(255, 0, 0);</string>
-          </property>
-          <property name="text">
-           <string>Sample</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lbPlotCan">
-          <property name="text">
-           <string>Background</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lbPlotTransmission">
-          <property name="styleSheet">
-           <string notr="true">color: rgb(0, 255, 0);</string>
-          </property>
-          <property name="text">
-           <string>Transmission</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
       </item>
      </layout>
     </widget>

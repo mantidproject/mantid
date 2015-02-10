@@ -107,9 +107,6 @@ namespace MantidWidgets
     /// If the widget was initialised
     bool m_init;
 
-    /// If the curve legend is shown
-    bool m_legendShown;
-
     /// The plot its self
     friend class RangeSelector;
     QwtPlot *m_plot;
@@ -127,6 +124,9 @@ namespace MantidWidgets
     QActionGroup *m_plotToolGroup;
     QActionGroup *m_xAxisTypeGroup;
     QActionGroup *m_yAxisTypeGroup;
+
+    /// Menu action for showing/hiding plot legend
+    QAction *m_showLegendAction;
 
     /// Layout for plot legend
     QHBoxLayout *m_legendLayout;

@@ -30,9 +30,9 @@ namespace
 PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent),
   m_removeObserver(*this, &PreviewPlot::handleRemoveEvent),
   m_replaceObserver(*this, &PreviewPlot::handleReplaceEvent),
-  m_init(init), m_legendShown(false), m_plot(new QwtPlot(this)), m_curves(),
+  m_init(init), m_plot(new QwtPlot(this)), m_curves(),
   m_magnifyTool(NULL), m_panTool(NULL), m_zoomTool(NULL),
-  m_contextMenu(new QMenu(this)), m_legendLayout(NULL)
+  m_contextMenu(new QMenu(this)), m_showLegendAction(NULL), m_legendLayout(NULL)
 {
   if(init)
   {
@@ -44,11 +44,12 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent)
     mainLayout->setSizeConstraint(QLayout::SetNoConstraint);
 
     m_plot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    mainLayout->addWidget(m_plot);
 
     m_legendLayout = new QHBoxLayout(mainLayout);
     m_legendLayout->addStretch();
     mainLayout->addItem(m_legendLayout);
+
+    mainLayout->addWidget(m_plot);
 
     this->setLayout(mainLayout);
   }
@@ -109,10 +110,10 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent)
   m_contextMenu->addSeparator();
 
   // Create the show legend option
-  QAction *showLegendAction = new QAction("Show Legend", m_contextMenu);
-  showLegendAction->setCheckable(true);
-  connect(showLegendAction, SIGNAL(toggled(bool)), this, SLOT(showLegend(bool)));
-  m_contextMenu->addAction(showLegendAction);
+  m_showLegendAction = new QAction("Show Legend", m_contextMenu);
+  m_showLegendAction->setCheckable(true);
+  connect(m_showLegendAction, SIGNAL(toggled(bool)), this, SLOT(showLegend(bool)));
+  m_contextMenu->addAction(m_showLegendAction);
 }
 
 
@@ -164,7 +165,7 @@ void PreviewPlot::setCanvasColour(const QColor & colour)
  */
 bool PreviewPlot::legendIsShown()
 {
-  return m_legendShown;
+  return m_showLegendAction->isChecked();
 }
 
 
@@ -258,11 +259,11 @@ void PreviewPlot::addSpectrum(const QString & curveName, const MatrixWorkspace_c
   curve->attach(m_plot);
 
   // Create the curve label
-  QLabel *label = new QLabel(curveName, this);
+  QLabel *label = new QLabel(curveName);
   QPalette palette = label->palette();
   palette.setColor(label->foregroundRole(), curveColour);
   label->setPalette(palette);
-  label->setVisible(m_legendShown);
+  label->setVisible(legendIsShown());
   m_legendLayout->addWidget(label);
 
   m_curves[ws] = qMakePair(curve, label);
@@ -306,6 +307,7 @@ void PreviewPlot::removeSpectrum(const MatrixWorkspace_const_sptr ws)
   {
     removeCurve(m_curves[ws].first);
     m_legendLayout->removeWidget(m_curves[ws].second);
+    delete m_curves[ws].second;
   }
 
   // Get the curve from the map
@@ -342,7 +344,7 @@ void PreviewPlot::removeSpectrum(const QString & wsName)
  */
 void PreviewPlot::showLegend(bool show)
 {
-  m_legendShown = show;
+  m_showLegendAction->setChecked(show);
 
   for(auto it = m_curves.begin(); it != m_curves.end(); ++it)
     it.value().second->setVisible(show);
@@ -428,6 +430,7 @@ void PreviewPlot::clear()
   {
     removeCurve(it.value().first);
     m_legendLayout->removeWidget(it.value().second);
+    delete it.value().second;
   }
 
   m_curves.clear();
