@@ -40,6 +40,21 @@ namespace
     }
     return ws;
   }
+
+  std::string getUnit(Projection& p, size_t nd)
+  {
+    return (p.getUnit(nd) == RLU ? "r" : "a");
+  }
+
+  void setUnit(Projection& p, size_t nd, std::string unit)
+  {
+    if(unit == "r")
+      p.setUnit(nd, RLU);
+    else if(unit == "a")
+      p.setUnit(nd, INV_ANG);
+    else
+      throw std::runtime_error("Invalid unit");
+  }
 }
 
 void export_Projection()
@@ -54,10 +69,10 @@ void export_Projection()
     .def("getNumDims", &Projection::getNumDims, "Returns the number of dimensions in the projection")
     .def("getOffset", &Projection::getOffset, "Returns the offset for the given dimension", args("dimension"))
     .def("getAxis", &Projection::getAxis, "Returns the axis for the given dimension", args("dimension"))
-    .def("getUnit", &Projection::getUnit, "Returns the unit for the given dimension", args("dimension"))
+    .def("getType", &getUnit, "Returns the unit for the given dimension", args("dimension"))
     .def("setOffset", &Projection::setOffset, "Sets the offset for the given dimension", args("dimension", "offset"))
     .def("setAxis", &Projection::setAxis, "Sets the axis for the given dimension", args("dimension", "axis"))
-    .def("setUnit", &Projection::setUnit, "Sets the unit for the given dimension", args("dimension", "unit"))
+    .def("setType", &setUnit, "Sets the unit for the given dimension", args("dimension", "unit"))
     .add_property("u",
         make_function(&Projection::U, return_internal_reference<>(), boost::mpl::vector2<VMD&, Projection&>()),
         make_function(boost::bind(&Projection::setAxis, _1, 0, _2), default_call_policies(), boost::mpl::vector3<void, Projection&, VMD>())
