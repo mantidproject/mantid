@@ -207,16 +207,12 @@ class RunDescriptor(PropDescriptor):
         new_name = self._build_ws_name()
         old_name = workspace.name()
         if new_name != old_name:
-            if new_name in mtd:
-               DeleteWorkspace(new_name)
-            RenameWorkspace(InputWorkspace=old_name,OutputWorkspace=new_name)
+           RenameWorkspace(InputWorkspace=old_name,OutputWorkspace=new_name)
 
-            old_mon_name = old_name + '_monitors'
-            new_mon_name = new_name + '_monitors'
-            if new_mon_name in mtd:
-               DeleteWorkspace(new_mon_name)
-            if old_mon_name in mtd:
-               RenameWorkspace(InputWorkspace=old_mon_name,OutputWorkspace=new_mon_name)
+           old_mon_name = old_name + '_monitors'
+           new_mon_name = new_name + '_monitors'
+           if old_mon_name in mtd:
+              RenameWorkspace(InputWorkspace=old_mon_name,OutputWorkspace=new_mon_name)
         self._ws_name = new_name
 #--------------------------------------------------------------------------------------------------------------------
     def get_file_ext(self):
