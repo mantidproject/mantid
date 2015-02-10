@@ -417,12 +417,6 @@ IMDEventWorkspace_sptr LoadHFIRPDData::convertToMDEventWS(
       // Increment on detector IDs
       detindex += nHist;
 
-      // Run time increment by time
-      /// Must make 'time' be specified by user.  A validity check is required
-      /// too
-      relruntime +=
-          atof(thisWorkspace->run().getProperty("time")->value().c_str());
-
       progress.report("Creating MD WS");
     }
     myfile.close();
@@ -511,12 +505,6 @@ IMDEventWorkspace_sptr LoadHFIRPDData::createMonitorMDWorkspace(
 
       // Increment on detector IDs
       detindex += nHist;
-
-      // Run time increment by time
-      /// Must make 'time' be specified by user.  A validity check is required
-      /// too
-      relruntime +=
-          atof(thisWorkspace->run().getProperty("time")->value().c_str());
 
       progress.report("Creating MD WS");
     }
