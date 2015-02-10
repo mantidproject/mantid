@@ -69,7 +69,7 @@ public:
     const MantidVec abcRadii = list_of(2)(3)(4);
     const MantidVec abcInnerRadii = list_of(5)(6)(7);
     const MantidVec abcOuterRadii = list_of(8)(9)(10);
-    const SpecialCoordinateSystem frame = HKL;
+    const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
 
