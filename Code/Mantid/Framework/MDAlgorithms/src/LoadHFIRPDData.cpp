@@ -211,15 +211,16 @@ void LoadHFIRPDData::parseSampleLogs(
 
 //----------------------------------------------------------------------------------------------
 /** Load one run of data to a new workspace
- * @brief LoadHFIRPDD::loadRunToMatrixWS
- * @param tablews :: input workspace
- * @param irow :: the row in workspace to load
- * @param parentws :: parent workspace with preset log
- * @param runstart :: run star time
- * @param irotangle :: column index of rotation angle
- * @param itime :: column index of duration
- * @param anodelist :: list of anodes
- * @param duration :: output of duration
+ * @brief LoadHFIRPDData::loadRunToMatrixWS
+ * @param tablews
+ * @param irow
+ * @param parentws
+ * @param runstart
+ * @param ipt
+ * @param irotangle
+ * @param itime
+ * @param anodelist
+ * @param duration
  * @return
  */
 MatrixWorkspace_sptr LoadHFIRPDData::loadRunToMatrixWS(
@@ -290,7 +291,7 @@ MatrixWorkspace_sptr LoadHFIRPDData::loadRunToMatrixWS(
  * @param irotangle
  * @param itime
  * @param anodelist
- * @param sampleindexlist
+ * @param samplenameindexmap
  */
 void LoadHFIRPDData::readTableInfo(
     TableWorkspace_const_sptr tablews, size_t &ipt, size_t &irotangle,
@@ -631,7 +632,6 @@ void LoadHFIRPDData::appendSampleLogs(
  * @brief LoadHFIRPDData::addExperimentInfos
  * @param mdws
  * @param vec_ws2d
- * @param init_runnumber
  */
 void LoadHFIRPDData::addExperimentInfos(
     API::IMDEventWorkspace_sptr mdws,
