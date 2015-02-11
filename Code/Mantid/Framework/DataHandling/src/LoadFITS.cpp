@@ -482,7 +482,8 @@ void LoadFITS::readFileToWorkspace(Workspace2D_sptr ws,
   if (fileErr)
     throw std::runtime_error("Error reading file; possibly invalid data.");
 
-  char *tmp = new char[fileInfo.bitsPerPixel / 8];
+  std::vector<char> buf(fileInfo.bitsPerPixel / 8);
+  char* tmp = &buf.front();
 
   for (size_t i = 0; i < fileInfo.axisPixelLengths[0]; ++i) {
     for (size_t j = 0; j < fileInfo.axisPixelLengths[1]; ++j) {

@@ -125,10 +125,10 @@ public:
 
   /// Set the special coordinate system.
   virtual void setCoordinateSystem(
-      const Mantid::API::SpecialCoordinateSystem coordinateSystem);
+      const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem);
 
   /// Get the special coordinate system.
-  virtual Mantid::API::SpecialCoordinateSystem
+  virtual Mantid::Kernel::SpecialCoordinateSystem
   getSpecialCoordinateSystem() const;
 
   // ====================================== ITableWorkspace Methods

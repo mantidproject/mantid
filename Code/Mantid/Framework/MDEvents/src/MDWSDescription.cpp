@@ -246,7 +246,7 @@ void MDWSDescription::checkWSCorresponsMDWorkspace(
 MDWSDescription::MDWSDescription(unsigned int nDimensions)
     : m_Wtransf(3, 3, true), m_RotMatrix(9, 0), m_buildingNewWorkspace(true),
       m_Emode(Kernel::DeltaEMode::Undefined), m_LorentzCorr(false),
-      m_coordinateSystem(Mantid::API::None) {
+      m_coordinateSystem(Mantid::Kernel::None) {
 
   this->resizeDimDescriptions(nDimensions);
   m_DimMin.assign(m_NDims, std::numeric_limits<double>::quiet_NaN());
@@ -425,12 +425,12 @@ MDWSDescription::getOrientedLattice(
 @param system : coordinate system.
 */
 void MDWSDescription::setCoordinateSystem(
-    const Mantid::API::SpecialCoordinateSystem system) {
+    const Mantid::Kernel::SpecialCoordinateSystem system) {
   m_coordinateSystem = system;
 }
 
 /// @return the special coordinate system if any.
-Mantid::API::SpecialCoordinateSystem
+Mantid::Kernel::SpecialCoordinateSystem
 MDWSDescription::getCoordinateSystem() const {
   return m_coordinateSystem;
 }

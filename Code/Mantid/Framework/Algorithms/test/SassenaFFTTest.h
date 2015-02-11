@@ -2,15 +2,12 @@
 #define MANTID_ALGORITHMS_SASSENAFFTTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <cmath>
 #include "MantidAlgorithms/SassenaFFT.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/SaveAscii.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 using namespace Mantid;
 

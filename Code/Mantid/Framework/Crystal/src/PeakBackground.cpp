@@ -26,7 +26,7 @@ PeakBackground::PeakBackground(IPeaksWorkspace_const_sptr peaksWS,
     m_coordFunction = &IPeak::getQLabFrame;
   } else if (m_mdCoordinates == QSample) {
     m_coordFunction = &IPeak::getQSampleFrame;
-  } else if (m_mdCoordinates == Mantid::API::HKL) {
+  } else if (m_mdCoordinates == Mantid::Kernel::HKL) {
     m_coordFunction = &IPeak::getHKL;
   } else {
     throw std::invalid_argument(

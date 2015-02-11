@@ -364,7 +364,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
 
   std::string dimensionNames[3] = {"Q_lab_x", "Q_lab_y", "Q_lab_z"};
   std::string dimensionUnits = "Angstroms^-1";
-  Mantid::API::SpecialCoordinateSystem coordinateSystem = Mantid::API::QLab;
+  Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = Mantid::Kernel::QLab;
   if (OutputDimensions == "Q (sample frame)") {
     // Set the matrix based on goniometer angles
     mat = m_inWS->mutableRun().getGoniometerMatrix();
@@ -374,7 +374,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
     dimensionNames[0] = "Q_sample_x";
     dimensionNames[1] = "Q_sample_y";
     dimensionNames[2] = "Q_sample_z";
-    coordinateSystem = Mantid::API::QSample;
+    coordinateSystem = Mantid::Kernel::QSample;
   } else if (OutputDimensions == "HKL") {
     // Set the matrix based on UB etc.
     Kernel::Matrix<double> ub =
@@ -391,7 +391,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
     dimensionNames[1] = "K";
     dimensionNames[2] = "L";
     dimensionUnits = "lattice";
-    coordinateSystem = Mantid::API::HKL;
+    coordinateSystem = Mantid::Kernel::HKL;
   }
   // Q in the lab frame is the default, so nothing special to do.
 

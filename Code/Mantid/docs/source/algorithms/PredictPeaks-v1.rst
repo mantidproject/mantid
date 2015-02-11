@@ -46,4 +46,9 @@ with the desired number of peaks. Use python or the GUI to enter the
 desired HKLs. If these are fraction (e.g. magnetic peaks) then make sure
 RoundHKL=False.
 
+Similar algorithms
+##################
+
+:ref:`algm-PredictFractionalPeaks`
+
 .. categories::
