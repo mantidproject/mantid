@@ -29,7 +29,7 @@ namespace MantidQt
       /// Constructor.
       FindFilesThread(QObject *parent = NULL);
       /// Set the various file-finding values / options.
-      void set(QString text, bool isForRunFiles, bool isOptional, const QString & defaultInstrumentName = "", const QString & algorithmProperty = "");
+      void set(QString text, bool isForRunFiles, bool isOptional, const QString & algorithmProperty = "");
 
       /// Returns the error string.  Empty if no error was caught.
       std::string error() const { return m_error; }
@@ -60,7 +60,6 @@ namespace MantidQt
       QString m_property;
       bool m_isForRunFiles;
       bool m_isOptional;
-      QString m_defaultInstrumentName;
     };
 
     /** 

@@ -20,6 +20,7 @@
 #include <Poco/File.h>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -36,7 +37,7 @@ using namespace MantidQt::MantidWidgets;
  */
 FindFilesThread::FindFilesThread(QObject *parent) :
   QThread(parent), m_error(), m_filenames(), m_valueForProperty(), m_text(),
-  m_algorithm(), m_property(), m_isForRunFiles(), m_isOptional(), m_defaultInstrumentName()
+  m_algorithm(), m_property(), m_isForRunFiles(), m_isOptional()
 {
 }
 
@@ -48,12 +49,11 @@ FindFilesThread::FindFilesThread(QObject *parent) :
  * @param isOptional        :: whether or not the files are optional.
  * @param algorithmProperty :: the algorithm and property to use as an alternative to FileFinder.  Optional.
  */
-void FindFilesThread::set(QString text, bool isForRunFiles, bool isOptional, const QString & defaultInstrumentName, const QString & algorithmProperty)
+void FindFilesThread::set(QString text, bool isForRunFiles, bool isOptional, const QString & algorithmProperty)
 {
   m_text = text.trimmed().toStdString();
   m_isForRunFiles = isForRunFiles;
   m_isOptional = isOptional;
-  m_defaultInstrumentName = defaultInstrumentName;
 
   QStringList elements = algorithmProperty.split("|");
 
@@ -103,7 +103,7 @@ void FindFilesThread::run()
     // Else if we are loading run files, then use findRuns.
     else if( m_isForRunFiles )
     {
-      m_filenames = fileSearcher.findRuns(m_text, m_defaultInstrumentName.toStdString());
+      m_filenames = fileSearcher.findRuns(m_text);
       m_valueForProperty = "";
       for(auto cit = m_filenames.begin(); cit != m_filenames.end(); ++cit)
       {
@@ -768,8 +768,38 @@ void MWRunFiles::findFiles()
     }
 
     emit findingFiles();
+
     // Set the values for the thread, and start it running.
-    m_thread->set(m_uiForm.fileEditor->text(), isForRunFiles(), this->isOptional(), m_defaultInstrumentName, m_algorithmProperty);
+    QString searchText = m_uiForm.fileEditor->text();
+
+    // If we have an override instrument then add it in appropriate places to the search text
+    if (!m_defaultInstrumentName.isEmpty())
+    {
+      // Regex to match a selection of run numbers as defined here: mantidproject.org/MultiFileLoading
+      // Also allowing spaces between delimiters as this seems to work fine
+      boost::regex runNumbers("([0-9]+)([:+-] ?[0-9]+)? ?(:[0-9]+)?", boost::regex::extended);
+      // Regex to match a list of run numbers delimited by commas
+      boost::regex runNumberList("([0-9]+)(, ?[0-9]+)*", boost::regex::extended);
+
+      // See if we can just prepend the instrument and be done
+      if (boost::regex_match(searchText.toStdString(), runNumbers))
+      {
+        searchText = m_defaultInstrumentName + searchText;
+      }
+      // If it is a list we need to prepend the instrument to all run numbers
+      else if (boost::regex_match(searchText.toStdString(), runNumberList))
+      {
+        QStringList runNumbers = searchText.split(",", QString::SkipEmptyParts);
+        QStringList newRunNumbers;
+
+        for(auto it = runNumbers.begin(); it != runNumbers.end(); ++it)
+          newRunNumbers << m_defaultInstrumentName + (*it).simplified();
+
+        searchText = newRunNumbers.join(",");
+      }
+    }
+
+    m_thread->set(searchText, isForRunFiles(), this->isOptional(), m_algorithmProperty);
     m_thread->start();
   }
   else
