@@ -26,10 +26,7 @@ if ( SPHINX_FOUND )
   set ( SPHINX_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source )
   set ( SPHINX_BUILD_DIR ${DOCS_BUILDDIR} )
   set ( SCREENSHOTS_DIR ${SPHINX_BUILD_DIR}/screenshots )
-
-  file ( GLOB DIAGRAMS_SRC "${CMAKE_CURRENT_SOURCE_DIR}/source/diagrams/*.dot" )
-  set ( DIAGRAMS_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/generate_diagrams.py )
-  set ( DIAGRAMS_OUT_DIR ${SPHINX_BUILD_DIR}/diagrams )
+  set ( DIAGRAMS_DIR ${SPHINX_BUILD_DIR}/diagrams )
 
   # targets
   set ( TARGET_PREFIX docs)
@@ -39,12 +36,6 @@ if ( SPHINX_FOUND )
   else ()
     set ( DOCS_RUNNER_EXE ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/MantidPlot )
   endif()
-
-  #Generate diagrams from .dot files
-  add_custom_target ( ${TARGET_PREFIX}-diagrams
-    COMMAND ${PYTHON_EXECUTABLE} ${DIAGRAMS_SCRIPT} -x ${DOT_EXECUTABLE} ${DIAGRAMS_OUT_DIR} ${DIAGRAMS_SRC}
-    SOURCES ${DIAGRAMS_SCRIPT} ${DIAGRAMS_SRC}
-    COMMENT "Generating .dot diagrams")
 
   # qthelp target
   if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
