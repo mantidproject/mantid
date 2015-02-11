@@ -4,6 +4,7 @@
 #include "MantidQtMantidWidgets/PreviewPlot.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 
 #include <Poco/Notification.h>
@@ -191,7 +192,7 @@ void PreviewPlot::setAxisRange(QPair<double, double> range, int axisID)
  *
  * @param ws Pointer to workspace
  */
-QPair<double, double> PreviewPlot::getCurveRange(const Mantid::API::MatrixWorkspace_const_sptr ws)
+QPair<double, double> PreviewPlot::getCurveRange(const Mantid::API::MatrixWorkspace_sptr ws)
 {
   if(!m_curves.contains(ws))
     throw std::runtime_error("Workspace not on preview plot.");
@@ -217,7 +218,7 @@ QPair<double, double> PreviewPlot::getCurveRange(const QString & wsName)
 {
   // Try to get a pointer from the name
   std::string wsNameStr = wsName.toStdString();
-  auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsName.toStdString());
+  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
 
   if(!ws)
     throw std::runtime_error(wsNameStr + " is not a MatrixWorkspace, not supported by PreviewPlot.");
@@ -234,7 +235,7 @@ QPair<double, double> PreviewPlot::getCurveRange(const QString & wsName)
  * @param specIndex Spectrum index to plot
  * @param curveColour Colour of curve to plot
  */
-void PreviewPlot::addSpectrum(const QString & curveName, const MatrixWorkspace_const_sptr ws,
+void PreviewPlot::addSpectrum(const QString & curveName, const MatrixWorkspace_sptr ws,
     const size_t specIndex, const QColor & curveColour)
 {
   // Create the curve
@@ -271,7 +272,7 @@ void PreviewPlot::addSpectrum(const QString & curveName, const QString & wsName,
 {
   // Try to get a pointer from the name
   std::string wsNameStr = wsName.toStdString();
-  auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsName.toStdString());
+  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
 
   if(!ws)
     throw std::runtime_error(wsNameStr + " is not a MatrixWorkspace, not supported by PreviewPlot.");
@@ -285,7 +286,7 @@ void PreviewPlot::addSpectrum(const QString & curveName, const QString & wsName,
  *
  * @param ws Pointer to workspace
  */
-void PreviewPlot::removeSpectrum(const MatrixWorkspace_const_sptr ws)
+void PreviewPlot::removeSpectrum(const MatrixWorkspace_sptr ws)
 {
   // Remove the curve object and legend label
   if(m_curves.contains(ws))
@@ -313,7 +314,7 @@ void PreviewPlot::removeSpectrum(const QString & wsName)
 {
   // Try to get a pointer from the name
   std::string wsNameStr = wsName.toStdString();
-  auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsNameStr);
+  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsNameStr);
 
   if(!ws)
     throw std::runtime_error(wsNameStr + " is not a MatrixWorkspace, not supported by PreviewPlot.");
@@ -434,6 +435,20 @@ void PreviewPlot::replot()
 
 
 /**
+ * Removes all curves and re-adds them.
+ */
+void PreviewPlot::hardReplot()
+{
+  QList<MatrixWorkspace_sptr> keys = m_curves.keys();
+
+  for(auto it = keys.begin(); it != keys.end(); ++it)
+    m_curves[*it].curve = addCurve(*it, m_curves[*it].wsIndex, m_curves[*it].colour);
+
+  replot();
+}
+
+
+/**
  * Handle a workspace being deleted from ADS.
  *
  * Removes it from the plot (via removeSpectrum).
@@ -485,7 +500,7 @@ void PreviewPlot::handleReplaceEvent(WorkspaceAfterReplaceNotification_ptr pNf)
  * @param curveColour Colour of curve
  * @return Pointer to new curve
  */
-QwtPlotCurve * PreviewPlot::addCurve(const MatrixWorkspace_const_sptr ws, const size_t specIndex,
+QwtPlotCurve * PreviewPlot::addCurve(MatrixWorkspace_sptr ws, const size_t specIndex,
    const QColor & curveColour)
 {
   // Check the spectrum index is in range
@@ -496,13 +511,27 @@ QwtPlotCurve * PreviewPlot::addCurve(const MatrixWorkspace_const_sptr ws, const 
   if(ws->readX(0).size() < 2)
     throw std::runtime_error("X axis is too small to generate a histogram plot.");
 
-  // Create the plot data
-  const bool logScale(false), distribution(false);
-  QwtWorkspaceSpectrumData wsData(*ws, static_cast<int>(specIndex), logScale, distribution);
-
   // Remove any existing curves
   if(m_curves.contains(ws))
     removeCurve(m_curves[ws].curve);
+
+  // Convert X axis to squared if needed
+  if(getAxisType(QwtPlot::xBottom) == "Squared")
+  {
+    Mantid::API::IAlgorithm_sptr convertXAlg = Mantid::API::AlgorithmManager::Instance().create("ConvertAxisByFormula");
+    convertXAlg->initialize();
+    convertXAlg->setChild(true);
+    convertXAlg->setLogging(false);
+    convertXAlg->setProperty("InputWorkspace", ws);
+    convertXAlg->setProperty("OutputWorkspace", "__PreviewPlot_Anon");
+    convertXAlg->setProperty("Axis", "X");
+    convertXAlg->setProperty("Formula", "x^2");
+    convertXAlg->execute();
+    ws = convertXAlg->getProperty("OutputWorkspace");
+  }
+
+  // Create the plot data
+  QwtWorkspaceSpectrumData wsData(*ws, static_cast<int>(specIndex), false, false);
 
   // Create the new curve
   QwtPlotCurve *curve = new QwtPlotCurve();
@@ -568,6 +597,31 @@ QList<QAction *> PreviewPlot::addOptionsToMenus(QString menuName, QActionGroup *
 
 
 /**
+ * Returns the type of axis scale specified for a giev axis.
+ *
+ * @param axisID ID of axis
+ * @return Axis type as string
+ */
+QString PreviewPlot::getAxisType(int axisID)
+{
+  QString axisType("Linear");
+  QAction * selectedAxisType = NULL;
+
+  if(axisID == QwtPlot::xBottom)
+    selectedAxisType = m_xAxisTypeGroup->checkedAction();
+  else if (axisID == QwtPlot::yLeft)
+    selectedAxisType = m_yAxisTypeGroup->checkedAction();
+  else
+    return QString();
+
+  if(selectedAxisType)
+    axisType = selectedAxisType->text();
+
+  return axisType;
+}
+
+
+/**
  * Handles displaying the context menu when a user right clicks on the plot.
  *
  * @param position Position at which to show menu
@@ -610,35 +664,44 @@ void PreviewPlot::handleViewToolSelect()
  */
 void PreviewPlot::handleAxisTypeSelect()
 {
-  QString xAxisType("Linear");
-  QString yAxisType("Linear");
-
-  QAction *selectedXAxisType = m_xAxisTypeGroup->checkedAction();
-  if(selectedXAxisType)
-    xAxisType = selectedXAxisType->text();
-
-  QAction *selectedYAxisType = m_yAxisTypeGroup->checkedAction();
-  if(selectedYAxisType)
-    yAxisType = selectedYAxisType->text();
+  // Determine the type of engine to use for each axis
+  QString xAxisType = getAxisType(QwtPlot::xBottom);
+  QString yAxisType = getAxisType(QwtPlot::yLeft);
 
   QwtScaleEngine *xEngine = NULL;
   QwtScaleEngine *yEngine = NULL;
 
+  // Get the X axis engine
   if(xAxisType == "Linear")
+  {
     xEngine = new QwtLinearScaleEngine();
+  }
   else if(xAxisType == "Logarithmic")
+  {
     xEngine = new QwtLog10ScaleEngine();
+  }
+  else if(xAxisType == "Squared")
+  {
+    xEngine = new QwtLinearScaleEngine();
+  }
 
+  // Get the Y axis engine
   if(yAxisType == "Linear")
+  {
     yEngine = new QwtLinearScaleEngine();
+  }
   else if(yAxisType == "Logarithmic")
+  {
     yEngine = new QwtLog10ScaleEngine();
+  }
 
+  // Set the axis scale engines
   if(xEngine)
     m_plot->setAxisScaleEngine(QwtPlot::xBottom, xEngine);
 
   if(yEngine)
     m_plot->setAxisScaleEngine(QwtPlot::yLeft, yEngine);
 
-  m_plot->replot();
+  // Update the plot
+  hardReplot();
 }

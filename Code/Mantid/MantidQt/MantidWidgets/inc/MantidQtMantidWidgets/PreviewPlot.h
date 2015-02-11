@@ -68,13 +68,13 @@ namespace MantidWidgets
 
     void setAxisRange(QPair<double, double> range, int axisID = QwtPlot::xBottom);
 
-    QPair<double, double> getCurveRange(const Mantid::API::MatrixWorkspace_const_sptr ws);
+    QPair<double, double> getCurveRange(const Mantid::API::MatrixWorkspace_sptr ws);
     QPair<double, double> getCurveRange(const QString & wsName);
 
-    void addSpectrum(const QString & curveName, const Mantid::API::MatrixWorkspace_const_sptr ws, const size_t specIndex = 0, const QColor & curveColour = QColor());
+    void addSpectrum(const QString & curveName, const Mantid::API::MatrixWorkspace_sptr ws, const size_t specIndex = 0, const QColor & curveColour = QColor());
     void addSpectrum(const QString & curveName, const QString & wsName, const size_t specIndex = 0, const QColor & curveColour = QColor());
 
-    void removeSpectrum(const Mantid::API::MatrixWorkspace_const_sptr ws);
+    void removeSpectrum(const Mantid::API::MatrixWorkspace_sptr ws);
     void removeSpectrum(const QString & wsName);
 
   signals:
@@ -89,6 +89,7 @@ namespace MantidWidgets
     void resizeX();
     void clear();
     void replot();
+    void hardReplot();
 
   private:
     /// Holds information about a plot curve
@@ -106,10 +107,12 @@ namespace MantidWidgets
     void handleRemoveEvent(Mantid::API::WorkspacePreDeleteNotification_ptr pNf);
     void handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
 
-    QwtPlotCurve * addCurve(const Mantid::API::MatrixWorkspace_const_sptr ws, const size_t specIndex, const QColor & curveColour);
+    QwtPlotCurve * addCurve(Mantid::API::MatrixWorkspace_sptr ws, const size_t specIndex, const QColor & curveColour);
     void removeCurve(QwtPlotCurve *curve);
 
     QList<QAction *> addOptionsToMenus(QString menuName, QActionGroup *group, QStringList items, QString defaultItem);
+
+    QString getAxisType(int axisID);
 
   private slots:
     void showContextMenu(QPoint position);
@@ -129,7 +132,7 @@ namespace MantidWidgets
     QwtPlot *m_plot;
 
     /// Map of curve key to plot info
-    QMap<Mantid::API::MatrixWorkspace_const_sptr, PlotCurveConfiguration> m_curves;
+    QMap<Mantid::API::MatrixWorkspace_sptr, PlotCurveConfiguration> m_curves;
 
     /// Plot manipulation tools
     QwtPlotMagnifier *m_magnifyTool;
