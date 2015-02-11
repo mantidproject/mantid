@@ -340,19 +340,45 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
  * @param username Username to use (should have authenticated before)
  */
 void SCARFTomoReconstruction::doQueryStatus(const std::string &username) {
-  try {
-    m_jobID = getPropertyValue("JobID");
-  } catch(std::runtime_error& /*e*/) {
-    g_log.error() << "You did not specify a JobID which is required "
-      "to query its status." << std::endl;
-    throw;
+  auto it = m_tokenStash.find(username);
+  if (m_tokenStash.end() == it) {
+    throw std::runtime_error("Job status query failed. You do not seem to be logged "
+                             "in. I do not remember this username. Please check "
+                             "your username.");
   }
 
-  progress(0, "Starting tomographic reconstruction job...");
+  progress(0, "Checking the status of jobs...");
 
-  // TODO: query about jobID and report
+  // Job submit, needs these headers:
+  // headers = {'Content-Type': 'application/xml', 'Cookie': token,
+  //            'Accept': ACCEPT_TYPE}
+  const std::string jobStatusPath = "webservice/pacclient/jobs?";
+  const std::string baseURL = it->second.m_url;
+  const std::string token = it->second.m_token_str;
 
-  progress(1.0, "Job created.");
+  InternetHelper session;
+  std::string httpsURL = baseURL + jobStatusPath;
+  g_log.debug() << "Sending HTTP GET request to: " << httpsURL << std::endl;
+  std::stringstream ss;
+  InternetHelper::StringToStringMap headers;
+  headers.insert(std::pair<std::string, std::string>("Content-Type",
+                                                     "application/xml"));
+  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  headers.insert(std::pair<std::string, std::string>("Cookie", token));
+  int code = session.sendRequest(httpsURL, ss, headers);
+  std::string resp = ss.str();
+  g_log.debug() << "Got HTTP code " << code << ", response: " <<  resp << std::endl;
+  if (Poco::Net::HTTPResponse::HTTP_OK == code) {
+    // TODO: still need to parse response string contents, look for a certain pattern
+    // in the response body. Maybe put it into an output TableWorkspace
+    g_log.notice() << "Queried job status with response: " << resp << std::endl;
+  } else {
+    throw std::runtime_error("Failed to obtain job status information through the "
+                             "web service at:" + httpsURL + ". Please check your "
+                             "username, credentials, and parameters.");
+  }
+
+  progress(1.0, "Status of jobs retrived.");
 }
 
 /**
