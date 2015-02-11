@@ -105,12 +105,22 @@ void InternetHelper::setupProxyOnSession(HTTPClientSession &session,
 void InternetHelper::createRequest(Poco::URI &uri) {
   m_request =
       new HTTPRequest(m_method, uri.getPathAndQuery(), HTTPMessage::HTTP_1_1);
-  if (!m_contentType.empty()) {
+
+  m_request->set("User-Agent", "MANTID");
+  // catch non-default Content-Type if given (example values: "text/plain",
+  //    "multipart/mixed; boundary=bqJky99mlBWa-ZuqjC53mG6EzbmlxB", etc.)
+  const std::string CTName = "Content-Type";
+  auto cti = m_headers.find(CTName);
+  if (m_headers.end() != cti) {
+    m_request->setContentType(cti->second);
+  } else if (!m_contentType.empty()) {
     m_request->setContentType(m_contentType);
   }
-  m_request->set("User-Agent", "MANTID");
+
   for (auto itHeaders = m_headers.begin(); itHeaders != m_headers.end();
        ++itHeaders) {
+    if (itHeaders->first == CTName) // don't put Content-Type a 2nd time
+      continue;
     m_request->set(itHeaders->first, itHeaders->second);
   }
 }
@@ -157,7 +167,8 @@ int InternetHelper::processRelocation(const HTTPResponse &response,
 * @param url the address to the network resource
 * @param responseStream The stream to fill with the reply on success
 * @param headers A optional key value pair map of any additional headers to
-* include in the request.
+* include in the request. A default 'Content-Type: application/json' is used
+* unless the 'Content-Type' key is included here with a different value.
 * @param method Generally GET (default) or POST.
 * @param body The request body to send.
 **/
@@ -373,7 +384,8 @@ The answer, will be inserted at the local_file_path.
 url_file.
 
 @param headers [optional] : A key value pair map of any additional headers to
-include in the request.
+include in the request. A default 'Content-Type: application/json' is used
+unless the 'Content-Type' key is included here with a different value.
 
 @exception Mantid::Kernel::Exception::InternetError : For any unexpected
 behaviour.
