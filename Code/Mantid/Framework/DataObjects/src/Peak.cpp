@@ -1,6 +1,7 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/NoShape.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
@@ -495,25 +496,32 @@ void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
   m_Col = -1;
   m_BankName = "None";
 
+
   // The q-vector direction of the peak is = goniometer * ub * hkl_vector
   V3D q = QLabFrame;
 
-  /* The incident neutron wavevector is in the +Z direction, ki = 1/wl (in z
-   * direction).
+  /* The incident neutron wavevector is along the beam direction, ki = 1/wl (usually z, but referenceframe is definitive).
    * In the inelastic convention, q = ki - kf.
-   * The final neutron wavector kf = -qx in x; -qy in y; and (-qz+1/wl) in z.
+   * The final neutron wavector kf = -qx in x; -qy in y; and (-q.beam_dir+1/wl) in beam direction.
    * AND: norm(kf) = norm(ki) = 2*pi/wavelength
-   * THEREFORE: 1/wl = norm(q)^2 / (2*qz)
+   * THEREFORE: 1/wl = norm(q)^2 / (2*q.beam_dir)
    */
   double norm_q = q.norm();
+  if(!this->m_inst)
+  {
+      throw std::invalid_argument("Setting QLab without an instrument would lead to an inconsistent state for the Peak");
+  }
+  boost::shared_ptr<const ReferenceFrame> refFrame = this->m_inst->getReferenceFrame();
+  const V3D refBeamDir = refFrame->vecPointingAlongBeam();
+  const double qBeam = q.scalar_prod(refBeamDir);
 
   if (norm_q == 0.0)
     throw std::invalid_argument("Peak::setQLabFrame(): Q cannot be 0,0,0.");
-  if (q.Z() == 0.0)
+  if ( qBeam == 0.0)
     throw std::invalid_argument(
-        "Peak::setQLabFrame(): Q cannot be 0 in the Z (beam) direction.");
+        "Peak::setQLabFrame(): Q cannot be 0 in the beam direction.");
 
-  double one_over_wl = (norm_q * norm_q) / (2.0 * q.Z());
+  double one_over_wl = (norm_q * norm_q) / (2.0 * qBeam);
   double wl = (2.0 * M_PI) / one_over_wl;
   if (wl < 0.0) {
     std::ostringstream mess;
@@ -522,16 +530,16 @@ void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
     throw std::invalid_argument(mess.str());
   }
 
-  // This is the scattered direction, kf = (-qx, -qy, 1/wl-qz)
-  V3D beam = q * -1.0;
-  beam.setZ(one_over_wl - q.Z());
-  beam.normalize();
 
   // Save the wavelength
   this->setWavelength(wl);
 
+  V3D detectorDir = q * -1.0;
+  detectorDir[refFrame->pointingAlongBeam()] = one_over_wl - q.Z();
+  detectorDir.normalize();
+
   // Use the given detector distance to find the detector position.
-  detPos = samplePos + beam * detectorDistance;
+  detPos = samplePos + detectorDir * detectorDistance;
 }
 
 /** After creating a peak using the Q in the lab frame,

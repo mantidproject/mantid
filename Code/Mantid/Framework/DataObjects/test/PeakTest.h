@@ -356,8 +356,12 @@ public:
       peak.setQLabFrame(qLab);
       auto detector = peak.getDetector();
 
-      TS_ASSERT_EQUALS(1, detector->getID());
-      TS_ASSERT_EQUALS(detectorPos, detector->getPos())
+      TSM_ASSERT("No detector", detector);
+      if(detector)
+      {
+          TS_ASSERT_EQUALS(1, detector->getID());
+          TS_ASSERT_EQUALS(detectorPos, detector->getPos());
+      }
 
       // Test that wavelengths aggree firstly.
       //TS_ASSERT_EQUALS(x[0], peak.getWavelength());
