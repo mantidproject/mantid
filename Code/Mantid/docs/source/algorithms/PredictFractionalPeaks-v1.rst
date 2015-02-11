@@ -39,3 +39,5 @@ Usage
 .. testoutput:: TopazExample
 
    Number of fractional peaks: 117
+
+.. categories::

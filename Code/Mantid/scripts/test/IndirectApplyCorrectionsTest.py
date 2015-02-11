@@ -10,7 +10,7 @@ def setup_corrections_test(using_can=False):
     def _decorator(test_case):
         def _inner_decorator(self, *args, **kwargs):
             self._corrections_workspace = self.make_corrections_workspace(using_can)
-            self._reference_corrections = CloneWorkspace(self._corrections_workspace, 
+            self._reference_corrections = CloneWorkspace(self._corrections_workspace,
                                                          OutputWorkspace='ref_corrections')
             self._using_corrections = True
             return test_case(self, *args, **kwargs)
@@ -21,14 +21,14 @@ def setup_can_test(test_case):
     """ Decorator to setup a test to use a can workspace """
     def _decorator(self, *args, **kwargs):
         self._can_workspace = self.make_can_workspace()
-        self._reference_can = CloneWorkspace(self._can_workspace, 
+        self._reference_can = CloneWorkspace(self._can_workspace,
                                              OutputWorkspace='ref_can')
         return test_case(self, *args, **kwargs)
     return _decorator
 
 
 class ApplyCorrectionsTests(unittest.TestCase):
-    
+
     def setUp(self):
         self._sample_workspace = self.make_sample_workspace()
         self._can_workspace = ''
@@ -36,11 +36,11 @@ class ApplyCorrectionsTests(unittest.TestCase):
         self._can_geometry = 'cyl'
         self._using_corrections = False
 
-        self._kwargs = {'Verbose':True, 'RebinCan':False, 'ScaleOrNotToScale':False, 
-                  'factor':1, 'Save':False, 'PlotResult':'None', 'PlotContrib':False}
+        self._kwargs = {'RebinCan':False, 'ScaleOrNotToScale':False,
+                        'factor':1, 'Save':False, 'PlotResult':'None', 'PlotContrib':False}
 
         self._saved_workspaces = []
-        
+
         self._reference_sample = CloneWorkspace(self._sample_workspace, OutputWorkspace='ref_sample')
         self._reference_can = None
         self._reference_corrections = None
@@ -104,7 +104,7 @@ class ApplyCorrectionsTests(unittest.TestCase):
         self.assert_input_workspaces_not_modified()
         self.assert_workspace_was_saved(output_workspaces['result_workspace'])
         self.assert_workspace_was_saved(output_workspaces['reduced_workspace'])
-        
+
         #append saved workspaces to list for cleanup
         self._saved_workspaces.append(output_workspaces['result_workspace'])
         self._saved_workspaces.append(output_workspaces['reduced_workspace'])
@@ -122,7 +122,7 @@ class ApplyCorrectionsTests(unittest.TestCase):
     @setup_corrections_test
     def test_with_corrections_no_can(self):
         output_workspaces = self.run_apply_corrections()
-        
+
         self.assert_workspaces_exist(output_workspaces)
         self.assert_workspaces_have_correct_types(output_workspaces)
         self.assert_workspaces_have_correct_units(output_workspaces)
@@ -155,14 +155,14 @@ class ApplyCorrectionsTests(unittest.TestCase):
                             "Result workspace should be a group workspace")
             result_workspace = mtd[output_workspaces['result_workspace']]
             self.assertEquals(1, result_workspace.size())
-            
+
             for workspace in result_workspace.getNames():
                 self.assertTrue(isinstance(mtd[workspace], MatrixWorkspace),
                                 "%s should be a matrix workspace" % workspace)
 
     def assert_units_match(self, workspace, unit_id, axis=0):
         unit = mtd[workspace].getAxis(axis).getUnit()
-        self.assertEquals(unit_id, unit.unitID(), 
+        self.assertEquals(unit_id, unit.unitID(),
                           "The units of axis %d in workspace %s do not match. (%s != %s)"
                           % (axis, workspace, unit_id, unit.unitID()))
 
@@ -171,13 +171,13 @@ class ApplyCorrectionsTests(unittest.TestCase):
         file_name = workspace + '.nxs'
         file_path = os.path.join(working_directory, file_name)
 
-        self.assertTrue(os.path.exists(file_path), 
+        self.assertTrue(os.path.exists(file_path),
                         "%s does not exist in the default save directory." % file_name)
-        self.assertTrue(os.path.isfile(file_path), 
+        self.assertTrue(os.path.isfile(file_path),
                         "%s should be a file but it is not" % file_name)
 
     def assert_input_workspaces_not_modified(self):
-        
+
         result = CheckWorkspacesMatch(self._reference_sample, self._sample_workspace)
         self.assertEquals("Success!", result)
 
@@ -197,7 +197,7 @@ class ApplyCorrectionsTests(unittest.TestCase):
     def make_dummy_workspace(self, function, output_name, x_unit='DeltaE', num_spectra=1, bin_width=0.001):
         """ Create a dummy workspace that looks like IRIS QENS data"""
         dummy_workspace = CreateSampleWorkspace(Random=True, XMin=0, XMax=1, BinWidth=bin_width, XUnit=x_unit,
-                                                Function="User Defined", UserDefinedFunction=function, 
+                                                Function="User Defined", UserDefinedFunction=function,
                                                 OutputWorkspace=output_name)
         ScaleX(dummy_workspace, -0.5, Operation="Add", OutputWorkspace=output_name)
         dummy_workspace = CropWorkspace(dummy_workspace, StartWorkspaceIndex=0, EndWorkspaceIndex=num_spectra-1,
@@ -225,30 +225,30 @@ class ApplyCorrectionsTests(unittest.TestCase):
         return can
 
     def make_corrections_workspace(self, using_can=False):
-        """ 
-        Creates a dummy workspace that looks like a workspace of corrections output from the 
+        """
+        Creates a dummy workspace that looks like a workspace of corrections output from the
         indirect calculate corrections routine. The naming convention must match and uses the formalism
         for absoprtion corrections outlined in Paalman and Pings (1962).
         """
         workspace_names = []
-        ass_workspace = self.make_dummy_workspace("name=LinearBackground, A0=0.922948, A1=0;", 
+        ass_workspace = self.make_dummy_workspace("name=LinearBackground, A0=0.922948, A1=0;",
                                                   x_unit='Wavelength', output_name='corr_ass')
         AddSampleLog(ass_workspace, LogName='sample_shape', LogType='String', LogText='cylinder')
 
         if using_can:
             workspace_names.append(ass_workspace)
 
-            assc_workspace = self.make_dummy_workspace("name=LinearBackground, A0=0.921233, A1=-0.007078;", 
+            assc_workspace = self.make_dummy_workspace("name=LinearBackground, A0=0.921233, A1=-0.007078;",
                                                        x_unit='Wavelength', output_name='corr_assc')
             AddSampleLog(assc_workspace, LogName='sample_shape', LogType='String', LogText='cylinder')
             workspace_names.append(assc_workspace)
 
-            acsc_workspace = self.make_dummy_workspace("name=LinearBackground, A0=0.933229, A1=-0.010020;", 
+            acsc_workspace = self.make_dummy_workspace("name=LinearBackground, A0=0.933229, A1=-0.010020;",
                                                        x_unit='Wavelength', output_name='corr_acsc')
             AddSampleLog(acsc_workspace, LogName='sample_shape', LogType='String', LogText='cylinder')
             workspace_names.append(acsc_workspace)
 
-            acc_workspace = self.make_dummy_workspace("name=LinearBackground, A0=0.995029, A1=-0.010694;", 
+            acc_workspace = self.make_dummy_workspace("name=LinearBackground, A0=0.995029, A1=-0.010694;",
                                                       x_unit='Wavelength', output_name='corr_acc')
             AddSampleLog(acc_workspace, LogName='sample_shape', LogType='String', LogText='cylinder')
             workspace_names.append(acc_workspace)
@@ -279,7 +279,7 @@ class ApplyCorrectionsTests(unittest.TestCase):
         elif self._corrections_workspace != '':
             mode = 'Corrected'
         else:
-            mode = 'Subtract_1' 
+            mode = 'Subtract_1'
 
         workspace_name_stem = 'irs1_graphite002_%s' % mode
 
@@ -287,7 +287,7 @@ class ApplyCorrectionsTests(unittest.TestCase):
             'reduced_workspace': workspace_name_stem + '_red',
             'rqw_workspace': workspace_name_stem + '_rqw',
         }
-        
+
         if self._can_workspace != '':
             output_workspaces['result_workspace'] = workspace_name_stem + '_Result'
 

@@ -86,6 +86,17 @@ public:
     TS_ASSERT( A.equals(B, 0.15) );
   }
 
+  void test_not_equal()
+  {
+      Matrix<double> A(3, 3, true);
+      Matrix<double> B(3, 3, true);
+
+      A[0][0] = -1.0;
+
+      TS_ASSERT(A != B);
+      TS_ASSERT(!(A == B));
+  }
+
   /**
   Check that we can swap rows and columns
   */

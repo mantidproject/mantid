@@ -29,7 +29,7 @@ namespace DataObjects
    * @brief Creational method
    * @return new NoShape object
    */
-  PeakShape* PeakNoShapeFactory::create(const std::string &) const
+  Mantid::Geometry::PeakShape* PeakNoShapeFactory::create(const std::string &) const
   {
       return new NoShape;
   }

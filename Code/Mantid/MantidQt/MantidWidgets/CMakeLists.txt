@@ -11,6 +11,7 @@ set ( SRC_FILES
 	src/FindReplaceDialog.cpp
 	src/FitPropertyBrowser.cpp
 	src/FormulaDialogEditor.cpp
+	src/FitOptionsBrowser.cpp
 	src/FunctionBrowser.cpp
 	src/HintingLineEdit.cpp
 	src/InstrumentSelector.cpp
@@ -32,7 +33,8 @@ set ( SRC_FILES
 	src/ScriptEditor.cpp
 	src/SelectFunctionDialog.cpp
 	src/SelectWorkspacesDialog.cpp
-	src/SequentialFitDialog.cpp
+        src/SequentialFitDialog.cpp
+	src/SlicingAlgorithmDialog.cpp
 	src/StringDialogEditor.cpp
 	src/StringEditorFactory.cpp
 	src/UserFunctionDialog.cpp
@@ -54,6 +56,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/FindReplaceDialog.h
     inc/MantidQtMantidWidgets/FindDialog.h
     inc/MantidQtMantidWidgets/FitPropertyBrowser.h
+    inc/MantidQtMantidWidgets/FitOptionsBrowser.h
     inc/MantidQtMantidWidgets/FunctionBrowser.h
     inc/MantidQtMantidWidgets/HintingLineEdit.h
     inc/MantidQtMantidWidgets/CatalogSearch.h
@@ -80,6 +83,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/SelectFunctionDialog.h
     inc/MantidQtMantidWidgets/SelectWorkspacesDialog.h
     inc/MantidQtMantidWidgets/SequentialFitDialog.h
+    inc/MantidQtMantidWidgets/SlicingAlgorithmDialog.h
     inc/MantidQtMantidWidgets/StringDialogEditor.h
     inc/MantidQtMantidWidgets/StringEditorFactory.h
     inc/MantidQtMantidWidgets/UserFunctionDialog.h
@@ -111,6 +115,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/RenameParDialog.ui
     inc/MantidQtMantidWidgets/SelectFunctionDialog.ui
     inc/MantidQtMantidWidgets/SequentialFitDialog.ui
+    inc/MantidQtMantidWidgets/SlicingAlgorithmDialog.ui
     inc/MantidQtMantidWidgets/UserFunctionDialog.ui
     inc/MantidQtMantidWidgets/pqHelpWindow.ui
 )
@@ -145,6 +150,10 @@ add_definitions ( -DIN_MANTIDQT_MANTIDWIDGETS -DQT_QTPROPERTYBROWSER_IMPORT )
 # Use a precompiled header where they are supported
 enable_precompiled_headers( inc/MantidQtMantidWidgets/PrecompiledHeader.h ALL_SRC )
 add_library ( MantidWidgets ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( MantidWidgets PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif ()
 
 target_link_libraries ( MantidWidgets MantidQtAPI QtPropertyBrowser 
     ${QT_LIBRARIES} ${QWT_LIBRARIES} 

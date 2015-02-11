@@ -392,7 +392,7 @@ public:
   void clearMDMasking();
 
   /// @return the special coordinate system used if any.
-  virtual Mantid::API::SpecialCoordinateSystem
+  virtual Mantid::Kernel::SpecialCoordinateSystem
   getSpecialCoordinateSystem() const;
 
   //=====================================================================================

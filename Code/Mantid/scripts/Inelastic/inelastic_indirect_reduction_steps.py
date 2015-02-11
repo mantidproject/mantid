@@ -986,14 +986,11 @@ class Naming(ReductionStep):
         try:
             short_name = config.getFacility().instrument(inst).shortName().lower()
         except RuntimeError:
-            original_facility = config['default.facility']
             for facility in config.getFacilities():
-                config['default.facility'] = facility.name()
                 try:
-                    short_name = config.getFacility().instrument(inst).shortName().lower()
+                    short_name = facility.instrument(inst).shortName().lower()
                 except RuntimeError:
                     pass
-            config['default.facility'] = original_facility
 
         if short_name == '':
             raise RuntimeError('Cannot find instrument "%s" in any facility' % str(inst))

@@ -51,6 +51,16 @@ if [[ $(uname) == 'Darwin' ]] && [[ ${JOB_NAME} != *clang* ]]; then
 fi
 
 ###############################################################################
+# Set up the location for the local object store outside of the build and
+# source tree, which can be shared by multiple builds.
+# It defaults to the parent directory of the workspace but can be overridden
+# by setting the MANTID_DATA_STORE environment variable.
+###############################################################################
+if [ -z "$MANTID_DATA_STORE" ]; then
+  export MANTID_DATA_STORE=$(dirname $WORKSPACE)
+fi
+
+###############################################################################
 # Check whether this is a clean build (must have 'clean' in the job name)
 ###############################################################################
 if [[ ${JOB_NAME} == *clean* ]]; then
@@ -104,7 +114,7 @@ fi
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DDOCS_HTML=ON ${PACKAGINGVARS} ../Code/Mantid"
+$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON ${PACKAGINGVARS} ../Code/Mantid"
 
 ###############################################################################
 # Coverity build should exit early

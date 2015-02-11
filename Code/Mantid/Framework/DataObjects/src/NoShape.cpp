@@ -51,9 +51,9 @@ int NoShape::algorithmVersion() const
  */
 std::string NoShape::shapeName() const { return "none"; }
 
-API::SpecialCoordinateSystem NoShape::frame() const
+Kernel::SpecialCoordinateSystem NoShape::frame() const
 {
-    return API::None;
+    return Kernel::None;
 }
 
 

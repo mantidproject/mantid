@@ -270,6 +270,7 @@ int OPJFile::ParseFormatOld() {
 
   if((debug=fopen("opjfile.log","w")) == NULL ) {
     printf("Could not open log file!\n");
+    fclose(f); //f is still open, so close it before returning
     return -1;
   }
 

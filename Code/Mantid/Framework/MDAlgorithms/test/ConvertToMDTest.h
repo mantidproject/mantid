@@ -109,7 +109,7 @@ void testExecNoQ()
     checkHistogramsHaveBeenStored("WS3DNoQ");
 
     auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS3DNoQ");
-    TS_ASSERT_EQUALS(Mantid::API::None, outWS->getSpecialCoordinateSystem());
+    TS_ASSERT_EQUALS(Mantid::Kernel::None, outWS->getSpecialCoordinateSystem());
 
     AnalysisDataService::Instance().remove("WS3DNoQ");
 }
@@ -137,7 +137,7 @@ void testExecModQ()
     checkHistogramsHaveBeenStored("WS3DmodQ",7000,6489.5591101441796,7300.7539989122024);
 
     auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS3DmodQ");
-    TS_ASSERT_EQUALS(Mantid::API::None, outWS->getSpecialCoordinateSystem());
+    TS_ASSERT_EQUALS(Mantid::Kernel::None, outWS->getSpecialCoordinateSystem());
 
     AnalysisDataService::Instance().remove("WS3DmodQ");
 }
@@ -166,7 +166,7 @@ void testExecQ3D()
     checkHistogramsHaveBeenStored("WS5DQ3D");
 
     auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS5DQ3D");
-    TS_ASSERT_EQUALS(Mantid::API::HKL, outWS->getSpecialCoordinateSystem());
+    TS_ASSERT_EQUALS(Mantid::Kernel::HKL, outWS->getSpecialCoordinateSystem());
 
     AnalysisDataService::Instance().remove("WS5DQ3D");
 }
