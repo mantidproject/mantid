@@ -251,7 +251,6 @@ namespace CustomInterfaces
       resAlg->setProperty("BackgroundRange", background.toStdString());
       resAlg->setProperty("ScaleFactor", m_uiForm.spScale->value());
       resAlg->setProperty("Smooth", m_uiForm.ckSmoothResolution->isChecked());
-      resAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
       resAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
       resAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
 

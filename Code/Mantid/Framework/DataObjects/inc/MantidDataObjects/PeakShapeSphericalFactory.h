@@ -5,10 +5,11 @@
 #include "MantidDataObjects/PeakShapeFactory.h"
 
 namespace Mantid {
-namespace DataObjects {
-
+namespace Geometry {
 // Forward declare
 class PeakShape;
+}
+namespace DataObjects {
 
 /** PeakShapeSphericalFactory : Factory for spherical peak shapes for
  de-serializing from JSON.
@@ -41,7 +42,7 @@ public:
   /// Destructor
   virtual ~PeakShapeSphericalFactory();
   /// Make product
-  PeakShape *create(const std::string &source) const;
+  Mantid::Geometry::PeakShape *create(const std::string &source) const;
   /// Set a successor should this factory be unsuitable
   void setSuccessor(PeakShapeFactory_const_sptr successorFactory);
 

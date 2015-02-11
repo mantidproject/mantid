@@ -28,7 +28,7 @@ PeakTransform_sptr makePeakTransform(IMDWorkspace const *const mdWS) {
     peakTransformFactory = boost::make_shared<PeakTransformQLabFactory>();
   } else if (mdCoordinates == QSample) {
     peakTransformFactory = boost::make_shared<PeakTransformQSampleFactory>();
-  } else if (mdCoordinates == Mantid::API::HKL) {
+  } else if (mdCoordinates == Mantid::Kernel::HKL) {
     peakTransformFactory = boost::make_shared<PeakTransformHKLFactory>();
   }
   const std::string xDim = mdWS->getDimension(0)->getName();

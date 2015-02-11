@@ -19,6 +19,7 @@
 using namespace Mantid;
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 using Mantid::Kernel::VMD;
 using Mantid::Geometry::MDHistoDimension;
 using Mantid::Geometry::MDImplicitFunction;

@@ -31,6 +31,11 @@
 #include <cmath>
 #include <Poco/Path.h>
 #include <Poco/StringTokenizer.h>
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidDataObjects/PeakNoShapeFactory.h"
+#include "MantidDataObjects/PeakShapeSphericalFactory.h"
+#include "MantidDataObjects/PeakShapeEllipsoidFactory.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -1132,26 +1137,30 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
       // Read shape information
       using namespace Mantid::DataObjects;
 
-      PeakShapeFactory_sptr peakFactory = boost::make_shared<PeakShapeSphericalFactory>();
-      peakFactory->setSuccessor(boost::make_shared<PeakNoShapeFactory>());
+      PeakShapeFactory_sptr peakFactoryEllipsoid = boost::make_shared<PeakShapeEllipsoidFactory>();
+      PeakShapeFactory_sptr peakFactorySphere = boost::make_shared<PeakShapeSphericalFactory>();
+      PeakShapeFactory_sptr peakFactoryNone = boost::make_shared<PeakNoShapeFactory>();
+
+      peakFactoryEllipsoid->setSuccessor(peakFactorySphere);
+      peakFactorySphere->setSuccessor(peakFactoryNone);
 
       NXInfo info = nx_tw.getDataSetInfo(str.c_str());
       NXChar data = nx_tw.openNXChar(str.c_str());
 
       const int maxShapeJSONLength = info.dims[1];
       data.load();
-      for (int r = 0; r < numberPeaks; r++) {
+      for (int i = 0; i < numberPeaks; ++i) {
 
         // iR = peak row number
-        auto startPoint = data() + (maxShapeJSONLength * r);
+        auto startPoint = data() + (maxShapeJSONLength * i);
         std::string shapeJSON(startPoint, startPoint + maxShapeJSONLength);
         boost::trim_right(shapeJSON);
 
         // Make the shape
-        PeakShape* peakShape = peakFactory->create(shapeJSON);
+        Mantid::Geometry::PeakShape* peakShape = peakFactoryEllipsoid->create(shapeJSON);
 
         // Set the shape
-        peakWS->getPeak(r).setPeakShape(peakShape);
+        peakWS->getPeak(i).setPeakShape(peakShape);
 
       }
     }

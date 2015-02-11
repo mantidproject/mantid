@@ -273,7 +273,7 @@ void test_getFriendlyName()
 void test_getCoordinateSystem()
 {
   PeakTransformHKL transform;
-  TS_ASSERT_EQUALS(Mantid::API::HKL, transform.getCoordinateSystem())
+  TS_ASSERT_EQUALS(Mantid::Kernel::HKL, transform.getCoordinateSystem())
 }
 
 };

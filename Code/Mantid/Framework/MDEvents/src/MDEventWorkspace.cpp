@@ -786,7 +786,7 @@ Set the special coordinate system (if any) to use.
 @param coordinateSystem : Special coordinate system to use.
 */
 TMDE(void MDEventWorkspace)::setCoordinateSystem(
-    const Mantid::API::SpecialCoordinateSystem coordinateSystem) {
+    const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem) {
   // If there isn't an experiment info, create one.
   if (this->getNumExperimentInfo() == 0) {
     ExperimentInfo_sptr expInfo =
@@ -801,9 +801,9 @@ TMDE(void MDEventWorkspace)::setCoordinateSystem(
 Get the special coordinate system (if any) to use.
 @return Special coordinate system if any.
 */
-TMDE(Mantid::API::SpecialCoordinateSystem
+TMDE(Mantid::Kernel::SpecialCoordinateSystem
          MDEventWorkspace)::getSpecialCoordinateSystem() const {
-  Mantid::API::SpecialCoordinateSystem result = None;
+  Mantid::Kernel::SpecialCoordinateSystem result = None;
   try {
     auto nInfos = this->getNumExperimentInfo();
     if (nInfos > 0) {

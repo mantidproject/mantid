@@ -55,9 +55,9 @@ PeakTransformHKL::transformPeak(const Mantid::API::IPeak &peak) const {
 /**
  * @return Special coordinate system associated with this type of transform.
  */
-Mantid::API::SpecialCoordinateSystem
+Mantid::Kernel::SpecialCoordinateSystem
 PeakTransformHKL::getCoordinateSystem() const {
-  return Mantid::API::HKL;
+  return Mantid::Kernel::HKL;
 }
 }
 }

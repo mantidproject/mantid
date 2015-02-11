@@ -75,6 +75,10 @@ add_library ( CustomDialogs ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 # Set the name of the generated library
 set_target_properties ( CustomDialogs PROPERTIES OUTPUT_NAME MantidQtCustomDialogs )
 
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( CustomDialogs PROPERTIES INSTALL_RPATH "@loader_path/../../../Contents/MacOS")
+endif () 
+
 target_link_libraries ( CustomDialogs MantidQtAPI MantidWidgets )
 
 ###########################################################################

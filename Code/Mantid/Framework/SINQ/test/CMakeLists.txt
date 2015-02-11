@@ -14,6 +14,8 @@ if ( CXXTEST_FOUND )
     cxxtest_add_test ( PSISINQTest ${TEST_FILES} )
     target_link_libraries ( PSISINQTest SINQ  CurveFitting ${MANTIDLIBS} MDEvents )
   endif()
+  # Test data
+  add_dependencies ( PSISINQTest StandardTestData )
 
   add_dependencies ( FrameworkTests PSISINQTest )
   # Add to the 'FrameworkTests' group in VS

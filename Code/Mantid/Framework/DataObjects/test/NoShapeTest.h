@@ -9,9 +9,8 @@
 #include <jsoncpp/json/json.h>
 #include "MantidDataObjects/NoShape.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 
-using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::DataObjects::NoShape;
 
@@ -28,7 +27,7 @@ public:
     NoShape shape;
 
 
-    TS_ASSERT_EQUALS(Mantid::API::None, shape.frame());
+    TS_ASSERT_EQUALS(Mantid::Kernel::None, shape.frame());
     TS_ASSERT_EQUALS(std::string(), shape.algorithmName());
     TS_ASSERT_EQUALS(-1, shape.algorithmVersion());
   }

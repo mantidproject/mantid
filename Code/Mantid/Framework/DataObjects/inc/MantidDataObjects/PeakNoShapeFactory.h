@@ -7,12 +7,13 @@
 
 namespace Mantid
 {
+namespace Geometry
+{
+// Forward declaration
+class PeakShape;
+}
 namespace DataObjects
 {
-
-   // Forward declaration
-   class PeakShape;
-
   /** PeakNoShapeFactory : Factory method for types of NoShape
 
     Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
@@ -43,7 +44,7 @@ namespace DataObjects
     // Destructor
     virtual ~PeakNoShapeFactory();
     // Factory method
-    PeakShape *create(const std::string &source) const;
+    Mantid::Geometry::PeakShape *create(const std::string &source) const;
     // Set successor. No shape will not delegate.
     void setSuccessor(boost::shared_ptr<const PeakShapeFactory> successorFactory);
   private:
