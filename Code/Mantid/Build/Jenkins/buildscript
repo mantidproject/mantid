@@ -4,9 +4,10 @@
 #
 # Notes:
 #
-# WORKSPACE, JOB_NAME & NODE_LABEL are environment variables that are set by
-# Jenkins. The last one corresponds to any labels set on a slave.
-# BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each slave.
+# WORKSPACE, JOB_NAME, NODE_LABEL GIT_COMMIT are environment variables that 
+# are set by Jenkins. The last one corresponds to any labels set on a slave.
+# BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each
+# slave.
 ###############################################################################
 
 ###############################################################################
@@ -15,6 +16,9 @@
 cmake --version
 echo "SHA1=${sha1}"
 
+###############################################################################
+# Setup clang
+###############################################################################
 if [[ ${JOB_NAME} == *clang* ]]; then
   # Assuming we are using the clang compiler
   echo "Using clang/llvm compiler."
@@ -61,22 +65,37 @@ if [ -z "$MANTID_DATA_STORE" ]; then
 fi
 
 ###############################################################################
-# Check whether this is a clean build (must have 'clean' in the job name)
+# Check job requirements from the name
 ###############################################################################
 if [[ ${JOB_NAME} == *clean* ]]; then
   CLEANBUILD=true
+  BUILDPKG=true
+fi
+if [[ ${JOB_NAME} == *pull_requests* ]]; then
+  BUILDPKG=true
+fi
+
+###############################################################################
+# Clean build directory if required
+###############################################################################
+if [[ "$CLEANBUILD" == true ]]; then
   # Removing the build directory entirely guarantees a completely clean build
   rm -rf $WORKSPACE/build
+fi
 
-  # Set some variables relating to the linux packages created from clean builds
+###############################################################################
+# Packaging options
+###############################################################################
+if [[ "$BUILDPKG" == true ]]; then
+  # Set some variables relating to the linux packages
   if [[ $(uname) != 'Darwin' ]]; then
     # Use different suffix for linux builds
-    if [[ ${JOB_NAME} == *master* ]]; then
-      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidnightly -DCPACK_PACKAGE_SUFFIX=nightly -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
-    elif [[ ${JOB_NAME} == *develop* ]]; then
-      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable -DCPACK_PACKAGE_SUFFIX=unstable -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
-    elif [[ ${JOB_NAME} == *release* ]]; then
+    if [[ ${JOB_NAME} == *release* ]]; then
       PACKAGINGVARS="-DENVVARS_ON_INSTALL=True -DCPACK_SET_DESTDIR=ON -DPACKAGE_DOCS=ON"
+    elif [[ ${JOB_NAME} == *master* ]]; then
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidnightly -DCPACK_PACKAGE_SUFFIX=nightly -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
+    else
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable -DCPACK_PACKAGE_SUFFIX=unstable -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
     fi
   else
     # Mac packaging
@@ -99,6 +118,12 @@ fi
 ###############################################################################
 [ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
 cd $WORKSPACE/build
+
+###############################################################################
+# Clean up any artifacts from last build so that if it fails
+# they don't get archived again
+###############################################################################
+rm -f *.dmg *.rpm *.deb *.tar.gz
 
 ###############################################################################
 ## Check the required build configuration
@@ -148,38 +173,23 @@ rm -f ~/.mantid/Mantid.user.properties
 $SCL_ON_RHEL6 "ctest -j$BUILD_THREADS --schedule-random --output-on-failure"
 
 ###############################################################################
-# Documentation
-# Build Qt help on all platforms for a clean build so that it can be packaged
+# Create the install kit if required. This includes building the Qt help
+# documentation
 ###############################################################################
-if [[ "$CLEANBUILD" == true ]]; then
+if [[ "$BUILDPKG" == true ]]; then
   # Workaround so that the target can find the properties file
   # CMake doesn't easily allow environment variables on custom targets
   if [[ $(uname) == 'Darwin' ]]; then
     export MANTIDPATH=$PWD/bin
   fi
   $SCL_ON_RHEL6 "cmake --build . --target docs-qthelp"
-fi
-
-###############################################################################
-# Create the install kit if this is a clean or non-Mac build
-###############################################################################
-rm -f *.dmg *.rpm *.deb *.tar.gz
-# Always build a package on linux
-if [[ $(uname) != 'Darwin' ]]; then
   $SCL_ON_RHEL6 "cpack"
-fi
 
-if [[ "$CLEANBUILD" == true ]]; then
-  # On the Mac, only create a package for clean builds
-  if [[ $(uname) == 'Darwin' ]]; then
-    $SCL_ON_RHEL6 "cpack"
-  fi
-
-  # We could build the source tarball anywhere, but we choose to do it on RHEL6
-  # We also parcel up the documentation into a tar file that is easier to move around
+  # Source tarball on clean build (arbitrarily choose rhel6)
+  # Also, parcel up the documentation into a tar file that is easier to move around
   # and labelled by the commit id it was built with. This assumes the Jenkins git plugin
   # has set the GIT_COMMIT environment variable
-  if [[ "$ON_RHEL6" == true ]]; then
+  if [[ "$CLEANBUILD" == true && "$ON_RHEL6" == true ]]; then
     $SCL_ON_RHEL6 "cmake --build . --target docs-html"
     tar -cjf mantiddocs-g${GIT_COMMIT:0:7}.tar.bz2 --exclude='*.buildinfo' --exclude="MantidProject.q*" docs/html
     # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree
