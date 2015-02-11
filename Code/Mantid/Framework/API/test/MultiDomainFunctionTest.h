@@ -81,7 +81,7 @@ public:
     auto jP = iP / np;
     if ( jY != jP ) off_diag += value;
   }
-  double get(size_t iY, size_t iP){
+  double get(size_t, size_t){
     return 0.0;
   }
 };
