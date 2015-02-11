@@ -31,9 +31,9 @@ class DiagramDirective(BaseDirective):
     """
     Adds a diagram from a dot source file
 
-    It requires a DIAGRAMS_DIR environment variable to be set to the
-    directory where a diagram should be generated. If it is not set then
-    a RuntimeError occurs
+    It requires DIAGRAMS_DIR and DOT_EXECUTABLE environment variables to be set to the
+    directory where a diagram should be generated and where the dot program may be found,
+    respectively. If they are not set then a RuntimeError occurs
     """
 
     required_arguments, optional_arguments = 1, 0
@@ -61,7 +61,7 @@ class DiagramDirective(BaseDirective):
         try:
             dot_executable = os.environ["DOT_EXECUTABLE"]
         except:
-            raise RuntimeError("The '.. diagram::' directive requires a DIAGRAMS_DIR environment variable to be set.")
+            raise RuntimeError("The '.. diagram::' directive requires a DOT_EXECUTABLE environment variable to be set.")
 
         #Make sure we have an output directory
         if not os.path.exists(out_dir):
