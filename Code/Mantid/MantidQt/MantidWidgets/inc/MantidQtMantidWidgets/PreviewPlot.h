@@ -1,6 +1,8 @@
 #ifndef MANTIDQTMANTIDWIDGETS_PREVIEWPLOT_H_
 #define MANTIDQTMANTIDWIDGETS_PREVIEWPLOT_H_
 
+#include "ui_PreviewPlot.h"
+
 #include "WidgetDllOption.h"
 #include "MantidQtAPI/MantidWidget.h"
 
@@ -120,6 +122,8 @@ namespace MantidWidgets
     void handleAxisTypeSelect();
 
   private:
+    Ui::PreviewPlot m_uiForm;
+
     /// Poco Observers for ADS Notifications
     Poco::NObserver<PreviewPlot, Mantid::API::WorkspacePreDeleteNotification> m_removeObserver;
     Poco::NObserver<PreviewPlot, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
@@ -129,7 +133,6 @@ namespace MantidWidgets
 
     /// The plot its self
     friend class RangeSelector;
-    QwtPlot *m_plot;
 
     /// Map of curve key to plot info
     QMap<Mantid::API::MatrixWorkspace_sptr, PlotCurveConfiguration> m_curves;
@@ -147,9 +150,6 @@ namespace MantidWidgets
 
     /// Menu action for showing/hiding plot legend
     QAction *m_showLegendAction;
-
-    /// Layout for plot legend
-    QHBoxLayout *m_legendLayout;
 
   };
 

@@ -119,6 +119,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/SequentialFitDialog.ui
     inc/MantidQtMantidWidgets/SlicingAlgorithmDialog.ui
     inc/MantidQtMantidWidgets/UserFunctionDialog.ui
+    inc/MantidQtMantidWidgets/PreviewPlot.ui
     inc/MantidQtMantidWidgets/pqHelpWindow.ui
 )
 

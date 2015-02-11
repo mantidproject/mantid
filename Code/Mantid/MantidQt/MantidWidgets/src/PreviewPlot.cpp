@@ -31,44 +31,35 @@ namespace
 PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent),
   m_removeObserver(*this, &PreviewPlot::handleRemoveEvent),
   m_replaceObserver(*this, &PreviewPlot::handleReplaceEvent),
-  m_init(init), m_plot(new QwtPlot(this)), m_curves(),
+  m_init(init), m_curves(),
   m_magnifyTool(NULL), m_panTool(NULL), m_zoomTool(NULL),
-  m_contextMenu(new QMenu(this)), m_showLegendAction(NULL), m_legendLayout(NULL)
+  m_contextMenu(new QMenu(this)), m_showLegendAction(NULL)
 {
+  m_uiForm.setupUi(this);
+  m_uiForm.loLegend->addStretch();
+
   if(init)
   {
     AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
     ads.notificationCenter.addObserver(m_removeObserver);
     ads.notificationCenter.addObserver(m_replaceObserver);
-
-    QBoxLayout *mainLayout = new QVBoxLayout(this);
-    mainLayout->setSizeConstraint(QLayout::SetNoConstraint);
-
-    m_plot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    mainLayout->addWidget(m_plot);
-
-    m_legendLayout = new QHBoxLayout(mainLayout);
-    m_legendLayout->addStretch();
-    mainLayout->addItem(m_legendLayout);
-
-    this->setLayout(mainLayout);
   }
 
   // Setup plot manipulation tools
   m_zoomTool = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft,
-      QwtPicker::DragSelection | QwtPicker::CornerToCorner, QwtPicker::AlwaysOff, m_plot->canvas());
+      QwtPicker::DragSelection | QwtPicker::CornerToCorner, QwtPicker::AlwaysOff, m_uiForm.plot->canvas());
   m_zoomTool->setEnabled(false);
 
-  m_panTool = new QwtPlotPanner(m_plot->canvas());
+  m_panTool = new QwtPlotPanner(m_uiForm.plot->canvas());
   m_panTool->setEnabled(false);
 
-  m_magnifyTool = new QwtPlotMagnifier(m_plot->canvas());
+  m_magnifyTool = new QwtPlotMagnifier(m_uiForm.plot->canvas());
   m_magnifyTool->setMouseButton(Qt::NoButton);
   m_magnifyTool->setEnabled(false);
 
   // Handle showing the context menu
-  m_plot->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(m_plot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
+  m_uiForm.plot->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(m_uiForm.plot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
 
   // Create the plot tool list for context menu
   m_plotToolGroup = new QActionGroup(m_contextMenu);
@@ -141,10 +132,7 @@ PreviewPlot::~PreviewPlot()
  */
 QColor PreviewPlot::canvasColour()
 {
-  if(m_plot)
-    return m_plot->canvasBackground();
-
-  return QColor();
+  return m_uiForm.plot->canvasBackground();
 }
 
 
@@ -155,8 +143,7 @@ QColor PreviewPlot::canvasColour()
  */
 void PreviewPlot::setCanvasColour(const QColor & colour)
 {
-  if(m_plot)
-    m_plot->setCanvasBackground(QBrush(colour));
+  m_uiForm.plot->setCanvasBackground(QBrush(colour));
 }
 
 
@@ -182,7 +169,7 @@ void PreviewPlot::setAxisRange(QPair<double, double> range, int axisID)
   if(range.first > range.second)
     throw std::runtime_error("Supplied range is invalid.");
 
-  m_plot->setAxisScale(axisID, range.first, range.second);
+  m_uiForm.plot->setAxisScale(axisID, range.first, range.second);
   replot();
 }
 
@@ -247,7 +234,9 @@ void PreviewPlot::addSpectrum(const QString & curveName, const MatrixWorkspace_s
   palette.setColor(label->foregroundRole(), curveColour);
   label->setPalette(palette);
   label->setVisible(legendIsShown());
-  m_legendLayout->addWidget(label);
+  label->setWordWrap(true);
+  label->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+  m_uiForm.loLegend->addWidget(label);
 
   m_curves[ws].curve = curve;
   m_curves[ws].label = label;
@@ -292,7 +281,7 @@ void PreviewPlot::removeSpectrum(const MatrixWorkspace_sptr ws)
   if(m_curves.contains(ws))
   {
     removeCurve(m_curves[ws].curve);
-    m_legendLayout->removeWidget(m_curves[ws].label);
+    m_uiForm.loLegend->removeWidget(m_curves[ws].label);
     delete m_curves[ws].label;
   }
 
@@ -375,8 +364,8 @@ void PreviewPlot::toggleZoomTool(bool enabled)
 void PreviewPlot::resetView()
 {
   // Auto scale the axis
-  m_plot->setAxisAutoScale(QwtPlot::xBottom);
-  m_plot->setAxisAutoScale(QwtPlot::yLeft);
+  m_uiForm.plot->setAxisAutoScale(QwtPlot::xBottom);
+  m_uiForm.plot->setAxisAutoScale(QwtPlot::yLeft);
 
   // Set this as the default zoom level
   m_zoomTool->setZoomBase(true);
@@ -415,7 +404,7 @@ void PreviewPlot::clear()
   for(auto it = m_curves.begin(); it != m_curves.end(); ++it)
   {
     removeCurve(it.value().curve);
-    m_legendLayout->removeWidget(it.value().label);
+    m_uiForm.loLegend->removeWidget(it.value().label);
     delete it.value().label;
   }
 
@@ -430,7 +419,7 @@ void PreviewPlot::clear()
  */
 void PreviewPlot::replot()
 {
-  m_plot->replot();
+  m_uiForm.plot->replot();
 }
 
 
@@ -537,7 +526,7 @@ QwtPlotCurve * PreviewPlot::addCurve(MatrixWorkspace_sptr ws, const size_t specI
   QwtPlotCurve *curve = new QwtPlotCurve();
   curve->setData(wsData);
   curve->setPen(curveColour);
-  curve->attach(m_plot);
+  curve->attach(m_uiForm.plot);
 
   return curve;
 }
@@ -629,7 +618,7 @@ QString PreviewPlot::getAxisType(int axisID)
 void PreviewPlot::showContextMenu(QPoint position)
 {
   // Show the context menu
-  m_contextMenu->popup(m_plot->mapToGlobal(position));
+  m_contextMenu->popup(m_uiForm.plot->mapToGlobal(position));
 }
 
 
@@ -697,10 +686,10 @@ void PreviewPlot::handleAxisTypeSelect()
 
   // Set the axis scale engines
   if(xEngine)
-    m_plot->setAxisScaleEngine(QwtPlot::xBottom, xEngine);
+    m_uiForm.plot->setAxisScaleEngine(QwtPlot::xBottom, xEngine);
 
   if(yEngine)
-    m_plot->setAxisScaleEngine(QwtPlot::yLeft, yEngine);
+    m_uiForm.plot->setAxisScaleEngine(QwtPlot::yLeft, yEngine);
 
   // Update the plot
   hardReplot();
