@@ -279,12 +279,18 @@ class IncidentEnergy(PropDescriptor):
         else:
             return self._incident_energy
     #
-    def set_current(self,value):
-        """ set current energy value (used in multirep mode) to 
+    def set_current(self,value,ind=None):
+        """ set current energy value (used in multirep mode) as
+            energy estimate for the reduction
             
+            ind -- if provided, the number of the value in the list of
+            values (can be used together with enumerate)
         """
         if isinstance(self._incident_energy,list):
-            ind = self._cur_iter_en
+            if ind:
+                self._cur_iter_en=ind
+            else:
+                ind = self._cur_iter_en
             self._incident_energy[ind]=value
         else:
             self._incident_energy = value

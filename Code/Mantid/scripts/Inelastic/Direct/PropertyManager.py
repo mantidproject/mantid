@@ -98,7 +98,9 @@ class PropertyManager(NonIDF_Properties):
         object.__setattr__(self,class_dec+'file_properties',['det_cal_file','map_file','hard_mask_file'])
         object.__setattr__(self,class_dec+'abs_norm_file_properties',['monovan_mapfile'])
 
-        # properties with allowed values
+        # Clear caches on construction to make class more like usual class then singleton (and cashes are dangerous)
+        PropertyManager.mono_correction_factor.set_cash_mono_run_number(None)
+
    
     def _convert_params_to_properties(self,param_list,detine_subst_dict=True,descr_list=[]):
         """ method processes parameters obtained from IDF and modifies the IDF properties
