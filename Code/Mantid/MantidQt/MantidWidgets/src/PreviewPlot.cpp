@@ -44,12 +44,11 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent)
     mainLayout->setSizeConstraint(QLayout::SetNoConstraint);
 
     m_plot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    mainLayout->addWidget(m_plot);
 
     m_legendLayout = new QHBoxLayout(mainLayout);
     m_legendLayout->addStretch();
     mainLayout->addItem(m_legendLayout);
-
-    mainLayout->addWidget(m_plot);
 
     this->setLayout(mainLayout);
   }
@@ -114,6 +113,8 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent)
   m_showLegendAction->setCheckable(true);
   connect(m_showLegendAction, SIGNAL(toggled(bool)), this, SLOT(showLegend(bool)));
   m_contextMenu->addAction(m_showLegendAction);
+
+  connect(this, SIGNAL(needToReplot()), this, SLOT(replot()));
 }
 
 
@@ -195,13 +196,13 @@ QPair<double, double> PreviewPlot::getCurveRange(const Mantid::API::MatrixWorksp
   if(!m_curves.contains(ws))
     throw std::runtime_error("Workspace not on preview plot.");
 
-  size_t numPoints = m_curves[ws].first->data().size();
+  size_t numPoints = m_curves[ws].curve->data().size();
 
   if(numPoints < 2)
     return qMakePair(0.0, 0.0);
 
-  double low = m_curves[ws].first->data().x(0);
-  double high = m_curves[ws].first->data().x(numPoints - 1);
+  double low = m_curves[ws].curve->data().x(0);
+  double high = m_curves[ws].curve->data().x(numPoints - 1);
 
   return qMakePair(low, high);
 }
@@ -236,27 +237,8 @@ QPair<double, double> PreviewPlot::getCurveRange(const QString & wsName)
 void PreviewPlot::addSpectrum(const QString & curveName, const MatrixWorkspace_const_sptr ws,
     const size_t specIndex, const QColor & curveColour)
 {
-  // Check the spectrum index is in range
-  if(specIndex >= ws->getNumberHistograms())
-    throw std::runtime_error("Workspace index is out of range, cannot plot.");
-
-  // Check the X axis is large enough
-  if(ws->readX(0).size() < 2)
-    throw std::runtime_error("X axis is too small to generate a histogram plot.");
-
-  // Create the plot data
-  const bool logScale(false), distribution(false);
-  QwtWorkspaceSpectrumData wsData(*ws, static_cast<int>(specIndex), logScale, distribution);
-
-  // Remove any existing curves
-  if(m_curves.contains(ws))
-    removeCurve(m_curves[ws].first);
-
-  // Create the new curve
-  QwtPlotCurve *curve = new QwtPlotCurve();
-  curve->setData(wsData);
-  curve->setPen(curveColour);
-  curve->attach(m_plot);
+  // Create the curve
+  QwtPlotCurve * curve = addCurve(ws, specIndex, curveColour);
 
   // Create the curve label
   QLabel *label = new QLabel(curveName);
@@ -266,10 +248,13 @@ void PreviewPlot::addSpectrum(const QString & curveName, const MatrixWorkspace_c
   label->setVisible(legendIsShown());
   m_legendLayout->addWidget(label);
 
-  m_curves[ws] = qMakePair(curve, label);
+  m_curves[ws].curve = curve;
+  m_curves[ws].label = label;
+  m_curves[ws].colour = curveColour;
+  m_curves[ws].wsIndex = specIndex;
 
   // Replot
-  m_plot->replot();
+  emit needToReplot();
 }
 
 
@@ -305,9 +290,9 @@ void PreviewPlot::removeSpectrum(const MatrixWorkspace_const_sptr ws)
   // Remove the curve object and legend label
   if(m_curves.contains(ws))
   {
-    removeCurve(m_curves[ws].first);
-    m_legendLayout->removeWidget(m_curves[ws].second);
-    delete m_curves[ws].second;
+    removeCurve(m_curves[ws].curve);
+    m_legendLayout->removeWidget(m_curves[ws].label);
+    delete m_curves[ws].label;
   }
 
   // Get the curve from the map
@@ -347,7 +332,7 @@ void PreviewPlot::showLegend(bool show)
   m_showLegendAction->setChecked(show);
 
   for(auto it = m_curves.begin(); it != m_curves.end(); ++it)
-    it.value().second->setVisible(show);
+    it.value().label->setVisible(show);
 }
 
 
@@ -428,14 +413,14 @@ void PreviewPlot::clear()
 {
   for(auto it = m_curves.begin(); it != m_curves.end(); ++it)
   {
-    removeCurve(it.value().first);
-    m_legendLayout->removeWidget(it.value().second);
-    delete it.value().second;
+    removeCurve(it.value().curve);
+    m_legendLayout->removeWidget(it.value().label);
+    delete it.value().label;
   }
 
   m_curves.clear();
 
-  replot();
+  emit needToReplot();
 }
 
 
@@ -448,15 +433,84 @@ void PreviewPlot::replot()
 }
 
 
+/**
+ * Handle a workspace being deleted from ADS.
+ *
+ * Removes it from the plot (via removeSpectrum).
+ *
+ * @param pNF Poco notification
+ */
 void PreviewPlot::handleRemoveEvent(WorkspacePreDeleteNotification_ptr pNf)
 {
-  //TODO
+  MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(pNf->object());
+
+  // Ignore non matrix worksapces and those not in the plot
+  if(!ws || !m_curves.contains(ws))
+    return;
+
+  // Remove the workspace
+  removeSpectrum(ws);
+
+  emit needToReplot();
 }
 
 
+/**
+ * Handle a workspace being modified in ADS.
+ *
+ * Removes the existing curve and re adds it to reflect new data.
+ *
+ * @param pNf Poco notification
+ */
 void PreviewPlot::handleReplaceEvent(WorkspaceAfterReplaceNotification_ptr pNf)
 {
-  //TODO
+  MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(pNf->object());
+
+  // Ignore non matrix worksapces and those not in the plot
+  if(!ws || !m_curves.contains(ws))
+    return;
+
+  // Replace the existing curve
+  m_curves[ws].curve = addCurve(ws, m_curves[ws].wsIndex, m_curves[ws].colour);
+
+  emit needToReplot();
+}
+
+
+/**
+ * Creates a new curve and adds it to the plot.
+ *
+ * @param ws Worksapce pointer
+ * @param specIndex Index of histogram to plot
+ * @param curveColour Colour of curve
+ * @return Pointer to new curve
+ */
+QwtPlotCurve * PreviewPlot::addCurve(const MatrixWorkspace_const_sptr ws, const size_t specIndex,
+   const QColor & curveColour)
+{
+  // Check the spectrum index is in range
+  if(specIndex >= ws->getNumberHistograms())
+    throw std::runtime_error("Workspace index is out of range, cannot plot.");
+
+  // Check the X axis is large enough
+  if(ws->readX(0).size() < 2)
+    throw std::runtime_error("X axis is too small to generate a histogram plot.");
+
+  // Create the plot data
+  const bool logScale(false), distribution(false);
+  QwtWorkspaceSpectrumData wsData(*ws, static_cast<int>(specIndex), logScale, distribution);
+
+  // Remove any existing curves
+  if(m_curves.contains(ws))
+    removeCurve(m_curves[ws].curve);
+
+  // Create the new curve
+  QwtPlotCurve *curve = new QwtPlotCurve();
+  curve->setData(wsData);
+  curve->setPen(curveColour);
+  curve->attach(m_plot);
+
+  return curve;
 }
 
 
@@ -505,7 +559,7 @@ QList<QAction *> PreviewPlot::addOptionsToMenus(QString menuName, QActionGroup *
     action->setChecked(*it == defaultItem);
   }
 
-  QAction *menuAction = new QAction(menuName, this);
+  QAction *menuAction = new QAction(menuName, menu);
   menuAction->setMenu(menu);
   m_contextMenu->addAction(menuAction);
 

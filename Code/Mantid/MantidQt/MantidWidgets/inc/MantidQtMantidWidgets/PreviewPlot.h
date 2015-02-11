@@ -77,6 +77,10 @@ namespace MantidWidgets
     void removeSpectrum(const Mantid::API::MatrixWorkspace_const_sptr ws);
     void removeSpectrum(const QString & wsName);
 
+  signals:
+    /// Signals that the plot should be refreshed
+    void needToReplot();
+
   public slots:
     void showLegend(bool show);
     void togglePanTool(bool enabled);
@@ -87,9 +91,22 @@ namespace MantidWidgets
     void replot();
 
   private:
+    /// Holds information about a plot curve
+    struct PlotCurveConfiguration
+    {
+      QwtPlotCurve *curve;
+      QLabel *label;
+      QColor colour;
+      size_t wsIndex;
+
+      PlotCurveConfiguration():
+        curve(NULL), label(NULL) {}
+    };
+
     void handleRemoveEvent(Mantid::API::WorkspacePreDeleteNotification_ptr pNf);
     void handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
 
+    QwtPlotCurve * addCurve(const Mantid::API::MatrixWorkspace_const_sptr ws, const size_t specIndex, const QColor & curveColour);
     void removeCurve(QwtPlotCurve *curve);
 
     QList<QAction *> addOptionsToMenus(QString menuName, QActionGroup *group, QStringList items, QString defaultItem);
@@ -111,8 +128,8 @@ namespace MantidWidgets
     friend class RangeSelector;
     QwtPlot *m_plot;
 
-    /// Map of curve key to plot curves and curve label
-    QMap<Mantid::API::MatrixWorkspace_const_sptr, QPair<QwtPlotCurve *, QLabel *>> m_curves;
+    /// Map of curve key to plot info
+    QMap<Mantid::API::MatrixWorkspace_const_sptr, PlotCurveConfiguration> m_curves;
 
     /// Plot manipulation tools
     QwtPlotMagnifier *m_magnifyTool;
