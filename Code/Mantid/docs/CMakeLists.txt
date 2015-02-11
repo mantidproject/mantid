@@ -3,9 +3,6 @@
 ###############################################################################
 find_package ( Sphinx 1.2 )
 
-#Needed to generate doc diagrams
-find_program ( DOT_EXECUTABLE NAMES dot DOC "Graphviz Dot tool for rendering diagrams" )
-
 if ( SPHINX_FOUND )
   # run python to see if the theme is installed
   execute_process ( COMMAND ${PYTHON_EXECUTABLE} -c "import sphinx_bootstrap_theme"
@@ -27,6 +24,7 @@ if ( SPHINX_FOUND )
   set ( SPHINX_BUILD_DIR ${DOCS_BUILDDIR} )
   set ( SCREENSHOTS_DIR ${SPHINX_BUILD_DIR}/screenshots )
   set ( DIAGRAMS_DIR ${SPHINX_BUILD_DIR}/diagrams )
+  set ( DOT_EXECUTABLE ${DOXYGEN_DOT_EXECUTABLE} )
 
   # targets
   set ( TARGET_PREFIX docs)
