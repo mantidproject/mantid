@@ -30,8 +30,6 @@ class JumpFit(PythonAlgorithm):
         self.declareProperty(name='Output', defaultValue='', direction=Direction.InOut,
                 doc='Output name')
 
-        self.declareProperty(name='Verbose', defaultValue=False,
-                doc='Output more verbose message to log')
         self.declareProperty(name='Plot', defaultValue=False,
                 doc='Plot result workspace')
         self.declareProperty(name='Save', defaultValue=False,
@@ -51,19 +49,18 @@ class JumpFit(PythonAlgorithm):
         spectrum_ws = "__" + self._in_ws
         ExtractSingleSpectrum(InputWorkspace=self._in_ws, OutputWorkspace=spectrum_ws, WorkspaceIndex=self._width)
 
-        if self._verbose:
-            logger.notice('Cropping from Q= ' + str(self._q_min) + ' to ' + str(self._q_max))
-            in_run = mtd[self._in_ws].getRun()
-            try:
-                log = in_run.getLogData('fit_program')
-                if log:
-                    val = log.value
-                    logger.notice('Fit program was : ' + val)
-            except RuntimeError:
-                # If we couldn't find the fit program, just pass
-                pass
+        logger.information('Cropping from Q= ' + str(self._q_min) + ' to ' + str(self._q_max))
+        in_run = mtd[self._in_ws].getRun()
+        try:
+            log = in_run.getLogData('fit_program')
+            if log:
+                val = log.value
+                logger.notice('Fit program was : ' + val)
+        except RuntimeError:
+            # If we couldn't find the fit program, just pass
+            pass
 
-            logger.notice('Parameters in ' + self._in_ws)
+        logger.information('Parameters in ' + self._in_ws)
 
         x_data = mtd[self._in_ws].readX(0)
         m_max = x_data[-1]
@@ -136,7 +133,6 @@ class JumpFit(PythonAlgorithm):
         self._q_min = self.getProperty('QMin').value
         self._q_max = self.getProperty('QMax').value
 
-        self._verbose = self.getProperty('Verbose').value
         self._plot = self.getProperty('Plot').value
         self._save = self.getProperty('Save').value
 
@@ -149,8 +145,7 @@ class JumpFit(PythonAlgorithm):
             fit_path = os.path.join(workdir, workspace + '.nxs')
             SaveNexusProcessed(InputWorkspace=workspace, Filename=fit_path)
 
-            if self._verbose:
-                logger.notice('Fit file is ' + fit_path)
+            logger.information('Fit file is ' + fit_path)
 
         if self._plot:
             from IndirectImport import import_mantidplot
