@@ -506,19 +506,19 @@ class PropertyManager(NonIDF_Properties):
         run_files_to_check =[]
         for prop_name in run_files_prop:
             theProp = getattr(PropertyManager,prop_name)
-            if theProp.has_own_value:
+            if theProp.has_own_value():
+               if theProp.is_existing_ws(): # it is loaded workspace 
+                  continue   # we do not care if it has file or not
                val = theProp.__get__(self,PropertyManager)
-               if isinstance(val,api.Workspace): # it is loaded workspace 
-                  continue                       # and we do not care if 
-               else:                             # it have file
-                   if not(val is None) :
-                      run_files_to_check.append(prop_name)
+               if not(val is None) :
+                   run_files_to_check.append(prop_name)
         # other files to check:
         aux_files_to_check=[]
         for prop_name in map_mask_prop:
             val = getattr(self,prop_name)
             if not(val is None):
                aux_files_to_check.append(prop_name)
+        # Absolute units files (only one?)
         if abs_units:
            val = self.monovan_mapfile
            if not(val is None) :

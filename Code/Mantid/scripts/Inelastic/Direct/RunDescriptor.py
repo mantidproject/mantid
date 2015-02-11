@@ -374,6 +374,16 @@ class RunDescriptor(PropDescriptor):
                    break
         return mon_ws
 #--------------------------------------------------------------------------------------------------------------------
+    def is_existing_ws(self):
+        """ method verifies if property value relates to workspace, present in ADS """ 
+        if self._ws_name:
+            if self._ws_name in mtd:
+                return True
+            else:
+                return False
+        else:
+           return False
+#--------------------------------------------------------------------------------------------------------------------
     def get_ws_name(self):
         """ return workspace name. If ws name is not defined, build it first and set up as the target ws name
         """ 
@@ -684,11 +694,11 @@ class RunDescriptorDependent(RunDescriptor):
 
     def __get__(self,instance,owner=None):
        """ return dependent run number which is host run number if this one has not been set or this run number if it was""" 
+       if instance is None:
+          return self
+
        if self._this_run_defined:
-             if instance is None:
-                 return self
-             else:
-                return super(RunDescriptorDependent,self).__get__(instance,owner)
+          return super(RunDescriptorDependent,self).__get__(instance,owner)
        else:
           return self._host.__get__(instance,owner)
 

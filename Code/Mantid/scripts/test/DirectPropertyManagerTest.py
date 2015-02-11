@@ -633,21 +633,23 @@ class DirectPropertyManagerTest(unittest.TestCase):
             ic+=1
         self.assertEqual(ic,3)
 
-    #def test_incident_energy_custom_enum(self):
-    ###### Custom enum does not work
-    #    propman = self.prop_man
-    #    en_source = [20,40,80]
-    #    propman.incident_energy=en_source
-    #    propman.energy_bins=[-2,0.1,0.8]
-    #    self.assertTrue(PropertyManager.incident_energy.multirep_mode())
+    def test_incident_energy_custom_enum(self):
+    ##### Custom enum works in a peculiar way
+        propman = self.prop_man
+        en_source = [20,40,80]
+        propman.incident_energy=en_source
+        propman.energy_bins=[-2,0.1,0.8]
+        self.assertTrue(PropertyManager.incident_energy.multirep_mode())
 
-    #    ic=0
-    #    for ind,en in enumerate(PropertyManager.incident_energy):
-    #        ic+=1
-    #        self.assertAlmostEqual(en,en_source[ind])
-    #        en_internal = PropertyManager.incident_energy.get_current()
-    #        self.assertAlmostEqual(en_internal,en_source[ind])
-    #        self.assertEqual(ind,ic-1)
+        ic=0
+        for ind,en in enumerate(PropertyManager.incident_energy):
+            ic+=1
+            # propagate current energy value to incident energy class 
+            PropertyManager.incident_energy.set_current(en,ind)
+            self.assertAlmostEqual(en,en_source[ind])
+            en_internal = PropertyManager.incident_energy.get_current()
+            self.assertAlmostEqual(en_internal,en_source[ind])
+            self.assertEqual(ind,ic-1)
 
     def test_ignore_complex_defailts_changes_fom_instrument(self) :
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
@@ -913,6 +915,32 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         PropertyManager.mono_correction_factor.set_cash_mono_run_number(11060)
         self.assertTrue(PropertyManager.mono_correction_factor.get_val_from_cash(propman) is None)
+
+    def test_mono_correction_factor(self):
+        propman = self.prop_man
+        propman.wb_run = 11001
+        sw = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
+        propman.monovan_run = sw
+        propman.mask_run = CloneWorkspace(sw,OutputWorkspace='mask_clone')
+        propman.map_file = None
+        propman.hard_mask_file='testmasking.xml'
+        propman.det_cal_file=11001
+        propman.monovan_mapfile = None
+                    
+
+        run_files,map_files = propman._get_properties_with_files()
+
+        self.assertEqual(len(run_files),2)
+        self.assertTrue('wb_run' in run_files)
+        self.assertFalse('monovan_run' in run_files)
+        self.assertTrue('mask_run' in run_files)
+        self.assertFalse('wb_for_monovan_run' in run_files)
+
+        self.assertEqual(len(map_files),2)
+        self.assertTrue('hard_mask_file' in map_files)
+        self.assertTrue('det_cal_file' in map_files)
+
+        api.AnalysisDataService.clear()
 
 if __name__=="__main__":
     unittest.main()

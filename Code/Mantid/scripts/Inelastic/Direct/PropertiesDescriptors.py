@@ -287,10 +287,10 @@ class IncidentEnergy(PropDescriptor):
             values (can be used together with enumerate)
         """
         if isinstance(self._incident_energy,list):
-            if ind:
-                self._cur_iter_en=ind
+            if ind is None:
+               ind = self._cur_iter_en
             else:
-                ind = self._cur_iter_en
+               self._cur_iter_en=ind
             self._incident_energy[ind]=value
         else:
             self._incident_energy = value
@@ -583,6 +583,7 @@ class DetCalFile(PropDescriptor):
     """ property describes various sources for the detector calibration file """
     def __init__(self):
         self._det_cal_file = None
+        self._calibrated_by_run=False
 
     def __get__(self,instance,owner):
         if instance is None:
@@ -599,6 +600,7 @@ class DetCalFile(PropDescriptor):
                 # workspace name provided
                 val = mtd[str(val)]
           self._det_cal_file = val
+          self._calibrated_by_run = False
           return
   
 
@@ -608,9 +610,13 @@ class DetCalFile(PropDescriptor):
           file_hint = str(val)
           file_name = FileFinder.findRuns(file_hint)[0]
           self._det_cal_file = file_name
+          self._calibrated_by_run = True
           return
 
        raise NameError('Detector calibration file name can be a workspace name present in Mantid or string describing an file name')
+    def calibrated_by_run(self):
+       """ reports if the detector calibration is in a run-file or separate file(workspace)""" 
+       return self._calibrated_by_run
     #if Reducer.det_cal_file != None :
     #    if isinstance(Reducer.det_cal_file,str) and not Reducer.det_cal_file
     #    in mtd : # it is a file
