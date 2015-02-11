@@ -329,7 +329,7 @@ public:
       const double l1 = beam1.norm();
       const double l2 = beam2.norm();
       const double scatteringAngle2 = beam2.angle(beam1);
-      const V3D qLabDir = beam1 - beam2;
+      const V3D qLabDir = (beam1/l1) - (beam2/l2);
 
       // Derive the wavelength
       std::vector<double> x;
@@ -427,7 +427,7 @@ public:
     const double wavelength = 2;
     Peak p(inst, detectorId, wavelength);
     TSM_ASSERT_THROWS_NOTHING("Nothing wrong here, detector is valid", p.getDetectorPosition());
-    p.setQLabFrame(V3D(1,1,1), 1); // This sets the detector pointer to null and detector id to -1;
+    p.setQLabFrame(V3D(1,1,1), 1.0); // This sets the detector pointer to null and detector id to -1;
     TSM_ASSERT_THROWS("Detector is not valid", p.getDetectorPosition(), Mantid::Kernel::Exception::NullPointerException&);
   }
 

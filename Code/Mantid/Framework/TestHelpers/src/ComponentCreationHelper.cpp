@@ -582,18 +582,21 @@ Instrument_sptr createMinimalInstrument(const V3D& sourcePos, const V3D& sampleP
     // A source
     ObjComponent *source = new ObjComponent("source");
     source->setPos(sourcePos);
+    source->setShape(createSphere(0.01 /*1cm*/, V3D(0,0,0), "1"));
     instrument->add(source);
     instrument->markAsSource(source);
 
     // A sample
     ObjComponent *sample = new ObjComponent("some-surface-holder");
-    source->setPos(samplePos);
+    sample->setPos(samplePos);
+    sample->setShape(createSphere(0.01 /*1cm*/, V3D(0,0,0), "1"));
     instrument->add(sample);
     instrument->markAsSamplePos(sample);
 
     // A detector
     Detector *det = new Detector("point-detector", 1 /*detector id*/, NULL);
     det->setPos(detectorPos);
+    det->setShape(createSphere(0.01 /*1cm*/, V3D(0,0,0), "1"));
     instrument->add(det);
     instrument->markAsDetector(det);
 

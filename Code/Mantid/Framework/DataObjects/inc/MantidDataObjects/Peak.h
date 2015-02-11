@@ -3,12 +3,15 @@
 
 #include "MantidAPI/IPeak.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/optional.hpp>
+
 
 namespace Mantid {
 namespace DataObjects {
@@ -85,7 +88,7 @@ public:
   void setQSampleFrame(Mantid::Kernel::V3D QSampleFrame,
                        double detectorDistance = 1.0);
   void setQLabFrame(Mantid::Kernel::V3D QLabFrame,
-                    double detectorDistance = 1.0);
+                    boost::optional<double> detectorDistance = boost::optional<double>());
 
   void setWavelength(double wavelength);
   double getWavelength() const;
@@ -134,7 +137,7 @@ public:
 
 private:
 
-
+  bool findDetector(const Mantid::Kernel::V3D &beam);
 
   /// Shared pointer to the instrument (for calculating some values )
   Geometry::Instrument_const_sptr m_inst;
@@ -208,6 +211,9 @@ private:
 
   /// Peak shape
   Mantid::Geometry::PeakShape_const_sptr m_peakShape;
+
+  /// Static logger
+  static Mantid::Kernel::Logger g_log;
 };
 
 } // namespace Mantid

@@ -484,11 +484,11 @@ void Peak::setQSampleFrame(Mantid::Kernel::V3D QSampleFrame,
  *        This is in inelastic convention: momentum transfer of the LATTICE!
  *        Also, q does have a 2pi factor = it is equal to 2pi/wavelength (in
  *Angstroms).
- * @param detectorDistance :: distance between the sample and the detector.
- *        Used to give a valid TOF. Default 1.0 meters.
+ * @param detectorDistance :: distance between the sample and the detector. If this is provided. Then we do not
+ * ray trace to find the intersecing detector.
  */
 void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
-                        double detectorDistance) {
+                        boost::optional<double> detectorDistance) {
   // Clear out the detector = we can't know them
   m_DetectorID = -1;
   m_det = IDetector_sptr();
@@ -535,11 +535,25 @@ void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
   this->setWavelength(wl);
 
   V3D detectorDir = q * -1.0;
-  detectorDir[refFrame->pointingAlongBeam()] = one_over_wl - q.Z();
+  detectorDir[refFrame->pointingAlongBeam()] = one_over_wl - qBeam;
   detectorDir.normalize();
 
   // Use the given detector distance to find the detector position.
-  detPos = samplePos + detectorDir * detectorDistance;
+  if(detectorDistance.is_initialized())
+  {
+      detPos = samplePos + detectorDir * detectorDistance.get();
+      // We do not-update the detector as by manually setting the distance the client seems to know better.
+  }
+  else
+  {
+      // Find the detector
+      const bool found = findDetector(detectorDir);
+      if (!found)
+      {
+          // This is important, so we ought to log when this fails to happen.
+          g_log.debug("Could not find detector after setting qLab via setQLab with QLab : " + q.toString());
+      }
+  }
 }
 
 /** After creating a peak using the Q in the lab frame,
@@ -552,12 +566,22 @@ void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
  * @return true if the detector ID was found.
  */
 bool Peak::findDetector() {
-  bool found = false;
+
   // Scattered beam direction
   V3D oldDetPos = detPos;
   V3D beam = detPos - samplePos;
   beam.normalize();
 
+  return findDetector(beam);
+}
+
+/**
+ * @brief Peak::findDetector : Find the detector along the beam location. sets the detector, and detector position if found
+ * @param beam : detector direction from the sample as V3D
+ * @return True if a detector has been found
+ */
+bool Peak::findDetector(const Mantid::Kernel::V3D &beam) {
+    bool found = false;
   // Create a ray tracer
   InstrumentRayTracer tracker(m_inst);
   tracker.traceFromSample(beam);
@@ -903,6 +927,8 @@ Mantid::Kernel::V3D Peak::getDetectorPosition() const {
   }
   return getDetector()->getPos();
 }
+
+Mantid::Kernel::Logger Peak::g_log("PeakLogger");
 
 } // namespace Mantid
 } // namespace DataObjects
