@@ -5,7 +5,7 @@
 #include "MantidAPI/IPeak.h"
 #include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
-#include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 
 namespace Mantid {
 namespace API {
@@ -35,7 +35,7 @@ public:
   /// Getter for a friendly name to describe the transform type.
   virtual std::string getFriendlyName() const = 0;
   /// Getter for the special coordinate representation of this transform type.
-  virtual Mantid::API::SpecialCoordinateSystem getCoordinateSystem() const = 0;
+  virtual Mantid::Kernel::SpecialCoordinateSystem getCoordinateSystem() const = 0;
 
 protected:
   PeakTransform(const PeakTransform &other);

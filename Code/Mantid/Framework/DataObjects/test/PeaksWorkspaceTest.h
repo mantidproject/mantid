@@ -355,7 +355,7 @@ public:
    void test_setSpecialCoordinates()
    {
      auto pw = PeaksWorkspace_sptr(new PeaksWorkspace);
-     SpecialCoordinateSystem coordSystem = Mantid::API::HKL;
+     SpecialCoordinateSystem coordSystem = Mantid::Kernel::HKL;
      pw->setCoordinateSystem(coordSystem);
      TS_ASSERT_EQUALS(coordSystem, pw->getSpecialCoordinateSystem());
    }

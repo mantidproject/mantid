@@ -51,8 +51,10 @@ void ProgressTracker::complete() {
 
 // EventCounter
 EventCounter::EventCounter(std::vector<size_t> &eventCounts,
-                           const std::vector<bool> &mask)
+                           const std::vector<bool> &mask,
+                           const std::vector<int> &offsets, size_t stride)
     : m_eventCounts(eventCounts), m_mask(mask),
+      m_offsets(offsets), m_stride(stride),
       m_tofMin(std::numeric_limits<double>::max()),
       m_tofMax(std::numeric_limits<double>::min()) {}
 double EventCounter::tofMin() const {
@@ -61,24 +63,36 @@ double EventCounter::tofMin() const {
 double EventCounter::tofMax() const {
   return m_tofMin <= m_tofMax ? m_tofMax : 0.0;
 }
-void EventCounter::addEvent(size_t s, double tof) {
-  if (m_mask[s]) {
-    if (m_tofMin > tof)
-      m_tofMin = tof;
-    if (m_tofMax < tof)
-      m_tofMax = tof;
+void EventCounter::addEvent(size_t x, size_t y, double tof) {
+  size_t yNew = y + (size_t)m_offsets[x];
+  if (yNew < m_stride) {
+    size_t s = m_stride * x + yNew;
 
-    m_eventCounts[s]++;
+    if (m_mask[s]) {
+      if (m_tofMin > tof)
+        m_tofMin = tof;
+      if (m_tofMax < tof)
+        m_tofMax = tof;
+
+      m_eventCounts[s]++;
+    }
   }
 }
 
 // EventAssigner
 EventAssigner::EventAssigner(std::vector<EventVector_pt> &eventVectors,
-                             const std::vector<bool> &mask)
-    : m_eventVectors(eventVectors), m_mask(mask) {}
-void EventAssigner::addEvent(size_t s, double tof) {
-  if (m_mask[s])
-    m_eventVectors[s]->push_back(tof);
+                             const std::vector<bool> &mask,
+                             const std::vector<int> &offsets, size_t stride)
+    : m_eventVectors(eventVectors), m_mask(mask),
+      m_offsets(offsets), m_stride(stride) {}
+void EventAssigner::addEvent(size_t x, size_t y, double tof) {
+  size_t yNew = y + (size_t)m_offsets[x];
+  if (yNew < m_stride) {
+    size_t s = m_stride * x + yNew;
+
+    if (m_mask[s])
+      m_eventVectors[s]->push_back(tof);
+  }
 }
 
 // FastReadOnlyFile

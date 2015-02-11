@@ -4,8 +4,11 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include <cmath>
 #include <iostream>
 #include <iomanip>
+#include <fstream>
+#include <Poco/File.h>
 
 #include "MantidAlgorithms/GenerateEventsFilter.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -22,10 +25,6 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include <iostream>
-#include <iomanip>
-#include <fstream>
-#include <Poco/File.h>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -413,7 +412,6 @@ public:
   DataObjects::EventWorkspace_sptr createEventWorkspace()
   {
     using namespace WorkspaceCreationHelper;
-    double PI = 3.14159265;
 
     // Empty workspace
     DataObjects::EventWorkspace_sptr eventws =
@@ -447,7 +445,7 @@ public:
     while (curtime_ns < runstoptime_ns)
     {
       Kernel::DateAndTime curtime(curtime_ns);
-      double value = sin(PI*static_cast<double>(curtime_ns)/period*0.25);
+      double value = sin(M_PI*static_cast<double>(curtime_ns)/period*0.25);
       sinlog->addValue(curtime, value);
       curtime_ns += pulsetime_ns/4;
     }
@@ -460,7 +458,7 @@ public:
     while (curtime_ns < runstoptime_ns)
     {
       Kernel::DateAndTime curtime(curtime_ns);
-      double value = sin(2*PI*static_cast<double>(curtime_ns)/period);
+      double value = sin(2*M_PI*static_cast<double>(curtime_ns)/period);
       coslog->addValue(curtime, value);
       curtime_ns += pulsetime_ns*2;
     }

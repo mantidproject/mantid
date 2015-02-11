@@ -252,13 +252,13 @@ class CutMD(DataProcessorAlgorithm):
                     max = p4_bins[1]
                     nbins = 1
                 elif n_args == 3:
-                    min = p4_bins[i][0]
-                    max = p4_bins[i][2]
+                    min = p4_bins[0]
+                    max = p4_bins[2]
                     step_size = p4_bins[1]
                     dim_range = max - min
                     if step_size > dim_range:
                         step_size = dim_range
-                    n_bins = int( dim_range / step_size)
+                    nbins = int( dim_range / step_size)
                 
                 extents.append(min)
                 extents.append(max)
@@ -303,7 +303,7 @@ class CutMD(DataProcessorAlgorithm):
                 label = orthogonal_dimension.getName() 
                 unit = orthogonal_dimension.getUnits()
                 vec = [0] * ndims
-                vec[i] = i
+                vec[i] = 1
             
             value = "%s, %s, %s" % ( label, unit, ",".join(map(str, vec))) 
             cut_alg.setPropertyValue("BasisVector{0}".format(i) , value)    

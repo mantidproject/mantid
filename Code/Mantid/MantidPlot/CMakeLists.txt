@@ -764,6 +764,7 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 ###########################################################################
 
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Images/images.qrc )
+qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Images//fonts/fonts.qrc )
 qt4_add_resources ( RES_FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/icons.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/MantidQt/SliceViewer/icons/SliceViewerIcons.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/MantidQt/CustomInterfaces/icons/CustomInterfacesIcons.qrc )
@@ -903,6 +904,9 @@ target_link_libraries ( MantidPlot
 # Plugin dependencies
 add_dependencies( MantidPlot mantidqtpython )
 
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties(MantidPlot PROPERTIES INSTALL_RPATH "@executable_path/")
+endif ()
 
 ###########################################################################
 # Custom Info.plist file for OS X
@@ -1034,11 +1038,17 @@ endforeach()
 install ( FILES ${CONFIG_RESET_SCRIPT} DESTINATION ${BIN_DIR} )
 
 if ( APPLE )
-  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in
+  if (OSX_VERSION VERSION_LESS 10.9)
+    configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in
                    ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake
-                   @ONLY
-  )
+                   @ONLY )
 
-  install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake )
+    install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake )
+  else ()
+    install ( FILES  make_package.rb DESTINATION MantidPlot.app/ )
+    configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixMavericksBundle.cmake.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/FixMavericksBundle.cmake
+                   @ONLY )
+    install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixMavericksBundle.cmake )
+  endif ()
 endif ()
-

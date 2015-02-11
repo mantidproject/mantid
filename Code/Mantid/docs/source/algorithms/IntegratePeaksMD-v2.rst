@@ -16,8 +16,8 @@ Similar algorithms
 ##################
 
 See :ref:`algm-IntegrateEllipsoids` for a ways of integrating peaks from data collected in
-`EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_.
-
+`EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_. :ref:`algm-PeakIntensityVsRadius`
+is meant to help determine an appropriate value for `PeakRadius`.
 
 Inputs
 ######
@@ -71,7 +71,7 @@ background signal density in the shell to the volume of the peak:
 
 with the error squared on that value:
 
-:math:`\sigma I_{bg}^2 = \frac{V_{peak}}{V_{shell}} \sigma I_{shell}^2`
+:math:`\sigma I_{bg}^2 = (\frac{V_{peak}}{V_{shell}})^2 \sigma I_{shell}^2`
 
 This is applied to the integrated peak intensity :math:`I_{peak}` to
 give the corrected intensity :math:`I_{corr}`:
