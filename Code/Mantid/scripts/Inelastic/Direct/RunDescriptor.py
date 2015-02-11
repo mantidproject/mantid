@@ -437,8 +437,8 @@ class RunDescriptor(PropDescriptor):
             fname,fex = os.path.splitext(file)
             self._run_ext = fex
             if old_ext != fex:
-                message = '   Cannot find run-file with extension {0}.\n'\
-                        '   Found file {1} instead'.format(old_ext,file)
+                message = '*** Cannot find run-file with extension {0}.\n'\
+                          '    Found file {1} instead'.format(old_ext,file)
                 RunDescriptor._logger(message,'notice')
             self._run_file_path = os.path.dirname(fname)
             return file
@@ -661,6 +661,12 @@ class RunDescriptor(PropDescriptor):
                    self._run_ext = None
                    self._run_file_path = ''
 
+    def has_own_value(self):
+        """ interface property, used in conjunction with 
+            RunDescriptorDependent property. Always true as
+            RunDescriptor property always have own value
+        """ 
+        return True
 
 #-------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------
@@ -693,6 +699,11 @@ class RunDescriptorDependent(RunDescriptor):
         self._this_run_defined = True
         super(RunDescriptorDependent,self).__set__(instance,value)
 
+    def has_own_value(self):
+        """ returns true if the property got own value and
+            is not bind to parent's value any more            
+        """
+        return self._this_run_defined
     #def __del__(self):
     #    # destructor removes bounded workspace 
     #    # Probably better not to at current approach

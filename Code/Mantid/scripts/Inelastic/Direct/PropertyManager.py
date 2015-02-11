@@ -273,8 +273,6 @@ class PropertyManager(NonIDF_Properties):
             if not(value is None):
                 setattr(self,par_name,value)
 
-
-
     def set_input_parameters(self,**kwargs):
         """ Set input properties from a dictionary of parameters
 
@@ -491,12 +489,48 @@ class PropertyManager(NonIDF_Properties):
             except:
                 file_path =''
 
+    def _get_properties_with_files(self):
+        """ Method returns list of properties, with values may have
+            files corresponding to them
+            
+            it does not include sample run, as this one will be 
+            treated separately
+        """ 
+
+        run_files_prop=['wb_run','monovan_run','mask_run','wb_for_monovan_run','second_white']
+        map_mask_prop =['det_cal_file','map_file','hard_mask_file']
+
+        abs_units = not(self.monovan_run is None)
+        run_files_to_check =[]
+        for prop_name in run_files_prop:
+            theProp = getattr(PropertyManager,prop_name)
+            if theProp.has_own_value:
+               val = theProp.__get__(self,PropertyManager)
+               if isinstance(val,api.Workspace): # it is loaded workspace 
+                  continue                       # and we do not care if 
+               else:                             # it have file
+                   if not(val is None) :
+                      run_files_to_check.append(prop_name)
+        # other files to check:
+        aux_files_to_check=[]
+        for prop_name in map_mask_prop:
+            val = getattr(self,prop_name)
+            if not(val is None):
+               aux_files_to_check.append(prop_name)
+        if abs_units:
+           val = self.monovan_mapfile
+           if not(val is None) :
+               aux_files_to_check.append('monovan_mapfile')
+        #
+        return run_files_to_check,aux_files_to_check
+
 
     def _check_necessary_files(self,monovan_run):
         """ Method verifies if all files necessary for a run are available.
 
            useful for long runs to check if all files necessary for it are present/accessible
         """
+
 
         def check_files_list(files_list):
             file_missing = False
