@@ -1,5 +1,5 @@
 import os
-os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -930,15 +930,16 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         run_files,map_files = propman._get_properties_with_files()
 
-        self.assertEqual(len(run_files),2)
+        self.assertEqual(len(run_files),1)
         self.assertTrue('wb_run' in run_files)
         self.assertFalse('monovan_run' in run_files)
-        self.assertTrue('mask_run' in run_files)
+        self.assertFalse('mask_run' in run_files)
         self.assertFalse('wb_for_monovan_run' in run_files)
 
         self.assertEqual(len(map_files),2)
         self.assertTrue('hard_mask_file' in map_files)
         self.assertTrue('det_cal_file' in map_files)
+
 
         api.AnalysisDataService.clear()
 
