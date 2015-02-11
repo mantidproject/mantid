@@ -1,12 +1,13 @@
-#ifndef MANTID_DATAOBJECTS_PEAKSHAPE_H_
-#define MANTID_DATAOBJECTS_PEAKSHAPE_H_
+#ifndef MANTID_GEOMETRY_PEAKSHAPE_H_
+#define MANTID_GEOMETRY_PEAKSHAPE_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include <string>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
-namespace DataObjects {
+namespace Geometry {
 
 /** PeakShape : Abstract type to describes the shape of a peak.
 
@@ -34,7 +35,7 @@ namespace DataObjects {
 class DLLExport PeakShape {
 public:
   /// Coordinte frame used upon creation
-  virtual Mantid::API::SpecialCoordinateSystem frame() const = 0;
+  virtual Mantid::Kernel::SpecialCoordinateSystem frame() const = 0;
   /// Serialize
   virtual std::string toJSON() const = 0;
   /// Deep copy this
@@ -49,7 +50,10 @@ public:
   virtual ~PeakShape() {}
 };
 
-} // namespace DataObjects
+typedef boost::shared_ptr<PeakShape> PeakShape_sptr;
+typedef boost::shared_ptr<const PeakShape> PeakShape_const_sptr;
+
+} // namespace Geometry
 } // namespace Mantid
 
-#endif /* MANTID_DATAOBJECTS_PEAKSHAPE_H_ */
+#endif /* MANTID_GEOMETRY_PEAKSHAPE_H_ */

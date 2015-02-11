@@ -326,6 +326,7 @@ if ( CXXTEST_FOUND OR PYUNITTEST_FOUND )
     # Create target to download data from the StandardTestData group.  This must come after
     # all tests have been added that reference the group, so we put it last.
     ExternalData_Add_Target(${_targetname})
+    set_target_properties(${_targetname} PROPERTIES EXCLUDE_FROM_ALL TRUE)
   endfunction()
 
   # We'll create two targets:

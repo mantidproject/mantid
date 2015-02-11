@@ -789,7 +789,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
  * @param coordinateSystem : Option to set.
  */
 void PeaksWorkspace::setCoordinateSystem(
-    const Mantid::API::SpecialCoordinateSystem coordinateSystem) {
+    const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem) {
   this->mutableRun().addProperty("CoordinateSystem", (int)coordinateSystem,
                                  true);
 }
@@ -797,9 +797,9 @@ void PeaksWorkspace::setCoordinateSystem(
 /**
  * @return the special Q3D coordinate system.
  */
-Mantid::API::SpecialCoordinateSystem
+Mantid::Kernel::SpecialCoordinateSystem
 PeaksWorkspace::getSpecialCoordinateSystem() const {
-  Mantid::API::SpecialCoordinateSystem result = None;
+  Mantid::Kernel::SpecialCoordinateSystem result = None;
   try {
     Property *prop = this->run().getProperty("CoordinateSystem");
     PropertyWithValue<int> *p = dynamic_cast<PropertyWithValue<int> *>(prop);
