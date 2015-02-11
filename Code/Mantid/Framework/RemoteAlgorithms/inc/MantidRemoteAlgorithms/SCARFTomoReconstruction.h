@@ -63,6 +63,8 @@ protected:
   virtual void doLogout(const std::string &username);
   virtual void doSubmit(const std::string &username);
   virtual void doQueryStatus(const std::string &username);
+  virtual void doQueryStatusById(const std::string& username,
+                                 const std::string& jobId);
   virtual void doCancel(const std::string &username);
 
 private:
@@ -81,7 +83,8 @@ private:
 
   class Action {
   public:
-  typedef enum {LOGIN=0, LOGOUT, SUBMIT, QUERYSTATUS, CANCEL, UNDEF} Type;
+    typedef enum {LOGIN=0, LOGOUT, SUBMIT, QUERYSTATUS, QUERYSTATUSBYID, CANCEL,
+                  UNDEF} Type;
   };
 
   // helper methods

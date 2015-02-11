@@ -20,12 +20,12 @@ time to login (for which you need to select the 'LogIn' action and set
 the username and password fields). After this step you can use the
 algorithm again several times, to submit jobs (setting the action
 'SubmitJob'), query the status of the jobs running on the computer
-cluster (setting the action 'JobStatus'), cancel jobs (setting the
-action 'CancelJob') and log out from the cluster (action
-'LogOut'). After logging out, subsequent submit or status queries will
-fail with an informative message. Note that the server will log out
-users every undetermined amount of time, which depends on server
-settings.
+cluster (setting the action to 'JobStatus' or 'JobStatusByID'), cancel
+jobs (setting the action 'CancelJob') and log out from the cluster
+(action 'LogOut'). After logging out, subsequent submit or status
+queries will fail with an informative message. Note that the server
+will log out users every undetermined amount of time, which depends on
+server settings.
 
 In principle, in a simple use case, the same username will be used in
 all the calls to this algorithm. This means that you type in the

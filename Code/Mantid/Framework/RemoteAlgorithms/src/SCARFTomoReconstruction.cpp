@@ -39,6 +39,7 @@ void SCARFTomoReconstruction::init() {
   reconstOps.push_back("LogOut");
   reconstOps.push_back("SubmitJob");
   reconstOps.push_back("JobStatus");
+  reconstOps.push_back("JobStatusByID");
   reconstOps.push_back("CancelJob");
   auto listValue = boost::make_shared<StringListValidator>(reconstOps);
 
@@ -91,6 +92,8 @@ SCARFTomoReconstruction::Action::Type SCARFTomoReconstruction::getAction()
     act = Action::SUBMIT;
   } else if (par == "JobStatus") {
     act = Action::QUERYSTATUS;
+  } else if (par == "JobStatusByID") {
+    act = Action::QUERYSTATUSBYID;
   } else if (par == "CancelJob") {
     act = Action::CANCEL;
   } else {
@@ -139,6 +142,17 @@ void SCARFTomoReconstruction::exec() {
     doSubmit(username);
   } else if (Action::QUERYSTATUS == m_action) {
     doQueryStatus(username);
+  } else if (Action::QUERYSTATUSBYID == m_action) {
+    std::string jobId;
+    try {
+      jobId = getPropertyValue("JobID");
+    } catch(std::runtime_error& /*e*/) {
+      g_log.error() << "To query the detailed status of a job by its ID you "
+        "need to give the ID of a job running on " <<
+        m_SCARFComputeResource << std::endl;
+      throw;
+    }
+    doQueryStatusById(username, jobId);
   } else if (Action::CANCEL == m_action) {
     doCancel(username);
   }
@@ -151,7 +165,7 @@ void SCARFTomoReconstruction::exec() {
  * response.
  *
  * @param username normally an STFC federal ID
- * @param passwork user password
+ * @param password user password
  */
 void SCARFTomoReconstruction::doLogin(const std::string &username,
                                       const std::string &password) {
@@ -379,6 +393,59 @@ void SCARFTomoReconstruction::doQueryStatus(const std::string &username) {
   }
 
   progress(1.0, "Status of jobs retrived.");
+}
+
+/**
+ * Query the status of jobs running (if successful will return info on
+ * jobs running for our user)
+ *
+ * @param username Username to use (should have authenticated before)
+ * @param jobId Identifier of a job as used by the job scheduler (integer number)
+ */
+void SCARFTomoReconstruction::doQueryStatusById(const std::string& username,
+                                                const std::string& jobId)
+{
+  auto it = m_tokenStash.find(username);
+  if (m_tokenStash.end() == it) {
+    throw std::runtime_error("Job status query failed. You do not seem to be logged "
+                             "in. I do not remember this username. Please check "
+                             "your username.");
+  }
+
+  progress(0, "Checking the status of job with Id " + jobId);
+
+  // Job submit, needs these headers:
+  // headers = {'Content-Type': 'application/xml', 'Cookie': token,
+  //            'Accept': ACCEPT_TYPE}
+  const std::string jobIdStatusPath = "webservice/pacclient/jobs/";
+  const std::string baseURL = it->second.m_url;
+  const std::string token = it->second.m_token_str;
+
+  InternetHelper session;
+  std::string httpsURL = baseURL + jobIdStatusPath;
+  g_log.debug() << "Sending HTTP GET request to: " << httpsURL << std::endl;
+  std::stringstream ss;
+  InternetHelper::StringToStringMap headers;
+  headers.insert(std::pair<std::string, std::string>("Content-Type",
+                                                     "application/xml"));
+  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  headers.insert(std::pair<std::string, std::string>("Cookie", token));
+  int code = session.sendRequest(httpsURL, ss, headers);
+  std::string resp = ss.str();
+  g_log.debug() << "Got HTTP code " << code << ", response: " <<  resp << std::endl;
+  if (Poco::Net::HTTPResponse::HTTP_OK == code) {
+    // TODO: still need to parse response string contents, look for a certain pattern
+    // in the response body. Maybe put it into an output TableWorkspace
+    g_log.notice() << "Queried job status (Id" << jobId << " ) with response: " <<
+      resp << std::endl;
+  } else {
+    throw std::runtime_error("Failed to obtain job (Id:" + jobId +" ) status "
+                             "information through the web service at:" + httpsURL +
+                             ". Please check your username, credentials, and "
+                             "parameters.");
+  }
+
+  progress(1.0, "Status of job " + jobId + "retrived.");
 }
 
 /**
