@@ -27,11 +27,13 @@ import argparse, os, string, subprocess
 
 parser = argparse.ArgumentParser(description="Generate diagrams from dot files")
 
+parser.add_argument("-x", "--dot-executable", default="/usr/bin/dot", help="The path to graphviz's dot tool")
 parser.add_argument("output_dir", help="The directory to write the output files to")
 parser.add_argument("input_files", nargs="+", help="The .dot files to process")
 
 args = parser.parse_args()
 
+print("dot executable: " + args.dot_executable)
 print("Output dir: " + args.output_dir)
 
 if not os.path.exists(args.output_dir):
@@ -49,7 +51,7 @@ for fn in args.input_files:
         out_src = string.Template(in_src).substitute(STYLE)
 
         print("Writing: " + png_path)
-        gviz = subprocess.Popen(["dot","-Tpng","-o",png_path], stdin=subprocess.PIPE)
+        gviz = subprocess.Popen([args.dot_executable,"-Tpng","-o",png_path], stdin=subprocess.PIPE)
         gviz.communicate(input=out_src)
         gviz.wait()
 
