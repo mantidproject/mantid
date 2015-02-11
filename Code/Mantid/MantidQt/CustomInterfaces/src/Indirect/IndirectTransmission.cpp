@@ -17,6 +17,8 @@ namespace CustomInterfaces
   {
     m_uiForm.setupUi(parent);
 
+    connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(instrumentSet()));
+
     // Preview plot
     m_plots["PreviewPlot"] = new QwtPlot(m_parentWidget);
     m_plots["PreviewPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
@@ -135,6 +137,15 @@ namespace CustomInterfaces
     // Set X range to data range
     setXAxisToCurve("PreviewPlot", "TransCurve");
     m_plots["PreviewPlot"]->replot();
+  }
+
+  void IndirectTransmission::instrumentSet()
+  {
+    std::map<QString, QString> instDetails = getInstrumentDetails();
+
+    // Set the search instrument for runs
+    m_uiForm.dsSampleInput->setInstrumentOverride(instDetails["instrument"]);
+    m_uiForm.dsCanInput->setInstrumentOverride(instDetails["instrument"]);
   }
 
 } // namespace CustomInterfaces
