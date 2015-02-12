@@ -192,11 +192,13 @@ void StandardView::renderAll()
 void StandardView::resetDisplay()
 {
   this->view->resetDisplay();
+  this->view->forceRender();
 }
 
 void StandardView::resetCamera()
 {
   this->view->resetCamera();
+  this->view->forceRender();
 }
 
 /**
