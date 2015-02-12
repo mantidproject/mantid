@@ -20,11 +20,19 @@ class RunDescriptor(PropDescriptor):
 #--------------------------------------------------------------------------------------------------------------------
     def __init__(self,prop_name,DocString=None): 
         """ """
+        self._prop_name = prop_name
+        if not DocString is None:
+            self.__doc__ = DocString
+
+        self._clear_all()
+#--------------------------------------------------------------------------------------------------------------------
+    def _clear_all(self):
+        """ clear all internal properties and settings """ 
         # Run number
         self._run_number = None
         # Extension of the file to load data from
         #
-        self._prop_name = prop_name
+
         self._run_file_path = ''
         self._run_ext = None
         # Workspace name which corresponds to the run
@@ -36,8 +44,8 @@ class RunDescriptor(PropDescriptor):
         self._bind_to_sum = False
 
         #
-        if not DocString is None:
-            self.__doc__ = DocString
+        self._in_cash = False
+
 #--------------------------------------------------------------------------------------------------------------------
     def __get__(self,instance,owner):
        """ return current run number or workspace if it is loaded""" 
@@ -62,13 +70,7 @@ class RunDescriptor(PropDescriptor):
        clear_fext = True
        #end
        if value == None: # clear current run number
-           self._run_number = None
-           self._ws_name = None
-           self._ws_cname = ''
-           self._ws_suffix = '' 
-           # only one RunDescriptor can be summed under current approach. 
-           # To disentangle one run descriptor from another -- set up binding
-           self._bind_to_sum = False
+           self._clear_all()
            self._clear_old_ws(old_ws_name,self._ws_name,clear_fext)
            RunDescriptor._PropMan.sum_runs.clear_sum()
            return
@@ -81,6 +83,7 @@ class RunDescriptor(PropDescriptor):
                 self._set_ws_as_source(value)
                 self._clear_old_ws(old_ws_name,self._ws_name,clear_fext)
                 self._bind_to_sum = False
+                self._in_cash = False
                 RunDescriptor._PropMan.sum_runs.clear_sum()
                 return
            else: # it is just reassigning the same workspace to itself
@@ -105,13 +108,13 @@ class RunDescriptor(PropDescriptor):
                   self.__set__(instance,run_num)
                   self._run_file_path = file_path
                   main_fext = fext.lower()
-                  
               #
               if len(main_fext) > 0:
                  self._run_ext = main_fext
               else: # will be default file extension
                  self._run_ext = None
               clear_fext = False
+              self._in_cash=False
        elif isinstance(value,list):
            if len(value) == 1:
                self.__set__(instance,value[0])
@@ -136,6 +139,7 @@ class RunDescriptor(PropDescriptor):
 
        self._ws_cname = ''
        self._ws_name = None
+       self._in_cash = False
        self._clear_old_ws(old_ws_name,None,clear_fext)
 #--------------------------------------------------------------------------------------------------------------------
     def run_number(self):
@@ -677,7 +681,7 @@ class RunDescriptor(PropDescriptor):
             property, this one depends on 
             
         """ 
-        return True
+        return not(self._in_cash)
 #-------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------

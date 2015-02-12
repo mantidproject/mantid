@@ -645,8 +645,8 @@ class DetCalFile(PropDescriptor):
         if isinstance(self._det_cal_file,api.Workspace): 
         # nothing to do. Workspace used for calibration
            return (True,'Workspace {0} used for detectors calibration'.format(self._det_cal_file.name()))
-        # string can be a run number or file name:
-        file_name = prop_helpers.findFile(self._det_cal_file)[0]
+        # string can be a run number or a file name:
+        file_name = prop_helpers.findFile(self._det_cal_file)
         if len(file_name) == 0: # it still can be a run number as string
            try: 
              file_name = FileFinder.findRuns(self._det_cal_file)[0]
@@ -690,7 +690,7 @@ class MapMaskFile(PropDescriptor):
 
        file_name = prop_helpers.findFile(self._file_name)
        if len(file_name) == 0: # it still can be a run number as string
-           return (False,'No file for {0} corresponding to hint {1} found'.format(self._prop_name,self._file_name))
+           return (False,'No file for {0} corresponding to guess: {1} found'.format(self._prop_name,self._file_name))
        else:
            self._file_name = file_name
            return (True,file_name)   

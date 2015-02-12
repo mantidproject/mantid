@@ -944,6 +944,17 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         api.AnalysisDataService.clear()
 
+        propman.monovan_run = 11002
+        propman.mask_run = None
+        propman.wb_for_monovan_run=11001
+        propman.map_file = 'some_missing_map'
+
+        ok,fail_list = propman._check_file_properties()
+        self.assertFalse(ok)
+        self.assertEqual(len(fail_list),2)
+        self.assertTrue('monovan_run' in fail_list)
+        self.assertTrue('map_file' in fail_list)
+
 if __name__=="__main__":
     unittest.main()
     #tester = DirectPropertyManagerTest('test_set_energy_bins_and_ei')

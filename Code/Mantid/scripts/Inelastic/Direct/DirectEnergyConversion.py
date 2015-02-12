@@ -293,20 +293,18 @@ class DirectEnergyConversion(object):
       except:
           out_ws_name = None
 
-
+     # check if reducer can find all non-run files necessary for the reduction
+     # and verify some other properties which can be wrong before starting long run.
+      self.prop_man.validate_properties()
 
       # inform user on what parameters have changed from script or gui
       # if monovan present, check if abs_norm_ parameters are set
       self.prop_man.log_changed_values('notice')
       prop_man = self.prop_man
-      #process complex parameters
+
 
       start_time = time.time()
 
-     # check if reducer can find all non-run files necessary for the reduction
-     # before starting long run.
-      #TODO:
-      # Reducer.check_necessary_files(monovan_run)
 
       PropertyManager.sample_run.set_action_suffix('')
       sample_ws = PropertyManager.sample_run.get_workspace()
@@ -466,6 +464,7 @@ class DirectEnergyConversion(object):
                 deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,
                                                                       ei_guess,PropertyManager.wb_for_monovan_run)
             self.check_background = current_bkg_opt
+         PropertyManager.monovan_run._in_cash = True # monovan run has been certainly deleted from memory
 
          # ensure that the sample_run name is intact with workspace
          PropertyManager.sample_run.synchronize_ws(deltaE_ws_sample)

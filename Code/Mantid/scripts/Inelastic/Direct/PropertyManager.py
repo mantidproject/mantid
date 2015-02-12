@@ -537,6 +537,23 @@ class PropertyManager(NonIDF_Properties):
         result = (len(file_errors)==0)
         return (result,file_errors)
 
+    def validate_properties(self):
+        """ Method validates if some properties values for 
+            properties set up in the property manager are correct 
+        """ 
+
+        if self.mono_correction_factor:
+           PropertyManager.monovan_run._in_cash = True
+
+        ok,fail_files= self._check_file_properties()
+
+        if not(ok):
+           for file_prop in fail_files:
+               self.log("*** ERROR: property {0} -->{1}".format(file_prop,fail_files[file_prop]),'warning')
+           raise RuntimeError('*** Invalid properties found. Can not run convert_to energy') 
+
+        return 0
+
     #
     def _check_monovan_par_changed(self):
         """ method verifies, if properties necessary for monovanadium reduction have indeed been changed  from defaults """
