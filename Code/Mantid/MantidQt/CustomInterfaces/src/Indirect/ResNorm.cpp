@@ -13,15 +13,8 @@ namespace MantidQt
 		{
 			m_uiForm.setupUi(parent);
 
-			// Create the plot
-      m_plots["ResNormPlot"] = new QwtPlot(m_parentWidget);
-      m_plots["ResNormPlot"]->setCanvasBackground(Qt::white);
-      m_plots["ResNormPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-      m_plots["ResNormPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-			m_uiForm.plotSpace->addWidget(m_plots["ResNormPlot"]);
-
       // Create range selector
-      m_rangeSelectors["ResNormERange"] = new MantidWidgets::RangeSelector(m_plots["ResNormPlot"]);
+      m_rangeSelectors["ResNormERange"] = new MantidWidgets::RangeSelector(m_uiForm.ppPlot);
       connect(m_rangeSelectors["ResNormERange"], SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
       connect(m_rangeSelectors["ResNormERange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
 
@@ -63,7 +56,7 @@ namespace MantidQt
 		bool ResNorm::validate()
 		{
 			UserInputValidator uiv;
-			uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsVanadium);
+			uiv.checkDataSelectorIsValid("Vanadium", m_uiForm.dsVanadium);
 			uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
 			QString errors = uiv.generateErrorMessage();
@@ -111,10 +104,7 @@ namespace MantidQt
 			runPythonScript(pyInput);
 
       // Plot the fit curve
-      plotMiniPlot("Fit", m_previewSpec, "ResNormPlot", "ResNormFitCurve");
-      m_curves["ResNormFitCurve"]->setPen(QColor(Qt::red));
-
-      replot("ResNormPlot");
+      m_uiForm.ppPlot->addSpectrum("Fit", "Fit", m_previewSpec, Qt::red);
 		}
 
 		/**
@@ -137,9 +127,10 @@ namespace MantidQt
 		 */
 		void ResNorm::handleVanadiumInputReady(const QString& filename)
 		{
-			plotMiniPlot(filename, m_previewSpec, "ResNormPlot", "RawPlotCurve");
-			std::pair<double,double> res;
-			std::pair<double,double> range = getCurveRange("RawPlotCurve");
+			m_uiForm.ppPlot->addSpectrum("Vanadium", filename, m_previewSpec);
+			std::pair<double, double> res;
+			QPair<double, double> curveRange = m_uiForm.ppPlot->getCurveRange("Vanadium");
+			std::pair<double, double> range(curveRange.first, curveRange.second);
 
       MatrixWorkspace_sptr vanWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(filename.toStdString());
       m_uiForm.spPreviewSpectrum->setMaximum(static_cast<int>(vanWs->getNumberHistograms()) - 1);
@@ -209,15 +200,10 @@ namespace MantidQt
       m_previewSpec = value;
 
       if(m_uiForm.dsVanadium->isValid())
-  			plotMiniPlot(m_uiForm.dsVanadium->getCurrentDataName(), m_previewSpec, "ResNormPlot", "RawPlotCurve");
+  			m_uiForm.ppPlot->addSpectrum("Vanadium", m_uiForm.dsVanadium->getCurrentDataName(), m_previewSpec);
 
       if(AnalysisDataService::Instance().doesExist("Fit"))
-      {
-        plotMiniPlot("Fit", m_previewSpec, "ResNormPlot", "ResNormFitCurve");
-        m_curves["ResNormFitCurve"]->setPen(QColor(Qt::red));
-      }
-
-      replot("ResNormPlot");
+        m_uiForm.ppPlot->addSpectrum("Fit", "Fit", m_previewSpec, Qt::red);
     }
 
 	} // namespace CustomInterfaces

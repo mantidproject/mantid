@@ -27,14 +27,14 @@
       </widget>
      </item>
      <item row="3" column="1">
-      <widget class="MantidQt::MantidWidgets::DataSelector" name="dsResolution">
+      <widget class="MantidQt::MantidWidgets::DataSelector" name="dsResolution" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="autoLoad">
+       <property name="autoLoad" stdset="0">
         <bool>true</bool>
        </property>
        <property name="loadLabelText" stdset="0">
@@ -52,7 +52,7 @@
          <string>_sqw.nxs</string>
         </stringlist>
        </property>
-       <property name="showLoad">
+       <property name="showLoad" stdset="0">
         <bool>false</bool>
        </property>
       </widget>
@@ -65,14 +65,14 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="MantidQt::MantidWidgets::DataSelector" name="dsVanadium">
+      <widget class="MantidQt::MantidWidgets::DataSelector" name="dsVanadium" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="autoLoad">
+       <property name="autoLoad" stdset="0">
         <bool>true</bool>
        </property>
        <property name="loadLabelText" stdset="0">
@@ -102,7 +102,18 @@
      <item>
       <layout class="QVBoxLayout" name="plotPane">
        <item>
-        <layout class="QVBoxLayout" name="plotSpace"/>
+        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlot" native="true">
+         <property name="showLegend" stdset="0">
+          <bool>true</bool>
+         </property>
+         <property name="canvasColour" stdset="0">
+          <color>
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
+          </color>
+         </property>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="underPlotSpace">
@@ -115,7 +126,7 @@
          </item>
          <item>
           <widget class="QSpinBox" name="spPreviewSpectrum">
-           <property name="maximum" stdset="0">
+           <property name="maximum">
             <number>0</number>
            </property>
           </widget>
@@ -132,23 +143,6 @@
             </size>
            </property>
           </spacer>
-         </item>
-         <item>
-          <widget class="QLabel" name="lblPlotLegendData">
-           <property name="text">
-            <string>Vanadium</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="lblPplotLegendFit">
-           <property name="text">
-            <string>Fit</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">color: rgb(255, 0, 0);</string>
-           </property>
-          </widget>
          </item>
         </layout>
        </item>
@@ -259,6 +253,12 @@
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/DataSelector.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::PreviewPlot</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/PreviewPlot.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

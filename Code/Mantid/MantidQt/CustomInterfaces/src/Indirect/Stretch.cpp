@@ -15,15 +15,9 @@ namespace MantidQt
 		{
 			m_uiForm.setupUi(parent);
 
-			// Create the plot
-      m_plots["StretchPlot"] = new QwtPlot(m_parentWidget);
-      m_plots["StretchPlot"]->setCanvasBackground(Qt::white);
-      m_plots["StretchPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-      m_plots["StretchPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-			m_uiForm.plotSpace->addWidget(m_plots["StretchPlot"]);
 
       // Create range selector
-      m_rangeSelectors["StretchERange"] = new MantidWidgets::RangeSelector(m_plots["StretchPlot"]);
+      m_rangeSelectors["StretchERange"] = new MantidWidgets::RangeSelector(m_uiForm.ppPlot);
       connect(m_rangeSelectors["StretchERange"], SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
       connect(m_rangeSelectors["StretchERange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
 
@@ -159,8 +153,9 @@ namespace MantidQt
 		 */
 		void Stretch::handleSampleInputReady(const QString& filename)
 		{
-			plotMiniPlot(filename, 0, "StretchPlot", "RawPlotCurve");
-			std::pair<double,double> range = getCurveRange("RawPlotCurve");
+			m_uiForm.ppPlot->addSpectrum("Sample", filename, 0);
+			QPair<double, double> curveRange = m_uiForm.ppPlot->getCurveRange("Sample");
+			std::pair<double, double> range(curveRange.first, curveRange.second);
 			setMiniPlotGuides("StretchERange", m_properties["EMin"], m_properties["EMax"], range);
 			setPlotRange("StretchERange", m_properties["EMin"], m_properties["EMax"], range);
 		}
