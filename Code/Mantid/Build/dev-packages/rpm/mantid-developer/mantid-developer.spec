@@ -64,6 +64,7 @@ Requires: scl-utils
 Requires: qt-devel
 Requires: qtwebkit-devel
 %endif
+Requires: graphviz
 
 BuildArch: noarch
 
@@ -86,6 +87,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Thu Feb 12 2015 Harry Jeffery <henry.jeffery@stfc.ac.uk>
+- Added graphviz dependency
+
 * Wed Aug 13 2014 Peter Peterson <petersonpf@ornl.gov>
 - Merged all three distribution spec files into one
 
