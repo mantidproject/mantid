@@ -72,12 +72,11 @@ public:
     Mantid::API::FunctionValues y(x);
 
     TS_ASSERT_THROWS_NOTHING(dkt.function(x,y));
-
-    TS_ASSERT_DELTA( y[0], 1.0000, 0.0001);
-    TS_ASSERT_DELTA( y[1], 0.8501, 0.0001);
-    TS_ASSERT_DELTA( y[2], 0.6252, 0.0001);
-    TS_ASSERT_DELTA( y[3], 0.4490, 0.0001);
-    TS_ASSERT_DELTA( y[4], 0.3233, 0.0001);
+    TS_ASSERT_DELTA( y[0], 1.000000, 0.000001);
+    TS_ASSERT_DELTA( y[1], 0.850107, 0.000001);
+    TS_ASSERT_DELTA( y[2], 0.625283, 0.000001);
+    TS_ASSERT_DELTA( y[3], 0.449064, 0.000001);
+    TS_ASSERT_DELTA( y[4], 0.323394, 0.000001);
   }
 
   void xtestZNDKTFunction()
