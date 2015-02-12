@@ -99,7 +99,6 @@ public:
     void testRRFMuonUnits()
   {
     // Test of the algorithm at non-zero frequency
-    // Results with different frequency units should match
 
     // Create input workspace with three spectra
     MatrixWorkspace_sptr ws = createDummyWorkspace();
@@ -137,7 +136,7 @@ public:
     TS_ASSERT(rrfMuon.isExecuted());
     TS_ASSERT(rrfMuon2.isExecuted());
     TS_ASSERT(rrfMuon3.isExecuted());
-    // Get result
+    // Get results
     MatrixWorkspace_const_sptr ows1 =
       boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outputWs1"));
     TS_ASSERT(ows1);
@@ -148,19 +147,25 @@ public:
       boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outputWs3"));
     TS_ASSERT(ows3);
 
-    // Checks
-    // Y values
+    // Check Y values
     // ows1 vs ows2
+    // Results with different frequency units should be very similar
     TS_ASSERT_DELTA  ( ows1->readY(0)[  5], ows2->readY(0)[  5], 0.000001 );
     TS_ASSERT_DELTA  ( ows1->readY(0)[ 98], ows2->readY(0)[ 98], 0.000001 );
     TS_ASSERT_DELTA  ( ows1->readY(0)[276], ows2->readY(0)[276], 0.000001 );
+    // But not exactly the same
+    // (They should only be the same if the input frequency in rrfMuon2 were exactly 1/2/M_PI)
     TS_ASSERT_DIFFERS( ows1->readY(0)[  5], ows2->readY(0)[  5]);
     TS_ASSERT_DIFFERS( ows1->readY(0)[ 98], ows2->readY(0)[ 98]);
     TS_ASSERT_DIFFERS( ows1->readY(0)[276], ows2->readY(0)[276]);
     // ows1 vs ows3
+    // Results with different frequency units should be very similar
     TS_ASSERT_DELTA  ( ows1->readY(0)[  8], ows3->readY(0)[  8], 0.000001 );
     TS_ASSERT_DELTA  ( ows1->readY(0)[109], ows3->readY(0)[109], 0.000001 );
     TS_ASSERT_DELTA  ( ows1->readY(0)[281], ows3->readY(0)[281], 0.000001 );
+    // But not exactly the same
+    // (They should only be the same if the input frequency in rrfMuon3 were exactly 1/2/M_PI/MU
+    // being MU the muon gyromagnetic ratio)
     TS_ASSERT_DIFFERS( ows1->readY(0)[  8], ows3->readY(0)[  8]);
     TS_ASSERT_DIFFERS( ows1->readY(0)[109], ows3->readY(0)[109]);
     TS_ASSERT_DIFFERS( ows1->readY(0)[281], ows3->readY(0)[281]);
