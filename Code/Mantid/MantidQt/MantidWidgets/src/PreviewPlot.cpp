@@ -233,13 +233,12 @@ void PreviewPlot::addSpectrum(const QString & curveName, const MatrixWorkspace_s
 
   // Create the curve label
   QLabel *label = new QLabel(curveName);
+  label->setVisible(false);
   QPalette palette = label->palette();
   palette.setColor(label->foregroundRole(), curveColour);
   label->setPalette(palette);
-  label->setVisible(legendIsShown());
-  label->setWordWrap(true);
-  label->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
   m_uiForm.loLegend->addWidget(label);
+  label->setVisible(legendIsShown());
 
   m_curves[curveName].ws = ws;
   m_curves[curveName].curve = curve;
