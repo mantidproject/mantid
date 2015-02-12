@@ -63,26 +63,18 @@ namespace IDA
     m_elwTree->addProperty(m_properties["BackgroundRange"]);
     m_elwTree->addProperty(m_properties["Normalise"]);
 
-    // Create Slice Plot Widget for Range Selection
-    m_plots["ElwinPlot"] = new QwtPlot(m_parentWidget);
-    m_plots["ElwinPlot"]->setAxisFont(QwtPlot::xBottom, m_parentWidget->font());
-    m_plots["ElwinPlot"]->setAxisFont(QwtPlot::yLeft, m_parentWidget->font());
-    m_uiForm.plot->addWidget(m_plots["ElwinPlot"]);
-    m_plots["ElwinPlot"]->setCanvasBackground(Qt::white);
     // We always want one range selector... the second one can be controlled from
     // within the elwinTwoRanges(bool state) function
-    m_rangeSelectors["ElwinIntegrationRange"] = new MantidWidgets::RangeSelector(m_plots["ElwinPlot"]);
+    m_rangeSelectors["ElwinIntegrationRange"] = new MantidWidgets::RangeSelector(m_uiForm.ppPlot);
     connect(m_rangeSelectors["ElwinIntegrationRange"], SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
     connect(m_rangeSelectors["ElwinIntegrationRange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
     // create the second range
-    m_rangeSelectors["ElwinBackgroundRange"] = new MantidWidgets::RangeSelector(m_plots["ElwinPlot"]);
+    m_rangeSelectors["ElwinBackgroundRange"] = new MantidWidgets::RangeSelector(m_uiForm.ppPlot);
     m_rangeSelectors["ElwinBackgroundRange"]->setColour(Qt::darkGreen); // dark green for background
     connect(m_rangeSelectors["ElwinIntegrationRange"], SIGNAL(rangeChanged(double, double)), m_rangeSelectors["ElwinBackgroundRange"], SLOT(setRange(double, double)));
     connect(m_rangeSelectors["ElwinBackgroundRange"], SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
     connect(m_rangeSelectors["ElwinBackgroundRange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
     m_rangeSelectors["ElwinBackgroundRange"]->setRange(m_rangeSelectors["ElwinIntegrationRange"]->getRange());
-    // Refresh the plot window
-    replot("ElwinPlot");
 
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
     connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(twoRanges(QtProperty*, bool)));
@@ -362,13 +354,13 @@ namespace IDA
     setDefaultResolution(ws);
     setDefaultSampleLog(ws);
 
-    plotMiniPlot(ws, specNo, "ElwinPlot", "ElwinDataCurve");
+    m_uiForm.ppPlot->clear();
+    m_uiForm.ppPlot->addSpectrum("Sample", ws, specNo);
 
     try
     {
-      const std::pair<double, double> range = getCurveRange("ElwinDataCurve");
+      QPair<double, double> range = m_uiForm.ppPlot->getCurveRange(ws);
       m_rangeSelectors["ElwinIntegrationRange"]->setRange(range.first, range.second);
-      replot("ElwinPlot");
     }
     catch(std::invalid_argument & exc)
     {
