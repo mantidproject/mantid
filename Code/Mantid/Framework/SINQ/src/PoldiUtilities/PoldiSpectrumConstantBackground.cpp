@@ -80,6 +80,19 @@ void PoldiSpectrumConstantBackground::setParameter(size_t i,
   }
 }
 
+double
+PoldiSpectrumConstantBackground::getParameter(const std::string &name) const {
+  return ParamFunction::getParameter(name);
+}
+
+double PoldiSpectrumConstantBackground::getParameter(size_t i) const {
+  if (m_flatBackground) {
+    return m_flatBackground->getParameter(i);
+  }
+
+  return 0;
+}
+
 void PoldiSpectrumConstantBackground::init() {
   m_flatBackground = boost::dynamic_pointer_cast<IFunction1D>(
       FunctionFactory::Instance().createFunction("FlatBackground"));

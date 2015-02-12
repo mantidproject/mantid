@@ -24,6 +24,7 @@ set ( EXPORT_FILES
   src/Exports/ReferenceFrame.cpp
   src/Exports/Goniometer.cpp
   src/Exports/Object.cpp
+  src/Exports/PeakShape.cpp
   src/Exports/PointGroup.cpp
   src/Exports/PointGroupFactory.cpp
   src/Exports/SpaceGroup.cpp
@@ -71,6 +72,10 @@ set_python_properties( PythonGeometryModule _geometry )
 set_target_output_directory ( PythonGeometryModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies
 target_link_libraries ( PythonGeometryModule PythonKernelModule Geometry )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( PythonGeometryModule PROPERTIES INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/")
+endif ()
 
 ###########################################################################
 # Installation settings

@@ -326,6 +326,10 @@ add_library ( CustomInterfaces ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 set_target_properties ( CustomInterfaces PROPERTIES OUTPUT_NAME MantidQtCustomInterfaces
                                                     COMPILE_DEFINITIONS IN_MANTIDQT_CUSTOMINTERFACES )
 
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( CustomInterfaces PROPERTIES INSTALL_RPATH "@loader_path/../../../Contents/MacOS")
+endif () 
+
 find_Package(Threads)
 
 target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBrowser ${CMAKE_THREAD_LIBS_INIT})

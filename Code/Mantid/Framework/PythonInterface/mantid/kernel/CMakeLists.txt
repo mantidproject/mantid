@@ -159,6 +159,10 @@ set_target_output_directory ( PythonKernelModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies
 target_link_libraries ( PythonKernelModule Kernel ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${PYTHON_DEPS} )
 
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( PythonKernelModule PROPERTIES INSTALL_RPATH "@loader_path/../../../MacOS")
+endif ()
+
 ###########################################################################
 # Installation settings
 ###########################################################################

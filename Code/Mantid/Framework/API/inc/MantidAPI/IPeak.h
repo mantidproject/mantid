@@ -3,6 +3,7 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -84,6 +85,8 @@ public:
   virtual Mantid::Kernel::V3D getDetPos() const = 0;
   virtual double getL1() const = 0;
   virtual double getL2() const = 0;
+
+  virtual const Mantid::Geometry::PeakShape& getPeakShape() = 0;
 };
 
 } // namespace Mantid

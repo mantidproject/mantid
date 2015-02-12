@@ -5,10 +5,11 @@
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
-namespace DataObjects {
-
+namespace Geometry {
 // Forward declaration
 class PeakShape;
+}
+namespace DataObjects {
 
 /** PeakShapeFactory : Factory for creating peak shapes
 
@@ -38,7 +39,7 @@ public:
   /// Destructor
   virtual ~PeakShapeFactory(){};
   /// Make the product
-  virtual PeakShape *create(const std::string &source) const = 0;
+  virtual Mantid::Geometry::PeakShape *create(const std::string &source) const = 0;
   /// Set the successor factory. create will be called on that if this instance
   /// is not suitable.
   virtual void
