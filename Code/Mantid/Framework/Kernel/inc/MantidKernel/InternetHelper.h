@@ -91,6 +91,10 @@ private:
                             Poco::URI &uri, std::ostream &responseStream);
   int processRelocation(const Poco::Net::HTTPResponse &response,
                         std::ostream &responseStream);
+
+  void logDebugRequestSending(const std::string &schemeName,
+                              const std::string &url) const;
+
   Kernel::ProxyInfo m_proxyInfo;
   bool m_isProxySet;
   int m_timeout;

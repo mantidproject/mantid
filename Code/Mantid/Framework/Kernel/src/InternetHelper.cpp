@@ -197,6 +197,28 @@ int InternetHelper::sendRequest(const std::string &url,
   }
 }
 
+/**
+ * Helper to log (debug level) the request being sent (careful not to
+ * print blatant passwords, etc.).
+ *
+ * @param url url being sent (will be logged)
+ * @param schemeName Normally "http" or "https"
+ */
+void InternetHelper::logDebugRequestSending(const std::string &schemeName,
+                                            const std::string &url) const {
+  std::string methodStr = (HTTPRequest::HTTP_GET==m_method)?
+    "GET" : "POST";
+  const std::string insecString = "password=";
+  if (std::string::npos == url.find(insecString)) {
+    g_log.debug() << "Sending " << schemeName << " " << methodStr <<
+      " request to: " << url << "\n";
+  } {
+    g_log.debug() << "Sending " << schemeName << " " << methodStr <<
+      " request to an url where the query string seems to contain a "
+      "password! (not shown for security reasons)." << "\n";
+  }
+}
+
 /** Performs a request using http
 * @param url the address to the network resource
 * @param responseStream The stream to fill with the reply on success
@@ -204,7 +226,8 @@ int InternetHelper::sendRequest(const std::string &url,
 int InternetHelper::sendHTTPRequest(const std::string &url,
                                     std::ostream &responseStream) {
   int retStatus = 0;
-  g_log.debug() << "Sending request to: " << url << "\n";
+
+  logDebugRequestSending("http", url);
 
   Poco::URI uri(url);
   // Configure Poco HTTP Client Session
@@ -233,7 +256,8 @@ int InternetHelper::sendHTTPRequest(const std::string &url,
 int InternetHelper::sendHTTPSRequest(const std::string &url,
                                      std::ostream &responseStream) {
   int retStatus = 0;
-  g_log.debug() << "Sending request to: " << url << "\n";
+
+  logDebugRequestSending("https", url);
 
   Poco::URI uri(url);
   try {
