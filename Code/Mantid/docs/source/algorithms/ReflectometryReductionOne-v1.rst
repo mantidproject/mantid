@@ -20,7 +20,7 @@ script.
 Workflow
 ########
 
-.. diagram:: ReflectometryReductionOne
+.. diagram:: ReflectometryReductionOne-v1_wkflw.dot
 
 Analysis Modes
 ##############

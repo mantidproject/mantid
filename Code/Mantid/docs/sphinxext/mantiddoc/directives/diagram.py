@@ -68,11 +68,18 @@ class DiagramDirective(BaseDirective):
             os.makedirs(out_dir)
 
         diagram_name = self.arguments[0]
-        in_path = os.path.join(env.srcdir, "diagrams", diagram_name + ".dot")
-        out_path = os.path.join(out_dir, diagram_name + ".png")
+        if diagram_name[-4:] != ".dot":
+            raise RuntimeError("Diagrams need to be referred to by their filename, including '.dot' extension.")
+
+        in_path = os.path.join(env.srcdir, "diagrams", diagram_name)
+        out_path = os.path.join(out_dir, diagram_name[:-4] + ".png")
 
         #Generate the diagram
-        in_src = open(in_path, 'r').read()
+        try:
+            in_src = open(in_path, 'r').read()
+        except:
+            raise RuntimeError("Cannot find dot-file: '" + diagram_name + "' in '" + os.path.join(env.srcdir,"diagrams"))
+
         out_src = string.Template(in_src).substitute(STYLE)
         gviz = subprocess.Popen([dot_executable,"-Tpng","-o",out_path], stdin=subprocess.PIPE)
         gviz.communicate(input=out_src)

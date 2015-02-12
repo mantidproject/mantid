@@ -26,7 +26,7 @@ Workflow for WorkspaceGroups
 
 If a WorkspaceGroup is provided to ReflectometryReductionOneAuto, it will follow the steps shown in the diagram below to produce its output.
 
-.. diagram:: ReflectometryReductionOneAuto-Groups
+.. diagram:: ReflectometryReductionOneAuto-v1-Groups_wkflw.dot
 
 Workflow for Polarization Correction
 ####################################
@@ -34,7 +34,7 @@ Workflow for Polarization Correction
 If polarization correction is enabled, it is performed as an additional step once the main processing has completed.
 The following diagram shows how the :ref:`algm-PolarizationCorrection` algorithm is used.
 
-.. diagram:: ReflectometryReductionOneAuto-PolarizationCorrection
+.. diagram:: ReflectometryReductionOneAuto-v1-PolarizationCorrection_wkflw.dot
 
 Usage
 -----
