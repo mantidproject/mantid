@@ -113,10 +113,14 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
         if not dest is None:
             filename = "SliceViewerSaveImage"
             filepath = os.path.join(dest, filename+".png")
+            # Remove any old file
+            if os.path.isfile(filepath):
+                os.remove(filepath)
+            # Save
             svw.saveImage(filepath)
             self.assertEquals(os.path.isfile(filepath), True,
                               "Screenshot was not written out as expected.")
-            if file_exists:
+            if os.path.isfile(filepath):
                 os.remove(filepath)
 
     def test_showLine(self):
