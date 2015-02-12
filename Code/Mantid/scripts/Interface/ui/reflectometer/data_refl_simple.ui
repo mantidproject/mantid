@@ -36,8 +36,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1606</width>
-        <height>1497</height>
+        <width>1594</width>
+        <height>1380</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -4272,7 +4272,7 @@ p, li { white-space: pre-wrap; }
                        </size>
                       </property>
                       <property name="text">
-                       <string>0.0009</string>
+                       <string>0.004</string>
                       </property>
                      </widget>
                     </item>
@@ -4326,7 +4326,7 @@ p, li { white-space: pre-wrap; }
                        </size>
                       </property>
                       <property name="text">
-                       <string>0.045</string>
+                       <string>0.02</string>
                       </property>
                      </widget>
                     </item>

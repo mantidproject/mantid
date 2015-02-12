@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/Indirect/IndirectSymmetrise.h"
+# include "MantidQtCustomInterfaces/Indirect/IndirectSymmetrise.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -188,7 +188,6 @@ namespace CustomInterfaces
     QString outputWorkspaceName = workspaceName.left(workspaceName.length() - 4) + "_sym" + workspaceName.right(4);
 
     bool plot = m_uiForm.ckPlot->isChecked();
-    bool verbose = m_uiForm.ckVerbose->isChecked();
     bool save = m_uiForm.ckSave->isChecked();
 
     double e_min = m_dblManager->value(m_properties["EMin"]);
@@ -200,7 +199,6 @@ namespace CustomInterfaces
     symmetriseAlg->setProperty("XMin", e_min);
     symmetriseAlg->setProperty("XMax", e_max);
     symmetriseAlg->setProperty("Plot", plot);
-    symmetriseAlg->setProperty("Verbose", verbose);
     symmetriseAlg->setProperty("Save", save);
     symmetriseAlg->setProperty("OutputWorkspace", outputWorkspaceName.toStdString());
     symmetriseAlg->setProperty("OutputPropertiesTable", "__SymmetriseProps_temp");
@@ -390,7 +388,6 @@ namespace CustomInterfaces
     if(workspaceName.isEmpty())
       return;
 
-    bool verbose = m_uiForm.ckVerbose->isChecked();
     double e_min = m_dblManager->value(m_properties["EMin"]);
     double e_max = m_dblManager->value(m_properties["EMax"]);
     long spectrumNumber = static_cast<long>(m_dblManager->value(m_properties["PreviewSpec"]));
@@ -403,7 +400,6 @@ namespace CustomInterfaces
     symmetriseAlg->setProperty("XMin", e_min);
     symmetriseAlg->setProperty("XMax", e_max);
     symmetriseAlg->setProperty("Plot", false);
-    symmetriseAlg->setProperty("Verbose", verbose);
     symmetriseAlg->setProperty("Save", false);
     symmetriseAlg->setProperty("SpectraRange", spectraRange);
     symmetriseAlg->setProperty("OutputWorkspace", "__Symmetrise_temp");

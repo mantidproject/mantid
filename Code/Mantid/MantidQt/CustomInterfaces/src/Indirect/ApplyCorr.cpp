@@ -149,10 +149,6 @@ namespace IDA
     pyInput += "scale = " + ScaleOrNot + "\n";
     pyInput += "scaleFactor = " + ScalingFactor + "\n";
 
-
-    if ( m_uiForm.ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-    else pyInput += "verbose = False\n";
-
     if ( m_uiForm.ckSave->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";
 
@@ -171,7 +167,7 @@ namespace IDA
     }
 
     pyInput += "plotResult = '" + plotResult + "'\n";
-    pyInput += "print abscorFeeder(sample, container, geom, useCor, corrections, Verbose=verbose, RebinCan=rebin_can, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult)\n";
+    pyInput += "print abscorFeeder(sample, container, geom, useCor, corrections, RebinCan=rebin_can, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
 

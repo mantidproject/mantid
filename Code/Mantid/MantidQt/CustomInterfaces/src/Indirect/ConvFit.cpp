@@ -184,9 +184,6 @@ namespace IDA
     if ( m_blnManager->value(m_properties["Convolve"]) ) pyInput += "convolve = True\n";
     else pyInput += "convolve = False\n";
 
-    if ( m_uiForm.ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-    else pyInput += "verbose = False\n";
-
     QString temperature = m_uiForm.leTempCorrection->text();
     bool useTempCorrection = (!temperature.isEmpty() && m_uiForm.ckTempCorrection->isChecked());
     if ( useTempCorrection )
@@ -201,7 +198,7 @@ namespace IDA
     pyInput +=
       "bg = '" + bgType + "'\n"
       "ftype = '" + fitType + "'\n"
-      "confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, convolve, Verbose=verbose, Plot=plot, Save=save)\n";
+      "confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, convolve, Plot=plot, Save=save)\n";
 
     QString pyOutput = runPythonCode(pyInput);
 

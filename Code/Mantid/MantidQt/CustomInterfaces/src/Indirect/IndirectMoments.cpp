@@ -89,7 +89,6 @@ namespace CustomInterfaces
     double eMax = m_dblManager->value(m_properties["EMax"]);
 
     bool plot = m_uiForm.ckPlot->isChecked();
-    bool verbose = m_uiForm.ckVerbose->isChecked();
     bool save = m_uiForm.ckSave->isChecked();
 
     std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
@@ -100,7 +99,6 @@ namespace CustomInterfaces
     momentsAlg->setProperty("EnergyMin", eMin);
     momentsAlg->setProperty("EnergyMax", eMax);
     momentsAlg->setProperty("Plot", plot);
-    momentsAlg->setProperty("Verbose", verbose);
     momentsAlg->setProperty("Save", save);
     momentsAlg->setProperty("OutputWorkspace", outputWorkspaceName);
 
@@ -208,8 +206,6 @@ namespace CustomInterfaces
     double eMin = m_dblManager->value(m_properties["EMin"]);
     double eMax = m_dblManager->value(m_properties["EMax"]);
 
-    bool verbose = m_uiForm.ckVerbose->isChecked();
-
     std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
 
     IAlgorithm_sptr momentsAlg = AlgorithmManager::Instance().create("SofQWMoments");
@@ -218,7 +214,6 @@ namespace CustomInterfaces
     momentsAlg->setProperty("EnergyMin", eMin);
     momentsAlg->setProperty("EnergyMax", eMax);
     momentsAlg->setProperty("Plot", false);
-    momentsAlg->setProperty("Verbose", verbose);
     momentsAlg->setProperty("Save", false);
     momentsAlg->setProperty("OutputWorkspace", outputWorkspaceName);
 

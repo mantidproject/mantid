@@ -72,8 +72,17 @@ def getSheight(mt, index):
         return the DAS hardware slits height of slits # index
     """
     mt_run = mt.getRun()
-    tag = 'S' + index + 'VHeight'
-    value = mt_run.getProperty(tag).value
+    if index == 2:
+        try:
+            tag = 'SiVHeight'
+            value = mt_run.getProperty(tag).value
+        except:
+            tag = 'S2VHeight'
+            value = mt_run.getProperty(tag).value
+    else:
+        tag = 'S1VHeight'
+        value = mt_run.getProperty(tag).value
+        
     return value[0]
 
 def getS1h(mt=None):
@@ -105,8 +114,16 @@ def getSwidth(mt, index):
         defined by the DAS hardware
     """
     mt_run = mt.getRun()
-    tag = 'S' + index + 'HWidth'
-    value = mt_run.getProperty(tag).value
+    if index==2:
+        try:
+            tag = 'SiHWidth'
+            value = mt_run.getProperty(tag).value
+        except:
+            tag = 'S2HWidth'
+            value = mt_run.getProperty(tag).value
+    else:
+        tag = 'S1HWidth'
+        value = mt_run.getProperty(tag).value
     return value[0]
 
 def getSw(mt, left_tag, right_tag):
@@ -823,32 +840,40 @@ def applySF(InputWorkspace,
         print '--> Data S2H: {0:2f}'.format(s2h_value)
         print '--> Data S1W: {0:2f}'.format(s1w_value)
         print '--> Data S2W: {0:2f}'.format(s2w_value)
-
+        
+        print 'mERDDEEEEDEDEED'
         for i in range(nbr_row):
 
             _file_incidentMedium = getFieldValue(sfFactorTable,i,0)
             if (_file_incidentMedium.strip() == _incidentMedium.strip()):
+                print '--- incident medium match ---'
                 _file_lambdaRequested = getFieldValue(sfFactorTable,i,1)
                 if (isWithinPrecisionRange(_file_lambdaRequested,
                                            _lr_value,
                                            valuePrecision)):
+                    print '--- lambda requested match ---'
                     _file_s1h = getFieldValue(sfFactorTable,i,2)
                     if(isWithinPrecisionRange(_file_s1h,
                                               s1h_value,
                                               valuePrecision)):
+                        print '--- S1H match ---'
                         _file_s2h = getFieldValue(sfFactorTable,i,3)
                         if(isWithinPrecisionRange(_file_s2h,
                                                   s2h_value,
                                                   valuePrecision)):
+                            print '--- S2H match ---'
                             if (slitsWidthFlag):
+                                print '--- (with Width flag) ----'
                                 _file_s1w = getFieldValue(sfFactorTable,i,4)
                                 if(isWithinPrecisionRange(_file_s1w,
                                                           s1w_value,
                                                           valuePrecision)):
+                                    print '--- S1W match ---'
                                     _file_s2w = getFieldValue(sfFactorTable,i,5)
                                     if(isWithinPrecisionRange(_file_s2w,
                                                               s2w_value,
                                                               valuePrecision)):
+                                        print '--- S2W match ---'
 
                                         print '--> Found a perfect match'
                                         a = float(getFieldValue(sfFactorTable,i,6))
@@ -1415,7 +1440,7 @@ def applyScalingFactor(tof_axis,
         _lr_value = _lr[0]
         _lr_value = float("{0:.2f}".format(_lr_value))
 
-        #retrieve s1h and s2h values
+        #retrieve s1h and s2h or sih values
         s1h = getS1h(mtd['ws_event_data'])
         s2h = getS2h(mtd['ws_event_data'])
 
@@ -1439,27 +1464,34 @@ def applyScalingFactor(tof_axis,
 
             _file_incidentMedium = getFieldValue(sfFactorTable,i,0)
             if (_file_incidentMedium.strip() == _incidentMedium.strip()):
+                print '*** incident medium match ***'
                 _file_lambdaRequested = getFieldValue(sfFactorTable,i,1)
                 if (isWithinPrecisionRange(_file_lambdaRequested,
                                            _lr_value,
                                            valuePrecision)):
+                    print '*** lambda requested match ***'
                     _file_s1h = getFieldValue(sfFactorTable,i,2)
                     if(isWithinPrecisionRange(_file_s1h,
                                               s1h_value,
                                               valuePrecision)):
+                        print '*** s1h match ***'
                         _file_s2h = getFieldValue(sfFactorTable,i,3)
                         if(isWithinPrecisionRange(_file_s2h,
                                                   s2h_value,
                                                   valuePrecision)):
+                            print '*** s2h match ***'
                             if (slitsWidthFlag):
+                                print '*** (with slits width flag) ***'
                                 _file_s1w = getFieldValue(sfFactorTable,i,4)
                                 if(isWithinPrecisionRange(_file_s1w,
                                                           s1w_value,
                                                           valuePrecision)):
+                                    print '*** s1w match ***'
                                     _file_s2w = getFieldValue(sfFactorTable,i,5)
                                     if(isWithinPrecisionRange(_file_s2w,
                                                               s2w_value,
                                                               valuePrecision)):
+                                        print '*** s2w match ***'
 
                                         print '--> Found a perfect match'
                                         a = float(getFieldValue(sfFactorTable,i,6))
@@ -2053,7 +2085,6 @@ def isNexusTakeAfterRefDate(nexus_date):
      return True
    else:
      return False
-
 
 
 

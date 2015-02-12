@@ -63,7 +63,7 @@ namespace Mantid
         }
         virtual int getSpecialCoordinates()
         {
-          return API::None;
+        return Kernel::None;
         }
 
         /**

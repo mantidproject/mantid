@@ -88,11 +88,10 @@ namespace MantidQt
 		 */
 		void JumpFit::run()
 		{
-			bool verbose = m_uiForm.chkVerbose->isChecked();
 			bool save = m_uiForm.chkSave->isChecked();
 			bool plot = m_uiForm.chkPlot->isChecked();
 
-      runImpl(verbose, plot, save);
+      runImpl(plot, save);
 		}
 
     /**
@@ -106,11 +105,10 @@ namespace MantidQt
     /**
      * Runs algorithm.
      *
-     * @param verbose Enable/disable verbose option
      * @param plot Enable/disable plotting
      * @param save Enable/disable saving
      */
-    void JumpFit::runImpl(bool verbose, bool plot, bool save)
+    void JumpFit::runImpl(bool plot, bool save)
     {
       // Do noting with invalid data
 			if(!m_uiForm.dsSample->isValid())
@@ -151,7 +149,6 @@ namespace MantidQt
       fitAlg->setProperty("QMin", m_dblManager->value(m_properties["QMin"]));
       fitAlg->setProperty("QMax", m_dblManager->value(m_properties["QMax"]));
 
-      fitAlg->setProperty("Verbose", verbose);
       fitAlg->setProperty("Plot", plot);
       fitAlg->setProperty("Save", save);
 

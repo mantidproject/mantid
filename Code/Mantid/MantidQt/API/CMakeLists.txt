@@ -126,6 +126,10 @@ add_library ( MantidQtAPI ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 set_target_properties ( MantidQtAPI PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_API )
 
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( MantidQtAPI PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif () 
+
 target_link_libraries ( MantidQtAPI ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 ###########################################################################
