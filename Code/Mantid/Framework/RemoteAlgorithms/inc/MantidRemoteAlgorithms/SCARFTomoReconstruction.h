@@ -49,8 +49,8 @@ public:
   virtual const std::string name() const { return "SCARFTomoReconstruction"; }
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
-    return "Perform a control action on tomographic reconstruction jobs, on "
-      "the SCARF computer cluster at RAL, STFC (http://www.scarf.rl.ac.uk/)";
+    return "Perform a control action on jobs running on the SCARF computer "
+      "cluster at RAL, STFC (http://www.scarf.rl.ac.uk/)";
   }
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -98,10 +98,6 @@ private:
   };
   typedef std::pair<std::string, SCARFTomoReconstruction::Token> UsernameToken;
 
-  /// check if output file is writeable, overwritten, etc.
-  const std::string checkDownloadOutputFile(const std::string &localPath,
-                                            const std::string &fname);
-
   /// helper to fetch and save one file from the compute resource
   void getOneJobFile(const std::string &jobId, const std::string &remotePath,
                      const std::string &localPath, const Token &t);
@@ -109,6 +105,13 @@ private:
   /// helper to fetch and save all the files for a remote job
   void getAllJobFiles(const std::string &jobId, const std::string &localDir,
                       const Token &t);
+
+  /// check if output file is writeable, overwritten, etc.
+  const std::string checkDownloadOutputFile(const std::string &localPath,
+                                            const std::string &fname);
+
+  /// get a normal file name from a 'PAC Server*...' name
+  const std::string filterPACFilename(const std::string PACName);
 
   class Action {
   public:

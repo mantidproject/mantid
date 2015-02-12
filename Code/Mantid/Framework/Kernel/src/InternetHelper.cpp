@@ -212,7 +212,7 @@ void InternetHelper::logDebugRequestSending(const std::string &schemeName,
   if (std::string::npos == url.find(insecString)) {
     g_log.debug() << "Sending " << schemeName << " " << methodStr <<
       " request to: " << url << "\n";
-  } {
+  } else {
     g_log.debug() << "Sending " << schemeName << " " << methodStr <<
       " request to an url where the query string seems to contain a "
       "password! (not shown for security reasons)." << "\n";

@@ -684,8 +684,6 @@ void SCARFTomoReconstruction::doDownload(const std::string &username,
 
   progress(0, "Downloading file: " + fname + " in " + localDir);
 
-  //TODO const std::string baseURL = it->second.m_url;
-  //const std::string token = it->second.m_token_str;
   if (fname.empty()) {
     // no name implies we want all the files of a remote job
     getAllJobFiles(jobId, localDir, it->second);
@@ -854,6 +852,30 @@ SCARFTomoReconstruction::checkDownloadOutputFile(const std::string &localPath,
 }
 
 /**
+ * Turns the esoteric name used in LSF PAC web service into a normal
+ * filename (as a basename + extention, discarding the path to
+ * it). For example, this method translates:
+ * 'PAC Server* /home/isisg/scarf362/../scarf362/
+ * Mantid_tomography_1_1423743450375PtlPj/417666.error*FILE*281*true'
+ * into '417666.error'.
+ *
+ * @param PACName A file name specification as returned by PAC LSF
+ * when downloading multiple files from jobs
+ *
+ * @return A filename ready to be used to save the file locally. Empty
+ * string if fails.
+ */
+const std::string
+SCARFTomoReconstruction::filterPACFilename(const std::string PACName) {
+  // discard up to last / (path)
+  std::string name = PACName.substr(PACName.rfind("/") + 1);
+  // remove trailing parameters
+  size_t ast = name.find("*");
+  name.replace(ast, std::string::npos, "");
+  return name;
+}
+
+/**
  * Download a job file once we have obtained the remote path.
  *
  * @param jobId Identifier of a job as used by the job scheduler (integer number)
@@ -885,16 +907,22 @@ void SCARFTomoReconstruction::getOneJobFile(const std::string &jobId,
   std::string body = remotePath;
   int code = session.sendRequest(httpsURL, ss, headers,
                                  Poco::Net::HTTPRequest::HTTP_GET, body);
-  // TODO std::string resp = ss.str();
   g_log.debug() << "Got HTTP code " << code << std::endl;
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     // this is what indicates success/failure: response content empty/not empty
     if (ss.rdbuf()->in_avail() > 0) {
       // check file is writeable and inform user
-      std::string outName = checkDownloadOutputFile(localPath, remotePath);
+      // get basename from 'PAC' name
+      std::string name = filterPACFilename(remotePath);
+      if (name.empty()) {
+        g_log.notice() << "Could not download remote file " << remotePath <<
+          " into " << localPath << ", a problem with its name was found" <<
+          std::endl;
+      }
+      std::string outName = checkDownloadOutputFile(localPath, name);
       std::ofstream file(outName, std::ios_base::binary);
       Poco::StreamCopier::copyStream(ss, file);
-      g_log.notice() << "Downloaded remote file " << remotePath << " into " <<
+      g_log.notice() << "Downloaded remote file " << outName << " into " <<
         localPath << std::endl;
     } else {
       // log an error but potentially continue with other files
@@ -938,17 +966,24 @@ void SCARFTomoReconstruction::getAllJobFiles(const std::string &jobId,
   int code = session.sendRequest(httpsURL, ss, headers);
   std::string resp = ss.str();
   g_log.debug() << "Got HTTP code " << code << ", response: " <<  resp << std::endl;
-  std::vector<std::string> fileNames;
+  // what you get in this response is one line with text like this:
+  // 'PAC Server*/home/isisg/scarf362/../scarf362/
+  // Mantid_tomography_1_1423743450375PtlPj/417666.error*FILE*281*true;PAC Server*/
+  // home/isisg/scarf362/../scarf362/
+  // Mantid_tomography_1_1423743450375PtlPj/417666.output*FILE*1145*true;'
+  //   (the number between *FILE* and *true is the size in bytes)
+  std::vector<std::string> filePACNames;
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     // this is what indicates success/failure: presence of '/' or '\'
-    if (std::string::npos != resp.find('/') || std::string::npos != resp.find('/')) {
+    if (std::string::npos != resp.find('/') ||
+        std::string::npos != resp.find('\\')) {
       // you can get multiple files, as remote file names listed separated by ';'
-      std::string name;
-      while (std::getline(ss, name, ';')) {
-        fileNames.push_back(name);
+      std::string PACname;
+      while (std::getline(ss, PACname, ';')) {
+        filePACNames.push_back(PACname);
       }
-      for (size_t i=0; i<fileNames.size(); i++) {
-        getOneJobFile(jobId, fileNames[i], localDir, t);
+      for (size_t i=0; i<filePACNames.size(); i++) {
+        getOneJobFile(jobId, filePACNames[i], localDir, t);
       }
     }
   } else {
@@ -957,8 +992,8 @@ void SCARFTomoReconstruction::getAllJobFiles(const std::string &jobId,
                              "existing jobs, username, and parameters.");
   }
 
-  progress(1.0, "Download  of " + boost::lexical_cast<std::string>(fileNames.size()) +
-           " file(s) completed in " + localDir);
+  progress(1.0, "Download  of " + boost::lexical_cast<std::string>(filePACNames.size())
+           + " file(s) completed in " + localDir);
 }
 
 } // end namespace RemoteAlgorithms
