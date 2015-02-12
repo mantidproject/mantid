@@ -278,20 +278,20 @@ namespace MantidQt
     void SlicingAlgorithmDialog::makeDimensionInputs(const QString& propertyPrefix,
         QLayout* owningLayout, QString (*format)(IMDDimension_const_sptr), History history)
     {
-      // Remove all properties associated with the propertyPrefix
-      size_t indexUntie = 0;
-      QString propertyNameUntie = propertyPrefix.copy().append(QString().number(indexUntie));
-      Mantid::Kernel::Property* propertyUntie = getAlgorithmProperty(propertyNameUntie);
-      while(propertyUntie)
+      // Remove excess dimensions from the tied properties and the stored property values
+      size_t indexRemoved = 0;
+      QString propertyNameRemoved = propertyPrefix.copy().append(QString().number(indexRemoved));
+      Mantid::Kernel::Property *propertyRemoved = getAlgorithmProperty(propertyNameRemoved);
+
+      while(propertyRemoved)
       {
-        untie(propertyNameUntie);
-        removePropertyValue(propertyNameUntie);
+        untie(propertyNameRemoved);
+        removePropertyValue(propertyNameRemoved);
 
-        indexUntie++;
-        propertyNameUntie = propertyPrefix.copy().append(QString().number(indexUntie));
-        propertyUntie = getAlgorithmProperty(propertyNameUntie);
+        indexRemoved++;
+        propertyNameRemoved = propertyPrefix.copy().append(QString().number(indexRemoved));
+        propertyRemoved = getAlgorithmProperty(propertyNameRemoved);
       }
-
 
       const QString& txt = getCurrentInputWorkspaceName();
       if (!txt.isEmpty())

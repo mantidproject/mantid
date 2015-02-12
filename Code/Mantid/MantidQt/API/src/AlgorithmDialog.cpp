@@ -265,9 +265,10 @@ void AlgorithmDialog::storePropertyValue(const QString & name, const QString & v
 
 //-------------------------------------------------------------------------------------------------
 /**
- * Removes a property (name,value) pair to the stored map
+ * Adds a property (name,value) pair to the stored map.
+ * @param name :: The name of the property.
  */
-void AlgorithmDialog::removePropertyValue(const QString & name)
+void AlgorithmDialog::removePropertyValue(const QString& name)
 {
   if( name.isEmpty() ) return;
   m_propertyValueMap.remove(name);
@@ -300,7 +301,6 @@ void AlgorithmDialog::showValidators()
       }
     } // widget is tied
   } // for each property
-
 }
 
 //-------------------------------------------------------------------------------------------------

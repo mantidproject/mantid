@@ -83,7 +83,7 @@ public:
   virtual bool threadSafe() const;
 
   virtual void setCoordinateSystem(
-      const Mantid::API::SpecialCoordinateSystem coordinateSystem) = 0;
+      const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem) = 0;
 
 protected:
   virtual const std::string toString() const;

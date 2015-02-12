@@ -33,8 +33,8 @@ set ( SRC_FILES
 	src/ScriptEditor.cpp
 	src/SelectFunctionDialog.cpp
 	src/SelectWorkspacesDialog.cpp
-	src/SequentialFitDialog.cpp
-  src/SlicingAlgorithmDialog.cpp
+        src/SequentialFitDialog.cpp
+	src/SlicingAlgorithmDialog.cpp
 	src/StringDialogEditor.cpp
 	src/StringEditorFactory.cpp
 	src/UserFunctionDialog.cpp
@@ -149,6 +149,10 @@ add_definitions ( -DIN_MANTIDQT_MANTIDWIDGETS -DQT_QTPROPERTYBROWSER_IMPORT )
 # Use a precompiled header where they are supported
 enable_precompiled_headers( inc/MantidQtMantidWidgets/PrecompiledHeader.h ALL_SRC )
 add_library ( MantidWidgets ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( MantidWidgets PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif ()
 
 target_link_libraries ( MantidWidgets MantidQtAPI QtPropertyBrowser 
     ${QT_LIBRARIES} ${QWT_LIBRARIES} 

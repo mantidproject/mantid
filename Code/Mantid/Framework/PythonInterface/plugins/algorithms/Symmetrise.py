@@ -28,8 +28,6 @@ class Symmetrise(PythonAlgorithm):
         self.declareProperty('XMin', 0.0, doc='X value marking lower limit of curve to copy')
         self.declareProperty('XMax', 0.0, doc='X value marking upper limit of curve to copy')
 
-        self.declareProperty('Verbose', defaultValue=False,
-                             doc='Switch verbose output Off/On')
         self.declareProperty('Plot', defaultValue=False,
                              doc='Switch plotting Off/On')
         self.declareProperty('Save', defaultValue=False,
@@ -73,19 +71,18 @@ class Symmetrise(PythonAlgorithm):
         output_cut_index = max_sample_index - self._positive_min_index - positive_diff_range_len - 1
         new_array_len = 2 * max_sample_index - centre_range_len - 2 * positive_diff_range_len - 1
 
-        if self._verbose:
-            logger.notice('Sample array length = %d' % sample_array_len)
+        logger.information('Sample array length = %d' % sample_array_len)
 
-            logger.notice('Positive X min at i=%d, x=%f'
-                          % (self._positive_min_index, sample_x[self._positive_min_index]))
-            logger.notice('Negative X min at i=%d, x=%f'
-                          % (self._negative_min_index, sample_x[self._negative_min_index]))
+        logger.information('Positive X min at i=%d, x=%f'
+                           % (self._positive_min_index, sample_x[self._positive_min_index]))
+        logger.information('Negative X min at i=%d, x=%f'
+                           % (self._negative_min_index, sample_x[self._negative_min_index]))
 
-            logger.notice('Positive X max at i=%d, x=%f'
-                          % (self._positive_max_index, sample_x[self._positive_max_index]))
+        logger.information('Positive X max at i=%d, x=%f'
+                           % (self._positive_max_index, sample_x[self._positive_max_index]))
 
-            logger.notice('New array length = %d' % new_array_len)
-            logger.notice('Output array LR split index = %d' % output_cut_index)
+        logger.information('New array length = %d' % new_array_len)
+        logger.information('Output array LR split index = %d' % output_cut_index)
 
         x_unit = mtd[self._sample].getAxis(0).getUnit().unitID()
         v_unit = mtd[self._sample].getAxis(1).getUnit().unitID()
@@ -234,7 +231,6 @@ class Symmetrise(PythonAlgorithm):
         self._x_min = math.fabs(self.getProperty('XMin').value)
         self._x_max = math.fabs(self.getProperty('XMax').value)
 
-        self._verbose = self.getProperty('Verbose').value
         self._plot = self.getProperty('Plot').value
         self._save = self.getProperty('Save').value
 
@@ -317,8 +313,7 @@ class Symmetrise(PythonAlgorithm):
         SaveNexusProcessed(InputWorkspace=self._output_workspace,
                            Filename=file_path)
 
-        if self._verbose:
-            logger.notice('Output file : ' + file_path)
+        logger.information('Output file : ' + file_path)
 
 
     def _plot_output(self):

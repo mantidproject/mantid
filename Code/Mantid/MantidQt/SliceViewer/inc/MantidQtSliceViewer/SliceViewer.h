@@ -8,6 +8,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/PeakTransformSelector.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/VMD.h"
 #include "MantidQtAPI/MantidColorMap.h"
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
@@ -179,8 +180,11 @@ public slots:
   // Dynamic rebinning
   void rebinParamsChanged();
   void dynamicRebinComplete(bool error);
+  // Peaks overlay
+  void peakOverlay_clicked();
 
 protected:
+
   void dragEnterEvent(QDragEnterEvent *e);
   void dropEvent(QDropEvent *e);
 
@@ -314,6 +318,9 @@ private:
 
   /// If true, the rebinned overlayWS is locked until refreshed.
   bool m_rebinLocked;
+
+  /// Logger
+  Mantid::Kernel::Logger m_logger;
 
   // -------------------------- Controllers ------------------------
   boost::shared_ptr<CompositePeaksPresenter>  m_peaksPresenter;
