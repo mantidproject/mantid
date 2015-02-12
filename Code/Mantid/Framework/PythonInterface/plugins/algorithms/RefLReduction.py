@@ -374,7 +374,8 @@ class RefLReduction(PythonAlgorithm):
         final_workspace = wks_utility.createFinalWorkspace(final_x_axis,
                                                            final_y_axis,
                                                            final_y_error_axis,
-                                                           name_output_ws)
+                                                           name_output_ws,
+                                                           ws_event_data)
 
         self.setProperty('OutputWorkspace', mtd[name_output_ws])
 

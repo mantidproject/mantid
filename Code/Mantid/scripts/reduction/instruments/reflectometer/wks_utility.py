@@ -1936,14 +1936,15 @@ def createQworkspace(q_axis, y_axis, y_error_axis):
 
     return q_workspace
 
-def createFinalWorkspace(q_axis, final_y_axis, final_error_axis, name_output_ws):
+def createFinalWorkspace(q_axis, final_y_axis, final_error_axis, name_output_ws, parent_workspace):
 
     final_workspace = CreateWorkspace(OutputWorkspace=name_output_ws,
                                       DataX=q_axis,
                                       DataY=final_y_axis,
                                       DataE=final_error_axis,
                                       Nspec=1,
-                                      UnitX="Wavelength")
+                                      UnitX="Wavelength",
+                                      ParentWorkspace=parent_workspace)
     final_workspace.setDistribution(True)
 
     return final_workspace
