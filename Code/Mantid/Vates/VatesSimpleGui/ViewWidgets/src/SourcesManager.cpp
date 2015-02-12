@@ -6,6 +6,11 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/Logger.h"
 
+// Have to deal with ParaView warnings and Intel compiler the hard way.
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1170
+#endif
+
 #include "boost/shared_ptr.hpp"
 
 #include <pqActiveObjects.h>
@@ -29,10 +34,7 @@
 
 #include <Poco/ActiveResult.h>
 
-// Have to deal with ParaView warnings and Intel compiler the hard way.
-#if defined(__INTEL_COMPILER)
-  #pragma warning disable 1170
-#endif
+
 
 namespace Mantid
 {

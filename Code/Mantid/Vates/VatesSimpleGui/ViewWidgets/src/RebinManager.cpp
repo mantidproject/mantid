@@ -5,8 +5,12 @@
 #include "MantidQtMantidWidgets/SlicingAlgorithmDialog.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "boost/shared_ptr.hpp"
 #include "MantidKernel/Logger.h"
+
+// Have to deal with ParaView warnings and Intel compiler the hard way.
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1170
+#endif
 
 #include <string>
 #include <vector>
@@ -14,15 +18,11 @@
 #include <QString>
 #include <QVariant>
 #include <QHash>
-
+#include "boost/shared_ptr.hpp"
 #include <pqActiveObjects.h>
 #include <pqPipelineSource.h>
 #include <vtkSMPropertyHelper.h>
 
-// Have to deal with ParaView warnings and Intel compiler the hard way.
-#if defined(__INTEL_COMPILER)
-  #pragma warning disable 1170
-#endif
 
 namespace Mantid
 {
