@@ -17,6 +17,8 @@ SRC_DIR = "@SPHINX_SRC_DIR@"
 CONF_DIR = "@SPHINX_CONF_DIR@"
 SPHINX_BUILD_DIR = "@SPHINX_BUILD_DIR@"
 SCREENSHOTS_DIR = "@SCREENSHOTS_DIR@"
+DIAGRAMS_DIR = "@DIAGRAMS_DIR@"
+DOT_EXECUTABLE = "@DOT_EXECUTABLE@"
 
 ###############################################################################
 # Main
@@ -45,6 +47,12 @@ def main(sysarg):
     # Update environment with screenshots path if necessary
     if SCREENSHOTS_DIR != "":
         os.environ["SCREENSHOTS_DIR"] = SCREENSHOTS_DIR
+
+    if DIAGRAMS_DIR != "":
+        os.environ["DIAGRAMS_DIR"] = DIAGRAMS_DIR
+
+    if os.path.isfile(DOT_EXECUTABLE):
+        os.environ["DOT_EXECUTABLE"] = DOT_EXECUTABLE
 
     # Arguments for main
     output_dir = pathjoin(SPHINX_BUILD_DIR, BUILDER)
