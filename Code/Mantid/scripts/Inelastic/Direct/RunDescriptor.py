@@ -451,20 +451,20 @@ class RunDescriptor(PropDescriptor):
                           '    Found file {1} instead'.format(old_ext,file)
                 RunDescriptor._logger(message,'notice')
             self._run_file_path = os.path.dirname(fname)
-            return file
+            return (True,file)
         except RuntimeError:
              message = 'Cannot find file matching hint {0} on current search paths ' \
                        'for instrument {1}'.format(file_hint,inst_name)
              if not ('be_quet' in kwargs):
                 RunDescriptor._logger(message,'warning')
-             return 'ERROR:find_file: ' + message
+             return (False,message)
 #--------------------------------------------------------------------------------------------------------------------
 
     def load_file(self,inst_name,ws_name,run_number=None,load_mon_with_workspace=False,filePath=None,fileExt=None,**kwargs):
         """ load run for the instrument name provided. If run_numner is None, look for the current run""" 
  
-        data_file = self.find_file(None,filePath,fileExt,**kwargs)
-        if data_file.find('ERROR') > -1:
+        ok,data_file = self.find_file(None,filePath,fileExt,**kwargs)
+        if not ok:
            self._ws_name = None
            raise IOError(data_file)
                        
@@ -522,7 +522,7 @@ class RunDescriptor(PropDescriptor):
              calibration option (e.g. det_cal_file used a while ago) and try to use it
         """
 
-        if not (calibration or use_ws_calibration):
+        if not (calibration) or use_ws_calibration:
             return 
         if not isinstance(loaded_ws, api.Workspace):
            raise RuntimeError(' Calibration can be applied to a workspace only and got object of type {0}'.format(type(loaded_ws)))
@@ -672,12 +672,12 @@ class RunDescriptor(PropDescriptor):
                    self._run_file_path = ''
 
     def has_own_value(self):
-        """ interface property, used in conjunction with 
-            RunDescriptorDependent property. Always true as
-            RunDescriptor property always have own value
+        """ interface property used to verify if
+            the class got its own values or been shadowed by 
+            property, this one depends on 
+            
         """ 
         return True
-
 #-------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------
@@ -690,35 +690,151 @@ class RunDescriptorDependent(RunDescriptor):
     def __init__(self,host_run,ws_preffix,DocString=None):
         RunDescriptor.__init__(self,ws_preffix,DocString)
         self._host = host_run
-        self._this_run_defined = False
+        self._has_own_value = False
 
     def __get__(self,instance,owner=None):
-       """ return dependent run number which is host run number if this one has not been set or this run number if it was""" 
-       if instance is None:
+       """ return dependent run number which is host run number if this one has not been set 
+           or this run number if it was
+       """ 
+       if instance is None: # this class functions and the host functions
           return self
 
-       if self._this_run_defined:
+       if self._has_own_value: # this allows to switch between 
           return super(RunDescriptorDependent,self).__get__(instance,owner)
        else:
           return self._host.__get__(instance,owner)
 
+
     def __set__(self,instance,value):
         if value is None:
-            self._this_run_defined = False
-            return
-        self._this_run_defined = True
+           self._has_own_value = False
+           return
+        self._has_own_value = True
         super(RunDescriptorDependent,self).__set__(instance,value)
 
-    def has_own_value(self):
-        """ returns true if the property got own value and
-            is not bind to parent's value any more            
-        """
-        return self._this_run_defined
-    #def __del__(self):
-    #    # destructor removes bounded workspace 
-    #    # Probably better not to at current approach
-    #    if self._ws_name in mtd:
-    #        DeleteWorkspace(self._ws_name)
-    #    object.__del__(self)
 
-  
+    def has_own_value(self):
+        """ interface property used to verify if
+            the class got its own values or been shadowed by 
+            property, this one depends on           
+        """ 
+        return self._has_own_value
+    #--------------------------------------------------------------
+    # TODO -- how to automate all these functions below?
+    def run_number(self):
+        if self._has_own_value:
+           return super(RunDescriptorDependent,self).run_number()
+        else:
+           return self._host.run_number()
+    #
+    def is_monws_separate(self):
+        if self._has_own_value:
+           return super(RunDescriptorDependent,self).is_monws_separate()
+        else:
+           return self._host.is_monws_separate()
+
+    def get_run_list(self):
+        if self._has_own_value:
+            return super(RunDescriptorDependent,self).get_run_list()
+        else:
+            return self._host.get_run_list()
+
+    def set_action_suffix(self,suffix=None):
+        if self._has_own_value:
+            return super(RunDescriptorDependent,self).set_action_suffix(suffix)
+        else:
+            return self._host.set_action_suffix(suffix)
+
+    def synchronize_ws(self,workspace=None):
+        if self._has_own_value:
+            return super(RunDescriptorDependent,self).synchronize_ws(workspace)
+        else:
+            return self._host.synchronize_ws(workspace)
+
+    def get_file_ext(self):
+        if self._has_own_value:
+            return super(RunDescriptorDependent,self).get_file_ext()
+        else:
+            return self._host.get_file_ext()
+
+    def set_file_ext(self,val):
+        if self._has_own_value:
+            return super(RunDescriptorDependent,self).set_file_ex(val)
+        else:
+            return self._host.set_file_ex(val)
+
+    def get_workspace(self):
+        if self._has_own_value:
+            return super(RunDescriptorDependent,self).get_workspace()
+        else:
+            return self._host.get_workspace()
+
+    def get_ws_clone(self,clone_name='ws_clone'):
+        if self._has_own_value:
+            return super(RunDescriptorDependent,self).get_ws_clone()
+        else:
+            return self._host.get_ws_clone()
+
+    def chop_ws_part(self,origin,tof_range,rebin,chunk_num,n_chunks):
+        if self._has_own_value:
+            return super(RunDescriptorDependent,self).chop_ws_part(origin,tof_range,rebin,chunk_num,n_chunks)
+        else:
+            return self._host.chop_ws_part(origin,tof_range,rebin,chunk_num,n_chunks)
+
+    def get_monitors_ws(self,monitor_ID=None):
+        if self._has_own_value:
+            return super(RunDescriptorDependent,self).get_monitors_ws(monitor_ID)
+        else:
+            return self._host.get_monitors_ws(monitor_ID)
+
+    def is_existing_ws(self):
+        if self._has_own_value:
+            return super(RunDescriptorDependent,self).is_existing_ws()
+        else:
+            return self._host.is_existing_ws()
+
+    def get_ws_name(self):
+        if self._has_own_value:
+            return super(RunDescriptorDependent,self).get_ws_name()
+        else:
+            return self._host.get_ws_name()
+       
+    def file_hint(self,run_num_str=None,filePath=None,fileExt=None,**kwargs):
+        if self._has_own_value:
+            return super(RunDescriptorDependent,self).file_hint(run_num_str,filePath,fileExt,**kwargs)
+        else:
+            return self._host.file_hint(run_num_str,filePath,fileExt,**kwargs)
+
+    def find_file(self,inst_name=None,run_num=None,filePath=None,fileExt=None,**kwargs):
+        if self._has_own_value:
+            return super(RunDescriptorDependent,self).find_file(inst_name,run_num,filePath,fileExt,**kwargs)
+        else:
+            return self._host.find_file(inst_name,run_num,filePath,fileExt,**kwargs)
+
+    def load_file(self,inst_name,ws_name,run_number=None,load_mon_with_workspace=False,filePath=None,fileExt=None,**kwargs):
+        if self._has_own_value:
+            return super(RunDescriptorDependent,self).load_file(inst_name,ws_name,run_number,load_mon_with_workspace,filePath,fileExt,**kwargs)
+        else:
+            return self._host.load_file(inst_name,ws_name,run_number,load_mon_with_workspace,filePath,fileExt,**kwargs)
+
+    def load_run(self,inst_name, calibration=None, force=False, mon_load_option=False,use_ws_calibration=True,\
+                 filePath=None,fileExt=None,**kwargs):
+        if self._has_own_value:
+            return super(RunDescriptorDependent,self).load_run(inst_name,calibration, force, mon_load_option,use_ws_calibration,\
+                 filePath,fileExt,**kwargs)
+        else:
+            return self._host.load_run(inst_name,calibration, force, mon_load_option,use_ws_calibration,\
+                               filePath,fileExt,**kwargs)
+
+    def apply_calibration(self,loaded_ws,calibration=None,use_ws_calibration=True):
+        if self._has_own_value:
+            return super(RunDescriptorDependent,self).apply_calibration(loaded_ws,calibration,use_ws_calibration)
+        else:
+            return self._host.apply_calibration(loaded_ws,calibration,use_ws_calibration)
+
+    def clear_monitors(self):
+        if self._has_own_value:
+            return super(RunDescriptorDependent,self).clear_monitors()
+        else:
+            return self._host.clear_monitors()
+    #--------------------------------------------------------------

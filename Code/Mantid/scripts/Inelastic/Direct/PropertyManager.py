@@ -205,11 +205,11 @@ class PropertyManager(NonIDF_Properties):
     #
     det_cal_file    = DetCalFile()
     #
-    map_file        = MapMaskFile('.map',"Spectra to detector mapping file for the sample run")
+    map_file        = MapMaskFile('map_file','.map',"Spectra to detector mapping file for the sample run")
     #
-    monovan_mapfile = MapMaskFile('.map',"Spectra to detector mapping file for the monovanadium integrals calculation")
+    monovan_mapfile = MapMaskFile('monovan_map_file','.map',"Spectra to detector mapping file for the monovanadium integrals calculation")
     #
-    hard_mask_file  = MapMaskFile('.msk',"Hard mask file")
+    hard_mask_file  = MapMaskFile('hard_mask_file','.msk',"Hard mask file")
     #
     monovan_integr_range     = MonovanIntegrationRange()
     #
@@ -483,27 +483,20 @@ class PropertyManager(NonIDF_Properties):
             return None
     #end
 
-    def _check_file_exist(self,file_name):
-        file_path = FileFinder.getFullPath(file)
-        if len(file_path) == 0:
-            try:
-                file_path = common.find_file(file)
-            except:
-                file_path =''
-
     def _get_properties_with_files(self):
-        """ Method returns list of properties, with values may have
-            files corresponding to them
+        """ Method returns list of properties, which may have 
+            files as their values
             
             it does not include sample run, as this one will be 
-            treated separately
+            treated separately.
         """ 
 
         run_files_prop=['wb_run','monovan_run','mask_run','wb_for_monovan_run','second_white']
         map_mask_prop =['det_cal_file','map_file','hard_mask_file']
 
         abs_units = not(self.monovan_run is None)
-        run_files_to_check =[]
+        files_to_check =[]
+        # run files to check
         for prop_name in run_files_prop:
             theProp = getattr(PropertyManager,prop_name)
             if theProp.has_own_value():
@@ -511,48 +504,39 @@ class PropertyManager(NonIDF_Properties):
                   continue   # we do not care if it has file or not
                val = theProp.__get__(self,PropertyManager)
                if not(val is None) :
-                   run_files_to_check.append(prop_name)
+                   files_to_check.append(prop_name)
+
         # other files to check:
-        aux_files_to_check=[]
         for prop_name in map_mask_prop:
             val = getattr(self,prop_name)
-            if not(val is None):
-               aux_files_to_check.append(prop_name)
+            if not(val is None or isinstance(val,api.Workspace)):
+               files_to_check.append(prop_name)
         # Absolute units files (only one?)
         if abs_units:
            val = self.monovan_mapfile
            if not(val is None) :
-               aux_files_to_check.append('monovan_mapfile')
+              files_to_check.append('monovan_mapfile')
         #
-        return run_files_to_check,aux_files_to_check
+        return files_to_check
 
 
-    def _check_necessary_files(self,monovan_run):
-        """ Method verifies if all files necessary for a run are available.
+    def _check_file_properties(self):
+        """ Method verifies if all files necessary for a reduction are available.
 
-           useful for long runs to check if all files necessary for it are present/accessible
+            useful for long runs to check if all files necessary for it are 
+            present/accessible before starting the run
         """
+        file_prop_names = self._get_properties_with_files()
+        file_errors={}
+        for prop_name in file_prop_names:
+            theProp = getattr(PropertyManager,prop_name)
+            ok,file = theProp.find_file(be_quet=True)
+            if not ok:
+               file_errors[prop_name]=file
+ 
+        result = (len(file_errors)==0)
+        return (result,file_errors)
 
-
-        def check_files_list(files_list):
-            file_missing = False
-            for prop in files_list :
-                file = getattr(self,prop)
-                if not (file is None) and isinstance(file,str):
-                    file_path = self._check_file_exist(file)
-                    if len(file_path)==0:
-                       self.log(" Can not find file ""{0}"" for property: {1} ".format(file,prop),'error')
-                       file_missing=True
-
-            return file_missing
-
-        base_file_missing = check_files_list(self.__file_properties)
-        abs_file_missing=False
-        if not (monovan_run is None):
-            abs_file_missing = check_files_list(self.__abs_norm_file_properties)
-
-        if  base_file_missing or abs_file_missing:
-             raise RuntimeError(" Files needed for the run are missing ")
     #
     def _check_monovan_par_changed(self):
         """ method verifies, if properties necessary for monovanadium reduction have indeed been changed  from defaults """

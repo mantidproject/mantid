@@ -49,6 +49,20 @@ class ComplexProperty(object):
         return len(self._other_prop)
 #end ComplexProperty
 
+def findFile(fileName):
+    """ Simple search within Mantid data search directories for 
+        a file which is not a run file
+    """ 
+
+    if os.path.exists(fileName):
+       return os.path.abspath(fileName)
+    fbase = os.path.basename(fileName)
+    search_path = config.getDataSearchDirs()
+    for path in search_path:
+        fname = os.path.join(path,fbase)
+        if os.path.exists(fname):
+           return fname
+    return ''
 
 
 def get_default_parameter(instrument, name):

@@ -916,7 +916,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         PropertyManager.mono_correction_factor.set_cash_mono_run_number(11060)
         self.assertTrue(PropertyManager.mono_correction_factor.get_val_from_cash(propman) is None)
 
-    def test_mono_correction_factor(self):
+    def test_mono_file_properties(self):
         propman = self.prop_man
         propman.wb_run = 11001
         sw = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
@@ -928,18 +928,19 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman.monovan_mapfile = None
                     
 
-        run_files,map_files = propman._get_properties_with_files()
+        file_prop = propman._get_properties_with_files()
 
-        self.assertEqual(len(run_files),1)
-        self.assertTrue('wb_run' in run_files)
-        self.assertFalse('monovan_run' in run_files)
-        self.assertFalse('mask_run' in run_files)
-        self.assertFalse('wb_for_monovan_run' in run_files)
+        self.assertEqual(len(file_prop),3)
+        self.assertTrue('wb_run' in file_prop)
+        self.assertFalse('monovan_run' in file_prop)
+        self.assertFalse('mask_run' in file_prop)
+        self.assertFalse('wb_for_monovan_run' in file_prop)
 
-        self.assertEqual(len(map_files),2)
-        self.assertTrue('hard_mask_file' in map_files)
-        self.assertTrue('det_cal_file' in map_files)
+        self.assertTrue('hard_mask_file' in file_prop)
+        self.assertTrue('det_cal_file' in file_prop)
 
+        ok,fail_list = propman._check_file_properties()
+        self.assertTrue(ok)
 
         api.AnalysisDataService.clear()
 

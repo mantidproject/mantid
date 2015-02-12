@@ -290,8 +290,8 @@ class IncidentEnergy(PropDescriptor):
             if ind is None:
                ind = self._cur_iter_en
             else:
-               self._cur_iter_en=ind
-            self._incident_energy[ind]=value
+               self._cur_iter_en = ind
+            self._incident_energy[ind] = value
         else:
             self._incident_energy = value
 
@@ -305,7 +305,7 @@ class IncidentEnergy(PropDescriptor):
         """ part of iterator """ 
         self._cur_iter_en += 1
         ind = self._cur_iter_en
-        if ind  < self._num_energies:
+        if ind < self._num_energies:
            if isinstance(self._incident_energy,list):
                return self._incident_energy[ind]
            else:
@@ -583,7 +583,7 @@ class DetCalFile(PropDescriptor):
     """ property describes various sources for the detector calibration file """
     def __init__(self):
         self._det_cal_file = None
-        self._calibrated_by_run=False
+        self._calibrated_by_run = False
 
     def __get__(self,instance,owner):
         if instance is None:
@@ -597,8 +597,8 @@ class DetCalFile(PropDescriptor):
        if val is None or isinstance(val,api.Workspace) or isinstance(val,str):
        # nothing provided or workspace provided or filename probably provided
           if str(val) in mtd:
-                # workspace name provided
-                val = mtd[str(val)]
+             # workspace name provided
+             val = mtd[str(val)]
           self._det_cal_file = val
           self._calibrated_by_run = False
           return
@@ -607,16 +607,10 @@ class DetCalFile(PropDescriptor):
        if isinstance(val,int):
           #if val in instance.all_run_numbers: TODO: retrieve workspace from
           #run numbers
-          file_hint = str(val)
-          file_name = FileFinder.findRuns(file_hint)[0]
-          self._det_cal_file = file_name
+          self._det_cal_file = val 
           self._calibrated_by_run = True
           return
-
        raise NameError('Detector calibration file name can be a workspace name present in Mantid or string describing an file name')
-    def calibrated_by_run(self):
-       """ reports if the detector calibration is in a run-file or separate file(workspace)""" 
-       return self._calibrated_by_run
     #if Reducer.det_cal_file != None :
     #    if isinstance(Reducer.det_cal_file,str) and not Reducer.det_cal_file
     #    in mtd : # it is a file
@@ -628,13 +622,49 @@ class DetCalFile(PropDescriptor):
     #else:
     #    Reducer.log('Setting detector calibration to detector block info from
     #    '+str(sample_run))
+
+    def calibrated_by_run(self):
+       """ reports if the detector calibration is in a run-file or separate file(workspace)""" 
+       return self._calibrated_by_run
+
+    def find_file(self,**kwargs):
+        """ Method to find file, correspondent to 
+            current _det_cal_file file hint
+        """
+        if self._det_cal_file is None:
+        # nothing to look for
+          return (True,"No Detector calibration file defined")
+        if isinstance(self._det_cal_file,int): # this can be only a run number
+           file_hint = str(self._det_cal_file)
+           try: 
+             file_name = FileFinder.findRuns(file_hint)[0]
+           except:
+              return (False,"Can not find run file corresponding to run N: {0}".format(file_hint))
+           self._det_cal_file = file_name
+           return (True,file_name)
+        if isinstance(self._det_cal_file,api.Workspace): 
+        # nothing to do. Workspace used for calibration
+           return (True,'Workspace {0} used for detectors calibration'.format(self._det_cal_file.name()))
+        # string can be a run number or file name:
+        file_name = prop_helpers.findFile(self._det_cal_file)[0]
+        if len(file_name) == 0: # it still can be a run number as string
+           try: 
+             file_name = FileFinder.findRuns(self._det_cal_file)[0]
+           except:
+              return (False,"Can not find file or run file corresponding to name : {0}".format(self._det_cal_file))
+        else:
+            pass
+        self._det_cal_file=file_name
+        return (True,file_name) 
 #end DetCalFile
 #-----------------------------------------------------------------------------------------
 class MapMaskFile(PropDescriptor):
     """ common method to wrap around an auxiliary file name """
-    def __init__(self,file_ext,doc_string=None):
+    def __init__(self,prop_name,file_ext,doc_string=None):
         self._file_name = None
         self._file_ext = file_ext
+        self._prop_name=prop_name
+
         if not(doc_string is None):
             self.__doc__ = doc_string
 
@@ -645,13 +675,27 @@ class MapMaskFile(PropDescriptor):
         return self._file_name
 
     def __set__(self,instance,value):
-        if value != None:
+        if not(value is None):
            fileName, fileExtension = os.path.splitext(value)
            if (not fileExtension):
                value = value + self._file_ext
         self._file_name = value
-  
+
+    def find_file(self,**kwargs):
+       """ Method to find file, correspondent to 
+           current MapMaskFile file hint
+       """
+       if self._file_name is None:
+           return (True,'No file for {0} is defined'.format(self._prop_name))
+
+       file_name = prop_helpers.findFile(self._file_name)
+       if len(file_name) == 0: # it still can be a run number as string
+           return (False,'No file for {0} corresponding to hint {1} found'.format(self._prop_name,self._file_name))
+       else:
+           self._file_name = file_name
+           return (True,file_name)   
 #end MapMaskFile
+
 #-----------------------------------------------------------------------------------------
 class HardMaskPlus(prop_helpers.ComplexProperty):
     """ Legacy HardMaskPlus class which sets up hard_mask_file to file and use_hard_mask_only to True""" 
@@ -985,14 +1029,13 @@ class MultirepTOFSpectraList(PropDescriptor):
             self.__set__(instance,value)
             return
         if isinstance(value, list):
-           rez =[]
+           rez = []
            for val in value:
                rez.append(int(val))
         else:
             rez = [int(value)]
-        self._spectra_list=rez
+        self._spectra_list = rez
 #end MultirepTOFSpectraList
-
 class MonoCorrectionFactor(PropDescriptor):
     """ property contains correction factor, used to convert 
         experimental scattering cross-section into absolute 
@@ -1009,9 +1052,9 @@ class MonoCorrectionFactor(PropDescriptor):
     """ 
     def __init__(self,ei_prop):
         self._cor_factor = None
-        self._mono_run_number=None
+        self._mono_run_number = None
         self._ei_prop = ei_prop
-        self.cashed_values={}
+        self.cashed_values = {}
 
     def __get__(self,instance,type=None):
        if instance is None:
@@ -1021,14 +1064,14 @@ class MonoCorrectionFactor(PropDescriptor):
 
     def __set__(self,instance,value):
        self._cor_factor = value
-    # 
+    #
     def set_val_to_cash(self,instance,value):
         """ """ 
         mono_int_range = instance.monovan_integr_range
         cash_id = self._build_cash_val_id(mono_int_range)
         self.cashed_values[cash_id] = value
         # tell property manager that mono_correction_factor has been modified
-        # to avoid automatic resetting this property from any workspace 
+        # to avoid automatic resetting this property from any workspace
         cp = getattr(instance,'_PropertyManager__changed_properties')
         cp.add('mono_correction_factor')
 
@@ -1042,11 +1085,11 @@ class MonoCorrectionFactor(PropDescriptor):
         
     def set_cash_mono_run_number(self,new_value):
         if new_value is None:
-           self.cashed_values={}
+           self.cashed_values = {}
            self._mono_run_number = None
            return
         if self._mono_run_number != int(new_value):
-           self.cashed_values={}
+           self.cashed_values = {}
            self._mono_run_number = int(new_value)
 
     def _build_cash_val_id(self,mono_int_range):
