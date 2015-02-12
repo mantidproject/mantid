@@ -92,7 +92,6 @@ namespace IDA
     long numBins = static_cast<long>(m_dblManager->value(m_properties["SampleBinning"]));
 
     bool plot = m_uiForm.ckPlot->isChecked();
-    bool verbose = m_uiForm.ckVerbose->isChecked();
     bool save = m_uiForm.ckSave->isChecked();
 
     IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("Fury", -1);
@@ -106,7 +105,7 @@ namespace IDA
     furyAlg->setProperty("NumBins", numBins);
 
     furyAlg->setProperty("Plot", plot);
-    furyAlg->setProperty("Verbose", verbose);
+    furyAlg->setProperty("Verbose", true);
     furyAlg->setProperty("Save", save);
     furyAlg->setProperty("DryRun", false);
 
@@ -194,8 +193,6 @@ namespace IDA
     if(numBins == 0)
       return;
 
-    bool verbose = m_uiForm.ckVerbose->isChecked();
-
     IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("Fury");
     furyAlg->initialize();
 
@@ -208,7 +205,7 @@ namespace IDA
     furyAlg->setProperty("NumBins", numBins);
 
     furyAlg->setProperty("Plot", false);
-    furyAlg->setProperty("Verbose", verbose);
+    furyAlg->setProperty("Verbose", true);
     furyAlg->setProperty("Save", false);
     furyAlg->setProperty("DryRun", true);
 

@@ -158,18 +158,18 @@ public:
 
     if (CoordinatesToUse == "HKL")
     {
-      mdews->setCoordinateSystem(Mantid::API::HKL);
+      mdews->setCoordinateSystem(Mantid::Kernel::HKL);
       doRun(V3D( 0.,0.,0.), 1.0, V3D( 0.,0.,0.), "Start at the center, get the center");
 
       doRun(V3D( 0.2,0.2,0.2), 1.8, V3D( 0.,0.,0.), "Somewhat off center");
     }
 	else if (CoordinatesToUse == "Q (lab frame)")
 	{
-	  mdews->setCoordinateSystem(Mantid::API::QLab);
+	  mdews->setCoordinateSystem(Mantid::Kernel::QLab);
 	}
 	else if (CoordinatesToUse == "Q (sample frame)")
 	{
-	  mdews->setCoordinateSystem(Mantid::API::QSample);
+	  mdews->setCoordinateSystem(Mantid::Kernel::QSample);
 	}
 
     doRun(V3D( 2.,3.,4.), 1.0, V3D( 2.,3.,4.), "Start at the center, get the center");

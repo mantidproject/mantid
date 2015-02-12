@@ -139,7 +139,6 @@ namespace CustomInterfaces
     sliceAlg->setProperty("InputFiles", filenames.toStdString());
     sliceAlg->setProperty("SpectraRange", spectraRange);
     sliceAlg->setProperty("PeakRange", peakRange);
-    sliceAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
     sliceAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
     sliceAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
     sliceAlg->setProperty("OutputNameSuffix", suffix.toStdString());
@@ -350,7 +349,6 @@ namespace CustomInterfaces
     sliceAlg->setProperty("InputFiles", filenames.toStdString());
     sliceAlg->setProperty("SpectraRange", spectraRange);
     sliceAlg->setProperty("PeakRange", peakRange);
-    sliceAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
     sliceAlg->setProperty("Plot", false);
     sliceAlg->setProperty("Save", false);
     sliceAlg->setProperty("OutputNameSuffix", suffix.toStdString());

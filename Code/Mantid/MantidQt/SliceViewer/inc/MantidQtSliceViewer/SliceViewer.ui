@@ -407,10 +407,10 @@
           <item>
            <widget class="QToolButton" name="btnPeakOverlay">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="toolTip">
-             <string>Drag-drop PeaksWorkspace onto plot to display</string>
+             <string>Overlay PeaksWorkspaces</string>
             </property>
             <property name="text">
              <string>...</string>
@@ -427,7 +427,7 @@
              </size>
             </property>
             <property name="checkable">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
            </widget>
           </item>

@@ -204,6 +204,7 @@ MDHistoWorkspaceIterator::~MDHistoWorkspaceIterator() {
   delete[] m_binWidth;
   delete[] m_index;
   delete[] m_indexMax;
+  delete[] m_indexMaker;
 
   if (m_function)
     delete m_function;

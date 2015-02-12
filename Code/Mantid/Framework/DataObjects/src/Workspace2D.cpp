@@ -90,7 +90,7 @@ size_t Workspace2D::size() const { return data.size() * blocksize(); }
 
 /// get the size of each vector
 size_t Workspace2D::blocksize() const {
-  return (data.size() > 0) ? data[0]->dataY().size() : 0;
+  return (data.size() > 0) ? static_cast<ISpectrum const *>(data[0])->dataY().size() : 0;
 }
 
 /**
