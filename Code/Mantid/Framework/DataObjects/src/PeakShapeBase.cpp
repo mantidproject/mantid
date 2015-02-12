@@ -1,11 +1,11 @@
 #include "MantidDataObjects/PeakShapeBase.h"
-#include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include <jsoncpp/json/json.h>
 
 namespace Mantid {
 namespace DataObjects {
 
-PeakShapeBase::PeakShapeBase(API::SpecialCoordinateSystem frame,
+PeakShapeBase::PeakShapeBase(Kernel::SpecialCoordinateSystem frame,
                              std::string algorithmName, int algorithmVersion)
     : m_frame(frame), m_algorithmName(algorithmName),
       m_algorithmVersion(algorithmVersion) {}
@@ -41,7 +41,7 @@ PeakShapeBase &PeakShapeBase::operator=(const PeakShapeBase &other) {
  * @brief PeakShapeBase::frame
  * @return The coordinate frame used
  */
-API::SpecialCoordinateSystem PeakShapeBase::frame() const { return m_frame; }
+Kernel::SpecialCoordinateSystem PeakShapeBase::frame() const { return m_frame; }
 
 /**
  * @brief PeakShapeBase::buildCommon. Serialize to JSON object and return the

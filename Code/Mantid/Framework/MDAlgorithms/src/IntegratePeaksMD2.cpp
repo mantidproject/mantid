@@ -1,6 +1,8 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidMDAlgorithms/GSLFunctions.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD2.h"
@@ -173,7 +175,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   // Get the instrument and its detectors
   inst = peakWS->getInstrument();
-  int CoordinatesToUse = ws->getSpecialCoordinateSystem();
+  Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse = ws->getSpecialCoordinateSystem();
 
   /// Radius to use around peaks
   double PeakRadius = getProperty("PeakRadius");
@@ -266,22 +268,22 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // PRAGMA_OMP(parallel for schedule(dynamic, 10) )
    // Initialize progress reporting
   int nPeaks = peakWS->getNumberPeaks();
-  Progress *m_progress = new Progress(this, 0., 1., nPeaks);
+  Progress progress(this, 0., 1., nPeaks);
   for (int i = 0; i < nPeaks; ++i) {
     if (this->getCancel())
       break; // User cancellation
-    m_progress->report();
+    progress.report();
 
     // Get a direct ref to that peak.
     IPeak &p = peakWS->getPeak(i);
 
     // Get the peak center as a position in the dimensions of the workspace
     V3D pos;
-    if (CoordinatesToUse == 1) //"Q (lab frame)"
+    if (CoordinatesToUse == Mantid::Kernel::QLab) //"Q (lab frame)"
       pos = p.getQLabFrame();
-    else if (CoordinatesToUse == 2) //"Q (sample frame)"
+    else if (CoordinatesToUse == Mantid::Kernel::QSample) //"Q (sample frame)"
       pos = p.getQSampleFrame();
-    else if (CoordinatesToUse == 3) //"HKL"
+    else if (CoordinatesToUse == Mantid::Kernel::HKL) //"HKL"
       pos = p.getHKL();
 
     // Do not integrate if sphere is off edge of detector
@@ -321,10 +323,18 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         }
         lenQpeak = std::sqrt(lenQpeak);
       }
+
       PeakRadiusVector[i] = lenQpeak * PeakRadius;
       BackgroundInnerRadiusVector[i] = lenQpeak * BackgroundInnerRadius;
       BackgroundOuterRadiusVector[i] = lenQpeak * BackgroundOuterRadius;
       CoordTransformDistance sphere(nd, center, dimensionsUsed);
+
+      if(Peak* shapeablePeak = dynamic_cast<Peak*>(&p)){
+
+          PeakShape* sphere = new PeakShapeSpherical(PeakRadiusVector[i], BackgroundInnerRadiusVector[i],
+                                                     BackgroundOuterRadiusVector[i], CoordinatesToUse, this->name(), this->version());
+          shapeablePeak->setPeakShape(sphere);
+      }
 
       // Perform the integration into whatever box is contained within.
       ws->getBox()->integrateSphere(
@@ -684,25 +694,25 @@ void IntegratePeaksMD2::runMaskDetectors(
 void
 IntegratePeaksMD2::checkOverlap(int i,
                                 Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
-                                int CoordinatesToUse, double radius) {
+                                Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse, double radius) {
   // Get a direct ref to that peak.
   IPeak &p1 = peakWS->getPeak(i);
   V3D pos1;
-  if (CoordinatesToUse == 1) //"Q (lab frame)"
+  if (CoordinatesToUse == Kernel::QLab) //"Q (lab frame)"
     pos1 = p1.getQLabFrame();
-  else if (CoordinatesToUse == 2) //"Q (sample frame)"
+  else if (CoordinatesToUse == Kernel::QSample) //"Q (sample frame)"
     pos1 = p1.getQSampleFrame();
-  else if (CoordinatesToUse == 3) //"HKL"
+  else if (CoordinatesToUse == Kernel::HKL) //"HKL"
     pos1 = p1.getHKL();
   for (int j = i + 1; j < peakWS->getNumberPeaks(); ++j) {
     // Get a direct ref to rest of peaks peak.
     IPeak &p2 = peakWS->getPeak(j);
     V3D pos2;
-    if (CoordinatesToUse == 1) //"Q (lab frame)"
+    if (CoordinatesToUse == Kernel::QLab) //"Q (lab frame)"
       pos2 = p2.getQLabFrame();
-    else if (CoordinatesToUse == 2) //"Q (sample frame)"
+    else if (CoordinatesToUse == Kernel::QSample) //"Q (sample frame)"
       pos2 = p2.getQSampleFrame();
-    else if (CoordinatesToUse == 3) //"HKL"
+    else if (CoordinatesToUse == Kernel::HKL) //"HKL"
       pos2 = p2.getHKL();
     if (pos1.distance(pos2) < radius) {
       g_log.warning() << " Warning:  Peak integration spheres for peaks " << i

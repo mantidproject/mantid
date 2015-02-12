@@ -20,7 +20,7 @@ public:
   void test_create()
   {
       PeakNoShapeFactory factory;
-      PeakShape* product = factory.create("-**-");
+      Mantid::Geometry::PeakShape* product = factory.create("-**-");
       TS_ASSERT(dynamic_cast<NoShape*>(product));
       TS_ASSERT_EQUALS("none", product->shapeName());
       delete product;

@@ -72,9 +72,6 @@ class TimeSlice(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty(name='BackgroundRange'),
                              doc='Background range in time of flight')
 
-        self.declareProperty(name='Verbose', defaultValue=False,
-                             doc='Output more messages to results log')
-
         self.declareProperty(name='Plot', defaultValue=False,
                              doc='Plot result workspaces')
 
@@ -146,9 +143,7 @@ class TimeSlice(PythonAlgorithm):
                 work_dir = config['defaultsave.directory']
                 save_path = os.path.join(work_dir, slice_file + '.nxs')
                 SaveNexusProcessed(InputWorkspace=slice_file, Filename=save_path)
-
-                if self._verbose:
-                    logger.notice('Output file :' + save_path)
+                logger.information('Output file :' + save_path)
 
         all_workspaces = ','.join(out_ws_list)
         GroupWorkspaces(InputWorkspaces=all_workspaces, OutputWorkspace=self._out_ws_group)
@@ -184,7 +179,6 @@ class TimeSlice(PythonAlgorithm):
 
         self._out_ws_group = self.getPropertyValue('OutputWorkspace')
 
-        self._verbose = self.getProperty('Verbose').value
         self._plot = self.getProperty('Plot').value
         self._save = self.getProperty('Save').value
 
@@ -197,8 +191,7 @@ class TimeSlice(PythonAlgorithm):
         @returns Name of workspace loaded into
         """
 
-        if self._verbose:
-            logger.notice('Reading file :' + filename)
+        logger.information('Reading file :' + filename)
 
         # Load the raw file
         f_name = os.path.split(filename)[1]

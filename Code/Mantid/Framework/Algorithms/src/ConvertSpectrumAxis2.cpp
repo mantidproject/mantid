@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/Run.h"
@@ -133,28 +134,19 @@ void ConvertSpectrumAxis2::createElasticQMap(const std::string &targetUnit) {
   else if (emodeStr == "Indirect")
     emode = 2;
 
-  // Get conversion factor from energy(meV) to wavelength(angstroms)
-  Kernel::Units::Energy energyUnit;
-  double wavelengthFactor(0.0), wavelengthPower(0.0);
-  energyUnit.quickConversion("Wavelength", wavelengthFactor, wavelengthPower);
-
   for (size_t i = 0; i < m_nHist; i++) {
     IDetector_const_sptr detector = m_inputWS->getDetector(i);
-    double theta(0.0), efixed(0.0);
+    double twoTheta(0.0), efixed(0.0);
     if (!detector->isMonitor()) {
-      theta = m_inputWS->detectorTwoTheta(detector) / 2.0;
+      twoTheta = m_inputWS->detectorTwoTheta(detector) / 2.0;
       efixed = getEfixed(detector, m_inputWS, emode); // get efixed
     } else {
-      theta = 0.0;
+      twoTheta = 0.0;
       efixed = DBL_MIN;
     }
 
-    const double stheta = std::sin(theta);
-
-    // Calculate the wavelength to allow it to be used to convert to elasticQ.
-    double wavelength = wavelengthFactor * std::pow(efixed, wavelengthPower);
-    // The MomentumTransfer value.
-    double elasticQInAngstroms = 4.0 * M_PI * stheta / wavelength;
+    // Convert to MomentumTransfer
+    double elasticQInAngstroms = Kernel::UnitConversion::run(twoTheta, efixed);
 
     if (targetUnit == "ElasticQ") {
       m_indexMap.insert(std::make_pair(elasticQInAngstroms, i));
