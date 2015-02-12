@@ -226,8 +226,6 @@ namespace Mantid
           return;
         }
 
-        // We can rebuild the pipeline by either creating it from scratch or by changing the lowest level source
-
         // Rebuild pipeline
         rebuildPipeline(src1, src2);
 
@@ -473,7 +471,6 @@ namespace Mantid
             proxy1 = filter1->getProxy();
 
             // Move source2 to its end.
-            int numConsumer = endOfSource2Pipeline->getNumberOfConsumers() ;
             while (endOfSource2Pipeline->getNumberOfConsumers() > 0)
             {
              endOfSource2Pipeline = endOfSource2Pipeline->getConsumer(0);

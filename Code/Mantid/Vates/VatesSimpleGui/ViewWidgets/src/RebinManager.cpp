@@ -237,7 +237,7 @@ namespace Mantid
           if (numberOfBins < m_binCutOffValue && index < 3)
           {
             // Only do this for BinMD, it is too costly for SliceMD to have very large cuts
-            if (MantidQt::MantidWidgets::BinMDDialog * binDialog = dynamic_cast<MantidQt::MantidWidgets::BinMDDialog *>(dialog))
+            if (dynamic_cast<MantidQt::MantidWidgets::BinMDDialog *>(dialog))
             {
               newNumberOfBins = QString::number(static_cast<unsigned long long>(m_binCutOffValue));
             }
