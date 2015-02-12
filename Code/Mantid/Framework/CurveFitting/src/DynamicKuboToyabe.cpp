@@ -40,70 +40,69 @@ void DynamicKuboToyabe::init()
   declareParameter("Nu",    0.0, "Hopping rate");
 }
 
-double getDKT (double t, double sig, double nu){
-
-#define tsmax 656 // 16 us of valid data
-#define stk 25
-#define eps 0.05 // bin for calculations
-
-
-  int k,j, xi;
-  static double gs[tsmax+1], gd[tsmax+1];
-
-  double y, tt, hop, xe;
-  static double oldsig=-1., oldnu=-1.;
-
-
-  if ( (sig == oldsig) && (nu == oldnu) ){
-    // Re-use previous computation
-    xi=int(fabs(t)/eps);
-    if (xi>tsmax-2)
-      xi = tsmax-2;
-    xe=(fabs(t)/eps)-xi;
-    return gd[xi+1]*(1-xe)+xe*gd[xi+2];
-  }
-
-  oldsig=sig;
-  oldnu =nu;
-
-  hop = nu*eps;
-
-  // Generate static Kubo-Toyabe
-  for (k=1; k<=tsmax; k++){
-    tt = (k-1)*eps*sig*(k-1)*eps*sig;
-    gs[k]=0.3333333333+0.6666666667*(1-tt)*exp(-tt/2);
-  }
-
-  // Generate dynamic f-u-f
-  for (k=1; k<=tsmax; k++){
-    y=gs[k];
-    for (j=k-1; j>=2; j--){
-      y=y*(1-hop)+hop*gd[k-j+1]*gs[j];
-    }
-    gd[k]=y;
-  }
-
-  
-  // Interpolate table. If beyond end, extrapolate...
-  xi=int(abs(t)/eps);
-  if (xi>tsmax-2)
-    xi = tsmax-2;
-  xe=abs(t)/eps-xi;
-  return gd[xi+1]*(1-xe)+xe*gd[xi+2];
-
-}
-
-// Zero Field Kubo Toyabe relaxation function
+// Static Zero Field Kubo Toyabe relaxation function
 double ZFKT (const double x, const double G){
 
   const double q = G*G*x*x;
   return (0.3333333333 + 0.6666666667*exp(-0.5*q)*(1-q));
 }
 
-// Non-Zero field Kubo Toyabe relaxation function
+// Static Non-Zero field Kubo Toyabe relaxation function
 double HKT (const double x, const double G, const double F) 
 {
   throw std::runtime_error("HKT not implemented yet");
+}
+
+// Dynamic Kubo-Toyabe
+double getDKT (double t, double G, double v){
+
+  const int tsmax = 656; // Length of the time axis, 32 us of valid data
+  const double eps = 0.05; // Bin width for calculations
+  //  const int stk = 25; // Not used for the moment
+
+
+  static double oldG=-1., oldV=-1.;
+  static std::vector<double> gStat(tsmax), gDyn(tsmax);
+
+
+  // If previous call was for the same G, v
+  // Re-use previous computation
+  if ( (G == oldG) && (v == oldV) ){
+    int x=int(fabs(t)/eps);
+    if (x>tsmax-2)
+      x = tsmax-2;
+    double xe=(fabs(t)/eps)-x;
+    return gDyn[x]*(1-xe)+xe*gDyn[x+1];
+  }
+   
+  // Else, store new values
+  oldG =G;
+  oldV =v;
+
+  double hop = v*eps;
+
+  // Generate static Kubo-Toyabe
+  for (size_t k=0; k<tsmax; k++){
+    gStat[k]= ZFKT(k*eps,G);
+  }
+
+  // Generate dynamic Kubo Toyabe
+  for (int k=0; k<tsmax; k++){
+    double y=gStat[k];
+    for (int j=k-1; j>0; j--){
+      y=y*(1-hop)+hop*gDyn[k-j]*gStat[j];
+    }
+    gDyn[k]=y;
+  }
+  
+  // Interpolate table 
+  // If beyond end, extrapolate
+  int x=int(abs(t)/eps);
+  if (x>tsmax-2)
+    x = tsmax-2;
+  double xe=(fabs(t)/eps)-x;
+  return gDyn[x]*(1-xe)+xe*gDyn[x+1];
+
 }
 
 // Dynamic Kubo Toyabe function
