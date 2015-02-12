@@ -121,7 +121,6 @@ class MantidPlotProxiesTest(unittest.TestCase):
         mm = importMatrixWorkspace("fake", visible=True)
         g = mm.plotGraph2D()
         spec = g.activeLayer().spectrogram()
-        screenshot(g, "MantidMatrix.plotGraph2D", "Call to MantidMatrix.plotGraph2D() on a workspace.")
         self.try_closing(mm, "importMatrixWorkspace()")
         self.assertTrue(g._getHeldObject() is None, "Deleted graph safely when the parent MantidMatrix was deleted")
         self.assertTrue(spec._getHeldObject() is None, "Deleted spectrogram safely")
@@ -135,13 +134,11 @@ class MantidPlotProxiesTest(unittest.TestCase):
 
     def test_closing_getInstrumentView(self):
         iv = getInstrumentView("IRS26173")
-        screenshot(iv, "getInstrumentView", "Call to getInstrumentView() on a workspace.")
         self.try_closing(iv, "getInstrumentView()")
 
     def test_convertToWaterfall(self):
         g = plot(workspace("IRS26173"),(0,1,2,3,4))
         convertToWaterfall(g)
-        screenshot(g, "convertToWaterfall", "Call to convertToWaterfall() on a workspace.")
         self.try_closing(g, "convertToWaterfall()")
 
     def test_dock_method_produces_docked_window_on_matrix(self):
