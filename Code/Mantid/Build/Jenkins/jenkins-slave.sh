@@ -6,7 +6,8 @@
 #
 # The settings at the top must be filled in for each slave.
 #####################################################################
-
+# Crontab setting should be something like
+# 0,30 * * * * /home/builder/jenkins-linode nodename secret
 #####################################################################
 # User configuration
 #####################################################################
@@ -78,4 +79,4 @@ echo "starting ..."
 JAVA=`which java`
 JAVA_ARGS="${PROXY_ARGS} -jar ${JAR_FILE} -jnlpUrl ${SLAVE_AGENT_URL} -secret ${SECRET}"
 echo "${JAVA} ${JAVA_ARGS}"
-#${JAVA} ${JAVA_ARGS}
+${JAVA} ${JAVA_ARGS}
