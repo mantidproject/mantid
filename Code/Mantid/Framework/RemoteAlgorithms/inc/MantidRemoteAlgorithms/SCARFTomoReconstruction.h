@@ -61,11 +61,13 @@ protected:
   /// different methods (HTTP requests) to process reconstruction job commands
   virtual void doLogin(const std::string &username, const std::string &password);
   virtual void doLogout(const std::string &username);
+  virtual bool doPing();
   virtual void doSubmit(const std::string &username);
   virtual void doQueryStatus(const std::string &username);
   virtual void doQueryStatusById(const std::string& username,
                                  const std::string& jobId);
-  virtual void doCancel(const std::string &username);
+  virtual void doCancel(const std::string &username,
+                        const std::string& jobId);
 
 private:
   void init();
@@ -83,8 +85,8 @@ private:
 
   class Action {
   public:
-    typedef enum {LOGIN=0, LOGOUT, SUBMIT, QUERYSTATUS, QUERYSTATUSBYID, CANCEL,
-                  UNDEF} Type;
+    typedef enum {LOGIN=0, LOGOUT, SUBMIT, QUERYSTATUS, QUERYSTATUSBYID,
+                  PING, CANCEL, UNDEF} Type;
   };
 
   // helper methods

@@ -40,6 +40,7 @@ void SCARFTomoReconstruction::init() {
   reconstOps.push_back("SubmitJob");
   reconstOps.push_back("JobStatus");
   reconstOps.push_back("JobStatusByID");
+  reconstOps.push_back("Ping");
   reconstOps.push_back("CancelJob");
   auto listValue = boost::make_shared<StringListValidator>(reconstOps);
 
@@ -94,6 +95,8 @@ SCARFTomoReconstruction::Action::Type SCARFTomoReconstruction::getAction()
     act = Action::QUERYSTATUS;
   } else if (par == "JobStatusByID") {
     act = Action::QUERYSTATUSBYID;
+  } else if (par == "Ping") {
+    act = Action::PING;
   } else if (par == "CancelJob") {
     act = Action::CANCEL;
   } else {
@@ -116,6 +119,13 @@ void SCARFTomoReconstruction::exec() {
 
   g_log.information("Running SCARFTomoReconstruction");
 
+  // only action that doesn't require any credentials
+  if (Action::PING == m_action) {
+    doPing();
+    return;
+  }
+
+  // otherwise, check first username and then action-specific parameters
   std::string username;
   try {
     username = getPropertyValue("UserName");
@@ -124,7 +134,7 @@ void SCARFTomoReconstruction::exec() {
       "on the compute resource" + m_SCARFComputeResource << std::endl;
     throw;
   }
-
+  // all actions that require at least a username
   if (Action::LOGIN == m_action) {
     std::string password;
     try {
@@ -154,7 +164,15 @@ void SCARFTomoReconstruction::exec() {
     }
     doQueryStatusById(username, jobId);
   } else if (Action::CANCEL == m_action) {
-    doCancel(username);
+    std::string jobId;
+    try {
+      jobId = getPropertyValue("JobID");
+    } catch(std::runtime_error& /*e*/) {
+      g_log.error() << "To cancel a job you need to give the ID of a job "
+        "running on " << m_SCARFComputeResource << std::endl;
+      throw;
+    }
+    doCancel(username, jobId);
   }
 }
 
@@ -229,7 +247,6 @@ void SCARFTomoReconstruction::doLogin(const std::string &username,
  * @param username Username to use (should have authenticated before)
  */
 void SCARFTomoReconstruction::doLogout(const std::string &username) {
-
   auto it = m_tokenStash.find(username);
   if (m_tokenStash.end() == it) {
     throw std::runtime_error("Logout failed. You do not seem to be logged in. "
@@ -363,7 +380,7 @@ void SCARFTomoReconstruction::doQueryStatus(const std::string &username) {
 
   progress(0, "Checking the status of jobs...");
 
-  // Job submit, needs these headers:
+  // Job query status, needs these headers:
   // headers = {'Content-Type': 'application/xml', 'Cookie': token,
   //            'Accept': ACCEPT_TYPE}
   const std::string jobStatusPath = "webservice/pacclient/jobs?";
@@ -414,7 +431,7 @@ void SCARFTomoReconstruction::doQueryStatusById(const std::string& username,
 
   progress(0, "Checking the status of job with Id " + jobId);
 
-  // Job submit, needs these headers:
+  // Job query status, needs these headers:
   // headers = {'Content-Type': 'application/xml', 'Cookie': token,
   //            'Accept': ACCEPT_TYPE}
   const std::string jobIdStatusPath = "webservice/pacclient/jobs/";
@@ -449,25 +466,97 @@ void SCARFTomoReconstruction::doQueryStatusById(const std::string& username,
 }
 
 /**
+ * Ping the server to see if the web service is active/available.
+ *
+ * @return true if the web service responds.
+ */
+bool SCARFTomoReconstruction::doPing() {
+  progress(0, "Pinging compute resource " + m_SCARFComputeResource);
+
+  // Job ping, needs these headers:
+  // headers = {'Content-Type': 'application/xml', 'Accept': ACCEPT_TYPE}
+  const std::string pingPath = "platform/webservice/pacclient/ping/";
+  // TODO: this should be retrieved from facilities or similar
+  // (like SCARFLoginBaseURL above)
+  // the port number is known only after logging in
+  const std::string baseURL = "https://portal.scarf.rl.ac.uk:8443/";
+
+  InternetHelper session;
+  std::string httpsURL = baseURL + pingPath;
+  g_log.debug() << "Sending HTTP GET request to: " << httpsURL << std::endl;
+  std::stringstream ss;
+  InternetHelper::StringToStringMap headers;
+  headers.insert(std::pair<std::string, std::string>("Content-Type",
+                                                     "application/xml"));
+  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  int code = session.sendRequest(httpsURL, ss, headers);
+  std::string resp = ss.str();
+  g_log.debug() << "Got HTTP code " << code << ", response: " <<  resp << std::endl;
+  bool ok = false;
+  if (Poco::Net::HTTPResponse::HTTP_OK == code) {
+    // TODO: still need to parse response string contents, look for a certain pattern
+    // in the response body. Maybe put it into an output TableWorkspace
+    g_log.notice() << "Pinged compute resource with response: " <<
+      resp << std::endl;
+    ok = true;
+  } else {
+    throw std::runtime_error("Failed to ping the web service at:" + httpsURL +
+                             ". Please check your parameters, software version, "
+                             "etc.");
+  }
+
+  progress(1.0, "Ping compute resource " + m_SCARFComputeResource +  " done.");
+
+  return ok;
+}
+
+/**
  * Cancel a submitted job, identified by its ID in the job queue.
  *
  * @param username Username to use (should have authenticated before)
+ * @param jobId Identifier of a job as used by the job scheduler (integer number)
  */
-void SCARFTomoReconstruction::doCancel(const std::string &username) {
-  try {
-    m_jobID = getPropertyValue("JobID");
-  } catch(std::runtime_error& /*e*/) {
-    g_log.error() << "You did not specify a JobID which is required "
-      "to cancel a job." << std::endl;
-    throw;
+void SCARFTomoReconstruction::doCancel(const std::string &username,
+                                       const std::string &jobId) {
+  auto it = m_tokenStash.find(username);
+  if (m_tokenStash.end() == it) {
+    throw std::runtime_error("Job status query failed. You do not seem to be logged "
+                             "in. I do not remember this username. Please check "
+                             "your username.");
   }
 
-  progress(0, "Cancelling tomographic reconstruction job...");
+  progress(0, "Cancelling tomographic reconstruction job " + jobId);
 
-  // TODO: query+cancel jobID, and report result
-  // TODO: handle failure
+  // Job kill, needs these headers:
+  // headers = {'Content-Type': 'text/plain', 'Cookie': token, 'Accept': ACCEPT_TYPE}
+  const std::string killPath = "webservice/pacclient/jobOperation/kill";
+  const std::string baseURL = it->second.m_url;
+  const std::string token = it->second.m_token_str;
 
-  progress(1.0, "Job cancelled.");
+  InternetHelper session;
+  std::string httpsURL = baseURL + killPath;
+  g_log.debug() << "Sending HTTP GET request to: " << httpsURL << std::endl;
+  std::stringstream ss;
+  InternetHelper::StringToStringMap headers;
+  headers.insert(std::pair<std::string, std::string>("Content-Type",
+                                                     "application/xml"));
+  headers.insert(std::pair<std::string, std::string>("Cookie", token));
+  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  int code = session.sendRequest(httpsURL, ss, headers);
+  std::string resp = ss.str();
+  g_log.debug() << "Got HTTP code " << code << ", response: " <<  resp << std::endl;
+  if (Poco::Net::HTTPResponse::HTTP_OK == code) {
+    // TODO: still need to parse response string contents, look for a certain pattern
+    // in the response body. Maybe put it into an output TableWorkspace
+    g_log.notice() << "Killed job with Id" << jobId << " with response: " <<
+      resp << std::endl;
+  } else {
+    throw std::runtime_error("Failed to kill job (Id:" + jobId +" ) through the web "
+                             "service at:" + httpsURL + ". Please check your "
+                             "existing jobs, username, and parameters.");
+  }
+
+  progress(1.0, "Killed job with Id " + jobId + ".");
 }
 
 /**
