@@ -51,7 +51,7 @@ def main(sysarg):
     if DIAGRAMS_DIR != "":
         os.environ["DIAGRAMS_DIR"] = DIAGRAMS_DIR
 
-    if DOT_EXECUTABLE != "":
+    if os.path.isfile(DOT_EXECUTABLE):
         os.environ["DOT_EXECUTABLE"] = DOT_EXECUTABLE
 
     # Arguments for main

@@ -61,7 +61,9 @@ class DiagramDirective(BaseDirective):
         try:
             dot_executable = os.environ["DOT_EXECUTABLE"]
         except:
-            raise RuntimeError("The '.. diagram::' directive requires a DOT_EXECUTABLE environment variable to be set.")
+            self.add_rst(".. figure:: /images/ImageNotFound.png\n\n" +
+                        "    graphviz not found - diagram could not be rendered.")
+            return []
 
         #Make sure we have an output directory
         if not os.path.exists(out_dir):
