@@ -690,14 +690,20 @@ namespace IDA
       dataX.append(inputXData[i]);
       dataY.append(outputData.getCalculated(i));
     }
+    IAlgorithm_sptr createWsAlg = AlgorithmManager::Instance().create("CreateWorkspace");
+    createWsAlg->initialize();
+    createWsAlg->setChild(true);
+    createWsAlg->setLogging(false);
+    createWsAlg->setProperty("OutputWorkspace", "__GuessAnon");
+    createWsAlg->setProperty("NSpec", 1);
+    createWsAlg->setProperty("DataX", dataX.toStdVector());
+    createWsAlg->setProperty("DataY", dataY.toStdVector());
+    createWsAlg->execute();
+    MatrixWorkspace_sptr guessWs = createWsAlg->getProperty("OutputWorkspace");
 
-    // Create the curve
-    removeCurve("FF_FitCurve");
-    m_curves["FF_FitCurve"] = new QwtPlotCurve();
-    m_curves["FF_FitCurve"]->setData(dataX, dataY);
-    m_curves["FF_FitCurve"]->attach(m_plots["FuryFitPlot"]);
-    QPen fitPen(Qt::red, Qt::SolidLine);
-    m_curves["FF_FitCurve"]->setPen(fitPen);
+    plotMiniPlot(guessWs, 0, "FuryFitPlot", "guess");
+    QPen p(Qt::green, Qt::SolidLine);
+    m_curves["guess"]->setPen(p);
     replot("FuryFitPlot");
   }
 
