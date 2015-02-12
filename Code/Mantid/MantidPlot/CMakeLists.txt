@@ -1037,8 +1037,11 @@ foreach(PY_FILE ${IPY_FILES} )
 endforeach()
 install ( FILES ${CONFIG_RESET_SCRIPT} DESTINATION ${BIN_DIR} )
 
+# file make_package.rb contains hard-coded path to the libraries
+# this causes fail of the installation with macports
+# therefore MACPORTS option is introduced
 if ( APPLE )
-  if (OSX_VERSION VERSION_LESS 10.9)
+  if (OSX_VERSION VERSION_LESS 10.9 OR MACPORTS)
     configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in
                    ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake
                    @ONLY )
