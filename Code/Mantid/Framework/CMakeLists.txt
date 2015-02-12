@@ -121,9 +121,7 @@ endif ()
 # Unit test helper packages
 if ( CXXTEST_FOUND )
   add_subdirectory ( UserAlgorithms )
-  # This needs to be here so that a Framework-only build will work.
-#  add_subdirectory ( ../TestingTools ${${CMAKE_PROJECT_NAME}_BINARY_DIR}/TestingTools/gmock-${GMOCK_VERSION} )
-  add_subdirectory ( ../TestingTools ${${CMAKE_PROJECT_NAME}_BINARY_DIR}/TestingTools )
+  add_subdirectory ( ../Testing/Tools ${${CMAKE_PROJECT_NAME}_BINARY_DIR}/Testing/Tools )
 endif ()
 
 add_subdirectory (MDAlgorithms)
