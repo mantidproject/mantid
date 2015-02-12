@@ -65,6 +65,16 @@ if [ -z "$MANTID_DATA_STORE" ]; then
 fi
 
 ###############################################################################
+# RHEL6 setup steps - nodes must have a "rhel6" label set (in lowercase)
+###############################################################################
+if [[ ${NODE_LABELS} == *rhel6* ]]; then
+  SCL_ON_RHEL6="scl enable mantidlibs"
+  ON_RHEL6=true
+else
+  SCL_ON_RHEL6="eval"
+fi
+
+###############################################################################
 # Check job requirements from the name
 ###############################################################################
 if [[ ${JOB_NAME} == *clean* ]]; then
@@ -101,16 +111,6 @@ if [[ "$BUILDPKG" == true ]]; then
     # Mac packaging
     PACKAGINGVARS="-DPACKAGE_DOCS=ON"
   fi
-fi
-
-###############################################################################
-# RHEL6 setup steps - nodes must have a "rhel6" label set (in lowercase)
-###############################################################################
-if [[ ${NODE_LABELS} == *rhel6* ]]; then
-  SCL_ON_RHEL6="scl enable mantidlibs"
-  ON_RHEL6=true
-else
-  SCL_ON_RHEL6="eval"
 fi
 
 ###############################################################################
@@ -169,7 +169,8 @@ $SCL_ON_RHEL6 "cmake --build . --target AllTests -- -j$BUILD_THREADS"
 # Run the tests
 ###############################################################################
 # Remove any Mantid.user.properties file
-rm -f ~/.mantid/Mantid.user.properties
+userprops=~/.mantid/Mantid.user.properties
+rm -f $userprops
 $SCL_ON_RHEL6 "ctest -j$BUILD_THREADS --schedule-random --output-on-failure"
 
 ###############################################################################
@@ -195,4 +196,17 @@ if [[ "$BUILDPKG" == true ]]; then
     # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree
     $SCL_ON_RHEL6 "cpack --config CPackSourceConfig.cmake -D CPACK_PACKAGING_INSTALL_PREFIX="
   fi
+fi
+
+###############################################################################
+# Run the system tests on RHEL6 when doing a pull request build. Run
+# from a package to have at least one Linux checks it install okay
+###############################################################################
+if [[ "${ON_RHEL6}" == true ]] && [[ ${JOB_NAME} == *pull_requests* ]]; then
+  PKGDIR=${WORKSPACE}/build
+  # Turn off usage reports and instrument downloading for the mantid call
+  # that creates the properties file
+  echo "UpdateInstrumentDefinitions.OnStartup = 0" > $userprops
+  echo "usagereports.enabled = 0" >> $userprops
+  python $WORKSPACE/Code/Mantid/Testing/SystemTests/scripts/InstallerTesting.py -o -d $PKGDIR
 fi
