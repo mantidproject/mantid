@@ -78,6 +78,7 @@ namespace MantidWidgets
 
     void removeSpectrum(const Mantid::API::MatrixWorkspace_sptr ws);
     void removeSpectrum(const QString & wsName);
+    void removeSpectrumByCurveName(const QString & name);
 
   signals:
     /// Signals that the plot should be refreshed

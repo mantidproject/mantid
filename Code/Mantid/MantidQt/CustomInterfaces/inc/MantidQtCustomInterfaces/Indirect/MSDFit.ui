@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>444</width>
-    <height>223</height>
+    <width>422</width>
+    <height>265</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,10 +54,21 @@
      <item>
       <layout class="QVBoxLayout" name="loMSDPlot">
        <item>
-        <layout class="QVBoxLayout" name="plot"/>
+        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlot" native="true">
+         <property name="showLegend" stdset="0">
+          <bool>true</bool>
+         </property>
+         <property name="canvasColour" stdset="0">
+          <color>
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
+          </color>
+         </property>
+        </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="loPlotLegend">
+        <layout class="QHBoxLayout" name="loPlotOptions">
          <item>
           <widget class="QPushButton" name="pbSingleFit">
            <property name="text">
@@ -77,23 +88,6 @@
             </size>
            </property>
           </spacer>
-         </item>
-         <item>
-          <widget class="QLabel" name="lbPlotSample">
-           <property name="text">
-            <string>Sample</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="lbPlotFit">
-           <property name="styleSheet">
-            <string notr="true">color: rgb(255, 0, 0);</string>
-           </property>
-           <property name="text">
-            <string>Fit</string>
-           </property>
-          </widget>
          </item>
         </layout>
        </item>
@@ -218,11 +212,14 @@
       </item>
       <item>
        <widget class="QCheckBox" name="ckPlot">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="text">
          <string>Plot Result</string>
         </property>
         <property name="checked">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -256,6 +253,12 @@
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/DataSelector.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::PreviewPlot</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/PreviewPlot.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

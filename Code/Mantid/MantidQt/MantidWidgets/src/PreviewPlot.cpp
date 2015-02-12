@@ -313,6 +313,22 @@ void PreviewPlot::removeSpectrum(const QString & wsName)
 
 
 /**
+ * Removes a curve from the plot given its name (as displayed in the legend).
+ *
+ * @param name Name of curve
+ */
+void PreviewPlot::removeSpectrumByCurveName(const QString & name)
+{
+  for(auto it = m_curves.begin(); it != m_curves.end(); ++it)
+  {
+    QLabel *label = it.value().label;
+    if(label && label->text() == name)
+      removeSpectrum(it.key());
+  }
+}
+
+
+/**
  * Shows or hides the plot legend.
  *
  * @param show If the legend should be shown
