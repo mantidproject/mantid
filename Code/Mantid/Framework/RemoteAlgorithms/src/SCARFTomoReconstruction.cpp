@@ -8,7 +8,11 @@
 #include "MantidKernel/RemoteJobManager.h"
 #include "MantidRemoteAlgorithms/SimpleJSON.h"
 
+#include <fstream>
+
+#include <Poco/File.h>
 #include <Poco/Net/HTTPRequest.h>
+#include <Poco/StreamCopier.h>
 
 namespace Mantid {
 namespace RemoteAlgorithms {
@@ -34,6 +38,7 @@ SCARFTomoReconstruction::SCARFTomoReconstruction():
 void SCARFTomoReconstruction::init() {
   auto requireValue = boost::make_shared<MandatoryValidator<std::string>>();
 
+  // list of all actions
   std::vector<std::string> reconstOps;
   reconstOps.push_back("LogIn");
   reconstOps.push_back("LogOut");
@@ -42,6 +47,8 @@ void SCARFTomoReconstruction::init() {
   reconstOps.push_back("JobStatusByID");
   reconstOps.push_back("Ping");
   reconstOps.push_back("CancelJob");
+  reconstOps.push_back("Upload");
+  reconstOps.push_back("Download");
   auto listValue = boost::make_shared<StringListValidator>(reconstOps);
 
   std::vector<std::string> exts;
@@ -78,11 +85,34 @@ void SCARFTomoReconstruction::init() {
                                         API::FileProperty::OptionalLoad, exts,
                                         Direction::Input),
                   "Parameter file for the reconstruction job");
+
+  // Path for upload file (on the server/compute resource)
+  declareProperty(new PropertyWithValue<std::string>("DestinationDirectory", "",
+                                                     Direction::Input),
+                  "Path where to upload the file on the compute resource/server");
+
+  // Local (full path) file name to upload
+  declareProperty(new API::FileProperty("FileToUpload", "",
+                                        API::FileProperty::Load, "",
+                                        Direction::Input),
+                  "Name of the file (full path) to upload to the compute "
+                  "resource/server ");
+
+  // Name of a file from a job running on the compute resource, to download
+  declareProperty(new PropertyWithValue<std::string>("RemoteJobFilename", "",
+                                                     Direction::Input),
+                  "Name of the job file to download");
+
+  // Local path where to download files
+  declareProperty(new API::FileProperty("LocalDirectory", "",
+                                        API::FileProperty::Directory, "",
+                                        Direction::Input),
+                  "Local path where to download files from the compute "
+                  "resource/server");
 }
 
 // gets action code in m_action, if input argument is valid
-SCARFTomoReconstruction::Action::Type SCARFTomoReconstruction::getAction()
-{
+SCARFTomoReconstruction::Action::Type SCARFTomoReconstruction::getAction() {
   std::string par = getPropertyValue("Action");
   Action::Type act = Action::UNDEF;
   if (par == "LogIn") {
@@ -99,6 +129,10 @@ SCARFTomoReconstruction::Action::Type SCARFTomoReconstruction::getAction()
     act = Action::PING;
   } else if (par == "CancelJob") {
     act = Action::CANCEL;
+  } else if (par == "Upload") {
+    act = Action::UPLOAD;
+  } else if (par == "Download") {
+    act = Action::DOWNLOAD;
   } else {
     g_log.error() << "Unknown action specified: '" <<
       m_action << "', ignoring it.";
@@ -130,8 +164,9 @@ void SCARFTomoReconstruction::exec() {
   try {
     username = getPropertyValue("UserName");
   } catch(std::runtime_error& /*e*/) {
-    g_log.error() << "To use this algorithm you need to give a valid username "
-      "on the compute resource" + m_SCARFComputeResource << std::endl;
+    g_log.error() << "To use this algorithm to perform the requested action "
+      "you need to give a valid username on the compute resource" +
+      m_SCARFComputeResource << std::endl;
     throw;
   }
   // all actions that require at least a username
@@ -142,7 +177,7 @@ void SCARFTomoReconstruction::exec() {
     } catch(std::runtime_error& /*e*/) {
       g_log.error() << "To log in using this algorithm you need to give a "
         "valid username and password on the compute resource " <<
-        m_SCARFComputeResource << std::endl;
+        m_SCARFComputeResource << "." << std::endl;
       throw;
     }
     doLogin(username, password);
@@ -159,7 +194,7 @@ void SCARFTomoReconstruction::exec() {
     } catch(std::runtime_error& /*e*/) {
       g_log.error() << "To query the detailed status of a job by its ID you "
         "need to give the ID of a job running on " <<
-        m_SCARFComputeResource << std::endl;
+        m_SCARFComputeResource << "." << std::endl;
       throw;
     }
     doQueryStatusById(username, jobId);
@@ -169,10 +204,51 @@ void SCARFTomoReconstruction::exec() {
       jobId = getPropertyValue("JobID");
     } catch(std::runtime_error& /*e*/) {
       g_log.error() << "To cancel a job you need to give the ID of a job "
-        "running on " << m_SCARFComputeResource << std::endl;
+        "running on " << m_SCARFComputeResource << "." << std::endl;
       throw;
     }
     doCancel(username, jobId);
+  } else if (Action::UPLOAD == m_action) {
+    std::string filename, destDir;
+    try {
+      filename = getPropertyValue("FileToUpload");
+    } catch(std::runtime_error& /*e*/) {
+      g_log.error() << "To upload a file you need to provide an existing "
+        "local file." << std::endl;
+      throw;
+    }
+    try {
+      destDir = getPropertyValue("DestinationDirectory");
+    } catch(std::runtime_error& /*e*/) {
+      g_log.error() << "To upload a file you need to provide a destination "
+        "directory on " << m_SCARFComputeResource << "." << std::endl;
+      throw;
+    }
+    doUploadFile(username, destDir, filename);
+  } else if (Action::DOWNLOAD == m_action) {
+    std::string jobId, fname, localDir;
+    try {
+      jobId = getPropertyValue("JobID");
+    } catch(std::runtime_error& /*e*/) {
+      g_log.error() << "To download a file you need to give the ID of a job "
+        "running on " << m_SCARFComputeResource << "." << std::endl;
+      throw;
+    }
+    try {
+      fname = getPropertyValue("RemoteJobFilename");
+    } catch(std::runtime_error& /*e*/) {
+      g_log.error() << "To download a file you need to provide the name of a "
+        "file from the remote job." << std::endl;
+      throw;
+    }
+    try {
+      localDir = getPropertyValue("LocalDirectory");
+    } catch(std::runtime_error& /*e*/) {
+      g_log.error() << "To download a file you need to provide a destination "
+        "(local) directory." << std::endl;
+      throw;
+    }
+    doDownload(username, jobId, fname, localDir);
   }
 }
 
@@ -420,8 +496,7 @@ void SCARFTomoReconstruction::doQueryStatus(const std::string &username) {
  * @param jobId Identifier of a job as used by the job scheduler (integer number)
  */
 void SCARFTomoReconstruction::doQueryStatusById(const std::string& username,
-                                                const std::string& jobId)
-{
+                                                const std::string& jobId) {
   auto it = m_tokenStash.find(username);
   if (m_tokenStash.end() == it) {
     throw std::runtime_error("Job status query failed. You do not seem to be logged "
@@ -525,11 +600,11 @@ void SCARFTomoReconstruction::doCancel(const std::string &username,
                              "your username.");
   }
 
-  progress(0, "Cancelling tomographic reconstruction job " + jobId);
+  progress(0, "Cancelling/killing job " + jobId);
 
   // Job kill, needs these headers:
   // headers = {'Content-Type': 'text/plain', 'Cookie': token, 'Accept': ACCEPT_TYPE}
-  const std::string killPath = "webservice/pacclient/jobOperation/kill";
+  const std::string killPath = "webservice/pacclient/jobOperation/kill" + jobId;
   const std::string baseURL = it->second.m_url;
   const std::string token = it->second.m_token_str;
 
@@ -557,6 +632,67 @@ void SCARFTomoReconstruction::doCancel(const std::string &username,
   }
 
   progress(1.0, "Killed job with Id " + jobId + ".");
+}
+
+/**
+ * Upload a file to a directory on the server.
+ *
+ * @param username Username to use (should have authenticated before)
+ * @param destDir Destination directory on the server
+ * @param filename File name of the local file to upload
+ */
+void SCARFTomoReconstruction::doUploadFile(const std::string &username,
+                                           const std::string &destDir,
+                                           const std::string &filename) {
+  auto it = m_tokenStash.find(username);
+  if (m_tokenStash.end() == it) {
+    throw std::runtime_error("File upload failed. You do not seem to be logged "
+                             "in. I do not remember this username. Please check "
+                             "your username.");
+  }
+
+  progress(0, "Uploading file: " + filename);
+
+
+}
+
+/**
+ * Download a file or a set of files from a remote job into a local
+ * directory. Note that this download as supported by LSF at SCARF is
+ * job-specific: you download a file from a job and not a file in the
+ * file system in general. When downloading multiple files this action
+ * requires two steps: one first HTTP request to get the remote
+ * path(s) for all the job file(s), and a second request or series of
+ * requests to actually download the file(s).
+ *
+ * @param username Username to use (should have authenticated before)
+ * @param jobId Identifier of a job as used by the job scheduler (integer number)
+ * @param fname File name (of a job file on the compute resource). If no name is
+ * given then all the job files are downloaded into localDir
+ * @param localDir Local directory where to download the file(s)
+ */
+void SCARFTomoReconstruction::doDownload(const std::string &username,
+                                         const std::string &jobId,
+                                         const std::string &fname,
+                                         const std::string &localDir) {
+  auto it = m_tokenStash.find(username);
+  if (m_tokenStash.end() == it) {
+    throw std::runtime_error("File upload failed. You do not seem to be logged "
+                             "in. I do not remember this username. Please check "
+                             "your username.");
+  }
+
+  progress(0, "Downloading file: " + fname + " in " + localDir);
+
+  //TODO const std::string baseURL = it->second.m_url;
+  //const std::string token = it->second.m_token_str;
+  if (fname.empty()) {
+    // no name implies we want all the files of a remote job
+    getAllJobFiles(jobId, localDir, it->second);
+  } else {
+    // name given, so we directly download this single file
+    getOneJobFile(jobId, fname, localDir, it->second);
+  }
 }
 
 /**
@@ -604,8 +740,6 @@ std::string SCARFTomoReconstruction::buildSubmitBody(const std::string &appName,
                                                      const std::string &boundary,
                                                      const std::string &inputFile,
                                                      const std::string &inputArgs) {
-
-
   // BLOCK: start and encode app name like this:
   // --bqJky99mlBWa-ZuqjC53mG6EzbmlxB
   // Content-Disposition: form-data; name="AppName"
@@ -693,6 +827,138 @@ std::string SCARFTomoReconstruction::buildSubmitBody(const std::string &appName,
   body += "--" + boundary + "--\r\n\r\n";
 
   return body;
+}
+
+/**
+ * Helper to check if it's possible to write an output file and give
+ * informative messages.
+ *
+ * @param localPath Destination directory
+ * @param filename Name of the file being downloaded
+ */
+const std::string
+SCARFTomoReconstruction::checkDownloadOutputFile(const std::string &localPath,
+                                                 const std::string &fname) {
+  std::string outName = localPath + "/" + fname;
+  Poco::File f(outName);
+  if (f.exists()) {
+    if (f.canWrite()) {
+      g_log.notice() << "Overwriting output file: " << outName << std::endl;
+    } else {
+      g_log.warning() << "It is not possible to write into the output file: "
+                      << outName << ", you may not have the required "
+        "permissions. Please check." << std::endl;
+    }
+  }
+  return f.path();
+}
+
+/**
+ * Download a job file once we have obtained the remote path.
+ *
+ * @param jobId Identifier of a job as used by the job scheduler (integer number)
+ * @param remotePath File name (of a job file on the compute resource)
+ * @param localPath Local path where to download the file (already checked)
+ * @param t Authentication token/cookie including url+string
+ */
+void SCARFTomoReconstruction::getOneJobFile(const std::string &jobId,
+                                            const std::string &remotePath,
+                                            const std::string &localPath,
+                                            const Token &t)
+{
+  // Job download (one) file once we know the remote path, needs these headers:
+  // headers = {'Content-Type': 'text/plain', 'Cookie': token, 'Accept': ACCEPT_TYPE}
+  // - and as request body the name of the file
+  const std::string downloadOnePath = "webservice/pacclient/file/" + jobId;
+  const std::string baseURL = t.m_url;
+  const std::string token = t.m_token_str;
+
+  InternetHelper session;
+  std::string httpsURL = baseURL + downloadOnePath;
+  g_log.debug() << "Sending HTTP GET request to: " << httpsURL << std::endl;
+  std::stringstream ss;
+  InternetHelper::StringToStringMap headers;
+  headers.insert(std::pair<std::string, std::string>("Content-Type",
+                                                     "application/xml"));
+  headers.insert(std::pair<std::string, std::string>("Cookie", token));
+  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  std::string body = remotePath;
+  int code = session.sendRequest(httpsURL, ss, headers,
+                                 Poco::Net::HTTPRequest::HTTP_GET, body);
+  // TODO std::string resp = ss.str();
+  g_log.debug() << "Got HTTP code " << code << std::endl;
+  if (Poco::Net::HTTPResponse::HTTP_OK == code) {
+    // this is what indicates success/failure: response content empty/not empty
+    if (ss.rdbuf()->in_avail() > 0) {
+      // check file is writeable and inform user
+      std::string outName = checkDownloadOutputFile(localPath, remotePath);
+      std::ofstream file(outName, std::ios_base::binary);
+      Poco::StreamCopier::copyStream(ss, file);
+      g_log.notice() << "Downloaded remote file " << remotePath << " into " <<
+        localPath << std::endl;
+    } else {
+      // log an error but potentially continue with other files
+      g_log.error() << "Download failed. You may not have the required permissions "
+        "or the file may not be available on " << m_SCARFComputeResource << ": " <<
+        remotePath << std::endl;
+    }
+  } else {
+    throw std::runtime_error("Failed to download a file for job Id:" + jobId +
+                             " through the web service at:" + httpsURL + ". Please "
+                             "check your existing jobs, username, and parameters.");
+  }
+}
+
+/**
+ * Download all files for a remote job.
+ *
+ * @param jobId Identifier of a job as used by the job scheduler (integer number)
+ * @param localDir Local directory where to download the file (already checked)
+ * @param t Authentication token/cookie including url+string
+ */
+void SCARFTomoReconstruction::getAllJobFiles(const std::string &jobId,
+                                             const std::string &localDir,
+                                             const Token &t)
+{
+  // Job download (multiple) files, needs these headers:
+  // headers = {'Content-Type': 'text/plain', 'Cookie': token, 'Accept': ACCEPT_TYPE}
+  const std::string downloadPath = "webservice/pacclient/jobfiles/" + jobId;
+  const std::string baseURL = t.m_url;
+  const std::string token = t.m_token_str;
+
+  InternetHelper session;
+  std::string httpsURL = baseURL + downloadPath;
+  g_log.debug() << "Sending HTTP GET request to: " << httpsURL << std::endl;
+  std::stringstream ss;
+  InternetHelper::StringToStringMap headers;
+  headers.insert(std::pair<std::string, std::string>("Content-Type",
+                                                     "application/xml"));
+  headers.insert(std::pair<std::string, std::string>("Cookie", token));
+  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  int code = session.sendRequest(httpsURL, ss, headers);
+  std::string resp = ss.str();
+  g_log.debug() << "Got HTTP code " << code << ", response: " <<  resp << std::endl;
+  std::vector<std::string> fileNames;
+  if (Poco::Net::HTTPResponse::HTTP_OK == code) {
+    // this is what indicates success/failure: presence of '/' or '\'
+    if (std::string::npos != resp.find('/') || std::string::npos != resp.find('/')) {
+      // you can get multiple files, as remote file names listed separated by ';'
+      std::string name;
+      while (std::getline(ss, name, ';')) {
+        fileNames.push_back(name);
+      }
+      for (size_t i=0; i<fileNames.size(); i++) {
+        getOneJobFile(jobId, fileNames[i], localDir, t);
+      }
+    }
+  } else {
+    throw std::runtime_error("Failed to download job files (Id:" + jobId +" ) through "
+                             "the web service at:" + httpsURL + ". Please check your "
+                             "existing jobs, username, and parameters.");
+  }
+
+  progress(1.0, "Download  of " + boost::lexical_cast<std::string>(fileNames.size()) +
+           " file(s) completed in " + localDir);
 }
 
 } // end namespace RemoteAlgorithms

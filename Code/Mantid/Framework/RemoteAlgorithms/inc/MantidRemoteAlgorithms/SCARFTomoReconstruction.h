@@ -68,6 +68,13 @@ protected:
                                  const std::string& jobId);
   virtual void doCancel(const std::string &username,
                         const std::string& jobId);
+  virtual void doUploadFile(const std::string &username,
+                            const std::string &destDir,
+                            const std::string &filename);
+  virtual void doDownload(const std::string &username,
+                          const std::string &jobId,
+                          const std::string &fname,
+                          const std::string &localDir);
 
 private:
   void init();
@@ -79,14 +86,34 @@ private:
                               const std::string &boundary,
                               const std::string &inputFiles,
                               const std::string &inputArgs);
-  // lower level helper to encode parameters
+  /// lower level helper to encode parameters
   void encodeParam(std::string &body, const std::string &boundary,
                    const std::string &paramName, const std::string &paramVal);
+
+  // cookie obtained after logging in
+  struct Token {
+    Token(std::string& u, std::string& t): m_url(u), m_token_str(t) {};
+    std::string m_url;
+    std::string m_token_str;
+  };
+  typedef std::pair<std::string, SCARFTomoReconstruction::Token> UsernameToken;
+
+  /// check if output file is writeable, overwritten, etc.
+  const std::string checkDownloadOutputFile(const std::string &localPath,
+                                            const std::string &fname);
+
+  /// helper to fetch and save one file from the compute resource
+  void getOneJobFile(const std::string &jobId, const std::string &remotePath,
+                     const std::string &localPath, const Token &t);
+
+  /// helper to fetch and save all the files for a remote job
+  void getAllJobFiles(const std::string &jobId, const std::string &localDir,
+                      const Token &t);
 
   class Action {
   public:
     typedef enum {LOGIN=0, LOGOUT, SUBMIT, QUERYSTATUS, QUERYSTATUSBYID,
-                  PING, CANCEL, UNDEF} Type;
+                  PING, CANCEL, UPLOAD, DOWNLOAD, UNDEF} Type;
   };
 
   // helper methods
@@ -105,14 +132,6 @@ private:
 
   // HTTP specifics for SCARF (IBM LSF PAC)
   static std::string m_acceptType;
-
-  // cookie obtained after logging in
-  struct Token {
-    Token(std::string& u, std::string& t): m_url(u), m_token_str(t) {};
-    std::string m_url;
-    std::string m_token_str;
-  };
-  typedef std::pair<const std::string, SCARFTomoReconstruction::Token> UsernameToken;
 
   // store for username-token pairs
   static std::map<std::string, Token> m_tokenStash;
