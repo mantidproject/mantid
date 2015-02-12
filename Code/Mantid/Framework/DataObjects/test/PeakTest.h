@@ -346,25 +346,14 @@ public:
 
       V3D qLab = qLabDir * wavenumber_in_angstrom_times_tof_in_microsec;
 
-
-      //Peak peak(minimalInstrument, 1 /* detector id */, x[0] /*wavelength*/);
-
-
-
       Peak peak; // Everything will be default
       peak.setInstrument(minimalInstrument); // Can't do anything without the instrument
       peak.setQLabFrame(qLab);
       auto detector = peak.getDetector();
 
       TSM_ASSERT("No detector", detector);
-      if(detector)
-      {
-          TS_ASSERT_EQUALS(1, detector->getID());
-          TS_ASSERT_EQUALS(detectorPos, detector->getPos());
-      }
-
-      // Test that wavelengths aggree firstly.
-      //TS_ASSERT_EQUALS(x[0], peak.getWavelength());
+      TS_ASSERT_EQUALS(1, detector->getID());
+      TS_ASSERT_EQUALS(detectorPos, detector->getPos());
   }
 
   /** Create peaks using Q in sample frame + a goniometer rotation matrix*/

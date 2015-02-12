@@ -6,9 +6,13 @@ using Mantid::API::IPeak;
 using namespace boost::python;
 
 namespace {
-Mantid::Geometry::PeakShape_sptr getPeakShape(IPeak& peak) {
-    // Use clone to make a copy of the PeakShape.
-    return Mantid::Geometry::PeakShape_sptr(peak.getPeakShape().clone());
+Mantid::Geometry::PeakShape_sptr getPeakShape(IPeak &peak) {
+  // Use clone to make a copy of the PeakShape.
+  return Mantid::Geometry::PeakShape_sptr(peak.getPeakShape().clone());
+}
+void setQLabFrame(IPeak &peak, Mantid::Kernel::V3D qLabFrame, double distance) {
+  // Set the qlab frame
+  return peak.setQLabFrame(qLabFrame, distance);
 }
 }
 
@@ -38,7 +42,8 @@ void export_IPeak()
          "Using the instrument set in the peak, perform ray tracing to find the exact detector.")
     .def("getQSampleFrame", &IPeak::getQSampleFrame, "Return the Q change (of the lattice, k_i - k_f) for this peak."
          "The Q is in the Sample frame: the goniometer rotation WAS taken out. ")
-    .def("setQLabFrame", &IPeak::setQLabFrame, "Set the peak using the peak's position in reciprocal space, in the lab frame.")
+    .def("setQLabFrame", (void (IPeak::*)(Mantid::Kernel::V3D))&IPeak::setQLabFrame)
+    .def("setQLabFrame", setQLabFrame, "Set the peak using the peak's position in reciprocal space, in the lab frame.")
     .def("setQSampleFrame", &IPeak::setQSampleFrame, "Set the peak using the peak's position in reciprocal space, in the sample frame.")
     .def("setWavelength", &IPeak::setWavelength, "Set the incident wavelength of the neutron. Calculates the energy from this assuming elastic scattering.")
     .def("getWavelength", &IPeak::getWavelength, "Return the incident wavelength")

@@ -51,6 +51,22 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         # Peaks workspace will not be integrated by default.
         self.assertTrue(not pws.hasIntegratedPeaks())
 
+    def test_peak_setQLab(self):
+        pws = WorkspaceCreationHelper.createPeaksWorkspace(1)
+        p = pws.getPeak(0)
+        try:
+            p.setQLabFrame(V3D(1,1,1))
+        except Exception:
+            self.fail("Tried setQLabFrame with one V3D argument")
+        
+        try:
+            p.setQLabFrame(V3D(1,1,1), 1)
+        except Exception:
+            self.fail("Tried setQLabFrame with one V3D argument and a double distance")
+        
+        
+
+
 if __name__ == '__main__':
     unittest.main()
 
