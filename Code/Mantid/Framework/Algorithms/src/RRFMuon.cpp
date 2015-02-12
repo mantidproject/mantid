@@ -102,7 +102,7 @@ void RRFMuon::exec()
 
 }
 
-/** Gets factor to convert frequency units to input workspace units
+/** Gets factor to convert frequency units to input workspace units, typically in microseconds
  *  @param uin :: [input] input workspace units
  *  @param uuser :: [input] units selected by user
  */
@@ -113,8 +113,12 @@ double RRFMuon::unitConversionFactor(std::string uin, std::string uuser){
     if ( uuser == "MHz" ) {
       return 1.0;
     } else if ( uuser == "Gauss" ) {
+      // Factor = 2 * PI * MU 
+      // where MU is the muon gyromagnetic ratio: 
+      // MU = 135.538817 MHz/T, 1T = 10000 Gauss
       return 2.0*M_PI*135.538817*0.0001;
     } else if ( uuser == "Mrad/s" ) {
+      // Factor = 2 * PI
       return 2.0*M_PI;
     } else {
       throw std::runtime_error("Could not find units");
