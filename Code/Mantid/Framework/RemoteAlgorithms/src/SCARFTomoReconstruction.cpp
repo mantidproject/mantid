@@ -31,25 +31,24 @@ std::string SCARFTomoReconstruction::m_acceptType =
 const std::string SCARFTomoReconstruction::m_SCARFComputeResource = "SCARF@STFC";
 
 SCARFTomoReconstruction::SCARFTomoReconstruction():
-  Mantid::API::Algorithm(),
-  m_action(), m_jobID(), m_nxTomoPath(), m_parameterPath(), m_outputPath()
+  Mantid::API::Algorithm(), m_action()
 { }
 
 void SCARFTomoReconstruction::init() {
   auto requireValue = boost::make_shared<MandatoryValidator<std::string>>();
 
   // list of all actions
-  std::vector<std::string> reconstOps;
-  reconstOps.push_back("LogIn");
-  reconstOps.push_back("LogOut");
-  reconstOps.push_back("SubmitJob");
-  reconstOps.push_back("JobStatus");
-  reconstOps.push_back("JobStatusByID");
-  reconstOps.push_back("Ping");
-  reconstOps.push_back("CancelJob");
-  reconstOps.push_back("Upload");
-  reconstOps.push_back("Download");
-  auto listValue = boost::make_shared<StringListValidator>(reconstOps);
+  std::vector<std::string> actions;
+  actions.push_back("LogIn");
+  actions.push_back("LogOut");
+  actions.push_back("SubmitJob");
+  actions.push_back("JobStatus");
+  actions.push_back("JobStatusByID");
+  actions.push_back("Ping");
+  actions.push_back("CancelJob");
+  actions.push_back("Upload");
+  actions.push_back("Download");
+  auto listValue = boost::make_shared<StringListValidator>(actions);
 
   std::vector<std::string> exts;
   exts.push_back(".nxs");
@@ -70,21 +69,20 @@ void SCARFTomoReconstruction::init() {
                                               "[CreateJob,JobStatus,JobCancel]",
                   Direction::Input);
 
-  // NXTomo File path on SCARF
-  declareProperty(new PropertyWithValue<std::string>("RemoteNXTomoPath", "",
-                                                     Direction::Input),
-                  "The path on SCARF to the NXTomo file to reconstruct");
-
-  // Job ID on SCARF
-  declareProperty(
-      new PropertyWithValue<std::string>("JobID", "", Direction::Input),
-      "The ID for a currently running job on SCARF");
+  // Runnable file when submitting a job
+  declareProperty(new PropertyWithValue<std::string>("RunnablePath",
+                      "/work/imat/webservice_test/tomopy/imat_recon_FBP.py",
+                      Direction::Input),
+                  "The path on SCARF of a file to run (example: shell or python "
+                  "script)");
 
   // Path to parameter file for reconstruction
-  declareProperty(new API::FileProperty("ParameterFilePath", "",
-                                        API::FileProperty::OptionalLoad, exts,
-                                        Direction::Input),
-                  "Parameter file for the reconstruction job");
+  declareProperty(new PropertyWithValue<std::string>("JobOptions",
+                      "/work/imat/webservice_test/remote_output/test_",
+                      Direction::Input),
+                  "Options for the job command line, application dependent. It "
+                  "can inclue for example the NXTomo input file when using savu "
+                  "for tomographic reconstruction.");
 
   // Path for upload file (on the server/compute resource)
   declareProperty(new PropertyWithValue<std::string>("DestinationDirectory", "",
@@ -97,6 +95,11 @@ void SCARFTomoReconstruction::init() {
                                         Direction::Input),
                   "Name of the file (full path) to upload to the compute "
                   "resource/server ");
+
+  // Job ID on SCARF
+  declareProperty(
+      new PropertyWithValue<std::string>("JobID", "", Direction::Input),
+      "The ID for a currently running job on SCARF");
 
   // Name of a file from a job running on the compute resource, to download
   declareProperty(new PropertyWithValue<std::string>("RemoteJobFilename", "",
@@ -371,17 +374,20 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
                              "your username.");
   }
 
+  // Not sure at this point if there could be commands without options
+  // For the time being it's possible.
+  std::string jobOptions = "";
   try {
-    m_nxTomoPath = getPropertyValue("RemoteNXTomoPath");
+    jobOptions = getPropertyValue("JobOptions");
   } catch(std::runtime_error& /*e*/) {
-    g_log.error() << "You did not specify the remote path to the NXTomo file "
-      "which is required to create a new reconstruction job. Please provide "
-      "a valid path on " << m_SCARFComputeResource << std::endl;
-    throw;
+    g_log.warning() << "You did not specify any options for the job. Maybe you "
+      "forgot to pass the options?" << std::endl;
+    m_jobOptions = "";
   }
 
+  std::string runnablePath = "";
   try {
-    m_parameterPath = getPropertyValue("ParameterFilePath");
+    getPropertyValue("RunnablePath");
   } catch(std::runtime_error& /*e*/) {
     g_log.error() << "You did not specify a the path to the parameter file "
       "which is required to create a new reconstruction job. Please provide "
@@ -389,7 +395,7 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
     throw;
   }
 
-  progress(0, "Starting tomographic reconstruction job...");
+  progress(0, "Starting job...");
 
   // Job submit query, requires specific parameters for LSF submit
   // Example params passed to python submit utility:
@@ -399,10 +405,9 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
   // %J.error"
   const std::string appName = "TOMOPY_0_0_3";
   // this gets executed (for example via 'exec' or 'python', depending on the appName
-  const std::string inputFiles = "/work/imat/webservice_test/tomopy/imat_recon_FBP.py";
-  const std::string inputArgs = "/work/imat/webservice_test/remote_output/test_";
   const std::string boundary = "bqJky99mlBWa-ZuqjC53mG6EzbmlxB";
-  const std::string &body = buildSubmitBody(appName, boundary, inputFiles, inputArgs);
+  const std::string &body = buildSubmitBody(appName, boundary,
+                                            runnablePath, jobOptions);
 
   // Job submit, needs these headers:
   // headers = {'Content-Type': 'multipart/mixed; boundary='+boundary,

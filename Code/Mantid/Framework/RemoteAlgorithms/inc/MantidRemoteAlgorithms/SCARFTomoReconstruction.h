@@ -98,6 +98,15 @@ private:
   };
   typedef std::pair<std::string, SCARFTomoReconstruction::Token> UsernameToken;
 
+  class Action {
+  public:
+    typedef enum {LOGIN=0, LOGOUT, SUBMIT, QUERYSTATUS, QUERYSTATUSBYID,
+                  PING, CANCEL, UPLOAD, DOWNLOAD, UNDEF} Type;
+  };
+
+  /// helper to filter the action given by the user
+  Action::Type getAction();
+
   /// helper to fetch and save one file from the compute resource
   void getOneJobFile(const std::string &jobId, const std::string &remotePath,
                      const std::string &localPath, const Token &t);
@@ -113,22 +122,12 @@ private:
   /// get a normal file name from a 'PAC Server*...' name
   const std::string filterPACFilename(const std::string PACName);
 
-  class Action {
-  public:
-    typedef enum {LOGIN=0, LOGOUT, SUBMIT, QUERYSTATUS, QUERYSTATUSBYID,
-                  PING, CANCEL, UPLOAD, DOWNLOAD, UNDEF} Type;
-  };
-
-  // helper methods
-  Action::Type getAction();
-
   // options passed to the algorithm
   Action::Type m_action;
 
-  std::string m_jobID;
-  std::string m_nxTomoPath;
-  std::string m_parameterPath;
-  std::string m_outputPath;
+  // when submitting jobs
+  std::string m_runnablePath;
+  std::string m_jobOptions;
 
   // resource name
   static const std::string m_SCARFComputeResource;
