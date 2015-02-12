@@ -289,7 +289,7 @@ void SCARFTomoReconstruction::doLogin(const std::string &username,
     username + "&password=" + password;
 
   std::stringstream ss;
-  int respCode = session.sendRequest(httpsURL, ss);
+  session.sendRequest(httpsURL, ss);
   std::string resp = ss.str();
   // We would check (Poco::Net::HTTPResponse::HTTP_OK == respCode) but the SCARF
   // login script (token.py) seems to return 200 whatever happens, as far as the
@@ -312,7 +312,7 @@ void SCARFTomoReconstruction::doLogin(const std::string &username,
                    << m_SCARFComputeResource << std::endl;
   } else {
     throw std::runtime_error("Login failed. Please check your username and "
-                             "password.");
+                             "password. Got this response: " + resp);
   }
 }
 
@@ -382,7 +382,7 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
 
   std::string runnablePath = "";
   try {
-    getPropertyValue("RunnablePath");
+    runnablePath = getPropertyValue("RunnablePath");
   } catch(std::runtime_error& /*e*/) {
     g_log.error() << "You did not specify a the path to the parameter file "
       "which is required to create a new reconstruction job. Please provide "
@@ -426,9 +426,12 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
                                  Poco::Net::HTTPRequest::HTTP_POST, body);
   std::string resp = ss.str();
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
-    // TODO: still need to parse response string contents, look for either 'ok' or
-    //      '<errMsg>'
-    g_log.notice() << "Submitted job with response: " << resp << std::endl;
+    if (std::string::npos != resp.find("<errMsg>")) {
+      g_log.warning() << "Submitted job but got an error message from " <<
+        m_SCARFComputeResource << ": " << resp << std::endl;
+    } else {
+      g_log.notice() << "Submitted job with response: " << resp << std::endl;
+    }
   } else {
     throw std::runtime_error("Failed to submit a job through the web service at:" +
                              httpsURL + ". Please check your username, credentials, "
@@ -472,8 +475,15 @@ void SCARFTomoReconstruction::doQueryStatus(const std::string &username) {
   int code = session.sendRequest(httpsURL, ss, headers);
   std::string resp = ss.str();
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
-    // TODO: still need to parse response string contents, look for a certain pattern
-    // in the response body. Maybe put it into an output TableWorkspace
+    // TODO: put it into an output TableWorkspace
+    if (std::string::npos != resp.find("<Jobs>") &&
+        std::string::npos != resp.find("<extStatus>")) {
+      g_log.notice() << "Queried the status of jobs with response: " << resp <<
+        std::endl;
+    } else {
+      g_log.warning() << "Queried the status of jobs but got what looks "
+        "like an error message as response: " << resp << std::endl;
+    }
     g_log.notice() << "Queried job status with response: " << resp << std::endl;
   } else {
     throw std::runtime_error("Failed to obtain job status information through the "
@@ -520,10 +530,15 @@ void SCARFTomoReconstruction::doQueryStatusById(const std::string& username,
   int code = session.sendRequest(httpsURL, ss, headers);
   std::string resp = ss.str();
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
-    // TODO: still need to parse response string contents, look for a certain pattern
-    // in the response body. Maybe put it into an output TableWorkspace
-    g_log.notice() << "Queried job status (Id" << jobId << " ) with response: " <<
-      resp << std::endl;
+    // TODO: put it into an output TableWorkspace
+    if (std::string::npos != resp.find("<Jobs>") &&
+        std::string::npos != resp.find("<extStatus>")) {
+      g_log.notice() << "Queried job status (Id " << jobId << " ) with response: "
+                     << resp << std::endl;
+    } else {
+      g_log.warning() << "Queried job status (Id " << jobId << " ) but got what "
+        "looks like an error message as response: " << resp << std::endl;
+    }
   } else {
     throw std::runtime_error("Failed to obtain job (Id:" + jobId +" ) status "
                              "information through the web service at:" + httpsURL +
@@ -561,11 +576,14 @@ bool SCARFTomoReconstruction::doPing() {
   std::string resp = ss.str();
   bool ok = false;
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
-    // TODO: still need to parse response string contents, look for a certain pattern
-    // in the response body. Maybe put it into an output TableWorkspace
-    g_log.notice() << "Pinged compute resource with response: " <<
-      resp << std::endl;
-    ok = true;
+    if (std::string::npos != resp.find("Web Services are ready")) {
+      g_log.notice() << "Pinged compute resource with response: " <<
+        resp << std::endl;
+      ok = true;
+    } else {
+      g_log.warning() << "Pinged compute resource but got what looks like an "
+        "error message: " << resp << std::endl;
+    }
   } else {
     throw std::runtime_error("Failed to ping the web service at:" + httpsURL +
                              ". Please check your parameters, software version, "
@@ -596,7 +614,7 @@ void SCARFTomoReconstruction::doCancel(const std::string &username,
 
   // Job kill, needs these headers:
   // headers = {'Content-Type': 'text/plain', 'Cookie': token, 'Accept': ACCEPT_TYPE}
-  const std::string killPath = "webservice/pacclient/jobOperation/kill" + jobId;
+  const std::string killPath = "webservice/pacclient/jobOperation/kill/" + jobId;
   const std::string baseURL = it->second.m_url;
   const std::string token = it->second.m_token_str;
 
@@ -611,10 +629,16 @@ void SCARFTomoReconstruction::doCancel(const std::string &username,
   int code = session.sendRequest(httpsURL, ss, headers);
   std::string resp = ss.str();
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
-    // TODO: still need to parse response string contents, look for a certain pattern
-    // in the response body. Maybe put it into an output TableWorkspace
-    g_log.notice() << "Killed job with Id" << jobId << " with response: " <<
-      resp << std::endl;
+    if (std::string::npos != resp.find("<errMsg>")) {
+      g_log.warning() << "Killed job with Id" << jobId << " but got what looks like an "
+        "error message as response: " << resp << std::endl;
+    } else if (std::string::npos != resp.find("<actionMsg>")) {
+      g_log.notice() << "Killed job with Id" << jobId << " with response: " <<
+        resp << std::endl;
+    } else {
+      g_log.warning() << "Killed job with Id" << jobId << " but got what a response "
+        "that I do not recognize: " << resp << std::endl;
+    }
   } else {
     throw std::runtime_error("Failed to kill job (Id:" + jobId +" ) through the web "
                              "service at:" + httpsURL + ". Please check your "
