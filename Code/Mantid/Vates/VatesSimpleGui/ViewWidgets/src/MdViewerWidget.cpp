@@ -578,8 +578,9 @@ void MdViewerWidget::removeRebinning(pqPipelineSource* source, bool forced, Mode
       if (forced == true)
       {
           QMessageBox::warning(this, QApplication::tr("Unbin Warning"),
-                      QApplication::tr("You cannot unbin a source which has not be rebinned. \n "\
-                      "To unbin, select a rebinned source and \n press the unbin button again"));
+                      QApplication::tr("You cannot unbin a source which has not be rebinned. \n"\
+                      "To unbin, select a rebinned source and \n"\
+                      "press Remove Rebinning again"));
       }
       return;
     }
@@ -685,6 +686,8 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
     QMessageBox::information(this, QApplication::tr("Loading Source Warning"),
                              QApplication::tr("You cannot laod a temporary vsi source. \n "\
                                               "Please select another source."));
+
+    return;
   }
 
   // Load a new source plugin

@@ -192,10 +192,6 @@ namespace Mantid
          // Setup the values of the axis dimensions
           setAxisDimensions(sliceDialog, inputWorkspace);
         }
-        else if (0==1)
-        {
-
-        }
 
         return dialog;
       }
@@ -240,7 +236,15 @@ namespace Mantid
           QString newNumberOfBins;
           if (numberOfBins < m_binCutOffValue && index < 3)
           {
-            newNumberOfBins = QString::number(static_cast<unsigned long long>(m_binCutOffValue));
+            // Only do this for BinMD, it is too costly for SliceMD to have very large cuts
+            if (MantidQt::MantidWidgets::BinMDDialog * binDialog = dynamic_cast<MantidQt::MantidWidgets::BinMDDialog *>(dialog))
+            {
+              newNumberOfBins = QString::number(static_cast<unsigned long long>(m_binCutOffValue));
+            }
+            else
+            {
+              newNumberOfBins = QString::number(static_cast<unsigned long long>(numberOfBins));
+            }
           }
           else
           {
