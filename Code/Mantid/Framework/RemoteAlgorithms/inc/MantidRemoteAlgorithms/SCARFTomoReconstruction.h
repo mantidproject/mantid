@@ -86,9 +86,15 @@ private:
                               const std::string &boundary,
                               const std::string &inputFiles,
                               const std::string &inputArgs);
+
   /// lower level helper to encode parameters
   void encodeParam(std::string &body, const std::string &boundary,
                    const std::string &paramName, const std::string &paramVal);
+
+  /// build body as headers + file as an octet string
+  std::string buildUploadBody(const std::string &boundary,
+                              const std::string &destDir,
+                              const std::string &filename);
 
   // cookie obtained after logging in
   struct Token {

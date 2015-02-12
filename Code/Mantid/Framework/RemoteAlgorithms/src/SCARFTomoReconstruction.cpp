@@ -85,7 +85,8 @@ void SCARFTomoReconstruction::init() {
                   "for tomographic reconstruction.");
 
   // Path for upload file (on the server/compute resource)
-  declareProperty(new PropertyWithValue<std::string>("DestinationDirectory", "",
+  declareProperty(new PropertyWithValue<std::string>("DestinationDirectory",
+                                                     "/work/imat",
                                                      Direction::Input),
                   "Path where to upload the file on the compute resource/server");
 
@@ -283,8 +284,6 @@ void SCARFTomoReconstruction::doLogin(const std::string &username,
                                ConfigService::Instance().getFacility().name() +
                                ")."));
 
-  g_log.debug() << "Sending HTTP GET request to: " << SCARFLoginBaseURL +
-    SCARFLoginPath << std::endl;
   InternetHelper session;
   std::string httpsURL = SCARFLoginBaseURL + SCARFLoginPath + "?username=" +
     username + "&password=" + password;
@@ -292,11 +291,9 @@ void SCARFTomoReconstruction::doLogin(const std::string &username,
   std::stringstream ss;
   int respCode = session.sendRequest(httpsURL, ss);
   std::string resp = ss.str();
-  g_log.debug() << "Got HTTP code " << respCode << ", response: " <<
-    resp << std::endl;
   // We would check (Poco::Net::HTTPResponse::HTTP_OK == respCode) but the SCARF
-  // login script (token.py) seems to return 200 whatever happens. So this is
-  // the way to know if authentication succeeded:
+  // login script (token.py) seems to return 200 whatever happens, as far as the
+  // request is well formed. So this is how to know if authentication succeeded:
   const std::string expectedSubstr = "https://portal.scarf.rl.ac.uk";
   if (resp.find(expectedSubstr) != std::string::npos) {
     // it went fine, stash cookie/token which looks like this (2 lines):
@@ -341,7 +338,6 @@ void SCARFTomoReconstruction::doLogout(const std::string &username) {
 
   InternetHelper session;
   std::string httpsURL = baseURL + logoutPath;
-  g_log.debug() << "Sending HTTP GET request to: " << httpsURL << std::endl;
   std::stringstream ss;
   InternetHelper::StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>("Content-Type",
@@ -350,7 +346,6 @@ void SCARFTomoReconstruction::doLogout(const std::string &username) {
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
   int code = session.sendRequest(httpsURL, ss, headers);
   std::string resp = ss.str();
-  g_log.debug() << "Got HTTP code " << code << ", response: " <<  resp << std::endl;
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     g_log.notice() << "Logged out with response: " << resp << std::endl;
   } else {
@@ -420,7 +415,6 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
 
   InternetHelper session;
   std::string httpsURL = baseURL + submitPath;
-  g_log.debug() << "Sending HTTP POST request to: " << httpsURL << std::endl;
   std::stringstream ss;
   InternetHelper::StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>("Content-Type",
@@ -431,7 +425,6 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
   int code = session.sendRequest(httpsURL, ss, headers,
                                  Poco::Net::HTTPRequest::HTTP_POST, body);
   std::string resp = ss.str();
-  g_log.debug() << "Got HTTP code " << code << ", response: " <<  resp << std::endl;
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     // TODO: still need to parse response string contents, look for either 'ok' or
     //      '<errMsg>'
@@ -470,7 +463,6 @@ void SCARFTomoReconstruction::doQueryStatus(const std::string &username) {
 
   InternetHelper session;
   std::string httpsURL = baseURL + jobStatusPath;
-  g_log.debug() << "Sending HTTP GET request to: " << httpsURL << std::endl;
   std::stringstream ss;
   InternetHelper::StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>("Content-Type",
@@ -479,7 +471,6 @@ void SCARFTomoReconstruction::doQueryStatus(const std::string &username) {
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
   int code = session.sendRequest(httpsURL, ss, headers);
   std::string resp = ss.str();
-  g_log.debug() << "Got HTTP code " << code << ", response: " <<  resp << std::endl;
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     // TODO: still need to parse response string contents, look for a certain pattern
     // in the response body. Maybe put it into an output TableWorkspace
@@ -520,7 +511,6 @@ void SCARFTomoReconstruction::doQueryStatusById(const std::string& username,
 
   InternetHelper session;
   std::string httpsURL = baseURL + jobIdStatusPath;
-  g_log.debug() << "Sending HTTP GET request to: " << httpsURL << std::endl;
   std::stringstream ss;
   InternetHelper::StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>("Content-Type",
@@ -529,7 +519,6 @@ void SCARFTomoReconstruction::doQueryStatusById(const std::string& username,
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
   int code = session.sendRequest(httpsURL, ss, headers);
   std::string resp = ss.str();
-  g_log.debug() << "Got HTTP code " << code << ", response: " <<  resp << std::endl;
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     // TODO: still need to parse response string contents, look for a certain pattern
     // in the response body. Maybe put it into an output TableWorkspace
@@ -563,7 +552,6 @@ bool SCARFTomoReconstruction::doPing() {
 
   InternetHelper session;
   std::string httpsURL = baseURL + pingPath;
-  g_log.debug() << "Sending HTTP GET request to: " << httpsURL << std::endl;
   std::stringstream ss;
   InternetHelper::StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>("Content-Type",
@@ -571,7 +559,6 @@ bool SCARFTomoReconstruction::doPing() {
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
   int code = session.sendRequest(httpsURL, ss, headers);
   std::string resp = ss.str();
-  g_log.debug() << "Got HTTP code " << code << ", response: " <<  resp << std::endl;
   bool ok = false;
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     // TODO: still need to parse response string contents, look for a certain pattern
@@ -615,7 +602,6 @@ void SCARFTomoReconstruction::doCancel(const std::string &username,
 
   InternetHelper session;
   std::string httpsURL = baseURL + killPath;
-  g_log.debug() << "Sending HTTP GET request to: " << httpsURL << std::endl;
   std::stringstream ss;
   InternetHelper::StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>("Content-Type",
@@ -624,7 +610,6 @@ void SCARFTomoReconstruction::doCancel(const std::string &username,
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
   int code = session.sendRequest(httpsURL, ss, headers);
   std::string resp = ss.str();
-  g_log.debug() << "Got HTTP code " << code << ", response: " <<  resp << std::endl;
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     // TODO: still need to parse response string contents, look for a certain pattern
     // in the response body. Maybe put it into an output TableWorkspace
@@ -658,7 +643,95 @@ void SCARFTomoReconstruction::doUploadFile(const std::string &username,
 
   progress(0, "Uploading file: " + filename);
 
+  // File upload, needs these headers:
+  // headers = {'Content-Type': 'multipart/mixed; boundary='+boundary,
+  //                 'Accept': 'text/plain;', 'Cookie': token,
+  //                 'Content-Length': str(len(body))}
+  // Content-Length is added by InternetHelper/Poco HTTP request
+  //  The 0 at the end of the upload path is 'jobId' 0, if a jobId is given the
+  //  upload goes to a path relative to the job path.
+  const std::string uploadPath = "webservice/pacclient/upfile/0";
+  const std::string boundary = "4k89ogja023oh1-gkdfk903jf9wngmujfs95m";
+  const std::string baseURL = it->second.m_url;
+  const std::string token = it->second.m_token_str;
 
+  InternetHelper session;
+  std::string httpsURL = baseURL + uploadPath;
+  std::stringstream ss;
+  InternetHelper::StringToStringMap headers;
+  headers.insert(std::pair<std::string, std::string>("Content-Type",
+                                                     "multipart/mixed; boundary=" +
+                                                     boundary));
+  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  headers.insert(std::pair<std::string, std::string>("Cookie", token));
+
+  const std::string &body = buildUploadBody(boundary, destDir, filename);
+  int code = session.sendRequest(httpsURL, ss, headers,
+                                 Poco::Net::HTTPRequest::HTTP_POST, body);
+  std::string resp = ss.str();
+  if (Poco::Net::HTTPResponse::HTTP_OK == code) {
+    g_log.notice() << "Uploaded file with response: " << resp << std::endl;
+  } else {
+    throw std::runtime_error("Failed to upload file through the web service at:" +
+                             httpsURL + ". Please check your username, credentials, "
+                             "and parameters.");
+  }
+
+  progress(1.0, "File uploaded to " + m_SCARFComputeResource);
+}
+
+/**
+ * Helper method to encode the body of file upload requests.
+ *
+ * @param boundary Boundary string between parts of the multi-part body
+ * @param destDir Path where to upload the file on the remote compute resource/server
+ * @param filename Name (path) of the local file to upload
+ *
+ * @return A string ready to be used as body of a 'file upload' HTTP request
+ */
+std::string SCARFTomoReconstruction::buildUploadBody(const std::string &boundary,
+                                                     const std::string &destDir,
+                                                     const std::string &filename) {
+  // build file name as given in the request body
+  std::string upName = filename;
+  std::replace(upName.begin(), upName.end(), '\\', '/');
+  // discard up to last / (path)
+  upName = upName.substr(upName.rfind("/") + 1);
+
+  // BLOCK: start and encode destination directory like this:
+  // --4k89ogja023oh1-gkdfk903jf9wngmujfs95m
+  // Content-Disposition: form-data; name="DirName"
+  // Content-ID: <DirName>
+  //
+  // /work/imat/foo_test
+  std::string body = "--" + boundary + "\r\n";
+  body += "Content-Disposition: form-data; name=\"DirName\"\r\n"
+    "Content-ID: <DirName>\r\n"
+    "\r\n"
+    + destDir + "\r\n";
+
+  // BLOCK: encode file like this (could be repeated for multi-file uploads):
+  // --4k89ogja023oh1-gkdfk903jf9wngmujfs95m
+  // Content-Disposition: form-data; name="bar.txt"; filename=bar.txt
+  // Content-Type: application/octet-stream
+  // Content-ID: <bar.txt>
+  //
+  body += "--" + boundary + "\r\n";
+  const std::string boundaryInner = "_Part_1_701508.1145579811786";
+  body += "Content-Disposition: form-data; name=\"" + upName  +"\"\r\n";
+  body += "Content-Type: application/octet-stream \r\n";
+  body += "Content-Transfer-Encoding: UTF-8\r\n";
+  body += "Content-ID: <" + upName + ">\r\n";
+  body += "\r\n";
+
+  // BLOCK: the file
+  std::ifstream fileStream(filename, std::ios_base::binary);
+  Poco::StreamCopier::copyToString(fileStream, body);
+
+  // BLOCK: end like this:
+  body += "--" + boundary + "--" + "\r\n\r\n";
+
+  return body;
 }
 
 /**
@@ -753,7 +826,7 @@ std::string SCARFTomoReconstruction::buildSubmitBody(const std::string &appName,
   body += "Content-Disposition: form-data; name=\"AppName\"\r\n"
     "Content-ID: <AppName>\r\n"
     "\r\n"
-    +appName + "\r\n";
+    + appName + "\r\n";
 
   // BLOCK: encode params head like this:
   // --bqJky99mlBWa-ZuqjC53mG6EzbmlxB
@@ -902,7 +975,6 @@ void SCARFTomoReconstruction::getOneJobFile(const std::string &jobId,
 
   InternetHelper session;
   std::string httpsURL = baseURL + downloadOnePath;
-  g_log.debug() << "Sending HTTP GET request to: " << httpsURL << std::endl;
   std::stringstream ss;
   InternetHelper::StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>("Content-Type",
@@ -912,7 +984,6 @@ void SCARFTomoReconstruction::getOneJobFile(const std::string &jobId,
   std::string body = remotePath;
   int code = session.sendRequest(httpsURL, ss, headers,
                                  Poco::Net::HTTPRequest::HTTP_GET, body);
-  g_log.debug() << "Got HTTP code " << code << std::endl;
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     // this is what indicates success/failure: response content empty/not empty
     if (ss.rdbuf()->in_avail() > 0) {
@@ -961,7 +1032,6 @@ void SCARFTomoReconstruction::getAllJobFiles(const std::string &jobId,
 
   InternetHelper session;
   std::string httpsURL = baseURL + downloadPath;
-  g_log.debug() << "Sending HTTP GET request to: " << httpsURL << std::endl;
   std::stringstream ss;
   InternetHelper::StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>("Content-Type",
@@ -970,7 +1040,6 @@ void SCARFTomoReconstruction::getAllJobFiles(const std::string &jobId,
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
   int code = session.sendRequest(httpsURL, ss, headers);
   std::string resp = ss.str();
-  g_log.debug() << "Got HTTP code " << code << ", response: " <<  resp << std::endl;
   // what you get in this response is one line with text like this:
   // 'PAC Server*/home/isisg/scarf362/../scarf362/
   // Mantid_tomography_1_1423743450375PtlPj/417666.error*FILE*281*true;PAC Server*/
