@@ -58,9 +58,9 @@ namespace
   }
 }
 
+GCC_DIAG_OFF(strict-aliasing)
 void export_Projection()
 {
-  GCC_DIAG_OFF(strict-aliasing)
   class_<Projection>("Projection", init<>("Default constructor creates a two dimensional projection"))
     .def(init<size_t>("Constructs an n-dimensional projection", args("num_dimensions")))
     .def(init<VMD,VMD>("Constructs a 2 dimensional projection", args("u","v")))
@@ -89,5 +89,5 @@ void export_Projection()
     )
     .def("toWorkspace", toWorkspace, "Create a TableWorkspace representing the projection")
     ;
-  GCC_DIAG_ON(strict-aliasing)
 }
+GCC_DIAG_ON(strict-aliasing)
