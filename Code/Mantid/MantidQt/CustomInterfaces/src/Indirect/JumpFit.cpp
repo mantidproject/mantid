@@ -18,15 +18,8 @@ namespace MantidQt
 		{
 			m_uiForm.setupUi(parent);
 
-			// Create the plot
-      m_plots["JumpFitPlot"] = new QwtPlot(m_parentWidget);
-      m_plots["JumpFitPlot"]->setCanvasBackground(Qt::white);
-      m_plots["JumpFitPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-      m_plots["JumpFitPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-			m_uiForm.plotSpace->addWidget(m_plots["JumpFitPlot"]);
-
       // Create range selector
-      m_rangeSelectors["JumpFitQ"] = new MantidWidgets::RangeSelector(m_plots["JumpFitPlot"]);
+      m_rangeSelectors["JumpFitQ"] = new MantidWidgets::RangeSelector(m_uiForm.ppPlot);
       connect(m_rangeSelectors["JumpFitQ"], SIGNAL(selectionChangedLazy(double, double)), this, SLOT(qRangeChanged(double, double)));
 
 			// Add the properties browser to the ui form
@@ -179,19 +172,11 @@ namespace MantidQt
         QString specName = QString::fromStdString(axis->label(histIndex));
 
         if(specName == "Calc")
-        {
-          plotMiniPlot(outputWorkspace, histIndex, "JumpFitPlot", specName);
-          m_curves[specName]->setPen(QColor(Qt::red));
-        }
+          m_uiForm.ppPlot->addSpectrum("Fit", outputWorkspace, histIndex, Qt::red);
 
         if(specName == "Diff")
-        {
-          plotMiniPlot(outputWorkspace, histIndex, "JumpFitPlot", specName);
-          m_curves[specName]->setPen(QColor(Qt::green));
-        }
+          m_uiForm.ppPlot->addSpectrum("Diff", outputWorkspace, histIndex, Qt::green);
       }
-
-      replot("JumpFitPlot");
     }
 
 		/**
@@ -236,10 +221,13 @@ namespace MantidQt
 				m_uiForm.cbWidth->setEnabled(true);
 
 				std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
-				plotMiniPlot(filename, m_spectraList[currentWidth], "JumpFitPlot", "RawPlotCurve");
 
-				std::pair<double,double> res;
-				std::pair<double,double> range = getCurveRange("RawPlotCurve");
+        m_uiForm.ppPlot->clear();
+        m_uiForm.ppPlot->addSpectrum("Sample", filename, m_spectraList[currentWidth]);
+
+				std::pair<double, double> res;
+				QPair<double, double> curveRange = m_uiForm.ppPlot->getCurveRange("Sample");
+        std::pair<double, double> range(curveRange.first, curveRange.second);
 
 				// Use the values from the instrument parameter file if we can
 				if(getInstrumentResolution(filename, res))
@@ -331,7 +319,8 @@ namespace MantidQt
 			{
 				if(validate())
 				{
-					plotMiniPlot(sampleName, m_spectraList[text.toStdString()], "JumpFitPlot", "RawPlotCurve");
+          m_uiForm.ppPlot->clear();
+          m_uiForm.ppPlot->addSpectrum("Sample", sampleName, m_spectraList[text.toStdString()]);
 				}
 			}
 		}

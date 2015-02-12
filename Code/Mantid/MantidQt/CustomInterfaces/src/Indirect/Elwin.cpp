@@ -359,7 +359,7 @@ namespace IDA
 
     try
     {
-      QPair<double, double> range = m_uiForm.ppPlot->getCurveRange(ws);
+      QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
       m_rangeSelectors["ElwinIntegrationRange"]->setRange(range.first, range.second);
     }
     catch(std::invalid_argument & exc)

@@ -146,7 +146,7 @@ namespace IDA
       auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(groupWs->getItem(0));
 
       // Remove the old fit
-      m_uiForm.ppPlot->removeSpectrumByCurveName("Fit");
+      m_uiForm.ppPlot->removeSpectrum("Fit");
 
       // Plot the new fit
       m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
@@ -198,7 +198,7 @@ namespace IDA
 
     try
     {
-      QPair<double, double> range = m_uiForm.ppPlot->getCurveRange(ws);
+      QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
       m_rangeSelectors["MSDRange"]->setRange(range.first, range.second);
     }
     catch(std::invalid_argument & exc)

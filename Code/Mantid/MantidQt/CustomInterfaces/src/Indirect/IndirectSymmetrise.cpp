@@ -206,7 +206,7 @@ namespace CustomInterfaces
     updateMiniPlots();
 
     // Set the preview range to the maximum absolute X value
-    QPair<double, double> axisRange = m_uiForm.ppRawPlot->getCurveRange(sampleWS);
+    QPair<double, double> axisRange = m_uiForm.ppRawPlot->getCurveRange("Raw");
     double symmRange = std::max(fabs(axisRange.first), fabs(axisRange.second));
 
     // Set valid range for range selectors
@@ -240,7 +240,7 @@ namespace CustomInterfaces
     m_uiForm.ppRawPlot->addSpectrum("Raw", input, spectrumIndex);
 
     // Match X axis range on preview plot
-    m_uiForm.ppPreviewPlot->setAxisRange(m_uiForm.ppRawPlot->getCurveRange(input), QwtPlot::xBottom);
+    m_uiForm.ppPreviewPlot->setAxisRange(m_uiForm.ppRawPlot->getCurveRange("Raw"), QwtPlot::xBottom);
     m_uiForm.ppPreviewPlot->replot();
   }
 

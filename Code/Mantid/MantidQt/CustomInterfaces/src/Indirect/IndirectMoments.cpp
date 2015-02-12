@@ -115,7 +115,7 @@ namespace CustomInterfaces
 
     m_uiForm.ppRawPlot->clear();
     m_uiForm.ppRawPlot->addSpectrum("Raw", filename, 0);
-    QPair<double, double> curveRange = m_uiForm.ppRawPlot->getCurveRange(filename);
+    QPair<double, double> curveRange = m_uiForm.ppRawPlot->getCurveRange("Raw");
     std::pair<double, double> range = std::make_pair(curveRange.first, curveRange.second);
     setMiniPlotGuides("MomentsRangeSelector", m_properties["EMin"], m_properties["EMax"], range);
     setPlotRange("MomentsRangeSelector", m_properties["EMin"], m_properties["EMax"], range);

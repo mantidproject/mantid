@@ -259,7 +259,7 @@ namespace IDA
 
     try
     {
-      QPair<double, double> range = m_uiForm.ppPlot->getCurveRange(workspace);
+      QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
       double rounded_min(range.first);
       double rounded_max(range.second);
       const std::string instrName(workspace->getInstrument()->getName());

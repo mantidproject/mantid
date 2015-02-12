@@ -107,6 +107,7 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent)
   m_contextMenu->addAction(m_showLegendAction);
 
   connect(this, SIGNAL(needToReplot()), this, SLOT(replot()));
+  connect(this, SIGNAL(needToHardReplot()), this, SLOT(hardReplot()));
 }
 
 
@@ -181,36 +182,34 @@ void PreviewPlot::setAxisRange(QPair<double, double> range, int axisID)
  */
 QPair<double, double> PreviewPlot::getCurveRange(const Mantid::API::MatrixWorkspace_sptr ws)
 {
-  if(!m_curves.contains(ws))
-    throw std::runtime_error("Workspace not on preview plot.");
+  QStringList curveNames = getCurvesForWorkspace(ws);
 
-  size_t numPoints = m_curves[ws].curve->data().size();
+  if(curveNames.size() == 0)
+    throw std::runtime_error("Curve for workspace not found.");
 
-  if(numPoints < 2)
-    return qMakePair(0.0, 0.0);
-
-  double low = m_curves[ws].curve->data().x(0);
-  double high = m_curves[ws].curve->data().x(numPoints - 1);
-
-  return qMakePair(low, high);
+  return getCurveRange(curveNames[0]);
 }
 
 
 /**
  * Gets the X range of a curve given its name.
  *
- * @param wsName Name of workspace
+ * @param wsName Name of curve
  */
-QPair<double, double> PreviewPlot::getCurveRange(const QString & wsName)
+QPair<double, double> PreviewPlot::getCurveRange(const QString & curveName)
 {
-  // Try to get a pointer from the name
-  std::string wsNameStr = wsName.toStdString();
-  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
+  if(!m_curves.contains(curveName))
+    throw std::runtime_error("Curve not on preview plot.");
 
-  if(!ws)
-    throw std::runtime_error(wsNameStr + " is not a MatrixWorkspace, not supported by PreviewPlot.");
+  size_t numPoints = m_curves[curveName].curve->data().size();
 
-  return getCurveRange(ws);
+  if(numPoints < 2)
+    return qMakePair(0.0, 0.0);
+
+  double low = m_curves[curveName].curve->data().x(0);
+  double high = m_curves[curveName].curve->data().x(numPoints - 1);
+
+  return qMakePair(low, high);
 }
 
 
@@ -225,6 +224,10 @@ QPair<double, double> PreviewPlot::getCurveRange(const QString & wsName)
 void PreviewPlot::addSpectrum(const QString & curveName, const MatrixWorkspace_sptr ws,
     const size_t specIndex, const QColor & curveColour)
 {
+  // Remove the existing curve if it exists
+  if(m_curves.contains(curveName))
+    removeSpectrum(curveName);
+
   // Create the curve
   QwtPlotCurve * curve = addCurve(ws, specIndex, curveColour);
 
@@ -238,10 +241,11 @@ void PreviewPlot::addSpectrum(const QString & curveName, const MatrixWorkspace_s
   label->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
   m_uiForm.loLegend->addWidget(label);
 
-  m_curves[ws].curve = curve;
-  m_curves[ws].label = label;
-  m_curves[ws].colour = curveColour;
-  m_curves[ws].wsIndex = specIndex;
+  m_curves[curveName].ws = ws;
+  m_curves[curveName].curve = curve;
+  m_curves[curveName].label = label;
+  m_curves[curveName].colour = curveColour;
+  m_curves[curveName].wsIndex = specIndex;
 
   // Replot
   emit needToReplot();
@@ -257,7 +261,7 @@ void PreviewPlot::addSpectrum(const QString & curveName, const MatrixWorkspace_s
  * @param curveColour Colour of curve to plot
  */
 void PreviewPlot::addSpectrum(const QString & curveName, const QString & wsName,
-    const size_t specIndex, const QColor & curveColour)
+        const size_t specIndex, const QColor & curveColour)
 {
   // Try to get a pointer from the name
   std::string wsNameStr = wsName.toStdString();
@@ -273,58 +277,40 @@ void PreviewPlot::addSpectrum(const QString & curveName, const QString & wsName,
 /**
  * Removes spectra from a gievn workspace from the plot given a pointer to it.
  *
+ * If multiple curves are plotted form the smae workspace then all wil lbe removed.
+ *
  * @param ws Pointer to workspace
  */
 void PreviewPlot::removeSpectrum(const MatrixWorkspace_sptr ws)
 {
-  // Remove the curve object and legend label
-  if(m_curves.contains(ws))
-  {
-    removeCurve(m_curves[ws].curve);
-    m_uiForm.loLegend->removeWidget(m_curves[ws].label);
-    delete m_curves[ws].label;
-  }
+  QStringList curveNames = getCurvesForWorkspace(ws);
 
-  // Get the curve from the map
-  auto it = m_curves.find(ws);
-
-  // Remove the curve from the map
-  if(it != m_curves.end())
-    m_curves.erase(it);
+  for(auto it = curveNames.begin(); it != curveNames.end(); ++it)
+    removeSpectrum(*it);
 }
 
 
 /**
  * Removes spectra from a gievn workspace from the plot given its name.
  *
- * @param wsName Name of workspace
+ * @param wsName Name of curve
  */
-void PreviewPlot::removeSpectrum(const QString & wsName)
+void PreviewPlot::removeSpectrum(const QString & curveName)
 {
-  // Try to get a pointer from the name
-  std::string wsNameStr = wsName.toStdString();
-  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsNameStr);
-
-  if(!ws)
-    throw std::runtime_error(wsNameStr + " is not a MatrixWorkspace, not supported by PreviewPlot.");
-
-  removeSpectrum(ws);
-}
-
-
-/**
- * Removes a curve from the plot given its name (as displayed in the legend).
- *
- * @param name Name of curve
- */
-void PreviewPlot::removeSpectrumByCurveName(const QString & name)
-{
-  for(auto it = m_curves.begin(); it != m_curves.end(); ++it)
+  // Remove the curve object and legend label
+  if(m_curves.contains(curveName))
   {
-    QLabel *label = it.value().label;
-    if(label && label->text() == name)
-      removeSpectrum(it.key());
+    removeCurve(m_curves[curveName].curve);
+    m_uiForm.loLegend->removeWidget(m_curves[curveName].label);
+    delete m_curves[curveName].label;
   }
+
+  // Get the curve from the map
+  auto it = m_curves.find(curveName);
+
+  // Remove the curve from the map
+  if(it != m_curves.end())
+    m_curves.erase(it);
 }
 
 
@@ -444,10 +430,13 @@ void PreviewPlot::replot()
  */
 void PreviewPlot::hardReplot()
 {
-  QList<MatrixWorkspace_sptr> keys = m_curves.keys();
+  QStringList keys = m_curves.keys();
 
   for(auto it = keys.begin(); it != keys.end(); ++it)
-    m_curves[*it].curve = addCurve(*it, m_curves[*it].wsIndex, m_curves[*it].colour);
+  {
+    removeCurve(m_curves[*it].curve);
+    m_curves[*it].curve = addCurve(m_curves[*it].ws, m_curves[*it].wsIndex, m_curves[*it].colour);
+  }
 
   replot();
 }
@@ -464,8 +453,8 @@ void PreviewPlot::handleRemoveEvent(WorkspacePreDeleteNotification_ptr pNf)
 {
   MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(pNf->object());
 
-  // Ignore non matrix worksapces and those not in the plot
-  if(!ws || !m_curves.contains(ws))
+  // Ignore non matrix worksapces
+  if(!ws)
     return;
 
   // Remove the workspace
@@ -486,14 +475,12 @@ void PreviewPlot::handleReplaceEvent(WorkspaceAfterReplaceNotification_ptr pNf)
 {
   MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(pNf->object());
 
-  // Ignore non matrix worksapces and those not in the plot
-  if(!ws || !m_curves.contains(ws))
+  // Ignore non matrix worksapces
+  if(!ws)
     return;
 
-  // Replace the existing curve
-  m_curves[ws].curve = addCurve(ws, m_curves[ws].wsIndex, m_curves[ws].colour);
-
-  emit needToReplot();
+  if(getCurvesForWorkspace(ws).size() > 0)
+    emit needToHardReplot();
 }
 
 
@@ -515,10 +502,6 @@ QwtPlotCurve * PreviewPlot::addCurve(MatrixWorkspace_sptr ws, const size_t specI
   // Check the X axis is large enough
   if(ws->readX(0).size() < 2)
     throw std::runtime_error("X axis is too small to generate a histogram plot.");
-
-  // Remove any existing curves
-  if(m_curves.contains(ws))
-    removeCurve(m_curves[ws].curve);
 
   // Convert X axis to squared if needed
   if(getAxisType(QwtPlot::xBottom) == "Squared")
@@ -627,6 +610,26 @@ QString PreviewPlot::getAxisType(int axisID)
 
 
 /**
+ * Gets a list of curve names that are plotted form the given workspace.
+ *
+ * @param Pointer to workspace
+ * @return List of curve names
+ */
+QStringList PreviewPlot::getCurvesForWorkspace(const MatrixWorkspace_sptr ws)
+{
+  QStringList curveNames;
+
+  for(auto it = m_curves.begin(); it != m_curves.end(); ++it)
+  {
+    if(it.value().ws == ws)
+      curveNames << it.key();
+  }
+
+  return curveNames;
+}
+
+
+/**
  * Handles displaying the context menu when a user right clicks on the plot.
  *
  * @param position Position at which to show menu
@@ -708,5 +711,5 @@ void PreviewPlot::handleAxisTypeSelect()
     m_uiForm.plot->setAxisScaleEngine(QwtPlot::yLeft, yEngine);
 
   // Update the plot
-  hardReplot();
+  emit needToHardReplot();
 }

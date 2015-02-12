@@ -71,18 +71,18 @@ namespace MantidWidgets
     void setAxisRange(QPair<double, double> range, int axisID = QwtPlot::xBottom);
 
     QPair<double, double> getCurveRange(const Mantid::API::MatrixWorkspace_sptr ws);
-    QPair<double, double> getCurveRange(const QString & wsName);
+    QPair<double, double> getCurveRange(const QString & curveName);
 
     void addSpectrum(const QString & curveName, const Mantid::API::MatrixWorkspace_sptr ws, const size_t specIndex = 0, const QColor & curveColour = QColor());
     void addSpectrum(const QString & curveName, const QString & wsName, const size_t specIndex = 0, const QColor & curveColour = QColor());
 
     void removeSpectrum(const Mantid::API::MatrixWorkspace_sptr ws);
-    void removeSpectrum(const QString & wsName);
-    void removeSpectrumByCurveName(const QString & name);
+    void removeSpectrum(const QString & curveName);
 
   signals:
     /// Signals that the plot should be refreshed
     void needToReplot();
+    void needToHardReplot();
 
   public slots:
     void showLegend(bool show);
@@ -98,6 +98,7 @@ namespace MantidWidgets
     /// Holds information about a plot curve
     struct PlotCurveConfiguration
     {
+      Mantid::API::MatrixWorkspace_sptr ws;
       QwtPlotCurve *curve;
       QLabel *label;
       QColor colour;
@@ -116,6 +117,7 @@ namespace MantidWidgets
     QList<QAction *> addOptionsToMenus(QString menuName, QActionGroup *group, QStringList items, QString defaultItem);
 
     QString getAxisType(int axisID);
+    QStringList getCurvesForWorkspace(const Mantid::API::MatrixWorkspace_sptr ws);
 
   private slots:
     void showContextMenu(QPoint position);
@@ -136,7 +138,7 @@ namespace MantidWidgets
     friend class RangeSelector;
 
     /// Map of curve key to plot info
-    QMap<Mantid::API::MatrixWorkspace_sptr, PlotCurveConfiguration> m_curves;
+    QMap<QString, PlotCurveConfiguration> m_curves;
 
     /// Plot manipulation tools
     QwtPlotMagnifier *m_magnifyTool;
