@@ -109,6 +109,75 @@ public:
 
     TS_ASSERT_EQUALS("HTTPS request succeeded", ss.str());
   }
+
+  void test_ContentType_GetSet()
+  {
+    MockedInternetHelper internetHelper;
+    TSM_ASSERT_EQUALS("Default content type is not application/json",internetHelper.getContentType(),"application/json");
+    internetHelper.setContentType("test value");
+    TSM_ASSERT_EQUALS("setContentType failed",internetHelper.getContentType(),"test value");
+  }
+  
+  void test_Method_GetSet()
+  {
+    MockedInternetHelper internetHelper;
+    TSM_ASSERT_EQUALS("Default method is not GET",internetHelper.getMethod(),"GET");
+    internetHelper.setMethod("POST");
+    TSM_ASSERT_EQUALS("setMethod failed",internetHelper.getMethod(),"POST");
+  }  
+
+  void test_Timeout_GetSet()
+  {
+    MockedInternetHelper internetHelper;
+    TSM_ASSERT_EQUALS("Default timeout is not 30",internetHelper.getTimeout(),30);
+    internetHelper.setTimeout(1);
+    TSM_ASSERT_EQUALS("setTimeout failed",internetHelper.getTimeout(),1);
+  }
+  
+  void test_Body_GetSet()
+  {
+    MockedInternetHelper internetHelper;
+    TSM_ASSERT_EQUALS("Default body is not empty",internetHelper.getBody(),"");
+    internetHelper.setBody("Test string");
+    TSM_ASSERT_EQUALS("setBody failed",internetHelper.getBody(),"Test string");
+    TSM_ASSERT_EQUALS("method is not POST",internetHelper.getMethod(),"POST");
+    TSM_ASSERT_EQUALS("Contentlength is wrong",internetHelper.getContentLength(),11);
+    internetHelper.setBody("");
+    TSM_ASSERT_EQUALS("setBody failed",internetHelper.getBody(),"");
+    TSM_ASSERT_EQUALS("method is not GET",internetHelper.getMethod(),"GET");
+    TSM_ASSERT_EQUALS("Contentlength is wrong",internetHelper.getContentLength(),0);
+  }
+
+  void test_BodyStream_GetSet()
+  {
+    MockedInternetHelper internetHelper;
+    std::stringstream ss;
+    ss << "Test string";
+    TSM_ASSERT_EQUALS("Default body is not empty",internetHelper.getBody(),"");
+    internetHelper.setBody(ss);
+    TSM_ASSERT_EQUALS("setBody failed",internetHelper.getBody(),ss.str());
+    TSM_ASSERT_EQUALS("method is not POST",internetHelper.getMethod(),"POST");
+    TSM_ASSERT_EQUALS("Contentlength is wrong",internetHelper.getContentLength(),11);
+    ss.str("");
+    internetHelper.setBody(ss);
+    TSM_ASSERT_EQUALS("setBody failed",internetHelper.getBody(),"");
+    TSM_ASSERT_EQUALS("method is not GET",internetHelper.getMethod(),"GET");
+    TSM_ASSERT_EQUALS("Contentlength is wrong",internetHelper.getContentLength(),0);
+  }
+
+  void test_Headers_GetSet()
+  {
+    MockedInternetHelper internetHelper;
+    TSM_ASSERT_EQUALS("Default headers are not empty",internetHelper.headers().size(),0);
+    internetHelper.addHeader("Test","value");
+    internetHelper.addHeader("Test2","value2");
+    TSM_ASSERT_EQUALS("addHeader failed",internetHelper.getHeader("Test"),"value");
+    TSM_ASSERT_EQUALS("addHeader failed",internetHelper.getHeader("Test2"),"value2");
+    internetHelper.removeHeader("Test");
+    TSM_ASSERT_EQUALS("Remove failed",internetHelper.headers().size(),1);
+    internetHelper.clearHeaders();
+    TSM_ASSERT_EQUALS("Clear failed",internetHelper.headers().size(),0);
+  }
 };
 
 #endif /* MANTID_KERNEL_INTERNETSERVICETEST_H_ */
