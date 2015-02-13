@@ -43,7 +43,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                              doc="Name for the right workspace if mirror mode is used.")
 
         # output options
-        self.declareProperty(name='Verbose', defaultValue=False, doc='Switch Verbose Off/On')
         self.declareProperty(name='Save', defaultValue=False, doc='Switch Save result to nxs file Off/On')
         self.declareProperty(name='Plot', defaultValue=False, doc='Whether to plot the output workspace.')
 
@@ -58,7 +57,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._map_file = self.getProperty('MapFile').value
 
         self._use_mirror_mode = self.getProperty('MirrorMode').value
-        self._verbose = self.getProperty('Verbose').value
         self._save = self.getProperty('Save').value
         self._plot = self.getProperty('Plot').value
 
@@ -81,8 +79,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         AddSampleLog(Workspace=self._raw_workspace, LogName="mirror_sense", LogType="String", LogText=str(self._use_mirror_mode))
 
-        if self._verbose:
-            logger.notice('Nxs file : %s' % run_path)
+        logger.information('Nxs file : %s' % run_path)
 
         output_workspaces = self._reduction()
 
@@ -91,8 +88,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             for ws in output_workspaces:
                 file_path = os.path.join(workdir, ws + '.nxs')
                 SaveNexusProcessed(InputWorkspace=ws, Filename=file_path)
-                if self._verbose:
-                    logger.notice('Output file : ' + file_path)
+                logger.information('Output file : ' + file_path)
 
         if self._plot:
             from IndirectImport import import_mantidplot
@@ -122,8 +118,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         StartTime('ILLindirect')
 
-        if self._verbose:
-            logger.notice('Input workspace : %s' % self._raw_workspace)
+        logger.information('Input workspace : %s' % self._raw_workspace)
 
         idf_directory = config['instrumentDefinition.directory']
         ipf_name = self._instrument_name + '_' + self._analyser + '_' + self._reflection + '_Parameters.xml'
@@ -141,8 +136,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             else:
                 raise ValueError("Failed to find default map file. Contact development team.")
 
-        if self._verbose:
-            logger.notice('Map file : %s' % self._map_file)
+            logger.information('Map file : %s' % self._map_file)
 
         grouped_ws = self._run_name + '_group'
         GroupDetectors(InputWorkspace=self._raw_workspace, OutputWorkspace=grouped_ws, MapFile=self._map_file,
@@ -154,8 +148,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         if self._use_mirror_mode:
             output_workspaces = self._run_mirror_mode(monitor_ws, grouped_ws)
         else:
-            if self._verbose:
-                logger.notice('Mirror sense is OFF')
+            logger.information('Mirror sense is OFF')
 
             self._calculate_energy(monitor_ws, grouped_ws, self._red_workspace)
             output_workspaces = [self._red_workspace]
@@ -170,8 +163,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         @param monitor_ws :: name of the monitor workspace
         @param grouped_ws :: name of workspace with the detectors grouped
         """
-        if self._verbose:
-            logger.notice('Mirror sense is ON')
+        logger.information('Mirror sense is ON')
 
         x = mtd[grouped_ws].readX(0)  # energy array
         mid_point = int((len(x) - 1) / 2)
@@ -185,8 +177,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._calculate_energy(left_mon_ws, left_ws, self._red_left_workspace)
         xl = mtd[self._red_left_workspace].readX(0)
 
-        if self._verbose:
-            logger.notice('Energy range, left : %f to %f' % (xl[0], xl[-1]))
+        logger.information('Energy range, left : %f to %f' % (xl[0], xl[-1]))
 
         #right half
         right_ws = self._run_name + '_right'
@@ -197,8 +188,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._calculate_energy(right_mon_ws, right_ws, self._red_right_workspace)
         xr = mtd[self._red_right_workspace].readX(0)
 
-        if self._verbose:
-            logger.notice('Energy range, right : %f to %f' % (xr[0], xr[-1]))
+        logger.information('Energy range, right : %f to %f' % (xr[0], xr[-1]))
 
         xl = mtd[self._red_left_workspace].readX(0)
         yl = mtd[self._red_left_workspace].readY(0)
@@ -243,9 +233,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         ConvertAxisByFormula(InputWorkspace=grouped_ws, OutputWorkspace=red_ws, Axis='X', Formula=formula,
                              AxisTitle='Energy transfer', AxisUnits='meV')
 
-        if self._verbose:
-            xnew = mtd[red_ws].readX(0)  # energy array
-            logger.notice('Energy range : %f to %f' % (xnew[0], xnew[-1]))
+        xnew = mtd[red_ws].readX(0)  # energy array
+        logger.information('Energy range : %f to %f' % (xnew[0], xnew[-1]))
 
         DeleteWorkspace(grouped_ws)
         DeleteWorkspace(monitor_ws)
@@ -264,8 +253,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         im = np.argmax(np.array(y[nch - 21:nch - 1]))
         imax = nch - 21 + im
 
-        if self._verbose:
-            logger.notice('Cropping range %f to %f' % (x[imin], x[imax]))
+        logger.information('Cropping range %f to %f' % (x[imin], x[imax]))
 
         return x[imin], x[imax]
 
@@ -284,10 +272,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         freq = gRun.getLogData('Doppler.doppler_frequency').value
         amp = gRun.getLogData('Doppler.doppler_amplitude').value
 
-        if self._verbose:
-            logger.notice('Wavelength : ' + str(wave))
-            logger.notice('Doppler frequency : ' + str(freq))
-            logger.notice('Doppler amplitude : ' + str(amp))
+        logger.information('Wavelength : ' + str(wave))
+        logger.information('Doppler frequency : ' + str(freq))
+        logger.information('Doppler amplitude : ' + str(amp))
 
         vmax = 1.2992581918414711e-4 * freq * amp * 2.0 / wave  # max energy
         dele = 2.0 * vmax / npt

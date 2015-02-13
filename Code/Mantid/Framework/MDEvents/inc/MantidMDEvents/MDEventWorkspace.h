@@ -150,12 +150,12 @@ public:
   void clearMDMasking();
 
   /// Get the special coordinate system.
-  virtual Mantid::API::SpecialCoordinateSystem
+  virtual Mantid::Kernel::SpecialCoordinateSystem
   getSpecialCoordinateSystem() const;
 
   /// Set the special coordinate system.
   void setCoordinateSystem(
-      const Mantid::API::SpecialCoordinateSystem coordinateSystem);
+      const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem);
   /// make the workspace file backed if it has not been already file backed;
   virtual void setFileBacked(const std::string &fileName);
   /// if workspace was file-backed, this should clear file-backed information

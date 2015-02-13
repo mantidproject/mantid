@@ -39,17 +39,20 @@ namespace MantidQt
      * @param name       :: name of the field, so as to be recognised by the user
      * @param field      :: the field object to be checked
      * @param errorLabel :: the "*" or "" label.
+     * @returns True if the input was valid
      */
-    void UserInputValidator::checkFieldIsNotEmpty(const QString & name, QLineEdit * field, QLabel * errorLabel)
+    bool UserInputValidator::checkFieldIsNotEmpty(const QString & name, QLineEdit * field, QLabel * errorLabel)
     {
       if(field->text() == "")
       {
         errorLabel->setText("*");
         m_errorMessages.append(name + " has been left blank.");
+        return false;
       }
       else
       {
         errorLabel->setText("");
+        return true;
       }
     }
 
@@ -59,8 +62,9 @@ namespace MantidQt
      * @param field        :: the field to be checked
      * @param errorLabel   :: the "" or "*" label
      * @param errorMessage :: the message to log if invalid
+     * @returns True if the input was valid
      */
-    void UserInputValidator::checkFieldIsValid(const QString & errorMessage, QLineEdit * field, QLabel * errorLabel)
+    bool UserInputValidator::checkFieldIsValid(const QString & errorMessage, QLineEdit * field, QLabel * errorLabel)
     {
       int dummyPos = 0;
       QString text = field->text();
@@ -69,12 +73,13 @@ namespace MantidQt
       if( fieldState == QValidator::Acceptable )
       {
         errorLabel->setText("");
-        return;
+        return true;
       }
       else
       {
         errorLabel->setText("*");
         m_errorMessages.append(errorMessage);
+        return false;
       }
     }
 
@@ -83,11 +88,17 @@ namespace MantidQt
      *
      * @param name              :: the "name" of the workspace selector, so as to be recognised by the user
      * @param workspaceSelector :: the workspace selector to check
+     * @returns True if the input was valid
      */
-    void UserInputValidator::checkWorkspaceSelectorIsNotEmpty(const QString & name, WorkspaceSelector * workspaceSelector)
+    bool UserInputValidator::checkWorkspaceSelectorIsNotEmpty(const QString & name, WorkspaceSelector * workspaceSelector)
     {
       if( workspaceSelector->currentText() == "" )
+      {
         m_errorMessages.append("No " + name + " workspace has been selected.");
+        return false;
+      }
+
+      return true;
     }
 
     /**
@@ -95,11 +106,17 @@ namespace MantidQt
      *
      * @param name   :: the "name" of the widget so as to be recognised by the user.
      * @param widget :: the widget to check
+     * @returns True if the input was valid
      */
-    void UserInputValidator::checkMWRunFilesIsValid(const QString & name, MWRunFiles * widget)
+    bool UserInputValidator::checkMWRunFilesIsValid(const QString & name, MWRunFiles * widget)
     {
       if( ! widget->isValid() )
+      {
         m_errorMessages.append(name + " file error: " + widget->getFileProblem());
+        return false;
+      }
+
+      return true;
     }
 
     /**
@@ -107,13 +124,17 @@ namespace MantidQt
      *
      * @param name   :: the "name" of the widget so as to be recognised by the user.
      * @param widget :: the widget to check
+     * @returns True if the input was valid
      */
-    void UserInputValidator::checkDataSelectorIsValid(const QString & name, DataSelector * widget)
+    bool UserInputValidator::checkDataSelectorIsValid(const QString & name, DataSelector * widget)
     {
       if( ! widget->isValid() )
       {
         m_errorMessages.append(name + " error: " + widget->getProblem());
+        return false;
       }
+
+      return true;
     }
 
     /**
@@ -121,26 +142,33 @@ namespace MantidQt
      *
      * @param name  :: the name of the range
      * @param range :: the range
+     * @returns True if the input was valid
      */
-    void UserInputValidator::checkValidRange(const QString & name, std::pair<double, double> range)
+    bool UserInputValidator::checkValidRange(const QString & name, std::pair<double, double> range)
     {
       if( range.second == range.first )
       {
         m_errorMessages.append(name + " must have a non-zero width.");
-        return;
+        return false;
       }
-      
+
       if( range.second < range.first )
+      {
         m_errorMessages.append("The start of " + name + " must be less than the end.");
+        return false;
+      }
+
+      return true;
     }
-    
+
     /**
      * Check that the given ranges dont overlap.
      *
      * @param rangeA :: the start of the range
      * @param rangeB :: the end of the range
+     * @returns True if the input was valid
      */
-    void UserInputValidator::checkRangesDontOverlap(std::pair<double, double> rangeA, std::pair<double, double> rangeB)
+    bool UserInputValidator::checkRangesDontOverlap(std::pair<double, double> rangeA, std::pair<double, double> rangeB)
     {
       sortPair(rangeA);
       sortPair(rangeB);
@@ -150,7 +178,10 @@ namespace MantidQt
         QString message = QString("The ranges must not overlap: [%1,%2], [%3,%4].")
           .arg(rangeA.first).arg(rangeA.second).arg(rangeB.first).arg(rangeB.second);
         m_errorMessages.append( message );
+        return false;
       }
+
+      return true;
     }
 
     /**
@@ -160,55 +191,67 @@ namespace MantidQt
      * @param outer :: pair of range bounds
      * @param innerName :: the start of the range
      * @param inner :: pair of range bounds
+     * @returns True if the input was valid
      */
-    void UserInputValidator::checkRangeIsEnclosed(const QString & outerName, std::pair<double, double> outer, 
+    bool UserInputValidator::checkRangeIsEnclosed(const QString & outerName, std::pair<double, double> outer,
                                                   const QString & innerName, std::pair<double, double> inner)
     {
       sortPair(inner);
       sortPair(outer);
 
       if( inner.first < outer.first || inner.second > outer.second )
+      {
         m_errorMessages.append(outerName + " must completely enclose " + innerName + ".");
+        return false;
+      }
+
+      return true;
     }
 
     /**
      * Given a range defined by lower and upper bounds, checks to see if it can be divided evenly into bins
      * of a given width.  Due to the nature of doubles, we use a tolerance value.
-     * 
+     *
      * @param lower     :: the lower bound of the range
      * @param binWidth  :: the wdith of the bin
      * @param upper     :: the upper bound of the range
      * @param tolerance :: the tolerance with which to judge range / bin suitablility
+     * @returns True if the input was valid
      */
-    void UserInputValidator::checkBins(double lower, double binWidth, double upper, double tolerance)
+    bool UserInputValidator::checkBins(double lower, double binWidth, double upper, double tolerance)
     {
       double range = upper - lower;
       if( range < 0 )
       {
         m_errorMessages.append("The start of a binning range must be less than the end.");
-        return;
+        return false;
       }
       if( range == 0 )
       {
         m_errorMessages.append("Binning ranges must be non-zero.");
-        return;
+        return false;
       }
       if( binWidth == 0 )
       {
         m_errorMessages.append("Bin width must be non-zero.");
-        return;
+        return false;
       }
       if( binWidth < 0 )
       {
         m_errorMessages.append("Bin width must be a positive value.");
-        return;
+        return false;
       }
-      
+
       while( range > tolerance )
         range -= binWidth;
 
       if( std::abs(range) > tolerance )
+      {
         m_errorMessages.append("Bin width must allow for even splitting of the range.");
+        return false;
+      }
+
+      return true;
     }
 
     /**
@@ -231,6 +274,16 @@ namespace MantidQt
         return "";
 
       return "Please correct the following:\n\n" + m_errorMessages.join("\n");
+    }
+
+    /**
+     * Checks if the user input checked is valid.
+     *
+     * @return True if all input is valid, false otherwise
+     */
+    bool UserInputValidator::isAllInputValid()
+    {
+      return m_errorMessages.isEmpty();
     }
   }
 }

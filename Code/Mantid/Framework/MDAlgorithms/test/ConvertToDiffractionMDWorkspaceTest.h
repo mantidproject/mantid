@@ -50,7 +50,7 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
     TS_ASSERT_EQUALS( ws->getDimension(0)->getName(), "Q_lab_x");
-    TS_ASSERT_EQUALS( ws->getSpecialCoordinateSystem(), Mantid::API::QLab);
+    TS_ASSERT_EQUALS( ws->getSpecialCoordinateSystem(), Mantid::Kernel::QLab);
 
     // But you can't add to an existing one of the wrong dimensions type, if you choose Append
     alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace",
@@ -81,7 +81,7 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
     TS_ASSERT_EQUALS( ws->getDimension(0)->getName(), "H");
-    TS_ASSERT_EQUALS( ws->getSpecialCoordinateSystem(), Mantid::API::HKL);
+    TS_ASSERT_EQUALS( ws->getSpecialCoordinateSystem(), Mantid::Kernel::HKL);
 
     AnalysisDataService::Instance().remove("testOutMD");
     alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace",
@@ -95,7 +95,7 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
     TS_ASSERT_EQUALS( ws->getDimension(0)->getName(), "Q_sample_x");
-    TS_ASSERT_EQUALS( ws->getSpecialCoordinateSystem(), Mantid::API::QSample);
+    TS_ASSERT_EQUALS( ws->getSpecialCoordinateSystem(), Mantid::Kernel::QSample);
   }
 
   void do_test_MINITOPAZ(EventType type, size_t numTimesToAdd = 1,

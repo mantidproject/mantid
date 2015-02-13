@@ -171,7 +171,6 @@ void testExecOnLoadraw()
 
     // obtain the expected log data which was read from the Nexus file (NXlog)
 
-
     Property *l_property =output->run().getLogData( std::string("height") );
     TimeSeriesProperty<double> *l_timeSeriesDouble1 = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble1->value();
@@ -185,22 +184,20 @@ void testExecOnLoadraw()
     TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
     timeSeriesString = l_timeSeriesString->value();
 
-//    TODO: Re-enable this particular test.
-//    //
-//    // Testing log data - this was failing at one time as internal format of log data changed, but now OK again
-//    //
-//    std::cout << timeSeriesString;
-//    TS_ASSERT_EQUALS( timeSeriesString.substr(0,38), "2008-Jun-17 11:11:13  CHANGE PERIOD 12" );
+    //
+    // Testing log data - this was failing at one time as internal format of log data changed, but now OK again
+    // It was disabled, with a TODO comment, with this string: "2008-Jun-17 11:11:13  CHANGE PERIOD 12",
+    // now enabled after changing 12=> 1 (and added one more space character before CHANGE).
+    std::cout << timeSeriesString;
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,38), "2008-Jun-17 11:11:13   CHANGE PERIOD 1" );
 
     remove(outputFile.c_str());
-
   }
 
 
 
 private:
   LoadNexus algToBeTested;
-  LoadNexus algToBeTested2;
   std::string inputFile;
   int entryNumber;
 

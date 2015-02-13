@@ -95,14 +95,12 @@ void BraggScattererInCrystalStructure::declareProperties() {
  * Additional property processing
  *
  * Takes care of handling new property values, for example for construction of a
- *space group
- * from string and so on.
+ * space group from string and so on.
  *
  * Please note that derived classes should not re-implement this method, as
  * the processing for the base properties is absolutely necessary. Instead, all
- *deriving
- * classes should override the method afterScattererPropertySet, which is called
- * from this method.
+ * deriving classes should override the method afterScattererPropertySet,
+ * which is called from this method.
  */
 void BraggScattererInCrystalStructure::afterPropertySet(
     const std::string &propertyName) {

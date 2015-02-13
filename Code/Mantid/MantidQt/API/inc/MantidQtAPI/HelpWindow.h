@@ -46,6 +46,8 @@ public:
   static void showConcept(QWidget *parent, const std::string &name=std::string());
   static void showConcept(QWidget *parent, const QString &name);
   static void showFitFunction(QWidget *parent, const std::string &name=std::string());
+  static void showCustomInterface(QWidget *parent, const QString &name);
+  static void showCustomInterface(QWidget *parent, const std::string &name=std::string());
 };
 } // namespace API
 } // namespace MantidQt
