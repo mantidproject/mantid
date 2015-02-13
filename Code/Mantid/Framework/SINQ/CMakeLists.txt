@@ -6,6 +6,7 @@ set ( SRC_FILES
 	src/PoldiAutoCorrelation5.cpp
 	src/PoldiCreatePeaksFromCell.cpp
 	src/PoldiFitPeaks1D.cpp
+        src/PoldiFitPeaks1D2.cpp
         src/PoldiFitPeaks2D.cpp
 	src/PoldiIndexKnownCompounds.cpp
 	src/PoldiLoadChopperSlits.cpp
@@ -14,6 +15,7 @@ set ( SRC_FILES
 	src/PoldiLoadSpectra.cpp
 	src/PoldiPeakDetection2.cpp
 	src/PoldiPeakSearch.cpp
+	src/PoldiPeakSummary.cpp
 	src/PoldiRemoveDeadWires.cpp
 	src/PoldiTruncateData.cpp
 	src/PoldiUtilities/IPoldiFunction1D.cpp
@@ -54,6 +56,7 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiAutoCorrelation5.h
 	inc/MantidSINQ/PoldiCreatePeaksFromCell.h
 	inc/MantidSINQ/PoldiFitPeaks1D.h
+        inc/MantidSINQ/PoldiFitPeaks1D2.h
         inc/MantidSINQ/PoldiFitPeaks2D.h
 	inc/MantidSINQ/PoldiIndexKnownCompounds.h
 	inc/MantidSINQ/PoldiLoadChopperSlits.h
@@ -62,6 +65,7 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiLoadSpectra.h
 	inc/MantidSINQ/PoldiPeakDetection2.h
 	inc/MantidSINQ/PoldiPeakSearch.h
+	inc/MantidSINQ/PoldiPeakSummary.h
 	inc/MantidSINQ/PoldiRemoveDeadWires.h
 	inc/MantidSINQ/PoldiTruncateData.h
 	inc/MantidSINQ/PoldiUtilities/IPoldiFunction1D.h
@@ -117,11 +121,13 @@ set ( TEST_FILES
 	PoldiDetectorFactoryTest.h
 	PoldiDetectorTest.h
 	PoldiFitPeaks1DTest.h
+        PoldiFitPeaks1D2Test.h
         PoldiFitPeaks2DTest.h
 	PoldiIndexKnownCompoundsTest.h
         PoldiInstrumentAdapterTest.h
         PoldiPeakCollectionTest.h
 	PoldiPeakSearchTest.h
+	PoldiPeakSummaryTest.h
 	PoldiPeakTest.h
 	PoldiResidualCorrelationCoreTest.h
         PoldiSourceSpectrumTest.h
@@ -144,12 +150,17 @@ add_library ( SINQ ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
 set_target_properties ( SINQ PROPERTIES OUTPUT_NAME MantidSINQ 
                                         COMPILE_DEFINITIONS "IN_MANTID_SINQ" )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( SINQ PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+endif () 
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET SINQ PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( inc ../MDEvents/inc ../CurveFitting/inc )
+include_directories ( inc ../MDEvents/inc )
 
-target_link_libraries ( SINQ ${MANTIDLIBS} MDEvents CurveFitting )
+target_link_libraries ( SINQ ${MANTIDLIBS} MDEvents )
 
 # Add the unit tests directory
 add_subdirectory ( test )

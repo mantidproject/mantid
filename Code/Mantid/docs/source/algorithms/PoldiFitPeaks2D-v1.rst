@@ -41,8 +41,7 @@ PoldiFitPeaks2D operates on a MatrixWorkspace with a valid POLDI instrument defi
 
     PoldiFitPeaks1D(InputWorkspace = correlated_6904, FwhmMultiples = 4.0,
                     PeakFunction = "Gaussian", PoldiPeakTable = peaks_6904,
-                    OutputWorkspace = "peaks_refined_6904", ResultTableWorkspace = "result_table_6904",
-                    FitCharacteristicsWorkspace = "raw_fit_results_6904",
+                    OutputWorkspace = "peaks_refined_6904",
                     FitPlotsWorkspace = "fit_plots_6904")
                     
     # Calculate a 2D spectrum using the refined peaks
@@ -78,8 +77,7 @@ In general, there is a background in POLDI data that depends on :math:`2\theta`.
 
     PoldiFitPeaks1D(InputWorkspace = correlated_6904, FwhmMultiples = 4.0,
                     PeakFunction = "Gaussian", PoldiPeakTable = peaks_6904,
-                    OutputWorkspace = "peaks_refined_6904", ResultTableWorkspace = "result_table_6904",
-                    FitCharacteristicsWorkspace = "raw_fit_results_6904",
+                    OutputWorkspace = "peaks_refined_6904",
                     FitPlotsWorkspace = "fit_plots_6904")
 
     # Calculate a 2D spectrum using the refined peaks - with background linear in 2theta

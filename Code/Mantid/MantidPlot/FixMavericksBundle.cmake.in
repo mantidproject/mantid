@@ -1,0 +1,3 @@
+set ( bundle ${CMAKE_INSTALL_PREFIX}/MantidPlot.app )
+execute_process(COMMAND chmod +x make_package.rb WORKING_DIRECTORY ${bundle})
+execute_process(COMMAND ./make_package.rb WORKING_DIRECTORY ${bundle})

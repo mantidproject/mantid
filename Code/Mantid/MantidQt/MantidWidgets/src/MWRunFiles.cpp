@@ -20,6 +20,7 @@
 #include <Poco/File.h>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -700,6 +701,33 @@ void MWRunFiles::setLiveAlgorithm(const IAlgorithm_sptr& monitorLiveData)
   m_monitorLiveData = monitorLiveData;
 }
 
+/**
+ * Gets the instrument currently set by the override property.
+ *
+ * If no override is set then the instrument set by default instrument configurtion
+ * option will be used and this function returns an empty string.
+ *
+ * @return Name of instrument, empty if not set
+ */
+QString MWRunFiles::getInstrumentOverride()
+{
+  return m_defaultInstrumentName;
+}
+
+/**
+ * Sets an instrument to fix the widget to.
+ *
+ * If an instrument name is geven then the widget will only look for files for that
+ * instrument, providing na empty string will remove this restriction and will search
+ * using the default instrument.
+ *
+ * @param instName Name of instrument, empty to disable override
+ */
+void MWRunFiles::setInstrumentOverride(const QString & instName)
+{
+  m_defaultInstrumentName = instName;
+}
+
 /** 
 * Set the file text.  This is different to setText in that it emits findFiles, as well
 * changing the state of the text box widget to "modified = true" which is a prerequisite
@@ -740,8 +768,38 @@ void MWRunFiles::findFiles()
     }
 
     emit findingFiles();
+
     // Set the values for the thread, and start it running.
-    m_thread->set(m_uiForm.fileEditor->text(), isForRunFiles(), this->isOptional(), m_algorithmProperty);
+    QString searchText = m_uiForm.fileEditor->text();
+
+    // If we have an override instrument then add it in appropriate places to the search text
+    if (!m_defaultInstrumentName.isEmpty())
+    {
+      // Regex to match a selection of run numbers as defined here: mantidproject.org/MultiFileLoading
+      // Also allowing spaces between delimiters as this seems to work fine
+      boost::regex runNumbers("([0-9]+)([:+-] ?[0-9]+)? ?(:[0-9]+)?", boost::regex::extended);
+      // Regex to match a list of run numbers delimited by commas
+      boost::regex runNumberList("([0-9]+)(, ?[0-9]+)*", boost::regex::extended);
+
+      // See if we can just prepend the instrument and be done
+      if (boost::regex_match(searchText.toStdString(), runNumbers))
+      {
+        searchText = m_defaultInstrumentName + searchText;
+      }
+      // If it is a list we need to prepend the instrument to all run numbers
+      else if (boost::regex_match(searchText.toStdString(), runNumberList))
+      {
+        QStringList runNumbers = searchText.split(",", QString::SkipEmptyParts);
+        QStringList newRunNumbers;
+
+        for(auto it = runNumbers.begin(); it != runNumbers.end(); ++it)
+          newRunNumbers << m_defaultInstrumentName + (*it).simplified();
+
+        searchText = newRunNumbers.join(",");
+      }
+    }
+
+    m_thread->set(searchText, isForRunFiles(), this->isOptional(), m_algorithmProperty);
     m_thread->start();
   }
   else

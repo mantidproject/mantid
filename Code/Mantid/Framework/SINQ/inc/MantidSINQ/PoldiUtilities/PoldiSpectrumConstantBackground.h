@@ -2,7 +2,8 @@
 #define MANTID_SINQ_POLDISPECTRUMCONSTANTBACKGROUND_H_
 
 #include "MantidSINQ/DllConfig.h"
-#include "MantidCurveFitting/FlatBackground.h"
+#include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidSINQ/PoldiUtilities/IPoldiFunction1D.h"
 
 namespace Mantid {
@@ -37,13 +38,18 @@ namespace Poldi {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 class MANTID_SINQ_DLL PoldiSpectrumConstantBackground
-    : public CurveFitting::FlatBackground,
+    : public API::ParamFunction,
+      public API::IFunction1D,
       public IPoldiFunction1D {
 public:
   PoldiSpectrumConstantBackground();
   virtual ~PoldiSpectrumConstantBackground();
 
   virtual std::string name() const { return "PoldiSpectrumConstantBackground"; }
+
+  void function1D(double *out, const double *xValues, const size_t nData) const;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues,
+                       const size_t nData);
 
   virtual void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
   size_t getTimeBinCount() const;
@@ -52,8 +58,18 @@ public:
                                const API::FunctionDomain1D &domain,
                                API::FunctionValues &values) const;
 
+  void setParameter(const std::string &name, const double &value,
+                    bool explicitlySet = true);
+  void setParameter(size_t i, const double &value, bool explicitlySet = true);
+
+  double getParameter(const std::string &name) const;
+  double getParameter(size_t i) const;
+
 protected:
+  void init();
+
   size_t m_timeBinCount;
+  API::IFunction1D_sptr m_flatBackground;
 };
 
 } // namespace Poldi

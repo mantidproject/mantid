@@ -104,9 +104,12 @@ namespace MantidQt
       Q_PROPERTY(QStringList fileExtensions READ getFileExtensions WRITE setFileExtensions)
       Q_PROPERTY(bool extsAsSingleOption READ extsAsSingleOption WRITE extsAsSingleOption)
       Q_PROPERTY(LiveButtonOpts liveButton READ liveButtonState WRITE liveButtonState)
+      Q_PROPERTY(QString instrumentOverride READ getInstrumentOverride WRITE setInstrumentOverride)
       Q_ENUMS(ButtonOpts)
       Q_ENUMS(LiveButtonOpts)
+
       friend class DataSelector;
+
     public:
       /// options for bringing up the load file dialog
       enum ButtonOpts
@@ -189,6 +192,10 @@ namespace MantidQt
       void setNumberOfEntries(int number);
       /// Inform the widget of a running instance of MonitorLiveData to be used in stopLiveListener()
       void setLiveAlgorithm(const boost::shared_ptr<Mantid::API::IAlgorithm>& monitorLiveData);
+      /// Gets the instrument currently fixed to
+      QString getInstrumentOverride();
+      /// Overrides the value of default instrument
+      void setInstrumentOverride(const QString & instName);
 
     signals:
       /// Emitted when the file text changes
@@ -281,6 +288,8 @@ namespace MantidQt
       QString m_fileFilter;
       /// Thread to allow asynchronous finding of files.
       FindFilesThread * m_thread;
+
+      QString m_defaultInstrumentName;
     };
   }
 }

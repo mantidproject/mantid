@@ -12,6 +12,9 @@ if ( CXXTEST_FOUND )
   target_link_libraries ( CrystalTest Crystal DataHandling MDEvents MDAlgorithms ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES})
   add_dependencies ( CrystalTest Algorithms CurveFitting )
   add_dependencies ( FrameworkTests CrystalTest )
+  # Test data
+  add_dependencies ( CrystalTest StandardTestData )
+
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET CrystalTest PROPERTY FOLDER "UnitTests" )
 endif ()

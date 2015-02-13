@@ -11,6 +11,9 @@ class Instrument3DWidget;
 class InstrumentActor;
 class CollapsiblePanel;
 class OneCurvePlot;
+class ComponentInfoController;
+class DetectorPlotController;
+class ProjectionSurface;
 
 class QPushButton;
 class QTextEdit;
@@ -44,18 +47,15 @@ public:
   ///               markers. Selected peaks can be deleted by pressing the Delete key.
   enum SelectionType {Single=0,AddPeak,ErasePeak,SingleDetectorSelection,Tube, Draw};
   enum ToolType {Zoom,PixelSelect,TubeSelect,PeakSelect,PeakErase, DrawEllipse, DrawRectangle, EditShape};
-  enum TubeXUnits {DETECTOR_ID = 0,LENGTH,PHI,OUT_OF_PLANE_ANGLE,NUMBER_OF_UNITS};
 
   InstrumentWindowPickTab(InstrumentWindow* instrWindow);
-  void updatePick(int detid);
   bool canUpdateTouchedDetector()const;
-  TubeXUnits getTubeXUnits() const {return m_tubeXUnits;}
-  void mouseLeftInstrmentDisplay();
   void initSurface();
   void saveSettings(QSettings& settings) const;
   void loadSettings(const QSettings& settings);
   bool addToDisplayContextMenu(QMenu&) const;
   void selectTool(const ToolType tool);
+  boost::shared_ptr<ProjectionSurface> getSurface() const;
 
 public slots:
   void setTubeXUnits(int units);
@@ -66,43 +66,17 @@ private slots:
   void integrateTimeBins();
   void setPlotCaption();
   void setSelectionType();
-  void addPeak(double,double);
   void storeCurve();
   void removeCurve(const QString &);
-  void savePlotToWorkspace();
-  void singleDetectorTouched(int detid);
-  void singleDetectorPicked(int detid);
+  void singleComponentTouched(size_t pickID);
+  void singleComponentPicked(size_t pickID);
   void updateSelectionInfoDisplay();
   void shapeCreated();
   void updatePlotMultipleDetectors();
+  void savePlotToWorkspace();
 private:
   void showEvent (QShowEvent *);
-  void updatePlot(int detid);
-  void updateSelectionInfo(int detid);
-  void plotSingle(int detid);
-  void plotTube(int detid);
-  void plotTubeSums(int detid);
-  void plotTubeIntegrals(int detid);
-  void prepareDataForSinglePlot(
-    int detid,
-    std::vector<double>&x,
-    std::vector<double>&y,
-    std::vector<double>* err = NULL);
-  void prepareDataForSumsPlot(
-    int detid,
-    std::vector<double>&x,
-    std::vector<double>&y,
-    std::vector<double>* err = NULL);
-  void prepareDataForIntegralsPlot(
-    int detid,
-    std::vector<double>&x,
-    std::vector<double>&y,
-    std::vector<double>* err = NULL);
-    QString getTubeXUnitsName(TubeXUnits unit) const;
-  QString getNonDetectorInfo();
-  QString getParameterInfo(Mantid::Geometry::IComponent_const_sptr comp);
   QColor getShapeBorderColor() const;
-  static double getOutOfPlaneAngle(const Mantid::Kernel::V3D& pos, const Mantid::Kernel::V3D& origin, const Mantid::Kernel::V3D& normal);
 
   /* Pick tab controls */
   OneCurvePlot* m_plot; ///< Miniplot to display data in the detectors
@@ -138,9 +112,112 @@ private:
   QTextEdit* m_selectionInfoDisplay; ///< Text control for displaying selection information
   CollapsiblePanel* m_infoPanel;
   SelectionType m_selectionType;
-  int m_currentDetID;
-  TubeXUnits m_tubeXUnits; ///< quantity the time bin integrals to be plotted against
   mutable bool m_freezePlot;
+
+  /// Controller responsible for the info display.
+  ComponentInfoController* m_infoController;
+  /// Controller responsible for the plot.
+  DetectorPlotController* m_plotController;
+
+  // Temporary caches for values from settings
+  int m_tubeXUnitsCache;
+  int m_plotTypeCache;
+};
+
+/**
+ * Class containing the logic of displaying info on the selected
+ * component(s) in the info text widget.
+ */
+class ComponentInfoController: public QObject
+{
+  Q_OBJECT
+public:
+  /// Constructor.
+  ComponentInfoController(InstrumentWindowPickTab *tab, InstrumentActor* instrActor, QTextEdit* infoDisplay);
+public slots:
+  void displayInfo(size_t pickID);
+  void clear();
+private:
+  QString displayDetectorInfo(Mantid::detid_t detid);
+  QString displayNonDetectorInfo(Mantid::Geometry::ComponentID compID);
+  QString getParameterInfo(Mantid::Geometry::IComponent_const_sptr comp);
+  QString getPeakOverlayInfo();
+
+  InstrumentWindowPickTab* m_tab;
+  InstrumentActor* m_instrActor;
+  QTextEdit* m_selectionInfoDisplay;
+
+  bool m_freezePlot;
+  bool m_instrWindowBlocked;
+  size_t m_currentPickID;
+  QString m_xUnits;
+
+};
+
+/**
+ * Class contining the logic of plotting the data in detectors/tubes.
+ */
+class DetectorPlotController: public QObject
+{
+  Q_OBJECT
+
+public:
+
+  enum PlotType {Single = 0, DetectorSum, TubeSum, TubeIntegral};
+  enum TubeXUnits {DETECTOR_ID = 0,LENGTH,PHI,OUT_OF_PLANE_ANGLE,NUMBER_OF_UNITS};
+
+  DetectorPlotController(InstrumentWindowPickTab *tab, InstrumentActor* instrActor, OneCurvePlot* plot);
+  void setEnabled( bool on ) { m_enabled = on; }
+  void setPlotData(size_t pickID);
+  void setPlotData(QList<int> detIDs);
+  void updatePlot();
+  void clear();
+  void savePlotToWorkspace();
+
+  void setPlotType(PlotType type) { m_plotType = type; }
+  PlotType getPlotType() const { return m_plotType; }
+  void setTubeXUnits( TubeXUnits units ) { m_tubeXUnits = units; }
+  TubeXUnits getTubeXUnits() const { return m_tubeXUnits; }
+  QString getTubeXUnitsName() const;
+  QString getTubeXUnitsUnits() const;
+  QString getPlotCaption() const;
+
+private slots:
+
+  void addPeak(double x,double y);
+
+private:
+
+  void plotSingle(int detid);
+  void plotTube(int detid);
+  void plotTubeSums(int detid);
+  void plotTubeIntegrals(int detid);
+  void prepareDataForSinglePlot(
+    int detid,
+    std::vector<double>&x,
+    std::vector<double>&y,
+    std::vector<double>* err = NULL);
+  void prepareDataForSumsPlot(
+    int detid,
+    std::vector<double>&x,
+    std::vector<double>&y,
+    std::vector<double>* err = NULL);
+  void prepareDataForIntegralsPlot(
+    int detid,
+    std::vector<double>&x,
+    std::vector<double>&y,
+    std::vector<double>* err = NULL);
+  static double getOutOfPlaneAngle(const Mantid::Kernel::V3D& pos, const Mantid::Kernel::V3D& origin, const Mantid::Kernel::V3D& normal);
+
+  InstrumentWindowPickTab* m_tab;
+  InstrumentActor* m_instrActor;
+  OneCurvePlot* m_plot;
+
+  PlotType m_plotType;
+  bool m_enabled;
+  TubeXUnits m_tubeXUnits; ///< quantity the time bin integrals to be plotted against
+  int m_currentDetID;
+
 };
 
 
