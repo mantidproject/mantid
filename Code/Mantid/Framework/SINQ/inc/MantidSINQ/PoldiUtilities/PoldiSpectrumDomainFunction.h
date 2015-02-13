@@ -70,6 +70,67 @@ struct MANTID_SINQ_DLL Poldi2DHelper {
 
 typedef boost::shared_ptr<Poldi2DHelper> Poldi2DHelper_sptr;
 
+class LocalJacobian : public API::Jacobian {
+public:
+  /// Constructor
+  LocalJacobian(size_t nValues, size_t nParams)
+      : Jacobian(), m_nValues(nValues), m_nParams(nParams),
+        m_jacobian(nValues * nParams) {}
+
+  /// Destructor
+  ~LocalJacobian() {}
+
+  /// Implementation of API::Jacobian::set. Throws std::out_of_range on invalid
+  /// index.
+  void set(size_t iY, size_t iP, double value) {
+    m_jacobian[safeIndex(iY, iP)] = value;
+  }
+
+  /// Implementation of API::Jacobian::get. Throws std::out_of_range on invalid
+  /// index.
+  double get(size_t iY, size_t iP) { return m_jacobian[safeIndex(iY, iP)]; }
+
+  /// Provides raw pointer access to the underlying std::vector. Required for
+  /// adept-interface.
+  double *rawValues() { return &m_jacobian[0]; }
+
+  /// Assign values to jacobian
+  void copyValuesToJacobian(Jacobian &jacobian, size_t yOffset) {
+    for (size_t y = 0; y < m_nValues; ++y) {
+      for (size_t p = 0; p < m_nParams; ++p) {
+        jacobian.set(y + yOffset, p, getRaw(y, p));
+      }
+    }
+  }
+
+protected:
+  /// Get-method without checks.
+  inline double getRaw(size_t iY, size_t iP) const {
+    return m_jacobian[index(iY, iP)];
+  }
+
+  /// Index-calculation for vector access.
+  inline size_t index(size_t iY, size_t iP) const {
+    return iY + iP * m_nValues;
+  }
+
+  /// Get index and check for validity. Throws std::out_of_range on invalid
+  /// index.
+  size_t safeIndex(size_t iY, size_t iP) const {
+    size_t i = index(iY, iP);
+
+    if (i >= m_jacobian.size()) {
+      throw std::out_of_range("Index is not valid for this Jacobian.");
+    }
+
+    return i;
+  }
+
+  size_t m_nValues;
+  size_t m_nParams;
+  std::vector<double> m_jacobian;
+};
+
 /** PoldiSpectrumDomainFunction : TODO: DESCRIPTION
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -119,7 +180,8 @@ public:
   virtual void setActiveParameter(size_t i, double value);
   virtual double activeParameter(size_t i) const;
 
-  virtual void setParameter(size_t i, const double &value, bool explicitlySet = true);
+  virtual void setParameter(size_t i, const double &value,
+                            bool explicitlySet = true);
   virtual void setParameter(const std::string &name, const double &value,
                             bool explicitlySet = true);
   virtual double getParameter(size_t i) const;

@@ -6,7 +6,6 @@
 #include <stdexcept>
 
 #include "MantidAPI/FunctionDomain1D.h"
-#include "MantidCurveFitting/Jacobian.h"
 
 namespace Mantid {
 namespace Poldi {
@@ -132,7 +131,7 @@ if (helper) {
   size_t baseOffset = static_cast<size_t>(pos + helper->minTOFN);
 
   for (size_t i = 0; i < helper->dOffsets.size(); ++i) {
-    CurveFitting::Jacobian smallJ(dWidthN, np);
+    LocalJacobian smallJ(dWidthN, np);
 
     double newD = centre + helper->dFractionalOffsets[i];
     size_t offset = static_cast<size_t>(helper->dOffsets[i]) + baseOffset;
