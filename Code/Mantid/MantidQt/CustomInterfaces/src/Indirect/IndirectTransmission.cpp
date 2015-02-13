@@ -19,13 +19,6 @@ namespace CustomInterfaces
 
     connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(instrumentSet()));
 
-    // Preview plot
-    m_plots["PreviewPlot"] = new QwtPlot(m_parentWidget);
-    m_plots["PreviewPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-    m_plots["PreviewPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-    m_plots["PreviewPlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.plotPreview->addWidget(m_plots["PreviewPlot"]);
-
     // Update the preview plot when the algorithm is complete
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(transAlgDone(bool)));
     connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(QString)), this, SLOT(dataLoaded()));

@@ -264,10 +264,10 @@ namespace MantidQt
       int numHist = static_cast<int>(inWs->getNumberHistograms()) - 1;
       m_uiForm.spPreviewSpectrum->setMaximum(numHist);
       updateMiniPlot();
-			QPair<double, double> curveRange = m_uiForm.ppPlot->getCurveRange("Sample");
-			std::pair<double, double> range(curveRange.first, curveRange.second);
-			setMiniPlotGuides("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
-			setPlotRange("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
+
+			QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
+			setRangeSelector("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
+			setPlotPropertyRange("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
 		}
 
 		/**

@@ -215,10 +215,10 @@ namespace CustomInterfaces
     //Set peak and background ranges
     if(instDetails.size() >= 8)
     {
-      setMiniPlotGuides("SlicePeak", m_properties["PeakStart"], m_properties["PeakEnd"],
-          std::pair<double, double>(instDetails["peak-start"].toDouble(), instDetails["peak-end"].toDouble()));
-      setMiniPlotGuides("SliceBackground", m_properties["BackgroundStart"], m_properties["BackgroundEnd"],
-          std::pair<double, double>(instDetails["back-start"].toDouble(), instDetails["back-end"].toDouble()));
+      setRangeSelector("SlicePeak", m_properties["PeakStart"], m_properties["PeakEnd"],
+          qMakePair(instDetails["peak-start"].toDouble(), instDetails["peak-end"].toDouble()));
+      setRangeSelector("SliceBackground", m_properties["BackgroundStart"], m_properties["BackgroundEnd"],
+          qMakePair(instDetails["back-start"].toDouble(), instDetails["back-end"].toDouble()));
     }
   }
 
@@ -258,13 +258,13 @@ namespace CustomInterfaces
           Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
 
       const Mantid::MantidVec & dataX = input->readX(0);
-      std::pair<double, double> range(dataX.front(), dataX.back());
+      QPair<double, double> range(dataX.front(), dataX.back());
 
       m_uiForm.ppRawPlot->clear();
       m_uiForm.ppRawPlot->addSpectrum("Raw", input, 0);
 
-      setPlotRange("SlicePeak", m_properties["PeakStart"], m_properties["PeakEnd"], range);
-      setPlotRange("SliceBackground", m_properties["BackgroundStart"], m_properties["BackgroundEnd"], range);
+      setPlotPropertyRange("SlicePeak", m_properties["PeakStart"], m_properties["PeakEnd"], range);
+      setPlotPropertyRange("SliceBackground", m_properties["BackgroundStart"], m_properties["BackgroundEnd"], range);
 
       m_uiForm.ppRawPlot->resizeX();
     }

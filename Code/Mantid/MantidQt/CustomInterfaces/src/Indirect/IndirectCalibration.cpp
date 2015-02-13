@@ -315,11 +315,11 @@ namespace CustomInterfaces
     // Set peak and background ranges
     std::map<std::string, double> ranges = getRangesFromInstrument();
 
-    std::pair<double, double> peakRange(ranges["peak-start-tof"], ranges["peak-end-tof"]);
-    std::pair<double, double> backgroundRange(ranges["back-start-tof"], ranges["back-end-tof"]);
+    QPair<double, double> peakRange(ranges["peak-start-tof"], ranges["peak-end-tof"]);
+    QPair<double, double> backgroundRange(ranges["back-start-tof"], ranges["back-end-tof"]);
 
-    setMiniPlotGuides("CalPeak", m_properties["CalPeakMin"], m_properties["CalPeakMax"], peakRange);
-    setMiniPlotGuides("CalBackground", m_properties["CalBackMin"], m_properties["CalBackMax"], backgroundRange);
+    setRangeSelector("CalPeak", m_properties["CalPeakMin"], m_properties["CalPeakMax"], peakRange);
+    setRangeSelector("CalBackground", m_properties["CalBackMin"], m_properties["CalBackMax"], backgroundRange);
   }
 
   /**
@@ -360,14 +360,14 @@ namespace CustomInterfaces
         Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
 
     const Mantid::MantidVec & dataX = input->readX(0);
-    std::pair<double, double> range(dataX.front(), dataX.back());
+    QPair<double, double> range(dataX.front(), dataX.back());
 
     m_uiForm.ppCalibration->clear();
     m_uiForm.ppCalibration->addSpectrum("Raw", input, 0);
     m_uiForm.ppCalibration->resizeX();
 
-    setPlotRange("CalPeak", m_properties["CalELow"], m_properties["CalEHigh"], range);
-    setPlotRange("CalBackground", m_properties["CalStart"], m_properties["CalEnd"], range);
+    setPlotPropertyRange("CalPeak", m_properties["CalELow"], m_properties["CalEHigh"], range);
+    setPlotPropertyRange("CalBackground", m_properties["CalStart"], m_properties["CalEnd"], range);
 
     m_uiForm.ppCalibration->replot();
 
@@ -424,9 +424,9 @@ namespace CustomInterfaces
     }
 
     const Mantid::MantidVec & dataX = energyWs->readX(0);
-    std::pair<double, double> range(dataX.front(), dataX.back());
+    QPair<double, double> range(dataX.front(), dataX.back());
 
-    setPlotRange("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], range);
+    setPlotPropertyRange("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], range);
 
     m_uiForm.ppResolution->clear();
     m_uiForm.ppResolution->addSpectrum("Energy", energyWs, 0);
@@ -462,13 +462,13 @@ namespace CustomInterfaces
       {
         double res = params[0];
 
-        //Set default rebinning bounds
-        std::pair<double, double> peakRange(-res*10, res*10);
-        setMiniPlotGuides("ResPeak", m_properties["ResELow"], m_properties["ResEHigh"], peakRange);
+        // Set default rebinning bounds
+        QPair<double, double> peakRange(-res*10, res*10);
+        setRangeSelector("ResPeak", m_properties["ResELow"], m_properties["ResEHigh"], peakRange);
 
-        //Set default background bounds
-        std::pair<double, double> backgroundRange(-res*9, -res*8);
-        setMiniPlotGuides("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], backgroundRange);
+        // Set default background bounds
+        QPair<double, double> backgroundRange(-res*9, -res*8);
+        setRangeSelector("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], backgroundRange);
       }
     }
   }

@@ -10,7 +10,7 @@ namespace MantidQt
 {
 	namespace CustomInterfaces
 	{
-		Stretch::Stretch(QWidget * parent) : 
+		Stretch::Stretch(QWidget * parent) :
 			IndirectBayesTab(parent)
 		{
 			m_uiForm.setupUi(parent);
@@ -29,7 +29,7 @@ namespace MantidQt
 			m_properties["SampleBinning"] = m_dblManager->addProperty("Sample Binning");
 			m_properties["Sigma"] = m_dblManager->addProperty("Sigma");
 			m_properties["Beta"] = m_dblManager->addProperty("Beta");
-			
+
 			m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
 			m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
 			m_dblManager->setDecimals(m_properties["SampleBinning"], INT_DECIMALS);
@@ -63,7 +63,7 @@ namespace MantidQt
 
 		/**
 		 * Validate the form to check the program can be run
-		 * 
+		 *
 		 * @return :: Whether the form was valid
 		 */
 		bool Stretch::validate()
@@ -86,7 +86,7 @@ namespace MantidQt
 		 * Collect the settings on the GUI and build a python
 		 * script that runs Stretch
 		 */
-		void Stretch::run() 
+		void Stretch::run()
 		{
       using namespace Mantid::API;
 
@@ -95,7 +95,7 @@ namespace MantidQt
 			QString elasticPeak("False");
 			QString sequence("False");
 
-			QString pyInput = 
+			QString pyInput =
 				"from IndirectBayes import QuestRun\n";
 
 			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
@@ -134,7 +134,7 @@ namespace MantidQt
 		/**
 		 * Set the data selectors to use the default save directory
 		 * when browsing for input files.
-		 *  
+		 *
      * @param settings :: The current settings
 		 */
 		void Stretch::loadSettings(const QSettings& settings)
@@ -146,16 +146,15 @@ namespace MantidQt
 		/**
 		 * Plots the loaded file to the miniplot and sets the guides
 		 * and the range
-		 * 
+		 *
 		 * @param filename :: The name of the workspace to plot
 		 */
 		void Stretch::handleSampleInputReady(const QString& filename)
 		{
 			m_uiForm.ppPlot->addSpectrum("Sample", filename, 0);
-			QPair<double, double> curveRange = m_uiForm.ppPlot->getCurveRange("Sample");
-			std::pair<double, double> range(curveRange.first, curveRange.second);
-			setMiniPlotGuides("StretchERange", m_properties["EMin"], m_properties["EMax"], range);
-			setPlotRange("StretchERange", m_properties["EMin"], m_properties["EMax"], range);
+			QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
+			setRangeSelector("StretchERange", m_properties["EMin"], m_properties["EMax"], range);
+			setPlotPropertyRange("StretchERange", m_properties["EMin"], m_properties["EMax"], range);
 		}
 
 		/**
@@ -175,7 +174,7 @@ namespace MantidQt
 		 */
     void Stretch::maxValueChanged(double max)
     {
-			m_dblManager->setValue(m_properties["EMax"], max);	
+			m_dblManager->setValue(m_properties["EMax"], max);
     }
 
 		/**

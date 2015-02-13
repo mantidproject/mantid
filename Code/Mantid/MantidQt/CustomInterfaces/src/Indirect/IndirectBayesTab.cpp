@@ -48,7 +48,7 @@ namespace MantidQt
      * @param workspace :: Name of the workspace to use
      * @param res :: The retrieved values for the resolution parameter (if one was found)
      */
-    bool IndirectBayesTab::getInstrumentResolution(const QString& workspace, std::pair<double,double>& res)
+    bool IndirectBayesTab::getInstrumentResolution(const QString& workspace, QPair<double, double> & res)
     {
       auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::MatrixWorkspace>(workspace.toStdString());
       return getInstrumentResolution(ws, res);
@@ -61,7 +61,7 @@ namespace MantidQt
      * @param ws :: Pointer to the workspace to use
      * @param res :: The retrieved values for the resolution parameter (if one was found)
      */
-    bool IndirectBayesTab::getInstrumentResolution(Mantid::API::MatrixWorkspace_const_sptr ws, std::pair<double,double>& res)
+    bool IndirectBayesTab::getInstrumentResolution(Mantid::API::MatrixWorkspace_const_sptr ws, QPair<double, double> & res)
     {
       auto inst = ws->getInstrument();
       auto analyser = inst->getStringParameter("analyser");
@@ -74,7 +74,7 @@ namespace MantidQt
         //set the default instrument resolution
         if(params.size() > 0)
         {
-          res = std::make_pair(-params[0], params[0]);
+          res = qMakePair(-params[0], params[0]);
           return true;
         }
       }

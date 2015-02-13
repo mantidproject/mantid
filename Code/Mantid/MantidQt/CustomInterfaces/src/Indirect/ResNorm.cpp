@@ -126,9 +126,8 @@ namespace MantidQt
 		void ResNorm::handleVanadiumInputReady(const QString& filename)
 		{
 			m_uiForm.ppPlot->addSpectrum("Vanadium", filename, m_previewSpec);
-			std::pair<double, double> res;
-			QPair<double, double> curveRange = m_uiForm.ppPlot->getCurveRange("Vanadium");
-			std::pair<double, double> range(curveRange.first, curveRange.second);
+			QPair<double, double> res;
+			QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Vanadium");
 
       MatrixWorkspace_sptr vanWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(filename.toStdString());
       m_uiForm.spPreviewSpectrum->setMaximum(static_cast<int>(vanWs->getNumberHistograms()) - 1);
@@ -140,14 +139,14 @@ namespace MantidQt
 				res.first = res.first * 10;
 				res.second = res.second * 10;
 
-				setMiniPlotGuides("ResNormERange", m_properties["EMin"], m_properties["EMax"], res);
+				setRangeSelector("ResNormERange", m_properties["EMin"], m_properties["EMax"], res);
 			}
 			else
 			{
-				setMiniPlotGuides("ResNormERange", m_properties["EMin"], m_properties["EMax"], range);
+				setRangeSelector("ResNormERange", m_properties["EMin"], m_properties["EMax"], range);
 			}
 
-			setPlotRange("ResNormERange", m_properties["EMin"], m_properties["EMax"], range);
+			setPlotPropertyRange("ResNormERange", m_properties["EMin"], m_properties["EMax"], range);
 		}
 
 		/**

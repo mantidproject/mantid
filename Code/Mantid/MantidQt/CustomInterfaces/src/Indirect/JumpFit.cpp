@@ -222,17 +222,16 @@ namespace MantidQt
         m_uiForm.ppPlot->clear();
         m_uiForm.ppPlot->addSpectrum("Sample", filename, m_spectraList[currentWidth]);
 
-				std::pair<double, double> res;
-				QPair<double, double> curveRange = m_uiForm.ppPlot->getCurveRange("Sample");
-        std::pair<double, double> range(curveRange.first, curveRange.second);
+				QPair<double, double> res;
+				QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
 
 				// Use the values from the instrument parameter file if we can
 				if(getInstrumentResolution(filename, res))
-					setMiniPlotGuides("JumpFitQ", m_properties["QMin"], m_properties["QMax"], res);
+					setRangeSelector("JumpFitQ", m_properties["QMin"], m_properties["QMax"], res);
 				else
-					setMiniPlotGuides("JumpFitQ", m_properties["QMin"], m_properties["QMax"], range);
+					setRangeSelector("JumpFitQ", m_properties["QMin"], m_properties["QMax"], range);
 
-				setPlotRange("JumpFitQ", m_properties["QMin"], m_properties["QMax"], range);
+				setPlotPropertyRange("JumpFitQ", m_properties["QMin"], m_properties["QMax"], range);
 			}
 			else
 			{
