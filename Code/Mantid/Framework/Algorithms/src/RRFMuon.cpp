@@ -37,7 +37,7 @@ void RRFMuon::init()
   unitOptions.push_back("MHz");
   unitOptions.push_back("Gauss");
   unitOptions.push_back("Mrad/s");
-  declareProperty("Frequency units", "MHz",
+  declareProperty("FrequencyUnits", "MHz",
                   boost::make_shared<StringListValidator>(unitOptions),
                   "The frequency units");
 
