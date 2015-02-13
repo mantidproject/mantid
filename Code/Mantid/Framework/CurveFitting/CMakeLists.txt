@@ -3,6 +3,7 @@ set ( SRC_FILES
 	#	src/SCDPanelErrors.cpp
 	# src/ChebyshevPolynomialBackground.cpp
 	src/Abragam.cpp
+	src/AreaGaussian.cpp
 	src/AugmentedLagrangianOptimizer.cpp
 	src/BFGS_Minimizer.cpp
 	src/BSpline.cpp
@@ -108,6 +109,7 @@ set ( INC_FILES
 	#	inc/MantidCurveFitting/SCDPanelErrors.h
 	# inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
 	inc/MantidCurveFitting/Abragam.h
+	inc/MantidCurveFitting/AreaGaussian.h
 	inc/MantidCurveFitting/AugmentedLagrangianOptimizer.h
 	inc/MantidCurveFitting/BFGS_Minimizer.h
 	inc/MantidCurveFitting/BSpline.h
@@ -215,6 +217,7 @@ set ( TEST_FILES
 	# RefinePowderInstrumentParametersTest.h
 	#SCDPanelErrorsTest.h
 	AbragamTest.h
+	AreaGaussianTest.h
 	AugmentedLagrangianOptimizerTest.h
 	BFGSTest.h
 	BSplineTest.h

@@ -133,11 +133,11 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
             poldi2DFunction->getFunction(i));
 
     if (peakFunction) {
-      size_t dIndex = peakFunction->parameterIndex("PeakCentre");
+      size_t dIndex = peakFunction->parameterIndex("Centre");
       UncertainValue d(peakFunction->getParameter(dIndex),
                        peakFunction->getError(dIndex));
 
-      size_t iIndex = peakFunction->parameterIndex("Height");
+      size_t iIndex = peakFunction->parameterIndex("Area");
       UncertainValue intensity(peakFunction->getParameter(iIndex),
                                peakFunction->getError(iIndex));
 
@@ -176,10 +176,10 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(
 
     IFunction_sptr peakFunction = FunctionFactory::Instance().createFunction(
         "PoldiSpectrumDomainFunction");
-    peakFunction->setParameter("Height", peak->intensity());
+    peakFunction->setParameter("Area", peak->intensity());
     peakFunction->setParameter("Sigma", peak->fwhm(PoldiPeak::AbsoluteD) /
                                             (2.0 * sqrt(2.0 * log(2.0))));
-    peakFunction->setParameter("PeakCentre", peak->d());
+    peakFunction->setParameter("Centre", peak->d());
 
     mdFunction->addFunction(peakFunction);
   }
@@ -628,7 +628,7 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getNormalizedPeakCollection(
         m_timeTransformer->calculatedTotalIntensity(peak->d());
 
     PoldiPeak_sptr normalizedPeak = peak->clone();
-    normalizedPeak->setIntensity(peak->intensity() / calculatedIntensity * 400);
+    normalizedPeak->setIntensity(peak->intensity() / calculatedIntensity);
 
     std::cout << normalizedPeak->intensity() << std::endl;
 
