@@ -1,5 +1,5 @@
 from mantid.simpleapi import *
-from mantid import config
+from mantid import config,api
 from mantid.kernel import funcreturns
 
 from PropertyManager import PropertyManager
@@ -65,6 +65,7 @@ class ReductionWrapper(object):
             reduction will fail
         """ 
         return self._wait_for_file
+
     @wait_for_file.setter
     def wait_for_file(self,value):
         if value>0:
@@ -126,7 +127,11 @@ class ReductionWrapper(object):
 
         if not build_validation:
            if validationFile:
-              sample = Load(validationFile)
+              if isinstance(validationFile,api.Workspace):
+                 sample = validationFile
+                 validationFile = sample.name()
+              else:
+                 sample = Load(validationFile)
            else:
               build_validation=True
 
@@ -155,6 +160,8 @@ class ReductionWrapper(object):
             SaveNexus(reduced,Filename=result_name+'.nxs')
             return True,'Created validation file {0}.nxs'.format(result_name)
         else:
+            if isinstance(reduced,list): # check only first result in multirep
+                reduced = reduced[0]
             result = CheckWorkspacesMatch(Workspace1=sample,Workspace2=reduced,
                                       Tolerance=Error,CheckSample=False,
                                       CheckInstrument=False,ToleranceRelErr=ToleranceRelErr)

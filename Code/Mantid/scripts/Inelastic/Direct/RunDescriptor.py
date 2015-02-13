@@ -3,6 +3,7 @@
 
 from mantid.simpleapi import *
 from PropertiesDescriptors import *
+import re
 
 
 class RunDescriptor(PropDescriptor):
@@ -42,9 +43,9 @@ class RunDescriptor(PropDescriptor):
        """ return current run number or workspace if it is loaded""" 
        if not RunDescriptor._PropMan:
           RunDescriptor._PropMan = owner
-
        if instance is None:
            return self
+
        if self._ws_name and self._ws_name in mtd:
            return mtd[self._ws_name]
        else:
@@ -76,15 +77,14 @@ class RunDescriptor(PropDescriptor):
                # TODO: not implemented
 
            #else:
-                self._run_number = value.getRunNumber()
-                ws_name = value.name()
-                self._split_ws_name(ws_name)
-                self.synchronize_ws(value)
+           if self._ws_name != value.name():
+                self._set_ws_as_source(value)
                 self._clear_old_ws(old_ws_name,self._ws_name,clear_fext)
                 self._bind_to_sum = False
                 RunDescriptor._PropMan.sum_runs.clear_sum()
                 return
-           #return
+           else: # it is just reassigning the same workspace to itself
+             return
 
        if isinstance(value,str): # it may be run number as string or it may be a workspace name
           if value in mtd: # workspace name
@@ -149,7 +149,11 @@ class RunDescriptor(PropDescriptor):
     def is_monws_separate(self):
         """ """
         mon_ws = self.get_monitors_ws()
-        name = mon_ws.name()
+        if mon_ws:
+            name = mon_ws.name()
+        else:
+            return False
+
         if name.endswith('_monitors'):
             return True
         else:
@@ -203,16 +207,12 @@ class RunDescriptor(PropDescriptor):
         new_name = self._build_ws_name()
         old_name = workspace.name()
         if new_name != old_name:
-            if new_name in mtd:
-               DeleteWorkspace(new_name)
-            RenameWorkspace(InputWorkspace=old_name,OutputWorkspace=new_name)
+           RenameWorkspace(InputWorkspace=old_name,OutputWorkspace=new_name)
 
-            old_mon_name = old_name + '_monitors'
-            new_mon_name = new_name + '_monitors'
-            if new_mon_name in mtd:
-               DeleteWorkspace(new_mon_name)
-            if old_mon_name in mtd:
-               RenameWorkspace(InputWorkspace=old_mon_name,OutputWorkspace=new_mon_name)
+           old_mon_name = old_name + '_monitors'
+           new_mon_name = new_name + '_monitors'
+           if old_mon_name in mtd:
+              RenameWorkspace(InputWorkspace=old_mon_name,OutputWorkspace=new_mon_name)
         self._ws_name = new_name
 #--------------------------------------------------------------------------------------------------------------------
     def get_file_ext(self):
@@ -283,7 +283,7 @@ class RunDescriptor(PropDescriptor):
               return None
 #--------------------------------------------------------------------------------------------------------------------
     def get_ws_clone(self,clone_name='ws_clone'):
-        """ Get unbounded clone of existing Run workspace """
+        """ Get unbounded clone of eisting Run workspace """
         ws = self.get_workspace()
         CloneWorkspace(InputWorkspace=ws,OutputWorkspace=clone_name)
         mon_ws_name = self.get_ws_name() + '_monitors'
@@ -292,6 +292,51 @@ class RunDescriptor(PropDescriptor):
             CloneWorkspace(InputWorkspace=mon_ws_name,OutputWorkspace=cl_mon_name)
 
         return mtd[clone_name]
+#--------------------------------------------------------------------------------------------------------------------
+    def _set_ws_as_source(self,value):
+        """ assign all parts of the run if input value is workspace """
+        self._run_number = value.getRunNumber()
+        ws_name = value.name()
+        self._ws_suffix=''
+        self._split_ws_name(ws_name)
+        self.synchronize_ws(value)
+
+#--------------------------------------------------------------------------------------------------------------------
+    def chop_ws_part(self,origin,tof_range,rebin,chunk_num,n_chunks):
+        """ chop part of the original workspace and sets it up as new original. 
+            Return the old one """ 
+        if not(origin):
+           origin = self.get_workspace()
+
+        origin_name = origin.name()
+        try:
+           mon_ws = mtd[origin_name+'_monitors']
+        except:
+           mon_ws = None
+
+        target_name = '#{0}/{1}#'.format(chunk_num,n_chunks)+origin_name
+        if chunk_num == n_chunks:
+           RenameWorkspace(InputWorkspace=origin_name,OutputWorkspace=target_name)
+           if mon_ws:
+              RenameWorkspace(InputWorkspace=mon_ws,OutputWorkspace=target_name+'_monitors')
+           origin_name = target_name
+           origin_invalidated=True
+        else:
+           if mon_ws:
+              CloneWorkspace(InputWorkspace=mon_ws,OutputWorkspace=target_name+'_monitors')
+           origin_invalidated=False
+
+        if rebin: # debug and compatibility mode with old reduction
+           Rebin(origin_name,OutputWorkspace=target_name,Params=[tof_range[0],tof_range[1],tof_range[2]],PreserveEvents=False)
+        else:
+           CropWorkspace(origin_name,OutputWorkspace=target_name,XMin=tof_range[0],XMax=tof_range[2])
+
+        self._set_ws_as_source(mtd[target_name])
+        if origin_invalidated:
+            return self.get_workspace()
+        else:
+            return origin
+
 #--------------------------------------------------------------------------------------------------------------------
     def get_monitors_ws(self,monitor_ID=None):
         """ get pointer to a workspace containing monitors. 
@@ -541,6 +586,17 @@ class RunDescriptor(PropDescriptor):
            DeleteWorkspace(WorkspaceName='tmp_mon')
        return mon_ws
 #--------------------------------------------------------------------------------------------------------------------
+    def clear_monitors(self):
+        """ method removes monitor workspace form analysis data service if it is there 
+        
+            (assuming it is not needed any more)
+        """
+        monWS_name = self._ws_name + '_monitors'
+        if monWS_name in mtd:
+            DeleteWorkspace(monWS_name)
+
+#--------------------------------------------------------------------------------------------------------------------
+
     def _build_ws_name(self):
 
         instr_name = self._instr_name()
@@ -570,13 +626,21 @@ class RunDescriptor(PropDescriptor):
             name = self.rremove(ws_name,sumExt)
         # remove _prop_name:
         name = name.replace(self._prop_name,'',1)
+
+        try:
+           part_ind = re.search('#(.+?)#', name).group(0)
+           name     =name.replace(part_ind,'',1)
+        except AttributeError:
+           part_ind=''
+
         if self._run_number:
             instr_name = self._instr_name()
             name = name.replace(instr_name,'',1)
-            self._ws_cname = filter(lambda c: not c.isdigit(), name)
+            self._ws_cname = part_ind+filter(lambda c: not c.isdigit(), name)
 
         else:
-            self._ws_cname = name
+            self._ws_cname = part_ind+name
+    #
     def _instr_name(self):
        if RunDescriptor._holder:
             instr_name = RunDescriptor._holder.short_inst_name
