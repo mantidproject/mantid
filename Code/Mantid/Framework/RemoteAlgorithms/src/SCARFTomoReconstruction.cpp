@@ -1,6 +1,7 @@
 #include "MantidRemoteAlgorithms/SCARFTomoReconstruction.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InternetHelper.h"
@@ -15,6 +16,11 @@
 #include <Poco/File.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/StreamCopier.h>
+
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeList.h>
 
 namespace Mantid {
 namespace RemoteAlgorithms {
@@ -104,7 +110,7 @@ void SCARFTomoReconstruction::init() {
 
   // - Action: query status (of implicitly all jobs)
   declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
-                  "JobsStatusWorkspace", m_SCARFComputeResource + "_StatusOfJobs",
+                  "JobsStatusWorkspace", "StatusOfJobs_" + m_SCARFComputeResource,
                   Direction::Output, API::PropertyMode::Optional),
                   "The name of the table workspace where to output the status "
                   "information about all the jobs for which there is information "
@@ -124,7 +130,7 @@ void SCARFTomoReconstruction::init() {
                                               "JobStatusByID"));
 
   declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
-                  "JobStatusWorkspace", m_SCARFComputeResource + "_StatusOfJob",
+                  "JobStatusWorkspace", "StatusOfJob_" + m_SCARFComputeResource,
                   Direction::Output, API::PropertyMode::Optional),
                   "The name of the table workspace where to output the status "
                   "information about the job.");
@@ -247,7 +253,8 @@ void SCARFTomoReconstruction::exec() {
   } else if (Action::SUBMIT == m_action) {
     doSubmit(username);
   } else if (Action::QUERYSTATUS == m_action) {
-    doQueryStatus(username);
+    std::string jobWS = getPropertyValue("JobsStatusWorkspace");
+    doQueryStatus(username, jobWS);
   } else if (Action::QUERYSTATUSBYID == m_action) {
     std::string jobId;
     try {
@@ -258,7 +265,8 @@ void SCARFTomoReconstruction::exec() {
         m_SCARFComputeResource << "." << std::endl;
       throw;
     }
-    doQueryStatusById(username, jobId);
+    std::string jobsWS = getPropertyValue("JobStatusWorkspace");
+    doQueryStatusById(username, jobId, jobsWS);
   } else if (Action::CANCEL == m_action) {
     std::string jobId;
     try {
@@ -505,7 +513,8 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
  *
  * @param username Username to use (should have authenticated before)
  */
-void SCARFTomoReconstruction::doQueryStatus(const std::string &username) {
+  void SCARFTomoReconstruction::doQueryStatus(const std::string &username,
+                                              const std::string &wsName) {
   auto it = m_tokenStash.find(username);
   if (m_tokenStash.end() == it) {
     throw std::runtime_error("Job status query failed. You do not seem to be logged "
@@ -536,8 +545,10 @@ void SCARFTomoReconstruction::doQueryStatus(const std::string &username) {
     // TODO: put it into an output TableWorkspace
     if (std::string::npos != resp.find("<Jobs>") &&
         std::string::npos != resp.find("<extStatus>")) {
-      g_log.notice() << "Queried the status of jobs with response: " << resp <<
-        std::endl;
+      API::ITableWorkspace_sptr ws = buildOutputStatusWorkspace(resp, wsName);
+      setProperty("JobsStatusWorkspace", ws);
+      g_log.notice() << "Queried the status of jobs and stored the "
+        "information in the workspace " << wsName << std::endl;
     } else {
       g_log.warning() << "Queried the status of jobs but got what looks "
         "like an error message as response: " << resp << std::endl;
@@ -559,8 +570,9 @@ void SCARFTomoReconstruction::doQueryStatus(const std::string &username) {
  * @param username Username to use (should have authenticated before)
  * @param jobId Identifier of a job as used by the job scheduler (integer number)
  */
-void SCARFTomoReconstruction::doQueryStatusById(const std::string& username,
-                                                const std::string& jobId) {
+void SCARFTomoReconstruction::doQueryStatusById(const std::string &username,
+                                                const std::string &jobId,
+                                                const std::string &wsName) {
   auto it = m_tokenStash.find(username);
   if (m_tokenStash.end() == it) {
     throw std::runtime_error("Job status query failed. You do not seem to be logged "
@@ -591,8 +603,10 @@ void SCARFTomoReconstruction::doQueryStatusById(const std::string& username,
     // TODO: put it into an output TableWorkspace
     if (std::string::npos != resp.find("<Jobs>") &&
         std::string::npos != resp.find("<extStatus>")) {
-      g_log.notice() << "Queried job status (Id " << jobId << " ) with response: "
-                     << resp << std::endl;
+      API::ITableWorkspace_sptr ws = buildOutputStatusWorkspace(resp, wsName);
+      setProperty("JobStatusWorkspace", ws);
+      g_log.notice() << "Queried job status (Id " << jobId << " ) and stored "
+        "information into the workspace " << wsName << std::endl;
     } else {
       g_log.warning() << "Queried job status (Id " << jobId << " ) but got what "
         "looks like an error message as response: " << resp << std::endl;
@@ -1151,6 +1165,99 @@ void SCARFTomoReconstruction::getAllJobFiles(const std::string &jobId,
 
   progress(1.0, "Download  of " + boost::lexical_cast<std::string>(filePACNames.size())
            + " file(s) completed in " + localDir);
+}
+
+/**
+ * Fills in a table workspace with job status information from an LSC
+ * PAC response in ~xml format. Assumes that the workspace passed is
+ * empty and ready to be filled. This guarantees that a non-null (I)
+ * table workspace object is returned.
+ *
+ * @param response Body of an HHTP response to a status query
+ * @param wsName Name of the workspace to create
+ */
+API::ITableWorkspace_sptr
+SCARFTomoReconstruction::buildOutputStatusWorkspace(const std::string &resp,
+                                                    const std::string &wsName)
+{
+  API::ITableWorkspace_sptr ws = API::WorkspaceFactory::Instance().
+    createTable("TableWorkspace");
+
+  // This is the information that is usually available for running/recently run jobs
+  ws->addColumn("int", "ID");
+  ws->addColumn("str", "Name");
+  ws->addColumn("str", "Status");
+  ws->addColumn("str", "Command run");
+
+  Poco::XML::DOMParser parser;
+  Poco::AutoPtr<Poco::XML::Document> doc;
+  try {
+    doc = parser.parseString(resp);
+  } catch (Poco::Exception &e) {
+    throw std::runtime_error("Unable to parse response in XML format: " +
+                             e.displayText());
+  } catch (std::exception &e) {
+    throw std::runtime_error("Unable to parse response in XML format: " +
+                             std::string(e.what()));
+  }
+
+  Poco::XML::Element *pRootElem = doc->documentElement();
+  if (!pRootElem || !pRootElem->hasChildNodes()) {
+    g_log.error("XML response from compute resouce contains no root element.");
+    throw std::runtime_error("No root element was found in XML response, "
+                             "cannot parse it.");
+  }
+
+  Poco::AutoPtr<Poco::XML::NodeList> jobs = pRootElem->getElementsByTagName("Job");
+  if (!jobs) {
+    g_log.error("XML response from compute resouce contains no root element.");
+    throw std::runtime_error("No root element was found in XML response, "
+                             "cannot parse it.");
+  }
+
+  size_t n = jobs->length();
+  if (0 == jobs->length()) {
+    g_log.notice() << "Got information about 0 jobs. You may not have any jobs "
+      "currently running on the compute resource. The output workspace will not "
+      "have any rows/information";
+  }
+  for (size_t i = 0; i < n; i++) {
+    Poco::XML::Element *el = static_cast<Poco::XML::Element *>(jobs->item(i));
+    if (!el)
+      throw std::runtime_error("Error while trying to parse job with index " +
+                               boost::lexical_cast<std::string>(i) +
+                               "could not produce a complete table workspace.");
+
+    ws->appendRow();
+
+    Poco::XML::Element *id = el->getChildElement("id");
+    if (id) {
+      ws->cell<int>(i, 0) = boost::lexical_cast<int>(id->innerText().c_str());
+    }
+
+    Poco::XML::Element *name = el->getChildElement("name");
+    if (name) {
+      ws->cell<std::string>(i, 1) = name->innerText().c_str();
+    }
+
+    Poco::XML::Element *status = el->getChildElement("status");
+    if (status) {
+      ws->cell<std::string>(i, 2) = status->innerText().c_str();
+    }
+
+    Poco::XML::Element *cmd = el->getChildElement("cmd");
+    if (cmd) {
+      ws->cell<std::string>(i, 3) = cmd->innerText().c_str();
+    }
+  }
+
+  if(!ws)
+    throw std::runtime_error("There was an unexpected error while building the output "
+                             "table workspace " + wsName + " from the information "
+                             "retrieved from the remote compute resource. Failed "
+                             "to create table workspace.");
+
+  return ws;
 }
 
 /**
