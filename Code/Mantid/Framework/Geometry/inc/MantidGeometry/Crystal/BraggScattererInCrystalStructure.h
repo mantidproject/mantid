@@ -9,7 +9,8 @@
 namespace Mantid {
 namespace Geometry {
 
-/** BraggScattererInCrystalStructure
+/**
+    @class BraggScattererInCrystalStructure
 
     This class provides an extension of BraggScatterer, suitable
     for scatterers that are part of a crystal structure. Information about

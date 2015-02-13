@@ -35,8 +35,6 @@ Beam Divergence
 
    \frac{d1}{x}  \equiv \frac{d2}{l - x}  \equiv tan\alpha
 
-    \therefore x = \frac{d1\centerdot\l}{l - x}
-
     \therefore \frac{d1}{x} = \frac{d1 + d2}{l}
 
     \therefore \alpha = tan^{-1}\left(\frac{d1 + d2}{l}\right)

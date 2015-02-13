@@ -12,7 +12,6 @@ set ( SRC_FILES src/CatalogPublishDialog.cpp
                 src/MantidGLWidget.cpp
                 src/PlotAsymmetryByLogValueDialog.cpp
                 src/SampleShapeHelpers.cpp
-                src/SlicingAlgorithmDialog.cpp
                 src/SmoothNeighboursDialog.cpp
                 src/SortTableWorkspaceDialog.cpp
 )
@@ -34,7 +33,6 @@ set ( MOC_FILES inc/MantidQtCustomDialogs/CatalogPublishDialog.h
                 inc/MantidQtCustomDialogs/MantidGLWidget.h
                 inc/MantidQtCustomDialogs/PlotAsymmetryByLogValueDialog.h
                 inc/MantidQtCustomDialogs/SampleShapeHelpers.h
-                inc/MantidQtCustomDialogs/SlicingAlgorithmDialog.h
                 inc/MantidQtCustomDialogs/SmoothNeighboursDialog.h
                 inc/MantidQtCustomDialogs/SortTableWorkspaceDialog.h
 )
@@ -53,7 +51,6 @@ set ( UI_FILES inc/MantidQtCustomDialogs/CatalogPublishDialog.ui
                inc/MantidQtCustomDialogs/LoadDialog.ui
                inc/MantidQtCustomDialogs/LoadInstrumentDialog.ui              
                inc/MantidQtCustomDialogs/StartLiveDataDialog.ui
-               inc/MantidQtCustomDialogs/SlicingAlgorithmDialog.ui
                inc/MantidQtCustomDialogs/FitDialog.ui
                inc/MantidQtCustomDialogs/SortTableWorkspaceDialog.ui
 )
@@ -77,6 +74,10 @@ enable_precompiled_headers( inc/MantidQtCustomDialogs/PrecompiledHeader.h ALL_SR
 add_library ( CustomDialogs ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 # Set the name of the generated library
 set_target_properties ( CustomDialogs PROPERTIES OUTPUT_NAME MantidQtCustomDialogs )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( CustomDialogs PROPERTIES INSTALL_RPATH "@loader_path/../../../Contents/MacOS")
+endif () 
 
 target_link_libraries ( CustomDialogs MantidQtAPI MantidWidgets )
 

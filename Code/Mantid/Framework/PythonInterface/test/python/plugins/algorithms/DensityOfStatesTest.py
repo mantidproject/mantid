@@ -1,6 +1,6 @@
 import unittest
 from mantid import logger
-from mantid.simpleapi import DensityOfStates, CheckWorkspacesMatch, Scale
+from mantid.simpleapi import DensityOfStates, CheckWorkspacesMatch, Scale, CreateEmptyTableWorkspace
 
 
 def scipy_not_available():
@@ -125,6 +125,26 @@ class DensityOfStatesTest(unittest.TestCase):
         total = DensityOfStates(File=self._file_name,  SpectrumType=spec_type, ScaleByCrossSection='Incoherent')
 
         self.assertEquals(CheckWorkspacesMatch(summed, total, tolerance), 'Success!')
+
+    def test_ion_table(self):
+        ws = DensityOfStates(File=self._file_name, SpectrumType='IonTable')
+
+        # Build the expected output
+        expected = CreateEmptyTableWorkspace()
+        expected.addColumn('str', 'Ion')
+        expected.addColumn('int', 'Count')
+        expected.addRow(['H', 4])
+        expected.addRow(['C', 8])
+        expected.addRow(['O', 8])
+
+        self.assertEquals(CheckWorkspacesMatch(ws, expected), 'Success!')
+
+    def test_ion_table_castep_error(self):
+        """
+        Creating an ion table from a castep file is not possible and should fail validation.
+        """
+        self.assertRaises(RuntimeError, DensityOfStates,
+                          File=self._file_name, SpectrumType='IonTable')
 
 
 if __name__=="__main__":

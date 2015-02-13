@@ -147,7 +147,7 @@ Refinement Algorithm
 Two refinement algorithms, DirectFit and MonteCarlo, are provided.
 
 DirectFit
-#########
+^^^^^^^^^
 
 This is a simple one step fitting. If there is one parameter to fit,
 Levenberg Marquart minimizer is chosen. As its coefficients are strongly
@@ -155,7 +155,7 @@ correlated to each other, Simplex minimizer is used if there are more
 than 1 parameter to fit.
 
 MonteCarlo
-##########
+^^^^^^^^^^
 
 This adopts the concept of Monte Carlo random walk in the parameter
 space. In each MC step, one parameter will be chosen, and a new value is
@@ -166,7 +166,7 @@ Simulated annealing will be tried as soon as it is implemented in
 Mantid.
 
 Constraint
-##########
+^^^^^^^^^^
 In future, constaint will be considered.
 
 

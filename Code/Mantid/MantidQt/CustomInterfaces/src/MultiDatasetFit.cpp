@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit.h"
 #include "MantidQtMantidWidgets/FunctionBrowser.h"
+#include "MantidQtMantidWidgets/FitOptionsBrowser.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -9,6 +10,7 @@
 #include "MantidAPI/ParameterTie.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/Exception.h"
 
 #include "qtpropertybrowser.h"
 
@@ -17,6 +19,8 @@
 #include <QMessageBox>
 #include <QToolBar>
 #include <QActionGroup>
+#include <QSplitter>
+#include <QSettings>
 
 #include <boost/make_shared.hpp>
 #include <qwt_plot_curve.h>
@@ -198,11 +202,18 @@ DatasetPlotData::DatasetPlotData(const QString& wsName, int wsIndex, const QStri
   Mantid::API::MatrixWorkspace_sptr outputWS;
   if ( !outputWSName.isEmpty() )
   {
-    outputWS = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>( outputWSName.toStdString() );
-    if ( !outputWS )
+    std::string stdOutputWSName = outputWSName.toStdString();
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist(stdOutputWSName) )
     {
-      QString mess = QString("Workspace %1 either doesn't exist or isn't a MatrixWorkspace").arg(outputWSName);
-      throw std::runtime_error( mess.toStdString() );
+      try
+      {
+        outputWS = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>( stdOutputWSName );
+      }
+      catch ( Mantid::Kernel::Exception::NotFoundError& )
+      {
+        QString mess = QString("Workspace %1 either doesn't exist or isn't a MatrixWorkspace").arg(outputWSName);
+        throw std::runtime_error( mess.toStdString() );
+      }
     }
   }
 
@@ -415,8 +426,9 @@ void PlotController::plotDataSet(int index)
       auto value = boost::make_shared<DatasetPlotData>( wsName, wsIndex, outputWorkspaceName );
       m_plotData.insert(index, value );
     }
-    catch(...)
+    catch(std::exception& e)
     {
+      QMessageBox::critical(owner(),"MantidPlot - Error",e.what());
       clear();
       owner()->checkDataSets();
       m_plot->replot();
@@ -561,6 +573,7 @@ MultiDatasetFit::MultiDatasetFit(QWidget *parent)
 
 MultiDatasetFit::~MultiDatasetFit()
 {
+  saveSettings();
   m_plotController->clear();
 }
 
@@ -595,19 +608,29 @@ void MultiDatasetFit::initLayout()
                                         m_uiForm.btnNext);
   connect(m_plotController,SIGNAL(currentIndexChanged(int)),this,SLOT(updateLocalParameters(int)));
 
+  QSplitter* splitter = new QSplitter(Qt::Vertical,this);
+
   m_functionBrowser = new MantidQt::MantidWidgets::FunctionBrowser(NULL, true);
-  m_uiForm.browserLayout->addWidget( m_functionBrowser );
+  splitter->addWidget( m_functionBrowser );
   connect(m_functionBrowser,SIGNAL(localParameterButtonClicked(const QString&)),this,SLOT(editLocalParameterValues(const QString&)));
   connect(m_functionBrowser,SIGNAL(functionStructureChanged()),this,SLOT(reset()));
+
+  m_fitOptionsBrowser = new MantidQt::MantidWidgets::FitOptionsBrowser(NULL);
+  splitter->addWidget( m_fitOptionsBrowser );
+
+  m_uiForm.browserLayout->addWidget( splitter );
 
   createPlotToolbar();
 
   // filters
   m_functionBrowser->installEventFilter( this );
+  m_fitOptionsBrowser->installEventFilter( this );
   m_uiForm.plot->installEventFilter( this );
   m_uiForm.dataTable->installEventFilter( this );
 
   showInfo( "Add some data, define fitting function" );
+
+  loadSettings();
 }
 
 void MultiDatasetFit::createPlotToolbar()
@@ -839,10 +862,6 @@ void MultiDatasetFit::fit()
     fit->setPropertyValue("InputWorkspace", getWorkspaceName(0));
     fit->setProperty("WorkspaceIndex", getWorkspaceIndex(0));
 
-    m_outputWorkspaceName = "out";
-    fit->setPropertyValue("Output",m_outputWorkspaceName);
-    m_outputWorkspaceName += "_Workspace";
-
     int n = getNumberOfSpectra();
     for(int ispec = 1; ispec < n; ++ispec)
     {
@@ -850,6 +869,17 @@ void MultiDatasetFit::fit()
       fit->setPropertyValue( "InputWorkspace_" + suffix, getWorkspaceName(ispec) );
       fit->setProperty( "WorkspaceIndex_" + suffix, getWorkspaceIndex(ispec) );
     }
+
+    m_fitOptionsBrowser->copyPropertiesToAlgorithm(*fit);
+
+    m_outputWorkspaceName = m_fitOptionsBrowser->getProperty("Output").toStdString();
+    if ( m_outputWorkspaceName.empty() )
+    {
+      m_outputWorkspaceName = "out";
+      fit->setPropertyValue("Output",m_outputWorkspaceName);
+      m_fitOptionsBrowser->setProperty("Output","out");
+    }
+    m_outputWorkspaceName += "_Workspace";
 
     m_fitRunner.reset( new API::AlgorithmRunner() );
     connect( m_fitRunner.get(),SIGNAL(algorithmComplete(bool)), this, SLOT(finishFit(bool)), Qt::QueuedConnection );
@@ -945,12 +975,19 @@ void MultiDatasetFit::reset()
   m_localParameterValues.clear();
 }
 
-void MultiDatasetFit::finishFit(bool)
+/**
+ * Slot called on completion of the Fit algorithm.
+ * @param error :: Set to true if Fit finishes with an error.
+ */
+void MultiDatasetFit::finishFit(bool error)
 {
-  m_plotController->clear();
-  m_plotController->update();
-  Mantid::API::IFunction_sptr fun = m_fitRunner->getAlgorithm()->getProperty("Function");
-  updateParameters( *fun );
+  if ( !error )
+  {
+    m_plotController->clear();
+    m_plotController->update();
+    Mantid::API::IFunction_sptr fun = m_fitRunner->getAlgorithm()->getProperty("Function");
+    updateParameters( *fun );
+  }
 }
 
 /**
@@ -1018,6 +1055,10 @@ bool MultiDatasetFit::eventFilter(QObject *widget, QEvent *evn)
     {
       showFunctionBrowserInfo();
     }
+    else if ( qobject_cast<QObject*>( m_fitOptionsBrowser ) == widget )
+    {
+      showFitOptionsBrowserInfo();
+    }
     else if ( qobject_cast<QObject*>( m_uiForm.plot ) == widget )
     {
       showPlotInfo();
@@ -1047,6 +1088,14 @@ void MultiDatasetFit::showFunctionBrowserInfo()
   {
     showInfo( "Use context menu to add a function." );
   }
+}
+
+/**
+ * Show info about the Fit options browser.
+ */
+void MultiDatasetFit::showFitOptionsBrowserInfo()
+{
+  showInfo( "Set Fit properties." );
 }
 
 /**
@@ -1118,6 +1167,21 @@ void MultiDatasetFit::removeDataSets( std::vector<int>& rows )
   }
   emit dataTableUpdated();
 }
+
+void MultiDatasetFit::loadSettings()
+{
+  QSettings settings;
+  settings.beginGroup("Mantid/MultiDatasetFit");
+  m_fitOptionsBrowser->loadSettings( settings );
+}
+
+void MultiDatasetFit::saveSettings() const
+{
+  QSettings settings;
+  settings.beginGroup("Mantid/MultiDatasetFit");
+  m_fitOptionsBrowser->saveSettings( settings );
+}
+
 
 /*==========================================================================================*/
 } // CustomInterfaces

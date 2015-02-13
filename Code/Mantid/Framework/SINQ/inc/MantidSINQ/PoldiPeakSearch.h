@@ -68,10 +68,6 @@ protected:
   std::list<MantidVec::const_iterator>
   findPeaksRecursive(MantidVec::const_iterator begin,
                      MantidVec::const_iterator end) const;
-  MantidVec::const_iterator
-  getLeftRangeBegin(MantidVec::const_iterator begin) const;
-  MantidVec::const_iterator
-  getRightRangeEnd(MantidVec::const_iterator end) const;
 
   std::list<MantidVec::const_iterator> mapPeakPositionsToCorrelationData(
       std::list<MantidVec::const_iterator> peakPositions,
@@ -112,9 +108,6 @@ protected:
   void setMinimumPeakHeight(double newMinimumPeakHeight);
   void setMaximumPeakNumber(int newMaximumPeakNumber);
 
-  void setRecursionAbsoluteBorders(MantidVec::const_iterator begin,
-                                   MantidVec::const_iterator end);
-
   static bool vectorElementGreaterThan(MantidVec::const_iterator first,
                                        MantidVec::const_iterator second);
   bool isLessThanMinimum(PoldiPeak_sptr peak);
@@ -123,10 +116,6 @@ protected:
   int m_doubleMinimumDistance;
   double m_minimumPeakHeight;
   int m_maximumPeakNumber;
-
-  MantidVec::const_iterator m_recursionAbsoluteBegin;
-  MantidVec::const_iterator m_recursionAbsoluteEnd;
-  bool m_recursionBordersInitialized;
 
   PoldiPeakCollection_sptr m_peaks;
 

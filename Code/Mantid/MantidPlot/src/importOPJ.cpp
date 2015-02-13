@@ -28,6 +28,8 @@
  ***************************************************************************/
 #include "importOPJ.h"
 
+#include <cmath>
+
 #include <QRegExp>
 #include <QMessageBox>
 #include <QDockWidget>
@@ -538,7 +540,6 @@ bool ImportOPJ::importNotes(const OPJFile& opj)
 
 bool ImportOPJ::importGraphs(const OPJFile& opj)
 {
-	double pi=3.141592653589793;
 	int visible_count=0;
 	int tickTypeMap[]={0,3,1,2};
 	for (int g=0; g<opj.numGraphs(); ++g)
@@ -706,8 +707,8 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 					{
 						type=2;
 						formulas << opj.functionFormula(s) << "x";
-						start = pi/180*opj.functionBegin(s) ;
-						end = pi/180*opj.functionEnd(s);
+						start = M_PI/180*opj.functionBegin(s) ;
+						end = M_PI/180*opj.functionEnd(s);
 					}
 					else
 					{

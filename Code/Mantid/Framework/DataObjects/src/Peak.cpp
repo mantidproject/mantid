@@ -1,4 +1,5 @@
 #include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/NoShape.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/Strings.h"
@@ -20,7 +21,7 @@ Peak::Peak()
     : m_H(0), m_K(0), m_L(0), m_Intensity(0), m_SigmaIntensity(0),
       m_BinCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_RunNumber(0), m_MonitorCount(0),
-      orig_H(0), orig_K(0), orig_L(0) {}
+      orig_H(0), orig_K(0), orig_L(0), m_peakShape(new NoShape) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor that uses the Q position of the peak (in the lab frame).
@@ -36,7 +37,7 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst,
     : m_H(0), m_K(0), m_L(0), m_Intensity(0), m_SigmaIntensity(0),
       m_BinCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_RunNumber(0), m_MonitorCount(0),
-      orig_H(0), orig_K(0), orig_L(0) {
+      orig_H(0), orig_K(0), orig_L(0), m_peakShape(new NoShape) {
   this->setInstrument(m_inst);
   this->setQLabFrame(QLabFrame, detectorDistance);
 }
@@ -59,7 +60,7 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst,
     : m_H(0), m_K(0), m_L(0), m_Intensity(0), m_SigmaIntensity(0),
       m_BinCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_RunNumber(0), m_MonitorCount(0),
-      orig_H(0), orig_K(0), orig_L(0) {
+      orig_H(0), orig_K(0), orig_L(0), m_peakShape(new NoShape) {
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");
@@ -80,7 +81,7 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID,
     : m_H(0), m_K(0), m_L(0), m_Intensity(0), m_SigmaIntensity(0),
       m_BinCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_RunNumber(0), m_MonitorCount(0),
-      orig_H(0), orig_K(0), orig_L(0) {
+      orig_H(0), orig_K(0), orig_L(0), m_peakShape(new NoShape) {
   this->setInstrument(m_inst);
   this->setDetectorID(m_DetectorID);
   this->setWavelength(m_Wavelength);
@@ -100,7 +101,7 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID,
     : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_Intensity(0),
       m_SigmaIntensity(0), m_BinCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_RunNumber(0), m_MonitorCount(0),
-      orig_H(0), orig_K(0), orig_L(0) {
+      orig_H(0), orig_K(0), orig_L(0), m_peakShape(new NoShape) {
   this->setInstrument(m_inst);
   this->setDetectorID(m_DetectorID);
   this->setWavelength(m_Wavelength);
@@ -122,7 +123,7 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID,
     : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_Intensity(0),
       m_SigmaIntensity(0), m_BinCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_RunNumber(0), m_MonitorCount(0),
-      orig_H(0), orig_K(0), orig_L(0) {
+      orig_H(0), orig_K(0), orig_L(0), m_peakShape(new NoShape) {
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");
@@ -143,11 +144,34 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, double scattering,
     : m_H(0), m_K(0), m_L(0), m_Intensity(0), m_SigmaIntensity(0),
       m_BinCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_RunNumber(0), m_MonitorCount(0),
-      orig_H(0), orig_K(0), orig_L(0) {
+      orig_H(0), orig_K(0), orig_L(0), m_peakShape(new NoShape) {
   this->setInstrument(m_inst);
   this->setWavelength(m_Wavelength);
   m_DetectorID = -1;
   detPos = V3D(sin(scattering), 0.0, cos(scattering));
+}
+
+/**
+ * @brief Copy constructor
+ * @param other : Source
+ * @return
+ */
+Peak::Peak(const Peak &other)
+    : m_inst(other.m_inst), m_det(other.m_det), m_BankName(other.m_BankName),
+      m_DetectorID(other.m_DetectorID), m_H(other.m_H), m_K(other.m_K),
+      m_L(other.m_L), m_Intensity(other.m_Intensity),
+      m_SigmaIntensity(other.m_SigmaIntensity), m_BinCount(other.m_BinCount),
+      m_InitialEnergy(other.m_InitialEnergy),
+      m_FinalEnergy(other.m_FinalEnergy),
+      m_GoniometerMatrix(other.m_GoniometerMatrix),
+      m_InverseGoniometerMatrix(other.m_InverseGoniometerMatrix),
+      m_RunNumber(other.m_RunNumber), m_MonitorCount(other.m_MonitorCount),
+      m_Row(other.m_Row), m_Col(other.m_Col), sourcePos(other.sourcePos),
+      samplePos(other.samplePos), detPos(other.detPos), orig_H(other.orig_H),
+      orig_K(other.orig_K), orig_L(other.orig_L), m_detIDs(other.m_detIDs),
+      m_peakShape(other.m_peakShape->clone())
+
+{
 }
 
 //----------------------------------------------------------------------------------------------
@@ -166,7 +190,9 @@ Peak::Peak(const API::IPeak &ipeak)
       m_GoniometerMatrix(ipeak.getGoniometerMatrix()),
       m_InverseGoniometerMatrix(ipeak.getGoniometerMatrix()),
       m_RunNumber(ipeak.getRunNumber()),
-      m_MonitorCount(ipeak.getMonitorCount()) {
+      m_MonitorCount(ipeak.getMonitorCount()),
+      m_peakShape(new NoShape)
+{
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");
@@ -793,6 +819,61 @@ double Peak::getValueByColName(const std::string &name_in) const {
     throw std::runtime_error(
         "Peak::getValueByColName() unknown column or column is not a number: " +
         name);
+}
+
+/**
+ * @brief Get the peak shape
+ * @return : const ref to current peak shape.
+ */
+const PeakShape &Peak::getPeakShape() { return *this->m_peakShape; }
+
+/**
+ * @brief Set the peak shape
+ * @param shape : Desired shape
+ */
+void Peak::setPeakShape(Mantid::Geometry::PeakShape *shape) { this->m_peakShape = PeakShape_const_sptr(shape); }
+
+/**
+ * @brief Set the peak shape
+ * @param shape : Desired shape
+ */
+void Peak::setPeakShape(Mantid::Geometry::PeakShape_const_sptr shape) { this->m_peakShape = shape; }
+
+/**
+ * @brief Assignement operator overload
+ * @param other : Other peak object to assign from
+ * @return this
+ */
+Peak &Peak::operator=(const Peak &other) {
+  if(&other != this){
+  m_inst = other.m_inst;
+  m_det = other.m_det;
+  m_BankName = other.m_BankName;
+  m_DetectorID = other.m_DetectorID;
+  m_H = other.m_H;
+  m_K = other.m_K;
+  m_L = other.m_L;
+  m_Intensity = other.m_Intensity;
+  m_SigmaIntensity = other.m_SigmaIntensity;
+  m_BinCount = other.m_BinCount;
+  m_InitialEnergy = other.m_InitialEnergy;
+  m_FinalEnergy = other.m_FinalEnergy;
+  m_GoniometerMatrix = other.m_GoniometerMatrix;
+  m_InverseGoniometerMatrix = other.m_InverseGoniometerMatrix;
+  m_RunNumber = other.m_RunNumber;
+  m_MonitorCount = other.m_MonitorCount;
+  m_Row = other.m_Row;
+  m_Col = other.m_Col;
+  sourcePos = other.sourcePos;
+  samplePos = other.samplePos;
+  detPos = other.detPos;
+  orig_H = other.orig_H;
+  orig_K = other.orig_K;
+  orig_L = other.orig_L;
+  m_detIDs = other.m_detIDs;
+  m_peakShape.reset(other.m_peakShape->clone());
+  }
+  return *this;
 }
 
 /**
