@@ -1,12 +1,14 @@
 #include "MantidRemoteAlgorithms/SCARFTomoReconstruction.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MaskedProperty.h"
 #include "MantidKernel/RemoteJobManager.h"
-#include "MantidRemoteAlgorithms/SimpleJSON.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 #include <fstream>
 
@@ -35,84 +37,132 @@ SCARFTomoReconstruction::SCARFTomoReconstruction():
 { }
 
 void SCARFTomoReconstruction::init() {
-  auto requireValue = boost::make_shared<MandatoryValidator<std::string>>();
-
   // list of all actions
   std::vector<std::string> actions;
   actions.push_back("LogIn");
   actions.push_back("LogOut");
+  actions.push_back("Ping");
+  actions.push_back("Upload");
   actions.push_back("SubmitJob");
   actions.push_back("JobStatus");
   actions.push_back("JobStatusByID");
-  actions.push_back("Ping");
-  actions.push_back("CancelJob");
-  actions.push_back("Upload");
   actions.push_back("Download");
+  actions.push_back("CancelJob");
   auto listValue = boost::make_shared<StringListValidator>(actions);
 
-  std::vector<std::string> exts;
-  exts.push_back(".nxs");
-  exts.push_back(".*");
-
-  // User
-  declareProperty("UserName", "", requireValue,
+  // Username always visible, it doesn't hurt and it is required to know the
+  // web service base URL for most LSF commands
+  auto requireStrValue = boost::make_shared<MandatoryValidator<std::string>>();
+  declareProperty("UserName", "", requireStrValue,
                   "Name of the user to authenticate as", Direction::Input);
 
-  // Password
-  declareProperty(new MaskedProperty<std::string>("Password", "", requireValue,
-                                                  Direction::Input),
-                  "The password for the user");
-
-  // Operation to perform : Update description as enum changes
-  declareProperty("Action", "", listValue, "Choose the operation to perform "
-                                              "on SCARF; "
-                                              "[CreateJob,JobStatus,JobCancel]",
+  // Action to perform
+  declareProperty("Action", "Login", listValue, "Choose the operation to perform "
+                  "on the compute resource " + m_SCARFComputeResource,
                   Direction::Input);
 
-  // Runnable file when submitting a job
+  // - Action: login
+  declareProperty(new MaskedProperty<std::string>("Password", "",
+                                                  Direction::Input),
+                  "The password for the user");
+  setPropertySettings("Password",
+                      new VisibleWhenProperty("Action", IS_EQUAL_TO, "LogIn"));
+
+  // - Action: submit
   declareProperty(new PropertyWithValue<std::string>("RunnablePath",
                       "/work/imat/webservice_test/tomopy/imat_recon_FBP.py",
                       Direction::Input),
-                  "The path on SCARF of a file to run (example: shell or python "
-                  "script)");
+                  "The path (on the remote compute resource) of a file to run "
+                  "(example: shell or python script)");
+  setPropertySettings("RunnablePath",
+                      new VisibleWhenProperty("Action", IS_EQUAL_TO, "SubmitJob"));
 
-  // Path to parameter file for reconstruction
   declareProperty(new PropertyWithValue<std::string>("JobOptions",
                       "/work/imat/webservice_test/remote_output/test_",
                       Direction::Input),
                   "Options for the job command line, application dependent. It "
                   "can inclue for example the NXTomo input file when using savu "
                   "for tomographic reconstruction.");
+  setPropertySettings("JobOptions",
+                      new VisibleWhenProperty("Action", IS_EQUAL_TO, "SubmitJob"));
 
-  // Path for upload file (on the server/compute resource)
+  // - Action: upload file
+  declareProperty(new API::FileProperty("FileToUpload", "",
+                                        API::FileProperty::Load, "",
+                                        Direction::Input),
+                  "Name of the file (local, full path) to upload to the compute "
+                  "resource/server ");
+  setPropertySettings("FileToUpload",
+                      new VisibleWhenProperty("Action", IS_EQUAL_TO, "Upload"));
+
   declareProperty(new PropertyWithValue<std::string>("DestinationDirectory",
                                                      "/work/imat",
                                                      Direction::Input),
                   "Path where to upload the file on the compute resource/server");
+  setPropertySettings("DestinationDirectory",
+                      new VisibleWhenProperty("Action", IS_EQUAL_TO, "Upload"));
 
-  // Local (full path) file name to upload
-  declareProperty(new API::FileProperty("FileToUpload", "",
-                                        API::FileProperty::Load, "",
-                                        Direction::Input),
-                  "Name of the file (full path) to upload to the compute "
-                  "resource/server ");
+  // - Action: query status (of implicitly all jobs)
+  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
+                  "JobsStatusWorkspace", m_SCARFComputeResource + "_StatusOfJobs",
+                  Direction::Output, API::PropertyMode::Optional),
+                  "The name of the table workspace where to output the status "
+                  "information about all the jobs for which there is information "
+                  "available, which normally includes running jobs and jobs that "
+                  "finished recently.");
 
-  // Job ID on SCARF
+  setPropertySettings("JobsStatusWorkspace",
+                      new VisibleWhenProperty("Action", IS_EQUAL_TO,
+                                              "JobStatus"));
+
+  // - Action: query status by ID
   declareProperty(
-      new PropertyWithValue<std::string>("JobID", "", Direction::Input),
-      "The ID for a currently running job on SCARF");
+      new PropertyWithValue<int>("JobID", 0, Direction::Input),
+      "The ID of a job currently running or recently run on the compute resource");
+  setPropertySettings("JobID",
+                      new VisibleWhenProperty("Action", IS_EQUAL_TO,
+                                              "JobStatusByID"));
 
-  // Name of a file from a job running on the compute resource, to download
+  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
+                  "JobStatusWorkspace", m_SCARFComputeResource + "_StatusOfJob",
+                  Direction::Output, API::PropertyMode::Optional),
+                  "The name of the table workspace where to output the status "
+                  "information about the job.");
+
+  setPropertySettings("JobStatusWorkspace",
+                      new VisibleWhenProperty("Action", IS_EQUAL_TO,
+                                              "JobStatusByID"));
+
+  // - Action: download file
   declareProperty(new PropertyWithValue<std::string>("RemoteJobFilename", "",
                                                      Direction::Input),
-                  "Name of the job file to download");
+                  "Name of the job file to download. Give an empty name "
+                  "to download  all the files of this job.");
+  setPropertySettings("RemoteJobFilename",
+                      new VisibleWhenProperty("Action", IS_EQUAL_TO, "Download"));
 
-  // Local path where to download files
   declareProperty(new API::FileProperty("LocalDirectory", "",
                                         API::FileProperty::Directory, "",
                                         Direction::Input),
-                  "Local path where to download files from the compute "
-                  "resource/server");
+                  "Path to a local directory/folder where to download files from "
+                  "the compute resource/server");
+  setPropertySettings("LocalDirectory",
+                      new VisibleWhenProperty("Action", IS_EQUAL_TO, "Download"));
+
+  declareProperty(new PropertyWithValue<int>("DownloadJobID", 0,
+                                             Direction::Input),
+                  "ID of the job for which to download files. A job with this ID "
+                  "must be running or have been run on the compute resource.");
+  setPropertySettings("DownloadJobID",
+                      new VisibleWhenProperty("Action", IS_EQUAL_TO, "Download"));
+
+  // - Action: cancel job by ID
+  declareProperty(
+      new PropertyWithValue<int>("CancelJobID", 0, Direction::Input),
+      "The ID for a currently running job on SCARF");
+  setPropertySettings("CancelJobID",
+                      new VisibleWhenProperty("Action", IS_EQUAL_TO,
+                                              "CancelJob"));
 }
 
 // gets action code in m_action, if input argument is valid
@@ -184,6 +234,13 @@ void SCARFTomoReconstruction::exec() {
         m_SCARFComputeResource << "." << std::endl;
       throw;
     }
+    if (password.empty()) {
+      throw std::runtime_error("You have given an empty password but the "
+                               "current login mechanism on " +
+                               m_SCARFComputeResource + " does not support "
+                               "this. This may change in the future. For the "
+                               "time being you need to provide a password.");
+    }
     doLogin(username, password);
   } else if (Action::LOGOUT == m_action) {
     doLogout(username);
@@ -205,7 +262,7 @@ void SCARFTomoReconstruction::exec() {
   } else if (Action::CANCEL == m_action) {
     std::string jobId;
     try {
-      jobId = getPropertyValue("JobID");
+      jobId = getPropertyValue("CancelJobID");
     } catch(std::runtime_error& /*e*/) {
       g_log.error() << "To cancel a job you need to give the ID of a job "
         "running on " << m_SCARFComputeResource << "." << std::endl;
@@ -232,7 +289,7 @@ void SCARFTomoReconstruction::exec() {
   } else if (Action::DOWNLOAD == m_action) {
     std::string jobId, fname, localDir;
     try {
-      jobId = getPropertyValue("JobID");
+      jobId = getPropertyValue("DownloadJobID");
     } catch(std::runtime_error& /*e*/) {
       g_log.error() << "To download a file you need to give the ID of a job "
         "running on " << m_SCARFComputeResource << "." << std::endl;
@@ -787,7 +844,7 @@ void SCARFTomoReconstruction::doDownload(const std::string &username,
   progress(0, "Downloading file: " + fname + " in " + localDir);
 
   if (fname.empty()) {
-    // no name implies we want all the files of a remote job
+    // no/empty name implies we want all the files of a remote job
     getAllJobFiles(jobId, localDir, it->second);
   } else {
     // name given, so we directly download this single file
