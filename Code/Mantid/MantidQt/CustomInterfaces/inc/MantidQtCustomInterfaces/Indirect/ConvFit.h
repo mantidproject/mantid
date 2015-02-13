@@ -6,8 +6,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/CompositeFunction.h"
 
-#include "boost/shared_ptr.hpp"
-
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -61,7 +59,7 @@ namespace IDA
     QtStringPropertyManager* m_stringManager;
     QtTreePropertyBrowser* m_cfTree;
     QMap<QtProperty*, QtProperty*> m_fixedProps;
-    boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_cfInputWS;
+    Mantid::API::MatrixWorkspace_sptr m_cfInputWS;
     QString m_cfInputWSName;
     bool m_confitResFileType;
 

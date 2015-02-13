@@ -50,20 +50,13 @@ namespace IDA
     m_cfTree->setFactoryForManager(m_blnManager, m_blnEdFac);
     m_cfTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
-    // Create Plot Widget
-    m_plots["ConvFitPlot"] = new QwtPlot(m_parentWidget);
-    m_plots["ConvFitPlot"]->setAxisFont(QwtPlot::xBottom, m_parentWidget->font());
-    m_plots["ConvFitPlot"]->setAxisFont(QwtPlot::yLeft, m_parentWidget->font());
-    m_plots["ConvFitPlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.plot->addWidget(m_plots["ConvFitPlot"]);
-
     // Create Range Selectors
-    m_rangeSelectors["ConvFitRange"] = new MantidQt::MantidWidgets::RangeSelector(m_plots["ConvFitPlot"]);
-    m_rangeSelectors["ConvFitBackRange"] = new MantidQt::MantidWidgets::RangeSelector(m_plots["ConvFitPlot"],
+    m_rangeSelectors["ConvFitRange"] = new MantidQt::MantidWidgets::RangeSelector(m_uiForm.ppPlot);
+    m_rangeSelectors["ConvFitBackRange"] = new MantidQt::MantidWidgets::RangeSelector(m_uiForm.ppPlot,
         MantidQt::MantidWidgets::RangeSelector::YSINGLE);
     m_rangeSelectors["ConvFitBackRange"]->setColour(Qt::darkGreen);
     m_rangeSelectors["ConvFitBackRange"]->setRange(0.0, 1.0);
-    m_rangeSelectors["ConvFitHWHM"] = new MantidQt::MantidWidgets::RangeSelector(m_plots["ConvFitPlot"]);
+    m_rangeSelectors["ConvFitHWHM"] = new MantidQt::MantidWidgets::RangeSelector(m_uiForm.ppPlot);
     m_rangeSelectors["ConvFitHWHM"]->setColour(Qt::red);
 
     // Populate Property Widget
@@ -248,7 +241,7 @@ namespace IDA
   void ConvFit::newDataLoaded(const QString wsName)
   {
     m_cfInputWSName = wsName;
-    m_cfInputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(m_cfInputWSName.toStdString());
+    m_cfInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_cfInputWSName.toStdString());
 
     int maxSpecIndex = static_cast<int>(m_cfInputWS->getNumberHistograms()) - 1;
 
@@ -688,10 +681,13 @@ namespace IDA
 
     int specNo = m_uiForm.spPlotSpectrum->text().toInt();
 
-    plotMiniPlot(m_cfInputWS, specNo, "ConvFitPlot", "CFDataCurve");
+    m_uiForm.ppPlot->clear();
+    m_uiForm.ppPlot->addSpectrum("Sample", m_cfInputWS, specNo);
+
     try
     {
-      const std::pair<double, double> range = getCurveRange("CFDataCurve");
+      const QPair<double, double> curveRange = m_uiForm.ppPlot->getCurveRange("Sample");
+      const std::pair<double, double> range(curveRange.first, curveRange.second);
       m_rangeSelectors["ConvFitRange"]->setRange(range.first, range.second);
       m_uiForm.ckPlotGuess->setChecked(plotGuess);
     }
@@ -707,18 +703,13 @@ namespace IDA
       m_dblManager->setValue(m_properties["Lorentzian 1.FWHM"], resolution);
       m_dblManager->setValue(m_properties["Lorentzian 2.FWHM"], resolution);
     }
-
-    // Remove the old fit curve
-    removeCurve("CFCalcCurve");
-    replot("ConvFitPlot");
   }
 
   void ConvFit::plotGuess(QtProperty*)
   {
-    if ( ! m_uiForm.ckPlotGuess->isChecked() || m_curves["CFDataCurve"] == NULL )
-    {
+    // Do nothing if there is no sample data curve
+    if(!m_uiForm.ppPlot->hasCurve("Sample"))
       return;
-    }
 
     bool tieCentres = (m_uiForm.cbFitType->currentIndex() > 1);
     CompositeFunction_sptr function = createFunction(tieCentres);
@@ -771,10 +762,8 @@ namespace IDA
     createWsAlg->execute();
     MatrixWorkspace_sptr guessWs = createWsAlg->getProperty("OutputWorkspace");
 
-    plotMiniPlot(guessWs, 0, "ConvFitPlot", "guess");
-    QPen p(Qt::green, Qt::SolidLine);
-    m_curves["guess"]->setPen(p);
-    replot("ConvFitPlot");
+    m_uiForm.ppPlot->removeSpectrum("Fit");
+    m_uiForm.ppPlot->addSpectrum("Guess", guessWs, 0, Qt::green);
   }
 
   void ConvFit::singleFit()
@@ -783,12 +772,6 @@ namespace IDA
       return;
 
     plotInput();
-
-    if ( m_curves["CFDataCurve"] == NULL )
-    {
-      showMessageBox("There was an error reading the data file.");
-      return;
-    }
 
     m_uiForm.ckPlotGuess->setChecked(false);
 
@@ -827,10 +810,8 @@ namespace IDA
     }
 
     // Plot the line on the mini plot
-    plotMiniPlot(outputNm+"_Workspace", 1, "ConvFitPlot", "CFCalcCurve");
-    QPen fitPen(Qt::red, Qt::SolidLine);
-    m_curves["CFCalcCurve"]->setPen(fitPen);
-    replot("ConvFitPlot");
+    m_uiForm.ppPlot->removeSpectrum("Guess");
+    m_uiForm.ppPlot->addSpectrum("Fit", outputNm+"_Workspace", 1, Qt::red);
 
     IFunction_sptr outputFunc = alg->getProperty("Function");
 

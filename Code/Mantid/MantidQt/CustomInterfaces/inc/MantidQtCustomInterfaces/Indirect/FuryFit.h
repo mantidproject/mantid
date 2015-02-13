@@ -6,8 +6,6 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "boost/shared_ptr.hpp"
-
 namespace Mantid
 {
   namespace API
@@ -66,8 +64,8 @@ namespace IDA
     QtTreePropertyBrowser* m_ffTree; ///< FuryFit Property Browser
     QtDoublePropertyManager* m_ffRangeManager; ///< StartX and EndX for FuryFit
     QMap<QtProperty*, QtProperty*> m_fixedProps;
-    boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_ffInputWS;
-    boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_ffOutputWS;
+    Mantid::API::MatrixWorkspace_sptr m_ffInputWS;
+    Mantid::API::MatrixWorkspace_sptr m_ffOutputWS;
     QString m_ffInputWSName;
     QString m_ties;
 

@@ -314,6 +314,18 @@ void PreviewPlot::removeSpectrum(const QString & curveName)
 
 
 /**
+ * Checks to see if a given curne name is present on the plot.
+ *
+ * @param curveName Curve name
+ * @return True if curve is on plot
+ */
+bool PreviewPlot::hasCurve(const QString & curveName)
+{
+  return m_curves.contains(curveName);
+}
+
+
+/**
  * Shows or hides the plot legend.
  *
  * @param show If the legend should be shown
