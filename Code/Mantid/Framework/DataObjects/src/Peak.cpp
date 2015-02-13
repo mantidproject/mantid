@@ -30,11 +30,11 @@ Peak::Peak()
  *
  * @param m_inst :: Shared pointer to the instrument for this peak detection
  * @param QLabFrame :: Q of the center of the peak, in reciprocal space
- * @param detectorDistance :: distance between the sample and the detector.
+ * @param detectorDistance :: Optional distance between the sample and the detector. Calculated if not explicitly provided.
  *        Used to give a valid TOF. Default 1.0 meters.
  */
 Peak::Peak(Geometry::Instrument_const_sptr m_inst,
-           Mantid::Kernel::V3D QLabFrame, double detectorDistance)
+           Mantid::Kernel::V3D QLabFrame, boost::optional<double> detectorDistance)
     : m_H(0), m_K(0), m_L(0), m_Intensity(0), m_SigmaIntensity(0),
       m_BinCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_RunNumber(0), m_MonitorCount(0),
@@ -52,12 +52,12 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst,
  * @param QSampleFrame :: Q of the center of the peak, in reciprocal space, in
  *the sample frame (goniometer rotation accounted for).
  * @param goniometer :: a 3x3 rotation matrix
- * @param detectorDistance :: distance between the sample and the detector.
+ * @param detectorDistance :: Optional distance between the sample and the detector. Calculated if not explicitly provided.
  *        Used to give a valid TOF. Default 1.0 meters.
  */
 Peak::Peak(Geometry::Instrument_const_sptr m_inst,
            Mantid::Kernel::V3D QSampleFrame,
-           Mantid::Kernel::Matrix<double> goniometer, double detectorDistance)
+           Mantid::Kernel::Matrix<double> goniometer, boost::optional<double> detectorDistance)
     : m_H(0), m_K(0), m_L(0), m_Intensity(0), m_SigmaIntensity(0),
       m_BinCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_RunNumber(0), m_MonitorCount(0),
@@ -464,10 +464,10 @@ Mantid::Kernel::V3D Peak::getQSampleFrame() const {
  *        This is in inelastic convention: momentum transfer of the LATTICE!
  *        Also, q does NOT have a 2pi factor = it is equal to 1/wavelength.
  * @param detectorDistance :: distance between the sample and the detector.
- *        Used to give a valid TOF. Default 1.0 meters.
+ *        Used to give a valid TOF. You do NOT need to explicitly set this.
  */
 void Peak::setQSampleFrame(Mantid::Kernel::V3D QSampleFrame,
-                           double detectorDistance) {
+                           boost::optional<double> detectorDistance) {
   V3D Qlab = m_GoniometerMatrix * QSampleFrame;
   this->setQLabFrame(Qlab, detectorDistance);
 }

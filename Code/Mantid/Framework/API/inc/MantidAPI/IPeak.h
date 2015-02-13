@@ -51,7 +51,7 @@ public:
   virtual bool findDetector() = 0;
 
   virtual void setQSampleFrame(Mantid::Kernel::V3D QSampleFrame,
-                               double detectorDistance = 1.0) = 0;
+                               boost::optional<double> detectorDistance = boost::optional<double>()) = 0;
   virtual void setQLabFrame(Mantid::Kernel::V3D QLabFrame,
                             boost::optional<double> detectorDistance = boost::optional<double>()) = 0;
 

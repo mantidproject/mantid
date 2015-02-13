@@ -28,10 +28,10 @@ public:
 
   Peak();
   Peak(Geometry::Instrument_const_sptr m_inst, Mantid::Kernel::V3D QLabFrame,
-       double detectorDistance = 1.0);
+        boost::optional<double> detectorDistance = boost::optional<double>());
   Peak(Geometry::Instrument_const_sptr m_inst, Mantid::Kernel::V3D QSampleFrame,
        Mantid::Kernel::Matrix<double> goniometer,
-       double detectorDistance = 1.0);
+       boost::optional<double> detectorDistance = boost::optional<double>());
   Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID,
        double m_Wavelength);
   Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID,
@@ -86,7 +86,7 @@ public:
   Mantid::Kernel::V3D getDetectorPositionNoCheck() const;
 
   void setQSampleFrame(Mantid::Kernel::V3D QSampleFrame,
-                       double detectorDistance = 1.0);
+                       boost::optional<double> detectorDistance = boost::optional<double>());
   void setQLabFrame(Mantid::Kernel::V3D QLabFrame,
                     boost::optional<double> detectorDistance = boost::optional<double>());
 

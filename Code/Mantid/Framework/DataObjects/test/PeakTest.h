@@ -271,8 +271,9 @@ public:
   void test_setQLabFrame_ThrowsIfQIsNull()
   {
     Peak p1(inst, 10000, 2.0);
-    TS_ASSERT_THROWS_ANYTHING(Peak p2(inst, V3D(0,0,0), 1.0));
-    TS_ASSERT_THROWS_ANYTHING(Peak p2(inst, V3D(1,2,0), 1.0));
+    const boost::optional<double> distance = 1.0;
+    TS_ASSERT_THROWS_ANYTHING(Peak p2(inst, V3D(0,0,0), distance));
+    TS_ASSERT_THROWS_ANYTHING(Peak p2(inst, V3D(1,2,0), distance));
   }
 
 
@@ -301,7 +302,7 @@ public:
     V3D detPos1 = p1.getDetPos();
 
     // Construct using just Q
-    Peak p2(inst, Qlab1, detPos1.norm());
+    Peak p2(inst, Qlab1, boost::optional<double>(detPos1.norm()));
     comparePeaks(p1, p2);
     TS_ASSERT_EQUALS( p2.getBankName(), "None");
     TS_ASSERT_EQUALS( p2.getRow(), -1);
@@ -311,7 +312,6 @@ public:
 
   void test_setQLabFrame2()
   {
-
       // Create fictional instrument
       const V3D source(0,0,0);
       const V3D sample(15, 0, 0);
@@ -320,24 +320,12 @@ public:
       const V3D beam2 = detectorPos - sample;
       auto minimalInstrument = ComponentCreationHelper::createMinimalInstrument( source, sample, detectorPos );
 
-      // Calculate energy of neutron based on velocity
-      const double velocity = 1.1 * 10e3; // m/sec
-      double efixed = 0.5 * Mantid::PhysicalConstants::NeutronMass * velocity * velocity  ; // In Joules
-      efixed = efixed / Mantid::PhysicalConstants::meV;
-
       // Derive distances and angles
       const double l1 = beam1.norm();
       const double l2 = beam2.norm();
-      const double scatteringAngle2 = beam2.angle(beam1);
       const V3D qLabDir = (beam1/l1) - (beam2/l2);
 
-      // Derive the wavelength
-      std::vector<double> x;
       const double microSecsInSec = 1e6;
-      x.push_back( ( (l1 + l2) / velocity ) * microSecsInSec ); // Make a TOF
-      std::vector<double> y;
-      Unit_sptr unitOfLambda = UnitFactory::Instance().create("Wavelength");
-      unitOfLambda->fromTOF(x, y, l1, l2, scatteringAngle2, 0, efixed, 0);
 
       // Derive QLab for diffraction
       const double wavenumber_in_angstrom_times_tof_in_microsec =
@@ -389,7 +377,7 @@ public:
     V3D detPos1 = p1.getDetPos();
 
     // Construct using just Q
-    Peak p2(inst, Qlab1, detPos1.norm());
+    Peak p2(inst, Qlab1, boost::optional<double>(detPos1.norm()));
     TS_ASSERT( p2.findDetector() );
     comparePeaks(p1, p2);
     TS_ASSERT_EQUALS( p2.getBankName(), "bank1");
