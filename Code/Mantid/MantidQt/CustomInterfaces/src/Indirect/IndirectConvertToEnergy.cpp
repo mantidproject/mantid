@@ -223,6 +223,9 @@ namespace CustomInterfaces
   {
     std::map<QString, QString> instDetails = getInstrumentDetails();
 
+    // Set the search instrument for runs
+    m_uiForm.dsRunFiles->setInstrumentOverride(instDetails["instrument"]);
+
     if(instDetails["spectra-min"].isEmpty() || instDetails["spectra-max"].isEmpty())
     {
       emit showMessageBox("Could not gather necessary data from parameter file.");

@@ -17,6 +17,15 @@ namespace CustomInterfaces
   {
     m_uiForm.setupUi(parent);
 
+    connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(instrumentSet()));
+
+    // Preview plot
+    m_plots["PreviewPlot"] = new QwtPlot(m_parentWidget);
+    m_plots["PreviewPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
+    m_plots["PreviewPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
+    m_plots["PreviewPlot"]->setCanvasBackground(Qt::white);
+    m_uiForm.plotPreview->addWidget(m_plots["PreviewPlot"]);
+
     // Update the preview plot when the algorithm is complete
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(transAlgDone(bool)));
     connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(QString)), this, SLOT(dataLoaded()));
@@ -119,6 +128,15 @@ namespace CustomInterfaces
     m_uiForm.ppPlot->addSpectrum("Sample", QString::fromStdString(resultWsNames[1]), 0, Qt::black);
     m_uiForm.ppPlot->addSpectrum("Transmission", QString::fromStdString(resultWsNames[2]), 0, Qt::green);
     m_uiForm.ppPlot->resizeX();
+  }
+
+  void IndirectTransmission::instrumentSet()
+  {
+    std::map<QString, QString> instDetails = getInstrumentDetails();
+
+    // Set the search instrument for runs
+    m_uiForm.dsSampleInput->setInstrumentOverride(instDetails["instrument"]);
+    m_uiForm.dsCanInput->setInstrumentOverride(instDetails["instrument"]);
   }
 
 } // namespace CustomInterfaces
