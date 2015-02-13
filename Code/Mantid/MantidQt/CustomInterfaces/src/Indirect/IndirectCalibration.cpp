@@ -319,6 +319,9 @@ namespace CustomInterfaces
     // Get spectra, peak and background details
     std::map<QString, QString> instDetails = getInstrumentDetails();
 
+    // Set the search instrument for runs
+    m_uiForm.leRunNo->setInstrumentOverride(instDetails["instrument"]);
+
     // Set spectra range
     m_dblManager->setValue(m_properties["ResSpecMin"], instDetails["spectra-min"].toDouble());
     m_dblManager->setValue(m_properties["ResSpecMax"], instDetails["spectra-max"].toDouble());
