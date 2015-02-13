@@ -199,7 +199,7 @@ SCARFTomoReconstruction::Action::Type SCARFTomoReconstruction::getAction() {
  * specific methods.
  *
  * The implementation of the more specific methods is based on:
- * Mantid::Kernel::InternetHelper and Mantid::RemoteAlgorithms::SimpleJSON?
+ * Mantid::Kernel::InternetHelper.
  */
 void SCARFTomoReconstruction::exec() {
 
@@ -337,9 +337,9 @@ void SCARFTomoReconstruction::doLogin(const std::string &username,
   auto it = std::find(res.begin(), res.end(), m_SCARFComputeResource);
   if (res.end() == it)
     throw std::runtime_error(std::string("Failed to find a compute resource "
-                               "for " +  m_SCARFComputeResource + " (facility: " +
-                               ConfigService::Instance().getFacility().name() +
-                               ")."));
+                               "for " +  m_SCARFComputeResource + " (facility: "
+                               + ConfigService::Instance().getFacility().name()
+                               + ")."));
 
   InternetHelper session;
   std::string httpsURL = SCARFLoginBaseURL + SCARFLoginPath + "?username=" +

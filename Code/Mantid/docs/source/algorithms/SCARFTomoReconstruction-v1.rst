@@ -9,11 +9,12 @@
 Description
 -----------
 
-Algorithm to control tomographic reconstruction jobs running on the
-SCARF computer cluster at RAL, STFC (see http://www.scarf.rl.ac.uk/
-for more information). This algorithm can be used to log in and out
-from the cluster, and to initiate, query the status of, or cancel a
-job.
+Algorithm to control jobs running on the SCARF computer cluster at
+RAL, STFC (see http://www.scarf.rl.ac.uk/ for more information). This
+algorithm can be used to log in and out from the cluster, and to
+initiate, query the status of, or cancel a job. It has been introduced
+to control tomographic reconstruction jobs but in principle it can be
+used for any other task.
 
 In a typical use case or session you would use the algorithm a first
 time to login (for which you need to select the 'LogIn' action and set
@@ -22,10 +23,10 @@ algorithm again several times, to submit jobs (setting the action
 'SubmitJob'), query the status of the jobs running on the computer
 cluster (setting the action to 'JobStatus' or 'JobStatusByID'), cancel
 jobs (setting the action 'CancelJob') and log out from the cluster
-(action 'LogOut'). After logging out, subsequent submit or status
-queries will fail with an informative message. Note that the server
-will log out users every undetermined amount of time, which depends on
-server settings.
+(action 'LogOut'). You can also upload and download files. After
+logging out, subsequent submit or status queries will fail with an
+informative message. Note that the server will log out users every
+undetermined amount of time, which depends on server settings.
 
 In principle, in a simple use case, the same username will be used in
 all the calls to this algorithm. This means that you type in the
