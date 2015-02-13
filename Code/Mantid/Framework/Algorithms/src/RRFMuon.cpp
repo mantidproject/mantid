@@ -52,7 +52,7 @@ void RRFMuon::exec()
   // Get frequency
   double freq = getProperty("Frequency");
   // Get units
-  std::string units = getProperty("Frequency units");
+  std::string units = getProperty("FrequencyUnits");
   // Convert frequency to input workspace X units
   double factor = unitConversionFactor(inputWs->getAxis(0)->unit()->label().ascii(),units);
   // Get phase
