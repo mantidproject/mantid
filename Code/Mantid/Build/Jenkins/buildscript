@@ -9,6 +9,7 @@
 # BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each
 # slave.
 ###############################################################################
+SCRIPT_DIR=$(dirname $(readlink -f "$0"))
 
 ###############################################################################
 # Print out the versions of things we are using
@@ -203,10 +204,5 @@ fi
 # from a package to have at least one Linux checks it install okay
 ###############################################################################
 if [[ "${ON_RHEL6}" == true ]] && [[ ${JOB_NAME} == *pull_requests* ]]; then
-  PKGDIR=${WORKSPACE}/build
-  # Turn off usage reports and instrument downloading for the mantid call
-  # that creates the properties file
-  echo "UpdateInstrumentDefinitions.OnStartup = 0" > $userprops
-  echo "usagereports.enabled = 0" >> $userprops
-  python $WORKSPACE/Code/Mantid/Testing/SystemTests/scripts/InstallerTesting.py -o -d $PKGDIR
+  $SCRIPT_DIR/systemtests
 fi
