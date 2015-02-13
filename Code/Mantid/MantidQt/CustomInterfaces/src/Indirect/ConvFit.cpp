@@ -105,8 +105,12 @@ namespace IDA
     connect(m_rangeSelectors["ConvFitHWHM"], SIGNAL(maxValueChanged(double)), this, SLOT(hwhmChanged(double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
     connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(checkBoxUpdate(QtProperty*, bool)));
-    connect(m_dblManager, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(plotGuess(QtProperty*)));
     connect(m_uiForm.ckTempCorrection, SIGNAL(toggled(bool)), m_uiForm.leTempCorrection, SLOT(setEnabled(bool)));
+
+    // Update guess curve when certain things happen
+    connect(m_dblManager, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(plotGuess()));
+    connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(plotGuess()));
+    connect(m_uiForm.ckPlotGuess, SIGNAL(stateChanged(int)), this, SLOT(plotGuess()));
 
     // Have FWHM Range linked to Fit Start/End Range
     connect(m_rangeSelectors["ConvFitRange"], SIGNAL(rangeChanged(double, double)), m_rangeSelectors["ConvFitHWHM"], SLOT(setRange(double, double)));
@@ -705,10 +709,13 @@ namespace IDA
     }
   }
 
-  void ConvFit::plotGuess(QtProperty*)
+  void ConvFit::plotGuess()
   {
-    // Do nothing if there is no sample data curve
-    if(!m_uiForm.ppPlot->hasCurve("Sample"))
+    m_uiForm.ppPlot->removeSpectrum("Guess");
+
+    // Do nothing if there is not a sample and resolution
+    if(!(m_uiForm.dsSampleInput->isValid() && m_uiForm.dsResInput->isValid()
+          && m_uiForm.ckPlotGuess->isChecked()))
       return;
 
     bool tieCentres = (m_uiForm.cbFitType->currentIndex() > 1);
@@ -762,7 +769,6 @@ namespace IDA
     createWsAlg->execute();
     MatrixWorkspace_sptr guessWs = createWsAlg->getProperty("OutputWorkspace");
 
-    m_uiForm.ppPlot->removeSpectrum("Fit");
     m_uiForm.ppPlot->addSpectrum("Guess", guessWs, 0, Qt::green);
   }
 

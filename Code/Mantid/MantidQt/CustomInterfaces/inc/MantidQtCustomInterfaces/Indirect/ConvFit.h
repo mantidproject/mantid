@@ -30,7 +30,7 @@ namespace IDA
     void bgTypeSelection(int index);
     void newDataLoaded(const QString wsName);
     void plotInput();
-    void plotGuess(QtProperty*);
+    void plotGuess();
     void singleFit();
     void specMinChanged(int value);
     void specMaxChanged(int value);

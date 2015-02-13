@@ -171,7 +171,7 @@ void PreviewPlot::setAxisRange(QPair<double, double> range, int axisID)
     throw std::runtime_error("Supplied range is invalid.");
 
   m_uiForm.plot->setAxisScale(axisID, range.first, range.second);
-  replot();
+  emit needToReplot();
 }
 
 
@@ -310,6 +310,8 @@ void PreviewPlot::removeSpectrum(const QString & curveName)
   // Remove the curve from the map
   if(it != m_curves.end())
     m_curves.erase(it);
+
+  emit needToReplot();
 }
 
 
@@ -449,7 +451,7 @@ void PreviewPlot::hardReplot()
     m_curves[*it].curve = addCurve(m_curves[*it].ws, m_curves[*it].wsIndex, m_curves[*it].colour);
   }
 
-  replot();
+  emit needToReplot();
 }
 
 
