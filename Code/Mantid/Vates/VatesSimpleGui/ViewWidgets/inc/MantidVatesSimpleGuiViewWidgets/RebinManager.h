@@ -8,7 +8,6 @@
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtMantidWidgets/SlicingAlgorithmDialog.h"
 
-#include <pqPipelineSource.h>
 #include <QWidget>
 
 
