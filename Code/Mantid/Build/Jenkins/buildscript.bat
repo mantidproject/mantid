@@ -11,19 +11,6 @@
 echo %sha1%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Check the required build configuration
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set BUILD_CONFIG=
-if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
-    set BUILD_CONFIG=Debug
-) else (
-if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
-    set BUILD_CONFIG=RelWithDbg
-) else (
-    set BUILD_CONFIG=Release
-    ))
-
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Get or update the third party dependencies
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 cd %WORKSPACE%\Code
@@ -43,22 +30,51 @@ if NOT DEFINED MANTID_DATA_STORE (
 )
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Check whether this is a clean build (must have 'clean' in the job name)
+:: Check job requirements from the name
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set PACKAGE_DOCS=
 if "%JOB_NAME%"=="%JOB_NAME:clean=%" (
-    set CLEANBUILD=no
-) else  (
-    set CLEANBUILD=yes
-    set PACKAGE_DOCS=-DPACKAGE_DOCS=True
-    rmdir /S /Q build
+  set CLEANBUILD=yes
+  set BUILDPKG=yes
+)
+if "%JOB_NAME%"=="%JOB_NAME:pull_requests=%" (
+  set BUILDPKG=yes
 )
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Create the build directory if it doesn't exist
+:: Packaging options
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+set PACKAGE_DOCS=
+if "%BUILDPKG%" EQU "yes" (
+  set PACKAGE_DOCS=-DPACKAGE_DOCS=ON
+)
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Setup the build directory
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+if "%CLEANBUILD%" EQU "yes" (
+  rmdir /S /Q %WORKSPACE%\build
+)
 md %WORKSPACE%\build
 cd %WORKSPACE%\build
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Clean up any artifacts from last build so that if it fails
+:: they don't get archived again.
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+del *.exe
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Check the required build configuration
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+set BUILD_CONFIG=
+if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
+  set BUILD_CONFIG=Debug
+) else (
+if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
+  set BUILD_CONFIG=RelWithDbg
+) else (
+    set BUILD_CONFIG=Release
+    ))
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration
@@ -75,17 +91,22 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Run the tests
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# Remove the user properties file just in case anything polluted it
+set USERPROPS=bin\%BUILD_CONFIG%\Mantid.user.properties
+del %USERPROPS%
 "C:\Program Files (x86)\CMake 2.8\bin\ctest.exe" -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Create the install kit if this is a clean build
+:: Create the install kit if required
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-if "%CLEANBUILD%" EQU "yes" (
-    :: Build offline documentation
-    msbuild /nologo /nr:false /p:Configuration=%BUILD_CONFIG% docs/docs-qthelp.vcxproj
+if "%BUILDPKG%" EQU "yes" (
+  :: Build offline documentation
+  msbuild /nologo /nr:false /p:Configuration=%BUILD_CONFIG% docs/docs-qthelp.vcxproj
 
-    :: ignore errors as the exit code of the build isn't correct
-    ::if ERRORLEVEL 1 exit /B %ERRORLEVEL%
-    cpack -C %BUILD_CONFIG% --config CPackConfig.cmake
+  :: Ignore errors as the exit code of msbuild is wrong here.
+  :: It always marks the build as a failure even thought the MantidPlot exit
+  :: code is correct!
+  ::if ERRORLEVEL 1 exit /B %ERRORLEVEL%
+  cpack -C %BUILD_CONFIG% --config CPackConfig.cmake
 )
