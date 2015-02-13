@@ -123,10 +123,13 @@ private:
 
   /// check if output file is writeable, overwritten, etc.
   const std::string checkDownloadOutputFile(const std::string &localPath,
-                                            const std::string &fname);
+                                            const std::string &fname) const;
 
   /// get a normal file name from a 'PAC Server*...' name
-  const std::string filterPACFilename(const std::string PACName);
+  const std::string filterPACFilename(const std::string PACName) const;
+
+  /// extremely simple parser for error messages from LSF PAC
+  std::string extractPACErrMsg(const std::string &response) const;
 
   // options passed to the algorithm
   Action::Type m_action;

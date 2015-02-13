@@ -136,7 +136,7 @@ void SCARFTomoReconstruction::init() {
   // - Action: download file
   declareProperty(new PropertyWithValue<std::string>("RemoteJobFilename", "",
                                                      Direction::Input),
-                  "Name of the job file to download. Give an empty name "
+                  "Name of the job file to download - you can give an empty name "
                   "to download  all the files of this job.");
   setPropertySettings("RemoteJobFilename",
                       new VisibleWhenProperty("Action", IS_EQUAL_TO, "Download"));
@@ -159,7 +159,7 @@ void SCARFTomoReconstruction::init() {
   // - Action: cancel job by ID
   declareProperty(
       new PropertyWithValue<int>("CancelJobID", 0, Direction::Input),
-      "The ID for a currently running job on SCARF");
+      "The ID for a currently running job on " + m_SCARFComputeResource);
   setPropertySettings("CancelJobID",
                       new VisibleWhenProperty("Action", IS_EQUAL_TO,
                                               "CancelJob"));
@@ -484,8 +484,9 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
   std::string resp = ss.str();
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     if (std::string::npos != resp.find("<errMsg>")) {
-      g_log.warning() << "Submitted job but got an error message from " <<
-        m_SCARFComputeResource << ": " << resp << std::endl;
+      g_log.warning() << "Submitted job but got a a response that seems to contain "
+        "an error message from " << m_SCARFComputeResource << ": " <<
+        extractPACErrMsg(resp) << std::endl;
     } else {
       g_log.notice() << "Submitted job with response: " << resp << std::endl;
     }
@@ -688,7 +689,7 @@ void SCARFTomoReconstruction::doCancel(const std::string &username,
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     if (std::string::npos != resp.find("<errMsg>")) {
       g_log.warning() << "Killed job with Id" << jobId << " but got what looks like an "
-        "error message as response: " << resp << std::endl;
+        "error message as response: " << extractPACErrMsg(resp) << std::endl;
     } else if (std::string::npos != resp.find("<actionMsg>")) {
       g_log.notice() << "Killed job with Id" << jobId << " with response: " <<
         resp << std::endl;
@@ -697,7 +698,7 @@ void SCARFTomoReconstruction::doCancel(const std::string &username,
         "that I do not recognize: " << resp << std::endl;
     }
   } else {
-    throw std::runtime_error("Failed to kill job (Id:" + jobId +" ) through the web "
+    throw std::runtime_error("Failed to kill job (Id: " + jobId +" ) through the web "
                              "service at:" + httpsURL + ". Please check your "
                              "existing jobs, username, and parameters.");
   }
@@ -995,7 +996,8 @@ std::string SCARFTomoReconstruction::buildSubmitBody(const std::string &appName,
  */
 const std::string
 SCARFTomoReconstruction::checkDownloadOutputFile(const std::string &localPath,
-                                                 const std::string &fname) {
+                                                 const std::string &fname)
+  const {
   std::string outName = localPath + "/" + fname;
   Poco::File f(outName);
   if (f.exists()) {
@@ -1025,7 +1027,7 @@ SCARFTomoReconstruction::checkDownloadOutputFile(const std::string &localPath,
  * string if fails.
  */
 const std::string
-SCARFTomoReconstruction::filterPACFilename(const std::string PACName) {
+SCARFTomoReconstruction::filterPACFilename(const std::string PACName) const {
   // discard up to last / (path)
   std::string name = PACName.substr(PACName.rfind("/") + 1);
   // remove trailing parameters
@@ -1149,6 +1151,34 @@ void SCARFTomoReconstruction::getAllJobFiles(const std::string &jobId,
 
   progress(1.0, "Download  of " + boost::lexical_cast<std::string>(filePACNames.size())
            + " file(s) completed in " + localDir);
+}
+
+/**
+ * Gets the error message from a more or less xml response body. Sometimes these error
+ * responses may read like this:
+ * <?xml version="1.0" encoding="UTF-8" standalone="yes"?><Job>
+ * <errMsg>Job &lt;417940&gt;: Job has already finished</errMsg><id>0</id></Job>
+ *
+ * @param response Body of an HHTP response that apparently contains some error message
+ *
+ * @return Part of the response that seems to contain the specific error message
+ */
+std::string SCARFTomoReconstruction::extractPACErrMsg(const std::string &response) const {
+  // discard up to last errMsg start tag
+  const std::string openTag = "<errMsg>";
+  std::string msg = response.substr(response.rfind(openTag) + openTag.size());
+  if (msg.empty())
+    return response;
+
+  // remove close tags
+  size_t tags = msg.rfind("</errMsg>");
+  msg.replace(tags, std::string::npos, "");
+
+  // avoid/translate common entities
+  boost::replace_all(msg, "&lt;", "<");
+  boost::replace_all(msg, "&gt;", ">");
+
+  return msg;
 }
 
 } // end namespace RemoteAlgorithms
