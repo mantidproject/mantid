@@ -42,6 +42,11 @@ distinguish quick tests, calibration of parameters, etc.). For this to
 work, you of course need to perform a 'LogIn' action for every
 username that is used in submit or query status actions.
 
+The 'JobStatus' and 'JobStatusByID' actions produce an output
+`TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ with
+status and general information about the jobs as retrieved from the
+compute resource/server.
+
 The algorithm relies on a web service provided by the SCARF computer
 cluster in order to control jobs on the cluster. If you use this
 algorithm from its dialog (for example starting it from the algorithm
