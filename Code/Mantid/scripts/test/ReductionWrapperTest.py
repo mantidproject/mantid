@@ -81,6 +81,7 @@ class ReductionWrapperTest(unittest.TestCase):
 
     def test_validate_settings(self):
         dsp = config.getDataSearchDirs()
+        # clear all not to find any files
         config.setDataSearchDirs('')
 
         red = mr.ReduceMARI()
