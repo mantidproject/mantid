@@ -108,6 +108,19 @@ class ReductionWrapper(object):
         f.write("\n}\n")
         f.close()
 
+    def validate_settings(self):
+        """ method validates initial parameters, provided for reduction """ 
+
+        self.def_advanced_properties()
+        self.def_main_properties()
+        if self._run_from_web:
+            web_vars = dict(self._wvs.standard_vars.items()+self._wvs.advanced_vars.items())
+            self.reducer.prop_man.set_input_parameters(**web_vars)
+        else:
+            pass # we should set already set up variables using 
+
+        # validate properties and report result
+        return self.reducer.prop_man.validate_properties(False)
 #
 #   
     def validate_result(self,build_validation=False,Error=1.e-3,ToleranceRelErr=True):
@@ -290,7 +303,7 @@ def iliad(reduce):
               except: # if mantid is not available, this should ignore config
                  pass
         if output_directory:
-           config['defaultsave.directory'] = output_directory
+           config['defaultsave.directory'] = str(output_directory)
 
         if host._run_from_web:
             web_vars = dict(host._wvs.standard_vars.items()+host._wvs.advanced_vars.items())

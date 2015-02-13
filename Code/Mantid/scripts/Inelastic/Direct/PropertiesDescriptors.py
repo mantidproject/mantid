@@ -984,7 +984,7 @@ class SaveFormat(PropDescriptor):
 
    def validate(self,instance, owner):
 
-       n_formats = len(self._set_format)
+       n_formats = len(self._save_format)
        if n_formats == 0:
           return (False,1,'No internal save format is defined. Results may be lost')
        else:

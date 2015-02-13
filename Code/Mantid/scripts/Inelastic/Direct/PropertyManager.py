@@ -548,7 +548,7 @@ class PropertyManager(NonIDF_Properties):
        except:
            return (False,'Can not write to default save directory {0}.\n Reduction results can be lost'.format(targ_dir))
     #
-    def validate_properties(self):
+    def validate_properties(self,fail_on_errors=True):
         """ Method validates if some properties values for 
             properties set up in the property manager are correct 
         """ 
@@ -556,21 +556,30 @@ class PropertyManager(NonIDF_Properties):
         if self.mono_correction_factor: # disable check for monovan_run, as it is not used if mono_correction provided
            PropertyManager.monovan_run._in_cash = True  # as soon as monovan_run is set up (mono correction disabled) 
         # this will be dropped
-
+        error_list={}
         error_level=0
+
         ok,fail_prop = self._check_file_properties()
         if not ok :
            for prop in fail_prop:
-               self.log("*** ERROR  : prop: {0} -->{1}".format(prop,fail_prop[prop]),'warning')
+               mess = "*** ERROR  : prop: {0} -->{1}".format(prop,fail_prop[prop])
+               if fail_on_errors:
+                 self.log(mess,'warning')
+               else:
+                 error_list[prop]=mess
            error_level=2
+
         ok,mess= self._check_ouptut_dir()
         if not ok:
-           self.log('*** WARNING: saving results --> {1}'.fornat(mess))
+           mess = '*** WARNING: saving results --> {1}'.format(mess)
+           if fail_on_errors:
+              self.log(mess,'warning')
+           else:
+               error_list['file_output']=mess
            error_level=max(1,error_level)
 
         # verify interconnected properties
         changed_prop = self.getChangedProperties()
-        error_mess={}
         for prop in changed_prop:
             try:
                 theProp =getattr(PropertyManager,prop)
@@ -584,18 +593,21 @@ class PropertyManager(NonIDF_Properties):
                      base = '*** WARNING: prop: {0} --> {1}'
                   else:
                      base = '*** ERROR  : prop: {0} --> {1}'
-                  error_mess[prop] = base.format(prop,message)
+                  mess =  base.format(prop,message)
+                  if fail_on_errors:
+                      self.log(mess,'warning')
+                  else:
+                      error_list[prop]=mess
             except: # its simple dictionary value, which do not have validator or 
                pass # other property without validator
         #end
-        # Print error messages
-        for prop in error_mess:
-           self.log(error_mess[prop],'warning')
-
-        if error_level>1:
+        if error_level>1 and fail_on_errors:
            raise RuntimeError('*** Invalid properties found. Can not run convert_to energy') 
-        
-        return 0
+        if error_level>0:
+           OK = False
+        else:
+           OK = True
+        return (OK,error_level,error_list)
     #
     def _check_monovan_par_changed(self):
         """ method verifies, if properties necessary for monovanadium reduction have indeed been changed  from defaults """
