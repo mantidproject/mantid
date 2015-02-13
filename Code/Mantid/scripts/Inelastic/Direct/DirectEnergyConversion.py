@@ -292,15 +292,19 @@ class DirectEnergyConversion(object):
           out_ws_name = r[0]
       except:
           out_ws_name = None
+      prop_man = self.prop_man
 
      # check if reducer can find all non-run files necessary for the reduction
      # and verify some other properties which can be wrong before starting long run.
-      self.prop_man.validate_properties()
+      prop_man.log("****************************************************************")
+      prop_man.validate_properties()
+      prop_man.log("****************************************************************")
 
       # inform user on what parameters have changed from script or gui
       # if monovan present, check if abs_norm_ parameters are set
       self.prop_man.log_changed_values('notice')
-      prop_man = self.prop_man
+
+
 
 
       start_time = time.time()

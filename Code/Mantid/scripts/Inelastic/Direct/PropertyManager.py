@@ -231,13 +231,15 @@ class PropertyManager(NonIDF_Properties):
     # 
     multirep_tof_specta_list=MultirepTOFSpectraList()
     #
-    mono_correction_factor = MonoCorrectionFactor(NonIDF_Properties.incident_energy)
+    mono_correction_factor = MonoCorrectionFactor(NonIDF_Properties.incident_energy,
+                                                  NonIDF_Properties.monovan_run)
 
 #----------------------------------------------------------------------------------------------------------------
     def getChangedProperties(self):
         """ method returns set of the properties changed from defaults """
         decor_prop = '_'+type(self).__name__+'__changed_properties'
         return self.__dict__[decor_prop]
+    #
     def setChangedProperties(self,value=set([])):
         """ Method to clear changed properties list""" 
         if isinstance(value,set):
@@ -245,14 +247,14 @@ class PropertyManager(NonIDF_Properties):
             self.__dict__[decor_prop] =value
         else:
             raise KeyError("Changed properties can be initialized by appropriate properties set only")
-
+    #
     @property
     def relocate_dets(self) :
         if self.det_cal_file != None:
             return True
         else:
             return False
-  
+    #
     def set_input_parameters_ignore_nan(self,**kwargs):
         """ Like similar method set_input_parameters this one is used to 
             set changed parameters from dictionary of parameters. 
@@ -274,7 +276,7 @@ class PropertyManager(NonIDF_Properties):
         for par_name,value in kwargs.items() :
             if not(value is None):
                 setattr(self,par_name,value)
-
+    #
     def set_input_parameters(self,**kwargs):
         """ Set input properties from a dictionary of parameters
 
@@ -293,7 +295,7 @@ class PropertyManager(NonIDF_Properties):
             setattr(self,par_name,value)
 
         return self.getChangedProperties()
-
+    #
     def get_used_monitors_list(self):
         """ Method returns list of monitors ID used during reduction """ 
 
@@ -312,8 +314,7 @@ class PropertyManager(NonIDF_Properties):
         used_mon.add(self.ei_mon2_spec)
 
         return used_mon
-
-
+    #
     def get_diagnostics_parameters(self):
         """ Return the dictionary of the properties used in diagnostics with their values defined in IDF
             
@@ -334,7 +335,7 @@ class PropertyManager(NonIDF_Properties):
                 self.log('--- Diagnostics property {0} is not found in instrument properties. Default value: {1} is used instead \n'.format(key,value),'warning')
   
         return result
-
+    #
     def update_defaults_from_instrument(self,pInstrument,ignore_changes=False):
         """ Method used to update default parameters from the same instrument (with different parameters).
 
@@ -482,7 +483,6 @@ class PropertyManager(NonIDF_Properties):
         else:
             return None
     #end
-
     def _get_properties_with_files(self):
         """ Method returns list of properties, which may have 
             files as their values
@@ -518,8 +518,7 @@ class PropertyManager(NonIDF_Properties):
               files_to_check.append('monovan_mapfile')
         #
         return files_to_check
-
-
+    #
     def _check_file_properties(self):
         """ Method verifies if all files necessary for a reduction are available.
 
@@ -536,24 +535,67 @@ class PropertyManager(NonIDF_Properties):
  
         result = (len(file_errors)==0)
         return (result,file_errors)
-
+    #
+    def _check_ouptut_dir(self):
+       """ check if default save directory is accessible for writing """ 
+       targ_dir = config['defaultsave.directory']
+       test_file = os.path.join(targ_dir,'test_file.txt')
+       try:
+           fp = open(test_file,'w')
+           fp.close()
+           os.remove(test_file)
+           return (True,'')
+       except:
+           return (False,'Can not write to default save directory {0}.\n Reduction results can be lost'.format(targ_dir))
+    #
     def validate_properties(self):
         """ Method validates if some properties values for 
             properties set up in the property manager are correct 
         """ 
 
-        if self.mono_correction_factor:
-           PropertyManager.monovan_run._in_cash = True
+        if self.mono_correction_factor: # disable check for monovan_run, as it is not used if mono_correction provided
+           PropertyManager.monovan_run._in_cash = True  # as soon as monovan_run is set up (mono correction disabled) 
+        # this will be dropped
 
-        ok,fail_files= self._check_file_properties()
+        error_level=0
+        ok,fail_prop = self._check_file_properties()
+        if not ok :
+           for prop in fail_prop:
+               self.log("*** ERROR  : prop: {0} -->{1}".format(prop,fail_prop[prop]),'warning')
+           error_level=2
+        ok,mess= self._check_ouptut_dir()
+        if not ok:
+           self.log('*** WARNING: saving results --> {1}'.fornat(mess))
+           error_level=max(1,error_level)
 
-        if not(ok):
-           for file_prop in fail_files:
-               self.log("*** ERROR: property {0} -->{1}".format(file_prop,fail_files[file_prop]),'warning')
+        # verify interconnected properties
+        changed_prop = self.getChangedProperties()
+        error_mess={}
+        for prop in changed_prop:
+            try:
+                theProp =getattr(PropertyManager,prop)
+            except: # not all changed properties are property manager properties
+                continue # we are not validating them
+            try:
+               ok,sev,message = theProp.validate(self,PropertyManager)
+               if not (ok):
+                  error_level=max(sev,error_level)
+                  if sev == 1:
+                     base = '*** WARNING: prop: {0} --> {1}'
+                  else:
+                     base = '*** ERROR  : prop: {0} --> {1}'
+                  error_mess[prop] = base.format(prop,message)
+            except: # its simple dictionary value, which do not have validator or 
+               pass # other property without validator
+        #end
+        # Print error messages
+        for prop in error_mess:
+           self.log(error_mess[prop],'warning')
+
+        if error_level>1:
            raise RuntimeError('*** Invalid properties found. Can not run convert_to energy') 
-
+        
         return 0
-
     #
     def _check_monovan_par_changed(self):
         """ method verifies, if properties necessary for monovanadium reduction have indeed been changed  from defaults """

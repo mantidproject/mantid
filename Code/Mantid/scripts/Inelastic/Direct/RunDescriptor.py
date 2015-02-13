@@ -274,7 +274,7 @@ class RunDescriptor(PropDescriptor):
                inst_name = RunDescriptor._holder.short_inst_name
                calibration = RunDescriptor._holder.det_cal_file
                if self._bind_to_sum and RunDescriptor._holder.sum_runs : # Sum runs
-                   ws = RunDescriptor._PropMan.sum_runs.load_and_sum_runs(inst_name,RunDescriptor._holder.load_monitors_with_workspace)
+                   ws = RunDescriptor._PropMan.sum_runs.load_and_sum_runs(RunDescriptor._holder,inst_name,RunDescriptor._holder.load_monitors_with_workspace)
                else: # load current workspace
                    ws = self.load_run(inst_name, calibration,False, RunDescriptor._holder.load_monitors_with_workspace,prefer_ws_calibration)
 

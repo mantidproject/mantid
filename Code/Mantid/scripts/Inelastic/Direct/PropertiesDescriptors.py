@@ -19,6 +19,14 @@ class PropDescriptor(object):
     def dependencies(self):
         """ Returns the list of other properties names, this property depends on""" 
         return []
+    def validate(self,instance, owner):
+        """ Interface to validate property descriptor,
+            provided to check properties interaction before long run
+
+            Return validation result, errors severity (0 -- fine, 1 -- warning, 2-- error)
+            and error message if any
+        """
+        return (True,0,'')
 
 # end PropDescriptor
 #-----------------------------------------------------------------------------------------
@@ -32,11 +40,11 @@ class SumRuns(PropDescriptor):
         It also specifies various auxiliary operations, defined for summing runs, so property 
         is deeply entangled with  the sample_run property
     """ 
-    def __init__(self,sample_run_prop):
+    def __init__(self,sample_run_prop,logger):
         # internal reference to sample run property
         self._sample_run = sample_run_prop
         # class containing this property
-        self._holder = None
+        self._logger = logger
         #
         self._last_ind2sum = -1
         self._sum_runs = False
@@ -47,17 +55,11 @@ class SumRuns(PropDescriptor):
 
     #
     def __get__(self,instance,holder_class):
-       if not self._holder:
-           self._holder = holder_class
        if instance is None:
            return self
        return self._sum_runs
     #
-    def __set__(self,instance,value):
-        if not self._holder:
-          from Direct.PropertyManager import PropertyManager
-          self._holder = PropertyManager
-        
+    def __set__(self,instance,value):      
         old_value = self._sum_runs
         if isinstance(value,bool):
             self._sum_runs = value
@@ -133,16 +135,17 @@ class SumRuns(PropDescriptor):
         return self._run_numbers[:num_to_load]
 
     #
-    def load_and_sum_runs(self,inst_name,monitors_with_ws):
-        """ Load multiple runs and sum them together """ 
+    def load_and_sum_runs(self,inst,inst_name,monitors_with_ws):
+        """ Load multiple runs and sum them together 
+        
+            inst -- current instance of PropertyManager
+        """ 
 
-        logger = lambda mess : (getattr(getattr(self,'_holder'),'log')\
-                               (self._sample_run._holder,mess))
-        logger("*** Summing multiple runs            ****")
+        self._logger(inst,"*** Summing multiple runs            ****")
 
         runs_to_load = self.get_run_list2sum()
         num_to_load = len(runs_to_load)
-        logger("*** Loading #{0}/{1}, run N: {2} ".\
+        self._logger(inst,"*** Loading #{0}/{1}, run N: {2} ".\
                format(1,num_to_load,self._run_numbers[0]))
 
 
@@ -159,8 +162,8 @@ class SumRuns(PropDescriptor):
 
            file_h = os.path.join(self._file_guess[ind + 1],'{0}{1}{2}'.\
                           format(inst_name,run_num,self._fext[ind + 1]))
-           logger("*** Adding  #{0}/{1}, run N: {2} ".\
-                   format(ind + 2,num_to_load,run_num))
+           self._logger(inst,"*** Adding  #{0}/{1}, run N: {2} ".\
+                         format(ind + 2,num_to_load,run_num))
            term_name = '{0}_ADDITIVE_#{1}/{2}'.format(inst_name,ind + 2,num_to_load)#
 
            wsp = self._sample_run.load_file(inst_name,term_name,False,
@@ -178,7 +181,7 @@ class SumRuns(PropDescriptor):
                DeleteWorkspace(wsp_name)
            if wsp_mon_name in mtd:
                DeleteWorkspace(wsp_mon_name)
-        logger("*** Summing multiple runs  completed ****")
+        self._logger(inst,"*** Summing multiple runs  completed ****")
 
         AddSampleLog(Workspace=sum_ws_name,LogName = 'SumOfRuns:',
                      LogText=AddedRunNumbers,LogType='String')
@@ -213,8 +216,8 @@ class IncidentEnergy(PropDescriptor):
         """ return  incident energy or list of incident energies """ 
         if instance is None:
            return self
-
         return self._incident_energy 
+
     def __set__(self,instance,value):
        """ Set up incident energy or range of energies in various formats """
        if value != None:
@@ -250,19 +253,16 @@ class IncidentEnergy(PropDescriptor):
                 self._incident_energy = float(value)
        else:
          raise KeyError("Incident energy have to be positive number of list of positive numbers. Got None")
-       
-       #
-       inc_en = self._incident_energy
-       if isinstance(inc_en,list):
-           self._num_energies = len(inc_en)
-           for en in inc_en:
-               if en <= 0:
-                 raise KeyError("Incident energy have to be positive number of list of positive numbers." + " For input argument {0} got negative value {1}".format(value,en))     
+
+       if isinstance(self._incident_energy,list):
+          self._num_energies = len(self._incident_energy)      
        else:
          self._num_energies = 1
-         if inc_en <= 0:
-            raise KeyError("Incident energy have to be positive number of list of positive numbers." + " For value {0} got negative {1}".format(value,inc_en))
        self._cur_iter_en = 0
+
+       ok,sev,message = self.validate(instance)
+       if not ok:
+          raise KeyError(message)
    
     def multirep_mode(self):
         """ return true if energy is defined as list of energies and false otherwise """ 
@@ -313,8 +313,22 @@ class IncidentEnergy(PropDescriptor):
         else:
            raise StopIteration
 
+    def validate(self,instance,owner=None):
+       #
+       inc_en = self._incident_energy
+       if isinstance(inc_en,list):
+           for ind,en in enumerate(inc_en):
+             if en <= 0:
+               return (False,2,"Incident energy have to be positive number or list of positive numbers.\n" +
+                               "For input argument {0} got negative energy {1}".format(ind,en))
+       else:
+         if inc_en <= 0:
+            return (False,2,"Incident energy have to be positive number or list of positive numbers.\n" +
+                             "Got single negative incident energy {0} ".format(en))
+       return (True,0,'')
 # end IncidentEnergy
 #-----------------------------------------------------------------------------------------
+
 class EnergyBins(PropDescriptor):
     """ Energy binning, requested for final converted to energy transfer workspace. 
 
@@ -407,6 +421,19 @@ class EnergyBins(PropDescriptor):
         mult = range_mult * ei
         return (self._energy_bins[0] * mult ,self._energy_bins[1] * mult,self._energy_bins[2] * mult)
 
+    def validate(self,instance,owner):
+        """ function verifies if the energy binning is consistent with incident energies """ 
+        ei = instance.incident_energy
+        ebin = instance.energy_bins
+        if isinstance(ei,list): # ebin expected to be relative
+           if ebin[2]>1:
+              return(False,1,"Binning for multiple energy range should be relative to incident energy. Got ebin_max={0} > 1\n"+\
+                             "Energy range will be normalized and treated as relative range")
+        else:
+            if ebin[2] > ei:
+              return (False,2,'Max rebin range {0:f} exceeds incident energy {1:f}'.format(ebin[2],en))
+        return(True,0,'')
+#-----------------------------------------------------------------------------------------
 
 #end EnergyBins
 #-----------------------------------------------------------------------------------------
@@ -467,19 +494,6 @@ class InstrumentDependentProp(PropDescriptor):
         raise AttributeError("Property {0} can not be assigned".format(self._prop_name))
 #end InstrumentDependentProp
 #-----------------------------------------------------------------------------------------
-def check_ei_bin_consistent(ei,binning_range):
-    """ function verifies if the energy binning is consistent with incident energies """ 
-    if isinstance(ei,list):
-        for en in ei:
-            range = binning_range[en]
-            if range[2] > en:
-                return (False,'Max rebin range {0:f} exceeds incident energy {1:f}'.format(range[2],en))
-    else:
-        if binning_range[2] > ei:
-            return (False,'Max rebin range {0:f} exceeds incident energy {1:f}'.format(binning_range[2],ei))
-
-    return (True,'')
-#-----------------------------------------------------------------------------------------
 class VanadiumRMM(PropDescriptor):
     """ define constant static rmm for vanadium """ 
     def __get__(self,instance,owner=None):
@@ -531,32 +545,56 @@ class mon2NormalizationEnergyRange(PropDescriptor):
     #
     def _check_range(self,val,instance):
         """ method to check if list of values acceptable as ranges """
-        if len(val) != 2:
-            raise KeyError('mon2_normalization_energy_range can be initialized by list of two values only. Got {0} values'.format(len(val)))
-        val1 = float(val[0])
-        if val1 < 0.1 or val1 > 0.9:
-            message = "Lower mon2_norm_energy_range describes lower limit of energy to integrate neutron signal after the chopper.\n"\
-                      "The limit is defined as (this value)*incident_energy. Are you sure you want to set this_value to {0}?\n".format(val1)
-            if val1 > 1:
-                raise KeyError(message)
-            else:
-                instance.log(message,'warning')
-        val2 = float(val[1])
-        if val2 < 1.1 or val2 > 1.9:
-           message = "Upper mon2_norm_energy_range describes upper limit of energy to integrate neutron signal after the chopper.\n"\
-                     "The limit is defined as (this value)*incident_energy. Are you sure you want to set this_value to {0}?\n".format(val2)
-           if val2 < 1:
-               raise KeyError(message)
-           else:
-            instance.log(message,'warning')
 
-        return [val1,val2]
+        if len(val) != 2:
+           raise KeyError("mon2_norm_energy_range needs to be initialized by lost of two values. Got {0}".format(len(val)))
+        self._relative_range = (float(val[0]),float(val[1]))
+        ok,sev,message=self.validate(instance)
+        if not ok:
+           if sev == 1:
+               instance.log(message,'warning')
+           else:
+               raise KeyError(message)
+
+        return self._relative_range
     #
     def _parce_string2list(self,val):
         """ method splits input string containing comma into list of strings"""
         value = val.strip('[]()')
         val = value.split(',')
         return val
+
+    def validate(self,instance,owner=None):
+        """ function verifies if the energy range is consistent with incident energies """ 
+        range = self._relative_range
+        if len(range ) != 2:
+           return(False,2,'mon2_normalization_energy_range can be initialized by list of two values only. Got {0} values'.format(len(range)))
+
+        result = (True,0,'')
+
+        val1 = float(range[0])
+        if val1 < 0.1 or val1 > 0.9:
+            message = "Lower mon2_norm_energy_range describes lower limit of energy to integrate neutron signal after the chopper.\n"\
+                      "The limit is defined as (this value)*incident_energy. Are you sure you want to set this_value to {0}?\n".format(val1)
+            if val1 > 1:
+                return(False,2,message)
+            else:
+                result = (False,1,message)
+
+
+        val2 = float(range[1])
+        if val2 < 1.1 or val2 > 1.9:
+           message = "Upper mon2_norm_energy_range describes upper limit of energy to integrate neutron signal after the chopper.\n"\
+                     "The limit is defined as (this value)*incident_energy. Are you sure you want to set this_value to {0}?\n".format(val2)
+           if val2 > 1:
+              if result[0]:
+                result = (False,1,message)
+              else:
+                result = (False,1,result[2]+message)
+           else:
+              return (False,2,message)
+
+        return result 
 
 #-----------------------------------------------------------------------------------------
 class PropertyFromRange(PropDescriptor):
@@ -830,6 +868,21 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
                 raise KeyError("monovan_integr_range has to be list of two values, "\
                     "defining min/max values of integration range or None to use relative to incident energy limits")
             prop_helpers.ComplexProperty.__set__(self,tDict,value)
+
+    def validate(self,instance, owner):
+        """ check if monovan integration range has reasonable value """ 
+       
+        if instance.monovan_run is None:
+           return (True,0,'')
+
+        range = sepf.__get__(instance,owner)
+        ei = instance.incident_energy
+        if range[0]>=range[1]:
+           return (False,2,'monovan integration range limits = [{0}:{1}] are wrong'.format(range[0],range[1]))
+        if range[0]<-100*ei or range[0]>100*ei:
+          return (False,1,'monovan integration is suspiciously wide: [{0}:{1}]. This may be incorrect'.format(range[0],range[1]))
+        return (True,0,'')
+
 #end MonovanIntegrationRange
 
 #-----------------------------------------------------------------------------------------
@@ -928,15 +981,24 @@ class SaveFormat(PropDescriptor):
                    .format(value,type(value)))
         #end if different types
         self._save_format.add(value)
+
+   def validate(self,instance, owner):
+
+       n_formats = len(self._set_format)
+       if n_formats == 0:
+          return (False,1,'No internal save format is defined. Results may be lost')
+       else:
+          return (True,0,'')
 #end SaveFormat
 
 #-----------------------------------------------------------------------------------------
 class DiagSpectra(PropDescriptor):
-    """ class describes spectra list which should be used in diagnostics 
+    """ class describes spectra groups list, for groups to be
+        used in diagnostics 
 
         consist of tuples list where each tuple are the numbers 
         indicating first-last spectra in the group.
-        if None, all spectra are used in diagnostics
+        if None, all spectra used in diagnostics
 
     """
     def __init__(self):
@@ -999,8 +1061,21 @@ class BackbgroundTestRange(PropDescriptor):
         if isinstance(value,str):
             value = str.split(value,',')
         if len(value) != 2:
-            raise ValueError("background test range can be set to a 2 element list of floats")
-        self._background_test_range = [float(value[0]),float(value[1])]
+            raise ValueError("background test range can be only a 2 element list of floats")
+        self._background_test_range = (float(value[0]),float(value[1]))
+
+    def validate(self,instance, owner=None):
+       """ validate background test range """
+       range = self.__get__(instance,owner)
+       if range is None:
+          return (True,0,'')
+       if range[0]>=range[1]:
+          return (False,2,' Background test range: [{0}:{1}] is incorrect '.format(range[0],range[1]))
+       if range[0]<0:
+          return (False,2,' Background test range is TOF range, so it can not be negative={0}'.format(range[0]))
+       if range[1]>20000:
+          return (False,1,' Background test range is TOF range, its max value looks suspiciously big={0}'.format(range[1]))
+       return (True,0,'')
 #end BackbgroundTestRange
 
 #-----------------------------------------------------------------------------------------
@@ -1008,7 +1083,7 @@ class MultirepTOFSpectraList(PropDescriptor):
     """ property describes list of spectra numbers, used to identify 
         TOF range corresponding to the particular energy range 
 
-        Usually it is list of two numbers, specifying monitors which are 
+        Usually it is list of two numbers, specifying spectra with monitors located 
         closest and furthest from the sample 
     """
     def __init__(self):
@@ -1036,12 +1111,13 @@ class MultirepTOFSpectraList(PropDescriptor):
             rez = [int(value)]
         self._spectra_list = rez
 #end MultirepTOFSpectraList
+
 class MonoCorrectionFactor(PropDescriptor):
     """ property contains correction factor, used to convert 
         experimental scattering cross-section into absolute 
         units ( mb/str/mev/fu) 
 
-        There are independent two sources for this factor: 
+        Two independent sources for this factor can be defined: 
         1) if user explicitly specifies correction value. 
            This value then will be applied to all subsequent runs 
            without any checks if the correction is appropriate
@@ -1050,13 +1126,14 @@ class MonoCorrectionFactor(PropDescriptor):
            This value is cashed at first run and reapplied if 
            no changes to the values it depends on were identified
     """ 
-    def __init__(self,ei_prop):
+    def __init__(self,ei_prop,monovan_run_prop):
         self._cor_factor = None
         self._mono_run_number = None
         self._ei_prop = ei_prop
         self.cashed_values = {}
+        self._mono_run_prop=monovan_run_prop
 
-    def __get__(self,instance,type=None):
+    def __get__(self,instance,type):
        if instance is None:
            return self
 
@@ -1064,6 +1141,9 @@ class MonoCorrectionFactor(PropDescriptor):
 
     def __set__(self,instance,value):
        self._cor_factor = value
+       # 
+       if value is None:
+          self._mono_run_prop._in_cash=False # enable monovan run validation if any
     #
     def set_val_to_cash(self,instance,value):
         """ """ 
@@ -1098,7 +1178,13 @@ class MonoCorrectionFactor(PropDescriptor):
            format(ei,mono_int_range[0],mono_int_range[1],self._mono_run_number)
        return cash_id
 
+    def validate(self,instance, owner=None):
 
+      if self._cor_factor is None:
+          return (True,0,'')
+      if self._cor_factor<=0:
+         return (False,2,'Mono-correction factor has to be positive if specified: {0}'.format(self._cor_factor))
+      return (True,0,'')
 #-----------------------------------------------------------------------------------------
 # END Descriptors for PropertyManager itself
 #-----------------------------------------------------------------------------------------

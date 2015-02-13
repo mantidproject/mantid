@@ -359,7 +359,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         propman.background_test_range = [1000,2000]
         bkg_test_range = propman.background_test_range
-        self.assertEqual(bkg_test_range,[1000,2000])
+        self.assertEqual(bkg_test_range,(1000.,2000.))
 
     def test_check_monovan_changed(self):
          propman = self.prop_man 
