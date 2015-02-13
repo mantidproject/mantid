@@ -253,13 +253,8 @@ namespace CustomInterfaces
       resAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
       resAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
 
-      if(m_uiForm.cal_ckResScale->isChecked())
-      {
-        QString scale = m_uiForm.cal_leResScale->text();
-        if(scale.isEmpty())
-          scale = "1.0";
-        resAlg->setProperty("ScaleFactor", scale.toDouble());
-      }
+      if(m_uiForm.ckResolutionScale->isChecked())
+        resAlg->setProperty("ScaleFactor", m_uiForm.spResolutionScale->value());
 
       m_batchAlgoRunner->addAlgorithm(resAlg);
 
@@ -277,10 +272,6 @@ namespace CustomInterfaces
 
     QString firstFile = m_uiForm.leRunNo->getFirstFilename();
     QFileInfo firstFileInfo(firstFile);
-    /* QString calFileName = firstFileInfo.baseName() + "_" + m_uiForm.iicInstrumentConfiguration->getAnalyserName() + m_uiForm.iicInstrumentConfiguration->getReflectionName() + "_calib.nxs"; */
-
-    /* m_uiForm.ind_calibFile->setFileTextWithSearch(calFileName); */
-    /* m_uiForm.ckUseCalib->setChecked(true); */
 
     disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmsComplete(bool)));
   }
