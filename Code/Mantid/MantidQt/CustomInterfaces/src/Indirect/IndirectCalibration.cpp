@@ -184,7 +184,7 @@ namespace CustomInterfaces
     QString calibrationWsName = outputWorkspaceNameStem + "_calib";
 
     // Configure the calibration algorithm
-    IAlgorithm_sptr calibrationAlg = AlgorithmManager::Instance().create("CreateCalibrationWorkspace", -1);
+    IAlgorithm_sptr calibrationAlg = AlgorithmManager::Instance().create("CreateCalibrationWorkspace");
     calibrationAlg->initialize();
 
     calibrationAlg->setProperty("InputFiles", filenames.toStdString());
@@ -212,7 +212,7 @@ namespace CustomInterfaces
     // Add save algorithm to queue if ticked
     if( m_uiForm.ckSave->isChecked() )
     {
-      IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus", -1);
+      IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexusProcessed");
       saveAlg->initialize();
       saveAlg->setProperty("Filename", calibrationWsName.toStdString() + ".nxs");
 
@@ -237,7 +237,7 @@ namespace CustomInterfaces
       bool smooth = m_uiForm.ckSmoothResolution->isChecked();
       bool save = m_uiForm.ckSave->isChecked();
 
-      Mantid::API::IAlgorithm_sptr resAlg = Mantid::API::AlgorithmManager::Instance().create("IndirectResolution", -1);
+      IAlgorithm_sptr resAlg = AlgorithmManager::Instance().create("IndirectResolution", -1);
       resAlg->initialize();
 
       resAlg->setProperty("InputFiles", filenames.toStdString());
@@ -266,7 +266,7 @@ namespace CustomInterfaces
 
       if(smooth)
       {
-        Mantid::API::IAlgorithm_sptr smoothAlg = Mantid::API::AlgorithmManager::Instance().create("WienerSmooth");
+        IAlgorithm_sptr smoothAlg = AlgorithmManager::Instance().create("WienerSmooth");
         smoothAlg->initialize();
         smoothAlg->setProperty("OutputWorkspace", resolutionWsName.toStdString());
 
@@ -277,7 +277,14 @@ namespace CustomInterfaces
 
         if(save)
         {
-          //TODO: Do save
+          IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexusProcessed");
+          saveAlg->initialize();
+
+          BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromSmoothProps;
+          inputFromSmoothProps["InputWorkspace"] = calibrationWsName.toStdString();
+          saveAlg->setProperty("Filename", resolutionWsName.toStdString() + ".nxs");
+
+          m_batchAlgoRunner->addAlgorithm(saveAlg, inputFromSmoothProps);
         }
       }
 
@@ -393,8 +400,8 @@ namespace CustomInterfaces
       return;
     }
 
-    Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
+    MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(wsname.toStdString()));
 
     const Mantid::MantidVec & dataX = input->readX(0);
     std::pair<double, double> range(dataX.front(), dataX.back());
@@ -478,7 +485,7 @@ namespace CustomInterfaces
    *
    * @param ws :: Mantid workspace containing the loaded instument
    */
-  void IndirectCalibration::calSetDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws)
+  void IndirectCalibration::calSetDefaultResolution(MatrixWorkspace_const_sptr ws)
   {
     auto inst = ws->getInstrument();
     auto analyser = inst->getStringParameter("analyser");
