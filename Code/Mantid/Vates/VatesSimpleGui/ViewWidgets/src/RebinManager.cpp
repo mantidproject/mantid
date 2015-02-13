@@ -11,6 +11,14 @@
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
 #endif
+#include <pqActiveObjects.h>
+#include <pqPipelineSource.h>
+#include <vtkSMPropertyHelper.h>
+
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1170
+#endif
+
 
 #include <string>
 #include <vector>
@@ -19,9 +27,7 @@
 #include <QVariant>
 #include <QHash>
 #include "boost/shared_ptr.hpp"
-#include <pqActiveObjects.h>
-#include <pqPipelineSource.h>
-#include <vtkSMPropertyHelper.h>
+
 
 
 namespace Mantid

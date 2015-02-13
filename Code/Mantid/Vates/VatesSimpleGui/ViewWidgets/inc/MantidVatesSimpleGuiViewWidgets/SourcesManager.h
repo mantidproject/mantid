@@ -13,6 +13,9 @@
 #include <pqPipelineFilter.h>
 #include <vtkSMProxy.h>
 
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1170
+#endif
 
 #include <QWidget>
 #include <map>

@@ -10,9 +10,6 @@
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
 #endif
-
-#include "boost/shared_ptr.hpp"
-
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
 #include <pqObjectBuilder.h>
@@ -32,6 +29,11 @@
 #include <vtkSMProxyListDomain.h>
 #include <QList>
 
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1170
+#endif
+
+#include "boost/shared_ptr.hpp"
 #include <Poco/ActiveResult.h>
 
 

@@ -2,6 +2,11 @@
 
 #include "MantidKernel/ConfigService.h"
 
+// Have to deal with ParaView warnings and Intel compiler the hard way.
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1170
+#endif
+
 #include <pqBuiltinColorMaps.h>
 #include <pqChartValue.h>
 #include <pqColorMapModel.h>
@@ -9,6 +14,10 @@
 #include <pqColorPresetModel.h>
 #include <vtkPVXMLElement.h>
 #include <vtkPVXMLParser.h>
+
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1170
+#endif
 
 #include <QDir>
 #include <QDoubleValidator>
