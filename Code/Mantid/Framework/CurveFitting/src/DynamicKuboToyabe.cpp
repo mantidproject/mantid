@@ -6,13 +6,6 @@
 #include "MantidAPI/FunctionFactory.h"
 #include <vector>
 
-#define EPS 1e-6
-#define JMAX 14
-#define JMAXP (JMAX+1)
-#define K 5
-#define NR_END 1
-#define FREE_ARG char*
-
 namespace Mantid
 {
 namespace CurveFitting
