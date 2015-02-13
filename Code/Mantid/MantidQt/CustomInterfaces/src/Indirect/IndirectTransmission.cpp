@@ -17,6 +17,8 @@ namespace CustomInterfaces
   {
     m_uiForm.setupUi(parent);
 
+    connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(instrumentSet()));
+
     // Preview plot
     m_plots["PreviewPlot"] = new QwtPlot(m_parentWidget);
     m_plots["PreviewPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
@@ -54,7 +56,6 @@ namespace CustomInterfaces
     transAlg->setProperty("CanWorkspace", canWsName.toStdString());
     transAlg->setProperty("OutputWorkspace", outWsName.toStdString());
 
-    transAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
     transAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
     transAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
 
@@ -98,7 +99,6 @@ namespace CustomInterfaces
     transAlg->setProperty("CanWorkspace", canWsName.toStdString());
     transAlg->setProperty("OutputWorkspace", outWsName.toStdString());
 
-    transAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
     transAlg->setProperty("Plot", false);
     transAlg->setProperty("Save", false);
 
@@ -135,6 +135,15 @@ namespace CustomInterfaces
     // Set X range to data range
     setXAxisToCurve("PreviewPlot", "TransCurve");
     m_plots["PreviewPlot"]->replot();
+  }
+
+  void IndirectTransmission::instrumentSet()
+  {
+    std::map<QString, QString> instDetails = getInstrumentDetails();
+
+    // Set the search instrument for runs
+    m_uiForm.dsSampleInput->setInstrumentOverride(instDetails["instrument"]);
+    m_uiForm.dsCanInput->setInstrumentOverride(instDetails["instrument"]);
   }
 
 } // namespace CustomInterfaces

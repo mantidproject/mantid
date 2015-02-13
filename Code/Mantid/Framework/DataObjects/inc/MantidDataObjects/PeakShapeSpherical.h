@@ -3,7 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/PeakShapeBase.h"
-#include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
+#include <boost/optional.hpp>
 #include <string>
 
 namespace Mantid {
@@ -36,7 +37,12 @@ class DLLExport PeakShapeSpherical : public PeakShapeBase {
 public:
   /// Constructor
   PeakShapeSpherical(const double &peakRadius,
-                     API::SpecialCoordinateSystem frame,
+                     Kernel::SpecialCoordinateSystem frame,
+                     std::string algorithmName = std::string(),
+                     int algorithmVersion = -1);
+  /// Constructor
+  PeakShapeSpherical(const double &peakRadius, const double& peakInnerRadius, const double& peakOuterRadius,
+                     Kernel::SpecialCoordinateSystem frame,
                      std::string algorithmName = std::string(),
                      int algorithmVersion = -1);
   /// Destructor
@@ -55,10 +61,20 @@ public:
   bool operator==(const PeakShapeSpherical &other) const;
   /// Peak radius
   double radius() const;
+  /// Peak outer background radius
+  boost::optional<double> backgroundOuterRadius() const;
+  /// Peak inner background radius
+  boost::optional<double> backgroundInnerRadius() const;
+  /// Non-instance shape name
+  static const std::string sphereShapeName();
 
 private:
   /// Peak radius
   double m_radius;
+  /// Background inner radius;
+  boost::optional<double> m_backgroundInnerRadius;
+  /// Background outer radius
+  boost::optional<double> m_backgroundOuterRadius;
 };
 
 } // namespace DataObjects

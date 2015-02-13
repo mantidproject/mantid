@@ -160,19 +160,16 @@ namespace IDA
     if (constrainIntens) pyInput += "constrain_intens = True \n";
     else pyInput += "constrain_intens = False \n";
 
-    if ( m_uiForm.ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-    else pyInput += "verbose = False\n";
-
     if ( m_uiForm.ckSave->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";
 
     if( !constrainBeta )
     {
-      pyInput += "furyfitSeq(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot, Verbose=verbose)\n";
+      pyInput += "furyfitSeq(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot)\n";
     }
     else
     {
-      pyInput += "furyfitMult(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot, Verbose=verbose)\n";
+      pyInput += "furyfitMult(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot)\n";
     }
 
     QString pyOutput = runPythonCode(pyInput);

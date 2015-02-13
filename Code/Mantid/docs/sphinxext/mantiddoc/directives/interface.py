@@ -59,14 +59,7 @@ class InterfaceDirective(BaseDirective):
         if not os.path.exists(screenshots_dir):
             os.makedirs(screenshots_dir)
 
-        try:
-            picture = custominterface_screenshot(self.interface_name(), screenshots_dir, widget_name = widget_name)
-        except RuntimeError, exc:
-            env = self.state.document.settings.env
-            env.warn(env.docname, "Unable to generate screenshot for '%s' - %s" % (self.interface_name(), str(exc)))
-            picture = None
-
-        return picture
+        return custominterface_screenshot(self.interface_name(), screenshots_dir, widget_name = widget_name)
 
     def _insert_screenshot_link(self, picture, align=None, width=None):
         """

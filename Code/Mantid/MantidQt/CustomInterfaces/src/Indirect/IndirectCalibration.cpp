@@ -235,6 +235,7 @@ namespace CustomInterfaces
           + QString::number(m_dblManager->value(m_properties["ResEnd"]));
 
       bool smooth = m_uiForm.ckSmoothResolution->isChecked();
+      bool save = m_uiForm.ckSave->isChecked();
 
       Mantid::API::IAlgorithm_sptr resAlg = Mantid::API::AlgorithmManager::Instance().create("IndirectResolution", -1);
       resAlg->initialize();
@@ -246,8 +247,7 @@ namespace CustomInterfaces
       resAlg->setProperty("RebinParam", rebinString.toStdString());
       resAlg->setProperty("DetectorRange", resDetectorRange.toStdString());
       resAlg->setProperty("BackgroundRange", background.toStdString());
-      resAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
-      resAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
+      resAlg->setProperty("Save", save);
 
       if(m_uiForm.ckResolutionScale->isChecked())
         resAlg->setProperty("ScaleFactor", m_uiForm.spScale->value());
@@ -274,6 +274,11 @@ namespace CustomInterfaces
         smoothAlgInputProps["InputWorkspace"] = resolutionWsName.toStdString() + "_pre_smooth";
 
         m_batchAlgoRunner->addAlgorithm(smoothAlg, smoothAlgInputProps);
+
+        if(save)
+        {
+          //TODO: Do save
+        }
       }
 
       // When creating resolution file take the resolution workspace as the result
@@ -336,6 +341,9 @@ namespace CustomInterfaces
   {
     // Get spectra, peak and background details
     std::map<QString, QString> instDetails = getInstrumentDetails();
+
+    // Set the search instrument for runs
+    m_uiForm.leRunNo->setInstrumentOverride(instDetails["instrument"]);
 
     // Set spectra range
     m_dblManager->setValue(m_properties["ResSpecMin"], instDetails["spectra-min"].toDouble());

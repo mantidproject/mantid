@@ -211,13 +211,12 @@ def PadArray(inarray,nfixed):                   #pad a list to specified size
     outarray +=[0]*padding
     return outarray
 
-def CheckAnalysers(in1WS,in2WS,Verbose):
+def CheckAnalysers(in1WS,in2WS):
     '''Check workspaces have identical analysers and reflections
 
     Args:
-      @param in1WS - first 2D workspace 
+      @param in1WS - first 2D workspace
       @param in2WS - second 2D workspace
-      @param Verbose - whether to log information regarding the analysers
 
     Returns:
       @return None
@@ -237,8 +236,7 @@ def CheckAnalysers(in1WS,in2WS,Verbose):
     elif r1 != r2:
         raise ValueError('Workspace '+in1WS+' and '+in2WS+' have different reflections')
     else:
-        if Verbose:
-            logger.notice('Analyser is '+a1+r1)
+        logger.information('Analyser is '+a1+r1)
 
 def CheckHistZero(inWS):
     '''Retrieves basic info on a worskspace

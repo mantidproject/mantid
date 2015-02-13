@@ -435,7 +435,7 @@ Element by Element comparison
 @return false :: failure
 */
 {
-  return (this->operator==(A));
+  return !(this->operator==(A));
 }
 
 template <typename T>

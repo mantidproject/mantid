@@ -51,6 +51,7 @@ namespace MantidQt
       Q_PROPERTY(QStringList workspaceSuffixes READ getWSSuffixes WRITE setWSSuffixes)
       Q_PROPERTY(QStringList fileBrowserSuffixes READ getFBSuffixes WRITE setFBSuffixes)
       Q_PROPERTY(bool showLoad READ willShowLoad WRITE setShowLoad)
+      Q_PROPERTY(QString instrumentOverride READ getInstrumentOverride WRITE setInstrumentOverride)
 
     public:
       DataSelector(QWidget *parent = 0);
@@ -92,6 +93,10 @@ namespace MantidQt
       bool willShowLoad();
       /// Set if the load button should be shown
       void setShowLoad(bool load);
+      /// Gets the instrument currently fixed to
+      QString getInstrumentOverride();
+      /// Overrides the value of default instrument
+      void setInstrumentOverride(const QString & instName);
 
     signals:
       /// Signal emitted when files were found but widget isn't autoloading

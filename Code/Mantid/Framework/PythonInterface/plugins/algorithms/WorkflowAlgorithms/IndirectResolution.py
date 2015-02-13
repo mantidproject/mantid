@@ -39,7 +39,6 @@ class IndirectResolution(DataProcessorAlgorithm):
         self.declareProperty(name='RebinParam', defaultValue='', doc='Rebinning parameters (min,width,max)')
         self.declareProperty(name='ScaleFactor', defaultValue=1.0, doc='Factor to scale resolution curve by')
 
-        self.declareProperty(name='Verbose', defaultValue=False, doc='Print more information to results log')
         self.declareProperty(name='Plot', defaultValue=False, doc='Plot resolution curve')
         self.declareProperty(name='Save', defaultValue=False, doc='Save resolution workspace as a Nexus file')
 
@@ -97,7 +96,6 @@ class IndirectResolution(DataProcessorAlgorithm):
         self._rebin_string = self.getProperty('RebinParam').value
         self._scale_factor = self.getProperty('ScaleFactor').value
 
-        self._verbose = self.getProperty('Verbose').value
         self._plot = self.getProperty('Plot').value
         self._save = self.getProperty('Save').value
 
@@ -124,8 +122,7 @@ class IndirectResolution(DataProcessorAlgorithm):
         self.setProperty('OutputWorkspace', self._out_ws)
 
         if self._save:
-            if self._verbose:
-                logger.notice("Resolution file saved to default save directory.")
+            logger.information("Resolution file saved to default save directory.")
             SaveNexusProcessed(InputWorkspace=self._out_ws, Filename=self._out_ws + '.nxs')
 
         if self._plot:
