@@ -60,44 +60,47 @@ double getDKT (double t, double G, double v){
   const double eps = 0.05; // Bin width for calculations
   //  const int stk = 25; // Not used for the moment
 
-
   static double oldG=-1., oldV=-1.;
   static std::vector<double> gStat(tsmax), gDyn(tsmax);
 
 
-  // If previous call was for the same G, v
-  // Re-use previous computation
-  if ( (G == oldG) && (v == oldV) ){
-    int x=int(fabs(t)/eps);
-    if (x>tsmax-2)
-      x = tsmax-2;
-    double xe=(fabs(t)/eps)-x;
-    return gDyn[x]*(1-xe)+xe*gDyn[x+1];
-  }
+  if ( (G != oldG) || (v != oldV) ){
    
-  // Else, store new values
-  oldG =G;
-  oldV =v;
+    // If G or v have changed with respect to the 
+    // previous call, we need to re-do the computations
 
-  double hop = v*eps;
 
-  // Generate static Kubo-Toyabe
-  for (size_t k=0; k<tsmax; k++){
-    gStat[k]= ZFKT(k*eps,G);
-  }
+    if ( G != oldG ){
 
-  // Generate dynamic Kubo Toyabe
-  for (int k=0; k<tsmax; k++){
-    double y=gStat[k];
-    for (int j=k-1; j>0; j--){
-      y=y*(1-hop)+hop*gDyn[k-j]*gStat[j];
+      // But we only need to
+      // re-compute gStat if G has changed
+
+      // Generate static Kubo-Toyabe
+      for (size_t k=0; k<tsmax; k++){
+        gStat[k]= ZFKT(k*eps,G);
+      }
+      // Store new G value
+      oldG =G;
     }
-    gDyn[k]=y;
+
+    // Store new v value
+    oldV =v;
+
+    double hop = v*eps;
+
+    // Generate dynamic Kubo Toyabe
+    for (int k=0; k<tsmax; k++){
+      double y=gStat[k];
+      for (int j=k-1; j>0; j--){
+        y=y*(1-hop)+hop*gDyn[k-j]*gStat[j];
+      }
+      gDyn[k]=y;
+    }
   }
-  
+
   // Interpolate table 
   // If beyond end, extrapolate
-  int x=int(abs(t)/eps);
+  int x=int(fabs(t)/eps);
   if (x>tsmax-2)
     x = tsmax-2;
   double xe=(fabs(t)/eps)-x;
