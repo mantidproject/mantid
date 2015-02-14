@@ -173,7 +173,9 @@ void LoadNexusLogs::exec() {
       std::vector<Mantid::Kernel::DateAndTime> ptime;
       pval.reserve(event_frame_number.size());
       ptime.reserve(event_frame_number.size());
-      std::vector<Mantid::Kernel::DateAndTime> plogt = plog->timesAsVector();
+      std::vector<Mantid::Kernel::DateAndTime> plogt;
+      if (plog)
+        plogt = plog->timesAsVector();
       std::vector<double> plogv = plog->valuesAsVector();
       for (size_t i = 0; i < event_frame_number.size(); ++i) {
         ptime.push_back(plogt[event_frame_number[i]]);
