@@ -37,6 +37,14 @@ if "%JOB_NAME%"=="%JOB_NAME:clean=%" (
   set CLEANBUILD=yes
   set BUILDPKG=yes
 )
+
+if EXIST %WORKSPACE%\build\CMakeCache.txt (
+  TYPE %WORKSPACE%\build\CMakeCache.txt | FINDSTR "Code/Mantid/TestingTools/cxxtest"
+  if %ERRORLEVEL% EQU 0 (
+    rmdir /S /Q %WORKSPACE%\build
+  )
+)
+
 if "%JOB_NAME%"=="%JOB_NAME:pull_requests=%" (
   set BUILDPKG=yes
 )

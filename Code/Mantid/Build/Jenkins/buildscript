@@ -82,6 +82,15 @@ if [[ ${JOB_NAME} == *clean* ]]; then
   CLEANBUILD=true
   BUILDPKG=true
 fi
+
+if [[ -e $WORKSPACE/build/CMakeCache.txt ]]
+  # Temporary while the builds flick between old & new TestingTools locations
+  grep 'Code/Mantid/TestingTools/cxxtest' $WORKSPACE/build/CMakeCache.txt > /dev/null
+  if [ $? -eq 0 ]; then
+    rm -fr $WORKSPACE/build
+  fi
+fi
+
 if [[ ${JOB_NAME} == *pull_requests* ]]; then
   BUILDPKG=true
 fi
