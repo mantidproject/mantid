@@ -9,7 +9,7 @@
 # BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each
 # slave.
 ###############################################################################
-SCRIPT_DIR=$(dirname $(readlink -f "$0"))
+SCRIPT_DIR=$(dirname "$0")
 
 ###############################################################################
 # Print out the versions of things we are using
