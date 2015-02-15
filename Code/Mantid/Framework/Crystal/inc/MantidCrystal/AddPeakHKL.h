@@ -9,7 +9,7 @@ namespace Mantid
 namespace Crystal
 {
 
-  /** AddPeakHKL : TODO: DESCRIPTION
+  /** AddPeakHKL : Algorithm to add a peaks to a PeaksWorkspace in the HKL frame
 
     Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 

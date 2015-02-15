@@ -1,12 +1,17 @@
 #include "MantidCrystal/AddPeakHKL.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IPeak.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid
 {
 namespace Crystal
 {
 
-  using Mantid::Kernel::Direction;
-  using Mantid::API::WorkspaceProperty;
+  using namespace Mantid::Kernel;
+  using namespace Mantid::API;
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(AddPeakHKL)
@@ -37,18 +42,18 @@ namespace Crystal
   int AddPeakHKL::version() const { return 1;};
 
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string AddPeakHKL::category() const { return TODO: FILL IN A CATEGORY;}
+  const std::string AddPeakHKL::category() const { return "Crystal";}
 
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-  const std::string AddPeakHKL::summary() const { return TODO: FILL IN A SUMMARY;};
+  const std::string AddPeakHKL::summary() const { return "Add a peak in the hkl frame";};
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
   void AddPeakHKL::init()
   {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
+    declareProperty(new WorkspaceProperty<Mantid::API::IPeaksWorkspace>("Workspace","",Direction::InOut), "An input workspace.");
+    declareProperty(new ArrayProperty<double>("HKL", boost::make_shared<ArrayLengthValidator<double> > (3)), "HKL point to add");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -56,7 +61,11 @@ namespace Crystal
    */
   void AddPeakHKL::exec()
   {
-    // TODO Auto-generated execute stub
+    IPeaksWorkspace_sptr peakWS = this->getProperty("Workspace");
+    const std::vector<double> hklValue = this->getProperty("HKL");
+    IPeak * peak = peakWS->createPeakHKL(V3D(hklValue[0], hklValue[1], hklValue[2]));
+    peakWS->addPeak(*peak);
+    delete peak;
   }
 
 

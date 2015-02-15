@@ -10,7 +10,9 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+Add a peak in the HKL frame to an existing :ref:`PeaksWorkspace <PeaksWorkspace>`. The OrientedLattice must be provided and the Goniometer should be set correctly before running the algorithm. 
+
+This algorithm will 
 
 
 Usage
