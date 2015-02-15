@@ -70,7 +70,7 @@ cd %WORKSPACE%\build
 :: Clean up any artifacts from last build so that if it fails
 :: they don't get archived again.
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-del *.exe
+del /Q *.exe
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check the required build configuration
