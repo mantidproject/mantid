@@ -22,11 +22,12 @@ set PATH=%WORKSPACE%\Code\Third_Party\lib\win64;%WORKSPACE%\Code\Third_Party\lib
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Set up the location for local object store outside of the build and source
 :: tree, which can be shared by multiple builds.
-:: It defaults to the parent directory of the workspace but can be overridden
-:: by setting the MANTID_DATA_STORE environment variable.
+:: It defaults to a MantidExternalData directory within the USERPROFILE
+:: directory. It can be overridden by setting the MANTID_DATA_STORE environment
+:: variable.
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if NOT DEFINED MANTID_DATA_STORE (
-  for %%F in ("%WORKSPACE%") do set MANTID_DATA_STORE=%%~dpF
+  set MANTID_DATA_STORE=%USERPROFILE%\MantidExternalData
 )
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
