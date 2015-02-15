@@ -33,7 +33,6 @@ class Fury(PythonAlgorithm):
                              doc='Output workspace')
 
         self.declareProperty(name='Plot', defaultValue=False, doc='Switch Plot Off/On')
-        self.declareProperty(name='Verbose', defaultValue=False, doc='Switch Verbose Off/On')
         self.declareProperty(name='Save', defaultValue=False, doc='Switch Save result to nxs file Off/On')
         self.declareProperty(name='DryRun', defaultValue=False, doc='Only calculate and output the parameters')
 
@@ -52,14 +51,12 @@ class Fury(PythonAlgorithm):
                 workdir = config['defaultsave.directory']
                 opath = os.path.join(workdir, self._output_workspace + '.nxs')
                 SaveNexusProcessed(InputWorkspace=self._output_workspace, Filename=opath)
-                if self._verbose:
-                    logger.notice('Output file : ' + opath)
+                logger.information('Output file : ' + opath)
 
             if self._plot:
                 self._plot_output()
         else:
-            if self._verbose:
-                logger.notice('Dry run, will not run Fury')
+            logger.information('Dry run, will not run Fury')
 
         self.setProperty('ParameterWorkspace', self._parameter_table)
         self.setProperty('OutputWorkspace', self._output_workspace)
@@ -86,7 +83,6 @@ class Fury(PythonAlgorithm):
         if self._output_workspace == '':
             self._output_workspace = getWSprefix(self._sample) + 'iqt'
 
-        self._verbose = self.getProperty('Verbose').value
         self._plot = self.getProperty('Plot').value
         self._save = self.getProperty('Save').value
         self._dry_run = self.getProperty('DryRun').value
@@ -135,8 +131,7 @@ class Fury(PythonAlgorithm):
                              % (analyserName, instrument))
                 resolution = instrument.getNumberParameter('resolution')[0]
 
-            if self._verbose:
-                logger.information('Got resolution from IPF: %f' % resolution)
+            logger.information('Got resolution from IPF: %f' % resolution)
 
         except (AttributeError, IndexError):
             resolution = 0.0175
@@ -196,7 +191,7 @@ class Fury(PythonAlgorithm):
         from IndirectCommon import CheckHistZero, CheckHistSame, CheckAnalysers
 
         # Process resolution data
-        CheckAnalysers(self._sample, self._resolution, self._verbose)
+        CheckAnalysers(self._sample, self._resolution)
         num_res_hist = CheckHistZero(self._resolution)[0]
         if num_res_hist > 1:
             CheckHistSame(self._sample, 'Sample', self._resolution, 'Resolution')

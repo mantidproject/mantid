@@ -251,7 +251,6 @@ namespace CustomInterfaces
       resAlg->setProperty("BackgroundRange", background.toStdString());
       resAlg->setProperty("ScaleFactor", m_uiForm.spScale->value());
       resAlg->setProperty("Smooth", m_uiForm.ckSmoothResolution->isChecked());
-      resAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
       resAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
       resAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
 
@@ -319,6 +318,9 @@ namespace CustomInterfaces
   {
     // Get spectra, peak and background details
     std::map<QString, QString> instDetails = getInstrumentDetails();
+
+    // Set the search instrument for runs
+    m_uiForm.leRunNo->setInstrumentOverride(instDetails["instrument"]);
 
     // Set spectra range
     m_dblManager->setValue(m_properties["ResSpecMin"], instDetails["spectra-min"].toDouble());

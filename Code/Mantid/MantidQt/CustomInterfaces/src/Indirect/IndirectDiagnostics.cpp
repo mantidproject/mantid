@@ -156,7 +156,6 @@ namespace CustomInterfaces
     sliceAlg->setProperty("InputFiles", filenames.toStdString());
     sliceAlg->setProperty("SpectraRange", spectraRange);
     sliceAlg->setProperty("PeakRange", peakRange);
-    sliceAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
     sliceAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
     sliceAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
     sliceAlg->setProperty("OutputNameSuffix", suffix.toStdString());
@@ -222,6 +221,9 @@ namespace CustomInterfaces
   {
     //Get spectra, peak and background details
     std::map<QString, QString> instDetails = getInstrumentDetails();
+
+    // Set the search instrument for runs
+    m_uiForm.dsInputFiles->setInstrumentOverride(instDetails["instrument"]);
 
     //Set spectra range
     m_dblManager->setValue(m_properties["SpecMin"], instDetails["spectra-min"].toDouble());
@@ -367,7 +369,6 @@ namespace CustomInterfaces
     sliceAlg->setProperty("InputFiles", filenames.toStdString());
     sliceAlg->setProperty("SpectraRange", spectraRange);
     sliceAlg->setProperty("PeakRange", peakRange);
-    sliceAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
     sliceAlg->setProperty("Plot", false);
     sliceAlg->setProperty("Save", false);
     sliceAlg->setProperty("OutputNameSuffix", suffix.toStdString());
