@@ -87,14 +87,6 @@ if [[ ${JOB_NAME} == *pull_requests* ]]; then
 fi
 
 ###############################################################################
-# Clean build directory if required
-###############################################################################
-if [[ "$CLEANBUILD" == true ]]; then
-  # Removing the build directory entirely guarantees a completely clean build
-  rm -rf $WORKSPACE/build
-fi
-
-###############################################################################
 # Packaging options
 ###############################################################################
 if [[ "$BUILDPKG" == true ]]; then
@@ -115,8 +107,11 @@ if [[ "$BUILDPKG" == true ]]; then
 fi
 
 ###############################################################################
-# Create the build directory if it doesn't exist
+# Setup the build directory
 ###############################################################################
+if [[ "$CLEANBUILD" == true ]]; then
+  rm -rf $WORKSPACE/build
+fi
 [ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
 cd $WORKSPACE/build
 
