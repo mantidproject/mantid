@@ -50,7 +50,7 @@ void export_IPeak()
     .def("setQLabFrame", (void (IPeak::*)(Mantid::Kernel::V3D))&IPeak::setQLabFrame, "Set the peak using the peak's position in reciprocal space, in the lab frame.")
     .def("setQLabFrame", setQLabFrame, "Set the peak using the peak's position in reciprocal space, in the lab frame. Detector distance explicitly supplied.") // two argument overload
     .def("setQSampleFrame", (void (IPeak::*)(Mantid::Kernel::V3D))&IPeak::setQSampleFrame, "Set the peak using the peak's position in reciprocal space, in the sample frame.")
-    .def("setQSampleFrame", &IPeak::setQSampleFrame, "Set the peak using the peak's position in reciprocal space, in the sample frame.")
+    .def("setQSampleFrame", setQSampleFrame, "Set the peak using the peak's position in reciprocal space, in the sample frame.")
     .def("setWavelength", &IPeak::setWavelength, "Set the incident wavelength of the neutron. Calculates the energy from this assuming elastic scattering.")
     .def("getWavelength", &IPeak::getWavelength, "Return the incident wavelength")
     .def("getScattering", &IPeak::getScattering, "Calculate the scattering angle of the peak")

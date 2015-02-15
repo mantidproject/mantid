@@ -1,7 +1,8 @@
 import unittest
 from testhelpers import run_algorithm, WorkspaceCreationHelper
 from mantid.kernel import V3D
-from mantid.api import IPeaksWorkspace
+from mantid.geometry import OrientedLattice
+from mantid.api import IPeaksWorkspace, IPeak
 
 class IPeaksWorkspaceTest(unittest.TestCase):
     """
@@ -38,6 +39,7 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         # Create a new peak at some Q in the lab frame
         qlab = V3D(1,2,3)
         p = pws.createPeak(qlab, 1.54)
+        p.getQLabFrame()
         self.assertAlmostEquals( p.getQLabFrame().X(), 1.0, 3)
 
         # Now try to add the peak back
@@ -50,7 +52,15 @@ class IPeaksWorkspaceTest(unittest.TestCase):
 
         # Peaks workspace will not be integrated by default.
         self.assertTrue(not pws.hasIntegratedPeaks())
-
+        
+    def test_createPeakHKL(self):
+        pws = WorkspaceCreationHelper.createPeaksWorkspace(0)
+        lattice = pws.mutableSample().getOrientedLattice()
+        
+        # Simple test that the creational method is exposed
+        p = pws.createPeakHKL([1,1,1])
+        self.assertTrue(IPeak != None)
+    
     def test_peak_setQLabFrame(self):
         pws = WorkspaceCreationHelper.createPeaksWorkspace(1)
         p = pws.getPeak(0)
@@ -64,7 +74,7 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         except Exception:
             self.fail("Tried setQLabFrame with one V3D argument and a double distance")
         
-     def test_peak_setQSampleFrame(self):
+    def test_peak_setQSampleFrame(self):
         pws = WorkspaceCreationHelper.createPeaksWorkspace(1)
         p = pws.getPeak(0)
         try:

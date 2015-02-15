@@ -397,6 +397,10 @@ PeaksWorkspace::peakInfo(Kernel::V3D qFrame, bool labCoords) const {
  */
 Peak *PeaksWorkspace::createPeakHKL(V3D HKL) const
 {
+    /*
+     The following allows us to add peaks where we have a single UB to work from.
+     */
+
     Geometry::OrientedLattice lattice = this->sample().getOrientedLattice();
     Geometry::Goniometer  goniometer = this->run().getGoniometer();
 
@@ -411,6 +415,9 @@ Peak *PeaksWorkspace::createPeakHKL(V3D HKL) const
 
     // Set the goniometer
     peak->setGoniometerMatrix(goniometer.getR());
+
+    // Take the run number from this
+    peak->setRunNumber(this->getRunNumber());
 
     return peak;
 }

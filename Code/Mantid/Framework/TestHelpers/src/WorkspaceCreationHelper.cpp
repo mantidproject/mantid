@@ -1193,6 +1193,8 @@ createPeaksWorkspace(const int numPeaks) {
     peaksWS->addPeak(peak);
   }
 
+  Mantid::Geometry::OrientedLattice lattice;
+  peaksWS->mutableSample().setOrientedLattice(&lattice);
   return peaksWS;
 }
 
