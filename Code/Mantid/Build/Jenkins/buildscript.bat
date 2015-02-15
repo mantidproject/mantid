@@ -110,3 +110,21 @@ if "%BUILDPKG%" EQU "yes" (
   ::if ERRORLEVEL 1 exit /B %ERRORLEVEL%
   cpack -C %BUILD_CONFIG% --config CPackConfig.cmake
 )
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Run the doc tests when doing a pull request build. Run from a package
+:: from a package to have at least one Linux checks it install okay
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+if "%JOB_NAME%"=="%JOB_NAME:pull_requests=%" (
+  set SYSTEMTEST_DIR=%WORKSPACE%\Code\Mantid\Testing\SystemTest
+  :: Install package
+  python %SYSTEMTEST_DIR%\scripts\mantidinstaller.py install %WORKSPACE%\build
+  cd %WORKSPACE%\build\docs
+  :: Run tests
+  C:\MantidInstall\bin\MantidPlot.exe -xq runsphinx_doctest.py
+  if ERRORLEVEl 1 exit /B %ERRORLEVEL%
+  :: Remove
+  cd %WORKSPACE%\build
+  python %SYSTEMTEST_DIR%\scripts\mantidinstaller.py uninstall %WORKSPACE%\build
+)
+
