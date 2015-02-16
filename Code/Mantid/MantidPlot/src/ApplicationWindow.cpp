@@ -8651,18 +8651,26 @@ MdiSubWindow* ApplicationWindow::clone(MdiSubWindow* w)
 
   if (w->isA("MultiLayer")){
     MultiLayer *g = dynamic_cast<MultiLayer*>(w);
+    if(!g)
+      return NULL;
     nw = multilayerPlot(generateUniqueName(tr("Graph")), 0, g->getRows(), g->getCols());
-    dynamic_cast<MultiLayer*>(nw)->copy(g);
+    auto nwg = dynamic_cast<MultiLayer*>(nw);
+    if(nwg)
+      nwg->copy(g);
   } else if (w->inherits("Table")){
     Table *t = dynamic_cast<Table*>(w);
+    if(!t)
+      return NULL;
     QString caption = generateUniqueName(tr("Table"));
     nw = newTable(caption, t->numRows(), t->numCols());
   } else if (w->isA("Graph3D")){
     Graph3D *g = dynamic_cast<Graph3D*>(w);
+    if(!g)
+      return NULL;
     if (!g->hasData()){
       QApplication::restoreOverrideCursor();
       QMessageBox::warning(this, tr("MantidPlot - Duplicate error"), tr("Empty 3D surface plots cannot be duplicated!"));//Mantid
-      return 0;
+      return NULL;
     }
 
     QString caption = generateUniqueName(tr("Graph"));
@@ -8695,15 +8703,32 @@ MdiSubWindow* ApplicationWindow::clone(MdiSubWindow* w)
 
     if (status == MdiSubWindow::Maximized)
       nw->hide();
-    dynamic_cast<Graph3D*>(nw)->copy(g);
+    auto g3d = dynamic_cast<Graph3D*>(nw);
+    if(g3d)
+      g3d->copy(g);
     customToolBars(nw);
   } else if (w->isA("Matrix")){
-    nw = newMatrix((dynamic_cast<Matrix*>(w))->numRows(), (dynamic_cast<Matrix*>(w))->numCols());
-    dynamic_cast<Matrix*>(nw)->copy(dynamic_cast<Matrix*>(w));
+    auto matrix = dynamic_cast<Matrix*>(w);
+    if(!matrix)
+      return NULL;
+    nw = newMatrix(matrix->numRows(), matrix->numCols());
+    auto nwmatrix = dynamic_cast<Matrix*>(nw);
+    if(nwmatrix)
+      nwmatrix->copy(matrix);
   } else if (w->isA("Note")){
+    auto note = dynamic_cast<Note*>(w);
+    if(!note)
+      return NULL;
+
     nw = newNote();
-    if (nw)
-      dynamic_cast<Note*>(nw)->setText(dynamic_cast<Note*>(w)->text());
+    if(!nw)
+      return NULL;
+
+    auto nwnote = dynamic_cast<Note*>(nw);
+    if(!nwnote)
+      return NULL;
+
+    nwnote->setText(note->text());
   }
 
   if (nw){
@@ -8711,13 +8736,16 @@ MdiSubWindow* ApplicationWindow::clone(MdiSubWindow* w)
       if (status == MdiSubWindow::Maximized)
         nw->showMaximized();
     } else if (w->isA("Graph3D")){
-      dynamic_cast<Graph3D*>(nw)->setIgnoreFonts(true);
+      auto g3d = dynamic_cast<Graph3D*>(nw);
+      if(!g3d)
+        return NULL;
+      g3d->setIgnoreFonts(true);
       if (status != MdiSubWindow::Maximized){
         nw->resize(w->size());
         nw->showNormal();
       } else
         nw->showMaximized();
-      dynamic_cast<Graph3D*>(nw)->setIgnoreFonts(false);
+      g3d->setIgnoreFonts(false);
     } else {
       nw->resize(w->size());
       nw->showNormal();
