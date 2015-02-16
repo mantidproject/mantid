@@ -10146,10 +10146,15 @@ void ApplicationWindow::showGraphContextMenu()
 
   QMenu cm(this);
   Graph* ag = dynamic_cast<Graph*>(plot->activeGraph());
+  if(!ag)
+    return;
   PlotToolInterface* tool = ag->activeTool();
   if (dynamic_cast<PeakPickerTool*>(tool))
   {
-    dynamic_cast<PeakPickerTool*>(tool)->prepareContextMenu(cm);
+    auto ppt = dynamic_cast<PeakPickerTool*>(tool);
+    if(!ppt)
+      return;
+    ppt->prepareContextMenu(cm);
     cm.exec(QCursor::pos());
     return;
   }
