@@ -9868,11 +9868,17 @@ void ApplicationWindow::deleteSelectedItems()
   folders->blockSignals(true);
   foreach(item, lst){
     if (item->rtti() == FolderListItem::RTTI){
-      Folder *f = dynamic_cast<FolderListItem*>(item)->folder();
+      auto fli = dynamic_cast<FolderListItem*>(item);
+      if(!fli)
+        continue;
+      Folder *f = fli->folder();
       if (deleteFolder(f))
         delete item;
-    } else
-      dynamic_cast<WindowListItem*>(item)->window()->close();
+    } else {
+      auto wli = dynamic_cast<WindowListItem*>(item);
+      if(wli)
+        wli->window()->close();
+    }
   }
   folders->blockSignals(false);
 }
