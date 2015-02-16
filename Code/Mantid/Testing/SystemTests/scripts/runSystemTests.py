@@ -78,7 +78,8 @@ sys.path.insert(0, mantid_module_path)
 # not the dynamic library path variable name
 if platform.system() == 'Windows':
   path_var = "PATH"
-elif platform.system() == 'Darwin':
+# only necessary on 10.8 build
+elif platform.system() == 'Darwin' and int(platform.release().split('.')[0]) < 13 :
   path_var = "DYLD_LIBRARY_PATH"
 else:
   path_var = None
