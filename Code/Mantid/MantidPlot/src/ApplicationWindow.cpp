@@ -8394,11 +8394,20 @@ void ApplicationWindow::copySelection()
   if (!m)
     return;
 
-    if (m->inherits("Table"))
-    dynamic_cast<Table*>(m)->copySelection();
+  if (m->inherits("Table"))
+  {
+    Table* table = dynamic_cast<Table*>(m);
+    if(table)
+      table->copySelection();
+  }
   else if (m->isA("Matrix"))
-    dynamic_cast<Matrix*>(m)->copySelection();
-  else if (m->isA("MultiLayer")){
+  {
+    Matrix* matrix = dynamic_cast<Matrix*>(m);
+    if(matrix)
+      matrix->copySelection();
+  }
+  else if (m->isA("MultiLayer"))
+  {
     MultiLayer* plot = dynamic_cast<MultiLayer*>(m);
     if (!plot || plot->layers() == 0)
       return;
@@ -8410,7 +8419,9 @@ void ApplicationWindow::copySelection()
     if (g->activeTool()){
       if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector)
       {
-        dynamic_cast<RangeSelectorTool*>(g->activeTool())->copySelection();
+        RangeSelectorTool* rst = dynamic_cast<RangeSelectorTool*>(g->activeTool());
+        if(rst)
+          rst->copySelection();
       }
     } else if (g->markerSelected()){
       copyMarker();
@@ -8422,7 +8433,11 @@ void ApplicationWindow::copySelection()
     plot->copyAllLayers();
   }
   else if (m->isA("Note"))
-    dynamic_cast<Note*>(m)->editor()->copy();
+  {
+    Note* note = dynamic_cast<Note*>(m);
+    if(note)
+      note->editor()->copy();
+  }
   else
     mantidUI->copyValues();//Mantid
 }
