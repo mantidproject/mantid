@@ -9,6 +9,9 @@
 #include "MantidKernel/ProxyInfo.h"
 
 #include <Poco/TemporaryFile.h>
+#include <Poco/Net/HTMLForm.h>
+#include "Poco/Net/PartSource.h"
+#include "Poco/Net/StringPartSource.h"
 
 #include <fstream>
 #include <sstream>
@@ -147,7 +150,7 @@ public:
     TSM_ASSERT_EQUALS("method is not GET",internetHelper.getMethod(),"GET");
     TSM_ASSERT_EQUALS("Contentlength is wrong",internetHelper.getContentLength(),0);
   }
-
+  
   void test_BodyStream_GetSet()
   {
     MockedInternetHelper internetHelper;
@@ -163,6 +166,38 @@ public:
     TSM_ASSERT_EQUALS("setBody failed",internetHelper.getBody(),"");
     TSM_ASSERT_EQUALS("method is not GET",internetHelper.getMethod(),"GET");
     TSM_ASSERT_EQUALS("Contentlength is wrong",internetHelper.getContentLength(),0);
+  }
+
+  void test_BodyForm_GetSet()
+  {
+    MockedInternetHelper internetHelper;
+	  Poco::Net::HTMLForm form(Poco::Net::HTMLForm::ENCODING_MULTIPART);
+	  form.set("field1", "value1");
+	  form.set("field2", "value 2");
+	  form.set("field3", "value=3");
+	  form.set("field4", "value&4");
+	
+	  form.addPart("attachment1", new Poco::Net::StringPartSource("This is an attachment"));
+	  Poco::Net::StringPartSource* pSPS = new Poco::Net::StringPartSource("This is another attachment", "text/plain", "att2.txt");
+	  pSPS->headers().set("Content-ID", "1234abcd");
+	  form.addPart("attachment2", pSPS);
+    TSM_ASSERT_EQUALS("Default body is not empty",internetHelper.getBody(),"");
+    TSM_ASSERT_EQUALS("method is not GET",internetHelper.getMethod(),"GET");
+    internetHelper.setBody(form);
+    std::string body = internetHelper.getBody();
+    TSM_ASSERT_DIFFERS("setBody failed \"--MIME_boundary\"",body.find("--MIME_boundary"),std::string::npos);
+    TSM_ASSERT_DIFFERS("setBody failed \"This is an attachment\"",body.find("This is an attachment"),std::string::npos);
+    TSM_ASSERT_DIFFERS("setBody failed \"This is another attachment\"",body.find("This is another attachment"),std::string::npos);
+    TSM_ASSERT_DIFFERS("setBody failed \"field1\"",body.find("field1"),std::string::npos);
+    TSM_ASSERT_DIFFERS("setBody failed \"field2\"",body.find("field2"),std::string::npos);
+    TSM_ASSERT_DIFFERS("setBody failed \"field3\"",body.find("field3"),std::string::npos);
+    TSM_ASSERT_DIFFERS("setBody failed \"field4\"",body.find("field4"),std::string::npos);
+    TSM_ASSERT_DIFFERS("setBody failed \"value1\"",body.find("value1"),std::string::npos);
+    TSM_ASSERT_DIFFERS("setBody failed \"value 2\"",body.find("value 2"),std::string::npos);
+    TSM_ASSERT_DIFFERS("setBody failed \"value=3\"",body.find("value=3"),std::string::npos);
+    TSM_ASSERT_DIFFERS("setBody failed \"value&4\"",body.find("value&4"),std::string::npos);
+    TSM_ASSERT_EQUALS("method is not POST",internetHelper.getMethod(),"POST");
+    TSM_ASSERT_LESS_THAN("Contentlength is wrong",700,internetHelper.getContentLength());
   }
 
   void test_Headers_GetSet()
