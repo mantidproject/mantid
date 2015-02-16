@@ -9144,22 +9144,27 @@ void ApplicationWindow::removeWindowFromLists(MdiSubWindow* w)
 
   QString caption = w->objectName();
   if (w->inherits("Table")){
-    Table* m=dynamic_cast<Table*>(w);
+    Table* m = dynamic_cast<Table*>(w);
+    if(!m)
+      return;
     for (int i=0; i<m->numCols(); i++){
       QString name=m->colName(i);
       removeCurves(name);
     }
   } else if (w->isA("MultiLayer")){
-    MultiLayer *ml =  dynamic_cast<MultiLayer*>(w);
+    MultiLayer *ml = dynamic_cast<MultiLayer*>(w);
+    if(!ml)
+      return;
     Graph *g = ml->activeGraph();
-    if (g)
-      btnPointer->setChecked(true);
+    if(!g)
+      return;
+    btnPointer->setChecked(true);
   } else if (w->isA("Matrix"))
   {
-    remove3DMatrixPlots(dynamic_cast<Matrix*>(w));
+    auto matrix = dynamic_cast<Matrix*>(w);
+    if(matrix)
+      remove3DMatrixPlots(matrix);
   }
-
-  else  {  }
 
   if (hiddenWindows->contains(w))
   {
