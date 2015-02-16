@@ -507,14 +507,14 @@ void ConvertToMD::performInitialSplitting(API::IMDEventWorkspace_sptr spws, Mant
   // Record the split settings of the box controller in a buffer and set the new value
   std::vector<size_t> splitBuffer;
   
-  for (size_t dim = 0; dim < bc->getNDims(); ++dim)
+  for (size_t dim = 0; dim < bc->getNDims(); dim++)
   {
     splitBuffer.push_back(bc->getSplitInto(dim));
 
     // Replace the box controller setting only for a max of the first three dimensions
     if (dim < dimCutoff)
     {
-       bc->setSplitInto(initialSplitSetting);
+       bc->setSplitInto(dim, initialSplitSetting);
     }
   }
 
@@ -524,7 +524,7 @@ void ConvertToMD::performInitialSplitting(API::IMDEventWorkspace_sptr spws, Mant
   // Revert changes on the box controller
   for (size_t dim = 0; dim < bc->getNDims(); ++dim)
   {
-    bc->setSplitInto(splitBuffer[dim]);
+    bc->setSplitInto(dim, splitBuffer[dim]);
   }
 }
 

@@ -5,6 +5,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/BoxController.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -164,6 +165,82 @@ void testExecQ3D()
     pAlg->execute();
     TSM_ASSERT("Should finish successfully",pAlg->isExecuted());
     checkHistogramsHaveBeenStored("WS5DQ3D");
+
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS5DQ3D");
+    TS_ASSERT_EQUALS(Mantid::Kernel::HKL, outWS->getSpecialCoordinateSystem());
+
+    AnalysisDataService::Instance().remove("WS5DQ3D");
+}
+
+void testInitialSplittingEnabled()
+{
+     Mantid::API::MatrixWorkspace_sptr ws2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
+     API::NumericAxis *pAxis = new API::NumericAxis(3);
+     pAxis->setUnit("DeltaE");
+
+     ws2D->replaceAxis(0,pAxis);
+
+    pAlg->setPropertyValue("OutputWorkspace","WS5DQ3D");
+    pAlg->setPropertyValue("InputWorkspace","testWSProcessed");
+    pAlg->setPropertyValue("OtherDimensions","phi,chi");
+    pAlg->setPropertyValue("PreprocDetectorsWS","");
+     
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "Q3D"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
+    pAlg->setPropertyValue("MinValues","-10,-10,-10,  0,-10,-10");
+    pAlg->setPropertyValue("MaxValues"," 10, 10, 10, 20, 40, 20");
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InitialSplitting", "0"));
+    pAlg->setRethrows(false);
+    pAlg->execute();
+    TSM_ASSERT("Should finish successfully",pAlg->isExecuted());
+
+    IMDEventWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("WS5DQ3D");
+    Mantid::API::BoxController_sptr boxController = outputWS->getBoxController();
+
+    std::vector<size_t> numMDBoxes = boxController->getNumMDBoxes();
+
+    // Check depth 0
+    TSM_ASSERT_EQUALS("Should have no MDBoxes at level 0", 0, numMDBoxes[0]);
+    // Check depth 1. The boxController is set to split with 50, 50, 50, 5, 5, 5
+    TSM_ASSERT_EQUALS("Should have 15625000 MDBoxes at level 1", 15625000, numMDBoxes[1]);
+
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS5DQ3D");
+    TS_ASSERT_EQUALS(Mantid::Kernel::HKL, outWS->getSpecialCoordinateSystem());
+
+    AnalysisDataService::Instance().remove("WS5DQ3D");
+}
+
+void testInitialSplittingDisabled()
+{
+     Mantid::API::MatrixWorkspace_sptr ws2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
+     API::NumericAxis *pAxis = new API::NumericAxis(3);
+     pAxis->setUnit("DeltaE");
+
+     ws2D->replaceAxis(0,pAxis);
+
+    pAlg->setPropertyValue("OutputWorkspace","WS5DQ3D");
+    pAlg->setPropertyValue("InputWorkspace","testWSProcessed");
+    pAlg->setPropertyValue("OtherDimensions","phi,chi");
+    pAlg->setPropertyValue("PreprocDetectorsWS","");
+     
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "Q3D"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
+    pAlg->setPropertyValue("MinValues","-10,-10,-10,  0,-10,-10");
+    pAlg->setPropertyValue("MaxValues"," 10, 10, 10, 20, 40, 20");
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InitialSplitting", "0"));
+    pAlg->setRethrows(false);
+    pAlg->execute();
+    TSM_ASSERT("Should finish successfully",pAlg->isExecuted());
+
+    IMDEventWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("WS5DQ3D");
+    Mantid::API::BoxController_sptr boxController = outputWS->getBoxController();
+
+    std::vector<size_t> numMDBoxes = boxController->getNumMDBoxes();
+
+    // Check depth 0
+    TSM_ASSERT_EQUALS("Should have no MDBoxes at level 0", 0, numMDBoxes[0]);
+    // Check depth 1. The boxController is set to split with 5, 5, 5, 5, 5, 5
+    TSM_ASSERT_EQUALS("Should have 15625 MDBoxes at level 1", 15625, numMDBoxes[1]);
 
     auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS5DQ3D");
     TS_ASSERT_EQUALS(Mantid::Kernel::HKL, outWS->getSpecialCoordinateSystem());
