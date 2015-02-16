@@ -9582,7 +9582,11 @@ void ApplicationWindow::savedProject()
     foreach(MdiSubWindow *w, folderWindows)
     {
       if (w->isA("Matrix"))
-        (dynamic_cast<Matrix*>(w))->undoStack()->setClean();
+      {
+        Matrix* m = dynamic_cast<Matrix*>(w);
+        if (m)
+          m->undoStack()->setClean();
+      }
     }
     f = f->folderBelow();
   }
