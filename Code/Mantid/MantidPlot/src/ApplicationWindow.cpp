@@ -7251,20 +7251,14 @@ QDialog* ApplicationWindow::showScaleDialog()
     return 0;
 
   if (w->isA("MultiLayer")){
-    MultiLayer* ml;
-    try
-    {
-      ml = dynamic_cast<MultiLayer*>(w);
-    }
-    catch(std::runtime_error& )
-    {
-      g_log.error() << "Failed to open scale dialog for multi layer plot";
-      return 0;
-    }
+    auto ml = dynamic_cast<MultiLayer*>(w);
     if (!ml || ml->isEmpty())
       return 0;
 
-    Graph* g = dynamic_cast<MultiLayer*>(w)->activeGraph();
+    Graph* g = ml->activeGraph();
+    if(!g)
+      return 0;
+
     if (g->isPiePlot()){
       QMessageBox::warning(this, tr("MantidPlot - Warning"), tr("This functionality is not available for pie plots!"));//Mantid
       return 0;
