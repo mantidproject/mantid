@@ -154,7 +154,7 @@ public:
   void test_BodyStream_GetSet()
   {
     MockedInternetHelper internetHelper;
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "Test string";
     TSM_ASSERT_EQUALS("Default body is not empty",internetHelper.getBody(),"");
     internetHelper.setBody(ss);

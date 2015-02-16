@@ -472,17 +472,8 @@ void InternetHelper::setBody(const std::string& body) {
 *   and GET if it is.
 * @param body A stringstream of the body
 **/
-void InternetHelper::setBody(const std::stringstream& body) { 
-  //clear the old body
-  m_body.str("") ;
-  //if empty
-  if (body.rdbuf()->in_avail() == 0) {
-    setMethod("GET");
-  } else {
-    setMethod("POST");
-    m_body << body.str();
-  }
-  setContentLength(m_body.tellp());
+void InternetHelper::setBody(const std::ostringstream& body) { 
+    setBody(body.str());
 }
 
 /** Sets the body & content length for future requests, this will also 

@@ -76,7 +76,7 @@ public:
   std::streamsize getContentLength();
 
   void setBody(const std::string& body);
-  void setBody(const std::stringstream& body);
+  void setBody(const std::ostringstream& body);
   void setBody(Poco::Net::HTMLForm& form);
   const std::string getBody();
 
@@ -124,7 +124,7 @@ private:
   std::streamsize m_contentLength;
   std::string m_method;
   std::string m_contentType;
-  std::stringstream m_body;
+  std::ostringstream m_body;
   StringToStringMap m_headers;
   Poco::Net::HTTPRequest *m_request;
 };
