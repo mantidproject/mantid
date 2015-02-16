@@ -6396,14 +6396,18 @@ void ApplicationWindow::showCurvesDialog()
   if (!w)
     return;
 
-  if (dynamic_cast<MultiLayer*>(w)->isEmpty()){
+  auto ml = dynamic_cast<MultiLayer*>(w);
+  if(!ml)
+    return;
+
+  if (ml->isEmpty()){
     QMessageBox::warning(this,tr("MantidPlot - Error"),//Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"
             "<p><h4>Please add a layer and try again!</h4>"));
     return;
   }
 
-  Graph* g = dynamic_cast<MultiLayer*>(w)->activeGraph();
+  Graph* g = ml->activeGraph();
   if (!g)
     return;
 
