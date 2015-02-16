@@ -8760,6 +8760,9 @@ void ApplicationWindow::resizeActiveWindow()
 void ApplicationWindow::resizeWindow()
 {
   WindowListItem *it = dynamic_cast<WindowListItem*>(lv->currentItem());
+  if (!it)
+    return;
+
   MdiSubWindow *w = it->window();
   if (!w)
     return;
