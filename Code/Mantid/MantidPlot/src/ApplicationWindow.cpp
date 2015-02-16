@@ -15161,21 +15161,27 @@ void ApplicationWindow::dropFolderItems(Q3ListViewItem *dest)
   if (!dest || draggedItems.isEmpty ())
     return;
 
-  Folder *dest_f = dynamic_cast<FolderListItem *>(dest)->folder();
+  auto dfli = dynamic_cast<FolderListItem*>(dest);
+  if(!dfli)
+    return;
+  Folder *dest_f = dfli->folder();
 
   Q3ListViewItem *it;
   QStringList subfolders = dest_f->subfolders();
 
   foreach(it, draggedItems){
     if (it->rtti() == FolderListItem::RTTI){
-      Folder *f = dynamic_cast<FolderListItem*>(it)->folder();
+      auto itfli = dynamic_cast<FolderListItem*>(it);
+      if(!itfli)
+        continue;
+      Folder *f = itfli->folder();
       FolderListItem *src = f->folderListItem();
       if (dest_f == f){
         QMessageBox::critical(this, "MantidPlot - Error", tr("Cannot move an object to itself!"));//Mantid
         return;
       }
 
-      if (dynamic_cast<FolderListItem *>(dest)->isChildOf(src)){
+      if (dfli->isChildOf(src)){
         QMessageBox::critical(this,"MantidPlot - Error",tr("Cannot move a parent folder into a child folder!"));//Mantid
         draggedItems.clear();
         folders->setCurrentItem(currentFolder()->folderListItem());
@@ -15192,17 +15198,22 @@ void ApplicationWindow::dropFolderItems(Q3ListViewItem *dest)
         QMessageBox::critical(this, tr("MantidPlot") +" - " + tr("Skipped moving folder"),//Mantid
             tr("The destination folder already contains a folder called '%1'! Folder skipped!").arg(f->objectName()));
       } else
-        moveFolder(src, dynamic_cast<FolderListItem *>(dest));
+        moveFolder(src, dfli);
     } else {
       if (dest_f == currentFolder())
         return;
 
-      MdiSubWindow *w = dynamic_cast<WindowListItem*>(it)->window();
-      if (w){
-        currentFolder()->removeWindow(w);
-        w->hide();
-        dest_f->addWindow(w);
-        delete it;
+      auto wli = dynamic_cast<WindowListItem*>(it);
+      if(wli)
+      {
+        MdiSubWindow *w = wli->window();
+        if (w)
+        {
+          currentFolder()->removeWindow(w);
+          w->hide();
+          dest_f->addWindow(w);
+          delete it;
+        }
       }
     }
   }
