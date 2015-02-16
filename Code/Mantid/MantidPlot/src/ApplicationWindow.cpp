@@ -8985,7 +8985,7 @@ void ApplicationWindow::activateWindow(Q3ListViewItem * lbi)
   if (!lbi || lbi->rtti() == FolderListItem::RTTI)
     return;
 
-  WindowListItem* wli = dynamic_cast<WindowListItem*>(lbi);
+  auto wli = dynamic_cast<WindowListItem*>(lbi);
   if(wli)
     activateWindow(wli->window());
 }
@@ -8998,7 +8998,9 @@ void ApplicationWindow::maximizeWindow(Q3ListViewItem * lbi)
   if (!lbi || lbi->rtti() == FolderListItem::RTTI)
     return;
 
-  maximizeWindow(dynamic_cast<WindowListItem*>(lbi)->window());
+  auto wli = dynamic_cast<WindowListItem*>(lbi);
+  if(wli)
+    maximizeWindow(wli->window());
 }
 
 void ApplicationWindow::maximizeWindow(MdiSubWindow *w)
