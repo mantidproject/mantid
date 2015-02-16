@@ -6220,8 +6220,11 @@ void ApplicationWindow::saveProjectAs(const QString& fileName, bool compress)
       QFileInfo fi(fn);
       QString baseName = fi.baseName();
       FolderListItem *item = dynamic_cast<FolderListItem *>(folders->firstChild());
-      item->setText(0, baseName);
-      item->folder()->setObjectName(baseName);
+      if(item)
+      {
+        item->setText(0, baseName);
+        item->folder()->setObjectName(baseName);
+      }
     }
   }
 }
