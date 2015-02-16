@@ -8966,7 +8966,9 @@ void ApplicationWindow::activateWindow(Q3ListViewItem * lbi)
   if (!lbi || lbi->rtti() == FolderListItem::RTTI)
     return;
 
-  activateWindow(dynamic_cast<WindowListItem*>(lbi)->window());
+  WindowListItem* wli = dynamic_cast<WindowListItem*>(lbi);
+  if(wli)
+    activateWindow(wli->window());
 }
 
 void ApplicationWindow::maximizeWindow(Q3ListViewItem * lbi)
