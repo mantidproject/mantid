@@ -13645,12 +13645,24 @@ void ApplicationWindow::deleteFitTables()
 
   foreach(QWidget *ml, *mLst){
     if (ml->isA("MultiLayer")){
-      QList<Graph *> layers = dynamic_cast<MultiLayer*>(ml)->layersList();
+      auto cml = dynamic_cast<MultiLayer*>(ml);
+      if(!cml)
+        continue;
+
+      QList<Graph *> layers = cml->layersList();
       foreach(Graph *g, layers){
         QList<QwtPlotCurve *> curves = g->fitCurvesList();
         foreach(QwtPlotCurve *c, curves){
-          if (dynamic_cast<PlotCurve*>(c)->type() != Graph::Function){
-            Table *t = dynamic_cast<DataCurve*>(c)->table();
+          auto curve = dynamic_cast<PlotCurve*>(c);
+          if(!curve)
+            continue;
+
+          if(curve->type() != Graph::Function)
+          {
+            auto dc = dynamic_cast<DataCurve*>(c);
+            if(!dc)
+              continue;
+            Table *t = dc->table();
             if (!t)
               continue;
 
