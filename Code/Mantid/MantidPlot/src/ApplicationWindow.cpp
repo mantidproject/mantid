@@ -16537,7 +16537,10 @@ void ApplicationWindow::setMatrixUndoStackSize(int size)
     QList<MdiSubWindow *> folderWindows = f->windowsList();
     foreach(MdiSubWindow *w, folderWindows){
       if (w->isA("Matrix")){
-        QUndoStack *stack = (dynamic_cast<Matrix*>(w))->undoStack();
+        auto matrix = dynamic_cast<Matrix*>(w);
+        if(!matrix)
+          continue;
+        QUndoStack *stack = matrix->undoStack();
         if (!stack->count())// undo limit can only be changed for empty stacks
           stack->setUndoLimit(size);
       }
