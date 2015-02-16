@@ -54,6 +54,13 @@ if "%JOB_NAME%"=="%JOB_NAME:clean=%" (
     rmdir /S /Q build
 )
 
+if EXIST %WORKSPACE%\build\CMakeCache.txt (
+  TYPE %WORKSPACE%\build\CMakeCache.txt | FINDSTR "Code/Mantid/TestingTools/cxxtest"
+  if %ERRORLEVEL% EQU 0 (
+    rmdir /S /Q %WORKSPACE%\build
+  )
+)
+
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the build directory if it doesn't exist
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

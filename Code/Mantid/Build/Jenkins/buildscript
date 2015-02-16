@@ -84,6 +84,14 @@ if [[ ${JOB_NAME} == *clean* ]]; then
   fi
 fi
 
+if [[ -e $WORKSPACE/build/CMakeCache.txt ]]; then
+  # Temporary while the builds flick between old & new TestingTools locations
+  TESTINGTOOLS_DIR=$(grep 'Code/Mantid/TestingTools/cxxtest' $WORKSPACE/build/CMakeCache.txt || true)
+  if [ ! -z "$TESTINGTOOLS_DIR"  ]; then
+    rm -fr $WORKSPACE/build
+  fi
+fi
+
 ###############################################################################
 # RHEL6 setup steps - nodes must have a "rhel6" label set (in lowercase)
 ###############################################################################
