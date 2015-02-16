@@ -6,14 +6,26 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>492</width>
-    <height>247</height>
+    <width>500</width>
+    <height>275</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Sample Transmission Calculator</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QGroupBox" name="gbRangeBinning">
@@ -21,6 +33,12 @@
        <string>Input Wavelength Range</string>
       </property>
       <layout class="QGridLayout" name="loRangeBinning">
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item row="0" column="1">
         <widget class="QComboBox" name="cbBinningType">
          <item>
@@ -63,7 +81,14 @@
             </widget>
            </item>
            <item>
-            <widget class="QDoubleSpinBox" name="spSingleLow"/>
+            <widget class="QDoubleSpinBox" name="spSingleLow">
+             <property name="minimum">
+              <double>-99.989999999999995</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QLabel" name="lbSingleWidth">
@@ -73,7 +98,14 @@
             </widget>
            </item>
            <item>
-            <widget class="QDoubleSpinBox" name="spSingleWidth"/>
+            <widget class="QDoubleSpinBox" name="spSingleWidth">
+             <property name="minimum">
+              <double>-99.989999999999995</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QLabel" name="lbSingleHigh">
@@ -83,7 +115,14 @@
             </widget>
            </item>
            <item>
-            <widget class="QDoubleSpinBox" name="spSingleHigh"/>
+            <widget class="QDoubleSpinBox" name="spSingleHigh">
+             <property name="minimum">
+              <double>-99.989999999999995</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -119,32 +158,12 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
-        <widget class="QDoubleSpinBox" name="spThickness"/>
-       </item>
-       <item row="1" column="1">
-        <widget class="QDoubleSpinBox" name="spNumberDensity"/>
-       </item>
        <item row="2" column="0">
         <widget class="QLabel" name="lbThickness">
          <property name="text">
           <string>Thickness</string>
          </property>
         </widget>
-       </item>
-       <item row="0" column="1">
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <item>
-          <widget class="QLineEdit" name="leChemicalFormula"/>
-         </item>
-         <item>
-          <widget class="QLabel" name="valChemicalFormula">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-        </layout>
        </item>
        <item row="0" column="0">
         <widget class="QLabel" name="lbChemicalFormula">
@@ -153,8 +172,59 @@
          </property>
         </widget>
        </item>
+       <item row="1" column="1">
+        <widget class="QDoubleSpinBox" name="spNumberDensity">
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QDoubleSpinBox" name="spThickness">
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QLabel" name="valThickness">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="valNumberDensity">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="valChemicalFormula">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="leChemicalFormula"/>
+       </item>
       </layout>
      </widget>
+    </item>
+    <item>
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
     </item>
     <item>
      <layout class="QHBoxLayout" name="loActionButtons">

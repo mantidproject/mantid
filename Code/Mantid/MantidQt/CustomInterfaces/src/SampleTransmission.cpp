@@ -44,6 +44,8 @@ void SampleTransmission::initLayout()
 {
   m_uiForm.setupUi(this);
   connect(m_uiForm.pbCalculate, SIGNAL(clicked()), this, SLOT(calculate()));
+
+  validate(true);
 }
 
 
@@ -51,9 +53,10 @@ void SampleTransmission::initLayout()
  * Validate user input.
  * Outputs any warnings to the results log at warning level.
  *
+ * @param silent If the results should not be logged
  * @return Result of validation
  */
-bool SampleTransmission::validate()
+bool SampleTransmission::validate(bool silent)
 {
   UserInputValidator uiv;
 
@@ -81,8 +84,16 @@ bool SampleTransmission::validate()
                            m_uiForm.leChemicalFormula,
                            m_uiForm.valChemicalFormula);
 
+  // Ensure number density is not zero
+  uiv.setErrorLabel(m_uiForm.valNumberDensity,
+    uiv.checkNotEqual("Number Density", m_uiForm.spNumberDensity->value()));
+
+  // Ensure thickness is not zero
+  uiv.setErrorLabel(m_uiForm.valThickness,
+    uiv.checkNotEqual("Thickness", m_uiForm.spThickness->value()));
+
   // Give error message
-  if(!uiv.isAllInputValid())
+  if(!silent && !uiv.isAllInputValid())
     g_log.error(uiv.generateErrorMessage().toStdString());
 
   return uiv.isAllInputValid();
@@ -143,5 +154,9 @@ void SampleTransmission::calculate()
  */
 void SampleTransmission::algorithmComplete(bool error)
 {
+  // Ignore errors
+  if(error)
+    return;
+
   //TODO
 }

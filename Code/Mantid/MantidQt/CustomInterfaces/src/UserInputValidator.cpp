@@ -21,6 +21,8 @@ namespace // anonymous
       pair.second = temp;
     }
   }
+
+  Mantid::Kernel::Logger g_log("UserInputValidator");
 } // anonymous namespace
 
 namespace MantidQt
@@ -248,6 +250,32 @@ namespace MantidQt
       if( std::abs(range) > tolerance )
       {
         m_errorMessages.append("Bin width must allow for even splitting of the range.");
+        return false;
+      }
+
+      return true;
+    }
+
+    /**
+     * Checks two values are not equal.
+     *
+     * @param name Name of value
+     * @param x First value
+     * @param y Second value (defaults to zero)
+     * @param tolerance Tolerance to which to compare
+     * @return True if input was valid
+     */
+    bool UserInputValidator::checkNotEqual(const QString & name, double x, double y, double tolerance)
+    {
+      double delta = x - y;
+
+      if(std::abs(delta) <= tolerance)
+      {
+        std::stringstream msg;
+        msg << name.toStdString() << " (" << x << ")"
+            << " should not be equal to " << y << ".";
+        QString msgStr = QString::fromStdString(msg.str());
+        m_errorMessages.append(msgStr);
         return false;
       }
 
