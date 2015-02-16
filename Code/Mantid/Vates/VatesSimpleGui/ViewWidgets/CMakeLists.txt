@@ -2,6 +2,7 @@ project( MantidVatesSimpleGuiViewWidgets )
 
 # These are the C++ files to be compiled.
 set( INCLUDE_FILES
+  inc/MantidVatesSimpleGuiViewWidgets/AutoScaleRangeGenerator.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorUpdater.h
   inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
@@ -19,6 +20,7 @@ set( INCLUDE_FILES
 )
 
 set( SOURCE_FILES
+  src/AutoScaleRangeGenerator.cpp
   src/ColorSelectionWidget.cpp
   src/ColorUpdater.cpp
   src/MdViewerWidget.cpp

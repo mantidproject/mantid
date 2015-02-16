@@ -14,8 +14,10 @@
 #include <pqPipelineRepresentation.h>
 #include <pqPVApplicationCore.h>
 #include <pqRenderView.h>
+#include <pqScalarsToColors.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
+#include <pqView.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMPropertyIterator.h>
@@ -105,29 +107,42 @@ void ViewBase::destroyFilter(pqObjectBuilder *builder, const QString &name)
 /**
  * This function is responsible for setting the color scale range from the
  * full extent of the data.
+ * @param colorSelectionWidget Pointer to the color selection widget.
  */
-void ViewBase::onAutoScale()
+void ViewBase::onAutoScale(ColorSelectionWidget* colorSelectionWidget)
 {
-  pqPipelineRepresentation *rep = this->getRep();
-  if (NULL == rep)
+  // Update the colorUpdater
+  this->colorUpdater.updateState(colorSelectionWidget);
+
+  if (this->colorUpdater.isAutoScale())
   {
-    // Can't get a good rep, just return
-    //qDebug() << "Bad rep for auto scale";
-    return;
+    this->setAutoColorScale();
   }
-  QPair <double, double> range;
+}
+
+/**
+ * Set the color scale for auto color scaling.
+ *
+ */
+void ViewBase::setAutoColorScale()
+{
+  VsiColorScale colorScale;
+
   try
   {
-    range = this->colorUpdater.autoScale(rep);
+    colorScale = this->colorUpdater.autoScale();
   }
   catch (std::invalid_argument &)
   {
     // Got a bad proxy or color scale range, so do nothing
     return;
   }
-  rep->renderViewEventually();
-  emit this->dataRange(range.first, range.second);
+
+  // Set the color scale widget
+  emit this->dataRange(colorScale.minValue, colorScale.maxValue);
+  emit this->setLogScale(colorScale.useLogScale);
 }
+
 
 /**
  * This function sets the requested color map on the data.
@@ -146,13 +161,13 @@ void ViewBase::onColorMapChange(const pqColorMapModel *model)
   bool logStateChanged = false;
   if (this->colorUpdater.isLogScale())
   {
-    this->colorUpdater.logScale(rep, false);
+    this->colorUpdater.logScale(false);
     logStateChanged = true;
   }
   this->colorUpdater.colorMapChange(rep, model);
   if (logStateChanged)
   {
-    this->colorUpdater.logScale(rep, true);
+    this->colorUpdater.logScale(true);
   }
   rep->renderViewEventually();
 }
@@ -164,28 +179,16 @@ void ViewBase::onColorMapChange(const pqColorMapModel *model)
  */
 void ViewBase::onColorScaleChange(double min, double max)
 {
-  pqPipelineRepresentation *rep = this->getRep();
-  if (NULL == rep)
-  {
-    return;
-  }
-  this->colorUpdater.colorScaleChange(rep, min, max);
-  rep->renderViewEventually();
+  this->colorUpdater.colorScaleChange(min, max);
 }
 
 /**
  * This function sets logarithmic color scaling on the data.
- * @param state flag to determine whether or not to use log color scaling
+ * @param state Flag to determine whether or not to use log color scaling
  */
 void ViewBase::onLogScale(int state)
 {
-  pqPipelineRepresentation *rep = this->getRep();
-  if (NULL == rep)
-  {
-    return;
-  }
-  this->colorUpdater.logScale(rep, state);
-  rep->renderViewEventually();
+  this->colorUpdater.logScale(state);
 }
 
 /**
@@ -201,12 +204,16 @@ void ViewBase::setColorScaleState(ColorSelectionWidget *cs)
 /**
  * This function checks the current state from the color updater and
  * processes the necessary color changes.
+ * @param colorScale A pointer to the colorscale widget.
  */
-void ViewBase::setColorsForView()
+void ViewBase::setColorsForView(ColorSelectionWidget *colorScale)
 {
+  // Update the colorupdater with the settings of the colorSelectionWidget
+  setColorScaleState(colorScale);
+
   if (this->colorUpdater.isAutoScale())
   {
-    this->onAutoScale();
+    this->onAutoScale(colorScale);
   }
   else
   {
@@ -733,6 +740,29 @@ bool ViewBase::hasWorkspaceType(const QString &wsTypeName)
   return hasWsType;
 }
 
+/**
+ * React to a change of the visibility of a representation of a source.
+ * This can be a change of the status if the "eye" symbol in the PipelineBrowserWidget
+ * as well as the addition or removal of a representation. 
+ * @param source The pipeleine source assoicated with the call.
+ * @param representation The representation associatied with the call 
+ */
+void ViewBase::onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)
+{
+  // Reset the colorscale if it is set to autoscale
+  if (colorUpdater.isAutoScale())
+  {
+    this->setAutoColorScale();
+  }
+}
+
+/**
+ * Initializes the settings of the color scale 
+ */
+void ViewBase::initializeColorScale()
+{
+  colorUpdater.initializeColorScale();
+}
 
 /**
  * This function reacts to a destroyed source.

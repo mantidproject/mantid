@@ -13,13 +13,15 @@ src/IgnoreZerosThresholdRange.cpp
 src/IMDDimensionComparitor.cpp
 src/LoadVTK.cpp
 src/MDEWEventNexusLoadingPresenter.cpp
-src/MDEWLoadingPresenter.cpp
 src/MDEWInMemoryLoadingPresenter.cpp
+src/MDEWLoadingPresenter.cpp
 src/MDHWInMemoryLoadingPresenter.cpp
 src/MDHWLoadingPresenter.cpp
 src/MDHWNexusLoadingPresenter.cpp
 src/MedianAndBelowThresholdRange.cpp
 src/MetadataToFieldData.cpp
+src/MetaDataExtractorUtils.cpp
+src/MetadataJsonManager.cpp
 src/NoThresholdRange.cpp
 src/ProgressAction.cpp
 src/SynchronisingGeometryPresenter.cpp
@@ -27,6 +29,7 @@ src/TimeStepToTimeStep.cpp
 src/TimeToTimeStep.cpp
 src/UserDefinedThresholdRange.cpp
 src/VatesXMLDefinitions.cpp
+src/VatesConfigurations.cpp
 src/VatesKnowledgeSerializer.cpp
 src/vtkDataSetFactory.cpp
 src/vtkDataSetToGeometry.cpp
@@ -69,6 +72,8 @@ inc/MantidVatesAPI/MDLoadingPresenter.h
 inc/MantidVatesAPI/MDLoadingView.h
 inc/MantidVatesAPI/MDLoadingViewAdapter.h
 inc/MantidVatesAPI/MedianAndBelowThresholdRange.h
+inc/MantidVatesAPI/MetaDataExtractorUtils.h
+inc/MantidVatesAPI/MetadataJsonManager.h
 inc/MantidVatesAPI/IgnoreZerosThresholdRange.h
 inc/MantidVatesAPI/IMDDimensionComparitor.h
 inc/MantidVatesAPI/MetadataToFieldData.h
@@ -81,6 +86,7 @@ inc/MantidVatesAPI/TimeStepToTimeStep.h
 inc/MantidVatesAPI/TimeToTimeStep.h
 inc/MantidVatesAPI/UserDefinedThresholdRange.h
 inc/MantidVatesAPI/VatesXMLDefinitions.h
+inc/MantidVatesAPI/VatesConfigurations.h
 inc/MantidVatesAPI/VatesKnowledgeSerializer.h
 inc/MantidVatesAPI/vtkDataSetFactory.h
 inc/MantidVatesAPI/vtkDataSetToGeometry.h
@@ -129,6 +135,8 @@ test/MDEWLoadingPresenterTest.h
 test/MDHWInMemoryLoadingPresenterTest.h
 test/MDHWLoadingPresenterTest.h
 test/MDHWNexusLoadingPresenterTest.h
+test/MetaDataExtractorUtilsTest.h
+test/MetadataJsonManagerTest.h
 test/MetadataToFieldDataTest.h
 test/SQWLoadingPresenterTest.h
 test/SynchronisingGeometryPresenterTest.h
@@ -144,6 +152,7 @@ test/vtkDataSetToNonOrthogonalDataSetTest.h
 )
 
 include_directories( inc )
+include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
 
 set( SRC_UNITY_IGNORE_FILES )
 if( UNITY_BUILD )
@@ -168,6 +177,7 @@ ${MANTID_SUBPROJECT_LIBS}
 vtkCommonCore
 vtkCommonDataModel
 vtkIOLegacy
+${QWT_LIBRARIES}
 )
 
 # Create test file projects

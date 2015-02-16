@@ -3,10 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/RRFMuon.h"
 
-
-#define REAL(z,i) ((z)[2*(i)])
-#define IMAG(z,i) ((z)[2*(i)+1])
-
 namespace Mantid
 {
 namespace Algorithms
@@ -37,7 +33,7 @@ void RRFMuon::init()
   unitOptions.push_back("MHz");
   unitOptions.push_back("Gauss");
   unitOptions.push_back("Mrad/s");
-  declareProperty("Frequency units", "MHz",
+  declareProperty("FrequencyUnits", "MHz",
                   boost::make_shared<StringListValidator>(unitOptions),
                   "The frequency units");
 
@@ -56,7 +52,7 @@ void RRFMuon::exec()
   // Get frequency
   double freq = getProperty("Frequency");
   // Get units
-  std::string units = getProperty("Frequency units");
+  std::string units = getProperty("FrequencyUnits");
   // Convert frequency to input workspace X units
   double factor = unitConversionFactor(inputWs->getAxis(0)->unit()->label().ascii(),units);
   // Get phase

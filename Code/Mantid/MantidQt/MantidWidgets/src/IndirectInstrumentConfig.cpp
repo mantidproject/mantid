@@ -22,18 +22,18 @@ namespace MantidQt
   namespace MantidWidgets
   {
 
-    IndirectInstrumentConfig::IndirectInstrumentConfig(QWidget *parent, bool init): API::MantidWidget(parent),
+    IndirectInstrumentConfig::IndirectInstrumentConfig(QWidget *parent): API::MantidWidget(parent),
       m_algRunner(),
       m_disabledInstruments()
     {
       m_uiForm.setupUi(this);
 
-      m_instrumentSelector = new InstrumentSelector(0, init);
+      m_instrumentSelector = new InstrumentSelector(0, false);
       m_instrumentSelector->updateInstrumentOnSelection(false);
 			m_uiForm.loInstrument->addWidget(m_instrumentSelector);
 
       // Use this signal to filter the instrument list for disabled instruments
-      connect(m_instrumentSelector, SIGNAL(currentIndexChanged(int)),
+      connect(m_instrumentSelector, SIGNAL(instrumentListUpdated()),
               this, SLOT(filterDisabledInstruments()));
 
       connect(m_instrumentSelector, SIGNAL(instrumentSelectionChanged(const QString)),
@@ -42,6 +42,8 @@ namespace MantidQt
               this, SLOT(updateReflectionsList(int)));
       connect(m_uiForm.cbReflection, SIGNAL(currentIndexChanged(int)),
               this, SLOT(newInstrumentConfiguration()));
+
+      m_instrumentSelector->fillWithInstrumentsFromFacility();
     }
 
 
@@ -142,6 +144,7 @@ namespace MantidQt
         forceDiffraction(false);
 
       m_removeDiffraction = !enabled;
+      updateInstrumentConfigurations(getInstrumentName());
     }
 
 
@@ -167,6 +170,7 @@ namespace MantidQt
         enableDiffraction(true);
 
       m_forceDiffraction = forced;
+      updateInstrumentConfigurations(getInstrumentName());
     }
 
 
@@ -422,6 +426,8 @@ namespace MantidQt
           ++i;
         }
       }
+
+      updateInstrumentConfigurations(getInstrumentName());
     }
 
   } /* namespace MantidWidgets */

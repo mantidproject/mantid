@@ -188,6 +188,8 @@ private:
   void resetCurrentView(int workspaceType, const std::string& instrumentName);
   /// Render temporary workspace
   void renderTemporaryWorkspace(const std::string temporaryWorkspaceName, std::string sourceType); 
+  /// Set visibility listener
+  void setVisibilityListener();
   /// Render the original workspace
   void renderOriginalWorkspace(const std::string originalWorkspaceName);
   /// Delete a specific workspace
