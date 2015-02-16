@@ -8811,10 +8811,14 @@ void ApplicationWindow::redo()
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-  if (qobject_cast<Note*>(w))
-    dynamic_cast<Note*>(w)->editor()->redo();
-  else if (qobject_cast<Matrix*>(w)){
-    QUndoStack *stack = (dynamic_cast<Matrix*>(w))->undoStack();
+  auto note = dynamic_cast<Note*>(w);
+  auto matrix = dynamic_cast<Matrix*>(w);
+
+  if(note)
+    note->editor()->redo();
+  else if(matrix)
+  {
+    QUndoStack *stack = matrix->undoStack();
     if (stack && stack->canRedo())
       stack->redo();
   }
