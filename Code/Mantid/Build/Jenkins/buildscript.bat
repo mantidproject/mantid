@@ -127,7 +127,7 @@ if "%BUILDPKG%" EQU "yes" (
 :: Run the doc tests when doing a pull request build. Run from a package
 :: from a package to have at least one Linux checks it install okay
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-if "%JOB_NAME%"=="%JOB_NAME:pull_requests=%" (
+if not "%JOB_NAME%"=="%JOB_NAME:pull_requests=%" (
   set SYSTEMTEST_DIR=%WORKSPACE%\Code\Mantid\Testing\SystemTest
   :: Install package
   python %SYSTEMTEST_DIR%\scripts\mantidinstaller.py install %WORKSPACE%\build
