@@ -136,6 +136,8 @@ namespace CustomInterfaces
 
     // Nudge resCheck to ensure res range selectors are only shown when Create RES file is checked
     resCheck(m_uiForm.ckCreateResolution->isChecked());
+
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   }
 
   //----------------------------------------------------------------------------------------------
@@ -151,8 +153,6 @@ namespace CustomInterfaces
 
   void IndirectCalibration::run()
   {
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmsComplete(bool)));
-
     // Get properties
     QString firstFile = m_uiForm.leRunNo->getFirstFilename();
     QString filenames = m_uiForm.leRunNo->getFilenames().join(",");
@@ -170,7 +170,7 @@ namespace CustomInterfaces
     QString calibrationWsName = outputWorkspaceNameStem + "_calib";
 
     // Configure the calibration algorithm
-    IAlgorithm_sptr calibrationAlg = AlgorithmManager::Instance().create("CreateCalibrationWorkspace", -1);
+    IAlgorithm_sptr calibrationAlg = AlgorithmManager::Instance().create("CreateCalibrationWorkspace");
     calibrationAlg->initialize();
 
     calibrationAlg->setProperty("InputFiles", filenames.toStdString());
@@ -198,7 +198,7 @@ namespace CustomInterfaces
     // Add save algorithm to queue if ticked
     if( m_uiForm.ckSave->isChecked() )
     {
-      IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus", -1);
+      IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexusProcessed");
       saveAlg->initialize();
       saveAlg->setProperty("Filename", calibrationWsName.toStdString() + ".nxs");
 
@@ -210,10 +210,6 @@ namespace CustomInterfaces
     {
       QString resolutionWsName = outputWorkspaceNameStem + "_res";
 
-      QString scaleFactor("1.0");
-      if(m_uiForm.ckResolutionScale->isChecked() && !m_uiForm.spResolutionScale->text().isEmpty())
-        scaleFactor = m_uiForm.spResolutionScale->text();
-
       QString resDetectorRange = QString::number(m_dblManager->value(m_properties["ResSpecMin"])) + ","
           + QString::number(m_dblManager->value(m_properties["ResSpecMax"]));
 
@@ -224,23 +220,59 @@ namespace CustomInterfaces
       QString background = QString::number(m_dblManager->value(m_properties["ResStart"])) + ","
           + QString::number(m_dblManager->value(m_properties["ResEnd"]));
 
-      Mantid::API::IAlgorithm_sptr resAlg = Mantid::API::AlgorithmManager::Instance().create("IndirectResolution", -1);
+      bool smooth = m_uiForm.ckSmoothResolution->isChecked();
+      bool save = m_uiForm.ckSave->isChecked();
+
+      IAlgorithm_sptr resAlg = AlgorithmManager::Instance().create("IndirectResolution", -1);
       resAlg->initialize();
 
       resAlg->setProperty("InputFiles", filenames.toStdString());
-      resAlg->setProperty("OutputWorkspace", resolutionWsName.toStdString());
       resAlg->setProperty("Instrument", getInstrumentConfiguration()->getInstrumentName().toStdString());
       resAlg->setProperty("Analyser", getInstrumentConfiguration()->getAnalyserName().toStdString());
       resAlg->setProperty("Reflection", getInstrumentConfiguration()->getReflectionName().toStdString());
       resAlg->setProperty("RebinParam", rebinString.toStdString());
       resAlg->setProperty("DetectorRange", resDetectorRange.toStdString());
       resAlg->setProperty("BackgroundRange", background.toStdString());
-      resAlg->setProperty("ScaleFactor", m_uiForm.spScale->value());
-      resAlg->setProperty("Smooth", m_uiForm.ckSmoothResolution->isChecked());
-      resAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
-      resAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
+      resAlg->setProperty("Save", save);
+
+      if(m_uiForm.ckResolutionScale->isChecked())
+        resAlg->setProperty("ScaleFactor", m_uiForm.spScale->value());
+
+      if(smooth)
+      {
+        resAlg->setProperty("OutputWorkspace", resolutionWsName.toStdString() + "_pre_smooth");
+      }
+      else
+      {
+        resAlg->setProperty("OutputWorkspace", resolutionWsName.toStdString());
+        resAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
+      }
 
       m_batchAlgoRunner->addAlgorithm(resAlg);
+
+      if(smooth)
+      {
+        IAlgorithm_sptr smoothAlg = AlgorithmManager::Instance().create("WienerSmooth");
+        smoothAlg->initialize();
+        smoothAlg->setProperty("OutputWorkspace", resolutionWsName.toStdString());
+
+        BatchAlgorithmRunner::AlgorithmRuntimeProps smoothAlgInputProps;
+        smoothAlgInputProps["InputWorkspace"] = resolutionWsName.toStdString() + "_pre_smooth";
+
+        m_batchAlgoRunner->addAlgorithm(smoothAlg, smoothAlgInputProps);
+
+        if(save)
+        {
+          IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexusProcessed");
+          saveAlg->initialize();
+
+          BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromSmoothProps;
+          inputFromSmoothProps["InputWorkspace"] = calibrationWsName.toStdString();
+          saveAlg->setProperty("Filename", resolutionWsName.toStdString() + ".nxs");
+
+          m_batchAlgoRunner->addAlgorithm(saveAlg, inputFromSmoothProps);
+        }
+      }
 
       // When creating resolution file take the resolution workspace as the result
       m_pythonExportWsName = resolutionWsName.toStdString();
@@ -249,19 +281,17 @@ namespace CustomInterfaces
     m_batchAlgoRunner->executeBatchAsync();
   }
 
-  void IndirectCalibration::algorithmsComplete(bool error)
+  void IndirectCalibration::algorithmComplete(bool error)
   {
     if(error)
       return;
 
-    QString firstFile = m_uiForm.leRunNo->getFirstFilename();
-    QFileInfo firstFileInfo(firstFile);
-    /* QString calFileName = firstFileInfo.baseName() + "_" + m_uiForm.iicInstrumentConfiguration->getAnalyserName() + m_uiForm.iicInstrumentConfiguration->getReflectionName() + "_calib.nxs"; */
-
-    /* m_uiForm.ind_calibFile->setFileTextWithSearch(calFileName); */
-    /* m_uiForm.ckUseCalib->setChecked(true); */
-
-    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmsComplete(bool)));
+    // Plot the smoothed workspace if required
+    if(m_uiForm.ckSmoothResolution->isChecked() && m_uiForm.ckPlot->isChecked())
+    {
+      std::string pyInput = "from mantidplot import plotSpectrum\nplotSpectrum(['" + m_pythonExportWsName + "', '" + m_pythonExportWsName + "_pre_smooth'], 0)\n";
+      m_pythonRunner.runPythonCode(QString::fromStdString(pyInput));
+    }
   }
 
   bool IndirectCalibration::validate()
@@ -356,8 +386,8 @@ namespace CustomInterfaces
       return;
     }
 
-    Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
+    MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(wsname.toStdString()));
 
     const Mantid::MantidVec & dataX = input->readX(0);
     QPair<double, double> range(dataX.front(), dataX.back());
@@ -443,7 +473,7 @@ namespace CustomInterfaces
    *
    * @param ws :: Mantid workspace containing the loaded instument
    */
-  void IndirectCalibration::calSetDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws)
+  void IndirectCalibration::calSetDefaultResolution(MatrixWorkspace_const_sptr ws)
   {
     auto inst = ws->getInstrument();
     auto analyser = inst->getStringParameter("analyser");
