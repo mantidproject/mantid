@@ -1,6 +1,6 @@
 from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode
-from mantid.kernel import StringListValidator, StringMandatoryValidator, Direction, logger
+from mantid.kernel import Direction, logger
 from mantid import config
 import math
 import os
@@ -20,9 +20,12 @@ class Fury(PythonAlgorithm):
                              optional=PropertyMode.Mandatory, direction=Direction.Input),
                              doc="Name for the Resolution workspace.")
 
-        self.declareProperty(name='EnergyMin', defaultValue=-0.5, doc='Minimum energy for fit. Default=-0.5')
-        self.declareProperty(name='EnergyMax', defaultValue=0.5, doc='Maximum energy for fit. Default=0.5')
-        self.declareProperty(name='NumBins', defaultValue=1, doc='Decrease total number of spectrum points by this ratio through merging of intensities from neighbouring bins. Default=1')
+        self.declareProperty(name='EnergyMin', defaultValue=-0.5,
+                             doc='Minimum energy for fit. Default=-0.5')
+        self.declareProperty(name='EnergyMax', defaultValue=0.5,
+                             doc='Maximum energy for fit. Default=0.5')
+        self.declareProperty(name='NumBins', defaultValue=1,
+                             doc='Decrease total number of spectrum points by this ratio through merging of intensities from neighbouring bins. Default=1')
 
         self.declareProperty(MatrixWorkspaceProperty('ParameterWorkspace', '',
                              direction=Direction.Output, optional=PropertyMode.Optional),
@@ -32,9 +35,12 @@ class Fury(PythonAlgorithm):
                              direction=Direction.Output, optional=PropertyMode.Optional),
                              doc='Output workspace')
 
-        self.declareProperty(name='Plot', defaultValue=False, doc='Switch Plot Off/On')
-        self.declareProperty(name='Save', defaultValue=False, doc='Switch Save result to nxs file Off/On')
-        self.declareProperty(name='DryRun', defaultValue=False, doc='Only calculate and output the parameters')
+        self.declareProperty(name='Plot', defaultValue=False,
+                             doc='Switch Plot Off/On')
+        self.declareProperty(name='Save', defaultValue=False,
+                             doc='Switch Save result to nxs file Off/On')
+        self.declareProperty(name='DryRun', defaultValue=False,
+                             doc='Only calculate and output the parameters')
 
 
     def PyExec(self):
@@ -110,7 +116,8 @@ class Fury(PythonAlgorithm):
         """
         Calculates the Fury parameters and saves in a table workspace.
         """
-        CropWorkspace(InputWorkspace=self._sample, OutputWorkspace='__Fury_sample_cropped', Xmin=self._e_min, Xmax=self._e_max)
+        CropWorkspace(InputWorkspace=self._sample, OutputWorkspace='__Fury_sample_cropped',
+                      Xmin=self._e_min, Xmax=self._e_max)
         x_data = mtd['__Fury_sample_cropped'].readX(0)
         number_input_points = len(x_data) - 1
         num_bins = number_input_points / self._number_points_per_bin
@@ -135,7 +142,8 @@ class Fury(PythonAlgorithm):
 
         except (AttributeError, IndexError):
             resolution = 0.0175
-            logger.warning('Could not get resolution from IPF, using default value: %f' % resolution)
+            logger.warning('Could not get resolution from IPF, using default value: %f' % (
+                            resolution))
 
         resolution_bins = int(round((2 * resolution) / self._e_width))
 
@@ -178,10 +186,14 @@ class Fury(PythonAlgorithm):
 
 
     def _add_logs(self):
-        AddSampleLog(Workspace=self._output_workspace, LogName='fury_resolution_ws', LogType='String', LogText=self._resolution)
-        AddSampleLog(Workspace=self._output_workspace, LogName='fury_rebin_emin', LogType='Number', LogText=str(self._e_min))
-        AddSampleLog(Workspace=self._output_workspace, LogName='fury_rebin_ewidth', LogType='Number', LogText=str(self._e_width))
-        AddSampleLog(Workspace=self._output_workspace, LogName='fury_rebin_emax', LogType='Number', LogText=str(self._e_max))
+        AddSampleLog(Workspace=self._output_workspace, LogName='fury_resolution_ws',
+                     LogType='String', LogText=self._resolution)
+        AddSampleLog(Workspace=self._output_workspace, LogName='fury_rebin_emin',
+                     LogType='Number', LogText=str(self._e_min))
+        AddSampleLog(Workspace=self._output_workspace, LogName='fury_rebin_ewidth',
+                     LogType='Number', LogText=str(self._e_width))
+        AddSampleLog(Workspace=self._output_workspace, LogName='fury_rebin_emax',
+                     LogType='Number', LogText=str(self._e_max))
 
 
     def _fury(self):
@@ -197,7 +209,8 @@ class Fury(PythonAlgorithm):
             CheckHistSame(self._sample, 'Sample', self._resolution, 'Resolution')
 
         rebin_param = str(self._e_min) + ',' + str(self._e_width) + ',' + str(self._e_max)
-        Rebin(InputWorkspace=self._sample, OutputWorkspace='__sam_rebin', Params=rebin_param, FullBinsOnly=True)
+        Rebin(InputWorkspace=self._sample, OutputWorkspace='__sam_rebin', Params=rebin_param,
+              FullBinsOnly=True)
 
         Rebin(InputWorkspace=self._resolution, OutputWorkspace='__res_data', Params=rebin_param)
         Integration(InputWorkspace='__res_data', OutputWorkspace='__res_int')
@@ -223,7 +236,8 @@ class Fury(PythonAlgorithm):
         # Crop nonsense values off workspace
         binning = int(math.ceil(mtd[self._output_workspace].blocksize() / 2.0))
         bin_v = mtd[self._output_workspace].dataX(0)[binning]
-        CropWorkspace(InputWorkspace=self._output_workspace, OutputWorkspace=self._output_workspace, XMax=bin_v)
+        CropWorkspace(InputWorkspace=self._output_workspace, OutputWorkspace=self._output_workspace,
+                      XMax=bin_v)
 
         # Clean up resolution workspaces
         DeleteWorkspace('__res_data')
