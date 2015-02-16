@@ -4212,7 +4212,10 @@ void ApplicationWindow::setGraphDefaultSettings(bool autoscale, bool scaleFonts,
   foreach(MdiSubWindow *w, windows){
     if (w->isA("MultiLayer"))
     {
-      QList<Graph *> layers = dynamic_cast<MultiLayer*>(w)->layersList();
+      auto ml = dynamic_cast<MultiLayer*>(w);
+      if(!ml)
+        continue;
+      QList<Graph *> layers = ml->layersList();
       foreach(Graph *g, layers)
       {
         g->enableAutoscaling(autoscale2DPlots);
