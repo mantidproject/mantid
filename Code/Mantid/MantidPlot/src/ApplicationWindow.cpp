@@ -4569,7 +4569,11 @@ ApplicationWindow* ApplicationWindow::open(const QString& fn, bool factorySettin
 
   QFile f(fname);
   QTextStream t( &f );
-  f.open(QIODevice::ReadOnly);
+  if(!f.open(QIODevice::ReadOnly))
+  {
+    QMessageBox::critical(this, tr("MantidPlot - File opening error"),  tr("The file: <b> %1 </b> could not be opened!").arg(fn));
+    return 0;
+  }
   QString s = t.readLine();
   QStringList list = s.split(QRegExp("\\s"), QString::SkipEmptyParts);
   if (list.count() < 2 || list[0] != "MantidPlot"){
