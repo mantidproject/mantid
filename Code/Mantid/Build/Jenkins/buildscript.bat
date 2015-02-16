@@ -129,13 +129,13 @@ if "%BUILDPKG%" EQU "yes" (
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if not "%JOB_NAME%"=="%JOB_NAME:pull_requests=%" (
   :: Install package
-  python %WORKSPACE%\Code\Mantid\Testing\SystemTest\scripts\mantidinstaller.py install %WORKSPACE%\build
+  python %WORKSPACE%\Code\Mantid\Testing\SystemTests\scripts\mantidinstaller.py install %WORKSPACE%\build
   cd %WORKSPACE%\build\docs
   :: Run tests
   C:\MantidInstall\bin\MantidPlot.exe -xq runsphinx_doctest.py
   if ERRORLEVEl 1 exit /B %ERRORLEVEL%
   :: Remove
   cd %WORKSPACE%\build
-  python %WORKSPACE%\Code\Mantid\Testing\SystemTest\scripts\mantidinstaller.py uninstall %WORKSPACE%\build
+  python %WORKSPACE%\Code\Mantid\Testing\SystemTests\scripts\mantidinstaller.py uninstall %WORKSPACE%\build
 )
 
