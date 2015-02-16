@@ -10053,8 +10053,12 @@ QStringList ApplicationWindow::depending3DPlots(Matrix *m)
   QStringList plots;
   QList<MdiSubWindow *> windows = windowsList();
   foreach(MdiSubWindow *w, windows){
-    if (w->isA("Graph3D") && dynamic_cast<Graph3D*>(w)->matrix() == m)
-      plots << w->objectName();
+    if (w->isA("Graph3D"))
+    {
+      auto g3d = dynamic_cast<Graph3D*>(w);
+      if(g3d && g3d->matrix() == m)
+        plots << w->objectName();
+    }
   }
   return plots;
 }
