@@ -7489,20 +7489,17 @@ void ApplicationWindow::showCurveWorksheet(Graph *g, int curveIndex)
   if (!it)
     return;
 
-  if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
-  {
-    Spectrogram *sp = dynamic_cast<Spectrogram*>(it);
-    if (sp->matrix())
-      sp->matrix()->showMaximized();
-  }
-  else if (dynamic_cast<PlotCurve*>(it)->type() == Graph::Function)
-  {
-    g->createTable(dynamic_cast<PlotCurve*>(it));
-  }
-  else
-  {
+
+  auto sp = dynamic_cast<Spectrogram*>(it);
+  auto pc = dynamic_cast<PlotCurve*>(it);
+
+  if(sp && sp->matrix())
+    sp->matrix()->showMaximized();
+  if(pc && pc->type() == Graph::Function)
+    g->createTable(pc);
+
+  if(!pc && !sp)
     showTable(it->title().text());
-  }
 }
 
 void ApplicationWindow::showCurveWorksheet()
