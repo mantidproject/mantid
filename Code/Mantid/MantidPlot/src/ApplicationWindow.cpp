@@ -3895,7 +3895,11 @@ void ApplicationWindow::defineErrorBars(const QString& name, int type, const QSt
   if (!w)
     return;
 
-  Graph* g = dynamic_cast<MultiLayer*>(w)->activeGraph();
+  auto ml = dynamic_cast<MultiLayer*>(w);
+  if(!ml)
+    return;
+
+  Graph* g = ml->activeGraph();
   if (!g)
     return;
 
@@ -3913,6 +3917,9 @@ void ApplicationWindow::defineErrorBars(const QString& name, int type, const QSt
   }
 
   DataCurve *master_curve = dynamic_cast<DataCurve *>(g->curve(name));
+  if(!master_curve)
+    return;
+
   QString xColName = master_curve->xColumnName();
   if (xColName.isEmpty())
     return;
