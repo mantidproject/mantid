@@ -7702,7 +7702,8 @@ void ApplicationWindow::print()
   if (!w)
     return;
 
-  if (w->isA("MultiLayer") && (dynamic_cast<MultiLayer*>(w))->isEmpty()){
+  auto ml = dynamic_cast<MultiLayer*>(w);
+  if (w->isA("MultiLayer") && ml && ml->isEmpty()){
     QMessageBox::warning(this,tr("MantidPlot - Warning"),//Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"));
     return;
