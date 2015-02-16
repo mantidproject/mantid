@@ -14485,7 +14485,12 @@ void ApplicationWindow::showFolderPopupMenu(Q3ListViewItem *it, const QPoint &p,
   cm.insertItem(tr("&Find..."), this, SLOT(showFindDialogue()));
   cm.insertSeparator();
   cm.insertItem(tr("App&end Project..."), this, SLOT(appendProject()));
-  if (dynamic_cast<FolderListItem*>(it)->folder()->parent())
+
+  auto fli = dynamic_cast<FolderListItem*>(it);
+  if(!fli)
+    return;
+
+  if (fli->folder()->parent())
     cm.insertItem(tr("Save &As Project..."), this, SLOT(saveAsProject()));
   else
     cm.insertItem(tr("Save Project &As..."), this, SLOT(saveProjectAs()));
@@ -14498,7 +14503,7 @@ void ApplicationWindow::showFolderPopupMenu(Q3ListViewItem *it, const QPoint &p,
     cm.insertSeparator();
   }
 
-  if (dynamic_cast<FolderListItem*>(it)->folder()->parent())
+  if (fli->folder()->parent())
   {
     cm.insertItem(getQPixmap("close_xpm"), tr("&Delete Folder"), this, SLOT(deleteFolder()), Qt::Key_F8);
     cm.insertItem(tr("&Rename"), this, SLOT(startRenameFolder()), Qt::Key_F2);
