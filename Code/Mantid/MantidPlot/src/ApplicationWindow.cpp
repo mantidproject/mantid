@@ -7707,7 +7707,11 @@ void ApplicationWindow::printAllPlots()
 
     foreach(MdiSubWindow *w, windows){
       if (w->isA("MultiLayer") && printer.newPage())
-        dynamic_cast<MultiLayer*>(w)->printAllLayers(paint);
+      {
+        MultiLayer* ml = dynamic_cast<MultiLayer*>(w);
+        if (ml)
+          ml->printAllLayers(paint);
+      }
     }
     paint->end();
     delete paint;
