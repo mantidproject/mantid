@@ -9086,8 +9086,10 @@ void ApplicationWindow::maximizeWindow(MdiSubWindow *w)
 
 void ApplicationWindow::minimizeWindow(MdiSubWindow *w)
 {
+  auto wli = dynamic_cast<WindowListItem*>(lv->currentItem());
+
   if (!w)
-    w = (dynamic_cast<WindowListItem*>(lv->currentItem()))->window();
+    w = wli->window();
 
   if (!w)
     return;
