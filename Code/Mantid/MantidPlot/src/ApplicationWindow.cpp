@@ -6495,8 +6495,12 @@ void ApplicationWindow::showTitleDialog()
     return;
 
   if (w->isA("MultiLayer")){
-    Graph* g = dynamic_cast<MultiLayer*>(w)->activeGraph();
-    if (g){
+    auto ml = dynamic_cast<MultiLayer*>(w);
+    if(!ml)
+      return;
+
+    Graph* g = ml->activeGraph();
+    if (g) {
       TextDialog* td= new TextDialog(TextDialog::LayerTitle, this,0);
       td->setGraph(g);
       td->exec();
