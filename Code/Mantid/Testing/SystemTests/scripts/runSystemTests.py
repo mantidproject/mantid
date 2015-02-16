@@ -115,7 +115,7 @@ except KeyboardInterrupt:
 
 # report the errors
 success = reporter.reportStatus()
-xml_report = open(os.path.join(mtdconf.saveDir, "SystemTestsReport.xml"),'w')
+xml_report = open(os.path.join(mtdconf.saveDir, "TEST-systemtests.xml"),'w')
 xml_report.write(reporter.getResults())
 xml_report.close()
 
