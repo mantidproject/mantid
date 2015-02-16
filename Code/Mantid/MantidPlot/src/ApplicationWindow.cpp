@@ -3021,7 +3021,11 @@ void ApplicationWindow::customizeTables(const QColor& bgColor,const QColor& text
   QList<MdiSubWindow *> windows = windowsList();
   foreach(MdiSubWindow *w, windows){
     if (w->inherits("Table"))
-      customTable(dynamic_cast<Table*>(w));
+    {
+      auto table = dynamic_cast<Table*>(w);
+      if(table)
+        customTable(table);
+    }
   }
 }
 
