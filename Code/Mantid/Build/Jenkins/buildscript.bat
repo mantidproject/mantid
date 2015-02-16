@@ -33,19 +33,20 @@ if NOT DEFINED MANTID_DATA_STORE (
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check job requirements from the name
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-if "%JOB_NAME%"=="%JOB_NAME:clean=%" (
+set CLEANBUILD=
+set BUILDPKG=
+if not "%JOB_NAME%" == "%JOB_NAME:clean=%" (
   set CLEANBUILD=yes
   set BUILDPKG=yes
 )
 
 if EXIST %WORKSPACE%\build\CMakeCache.txt (
-  TYPE %WORKSPACE%\build\CMakeCache.txt | FINDSTR "Code/Mantid/TestingTools/cxxtest"
-  if %ERRORLEVEL% EQU 0 (
+  FINDSTR "Code/Mantid/TestingTools/cxxtest" %WORKSPACE%\build\CMakeCache.txt && (
     rmdir /S /Q %WORKSPACE%\build
   )
 )
 
-if "%JOB_NAME%"=="%JOB_NAME:pull_requests=%" (
+if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
   set BUILDPKG=yes
 )
 
@@ -60,7 +61,7 @@ if "%BUILDPKG%" EQU "yes" (
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Setup the build directory
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-if "%CLEANBUILD%" EQU "yes" (
+if "%CLEANBUILD%" == "yes" (
   rmdir /S /Q %WORKSPACE%\build
 )
 md %WORKSPACE%\build
