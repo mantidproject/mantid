@@ -12045,6 +12045,8 @@ void ApplicationWindow::setPlot3DOptions()
   foreach(MdiSubWindow *w, windows){
     if (w->isA("Graph3D")){
       Graph3D *g = dynamic_cast<Graph3D*>(w);
+      if(!g)
+        continue;
       g->setOrthogonal(orthogonal3DPlots);
       g->setAutoscale(autoscale3DPlots);
       g->setAntialiasing(smooth3DMesh);
