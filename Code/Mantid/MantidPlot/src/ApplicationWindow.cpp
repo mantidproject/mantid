@@ -2424,7 +2424,10 @@ void ApplicationWindow::insert3DMatrixPlot(const QString& matrix_name)
   if (!w)
     return;
 
-  dynamic_cast<Graph3D*>(w)->addMatrixData(matrix(matrix_name));
+  auto g3d = dynamic_cast<Graph3D*>(w);
+  if(g3d)
+    g3d->addMatrixData(matrix(matrix_name));
+
   emit modified();
 }
 
