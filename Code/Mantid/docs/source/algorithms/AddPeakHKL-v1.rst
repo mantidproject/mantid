@@ -12,35 +12,51 @@ Description
 
 Add a peak in the HKL frame to an existing :ref:`PeaksWorkspace <PeaksWorkspace>`. The OrientedLattice must be provided and the Goniometer should be set correctly before running the algorithm. 
 
-This algorithm will 
+The peak is added to the existing PeaksWorkspace. Run information and goniometer setting and the UB matrix are taken from the provided PeaksWorkspace.
 
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - AddPeakHKL**
 
 .. testcode:: AddPeakHKLExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
+   import os
+   import numpy 
+   import mantid.kernel
 
-   wsOut = AddPeakHKL()
+   # Create an instrument workspace 
+   inst_dir = config.getInstrumentDirectory()
+   sxd_ws = LoadEmptyInstrument(os.path.join(inst_dir, "SXD_Definition.xml"))
+   AddSampleLog(sxd_ws, 'run_number', '1', 'Number')
 
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
+   # Create a peaks workspace from the instrument workspace
+   peak_ws = CreatePeaksWorkspace(InstrumentWorkspace=sxd_ws, NumberOfPeaks=0)
+   peak_ws.mutableRun().addProperty('run_number', sxd_ws.run().getProperty('run_number'), True)
+
+   # Apply a UB
+   ub = numpy.array([[-0.15097235,  0.09164432,  0.00519473], [ 0.0831895,   0.14123681, -0.06719047], [-0.03845029, -0.05534039, -0.1633801 ]])
+   SetUB(peak_ws, UB=ub)
+
+   # Add a new peak
+   AddPeakHKL(peak_ws, [2, 0, -4])
+
+   # Get info on newly added peak
+   peak = peak_ws.getPeak(0)
+   print 'Peak wavelength', round(peak.getWavelength(), 4)
+   print 'Peak detector id', peak.getDetectorID()
+   print 'Peak run number', peak.getRunNumber()
+   print 'Peak HKL', peak.getHKL()
 
 Output:
 
 .. testoutput:: AddPeakHKLExample
 
-  The output workspace has ?? spectra
+  Peak wavelength 1.8423
+  Peak detector id 25766
+  Peak run number 1
+  Peak HKL [2,0,-4]
 
 .. categories::
 
