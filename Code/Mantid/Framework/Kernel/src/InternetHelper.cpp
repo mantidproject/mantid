@@ -75,7 +75,7 @@ bool isRelocated(const int response) {
 InternetHelper::InternetHelper()
     : m_proxyInfo(), m_isProxySet(false), m_timeout(30), m_contentLength(0),
       m_method(HTTPRequest::HTTP_GET), m_contentType("application/json"),
-      m_body(), m_request(NULL) {}
+      m_body(), m_headers(), m_request(NULL) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -83,7 +83,7 @@ InternetHelper::InternetHelper()
 InternetHelper::InternetHelper(const Kernel::ProxyInfo &proxy)
     : m_proxyInfo(proxy), m_isProxySet(true), m_timeout(30),
       m_method(HTTPRequest::HTTP_GET), m_contentType("application/json"),
-      m_body(), m_request(NULL) {}
+      m_body(), m_headers(), m_request(NULL) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
