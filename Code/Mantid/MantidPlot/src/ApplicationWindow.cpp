@@ -7831,20 +7831,33 @@ void ApplicationWindow::showFFTDialog()
 
   FFTDialog *sd = 0;
   if (w->isA("MultiLayer")) {
-    Graph* g = dynamic_cast<MultiLayer*>(w)->activeGraph();
-    if ( g && g->validCurvesDataSize() ){
+    MultiLayer* ml = dynamic_cast<MultiLayer*>(w);
+    if(!ml)
+      return;
+
+    Graph* g = ml->activeGraph();
+    if(!g)
+      return;
+
+    if (g->validCurvesDataSize() ){
       sd = new FFTDialog(FFTDialog::onGraph, this);
       sd->setAttribute(Qt::WA_DeleteOnClose);
       sd->setGraph(g);
     }
   } else if (w->inherits("Table")) {
+    Table* t = dynamic_cast<Table*>(w);
+    if(!t)
+      return;
     sd = new FFTDialog(FFTDialog::onTable, this);
     sd->setAttribute(Qt::WA_DeleteOnClose);
-    sd->setTable(dynamic_cast<Table*>(w));
+    sd->setTable(t);
   } else if (w->inherits("Matrix")) {
+    Matrix* m = dynamic_cast<Matrix*>(w);
+    if(!m)
+      return;
     sd = new FFTDialog(FFTDialog::onMatrix, this);
     sd->setAttribute(Qt::WA_DeleteOnClose);
-    sd->setMatrix(dynamic_cast<Matrix*>(w));
+    sd->setMatrix(m);
   }
 
   if (sd)
