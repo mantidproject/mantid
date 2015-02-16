@@ -14603,8 +14603,12 @@ void ApplicationWindow::startRenameFolder(Q3ListViewItem *item)
     return;
 
   if (item->listView() == lv && item->rtti() == FolderListItem::RTTI) {
+    auto fli = dynamic_cast<FolderListItem*>(item);
+    if(!fli)
+      return;
+
     disconnect(folders, SIGNAL(currentChanged(Q3ListViewItem *)), this, SLOT(folderItemChanged(Q3ListViewItem *)));
-    d_current_folder = dynamic_cast<FolderListItem*>(item)->folder();
+    d_current_folder = fli->folder();
     FolderListItem *it = d_current_folder->folderListItem();
     it->setRenameEnabled (0, true);
     it->startRename (0);
@@ -14618,8 +14622,8 @@ void ApplicationWindow::renameFolder(Q3ListViewItem *it, int col, const QString 
 {
   Q_UNUSED(col)
 
-		    if (!it)
-		      return;
+  if (!it)
+    return;
 
   Folder *parent = dynamic_cast<Folder *>(currentFolder()->parent());
   if (!parent)//the parent folder is the project folder (it always exists)
