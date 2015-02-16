@@ -11833,11 +11833,16 @@ void ApplicationWindow::integrate()
 
   if (w->isA("MultiLayer"))
     analysis(Integrate);
-  else if (w->isA("Matrix")){
+  else if (w->isA("Matrix"))
+  {
+    auto matrix = dynamic_cast<Matrix*>(w);
+    if(!matrix)
+      return;
+
     QDateTime dt = QDateTime::currentDateTime ();
     QString info = dt.toString(Qt::LocalDate);
     info += "\n" + tr("Integration of %1 from zero is").arg(QString(w->objectName())) + ":\t";
-    info += QString::number((dynamic_cast<Matrix*>(w))->integrate()) + "\n";
+    info += QString::number(matrix->integrate()) + "\n";
     info += "-------------------------------------------------------------\n";
     currentFolder()->appendLogInfo(info);
     showResults(true);
