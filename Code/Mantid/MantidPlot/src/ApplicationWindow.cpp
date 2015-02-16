@@ -2278,10 +2278,13 @@ void ApplicationWindow::remove3DMatrixPlots(Matrix *m)
 
   QList<MdiSubWindow *> windows = windowsList();
   foreach(MdiSubWindow *w, windows){
-    if (w->isA("Graph3D") && dynamic_cast<Graph3D*>(w)->matrix() == m)
-      dynamic_cast<Graph3D*>(w)->clearData();
-    else if (w->isA("MultiLayer")){
-      QList<Graph *> layers = dynamic_cast<MultiLayer*>(w)->layersList();
+    auto g3d = dynamic_cast<Graph3D*>(w);
+    if(g3d && g3d->matrix() == m)
+      g3d->clearData();
+    auto ml = dynamic_cast<MultiLayer*>(w);
+
+    if(ml) {
+      QList<Graph *> layers = ml->layersList();
       foreach(Graph *g, layers){
         for (int i=0; i<g->curves(); i++){
           if (g->curveType(i) == Graph::Histogram){
