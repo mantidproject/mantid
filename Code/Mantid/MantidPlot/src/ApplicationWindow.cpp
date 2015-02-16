@@ -6245,6 +6245,9 @@ void ApplicationWindow::rename()
 void ApplicationWindow::renameWindow()
 {
   WindowListItem *it = dynamic_cast<WindowListItem *>(lv->currentItem());
+  if (!it)
+    return;
+
   MdiSubWindow *w = it->window();
   if (!w)
     return;
