@@ -6,6 +6,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 
 #include <QMessageBox>
 
@@ -13,6 +14,11 @@
 #include <Poco/NotificationCenter.h>
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("InstrumentSelector");
+}
 
 namespace MantidQt
 {
@@ -32,18 +38,19 @@ namespace MantidWidgets
   InstrumentSelector::InstrumentSelector(QWidget *parent, bool init)
     : QComboBox(parent), m_changeObserver(*this, &InstrumentSelector::handleConfigChange),
       m_techniques(), m_currentFacility(NULL), m_init(init), m_storeChanges(true),
-      m_updateOnFacilityChange(true)
+      m_updateOnFacilityChange(true), m_selectedInstrument()
   {
     setEditable(false);
+
     if( init )
     {
       fillWithInstrumentsFromFacility();
-      connect(this, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(updateDefaultInstrument(const QString &)));
-      connect(this, SIGNAL(currentIndexChanged(const QString &)), this, SIGNAL(instrumentSelectionChanged(const QString &)));
 
       Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
       config.addObserver(m_changeObserver);
     }
+
+    connect(this, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(updateInstrument(const QString &)));
   }
 
   /**
@@ -209,7 +216,8 @@ namespace MantidWidgets
     this->setCurrentIndex(index);
     this->blockSignals(false);
 
-    emit instrumentSelectionChanged(this->currentText());
+    emit instrumentListUpdated();
+    updateInstrument(this->currentText());
   }
 
  /**
@@ -226,14 +234,26 @@ namespace MantidWidgets
   // Private slot member functions
   //------------------------------------------------------
   /**
-  * Set the named instrument as the default for Mantid
+  * Handle an instrument being selected from the drop down.
+  * Set the named instrument as the default for Mantid if desired and emit
+  * the signal if the new instrument is different to that which was previously
+  * selected.
   * @param name :: A string containing the new instrument to set as the default
   */
-  void InstrumentSelector::updateDefaultInstrument(const QString & name) const
+  void InstrumentSelector::updateInstrument(const QString & name)
   {
+    // If enabled, set instrument default
     if( !name.isEmpty() && m_storeChanges)
     {
       ConfigService::Instance().setString("default.instrument", name.toStdString());
+    }
+
+    // If this instrument is different emit the changed signal
+    if( name != m_selectedInstrument )
+    {
+      m_selectedInstrument = name;
+      g_log.debug() << "New instrument selected: " << m_selectedInstrument.toStdString() << std::endl;
+      emit instrumentSelectionChanged(m_selectedInstrument);
     }
   }
 
@@ -278,6 +298,8 @@ namespace MantidWidgets
     }
 
     this->blockSignals(false);
+
+    emit instrumentListUpdated();
   }
 
 } // namespace: MantidWidgets

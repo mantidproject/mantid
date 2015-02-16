@@ -226,6 +226,11 @@ class PropertyManager(NonIDF_Properties):
     # Properties with allowed value
     normalise_method= PropertyFromRange([None,'monitor-1','monitor-2','current'],'current')
     deltaE_mode     = PropertyFromRange(['direct'],'direct') # other modes should not be considered here
+    # 
+    multirep_tof_specta_list=MultirepTOFSpectraList()
+    #
+    mono_correction_factor = MonoCorrectionFactor(NonIDF_Properties.incident_energy)
+
 #----------------------------------------------------------------------------------------------------------------
     def getChangedProperties(self):
         """ method returns set of the properties changed from defaults """
@@ -353,12 +358,28 @@ class PropertyManager(NonIDF_Properties):
         # Retrieve the properties, changed from interface earlier
         old_changes_list  = self.getChangedProperties()
         # record all changes, present in the old changes list
-        old_changes={}
+        old_changes=OrderedDict()
         for prop_name in old_changes_list:
             old_changes[prop_name] = getattr(self,prop_name)
 
  
         param_list = prop_helpers.get_default_idf_param_list(pInstrument)
+        # remove old changes which are not related to IDF (not to reapply it again)
+        for prop_name in old_changes:
+            if not (prop_name in param_list):
+               try:
+                     dependencies = getattr(PropertyManager,prop_name).dependencies()
+               except:
+                     dependencies = []
+               modified = False
+               for name in dependencies:
+                   if name in param_list:
+                      modified = True
+                      break
+               if not modified:
+                  del old_changes[prop_name]
+        #end
+
         param_list,descr_dict =  self._convert_params_to_properties(param_list,False,self.__descriptors)
         # clear record about previous changes
         self.setChangedProperties(set())
@@ -400,6 +421,8 @@ class PropertyManager(NonIDF_Properties):
                 for dep_name in dependencies:
                     if dep_name in sorted_param:
                        del sorted_param[dep_name]
+            else: # remove property from old changes list not to reapply it again?
+                pass
         #end loop
         # clear record about all changes and store only changed descriptors list
         self.setChangedProperties(changed_descriptors)
@@ -449,6 +472,7 @@ class PropertyManager(NonIDF_Properties):
             self.setChangedProperties(old_changes_list)
             all_changes = old_changes
         else:
+            new_changes_list=new_changes_list.union(old_changes_list)
             all_changes = old_changes_list.union(new_changes_list)
             self.setChangedProperties(all_changes)
 
@@ -532,7 +556,15 @@ class PropertyManager(NonIDF_Properties):
 
 
           # now let's report on normal run.
-        self.log("*** Provisional Incident energy: {0:>12.3f} mEv".format(self.incident_energy),log_level)
+        if PropertyManager.incident_energy.multirep_mode():
+            ei = self.incident_energy
+            mess = "*** Provisional Incident energies: {0:>8.3f}".format(ei[0])
+            for en in ei[1:]:
+              mess += "; {0:>8.3f}".format(en)
+            mess+=" mEv"
+            self.log(mess,log_level)
+        else:
+            self.log("*** Provisional Incident energy: {0:>12.3f} mEv".format(self.incident_energy),log_level)
       #end display_header
 
       self.log("****************************************************************",log_level)

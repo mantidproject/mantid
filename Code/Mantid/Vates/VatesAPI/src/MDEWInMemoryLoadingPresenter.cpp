@@ -4,6 +4,7 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+#include <qwt_double_interval.h>
 #include <vtkUnstructuredGrid.h>
 
 namespace Mantid
@@ -20,7 +21,8 @@ namespace Mantid
     @throw invalid_argument if the repository is null
     @throw invalid_arument if view is null
     */
-  MDEWInMemoryLoadingPresenter::MDEWInMemoryLoadingPresenter(MDLoadingView* view, WorkspaceProvider* repository, std::string wsName) : MDEWLoadingPresenter(view), m_repository(repository), m_wsName(wsName), m_wsTypeName(""), m_specialCoords(-1)
+  MDEWInMemoryLoadingPresenter::MDEWInMemoryLoadingPresenter(MDLoadingView* view, WorkspaceProvider* repository, std::string wsName) : MDEWLoadingPresenter(view), 
+    m_repository(repository), m_wsName(wsName), m_wsTypeName(""), m_specialCoords(-1)
     {
       if(m_wsName.empty())
       {
@@ -81,6 +83,16 @@ namespace Mantid
       /*extractMetaData needs to be re-run here because the first execution of this from ::executeLoadMetadata will not have ensured that all dimensions
         have proper range extents set.
       */
+
+      // Update the meta data min and max values with the values of the visual data set. This is necessary since we want the full data range of the visual 
+      // data set and not of the actual underlying data set.
+      double* range  = visualDataSet->GetScalarRange();
+      if (range)
+      {
+        this->m_metadataJsonManager->setMinValue(range[0]);
+        this->m_metadataJsonManager->setMaxValue(range[1]);
+      }
+
       this->extractMetadata(eventWs);
 
       this->appendMetadata(visualDataSet, eventWs->getName());
@@ -98,6 +110,15 @@ namespace Mantid
       IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws);
       m_wsTypeName = eventWs->id();
       m_specialCoords = eventWs->getSpecialCoordinateSystem();
+
+      // Set the minimum and maximum of the workspace data.
+      QwtDoubleInterval minMaxContainer = m_metaDataExtractor->getMinAndMax(eventWs);
+      m_metadataJsonManager->setMinValue(minMaxContainer.minValue());
+      m_metadataJsonManager->setMaxValue(minMaxContainer.maxValue());
+
+      // Set the instrument which is associated with the workspace.
+      m_metadataJsonManager->setInstrument(m_metaDataExtractor->extractInstrument(eventWs));
+
       //Call base-class extraction method.
       this->extractMetadata(eventWs);
     }

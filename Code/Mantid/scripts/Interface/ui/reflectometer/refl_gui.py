@@ -14,6 +14,7 @@ from isis_reflectometry.quick import *
 from isis_reflectometry.convert_to_wavelength import ConvertToWavelength
 from isis_reflectometry import load_live_runs
 from isis_reflectometry.combineMulti import *
+import mantidqtpython
 from mantid.api import Workspace, WorkspaceGroup, CatalogManager, AlgorithmManager
 
 try:
@@ -200,6 +201,10 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         plotbutton = self.sender()
         self._plot(plotbutton)
 
+    def _show_slit_calculator(self):
+        calc = mantidqtpython.MantidQt.MantidWidgets.SlitCalculator(self)
+        calc.exec_()
+
     def _polar_corr_selected(self):
         """
         Event handler for polarisation correction selection.
@@ -360,6 +365,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.actionCopy.triggered.connect(self._copy_cells)
         self.actionChoose_Columns.triggered.connect(self._choose_columns)
         self.actionRefl_Gui_Options.triggered.connect(self._options_dialog)
+        self.actionSlit_Calculator.triggered.connect(self._show_slit_calculator)
 
 
     def __valid_rb(self):
