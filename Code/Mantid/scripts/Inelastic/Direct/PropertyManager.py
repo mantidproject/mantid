@@ -562,7 +562,7 @@ class PropertyManager(NonIDF_Properties):
         ok,fail_prop = self._check_file_properties()
         if not ok :
            for prop in fail_prop:
-               mess = "*** ERROR  : prop: {0} -->{1}".format(prop,fail_prop[prop])
+               mess = "*** ERROR  : properties : {0} -->{1}".format(prop,fail_prop[prop])
                if fail_on_errors:
                  self.log(mess,'warning')
                else:
@@ -571,7 +571,8 @@ class PropertyManager(NonIDF_Properties):
 
         ok,mess= self._check_ouptut_dir()
         if not ok:
-           mess = '*** WARNING: saving results --> {1}'.format(mess)
+           mess = '*** WARNING: saving results: --> {1}'.format(mess)
+
            if fail_on_errors:
               self.log(mess,'warning')
            else:
@@ -590,9 +591,9 @@ class PropertyManager(NonIDF_Properties):
                if not (ok):
                   error_level=max(sev,error_level)
                   if sev == 1:
-                     base = '*** WARNING: prop: {0} --> {1}'
+                     base = '*** WARNING: properties : {0} --> {1}'
                   else:
-                     base = '*** ERROR  : prop: {0} --> {1}'
+                     base = '*** ERROR  : properties : {0} --> {1}'
                   mess =  base.format(prop,message)
                   if fail_on_errors:
                       self.log(mess,'warning')
