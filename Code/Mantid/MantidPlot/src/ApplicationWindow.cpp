@@ -10259,6 +10259,8 @@ void ApplicationWindow::showWindowContextMenu()
   QMenu plot3D(this);
   if (w->isA("MultiLayer")){
     MultiLayer *g = dynamic_cast<MultiLayer*>(w);
+    if(!g)
+      return;
     if (lastCopiedLayer){
       cm.insertItem(getQPixmap("paste_xpm"), tr("&Paste Layer"), this, SLOT(pasteSelection()));
       cm.insertSeparator();
@@ -10280,6 +10282,8 @@ void ApplicationWindow::showWindowContextMenu()
     cm.addAction(actionCloseWindow);
   } else if (w->isA("Graph3D")){
     Graph3D *g=dynamic_cast<Graph3D*>(w);
+    if(!g)
+      return;
     if (!g->hasData()){
       cm.insertItem(tr("3D &Plot"), &plot3D);
       plot3D.addAction(actionAdd3DData);
@@ -10306,6 +10310,8 @@ void ApplicationWindow::showWindowContextMenu()
     cm.addAction(actionCloseWindow);
   } else if (w->isA("Matrix")) {
     Matrix *t = dynamic_cast<Matrix*>(w);
+    if(!t)
+      return;
     if (t->viewType() == Matrix::TableView){
       cm.insertItem(getQPixmap("cut_xpm"),tr("Cu&t"), t, SLOT(cutSelection()));
       cm.insertItem(getQPixmap("copy_xpm"),tr("&Copy"), t, SLOT(copySelection()));
