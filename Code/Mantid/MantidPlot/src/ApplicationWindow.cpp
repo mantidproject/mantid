@@ -2320,10 +2320,17 @@ void ApplicationWindow::updateMatrixPlots(MdiSubWindow *window)
 
   QList<MdiSubWindow *> windows = windowsList();
   foreach(MdiSubWindow *w, windows){
-    if (w->isA("Graph3D") && dynamic_cast<Graph3D*>(w)->matrix() == m)
-      dynamic_cast<Graph3D*>(w)->updateMatrixData(m);
+    if (w->isA("Graph3D")) {
+      auto g3d = dynamic_cast<Graph3D*>(w);
+      if(g3d && g3d->matrix() == m)
+        g3d->updateMatrixData(m);
+    }
     else if (w->isA("MultiLayer")){
-      QList<Graph *> layers = dynamic_cast<MultiLayer*>(w)->layersList();
+      auto ml = dynamic_cast<MultiLayer*>(w);
+      if(!ml)
+        continue;
+
+      QList<Graph *> layers = ml->layersList();
       foreach(Graph *g, layers){
         for (int i=0; i<g->curves(); i++){
           if (g->curveType(i) == Graph::Histogram){
