@@ -14876,7 +14876,13 @@ void ApplicationWindow::folderItemChanged(Q3ListViewItem *it)
     return;
 
   it->setOpen(true);
-  changeFolder (dynamic_cast<FolderListItem*>(it)->folder());
+
+  auto fli = dynamic_cast<FolderListItem*>(it);
+
+  if(!fli)
+    return;
+
+  changeFolder(fli->folder());
   folders->setFocus();
 }
 
