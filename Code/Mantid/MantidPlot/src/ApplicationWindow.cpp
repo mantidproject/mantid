@@ -15867,7 +15867,11 @@ void ApplicationWindow::showSelectedWindows()
   folders->blockSignals(true);
   foreach(item, lst){
     if (item->rtti() != FolderListItem::RTTI)
-      activateWindow(dynamic_cast<WindowListItem*>(item)->window());
+    {
+      auto wli = dynamic_cast<WindowListItem*>(item);
+      if(wli)
+        activateWindow(wli->window());
+    }
   }
   folders->blockSignals(false);
 }
