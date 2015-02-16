@@ -128,15 +128,14 @@ if "%BUILDPKG%" EQU "yes" (
 :: from a package to have at least one Linux checks it install okay
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if not "%JOB_NAME%"=="%JOB_NAME:pull_requests=%" (
-  set SYSTEMTEST_DIR=%WORKSPACE%\Code\Mantid\Testing\SystemTest
   :: Install package
-  python %SYSTEMTEST_DIR%\scripts\mantidinstaller.py install %WORKSPACE%\build
+  python %WORKSPACE%\Code\Mantid\Testing\SystemTest\scripts\mantidinstaller.py install %WORKSPACE%\build
   cd %WORKSPACE%\build\docs
   :: Run tests
   C:\MantidInstall\bin\MantidPlot.exe -xq runsphinx_doctest.py
   if ERRORLEVEl 1 exit /B %ERRORLEVEL%
   :: Remove
   cd %WORKSPACE%\build
-  python %SYSTEMTEST_DIR%\scripts\mantidinstaller.py uninstall %WORKSPACE%\build
+  python %WORKSPACE%\Code\Mantid\Testing\SystemTest\scripts\mantidinstaller.py uninstall %WORKSPACE%\build
 )
 
