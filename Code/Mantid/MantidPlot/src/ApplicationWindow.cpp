@@ -6093,7 +6093,11 @@ void ApplicationWindow::restoreWindowGeometry(ApplicationWindow *app, MdiSubWind
 
 Folder* ApplicationWindow::projectFolder() const
 {
-  return dynamic_cast<FolderListItem*>(folders->firstChild())->folder();
+  auto fli = dynamic_cast<FolderListItem*>(folders->firstChild());
+  if(fli)
+    return fli->folder();
+  else
+    throw std::runtime_error("Couldn't retrieve project folder");
 }
 
 bool ApplicationWindow::saveProject(bool compress)
