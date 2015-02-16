@@ -9967,12 +9967,20 @@ void ApplicationWindow::showWindowPopupMenu(Q3ListViewItem *it, const QPoint &p,
   }
 
   if (it->rtti() == FolderListItem::RTTI){
-    d_current_folder = dynamic_cast<FolderListItem*>(it)->folder();
-    showFolderPopupMenu(it, p, false);
+    auto fli = dynamic_cast<FolderListItem*>(it);
+    if(fli)
+    {
+      d_current_folder = fli->folder();
+      showFolderPopupMenu(it, p, false);
+    }
     return;
   }
 
-  MdiSubWindow *w= dynamic_cast<WindowListItem*>(it)->window();
+  auto wli = dynamic_cast<WindowListItem*>(it);
+  if(!wli)
+    return;
+
+  MdiSubWindow *w = wli->window();
   if (w){
     QMenu cm(this);
     QMenu plots(this);
@@ -10023,6 +10031,8 @@ void ApplicationWindow::showWindowPopupMenu(Q3ListViewItem *it, const QPoint &p,
       }
     } else if (w->isA("Graph3D")) {
       Graph3D *sp=dynamic_cast<Graph3D*>(w);
+      if(!sp)
+        return;
       Matrix *m = sp->matrix();
       QString formula = sp->formula();
       if (!formula.isEmpty()){
