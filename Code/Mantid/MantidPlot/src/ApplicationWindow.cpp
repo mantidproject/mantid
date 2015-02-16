@@ -6669,10 +6669,13 @@ void ApplicationWindow::recalculateTable()
   if (!w)
     return;
 
-  if (w->inherits("Table"))
-    (dynamic_cast<Table*>(w))->calculate();
-  else if (w->isA("Matrix"))
-    (dynamic_cast<Matrix*>(w))->calculate();
+  auto table = dynamic_cast<Table*>(w);
+  auto matrix = dynamic_cast<Matrix*>(w);
+
+  if(table)
+    table->calculate();
+  else if(matrix)
+    matrix->calculate();
 }
 
 void ApplicationWindow::sortActiveTable()
