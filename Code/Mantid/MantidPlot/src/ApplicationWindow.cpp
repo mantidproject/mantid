@@ -5922,6 +5922,8 @@ void ApplicationWindow::exportAllGraphs()
     if (w->isA("MultiLayer")) {
       plot3D = 0;
       plot2D = dynamic_cast<MultiLayer*>(w);
+      if(!plot2D)
+        continue;
       if (plot2D->isEmpty()) {
         QApplication::restoreOverrideCursor();
         QMessageBox::warning(this, tr("MantidPlot - Warning"),//Mantid
@@ -5933,6 +5935,8 @@ void ApplicationWindow::exportAllGraphs()
     } else if (w->isA("Graph3D")) {
       plot2D = 0;
       plot3D = dynamic_cast<Graph3D*>(w);
+      if(!plot3D)
+        continue;
     } else
       continue;
 
@@ -5943,8 +5947,7 @@ void ApplicationWindow::exportAllGraphs()
 
       QString msg = tr("A file called: <p><b>%1</b><p>already exists. ""Do you want to overwrite it?").arg(file_name);
       QMessageBox msgBox(QMessageBox::Question, tr("MantidPlot - Overwrite file?"), msg,//Mantid
-          QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::Cancel,
-          dynamic_cast<ApplicationWindow *>(this));
+          QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::Cancel, this);
       msgBox.exec();
       switch(msgBox.standardButton(msgBox.clickedButton())){
       case QMessageBox::Yes:
