@@ -7769,7 +7769,11 @@ void ApplicationWindow::showFitDialog()
   if(w->isA("MultiLayer"))
     plot = dynamic_cast<MultiLayer*>(w);
   else if(w->inherits("Table"))
-    plot = multilayerPlot(dynamic_cast<Table*>(w), dynamic_cast<Table*>(w)->drawableColumnSelection(), Graph::LineSymbols);
+  {
+    Table* t = dynamic_cast<Table*>(w);
+    if(t)
+      plot = multilayerPlot(t, t->drawableColumnSelection(), Graph::LineSymbols);
+  }
 
   if (!plot)
     return;
