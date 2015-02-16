@@ -2221,13 +2221,18 @@ void ApplicationWindow::updateColNames(const QString& oldName, const QString& ne
 {
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows){
-    if (w->isA("MultiLayer")){
-      QList<Graph *> layers = dynamic_cast<MultiLayer*>(w)->layersList();
+    auto ml = dynamic_cast<MultiLayer*>(w);
+    auto g3d = dynamic_cast<Graph3D*>(w);
+
+    if(ml)
+    {
+      QList<Graph *> layers = ml->layersList();
       foreach(Graph *g, layers)
-      g->updateCurveNames(oldName, newName, false);
+        g->updateCurveNames(oldName, newName, false);
     }
-    else if (w->isA("Graph3D")){
-      QString name = dynamic_cast<Graph3D*>(w)->formula();
+    else if(g3d)
+    {
+      QString name = g3d->formula();
       if (name.contains(oldName)){
         name.replace(oldName,newName);
         dynamic_cast<Graph3D*>(w)->setPlotAssociation(name);
