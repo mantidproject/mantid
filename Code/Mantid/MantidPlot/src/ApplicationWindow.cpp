@@ -4004,14 +4004,18 @@ void ApplicationWindow::removeCurves(const QString& name)
   foreach(MdiSubWindow *w, windows){
     if (w->isA("MultiLayer"))
     {
-      QList<Graph *> layers = dynamic_cast<MultiLayer*>(w)->layersList();
+      auto ml = dynamic_cast<MultiLayer*>(w);
+      if(!ml)
+        return;
+      QList<Graph *> layers = ml->layersList();
       foreach(Graph *g, layers)
-      g->removeCurves(name);
+        g->removeCurves(name);
     }
     else if (w->isA("Graph3D"))
     {
-      if ( (dynamic_cast<Graph3D*>(w)->formula()).contains(name) )
-        dynamic_cast<Graph3D*>(w)->clearData();
+      auto g3d = dynamic_cast<Graph3D*>(w);
+      if(g3d && g3d->formula().contains(name))
+          g3d->clearData();
     }
   }
   QApplication::restoreOverrideCursor();
