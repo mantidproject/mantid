@@ -10001,7 +10001,10 @@ QStringList ApplicationWindow::dependingPlots(const QString& name)
   QList<MdiSubWindow *> windows = windowsList();
   foreach(MdiSubWindow *w, windows){
     if (w->isA("MultiLayer")){
-      QList<Graph *> layers = dynamic_cast<MultiLayer*>(w)->layersList();
+      auto ml = dynamic_cast<MultiLayer*>(w);
+      if(!ml)
+        return plots;
+      QList<Graph *> layers = ml->layersList();
       foreach(Graph *g, layers){
         onPlot = g->curvesList();
         onPlot = onPlot.grep (name,TRUE);
@@ -10009,7 +10012,8 @@ QStringList ApplicationWindow::dependingPlots(const QString& name)
           plots << w->objectName();
       }
     }else if (w->isA("Graph3D")){
-      if ((dynamic_cast<Graph3D*>(w)->formula()).contains(name,TRUE) && plots.contains(w->objectName())<=0)
+      auto g3d = dynamic_cast<Graph3D*>(w);
+      if (g3d && (g3d->formula()).contains(name,TRUE) && plots.contains(w->objectName())<=0)
         plots << w->objectName();
     }
   }
