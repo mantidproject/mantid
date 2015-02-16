@@ -8554,11 +8554,23 @@ void ApplicationWindow::pasteSelection()
     return;
 
   if (m->inherits("Table"))
-    dynamic_cast<Table*>(m)->pasteSelection();
+  {
+    auto table = dynamic_cast<Table*>(m);
+    if(table)
+      table->pasteSelection();
+  }
   else if (m->isA("Matrix"))
-    dynamic_cast<Matrix*>(m)->pasteSelection();
+  {
+    auto matrix = dynamic_cast<Matrix*>(m);
+    if(matrix)
+      matrix->pasteSelection();
+  }
   else if (m->isA("Note"))
-    dynamic_cast<Note*>(m)->editor()->paste();
+  {
+    auto note = dynamic_cast<Note*>(m);
+    if(note)
+      note->editor()->paste();
+  }
   else if (m->isA("MultiLayer")){
     MultiLayer* plot = dynamic_cast<MultiLayer*>(m);
     if (!plot)
