@@ -430,8 +430,6 @@ unsigned long vtkMDEWRebinningCutter::GetMTime()
   return mTime;
 }
 
-
-
 void vtkMDEWRebinningCutter::setTimeRange(vtkInformationVector* outputVector)
 {
   if(SetupDone == m_setup)
@@ -452,6 +450,69 @@ void vtkMDEWRebinningCutter::setTimeRange(vtkInformationVector* outputVector)
     }
   }
 }
+
+/**
+ * Gets the minimum value of the data associated with the 
+ * workspace.
+ * @return The minimum value of the workspace data.
+ */
+double vtkMDEWRebinningCutter::GetMinValue() const
+{
+  if (NULL == m_presenter)
+  {
+    return 0.0;
+  }
+  try
+  {
+    return m_presenter->getMinValue();
+  }
+  catch (std::runtime_error &)
+  {
+    return 0;
+  }
+}
+
+/**
+ * Gets the maximum value of the data associated with the 
+ * workspace.
+ * @return The maximum value of the workspace data.
+ */
+double vtkMDEWRebinningCutter::GetMaxValue() const
+{
+  if (NULL == m_presenter)
+  {
+    return 0.0;
+  }
+  try
+  {
+    return m_presenter->getMaxValue();
+  }
+  catch (std::runtime_error &)
+  {
+    return 0;
+  }
+}
+
+/**
+ * Gets the (first) instrument which is associated with the workspace.
+ * @return The name of the instrument.
+ */
+const char* vtkMDEWRebinningCutter::GetInstrument() const
+{
+  if (NULL == m_presenter)
+  {
+    return "";
+  }
+  try
+  {
+    return m_presenter->getInstrument().c_str();
+  }
+  catch (std::runtime_error &)
+  {
+    return "";
+  }
+}
+
 
 Mantid::Kernel::V3D vtkMDEWRebinningCutter::getOrigin()
 {
