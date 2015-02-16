@@ -6,6 +6,7 @@
 #include "MantidKernel/ProxyInfo.h"
 
 #include <map>
+#include <iostream>
 #include <sstream>
 
 namespace Poco {

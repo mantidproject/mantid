@@ -485,7 +485,8 @@ void InternetHelper::setBody(Poco::Net::HTMLForm& form) {
 
   setMethod("POST");
   if (m_request == NULL) {
-    createRequest(Poco::URI("http://www.mantidproject.org"));
+    Poco::URI uri("http://www.mantidproject.org");
+    createRequest(uri);
   }
   form.prepareSubmit(*m_request);
   setContentType(m_request->getContentType());
