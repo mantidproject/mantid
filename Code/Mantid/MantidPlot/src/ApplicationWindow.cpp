@@ -14866,7 +14866,11 @@ void ApplicationWindow::folderItemDoubleClicked(Q3ListViewItem *it)
   if (!it || it->rtti() != FolderListItem::RTTI)
     return;
 
-  FolderListItem *item = dynamic_cast<FolderListItem*>(it)->folder()->folderListItem();
+  auto fli = dynamic_cast<FolderListItem*>(it);
+  if(!fli)
+    return;
+
+  FolderListItem *item = fli->folder()->folderListItem();
   folders->setCurrentItem(item);
 }
 
