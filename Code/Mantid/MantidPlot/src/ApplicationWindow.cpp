@@ -6473,7 +6473,11 @@ AssociationsDialog* ApplicationWindow::showPlotAssociations(int curve)
   if (!w)
     return 0;
 
-  Graph *g = dynamic_cast<MultiLayer*>(w)->activeGraph();
+  auto ml = dynamic_cast<MultiLayer*>(w);
+  if(!ml)
+    return 0;
+
+  Graph *g = ml->activeGraph();
   if (!g)
     return 0;
 
