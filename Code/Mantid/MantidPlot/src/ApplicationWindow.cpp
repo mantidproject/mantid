@@ -15795,7 +15795,11 @@ void ApplicationWindow::hideSelectedWindows()
   folders->blockSignals(true);
   foreach(item, lst){
     if (item->rtti() != FolderListItem::RTTI)
-      hideWindow(dynamic_cast<WindowListItem*>(item)->window());
+    {
+      auto wli = dynamic_cast<WindowListItem*>(item);
+      if(wli)
+        hideWindow(wli->window());
+    }
   }
   folders->blockSignals(false);
 }
