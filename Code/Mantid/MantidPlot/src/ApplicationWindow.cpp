@@ -10082,7 +10082,7 @@ QStringList ApplicationWindow::dependingPlots(const QString& name)
       }
     }else if (w->isA("Graph3D")){
       auto g3d = dynamic_cast<Graph3D*>(w);
-      if (g3d && (g3d->formula()).contains(name,TRUE) && plots.contains(w->objectName())<=0)
+      if (g3d && (g3d->formula()).contains(name,TRUE) && !plots.contains(w->objectName()))
         plots << w->objectName();
     }
   }
