@@ -6522,35 +6522,28 @@ void ApplicationWindow::exportAllTables(const QString& sep, bool colNames, bool 
       if (w->inherits("Table") || w->isA("Matrix")){
         QString fileName = dir + "/" + w->objectName() + ".txt";
         QFile f(fileName);
-        if (f.exists(fileName) && confirmOverwrite){
+        if (f.exists(fileName) && confirmOverwrite)
+        {
           QApplication::restoreOverrideCursor();
-          switch(QMessageBox::question(this, tr("MantidPlot - Overwrite file?"),//Mantid
+          auto result = QMessageBox::question(this, tr("MantidPlot - Overwrite file?"),
               tr("A file called: <p><b>%1</b><p>already exists. "
-                  "Do you want to overwrite it?").arg(fileName), tr("&Yes"), tr("&All"), tr("&Cancel"), 0, 1))
-          {
-          case 0:
-            if (w->inherits("Table"))
-              success = (dynamic_cast<Table*>(w))->exportASCII(fileName, sep, colNames, colComments, expSelection);
-            else if (w->isA("Matrix"))
-              success = (dynamic_cast<Matrix*>(w))->exportASCII(fileName, sep, expSelection);
-            break;
+                 "Do you want to overwrite it?").arg(fileName),
+              tr("&Yes"), tr("&All"), tr("&Cancel"), 0, 1);
 
-          case 1:
+          if(result == 1)
             confirmOverwrite = false;
-            if (w->inherits("Table"))
-              success = (dynamic_cast<Table*>(w))->exportASCII(fileName, sep, colNames, colComments, expSelection);
-            else if (w->isA("Matrix"))
-              success = (dynamic_cast<Matrix*>(w))->exportASCII(fileName, sep, expSelection);
-            break;
-
-          case 2:
+          else if(result == 2)
             return;
-            break;
-          }
-        } else if (w->inherits("Table"))
-          success = (dynamic_cast<Table*>(w))->exportASCII(fileName, sep, colNames, colComments, expSelection);
-        else if (w->isA("Matrix"))
-          success = (dynamic_cast<Matrix*>(w))->exportASCII(fileName, sep, expSelection);
+
+        }
+
+        auto table = dynamic_cast<Table*>(w);
+        auto matrix = dynamic_cast<Matrix*>(w);
+
+        if(table)
+          success = table->exportASCII(fileName, sep, colNames, colComments, expSelection);
+        else if(matrix)
+          success = matrix->exportASCII(fileName, sep, expSelection);
 
         if (!success)
           break;
