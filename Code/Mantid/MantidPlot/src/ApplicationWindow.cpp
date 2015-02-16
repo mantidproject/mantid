@@ -10100,14 +10100,17 @@ QStringList ApplicationWindow::dependingPlots(const QString& name)
 QStringList ApplicationWindow::multilayerDependencies(QWidget *w)
 {
   QStringList tables;
-  MultiLayer *g=dynamic_cast<MultiLayer*>(w);
+  MultiLayer* g = dynamic_cast<MultiLayer*>(w);
+  if(!g)
+    return tables;
+
   QList<Graph *> layers = g->layersList();
   foreach(Graph *ag, layers){
     QStringList onPlot=ag->curvesList();
     for (int j=0; j<onPlot.count(); j++)
     {
       QStringList tl = onPlot[j].split("_", QString::SkipEmptyParts);
-      if (tables.contains(tl[0])<=0)
+      if (!tables.contains(tl[0]))
         tables << tl[0];
     }
   }
