@@ -9,34 +9,6 @@ from mantid import *
 
 
 ##############################################################################
-# Misc. Helper Functions
-##############################################################################
-
-def split(l, n):
-    """
-    Yield successive n-sized chunks from l.
-    """
-    for i in xrange(0, len(l), n):
-        yield l[i:i+n]
-
-def segment(l, fromIndex, toIndex):
-    for i in xrange(fromIndex, toIndex + 1):
-        yield l[i]
-
-def trimData(nSpec, vals, min, max):
-    result = []
-    chunk_size = len(vals  / nSpec)
-    assert min >= 0, 'trimData: min is less then zero'
-    assert max <= chunk_size - 1, 'trimData: max is greater than the number of spectra'
-    assert min <= max, 'trimData: min is greater than max'
-    chunks = split(vals, chunk_size)
-    for chunk in chunks:
-        seg = segment(chunk, min, max)
-        for val in seg:
-            result.append(val)
-    return result
-
-##############################################################################
 # ConvFit
 ##############################################################################
 
@@ -89,11 +61,13 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
     using_delta_func = ftype[:5] == 'Delta'
     lorentzians = ftype[5:6] if using_delta_func else ftype[:1]
 
-    logger.information('Input files : '+str(inputWS))
-    logger.information('Fit type : Delta = ' + str(using_delta_func) + ' ; Lorentzians = ' + str(lorentzians))
-    logger.information('Background type : ' + bgd)
+    logger.information('Input files: ' + str(inputWS))
+    logger.information('Fit type: Delta=%s; Lorentzians=%s' % (
+                       str(using_delta_func), str(lorentzians)))
+    logger.information('Background type: ' + bgd)
 
-    output_workspace = '%sconv_%s%s_s%d_to_%d' % (getWSprefix(inputWS), ftype, bgd, specMin, specMax)
+    output_workspace = '%sconv_%s%s_s%d_to_%d' % (
+                       getWSprefix(inputWS), ftype, bgd, specMin, specMax)
 
     #convert input workspace to get Q axis
     temp_fit_workspace = "__convfit_fit_ws"
@@ -147,8 +121,9 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
     RenameWorkspace(InputWorkspace=output_workspace,
                     OutputWorkspace=output_workspace + "_Parameters")
     fit_workspaces = mtd[output_workspace + '_Workspaces'].getNames()
-    for i, ws in enumerate(fit_workspaces):
-        RenameWorkspace(ws, OutputWorkspace=output_workspace + '_' + str(i+specMin) + '_Workspace')
+    for i, workspace in enumerate(fit_workspaces):
+        RenameWorkspace(workspace,
+                        OutputWorkspace='%s_%d_Workspace' % (output_workspace, i + specMin))
 
     if Save:
         # path name for nxs file
@@ -214,9 +189,9 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, in
 
     # Process generated workspaces
     wsnames = mtd[fit_group].getNames()
-    for i, ws in enumerate(wsnames):
+    for i, workspace in enumerate(wsnames):
         output_ws = output_workspace + '_%d_Workspace' % i
-        RenameWorkspace(ws, OutputWorkspace=output_ws)
+        RenameWorkspace(workspace, OutputWorkspace=output_ws)
 
     sample_logs  = {'start_x': startx, 'end_x': endx, 'fit_type': fit_type,
                     'intensities_constrained': intensities_constrained, 'beta_constrained': False}
@@ -271,8 +246,8 @@ def furyfitMult(inputWS, function, ftype, startx, endx, spec_min=0, spec_max=Non
     transposeFitParametersTable(params_table)
 
     #set first column of parameter table to be axis values
-    ax = mtd[tmp_fit_workspace].getAxis(1)
-    axis_values = ax.extractValues()
+    x_axis = mtd[tmp_fit_workspace].getAxis(1)
+    axis_values = x_axis.extractValues()
     for i, value in enumerate(axis_values):
         mtd[params_table].setCell('axis-1', i, value)
 
@@ -336,11 +311,11 @@ def createFuryMultiDomainFunction(function, input_ws):
 
 def furyFitSaveWorkspaces(save_workspaces):
     workdir = getDefaultWorkingDirectory()
-    for ws in save_workspaces:
+    for workspace in save_workspaces:
         #save workspace to default directory
-        fpath = os.path.join(workdir, ws+'.nxs')
-        SaveNexusProcessed(InputWorkspace=ws, Filename=fpath)
-        logger.information(ws + ' output to file : '+fpath)
+        fpath = os.path.join(workdir, workspace+'.nxs')
+        SaveNexusProcessed(InputWorkspace=workspace, Filename=fpath)
+        logger.information(workspace + ' output to file : '+fpath)
 
 
 def furyfitPlotSeq(ws, plot):
@@ -357,8 +332,8 @@ def furyfitPlotSeq(ws, plot):
 ##############################################################################
 
 def msdfitPlotSeq(inputWS, xlabel):
-    ws = mtd[inputWS+'_A1']
-    if len(ws.readX(0)) > 1:
+    workspace = mtd[inputWS + '_A1']
+    if len(workspace.readX(0)) > 1:
         msd_plot = MTD_PLOT.plotSpectrum(inputWS+'_A1',0,True)
         msd_layer = msd_plot.activeLayer()
         msd_layer.setAxisTitle(MTD_PLOT.Layer.Bottom,xlabel)
@@ -448,8 +423,8 @@ def plotInput(inputfiles,spectra=[]):
         spectra = [spectra[0], spectra[0]]
         OneSpectra = True
     workspaces = []
-    for file in inputfiles:
-        root = LoadNexus(Filename=file)
+    for in_file in inputfiles:
+        root = LoadNexus(Filename=in_file)
         if not OneSpectra:
             GroupDetectors(root, root, DetectorList=range(spectra[0],spectra[1]+1) )
         workspaces.append(root)
@@ -471,9 +446,9 @@ def CubicFit(inputWS, spec):
     fit = Fit(Function=function, InputWorkspace=inputWS, WorkspaceIndex=spec,
               CreateOutput=True, Output='Fit')
     table = mtd['Fit_Parameters']
-    A0 = table.cell(0,1)
-    A1 = table.cell(1,1)
-    A2 = table.cell(2,1)
+    A0 = table.cell(0, 1)
+    A1 = table.cell(1, 1)
+    A2 = table.cell(2, 1)
     Abs = [A0, A1, A2]
     logger.information('Group '+str(spec)+' of '+inputWS+' ; fit coefficients are : '+str(Abs))
     return Abs
@@ -534,9 +509,9 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False):
     nHist = mtd[inputWS].getNumberHistograms()
     # Check that number of histograms in each corrections workspace matches
     # that of the input (sample) workspace
-    for ws in corrections:
-        if mtd[ws].getNumberHistograms() != nHist:
-            raise ValueError('Mismatch: num of spectra in '+ws+' and inputWS')
+    for workspace in corrections:
+        if mtd[workspace].getNumberHistograms() != nHist:
+            raise ValueError('Mismatch: num of spectra in '+workspace+' and inputWS')
     # Workspaces that hold intermediate results
     CorrectedSampleWS = '__csam'
     CorrectedCanWS = '__ccan'

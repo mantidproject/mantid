@@ -31,8 +31,8 @@ def getInstrRun(ws_name):
     @param ws_name - name of the workspace
     @return tuple of form (instrument, run number)
     """
-    ws = mtd[ws_name]
-    run_number = str(ws.getRunNumber())
+    workspace = mtd[ws_name]
+    run_number = str(workspace.getRunNumber())
     if run_number == '0':
         # Attempt to parse run number off of name
         match = re.match(r'([a-zA-Z]+)([0-9]+)', ws_name)
@@ -41,7 +41,7 @@ def getInstrRun(ws_name):
         else:
             raise RuntimeError("Could not find run number associated with workspace.")
 
-    instrument = ws.getInstrument().getName()
+    instrument = workspace.getInstrument().getName()
     facility = config.getFacility()
     instrument = facility.instrument(instrument).filePrefix(int(run_number))
     instrument = instrument.lower()
@@ -57,10 +57,10 @@ def getWSprefix(wsname):
     if wsname == '':
         return ''
 
-    ws = mtd[wsname]
+    workspace = mtd[wsname]
     facility = config['default.facility']
 
-    ws_run = ws.getRun()
+    ws_run = workspace.getRun()
     if 'facility' in ws_run:
         facility = ws_run.getLogData('facility').value
 
@@ -71,8 +71,8 @@ def getWSprefix(wsname):
         run_name = instrument + run_number
 
     try:
-        analyser = ws.getInstrument().getStringParameter('analyser')[0]
-        reflection = ws.getInstrument().getStringParameter('reflection')[0]
+        analyser = workspace.getInstrument().getStringParameter('analyser')[0]
+        reflection = workspace.getInstrument().getStringParameter('reflection')[0]
     except IndexError:
         analyser = ''
         reflection = ''
@@ -114,21 +114,21 @@ def getDefaultWorkingDirectory():
 
 def createQaxis(inputWS):
     result = []
-    ws = mtd[inputWS]
-    num_hist = ws.getNumberHistograms()
-    if ws.getAxis(1).isSpectra():
-        inst = ws.getInstrument()
+    workspace = mtd[inputWS]
+    num_hist = workspace.getNumberHistograms()
+    if workspace.getAxis(1).isSpectra():
+        inst = workspace.getInstrument()
         sample_pos = inst.getSample().getPos()
         beam_pos = sample_pos - inst.getSource().getPos()
         for i in range(0, num_hist):
             efixed = getEfixed(inputWS, i)
-            detector = ws.getDetector(i)
+            detector = workspace.getDetector(i)
             theta = detector.getTwoTheta(sample_pos, beam_pos) / 2
             lamda = math.sqrt(81.787 / efixed)
             q = 4 * math.pi * math.sin(theta) / lamda
             result.append(q)
     else:
-        axis = ws.getAxis(1)
+        axis = workspace.getAxis(1)
         msg = 'Creating Axis based on Detector Q value: '
         if not axis.isNumeric():
             msg += 'Input workspace must have either spectra or numeric axis.'
@@ -421,7 +421,8 @@ def convertToElasticQ(input_ws, output_ws=None):
     axis = mtd[input_ws].getAxis(1)
     if axis.isSpectra():
         e_fixed = getEfixed(input_ws)
-        ConvertSpectrumAxis(input_ws, Target='ElasticQ', EMode='Indirect', EFixed=e_fixed, OutputWorkspace=output_ws)
+        ConvertSpectrumAxis(input_ws, Target='ElasticQ', EMode='Indirect', EFixed=e_fixed,
+                            OutputWorkspace=output_ws)
 
     elif axis.isNumeric():
         # Check that units are Momentum Transfer
@@ -512,7 +513,8 @@ def convertParametersToWorkspace(params_table, x_column, param_names, output_nam
         column_error_names = search_for_fit_params(param_name + '_Err', params_table)
         param_workspaces = []
         for name, error_name in zip(column_names, column_error_names):
-            ConvertTableToMatrixWorkspace(params_table, x_column, name, error_name, OutputWorkspace=name)
+            ConvertTableToMatrixWorkspace(params_table, x_column, name, error_name,
+                                          OutputWorkspace=name)
             param_workspaces.append(name)
         workspace_names.append(param_workspaces)
 
