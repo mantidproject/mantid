@@ -196,5 +196,7 @@ void SampleTransmission::algorithmComplete(bool error)
     transmissionItem->addChild(item);
   }
 
-  //TODO: plot
+  m_uiForm.twResults->resizeColumnToContents(0);
+
+  //TODO: Preview plot
 }

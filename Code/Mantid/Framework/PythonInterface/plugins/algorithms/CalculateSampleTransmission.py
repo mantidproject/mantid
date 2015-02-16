@@ -53,7 +53,7 @@ class CalculateSampleTransmission(PythonAlgorithm):
         CreateWorkspace(OutputWorkspace=self._output_ws, NSpec=2, DataX=[0, 0], DataY=[0, 0],
                         VerticalAxisUnit='Text', VerticalAxisValues='Transmission,Scattering')
         Rebin(InputWorkspace=self._output_ws, OutputWorkspace=self._output_ws, Params=self._bin_params)
-        SetSampleMaterial(InputWorkspace=self._output_ws, ChemicalFormula=self._chamical_formula)
+        SetSampleMaterial(InputWorkspace=self._output_ws, ChemicalFormula=self._chemical_formula)
         ConvertToPointData(InputWorkspace=self._output_ws, OutputWorkspace=self._output_ws)
 
         ws = mtd[self._output_ws]
@@ -79,7 +79,7 @@ class CalculateSampleTransmission(PythonAlgorithm):
         """
 
         self._bin_params = self.getPropertyValue('WavelengthRange')
-        self._chamical_formula = self.getPropertyValue('ChemicalFormula')
+        self._chemical_formula = self.getPropertyValue('ChemicalFormula')
         self._density = self.getProperty('NumberDensity').value
         self._thickness = self.getProperty('Thickness').value
         self._output_ws = self.getPropertyValue('OutputWorkspace')
