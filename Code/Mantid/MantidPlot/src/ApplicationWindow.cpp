@@ -8902,7 +8902,8 @@ void ApplicationWindow::setActiveWindow(MdiSubWindow* w)
 void ApplicationWindow::activateWindow()
 {
   WindowListItem *it = dynamic_cast<WindowListItem*>(lv->currentItem());
-  activateWindow(it->window());
+  if(it)
+    activateWindow(it->window());
 }
 
 /**
