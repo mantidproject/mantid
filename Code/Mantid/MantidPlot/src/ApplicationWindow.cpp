@@ -6263,8 +6263,15 @@ void ApplicationWindow::renameWindow(Q3ListViewItem *item, int, const QString &t
   if (!item)
     return;
 
-  MdiSubWindow *w = dynamic_cast<WindowListItem*>(item)->window();
-  if (!w || text == w->objectName())
+  WindowListItem *wli = dynamic_cast<WindowListItem*>(item);
+  if (!wli)
+    return;
+
+  MdiSubWindow *w = wli->window();
+  if (!w)
+    return;
+
+  if(text == w->objectName())
     return;
 
   if(!setWindowName(w, text))
