@@ -45,16 +45,9 @@ namespace CustomInterfaces
     m_propTrees["CalPropTree"]->addProperty(m_properties["CalBackMin"]);
     m_propTrees["CalPropTree"]->addProperty(m_properties["CalBackMax"]);
 
-    // CAL PLOT
-    m_plots["CalPlot"] = new QwtPlot(m_parentWidget);
-    m_plots["CalPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-    m_plots["CalPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-    m_plots["CalPlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.plotCalibration->addWidget(m_plots["CalPlot"]);
-
     // Cal plot range selectors
-    m_rangeSelectors["CalPeak"] = new MantidWidgets::RangeSelector(m_plots["CalPlot"]);
-    m_rangeSelectors["CalBackground"] = new MantidWidgets::RangeSelector(m_plots["CalPlot"]);
+    m_rangeSelectors["CalPeak"] = new MantidWidgets::RangeSelector(m_uiForm.ppCalibration);
+    m_rangeSelectors["CalBackground"] = new MantidWidgets::RangeSelector(m_uiForm.ppCalibration);
     m_rangeSelectors["CalBackground"]->setColour(Qt::darkGreen); //Dark green to signify background range
 
     // RES PROPERTY TREE
@@ -102,19 +95,12 @@ namespace CustomInterfaces
     m_dblManager->setValue(m_properties["ResEHigh"], 0.2);
     resRB->addSubProperty(m_properties["ResEHigh"]);
 
-    // RES PLOT
-    m_plots["ResPlot"] = new QwtPlot(m_parentWidget);
-    m_plots["ResPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-    m_plots["ResPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-    m_plots["ResPlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.plotResolution->addWidget(m_plots["ResPlot"]);
-
     // Res plot range selectors
     // Create ResBackground first so ResPeak is drawn above it
-    m_rangeSelectors["ResBackground"] = new MantidWidgets::RangeSelector(m_plots["ResPlot"],
+    m_rangeSelectors["ResBackground"] = new MantidWidgets::RangeSelector(m_uiForm.ppResolution,
         MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, false);
     m_rangeSelectors["ResBackground"]->setColour(Qt::darkGreen);
-    m_rangeSelectors["ResPeak"] = new MantidWidgets::RangeSelector(m_plots["ResPlot"],
+    m_rangeSelectors["ResPeak"] = new MantidWidgets::RangeSelector(m_uiForm.ppResolution,
         MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, true);
 
     // SIGNAL/SLOT CONNECTIONS
@@ -329,11 +315,11 @@ namespace CustomInterfaces
     // Set peak and background ranges
     std::map<std::string, double> ranges = getRangesFromInstrument();
 
-    std::pair<double, double> peakRange(ranges["peak-start-tof"], ranges["peak-end-tof"]);
-    std::pair<double, double> backgroundRange(ranges["back-start-tof"], ranges["back-end-tof"]);
+    QPair<double, double> peakRange(ranges["peak-start-tof"], ranges["peak-end-tof"]);
+    QPair<double, double> backgroundRange(ranges["back-start-tof"], ranges["back-end-tof"]);
 
-    setMiniPlotGuides("CalPeak", m_properties["CalPeakMin"], m_properties["CalPeakMax"], peakRange);
-    setMiniPlotGuides("CalBackground", m_properties["CalBackMin"], m_properties["CalBackMax"], backgroundRange);
+    setRangeSelector("CalPeak", m_properties["CalPeakMin"], m_properties["CalPeakMax"], peakRange);
+    setRangeSelector("CalBackground", m_properties["CalBackMin"], m_properties["CalBackMax"], backgroundRange);
   }
 
   /**
@@ -374,15 +360,16 @@ namespace CustomInterfaces
         Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
 
     const Mantid::MantidVec & dataX = input->readX(0);
-    std::pair<double, double> range(dataX.front(), dataX.back());
+    QPair<double, double> range(dataX.front(), dataX.back());
 
-    plotMiniPlot(input, 0, "CalPlot", "CalCurve");
-    setXAxisToCurve("CalPlot", "CalCurve");
+    m_uiForm.ppCalibration->clear();
+    m_uiForm.ppCalibration->addSpectrum("Raw", input, 0);
+    m_uiForm.ppCalibration->resizeX();
 
-    setPlotRange("CalPeak", m_properties["CalELow"], m_properties["CalEHigh"], range);
-    setPlotRange("CalBackground", m_properties["CalStart"], m_properties["CalEnd"], range);
+    setPlotPropertyRange("CalPeak", m_properties["CalELow"], m_properties["CalEHigh"], range);
+    setPlotPropertyRange("CalBackground", m_properties["CalStart"], m_properties["CalEnd"], range);
 
-    replot("CalPlot");
+    m_uiForm.ppCalibration->replot();
 
     //Also replot the energy
     calPlotEnergy();
@@ -437,16 +424,17 @@ namespace CustomInterfaces
     }
 
     const Mantid::MantidVec & dataX = energyWs->readX(0);
-    std::pair<double, double> range(dataX.front(), dataX.back());
+    QPair<double, double> range(dataX.front(), dataX.back());
 
-    setPlotRange("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], range);
+    setPlotPropertyRange("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], range);
 
-    plotMiniPlot(energyWs, 0, "ResPlot", "ResCurve");
-    setXAxisToCurve("ResPlot", "ResCurve");
+    m_uiForm.ppResolution->clear();
+    m_uiForm.ppResolution->addSpectrum("Energy", energyWs, 0);
+    m_uiForm.ppResolution->resizeX();
 
     calSetDefaultResolution(energyWs);
 
-    replot("ResPlot");
+    m_uiForm.ppResolution->replot();
   }
 
   /**
@@ -474,13 +462,13 @@ namespace CustomInterfaces
       {
         double res = params[0];
 
-        //Set default rebinning bounds
-        std::pair<double, double> peakRange(-res*10, res*10);
-        setMiniPlotGuides("ResPeak", m_properties["ResELow"], m_properties["ResEHigh"], peakRange);
+        // Set default rebinning bounds
+        QPair<double, double> peakRange(-res*10, res*10);
+        setRangeSelector("ResPeak", m_properties["ResELow"], m_properties["ResEHigh"], peakRange);
 
-        //Set default background bounds
-        std::pair<double, double> backgroundRange(-res*9, -res*8);
-        setMiniPlotGuides("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], backgroundRange);
+        // Set default background bounds
+        QPair<double, double> backgroundRange(-res*9, -res*8);
+        setRangeSelector("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], backgroundRange);
       }
     }
   }

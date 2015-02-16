@@ -2,6 +2,7 @@
 #define MANTIDQT_MANTIDWIDGET_POSHPLOTTING_H
 
 #include "WidgetDllOption.h"
+#include "PreviewPlot.h"
 
 #include <qwt_plot_picker.h>
 #include <qwt_plot.h>
@@ -25,6 +26,7 @@ namespace MantidWidgets
     enum SelectType { XMINMAX, XSINGLE, YMINMAX, YSINGLE };
 
     RangeSelector(QwtPlot* plot, SelectType type=XMINMAX, bool visible=true, bool infoOnly=false);
+    RangeSelector(PreviewPlot* plot, SelectType type=XMINMAX, bool visible=true, bool infoOnly=false);
     ~RangeSelector() {};
 
     std::pair<double,double> getRange();
@@ -39,7 +41,7 @@ namespace MantidWidgets
     void rangeChanged(double, double);
     void selectionChanged(double, double);
     void selectionChangedLazy(double, double);
-    
+
   public slots:
     void setRange(double, double);
     void setMinimum(double); ///< outside setting of value
@@ -51,6 +53,7 @@ namespace MantidWidgets
     void setVisible(bool state);
 
   private:
+    void init();
     void setMin(double val);
     void setMax(double val);
     void setMaxMin(const double min, const double max);
@@ -69,7 +72,7 @@ namespace MantidWidgets
     double m_max;
     double m_lower; ///< lowest allowed value for range
     double m_higher; ///< highest allowed value for range
-    
+
     QwtPlotCanvas* m_canvas;
     QwtPlot* m_plot;
 
