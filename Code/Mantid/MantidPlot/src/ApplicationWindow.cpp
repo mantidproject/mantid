@@ -14666,10 +14666,15 @@ void ApplicationWindow::showAllFolderWindows()
 
   FolderListItem *fi = currentFolder()->folderListItem();
   FolderListItem *item = dynamic_cast<FolderListItem *>(fi->firstChild());
+  if(!item)
+    return;
   int initial_depth = item->depth();
   while (item && item->depth() >= initial_depth)
   {// show/hide windows in all subfolders
-    lst = dynamic_cast<Folder *>(item->folder())->windowsList();
+    auto fld = dynamic_cast<Folder*>(item->folder());
+    if(!fld)
+      break;
+    lst = fld->windowsList();
     foreach(MdiSubWindow *w, lst){
       if (w && show_windows_policy == SubFolders){
         updateWindowLists(w);
