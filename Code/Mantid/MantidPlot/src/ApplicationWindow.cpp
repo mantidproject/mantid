@@ -7209,32 +7209,18 @@ void ApplicationWindow::showAxisDialog()
   QDialog* gd = showScaleDialog();
   if (gd && plot->isA("MultiLayer"))
   {
-    MultiLayer* ml;
-    try
-    {
-      ml = dynamic_cast<MultiLayer*>(plot);
-    }
-    catch(std::runtime_error& )
-    {
-      g_log.error() << "Failed to open axis dialog for multi layer plot";
+    MultiLayer* ml = dynamic_cast<MultiLayer*>(plot);
+    if (!ml || (ml && !ml->layers()))
       return;
-    }
-    if (ml && ml->layers())
-      dynamic_cast<AxesDialog*>(gd)->showAxesPage();
+
+    auto ad = dynamic_cast<AxesDialog*>(gd);
+    if(ad)
+      ad->showAxesPage();
   }
   else if (gd && plot->isA("Graph3D"))
   {
-    Plot3DDialog* p3d;
-    try
-    {
-      p3d = dynamic_cast<Plot3DDialog*>(gd);
-    }
-    catch(std::runtime_error& )
-    {
-      g_log.error() << "Failed to open axis dialog for multi layer plot";
-      return;
-    }
-    if (p3d)
+    Plot3DDialog* p3d = dynamic_cast<Plot3DDialog*>(gd);
+    if(p3d)
       p3d->showAxisTab();
   }
 }
