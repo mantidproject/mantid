@@ -14383,7 +14383,12 @@ Folder* ApplicationWindow::appendProject(const QString& fn, Folder* parentFolder
   QFile file(fn);
   QFileInfo fileInfo(fn);
 
-  file.open(QIODevice::ReadOnly);
+  if(!file.open(QIODevice::ReadOnly))
+  {
+    QMessageBox::critical(this, tr("MantidPlot - File opening error"),  tr("The file: <b> %1 </b> could not be opened!").arg(fn));
+    return 0;
+  }
+
   QTextStream fileTS(&file);
   fileTS.setEncoding(QTextStream::UnicodeUTF8);
 
