@@ -2458,6 +2458,9 @@ void ApplicationWindow::editSurfacePlot()
     return;
 
   Graph3D* g = dynamic_cast<Graph3D*>(w);
+  if(!g)
+    return;
+
   SurfaceDialog* sd = new SurfaceDialog(this);
   sd->setAttribute(Qt::WA_DeleteOnClose);
 
