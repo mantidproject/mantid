@@ -54,7 +54,7 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         self.assertTrue(not pws.hasIntegratedPeaks())
         
     def test_createPeakHKL(self):
-        pws = WorkspaceCreationHelper.createPeaksWorkspace(0)
+        pws = WorkspaceCreationHelper.createPeaksWorkspace(0, True)
         lattice = pws.mutableSample().getOrientedLattice()
         
         # Simple test that the creational method is exposed
@@ -62,7 +62,7 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         self.assertTrue(IPeak != None)
     
     def test_peak_setQLabFrame(self):
-        pws = WorkspaceCreationHelper.createPeaksWorkspace(1)
+        pws = WorkspaceCreationHelper.createPeaksWorkspace(1, True)
         p = pws.getPeak(0)
         try:
             p.setQLabFrame(V3D(1,1,1))
@@ -75,7 +75,7 @@ class IPeaksWorkspaceTest(unittest.TestCase):
             self.fail("Tried setQLabFrame with one V3D argument and a double distance")
         
     def test_peak_setQSampleFrame(self):
-        pws = WorkspaceCreationHelper.createPeaksWorkspace(1)
+        pws = WorkspaceCreationHelper.createPeaksWorkspace(1, True)
         p = pws.getPeak(0)
         try:
             p.setQSampleFrame(V3D(1,1,1))

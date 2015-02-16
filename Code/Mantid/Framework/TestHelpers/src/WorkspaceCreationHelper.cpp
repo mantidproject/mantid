@@ -1182,7 +1182,7 @@ RebinnedOutput_sptr CreateRebinnedOutputWorkspace() {
 }
 
 Mantid::DataObjects::PeaksWorkspace_sptr
-createPeaksWorkspace(const int numPeaks) {
+createPeaksWorkspace(const int numPeaks, const bool createOrientedLattice) {
   PeaksWorkspace_sptr peaksWS(new PeaksWorkspace());
   Instrument_sptr inst =
       ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
@@ -1193,8 +1193,10 @@ createPeaksWorkspace(const int numPeaks) {
     peaksWS->addPeak(peak);
   }
 
-  Mantid::Geometry::OrientedLattice lattice;
-  peaksWS->mutableSample().setOrientedLattice(&lattice);
+  if(createOrientedLattice) {
+    Mantid::Geometry::OrientedLattice lattice;
+    peaksWS->mutableSample().setOrientedLattice(&lattice);
+  }
   return peaksWS;
 }
 
