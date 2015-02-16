@@ -354,7 +354,12 @@ void SCARFTomoReconstruction::doLogin(const std::string &username,
     username + "&password=" + password;
 
   std::stringstream ss;
-  session.sendRequest(httpsURL, ss);
+  try {
+    session.sendRequest(httpsURL, ss);
+  } catch (Kernel::Exception::InternetError& ie) {
+    throw std::runtime_error("Error while sending HTTP request to authenticate "
+                             "(log in): " + std::string(ie.what()));
+  }
   std::string resp = ss.str();
   // We would check (Poco::Net::HTTPResponse::HTTP_OK == respCode) but the SCARF
   // login script (token.py) seems to return 200 whatever happens, as far as the
@@ -409,7 +414,13 @@ void SCARFTomoReconstruction::doLogout(const std::string &username) {
                                                      "text/plain"));
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
-  int code = session.sendRequest(httpsURL, ss, headers);
+  int code;
+  try {
+    code = session.sendRequest(httpsURL, ss, headers);
+  } catch (Kernel::Exception::InternetError& ie) {
+    throw std::runtime_error("Error while sending HTTP request to log out: "
+                             + std::string(ie.what()));
+  }
   std::string resp = ss.str();
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     g_log.notice() << "Logged out with response: " << resp << std::endl;
@@ -487,8 +498,14 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
                                                      boundary));
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  int code = session.sendRequest(httpsURL, ss, headers,
-                                 Poco::Net::HTTPRequest::HTTP_POST, body);
+  int code;
+  try {
+    code = session.sendRequest(httpsURL, ss, headers,
+                               Poco::Net::HTTPRequest::HTTP_POST, body);
+  } catch (Kernel::Exception::InternetError& ie) {
+    throw std::runtime_error("Error while sending HTTP request to submit a job: "
+                             + std::string(ie.what()));
+  }
   std::string resp = ss.str();
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     if (std::string::npos != resp.find("<errMsg>")) {
@@ -539,7 +556,13 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
                                                      "application/xml"));
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  int code = session.sendRequest(httpsURL, ss, headers);
+  int code;
+  try {
+    code = session.sendRequest(httpsURL, ss, headers);
+  } catch (Kernel::Exception::InternetError& ie) {
+    throw std::runtime_error("Error while sending HTTP request to query the status "
+                             "of jobs: " + std::string(ie.what()));
+  }
   std::string resp = ss.str();
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     // TODO: put it into an output TableWorkspace
@@ -597,7 +620,13 @@ void SCARFTomoReconstruction::doQueryStatusById(const std::string &username,
                                                      "application/xml"));
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  int code = session.sendRequest(httpsURL, ss, headers);
+  int code;
+  try {
+    code = session.sendRequest(httpsURL, ss, headers);
+  } catch (Kernel::Exception::InternetError& ie) {
+    throw std::runtime_error("Error while sending HTTP request to query the status "
+                             "of a job: " + std::string(ie.what()));
+  }
   std::string resp = ss.str();
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     // TODO: put it into an output TableWorkspace
@@ -644,7 +673,13 @@ bool SCARFTomoReconstruction::doPing() {
   headers.insert(std::pair<std::string, std::string>("Content-Type",
                                                      "application/xml"));
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
-  int code = session.sendRequest(httpsURL, ss, headers);
+  int code;
+  try {
+    code = session.sendRequest(httpsURL, ss, headers);
+  } catch (Kernel::Exception::InternetError& ie) {
+    throw std::runtime_error("Error while sending HTTP request to ping the "
+                             "server " + std::string(ie.what()));
+  }
   std::string resp = ss.str();
   bool ok = false;
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
@@ -698,7 +733,13 @@ void SCARFTomoReconstruction::doCancel(const std::string &username,
                                                      "application/xml"));
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
-  int code = session.sendRequest(httpsURL, ss, headers);
+  int code;
+  try {
+    code = session.sendRequest(httpsURL, ss, headers);
+  } catch (Kernel::Exception::InternetError& ie) {
+    throw std::runtime_error("Error while sending HTTP request to cancel a job: " +
+                             std::string(ie.what()));
+  }
   std::string resp = ss.str();
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     if (std::string::npos != resp.find("<errMsg>")) {
@@ -762,8 +803,14 @@ void SCARFTomoReconstruction::doUploadFile(const std::string &username,
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
 
   const std::string &body = buildUploadBody(boundary, destDir, filename);
-  int code = session.sendRequest(httpsURL, ss, headers,
-                                 Poco::Net::HTTPRequest::HTTP_POST, body);
+  int code;
+  try {
+    code = session.sendRequest(httpsURL, ss, headers,
+                               Poco::Net::HTTPRequest::HTTP_POST, body);
+  } catch (Kernel::Exception::InternetError& ie) {
+    throw std::runtime_error("Error while sending HTTP request to upload a file: " +
+                             std::string(ie.what()));
+  }
   std::string resp = ss.str();
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     g_log.notice() << "Uploaded file with response: " << resp << std::endl;
@@ -1079,8 +1126,14 @@ void SCARFTomoReconstruction::getOneJobFile(const std::string &jobId,
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
   std::string body = remotePath;
-  int code = session.sendRequest(httpsURL, ss, headers,
-                                 Poco::Net::HTTPRequest::HTTP_GET, body);
+  int code;
+  try {
+    code = session.sendRequest(httpsURL, ss, headers,
+                               Poco::Net::HTTPRequest::HTTP_GET, body);
+  } catch (Kernel::Exception::InternetError& ie) {
+    throw std::runtime_error("Error while sending HTTP request to download a file: " +
+                             std::string(ie.what()));
+  }
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     // this is what indicates success/failure: response content empty/not empty
     if (ss.rdbuf()->in_avail() > 0) {
@@ -1135,7 +1188,13 @@ void SCARFTomoReconstruction::getAllJobFiles(const std::string &jobId,
                                                      "application/xml"));
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
-  int code = session.sendRequest(httpsURL, ss, headers);
+  int code;
+  try {
+    code = session.sendRequest(httpsURL, ss, headers);
+  } catch (Kernel::Exception::InternetError& ie) {
+    throw std::runtime_error("Error while sending HTTP request to download files: " +
+                             std::string(ie.what()));
+  }
   std::string resp = ss.str();
   // what you get in this response is one line with text like this:
   // 'PAC Server*/home/isisg/scarf362/../scarf362/
