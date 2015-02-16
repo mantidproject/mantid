@@ -4035,7 +4035,7 @@ void ApplicationWindow::updateCurves(Table *t, const QString& name)
       }
     } else if (w->isA("Graph3D")){
       Graph3D* g = dynamic_cast<Graph3D*>(w);
-      if ((g->formula()).contains(name))
+      if (g && (g->formula()).contains(name))
         g->updateData(t);
     }
   }
