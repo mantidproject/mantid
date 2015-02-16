@@ -10877,6 +10877,8 @@ void ApplicationWindow::custom3DActions(MdiSubWindow *w)
   if (w && w->isA("Graph3D"))
   {
     Graph3D* plot = dynamic_cast<Graph3D*>(w);
+    if(!plot)
+      return;
     actionAnimate->setOn(plot->isAnimated());
     actionPerspective->setOn(!plot->isOrthogonal());
     switch(plot->plotStyle())
