@@ -2437,7 +2437,9 @@ void ApplicationWindow::insertNew3DData(const QString& colName)
   if (!w)
     return;
 
-  dynamic_cast<Graph3D*>(w)->insertNewData(table(colName),colName);
+  auto g3d = dynamic_cast<Graph3D*>(w);
+  if(g3d)
+    g3d->insertNewData(table(colName),colName);
   emit modified();
 }
 
