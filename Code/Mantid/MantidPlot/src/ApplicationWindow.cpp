@@ -3858,6 +3858,9 @@ void ApplicationWindow::removeErrorBars()
     return;
 
   MultiLayer* plot = dynamic_cast<MultiLayer*>(w);
+  if(!plot)
+    return;
+
   if (plot->isEmpty()){
     QMessageBox::warning(this,tr("MantidPlot - Warning"),//Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"
@@ -3892,7 +3895,11 @@ void ApplicationWindow::removeErrorBars(const QString& name)
   if (!w)
     return;
 
-  Graph* g = dynamic_cast<MultiLayer*>(w)->activeGraph();
+  auto ml = dynamic_cast<MultiLayer*>(w);
+  if(!ml)
+    return;
+
+  Graph* g = ml->activeGraph();
   if (!g)
     return;
 
