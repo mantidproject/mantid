@@ -129,6 +129,7 @@ namespace MantidQt
       instruments.push_back("SURF");
       instruments.push_back("CRISP");
       instruments.push_back("POLREF");
+      instruments.push_back("OFFSPEC");
 
       //If the user's configured default instrument is in this list, set it as the default, otherwise use INTER
       const std::string defaultInst = Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
@@ -925,6 +926,38 @@ namespace MantidQt
     }
 
     /**
+    Get the index of the first blank row, or if none exists, returns -1.
+    */
+    int ReflMainViewPresenter::getBlankRow()
+    {
+      //Go through every column of every row (except for the scale column) and check if it's blank.
+      //If there's a blank row, return it.
+      const int rowCount = m_model->rowCount();
+      for(int i = 0; i < rowCount; ++i)
+      {
+        bool isBlank = true;
+        for(int j = COL_RUNS; j <= COL_OPTIONS; ++j)
+        {
+          //Don't bother checking the scale or group column, it'll always have a value.
+          if(j == COL_SCALE || j == COL_GROUP)
+            continue;
+
+          if(!m_model->data(m_model->index(i, j)).toString().isEmpty())
+          {
+            isBlank = false;
+            break;
+          }
+        }
+
+        if(isBlank)
+          return i;
+      }
+
+      //There are no blank rows
+      return -1;
+    }
+
+    /**
     Delete row(s) from the model
     */
     void ReflMainViewPresenter::deleteRow()
@@ -1319,8 +1352,14 @@ namespace MantidQt
         if(groups.count(row["group"]) == 0)
           groups[row["group"]] = getUnusedGroup();
 
-        const int rowIndex = m_model->rowCount();
-        m_model->insertRow(rowIndex);
+        //Overwrite the first blank row we find, otherwise, append a new row to the end.
+        int rowIndex = getBlankRow();
+        if(rowIndex == -1)
+        {
+          rowIndex = m_model->rowCount();
+          insertRow(rowIndex);
+        }
+
         m_model->setData(m_model->index(rowIndex, COL_RUNS), QString::fromStdString(row["runs"]));
         m_model->setData(m_model->index(rowIndex, COL_ANGLE), QString::fromStdString(row["theta"]));
         m_model->setData(m_model->index(rowIndex, COL_SCALE), 1.0);

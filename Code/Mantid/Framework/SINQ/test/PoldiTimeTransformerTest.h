@@ -108,7 +108,7 @@ public:
       TestablePoldiTimeTransformer function;
       function.initializeFromPoldiInstrument(m_instrument);
 
-      TS_ASSERT_DELTA(function.timeTransformedWidth(fwhm, 342) / deltaT, 4.526804, 1e-5);
+      TS_ASSERT_DELTA(function.timeTransformedWidth(fwhm, 342) / deltaT, 4.526804 * function.m_detectorElementData[342]->tofFactor(), 1e-5);
   }
 
   void testTimeTransformedCentre()

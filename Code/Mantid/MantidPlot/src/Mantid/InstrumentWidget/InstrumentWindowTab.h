@@ -28,9 +28,9 @@ public:
     /// Add tab-specific items to the context menu
     /// Return true if at least 1 item was added or false otherwise.
     virtual bool addToDisplayContextMenu(QMenu&) const {return false;}
-protected:
     /// Get the projection surface
     boost::shared_ptr<ProjectionSurface> getSurface() const;
+protected:
     /// The parent InstrumentWindow
     InstrumentWindow* m_instrWindow;
 

@@ -17,8 +17,8 @@ AsciiPointBase class which provides the main implementation for the init() &
 exec() methods.
 Output is tab delimited Ascii point data with dq/q and extra header information.
 
-Copyright &copy; 2007-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
+Copyright &copy; 2007-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge
+National Laboratory
 
 This file is part of Mantid.
 
