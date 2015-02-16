@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/SampleTransmission.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/Statistics.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 
@@ -154,9 +155,46 @@ void SampleTransmission::calculate()
  */
 void SampleTransmission::algorithmComplete(bool error)
 {
+  using namespace Mantid::Kernel;
+
   // Ignore errors
   if(error)
     return;
 
-  //TODO
+  MatrixWorkspace_sptr ws =
+    AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("CalculatedSampleTransmission");
+
+  // Fill the output table
+  m_uiForm.twResults->clear();
+
+  double scattering = ws->dataY(1)[0];
+  QTreeWidgetItem *scatteringItem = new QTreeWidgetItem();
+  scatteringItem->setText(0, "Scattering");
+  scatteringItem->setText(1, QString::number(scattering));
+  m_uiForm.twResults->addTopLevelItem(scatteringItem);
+
+  QTreeWidgetItem *transmissionItem = new QTreeWidgetItem();
+  transmissionItem->setText(0, "Transmission");
+  m_uiForm.twResults->addTopLevelItem(transmissionItem);
+  transmissionItem->setExpanded(true);
+
+  std::vector<double> transmissionData = ws->dataY(0);
+  Statistics stats = getStatistics(transmissionData);
+
+  QMap<QString, double> transmissionStats;
+  transmissionStats["Min"] = stats.minimum;
+  transmissionStats["Max"] = stats.maximum;
+  transmissionStats["Mean"] = stats.mean;
+  transmissionStats["Median"] = stats.median;
+  transmissionStats["Std. Dev."] = stats.standard_deviation;
+
+  for(auto it = transmissionStats.begin(); it != transmissionStats.end(); ++it)
+  {
+    QTreeWidgetItem *item = new QTreeWidgetItem();
+    item->setText(0, it.key());
+    item->setText(1, QString::number(it.value()));
+    transmissionItem->addChild(item);
+  }
+
+  //TODO: plot
 }

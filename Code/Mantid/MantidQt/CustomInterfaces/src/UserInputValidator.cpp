@@ -21,8 +21,6 @@ namespace // anonymous
       pair.second = temp;
     }
   }
-
-  Mantid::Kernel::Logger g_log("UserInputValidator");
 } // anonymous namespace
 
 namespace MantidQt
