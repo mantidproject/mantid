@@ -8380,22 +8380,36 @@ void ApplicationWindow::clearSelection()
     return;
 
   if (m->inherits("Table"))
-    dynamic_cast<Table*>(m)->clearSelection();
+  {
+    auto t = dynamic_cast<Table*>(m);
+    if(t)
+      t->clearSelection();
+  }
   else if (m->isA("Matrix"))
-    dynamic_cast<Matrix*>(m)->clearSelection();
+  {
+    auto matrix = dynamic_cast<Matrix*>(m);
+    if(matrix)
+      matrix->clearSelection();
+  }
   else if (m->isA("MultiLayer"))
   {
-    Graph* g = dynamic_cast<MultiLayer*>(m)->activeGraph();
+    auto ml = dynamic_cast<MultiLayer*>(m);
+    if(!ml)
+      return;
+
+    Graph* g = ml->activeGraph();
     if (!g)
       return;
 
     if (g->activeTool())
     {
-      if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector)
-        dynamic_cast<RangeSelectorTool*>(g->activeTool())->clearSelection();
+      auto rst = dynamic_cast<RangeSelectorTool*>(g->activeTool());
+      auto lbt = dynamic_cast<LabelTool*>(g->activeTool());
 
-      if (g->activeTool()->rtti() == PlotToolInterface::Rtti_LabelTool)
-        dynamic_cast<LabelTool*>(g->activeTool())->removeTextBox();
+      if(rst)
+        rst->clearSelection();
+      else if(lbt)
+        lbt->removeTextBox();
     }
 
     else if (g->titleSelected())
@@ -8404,7 +8418,11 @@ void ApplicationWindow::clearSelection()
       g->removeMarker();
   }
   else if (m->isA("Note"))
-    dynamic_cast<Note*>(m)->editor()->clear();
+  {
+    auto note = dynamic_cast<Note*>(m);
+    if(note)
+      note->editor()->clear();
+  }
   emit modified();
 }
 
