@@ -80,8 +80,12 @@ namespace MantidQt
       bool isAllInputValid();
 
     private:
+      /// Sets a validation label
+      void setErrorLabel(QLabel * errorLabel, bool valid);
+
       /// Any raised error messages.
       QStringList m_errorMessages;
+
     };
   }
 }

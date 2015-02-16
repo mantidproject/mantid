@@ -45,13 +45,13 @@ namespace MantidQt
     {
       if(field->text() == "")
       {
-        errorLabel->setText("*");
+        setErrorLabel(errorLabel, false);
         m_errorMessages.append(name + " has been left blank.");
         return false;
       }
       else
       {
-        errorLabel->setText("");
+        setErrorLabel(errorLabel, true);
         return true;
       }
     }
@@ -72,12 +72,12 @@ namespace MantidQt
 
       if( fieldState == QValidator::Acceptable )
       {
-        errorLabel->setText("");
+        setErrorLabel(errorLabel, true);
         return true;
       }
       else
       {
-        errorLabel->setText("*");
+        setErrorLabel(errorLabel, false);
         m_errorMessages.append(errorMessage);
         return false;
       }
@@ -273,7 +273,7 @@ namespace MantidQt
       if( m_errorMessages.isEmpty() )
         return "";
 
-      return "Please correct the following:\n\n" + m_errorMessages.join("\n");
+      return "Please correct the following:\n" + m_errorMessages.join("\n");
     }
 
     /**
@@ -285,5 +285,36 @@ namespace MantidQt
     {
       return m_errorMessages.isEmpty();
     }
+
+    /**
+     * Sets a validation label that is displyed next to the widget on the UI.
+     *
+     * @param errorLabel Label to change
+     * @param valid If the input was valid
+     */
+    void UserInputValidator::setErrorLabel(QLabel * errorLabel, bool valid)
+    {
+      // Do nothing if no error label was provided
+      if(errorLabel == NULL)
+        return;
+
+      if(!valid)
+      {
+        // Set the label to be red
+        QPalette palette = errorLabel->palette();
+        palette.setColor(errorLabel->foregroundRole(), Qt::red);
+        errorLabel->setPalette(palette);
+
+        errorLabel->setText("*");
+      }
+      else
+      {
+        errorLabel->setText("");
+      }
+
+      // Only show the label if input is invalid
+      errorLabel->setVisible(!valid);
+    }
+
   }
 }

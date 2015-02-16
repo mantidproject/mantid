@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>492</width>
-    <height>245</height>
+    <height>247</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -92,6 +92,13 @@
            <item>
             <widget class="QLineEdit" name="leMultiple"/>
            </item>
+           <item>
+            <widget class="QLabel" name="valMultiple">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </widget>
@@ -105,13 +112,6 @@
        <string>Sample Details</string>
       </property>
       <layout class="QGridLayout" name="loSampleDetails">
-       <item row="2" column="0">
-        <widget class="QLabel" name="lbThickness">
-         <property name="text">
-          <string>Thickness</string>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="0">
         <widget class="QLabel" name="lbNumberDensity">
          <property name="text">
@@ -119,21 +119,39 @@
          </property>
         </widget>
        </item>
+       <item row="2" column="1">
+        <widget class="QDoubleSpinBox" name="spThickness"/>
+       </item>
+       <item row="1" column="1">
+        <widget class="QDoubleSpinBox" name="spNumberDensity"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="lbThickness">
+         <property name="text">
+          <string>Thickness</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QLineEdit" name="leChemicalFormula"/>
+         </item>
+         <item>
+          <widget class="QLabel" name="valChemicalFormula">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
        <item row="0" column="0">
         <widget class="QLabel" name="lbChemicalFormula">
          <property name="text">
           <string>Chemical Formula</string>
          </property>
         </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="leChemicalFormula"/>
-       </item>
-       <item row="1" column="1">
-        <widget class="QDoubleSpinBox" name="spNumberDensity"/>
-       </item>
-       <item row="2" column="1">
-        <widget class="QDoubleSpinBox" name="spThickness"/>
        </item>
       </layout>
      </widget>

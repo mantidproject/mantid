@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/SampleTransmission.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 
 namespace
@@ -54,8 +55,37 @@ void SampleTransmission::initLayout()
  */
 bool SampleTransmission::validate()
 {
-  //TODO
-  return false;
+  UserInputValidator uiv;
+
+  // Valudate input binning
+  int wavelengthBinning = m_uiForm.cbBinningType->currentIndex();
+  switch(wavelengthBinning)
+  {
+    // Single
+    case 0:
+      uiv.checkBins(m_uiForm.spSingleLow->value(),
+                    m_uiForm.spSingleWidth->value(),
+                    m_uiForm.spSingleHigh->value());
+      break;
+
+    // Multiple
+    case 1:
+      uiv.checkFieldIsNotEmpty("Multiple binning",
+                               m_uiForm.leMultiple,
+                               m_uiForm.valMultiple);
+      break;
+  }
+
+  // Validate chemical formula
+  uiv.checkFieldIsNotEmpty("Chemical Formula",
+                           m_uiForm.leChemicalFormula,
+                           m_uiForm.valChemicalFormula);
+
+  // Give error message
+  if(!uiv.isAllInputValid())
+    g_log.error(uiv.generateErrorMessage().toStdString());
+
+  return uiv.isAllInputValid();
 }
 
 
@@ -64,6 +94,10 @@ bool SampleTransmission::validate()
  */
 void SampleTransmission::calculate()
 {
+  // Do not try to run with invalid input
+  if(!validate())
+    return;
+
   // Create the transmission calculation algorithm
   IAlgorithm_sptr transCalcAlg = AlgorithmManager::Instance().create("CalculateSampleTransmission");
   transCalcAlg->initialize();
@@ -72,13 +106,19 @@ void SampleTransmission::calculate()
   int wavelengthBinning = m_uiForm.cbBinningType->currentIndex();
   switch(wavelengthBinning)
   {
-    // Multiple
-    case 0:
-      //TODO
-      transCalcAlg->setProperty("WavelengthRange", "");
-      break;
-
     // Single
+    case 0:
+    {
+      QStringList params;
+      params << m_uiForm.spSingleLow->text()
+             << m_uiForm.spSingleWidth->text()
+             << m_uiForm.spSingleHigh->text();
+      QString binString = params.join(",");
+      transCalcAlg->setProperty("WavelengthRange", binString.toStdString());
+      break;
+    }
+
+    // Multiple
     case 1:
       transCalcAlg->setProperty("WavelengthRange", m_uiForm.leMultiple->text().toStdString());
       break;
