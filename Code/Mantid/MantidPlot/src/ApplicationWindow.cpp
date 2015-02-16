@@ -15368,10 +15368,13 @@ void ApplicationWindow::goToRow()
     if ( !ok )
       return;
 
-    if (w->inherits("Table"))
-      dynamic_cast<Table*>(w)->goToRow(row);
-    else if (w->isA("Matrix"))
-      (dynamic_cast<Matrix*>(w))->goToRow(row);
+    auto table = dynamic_cast<Table*>(w);
+    auto matrix = dynamic_cast<Matrix*>(w);
+
+    if(table)
+      table->goToRow(row);
+    else if(matrix)
+      matrix->goToRow(row);
   }
 }
 
