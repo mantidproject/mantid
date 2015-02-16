@@ -2242,16 +2242,22 @@ void ApplicationWindow::changeMatrixName(const QString& oldName, const QString& 
   foreach(MdiSubWindow *w, windows){
     if (w->isA("Graph3D"))
     {
-      QString s = dynamic_cast<Graph3D*>(w)->formula();
+      auto g3d = dynamic_cast<Graph3D*>(w);
+      if(!g3d)
+        return;
+      QString s = g3d->formula();
       if (s.contains(oldName))
       {
         s.replace(oldName, newName);
-        dynamic_cast<Graph3D*>(w)->setPlotAssociation(s);
+        g3d->setPlotAssociation(s);
       }
     }
     else if (w->isA("MultiLayer"))
     {
-      QList<Graph *> layers = dynamic_cast<MultiLayer*>(w)->layersList();
+      auto ml = dynamic_cast<MultiLayer*>(w);
+      if(!ml)
+        return;
+      QList<Graph *> layers = ml->layersList();
       foreach(Graph *g, layers){
         for (int i=0; i<g->curves(); i++){
           QwtPlotItem *sp = dynamic_cast<QwtPlotItem*>(g->plotItem(i));
