@@ -15,7 +15,6 @@
 #include "Poco/SAX/InputSource.h"
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/NodeIterator.h>
-#include <Poco/NET/HTTPResponse.h>
 #include <boost/algorithm/string/predicate.hpp>
 #include "Poco/DOM/AutoPtr.h"
 
@@ -74,7 +73,7 @@ SNSDataArchive::getArchivePath(const std::set<std::string> &filenames,
 
   // Everything went fine, return the XML document.
   // Otherwise look for an error message in the XML document.
-  if (status == Poco::Net::HTTPResponse::HTTP_OK) {
+  if (status == Kernel::InternetHelper::HTTP_OK) {
     std::string location;
     Poco::AutoPtr<Poco::XML::NodeList> pList =
         pDoc->getElementsByTagName("location");
