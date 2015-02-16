@@ -41,19 +41,7 @@ class ReductionWrapper(object):
       # Initialize reduced for given instrument
       self.reducer = DirectEnergyConversion(instrumentName)
 
-      self._validation_fname=None
-#
-    def get_validation_file_name(self,ReferenceFile=None):
-      """ function provides name of the file with mantid
-          workspace reduced earlier and which should be validated 
-          against results of current reduction
 
-          Should be overloaded to return real file name for particular
-          reduction
-      """ 
-      if ReferenceFile:
-          self._validation_fname = ReferenceFile
-      return self._validation_fname
 
     @property
     def wait_for_file(self):
@@ -79,7 +67,7 @@ class ReductionWrapper(object):
             interface
 
             If no file is provided, reduce_var.py file will be written 
-            to 
+            to the folder, containing current script
 
         """
         if not FileName:
@@ -127,24 +115,38 @@ class ReductionWrapper(object):
         """ Overload this using build_or_validate_result to have possibility to run or validate result """ 
         return True
 
-    def build_or_validate_result(self,sample_run,validationFile,build_validation=False,Error=1.e-3,ToleranceRelErr=True):
-        """ Method validates results of the reduction against reference file provided
-            by get_validation_file_name() method 
+    def build_or_validate_result(self,sample_run,validation_file,build_validation=False,Error=1.e-3,ToleranceRelErr=True):
+        """ Method validates results of the reduction against reference file.
+
+            Inputs:
+            sample_run     -- the run number to reduce or validate against existing result
+            validation_file -- The name of nxs file, containing workspace, produced by reducing SampleRun,
+                              or the pointer to the workspace, which is the reference workspace 
+                              for SampleRun reduction
+                              If 
+            Returns:
+            True   if reduction for sample_run produces result within Error from the reference file
+                   as reported by CheckWorkspaceMatch.
+            False  if CheckWorkspaceMatch comparison between sample and reduction is unsuccessful
+
+            True  if was not able to load reference file. In this case, algorithm builds validation 
+                  file and returns True if the reduction and saving of this file is successful
             
-            At the moment, get_validation_file_name method should return the name of a file,
-            where workspace sample reduced workspace with default properties 
-            is stored. 
-            CheckWorkspaceMatch method is applied to verify if current reduced workspace is 
-            equivalent to the workspace, stored in the reference file. 
         """
 
         if not build_validation:
-           if validationFile:
-              if isinstance(validationFile,api.Workspace):
-                 sample = validationFile
-                 validationFile = sample.name()
+           if validation_file:
+              if isinstance(validation_file,api.Workspace):
+                 sample = validation_file
+                 validation_file = sample.name()
               else:
-                 sample = Load(validationFile)
+                 try:
+                    sample = Load(validation_file)
+                 except:
+                    self.reducer.prop_man.log\
+                        ("*** WARNING:can not load (find?) validation file {0}\n"\
+                         "    Building validation".format(validation_file),'warning')
+                    build_validation=True
            else:
               build_validation=True
 
@@ -165,8 +167,8 @@ class ReductionWrapper(object):
         reduced = self.reduce()
 
         if build_validation:
-            if validationFile:
-               result_name = os.path.splitext(validationFile)[0]
+            if validation_file:
+               result_name = os.path.splitext(validation_file)[0]
             else:
                result_name = self.reducer.prop_man.save_file_name
             self.reducer.prop_man.log("*** Saving validation file with name: {0}.nxs".format(result_name),'notice')

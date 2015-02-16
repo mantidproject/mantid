@@ -50,6 +50,21 @@ class ReduceMARI(ReductionWrapper):
       ws = ReductionWrapper.reduce(input_file,output_directory)
       #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
       return ws
+#------------------------------------------------------------------------------------------------ #
+   def validate_result(self,build_validation=False):
+      """ Change this method to verify different results     """
+
+      # Two commented code rows below define location of the validation file in this script folder 
+      # (which is incorrect for Mantid development, as the files are on the data search path or
+      # mantid distribution, as the files are not there)
+      #run_dir = os.path.dirname(os.path.realpath(__file__))
+      #validation_file = os.path.join(run_dir,"MARIReduction.nxs")
+
+      # build_validation -- if true, build and overwrite new workspace rather then validating the old one
+      # if file is missing, the validation tries to build it
+      rez,message = ReductionWrapper.build_or_validate_result(self,11001,"MARIReduction.nxs",
+                                                              build_validation,1.e-3)
+      return rez,message
 
    def __init__(self,web_var=None):
        """ sets properties defaults for the instrument with Name"""
