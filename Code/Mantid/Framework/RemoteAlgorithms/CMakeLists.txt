@@ -28,9 +28,10 @@ set( INC_FILES
 	inc/MantidRemoteAlgorithms/SCARFTomoReconstruction.h
 )
 
-#set ( TEST_FILES
-#
-#)
+set ( TEST_FILES
+  SCARFTomoReconstructionTest.h
+)
+
 #set ( TEST_PY_FILES
 #
 #)
@@ -54,13 +55,10 @@ include_directories ( inc )
 target_link_libraries ( RemoteAlgorithms ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 # Add the unit tests directory
-#add_subdirectory ( test )  # No tests yet...
+add_subdirectory ( test )  # Note: No tests yet for many remote algorithms...
 
 ###########################################################################
 # Installation settings
 ###########################################################################
 
 install ( TARGETS RemoteAlgorithms ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
-
-
-
