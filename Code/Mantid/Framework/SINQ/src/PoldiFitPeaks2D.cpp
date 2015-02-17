@@ -249,11 +249,6 @@ void PoldiFitPeaks2D::exec() {
 
   IFunction_sptr fitFunction = getFunction(fitAlgorithm);
 
-  for (size_t i = 0; i < fitFunction->nParams(); ++i) {
-    std::cout << fitFunction->parameterName(i) << " "
-              << fitFunction->getParameter(i) << std::endl;
-  }
-
   MatrixWorkspace_sptr outWs1D = get1DSpectrum(fitFunction, ws);
 
   PoldiPeakCollection_sptr normalizedPeaks =
@@ -321,11 +316,6 @@ IAlgorithm_sptr PoldiFitPeaks2D::calculateSpectrum(
 
   Poldi2DFunction_sptr mdFunction =
       getFunctionFromPeakCollection(normalizedPeakCollection);
-
-  for (size_t i = 0; i < mdFunction->nParams(); ++i) {
-    std::cout << mdFunction->parameterName(i) << " "
-              << mdFunction->getParameter(i) << std::endl;
-  }
 
   addBackgroundTerms(mdFunction);
 
