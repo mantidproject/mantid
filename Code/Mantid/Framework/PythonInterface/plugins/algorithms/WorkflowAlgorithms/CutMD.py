@@ -175,12 +175,13 @@ class CutMD(DataProcessorAlgorithm):
     def __verify_projection_input(self, projection_table):
         if isinstance(projection_table, ITableWorkspace):
             column_names = set(projection_table.getColumnNames())
-            if not column_names == set([Projection.u, Projection.v, 'type']):
-                    if not column_names == set([Projection.u, Projection.v, 'offsets', 'type']):
-                        if not column_names == set([Projection.u, Projection.v, Projection.w, 'offsets', 'type']):
-                            raise ValueError("Projection table schema is wrong! Column names received: " + str(column_names) )
-            if projection_table.rowCount() != 3:
-                raise ValueError("Projection table expects 3 rows")
+            if column_names != set(["name", "value", "type", "offset"]):
+                raise ValueError("Projection table schema is wrong! Column names received: " + str(column_names) )
+            if projection_table.rowCount() < 2:
+                raise ValueError("Projection table expects at least 2 rows")
+        elif projection_table is not None:
+            print(help(projection_table))
+            raise ValueError("Projection should be either an ITableWorkspace or None. It's a: " + str(type(projection_table)))
                
     def __scale_projection(self, (u, v, w), origin_units, target_units, to_cut):
         
