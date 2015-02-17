@@ -226,7 +226,9 @@ public slots:
   void onScriptExecuteError(const QString & message, const QString & scriptName, int lineNumber);
   /// Runs an arbitrary lump of python code, return true/false on success/failure.
   bool runPythonScript(const QString & code, bool async = false, bool quiet=false, bool redirect=true);
-  
+  /// Checks for the presence of the Python psutil module for the system monitor widget
+  bool psutilPresent();
+
   QList<MdiSubWindow *> windowsList() const;
   QList<MdiSubWindow *> getAllWindows() const;
   void updateWindowLists(MdiSubWindow *w);
@@ -595,8 +597,8 @@ public slots:
   //! Creates a new empty multilayer plot
   MultiLayer* newGraph(const QString& caption = tr("Graph"));
 
-  /// Prepares MultiLayer for plotting - creates if necessary, clears, applies initial settings 
-  MultiLayer* prepareMultiLayer(bool& isNew, MultiLayer* window, const QString& newWindowName = "Graph", 
+  /// Prepares MultiLayer for plotting - creates if necessary, clears, applies initial settings
+  MultiLayer* prepareMultiLayer(bool& isNew, MultiLayer* window, const QString& newWindowName = "Graph",
     bool clearWindow = false);
 
   void openRecentProject(int index);
@@ -1005,12 +1007,12 @@ public slots:
   //@{
   //! show scripting language selection dialog
   void showScriptingLangDialog();
-  //! switches to the given scripting language; 
+  //! switches to the given scripting language;
   bool setScriptingLanguage(const QString &lang);
 
   void scriptsDirPathChanged(const QString& path);
   //@}
-  
+
   void makeToolbarsMenu();
   void savetoNexusFile();
 
@@ -1320,7 +1322,7 @@ public:
   bool applyCurveStyleToMantid; ///< if true defaultCurveStyle, defaultSymbolSize are applyed to MantidCurves
   /// if true all errors are drawn on new plots with error bars, for a particular graph can be overridden
   /// form Add Error bars dialog
-  bool drawAllErrors; 
+  bool drawAllErrors;
   QFont appFont, plot3DTitleFont, plot3DNumbersFont, plot3DAxesFont;
   QFont tableTextFont, tableHeaderFont, plotAxesFont, plotLegendFont, plotNumbersFont, plotTitleFont;
   QColor tableBkgdColor, tableTextColor, tableHeaderColor;
@@ -1354,7 +1356,8 @@ public:
   QString defaultScriptingLang;
 
   QDockWidget *m_interpreterDock;
-  
+  QDockWidget *m_sysMonitorDock;
+
   QSet<QString> allCategories() const { return m_allCategories; }
 
 private:
@@ -1400,7 +1403,7 @@ private:
 
   QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit;
   QMenu *recentProjectsMenu, *recentFilesMenu, *interfaceMenu;
-  
+
   QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
   QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu, *smoothMenu, *filterMenu, *decayMenu,*saveMenu,*openMenu, *toolbarsMenu;
@@ -1483,7 +1486,7 @@ private:
 
   QList<QAction *> d_user_actions;
   QList<QMenu* > d_user_menus; //Mantid
-  
+
   QList<QAction *> m_interfaceActions;
 
   /// list of mantidmatrix windows opened from project file.
@@ -1502,7 +1505,7 @@ private:
   QList<FloatingWindow*> m_floatingWindows;
   // To block activating new window when a floating window is in process of resetting flags
   bool blockWindowActivation;
-  /// 
+  ///
   bool m_enableQtiPlotFitting;
 
 #ifdef SHARED_MENUBAR
