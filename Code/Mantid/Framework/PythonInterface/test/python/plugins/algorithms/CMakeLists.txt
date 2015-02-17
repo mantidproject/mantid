@@ -30,6 +30,7 @@ set ( TEST_PY_FILES
   MeanTest.py
   MergeCalFilesTest.py
   MolDynTest.py
+  MSDFitTest.py
   PDDetermineCharacterizationsTest.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
