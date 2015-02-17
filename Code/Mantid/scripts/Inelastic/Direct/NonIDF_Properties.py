@@ -96,8 +96,6 @@ class NonIDF_Properties(object):
     second_white  = RunDescriptor("Second white beam currently unused in the  workflow despite being referred to in Diagnostics. Should it be used for Monovan Diagnostics?") 
     # 
     _tmp_run     = RunDescriptor("_TMP","Property used for storing intermediate run data during reduction")
-    # property responsible for summing runs
-    sum_runs = SumRuns(sample_run,log)
     #-----------------------------------------------------------------------------------
     def getDefaultParameterValue(self,par_name):
         """ method to get default parameter value, specified in IDF """

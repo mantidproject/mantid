@@ -22,7 +22,7 @@ class RunDescriptorTest(unittest.TestCase):
         if self.prop_man == None or type(self.prop_man) != type(PropertyManager):
             self.prop_man  = PropertyManager("MAR");
     def tearDown(self):
-        pass
+        api.AnalysisDataService.clear()
 
     @staticmethod
     def getInstrument(InstrumentName='MAR'):
@@ -53,15 +53,28 @@ class RunDescriptorTest(unittest.TestCase):
 
         self.assertEqual(rez,'Success!')
 
+
     def test_descr_dependend(self):
         propman  = self.prop_man
         propman.wb_run = 100
+        self.assertTrue(PropertyManager.wb_run.has_own_value())
         self.assertEqual(propman.wb_run,100)
         self.assertEqual(propman.wb_for_monovan_run,100)
+        self.assertFalse(PropertyManager.wb_for_monovan_run.has_own_value())
+        self.assertTrue(PropertyManager.wb_run.has_own_value())
 
         propman.wb_for_monovan_run = 200
         self.assertEqual(propman.wb_for_monovan_run,200)
         self.assertEqual(propman.wb_run,100)
+        self.assertTrue(PropertyManager.wb_run.has_own_value())
+        self.assertTrue(PropertyManager.wb_for_monovan_run.has_own_value())
+
+        propman.wb_for_monovan_run = None
+        self.assertFalse(PropertyManager.wb_for_monovan_run.has_own_value())
+        self.assertEqual(propman.wb_for_monovan_run,100)
+        self.assertEqual(propman.wb_run,100)
+
+
 
     def test_find_file(self):
         propman  = self.prop_man
@@ -110,12 +123,12 @@ class RunDescriptorTest(unittest.TestCase):
 
         # MARI run with number 11001 and extension raw must among unit test files
         propman.sample_run = 11001
-        PropertyManager.sample_run.set_file_ext('raw')
+        PropertyManager.sample_run.set_file_ext('nxs')
 
         ws = PropertyManager.sample_run.get_workspace()
+        self.assertEqual(PropertyManager.sample_run.get_file_ext(),'.raw')
 
         self.assertTrue(isinstance(ws, api.Workspace))
-        self.assertEqual(ws.name(), PropertyManager.sample_run.get_ws_name())
 
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
         self.assertTrue(isinstance(mon_ws, api.Workspace))
@@ -141,12 +154,12 @@ class RunDescriptorTest(unittest.TestCase):
         propman  = self.prop_man
         propman.sample_run = run_ws
 
-        self.assertEqual(PropertyManager.sample_run.get_ws_name(),'SR_run_ws')
         ws = PropertyManager.sample_run.get_workspace()
         self.assertEqual(ws.name(),'SR_run_ws')
 
         propman.sample_run = ws
-        self.assertEqual(PropertyManager.sample_run.get_ws_name(),'SR_run_ws')
+        ws = PropertyManager.sample_run.get_workspace()
+        self.assertEqual(ws.name(),'SR_run_ws')
         self.assertTrue('SR_run_ws' in mtd)
 
         propman.sample_run = 11001
@@ -155,12 +168,11 @@ class RunDescriptorTest(unittest.TestCase):
         propman.load_monitors_with_workspace = False
         ws = PropertyManager.sample_run.get_workspace()
         ws_name = ws.name()
-        self.assertEqual(PropertyManager.sample_run.get_ws_name(),ws_name)
+        self.assertEqual('SR_MAR011001',ws_name)
         self.assertTrue(ws_name in mtd)
         self.assertTrue(ws_name+'_monitors' in mtd)
 
         propman.sample_run = ws
-        self.assertEqual(PropertyManager.sample_run.get_ws_name(),ws_name)
         self.assertTrue(ws_name in mtd)
 
         ws1 = PropertyManager.sample_run.get_workspace()
@@ -175,62 +187,17 @@ class RunDescriptorTest(unittest.TestCase):
         propman.sample_run = ws1
         self.assertEqual(ws1.name(),PropertyManager.sample_run._ws_name)
 
-        ws_name = PropertyManager.sample_run.get_ws_name()
+        ws = PropertyManager.sample_run.get_workspace()
+        ws_name = ws.name()
 
 
         # if no workspace is available, attempt to get workspace name fails
         DeleteWorkspace(ws_name)
-        self.assertRaises(RuntimeError,PropertyManager.sample_run.get_ws_name)
 
         propman.sample_run = None
         self.assertFalse(ws_name+'_monitors' in mtd)
         # name of empty property workspace 
-        self.assertEqual(PropertyManager.sample_run.get_ws_name(),'SR_')
-
-
-
-    def test_sum_runs(self):
-        propman  = self.prop_man
-        propman.sample_run = [11001,11001]
-        ws = PropertyManager.sample_run.get_workspace()
-        test_val1 = ws.dataY(3)[0]
-        test_val2 = ws.dataY(6)[100]
-        test_val3 = ws.dataY(50)[200]
-        self.assertEqual(ws.name(),'SR_MAR011001')
-        self.assertEqual(ws.getNEvents(),2455286)
-
-        #propman.sample_run = [11001,11001]
-        propman.sum_runs = True
-        ws = PropertyManager.sample_run.get_workspace()
-        self.assertEqual(ws.name(),'SR_MAR011001SumOf2')
-        ws_name = PropertyManager.sample_run.get_ws_name()
-        self.assertEqual(ws.name(),ws_name)
-
-        self.assertEqual(2*test_val1, ws.dataY(3)[0])
-        self.assertEqual(2*test_val2, ws.dataY(6)[100])
-        self.assertEqual(2*test_val3, ws.dataY(50)[200])
-
-
-        propman.sample_run = "MAR11001.raw,11001.nxs,MAR11001.raw"
-        self.assertFalse('SR_MAR011001SumOf2' in mtd)
-        ws = PropertyManager.sample_run.get_workspace()
-        self.assertEqual(ws.name(),'SR_MAR011001SumOf3')
-        ws_name = PropertyManager.sample_run.get_ws_name()
-        self.assertEqual(ws.name(),ws_name)
-
-        self.assertEqual(3*test_val1, ws.dataY(3)[0])
-        self.assertEqual(3*test_val2, ws.dataY(6)[100])
-        self.assertEqual(3*test_val3, ws.dataY(50)[200])
-
-        propman.sum_runs = 2
-        propman.sample_run = "/home/my_path/MAR11001.raw,c:/somewhere/11001.nxs,MAR11001.raw"
-        self.assertFalse('SR_MAR011001SumOf3' in mtd)
-        self.assertFalse('SR_MAR011001SumOf2' in mtd)
-        ws = PropertyManager.sample_run.get_workspace()
-        self.assertEqual(ws.name(),'SR_MAR011001SumOf2')
-        ws_name = PropertyManager.sample_run.get_ws_name()
-        self.assertEqual(ws.name(),ws_name)
-
+        #self.assertEqual(PropertyManager.sample_run.get_ws_name(),'SR_')
 
         
     def test_assign_fname(self):
@@ -238,63 +205,7 @@ class RunDescriptorTest(unittest.TestCase):
         propman.sample_run = 'MAR11001.RAW'
 
         self.assertEqual(PropertyManager.sample_run.run_number(),11001)
-        self.assertEqual(PropertyManager.sample_run._run_ext,'.raw')
-
-    def test_get_run_list(self):
-        propman = PropertyManager('MAR')
-        propman.sample_run = [10204]
-
-        self.assertEqual(propman.sample_run,10204)
-        runs = PropertyManager.sample_run.get_run_list()
-        self.assertEqual(len(runs),1)
-        self.assertEqual(runs[0],10204)
-
-        propman.sample_run = [11230,10382,10009]
-        self.assertEqual(propman.sample_run,11230)
-        propman.sum_runs = True
-        propman.sample_run = [11231,10382,10010]
-        self.assertEqual(propman.sample_run,10010)
-
-        sum_list = PropertyManager.sum_runs.get_run_list2sum()
-        self.assertEqual(len(sum_list),3)
-
-        runs = PropertyManager.sample_run.get_run_list()
-        self.assertEqual(runs[0],sum_list[0])
-
-        propman.sample_run = 11231
-        sum_list = PropertyManager.sum_runs.get_run_list2sum()
-        self.assertEqual(len(sum_list),1)
-        self.assertEqual(sum_list[0],11231)
-        self.assertEqual(propman.sample_run,11231)
-
-        propman.sample_run = 10382
-        sum_list = PropertyManager.sum_runs.get_run_list2sum()
-        self.assertEqual(len(sum_list),2)
-        self.assertEqual(sum_list[0],11231)
-        self.assertEqual(sum_list[1],10382)
-        self.assertEqual(propman.sample_run,10382)
-        runs = PropertyManager.sample_run.get_run_list()
-        self.assertEqual(len(runs),3)
-
-        propman.sample_run = 10010
-        sum_list = PropertyManager.sum_runs.get_run_list2sum()
-        self.assertEqual(len(sum_list),3)
-        self.assertEqual(sum_list[0],11231)
-        self.assertEqual(sum_list[1],10382)
-        self.assertEqual(sum_list[2],10010)
-        runs = PropertyManager.sample_run.get_run_list()
-        self.assertEqual(len(runs),3)
-        self.assertTrue(propman.sum_runs)
-
-
-        propman.sample_run = 10011
-        sum_list = PropertyManager.sum_runs.get_run_list2sum()
-        self.assertEqual(len(sum_list),0)
-
-        runs = PropertyManager.sample_run.get_run_list()
-        self.assertEqual(len(runs),1)
-        self.assertEqual(runs[0],10011)
-        self.assertFalse(propman.sum_runs)
+        self.assertEqual(PropertyManager.sample_run._run_ext,'.RAW')
 
     def test_chop_ws_part(self):
         propman  = self.prop_man
@@ -329,26 +240,153 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertEqual(ws1.name(),'SR_#2/2#ws')
         self.assertTrue('SR_#2/2#ws_monitors' in mtd)
 
-        api.AnalysisDataService.clear()
+    def test_run_list(self):
+        pass
 
-    def test_runDescriptorDependant(self):
+    def test_get_run_list(self):
+        propman = PropertyManager('MAR')
+        propman.sample_run = [10204]
+
+        self.assertEqual(propman.sample_run,10204)
+        runs = PropertyManager.sample_run.get_run_list()
+        self.assertEqual(len(runs),1)
+        self.assertEqual(runs[0],10204)
+
+        # the same run list changes nothing
+        propman.sample_run = [10204]
+        self.assertEqual(propman.sample_run,10204)
+        runs = PropertyManager.sample_run.get_run_list()
+        self.assertEqual(len(runs),1)
+        self.assertEqual(runs[0],10204)
+
+
+        propman.sample_run = [11230,10382,10009]
+        self.assertEqual(propman.sample_run,11230)
+        propman.sum_runs = True
+        self.assertEqual(propman.sample_run,10009)
+        propman.sample_run = [11231,10382,10010]
+        self.assertEqual(propman.sample_run,10010)
+
+        sum_list = PropertyManager.sample_run.get_runs_to_sum()
+        self.assertEqual(len(sum_list),3)
+        runs = PropertyManager.sample_run.get_run_list()
+        self.assertEqual(runs[0],sum_list[0])
+
+        # Autoreduction workflow with summation. Runs appear
+        # one by one and summed together when next run appears
+        propman.sample_run = 11231
+        sum_list = PropertyManager.sample_run.get_runs_to_sum()
+
+        self.assertEqual(len(sum_list),1)
+        self.assertEqual(sum_list[0],11231)
+        self.assertEqual(propman.sample_run,11231)
+
+        propman.sample_run = 10382
+        sum_list = PropertyManager.sample_run.get_runs_to_sum()
+        self.assertEqual(len(sum_list),2)
+        self.assertEqual(sum_list[0],11231)
+        self.assertEqual(sum_list[1],10382)
+        self.assertEqual(propman.sample_run,10382)
+        runs = PropertyManager.sample_run.get_run_list()
+        self.assertEqual(len(runs),3)
+
+        propman.sample_run = 10010
+        sum_list = PropertyManager.sample_run.get_runs_to_sum()
+        self.assertEqual(len(sum_list),3)
+        self.assertEqual(sum_list[0],11231)
+        self.assertEqual(sum_list[1],10382)
+        self.assertEqual(sum_list[2],10010)
+        runs = PropertyManager.sample_run.get_run_list()
+        self.assertEqual(len(runs),3)
+        self.assertTrue(propman.sum_runs)
+
+        # check extend when summing
+        propman.sample_run = 10999
+        sum_list = PropertyManager.sample_run.get_runs_to_sum()
+        self.assertEqual(len(sum_list),4)
+        self.assertEqual(sum_list[0],11231)
+        self.assertEqual(sum_list[1],10382)
+        self.assertEqual(sum_list[2],10010)
+        self.assertEqual(sum_list[3],10999)
+        self.assertTrue(propman.sum_runs)
+
+        runs = PropertyManager.sample_run.get_run_list()
+        self.assertEqual(len(runs),4)
+        self.assertTrue(propman.sum_runs)
+
+
+        propman.sum_runs=False
+        run_list = PropertyManager.sample_run.get_run_list()
+        self.assertEqual(len(run_list),4)
+        self.assertEqual(propman.sample_run,11231)
+        sum_list = PropertyManager.sample_run.get_runs_to_sum()
+        self.assertEqual(len(sum_list),0)
+
+        # check clear list when not summing 
+        propman.sample_run = 11999
+        run_list = PropertyManager.sample_run.get_run_list()
+        self.assertEqual(len(run_list),1)
+
+    def test_sum_runs(self):
         propman  = self.prop_man
-        self.assertTrue(PropertyManager.wb_run.has_own_value())
-        propman.wb_for_monovan_run = None
-        self.assertFalse(PropertyManager.wb_for_monovan_run.has_own_value())
-        propman.wb_run = 2000
-        self.assertEqual(propman.wb_for_monovan_run,2000)
-        self.assertEqual(propman.wb_run,2000)
-        self.assertFalse(PropertyManager.wb_for_monovan_run.has_own_value())
-        propman.wb_for_monovan_run = None
-        self.assertEqual(propman.wb_for_monovan_run,2000)
-        self.assertEqual(propman.wb_run,2000)
+        propman.sample_run = [11001,11001]
+        ws = PropertyManager.sample_run.get_workspace()
+        test_val1 = ws.dataY(3)[0]
+        test_val2 = ws.dataY(6)[100]
+        test_val3 = ws.dataY(50)[200]
+        self.assertEqual(ws.name(),'SR_MAR011001')
+        self.assertEqual(ws.getNEvents(),2455286)
 
-        
-        propman.wb_for_monovan_run = 3000
-        self.assertTrue(PropertyManager.wb_for_monovan_run.has_own_value())
-        self.assertEqual(propman.wb_run,2000)
-        self.assertEqual(propman.wb_for_monovan_run,3000)
+        #propman.sample_run = [11001,11001]
+        propman.sum_runs = True
+        self.assertFalse('SR_MAR011001' in mtd)
+        ws = PropertyManager.sample_run.get_workspace()
+        self.assertEqual(ws.name(),'SR_MAR011001SumOf2')
+ 
+        self.assertEqual(2*test_val1, ws.dataY(3)[0])
+        self.assertEqual(2*test_val2, ws.dataY(6)[100])
+        self.assertEqual(2*test_val3, ws.dataY(50)[200])
+
+
+        propman.sample_run = "MAR11001.raw,11001.nxs,MAR11001.raw"
+        self.assertFalse('SR_MAR011001SumOf2' in mtd)
+        ws = PropertyManager.sample_run.get_workspace()
+        self.assertEqual(ws.name(),'SR_MAR011001SumOf3')
+ 
+        self.assertEqual(3*test_val1, ws.dataY(3)[0])
+        self.assertEqual(3*test_val2, ws.dataY(6)[100])
+        self.assertEqual(3*test_val3, ws.dataY(50)[200])
+
+        #TODO: Partial sum is not implemented. Should it?
+        #propman.sum_runs = 2
+        #propman.sample_run = "/home/my_path/MAR11001.raw,c:/somewhere/11001.nxs,MAR11001.raw"
+        #self.assertFalse('SR_MAR011001SumOf3' in mtd)
+        #self.assertFalse('SR_MAR011001SumOf2' in mtd)
+        #ws = PropertyManager.sample_run.get_workspace()
+        #self.assertEqual(ws.name(),'SR_MAR011001SumOf2')
+
+
+        propman.sample_run = 10011
+        sum_list = PropertyManager.sample_run.get_runs_to_sum()
+        self.assertEqual(len(sum_list),1)
+
+        runs = PropertyManager.sample_run.get_run_list()
+        self.assertEqual(len(runs),4)
+        self.assertEqual(runs[3],10011)
+        self.assertTrue(propman.sum_runs)
+        self.assertTrue('SR_MAR011001SumOf3' in mtd)
+
+        propman.sum_runs=False
+        self.assertFalse('SR_MAR011001SumOf3' in mtd)
+        runs = PropertyManager.sample_run.get_run_list()
+        self.assertEqual(len(runs),4)
+        self.assertEqual(propman.sample_run,11001)
+
+        propman.sample_run = 10011
+        runs = PropertyManager.sample_run.get_run_list()
+        self.assertEqual(len(runs),1)
+        self.assertEqual(runs[0],10011)
+        self.assertEqual(propman.sample_run,10011)
 
 
 if __name__=="__main__":

@@ -40,11 +40,10 @@ class SumRuns(PropDescriptor):
         It also specifies various auxiliary operations, defined for summing runs, so property 
         is deeply entangled with  the sample_run property
     """ 
-    def __init__(self,sample_run_prop,logger):
+    def __init__(self,sample_run_prop):
         # internal reference to sample run property
         self._sample_run = sample_run_prop
         # class containing this property
-        self._logger = logger
         #
         self._sum_runs = False
     #
@@ -57,23 +56,16 @@ class SumRuns(PropDescriptor):
         old_value = self._sum_runs
         if isinstance(value,bool):
             self._sum_runs = value
-            self._last_ind2sum = -1
         elif isinstance(value,int):
             if value > 0:
-               self._last_ind2sum = int(value) - 1
                self._sum_runs = True
             else:
-               self._last_ind2sum = -1
                self._sum_runs = False
         else:
             self._sum_runs = bool(value)
-            self._last_ind2sum = -1
         #
         if old_value != self._sum_runs:
-            if len(self._run_numbers) > 0 and self._sum_runs:
-               # clear previous state of sample_run
-               ind = self.get_last_ind2sum()
-               self._sample_run.__set__(None,self._run_numbers[ind])
+           self._sample_run.notify_sum_runs_changed(old_value,self._sum_runs)
 
 #--------------------------------------------------------------------------------------------------------------------
 class IncidentEnergy(PropDescriptor):

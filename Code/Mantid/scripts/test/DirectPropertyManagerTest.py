@@ -817,6 +817,17 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue(propman1.run_diagnostics)
 
 
+    def test_sum_runs(self):
+        propman = self.prop_man
+        propman.sum_runs = True
+        self.assertTrue(propman.sum_runs)
+        propman.sum_runs = False
+        self.assertFalse(propman.sum_runs)
+
+        propman.sum_runs = 10 #TODO should we define number of runs to sum? 
+        self.assertTrue(propman.sum_runs)
+        propman.sum_runs = 0
+        self.assertFalse(propman.sum_runs)
  
     #def test_do_white(self) :
     #    tReducer = self.reducer

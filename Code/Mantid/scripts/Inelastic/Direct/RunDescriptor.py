@@ -1,42 +1,20 @@
 """ File contains Descriptors used describe run for direct inelastic reduction """ 
 
-
 from mantid.simpleapi import *
 from PropertiesDescriptors import *
 import re
 
 class RunList(object):
-   """ helper class to maintain list of runs used in run descriptor and 
-        support basis operations with this list 
+   """ helper class to maintain list of runs used in RunDescriptor for summing 
+       or subsequent processing range of files and supports basic operations with this list 
    """ 
-   def __init__(self):
-        self._last_ind2sum = -1
-        self._run_numbers = []
-        self._file_guess = []
-        self._fext = []
-
-   def set_run_list(self,instance,value):      
-        old_value = self._sum_runs
-        if isinstance(value,bool):
-            self._sum_runs = value
-            self._last_ind2sum = -1
-        elif isinstance(value,int):
-            if value > 0:
-               self._last_ind2sum = int(value) - 1
-               self._sum_runs = True
-            else:
-               self._last_ind2sum = -1
-               self._sum_runs = False
-        else:
-            self._sum_runs = bool(value)
-            self._last_ind2sum = -1
-        #
-        if old_value != self._sum_runs:
-            if len(self._run_numbers) > 0 and self._sum_runs:
-               # clear previous state of sample_run
-               ind = self.get_last_ind2sum()
-               self._sample_run.__set__(None,self._run_numbers[ind])
-    #
+   def __init__(self,run_list,file_names=None,fext=None):
+       """ """
+       self._last_ind2sum = -1
+       self._file_guess   = None
+       self._fext         = None
+       self.set_list2add(run_list,file_names,fext)
+   #
    def set_list2add(self,runs_to_add,fnames=None,fext=None):
        """Set run numbers to add together with possible file guess-es """
        if not isinstance(runs_to_add,list):
@@ -45,31 +23,73 @@ class RunList(object):
        for item in runs_to_add:
            runs.append(int(item))
        self._run_numbers = runs
+       self._set_fnames(fnames,fext)
+   #
+   def _set_fnames(self,fnames,fext):
        if fnames:
           self._file_guess = fnames
-       if len(self._file_guess) != len(self._run_numbers):
+       if not(self._file_guess) or len(self._file_guess) != len(self._run_numbers):
            self._file_guess = [''] * len(self._run_numbers)
 
        if fext:
          self._fext = fext
-       if len(self._fext) != len(self._run_numbers):
+       if not (self._fext):
           self._fext = [''] * len(self._run_numbers)
-    #
-   def clear_sum(self):
-       """Clear all defined summation""" 
-       # if last_to_sum is -1, sum all run list provided
-       self._last_ind2sum = -1
-       self._sum_runs = False
-       self._run_numbers = []
-       self._file_guess = []
-       self._fext = []
-    #
-   def get_last_ind2sum(self):
-       """Get last run number contributing to sum""" 
-       if self._last_ind2sum > 0:
-          return self._last_ind2sum
+       elif len(self._fext) != len(self._run_numbers):
+           base_fext = self._fext[0]
+           self._fext = [base_fext] * len(self._run_numbers)
+   #
+   def get_file_guess(self,inst_name,index=0):
+      path_guess = self._file_guess[index]
+      fext       =  self._fext[index]
+      guess = os.path.join(path_guess,'{0}{1}{2}'.\
+                      format(inst_name,self._run_numbers[index],fext))
+ 
+      return guess
+   #
+   def add_run(self,run_number,fpath=None,fext=None):
+      """ add run number to list of existing runs
+      
+          Let's prohibit adding the same run numbers using this method 
+          equivalent run numbers can still be added using list assignment
+      """ 
+      if not(run_number in self._run_numbers):
+          self._run_numbers.append(run_number)
+          if not fpath:
+             fpath = self._file_guess[-1]
+          self._file_guess.append(fpath)
+          if not fext:
+             fext = self._fext[-1]
+          self._fext.append(fext)
+          return ""
+      else:
+          return "Run Number #{0} is already in list of runs to add. Not adding it again".format(run_number)
+   #
+   def check_runs_equal(self,run_list,fpath=None,fext=None):
+       """ returns true if all run numbers in existing list are 
+           in the comparison list and vice versa.
+
+           Sets new file path and fext list regardless to run 
+           number coincide or not
+       """ 
+       if len(run_list) != len(self._run_numbers):
+           return False
+
+       for run in run_list:
+           if not(run in self._run_numbers):
+              return False
+       self._set_fnames(fpath,fext)
+       return True
+  
+   #
+   def get_1run_info(self,sum_runs,ind = None):
+       """ return last run info for file to sum""" 
+       if ind:
+           if not(ind>-1 and ind<len(self._run_numbers)):
+              raise RuntimeError("Index {0} is outside of the run list of {1} runs".format(ind,len(self._run_numbers))) 
        else:
-          return len(self._run_numbers) - 1
+          ind = self.get_last_ind2sum(sum_runs)
+       return self._run_numbers[ind],self._file_guess[ind],self._fext[ind]
     #
    def set_last_ind2sum(self,run_number):
         """Check and set last number, contributing to summation 
@@ -77,80 +97,36 @@ class RunList(object):
         """
         run_number = int(run_number)
         if run_number in self._run_numbers:
-            self._last_ind2sum = self._run_numbers.index(run_number) + 1
-            return (self._last_ind2sum,self._file_guess[self._last_ind2sum],self._fext[self._last_ind2sum])
+            self._last_ind2sum = self._run_numbers.index(run_number) 
         else:
-            self.clear_sum()
-            return (0,'','')
-    #
-       #last_run_ind = RunDescriptor._PropMan.sum_runs.get_last_ind2sum()
-       #main_fext = fext[last_run_ind].lower()
-       #self._run_file_path = file_path[last_run_ind].lower()
+            self._last_ind2sum = -1
 
    def get_run_list2sum(self):
-        """Get run numbers of the files to be summed together """ 
-        num_to_load = len(self._run_numbers)
-        if self._last_ind2sum > 0 and self._last_ind2sum < num_to_load:
-            num_to_load = self._last_ind2sum 
-        return self._run_numbers[:num_to_load]
-
-    #
-   def load_and_sum_runs(self,inst,inst_name,monitors_with_ws):
-        """ Load multiple runs and sum them together 
-        
-            inst -- current instance of PropertyManager
+        """Get run numbers of the files to be summed together 
+           from the list of defined run numbers
         """ 
+        num_to_load = len(self._run_numbers)
+        if self._last_ind2sum >= 0 and self._last_ind2sum < num_to_load:
+            num_to_load = self._last_ind2sum+1
 
-        self._logger(inst,"*** Summing multiple runs            ****")
+        return self._run_numbers[:num_to_load]
+   #
+   def get_last_ind2sum(self,sum_runs):
+       """Get last run number contributing to sum""" 
+       if sum_runs:
+          default = len(self._run_numbers)-1
+       else:
+          default = 0
 
-        runs_to_load = self.get_run_list2sum()
-        num_to_load = len(runs_to_load)
-        self._logger(inst,"*** Loading #{0}/{1}, run N: {2} ".\
-               format(1,num_to_load,self._run_numbers[0]))
-
-
-        file_h = os.path.join(self._file_guess[0],'{0}{1}{2}'.\
-                 format(inst_name,runs_to_load[0],self._fext[0]))
-        ws = self._sample_run.load_file(inst_name,'Summ',False,monitors_with_ws,
-                                        False,file_hint=file_h)
-
-        sum_ws_name = ws.name()
-        sum_mon_name = sum_ws_name + '_monitors'
-        AddedRunNumbers = str(self._sample_run.run_number())
-
-        for ind,run_num in enumerate(runs_to_load[1:num_to_load]):
-
-           file_h = os.path.join(self._file_guess[ind + 1],'{0}{1}{2}'.\
-                          format(inst_name,run_num,self._fext[ind + 1]))
-           self._logger(inst,"*** Adding  #{0}/{1}, run N: {2} ".\
-                         format(ind + 2,num_to_load,run_num))
-           term_name = '{0}_ADDITIVE_#{1}/{2}'.format(inst_name,ind + 2,num_to_load)#
-
-           wsp = self._sample_run.load_file(inst_name,term_name,False,
-                                            monitors_with_ws,False,file_hint=file_h)
-
-           wsp_name = wsp.name()
-           wsp_mon_name = wsp_name + '_monitors'
-           Plus(LHSWorkspace=sum_ws_name,RHSWorkspace=wsp_name,
-                OutputWorkspace=sum_ws_name,ClearRHSWorkspace=True)
-           AddedRunNumbers+=',{0}'.format(run_num)
-           if not monitors_with_ws:
-              Plus(LHSWorkspace=sum_mon_name,RHSWorkspace=wsp_mon_name,
-                   OutputWorkspace=sum_mon_name,ClearRHSWorkspace=True)
-           if wsp_name in mtd:
-               DeleteWorkspace(wsp_name)
-           if wsp_mon_name in mtd:
-               DeleteWorkspace(wsp_mon_name)
-        self._logger(inst,"*** Summing multiple runs  completed ****")
-
-        AddSampleLog(Workspace=sum_ws_name,LogName = 'SumOfRuns:',
-                     LogText=AddedRunNumbers,LogType='String')
-        ws = mtd[sum_ws_name]
-        return ws
-    #
-   def sum_ext(self):        
-        if self._sum_runs:
-            last = self.get_last_ind2sum()
+       if self._last_ind2sum >= 0 and self._last_ind2sum < len(self._run_numbers):
+           ind = self._last_ind2sum
+       else:
+           ind = default
+       return ind
+   #
+   def sum_ext(self,sum_runs):        
+        if sum_runs:
+            last = self.get_last_ind2sum(sum_runs)
             sum_ext = "SumOf{0}".format(len(self._run_numbers[:last + 1]))
         else:
             sum_ext = ''
@@ -169,8 +145,7 @@ class RunDescriptor(PropDescriptor):
     # so it has to be set up manually by PropertyManager __init__ method
     _holder = None
     _logger = None
-    # class level reference to the property manager
-    _PropMan = None
+    _sum_log_name = 'SumRuns'
 #--------------------------------------------------------------------------------------------------------------------
     def __init__(self,prop_name,DocString=None): 
         """ """
@@ -186,14 +161,15 @@ class RunDescriptor(PropDescriptor):
 #--------------------------------------------------------------------------------------------------------------------
     def _clear_all(self):
         """ clear all internal properties, workspaces and caches, 
-        associated with this workspace """ 
+            associated with this run 
+        """ 
         # Run number
         self._run_number = None
         # Extension of the file to load data from
         #
-
         self._run_file_path = ''
         self._run_ext = None
+
         if self._ws_name:
            mon_ws = self._ws_name + '_monitors'
            # Workspace name which corresponds to the run
@@ -219,8 +195,6 @@ class RunDescriptor(PropDescriptor):
 #--------------------------------------------------------------------------------------------------------------------
     def __get__(self,instance,owner):
        """ return current run number or workspace if it is loaded""" 
-       if not RunDescriptor._PropMan:
-          RunDescriptor._PropMan = owner
        if instance is None:
            return self
 
@@ -232,20 +206,20 @@ class RunDescriptor(PropDescriptor):
     def __set__(self,instance,value):
        """ Set up Run number and define workspace name from any source """
        #
-       if not RunDescriptor._PropMan:
-          from PropertyManager import PropertyManager
-          RunDescriptor._PropMan = PropertyManager
-
        if value == None: # clear current run number
           self._clear_all()
           return
        if isinstance(value, api.Workspace):
-           if  self._ws_name and  self._ws_name != value.name():
+           if  self._ws_name:
+             if self._ws_name != value.name():
                self._clear_all()
                self._set_ws_as_source(value)
-               return
-           else: # it is just reassigning the same workspace to itself
-             return # do nothing
+             else:
+                return # do nothing
+                # it is just reassigning the same workspace to itself
+           else: # first assignment of workspace to property
+               self._set_ws_as_source(value)
+           return
 
        if isinstance(value,str): # it may be run number as string or it may be a workspace name
           if value in mtd: # workspace name
@@ -258,10 +232,10 @@ class RunDescriptor(PropDescriptor):
               if isinstance(run_num,list):
                  self._set_run_list(instance,run_num,file_path,fext)
               else:
-                 self._set_single_run(instance,run_number,file_path,fext)
+                 self._set_single_run(instance,run_num,file_path,fext)
 
        elif isinstance(value,list):
-           self._set_run_list(value)
+           self._set_run_list(instance,value)
        else:
            self._set_single_run(instance,value)
 
@@ -269,39 +243,35 @@ class RunDescriptor(PropDescriptor):
     def _set_single_run(self,instance,run_number,file_path='',fext=None):
         """ """ 
         self._run_number = int(run_number)
-        self._build_ws_name() # workspace name generally exist only if 
+        # build workspace name for current run number
+        new_ws_name = self._build_ws_name() 
+
         if self._run_list and instance.sum_runs:
-           num2_sum = self._run_list.set_last_ind2sum(self._run_number)                     
-           if num2_sum == 0:
-              self._run_list = None
-              instance.sum_runs = False
+              self._run_list.add_run(self._run_number)             
+              self._run_list.set_last_ind2sum(run_number)
         else:
-           if self._ws_name != old_ws_name:
-              self._ws_name = old_ws_name
+           if self._ws_name != new_ws_name:
               self._clear_all()
-        # clear all would invalidate run number and workspace number
-        self._run_number = int(value)
-        self._run_file_path = file_path
-        self._run_ext = fext
-
-#--------------------------------------------------------------------------------------------------------------------
-    def _set_run_list(self,instance,run_num,file_path,fext):
-        if len(run_num) == 1:
-               self.__set__(instance,value[0])
-               return
-
-        if self._run_list and self._run_list.check_runs_equal(run_num):
-                     return 
-        else:
-              self._clear_all()
-              self._run_list = RunList(run_num,file_path,fext)
-              run_ind,file_path,main_fext = self._run_list.get_last_ind2sum(instance.sum_runs)
-    #       else:
-              self.__set__(instance,run_num)
+              # clear all would invalidate run number and workspace number
+              self._run_number = int(run_number)
               self._run_file_path = file_path
-              main_fext           = fext.lower()
-              #
-              self._run_ext = main_fext
+              self._run_ext = fext
+              self._ws_name = new_ws_name
+           else: # nothing to do, there is workspace, which corresponds to this run number 
+              pass # and it may be already loaded (may be not) 
+#--------------------------------------------------------------------------------------------------------------------
+    def _set_run_list(self,instance,run_list,file_path=None,fext=None):
+
+        if self._run_list and self._run_list.check_runs_equal(run_list,file_path,fext):
+           return 
+        else:
+           self._clear_all()
+           self._run_list = RunList(run_list,file_path,fext)
+           run_num,file_path,main_fext = self._run_list.get_1run_info(instance.sum_runs)
+           self._run_number =run_num
+           self._run_file_path = file_path
+           self._run_ext = main_fext 
+           self._ws_name = self._build_ws_name()
 
     def run_number(self):
         """ Return run number regardless of workspace is loaded or not"""
@@ -327,8 +297,8 @@ class RunDescriptor(PropDescriptor):
     def get_run_list(self):
         """ Returns list of the files, assigned to current property """
         current_run = self.run_number()
-        if self._bind_to_sum:
-            runs = RunDescriptor._PropMan.sum_runs.get_runs()
+        if self._run_list:
+            runs = self._run_list.get_runs()
             if current_run in runs:
                 return runs
             else:
@@ -336,15 +306,38 @@ class RunDescriptor(PropDescriptor):
         else:
            return [current_run]
 #--------------------------------------------------------------------------------------------------------------------
+    def get_runs_to_sum(self):
+        """ return list of runs, expected to be summed together"""
+
+        if not RunDescriptor._holder.sum_runs:
+           return []
+        summed_runs = []
+        if self._ws_name in mtd:
+           ws = mtd[self._ws_name]
+           if RunDescriptor._sum_log_name in ws.getRun():
+              summed_str = ws.getRun().getLogData(RunDescriptor._sum_log_name).value
+              run_nums = summed_str.split(',')
+              for run_str in run_nums:
+                  summed_runs.append(int(run_str))
+
+        runs2_sum = self._run_list.get_run_list2sum()
+        for run in summed_runs:
+            if run in runs2_sum:
+               del runs2_sum[runs2_sum.index(run)]
+        return runs2_sum
+#--------------------------------------------------------------------------------------------------------------------
     def set_action_suffix(self,suffix=None):
         """ method to set part of the workspace name, which indicate some action performed over this workspace           
             
             e.g.: default suffix of a loaded workspace is 'RAW' but we can set it to SPE to show that conversion to 
             energy will be performed for this workspace.
 
-            method returns the name of the workspace is will have with this suffix. Algorithms would later  
+            method returns the name of the workspace is will have with this suffix. 
+            
+            Algorithms would later  
             work on the initial workspace and modify it in-place or to produce workspace with new name (depending if one 
             wants to keep initial workspace)
+
             synchronize_ws(ws_pointer) then should synchronize workspace and its name.
 
             TODO: This method should be automatically invoked by an algorithm decorator
@@ -401,7 +394,7 @@ class RunDescriptor(PropDescriptor):
             raise AttributeError('Source file extension can be only a string')
 #--------------------------------------------------------------------------------------------------------------------
     @staticmethod
-    def _check_claibration_source():
+    def _check_calibration_source():
          """ if user have not specified calibration as input to the script, 
              try to retrieve calibration stored in file with run properties"""
          changed_prop = RunDescriptor._holder.getChangedProperties()
@@ -426,16 +419,16 @@ class RunDescriptor(PropDescriptor):
             if ws.run().hasProperty("calibrated"):
                 return ws # already calibrated
             else:
-               prefer_ws_calibration = self._check_claibration_source()
+               prefer_ws_calibration = self._check_calibration_source()
                self.apply_calibration(ws,RunDescriptor._holder.det_cal_file,prefer_ws_calibration)
                return ws
         else:
            if self._run_number:
-               prefer_ws_calibration = self._check_claibration_source()
+               prefer_ws_calibration = self._check_calibration_source()
                inst_name = RunDescriptor._holder.short_inst_name
                calibration = RunDescriptor._holder.det_cal_file
-               if self._bind_to_sum and RunDescriptor._holder.sum_runs : # Sum runs
-                   ws = RunDescriptor._PropMan.sum_runs.load_and_sum_runs(RunDescriptor._holder,inst_name,RunDescriptor._holder.load_monitors_with_workspace)
+               if self._run_list and RunDescriptor._holder.sum_runs : # Sum runs
+                   ws = self._load_and_sum_runs(inst_name,RunDescriptor._holder.load_monitors_with_workspace)
                else: # load current workspace
                    ws = self.load_run(inst_name, calibration,False, RunDescriptor._holder.load_monitors_with_workspace,prefer_ws_calibration)
 
@@ -448,10 +441,10 @@ class RunDescriptor(PropDescriptor):
               return None
 #--------------------------------------------------------------------------------------------------------------------
     def get_ws_clone(self,clone_name='ws_clone'):
-        """ Get unbounded clone of eisting Run workspace """
+        """ Get unbounded clone of existing Run workspace """
         ws = self.get_workspace()
         CloneWorkspace(InputWorkspace=ws,OutputWorkspace=clone_name)
-        mon_ws_name = self.get_ws_name() + '_monitors'
+        mon_ws_name = ws.name() + '_monitors'
         if mon_ws_name in mtd:
             cl_mon_name = clone_name + '_monitors'
             CloneWorkspace(InputWorkspace=mon_ws_name,OutputWorkspace=cl_mon_name)
@@ -468,8 +461,8 @@ class RunDescriptor(PropDescriptor):
 
 #--------------------------------------------------------------------------------------------------------------------
     def chop_ws_part(self,origin,tof_range,rebin,chunk_num,n_chunks):
-        """ chop part of the original workspace and sets it up as new original. 
-            Return the old one """ 
+        """ chop part of the original workspace and sets it up to this run as new original
+            Return the pointer to workspace being chopped """ 
         if not(origin):
            origin = self.get_workspace()
 
@@ -510,8 +503,10 @@ class RunDescriptor(PropDescriptor):
            workspace which contains monitors.
         """
         data_ws = self.get_workspace()
+        if not data_ws:
+           return None
 
-        monWS_name = self.get_ws_name() + '_monitors'
+        monWS_name = data_ws.name() + '_monitors'
         if monWS_name in mtd:
             mon_ws = mtd[monWS_name]
             monitors_separate = True
@@ -548,18 +543,6 @@ class RunDescriptor(PropDescriptor):
                 return False
         else:
            return False
-#--------------------------------------------------------------------------------------------------------------------
-    def get_ws_name(self):
-        """ return workspace name. If ws name is not defined, build it first and set up as the target ws name
-        """ 
-        if self._ws_name:
-            if self._ws_name in mtd:
-                return self._ws_name
-            else:
-                raise RuntimeError('Getting workspace name {0} for undefined workspace. Run get_workspace first'.format(self._ws_name)) 
-
-        self._ws_name = self._build_ws_name()
-        return self._ws_name
 #--------------------------------------------------------------------------------------------------------------------
     def file_hint(self,run_num_str=None,filePath=None,fileExt=None,**kwargs):
         """ procedure to provide run file guess name from run properties
@@ -664,11 +647,12 @@ class RunDescriptor(PropDescriptor):
             ws_name = kwargs['ws_name']
             del kwargs['ws_name']
         else:
-            try:
-                ws_name = self.get_ws_name()
-            except RuntimeError:
-                self._ws_name = None
-                ws_name = self.get_ws_name()
+            ws_name = self._build_ws_name()
+            #try:
+            #    ws_name = self.get_ws_name()
+            #except RuntimeError:
+            #    self._ws_name = None
+            #    ws_name = self.get_ws_name()
         #-----------------------------------
         if ws_name in mtd and not(force):
             RunDescriptor._logger("{0} already loaded as workspace.".format(ws_name),'information')
@@ -772,11 +756,16 @@ class RunDescriptor(PropDescriptor):
 
 #--------------------------------------------------------------------------------------------------------------------
 
-    def _build_ws_name(self):
+    def _build_ws_name(self,sum_runs=None):
 
         instr_name = self._instr_name()
+        if self._run_list:
+            if not sum_runs:
+               sum_runs= RunDescriptor._holder.sum_runs
+            sum_ext = self._run_list.sum_ext(sum_runs)
+        else:
+            sum_ext = ''
 
-        sum_ext = RunDescriptor._PropMan.sum_runs.sum_ext()
         if self._run_number:
             ws_name = '{0}{1}{2}{3:0>#6d}{4}{5}'.format(self._prop_name,instr_name,self._ws_cname,self._run_number,sum_ext,self._ws_suffix)
         else:
@@ -796,7 +785,10 @@ class RunDescriptor(PropDescriptor):
         """
         # Remove suffix
         name = self.rremove(ws_name,self._ws_suffix)
-        sumExt = RunDescriptor._PropMan.sum_runs.sum_ext()
+        if self._run_list:
+            sumExt = self._run_list.sum_ext()
+        else:
+            sumExt = ''
         if len(sumExt) > 0:
             name = self.rremove(ws_name,sumExt)
         # remove _prop_name:
@@ -831,6 +823,80 @@ class RunDescriptor(PropDescriptor):
             
         """ 
         return not(self._in_cashe)
+
+    def notify_sum_runs_changed(self,old_value,new_value):
+       """ Take actions on changes to sum_runs option 
+
+            no actions at the moment?
+       """ 
+       if self._run_list and old_value != new_value:
+          rl = self._run_list
+          self._clear_all()
+          rl.set_last_ind2sum(-1) # this will reset index to default
+          self._run_list = rl
+          run_num,file_path,main_fext = self._run_list.get_1run_info(new_value)
+          self._run_number =run_num
+          self._run_file_path = file_path
+          self._run_ext = main_fext 
+          self._ws_name = self._build_ws_name(new_value)
+
+    def _load_and_sum_runs(self,inst_name,monitors_with_ws):
+        """ Load multiple runs and sum them together 
+        
+            monitors_with_ws -- if true, load monitors with workspace 
+        """ 
+
+        RunDescriptor._logger("*** Summing multiple runs            ****")
+
+        runs_to_sum = self.get_runs_to_sum()
+        num_to_sum = len(runs_to_sum)
+
+        RunDescriptor._logger("*** Loading #{0}/{1}, run N: {2} ".\
+               format(1,num_to_sum,runs_to_sum[0]))
+
+        f_guess = self._run_list.get_file_guess(inst_name,0)
+        ws =self.load_file(inst_name,'Summ',False,monitors_with_ws,
+                                      False,file_hint=f_guess )
+
+        sum_ws_name = ws.name()
+        sum_mon_name = sum_ws_name + '_monitors'
+        #AddedRunNumbers = [ws.getRunNumber()]
+        AddedRunNumbers = str(ws.getRunNumber())
+
+        for ind,run_num in enumerate(runs_to_sum[1:num_to_sum]):
+
+           RunDescriptor._logger("*** Adding  #{0}/{1}, run N: {2} ".\
+                          format(ind + 2,num_to_sum,run_num))
+
+           term_name = '{0}_ADDITIVE_#{1}/{2}'.format(inst_name,ind + 2,num_to_sum)#
+           f_guess = self._run_list.get_file_guess(inst_name,ind+1)
+
+           wsp = self.load_file(inst_name,term_name,False,
+                                monitors_with_ws,False,file_hint=f_guess)
+
+           wsp_name = wsp.name()
+           wsp_mon_name = wsp_name + '_monitors'
+           Plus(LHSWorkspace=sum_ws_name,RHSWorkspace=wsp_name,
+                OutputWorkspace=sum_ws_name,ClearRHSWorkspace=True)
+         #  AddedRunNumbers.append(run_num)
+           AddedRunNumbers+=','+str(run_num)
+           if not monitors_with_ws:
+              Plus(LHSWorkspace=sum_mon_name,RHSWorkspace=wsp_mon_name,
+                   OutputWorkspace=sum_mon_name,ClearRHSWorkspace=True)
+           if wsp_name in mtd:
+               DeleteWorkspace(wsp_name)
+           if wsp_mon_name in mtd:
+               DeleteWorkspace(wsp_mon_name)
+        RunDescriptor._logger("*** Summing multiple runs  completed ****")
+
+        #AddSampleLog(Workspace=sum_ws_name,LogName = RunDescriptor._sum_log_name,
+        #             LogText=AddedRunNumbers,LogType='Number Series')
+        AddSampleLog(Workspace=sum_ws_name,LogName = RunDescriptor._sum_log_name,
+                    LogText=AddedRunNumbers,LogType='String')
+        ws = mtd[sum_ws_name]
+        return ws
+
+
 #-------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------
@@ -946,11 +1012,11 @@ class RunDescriptorDependent(RunDescriptor):
         else:
             return self._host.is_existing_ws()
 
-    def get_ws_name(self):
-        if self._has_own_value:
-            return super(RunDescriptorDependent,self).get_ws_name()
-        else:
-            return self._host.get_ws_name()
+    #def get_ws_name(self):
+    #    if self._has_own_value:
+    #        return super(RunDescriptorDependent,self).get_ws_name()
+    #    else:
+    #        return self._host.get_ws_name()
        
     def file_hint(self,run_num_str=None,filePath=None,fileExt=None,**kwargs):
         if self._has_own_value:
