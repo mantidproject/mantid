@@ -179,10 +179,9 @@
 #include <boost/scoped_ptr.hpp>
 
 //Mantid
-#include "ScriptingWindow.h"
-
-#include "Mantid/MantidUI.h"
 #include "Mantid/MantidAbout.h"
+#include "Mantid/MantidDock.h"
+#include "Mantid/MantidUI.h"
 #include "Mantid/PeakPickerTool.h"
 #include "Mantid/ManageCustomMenus.h"
 #include "Mantid/ManageInterfaceCategories.h"
@@ -390,6 +389,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
 
   actionSaveFile=NULL;
   actionSaveProject=NULL;
+  actionSaveProjectAs=NULL;
   folders = new FolderListView(this);
   folders->header()->setClickEnabled( false );
   folders->addColumn( tr("Folder") );
@@ -438,6 +438,10 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   QList<int> splitterSizes;
   explorerSplitter->setSizes( splitterSizes << 45 << 45);
   explorerWindow->hide();
+
+  // Other docked widgets
+  m_interpreterDock = new QDockWidget(this);
+  m_sysMonitorDock = new QDockWidget(this);
 
   // Needs to be done after initialization of dock windows,
   // because we now use QDockWidget::toggleViewAction()
@@ -569,7 +573,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   setScriptingLanguage(defaultScriptingLang);
   m_iface_script = NULL;
 
-  m_interpreterDock = new QDockWidget(this);
+  // -- IPython docked widget --
   m_interpreterDock->setObjectName("interpreterDock"); // this is needed for QMainWindow::restoreState()
   m_interpreterDock->setWindowTitle("Script Interpreter");
   runPythonScript("from ipython_widget import *\nw = _qti.app._getInterpreterDock()\nw.setWidget(MantidIPythonWidget())",false,true,true);
@@ -577,6 +581,54 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   {
     // Restoring the widget fails if the settings aren't found or read. Therefore, add it manually.
     addDockWidget( Qt::BottomDockWidgetArea, m_interpreterDock );
+  }
+
+  // Algorithms, Workspaces & SysMonitor
+  if ( !restoreDockWidget(mantidUI->m_exploreMantid))
+  {
+    addDockWidget(Qt::RightDockWidgetArea, mantidUI->m_exploreMantid);
+  }
+  if ( !restoreDockWidget(mantidUI->m_exploreAlgorithms))
+  {
+    addDockWidget(Qt::RightDockWidgetArea, mantidUI->m_exploreAlgorithms);
+  }
+  if(psutilPresent())
+  {
+    m_sysMonitorDock->setObjectName("systemMonitor"); // this is needed for QMainWindow::restoreState()
+    m_sysMonitorDock->setWindowTitle("System Monitor");
+    runPythonScript("from SysMon import sysmon\n"
+                    "w = sysmon.SysMon(_qti.app._getSysMonitorDock())\n"
+                    "_qti.app._getSysMonitorDock().setWidget(w)",
+                    false, true, true);
+    if ( !restoreDockWidget(m_sysMonitorDock))
+    {
+      // Setting the max width to 300 and then to -1 later seems to
+      // be the only way that I found to get the dock to have a decent initial
+      // size but then still be resizable.
+      m_sysMonitorDock->setMaximumWidth(300);
+      addDockWidget(Qt::RightDockWidgetArea, m_sysMonitorDock);
+      m_sysMonitorDock->setMaximumWidth(QWIDGETSIZE_MAX); // reset it
+    }
+    tabifyDockWidget(mantidUI->m_exploreAlgorithms, m_sysMonitorDock); // first, second in that order on tabs
+    mantidUI->m_exploreAlgorithms->raise();
+
+  }
+  else
+  {
+    // Remove menu item
+    auto actions = view->actions();
+    auto itr = actions.constBegin();
+    auto iend = actions.constEnd();
+    for(; itr != iend; ++itr)
+    {
+      if(*itr == m_sysMonitorDock->toggleViewAction()) break;
+    }
+    // Move back for the separator
+    if(itr != actions.constBegin()) --itr;
+    view->removeAction(*itr);
+    ++itr;
+    view->removeAction(*itr);
+    delete m_sysMonitorDock;
   }
 
   loadCustomActions();
@@ -642,13 +694,13 @@ bool ApplicationWindow::shouldWeShowFirstTimeSetup(const QStringList& commandArg
     {
       const Mantid::Kernel::FacilityInfo& facilityInfo = config.getFacility(facility);
       const Mantid::Kernel::InstrumentInfo& instrumentInfo = config.getInstrument(instrument);
-      g_log.information()<<"Default facility '" << facilityInfo.name() 
+      g_log.information()<<"Default facility '" << facilityInfo.name()
         << "', instrument '" << instrumentInfo.name() << "'" << std::endl;
     }
     catch (Mantid::Kernel::Exception::NotFoundError&)
     {
       //failed to find the facility or instrument
-      g_log.error()<<"Could not find your default facility '" << facility 
+      g_log.error()<<"Could not find your default facility '" << facility
         <<"' or instrument '" << instrument << "' in facilities.xml, showing please select again." << std::endl;
       return true;
     }
@@ -1256,6 +1308,12 @@ void ApplicationWindow::initMainMenu()
 
   mantidUI->addMenuItems(view);
 
+  // System monitor (might get removed later after check)
+  view->insertSeparator();
+  m_sysMonitorDock->toggleViewAction()->setChecked(false);
+  view->addAction(m_sysMonitorDock->toggleViewAction());
+
+
   view->insertSeparator();
   toolbarsMenu = view->addMenu(tr("&Toolbars"));
   view->addAction(actionShowConfigureDialog);
@@ -1587,7 +1645,8 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
       format->addAction(actionShowAxisDialog);
       format->addAction(actionShowTitleDialog);
 
-      if (dynamic_cast<Graph3D*>(w)->coordStyle() == Qwt3D::NOCOORD)
+      auto g3d = dynamic_cast<Graph3D*>(w);
+      if (g3d && g3d->coordStyle() == Qwt3D::NOCOORD)
         actionShowAxisDialog->setEnabled(false);
 
       format->addSeparator();
@@ -2438,7 +2497,10 @@ void ApplicationWindow::change3DData(const QString& colName)
   if (!w)
     return;
 
-  dynamic_cast<Graph3D*>(w)->changeDataColumn(table(colName), colName);
+  auto g3d = dynamic_cast<Graph3D*>(w);
+  if (g3d)
+    g3d->changeDataColumn(table(colName), colName);
+
   emit modified();
 }
 
@@ -2726,9 +2788,8 @@ Matrix* ApplicationWindow::importImage(const QString& fileName)
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
   MdiSubWindow *w = activeWindow(MatrixWindow);
-  Matrix* m = NULL;
-  if (w){
-    m = dynamic_cast<Matrix*>(w);
+  Matrix* m = dynamic_cast<Matrix*>(w);
+  if (m){
     m->importImage(fn);
   } else {
     m = new Matrix(scriptingEnv(), image, "", this);
@@ -3794,6 +3855,9 @@ void ApplicationWindow::addErrorBars()
     return;
 
   MultiLayer* plot = dynamic_cast<MultiLayer*>(w);
+  if (!plot)
+    return;
+
   if (plot->isEmpty()){
     QMessageBox::warning(this,tr("MantidPlot - Warning"),//Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"
@@ -4373,6 +4437,8 @@ void ApplicationWindow::importASCII(const QStringList& files, int import_mode, c
 
     if (w->inherits("Table")){
       Table *t = dynamic_cast<Table*>(w);
+      if (!t)
+        return;
       t->importASCII(files[0], local_column_separator, local_ignored_lines, local_rename_columns,
           local_strip_spaces, local_simplify_spaces, local_import_comments,
           local_comment_string, import_read_only, Table::Overwrite, endLineChar);
@@ -4381,6 +4447,8 @@ void ApplicationWindow::importASCII(const QStringList& files, int import_mode, c
       t->notifyChanges();
     } else if (w->isA("Matrix")){
       Matrix *m = dynamic_cast<Matrix*>(w);
+      if (!m)
+        return;
       m->importASCII(files[0], local_column_separator, local_ignored_lines,
           local_strip_spaces, local_simplify_spaces, local_comment_string,
           Matrix::Overwrite, local_separators, endLineChar);
@@ -4599,7 +4667,9 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& filename, const
   QFile file(filename);
   QFileInfo fileInfo(filename);
 
-  file.open(QIODevice::ReadOnly);
+  if(!file.open(QIODevice::ReadOnly))
+    throw std::runtime_error("Couldn't open project file");
+
   QTextStream fileTS(&file);
   fileTS.setEncoding(QTextStream::UnicodeUTF8);
 
@@ -4622,6 +4692,9 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& filename, const
 
   //rename project folder item
   FolderListItem *item = dynamic_cast<FolderListItem *>(folders->firstChild());
+  if(!item)
+    throw std::runtime_error("Couldn't retrieve folder list items.");
+
   item->setText(0, fileInfo.baseName());
   item->folder()->setObjectName(fileInfo.baseName());
 
@@ -5032,11 +5105,6 @@ void ApplicationWindow::readSettings()
   /* ------------- end group General ------------------- */
 
   settings.beginGroup("/UserFunctions");
-  if (100*maj_version + 10*min_version + patch_version == 91 &&
-      settings.contains("/FitFunctions")){
-    saveFitFunctions(settings.value("/FitFunctions").toStringList());
-    settings.remove("/FitFunctions");
-  }
   surfaceFunc = settings.value("/SurfaceFunctions").toStringList();
   xFunctions = settings.value("/xFunctions").toStringList();
   yFunctions = settings.value("/yFunctions").toStringList();
@@ -5743,6 +5811,8 @@ void ApplicationWindow::exportGraph()
   Graph3D *plot3D = 0;
   if(w->isA("MultiLayer")){
     plot2D = dynamic_cast<MultiLayer*>(w);
+    if (!plot2D)
+      return;
     if (plot2D->isEmpty()){
       QMessageBox::critical(this, tr("MantidPlot - Export Error"),//Mantid
           tr("<h4>There are no plot layers available in this window!</h4>"));
@@ -5805,7 +5875,11 @@ void ApplicationWindow::exportLayer()
   if (!w)
     return;
 
-  Graph* g = dynamic_cast<MultiLayer*>(w)->activeGraph();
+  auto ml = dynamic_cast<MultiLayer*>(w);
+  if(!ml)
+    return;
+
+  Graph* g = ml->activeGraph();
   if (!g)
     return;
 
@@ -6078,12 +6152,11 @@ void ApplicationWindow::savetoNexusFile()
 {
   QString filter = tr("Mantid Files")+" (*.nxs *.nx5 *.xml);;";
   QString selectedFilter;
-  QString fileDir=MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  if(fileDir.isEmpty())
-  {fileDir="C\\Mantid\\Test\\Nexus";
-  }
-  QString fileName = MantidQt::API::FileDialogHandler::getSaveFileName(this, tr("Save File As"), fileDir, filter, &selectedFilter);
-  if ( !fileName.isEmpty() ){
+  QString fileDir = MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  QString fileName =
+    MantidQt::API::FileDialogHandler::getSaveFileName(this, tr("Save File As"), fileDir, filter, &selectedFilter);
+  if ( !fileName.isEmpty() )
+  {
     std::string wsName;
     MdiSubWindow *w = activeWindow();
     if(w)
@@ -6091,11 +6164,16 @@ void ApplicationWindow::savetoNexusFile()
       if(w->isA("MantidMatrix"))
       {
         wsName=dynamic_cast<MantidMatrix*>(w)->getWorkspaceName();
+
       }
-      if(w->isA("MantidTable"))
+      else if(w->isA("MantidTable"))
       {
         wsName=dynamic_cast<MantidTable*>(w)->getWorkspaceName();
       }
+      else
+      {
+        throw std::runtime_error("Invalid input for SaveNexus, you cannot save this type of object as a NeXus file");
+    }
     }
     else
     {
@@ -6107,7 +6185,6 @@ void ApplicationWindow::savetoNexusFile()
     }
 
     savedatainNexusFormat(wsName,fileName.toStdString());
-
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(fileName).absoluteDir().path());
     updateRecentFilesList(fileName);
   }
@@ -6297,7 +6374,7 @@ QStringList ApplicationWindow::columnsList(Table::PlotDesignation plotType)
       continue;
 
     Table *t = dynamic_cast<Table*>(w);
-    for (int i=0; i < t->numCols(); i++)
+    for (int i=0; t && i < t->numCols(); i++)
     {
       if (t->colPlotDesignation(i) == plotType || plotType == Table::All)
         list << QString(t->objectName()) + "_" + t->colLabel(i);
@@ -6517,10 +6594,12 @@ void ApplicationWindow::exportASCII(const QString& tableName, const QString& sep
     asciiDirPath = fi.dirPath(true);
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    if (w->inherits("Table"))
-      dynamic_cast<Table*>(w)->exportASCII(fname, sep, colNames, colComments, expSelection);
-    else if (w->isA("Matrix"))
-      (dynamic_cast<Matrix*>(w))->exportASCII(fname, sep, expSelection);
+    auto t = dynamic_cast<Table*>(w);
+    auto m = dynamic_cast<Matrix*>(w);
+    if (t)
+      t->exportASCII(fname, sep, colNames, colComments, expSelection);
+    else if (m)
+      m->exportASCII(fname, sep, expSelection);
     else if (w->isA("MantidMatrix"))
     {
       //call save ascii
@@ -7083,11 +7162,38 @@ void ApplicationWindow::showGeneralPlotDialog()
   if (!plot)
     return;
 
-  if (plot->isA("MultiLayer") && dynamic_cast<MultiLayer*>(plot)->layers())
+  if (plot->isA("MultiLayer"))
+  {
+    // do the dynamic_casts inside a try/c, as there may be issues with the plots
+    // (source data/table/matrix has been removed/closed, etc.)
+    MultiLayer* ml;
+    try
+    {
+      ml = dynamic_cast<MultiLayer*>(plot);
+    }
+    catch(std::runtime_error& )
+    {
+      g_log.error() << "Failed to open general plot dialog for multi layer plot";
+      return;
+    }
+    if (ml && ml->layers())
     showPlotDialog();
-  else if (plot->isA("Graph3D")){
+  }
+  else if (plot->isA("Graph3D"))
+  {
     QDialog* gd = showScaleDialog();
-    dynamic_cast<Plot3DDialog*>(gd)->showGeneralTab();
+    Plot3DDialog* plot3D;
+    try
+    {
+      plot3D = dynamic_cast<Plot3DDialog*>(gd);
+  }
+    catch(std::runtime_error& )
+    {
+      g_log.error() << "Failed to open general plot dialog for 3D plot";
+      return;
+    }
+    if(plot3D)
+      plot3D->showGeneralTab();
   }
 }
 
@@ -7098,10 +7204,36 @@ void ApplicationWindow::showAxisDialog()
     return;
 
   QDialog* gd = showScaleDialog();
-  if (gd && plot->isA("MultiLayer") && dynamic_cast<MultiLayer*>(plot)->layers())
+  if (gd && plot->isA("MultiLayer"))
+  {
+    MultiLayer* ml;
+    try
+    {
+      ml = dynamic_cast<MultiLayer*>(plot);
+    }
+    catch(std::runtime_error& )
+    {
+      g_log.error() << "Failed to open axis dialog for multi layer plot";
+      return;
+    }
+    if (ml && ml->layers())
     dynamic_cast<AxesDialog*>(gd)->showAxesPage();
+  }
   else if (gd && plot->isA("Graph3D"))
-    dynamic_cast<Plot3DDialog*>(gd)->showAxisTab();
+  {
+    Plot3DDialog* p3d;
+    try
+    {
+      p3d = dynamic_cast<Plot3DDialog*>(gd);
+    }
+    catch(std::runtime_error& )
+    {
+      g_log.error() << "Failed to open axis dialog for multi layer plot";
+      return;
+    }
+    if (p3d)
+      p3d->showAxisTab();
+  }
 }
 
 void ApplicationWindow::showGridDialog()
@@ -7118,7 +7250,17 @@ QDialog* ApplicationWindow::showScaleDialog()
     return 0;
 
   if (w->isA("MultiLayer")){
-    if (dynamic_cast<MultiLayer*>(w)->isEmpty())
+    MultiLayer* ml;
+    try
+    {
+      ml = dynamic_cast<MultiLayer*>(w);
+    }
+    catch(std::runtime_error& )
+    {
+      g_log.error() << "Failed to open scale dialog for multi layer plot";
+      return 0;
+    }
+    if (!ml || ml->isEmpty())
       return 0;
 
     Graph* g = dynamic_cast<MultiLayer*>(w)->activeGraph();
@@ -8333,29 +8475,32 @@ void ApplicationWindow::cutSelection()
   if (!m)
     return;
 
-  if (m->inherits("Table"))
-    dynamic_cast<Table*>(m)->cutSelection();
-  else if (m->isA("Matrix"))
-    dynamic_cast<Matrix*>(m)->cutSelection();
-  else if(m->isA("MultiLayer")){
-    MultiLayer* plot = dynamic_cast<MultiLayer*>(m);
-    if (!plot || plot->layers() == 0)
-      return;
+  auto t = dynamic_cast<Table*>(m);
+  auto mat = dynamic_cast<Matrix*>(m);
+  auto plot = dynamic_cast<MultiLayer*>(m);
+  auto note = dynamic_cast<Note*>(m);
 
+  if(t)
+    t->cutSelection();
+  else if (mat)
+    mat->cutSelection();
+  else if (plot && plot->layers())
+  {
     Graph* g = dynamic_cast<Graph*>(plot->activeGraph());
     if (!g)
       return;
 
     if (g->activeTool()){
-      if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector)
-        dynamic_cast<RangeSelectorTool*>(g->activeTool())->cutSelection();
+      auto rst = dynamic_cast<RangeSelectorTool*>(g->activeTool());
+      if (rst)
+        rst->cutSelection();
     } else {
       copyMarker();
       g->removeMarker();
     }
   }
-  else if (m->isA("Note"))
-    dynamic_cast<Note*>(m)->editor()->cut();
+  else if (note)
+    note->editor()->cut();
 
   emit modified();
 }
@@ -8631,6 +8776,9 @@ void ApplicationWindow::hideWindow(MdiSubWindow* w)
 void ApplicationWindow::hideWindow()
 {
   WindowListItem *it = dynamic_cast<WindowListItem*>(lv->currentItem());
+  if(!it)
+    return;
+
   MdiSubWindow *w = it->window();
   if (!w)
     return;
@@ -9148,7 +9296,7 @@ void ApplicationWindow::fileMenuAboutToShow()
 
   fileMenu->insertSeparator();
   fileMenu->addAction(actionSaveProjectAs);
-  //fileMenu->insertSeparator();
+
   saveMenu=fileMenu->addMenu(tr("&Save"));
   saveMenu->addAction(actionSaveFile);
   saveMenu->addAction(actionSaveProject);
@@ -9455,13 +9603,18 @@ void ApplicationWindow::newProject()
   resultsLog->clear();
   setWindowTitle(tr("MantidPlot - untitled"));//Mantid
   projectname = "untitled";
+
+  if(actionSaveProject)
+    actionSaveProject->setEnabled(false);
 }
 
 void ApplicationWindow::savedProject()
 {
   QCoreApplication::processEvents();
-  if(actionSaveFile) actionSaveFile->setEnabled(false);
-  if(actionSaveProject)actionSaveProject->setEnabled(false);
+  if(actionSaveFile)
+    actionSaveFile->setEnabled(false);
+  if(actionSaveProject)
+    actionSaveProject->setEnabled(false);
   saved = true;
 
   Folder *f = projectFolder();
@@ -9481,8 +9634,12 @@ void ApplicationWindow::modifiedProject()
 {
   if (saved == false)
     return;
-  if(actionSaveFile) actionSaveFile->setEnabled(true);
-  if(actionSaveProject)actionSaveProject->setEnabled(true);
+  // enable actionSaveProject, but not actionSaveFile (which is Save Nexus and doesn't
+  // seem to make sense for qti objects (graphs, tables, matrices, notes, etc.)
+  if(actionSaveProject)
+    actionSaveProject->setEnabled(true);
+  if(actionSaveProjectAs)
+    actionSaveProjectAs->setEnabled(true);
   saved = false;
 }
 
@@ -9597,8 +9754,15 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 
 void ApplicationWindow::customEvent(QEvent *e)
 {
+  if(!e)
+    return;
+
   if (e->type() == SCRIPTING_CHANGE_EVENT)
-    scriptingChangeEvent(dynamic_cast<ScriptingChangeEvent*>(e));
+  {
+    auto se = dynamic_cast<ScriptingChangeEvent*>(e);
+    if(se)
+      scriptingChangeEvent(se);
+  }
 }
 
 void ApplicationWindow::deleteSelectedItems()
@@ -11499,11 +11663,14 @@ void ApplicationWindow::analyzeCurve(Graph *g, Analysis operation, const QString
     QwtPlotCurve* c = g->curve(curveTitle);
     if (c){
       ScaleEngine *se = dynamic_cast<ScaleEngine *>(g->plotWidget()->axisScaleEngine(c->xAxis()));
+      if(se)
+      {
       if(se->type() == QwtScaleTransformation::Log10)
         fitter = new LogisticFit (this, g);
       else
         fitter = new SigmoidalFit (this, g);
     }
+  }
   }
   break;
   }
@@ -11608,8 +11775,10 @@ void ApplicationWindow::disableTools()
 
   QList<MdiSubWindow *> windows = windowsList();
   foreach(MdiSubWindow *w, windows){
-    if (w->isA("MultiLayer")){
-      QList<Graph *> layers = dynamic_cast<MultiLayer*>(w)->layersList();
+    auto ml = dynamic_cast<MultiLayer*>(w);
+    if (ml)
+    {
+      QList<Graph *> layers = ml->layersList();
       foreach(Graph *g, layers)
       g->disableTools();
     }
@@ -11810,8 +11979,9 @@ void ApplicationWindow::createActions()
   actionImportImage = new QAction(tr("Import I&mage..."), this);
   connect(actionImportImage, SIGNAL(activated()), this, SLOT(importImage()));
 
-  actionSaveProjectAs = new QAction(tr("Save Project &As..."), this);
+  actionSaveProjectAs = new QAction(QIcon(":/SaveProject16x16.png"), tr("Save Project &As..."), this);
   connect(actionSaveProjectAs, SIGNAL(activated()), this, SLOT(saveProjectAs()));
+  actionSaveProjectAs->setEnabled(false);
 
   actionSaveNote = new QAction(tr("Save Note As..."), this);
   connect(actionSaveNote, SIGNAL(activated()), this, SLOT(saveNoteAs()));
@@ -11844,6 +12014,27 @@ void ApplicationWindow::createActions()
 
   actionShowLog = logWindow->toggleViewAction();
   actionShowLog->setIcon(getQPixmap("log_xpm"));
+
+
+#ifdef SCRIPTING_PYTHON
+  actionShowScriptWindow = new QAction(getQPixmap("python_xpm"), tr("Toggle &Script Window"), this);
+#ifdef __APPLE__
+  actionShowScriptWindow->setShortcut(tr("Ctrl+3")); // F3 is used by the window manager on Mac
+#else
+  actionShowScriptWindow->setShortcut(tr("F3"));
+#endif
+  actionShowScriptWindow->setToggleAction(true);
+  connect(actionShowScriptWindow, SIGNAL(activated()), this, SLOT(showScriptWindow()));
+
+  actionShowScriptInterpreter = new QAction(getQPixmap("python_xpm"), tr("Toggle Script &Interpreter"), this);
+#ifdef __APPLE__
+  actionShowScriptInterpreter->setShortcut(tr("Ctrl+4")); // F4 is used by the window manager on Mac
+#else
+  actionShowScriptInterpreter->setShortcut(tr("F4"));
+#endif
+  actionShowScriptInterpreter->setToggleAction(true);
+  connect(actionShowScriptInterpreter, SIGNAL(activated()), this, SLOT(showScriptInterpreter()));
+#endif
 
   actionAddLayer = new QAction(QIcon(getQPixmap("newLayer_xpm")), tr("Add La&yer"), this);
   actionAddLayer->setShortcut( tr("Alt+L") );
@@ -12424,38 +12615,6 @@ void ApplicationWindow::createActions()
   actionAskHelp = new QAction(tr("Ask for Help"), this);
   connect(actionAskHelp, SIGNAL(triggered()), this, SLOT(showBugTracker()));
 
-  //actionDownloadManual = new QAction(tr("Download &Manual"), this); // Mantid change
-  //connect(actionDownloadManual, SIGNAL(activated()), this, SLOT(downloadManual())); // Mantid change
-
-  //actionTranslations = new QAction(tr("&Translations"), this); // Mantid change
-  //connect(actionTranslations, SIGNAL(activated()), this, SLOT(downloadTranslation())); // Mantid change
-
-  //actionDonate = new QAction(tr("Make a &Donation"), this); // Mantid change
-  //connect(actionDonate, SIGNAL(activated()), this, SLOT(showDonationsPage())); // Mantid change
-
-  // 	actionTechnicalSupport = new QAction(tr("Technical &Support"), this); // Mantid change
-  // 	connect(actionTechnicalSupport, SIGNAL(activated()), this, SLOT(showSupportPage())); // Mantid change
-
-#ifdef SCRIPTING_PYTHON
-  actionShowScriptWindow = new QAction(getQPixmap("python_xpm"), tr("Toggle &Script Window"), this);
-#ifdef __APPLE__
-  actionShowScriptWindow->setShortcut(tr("Ctrl+3")); // F3 is used by the window manager on Mac
-#else
-  actionShowScriptWindow->setShortcut(tr("F3"));
-#endif
-  actionShowScriptWindow->setToggleAction(true);
-  connect(actionShowScriptWindow, SIGNAL(activated()), this, SLOT(showScriptWindow()));
-
-  actionShowScriptInterpreter = new QAction(getQPixmap("python_xpm"), tr("Toggle Script &Interpreter"), this);
-#ifdef __APPLE__
-  actionShowScriptInterpreter->setShortcut(tr("Ctrl+4")); // F4 is used by the window manager on Mac
-#else
-  actionShowScriptInterpreter->setShortcut(tr("F4"));
-#endif
-  actionShowScriptInterpreter->setToggleAction(true);
-  connect(actionShowScriptInterpreter, SIGNAL(activated()), this, SLOT(showScriptInterpreter()));
-#endif
-
   actionShowCurvePlotDialog = new QAction(tr("&Plot details..."), this);
   connect(actionShowCurvePlotDialog, SIGNAL(activated()), this, SLOT(showCurvePlotDialog()));
 
@@ -12631,15 +12790,15 @@ void ApplicationWindow::translateActionsStrings()
   actionImportImage->setMenuText(tr("Import I&mage..."));
 
   actionSaveFile->setMenuText(tr("&Nexus"));
-  actionSaveFile->setToolTip(tr("Save nexus file"));
+  actionSaveFile->setToolTip(tr("Save as NeXus file"));
   actionSaveFile->setShortcut(tr("Ctrl+S"));
 
   actionSaveProject->setMenuText(tr("&Project"));
   actionSaveProject->setToolTip(tr("Save Mantid Project"));
   actionSaveProject->setShortcut(tr("Ctrl+Shift+S"));
 
-
   actionSaveProjectAs->setMenuText(tr("Save Project &As..."));
+  actionSaveProjectAs->setToolTip(tr("Save Mantid Project using a different name or path"));
 
   actionLoad->setMenuText(tr("&Import ASCII..."));
   actionLoad->setToolTip(tr("Import data file(s)"));
@@ -14523,7 +14682,11 @@ bool ApplicationWindow::deleteFolder(Folder *f)
     Folder *parent = projectFolder();
     if (currentFolder()){
       if (currentFolder()->parent())
-        parent = dynamic_cast<Folder*>(currentFolder()->parent());
+      {
+        auto newParent = dynamic_cast<Folder*>(currentFolder()->parent());
+        if(newParent)
+          parent = newParent;
+    }
     }
 
     folders->blockSignals(true);
@@ -15090,10 +15253,12 @@ void ApplicationWindow::goToColumn()
     if ( !ok )
       return;
 
-    if (w->inherits("Table"))
-      dynamic_cast<Table*>(w)->goToColumn(col);
-    else if (w->isA("Matrix"))
-      (dynamic_cast<Matrix*>(w))->goToColumn(col);
+    auto t = dynamic_cast<Table*>(w);
+    auto m = dynamic_cast<Matrix*>(w);
+    if (t)
+      t->goToColumn(col);
+    else if (m)
+      m->goToColumn(col);
   }
 }
 
@@ -15117,6 +15282,9 @@ void ApplicationWindow::showScriptWindow(bool forceVisible, bool quitting)
     connect(scriptingWindow, SIGNAL(hideMe()), this, SLOT(saveScriptWindowGeometry()));
     connect(scriptingWindow, SIGNAL(hideMe()), this, SLOT(showScriptWindow()));
     connect(scriptingWindow, SIGNAL(chooseScriptingLanguage()), this, SLOT(showScriptingLangDialog()));
+    // keep toolbar button status in sync with this window visibility
+    connect(scriptingWindow, SIGNAL(closeMe()), actionShowScriptWindow, SLOT(toggle()));
+    connect(scriptingWindow, SIGNAL(hideMe()), actionShowScriptWindow, SLOT(toggle()));
   }
 
   if( forceVisible || scriptingWindow->isMinimized() || !scriptingWindow->isVisible() )
@@ -15416,6 +15584,25 @@ bool ApplicationWindow::runPythonScript(const QString & code, bool async,
   return success;
 }
 
+/// @return True if the psuitl python module is present and importable otherwise return false
+bool ApplicationWindow::psutilPresent()
+{
+  static bool checkPerformed(false);
+  static bool pkgPresent(false);
+
+  if(!checkPerformed)
+  {
+    g_log.debug("Checking for psutil\n");
+    using Mantid::Kernel::Logger;
+    bool verbose = g_log.is(Logger::Priority::PRIO_DEBUG);
+    pkgPresent = runPythonScript("import psutil", false, false, verbose);
+    if(pkgPresent) g_log.debug() << "Found psutil package";
+    else g_log.debug() << "Unable to find psutil package";
+    checkPerformed = true;
+  }
+
+  return pkgPresent;
+}
 
 
 bool ApplicationWindow::validFor2DPlot(Table *table)
@@ -16295,8 +16482,6 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer* w)
  */
 void ApplicationWindow::savedatainNexusFormat(const std::string& wsName,const std::string& fileName)
 {
-  //std::string s=workingDir.toStdString()+wsName+".nxs";
-  // std::string fileName(s);
   if(fileName.empty()) return ;
   try
   {
@@ -16310,6 +16495,7 @@ void ApplicationWindow::savedatainNexusFormat(const std::string& wsName,const st
 void ApplicationWindow::enableSaveNexus(const QString &wsName)
 {
   if (actionSaveFile) actionSaveFile->setEnabled(true);
+
   m_nexusInputWSName=wsName;
 }
 

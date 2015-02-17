@@ -48,8 +48,12 @@ Usage
    # Update instrument geometry to something that would allow converting to some sane dSpacing values
    EditInstrumentGeometry(Workspace = ws, L2 = [1.5], Polar = [90], PrimaryFlightPath = 50)
 
-   # Run the algorithm
+   # Run the algorithm. Defaults are shown below. Files entered must be in .csv format and if both ExpectedPeaks and ExpectedPeaksFromFile are entered, the latter will be used.
+   # difc, zero = EnginXFitPeaks(InputWorkspace = No default, WorkspaceIndex = None, ExpectedPeaks=[0.6, 1.9], ExpectedPeaksFromFile=None)
+   
    difc, zero = EnginXFitPeaks(ws, 0, [0.6, 1.9])
+   
+   
 
    # Print the results
    print "Difc:", difc

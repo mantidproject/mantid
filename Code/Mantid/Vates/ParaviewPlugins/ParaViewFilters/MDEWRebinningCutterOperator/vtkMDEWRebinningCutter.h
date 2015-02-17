@@ -87,6 +87,9 @@ public:
   virtual double getLengthB3() const;
   virtual bool getForceOrthogonal() const { throw std::runtime_error("Not implemented"); }
   virtual bool getOutputHistogramWS() const;
+  virtual double GetMinValue() const;
+  virtual double GetMaxValue() const;
+  virtual const char* GetInstrument() const;
 
 protected:
 

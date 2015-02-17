@@ -263,6 +263,17 @@ void AlgorithmDialog::storePropertyValue(const QString & name, const QString & v
   m_propertyValueMap.insert(name, value);
 }
 
+//-------------------------------------------------------------------------------------------------
+/**
+ * Adds a property (name,value) pair to the stored map.
+ * @param name :: The name of the property.
+ */
+void AlgorithmDialog::removePropertyValue(const QString& name)
+{
+  if( name.isEmpty() ) return;
+  m_propertyValueMap.remove(name);
+}
+
 
 //-------------------------------------------------------------------------------------------------
 /** Show the validators for all the properties */
@@ -290,7 +301,6 @@ void AlgorithmDialog::showValidators()
       }
     } // widget is tied
   } // for each property
-
 }
 
 //-------------------------------------------------------------------------------------------------

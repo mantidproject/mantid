@@ -124,9 +124,9 @@ public:
   }
   void generateHistogram(const std::size_t, const MantidVec &, MantidVec &,
                          MantidVec &, bool) const {}
-  virtual Mantid::API::SpecialCoordinateSystem
+  virtual Mantid::Kernel::SpecialCoordinateSystem
   getSpecialCoordinateSystem() const {
-    return Mantid::API::None;
+    return Mantid::Kernel::None;
   }
 
 private:

@@ -304,6 +304,35 @@ void MantidHelpWindow::showFitFunction(const std::string &name)
 }
 
 /**
+ * Show the help page for a given custom interface.
+ *
+ * @param name The name of the interface to show
+ */
+void MantidHelpWindow::showCustomInterface(const QString &name)
+{
+    this->showCustomInterface(name.toStdString());
+}
+
+/**
+ * Show the help page for a given custom interface.
+ *
+ * @param name The name of the interface to show
+ */
+void MantidHelpWindow::showCustomInterface(const std::string &name)
+{
+    if (bool(g_helpWindow))
+    {
+        QString url(BASE_URL);
+        url += "interfaces/";
+        if (name.empty())
+            url += "index.html";
+        else
+          url += QString(name.c_str()) + ".html";
+        this->showHelp(url);
+    }
+}
+
+/**
  * Can be called by the host process to indicate that it will
  * close soon. This closes the help window & releases the QProcess
  */

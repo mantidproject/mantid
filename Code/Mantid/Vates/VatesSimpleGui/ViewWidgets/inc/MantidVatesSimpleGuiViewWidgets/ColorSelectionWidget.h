@@ -3,13 +3,14 @@
 
 #include "ui_ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
-
+#include "MantidQtAPI/MdConstants.h"
 #include <QWidget>
 
 class pqColorMapModel;
 class pqColorPresetManager;
 class pqColorPresetModel;
 class vtkPVXMLParser;
+class QDoubleValidator;
 
 namespace Mantid
 {
@@ -75,7 +76,7 @@ signals:
   /**
    * Signal to let views know that autoscaling is on.
    */
-  void autoScale();
+  void autoScale(ColorSelectionWidget*);
   /**
    * Signal to pass on information about a change to the color map.
    * @param model the color map to send
@@ -103,6 +104,8 @@ protected slots:
   void loadPreset();
   /// Set log color scaling.
   void useLogScaling(int state);
+  /// Set log scaling button
+  void onSetLogScale(bool state);
 
 private:
   /// Add color maps from XML files.
@@ -114,6 +117,18 @@ private:
   void loadBuiltinColorPresets();
   /// Set status of the color selection editor widgets.
   void setEditorStatus(bool status);
+  /// Set up the behaviour for with or without log scale.
+  void setupLogScale(int state);
+  /// Set min smaller max 
+  void setMinSmallerMax(double& min, double& max);
+
+  QDoubleValidator* m_minValidator;
+  QDoubleValidator* m_maxValidator;
+
+  double m_minHistoric;
+  double m_maxHistoric;
+
+  MantidQt::API::MdConstants m_mdConstants;
 
   pqColorPresetManager *presets; ///< Dialog for choosing color presets
   Ui::ColorSelectionWidgetClass ui; ///< The mode control widget's UI form

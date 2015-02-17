@@ -153,7 +153,7 @@ namespace MantidQt
     Constructor
     @param peaksWS : Workspace model.
     */
-    QPeaksTableModel::QPeaksTableModel(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) :
+    QPeaksTableModel::QPeaksTableModel(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) : QAbstractTableModel(NULL),
         m_dataCachePeakIndex(-1),
         m_peaksWS(peaksWS)
     {
@@ -202,6 +202,12 @@ namespace MantidQt
 
       if (!Mantid::Kernel::ConfigService::Instance().getValue("PeakColumn.hklPrec", m_hklPrec))
         m_hklPrec = 2;
+    }
+
+    void QPeaksTableModel::setPeaksWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS)
+    {
+        m_peaksWS = peaksWS;
+        this->update();
     }
 
     /**

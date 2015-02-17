@@ -11,8 +11,6 @@ Description
 
 Creates a resolution workspace for an inelastic indirect sample run.
 
-See `Indirect:Calibration <http://www.mantidproject.org/Indirect:Calibration>`_.
-
 Usage
 -----
 

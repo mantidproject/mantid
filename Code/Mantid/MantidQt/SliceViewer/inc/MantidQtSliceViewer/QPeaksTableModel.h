@@ -62,6 +62,7 @@ namespace MantidQt
       int numCharacters(const int column) const;
       std::vector<int> defaultHideCols();
       ~QPeaksTableModel();
+      void setPeaksWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
      signals:
       void peaksSorted(const std::string&, const bool);
     private:

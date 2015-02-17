@@ -70,7 +70,7 @@ void LoadParameterFile::init() {
  */
 void LoadParameterFile::exec() {
   // Retrieve the filename from the properties
-  const std::string filename = getPropertyValue("Filename");
+  std::string filename = getPropertyValue("Filename");
 
   // Retrieve the parameter XML string from the properties
   const Property *const parameterXMLProperty =
@@ -103,6 +103,7 @@ void LoadParameterFile::exec() {
   // If we've been given an XML string parse that instead
   if (!parameterXMLProperty->isDefault()) {
     try {
+      g_log.information("Parsing from ParameterXML property.");
       pDoc = pParser.parseString(parameterXML);
     } catch (Poco::Exception &exc) {
       throw Kernel::Exception::FileError(
@@ -114,6 +115,15 @@ void LoadParameterFile::exec() {
     }
   } else {
     try {
+      // First see if the file exists
+      Poco::File ipfFile(filename);
+      if(!ipfFile.exists()) {
+        std::string directoryName =
+            Kernel::ConfigService::Instance().getInstrumentDirectory();
+        filename = directoryName + "/" + filename;
+      }
+      g_log.information() << "Parsing from XML file: " << filename
+                          << std::endl;
       pDoc = pParser.parse(filename);
     } catch (Poco::Exception &exc) {
       throw Kernel::Exception::FileError(
