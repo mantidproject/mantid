@@ -7,6 +7,7 @@ set( SRC_FILES
 src/ADSWorkspaceProvider.cpp
 src/Clipper.cpp
 src/Common.cpp
+src/ConcretePeaksPresenterVsi.cpp
 src/DimensionPresenter.cpp
 src/EscalatingRebinningActionManager.cpp
 src/EventNexusLoadingPresenter.cpp
@@ -35,6 +36,7 @@ src/TimeStepToTimeStep.cpp
 src/TimeToTimeStep.cpp
 src/UserDefinedThresholdRange.cpp
 src/VatesConfigurations.cpp
+src/ViewFrustum.cpp
 src/vtkDataSetFactory.cpp
 src/vtkDataSetToGeometry.cpp
 src/vtkDataSetToImplicitFunction.cpp
@@ -58,6 +60,7 @@ set( INC_FILES
 inc/MantidVatesAPI/ADSWorkspaceProvider.h
 inc/MantidVatesAPI/Clipper.h
 inc/MantidVatesAPI/Common.h
+inc/MantidVatesAPI/ConcretePeaksPresenterVsi.h
 inc/MantidVatesAPI/DimensionPresenter.h
 inc/MantidVatesAPI/DimensionView.h
 inc/MantidVatesAPI/DimensionViewFactory.h
@@ -89,6 +92,8 @@ inc/MantidVatesAPI/IMDDimensionComparitor.h
 inc/MantidVatesAPI/MetadataToFieldData.h
 inc/MantidVatesAPI/NoThresholdRange.h
 inc/MantidVatesAPI/NullRebinningPresenter.h
+inc/MantidVatesAPI/NullPeaksPresenterVsi.h
+inc/MantidVatesAPI/PeaksPresenterVsi.h
 inc/MantidVatesAPI/ProgressAction.h
 inc/MantidVatesAPI/RebinningActionManager.h
 inc/MantidVatesAPI/RebinningCutterXMLDefinitions.h 
@@ -100,6 +105,7 @@ inc/MantidVatesAPI/TimeStepToTimeStep.h
 inc/MantidVatesAPI/TimeToTimeStep.h
 inc/MantidVatesAPI/UserDefinedThresholdRange.h
 inc/MantidVatesAPI/VatesConfigurations.h
+inc/MantidVatesAPI/ViewFrustum.h
 inc/MantidVatesAPI/vtkDataSetFactory.h
 inc/MantidVatesAPI/vtkDataSetToGeometry.h
 inc/MantidVatesAPI/vtkDataSetToImplicitFunction.h
@@ -163,6 +169,7 @@ test/UserDefinedThresholdRangeTest.h
 test/MedianAndBelowThresholdRangeTest.h
 test/NoThresholdRangeTest.h
 test/IgnoreZerosThresholdRangeTest.h
+test/ViewFrustumTest.h
 test/vtkDataSetToScaledDataSetTest.h
 test/vtkDataSetToNonOrthogonalDataSetTest.h
 )

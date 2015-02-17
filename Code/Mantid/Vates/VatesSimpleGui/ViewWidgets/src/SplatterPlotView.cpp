@@ -1,9 +1,13 @@
 #include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
-
+#include "MantidVatesSimpleGuiViewWidgets/CameraManager.h"
+#include "MantidVatesSimpleGuiViewWidgets/PeakViewerVsi.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidQtAPI/SelectionNotificationService.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
+#include "MantidVatesAPI/ViewFrustum.h"
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
@@ -30,6 +34,9 @@
 
 #include <QKeyEvent>
 #include <QMessageBox>
+#include <QToolButton>
+#include <QMenu>
+#include <QAction>
 
 using namespace MantidQt::API;
 using namespace Mantid::VATES;
@@ -41,10 +48,18 @@ namespace Vates
 namespace SimpleGui
 {
 
-SplatterPlotView::SplatterPlotView(QWidget *parent) : ViewBase(parent)
+SplatterPlotView::SplatterPlotView(QWidget *parent) : ViewBase(parent),
+                                                      m_cameraManager(boost::make_shared<CameraManager>()),
+                                                      m_peaksViewer(NULL)
+                                                                
 {
   this->noOverlay = false;
   this->ui.setupUi(this);
+
+  m_peaksViewer = new PeaksViewerVsi(m_cameraManager, this);
+  this->ui.tableLayout->addWidget(m_peaksViewer);
+  m_peaksViewer->setVisible(true);
+
 
   // Set the threshold button to create a threshold filter on data
   QObject::connect(this->ui.thresholdButton, SIGNAL(clicked()),
@@ -64,6 +79,9 @@ SplatterPlotView::SplatterPlotView(QWidget *parent) : ViewBase(parent)
 
   this->view = this->createRenderView(this->ui.renderFrame);
   this->installEventFilter(this);
+
+  setupVisiblePeaksButtons();
+  
 }
 
 SplatterPlotView::~SplatterPlotView()
@@ -190,6 +208,20 @@ void SplatterPlotView::render()
   {
     this->renderAll();
   }
+
+  // Add peaksSource to peaksViewer, currently only one
+  if (isPeaksWorkspace)
+  {
+    try
+    {
+      m_peaksViewer->addWorkspace(src, this->splatSource);
+    }
+    catch (...)
+    {
+      // Log the error
+    }
+  }
+
   emit this->triggerAccept();
 }
 
@@ -341,6 +373,76 @@ void SplatterPlotView::readAndSendCoordinates()
   else
   {
     return;
+  }
+}
+
+/**
+ * Set up the buttons for the visible peaks.
+ */
+void SplatterPlotView::setupVisiblePeaksButtons()
+{
+  // Populate the rebin button
+  QMenu* peaksMenu = new QMenu(this->ui.peaksButton);
+
+  m_allPeaksAction = new QAction("Show all peaks in table", peaksMenu);
+  m_allPeaksAction->setIconVisibleInMenu(false);
+
+  m_visiblePeaksAction = new QAction("Show visible peaks in table", peaksMenu);
+  m_visiblePeaksAction->setIconVisibleInMenu(false);
+  
+  m_removePeaksAction = new QAction("Remove table", peaksMenu);
+  m_removePeaksAction->setIconVisibleInMenu(false);
+
+  peaksMenu->addAction(m_allPeaksAction);
+  peaksMenu->addAction(m_visiblePeaksAction);
+  peaksMenu->addAction(m_removePeaksAction);
+
+  this->ui.peaksButton->setPopupMode(QToolButton::InstantPopup);
+  this->ui.peaksButton->setMenu(peaksMenu);
+
+  QObject::connect(m_allPeaksAction, SIGNAL(triggered()),
+                   this, SLOT(onShowAllPeaksTable()), Qt::QueuedConnection);
+
+  QObject::connect(m_visiblePeaksAction, SIGNAL(triggered()),
+                   this, SLOT(onShowVisiblePeaksTable()), Qt::QueuedConnection);
+
+  QObject::connect(m_removePeaksAction, SIGNAL(triggered()),
+                   this, SLOT(onRemoveVisiblePeaksTable()), Qt::QueuedConnection);
+}
+
+/**
+ * Show the visible peaks table.
+ */
+void SplatterPlotView::onShowVisiblePeaksTable()
+{
+  if (m_peaksViewer->hasPeaks())
+  {
+     m_peaksViewer->showTable();
+     m_peaksViewer->show();
+  }
+}
+
+/**
+ * Remove the visible peaks table.
+ */
+void SplatterPlotView::onRemoveVisiblePeaksTable()
+{
+  if (m_peaksViewer->hasPeaks())
+  {
+    //m_peaksViewer->removeTable();
+    m_peaksViewer->hide();
+  }
+}
+
+/**
+ * On show all peaks 
+ */
+void SplatterPlotView::onShowAllPeaksTable()
+{
+  if (m_peaksViewer->hasPeaks())
+  {
+     m_peaksViewer->showFullTable();
+     m_peaksViewer->show();
   }
 }
 

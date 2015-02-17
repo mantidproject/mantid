@@ -4,11 +4,15 @@
 #include "ui_SplatterPlotView.h"
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "MantidVatesSimpleGuiViewWidgets/CameraManager.h"
+#include "MantidVatesSimpleGuiViewWidgets/PeakViewerVsi.h"
+#include <boost/shared_ptr.hpp>
 
 #include <QList>
 #include <QPointer>
 
 class QWidget;
+class QAction;
 
 class pqPipelineRepresentation;
 class pqPipelineSource;
@@ -95,6 +99,12 @@ signals:
 public slots:
   /// Check the coordinates for the peaks overlay if necessary
   void checkPeaksCoordinates();
+  /// Show the visible peaks table.
+  void onShowVisiblePeaksTable();
+  /// Remove the visible peaks table.
+  void onRemoveVisiblePeaksTable();
+  /// Show all peaks in table.
+  void onShowAllPeaksTable();
 
 protected slots:
   /// Check state of toggle button with respect to peak coordinates.
@@ -117,6 +127,8 @@ private:
   bool eventFilter(QObject *obj, QEvent *ev);
   /// Read the coordinates and send to service.
   void readAndSendCoordinates();
+  /// Setup the buttons for the visible peaks
+  void setupVisiblePeaksButtons();
 
   bool noOverlay; ///< Flag to respond to overlay situation correctly
   QList<QPointer<pqPipelineSource> > peaksSource; ///< A list of peaks sources
@@ -126,6 +138,11 @@ private:
   QPointer<pqPipelineSource> threshSource; ///< The thresholding filter source
   Ui::SplatterPlotView ui; ///< The splatter plot view'a UI form
   QPointer<pqRenderView> view; ///< The main view area
+  boost::shared_ptr<CameraManager> m_cameraManager; ///< The camera manager
+  PeaksViewerVsi* m_peaksViewer; ///< The peaks presenter
+  QAction* m_allPeaksAction;///<The action for showing all peaks in the table.
+  QAction* m_removePeaksAction; ///<The action for removing the peaks table.
+  QAction*  m_visiblePeaksAction; ///<The action for adding the visible peaks table.
 };
 
 } // SimpleGui

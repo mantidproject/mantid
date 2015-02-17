@@ -2,7 +2,7 @@
 #define CAMERAMANAGER_H_
 
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
-
+#include "MantidVatesAPI/ViewFrustum.h"
 
 namespace Mantid
 {
@@ -44,13 +44,10 @@ public:
   CameraManager();
 
   ~CameraManager();
+  
+  Mantid::VATES::ViewFrustum getCurrentViewFrustum();
 
-  void getCurrentViewFrustum(double left[4],
-                             double right[4],
-                             double bottom[4],
-                             double top[4],
-                             double far[4],
-                             double near[4]);
+  void setCameraToPeak(double xpos, double ypos, double zpos, double peakRadius);
 };
 
 }

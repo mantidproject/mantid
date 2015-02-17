@@ -9,6 +9,8 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeakViewerVsi.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h
@@ -25,6 +27,8 @@ set( SOURCE_FILES
   src/ColorUpdater.cpp
   src/MdViewerWidget.cpp
   src/MultisliceView.cpp
+  src/PeakViewerVsi.cpp
+  src/PeaksWidget.cpp
   src/SaveScreenshotReaction.cpp
   src/StandardView.cpp
   src/SplatterPlotView.cpp
@@ -39,6 +43,8 @@ qt4_wrap_cpp( MOC_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeakViewerVsi.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h
@@ -53,6 +59,7 @@ qt4_wrap_ui( UI_BUILT_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.ui
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.ui
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.ui
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksWidget.ui
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.ui
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.ui
   inc/MantidVatesSimpleGuiViewWidgets/ThreesliceView.ui
