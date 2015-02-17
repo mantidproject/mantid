@@ -38,7 +38,6 @@ class IndirectResolution(DataProcessorAlgorithm):
 
         self.declareProperty(name='RebinParam', defaultValue='', doc='Rebinning parameters (min,width,max)')
         self.declareProperty(name='ScaleFactor', defaultValue=1.0, doc='Factor to scale resolution curve by')
-        self.declareProperty(name='Smooth', defaultValue=False, doc='Apply WienerSmooth to resolution')
 
         self.declareProperty(name='Plot', defaultValue=False, doc='Plot resolution curve')
         self.declareProperty(name='Save', defaultValue=False, doc='Save resolution workspace as a Nexus file')
@@ -74,11 +73,6 @@ class IndirectResolution(DataProcessorAlgorithm):
 
         Rebin(InputWorkspace=self._out_ws, OutputWorkspace=self._out_ws, Params=self._rebin_string)
 
-        if self._smooth:
-            WienerSmooth(InputWorkspace=self._out_ws, OutputWorkspace='__smooth_temp')
-            CopyLogs(InputWorkspace=self._out_ws, OutputWorkspace='__smooth_temp')
-            RenameWorkspace(InputWorkspace='__smooth_temp', OutputWorkspace=self._out_ws)
-
         self._post_process()
         self.setProperty('OutputWorkspace', self._out_ws)
 
@@ -101,7 +95,6 @@ class IndirectResolution(DataProcessorAlgorithm):
         self._background = self.getProperty('BackgroundRange').value
         self._rebin_string = self.getProperty('RebinParam').value
         self._scale_factor = self.getProperty('ScaleFactor').value
-        self._smooth = self.getProperty('Smooth').value
 
         self._plot = self.getProperty('Plot').value
         self._save = self.getProperty('Save').value
@@ -116,8 +109,6 @@ class IndirectResolution(DataProcessorAlgorithm):
         AddSampleLog(Workspace=self._out_ws, LogName='scale', LogType='String', LogText=str(use_scale_factor))
         if use_scale_factor:
             AddSampleLog(Workspace=self._out_ws, LogName='scale_factor', LogType='Number', LogText=str(self._scale_factor))
-
-        AddSampleLog(Workspace=self._out_ws, LogName='res_smoothing_applied', LogType='String', LogText=str(self._smooth))
 
         AddSampleLog(Workspace=self._out_ws, LogName='back_start', LogType='Number', LogText=str(self._background[0]))
         AddSampleLog(Workspace=self._out_ws, LogName='back_end', LogType='Number', LogText=str(self._background[1]))
