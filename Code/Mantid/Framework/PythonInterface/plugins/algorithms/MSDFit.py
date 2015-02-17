@@ -10,7 +10,7 @@ class MSDFit(DataProcessorAlgorithm):
 
 
     def summary(self):
-        return ''
+        return 'Fits log(intensity) vs Q-squared to obtain the mean squared displacement.'
 
 
     def PyInit(self):
@@ -29,9 +29,7 @@ class MSDFit(DataProcessorAlgorithm):
                              doc='End of spectra range to be fit')
 
         self.declareProperty(name='Plot', defaultValue=False,
-                             doc='')
-        self.declareProperty(name='Save', defaultValue=False,
-                             doc='')
+                             doc='Plots results after fit')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                              direction=Direction.Output),
@@ -80,7 +78,8 @@ class MSDFit(DataProcessorAlgorithm):
 
         # Fit line to each of the spectra
         function = 'name=LinearBackground, A0=0, A1=0'
-        input_params = [self._sample_ws + ',i%d' % i for i in self._spec_range]
+        input_params = [self._input_ws + ',i%d' % i for i in xrange(
+                        self._spec_range[0], self._spec_range[1] + 1)]
         input_params = ';'.join(input_params)
         PlotPeakByLogValue(Input=input_params, OutputWorkspace=self._output_msd_ws,
                            Function=function, StartX=self._x_range[0], EndX=self._x_range[1],
@@ -118,28 +117,41 @@ class MSDFit(DataProcessorAlgorithm):
         SortXAxis(ws_name, OutputWorkspace=ws_name)
 
         # Group parameter workspaces
-        GroupWorkspaces(InputWorkspaces=','.join(parameter_ws_group), OutputWorkspace=self._output_msd_ws)
+        GroupWorkspaces(InputWorkspaces=','.join(parameter_ws_group),
+                        OutputWorkspace=self._output_msd_ws)
 
         # Rename fit workspace group
-        RenameWorkspace(InputWorkspace=self._output_msd_ws + '_Workspaces', OutputWorkspace=self._output_fit_ws)
+        original_fit_ws_name = self._output_msd_ws + '_Workspaces'
+        if original_fit_ws_name != self._output_fit_ws:
+            RenameWorkspace(InputWorkspace=self._output_msd_ws + '_Workspaces',
+                            OutputWorkspace=self._output_fit_ws)
 
         # Add sample logs to output workspace
-        CopyLogs(InputWorkspace=self._sample_ws, OutputWorkspace=self._output_msd_ws)
+        CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=self._output_msd_ws)
         CopyLogs(InputWorkspace=self._output_msd_ws + '_A0', OutputWorkspace=self._output_fit_ws)
 
         self.setProperty('OutputWorkspace', self._output_msd_ws)
         self.setProperty('ParameterWorkspace', self._output_param_ws)
         self.setProperty('FitWorkspaces', self._output_fit_ws)
 
+        if self._plot:
+            self._plot_result()
+
 
     def _setup(self):
         """
         Gets algorithm properties.
         """
-        self._sample_ws = self.getPropertyValue('InputWorkspace')
+        self._input_ws = self.getPropertyValue('InputWorkspace')
         self._output_msd_ws = self.getPropertyValue('OutputWorkspace')
+
         self._output_param_ws = self.getPropertyValue('ParameterWorkspace')
+        if self._output_param_ws == '':
+            self._output_param_ws = self._output_msd_ws + '_Parameters'
+
         self._output_fit_ws = self.getPropertyValue('FitWorkspaces')
+        if self._output_fit_ws == '':
+            self._output_fit_ws = self._output_msd_ws + '_Workspaces'
 
         self._x_range = [self.getProperty('XStart').value,
                          self.getProperty('XEnd').value]
@@ -147,18 +159,28 @@ class MSDFit(DataProcessorAlgorithm):
         self._spec_range = [self.getProperty('SpecMin').value,
                             self.getProperty('SpecMax').value]
 
+        self._plot = self.getProperty('Plot').value
 
-    # xlabel = ''
-    # ws_run = mtd[ws].getRun()
-    # if 'vert_axis' in ws_run:
-    #     xlabel = ws_run.getLogData('vert_axis').value
-    # if Plot:
-    #     msdfitPlotSeq(msdWS, xlabel)
-    # if Save:
-    #     workdir = getDefaultWorkingDirectory()
-    #     msd_path = os.path.join(workdir, msdWS+'.nxs')                  # path name for nxs file
-    #     SaveNexusProcessed(InputWorkspace=msdWS, Filename=msd_path, Title=msdWS)
-    #     logger.information('Output msd file : '+msd_path)
+
+    def _plot_result(self):
+        """
+        Handles plotting result workspaces.
+        """
+
+        from IndirectImport import import_mantidplot
+        mtd_plot = import_mantidplot()
+
+        x_label = ''
+        ws_run = mtd[self._input_ws].getRun()
+        if 'vert_axis' in ws_run:
+            x_label = ws_run.getLogData('vert_axis').value
+
+        result_ws = mtd[self._output_msd_ws + '_A1']
+        if len(result_ws.readX(0)) > 1:
+            msd_plot = mtd_plot.plotSpectrum(result_ws, 0, True)
+            msd_layer = msd_plot.activeLayer()
+            msd_layer.setAxisTitle(mtd_plot.Layer.Bottom, x_label)
+            msd_layer.setAxisTitle(mtd_plot.Layer.Left, '<u2>')
 
 
 AlgorithmFactory.subscribe(MSDFit)
