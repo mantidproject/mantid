@@ -41,9 +41,7 @@ namespace API
   {
   public:
     /// Constructor
-    FileBackedExperimentInfo(::NeXus::File *file, std::string groupName);
-    /// Virtual destructor
-    virtual ~FileBackedExperimentInfo();
+    FileBackedExperimentInfo(::NeXus::File *file, const std::string groupName);
 
     /// Returns a string description of the object
     const std::string toString();
@@ -52,9 +50,9 @@ namespace API
      /// Does the real load
      void intialise();
 
-     ::NeXus::File *file;
-     std::string groupName;
-     bool experimentInfoIsLoaded;
+     ::NeXus::File *m_file;
+     std::string m_groupName;
+     bool m_experimentInfoIsLoaded;
   };
 
 

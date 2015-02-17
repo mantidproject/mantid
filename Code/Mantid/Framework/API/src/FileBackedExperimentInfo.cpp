@@ -12,24 +12,13 @@ Kernel::Logger g_log("FileBackedExperimentInfo");
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  FileBackedExperimentInfo::FileBackedExperimentInfo(::NeXus::File *file, std::string groupName)
-  {
-      this->file = file;
-      this->groupName = groupName;
-      this->experimentInfoIsLoaded = false;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Destructor
-   */
-  FileBackedExperimentInfo::~FileBackedExperimentInfo()
-  {
-  }
+  FileBackedExperimentInfo::FileBackedExperimentInfo(::NeXus::File *file, const std::string groupName)
+   : ExperimentInfo(), m_file(file), m_groupName(groupName){}
 
   //----------------------------------------------------------------------------------------------
   /// @returns A human-readable description of the object
   const std::string FileBackedExperimentInfo::toString() {
-      if (!experimentInfoIsLoaded) {
+      if (!m_experimentInfoIsLoaded) {
           intialise();
       }
 
@@ -46,11 +35,11 @@ Kernel::Logger g_log("FileBackedExperimentInfo");
       std::string parameterStr;
       try {
         // Get the sample, logs, instrument
-        this->loadExperimentInfoNexus(file, parameterStr);
+        this->loadExperimentInfoNexus(m_file, parameterStr);
         // Now do the parameter map
         this->readParameterMap(parameterStr);
       } catch (std::exception &e) {
-        g_log.information("Error loading section '" + groupName +
+        g_log.information("Error loading section '" + m_groupName +
                           "' of nxs file.");
         g_log.information(e.what());
       }
