@@ -20,19 +20,6 @@ class IndirectCommonTests(unittest.TestCase):
     def tearDown(self):
         config = self._config_defaults
 
-    def test_loadInst(self):
-        indirect_common.loadInst('IRIS')
-
-        ws_name = '__empty_IRIS'
-        ws = mtd[ws_name]
-        instrument = ws.getInstrument()
-        self.assertEqual(instrument.getName(), 'IRIS')
-
-    def test_loadNexus(self):
-        ws_name = indirect_common.loadNexus('IRS26173_ipg.nxs')
-        self.assertEqual(ws_name, 'IRS26173_ipg')
-        self.assertTrue(mtd.doesExist(ws_name))
-
     def test_getInstrRun_from_name(self):
         ws = self.make_dummy_QENS_workspace()
         (instrument, run_number) = indirect_common.getInstrRun(ws)

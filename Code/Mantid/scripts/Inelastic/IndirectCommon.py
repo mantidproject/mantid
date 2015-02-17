@@ -314,7 +314,7 @@ def CheckHistSame(in1WS, name1, in2WS, name2):
 
 
 def CheckXrange(x_range, type):
-    if not (len(x_range) == 2) or (len(x_range) == 4):
+    if not ((len(x_range) == 2) or (len(x_range) == 4)):
         raise ValueError(type + ' - Range must contain either 2 or 4 numbers')
 
     for lower, upper in zip(x_range[::2], x_range[1::2]):
@@ -557,7 +557,9 @@ def addSampleLogs(ws, sample_logs):
     """
 
     for key, value in sample_logs.iteritems():
-        if isinstance(value, (int, long, float)):
+        if isinstance(value, bool):
+            log_type = 'String'
+        elif isinstance(value, (int, long, float)):
             log_type = 'Number'
         else:
             log_type = 'String'
