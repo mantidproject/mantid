@@ -128,13 +128,13 @@ class CutMD(DataProcessorAlgorithm):
         if not isinstance(projection_table, ITableWorkspace):
             I = np.identity(3)
             return (I[0, :], I[1, :], I[2, :])
-        column_names = projection_table.getColumnNames()
-        u = np.array(projection_table.column(Projection.u))
-        v = np.array(projection_table.column(Projection.v))
-        if not Projection.w in column_names:
-            w = np.cross(v,u)
+        u = np.array(str(projection_table.cell("value", 0)).split(","))
+        v = np.array(str(projection_table.cell("value", 1)).split(","))
+        if projection_table.rowCount() >= 3:
+            w = np.array(str(projection_table.cell("value", 2)).split(","))
         else:
-            w = np.array(projection_table.column(Projection.w))
+            w = np.cross(v,u)
+
         return (u, v, w)
     
     def __units_from_projection_table(self, projection_table):
