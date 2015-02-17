@@ -30,7 +30,7 @@
     <item>
      <widget class="QGroupBox" name="gbRangeBinning">
       <property name="title">
-       <string>Input Wavelength Range</string>
+       <string>Input Wavelength Range (Å)</string>
       </property>
       <layout class="QGridLayout" name="loRangeBinning">
        <property name="topMargin">

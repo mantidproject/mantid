@@ -106,7 +106,7 @@ bool SampleTransmission::validate(bool silent)
 
   // Give error message
   if(!silent && !uiv.isAllInputValid())
-    g_log.error(uiv.generateErrorMessage().toStdString());
+    showInformationBox(uiv.generateErrorMessage());
 
   return uiv.isAllInputValid();
 }
@@ -154,6 +154,10 @@ void SampleTransmission::calculate()
 
   transCalcAlg->setProperty("OutputWorkspace", "CalculatedSampleTransmission");
 
+  // Clear the previous results
+  m_uiForm.twResults->clear();
+  m_uiForm.ppTransmission->clear();
+
   // Run algorithm
   m_algRunner->startAlgorithm(transCalcAlg);
 }
@@ -170,14 +174,15 @@ void SampleTransmission::algorithmComplete(bool error)
 
   // Ignore errors
   if(error)
+  {
+    showInformationBox("Transmission calculation failed.\nSee Results Log for details.");
     return;
+  }
 
   MatrixWorkspace_sptr ws =
     AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("CalculatedSampleTransmission");
 
   // Fill the output table
-  m_uiForm.twResults->clear();
-
   double scattering = ws->dataY(1)[0];
   QTreeWidgetItem *scatteringItem = new QTreeWidgetItem();
   scatteringItem->setText(0, "Scattering");
