@@ -15,8 +15,7 @@ namespace
   Mantid::Kernel::Logger g_log("Fury");
 }
 
-using Mantid::API::MatrixWorkspace;
-using Mantid::API::MatrixWorkspace_const_sptr;
+using namespace Mantid::API;
 
 namespace MantidQt
 {
@@ -35,12 +34,6 @@ namespace IDA
   {
     m_furTree = new QtTreePropertyBrowser();
     m_uiForm.properties->addWidget(m_furTree);
-
-    m_plots["FuryPlot"] = new QwtPlot(m_parentWidget);
-    m_uiForm.plot->addWidget(m_plots["FuryPlot"]);
-    m_plots["FuryPlot"]->setCanvasBackground(Qt::white);
-    m_plots["FuryPlot"]->setAxisFont(QwtPlot::xBottom, m_parentWidget->font());
-    m_plots["FuryPlot"]->setAxisFont(QwtPlot::yLeft, m_parentWidget->font());
 
     // Create and configure properties
     m_properties["ELow"] = m_dblManager->addProperty("ELow");
@@ -75,7 +68,7 @@ namespace IDA
 
     m_furTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
-    m_rangeSelectors["FuryRange"] = new MantidQt::MantidWidgets::RangeSelector(m_plots["FuryPlot"]);
+    m_rangeSelectors["FuryRange"] = new MantidQt::MantidWidgets::RangeSelector(m_uiForm.ppPlot);
 
     // signals / slots & validators
     connect(m_rangeSelectors["FuryRange"], SIGNAL(selectionChangedLazy(double, double)), this, SLOT(rsRangeChangedLazy(double, double)));
@@ -247,10 +240,10 @@ namespace IDA
 
   void Fury::plotInput(const QString& wsname)
   {
-    MatrixWorkspace_const_sptr workspace;
+    MatrixWorkspace_sptr workspace;
     try
     {
-      workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsname.toStdString());
+      workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname.toStdString());
     }
     catch(Mantid::Kernel::Exception::NotFoundError&)
     {
@@ -258,13 +251,15 @@ namespace IDA
       return;
     }
 
-    plotMiniPlot(workspace, 0, "FuryPlot", "FuryCurve");
+    m_uiForm.ppPlot->clear();
+    m_uiForm.ppPlot->addSpectrum("Sample", workspace, 0);
+
     try
     {
-      const std::pair<double, double> range = getCurveRange("FuryCurve");
+      QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
       double rounded_min(range.first);
       double rounded_max(range.second);
-      const std::string instrName( workspace->getInstrument()->getName() );
+      const std::string instrName(workspace->getInstrument()->getName());
       if(instrName == "BASIS")
       {
         m_rangeSelectors["FuryRange"]->setRange(range.first, range.second);
@@ -305,8 +300,6 @@ namespace IDA
         //set default value for width
         m_dblManager->setValue(m_properties["EWidth"], 0.005);
       }
-
-      replot("FuryPlot");
     }
     catch(std::invalid_argument & exc)
     {

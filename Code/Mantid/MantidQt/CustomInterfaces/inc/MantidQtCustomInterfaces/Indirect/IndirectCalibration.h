@@ -48,7 +48,7 @@ namespace CustomInterfaces
     virtual bool validate();
 
   private slots:
-    void algorithmsComplete(bool error);
+    void algorithmComplete(bool error);
     void calPlotRaw();
     void calPlotEnergy();
     void calMinChanged(double);

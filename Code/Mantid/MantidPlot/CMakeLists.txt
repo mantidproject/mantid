@@ -880,6 +880,21 @@ copy_files_to_dir ( "${IPY_FILES}"
                      ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/ipython_widget
                      IPYTHON_INSTALL_FILES )
 
+# SysMon scripts
+set( SYSMON_FILES
+  __init__.py
+  _version.py
+  config.py
+  sysmon.py
+  sysmon_tools.py
+  ui_sysmon.py
+  ui_sysmon.ui
+)
+copy_files_to_dir ( "${SYSMON_FILES}"
+                     ${CMAKE_CURRENT_SOURCE_DIR}/SysMon
+                     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/SysMon
+                     SYSMON_INSTALL_FILES )
+
 ###########################################################################
 # MantidPlot executable
 ###########################################################################
@@ -887,7 +902,7 @@ copy_files_to_dir ( "${IPY_FILES}"
 add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 							${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS}
 							${RES_FILES} ${MANTID_RC_FILE}
-							${PYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES} ${CONFIG_RESET_SCRIPT_FILE} ${MTDPLOT_FUTURE_INSTALL_FILES} ${IPYTHON_INSTALL_FILES}
+							${PYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES} ${CONFIG_RESET_SCRIPT_FILE} ${MTDPLOT_FUTURE_INSTALL_FILES} ${IPYTHON_INSTALL_FILES} ${SYSMON_INSTALL_FILES}
 )
 
 # Library dependencies
@@ -1035,6 +1050,9 @@ endforeach()
 foreach(PY_FILE ${IPY_FILES} )
   install ( FILES ipython_widget/${PY_FILE} DESTINATION ${BIN_DIR}/ipython_widget )
 endforeach()
+foreach(PY_FILE ${SYSMON_FILES} )
+  install ( FILES SysMon/${PY_FILE} DESTINATION ${BIN_DIR}/SysMon )
+endforeach()
 install ( FILES ${CONFIG_RESET_SCRIPT} DESTINATION ${BIN_DIR} )
 
 # file make_package.rb contains hard-coded path to the libraries
@@ -1042,11 +1060,11 @@ install ( FILES ${CONFIG_RESET_SCRIPT} DESTINATION ${BIN_DIR} )
 # therefore MACPORTS option is introduced
 if ( APPLE )
   if (OSX_VERSION VERSION_LESS 10.9 OR MACPORTS)
-    configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in
+  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in
                    ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake
                    @ONLY )
 
-    install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake )
+  install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake )
   else ()
     install ( FILES  make_package.rb DESTINATION MantidPlot.app/ )
     configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixMavericksBundle.cmake.in
