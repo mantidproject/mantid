@@ -12,8 +12,10 @@ Kernel::Logger g_log("FileBackedExperimentInfo");
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  FileBackedExperimentInfo::FileBackedExperimentInfo(::NeXus::File file, std::string groupName)
+  FileBackedExperimentInfo::FileBackedExperimentInfo(::NeXus::File *file, std::string groupName)
   {
+      this->file = file;
+      this->groupName = groupName;
   }
 
   //----------------------------------------------------------------------------------------------

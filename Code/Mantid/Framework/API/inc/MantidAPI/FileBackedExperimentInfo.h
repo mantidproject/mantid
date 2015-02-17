@@ -41,7 +41,7 @@ namespace API
   {
   public:
     /// Constructor
-    FileBackedExperimentInfo(::NeXus::File file, std::string groupName);
+    FileBackedExperimentInfo(::NeXus::File *file, std::string groupName);
     /// Virtual destructor
     virtual ~FileBackedExperimentInfo();
 
