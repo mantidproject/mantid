@@ -1,3 +1,4 @@
+setlocal enbaleextensions enabledelayedexpansion
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: WINDOWS SCRIPT TO DRIVE THE JENKINS BUILDS OF MANTID.
 ::
@@ -131,11 +132,18 @@ if not "%JOB_NAME%"=="%JOB_NAME:pull_requests=%" (
   :: Install package
   python %WORKSPACE%\Code\Mantid\Testing\SystemTests\scripts\mantidinstaller.py install %WORKSPACE%\build
   cd %WORKSPACE%\build\docs
+  ::Remove user properties, disable instrument updating & usage reports
+  del /Q C:\MantidInstall\bin\Mantid.user.properties
+  echo UpdateInstrumentDefinitions.OnStartup = 0 > C:\MantidInstall\bin\Mantid.user.properties
+  echo usagereports.enabled = 0 >> C:\MantidInstall\bin\Mantid.user.properties
+  set DATA_ROOT=%WORKSPACE%\build\ExternalData\Testing\Data
+  echo datasearch.directories = !DATA_ROOT!\UnitTest;!DATA_ROOT!\DocTest;%WORKSPACE%\Code\Mantid\instrument >> C:\MantidInstall\bin\Mantid.user.properties
   :: Run tests
   C:\MantidInstall\bin\MantidPlot.exe -xq runsphinx_doctest.py
-  if ERRORLEVEl 1 exit /B %ERRORLEVEL%
+  set RETCODE=!ERRORLEVEL!
   :: Remove
   cd %WORKSPACE%\build
   python %WORKSPACE%\Code\Mantid\Testing\SystemTests\scripts\mantidinstaller.py uninstall %WORKSPACE%\build
+  if !RETCODE! NEQ 0 exit /B 1
 )
 
