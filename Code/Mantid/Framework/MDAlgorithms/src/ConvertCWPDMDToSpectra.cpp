@@ -154,10 +154,18 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
   for (size_t i = 0; i < vecm.size(); ++i) {
     if (vecy[i] < 1.0E-5)
       veczerocounts[i] = true;
-    if (vecm[i] >= 1.)
-      vecy[i] = vecy[i] / vecm[i];
-    else
+    if (vecm[i] >= 1.) {
+      double y = vecy[i];
+      double ey = sqrt(y);
+      double m = vecm[i];
+      double em = sqrt(m);
+      vecy[i] = y / m;
+      // using standard deviation's error propagation
+      vece[i] = vecy[i] * sqrt((ey / y) * (ey / y) + (em / m) * (em / m));
+    } else {
       vecy[i] = 0.0;
+      vece[i] = 1.0;
+    }
   }
   // error
   g_log.error("How to calculate the error bar?");
@@ -181,7 +189,8 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
   return pdws;
 }
 
-/**
+//----------------------------------------------------------------------------------------------
+/** Bin MD Workspace for detector's position at 2theta
  * @brief LoadHFIRPDD::binMD
  * @param mdws
  * @param vecx

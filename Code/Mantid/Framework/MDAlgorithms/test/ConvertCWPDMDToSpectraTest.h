@@ -74,6 +74,7 @@ public:
     // Get ouput
     MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("ReducedData"));
+    TS_ASSERT(outws);
   }
 };
 

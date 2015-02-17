@@ -9,30 +9,76 @@
 Description
 -----------
 
-... ...
+This algorithms is to collect the all the counts on the detectors among
+a set of measurements, which belong to a same experiment run,
+and bin them according to detector's position, i.e., :math:`2\theta`. 
+
+This algorithm takes 2 MDEventWorkspaces as inputs.  
+One stores the detectors' counts;
+and the other stores the monitors' counts. 
+These two MDEventWorkspaces are generated from algorithm ConvertSpiceToRealSpace. 
+
+Futhermore, the unit of the output matrix workspace can be converted to 
+d-spacing and momentum transfer (:math:`Q`). 
 
 
-Inputs
-######
+Input Workspaces
+################
 
-... ...
+Two input MDEventWorkspaces that are required. 
+
+{\it InputWorkspace} is an MDEventWorkspace stores detectors counts and sample logs. 
+Each run in this MDEventWorkspace corresponds to an individual measurement point in experiment run. 
+Each run has its own instrument object. 
+
+The other input MDEventWorkspace, i.e., {\it InputMonitorWorkspace} contains the monitor counts of each measurement point.  
+The signal value of each MDEvent in this workspace is the monitor counts
+corresponding to an individual detector. 
+
+These two MDEventWorkspace should have the same number of runs and same number of MDEvent.  
+
 
 Outputs
 #######
 
-... ...
+The output is a MatrixWorkspace containing the reduced powder diffraction data from a SPICE file for 
+powder diffractometers in HFIR. 
+
+Besides the data, it also has the sample logs' copied from the input workspace. 
 
 
 Sample Logs
 ###########
 
-... ...
+The sample logs of the reduced HFIR powder diffraction data are aggregrated from all measurements points
+in the experiment run. 
 
+They are copied from the last ExperimentInfo object of the input MDWorkspace {\it InputWorkspace}. 
+
+Binning, Normalization and Error
+################################
+
+According to the input binning parameters, the bins in :math:`2\theta` are created as
+:math:`2\theta_{min}, 2\theta_{min}+\Delta, 2\theta_{min}+1\Delta, \cdots`. 
+For each detector, if its position falls between :math:`2\theta_i` and :math:`2\theta_{i+1}`,
+then its counts is added to :math:`Y_i` and the corresponding monitor counts is added to 
+:math:`M_i`. 
+
+The singals on these bins are normalized by its monitor counts, such that 
+.. math:: y_i = \frac{Y_i}{M_i}
+
+
+The error (i.e., standard deviation) is defined as 
+.. math:: \frac{\Delta y_i}{y_i} = \sqrt{(\frac{\Delta Y_i}{Y_i})^2 + (\frac{\Delta M_i}{M_i})^2}
 
 Workflow
 --------
 
-... ...
+This algorithm is the third step to reduce powder diffraction data from a SPICE file.
+Following algorithm {\it LoadSpiceAscii}, which loads SPICE file to a TableWorkspace
+and {\it ConvertSpiceToRealSpace}, which converts the TableWorkspace to MDEvnetWorkspace 
+that is able to reflect all the information of the epxeriment,
+{\it ConvertCWPDMDToSpectra} goes through all the detectors' counts and rebins the data. 
 
 
 Usage
