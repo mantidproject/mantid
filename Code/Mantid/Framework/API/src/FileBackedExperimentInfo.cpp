@@ -13,7 +13,9 @@ Kernel::Logger g_log("FileBackedExperimentInfo");
   /** Constructor
    */
   FileBackedExperimentInfo::FileBackedExperimentInfo(::NeXus::File *file, const std::string groupName)
-   : ExperimentInfo(), m_file(file), m_groupName(groupName){}
+   : ExperimentInfo(), m_file(file), m_groupName(groupName) {
+      m_experimentInfoIsLoaded = false;
+  }
 
   //----------------------------------------------------------------------------------------------
   /// @returns A human-readable description of the object
@@ -33,6 +35,7 @@ Kernel::Logger g_log("FileBackedExperimentInfo");
    */
   void FileBackedExperimentInfo::intialise() {
       std::string parameterStr;
+      m_file->openGroup(m_groupName, "NXgroup");
       try {
         // Get the sample, logs, instrument
         this->loadExperimentInfoNexus(m_file, parameterStr);
@@ -43,6 +46,8 @@ Kernel::Logger g_log("FileBackedExperimentInfo");
                           "' of nxs file.");
         g_log.information(e.what());
       }
+
+      m_experimentInfoIsLoaded = true;
   }
 
 } // namespace API

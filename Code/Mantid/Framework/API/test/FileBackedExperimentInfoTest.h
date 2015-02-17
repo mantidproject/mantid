@@ -7,7 +7,9 @@
 #include "MantidAPI/FileBackedExperimentInfo.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidAPI/FileFinder.h"
 
+#include <nexus/NeXusFile.hpp>
 
 using Mantid::API::FileBackedExperimentInfo;
 
@@ -23,45 +25,34 @@ public:
   static FileBackedExperimentInfoTest *createSuite() { return new FileBackedExperimentInfoTest(); }
   static void destroySuite( FileBackedExperimentInfoTest *suite ) { delete suite; }
 
-
-  void test_toString_method_returns_same_as_parent()
+  void test_toString_method_returns_same_as_ExperimentInfo_class()
   {
-    // Create a helpful file
+    // Find an MD file to use, and MD file is fine
+    std::string filename = FileFinder::Instance().getFullPath("TOPAZ_3680_5_sec_MDEW.nxs");
 
-    NexusTestHelper nexusTestHelper(true);
-    nexusTestHelper.createFile("ExperimentInfoTest1.nxs");
-    std::string groupName = "experiment0";
-    ExperimentInfo ws;
+    // Filebacked ExperimentInfo
+    //
+    // Load the file we want to use
+    ::NeXus::File *nexusFileBacked = new ::NeXus::File(filename, NXACC_READ);
+    nexusFileBacked->openGroup("MDEventWorkspace", "NXentry");
 
-    boost::shared_ptr<Instrument> inst1(new Instrument());
-    inst1->setName("GEM");
-    inst1->setFilename("GEM_Definition.xml");
-    inst1->setXmlText("");
-    //boost::shared_ptr<ParameterMap> paramMap = inst1->getParameterMap();
-    //paramMap->addParameterFilename("refl_fake.cal");
+    // Create the file backed experiment info, shouldn't be loaded yet
+    FileBackedExperimentInfo fileBackedWS(nexusFileBacked, "experiment0");
 
-    ws.setInstrument(inst1);
+    // Standard ExperimentInfo
+    //
+    // Load the file again, so what we did before does not affect it
+    ::NeXus::File *nexusFile = new ::NeXus::File(filename, NXACC_READ);
+    nexusFile->openGroup("MDEventWorkspace", "NXentry");
 
-    ws.saveExperimentInfoNexus(nexusTestHelper.file);
-
-    // Load the file using filebacked experiment info
-
-    FileBackedExperimentInfo fileBackedWS(nexusTestHelper.file, groupName);
-    std::string fileBackedParameterStr;
-    nexusTestHelper.reopenFile();
-    fileBackedWS.loadExperimentInfoNexus(nexusTestHelper.file, fileBackedParameterStr);
-
-    // Load the file using standard experiment info
-
+    // Actually do the loading here
     ExperimentInfo standardWS;
     std::string standardParameterStr;
-    nexusTestHelper.reopenFile();
-    standardWS.loadExperimentInfoNexus(nexusTestHelper.file, standardParameterStr);
+    nexusFile->openGroup("experiment0", "NXgroup");
+    standardWS.loadExperimentInfoNexus(nexusFile, standardParameterStr);
 
-    // Check results do not differ
     TS_ASSERT_EQUALS(standardWS.toString(), fileBackedWS.toString());
   }
-
 
 };
 
