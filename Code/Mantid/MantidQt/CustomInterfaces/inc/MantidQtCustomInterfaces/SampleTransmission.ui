@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>550</width>
-    <height>450</height>
+    <height>570</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -232,22 +232,22 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
-        <widget class="QWidget" name="ppTransmission" native="true">
+        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppTransmission" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="canvasColor" stdset="0">
-          <color>
-           <red>0</red>
-           <green>0</green>
-           <blue>0</blue>
-          </color>
-         </property>
          <property name="showLegend" stdset="0">
-          <bool>true</bool>
+          <bool>false</bool>
+         </property>
+         <property name="canvasColour" stdset="0">
+          <color>
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
+          </color>
          </property>
         </widget>
        </item>
@@ -295,6 +295,26 @@
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::PreviewPlot</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/PreviewPlot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>cbBinningType</tabstop>
+  <tabstop>spSingleLow</tabstop>
+  <tabstop>spSingleWidth</tabstop>
+  <tabstop>spSingleHigh</tabstop>
+  <tabstop>leMultiple</tabstop>
+  <tabstop>leChemicalFormula</tabstop>
+  <tabstop>spNumberDensity</tabstop>
+  <tabstop>spThickness</tabstop>
+  <tabstop>twResults</tabstop>
+  <tabstop>pbCalculate</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

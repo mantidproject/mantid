@@ -1,5 +1,5 @@
-Data Comparison
-===============
+Sample Transmission Calculator
+==============================
 
 .. contents:: Table of Contents
   :local:

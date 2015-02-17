@@ -198,5 +198,7 @@ void SampleTransmission::algorithmComplete(bool error)
 
   m_uiForm.twResults->resizeColumnToContents(0);
 
-  //TODO: Preview plot
+  // Plot transmission curve on preview plot
+  m_uiForm.ppTransmission->addSpectrum("Transmission", "CalculatedSampleTransmission", 0);
+  m_uiForm.ppTransmission->resizeX();
 }
