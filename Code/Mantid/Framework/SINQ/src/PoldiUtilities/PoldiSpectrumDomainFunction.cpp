@@ -144,7 +144,7 @@ void PoldiSpectrumDomainFunction::functionDeriv1DSpectrum(
       for (size_t j = 0; j < dWidthN; ++j) {
         size_t off = (offset + j) % domainSize;
         for (size_t p = 0; p < np; ++p) {
-          jacobian.set(off, p, smallJ.get(j, p) * helper->factors[pos + j]);
+          jacobian.set(off, p, smallJ.getRaw(j, p) * helper->factors[pos + j]);
         }
       }
     }
@@ -203,22 +203,59 @@ PoldiSpectrumDomainFunction::getParameter(const std::string &name) const {
   return ParamFunction::getParameter(name);
 }
 
+void PoldiSpectrumDomainFunction::setAttribute(
+    const std::string &attName, const IFunction::Attribute &attValue) {
+  ParamFunction::setAttribute(attName, attValue);
+
+  if (attName == "ProfileFunction") {
+    clearAllParameters();
+
+    setProfileFunction(attValue.asString());
+    exposeFunctionParameters(getProfileFunction());
+  }
+}
+
+void PoldiSpectrumDomainFunction::setProfileFunction(
+    const std::string &profileFunctionName) {
+  try {
+    m_profileFunction = boost::dynamic_pointer_cast<IPeakFunction>(
+        FunctionFactory::Instance().createFunction(profileFunctionName));
+  }
+  catch (std::runtime_error) {
+    throw std::invalid_argument("Could not construct function from name " +
+                                profileFunctionName + ".");
+  }
+}
+
+IPeakFunction_sptr PoldiSpectrumDomainFunction::getProfileFunction() const {
+  return m_profileFunction;
+}
+
+void PoldiSpectrumDomainFunction::exposeFunctionParameters(
+    const IFunction_sptr &function) {
+
+  if (!function) {
+    throw std::invalid_argument(
+        "Cannot expose parameters of null function pointer.");
+  }
+
+  for (size_t i = 0; i < function->nParams(); ++i) {
+    declareParameter(function->parameterName(i));
+  }
+}
+
 /**
  * Initializes function parameters
  */
 void PoldiSpectrumDomainFunction::init() {
-  m_profileFunction = boost::dynamic_pointer_cast<IPeakFunction>(
-      FunctionFactory::Instance().createFunction("AreaGaussian"));
-
-  for (size_t i = 0; i < m_profileFunction->nParams(); ++i) {
-    declareParameter(m_profileFunction->parameterName(i));
-  }
+  declareAttribute("ProfileFunction", Attribute(""));
 }
 
 /**
  * Extracts the time difference as well as instrument information
  *
- * @param workspace2D :: Workspace with valid POLDI instrument and required run
+ * @param workspace2D :: Workspace with valid POLDI instrument and required
+ *run
  *information
  */
 void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(
@@ -239,7 +276,8 @@ void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(
  * available to transfer parameters to the time domain using correct factors
  *etc.
  *
- * @param poldiInstrument :: PoldiInstrumentAdapter that holds chopper, detector
+ * @param poldiInstrument :: PoldiInstrumentAdapter that holds chopper,
+ *detector
  *and spectrum
  */
 void PoldiSpectrumDomainFunction::initializeInstrumentParameters(

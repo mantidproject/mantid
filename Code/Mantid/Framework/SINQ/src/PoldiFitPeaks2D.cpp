@@ -133,15 +133,36 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
             poldi2DFunction->getFunction(i));
 
     if (peakFunction) {
-      size_t dIndex = peakFunction->parameterIndex("Centre");
+      IPeakFunction_sptr profileFunction =
+          boost::dynamic_pointer_cast<IPeakFunction>(
+              peakFunction->getProfileFunction());
+
+      double centre = profileFunction->centre();
+      double height = profileFunction->height();
+
+      size_t dIndex = 0;
+      size_t iIndex = 0;
+      size_t fIndex = 0;
+
+      for (size_t j = 0; j < profileFunction->nParams(); ++j) {
+        if (profileFunction->getParameter(j) == centre) {
+          dIndex = j;
+        } else if (profileFunction->getParameter(j) == height) {
+          iIndex = j;
+        } else {
+          fIndex = j;
+        }
+      }
+
+      // size_t dIndex = peakFunction->parameterIndex("Centre");
       UncertainValue d(peakFunction->getParameter(dIndex),
                        peakFunction->getError(dIndex));
 
-      size_t iIndex = peakFunction->parameterIndex("Area");
+      // size_t iIndex = peakFunction->parameterIndex("Area");
       UncertainValue intensity(peakFunction->getParameter(iIndex),
                                peakFunction->getError(iIndex));
 
-      size_t fIndex = peakFunction->parameterIndex("Sigma");
+      // size_t fIndex = peakFunction->parameterIndex("Sigma");
       UncertainValue fwhm(peakFunction->getParameter(fIndex),
                           peakFunction->getError(fIndex));
 
@@ -174,12 +195,28 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(
   for (size_t i = 0; i < peakCollection->peakCount(); ++i) {
     PoldiPeak_sptr peak = peakCollection->peak(i);
 
-    IFunction_sptr peakFunction = FunctionFactory::Instance().createFunction(
-        "PoldiSpectrumDomainFunction");
-    peakFunction->setParameter("Area", peak->intensity());
-    peakFunction->setParameter("Sigma", peak->fwhm(PoldiPeak::AbsoluteD) /
-                                            (2.0 * sqrt(2.0 * log(2.0))));
-    peakFunction->setParameter("Centre", peak->d());
+    std::string profileFunctionName = getProperty("PeakProfileFunction");
+
+    boost::shared_ptr<PoldiSpectrumDomainFunction> peakFunction =
+        boost::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(
+            FunctionFactory::Instance().createInitialized(
+                "name=PoldiSpectrumDomainFunction,ProfileFunction=" +
+                profileFunctionName));
+
+    if (!peakFunction) {
+      throw std::invalid_argument(
+          "Cannot process null pointer poldi function.");
+    }
+
+    IPeakFunction_sptr wrappedProfile =
+        boost::dynamic_pointer_cast<IPeakFunction>(
+            peakFunction->getProfileFunction());
+
+    if (wrappedProfile) {
+      wrappedProfile->setCentre(peak->d());
+      wrappedProfile->setFwhm(peak->fwhm(PoldiPeak::AbsoluteD));
+      wrappedProfile->setHeight(peak->intensity() * 300.0);
+    }
 
     mdFunction->addFunction(peakFunction);
   }

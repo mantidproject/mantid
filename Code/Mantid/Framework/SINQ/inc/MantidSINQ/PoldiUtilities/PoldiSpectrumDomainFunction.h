@@ -103,12 +103,12 @@ public:
     }
   }
 
-protected:
   /// Get-method without checks.
   inline double getRaw(size_t iY, size_t iP) const {
     return m_jacobian[index(iY, iP)];
   }
 
+protected:
   /// Index-calculation for vector access.
   inline size_t index(size_t iY, size_t iP) const {
     return iY + iP * m_nValues;
@@ -187,12 +187,23 @@ public:
   virtual double getParameter(size_t i) const;
   virtual double getParameter(const std::string &name) const;
 
+  virtual void setAttribute(const std::string &attName,
+                            const API::IFunction::Attribute &attValue);
+
+  API::IPeakFunction_sptr getProfileFunction() const;
+
 protected:
   virtual void init();
+
   void initializeParametersFromWorkspace(
       const DataObjects::Workspace2D_const_sptr &workspace2D);
   void initializeInstrumentParameters(
       const PoldiInstrumentAdapter_sptr &poldiInstrument);
+
+  void setProfileFunction(const std::string &profileFunctionName);
+
+  void exposeFunctionParameters(const API::IFunction_sptr &function);
+
   std::vector<double>
   getChopperSlitOffsets(const PoldiAbstractChopper_sptr &chopper);
 
