@@ -2,14 +2,17 @@
 #define MANTID_VATES_vtkSplatterPlotFactory_H_
 
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidVatesAPI/MetaDataExtractorUtils.h"
 #include "MantidAPI/IMDNode.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <vtkPoints.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
+
 
 using Mantid::MDEvents::MDEventWorkspace;
 
@@ -79,6 +82,15 @@ public:
   /// Set the time value.
   void setTime(double timeStep);
 
+  /// Get the max value of the data set
+  virtual double getMinValue();
+
+  /// Get the min value of the data set
+  virtual double getMaxValue();
+
+  /// Getter for the instrument
+  virtual const std::string& getInstrument();
+
 private:
 
   template<typename MDE, size_t nd>
@@ -134,6 +146,18 @@ private:
 
   /// Time value.
   double m_time;
+
+  /// Min data value
+  mutable double m_minValue;
+
+  /// Max data value;
+  mutable double m_maxValue;
+
+  /// Instrument
+  mutable std::string m_instrument;
+
+  /// Meta data extractor
+  boost::scoped_ptr<MetaDataExtractorUtils> m_metaDataExtractor;
 };
 
 }

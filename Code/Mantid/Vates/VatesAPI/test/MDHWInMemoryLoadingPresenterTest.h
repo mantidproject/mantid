@@ -121,11 +121,17 @@ public:
     
     //Test that it does work when setup.
     presenter.executeLoadMetadata();
+
+    std::string ins = presenter.getInstrument();
+
     TSM_ASSERT("Should export geometry xml metadata on request.", !presenter.getGeometryXML().empty())
+    TSM_ASSERT("Should export min value metadata on request.", presenter.getMinValue() <= presenter.getMaxValue())
+    TSM_ASSERT("Should export instrument metadata on request", presenter.getInstrument().empty())
   }
 
   void testExecution()
   {
+
     //Setup view
     MockMDLoadingView* view = new MockMDLoadingView;
     EXPECT_CALL(*view, getRecursionDepth()).Times(0);
@@ -153,7 +159,7 @@ public:
     TSM_ASSERT("Should have generated a vtkDataSet", NULL != product);
     TSM_ASSERT_EQUALS("Wrong type of output generated", "vtkUnstructuredGrid", std::string(product->GetClassName()));
     TSM_ASSERT("No field data!", NULL != product->GetFieldData());
-    TSM_ASSERT_EQUALS("One array expected on field data!", 1, product->GetFieldData()->GetNumberOfArrays());
+    TSM_ASSERT_EQUALS("Two arrays expected on field data, one for XML and one for JSON!", 2, product->GetFieldData()->GetNumberOfArrays());
     TS_ASSERT_THROWS_NOTHING(presenter.hasTDimensionAvailable());
     TS_ASSERT_THROWS_NOTHING(presenter.getGeometryXML());
     TS_ASSERT(!presenter.getWorkspaceTypeName().empty());

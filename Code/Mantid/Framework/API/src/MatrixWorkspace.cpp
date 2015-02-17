@@ -1704,9 +1704,9 @@ void MatrixWorkspace::clearMDMasking() {
 /**
 @return the special coordinate system used if any.
 */
-Mantid::API::SpecialCoordinateSystem
+Mantid::Kernel::SpecialCoordinateSystem
 MatrixWorkspace::getSpecialCoordinateSystem() const {
-  return Mantid::API::None;
+  return Mantid::Kernel::None;
 }
 
 /**

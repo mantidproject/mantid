@@ -5,7 +5,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidAPI/PeakTransformFactory.h"
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
@@ -588,9 +588,9 @@ public:
 
   void test_coordinateToString()
   {
-    TS_ASSERT_EQUALS("HKL", coordinateToString(Mantid::API::HKL));
-    TS_ASSERT_EQUALS("QLab", coordinateToString(Mantid::API::QLab));
-    TS_ASSERT_EQUALS("QSample", coordinateToString(Mantid::API::QSample));
+    TS_ASSERT_EQUALS("HKL", coordinateToString(Mantid::Kernel::HKL));
+    TS_ASSERT_EQUALS("QLab", coordinateToString(Mantid::Kernel::QLab));
+    TS_ASSERT_EQUALS("QSample", coordinateToString(Mantid::Kernel::QSample));
   }
 
   void test_getPeaksSizeOnProjection()

@@ -44,15 +44,7 @@ namespace IDA
     m_msdTree->addProperty(m_properties["Start"]);
     m_msdTree->addProperty(m_properties["End"]);
 
-    m_plots["MSDPlot"] = new QwtPlot(m_parentWidget);
-    m_uiForm.plot->addWidget(m_plots["MSDPlot"]);
-
-    // Cosmetics
-    m_plots["MSDPlot"]->setAxisFont(QwtPlot::xBottom, m_parentWidget->font());
-    m_plots["MSDPlot"]->setAxisFont(QwtPlot::yLeft, m_parentWidget->font());
-    m_plots["MSDPlot"]->setCanvasBackground(Qt::white);
-
-    m_rangeSelectors["MSDRange"] = new MantidWidgets::RangeSelector(m_plots["MSDPlot"]);
+    m_rangeSelectors["MSDRange"] = new MantidWidgets::RangeSelector(m_uiForm.ppPlot);
 
     connect(m_rangeSelectors["MSDRange"], SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
     connect(m_rangeSelectors["MSDRange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
@@ -76,9 +68,6 @@ namespace IDA
     "specMax = " + m_uiForm.spSpectraMax->text() + "\n"
     "input = '" + m_uiForm.dsSampleInput->getCurrentDataName() + "'\n";
 
-    if ( m_uiForm.ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-    else pyInput += "verbose = False\n";
-
     if ( m_uiForm.ckPlot->isChecked() ) pyInput += "plot = True\n";
     else pyInput += "plot = False\n";
 
@@ -86,7 +75,7 @@ namespace IDA
     else pyInput += "save = False\n";
 
     pyInput +=
-      "msdfit(input, startX, endX, spec_min=specMin, spec_max=specMax, Save=save, Verbose=verbose, Plot=plot)\n";
+      "msdfit(input, startX, endX, spec_min=specMin, spec_max=specMax, Save=save, Plot=plot)\n";
 
     QString pyOutput = runPythonCode(pyInput);
     UNUSED_ARG(pyOutput);
@@ -109,11 +98,8 @@ namespace IDA
       "specMax = " + m_uiForm.spPlotSpectrum->text() + "\n"
       "input = '" + m_uiForm.dsSampleInput->getCurrentDataName() + "'\n";
 
-    if ( m_uiForm.ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-    else pyInput += "verbose = False\n";
-
     pyInput +=
-      "output = msdfit(input, startX, endX, spec_min=specMin, spec_max=specMax, Save=False, Verbose=verbose, Plot=False)\n"
+      "output = msdfit(input, startX, endX, spec_min=specMin, spec_max=specMax, Save=False, Plot=False)\n"
       "print output \n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
@@ -149,13 +135,15 @@ namespace IDA
   {
     if(Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()))
     {
-      //read the fit from the workspace
+      // Get the workspace
       auto groupWs = Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::WorkspaceGroup>(wsName.toStdString());
       auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(groupWs->getItem(0));
-      plotMiniPlot(ws, 1, "MSDPlot", "MSDFitCurve");
-      QPen fitPen(Qt::red, Qt::SolidLine);
-      m_curves["MSDFitCurve"]->setPen(fitPen);
-      replot("MSDPlot");
+
+      // Remove the old fit
+      m_uiForm.ppPlot->removeSpectrum("Fit");
+
+      // Plot the new fit
+      m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
     }
   }
 
@@ -187,6 +175,8 @@ namespace IDA
 
   void MSDFit::plotInput()
   {
+    m_uiForm.ppPlot->clear();
+
     QString wsname = m_uiForm.dsSampleInput->getCurrentDataName();
 
     if(!AnalysisDataService::Instance().doesExist(wsname.toStdString()))
@@ -195,18 +185,15 @@ namespace IDA
       return;
     }
 
-    auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsname.toStdString());
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname.toStdString());
 
     int wsIndex = m_uiForm.spPlotSpectrum->value();
-    plotMiniPlot(ws, wsIndex, "MSDPlot", "MSDDataCurve");
+    m_uiForm.ppPlot->addSpectrum("Sample", ws, wsIndex);
 
     try
     {
-      const std::pair<double, double> range = getCurveRange("MSDDataCurve");
+      QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
       m_rangeSelectors["MSDRange"]->setRange(range.first, range.second);
-
-      // Replot
-      replot("MSDPlot");
     }
     catch(std::invalid_argument & exc)
     {
@@ -214,10 +201,6 @@ namespace IDA
     }
 
     m_currentWsName = wsname;
-
-    // Remove the old fit curve
-    removeCurve("MSDFitCurve");
-    replot("MSDPlot");
   }
 
   /**
@@ -259,6 +242,7 @@ namespace IDA
     if ( prop == m_properties["Start"] ) m_rangeSelectors["MSDRange"]->setMinimum(val);
     else if ( prop == m_properties["End"] ) m_rangeSelectors["MSDRange"]->setMaximum(val);
   }
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

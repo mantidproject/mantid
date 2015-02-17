@@ -9,12 +9,15 @@
 Description
 -----------
 
-Calculates the scattering & transmission for Indirect Geometry
-spectrometers. The sample chemical formula is input for the
-SetSampleMaterial algorithm to calculate the cross-sections. The
-instrument analyser reflection is selected to obtain the wavelength to
-calculate the absorption cross-section. The sample number density &
-thickness is input to then calculate the percentage scattering &
+Calculates the scattering & transmission for Indirect Geometry spectrometers at
+the elastic peak, as the transmission variation over wavelength is not
+substantial.
+
+The sample chemical formula is input for the :ref:`SetSampleMaterial
+<algm-SetSampleMaterial>` algorithm to calculate the cross-sections. The
+instrument analyser reflection is selected to obtain the wavelength of the
+elastic peak to calculate the absorption cross-section. The sample number
+density & thickness is input to then calculate the percentage scattering &
 transmission.
 
 Usage

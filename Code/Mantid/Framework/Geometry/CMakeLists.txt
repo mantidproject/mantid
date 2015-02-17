@@ -129,6 +129,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h
 	inc/MantidGeometry/Crystal/NiggliCell.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
+        inc/MantidGeometry/Crystal/PeakShape.h
 	inc/MantidGeometry/Crystal/PointGroup.h
 	inc/MantidGeometry/Crystal/PointGroupFactory.h
 	inc/MantidGeometry/Crystal/ProductOfCyclicGroups.h
@@ -367,6 +368,11 @@ add_library ( Geometry ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
 set_target_properties ( Geometry PROPERTIES OUTPUT_NAME MantidGeometry 
                                             COMPILE_DEFINITIONS IN_MANTID_GEOMETRY )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( Geometry PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif () 
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 

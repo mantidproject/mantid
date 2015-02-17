@@ -127,6 +127,10 @@ set ( SRCS
 
 add_library ( ${PROJECT_NAME} SHARED ${SRCS} )
 
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( ${PROJECT_NAME} PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif ()
+
 target_link_libraries ( ${PROJECT_NAME} ${QT_LIBRARIES} )
 
 if ( WIN32 )

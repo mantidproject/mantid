@@ -18,15 +18,8 @@ namespace MantidQt
 		{
 			m_uiForm.setupUi(parent);
 
-			// Create the plot
-      m_plots["JumpFitPlot"] = new QwtPlot(m_parentWidget);
-      m_plots["JumpFitPlot"]->setCanvasBackground(Qt::white);
-      m_plots["JumpFitPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-      m_plots["JumpFitPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-			m_uiForm.plotSpace->addWidget(m_plots["JumpFitPlot"]);
-
       // Create range selector
-      m_rangeSelectors["JumpFitQ"] = new MantidWidgets::RangeSelector(m_plots["JumpFitPlot"]);
+      m_rangeSelectors["JumpFitQ"] = new MantidWidgets::RangeSelector(m_uiForm.ppPlot);
       connect(m_rangeSelectors["JumpFitQ"], SIGNAL(selectionChangedLazy(double, double)), this, SLOT(qRangeChanged(double, double)));
 
 			// Add the properties browser to the ui form
@@ -88,11 +81,10 @@ namespace MantidQt
 		 */
 		void JumpFit::run()
 		{
-			bool verbose = m_uiForm.chkVerbose->isChecked();
 			bool save = m_uiForm.chkSave->isChecked();
 			bool plot = m_uiForm.chkPlot->isChecked();
 
-      runImpl(verbose, plot, save);
+      runImpl(plot, save);
 		}
 
     /**
@@ -106,11 +98,10 @@ namespace MantidQt
     /**
      * Runs algorithm.
      *
-     * @param verbose Enable/disable verbose option
      * @param plot Enable/disable plotting
      * @param save Enable/disable saving
      */
-    void JumpFit::runImpl(bool verbose, bool plot, bool save)
+    void JumpFit::runImpl(bool plot, bool save)
     {
       // Do noting with invalid data
 			if(!m_uiForm.dsSample->isValid())
@@ -151,7 +142,6 @@ namespace MantidQt
       fitAlg->setProperty("QMin", m_dblManager->value(m_properties["QMin"]));
       fitAlg->setProperty("QMax", m_dblManager->value(m_properties["QMax"]));
 
-      fitAlg->setProperty("Verbose", verbose);
       fitAlg->setProperty("Plot", plot);
       fitAlg->setProperty("Save", save);
 
@@ -179,19 +169,11 @@ namespace MantidQt
         QString specName = QString::fromStdString(axis->label(histIndex));
 
         if(specName == "Calc")
-        {
-          plotMiniPlot(outputWorkspace, histIndex, "JumpFitPlot", specName);
-          m_curves[specName]->setPen(QColor(Qt::red));
-        }
+          m_uiForm.ppPlot->addSpectrum("Fit", outputWorkspace, histIndex, Qt::red);
 
         if(specName == "Diff")
-        {
-          plotMiniPlot(outputWorkspace, histIndex, "JumpFitPlot", specName);
-          m_curves[specName]->setPen(QColor(Qt::green));
-        }
+          m_uiForm.ppPlot->addSpectrum("Diff", outputWorkspace, histIndex, Qt::green);
       }
-
-      replot("JumpFitPlot");
     }
 
 		/**
@@ -236,18 +218,20 @@ namespace MantidQt
 				m_uiForm.cbWidth->setEnabled(true);
 
 				std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
-				plotMiniPlot(filename, m_spectraList[currentWidth], "JumpFitPlot", "RawPlotCurve");
 
-				std::pair<double,double> res;
-				std::pair<double,double> range = getCurveRange("RawPlotCurve");
+        m_uiForm.ppPlot->clear();
+        m_uiForm.ppPlot->addSpectrum("Sample", filename, m_spectraList[currentWidth]);
+
+				QPair<double, double> res;
+				QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
 
 				// Use the values from the instrument parameter file if we can
 				if(getInstrumentResolution(filename, res))
-					setMiniPlotGuides("JumpFitQ", m_properties["QMin"], m_properties["QMax"], res);
+					setRangeSelector("JumpFitQ", m_properties["QMin"], m_properties["QMax"], res);
 				else
-					setMiniPlotGuides("JumpFitQ", m_properties["QMin"], m_properties["QMax"], range);
+					setRangeSelector("JumpFitQ", m_properties["QMin"], m_properties["QMax"], range);
 
-				setPlotRange("JumpFitQ", m_properties["QMin"], m_properties["QMax"], range);
+				setPlotPropertyRange("JumpFitQ", m_properties["QMin"], m_properties["QMax"], range);
 			}
 			else
 			{
@@ -331,7 +315,8 @@ namespace MantidQt
 			{
 				if(validate())
 				{
-					plotMiniPlot(sampleName, m_spectraList[text.toStdString()], "JumpFitPlot", "RawPlotCurve");
+          m_uiForm.ppPlot->clear();
+          m_uiForm.ppPlot->addSpectrum("Sample", sampleName, m_spectraList[text.toStdString()]);
 				}
 			}
 		}

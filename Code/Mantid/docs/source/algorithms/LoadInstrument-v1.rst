@@ -52,7 +52,7 @@ Usage
 .. testoutput:: exLoadInstrument
 
    Default workspace has instrument: basic_rect with 0 parameters
-   Modified workspace has instrument: MARI with 71 parameters
+   Modified workspace has instrument: MARI with 72 parameters
    Instrument MARI has the following detectors:  [1 2 3]
 
 

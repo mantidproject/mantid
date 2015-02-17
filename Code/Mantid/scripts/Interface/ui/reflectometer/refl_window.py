@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'refl_window.ui'
 #
-# Created: Thu Aug 14 15:01:03 2014
+# Created: Tue Jan 27 15:40:39 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -220,7 +220,7 @@ class Ui_windowRefl(object):
         self.layoutBase.addWidget(self.splitterList)
         windowRefl.setCentralWidget(self.widgetMainRow)
         self.menuBar = QtGui.QMenuBar(windowRefl)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1000, 21))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1000, 23))
         self.menuBar.setObjectName(_fromUtf8("menuBar"))
         self.menuFile = QtGui.QMenu(self.menuBar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -275,6 +275,8 @@ class Ui_windowRefl(object):
         self.actionChoose_Columns.setObjectName(_fromUtf8("actionChoose_Columns"))
         self.actionRefl_Gui_Options = QtGui.QAction(windowRefl)
         self.actionRefl_Gui_Options.setObjectName(_fromUtf8("actionRefl_Gui_Options"))
+        self.actionSlit_Calculator = QtGui.QAction(windowRefl)
+        self.actionSlit_Calculator.setObjectName(_fromUtf8("actionSlit_Calculator"))
         self.menuFile.addAction(self.actionOpen_Table)
         self.menuFile.addAction(self.actionReload_from_Disk)
         self.menuFile.addSeparator()
@@ -284,6 +286,7 @@ class Ui_windowRefl(object):
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionClose_Refl_Gui)
         self.menuHelp.addAction(self.actionMantid_Help)
+        self.menuHelp.addAction(self.actionSlit_Calculator)
         self.menuFunction.addAction(self.actionTransfer)
         self.menuFunction.addAction(self.actionAutofill)
         self.menuFunction.addSeparator()
@@ -420,4 +423,5 @@ class Ui_windowRefl(object):
         self.actionChoose_Columns.setShortcut(_translate("windowRefl", "Ctrl+M", None))
         self.actionRefl_Gui_Options.setText(_translate("windowRefl", "Refl Gui Options...", None))
         self.actionRefl_Gui_Options.setShortcut(_translate("windowRefl", "Ctrl+Shift+O", None))
+        self.actionSlit_Calculator.setText(_translate("windowRefl", "Slit Calculator", None))
 

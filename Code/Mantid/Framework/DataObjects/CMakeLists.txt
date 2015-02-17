@@ -14,6 +14,8 @@ set ( SRC_FILES
 	src/PeakColumn.cpp
 	src/PeakNoShapeFactory.cpp
 	src/PeakShapeBase.cpp
+	src/PeakShapeEllipsoid.cpp
+	src/PeakShapeEllipsoidFactory.cpp
 	src/PeakShapeSpherical.cpp
 	src/PeakShapeSphericalFactory.cpp
 	src/PeaksWorkspace.cpp
@@ -49,8 +51,9 @@ set ( INC_FILES
 	inc/MantidDataObjects/Peak.h
 	inc/MantidDataObjects/PeakColumn.h
 	inc/MantidDataObjects/PeakNoShapeFactory.h
-	inc/MantidDataObjects/PeakShape.h
 	inc/MantidDataObjects/PeakShapeBase.h
+	inc/MantidDataObjects/PeakShapeEllipsoid.h
+	inc/MantidDataObjects/PeakShapeEllipsoidFactory.h
 	inc/MantidDataObjects/PeakShapeFactory.h
 	inc/MantidDataObjects/PeakShapeSpherical.h
 	inc/MantidDataObjects/PeakShapeSphericalFactory.h
@@ -79,6 +82,8 @@ set ( TEST_FILES
 	OffsetsWorkspaceTest.h
 	PeakColumnTest.h
 	PeakNoShapeFactoryTest.h
+	PeakShapeEllipsoidFactoryTest.h
+	PeakShapeEllipsoidTest.h
 	PeakShapeSphericalFactoryTest.h
 	PeakShapeSphericalTest.h
 	PeakTest.h
@@ -111,6 +116,10 @@ add_library ( DataObjects ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( DataObjects PROPERTIES OUTPUT_NAME MantidDataObjects 
                                                COMPILE_DEFINITIONS IN_MANTID_DATAOBJECTS )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( DataObjects PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif ()
                                                
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataObjects PROPERTY FOLDER "MantidFramework" )

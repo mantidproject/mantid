@@ -2153,7 +2153,8 @@ void LoadEventNexus::deleteBanks(API::MatrixWorkspace_sptr workspace,
         for (int row = 0; row < static_cast<int>(grandchildren.size()); row++) {
           Detector *d = dynamic_cast<Detector *>(
               const_cast<IComponent *>(grandchildren[row].get()));
-          inst->removeDetector(d);
+          if (d)
+            inst->removeDetector(d);
         }
       }
       IComponent *comp = dynamic_cast<IComponent *>(detList[i].get());
@@ -2823,7 +2824,9 @@ LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename,
     Kernel::TimeSeriesProperty<double> *log =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
             localWorkspace->mutableRun().getProperty("proton_charge"));
-    const std::vector<Kernel::DateAndTime> temp = log->timesAsVector();
+    std::vector<Kernel::DateAndTime> temp;
+    if (log)
+      temp = log->timesAsVector();
     // if (returnpulsetimes) out = new BankPulseTimes(temp);
     if (returnpulsetimes)
       out = boost::make_shared<BankPulseTimes>(temp);

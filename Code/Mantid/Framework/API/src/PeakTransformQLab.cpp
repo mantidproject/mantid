@@ -54,9 +54,9 @@ PeakTransformQLab::transformPeak(const Mantid::API::IPeak &peak) const {
 /**
  * @return Special coordinate system associated with this type of transform.
  */
-Mantid::API::SpecialCoordinateSystem
+Mantid::Kernel::SpecialCoordinateSystem
 PeakTransformQLab::getCoordinateSystem() const {
-  return Mantid::API::QLab;
+  return Mantid::Kernel::QLab;
 }
 }
 }

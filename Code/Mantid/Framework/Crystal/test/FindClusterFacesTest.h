@@ -25,7 +25,7 @@ namespace
   IPeaksWorkspace_sptr create_peaks_WS(Instrument_sptr inst)
   {
     PeaksWorkspace* pPeaksWS = new PeaksWorkspace();
-    pPeaksWS->setCoordinateSystem(Mantid::API::HKL);
+    pPeaksWS->setCoordinateSystem(Mantid::Kernel::HKL);
     IPeaksWorkspace_sptr peakWS(pPeaksWS);
     peakWS->setInstrument(inst);
     return peakWS;

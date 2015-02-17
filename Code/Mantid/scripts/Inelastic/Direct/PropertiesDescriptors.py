@@ -197,10 +197,18 @@ class SumRuns(PropDescriptor):
         return self._run_numbers
 #--------------------------------------------------------------------------------------------------------------------
 class IncidentEnergy(PropDescriptor):
-    """ descriptor for incident energy or range of incident energies to be processed """
+    """ Property for incident energy or range of incident energies to be processed 
+
+        Set it up to list of values (even with single value i.e. prop_man.incident_energy=[10]) 
+        if the energy_bins property value to be treated as relative energy ranges.
+
+        Set it up to single value (e.g. prop_man.incident_energy=10) to treat energy energy_bins 
+        as absolute energy values
+    """
     def __init__(self): 
         self._incident_energy = 0
-        pass
+        self._num_energies = 1
+        self._cur_iter_en = 0
     def __get__(self,instance,owner=None):
         """ return  incident energy or list of incident energies """ 
         if instance is None:
@@ -211,6 +219,11 @@ class IncidentEnergy(PropDescriptor):
        """ Set up incident energy or range of energies in various formats """
        if value != None:
           if isinstance(value,str):
+             if value.find('[') > -1:
+                energy_list = True
+                value = value.translate(None, '[]').strip()
+             else:
+                energy_list = False
              en_list = str.split(value,',')
              if len(en_list) > 1:                 
                 rez = []
@@ -219,7 +232,10 @@ class IncidentEnergy(PropDescriptor):
                     rez.append(val)
                 self._incident_energy = rez
              else:
-               self._incident_energy = float(value)
+                 if energy_list:
+                    self._incident_energy = [float(value)]
+                 else:
+                   self._incident_energy = float(value)
           else:
             if isinstance(value,list):
                 rez = []
@@ -238,40 +254,154 @@ class IncidentEnergy(PropDescriptor):
        #
        inc_en = self._incident_energy
        if isinstance(inc_en,list):
+           self._num_energies = len(inc_en)
            for en in inc_en:
                if en <= 0:
                  raise KeyError("Incident energy have to be positive number of list of positive numbers." + " For input argument {0} got negative value {1}".format(value,en))     
        else:
+         self._num_energies = 1
          if inc_en <= 0:
             raise KeyError("Incident energy have to be positive number of list of positive numbers." + " For value {0} got negative {1}".format(value,inc_en))
+       self._cur_iter_en = 0
+   
+    def multirep_mode(self):
+        """ return true if energy is defined as list of energies and false otherwise """ 
+        if isinstance(self._incident_energy,list):
+            return True
+        else:
+            return False
+
+    def get_current(self):
+        """ Return current energy out of range of energies""" 
+        if isinstance(self._incident_energy,list):
+            ind = self._cur_iter_en
+            return self._incident_energy[ind]
+        else:
+            return self._incident_energy
+    #
+    def set_current(self,value):
+        """ set current energy value (used in multirep mode) to 
+            
+        """
+        if isinstance(self._incident_energy,list):
+            ind = self._cur_iter_en
+            self._incident_energy[ind]=value
+        else:
+            self._incident_energy = value
+
+
+    def __iter__(self):
+        """ iterator over energy range, initializing iterations over energies """
+        self._cur_iter_en = -1
+        return self
+
+    def next(self): # Python 3: def __next__(self)
+        """ part of iterator """ 
+        self._cur_iter_en += 1
+        ind = self._cur_iter_en
+        if ind  < self._num_energies:
+           if isinstance(self._incident_energy,list):
+               return self._incident_energy[ind]
+           else:
+               return self._incident_energy
+        else:
+           raise StopIteration
+
 # end IncidentEnergy
 #-----------------------------------------------------------------------------------------
 class EnergyBins(PropDescriptor):
-    """ Property provides various energy bin possibilities """
-    def __init__(self):
+    """ Energy binning, requested for final converted to energy transfer workspace. 
+
+        Provide it in the form:
+        [min_energy,step,max_energy] if energy to process (incident_energy property ) 
+        has a single value
+        or 
+        [min_rel_enrgy,rel_step,max_rel_energy] where rel_energy is relative energy
+        if energy(ies) to process are list of energies. The list of energies can 
+        consist of single value  (e.g. prop_man.incident_energy=[100])
+
+    """
+    def __init__(self,IncidentEnergyProp):
+        self._incident_energy = IncidentEnergyProp
         self._energy_bins = None
+        # how close you are ready to rebin w.r.t.  the incident energy
+        self._range = 0.99999
+
     def __get__(self,instance,owner=None):
         """ binning range for the result of convertToenergy procedure or list of such ranges """
         if instance is None:
            return self
         return self._energy_bins
 
+
     def __set__(self,instance,values):
        if values != None:
           if isinstance(values,str):
-             lst = str.split(values,',')
-             nBlocks = len(lst)
-             for i in xrange(0,nBlocks,3):
-                value = [float(lst[i]),float(lst[i + 1]),float(lst[i + 2])]
+             values = values.translate(None, '[]').strip()
+             lst = values.split(',')
+             self.__set__(instance,lst)
+             return
           else:
               value = values
-              nBlocks = len(value)
-          if nBlocks % 3 != 0:
-               raise KeyError("Energy_bin value has to be either list of n-blocks of 3 number each or string representation of this list with numbers separated by commas")
+              if len(value) != 3:
+                raise KeyError("Energy_bin value has to be a tuple of 3 elements or string of 3 comma-separated numbers")           
+              value = (float(value[0]),float(value[1]),float(value[2]))
+          # Let's not support list of multiple absolute energy bins for the
+          # time being
+          # nBlocks = len(value)
+          #if nBlocks % 3 != 0:
+          #     raise KeyError("Energy_bin value has to be either list of
+          #     n-blocks of 3 number each or string representation of this list
+          #     with numbers separated by commas")
        else:
           value = None              
-       #TODO: implement single value settings according to rebin
+       #TODO: implement single value settings according to rebin?
        self._energy_bins = value
+
+    def get_abs_range(self,instance=None):
+        """ return energies related to incident energies either as 
+            
+        """
+        if self._incident_energy.multirep_mode(): # Relative energy
+            ei = self._incident_energy.get_current()
+            if self._energy_bins:
+                if self.is_range_valid():
+                   rez = self._calc_relative_range(ei)
+                else:
+                   if instance:
+                    instance.log("*** WARNING! Got energy_bins specified as absolute values in multirep mode.\n"\
+                                "             Will normalize these values by max value and treat as relative values ",
+                                "warning")
+                   mult = self._range / self._energy_bins[2]
+                   rez = self._calc_relative_range(ei,mult)
+                return rez
+            else:
+               return None
+        else: # Absolute energy ranges
+           if self.is_range_valid():
+              return self._energy_bins
+           else:
+            if instance:
+             instance.log("*** WARNING! Requested maximum binning range exceeds incident energy!\n"\
+                           "             Will normalize binning range by max value and treat as relative range",
+                                "warning")
+             mult = self._range / self._energy_bins[2]
+             ei = self._incident_energy.get_current()
+             return self._calc_relative_range(ei,mult)
+
+    def is_range_valid(self):
+        """Method verifies if binning range is consistent with incident energy """ 
+        if self._incident_energy.multirep_mode():
+            return (self._energy_bins[2] <= self._range)
+        else:
+            return (self._energy_bins[2] <= self._incident_energy.get_current())
+
+    def _calc_relative_range(self,ei,range_mult=1):
+        """ """ 
+        mult = range_mult * ei
+        return (self._energy_bins[0] * mult ,self._energy_bins[1] * mult,self._energy_bins[2] * mult)
+
+
 #end EnergyBins
 #-----------------------------------------------------------------------------------------
 class SaveFileName(PropDescriptor):
@@ -297,14 +427,15 @@ class SaveFileName(PropDescriptor):
             if not sr:
                 sr = 0
             try:
-                name +='{0:0<5}Ei{1:<4.2f}meV'.format(sr,instance.incident_energy)
+                ei = owner.incident_energy.get_current()
+                name +='{0:0<5}Ei{1:<4.2f}meV'.format(sr,ei)
                 if instance.sum_runs:
                     name +='sum'
                 if owner.monovan_run.run_number():
                     name +='_Abs'
+                name = name.replace('.','d')
             except:
                 name = None
-        name = name.replace('.','d')
         return name
 
     def __set__(self,instance,value):
@@ -582,7 +713,8 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
 #end HardMaskOnly
 #-----------------------------------------------------------------------------------------
 class MonovanIntegrationRange(prop_helpers.ComplexProperty):
-    """ integration range for monochromatic vanadium 
+    """ integration range for monochromatic vanadium. The final integral is used to estimate
+        relative detector's efficiency
 
         Defined either directly or as the function of the incident energy(s)
 
@@ -597,7 +729,7 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
             prop_helpers.ComplexProperty.__init__(self,['monovan_lo_frac','monovan_hi_frac'])
         pass
 
-    def __get__(self,instance,type=None):
+    def __get__(self,instance,owner):
 
         if instance is None:
            return self
@@ -606,19 +738,14 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
                 ei = 1
                 tDict = instance
         else:
-                ei = instance.incident_energy
+                ei = owner.incident_energy.get_current()
                 tDict = instance.__dict__
 
         if self._rel_range: # relative range
             if ei is None:
                 raise AttributeError('Attempted to obtain relative to ei monovan integration range, but incident energy has not been set')
             rel_range = prop_helpers.ComplexProperty.__get__(self,tDict)
-            if isinstance(ei,list):
-                range = dict()
-                for en in ei:
-                    range[en] = [rel_range[0] * en,rel_range[1] * en]
-            else:
-                range = [rel_range[0] * ei,rel_range[1] * ei]
+            range = [rel_range[0] * ei,rel_range[1] * ei]
             return range
         else: # absolute range
             return prop_helpers.ComplexProperty.__get__(self,tDict)
@@ -648,6 +775,7 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
                     "defining min/max values of integration range or None to use relative to incident energy limits")
             prop_helpers.ComplexProperty.__set__(self,tDict,value)
 #end MonovanIntegrationRange
+
 #-----------------------------------------------------------------------------------------
 class SpectraToMonitorsList(PropDescriptor):
    """ property describes list of spectra, used as monitors to estimate incident energy
@@ -697,6 +825,7 @@ class SpectraToMonitorsList(PropDescriptor):
                 result = [int(spectra_list)]
        return result
 #end SpectraToMonitorsList
+
 #-----------------------------------------------------------------------------------------
 class SaveFormat(PropDescriptor):
    # formats available for saving the data
@@ -744,6 +873,7 @@ class SaveFormat(PropDescriptor):
         #end if different types
         self._save_format.add(value)
 #end SaveFormat
+
 #-----------------------------------------------------------------------------------------
 class DiagSpectra(PropDescriptor):
     """ class describes spectra list which should be used in diagnostics 
@@ -786,6 +916,7 @@ class DiagSpectra(PropDescriptor):
         else:
             raise ValueError("Spectra For diagnostics can be a string inthe form (num1,num2);(num3,num4) etc. or None")
 #end class DiagSpectra
+
 #-----------------------------------------------------------------------------------------
 class BackbgroundTestRange(PropDescriptor):
     """ The TOF range used in diagnostics to reject high background spectra. 
@@ -815,6 +946,103 @@ class BackbgroundTestRange(PropDescriptor):
             raise ValueError("background test range can be set to a 2 element list of floats")
         self._background_test_range = [float(value[0]),float(value[1])]
 #end BackbgroundTestRange
+
+#-----------------------------------------------------------------------------------------
+class MultirepTOFSpectraList(PropDescriptor):
+    """ property describes list of spectra numbers, used to identify 
+        TOF range corresponding to the particular energy range 
+
+        Usually it is list of two numbers, specifying monitors which are 
+        closest and furthest from the sample 
+    """
+    def __init__(self):
+        self._spectra_list = None
+
+    def __get__(self,instance,type=None):
+       if instance is None:
+           return self
+
+       return self._spectra_list
+
+    def __set__(self,instance,value):
+        if value is None:
+           self._spectra_list = None
+           return
+        if isinstance(value,str):
+            value = str.split(value,',')
+            self.__set__(instance,value)
+            return
+        if isinstance(value, list):
+           rez =[]
+           for val in value:
+               rez.append(int(val))
+        else:
+            rez = [int(value)]
+        self._spectra_list=rez
+#end MultirepTOFSpectraList
+
+class MonoCorrectionFactor(PropDescriptor):
+    """ property contains correction factor, used to convert 
+        experimental scattering cross-section into absolute 
+        units ( mb/str/mev/fu) 
+
+        There are independent two sources for this factor: 
+        1) if user explicitly specifies correction value. 
+           This value then will be applied to all subsequent runs 
+           without any checks if the correction is appropriate
+        2) set/get cashed value correspondent to current monovan 
+           run number, incident energy and integration range.
+           This value is cashed at first run and reapplied if 
+           no changes to the values it depends on were identified
+    """ 
+    def __init__(self,ei_prop):
+        self._cor_factor = None
+        self._mono_run_number=None
+        self._ei_prop = ei_prop
+        self.cashed_values={}
+
+    def __get__(self,instance,type=None):
+       if instance is None:
+           return self
+
+       return self._cor_factor
+
+    def __set__(self,instance,value):
+       self._cor_factor = value
+    # 
+    def set_val_to_cash(self,instance,value):
+        """ """ 
+        mono_int_range = instance.monovan_integr_range
+        cash_id = self._build_cash_val_id(mono_int_range)
+        self.cashed_values[cash_id] = value
+        # tell property manager that mono_correction_factor has been modified
+        # to avoid automatic resetting this property from any workspace 
+        cp = getattr(instance,'_PropertyManager__changed_properties')
+        cp.add('mono_correction_factor')
+
+    def get_val_from_cash(self,instance):
+        mono_int_range = instance.monovan_integr_range
+        cash_id = self._build_cash_val_id(mono_int_range)
+        if cash_id in self.cashed_values:
+           return self.cashed_values[cash_id]
+        else:
+           return None
+        
+    def set_cash_mono_run_number(self,new_value):
+        if new_value is None:
+           self.cashed_values={}
+           self._mono_run_number = None
+           return
+        if self._mono_run_number != int(new_value):
+           self.cashed_values={}
+           self._mono_run_number = int(new_value)
+
+    def _build_cash_val_id(self,mono_int_range):
+       ei = self._ei_prop.get_current()
+       cash_id = "Ei={0:0>9.4e}:Int({1:0>9.4e}:{2:0>9.5e}):Run{3}".\
+           format(ei,mono_int_range[0],mono_int_range[1],self._mono_run_number)
+       return cash_id
+
 
 #-----------------------------------------------------------------------------------------
 # END Descriptors for PropertyManager itself

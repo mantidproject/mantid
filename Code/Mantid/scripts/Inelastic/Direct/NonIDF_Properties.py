@@ -58,13 +58,24 @@ class NonIDF_Properties(object):
         super(NonIDF_Properties,self).__setattr__('second_white',None)
         super(NonIDF_Properties,self).__setattr__('_tmp_run',None)
 
+
     #end
+    def log(self, msg,level="notice"):
+        """Send a log message to the location defined
+        """
+        lev,logger = NonIDF_Properties.log_options[level]
+        if self._log_to_mantid:
+            logger(msg)
+        else:
+        # TODO: reconcile this with Mantid.
+           if lev <= self._current_log_level:
+              print msg
     #-----------------------------------------------------------------------------
     # Complex properties with personal descriptors
     #-----------------------------------------------------------------------------
     incident_energy = IncidentEnergy()
     #
-    energy_bins = EnergyBins()
+    energy_bins = EnergyBins(incident_energy)
     #
     save_file_name = SaveFileName()
     #
@@ -186,16 +197,6 @@ class NonIDF_Properties(object):
 
  
 
-    def log(self, msg,level="notice"):
-        """Send a log message to the location defined
-        """
-        lev,logger = NonIDF_Properties.log_options[level]
-        if self._log_to_mantid:
-            logger(msg)
-        else:
-        # TODO: reconcile this with Mantid.
-           if lev <= self._current_log_level:
-              print msg
 
 
 
