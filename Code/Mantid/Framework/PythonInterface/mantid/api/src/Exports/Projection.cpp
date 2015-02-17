@@ -53,7 +53,7 @@ namespace
     for(size_t i = 0; i < p.getNumDims(); ++i)
     {
       TableRow row = ws->appendRow();
-      row << indexToName(i) << p.getAxis(i).toString(",") << getUnit(p, i) << static_cast<double>(p.getOffset(i));
+      row << indexToName(i) << p.getAxis(i).toString(",") << getUnit(p, i) << p.getOffset(i);
     }
 
     return ws;

@@ -107,9 +107,9 @@ public:
 
   void test_setOffset() {
     Projection p(3);
-    p.setOffset(0, 1.00f);
-    p.setOffset(1, 1.50f);
-    p.setOffset(2, 4.75f);
+    p.setOffset(0, 1.00);
+    p.setOffset(1, 1.50);
+    p.setOffset(2, 4.75);
     TS_ASSERT_EQUALS(p.getOffset(0), 1.00);
     TS_ASSERT_EQUALS(p.getOffset(1), 1.50);
     TS_ASSERT_EQUALS(p.getOffset(2), 4.75);

@@ -65,13 +65,13 @@ public:
   /// Destructor
   virtual ~Projection();
   /// Retrieves the offset for the given dimension
-  float getOffset(size_t nd);
+  double getOffset(size_t nd);
   /// Retrieves the axis vector for the given dimension
   VMD getAxis(size_t nd);
   /// Retrives the unit of the given dimension
   ProjectionUnit getUnit(size_t nd);
   /// Set the offset for a given dimension
-  void setOffset(size_t nd, float offset);
+  void setOffset(size_t nd, double offset);
   /// Set the axis vector for a given dimension
   void setAxis(size_t nd, VMD axis);
   /// Set the unit for a given dimension
@@ -95,7 +95,7 @@ protected:
   /// A vector of the dimensions
   VMD *m_dimensions;
   /// A vector of the offsets for each dimension
-  float *m_offsets;
+  double *m_offsets;
   /// A vector of the units for each dimension
   ProjectionUnit *m_units;
 };
