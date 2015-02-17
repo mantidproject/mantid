@@ -7,7 +7,9 @@
 # The settings at the top must be filled in for each slave.
 #####################################################################
 # Crontab setting should be something like
-# 0,30 * * * * /home/builder/jenkins-linode nodename secret
+# 0,30 * * * * /home/builder/jenkins-linode/jenkins-slave.sh nodename secret
+# or (on mac)
+# 0,30 * * * * /Users/builder/jenkins-linode/jenkins-slave.sh nodename secret
 #####################################################################
 # User configuration
 #####################################################################
