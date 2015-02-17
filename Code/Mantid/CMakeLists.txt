@@ -197,8 +197,8 @@ if ( ENABLE_CPACK )
 
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4,sip" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-ipython >= 1.1.0" )
-      # scipy, matplotlib, psutil
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy,python-matplotlib,python-psutil" )
+      # scipy & matplotlib
+      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy,python-matplotlib" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5,jsoncpp" )
 
       if( "${UNIX_CODENAME}" MATCHES "Santiago" )
@@ -226,19 +226,19 @@ if ( ENABLE_CPACK )
         set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools0 (>= 1.7)" )
         if( "${UNIX_CODENAME}" MATCHES "lucid" )
           list ( APPEND DEPENDS_LIST ",libqscintilla2-5,"
-                                     "libopencascade-foundation-6.3.0 (>= 6.3.0),libopencascade-modeling-6.3.0 (>= 6.3.0),python-psutil,"
+                                     "libopencascade-foundation-6.3.0 (>= 6.3.0),libopencascade-modeling-6.3.0 (>= 6.3.0),"
                                      "libmuparser0,libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9" )
         elseif( "${UNIX_CODENAME}" MATCHES "precise" )
           list ( APPEND DEPENDS_LIST ",libqscintilla2-8,"
                                      "libopencascade-foundation-6.5.0 (>= 6.5.0),libopencascade-modeling-6.5.0 (>= 6.5.0),"
                                      "libmuparser0debian1,"
-                                     "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy,python-psutil,"
+                                     "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy,"
                                      "libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9")
         elseif( "${UNIX_CODENAME}" STREQUAL "trusty" )
           list ( APPEND DEPENDS_LIST ",libqscintilla2-11,"
                                      "liboce-foundation8,liboce-modeling8,"
                                      "libmuparser2,"
-                                     "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy,python-psutil,"
+                                     "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy,"
                                      "libpocofoundation11,libpocoutil11,libpoconet11,libpoconetssl11,libpococrypto11,libpocoxml11")
           set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
         else()
