@@ -10,6 +10,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/Column.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -74,8 +75,12 @@ void GenerateEventsFilter::init() {
       "while the relative time takes integer or float. ");
 
   // Split by time (only) in steps
-  declareProperty("TimeInterval", EMPTY_DBL(),
-                  "Length of the time splices if filtered in time only.");
+  // TODO - clean this part
+  // auto timeintervalproperty = boost::make_shared<ArrayProperty<double> >("TimeInterval");
+  declareProperty(new ArrayProperty<double>("TimeInterval"),
+                  "Length...");
+  // declareProperty("TimeInterval", EMPTY_DBL(),
+     //              "Length of the time splices if filtered in time only.");
   setPropertySettings("TimeInterval",
                       new VisibleWhenProperty("LogName", IS_EQUAL_TO, ""));
 
@@ -379,10 +384,10 @@ void GenerateEventsFilter::processInputTime() {
 /** Set splitters by time value / interval only
  */
 void GenerateEventsFilter::setFilterByTimeOnly() {
-  double timeinterval = this->getProperty("TimeInterval");
+  vector<double> vec_timeintervals = this->getProperty("TimeInterval");
 
   bool singleslot = false;
-  if (timeinterval == EMPTY_DBL())
+  if (vec_timeintervals.size() == 0)
     singleslot = true;
 
   // Progress
@@ -401,7 +406,8 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
     ss << "Time Interval From " << m_startTime << " to " << m_stopTime;
 
     addNewTimeFilterSplitter(m_startTime, m_stopTime, wsindex, ss.str());
-  } else {
+  } else if (vec_timeintervals.size() == 1) {
+    double timeinterval = vec_timeintervals[0];
     int64_t timeslot = 0;
 
     // Explicitly N time intervals
@@ -439,6 +445,10 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
       }
     } // END-WHILE
   }   // END-IF-ELSE
+  else
+  {
+    throw std::runtime_error("Implement multiple time interval ASAP.");
+  }
 
   return;
 }

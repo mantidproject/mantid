@@ -123,7 +123,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", eventWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "Splitters01"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InformationWorkspace", "InfoWS");)
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeInterval", 15000.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("TimeInterval", "15000.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOfTime", "Nanoseconds"));
 
     // 3. Running and get result
@@ -597,7 +597,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Splitters08"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InformationWorkspace", "InfoWS08"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FastLog", true));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeInterval", 15000.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("TimeInterval", "15000.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOfTime", "Nanoseconds"));
 
     // Running and get result
