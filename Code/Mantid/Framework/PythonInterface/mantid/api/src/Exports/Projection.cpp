@@ -3,6 +3,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include <boost/bind.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
 
@@ -12,34 +13,15 @@ using namespace boost::python;
 
 namespace
 {
-  ITableWorkspace_sptr toWorkspace(Projection& p)
+  std::string indexToName(size_t i)
   {
-    if(p.getNumDims() > 3)
-      throw std::runtime_error("Only 2 or 3 dimensional projections can be converted to a workspace.");
-
-    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
-    auto colU = ws->addColumn("double", "u");
-    auto colV = ws->addColumn("double", "v");
-
-    if(p.getNumDims() == 3)
-      auto colW = ws->addColumn("double", "w");
-
-    auto colOffset = ws->addColumn("double", "offsets");
-    auto colType = ws->addColumn("str", "type");
-
-    //Outer loop traverses rows
-    for(size_t i = 0; i < p.getNumDims(); ++i)
+    switch(i)
     {
-      TableRow row = ws->appendRow();
-
-      //Inner loop traverses columns
-      for(size_t j = 0; j < p.getNumDims(); ++j)
-        row << static_cast<double>(p.getAxis(j)[i]);
-
-      row << static_cast<double>(p.getOffset(i));
-      row << (p.getUnit(i) == RLU ? "r" : "a");
+      case 0: return "u";
+      case 1: return "v";
+      case 2: return "w";
+      default: return "d" + boost::lexical_cast<std::string>(i);
     }
-    return ws;
   }
 
   std::string getUnit(Projection& p, size_t nd)
@@ -55,6 +37,26 @@ namespace
       p.setUnit(nd, INV_ANG);
     else
       throw std::runtime_error("Invalid unit");
+  }
+
+  ITableWorkspace_sptr toWorkspace(Projection& p)
+  {
+    if(p.getNumDims() > 3)
+      throw std::runtime_error("Only 2 or 3 dimensional projections can be converted to a workspace.");
+
+    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
+    auto colName = ws->addColumn("str", "name");
+    auto colValue = ws->addColumn("str", "value");
+    auto colType = ws->addColumn("str", "type");
+    auto colOffset = ws->addColumn("double", "offset");
+
+    for(size_t i = 0; i < p.getNumDims(); ++i)
+    {
+      TableRow row = ws->appendRow();
+      row << indexToName(i) << p.getAxis(i).toString(",") << getUnit(p, i) << static_cast<double>(p.getOffset(i));
+    }
+
+    return ws;
   }
 }
 
