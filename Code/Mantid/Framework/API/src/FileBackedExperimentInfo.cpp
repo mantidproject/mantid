@@ -16,6 +16,7 @@ Kernel::Logger g_log("FileBackedExperimentInfo");
   {
       this->file = file;
       this->groupName = groupName;
+      this->experimentInfoIsLoaded = false;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -23,6 +24,16 @@ Kernel::Logger g_log("FileBackedExperimentInfo");
    */
   FileBackedExperimentInfo::~FileBackedExperimentInfo()
   {
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /// @returns A human-readable description of the object
+  const std::string FileBackedExperimentInfo::toString() {
+      if (!experimentInfoIsLoaded) {
+          intialise();
+      }
+
+      return ExperimentInfo::toString();
   }
 
   //------------------------------------------------------------------------------------------------------

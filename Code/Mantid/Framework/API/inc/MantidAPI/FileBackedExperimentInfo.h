@@ -45,10 +45,16 @@ namespace API
     /// Virtual destructor
     virtual ~FileBackedExperimentInfo();
 
+    /// Returns a string description of the object
+    const std::string toString();
+
   private:
+     /// Does the real load
      void intialise();
+
      ::NeXus::File *file;
      std::string groupName;
+     bool experimentInfoIsLoaded;
   };
 
 
