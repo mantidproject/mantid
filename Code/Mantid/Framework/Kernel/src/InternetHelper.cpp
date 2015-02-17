@@ -479,7 +479,7 @@ void InternetHelper::setBody(const std::ostringstream& body) {
 /** Sets the body & content length for future requests, this will also 
 *   set the method to POST is the body is not empty
 *   and GET if it is.
-* @param body A HTMLform
+* @param form A HTMLform
 **/
 void InternetHelper::setBody(Poco::Net::HTMLForm& form) { 
 
