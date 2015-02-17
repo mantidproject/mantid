@@ -30,6 +30,8 @@ namespace CustomInterfaces
     SampleTransmission(QWidget *parent = 0);
 
   private slots:
+    /// Opens the Qt help page for the interface
+    void showHelp();
     /// Runs the calculation
     void calculate();
     /// Handle completion of the calculation algorithm

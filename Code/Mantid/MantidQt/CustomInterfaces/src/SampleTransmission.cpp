@@ -5,6 +5,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Statistics.h"
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 
@@ -45,8 +46,18 @@ void SampleTransmission::initLayout()
 {
   m_uiForm.setupUi(this);
   connect(m_uiForm.pbCalculate, SIGNAL(clicked()), this, SLOT(calculate()));
+  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(showHelp()));
 
   validate(true);
+}
+
+
+/**
+ * Opens the Qt help page for the interface.
+ */
+void SampleTransmission::showHelp()
+{
+  MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("SampleTransmissionCalculator"));
 }
 
 
