@@ -98,7 +98,7 @@ class CutMD(DataProcessorAlgorithm):
         dim_max = dim.getMaximum()
         return (dim_min, dim_max)
       
-    def __calculate_extents(self, v, u, w, limits):
+    def __calculate_extents(self, u, v, w, limits):
         M=np.array([u,v,w])
         Minv=np.linalg.inv(M)
     
@@ -236,7 +236,7 @@ class CutMD(DataProcessorAlgorithm):
     
         u,v,w = self.__scale_projection(projection, origin_units, target_units, to_cut)
    
-        extents = self.__calculate_extents(v, u, w, ( x_extents, y_extents, z_extents ) )
+        extents = self.__calculate_extents(u, v, w, ( x_extents, y_extents, z_extents ) )
         extents, bins = self.__calculate_steps( extents, ( p1_bins, p2_bins, p3_bins ) )
         
         if not p4_bins_property.isDefault:
