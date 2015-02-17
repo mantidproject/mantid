@@ -6,6 +6,8 @@
 #include "MantidKernel/ProxyInfo.h"
 
 #include <map>
+#include <iostream>
+#include <sstream>
 
 namespace Poco {
 // forward declaration
@@ -18,6 +20,8 @@ class HTTPClientSession;
 class HTTPResponse;
 // forward declaration
 class HTTPRequest;
+// forward declaration
+class HTMLForm;
 }
 }
 
@@ -59,21 +63,44 @@ public:
   // Convenience typedef
   typedef std::map<std::string, std::string> StringToStringMap;
 
-  virtual int
-  downloadFile(const std::string &urlFile,
-               const std::string &localFilePath = "",
-               const StringToStringMap &headers = StringToStringMap());
-  virtual int
-  sendRequest(const std::string &url, std::ostream &responseStream,
-              const StringToStringMap &headers = StringToStringMap(),
-              const std::string &method = std::string(),
-              const std::string &body = std::string());
+  //getters and setters
+  void setTimeout(int seconds);
+  int getTimeout();
+  
+  void setMethod(const std::string& method);
+  const std::string& getMethod();
+  
+  void setContentType(const std::string& contentType);
+  const std::string& getContentType();
 
+  void setContentLength(std::streamsize length);
+  std::streamsize getContentLength();
+
+  void setBody(const std::string& body);
+  void setBody(const std::ostringstream& body);
+  void setBody(Poco::Net::HTMLForm& form);
+  const std::string getBody();
+
+
+  void addHeader(const std::string& key, const std::string& value);
+  void removeHeader (const std::string& key);
+  const std::string& getHeader (const std::string& key);
+  void clearHeaders();
+  StringToStringMap& headers();
+  void reset();
+
+
+  //Proxy methods
   Kernel::ProxyInfo &getProxy(const std::string &url);
   void clearProxy();
   void setProxy(const Kernel::ProxyInfo &proxy);
 
-  void setTimeout(int seconds);
+  //Execute call methods
+  virtual int
+  downloadFile(const std::string &urlFile,
+               const std::string &localFilePath = "");
+  virtual int
+  sendRequest(const std::string &url, std::ostream &responseStream);
 
 protected:
   virtual int sendHTTPSRequest(const std::string &url,
@@ -91,12 +118,14 @@ private:
                             Poco::URI &uri, std::ostream &responseStream);
   int processRelocation(const Poco::Net::HTTPResponse &response,
                         std::ostream &responseStream);
+
   Kernel::ProxyInfo m_proxyInfo;
   bool m_isProxySet;
   int m_timeout;
+  std::streamsize m_contentLength;
   std::string m_method;
   std::string m_contentType;
-  std::string m_body;
+  std::ostringstream m_body;
   StringToStringMap m_headers;
   Poco::Net::HTTPRequest *m_request;
 };
