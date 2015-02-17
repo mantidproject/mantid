@@ -31,6 +31,7 @@ set ( SRC_FILES
 	src/ExperimentInfo.cpp
 	src/Expression.cpp
 	src/FermiChopperModel.cpp
+	src/FileBackedExperimentInfo.cpp
 	src/FileFinder.cpp
 	src/FileLoaderRegistry.cpp
 	src/FileProperty.cpp
@@ -170,6 +171,7 @@ set ( INC_FILES
 	inc/MantidAPI/ExperimentInfo.h
 	inc/MantidAPI/Expression.h
 	inc/MantidAPI/FermiChopperModel.h
+	inc/MantidAPI/FileBackedExperimentInfo.h
 	inc/MantidAPI/FileFinder.h
 	inc/MantidAPI/FileLoaderRegistry.h
 	inc/MantidAPI/FileProperty.h
@@ -309,6 +311,7 @@ set ( TEST_FILES
 	ExperimentInfoTest.h
 	ExpressionTest.h
 	FermiChopperModelTest.h
+	FileBackedExperimentInfoTest.h
 	FileFinderTest.h
 	FilePropertyTest.h
 	FrameworkManagerTest.h
