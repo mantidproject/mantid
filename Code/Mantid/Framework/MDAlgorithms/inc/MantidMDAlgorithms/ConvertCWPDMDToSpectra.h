@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -59,6 +60,24 @@ private:
 
   /// Execution code
   void exec();
+
+  API::MatrixWorkspace_sptr
+  reducePowderData(API::IMDEventWorkspace_const_sptr dataws,
+                   API::IMDEventWorkspace_const_sptr monitorws,
+                   const double min2theta, const double max2theta,
+                   const double binsize, bool dolinearinterpolation);
+
+  void binMD(API::IMDEventWorkspace_const_sptr mdws,
+             const std::vector<double> &vecx, std::vector<double> &vecy);
+
+  void linearInterpolation(API::MatrixWorkspace_sptr matrixws,
+                           std::vector<bool> &vec0count);
+
+  void setupSampleLogs(API::MatrixWorkspace_sptr matrixws,
+                       API::IMDEventWorkspace_const_sptr inputmdws);
+
+  void scaleMatrixWorkspace(API::MatrixWorkspace_sptr matrixws,
+                            const double &scalefactor);
 };
 
 } // namespace MDAlgorithms
