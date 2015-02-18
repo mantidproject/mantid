@@ -79,6 +79,17 @@ class MSDFitTest(unittest.TestCase):
                                      SpecMin=-1, SpecMax=0)
 
 
+    def test_fail_spec_min(self):
+        """
+        Tests validation for SpecMin >= num histograms.
+        """
+
+        with self.assertRaises(RuntimeError):
+            msd, param, fit = MSDFit(InputWorkspace=self._ws,
+                                     XStart=0.0, XEnd=5.0,
+                                     SpecMin=0, SpecMax=20)
+
+
     def test_fail_spec_range(self):
         """
         Test svalidation for SpecMax >= SpecMin.
@@ -98,6 +109,17 @@ class MSDFitTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             msd, param, fit = MSDFit(InputWorkspace=self._ws,
                                      XStart=10.0, XEnd=5.0,
+                                     SpecMin=0, SpecMax=0)
+
+
+    def test_fail_x_range_ws(self):
+        """
+        Tests validation for X range in workspace range
+        """
+
+        with self.assertRaises(RuntimeError):
+            msd, param, fit = MSDFit(InputWorkspace=self._ws,
+                                     XStart=0.0, XEnd=20.0,
                                      SpecMin=0, SpecMax=0)
 
 

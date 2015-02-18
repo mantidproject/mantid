@@ -48,6 +48,10 @@ class MSDFit(DataProcessorAlgorithm):
 
     def validateInputs(self):
         issues = dict()
+        tolerance = 1e-10
+
+        workspace = self.getProperty('InputWorkspace').value
+        x_data = workspace.readX(0)
 
         # Validate X axis fitting range
         x_min = self.getProperty('XStart').value
@@ -58,12 +62,21 @@ class MSDFit(DataProcessorAlgorithm):
             issues['XStart'] = msg
             issues['XEnd'] = msg
 
+        if x_min < x_data[0]:
+            issues['XStart'] = 'Must be greater than minimum X value in workspace'
+
+        if x_max > x_data[-1]:
+            issues['XEnd'] = 'Must be less than maximum X value in workspace'
+
         # Validate specta fitting range
         spec_min = self.getProperty('SpecMin').value
         spec_max = self.getProperty('SpecMax').value
 
         if spec_min < 0:
-            issues['SpecMin'] = 'First spectrum index must be greater than or equal to 0'
+            issues['SpecMin'] = 'Minimum spectrum index must be greater than or equal to 0'
+
+        if spec_max > workspace.getNumberHistograms():
+            issues['SpecMax'] = 'Maximum spectrum index must be less than number of spectra in workspace'
 
         if spec_min > spec_max:
             msg = 'SpecMin must be less then SpecMax'
