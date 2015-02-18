@@ -53,7 +53,7 @@ public:
   virtual double intensity() const;
 
   /// Sets the integral intensity of the peak
-  virtual void setIntensity(const double intensity);
+  virtual void setIntensity(const double newIntensity);
 
   /// General implementation of the method for all peaks.
   void function1D(double *out, const double *xValues, const size_t nData) const;
