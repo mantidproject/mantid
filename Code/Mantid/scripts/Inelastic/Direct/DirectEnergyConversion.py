@@ -177,6 +177,12 @@ class DirectEnergyConversion(object):
       bleed_pixels - If the bleed test is on then this is the number of pixels ignored within the
                      bleed test diagnostic
       """
+      # output workspace name.
+      try:
+          n,r = funcreturns.lhs_info('both')
+          out_ws_name = r[0]
+      except:
+          out_ws_name = None
       # modify properties using input arguments
       self.prop_man.set_input_parameters(**kwargs)
       # obtain proper run descriptor in case it is not a run descriptor but
@@ -274,7 +280,11 @@ class DirectEnergyConversion(object):
       if 'second_white' in diag_params:
            DeleteWorkspace(Workspace=diag_params['second_white'])
         # Extract a mask workspace
-      diag_mask, det_ids = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=var_name)
+      if out_ws_name:
+        diag_mask, det_ids = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=out_ws_name)
+      else:
+        diag_mask=None
+        det_ids  = []
 
       DeleteWorkspace(Workspace=whiteintegrals)
       return diag_mask,len(det_ids)
@@ -389,7 +399,9 @@ class DirectEnergyConversion(object):
          #    mask_file_name,GroupedDetectors=True)
       else:
           header = '*** Using stored mask file for workspace with  {0} spectra and {1} masked spectra'
-          masking = self.spectra_masks
+          masking = self.spectra_masks 
+          num_failed  = 0 #TODO extract this from stored masks
+          num_failed2 = 0
  
       # estimate and report the number of failing detectors
       nMaskedSpectra = num_failed+num_failed2
@@ -476,8 +488,11 @@ class DirectEnergyConversion(object):
                 deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,
                                                                       ei_guess,PropertyManager.wb_for_monovan_run,
                                                                       'calculated')
+                # monovan run has been certainly deleted from memory after calculations
+                PropertyManager.monovan_run._in_cash = True
             self.check_background = current_bkg_opt
-         PropertyManager.monovan_run._in_cash = True # monovan run has been certainly deleted from memory
+
+
 
          # ensure that the sample_run name is intact with workspace
          PropertyManager.sample_run.synchronize_ws(deltaE_ws_sample)

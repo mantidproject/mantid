@@ -258,7 +258,7 @@ class RunDescriptor(PropDescriptor):
         # property contains run lists
         self._run_list = None
         #
-        self._in_cashe = False
+        self._in_cash = False
         # clear masking workspace if any available
         if self._mask_ws:
            DeleteWorkspace(self._mask_ws)
@@ -358,6 +358,8 @@ class RunDescriptor(PropDescriptor):
     def get_masking(self):
         """ return masking workspace specific to this particular workspace """ 
         return None
+#--------------------------------------------------------------------------------------------------------------------
+
     def add_masking_ws(self,masked_ws):
         """ extract masking from the workspace provided and apply it to this
             run workspace
@@ -920,7 +922,7 @@ class RunDescriptor(PropDescriptor):
             property, this one depends on 
             
         """ 
-        return not(self._in_cashe)
+        return not(self._in_cash)
 
     def notify_sum_runs_changed(self,old_value,new_value):
        """ Take actions on changes to sum_runs option 

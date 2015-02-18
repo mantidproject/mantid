@@ -135,7 +135,7 @@ def diagnose(white_int,**kwargs):
        if hasattr(parser, 'background_int'):
             add_masking(parser.background_int, white_int)
             __bkgd_mask, failures = do_background_test(parser.background_int, parser.samp_lo,
-                                                           parser.samp_hi, parser.samp_sig, parser.samp_zero, start_index, end_index)
+                                                       parser.samp_hi, parser.samp_sig, parser.samp_zero, start_index, end_index)
             test_results[3] = [str(__bkgd_mask), zero_count_failures + failures]
             add_masking(white_int, __bkgd_mask, start_index, end_index)
             DeleteWorkspace(__bkgd_mask)
