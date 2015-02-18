@@ -25,9 +25,9 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 /// Major version of Poco used to build Mantid.
-#define POCO_VERSION_MAJOR  @POCO_VERSION_MAJOR@
+#define POCO_VERSION_MAJOR @POCO_VERSION_MAJOR @
 /// Minor version of Poco used to build Mantid.
-#define POCO_VERSION_MINOR  @POCO_VERSION_MINOR@
+#define POCO_VERSION_MINOR @POCO_VERSION_MINOR @
 /// Patch version of Poco used to build Mantid.
-#define POCO_VERSION_PATCH  @POCO_VERSION_PATCH@
+#define POCO_VERSION_PATCH @POCO_VERSION_PATCH @
 #endif /* MANTID_KERNEL_POCOVERSION_H_ */
