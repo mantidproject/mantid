@@ -128,10 +128,10 @@ class CutMD(DataProcessorAlgorithm):
         if not isinstance(projection_table, ITableWorkspace):
             I = np.identity(3)
             return (I[0, :], I[1, :], I[2, :])
-        u = np.array(str(projection_table.cell("value", 0)).split(","))
-        v = np.array(str(projection_table.cell("value", 1)).split(","))
+        u = np.array(map(float,str(projection_table.cell("value", 0)).split(",")))
+        v = np.array(map(float,str(projection_table.cell("value", 1)).split(",")))
         if projection_table.rowCount() >= 3:
-            w = np.array(str(projection_table.cell("value", 2)).split(","))
+            w = np.array(map(float,str(projection_table.cell("value", 2)).split(",")))
         else:
             w = np.cross(v,u)
 
