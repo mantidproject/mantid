@@ -68,7 +68,7 @@ def CalibrateWish( run_per_panel_list):
         # copy data from the current panel to the whole_instrument
         for i in range(tube_set.getNumTubes()):
             for spec_num in tube_set.getTube(i):
-    		whole_instrument.setY(spec_num,ws.dataY(spec_num))
+            whole_instrument.setY(spec_num,ws.dataY(spec_num))
 
     # calibrate the whole_instrument with the last calibrated panel which has the calibration accumulation
     # of all the others
@@ -80,5 +80,5 @@ def CalibrateWish( run_per_panel_list):
 
 if __name__ == "__main__":
   # this file is found on cycle_11_1
-  run_per_panel_list =  [ (17706, 'panel01'), (17705, 'panel02'),  (17701, 'panel03'), (17702, 'panel04'), (17695, 'panel05')]
-  CalibrateWish(run_per_panel_list)
+    run_per_panel_list =    [ (17706, 'panel01'), (17705, 'panel02'),    (17701, 'panel03'), (17702, 'panel04'), (17695, 'panel05')]
+    CalibrateWish(run_per_panel_list)

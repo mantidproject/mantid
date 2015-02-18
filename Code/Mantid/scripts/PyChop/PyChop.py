@@ -3,9 +3,9 @@ import math
 import numpy
 from mantid.simpleapi import *
 try:
-  from mantidplot import *
+    from mantidplot import *
 except ImportError:
-  pass
+    pass
 '''
 chop(inst,ei,chop_type,frequency):
 python implementation of CHOP ver 1.0
@@ -193,39 +193,39 @@ def calculate(ei,frequency,**kwargs):
 
     if instname=='maps' or instname=='map' or instname=='MAP'or instname=='MAPS':
          #For MAPS
-         x0 = 10.1000
-         xa = 8.1100
-         x1 = 1.9000
-         x2 = 6.0000
-         wa_mm = 70.130
-         ha_mm = 70.130
-         wa = ha_mm / 1000.00
-         ha = ha_mm / 1000.00
+        x0 = 10.1000
+        xa = 8.1100
+        x1 = 1.9000
+        x2 = 6.0000
+        wa_mm = 70.130
+        ha_mm = 70.130
+        wa = ha_mm / 1000.00
+        ha = ha_mm / 1000.00
 
          # chopper details
          # now some moderator details
          # for 300K H2O
-         s=numpy.zeros(6)
-         s[1] = 38.60
-         s[2] = 0.52260
-         s[3] = 0.00
-         s[4] = 0.00
-         s[5] = 0.00
-         th_deg = 32.00
-         imod = 2
-         mod_type = 'AP'
+        s=numpy.zeros(6)
+        s[1] = 38.60
+        s[2] = 0.52260
+        s[3] = 0.00
+        s[4] = 0.00
+        s[5] = 0.00
+        th_deg = 32.00
+        imod = 2
+        mod_type = 'AP'
          # sample details
-         sx_mm = 2.00
-         sy_mm = 50.00
-         sz_mm = 50.00
-         isam = 0
-         gam_deg = 0.00
-         ia = 0
-         ix = 0
+        sx_mm = 2.00
+        sy_mm = 50.00
+        sz_mm = 50.00
+        isam = 0
+        gam_deg = 0.00
+        ia = 0
+        ix = 0
          # detector details
-         idet    = 1
-         dd_mm   = 250
-         tbin_us = 0.00
+        idet    = 1
+        dd_mm   = 250
+        tbin_us = 0.00
 
          #chop_par,titledata=setchoptype(instname,chop_type)
          # end of maps parameters
@@ -788,7 +788,7 @@ def achop(ei,omega):
     return area
 
 def frange(limit1, limit2 = None, increment = 1.):
-  """
+    """
   Range function that accepts floats (and integers).
 
   Usage:
@@ -799,10 +799,10 @@ def frange(limit1, limit2 = None, increment = 1.):
   The returned value is an iterator.  Use list(frange) for a list.
   """
 
-  if limit2 is None:
-    limit2, limit1 = limit1, 0.
-  else:
-    limit1 = float(limit1)
+    if limit2 is None:
+        limit2, limit1 = limit1, 0.
+    else:
+        limit1 = float(limit1)
 
-  count = int(math.ceil(limit2 - limit1)/increment)
-  return (limit1 + n*increment for n in range(count))
+    count = int(math.ceil(limit2 - limit1)/increment)
+    return (limit1 + n*increment for n in range(count))

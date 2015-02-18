@@ -540,7 +540,7 @@ class ConvertToQ(ReductionStep):
             self._grav_set = True
 
         if (not self._grav_set) or override:
-                self._use_gravity = bool(flag)
+            self._use_gravity = bool(flag)
         else:
             msg = "User file can't override previous gravity setting, do gravity correction remains " + str(self._use_gravity)
             print msg

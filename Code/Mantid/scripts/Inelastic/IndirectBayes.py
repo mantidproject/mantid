@@ -141,8 +141,8 @@ def ReadWidthFile(readWidth,widthFile,numSampleGroups):
             raise ValueError('Width groups (' +str(numLines) + ') not = Sample (' +str(numSampleGroups) +')')
     else:
          # no file: just use constant values
-         widthY = np.zeros(numSampleGroups)
-         widthE = np.zeros(numSampleGroups)
+        widthY = np.zeros(numSampleGroups)
+        widthE = np.zeros(numSampleGroups)
 
     # pad for Fortran call
     widthY = PadArray(widthY,51)
@@ -513,12 +513,12 @@ def C2Fw(prog,sname):
         axis_names.append('f'+str(nl)+'.f0.'+'Height')
         x.append(x_data)
         for j in range(1,nl+1):
-                axis_names.append('f'+str(nl)+'.f'+str(j)+'.Amplitude')
-                x.append(x_data)
-                axis_names.append('f'+str(nl)+'.f'+str(j)+'.FWHM')
-                x.append(x_data)
-                axis_names.append('f'+str(nl)+'.f'+str(j)+'.EISF')
-                x.append(x_data)
+            axis_names.append('f'+str(nl)+'.f'+str(j)+'.Amplitude')
+            x.append(x_data)
+            axis_names.append('f'+str(nl)+'.f'+str(j)+'.FWHM')
+            x.append(x_data)
+            axis_names.append('f'+str(nl)+'.f'+str(j)+'.EISF')
+            x.append(x_data)
 
     x = np.asarray(x).flatten()
     y = np.asarray(y).flatten()

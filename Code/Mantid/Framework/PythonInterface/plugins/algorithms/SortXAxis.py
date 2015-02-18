@@ -36,8 +36,8 @@ class SortXAxis(PythonAlgorithm):
 
             x_ordered = x[indexes]
             if input_ws.isHistogramData():
-               max_index = np.argmax(indexes)
-               indexes = np.delete(indexes, max_index)
+                max_index = np.argmax(indexes)
+                indexes = np.delete(indexes, max_index)
 
             y_ordered = y[indexes]
             e_ordered = e[indexes]

@@ -119,11 +119,11 @@ class LoadData(ReductionStep):
             basis_mask_filename = os.path.join(config.getString('maskFiles.directory')
                     , basis_mask)
             if os.path.isfile(basis_mask_filename):
-                    LoadMask(Instrument="BASIS", OutputWorkspace="__basis_mask",
+                LoadMask(Instrument="BASIS", OutputWorkspace="__basis_mask",
                              InputFile=basis_mask_filename)
-                    MaskDetectors(Workspace=output_ws, MaskedWorkspace="__basis_mask")
+                MaskDetectors(Workspace=output_ws, MaskedWorkspace="__basis_mask")
             else:
-                    logger.notice("Couldn't find specified mask file : " + str(basis_mask_filename))
+                logger.notice("Couldn't find specified mask file : " + str(basis_mask_filename))
 
         if self._parameter_file != None:
             LoadParameterFile(Workspace=output_ws,Filename= self._parameter_file)
@@ -824,7 +824,7 @@ class Grouping(ReductionStep):
             for i in range(0, nhist):
                 if i not in self._masking_detectors:
                     wslist.append(i)
-            GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, 
+            GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace,
                            WorkspaceIndexList=wslist, Behaviour='Average')
         else:
             # We may have either a workspace name or a mapping file name here
@@ -852,10 +852,10 @@ class Grouping(ReductionStep):
             # Run GroupDetectors with a workspace if we have one
             # Otherwise try to run it with a mapping file
             if grouping_workspace is not None:
-                GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, CopyGroupingFromWorkspace=grouping_workspace, 
+                GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, CopyGroupingFromWorkspace=grouping_workspace,
                         Behaviour='Average')
             elif os.path.isfile(grouping_filename):
-                GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, MapFile=grouping_filename, 
+                GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, MapFile=grouping_filename,
                         Behaviour='Average')
 
         return workspace

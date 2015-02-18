@@ -14,7 +14,7 @@ class NormaliseByThickness(PythonAlgorithm):
         return "NormaliseByThickness"
 
     def summary(self):
-      return "Normalise detector counts by the sample thickness."
+        return "Normalise detector counts by the sample thickness."
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
