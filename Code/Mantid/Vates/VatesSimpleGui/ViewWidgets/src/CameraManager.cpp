@@ -131,9 +131,6 @@ namespace Mantid
         // Setup the focal point of the camera. we want this to be on the peak
         camera->SetFocalPoint(xpos, ypos, zpos);
 
-        // Setup the depth of the view 
-        camera->SetClippingRange(0.1, 1.0);
-
         // Setup the position of the camera. We want this to be 
         double zposCamera = zpos + peakRadius;
         camera->SetPosition(xpos, ypos, zposCamera);

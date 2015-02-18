@@ -17,12 +17,13 @@ src/IMDDimensionComparitor.cpp
 src/LoadVTK.cpp
 src/MDEWEventNexusLoadingPresenter.cpp
 src/MDEWRebinningPresenter.cpp
-src/MDEWInMemoryLoadingPresenter.cpp
 src/MDEWLoadingPresenter.cpp
+src/MDEWInMemoryLoadingPresenter.cpp
 src/MDHWInMemoryLoadingPresenter.cpp
 src/MDHWLoadingPresenter.cpp
 src/MDHWNexusLoadingPresenter.cpp
 src/MedianAndBelowThresholdRange.cpp
+src/MetadataToFieldData.cpp
 src/MetadataToFieldData.cpp
 src/MetaDataExtractorUtils.cpp
 src/MetadataJsonManager.cpp
@@ -41,6 +42,7 @@ src/vtkDataSetFactory.cpp
 src/vtkDataSetToGeometry.cpp
 src/vtkDataSetToImplicitFunction.cpp
 src/vtkDataSetToNonOrthogonalDataSet.cpp
+src/vtkDataSetToPeaksFilteredDataSet.cpp
 src/vtkDataSetToScaledDataSet.cpp
 src/vtkDataSetToWsName.cpp
 src/vtkDataSetToWsLocation.cpp
@@ -110,6 +112,7 @@ inc/MantidVatesAPI/vtkDataSetFactory.h
 inc/MantidVatesAPI/vtkDataSetToGeometry.h
 inc/MantidVatesAPI/vtkDataSetToImplicitFunction.h
 inc/MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h
+inc/MantidVatesAPI/vtkDataSetToPeaksFilteredDataSet.h
 inc/MantidVatesAPI/vtkDataSetToScaledDataSet.h
 inc/MantidVatesAPI/vtkDataSetToWsName.h
 inc/MantidVatesAPI/vtkDataSetToWsLocation.h
@@ -200,6 +203,7 @@ ${MANTID_SUBPROJECT_LIBS}
 vtkCommonCore
 vtkCommonDataModel
 vtkIOLegacy
+vtkFiltersExtraction
 ${QWT_LIBRARIES}
 )
 

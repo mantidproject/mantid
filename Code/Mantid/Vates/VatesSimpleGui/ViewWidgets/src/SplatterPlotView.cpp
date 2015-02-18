@@ -57,6 +57,7 @@ SplatterPlotView::SplatterPlotView(QWidget *parent) : ViewBase(parent),
   this->ui.setupUi(this);
 
   m_peaksViewer = new PeaksViewerVsi(m_cameraManager, this);
+  m_peaksViewer->setMaximumHeight(150);
   this->ui.tableLayout->addWidget(m_peaksViewer);
   m_peaksViewer->setVisible(true);
 
@@ -136,6 +137,11 @@ void SplatterPlotView::destroyView()
   {
     builder->destroy(this->splatSource);
   }
+  if (this->m_peaksFilter)
+  {
+    builder->destroy(this->m_peaksFilter);
+  }
+
   builder->destroy(this->view);
 }
 
@@ -415,12 +421,30 @@ void SplatterPlotView::setupVisiblePeaksButtons()
  */
 void SplatterPlotView::onShowVisiblePeaksTable()
 {
+  // Create a peaks filter
+  createPeaksFilter();
+
   if (m_peaksViewer->hasPeaks())
   {
      m_peaksViewer->showTable();
      m_peaksViewer->show();
   }
 }
+
+/**
+ * On show all peaks 
+ */
+void SplatterPlotView::onShowAllPeaksTable()
+{
+  createPeaksFilter();
+
+  if (m_peaksViewer->hasPeaks())
+  {
+     m_peaksViewer->showFullTable();
+     m_peaksViewer->show();
+  }
+}
+
 
 /**
  * Remove the visible peaks table.
@@ -432,18 +456,52 @@ void SplatterPlotView::onRemoveVisiblePeaksTable()
     //m_peaksViewer->removeTable();
     m_peaksViewer->hide();
   }
+
+  if (m_peaksFilter)
+  {
+    pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+    builder->destroy(m_peaksFilter);
+  }
 }
 
+
 /**
- * On show all peaks 
+ * Create the peaks filter
  */
-void SplatterPlotView::onShowAllPeaksTable()
+void SplatterPlotView::createPeaksFilter()
 {
-  if (m_peaksViewer->hasPeaks())
+  // If the peaks filter already exist, then don't do anything
+  if (m_peaksFilter)
   {
-     m_peaksViewer->showFullTable();
-     m_peaksViewer->show();
+    return;
   }
+
+  // Create the peak filter
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  pqPipelineSource* filter = builder->createFilter("filters","MantidParaViewPeaksFilter", this->splatSource);
+
+  // Set the peaks workspace name. We need to trigger accept in order to log the workspace in the filter
+  std::string workspaceName = m_peaksViewer->getPeaksWorkspaceName();
+  if (workspaceName.empty())
+  {
+    return;
+  }
+  vtkSMPropertyHelper(filter->getProxy(), "PeaksWorkspace").Set(workspaceName.c_str());
+  emit this->triggerAccept();
+  filter->updatePipeline();
+
+  // Create point representation of the source and set the point size 
+  pqDataRepresentation *dataRepresentation  = filter->getRepresentation(this->view);
+  vtkSMPropertyHelper(dataRepresentation->getProxy(), "Representation").Set("Points");
+  vtkSMPropertyHelper(dataRepresentation->getProxy(), "PointSize").Set(4);
+  dataRepresentation->getProxy()->UpdateVTKObjects();
+
+  pqPipelineRepresentation *pipelineRepresentation = qobject_cast<pqPipelineRepresentation*>(dataRepresentation);
+  pipelineRepresentation->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+  this->resetDisplay();
+  this->renderAll();
+
+  m_peaksFilter = filter;
 }
 
 } // SimpleGui

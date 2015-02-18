@@ -16,10 +16,13 @@ namespace VATES
     public:
     NullPeaksPresenterVsi(){}
     virtual ~NullPeaksPresenterVsi(){}
-    virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace(){return Mantid::API::IPeaksWorkspace_sptr();};
-    virtual std::vector<bool> getViewablePeaks() {return std::vector<bool>();}
-    virtual void updateViewFrustum(ViewFrustum frustum) {};
-    virtual std::string getFrame(){return std::string();}
+    virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace(){throw std::runtime_error("NullPeaksPresenterVsi does not implement this method. Misused");}
+    virtual std::vector<bool> getViewablePeaks() {throw std::runtime_error("NullPeaksPresenterVsi does not implement this method. Misused");}
+    virtual void updateViewFrustum(ViewFrustum frustum) {}
+    virtual std::string getFrame(){throw std::runtime_error("NullPeaksPresenterVsi does not implement this method. Misused");}
+    virtual std::string getPeaksWorkspaceName(){throw std::runtime_error("NullPeaksPresenterVsi does not implement this method. Misused");}
+    virtual void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row,
+                              Mantid::Kernel::V3D& position, double& radius){throw std::runtime_error("NullPeaksPresenterVsi does not implement this method. Misused");}
   };
 }
 }

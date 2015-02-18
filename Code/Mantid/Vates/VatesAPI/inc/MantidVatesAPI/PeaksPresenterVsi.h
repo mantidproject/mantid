@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidKernel/V3D.h"
 #include <vector>
 #include <string>
 
@@ -21,6 +22,9 @@ class DLLExport PeaksPresenterVsi
     virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() = 0;
     virtual void updateViewFrustum(ViewFrustum frustum) = 0;
     virtual std::string getFrame() = 0;
+    virtual std::string getPeaksWorkspaceName() = 0;
+    virtual void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row,
+                              Mantid::Kernel::V3D& position, double& radius) = 0;
 };
 }
 }

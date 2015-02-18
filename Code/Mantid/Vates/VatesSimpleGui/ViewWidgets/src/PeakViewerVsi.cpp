@@ -7,18 +7,15 @@
 #include "MantidAPI/PeakTransformHKL.h"
 #include "MantidAPI/PeakTransformQSample.h"
 #include "MantidAPI/PeakTransformQLab.h"
-#include "MantidAPI/IPeak.h"
 #include "MantidKernel/V3D.h"
-#include "MantidDataObjects/NoShape.h"
-#include "MantidDataObjects/PeakShapeSpherical.h"
-#include "MantidDataObjects/PeakShapeEllipsoid.h"
-#include "MantidKernel/SpecialCoordinateSystem.h"
+
 #include "MantidVatesAPI/PeaksPresenterVsi.h"
 #include "MantidVatesAPI/NullPeaksPresenterVsi.h"
 #include "MantidVatesAPI/ConcretePeaksPresenterVsi.h"
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidGeometry/Crystal/PeakShape.h"
+
+#include "MantidKernel/Logger.h"
 
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
@@ -46,6 +43,12 @@ namespace Vates
 {
 namespace SimpleGui
 {
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("PeakViewerVsi");
+}
+
   /**
    * Constructor
    * @param cameraManager A cameraManager pointer.
@@ -74,7 +77,14 @@ namespace SimpleGui
       updateViewableArea();
 
       //Get a list with viewable peak coordinates
-      viewablePeaks = m_presenter->getViewablePeaks();
+      try
+      {
+        viewablePeaks = m_presenter->getViewablePeaks();
+      }
+      catch(...)
+      {
+        g_log.warning() << "The viewable peaks could not be retrieved. \n"; 
+      }
     }
     return viewablePeaks;
   }
@@ -86,52 +96,53 @@ namespace SimpleGui
    */
   void PeaksViewerVsi::addWorkspace(pqPipelineSource* source, QPointer<pqPipelineSource> splatSource)
   {
-    if (!source || !splatSource)
-    {
-      throw std::invalid_argument("The pqPipelineSource of the peaks workspace does not exist.");
-    }
-
-    // Get the pointer to the peaks workspace 
-    std::string wsName(vtkSMPropertyHelper(source->getProxy(), "WorkspaceName", true).GetAsString());
-    std::string peaksFrame(vtkSMPropertyHelper(source->getProxy(), "Peak Dimensions", true).GetAsString());
-
-    // Get dimensions from splattersource
-    std::vector<std::string> dimInfo = extractFrameFromSource(splatSource);
-    if (dimInfo.size() < 2)
-    {
-      throw std::invalid_argument("The workspace needs to have at least two dimensions");
-    }
-
-    std::string dimCompare = dimInfo[0];
-    std::transform(dimCompare.begin(), dimCompare.end(),dimCompare.begin(), ::toupper);
-    std::transform(peaksFrame.begin(), peaksFrame.end(),peaksFrame.begin(), ::toupper);
-    // Check if frames match
-    if (dimCompare.find(peaksFrame) == std::string::npos)
-    {
-      throw std::runtime_error("The workspaces don't match");
-    }
-
-    Mantid::API::IPeaksWorkspace_sptr peaksWorkspace;
     try
     {
-      peaksWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::IPeaksWorkspace>(wsName);
+      if (!source || !splatSource)
+      {
+        throw std::invalid_argument("The pqPipelineSource of the peaks workspace does not exist.");
+      }
+
+      // Get the pointer to the peaks workspace 
+      std::string wsName(vtkSMPropertyHelper(source->getProxy(), "WorkspaceName", true).GetAsString());
+      std::string peaksFrame(vtkSMPropertyHelper(source->getProxy(), "Peak Dimensions", true).GetAsString());
+
+      // Get dimensions from splattersource
+      std::vector<std::string> dimInfo = extractFrameFromSource(splatSource);
+      if (dimInfo.size() < 2)
+      {
+        throw std::invalid_argument("The workspace needs to have at least two dimensions");
+      }
+
+      std::string dimCompare = dimInfo[0];
+      std::transform(dimCompare.begin(), dimCompare.end(),dimCompare.begin(), ::toupper);
+      std::transform(peaksFrame.begin(), peaksFrame.end(),peaksFrame.begin(), ::toupper);
+      // Check if frames match
+      if (dimCompare.find(peaksFrame) == std::string::npos)
+      {
+        throw std::runtime_error("The workspaces do not match.");
+      }
+
+      Mantid::API::IPeaksWorkspace_sptr peaksWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::IPeaksWorkspace>(wsName);
+
+      Mantid::API::PeakTransformFactory_sptr transformFactory = m_peakTransformSelector.makeChoice(dimInfo[0], dimInfo[1]);
+      Mantid::API::PeakTransform_sptr transform = transformFactory->createTransform(dimInfo[0], dimInfo[1]);
+      std::string frame = transform->getFriendlyName();
+
+      m_presenter = boost::make_shared<Mantid::VATES::ConcretePeaksPresenterVsi>(peaksWorkspace, m_cameraManager->getCurrentViewFrustum(), frame);
     }
     catch(Mantid::Kernel::Exception::NotFoundError&)
     {
-      throw std::invalid_argument("The peaks workspace cannot be retrieved.");
+      g_log.warning() << "Could not retrieve the peaks workspace.\n";
     }
-    
-    std::string frame;
-    try 
+    catch(std::invalid_argument &ex)
     {
-      Mantid::API::PeakTransformFactory_sptr transformFactory = m_peakTransformSelector.makeChoice(dimInfo[0], dimInfo[1]);
-      Mantid::API::PeakTransform_sptr transform = transformFactory->createTransform(dimInfo[0], dimInfo[1]);
-      frame = transform->getFriendlyName();
-    } catch (std::invalid_argument &ex) {
-      throw std::invalid_argument("Couldn't create the transform factory");
+      g_log.warning() << ex.what();
     }
-
-    m_presenter = boost::make_shared<Mantid::VATES::ConcretePeaksPresenterVsi>(peaksWorkspace, m_cameraManager->getCurrentViewFrustum(), frame);
+    catch(std::runtime_error &ex)
+    {
+      g_log.warning() << ex.what();
+    }
   }
 
   /**
@@ -225,29 +236,33 @@ namespace SimpleGui
         removeLayout(this);
       }
 
-      this->setLayout(new QVBoxLayout);
-
       // Create new widget
-      PeaksWidget* widget = new PeaksWidget(m_presenter->getPeaksWorkspace(), m_presenter->getFrame(), this);
-      QObject::connect(widget, SIGNAL(zoomToPeak(Mantid::API::IPeaksWorkspace_sptr, int)),
-                       this, SLOT(onZoomToPeak(Mantid::API::IPeaksWorkspace_sptr, int)));
-      
-      // Initialize the viewablePeaks to be true
-      std::vector<bool> viewablePeaks(m_presenter->getPeaksWorkspace()->getNumberPeaks(),true);
-
-      if (!full)
+      try
       {
-        try
+        this->setLayout(new QVBoxLayout);
+        PeaksWidget* widget = new PeaksWidget(m_presenter->getPeaksWorkspace(), m_presenter->getFrame(), this);
+        QObject::connect(widget, SIGNAL(zoomToPeak(Mantid::API::IPeaksWorkspace_sptr, int)),
+                         this, SLOT(onZoomToPeak(Mantid::API::IPeaksWorkspace_sptr, int)));
+
+        // Initialize the viewablePeaks to be true
+        std::vector<bool> viewablePeaks(m_presenter->getPeaksWorkspace()->getNumberPeaks(),true);
+
+        if (!full)
         {
           viewablePeaks = getViewablePeaks();
-        } catch (...)
-        {
-          // Log 
         }
-      }
 
-      widget->setupMvc(viewablePeaks);
-      layout()->addWidget(widget);
+        widget->setupMvc(viewablePeaks);
+        layout()->addWidget(widget);
+      }
+      catch(std::runtime_error &ex)
+      {
+        g_log.warning() << "Could not setup the the peaks widget for the splatterplot: " << ex.what() << "\n";
+      }
+      catch(...)
+      {
+        g_log.warning() << "Could not setup the the peaks widget for the splatterplot.\n";
+      }
     }
   }
 
@@ -284,76 +299,28 @@ namespace SimpleGui
   */
   void PeaksViewerVsi::onZoomToPeak(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row)
   {
-    // Extract the position
-    Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = peaksWorkspace->getSpecialCoordinateSystem();
-
-    Mantid::Kernel::V3D position;
-    switch(coordinateSystem)
+    try
     {
-      case(Mantid::Kernel::SpecialCoordinateSystem::QLab):
-        position = peaksWorkspace->getPeak(row).getQLabFrame();
-        break;
-      case(Mantid::Kernel::SpecialCoordinateSystem::QSample):
-        position = peaksWorkspace->getPeak(row).getQSampleFrame();
-        break;
-      case(Mantid::Kernel::SpecialCoordinateSystem::HKL):
-        position = peaksWorkspace->getPeak(row).getHKL();
-        break;
-      default:
-        return;
+      double radius;
+      Mantid::Kernel::V3D position;
+      m_presenter->getPeaksInfo(peaksWorkspace, row, position, radius);
+
+      // Reset camera
+      m_cameraManager->setCameraToPeak(position[0], position[1], position[2], radius);
+    } 
+    catch (std::invalid_argument &ex)
+    {
+      g_log.warning() << ex.what();
     }
-
-    // Peak radius
-    Mantid::Geometry::PeakShape_sptr shape(peaksWorkspace->getPeakPtr(row)->getPeakShape().clone());
-    double maxRadius = getMaxRadius(shape);
-    
-    // Peak position
-    double xpos = position[0];
-    double ypos = position[1];
-    double zpos = position[2];
-    
-    // Direction
-    
-
-    // Reset camera
-    m_cameraManager->setCameraToPeak(xpos, ypos, zpos, maxRadius);
   }
 
   /**
-   * Get the maximal radius
-   * @param shape The shape of a peak.
-   * @param The maximal radius of the peak.
+   * Get the name of the peaks workspace
+   * @returns The name of the peaks workspace
    */
-  double PeaksViewerVsi::getMaxRadius(Mantid::Geometry::PeakShape_sptr shape)
+  std::string PeaksViewerVsi::getPeaksWorkspaceName()
   {
-    boost::shared_ptr<Mantid::DataObjects::NoShape> nullShape = boost::dynamic_pointer_cast<Mantid::DataObjects::NoShape>(shape);
-    boost::shared_ptr<Mantid::DataObjects::PeakShapeEllipsoid> ellipsoidShape = boost::dynamic_pointer_cast<Mantid::DataObjects::PeakShapeEllipsoid>(shape);
-    boost::shared_ptr<Mantid::DataObjects::PeakShapeSpherical> sphericalShape = boost::dynamic_pointer_cast<Mantid::DataObjects::PeakShapeSpherical>(shape);
-    
-    if (nullShape)
-    {
-      return 0;
-    }
-    else if (ellipsoidShape)
-    {
-      std::vector<double> radius = ellipsoidShape->abcRadiiBackgroundOuter();
-      return *(std::max_element(radius.begin(),radius.end()));
-    }
-    else if (sphericalShape)
-    {
-      if (boost::optional<double> radius = sphericalShape->backgroundOuterRadius())
-      {
-        return *radius;
-      }
-      else
-      {
-        return 0;
-      }
-    }
-    else
-    {
-      return 0;
-    }
+    return m_presenter->getPeaksWorkspaceName();
   }
 }
 }

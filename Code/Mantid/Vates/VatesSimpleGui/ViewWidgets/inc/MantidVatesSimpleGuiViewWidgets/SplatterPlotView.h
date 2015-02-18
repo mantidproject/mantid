@@ -129,6 +129,8 @@ private:
   void readAndSendCoordinates();
   /// Setup the buttons for the visible peaks
   void setupVisiblePeaksButtons();
+  /// Create the peaks filter
+  void createPeaksFilter();
 
   bool noOverlay; ///< Flag to respond to overlay situation correctly
   QList<QPointer<pqPipelineSource> > peaksSource; ///< A list of peaks sources
@@ -136,6 +138,7 @@ private:
   QPointer<pqPipelineRepresentation> splatRepr; ///< The splatter plot representation
   QPointer<pqPipelineSource> splatSource; ///< The splatter plot source
   QPointer<pqPipelineSource> threshSource; ///< The thresholding filter source
+  QPointer<pqPipelineSource> m_peaksFilter; ///< The peaks filter
   Ui::SplatterPlotView ui; ///< The splatter plot view'a UI form
   QPointer<pqRenderView> view; ///< The main view area
   boost::shared_ptr<CameraManager> m_cameraManager; ///< The camera manager

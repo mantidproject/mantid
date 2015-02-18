@@ -30,7 +30,7 @@ public:
   void showTable();
   void showFullTable();
   void removeTable();
-
+  std::string getPeaksWorkspaceName();
 public slots:
   void updateViewableArea();
   void onZoomToPeak(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row);

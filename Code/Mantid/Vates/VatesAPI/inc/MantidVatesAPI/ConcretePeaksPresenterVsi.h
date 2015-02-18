@@ -6,6 +6,7 @@
 #include "MantidAPI/PeakTransform.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidVatesAPI/ViewFrustum.h"
+#include "MantidGeometry/Crystal/PeakShape.h"
 #include <vector>
 
 
@@ -22,7 +23,11 @@ class DLLExport ConcretePeaksPresenterVsi : public PeaksPresenterVsi
     virtual std::vector<bool> getViewablePeaks();
     virtual void updateViewFrustum(ViewFrustum frustum);
     virtual std::string getFrame();
+    virtual std::string getPeaksWorkspaceName();
+    virtual void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row, Mantid::Kernel::V3D& position, double& radius);
   private:
+    /// Get the max radius.
+    double getMaxRadius(Mantid::Geometry::PeakShape_sptr shape);
     /// Viewable Peaks
     std::vector<bool> m_viewablePeaks;
     /// The viewable region
