@@ -200,7 +200,7 @@ double PoldiSpectrumDomainFunction::getParameter(size_t i) const {
 
 double
 PoldiSpectrumDomainFunction::getParameter(const std::string &name) const {
-  return ParamFunction::getParameter(name);
+  return getParameter(parameterIndex(name));
 }
 
 void PoldiSpectrumDomainFunction::setAttribute(

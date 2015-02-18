@@ -10,6 +10,7 @@
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidCurveFitting/Gaussian.h"
 #include "MantidCurveFitting/FitMW.h"
@@ -49,13 +50,34 @@ public:
     void testInit()
     {
         PoldiSpectrumDomainFunction function;
+        TS_ASSERT_THROWS_NOTHING(function.initialize());
+
+        // Function has one attribute, "ProfileFunction"
+        TS_ASSERT_EQUALS(function.getAttributeNames().size(), 1);
+    }
+
+    void testProfileFunctionAttribute()
+    {
+        PoldiSpectrumDomainFunction function;
         function.initialize();
 
-        std::vector<std::string> parameterNames = function.getParameterNames();
+        TS_ASSERT_EQUALS(function.nParams(), 0);
 
-        TS_ASSERT_EQUALS(parameterNames[0], "Area");
-        TS_ASSERT_EQUALS(parameterNames[1], "Fwhm");
-        TS_ASSERT_EQUALS(parameterNames[2], "Centre");
+        TS_ASSERT_THROWS_NOTHING(function.setAttributeValue("ProfileFunction", "Gaussian"));
+
+        // Make sure the parameters are exposed correctly
+        IFunction_sptr gaussian = FunctionFactory::Instance().createFunction("Gaussian");
+        TS_ASSERT_EQUALS(function.nParams(), gaussian->nParams());
+        for(size_t i = 0; i < gaussian->nParams(); ++i) {
+            TS_ASSERT_EQUALS(function.parameterName(i), gaussian->parameterName(i));
+        }
+
+        TS_ASSERT_THROWS_NOTHING(function.setAttributeValue("ProfileFunction", "DeltaFunction"));
+        IFunction_sptr delta = FunctionFactory::Instance().createFunction("DeltaFunction");
+        TS_ASSERT_EQUALS(function.nParams(), delta->nParams());
+        for(size_t i = 0; i < delta->nParams(); ++i) {
+            TS_ASSERT_EQUALS(function.parameterName(i), delta->parameterName(i));
+        }
     }
 
     void testChopperSlitOffsets()
@@ -81,6 +103,7 @@ public:
     {
         TestablePoldiSpectrumDomainFunction function;
         function.initialize();
+        function.setAttributeValue("ProfileFunction", "Gaussian");
         function.setParameter("Height", 679.59369981039407842726);//1.9854805);
         function.setParameter("Sigma", 0.0027446316797104233 / (2.0 * sqrt(2.0 * log(2.0))));
         function.setParameter("PeakCentre", 1.1086444);
@@ -128,6 +151,7 @@ public:
     {
         TestablePoldiSpectrumDomainFunction function;
         function.initialize();
+        function.setAttributeValue("ProfileFunction", "Gaussian");
         function.setParameter("Height", 679.59369981039407842726);//1.9854805);
         function.setParameter("Sigma", 0.0027446316797104233 / (2.0 * sqrt(2.0 * log(2.0))));
         function.setParameter("PeakCentre", 1.1086444);
@@ -176,6 +200,7 @@ public:
     {
         TestablePoldiSpectrumDomainFunction *function = new TestablePoldiSpectrumDomainFunction();
         function->initialize();
+        function->setAttributeValue("ProfileFunction", "Gaussian");
         function->setParameter("Height", 1.9854805);
         function->setParameter("Sigma", 0.0027446316797104233 / (2.0 * sqrt(2.0 * log(2.0))));
         function->setParameter("PeakCentre", 1.1086444);
