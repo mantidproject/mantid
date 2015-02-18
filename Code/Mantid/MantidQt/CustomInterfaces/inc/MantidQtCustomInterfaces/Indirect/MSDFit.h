@@ -25,7 +25,7 @@ namespace IDA
 
   private slots:
     void singleFit();
-    void plotFit(QString wsName);
+    void plotFit(bool error);
     void newDataLoaded(const QString wsName);
     void plotInput();
     void specMinChanged(int value);

@@ -60,29 +60,47 @@ namespace IDA
 
   void MSDFit::run()
   {
-    QString pyInput =
-    "from IndirectDataAnalysis import msdfit\n"
-    "startX = " + QString::number(m_dblManager->value(m_properties["Start"])) +"\n"
-    "endX = " + QString::number(m_dblManager->value(m_properties["End"])) +"\n"
-    "specMin = " + m_uiForm.spSpectraMin->text() + "\n"
-    "specMax = " + m_uiForm.spSpectraMax->text() + "\n"
-    "input = '" + m_uiForm.dsSampleInput->getCurrentDataName() + "'\n";
-
-    if ( m_uiForm.ckPlot->isChecked() ) pyInput += "plot = True\n";
-    else pyInput += "plot = False\n";
-
-    if ( m_uiForm.ckSave->isChecked() ) pyInput += "save = True\n";
-    else pyInput += "save = False\n";
-
-    pyInput +=
-      "msdfit(input, startX, endX, spec_min=specMin, spec_max=specMax, Save=save, Plot=plot)\n";
-
-    QString pyOutput = runPythonCode(pyInput);
-    UNUSED_ARG(pyOutput);
+    if(!validate())
+      return;
 
     // Set the result workspace for Python script export
     QString dataName = m_uiForm.dsSampleInput->getCurrentDataName();
     m_pythonExportWsName = dataName.left(dataName.lastIndexOf("_")).toStdString() + "_msd";
+
+    QString wsName = m_uiForm.dsSampleInput->getCurrentDataName();
+    double xStart = m_dblManager->value(m_properties["Start"]);
+    double xEnd = m_dblManager->value(m_properties["End"]);
+    long specMin = m_uiForm.spSpectraMin->value();
+    long specMax = m_uiForm.spSpectraMax->value();
+    bool plot = m_uiForm.ckPlot->isChecked();
+    bool save = m_uiForm.ckSave->isChecked();
+
+    IAlgorithm_sptr msdAlg = AlgorithmManager::Instance().create("MSDFit");
+    msdAlg->initialize();
+    msdAlg->setProperty("InputWorkspace", wsName.toStdString());
+    msdAlg->setProperty("XStart", xStart);
+    msdAlg->setProperty("XEnd", xEnd);
+    msdAlg->setProperty("SpecMin", specMin);
+    msdAlg->setProperty("SpecMax", specMax);
+    msdAlg->setProperty("Plot", plot);
+    msdAlg->setProperty("OutputWorkspace", m_pythonExportWsName);
+
+    m_batchAlgoRunner->addAlgorithm(msdAlg);
+
+    // Handle saving results
+    if(save)
+    {
+      API::BatchAlgorithmRunner::AlgorithmRuntimeProps saveInputProps;
+      saveInputProps["InputWorkspace"] = m_pythonExportWsName;
+
+      IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexusProcessed");
+      saveAlg->initialize();
+      saveAlg->setProperty("Filename", m_pythonExportWsName + ".nxs");
+
+      m_batchAlgoRunner->addAlgorithm(saveAlg, saveInputProps);
+    }
+
+    m_batchAlgoRunner->executeBatchAsync();
   }
 
   void MSDFit::singleFit()
@@ -90,20 +108,28 @@ namespace IDA
     if(!validate())
       return;
 
-    QString pyInput =
-      "from IndirectDataAnalysis import msdfit\n"
-      "startX = " + QString::number(m_dblManager->value(m_properties["Start"])) +"\n"
-      "endX = " + QString::number(m_dblManager->value(m_properties["End"])) +"\n"
-      "specMin = " + m_uiForm.spPlotSpectrum->text() + "\n"
-      "specMax = " + m_uiForm.spPlotSpectrum->text() + "\n"
-      "input = '" + m_uiForm.dsSampleInput->getCurrentDataName() + "'\n";
+    // Set the result workspace for Python script export
+    QString dataName = m_uiForm.dsSampleInput->getCurrentDataName();
+    m_pythonExportWsName = dataName.left(dataName.lastIndexOf("_")).toStdString() + "_msd";
 
-    pyInput +=
-      "output = msdfit(input, startX, endX, spec_min=specMin, spec_max=specMax, Save=False, Plot=False)\n"
-      "print output \n";
+    QString wsName = m_uiForm.dsSampleInput->getCurrentDataName();
+    double xStart = m_dblManager->value(m_properties["Start"]);
+    double xEnd = m_dblManager->value(m_properties["End"]);
+    long fitSpec = m_uiForm.spPlotSpectrum->value();
 
-    QString pyOutput = runPythonCode(pyInput).trimmed();
-    plotFit(pyOutput);
+    IAlgorithm_sptr msdAlg = AlgorithmManager::Instance().create("MSDFit");
+    msdAlg->initialize();
+    msdAlg->setProperty("InputWorkspace", wsName.toStdString());
+    msdAlg->setProperty("XStart", xStart);
+    msdAlg->setProperty("XEnd", xEnd);
+    msdAlg->setProperty("SpecMin", fitSpec);
+    msdAlg->setProperty("SpecMax", fitSpec);
+    msdAlg->setProperty("OutputWorkspace", m_pythonExportWsName);
+
+    m_batchAlgoRunner->addAlgorithm(msdAlg);
+
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotFit(bool)));
+    m_batchAlgoRunner->executeBatchAsync();
   }
 
   bool MSDFit::validate()
@@ -131,12 +157,18 @@ namespace IDA
     m_uiForm.dsSampleInput->readSettings(settings.group());
   }
 
-  void MSDFit::plotFit(QString wsName)
+  void MSDFit::plotFit(bool error)
   {
-    if(Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotFit(bool)));
+
+    // Ignore errors
+    if(error)
+      return;
+
+    if(Mantid::API::AnalysisDataService::Instance().doesExist(m_pythonExportWsName + "_Workspaces"))
     {
       // Get the workspace
-      auto groupWs = Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::WorkspaceGroup>(wsName.toStdString());
+      auto groupWs = Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::WorkspaceGroup>(m_pythonExportWsName + "_Workspaces");
       auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(groupWs->getItem(0));
 
       // Remove the old fit
