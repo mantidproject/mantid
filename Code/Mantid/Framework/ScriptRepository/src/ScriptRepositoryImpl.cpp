@@ -64,23 +64,6 @@ namespace {
 Kernel::Logger g_log("ScriptRepositoryImpl");
 }
 
-static ScriptRepoException pocoException(const std::string &info,
-                                         Poco::Exception &ex) {
-  std::stringstream ss;
-  if (dynamic_cast<Poco::FileAccessDeniedException *>(&ex))
-    ss << info << ", because you do not have access to write to this path :"
-       << ex.message() << std::ends;
-  else if (dynamic_cast<Poco::Net::HostNotFoundException *>(&ex))
-    ss << info << ". The definition of the remote url is not correct. Please "
-                  "check the Mantid settings, the ScriptRepository entry. "
-                  "Current: " << ex.message() << std::ends;
-  else {
-    ss << info << " . Unknown:" << ex.displayText() << std::ends;
-  }
-
-  return ScriptRepoException(ss.str(), ex.displayText());
-}
-
 const char *timeformat = "%Y-%b-%d %H:%M:%S";
 
 const char *emptyURL =
