@@ -160,7 +160,7 @@ public:
 		for (size_t i=0; i < 41; i++) e[i] = sqrt( y[i] );
 	}
 
-    void xtest_with_Levenberg_Marquardt()
+    void test_with_Levenberg_Marquardt()
     {
       API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector( 79292.4, 79603.6, 41));
       API::FunctionValues mockData(*domain);
@@ -426,7 +426,7 @@ public:
   }
 
 
-  void xtestAgainstMockDataSimplex2()
+  void testAgainstMockDataSimplex2()
   {
     // create mock data to test against
     std::string wsName = "GaussMockDataSimplex2";
