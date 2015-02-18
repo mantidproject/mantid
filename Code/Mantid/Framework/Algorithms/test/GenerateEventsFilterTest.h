@@ -942,6 +942,79 @@ public:
 
 
   //----------------------------------------------------------------------------------------------
+  /** Test generation of splitters by various time intervals
+   * (1) Multiple time interval with various time interval lengths
+   * (2) Default start time and stop time
+   */
+  void test_genTimeVariousIntervalMatrixSplitter()
+  {
+    // Create input Workspace & initial setup
+    DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
+    AnalysisDataService::Instance().addOrReplace("TestEventWorkspace08v", eventWS);
+    int64_t timeinterval_ns = 15000;
+
+    // Init and set property
+    GenerateEventsFilter alg;
+    alg.initialize();
+
+    std::vector<double> vectimeintervals;
+    vectimeintervals.push_back(static_cast<double>(timeinterval_ns));
+    vectimeintervals.push_back(static_cast<double>(timeinterval_ns)*2.);
+    vectimeintervals.push_back(static_cast<double>(timeinterval_ns)*3.);
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "TestEventWorkspace08v"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Splitters08v"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InformationWorkspace", "InfoWS08v"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FastLog", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeInterval", vectimeintervals));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOfTime", "Nanoseconds"));
+
+    // Running and get result
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Check output workspace
+    API::MatrixWorkspace_sptr splittersws =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Splitters08v"));
+
+    TS_ASSERT(splittersws);
+
+    // Check values of output workspace
+    size_t numintervals = 38;
+    TS_ASSERT_EQUALS(splittersws->readY(0).size(), numintervals);
+
+    std::string runstarttimestr = eventWS->run().getProperty("run_start")->value();
+    Kernel::DateAndTime runstarttime(runstarttimestr);
+    int64_t runstarttime_ns = runstarttime.totalNanoseconds();
+
+    Kernel::TimeSeriesProperty<double> *protonchargelog =
+        dynamic_cast<Kernel::TimeSeriesProperty<double>* >(eventWS->run().getProperty("proton_charge"));
+    Kernel::DateAndTime runstoptime = Kernel::DateAndTime(protonchargelog->lastTime().totalNanoseconds() + 100000);
+
+    // First 3 intervals
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->readX(0)[0]), runstarttime_ns);
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->readX(0)[1]), runstarttime_ns + timeinterval_ns);
+    TS_ASSERT_EQUALS(static_cast<int>(splittersws->readY(0)[0]), 0);
+
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->readX(0)[2]), runstarttime_ns + timeinterval_ns*3);
+    TS_ASSERT_EQUALS(static_cast<int>(splittersws->readY(0)[1]), 1);
+
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->readX(0)[3]), runstarttime_ns + timeinterval_ns*6);
+    TS_ASSERT_EQUALS(static_cast<int>(splittersws->readY(0)[2]), 2);
+
+    // Last interval
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->readX(0).back()), runstoptime.totalNanoseconds());
+    TS_ASSERT_EQUALS(static_cast<int>(splittersws->readY(0).back()), numintervals-1);
+
+    // Clean
+    AnalysisDataService::Instance().remove("Splitters08v");
+    AnalysisDataService::Instance().remove("InfoWS08v");
+    AnalysisDataService::Instance().remove("TestEventWorkspace08v");
+
+    return;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
   /** Convert the splitters stored in a matrix workspace to a vector of SplittingInterval objects
     */
   size_t convertMatrixSplitterToSplitters(API::MatrixWorkspace_const_sptr matrixws,

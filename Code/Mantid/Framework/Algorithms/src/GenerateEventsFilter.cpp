@@ -75,12 +75,8 @@ void GenerateEventsFilter::init() {
       "while the relative time takes integer or float. ");
 
   // Split by time (only) in steps
-  // TODO - clean this part
-  // auto timeintervalproperty = boost::make_shared<ArrayProperty<double> >("TimeInterval");
   declareProperty(new ArrayProperty<double>("TimeInterval"),
                   "Length...");
-  // declareProperty("TimeInterval", EMPTY_DBL(),
-     //              "Length of the time splices if filtered in time only.");
   setPropertySettings("TimeInterval",
                       new VisibleWhenProperty("LogName", IS_EQUAL_TO, ""));
 
@@ -117,16 +113,6 @@ void GenerateEventsFilter::init() {
                   "If not given, then only value ");
   setPropertySettings("LogValueInterval",
                       new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
-
-  /*
-    Documentation doesn't include property options in property descriptions or
-  anywhere else.
-   For example, FilterLogValueByChangingDirection doesn't let me know that
-  Increasing and Decreasing
-  are valid options without using the MantidPlotGui to open the algorithm
-  dialog.
-
-    */
 
   std::vector<std::string> filteroptions;
   filteroptions.push_back("Both");
@@ -447,7 +433,64 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
   }   // END-IF-ELSE
   else
   {
-    throw std::runtime_error("Implement multiple time interval ASAP.");
+    // Explicitly N time intervals with various interval
+
+    // Construct a vector for time intervals in nanosecond
+    size_t numtimeintervals = vec_timeintervals.size();
+    std::vector<int64_t> vec_dtimens(numtimeintervals);
+    for (size_t id = 0; id < numtimeintervals; ++id)
+    {
+      int64_t deltatime_ns =
+          static_cast<int64_t>(vec_timeintervals[id] * m_timeUnitConvertFactorToNS);
+      vec_dtimens[id] = deltatime_ns;
+    }
+
+    // Build the splitters
+    int64_t timeslot = 0;
+
+    int64_t curtime_ns = m_startTime.totalNanoseconds();
+    int wsindex = 0;
+    while (curtime_ns < m_stopTime.totalNanoseconds()) {
+      int64_t deltatime_ns;
+      for (size_t id = 0; id < numtimeintervals; ++id)
+      {
+        // get next time interval value
+        deltatime_ns = vec_dtimens[id];
+        // Calculate next.time
+        int64_t nexttime_ns = curtime_ns + deltatime_ns;
+        bool breaklater = false;
+        if (nexttime_ns > m_stopTime.totalNanoseconds())
+        {
+          nexttime_ns = m_stopTime.totalNanoseconds();
+          breaklater = true;
+        }
+
+        // Create splitter and information
+        Kernel::DateAndTime t0(curtime_ns);
+        Kernel::DateAndTime tf(nexttime_ns);
+        std::stringstream ss;
+        ss << "Time Interval From " << t0 << " to " << tf;
+
+        addNewTimeFilterSplitter(t0, tf, wsindex, ss.str());
+
+        // Update loop variable
+        curtime_ns = nexttime_ns;
+        ++wsindex;
+
+        // Update progress
+        int64_t newtimeslot =
+            (curtime_ns - m_startTime.totalNanoseconds()) * 90 / totaltime;
+        if (newtimeslot > timeslot) {
+          // There is change and update progress
+          timeslot = newtimeslot;
+          double prog = 0.1 + double(timeslot) / 100.0;
+          progress(prog);
+        }
+
+        if (breaklater)
+          break;
+      } // END-FOR
+    } // END-WHILE
   }
 
   return;
