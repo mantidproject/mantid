@@ -70,6 +70,12 @@ this algorithm:
    workspace index associated. These workspace indices are incremented
    by 1 from 0 along with their orders in time.
 
+-  A series of filters for multiple continuous time intervals, which
+   have various lengths of period.  
+   Each of them has an individual workspace index associated. 
+   These workspace indices are incremented by 1 from 0 along with their
+   order in time. 
+
 -  A filter containing one or multiple time intervals according to a
    specified log value. Any log value of the time that falls into the
    selected time intervals is equal or within the tolerance of a user
@@ -80,6 +86,33 @@ this algorithm:
    value of the time that falls into the selected time intervals is
    equal or within the tolerance of the log value as v\_0 + n x delta\_v
    +/- tolerance\_v.
+
+Generate event filters by time
+==============================
+
+Event filters can be created by defining start and stop time and time intervals. 
+The three input properties used are *StartTime*, *StopTime* and *TimeInterval*. 
+*TimeInterval* accepts an array of doubles. 
+
+If the array size is zero, then there will be one and only splitter will be 
+created from *StartTime* and *StopTime*. 
+
+If the size of the array is one, then all event splitters will have the same duration
+of time. 
+
+In general if the array is composed as :math:`t_1, t_2, \cdots, t_n`, 
+and :math:`T_0` is the run start time, 
+then the event splitters will have the time boudaries as 
+
+.. math:: (T_0, T_0+t_1), (T_0+t_1, T_0+t_1+t_2), \cdots, (T_0+\sum_{i=1}^(n-1)t_i, T_0+\sum_{i=1}^nt_i), (T_0+\sum_{i=1}^nt_i, T_0+\sum_{i=1}^nt_i+t_1), \cdots
+
+until the stop time is reached. 
+
+Unit of time
+############
+
+There are three types of units that are supported for time. 
+They are second, nanosecond and percentage of duration from *StartTime* to *StopTime*. 
 
 
 Generate event filters by sample log value

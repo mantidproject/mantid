@@ -76,7 +76,13 @@ void GenerateEventsFilter::init() {
 
   // Split by time (only) in steps
   declareProperty(new ArrayProperty<double>("TimeInterval"),
-                  "Length...");
+                  "Array for lengths of time intervals for splitters.  "
+                  "If the array is empty, then there will be one splitter "
+                  "created from StartTime and StopTime. "
+                  "If the array has one value, then all splitters will have "
+                  "same time intervals. "
+                  "If the size of the array is larger than one, then the "
+                  "splitters can have various time interval values.");
   setPropertySettings("TimeInterval",
                       new VisibleWhenProperty("LogName", IS_EQUAL_TO, ""));
 
