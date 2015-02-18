@@ -68,7 +68,7 @@ void PoldiFitPeaks2D::init() {
   declareProperty(new WorkspaceProperty<TableWorkspace>("PoldiPeakWorkspace",
                                                         "", Direction::Input),
                   "Table workspace with peak information.");
-  declareProperty("PeakProfileFunction", "",
+  declareProperty("PeakProfileFunction", "Gaussian",
                   "Profile function to use for integrating the peak profiles "
                   "before calculating the spectrum.");
 
@@ -163,8 +163,10 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
                                peakFunction->getError(iIndex));
 
       // size_t fIndex = peakFunction->parameterIndex("Sigma");
-      UncertainValue fwhm(peakFunction->getParameter(fIndex),
-                          peakFunction->getError(fIndex));
+      double fwhmValue = profileFunction->fwhm();
+      UncertainValue fwhm(fwhmValue, fwhmValue /
+                                         peakFunction->getParameter(fIndex) *
+                                         peakFunction->getError(fIndex));
 
       PoldiPeak_sptr peak =
           PoldiPeak::create(MillerIndices(), d, intensity, UncertainValue(1.0));
@@ -656,9 +658,6 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getNormalizedPeakCollection(
 
     PoldiPeak_sptr normalizedPeak = peak->clone();
     normalizedPeak->setIntensity(peak->intensity() / calculatedIntensity);
-
-    std::cout << normalizedPeak->intensity() << std::endl;
-
     normalizedPeakCollection->addPeak(normalizedPeak);
   }
 

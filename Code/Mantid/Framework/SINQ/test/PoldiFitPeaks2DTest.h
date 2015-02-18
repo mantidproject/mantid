@@ -113,7 +113,17 @@ public:
         TS_ASSERT_EQUALS(integratedTestPeaks->peakCount(), testPeaks->peakCount());
 
         // checking the actual integration result agains reference.
-        PoldiPeakCollection_sptr integratedReference = PoldiPeakCollectionHelpers::createPoldiPeakCollectionIntegral();
+        PoldiPeakCollection_sptr integratedReference(new PoldiPeakCollection(PoldiPeakCollection::Integral));
+        for(size_t i = 0; i < testPeaks->peakCount(); ++i) {
+            PoldiPeak_sptr peak = testPeaks->peak(i)->clone();
+
+            double oldIntensity = peak->intensity();
+            double fwhm = peak->fwhm(PoldiPeak::AbsoluteD);
+
+            // Integral of gaussian is height * sigma * sqrt(2 * pi)
+            peak->setIntensity(UncertainValue(oldIntensity * fwhm / (2.0 * sqrt(2.0 * log(2.0))) * sqrt(2.0 * M_PI)));
+            integratedReference->addPeak(peak);
+        }
 
         // compare result to relative error of 1e-6
         compareIntensities(integratedTestPeaks, integratedReference, 1e-6);
@@ -188,6 +198,8 @@ public:
     void testGetFunctionFromPeakCollection()
     {
         TestablePoldiFitPeaks2D spectrumCalculator;
+        spectrumCalculator.initialize();
+
         PoldiPeakCollection_sptr peaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
 
         boost::shared_ptr<Poldi2DFunction> poldi2DFunction = spectrumCalculator.getFunctionFromPeakCollection(peaks);
@@ -197,14 +209,15 @@ public:
         for(size_t i = 0; i < poldi2DFunction->nFunctions(); ++i) {
             IFunction_sptr rawFunction = poldi2DFunction->getFunction(i);
             TS_ASSERT(boost::dynamic_pointer_cast<IFunction1DSpectrum>(rawFunction));
-            TS_ASSERT_EQUALS(rawFunction->parameterName(0), "Area");
-            TS_ASSERT_EQUALS(rawFunction->getParameter(0), peaks->peak(i)->intensity());
+            TS_ASSERT_EQUALS(rawFunction->getParameter(0), static_cast<double>(peaks->peak(i)->intensity()) * 300.0);
         }
     }
 
     void testGetPeakCollectionFromFunction()
     {
         TestablePoldiFitPeaks2D spectrumCalculator;
+        spectrumCalculator.initialize();
+
         PoldiPeakCollection_sptr peaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
 
         IFunction_sptr poldi2DFunction = spectrumCalculator.getFunctionFromPeakCollection(peaks);
@@ -218,7 +231,7 @@ public:
 
             TS_ASSERT_EQUALS(functionPeak->d(), referencePeak->d());
             TS_ASSERT_EQUALS(functionPeak->fwhm(), referencePeak->fwhm());
-            TS_ASSERT_EQUALS(functionPeak->intensity(), referencePeak->intensity());
+            TS_ASSERT_EQUALS(functionPeak->intensity(), referencePeak->intensity() * 300.0);
         }
     }
 
