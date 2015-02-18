@@ -58,20 +58,19 @@ public:
   double requiredRelativePrecision() const;
 
   IntegrationResult
-  integrateInfinity(IPeakFunction_const_sptr peakFunction) const;
+  integrateInfinity(const IPeakFunction &peakFunction) const;
   IntegrationResult
-  integratePositiveInfinity(IPeakFunction_const_sptr peakFunction,
+  integratePositiveInfinity(const IPeakFunction &peakFunction,
                             double lowerLimit) const;
   IntegrationResult
-  integrateNegativeInfinity(IPeakFunction_const_sptr peakFunction,
+  integrateNegativeInfinity(const IPeakFunction &peakFunction,
                             double upperLimit) const;
 
-  IntegrationResult integrate(IPeakFunction_const_sptr peakFunction,
+  IntegrationResult integrate(const IPeakFunction &peakFunction,
                               double lowerLimit, double upperLimit) const;
 
 protected:
-  gsl_function getGSLFunction(IPeakFunction_const_sptr peakFunction) const;
-  void throwIfInvalid(IPeakFunction_const_sptr peakFunction) const;
+  gsl_function getGSLFunction(const IPeakFunction &peakFunction) const;
 
   gsl_integration_workspace *m_integrationWorkspace;
 

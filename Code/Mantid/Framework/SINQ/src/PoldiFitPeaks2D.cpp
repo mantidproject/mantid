@@ -571,7 +571,7 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getIntegratedPeakCollection(
     profileFunction->setCentre(0.0);
 
     IntegrationResult integration =
-        peakIntegrator.integrateInfinity(profileFunction);
+        peakIntegrator.integrateInfinity(*profileFunction);
 
     if (!integration.success) {
       throw std::runtime_error("Problem during peak integration. Aborting.");
