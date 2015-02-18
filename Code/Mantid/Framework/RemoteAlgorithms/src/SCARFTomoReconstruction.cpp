@@ -171,35 +171,6 @@ void SCARFTomoReconstruction::init() {
                                               "CancelJob"));
 }
 
-// gets action code in m_action, if input argument is valid
-SCARFTomoReconstruction::Action::Type SCARFTomoReconstruction::getAction() {
-  std::string par = getPropertyValue("Action");
-  Action::Type act = Action::UNDEF;
-  if (par == "LogIn") {
-    act = Action::LOGIN;
-  } else if (par == "LogOut") {
-    act = Action::LOGOUT;
-  } else if (par == "SubmitJob") {
-    act = Action::SUBMIT;
-  } else if (par == "JobStatus") {
-    act = Action::QUERYSTATUS;
-  } else if (par == "JobStatusByID") {
-    act = Action::QUERYSTATUSBYID;
-  } else if (par == "Ping") {
-    act = Action::PING;
-  } else if (par == "CancelJob") {
-    act = Action::CANCEL;
-  } else if (par == "Upload") {
-    act = Action::UPLOAD;
-  } else if (par == "Download") {
-    act = Action::DOWNLOAD;
-  } else {
-    g_log.error() << "Unknown action specified: '" <<
-      m_action << "', ignoring it.";
-  }
-  return act;
-}
-
 /**
  * Execute algorithm: check what action/command has to be run and call
  * specific methods.
@@ -1049,11 +1020,46 @@ std::string SCARFTomoReconstruction::buildSubmitBody(const std::string &appName,
 }
 
 /**
+ * Gets action code in m_action, if input argument is valid. Otherwise
+ * show error message and get undefined action.
+ *
+ * @return A valid action code (including 'undefined' code, if action
+ * not known).
+ */
+SCARFTomoReconstruction::Action::Type SCARFTomoReconstruction::getAction() {
+  std::string par = getPropertyValue("Action");
+  Action::Type act = Action::UNDEF;
+  if (par == "LogIn") {
+    act = Action::LOGIN;
+  } else if (par == "LogOut") {
+    act = Action::LOGOUT;
+  } else if (par == "SubmitJob") {
+    act = Action::SUBMIT;
+  } else if (par == "JobStatus") {
+    act = Action::QUERYSTATUS;
+  } else if (par == "JobStatusByID") {
+    act = Action::QUERYSTATUSBYID;
+  } else if (par == "Ping") {
+    act = Action::PING;
+  } else if (par == "CancelJob") {
+    act = Action::CANCEL;
+  } else if (par == "Upload") {
+    act = Action::UPLOAD;
+  } else if (par == "Download") {
+    act = Action::DOWNLOAD;
+  } else {
+    g_log.error() << "Unknown action specified: '" <<
+      m_action << "', ignoring it.";
+  }
+  return act;
+}
+
+/**
  * Helper to check if it's possible to write an output file and give
  * informative messages.
  *
  * @param localPath Destination directory
- * @param filename Name of the file being downloaded
+ * @param fname Name of the file being downloaded
  */
 const std::string
 SCARFTomoReconstruction::checkDownloadOutputFile(const std::string &localPath,
