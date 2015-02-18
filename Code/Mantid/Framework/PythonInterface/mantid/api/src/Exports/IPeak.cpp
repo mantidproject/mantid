@@ -10,11 +10,21 @@ Mantid::Geometry::PeakShape_sptr getPeakShape(IPeak &peak) {
   // Use clone to make a copy of the PeakShape.
   return Mantid::Geometry::PeakShape_sptr(peak.getPeakShape().clone());
 }
-void setQLabFrame(IPeak &peak, Mantid::Kernel::V3D qLabFrame, double distance) {
-  // Set the qlab frame
+void setQLabFrame1(IPeak &peak, Mantid::Kernel::V3D qLabFrame) {
+  // Set the q lab frame
+  return peak.setQLabFrame(qLabFrame);
+}
+void setQLabFrame2(IPeak &peak, Mantid::Kernel::V3D qLabFrame, double distance) {
+  // Set the q lab frame
   return peak.setQLabFrame(qLabFrame, distance);
 }
-void setQSampleFrame(IPeak &peak, Mantid::Kernel::V3D qSampleFrame, double distance) {
+
+void setQSampleFrame1(IPeak &peak, Mantid::Kernel::V3D qSampleFrame) {
+   // Set the qsample frame
+   return peak.setQSampleFrame(qSampleFrame);
+}
+
+void setQSampleFrame2(IPeak &peak, Mantid::Kernel::V3D qSampleFrame, double distance) {
     // Set the qsample frame
    return peak.setQSampleFrame(qSampleFrame, distance);
 }
@@ -47,10 +57,10 @@ void export_IPeak()
          "Using the instrument set in the peak, perform ray tracing to find the exact detector.")
     .def("getQSampleFrame", &IPeak::getQSampleFrame, "Return the Q change (of the lattice, k_i - k_f) for this peak."
          "The Q is in the Sample frame: the goniometer rotation WAS taken out. ")
-    .def("setQLabFrame", (void (IPeak::*)(Mantid::Kernel::V3D))&IPeak::setQLabFrame, "Set the peak using the peak's position in reciprocal space, in the lab frame.")
-    .def("setQLabFrame", setQLabFrame, "Set the peak using the peak's position in reciprocal space, in the lab frame. Detector distance explicitly supplied.") // two argument overload
-    .def("setQSampleFrame", (void (IPeak::*)(Mantid::Kernel::V3D))&IPeak::setQSampleFrame, "Set the peak using the peak's position in reciprocal space, in the sample frame.")
-    .def("setQSampleFrame", setQSampleFrame, "Set the peak using the peak's position in reciprocal space, in the sample frame.")
+    .def("setQLabFrame", setQLabFrame1, "Set the peak using the peak's position in reciprocal space, in the lab frame.")
+    .def("setQLabFrame", setQLabFrame2, "Set the peak using the peak's position in reciprocal space, in the lab frame. Detector distance explicitly supplied.") // two argument overload
+    .def("setQSampleFrame", setQSampleFrame1, "Set the peak using the peak's position in reciprocal space, in the sample frame.")
+    .def("setQSampleFrame", setQSampleFrame2, "Set the peak using the peak's position in reciprocal space, in the sample frame. Detector distance explicitly supplied.")
     .def("setWavelength", &IPeak::setWavelength, "Set the incident wavelength of the neutron. Calculates the energy from this assuming elastic scattering.")
     .def("getWavelength", &IPeak::getWavelength, "Return the incident wavelength")
     .def("getScattering", &IPeak::getScattering, "Calculate the scattering angle of the peak")
