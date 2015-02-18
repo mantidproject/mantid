@@ -82,14 +82,14 @@ class IPeakFunctionTest(unittest.TestCase):
 
         # This is a rectangle function with height 2 and width 3, centered
         # around 1.0. The intensity should be 6.0 (height * width)
-        self.assertAlmostEquals(func.intensity(), 6.0, delta=1e-10)
+        self.assertAlmostEquals(func.intensity(), 6.0, places=10)
 
         # Setting the intensity only changes height, not width
         func.setIntensity(12.0)
 
         self.assertEquals(func.fwhm(), 3.0)
-        self.assertAlmostEquals(func.height(), 4.0, delta=1e-10)
-        self.assertAlmostEquals(func.intensity(), 12.0, delta=1e-10)
+        self.assertAlmostEquals(func.height(), 4.0, places=10)
+        self.assertAlmostEquals(func.intensity(), 12.0, places=10)
 
 if __name__ == '__main__':
     unittest.main()
