@@ -57,7 +57,7 @@ class NonIDF_Properties(object):
         super(NonIDF_Properties,self).__setattr__('wb_for_monovan_run',None)
         super(NonIDF_Properties,self).__setattr__('second_white',None)
         super(NonIDF_Properties,self).__setattr__('_tmp_run',None)
-
+        super(NonIDF_Properties,self).__setattr__('_cashe_sum_ws',False)
 
     #end
     def log(self, msg,level="notice"):
@@ -117,6 +117,17 @@ class NonIDF_Properties(object):
     def print_diag_results(self,value):
         pass
     #-----------------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+    @property
+    def cashe_sum_ws(self):
+      """ Used together with sum_runs property. If True, a workspace 
+          with partial sum is stored in ADS 
+          and used later to add more runs to it
+      """ 
+      return self._cashe_sum_ws
+    @cashe_sum_ws.setter
+    def cashe_sum_ws(self,val):
+        self._cashe_sum_ws = bool(val)
     # -----------------------------------------------------------------------------
     @property
     def log_to_mantid(self):

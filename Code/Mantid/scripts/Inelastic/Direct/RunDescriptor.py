@@ -6,14 +6,65 @@ import re
 
 class RunList(object):
    """ helper class to maintain list of runs used in RunDescriptor for summing 
-       or subsequent processing range of files and supports basic operations with this list 
+       or subsequent processing range of files.
+
+       Supports basic operations with this list 
    """ 
    def __init__(self,run_list,file_names=None,fext=None):
        """ """
        self._last_ind2sum = -1
-       self._file_guess   = None
-       self._fext         = None
+       self._file_path = None
+       self._fext = None
        self.set_list2add(run_list,file_names,fext)
+       self._partial_sum_ws_name = None
+#--------------------------------------------------------------------------------------------------
+   #
+   def set_cashed_sum_ws(self,ws,new_ws_name=None):
+       """ store the name of a workspace in the class 
+           as reference clone 
+       """
+       if new_ws_name:
+          old_name = ws.name()
+          if old_name != new_ws_name:
+            old_mon_name = old_name + '_monitors'
+            RenameWorkspace(ws,OutputWorkspace=new_ws_name)
+            if old_mon_name in mtd:
+                RenameWorkspace(old_mon_name,OutputWorkspace=new_ws_name + '_monitors')
+       else:
+          new_ws_name = ws.name()
+       self._partial_sum_ws_name = new_ws_name
+   #
+   def get_cashed_sum_ws(self):
+       """ """ 
+       if not (self._partial_sum_ws_name):
+          return None
+       if self._partial_sum_ws_name in mtd:
+           return mtd[self._partial_sum_ws_name]
+       else:
+          return None
+   #
+   def get_cashed_sum_clone(self):
+       """ """ 
+       origin = self.get_cashed_sum_ws()
+       if not origin:
+          return None
+       origin_name = origin.name()
+       mon_name = origin_name + '_monitors'
+       if mon_name in mtd:
+          CloneWorkspace(InputWorkspace=mon_name,OutputWorkspace=origin_name + '_clone_monitors')
+       ws = CloneWorkspace(InputWorkspace=origin_name,OutputWorkspace=origin_name + '_clone')
+       return ws
+   #
+   def del_cashed_sum(self):
+      """ """
+      if not self._partial_sum_ws_name:
+          return
+      if self._partial_sum_ws_name in mtd:
+         DeleteWorkspace(self._partial_sum_ws_name)
+      mon_ws = self._partial_sum_ws_name + '_monitors'
+      if mon_ws in mtd:
+         DeleteWorkspace(mon_ws)
+#--------------------------------------------------------------------------------------------------
    #
    def set_list2add(self,runs_to_add,fnames=None,fext=None):
        """Set run numbers to add together with possible file guess-es """
@@ -26,38 +77,59 @@ class RunList(object):
        self._set_fnames(fnames,fext)
    #
    def _set_fnames(self,fnames,fext):
+       """ sets filenames lists and file extension lists 
+           of length correspondent to run number length
+
+           if length of the list provided differs from the length 
+           of the run list, expands fnames list and fext list 
+           to the whole runnumber list using last for fext and
+           first for fnames members of the  
+       """
        if fnames:
-          self._file_guess = fnames
-       if not(self._file_guess) or len(self._file_guess) != len(self._run_numbers):
-           self._file_guess = [''] * len(self._run_numbers)
+          if isinstance(fnames,list):
+             self._file_path = fnames
+          else:
+            self._file_path = [fnames]
+
+       if not(self._file_path):
+           self._file_path = [''] * len(self._run_numbers)
+       else:
+          if len(self._file_path) != len(self._run_numbers):
+              self._file_path = [self._file_path[0]] * len(self._run_numbers)
 
        if fext:
-         self._fext = fext
+         if isinstance(fext,list):
+            self._fext = fext
+         else:
+            self._fext = [fext]
+
        if not (self._fext):
           self._fext = [''] * len(self._run_numbers)
-       elif len(self._fext) != len(self._run_numbers):
-           base_fext = self._fext[0]
-           self._fext = [base_fext] * len(self._run_numbers)
+       else:
+         if len(self._fext) != len(self._run_numbers):
+             base_fext = self._fext[-1]
+             self._fext = [base_fext] * len(self._run_numbers)
    #
-   def get_file_guess(self,inst_name,index=0):
-      path_guess = self._file_guess[index]
-      fext       =  self._fext[index]
+   def get_file_guess(self,inst_name,run_num):
+      index = self._run_numbers.index(run_num)
+      path_guess = self._file_path[index]
+      fext = self._fext[index]
       guess = os.path.join(path_guess,'{0}{1}{2}'.\
-                      format(inst_name,self._run_numbers[index],fext))
+                      format(inst_name,run_num,fext))
  
       return guess
    #
    def add_run(self,run_number,fpath=None,fext=None):
       """ add run number to list of existing runs
       
-          Let's prohibit adding the same run numbers using this method 
-          equivalent run numbers can still be added using list assignment
+          Let's prohibit adding the same run numbers using this method.
+          Equivalent run numbers can still be added using list assignment
       """ 
       if not(run_number in self._run_numbers):
           self._run_numbers.append(run_number)
           if not fpath:
-             fpath = self._file_guess[-1]
-          self._file_guess.append(fpath)
+             fpath = self._file_path[-1]
+          self._file_path.append(fpath)
           if not fext:
              fext = self._fext[-1]
           self._fext.append(fext)
@@ -69,8 +141,8 @@ class RunList(object):
        """ returns true if all run numbers in existing list are 
            in the comparison list and vice versa.
 
-           Sets new file path and fext list regardless to run 
-           number coincide or not
+           if lists numbers coincide, 
+           sets new file_path and fext list if such are provided
        """ 
        if len(run_list) != len(self._run_numbers):
            return False
@@ -79,18 +151,17 @@ class RunList(object):
            if not(run in self._run_numbers):
               return False
        self._set_fnames(fpath,fext)
-       return True
-  
+       return True 
    #
-   def get_1run_info(self,sum_runs,ind = None):
+   def get_1run_info(self,sum_runs,ind=None):
        """ return last run info for file to sum""" 
        if ind:
-           if not(ind>-1 and ind<len(self._run_numbers)):
+           if not(ind > -1 and ind < len(self._run_numbers)):
               raise RuntimeError("Index {0} is outside of the run list of {1} runs".format(ind,len(self._run_numbers))) 
        else:
           ind = self.get_last_ind2sum(sum_runs)
-       return self._run_numbers[ind],self._file_guess[ind],self._fext[ind]
-    #
+       return self._run_numbers[ind],self._file_path[ind],self._fext[ind]
+   #
    def set_last_ind2sum(self,run_number):
         """Check and set last number, contributing to summation 
            if this number is out of summation range, clear the summation
@@ -100,21 +171,21 @@ class RunList(object):
             self._last_ind2sum = self._run_numbers.index(run_number) 
         else:
             self._last_ind2sum = -1
-
+   #
    def get_run_list2sum(self):
         """Get run numbers of the files to be summed together 
            from the list of defined run numbers
         """ 
         num_to_load = len(self._run_numbers)
         if self._last_ind2sum >= 0 and self._last_ind2sum < num_to_load:
-            num_to_load = self._last_ind2sum+1
+            num_to_load = self._last_ind2sum + 1
 
         return self._run_numbers[:num_to_load]
    #
    def get_last_ind2sum(self,sum_runs):
        """Get last run number contributing to sum""" 
        if sum_runs:
-          default = len(self._run_numbers)-1
+          default = len(self._run_numbers) - 1
        else:
           default = 0
 
@@ -154,7 +225,8 @@ class RunDescriptor(PropDescriptor):
             self.__doc__ = DocString
 
         self._ws_name = None
-        # pointer to workspace used to mask this workspace obtained at diag for this ws
+        # pointer to workspace used to mask this workspace obtained at diag for
+        # this ws
         self._mask_ws = None
 
         self._clear_all()
@@ -180,7 +252,7 @@ class RunDescriptor(PropDescriptor):
 
         self._ws_name = None # none if not loaded
         # String used to identify the workspace related to this property
-        #  w.r.t. other workspaces
+        #  w.r.t.  other workspaces
         self._ws_cname = ''
         self._ws_suffix = ''
         # property contains run lists
@@ -257,8 +329,8 @@ class RunDescriptor(PropDescriptor):
               self._run_file_path = file_path
               self._run_ext = fext
               self._ws_name = new_ws_name
-           else: # nothing to do, there is workspace, which corresponds to this run number 
-              pass # and it may be already loaded (may be not) 
+           else: # nothing to do, there is workspace, which corresponds to this run number
+              pass # and it may be already loaded (may be not)
 #--------------------------------------------------------------------------------------------------------------------
     def _set_run_list(self,instance,run_list,file_path=None,fext=None):
 
@@ -268,7 +340,7 @@ class RunDescriptor(PropDescriptor):
            self._clear_all()
            self._run_list = RunList(run_list,file_path,fext)
            run_num,file_path,main_fext = self._run_list.get_1run_info(instance.sum_runs)
-           self._run_number =run_num
+           self._run_number = run_num
            self._run_file_path = file_path
            self._run_ext = main_fext 
            self._ws_name = self._build_ws_name()
@@ -306,25 +378,40 @@ class RunDescriptor(PropDescriptor):
         else:
            return [current_run]
 #--------------------------------------------------------------------------------------------------------------------
-    def get_runs_to_sum(self):
+    @staticmethod
+    def get_sum_run_list(ws):
+        """retrieve list of contributed run numbers from the sum workspace log"""
+
+        summed_runs=[]
+        if RunDescriptor._sum_log_name in ws.getRun():
+            summed_str = ws.getRun().getLogData(RunDescriptor._sum_log_name).value
+            run_nums = summed_str.split(',')
+            for run_str in run_nums:
+                summed_runs.append(int(run_str))
+        else:
+            raise RuntimeError("Presumably sum workspace {0} does not have sum log attached to it".format(ws.name()))
+        return summed_runs
+#--------------------------------------------------------------------------------------------------------------------
+    def get_runs_to_sum(self,existing_sum_ws=None):
         """ return list of runs, expected to be summed together"""
 
         if not RunDescriptor._holder.sum_runs:
-           return []
+           return ([],None,0)
+        if not self._run_list:
+           return ([],None,0)
+        #
         summed_runs = []
-        if self._ws_name in mtd:
-           ws = mtd[self._ws_name]
-           if RunDescriptor._sum_log_name in ws.getRun():
-              summed_str = ws.getRun().getLogData(RunDescriptor._sum_log_name).value
-              run_nums = summed_str.split(',')
-              for run_str in run_nums:
-                  summed_runs.append(int(run_str))
+        if not existing_sum_ws:
+           existing_sum_ws = self._run_list.get_cashed_sum_ws()
+        if existing_sum_ws:
+           summed_runs = RunDescriptor.get_sum_run_list(existing_sum_ws)
+        n_existing_sums = len(summed_runs)
 
         runs2_sum = self._run_list.get_run_list2sum()
         for run in summed_runs:
             if run in runs2_sum:
                del runs2_sum[runs2_sum.index(run)]
-        return runs2_sum
+        return (runs2_sum,existing_sum_ws,n_existing_sums)
 #--------------------------------------------------------------------------------------------------------------------
     def set_action_suffix(self,suffix=None):
         """ method to set part of the workspace name, which indicate some action performed over this workspace           
@@ -455,7 +542,7 @@ class RunDescriptor(PropDescriptor):
         """ assign all parts of the run if input value is workspace """
         self._run_number = value.getRunNumber()
         ws_name = value.name()
-        self._ws_suffix=''
+        self._ws_suffix = ''
         self._split_ws_name(ws_name)
         self.synchronize_ws(value)
 
@@ -468,21 +555,21 @@ class RunDescriptor(PropDescriptor):
 
         origin_name = origin.name()
         try:
-           mon_ws = mtd[origin_name+'_monitors']
+           mon_ws = mtd[origin_name + '_monitors']
         except:
            mon_ws = None
 
-        target_name = '#{0}/{1}#'.format(chunk_num,n_chunks)+origin_name
+        target_name = '#{0}/{1}#'.format(chunk_num,n_chunks) + origin_name
         if chunk_num == n_chunks:
            RenameWorkspace(InputWorkspace=origin_name,OutputWorkspace=target_name)
            if mon_ws:
-              RenameWorkspace(InputWorkspace=mon_ws,OutputWorkspace=target_name+'_monitors')
+              RenameWorkspace(InputWorkspace=mon_ws,OutputWorkspace=target_name + '_monitors')
            origin_name = target_name
-           origin_invalidated=True
+           origin_invalidated = True
         else:
            if mon_ws:
-              CloneWorkspace(InputWorkspace=mon_ws,OutputWorkspace=target_name+'_monitors')
-           origin_invalidated=False
+              CloneWorkspace(InputWorkspace=mon_ws,OutputWorkspace=target_name + '_monitors')
+           origin_invalidated = False
 
         if rebin: # debug and compatibility mode with old reduction
            Rebin(origin_name,OutputWorkspace=target_name,Params=[tof_range[0],tof_range[1],tof_range[2]],PreserveEvents=False)
@@ -761,7 +848,7 @@ class RunDescriptor(PropDescriptor):
         instr_name = self._instr_name()
         if self._run_list:
             if not sum_runs:
-               sum_runs= RunDescriptor._holder.sum_runs
+               sum_runs = RunDescriptor._holder.sum_runs
             sum_ext = self._run_list.sum_ext(sum_runs)
         else:
             sum_ext = ''
@@ -796,17 +883,17 @@ class RunDescriptor(PropDescriptor):
 
         try:
            part_ind = re.search('#(.+?)#', name).group(0)
-           name     =name.replace(part_ind,'',1)
+           name = name.replace(part_ind,'',1)
         except AttributeError:
-           part_ind=''
+           part_ind = ''
 
         if self._run_number:
             instr_name = self._instr_name()
             name = name.replace(instr_name,'',1)
-            self._ws_cname = part_ind+filter(lambda c: not c.isdigit(), name)
+            self._ws_cname = part_ind + filter(lambda c: not c.isdigit(), name)
 
         else:
-            self._ws_cname = part_ind+name
+            self._ws_cname = part_ind + name
     #
     def _instr_name(self):
        if RunDescriptor._holder:
@@ -827,18 +914,20 @@ class RunDescriptor(PropDescriptor):
     def notify_sum_runs_changed(self,old_value,new_value):
        """ Take actions on changes to sum_runs option 
 
-            no actions at the moment?
        """ 
-       if self._run_list and old_value != new_value:
-          rl = self._run_list
-          self._clear_all()
-          rl.set_last_ind2sum(-1) # this will reset index to default
-          self._run_list = rl
-          run_num,file_path,main_fext = self._run_list.get_1run_info(new_value)
-          self._run_number =run_num
-          self._run_file_path = file_path
-          self._run_ext = main_fext 
-          self._ws_name = self._build_ws_name(new_value)
+       if self._run_list:
+          if old_value != new_value:
+             rl = self._run_list
+             self._clear_all()
+             rl.set_last_ind2sum(-1) # this will reset index to default
+             self._run_list = rl
+             run_num,file_path,main_fext = self._run_list.get_1run_info(new_value)
+             self._run_number = run_num
+             self._run_file_path = file_path
+             self._run_ext = main_fext 
+             self._ws_name = self._build_ws_name(new_value)
+          if new_value is False:
+             self._run_list.del_cashed_sum()
 
     def _load_and_sum_runs(self,inst_name,monitors_with_ws):
         """ Load multiple runs and sum them together 
@@ -848,28 +937,38 @@ class RunDescriptor(PropDescriptor):
 
         RunDescriptor._logger("*** Summing multiple runs            ****")
 
-        runs_to_sum = self.get_runs_to_sum()
+        runs_to_sum,sum_ws,n_already_summed = self.get_runs_to_sum()
         num_to_sum = len(runs_to_sum)
 
-        RunDescriptor._logger("*** Loading #{0}/{1}, run N: {2} ".\
-               format(1,num_to_sum,runs_to_sum[0]))
+        if sum_ws:
+            RunDescriptor._logger("*** Use cached sum of {0} workspaces and adding {1} remaining".\
+                          format(n_already_summed,num_to_sum))
+            sum_ws_name = sum_ws.name()
+            sum_mon_name = sum_ws_name + '_monitors'
+            AddedRunNumbers = sum_ws.getRun().getLogData(RunDescriptor._sum_log_name).value
+            load_start=0
+        else:
+            RunDescriptor._logger("*** Loading #{0}/{1}, run N: {2} ".\
+                   format(1,num_to_sum,runs_to_sum[0]))
 
-        f_guess = self._run_list.get_file_guess(inst_name,0)
-        ws =self.load_file(inst_name,'Summ',False,monitors_with_ws,
-                                      False,file_hint=f_guess )
+            f_guess = self._run_list.get_file_guess(inst_name,runs_to_sum[0])
+            ws = self.load_file(inst_name,'Summ',False,monitors_with_ws,
+                                      False,file_hint=f_guess)
 
-        sum_ws_name = ws.name()
-        sum_mon_name = sum_ws_name + '_monitors'
-        #AddedRunNumbers = [ws.getRunNumber()]
-        AddedRunNumbers = str(ws.getRunNumber())
+            sum_ws_name = ws.name()
+            sum_mon_name = sum_ws_name + '_monitors'
+            #AddedRunNumbers = [ws.getRunNumber()]
+            AddedRunNumbers = str(ws.getRunNumber())
+            load_start =1
+        #end
 
-        for ind,run_num in enumerate(runs_to_sum[1:num_to_sum]):
+        for ind,run_num in enumerate(runs_to_sum[load_start:num_to_sum]):
 
            RunDescriptor._logger("*** Adding  #{0}/{1}, run N: {2} ".\
                           format(ind + 2,num_to_sum,run_num))
 
            term_name = '{0}_ADDITIVE_#{1}/{2}'.format(inst_name,ind + 2,num_to_sum)#
-           f_guess = self._run_list.get_file_guess(inst_name,ind+1)
+           f_guess = self._run_list.get_file_guess(inst_name,run_num)
 
            wsp = self.load_file(inst_name,term_name,False,
                                 monitors_with_ws,False,file_hint=f_guess)
@@ -879,7 +978,7 @@ class RunDescriptor(PropDescriptor):
            Plus(LHSWorkspace=sum_ws_name,RHSWorkspace=wsp_name,
                 OutputWorkspace=sum_ws_name,ClearRHSWorkspace=True)
          #  AddedRunNumbers.append(run_num)
-           AddedRunNumbers+=','+str(run_num)
+           AddedRunNumbers+=',' + str(run_num)
            if not monitors_with_ws:
               Plus(LHSWorkspace=sum_mon_name,RHSWorkspace=wsp_mon_name,
                    OutputWorkspace=sum_mon_name,ClearRHSWorkspace=True)
@@ -887,13 +986,21 @@ class RunDescriptor(PropDescriptor):
                DeleteWorkspace(wsp_name)
            if wsp_mon_name in mtd:
                DeleteWorkspace(wsp_mon_name)
+        #end for
         RunDescriptor._logger("*** Summing multiple runs  completed ****")
 
-        #AddSampleLog(Workspace=sum_ws_name,LogName = RunDescriptor._sum_log_name,
+        #AddSampleLog(Workspace=sum_ws_name,LogName =
+        #RunDescriptor._sum_log_name,
         #             LogText=AddedRunNumbers,LogType='Number Series')
         AddSampleLog(Workspace=sum_ws_name,LogName = RunDescriptor._sum_log_name,
                     LogText=AddedRunNumbers,LogType='String')
-        ws = mtd[sum_ws_name]
+
+        if RunDescriptor._holder.cashe_sum_ws:
+            # store workspace in cash for further usage
+            self._run_list.set_cashed_sum_ws(mtd[sum_ws_name],self._prop_name+sum_ws_name)
+            ws = self._run_list.get_cashed_sum_clone()
+        else:
+            ws = mtd[sum_ws_name]
         return ws
 
 
@@ -918,7 +1025,7 @@ class RunDescriptorDependent(RunDescriptor):
        if instance is None: # this class functions and the host functions
           return self
 
-       if self._has_own_value: # this allows to switch between 
+       if self._has_own_value: # this allows to switch between
           return super(RunDescriptorDependent,self).__get__(instance,owner)
        else:
           return self._host.__get__(instance,owner)

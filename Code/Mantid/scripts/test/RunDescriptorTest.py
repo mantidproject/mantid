@@ -267,7 +267,7 @@ class RunDescriptorTest(unittest.TestCase):
         propman.sample_run = [11231,10382,10010]
         self.assertEqual(propman.sample_run,10010)
 
-        sum_list = PropertyManager.sample_run.get_runs_to_sum()
+        sum_list,sum_ws,n_sum = PropertyManager.sample_run.get_runs_to_sum()
         self.assertEqual(len(sum_list),3)
         runs = PropertyManager.sample_run.get_run_list()
         self.assertEqual(runs[0],sum_list[0])
@@ -275,14 +275,14 @@ class RunDescriptorTest(unittest.TestCase):
         # Autoreduction workflow with summation. Runs appear
         # one by one and summed together when next run appears
         propman.sample_run = 11231
-        sum_list = PropertyManager.sample_run.get_runs_to_sum()
+        sum_list,sum_ws,n_sum = PropertyManager.sample_run.get_runs_to_sum()
 
         self.assertEqual(len(sum_list),1)
         self.assertEqual(sum_list[0],11231)
         self.assertEqual(propman.sample_run,11231)
 
         propman.sample_run = 10382
-        sum_list = PropertyManager.sample_run.get_runs_to_sum()
+        sum_list,sum_ws,n_sum = PropertyManager.sample_run.get_runs_to_sum()
         self.assertEqual(len(sum_list),2)
         self.assertEqual(sum_list[0],11231)
         self.assertEqual(sum_list[1],10382)
@@ -291,7 +291,7 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertEqual(len(runs),3)
 
         propman.sample_run = 10010
-        sum_list = PropertyManager.sample_run.get_runs_to_sum()
+        sum_list,sum_ws,n_sum = PropertyManager.sample_run.get_runs_to_sum()
         self.assertEqual(len(sum_list),3)
         self.assertEqual(sum_list[0],11231)
         self.assertEqual(sum_list[1],10382)
@@ -302,7 +302,7 @@ class RunDescriptorTest(unittest.TestCase):
 
         # check extend when summing
         propman.sample_run = 10999
-        sum_list = PropertyManager.sample_run.get_runs_to_sum()
+        sum_list,sum_ws,n_sum = PropertyManager.sample_run.get_runs_to_sum()
         self.assertEqual(len(sum_list),4)
         self.assertEqual(sum_list[0],11231)
         self.assertEqual(sum_list[1],10382)
@@ -319,7 +319,7 @@ class RunDescriptorTest(unittest.TestCase):
         run_list = PropertyManager.sample_run.get_run_list()
         self.assertEqual(len(run_list),4)
         self.assertEqual(propman.sample_run,11231)
-        sum_list = PropertyManager.sample_run.get_runs_to_sum()
+        sum_list,sum_ws,n_sum = PropertyManager.sample_run.get_runs_to_sum()
         self.assertEqual(len(sum_list),0)
 
         # check clear list when not summing 
@@ -366,27 +366,49 @@ class RunDescriptorTest(unittest.TestCase):
         #self.assertEqual(ws.name(),'SR_MAR011001SumOf2')
 
 
-        propman.sample_run = 10011
-        sum_list = PropertyManager.sample_run.get_runs_to_sum()
-        self.assertEqual(len(sum_list),1)
+        propman.sample_run = 11111
+        sum_list,sum_ws,n_sum = PropertyManager.sample_run.get_runs_to_sum()
+        self.assertEqual(len(sum_list),4)
 
         runs = PropertyManager.sample_run.get_run_list()
         self.assertEqual(len(runs),4)
-        self.assertEqual(runs[3],10011)
+        self.assertEqual(runs[3],11111)
         self.assertTrue(propman.sum_runs)
         self.assertTrue('SR_MAR011001SumOf3' in mtd)
 
+        propman.cashe_sum_ws  = True # Not used at this stage but will be used at loading
+        PropertyManager.sample_run._run_list.set_cashed_sum_ws(mtd['SR_MAR011001SumOf3'],'SumWS_cashe')
+        self.assertTrue('SumWS_cashe' in mtd)
+        self.assertFalse('SR_MAR011001SumOf3' in mtd)
+
+        sum_list,sum_ws,n_summed = PropertyManager.sample_run.get_runs_to_sum()
+        self.assertEqual(len(sum_list),1)
+        self.assertEqual(n_summed,3)
+        self.assertEqual(sum_ws.name(),'SumWS_cashe')
+        self.assertEqual(sum_list[0],11111)
+
+        # file 1 does not exist, so can not be found. Otherwise it should load it
+        self.assertRaises(IOError,PropertyManager.sample_run.get_workspace)
+
+        # Clear all 
         propman.sum_runs=False
         self.assertFalse('SR_MAR011001SumOf3' in mtd)
+        # disabling sum_runs clears sum cash
+        self.assertFalse('SumWS_cashe' in mtd)
         runs = PropertyManager.sample_run.get_run_list()
         self.assertEqual(len(runs),4)
         self.assertEqual(propman.sample_run,11001)
 
-        propman.sample_run = 10011
+        propman.sample_run = 10111
         runs = PropertyManager.sample_run.get_run_list()
         self.assertEqual(len(runs),1)
-        self.assertEqual(runs[0],10011)
-        self.assertEqual(propman.sample_run,10011)
+        self.assertEqual(runs[0],10111)
+        self.assertEqual(propman.sample_run,10111)
+        sums,ws,n_sums = PropertyManager.sample_run.get_runs_to_sum()
+        self.assertEqual(len(sums),0)
+        self.assertTrue(ws is None)
+        self.assertEqual(n_sums,0)
+
 
 
 if __name__=="__main__":
