@@ -11,21 +11,21 @@ Mantid::Geometry::PeakShape_sptr getPeakShape(IPeak &peak) {
   return Mantid::Geometry::PeakShape_sptr(peak.getPeakShape().clone());
 }
 void setQLabFrame1(IPeak &peak, Mantid::Kernel::V3D qLabFrame) {
-  // Set the q lab frame
-  return peak.setQLabFrame(qLabFrame);
+  // Set the q lab frame. No explicit detector distance.
+  return peak.setQLabFrame(qLabFrame, boost::optional<double>());
 }
 void setQLabFrame2(IPeak &peak, Mantid::Kernel::V3D qLabFrame, double distance) {
-  // Set the q lab frame
+  // Set the q lab frame. Detector distance specified.
   return peak.setQLabFrame(qLabFrame, distance);
 }
 
 void setQSampleFrame1(IPeak &peak, Mantid::Kernel::V3D qSampleFrame) {
-   // Set the qsample frame
-   return peak.setQSampleFrame(qSampleFrame);
+   // Set the qsample frame. No explicit detector distance.
+   return peak.setQSampleFrame(qSampleFrame, boost::optional<double>());
 }
 
 void setQSampleFrame2(IPeak &peak, Mantid::Kernel::V3D qSampleFrame, double distance) {
-    // Set the qsample frame
+    // Set the qsample frame. Detector distance specified.
    return peak.setQSampleFrame(qSampleFrame, distance);
 }
 

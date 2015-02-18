@@ -51,9 +51,9 @@ public:
   virtual bool findDetector() = 0;
 
   virtual void setQSampleFrame(Mantid::Kernel::V3D QSampleFrame,
-                               boost::optional<double> detectorDistance = boost::optional<double>()) = 0;
+                               boost::optional<double> detectorDistance) = 0;
   virtual void setQLabFrame(Mantid::Kernel::V3D QLabFrame,
-                            boost::optional<double> detectorDistance = boost::optional<double>()) = 0;
+                            boost::optional<double> detectorDistance) = 0;
 
   virtual void setWavelength(double wavelength) = 0;
   virtual double getWavelength() const = 0;
