@@ -318,7 +318,7 @@ create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
 
   boost::shared_ptr<Instrument> testInst(new Instrument(instrumentName));
   testInst->setReferenceFrame(
-      boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, X, Left, "")));
+      boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
   space->setInstrument(testInst);
 
   const double pixelRadius(0.05);
@@ -366,14 +366,14 @@ create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
   // Define a source and sample position
   // Define a source component
   ObjComponent *source =
-      new ObjComponent("moderator", Object_sptr(), testInst.get());
+      new ObjComponent("moderator", ComponentCreationHelper::createSphere(0.1, V3D(0,0,0), "1"), testInst.get());
   source->setPos(V3D(-20, 0.0, 0.0));
   testInst->add(source);
   testInst->markAsSource(source);
 
   // Define a sample as a simple sphere
   ObjComponent *sample =
-      new ObjComponent("samplePos", Object_sptr(), testInst.get());
+      new ObjComponent("samplePos", ComponentCreationHelper::createSphere(0.1, V3D(0,0,0), "1"), testInst.get());
   testInst->setPos(0.0, 0.0, 0.0);
   testInst->add(sample);
   testInst->markAsSamplePos(sample);
