@@ -138,23 +138,23 @@ double IPeakFunction::intensity() const {
   PeakFunctionIntegrator integrator;
   IntegrationResult result = integrator.integrate(*this, x0 - dx, x0 + dx);
 
-  if(!result.success) {
-      return 0.0;
+  if (!result.success) {
+    return 0.0;
   }
 
   return result.result;
 }
 
-void IPeakFunction::setIntensity(const double newIntensity)
-{
-    double currentHeight = height();
-    double currentIntensity = intensity();
+void IPeakFunction::setIntensity(const double newIntensity) {
+  double currentHeight = height();
+  double currentIntensity = intensity();
 
-    if(currentIntensity == 0.0) {
-        setHeight(0.0);
-    } else {
-        setHeight(newIntensity / currentIntensity * currentHeight);
-    }
+  if (currentIntensity == 0.0) {
+    throw std::invalid_argument(
+        "Cannot set new intensity, not enough information available.");
+  }
+
+  setHeight(newIntensity / currentIntensity * currentHeight);
 }
 
 } // namespace API

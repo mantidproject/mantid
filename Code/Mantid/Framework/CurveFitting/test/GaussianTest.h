@@ -614,6 +614,17 @@ public:
       TS_ASSERT_DELTA(fn->height(), 3.75774911479860533509, 1e-10);
   }
 
+  void testSetIntensityDefault()
+  {
+      boost::shared_ptr<Gaussian> fn( new Gaussian() );
+      fn->initialize();
+
+      TS_ASSERT_EQUALS(fn->intensity(), 0.0);
+
+      TS_ASSERT_THROWS(fn->setIntensity(20.0), std::invalid_argument);
+      TS_ASSERT_EQUALS(fn->intensity(), 0.0);
+  }
+
 
 };
 
