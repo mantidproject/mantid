@@ -131,6 +131,8 @@ void IPeakFunction::setPeakRadius(const int &r) {
   }
 }
 
+/// Returns the integral intensity of the peak function, using the peak radius
+/// to determine integration borders.
 double IPeakFunction::intensity() const {
   double x0 = centre();
   double dx = fabs(s_peakRadius * fwhm());
@@ -145,6 +147,7 @@ double IPeakFunction::intensity() const {
   return result.result;
 }
 
+/// Sets the integral intensity of the peak by adjusting the height.
 void IPeakFunction::setIntensity(const double newIntensity) {
   double currentHeight = height();
   double currentIntensity = intensity();
