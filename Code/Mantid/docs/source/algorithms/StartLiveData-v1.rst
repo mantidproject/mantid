@@ -144,7 +144,7 @@ Output:
 
 **Example 2:**
 
-.. testcode:: exStartLiveDataisto
+.. testcode:: exStartLiveDataHisto
 
     from threading import Thread
     import time
