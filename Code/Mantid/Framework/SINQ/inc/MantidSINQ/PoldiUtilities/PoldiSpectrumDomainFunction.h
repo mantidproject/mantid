@@ -207,8 +207,6 @@ protected:
   std::vector<double>
   getChopperSlitOffsets(const PoldiAbstractChopper_sptr &chopper);
 
-  double actualFunction(double x, double x0, double sigma, double area) const;
-
   std::vector<double> m_chopperSlitOffsets;
   double m_deltaT;
 

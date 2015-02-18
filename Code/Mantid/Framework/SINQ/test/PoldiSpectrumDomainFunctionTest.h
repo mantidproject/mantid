@@ -77,32 +77,6 @@ public:
         TS_ASSERT_EQUALS(function.m_chopperSlitOffsets.size(), m_chopper->slitPositions().size());
     }
 
-    void testActualFunction()
-    {
-        /* comparison with results from a math program */
-        double area = 1.0;
-        double sigma = 1.0;
-        double x0 = 0.0;
-
-        std::vector<double> reference;
-        reference.push_back(0.388349126567583);
-        reference.push_back(0.398942280401433);
-        reference.push_back(0.359646701831886);
-        reference.push_back(0.004431848411938);
-
-        TestablePoldiSpectrumDomainFunction function;
-
-        std::vector<double> x;
-        x.push_back(-0.232);
-        x.push_back(0.0);
-        x.push_back(0.4554);
-        x.push_back(3.0);
-
-        for(size_t i = 0; i < x.size(); ++i) {
-            TS_ASSERT_DELTA(function.actualFunction(x[i], x0, sigma, area), reference[i], 1e-15);
-        }
-    }
-
     void testFunction()
     {
         TestablePoldiSpectrumDomainFunction function;

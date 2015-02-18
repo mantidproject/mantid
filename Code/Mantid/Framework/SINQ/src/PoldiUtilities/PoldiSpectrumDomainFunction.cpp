@@ -338,23 +338,5 @@ std::vector<double> PoldiSpectrumDomainFunction::getChopperSlitOffsets(
   return offsets;
 }
 
-/**
- * Profile function
- *
- * This is the actual profile function. Currently this is a Gaussian.
- *
- * @param x :: x-value for which y is to be calculated, in channel units
- * @param x0 :: Centre of the peak, in channel units
- * @param sigma :: Sigma-parameter of Gaussian distribution, in channel units
- * @param area :: Area parameter
- * @return Function value at position x
- */
-double PoldiSpectrumDomainFunction::actualFunction(double x, double x0,
-                                                   double sigma,
-                                                   double area) const {
-  return area / (sqrt(2.0 * M_PI) * sigma) *
-         exp(-0.5 * pow((x - x0) / sigma, 2.0));
-}
-
 } // namespace Poldi
 } // namespace Mantid
