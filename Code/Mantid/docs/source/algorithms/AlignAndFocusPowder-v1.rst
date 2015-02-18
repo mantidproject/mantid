@@ -32,6 +32,11 @@ sub-algorithms as listed below.
 #. :ref:`algm-EditInstrumentGeometry` (if appropriate)
 #. :ref:`algm-ConvertUnits` to time-of-flight
 
+Workflow
+--------
+
+.. diagram:: AlignAndFocusPowder-v1_wkflw.dot
+
 Usage
 -----
 
@@ -46,15 +51,4 @@ The files needed for this example are not present in our standard usage data dow
         CalFileName='pg3_mantid_det.cal', Params='100')
 
 
-
-
-
-
-
-
-.. image:: /images/AlignAndFocusPowderFlowchart.png
-
 .. categories::
-
-
-
