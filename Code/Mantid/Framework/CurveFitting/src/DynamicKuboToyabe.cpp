@@ -16,15 +16,6 @@ using namespace API;
 
 DECLARE_FUNCTION(DynamicKuboToyabe)
 
-// ** MODIFY THIS **
-// Here specify/declare the parameters of your Fit Function
-// 
-// declareParameter takes three arguments:
-//
-//   1st: The name of the parameter
-//   2nd: The default (initial) value of the parameter
-//   3rd: A description of the parameter (optional)
-//
 void DynamicKuboToyabe::init()
 {
   declareParameter("Asym",  0.2, "Amplitude at time 0");
@@ -40,25 +31,18 @@ double ZFKT (const double x, const double G){
   return (0.3333333333 + 0.6666666667*exp(-0.5*q)*(1-q));
 }
 
-// Static Non-Zero field Kubo Toyabe relaxation function
-//double HKT (const double x, const double G, const double F) 
-//{
-//  throw std::runtime_error("HKT not implemented yet");
-//}
-
 // Dynamic Kubo-Toyabe
 double getDKT (double t, double G, double v){
 
   const int tsmax = 656; // Length of the time axis, 32 us of valid data
   const double eps = 0.05; // Bin width for calculations
-  //  const int stk = 25; // Not used for the moment
 
   static double oldG=-1., oldV=-1.;
   static std::vector<double> gStat(tsmax), gDyn(tsmax);
 
 
   if ( (G != oldG) || (v != oldV) ){
-   
+
     // If G or v have changed with respect to the 
     // previous call, we need to re-do the computations
 
@@ -110,8 +94,8 @@ void DynamicKuboToyabe::function1D(double* out, const double* xValues, const siz
   const double& v = fabs(getParameter("Nu"));
 
 
-    // Zero hopping rate
-	if (v == 0.0) {
+  // Zero hopping rate
+  if (v == 0.0) {
 
     // Zero external field
     if ( F == 0.0 ){
@@ -126,10 +110,10 @@ void DynamicKuboToyabe::function1D(double* out, const double* xValues, const siz
       //}
       throw std::runtime_error("HKT() not implemented yet");
     }
-	} 
+  } 
 
   // Non-zero hopping rate
-	else {
+  else {
 
     if ( F==0.0 ) {
 
@@ -137,13 +121,13 @@ void DynamicKuboToyabe::function1D(double* out, const double* xValues, const siz
         out[i] = A*getDKT(xValues[i],G,v);
       }
 
-	  } else {
+    } else {
 
-	    // Non-zero field
+      // Non-zero field
       throw std::runtime_error("HKT() not implemented yet");
     }
 
-	} // else hopping rate != 0
+  } // else hopping rate != 0
 
 
 }

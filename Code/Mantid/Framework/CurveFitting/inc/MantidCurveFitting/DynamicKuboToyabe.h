@@ -9,21 +9,15 @@
 #include "MantidAPI/IFunctionWithLocation.h"
 #include <cmath>
 
-//#include "MantidAPI/ParamFunction.h"
-//#include "MantidAPI/IPeakFunction.h"
-
-//#include "MantidAPI/IFunctionMW.h"
-//#include "MantidAPI/IFunction1D.h"
-
 namespace Mantid
 {
   namespace CurveFitting
   {
     /** 
-     Provide Dynamic Kubo Toyabe function interface to IPeakFunction for muon scientists.
+     Provide Dynamic Kubo Toyabe function interface to IFunction1D for muon scientists.
    
-     @author Karl Palmen, ISIS, RAL 
-     @date 21/03/2012 
+     @author Raquel Alvarez, ISIS, RAL 
+     @date 18/02/2015 
   
      Copyright &copy; 2007-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory 
   
