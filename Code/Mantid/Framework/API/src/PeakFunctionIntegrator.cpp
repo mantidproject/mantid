@@ -45,12 +45,11 @@ double PeakFunctionIntegrator::requiredRelativePrecision() const {
 }
 
 /** Integration of peak function on the interval [-Inf, +Inf]. Internally,
- *gsl_integration_qagi is used
- *  for this. If a default constructed IPeakFunction_const_sptr is passed to the
- *function, std::invalid_argument is thrown.
- *  The results are returned as IntegrationResult-struct, which contains the
- *approximation of the integral along
- *  with other information such as an error estimate (absolute).
+ *  gsl_integration_qagi is used for this. If a default constructed
+ *  IPeakFunction_const_sptr is passed to the function,
+ *  std::invalid_argument is thrown. The results are returned as
+ *  IntegrationResult-struct, which contains the approximation of the integral
+ *  along with other information such as an error estimate (absolute).
  *
  *  @param peakFunction :: Peak function to integrate.
  */
@@ -72,9 +71,9 @@ IntegrationResult PeakFunctionIntegrator::integrateInfinity(
 }
 
 /** Integration of peak function on the interval [a, +Inf]. Internally,
- *gsl_integration_qagiu is used
- *  for this. If a default constructed IPeakFunction_const_sptr is passed to the
- *function, std::invalid_argument is thrown.
+ *  gsl_integration_qagiu is used for this. If a default constructed
+ *  IPeakFunction_const_sptr is passed to the function,
+ *  std::invalid_argument is thrown.
  *
  *  @param peakFunction :: Peak function to integrate.
  */
@@ -96,9 +95,9 @@ IntegrationResult PeakFunctionIntegrator::integratePositiveInfinity(
 }
 
 /** Integration of peak function on the interval [-Inf, b]. Internally,
- *gsl_integration_qagil is used
- *  for this. If a default constructed IPeakFunction_const_sptr is passed to the
- *function, std::invalid_argument is thrown.
+ *  gsl_integration_qagil is used for this. If a default constructed
+ *  IPeakFunction_const_sptr is passed to the function,
+ *  std::invalid_argument is thrown.
  *
  *  @param peakFunction :: Peak function to integrate.
  */
@@ -120,9 +119,9 @@ IntegrationResult PeakFunctionIntegrator::integrateNegativeInfinity(
 }
 
 /** Integration of peak function on the interval [a, b]. Internally,
- *gsl_integration_qags is used
- *  for this. If a default constructed IPeakFunction_const_sptr is passed to the
- *function, std::invalid_argument is thrown.
+ *  gsl_integration_qags is used for this. If a default constructed
+ *  IPeakFunction_const_sptr is passed to the function,
+ *  std::invalid_argument is thrown.
  *
  *  @param peakFunction :: Peak function to integrate.
  */

@@ -13,10 +13,13 @@ namespace API {
   General integration of peaks (in the form of IPeakFunction) by wrapping the
   corresponding GSL-functions. Integration with infinity limits is supported.
 
+  PeakFunctionIntegrator allocates a GSL integration workspace on construction
+  and frees the memory when it's destroyed.
+
     @author Michael Wedel, Paul Scherrer Institut - SINQ
     @date 24/04/2014
 
-    Copyright © 2014 PSI-MSS
+    Copyright © 2014,2015 PSI-MSS
 
   This file is part of Mantid.
 
