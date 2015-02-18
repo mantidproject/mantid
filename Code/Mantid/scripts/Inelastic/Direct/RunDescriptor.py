@@ -353,6 +353,16 @@ class RunDescriptor(PropDescriptor):
         else:
             return self._run_number 
 #--------------------------------------------------------------------------------------------------------------------
+# Masking    #TODO: resolve stub
+#--------------------------------------------------------------------------------------------------------------------
+    def get_masking(self):
+        """ return masking workspace specific to this particular workspace """ 
+        return None
+    def add_masking_ws(self,masked_ws):
+        """ extract masking from the workspace provided and apply it to this
+            run workspace
+        """ 
+#--------------------------------------------------------------------------------------------------------------------
     def is_monws_separate(self):
         """ """
         mon_ws = self.get_monitors_ws()
@@ -365,6 +375,7 @@ class RunDescriptor(PropDescriptor):
             return True
         else:
             return False
+
 #--------------------------------------------------------------------------------------------------------------------
     def get_run_list(self):
         """ Returns list of the files, assigned to current property """

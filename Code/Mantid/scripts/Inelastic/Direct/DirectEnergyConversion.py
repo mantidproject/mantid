@@ -177,12 +177,6 @@ class DirectEnergyConversion(object):
       bleed_pixels - If the bleed test is on then this is the number of pixels ignored within the
                      bleed test diagnostic
       """
-      lhs_names = funcreturns.lhs_info('names')
-      if len(lhs_names) > 0:
-          var_name = lhs_names[0]
-      else:
-          var_name = "diag_mask"
-
       # modify properties using input arguments
       self.prop_man.set_input_parameters(**kwargs)
       # obtain proper run descriptor in case it is not a run descriptor but
@@ -209,7 +203,7 @@ class DirectEnergyConversion(object):
             diag_mask,masked_list = ExtractMask(InputWorkspace=white_data)
             DeleteWorkspace(Workspace='white_ws_clone')
 
-         return diag_mask
+         return diag_mask,len(masked_list)
 
 
       # Get the white beam vanadium integrals
@@ -247,18 +241,32 @@ class DirectEnergyConversion(object):
          diagnostics.normalise_background(background_int, whiteintegrals,
                                            diag_params.get('second_white',None))
          diag_params['background_int'] = background_int
-         diag_params['sample_counts'] = total_counts
+         diag_params['sample_counts']  = total_counts
 
       # Check how we should run diag
       diag_spectra_blocks = self.diag_spectra
+
+      # extract existing white mask if one is defined and provide it for 
+      # diagnose to use instead of constantly diagnosing the same vanadium
+      white_mask = white.get_masking()
+
+      if white_mask:
+         diag_params['white_mask']=white_mask
+      # keep white mask workspace for further usage
       if diag_spectra_blocks is None:
          # Do the whole lot at once
-         diagnostics.diagnose(whiteintegrals, **diag_params)
+         white_masked_ws =diagnostics.diagnose(whiteintegrals, **diag_params)
+         if white_masked_ws:
+            white.add_masking_ws(white_masked_ws)
+            DeleteWorkspace(white_masked_ws)
       else:
          for index, bank in enumerate(diag_spectra_blocks):
              diag_params['start_index'] = bank[0] - 1
              diag_params['end_index'] = bank[1] - 1
-             diagnostics.diagnose(whiteintegrals, **diag_params)
+             white_masked_ws=diagnostics.diagnose(whiteintegrals, **diag_params)
+             if white_masked_ws:
+                white.add_masking_ws(white_masked_ws)
+                DeleteWorkspace(white_masked_ws)
 
       if 'sample_counts' in diag_params:
           DeleteWorkspace(Workspace='background_int')
@@ -269,9 +277,7 @@ class DirectEnergyConversion(object):
       diag_mask, det_ids = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=var_name)
 
       DeleteWorkspace(Workspace=whiteintegrals)
-      #TODO do we need this?
-      #self.spectra_masks = diag_mask
-      return diag_mask
+      return diag_mask,len(det_ids)
 
 #-------------------------------------------------------------------------------
     def convert_to_energy(self,wb_run=None,sample_run=None,ei_guess=None,rebin=None,map_file=None,
@@ -295,7 +301,7 @@ class DirectEnergyConversion(object):
       prop_man = self.prop_man
 
      # check if reducer can find all non-run files necessary for the reduction
-     # and verify some other properties which can be wrong before starting long run.
+     # and verify some other properties which can be wrong before starting a long run.
       prop_man.log("****************************************************************")
       prop_man.validate_properties()
       prop_man.log("****************************************************************")
@@ -303,8 +309,6 @@ class DirectEnergyConversion(object):
       # inform user on what parameters have changed from script or gui
       # if monovan present, check if abs_norm_ parameters are set
       self.prop_man.log_changed_values('notice')
-
-
 
 
       start_time = time.time()
@@ -322,7 +326,7 @@ class DirectEnergyConversion(object):
       if len(workspace_defined_prop) > 0:
           prop_man.log("****************************************************************")
           prop_man.log('*** Sample run {0} properties change default reduction properties: '.\
-                       format(PropertyManager.sample_run.get_ws_name()))
+                       format(PropertyManager.sample_run.get_workspace().name()))
           prop_man.log_changed_values('notice',False,oldChanges)
           prop_man.log("****************************************************************")
 
@@ -344,7 +348,7 @@ class DirectEnergyConversion(object):
      # if it is set that way
       if not masks_done:
         prop_man.log("======== Run diagnose for sample run ===========================",'notice')
-        masking = self.diagnose(PropertyManager.wb_run,PropertyManager.mask_run,
+        masking,num_failed = self.diagnose(PropertyManager.wb_run,PropertyManager.mask_run,
                                 second_white=None,print_diag_results=True)
         if prop_man.use_hard_mask_only:
             header = "*** Hard mask file applied to workspace with {0:d} spectra masked {1:d} spectra"
@@ -365,7 +369,7 @@ class DirectEnergyConversion(object):
                                                                                                          # solution for that.
                         prop_man.log("======== Run diagnose for monochromatic vanadium run ===========",'notice')
 
-                        masking2 = self.diagnose(PropertyManager.wb_for_monovan_run,PropertyManager.monovan_run,
+                        masking2,num_failed2 = self.diagnose(PropertyManager.wb_for_monovan_run,PropertyManager.monovan_run,
                                          second_white = None,print_diag_results=True)
                         masking +=  masking2
                         DeleteWorkspace(masking2)
@@ -373,6 +377,8 @@ class DirectEnergyConversion(object):
 
             else: # if Reducer.mono_correction_factor != None :
                 pass
+        else:
+            num_failed2=0
         # Very important statement propagating masks for further usage in
         # convert_to_energy.
         # This property is also directly accessible from GUI.
@@ -386,7 +392,7 @@ class DirectEnergyConversion(object):
           masking = self.spectra_masks
  
       # estimate and report the number of failing detectors
-      failed_sp_list,nMaskedSpectra = get_failed_spectra_list_from_masks(masking)
+      nMaskedSpectra = num_failed+num_failed2
       if masking:
          nSpectra = masking.getNumberHistograms()
       else:
@@ -455,18 +461,21 @@ class DirectEnergyConversion(object):
             # what we want to do with absolute units: 
             if self.mono_correction_factor: # Correction provided. Just apply it
                 deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,
-                                                                      ei_guess,PropertyManager.wb_for_monovan_run)
+                                                                      ei_guess,PropertyManager.wb_for_monovan_run,
+                                                                      ' provided ')
             elif cashed_mono_int:  # Correction cashed from previous run
                 self.mono_correction_factor = cashed_mono_int
                 deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,
-                                                                      ei_guess,PropertyManager.wb_for_monovan_run)
+                                                                      ei_guess,PropertyManager.wb_for_monovan_run,
+                                                                      ' -cached- ')
                 self.mono_correction_factor = None
             else:   # Calculate corrections
                 if self._multirep_mode and calculate_abs_units:
                    mono_ws_base = PropertyManager.monovan_run.chop_ws_part(mono_ws_base,tof_range,self._do_early_rebinning,
                                                                           cut_ind,num_ei_cuts)
                 deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,
-                                                                      ei_guess,PropertyManager.wb_for_monovan_run)
+                                                                      ei_guess,PropertyManager.wb_for_monovan_run,
+                                                                      'calculated')
             self.check_background = current_bkg_opt
          PropertyManager.monovan_run._in_cash = True # monovan run has been certainly deleted from memory
 
@@ -723,11 +732,12 @@ class DirectEnergyConversion(object):
            if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not
                                              # have monitors
               self.normalise(run,'current',range_offset)
-              new_name = run.get_ws_name()
+              ws = run.get_workspace()
+              new_name = ws.name()
               return ('current',new_name)
            else:
               raise RuntimeError('Normalise by monitor-1:: Workspace {0} for run {1} does not have monitors in it'\
-                   .format(run.get_ws_name(),run.__get__()))
+                   .format(ws.name(),run.run_number()))
 
 
         range = self.norm_mon_integration_range
@@ -769,11 +779,13 @@ class DirectEnergyConversion(object):
            if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not
                                              # have monitors
               self.normalise(run,'current',range_offset)
-              new_name = run.get_ws_name()
+              ws = run.get_workspace()
+              new_name =ws.name()
               return ('current',new_name)
            else:
+              ws = run.get_workspace()
               raise RuntimeError('Normalize by monitor-2:: Workspace {0} for run {1} does not have monitors in it'\
-                   .format(run.get_ws_name(),run.__get__()))
+                   .format(ws.name(),run.run_number()))
         #
         if self._debug_mode:
            kwargs = {'NormFactorWS':'NormMon2_WS' + mon_ws.getName()}
@@ -974,7 +986,7 @@ class DirectEnergyConversion(object):
         """ set up spectra masks """ 
         self._spectra_masks = value
 #-------------------------------------------------------------------------------
-    def apply_absolute_normalization(self,sample_ws,monovan_run=None,ei_guess=None,wb_mono=None):
+    def apply_absolute_normalization(self,sample_ws,monovan_run=None,ei_guess=None,wb_mono=None,abs_norm_factor_is=None):
         """  Function applies absolute normalization factor to the target workspace
              and calculates this factor if necessary
 
@@ -992,12 +1004,15 @@ class DirectEnergyConversion(object):
         if prop_man.mono_correction_factor:
             absnorm_factor = float(prop_man.mono_correction_factor)
             prop_man.log('*** Using supplied workspace correction factor                           ******','notice')
-            abs_norm_factor_is = 'provided'
+            if not abs_norm_factor_is:
+                abs_norm_factor_is = ' provided '
+
         else:
             mvir = prop_man.monovan_integr_range
             prop_man.log('*** Evaluating the integral from the monovan run and calculate the correction factor ******','notice')
             prop_man.log('    Using absolute units vanadium integration range : [{0:8f}:{1:8f}]         ******'.format(mvir[0],mvir[1]),'notice')
-            abs_norm_factor_is = 'calculated'
+            if not abs_norm_factor_is:
+                abs_norm_factor_is = 'calculated'
 
             # convert to monovanadium to energy
             deltaE_wkspace_monovan = self.mono_sample(monovan_run,ei_guess,wb_mono,
@@ -1398,7 +1413,8 @@ class DirectEnergyConversion(object):
           run.synchronize_ws()
 
         prop_man = self.prop_man
-        result_name = run.get_ws_name()
+        ws = run.get_workspace()
+        result_name = ws.name()
         #######################
         # Ki/Kf Scaling...
         if prop_man.apply_kikf_correction:
