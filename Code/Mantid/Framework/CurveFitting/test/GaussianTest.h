@@ -583,6 +583,37 @@ public:
     ConfigService::Instance().setString("curvefitting.peakRadius",priorRadius);
   }
 
+  void testIntensity()
+  {
+      boost::shared_ptr<Gaussian> fn( new Gaussian() );
+      fn->initialize();
+      fn->setHeight(2.0);
+      fn->setFwhm(0.125);
+      fn->setCentre(-200.0);
+
+      // Area under a gaussian is height * sigma * sqrt(2 * pi)
+      TS_ASSERT_DELTA(fn->intensity(), 0.26611675485780654483, 1e-10);
+  }
+
+  void testSetIntensity()
+  {
+      boost::shared_ptr<Gaussian> fn( new Gaussian() );
+      fn->initialize();
+      fn->setHeight(2.0);
+      fn->setFwhm(0.125);
+      fn->setCentre(-200.0);
+
+      TS_ASSERT_THROWS_NOTHING(fn->setIntensity(0.5));
+
+      TS_ASSERT_DELTA(fn->intensity(), 0.5, 1e-10);
+
+      // FWHM does not change
+      TS_ASSERT_EQUALS(fn->fwhm(), 0.125);
+
+      // Height changes
+      TS_ASSERT_DELTA(fn->height(), 3.75774911479860533509, 1e-10);
+  }
+
 
 };
 
