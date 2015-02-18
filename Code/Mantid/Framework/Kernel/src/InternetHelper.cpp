@@ -134,7 +134,7 @@ int InternetHelper::sendRequestAndProcess(HTTPClientSession &session,
                                           std::ostream &responseStream) {
   // create a request
   this->createRequest(uri);
-  session.sendRequest(*m_request) << m_body;
+  session.sendRequest(*m_request) << m_body.str();
 
   HTTPResponse res;
   std::istream &rs = session.receiveResponse(res);
