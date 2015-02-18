@@ -13,6 +13,41 @@ class MyPeak(IPeakFunction):
     def functionLocal(self, xvals):
         return 5*xvals
 
+class RectangularFunction(IPeakFunction):
+    def init(self):
+        self.declareParameter("Height")
+        self.declareParameter("Fwhm")
+        self.declareParameter("Center")
+
+    def centre(self):
+        return self.getParameterValue("Center")
+
+    def setCentre(self, newCenter):
+        self.setParameter("Center", newCenter)
+
+    def height(self):
+        return self.getParameterValue("Height")
+
+    def setHeight(self, newHeight):
+        self.setParameter("Height", newHeight)
+
+    def fwhm(self):
+        return self.getParameterValue("Fwhm")
+
+    def setFwhm(self, newFwhm):
+        self.setParameter("Fwhm", newFwhm)
+
+    def functionLocal(self, xvals):
+        center = self.getParameterValue("Center")
+        fwhm = self.getParameterValue("Fwhm")
+        height = self.getParameterValue("Height")
+
+        values = np.zeros(xvals.shape)
+        nonZero = (xvals > (center - fwhm/2.0)) & (xvals < (center + fwhm / 2.0))
+        values[nonZero] = height
+
+        return values
+
 class IPeakFunctionTest(unittest.TestCase):
 
     def test_instance_can_be_created_standalone(self):
@@ -37,6 +72,24 @@ class IPeakFunctionTest(unittest.TestCase):
         self.assertEquals(5., out[0])
         self.assertEquals(10., out[1])
         self.assertEquals(15., out[2])
+
+    def test_get_set_intensity(self):
+        func = RectangularFunction()
+        func.initialize()
+        func.setCentre(1.0)
+        func.setHeight(2.0)
+        func.setFwhm(3.0)
+
+        # This is a rectangle function with height 2 and width 3, centered
+        # around 1.0. The intensity should be 6.0 (height * width)
+        self.assertAlmostEquals(func.intensity(), 6.0, delta=1e-10)
+
+        # Setting the intensity only changes height, not width
+        func.setIntensity(12.0)
+
+        self.assertEquals(func.fwhm(), 3.0)
+        self.assertAlmostEquals(func.height(), 4.0, delta=1e-10)
+        self.assertAlmostEquals(func.intensity(), 12.0, delta=1e-10)
 
 if __name__ == '__main__':
     unittest.main()
