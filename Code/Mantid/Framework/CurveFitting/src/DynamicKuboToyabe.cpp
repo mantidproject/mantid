@@ -41,10 +41,10 @@ double ZFKT (const double x, const double G){
 }
 
 // Static Non-Zero field Kubo Toyabe relaxation function
-double HKT (const double x, const double G, const double F) 
-{
-  throw std::runtime_error("HKT not implemented yet");
-}
+//double HKT (const double x, const double G, const double F) 
+//{
+//  throw std::runtime_error("HKT not implemented yet");
+//}
 
 // Dynamic Kubo-Toyabe
 double getDKT (double t, double G, double v){
@@ -121,9 +121,10 @@ void DynamicKuboToyabe::function1D(double* out, const double* xValues, const siz
     }
     // Non-zero external field
     else{
-      for (size_t i = 0; i < nData; i++) {
-        out[i] = A*HKT(xValues[i],G,F);
-      }
+      //for (size_t i = 0; i < nData; i++) {
+      //  out[i] = A*HKT(xValues[i],G,F);
+      //}
+      throw std::runtime_error("HKT() not implemented yet");
     }
 	} 
 
@@ -139,7 +140,7 @@ void DynamicKuboToyabe::function1D(double* out, const double* xValues, const siz
 	  } else {
 
 	    // Non-zero field
-      throw std::runtime_error("Not implemented yet");
+      throw std::runtime_error("HKT() not implemented yet");
     }
 
 	} // else hopping rate != 0
