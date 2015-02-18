@@ -2,14 +2,12 @@
 #define PEAKFUNCTIONINTEGRATORTEST_H
 
 #include <cxxtest/TestSuite.h>
-#include "MantidSINQ/PoldiUtilities/PeakFunctionIntegrator.h"
-
-#include "MantidCurveFitting/Gaussian.h"
-#include "MantidCurveFitting/Lorentzian.h"
+#include "MantidAPI/PeakFunctionIntegrator.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
 
 #include "gsl/gsl_errno.h"
 
-using namespace Mantid::Poldi;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 
@@ -30,10 +28,15 @@ public:
 class PeakFunctionIntegratorTest : public CxxTest::TestSuite
 {
 private:
+    PeakFunctionIntegratorTest()
+    {
+        FrameworkManager::Instance();
+    }
+
     IPeakFunction_sptr getGaussian(double center, double fwhm, double height)
     {
-        IPeakFunction_sptr gaussian(new Gaussian);
-        gaussian->initialize();
+        IPeakFunction_sptr gaussian = boost::dynamic_pointer_cast<IPeakFunction>(
+                    FunctionFactory::Instance().createFunction("Gaussian"));
         gaussian->setCentre(center);
         gaussian->setFwhm(fwhm);
         gaussian->setHeight(height);
@@ -48,8 +51,8 @@ private:
 
     IPeakFunction_sptr getLorentzian(double center, double fwhm, double height)
     {
-        IPeakFunction_sptr lorentzian(new Lorentzian);
-        lorentzian->initialize();
+        IPeakFunction_sptr lorentzian = boost::dynamic_pointer_cast<IPeakFunction>(
+                    FunctionFactory::Instance().createFunction("Lorentzian"));
         lorentzian->setCentre(center);
         lorentzian->setFwhm(fwhm);
         lorentzian->setHeight(height);

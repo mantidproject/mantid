@@ -18,7 +18,7 @@ use the Build/wiki_maker.py script to generate your full wiki page.
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
-#include "MantidSINQ/PoldiUtilities/PeakFunctionIntegrator.h"
+#include "MantidAPI/PeakFunctionIntegrator.h"
 #include "MantidAPI/IPeakFunction.h"
 
 #include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"

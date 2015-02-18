@@ -1,4 +1,4 @@
-#include "MantidSINQ/PoldiUtilities/PeakFunctionIntegrator.h"
+#include "MantidAPI/PeakFunctionIntegrator.h"
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "gsl/gsl_errno.h"
@@ -6,9 +6,7 @@
 #include <iomanip>
 
 namespace Mantid {
-namespace Poldi {
-
-using namespace API;
+namespace API {
 
 /** Constructor with required relative precision argument. The default is 1e-8.
  *  See also PeakFunctionIntegrator::setRequiredRelativePrecision.
@@ -153,7 +151,7 @@ PeakFunctionIntegrator::integrate(IPeakFunction_const_sptr peakFunction,
 gsl_function PeakFunctionIntegrator::getGSLFunction(
     IPeakFunction_const_sptr peakFunction) const {
   gsl_function f;
-  f.function = &Mantid::Poldi::gsl_peak_wrapper;
+  f.function = &Mantid::API::gsl_peak_wrapper;
   f.params = &peakFunction;
 
   return f;
