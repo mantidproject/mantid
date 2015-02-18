@@ -69,7 +69,7 @@ double getDKT (double t, double G, double v){
       // re-compute gStat if G has changed
 
       // Generate static Kubo-Toyabe
-      for (size_t k=0; k<tsmax; k++){
+      for (int k=0; k<tsmax; k++){
         gStat[k]= ZFKT(k*eps,G);
       }
       // Store new G value
