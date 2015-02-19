@@ -76,7 +76,7 @@ class ReflOptions(QtGui.QDialog, refl_options_window.Ui_OptionsDialog):
 
     def frequency(self):
         return self.__frequency
-    
+
     def useAlg(self):
         return self.__alg_use
 

@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_SaveWindow(object):
     def __init__(self):
 
-        self.__has_mount_point = True;
+        self.__has_mount_point = True
 
         self.__instrument = config['default.instrument'].strip().upper()
 
@@ -26,7 +26,7 @@ class Ui_SaveWindow(object):
             self.__mountpoint = usersettings.get_named_setting("DataMountPoint")
         except KeyError:
             print "DataMountPoint is missing from the config.xml file."
-            self.__has_mount_point = False;
+            self.__has_mount_point = False
 
     def setupUi(self, SaveWindow):
         self.SavePath=""

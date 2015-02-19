@@ -36,7 +36,7 @@ class PearlMCAbsorption(PythonAlgorithm):
             coeffs = self._calculateAbsorption(ascii_wkspace, float(thickness))
 
         coeffs.setYUnitLabel("Attenuation Factor (I/I0)")
-        coeffs.setYUnit("");
+        coeffs.setYUnit("")
         coeffs.setDistribution(True)
         self.setProperty("OutputWorkspace", coeffs)
 

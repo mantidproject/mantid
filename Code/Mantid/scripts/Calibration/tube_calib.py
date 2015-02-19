@@ -43,9 +43,9 @@ def createTubeCalibtationWorkspaceByWorkspaceIndexList ( integratedWorkspace, ou
     pixel = 1
     #integratedWorkspace.
     for i in workspaceIndexList:
-     pixelNumbers.append(pixel)
-     pixel = pixel + 1
-     integratedPixelCounts.append( integratedWorkspace.dataY(i)[0] )
+        pixelNumbers.append(pixel)
+        pixel = pixel + 1
+        integratedPixelCounts.append( integratedWorkspace.dataY(i)[0] )
 
     CreateWorkspace(dataX=pixelNumbers,dataY=integratedPixelCounts, OutputWorkspace=outputWorkspace)
     #if (showPlot):
@@ -210,20 +210,20 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
 
     # Loop over the points
     for i in range(len(funcForms)):
-      if funcForms[i] == 2:
+        if funcForms[i] == 2:
         # find the edge position
-        peakIndex = fitEdges(fitParams, i, getPointsWs, calibPointWs)
-      else:
-        peakIndex = fitGaussian(fitParams, i, getPointsWs, calibPointWs)
+            peakIndex = fitEdges(fitParams, i, getPointsWs, calibPointWs)
+        else:
+            peakIndex = fitGaussian(fitParams, i, getPointsWs, calibPointWs)
 
       # get the peak centre
-      peakCentre = mtd[calibPointWs + '_Parameters'].row(peakIndex).items()[1][1]
-      results.append(peakCentre)
+        peakCentre = mtd[calibPointWs + '_Parameters'].row(peakIndex).items()[1][1]
+        results.append(peakCentre)
 
-      if showPlot:
-        ws = mtd[calibPointWs + '_Workspace']
-        fitt_y_values.append(copy.copy(ws.dataY(1)))
-        fitt_x_values.append(copy.copy(ws.dataX(1)))
+        if showPlot:
+            ws = mtd[calibPointWs + '_Workspace']
+            fitt_y_values.append(copy.copy(ws.dataY(1)))
+            fitt_x_values.append(copy.copy(ws.dataX(1)))
 
     if showPlot:
         FittedData = CreateWorkspace(numpy.hstack(fitt_x_values),
@@ -329,10 +329,10 @@ def correctTubeToIdealTube( tubePoints, idealTubePoints, nDets, TestMode=False, 
     # Fit quadratic to ideal tube points
     CreateWorkspace(dataX=usedTubePoints,dataY=usedIdealTubePoints, OutputWorkspace="PolyFittingWorkspace")
     try:
-       Fit(InputWorkspace="PolyFittingWorkspace",Function='name=Polynomial,n=%d'%(polinFit),StartX=str(0.0),EndX=str(nDets),Output="QF")
+        Fit(InputWorkspace="PolyFittingWorkspace",Function='name=Polynomial,n=%d'%(polinFit),StartX=str(0.0),EndX=str(nDets),Output="QF")
     except:
-       print "Fit failed"
-       return []
+        print "Fit failed"
+        return []
 
     paramQF = mtd['QF_Parameters']
 
@@ -349,7 +349,7 @@ def correctTubeToIdealTube( tubePoints, idealTubePoints, nDets, TestMode=False, 
         print "TestMode code"
         for i in range( len(usedTubePoints) ):
            #print "used point",i,"shoving pixel",int(usedTubePoints[i])
-           xResult[ int(usedTubePoints[i]) ] = xResult[0]
+            xResult[ int(usedTubePoints[i]) ] = xResult[0]
 
     # print xResult
     return xResult
@@ -383,8 +383,8 @@ def getCalibratedPixelPositions( ws, tubePts, idealTubePts, whichTube, peakTestM
     pixels = correctTubeToIdealTube ( tubePts, idealTubePts, nDets, TestMode=peakTestMode, polinFit=polinFit )
     #print pixels
     if( len(pixels) != nDets):
-       print "Tube correction failed."
-       return detIDs, detPositions
+        print "Tube correction failed."
+        return detIDs, detPositions
     baseInstrument = ws.getInstrument().getBaseInstrument()
     # Get tube unit vector
     # get the detector from the baseInstrument, in order to get the positions
@@ -502,9 +502,9 @@ def getCalibration( ws, tubeSet, calibTable, fitPar, iTube, peaksTable,
 
         print "Calibrating tube", i+1,"of",nTubes, tubeSet.getTubeName(i)
         if ( len(wht) < 1 ):
-           print "Unable to get any workspace indices (spectra) for this tube. Tube",tubeSet.getTubeName(i),"not calibrated."
+            print "Unable to get any workspace indices (spectra) for this tube. Tube",tubeSet.getTubeName(i),"not calibrated."
            #skip this tube
-           continue
+            continue
 
         # Calibribate the tube, if possible
         if (tubeSet.getTubeLength(i) <= excludeShortTubes):
@@ -599,7 +599,7 @@ def getCalibrationFromPeakFile ( ws, calibTable, iTube,  PeakFile ):
                 calibTable.addRow ( nextRow )
 
     if(nTubes == 0):
-       return
+        return
 
     # Delete temporary workspaces for getting new detector positions
     DeleteWorkspace('PolyFittingWorkspace')
@@ -611,7 +611,7 @@ def getCalibrationFromPeakFile ( ws, calibTable, iTube,  PeakFile ):
 
 ## implement this function
 def constructIdealTubeFromRealTube( ws, tube, fitPar, funcForm ):
-   """
+    """
    Construct an ideal tube from an actual tube (assumed ideal)
 
    :param ws: integrated workspace
@@ -622,32 +622,32 @@ def constructIdealTubeFromRealTube( ws, tube, fitPar, funcForm ):
 
    """
    # Get workspace indices
-   idealTube = IdealTube()
+    idealTube = IdealTube()
 
-   nTubes = tube.getNumTubes()
-   if(nTubes < 1):
-       raise RuntimeError("Invalid tube specification received by constructIdealTubeFromRealTube")
-   elif(nTubes > 1):
-      print "Specification has several tubes. The ideal tube will be based on the first tube",tube.getTubeName(0)
+    nTubes = tube.getNumTubes()
+    if(nTubes < 1):
+        raise RuntimeError("Invalid tube specification received by constructIdealTubeFromRealTube")
+    elif(nTubes > 1):
+        print "Specification has several tubes. The ideal tube will be based on the first tube",tube.getTubeName(0)
 
-   wht, _ = tube.getTube(0)
+    wht, _ = tube.getTube(0)
    # print wht
 
    # Check tube
-   if ( len(wht) < 1 ):
+    if ( len(wht) < 1 ):
         raise RuntimeError("Unable to get any workspace indices for this tube. Cannot use as ideal tube.")
 
    # Get actual tube on which ideal tube is based
-   actualTube = getPoints ( ws, funcForm, fitPar, wht)
-   print "Actual tube that ideal tube is to be based upon",actualTube
+    actualTube = getPoints ( ws, funcForm, fitPar, wht)
+    print "Actual tube that ideal tube is to be based upon",actualTube
 
    # Get ideal tube based on this actual tube
-   try:
-       idealTube.setArray(actualTube)
-   except:
-       msg = "Attempted to create ideal tube based on actual tube" + str(actualTube)
-       msg += "Unable to create ideal tube."
-       msg += "Please choose another tube for constructIdealTubeFromRealTube()."
-       raise RuntimeError(msg)
-   return idealTube
+    try:
+        idealTube.setArray(actualTube)
+    except:
+        msg = "Attempted to create ideal tube based on actual tube" + str(actualTube)
+        msg += "Unable to create ideal tube."
+        msg += "Please choose another tube for constructIdealTubeFromRealTube()."
+        raise RuntimeError(msg)
+    return idealTube
 
