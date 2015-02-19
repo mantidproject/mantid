@@ -105,9 +105,6 @@ void DynamicKuboToyabe::function1D(double* out, const double* xValues, const siz
     }
     // Non-zero external field
     else{
-      //for (size_t i = 0; i < nData; i++) {
-      //  out[i] = A*HKT(xValues[i],G,F);
-      //}
       throw std::runtime_error("HKT() not implemented yet");
     }
   } 
