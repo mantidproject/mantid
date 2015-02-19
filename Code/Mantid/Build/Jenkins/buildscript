@@ -16,17 +16,16 @@ cmake --version
 echo "SHA1=${sha1}"
 
 
-#determine if we are using the clang compiler.
-#true if *clang* is in the jobname or if we are on a mac without icpc
-if ! command -v icpc 2>/dev/null 1>&2 &&  [[ $(uname) = 'Darwin' ]] ; then
-  export USE_CLANG=true
-elif [[ ${JOB_NAME} == *clang* ]]; then
-  export USE_CLANG=true
-else
-  export USE_CLANG=false
+#determine if should use the clang compiler.
+if [[ ${JOB_NAME} == *clang* ]]; then
+  USE_CLANG=true
+elif [[ $(uname) == 'Darwin' ]] ; then
+  if [[ ! $(command -v icpc) ]] ; then
+    USE_CLANG=true
+  fi
 fi  
 
-if [["$USE_CLANG" == "true"]]; then
+if [[ $USE_CLANG ]]; then
   # Assuming we are using the clang compiler
   echo "Using clang/llvm compiler."
   clang --version
@@ -46,7 +45,7 @@ fi
 ###############################################################################
 # OS X 10.8 setup steps
 ###############################################################################
-if [[ $(uname) == 'Darwin' ]] && [[ "$USE_CLANG" == "false" ]]; then
+if [[ $(uname) == 'Darwin' ]] && [[ ! $USE_CLANG ]]; then
   # Assuming we are using the Intel compiler
   cd $WORKSPACE/Code
   ./fetch_Third_Party.sh
