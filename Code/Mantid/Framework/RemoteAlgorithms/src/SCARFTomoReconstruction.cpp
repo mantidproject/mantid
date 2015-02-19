@@ -94,7 +94,7 @@ void SCARFTomoReconstruction::init() {
 
   // - Action: upload file
   declareProperty(new API::FileProperty("FileToUpload", "",
-                                        API::FileProperty::Load, "",
+                                        API::FileProperty::OptionalLoad, "",
                                         Direction::Input),
                   "Name of the file (local, full path) to upload to the compute "
                   "resource/server ");
@@ -148,7 +148,7 @@ void SCARFTomoReconstruction::init() {
                       new VisibleWhenProperty("Action", IS_EQUAL_TO, "Download"));
 
   declareProperty(new API::FileProperty("LocalDirectory", "",
-                                        API::FileProperty::Directory, "",
+                                        API::FileProperty::OptionalDirectory, "",
                                         Direction::Input),
                   "Path to a local directory/folder where to download files from "
                   "the compute resource/server");
@@ -399,6 +399,9 @@ void SCARFTomoReconstruction::doLogout(const std::string &username) {
     throw std::runtime_error("Failed to logout from the web service at: " +
                              httpsURL + ". Please check your username.");
   }
+
+  // successfully logged out, forget the token
+  m_tokenStash.erase(it);
 }
 
 /**
