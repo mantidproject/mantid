@@ -175,7 +175,7 @@ class DataCatalog(object):
         self.db = None
 
         try:
-             self._create_db(db_path, replace_db)
+            self._create_db(db_path, replace_db)
         except:
             print "DataCatalog: Could not access local data catalog\n%s" % sys.exc_value
 

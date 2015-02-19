@@ -82,7 +82,7 @@ def getSheight(mt, index):
     else:
         tag = 'S1VHeight'
         value = mt_run.getProperty(tag).value
-        
+
     return value[0]
 
 def getS1h(mt=None):
@@ -437,7 +437,7 @@ def convertWorkspaceToQ(ws_data,
             a = y_range[y]
 
             _tmp_y_axis = mt1.readY(int(a))[:]
-            _y_axis[int(y), :] = _tmp_y_axis;
+            _y_axis[int(y), :] = _tmp_y_axis
             _tmp_y_error_axis = mt1.readE(int(a))[:]
             _y_error_axis[int(y),:] = _tmp_y_error_axis
 
@@ -503,19 +503,19 @@ def angleUnitConversion(value, from_units='degree', to_units='rad'):
     """
 
     if (from_units == to_units):
-        return value;
+        return value
 
-    from_factor = 1;
+    from_factor = 1
     #convert everything into rad
     if (from_units == 'degree'):
-        from_factor = 1.745329252e-2;
-    value_rad = from_factor * value;
+        from_factor = 1.745329252e-2
+    value_rad = from_factor * value
 
     if (to_units == 'rad'):
-        return value_rad;
+        return value_rad
     else:
-        to_factor = 57.2957795;
-        return to_factor * value_rad;
+        to_factor = 57.2957795
+        return to_factor * value_rad
 
 def convertToThetaVsLambda(_tof_axis,
                            _pixel_axis,
@@ -840,7 +840,7 @@ def applySF(InputWorkspace,
         print '--> Data S2H: {0:2f}'.format(s2h_value)
         print '--> Data S1W: {0:2f}'.format(s1w_value)
         print '--> Data S2W: {0:2f}'.format(s2w_value)
-        
+
         print 'mERDDEEEEDEDEED'
         for i in range(nbr_row):
 
@@ -1005,7 +1005,7 @@ def rebinNeXus(inputWorkspace, params, type):
     print '--> rebin ', type
     ws_histo_data = Rebin(InputWorkspace=inputWorkspace,
                           Params=params,
-                          PreserveEvents=True);
+                          PreserveEvents=True)
     return ws_histo_data
 
 def cropTOF(inputWorkspace, min, max, type):
@@ -1170,7 +1170,7 @@ def weightedMean(data_array, error_array, error_0):
     sz = len(data_array)
 
     # calculate the numerator of mean
-    dataNum = 0;
+    dataNum = 0
     for i in range(sz):
         if (error_array[i] == 0):
             error_array[i] = error_0
@@ -1179,7 +1179,7 @@ def weightedMean(data_array, error_array, error_0):
         dataNum += tmpFactor
 
     # calculate denominator
-    dataDen = 0;
+    dataDen = 0
     for i in range(sz):
         if (error_array[i] == 0):
             error_array[i] = error_0
@@ -1334,7 +1334,7 @@ def ouput_ascii_file(file_name,
 
     sz_x_axis = len(x_axis)
     for i in range(sz_x_axis-1):
-        f.write(str(x_axis[i]) + "," + str(y_axis[i]) + "," + str(y_error_axis[i]) + "\n");
+        f.write(str(x_axis[i]) + "," + str(y_axis[i]) + "," + str(y_error_axis[i]) + "\n")
 
     f.close
 
@@ -1957,8 +1957,8 @@ def cropAxisToOnlyNonzeroElements(q_rebin, dataPeakRange):
     x_axis = q_rebin.readX(0)[:]
     sz = x_axis.shape[0]-1
 
-    index_first_non_zero_value = sz;
-    index_last_non_zero_value = 0;
+    index_first_non_zero_value = sz
+    index_last_non_zero_value = 0
 
     for x in range(nbrPixel):
         _pixel_axis = q_rebin.readY(x)[:]
@@ -2043,7 +2043,7 @@ def cleanupData1D(final_data_y_axis, final_data_y_error_axis):
     sz = final_data_y_axis.shape
     nbrTof = sz[0]
 
-    notYetRemoved = True;
+    notYetRemoved = True
 
     for t in range(nbrTof):
 
@@ -2076,15 +2076,15 @@ def cleanupData1D(final_data_y_axis, final_data_y_error_axis):
     return [final_data_y_axis, final_data_y_error_axis]
 
 def isNexusTakeAfterRefDate(nexus_date):
-   '''
+    '''
    This function parses the output.date and returns true if this date is after the ref date
    '''
-   nexus_date_acquistion = nexus_date.split('T')[0]
-   
-   if nexus_date_acquistion > ref_date:
-     return True
-   else:
-     return False
+    nexus_date_acquistion = nexus_date.split('T')[0]
+
+    if nexus_date_acquistion > ref_date:
+        return True
+    else:
+        return False
 
 
 

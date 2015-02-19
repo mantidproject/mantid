@@ -402,17 +402,17 @@ class SANSReduction(PythonAlgorithm):
                     elif len(process_file)>0 and process_file.lower().find("none") != 0:
                         Logger("SANSReduction").error("Could not read process info file %s\n" % process_file)
                 if property_manager.existsProperty("SetupAlgorithm"):
-                        if property_manager.existsProperty('InstrumentName'):
-                            instrument_name = property_manager.getProperty('InstrumentName').value
-                        else:
-                            instrument_name = 'EQSANS'
-                        setup_info = property_manager.getProperty("SetupAlgorithm").value
-                        proc_xml += "\n<Reduction>\n"
-                        proc_xml += "  <instrument_name>%s</instrument_name>\n" % instrument_name
-                        proc_xml += "  <SetupInfo>%s</SetupInfo>\n" % setup_info
-                        filename = self.getProperty("Filename").value
-                        proc_xml += "  <Filename>%s</Filename>\n" % filename
-                        proc_xml += "</Reduction>\n"
+                    if property_manager.existsProperty('InstrumentName'):
+                        instrument_name = property_manager.getProperty('InstrumentName').value
+                    else:
+                        instrument_name = 'EQSANS'
+                    setup_info = property_manager.getProperty("SetupAlgorithm").value
+                    proc_xml += "\n<Reduction>\n"
+                    proc_xml += "  <instrument_name>%s</instrument_name>\n" % instrument_name
+                    proc_xml += "  <SetupInfo>%s</SetupInfo>\n" % setup_info
+                    filename = self.getProperty("Filename").value
+                    proc_xml += "  <Filename>%s</Filename>\n" % filename
+                    proc_xml += "</Reduction>\n"
 
                 filename = os.path.join(output_dir, iq_output+'.txt')
 

@@ -40,9 +40,9 @@ class MainWindow(QtGui.QMainWindow):
         self.inst=name
         config['default.instrument']=name
         if len(self.chop)>0:
-           message,err = PyChop.setchoptype(self.inst,self.chop)
-           if err>0:
-             self.chop=''
+            message,err = PyChop.setchoptype(self.inst,self.chop)
+            if err>0:
+                self.chop=''
 
     def set_chop(self,chop_type):
         message,err = PyChop.setchoptype(self.inst,chop_type)
