@@ -56,6 +56,9 @@ public:
     return "DataHandling";
   }
 
+  /// Input property validation
+  virtual std::map<std::string, std::string> validateInputs();
+
 private:
   /// Initialisation code
   void init();

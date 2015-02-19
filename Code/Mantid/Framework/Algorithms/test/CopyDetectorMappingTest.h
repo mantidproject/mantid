@@ -5,22 +5,25 @@
 #include "MantidAlgorithms/CopyDetectorMapping.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::MantidVec;
+using namespace Mantid;
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 class CopyDetectorMappingTest : public CxxTest::TestSuite
 {
 public:
   void testInit()
   {
+    Mantid::Algorithms::CopyDetectorMapping copyMapping;
+
     TS_ASSERT_THROWS_NOTHING( copyMapping.initialize() )
     TS_ASSERT( copyMapping.isInitialized() )
   }
 
-  void testAdd()
+  void testSimple()
   {
-    using namespace Mantid;
-    using namespace Mantid::API;
-    using namespace Mantid::Kernel;
+    Mantid::Algorithms::CopyDetectorMapping copyMapping;
+    TS_ASSERT_THROWS_NOTHING( copyMapping.initialize() )
 
     auto toMatch = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
 
@@ -55,8 +58,29 @@ public:
     AnalysisDataService::Instance().remove("to_remap");
   }
 
-private:
-  Mantid::Algorithms::CopyDetectorMapping copyMapping;
+  void testFailWithDifferingSpecSize()
+  {
+    Mantid::Algorithms::CopyDetectorMapping copyMapping;
+    TS_ASSERT_THROWS_NOTHING( copyMapping.initialize() )
+
+    // Add workspaces to ADS
+    AnalysisDataService::Instance().add("to_match", WorkspaceCreationHelper::Create2DWorkspace(10, 10));
+    AnalysisDataService::Instance().add("to_remap", WorkspaceCreationHelper::Create2DWorkspace(20, 10));
+
+    // Run algorithm
+    TS_ASSERT_THROWS_NOTHING( copyMapping.setPropertyValue("WorkspaceToMatch", "to_match") );
+    TS_ASSERT_THROWS_NOTHING( copyMapping.setPropertyValue("WorkspaceToRemap", "to_remap") );
+
+    auto validationIssues = copyMapping.validateInputs();
+    TS_ASSERT_DIFFERS( validationIssues.size(), 0 );
+
+    TS_ASSERT_THROWS_ANYTHING( copyMapping.execute() );
+    TS_ASSERT( !copyMapping.isExecuted() );
+
+    // Clean up workspace
+    AnalysisDataService::Instance().remove("to_match");
+    AnalysisDataService::Instance().remove("to_remap");
+  }
 
 };
 
