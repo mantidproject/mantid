@@ -46,6 +46,8 @@ cd $WORKSPACE/build
 ###############################################################################
 if [[ ! -e $WORKSPACE/build/CMakeCache.txt ]]; then
   $SCL_ON_RHEL6 "cmake -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDATA_TARGETS_ONLY=ON ../Code/Mantid"
+else
+  $SCL_ON_RHEL6 "cmake ."
 fi
 
 ###############################################################################
