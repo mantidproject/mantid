@@ -573,7 +573,7 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
  * @param detectorPos : V3D detector position
  * @return Instrument generated.
  */
-Instrument_sptr createMinimalInstrument(const V3D& sourcePos, const V3D& samplePos, const V3D& detectorPos )
+Instrument_sptr createMinimalInstrument(const Mantid::Kernel::V3D& sourcePos, const Mantid::Kernel::V3D& samplePos, const Mantid::Kernel::V3D& detectorPos )
 {
     Instrument_sptr instrument = boost::make_shared<Instrument>();
     instrument->setReferenceFrame(
