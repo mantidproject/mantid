@@ -320,22 +320,21 @@ void SCARFTomoReconstruction::doLogin(const std::string &username,
                                + ConfigService::Instance().getFacility().name()
                                + ")."));
 
-  InternetHelper session;
   std::string httpsURL = SCARFLoginBaseURL + SCARFLoginPath + "?username=" +
     username + "&password=" + password;
 
   std::stringstream ss;
   try {
-    session.sendRequest(httpsURL, ss);
+    doSendRequestGetResponse(httpsURL, ss);
   } catch (Kernel::Exception::InternetError& ie) {
     throw std::runtime_error("Error while sending HTTP request to authenticate "
                              "(log in): " + std::string(ie.what()));
   }
-  std::string resp = ss.str();
-  // We would check (Poco::Net::HTTPResponse::HTTP_OK == respCode) but the SCARF
+  // We would check (Poco::Net::HTTPResponse::HTTP_OK == code) but the SCARF
   // login script (token.py) seems to return 200 whatever happens, as far as the
   // request is well formed. So this is how to know if authentication succeeded:
   const std::string expectedSubstr = "https://portal.scarf.rl.ac.uk";
+  std::string resp = ss.str();
   if (resp.find(expectedSubstr) != std::string::npos) {
     // it went fine, stash cookie/token which looks like this (2 lines):
     // https://portal.scarf.rl.ac.uk:8443/platform/
@@ -377,24 +376,22 @@ void SCARFTomoReconstruction::doLogout(const std::string &username) {
   const std::string baseURL = it->second.m_url;
   const std::string token = it->second.m_token_str;
 
-  InternetHelper session;
   std::string httpsURL = baseURL + logoutPath;
-  std::stringstream ss;
-  InternetHelper::StringToStringMap headers;
+  StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>("Content-Type",
                                                      "text/plain"));
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
   int code;
+  std::stringstream ss;
   try {
-    code = session.sendRequest(httpsURL, ss, headers);
+    code = doSendRequestGetResponse(httpsURL, ss, headers);
   } catch (Kernel::Exception::InternetError& ie) {
     throw std::runtime_error("Error while sending HTTP request to log out: "
                              + std::string(ie.what()));
   }
-  std::string resp = ss.str();
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
-    g_log.notice() << "Logged out with response: " << resp << std::endl;
+    g_log.notice() << "Logged out with response: " << ss.str() << std::endl;
   } else {
     throw std::runtime_error("Failed to logout from the web service at: " +
                              httpsURL + ". Please check your username.");
@@ -463,31 +460,30 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
   const std::string baseURL = it->second.m_url;
   const std::string token = it->second.m_token_str;
 
-  InternetHelper session;
   std::string httpsURL = baseURL + submitPath;
-  std::stringstream ss;
-  InternetHelper::StringToStringMap headers;
+  StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>("Content-Type",
                                                      "multipart/mixed; boundary=" +
                                                      boundary));
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
   int code;
+  std::stringstream ss;
   try {
-    code = session.sendRequest(httpsURL, ss, headers,
-                               Poco::Net::HTTPRequest::HTTP_POST, body);
+    code = doSendRequestGetResponse(httpsURL, ss, headers,
+                                    Poco::Net::HTTPRequest::HTTP_POST, body);
   } catch (Kernel::Exception::InternetError& ie) {
     throw std::runtime_error("Error while sending HTTP request to submit a job: "
                              + std::string(ie.what()));
   }
-  std::string resp = ss.str();
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
+    std::string resp = ss.str();
     if (std::string::npos != resp.find("<errMsg>")) {
       g_log.warning() << "Submitted job but got a a response that seems to contain "
         "an error message from " << m_SCARFComputeResource << ": " <<
-        extractPACErrMsg(resp) << std::endl;
+        extractPACErrMsg(ss.str()) << std::endl;
     } else {
-      g_log.notice() << "Submitted job with response: " << resp << std::endl;
+      g_log.notice() << "Submitted job with response: " << ss.str() << std::endl;
     }
   } else {
     throw std::runtime_error("Failed to submit a job through the web service at:" +
@@ -522,24 +518,22 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
   const std::string baseURL = it->second.m_url;
   const std::string token = it->second.m_token_str;
 
-  InternetHelper session;
   std::string httpsURL = baseURL + jobStatusPath;
-  std::stringstream ss;
-  InternetHelper::StringToStringMap headers;
+  StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>("Content-Type",
                                                      "application/xml"));
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
   int code;
+  std::stringstream ss;
   try {
-    code = session.sendRequest(httpsURL, ss, headers);
+    code = doSendRequestGetResponse(httpsURL, ss, headers);
   } catch (Kernel::Exception::InternetError& ie) {
     throw std::runtime_error("Error while sending HTTP request to query the status "
                              "of jobs: " + std::string(ie.what()));
   }
-  std::string resp = ss.str();
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
-    // TODO: put it into an output TableWorkspace
+    std::string resp = ss.str();
     if (std::string::npos != resp.find("<Jobs>") &&
         std::string::npos != resp.find("<extStatus>")) {
       API::ITableWorkspace_sptr ws = buildOutputStatusWorkspace(resp, wsName);
@@ -586,24 +580,22 @@ void SCARFTomoReconstruction::doQueryStatusById(const std::string &username,
   const std::string baseURL = it->second.m_url;
   const std::string token = it->second.m_token_str;
 
-  InternetHelper session;
   std::string httpsURL = baseURL + jobIdStatusPath;
-  std::stringstream ss;
-  InternetHelper::StringToStringMap headers;
+  StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>("Content-Type",
                                                      "application/xml"));
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
   int code;
+  std::stringstream ss;
   try {
-    code = session.sendRequest(httpsURL, ss, headers);
+    code = doSendRequestGetResponse(httpsURL, ss, headers);
   } catch (Kernel::Exception::InternetError& ie) {
     throw std::runtime_error("Error while sending HTTP request to query the status "
                              "of a job: " + std::string(ie.what()));
   }
-  std::string resp = ss.str();
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
-    // TODO: put it into an output TableWorkspace
+    std::string resp = ss.str();
     if (std::string::npos != resp.find("<Jobs>") &&
         std::string::npos != resp.find("<extStatus>")) {
       API::ITableWorkspace_sptr ws = buildOutputStatusWorkspace(resp, wsName);
@@ -640,23 +632,22 @@ bool SCARFTomoReconstruction::doPing() {
   // the port number is known only after logging in
   const std::string baseURL = "https://portal.scarf.rl.ac.uk:8443/";
 
-  InternetHelper session;
   std::string httpsURL = baseURL + pingPath;
-  std::stringstream ss;
-  InternetHelper::StringToStringMap headers;
+  StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>("Content-Type",
                                                      "application/xml"));
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
   int code;
+  std::stringstream ss;
   try {
-    code = session.sendRequest(httpsURL, ss, headers);
+    code = doSendRequestGetResponse(httpsURL, ss, headers);
   } catch (Kernel::Exception::InternetError& ie) {
     throw std::runtime_error("Error while sending HTTP request to ping the "
                              "server " + std::string(ie.what()));
   }
-  std::string resp = ss.str();
   bool ok = false;
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
+    std::string resp = ss.str();
     if (std::string::npos != resp.find("Web Services are ready")) {
       g_log.notice() << "Pinged compute resource with response: " <<
         resp << std::endl;
@@ -699,23 +690,22 @@ void SCARFTomoReconstruction::doCancel(const std::string &username,
   const std::string baseURL = it->second.m_url;
   const std::string token = it->second.m_token_str;
 
-  InternetHelper session;
   std::string httpsURL = baseURL + killPath;
-  std::stringstream ss;
-  InternetHelper::StringToStringMap headers;
+  StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>("Content-Type",
                                                      "application/xml"));
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
   int code;
+  std::stringstream ss;
   try {
-    code = session.sendRequest(httpsURL, ss, headers);
+    code = doSendRequestGetResponse(httpsURL, ss, headers);
   } catch (Kernel::Exception::InternetError& ie) {
     throw std::runtime_error("Error while sending HTTP request to cancel a job: " +
                              std::string(ie.what()));
   }
-  std::string resp = ss.str();
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
+    std::string resp = ss.str();
     if (std::string::npos != resp.find("<errMsg>")) {
       g_log.warning() << "Killed job with Id" << jobId << " but got what looks like an "
         "error message as response: " << extractPACErrMsg(resp) << std::endl;
@@ -768,8 +758,7 @@ void SCARFTomoReconstruction::doUploadFile(const std::string &username,
 
   InternetHelper session;
   std::string httpsURL = baseURL + uploadPath;
-  std::stringstream ss;
-  InternetHelper::StringToStringMap headers;
+  StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>("Content-Type",
                                                      "multipart/mixed; boundary=" +
                                                      boundary));
@@ -778,15 +767,16 @@ void SCARFTomoReconstruction::doUploadFile(const std::string &username,
 
   const std::string &body = buildUploadBody(boundary, destDir, filename);
   int code;
+  std::stringstream ss;
   try {
-    code = session.sendRequest(httpsURL, ss, headers,
-                               Poco::Net::HTTPRequest::HTTP_POST, body);
+    code = doSendRequestGetResponse(httpsURL, ss, headers,
+                                    Poco::Net::HTTPRequest::HTTP_POST, body);
   } catch (Kernel::Exception::InternetError& ie) {
     throw std::runtime_error("Error while sending HTTP request to upload a file: " +
                              std::string(ie.what()));
   }
-  std::string resp = ss.str();
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
+    std::string resp = ss.str();
     g_log.notice() << "Uploaded file with response: " << resp << std::endl;
   } else {
     throw std::runtime_error("Failed to upload file through the web service at:" +
@@ -795,60 +785,6 @@ void SCARFTomoReconstruction::doUploadFile(const std::string &username,
   }
 
   progress(1.0, "File uploaded to " + m_SCARFComputeResource);
-}
-
-/**
- * Helper method to encode the body of file upload requests.
- *
- * @param boundary Boundary string between parts of the multi-part body
- * @param destDir Path where to upload the file on the remote compute resource/server
- * @param filename Name (path) of the local file to upload
- *
- * @return A string ready to be used as body of a 'file upload' HTTP request
- */
-std::string SCARFTomoReconstruction::buildUploadBody(const std::string &boundary,
-                                                     const std::string &destDir,
-                                                     const std::string &filename) {
-  // build file name as given in the request body
-  std::string upName = filename;
-  std::replace(upName.begin(), upName.end(), '\\', '/');
-  // discard up to last / (path)
-  upName = upName.substr(upName.rfind("/") + 1);
-
-  // BLOCK: start and encode destination directory like this:
-  // --4k89ogja023oh1-gkdfk903jf9wngmujfs95m
-  // Content-Disposition: form-data; name="DirName"
-  // Content-ID: <DirName>
-  //
-  // /work/imat/foo_test
-  std::string body = "--" + boundary + "\r\n";
-  body += "Content-Disposition: form-data; name=\"DirName\"\r\n"
-    "Content-ID: <DirName>\r\n"
-    "\r\n"
-    + destDir + "\r\n";
-
-  // BLOCK: encode file like this (could be repeated for multi-file uploads):
-  // --4k89ogja023oh1-gkdfk903jf9wngmujfs95m
-  // Content-Disposition: form-data; name="bar.txt"; filename=bar.txt
-  // Content-Type: application/octet-stream
-  // Content-ID: <bar.txt>
-  //
-  body += "--" + boundary + "\r\n";
-  const std::string boundaryInner = "_Part_1_701508.1145579811786";
-  body += "Content-Disposition: form-data; name=\"" + upName  +"\"\r\n";
-  body += "Content-Type: application/octet-stream \r\n";
-  body += "Content-Transfer-Encoding: UTF-8\r\n";
-  body += "Content-ID: <" + upName + ">\r\n";
-  body += "\r\n";
-
-  // BLOCK: the file
-  std::ifstream fileStream(filename, std::ios_base::binary);
-  Poco::StreamCopier::copyToString(fileStream, body);
-
-  // BLOCK: end like this:
-  body += "--" + boundary + "--" + "\r\n\r\n";
-
-  return body;
 }
 
 /**
@@ -886,6 +822,28 @@ void SCARFTomoReconstruction::doDownload(const std::string &username,
     // name given, so we directly download this single file
     getOneJobFile(jobId, fname, localDir, it->second);
   }
+}
+
+/**
+ * Send the HHTP(S) request required to perform one of the actions.
+ *
+ * @param url Full URL, including request string
+ * @param response Response body
+ * @param headers HTTP headers given as key-value pairs
+ * @param method By default GET (Poco::Net::HTTPRequest::HTTP_POST), also accepts
+ * POST (Poco::Net::HTTPRequest::HTTP_POST)
+ * @param body HTTP message body
+ *
+ * @return HTTP(S) response code
+ */
+int SCARFTomoReconstruction::doSendRequestGetResponse(const std::string &url,
+                                                      std::ostream &rss,
+                                                      const StringToStringMap
+                                                      &headers,
+                                                      const std::string &method,
+                                                      const std::string &body) {
+  InternetHelper session;
+  return session.sendRequest(url, rss, headers, method, body);
 }
 
 /**
@@ -1023,6 +981,153 @@ std::string SCARFTomoReconstruction::buildSubmitBody(const std::string &appName,
 }
 
 /**
+ * Helper method to encode the body of file upload requests.
+ *
+ * @param boundary Boundary string between parts of the multi-part body
+ * @param destDir Path where to upload the file on the remote compute resource/server
+ * @param filename Name (path) of the local file to upload
+ *
+ * @return A string ready to be used as body of a 'file upload' HTTP request
+ */
+std::string SCARFTomoReconstruction::buildUploadBody(const std::string &boundary,
+                                                     const std::string &destDir,
+                                                     const std::string &filename) {
+  // build file name as given in the request body
+  std::string upName = filename;
+  std::replace(upName.begin(), upName.end(), '\\', '/');
+  // discard up to last / (path)
+  upName = upName.substr(upName.rfind("/") + 1);
+
+  // BLOCK: start and encode destination directory like this:
+  // --4k89ogja023oh1-gkdfk903jf9wngmujfs95m
+  // Content-Disposition: form-data; name="DirName"
+  // Content-ID: <DirName>
+  //
+  // /work/imat/foo_test
+  std::string body = "--" + boundary + "\r\n";
+  body += "Content-Disposition: form-data; name=\"DirName\"\r\n"
+    "Content-ID: <DirName>\r\n"
+    "\r\n"
+    + destDir + "\r\n";
+
+  // BLOCK: encode file like this (could be repeated for multi-file uploads):
+  // --4k89ogja023oh1-gkdfk903jf9wngmujfs95m
+  // Content-Disposition: form-data; name="bar.txt"; filename=bar.txt
+  // Content-Type: application/octet-stream
+  // Content-ID: <bar.txt>
+  //
+  body += "--" + boundary + "\r\n";
+  const std::string boundaryInner = "_Part_1_701508.1145579811786";
+  body += "Content-Disposition: form-data; name=\"" + upName  +"\"\r\n";
+  body += "Content-Type: application/octet-stream \r\n";
+  body += "Content-Transfer-Encoding: UTF-8\r\n";
+  body += "Content-ID: <" + upName + ">\r\n";
+  body += "\r\n";
+
+  // BLOCK: the file
+  std::ifstream fileStream(filename, std::ios_base::binary);
+  Poco::StreamCopier::copyToString(fileStream, body);
+
+  // BLOCK: end like this:
+  body += "--" + boundary + "--" + "\r\n\r\n";
+
+  return body;
+}
+
+/**
+ * Fills in a table workspace with job status information from an LSC
+ * PAC response in ~xml format. Assumes that the workspace passed is
+ * empty and ready to be filled. This guarantees that a non-null (I)
+ * table workspace object is returned.
+ *
+ * @param response Body of an HHTP response to a status query
+ * @param wsName Name of the workspace to create
+ */
+API::ITableWorkspace_sptr
+SCARFTomoReconstruction::buildOutputStatusWorkspace(const std::string &resp,
+                                                    const std::string &wsName)
+{
+  API::ITableWorkspace_sptr ws = API::WorkspaceFactory::Instance().
+    createTable("TableWorkspace");
+
+  // This is the information that is usually available for running/recently run jobs
+  ws->addColumn("int", "ID");
+  ws->addColumn("str", "Name");
+  ws->addColumn("str", "Status");
+  ws->addColumn("str", "Command run");
+
+  Poco::XML::DOMParser parser;
+  Poco::AutoPtr<Poco::XML::Document> doc;
+  try {
+    doc = parser.parseString(resp);
+  } catch (Poco::Exception &e) {
+    throw std::runtime_error("Unable to parse response in XML format: " +
+                             e.displayText());
+  } catch (std::exception &e) {
+    throw std::runtime_error("Unable to parse response in XML format: " +
+                             std::string(e.what()));
+  }
+
+  Poco::XML::Element *pRootElem = doc->documentElement();
+  if (!pRootElem || !pRootElem->hasChildNodes()) {
+    g_log.error("XML response from compute resouce contains no root element.");
+    throw std::runtime_error("No root element was found in XML response, "
+                             "cannot parse it.");
+  }
+
+  Poco::AutoPtr<Poco::XML::NodeList> jobs = pRootElem->getElementsByTagName("Job");
+  if (!jobs) {
+    g_log.error("XML response from compute resouce contains no root element.");
+    throw std::runtime_error("No root element was found in XML response, "
+                             "cannot parse it.");
+  }
+
+  size_t n = jobs->length();
+  if (0 == jobs->length()) {
+    g_log.notice() << "Got information about 0 jobs. You may not have any jobs "
+      "currently running on the compute resource. The output workspace will not "
+      "have any rows/information";
+  }
+  for (size_t i = 0; i < n; i++) {
+    Poco::XML::Element *el = static_cast<Poco::XML::Element *>(jobs->item(i));
+    if (!el)
+      throw std::runtime_error("Error while trying to parse job with index " +
+                               boost::lexical_cast<std::string>(i) +
+                               "could not produce a complete table workspace.");
+
+    ws->appendRow();
+
+    Poco::XML::Element *id = el->getChildElement("id");
+    if (id) {
+      ws->cell<int>(i, 0) = boost::lexical_cast<int>(id->innerText().c_str());
+    }
+
+    Poco::XML::Element *name = el->getChildElement("name");
+    if (name) {
+      ws->cell<std::string>(i, 1) = name->innerText().c_str();
+    }
+
+    Poco::XML::Element *status = el->getChildElement("status");
+    if (status) {
+      ws->cell<std::string>(i, 2) = status->innerText().c_str();
+    }
+
+    Poco::XML::Element *cmd = el->getChildElement("cmd");
+    if (cmd) {
+      ws->cell<std::string>(i, 3) = cmd->innerText().c_str();
+    }
+  }
+
+  if(!ws)
+    throw std::runtime_error("There was an unexpected error while building the output "
+                             "table workspace " + wsName + " from the information "
+                             "retrieved from the remote compute resource. Failed "
+                             "to create table workspace.");
+
+  return ws;
+}
+
+/**
  * Gets action code in m_action, if input argument is valid. Otherwise
  * show error message and get undefined action.
  *
@@ -1126,19 +1231,20 @@ void SCARFTomoReconstruction::getOneJobFile(const std::string &jobId,
   const std::string baseURL = t.m_url;
   const std::string token = t.m_token_str;
 
-  InternetHelper session;
   std::string httpsURL = baseURL + downloadOnePath;
-  std::stringstream ss;
-  InternetHelper::StringToStringMap headers;
+
+  InternetHelper session;
+  StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>("Content-Type",
                                                      "application/xml"));
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
   std::string body = remotePath;
   int code;
+  std::stringstream ss;
   try {
     code = session.sendRequest(httpsURL, ss, headers,
-                               Poco::Net::HTTPRequest::HTTP_GET, body);
+                               Poco::Net::HTTPRequest::HTTP_POST, body);
   } catch (Kernel::Exception::InternetError& ie) {
     throw std::runtime_error("Error while sending HTTP request to download a file: " +
                              std::string(ie.what()));
@@ -1189,22 +1295,20 @@ void SCARFTomoReconstruction::getAllJobFiles(const std::string &jobId,
   const std::string baseURL = t.m_url;
   const std::string token = t.m_token_str;
 
-  InternetHelper session;
   std::string httpsURL = baseURL + downloadPath;
-  std::stringstream ss;
-  InternetHelper::StringToStringMap headers;
+  StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>("Content-Type",
                                                      "application/xml"));
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
   headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
   int code;
+  std::stringstream ss;
   try {
-    code = session.sendRequest(httpsURL, ss, headers);
+    code = doSendRequestGetResponse(httpsURL, ss, headers);
   } catch (Kernel::Exception::InternetError& ie) {
     throw std::runtime_error("Error while sending HTTP request to download files: " +
                              std::string(ie.what()));
   }
-  std::string resp = ss.str();
   // what you get in this response is one line with text like this:
   // 'PAC Server*/home/isisg/scarf362/../scarf362/
   // Mantid_tomography_1_1423743450375PtlPj/417666.error*FILE*281*true;PAC Server*/
@@ -1213,6 +1317,7 @@ void SCARFTomoReconstruction::getAllJobFiles(const std::string &jobId,
   //   (the number between *FILE* and *true is the size in bytes)
   std::vector<std::string> filePACNames;
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
+    std::string resp = ss.str();
     // this is what indicates success/failure: presence of '/' or '\'
     if (std::string::npos != resp.find('/') ||
         std::string::npos != resp.find('\\')) {
@@ -1233,99 +1338,6 @@ void SCARFTomoReconstruction::getAllJobFiles(const std::string &jobId,
 
   progress(1.0, "Download  of " + boost::lexical_cast<std::string>(filePACNames.size())
            + " file(s) completed in " + localDir);
-}
-
-/**
- * Fills in a table workspace with job status information from an LSC
- * PAC response in ~xml format. Assumes that the workspace passed is
- * empty and ready to be filled. This guarantees that a non-null (I)
- * table workspace object is returned.
- *
- * @param response Body of an HHTP response to a status query
- * @param wsName Name of the workspace to create
- */
-API::ITableWorkspace_sptr
-SCARFTomoReconstruction::buildOutputStatusWorkspace(const std::string &resp,
-                                                    const std::string &wsName)
-{
-  API::ITableWorkspace_sptr ws = API::WorkspaceFactory::Instance().
-    createTable("TableWorkspace");
-
-  // This is the information that is usually available for running/recently run jobs
-  ws->addColumn("int", "ID");
-  ws->addColumn("str", "Name");
-  ws->addColumn("str", "Status");
-  ws->addColumn("str", "Command run");
-
-  Poco::XML::DOMParser parser;
-  Poco::AutoPtr<Poco::XML::Document> doc;
-  try {
-    doc = parser.parseString(resp);
-  } catch (Poco::Exception &e) {
-    throw std::runtime_error("Unable to parse response in XML format: " +
-                             e.displayText());
-  } catch (std::exception &e) {
-    throw std::runtime_error("Unable to parse response in XML format: " +
-                             std::string(e.what()));
-  }
-
-  Poco::XML::Element *pRootElem = doc->documentElement();
-  if (!pRootElem || !pRootElem->hasChildNodes()) {
-    g_log.error("XML response from compute resouce contains no root element.");
-    throw std::runtime_error("No root element was found in XML response, "
-                             "cannot parse it.");
-  }
-
-  Poco::AutoPtr<Poco::XML::NodeList> jobs = pRootElem->getElementsByTagName("Job");
-  if (!jobs) {
-    g_log.error("XML response from compute resouce contains no root element.");
-    throw std::runtime_error("No root element was found in XML response, "
-                             "cannot parse it.");
-  }
-
-  size_t n = jobs->length();
-  if (0 == jobs->length()) {
-    g_log.notice() << "Got information about 0 jobs. You may not have any jobs "
-      "currently running on the compute resource. The output workspace will not "
-      "have any rows/information";
-  }
-  for (size_t i = 0; i < n; i++) {
-    Poco::XML::Element *el = static_cast<Poco::XML::Element *>(jobs->item(i));
-    if (!el)
-      throw std::runtime_error("Error while trying to parse job with index " +
-                               boost::lexical_cast<std::string>(i) +
-                               "could not produce a complete table workspace.");
-
-    ws->appendRow();
-
-    Poco::XML::Element *id = el->getChildElement("id");
-    if (id) {
-      ws->cell<int>(i, 0) = boost::lexical_cast<int>(id->innerText().c_str());
-    }
-
-    Poco::XML::Element *name = el->getChildElement("name");
-    if (name) {
-      ws->cell<std::string>(i, 1) = name->innerText().c_str();
-    }
-
-    Poco::XML::Element *status = el->getChildElement("status");
-    if (status) {
-      ws->cell<std::string>(i, 2) = status->innerText().c_str();
-    }
-
-    Poco::XML::Element *cmd = el->getChildElement("cmd");
-    if (cmd) {
-      ws->cell<std::string>(i, 3) = cmd->innerText().c_str();
-    }
-  }
-
-  if(!ws)
-    throw std::runtime_error("There was an unexpected error while building the output "
-                             "table workspace " + wsName + " from the information "
-                             "retrieved from the remote compute resource. Failed "
-                             "to create table workspace.");
-
-  return ws;
 }
 
 /**

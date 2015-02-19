@@ -78,6 +78,17 @@ protected:
                           const std::string &fname,
                           const std::string &localDir);
 
+  typedef std::map<std::string, std::string> StringToStringMap;
+
+  /// method that deals with the actual HTTP(S) connection (convenient to
+  /// mock up all inet messaging)
+  virtual int doSendRequestGetResponse(const std::string &url,
+                                       std::ostream &response,
+                                       const StringToStringMap &headers =
+                                       StringToStringMap(),
+                                       const std::string &method = std::string(),
+                                       const std::string &body = "");
+
 private:
   void init();
   /// Execution code
