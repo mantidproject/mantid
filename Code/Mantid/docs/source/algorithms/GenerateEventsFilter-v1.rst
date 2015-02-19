@@ -88,35 +88,34 @@ this algorithm:
    +/- tolerance\_v.
 
 Generate event filters by time
-==============================
+##############################
 
-Event filters can be created by defining start and stop time and time intervals. 
-The three input properties used are *StartTime*, *StopTime* and *TimeInterval*. 
-*TimeInterval* accepts an array of doubles. 
+Event filters can be created by defining start time, stop time and time intervals. 
+The three input properties for them are *StartTime*, *StopTime* and *TimeInterval*, 
+respectively. 
 
+*TimeInterval* accepts an array of doubles.  
 If the array size is zero, then there will be one and only splitter will be 
-created from *StartTime* and *StopTime*. 
-
+created from *StartTime* and *StopTime*.  
 If the size of the array is one, then all event splitters will have the same duration
 of time. 
-
 In general if the array is composed as :math:`t_1, t_2, \cdots, t_n`, 
 and :math:`T_0` is the run start time, 
 then the event splitters will have the time boudaries as 
 
-.. math:: (T_0, T_0+t_1), (T_0+t_1, T_0+t_1+t_2), \cdots, (T_0+\sum_{i=1}^(n-1)t_i, T_0+\sum_{i=1}^nt_i), (T_0+\sum_{i=1}^nt_i, T_0+\sum_{i=1}^nt_i+t_1), \cdots
+.. math:: (T_0, T_0+t_1), (T_0+t_1, T_0+t_1+t_2), \cdots, (T_0+\sum_{i=1}^{n-1}t_i, T_0+\sum_{i=1}^nt_i), (T_0+\sum_{i=1}^nt_i, T_0+\sum_{i=1}^nt_i+t_1), \cdots
 
 until the stop time is reached. 
 
 Unit of time
-############
+============
 
 There are three types of units that are supported for time. 
 They are second, nanosecond and percentage of duration from *StartTime* to *StopTime*. 
 
 
 Generate event filters by sample log value
-==========================================
+##########################################
 
 The sample log will be divided to intervals as :math:`v_0, v_1, \cdots, v_{i-1}, v_i, v_{i+1}, \cdots`. 
 All log entries, whose values falls into range :math:`[v_j, v_{j+1})`, will be assigned to
@@ -124,7 +123,7 @@ a same workspace group.
 
 
 About how log value is recorded
-###############################
+===============================
 
 SNS DAS records log values upon its changing. The frequency of log
 sampling is significantly faster than change of the log, i.e., sample
@@ -134,7 +133,7 @@ log value changes as step functions.
 The option to do interpolation is not supported at this moment.
 
 Comparison to FilterByLogValue
-##############################
+==============================
 
 1. If the first log value is within the specified range and the first
 log time is after run star time, FilterByLogValue assumes that the log
