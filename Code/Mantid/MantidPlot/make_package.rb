@@ -46,7 +46,9 @@ library_filenames = ["libboost_regex-mt.dylib",
                      "libsz.dylib",
                      "libjpeg.dylib",
                      "libssl.dylib",
-                     "libcrypto.dylib"]
+                     "libcrypto.dylib",
+                     "libtbb.dylib",
+                     "libtbbmalloc.dylib"]
 
 #This copies the libraries over, then changes permissions and the id from /usr/local/lib to @rpath
 library_filenames.each do |filename|
