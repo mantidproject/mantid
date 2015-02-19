@@ -16,9 +16,8 @@ namespace MDAlgorithms {
  * @param wavelength
  * @return
  */
-double calculateD(const double &theta, const double &wavelength) {
-  double d = 0.5 * wavelength / sin(theta);
-  return d;
+inline double calculateD(const double &theta, const double &wavelength) {
+  return (0.5 * wavelength / sin(theta));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -29,12 +28,14 @@ double calculateD(const double &theta, const double &wavelength) {
  * @param wavelength
  * @return
  */
-double calculateQ(const double &theta, const double &wavelength) {
-  double q = 4 * M_PI * sin(theta) / wavelength;
-  return q;
+inline double calculateQ(const double &theta, const double &wavelength) {
+  return (4 * M_PI * sin(theta) / wavelength);
 }
 
-/** ConvertCWPDMDToSpectra : TODO: DESCRIPTION
+/** ConvertCWPDMDToSpectra : Convert one MDWorkspaces containing reactor-source
+  powder diffractometer's data to single spectrum matrix workspace
+  by merging and binning the detectors' counts by their 2theta value.
+
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -114,8 +115,6 @@ private:
   void convertUnits(API::MatrixWorkspace_sptr matrixws,
                     const std::string &targetunit, const double &wavelength);
 
-  /// Infinitesimal number to identify zero value from 1/monitor counts
-  double m_infinitesimal;
 };
 
 } // namespace MDAlgorithms

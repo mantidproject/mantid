@@ -23,7 +23,7 @@ DECLARE_ALGORITHM(ConvertCWPDMDToSpectra)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ConvertCWPDMDToSpectra::ConvertCWPDMDToSpectra() : m_infinitesimal(1.0E-10) {}
+ConvertCWPDMDToSpectra::ConvertCWPDMDToSpectra() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -187,6 +187,7 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
   binMD(monitorws, vecx, vecm);
 
   // Normalize by division
+  double maxmonitorcounts = 0;
   for (size_t i = 0; i < vecm.size(); ++i) {
     if (vecy[i] < 1.0E-5)
       veczerocounts[i] = true;
@@ -198,13 +199,14 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
       vecy[i] = y / m;
       // using standard deviation's error propagation
       vece[i] = vecy[i] * sqrt((ey / y) * (ey / y) + (em / m) * (em / m));
+      // maximum monitor counts
+      if (m > maxmonitorcounts)
+        maxmonitorcounts = m;
     } else {
       vecy[i] = 0.0;
       vece[i] = 1.0;
     }
   }
-  // error
-  g_log.error("How to calculate the error bar?");
 
   /*
   coord_t pos0 = mditer->getInnerPosition(0, 0);
@@ -219,8 +221,10 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
       WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
 
   // Interpolation
+  double infinitesimal = 0.1 / (maxmonitorcounts);
+
   if (dolinearinterpolation)
-    linearInterpolation(pdws, m_infinitesimal);
+    linearInterpolation(pdws, infinitesimal);
 
   return pdws;
 }
