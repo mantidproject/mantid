@@ -301,8 +301,8 @@ def furyfitMult(inputWS, function, ftype, startx, endx, spec_min=0, spec_max=Non
 
 
 def createFuryMultiDomainFunction(function, input_ws):
-    multi= 'composite=MultiDomainFunction,NumDeriv=1;'
-    comp =    '(composite=CompositeFunction,$domains=i;' + function + ');'
+    multi= 'composite=MultiDomainFunction,NumDeriv=true;'
+    comp = '(composite=CompositeFunction,NumDeriv=true,$domains=i;' + function + ');'
 
     ties = []
     kwargs = {}
@@ -314,7 +314,7 @@ def createFuryMultiDomainFunction(function, input_ws):
         if i > 0:
             kwargs['InputWorkspace_' + str(i)] = input_ws
 
-      #tie beta for every spectrum
+            #tie beta for every spectrum
             tie = 'f%d.f1.Beta=f0.f1.Beta' % i
             ties.append(tie)
 
