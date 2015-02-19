@@ -1,7 +1,6 @@
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty
 import mantid.simpleapi
 from mantid.kernel import Direction, logger
-from string import *
 
 class CheckForSampleLogs(PythonAlgorithm):
     """ Check if certain sample logs exists on a workspace
@@ -38,7 +37,7 @@ class CheckForSampleLogs(PythonAlgorithm):
         for value in logNames.split(','):
             value=value.strip()
             if len(value)>0:
-    		if not w.run().hasProperty(value):
+                if not w.run().hasProperty(value):
                     resultString+='Property '+value+' not found\n'
 
         #return the result

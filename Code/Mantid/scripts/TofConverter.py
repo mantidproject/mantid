@@ -4,9 +4,9 @@ import sys
 
 def qapp():
     if QtGui.QApplication.instance():
-    	app = QtGui.QApplication.instance()
+        app = QtGui.QApplication.instance()
     else:
-    	app = QtGui.QApplication(sys.argv)
+        app = QtGui.QApplication(sys.argv)
     return app
 
 app = qapp()

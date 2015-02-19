@@ -34,7 +34,7 @@ _LOGGING_ = False
 class LoadVesuvio(PythonAlgorithm):
 
     def summary(self):
-      return "Loads raw data produced by the Vesuvio instrument at ISIS."
+        return "Loads raw data produced by the Vesuvio instrument at ISIS."
 
     def PyInit(self):
         self.declareProperty(RUN_PROP, "", StringMandatoryValidator(),
@@ -417,9 +417,9 @@ class LoadVesuvio(PythonAlgorithm):
         foil_out_periods, foil_thin_periods, foil_thick_periods = self._get_foil_periods()
 
         if self._nperiods == 6 and self._spectra_type == FORWARD:
-                mon_out_periods = (5,6)
-                mon_thin_periods = (3,4)
-                mon_thick_periods = foil_thick_periods
+            mon_out_periods = (5,6)
+            mon_thin_periods = (3,4)
+            mon_thick_periods = foil_thick_periods
         else:
             # None indicates same as standard foil
             mon_out_periods, mon_thin_periods, mon_thick_periods = (None,None,None)
@@ -824,7 +824,7 @@ class SpectraToFoilPeriodMap(object):
              (spectrum_no >= 167 and spectrum_no <= 174) or \
              (spectrum_no >= 183 and spectrum_no <= 190):
              # foil_in = 1,3,5, foil out = 2,4,6
-             foil_periods = self._odd_even
+            foil_periods = self._odd_even
         else:
             # foil_in = 2,4,6 foil out = 1,3,5
             foil_periods = self._even_odd

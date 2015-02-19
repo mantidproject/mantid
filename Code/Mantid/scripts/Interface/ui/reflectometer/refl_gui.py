@@ -93,17 +93,17 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         settings.endGroup()
 
         settings.beginGroup(self.__generic_settings)
-        
+
         self.__alg_migrate = settings.value(self.__alg_migration_key, True, type=bool)
         if self.__alg_migrate:
             self.__alg_use = True # We will use the algorithms by default rather than the quick scripts
             self.__alg_migrate = False # Never do this again. We only want to reset once.
         else:
             self.__alg_use = settings.value(self.__ads_use_key, True, type=bool)
-    
+
         self.__icat_download = settings.value(self.__icat_download_key, False, type=bool)
         self.__group_tof_workspaces = settings.value(self.__group_tof_workspaces_key, True, type=bool)
-        
+
         settings.setValue(self.__ads_use_key, self.__alg_use)
         settings.setValue(self.__icat_download_key, self.__icat_download)
         settings.setValue(self.__group_tof_workspaces_key, self.__group_tof_workspaces)
@@ -127,15 +127,15 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         """
         msgBox = QtGui.QMessageBox()
         msgBox.setText("The table has been modified. Do you want to save your changes?")
-        
+
         accept_btn = QtGui.QPushButton('Accept')
         cancel_btn = QtGui.QPushButton('Cancel')
         discard_btn = QtGui.QPushButton('Discard')
-        
+
         msgBox.addButton(accept_btn, QtGui.QMessageBox.AcceptRole)
         msgBox.addButton(cancel_btn, QtGui.QMessageBox.RejectRole)
         msgBox.addButton(discard_btn, QtGui.QMessageBox.NoRole)
-        
+
         msgBox.setIcon(QtGui.QMessageBox.Question)
         msgBox.setDefaultButton(accept_btn)
         msgBox.setEscapeButton(cancel_btn)
@@ -149,7 +149,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             ret = QtGui.QMessageBox.RejectRole
         else:
             ret = QtGui.QMessageBox.NoRole
-        
+
         return ret, saved
 
     def closeEvent(self, event):
@@ -166,7 +166,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             elif ret == QtGui.QMessageBox.NoRole:
                 self.mod_flag = False
                 event.accept()
-                
+
     def _instrument_selected(self, instrument):
         """
         Change the default instrument to the selected one
@@ -717,7 +717,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                                 #If we're given a group workspace, we can just run it on the first member of the group instead
                                 thetaRun = loadedRun
                                 if isinstance(thetaRun, WorkspaceGroup):
-                                  thetaRun = thetaRun[0]
+                                    thetaRun = thetaRun[0]
                                 dqq, two_theta = CalculateResolution(Workspace = thetaRun, TwoTheta = two_theta)
 
                                 #Put the calculated resolution into the table
@@ -783,7 +783,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                             #Scale each run
                             if self.tableMain.item(row, self.scale_col).text():
                                 Scale(InputWorkspace=wksp[i], OutputWorkspace=wksp[i], Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
-                                
+
                         if self.__checked_row_stiched(row):
                             if (len(runno) == 1):
                                 logger.notice("Nothing to combine for processing row : " + str(row))
@@ -803,8 +803,8 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                                 Qmax = max(w2.readX(0))
 
                                 wcomb = combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1, keep=True)
-                               
-                                    
+
+
                         # Enable the plot button
                         plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
                         plotbutton.setProperty('runno',runno)
@@ -896,7 +896,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             if not getWorkspace(outputwksp, report_error=False):
                 # Stitching has not been done as part of processing, so we need to do it here.
                 wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1, keep=True)
-                    
+
             Qmin = min(getWorkspace(outputwksp).readX(0))
             Qmax = max(getWorkspace(outputwksp).readX(0))
             if canMantidPlot:
@@ -1198,8 +1198,8 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         Shows the dialog for setting options regarding live data
         """
         try:
-            
-            dialog_controller = refl_options.ReflOptions(def_method = self.live_method, def_freq = self.live_freq, 
+
+            dialog_controller = refl_options.ReflOptions(def_method = self.live_method, def_freq = self.live_freq,
                                                          def_alg_use = self.__alg_use, def_icat_download=self.__icat_download,
                                                          def_group_tof_workspaces = self.__group_tof_workspaces)
             if dialog_controller.exec_():
