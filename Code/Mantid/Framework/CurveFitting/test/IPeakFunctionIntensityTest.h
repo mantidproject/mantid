@@ -31,7 +31,6 @@ public:
   IPeakFunctionIntensityTest() : m_blackList() {
     FrameworkManager::Instance();
 
-    m_blackList.insert("BackToBackExponential");
     m_blackList.insert("DeltaFunction");
     m_blackList.insert("ElasticDiffRotDiscreteCircle");
     m_blackList.insert("ElasticDiffSphere");
