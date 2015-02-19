@@ -838,7 +838,7 @@ class SpectraToFoilPeriodMap(object):
              (spectrum_no >= 167 and spectrum_no <= 174) or \
              (spectrum_no >= 183 and spectrum_no <= 190):
              # foil_in = 1,3,5, foil out = 2,4,6
-             foil_periods = self._odd_even
+            foil_periods = self._odd_even
         else:
             # foil_in = 2,4,6 foil out = 1,3,5
             foil_periods = self._even_odd

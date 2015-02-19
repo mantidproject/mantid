@@ -15,6 +15,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -130,232 +131,303 @@ void PlotAsymmetryByLogValue::init() {
 *   Executes the algorithm
 */
 void PlotAsymmetryByLogValue::exec() {
+
+  // Get properties
+  // Get grouping property
   m_forward_list = getProperty("ForwardSpectra");
   m_backward_list = getProperty("BackwardSpectra");
   m_autogroup = (m_forward_list.size() == 0 && m_backward_list.size() == 0);
-
-  std::string logName = getProperty("LogValue");
-
+  // Get log value
+  m_logName = getPropertyValue("LogValue");
+  // Get green and red periods
   int red = getProperty("Red");
   int green = getProperty("Green");
-
+  // Get type of computation
   std::string stype = getProperty("Type");
   m_int = stype == "Integral";
-
+  // Get type of dead-time corrections
+  const std::string dtcType = getPropertyValue("DeadTimeCorrType");
+  // Get runs
   std::string firstFN = getProperty("FirstRun");
   std::string lastFN = getProperty("LastRun");
 
-  std::string ext = firstFN.substr(firstFN.find_last_of("."));
-
-  firstFN.erase(firstFN.size() - 4);
-  lastFN.erase(lastFN.size() - 4);
-
-  std::string fnBase = firstFN;
-  size_t i = fnBase.size() - 1;
-  while (isdigit(fnBase[i]))
-    i--;
-  if (i == fnBase.size() - 1) {
-    g_log.error("File name must end with a number.");
-    throw Exception::FileError("File name must end with a number.", firstFN);
-  }
-  fnBase.erase(i + 1);
-
-  firstFN.erase(0, fnBase.size());
-  lastFN.erase(0, fnBase.size());
-
+  // Parse run names and get the number of runs
+  std::string fnBase, fnExt;
+  parseRunNames( firstFN, lastFN, fnBase, fnExt);
   size_t is = atoi(firstFN.c_str()); // starting run number
   size_t ie = atoi(lastFN.c_str());  // last run number
   int w = static_cast<int>(firstFN.size());
 
-  // The number of runs
-  size_t npoints = ie - is + 1;
 
-  // Create the 2D workspace for the output
-  int nplots = green != EMPTY_INT() ? 4 : 1;
-  MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(
-      "Workspace2D",
-      nplots,  //  the number of plots
-      npoints, //  the number of data points on a plot
-      npoints  //  it's not a histogram
-      );
-  TextAxis *tAxis = new TextAxis(nplots);
-  if (nplots == 1) {
-    tAxis->setLabel(0, "Asymmetry");
-  } else {
-    tAxis->setLabel(0, "Red-Green");
-    tAxis->setLabel(1, "Red");
-    tAxis->setLabel(2, "Green");
-    tAxis->setLabel(3, "Red+Green");
-  }
-  outWS->replaceAxis(1, tAxis);
-
-  const std::string dtcType = getPropertyValue("DeadTimeCorrType");
-
+  // Dead-time corrections: if user specifies a file, load corrections now
   Workspace_sptr customDeadTimes;
-
   if (dtcType == "FromSpecifiedFile") {
-    IAlgorithm_sptr loadDeadTimes = createChildAlgorithm("LoadNexusProcessed");
-    loadDeadTimes->initialize();
-    loadDeadTimes->setPropertyValue("Filename",
-                                    getPropertyValue("DeadTimeCorrFile"));
-    loadDeadTimes->execute();
-
-    customDeadTimes = loadDeadTimes->getProperty("OutputWorkspace");
+    loadCorrectionsFromFile (customDeadTimes, getPropertyValue("DeadTimeCorrFile"));
   }
 
   Progress progress(this, 0, 1, ie - is + 2);
+
+  // Loop through runs
   for (size_t i = is; i <= ie; i++) {
+
+    // Get complete run name
     std::ostringstream fn, fnn;
     fnn << std::setw(w) << std::setfill('0') << i;
-    fn << fnBase << fnn.str() << ext;
+    fn << fnBase << fnn.str() << fnExt;
 
+    // Load run
     IAlgorithm_sptr load = createChildAlgorithm("LoadMuonNexus");
-    load->initialize();
     load->setPropertyValue("Filename", fn.str());
     load->execute();
-
     Workspace_sptr loadedWs = load->getProperty("OutputWorkspace");
 
+    // Check if dead-time corrections have to be applied
     if (dtcType != "None") {
-      IAlgorithm_sptr applyCorr =
-          AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
-      applyCorr->setLogging(false);
-      applyCorr->setRethrows(true);
-
-      ScopedWorkspace ws(loadedWs);
-      applyCorr->setPropertyValue("InputWorkspace", ws.name());
-      applyCorr->setPropertyValue("OutputWorkspace", ws.name());
-
-      ScopedWorkspace deadTimes;
-
       if (dtcType == "FromSpecifiedFile") {
-        deadTimes.set(customDeadTimes);
+        applyDeadtimeCorr (loadedWs, customDeadTimes);
       } else {
-        deadTimes.set(load->getProperty("DeadTimeTable"));
+        Workspace_sptr deadTimes = load->getProperty("DeadTimeTable");
+        applyDeadtimeCorr (loadedWs, deadTimes);
       }
-
-      applyCorr->setPropertyValue("DeadTimeTable", deadTimes.name());
-      applyCorr->execute();
-
-      // Workspace should've been replaced in the ADS by ApplyDeadTimeCorr, so
-      // need to
-      // re-assign it
-      loadedWs = ws.retrieve();
     }
 
+    // If m_autogroup, group detectors
     if (m_autogroup) {
-      Workspace_sptr loadedDetGrouping =
-          load->getProperty("DetectorGroupingTable");
-
+      Workspace_sptr loadedDetGrouping = load->getProperty("DetectorGroupingTable");
       if (!loadedDetGrouping)
         throw std::runtime_error("No grouping info in the file.\n\nPlease "
                                  "specify grouping manually");
-
-      // Could be groups of workspaces, so need to work with ADS
-      ScopedWorkspace inWS(loadedWs);
-      ScopedWorkspace grouping(loadedDetGrouping);
-      ScopedWorkspace outWS;
-
-      try {
-        IAlgorithm_sptr applyGrouping =
-            AlgorithmManager::Instance().create("MuonGroupDetectors");
-        applyGrouping->setLogging(false);
-        applyGrouping->setRethrows(true);
-
-        applyGrouping->setPropertyValue("InputWorkspace", inWS.name());
-        applyGrouping->setPropertyValue("DetectorGroupingTable",
-                                        grouping.name());
-        applyGrouping->setPropertyValue("OutputWorkspace", outWS.name());
-        applyGrouping->execute();
-
-        loadedWs = outWS.retrieve();
-      } catch (...) {
-        throw std::runtime_error(
-            "Unable to group detectors.\n\nPlease specify grouping manually.");
-      }
+      groupDetectors(loadedWs,loadedDetGrouping);
     }
 
+    // Check if workspace is a workspace group
     WorkspaceGroup_sptr loadedGroup =
         boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWs);
 
+    // If it is not, we only have 'red' data
     if (!loadedGroup) {
       Workspace2D_sptr loadedWs2D =
           boost::dynamic_pointer_cast<Workspace2D>(loadedWs);
 
       double Y, E;
       calcIntAsymmetry(loadedWs2D, Y, E);
-      outWS->dataY(0)[i - is] = Y;
-      outWS->dataX(0)[i - is] = getLogValue(*loadedWs2D, logName);
-      outWS->dataE(0)[i - is] = E;
+      m_redX.push_back(getLogValue(*loadedWs2D));
+      m_redY.push_back(Y);
+      m_redE.push_back(E);
+
     } else {
+
       DataObjects::Workspace2D_sptr ws_red;
       DataObjects::Workspace2D_sptr ws_green;
-
-      // Run through the periods of the loaded file and do calculations on the
+      // Run through the periods of the loaded file and save the
       // selected ones
       for (int mi = 0; mi < loadedGroup->getNumberOfEntries(); mi++) {
+
         Workspace2D_sptr memberWs =
             boost::dynamic_pointer_cast<Workspace2D>(loadedGroup->getItem(mi));
-
         int period = mi + 1;
-
-        // Do only one period
-        if (green == EMPTY_INT() && period == red) {
+        if ( period == red ){
           ws_red = memberWs;
-          double Y, E;
-          calcIntAsymmetry(ws_red, Y, E);
-          outWS->dataY(0)[i - is] = Y;
-          outWS->dataX(0)[i - is] = getLogValue(*ws_red, logName);
-          outWS->dataE(0)[i - is] = E;
-        } else // red & green
-        {
-          if (period == red)
-            ws_red = memberWs;
-          if (period == green)
+        }
+        if ( green!= EMPTY_INT() ){
+          if ( period == green ){
             ws_green = memberWs;
+          }
         }
       }
 
-      // red & green claculation
-      if (green != EMPTY_INT()) {
-        if (!ws_red || !ws_green)
-          throw std::invalid_argument("Red or green period is out of range");
+      // Check ws_red
+      if (!ws_red){
+        throw std::invalid_argument("Red period is out of range");
+      }
+      // Check ws_green
+      if ( (green!=EMPTY_INT()) && (!ws_green) ){
+        throw std::invalid_argument("Green period is out of range");
+      }
+
+      if ( green==EMPTY_INT() ){
         double Y, E;
-        double Y1, E1;
-        double logValue = getLogValue(*ws_red, logName);
         calcIntAsymmetry(ws_red, Y, E);
-        calcIntAsymmetry(ws_green, Y1, E1);
-        outWS->dataY(1)[i - is] = Y;
-        outWS->dataX(1)[i - is] = logValue;
-        outWS->dataE(1)[i - is] = E;
+        m_redX.push_back(getLogValue(*ws_red));
+        m_redY.push_back(Y);
+        m_redE.push_back(E);
 
-        outWS->dataY(2)[i - is] = Y1;
-        outWS->dataX(2)[i - is] = logValue;
-        outWS->dataE(2)[i - is] = E1;
-
-        outWS->dataY(3)[i - is] = Y + Y1;
-        outWS->dataX(3)[i - is] = logValue;
-        outWS->dataE(3)[i - is] = sqrt(E * E + E1 * E1);
-
+      } else{
+      
+        double YR, ER;
+        double YG, EG;
+        double logValue = getLogValue(*ws_red);
+        calcIntAsymmetry(ws_red, YR, ER);
+        calcIntAsymmetry(ws_green, YG, EG);
+        // Red data
+        m_redX.push_back(logValue);
+        m_redY.push_back(YR);
+        m_redE.push_back(ER);
+        // Green data
+        m_greenX.push_back(logValue);
+        m_greenY.push_back(YG);
+        m_greenE.push_back(EG);
+        // Sum
+        m_sumX.push_back(logValue);
+        m_sumY.push_back(YR+YG);
+        m_sumE.push_back(sqrt(ER * ER + EG * EG));
         // move to last for safety since some grouping takes place in the
         // calcIntAsymmetry call below
-        calcIntAsymmetry(ws_red, ws_green, Y, E);
-        outWS->dataY(0)[i - is] = Y;
-        outWS->dataX(0)[i - is] = logValue;
-        outWS->dataE(0)[i - is] = E;
-      } else if (!ws_red)
-        throw std::invalid_argument("Red period is out of range");
-    }
+        calcIntAsymmetry(ws_red, ws_green, YR, ER);
+        m_diffX.push_back(logValue);
+        m_diffY.push_back(YR);
+        m_diffE.push_back(ER);
+      }
+    } // else loadedGroup
     progress.report();
   }
 
-  outWS->getAxis(0)->title() = logName;
-  outWS->setYUnitLabel("Asymmetry");
 
+  // Create the 2D workspace for the output
+  int nplots = m_greenX.size() ? 4 : 1;
+  size_t npoints = ie - is + 1;
+  MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(
+      "Workspace2D",
+      nplots,  //  the number of plots
+      npoints, //  the number of data points on a plot
+      npoints  //  it's not a histogram
+      );
+  // Populate output workspace with data
+  populateOutputWorkspace(outWS,nplots);
   // Assign the result to the output workspace property
   setProperty("OutputWorkspace", outWS);
 }
 
+/**  Load dead-time corrections from specified file
+*   @param customDeadTimes :: [input/output] Output workspace to store corrections
+*   @param deadTimeFile :: [input] File to read corrections from
+*/
+void PlotAsymmetryByLogValue::loadCorrectionsFromFile (Workspace_sptr &customDeadTimes, std::string deadTimeFile )
+{
+  IAlgorithm_sptr loadDeadTimes = createChildAlgorithm("LoadNexusProcessed");
+  loadDeadTimes->setPropertyValue("Filename", deadTimeFile);
+  loadDeadTimes->setProperty("OutputWorkspace", customDeadTimes);
+  loadDeadTimes->executeAsChildAlg();
+  customDeadTimes = loadDeadTimes->getProperty("OutputWorkspace");
+}
+/**  Populate output workspace with results
+*   @param outWS :: [input/output] Output workspace to populate
+*   @param nplots :: [input] Number of histograms
+*/
+void PlotAsymmetryByLogValue::populateOutputWorkspace (MatrixWorkspace_sptr &outWS, int nplots)
+{
+  TextAxis *tAxis = new TextAxis(nplots);
+  if (nplots == 1) {
+    tAxis->setLabel(0, "Asymmetry");
+    outWS->dataX(0) = m_redX;
+    outWS->dataY(0) = m_redY;
+    outWS->dataE(0) = m_redE;
+  } else {
+    tAxis->setLabel(0, "Red-Green");
+    tAxis->setLabel(1, "Red");
+    tAxis->setLabel(2, "Green");
+    tAxis->setLabel(3, "Red+Green");
+    outWS->dataX(0) = m_diffX;
+    outWS->dataY(0) = m_diffY;
+    outWS->dataE(0) = m_diffE;
+    outWS->dataX(1) = m_redX;
+    outWS->dataY(1) = m_redY;
+    outWS->dataE(1) = m_redE;
+    outWS->dataX(2) = m_greenX;
+    outWS->dataY(2) = m_greenY;
+    outWS->dataE(2) = m_greenE;
+    outWS->dataX(3) = m_sumX;
+    outWS->dataY(3) = m_sumY;
+    outWS->dataE(3) = m_sumE;
+  }
+  outWS->replaceAxis(1, tAxis);
+  outWS->getAxis(0)->title() = m_logName;
+  outWS->setYUnitLabel("Asymmetry");
+}
+/**  Parse run names
+*   @param firstFN :: [input/output] First run's name
+*   @param lastFN :: [input/output] Last run's name
+*   @param fnBase :: [output] Runs base name
+*   @param fnExt :: [output] Runs extension
+*/
+void PlotAsymmetryByLogValue::parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt)
+{
+
+  if ( firstFN.size() != lastFN.size() )
+  {
+    throw std::runtime_error("First and last runs are not in the same directory\n");
+  }
+
+  fnExt = firstFN.substr(firstFN.find_last_of("."));
+
+  firstFN.erase(firstFN.size() - 4);
+  lastFN.erase(lastFN.size() - 4);
+
+  fnBase = firstFN;
+  size_t i = fnBase.size() - 1;
+  while (isdigit(fnBase[i]))
+    i--;
+  if (i == fnBase.size() - 1) {
+    throw Exception::FileError("File name must end with a number.", firstFN);
+  }
+  fnBase.erase(i + 1);
+  
+  std::string fnBase2 = lastFN;
+  fnBase2.erase(i + 1);
+  if ( fnBase != fnBase2 )
+  {
+    throw std::runtime_error("First and last runs are not in the same directory\n");
+  }
+
+  firstFN.erase(0, fnBase.size());
+  lastFN.erase(0, fnBase.size());
+}
+
+/**  Apply dead-time corrections. The calculation is done by ApplyDeadTimeCorr algorithm
+*   @param loadedWs :: [input/output] Workspace to apply corrections to
+*   @param deadTimes :: [input] Corrections to apply
+*/
+void PlotAsymmetryByLogValue::applyDeadtimeCorr (Workspace_sptr &loadedWs, Workspace_sptr deadTimes)
+{
+  ScopedWorkspace ws(loadedWs);
+  ScopedWorkspace dt(deadTimes);
+
+  IAlgorithm_sptr applyCorr = AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
+  applyCorr->setLogging(false);
+  applyCorr->setRethrows(true);
+  applyCorr->setPropertyValue("InputWorkspace", ws.name());
+  applyCorr->setPropertyValue("OutputWorkspace", ws.name());
+  applyCorr->setProperty("DeadTimeTable", dt.name());
+  applyCorr->execute();
+  // Workspace should've been replaced in the ADS by ApplyDeadTimeCorr, so
+  // need to
+  // re-assign it
+  loadedWs = ws.retrieve();
+}
+
+/**  Group detectors from specified file
+*   @param loadedWs :: [input/output] Workspace to apply grouping to
+*   @param loadedDetGrouping :: [input] Workspace storing detectors grouping
+*/
+void PlotAsymmetryByLogValue::groupDetectors (Workspace_sptr &loadedWs, Workspace_sptr loadedDetGrouping)
+{
+
+  // Could be groups of workspaces, so need to work with ADS
+  ScopedWorkspace inWS(loadedWs);
+  ScopedWorkspace grouping(loadedDetGrouping);
+  ScopedWorkspace outWS;
+
+  IAlgorithm_sptr applyGrouping = AlgorithmManager::Instance().create("MuonGroupDetectors");
+  applyGrouping->setLogging(false);
+  applyGrouping->setRethrows(true);
+
+  applyGrouping->setPropertyValue("InputWorkspace", inWS.name());
+  applyGrouping->setPropertyValue("DetectorGroupingTable", grouping.name());
+  applyGrouping->setPropertyValue("OutputWorkspace", outWS.name());
+  applyGrouping->execute();
+
+  loadedWs = outWS.retrieve();
+}
 /**  Calculate the integral asymmetry for a workspace.
 *   The calculation is done by MuonAsymmetryCalc and SimpleIntegration
 * algorithms.
@@ -539,16 +611,14 @@ PlotAsymmetryByLogValue::groupDetectors(API::MatrixWorkspace_sptr &ws,
  * Get log value from a workspace. Convert to double if possible.
  *
  * @param ws :: The input workspace.
- * @param logName :: Name of the log file.
  * @return :: Log value.
  * @throw :: std::invalid_argument if the log cannot be converted to a double or
  *doesn't exist.
  */
-double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws,
-                                            const std::string &logName) {
-  auto *property = ws.run().getLogData(logName);
+double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
+  auto *property = ws.run().getLogData(m_logName);
   if (!property) {
-    throw std::invalid_argument("Log " + logName + " does not exist.");
+    throw std::invalid_argument("Log " + m_logName + " does not exist.");
   }
 
   double value = 0;
@@ -582,8 +652,11 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws,
     }
   }
 
-  throw std::invalid_argument("Log " + logName +
+  throw std::invalid_argument("Log " + m_logName +
                               " cannot be converted to a double type.");
 }
+
+
+
 } // namespace Algorithm
 } // namespace Mantid

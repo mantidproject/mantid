@@ -103,9 +103,9 @@ class REFLReprocess(PythonAlgorithm):
         ws_list = AnalysisDataService.getObjectNames()
         for item in ws_list:
             if item.endswith('ts'):
-                    (_name,_ts) = item.split('_#')
-                    _list_name.append(item)
-                    _list_ts.append(_ts)
+                (_name,_ts) = item.split('_#')
+                _list_name.append(item)
+                _list_ts.append(_ts)
 
         _name_ts = zip(_list_ts, _list_name)
         _name_ts.sort()
@@ -147,14 +147,14 @@ def weightedMean(data_array, error_array):
     sz = len(data_array)
 
     # calculate the numerator of mean
-    dataNum = 0;
+    dataNum = 0
     for i in range(sz):
         if not (data_array[i] == 0):
             tmpFactor = float(data_array[i]) / float((pow(error_array[i],2)))
             dataNum += tmpFactor
 
     # calculate denominator
-    dataDen = 0;
+    dataDen = 0
     for i in range(sz):
         if not (error_array[i] == 0):
             tmpFactor = 1./float((pow(error_array[i],2)))
@@ -212,7 +212,7 @@ def _average_y_of_same_x_(q_min, q_step, q_max=2):
         data_e_i = mtd[scaled_ws_list[i]+'_histo'].dataE(0)
         for j in range(len(data_y_i)):
             if data_y[j]>0 and data_y_i[j]>0:
-                [data_y[j], data_e[j]] = weightedMean([data_y[j], data_y_i[j]], [data_e[j], data_e_i[j]]);
+                [data_y[j], data_e[j]] = weightedMean([data_y[j], data_y_i[j]], [data_e[j], data_e_i[j]])
             elif (data_y[j] == 0) and (data_y_i[j]>0):
                 data_y[j] = data_y_i[j]
                 data_e[j] = data_e_i[j]

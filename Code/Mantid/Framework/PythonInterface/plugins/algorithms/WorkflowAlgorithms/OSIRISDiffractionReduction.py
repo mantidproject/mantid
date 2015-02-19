@@ -149,7 +149,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         return 'Diffraction;PythonAlgorithms'
 
     def summary(self):
-      return "This Python algorithm performs the operations necessary for the reduction of diffraction data from the Osiris instrument at ISIS \
+        return "This Python algorithm performs the operations necessary for the reduction of diffraction data from the Osiris instrument at ISIS \
               into dSpacing, by correcting for the monitor and linking the various d-ranges together."
 
     def PyInit(self):

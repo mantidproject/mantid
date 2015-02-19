@@ -275,7 +275,7 @@ namespace CustomInterfaces
     }
 
     // If we get this far then properties are valid so update mini plots
-    if((prop == m_properties["PreviewSpec"]))
+    if(prop == m_properties["PreviewSpec"])
       updateMiniPlots();
   }
 

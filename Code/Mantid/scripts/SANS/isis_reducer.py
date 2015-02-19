@@ -313,7 +313,7 @@ class ISISReducer(Reducer):
         name += '_' + self.to_Q.output_type
         name += '_' + self.to_wavelen.get_range()
         if self.to_Q.get_output_type() == "1D":
-          name += self.mask.get_phi_limits_tag()
+            name += self.mask.get_phi_limits_tag()
 
         if self.getNumSlices() > 0:
             limits = self.getCurrSliceLimit()
@@ -421,7 +421,7 @@ class ISISReducer(Reducer):
         return self._reduce(init=False, post=True)
 
     def set_Q_output_type(self, out_type):
-       self.to_Q.set_output_type(out_type)
+        self.to_Q.set_output_type(out_type)
 
     def pre_process(self):
         """
@@ -566,9 +566,9 @@ class ISISReducer(Reducer):
         """
         if issubclass(finder.__class__, isis_reduction_steps.BaseBeamFinder) or finder is None:
             if det_bank == 'front':
-              self._front_beam_finder = finder
+                self._front_beam_finder = finder
             else:
-              self._beam_finder = finder
+                self._beam_finder = finder
         else:
             raise RuntimeError, "Reducer.set_beam_finder expects an object of class ReductionStep"
 

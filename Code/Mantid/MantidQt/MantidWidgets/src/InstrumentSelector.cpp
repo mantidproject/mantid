@@ -37,7 +37,7 @@ namespace MantidWidgets
   */
   InstrumentSelector::InstrumentSelector(QWidget *parent, bool init)
     : QComboBox(parent), m_changeObserver(*this, &InstrumentSelector::handleConfigChange),
-      m_techniques(), m_currentFacility(NULL), m_init(init), m_storeChanges(true),
+      m_techniques(), m_currentFacility(NULL), m_init(init), m_storeChanges(false),
       m_updateOnFacilityChange(true), m_selectedInstrument()
   {
     setEditable(false);

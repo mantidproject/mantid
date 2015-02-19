@@ -16,6 +16,7 @@ class IndirectCommonTests(unittest.TestCase):
 
     def setUp(self):
         self._config_defaults = config
+        config['default.facility'] = 'ISIS'
 
     def tearDown(self):
         config = self._config_defaults

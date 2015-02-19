@@ -7,8 +7,8 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui 
-from MplFigureCanvas import Qt4MplCanvas 
+from PyQt4 import QtCore, QtGui
+from MplFigureCanvas import Qt4MplCanvas
 
 
 try:

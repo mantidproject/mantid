@@ -42,7 +42,7 @@ class MSGReducer(reducer.Reducer):
         loadData.set_parameter_file(self._parameter_file)
         loadData.set_extra_load_opts(self._extra_load_opts)
         loadData.execute(self, None)
-     
+
         if loadData.contains_event_data and (self._rebin_string is None or self._rebin_string is ''):
             logger.warning('Reductins of event data without rebinning may give bad data!')
 
@@ -111,7 +111,7 @@ class MSGReducer(reducer.Reducer):
         for directory in config.getInstrumentDirectories():
             if os.path.isfile(os.path.join(directory, file_name)):
                 self._parameter_file = os.path.join(directory, file_name)
-                return 
+                return
 
     def set_rebin_string(self, rebin):
         """Sets the rebin string to be used with the Rebin algorithm.

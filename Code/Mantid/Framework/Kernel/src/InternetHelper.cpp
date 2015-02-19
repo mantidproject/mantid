@@ -7,6 +7,7 @@
 // Poco
 #include <Poco/Net/AcceptCertificateHandler.h>
 #include <Poco/Net/NetException.h>
+#include <Poco/Net/HTMLForm.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPSClientSession.h>
@@ -72,9 +73,9 @@ bool isRelocated(const int response) {
 /** Constructor
 */
 InternetHelper::InternetHelper()
-    : m_proxyInfo(), m_isProxySet(false), m_timeout(30),
+    : m_proxyInfo(), m_isProxySet(false), m_timeout(30), m_contentLength(0),
       m_method(HTTPRequest::HTTP_GET), m_contentType("application/json"),
-      m_request(NULL) {}
+      m_body(), m_headers(), m_request(NULL) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -82,7 +83,7 @@ InternetHelper::InternetHelper()
 InternetHelper::InternetHelper(const Kernel::ProxyInfo &proxy)
     : m_proxyInfo(proxy), m_isProxySet(true), m_timeout(30),
       m_method(HTTPRequest::HTTP_GET), m_contentType("application/json"),
-      m_request(NULL) {}
+      m_body(), m_headers(), m_request(NULL) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -103,15 +104,28 @@ void InternetHelper::setupProxyOnSession(HTTPClientSession &session,
 }
 
 void InternetHelper::createRequest(Poco::URI &uri) {
+  if (m_request != NULL) {
+    delete m_request;
+  }
+
   m_request =
       new HTTPRequest(m_method, uri.getPathAndQuery(), HTTPMessage::HTTP_1_1);
   if (!m_contentType.empty()) {
     m_request->setContentType(m_contentType);
   }
+
   m_request->set("User-Agent", "MANTID");
+  if (m_contentLength > 0) {
+    m_request->setContentLength(m_contentLength);
+  }
+
   for (auto itHeaders = m_headers.begin(); itHeaders != m_headers.end();
        ++itHeaders) {
     m_request->set(itHeaders->first, itHeaders->second);
+  }
+  
+	if (m_method == "POST") {
+    m_request->setChunkedTransferEncoding(true);
   }
 }
 
@@ -120,8 +134,7 @@ int InternetHelper::sendRequestAndProcess(HTTPClientSession &session,
                                           std::ostream &responseStream) {
   // create a request
   this->createRequest(uri);
-  m_request->setContentLength(m_body.length());
-  session.sendRequest(*m_request) << m_body;
+  session.sendRequest(*m_request) << m_body.str();
 
   HTTPResponse res;
   std::istream &rs = session.receiveResponse(res);
@@ -162,28 +175,17 @@ int InternetHelper::processRelocation(const HTTPResponse &response,
 * @param body The request body to send.
 **/
 int InternetHelper::sendRequest(const std::string &url,
-                                std::ostream &responseStream,
-                                const StringToStringMap &headers,
-                                const std::string &method,
-                                const std::string &body) {
-  // set instance variables from the input as appropriate
-  if (!method.empty()) {
-    m_method = method;
-  }
-  if (!headers.empty()) {
-    m_headers = headers;
-  }
-  if (!body.empty()) {
-    m_body = body;
-  }
-
+                                std::ostream &responseStream) {
+  
   // send the request
   Poco::URI uri(url);
+  int retval;
   if ((uri.getScheme() == "https") || (uri.getPort() == 443)) {
-    return sendHTTPSRequest(url, responseStream);
+    retval = sendHTTPSRequest(url, responseStream);
   } else {
-    return sendHTTPRequest(url, responseStream);
+    retval = sendHTTPRequest(url, responseStream);
   }
+  return retval;
 }
 
 /** Performs a request using http
@@ -379,15 +381,14 @@ include in the request.
 behaviour.
 */
 int InternetHelper::downloadFile(const std::string &urlFile,
-                                 const std::string &localFilePath,
-                                 const StringToStringMap &headers) {
+                                 const std::string &localFilePath) {
   int retStatus = 0;
   g_log.debug() << "DownloadFile : " << urlFile << " to file: " << localFilePath
                 << std::endl;
 
   Poco::TemporaryFile tempFile;
   Poco::FileStream tempFileStream(tempFile.path());
-  retStatus = sendRequest(urlFile, tempFileStream, headers);
+  retStatus = sendRequest(urlFile, tempFileStream);
   tempFileStream.close();
 
   // if there have been no errors move it to the final location, and turn off
@@ -402,6 +403,153 @@ int InternetHelper::downloadFile(const std::string &urlFile,
 * @param seconds The value in seconds for the timeout
 **/
 void InternetHelper::setTimeout(int seconds) { m_timeout = seconds; }
+
+
+/** Gets the timeout in seconds
+* @returns The value in seconds for the timeout
+**/
+int InternetHelper::getTimeout() { return m_timeout; }
+
+/** Sets the Method
+* @param method A string of GET or POST, anything other than POST is considered GET
+**/
+void InternetHelper::setMethod(const std::string& method) { 
+  if (method == "POST") {
+    m_method = method; 
+  } else {
+    m_method = "GET"; 
+  }
+}
+
+/** Gets the method
+* @returns either "GET" or "POST"
+**/
+const std::string& InternetHelper::getMethod() {return m_method; }
+
+/** Sets the Content Type
+* @param contentType A string of the content type
+**/
+void InternetHelper::setContentType(const std::string& contentType) { 
+  m_contentType = contentType; 
+}
+
+/** Gets the Content Type
+* @returns A string of the content type
+**/
+const std::string& InternetHelper::getContentType() {return m_contentType; }
+
+
+
+/** Sets the content length
+* @param length The content length in bytes
+**/
+void InternetHelper::setContentLength(std::streamsize length) { m_contentLength = length; }
+
+/** Gets the content length
+* @returns The content length in bytes
+**/
+std::streamsize InternetHelper::getContentLength() { return m_contentLength; }
+
+/** Sets the body & content length  for future requests, this will also 
+*   set the method to POST is the body is not empty
+*   and GET if it is.
+* @param body A string of the body
+**/
+void InternetHelper::setBody(const std::string& body) { 
+  //clear the old body
+  m_body.str("") ;
+  if (body.empty()) {
+    setMethod("GET");
+  } else {
+    setMethod("POST");
+    m_body << body;
+  }
+  setContentLength(body.size());
+}
+
+/** Sets the body & content length  for future requests, this will also 
+*   set the method to POST is the body is not empty
+*   and GET if it is.
+* @param body A stringstream of the body
+**/
+void InternetHelper::setBody(const std::ostringstream& body) { 
+    setBody(body.str());
+}
+
+/** Sets the body & content length for future requests, this will also 
+*   set the method to POST is the body is not empty
+*   and GET if it is.
+* @param form A HTMLform
+**/
+void InternetHelper::setBody(Poco::Net::HTMLForm& form) { 
+
+  setMethod("POST");
+  if (m_request == NULL) {
+    Poco::URI uri("http://www.mantidproject.org");
+    createRequest(uri);
+  }
+  form.prepareSubmit(*m_request);
+  setContentType(m_request->getContentType());
+  //clear the old body
+  m_body.str("") ;
+  
+  form.write(m_body);
+  setContentLength(m_body.tellp());
+}
+
+
+
+/** Gets the body set for future requests
+* @returns A string of the content type
+**/
+const std::string InternetHelper::getBody() {return m_body.str(); }
+
+void setBody(const std::string& body);
+  const std::string getBody();
+
+/** Adds a header
+* @param key The key to refer to the value
+* @param value The value in seconds for the timeout
+**/
+void InternetHelper::addHeader(const std::string& key, const std::string& value) {
+  m_headers.insert(std::pair<std::string,std::string>(key,value));
+}
+
+/** Removes a header
+* @param key The key to refer to the value
+**/
+void InternetHelper::removeHeader (const std::string& key) {
+  m_headers.erase(key);
+}
+
+/** Gets the value of a header
+* @param key The key to refer to the value
+* @returns the value as a string
+**/
+const std::string& InternetHelper::getHeader (const std::string& key) {
+  return m_headers[key];
+}
+
+/** Clears all headers
+**/
+void InternetHelper::clearHeaders() { m_headers.clear(); }
+
+/** Returns a reference to the headers map
+**/
+std::map<std::string, std::string>& InternetHelper::headers() {
+  return m_headers;
+}
+
+/** Resets properties to defaults (except the proxy)
+**/
+void InternetHelper::reset() {
+  m_headers.clear();
+  m_timeout = 30;
+  m_body.str("");
+  m_method = HTTPRequest::HTTP_GET;
+  m_contentType = "application/json";
+  m_request = NULL ;
+}
 
 } // namespace Kernel
 } // namespace Mantid
