@@ -23,7 +23,7 @@ DECLARE_ALGORITHM(ConvertCWPDMDToSpectra)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ConvertCWPDMDToSpectra::ConvertCWPDMDToSpectra() {}
+ConvertCWPDMDToSpectra::ConvertCWPDMDToSpectra() : m_infinitesimal(1.0E-10) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -61,6 +61,16 @@ void ConvertCWPDMDToSpectra::init() {
   auto unitval = boost::make_shared<ListValidator<std::string> >(vecunits);
   declareProperty("UnitOutput", "2-theta", unitval,
                   "Unit of the output workspace.");
+
+  declareProperty("NeutronWaveLength", EMPTY_DBL(),
+                  "Constant wavelength of the neutrons from reactor source.");
+
+  declareProperty(
+      "NeutornWaveLengthPropertyName", "wavelength",
+      "Property name of the neutron wavelength in the sample log."
+      "If output unit is other than 2theta and NeutronWaveLength is not given,"
+      "then the neutron wavelength will be searched in sample logs by "
+      "name specified by this property.");
 
   declareProperty("ScaleFactor", 1.0,
                   "Scaling factor on the normalized counts.");
@@ -109,11 +119,32 @@ void ConvertCWPDMDToSpectra::exec() {
   // Set up the sample logs
   setupSampleLogs(outws, inputDataWS);
 
+  // Output units
+  std::string outputunit = getProperty("UnitOutput");
+  if (outputunit.compare("2theta")) {
+    double wavelength = getProperty("NeutronWaveLength");
+    if (wavelength == EMPTY_DBL()) {
+      // Find it via property
+      std::string wavelengthpropertyname =
+          getProperty("NeutornWaveLengthPropertyName");
+      if (!outws->run().hasProperty(wavelengthpropertyname)) {
+        std::stringstream errss;
+        errss << "In order to convert unit to " << outputunit
+              << ", either NeutronWaveLength "
+                 " is to be specified or property " << wavelengthpropertyname
+              << " must exist.";
+        throw std::runtime_error(errss.str());
+      }
+      wavelength = atof(
+          outws->run().getProperty(wavelengthpropertyname)->value().c_str());
+    }
+    convertUnits(outws, outputunit, wavelength);
+  }
   // Return
   setProperty("OutputWorkspace", outws);
 }
 
-//---------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------
 /** Reduce the 2 MD workspaces to a workspace2D for powder diffraction pattern
  * Reduction procedure
  * 1. set up bins
@@ -121,9 +152,14 @@ void ConvertCWPDMDToSpectra::exec() {
  * 3. For each MD event, find out its 2theta value and add its signal and
  * monitor counts to the correct bin
  * 4. For each bin, normalize the sum of the signal by sum of monitor counts
- * @brief LoadHFIRPDD::reducePowderData
+ * @brief ConvertCWPDMDToSpectra::reducePowderData
  * @param dataws
  * @param monitorws
+ * @param min2theta
+ * @param max2theta
+ * @param binsize
+ * @param dolinearinterpolation
+ * @return
  */
 API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
     API::IMDEventWorkspace_const_sptr dataws,
@@ -184,7 +220,7 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
 
   // Interpolation
   if (dolinearinterpolation)
-    linearInterpolation(pdws, veczerocounts);
+    linearInterpolation(pdws, m_infinitesimal);
 
   return pdws;
 }
@@ -284,18 +320,69 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
   return;
 }
 
-/** Do linear interpolation to bins with zero counts
- * @brief ConvertCWPDMDToSpectra::doLinearInterpolation
+//----------------------------------------------------------------------------------------------
+/** Do linear interpolation to bins with zero counts.
+ * It is applied to those bins with zero value but their neighbor has non-zero
+ * values
+ * @brief ConvertCWPDMDToSpectra::linearInterpolation
  * @param matrixws
+ * @param infinitesimal
  */
 void
 ConvertCWPDMDToSpectra::linearInterpolation(API::MatrixWorkspace_sptr matrixws,
-                                            std::vector<bool> &vec0count) {
-  throw std::runtime_error("Need to implement ASAP.");
+                                            const double &infinitesimal) {
+  size_t numspec = matrixws->getNumberHistograms();
+  for (size_t i = 0; i < numspec; ++i) {
+    // search for the first nonzero value and last nonzero value
+    bool onsearch = true;
+    size_t minNonZeroIndex = 0;
+    while (onsearch) {
+      if (matrixws->readY(i)[minNonZeroIndex] > infinitesimal)
+        onsearch = false;
+      else
+        ++minNonZeroIndex;
+    }
+    size_t maxNonZeroIndex = matrixws->readY(i).size() - 1;
+    onsearch = true;
+    while (onsearch) {
+      if (matrixws->readY(i)[maxNonZeroIndex] > infinitesimal)
+        onsearch = false;
+      else
+        --maxNonZeroIndex;
+    }
+
+    // Do linear interpolation for zero count values
+    for (size_t j = minNonZeroIndex + 1; j < maxNonZeroIndex; ++j) {
+      if (matrixws->readY(i)[j] < infinitesimal) {
+        // Do interpolation
+        // gives y = y_0 + (y_1-y_0)\frac{x - x_0}{x_1-x_0}
+
+        double leftx = matrixws->readX(i)[j - 1];
+        double lefty = matrixws->readY(i)[j - 1];
+        bool findnonzeroy = true;
+        size_t iright = j + 1;
+        while (findnonzeroy) {
+          if (matrixws->readY(i)[iright] > infinitesimal)
+            findnonzeroy = false;
+          else
+            ++iright;
+        }
+        double rightx = matrixws->readX(i)[iright];
+        double righty = matrixws->readY(i)[iright];
+        double curx = matrixws->readX(i)[j];
+        double curinterpoy =
+            lefty + (righty - lefty) * (curx - leftx) / (rightx - leftx);
+        matrixws->dataY(i)[j] = curinterpoy;
+      }
+    }
+
+    return;
+  }
 
   return;
 }
 
+//----------------------------------------------------------------------------------------------
 /** Set up sample logs from input data MDWorkspace
  * @brief ConvertCWPDMDToSpectra::setupSampleLogs
  * @param matrixws
@@ -322,6 +409,7 @@ void ConvertCWPDMDToSpectra::setupSampleLogs(
   return;
 }
 
+//----------------------------------------------------------------------------------------------
 /** Scale up the values of matrix workspace
  * @brief ConvertCWPDMDToSpectra::scaleMatrixWorkspace
  * @param matrixws
@@ -340,6 +428,37 @@ ConvertCWPDMDToSpectra::scaleMatrixWorkspace(API::MatrixWorkspace_sptr matrixws,
       datae[i] *= sqrt(scalefactor);
     }
   } // FOR(iws)
+
+  return;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Convert units from 2theta to d-spacing or Q
+ * Equation:  	λ = 2d sinθ
+ * @brief ConvertCWPDMDToSpectra::convertUnits
+ * @param matrixws
+ * @param targetunit
+ */
+void ConvertCWPDMDToSpectra::convertUnits(API::MatrixWorkspace_sptr matrixws,
+                                          const std::string &targetunit,
+                                          const double &wavelength) {
+  // Determine target unit
+  char target = 'd';
+  if (targetunit.compare("MomentumTransfer (Q)") == 0)
+    target = 'q';
+
+  // Loop through all X values
+  size_t numspec = matrixws->getNumberHistograms();
+  for (size_t i = 0; i < numspec; ++i) {
+    MantidVec &vecX = matrixws->dataX(i);
+    size_t vecsize = vecX.size();
+    for (size_t j = 0; j < vecsize; ++j) {
+      if (target == 'd')
+        vecX[j] = calculateD(vecX[j] * 0.5, wavelength);
+      else
+        vecX[j] = calculateQ(vecX[j] * 0.5, wavelength);
+    }
+  }
 
   return;
 }

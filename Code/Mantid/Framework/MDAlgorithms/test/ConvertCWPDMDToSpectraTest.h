@@ -64,7 +64,60 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("BinningParams", "0, 0.05, 120."));
     TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("LinearInterpolateZeroCounts", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ReducedData"));
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Get ouput
+    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("ReducedData"));
+    TS_ASSERT(outws);
+  }
+
+  /** Unit test to reduce/bin the HB2A data with more options
+   * @brief test_ReduceHB2AData
+   */
+  void test_ReduceHB2ADataMoreOptions() {
+    // Load data
+    LoadMD loader1;
+    loader1.initialize();
+    loader1.setProperty("Filename", "data_md.nxs");
+    loader1.setProperty("OutputWorkspace", "DataMDWS");
+    loader1.execute();
+    IMDEventWorkspace_const_sptr datamdws =
+        boost::dynamic_pointer_cast<const IMDEventWorkspace>(
+            AnalysisDataService::Instance().retrieve("DataMDWS"));
+    TS_ASSERT(datamdws);
+
+    LoadMD loader2;
+    loader2.initialize();
+    loader2.setProperty("Filename", "monitor_md.nxs");
+    loader2.setProperty("OutputWorkspace", "MonitorMDWS");
+    loader2.execute();
+    IMDEventWorkspace_sptr monitormdws =
+        boost::dynamic_pointer_cast<IMDEventWorkspace>(
+            AnalysisDataService::Instance().retrieve("MonitorMDWS"));
+    TS_ASSERT(monitormdws);
+
+    // Init
+    ConvertCWPDMDToSpectra alg;
+    alg.initialize();
+
+    // Set properties
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", datamdws->name()));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputMonitorWorkspace", monitormdws->name()));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("BinningParams", "0, 0.05, 120."));
+    TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("LinearInterpolateZeroCounts", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ScaleFactor", 10.0));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("UnitOutput", "Momenum Transfer (Q)"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ReducedData"));
 
     // Execute

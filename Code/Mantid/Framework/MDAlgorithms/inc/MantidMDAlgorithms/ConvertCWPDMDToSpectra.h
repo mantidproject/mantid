@@ -8,6 +8,32 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
+//----------------------------------------------------------------------------------------------
+/** Calculate d-space value from detector's position (2theta/theta) and
+ * wavelength
+ * @brief calculateD
+ * @param theta
+ * @param wavelength
+ * @return
+ */
+double calculateD(const double &theta, const double &wavelength) {
+  double d = 0.5 * wavelength / sin(theta);
+  return d;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Calculate Q value from detector's positin (2theta/theta) and wavelength
+ * q = 2 k \sin(\theta) = \frac{4 \pi}{\lambda} \sin(\theta).
+ * @brief calculateQ
+ * @param theta
+ * @param wavelength
+ * @return
+ */
+double calculateQ(const double &theta, const double &wavelength) {
+  double q = 4 * M_PI * sin(theta) / wavelength;
+  return q;
+}
+
 /** ConvertCWPDMDToSpectra : TODO: DESCRIPTION
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -61,23 +87,35 @@ private:
   /// Execution code
   void exec();
 
+  /// Main algorithm to reduce powder diffraction data
   API::MatrixWorkspace_sptr
   reducePowderData(API::IMDEventWorkspace_const_sptr dataws,
                    API::IMDEventWorkspace_const_sptr monitorws,
                    const double min2theta, const double max2theta,
                    const double binsize, bool dolinearinterpolation);
 
+  /// Bin signals to its 2theta position
   void binMD(API::IMDEventWorkspace_const_sptr mdws,
              const std::vector<double> &vecx, std::vector<double> &vecy);
 
+  /// Do linear interpolation to zero counts if bin is too small
   void linearInterpolation(API::MatrixWorkspace_sptr matrixws,
-                           std::vector<bool> &vec0count);
+                           const double &infinitesimal);
 
+  /// Set up sample logs
   void setupSampleLogs(API::MatrixWorkspace_sptr matrixws,
                        API::IMDEventWorkspace_const_sptr inputmdws);
 
+  /// Scale reduced data
   void scaleMatrixWorkspace(API::MatrixWorkspace_sptr matrixws,
                             const double &scalefactor);
+
+  /// Convert units from 2theta to d-spacing or Q
+  void convertUnits(API::MatrixWorkspace_sptr matrixws,
+                    const std::string &targetunit, const double &wavelength);
+
+  /// Infinitesimal number to identify zero value from 1/monitor counts
+  double m_infinitesimal;
 };
 
 } // namespace MDAlgorithms
