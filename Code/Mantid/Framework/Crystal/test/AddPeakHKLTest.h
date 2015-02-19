@@ -75,8 +75,8 @@ public:
       ws->mutableSample().setOrientedLattice(&orientedLattice);
       ws->mutableRun().setGoniometer(goniometer, false);
 
-      Mantid::API::AnalysisDataService::Instance().add("peaks_ws",ws);
       AddPeakHKL alg;
+      alg.setChild(true);
       alg.initialize();
       std::vector<double> hklVec;
       hklVec.push_back(hkl.X());
@@ -85,10 +85,10 @@ public:
       alg.setProperty("HKL", hklVec);
       alg.setProperty("Workspace", ws);
       alg.execute();
-      ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("peaks_ws");
+      IPeaksWorkspace_sptr ws_out = alg.getProperty("Workspace");
 
       // Get the peak just added.
-      const Peak& peak = ws->getPeak(0);
+      const IPeak& peak =ws_out->getPeak(0);
 
       /*
        Now we check we have made a self - consistent peak
