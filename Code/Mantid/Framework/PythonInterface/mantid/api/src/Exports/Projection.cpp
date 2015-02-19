@@ -92,4 +92,3 @@ void export_Projection()
     .def("toWorkspace", toWorkspace, "Create a TableWorkspace representing the projection")
     ;
 }
-GCC_DIAG_ON(strict-aliasing)
