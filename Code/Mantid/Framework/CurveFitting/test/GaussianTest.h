@@ -621,8 +621,15 @@ public:
 
       TS_ASSERT_EQUALS(fn->intensity(), 0.0);
 
+      // This does not work, because fwhm is 0 and height is 0
       TS_ASSERT_THROWS(fn->setIntensity(20.0), std::invalid_argument);
       TS_ASSERT_EQUALS(fn->intensity(), 0.0);
+
+      // Now, fwhm is not zero
+      fn->setFwhm(0.02);
+
+      TS_ASSERT_THROWS_NOTHING(fn->setIntensity(20.0));
+      TS_ASSERT_DELTA(fn->intensity(), 20.0, 1e-10);
   }
 
 

@@ -153,8 +153,17 @@ void IPeakFunction::setIntensity(const double newIntensity) {
   double currentIntensity = intensity();
 
   if (currentIntensity == 0.0) {
-    throw std::invalid_argument(
-        "Cannot set new intensity, not enough information available.");
+    // Try to set a different height first.
+    setHeight(2.0);
+
+    currentHeight = height();
+    currentIntensity = intensity();
+
+    // If the current intensity is still 0, there's nothing left to do.
+    if (currentIntensity == 0.0) {
+      throw std::invalid_argument(
+          "Cannot set new intensity, not enough information available.");
+    }
   }
 
   setHeight(newIntensity / currentIntensity * currentHeight);
