@@ -56,10 +56,11 @@ void ConvertCWPDMDToSpectra::init() {
                   "Name of the output workspace for reduced data.");
 
   std::vector<std::string> vecunits;
-  vecunits.push_back("2-theta");
+  vecunits.push_back("2theta");
+  vecunits.push_back("dSpacing");
   vecunits.push_back("Momenum Transfer (Q)");
   auto unitval = boost::make_shared<ListValidator<std::string> >(vecunits);
-  declareProperty("UnitOutput", "2-theta", unitval,
+  declareProperty("UnitOutput", "2theta", unitval,
                   "Unit of the output workspace.");
 
   declareProperty("NeutronWaveLength", EMPTY_DBL(),
@@ -270,7 +271,7 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
   while (scancell) {
     // get the number of events of this cell
     size_t numev2 = mditer->getNumEvents();
-    g_log.notice() << "[DB] Cell " << nextindex - 1
+    g_log.notice() << "[DB] MDWorkspace " << mdws->name() << " Cell " << nextindex - 1
                    << ": Number of events = " << numev2
                    << " Does NEXT cell exist = " << mditer->next() << "\n";
 
@@ -295,6 +296,7 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
       if (xindex < 0)
         g_log.warning("xindex < 0");
       if (xindex >= static_cast<int>(vecy.size()) - 1) {
+        // FIXME - It may throw away all the detectors' value above Ymax
         g_log.error() << "This is the bug! "
                       << "xindex = " << xindex << " 2theta = " << twotheta
                       << " out of [" << vecx.front() << ", " << vecx.back()
@@ -335,6 +337,8 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
 void
 ConvertCWPDMDToSpectra::linearInterpolation(API::MatrixWorkspace_sptr matrixws,
                                             const double &infinitesimal) {
+  g_log.notice() << "Number of spectrum = " << matrixws->getNumberHistograms()
+                 << " Infinitesimal = " << infinitesimal << "\n";
   size_t numspec = matrixws->getNumberHistograms();
   for (size_t i = 0; i < numspec; ++i) {
     // search for the first nonzero value and last nonzero value
@@ -345,18 +349,29 @@ ConvertCWPDMDToSpectra::linearInterpolation(API::MatrixWorkspace_sptr matrixws,
         onsearch = false;
       else
         ++minNonZeroIndex;
+
+      if (minNonZeroIndex == matrixws->readY(i).size())
+        onsearch = false;
     }
     size_t maxNonZeroIndex = matrixws->readY(i).size() - 1;
     onsearch = true;
     while (onsearch) {
       if (matrixws->readY(i)[maxNonZeroIndex] > infinitesimal)
         onsearch = false;
+      else if (maxNonZeroIndex == 0)
+        onsearch = false;
       else
         --maxNonZeroIndex;
     }
+    g_log.notice() << "[DB] iMinNonZero = " << minNonZeroIndex << ", iMaxNonZero = " << maxNonZeroIndex
+                   << " Spectrum index = " << i << ", Y size = " << matrixws->readY(i).size() << "\n";
+    if (minNonZeroIndex >= maxNonZeroIndex)
+      throw std::runtime_error("It is not right!");
+
 
     // Do linear interpolation for zero count values
     for (size_t j = minNonZeroIndex + 1; j < maxNonZeroIndex; ++j) {
+      // g_log.notice() << "[DB]   spectrum index i = " << i << ", Item j = " << j << "\n";
       if (matrixws->readY(i)[j] < infinitesimal) {
         // Do interpolation
         // gives y = y_0 + (y_1-y_0)\frac{x - x_0}{x_1-x_0}
@@ -396,9 +411,9 @@ void ConvertCWPDMDToSpectra::setupSampleLogs(
     API::MatrixWorkspace_sptr matrixws,
     API::IMDEventWorkspace_const_sptr inputmdws) {
   // get hold of the last experiment info from md workspace to copy over
-  size_t numexpinfo = inputmdws->getNumExperimentInfo();
+  uint16_t lastindex = static_cast<uint16_t>(inputmdws->getNumExperimentInfo()-1);
   ExperimentInfo_const_sptr lastexpinfo =
-      inputmdws->getExperimentInfo(numexpinfo - 1);
+      inputmdws->getExperimentInfo(lastindex);
 
   // get hold of experiment info from matrix ws
   Run targetrun = matrixws->mutableRun();

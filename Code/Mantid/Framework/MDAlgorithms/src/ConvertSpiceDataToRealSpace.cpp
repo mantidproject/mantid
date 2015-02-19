@@ -104,10 +104,14 @@ void ConvertSpiceDataToRealSpace::exec() {
     std::string runstartstr = getProperty("RunStart");
     // raise exception if user does not give a proper run start
     if (runstartstr.size() == 0)
+    {
       g_log.warning("Run-start time is not defined either in "
                     "input parent workspace or given by user. 1990-01-01 "
                     "00:00:00 is used");
-    runstart = DateAndTime(runstartstr);
+    }
+    else {
+      runstart = DateAndTime(runstartstr);
+    }
   }
 
   // Convert table workspace to a list of 2D workspaces
