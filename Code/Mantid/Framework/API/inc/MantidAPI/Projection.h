@@ -49,15 +49,15 @@ public:
   /// Constructor specifying the number of dimensions
   Projection(size_t nd);
   /// Two dimensional value constructor
-  Projection(VMD u, VMD v);
+  Projection(const VMD &u, const VMD &v);
   /// Three dimensional value constructor
-  Projection(VMD u, VMD v, VMD w);
+  Projection(const VMD &u, const VMD &v, const VMD &w);
   /// Four dimensional value constructor
-  Projection(VMD u, VMD v, VMD w, VMD x);
+  Projection(const VMD &u, const VMD &v, const VMD &w, const VMD &x);
   /// Five dimensional value constructor
-  Projection(VMD u, VMD v, VMD w, VMD x, VMD y);
+  Projection(const VMD &u, const VMD &v, const VMD &w, const VMD &x, const VMD &y);
   /// Six dimensional value constructor
-  Projection(VMD u, VMD v, VMD w, VMD x, VMD y, VMD z);
+  Projection(const VMD &u, const VMD &v, const VMD &w, const VMD &x, const VMD &y, const VMD &z);
   /// Copy constructor
   Projection(const Projection &other);
   /// Assignment operator
