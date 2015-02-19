@@ -82,30 +82,48 @@ public:
   static SCARFTomoReconstructionTest *createSuite() { return new SCARFTomoReconstructionTest(); }
   static void destroySuite(SCARFTomoReconstructionTest *suite) { delete suite; }
 
+  void test_castAlgorithm() {
+    // can create
+    boost::shared_ptr<MockedSCARFTomo> a = NULL;
+    TS_ASSERT(a = boost::make_shared<MockedSCARFTomo>());
+    // can cast to inherited interfaces and base classes
+    TS_ASSERT( dynamic_cast<Mantid::RemoteAlgorithms::SCARFTomoReconstruction*>(&alg) );
+    TS_ASSERT( dynamic_cast<Mantid::API::Algorithm*>(&alg) );
+    TS_ASSERT( dynamic_cast<Mantid::Kernel::PropertyManagerOwner*>(&alg) );
+    TS_ASSERT( dynamic_cast<Mantid::API::IAlgorithm*>(&alg) );
+    TS_ASSERT( dynamic_cast<Mantid::Kernel::IPropertyManager*>(&alg) );
+  }
+
   void test_initAlgorithm() {
     MockedSCARFTomo tomo;
     TS_ASSERT_THROWS_NOTHING( tomo.initialize() );
   }
 
   void test_propertiesMissing() {
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Username", "anything") );
-    // missing password
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Action","Login") );
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+
+    // password missing
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("UserName", "anything") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Action","LogIn") );
 
     TS_ASSERT_THROWS( alg.execute(), std::runtime_error );
     TS_ASSERT( !alg.isExecuted() );
 
-
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    // username missing
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Password", "whatever") );
-    // missing username
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Action","Login") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Action","LogIn") );
 
     TS_ASSERT_THROWS( alg.execute(), std::runtime_error );
     TS_ASSERT( !alg.isExecuted() );
-  }
 
-  void test_castAlgorithm() {
-    // TODO
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    // mispellings...
+    TS_ASSERT_THROWS( alg.setPropertyValue("Passw", "anything"), std::invalid_argument );
+    TS_ASSERT_THROWS( alg.setPropertyValue("Username", "anything"), std::invalid_argument );
+    TS_ASSERT_THROWS( alg.setPropertyValue("Action","Login"), std::invalid_argument );
+    TS_ASSERT_THROWS( alg.setProperty("Action", "unknown_opt"), std::invalid_argument );
+    TS_ASSERT_THROWS( alg.setPropertyValue("JobID","strings_not_allowed"), std::invalid_argument );
   }
 
   void test_actionWithoutUsernameBeforeLogin() {
@@ -134,7 +152,7 @@ public:
 
     MockedSCARFTomo tomo;
     TS_ASSERT_THROWS_NOTHING( tomo.initialize() );
-    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("Username", goodUsername) );
+    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("UserName", "anyone") );
     TS_ASSERT_THROWS_NOTHING( tomo.setProperty("Action", "SubmitJob") );
     TS_ASSERT_THROWS_NOTHING( tomo.setProperty("RunnablePath", "/foo/bar.sh") );
     TS_ASSERT_THROWS_NOTHING( tomo.setProperty("JobOptions", "--test --baz") );
@@ -152,9 +170,9 @@ public:
     MockedSCARFTomo tomo;
     TS_ASSERT_THROWS_NOTHING( tomo.initialize() );
     TS_ASSERT_THROWS_NOTHING( tomo.setProperty("UserName", goodUsername) );
-    TS_ASSERT_THROWS_NOTHING(tomo.setProperty("Password", goodPassword));
+    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("Password", goodPassword) );
 
-    TS_ASSERT_THROWS_NOTHING(tomo.execute());
+    TS_ASSERT_THROWS_NOTHING( tomo.execute() );
     TS_ASSERT( tomo.isExecuted() );
   }
 
@@ -294,7 +312,7 @@ public:
     // Once you log out all actions should produce an exception, regardless of the username given
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("UserName", "fail_" + goodUsername) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Action", "Jobstatus") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Action", "JobStatus") );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("RunnablePath", "/foo/bar.sh") );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("JobOptions", "--test --baz") );
 
@@ -304,7 +322,7 @@ public:
     MockedSCARFTomo tomo;
     TS_ASSERT_THROWS_NOTHING( tomo.initialize() );
     TS_ASSERT_THROWS_NOTHING( tomo.setProperty("UserName", goodUsername) );
-    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("Action", "Jobstatus") );
+    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("Action", "JobStatus") );
     TS_ASSERT_THROWS_NOTHING( tomo.setProperty("RunnablePath", "/foo/bar.sh") );
     TS_ASSERT_THROWS_NOTHING( tomo.setProperty("JobOptions", "--test --baz") );
 
