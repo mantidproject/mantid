@@ -67,6 +67,6 @@ def CalibrateWish( RunNumber, PanelNumber):
     # ==== End of CalibrateWish() ====
 if __name__ == "__main__":
   # this file is found on cycle_11_1
-  RunNumber = 17701
-  PanelNumber = '03'
-  CalibrateWish(RunNumber, PanelNumber)
+    RunNumber = 17701
+    PanelNumber = '03'
+    CalibrateWish(RunNumber, PanelNumber)

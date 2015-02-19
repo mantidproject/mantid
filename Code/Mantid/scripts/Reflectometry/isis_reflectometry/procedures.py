@@ -1,16 +1,16 @@
 from math import *
 
 try:
-  from mantid.simpleapi import *  # New API
+    from mantid.simpleapi import *    # New API
 except ImportError:
-  pass
+    pass
 #import qti as qti
 import numpy as n
 
 def addRuns(runlist,wname):
-  mtd.deleteWorkspace(str(wname))
-  output=str(wname)
-  if runlist[0] != "0":
+    mtd.deleteWorkspace(str(wname))
+    output=str(wname)
+    if runlist[0] != "0":
     #nzeros=8-len(str(runlist[0]))
     #fpad=""
     #for i in range(nzeros):
@@ -24,20 +24,20 @@ def addRuns(runlist,wname):
     #fname=fname.lower()
     ##fname=str.replace(fname,'.nxs','.raw')
     #Load(fname,output)
-    Load(str(runlist[0]),output)
-  else:
-    #dae="ndx"+mtd.settings['default.instrument'].lower()
-    dae="ndxoffspec"
-    LoadDAE(DAEname=dae,OutputWorkspace=output,SpectrumMin="1")
-    if(mtd[output].isGroup()):
-        for k in mtd[output].getNames():
-            mtd[k].setYUnit('Counts')
+        Load(str(runlist[0]),output)
     else:
-        mtd[output].setYUnit('Counts')
+    #dae="ndx"+mtd.settings['default.instrument'].lower()
+        dae="ndxoffspec"
+        LoadDAE(DAEname=dae,OutputWorkspace=output,SpectrumMin="1")
+        if(mtd[output].isGroup()):
+            for k in mtd[output].getNames():
+                mtd[k].setYUnit('Counts')
+        else:
+            mtd[output].setYUnit('Counts')
 
-  if len(runlist) > 1:
-    for i in range(1,len(runlist)):
-      if runlist[i] != "0":
+    if len(runlist) > 1:
+        for i in range(1,len(runlist)):
+            if runlist[i] != "0":
         #nzeros=8-len(str(runlist[i]))
         #fpad=""
         #for j in range(nzeros):
@@ -51,20 +51,20 @@ def addRuns(runlist,wname):
         #fname=fname.lower()
         ##fname=str.replace(fname,'.nxs','.raw')
         #Load(fname,"wtemp")
-        Load(str(runlist[i]),"wtemp")
-      else:
+                Load(str(runlist[i]),"wtemp")
+            else:
         #dae="ndx"+mtd.settings['default.instrument'].lower()
-        dae="ndxoffspec"
-        LoadDAE(DAEname=dae,OutputWorkspace="wtemp",SpectrumMin="1")
-        if(mtd['wtemp'].isGroup()):
-            for k in mtd['wtemp'].getNames():
-                mtd[k].setYUnit('Counts')
-        else:
-            mtd[output].setYUnit('Counts')
-      Plus(output,"wtemp",output)
-      mtd.deleteWorkspace("wtemp")
+                dae="ndxoffspec"
+                LoadDAE(DAEname=dae,OutputWorkspace="wtemp",SpectrumMin="1")
+                if(mtd['wtemp'].isGroup()):
+                    for k in mtd['wtemp'].getNames():
+                        mtd[k].setYUnit('Counts')
+                else:
+                    mtd[output].setYUnit('Counts')
+            Plus(output,"wtemp",output)
+            mtd.deleteWorkspace("wtemp")
 
-  mtd.sendLogMessage("addRuns Completed")
+    mtd.sendLogMessage("addRuns Completed")
 
 '''
 parse a text string of the format "1-6:2+8+9,10+11+12+13-19:3,20-24"
@@ -132,15 +132,15 @@ def floodnorm(wkspName,floodfile):
    #
    # pixel by pixel efficiency correction for the linear detector
    #
-   floodloaded=0
-   a1=mtd.getWorkspaceNames()
-   for i in range(len(a1)):
-       if a1[i] == "ld240flood":
-           floodloaded=1
-   if floodloaded == 0:
-       LoadNexusProcessed(Filename=floodfile,OutputWorkspace="ld240flood")
+    floodloaded=0
+    a1=mtd.getWorkspaceNames()
+    for i in range(len(a1)):
+        if a1[i] == "ld240flood":
+            floodloaded=1
+    if floodloaded == 0:
+        LoadNexusProcessed(Filename=floodfile,OutputWorkspace="ld240flood")
 
-   Divide(wkspName,"ld240flood",wkspName)
+    Divide(wkspName,"ld240flood",wkspName)
 #
 # Plot a bunch of workspaces as 2D maps
 # using the supplied limits and log scale settings
@@ -264,8 +264,8 @@ def removeoutlayer(wksp):
         for j in range(len(x)-1):
             y=a1.readY(i)[j]
             if (y<2):
-                a1.dataY(i)[j]=0.0;
-                a1.dataE(i)[j]=0.0;
+                a1.dataY(i)[j]=0.0
+                a1.dataE(i)[j]=0.0
 
 def nrSESANSFn(runList,nameList,P0runList,P0nameList,minSpec,maxSpec,upPeriod,downPeriod,existingP0,SEConstants,gparams,convertToSEL,lnPOverLam,diagnostics="0",removeoutlayer="0",floodfile="none",):
     nlist=parseNameList(nameList)

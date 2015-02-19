@@ -439,7 +439,7 @@ def getLocalTimeShiftInSecond(utctime, localtimezone, logger = None):
 
     if logger:
         logger.information("Input UTC time = %s" % (str(utctime)))
-    
+
     # Return early if local time zone is UTC
     if localtimezone == "UTC":
         return 0
@@ -452,7 +452,7 @@ def getLocalTimeShiftInSecond(utctime, localtimezone, logger = None):
     if logger:
         logger.information("About to convert time string: %s" % t1str)
     try:
-        if t1str.count("T") == 1: 
+        if t1str.count("T") == 1:
             utc = datetime.strptime(t1str, '%Y-%m-%dT%H:%M:%S')
         else:
             utc = datetime.strptime(t1str, '%Y-%m-%d %H:%M:%S')

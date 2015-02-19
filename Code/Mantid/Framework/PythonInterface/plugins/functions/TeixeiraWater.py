@@ -55,8 +55,8 @@ class TeixeiraWater(IFunction1D):
         i = 0
         for x in xvals:
             h = x*x*length/(tau*(1+x*x*length))
-            jacobian.set(i,0,-h/tau);
-            jacobian.set(i,1,h*(1.0-h*tau)/length);
+            jacobian.set(i,0,-h/tau)
+            jacobian.set(i,1,h*(1.0-h*tau)/length)
             i += 1
 
 # Required to have Mantid recognise the new function

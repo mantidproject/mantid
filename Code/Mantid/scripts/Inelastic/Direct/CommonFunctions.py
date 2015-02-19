@@ -7,7 +7,7 @@ import string
 
 
 class switch(object):
-    """ Helper class providing nice switch statement""" 
+    """ Helper class providing nice switch statement"""
     def __init__(self, value):
         self.value = value
         self.fall = False
@@ -16,7 +16,7 @@ class switch(object):
         """Return the match method once, then stop"""
         yield self.match
         raise StopIteration
-    
+
     def match(self, *args):
         """Indicate whether or not to enter a case suite"""
         if self.fall or not args:

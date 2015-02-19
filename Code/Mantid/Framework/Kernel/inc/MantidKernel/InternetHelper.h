@@ -5,9 +5,8 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ProxyInfo.h"
 
+#include <ios>
 #include <map>
-#include <iostream>
-#include <sstream>
 
 namespace Poco {
 // forward declaration
@@ -79,9 +78,11 @@ public:
   void setBody(const std::string& body);
   void setBody(const std::ostringstream& body);
   void setBody(Poco::Net::HTMLForm& form);
-  const std::string getBody();
-
-
+  const std::string& getBody();
+  
+  int getResponseStatus();
+  const std::string& getResponseReason();
+  
   void addHeader(const std::string& key, const std::string& value);
   void removeHeader (const std::string& key);
   const std::string& getHeader (const std::string& key);
@@ -125,9 +126,10 @@ private:
   std::streamsize m_contentLength;
   std::string m_method;
   std::string m_contentType;
-  std::ostringstream m_body;
+  std::string m_body;
   StringToStringMap m_headers;
   Poco::Net::HTTPRequest *m_request;
+  Poco::Net::HTTPResponse *m_response;
 };
 
 } // namespace Kernel

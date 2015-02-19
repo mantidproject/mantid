@@ -274,35 +274,35 @@ public:
 
     // Now check second workspace
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(1));
-    paramMap = ws->instrumentParameters();
+    Mantid::Geometry::ParameterMap& paramMap2 = ws->instrumentParameters();
     instr = ws->getInstrument();
 
-    // Check Alpha0 parameter    
-    param = paramMap.get(&(*instr), "Alpha0", "fitting");
+    // Check Alpha0 parameter
+    param = paramMap2.get(&(*instr), "Alpha0", "fitting");
     fitParam = param->value<Mantid::Geometry::FitParameter>();
     TS_ASSERT_EQUALS( boost::lexical_cast<double>(fitParam.getFormula()), 0.001);
     // Check Alpha1 parameter
-    param = paramMap.get(&(*instr), "Alpha1", "fitting");
+    param = paramMap2.get(&(*instr), "Alpha1", "fitting");
     fitParam = param->value<Mantid::Geometry::FitParameter>();
     TS_ASSERT_EQUALS( boost::lexical_cast<double>(fitParam.getFormula()), 0.22);
     // Check Beta0 parameter
-    param = paramMap.get(&(*instr), "Beta0", "fitting");
+    param = paramMap2.get(&(*instr), "Beta0", "fitting");
     fitParam = param->value<Mantid::Geometry::FitParameter>();
     TS_ASSERT_EQUALS( boost::lexical_cast<double>(fitParam.getFormula()), 32.7927);
     // Check Beta1 parameter
-    param = paramMap.get(&(*instr), "Kappa", "fitting");
+    param = paramMap2.get(&(*instr), "Kappa", "fitting");
     fitParam = param->value<Mantid::Geometry::FitParameter>();
     TS_ASSERT_EQUALS( boost::lexical_cast<double>(fitParam.getFormula()), 52.4205);
     // Check SigmsSquared parameter
     // This is a formula, so values are not exact
-    param = paramMap.get(&(*instr), "SigmaSquared", "fitting");
+    param = paramMap2.get(&(*instr), "SigmaSquared", "fitting");
     fitParam = param->value<Mantid::Geometry::FitParameter>();
     TS_ASSERT_DELTA( fitParam.getValue(0.0), 0.04, 0.000001);
     TS_ASSERT_DELTA( fitParam.getValue(0.5), 21840.741796, 0.000001);
     // Check Gamma parameter
     // Although this is a formula, all coefficients should be zero
     // and so values should be exactly 0 as well
-    param = paramMap.get(&(*instr), "Gamma", "fitting");
+    param = paramMap2.get(&(*instr), "Gamma", "fitting");
     fitParam = param->value<Mantid::Geometry::FitParameter>();
     TS_ASSERT_EQUALS( fitParam.getValue( 0.0 ), 0.0);
     TS_ASSERT_EQUALS( fitParam.getValue( 0.0 ), 0.0);

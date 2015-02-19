@@ -91,7 +91,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self._compute_resources = ['Fermi']
         if IS_IN_MANTIDPLOT \
         and hasattr(ConfigService.Instance().getFacility(), "computeResources"):
-                self._compute_resources = ConfigService.Instance().getFacility().computeResources()
+            self._compute_resources = ConfigService.Instance().getFacility().computeResources()
 
         # Internal flag for clearing all settings and restarting the application
         self._clear_and_restart = False

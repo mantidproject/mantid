@@ -209,7 +209,7 @@ class sfCalculator():
         This function parses the output.date and returns true if this date is after the ref date
         '''
         nexus_date_acquisition = nexus_date.split('T')[0]
-        
+
         if nexus_date_acquisition > self.ref_date:
             return True
         else:
@@ -238,7 +238,7 @@ class sfCalculator():
         nexus_file_numerator = file
         print '----> loading nexus file: ' + nexus_file_numerator
         EventDataWks = LoadEventNexus(Filename=nexus_file_numerator)
-        
+
         self.is_nexus_detector_rotated_flag = self.isNexusTakeAfterRefDate(EventDataWks.getRun().getProperty('run_start').value)
 
         if self.is_nexus_detector_rotated_flag:
@@ -431,7 +431,7 @@ class sfCalculator():
                     y_axis[y, :] += InputWorkspace.readY(index)[:]
                     y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *
                                             (InputWorkspace.readE(index)[:]))
-            
+
         else:
             for x in range(304):
                 for y in y_range:
@@ -566,13 +566,13 @@ class sfCalculator():
         peak_array = zeros(nbr_tof)
         peak_array_error = zeros(nbr_tof)
 
-        bMinBack = False;
-        bMaxBack = False;
+        bMinBack = False
+        bMaxBack = False
 
-        min_back = 0;
-        min_back_error = 0;
-        max_back = 0;
-        max_back_error = 0;
+        min_back = 0
+        min_back_error = 0
+        max_back = 0
+        max_back_error = 0
 
         for t in (range(nbr_tof-1)):
 
@@ -616,8 +616,8 @@ class sfCalculator():
 
             [final_value, final_error] = self.sumWithError(new_tmp_peak, new_tmp_peak_error)
 
-            peak_array[t] = final_value;
-            peak_array_error[t] = final_error;
+            peak_array[t] = final_value
+            peak_array_error[t] = final_error
 
 
         # make new workspace
@@ -1247,7 +1247,7 @@ def calculate(string_runs=None,
 
     """
 
-    list_attenuator = None;
+    list_attenuator = None
 
     #use default string files if not provided
     if (string_runs is None):
@@ -1284,7 +1284,7 @@ def calculate(string_runs=None,
 
     if (list_attenuator is None):
 #        list_attenuator = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]
-        list_attenuator = [0, 1, 1, 1, 1, 1];
+        list_attenuator = [0, 1, 1, 1, 1, 1]
 
     if (list_peak_back is None):
         list_peak_back = zeros((len(list_runs), 4))   #[peak_min, peak_max, back_min, back_max]

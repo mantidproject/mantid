@@ -383,14 +383,14 @@ class BaseRefWidget(BaseWidget):
         sz = len(data_array)
 
         # calculate the numerator of mean
-        dataNum = 0;
+        dataNum = 0
         for i in range(sz):
             if not (data_array[i] == 0):
                 tmpFactor = float(data_array[i]) / float((pow(error_array[i],2)))
                 dataNum += tmpFactor
 
         # calculate denominator
-        dataDen = 0;
+        dataDen = 0
         for i in range(sz):
             if not (error_array[i] == 0):
                 tmpFactor = 1./float((pow(error_array[i],2)))
@@ -444,7 +444,7 @@ class BaseRefWidget(BaseWidget):
             for j in range(len(data_y_i)):
 
                 if data_y[j]>0 and data_y_i[j]>0:
-                    [data_y[j], data_e[j]] = self.weightedMean([data_y[j], data_y_i[j]], [data_e[j], data_e_i[j]]);
+                    [data_y[j], data_e[j]] = self.weightedMean([data_y[j], data_y_i[j]], [data_e[j], data_e_i[j]])
                 elif (data_y[j] == 0) and (data_y_i[j]>0):
                     data_y[j] = data_y_i[j]
                     data_e[j] = data_e_i[j]
@@ -973,7 +973,7 @@ class BaseRefWidget(BaseWidget):
             For REFM, this is X
             For REFL, this is Y
         """
-        
+
 #        run_number = self._summary.data_run_number_edit.text()
 #        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(run_number)))[0]
 #
@@ -1122,12 +1122,12 @@ class BaseRefWidget(BaseWidget):
         #mantidplot.app.connect(mantidplot.app.mantidUI, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
         #mantidplot.app.connect(mantidplot.app.RefDetectorViewer, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
 
-        peak_min = int(self._summary.data_peak_from_pixel.text());
-        peak_max = int(self._summary.data_peak_to_pixel.text());
-        back_min = int(self._summary.data_background_from_pixel1.text());
-        back_max = int(self._summary.data_background_to_pixel1.text());
-        tof_min = int(self._summary.data_from_tof.text());
-        tof_max = int(self._summary.data_to_tof.text());
+        peak_min = int(self._summary.data_peak_from_pixel.text())
+        peak_max = int(self._summary.data_peak_to_pixel.text())
+        back_min = int(self._summary.data_background_from_pixel1.text())
+        back_max = int(self._summary.data_background_to_pixel1.text())
+        tof_min = int(self._summary.data_from_tof.text())
+        tof_max = int(self._summary.data_to_tof.text())
 
         import mantidqtpython
         self.ref_det_view = mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base, peak_min, peak_max, back_min, back_max, tof_min, tof_max)
@@ -1136,12 +1136,12 @@ class BaseRefWidget(BaseWidget):
 
 
     def call_back(self, peakmin, peakmax, backmin, backmax, tofmin, tofmax):
-            self._summary.data_peak_from_pixel.setText("%-d" % int(peakmin))
-            self._summary.data_peak_to_pixel.setText("%-d" % int(peakmax))
-            self._summary.data_background_from_pixel1.setText("%-d" % int(backmin))
-            self._summary.data_background_to_pixel1.setText("%-d" % int(backmax))
-            self._summary.data_from_tof.setText("%-d" % int(tofmin))
-            self._summary.data_to_tof.setText("%-d" % int(tofmax))
+        self._summary.data_peak_from_pixel.setText("%-d" % int(peakmin))
+        self._summary.data_peak_to_pixel.setText("%-d" % int(peakmax))
+        self._summary.data_background_from_pixel1.setText("%-d" % int(backmin))
+        self._summary.data_background_to_pixel1.setText("%-d" % int(backmax))
+        self._summary.data_from_tof.setText("%-d" % int(tofmin))
+        self._summary.data_to_tof.setText("%-d" % int(tofmax))
 
     def _norm_count_vs_y(self):
 

@@ -49,7 +49,7 @@ class ExamplePeakFunction(IPeakFunction):
         height = self.getParameterValue("Height") # Can also be retrieve by index self.getParameterValue(0)
         peak_centre = self.getParameterValue("PeakCentre")
         sigma = self.getParameterValue("Sigma")
-        weight = math.pow(1./sigma,2);
+        weight = math.pow(1./sigma,2)
 
         # Here you can use the NTerms attr if required by
         #   using self._nterms: see setAttributeValue below or
@@ -68,10 +68,10 @@ class ExamplePeakFunction(IPeakFunction):
             ip = The index of the parameter value whose partial derivative this corresponds to
             value = The value of the derivative
         """
-        height = self.getParameterValue("Height");
-        peak_centre = self.getParameterValue("PeakCentre");
+        height = self.getParameterValue("Height")
+        peak_centre = self.getParameterValue("PeakCentre")
         sigma = self.getParameterValue("Sigma")
-        weight = math.pow(1./sigma,2);
+        weight = math.pow(1./sigma,2)
 
         # X index
         i = 0
