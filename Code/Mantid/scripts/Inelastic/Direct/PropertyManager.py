@@ -502,6 +502,22 @@ class PropertyManager(NonIDF_Properties):
         #
         return files_to_check
     #
+    def find_files_to_sum(self,num_files=None):
+        """ method searches for run files in run list to sum and returns 
+            list of runs with run-files missing or ok and empty list if all files 
+            are there 
+
+            if num_files is not None, find specified number of files out of total 
+            file list to sum
+        """ 
+        # this returns only runs, left to sum with current sample_run sum settings
+        runs,sum_ws,added      = PropertyManager.sample_run.get_runs_to_sum(None,num_files)
+        if len(runs) == 0:
+           return (True,[],[])
+
+        ok,not_found_list,found_list = PropertyManager.sample_run.find_run_files(runs)     
+        return (ok,not_found_list,found_list)
+    #
     def _check_file_properties(self):
         """ Method verifies if all files necessary for a reduction are available.
 
@@ -515,7 +531,12 @@ class PropertyManager(NonIDF_Properties):
             ok,file = theProp.find_file(be_quet=True)
             if not ok:
                file_errors[prop_name]=file
- 
+
+        if self.sum_runs :
+           ok,missing,found=self.find_files_to_sum()
+           if not ok and not self.cashe_sum_ws:
+              file_errors['missing_runs_toSum']=str(missing)
+
         result = (len(file_errors)==0)
         return (result,file_errors)
     #

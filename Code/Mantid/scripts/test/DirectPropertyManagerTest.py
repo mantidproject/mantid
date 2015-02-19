@@ -966,6 +966,36 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue('monovan_run' in fail_list)
         self.assertTrue('map_file' in fail_list)
 
+    def test_find_files2sum(self):
+        propman = self.prop_man
+        propman.sample_run = [11001,11111]
+
+        propman.sum_runs =False
+        ok,not_found,found = propman.find_files_to_sum()
+        self.assertTrue(ok)
+        self.assertEqual(len(not_found),0)
+        self.assertEqual(len(found),0)
+
+        propman.sum_runs =True
+        ok,not_found,found = propman.find_files_to_sum()
+        self.assertFalse(ok)
+        self.assertEqual(len(not_found),1)
+        self.assertEqual(len(found),1)
+        self.assertEqual(not_found[0],11111)
+        self.assertEqual(found[0],11001)
+
+
+        ok,err_list=propman._check_file_properties()
+        self.assertFalse(ok)
+        self.assertEqual(len(err_list),2)
+        self.assertTrue('missing_runs_toSum' in err_list)
+        self.assertEqual(err_list['missing_runs_toSum'],'[11111]')
+
+
+
+
+
+
 if __name__=="__main__":
     unittest.main()
     #tester = DirectPropertyManagerTest('test_set_energy_bins_and_ei')

@@ -1522,28 +1522,6 @@ class DirectEnergyConversion(object):
         white_tag = 'NormBy:{0}_IntergatedIn:{1:0>10.2f}:{2:0>10.2f}'.format(self.normalise_method,low,upp)
         return white_tag
 
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-def get_failed_spectra_list_from_masks(masked_wksp):
-    """Compile a list of spectra numbers that are marked as
-       masked in the masking workspace
-
-    Input:
-     masking_workspace -  A special masking workspace containing masking data
-    """
-    #TODO: get rid of this and use data, obtained form diagnostics
-
-    failed_spectra = []
-    if masked_wksp is None:
-       return (failed_spectra,0)
-
-    masking_wksp,sp_list = ExtractMask(masked_wksp)
-    DeleteWorkspace(masking_wksp)
-
-    n_spectra = len(sp_list)
-    return (sp_list.tolist(),n_spectra)
-
 
 #-----------------------------------------------------------------
 if __name__ == "__main__":

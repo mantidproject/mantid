@@ -117,5 +117,5 @@ if __name__ == "__main__":
      #file = os.path.join(run_dir,'reduce_vars.py')
      #rd.save_web_variables(file)
 
-     rd.reduce() 
-
+###### Run reduction on all files provided as parameters ######
+     red_ws = rd.run_reduction()

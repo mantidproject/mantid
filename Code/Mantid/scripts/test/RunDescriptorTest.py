@@ -205,7 +205,7 @@ class RunDescriptorTest(unittest.TestCase):
         propman.sample_run = 'MAR11001.RAW'
 
         self.assertEqual(PropertyManager.sample_run.run_number(),11001)
-        self.assertEqual(PropertyManager.sample_run._run_ext,'.RAW')
+        self.assertEqual(PropertyManager.sample_run._fext,'.RAW')
 
     def test_chop_ws_part(self):
         propman  = self.prop_man
@@ -244,6 +244,10 @@ class RunDescriptorTest(unittest.TestCase):
         pass
 
     def test_get_run_list(self):
+        """ verify the logic behind setting a run file as 
+            a sample run when run list is defined
+            
+        """ 
         propman = PropertyManager('MAR')
         propman.sample_run = [10204]
 
@@ -251,6 +255,11 @@ class RunDescriptorTest(unittest.TestCase):
         runs = PropertyManager.sample_run.get_run_list()
         self.assertEqual(len(runs),1)
         self.assertEqual(runs[0],10204)
+        sum_list,sum_ws,n_sum = PropertyManager.sample_run.get_runs_to_sum()
+        self.assertEqual(len(sum_list),0)
+        self.assertTrue(sum_ws is None)
+        self.assertEqual(n_sum,0)
+
 
         # the same run list changes nothing
         propman.sample_run = [10204]
@@ -262,6 +271,8 @@ class RunDescriptorTest(unittest.TestCase):
 
         propman.sample_run = [11230,10382,10009]
         self.assertEqual(propman.sample_run,11230)
+
+
         propman.sum_runs = True
         self.assertEqual(propman.sample_run,10009)
         propman.sample_run = [11231,10382,10010]
@@ -299,6 +310,14 @@ class RunDescriptorTest(unittest.TestCase):
         runs = PropertyManager.sample_run.get_run_list()
         self.assertEqual(len(runs),3)
         self.assertTrue(propman.sum_runs)
+
+        # check asigning file with path
+        propman.sample_run = 'c:/data/MAR10382.nxs'
+        self.assertEqual(propman.sample_run,10382)
+        self.assertEqual(PropertyManager.sample_run._run_list._last_ind2sum,1)
+        self.assertEqual(PropertyManager.sample_run._run_list._file_path[1],'c:/data')
+        self.assertEqual(PropertyManager.sample_run._run_list._fext[1],'.nxs')
+
 
         # check extend when summing
         propman.sample_run = 10999
@@ -409,6 +428,16 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertTrue(ws is None)
         self.assertEqual(n_sums,0)
 
+    def test_find_runfiles(self):
+        propman = self.prop_man
+        propman.sample_run = [11001,11111]
+
+        nf,found=PropertyManager.sample_run._run_list.find_run_files('MAR')
+        self.assertEqual(len(nf),1)
+        self.assertEqual(len(found),1)
+        self.assertEqual(nf[0],11111)
+
+       
 
 
 if __name__=="__main__":
