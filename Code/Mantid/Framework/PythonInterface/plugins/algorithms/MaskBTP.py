@@ -176,9 +176,9 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         elif self.instname=="WISH":
             if (self.bankmin[self.instname]<=banknum<= self.bankmax[self.instname]):
                 try:
-                	return self.instrument.getComponentByName("panel"+"%02d" % banknum)[0]
+                    return self.instrument.getComponentByName("panel"+"%02d" % banknum)[0]
                 except:
-                        return None
+                    return None
             else:
                 raise ValueError("Out of range index for "+str(self.instname)+" instrument bank numbers")
         else:

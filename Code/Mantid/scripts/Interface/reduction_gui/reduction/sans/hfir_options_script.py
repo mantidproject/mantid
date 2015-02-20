@@ -40,12 +40,12 @@ class ReductionOptions(BaseScriptElement):
     log_binning = False
     align_log_with_decades = True
     error_weighting = False
-    
+
     # Wedges
     n_wedges = 2
     wedge_angle = 30.0
     wedge_offset = 0.0
-    
+
     # Mask side
     masked_side = None
 
@@ -126,13 +126,13 @@ class ReductionOptions(BaseScriptElement):
         if self.align_log_with_decades: script += ", align_log_with_decades=%s" % str(self.align_log_with_decades)
         if self.error_weighting: script += ", error_weighting=%s" % str(self.error_weighting)
         script += ")\n"
-        
+
         # If we align we decades, use more points for I(qx,qy)
         n_xy_bins = self.n_q_bins
         if self.log_binning and self.align_log_with_decades:
             n_xy_bins = int(3*self.n_q_bins)
         script += "IQxQy(nbins=%g)\n" % n_xy_bins
-        
+
         if self.n_wedges>0:
             script += "SetWedges(number_of_wedges=%g, wedge_angle=%g, wedge_offset=%g)\n" % (self.n_wedges, self.wedge_angle, self.wedge_offset)
 
@@ -198,7 +198,7 @@ class ReductionOptions(BaseScriptElement):
         xml += "  <n_wedges>%g</n_wedges>\n" % self.n_wedges
         xml += "  <wedge_angle>%g</wedge_angle>\n" % self.wedge_angle
         xml += "  <wedge_offset>%g</wedge_offset>\n" % self.wedge_offset
-        
+
         xml += "  <normalization>%d</normalization>\n" % self.normalization
 
         # Output directory
@@ -212,7 +212,7 @@ class ReductionOptions(BaseScriptElement):
         xml += "  <mask_bottom>%g</mask_bottom>\n" % self.bottom
         xml += "  <mask_left>%g</mask_left>\n" % self.left
         xml += "  <mask_right>%g</mask_right>\n" % self.right
-        
+
         xml += "  <mask_side>%s</mask_side>\n" % str(self.masked_side)
 
         xml += "  <Shapes>\n"
@@ -452,7 +452,7 @@ class ReductionOptions(BaseScriptElement):
         self.log_binning = ReductionOptions.log_binning
         self.align_log_with_decades = ReductionOptions.align_log_with_decades
         self.error_weighting = ReductionOptions.error_weighting
-        
+
         self.n_wedges = ReductionOptions.n_wedges
         self.wedge_angle = ReductionOptions.wedge_angle
         self.wedge_offset = ReductionOptions.wedge_offset

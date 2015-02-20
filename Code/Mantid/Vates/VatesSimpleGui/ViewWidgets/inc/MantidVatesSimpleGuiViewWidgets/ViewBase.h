@@ -10,6 +10,7 @@
 #include <QWidget>
 
 class pqColorMapModel;
+class pqDataRepresentation;
 class pqObjectBuilder;
 class pqPipelineSource;
 class pqPipelineRepresentation;
@@ -114,6 +115,8 @@ public:
   virtual void setPluginSource(QString pluginName, QString wsName);
   /// Determines if source has timesteps (4D).
   virtual bool srcHasTimeSteps(pqPipelineSource *src);
+  /// Initializes the settings of the color scale 
+  virtual void initializeColorScale();
 
   /// Enumeration for Cartesian coordinates
   enum Direction {X, Y, Z};
@@ -123,7 +126,7 @@ public:
 
 public slots:
   /// Set the color scale back to the original bounds.
-  void onAutoScale();
+  void onAutoScale(ColorSelectionWidget* colorSelectionWidget);
   /// Set the requested color map on the data.
   void onColorMapChange(const pqColorMapModel *model);
   /// Set the data color scale range to the requested bounds.
@@ -137,13 +140,15 @@ public slots:
   /// Reset center of rotation to given point.
   void onResetCenterToPoint(double x, double y, double z);
   /// Set color scaling for a view.
-  void setColorsForView();
+  void setColorsForView(ColorSelectionWidget *colorScale);
   /// Setup the animation controls.
   void updateAnimationControls();
   /// Provide updates to UI.
   virtual void updateUI();
   /// Provide updates to View
   virtual void updateView();
+  /// React when the visibility of a representation changes
+  virtual void onVisibilityChanged(pqPipelineSource *source, pqDataRepresentation *representation);
 
 signals:
   /**
@@ -185,6 +190,17 @@ signals:
    * @param state Whether or not to enable to view mode buttons.
    */
   void setViewsStatus(ModeControlWidget::Views view, bool state);
+  /**
+   * Singal to tell other elements that the log scale was altered programatically
+   * @param state flag wheter or not to enable the 
+   */
+  void setLogScale(bool state);
+
+protected:
+  /**
+   * Set the color scale for auto color scaling.
+   */
+  void setAutoColorScale();
 
 private:
   Q_DISABLE_COPY(ViewBase)

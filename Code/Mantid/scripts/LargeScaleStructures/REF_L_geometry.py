@@ -99,5 +99,5 @@ def create_geometry(file_name=None, pixel_width=None, pixel_height=None):
     det.writeGeom(xml_outfile)
 
 if __name__ == "__main__":
-    #create_geometry()
-    create_grouping()
+    create_geometry()
+    #create_grouping()

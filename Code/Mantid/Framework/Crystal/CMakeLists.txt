@@ -1,5 +1,6 @@
 
 set ( SRC_FILES
+	src/AddPeakHKL.cpp
 	src/AnvredCorrection.cpp
 	src/CalculatePeaksHKL.cpp
 	src/CalculateUMatrix.cpp
@@ -69,6 +70,7 @@ set ( SRC_FILES
 
 set ( SRC_UNITY_IGNORE_FILES )
 set ( INC_FILES
+	inc/MantidCrystal/AddPeakHKL.h
 	inc/MantidCrystal/AnvredCorrection.h
 	inc/MantidCrystal/BackgroundStrategy.h
 	inc/MantidCrystal/CalculatePeaksHKL.h
@@ -140,6 +142,7 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+	AddPeakHKLTest.h
 	AnvredCorrectionTest.h
 	CalculatePeaksHKLTest.h
 	CalculateUMatrixTest.h

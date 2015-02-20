@@ -50,6 +50,28 @@
         information_only="1"
         si_class="vtkSITimeLabelProperty">
       </StringVectorProperty>
+       <DoubleVectorProperty 
+        name="MinValue"
+		command="GetMinValue"
+        information_only="1">
+        <Documentation>
+          Minimum value of the data set.
+        </Documentation>
+      </DoubleVectorProperty>
+	  <DoubleVectorProperty 
+        name="MaxValue"
+		command="GetMaxValue"
+        information_only="1">
+        <Documentation>
+          Maximum value of the data set.
+        </Documentation>
+      </DoubleVectorProperty>
+	  <StringVectorProperty
+         name="Instrument"
+         command="GetInstrument"
+         number_of_elements="1"
+         information_only="1">
+       </StringVectorProperty>
     </SourceProxy>
   </ProxyGroup>
   <!-- End MDHWSource -->

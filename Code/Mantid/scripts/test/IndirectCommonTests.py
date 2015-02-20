@@ -16,22 +16,10 @@ class IndirectCommonTests(unittest.TestCase):
 
     def setUp(self):
         self._config_defaults = config
+        config['default.facility'] = 'ISIS'
 
     def tearDown(self):
         config = self._config_defaults
-
-    def test_loadInst(self):
-        indirect_common.loadInst('IRIS')
-
-        ws_name = '__empty_IRIS'
-        ws = mtd[ws_name]
-        instrument = ws.getInstrument()
-        self.assertEqual(instrument.getName(), 'IRIS')
-
-    def test_loadNexus(self):
-        ws_name = indirect_common.loadNexus('IRS26173_ipg.nxs')
-        self.assertEqual(ws_name, 'IRS26173_ipg')
-        self.assertTrue(mtd.doesExist(ws_name))
 
     def test_getInstrRun_from_name(self):
         ws = self.make_dummy_QENS_workspace()
@@ -135,19 +123,19 @@ class IndirectCommonTests(unittest.TestCase):
         ws1 = self.make_dummy_QENS_workspace(output_name="ws1")
         ws2 = self.make_dummy_QENS_workspace(output_name="ws2")
 
-        self.assert_does_not_raise(ValueError, indirect_common.CheckAnalysers, ws1, ws2, True)
+        self.assert_does_not_raise(ValueError, indirect_common.CheckAnalysers, ws1, ws2)
 
     def test_CheckAnalysers_fails_on_analyser_mismatch(self):
         ws1 = self.make_dummy_QENS_workspace(output_name="ws1", analyser='graphite')
         ws2 = self.make_dummy_QENS_workspace(output_name="ws2", analyser='fmica')
 
-        self.assertRaises(ValueError, indirect_common.CheckAnalysers, ws1, ws2, True)
+        self.assertRaises(ValueError, indirect_common.CheckAnalysers, ws1, ws2)
 
     def test_CheckAnalysers_fails_on_reflection_mismatch(self):
         ws1 = self.make_dummy_QENS_workspace(output_name="ws1", reflection='002')
         ws2 = self.make_dummy_QENS_workspace(output_name="ws2", reflection='004')
 
-        self.assertRaises(ValueError, indirect_common.CheckAnalysers, ws1, ws2, True)
+        self.assertRaises(ValueError, indirect_common.CheckAnalysers, ws1, ws2)
 
     def test_CheckHistZero(self):
         ws = self.make_dummy_QENS_workspace()

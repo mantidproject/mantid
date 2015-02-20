@@ -77,9 +77,9 @@ you can do by your available memory and CPUs.
 Usage
 -----
 
-**Example:**
+**Example 1:**
 
-.. testcode:: exStartLiveData
+.. testcode:: exStartLiveDataEvent
 
     from threading import Thread
     import time
@@ -135,9 +135,77 @@ Usage
 
 Output:
 
-.. testoutput:: exStartLiveData
+.. testoutput:: exStartLiveDataEvent
    :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
 
     The workspace contains ... events
+
+
+
+**Example 2:**
+
+.. testcode:: exStartLiveDataHisto
+
+    from threading import Thread
+    import time
+
+    def startFakeDAE():
+        # This will generate 5 periods of histogram data, 10 spectra in each period,
+        # 100 bins in each spectrum
+        try:
+            FakeISISHistoDAE(NPeriods=5,NSpectra=10,NBins=100)
+        except RuntimeError:
+            pass
+
+    def captureLive():
+        ConfigService.setFacility("TEST_LIVE")
+
+        # Start a Live data listener updating every second, 
+        # that replaces the results each time with those of the last second.
+        # Load only spectra 2,4, and 6 from periods 1 and 3
+        StartLiveData(Instrument='ISIS_Histogram', OutputWorkspace='wsOut', UpdateEvery=1,
+                            AccumulationMethod='Replace', PeriodList=[1,3],SpectraList=[2,4,6])
+
+        # give it a couple of seconds before stopping it
+        time.sleep(2)
+
+        # This will cancel both algorithms
+        # you can do the same in the GUI
+        # by clicking on the details button on the bottom right
+        AlgorithmManager.newestInstanceOf("MonitorLiveData").cancel()
+        AlgorithmManager.newestInstanceOf("FakeISISHistoDAE").cancel()
+    #--------------------------------------------------------------------------------------------------
+
+    oldFacility = ConfigService.getFacility().name()
+    thread = Thread(target = startFakeDAE)
+    thread.start()
+    time.sleep(2) # give it a small amount of time to get ready
+    if not thread.is_alive():
+        raise RuntimeError("Unable to start FakeDAE")
+
+    try:
+        captureLive()
+    except Exception, exc:
+        print "Error occurred starting live data"
+    finally:
+        thread.join() # this must get hit
+
+    # put back the facility
+    ConfigService.setFacility(oldFacility)
+
+    #get the ouput workspace
+    wsOut = mtd["wsOut"]
+    print "The workspace contains %i periods" % wsOut.getNumberOfEntries()
+    print "Each period   contains %i spectra" % wsOut.getItem(0).getNumberHistograms()
+
+
+Output:
+
+.. testoutput:: exStartLiveDataHisto
+   :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
+
+    The workspace contains ... periods
+    Each period   contains ... spectra
+
 
 .. categories::

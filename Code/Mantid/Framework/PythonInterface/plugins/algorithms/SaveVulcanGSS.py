@@ -24,14 +24,14 @@ class SaveVulcanGSS(PythonAlgorithm):
 
     def PyInit(self):
         """ Declare properties
-        """        
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input), 
+        """
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
                 "Focussed diffraction workspace to be exported to GSAS file. ")
 
         self.declareProperty(FileProperty("BinFilename","", FileAction.Load, ['.dat']),
                 "Name of a data file containing the bin boundaries in Log(TOF). ")
 
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), 
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
                 "Name of rebinned matrix workspace. ")
 
         self.declareProperty(FileProperty("GSSFilename","", FileAction.Save, ['.gda']),
@@ -42,7 +42,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         self.declareProperty("GSSParmFileName", "", "GSAS parameter file name for this GSAS data file.")
 
         return
- 
+
     def PyExec(self):
         """ Main Execution Body
         """
@@ -69,7 +69,7 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         # Generate GSAS file
         outputws = self._saveGSAS(gsaws, outgssfilename)
-   
+
         # Convert header and bank information
         ipts = self.getPropertyValue("IPTS")
         parmfname = self.getPropertyValue("GSSParmFileName")
@@ -115,14 +115,14 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         return vecPow10X
 
-    
+
     def _rebinVdrive(self, inputws, vec_refT, outputwsname):
         """ Rebin to match VULCAN's VDRIVE-generated GSAS file
         Arguments:
          - inputws : focussed workspace
          - vec_refT: list of TOF bins
         """
-        # Create a complicated bin parameter 
+        # Create a complicated bin parameter
         params = []
         for ibin in xrange(len(vec_refT)-1):
             x0 = vec_refT[ibin]
@@ -133,7 +133,7 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         # last bin
         x0 = vec_refT[-1]
-        xf = 2*dx + x0 
+        xf = 2*dx + x0
         params.extend([x0, 2*dx, xf])
 
         # Rebin
@@ -155,7 +155,7 @@ class SaveVulcanGSS(PythonAlgorithm):
             # ENDFOR (i)
         # ENDFOR (iws)
         api.DeleteWorkspace(Workspace=tempws)
-        gsaws = api.CreateWorkspace(DataX=newvecx, DataY=newvecy, DataE=newvece, NSpec=numhist, 
+        gsaws = api.CreateWorkspace(DataX=newvecx, DataY=newvecy, DataE=newvece, NSpec=numhist,
                 UnitX="TOF", ParentWorkspace=inputws, OutputWorkspace=outputwsname)
 
         return gsaws
@@ -167,8 +167,8 @@ class SaveVulcanGSS(PythonAlgorithm):
         # Convert from PointData to Histogram
         gsaws = api.ConvertToHistogram(InputWorkspace=gsaws, OutputWorkspace=str(gsaws))
 
-        # Save 
-        api.SaveGSS(InputWorkspace=gsaws, Filename=gdafilename, SplitFiles=False, Append=False, 
+        # Save
+        api.SaveGSS(InputWorkspace=gsaws, Filename=gdafilename, SplitFiles=False, Append=False,
                 Format="SLOG", MultiplyByBinWidth=False, ExtendedHeader=False, UseSpectrumNumberAsBankID=True)
 
         return gsaws
@@ -181,18 +181,18 @@ class SaveVulcanGSS(PythonAlgorithm):
         gfile = open(gssfilename, "r")
         lines = gfile.readlines()
         gfile.close()
-    
+
         # New file
         filebuffer = ""
         filebuffer += newheader
-    
+
         inbank = False
         banklines = []
         for line in lines:
             cline = line.strip()
             if len(cline) == 0:
                 continue
-    
+
             if line.startswith("BANK"):
                 # Indicate a new bank
                 if len(banklines) == 0:
@@ -200,7 +200,7 @@ class SaveVulcanGSS(PythonAlgorithm):
                     inbank = True
                     banklines.append(line.strip("\n"))
                 else:
-                    # bank line for non-first bank. 
+                    # bank line for non-first bank.
                     tmpbuffer = self._rewriteOneBankData(banklines)
                     filebuffer += tmpbuffer
                     banklines = [line]
@@ -208,33 +208,33 @@ class SaveVulcanGSS(PythonAlgorithm):
             elif (inbank is True and cline.startswith("#") is False):
                 # Write data line
                 banklines.append(line.strip("\n"))
-    
+
         # ENDFOR
-    
-        if len(banklines) > 0: 
-            tmpbuffer = self._rewriteOneBankData(banklines) 
+
+        if len(banklines) > 0:
+            tmpbuffer = self._rewriteOneBankData(banklines)
             filebuffer += tmpbuffer
         else:
             raise NotImplementedError("Impossible to have this")
-    
+
         # Overwrite the original file
         ofile = open(gssfilename, "w")
         ofile.write(filebuffer)
         ofile.close()
-    
+
         return
-    
+
 
     def _genVulcanGSSHeader(self, ws, gssfilename, ipts, parmfname):
         """
         """
         from datetime import datetime
         import os.path
-        
+
         # Get necessary information
         title = ws.getTitle()
-    
-        run = ws.getRun() 
+
+        run = ws.getRun()
 
         # Get information on start/stop
         processtime = True
@@ -249,45 +249,45 @@ class SaveVulcanGSS(PythonAlgorithm):
             # property run_start and duration exist
             runstart_sec = runstart.split(".")[0]
             runstart_ns = runstart.split(".")[1]
-    
+
             utctime = datetime.strptime(runstart_sec, '%Y-%m-%dT%H:%M:%S')
             time0=datetime.strptime("1990-01-01T0:0:0",'%Y-%m-%dT%H:%M:%S')
-            
+
             delta = utctime-time0
-            try: 
+            try:
                 total_nanosecond_start =  int(delta.total_seconds()*int(1.0E9)) + int(runstart_ns)
-            except: 
-                total_seconds = delta.days*24*3600 + delta.seconds 
+            except:
+                total_seconds = delta.days*24*3600 + delta.seconds
                 total_nanosecond_start = total_seconds * int(1.0E9)  + int(runstart_ns)
             total_nanosecond_stop = total_nanosecond_start + int(duration*1.0E9)
         else:
             # not both property is found
             total_nanosecond_start = 0
             total_nanosecond_stop = 0
-        
+
         self.log().debug("Start = %d, Stop = %d" % (total_nanosecond_start, total_nanosecond_stop))
-    
+
         # Construct new header
         newheader = ""
-    
+
         if len(title) > 80:
             title = title[0:80]
         newheader += "%-80s\n" % (title)
-    
+
         newheader += "%-80s\n" % ( "Instrument parameter file: %s" %(parmfname) )
-    
+
         newheader += "%-80s\n" % ( "#IPTS: %s" % (str(ipts)) )
-    
+
         newheader += "%-80s\n" % ( "#binned by: Mantid" )
-    
+
         newheader += "%-80s\n" % ( "#GSAS file name: %s" % (os.path.basename(gssfilename)) )
-    
+
         newheader += "%-80s\n" % ( "#GSAS IPARM file: %s" % (parmfname) )
-    
+
         newheader += "%-80s\n" % ( "#Pulsestart:    %d" % (total_nanosecond_start) )
-    
+
         newheader += "%-80s\n" % ( "#Pulsestop:     %d" % (total_nanosecond_stop) )
-    
+
         return newheader
 
 
@@ -295,33 +295,33 @@ class SaveVulcanGSS(PythonAlgorithm):
         """ first line is for bank information
         """
         wbuf = ""
-    
+
         # Rewrite bank lines
         bankline = banklines[0].strip()
         terms = bankline.split()
         tofmin = float(banklines[1].split()[0])
         tofmax = float(banklines[-1].split()[0])
-        
+
         terms[5] = "%.1f" % (tofmin)
         terms[6] = "%.1f" % (tofmax)
-    
+
         newbankline = ""
-        
+
         # title
         for t in terms:
             newbankline += "%s " % (t)
         wbuf = "%-80s\n" % (newbankline)
-   
+
         # data
         for i in xrange(1, len(banklines)):
-            cline = banklines[i] 
-            
+            cline = banklines[i]
+
             terms = cline.split()
             try:
                 tof = float(terms[0])
                 y = float(terms[1])
                 e = float(terms[2])
-                
+
                 x_s = "%.1f" % (tof)
                 y_s = "%.1f" % (y)
                 e_s = "%.2f" % (e)
@@ -333,7 +333,7 @@ class SaveVulcanGSS(PythonAlgorithm):
 
             wbuf += "%-80s\n" % (temp)
         # ENDFOR
-    
+
         return wbuf
 
 

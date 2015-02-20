@@ -703,6 +703,9 @@ MatrixWorkspace_sptr MuonAnalysis::getPeriodWorkspace(PeriodType periodType, Wor
 */
 void MuonAnalysis::userSelectInstrument(const QString& prefix)
 {
+  // Set file browsing to current instrument
+  m_uiForm.mwRunFiles->setInstrumentOverride(prefix);
+
   if ( prefix != m_curInterfaceSetup )
   {
     runClearGroupingButton();

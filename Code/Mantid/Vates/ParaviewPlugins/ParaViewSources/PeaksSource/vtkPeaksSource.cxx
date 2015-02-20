@@ -140,6 +140,7 @@ int vtkPeaksSource::RequestInformation(vtkInformation *vtkNotUsed(request),
     Workspace_sptr result = AnalysisDataService::Instance().retrieve(m_wsName);
     m_PeakWS = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(result);
     m_wsTypeName = m_PeakWS->id();
+    m_instrument = m_PeakWS->getInstrument()->getName();
   }
   return 1;
 }
@@ -167,4 +168,13 @@ char* vtkPeaksSource::GetWorkspaceTypeName()
 const char* vtkPeaksSource::GetWorkspaceName()
 {
   return m_wsName.c_str();
+}
+
+/**
+ * Gets the (first) instrument which is associated with the workspace.
+ * @return The name of the instrument.
+ */
+const char* vtkPeaksSource::GetInstrument()
+{
+  return m_instrument.c_str();
 }

@@ -209,7 +209,7 @@ class sfCalculator():
         This function parses the output.date and returns true if this date is after the ref date
         '''
         nexus_date_acquisition = nexus_date.split('T')[0]
-        
+
         if nexus_date_acquisition > self.ref_date:
             return True
         else:
@@ -238,7 +238,7 @@ class sfCalculator():
         nexus_file_numerator = file
         print '----> loading nexus file: ' + nexus_file_numerator
         EventDataWks = LoadEventNexus(Filename=nexus_file_numerator)
-        
+
         self.is_nexus_detector_rotated_flag = self.isNexusTakeAfterRefDate(EventDataWks.getRun().getProperty('run_start').value)
 
         if self.is_nexus_detector_rotated_flag:
@@ -431,7 +431,7 @@ class sfCalculator():
                     y_axis[y, :] += InputWorkspace.readY(index)[:]
                     y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *
                                             (InputWorkspace.readE(index)[:]))
-            
+
         else:
             for x in range(304):
                 for y in y_range:
@@ -566,13 +566,13 @@ class sfCalculator():
         peak_array = zeros(nbr_tof)
         peak_array_error = zeros(nbr_tof)
 
-        bMinBack = False;
-        bMaxBack = False;
+        bMinBack = False
+        bMaxBack = False
 
-        min_back = 0;
-        min_back_error = 0;
-        max_back = 0;
-        max_back_error = 0;
+        min_back = 0
+        min_back_error = 0
+        max_back = 0
+        max_back_error = 0
 
         for t in (range(nbr_tof-1)):
 
@@ -616,8 +616,8 @@ class sfCalculator():
 
             [final_value, final_error] = self.sumWithError(new_tmp_peak, new_tmp_peak_error)
 
-            peak_array[t] = final_value;
-            peak_array_error[t] = final_error;
+            peak_array[t] = final_value
+            peak_array_error[t] = final_error
 
 
         # make new workspace
@@ -899,7 +899,7 @@ def outputFittingParameters(a, b, error_a, error_b,
         except:
             #replace file because this one has the wrong format
             _content = ['#y=a+bx\n', '#\n',
-                        '#lambdaRequested[Angstroms] S1H[mm] S2H[mm] S1W[mm] S2W[mm] a b error_a error_b\n', '#\n']
+                        '#lambdaRequested[Angstroms] S1H[mm] (S2/Si)H[mm] S1W[mm] (S2/Si)W[mm] a b error_a error_b\n', '#\n']
             sz = len(a)
             for i in range(sz):
 
@@ -943,8 +943,8 @@ def outputFittingParameters(a, b, error_a, error_b,
             _error_a = "{0:}".format(float(error_a[j]))
             _error_b = "{0:}".format(float(error_b[j]))
 
-            _line += 'S1H=' + _S1H + ' ' + 'S2H=' + _S2H + ' '
-            _line += 'S1W=' + _S1W + ' ' + 'S2W=' + _S2W + ' '
+            _line += 'S1H=' + _S1H + ' ' + 'S2iH=' + _S2H + ' '
+            _line += 'S1W=' + _S1W + ' ' + 'S2iW=' + _S2W + ' '
             _line += 'a=' + _a + ' '
             _line += 'b=' + _b + ' '
             _line += 'error_a=' + _error_a + ' '
@@ -958,7 +958,7 @@ def outputFittingParameters(a, b, error_a, error_b,
     else:
 
         _content = ['#y=a+bx\n', '#\n',
-                    '#lambdaRequested[Angstroms] S1H[mm] S2H[mm] S1W[mm] S2W[mm] a b error_a error_b\n', '#\n']
+                    '#lambdaRequested[Angstroms] S1H[mm] (S2/Si)H[mm] S1W[mm] (S2/Si)W[mm] a b error_a error_b\n', '#\n']
         sz = len(a)
         for i in range(sz):
 
@@ -974,8 +974,8 @@ def outputFittingParameters(a, b, error_a, error_b,
             _error_a = "{0:}".format(float(error_a[i]))
             _error_b = "{0:}".format(float(error_b[i]))
 
-            _line += 'S1H=' + _S1H + ' ' + 'S2H=' + _S2H + ' '
-            _line += 'S1W=' + _S1W + ' ' + 'S2W=' + _S2W + ' '
+            _line += 'S1H=' + _S1H + ' ' + 'S2iH=' + _S2H + ' '
+            _line += 'S1W=' + _S1W + ' ' + 'S2iW=' + _S2W + ' '
             _line += 'a=' + _a + ' '
             _line += 'b=' + _b + ' '
             _line += 'error_a=' + _error_a + ' '
@@ -1034,8 +1034,17 @@ def getSheight(mt, index):
         return the DAS hardware slits height of slits # index
     """
     mt_run = mt.getRun()
-    tag = 'S' + index + 'VHeight'
-    value = mt_run.getProperty(tag).value
+    if index == '2':
+        try:
+            tag = 'SiVHeight'
+            value = mt_run.getProperty(tag).value
+        except:
+            tag = 'S2VHeight'
+            value = mt_run.getProperty(tag).value
+    else:
+        tag = 'S1VHeight'
+        value = mt_run.getProperty(tag).value
+
     return value[0]
 
 def getS1h(mt=None):
@@ -1059,16 +1068,22 @@ def getS2h(mt=None):
     return None
 
 
-
-
 def getSwidth(mt, index):
     """
         returns the width and units of the given index slits
         defined by the DAS hardware
     """
     mt_run = mt.getRun()
-    tag = 'S' + index + 'HWidth'
-    value = mt_run.getProperty(tag).value
+    if index == '2':
+        try:
+            tag = 'SiHWidth'
+            value = mt_run.getProperty(tag).value
+        except:
+            tag = 'S2HWidth'
+            value = mt_run.getProperty(tag).value
+    else:
+        tag = 'S1HWidth'
+        value = mt_run.getProperty(tag).value
     return value[0]
 
 def getSw(mt, left_tag, right_tag):
@@ -1232,7 +1247,7 @@ def calculate(string_runs=None,
 
     """
 
-    list_attenuator = None;
+    list_attenuator = None
 
     #use default string files if not provided
     if (string_runs is None):
@@ -1269,7 +1284,7 @@ def calculate(string_runs=None,
 
     if (list_attenuator is None):
 #        list_attenuator = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]
-        list_attenuator = [0, 1, 1, 1, 1, 1];
+        list_attenuator = [0, 1, 1, 1, 1, 1]
 
     if (list_peak_back is None):
         list_peak_back = zeros((len(list_runs), 4))   #[peak_min, peak_max, back_min, back_max]

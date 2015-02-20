@@ -1,13 +1,9 @@
 digraph ReflectometryReductionOne {
   label = "ReflectometryReductionOne Flowchart"
-  fontname = Helvetica
-  labelloc = t
-
-  node[fontname="Helvetica", style = filled]
-  edge[fontname="Helvetica"]
+  $global_style
 
   subgraph params {
-    node[fillcolor = khaki, shape = oval]
+    $param_style
     inputWorkspace    [label="InputWorkspace"]
     firstTransRun     [label="FirstTransmissionRun"]
     secondTransRun    [label="SecondTransmissionRun"]
@@ -18,7 +14,7 @@ digraph ReflectometryReductionOne {
   }
 
   subgraph decisions {
-    node[fillcolor = limegreen, shape = diamond]
+    $decision_style
     checkXUnit      [label="X axis in &lambda;?"]
     checkMultDet    [label="Multidetector?"]
     checkTransRun   [label="FirstTransmissionRun\ngiven?"]
@@ -28,7 +24,7 @@ digraph ReflectometryReductionOne {
   }
 
   subgraph algorithms {
-    node[style = "rounded,filled", fillcolor = lightskyblue, shape = rectangle]
+    $algorithm_style
     calcTheta       [label="SpecularReflectionCalculateTheta"]
     convertToMT     [label="ConvertUnits\n(Momentum-transfer)"]
     convertToWL     [label="ConvertUnits\n(To &lambda;)"]
@@ -40,12 +36,12 @@ digraph ReflectometryReductionOne {
   }
 
   subgraph processes {
-    node[fillcolor = lightseagreen, shape = rectangle]
+    $process_style
     directBeamNorm  [label="Perform Direct\nBeam Normalisation"]
   }
 
   subgraph values {
-    node[fontname = "Times-Roman", fillcolor = grey, shape = parallelogram]
+    $value_style
     valMon          [label="I&#8320;(&lambda;)"]
     valDet          [label="I(&lambda;)"]
     valIntegrated   [label="&Sigma; I&#8320;(&lambda;)"]

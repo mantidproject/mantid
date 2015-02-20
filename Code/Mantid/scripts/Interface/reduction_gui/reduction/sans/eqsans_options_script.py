@@ -31,10 +31,10 @@ class ReductionOptions(BaseOptions):
 
     # Perform EQSANS TOF correction
     perform_TOF_correction = True
-    
+
     # Turn off the wedges
     n_wedges = 0
-    
+
     # Turn off log binning alignment with decades
     align_log_with_decades = False
 

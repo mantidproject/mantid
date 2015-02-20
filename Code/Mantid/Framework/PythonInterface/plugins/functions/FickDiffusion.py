@@ -43,7 +43,7 @@ class FickDiffusion(IFunction1D):
     def functionDeriv1D(self, xvals, jacobian):
         i = 0
         for x in xvals:
-            jacobian.set(i,0,2.0*x);
+            jacobian.set(i,0,2.0*x)
             i += 1
 
 # Required to have Mantid recognise the new function

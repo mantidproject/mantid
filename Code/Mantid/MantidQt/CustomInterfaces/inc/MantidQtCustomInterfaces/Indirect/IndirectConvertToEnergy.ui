@@ -890,8 +890,7 @@
            <bool>true</bool>
           </property>
           <property name="toolTip">
-           <string>If this box is unchecked and the raw files are determined to contain multiple frames, then the reduction process will end at the step where they would have been folded together.
-Later steps in the process (saving, renaming) will not be done.</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked, multiple-framed data will be folded back into a single spectrum.&lt;br/&gt;Otherwise data is left as is and multiple frames are named giving the frame number at the end of the workspace name.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string>Fold Multiple Frames</string>

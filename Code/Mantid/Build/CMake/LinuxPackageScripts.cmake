@@ -22,6 +22,10 @@ endif()
 
 set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR};${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR} )
 
+# Tell rpm that this package does not own /opt /usr/share/{applications,pixmaps}
+# Required for Fedora >= 18 and RHEL >= 7
+set ( CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION /opt /usr/share/applications /usr/share/pixmaps )
+
 ###########################################################################
 # LD_PRELOAD TCMalloc
 ###########################################################################
