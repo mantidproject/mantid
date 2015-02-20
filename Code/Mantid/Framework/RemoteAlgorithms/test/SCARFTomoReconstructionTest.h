@@ -116,6 +116,11 @@ protected:
  */
 class MockedGoodJobStatus_SCARFTomo: public SCARFTomoReconstruction
 {
+public:
+ MockedGoodJobStatus_SCARFTomo(const std::string &id): SCARFTomoReconstruction(),
+  jobID(id)
+  {};
+
 protected:
   virtual int doSendRequestGetResponse(const std::string &url,
                                        std::ostream &response,
@@ -132,10 +137,12 @@ protected:
     response << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
       "<Jobs><Job><cmd>python /work/imat/webservice_test/test.py.py "
       "/work/imat/webservice_test/test_out/</cmd><extStatus>-</extStatus>"
-      "<id>417266</id><name>Mantid_tomography_1</name><status>Running</status>"
+      "<id>" << jobID << "</id><name>Mantid_tomography_1</name><status>Running</status>"
       "</Job></Jobs>";
     return 200;
   }
+private:
+  std::string jobID;
 };
 
 class SCARFTomoReconstructionTest: public CxxTest::TestSuite
@@ -370,12 +377,18 @@ public:
     TS_ASSERT_THROWS_NOTHING( err.execute() );
     TS_ASSERT( err.isExecuted()) ;
 
-    std::string outName = "StatusOfJobs_" + SCARFName;
-    Mantid::API::Workspace_sptr ws;
-    TS_ASSERT_THROWS( ws = Mantid::API::AnalysisDataService::Instance().retrieve(outName), std::runtime_error );
+    std::vector<std::string> vec;
+    TS_ASSERT_THROWS_NOTHING(vec = err.getProperty("RemoteJobsID"));
+    TS_ASSERT_EQUALS( vec.size(), 0 );
+    TS_ASSERT_THROWS_NOTHING(vec = err.getProperty("RemoteJobsNames"));
+    TS_ASSERT_EQUALS( vec.size(), 0 );
+    TS_ASSERT_THROWS_NOTHING(vec = err.getProperty("RemoteJobsStatus"));
+    TS_ASSERT_EQUALS( vec.size(), 0 );
+    TS_ASSERT_THROWS_NOTHING(vec = err.getProperty("RemoteJobsCommands"));
+    TS_ASSERT_EQUALS( vec.size(), 0 );
 
     // this one gives a basic/sufficient response with job status information
-    MockedGoodJobStatus_SCARFTomo alg;
+    MockedGoodJobStatus_SCARFTomo alg("wrong id");
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("UserName", goodUsername) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("Action", "JobStatus") );
@@ -383,12 +396,19 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted()) ;
 
-    Mantid::API::Workspace_sptr out;
-    TS_ASSERT_THROWS_NOTHING( out = Mantid::API::AnalysisDataService::Instance().retrieve(outName) );
-    Mantid::API::ITableWorkspace_sptr t;
-    TS_ASSERT_THROWS_NOTHING( t = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(out) );
-    TS_ASSERT( t );
-    TS_ASSERT_THROWS_NOTHING( Mantid::API::AnalysisDataService::Instance().remove(outName) );
+    // the mock produces info on one job
+    TS_ASSERT_THROWS_NOTHING(vec = alg.getProperty("RemoteJobsID"));
+    TS_ASSERT_EQUALS( vec.size(), 1 );
+    TS_ASSERT( vec.size()>0 && !vec.front().empty() );
+    TS_ASSERT_THROWS_NOTHING(vec = alg.getProperty("RemoteJobsNames"));
+    TS_ASSERT_EQUALS( vec.size(), 1 );
+    TS_ASSERT( vec.size()>0 && !vec.front().empty() );
+    TS_ASSERT_THROWS_NOTHING(vec = alg.getProperty("RemoteJobsStatus"));
+    TS_ASSERT_EQUALS( vec.size(), 1 );
+    TS_ASSERT( vec.size()>0 && !vec.front().empty() );
+    TS_ASSERT_THROWS_NOTHING(vec = alg.getProperty("RemoteJobsCommands"));
+    TS_ASSERT_EQUALS( vec.size(), 1 );
+    TS_ASSERT( vec.size()>0 && !vec.front().empty() );
   }
 
   void test_queryStatusByID()
@@ -403,26 +423,32 @@ public:
     TS_ASSERT_THROWS_NOTHING( err.execute() );
     TS_ASSERT( err.isExecuted()) ;
 
-    std::string outName = "StatusOfJob_" + SCARFName;
-    Mantid::API::Workspace_sptr ws;
-    TS_ASSERT_THROWS( ws = Mantid::API::AnalysisDataService::Instance().retrieve(outName), std::runtime_error );
+    std::string tmp;
+    TS_ASSERT_THROWS_NOTHING( tmp = err.getPropertyValue("RemoteJobName") );
+    TS_ASSERT( tmp.empty() );
+    TS_ASSERT_THROWS_NOTHING( tmp = err.getPropertyValue("RemoteJobStatus") );
+    TS_ASSERT( tmp.empty() );
+    TS_ASSERT_THROWS_NOTHING( tmp = err.getPropertyValue("RemoteJobsCommands") );
+    TS_ASSERT( tmp.empty() );
 
     // this one gives a basic/sufficient response with job status information
-    MockedGoodJobStatus_SCARFTomo alg;
+    std::string jobID = "444449";
+    MockedGoodJobStatus_SCARFTomo alg(jobID);
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("UserName", goodUsername) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("Action", "JobStatusByID") );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("JobID", 123456789) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("JobID", jobID) );
 
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted()) ;
 
-    Mantid::API::Workspace_sptr out;
-    TS_ASSERT_THROWS_NOTHING( out = Mantid::API::AnalysisDataService::Instance().retrieve(outName) );
-    Mantid::API::ITableWorkspace_sptr t;
-    TS_ASSERT_THROWS_NOTHING( t = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(out) );
-    TS_ASSERT( t );
-    TS_ASSERT_THROWS_NOTHING( Mantid::API::AnalysisDataService::Instance().remove(outName) );
+    // It could also check that it gets the names, etc. that the mock-up produces
+    TS_ASSERT_THROWS_NOTHING( tmp = alg.getPropertyValue("RemoteJobName") );
+    TS_ASSERT( !tmp.empty() );
+    TS_ASSERT_THROWS_NOTHING( tmp = alg.getPropertyValue("RemoteJobStatus") );
+    TS_ASSERT( !tmp.empty() );
+    TS_ASSERT_THROWS_NOTHING( tmp = alg.getPropertyValue("RemoteJobCommand") );
+    TS_ASSERT( !tmp.empty() );
   }
 
   void test_cancel()

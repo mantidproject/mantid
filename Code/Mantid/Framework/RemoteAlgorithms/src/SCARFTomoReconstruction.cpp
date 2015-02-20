@@ -1,13 +1,14 @@
 #include "MantidRemoteAlgorithms/SCARFTomoReconstruction.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MaskedProperty.h"
+#include "MantidKernel/NullValidator.h"
 #include "MantidKernel/RemoteJobManager.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
@@ -54,7 +55,9 @@ void SCARFTomoReconstruction::init() {
   actions.push_back("JobStatusByID");
   actions.push_back("Download");
   actions.push_back("CancelJob");
+
   auto listValue = boost::make_shared<StringListValidator>(actions);
+  auto nullV = boost::make_shared<Kernel::NullValidator>();
 
   // Username always visible, it doesn't hurt and it is required to know the
   // web service base URL for most LSF commands
@@ -108,36 +111,44 @@ void SCARFTomoReconstruction::init() {
   setPropertySettings("DestinationDirectory",
                       new VisibleWhenProperty("Action", IS_EQUAL_TO, "Upload"));
 
-  // - Action: query status (of implicitly all jobs)
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
-                  "JobsStatusWorkspace", "StatusOfJobs_" + m_SCARFComputeResource,
-                  Direction::Output, API::PropertyMode::Optional),
-                  "The name of the table workspace where to output the status "
-                  "information about all the jobs for which there is information "
-                  "available, which normally includes running jobs and jobs that "
-                  "finished recently.");
+  // - Action: query status and info (of implicitly all jobs)
+  declareProperty(new ArrayProperty<std::string>("RemoteJobsID", Direction::Output),
+                  "ID strings for the jobs");
+  declareProperty(new ArrayProperty<std::string>("RemoteJobsNames", Direction::Output),
+                  "Names of the jobs");
+  declareProperty(new ArrayProperty<std::string>("RemoteJobsStatus", Direction::Output),
+                  "Strings describing the current status of the jobs");
+  declareProperty(new ArrayProperty<std::string>("RemoteJobsCommands", Direction::Output),
+                  "Strings with the command line run for the jobs");
+  setPropertySettings("RemoteJobsID", new VisibleWhenProperty("Action", IS_EQUAL_TO,
+                                                              "JobStatus"));
+  setPropertySettings("RemoteJobsNames", new VisibleWhenProperty("Action", IS_EQUAL_TO,
+                                                                "JobStatus"));
+  setPropertySettings("RemoteJobsStatus", new VisibleWhenProperty("Action", IS_EQUAL_TO,
+                                                                  "JobStatus"));
+  setPropertySettings("RemoteJobsCommands", new VisibleWhenProperty("Action", IS_EQUAL_TO,
+                                                                   "JobStatus"));
 
-  setPropertySettings("JobsStatusWorkspace",
-                      new VisibleWhenProperty("Action", IS_EQUAL_TO,
-                                              "JobStatus"));
-
-  // - Action: query status by ID
+  // - Action: query status and info by ID
   declareProperty(
-      new PropertyWithValue<int>("JobID", 0, Direction::Input),
-      "The ID of a job currently running or recently run on the compute resource");
-  setPropertySettings("JobID",
-                      new VisibleWhenProperty("Action", IS_EQUAL_TO,
-                                              "JobStatusByID"));
+                  new PropertyWithValue<int>("JobID", 0, Direction::Input),
+                  "The ID of a job currently running or recently run on the "
+                  "compute resource");
+  setPropertySettings("JobID", new VisibleWhenProperty("Action", IS_EQUAL_TO,
+                                                     "JobStatusByID"));
 
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
-                  "JobStatusWorkspace", "StatusOfJob_" + m_SCARFComputeResource,
-                  Direction::Output, API::PropertyMode::Optional),
-                  "The name of the table workspace where to output the status "
-                  "information about the job.");
-
-  setPropertySettings("JobStatusWorkspace",
-                      new VisibleWhenProperty("Action", IS_EQUAL_TO,
-                                              "JobStatusByID"));
+  declareProperty("RemoteJobName", "", nullV, "Name of the remote job",
+                  Direction::Output);
+  declareProperty("RemoteJobStatus", "", nullV, "Current status of the job "
+                  "(running, exited, etc.)", Direction::Output);
+  declareProperty("RemoteJobCommand", "", nullV, "Command line run remotely "
+                  "for this job ", Direction::Output);
+  setPropertySettings("RemoteJobName", new VisibleWhenProperty("Action", IS_EQUAL_TO,
+                                                               "JobStatusByID"));
+  setPropertySettings("RemoteJobStatus", new VisibleWhenProperty("Action", IS_EQUAL_TO,
+                                                                 "JobStatusByID"));
+  setPropertySettings("RemoteJobCommand", new VisibleWhenProperty("Action", IS_EQUAL_TO,
+                                                                "JobStatusByID"));
 
   // - Action: download file
   declareProperty(new PropertyWithValue<std::string>("RemoteJobFilename", "",
@@ -224,8 +235,7 @@ void SCARFTomoReconstruction::exec() {
   } else if (Action::SUBMIT == m_action) {
     doSubmit(username);
   } else if (Action::QUERYSTATUS == m_action) {
-    std::string jobWS = getPropertyValue("JobsStatusWorkspace");
-    doQueryStatus(username, jobWS);
+    doQueryStatus(username);
   } else if (Action::QUERYSTATUSBYID == m_action) {
     std::string jobId;
     try {
@@ -236,8 +246,7 @@ void SCARFTomoReconstruction::exec() {
         m_SCARFComputeResource << "." << std::endl;
       throw;
     }
-    std::string jobsWS = getPropertyValue("JobStatusWorkspace");
-    doQueryStatusById(username, jobId, jobsWS);
+    doQueryStatusById(username, jobId);
   } else if (Action::CANCEL == m_action) {
     std::string jobId;
     try {
@@ -502,8 +511,7 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
  *
  * @param username Username to use (should have authenticated before)
  */
-  void SCARFTomoReconstruction::doQueryStatus(const std::string &username,
-                                              const std::string &wsName) {
+void SCARFTomoReconstruction::doQueryStatus(const std::string &username) {
   auto it = m_tokenStash.find(username);
   if (m_tokenStash.end() == it) {
     throw std::runtime_error("Job status query failed. You do not seem to be logged "
@@ -538,10 +546,9 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
     std::string resp = ss.str();
     if (std::string::npos != resp.find("<Jobs>") &&
         std::string::npos != resp.find("<extStatus>")) {
-      API::ITableWorkspace_sptr ws = buildOutputStatusWorkspace(resp, wsName);
-      setProperty("JobsStatusWorkspace", ws);
+      genOutputStatusInfo(resp);
       g_log.notice() << "Queried the status of jobs and stored the "
-        "information in the workspace " << wsName << std::endl;
+        "information in output properties." << std::endl;
     } else {
       g_log.warning() << "Queried the status of jobs but got what looks "
         "like an error message as response: " << resp << std::endl;
@@ -565,8 +572,7 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
  * @param jobId Identifier of a job as used by the job scheduler (integer number)
  */
 void SCARFTomoReconstruction::doQueryStatusById(const std::string &username,
-                                                const std::string &jobId,
-                                                const std::string &wsName) {
+                                                const std::string &jobId) {
   auto it = m_tokenStash.find(username);
   if (m_tokenStash.end() == it) {
     throw std::runtime_error("Job status query failed. You do not seem to be logged "
@@ -601,10 +607,9 @@ void SCARFTomoReconstruction::doQueryStatusById(const std::string &username,
     std::string resp = ss.str();
     if (std::string::npos != resp.find("<Jobs>") &&
         std::string::npos != resp.find("<extStatus>")) {
-      API::ITableWorkspace_sptr ws = buildOutputStatusWorkspace(resp, wsName);
-      setProperty("JobStatusWorkspace", ws);
-      g_log.notice() << "Queried job status (Id " << jobId << " ) and stored "
-        "information into the workspace " << wsName << std::endl;
+      genOutputStatusInfo(resp, jobId);
+      g_log.notice() << "Queried job status (Id " << jobId << ") and stored "
+        "information into output properties." << std::endl;
       g_log.debug() << "Response from server: " << resp << std::endl;
     } else {
       g_log.warning() << "Queried job status (Id " << jobId << " ) but got what "
@@ -1061,22 +1066,12 @@ std::string SCARFTomoReconstruction::buildUploadBody(const std::string &boundary
  * empty and ready to be filled. This guarantees that a non-null (I)
  * table workspace object is returned.
  *
- * @param response Body of an HHTP response to a status query
- * @param wsName Name of the workspace to create
+ * @param resp Body of an HHTP response to a status query
+ * @param jobIDFilter ID of one job (empty string immplies all jobs)
  */
-API::ITableWorkspace_sptr
-SCARFTomoReconstruction::buildOutputStatusWorkspace(const std::string &resp,
-                                                    const std::string &wsName)
+void SCARFTomoReconstruction::genOutputStatusInfo(const std::string &resp,
+                                                  const std::string &jobIDFilter)
 {
-  API::ITableWorkspace_sptr ws = API::WorkspaceFactory::Instance().
-    createTable("TableWorkspace");
-
-  // This is the information that is usually available for running/recently run jobs
-  ws->addColumn("int", "ID");
-  ws->addColumn("str", "Name");
-  ws->addColumn("str", "Status");
-  ws->addColumn("str", "Command run");
-
   Poco::XML::DOMParser parser;
   Poco::AutoPtr<Poco::XML::Document> doc;
   try {
@@ -1109,6 +1104,13 @@ SCARFTomoReconstruction::buildOutputStatusWorkspace(const std::string &resp,
       "currently running on the compute resource. The output workspace will not "
       "have any rows/information";
   }
+
+  // This is the information that is usually available for running/recently
+  // run jobs
+  std::vector<std::string> jobIds;
+  std::vector<std::string> jobNames;
+  std::vector<std::string> jobStatus;
+  std::vector<std::string> jobCommands;
   for (size_t i = 0; i < n; i++) {
     Poco::XML::Element *el = static_cast<Poco::XML::Element *>(jobs->item(i));
     if (!el)
@@ -1116,36 +1118,61 @@ SCARFTomoReconstruction::buildOutputStatusWorkspace(const std::string &resp,
                                boost::lexical_cast<std::string>(i) +
                                "could not produce a complete table workspace.");
 
-    ws->appendRow();
-
     Poco::XML::Element *id = el->getChildElement("id");
     if (id) {
-      ws->cell<int>(i, 0) = boost::lexical_cast<int>(id->innerText().c_str());
+      const std::string &IdStr = id->innerText().c_str();
+      if (!jobIDFilter.empty() && IdStr != jobIDFilter)
+        continue;
+
+      jobIds.push_back(IdStr);
     }
 
     Poco::XML::Element *name = el->getChildElement("name");
     if (name) {
-      ws->cell<std::string>(i, 1) = name->innerText().c_str();
+      jobNames.push_back(name->innerText().c_str());
+    } else {
+      jobNames.push_back("Unknown!");
     }
 
     Poco::XML::Element *status = el->getChildElement("status");
     if (status) {
-      ws->cell<std::string>(i, 2) = status->innerText().c_str();
+      jobStatus.push_back(status->innerText().c_str());
+    } else {
+      jobStatus.push_back("Unknown!");
     }
 
     Poco::XML::Element *cmd = el->getChildElement("cmd");
     if (cmd) {
-      ws->cell<std::string>(i, 3) = cmd->innerText().c_str();
+      jobCommands.push_back(cmd->innerText().c_str());
+    } else {
+      jobCommands.push_back("Unknown!");
     }
   }
 
-  if(!ws)
-    throw std::runtime_error("There was an unexpected error while building the output "
-                             "table workspace " + wsName + " from the information "
-                             "retrieved from the remote compute resource. Failed "
-                             "to create table workspace.");
-
-  return ws;
+  if ( jobIds.size() != jobNames.size() || jobIds.size() != jobStatus.size() ||
+       jobIds.size() != jobCommands.size() ) {
+    throw std::runtime_error("There was an unexpected error while filling output "
+                             "properties the information retrieved from the remote "
+                             "compute resource. Failed to assign properties.");
+  }
+  if (jobIDFilter.empty()) {
+    // multi-job query
+    setProperty("RemoteJobsID", jobIds);
+    setProperty("RemoteJobsNames", jobNames);
+    setProperty("RemoteJobsStatus", jobStatus);
+    setProperty("RemoteJobsCommands", jobCommands);
+  } else {
+    // Single job query. Here the job ID is an input
+    if (0 == jobIds.size()) {
+      setProperty("RemoteJobName", "Unknown!");
+      setProperty("RemoteJobStatus", "Unknown!");
+      setProperty("RemoteJobCommand", "Unknown!");
+    } else {
+      setProperty("RemoteJobName", jobNames.front());
+      setProperty("RemoteJobStatus", jobStatus.front());
+      setProperty("RemoteJobCommand", jobCommands.front());
+    }
+  }
 }
 
 /**

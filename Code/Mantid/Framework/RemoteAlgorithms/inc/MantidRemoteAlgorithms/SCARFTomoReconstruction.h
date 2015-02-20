@@ -63,11 +63,9 @@ protected:
   virtual void doLogout(const std::string &username);
   virtual bool doPing();
   virtual void doSubmit(const std::string &username);
-  virtual void doQueryStatus(const std::string &username,
-                             const std::string &wsName);
+  virtual void doQueryStatus(const std::string &username);
   virtual void doQueryStatusById(const std::string &username,
-                                 const std::string &jobId,
-                                 const std::string &wsName);
+                                 const std::string &jobId);
   virtual void doCancel(const std::string &username,
                         const std::string& jobId);
   virtual void doUploadFile(const std::string &username,
@@ -109,9 +107,9 @@ private:
                               const std::string &destDir,
                               const std::string &filename);
 
-  /// fill in output table workspace
-  API::ITableWorkspace_sptr buildOutputStatusWorkspace(const std::string &resp,
-                                                       const std::string &wsName);
+  /// fill in output properties with job status and info
+  void genOutputStatusInfo(const std::string &resp, const std::string &jobID =
+                           std::string());
 
   // cookie obtained after logging in
   struct Token {
