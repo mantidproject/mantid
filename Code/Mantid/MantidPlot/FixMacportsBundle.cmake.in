@@ -1,0 +1,121 @@
+set(BU_CHMOD_BUNDLE_ITEMS True)
+set ( bundle ${CMAKE_INSTALL_PREFIX}/MantidPlot.app )
+execute_process(COMMAND chmod +x package_python_macports.py WORKING_DIRECTORY ${bundle})
+execute_process(COMMAND ./package_python_macports.py WORKING_DIRECTORY ${bundle})
+
+file ( GLOB pyqt_libs ${bundle}/Contents/MacOS/PyQt4/*.so )
+file ( GLOB mantid_plugins ${bundle}/plugins/*.dylib )
+file ( GLOB_RECURSE qtplugins ${bundle}/Contents/Frameworks/plugins/*.dylib )
+file ( GLOB_RECURSE mtdqtplugins ${bundle}/plugins/*.dylib )
+file ( GLOB_RECURSE pvplugins ${bundle}/pvplugins/*.dylib )
+file ( GLOB vatesplugins ${bundle}/pvplugins/*.dylib ) # Find just the top level Vates plugins
+
+# gp_resolved_file_type_override
+#   Sets the type of the dependency. The options are: system, local, embedded, other
+#   For OS X, system & embedded dependencies are NOT copied in to the bundle
+function(gp_resolved_file_type_override resolved_file type_var)
+  if(resolved_file MATCHES "^/usr(|/local)/lib")
+    message(STATUS "resolving ${file} as system")
+    set(${type_var} system PARENT_SCOPE)
+  endif()
+  # Copy Qt dependencies to bundle
+  if(file MATCHES "libQt")
+    message("resolving ${file} as embedded")
+    set(${type_var} embedded PARENT_SCOPE)
+  endif()
+  # Don't copy ParaView into the bundle
+#  if(resolved_file MATCHES "^@ParaView_DIR@")
+#    message(STATUS "resolving ParaView dependency ${file} as system")
+#    set(${type_var} system PARENT_SCOPE)
+#  endif()
+endfunction()
+
+# gp_item_default_embedded_path_override item default_embedded_path_var
+#
+# Return the path that others should refer to the item by when the item
+# is embedded inside a bundle.
+#
+# This is a project-specific override of BundleUtilities.cmake's
+# gp_item_default_embedded_path
+#
+function(gp_item_default_embedded_path_override item default_embedded_path_var)
+  # By default, embed items next to application
+  #
+  set( path "@executable_path/../MacOS" )
+
+  list( FIND mantid_plugins ${item} mtd_plugin_found )
+  if( mtd_plugin_found GREATER -1 )
+    message( STATUS "Setting path for Mantid plugin ")
+    set( path "@executable_path/../../plugins" )
+    set( overridden 1 PARENT_SCOPE )
+  endif()
+
+  list( FIND vatesplugins ${item} vatesplugin_found )
+  if( vatesplugin_found GREATER -1 )
+    message( STATUS "Setting path for Vates plugin ")
+    set( path "@executable_path/../../pvplugins" )
+    set( overridden 1 PARENT_SCOPE )
+  endif()
+
+  if(item MATCHES "[^/]+\\.framework/")
+     set(path "@executable_path/../Frameworks")
+     set( overridden 1 PARENT_SCOPE )
+   endif()
+
+  if(item MATCHES "_kernel.so")
+    set(path "@loader_path/../kernel")
+    set( overridden 1 PARENT_SCOPE )
+  endif()
+
+  if(item MATCHES "_geometry.so")
+    set(path "@loader_path/../geometry")
+    set( overridden 1 PARENT_SCOPE )
+  endif()
+
+  set(${default_embedded_path_var} "${path}" PARENT_SCOPE)
+endfunction(gp_item_default_embedded_path_override)
+
+include (BundleUtilities)
+
+set ( mantidpydir ${bundle}/Contents/MacOS/mantid )
+set ( mantidpylibs ${mantidpydir}/kernel/_kernel.so
+                   ${mantidpydir}/geometry/_geometry.so
+                   ${mantidpydir}/api/_api.so )
+
+set ( other_libs ${bundle}/Contents/MacOS/mantidqtpython.so
+                 ${bundle}/Contents/MacOS/readline.so
+                 ${mantid_plugins}
+                 ${pyqt_libs} ${qtplugins} ${pvplugins}
+                 ${mantidpylibs} ${mtdqtplugins} )
+
+set ( dirs "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@" "@CMAKE_LIBRARY_PATH@" /Library/Frameworks /opt/intel/lib /opt/local/lib)
+
+fixup_bundle ( "${bundle}" "${other_libs}" "${dirs}" ) # This will fix up the dependencies for the hard dependencies: MantidKernel etc
+
+####################################################
+# Functions to change the dependency references
+####################################################
+function( change_bundle_id new_id sharedlib )
+  execute_process(COMMAND install_name_tool -id ${new_id} ${sharedlib})
+endfunction()
+
+function( change_bundle_dep old_dep new_dep sharedlib )
+  execute_process(COMMAND install_name_tool -change ${old_dep} ${new_dep} ${sharedlib})
+endfunction()
+
+
+# Allow include to do cmake_policy push/pops:
+# Makes the below behaviour work
+if(COMMAND CMAKE_POLICY)
+  cmake_policy(SET CMP0011 NEW)
+endif(COMMAND CMAKE_POLICY)
+# Allows ON to be treated directly in an if() statement
+if(COMMAND CMAKE_POLICY)
+  cmake_policy(SET CMP0012 NEW)
+endif(COMMAND CMAKE_POLICY)
+
+# MAKE_VATES does not work with macports
+
+
+endif()
+
