@@ -38,7 +38,7 @@ namespace RemoteAlgorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-class SCARFTomoReconstruction : public Mantid::API::Algorithm {
+class DLLExport SCARFTomoReconstruction : public Mantid::API::Algorithm {
 public:
   /// Constructor
   SCARFTomoReconstruction();
