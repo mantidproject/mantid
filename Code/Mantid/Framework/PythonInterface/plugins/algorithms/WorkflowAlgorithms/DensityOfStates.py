@@ -124,7 +124,9 @@ class DensityOfStates(PythonAlgorithm):
                 if k in self._ions:
                     partial_ions[k] = v
 
-            partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(partial_ions, frequencies, eigenvectors, weights)
+            partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(
+                                                    partial_ions, frequencies,
+                                                    eigenvectors, weights)
 
             if self._sum_contributions:
                 # Discard the partial workspaces
@@ -147,7 +149,9 @@ class DensityOfStates(PythonAlgorithm):
 
             eigenvectors = file_data[4]
 
-            partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(self._ion_dict, frequencies, eigenvectors, weights)
+            partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(
+                                                    self._ion_dict, frequencies,
+                                                    eigenvectors, weights)
 
             # Discard the partial workspaces
             for partial_ws in partial_workspaces:
@@ -288,7 +292,8 @@ class DensityOfStates(PythonAlgorithm):
                 scattering_x_section = mtd[self._ws_name].mutableSample().getMaterial().totalScatterXSection()
 
             if self._scale_by_cross_section != 'None':
-                Scale(InputWorkspace=self._ws_name, OutputWorkspace=self._ws_name, Operation='Multiply', Factor=scattering_x_section)
+                Scale(InputWorkspace=self._ws_name, OutputWorkspace=self._ws_name,
+                      Operation='Multiply', Factor=scattering_x_section)
 
             partial_workspaces.append(partial_ws_name)
             RenameWorkspace(self._ws_name, OutputWorkspace=partial_ws_name)
@@ -300,9 +305,11 @@ class DensityOfStates(PythonAlgorithm):
             sum_workspace = '__dos_sum'
 
             # Collect spectra into a single workspace
-            AppendSpectra(OutputWorkspace=sum_workspace, InputWorkspace1=partial_workspaces[0], InputWorkspace2=partial_workspaces[1])
+            AppendSpectra(OutputWorkspace=sum_workspace, InputWorkspace1=partial_workspaces[0],
+                          InputWorkspace2=partial_workspaces[1])
             for ws_idx in xrange(2, len(partial_workspaces)):
-                AppendSpectra(OutputWorkspace=sum_workspace, InputWorkspace1=sum_workspace, InputWorkspace2=partial_workspaces[ws_idx])
+                AppendSpectra(OutputWorkspace=sum_workspace, InputWorkspace1=sum_workspace,
+                              InputWorkspace2=partial_workspaces[ws_idx])
 
             # Sum all spectra
             SumSpectra(InputWorkspace=sum_workspace, OutputWorkspace=total_workspace)

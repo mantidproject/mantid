@@ -1,5 +1,5 @@
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction
-from mantid.kernel import Direction, StringListValidator 
+from mantid.kernel import Direction, StringListValidator
 import warnings
 
 _OUTPUTLEVEL = "NOOUTPUT"

@@ -30,6 +30,9 @@ def setup_can_test(test_case):
 class ApplyCorrectionsTests(unittest.TestCase):
 
     def setUp(self):
+        self._config_defaults = config
+        config['default.facility'] = 'ISIS'
+
         self._sample_workspace = self.make_sample_workspace()
         self._can_workspace = ''
         self._corrections_workspace = ''
@@ -48,6 +51,8 @@ class ApplyCorrectionsTests(unittest.TestCase):
     def tearDown(self):
         mtd.clear()
         self.clean_up_saved_workspaces()
+
+        config = self._config_defaults
 
     @setup_can_test
     def test_with_can_workspace(self):

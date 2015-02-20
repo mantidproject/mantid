@@ -5,11 +5,16 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
+#include "MantidVatesAPI/MetaDataExtractorUtils.h"
+#include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/VatesConfigurations.h"
 #include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
 #include "MantidVatesAPI/Common.h"
+
+#include <boost/scoped_ptr.hpp>
 
 #include <vtkFieldData.h>
 #include <vtkDataSet.h>
@@ -24,7 +29,10 @@ namespace Mantid
     m_isSetup(false), 
     m_time(-1),
     m_loadInMemory(false),
-    m_firstLoad(true)
+    m_firstLoad(true),
+    m_metadataJsonManager(new MetadataJsonManager()),
+    m_metaDataExtractor(new MetaDataExtractorUtils()),
+    m_vatesConfigurations(new VatesConfigurations())
     {
       Mantid::API::FrameworkManager::Instance();
     }
@@ -147,10 +155,14 @@ namespace Mantid
       serializer.setGeometryXML(xmlBuilder.create());
       serializer.setImplicitFunction( Mantid::Geometry::MDImplicitFunction_sptr(new Mantid::Geometry::NullImplicitFunction()));
       std::string xmlString = serializer.createXMLString();
+      
+      // Serialize Json metadata
+      std::string jsonString = m_metadataJsonManager->getSerializedJson();
 
       //Add metadata to dataset.
       MetadataToFieldData convert;
       convert(outputFD, xmlString, XMLDefinitions::metaDataId().c_str());
+      convert(outputFD, jsonString, m_vatesConfigurations->getMetadataIdJson().c_str());
       visualDataSet->SetFieldData(outputFD);
       outputFD->Delete();
     }
@@ -235,6 +247,33 @@ namespace Mantid
         throw std::runtime_error("Have not yet run ::extractMetaData!");
       }
       return tDimension->getName() + " (" + tDimension->getUnits().ascii() + ")";
+    }
+
+    /**
+     * Getter for the instrument.
+     * @returns The name of the instrument which is associated with the workspace.
+     */
+    const std::string& MDHWLoadingPresenter::getInstrument()
+    {
+      return m_metadataJsonManager->getInstrument();
+    }
+
+   /**
+     * Getter for the minimum value;
+     * @return The minimum value of the data set.
+     */
+    double MDHWLoadingPresenter::getMinValue()
+    {
+      return m_metadataJsonManager->getMinValue();
+    }
+
+   /**
+    * Getter for the maximum value;
+    * @return The maximum value of the data set.
+    */
+    double MDHWLoadingPresenter::getMaxValue()
+    {
+      return m_metadataJsonManager->getMaxValue();
     }
   }
 }

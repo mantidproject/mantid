@@ -37,7 +37,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
 
     def summary(self):
         return "Determines the characterizations of a workspace."
-    
+
     def PyInit(self):
         # input parameters
         self.declareProperty(WorkspaceProperty("InputWorkspace", "",
@@ -49,23 +49,23 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                              "Table of characterization information")
 
         self.declareProperty("ReductionProperties",
-                             "__pd_reduction_properties", 
+                             "__pd_reduction_properties",
                              validator=StringMandatoryValidator(),
                              doc="Property manager name for the reduction")
 
         defaultMsg = " run to use. 0 to use value in table, -1 to not use."
-        self.declareProperty("BackRun", 0, 
+        self.declareProperty("BackRun", 0,
                              doc="The background" + defaultMsg)
-        self.declareProperty("NormRun", 0, 
+        self.declareProperty("NormRun", 0,
                              doc="The background" + defaultMsg)
-        self.declareProperty("NormBackRun", 0, 
+        self.declareProperty("NormBackRun", 0,
                              doc="The background" + defaultMsg)
 
-        self.declareProperty(StringArrayProperty("FrequencyLogNames", ["SpeedRequest1", "Speed1", "frequency"], 
+        self.declareProperty(StringArrayProperty("FrequencyLogNames", ["SpeedRequest1", "Speed1", "frequency"],
             direction=Direction.Input),
             "Possible log names for frequency.")
 
-        self.declareProperty(StringArrayProperty("WaveLengthLogNames", ["LambdaRequest", "lambda"], 
+        self.declareProperty(StringArrayProperty("WaveLengthLogNames", ["LambdaRequest", "lambda"],
             direction=Direction.Input),
             "Candidate log names for wave length.")
 
@@ -119,7 +119,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
         self.log().information("Determined frequency: " + str(frequency) \
                                    + " Hz, center wavelength:" \
                                    + str(wavelength) + " Angstrom")
-        
+
         # get a row of the table
         info = self.getLine(char, frequency, wavelength)
 
@@ -140,7 +140,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
     def processInformation(self, prop_man, info_dict):
         for key in COL_NAMES:
             val = info_dict[key]
-            # Convert comma-delimited list to array, else return the original 
+            # Convert comma-delimited list to array, else return the original
             # value.
             if type("") == type(val):
                 if (len(val)==0) and  (key in DEF_INFO.keys()):
@@ -177,7 +177,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
 
         # go through every row looking for a match
         result = dict(DEF_INFO)
-        icount = 0 
+        icount = 0
         for i in xrange(char.rowCount()):
             row = char.row(i)
             if not self.closeEnough(frequency, row['frequency']):
@@ -206,7 +206,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                     self.log().information(msg)
                 else:
                     frequency = frequency.getStatistics().mean
-                    if frequency == 0.: 
+                    if frequency == 0.:
                         self.log().information("'%s' mean value is zero" % name)
                     else:
                         self.log().information("Found frequency in %s log" \
@@ -219,13 +219,13 @@ class PDDetermineCharacterizations(PythonAlgorithm):
     def getWavelength(self, logs, wkspName):
         """ Get wave length
         Wavelength can be given by 2 sample logs, either LambdaRequest or lambda.
-        And its unit can be either Angstrom or A. 
+        And its unit can be either Angstrom or A.
         """
         wavelengthnames = self.getProperty("WaveLengthLogNames").value
 
-        for name in wavelengthnames: 
-            # skip if not exists 
-            if name not in logs.keys(): 
+        for name in wavelengthnames:
+            # skip if not exists
+            if name not in logs.keys():
                 continue
 
             # get value
@@ -233,7 +233,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
 
             # unit
             if name == "LambdaRequest":
-                if wavelength.units != "Angstrom": 
+                if wavelength.units != "Angstrom":
                     msg = "Only know how to deal with LambdaRequest in Angstrom, not %s" % (wavelength.units)
                     self.log().warning(msg)
                     break
@@ -246,17 +246,17 @@ class PDDetermineCharacterizations(PythonAlgorithm):
 
             else:
                 if wavelength.units != "Angstrom" and wavelength.units != "A":
-                    msg = "Only know how to deal with %s in Angstrom (A) but not %s" % (name, 
+                    msg = "Only know how to deal with %s in Angstrom (A) but not %s" % (name,
                             wavelength.units)
                     self.log().warning(msg)
                     break
 
             # return
-            wavelength = wavelength.getStatistics().mean 
-            if wavelength == 0.: 
-                self.log().warning("'%s' mean value is zero" % name) 
+            wavelength = wavelength.getStatistics().mean
+            if wavelength == 0.:
+                self.log().warning("'%s' mean value is zero" % name)
                 break
-            else: 
+            else:
                 return wavelength
 
         # ENDFOR

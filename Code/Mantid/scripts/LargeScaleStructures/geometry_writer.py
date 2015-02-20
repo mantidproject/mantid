@@ -76,10 +76,10 @@ class MantidGeom:
         """
         source = self._append_child("component", self._root, type="moderator")
         try:
-          distance = float(distance)
-          if distance > 0:
-            distance *= -1.0
-          self._append_child("location", source, z=distance)
+            distance = float(distance)
+            if distance > 0:
+                distance *= -1.0
+            self._append_child("location", source, z=distance)
         except:
             print "PROBLEM with addModerator"
 
@@ -198,7 +198,7 @@ class MantidGeom:
         if usepolar is not None:
             self.addLocationPolar(comp_element, x, y, z)
         else:
-           self.addLocation(comp_element, x, y, z, rot_x, rot_y, rot_z)
+            self.addLocation(comp_element, x, y, z, rot_x, rot_y, rot_z)
 
     def addSingleDetector(self, root, x, y, z, rot_x, rot_y, rot_z, name=None,
                           id=None, usepolar=None):

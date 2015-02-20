@@ -104,7 +104,7 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
             else:
                 geo_base_file_x = "REFL_Detector_Grouping_Sum_X.xml"
                 geo_base_file_y = "REFL_Detector_Grouping_Sum_Y.xml"
-                
+
             if is_pixel_y:
                 grouping_file = os.path.join(instr_dir, "Grouping",
                                              geo_base_file_x)

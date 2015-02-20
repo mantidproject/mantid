@@ -51,7 +51,7 @@ class ConvertToWavelength(object):
                 msi.Load(Filename=candidate, OutputWorkspace=ws_name)
                 _workspace = mantid.api.AnalysisDataService.retrieve(ws_name)
         else:
-             raise ValueError("Unknown source item %s" % candidate)
+            raise ValueError("Unknown source item %s" % candidate)
         return _workspace
 
     def get_workspace_from_list(self, index):
