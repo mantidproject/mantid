@@ -46,7 +46,7 @@ public:
   virtual const std::string name() const { return "CopyDetectorMapping"; }
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
-    return "";
+    return "Copies spectra to detector mapping from one Matrix Workspace to another.";
   }
 
   /// Algorithm's version
