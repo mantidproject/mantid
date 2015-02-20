@@ -162,8 +162,9 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer = DirectEnergyConversion(mono_ws.getInstrument())
         tReducer.prop_man.incident_energy = 5.
         tReducer.prop_man.monovan_integr_range=[-10,10]
+        tReducer.wb_run = mono_ws
 
-        (nf1,nf2,nf3,nf4) = tReducer.get_abs_normalization_factor(mono_ws.getName(),5.)        
+        (nf1,nf2,nf3,nf4) = tReducer.get_abs_normalization_factor(PropertyManager.wb_run,5.)        
         self.assertAlmostEqual(nf1,0.58561121802167193,7)
         self.assertAlmostEqual(nf1,nf2)
         self.assertAlmostEqual(nf2,nf3)
@@ -175,7 +176,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
         sig = mono_ws.dataY(0)
         sig[:]=0          
 
-        (nf1,nf2,nf3,nf4) = tReducer.get_abs_normalization_factor(mono_ws.getName(),5.)
+        tReducer.wb_run = mono_ws
+        (nf1,nf2,nf3,nf4) = tReducer.get_abs_normalization_factor(PropertyManager.wb_run,5.)
         self.assertAlmostEqual(nf1,0.585611218022,7)
         self.assertAlmostEqual(nf1,nf2)
         self.assertAlmostEqual(nf2,nf3)
@@ -206,10 +208,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertTrue(isinstance(ws,api.MatrixWorkspace))
     
   
-    ##def test_diag_call(self):
-    ##    tReducer = self.reducer
-    ##    # should do nothing as already initialized above, but if not will initiate the instrument
-    ##    tReducer.initialise("MAP")
 
     ##    tReducet.di
     def test_energy_to_TOF_range(self):

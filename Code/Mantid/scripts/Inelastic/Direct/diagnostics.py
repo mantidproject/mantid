@@ -91,6 +91,7 @@ def diagnose(white_int,**kwargs):
         DeleteWorkspace('_dummy_ws')
         test_results[0][0] = os.path.basename(parser.hard_mask_file)
         test_results[0][1] = len(masked_list)
+        DeleteWorkspace('hard_mask_ws')
 
     if not parser.use_hard_mask_only :
        # White beam Test

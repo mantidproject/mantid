@@ -1050,7 +1050,7 @@ class DirectEnergyConversion(object):
             prop_man.log('    Incident energy found for monovanadium run: ' + str(ei_monovan) + ' meV','notice')
 
 
-            (anf_LibISIS,anf_SS2,anf_Puas,anf_TGP) = self.get_abs_normalization_factor(deltaE_wkspace_monovan.getName(),ei_monovan)
+            (anf_LibISIS,anf_SS2,anf_Puas,anf_TGP) = self.get_abs_normalization_factor(monovan_run,ei_monovan)
 
             prop_man.log('*** Absolute correction factor(s): S^2: {0:10.4f}\n*** LibISIS: {1:10.4f} Poisson: {2:10.4f}  TGP: {3:10.4f} '\
                 .format(anf_LibISIS,anf_SS2,anf_Puas,anf_TGP),'notice')
@@ -1071,12 +1071,12 @@ class DirectEnergyConversion(object):
 
         return sample_ws
 #-------------------------------------------------------------------------------
-    def get_abs_normalization_factor(self,deltaE_wkspaceName,ei_monovan):
+    def get_abs_normalization_factor(self,monovan_run,ei_monovan):
         """get absolute normalization factor for monochromatic vanadium
 
           Inputs:
-          @param: deltaE_wkspace  -- the name (string) of monovan workspace, converted to energy
-          @param: ei_monovan      -- monovan sample incident energy
+          @param: monvan_run   -- run descriptor of converted to energy monovan workspace
+          @param: ei_monovan   -- monovan sample incident energy
 
           @returns the value of monovan absolute normalization factor.
                    deletes monovan workspace (deltaE_wkspace) if abs norm factor was calculated successfully
@@ -1095,9 +1095,11 @@ class DirectEnergyConversion(object):
         # list of two number representing the minimal (ei_monovan[0])
         # and the maximal (ei_monovan[1]) energy to integrate the spectra
         minmax = propman.monovan_integr_range
+        mono_vs = monovan_run.get_workspace()
+        ws_name = mono_vs.name()
 
-
-        data_ws = Integration(InputWorkspace=deltaE_wkspaceName,OutputWorkspace='van_int',RangeLower=minmax[0],RangeUpper=minmax[1],IncludePartialBins='1')
+        data_ws = Integration(InputWorkspace=mono_vs,OutputWorkspace='van_int',
+                              RangeLower=minmax[0],RangeUpper=minmax[1],IncludePartialBins='1')
  
         nhist = data_ws.getNumberHistograms()
         # extract wb integrals for combined spectra
@@ -1150,8 +1152,8 @@ class DirectEnergyConversion(object):
         signal_sum = sum(map(lambda e: e * e,error))
         weight_sum = sum(map(lambda s,e: e * e / s,signal,error))
         if(weight_sum == 0.0):
-            prop_man.log("WB integral has been calculated incorrectly, look at van_int workspace: {0}".format(deltaE_wkspaceName),'error')
-            raise ArithmeticError("Division by 0 weight when calculating WB integrals from workspace {0}".format(deltaE_wkspaceName))
+            prop_man.log("WB integral has been calculated incorrectly, look at van_int workspace: {0}".format(ws_name),'error')
+            raise ArithmeticError("Division by 0 weight when calculating WB integrals from workspace {0}".format(ws_name))
         norm_factor['Poisson'] = signal_sum / weight_sum
         #-------------------------------------------------------------------------
         # Guess which estimates value sum(n_i^2/Sigma_i^2)/sum(n_i/Sigma_i^2)
@@ -1159,8 +1161,8 @@ class DirectEnergyConversion(object):
         signal_sum = sum(map(lambda s,e: s * s / (e * e),signal,error))
         weight_sum = sum(map(lambda s,e: s / (e * e),signal,error))
         if(weight_sum == 0.0):
-            prop_man.log("WB integral has been calculated incorrectly, look at van_int workspace: {0}".format(deltaE_wkspaceName),'error')
-            raise ArithmeticError("Division by 0 weight when calculating WB integrals from workspace {0}".format(deltaE_wkspaceName))
+            prop_man.log("WB integral has been calculated incorrectly, look at van_int workspace: {0}".format(ws_name),'error')
+            raise ArithmeticError("Division by 0 weight when calculating WB integrals from workspace {0}".format(ws_name))
         norm_factor['TGP'] = signal_sum / weight_sum
         #
         #
@@ -1194,13 +1196,13 @@ class DirectEnergyConversion(object):
                "--------> Abs norm factors: Sigma^2: {9}\n"\
                "--------> Abs norm factors: Poisson: {10}\n"\
                "--------> Abs norm factors: TGP    : {11}\n"\
-               .format(deltaE_wkspaceName,minmax[0],minmax[1],nhist,sum(signal),sum(error),izerc,scale_factor,
+               .format(ws_name,minmax[0],minmax[1],nhist,sum(signal),sum(error),izerc,scale_factor,
                           norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
            log_value = log_value + log1_value
            propman.log(log_value,'error')
         else:
             if not self._debug_mode:
-                DeleteWorkspace(Workspace=deltaE_wkspaceName)
+                monovan_run.clear_resulting_ws()
                 DeleteWorkspace(Workspace=data_ws)
         return (norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
 

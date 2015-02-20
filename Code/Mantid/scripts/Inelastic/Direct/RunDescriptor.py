@@ -414,6 +414,7 @@ class RunDescriptor(PropDescriptor):
               self._ws_name = new_ws_name
            else: # nothing to do, there is workspace, which corresponds to this run number
               pass # and it may be already loaded (may be not)
+
 #--------------------------------------------------------------------------------------------------------------------
     def _set_run_list(self,instance,run_list,file_path=None,fext=None):
 
@@ -450,7 +451,6 @@ class RunDescriptor(PropDescriptor):
         else:
            return (None,0)
 #--------------------------------------------------------------------------------------------------------------------
-
     def add_masked_ws(self,masked_ws):
         """ extract masking from the workspace provided and store masks
             to use with this run workspace 
@@ -471,7 +471,6 @@ class RunDescriptor(PropDescriptor):
             self._mask_ws_name=add_mask_name
         AddSampleLog(Workspace=self._mask_ws_name,LogName = 'NUM_SPECTRA_Masked',
                      LogText=str(num_masked),LogType='Number')
-
 #--------------------------------------------------------------------------------------------------------------------
     def is_monws_separate(self):
         """ """
@@ -994,7 +993,30 @@ class RunDescriptor(PropDescriptor):
         monWS_name = self._ws_name + '_monitors'
         if monWS_name in mtd:
             DeleteWorkspace(monWS_name)
+#--------------------------------------------------------------------------------------------------------------------
+    def clear_resulting_ws(self):
+        """ remove workspace from memory as if it has not been processed
+            and clear all operations indicators except cashes and run lists.
 
+            Attempt to get workspace for a file based run should in this case 
+            load workspace again 
+        """
+        ws_name = self._ws_name 
+        mon_name = ws_name+'_monitors'
+
+        self._ws_name =''
+        self._ws_cname = ''
+        self._ws_suffix = ''
+        if ws_name in mtd:
+           ws = mtd[ws_name]
+           self._run_number = ws.getRunNumber()
+           DeleteWorkspace(ws_name)
+        if mon_name  in mtd:
+           DeleteWorkspace(mon_name)
+        if self._run_list:
+           ind = self._run_list.add_or_replace_run(self._run_number)
+           self._run_file_path = self._run_list._file_path[ind]
+           self._fext= self._run_list._fext[ind]
 #--------------------------------------------------------------------------------------------------------------------
 
     def _build_ws_name(self,sum_runs=None):
