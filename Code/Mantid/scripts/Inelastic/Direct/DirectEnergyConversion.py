@@ -220,7 +220,7 @@ class DirectEnergyConversion(object):
          self.second_white = other_whiteintegrals
 
       # Get the background/total counts from the sample run if present
-      if diag_sample: 
+      if not(diag_sample is None): 
          diag_sample = self.get_run_descriptor(diag_sample)
          # If the bleed test is requested then we need to pass in the
          # sample_run as well
