@@ -61,6 +61,15 @@ def _make_list(a, l1, l2):
 
 class MolDyn(PythonAlgorithm):
 
+    _plot = None
+    _save = None
+    _sam_path = None
+    _symmetrise = None
+    _functions = None
+    _emax = None
+    _res_ws = None
+    _out_ws = None
+
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
 

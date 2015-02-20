@@ -9,6 +9,13 @@ import json
 
 class USANSReduction(PythonAlgorithm):
 
+    wl_list = None
+    data_files = None
+    total_points = None
+    q_output = None
+    iq_output = None
+    iq_err_output = None
+
     def category(self):
         return "SANS"
 

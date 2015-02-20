@@ -145,6 +145,14 @@ def isInRanges(rangeList, n):
 class OSIRISDiffractionReduction(PythonAlgorithm):
     """ Handles the reduction of OSIRIS Diffraction Data.
     """
+
+    _cal = None
+    _outputWsName = None
+    _sams = None
+    _vans = None
+    _samMap = None
+    _vanMap = None
+
     def category(self):
         return 'Diffraction;PythonAlgorithms'
 

@@ -10,6 +10,8 @@ class SANSAbsoluteScale(PythonAlgorithm):
         Normalise detector counts by the sample thickness
     """
 
+    instrument = None
+
     def category(self):
         return "Workflow\\SANS\\UsesPropertyManager"
 

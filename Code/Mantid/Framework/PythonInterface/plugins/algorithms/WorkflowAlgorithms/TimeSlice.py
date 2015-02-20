@@ -47,6 +47,16 @@ def _count_monitors(raw_file):
 
 class TimeSlice(PythonAlgorithm):
 
+    _raw_files = None
+    _spectra_range = None
+    _peak_range = None
+    _output_ws_name_suffix = None
+    _background_range = None
+    _calib_ws = None
+    _out_ws_group = None
+    _plot = None
+    _save = None
+
     def category(self):
         return 'PythonAlgorithms;Inelastic'
 
