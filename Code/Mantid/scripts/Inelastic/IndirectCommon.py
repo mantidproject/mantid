@@ -4,85 +4,75 @@ from mantid import config, logger
 
 from IndirectImport import import_mantidplot
 
-import sys, platform, os.path, math, datetime, re
+import os.path
+import math
+import datetime
+import re
 import numpy as np
 import itertools
 
+
 def StartTime(prog):
     logger.notice('----------')
-    message = 'Program ' + prog +' started @ ' + str(datetime.datetime.now())
+    message = 'Program ' + prog + ' started @ ' + str(datetime.datetime.now())
     logger.notice(message)
 
+
 def EndTime(prog):
-    message = 'Program ' + prog +' ended @ ' + str(datetime.datetime.now())
+    message = 'Program ' + prog + ' ended @ ' + str(datetime.datetime.now())
     logger.notice(message)
     logger.notice('----------')
 
-def loadInst(instrument):
-    ws = '__empty_' + instrument
-    if not mtd.doesExist(ws):
-        idf_dir = config['instrumentDefinition.directory']
-        idf = idf_dir + instrument + '_Definition.xml'
-        LoadEmptyInstrument(Filename=idf, OutputWorkspace=ws)
-
-def loadNexus(filename):
-    '''
-    Loads a Nexus file into a workspace with the name based on the
-    filename. Convenience function for not having to play around with paths
-    in every function.
-    '''
-    name = os.path.splitext( os.path.split(filename)[1] )[0]
-    LoadNexus(Filename=filename, OutputWorkspace=name)
-    return name
 
 def getInstrRun(ws_name):
-    '''
+    """
     Get the instrument name and run number from a workspace.
 
     @param ws_name - name of the workspace
     @return tuple of form (instrument, run number)
-    '''
-    ws = mtd[ws_name]
-    run_number = str(ws.getRunNumber())
+    """
+    workspace = mtd[ws_name]
+    run_number = str(workspace.getRunNumber())
     if run_number == '0':
-        #attempt to parse run number off of name
+        # Attempt to parse run number off of name
         match = re.match(r'([a-zA-Z]+)([0-9]+)', ws_name)
         if match:
             run_number = match.group(2)
         else:
             raise RuntimeError("Could not find run number associated with workspace.")
 
-    instrument = ws.getInstrument().getName()
+    instrument = workspace.getInstrument().getName()
     facility = config.getFacility()
     instrument = facility.instrument(instrument).filePrefix(int(run_number))
     instrument = instrument.lower()
     return instrument, run_number
 
+
 def getWSprefix(wsname):
-    '''
+    """
     Returns a string of the form '<ins><run>_<analyser><refl>_' on which
     all of our other naming conventions are built. The workspace is used to get the
     instrument parameters.
-    '''
+    """
     if wsname == '':
         return ''
 
-    ws = mtd[wsname]
+    workspace = mtd[wsname]
     facility = config['default.facility']
 
-    ws_run = ws.getRun()
+    ws_run = workspace.getRun()
     if 'facility' in ws_run:
         facility = ws_run.getLogData('facility').value
 
     (instrument, run_number) = getInstrRun(wsname)
     if facility == 'ILL':
-        run_name = instrument + '_'+ run_number
+        run_name = instrument + '_' + run_number
     else:
         run_name = instrument + run_number
 
     try:
-        analyser = ws.getInstrument().getStringParameter('analyser')[0]
-        reflection = ws.getInstrument().getStringParameter('reflection')[0]
+        analyser = workspace.getInstrument().getStringParameter('analyser')[0]
+        reflection = workspace.getInstrument().getStringParameter('reflection')[0]
     except IndexError:
         analyser = ''
         reflection = ''
@@ -94,9 +84,11 @@ def getWSprefix(wsname):
 
     return prefix
 
+
 def getEfixed(workspace, detIndex=0):
     inst = mtd[workspace].getInstrument()
     return inst.getNumberParameter("efixed-val")[0]
+
 
 def checkUnitIs(ws, unit_id, axis_index=0):
     """
@@ -105,10 +97,13 @@ def checkUnitIs(ws, unit_id, axis_index=0):
     """
     axis = mtd[ws].getAxis(axis_index)
     unit = axis.getUnit()
-    return (unit.unitID() == unit_id)
+    return unit.unitID() == unit_id
 
-# Get the default save directory and check it's valid
+
 def getDefaultWorkingDirectory():
+    """
+    Get the default save directory and check it's valid.
+    """
     workdir = config['defaultsave.directory']
 
     if not os.path.isdir(workdir):
@@ -116,45 +111,48 @@ def getDefaultWorkingDirectory():
 
     return workdir
 
+
 def createQaxis(inputWS):
     result = []
-    ws = mtd[inputWS]
-    nHist = ws.getNumberHistograms()
-    if ws.getAxis(1).isSpectra():
-        inst = ws.getInstrument()
-        samplePos = inst.getSample().getPos()
-        beamPos = samplePos - inst.getSource().getPos()
-        for i in range(0,nHist):
+    workspace = mtd[inputWS]
+    num_hist = workspace.getNumberHistograms()
+    if workspace.getAxis(1).isSpectra():
+        inst = workspace.getInstrument()
+        sample_pos = inst.getSample().getPos()
+        beam_pos = sample_pos - inst.getSource().getPos()
+        for i in range(0, num_hist):
             efixed = getEfixed(inputWS, i)
-            detector = ws.getDetector(i)
-            theta = detector.getTwoTheta(samplePos, beamPos) / 2
-            lamda = math.sqrt(81.787/efixed)
+            detector = workspace.getDetector(i)
+            theta = detector.getTwoTheta(sample_pos, beam_pos) / 2
+            lamda = math.sqrt(81.787 / efixed)
             q = 4 * math.pi * math.sin(theta) / lamda
             result.append(q)
     else:
-        axis = ws.getAxis(1)
+        axis = workspace.getAxis(1)
         msg = 'Creating Axis based on Detector Q value: '
         if not axis.isNumeric():
             msg += 'Input workspace must have either spectra or numeric axis.'
             raise ValueError(msg)
-        if ( axis.getUnit().unitID() != 'MomentumTransfer' ):
+        if axis.getUnit().unitID() != 'MomentumTransfer':
             msg += 'Input must have axis values of Q'
             raise ValueError(msg)
-        for i in range(0, nHist):
+        for i in range(0, num_hist):
             result.append(float(axis.label(i)))
     return result
 
+
 def GetWSangles(inWS):
-    nhist = mtd[inWS].getNumberHistograms()    					# get no. of histograms/groups
-    sourcePos = mtd[inWS].getInstrument().getSource().getPos()
-    samplePos = mtd[inWS].getInstrument().getSample().getPos()
-    beamPos = samplePos - sourcePos
+    num_hist = mtd[inWS].getNumberHistograms()    					# get no. of histograms/groups
+    source_pos = mtd[inWS].getInstrument().getSource().getPos()
+    sample_pos = mtd[inWS].getInstrument().getSample().getPos()
+    beam_pos = sample_pos - source_pos
     angles = []    									# will be list of angles
-    for index in range(0, nhist):
+    for index in range(0, num_hist):
         detector = mtd[inWS].getDetector(index)    				# get index
-        twoTheta = detector.getTwoTheta(samplePos, beamPos)*180.0/math.pi    	# calc angle
-        angles.append(twoTheta)    					# add angle
+        two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi    	# calc angle
+        angles.append(two_theta)    					# add angle
     return angles
+
 
 def GetThetaQ(ws):
     """
@@ -164,8 +162,8 @@ def GetThetaQ(ws):
     @returns A tuple containing a list of theta values and a list of Q values
     """
 
-    eFixed = getEfixed(ws)
-    wavelas = math.sqrt(81.787 / eFixed)  # Elastic wavelength
+    e_fixed = getEfixed(ws)
+    wavelas = math.sqrt(81.787 / e_fixed)  # Elastic wavelength
     k0 = 4.0 * math.pi / wavelas
 
     axis = mtd[ws].getAxis(1)
@@ -191,28 +189,40 @@ def GetThetaQ(ws):
 
     return theta, q
 
+
 def ExtractFloat(data_string):
-    """ Extract float values from an ASCII string"""
+    """
+    Extract float values from an ASCII string
+    """
     values = data_string.split()
     values = map(float, values)
     return values
 
+
 def ExtractInt(data_string):
-    """ Extract int values from an ASCII string"""
+    """
+    Extract int values from an ASCII string
+    """
     values = data_string.split()
     values = map(int, values)
     return values
 
-def PadArray(inarray,nfixed):                   #pad a list to specified size
-    npt=len(inarray)
-    padding = nfixed-npt
-    outarray=[]
+
+def PadArray(inarray, nfixed):
+    """
+    Pad a list to specified size.
+    """
+    npt = len(inarray)
+    padding = nfixed - npt
+    outarray = []
     outarray.extend(inarray)
-    outarray +=[0]*padding
+    outarray += [0] * padding
     return outarray
 
-def CheckAnalysers(in1WS,in2WS):
-    '''Check workspaces have identical analysers and reflections
+
+def CheckAnalysers(in1WS, in2WS):
+    """
+    Check workspaces have identical analysers and reflections
 
     Args:
       @param in1WS - first 2D workspace
@@ -224,22 +234,24 @@ def CheckAnalysers(in1WS,in2WS):
     Raises:
       @exception Valuerror - workspaces have different analysers
       @exception Valuerror - workspaces have different reflections
-    '''
+    """
     ws1 = mtd[in1WS]
-    a1 = ws1.getInstrument().getStringParameter('analyser')[0]
-    r1 = ws1.getInstrument().getStringParameter('reflection')[0]
+    analyser_1 = ws1.getInstrument().getStringParameter('analyser')[0]
+    reflection_1 = ws1.getInstrument().getStringParameter('reflection')[0]
     ws2 = mtd[in2WS]
-    a2 = ws2.getInstrument().getStringParameter('analyser')[0]
-    r2 = ws2.getInstrument().getStringParameter('reflection')[0]
-    if a1 != a2:
-        raise ValueError('Workspace '+in1WS+' and '+in2WS+' have different analysers')
-    elif r1 != r2:
-        raise ValueError('Workspace '+in1WS+' and '+in2WS+' have different reflections')
+    analyser_2 = ws2.getInstrument().getStringParameter('analyser')[0]
+    reflection_2 = ws2.getInstrument().getStringParameter('reflection')[0]
+    if analyser_1 != analyser_2:
+        raise ValueError('Workspace %s and %s have different analysers' % (ws1, ws2))
+    elif reflection_1 != reflection_2:
+        raise ValueError('Workspace %s and %s have different reflections' % (ws1, ws2))
     else:
-        logger.information('Analyser is '+a1+r1)
+        logger.information('Analyser is %s, reflection %s' % (analyser_1, reflection_1))
+
 
 def CheckHistZero(inWS):
-    '''Retrieves basic info on a worskspace
+    """
+    Retrieves basic info on a worskspace
 
     Checks the workspace is not empty, then returns the number of histogram and
     the number of X-points, which is the number of bin boundaries minus one
@@ -248,25 +260,27 @@ def CheckHistZero(inWS):
       @param inWS  2D workspace
 
     Returns:
-      @return nhist - number of histograms in the workspace
+      @return num_hist - number of histograms in the workspace
       @return ntc - number of X-points in the first histogram, which is the number of bin
            boundaries minus one. It is assumed all histograms have the same
            number of X-points.
 
     Raises:
       @exception ValueError - Worskpace has no histograms
-    '''
-    nhist = mtd[inWS].getNumberHistograms()       # no. of hist/groups in WS
-    if nhist == 0:
-        raise ValueError('Workspace '+inWS+' has NO histograms')
-    Xin = mtd[inWS].readX(0)
-    ntc = len(Xin)-1    					# no. points from length of x array
+    """
+    num_hist = mtd[inWS].getNumberHistograms()  # no. of hist/groups in WS
+    if num_hist == 0:
+        raise ValueError('Workspace ' + inWS + ' has NO histograms')
+    x_in = mtd[inWS].readX(0)
+    ntc = len(x_in) - 1  # no. points from length of x array
     if ntc == 0:
-        raise ValueError('Workspace '+inWS+' has NO points')
-    return nhist,ntc
+        raise ValueError('Workspace ' + inWS + ' has NO points')
+    return num_hist, ntc
 
-def CheckHistSame(in1WS,name1,in2WS,name2):
-    '''Check workspaces have same number of histograms and bin boundaries
+
+def CheckHistSame(in1WS, name1, in2WS, name2):
+    """
+    Check workspaces have same number of histograms and bin boundaries
 
     Args:
       @param in1WS - first 2D workspace
@@ -280,49 +294,52 @@ def CheckHistSame(in1WS,name1,in2WS,name2):
     Raises:
       Valuerror: number of histograms is different
       Valuerror: number of bin boundaries in the histograms is different
-    '''
-    nhist1 = mtd[in1WS].getNumberHistograms()       # no. of hist/groups in WS1
-    X1 = mtd[in1WS].readX(0)
-    xlen1 = len(X1)
-    nhist2 = mtd[in2WS].getNumberHistograms()       # no. of hist/groups in WS2
-    X2 = mtd[in2WS].readX(0)
-    xlen2 = len(X2)
-    if nhist1 != nhist2:    			# check that no. groups are the same
-        e1 = name1+' ('+in1WS+') histograms (' +str(nhist1) + ')'
-        e2 = name2+' ('+in2WS+') histograms (' +str(nhist2) + ')'
-        error = e1 + ' not = ' + e2
+    """
+    num_hist_1 = mtd[in1WS].getNumberHistograms()  # no. of hist/groups in WS1
+    x_1 = mtd[in1WS].readX(0)
+    x_len_1 = len(x_1)
+    num_hist_2 = mtd[in2WS].getNumberHistograms()  # no. of hist/groups in WS2
+    x_2 = mtd[in2WS].readX(0)
+    x_len_2 = len(x_2)
+    if num_hist_1 != num_hist_2:  # Check that no. groups are the same
+        error_1 = '%s (%s) histograms (%d)' % (name1, in1WS, num_hist_1)
+        error_2 = '%s (%s) histograms (%d)' % (name2, in2WS, num_hist_2)
+        error = error_1 + ' not = ' + error_2
         raise ValueError(error)
-    elif xlen1 != xlen2:
-        e1 = name1+' ('+in1WS+') array length (' +str(xlen1) + ')'
-        e2 = name2+' ('+in2WS+') array length (' +str(xlen2) + ')'
-        error = e1 + ' not = ' + e2
+    elif x_len_1 != x_len_2:
+        error_1 = '%s (%s) array length (%d)' % (name1, in1WS, x_len_1)
+        error_2 = '%s (%s) array length (%d)' % (name2, in2WS, x_len_2)
+        error = error_1 + ' not = ' + error_2
         raise ValueError(error)
 
-def CheckXrange(x_range,type):
-    if  not ( ( len(x_range) == 2 ) or ( len(x_range) == 4 ) ):
+
+def CheckXrange(x_range, type):
+    if not ((len(x_range) == 2) or (len(x_range) == 4)):
         raise ValueError(type + ' - Range must contain either 2 or 4 numbers')
 
     for lower, upper in zip(x_range[::2], x_range[1::2]):
         if math.fabs(lower) < 1e-5:
-            raise ValueError(type + ' - input minimum ('+str(lower)+') is Zero')
+            raise ValueError('%s - input minimum (%f) is zero' % (type, lower))
         if math.fabs(upper) < 1e-5:
-            raise ValueError(type + ' - input maximum ('+str(upper)+') is Zero')
+            raise ValueError('%s - input maximum (%f) is zero' % (type, upper))
         if upper < lower:
-            raise ValueError(type + ' - input max ('+str(upper)+') < min ('+str(lower)+')')
+            raise ValueError('%s - input maximum (%f) < minimum (%f)' % (type, upper, lower))
 
-def CheckElimits(erange,Xin):
-    nx = len(Xin)-1
+
+def CheckElimits(erange, Xin):
+    len_x = len(Xin) - 1
 
     if math.fabs(erange[0]) < 1e-5:
-        raise ValueError('Elimits - input emin ( '+str(erange[0])+' ) is Zero')
+        raise ValueError('Elimits - input emin (%f) is Zero' % (erange[0]))
     if erange[0] < Xin[0]:
-        raise ValueError('Elimits - input emin ( '+str(erange[0])+' ) < data emin ( '+str(Xin[0])+' )')
+        raise ValueError('Elimits - input emin (%f) < data emin (%f)' % (erange[0], Xin[0]))
     if math.fabs(erange[1]) < 1e-5:
-        raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) is Zero')
-    if erange[1] > Xin[nx]:
-        raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) > data emax ( '+str(Xin[nx])+' )')
+        raise ValueError('Elimits - input emax (%f) is Zero' % (erange[1]))
+    if erange[1] > Xin[len_x]:
+        raise ValueError('Elimits - input emax (%f) > data emax (%f)' % (erange[1], Xin[len_x]))
     if erange[1] < erange[0]:
-        raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) < emin ( '+str(erange[0])+' )')
+        raise ValueError('Elimits - input emax (%f) < emin (%f)' % (erange[1], erange[0]))
+
 
 def getInstrumentParameter(ws, param_name):
     """Get an named instrument parameter from a workspace.
@@ -333,8 +350,8 @@ def getInstrumentParameter(ws, param_name):
     """
     inst = mtd[ws].getInstrument()
 
-    #create a map of type parameters to functions. This is so we avoid writing lots of
-    #if statements becuase there's no way to dynamically get the type.
+    # Create a map of type parameters to functions. This is so we avoid writing lots of
+    # if statements becuase there's no way to dynamically get the type.
     func_map = {'double': inst.getNumberParameter, 'string': inst.getStringParameter,
                 'int': inst.getIntParameter, 'bool': inst.getBoolParameter}
 
@@ -349,6 +366,7 @@ def getInstrumentParameter(ws, param_name):
 
     return param
 
+
 def plotSpectra(ws, y_axis_title, indicies=[]):
     """
     Plot a selection of spectra given a list of indicies
@@ -362,13 +380,14 @@ def plotSpectra(ws, y_axis_title, indicies=[]):
         indicies = range(num_spectra)
 
     try:
-        mp = import_mantidplot()
-        plot = mp.plotSpectrum(ws, indicies, True)
+        mtd_plot = import_mantidplot()
+        plot = mtd_plot.plotSpectrum(ws, indicies, True)
         layer = plot.activeLayer()
-        layer.setAxisTitle(mp.Layer.Left, y_axis_title)
+        layer.setAxisTitle(mtd_plot.Layer.Left, y_axis_title)
     except RuntimeError:
-        #User clicked cancel on plot so don't do anything
+        # User clicked cancel on plot so don't do anything
         return
+
 
 def plotParameters(ws, *param_names):
     """
@@ -387,13 +406,14 @@ def plotParameters(ws, *param_names):
             if len(indicies) > 0:
                 plotSpectra(ws, name, indicies)
 
+
 def convertToElasticQ(input_ws, output_ws=None):
     """
     Helper function to convert the spectrum axis of a sample to ElasticQ.
 
     @param input_ws - the name of the workspace to convert from
     @param output_ws - the name to call the converted workspace
-  """
+    """
 
     if output_ws is None:
         output_ws = input_ws
@@ -401,16 +421,18 @@ def convertToElasticQ(input_ws, output_ws=None):
     axis = mtd[input_ws].getAxis(1)
     if axis.isSpectra():
         e_fixed = getEfixed(input_ws)
-        ConvertSpectrumAxis(input_ws,Target='ElasticQ',EMode='Indirect',EFixed=e_fixed,OutputWorkspace=output_ws)
+        ConvertSpectrumAxis(input_ws, Target='ElasticQ', EMode='Indirect', EFixed=e_fixed,
+                            OutputWorkspace=output_ws)
 
     elif axis.isNumeric():
-      #check that units are Momentum Transfer
+        # Check that units are Momentum Transfer
         if axis.getUnit().unitID() != 'MomentumTransfer':
             raise RuntimeError('Input must have axis values of Q')
 
         CloneWorkspace(input_ws, OutputWorkspace=output_ws)
     else:
         raise RuntimeError('Input workspace must have either spectra or numeric axis.')
+
 
 def transposeFitParametersTable(params_table, output_table=None):
     """
@@ -420,17 +442,17 @@ def transposeFitParametersTable(params_table, output_table=None):
     @param params_table - the parameter table output from Fit.
     @param output_table - name to call the transposed table. If omitted,
             the output_table will be the same as the params_table
-  """
+    """
     params_table = mtd[params_table]
 
     table_ws = '__tmp_table_ws'
     table_ws = CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
 
-    param_names = params_table.column(0)[:-1] #-1 to remove cost function
+    param_names = params_table.column(0)[:-1]  # -1 to remove cost function
     param_values = params_table.column(1)[:-1]
     param_errors = params_table.column(2)[:-1]
 
-  #find the number of parameters per function
+    # Find the number of parameters per function
     func_index = param_names[0].split('.')[0]
     num_params = 0
     for i, name in enumerate(param_names):
@@ -438,7 +460,7 @@ def transposeFitParametersTable(params_table, output_table=None):
             num_params = i
             break
 
-  #create columns with parameter names for headers
+    # Create columns with parameter names for headers
     column_names = ['.'.join(name.split('.')[1:]) for name in param_names[:num_params]]
     column_error_names = [name + '_Err' for name in column_names]
     column_names = zip(column_names, column_error_names)
@@ -447,12 +469,12 @@ def transposeFitParametersTable(params_table, output_table=None):
         table_ws.addColumn('double', name)
         table_ws.addColumn('double', error_name)
 
-  #output parameter values to table row
-    for i in xrange(0, params_table.rowCount()-1, num_params):
-        row_values = param_values[i:i+num_params]
-        row_errors = param_errors[i:i+num_params]
+    # Output parameter values to table row
+    for i in xrange(0, params_table.rowCount() - 1, num_params):
+        row_values = param_values[i:i + num_params]
+        row_errors = param_errors[i:i + num_params]
         row = [value for pair in zip(row_values, row_errors) for value in pair]
-        row = [i/num_params] + row
+        row = [i / num_params] + row
         table_ws.addRow(row)
 
     if output_table is None:
@@ -482,25 +504,26 @@ def convertParametersToWorkspace(params_table, x_column, param_names, output_nam
     @param x_column - the column in the table to use for the x values.
     @param parameter_names - list of parameter names to add to the workspace
     @param output_name - name to call the output workspace.
-  """
-  #search for any parameters in the table with the given parameter names,
-  #ignoring their function index and output them to a workspace
+    """
+    # Search for any parameters in the table with the given parameter names,
+    # ignoring their function index and output them to a workspace
     workspace_names = []
     for param_name in param_names:
         column_names = search_for_fit_params(param_name, params_table)
-        column_error_names = search_for_fit_params(param_name+'_Err', params_table)
+        column_error_names = search_for_fit_params(param_name + '_Err', params_table)
         param_workspaces = []
         for name, error_name in zip(column_names, column_error_names):
-            ConvertTableToMatrixWorkspace(params_table, x_column, name, error_name, OutputWorkspace=name)
+            ConvertTableToMatrixWorkspace(params_table, x_column, name, error_name,
+                                          OutputWorkspace=name)
             param_workspaces.append(name)
         workspace_names.append(param_workspaces)
 
-  #transpose list of workspaces, ignoring unequal length of lists
-  #this handles the case where a parameter occurs only once in the whole workspace
+    # Transpose list of workspaces, ignoring unequal length of lists
+    # this handles the case where a parameter occurs only once in the whole workspace
     workspace_names = map(list, itertools.izip_longest(*workspace_names))
     workspace_names = [filter(None, sublist) for sublist in workspace_names]
 
-  #join all the parameters for each peak into a single workspace per peak
+    # Join all the parameters for each peak into a single workspace per peak
     temp_workspaces = []
     for peak_params in workspace_names:
         temp_peak_ws = peak_params[0]
@@ -508,28 +531,31 @@ def convertParametersToWorkspace(params_table, x_column, param_names, output_nam
             ConjoinWorkspaces(temp_peak_ws, param_ws, False)
         temp_workspaces.append(temp_peak_ws)
 
-  #join all peaks into a single workspace
+    # Join all peaks into a single workspace
     temp_workspace = temp_workspaces[0]
-    for temp_ws in temp_workspaces[1:]:
+    for temp_ws in temp_workspaces[1:]:  # TODO: fairly certain something is wrong here
         ConjoinWorkspaces(temp_workspace, temp_peak_ws, False)
 
     RenameWorkspace(temp_workspace, OutputWorkspace=output_name)
 
-  #replace axis on workspaces with text axis
+    # Replace axis on workspaces with text axis
     axis = TextAxis.create(mtd[output_name].getNumberHistograms())
     workspace_names = [name for sublist in workspace_names for name in sublist]
     for i, name in enumerate(workspace_names):
         axis.setLabel(i, name)
     mtd[output_name].replaceAxis(1, axis)
 
+
 def addSampleLogs(ws, sample_logs):
     """
     Add a dictionary of logs to a workspace.
 
     The type of the log is inferred by the type of the value passed to the log.
+
     @param ws - workspace to add logs too.
     @param sample_logs - dictionary of logs to append to the workspace.
-  """
+    """
+
     for key, value in sample_logs.iteritems():
         if isinstance(value, bool):
             log_type = 'String'
