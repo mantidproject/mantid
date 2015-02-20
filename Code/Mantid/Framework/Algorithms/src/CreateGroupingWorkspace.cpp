@@ -9,6 +9,7 @@
 #include <queue>
 #include <fstream>
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
 namespace {
@@ -92,9 +93,10 @@ void CreateGroupingWorkspace::init() {
   declareProperty("MaxRecursionDepth", 5,
                   "Number of levels to search into the instrument (default=5)");
 
-  declareProperty("FixedGroupCount", 0, "Used to distribute the detectors of a "
-                                        "given component into a fixed number "
-                                        "of groups");
+  declareProperty("FixedGroupCount", 0,
+                  boost::make_shared<BoundedValidator<int> >(0, INT_MAX),
+                  "Used to distribute the detectors of a given component into "
+                  "a fixed number of groups");
   declareProperty("ComponentName", "", "Specify the instrument component to "
                                        "group into a fixed number of groups");
 
