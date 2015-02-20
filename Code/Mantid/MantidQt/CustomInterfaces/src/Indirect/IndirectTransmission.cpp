@@ -19,13 +19,6 @@ namespace CustomInterfaces
 
     connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(instrumentSet()));
 
-    // Preview plot
-    m_plots["PreviewPlot"] = new QwtPlot(m_parentWidget);
-    m_plots["PreviewPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-    m_plots["PreviewPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-    m_plots["PreviewPlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.plotPreview->addWidget(m_plots["PreviewPlot"]);
-
     // Update the preview plot when the algorithm is complete
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(transAlgDone(bool)));
     connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(QString)), this, SLOT(dataLoaded()));
@@ -122,19 +115,12 @@ namespace CustomInterfaces
     if(resultWsNames.size() < 3)
       return;
 
-    // Plot each spectrum
-    plotMiniPlot(QString::fromStdString(resultWsNames[0]), 0, "PreviewPlot", "SamCurve");
-    plotMiniPlot(QString::fromStdString(resultWsNames[1]), 0, "PreviewPlot", "CanCurve");
-    plotMiniPlot(QString::fromStdString(resultWsNames[2]), 0, "PreviewPlot", "TransCurve");
-
-    // Colour plots as per plot option
-    m_curves["SamCurve"]->setPen(QColor(Qt::red));
-    m_curves["CanCurve"]->setPen(QColor(Qt::black));
-    m_curves["TransCurve"]->setPen(QColor(Qt::green));
-
-    // Set X range to data range
-    setXAxisToCurve("PreviewPlot", "TransCurve");
-    m_plots["PreviewPlot"]->replot();
+    // Do plotting
+    m_uiForm.ppPlot->clear();
+    m_uiForm.ppPlot->addSpectrum("Can", QString::fromStdString(resultWsNames[0]), 0, Qt::red);
+    m_uiForm.ppPlot->addSpectrum("Sample", QString::fromStdString(resultWsNames[1]), 0, Qt::black);
+    m_uiForm.ppPlot->addSpectrum("Transmission", QString::fromStdString(resultWsNames[2]), 0, Qt::green);
+    m_uiForm.ppPlot->resizeX();
   }
 
   void IndirectTransmission::instrumentSet()

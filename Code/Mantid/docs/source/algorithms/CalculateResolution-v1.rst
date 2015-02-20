@@ -19,6 +19,8 @@ TwoTheta that was used in the calculation. The latter is useful when TwoTheta wa
 given to CalculateResolution, causing CalculateResolution to extract it from the
 workspace's sample log.
 
+The effective inverse of this algorithm is :ref:`algm-CalculateSlits`.
+
 Beam Divergence
 ***************
 

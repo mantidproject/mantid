@@ -10,12 +10,14 @@
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
+#include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MantidVatesAPI/vtkDataSetToImplicitFunction.h"
 #include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
 #include "MantidVatesAPI/vtkDataSetToWsLocation.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
+#include "MantidVatesAPI/VatesConfigurations.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
@@ -56,7 +58,10 @@ namespace Mantid
       m_lengthB2(1),
       m_lengthB3(1),
       m_ForceOrthogonal(true),
-      m_bOutputHistogramWS(true)
+      m_bOutputHistogramWS(true),
+      m_instrument(""),
+      m_metadataJsonManager(new MetadataJsonManager()),
+      m_vatesConfigurations(new VatesConfigurations())
     {
       using namespace Mantid::API;
       vtkFieldData* fd = input->GetFieldData();
@@ -105,6 +110,18 @@ namespace Mantid
       //Apply the workspace name after extraction from the input xml.
       m_serializer.setWorkspaceName( wsName);
 
+      // Extract Json metadata from the field data
+      if(NULL == fd || NULL == fd->GetArray(m_vatesConfigurations->getMetadataIdJson().c_str()))
+      {
+        throw std::logic_error("Rebinning operations require Rebinning Json Metadata");
+      }
+
+      FieldDataToMetadata fieldDataToMetadata;
+
+      std::string jsonString = fieldDataToMetadata(fd, m_vatesConfigurations->getMetadataIdJson());
+      m_metadataJsonManager->readInSerializedJson(jsonString);
+
+      m_instrument = m_metadataJsonManager->getInstrument();
     }
 
     /// Destructor
@@ -388,9 +405,19 @@ namespace Mantid
 
       Mantid::API::Workspace_sptr result=Mantid::API::AnalysisDataService::Instance().retrieve(outWsName);
 
-      vtkDataSet* temp = factory->oneStepCreate(result, drawingProgressUpdate);
+      vtkDataSet* temp = factory->oneStepCreate(result, drawingProgressUpdate); 
+
+      // Extract min and max range of the data set and update the json store
+      double* range = temp->GetScalarRange();
+      
+      if (range)
+      {
+        m_metadataJsonManager->setMinValue(range[0]);
+        m_metadataJsonManager->setMaxValue(range[1]);
+      }
 
       persistReductionKnowledge(temp, this->m_serializer, XMLDefinitions::metaDataId().c_str());
+     
       m_request->reset();
       return temp;
     }
@@ -467,9 +494,39 @@ namespace Mantid
       MetadataToFieldData convert;
       convert(fd, xmlGenerator.createXMLString().c_str(), id);
 
+      // Add second entry for Json metadata
+      std::string jsonMetadata = m_metadataJsonManager->getSerializedJson();
+      convert(fd, jsonMetadata, m_vatesConfigurations->getMetadataIdJson());
+
       out_ds->SetFieldData(fd);
       fd->Delete();
     }
 
+    /**
+     * Get the maximum value of the data range.
+     * @returns The maximum value.
+     */
+    double MDEWRebinningPresenter::getMaxValue() const
+    {
+      return this->m_metadataJsonManager->getMaxValue();
+    }
+
+    /**
+     * Get the minimum value of the data range.
+     * @returns The maximum value of the data range.
+     */
+    double MDEWRebinningPresenter::getMinValue() const
+    {
+      return this->m_metadataJsonManager->getMinValue();
+    }
+
+    /**getM
+     * Get the instrument associated with the workspace
+     * @returns The instrument 
+     */
+    const std::string& MDEWRebinningPresenter::getInstrument() const
+    {
+      return m_instrument;
+    }
   }
 }

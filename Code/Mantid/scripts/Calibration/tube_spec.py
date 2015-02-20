@@ -91,7 +91,7 @@ class TubeSpec:
 
         """
         for i in range(len(tubeSpecArray)):
-           self.setTubeSpecByString(tubeSpecArray[i])
+            self.setTubeSpecByString(tubeSpecArray[i])
 
 
     def getInstrumentName (self):
@@ -107,26 +107,26 @@ class TubeSpec:
         """
         # We simply assume it's a tube if it has a large number of children
         if( hasattr( comp, "nelements")):
-           return (comp.nelements() >= self.minNumDetsInTube )
+            return (comp.nelements() >= self.minNumDetsInTube )
         else:
-           return False
+            return False
 
     def searchForTubes(self, comp):
-         """
+        """
          Searches the component for tubes and saves them in array, appending if array is not empty.
 
          :param comp: the component
          """
          # Go through all descendents that are not a descendent of a tube and if it's a tube, store and count it.
 
-         if self.isTube( comp ):
-             self.tubes.append( comp )
+        if self.isTube( comp ):
+            self.tubes.append( comp )
              #print "Tube found", comp.getName()
          # If not tube, Search children, if any
-         else:
-             if( hasattr( comp, "nelements")):
-                 for i in range(comp.nelements()):
-                     self.searchForTubes(comp[i])
+        else:
+            if( hasattr( comp, "nelements")):
+                for i in range(comp.nelements()):
+                    self.searchForTubes(comp[i])
 
 
     def getNumTubes(self):
@@ -144,7 +144,7 @@ class TubeSpec:
             return self.numTubes
 
         for i in range( len(comps)):
-           self.searchForTubes(comps[i])
+            self.searchForTubes(comps[i])
 
         self.numTubes = len(self.tubes)
         return self.numTubes
@@ -165,7 +165,7 @@ class TubeSpec:
         comp = self.inst.getComponentByName(self.componentNameArray[0])
 
         if( comp ):
-           self.componentArray.append(comp)
+            self.componentArray.append(comp)
 
         return self.componentArray[0]
 
@@ -181,9 +181,9 @@ class TubeSpec:
 
         # We look for the components
         for i in range( len(self.componentNameArray)):
-           print "Looking for", self.componentNameArray[i]
+            print "Looking for", self.componentNameArray[i]
 
-           comp = self.inst.getComponentByName(self.componentNameArray[i])
+            comp = self.inst.getComponentByName(self.componentNameArray[i])
 
         if( comp ):
             self.componentArray.append(comp)
@@ -214,11 +214,11 @@ class TubeSpec:
         """
         nTubes = self.getNumTubes()
         if(nTubes < 0):
-           print "Error in listing tubes"
-           return 0, 0, 1
+            print "Error in listing tubes"
+            return 0, 0, 1
         if(tubeIx < 0 or tubeIx >= nTubes):
-           print "Tube index",tubeIx,"out of range 0 to",nTubes
-           return 0, 0, 1
+            print "Tube index",tubeIx,"out of range 0 to",nTubes
+            return 0, 0, 1
 
         comp = self.tubes[tubeIx]
 
@@ -228,15 +228,15 @@ class TubeSpec:
             # Allow for reverse numbering of Detectors
             lastDet = comp[numDet-1].getID()
             if (lastDet < firstDet):
-               step = -1
-               if( firstDet - lastDet + 1 != numDet):
-                  print "Detector number range",firstDet-lastDet+1," not equal to number of detectors",numDet
-                  print "Detectors not numbered continuously in this tube. Calibration will fail for this tube."
+                step = -1
+                if( firstDet - lastDet + 1 != numDet):
+                    print "Detector number range",firstDet-lastDet+1," not equal to number of detectors",numDet
+                    print "Detectors not numbered continuously in this tube. Calibration will fail for this tube."
             else:
-               step = 1
-               if( lastDet - firstDet + 1 != numDet):
-                  print "Detector number range",lastDet-firstDet+1," not equal to number of detectors",numDet
-                  print "Detectors not numbered continuously in this tube. Calibration will fail for this tube."
+                step = 1
+                if( lastDet - firstDet + 1 != numDet):
+                    print "Detector number range",lastDet-firstDet+1," not equal to number of detectors",numDet
+                    print "Detectors not numbered continuously in this tube. Calibration will fail for this tube."
 
             #print "First dectector ", firstDet," Last detector ", firstDet+numDet-1, "Number of detectors ", numDet
             #print "First dectector ", firstDet," Last detector ", comp[numDet-1].getID()
@@ -286,11 +286,11 @@ class TubeSpec:
         """
         nTubes = self.getNumTubes()
         if(nTubes < 0):
-           print "Error in listing tubes"
-           return 'Unknown'
+            print "Error in listing tubes"
+            return 'Unknown'
         if(tubeIx < 0 or tubeIx >= nTubes):
-           print "Tube index",tubeIx,"out of range 0 to",nTubes
-           return 'Unknown'
+            print "Tube index",tubeIx,"out of range 0 to",nTubes
+            return 'Unknown'
 
         comp = self.tubes[tubeIx]
 

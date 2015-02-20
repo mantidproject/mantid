@@ -142,7 +142,7 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
 
         # Load .irf file and .hkl file optionally
         if self.loadinfofile is True:
-            if dir(self).count('latticesize') == 0 or self.latticesize is None: 
+            if dir(self).count('latticesize') == 0 or self.latticesize is None:
                 raise NotImplementedError("Lattice size is not defined.  Unable to use option 'LoadInfo'")
 
             api.CreateLeBailFitInput(

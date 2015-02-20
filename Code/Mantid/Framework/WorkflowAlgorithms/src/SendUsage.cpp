@@ -6,7 +6,6 @@
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/ParaViewVersion.h"
-#include <Poco/Net/HTTPRequest.h>
 #include <sstream>
 
 namespace Mantid {
@@ -34,9 +33,6 @@ const int STATUS_DEFAULT = -1;
 /// The URL endpoint.
 const std::string URL("http://reports.mantidproject.org/api/usage");
 // const std::string URL("http://127.0.0.1:8000/api/usage"); // dev location
-
-/// The string for post method
-const std::string POST(Poco::Net::HTTPRequest::HTTP_POST);
 
 /// @returns true if Kernel::ConfigService says the option is on.
 bool doSend() {
@@ -121,10 +117,10 @@ void SendUsage::sendReport(const std::string &json) {
   int status = STATUS_DEFAULT;
 
   try {
-    std::map<string, string> htmlHeaders;
     Kernel::InternetHelper helper;
     std::stringstream responseStream;
-    status = helper.sendRequest(URL, responseStream, htmlHeaders, POST, json);
+    helper.setBody(json);
+    status = helper.sendRequest(URL, responseStream);
     g_log.debug() << "Call to \"" << URL << "\" responded with " << status
                   << "\n" << responseStream.str() << "\n";
   }

@@ -172,7 +172,7 @@ class BeamSpreader(BaseWidget):
         return m
 
     def _sample_scatt_plot(self):
-         self.show_instrument(unicode(self._content.sample_scatt_edit.text()))
+        self.show_instrument(unicode(self._content.sample_scatt_edit.text()))
 
     def _sample_scatt_browse(self):
         fname = self.data_browse_dialog()
