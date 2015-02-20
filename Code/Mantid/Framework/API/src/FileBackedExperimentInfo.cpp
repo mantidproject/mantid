@@ -44,6 +44,46 @@ const std::string FileBackedExperimentInfo::toString() const {
   return ExperimentInfo::toString();
 }
 
+//----------------------------------------------------------------------------------------------
+
+/// @return A pointer to the parametrized instrument
+Geometry::Instrument_const_sptr FileBackedExperimentInfo::getInstrument() const
+{
+  checkAndPopulate();
+  return ExperimentInfo::getInstrument();
+}
+
+//----------------------------------------------------------------------------------------------
+/**
+ * @return A reference to a const version of the parameter map
+ */
+const Geometry::ParameterMap & FileBackedExperimentInfo::instrumentParameters() const
+{
+  checkAndPopulate();
+  return ExperimentInfo::instrumentParameters();
+}
+
+//----------------------------------------------------------------------------------------------
+/**
+ * @return A reference to a non-const version of the parameter map
+ */
+Geometry::ParameterMap &FileBackedExperimentInfo::instrumentParameters()
+{
+  checkAndPopulate();
+  return ExperimentInfo::instrumentParameters();
+  
+}
+
+//----------------------------------------------------------------------------------------------
+/**
+ * @return A reference to a const version of the parameter map
+ */
+const Geometry::ParameterMap &FileBackedExperimentInfo::constInstrumentParameters() const
+{
+  checkAndPopulate();
+  return ExperimentInfo::constInstrumentParameters();
+}
+
 //------------------------------------------------------------------------------------------------------
 // Private members
 //------------------------------------------------------------------------------------------------------
@@ -66,7 +106,9 @@ void FileBackedExperimentInfo::populateFromFile() const {
     // Get the sample, logs, instrument
     std::string parameterStr;
     const_cast<FileBackedExperimentInfo*>(this)->loadExperimentInfoNexus(m_file, parameterStr);
-    // Now do the parameter map
+    // readParameterMap calls getInstrument() & instrumentParameters() so make sure we
+    // have marked the read as done by this point or it will keep entering this method
+    m_empty = false;
     const_cast<FileBackedExperimentInfo*>(this)->readParameterMap(parameterStr);
   } catch (::NeXus::Exception &exc) {
     std::ostringstream os;
@@ -74,7 +116,6 @@ void FileBackedExperimentInfo::populateFromFile() const {
        << exc.what() << "\n";
     throw std::runtime_error(os.str());
   }
-  m_empty = false;
 }
 
 } // namespace API

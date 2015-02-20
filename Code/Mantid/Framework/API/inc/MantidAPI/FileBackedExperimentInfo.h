@@ -41,6 +41,13 @@ public:
 
   ExperimentInfo *cloneExperimentInfo() const;
   const std::string toString() const;
+  Geometry::Instrument_const_sptr getInstrument() const;
+  const Geometry::ParameterMap &instrumentParameters() const;
+  Geometry::ParameterMap &instrumentParameters();
+  const Geometry::ParameterMap &constInstrumentParameters() const;
+//  void populateInstrumentParameters();
+//  void replaceInstrumentParameters(const Geometry::ParameterMap &pmap);
+//  void swapInstrumentParameters(Geometry::ParameterMap &pmap);
 
 private:
 

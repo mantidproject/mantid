@@ -56,22 +56,22 @@ public:
   /// Instrument accessors
   void setInstrument(const Geometry::Instrument_const_sptr &instr);
   /// Returns the parameterized instrument
-  Geometry::Instrument_const_sptr getInstrument() const;
+  virtual Geometry::Instrument_const_sptr getInstrument() const;
 
   /// Returns the set of parameters modifying the base instrument
   /// (const-version)
-  const Geometry::ParameterMap &instrumentParameters() const;
+  virtual const Geometry::ParameterMap &instrumentParameters() const;
   /// Returns a modifiable set of instrument parameters
-  Geometry::ParameterMap &instrumentParameters();
+  virtual Geometry::ParameterMap &instrumentParameters();
   /// Const version
-  const Geometry::ParameterMap &constInstrumentParameters() const;
+  virtual const Geometry::ParameterMap &constInstrumentParameters() const;
   // Add parameters to the instrument parameter map
   virtual void populateInstrumentParameters();
 
   /// Replaces current parameter map with copy of given map
-  void replaceInstrumentParameters(const Geometry::ParameterMap &pmap);
+  virtual void replaceInstrumentParameters(const Geometry::ParameterMap &pmap);
   /// exchange contents of current parameter map with contents of other map)
-  void swapInstrumentParameters(Geometry::ParameterMap &pmap);
+  virtual void swapInstrumentParameters(Geometry::ParameterMap &pmap);
 
   /// Cache a lookup of grouped detIDs to member IDs
   void cacheDetectorGroupings(const det2group_map &mapping);

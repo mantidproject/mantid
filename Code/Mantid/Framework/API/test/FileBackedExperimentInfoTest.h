@@ -23,16 +23,15 @@ public:
     using Mantid::API::ExperimentInfo;
     using Mantid::API::FileFinder;
     // Cache in-memory experiment info for comparison
-    m_filename = FileFinder::Instance().getFullPath("TOPAZ_3680_5_sec_MDEW.nxs");
+    m_filename = FileFinder::Instance().getFullPath("HRP38692a.nxs");
     if(m_filename.empty())
     {
-      throw std::runtime_error("Cannot find test file TOPAZ_3680_5_sec_MDEW.nxs");
+      throw std::runtime_error("Cannot find test file HRP38692a.nxs");
     }
     
     m_inMemoryExptInfo = boost::make_shared<ExperimentInfo>();
     m_nexusFile = boost::make_shared< ::NeXus::File >(m_filename, NXACC_READ);
-    m_nexusFile->openGroup("MDEventWorkspace", "NXentry");
-    m_nexusFile->openGroup("experiment0", "NXgroup");
+    m_nexusFile->openGroup("mantid_workspace_1", "NXentry");
     std::string paramString;
     m_inMemoryExptInfo->loadExperimentInfoNexus(m_nexusFile.get(), paramString);
     m_inMemoryExptInfo->readParameterMap(paramString);
@@ -51,6 +50,40 @@ public:
     
     TS_ASSERT_EQUALS(clonedFileBacked->toString(), m_inMemoryExptInfo->toString());
     delete clonedFileBacked;
+  }
+
+  void test_getInstrument_populates_object()
+  {
+    auto fileBacked = createTestObject();
+    auto fileBackedInstrument = fileBacked->getInstrument();
+    auto inMemoryInstrument = m_inMemoryExptInfo->getInstrument();
+
+    TS_ASSERT_EQUALS(fileBacked->constInstrumentParameters(),
+                     m_inMemoryExptInfo->constInstrumentParameters());
+  }
+
+  void test_instrumentParameters_const_ref_method_populate_object()
+  {
+    auto fileBacked = createTestObject();
+    const auto & pmap = fileBacked->instrumentParameters(); //const
+    
+    TS_ASSERT(pmap.size() > 0);
+  }
+
+  void test_nonconst_ref_instrumentParameters_method_populate_object()
+  {
+    auto fileBacked = createTestObject();
+    auto & pmap = fileBacked->instrumentParameters(); //non-const
+    
+    TS_ASSERT(pmap.size() > 0);
+  }
+
+  void test_constInstrumentParameters_method_populate_object()
+  {
+    auto fileBacked = createTestObject();
+    const auto & pmap = fileBacked->constInstrumentParameters();
+
+    TS_ASSERT(pmap.size() > 0);
   }
   
   //------------------------------------------------------------------------------------------------
@@ -77,7 +110,7 @@ private:
     // Create the file backed experiment info, shouldn't be loaded yet. Manipulate it through
     // the interface
     return boost::make_shared<FileBackedExperimentInfo>(m_nexusFile.get(),
-                                                        "/MDEventWorkspace/experiment0");
+                                                        "/mantid_workspace_1");
     
   }
   
