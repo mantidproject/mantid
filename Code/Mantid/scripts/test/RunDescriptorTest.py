@@ -196,9 +196,7 @@ class RunDescriptorTest(unittest.TestCase):
 
         propman.sample_run = None
         self.assertFalse(ws_name+'_monitors' in mtd)
-        # name of empty property workspace 
-        #self.assertEqual(PropertyManager.sample_run.get_ws_name(),'SR_')
-
+    
         
     def test_assign_fname(self):
         propman  = self.prop_man

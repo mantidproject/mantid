@@ -888,11 +888,6 @@ class RunDescriptor(PropDescriptor):
             del kwargs['ws_name']
         else:
             ws_name = self._build_ws_name()
-            #try:
-            #    ws_name = self.get_ws_name()
-            #except RuntimeError:
-            #    self._ws_name = None
-            #    ws_name = self.get_ws_name()
         #-----------------------------------
         if ws_name in mtd and not(force):
             RunDescriptor._logger("{0} already loaded as workspace.".format(ws_name),'information')
@@ -1049,7 +1044,8 @@ class RunDescriptor(PropDescriptor):
         # Remove suffix
         name = self.rremove(ws_name,self._ws_suffix)
         if self._run_list:
-            sumExt = self._run_list.sum_ext()
+            summed = RunDescriptor._holder.sum_runs
+            sumExt = self._run_list.sum_ext(summed)
         else:
             sumExt = ''
         if len(sumExt) > 0:

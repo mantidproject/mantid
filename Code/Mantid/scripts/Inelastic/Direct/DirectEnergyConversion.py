@@ -208,11 +208,11 @@ class DirectEnergyConversion(object):
             white.add_masked_ws(white_data)
             DeleteWorkspace(Workspace='white_ws_clone')
             diag_mask,n_masks  = white.get_masking()
-         if not(out_ws_name in None):
+         if not(out_ws_name is None):
             dm = CloneWorkspace(diag_mask,OutputWorkspace=out_ws_name)
-            return dm,n_masks
+            return dm
          else:
-            return
+            return None
 
       # Get the white beam vanadium integrals
       whiteintegrals = self.do_white(white, None, None) # No grouping yet
@@ -261,8 +261,7 @@ class DirectEnergyConversion(object):
       if not(white_mask is None) and not(sample_mask is None):
          # nothing to do then 
          total_mask = sample_mask+white_mask
-         total_masked = n_sam_masked+num_masked
-         return (total_mask, total_masked)
+         return total_mask
       else:
          pass # have to run diagnostics after all
 
@@ -286,6 +285,7 @@ class DirectEnergyConversion(object):
              if white_masked_ws:
                 white.add_masked_ws(white_masked_ws)
                 DeleteWorkspace(white_masked_ws)
+
       if out_ws_name:
         if not(diag_sample is None):
             diag_sample.add_masked_ws(whiteintegrals)
@@ -294,10 +294,8 @@ class DirectEnergyConversion(object):
         else: # either WB was diagnosed or WB masks were applied to it
             # Extract a mask workspace
             diag_mask, det_ids = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=out_ws_name)
-            n_removed =len(det_ids)
       else:
           diag_mask=None
-          n_removed =None
       # Clean up
       if 'sample_counts' in diag_params:
           DeleteWorkspace(Workspace='background_int')
@@ -306,7 +304,7 @@ class DirectEnergyConversion(object):
            DeleteWorkspace(Workspace=diag_params['second_white'])
       DeleteWorkspace(Workspace=whiteintegrals)
 
-      return diag_mask,n_removed
+      return diag_mask
 
 #-------------------------------------------------------------------------------
     def convert_to_energy(self,wb_run=None,sample_run=None,ei_guess=None,rebin=None,map_file=None,
@@ -377,7 +375,7 @@ class DirectEnergyConversion(object):
      # if it is set that way
       if not masks_done:
         prop_man.log("======== Run diagnose for sample run ===========================",'notice')
-        masking,num_failed = self.diagnose(PropertyManager.wb_run,PropertyManager.mask_run,
+        masking = self.diagnose(PropertyManager.wb_run,PropertyManager.mask_run,
                                 second_white=None,print_diag_results=True)
         if prop_man.use_hard_mask_only:
             header = "*** Hard mask file applied to workspace with {0:d} spectra masked {1:d} spectra"
@@ -398,7 +396,7 @@ class DirectEnergyConversion(object):
                                                                                                          # solution for that.
                         prop_man.log("======== Run diagnose for monochromatic vanadium run ===========",'notice')
 
-                        masking2,num_failed2 = self.diagnose(PropertyManager.wb_for_monovan_run,PropertyManager.monovan_run,
+                        masking2 = self.diagnose(PropertyManager.wb_for_monovan_run,PropertyManager.monovan_run,
                                          second_white = None,print_diag_results=True)
                         masking +=  masking2
                         DeleteWorkspace(masking2)
@@ -407,7 +405,7 @@ class DirectEnergyConversion(object):
             else: # if Reducer.mono_correction_factor != None :
                 pass
         else:
-            num_failed2=0
+            pass
         # Very important statement propagating masks for further usage in
         # convert_to_energy.
         # This property is also directly accessible from GUI.
@@ -419,11 +417,9 @@ class DirectEnergyConversion(object):
       else:
           header = '*** Using stored mask file for workspace with  {0} spectra and {1} masked spectra'
           masking = self.spectra_masks 
-          num_failed  = 0 #TODO extract this from stored masks
-          num_failed2 = 0
  
       # estimate and report the number of failing detectors
-      nMaskedSpectra = num_failed+num_failed2
+      nMaskedSpectra = get_failed_spectra_list_from_masks(masking)
       if masking:
          nSpectra = masking.getNumberHistograms()
       else:
@@ -1536,7 +1532,23 @@ class DirectEnergyConversion(object):
         white_tag = 'NormBy:{0}_IntergatedIn:{1:0>10.2f}:{2:0>10.2f}'.format(self.normalise_method,low,upp)
         return white_tag
 
+def get_failed_spectra_list_from_masks(masked_wksp):
+    """Compile a list of spectra numbers that are marked as
+       masked in the masking workspace
 
+       Input:
+       masking_workspace - A special masking workspace containing masking data
+    """
+    #TODO: get rid of this and use data, obtained form diagnostics
+    failed_spectra = []
+    if masked_wksp is None:
+       return (failed_spectra,0)
+
+    masking_wksp,sp_list = ExtractMask(masked_wksp)
+    DeleteWorkspace(masking_wksp)
+
+    n_spectra = len(sp_list)
+    return n_spectra
 #-----------------------------------------------------------------
 if __name__ == "__main__":
     pass

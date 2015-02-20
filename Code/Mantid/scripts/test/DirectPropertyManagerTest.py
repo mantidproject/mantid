@@ -991,10 +991,28 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue('missing_runs_toSum' in err_list)
         self.assertEqual(err_list['missing_runs_toSum'],'[11111]')
 
+    def test_custom_print(self):
 
+       propman = self.prop_man
+       propman.sample_run = 1000
+       propman.incident_energy = 20.
 
+       def custom_print(propman,PropertyManager):
 
+           ei = propman.incident_energy
+           run_n = PropertyManager.sample_run.run_number()
+           name = "RUN{0}atEi{1:<4.1f}meV_One2One".format(run_n,ei)
+           return name
 
+       PropertyManager.save_file_name.set_custom_print(custom_print)
+
+                                               
+       self.assertEqual(propman.save_file_name,'RUN1000atEi20.0meV_One2One')
+
+       propman.sample_run = 2000
+       self.assertEqual(propman.save_file_name,'RUN2000atEi20.0meV_One2One')
+       # clean up
+       PropertyManager.save_file_name.set_custom_print(None)
 
 if __name__=="__main__":
     unittest.main()

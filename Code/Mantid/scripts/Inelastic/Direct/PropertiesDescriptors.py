@@ -313,10 +313,14 @@ class SaveFileName(PropDescriptor):
     """
     def __init__(self,Name=None):
        self._file_name = Name
+       self._custom_print = None
     def __get__(self,instance,owner=None):
 
         if instance is None:
            return self
+        if not (self._custom_print is None):
+           return self._custom_print(instance,owner)
+
         if self._file_name:
             return self._file_name
         else:
@@ -342,6 +346,8 @@ class SaveFileName(PropDescriptor):
 
     def __set__(self,instance,value):
         self._file_name = value
+    def set_custom_print(self,routine):
+        self._custom_print = routine
 #end SaveFileName
 #-----------------------------------------------------------------------------------------
 class InstrumentDependentProp(PropDescriptor):
