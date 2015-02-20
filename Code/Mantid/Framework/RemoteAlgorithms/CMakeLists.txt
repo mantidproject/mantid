@@ -37,8 +37,9 @@ set ( TEST_FILES
 #)
 # No tests yet...
 
-# Add a precompiled header where they are supported
-enable_precompiled_headers ( inc/MantidRemoteAlgorithms/PrecompiledHeader.h SRC_FILES )
+# Not for now, remember later if convenient: Add a precompiled header where they are supported
+# enable_precompiled_headers ( inc/MantidRemoteAlgorithms/PrecompiledHeader.h SRC_FILES )
+
 # Add the target for this directory
 add_library ( RemoteAlgorithms ${SRC_FILES} ${INC_FILES})
 
