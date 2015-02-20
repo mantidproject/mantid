@@ -37,11 +37,21 @@ namespace // anonymous
  */
 template <typename T>
 bool convertLogToDouble(const Mantid::Kernel::Property *property,
-                        double &value) {
+                        double &value, const std::string& function) {
   const Mantid::Kernel::TimeSeriesProperty<T> *log =
       dynamic_cast<const Mantid::Kernel::TimeSeriesProperty<T> *>(property);
   if (log) {
-    value = static_cast<double>(log->lastValue());
+    if (function=="Mean") {
+      value = static_cast<double>(log->timeAverageValue());
+    } else if (function=="First") {
+      value = static_cast<double>(log->firstValue());
+    } else if (function=="Min") {
+      value = static_cast<double>(log->minValue());
+    } else if (function=="Max") {
+      value = static_cast<double>(log->maxValue());
+    } else { // Default
+      value = static_cast<double>(log->lastValue());
+    }
     return true;
   }
   auto tlog =
@@ -160,6 +170,8 @@ void PlotAsymmetryByLogValue::exec() {
   // Get runs
   std::string firstFN = getProperty("FirstRun");
   std::string lastFN = getProperty("LastRun");
+  // Get function to apply to logValue
+  m_logFunc = getProperty("Function");
 
   // Parse run names and get the number of runs
   std::string fnBase, fnExt;
@@ -630,24 +642,23 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
   if (!property) {
     throw std::invalid_argument("Log " + m_logName + " does not exist.");
   }
-
   double value = 0;
   // try different property types
-  if (convertLogToDouble<double>(property, value))
+  if (convertLogToDouble<double>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<float>(property, value))
+  if (convertLogToDouble<float>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<int>(property, value))
+  if (convertLogToDouble<int>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<long>(property, value))
+  if (convertLogToDouble<long>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<long long>(property, value))
+  if (convertLogToDouble<long long>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<unsigned int>(property, value))
+  if (convertLogToDouble<unsigned int>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<unsigned long>(property, value))
+  if (convertLogToDouble<unsigned long>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<unsigned long long>(property, value))
+  if (convertLogToDouble<unsigned long long>(property, value, m_logFunc))
     return value;
   // try if it's a string and can be lexically cast to double
   auto slog =
