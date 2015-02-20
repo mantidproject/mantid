@@ -119,6 +119,9 @@ void ConvertCWPDMDToSpectra::exec() {
 
   // Set up the sample logs
   setupSampleLogs(outws, inputDataWS);
+  g_log.notice() << "[DB] output workspace has "
+                 << outws->run().getProperties().size() << " properties."
+                 << "\n";
 
   // Output units
   std::string outputunit = getProperty("UnitOutput");
@@ -140,6 +143,8 @@ void ConvertCWPDMDToSpectra::exec() {
           outws->run().getProperty(wavelengthpropertyname)->value().c_str());
     }
     convertUnits(outws, outputunit, wavelength);
+  } else {
+    outws->getAxis(0)->setUnit("degree");
   }
   // Return
   setProperty("OutputWorkspace", outws);
@@ -175,14 +180,16 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
   sizex = static_cast<size_t>((max2theta - min2theta) / binsize + 0.5);
   sizey = sizex - 1;
   g_log.notice() << "[DB] "
-                 << "SizeX = " << sizex << ", "
-                 << "SizeY = " << sizey << "\n";
+                 << "bin size = " << binsize << ", SizeX = " << sizex << ", "
+                 << ", SizeY = " << sizey << "\n";
   std::vector<double> vecx(sizex), vecy(sizex - 1, 0), vecm(sizex - 1, 0),
       vece(sizex - 1, 0);
   std::vector<bool> veczerocounts(sizex - 1, false);
 
-  for (size_t i = 0; i < sizex; ++i)
+  for (size_t i = 0; i < sizex; ++i) {
     vecx[i] = min2theta + static_cast<double>(i) * binsize;
+    // g_log.notice() << "[DB] " << "x[" << i << "] = " << vecx[i] << "\n";
+  }
 
   binMD(dataws, vecx, vecy);
   binMD(monitorws, vecx, vecm);
@@ -217,9 +224,18 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
                  << " pos1 = " << posn << "\n";
                  */
 
-  // Create workspace
+  // Create workspace and set values
   API::MatrixWorkspace_sptr pdws =
       WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
+  MantidVec &dataX = pdws->dataX(0);
+  for (size_t i = 0; i < sizex; ++i)
+    dataX[i] = vecx[i];
+  MantidVec &dataY = pdws->dataY(0);
+  MantidVec &dataE = pdws->dataE(0);
+  for (size_t i = 0; i < sizey; ++i) {
+    dataY[i] = vecy[i];
+    dataE[i] = vece[i];
+  }
 
   // Interpolation
   double infinitesimal = 0.1 / (maxmonitorcounts);
@@ -416,13 +432,16 @@ void ConvertCWPDMDToSpectra::setupSampleLogs(
       inputmdws->getExperimentInfo(lastindex);
 
   // get hold of experiment info from matrix ws
-  Run targetrun = matrixws->mutableRun();
+  Run &targetrun = matrixws->mutableRun();
   const Run &srcrun = lastexpinfo->run();
+
+  g_log.notice("[DB] Cloning properties.... ");
 
   const std::vector<Kernel::Property *> &vec_srcprop = srcrun.getProperties();
   for (size_t i = 0; i < vec_srcprop.size(); ++i) {
     Property *p = vec_srcprop[i];
     targetrun.addProperty(p->clone());
+    g_log.notice() << "\tCloned property " << p->name() << "\n";
   }
 
   return;
@@ -478,6 +497,12 @@ void ConvertCWPDMDToSpectra::convertUnits(API::MatrixWorkspace_sptr matrixws,
         vecX[j] = calculateQ(vecX[j] * 0.5, wavelength);
     }
   }
+
+  // Set unit
+  if (target == 'd')
+    matrixws->getAxis(0)->setUnit("dSpacing");
+  else
+    matrixws->getAxis(0)->setUnit("MomentumTransfer");
 
   return;
 }
