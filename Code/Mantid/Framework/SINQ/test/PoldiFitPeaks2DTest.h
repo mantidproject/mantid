@@ -7,6 +7,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 
 #include "MantidSINQ/PoldiFitPeaks2D.h"
+#include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -208,8 +209,14 @@ public:
 
         for(size_t i = 0; i < poldi2DFunction->nFunctions(); ++i) {
             IFunction_sptr rawFunction = poldi2DFunction->getFunction(i);
-            TS_ASSERT(boost::dynamic_pointer_cast<IFunction1DSpectrum>(rawFunction));
-            TS_ASSERT_EQUALS(rawFunction->getParameter(0), static_cast<double>(peaks->peak(i)->intensity()) * 300.0);
+            boost::shared_ptr<PoldiSpectrumDomainFunction> poldiFunction =
+                boost::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(rawFunction);
+
+            TS_ASSERT(poldiFunction);
+
+            IPeakFunction_sptr wrappedFunction = poldiFunction->getProfileFunction();
+
+            TS_ASSERT_DELTA(wrappedFunction->intensity(), static_cast<double>(peaks->peak(i)->intensity()), 1e-10);
         }
     }
 
@@ -219,7 +226,6 @@ public:
         spectrumCalculator.initialize();
 
         PoldiPeakCollection_sptr peaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
-
         IFunction_sptr poldi2DFunction = spectrumCalculator.getFunctionFromPeakCollection(peaks);
 
         PoldiPeakCollection_sptr peaksFromFunction = spectrumCalculator.getPeakCollectionFromFunction(poldi2DFunction);
@@ -231,7 +237,6 @@ public:
 
             TS_ASSERT_EQUALS(functionPeak->d(), referencePeak->d());
             TS_ASSERT_EQUALS(functionPeak->fwhm(), referencePeak->fwhm());
-            TS_ASSERT_EQUALS(functionPeak->intensity(), referencePeak->intensity() * 300.0);
         }
     }
 

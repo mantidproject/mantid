@@ -18,7 +18,6 @@ use the Build/wiki_maker.py script to generate your full wiki page.
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
-#include "MantidAPI/PeakFunctionIntegrator.h"
 #include "MantidAPI/IPeakFunction.h"
 
 #include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
@@ -217,7 +216,7 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(
     if (wrappedProfile) {
       wrappedProfile->setCentre(peak->d());
       wrappedProfile->setFwhm(peak->fwhm(PoldiPeak::AbsoluteD));
-      wrappedProfile->setHeight(peak->intensity() * 300.0);
+      wrappedProfile->setIntensity(peak->intensity());
     }
 
     mdFunction->addFunction(peakFunction);
@@ -581,8 +580,6 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getIntegratedPeakCollection(
         "Cannot integrate peak profiles without profile function.");
   }
 
-  PeakFunctionIntegrator peakIntegrator(1e-10);
-
   PoldiPeakCollection_sptr integratedPeakCollection =
       boost::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
   integratedPeakCollection->setProfileFunctionName(
@@ -595,30 +592,12 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getIntegratedPeakCollection(
         boost::dynamic_pointer_cast<IPeakFunction>(
             FunctionFactory::Instance().createFunction(
                 rawPeakCollection->getProfileFunctionName()));
+
     profileFunction->setHeight(peak->intensity());
     profileFunction->setFwhm(peak->fwhm(PoldiPeak::AbsoluteD));
 
-    /* Because the integration is running from -inf to inf, it is necessary
-     * to set the centre to 0. Otherwise the transformation performed by
-     * the integration routine will create problems.
-     */
-    profileFunction->setCentre(0.0);
-
-    IntegrationResult integration =
-        peakIntegrator.integrateInfinity(*profileFunction);
-
-    if (!integration.success) {
-      throw std::runtime_error("Problem during peak integration. Aborting.");
-    }
-
     PoldiPeak_sptr integratedPeak = peak->clone();
-    /* Integration is performed in the time domain and later everything is
-     * normalized
-     * by deltaT. In the original code this is done at this point, so this
-     * behavior is kept
-     * for now.
-     */
-    integratedPeak->setIntensity(UncertainValue(integration.result));
+    integratedPeak->setIntensity(UncertainValue(profileFunction->intensity()));
     integratedPeakCollection->addPeak(integratedPeak);
   }
 
