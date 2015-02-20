@@ -1041,12 +1041,18 @@ install ( FILES ${CONFIG_RESET_SCRIPT} DESTINATION ${BIN_DIR} )
 # this causes fail of the installation with macports
 # therefore MACPORTS option is introduced
 if ( APPLE )
-  if (OSX_VERSION VERSION_LESS 10.9 OR MACPORTS)
+  if (OSX_VERSION VERSION_LESS 10.9)
     configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in
                    ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake
                    @ONLY )
 
     install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake )
+  elseif (MACPORTS)
+        install ( FILES  package_python_macports.py DESTINATION MantidPlot.app/ )
+        configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixMacportsBundle.cmake.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/FixMacportsBundle.cmake
+                   @ONLY )
+        install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixMacportsBundle.cmake )
   else ()
     install ( FILES  make_package.rb DESTINATION MantidPlot.app/ )
     configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixMavericksBundle.cmake.in

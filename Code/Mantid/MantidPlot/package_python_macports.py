@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Script to pack the python libraries
 to the dmg package created with clang+macports
@@ -6,7 +7,8 @@ import sys, shutil, os
 from distutils.spawn import find_executable
 
 # path to copy the libraries
-OUTPUT_PATH = "/Users/ganeva/build/jcns-mantid/build/bin/MantidPlot.app/Contents/MacOS"
+#OUTPUT_PATH = "/Users/ganeva/build/jcns-mantid/build/bin/MantidPlot.app/Contents/MacOS"
+OUTPUT_PATH = os.path.abspath("Contents/MacOS")
 
 # list of the python libraries to copy
 PYTHON_LIBRARIES = ['sphinx', 'sphinx_bootstrap_theme', 'IPython', 'zmq', 'pygments', \
