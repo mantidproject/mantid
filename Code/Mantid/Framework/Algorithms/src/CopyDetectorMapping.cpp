@@ -14,10 +14,10 @@ using namespace API;
 
 void CopyDetectorMapping::init() {
   declareProperty(
-      new WorkspaceProperty<>("WorkspaceToMatch", "", Direction::Input));
+      new WorkspaceProperty<MatrixWorkspace>("WorkspaceToMatch", "", Direction::Input));
 
   declareProperty(
-      new WorkspaceProperty<>("WorkspaceToRemap", "", Direction::InOut));
+      new WorkspaceProperty<MatrixWorkspace>("WorkspaceToRemap", "", Direction::InOut));
 
   declareProperty(
       new PropertyWithValue<bool>("IndexBySpectrumNumber", false, Direction::Input),
