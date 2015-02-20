@@ -18,7 +18,33 @@
 namespace Mantid {
 namespace Poldi {
 
+/**
+ * @brief Helper struct for POLDI 2D spectrum calculation
+ *
+ * This helper struct collects some quantities that are required
+ * for calculating POLDI 2D spectra with arbitrary profile functions.
+ *
+ * Bragg peak-parameters are stored in terms of d and their profiles
+ * are also calculated d-dependent. The helper struct helps transforming
+ * the d-spectrum to the arrival time spectrum, for example by translating
+ * the chopper slit timing offsets into fractions of a d-bin. Also, it
+ * holds the d-bins for a given 2theta, because the d-resolution at
+ * each angle is different at the current POLDI setup.
+ *
+ * Also it provides intensity multiplication factors for each 2theta value.
+ *
+ * Having these things available removes the need of transforming parameters
+ * on each call to PoldiSpectrumDomainFunction::function() and thus makes
+ * PoldiSpectrumDomainFunction independent of knowing anything about the profile
+ * function that is used.
+ */
 struct MANTID_SINQ_DLL Poldi2DHelper {
+  /// Default constructor
+  Poldi2DHelper()
+      : dFractionalOffsets(), dOffsets(), domain(), factors(), deltaD(),
+        minTOFN() {}
+
+  /// Transforms the chopper slit offsets for a given 2theta/distance pair.
   void setChopperSlitOffsets(double distance, double sinTheta, double deltaD,
                              const std::vector<double> &offsets) {
     dFractionalOffsets.clear();
@@ -32,6 +58,7 @@ struct MANTID_SINQ_DLL Poldi2DHelper {
     }
   }
 
+  /// Generates the d-domain with the given parameters.
   void setDomain(double dMin, double dMax, double deltaD) {
     int dMinN = static_cast<int>(dMin / deltaD);
     int dMaxN = static_cast<int>(dMax / deltaD);
@@ -46,6 +73,7 @@ struct MANTID_SINQ_DLL Poldi2DHelper {
     domain = boost::make_shared<API::FunctionDomain1DVector>(current);
   }
 
+  /// Calculates intensity factors for each point in the spectrum domain.
   void setFactors(const PoldiTimeTransformer_sptr &timeTransformer,
                   size_t index) {
     factors.clear();
@@ -70,6 +98,17 @@ struct MANTID_SINQ_DLL Poldi2DHelper {
 
 typedef boost::shared_ptr<Poldi2DHelper> Poldi2DHelper_sptr;
 
+/**
+ * @brief The LocalJacobian class
+ *
+ * Transformation of the d-based profile into the arrival time based profile
+ * is just a matter of multiplication by a constant factor. This means that
+ * the derivatives of the profile function can be obtained for a given
+ * range, using a small "local" jacobian matrix. The values from this matrix
+ * are then copied to the right place in the actual Jacobian. This makes
+ * PoldiSpectrumDomainFunction independent from knowing anything about
+ * how the derivatives of the profile function are calculated.
+ */
 class LocalJacobian : public API::Jacobian {
 public:
   /// Constructor
@@ -131,10 +170,22 @@ protected:
   std::vector<double> m_jacobian;
 };
 
-/** PoldiSpectrumDomainFunction : TODO: DESCRIPTION
+/** PoldiSpectrumDomainFunction
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
+    PoldiSpectrumDomainFunction wraps an IPeakFunction. The parameters
+    of the wrapped profile function are given in terms of d, whereas
+    PoldiSpectrumDomainFunction operates in terms of "arrival time", which
+    is specific to the POLDI experiment.
+
+    The wrapped profile function is controlled by the "ProfileFunction"
+    attribute. Setting the attribute creates the function in question and
+    exposes its parameters as the parameters of PoldiSpectrumDomainFunction
+    which can then be used for fitting.
+
+        @author Michael Wedel, Paul Scherrer Institut - SINQ
+        @date 16/05/2014
+
+    Copyright © 2014,2015 PSI-MSS
 
     This file is part of Mantid.
 
@@ -209,11 +260,8 @@ protected:
 
   std::vector<double> m_chopperSlitOffsets;
   double m_deltaT;
-
   PoldiTimeTransformer_sptr m_timeTransformer;
-
   std::vector<Poldi2DHelper_sptr> m_2dHelpers;
-
   API::IPeakFunction_sptr m_profileFunction;
 };
 

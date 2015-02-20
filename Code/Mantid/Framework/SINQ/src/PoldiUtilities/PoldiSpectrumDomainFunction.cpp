@@ -23,7 +23,7 @@ PoldiSpectrumDomainFunction::PoldiSpectrumDomainFunction()
  * Sets the workspace and initializes helper data
  *
  * This method calls
- *PoldiSpectrumDomainFunction::initializeParametersFromWorkspace to
+ * PoldiSpectrumDomainFunction::initializeParametersFromWorkspace to
  * setup the factors required for calculation of the spectrum with given index.
  *
  * @param ws :: Workspace with valid POLDI instrument and run information
@@ -44,9 +44,9 @@ void PoldiSpectrumDomainFunction::setWorkspace(
 /**
  * Performs the actual function calculation
  *
- * This method performs the necessary transformations for the parameters and
- *calculates the function
- * values for the spectrum with the index stored in domain.
+ * This method calculates a peak profile and transforms the resulting function
+ * values from the d-based domain into the desired arrival time based domain,
+ * using Poldi2DHelper.
  *
  * @param domain :: FunctionDomain1DSpectrum, containing a workspace index
  * @param values :: Object to store the calculated function values
@@ -92,8 +92,8 @@ void PoldiSpectrumDomainFunction::function1DSpectrum(
           &localOut[0], helper->domain->getPointerAt(pos), dWidthN);
 
       for (size_t j = 0; j < dWidthN; ++j) {
-        values.setCalculated((offset + j) % domainSize,
-                             localOut[j] * helper->factors[pos + j]);
+        values.addToCalculated((offset + j) % domainSize,
+                               localOut[j] * helper->factors[pos + j]);
       }
     }
 
@@ -101,6 +101,15 @@ void PoldiSpectrumDomainFunction::function1DSpectrum(
   }
 }
 
+/**
+ * Calculates derivatives
+ *
+ * The method calculates derivatives of the wrapped profile function and
+ * transforms them into the correct domain.
+ *
+ * @param domain :: FunctionDomain1DSpectrum, containing a workspace index
+ * @param jacobian :: Jacobian matrix.
+ */
 void PoldiSpectrumDomainFunction::functionDeriv1DSpectrum(
     const FunctionDomain1DSpectrum &domain, Jacobian &jacobian) {
   size_t index = domain.getWorkspaceIndex();
@@ -144,7 +153,9 @@ void PoldiSpectrumDomainFunction::functionDeriv1DSpectrum(
       for (size_t j = 0; j < dWidthN; ++j) {
         size_t off = (offset + j) % domainSize;
         for (size_t p = 0; p < np; ++p) {
-          jacobian.set(off, p, smallJ.getRaw(j, p) * helper->factors[pos + j]);
+          jacobian.set(off, p,
+                       jacobian.get(off, p) +
+                           smallJ.getRaw(j, p) * helper->factors[pos + j]);
         }
       }
     }
@@ -163,46 +174,64 @@ PoldiSpectrumDomainFunction::poldiFunction1D(const std::vector<int> &indices,
   m_profileFunction->functionLocal(localValues.getPointerToCalculated(0),
                                    domain.getPointerAt(0), domain.size());
 
+  double chopperSlitCount = static_cast<double>(m_chopperSlitOffsets.size());
+
   for (auto index = indices.begin(); index != indices.end(); ++index) {
     std::vector<double> factors(domain.size());
 
     for (size_t i = 0; i < factors.size(); ++i) {
       values.addToCalculated(i,
-                             8.0 * localValues[i] *
+                             chopperSlitCount * localValues[i] *
                                  m_timeTransformer->detectorElementIntensity(
                                      domain[i], static_cast<size_t>(*index)));
     }
   }
 }
 
+/// Sets the active parameter i on the wrapped IPeakFunction.
 void PoldiSpectrumDomainFunction::setActiveParameter(size_t i, double value) {
   m_profileFunction->setActiveParameter(i, value);
 }
 
+/// Returns the value of the active parameter i of the wrapped IPeakFunction.
 double PoldiSpectrumDomainFunction::activeParameter(size_t i) const {
   return m_profileFunction->activeParameter(i);
 }
 
+/// Sets the i-th parameter of the wrapped IPeakFunction.
 void PoldiSpectrumDomainFunction::setParameter(size_t i, const double &value,
                                                bool explicitlySet) {
   m_profileFunction->setParameter(i, value, explicitlySet);
 }
 
+/// Sets the value of the named parameter of the wrapped IPeakFunction.
 void PoldiSpectrumDomainFunction::setParameter(const std::string &name,
                                                const double &value,
                                                bool explicitlySet) {
   ParamFunction::setParameter(name, value, explicitlySet);
 }
 
+/// Returns the value of the i-th parameter of the wrapped IPeakFunction.
 double PoldiSpectrumDomainFunction::getParameter(size_t i) const {
   return m_profileFunction->getParameter(i);
 }
 
+/// Returns the value of the named parameter of the wrapped IPeakFunction.
 double
 PoldiSpectrumDomainFunction::getParameter(const std::string &name) const {
   return getParameter(parameterIndex(name));
 }
 
+/**
+ * @brief Sets the attribute value and constructs a wrapped profile function
+ *
+ * If the "ProfileFunction"-attribute is set, all parameters of this function
+ * are cleared and the new profile function is created. If successfull, its
+ * parameters are exposed.
+ *
+ * @param attName :: Name of the attribute.
+ * @param attValue :: Value of the attribute.
+ */
 void PoldiSpectrumDomainFunction::setAttribute(
     const std::string &attName, const IFunction::Attribute &attValue) {
   ParamFunction::setAttribute(attName, attValue);
@@ -215,6 +244,7 @@ void PoldiSpectrumDomainFunction::setAttribute(
   }
 }
 
+/// Sets the wrapped profile function and constructs an instance of it.
 void PoldiSpectrumDomainFunction::setProfileFunction(
     const std::string &profileFunctionName) {
   try {
@@ -227,10 +257,13 @@ void PoldiSpectrumDomainFunction::setProfileFunction(
   }
 }
 
+/// Returns a smart pointer to the wrapped profile function.
 IPeakFunction_sptr PoldiSpectrumDomainFunction::getProfileFunction() const {
   return m_profileFunction;
 }
 
+/// Exposes the parameters of the supplied function as if they were declared
+/// on this function.
 void PoldiSpectrumDomainFunction::exposeFunctionParameters(
     const IFunction_sptr &function) {
 
@@ -244,9 +277,7 @@ void PoldiSpectrumDomainFunction::exposeFunctionParameters(
   }
 }
 
-/**
- * Initializes function parameters
- */
+/// Initialize ProfileFunction attribute.
 void PoldiSpectrumDomainFunction::init() {
   declareAttribute("ProfileFunction", Attribute(""));
 }
@@ -255,8 +286,7 @@ void PoldiSpectrumDomainFunction::init() {
  * Extracts the time difference as well as instrument information
  *
  * @param workspace2D :: Workspace with valid POLDI instrument and required
- *run
- *information
+ *                       run information
  */
 void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(
     const Workspace2D_const_sptr &workspace2D) {
@@ -272,13 +302,10 @@ void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(
  * Initializes chopper offsets and time transformer
  *
  * In this method, the instrument dependent parameter for the calculation are
- *setup, so that a PoldiTimeTransformer is
- * available to transfer parameters to the time domain using correct factors
- *etc.
+ * setup, so that a PoldiTimeTransformer is available to transfer parameters to
+ * the time domain using correct factors etc.
  *
- * @param poldiInstrument :: PoldiInstrumentAdapter that holds chopper,
- *detector
- *and spectrum
+ * @param poldiInstrument :: Valid PoldiInstrumentAdapter
  */
 void PoldiSpectrumDomainFunction::initializeInstrumentParameters(
     const PoldiInstrumentAdapter_sptr &poldiInstrument) {
@@ -322,7 +349,7 @@ void PoldiSpectrumDomainFunction::initializeInstrumentParameters(
  * Adds the zero-offset of the chopper to the slit times
  *
  * @param chopper :: PoldiAbstractChopper with slit times, not corrected with
- *zero-offset
+ *                   zero-offset
  * @return vector with zero-offset-corrected chopper slit times
  */
 std::vector<double> PoldiSpectrumDomainFunction::getChopperSlitOffsets(
