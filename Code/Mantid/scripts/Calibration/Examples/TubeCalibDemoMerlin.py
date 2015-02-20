@@ -99,11 +99,11 @@ def calibrateMerlin(filename):
     CalibratedComponent = 'MERLIN/door9'    # door9
   # == Get the calibration and put results into calibration table ==
   # also put peaks into PeakFile
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, door9pos, door9func,\
-        outputPeak=True,\
-    margin=30,\
-    rangeList=range(20)\ # because 20, 21, 22, 23 are defective detectors
-    )
+    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, door9pos, door9func,
+        outputPeak=True,
+        margin=30,
+        rangeList=range(20) # because 20, 21, 22, 23 are defective detectors
+        )
     print "Got calibration (new positions of detectors) and put slit peaks into file TubeDemoMerlin01.txt"
     analisePeakTable(peakTable, 'door9_tube1_peaks')
 
@@ -111,10 +111,10 @@ def calibrateMerlin(filename):
     door8pos = points7
     door8func = points7func
     CalibratedComponent = 'MERLIN/door8'
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, door8pos,\
-        door8func,\
-    outputPeak = True,\ #change to peakTable to append to peakTable
-    calibTable = calibrationTable,\
+    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, door8pos,
+        door8func,
+    outputPeak = True, #change to peakTable to append to peakTable
+    calibTable = calibrationTable,
     margin = 30)
     analisePeakTable(peakTable, 'door8_peaks')
 
