@@ -181,7 +181,7 @@ int InternetHelper::processRelocation(const HTTPResponse &response,
 * @param responseStream The stream to fill with the reply on success
 * @param headers A optional key value pair map of any additional headers to
 * include in the request. A default 'Content-Type: application/json' is used
-* unless the 'Content-Type' key is included here with a different value.
+* unless setContentType() is called.
 * @param method Generally GET (default) or POST.
 * @param body The request body to send.
 **/
