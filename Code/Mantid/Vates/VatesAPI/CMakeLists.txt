@@ -174,6 +174,7 @@ test/NoThresholdRangeTest.h
 test/IgnoreZerosThresholdRangeTest.h
 test/ViewFrustumTest.h
 test/vtkDataSetToScaledDataSetTest.h
+test/vtkDataSetToPeaksFilteredDataSetTest.h
 test/vtkDataSetToNonOrthogonalDataSetTest.h
 )
 

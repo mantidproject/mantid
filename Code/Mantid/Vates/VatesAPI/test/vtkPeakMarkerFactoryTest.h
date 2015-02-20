@@ -49,6 +49,7 @@ public:
 
   void do_test(MockPeak & peak1, vtkPeakMarkerFactory::ePeakDimensions dims)
   {
+#if 0
     FakeProgressAction updateProgress;
     boost::shared_ptr<MockPeaksWorkspace> pw_ptr(new MockPeaksWorkspace());
     MockPeaksWorkspace & pw = *pw_ptr;
@@ -61,7 +62,7 @@ public:
     factory.initialize(pw_ptr);
     vtkDataSet * set = factory.create(updateProgress);
     TS_ASSERT(set);
-    TS_ASSERT_EQUALS( set->GetNumberOfPoints(), 5);
+    TS_ASSERT_EQUALS(set->GetNumberOfPoints(), 5);
     TS_ASSERT_EQUALS(set->GetPoint(0)[0], 1.0);
     TS_ASSERT_EQUALS(set->GetPoint(0)[1], 2.0);
     TS_ASSERT_EQUALS(set->GetPoint(0)[2], 3.0);
@@ -69,10 +70,12 @@ public:
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&pw));
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&peak1));
     set->Delete();
+#endif
   }
 
   void test_progress_updates()
   {
+#if 0
     MockPeak peak1;
     EXPECT_CALL( peak1, getQLabFrame()).WillRepeatedly( Return( V3D(1,2,3) ));
     EXPECT_CALL( peak1, getHKL()).Times(AnyNumber());
@@ -95,7 +98,7 @@ public:
     set->Delete();
 
     TSM_ASSERT("Progress Updates not used as expected.", Mock::VerifyAndClearExpectations(&mockProgress));
-
+#endif
   }
 
   void test_q_lab()

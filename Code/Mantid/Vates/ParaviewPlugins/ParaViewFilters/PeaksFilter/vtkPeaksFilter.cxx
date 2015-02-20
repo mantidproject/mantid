@@ -1,5 +1,11 @@
 #include "vtkPeaksFilter.h"
 #include "MantidVatesAPI/vtkDataSetToPeaksFilteredDataSet.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidVatesAPI/FieldDataToMetadata.h"
+#include "MantidVatesAPI/MetadataJsonManager.h"
+#include "MantidVatesAPI/VatesConfigurations.h"
+#include <boost/scoped_ptr.hpp>
 
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
@@ -33,15 +39,40 @@ int vtkPeaksFilter::RequestData(vtkInformation*, vtkInformationVector **inputVec
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
   vtkUnstructuredGrid *outputDataSet = vtkUnstructuredGrid::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
+  // Get the peaks workspace
+  if (!Mantid::API::AnalysisDataService::Instance().doesExist(m_peaksWorkspaceName))
+  {
+  return 0;
+  }
+
+  Mantid::API::IPeaksWorkspace_sptr peaksWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::IPeaksWorkspace>(m_peaksWorkspaceName);
+
   vtkDataSetToPeaksFilteredDataSet peaksFilter(inputDataSet, outputDataSet);
-  peaksFilter.initialize(m_peaksWorkspaceName, m_radiusNoShape, m_radiusType);
+  peaksFilter.initialize(peaksWorkspace, m_radiusNoShape, m_radiusType);
   peaksFilter.execute();
 
   return 1;
 }
 
-int vtkPeaksFilter::RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*)
+int vtkPeaksFilter::RequestInformation(vtkInformation*, vtkInformationVector** inputVector, vtkInformationVector*)
 {
+  // Set the meta data 
+  vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
+  vtkUnstructuredGrid *inputDataSet = vtkUnstructuredGrid::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
+
+  vtkFieldData* fieldData = inputDataSet->GetFieldData();
+  
+  // Extract information for meta data in Json format.
+  FieldDataToMetadata fieldDataToMetadata;
+
+#if 0
+  std::string jsonString = fieldDataToMetadata(fieldData, m_vatesConfigurations->getMetadataIdJson());
+  m_metadataJsonManager->readInSerializedJson(jsonString);
+
+  m_minValue = m_metadataJsonManager->getMinValue();
+  m_maxValue = m_metadataJsonManager->getMaxValue();
+  m_instrument = m_metadataJsonManager->getInstrument();
+#endif
   return 1;
 }
 

@@ -523,15 +523,10 @@ void SplatterPlotView::createPeaksFilter()
     this->renderAll();
 
     m_peaksFilter = filter;
-
-
   } catch(std::runtime_error &ex)
   {
     g_log.warning() << ex.what();
   }
-  
-
-
 }
 
 } // SimpleGui

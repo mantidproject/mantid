@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include <string>
 
 class vtkUnstructuredGrid;
@@ -44,7 +45,7 @@ namespace VATES
       vtkDataSetToPeaksFilteredDataSet(vtkUnstructuredGrid *input, vtkUnstructuredGrid *output);
       virtual ~vtkDataSetToPeaksFilteredDataSet();
       /// Set the name of the peaks workspace
-      void initialize(std::string peaksWorkpspaceName, double radiusNoShape, int radiusType);
+      void initialize(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, double radiusNoShape, int radiusType);
       /// Apply the peak filtering
       void execute();
     private:
@@ -52,7 +53,7 @@ namespace VATES
       std::vector<std::pair<Mantid::Kernel::V3D, double>> getPeaksInfo();
       vtkUnstructuredGrid *m_inputData; ///< Data to peak filter
       vtkUnstructuredGrid *m_outputData; ///< Peak filtered data
-      std::string m_peaksWorkspaceName; ///< The name of the peaks workspace.
+      Mantid::API::IPeaksWorkspace_sptr m_peaksWorkspace; ///< The name of the peaks workspace.
       bool m_isInitialised; ///<Flag if the filter is initialized
       double m_radiusNoShape; ///< The radius for peaks with no peak shape.
       int m_radiusType;

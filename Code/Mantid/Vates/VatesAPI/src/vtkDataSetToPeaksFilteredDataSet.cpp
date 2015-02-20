@@ -1,5 +1,4 @@
 #include "MantidVatesAPI/vtkDataSetToPeaksFilteredDataSet.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidDataObjects/NoShape.h"
@@ -35,24 +34,24 @@ namespace VATES
 {
   /**
     * Standard constructor for object.
-    * @param input : The dataset to scale
-    * @param output : The resulting scaled dataset
+    * @param input : The dataset to peaks filter
+    * @param output : The resulting peaks filtered dataset
     */
   vtkDataSetToPeaksFilteredDataSet::vtkDataSetToPeaksFilteredDataSet(vtkUnstructuredGrid *input,
                                                                      vtkUnstructuredGrid *output) :
-                                                              m_inputData(input),
-                                                              m_outputData(output),
-                                                              m_isInitialised(false),
-                                                              m_radiusNoShape(1.0),
-                                                              m_radiusType(0)
+                                                                    m_inputData(input),
+                                                                    m_outputData(output),
+                                                                    m_isInitialised(false),
+                                                                    m_radiusNoShape(1.0),
+                                                                    m_radiusType(0)
   {
     if (NULL == m_inputData)
     {
-      throw std::runtime_error("Cannot construct vtkDataSetToScaledDataSet with NULL input vtkUnstructuredGrid");
+      throw std::runtime_error("Cannot construct vtkDataSetToPeaksFilteredDataSet with NULL input vtkUnstructuredGrid");
     }
     if (NULL == m_outputData)
     {
-      throw std::runtime_error("Cannot construct vtkDataSetToScaledDataSet with NULL output vtkUnstructuredGrid");
+      throw std::runtime_error("Cannot construct vtkDataSetToPeaksFilteredDataSet with NULL output vtkUnstructuredGrid");
     }
   }
 
@@ -68,9 +67,9 @@ namespace VATES
     * @param radiusNoShape : The peak radius for no shape.
     * @param radiusType : The type of the radius: Radius(0), Outer Radius(10, Inner Radius(1)
     */
-  void vtkDataSetToPeaksFilteredDataSet::initialize(std::string peaksWorkspaceName, double radiusNoShape, int radiusType)
+  void vtkDataSetToPeaksFilteredDataSet::initialize(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, double radiusNoShape, int radiusType)
   {
-    m_peaksWorkspaceName = peaksWorkspaceName;
+    m_peaksWorkspace = peaksWorkspace;
     m_radiusNoShape = radiusNoShape;
     m_radiusType = radiusType;
     m_isInitialised = true;
@@ -141,30 +140,28 @@ namespace VATES
 
     //Extract
     m_outputData->ShallowCopy(extractSelection->GetOutput());
+
+    // Update the metadata
+
   }
 
   /**
-   * Get the peaks information 
+   * Get the peaks information which is the position and the largest radius of the peak.
    * @returns A list of peaks with position and radius information
    */
   std::vector<std::pair<Mantid::Kernel::V3D, double>> vtkDataSetToPeaksFilteredDataSet::getPeaksInfo()
   {
-    // Get the peaks workps
-    if (!Mantid::API::AnalysisDataService::Instance().doesExist(m_peaksWorkspaceName))
-    {
-      throw std::invalid_argument("The peaks workspace does not seem to exist.");
-    }
-
-    Mantid::API::IPeaksWorkspace_sptr peaksWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::IPeaksWorkspace>(m_peaksWorkspaceName);
-    Mantid::Kernel::ReadLock lock(*peaksWorkspace);
-    const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = peaksWorkspace->getSpecialCoordinateSystem();
+    Mantid::Kernel::ReadLock lock(*m_peaksWorkspace);
+    const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = m_peaksWorkspace->getSpecialCoordinateSystem();
+    
+    int numPeaks = m_peaksWorkspace->getNumberPeaks();
 
     // Iterate over all peaks and store their information
-    std::vector<std::pair<Mantid::Kernel::V3D, double>> peaksInfo(peaksWorkspace->getNumberPeaks());
+    std::vector<std::pair<Mantid::Kernel::V3D, double>> peaksInfo(numPeaks);
 
-    for (int i = 0; i < peaksWorkspace->getNumberPeaks(); i++)
+    for (int i = 0; i < numPeaks ; i++)
     {
-      Mantid::API::IPeak* peak = peaksWorkspace->getPeakPtr(i);
+      Mantid::API::IPeak* peak = m_peaksWorkspace->getPeakPtr(i);
 
       // Get radius, check directly for name and don't cast
       double radius;
@@ -172,7 +169,7 @@ namespace VATES
       const Mantid::Geometry::PeakShape& shape = peak->getPeakShape();
       std::string shapeName = shape.shapeName();
 
-      if (shapeName == "spherical")
+      if (shapeName == Mantid::DataObjects::PeakShapeSpherical::sphereShapeName())
       {
         const Mantid::DataObjects::PeakShapeSpherical& sphericalShape = dynamic_cast<const Mantid::DataObjects::PeakShapeSpherical&>(shape);
         if (m_radiusType == 0)
@@ -194,7 +191,7 @@ namespace VATES
           throw std::invalid_argument("The shperical peak shape does not have a radius. \n");
         }
       }
-      else if (shapeName == "ellipsoid")
+      else if (shapeName == Mantid::DataObjects::PeakShapeEllipsoid::ellipsoidShapeName())
       {
         const Mantid::DataObjects::PeakShapeEllipsoid& ellipticalShape = dynamic_cast<const Mantid::DataObjects::PeakShapeEllipsoid&>(shape);
         if (m_radiusType == 0)
@@ -214,16 +211,12 @@ namespace VATES
         }
         else 
         {
-          throw std::invalid_argument("The shperical peak shape does not have a radius. \n");
+          throw std::invalid_argument("The ellipsoidal peak shape does not have a radius. \n");
         }
       }
-      else if (shapeName == "none")
+      else
       {
         radius = m_radiusNoShape;
-      }
-      else 
-      {
-        throw std::invalid_argument("An unknown peak shape was registered.");
       }
 
       // Get position
@@ -242,7 +235,6 @@ namespace VATES
           throw std::invalid_argument("The special coordinate systems don't match.");
       }
     }
-
     return peaksInfo;
   }
 }
