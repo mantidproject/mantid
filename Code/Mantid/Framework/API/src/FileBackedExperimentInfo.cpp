@@ -14,7 +14,6 @@ namespace {
 
 /// static logger object
 Kernel::Logger g_log("FileBackedExperimentInfo");
-
 }
 
 //----------------------------------------------------------------------------------------------
@@ -24,17 +23,26 @@ Kernel::Logger g_log("FileBackedExperimentInfo");
   * @param path Path to the location of the data
   */
 FileBackedExperimentInfo::FileBackedExperimentInfo(::NeXus::File *file,
-                                                   const std::string & path)
-    : ExperimentInfo(), m_loaded(false), m_file(file), m_path(path) {
+                                                   const std::string &path)
+    : ExperimentInfo(), m_empty(true), m_file(file), m_path(path) {}
+
+//----------------------------------------------------------------------------------------------
+
+/**
+ * @return A clone of the object
+ */
+ExperimentInfo *FileBackedExperimentInfo::cloneExperimentInfo() const {
+  checkAndPopulate();
+  return ExperimentInfo::cloneExperimentInfo();
 }
 
 //----------------------------------------------------------------------------------------------
+
 /// @returns A human-readable description of the object
-const std::string FileBackedExperimentInfo::toString() {
+const std::string FileBackedExperimentInfo::toString() const {
   checkAndPopulate();
   return ExperimentInfo::toString();
 }
-
 
 //------------------------------------------------------------------------------------------------------
 // Private members
@@ -43,9 +51,8 @@ const std::string FileBackedExperimentInfo::toString() {
  * Check if the object has been populated and load the information if
  * it has not
  */
-void FileBackedExperimentInfo::checkAndPopulate()
-{
-  if (!m_loaded) {
+void FileBackedExperimentInfo::checkAndPopulate() const {
+  if (m_empty) {
     populateFromFile();
   }
 }
@@ -53,20 +60,21 @@ void FileBackedExperimentInfo::checkAndPopulate()
 /**
  * Populate this object with the data from the file
  */
-void FileBackedExperimentInfo::populateFromFile() {
+void FileBackedExperimentInfo::populateFromFile() const {
   try {
     m_file->openPath(m_path);
     // Get the sample, logs, instrument
     std::string parameterStr;
-    this->loadExperimentInfoNexus(m_file, parameterStr);
+    const_cast<FileBackedExperimentInfo*>(this)->loadExperimentInfoNexus(m_file, parameterStr);
     // Now do the parameter map
-    this->readParameterMap(parameterStr);
+    const_cast<FileBackedExperimentInfo*>(this)->readParameterMap(parameterStr);
   } catch (::NeXus::Exception &exc) {
     std::ostringstream os;
-    os << "Unable to load experiment information from NeXus file: " << exc.what() << "\n";
+    os << "Unable to load experiment information from NeXus file: "
+       << exc.what() << "\n";
     throw std::runtime_error(os.str());
   }
-  m_loaded = true;
+  m_empty = false;
 }
 
 } // namespace API

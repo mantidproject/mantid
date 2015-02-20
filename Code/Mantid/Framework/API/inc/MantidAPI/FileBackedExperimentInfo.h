@@ -39,15 +39,15 @@ public:
   /// Constructor
   FileBackedExperimentInfo(::NeXus::File *file, const std::string & path);
 
-  /// Returns a string description of the object
-  const std::string toString();
+  ExperimentInfo *cloneExperimentInfo() const;
+  const std::string toString() const;
 
 private:
 
-  void checkAndPopulate();
-  void populateFromFile();
+  void checkAndPopulate() const;
+  void populateFromFile() const;
 
-  bool m_loaded;
+  mutable bool m_empty;
   ::NeXus::File *m_file;
   std::string m_path;
 };

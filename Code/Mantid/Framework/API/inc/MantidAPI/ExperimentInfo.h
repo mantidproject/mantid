@@ -48,10 +48,10 @@ public:
   /// Copy everything from the given experiment object
   void copyExperimentInfoFrom(const ExperimentInfo *other);
   /// Clone us
-  ExperimentInfo *cloneExperimentInfo() const;
+  virtual ExperimentInfo *cloneExperimentInfo() const;
 
   /// Returns a string description of the object
-  const std::string toString() const;
+  virtual const std::string toString() const;
 
   /// Instrument accessors
   void setInstrument(const Geometry::Instrument_const_sptr &instr);

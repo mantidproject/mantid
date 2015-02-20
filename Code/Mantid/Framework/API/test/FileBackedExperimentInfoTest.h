@@ -30,26 +30,30 @@ public:
     }
     
     m_inMemoryExptInfo = boost::make_shared<ExperimentInfo>();
-   ::NeXus::File nexusFile(m_filename, NXACC_READ);
-    nexusFile.openGroup("MDEventWorkspace", "NXentry");
-    nexusFile.openGroup("experiment0", "NXgroup");
+    m_nexusFile = boost::make_shared< ::NeXus::File >(m_filename, NXACC_READ);
+    m_nexusFile->openGroup("MDEventWorkspace", "NXentry");
+    m_nexusFile->openGroup("experiment0", "NXgroup");
     std::string paramString;
-    m_inMemoryExptInfo->loadExperimentInfoNexus(&nexusFile, paramString);
+    m_inMemoryExptInfo->loadExperimentInfoNexus(m_nexusFile.get(), paramString);
     m_inMemoryExptInfo->readParameterMap(paramString);
   }
   
-  void test_toString_method_returns_same_as_ExperimentInfo_class()
+  void test_toString_populates_object()
   {
-    // Load the file we want to use
-    ::NeXus::File nexusFile(m_filename, NXACC_READ);
-
-    // Create the file backed experiment info, shouldn't be loaded yet
-    FileBackedExperimentInfo fileBacked(&nexusFile, "/MDEventWorkspace/experiment0");
-
-    TS_ASSERT_EQUALS(fileBacked.toString(), m_inMemoryExptInfo->toString());
+    auto fileBacked = createTestObject();
+    TS_ASSERT_EQUALS(fileBacked->toString(), m_inMemoryExptInfo->toString());
   }
 
-  //------------------------------------------------------------------------------------------------a
+  void test_cloneExperimentInfo_populates_object()
+  {
+    auto fileBacked = createTestObject();
+    auto *clonedFileBacked = fileBacked->cloneExperimentInfo();
+    
+    TS_ASSERT_EQUALS(clonedFileBacked->toString(), m_inMemoryExptInfo->toString());
+    delete clonedFileBacked;
+  }
+  
+  //------------------------------------------------------------------------------------------------
   // Failure tests
   //------------------------------------------------------------------------------------------------
   void test_runtime_error_generated_when_unable_to_load_from_file()
@@ -65,8 +69,21 @@ public:
   }
   
 private:
-  std::string m_filename;
+  
+  Mantid::API::ExperimentInfo_sptr createTestObject()
+  {
+    // Load the file we want to use
+    ::NeXus::File nexusFile(m_filename, NXACC_READ);
+    // Create the file backed experiment info, shouldn't be loaded yet. Manipulate it through
+    // the interface
+    return boost::make_shared<FileBackedExperimentInfo>(m_nexusFile.get(),
+                                                        "/MDEventWorkspace/experiment0");
+    
+  }
+  
+  boost::shared_ptr< ::NeXus::File > m_nexusFile;
   Mantid::API::ExperimentInfo_sptr m_inMemoryExptInfo;
+  std::string m_filename;
 };
 
 
