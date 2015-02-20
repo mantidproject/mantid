@@ -9,11 +9,11 @@
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
+const std::string outputName = "MuonRemoveExpDecay_Output";
+
 class RemoveExpDecayTest : public CxxTest::TestSuite
 {
 public:
-
-  const std::string outputName = "MuonRemoveExpDecay_Output";
 
   void testInit()
   {
