@@ -5,6 +5,27 @@ from mantid.simpleapi import *
 
 class InelasticIndirectReduction(DataProcessorAlgorithm):
 
+    _out_ws_group = None
+    _data_files = None
+    _instrument = None
+    _analyser = None
+    _reflection = None
+    _param_file = None
+    _detector_range = None
+    _background_range = None
+    _calib_ws_name = None
+    _detailed_balance = None
+    _rebin_string = None
+    _scale_factor = None
+    _sum_files = None
+    _map_file = None
+    _save_formats = None
+    _plot_type = None
+    _use_calib_ws = None
+    _use_detailed_balance = None
+    _use_scale_factor = None
+    _plot_ws = None
+
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
 
