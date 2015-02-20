@@ -268,17 +268,17 @@ def improvingCalibrationOfListOfTubes(filename):
     #CalibInstWS = loadingStep(filename)
 
     # it is defined as the mean values around the neighbours
-    define_peaks = {19:[10, 80.9771, 123.221, 164.993, 245.717],\ # the first one was bad
-        37: [6.36, 80.9347, 122.941, 165.104, 248.32],\ # the first one was bad
-        71: [8.62752, 85.074, 124.919, 164.116, 246.82 ],\ # the last one was bad - check if we can inprove
-        75: [14.4285, 90.087, 128.987, 167.047, 242.62],\ # the last one was bad - check if we can inprove
-        181: [11.726, 94.0496, 137.816,  180, 255],\ # the third peak was lost
-        186:[11.9382, 71.5203, 107, 147.727, 239.041],\ #lost the second peak
-        234: [4.84, 82.7824, 123.125, 163.945, 241.877],\ # the first one was bad
-        235: [4.84, 80.0077, 121.002, 161.098, 238.502],\ # the first one was bad
-        245: [9.88089, 93.0593, 136.911, 179.5, 255],\ # the third peak was bad
-        273: [18.3711, 105.5, 145.5, 181.6, 243.252],\ # lost first and third peaks
-        345: [4.6084, 87.0351, 128.125, 169.923, 245.3]\ # the last one was bad
+    define_peaks = {19:[10, 80.9771, 123.221, 164.993, 245.717], # the first one was bad
+        37: [6.36, 80.9347, 122.941, 165.104, 248.32], # the first one was bad
+        71: [8.62752, 85.074, 124.919, 164.116, 246.82 ], # the last one was bad - check if we can inprove
+        75: [14.4285, 90.087, 128.987, 167.047, 242.62], # the last one was bad - check if we can inprove
+        181: [11.726, 94.0496, 137.816,  180, 255], # the third peak was lost
+        186:[11.9382, 71.5203, 107, 147.727, 239.041], #lost the second peak
+        234: [4.84, 82.7824, 123.125, 163.945, 241.877], # the first one was bad
+        235: [4.84, 80.0077, 121.002, 161.098, 238.502], # the first one was bad
+        245: [9.88089, 93.0593, 136.911, 179.5, 255], # the third peak was bad
+        273: [18.3711, 105.5, 145.5, 181.6, 243.252], # lost first and third peaks
+        345: [4.6084, 87.0351, 128.125, 169.923, 245.3] # the last one was bad
         }
     calibrationTable, peakTable= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
                                                 fitPar=fitPar, outputPeak=True, overridePeaks=define_peaks)
@@ -486,12 +486,12 @@ def completeCalibration(filename):
     fitPar.setAutomatic(True)
 
     # apply the calibration for the b2_window 2 strips values
-    calibrationTable, peak2Table = tube.calibrate(CalibInstWS, CalibratedComponent,\
-        knownPos,\  #these parameters now have only 4 points
-        funcFactor,\
-        fitPar=fitPar,\
-        outputPeak=True,\
-        calibTable = calibrationTable,\ # it will append to the calibTable
+    calibrationTable, peak2Table = tube.calibrate(CalibInstWS, CalibratedComponent,
+        knownPos,  #these parameters now have only 4 points
+        funcFactor,
+        fitPar=fitPar,
+        outputPeak=True,
+        calibTable = calibrationTable, # it will append to the calibTable
         rangeList = b2_window)
 
     ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
