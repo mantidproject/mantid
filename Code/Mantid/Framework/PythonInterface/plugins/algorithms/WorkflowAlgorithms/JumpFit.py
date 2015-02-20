@@ -37,7 +37,8 @@ class JumpFit(PythonAlgorithm):
 
 
     def PyExec(self):
-        from mantid.simpleapi import ExtractSingleSpectrum, Scale, Fit, CopyLogs, AddSampleLog, DeleteWorkspace
+        from mantid.simpleapi import ExtractSingleSpectrum, Fit, CopyLogs, AddSampleLog, \
+                                     DeleteWorkspace
         from mantid import logger, mtd
         from IndirectCommon import StartTime, EndTime
 
@@ -47,7 +48,8 @@ class JumpFit(PythonAlgorithm):
 
         # Select the width we wish to fit
         spectrum_ws = "__" + self._in_ws
-        ExtractSingleSpectrum(InputWorkspace=self._in_ws, OutputWorkspace=spectrum_ws, WorkspaceIndex=self._width)
+        ExtractSingleSpectrum(InputWorkspace=self._in_ws, OutputWorkspace=spectrum_ws,
+                              WorkspaceIndex=self._width)
 
         logger.information('Cropping from Q= ' + str(self._q_min) + ' to ' + str(self._q_max))
         in_run = mtd[self._in_ws].getRun()

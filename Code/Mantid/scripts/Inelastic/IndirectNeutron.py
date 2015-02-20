@@ -3,10 +3,9 @@
 from IndirectImport import *
 from mantid.simpleapi import *
 from mantid import config, logger, mtd, FileFinder
-from mantid.kernel import V3D
 import sys, math, os.path, numpy as np
 from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt
-mp = import_mantidplot()
+MTD_PLOT = import_mantidplot()
 
 #  Routines for Ascii file of raw data
 
@@ -94,7 +93,7 @@ def ReadIbackGroup(a,first):                           #read Ascii block of spec
 def getFilePath(run,ext,instr):
     path = None
     fname = None
-    if(os.path.isfile(run)):
+    if os.path.isfile(run):
         #using full file path
         path = run
         #base name less extension
@@ -255,7 +254,7 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Plot,Save):      #Ascii s
         opath = os.path.join(workdir,outWS+'.nxs')
         SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
         logger.information('Output file : ' + opath)
-    if (Plot):
+    if Plot:
         plotForce(outWS,Plot)
     EndTime('Iback')
 
@@ -347,7 +346,7 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,mapPath,Plot,Save):
         opath = os.path.join(workdir,outWS+'.nxs')
         SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
         logger.information('Output file : ' + opath)
-    if (Plot):
+    if Plot:
         plotForce(outWS,Plot)
     EndTime('Inx')
 
@@ -364,7 +363,8 @@ def RejectZero(inWS,tot):
             if nout == 0:
                 RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
             else:
-                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',CheckOverlapping=False)
+                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',
+                                  CheckOverlapping=False)
             nout += 1
         else:
             logger.information('** spectrum '+str(n+1)+' rejected')
@@ -378,7 +378,7 @@ def ReadMap(path):
     logger.information('Map file : ' + path +' ; spectra = ' +str(lasc-1))
     val = ExtractInt(asc[0])
     numb = val[0]
-    if (numb != (lasc-1)):
+    if numb != (lasc-1):
         error = 'Number of lines  not equal to number of spectra'
         logger.error(error)
         sys.exit(error)
@@ -388,7 +388,7 @@ def ReadMap(path):
         map.append(val[1])
     return map
 
-def UseMap(inWS,map):
+def UseMap(inWS, map):
     nin = mtd[inWS].getNumberHistograms()                      # no. of hist/groups in sam
     nout = 0
     outWS = inWS[:-3]+'red'
@@ -399,28 +399,29 @@ def UseMap(inWS,map):
             if nout == 0:
                 RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
             else:
-                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',CheckOverlapping=False)
+                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',
+                                  CheckOverlapping=False)
             nout += 1
             logger.information('** spectrum '+str(n+1)+' mapped')
         else:
             logger.information('** spectrum '+str(n+1)+' skipped')
 
 def plotForce(inWS,Plot):
-    if (Plot == 'Spectrum' or Plot == 'Both'):
+    if Plot == 'Spectrum' or Plot == 'Both':
         nHist = mtd[inWS].getNumberHistograms()
         if nHist > 10 :
             nHist = 10
         plot_list = []
         for i in range(0, nHist):
             plot_list.append(i)
-        res_plot=mp.plotSpectrum(inWS,plot_list)
-    if (Plot == 'Contour' or Plot == 'Both'):
-        cont_plot=mp.importMatrixWorkspace(inWS).plotGraph2D()
+        MTD_PLOT.plotSpectrum(inWS,plot_list)
+    if Plot == 'Contour' or Plot == 'Both':
+        MTD_PLOT.importMatrixWorkspace(inWS).plotGraph2D()
 
 def ChangeAngles(inWS,instr,theta):
     workdir = config['defaultsave.directory']
-    file = instr+'_angles.txt'
-    path = os.path.join(workdir, file)
+    filename = instr+'_angles.txt'
+    path = os.path.join(workdir, filename)
     logger.information('Creating angles file : ' + path)
     handle = open(path, 'w')
     head = 'spectrum,theta'
@@ -594,7 +595,7 @@ def IN13Read(instr,run,ana,refl,Plot,Save):      #Ascii start routine
         opath = os.path.join(workdir,outWS+'.nxs')
         SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
         logger.information('Output file : ' + opath)
-    if (Plot != 'None'):
+    if Plot != 'None':
         plotForce(outWS,Plot)
     return outWS
 

@@ -20,7 +20,6 @@ set ( SRC_FILES
 	src/PoldiTruncateData.cpp
 	src/PoldiUtilities/IPoldiFunction1D.cpp
 	src/PoldiUtilities/MillerIndices.cpp
-        src/PoldiUtilities/PeakFunctionIntegrator.cpp
 	src/PoldiUtilities/Poldi2DFunction.cpp
 	src/PoldiUtilities/PoldiAutoCorrelationCore.cpp
 	src/PoldiUtilities/PoldiBasicChopper.cpp
@@ -71,7 +70,6 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiUtilities/IPoldiFunction1D.h
 	inc/MantidSINQ/PoldiUtilities/MillerIndices.h
 	inc/MantidSINQ/PoldiUtilities/MillerIndicesIO.h
-        inc/MantidSINQ/PoldiUtilities/PeakFunctionIntegrator.h
 	inc/MantidSINQ/PoldiUtilities/Poldi2DFunction.h
 	inc/MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h
 	inc/MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h
@@ -107,7 +105,6 @@ set ( TEST_FILES
 	MDHistoToWorkspace2DTest.h
 	MillerIndicesIOTest.h
 	MillerIndicesTest.h
-        PeakFunctionIntegratorTest.h
 	Poldi2DFunctionTest.h
 	PoldiAnalyseResidualsTest.h
 	PoldiAutoCorrelationCoreTest.h

@@ -1,7 +1,7 @@
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
-from mantid import config, logger
+from mantid import logger
 
 
 class IndirectResolution(DataProcessorAlgorithm):
@@ -19,7 +19,8 @@ class IndirectResolution(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                              optional=PropertyMode.Optional,
                              direction=Direction.Output),
-                             doc='Output resolution workspace (if left blank a name will be gernerated automatically)')
+                             doc='Output resolution workspace (if left blank a name will '
+                                 'be gernerated automatically)')
 
         self.declareProperty(name='Instrument', defaultValue='',
                              validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA']),
@@ -36,16 +37,18 @@ class IndirectResolution(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0.0, 0.0]),
                              doc='Energy range to use as background')
 
-        self.declareProperty(name='RebinParam', defaultValue='', doc='Rebinning parameters (min,width,max)')
-        self.declareProperty(name='ScaleFactor', defaultValue=1.0, doc='Factor to scale resolution curve by')
+        self.declareProperty(name='RebinParam', defaultValue='',
+                             doc='Rebinning parameters (min,width,max)')
+        self.declareProperty(name='ScaleFactor', defaultValue=1.0,
+                             doc='Factor to scale resolution curve by')
 
         self.declareProperty(name='Plot', defaultValue=False, doc='Plot resolution curve')
-        self.declareProperty(name='Save', defaultValue=False, doc='Save resolution workspace as a Nexus file')
+        self.declareProperty(name='Save', defaultValue=False,
+                             doc='Save resolution workspace as a Nexus file')
 
 
     def PyExec(self):
         from IndirectCommon import StartTime, EndTime, getWSprefix
-        import inelastic_indirect_reducer
 
         StartTime('IndirectResolution')
         self._setup()
@@ -106,18 +109,25 @@ class IndirectResolution(DataProcessorAlgorithm):
         """
 
         use_scale_factor = self._scale_factor == 1.0
-        AddSampleLog(Workspace=self._out_ws, LogName='scale', LogType='String', LogText=str(use_scale_factor))
+        AddSampleLog(Workspace=self._out_ws, LogName='scale',
+                     LogType='String', LogText=str(use_scale_factor))
         if use_scale_factor:
-            AddSampleLog(Workspace=self._out_ws, LogName='scale_factor', LogType='Number', LogText=str(self._scale_factor))
+            AddSampleLog(Workspace=self._out_ws, LogName='scale_factor',
+                         LogType='Number', LogText=str(self._scale_factor))
 
-        AddSampleLog(Workspace=self._out_ws, LogName='back_start', LogType='Number', LogText=str(self._background[0]))
-        AddSampleLog(Workspace=self._out_ws, LogName='back_end', LogType='Number', LogText=str(self._background[1]))
+        AddSampleLog(Workspace=self._out_ws, LogName='back_start',
+                     LogType='Number', LogText=str(self._background[0]))
+        AddSampleLog(Workspace=self._out_ws, LogName='back_end',
+                     LogType='Number', LogText=str(self._background[1]))
 
         rebin_params = self._rebin_string.split(',')
         if len(rebin_params) == 3:
-            AddSampleLog(Workspace=self._out_ws, LogName='rebin_low', LogType='Number', LogText=rebin_params[0])
-            AddSampleLog(Workspace=self._out_ws, LogName='rebin_width', LogType='Number', LogText=rebin_params[1])
-            AddSampleLog(Workspace=self._out_ws, LogName='rebin_high', LogType='Number', LogText=rebin_params[2])
+            AddSampleLog(Workspace=self._out_ws, LogName='rebin_low',
+                         LogType='Number', LogText=rebin_params[0])
+            AddSampleLog(Workspace=self._out_ws, LogName='rebin_width',
+                         LogType='Number', LogText=rebin_params[1])
+            AddSampleLog(Workspace=self._out_ws, LogName='rebin_high',
+                         LogType='Number', LogText=rebin_params[2])
 
         self.setProperty('OutputWorkspace', self._out_ws)
 
