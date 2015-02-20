@@ -26,7 +26,7 @@ def setup_reducer(inst_name,reload_instrument=False):
 
 class DirectEnergyConversion(object):
     """
-    Performs a convert to energy assuming the provided instrument is
+    Performs a convert to energy assuming the provided instrument is 
     an direct inelastic geometry instrument
 
     The class defines various methods to allow users to convert their
@@ -34,7 +34,7 @@ class DirectEnergyConversion(object):
 
     Usage:
     >>red = DirectEnergyConversion('InstrumentName')
-      and then:
+      and then: 
     >>red.convert_to_energy(wb_run,sample_run,ei_guess,rebin)
       or
     >>red.convert_to_energy(wb_run,sample_run,ei_guess,rebin,**arguments)
@@ -42,7 +42,7 @@ class DirectEnergyConversion(object):
     >>red.convert_to_energy(wb_run,sample_run,ei_guess,rebin,mapfile,**arguments)
       or
     >>red.prop_man.sample_run = run number
-    >>red.prop_man.wb_run     = Whitebeam
+    >>red.prop_man.wb_run     = Whitebeam 
     >>red.prop_man.incident_energy = energy guess
     >>red.prop_man.energy_bins = [min_val,step,max_val]
     >>red.convert_to_energy()
@@ -51,14 +51,14 @@ class DirectEnergyConversion(object):
     Whitebeam run number or file name or workspace
     sample_run  sample run number or file name or workspace
     ei_guess    suggested value for incident energy of neutrons in direct inelastic instrument
-    energy_bins energy binning requested for resulting spe workspace.
+    energy_bins energy binning requested for resulting spe workspace. 
     mapfile     Mapfile -- if absent/'default' the defaults from IDF are used
     monovan_run If present will do the absolute units normalization. Number of additional parameters
                 specified in **kwargs is usually requested for this. If they are absent,
                 program uses defaults, but the defaults (e.g. sample_mass or sample_rmm )
                 are usually incorrect for a particular run.
     arguments   The dictionary containing additional keyword arguments.
-                The list of allowed additional arguments is defined in InstrName_Parameters.xml
+                The list of allowed additional arguments is defined in InstrName_Parameters.xml 
                 file, located in:
                 MantidPlot->View->Preferences->Mantid->Directories->Parameter Definitions
 
@@ -87,13 +87,13 @@ class DirectEnergyConversion(object):
 
    bkgd_range  =[15000,19000]  :integration range for background tests
 
-   second_white     - If provided an additional set of tests is performed on this.
+   second_white     - If provided an additional set of tests is performed on this. 
                          (default = None)
    hardmaskPlus     - A file specifying those spectra that should be masked
                          without testing (default=None)
    tiny             - Minimum threshold for acceptance (default = 1e-10)
    large            - Maximum threshold for acceptance (default = 1e10)
-   bkgd_range       - A list of two numbers indicating the background range
+   bkgd_range       - A list of two numbers indicating the background range 
                          (default=instrument defaults)
    diag_van_median_rate_limit_lo  - Lower bound defining outliers as fraction of median value (default = 0.01)
    diag_van_median_rate_limit_hi  - Upper bound defining outliers as fraction of median value (default = 100.)
@@ -220,7 +220,7 @@ class DirectEnergyConversion(object):
          self.second_white = other_whiteintegrals
 
       # Get the background/total counts from the sample run if present
-        if diag_sample:
+      if diag_sample: 
          diag_sample = self.get_run_descriptor(diag_sample)
          # If the bleed test is requested then we need to pass in the
          # sample_run as well
@@ -278,7 +278,7 @@ class DirectEnergyConversion(object):
                           monovan_run=None,wb_for_monovan_run=None,**kwargs):
       """ One step conversion of run into workspace containing information about energy transfer
 
-      """
+      """ 
       # Support for old reduction interface:
       self.prop_man.set_input_parameters_ignore_nan\
            (wb_run=wb_run,sample_run=sample_run,incident_energy=ei_guess,energy_bins=rebin,
@@ -384,7 +384,7 @@ class DirectEnergyConversion(object):
       else:
           header = '*** Using stored mask file for workspace with  {0} spectra and {1} masked spectra'
           masking = self.spectra_masks
-
+ 
       # estimate and report the number of failing detectors
       failed_sp_list,nMaskedSpectra = get_failed_spectra_list_from_masks(masking)
       if masking:
@@ -424,12 +424,12 @@ class DirectEnergyConversion(object):
             bkgd_range = self.bkgd_range
             bkgr_ws=self._find_or_build_bkgr_ws(ws_base,bkgd_range[0],bkgd_range[1])
             RenameWorkspace(InputWorkspace=bkgr_ws, OutputWorkspace='bkgr_ws_source')
-         # initialize list to store resulting workspaces to return
+         # initialize list to store resulting workspaces to return 
          result = []
       else:
          self._multirep_mode = False
          num_ei_cuts = 0
-
+ 
       cut_ind = 0 # do not do enumerate if it generates all sequence at once
       #  -- code below uses current energy state from
                        #  PropertyManager.incident_energy
@@ -445,14 +445,14 @@ class DirectEnergyConversion(object):
          #Run the conversion first on the sample
          deltaE_ws_sample = self.mono_sample(PropertyManager.sample_run,ei_guess,PropertyManager.wb_run,
                                              self.map_file,masking)
-
+ 
          # calculate absolute units integral and apply it to the workspace
          cashed_mono_int = PropertyManager.mono_correction_factor.get_val_from_cash(prop_man)
          if MonovanCashNum != None or self.mono_correction_factor or cashed_mono_int :
             # do not remove background from vanadium (sample background is not fit for that anyway)
             current_bkg_opt = self.check_background
             self.check_background= False
-            # what we want to do with absolute units:
+            # what we want to do with absolute units: 
             if self.mono_correction_factor: # Correction provided. Just apply it
                 deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,
                                                                       ei_guess,PropertyManager.wb_for_monovan_run)
@@ -481,8 +481,8 @@ class DirectEnergyConversion(object):
          prop_man.log("*** Incident energy found for sample run: {0} meV".format(ei),'notice')
          #
          self.save_results(deltaE_ws_sample)
-            if out_ws_name:
-                if self._multirep_mode:
+         if out_ws_name: 
+            if self._multirep_mode: 
                result.append(deltaE_ws_sample)
          else: # delete workspace if no output is requested
             self.sample_run = None
@@ -555,7 +555,7 @@ class DirectEnergyConversion(object):
 #-------------------------------------------------------------------------------
     def calculate_rotation(self,sample_wkspace,motor=None, offset=None):
         """calculate psi from sample environment motor and offset
-
+       
            TODO: should probably go to properties
         """
 
@@ -641,13 +641,13 @@ class DirectEnergyConversion(object):
                InstrumentParameter="DelayTime",Combine=True)
 
         # shift to monitor used to calculate energy transfer
-        spec_num = monitor_ws.getIndexFromSpectrumNumber(int(ei_mon_spectra[0]))
+        spec_num = monitor_ws.getIndexFromSpectrumNumber(int(ei_mon_spectra[0])) 
         mon1_det = monitor_ws.getDetector(spec_num)
         mon1_pos = mon1_det.getPos()
         src_name = data_ws.getInstrument().getSource().getName()
-        MoveInstrumentComponent(Workspace=resultws_name,ComponentName= src_name, X=mon1_pos.getX(),
+        MoveInstrumentComponent(Workspace=resultws_name,ComponentName= src_name, X=mon1_pos.getX(), 
                                 Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
-
+ 
         #
         data_run.synchronize_ws(mtd[resultws_name])
         return ei, mon1_peak
@@ -709,7 +709,7 @@ class DirectEnergyConversion(object):
         return output
     #
     def _normalize_to_monitor1(self,run,old_name,range_offset=0.0,external_monitor_ws=None):
-        """ Helper method implementing  normalize_to_monitor1 """
+        """ Helper method implementing  normalize_to_monitor1 """ 
 
         # get monitor's workspace
         separate_monitors = run.is_monws_separate()
@@ -749,12 +749,12 @@ class DirectEnergyConversion(object):
 
 
 
-        NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, IntegrationRangeMin=range_min,
+        NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name, IntegrationRangeMin=range_min, 
                            IntegrationRangeMax=range_max,IncludePartialBins=True,**kwargs)
         return ('monitor-1',old_name)
     #
     def _normalize_to_monitor2(self,run,old_name, range_offset=0.0,external_monitor_ws=None):
-        """ Helper method implementing  normalize_to_monitor_2 """
+        """ Helper method implementing  normalize_to_monitor_2 """ 
 
       # get monitor's workspace
         separate_monitors = run.is_monws_separate()
@@ -764,7 +764,7 @@ class DirectEnergyConversion(object):
         else:
            mon_ws = run.get_monitors_ws()
 
-
+ 
         if not mon_ws: # no monitors
            if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not
                                              # have monitors
@@ -799,7 +799,7 @@ class DirectEnergyConversion(object):
            if mon_ws_name.find('_shifted') != -1:
               # monitor-2 normalization ranges have to be identified before the
               # instrument is shifted
-                raise RuntimeError("Instrument have been shifted but no time range has been identified. Monitor-2 normalization can not be performed ")
+              raise RuntimeError("Instrument have been shifted but no time range has been identified. Monitor-2 normalization can not be performed ") 
            else:
               # instrument and workspace shifted, so TOF will be calculated wrt
               # shifted instrument
@@ -809,15 +809,15 @@ class DirectEnergyConversion(object):
               range_max = TOF_range[1]
 
        # Normalize to monitor 2
-        NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name,IntegrationRangeMin=range_min,
+        NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name,IntegrationRangeMin=range_min, 
                            IntegrationRangeMax=range_max,IncludePartialBins=True,**kwargs)
         return ('monitor-2',old_name)
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
     def find_tof_range_for_multirep(self,workspace):
-        """ Find range of tof-s (and time bin size) corresponding to the
+        """ Find range of tof-s (and time bin size) corresponding to the 
             energy range requested
-        """
+        """ 
         if not workspace:
            workspace = PropertyManager.sample_run.get_workspace()
 
@@ -855,19 +855,19 @@ class DirectEnergyConversion(object):
     #
     @staticmethod
     def get_TOF_for_energies(workspace,energy_list,specID_list,ei=None,debug_mode=False):
-        """ Method to find what TOF range corresponds to given energy range
+        """ Method to find what TOF range corresponds to given energy range             
            for given workspace and detectors.
 
            Input:
-           workspace    pointer to workspace with instrument attached.
+           workspace    pointer to workspace with instrument attached. 
            energy_list  the list of input energies to process
-           detID_list   list of detectors to find
-           ei           incident energy. If present, TOF range is calculated in direct mode,
+           detID_list   list of detectors to find 
+           ei           incident energy. If present, TOF range is calculated in direct mode, 
                         if not -- elastic mode
 
-           Returns:
-           list of TOF corresponding to input energies list.
-        """
+           Returns: 
+           list of TOF corresponding to input energies list. 
+        """ 
         template_ws_name = '_energy_range_ws'
         range_ws_name = '_TOF_range_ws'
         y = [1] * (len(energy_list) - 1)
@@ -916,8 +916,8 @@ class DirectEnergyConversion(object):
         else:
             pass
 
-        prop_man = self.prop_man
-
+        prop_man = self.prop_man 
+         
         save_file,ext = os.path.splitext(save_file)
         if len(ext) > 1:
             formats.add(ext[1:])
@@ -946,7 +946,7 @@ class DirectEnergyConversion(object):
                    prop_man.log("Unknown file format {0} requested to save results. No saving performed this format".format(file_format))
 
     #########
-    @property
+    @property 
     def prop_man(self):
         """ Return property manager containing DirectEnergyConversion parameters """
         return self._propMan
@@ -961,7 +961,7 @@ class DirectEnergyConversion(object):
     #########
     @property
     def spectra_masks(self):
-        """ The property keeps a workspace with masks, stored for further usage """
+        """ The property keeps a workspace with masks, stored for further usage """ 
 
         # check if spectra masks is defined
         if hasattr(self,'_spectra_masks'):
@@ -971,7 +971,7 @@ class DirectEnergyConversion(object):
 
     @spectra_masks.setter
     def spectra_masks(self,value):
-        """ set up spectra masks """
+        """ set up spectra masks """ 
         self._spectra_masks = value
 #-------------------------------------------------------------------------------
     def apply_absolute_normalization(self,sample_ws,monovan_run=None,ei_guess=None,wb_mono=None):
@@ -1020,7 +1020,7 @@ class DirectEnergyConversion(object):
             # workspace is not good for further processing any more
             mono_run_num = PropertyManager.monovan_run.run_number()
             prop_man.monovan_run = None # delete everything from memory
-            prop_man.monovan_run = mono_run_num
+            prop_man.monovan_run = mono_run_num 
         #end
         prop_man.log('*** Using {0} value : {1} of absolute units correction factor (TGP)'.format(abs_norm_factor_is,absnorm_factor),'notice')
         prop_man.log('*******************************************************************************************','notice')
@@ -1056,7 +1056,7 @@ class DirectEnergyConversion(object):
 
 
         data_ws = Integration(InputWorkspace=deltaE_wkspaceName,OutputWorkspace='van_int',RangeLower=minmax[0],RangeUpper=minmax[1],IncludePartialBins='1')
-
+ 
         nhist = data_ws.getNumberHistograms()
         # extract wb integrals for combined spectra
         signal = []
@@ -1078,7 +1078,7 @@ class DirectEnergyConversion(object):
               izerc+=1
               continue
 
-            signal.append(sig)
+           signal.append(sig) 
            error.append(err)
         #---------------- Loop finished
 
@@ -1198,10 +1198,10 @@ class DirectEnergyConversion(object):
         #end
 
     def __getattr__(self,attr_name):
-        """  overloaded to return values of properties non-existing in the class dictionary
+       """  overloaded to return values of properties non-existing in the class dictionary 
             from the property manager class except this
             property already have descriptor in self class
-       """
+       """ 
        if attr_name in self._descriptors:
           return object.__getattr__(self,attr_name)
        else:
@@ -1219,7 +1219,7 @@ class DirectEnergyConversion(object):
                 object.__setattr__(self,attr_name,attr_value)
             else:
                 setattr(self._propMan,attr_name,attr_value)
-
+          
     def initialise(self, instr,reload_instrument=False):
         """
         Initialize the private attributes of the class and the nullify the attributes which expected
@@ -1264,15 +1264,15 @@ class DirectEnergyConversion(object):
             if name != self.prop_man.instr_name:
                self.prop_man = PropertyManager(name,workspace)
 
-
+                
     def get_run_descriptor(self,run):
        """ Spawn temporary run descriptor for input data given in format,
-           different from run descriptor. Return existing run descriptor,
+           different from run descriptor. Return existing run descriptor, 
            if it is what provided.
        """
        if not isinstance(run,RunDescriptor):
           tRun = copy.copy(PropertyManager._tmp_run)
-            tRun.__set__(None,run)
+          tRun.__set__(None,run)      
           return tRun
        else:
            return run
@@ -1353,22 +1353,22 @@ class DirectEnergyConversion(object):
         #############
         data_run.synchronize_ws(mtd[result_name])
 
-        return
+        return 
 #-------------------------------------------------------------------------------
     def _find_or_build_bkgr_ws(self,result_ws,bkg_range_min=None,bkg_range_max=None,time_shift=0):
-        """ Method calculates  background workspace or restore workspace with
+        """ Method calculates  background workspace or restore workspace with 
             the same name as the one produced by this method from ADS
-        """
+        """ 
         if not bkg_range_min or not bkg_range_max:
             bkg_range_min,bkg_range_max = self.bkgd_range
         bkg_range_min += time_shift
         bkg_range_max += time_shift
 
-        # has to have specific name for this all working. This ws is build at the beginning of
+        # has to have specific name for this all working. This ws is build at the beginning of 
         # multirep run
         if 'bkgr_ws_source' in mtd:
             bkgr_ws = CloneWorkspace(InputWorkspace='bkgr_ws_source',OutputWorkspace='bkgr_ws')
-            if time_shift != 0: # Workspace has probably been shifted, so to have correct units conversion
+            if time_shift != 0: # Workspace has probably been shifted, so to have correct units conversion 
                                 # one needs to do appropriate shift here as well
               CopyInstrumentParameters(result_ws,bkgr_ws)
              # Adjust the TOF such that the first monitor peak is at t=0
@@ -1450,7 +1450,7 @@ class DirectEnergyConversion(object):
                         result = run.get_ws_clone()
                    else:
                         result = run.get_workspace()
-                    return result
+                   return result 
                 else:
                     DeleteWorkspace(Workspace=new_ws_name)
             else:
@@ -1486,7 +1486,7 @@ class DirectEnergyConversion(object):
         return result
 #-------------------------------------------------------------------------------
     def _build_white_tag(self):
-        """ build tag indicating wb-integration ranges """
+        """ build tag indicating wb-integration ranges """ 
         low,upp = self.wb_integr_range
         white_tag = 'NormBy:{0}_IntergatedIn:{1:0>10.2f}:{2:0>10.2f}'.format(self.normalise_method,low,upp)
         return white_tag

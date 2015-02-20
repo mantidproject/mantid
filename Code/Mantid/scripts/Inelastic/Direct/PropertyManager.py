@@ -183,8 +183,8 @@ class PropertyManager(NonIDF_Properties):
 
    # ----------------------------
     def __getattr__(self,name):
-        """ Overloaded get method, disallowing non-existing properties being get but allowing
-          a property been called with  different names specified in substitution dictionary. """
+       """ Overloaded get method, disallowing non-existing properties being get but allowing
+           a property been called with  different names specified in substitution dictionary. """
 
        if name in self.__subst_dict:
           name = self.__subst_dict[name]
@@ -671,7 +671,7 @@ class PropertyManager(NonIDF_Properties):
 
       save_dir = config.getString('defaultsave.directory')
       self.log("****************************************************************",log_level)
-        if self.monovan_run != None and not('van_mass' in changed_Keys):                                   # This output is
+      if self.monovan_run != None and not('van_mass' in changed_Keys):                           # This output is
          self.log("*** Monochromatic vanadium mass used : {0} ".format(self.van_mass),log_level) # Adroja request from may 2014
       #
       self.log("*** By default results are saved into: {0}".format(save_dir),log_level)
