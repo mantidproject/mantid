@@ -216,6 +216,62 @@ public:
         TS_ASSERT_EQUALS(static_cast<IFunction*>(mdf)->getParameter("f0.PeakCentre"), 1.1086444);
     }
 
+    void testLocalJacobianConstruction()
+    {
+        TS_ASSERT_THROWS_NOTHING(LocalJacobian localJacobian(0, 0));
+        TS_ASSERT_THROWS_NOTHING(LocalJacobian localJacobian(0, 10));
+        TS_ASSERT_THROWS_NOTHING(LocalJacobian localJacobian(10, 0));
+        TS_ASSERT_THROWS_NOTHING(LocalJacobian localJacobian(10, 10));
+    }
+
+    void testLocalJacobianGetSet()
+    {
+        /* These checks also verify that the protected methods
+         * getRaw, index and safeIndex work as expected.
+         */
+        LocalJacobian localJacobian(20, 3);
+
+        for(size_t y = 0; y < 20; ++y) {
+            for(size_t p = 0; p < 3; ++p) {
+                double value = static_cast<double>(y * p);
+                TS_ASSERT_THROWS_NOTHING(localJacobian.set(y, p, value));
+                TS_ASSERT_THROWS_NOTHING(localJacobian.get(y, p));
+
+                TS_ASSERT_EQUALS(localJacobian.get(y, p), value);
+            }
+        }
+
+        TS_ASSERT_THROWS(localJacobian.set(20, 3, 30.0), std::out_of_range);
+        TS_ASSERT_THROWS(localJacobian.set(10, 4, 30.0), std::out_of_range);
+
+        TS_ASSERT_THROWS(localJacobian.get(20, 3), std::out_of_range);
+        TS_ASSERT_THROWS(localJacobian.get(10, 4), std::out_of_range);
+    }
+
+    void testLocalJacobianRawValues()
+    {
+        LocalJacobian writeAdapter(3, 1);
+
+        double *rawJacobianWrite = writeAdapter.rawValues();
+        for(size_t i = 0; i < 3; ++i) {
+            *(rawJacobianWrite + i) = static_cast<double>(i + 1);
+        }
+
+        TS_ASSERT_EQUALS(writeAdapter.get(0, 0), 1.0);
+        TS_ASSERT_EQUALS(writeAdapter.get(1, 0), 2.0);
+        TS_ASSERT_EQUALS(writeAdapter.get(2, 0), 3.0);
+
+        LocalJacobian readAdapter(3, 1);
+        readAdapter.set(0, 0, 1.0);
+        readAdapter.set(1, 0, 2.0);
+        readAdapter.set(2, 0, 3.0);
+
+        double *rawJacobianRead = readAdapter.rawValues();
+        for(size_t i = 0; i < 3; ++i) {
+            TS_ASSERT_EQUALS(*(rawJacobianRead + i), static_cast<double>(i + 1));
+        }
+    }
+
    /*
     * This test must be re-enabled, when #9497 is fixed, then it will pass.
     *
