@@ -1,4 +1,5 @@
-#include "MantidRemoteAlgorithms/SCARFTomoReconstruction.h"
+#include <fstream>
+
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -11,17 +12,15 @@
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/RemoteJobManager.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-
-#include <fstream>
+#include "MantidRemoteAlgorithms/SCARFTomoReconstruction.h"
 
 #include <Poco/File.h>
-#include <Poco/Net/HTTPRequest.h>
-#include <Poco/StreamCopier.h>
-
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
+#include <Poco/Net/HTTPRequest.h>
+#include <Poco/StreamCopier.h>
 
 namespace Mantid {
 namespace RemoteAlgorithms {
