@@ -98,8 +98,7 @@ set ( POST_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/postrm )
 
 if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedora" ) # RHEL/Fedora
   if ( "${UNIX_CODENAME}" MATCHES "Santiago" OR 
-       "${UNIX_CODENAME}" MATCHES "Maipo" OR 
-       "${UNIX_CODENAME}" MATCHES "Heisenbug" )
+       "${UNIX_CODENAME}" MATCHES "Maipo" ) 
     set ( WRAPPER_PREFIX "scl enable mantidlibs \"" )
     set ( WRAPPER_POSTFIX "\"" )
     set ( EXTRA_LDPATH "/usr/lib64/paraview" )
