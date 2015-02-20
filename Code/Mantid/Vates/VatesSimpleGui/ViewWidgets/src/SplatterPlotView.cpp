@@ -6,6 +6,7 @@
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
 #include "MantidVatesAPI/ViewFrustum.h"
+#include "MantidKernel/Logger.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 
@@ -47,6 +48,12 @@ namespace Vates
 {
 namespace SimpleGui
 {
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("SplatterPlotView");
+}
+
 
 SplatterPlotView::SplatterPlotView(QWidget *parent) : ViewBase(parent),
                                                       m_cameraManager(boost::make_shared<CameraManager>()),
@@ -120,6 +127,10 @@ bool SplatterPlotView::eventFilter(QObject *obj, QEvent *ev)
 void SplatterPlotView::destroyView()
 {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  if (this->m_peaksFilter)
+  {
+    builder->destroy(this->m_peaksFilter);
+  }
   if (!this->peaksSource.isEmpty())
   {
     this->destroyPeakSources();
@@ -137,11 +148,6 @@ void SplatterPlotView::destroyView()
   {
     builder->destroy(this->splatSource);
   }
-  if (this->m_peaksFilter)
-  {
-    builder->destroy(this->m_peaksFilter);
-  }
-
   builder->destroy(this->view);
 }
 
@@ -330,6 +336,9 @@ void SplatterPlotView::resetCamera()
 
 void SplatterPlotView::destroyPeakSources()
 {
+  // First remove the peaks table, since it makes use of the peaks workspace.
+  onRemoveVisiblePeaksTable();
+
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
@@ -461,6 +470,7 @@ void SplatterPlotView::onRemoveVisiblePeaksTable()
   {
     pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
     builder->destroy(m_peaksFilter);
+    m_peaksFilter = NULL;
   }
 }
 
@@ -470,38 +480,58 @@ void SplatterPlotView::onRemoveVisiblePeaksTable()
  */
 void SplatterPlotView::createPeaksFilter()
 {
-  // If the peaks filter already exist, then don't do anything
+  // If the peaks filter already exists, then stay idle.
   if (m_peaksFilter)
   {
     return;
   }
+
+  // If the there is no peaks workspace, then stay idle.
+  if (peaksSource.empty())
+  {
+    return;
+  }
+
 
   // Create the peak filter
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   pqPipelineSource* filter = builder->createFilter("filters","MantidParaViewPeaksFilter", this->splatSource);
 
   // Set the peaks workspace name. We need to trigger accept in order to log the workspace in the filter
-  std::string workspaceName = m_peaksViewer->getPeaksWorkspaceName();
-  if (workspaceName.empty())
+  try
   {
-    return;
+    std::string workspaceName = m_peaksViewer->getPeaksWorkspaceName();
+
+    if (workspaceName.empty())
+    {
+      throw std::runtime_error("The peaks viewer does not contain a valid peaks workspace.");
+    }
+
+    vtkSMPropertyHelper(filter->getProxy(), "PeaksWorkspace").Set(workspaceName.c_str());
+    emit this->triggerAccept();
+    filter->updatePipeline();
+
+    // Create point representation of the source and set the point size 
+    pqDataRepresentation *dataRepresentation  = filter->getRepresentation(this->view);
+    vtkSMPropertyHelper(dataRepresentation->getProxy(), "Representation").Set("Points");
+    vtkSMPropertyHelper(dataRepresentation->getProxy(), "PointSize").Set(4);
+    dataRepresentation->getProxy()->UpdateVTKObjects();
+
+    pqPipelineRepresentation *pipelineRepresentation = qobject_cast<pqPipelineRepresentation*>(dataRepresentation);
+    pipelineRepresentation->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    this->resetDisplay();
+    this->renderAll();
+
+    m_peaksFilter = filter;
+
+
+  } catch(std::runtime_error &ex)
+  {
+    g_log.warning() << ex.what();
   }
-  vtkSMPropertyHelper(filter->getProxy(), "PeaksWorkspace").Set(workspaceName.c_str());
-  emit this->triggerAccept();
-  filter->updatePipeline();
+  
 
-  // Create point representation of the source and set the point size 
-  pqDataRepresentation *dataRepresentation  = filter->getRepresentation(this->view);
-  vtkSMPropertyHelper(dataRepresentation->getProxy(), "Representation").Set("Points");
-  vtkSMPropertyHelper(dataRepresentation->getProxy(), "PointSize").Set(4);
-  dataRepresentation->getProxy()->UpdateVTKObjects();
 
-  pqPipelineRepresentation *pipelineRepresentation = qobject_cast<pqPipelineRepresentation*>(dataRepresentation);
-  pipelineRepresentation->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
-  this->resetDisplay();
-  this->renderAll();
-
-  m_peaksFilter = filter;
 }
 
 } // SimpleGui

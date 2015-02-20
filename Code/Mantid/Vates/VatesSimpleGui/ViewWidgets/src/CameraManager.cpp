@@ -132,7 +132,7 @@ namespace Mantid
         camera->SetFocalPoint(xpos, ypos, zpos);
 
         // Setup the position of the camera. We want this to be 
-        double zposCamera = zpos + peakRadius;
+        double zposCamera = zpos + peakRadius*3;
         camera->SetPosition(xpos, ypos, zposCamera);
         camera->SetViewUp(0.0, 1.0, 0.0);
 

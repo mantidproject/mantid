@@ -35,6 +35,12 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
+#include <vtkSmartPointer.h>
+
+class vtkTransform;
+class vtkPolyData;
+
+
 namespace Mantid
 {
 namespace VATES
@@ -70,7 +76,7 @@ public:
   virtual void initialize(Mantid::API::Workspace_sptr workspace);
 
   /// Factory method
-  vtkDataSet* create(ProgressAction& progressUpdating) const;
+  vtkPolyData* create(ProgressAction& progressUpdating) const;
 
   virtual std::string getFactoryTypeName() const
   {
@@ -88,6 +94,10 @@ protected:
   virtual void validate() const;
 
 private:
+
+  vtkSmartPointer<vtkTransform>  vtkPeakMarkerFactory::createEllipsoidTransform(std::vector<Mantid::Kernel::V3D> directions) const;
+
+  Mantid::Kernel::V3D rotateVector(Mantid::Kernel::V3D original, Mantid::Kernel::V3D rotationAxis, double angle) const;
 
   void validateWsNotNull() const;
 

@@ -204,6 +204,8 @@ vtkCommonCore
 vtkCommonDataModel
 vtkIOLegacy
 vtkFiltersExtraction
+vtkFiltersSources
+vtkPVVTKExtensionsDefault
 ${QWT_LIBRARIES}
 )
 
