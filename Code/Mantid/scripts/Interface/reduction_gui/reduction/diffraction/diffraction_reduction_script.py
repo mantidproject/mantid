@@ -27,7 +27,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         """ Initialization
         """
         super(DiffractionReductionScripter, self).__init__(name=name, facility=facility)
-        
+
         print "[diffraction_reduction_script]  Facility = %s,  Instrument = %s" % (self.facility_name, self.instrument_name)
 
         return

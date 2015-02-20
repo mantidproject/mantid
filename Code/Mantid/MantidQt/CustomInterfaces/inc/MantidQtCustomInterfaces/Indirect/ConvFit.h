@@ -6,8 +6,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/CompositeFunction.h"
 
-#include "boost/shared_ptr.hpp"
-
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -32,7 +30,7 @@ namespace IDA
     void bgTypeSelection(int index);
     void newDataLoaded(const QString wsName);
     void plotInput();
-    void plotGuess(QtProperty*);
+    void plotGuess();
     void singleFit();
     void specMinChanged(int value);
     void specMaxChanged(int value);
@@ -61,7 +59,7 @@ namespace IDA
     QtStringPropertyManager* m_stringManager;
     QtTreePropertyBrowser* m_cfTree;
     QMap<QtProperty*, QtProperty*> m_fixedProps;
-    boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_cfInputWS;
+    Mantid::API::MatrixWorkspace_sptr m_cfInputWS;
     QString m_cfInputWSName;
     bool m_confitResFileType;
 

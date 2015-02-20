@@ -3,6 +3,7 @@
 ##
 
 set ( TEST_PY_FILES
+  CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
   CorrectLogTimesTest.py

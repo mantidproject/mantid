@@ -257,6 +257,7 @@ set ( TEST_FILES
 	GaussianTest.h
 	GramCharlierComptonProfileTest.h
 	IkedaCarpenterPVTest.h
+        IPeakFunctionIntensityTest.h
 	LeBailFitTest.h
 	LeBailFunctionTest.h
 	LeastSquaresTest.h

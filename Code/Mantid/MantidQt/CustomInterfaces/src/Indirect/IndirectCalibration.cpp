@@ -45,16 +45,9 @@ namespace CustomInterfaces
     m_propTrees["CalPropTree"]->addProperty(m_properties["CalBackMin"]);
     m_propTrees["CalPropTree"]->addProperty(m_properties["CalBackMax"]);
 
-    // CAL PLOT
-    m_plots["CalPlot"] = new QwtPlot(m_parentWidget);
-    m_plots["CalPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-    m_plots["CalPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-    m_plots["CalPlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.plotCalibration->addWidget(m_plots["CalPlot"]);
-
     // Cal plot range selectors
-    m_rangeSelectors["CalPeak"] = new MantidWidgets::RangeSelector(m_plots["CalPlot"]);
-    m_rangeSelectors["CalBackground"] = new MantidWidgets::RangeSelector(m_plots["CalPlot"]);
+    m_rangeSelectors["CalPeak"] = new MantidWidgets::RangeSelector(m_uiForm.ppCalibration);
+    m_rangeSelectors["CalBackground"] = new MantidWidgets::RangeSelector(m_uiForm.ppCalibration);
     m_rangeSelectors["CalBackground"]->setColour(Qt::darkGreen); //Dark green to signify background range
 
     // RES PROPERTY TREE
@@ -102,19 +95,12 @@ namespace CustomInterfaces
     m_dblManager->setValue(m_properties["ResEHigh"], 0.2);
     resRB->addSubProperty(m_properties["ResEHigh"]);
 
-    // RES PLOT
-    m_plots["ResPlot"] = new QwtPlot(m_parentWidget);
-    m_plots["ResPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-    m_plots["ResPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-    m_plots["ResPlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.plotResolution->addWidget(m_plots["ResPlot"]);
-
     // Res plot range selectors
     // Create ResBackground first so ResPeak is drawn above it
-    m_rangeSelectors["ResBackground"] = new MantidWidgets::RangeSelector(m_plots["ResPlot"],
+    m_rangeSelectors["ResBackground"] = new MantidWidgets::RangeSelector(m_uiForm.ppResolution,
         MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, false);
     m_rangeSelectors["ResBackground"]->setColour(Qt::darkGreen);
-    m_rangeSelectors["ResPeak"] = new MantidWidgets::RangeSelector(m_plots["ResPlot"],
+    m_rangeSelectors["ResPeak"] = new MantidWidgets::RangeSelector(m_uiForm.ppResolution,
         MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, true);
 
     // SIGNAL/SLOT CONNECTIONS
@@ -150,6 +136,8 @@ namespace CustomInterfaces
 
     // Nudge resCheck to ensure res range selectors are only shown when Create RES file is checked
     resCheck(m_uiForm.ckCreateResolution->isChecked());
+
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   }
 
   //----------------------------------------------------------------------------------------------
@@ -165,8 +153,6 @@ namespace CustomInterfaces
 
   void IndirectCalibration::run()
   {
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmsComplete(bool)));
-
     // Get properties
     QString firstFile = m_uiForm.leRunNo->getFirstFilename();
     QString filenames = m_uiForm.leRunNo->getFilenames().join(",");
@@ -184,7 +170,7 @@ namespace CustomInterfaces
     QString calibrationWsName = outputWorkspaceNameStem + "_calib";
 
     // Configure the calibration algorithm
-    IAlgorithm_sptr calibrationAlg = AlgorithmManager::Instance().create("CreateCalibrationWorkspace", -1);
+    IAlgorithm_sptr calibrationAlg = AlgorithmManager::Instance().create("CreateCalibrationWorkspace");
     calibrationAlg->initialize();
 
     calibrationAlg->setProperty("InputFiles", filenames.toStdString());
@@ -212,7 +198,7 @@ namespace CustomInterfaces
     // Add save algorithm to queue if ticked
     if( m_uiForm.ckSave->isChecked() )
     {
-      IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus", -1);
+      IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexusProcessed");
       saveAlg->initialize();
       saveAlg->setProperty("Filename", calibrationWsName.toStdString() + ".nxs");
 
@@ -224,10 +210,6 @@ namespace CustomInterfaces
     {
       QString resolutionWsName = outputWorkspaceNameStem + "_res";
 
-      QString scaleFactor("1.0");
-      if(m_uiForm.ckResolutionScale->isChecked() && !m_uiForm.spResolutionScale->text().isEmpty())
-        scaleFactor = m_uiForm.spResolutionScale->text();
-
       QString resDetectorRange = QString::number(m_dblManager->value(m_properties["ResSpecMin"])) + ","
           + QString::number(m_dblManager->value(m_properties["ResSpecMax"]));
 
@@ -238,25 +220,59 @@ namespace CustomInterfaces
       QString background = QString::number(m_dblManager->value(m_properties["ResStart"])) + ","
           + QString::number(m_dblManager->value(m_properties["ResEnd"]));
 
-      Mantid::API::IAlgorithm_sptr resAlg = Mantid::API::AlgorithmManager::Instance().create("IndirectResolution", -1);
+      bool smooth = m_uiForm.ckSmoothResolution->isChecked();
+      bool save = m_uiForm.ckSave->isChecked();
+
+      IAlgorithm_sptr resAlg = AlgorithmManager::Instance().create("IndirectResolution", -1);
       resAlg->initialize();
 
       resAlg->setProperty("InputFiles", filenames.toStdString());
-      resAlg->setProperty("OutputWorkspace", resolutionWsName.toStdString());
       resAlg->setProperty("Instrument", getInstrumentConfiguration()->getInstrumentName().toStdString());
       resAlg->setProperty("Analyser", getInstrumentConfiguration()->getAnalyserName().toStdString());
       resAlg->setProperty("Reflection", getInstrumentConfiguration()->getReflectionName().toStdString());
       resAlg->setProperty("RebinParam", rebinString.toStdString());
       resAlg->setProperty("DetectorRange", resDetectorRange.toStdString());
       resAlg->setProperty("BackgroundRange", background.toStdString());
-      resAlg->setProperty("Smooth", m_uiForm.ckSmoothResolution->isChecked());
-      resAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
-      resAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
+      resAlg->setProperty("Save", save);
 
       if(m_uiForm.ckResolutionScale->isChecked())
-        resAlg->setProperty("ScaleFactor", m_uiForm.spResolutionScale->value());
+        resAlg->setProperty("ScaleFactor", m_uiForm.spScale->value());
+
+      if(smooth)
+      {
+        resAlg->setProperty("OutputWorkspace", resolutionWsName.toStdString() + "_pre_smooth");
+      }
+      else
+      {
+        resAlg->setProperty("OutputWorkspace", resolutionWsName.toStdString());
+        resAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
+      }
 
       m_batchAlgoRunner->addAlgorithm(resAlg);
+
+      if(smooth)
+      {
+        IAlgorithm_sptr smoothAlg = AlgorithmManager::Instance().create("WienerSmooth");
+        smoothAlg->initialize();
+        smoothAlg->setProperty("OutputWorkspace", resolutionWsName.toStdString());
+
+        BatchAlgorithmRunner::AlgorithmRuntimeProps smoothAlgInputProps;
+        smoothAlgInputProps["InputWorkspace"] = resolutionWsName.toStdString() + "_pre_smooth";
+
+        m_batchAlgoRunner->addAlgorithm(smoothAlg, smoothAlgInputProps);
+
+        if(save)
+        {
+          IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexusProcessed");
+          saveAlg->initialize();
+
+          BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromSmoothProps;
+          inputFromSmoothProps["InputWorkspace"] = calibrationWsName.toStdString();
+          saveAlg->setProperty("Filename", resolutionWsName.toStdString() + ".nxs");
+
+          m_batchAlgoRunner->addAlgorithm(saveAlg, inputFromSmoothProps);
+        }
+      }
 
       // When creating resolution file take the resolution workspace as the result
       m_pythonExportWsName = resolutionWsName.toStdString();
@@ -265,15 +281,17 @@ namespace CustomInterfaces
     m_batchAlgoRunner->executeBatchAsync();
   }
 
-  void IndirectCalibration::algorithmsComplete(bool error)
+  void IndirectCalibration::algorithmComplete(bool error)
   {
     if(error)
       return;
 
-    QString firstFile = m_uiForm.leRunNo->getFirstFilename();
-    QFileInfo firstFileInfo(firstFile);
-
-    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmsComplete(bool)));
+    // Plot the smoothed workspace if required
+    if(m_uiForm.ckSmoothResolution->isChecked() && m_uiForm.ckPlot->isChecked())
+    {
+      std::string pyInput = "from mantidplot import plotSpectrum\nplotSpectrum(['" + m_pythonExportWsName + "', '" + m_pythonExportWsName + "_pre_smooth'], 0)\n";
+      m_pythonRunner.runPythonCode(QString::fromStdString(pyInput));
+    }
   }
 
   bool IndirectCalibration::validate()
@@ -327,11 +345,11 @@ namespace CustomInterfaces
     // Set peak and background ranges
     std::map<std::string, double> ranges = getRangesFromInstrument();
 
-    std::pair<double, double> peakRange(ranges["peak-start-tof"], ranges["peak-end-tof"]);
-    std::pair<double, double> backgroundRange(ranges["back-start-tof"], ranges["back-end-tof"]);
+    QPair<double, double> peakRange(ranges["peak-start-tof"], ranges["peak-end-tof"]);
+    QPair<double, double> backgroundRange(ranges["back-start-tof"], ranges["back-end-tof"]);
 
-    setMiniPlotGuides("CalPeak", m_properties["CalPeakMin"], m_properties["CalPeakMax"], peakRange);
-    setMiniPlotGuides("CalBackground", m_properties["CalBackMin"], m_properties["CalBackMax"], backgroundRange);
+    setRangeSelector("CalPeak", m_properties["CalPeakMin"], m_properties["CalPeakMax"], peakRange);
+    setRangeSelector("CalBackground", m_properties["CalBackMin"], m_properties["CalBackMax"], backgroundRange);
   }
 
   /**
@@ -368,19 +386,20 @@ namespace CustomInterfaces
       return;
     }
 
-    Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
+    MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(wsname.toStdString()));
 
     const Mantid::MantidVec & dataX = input->readX(0);
-    std::pair<double, double> range(dataX.front(), dataX.back());
+    QPair<double, double> range(dataX.front(), dataX.back());
 
-    plotMiniPlot(input, 0, "CalPlot", "CalCurve");
-    setXAxisToCurve("CalPlot", "CalCurve");
+    m_uiForm.ppCalibration->clear();
+    m_uiForm.ppCalibration->addSpectrum("Raw", input, 0);
+    m_uiForm.ppCalibration->resizeX();
 
-    setPlotRange("CalPeak", m_properties["CalELow"], m_properties["CalEHigh"], range);
-    setPlotRange("CalBackground", m_properties["CalStart"], m_properties["CalEnd"], range);
+    setPlotPropertyRange("CalPeak", m_properties["CalELow"], m_properties["CalEHigh"], range);
+    setPlotPropertyRange("CalBackground", m_properties["CalStart"], m_properties["CalEnd"], range);
 
-    replot("CalPlot");
+    m_uiForm.ppCalibration->replot();
 
     //Also replot the energy
     calPlotEnergy();
@@ -435,16 +454,17 @@ namespace CustomInterfaces
     }
 
     const Mantid::MantidVec & dataX = energyWs->readX(0);
-    std::pair<double, double> range(dataX.front(), dataX.back());
+    QPair<double, double> range(dataX.front(), dataX.back());
 
-    setPlotRange("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], range);
+    setPlotPropertyRange("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], range);
 
-    plotMiniPlot(energyWs, 0, "ResPlot", "ResCurve");
-    setXAxisToCurve("ResPlot", "ResCurve");
+    m_uiForm.ppResolution->clear();
+    m_uiForm.ppResolution->addSpectrum("Energy", energyWs, 0);
+    m_uiForm.ppResolution->resizeX();
 
     calSetDefaultResolution(energyWs);
 
-    replot("ResPlot");
+    m_uiForm.ppResolution->replot();
   }
 
   /**
@@ -453,7 +473,7 @@ namespace CustomInterfaces
    *
    * @param ws :: Mantid workspace containing the loaded instument
    */
-  void IndirectCalibration::calSetDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws)
+  void IndirectCalibration::calSetDefaultResolution(MatrixWorkspace_const_sptr ws)
   {
     auto inst = ws->getInstrument();
     auto analyser = inst->getStringParameter("analyser");
@@ -472,13 +492,13 @@ namespace CustomInterfaces
       {
         double res = params[0];
 
-        //Set default rebinning bounds
-        std::pair<double, double> peakRange(-res*10, res*10);
-        setMiniPlotGuides("ResPeak", m_properties["ResELow"], m_properties["ResEHigh"], peakRange);
+        // Set default rebinning bounds
+        QPair<double, double> peakRange(-res*10, res*10);
+        setRangeSelector("ResPeak", m_properties["ResELow"], m_properties["ResEHigh"], peakRange);
 
-        //Set default background bounds
-        std::pair<double, double> backgroundRange(-res*9, -res*8);
-        setMiniPlotGuides("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], backgroundRange);
+        // Set default background bounds
+        QPair<double, double> backgroundRange(-res*9, -res*8);
+        setRangeSelector("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], backgroundRange);
       }
     }
   }

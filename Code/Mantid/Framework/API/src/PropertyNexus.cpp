@@ -193,7 +193,9 @@ Property *loadProperty(::NeXus::File *file, const std::string &group) {
   file->closeData();
   file->closeGroup();
   // add units
-  retVal->setUnits(unitsStr);
+  if (retVal)
+    retVal->setUnits(unitsStr);
+
   return retVal;
 }
 

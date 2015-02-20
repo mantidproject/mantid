@@ -36,7 +36,7 @@ namespace IDA
 
     Ui::ApplyCorr m_uiForm;
     /// Pointer to the result workspace (for plotting)
-    Mantid::API::MatrixWorkspace_sptr outputWs;
+    Mantid::API::MatrixWorkspace_sptr m_outputWs;
 
   };
 } // namespace IDA

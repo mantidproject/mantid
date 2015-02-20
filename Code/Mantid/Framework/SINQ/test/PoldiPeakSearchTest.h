@@ -133,7 +133,7 @@ public:
 
         maxima.sort();
 
-        std::vector<PoldiPeak_sptr> peaks = poldiPeakSearch.getPeaks(baseData.begin(), maxima, testXData);
+        std::vector<PoldiPeak_sptr> peaks = poldiPeakSearch.getPeaks(baseData.begin(), baseData.end(), maxima, testXData);
 
         TS_ASSERT_EQUALS(peaks.size(), 4);
 

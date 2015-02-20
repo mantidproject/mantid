@@ -274,6 +274,12 @@ namespace CustomInterfaces
       bool defaultOptions = instDetails["save-ascii-choice"] == "true";
       m_uiForm.ckSaveASCII->setChecked(defaultOptions);
     }
+
+    if(!instDetails["fold-frames-choice"].isEmpty())
+    {
+      bool defaultOptions = instDetails["fold-frames-choice"] == "true";
+      m_uiForm.ckFold->setChecked(defaultOptions);
+    }
   }
 
   /**
@@ -328,6 +334,10 @@ namespace CustomInterfaces
       m_batchAlgoRunner->addAlgorithm(groupingAlg);
 
       return qMakePair(QString("Workspace"), groupWS);
+    }
+    else if (groupType == "Default")
+    {
+      return qMakePair(QString("IPF"), QString());
     }
     else
     {

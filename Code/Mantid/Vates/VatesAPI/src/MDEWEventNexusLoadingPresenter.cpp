@@ -15,7 +15,7 @@ namespace Mantid
   namespace VATES
   {
 
-        /*
+    /*
     Constructor
     @param view : MVP view
     @param filename : name of file to load

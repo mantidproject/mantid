@@ -2,10 +2,13 @@
 #define _vtkRebinningTransformOperator_h
 #include <boost/scoped_ptr.hpp>
 #include "vtkUnstructuredGridAlgorithm.h"
+#include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/ThresholdRange.h"
+#include "MantidVatesAPI/VatesConfigurations.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/V3D.h"
+#include <boost/scoped_ptr.hpp>
 #include <string>
 
 /**
@@ -100,6 +103,9 @@ public:
   virtual double getLengthB3() const;
   virtual bool getForceOrthogonal() const;
   virtual bool getOutputHistogramWS() const;
+  virtual double GetMinValue() const;
+  virtual double GetMaxValue() const;
+  virtual const char* GetInstrument() const;
 
 protected:
 
@@ -172,6 +178,5 @@ private:
   bool m_ForceOrthogonal;
   /// Flag indicating that a histogram workspace should be provided.
   bool m_bOutputHistogramWS;
-
 };
 #endif

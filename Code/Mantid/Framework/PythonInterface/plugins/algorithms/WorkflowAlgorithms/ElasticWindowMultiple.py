@@ -40,7 +40,8 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         self.declareProperty(name='Range2Start', defaultValue='', doc='Range 2 start')
         self.declareProperty(name='Range2End', defaultValue='', doc='Range 2 end')
 
-        self.declareProperty(name='SampleEnvironmentLogName', defaultValue='sample', doc='Name of the sample environment log entry')
+        self.declareProperty(name='SampleEnvironmentLogName', defaultValue='sample',
+                             doc='Name of the sample environment log entry')
 
         self.declareProperty(WorkspaceProperty('OutputInQ', '', Direction.Output),
                              doc='Output workspace in Q')
@@ -48,10 +49,12 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputInQSquared', '', Direction.Output),
                              doc='Output workspace in Q Squared')
 
-        self.declareProperty(WorkspaceProperty('OutputELF', '', Direction.Output, PropertyMode.Optional),
+        self.declareProperty(WorkspaceProperty('OutputELF', '', Direction.Output,
+                                               PropertyMode.Optional),
                              doc='Output workspace ELF')
 
-        self.declareProperty(WorkspaceProperty('OutputELT', '', Direction.Output, PropertyMode.Optional),
+        self.declareProperty(WorkspaceProperty('OutputELT', '', Direction.Output,
+                                               PropertyMode.Optional),
                              doc='Output workspace ELT')
 
         self.declareProperty(name='Plot', defaultValue=False, doc='Plot result spectra')
@@ -71,13 +74,13 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         if range_2_start != '':
             try:
-                val = float(range_2_start)
+                _ = float(range_2_start)
             except ValueError:
                 issues['Range2Start'] = 'Range 2 start is not a double number'
 
         if range_2_end != '':
             try:
-                val = float(range_2_end)
+                _ = float(range_2_end)
             except ValueError:
                 issues['Range2End'] = 'Range 2 end is not a double number'
 
@@ -110,9 +113,12 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             q2_ws = '__' + input_ws + '_q2'
 
             if self._range_2_start != '' and self._range_2_end != '':
-                ElasticWindow(InputWorkspace=input_ws, OutputInQ=q_ws, OutputInQSquared=q2_ws,
-                              Range1Start=self._range_1_start, Range1End=self._range_1_end,
-                              Range2Start=float(self._range_2_start), Range2End=float(self._range_2_end))
+                ElasticWindow(InputWorkspace=input_ws,
+                              OutputInQ=q_ws, OutputInQSquared=q2_ws,
+                              Range1Start=self._range_1_start,
+                              Range1End=self._range_1_end,
+                              Range2Start=float(self._range_2_start),
+                              Range2End=float(self._range_2_end))
             else:
                 ElasticWindow(InputWorkspace=input_ws, OutputInQ=q_ws, OutputInQSquared=q2_ws,
                               Range1Start=self._range_1_start, Range1End=self._range_1_end)
@@ -139,13 +145,19 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             RenameWorkspace(InputWorkspace=q2_workspaces[0], OutputWorkspace=self._q2_workspace)
         else:
             # Append the spectra of the first two workspaces
-            AppendSpectra(InputWorkspace1=q_workspaces[0], InputWorkspace2=q_workspaces[1], OutputWorkspace=self._q_workspace)
-            AppendSpectra(InputWorkspace1=q2_workspaces[0], InputWorkspace2=q2_workspaces[1], OutputWorkspace=self._q2_workspace)
+            AppendSpectra(InputWorkspace1=q_workspaces[0], InputWorkspace2=q_workspaces[1],
+                          OutputWorkspace=self._q_workspace)
+            AppendSpectra(InputWorkspace1=q2_workspaces[0], InputWorkspace2=q2_workspaces[1],
+                          OutputWorkspace=self._q2_workspace)
 
             # Append to the spectra of each remaining workspace
             for idx in range(2, len(input_workspace_names)):
-                AppendSpectra(InputWorkspace1=self._q_workspace, InputWorkspace2=q_workspaces[idx], OutputWorkspace=self._q_workspace)
-                AppendSpectra(InputWorkspace1=self._q2_workspace, InputWorkspace2=q2_workspaces[idx], OutputWorkspace=self._q2_workspace)
+                AppendSpectra(InputWorkspace1=self._q_workspace,
+                              InputWorkspace2=q_workspaces[idx],
+                              OutputWorkspace=self._q_workspace)
+                AppendSpectra(InputWorkspace1=self._q2_workspace,
+                              InputWorkspace2=q2_workspaces[idx],
+                              OutputWorkspace=self._q2_workspace)
 
             # Delete the output workspaces from the ElasticWindow algorithms
             for q_ws in q_workspaces:
@@ -193,12 +205,14 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         if self._elt_workspace != '':
             logger.information('Creating ELT workspace')
 
-            # If the ELT workspace was not already created then create it here, otherwise just clone it
+            # If the ELT workspace was not already created then create it here,
+            # otherwise just clone it
             if self._elf_workspace == '':
                 Transpose(InputWorkspace=self._q_workspace, OutputWorkspace=self._elt_workspace)
                 SortXAxis(InputWorkspace=self._elt_workspace, OutputWorkspace=self._elt_workspace)
             else:
-                CloneWorkspace(InputWorkspace=self._elf_workspace, OutputWorkspace=self._elt_workspace)
+                CloneWorkspace(InputWorkspace=self._elf_workspace,
+                               OutputWorkspace=self._elt_workspace)
 
             _normalize_to_lowest_temp(self._elt_workspace)
 

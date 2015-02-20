@@ -50,20 +50,13 @@ namespace IDA
     m_cfTree->setFactoryForManager(m_blnManager, m_blnEdFac);
     m_cfTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
-    // Create Plot Widget
-    m_plots["ConvFitPlot"] = new QwtPlot(m_parentWidget);
-    m_plots["ConvFitPlot"]->setAxisFont(QwtPlot::xBottom, m_parentWidget->font());
-    m_plots["ConvFitPlot"]->setAxisFont(QwtPlot::yLeft, m_parentWidget->font());
-    m_plots["ConvFitPlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.plot->addWidget(m_plots["ConvFitPlot"]);
-
     // Create Range Selectors
-    m_rangeSelectors["ConvFitRange"] = new MantidQt::MantidWidgets::RangeSelector(m_plots["ConvFitPlot"]);
-    m_rangeSelectors["ConvFitBackRange"] = new MantidQt::MantidWidgets::RangeSelector(m_plots["ConvFitPlot"],
+    m_rangeSelectors["ConvFitRange"] = new MantidQt::MantidWidgets::RangeSelector(m_uiForm.ppPlot);
+    m_rangeSelectors["ConvFitBackRange"] = new MantidQt::MantidWidgets::RangeSelector(m_uiForm.ppPlot,
         MantidQt::MantidWidgets::RangeSelector::YSINGLE);
     m_rangeSelectors["ConvFitBackRange"]->setColour(Qt::darkGreen);
     m_rangeSelectors["ConvFitBackRange"]->setRange(0.0, 1.0);
-    m_rangeSelectors["ConvFitHWHM"] = new MantidQt::MantidWidgets::RangeSelector(m_plots["ConvFitPlot"]);
+    m_rangeSelectors["ConvFitHWHM"] = new MantidQt::MantidWidgets::RangeSelector(m_uiForm.ppPlot);
     m_rangeSelectors["ConvFitHWHM"]->setColour(Qt::red);
 
     // Populate Property Widget
@@ -112,8 +105,12 @@ namespace IDA
     connect(m_rangeSelectors["ConvFitHWHM"], SIGNAL(maxValueChanged(double)), this, SLOT(hwhmChanged(double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
     connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(checkBoxUpdate(QtProperty*, bool)));
-    connect(m_dblManager, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(plotGuess(QtProperty*)));
     connect(m_uiForm.ckTempCorrection, SIGNAL(toggled(bool)), m_uiForm.leTempCorrection, SLOT(setEnabled(bool)));
+
+    // Update guess curve when certain things happen
+    connect(m_dblManager, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(plotGuess()));
+    connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(plotGuess()));
+    connect(m_uiForm.ckPlotGuess, SIGNAL(stateChanged(int)), this, SLOT(plotGuess()));
 
     // Have FWHM Range linked to Fit Start/End Range
     connect(m_rangeSelectors["ConvFitRange"], SIGNAL(rangeChanged(double, double)), m_rangeSelectors["ConvFitHWHM"], SLOT(setRange(double, double)));
@@ -162,7 +159,7 @@ namespace IDA
     bool useTies = m_uiForm.ckTieCentres->isChecked();
     QString ties = (useTies ? "True" : "False");
 
-    Mantid::API::CompositeFunction_sptr func = createFunction(useTies);
+    CompositeFunction_sptr func = createFunction(useTies);
     std::string function = std::string(func->asString());
     QString stX = m_properties["StartX"]->valueText();
     QString enX = m_properties["EndX"]->valueText();
@@ -213,8 +210,6 @@ namespace IDA
    */
   bool ConvFit::validate()
   {
-    using Mantid::API::AnalysisDataService;
-
     UserInputValidator uiv;
 
     uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
@@ -250,7 +245,7 @@ namespace IDA
   void ConvFit::newDataLoaded(const QString wsName)
   {
     m_cfInputWSName = wsName;
-    m_cfInputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(m_cfInputWSName.toStdString());
+    m_cfInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_cfInputWSName.toStdString());
 
     int maxSpecIndex = static_cast<int>(m_cfInputWS->getNumberHistograms()) - 1;
 
@@ -334,18 +329,18 @@ namespace IDA
    *
    * @returns the composite fitting function.
    */
-  Mantid::API::CompositeFunction_sptr ConvFit::createFunction(bool tieCentres)
+  CompositeFunction_sptr ConvFit::createFunction(bool tieCentres)
   {
-    auto conv = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(Mantid::API::FunctionFactory::Instance().createFunction("Convolution"));
-    Mantid::API::CompositeFunction_sptr comp( new Mantid::API::CompositeFunction );
+    auto conv = boost::dynamic_pointer_cast<CompositeFunction>(FunctionFactory::Instance().createFunction("Convolution"));
+    CompositeFunction_sptr comp( new CompositeFunction );
 
-    Mantid::API::IFunction_sptr func;
+    IFunction_sptr func;
     size_t index = 0;
 
     // -------------------------------------
     // --- Composite / Linear Background ---
     // -------------------------------------
-    func = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
+    func = FunctionFactory::Instance().createFunction("LinearBackground");
     comp->addFunction(func);
 
     const int bgType = m_uiForm.cbBackground->currentIndex(); // 0 = Fixed Flat, 1 = Fit Flat, 2 = Fit all
@@ -375,27 +370,27 @@ namespace IDA
     // --------------------------------------------
     // --- Composite / Convolution / Resolution ---
     // --------------------------------------------
-    func = Mantid::API::FunctionFactory::Instance().createFunction("Resolution");
+    func = FunctionFactory::Instance().createFunction("Resolution");
     conv->addFunction(func);
 
     //add resolution file
     if (m_uiForm.dsResInput->isFileSelectorVisible())
     {
       std::string resfilename = m_uiForm.dsResInput->getFullFilePath().toStdString();
-      Mantid::API::IFunction::Attribute attr(resfilename);
+      IFunction::Attribute attr(resfilename);
       func->setAttribute("FileName", attr);
     }
     else
     {
       std::string resWorkspace = m_uiForm.dsResInput->getCurrentDataName().toStdString();
-      Mantid::API::IFunction::Attribute attr(resWorkspace);
+      IFunction::Attribute attr(resWorkspace);
       func->setAttribute("Workspace", attr);
     }
 
     // --------------------------------------------------------
     // --- Composite / Convolution / Model / Delta Function ---
     // --------------------------------------------------------
-    Mantid::API::CompositeFunction_sptr model( new Mantid::API::CompositeFunction );
+    CompositeFunction_sptr model( new CompositeFunction );
 
     bool useDeltaFunc = m_blnManager->value(m_properties["UseDeltaFunc"]);
 
@@ -403,7 +398,7 @@ namespace IDA
 
     if ( useDeltaFunc )
     {
-      func = Mantid::API::FunctionFactory::Instance().createFunction("DeltaFunction");
+      func = FunctionFactory::Instance().createFunction("DeltaFunction");
       index = model->addFunction(func);
       std::string parName = createParName(index);
       populateFunction(func, model, m_properties["DeltaFunction"], parName, false);
@@ -414,7 +409,7 @@ namespace IDA
     // ------------------------------------------------------------
 
     //create temperature correction function to multiply with the lorentzians
-    Mantid::API::IFunction_sptr tempFunc;
+    IFunction_sptr tempFunc;
     QString temperature = m_uiForm.leTempCorrection->text();
     bool useTempCorrection = (!temperature.isEmpty() && m_uiForm.ckTempCorrection->isChecked());
 
@@ -431,14 +426,14 @@ namespace IDA
     {
       //if temperature not included then product is lorentzian * 1
       //create product function for temp * lorentzian
-      auto product = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(Mantid::API::FunctionFactory::Instance().createFunction("ProductFunction"));
+      auto product = boost::dynamic_pointer_cast<CompositeFunction>(FunctionFactory::Instance().createFunction("ProductFunction"));
 
       if(useTempCorrection)
       {
         createTemperatureCorrection(product);
       }
 
-      func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
+      func = FunctionFactory::Instance().createFunction("Lorentzian");
       subIndex = product->addFunction(func);
       index = model->addFunction(product);
       prefix1 = createParName(index, subIndex);
@@ -451,14 +446,14 @@ namespace IDA
     {
       //if temperature not included then product is lorentzian * 1
       //create product function for temp * lorentzian
-      auto product = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(Mantid::API::FunctionFactory::Instance().createFunction("ProductFunction"));
+      auto product = boost::dynamic_pointer_cast<CompositeFunction>(FunctionFactory::Instance().createFunction("ProductFunction"));
 
       if(useTempCorrection)
       {
         createTemperatureCorrection(product);
       }
 
-      func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
+      func = FunctionFactory::Instance().createFunction("Lorentzian");
       subIndex = product->addFunction(func);
       index = model->addFunction(product);
       prefix2 = createParName(index, subIndex);
@@ -481,18 +476,18 @@ namespace IDA
     return comp;
   }
 
-  void ConvFit::createTemperatureCorrection(Mantid::API::CompositeFunction_sptr product)
+  void ConvFit::createTemperatureCorrection(CompositeFunction_sptr product)
   {
     //create temperature correction function to multiply with the lorentzians
-    Mantid::API::IFunction_sptr tempFunc;
+    IFunction_sptr tempFunc;
     QString temperature = m_uiForm.leTempCorrection->text();
 
     //create user function for the exponential correction
     // (x*temp) / 1-exp(-(x*temp))
-    tempFunc = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
+    tempFunc = FunctionFactory::Instance().createFunction("UserFunction");
     //11.606 is the conversion factor from meV to K
     std::string formula = "((x*11.606)/Temp) / (1 - exp(-((x*11.606)/Temp)))";
-    Mantid::API::IFunction::Attribute att(formula);
+    IFunction::Attribute att(formula);
     tempFunc->setAttribute("Formula", att);
     tempFunc->setParameter("Temp", temperature.toDouble());
 
@@ -563,7 +558,7 @@ namespace IDA
     return lorentzGroup;
   }
 
-  void ConvFit::populateFunction(Mantid::API::IFunction_sptr func, Mantid::API::IFunction_sptr comp, QtProperty* group, const std::string & pref, bool tie)
+  void ConvFit::populateFunction(IFunction_sptr func, IFunction_sptr comp, QtProperty* group, const std::string & pref, bool tie)
   {
     // Get subproperties of group and apply them as parameters on the function object
     QList<QtProperty*> props = group->subProperties();
@@ -690,10 +685,13 @@ namespace IDA
 
     int specNo = m_uiForm.spPlotSpectrum->text().toInt();
 
-    plotMiniPlot(m_cfInputWS, specNo, "ConvFitPlot", "CFDataCurve");
+    m_uiForm.ppPlot->clear();
+    m_uiForm.ppPlot->addSpectrum("Sample", m_cfInputWS, specNo);
+
     try
     {
-      const std::pair<double, double> range = getCurveRange("CFDataCurve");
+      const QPair<double, double> curveRange = m_uiForm.ppPlot->getCurveRange("Sample");
+      const std::pair<double, double> range(curveRange.first, curveRange.second);
       m_rangeSelectors["ConvFitRange"]->setRange(range.first, range.second);
       m_uiForm.ckPlotGuess->setChecked(plotGuess);
     }
@@ -709,21 +707,19 @@ namespace IDA
       m_dblManager->setValue(m_properties["Lorentzian 1.FWHM"], resolution);
       m_dblManager->setValue(m_properties["Lorentzian 2.FWHM"], resolution);
     }
-
-    // Remove the old fit curve
-    removeCurve("CFCalcCurve");
-    replot("ConvFitPlot");
   }
 
-  void ConvFit::plotGuess(QtProperty*)
+  void ConvFit::plotGuess()
   {
-    if ( ! m_uiForm.ckPlotGuess->isChecked() || m_curves["CFDataCurve"] == NULL )
-    {
+    m_uiForm.ppPlot->removeSpectrum("Guess");
+
+    // Do nothing if there is not a sample and resolution
+    if(!(m_uiForm.dsSampleInput->isValid() && m_uiForm.dsResInput->isValid()
+          && m_uiForm.ckPlotGuess->isChecked()))
       return;
-    }
 
     bool tieCentres = (m_uiForm.cbFitType->currentIndex() > 1);
-    Mantid::API::CompositeFunction_sptr function = createFunction(tieCentres);
+    CompositeFunction_sptr function = createFunction(tieCentres);
 
     if ( m_cfInputWS == NULL )
     {
@@ -750,8 +746,8 @@ namespace IDA
       }
     }
 
-    Mantid::API::FunctionDomain1DVector domain(inputXData);
-    Mantid::API::FunctionValues outputData(domain);
+    FunctionDomain1DVector domain(inputXData);
+    FunctionValues outputData(domain);
     function->function(domain, outputData);
 
     QVector<double> dataX, dataY;
@@ -762,13 +758,18 @@ namespace IDA
       dataY.append(outputData.getCalculated(i));
     }
 
-    removeCurve("CFCalcCurve");
-    m_curves["CFCalcCurve"] = new QwtPlotCurve();
-    m_curves["CFCalcCurve"]->setData(dataX, dataY);
-    QPen fitPen(Qt::red, Qt::SolidLine);
-    m_curves["CFCalcCurve"]->setPen(fitPen);
-    m_curves["CFCalcCurve"]->attach(m_plots["ConvFitPlot"]);
-    m_plots["ConvFitPlot"]->replot();
+    IAlgorithm_sptr createWsAlg = AlgorithmManager::Instance().create("CreateWorkspace");
+    createWsAlg->initialize();
+    createWsAlg->setChild(true);
+    createWsAlg->setLogging(false);
+    createWsAlg->setProperty("OutputWorkspace", "__GuessAnon");
+    createWsAlg->setProperty("NSpec", 1);
+    createWsAlg->setProperty("DataX", dataX.toStdVector());
+    createWsAlg->setProperty("DataY", dataY.toStdVector());
+    createWsAlg->execute();
+    MatrixWorkspace_sptr guessWs = createWsAlg->getProperty("OutputWorkspace");
+
+    m_uiForm.ppPlot->addSpectrum("Guess", guessWs, 0, Qt::green);
   }
 
   void ConvFit::singleFit()
@@ -778,15 +779,9 @@ namespace IDA
 
     plotInput();
 
-    if ( m_curves["CFDataCurve"] == NULL )
-    {
-      showMessageBox("There was an error reading the data file.");
-      return;
-    }
-
     m_uiForm.ckPlotGuess->setChecked(false);
 
-    Mantid::API::CompositeFunction_sptr function = createFunction(m_uiForm.ckTieCentres->isChecked());
+    CompositeFunction_sptr function = createFunction(m_uiForm.ckTieCentres->isChecked());
 
     // get output name
     QString fitType = fitTypeString();
@@ -801,7 +796,7 @@ namespace IDA
     outputNm += QString("conv_") + fitType + bgType + m_uiForm.spPlotSpectrum->text();
     std::string output = outputNm.toStdString();
 
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     alg->setPropertyValue("Function", function->asString());
     alg->setPropertyValue("InputWorkspace", m_cfInputWSName.toStdString());
@@ -821,12 +816,10 @@ namespace IDA
     }
 
     // Plot the line on the mini plot
-    plotMiniPlot(outputNm+"_Workspace", 1, "ConvFitPlot", "CFCalcCurve");
-    QPen fitPen(Qt::red, Qt::SolidLine);
-    m_curves["CFCalcCurve"]->setPen(fitPen);
-    replot("ConvFitPlot");
+    m_uiForm.ppPlot->removeSpectrum("Guess");
+    m_uiForm.ppPlot->addSpectrum("Fit", outputNm+"_Workspace", 1, Qt::red);
 
-    Mantid::API::IFunction_sptr outputFunc = alg->getProperty("Function");
+    IFunction_sptr outputFunc = alg->getProperty("Function");
 
     // Get params.
     QMap<QString,double> parameters;
