@@ -3,19 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileBackedExperimentInfo.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/FileFinder.h"
 
 #include <nexus/NeXusFile.hpp>
 
 using Mantid::API::FileBackedExperimentInfo;
-
-using namespace Mantid::API;
-using namespace Mantid::Kernel;
-using namespace Mantid::Geometry;
 
 class FileBackedExperimentInfoTest : public CxxTest::TestSuite
 {
@@ -25,35 +18,55 @@ public:
   static FileBackedExperimentInfoTest *createSuite() { return new FileBackedExperimentInfoTest(); }
   static void destroySuite( FileBackedExperimentInfoTest *suite ) { delete suite; }
 
+  FileBackedExperimentInfoTest()
+  {
+    using Mantid::API::ExperimentInfo;
+    using Mantid::API::FileFinder;
+    // Cache in-memory experiment info for comparison
+    m_filename = FileFinder::Instance().getFullPath("TOPAZ_3680_5_sec_MDEW.nxs");
+    if(m_filename.empty())
+    {
+      throw std::runtime_error("Cannot find test file TOPAZ_3680_5_sec_MDEW.nxs");
+    }
+    
+    m_inMemoryExptInfo = boost::make_shared<ExperimentInfo>();
+   ::NeXus::File nexusFile(m_filename, NXACC_READ);
+    nexusFile.openGroup("MDEventWorkspace", "NXentry");
+    nexusFile.openGroup("experiment0", "NXgroup");
+    std::string paramString;
+    m_inMemoryExptInfo->loadExperimentInfoNexus(&nexusFile, paramString);
+    m_inMemoryExptInfo->readParameterMap(paramString);
+  }
+  
   void test_toString_method_returns_same_as_ExperimentInfo_class()
   {
-    // Find an MD file to use, and MD file is fine
-    std::string filename = FileFinder::Instance().getFullPath("TOPAZ_3680_5_sec_MDEW.nxs");
-
-    // Filebacked ExperimentInfo
-    //
     // Load the file we want to use
-    ::NeXus::File *nexusFileBacked = new ::NeXus::File(filename, NXACC_READ);
-    nexusFileBacked->openGroup("MDEventWorkspace", "NXentry");
+    ::NeXus::File nexusFile(m_filename, NXACC_READ);
 
     // Create the file backed experiment info, shouldn't be loaded yet
-    FileBackedExperimentInfo fileBackedWS(nexusFileBacked, "experiment0");
+    FileBackedExperimentInfo fileBacked(&nexusFile, "/MDEventWorkspace/experiment0");
 
-    // Standard ExperimentInfo
-    //
-    // Load the file again, so what we did before does not affect it
-    ::NeXus::File *nexusFile = new ::NeXus::File(filename, NXACC_READ);
-    nexusFile->openGroup("MDEventWorkspace", "NXentry");
-
-    // Actually do the loading here
-    ExperimentInfo standardWS;
-    std::string standardParameterStr;
-    nexusFile->openGroup("experiment0", "NXgroup");
-    standardWS.loadExperimentInfoNexus(nexusFile, standardParameterStr);
-
-    TS_ASSERT_EQUALS(standardWS.toString(), fileBackedWS.toString());
+    TS_ASSERT_EQUALS(fileBacked.toString(), m_inMemoryExptInfo->toString());
   }
 
+  //------------------------------------------------------------------------------------------------a
+  // Failure tests
+  //------------------------------------------------------------------------------------------------
+  void test_runtime_error_generated_when_unable_to_load_from_file()
+  {
+    // Load the file we want to use
+    ::NeXus::File nexusFile(m_filename, NXACC_READ);
+
+    // Create the file backed experiment info, shouldn't be loaded yet
+    FileBackedExperimentInfo fileBacked(&nexusFile, "/not/right/path");
+    
+    TS_ASSERT_THROWS(fileBacked.toString(), std::runtime_error);
+
+  }
+  
+private:
+  std::string m_filename;
+  Mantid::API::ExperimentInfo_sptr m_inMemoryExptInfo;
 };
 
 

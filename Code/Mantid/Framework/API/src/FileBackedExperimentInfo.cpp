@@ -3,54 +3,70 @@
 //----------------------------------------------------------------------------------------------
 #include "MantidAPI/FileBackedExperimentInfo.h"
 
+#include <nexus/NeXusException.hpp>
+
+#include <sstream>
+
 namespace Mantid {
 namespace API {
 
 namespace {
+
 /// static logger object
 Kernel::Logger g_log("FileBackedExperimentInfo");
+
 }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
+/**
+  * Create an object based on a NeXus file and path
+  * @param file A pointer to an open NeXus file object
+  * @param path Path to the location of the data
+  */
 FileBackedExperimentInfo::FileBackedExperimentInfo(::NeXus::File *file,
-                                                   const std::string groupName)
-    : ExperimentInfo(), m_file(file), m_groupName(groupName) {
-  m_experimentInfoIsLoaded = false;
+                                                   const std::string & path)
+    : ExperimentInfo(), m_loaded(false), m_file(file), m_path(path) {
 }
 
 //----------------------------------------------------------------------------------------------
 /// @returns A human-readable description of the object
 const std::string FileBackedExperimentInfo::toString() {
-  if (!m_experimentInfoIsLoaded) {
-    intialise();
-  }
-
+  checkAndPopulate();
   return ExperimentInfo::toString();
 }
+
 
 //------------------------------------------------------------------------------------------------------
 // Private members
 //------------------------------------------------------------------------------------------------------
 /**
- * Here we actually load the data
+ * Check if the object has been populated and load the information if
+ * it has not
  */
-void FileBackedExperimentInfo::intialise() {
+void FileBackedExperimentInfo::checkAndPopulate()
+{
+  if (!m_loaded) {
+    populateFromFile();
+  }
+}
+
+/**
+ * Populate this object with the data from the file
+ */
+void FileBackedExperimentInfo::populateFromFile() {
   try {
-    m_file->openGroup(m_groupName, "NXgroup");
+    m_file->openPath(m_path);
     // Get the sample, logs, instrument
     std::string parameterStr;
     this->loadExperimentInfoNexus(m_file, parameterStr);
     // Now do the parameter map
     this->readParameterMap(parameterStr);
-  } catch (std::exception &e) {
-    g_log.information("Error loading section '" + m_groupName +
-                      "' of nxs file.");
-    g_log.information(e.what());
+  } catch (::NeXus::Exception &exc) {
+    std::ostringstream os;
+    os << "Unable to load experiment information from NeXus file: " << exc.what() << "\n";
+    throw std::runtime_error(os.str());
   }
-
-  m_experimentInfoIsLoaded = true;
+  m_loaded = true;
 }
 
 } // namespace API

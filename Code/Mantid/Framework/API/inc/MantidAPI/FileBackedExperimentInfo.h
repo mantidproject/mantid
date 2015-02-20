@@ -1,6 +1,8 @@
 #ifndef MANTID_API_FILEBACKEDEXPERIMENTINFO_H_
 #define MANTID_API_FILEBACKEDEXPERIMENTINFO_H_
-
+//-----------------------------------------------------------------------------
+// Includes
+//-----------------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
 
@@ -32,21 +34,22 @@ namespace API {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport FileBackedExperimentInfo : public ExperimentInfo {
+class MANTID_API_DLL FileBackedExperimentInfo : public ExperimentInfo {
 public:
   /// Constructor
-  FileBackedExperimentInfo(::NeXus::File *file, const std::string groupName);
+  FileBackedExperimentInfo(::NeXus::File *file, const std::string & path);
 
   /// Returns a string description of the object
   const std::string toString();
 
 private:
-  /// Does the real load
-  void intialise();
 
+  void checkAndPopulate();
+  void populateFromFile();
+
+  bool m_loaded;
   ::NeXus::File *m_file;
-  std::string m_groupName;
-  bool m_experimentInfoIsLoaded;
+  std::string m_path;
 };
 
 } // namespace API
