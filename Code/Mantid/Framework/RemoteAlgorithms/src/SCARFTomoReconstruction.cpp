@@ -63,7 +63,7 @@ void SCARFTomoReconstruction::init() {
                   "Name of the user to authenticate as", Direction::Input);
 
   // Action to perform
-  declareProperty("Action", "Login", listValue, "Choose the operation to perform "
+  declareProperty("Action", "LogIn", listValue, "Choose the operation to perform "
                   "on the compute resource " + m_SCARFComputeResource,
                   Direction::Input);
 
