@@ -82,7 +82,7 @@ Output:
 
 .. testoutput:: SCARFTomoReconstruction
 
-   ValueError as expected because no Password= parameter given
+   ValueError, as expected, because no Password= parameter given
    ValueError, as expected, as it was not previously logged on
 
 .. categories::
