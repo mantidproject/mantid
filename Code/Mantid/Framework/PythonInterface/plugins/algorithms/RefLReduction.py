@@ -1,8 +1,6 @@
 #pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.simpleapi import *
-from numpy import zeros, shape, arange
-import math
 
 # import sfCalculator
 import sys

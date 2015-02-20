@@ -2,7 +2,8 @@
 from mantid import logger, mtd
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, ITableWorkspaceProperty, PropertyMode
 from mantid.kernel import Direction, IntArrayProperty
-from mantid.simpleapi import CreateWorkspace, CopyLogs, CopySample, CopyInstrumentParameters, SaveNexusProcessed, CreateEmptyTableWorkspace, RenameWorkspace
+from mantid.simpleapi import CreateWorkspace, CopyLogs, CopyInstrumentParameters,\
+    SaveNexusProcessed, CreateEmptyTableWorkspace, RenameWorkspace
 
 import math
 import os.path

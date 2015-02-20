@@ -10,9 +10,6 @@ to have meaningful concepts such as this then see ExamplePeakFunction.
 derivative
 """
 from mantid.api import IFunction1D, FunctionFactory
-from mantid import logger
-import math
-import numpy as np
 
 class Example1DFunction(IFunction1D):
 

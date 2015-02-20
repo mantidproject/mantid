@@ -3,8 +3,6 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 import numpy as np
-import os.path
-import re
 import __builtin__
 
 class Projection(object):

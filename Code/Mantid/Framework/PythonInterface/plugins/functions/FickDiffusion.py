@@ -25,9 +25,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 '''
 
 from mantid.api import IFunction1D, FunctionFactory
-from mantid import logger
-import math
-import numpy as np
 
 class FickDiffusion(IFunction1D):
 

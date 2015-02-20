@@ -110,7 +110,7 @@ class DSFinterp(PythonAlgorithm):
             dsf.Save(outws) # overwrite dataY and dataE
 
 #############################################################################################
-
+#pylint: disable=unused-import
 try:
     import dsfinterp
     AlgorithmFactory.subscribe(DSFinterp)

@@ -3,8 +3,7 @@ from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
 import os
-import datetime
-from time import localtime, strftime
+from time import strftime
 from mantid import config
 from mantid.kernel import Direction
 

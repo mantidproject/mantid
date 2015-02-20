@@ -4,7 +4,6 @@ import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
 import numpy as np
-import operator
 
 class SortXAxis(PythonAlgorithm):
 

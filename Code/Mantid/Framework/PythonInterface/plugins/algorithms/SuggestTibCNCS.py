@@ -40,7 +40,7 @@ class SuggestTibCNCS(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-        val=mantid.kernel.FloatBoundedValidator()
+        val=FloatBoundedValidator()
         val.setBounds(0.5,50) #reasonable incident nergy range for CNCS
         self.declareProperty("IncidentEnergy",0.,val,"Incident energy (0.5 to 50 meV)")
         self.declareProperty("TibMin",0.,Direction.Output)

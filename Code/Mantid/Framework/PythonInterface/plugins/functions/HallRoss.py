@@ -25,7 +25,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 '''
 
 from mantid.api import IFunction1D, FunctionFactory
-from mantid import logger
 import math, numpy as np
 
 class HallRoss(IFunction1D):
