@@ -592,16 +592,14 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getIntegratedPeakCollection(
 
   PoldiPeakCollection_sptr integratedPeakCollection =
       boost::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
-  integratedPeakCollection->setProfileFunctionName(
-      rawPeakCollection->getProfileFunctionName());
+  integratedPeakCollection->setProfileFunctionName(profileFunctionName);
 
   for (size_t i = 0; i < rawPeakCollection->peakCount(); ++i) {
     PoldiPeak_sptr peak = rawPeakCollection->peak(i);
 
     IPeakFunction_sptr profileFunction =
         boost::dynamic_pointer_cast<IPeakFunction>(
-            FunctionFactory::Instance().createFunction(
-                rawPeakCollection->getProfileFunctionName()));
+            FunctionFactory::Instance().createFunction(profileFunctionName));
 
     profileFunction->setHeight(peak->intensity());
     profileFunction->setFwhm(peak->fwhm(PoldiPeak::AbsoluteD));
