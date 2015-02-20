@@ -96,6 +96,7 @@ public:
         PoldiPeakCollection_sptr testPeaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum();
 
         TestablePoldiFitPeaks2D spectrumCalculator;
+        spectrumCalculator.initialize();
         // deltaT is not set, so this must fail
         TS_ASSERT_THROWS(spectrumCalculator.getIntegratedPeakCollection(testPeaks), std::invalid_argument);
         spectrumCalculator.setDeltaT(3.0);
@@ -138,8 +139,13 @@ public:
         TS_ASSERT_EQUALS(alreadyIntegratedResult->peakCount(), alreadyIntegratedPeaks->peakCount());
         TS_ASSERT_EQUALS(alreadyIntegratedResult->peak(0)->d(), alreadyIntegratedPeaks->peak(0)->d());
 
-        // Where there's no profile function specified, the integration can not be performed.
+        // Where there's no profile function in the peak collection, falling back to the property PeakProfileFunction.
+        // Default is Gaussian, so this is supposed to work.
         PoldiPeakCollection_sptr noProfilePeaks(new PoldiPeakCollection);
+        TS_ASSERT_THROWS_NOTHING(spectrumCalculator.getIntegratedPeakCollection(noProfilePeaks));
+
+        // While setting an invalid function name throws.
+        spectrumCalculator.setProperty("PeakProfileFunction", "InvalidFunctionName");
         TS_ASSERT_THROWS(spectrumCalculator.getIntegratedPeakCollection(noProfilePeaks), std::runtime_error);
 
         // When there is no valid PoldiPeakCollection, the method also throws

@@ -573,11 +573,21 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getIntegratedPeakCollection(
   }
 
   /* If no profile function is specified, it's not possible to get integrated
-   * intensities at all and we need to abort at this point.
+   * intensities at all and we try to use the one specified by the user instead.
    */
+  std::string profileFunctionName = rawPeakCollection->getProfileFunctionName();
+
   if (!rawPeakCollection->hasProfileFunctionName()) {
+    profileFunctionName = getPropertyValue("PeakProfileFunction");
+  }
+
+  std::vector<std::string> allowedProfiles =
+      FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
+
+  if (std::find(allowedProfiles.begin(), allowedProfiles.end(),
+                profileFunctionName) == allowedProfiles.end()) {
     throw std::runtime_error(
-        "Cannot integrate peak profiles without profile function.");
+        "Cannot integrate peak profiles with invalid profile function.");
   }
 
   PoldiPeakCollection_sptr integratedPeakCollection =
