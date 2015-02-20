@@ -86,7 +86,7 @@ public:
   /** Unit test to reduce/bin the HB2A data with more options
    * @brief test_ReduceHB2AData
    */
-  void Xtest_ReduceHB2ADataMoreOptions() {
+  void test_ReduceHB2ADataMoreOptions() {
     // Init
     ConvertCWPDMDToSpectra alg;
     alg.initialize();
@@ -103,6 +103,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ScaleFactor", 10.0));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("UnitOutput", "Momenum Transfer (Q)"));
+    TS_ASSERT_THROWS_NOTHING(
+          alg.setProperty("NeutronWaveLength", 2.41));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ReducedData"));
 
     // Execute
@@ -114,8 +116,12 @@ public:
         AnalysisDataService::Instance().retrieve("ReducedData"));
     TS_ASSERT(outws);
 
+    // Check statistics
+
+
     // Clean
     AnalysisDataService::Instance().remove("ReducedData");
+
   }
 
   void test_Clean() {

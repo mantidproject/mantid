@@ -143,9 +143,9 @@ void ConvertCWPDMDToSpectra::exec() {
           outws->run().getProperty(wavelengthpropertyname)->value().c_str());
     }
     convertUnits(outws, outputunit, wavelength);
-  } else {
-    outws->getAxis(0)->setUnit("degree");
   }
+  // TODO : Implement unit for 2theta in another ticket.
+
   // Return
   setProperty("OutputWorkspace", outws);
 }
@@ -462,6 +462,7 @@ ConvertCWPDMDToSpectra::scaleMatrixWorkspace(API::MatrixWorkspace_sptr matrixws,
     MantidVec &datae = matrixws->dataE(iws);
     size_t numelements = datay.size();
     for (size_t i = 0; i < numelements; ++i) {
+      // FIXME - Be careful about zero count
       datay[i] *= scalefactor;
       datae[i] *= sqrt(scalefactor);
     }
@@ -486,6 +487,7 @@ void ConvertCWPDMDToSpectra::convertUnits(API::MatrixWorkspace_sptr matrixws,
     target = 'q';
 
   // Loop through all X values
+  std::runtime_error("It is somehow very wrong as converting unit!  Take care of unit for wavelength (A?), and 2theta as degree of radian in pi!");
   size_t numspec = matrixws->getNumberHistograms();
   for (size_t i = 0; i < numspec; ++i) {
     MantidVec &vecX = matrixws->dataX(i);
@@ -497,6 +499,8 @@ void ConvertCWPDMDToSpectra::convertUnits(API::MatrixWorkspace_sptr matrixws,
         vecX[j] = calculateQ(vecX[j] * 0.5, wavelength);
     }
   }
+
+  throw std::runtime_error("Consider whether (x,y,e) are to be re-ordered.");
 
   // Set unit
   if (target == 'd')
