@@ -1,23 +1,18 @@
 #ifndef MANTID_API_FILEBACKEDEXPERIMENTINFO_H_
 #define MANTID_API_FILEBACKEDEXPERIMENTINFO_H_
 
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
 
-#if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 // libstdc++-4.4.3
-typedef std::unique_ptr< ::NeXus::File> file_holder_type;
-#else
-typedef std::auto_ptr< ::NeXus::File> file_holder_type;
-#endif
+namespace Mantid {
+namespace API {
 
-namespace Mantid
-{
-namespace API
-{
+/**
+    Implements a lazy-loading mechanism for the experimental information
+    stored in a NeXus file.
 
-  /** FileBackedExperimentInfo : TODO: DESCRIPTION
-
-    Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -37,26 +32,24 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport FileBackedExperimentInfo : public ExperimentInfo
-  {
-  public:
-    /// Constructor
-    FileBackedExperimentInfo(::NeXus::File *file, const std::string groupName);
+class DLLExport FileBackedExperimentInfo : public ExperimentInfo {
+public:
+  /// Constructor
+  FileBackedExperimentInfo(::NeXus::File *file, const std::string groupName);
 
-    /// Returns a string description of the object
-    const std::string toString();
+  /// Returns a string description of the object
+  const std::string toString();
 
-  private:
-     /// Does the real load
-     void intialise();
+private:
+  /// Does the real load
+  void intialise();
 
-     ::NeXus::File *m_file;
-     std::string m_groupName;
-     bool m_experimentInfoIsLoaded;
-  };
-
+  ::NeXus::File *m_file;
+  std::string m_groupName;
+  bool m_experimentInfoIsLoaded;
+};
 
 } // namespace API
 } // namespace Mantid
 
-#endif  /* MANTID_API_FILEBACKEDEXPERIMENTINFO_H_ */
+#endif /* MANTID_API_FILEBACKEDEXPERIMENTINFO_H_ */
