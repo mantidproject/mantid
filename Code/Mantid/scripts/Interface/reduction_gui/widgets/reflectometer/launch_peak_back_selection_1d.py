@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # used to parse files more easily
 from __future__ import with_statement
 

@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # Bayes routines
 # Fortran programs use fixed length arrays whereas Python has variable lenght lists
 # Input : the Python list is padded to Fortrans length using procedure PadArray
@@ -271,8 +272,8 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Plot,Save):
             message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])+' '+str(yprob[2])+' '+str(yprob[3])
             logger.information(message)
         if prog == 'QSe':
-            nd,xout,yout,eout,yfit,yprob=Qse.qlstexp(numb,Xv,Yv,Ev,reals,fitOp,
-                                                    Xdat,Xb,Yb,Wy,We,dtn,xsc,
+            nd,xout,yout,eout,yfit,yprob=Qse.qlstexp(numb,Xv,Yv,Ev,reals,fitOp,\
+                                                    Xdat,Xb,Yb,Wy,We,dtn,xsc,\
                                                     wrks,wrkr,lwrk)
         dataX = xout[:nd]
         dataX = np.append(dataX,2*xout[nd-1]-xout[nd-2])
@@ -315,7 +316,7 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Plot,Save):
         fitWS = fname+'_Workspaces'
         fout = fname+'_Workspace_'+ str(m)
 
-        CreateWorkspace(OutputWorkspace=fout, DataX=datX, DataY=datY, DataE=datE,
+        CreateWorkspace(OutputWorkspace=fout, DataX=datX, DataY=datY, DataE=datE,\
             Nspec=nsp, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names)
 
         # append workspace to list of results
@@ -334,7 +335,7 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Plot,Save):
         yProb = yPr0
         yProb = np.append(yProb,yPr1)
         yProb = np.append(yProb,yPr2)
-        CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,
+        CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,\
             Nspec=3, UnitX='MomentumTransfer')
         outWS = C2Fw(samWS[:-4],fname)
         if (Plot != 'None'):
@@ -524,7 +525,7 @@ def C2Fw(prog,sname):
     y = np.asarray(y).flatten()
     e = np.asarray(e).flatten()
 
-    CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,
+    CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,\
         UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=axis_names)
 
     return output_workspace
@@ -613,7 +614,7 @@ def C2Se(sname):
     Vaxis.append('f1.Beta')
 
     logger.information('Vaxis=' + str(Vaxis))
-    CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
+    CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,\
         UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
     return outWS
 
@@ -735,7 +736,7 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Plot,Save):
         Nb,Xb,Yb,Eb = GetXYE(resWS,0,array_len)
         numb = [nsam, nsp, ntc, Ndat, nbin, Imin, Imax, Nb, nrbin, Nbet, Nsig]
         reals = [efix, theta[m], rscl, bnorm]
-        xsout,ysout,xbout,ybout,zpout=Que.quest(numb,Xv,Yv,Ev,reals,fitOp,
+        xsout,ysout,xbout,ybout,zpout=Que.quest(numb,Xv,Yv,Ev,reals,fitOp,\
                                             Xdat,Xb,Yb,wrks,wrkr,lwrk)
         dataXs = xsout[:Nsig]               # reduce from fixed Fortran array
         dataYs = ysout[:Nsig]
@@ -758,7 +759,7 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Plot,Save):
             dataYz = np.append(dataYz,dataYzp[:Nbet])
             dataEz = np.append(dataEz,eBet0)
 
-        CreateWorkspace(OutputWorkspace=zpWS, DataX=dataXz, DataY=dataYz, DataE=dataEz,
+        CreateWorkspace(OutputWorkspace=zpWS, DataX=dataXz, DataY=dataYz, DataE=dataEz,\
             Nspec=Nsig, UnitX='MomentumTransfer', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=dataXs)
 
         unitx = mtd[zpWS].getAxis(0).setUnit("Label")
@@ -784,12 +785,12 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Plot,Save):
             groupZ = groupZ +','+ zpWS
 
     #create workspaces for sigma and beta
-    CreateWorkspace(OutputWorkspace=fname+'_Sigma', DataX=xSig, DataY=ySig, DataE=eSig,
+    CreateWorkspace(OutputWorkspace=fname+'_Sigma', DataX=xSig, DataY=ySig, DataE=eSig,\
         Nspec=nsam, UnitX='', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
     unitx = mtd[fname+'_Sigma'].getAxis(0).setUnit("Label")
     unitx.setLabel('sigma' , '')
 
-    CreateWorkspace(OutputWorkspace=fname+'_Beta', DataX=xBet, DataY=yBet, DataE=eBet,
+    CreateWorkspace(OutputWorkspace=fname+'_Beta', DataX=xBet, DataY=yBet, DataE=eBet,\
         Nspec=nsam, UnitX='', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
     unitx = mtd[fname+'_Beta'].getAxis(0).setUnit("Label")
     unitx.setLabel('beta' , '')
@@ -879,7 +880,7 @@ def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
         nsp = m+1
         numb = [nvan, nsp, ntc, Ndat, nbin, Imin, Imax, Nb]
         reals = [efix, theta[0], rscl, bnorm]
-        nd,xout,yout,eout,yfit,pfit=resnorm.resnorm(numb,Xv,Yv,Ev,reals,
+        nd,xout,yout,eout,yfit,pfit=resnorm.resnorm(numb,Xv,Yv,Ev,reals,\
                                     Xdat,Xb,Yb,wrks,wrkr,lwrk)
         message = ' Fit paras : '+str(pfit[0])+' '+str(pfit[1])
         logger.information(message)
@@ -888,26 +889,26 @@ def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
         if m == 0:
             yPar1 = np.array([pfit[0]])
             yPar2 = np.array([pfit[1]])
-            CreateWorkspace(OutputWorkspace='Data', DataX=dataX, DataY=yout[:nd], DataE=eout[:nd],
+            CreateWorkspace(OutputWorkspace='Data', DataX=dataX, DataY=yout[:nd], DataE=eout[:nd],\
                 NSpec=1, UnitX='DeltaE')
-            CreateWorkspace(OutputWorkspace='Fit', DataX=dataX, DataY=yfit[:nd], DataE=np.zeros(nd),
+            CreateWorkspace(OutputWorkspace='Fit', DataX=dataX, DataY=yfit[:nd], DataE=np.zeros(nd),\
                 NSpec=1, UnitX='DeltaE')
         else:
             yPar1 = np.append(yPar1,pfit[0])
             yPar2 = np.append(yPar2,pfit[1])
-            CreateWorkspace(OutputWorkspace='__datmp', DataX=dataX, DataY=yout[:nd], DataE=eout[:nd],
+            CreateWorkspace(OutputWorkspace='__datmp', DataX=dataX, DataY=yout[:nd], DataE=eout[:nd],\
                 NSpec=1, UnitX='DeltaE')
             ConjoinWorkspaces(InputWorkspace1='Data', InputWorkspace2='__datmp', CheckOverlapping=False)
-            CreateWorkspace(OutputWorkspace='__f1tmp', DataX=dataX, DataY=yfit[:nd], DataE=np.zeros(nd),
+            CreateWorkspace(OutputWorkspace='__f1tmp', DataX=dataX, DataY=yfit[:nd], DataE=np.zeros(nd),\
                 NSpec=1, UnitX='DeltaE')
             ConjoinWorkspaces(InputWorkspace1='Fit', InputWorkspace2='__f1tmp', CheckOverlapping=False)
 
     resnorm_intesity = fname+'_ResNorm_Intensity'
     resnorm_stretch = fname+'_ResNorm_Stretch'
 
-    CreateWorkspace(OutputWorkspace=resnorm_intesity, DataX=xPar, DataY=yPar1, DataE=xPar,
+    CreateWorkspace(OutputWorkspace=resnorm_intesity, DataX=xPar, DataY=yPar1, DataE=xPar,\
         NSpec=1, UnitX='MomentumTransfer')
-    CreateWorkspace(OutputWorkspace=resnorm_stretch, DataX=xPar, DataY=yPar2, DataE=xPar,
+    CreateWorkspace(OutputWorkspace=resnorm_stretch, DataX=xPar, DataY=yPar2, DataE=xPar,\
         NSpec=1, UnitX='MomentumTransfer')
 
     group = resnorm_intesity + ','+ resnorm_stretch

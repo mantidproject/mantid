@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid import logger, mtd
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, ITableWorkspaceProperty, PropertyMode
 from mantid.kernel import Direction, IntArrayProperty
@@ -33,10 +34,10 @@ class Symmetrise(PythonAlgorithm):
         self.declareProperty('Save', defaultValue=False,
                              doc='Switch saving result to nxs file Off/On')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',\
                              Direction.Output), doc='Name to call the output workspace.')
 
-        self.declareProperty(ITableWorkspaceProperty('OutputPropertiesTable', '',
+        self.declareProperty(ITableWorkspaceProperty('OutputPropertiesTable', '',\
                              Direction.Output, PropertyMode.Optional), doc='Name to call the properties output table workspace.')
 
 

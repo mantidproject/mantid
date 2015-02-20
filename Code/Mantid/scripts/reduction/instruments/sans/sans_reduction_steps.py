@@ -1,14 +1,11 @@
+#pylint: disable=invalid-name
 """
     Implementation of reduction steps for SANS
 """
-import os
-import sys
 import math
 import pickle
 from reduction import ReductionStep
-from reduction import extract_workspace_name, find_data
 from reduction import validate_step
-import warnings
 
 # Mantid imports
 import mantid
@@ -56,10 +53,10 @@ class BaseBeamFinder(ReductionStep):
         if self._beam_center_x is not None and self._beam_center_y is not None:
             return "Using Beam Center at: %g %g" % (self._beam_center_x, self._beam_center_y)
 
-        beam_x,beam_y,msg = SANSBeamFinder(Filename=self._datafile,
-                                         UseDirectBeamMethod=direct_beam,
-                                         BeamRadius=self._beam_radius,
-                                         PersistentCorrection=self._persistent,
+        beam_x,beam_y,msg = SANSBeamFinder(Filename=self._datafile,\
+                                         UseDirectBeamMethod=direct_beam,\
+                                         BeamRadius=self._beam_radius,\
+                                         PersistentCorrection=self._persistent,\
                                          ReductionProperties=reducer.get_reduction_table_name())
 
         self._beam_center_x = beam_x

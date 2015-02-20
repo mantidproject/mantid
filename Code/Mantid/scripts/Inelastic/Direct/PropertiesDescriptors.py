@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """ File contains collection of Descriptors used to define complex
     properties in NonIDF_Properties and PropertyManager classes
 """
@@ -163,16 +164,16 @@ class SumRuns(PropDescriptor):
                    format(ind + 2,num_to_load,run_num))
             term_name = '{0}_ADDITIVE_#{1}/{2}'.format(inst_name,ind + 2,num_to_load)#
 
-            wsp = self._sample_run.load_file(inst_name,term_name,False,
+            wsp = self._sample_run.load_file(inst_name,term_name,False,\
                                             monitors_with_ws,False,file_hint=file_h)
 
             wsp_name = wsp.name()
             wsp_mon_name = wsp_name + '_monitors'
-            Plus(LHSWorkspace=sum_ws_name,RHSWorkspace=wsp_name,
+            Plus(LHSWorkspace=sum_ws_name,RHSWorkspace=wsp_name,\
                 OutputWorkspace=sum_ws_name,ClearRHSWorkspace=True)
             AddedRunNumbers+=',{0}'.format(run_num)
             if not monitors_with_ws:
-                Plus(LHSWorkspace=sum_mon_name,RHSWorkspace=wsp_mon_name,
+                Plus(LHSWorkspace=sum_mon_name,RHSWorkspace=wsp_mon_name,\
                    OutputWorkspace=sum_mon_name,ClearRHSWorkspace=True)
             if wsp_name in mtd:
                 DeleteWorkspace(wsp_name)
@@ -370,7 +371,7 @@ class EnergyBins(PropDescriptor):
                 else:
                     if instance:
                         instance.log("*** WARNING! Got energy_bins specified as absolute values in multirep mode.\n"\
-                                "             Will normalize these values by max value and treat as relative values ",
+                                "             Will normalize these values by max value and treat as relative values ",\
                                 "warning")
                     mult = self._range / self._energy_bins[2]
                     rez = self._calc_relative_range(ei,mult)
@@ -383,7 +384,7 @@ class EnergyBins(PropDescriptor):
             else:
                 if instance:
                     instance.log("*** WARNING! Requested maximum binning range exceeds incident energy!\n"\
-                           "             Will normalize binning range by max value and treat as relative range",
+                           "             Will normalize binning range by max value and treat as relative range",\
                                 "warning")
                     mult = self._range / self._energy_bins[2]
                     ei = self._incident_energy.get_current()
@@ -520,7 +521,7 @@ class mon2NormalizationEnergyRange(PropDescriptor):
             val = self._parce_string2list(val)
             self.__set__(instance,val)
         else:
-            raise KeyError('mon2_norm_energy_range needs to be initialized by two values.\n'
+            raise KeyError('mon2_norm_energy_range needs to be initialized by two values.\n'\
                           'Trying to assign value {0} of unknown type {1}'.format(val,type(val)))
     #
     def _check_range(self,val,instance):
@@ -727,7 +728,6 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
         else:
             self._rel_range = True
             prop_helpers.ComplexProperty.__init__(self,['monovan_lo_frac','monovan_hi_frac'])
-        pass
 
     def __get__(self,instance,owner):
 

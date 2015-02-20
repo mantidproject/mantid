@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.kernel import StringArrayProperty, Direction
 from mantid.simpleapi import *
 from mantid.api import *

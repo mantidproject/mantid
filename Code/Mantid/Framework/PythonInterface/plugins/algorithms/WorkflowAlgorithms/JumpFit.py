@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.kernel import *
 from mantid.api import *
 import os
@@ -11,7 +12,7 @@ class JumpFit(PythonAlgorithm):
 
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
+        self.declareProperty(WorkspaceProperty('InputWorkspace', '', direction=Direction.Input),\
                 doc='Input workspace in HWHM')
 
         valid_functions = ['ChudleyElliot', 'HallRoss', 'FickDiffusion', 'TeixeiraWater']
@@ -19,20 +20,20 @@ class JumpFit(PythonAlgorithm):
                              validator=StringListValidator(valid_functions),
                              doc='The fit function to use')
 
-        self.declareProperty(name='Width', defaultValue=0, validator=IntMandatoryValidator(),
+        self.declareProperty(name='Width', defaultValue=0, validator=IntMandatoryValidator(),\
                 doc='Spectrum in the workspace to use for fiting')
 
-        self.declareProperty(name='QMin', defaultValue=0.0, validator=FloatMandatoryValidator(),
+        self.declareProperty(name='QMin', defaultValue=0.0, validator=FloatMandatoryValidator(),\
                 doc='Lower bound of Q range to use for fitting')
-        self.declareProperty(name='QMax', defaultValue=0.0, validator=FloatMandatoryValidator(),
+        self.declareProperty(name='QMax', defaultValue=0.0, validator=FloatMandatoryValidator(),\
                 doc='Upper bound of Q range to use for fitting')
 
-        self.declareProperty(name='Output', defaultValue='', direction=Direction.InOut,
+        self.declareProperty(name='Output', defaultValue='', direction=Direction.InOut,\
                 doc='Output name')
 
-        self.declareProperty(name='Plot', defaultValue=False,
+        self.declareProperty(name='Plot', defaultValue=False,\
                 doc='Plot result workspace')
-        self.declareProperty(name='Save', defaultValue=False,
+        self.declareProperty(name='Save', defaultValue=False,\
                 doc='Save result workspace to nexus file in the default save directory')
 
 

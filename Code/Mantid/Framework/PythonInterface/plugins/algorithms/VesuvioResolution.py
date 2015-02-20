@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -110,8 +111,8 @@ class VesuvioResolution(PythonAlgorithm):
         fit = mantid.api.AlgorithmManager.createUnmanaged('Fit')
         fit.initialize()
         fit.setChild(True)
-        mantid.simpleapi._set_properties(fit, function, InputWorkspace=workspace, MaxIterations=0,
-                CreateOutput=True, Output=fit_naming_stem, WorkspaceIndex=self._spectrum_index,
+        mantid.simpleapi._set_properties(fit, function, InputWorkspace=workspace, MaxIterations=0,\
+                CreateOutput=True, Output=fit_naming_stem, WorkspaceIndex=self._spectrum_index,\
                 OutputCompositeMembers=True)
         fit.execute()
         fit_ws = fit.getProperty('OutputWorkspace').value

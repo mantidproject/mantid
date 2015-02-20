@@ -1,8 +1,7 @@
+#pylint: disable=no-init,invalid-name
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
-import mantid.simpleapi as api
-from mantid.api import AnalysisDataService
 
 class SaveVulcanGSS(PythonAlgorithm):
     """ Save GSS file for VULCAN
@@ -25,16 +24,16 @@ class SaveVulcanGSS(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),\
                 "Focussed diffraction workspace to be exported to GSAS file. ")
 
-        self.declareProperty(FileProperty("BinFilename","", FileAction.Load, ['.dat']),
+        self.declareProperty(FileProperty("BinFilename","", FileAction.Load, ['.dat']),\
                 "Name of a data file containing the bin boundaries in Log(TOF). ")
 
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),\
                 "Name of rebinned matrix workspace. ")
 
-        self.declareProperty(FileProperty("GSSFilename","", FileAction.Save, ['.gda']),
+        self.declareProperty(FileProperty("GSSFilename","", FileAction.Save, ['.gda']),\
                 "Name of the output GSAS file. ")
 
         self.declareProperty("IPTS", 0, "IPTS number")
@@ -155,7 +154,7 @@ class SaveVulcanGSS(PythonAlgorithm):
             # ENDFOR (i)
         # ENDFOR (iws)
         api.DeleteWorkspace(Workspace=tempws)
-        gsaws = api.CreateWorkspace(DataX=newvecx, DataY=newvecy, DataE=newvece, NSpec=numhist,
+        gsaws = api.CreateWorkspace(DataX=newvecx, DataY=newvecy, DataE=newvece, NSpec=numhist,\
                 UnitX="TOF", ParentWorkspace=inputws, OutputWorkspace=outputwsname)
 
         return gsaws
@@ -168,7 +167,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         gsaws = api.ConvertToHistogram(InputWorkspace=gsaws, OutputWorkspace=str(gsaws))
 
         # Save
-        api.SaveGSS(InputWorkspace=gsaws, Filename=gdafilename, SplitFiles=False, Append=False,
+        api.SaveGSS(InputWorkspace=gsaws, Filename=gdafilename, SplitFiles=False, Append=False,\
                 Format="SLOG", MultiplyByBinWidth=False, ExtendedHeader=False, UseSpectrumNumberAsBankID=True)
 
         return gsaws
@@ -205,7 +204,7 @@ class SaveVulcanGSS(PythonAlgorithm):
                     filebuffer += tmpbuffer
                     banklines = [line]
                 # ENDIFELSE
-            elif (inbank is True and cline.startswith("#") is False):
+            elif inbank is True and cline.startswith("#") is False:
                 # Write data line
                 banklines.append(line.strip("\n"))
 

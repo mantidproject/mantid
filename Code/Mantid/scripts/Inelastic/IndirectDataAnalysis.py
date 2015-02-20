@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from IndirectImport import import_mantidplot
 mp = import_mantidplot()
 from IndirectCommon import *
@@ -183,7 +184,7 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, in
     input_str = [tmp_fit_workspace + ',i%d' % i for i in range(spec_min, spec_max + 1)]
     input_str = ';'.join(input_str)
 
-    PlotPeakByLogValue(Input=input_str, OutputWorkspace=output_workspace, Function=func,
+    PlotPeakByLogValue(Input=input_str, OutputWorkspace=output_workspace, Function=func,\
                      StartX=startx, EndX=endx, FitType='Sequential', CreateOutput=True)
 
   #remove unsused workspaces
@@ -210,7 +211,7 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, in
         output_ws = output_workspace + '_%d_Workspace' % i
         RenameWorkspace(ws, OutputWorkspace=output_ws)
 
-    sample_logs    = {'start_x': startx, 'end_x': endx, 'fit_type': fit_type,
+    sample_logs    = {'start_x': startx, 'end_x': endx, 'fit_type': fit_type,\
                   'intensities_constrained': intensities_constrained, 'beta_constrained': False}
 
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=fit_group)
@@ -243,10 +244,10 @@ def furyfitMult(inputWS, function, ftype, startx, endx, spec_min=0, spec_max=Non
   #prepare input workspace for fitting
     tmp_fit_workspace = "__furyfit_fit_ws"
     if spec_max is None:
-        CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx,
+        CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx,\
                     StartWorkspaceIndex=spec_min)
     else:
-        CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx,
+        CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx,\
                     StartWorkspaceIndex=spec_min, EndWorkspaceIndex=spec_max)
 
     ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
@@ -254,7 +255,7 @@ def furyfitMult(inputWS, function, ftype, startx, endx, spec_min=0, spec_max=Non
 
   #fit multi-domian functino to workspace
     multi_domain_func, kwargs = createFuryMultiDomainFunction(function, tmp_fit_workspace)
-    Fit(Function=multi_domain_func, InputWorkspace=tmp_fit_workspace, WorkspaceIndex=0,
+    Fit(Function=multi_domain_func, InputWorkspace=tmp_fit_workspace, WorkspaceIndex=0,\
       Output=output_workspace, CreateOutput=True, **kwargs)
 
     params_table = output_workspace + '_Parameters'
@@ -278,7 +279,7 @@ def furyfitMult(inputWS, function, ftype, startx, endx, spec_min=0, spec_max=Non
     result_workspace = output_workspace + '_Result'
     fit_group = output_workspace + '_Workspaces'
 
-    sample_logs    = {'start_x': startx, 'end_x': endx, 'fit_type': ftype,
+    sample_logs    = {'start_x': startx, 'end_x': endx, 'fit_type': ftype,\
                   'intensities_constrained': intensities_constrained, 'beta_constrained': True}
 
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=result_workspace)
@@ -557,7 +558,7 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False):
                 subractCanWorkspace(CorrectedSampleWS, CorrectedCanWS, CorrectedSampleWS, rebin_can=rebin_can)
 
             Assc = CubicFit(corrections[1], i)
-            PolynomialCorrection(InputWorkspace=CorrectedSampleWS, OutputWorkspace=CorrectedSampleWS,
+            PolynomialCorrection(InputWorkspace=CorrectedSampleWS, OutputWorkspace=CorrectedSampleWS,\
                 Coefficients=Assc, Operation='Divide')
             if i == 0:
                 CloneWorkspace(InputWorkspace=CorrectedSampleWS, OutputWorkspace=CorrectedWS)
@@ -604,7 +605,7 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False):
     return CorrectedWS
 
 
-def abscorFeeder(sample, container, geom, useCor, corrections, RebinCan=False, ScaleOrNotToScale=False, factor=1, Save=False,
+def abscorFeeder(sample, container, geom, useCor, corrections, RebinCan=False, ScaleOrNotToScale=False, factor=1, Save=False,\
         PlotResult='None', PlotContrib=False):
     '''
     Load up the necessary files and then passes them into the main
@@ -676,7 +677,7 @@ def abscorFeeder(sample, container, geom, useCor, corrections, RebinCan=False, S
             subractCanWorkspace(sample, scaled_container, sub_result, rebin_can=RebinCan)
 
             if not diffraction_run:
-                ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw',
+                ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw',\
                     Target='ElasticQ', EMode='Indirect', EFixed=efixed)
 
             red_ws_name = sub_result + '_red'

@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import *
 import mantid.simpleapi as api
 from mantid.api import *
@@ -27,21 +28,21 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input, PropertyMode.Optional),
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input, PropertyMode.Optional),\
                 "Name of data workspace containing the diffraction pattern in .prf file. ")
 
         self.declareProperty("WorkspaceIndex", 0, "Spectrum (workspace index starting from 0) of the data to refine against in input workspace.")
 
-        self.declareProperty(ITableWorkspaceProperty("SeqControlInfoWorkspace", "", Direction.InOut, PropertyMode.Optional),
+        self.declareProperty(ITableWorkspaceProperty("SeqControlInfoWorkspace", "", Direction.InOut, PropertyMode.Optional),\
             "Name of table workspace containing sequential refinement information.")
 
-        self.declareProperty(ITableWorkspaceProperty("InputProfileWorkspace", "", Direction.Input, PropertyMode.Optional),
+        self.declareProperty(ITableWorkspaceProperty("InputProfileWorkspace", "", Direction.Input, PropertyMode.Optional),\
             "Name of table workspace containing starting profile parameters.")
 
-        self.declareProperty(ITableWorkspaceProperty("InputBraggPeaksWorkspace", "", Direction.Input, PropertyMode.Optional),
+        self.declareProperty(ITableWorkspaceProperty("InputBraggPeaksWorkspace", "", Direction.Input, PropertyMode.Optional),\
             "Name of table workspace containing a list of reflections. ")
 
-        self.declareProperty(ITableWorkspaceProperty("InputBackgroundParameterWorkspace", "", Direction.Input,
+        self.declareProperty(ITableWorkspaceProperty("InputBackgroundParameterWorkspace", "", Direction.Input,\
             PropertyMode.Optional), "Name of table workspace containing a list of reflections. ")
 
         self.declareProperty("StartX", -0., "Start X (TOF) to refine diffraction pattern.")
@@ -52,15 +53,15 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
 
         #refoptions = ["Levenberg-Marquardt", "Random Walk", "Single Peak Fit"]
         refoptions = ["Random Walk"]
-        self.declareProperty("RefinementOption", "Random Walk", StringListValidator(refoptions),
+        self.declareProperty("RefinementOption", "Random Walk", StringListValidator(refoptions),\
             "Options of algorithm to refine. ")
 
-        self.declareProperty(StringArrayProperty("ParametersToRefine", values=[], direction=Direction.Input),
+        self.declareProperty(StringArrayProperty("ParametersToRefine", values=[], direction=Direction.Input),\
             "List of parameters to refine.")
 
         self.declareProperty("NumRefineCycles", 1, "Number of refinement cycles.")
 
-        peaktypes = ["", "Neutron Back-to-back exponential convoluted with pseudo-voigt",
+        peaktypes = ["", "Neutron Back-to-back exponential convoluted with pseudo-voigt",\
                 "Thermal neutron Back-to-back exponential convoluted with pseudo-voigt"]
         self.declareProperty("ProfileType", "", StringListValidator(peaktypes), "Type of peak profile function.")
 
@@ -70,11 +71,11 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
         self.declareProperty("FromStep", -1, "If non-negative, the previous code is not set from last step, but the step specified.")
 
         # Property for save project
-        self.declareProperty(FileProperty("OutputProjectFilename","", FileAction.OptionalSave, ['.nxs']),
+        self.declareProperty(FileProperty("OutputProjectFilename","", FileAction.OptionalSave, ['.nxs']),\
                 "Name of sequential project file.")
 
         # Property for save project
-        self.declareProperty(FileProperty("InputProjectFilename","", FileAction.OptionalLoad, ['.nxs']),
+        self.declareProperty(FileProperty("InputProjectFilename","", FileAction.OptionalLoad, ['.nxs']),\
                 "Name of sequential project file.")
 
         # Project ID
@@ -98,7 +99,7 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
             if seqrefine.isSetup() is True:
                 raise NotImplementedError("Impossible to have it set up already.")
 
-            seqrefine.initSetup(self.dataws, self.wsindex, self.peaktype, self.profilews, self.braggpeakws, self.bkgdtype,
+            seqrefine.initSetup(self.dataws, self.wsindex, self.peaktype, self.profilews, self.braggpeakws, self.bkgdtype,\
                     self.bkgdparws, self.startx, self.endx)
 
         elif self.functionoption == "Refine":
@@ -174,7 +175,7 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
         if self.functionoption != "Load":
             self.datawsname = str(self.dataws)
             if self.wsindex < 0 or self.wsindex >= self.dataws.getNumberHistograms():
-                raise NotImplementedError("Input workspace index %d is out of range (0, %d)." %
+                raise NotImplementedError("Input workspace index %d is out of range (0, %d)." %\
                         (self.wsindex, self.dataws.getNumberHistograms()))
 
         return
@@ -264,7 +265,7 @@ class SeqRefineProfile:
         self._recordPostRefineInfo(runner)
 
         # Group the newly generated workspace and do some record
-        api.GroupWorkspaces(InputWorkspaces="%s, %s, %s, %s" % (outwsname, self._profileWS, self._braggpeakws, self._bkgdparws),
+        api.GroupWorkspaces(InputWorkspaces="%s, %s, %s, %s" % (outwsname, self._profileWS, self._braggpeakws, self._bkgdparws),\
                 OutputWorkspace=self._wsgroupName)
         self._wsgroupCreated = True
 
@@ -355,16 +356,16 @@ class SeqRefineProfile:
 
         # Group newly generated workspaces and add name to reposiotry
         if self._wsgroupCreated is True:
-            api.GroupWorkspaces(InputWorkspaces="%s, %s, %s, %s" % (outwsname, outprofilewsname, outbraggpeakwsname, self._wsgroupName),
+            api.GroupWorkspaces(InputWorkspaces="%s, %s, %s, %s" % (outwsname, outprofilewsname, outbraggpeakwsname, self._wsgroupName),\
                     OutputWorkspace=self._wsgroupName)
         else:
             wsgroup = AnalysisDataService.retrieve(self._wsgroupName)
             hasbkgd = list(wsgroup.getNames()).count(bkgdparamwsname)
             if hasbkgd == 1:
-                api.GroupWorkspaces(InputWorkspaces="%s, %s, %s" % (outwsname, outprofilewsname, outbraggpeakwsname),
+                api.GroupWorkspaces(InputWorkspaces="%s, %s, %s" % (outwsname, outprofilewsname, outbraggpeakwsname),\
                         OutputWorkspace=self._wsgroupName)
             elif hasbkgd == 0:
-                api.GroupWorkspaces(InputWorkspaces="%s, %s, %s, %s" % (outwsname, outprofilewsname, outbraggpeakwsname, bkgdparamwsname),
+                api.GroupWorkspaces(InputWorkspaces="%s, %s, %s, %s" % (outwsname, outprofilewsname, outbraggpeakwsname, bkgdparamwsname),\
                         OutputWorkspace=self._wsgroupName)
             else:
                 raise NotImplementedError("Impossible to have 1 workspace appeared twice in a workspace group.")
@@ -482,7 +483,7 @@ class SeqRefineProfile:
         self._lastValidRowIndex = lastvalidrow
 
         if laststep > lastrecordedstep:
-            self.glog.warning("Last step %d is not recorded.  Using step %d instead. " %
+            self.glog.warning("Last step %d is not recorded.  Using step %d instead. " %\
                     (laststep, lastrecordedstep))
             laststep = lastrecordedstep
         elif laststep < 0:
@@ -500,12 +501,12 @@ class SeqRefineProfile:
                 bkgdtype = self._recordws.cell(lastrow, 3).strip()
                 bkgdparamwsname = self._recordws.cell(lastrow, 4).strip()
                 if profilewsname == "":
-                    raise NotImplementedError("Profile workspace name is emtpy in row %d.  It is not supposed to happen." %
+                    raise NotImplementedError("Profile workspace name is emtpy in row %d.  It is not supposed to happen." %\
                             (lastvalidrow))
                 break
         # ENDWHILE
         if profilewsname == "":
-            raise NotImplementedError("Step %d is not found in record table.  It is impossible. " %
+            raise NotImplementedError("Step %d is not found in record table.  It is impossible. " %\
                     (laststep))
 
         # Current step
@@ -529,7 +530,7 @@ class SeqRefineProfile:
 
         if self._recordWSLastRowInvalid is False:
             self._currstep = numrows
-            rectablews.addRow([self._currstep, "", "", "", "", "", -1.0, laststep, -1.0, "profilews",
+            rectablews.addRow([self._currstep, "", "", "", "", "", -1.0, laststep, -1.0, "profilews",\
                 "reflectionws", "Polynomial", "BkgdParm"])
         else:
             self._currstep = numrows-1
@@ -774,7 +775,7 @@ class RefineProfileParameters:
         """ Do Le bail calculation
         """
         if (self._inputIsSetup and self._outputIsSetup) is False:
-            raise NotImplementedError("Either input or output is not setup: inputIsStepUp = %s, outputIsSetup = %s" %
+            raise NotImplementedError("Either input or output is not setup: inputIsStepUp = %s, outputIsSetup = %s" %\
                     (str(self._inputIsSetup), str(self._outputIsSetup)))
 
         self.glog.information("**** Calculate: DataWorksapce = %s" % (str(self.datawsname)))

@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'ui/sans/eqsans_info.ui'
@@ -46,7 +47,7 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "EQSANS help", None, QtGui.QApplication.UnicodeUTF8))
-        self.plainTextEdit.setPlainText(QtGui.QApplication.translate("Dialog", "To use this application, you will need:\n"
+        self.plainTextEdit.setPlainText(QtGui.QApplication.translate("Dialog", "To use this application, you will need:\n"\
 "\n"
 "- Your Nexus event files (.nxs)\n"
 "- The corresponding eqsans_configuration.xxxx files [optional]\n"

@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from PyQt4 import QtGui, uic, QtCore
 import reduction_gui.widgets.util as util
 import math
@@ -211,8 +212,8 @@ class BaseRefWidget(BaseWidget):
         This retrieve the metadata from the data event NeXus file
         """
         _full_file_name = file
-        tmpWks = LoadEventNexus(Filename=_full_file_name,
-#                       OutputWorkspace='tmpWks',
+        tmpWks = LoadEventNexus(Filename=_full_file_name,\
+#                       OutputWorkspace='tmpWks',\
                        MetaDataOnly='1')
 
         #mt1 = mtd['tmpWks']
@@ -816,7 +817,7 @@ class BaseRefWidget(BaseWidget):
                     f = open(file_path,'w')
                     f.write(content)
                     f.close()
-                    QtGui.QMessageBox.information(self, "Automated reduction script saved",
+                    QtGui.QMessageBox.information(self, "Automated reduction script saved",\
                                            "The automated reduction script has been updated")
                 except:
                     _report_error()
@@ -1023,10 +1024,10 @@ class BaseRefWidget(BaseWidget):
             For REFL, this is Y
         """
 
-        min, max = self._integrated_plot(True,
-                              self._summary.data_run_number_edit,
-                              self._summary.data_background_from_pixel1,
-                              self._summary.data_background_to_pixel1,
+        min, max = self._integrated_plot(True,\
+                              self._summary.data_run_number_edit,\
+                              self._summary.data_background_from_pixel1,\
+                              self._summary.data_background_to_pixel1,\
                               False)
 
     def _plot_count_vs_x(self):
@@ -1320,7 +1321,7 @@ class BaseRefWidget(BaseWidget):
                 state.geometry_correction_switch = self._summary.geometry_correction_switch.isChecked()
 
                 #incident medium
-                _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j))
+                _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j))\
                                           for j in range(self._summary.incident_medium_combobox.count())]
                 _incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
 

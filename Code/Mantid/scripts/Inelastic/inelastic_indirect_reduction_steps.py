@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init
 from reduction.reducer import ReductionStep
 
 import mantid
@@ -116,10 +117,10 @@ class LoadData(ReductionStep):
             # Quick hack for older BASIS files that only have one side
             #if (mtd[file].getRun()['run_number'] < 16693):
             #        basis_mask = "BASIS_Mask_before_16693.xml"
-            basis_mask_filename = os.path.join(config.getString('maskFiles.directory')
+            basis_mask_filename = os.path.join(config.getString('maskFiles.directory')\
                     , basis_mask)
             if os.path.isfile(basis_mask_filename):
-                LoadMask(Instrument="BASIS", OutputWorkspace="__basis_mask",
+                LoadMask(Instrument="BASIS", OutputWorkspace="__basis_mask",\
                              InputFile=basis_mask_filename)
                 MaskDetectors(Workspace=output_ws, MaskedWorkspace="__basis_mask")
             else:
@@ -131,8 +132,8 @@ class LoadData(ReductionStep):
         self._monitor_index = self._reducer._get_monitor_index(mtd[output_ws])
 
         if self._require_chop_data(output_ws):
-            ChopData(InputWorkspace=output_ws,OutputWorkspace= output_ws,Step= 20000.0,NChops= 5, IntegrationRangeLower=5000.0,
-                IntegrationRangeUpper=10000.0,
+            ChopData(InputWorkspace=output_ws,OutputWorkspace= output_ws,Step= 20000.0,NChops= 5, IntegrationRangeLower=5000.0,\
+                IntegrationRangeUpper=10000.0,\
                 MonitorWorkspaceIndex=self._monitor_index)
             self._multiple_frames = True
         else:
@@ -157,8 +158,8 @@ class LoadData(ReductionStep):
                     raise ValueError("Range %d - %d is not a valid detector range." % (self._detector_range_start, self._detector_range_end))
 
                 ## Crop the workspace to remove uninteresting detectors
-                CropWorkspace(InputWorkspace=ws,OutputWorkspace= ws,
-                    StartWorkspaceIndex=self._detector_range_start,
+                CropWorkspace(InputWorkspace=ws,OutputWorkspace= ws,\
+                    StartWorkspaceIndex=self._detector_range_start,\
                     EndWorkspaceIndex=self._detector_range_end)
 
     def _load_data(self, filename, output_ws):
@@ -316,7 +317,7 @@ class BackgroundOperations(ReductionStep):
 
         for ws in workspaces:
             ConvertToDistribution(Workspace=ws)
-            CalculateFlatBackground(InputWorkspace=ws,OutputWorkspace= ws,StartX= self._background_start,
+            CalculateFlatBackground(InputWorkspace=ws,OutputWorkspace= ws,StartX= self._background_start,\
                            EndX=self._background_end, Mode='Mean')
             ConvertFromDistribution(Workspace=ws)
 
@@ -431,7 +432,7 @@ class HandleMonitor(ReductionStep):
         l_ref = self._get_reference_length(ws, 0)
         monitor = ws+'_mon'
         unwrapped_ws, join = UnwrapMonitor(InputWorkspace=monitor, OutputWorkspace=monitor, LRef=l_ref)
-        RemoveBins(InputWorkspace=monitor,OutputWorkspace= monitor,XMin= join-0.001,XMax= join+0.001,
+        RemoveBins(InputWorkspace=monitor,OutputWorkspace= monitor,XMin= join-0.001,XMax= join+0.001,\
             Interpolation='Linear')
         try:
             FFTSmooth(InputWorkspace=monitor,OutputWorkspace=monitor,WorkspaceIndex=0)
@@ -458,7 +459,7 @@ class HandleMonitor(ReductionStep):
             thickness = inst.getNumberParameter(montiorStr+'-Thickness')[0]
             attenuation= inst.getNumberParameter(montiorStr+'-Attenuation')[0]
         except IndexError:
-            raise ValueError('Unable to retrieve monitor thickness, area and '
+            raise ValueError('Unable to retrieve monitor thickness, area and '\
                 'attenuation from Instrument Parameter file.')
         else:
             if ( area == -1 or thickness == -1 or attenuation == -1):
@@ -852,10 +853,10 @@ class Grouping(ReductionStep):
             # Run GroupDetectors with a workspace if we have one
             # Otherwise try to run it with a mapping file
             if grouping_workspace is not None:
-                GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, CopyGroupingFromWorkspace=grouping_workspace,
+                GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, CopyGroupingFromWorkspace=grouping_workspace,\
                         Behaviour='Average')
             elif os.path.isfile(grouping_filename):
-                GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, MapFile=grouping_filename,
+                GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, MapFile=grouping_filename,\
                         Behaviour='Average')
 
         return workspace
@@ -960,7 +961,7 @@ class Naming(ReductionStep):
         elif type == 'RunTitle':
             return self._run_title(workspace)
         else:
-            raise NotImplementedError('Unknown \'Workflow.NamingConvention\''
+            raise NotImplementedError('Unknown \'Workflow.NamingConvention\''\
                 ' parameter encountered on workspace: ' + workspace)
 
     def _run_title(self, workspace):

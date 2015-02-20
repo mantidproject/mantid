@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import (CropWorkspace, LoadEmptyInstrument, LoadRaw, Plus,
@@ -52,7 +53,7 @@ class LoadVesuvio(PythonAlgorithm):
 
         self.declareProperty(FileProperty(INST_PAR_PROP,"",action=FileAction.OptionalLoad,
                                           extensions=["dat"]),
-                             doc="An optional IP file. If provided the values are used to correct "
+                             doc="An optional IP file. If provided the values are used to correct "\
                                   "the default instrument values and attach the t0 values to each detector")
 
         self.declareProperty(SUM_PROP, False,

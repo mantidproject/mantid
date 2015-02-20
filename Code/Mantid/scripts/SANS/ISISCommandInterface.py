@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Enables the SANS commands (listed at http://www.mantidproject.org/SANS) to
     be run

@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from math import *
 
 try:

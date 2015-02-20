@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 ''' SVN Info:      The variables below will only get subsituted at svn checkout if
         the repository is configured for variable subsitution.
 
@@ -91,12 +92,12 @@ def quick(run, theta=None, pointdet=True,roi=[0,0], db=[0,0], trans='', polcorr=
         cPp = idf_defaults['cPp']
 
 
-    return quick_explicit(run=run, i0_monitor_index = i0_monitor_index, lambda_min = lambda_min, lambda_max = lambda_max,
-                   point_detector_start = point_detector_start, point_detector_stop = point_detector_stop,
-                   multi_detector_start = multi_detector_start, background_min = background_min, background_max = background_max,
-                   int_min = int_min, int_max = int_max, theta = theta, pointdet = pointdet, roi = roi, db = db, trans = trans,
-                   debug = debug, correction_strategy = correction_strategy, stitch_start_overlap=stitch_start_overlap,
-                   stitch_end_overlap=stitch_end_overlap, stitch_params=stitch_params, polcorr=polcorr, crho=crho, calpha=calpha, cAp=cAp, cPp=cPp,
+    return quick_explicit(run=run, i0_monitor_index = i0_monitor_index, lambda_min = lambda_min, lambda_max = lambda_max,\
+                   point_detector_start = point_detector_start, point_detector_stop = point_detector_stop,\
+                   multi_detector_start = multi_detector_start, background_min = background_min, background_max = background_max,\
+                   int_min = int_min, int_max = int_max, theta = theta, pointdet = pointdet, roi = roi, db = db, trans = trans,\
+                   debug = debug, correction_strategy = correction_strategy, stitch_start_overlap=stitch_start_overlap,\
+                   stitch_end_overlap=stitch_end_overlap, stitch_params=stitch_params, polcorr=polcorr, crho=crho, calpha=calpha, cAp=cAp, cPp=cPp,\
                    detector_component_name=detector_component_name, sample_component_name=sample_component_name, correct_positions=correct_positions)
 
 
@@ -290,7 +291,7 @@ def make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_p
         _detector_ws_llam = Divide(LHSWorkspace=_detector_ws_llam, RHSWorkspace=_mon_int_trans)
 
         print stitch_start_overlap, stitch_end_overlap, stitch_params
-        transWS, outputScaling = Stitch1D(LHSWorkspace=_detector_ws_slam, RHSWorkspace=_detector_ws_llam, StartOverlap=stitch_start_overlap,
+        transWS, outputScaling = Stitch1D(LHSWorkspace=_detector_ws_slam, RHSWorkspace=_detector_ws_llam, StartOverlap=stitch_start_overlap,\
                                            EndOverlap=stitch_end_overlap,  Params=stitch_params)
 
         transWS = RenameWorkspace(InputWorkspace=transWS, OutputWorkspace="TRANS_" + slam + "_" + llam)
@@ -319,8 +320,8 @@ def transCorr(transrun, i_vs_lam, lambda_min, lambda_max, background_min, backgr
     else:
         logger.debug("Creating new transmission correction workspace.")
         # Make the transmission correction workspace.
-        _transWS = make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_params,
-                                    lambda_min, lambda_max, background_min, background_max,
+        _transWS = make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_params,\
+                                    lambda_min, lambda_max, background_min, background_max,\
                                     int_min, int_max, detector_index_ranges, i0_monitor_index,)
 
     #got sometimes very slight binning diferences, so do this again:

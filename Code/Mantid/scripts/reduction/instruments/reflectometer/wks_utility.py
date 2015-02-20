@@ -1,9 +1,9 @@
-from numpy import zeros, ones, arctan2, arange, shape, sqrt, fliplr, asfarray, where, mean, sum, empty, NAN
+#pylint: disable=invalid-name
+from numpy import zeros, arctan2, arange, shape, sqrt, fliplr, asfarray, mean, sum, NAN
 from mantid.simpleapi import *
 # from MantidFramework import *
 import math
 import os.path
-import sys
 
 h = 6.626e-34 #m^2 kg s^-1
 m = 1.675e-27 #kg
@@ -414,7 +414,7 @@ def convertWorkspaceToQ(ws_data,
 
         outputWorkspace.setDistribution(True)
 
-        outputWorkspace = Rebin(InputWorkspace=outputWorkspace,
+        outputWorkspace = Rebin(InputWorkspace=outputWorkspace,\
               Params=q_binning)
 
     else:
@@ -459,7 +459,7 @@ def convertWorkspaceToQ(ws_data,
 
         outputWorkspace.setDistribution(True)
 
-        outputWorkspace = Rebin(InputWorkspace=outputWorkspace,
+        outputWorkspace = Rebin(InputWorkspace=outputWorkspace,\
               Params=q_binning)
 
     return outputWorkspace
@@ -1014,8 +1014,8 @@ def cropTOF(inputWorkspace, min, max, type):
     used here to crop the TOF range
     """
     print '--> crop ' , type , ' workspace in TOF'
-    ws_histo_data = CropWorkspace(InputWorkspace = inputWorkspace,
-                                      XMin = min,
+    ws_histo_data = CropWorkspace(InputWorkspace = inputWorkspace,\
+                                      XMin = min,\
                                       XMax = max)
     return ws_histo_data
 
@@ -1027,9 +1027,9 @@ def normalizeNeXus(inputWorkspace, type):
     ws_histo_data = NormaliseByCurrent(InputWorkspace=inputWorkspace)
     return ws_histo_data
 
-def integrateOverLowResRange(mt1,
-                            dataLowResRange,
-                            type,
+def integrateOverLowResRange(mt1,\
+                            dataLowResRange,\
+                            type,\
                             is_nexus_detector_rotated_flag):
     """
         This creates the integrated workspace over the low resolution range leaving
@@ -1133,7 +1133,7 @@ def substractBackground(tof_axis, y_axis, y_error_axis,
             bMinBack = True
             _backMinArray = y_axis[backMin:peakMin, t]
             _backMinErrorArray = y_error_axis[backMin:peakMin, t]
-            [_backMin, _backMinError] = weightedMean(_backMinArray,
+            [_backMin, _backMinError] = weightedMean(_backMinArray,\
                                                           _backMinErrorArray, error_0)
 
         if (peakMax) < backMax:
@@ -1361,9 +1361,9 @@ def ouput_big_ascii_file(file_name,
 
 
 
-def ouput_big_Q_ascii_file(file_name,
-                         x_axis,
-                         y_axis,
+def ouput_big_Q_ascii_file(file_name,\
+                         x_axis,\
+                         y_axis,\
                          y_error_axis):
 
     f=open(file_name,'w')
@@ -1787,14 +1787,14 @@ def convertToQ(tof_axis,
 
     return [q_axis_reverse, _y_axis, _y_error_axis]
 
-def convertToQWithoutCorrection(tof_axis,
-               y_axis,
-               y_error_axis,
-               peak_range = None,
-               source_to_detector_distance = None,
-               sample_to_detector_distance = None,
-               theta = None,
-               first_slit_size = None,
+def convertToQWithoutCorrection(tof_axis,\
+               y_axis,\
+               y_error_axis,\
+               peak_range = None,\
+               source_to_detector_distance = None,\
+               sample_to_detector_distance = None,\
+               theta = None,\
+               first_slit_size = None,\
                last_slit_size = None):
     """
     will convert the tof_axis into q_axis according to q range specified
@@ -1927,10 +1927,10 @@ def createQworkspace(q_axis, y_axis, y_error_axis):
     y_axis_1d = y_axis.flatten()
     y_error_axis_1d = y_error_axis.flatten()
 
-    q_workspace = CreateWorkspace(DataX=q_axis_1d,
-                           DataY=y_axis_1d,
-                           DataE=y_error_axis_1d,
-                           Nspec=nbr_pixel,
+    q_workspace = CreateWorkspace(DataX=q_axis_1d,\
+                           DataY=y_axis_1d,\
+                           DataE=y_error_axis_1d,\
+                           Nspec=nbr_pixel,\
                            UnitX="Wavelength")
     q_workspace.setDistribution(True)
 

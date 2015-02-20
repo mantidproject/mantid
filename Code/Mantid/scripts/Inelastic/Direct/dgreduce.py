@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """ Empty class temporary left for compatibility with previous interfaces """
 import DirectEnergyConversion as DRC
 import CommonFunctions as common

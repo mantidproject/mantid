@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from mantid.simpleapi import *
 def get_live_data(instrument_name, frequency = 60, accumulation = "Add", output_name = "live"):
     StartLiveData(Instrument=str(instrument_name), UpdateEvery = frequency, Outputworkspace=str(output_name), AccumulationMethod = accumulation)

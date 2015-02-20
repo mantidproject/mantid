@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -42,7 +43,7 @@ class CutMD(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty(name='P4Bin', values=[]),
                              doc='Projection 4 binning')
 
-        self.declareProperty(IMDWorkspaceProperty('OutputWorkspace', '',
+        self.declareProperty(IMDWorkspaceProperty('OutputWorkspace', '',\
                              direction=Direction.Output),
                              doc='Output cut workspace')
 

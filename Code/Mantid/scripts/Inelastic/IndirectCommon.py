@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from mantid.simpleapi import *
 from mantid.api import TextAxis
 from mantid import config, logger

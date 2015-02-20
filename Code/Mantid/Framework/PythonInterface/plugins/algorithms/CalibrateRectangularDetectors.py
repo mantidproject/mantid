@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -64,15 +65,15 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              "Comma delimited d-space positions of reference peaks.  Use 1-3 for Cross Correlation.  Unlimited for many peaks option.")
         self.declareProperty("PeakWindowMax", 0.,
                              "Maximum window around a peak to search for it. Optional.")
-        self.declareProperty(ITableWorkspaceProperty("FitwindowTableWorkspace", "", Direction.Input, PropertyMode.Optional),
+        self.declareProperty(ITableWorkspaceProperty("FitwindowTableWorkspace", "", Direction.Input, PropertyMode.Optional),\
                 "Name of input table workspace containing the fit window information for each spectrum. ")
         self.declareProperty("MinimumPeakHeight", 2., "Minimum value allowed for peak height")
-        self.declareProperty("MinimumPeakHeightObs", 0.,
+        self.declareProperty("MinimumPeakHeightObs", 0.,\
             "Minimum value of a peak's maximum observed Y value for this peak to be used to calculate offset.")
 
-        self.declareProperty(MatrixWorkspaceProperty("DetectorResolutionWorkspace", "", Direction.Input, PropertyMode.Optional),
+        self.declareProperty(MatrixWorkspaceProperty("DetectorResolutionWorkspace", "", Direction.Input, PropertyMode.Optional),\
                 "Name of optional input matrix workspace for each detector's resolution (D(d)/d).")
-        self.declareProperty(FloatArrayProperty("AllowedResRange", [0.25, 4.0], direction=Direction.Input),
+        self.declareProperty(FloatArrayProperty("AllowedResRange", [0.25, 4.0], direction=Direction.Input),\
                 "Range of allowed individual peak's resolution factor to input detector's resolution.")
 
         self.declareProperty("PeakFunction", "Gaussian", StringListValidator(["BackToBackExponential", "Gaussian", "Lorentzian"]),
@@ -314,7 +315,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             for ws in [str(wksp)+"cc3", str(wksp)+"offset3", str(wksp)+"mask3"]:
                 if AnalysisDataService.doesExist(ws):
                     AnalysisDataService.remove(ws)
-        (temp, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping,
+        (temp, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping,\
                                 OutputWorkspace=str(wksp)+"group")
         if (numGroupedSpectra==0) or (numGroups==0):
             raise RuntimeError("%d spectra will be in %d groups" % (numGroupedSpectra, numGroups))
@@ -363,7 +364,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if not "histo" in self.getProperty("Extension").value:
             wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
                          Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
-        (temp, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping,
+        (temp, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping,\
                                 OutputWorkspace=str(wksp)+"group")
         if (numGroupedSpectra==0) or (numGroups==0):
             raise RuntimeError("%d spectra will be in %d groups" % (numGroupedSpectra, numGroups))
@@ -386,7 +387,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             reslowf = resrange[0]
             resupf = resrange[1]
             if reslowf >= resupf:
-                raise NotImplementedError("Allowed resolution range factor, lower boundary (%f) must be smaller than upper boundary (%f)."
+                raise NotImplementedError("Allowed resolution range factor, lower boundary (%f) must be smaller than upper boundary (%f)."\
                         % (reslowf, resupf))
         else:
             reslowf = 0.0
@@ -436,7 +437,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if wksp is None:
             return None
         MaskDetectors(Workspace=wksp, MaskedWorkspace=str(wksp)+"mask")
-        wksp = AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
+        wksp = AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp.name(),\
                        OffsetsWorkspace=str(wksp)+"offset")
         # Diffraction focusing using new calibration file with offsets
         if self._diffractionfocus:

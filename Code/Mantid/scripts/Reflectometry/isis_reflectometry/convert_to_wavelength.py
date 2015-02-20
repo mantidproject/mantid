@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import mantid.simpleapi as msi
 import mantid.api
 from mantid.kernel import logger

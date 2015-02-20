@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.api import *
 from mantid.kernel import *
 

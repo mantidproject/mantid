@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from PyQt4 import QtGui, uic, QtCore
 import reduction_gui.widgets.util as util
 import math
@@ -314,7 +315,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
                 state.scaling_factor_file = self._summary.cfg_scaling_factor_file_name.text()
 
                 #incident medium
-                _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j))
+                _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j))\
                                           for j in range(self._summary.incident_medium_combobox.count())]
                 _incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
 
@@ -429,7 +430,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         state_list = []
 
         #common incident medium
-        m.incident_medium_list = [self._summary.incident_medium_combobox.itemText(i)
+        m.incident_medium_list = [self._summary.incident_medium_combobox.itemText(i)\
                                 for i in range(self._summary.incident_medium_combobox.count())]
 
         m.incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()

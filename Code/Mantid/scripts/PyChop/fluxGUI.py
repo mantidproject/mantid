@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import sys
 from PyChop_LET_UI import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui #import others if needed
@@ -111,7 +112,7 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.QMessageBox.warning(self, "Currently You have to switch gui to select another instrument")
         self.ui.actionLET.setChecked(True)
     def otherInstrumentSelected(self,INAME):
-        reply = QtGui.QMessageBox.question(self, 'Selecting : '+INAME,
+        reply = QtGui.QMessageBox.question(self, 'Selecting : '+INAME,\
         "Do you want to switch GUI?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
         if reply == QtGui.QMessageBox.Yes:
             config['default.instrument'] = INAME

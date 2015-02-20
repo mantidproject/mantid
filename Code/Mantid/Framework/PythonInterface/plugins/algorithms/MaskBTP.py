@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 import mantid.simpleapi
 import mantid.api
 import mantid.kernel

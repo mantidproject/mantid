@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -16,8 +17,8 @@ class IndirectResolution(DataProcessorAlgorithm):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
                              doc='Comma seperated list if input files')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                             optional=PropertyMode.Optional,
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',\
+                             optional=PropertyMode.Optional,\
                              direction=Direction.Output),
                              doc='Output resolution workspace (if left blank a name will be gernerated automatically)')
 

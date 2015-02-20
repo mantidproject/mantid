@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     This file defines what happens in each step in the data reduction, it's
     the guts of the reduction. See ISISReducer for order the steps are run
@@ -847,7 +848,7 @@ class Mask_ISIS(ReductionStep):
             @param angle: angle of line in xy-plane in units of degrees
             @return: return xml shape string
         '''
-        return self._finite_cylinder(startPoint, width/2000.0, length,
+        return self._finite_cylinder(startPoint, width/2000.0, length,\
                                                [math.cos(angle*math.pi/180.0),math.sin(angle*math.pi/180.0),0.0], "arm")
 
 
@@ -950,7 +951,7 @@ class Mask_ISIS(ReductionStep):
                 det = ws.getInstrument().getComponentByName('rear-detector')
                 det_Z = det.getPos().getZ()
                 start_point = [self.arm_x, self.arm_y, det_Z]
-                MaskDetectorsInShape(Workspace=workspace,ShapeXML=
+                MaskDetectorsInShape(Workspace=workspace,ShapeXML=\
                                  self._mask_line(start_point, 1e6, self.arm_width, self.arm_angle))
 
         output_ws, detector_list = ExtractMask(InputWorkspace=workspace, OutputWorkspace="__mask")
@@ -1288,8 +1289,8 @@ class TransmissionCalc(ReductionStep):
         #exclude unused spectra because the sometimes empty/sometimes not spectra can cause errors with interpolate
         spectrum1 = min(pre_monitor, post_monitor)
         spectrum2 = max(pre_monitor, post_monitor)
-        CropWorkspace(InputWorkspace=inputWS,OutputWorkspace= tmpWS,
-            StartWorkspaceIndex=self._get_index(spectrum1),
+        CropWorkspace(InputWorkspace=inputWS,OutputWorkspace= tmpWS,\
+            StartWorkspaceIndex=self._get_index(spectrum1),\
             EndWorkspaceIndex=self._get_index(spectrum2))
 
         if inst.name() == 'LOQ':
@@ -1300,7 +1301,7 @@ class TransmissionCalc(ReductionStep):
             back_start, back_end = inst.get_TOFs(spectra_number)
             if back_start and back_end:
                 index = spectra_number - spectrum1
-                CalculateFlatBackground(InputWorkspace=tmpWS,OutputWorkspace= tmpWS, StartX=back_start, EndX=back_end,
+                CalculateFlatBackground(InputWorkspace=tmpWS,OutputWorkspace= tmpWS, StartX=back_start, EndX=back_end,\
                                WorkspaceIndexList=index, Mode='Mean')
 
         ConvertUnits(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Target="Wavelength")
@@ -1399,9 +1400,9 @@ class TransmissionCalc(ReductionStep):
         wavbin +=','+str(translambda_max)
 
         #set up the input workspaces
-        trans_tmp_out = self.setup_wksp(trans_raw, reducer.instrument,
+        trans_tmp_out = self.setup_wksp(trans_raw, reducer.instrument,\
             wavbin, pre_sample, post_sample)
-        direct_tmp_out = self.setup_wksp(direct_raw, reducer.instrument,
+        direct_tmp_out = self.setup_wksp(direct_raw, reducer.instrument,\
             wavbin, pre_sample, post_sample)
 
         fittedtransws, unfittedtransws = self.get_wksp_names(
@@ -1709,8 +1710,8 @@ class ConvertToQISIS(ReductionStep):
         if (reducer.wide_angle_correction and reducer.transmission_calculator.output_wksp):
             #calculate the transmission wide angle correction
             _issueWarning("sans solid angle correction execution")
-            SANSWideAngleCorrection(SampleData=workspace,
-                                     TransmissionData = reducer.transmission_calculator.output_wksp,
+            SANSWideAngleCorrection(SampleData=workspace,\
+                                     TransmissionData = reducer.transmission_calculator.output_wksp,\
                                      OutputWorkspace='transmissionWorkspace')
             wavepixeladj = 'transmissionWorkspace'
         #create normalization workspaces

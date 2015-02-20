@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # IDA F2PY Absorption Corrections Wrapper
 ## Handle selection of .pyd files for absorption corrections
 import platform, sys
@@ -163,7 +164,7 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Save):
                 raise ValueError('Number of steps ( ' + str(nstep) + ' ) should be >= 20')
 
             angle = det[n]
-            kill, A1, A2, A3, A4 = cylabs.cylabs(astep, beam, ncan, size,
+            kill, A1, A2, A3, A4 = cylabs.cylabs(astep, beam, ncan, size,\
                 density, sigs, siga, angle, wavelas, waves, n, wrk, 0)
 
         if kill == 0:

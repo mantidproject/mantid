@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Simple local data catalog for Mantid
     Gets main information from data files in a directory and stores

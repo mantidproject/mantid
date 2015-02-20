@@ -1,8 +1,7 @@
+#pylint: disable=no-init
 from mantid.api import *
 from mantid.kernel import Direction
-
-from os import listdir
-from os.path import isfile, join, split, splitext
+from os.path import split, splitext
 
 import re
 

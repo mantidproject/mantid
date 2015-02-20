@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -38,7 +39,7 @@ class DRangeToWsMap(object):
         try:
             dRange = timeRegimeToDRange[timeRegime]
         except KeyError:
-            raise RuntimeError("Unable to identify the DRange of " + wsname +
+            raise RuntimeError("Unable to identify the DRange of " + wsname +\
                 ", which has a time regime of " + str(timeRegime))
 
         # Add the workspace to the map, alongside its DRange.

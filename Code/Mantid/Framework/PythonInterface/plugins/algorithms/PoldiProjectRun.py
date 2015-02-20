@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.api import PythonAlgorithm
 from mantid.api import ITableWorkspaceProperty
 from mantid.api import AlgorithmFactory, WorkspaceFactory
@@ -12,8 +13,8 @@ from mantid.simpleapi import (LoadSINQFile,
                               PoldiLoadChopperSlits,
                               PoldiLoadSpectra,
                               PoldiLoadIPP,
-                              PoldiAutoCorrelation,
-                              PoldiPeakDetection,
+                              #PoldiAutoCorrelation,
+                              #PoldiPeakDetection,
                               GroupWorkspaces,
                               RenameWorkspace)
 import os.path
@@ -42,7 +43,7 @@ class PoldiProjectRun(PythonAlgorithm):
         self.declareProperty(ITableWorkspaceProperty("InputWorkspace", "PoldiAnalysis", direction=Direction.Input),
                              "Poldi analysis main worksheet")
 
-        self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "PoldiIPPmanager", direction=Direction.Output),
+        self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "PoldiIPPmanager", direction=Direction.Output),\
                               "Poldi IPP table manager")
 
         self.declareProperty("wlenmin", 1.1,

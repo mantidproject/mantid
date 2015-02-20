@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """ File contains Descriptors used describe run for direct inelastic reduction """
 
 

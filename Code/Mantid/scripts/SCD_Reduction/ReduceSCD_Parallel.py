@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 
 # File: ReduceSCD_Parallel.py
 #
@@ -218,7 +219,7 @@ if not use_cylindrical_integration:
         conventional_integrate_file = conv_name + ".integrate"
         conventional_matrix_file = conv_name + ".mat"
 
-        SelectCellOfType( PeaksWorkspace=peaks_ws, CellType=cell_type, Centering=centering,
+        SelectCellOfType( PeaksWorkspace=peaks_ws, CellType=cell_type, Centering=centering,\
                       AllowPermutations=allow_perm, Apply=True, Tolerance=tolerance )
         SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=conventional_integrate_file )
         SaveIsawUB( InputWorkspace=peaks_ws, Filename=conventional_matrix_file )

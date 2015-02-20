@@ -37,7 +37,7 @@ class MSGReducer(reducer.Reducer):
         loadData.set_ws_list(self._data_files)
         loadData.set_sum(self._sum)
         loadData.set_load_logs(self._load_logs)
-        loadData.set_detector_range(self._detector_range[0],
+        loadData.set_detector_range(self._detector_range[0],\
             self._detector_range[1])
         loadData.set_parameter_file(self._parameter_file)
         loadData.set_extra_load_opts(self._extra_load_opts)
@@ -178,7 +178,7 @@ class MSGReducer(reducer.Reducer):
             except AttributeError:
                 pass
             except IndexError:
-                raise RuntimeError("None of the reduction steps implement "
+                raise RuntimeError("None of the reduction steps implement "\
                     "the get_result_workspaces() method.")
 
     def _get_monitor_index(self, workspace):

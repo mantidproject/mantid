@@ -261,7 +261,7 @@ class ReductionOptions(BaseScriptElement):
                                                                  default=ReductionOptions.detector_offset)
         self.wavelength = BaseScriptElement.getFloatElement(instrument_dom, "wavelength",
                                                             default=ReductionOptions.wavelength)
-        self.wavelength_spread = BaseScriptElement.getFloatElement(instrument_dom, "wavelength_spread",
+        self.wavelength_spread = BaseScriptElement.getFloatElement(instrument_dom, "wavelength_spread",\
                                                             default=ReductionOptions.wavelength_spread)
 
         self.solid_angle_corr = BaseScriptElement.getBoolElement(instrument_dom, "solid_angle_corr",
@@ -278,11 +278,11 @@ class ReductionOptions(BaseScriptElement):
                                                                   default = ReductionOptions.dark_current_corr)
         self.dark_current_data = BaseScriptElement.getStringElement(instrument_dom, "dark_current_data")
 
-        self.n_q_bins = BaseScriptElement.getIntElement(instrument_dom, "n_q_bins",
+        self.n_q_bins = BaseScriptElement.getIntElement(instrument_dom, "n_q_bins",\
                                                        default=ReductionOptions.n_q_bins)
-        self.n_sub_pix = BaseScriptElement.getIntElement(instrument_dom, "n_sub_pix",
+        self.n_sub_pix = BaseScriptElement.getIntElement(instrument_dom, "n_sub_pix",\
                                                        default=ReductionOptions.n_sub_pix)
-        self.log_binning = BaseScriptElement.getBoolElement(instrument_dom, "log_binning",
+        self.log_binning = BaseScriptElement.getBoolElement(instrument_dom, "log_binning",\
                                                                  default = ReductionOptions.log_binning)
         self.align_log_with_decades = BaseScriptElement.getBoolElement(instrument_dom, "align_log_with_decades",
                                                                        default = ReductionOptions.align_log_with_decades)

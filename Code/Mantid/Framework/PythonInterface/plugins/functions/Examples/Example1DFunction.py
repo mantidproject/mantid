@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 """
 This example implements a simple Linear function that could be used as a background.
 

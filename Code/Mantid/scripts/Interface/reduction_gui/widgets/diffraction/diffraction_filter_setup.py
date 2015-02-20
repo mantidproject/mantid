@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 ################################################################################
 # Event Filtering (and advanced) Setup Widget
 ################################################################################
@@ -111,25 +112,25 @@ class FilterSetupWidget(BaseWidget):
         # Default states
 
         # Connections from action/event to function to handle
-        self.connect(self._content.timefilter_checkBox, QtCore.SIGNAL("stateChanged(int)"),
+        self.connect(self._content.timefilter_checkBox, QtCore.SIGNAL("stateChanged(int)"),\
                 self._filterbytime_statechanged)
 
-        self.connect(self._content.logvaluefilter_checkBox, QtCore.SIGNAL("stateChanged(int)"),
+        self.connect(self._content.logvaluefilter_checkBox, QtCore.SIGNAL("stateChanged(int)"),\
                 self._filterbylogvalue_statechanged)
 
-        self.connect(self._content.load_button, QtCore.SIGNAL("clicked()"),
+        self.connect(self._content.load_button, QtCore.SIGNAL("clicked()"),\
                 self._run_number_changed)
 
         # self.connect(self._content.run_number_edit, QtCore.SIGNAL("textChanged(QString)"), self._run_number_changed)
         self.connect(self._content.run_number_edit, QtCore.SIGNAL("returnPressed()"), self._run_number_changed)
 
-        self.connect(self._content.plot_log_button, QtCore.SIGNAL("clicked()"),
+        self.connect(self._content.plot_log_button, QtCore.SIGNAL("clicked()"),\
                 self._plot_log_clicked)
 
-        self.connect(self._content.syn_logname_button, QtCore.SIGNAL("clicked()"),
+        self.connect(self._content.syn_logname_button, QtCore.SIGNAL("clicked()"),\
                 self._sync_logname_clicked)
 
-        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),
+        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),\
                 self._show_help)
 
         # Validated widgets
@@ -334,15 +335,15 @@ class FilterSetupWidget(BaseWidget):
             logproperty = run.getProperty(str(logname))
         except RuntimeError:
             # Unable to plot
-            msg3 = str("Error! Workspace %s does not contain log %s. " % (str(self._metaws),
+            msg3 = str("Error! Workspace %s does not contain log %s. " % (str(self._metaws),\
                 logname))
             self._content.info_text_browser.setText(str(msg1+msg3))
             return
 
         # Construct workspace
-        output = api.ExportTimeSeriesLog(InputWorkspace = str(self._metaws),
-                OutputWorkspace = str(logname),
-                LogName = str(logname),
+        output = api.ExportTimeSeriesLog(InputWorkspace = str(self._metaws),\
+                OutputWorkspace = str(logname),\
+                LogName = str(logname),\
                 IsEventWorkspace = False)
         #api.DeleteWorkspace(Workspace="PercentStat")
 
@@ -439,7 +440,7 @@ class FilterSetupWidget(BaseWidget):
             maxwidget.setText("%-f" % float(xmax))
             return
 
-        self.logvalue_vs_time_distribution(workspace=ws,
+        self.logvalue_vs_time_distribution(workspace=ws,\
                 callback=call_back)
 
         return
@@ -451,7 +452,7 @@ class FilterSetupWidget(BaseWidget):
         xmax = workspace.dataX(0)[-1]
         if callback is not None:
             from LargeScaleStructures import data_stitching
-            data_stitching.RangeSelector.connect([workspace], callback,
+            data_stitching.RangeSelector.connect([workspace], callback,\
                                              xmin=xmin, xmax=xmax)
 
         return

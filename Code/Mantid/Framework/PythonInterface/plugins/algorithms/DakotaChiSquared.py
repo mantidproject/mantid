@@ -1,5 +1,6 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import PythonAlgorithm, AlgorithmFactory,MatrixWorkspaceProperty,PropertyMode
-from mantid.kernel import Direction,IntBoundedValidator,FloatBoundedValidator
+from mantid.kernel import Direction
 import mantid.simpleapi
 import mantid
 import numpy
@@ -46,13 +47,13 @@ class DakotaChiSquared(PythonAlgorithm):
         __w2=mantid.simpleapi.Load(f2)
 
 	    #validate inputs
-        if (type(__w1)!= mantid.api._api.MatrixWorkspace):
+        if type(__w1)!= mantid.api.MatrixWorkspace:
             mantid.kernel.logger.error('Wrong workspace type for data file')
             raise ValueError( 'Wrong workspace type for data file')
-        if (type(__w2)!= mantid.api._api.MatrixWorkspace):
+        if type(__w2)!= mantid.api.MatrixWorkspace:
             mantid.kernel.logger.error('Wrong workspace type for calculated file')
             raise ValueError( 'Wrong workspace type for calculated file')
-        if((__w1.blocksize()!=__w2.blocksize()) or (__w1.getNumberHistograms()!=__w2.getNumberHistograms())):
+        if __w1.blocksize()!=__w2.blocksize() or __w1.getNumberHistograms()!=__w2.getNumberHistograms():
             mantid.kernel.logger.error('The file sizes are different')
             raise ValueError( 'The file sizes are different')
 
@@ -83,6 +84,6 @@ class DakotaChiSquared(PythonAlgorithm):
         mantid.simpleapi.DeleteWorkspace(__w2.getName())
         mantid.simpleapi.DeleteWorkspace(__soe2.getName())
         if (len(soeName)==0):
-           mantid.simpleapi.DeleteWorkspace(__soe.getName())
+            mantid.simpleapi.DeleteWorkspace(__soe.getName())
 
 AlgorithmFactory.subscribe(DakotaChiSquared)

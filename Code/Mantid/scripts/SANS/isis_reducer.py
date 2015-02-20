@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     ISIS-specific implementation of the SANS Reducer.
 

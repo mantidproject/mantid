@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 #from MantidFramework import *
 #from mantidsimple import *
 from mantid.simpleapi import *
@@ -7,7 +8,7 @@ import math
 
 PRECISION = 0.020
 
-class sfCalculator():
+class sfCalculator(object):
 
     ref_date = '2014-10-01' # when the detector has been rotated
 
@@ -250,7 +251,7 @@ class sfCalculator():
 
         proton_charge = self._getProtonCharge(EventDataWks)
         print '----> rebinning '
-        HistoDataWks = Rebin(InputWorkspace=EventDataWks,
+        HistoDataWks = Rebin(InputWorkspace=EventDataWks,\
               Params=self.rebin_parameters)
 
 #        mt2 = mtd['HistoDataWks']
@@ -259,9 +260,9 @@ class sfCalculator():
         x_axis = HistoDataWks.readX(0)[:]
         self.x_axis = x_axis
 
-        OutputWorkspace = self._createIntegratedWorkspace(InputWorkspace=HistoDataWks,
-                                        proton_charge=proton_charge,
-                                        from_pixel=self.peak_pixel_min,
+        OutputWorkspace = self._createIntegratedWorkspace(InputWorkspace=HistoDataWks,\
+                                        proton_charge=proton_charge,\
+                                        from_pixel=self.peak_pixel_min,\
                                         to_pixel=self.peak_pixel_max)
 
         DataWks = self._removeBackground(InputWorkspace=OutputWorkspace,
@@ -329,7 +330,7 @@ class sfCalculator():
 
 
 #        mt3 = mtd['DataWks']
-        self._calculateFinalAxis(Workspace=DataWks,
+        self._calculateFinalAxis(Workspace=DataWks,\
                            bNumerator=bNumerator)
         print 'done with _calculateFinalAxis and back in calculatefinalaxis' #REMOVEME
 
@@ -429,7 +430,7 @@ class sfCalculator():
                     index = int(y+x*304)
     #                y_axis[y, :] += InputWorkspace.readY(index)[:]
                     y_axis[y, :] += InputWorkspace.readY(index)[:]
-                    y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *
+                    y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *\
                                             (InputWorkspace.readE(index)[:]))
 
         else:
@@ -438,7 +439,7 @@ class sfCalculator():
                     index = int(y+x*256)
     #                y_axis[y, :] += InputWorkspace.readY(index)[:]
                     y_axis[y, :] += InputWorkspace.readY(index)[:]
-                    y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *
+                    y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *\
                                             (InputWorkspace.readE(index)[:]))
 
 #        #DEBUG
@@ -467,9 +468,9 @@ class sfCalculator():
         y_axis /= (proton_charge * 1e-12)
         y_error_axis /= (proton_charge * 1e-12)
 
-        OutputWorkspace = CreateWorkspace(DataX=x_axis,
-                        DataY=y_axis,
-                        DataE=y_error_axis,
+        OutputWorkspace = CreateWorkspace(DataX=x_axis,\
+                        DataY=y_axis,\
+                        DataE=y_error_axis,\
                         Nspec=self.alpha_pixel_nbr)
 
         return OutputWorkspace
@@ -624,9 +625,9 @@ class sfCalculator():
         y_axis = peak_array.flatten()
         y_error_axis = peak_array_error.flatten()
 
-        DataWks = CreateWorkspace(DataX=tof_axis[0:-1],
-                        DataY=y_axis,
-                        DataE=y_error_axis,
+        DataWks = CreateWorkspace(DataX=tof_axis[0:-1],\
+                        DataY=y_axis,\
+                        DataE=y_error_axis,\
                         Nspec=1)
 
 #         import sys
@@ -695,16 +696,16 @@ class sfCalculator():
         b coefficients (y=a+bx)
         """
 
-        DataToFit = CreateWorkspace(DataX=self.x_axis_ratio,
-                        DataY=self.y_axis_ratio,
-                        DataE=self.y_axis_error_ratio,
+        DataToFit = CreateWorkspace(DataX=self.x_axis_ratio,\
+                        DataY=self.y_axis_ratio,\
+                        DataE=self.y_axis_error_ratio,\
                         Nspec=1)
 
         print 'replaceSpecialValues'
-        DataToFit = ReplaceSpecialValues(InputWorkspace=DataToFit,
-                             NaNValue=0,
-                             NaNError=0,
-                             InfinityValue=0,
+        DataToFit = ReplaceSpecialValues(InputWorkspace=DataToFit,\
+                             NaNValue=0,\
+                             NaNError=0,\
+                             InfinityValue=0,\
                              InfinityError=0)
 
 #        ResetNegatives(InputWorkspace='DataToFit',
@@ -743,8 +744,8 @@ class sfCalculator():
             xmin = xaxis[0]
             xmax = xaxis[sz/2]
 
-            DataToFit = CropWorkspace(InputWorkspace=DataToFit,
-                         XMin=xmin,
+            DataToFit = CropWorkspace(InputWorkspace=DataToFit,\
+                         XMin=xmin,\
                          XMax=xmax)
 
             Fit(InputWorkspace=DataToFit,
@@ -1134,7 +1135,7 @@ def getSlitsValueAndLambda(full_list_runs,
     for i in range(_nbr_files):
         _full_file_name = full_list_runs[i]
         print '-> ' + _full_file_name
-        tmpWks = LoadEventNexus(Filename=_full_file_name,
+        tmpWks = LoadEventNexus(Filename=_full_file_name,\
                        MetaDataOnly='1')
 #        mt1 = mtd['tmpWks']
         _s1h_value = getS1h(tmpWks)
@@ -1218,7 +1219,7 @@ def help():
     print '                          list_'
 
 #if __name__ == '__main__':
-def calculate(string_runs=None,
+def calculate(string_runs=None,\
 #              list_attenuator=None,
               list_peak_back=None,
               incident_medium=None,
@@ -1412,10 +1413,10 @@ def calculate(string_runs=None,
 
         print 'Done !'
 
-    else:
-        """
-        sort the files
-        """
-        pass
+#    else:
+#        """
+#        sort the files
+#        """
+#        pass
 
 

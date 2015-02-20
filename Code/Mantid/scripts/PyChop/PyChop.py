@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import time as time
 import math
 import numpy

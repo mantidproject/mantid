@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import math
 import numpy
 
@@ -195,9 +196,9 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_8.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_8))
         self.ui.lineEdit_9.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_9))
 
-        self.connect(self.ui.lineEdit_5, QtCore.SIGNAL("textChanged(QString)"),
+        self.connect(self.ui.lineEdit_5, QtCore.SIGNAL("textChanged(QString)"),\
                 self.set_minLogValue)
-        self.connect(self.ui.lineEdit_6, QtCore.SIGNAL("textChanged(QString)"),
+        self.connect(self.ui.lineEdit_6, QtCore.SIGNAL("textChanged(QString)"),\
                 self.set_maxLogValue)
 
         dirchangeops = ["Both", "Increase", "Decrease"]
@@ -658,7 +659,7 @@ class MainWindow(QtGui.QMainWindow):
     def browse_File(self):
         """ Open a file dialog to get file
         """
-        filename = QtGui.QFileDialog.getOpenFileName(self, 'Input File Dialog',
+        filename = QtGui.QFileDialog.getOpenFileName(self, 'Input File Dialog',\
             self._defaultdir, "Data (*.nxs *.dat);;All files (*.*)")
 
         self.ui.lineEdit.setText(str(filename))
@@ -959,7 +960,7 @@ class MainWindow(QtGui.QMainWindow):
 
             sumwsname = "_Summed_%s"%(str(wksp))
             if AnalysisDataService.doesExist(sumwsname) is False:
-                sumws = api.RebinByPulseTimes(InputWorkspace=wksp, OutputWorkspace = sumwsname,
+                sumws = api.RebinByPulseTimes(InputWorkspace=wksp, OutputWorkspace = sumwsname,\
                     Params="0, %f, %d"%(timeres, timeduration))
                 sumws = api.SumSpectra(InputWorkspace=sumws, OutputWorkspace=str(sumws))
                 sumws = api.ConvertToPointData(InputWorkspace=sumws, OutputWorkspace=str(sumws))

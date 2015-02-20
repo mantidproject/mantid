@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
 import math
@@ -13,13 +14,13 @@ class EnginXCalibrateFull(PythonAlgorithm):
         return "Calibrates every pixel position by performing single peak fitting."
 
     def PyInit(self):
-        self.declareProperty(FileProperty("Filename", "", FileAction.Load),
+        self.declareProperty(FileProperty("Filename", "", FileAction.Load),\
     		"Calibration run to use")
 
-        self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "", Direction.Output),
+        self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "", Direction.Output),\
     		"A table with the detector IDs and calibrated detector positions in V3P format.")
 
-        self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),
+        self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),\
     		"A list of dSpacing values where peaks are expected.")
 
         self.declareProperty("Bank", 1, "Which bank to calibrate")

@@ -1,8 +1,8 @@
-from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory
+#pylint: disable=no-init,invalid-name
+from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.simpleapi import CloneWorkspace, mtd
-from mantid.kernel import StringListValidator, FloatArrayProperty, FloatArrayLengthValidator, FloatArrayMandatoryValidator, StringArrayProperty, StringArrayMandatoryValidator, Direction, FloatBoundedValidator, logger, EnabledWhenProperty, PropertyCriterion
-
-from pdb import set_trace as tr
+from mantid.kernel import StringListValidator, FloatArrayProperty, FloatArrayMandatoryValidator,\
+    StringArrayProperty, StringArrayMandatoryValidator, Direction, logger, EnabledWhenProperty, PropertyCriterion
 
 class DSFinterp(PythonAlgorithm):
 
@@ -13,14 +13,18 @@ class DSFinterp(PythonAlgorithm):
         return 'DSFinterp'
 
     def summary(self):
-        return 'Given a set of parameter values {Ti} and corresponding structure factors S(Q,E,Ti), this algorithm interpolates S(Q,E,T) for any value of parameter T within the range spanned by the {Ti} set.'
+        return 'Given a set of parameter values {Ti} and corresponding structure factors S(Q,E,Ti), this algorithm '\
+        'interpolates S(Q,E,T) for any value of parameter T within the range spanned by the {Ti} set.'
 
     def PyInit(self):
         arrvalidator = StringArrayMandatoryValidator()
         lrg='Input'
-        self.declareProperty(StringArrayProperty('Workspaces', values=[], validator=arrvalidator, direction=Direction.Input), doc='list of input workspaces')
-        self.declareProperty('LoadErrors', True, direction=Direction.Input, doc='Do we load error data contained in the workspaces?')
-        self.declareProperty(FloatArrayProperty('ParameterValues', values=[], validator=FloatArrayMandatoryValidator(),direction=Direction.Input), doc='list of input parameter values')
+        self.declareProperty(StringArrayProperty('Workspaces', values=[], validator=arrvalidator,\
+            direction=Direction.Input), doc='list of input workspaces')
+        self.declareProperty('LoadErrors', True, direction=Direction.Input,\
+            doc='Do we load error data contained in the workspaces?')
+        self.declareProperty(FloatArrayProperty('ParameterValues', values=[],\
+            validator=FloatArrayMandatoryValidator(),direction=Direction.Input), doc='list of input parameter values')
         self.setPropertyGroup('Workspaces', lrg)
         self.setPropertyGroup('LoadErrors', lrg)
         self.setPropertyGroup('ParameterValues', lrg)
@@ -30,7 +34,8 @@ class DSFinterp(PythonAlgorithm):
         self.declareProperty('RegressionWindow', 6, direction=Direction.Input, doc='window size for the running local-regression')
         self.setPropertySettings("RegressionWindow", condition)
         regtypes = [ 'linear', 'quadratic']
-        self.declareProperty('RegressionType', 'quadratic', StringListValidator(regtypes), direction=Direction.Input, doc='type of local-regression; linear and quadratic are available')
+        self.declareProperty('RegressionType', 'quadratic', StringListValidator(regtypes),\
+            direction=Direction.Input, doc='type of local-regression; linear and quadratic are available')
         self.setPropertySettings("RegressionType", condition)
         lrg = 'Running Local Regression Options'
         self.setPropertyGroup('LocalRegression', lrg)
@@ -39,7 +44,8 @@ class DSFinterp(PythonAlgorithm):
 
         lrg='Output'
         self.declareProperty(FloatArrayProperty('TargetParameters', values=[], ), doc="Parameters to interpolate the structure factor")
-        self.declareProperty(StringArrayProperty('OutputWorkspaces', values=[], validator=arrvalidator), doc='list of output workspaces to save the interpolated structure factors')
+        self.declareProperty(StringArrayProperty('OutputWorkspaces', values=[], validator=arrvalidator),\
+            doc='list of output workspaces to save the interpolated structure factors')
         self.setPropertyGroup('TargetParameters', lrg)
         self.setPropertyGroup('OutputWorkspaces', lrg)
         self.channelgroup = None
@@ -109,5 +115,6 @@ try:
     import dsfinterp
     AlgorithmFactory.subscribe(DSFinterp)
 except:
-    logger.debug('Failed to subscribe algorithm DSFinterp; Python package dsfinterp may be missing (https://pypi.python.org/pypi/dsfinterp)')
-    pass
+    logger.debug('Failed to subscribe algorithm DSFinterp; Python package dsfinterp'\
+        'may be missing (https://pypi.python.org/pypi/dsfinterp)')
+

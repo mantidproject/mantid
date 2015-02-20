@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
 This file is concerned with calibrating a specified set of tubes
 
@@ -150,7 +151,7 @@ def fitGaussian(fitPar, index, ws, outputWs):
 
         fit_msg = 'name=LinearBackground,A0=%f;name=Gaussian,Height=%f,PeakCentre=%f,Sigma=%f'%(background, height, centre, width)
 
-        Fit(InputWorkspace=ws, Function=fit_msg,
+        Fit(InputWorkspace=ws, Function=fit_msg,\
                 StartX = str(start), EndX=str(end), Output=outputWs)
 
         peakIndex = 3
@@ -226,7 +227,7 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
             fitt_x_values.append(copy.copy(ws.dataX(1)))
 
     if showPlot:
-        FittedData = CreateWorkspace(numpy.hstack(fitt_x_values),
+        FittedData = CreateWorkspace(numpy.hstack(fitt_x_values),\
                                          numpy.hstack(fitt_y_values))
     return results
 

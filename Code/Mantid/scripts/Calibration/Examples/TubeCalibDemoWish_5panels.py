@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 #
 # TUBE CALIBRATION DEMONSTRATION PROGRAM FOR WISH
 #

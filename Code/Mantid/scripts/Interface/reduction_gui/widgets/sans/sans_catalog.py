@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from PyQt4 import QtGui, uic, QtCore
 import os
 from reduction_gui.settings.application_settings import GeneralSettings
@@ -162,7 +163,7 @@ class SANSCatalogWidget(BaseWidget):
         self._content.data_set_table.resizeColumnsToContents()
 
     def _browse_directory(self):
-        dir = QtGui.QFileDialog.getExistingDirectory(self, "Open Directory",
+        dir = QtGui.QFileDialog.getExistingDirectory(self, "Open Directory",\
                                                     self._settings.data_path)
         if dir:
                 # Store the location of the loaded file

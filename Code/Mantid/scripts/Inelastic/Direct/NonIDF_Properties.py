@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from PropertiesDescriptors import *
 from RunDescriptor import RunDescriptor,RunDescriptorDependent
 

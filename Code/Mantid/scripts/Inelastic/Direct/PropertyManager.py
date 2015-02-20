@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from NonIDF_Properties import *
 
 from collections import OrderedDict

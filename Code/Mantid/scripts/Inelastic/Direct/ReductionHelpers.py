@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from mantid import config
 import os
 
@@ -249,8 +250,7 @@ def gen_setter(keyval_dict,key,val):
     if isinstance(test_val,ComplexProperty):
         if not isinstance(val,list):
             raise KeyError(' You can not assign non-list value to complex property {0}'.format(key))
-        pass
-            # Assigning values for composite function to the function components
+        # Assigning values for composite function to the function components
         test_val.__set__(keyval_dict,val)
         return None
     else:

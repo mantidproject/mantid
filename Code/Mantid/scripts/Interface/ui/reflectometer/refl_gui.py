@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import refl_window
 import refl_save
 import refl_choose_col
