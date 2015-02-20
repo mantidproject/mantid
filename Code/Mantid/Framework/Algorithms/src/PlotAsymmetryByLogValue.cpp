@@ -94,6 +94,16 @@ void PlotAsymmetryByLogValue::init() {
                   boost::make_shared<StringListValidator>(options),
                   "The calculation type: 'Integral' or 'Differential'.");
 
+  std::vector<std::string> optionsLog;
+  optionsLog.push_back("Mean");
+  optionsLog.push_back("Min");
+  optionsLog.push_back("Max");
+  optionsLog.push_back("First");
+  optionsLog.push_back("Last");
+  declareProperty("Function", "Last",
+    boost::make_shared<StringListValidator>(optionsLog),
+    "The calculation type: 'Integral' or 'Differential'.");
+
   declareProperty(
       "TimeMin", EMPTY_DBL(),
       "The beginning of the time interval used in the calculations.");
