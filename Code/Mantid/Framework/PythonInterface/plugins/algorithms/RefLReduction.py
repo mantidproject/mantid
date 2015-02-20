@@ -138,7 +138,7 @@ class RefLReduction(PythonAlgorithm):
         qMin = self.getProperty("QMin").value
         qStep = self.getProperty("QStep").value
         if (qStep > 0): #force logarithmic binning
-            qStep = -qStep;
+            qStep = -qStep
 
         # angle offset
         angleOffsetDeg = self.getProperty("AngleOffset").value

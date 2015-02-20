@@ -395,7 +395,7 @@ class HFIRSANSReduction(PythonAlgorithm):
             @param property_manager: property manager object
         """
         output_msg = ""
-                
+
         def _save_ws(iq_ws):
             if AnalysisDataService.doesExist(iq_ws):
                 proc_xml = ""
@@ -407,14 +407,14 @@ class HFIRSANSReduction(PythonAlgorithm):
                     elif len(process_file)>0:
                         Logger("HFIRSANSReduction").error("Could not read %s\n" % process_file)
                 if property_manager.existsProperty("SetupAlgorithm"):
-                        setup_info = property_manager.getProperty("SetupAlgorithm").value
-                        proc_xml += "\n<Reduction>\n"
+                    setup_info = property_manager.getProperty("SetupAlgorithm").value
+                    proc_xml += "\n<Reduction>\n"
                         # The instrument name refers to the UI, which is named BIOSANS for all HFIR SANS
-                        proc_xml += "  <instrument_name>BIOSANS</instrument_name>\n"
-                        proc_xml += "  <SetupInfo>%s</SetupInfo>\n" % setup_info
-                        filename = self.getProperty("Filename").value
-                        proc_xml += "  <Filename>%s</Filename>\n" % filename
-                        proc_xml += "</Reduction>\n"
+                    proc_xml += "  <instrument_name>BIOSANS</instrument_name>\n"
+                    proc_xml += "  <SetupInfo>%s</SetupInfo>\n" % setup_info
+                    filename = self.getProperty("Filename").value
+                    proc_xml += "  <Filename>%s</Filename>\n" % filename
+                    proc_xml += "</Reduction>\n"
 
                 filename = os.path.join(output_dir, iq_ws+'.txt')
 
@@ -448,7 +448,7 @@ class HFIRSANSReduction(PythonAlgorithm):
                 filename = _save_ws(item)
                 if filename is not None:
                     output_msg += "I(Q) saved in %s\n" % (filename)
-                    
+
         # Save I(Qx,Qy)
         if iqxy_output is not None:
             if AnalysisDataService.doesExist(iqxy_output):

@@ -56,8 +56,8 @@ class HallRoss(IFunction1D):
         for x in xvals:
             ex = math.exp(-l*x*x)
             h = (1.0-ex)/tau
-            jacobian.set(i,0,-h/tau);
-            jacobian.set(i,1,x*x*ex/tau);
+            jacobian.set(i,0,-h/tau)
+            jacobian.set(i,1,x*x*ex/tau)
             i += 1
 
 # Required to have Mantid recognise the new function

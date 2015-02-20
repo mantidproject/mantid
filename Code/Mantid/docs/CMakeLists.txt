@@ -23,6 +23,8 @@ if ( SPHINX_FOUND )
   set ( SPHINX_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source )
   set ( SPHINX_BUILD_DIR ${DOCS_BUILDDIR} )
   set ( SCREENSHOTS_DIR ${SPHINX_BUILD_DIR}/screenshots )
+  set ( DIAGRAMS_DIR ${SPHINX_BUILD_DIR}/diagrams )
+  set ( DOT_EXECUTABLE ${DOXYGEN_DOT_EXECUTABLE} )
 
   # targets
   set ( TARGET_PREFIX docs)

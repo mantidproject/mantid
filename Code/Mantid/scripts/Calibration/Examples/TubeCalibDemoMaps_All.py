@@ -372,10 +372,10 @@ def findThoseTubesThatNeedSpecialCareForCalibration(filename):
     data = numpy.zeros((n,5))
     line = 0
     for row in peakTable:
-    	data_row = [row['Peak%d'%(i)] for i in [1,2,3,4,5]]
-    	data[line,:] = data_row
-    	peaksId[line] = row['TubeId']
-    	line+=1
+        data_row = [row['Peak%d'%(i)] for i in [1,2,3,4,5]]
+        data[line,:] = data_row
+        peaksId[line] = row['TubeId']
+        line+=1
     # data now has all the peaks positions for each tube
     # the mean value is the expected value for the peak position for each tube
     expected_peak_pos = numpy.mean(data,axis=0)

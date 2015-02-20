@@ -717,7 +717,7 @@ class Mask_ISIS(ReductionStep):
                 else:
                     _issueWarning('Unrecognized masking line "' + details + '"')
         else:
-             _issueWarning('Unrecognized masking line "' + details + '"')
+            _issueWarning('Unrecognized masking line "' + details + '"')
 
     def add_mask_string(self, mask_string, detect):
         if detect.upper() == 'FRONT' or detect.upper() == 'HAB':
@@ -858,9 +858,9 @@ class Mask_ISIS(ReductionStep):
             @return 'Phi'low'_'high if it has been set
         """
         if self.mask_phi and self._lim_phi_xml != '' and (abs(self.phi_max - self.phi_min) != 180.0):
-          return 'Phi'+str(self.phi_min)+'_'+str(self.phi_max)
+            return 'Phi'+str(self.phi_min)+'_'+str(self.phi_max)
         else:
-          return ''
+            return ''
 
     def set_phi_limit(self, phimin, phimax, phimirror, override=True):
         '''
@@ -1695,7 +1695,7 @@ class ConvertToQISIS(ReductionStep):
             self._grav_set = True
 
         if (not self._grav_set) or override:
-                self._use_gravity = bool(flag)
+            self._use_gravity = bool(flag)
         else:
             msg = "User file can't override previous gravity setting, do gravity correction remains " + str(self._use_gravity)
             print msg
@@ -1992,26 +1992,26 @@ class UserFile(ReductionStep):
             # SET CENTRE/HAB X Y
             main_str_pos = upper_line.find('MAIN')
             hab_str_pos = upper_line.find('HAB')
-            x_pos = 0.0;
-            y_pos = 0.0;
+            x_pos = 0.0
+            y_pos = 0.0
             if (main_str_pos > 0):
-              values = upper_line[main_str_pos+5:].split() #remov the SET CENTRE/MAIN
-              x_pos = float(values[0])/1000.0
-              y_pos = float(values[1])/1000.0
+                values = upper_line[main_str_pos+5:].split() #remov the SET CENTRE/MAIN
+                x_pos = float(values[0])/1000.0
+                y_pos = float(values[1])/1000.0
             elif (hab_str_pos > 0):
-              values = upper_line[hab_str_pos+4:].split() # remove the SET CENTRE/HAB
-              print ' convert values ',values
-              x_pos = float(values[0])/1000.0
-              y_pos = float(values[1])/1000.0
+                values = upper_line[hab_str_pos+4:].split() # remove the SET CENTRE/HAB
+                print ' convert values ',values
+                x_pos = float(values[0])/1000.0
+                y_pos = float(values[1])/1000.0
             else:
-              values = upper_line.split()
-              x_pos = float(values[2])/1000.0
-              y_pos = float(values[3])/1000.0
+                values = upper_line.split()
+                x_pos = float(values[2])/1000.0
+                y_pos = float(values[3])/1000.0
             if (hab_str_pos > 0):
-              print 'Front values = ',x_pos,y_pos
-              reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos),'front')
+                print 'Front values = ',x_pos,y_pos
+                reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos),'front')
             else:
-              reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos))
+                reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos))
 
         elif upper_line.startswith('SET SCALES'):
             values = upper_line.split()
@@ -2077,9 +2077,9 @@ class UserFile(ReductionStep):
                 reducer.transmission_calculator.loq_removePromptPeakMax = float(params[2])
             else:
                 if reducer.instrument.name() == 'LOQ':
-                  _issueWarning('Incorrectly formatted FIT/MONITOR line, %s, line ignored' % upper_line)
+                    _issueWarning('Incorrectly formatted FIT/MONITOR line, %s, line ignored' % upper_line)
                 else:
-                  _issueWarning('FIT/MONITOR line specific to LOQ instrument. Line ignored')
+                    _issueWarning('FIT/MONITOR line specific to LOQ instrument. Line ignored')
 
         elif upper_line == 'SANS2D' or upper_line == 'LOQ':
             self._check_instrument(upper_line, reducer)
@@ -2532,9 +2532,9 @@ class UserFile(ReductionStep):
         path2file = parts[1]
 
         try:
-          file_path, suggested_name = getFileAndName(path2file)
-          __calibrationWs = Load(file_path, OutputWorkspace=suggested_name)
-          reducer.instrument.setCalibrationWorkspace(__calibrationWs)
+            file_path, suggested_name = getFileAndName(path2file)
+            __calibrationWs = Load(file_path, OutputWorkspace=suggested_name)
+            reducer.instrument.setCalibrationWorkspace(__calibrationWs)
         except:
             # If we throw a runtime here, then we cannot execute 'Load Data'.
             raise RuntimeError("Invalid input for tube calibration file (" + path2file + " ).\n" \

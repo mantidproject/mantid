@@ -8,8 +8,9 @@
 #include "MockObjects.h"
 
 #include "MantidVatesAPI/MDEWRebinningPresenter.h"
-
+#include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
+#include "MantidVatesAPI/VatesConfigurations.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
@@ -28,7 +29,27 @@ using namespace Mantid::MDEvents;
 //=====================================================================================
 class MDEWRebinningPresenterTest : public CxxTest::TestSuite
 {
+private:
 
+  vtkFieldData* generateFieldData(std::string testData)
+  {
+    // Create mock object
+    vtkFieldData* fieldData = createFieldDataWithCharArray(testData);
+
+    // Generate metadata
+    MetadataJsonManager manager;
+    manager.setInstrument("OSIRIS");
+
+    VatesConfigurations config;
+
+    std::string jsonString = manager.getSerializedJson();
+
+    // Add additional json metadata to the field data
+    MetadataToFieldData convert;
+    convert(fieldData, jsonString, config.getMetadataIdJson().c_str());
+    
+    return fieldData;
+  }
 
 public:
 
@@ -47,7 +68,7 @@ public:
     MockRebinningActionManager actionManager;
 
     vtkUnstructuredGrid* dataset = vtkUnstructuredGrid::New();
-    dataset->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
+    dataset->SetFieldData(generateFieldData(constructXML("qx", "qy", "qz", "en")));
 
     MockWorkspaceProvider wsProvider;
     EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillOnce(Return(false));
@@ -62,7 +83,7 @@ public:
     EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
-    dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
+    dataSet->SetFieldData(generateFieldData(constructXML("qx", "qy", "qz", "en")));
 
     MDEWRebinningPresenter presenter(dataSet, pRequest, new MockMDRebinningView, wsProvider);
     TSM_ASSERT("Geometry should be available immediately after construction.", !presenter.getAppliedGeometryXML().empty());
@@ -86,7 +107,7 @@ public:
     EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
-    dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
+    dataSet->SetFieldData(generateFieldData(constructXML("qx", "qy", "qz", "en")));
 
     MDEWRebinningPresenter presenter(dataSet, pRequest, view, wsProvider);
     presenter.updateModel();
@@ -113,7 +134,7 @@ public:
     EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
-    dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
+    dataSet->SetFieldData(generateFieldData(constructXML("qx", "qy", "qz", "en")));
 
     MDEWRebinningPresenter presenter(dataSet, pRequest, view, wsProvider);
     presenter.updateModel();
@@ -140,7 +161,7 @@ public:
     EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
-    dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
+    dataSet->SetFieldData(generateFieldData(constructXML("qx", "qy", "qz", "en")));
 
     MDEWRebinningPresenter presenter(dataSet, pRequest, view, wsProvider);
     presenter.updateModel();
@@ -167,7 +188,7 @@ public:
     EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
-    dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
+    dataSet->SetFieldData(generateFieldData(constructXML("qx", "qy", "qz", "en")));
 
     MDEWRebinningPresenter presenter(dataSet, pRequest, view, wsProvider);
     presenter.updateModel();
@@ -194,7 +215,7 @@ public:
     EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
-    dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
+    dataSet->SetFieldData(generateFieldData(constructXML("qx", "qy", "qz", "en")));
 
     MDEWRebinningPresenter presenter(dataSet, pRequest, view, wsProvider);
     presenter.updateModel();
@@ -221,7 +242,7 @@ public:
     EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
-    dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
+    dataSet->SetFieldData(generateFieldData(constructXML("qx", "qy", "qz", "en")));
 
     MDEWRebinningPresenter presenter(dataSet, pRequest, view, wsProvider);
     presenter.updateModel();
@@ -249,7 +270,7 @@ public:
     EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
-    dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
+    dataSet->SetFieldData(generateFieldData(constructXML("qx", "qy", "qz", "en")));
 
     MDEWRebinningPresenter presenter(dataSet, pRequest, view, wsProvider);
     presenter.updateModel();
@@ -276,7 +297,7 @@ public:
     EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
-    dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
+    dataSet->SetFieldData(generateFieldData(constructXML("qx", "qy", "qz", "en")));
 
     MDEWRebinningPresenter presenter(dataSet, pRequest, view, wsProvider);
     presenter.updateModel();
@@ -312,7 +333,7 @@ public:
     EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
-    dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
+    dataSet->SetFieldData(generateFieldData(constructXML("qx", "qy", "qz", "en")));
 
     MDEWRebinningPresenter presenter(dataSet, pRequest, view, wsProvider);
     presenter.updateModel();
@@ -352,7 +373,7 @@ public:
     EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
-    dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
+    dataSet->SetFieldData(generateFieldData(constructXML("qx", "qy", "qz", "en")));
 
     MDEWRebinningPresenter presenter(dataSet, pRequest, view, wsProvider);
     presenter.updateModel();
@@ -393,7 +414,7 @@ public:
     EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
-    dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
+    dataSet->SetFieldData(generateFieldData(constructXML("qx", "qy", "qz", "en")));
 
     MDEWRebinningPresenter presenter(dataSet, pRequest, view, wsProvider);
     presenter.updateModel();
@@ -416,7 +437,7 @@ public:
 
     // Create an empty dataset and attach that xml as field data.
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
-    dataSet->SetFieldData(createFieldDataWithCharArray(creationalXML));
+    dataSet->SetFieldData(generateFieldData(creationalXML));
 
     /*
     The vtkFilter is the view in our MVP set up.
@@ -472,7 +493,7 @@ public:
     std::string creationalXML = serializer.createXMLString();
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
-    dataSet->SetFieldData(createFieldDataWithCharArray(creationalXML));
+    dataSet->SetFieldData(generateFieldData(creationalXML));
 
     MockMDRebinningView* view = new MockMDRebinningView;
     EXPECT_CALL(*view, getOutputHistogramWS()).WillRepeatedly(Return(true));
@@ -508,7 +529,7 @@ public:
     std::string creationalXML = serializer.createXMLString();
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
-    dataSet->SetFieldData(createFieldDataWithCharArray(creationalXML));
+    dataSet->SetFieldData(generateFieldData(creationalXML));
 
     MockMDRebinningView* view = new MockMDRebinningView;
     EXPECT_CALL(*view, getOutputHistogramWS()).WillRepeatedly(Return(true));
@@ -558,7 +579,7 @@ public:
     std::string creationalXML = serializer.createXMLString();
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
-    dataSet->SetFieldData(createFieldDataWithCharArray(creationalXML));
+    dataSet->SetFieldData(generateFieldData(creationalXML));
 
     MockMDRebinningView* view = new MockMDRebinningView;
     EXPECT_CALL(*view, getOutputHistogramWS()).WillRepeatedly(Return(true));
@@ -597,6 +618,19 @@ public:
                       "Axis1 (m)");
   }
 
+  void testJsonMetadataExtractionFromRebinnedDataSet()
+  {
+    MockRebinningActionManager* pRequest = new MockRebinningActionManager;
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
+
+    vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
+    dataSet->SetFieldData(generateFieldData(constructXML("qx", "qy", "qz", "en")));
+
+    MDEWRebinningPresenter presenter(dataSet, pRequest, new MockMDRebinningView, wsProvider);
+    TSM_ASSERT("Instrument should be available immediately after construction.", !presenter.getInstrument().empty());
+    TSM_ASSERT("Instrument should be read out correctly.", presenter.getInstrument() == "OSIRIS");
+  }
 };
 
 #endif

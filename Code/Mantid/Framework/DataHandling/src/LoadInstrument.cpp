@@ -122,9 +122,14 @@ void LoadInstrument::exec() {
 
     // Initialize the parser. Avoid copying the xmltext out of the property
     // here.
-    parser.initialize(
-        m_filename, m_instName,
-        *dynamic_cast<const PropertyWithValue<std::string> *>(InstrumentXML));
+    const PropertyWithValue<std::string> *xml =
+      dynamic_cast<const PropertyWithValue<std::string> *>(InstrumentXML);
+    if (xml) {
+      parser.initialize(m_filename, m_instName, *xml);
+    } else {
+      throw std::invalid_argument("The instrument XML passed cannot be "
+                                  "casted to a standard string.");
+    }
   }
   // otherwise we need either Filename or InstrumentName to be set
   else {

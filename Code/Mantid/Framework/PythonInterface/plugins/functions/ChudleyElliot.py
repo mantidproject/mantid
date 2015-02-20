@@ -53,8 +53,8 @@ class ChudleyElliot(IFunction1D):
         for x in xvals:
             s = math.sin(x*length)/(x*length)
             h = (1.0-s)/tau
-            jacobian.set(i,0,-h/tau);
-            jacobian.set(i,1,(math.cos(x*length)-s)/(length*tau));
+            jacobian.set(i,0,-h/tau)
+            jacobian.set(i,1,(math.cos(x*length)-s)/(length*tau))
             i += 1
 
 # Required to have Mantid recognise the new function

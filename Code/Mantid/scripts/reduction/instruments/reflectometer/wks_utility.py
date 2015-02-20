@@ -72,8 +72,17 @@ def getSheight(mt, index):
         return the DAS hardware slits height of slits # index
     """
     mt_run = mt.getRun()
-    tag = 'S' + index + 'VHeight'
-    value = mt_run.getProperty(tag).value
+    if index == 2:
+        try:
+            tag = 'SiVHeight'
+            value = mt_run.getProperty(tag).value
+        except:
+            tag = 'S2VHeight'
+            value = mt_run.getProperty(tag).value
+    else:
+        tag = 'S1VHeight'
+        value = mt_run.getProperty(tag).value
+
     return value[0]
 
 def getS1h(mt=None):
@@ -105,8 +114,16 @@ def getSwidth(mt, index):
         defined by the DAS hardware
     """
     mt_run = mt.getRun()
-    tag = 'S' + index + 'HWidth'
-    value = mt_run.getProperty(tag).value
+    if index==2:
+        try:
+            tag = 'SiHWidth'
+            value = mt_run.getProperty(tag).value
+        except:
+            tag = 'S2HWidth'
+            value = mt_run.getProperty(tag).value
+    else:
+        tag = 'S1HWidth'
+        value = mt_run.getProperty(tag).value
     return value[0]
 
 def getSw(mt, left_tag, right_tag):
@@ -420,7 +437,7 @@ def convertWorkspaceToQ(ws_data,
             a = y_range[y]
 
             _tmp_y_axis = mt1.readY(int(a))[:]
-            _y_axis[int(y), :] = _tmp_y_axis;
+            _y_axis[int(y), :] = _tmp_y_axis
             _tmp_y_error_axis = mt1.readE(int(a))[:]
             _y_error_axis[int(y),:] = _tmp_y_error_axis
 
@@ -486,19 +503,19 @@ def angleUnitConversion(value, from_units='degree', to_units='rad'):
     """
 
     if (from_units == to_units):
-        return value;
+        return value
 
-    from_factor = 1;
+    from_factor = 1
     #convert everything into rad
     if (from_units == 'degree'):
-        from_factor = 1.745329252e-2;
-    value_rad = from_factor * value;
+        from_factor = 1.745329252e-2
+    value_rad = from_factor * value
 
     if (to_units == 'rad'):
-        return value_rad;
+        return value_rad
     else:
-        to_factor = 57.2957795;
-        return to_factor * value_rad;
+        to_factor = 57.2957795
+        return to_factor * value_rad
 
 def convertToThetaVsLambda(_tof_axis,
                            _pixel_axis,
@@ -824,31 +841,39 @@ def applySF(InputWorkspace,
         print '--> Data S1W: {0:2f}'.format(s1w_value)
         print '--> Data S2W: {0:2f}'.format(s2w_value)
 
+        print 'mERDDEEEEDEDEED'
         for i in range(nbr_row):
 
             _file_incidentMedium = getFieldValue(sfFactorTable,i,0)
             if (_file_incidentMedium.strip() == _incidentMedium.strip()):
+                print '--- incident medium match ---'
                 _file_lambdaRequested = getFieldValue(sfFactorTable,i,1)
                 if (isWithinPrecisionRange(_file_lambdaRequested,
                                            _lr_value,
                                            valuePrecision)):
+                    print '--- lambda requested match ---'
                     _file_s1h = getFieldValue(sfFactorTable,i,2)
                     if(isWithinPrecisionRange(_file_s1h,
                                               s1h_value,
                                               valuePrecision)):
+                        print '--- S1H match ---'
                         _file_s2h = getFieldValue(sfFactorTable,i,3)
                         if(isWithinPrecisionRange(_file_s2h,
                                                   s2h_value,
                                                   valuePrecision)):
+                            print '--- S2H match ---'
                             if (slitsWidthFlag):
+                                print '--- (with Width flag) ----'
                                 _file_s1w = getFieldValue(sfFactorTable,i,4)
                                 if(isWithinPrecisionRange(_file_s1w,
                                                           s1w_value,
                                                           valuePrecision)):
+                                    print '--- S1W match ---'
                                     _file_s2w = getFieldValue(sfFactorTable,i,5)
                                     if(isWithinPrecisionRange(_file_s2w,
                                                               s2w_value,
                                                               valuePrecision)):
+                                        print '--- S2W match ---'
 
                                         print '--> Found a perfect match'
                                         a = float(getFieldValue(sfFactorTable,i,6))
@@ -980,7 +1005,7 @@ def rebinNeXus(inputWorkspace, params, type):
     print '--> rebin ', type
     ws_histo_data = Rebin(InputWorkspace=inputWorkspace,
                           Params=params,
-                          PreserveEvents=True);
+                          PreserveEvents=True)
     return ws_histo_data
 
 def cropTOF(inputWorkspace, min, max, type):
@@ -1145,7 +1170,7 @@ def weightedMean(data_array, error_array, error_0):
     sz = len(data_array)
 
     # calculate the numerator of mean
-    dataNum = 0;
+    dataNum = 0
     for i in range(sz):
         if (error_array[i] == 0):
             error_array[i] = error_0
@@ -1154,7 +1179,7 @@ def weightedMean(data_array, error_array, error_0):
         dataNum += tmpFactor
 
     # calculate denominator
-    dataDen = 0;
+    dataDen = 0
     for i in range(sz):
         if (error_array[i] == 0):
             error_array[i] = error_0
@@ -1309,7 +1334,7 @@ def ouput_ascii_file(file_name,
 
     sz_x_axis = len(x_axis)
     for i in range(sz_x_axis-1):
-        f.write(str(x_axis[i]) + "," + str(y_axis[i]) + "," + str(y_error_axis[i]) + "\n");
+        f.write(str(x_axis[i]) + "," + str(y_axis[i]) + "," + str(y_error_axis[i]) + "\n")
 
     f.close
 
@@ -1415,7 +1440,7 @@ def applyScalingFactor(tof_axis,
         _lr_value = _lr[0]
         _lr_value = float("{0:.2f}".format(_lr_value))
 
-        #retrieve s1h and s2h values
+        #retrieve s1h and s2h or sih values
         s1h = getS1h(mtd['ws_event_data'])
         s2h = getS2h(mtd['ws_event_data'])
 
@@ -1439,27 +1464,34 @@ def applyScalingFactor(tof_axis,
 
             _file_incidentMedium = getFieldValue(sfFactorTable,i,0)
             if (_file_incidentMedium.strip() == _incidentMedium.strip()):
+                print '*** incident medium match ***'
                 _file_lambdaRequested = getFieldValue(sfFactorTable,i,1)
                 if (isWithinPrecisionRange(_file_lambdaRequested,
                                            _lr_value,
                                            valuePrecision)):
+                    print '*** lambda requested match ***'
                     _file_s1h = getFieldValue(sfFactorTable,i,2)
                     if(isWithinPrecisionRange(_file_s1h,
                                               s1h_value,
                                               valuePrecision)):
+                        print '*** s1h match ***'
                         _file_s2h = getFieldValue(sfFactorTable,i,3)
                         if(isWithinPrecisionRange(_file_s2h,
                                                   s2h_value,
                                                   valuePrecision)):
+                            print '*** s2h match ***'
                             if (slitsWidthFlag):
+                                print '*** (with slits width flag) ***'
                                 _file_s1w = getFieldValue(sfFactorTable,i,4)
                                 if(isWithinPrecisionRange(_file_s1w,
                                                           s1w_value,
                                                           valuePrecision)):
+                                    print '*** s1w match ***'
                                     _file_s2w = getFieldValue(sfFactorTable,i,5)
                                     if(isWithinPrecisionRange(_file_s2w,
                                                               s2w_value,
                                                               valuePrecision)):
+                                        print '*** s2w match ***'
 
                                         print '--> Found a perfect match'
                                         a = float(getFieldValue(sfFactorTable,i,6))
@@ -1925,8 +1957,8 @@ def cropAxisToOnlyNonzeroElements(q_rebin, dataPeakRange):
     x_axis = q_rebin.readX(0)[:]
     sz = x_axis.shape[0]-1
 
-    index_first_non_zero_value = sz;
-    index_last_non_zero_value = 0;
+    index_first_non_zero_value = sz
+    index_last_non_zero_value = 0
 
     for x in range(nbrPixel):
         _pixel_axis = q_rebin.readY(x)[:]
@@ -2011,7 +2043,7 @@ def cleanupData1D(final_data_y_axis, final_data_y_error_axis):
     sz = final_data_y_axis.shape
     nbrTof = sz[0]
 
-    notYetRemoved = True;
+    notYetRemoved = True
 
     for t in range(nbrTof):
 
@@ -2044,16 +2076,15 @@ def cleanupData1D(final_data_y_axis, final_data_y_error_axis):
     return [final_data_y_axis, final_data_y_error_axis]
 
 def isNexusTakeAfterRefDate(nexus_date):
-   '''
+    '''
    This function parses the output.date and returns true if this date is after the ref date
    '''
-   nexus_date_acquistion = nexus_date.split('T')[0]
-   
-   if nexus_date_acquistion > ref_date:
-     return True
-   else:
-     return False
+    nexus_date_acquistion = nexus_date.split('T')[0]
 
+    if nexus_date_acquistion > ref_date:
+        return True
+    else:
+        return False
 
 
 

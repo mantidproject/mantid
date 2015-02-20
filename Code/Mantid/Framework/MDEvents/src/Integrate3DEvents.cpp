@@ -188,10 +188,16 @@ int Integrate3DEvents::numInEllipsoid(std::vector<V3D> const &events,
 
 /**
  *  Given a list of events, associated with a particular peak
- *  and SHIFTED to be centered at (0,0,0), calculate the 3x3
+ *  and already SHIFTED to be centered at (0,0,0), calculate the 3x3
  *  covariance matrix for finding the principal axes of that
  *  local event data.  Only events within the specified radius
  *  of (0,0,0) will be used.
+ *
+ *  The covariance matrix can be easily constructed. X, Y, Z of each peak position are the variables we wish to determine
+ *  the covariance. The mean position in each dimension has already been calculated on subtracted, since this corresponds to the centre position of each
+ *  peak, which we knew aprori. The expected values of each correlation test X,X X,Y X,Z e.t.c form the elements of this 3 by 3 matrix, but since the
+ *  probabilities are equal, we can remove them from the sums of the expected values, and simply divide by the number of events for each matrix element.
+ *  Note that the diagonal elements form the variance X,X, Y,Y, Z,Z
  *
  *  @param events    Vector of V3D objects containing the
  *                   Q vectors for a peak, with mean at (0,0,0).

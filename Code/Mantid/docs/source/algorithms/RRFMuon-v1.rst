@@ -22,7 +22,7 @@ where :math:`P_R\left(0,t\right)` and :math:`P_I\left(0,t\right)` are the real a
 Usage
 -----
 
-**Example - Computing polarization in RRF**
+**Example - Computing asymmetry in RRF**
 
 .. testcode:: ExRRF
 
@@ -32,9 +32,9 @@ Usage
    datay1 = [ math.cos(2*3.14159*i/100.) for i in range(1,299) ]
    datay2 = [ math.sin(2*3.14159*i/100.) for i in range(1,299) ]
    datay = datay1 + datay2
-   input = CreateWorkspace(dataX=datax, dataY=datay,Nspec=2)
+   input = CreateWorkspace(dataX=datax, dataY=datay,Nspec=2,UnitX="TOF")
    # Compute polarization in RRF
-   output = RRFMuon(input,1.0,0)
+   output = RRFMuon(input,1.0,"MHz",0)
    print("%.1f" % output.readY(0)[0])
    print("%.1f" % output.readY(1)[0])
 

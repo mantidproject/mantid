@@ -33,8 +33,7 @@ using namespace DataObjects;
 PoldiPeakSearch::PoldiPeakSearch()
     : API::Algorithm(), m_minimumDistance(0), m_doubleMinimumDistance(0),
       m_minimumPeakHeight(0.0), m_maximumPeakNumber(0),
-      m_peaks(new PoldiPeakCollection()) {
-}
+      m_peaks(new PoldiPeakCollection()) {}
 
 /** Sums the counts of neighboring d-values
   *
@@ -212,7 +211,8 @@ PoldiPeakSearch::mapPeakPositionsToCorrelationData(
   *data.
   */
 std::vector<PoldiPeak_sptr>
-PoldiPeakSearch::getPeaks(MantidVec::const_iterator baseListStart,
+PoldiPeakSearch::getPeaks(const MantidVec::const_iterator &baseListStart,
+                          const MantidVec::const_iterator &baseListEnd,
                           std::list<MantidVec::const_iterator> peakPositions,
                           const MantidVec &xData) const {
   std::vector<PoldiPeak_sptr> peakData;
@@ -225,7 +225,8 @@ PoldiPeakSearch::getPeaks(MantidVec::const_iterator baseListStart,
 
     PoldiPeak_sptr newPeak =
         PoldiPeak::create(UncertainValue(xData[index]), UncertainValue(**peak));
-    double fwhmEstimate = getFWHMEstimate(baseListStart, *peak, xData);
+    double fwhmEstimate =
+        getFWHMEstimate(baseListStart, baseListEnd, *peak, xData);
     newPeak->setFwhm(UncertainValue(fwhmEstimate));
     peakData.push_back(newPeak);
   }
@@ -243,9 +244,11 @@ PoldiPeakSearch::getPeaks(MantidVec::const_iterator baseListStart,
   * @param xData :: Vector with x-values of the correlation spectrum.
   * @return Estimation of FWHM
   */
-double PoldiPeakSearch::getFWHMEstimate(MantidVec::const_iterator baseListStart,
-                                        MantidVec::const_iterator peakPosition,
-                                        const MantidVec &xData) const {
+double
+PoldiPeakSearch::getFWHMEstimate(const MantidVec::const_iterator &baseListStart,
+                                 const MantidVec::const_iterator &baseListEnd,
+                                 MantidVec::const_iterator peakPosition,
+                                 const MantidVec &xData) const {
   size_t peakPositionIndex = std::distance(baseListStart, peakPosition);
   double halfPeakIntensity = *peakPosition / 2.0;
 
@@ -253,15 +256,19 @@ double PoldiPeakSearch::getFWHMEstimate(MantidVec::const_iterator baseListStart,
    * - average positions i-1 and i as guess for position of fwhm
    * - return difference to peak position * 2
    */
-  MantidVec::const_iterator nextIntensity = peakPosition + 1;
-  while (*nextIntensity > halfPeakIntensity) {
+  MantidVec::const_iterator nextIntensity = peakPosition;
+  while (nextIntensity != baseListEnd && (*nextIntensity > halfPeakIntensity)) {
     nextIntensity += 1;
   }
 
-  size_t fwhmIndex = std::distance(baseListStart, nextIntensity);
-  double hmXGuess = (xData[fwhmIndex - 1] + xData[fwhmIndex]) / 2.0;
+  if (nextIntensity != baseListEnd) {
+    size_t fwhmIndex = std::distance(baseListStart, nextIntensity);
+    double hmXGuess = (xData[fwhmIndex - 1] + xData[fwhmIndex]) / 2.0;
 
-  return (hmXGuess - xData[peakPositionIndex]) * 2.0;
+    return (hmXGuess - xData[peakPositionIndex]) * 2.0;
+  }
+
+  return 0.002;
 }
 
 /** Sets error of workspace to specified value
@@ -499,16 +506,16 @@ void PoldiPeakSearch::init() {
                                                      Direction::InOut),
                   "Workspace containing a POLDI auto-correlation spectrum.");
 
-  boost::shared_ptr<BoundedValidator<int>> minPeakSeparationValidator =
-      boost::make_shared<BoundedValidator<int>>();
+  boost::shared_ptr<BoundedValidator<int> > minPeakSeparationValidator =
+      boost::make_shared<BoundedValidator<int> >();
   minPeakSeparationValidator->setLower(1);
   declareProperty("MinimumPeakSeparation", 15, minPeakSeparationValidator,
                   "Minimum number of points in the spectrum by which two peaks "
                   "have to be separated.",
                   Direction::Input);
 
-  boost::shared_ptr<BoundedValidator<int>> maxPeakNumberValidator =
-      boost::make_shared<BoundedValidator<int>>();
+  boost::shared_ptr<BoundedValidator<int> > maxPeakNumberValidator =
+      boost::make_shared<BoundedValidator<int> >();
   maxPeakNumberValidator->setLower(1);
   declareProperty("MaximumPeakNumber", 24, maxPeakNumberValidator,
                   "Maximum number of peaks to be detected.", Direction::Input);
@@ -567,8 +574,9 @@ void PoldiPeakSearch::exec() {
    * original count data,
    * along with the Q-values.
    */
-  std::vector<PoldiPeak_sptr> peakCoordinates = getPeaks(
-      correlatedCounts.begin(), peakPositionsCorrelation, correlationQValues);
+  std::vector<PoldiPeak_sptr> peakCoordinates =
+      getPeaks(correlatedCounts.begin(), correlatedCounts.end(),
+               peakPositionsCorrelation, correlationQValues);
   g_log.information()
       << "   Extracted peak positions in Q and intensity guesses." << std::endl;
 

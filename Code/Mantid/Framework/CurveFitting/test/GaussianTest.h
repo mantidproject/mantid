@@ -295,85 +295,7 @@ public:
 
   }
 
-    void t11estAgainstPeak2FallbackToSimplex()
-  {
-	// create peak2 mock data to test against
-    std::string wsName = "GaussHRP38692MockData";
-    int histogramNumber = 1;
-    int timechannels = 41;
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-	Mantid::MantidVec& x = ws2D->dataX(0); // x-values (time-of-flight)
-    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
-    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
-    getHRP38692Peak2Data(x, y, e);
-
-	//put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-
-	// Initialise algorithm
-    Fit alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT( alg.isInitialized() );
-
-    // create function you want to fit against
-    CompositeFunction_sptr fnWithBk( new CompositeFunction() );
-
-    boost::shared_ptr<LinearBackground> bk( new LinearBackground() );
-    bk->initialize();
-
-    bk->setParameter("A0",0.0);
-    bk->setParameter("A1",0.0);
-    bk->tie("A1","0");
-
-    BoundaryConstraint* bc_b = new BoundaryConstraint(bk.get(),"A0",0, 20.0);
-    bk->addConstraint(bc_b);
-
-    // set up Gaussian fitting function
-    boost::shared_ptr<Gaussian> fn( new Gaussian() );
-    fn->initialize();
-
-    fn->setParameter("Height",200.0);   
-    fn->setParameter("PeakCentre",79450.0);
-    fn->setParameter("Sigma",300.0);
-
-    // add constraint to function
-    BoundaryConstraint* bc3 = new BoundaryConstraint(fn.get(),"Sigma",20, 100.0);
-    fn->addConstraint(bc3);
-
-    fnWithBk->addFunction(bk);
-    fnWithBk->addFunction(fn);
-
-    alg.setProperty("Function",fnWithBk);
-    // Set which spectrum to fit against and initial starting values
-    alg.setPropertyValue("InputWorkspace", wsName);
-    alg.setPropertyValue("StartX","79300");
-    alg.setPropertyValue("EndX","79600");
-
-
-    // execute fit
-    TS_ASSERT_THROWS_NOTHING(
-      TS_ASSERT( alg.execute() )
-    )
-    TS_ASSERT( alg.isExecuted() );
-
-    // test the output from fit is what you expect
-    double dummy = alg.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 0.0,0.1);
-
-    IFunction_sptr out = alg.getProperty("Function");
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out.get())->getFunction(1).get());
-    TS_ASSERT_DELTA( pk->height(), 249.3187 ,0.01);
-    TS_ASSERT_DELTA( pk->centre(), 79430 ,0.1);
-    TS_ASSERT_DELTA( pk->getParameter("Sigma"), 25.3066 ,0.01);
-    TS_ASSERT_DELTA( out->getParameter("f0.A0"), 7.8643 ,0.001);
-    TS_ASSERT_DELTA( out->getParameter("f0.A1"), 0.0 ,0.01); 
-
-	AnalysisDataService::Instance().remove(wsName);
-  }
-
-
-  void xtestAgainstMockData()
+  void testAgainstMockData()
   {
     // create mock data to test against
     std::string wsName = "GaussMockData";
@@ -404,6 +326,7 @@ public:
     alg2.setPropertyValue("WorkspaceIndex","0");
     alg2.setPropertyValue("StartX","0");
     alg2.setPropertyValue("EndX","20");
+    alg2.setPropertyValue("Minimizer","Levenberg-MarquardtMD");
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(
@@ -411,18 +334,15 @@ public:
     )
     TS_ASSERT( alg2.isExecuted() );
 
-    std::string minimizer = alg2.getProperty("Minimizer");
-    TS_ASSERT( minimizer.compare("Levenberg-Marquardt") == 0 );
-
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.035,0.01);
 
     IFunction_sptr out = alg2.getProperty("Function");
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
-    TS_ASSERT_DELTA( pk->height(), 97.9728 ,0.0001);
-    TS_ASSERT_DELTA( pk->centre(), 11.2194 ,0.0001);
-    TS_ASSERT_DELTA( pk->fwhm(), 2.6181 ,0.0001);
+    TS_ASSERT_DELTA( pk->height(), 97.8036 ,0.0001);
+    TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.0001);
+    TS_ASSERT_DELTA( pk->fwhm(), 2.6237 ,0.0001);
   }
 
 
@@ -492,7 +412,7 @@ public:
   // and used a starting of Sigma = 100.
   // Note that the no constraint simplex with Sigma = 300 also does not locate
   // the correct minimum but not as badly as levenberg-marquardt
-  void t11estAgainstHRPD_DatasetWithConstraintsSimplex()
+  void testAgainstHRPD_DatasetWithConstraintsSimplex()
   {
 	// create peak2 mock data to test against
     std::string wsName = "GaussHRP38692MockData";
@@ -500,7 +420,7 @@ public:
     int timechannels = 41;
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-	Mantid::MantidVec& x = ws2D->dataX(0); // x-values (time-of-flight)
+	  Mantid::MantidVec& x = ws2D->dataX(0); // x-values (time-of-flight)
     Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
     Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
     getHRP38692Peak2Data(x, y, e);
@@ -536,21 +456,16 @@ public:
     fn->setParameter("Sigma",10.0);
 
     // add constraint to function
-    //BoundaryConstraint* bc1 = new BoundaryConstraint(fn,"Height",100, 300.0);
-    //BoundaryConstraint* bc2 = new BoundaryConstraint(fn,"PeakCentre",79200, 79700.0);
     BoundaryConstraint* bc3 = new BoundaryConstraint(fn.get(),"Sigma",20, 100.0);
-    //fn->addConstraint(bc1);
-    //fn->addConstraint(bc2);
     fn->addConstraint(bc3);
 
     fnWithBk->addFunction(bk);
     fnWithBk->addFunction(fn);
 
-    //alg.setPropertyValue("Function",*fnWithBk);
-    alg.setProperty("Function",fnWithBk);
+    alg.setProperty("Function",boost::dynamic_pointer_cast<IFunction>(fnWithBk));
 
     // Set which spectrum to fit against and initial starting values
-    alg.setPropertyValue("InputWorkspace",wsName);
+    alg.setProperty("InputWorkspace",ws);
     alg.setPropertyValue("StartX","79300");
     alg.setPropertyValue("EndX","79600");
     alg.setPropertyValue("Minimizer","Simplex");
@@ -566,16 +481,16 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 5.1604,1);
+    TS_ASSERT_DELTA( dummy, 2.5911,1);
 
     IFunction_sptr fun = alg.getProperty("Function");
     TS_ASSERT(fun);
     
     IFunction_sptr out = alg.getProperty("Function");
-    TS_ASSERT_DELTA( out->getParameter("f1.Height"), 216.419 ,1);
-    TS_ASSERT_DELTA( out->getParameter("f1.PeakCentre"), 79430.1 ,1);
-    TS_ASSERT_DELTA( out->getParameter("f1.Sigma"), 27.08 ,0.1);
-    TS_ASSERT_DELTA( out->getParameter("f0.A0"), 2.18 ,0.1);
+    TS_ASSERT_DELTA( out->getParameter("f1.Height"), 232 ,1);
+    TS_ASSERT_DELTA( out->getParameter("f1.PeakCentre"), 79430 ,1);
+    TS_ASSERT_DELTA( out->getParameter("f1.Sigma"), 26.08 ,1);
+    TS_ASSERT_DELTA( out->getParameter("f0.A0"), 8 ,1);
     TS_ASSERT_DELTA( out->getParameter("f0.A1"), 0.0 ,0.01); 
 
     AnalysisDataService::Instance().remove(wsName);

@@ -67,29 +67,12 @@ namespace CustomInterfaces
     m_propTrees["SlicePropTree"]->addProperty(m_properties["Range2"]);
 
     // Slice plot
-    m_plots["SlicePlot"] = new QwtPlot(m_parentWidget);
-    m_rangeSelectors["SlicePeak"] = new MantidWidgets::RangeSelector(m_plots["SlicePlot"]);
-    m_rangeSelectors["SliceBackground"] = new MantidWidgets::RangeSelector(m_plots["SlicePlot"]);
-
-    m_plots["SlicePlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-    m_plots["SlicePlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-    m_plots["SlicePlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.plotRaw->addWidget(m_plots["SlicePlot"]);
+    m_rangeSelectors["SlicePeak"] = new MantidWidgets::RangeSelector(m_uiForm.ppRawPlot);
+    m_rangeSelectors["SliceBackground"] = new MantidWidgets::RangeSelector(m_uiForm.ppRawPlot);
 
     // Setup second range
     m_rangeSelectors["SliceBackground"]->setColour(Qt::darkGreen); // Dark green for background
     m_rangeSelectors["SliceBackground"]->setRange(m_rangeSelectors["SlicePeak"]->getRange());
-
-    // Refresh the plot window
-    m_plots["SlicePlot"]->replot();
-
-    // Preview plot
-    m_plots["SlicePreviewPlot"] = new QwtPlot(m_parentWidget);
-    m_plots["SlicePreviewPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-    m_plots["SlicePreviewPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-    m_plots["SlicePreviewPlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.plotPreview->addWidget(m_plots["SlicePreviewPlot"]);
-    m_plots["SlicePreviewPlot"]->replot();
 
     // SIGNAL/SLOT CONNECTIONS
 
@@ -156,7 +139,6 @@ namespace CustomInterfaces
     sliceAlg->setProperty("InputFiles", filenames.toStdString());
     sliceAlg->setProperty("SpectraRange", spectraRange);
     sliceAlg->setProperty("PeakRange", peakRange);
-    sliceAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
     sliceAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
     sliceAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
     sliceAlg->setProperty("OutputNameSuffix", suffix.toStdString());
@@ -223,6 +205,9 @@ namespace CustomInterfaces
     //Get spectra, peak and background details
     std::map<QString, QString> instDetails = getInstrumentDetails();
 
+    // Set the search instrument for runs
+    m_uiForm.dsInputFiles->setInstrumentOverride(instDetails["instrument"]);
+
     //Set spectra range
     m_dblManager->setValue(m_properties["SpecMin"], instDetails["spectra-min"].toDouble());
     m_dblManager->setValue(m_properties["SpecMax"], instDetails["spectra-max"].toDouble());
@@ -230,10 +215,10 @@ namespace CustomInterfaces
     //Set peak and background ranges
     if(instDetails.size() >= 8)
     {
-      setMiniPlotGuides("SlicePeak", m_properties["PeakStart"], m_properties["PeakEnd"],
-          std::pair<double, double>(instDetails["peak-start"].toDouble(), instDetails["peak-end"].toDouble()));
-      setMiniPlotGuides("SliceBackground", m_properties["BackgroundStart"], m_properties["BackgroundEnd"],
-          std::pair<double, double>(instDetails["back-start"].toDouble(), instDetails["back-end"].toDouble()));
+      setRangeSelector("SlicePeak", m_properties["PeakStart"], m_properties["PeakEnd"],
+          qMakePair(instDetails["peak-start"].toDouble(), instDetails["peak-end"].toDouble()));
+      setRangeSelector("SliceBackground", m_properties["BackgroundStart"], m_properties["BackgroundEnd"],
+          qMakePair(instDetails["back-start"].toDouble(), instDetails["back-end"].toDouble()));
     }
   }
 
@@ -273,15 +258,15 @@ namespace CustomInterfaces
           Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
 
       const Mantid::MantidVec & dataX = input->readX(0);
-      std::pair<double, double> range(dataX.front(), dataX.back());
+      QPair<double, double> range(dataX.front(), dataX.back());
 
-      plotMiniPlot(input, 0, "SlicePlot");
-      setXAxisToCurve("SlicePlot", "SlicePlot");
+      m_uiForm.ppRawPlot->clear();
+      m_uiForm.ppRawPlot->addSpectrum("Raw", input, 0);
 
-      setPlotRange("SlicePeak", m_properties["PeakStart"], m_properties["PeakEnd"], range);
-      setPlotRange("SliceBackground", m_properties["BackgroundStart"], m_properties["BackgroundEnd"], range);
+      setPlotPropertyRange("SlicePeak", m_properties["PeakStart"], m_properties["PeakEnd"], range);
+      setPlotPropertyRange("SliceBackground", m_properties["BackgroundStart"], m_properties["BackgroundEnd"], range);
 
-      replot("SlicePlot");
+      m_uiForm.ppRawPlot->resizeX();
     }
     else
     {
@@ -367,7 +352,6 @@ namespace CustomInterfaces
     sliceAlg->setProperty("InputFiles", filenames.toStdString());
     sliceAlg->setProperty("SpectraRange", spectraRange);
     sliceAlg->setProperty("PeakRange", peakRange);
-    sliceAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
     sliceAlg->setProperty("Plot", false);
     sliceAlg->setProperty("Save", false);
     sliceAlg->setProperty("OutputNameSuffix", suffix.toStdString());
@@ -424,11 +408,9 @@ namespace CustomInterfaces
     m_pythonExportWsName = sliceWs->getName();
 
     // Plot result spectrum
-    plotMiniPlot(sliceWs, 0, "SlicePreviewPlot", "SlicePreviewCurve");
-
-    // Set X range to data range
-    setXAxisToCurve("SlicePreviewPlot", "SlicePreviewCurve");
-    m_plots["SlicePreviewPlot"]->replot();
+    m_uiForm.ppSlicePreview->clear();
+    m_uiForm.ppSlicePreview->addSpectrum("Slice", sliceWs, 0);
+    m_uiForm.ppSlicePreview->resizeX();
 
     // Ungroup the output workspace
     sliceOutputGroup->removeAll();

@@ -211,13 +211,12 @@ def PadArray(inarray,nfixed):                   #pad a list to specified size
     outarray +=[0]*padding
     return outarray
 
-def CheckAnalysers(in1WS,in2WS,Verbose):
+def CheckAnalysers(in1WS,in2WS):
     '''Check workspaces have identical analysers and reflections
 
     Args:
-      @param in1WS - first 2D workspace 
+      @param in1WS - first 2D workspace
       @param in2WS - second 2D workspace
-      @param Verbose - whether to log information regarding the analysers
 
     Returns:
       @return None
@@ -237,8 +236,7 @@ def CheckAnalysers(in1WS,in2WS,Verbose):
     elif r1 != r2:
         raise ValueError('Workspace '+in1WS+' and '+in2WS+' have different reflections')
     else:
-        if Verbose:
-            logger.notice('Analyser is '+a1+r1)
+        logger.information('Analyser is '+a1+r1)
 
 def CheckHistZero(inWS):
     '''Retrieves basic info on a worskspace
@@ -390,32 +388,32 @@ def plotParameters(ws, *param_names):
                 plotSpectra(ws, name, indicies)
 
 def convertToElasticQ(input_ws, output_ws=None):
-  """
+    """
     Helper function to convert the spectrum axis of a sample to ElasticQ.
 
     @param input_ws - the name of the workspace to convert from
     @param output_ws - the name to call the converted workspace
   """
 
-  if output_ws is None:
-    output_ws = input_ws
+    if output_ws is None:
+        output_ws = input_ws
 
-  axis = mtd[input_ws].getAxis(1)
-  if axis.isSpectra():
-      e_fixed = getEfixed(input_ws)
-      ConvertSpectrumAxis(input_ws,Target='ElasticQ',EMode='Indirect',EFixed=e_fixed,OutputWorkspace=output_ws)
+    axis = mtd[input_ws].getAxis(1)
+    if axis.isSpectra():
+        e_fixed = getEfixed(input_ws)
+        ConvertSpectrumAxis(input_ws,Target='ElasticQ',EMode='Indirect',EFixed=e_fixed,OutputWorkspace=output_ws)
 
-  elif axis.isNumeric():
+    elif axis.isNumeric():
       #check that units are Momentum Transfer
-      if axis.getUnit().unitID() != 'MomentumTransfer':
-          raise RuntimeError('Input must have axis values of Q')
+        if axis.getUnit().unitID() != 'MomentumTransfer':
+            raise RuntimeError('Input must have axis values of Q')
 
-      CloneWorkspace(input_ws, OutputWorkspace=output_ws)
-  else:
-    raise RuntimeError('Input workspace must have either spectra or numeric axis.')
+        CloneWorkspace(input_ws, OutputWorkspace=output_ws)
+    else:
+        raise RuntimeError('Input workspace must have either spectra or numeric axis.')
 
 def transposeFitParametersTable(params_table, output_table=None):
-  """
+    """
     Transpose the parameter table created from a multi domain Fit.
 
     This function will make the output consistent with PlotPeakByLogValue.
@@ -423,44 +421,44 @@ def transposeFitParametersTable(params_table, output_table=None):
     @param output_table - name to call the transposed table. If omitted,
             the output_table will be the same as the params_table
   """
-  params_table = mtd[params_table]
+    params_table = mtd[params_table]
 
-  table_ws = '__tmp_table_ws'
-  table_ws = CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
+    table_ws = '__tmp_table_ws'
+    table_ws = CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
 
-  param_names = params_table.column(0)[:-1] #-1 to remove cost function
-  param_values = params_table.column(1)[:-1]
-  param_errors = params_table.column(2)[:-1]
+    param_names = params_table.column(0)[:-1] #-1 to remove cost function
+    param_values = params_table.column(1)[:-1]
+    param_errors = params_table.column(2)[:-1]
 
   #find the number of parameters per function
-  func_index = param_names[0].split('.')[0]
-  num_params = 0
-  for i, name in enumerate(param_names):
-    if name.split('.')[0] != func_index:
-      num_params = i
-      break
+    func_index = param_names[0].split('.')[0]
+    num_params = 0
+    for i, name in enumerate(param_names):
+        if name.split('.')[0] != func_index:
+            num_params = i
+            break
 
   #create columns with parameter names for headers
-  column_names = ['.'.join(name.split('.')[1:]) for name in param_names[:num_params]]
-  column_error_names = [name + '_Err' for name in column_names]
-  column_names = zip(column_names, column_error_names)
-  table_ws.addColumn('double', 'axis-1')
-  for name, error_name in column_names:
-    table_ws.addColumn('double', name)
-    table_ws.addColumn('double', error_name)
+    column_names = ['.'.join(name.split('.')[1:]) for name in param_names[:num_params]]
+    column_error_names = [name + '_Err' for name in column_names]
+    column_names = zip(column_names, column_error_names)
+    table_ws.addColumn('double', 'axis-1')
+    for name, error_name in column_names:
+        table_ws.addColumn('double', name)
+        table_ws.addColumn('double', error_name)
 
   #output parameter values to table row
-  for i in xrange(0, params_table.rowCount()-1, num_params):
-    row_values = param_values[i:i+num_params]
-    row_errors = param_errors[i:i+num_params]
-    row = [value for pair in zip(row_values, row_errors) for value in pair]
-    row = [i/num_params] + row
-    table_ws.addRow(row)
+    for i in xrange(0, params_table.rowCount()-1, num_params):
+        row_values = param_values[i:i+num_params]
+        row_errors = param_errors[i:i+num_params]
+        row = [value for pair in zip(row_values, row_errors) for value in pair]
+        row = [i/num_params] + row
+        table_ws.addRow(row)
 
-  if output_table is None:
-    output_table = params_table.name()
+    if output_table is None:
+        output_table = params_table.name()
 
-  RenameWorkspace(table_ws.name(), OutputWorkspace=output_table)
+    RenameWorkspace(table_ws.name(), OutputWorkspace=output_table)
 
 
 def search_for_fit_params(suffix, table_ws):
@@ -474,7 +472,7 @@ def search_for_fit_params(suffix, table_ws):
 
 
 def convertParametersToWorkspace(params_table, x_column, param_names, output_name):
-  """
+    """
     Convert a parameter table output by PlotPeakByLogValue to a MatrixWorkspace.
 
     This will make a spectrum for each parameter name using the x_column vairable as the
@@ -487,57 +485,57 @@ def convertParametersToWorkspace(params_table, x_column, param_names, output_nam
   """
   #search for any parameters in the table with the given parameter names,
   #ignoring their function index and output them to a workspace
-  workspace_names = []
-  for param_name in param_names:
-    column_names = search_for_fit_params(param_name, params_table)
-    column_error_names = search_for_fit_params(param_name+'_Err', params_table)
-    param_workspaces = []
-    for name, error_name in zip(column_names, column_error_names):
-      ConvertTableToMatrixWorkspace(params_table, x_column, name, error_name, OutputWorkspace=name)
-      param_workspaces.append(name)
-    workspace_names.append(param_workspaces)
+    workspace_names = []
+    for param_name in param_names:
+        column_names = search_for_fit_params(param_name, params_table)
+        column_error_names = search_for_fit_params(param_name+'_Err', params_table)
+        param_workspaces = []
+        for name, error_name in zip(column_names, column_error_names):
+            ConvertTableToMatrixWorkspace(params_table, x_column, name, error_name, OutputWorkspace=name)
+            param_workspaces.append(name)
+        workspace_names.append(param_workspaces)
 
   #transpose list of workspaces, ignoring unequal length of lists
   #this handles the case where a parameter occurs only once in the whole workspace
-  workspace_names = map(list, itertools.izip_longest(*workspace_names))
-  workspace_names = [filter(None, sublist) for sublist in workspace_names]
+    workspace_names = map(list, itertools.izip_longest(*workspace_names))
+    workspace_names = [filter(None, sublist) for sublist in workspace_names]
 
   #join all the parameters for each peak into a single workspace per peak
-  temp_workspaces = []
-  for peak_params in workspace_names:
-    temp_peak_ws = peak_params[0]
-    for param_ws in peak_params[1:]:
-      ConjoinWorkspaces(temp_peak_ws, param_ws, False)
-    temp_workspaces.append(temp_peak_ws)
+    temp_workspaces = []
+    for peak_params in workspace_names:
+        temp_peak_ws = peak_params[0]
+        for param_ws in peak_params[1:]:
+            ConjoinWorkspaces(temp_peak_ws, param_ws, False)
+        temp_workspaces.append(temp_peak_ws)
 
   #join all peaks into a single workspace
-  temp_workspace = temp_workspaces[0]
-  for temp_ws in temp_workspaces[1:]:
-    ConjoinWorkspaces(temp_workspace, temp_peak_ws, False)
+    temp_workspace = temp_workspaces[0]
+    for temp_ws in temp_workspaces[1:]:
+        ConjoinWorkspaces(temp_workspace, temp_peak_ws, False)
 
-  RenameWorkspace(temp_workspace, OutputWorkspace=output_name)
+    RenameWorkspace(temp_workspace, OutputWorkspace=output_name)
 
   #replace axis on workspaces with text axis
-  axis = TextAxis.create(mtd[output_name].getNumberHistograms())
-  workspace_names = [name for sublist in workspace_names for name in sublist]
-  for i, name in enumerate(workspace_names):
-    axis.setLabel(i, name)
-  mtd[output_name].replaceAxis(1, axis)
+    axis = TextAxis.create(mtd[output_name].getNumberHistograms())
+    workspace_names = [name for sublist in workspace_names for name in sublist]
+    for i, name in enumerate(workspace_names):
+        axis.setLabel(i, name)
+    mtd[output_name].replaceAxis(1, axis)
 
 def addSampleLogs(ws, sample_logs):
-  """
+    """
     Add a dictionary of logs to a workspace.
 
     The type of the log is inferred by the type of the value passed to the log.
     @param ws - workspace to add logs too.
     @param sample_logs - dictionary of logs to append to the workspace.
   """
-  for key, value in sample_logs.iteritems():
-    if isinstance(value, bool):
-      log_type = 'String'
-    elif isinstance(value, (int, long, float)):
-      log_type = 'Number'
-    else:
-      log_type = 'String'
+    for key, value in sample_logs.iteritems():
+        if isinstance(value, bool):
+            log_type = 'String'
+        elif isinstance(value, (int, long, float)):
+            log_type = 'Number'
+        else:
+            log_type = 'String'
 
-    AddSampleLog(Workspace=ws, LogName=key, LogType=log_type, LogText=str(value))
+        AddSampleLog(Workspace=ws, LogName=key, LogType=log_type, LogText=str(value))

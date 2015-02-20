@@ -42,7 +42,7 @@ class ExportExperimentLog(PythonAlgorithm):
                 "With this option, the posfix of the output file is .csv automatically. "
         self.declareProperty("FileFormat", "tab", mantid.kernel.StringListValidator(fileformates), des)
 
-        self.declareProperty("OrderByTitle", "", "Log file will be ordered by the value of this title from low to high.") 
+        self.declareProperty("OrderByTitle", "", "Log file will be ordered by the value of this title from low to high.")
         self.declareProperty("RemoveDuplicateRecord", False, "Coupled with OrderByTitle, duplicated record will be removed.")
 
         overrideprop = StringArrayProperty("OverrideLogValue", values=[], direction=Direction.Input)
@@ -160,7 +160,7 @@ class ExportExperimentLog(PythonAlgorithm):
         self._orderRecord = False
         self._titleToOrder = None
         if self._filemode != "new":
-            ordertitle = self.getProperty("OrderByTitle").value 
+            ordertitle = self.getProperty("OrderByTitle").value
             if ordertitle in self._headerTitles:
                 self._orderRecord = True
                 self._removeDupRecord = self.getProperty("RemoveDuplicateRecord").value
@@ -237,7 +237,7 @@ class ExportExperimentLog(PythonAlgorithm):
         if len(titles) != len(self._headerTitles):
             if len(self._headerTitles) == 0:
                 self._headerTitles = titles[:]
-            else: 
+            else:
                 same = False
         for ititle in xrange(len(titles)):
             title1 = titles[ititle]
@@ -290,10 +290,10 @@ class ExportExperimentLog(PythonAlgorithm):
             skip = True
         else:
             skip = False
-        
+
         headertitle = None
         for il in xrange(len(self._sampleLogNames)):
-            if skip is False: 
+            if skip is False:
                 headertitle = self._headerTitles[il]
             if headertitle is not None and headertitle in self._ovrdTitleValueDict.keys():
                 # overriden
@@ -321,7 +321,7 @@ class ExportExperimentLog(PythonAlgorithm):
         return
 
     def _orderRecordFile(self):
-        """ Check and order (if necessary) record file 
+        """ Check and order (if necessary) record file
         by value of specified log by title
         """
         self.log().debug("Order Record File!")
@@ -347,12 +347,12 @@ class ExportExperimentLog(PythonAlgorithm):
                 titlelines.append(line)
             else:
                 # value line
-                try: 
+                try:
                     keyvalue = line.split(self._valuesep)[ilog].strip()
                 except IndexError:
                     self.log().error("Order record failed.")
                     return
-                if linedict.has_key(keyvalue) is False: 
+                if linedict.has_key(keyvalue) is False:
                     linedict[keyvalue] = []
                 linedict[keyvalue].append(line)
                 totnumlines += 1
@@ -363,7 +363,7 @@ class ExportExperimentLog(PythonAlgorithm):
         if linedict.keys() != sorted(linedict.keys()):
             # Re-write file
             wbuf = ""
-            
+
             # title line
             for line in titlelines:
                 wbuf += line
@@ -385,8 +385,8 @@ class ExportExperimentLog(PythonAlgorithm):
                     numlines += 1
 
                 else:
-                    # Consider all! 
-                    for line in linedict[ivalue]: 
+                    # Consider all!
+                    for line in linedict[ivalue]:
                         wbuf += line
                         # Add extra \n in case reordered
                         if numlines != totnumlines-1 and wbuf[-1] != '\n':

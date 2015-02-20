@@ -1,11 +1,9 @@
-import os
+import os,sys,inspect
 #os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
-import inspect
 import numpy as np
-import sys
 from Direct.PropertyManager import PropertyManager
 from Direct.RunDescriptor   import RunDescriptor
 
@@ -166,6 +164,18 @@ class RunDescriptorTest(unittest.TestCase):
 
         ws1 = PropertyManager.sample_run.get_workspace()
         self.assertEqual(ws1.name(),ws_name)
+        #
+        PropertyManager.sample_run.set_action_suffix('_modified')
+        PropertyManager.sample_run.synchronize_ws(ws1)
+
+        ws1 = PropertyManager.sample_run.get_workspace()
+        self.assertTrue(str.find(ws1.name(),'_modified')>0)
+
+        propman.sample_run = ws1
+        self.assertEqual(ws1.name(),PropertyManager.sample_run._ws_name)
+
+        ws_name = PropertyManager.sample_run.get_ws_name()
+
 
         # if no workspace is available, attempt to get workspace name fails
         DeleteWorkspace(ws_name)
@@ -175,6 +185,8 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertFalse(ws_name+'_monitors' in mtd)
         # name of empty property workspace 
         self.assertEqual(PropertyManager.sample_run.get_ws_name(),'SR_')
+
+
 
     def test_sum_runs(self):
         propman  = self.prop_man
@@ -283,14 +295,42 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertEqual(runs[0],10011)
         self.assertFalse(propman.sum_runs)
 
+    def test_chop_ws_part(self):
+        propman  = self.prop_man
+        ws=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
+                                                     XMin=2000, XMax=20000, BinWidth=1)
+
+        ws_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
+                                                    XMin=2000, XMax=20000, BinWidth=1)
+
+        propman.sample_run = ws
+
+        ws1 = PropertyManager.sample_run.chop_ws_part(None,(2000,1,5000),False,1,2)
+
+        rez=CheckWorkspacesMatch('SR_ws',ws1)
+        self.assertEqual(rez,'Success!')
+
+        wsc=PropertyManager.sample_run.get_workspace()
+        x =wsc.readX(0)
+        self.assertAlmostEqual(x[0],2000)
+        self.assertAlmostEqual(x[-1],5000)
+
+        self.assertEqual(wsc.name(),'SR_#1/2#ws')
+        self.assertTrue('SR_#1/2#ws_monitors' in mtd)
 
 
 
+        ws1 = PropertyManager.sample_run.chop_ws_part(ws1,(10000,100,20000),True,2,2)
+        x =ws1.readX(0)
+        self.assertAlmostEqual(x[0],10000)
+        self.assertAlmostEqual(x[-1],20000)
 
+        self.assertEqual(ws1.name(),'SR_#2/2#ws')
+        self.assertTrue('SR_#2/2#ws_monitors' in mtd)
 
+        api.AnalysisDataService.clear()
 
-
-
+       
 
 if __name__=="__main__":
     unittest.main()
