@@ -156,7 +156,7 @@ public:
   void test_castAlgorithm()
   {
     // can create
-    boost::shared_ptr<MockedSCARFTomo> a = NULL;
+    boost::shared_ptr<MockedSCARFTomo> a;
     TS_ASSERT(a = boost::make_shared<MockedSCARFTomo>());
     // can cast to inherited interfaces and base classes
 
@@ -584,7 +584,9 @@ public:
 private:
   std::string goodUsername;
   std::string goodPassword;
-  const std::string SCARFName = "SCARF@STFC";
+  static const std::string SCARFName;
 };
+
+const std::string SCARFTomoReconstructionTest::SCARFName = "SCARF@STFC";
 
 #endif // MANTID_REMOTEALGORITHMS_SCARFTOMORECONSTRUCTION_H_

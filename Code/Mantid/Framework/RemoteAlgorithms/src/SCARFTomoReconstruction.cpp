@@ -1052,7 +1052,8 @@ std::string SCARFTomoReconstruction::buildUploadBody(const std::string &boundary
   body += "\r\n";
 
   // BLOCK: the file
-  std::ifstream fileStream(filename, std::ios_base::binary);
+  std::ifstream fileStream(filename.c_str(), std::ios_base::binary |
+                           std::ios_base::in);
   Poco::StreamCopier::copyToString(fileStream, body);
 
   // BLOCK: end like this:
@@ -1113,7 +1114,8 @@ void SCARFTomoReconstruction::genOutputStatusInfo(const std::string &resp,
   std::vector<std::string> jobStatus;
   std::vector<std::string> jobCommands;
   for (size_t i = 0; i < n; i++) {
-    Poco::XML::Element *el = static_cast<Poco::XML::Element *>(jobs->item(i));
+    Poco::XML::Element *el = static_cast<Poco::XML::Element *>(jobs->item(
+        static_cast<unsigned long>(i)));
     if (!el)
       throw std::runtime_error("Error while trying to parse job with index " +
                                boost::lexical_cast<std::string>(i) +
@@ -1311,7 +1313,7 @@ void SCARFTomoReconstruction::getOneJobFile(const std::string &jobId,
           std::endl;
       }
       std::string outName = checkDownloadOutputFile(localPath, name);
-      std::ofstream file(outName, std::ios_base::binary);
+      std::ofstream file(outName. c_str(), std::ios_base::binary | std::ios_base::out);
       Poco::StreamCopier::copyStream(ss, file);
       g_log.notice() << "Downloaded remote file " << outName << " into " <<
         localPath << "." << std::endl;
