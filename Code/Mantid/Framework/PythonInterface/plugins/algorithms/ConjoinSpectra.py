@@ -1,7 +1,7 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
-import os
 
 class ConjoinSpectra(PythonAlgorithm):
     """
@@ -61,9 +61,9 @@ class ConjoinSpectra(PythonAlgorithm):
             ExtractSingleSpectrum(InputWorkspace=wsName,OutputWorkspace=wsTemp,WorkspaceIndex=wsIndex)
 
             labelString =""
-            if (labelUsing != ""):
+            if labelUsing != "":
                 labelString = self.GetLogValue(mtd[wsName.strip()],labelUsing,labelValue)
-            if (labelString == ""):
+            if labelString == "":
                 labelString =wsName+"_"+str(wsIndex)
             ta.setLabel(loopIndex,labelString)
             loopIndex += 1
@@ -88,13 +88,13 @@ class ConjoinSpectra(PythonAlgorithm):
             prop = run.getProperty(labelUsing)
             try:
                 stats = prop.getStatistics()
-                if (labelValue == "Mean"):
+                if labelValue == "Mean":
                     labelString = str(stats.mean)
-                elif (labelValue == "Median"):
+                elif labelValue == "Median":
                     labelString = str(stats.median)
-                elif (labelValue == "Maximum"):
+                elif labelValue == "Maximum":
                     labelString = str(stats.maximum)
-                elif (labelValue == "Minimum"):
+                elif labelValue == "Minimum":
                     labelString = str(stats.minimum)
                 else:
                     labelString =  str(prop.value[0])

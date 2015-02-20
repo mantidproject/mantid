@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     List of user commands.
 """

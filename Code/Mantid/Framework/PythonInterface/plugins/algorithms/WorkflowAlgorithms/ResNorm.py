@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import StringListValidator, StringMandatoryValidator
 from mantid.simpleapi import *

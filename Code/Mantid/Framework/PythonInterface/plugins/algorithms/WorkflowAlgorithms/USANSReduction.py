@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -21,7 +22,7 @@ class USANSReduction(PythonAlgorithm):
     def PyInit(self):
         arrvalidator = IntArrayBoundedValidator()
         arrvalidator.setLower(0)
-        self.declareProperty(IntArrayProperty("RunNumbers", values=[0], validator=arrvalidator,
+        self.declareProperty(IntArrayProperty("RunNumbers", values=[0], validator=arrvalidator,\
                              direction=Direction.Input), "Runs to reduce")
         self.declareProperty("EmptyRun", '', "Run number for the empty run")
 
@@ -99,11 +100,11 @@ class USANSReduction(PythonAlgorithm):
                         is_scan = True
 
             # Append the info for when we do the reduction
-            self.data_files.append(self.DataFile(workspace=ws_name,
-                                            monitor=ws_name+'_monitors',
-                                            empty='__empty',
-                                            empty_monitor='__empty_monitors',
-                                            is_scan=is_scan,
+            self.data_files.append(self.DataFile(workspace=ws_name,\
+                                            monitor=ws_name+'_monitors',\
+                                            empty='__empty',\
+                                            empty_monitor='__empty_monitors',\
+                                            is_scan=is_scan,\
                                             max_index=max_index))
             total_points += max_index
 
@@ -271,9 +272,9 @@ class USANSReduction(PythonAlgorithm):
                                 OutputWorkspace='transmission')
 
         # Scattering signal
-        __signal_summed = _execute('SumSpectra', InputWorkspace=sample,
-                                     StartWorkspaceIndex=0,
-                                     EndWorkspaceIndex=nspecs/2,
+        __signal_summed = _execute('SumSpectra', InputWorkspace=sample,\
+                                     StartWorkspaceIndex=0,\
+                                     EndWorkspaceIndex=nspecs/2,\
                                      OutputWorkspace='__signal_summed')
         __point = _execute('CropWorkspace', InputWorkspace=__signal_summed,
                            XMin=tof_min, XMax=tof_max,

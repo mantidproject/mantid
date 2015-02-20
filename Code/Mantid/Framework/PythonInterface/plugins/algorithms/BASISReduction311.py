@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -33,18 +34,18 @@ class BASISReduction311(PythonAlgorithm):
                              "Stop monitor normalization")
         self.declareProperty("NormRunNumbers", "", "Normalization run numbers")
         arrVal = FloatArrayLengthValidator(2)
-        self.declareProperty(FloatArrayProperty("NormWavelengthRange", DEFAULT_RANGE,
-						arrVal, direction=Direction.Input),
+        self.declareProperty(FloatArrayProperty("NormWavelengthRange", DEFAULT_RANGE,\
+						arrVal, direction=Direction.Input),\
 			            "Wavelength range for normalization. default:(6.24A, 6.30A)")
         self.declareProperty(FloatArrayProperty("EnergyBins", DEFAULT_BINS,
-                                                direction=Direction.Input),
+                                                direction=Direction.Input),\
                                                 "Energy transfer binning scheme (in ueV)")
         self.declareProperty(FloatArrayProperty("MomentumTransferBins",
                                                 DEFAULT_BINS,
-                                                direction=Direction.Input),
+                                                direction=Direction.Input),\
                                                 "Momentum transfer binning scheme")
-        self.declareProperty(FileProperty(name="MaskFile", defaultValue="",
-                                            action=FileAction.OptionalLoad, extensions=['.xml']),
+        self.declareProperty(FileProperty(name="MaskFile", defaultValue="",\
+                                            action=FileAction.OptionalLoad, extensions=['.xml']),\
                                             "Directory location for standard masking and grouping files.")
         grouping_type = ["None", "Low-Resolution", "By-Tube"]
         self.declareProperty("GroupDetectors", "None",
@@ -62,7 +63,7 @@ class BASISReduction311(PythonAlgorithm):
         self._groupDetOpt = self.getProperty("GroupDetectors").value
 
         datasearch = config["datasearch.searcharchive"]
-        if (datasearch != "On"):
+        if datasearch != "On":
             config["datasearch.searcharchive"] = "On"
 
         # Handle masking file override if necessary
@@ -100,9 +101,9 @@ class BASISReduction311(PythonAlgorithm):
                 self._sumRuns(norm_set, self._normWs, self._normMonWs, extra_extension)
                 self._calibData(self._normWs, self._normMonWs)
 
-            api.Rebin(InputWorkspace=self._normWs, OutputWorkspace=self._normWs,
+            api.Rebin(InputWorkspace=self._normWs, OutputWorkspace=self._normWs,\
 		            Params=self._normRange)
-            api.FindDetectorsOutsideLimits(InputWorkspace=self._normWs,
+            api.FindDetectorsOutsideLimits(InputWorkspace=self._normWs,\
 			        OutputWorkspace="BASIS_NORM_MASK")
 
         self._run_list = self._getRuns(self.getProperty("RunNumbers").value)
@@ -116,9 +117,9 @@ class BASISReduction311(PythonAlgorithm):
             self._calibData(self._samWs, self._samMonWs)
 
             if self._doNorm:
-                api.MaskDetectors(Workspace=self._samWs,
+                api.MaskDetectors(Workspace=self._samWs,\
 	                MaskedWorkspace='BASIS_NORM_MASK')
-                api.Divide(LHSWorkspace=self._samWs, RHSWorkspace=self._normWs,
+                api.Divide(LHSWorkspace=self._samWs, RHSWorkspace=self._normWs,\
 		    	    OutputWorkspace=self._samWs)
 
             api.ConvertUnits(InputWorkspace=self._samWs,
@@ -220,7 +221,7 @@ class BASISReduction311(PythonAlgorithm):
         api.MaskDetectors(Workspace=sam_ws,
                           DetectorList=self._dMask)
                           #MaskedWorkspace='BASIS_MASK')
-        api.ModeratorTzeroLinear(InputWorkspace=sam_ws,
+        api.ModeratorTzeroLinear(InputWorkspace=sam_ws,\
                            OutputWorkspace=sam_ws)
         api.LoadParameterFile(Workspace=sam_ws,
                               Filename=os.path.join(DEFAULT_CONFIG_DIR, 'BASIS_silicon_311_Parameters.xml'))
@@ -229,7 +230,7 @@ class BASISReduction311(PythonAlgorithm):
                          Target='Wavelength', EMode='Indirect')
 
         if not self._noMonNorm:
-            api.ModeratorTzeroLinear(InputWorkspace=mon_ws,
+            api.ModeratorTzeroLinear(InputWorkspace=mon_ws,\
                                OutputWorkspace=mon_ws)
             api.Rebin(InputWorkspace=mon_ws,
                       OutputWorkspace=mon_ws, Params='10')

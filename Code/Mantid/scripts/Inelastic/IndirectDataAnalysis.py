@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from IndirectImport import import_mantidplot
 MTD_PLOT = import_mantidplot()
 from IndirectCommon import *
@@ -591,7 +592,7 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False):
     return CorrectedWS
 
 
-def abscorFeeder(sample, container, geom, useCor, corrections, RebinCan=False, ScaleOrNotToScale=False, factor=1, Save=False,
+def abscorFeeder(sample, container, geom, useCor, corrections, RebinCan=False, ScaleOrNotToScale=False, factor=1, Save=False,\
         PlotResult='None', PlotContrib=False):
     '''
     Load up the necessary files and then passes them into the main
@@ -663,7 +664,7 @@ def abscorFeeder(sample, container, geom, useCor, corrections, RebinCan=False, S
             subractCanWorkspace(sample, scaled_container, sub_result, rebin_can=RebinCan)
 
             if not diffraction_run:
-                ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw',
+                ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw',\
                     Target='ElasticQ', EMode='Indirect', EFixed=efixed)
 
             red_ws_name = sub_result + '_red'

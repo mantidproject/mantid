@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """ File contains collection of Descriptors used to define complex
     properties in NonIDF_Properties and PropertyManager classes
 """
@@ -163,16 +164,16 @@ class SumRuns(PropDescriptor):
                    format(ind + 2,num_to_load,run_num))
             term_name = '{0}_ADDITIVE_#{1}/{2}'.format(inst_name,ind + 2,num_to_load)#
 
-            wsp = self._sample_run.load_file(inst_name,term_name,False,
+            wsp = self._sample_run.load_file(inst_name,term_name,False,\
                                             monitors_with_ws,False,file_hint=file_h)
 
             wsp_name = wsp.name()
             wsp_mon_name = wsp_name + '_monitors'
-            Plus(LHSWorkspace=sum_ws_name,RHSWorkspace=wsp_name,
+            Plus(LHSWorkspace=sum_ws_name,RHSWorkspace=wsp_name,\
                 OutputWorkspace=sum_ws_name,ClearRHSWorkspace=True)
             AddedRunNumbers+=',{0}'.format(run_num)
             if not monitors_with_ws:
-                Plus(LHSWorkspace=sum_mon_name,RHSWorkspace=wsp_mon_name,
+                Plus(LHSWorkspace=sum_mon_name,RHSWorkspace=wsp_mon_name,\
                    OutputWorkspace=sum_mon_name,ClearRHSWorkspace=True)
             if wsp_name in mtd:
                 DeleteWorkspace(wsp_name)
@@ -370,7 +371,7 @@ class EnergyBins(PropDescriptor):
                 else:
                     if instance:
                         instance.log("*** WARNING! Got energy_bins specified as absolute values in multirep mode.\n"\
-                                "             Will normalize these values by max value and treat as relative values ",
+                                "             Will normalize these values by max value and treat as relative values ",\
                                 "warning")
                     mult = self._range / self._energy_bins[2]
                     rez = self._calc_relative_range(ei,mult)
@@ -383,7 +384,7 @@ class EnergyBins(PropDescriptor):
             else:
                 if instance:
                     instance.log("*** WARNING! Requested maximum binning range exceeds incident energy!\n"\
-                           "             Will normalize binning range by max value and treat as relative range",
+                           "             Will normalize binning range by max value and treat as relative range",\
                                 "warning")
                     mult = self._range / self._energy_bins[2]
                     ei = self._incident_energy.get_current()
@@ -392,9 +393,9 @@ class EnergyBins(PropDescriptor):
     def is_range_valid(self):
         """Method verifies if binning range is consistent with incident energy """
         if self._incident_energy.multirep_mode():
-            return (self._energy_bins[2] <= self._range)
+            return self._energy_bins[2] <= self._range
         else:
-            return (self._energy_bins[2] <= self._incident_energy.get_current())
+            return self._energy_bins[2] <= self._incident_energy.get_current()
 
     def _calc_relative_range(self,ei,range_mult=1):
         """ """
@@ -520,7 +521,7 @@ class mon2NormalizationEnergyRange(PropDescriptor):
             val = self._parce_string2list(val)
             self.__set__(instance,val)
         else:
-            raise KeyError('mon2_norm_energy_range needs to be initialized by two values.\n'
+            raise KeyError('mon2_norm_energy_range needs to be initialized by two values.\n'\
                           'Trying to assign value {0} of unknown type {1}'.format(val,type(val)))
     #
     def _check_range(self,val,instance):
@@ -623,7 +624,7 @@ class MapMaskFile(PropDescriptor):
     def __init__(self,file_ext,doc_string=None):
         self._file_name = None
         self._file_ext = file_ext
-        if not(doc_string is None):
+        if not doc_string is None:
             self.__doc__ = doc_string
 
     def __get__(self,instance,type=None):
@@ -635,7 +636,7 @@ class MapMaskFile(PropDescriptor):
     def __set__(self,instance,value):
         if value != None:
             fileName, fileExtension = os.path.splitext(value)
-            if (not fileExtension):
+            if not fileExtension:
                 value = value + self._file_ext
         self._file_name = value
 
@@ -654,7 +655,7 @@ class HardMaskPlus(prop_helpers.ComplexProperty):
     def __set__(self,instance,value):
         if value != None:
             fileName, fileExtension = os.path.splitext(value)
-            if (not fileExtension):
+            if not fileExtension:
                 value = value + '.msk'
             instance.hard_mask_file = value
             prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[False,True])
@@ -727,7 +728,6 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
         else:
             self._rel_range = True
             prop_helpers.ComplexProperty.__init__(self,['monovan_lo_frac','monovan_hi_frac'])
-        pass
 
     def __get__(self,instance,owner):
 
@@ -756,7 +756,7 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
         else:
             tDict = instance.__dict__
         if value is None:
-            if (not self._rel_range):
+            if not self._rel_range:
                 self._rel_range = True
                 self._other_prop = ['monovan_lo_frac','monovan_hi_frac']
         else:
@@ -858,7 +858,7 @@ class SaveFormat(PropDescriptor):
             else:
                 value = subformats[0]
 
-                if not(value in SaveFormat.save_formats):
+                if not value in SaveFormat.save_formats:
                     instance.log("Trying to set saving in unknown format: \"" + str(value) + "\" No saving will occur for this format")
                     return
         else:

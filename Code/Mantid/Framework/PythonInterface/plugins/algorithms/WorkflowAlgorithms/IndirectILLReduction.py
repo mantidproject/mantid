@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.simpleapi import *
 from mantid.kernel import StringListValidator, Direction
 from mantid.api import DataProcessorAlgorithm, PropertyMode, AlgorithmFactory, \

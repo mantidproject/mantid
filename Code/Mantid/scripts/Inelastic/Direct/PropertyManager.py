@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from NonIDF_Properties import *
 
 from collections import OrderedDict
@@ -156,7 +157,7 @@ class PropertyManager(NonIDF_Properties):
         # replace common substitutions for string value
         if type(val) is str :
             val1 = val.lower()
-            if (val1 == 'none' or len(val1) == 0):
+            if val1 == 'none' or len(val1) == 0:
                 val = None
             if val1 == 'default':
                 val = self.getDefaultParameterValue(name0)
@@ -261,16 +262,16 @@ class PropertyManager(NonIDF_Properties):
             with some parameters missing.
         """
         # if sum is in parameters one needs to set it first
-        if 'sum_runs' in kwargs and not (kwargs['sum_runs'] is None):
+        if 'sum_runs' in kwargs and not kwargs['sum_runs'] is None:
             self.sum_runs = kwargs['sum_runs']
             del kwargs['sum_runs']
-        if 'sum' in kwargs and not (kwargs['sum'] is None):
+        if 'sum' in kwargs and not kwargs['sum'] is None:
             self.sum_runs = kwargs['sum']
             del kwargs['sum']
 
 
         for par_name,value in kwargs.items() :
-            if not(value is None):
+            if not value is None:
                 setattr(self,par_name,value)
 
 
@@ -366,7 +367,7 @@ class PropertyManager(NonIDF_Properties):
         param_list = prop_helpers.get_default_idf_param_list(pInstrument)
         # remove old changes which are not related to IDF (not to reapply it again)
         for prop_name in old_changes:
-            if not (prop_name in param_list):
+            if not prop_name in param_list:
                 try:
                     dependencies = getattr(PropertyManager,prop_name).dependencies()
                 except:
@@ -391,7 +392,7 @@ class PropertyManager(NonIDF_Properties):
         # Assignment to descriptors should accept the form, descriptor is written in IDF
         changed_descriptors = set()
         for key,val in descr_dict.iteritems():
-            if not (key in old_changes_list):
+            if not key in old_changes_list:
                 try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains
                    # properties, not present in recent IDF.
                     cur_val = getattr(self,key)
@@ -429,7 +430,7 @@ class PropertyManager(NonIDF_Properties):
 
         # Walk through the complex properties first and then through simple properties
         for key,val in sorted_param.iteritems():
-            if not(key in old_changes_list):
+            if not key in old_changes_list:
                 # complex properties change through their dependencies so we are setting them first
                 if isinstance(val,prop_helpers.ComplexProperty):
                     public_name = key[1:]
@@ -512,7 +513,7 @@ class PropertyManager(NonIDF_Properties):
 
         base_file_missing = check_files_list(self.__file_properties)
         abs_file_missing=False
-        if not (monovan_run is None):
+        if not monovan_run is None:
             abs_file_missing = check_files_list(self.__abs_norm_file_properties)
 
         if  base_file_missing or abs_file_missing:
@@ -580,7 +581,7 @@ class PropertyManager(NonIDF_Properties):
 
         save_dir = config.getString('defaultsave.directory')
         self.log("****************************************************************",log_level)
-        if self.monovan_run != None and not('van_mass' in changed_Keys):                                   # This output is
+        if self.monovan_run != None and not 'van_mass' in changed_Keys:                                   # This output is
             self.log("*** Monochromatic vanadium mass used : {0} ".format(self.van_mass),log_level) # Adroja request from may 2014
       #
         self.log("*** By default results are saved into: {0}".format(save_dir),log_level)

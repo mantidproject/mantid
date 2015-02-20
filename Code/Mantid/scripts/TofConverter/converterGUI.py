@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from Ui_MainWindow import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui
 import math
