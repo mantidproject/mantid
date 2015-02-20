@@ -137,7 +137,7 @@ class ConvertToWavelength(object):
         _monitor_ws: A workspace of monitors
         """
         # Sanity check inputs.
-        if(wavelength_min >= wavelength_max):
+        if wavelength_min >= wavelength_max:
             raise ValueError("Wavelength_min must be < wavelength_max min: %s, max: %s" % (wavelength_min, wavelength_max))
 
         if correct_monitor and not all((bg_min, bg_max)):

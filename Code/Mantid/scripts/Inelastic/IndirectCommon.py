@@ -106,7 +106,7 @@ def checkUnitIs(ws, unit_id, axis_index=0):
     """
     axis = mtd[ws].getAxis(axis_index)
     unit = axis.getUnit()
-    return (unit.unitID() == unit_id)
+    return unit.unitID() == unit_id
 
 # Get the default save directory and check it's valid
 def getDefaultWorkingDirectory():
@@ -138,7 +138,7 @@ def createQaxis(inputWS):
         if not axis.isNumeric():
             msg += 'Input workspace must have either spectra or numeric axis.'
             raise ValueError(msg)
-        if ( axis.getUnit().unitID() != 'MomentumTransfer' ):
+        if  axis.getUnit().unitID() != 'MomentumTransfer' :
             msg += 'Input must have axis values of Q'
             raise ValueError(msg)
         for i in range(0, nHist):

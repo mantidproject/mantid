@@ -433,7 +433,7 @@ def van_var(*args):
 #!  chopper:
     tsqchp,ifail=tchop(omega, ei)
     ifail
-    if (ifail <> 0):
+    if ifail <> 0:
         tsqchp = 0.0
 
 
@@ -468,7 +468,7 @@ def tikeda(S1,S2,B1,B2,EMOD,ei):
     SIG=math.sqrt( (S1*S1) + ((S2*S2*81.8048)/ei) )
     A = 4.37392e-4 * SIG * math.sqrt(ei)
     for j in range(len(ei)):
-        if (ei[j] > 130.0):
+        if ei[j] > 130.0:
             B[j]=B2
         else:
             B[j]=B1
@@ -509,7 +509,7 @@ def tchop(omega,ei):
     w=omega
     ei=ei
 
-    if (p == 0.00 and R == 0.00 and rho == 0.00):
+    if p == 0.00 and R == 0.00 and rho == 0.00:
         ierr=1
         tausqr = 0.00
 
@@ -523,12 +523,12 @@ def tchop(omega,ei):
 #! -------------------------------------
     #for j in range(len(ei)):
     groot=0
-    if (gammm >= 4.00):
+    if gammm >= 4.00:
         ierr=1
         tausqr=0.00
     else:
         ierr=0
-    if (gammm <= 1.00):
+    if gammm <= 1.00:
         gsqr=(1.00-(gammm**2)**2 /10.00) / (1.00-(gammm**2)/6.00)
     else:
         groot=math.sqrt(gammm)
@@ -772,7 +772,7 @@ def achop(ei,omega):
 
     #for j in range(numpy.size(ei)):
     groot=0
-    if (gamm >= 4.00):
+    if gamm >= 4.00:
         f1=0
         print 'no transmission at ', ei, 'meV at ',omega/(2*math.pi), 'Hz'
     else:

@@ -1,5 +1,4 @@
 #pylint: disable=invalid-name
-import math
 import numpy
 
 from Ui_MainWindow import Ui_MainWindow #import line for the UI python class
@@ -7,11 +6,7 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-import matplotlib
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-from matplotlib.figure import Figure
-from matplotlib.pyplot import gcf, setp
+from matplotlib.pyplot import setp
 
 import mantid
 import mantid.simpleapi as api
@@ -1027,11 +1022,11 @@ class MainWindow(QtGui.QMainWindow):
         print "Input workspace = ", str(self._dataWS)
          END DB """
 
-        splitws, infows = api.GenerateEventsFilter(
-                InputWorkspace      = self._dataWS,
-                UnitOfTime          = "Seconds",
-                TitleOfSplitters    = title,
-                OutputWorkspace     = splitwsname,
+        splitws, infows = api.GenerateEventsFilter(\
+                InputWorkspace      = self._dataWS,\
+                UnitOfTime          = "Seconds",\
+                TitleOfSplitters    = title,\
+                OutputWorkspace     = splitwsname,\
                 InformationWorkspace = splitinfowsname, **kwargs)
 
         self.splitWksp(splitws, infows)
@@ -1081,12 +1076,12 @@ class MainWindow(QtGui.QMainWindow):
 
         title = str(self.ui.lineEdit_title.text())
 
-        splitws, infows = api.GenerateEventsFilter(
-                InputWorkspace      = self._dataWS,
-                UnitOfTime          = "Seconds",
-                TitleOfSplitters    = title,
-                OutputWorkspace     = splitwsname,
-                LogName             = samplelog,
+        splitws, infows = api.GenerateEventsFilter(\
+                InputWorkspace      = self._dataWS,\
+                UnitOfTime          = "Seconds",\
+                TitleOfSplitters    = title,\
+                OutputWorkspace     = splitwsname,\
+                LogName             = samplelog,\
                 InformationWorkspace = splitinfowsname, **kwargs)
 
         try:
@@ -1121,17 +1116,17 @@ class MainWindow(QtGui.QMainWindow):
             outbasewsname = "tempsplitted"
             self.ui.lineEdit_outwsname.setText(outbasewsname)
 
-        api.FilterEvents(
-                InputWorkspace          = self._dataWS,
-                SplitterWorkspace       = splitws,
-                InformationWorkspace    = infows,
-                OutputWorkspaceBaseName = outbasewsname,
-                GroupWorkspaces         = dogroupws,
-                FilterByPulseTime       = filterbypulse,
-                CorrectionToSample      = corr2sample,
-                SpectrumWithoutDetector = how2skip,
-                SplitSampleLogs         = splitsamplelog,
-                OutputWorkspaceIndexedFrom1     = startfrom1,
+        api.FilterEvents(\
+                InputWorkspace          = self._dataWS,\
+                SplitterWorkspace       = splitws,\
+                InformationWorkspace    = infows,\
+                OutputWorkspaceBaseName = outbasewsname,\
+                GroupWorkspaces         = dogroupws,\
+                FilterByPulseTime       = filterbypulse,\
+                CorrectionToSample      = corr2sample,\
+                SpectrumWithoutDetector = how2skip,\
+                SplitSampleLogs         = splitsamplelog,\
+                OutputWorkspaceIndexedFrom1     = startfrom1,\
                 OutputTOFCorrectionWorkspace    = 'TOFCorrTable', **kwargs)
 
         return

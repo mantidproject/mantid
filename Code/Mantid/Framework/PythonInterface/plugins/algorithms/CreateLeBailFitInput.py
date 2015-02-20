@@ -113,9 +113,9 @@ class CreateLeBailFitInput(PythonAlgorithm):
         # api.DeleteWorkspace(Workspace=dummyws)
         # api.DeleteWorkspace(Workspace="TempXXX")
 
-        api.LoadFullprofFile(
-                Filename=hklfilename,
-                PeakParameterWorkspace = hklwsname,
+        api.LoadFullprofFile(\
+                Filename=hklfilename,\
+                PeakParameterWorkspace = hklwsname,\
                 OutputWorkspace = dummywsname)
 
         hklws = AnalysisDataService.retrieve(hklwsname)

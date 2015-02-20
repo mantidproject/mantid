@@ -48,7 +48,7 @@ class MSGReducer(reducer.Reducer):
 
         self._multiple_frames = loadData.is_multiple_frames()
 
-        if( self._info_table_props is not None ):
+        if  self._info_table_props is not None :
             wsNames = loadData.get_ws_list().keys()
             wsNameList = ", ".join(wsNames)
             propsList = ", ".join(self._info_table_props)
@@ -58,7 +58,7 @@ class MSGReducer(reducer.Reducer):
                 LogPropertyNames=propsList,
                 GroupPolicy="First")
 
-        if ( self._sum ):
+        if  self._sum :
             self._data_files = loadData.get_ws_list()
 
         self._setup_steps()

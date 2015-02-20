@@ -6,6 +6,6 @@ def get_live_data(instrument_name, frequency = 60, accumulation = "Add", output_
     return ws
 def is_live_run(run):
     try:
-        return (int(run) is 0)
+        return int(run) is 0
     except:
         return False

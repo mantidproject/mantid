@@ -527,7 +527,7 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False):
     # Check that number of histograms in each corrections workspace matches
     # that of the input (sample) workspace
     for ws in corrections:
-        if ( mtd[ws].getNumberHistograms() != nHist ):
+        if  mtd[ws].getNumberHistograms() != nHist :
             raise ValueError('Mismatch: num of spectra in '+ws+' and inputWS')
     # Workspaces that hold intermediate results
     CorrectedSampleWS = '__csam'

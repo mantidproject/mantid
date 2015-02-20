@@ -183,10 +183,10 @@ class ISISReducer(Reducer):
         # so currently do not understand why it is in isis_reduction_steps
         # Also the main purpose of this class is to use it as an input argument
         # to ConvertToQ below
-        self.prep_normalize = isis_reduction_steps.CalculateNormISIS(
+        self.prep_normalize = isis_reduction_steps.CalculateNormISIS(\
                             [self.norm_mon, self.transmission_calculator])
 
-        self.to_Q =            isis_reduction_steps.ConvertToQISIS(
+        self.to_Q =            isis_reduction_steps.ConvertToQISIS(\
                                                         self.prep_normalize)
         self._background_subtracter = isis_reduction_steps.CanSubtraction()
         self.geometry_correcter =       isis_reduction_steps.SampleGeomCor()
@@ -600,7 +600,7 @@ class ISISReducer(Reducer):
     def getCurrSliceLimit(self):
         if not self._slices_def:
             self._slices_def = su.sliceParser("")
-            assert(self._slice_index == 0)
+            assert self._slice_index == 0
         return self._slices_def[self._slice_index]
 
     def getNumSlices(self):

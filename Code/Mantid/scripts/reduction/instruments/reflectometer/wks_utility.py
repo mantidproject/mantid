@@ -218,9 +218,9 @@ def findQaxisMinMax(q_axis):
     for i in arange(nbr_row - 1) + 1:
         _q_min = q_axis[i][-1]
         _q_max = q_axis[i][0]
-        if (_q_min > q_min):
+        if _q_min > q_min:
             q_min = _q_min
-        if (_q_max < q_max):
+        if _q_max < q_max:
             q_max = _q_max
 
     #find now the index of those min and max in each row
@@ -386,13 +386,13 @@ def convertWorkspaceToQ(ws_data,
 
             #keep only the overlap region of Qs
             _q_min = _q_axis_min_max_index[_q_index, 0]
-            if (_q_min != 0):
+            if _q_min != 0:
                 _y_axis_tmp[0:_q_min] = 0
                 _y_error_axis_tmp[0:_q_min] = 0
 
             _q_max = int(_q_axis_min_max_index[_q_index, 1])
             sz = shape(_y_axis_tmp)[0]
-            if (_q_max != sz):
+            if _q_max != sz:
                 _index_q_max_range = arange(sz - _q_max) + _q_max
                 for i in _index_q_max_range:
                     _y_axis_tmp[i] = 0
@@ -502,16 +502,16 @@ def angleUnitConversion(value, from_units='degree', to_units='rad'):
 
     """
 
-    if (from_units == to_units):
+    if from_units == to_units:
         return value
 
     from_factor = 1
     #convert everything into rad
-    if (from_units == 'degree'):
+    if from_units == 'degree':
         from_factor = 1.745329252e-2
     value_rad = from_factor * value
 
-    if (to_units == 'rad'):
+    if to_units == 'rad':
         return value_rad
     else:
         to_factor = 57.2957795
@@ -723,7 +723,7 @@ def ref_beamdiv_correct(cpix, det_secondary,
         xI = xF
         yI = yF
 
-    if (len(int_poly_x) > 2):
+    if len(int_poly_x) > 2:
         int_poly_x.append(int_poly_x[0])
         int_poly_y.append(int_poly_y[0])
         int_poly_x.append(int_poly_x[1])
@@ -800,13 +800,13 @@ def applySF(InputWorkspace,
     """
 
     #check if config file is there
-    if (os.path.isfile(sfFile)):
+    if os.path.isfile(sfFile):
 
         #parse file and put info into array
         f = open(sfFile, 'r')
         sfFactorTable = []
         for line in f.read().split('\n'):
-            if (len(line) > 0 and line[0] != '#'):
+            if len(line) > 0 and line[0] != '#':
                 sfFactorTable.append(line.split(' '))
         f.close()
 
@@ -845,7 +845,7 @@ def applySF(InputWorkspace,
         for i in range(nbr_row):
 
             _file_incidentMedium = getFieldValue(sfFactorTable,i,0)
-            if (_file_incidentMedium.strip() == _incidentMedium.strip()):
+            if _file_incidentMedium.strip() == _incidentMedium.strip():
                 print '--- incident medium match ---'
                 _file_lambdaRequested = getFieldValue(sfFactorTable,i,1)
                 if (isWithinPrecisionRange(_file_lambdaRequested,
@@ -862,7 +862,7 @@ def applySF(InputWorkspace,
                                                   s2h_value,
                                                   valuePrecision)):
                             print '--- S2H match ---'
-                            if (slitsWidthFlag):
+                            if slitsWidthFlag:
                                 print '--- (with Width flag) ----'
                                 _file_s1w = getFieldValue(sfFactorTable,i,4)
                                 if(isWithinPrecisionRange(_file_s1w,
@@ -946,7 +946,7 @@ def loadNeXus(runNumbers, type):
     """
 
     wks_name = ''
-    if (type == 'data'):
+    if type == 'data':
         wks_name = 'ws_event_data'
     else:
         wks_name = 'ws_event_norm'
@@ -1172,7 +1172,7 @@ def weightedMean(data_array, error_array, error_0):
     # calculate the numerator of mean
     dataNum = 0
     for i in range(sz):
-        if (error_array[i] == 0):
+        if error_array[i] == 0:
             error_array[i] = error_0
 
         tmpFactor = float(data_array[i]) / float((pow(error_array[i],2)))
@@ -1181,7 +1181,7 @@ def weightedMean(data_array, error_array, error_0):
     # calculate denominator
     dataDen = 0
     for i in range(sz):
-        if (error_array[i] == 0):
+        if error_array[i] == 0:
             error_array[i] = error_0
         tmpFactor = 1./float((pow(error_array[i],2)))
         dataDen += tmpFactor
@@ -1419,7 +1419,7 @@ def applyScalingFactor(tof_axis,
     file created by the sfCalculator procedure
     """
     #sf_file = 'NaN'
-    if (os.path.isfile(sf_file)):
+    if os.path.isfile(sf_file):
 
         print '-> scaling factor file FOUND! (', sf_file, ')'
 
@@ -1427,7 +1427,7 @@ def applyScalingFactor(tof_axis,
         f = open(sf_file, 'r')
         sfFactorTable = []
         for line in f.read().split('\n'):
-            if (len(line) > 0 and line[0] != '#'):
+            if len(line) > 0 and line[0] != '#':
                 sfFactorTable.append(line.split(' '))
         f.close()
 
@@ -1463,7 +1463,7 @@ def applyScalingFactor(tof_axis,
         for i in range(nbr_row):
 
             _file_incidentMedium = getFieldValue(sfFactorTable,i,0)
-            if (_file_incidentMedium.strip() == _incidentMedium.strip()):
+            if _file_incidentMedium.strip() == _incidentMedium.strip():
                 print '*** incident medium match ***'
                 _file_lambdaRequested = getFieldValue(sfFactorTable,i,1)
                 if (isWithinPrecisionRange(_file_lambdaRequested,
@@ -1480,7 +1480,7 @@ def applyScalingFactor(tof_axis,
                                                   s2h_value,
                                                   valuePrecision)):
                             print '*** s2h match ***'
-                            if (slitsWidthFlag):
+                            if slitsWidthFlag:
                                 print '*** (with slits width flag) ***'
                                 _file_s1w = getFieldValue(sfFactorTable,i,4)
                                 if(isWithinPrecisionRange(_file_s1w,
@@ -1709,7 +1709,7 @@ def getQrange(ws_histo_data, theta, dMD, q_min, q_step):
         _Q = _const * math.sin(theta) / (tofm*1e-6)
         _q_axis[t] = _Q*1e-10
     q_max = max(_q_axis)
-    if (q_min >= q_max):
+    if q_min >= q_max:
         q_min = min(_q_axis)
     print '----> q_min: ', q_min
     print '----> q_step: ', q_step
@@ -1767,13 +1767,13 @@ def convertToQ(tof_axis,
 
         # keep only the overlap region of Qs
         _q_min = _q_axis_min_max_index[_y_index, 0]
-        if (_q_min != 0):
+        if _q_min != 0:
             _y_axis_tmp[0:_q_min] = 0
             _y_error_axis_tmp[0:_q_min] = 0
 
         _q_max = int(_q_axis_min_max_index[_y_index, 1])
         sz = shape(_y_axis_tmp)[0]
-        if (_q_max != sz):
+        if _q_max != sz:
             _index_q_max_range = arange(sz - _q_max) + _q_max
             for i in _index_q_max_range:
                 _y_axis_tmp[i] = 0
@@ -2060,7 +2060,7 @@ def cleanupData1D(final_data_y_axis, final_data_y_error_axis):
         if abs(_error) >= abs(_data):
             _data_tmp = 0
             _error_tmp = 1
-        elif (_data< 1e-12):
+        elif _data< 1e-12:
         # if value is below 10^-12
             _data_tmp = 0
             _error_tmp = 1

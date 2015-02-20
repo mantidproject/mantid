@@ -393,9 +393,9 @@ class EnergyBins(PropDescriptor):
     def is_range_valid(self):
         """Method verifies if binning range is consistent with incident energy """
         if self._incident_energy.multirep_mode():
-            return (self._energy_bins[2] <= self._range)
+            return self._energy_bins[2] <= self._range
         else:
-            return (self._energy_bins[2] <= self._incident_energy.get_current())
+            return self._energy_bins[2] <= self._incident_energy.get_current()
 
     def _calc_relative_range(self,ei,range_mult=1):
         """ """
@@ -624,7 +624,7 @@ class MapMaskFile(PropDescriptor):
     def __init__(self,file_ext,doc_string=None):
         self._file_name = None
         self._file_ext = file_ext
-        if not(doc_string is None):
+        if not doc_string is None:
             self.__doc__ = doc_string
 
     def __get__(self,instance,type=None):
@@ -636,7 +636,7 @@ class MapMaskFile(PropDescriptor):
     def __set__(self,instance,value):
         if value != None:
             fileName, fileExtension = os.path.splitext(value)
-            if (not fileExtension):
+            if not fileExtension:
                 value = value + self._file_ext
         self._file_name = value
 
@@ -655,7 +655,7 @@ class HardMaskPlus(prop_helpers.ComplexProperty):
     def __set__(self,instance,value):
         if value != None:
             fileName, fileExtension = os.path.splitext(value)
-            if (not fileExtension):
+            if not fileExtension:
                 value = value + '.msk'
             instance.hard_mask_file = value
             prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[False,True])
@@ -756,7 +756,7 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
         else:
             tDict = instance.__dict__
         if value is None:
-            if (not self._rel_range):
+            if not self._rel_range:
                 self._rel_range = True
                 self._other_prop = ['monovan_lo_frac','monovan_hi_frac']
         else:
@@ -858,7 +858,7 @@ class SaveFormat(PropDescriptor):
             else:
                 value = subformats[0]
 
-                if not(value in SaveFormat.save_formats):
+                if not value in SaveFormat.save_formats:
                     instance.log("Trying to set saving in unknown format: \"" + str(value) + "\" No saving will occur for this format")
                     return
         else:

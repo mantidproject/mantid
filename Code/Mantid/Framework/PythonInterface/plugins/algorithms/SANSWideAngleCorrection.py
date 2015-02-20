@@ -33,7 +33,7 @@ class SANSWideAngleCorrection(PythonAlgorithm):
         trans = self.getProperty("TransmissionData").value
 
         # check transmission input workspace
-        if (len(trans.dataX(0)) != len(wd.dataX(0))):
+        if len(trans.dataX(0)) != len(wd.dataX(0)):
             raise RuntimeError("Uncompatible sizes. Transmission must have the same bins of sample values")
         if min(trans.dataY(0)) < 0:
             raise RuntimeError("Invalid workspace for transmission, it does not accept negative values.")

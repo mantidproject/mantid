@@ -69,7 +69,7 @@ class ProcessThread ( threading.Thread ):
 #
 # Get the config file name from the command line
 #
-if (len(sys.argv) < 2):
+if len(sys.argv) < 2:
     print "You MUST give the config file name on the command line"
     exit(0)
 
@@ -132,7 +132,7 @@ for r_num in run_nums:
 all_done = False
 active_list=[]
 while not all_done:
-    if ( len(list) > 0 and len(active_list) < max_processes ):
+    if  len(list) > 0 and len(active_list) < max_processes :
         thread = list[0]
         list.remove(thread)
         active_list.append( thread )

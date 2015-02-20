@@ -141,7 +141,7 @@ class ReductionOptions(BaseScriptElement):
         if self.masked_side is not None:
             script += "MaskDetectorSide('%s')\n" % str(self.masked_side)
         #   Edges
-        if (self.top != 0 or self.bottom != 0 or self.left != 0 or self.right != 0):
+        if self.top != 0 or self.bottom != 0 or self.left != 0 or self.right != 0:
             script += "Mask(nx_low=%d, nx_high=%d, ny_low=%d, ny_high=%d)\n" % (self.left, self.right, self.bottom, self.top)
         #   Rectangles
         for item in self.shapes:

@@ -356,7 +356,7 @@ def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
     acc = np.ones(nlam)
 
     # case where tsec is close to 90 degrees. CALCULATION IS UNRELIABLE
-    if (abs(abs(tsec)-90.0) < 1.0):
+    if abs(abs(tsec)-90.0) < 1.0:
         #default to 1 for everything
         return ass, assc, acsc, acc
     else:
@@ -386,7 +386,7 @@ def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
 
         sampleSec1, sampleSec2 = calcThicknessAtSec(sampleXSection, samThickness, [sec1, sec2])
 
-        if (sec2 < 0.):
+        if sec2 < 0.:
             ass = fs / samThickness
         else:
             ass= np.exp(-sampleSec2) * fs / samThickness
@@ -432,7 +432,7 @@ def calcFlatAbsCan(ass, canXSection, canThickness1, canThickness2, sampleSec1, s
     canThick1Sec1, canThick1Sec2 = calcThicknessAtSec(canXSection, canThickness1, sec)
     canThick2Sec1, canThick2Sec2 = calcThicknessAtSec(canXSection, canThickness2, sec)
 
-    if (sec2 < 0.):
+    if sec2 < 0.:
         val = np.exp(-(canThick1Sec1-canThick1Sec2))
         assc = ass * val
 
@@ -453,7 +453,7 @@ def calcFlatAbsCan(ass, canXSection, canThickness1, canThickness2, sampleSec1, s
 
     canThickness = canThickness1 + canThickness2
 
-    if(canThickness > 0.):
+    if canThickness > 0.:
         acc = (acc1 + acc2) / canThickness
         acsc = (acsc1 + acsc2) / canThickness
 

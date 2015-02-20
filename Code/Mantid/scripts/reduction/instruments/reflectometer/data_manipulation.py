@@ -54,7 +54,7 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
     ws_base = "__%s" % basename
 
     ws_output_base = ''
-    if (instrument == 'REFL'):
+    if instrument == 'REFL':
         if isPeak:
             type = 'Peak'
         else:

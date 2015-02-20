@@ -37,11 +37,11 @@ class CalculateSampleTransmission(PythonAlgorithm):
         issues = dict()
 
         density = self.getProperty('NumberDensity').value
-        if(density < 0.0):
+        if density < 0.0:
             issues['NumberDensity'] = 'NumberDensity must be positive'
 
         thickness = self.getProperty('Thickness').value
-        if(thickness < 0.0):
+        if thickness < 0.0:
             issues['Thickness'] = 'Thickness must be positive'
 
         return issues

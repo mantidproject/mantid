@@ -49,7 +49,7 @@ class EnginXFitPeaks(PythonAlgorithm):
         findPeaksAlg.execute()
         foundPeaks = findPeaksAlg.getProperty('PeaksList').value
 
-        if (foundPeaks.rowCount() < len(expectedPeaksTof)):
+        if foundPeaks.rowCount() < len(expectedPeaksTof):
             raise Exception("Some peaks were not found")
 
         fittedPeaks = self._createFittedPeaksTable()

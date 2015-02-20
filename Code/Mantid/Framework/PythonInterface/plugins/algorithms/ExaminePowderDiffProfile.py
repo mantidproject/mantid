@@ -134,10 +134,10 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
         # Load data optionally
         if self.loaddata is True:
             # Load data file
-            api.LoadAscii(
-                    Filename        = self.datafilename,
-                    OutputWorkspace = self.datawsname,
-                    Unit            = 'TOF'
+            api.LoadAscii(\
+                    Filename        = self.datafilename,\
+                    OutputWorkspace = self.datawsname,\
+                    Unit            = 'TOF'\
                     )
 
         # Load .irf file and .hkl file optionally
@@ -145,60 +145,60 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
             if dir(self).count('latticesize') == 0 or self.latticesize is None:
                 raise NotImplementedError("Lattice size is not defined.  Unable to use option 'LoadInfo'")
 
-            api.CreateLeBailFitInput(
-                    FullprofParameterFile   = self.irffilename,
-                    MaxHKL                  = [13, 13, 13],
-                    LatticeConstant         = float(self.latticesize),
-                    Bank                    = self.bankid,
-                    GenerateBraggReflections        =  True,
-                    InstrumentParameterWorkspace    =  str(self.inputparamws),
-                    BraggPeakParameterWorkspace     =  str(self.inputbraggws)
+            api.CreateLeBailFitInput(\
+                    FullprofParameterFile   = self.irffilename,\
+                    MaxHKL                  = [13, 13, 13],\
+                    LatticeConstant         = float(self.latticesize),\
+                    Bank                    = self.bankid,\
+                    GenerateBraggReflections        =  True,\
+                    InstrumentParameterWorkspace    =  str(self.inputparamws),\
+                    BraggPeakParameterWorkspace     =  str(self.inputbraggws)\
                     )
 
         # Process background optionally
         if self.process_bkgd is True:
             # [Background]
             # Remove peaks and get pure background (hopefully)
-            api.ProcessBackground(
-                    Options         =   'SelectBackgroundPoints',
-                    InputWorkspace  =   self.dataws,
-                    OutputWorkspace =   self.bkgdwsname,
-                    LowerBound      =   self.startx,
-                    UpperBound      =   self.endx,
-                    BackgroundType  =   self.backgroundtype,
-                    BackgroundPoints=   self.usrbkgdpoints,
+            api.ProcessBackground(\
+                    Options         =   'SelectBackgroundPoints',\
+                    InputWorkspace  =   self.dataws,\
+                    OutputWorkspace =   self.bkgdwsname,\
+                    LowerBound      =   self.startx,\
+                    UpperBound      =   self.endx,\
+                    BackgroundType  =   self.backgroundtype,\
+                    BackgroundPoints=   self.usrbkgdpoints,\
                     NoiseTolerance  =   '0.10000000000000001')
 
             # Fit background points
             functionstr = "name=%s,n=%d" % (self.backgroundtype, self.backgroundorder)
             for iborder in xrange(self.backgroundorder+1):
                 functionstr = "%s,A%d=%.5f" % (functionstr, iborder, 0.0)
-            api.Fit(
-                    Function        =   functionstr,
-                    InputWorkspace  =   self.bkgdwsname,
-                    Output          =   self.bkgdwsname,
-                    MaxIterations   =   '1000',
-                    Minimizer       =   'Levenberg-MarquardtMD',
-                    CreateOutput    =   '1',
-                    StartX          =   self.startx,
+            api.Fit(\
+                    Function        =   functionstr,\
+                    InputWorkspace  =   self.bkgdwsname,\
+                    Output          =   self.bkgdwsname,\
+                    MaxIterations   =   '1000',\
+                    Minimizer       =   'Levenberg-MarquardtMD',\
+                    CreateOutput    =   '1',\
+                    StartX          =   self.startx,\
                     EndX            =   self.endx)
 
         # [Le Bail calculation]
         self.log().debug("Fit range: %f , %f, Outputworkspace = %s" % (self.startx, self.endx, self.outwsname))
-        api.LeBailFit(
-                Function                =   'Calculation',
-                InputWorkspace          =   self.dataws,
-                OutputWorkspace         =   self.outwsname,
-                InputParameterWorkspace =   self.inputparamws,
-                OutputParameterWorkspace=   str(self.inputparamws),
-                InputHKLWorkspace       =   self.inputbraggws,
-                OutputPeaksWorkspace    =   str(self.inputbraggws),
-                FitRegion               =   '%f, %f' % (self.startx, self.endx),
-                BackgroundType          =  self.backgroundtype,
-                UseInputPeakHeights     =   False,
-                PeakRadius              =   '7',
-                BackgroundParametersWorkspace   =   self.bkgdtablews,
-                PeakType                = self.profiletype,
+        api.LeBailFit(\
+                Function                =   'Calculation',\
+                InputWorkspace          =   self.dataws,\
+                OutputWorkspace         =   self.outwsname,\
+                InputParameterWorkspace =   self.inputparamws,\
+                OutputParameterWorkspace=   str(self.inputparamws),\
+                InputHKLWorkspace       =   self.inputbraggws,\
+                OutputPeaksWorkspace    =   str(self.inputbraggws),\
+                FitRegion               =   '%f, %f' % (self.startx, self.endx),\
+                BackgroundType          =  self.backgroundtype,\
+                UseInputPeakHeights     =   False,\
+                PeakRadius              =   '7',\
+                BackgroundParametersWorkspace   =   self.bkgdtablews,\
+                PeakType                = self.profiletype,\
                 )
 
         return

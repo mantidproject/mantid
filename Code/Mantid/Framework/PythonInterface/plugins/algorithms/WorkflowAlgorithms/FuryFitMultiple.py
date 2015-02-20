@@ -1,5 +1,5 @@
 #pylint: disable=no-init
-from mantid import config, logger, mtd, AlgorithmFactory
+from mantid import config, logger, AlgorithmFactory
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *

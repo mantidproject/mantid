@@ -338,11 +338,11 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Plot,Save):
         CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,\
             Nspec=3, UnitX='MomentumTransfer')
         outWS = C2Fw(samWS[:-4],fname)
-        if (Plot != 'None'):
+        if Plot != 'None':
             QuasiPlot(fname,Plot,res_plot,Loop)
     if program == 'QSe':
         outWS = C2Se(fname)
-        if (Plot != 'None'):
+        if Plot != 'None':
             QuasiPlot(fname,Plot,res_plot,Loop)
 
     #Add some sample logs to the output workspaces
@@ -624,14 +624,14 @@ def QuasiPlot(ws_stem,plot_type,res_plot,sequential):
             ws_name = ws_stem + '_Result'
             num_spectra = mtd[ws_name].getNumberHistograms()
 
-            if (plot_type == 'Prob' or plot_type == 'All'):
+            if plot_type == 'Prob' or plot_type == 'All':
                 prob_ws = ws_stem+'_Prob'
                 if prob_ws in mtd.getObjectNames():
                     mp.plotSpectrum(prob_ws,[1,2],False)
 
             QuasiPlotParameters(ws_name, plot_type)
 
-        if (plot_type == 'Fit' or plot_type == 'All'):
+        if plot_type == 'Fit' or plot_type == 'All':
             fWS = ws_stem+'_Workspace_0'
             f_plot=mp.plotSpectrum(fWS,res_plot,False)
 
@@ -648,10 +648,10 @@ def QuasiPlotParameters(ws_name, plot_type):
     param_names = ['Amplitude', 'FWHM', 'Beta']
 
     for param_name in param_names:
-        if (plot_type == param_name or plot_type == 'All'):
+        if plot_type == param_name or plot_type == 'All':
             spectra_indicies = [i for i in range(num_spectra) if param_name in mtd[ws_name].getAxis(1).label(i)]
 
-            if(len(spectra_indicies) > 0):
+            if len(spectra_indicies) > 0:
                 plotSpectra(ws_name, param_name, indicies=spectra_indicies[:3])
 
 # Quest programs
@@ -743,7 +743,7 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Plot,Save):
         dataXb = xbout[:Nbet]
         dataYb = ybout[:Nbet]
         zpWS = fname + '_Zp' +str(m)
-        if (m > 0):
+        if m > 0:
             Qaxis += ','
         Qaxis += str(Q[m])
 
@@ -818,7 +818,7 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Plot,Save):
         logger.information('Output file for Fit : ' + fpath)
         logger.information('Output file for Contours : ' + cpath)
 
-    if (Plot != 'None' and Loop == True):
+    if Plot != 'None' and Loop == True:
         QuestPlot(fname,Plot)
     EndTime('Quest')
 
@@ -836,9 +836,9 @@ def QuestAddSampleLogs(workspace, res_workspace, background, elastic_peak, e_ran
 
 
 def QuestPlot(inputWS,Plot):
-    if (Plot == 'Sigma' or Plot == 'All'):
+    if Plot == 'Sigma' or Plot == 'All':
         sig_plot=mp.importMatrixWorkspace(inputWS+'_Sigma').plotGraph2D()
-    if (Plot == 'Beta' or Plot == 'All'):
+    if Plot == 'Beta' or Plot == 'All':
         beta_plot=mp.importMatrixWorkspace(inputWS+'_Beta').plotGraph2D()
 
 # ResNorm programs
@@ -935,7 +935,7 @@ def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
         logger.information('Parameter file created : ' + par_path)
         logger.information('Fit file created : ' + fit_path)
 
-    if (Plot != 'None'):
+    if Plot != 'None':
         ResNormPlot(fname,Plot)
     EndTime('ResNorm')
 
@@ -947,12 +947,12 @@ def ResNormAddSampleLogs(workspace, e_range, v_binning):
     AddSampleLog(Workspace=workspace, LogName="van_binning", LogType="Number", LogText=str(v_binning))
 
 def ResNormPlot(inputWS,Plot):
-    if (Plot == 'Intensity' or Plot == 'All'):
+    if Plot == 'Intensity' or Plot == 'All':
         iWS = inputWS + '_ResNorm_Intensity'
         i_plot=mp.plotSpectrum(iWS,0,False)
-    if (Plot == 'Stretch' or Plot == 'All'):
+    if Plot == 'Stretch' or Plot == 'All':
         sWS = inputWS + '_ResNorm_Stretch'
         s_plot=mp.plotSpectrum(sWS,0,False)
-    if (Plot == 'Fit' or Plot == 'All'):
+    if Plot == 'Fit' or Plot == 'All':
         fWS = inputWS + '_ResNorm_Fit'
         f_plot=mp.plotSpectrum(fWS,0,False)

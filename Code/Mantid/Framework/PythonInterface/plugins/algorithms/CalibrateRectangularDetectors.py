@@ -149,7 +149,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         wksp = LoadPreNexus(Filename=filename, OutputWorkspace=name, **mykwargs)
 
         # add the logs to it
-        if (str(self._instrument) == "SNAP"):
+        if str(self._instrument) == "SNAP":
             LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
 
         return wksp
@@ -516,7 +516,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         for (samNum, backNum) in zip(samRuns, backRuns):
             # first round of processing the sample
             samRun = self._loadData(samNum, SUFFIX, filterWall)
-            if (backNum > 0):
+            if backNum > 0:
                 backRun = self._loadData(backNum, SUFFIX, filterWall)
                 samRun -= backRun
                 DeleteWorkspace(backRun)

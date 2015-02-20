@@ -462,14 +462,14 @@ class DataReflWidget(BaseWidget):
         self._summary.norm_peak_to_pixel.setEnabled(is_checked)
 
         self._summary.norm_background_switch.setEnabled(is_checked)
-        if (not(is_checked)):
+        if not is_checked:
             self._norm_background_clicked(False)
         else:
             NormBackFlag = self._summary.norm_background_switch.isChecked()
             self._norm_background_clicked(NormBackFlag)
 
         self._summary.norm_low_res_range_switch.setEnabled(is_checked)
-        if (not(is_checked)):
+        if not is_checked:
             self._norm_low_res_clicked(False)
         else:
             LowResFlag = self._summary.norm_low_res_range_switch.isChecked()

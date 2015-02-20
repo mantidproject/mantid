@@ -752,7 +752,7 @@ class SampleGeomCor(ReductionStep):
 
     def calculate_volume(self, reducer):
         geo = reducer.get_sample().geometry
-        assert( issubclass(geo.__class__, GetSampleGeom))
+        assert  issubclass(geo.__class__, GetSampleGeom)
 
         try:
             if geo.shape == 'cylinder-axis-up':
@@ -804,14 +804,14 @@ class StripEndZeros(ReductionStep):
         # Find the first non-zero value
         start = 0
         for i in range(0, length):
-            if ( y_vals[i] != self._flag_value ):
+            if  y_vals[i] != self._flag_value :
                 start = i
                 break
         # Now find the last non-zero value
         stop = 0
         length -= 1
         for j in range(length, 0,-1):
-            if ( y_vals[j] != self._flag_value ):
+            if  y_vals[j] != self._flag_value :
                 stop = j
                 break
         # Find the appropriate X values and call CropWorkspace

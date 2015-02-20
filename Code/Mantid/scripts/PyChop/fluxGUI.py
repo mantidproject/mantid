@@ -1,8 +1,6 @@
 #pylint: disable=invalid-name
-import sys
 from PyChop_LET_UI import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui #import others if needed
-import math
 
 from mantidplot import *
 from mantid import *

@@ -28,12 +28,12 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
 
     userEntry = runs[0]
 
-    while(True):
+    while True:
 
         isFirstDataSetEvent = False
     #we need to catch all exceptions to ensure that a dialog box is raised with the error
         try :
-            lastPath, lastFile, logFile, num_periods, isFirstDataSetEvent = _loadWS(
+            lastPath, lastFile, logFile, num_periods, isFirstDataSetEvent = _loadWS(\
         userEntry, defType, inst, 'AddFilesSumTempory', rawTypes, period)
 
       # if event data prevent loop over periods makes no sense
@@ -51,7 +51,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
 
             for i in range(len(runs)-1):
                 userEntry = runs[i+1]
-                lastPath, lastFile, logFile, dummy, isDataSetEvent = _loadWS(
+                lastPath, lastFile, logFile, dummy, isDataSetEvent = _loadWS(\
           userEntry, defType, inst,'AddFilesNewTempory', rawTypes, period)
 
                 if isDataSetEvent != isFirstDataSetEvent:
@@ -154,7 +154,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
     path,base = os.path.split(outFile)
     if path == '' or base not in os.listdir(path):
         path = config['defaultsave.directory'] + path
-        assert(base in os.listdir(path))
+        assert base in os.listdir(path)
     pathout = path
     if logFile:
         _copyLog(lastPath, logFile, pathout)

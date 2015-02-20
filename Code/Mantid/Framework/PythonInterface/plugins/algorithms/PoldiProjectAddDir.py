@@ -69,7 +69,7 @@ class PoldiProjectAddDir(PythonAlgorithm):
 
         try:
             sample_info_ws_name = self.getProperty("PoldiAnalysis").value
-            if(sample_info_ws_name == ""):
+            if sample_info_ws_name == "":
                 sample_info_ws_name = "PoldiAnalysis"
             self.log().debug('Poldi Data Analysis ---- %s'%(sample_info_ws_name))
             sample_info_ws = mtd["PoldiAnalysis"]
@@ -108,7 +108,7 @@ class PoldiProjectAddDir(PythonAlgorithm):
 
 
 
-            if("hdf" in sampleExt):
+            if "hdf" in sampleExt:
                 self.log().error('Poldi -  samples : %s' %(sample_name))
                 file_path = join(directory,dataFile)
                 sample_name_log = "%sLog" %sample_name
@@ -128,7 +128,7 @@ class PoldiProjectAddDir(PythonAlgorithm):
 
 
 
-        if(load_data_at_the_end):
+        if load_data_at_the_end:
             self.setProperty("PoldiAnalysis", sample_info_ws)
 
 

@@ -115,7 +115,7 @@ class MantidGeom:
 
         for i in range(len(r)):
             for j in range(len(r[i])):
-                if (str(r[i][j]) != "nan"):
+                if str(r[i][j]) != "nan":
                     basecomponent = self._append_child("component", type_element, type="pixel")
                     location_element = self._append_child("location", basecomponent,r=str(r[i][j]),\
                           t=str(theta[i][j]), p=str(phi[i][j]), name=str(names[i][j]))
@@ -128,7 +128,7 @@ class MantidGeom:
         component = self._append_child("idlist", self._root, idname=name)
         for i in range(len(r)):
             for j in range(len(r[i])):
-                if (str(r[i][j]) != "nan"):
+                if str(r[i][j]) != "nan":
                     self._append_child("id", component, val=str(names[i][j]))
 
     def addMonitors(self, distance=[], names=[]):

@@ -141,7 +141,7 @@ class USANSSimulation(PythonAlgorithm):
         bes = 3.0*(math.sin(qr)-qr*math.cos(qr))/(qr*qr*qr) if not qr == 0.0 else 1.0
         vol = 4.0*math.pi/3.0*radius*radius*radius
         f2 = vol*bes*bes*1.0e-6
-        return(scale*f2+bck)
+        return scale*f2+bck
 
 #############################################################################################
 AlgorithmFactory.subscribe(USANSSimulation())

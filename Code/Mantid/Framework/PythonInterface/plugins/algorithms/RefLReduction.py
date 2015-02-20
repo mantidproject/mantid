@@ -125,7 +125,7 @@ class RefLReduction(PythonAlgorithm):
 
         #GENERAL
         TOFrangeFlag = self.getProperty("TofRangeFlag")
-        if (TOFrangeFlag):
+        if TOFrangeFlag:
             TOFrange = self.getProperty("TOFRange").value #microS
         else:
             TOFrange = [0, 200000]
@@ -138,7 +138,7 @@ class RefLReduction(PythonAlgorithm):
 
         qMin = self.getProperty("QMin").value
         qStep = self.getProperty("QStep").value
-        if (qStep > 0): #force logarithmic binning
+        if qStep > 0: #force logarithmic binning
             qStep = -qStep
 
         # angle offset

@@ -296,7 +296,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     canFilterWall = timeFilterWall
                 else:
                     canFilterWall = (0., 0.)
-                if ("%s_%d" % (self._instrument, canRun)) in mtd:
+                if "%s_%d" % (self._instrument, canRun) in mtd:
                     canRun = mtd["%s_%d" % (self._instrument, canRun)]
                 else:
                     canRun = self._focusChunks(canRun, SUFFIX, canFilterWall, calib,\
@@ -319,7 +319,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     vanFilterWall = timeFilterWall
                 else:
                     vanFilterWall = (0., 0.)
-                if ("%s_%d" % (self._instrument, vanRun)) in mtd:
+                if "%s_%d" % (self._instrument, vanRun) in mtd:
                     vanRun = mtd["%s_%d" % (self._instrument, vanRun)]
                     vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                 else:
@@ -505,7 +505,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             if isEventWS is True:
                 # Event workspace
-                self.log().information("FilterBadPulses reduces number of events from %d to %d (under %s percent) of workspace %s." % (
+                self.log().information("FilterBadPulses reduces number of events from %d to %d (under %s percent) of workspace %s." % (\
                         numeventsbefore, wksp.getNumberEvents(), str(self._filterBadPulses), str(wksp)))
 
         return wksp

@@ -163,9 +163,9 @@ class DetectorBank:
 
     def __init__(self, instr, det_type):
         #detectors are known by many names, the 'uni' name is an instrument independent alias the 'long' name is the instrument view name and 'short' name often used for convenience
-        self._names = {
-          'uni' : det_type,
-          'long': instr.getStringParameter(det_type+'-detector-name')[0],
+        self._names = {\
+          'uni' : det_type,\
+          'long': instr.getStringParameter(det_type+'-detector-name')[0],\
           'short': instr.getStringParameter(det_type+'-detector-short-name')[0]}
         #the bank is often also referred to by its location, as seen by the sample
         if det_type.startswith('low'):
@@ -399,7 +399,7 @@ class DetectorBank:
         try:
             wki = mtd[input_name]
             #Is it really necessary to crop?
-            if (wki.getNumberHistograms() != self.last_spec_num - self.get_first_spec_num() + 1):
+            if wki.getNumberHistograms() != self.last_spec_num - self.get_first_spec_num() + 1:
                 CropWorkspace(InputWorkspace=input_name,OutputWorkspace= output_name,
                               StartWorkspaceIndex = self.get_first_spec_num() - 1,
                               EndWorkspaceIndex = self.last_spec_num - 1)
@@ -699,7 +699,7 @@ class ISISInstrument(BaseInstrument):
         CopyInstrumentParameters(calib, ws_name)
 
     def setCalibrationWorkspace(self, ws_reference):
-        assert(isinstance(ws_reference, Workspace))
+        assert isinstance(ws_reference, Workspace)
         # we do deep copy of singleton - to be removed in 8470
         # this forces us to have 'copyable' objects.
         self._newCalibrationWS = str(ws_reference)
@@ -823,7 +823,7 @@ class SANS2D(ISISInstrument):
                 first.set_first_spec_num(1)
                 first.set_orien('Vertical')
                 second.set_orien('Vertical')
-            elif (base_runno >= 568 and base_runno < 684):
+            elif base_runno >= 568 and base_runno < 684:
                 first.set_first_spec_num(9)
                 first.set_orien('Rotated')
                 second.set_orien('Rotated')

@@ -278,7 +278,7 @@ class FilterSetupWidget(BaseWidget):
 
         # 3. Update the log name combo box
         if metaws is None:
-            self._content.info_text_browser.setText(
+            self._content.info_text_browser.setText(\
                     str("Error! Failed to load data file %s.  Current working directory is %s. " % (eventnxsname, os.getcwd())))
         else:
             self._metaws = metaws

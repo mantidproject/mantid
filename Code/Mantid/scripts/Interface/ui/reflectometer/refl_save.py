@@ -277,7 +277,7 @@ class Ui_SaveWindow(object):
             self.listWidget.setCurrentItem(self.listWidget.item(0))
             # try to get correct user directory
             currentInstrument=config['default.instrument']
-            if (self.SavePath!=''):
+            if self.SavePath!='':
                 self.lineEdit.setText(self.SavePath)
             else:
                 if self.__has_mount_point:
@@ -318,23 +318,23 @@ class Ui_SaveWindow(object):
         for idx in self.listWidget.selectedItems():
             runlist=parseRunList(str(self.spectraEdit.text()))
             fname=os.path.join(self.lineEdit.text(),prefix + idx.text())
-            if (self.comboBox.currentIndex() == 0):
+            if self.comboBox.currentIndex() == 0:
                 print "Custom Ascii format"
-                if (self.radio1.isChecked()):
+                if self.radio1.isChecked():
                     sep=','
-                elif (self.radio2.isChecked()):
+                elif self.radio2.isChecked():
                     sep=' '
-                elif (self.radio3.isChecked()):
+                elif self.radio3.isChecked():
                     sep='\t'
                 else:
                     sep=' '
                 saveCustom(idx,fname,sep,self.listWidget2.selectedItems(),self.titleCheckBox.isChecked(),self.xErrorCheckBox.isChecked())
-            elif (self.comboBox.currentIndex() == 1):
+            elif self.comboBox.currentIndex() == 1:
                 print "Not yet implemented!"
-            elif (self.comboBox.currentIndex() == 2):
+            elif self.comboBox.currentIndex() == 2:
                 print "ANSTO format"
                 saveANSTO(idx,fname)
-            elif (self.comboBox.currentIndex() == 3):
+            elif self.comboBox.currentIndex() == 3:
                 print "ILL MFT format"
                 saveMFT(idx,fname,self.listWidget2.selectedItems())
         # for idx in self.listWidget.selectedItems():
@@ -378,16 +378,16 @@ def groupGet(wksp, whattoget, field=''):
     returns information about instrument or sample details for a given workspace wksp,
     also if the workspace is a group (info from first group element)
     '''
-    if (whattoget == 'inst'):
+    if whattoget == 'inst':
         if isinstance(mtd[wksp], WorkspaceGroup):
             return mtd[wksp + '_1'].getInstrument()
         else:
             return mtd[wksp].getInstrument()
-    elif (whattoget == 'samp' and field != ''):
+    elif whattoget == 'samp' and field != '':
         if isinstance(mtd[wksp], WorkspaceGroup):
             try:
                 log = mtd[wksp + '_1'].getRun().getLogData(field).value
-                if (type(log) is int or type(log) is str):
+                if type(log) is int or type(log) is str:
                     res = log
                 else:
                     res = log[len(log) - 1]
@@ -397,7 +397,7 @@ def groupGet(wksp, whattoget, field=''):
         else:
             try:
                 log = mtd[wksp].getRun().getLogData(field).value
-                if (type(log) is int or type(log) is str):
+                if type(log) is int or type(log) is str:
                     res = log
                 else:
                     res = log[len(log) - 1]
@@ -405,7 +405,7 @@ def groupGet(wksp, whattoget, field=''):
                 res = 0
                 print "Block " + field + " not found."
         return res
-    elif (whattoget == 'wksp'):
+    elif whattoget == 'wksp':
         if isinstance(mtd[wksp], WorkspaceGroup):
             return mtd[wksp + '_1'].getNumberHistograms()
         else:

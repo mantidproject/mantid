@@ -130,7 +130,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
     print i0_monitor_index
     print nHist
 
-    if (run=='0'):
+    if run=='0':
         RunNumber = '0'
     else:
         RunNumber = groupGet(_sample_ws.getName(),'samp','run_number')
@@ -148,7 +148,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
             DirectBeam = SumSpectra(InputWorkspace=_detector_ws, StartWorkspaceIndex=db[0], EndWorkspaceIndex=db[1])
             ReflectedBeam = ReflectedBeam / DirectBeam
         polCorr(polcorr, IvsLam, crho, calpha, cAp, cPp)
-        if (theta and correct_positions):
+        if theta and correct_positions:
             IvsQ = l2q(ReflectedBeam, detector_component_name, theta, sample_component_name)
         else:
             IvsQ = ConvertUnits(InputWorkspace=ReflectedBeam, Target="MomentumTransfer")
@@ -182,7 +182,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
 
         # Convert to I vs Q
         # check if detector in direct beam
-        if (theta == None or theta == 0 or theta == ''):
+        if theta == None or theta == 0 or theta == '':
             inst = groupGet('IvsLam','inst')
             detLocation=inst.getComponentByName(detector_component_name).getPos()
             sampleLocation=inst.getComponentByName(sample_component_name).getPos()
@@ -411,7 +411,7 @@ def nrPNRCorrection(Wksp,crho,calpha,cAp,cPp):
     logger.notice(message)
     print message
     CloneWorkspace(Wksp,OutputWorkspace='_'+Wksp+'_uncorrected')
-    if ( (not isinstance(mtd[Wksp], WorkspaceGroup))  or (not  mtd[Wksp].size()==2) ):
+    if  (not isinstance(mtd[Wksp], WorkspaceGroup))  or (not  mtd[Wksp].size()==2) :
         print "PNR correction works only with exactly 2 periods!"
         return mtd[Wksp]
     else:
@@ -560,17 +560,17 @@ def groupGet(wksp,whattoget,field=''):
     returns information about instrument or sample details for a given workspace wksp,
     also if the workspace is a group (info from first group element)
     '''
-    if (whattoget == 'inst'):
+    if whattoget == 'inst':
         if isinstance(mtd[wksp], WorkspaceGroup):
             return mtd[wksp+'_1'].getInstrument()
         else:
             return mtd[wksp].getInstrument()
 
-    elif (whattoget == 'samp' and field != ''):
+    elif whattoget == 'samp' and field != '':
         if isinstance(mtd[wksp], WorkspaceGroup):
             try:
                 log = mtd[wksp + '_1'].getRun().getLogData(field).value
-                if (type(log) is int or type(log) is str):
+                if type(log) is int or type(log) is str:
                     res=log
                 else:
                     res = log[len(log)-1]
@@ -580,7 +580,7 @@ def groupGet(wksp,whattoget,field=''):
         else:
             try:
                 log = mtd[wksp].getRun().getLogData(field).value
-                if (type(log) is int or type(log) is str):
+                if type(log) is int or type(log) is str:
                     res=log
                 else:
                     res = log[len(log)-1]
@@ -588,7 +588,7 @@ def groupGet(wksp,whattoget,field=''):
                 res = 0
                 print "Block "+field+" not found."
         return res
-    elif (whattoget == 'wksp'):
+    elif whattoget == 'wksp':
         if isinstance(mtd[wksp], WorkspaceGroup):
             return mtd[wksp+'_1'].getNumberHistograms()
         else:

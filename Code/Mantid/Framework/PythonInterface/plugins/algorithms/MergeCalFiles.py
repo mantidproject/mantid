@@ -32,7 +32,7 @@ class MergeCalFiles(PythonAlgorithm):
         outputFileName = self.getPropertyValue("OutputFile")
 
 
-        if (masterFileName == outputFileName) :
+        if masterFileName == outputFileName :
             raise RuntimeError('The output file must be different to the master file.')
 
         self.DisplayMessage(mergeOffsets,mergeSelections,mergeGroups,updateFileName,masterFileName)
@@ -102,11 +102,11 @@ class MergeCalFiles(PythonAlgorithm):
     def DisplayMessage(self,mergeOffsets,mergeSelections,mergeGroups,fileName1,fileName2):
     #Log the settings string
         outputString = "Merging "
-        if (mergeOffsets):
+        if mergeOffsets:
             outputString+= "offsets, "
-        if (mergeSelections):
+        if mergeSelections:
             outputString+= "selections, "
-        if (mergeGroups):
+        if mergeGroups:
             outputString+= "groups, "
     #strip the final comma
         outputString = outputString [0:len(outputString)-2]

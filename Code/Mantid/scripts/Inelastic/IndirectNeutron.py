@@ -95,7 +95,7 @@ def ReadIbackGroup(a,first):                           #read Ascii block of spec
 def getFilePath(run,ext,instr):
     path = None
     fname = None
-    if(os.path.isfile(run)):
+    if os.path.isfile(run):
         #using full file path
         path = run
         #base name less extension
@@ -256,7 +256,7 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Plot,Save):      #Ascii s
         opath = os.path.join(workdir,outWS+'.nxs')
         SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
         logger.information('Output file : ' + opath)
-    if (Plot):
+    if Plot:
         plotForce(outWS,Plot)
     EndTime('Iback')
 
@@ -348,7 +348,7 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,mapPath,Plot,Save):
         opath = os.path.join(workdir,outWS+'.nxs')
         SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
         logger.information('Output file : ' + opath)
-    if (Plot):
+    if Plot:
         plotForce(outWS,Plot)
     EndTime('Inx')
 
@@ -379,7 +379,7 @@ def ReadMap(path):
     logger.information('Map file : ' + path +' ; spectra = ' +str(lasc-1))
     val = ExtractInt(asc[0])
     numb = val[0]
-    if (numb != (lasc-1)):
+    if numb != (lasc-1):
         error = 'Number of lines  not equal to number of spectra'
         logger.error(error)
         sys.exit(error)
@@ -407,7 +407,7 @@ def UseMap(inWS,map):
             logger.information('** spectrum '+str(n+1)+' skipped')
 
 def plotForce(inWS,Plot):
-    if (Plot == 'Spectrum' or Plot == 'Both'):
+    if Plot == 'Spectrum' or Plot == 'Both':
         nHist = mtd[inWS].getNumberHistograms()
         if nHist > 10 :
             nHist = 10
@@ -415,7 +415,7 @@ def plotForce(inWS,Plot):
         for i in range(0, nHist):
             plot_list.append(i)
         res_plot=mp.plotSpectrum(inWS,plot_list)
-    if (Plot == 'Contour' or Plot == 'Both'):
+    if Plot == 'Contour' or Plot == 'Both':
         cont_plot=mp.importMatrixWorkspace(inWS).plotGraph2D()
 
 def ChangeAngles(inWS,instr,theta):
@@ -595,7 +595,7 @@ def IN13Read(instr,run,ana,refl,Plot,Save):      #Ascii start routine
         opath = os.path.join(workdir,outWS+'.nxs')
         SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
         logger.information('Output file : ' + opath)
-    if (Plot != 'None'):
+    if Plot != 'None':
         plotForce(outWS,Plot)
     return outWS
 

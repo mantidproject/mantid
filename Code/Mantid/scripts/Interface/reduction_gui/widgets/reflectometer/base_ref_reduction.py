@@ -1,5 +1,5 @@
-#pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
+#pylint: disable=invalid-name,unused-import
+from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
 import math
 import os
@@ -212,9 +212,7 @@ class BaseRefWidget(BaseWidget):
         This retrieve the metadata from the data event NeXus file
         """
         _full_file_name = file
-        tmpWks = LoadEventNexus(Filename=_full_file_name,\
-#                       OutputWorkspace='tmpWks',\
-                       MetaDataOnly='1')
+        tmpWks = LoadEventNexus(Filename=_full_file_name,MetaDataOnly='1')
 
         #mt1 = mtd['tmpWks']
         #mt_run = mt1.getRun()
@@ -320,19 +318,19 @@ class BaseRefWidget(BaseWidget):
 
         sz = len(x_axis)
         i=0
-        while (i < sz-1):
+        while i < sz-1:
 
             _left_x = x_axis[i]
             _right_x = x_axis[i+1]
 
             bCalAverage = False
-            if (_left_x == _right_x):
+            if _left_x == _right_x:
                 bCalAverage = True
             else:
                 _left_x = math.fabs(_left_x)
                 _right_x = math.fabs(_right_x)
                 _relative_diff = (_left_x - _right_x) / (_left_x + _right_x)
-                if (math.fabs(_relative_diff <= _precision)):
+                if math.fabs(_relative_diff <= _precision):
                     bCalAverage = True
 
             _left_e = e_axis[i]
@@ -346,7 +344,7 @@ class BaseRefWidget(BaseWidget):
                 _right_e2 = _right_e * _right_e
                 _right_y = y_axis[i+1]
 
-                if (_left_e2 == 0. or _right_e2 == 0.):
+                if _left_e2 == 0. or _right_e2 == 0.:
                     _y = 0.
                     _e = 0.
                 else:
@@ -386,14 +384,14 @@ class BaseRefWidget(BaseWidget):
         # calculate the numerator of mean
         dataNum = 0
         for i in range(sz):
-            if not (data_array[i] == 0):
+            if not data_array[i] == 0:
                 tmpFactor = float(data_array[i]) / float((pow(error_array[i],2)))
                 dataNum += tmpFactor
 
         # calculate denominator
         dataDen = 0
         for i in range(sz):
-            if not (error_array[i] == 0):
+            if not error_array[i] == 0:
                 tmpFactor = 1./float((pow(error_array[i],2)))
                 dataDen += tmpFactor
 
@@ -542,7 +540,7 @@ class BaseRefWidget(BaseWidget):
                 if data_y[j]>0 and data_y_i[j]>0:
 
                     if isUsingLessErrorValue:
-                        if (data_e[j] > data_e_i[j]):
+                        if data_e[j] > data_e_i[j]:
                             data_y[j] = data_y_i[j]
                             data_e[j] = data_e_i[j]
                     else:
@@ -571,7 +569,7 @@ class BaseRefWidget(BaseWidget):
 
         #retrieve name of the output file
         file_name = QtGui.QFileDialog.getSaveFileName(self, "Select or define a ASCII file name", default_file_name, "(*.txt)")
-        if (str(file_name).strip() == ''):
+        if str(file_name).strip() == '':
             return
 
         #check the status of the 4th column switch
@@ -619,7 +617,7 @@ class BaseRefWidget(BaseWidget):
         sz = len(x_axis)-1
         for i in range(sz):
             # do not display data where R=0
-            if (y_axis[i] > 1e-15):
+            if y_axis[i] > 1e-15:
                 _line = str(x_axis[i])
                 _line += ' ' + str(y_axis[i])
                 _line += ' ' + str(e_axis[i])
@@ -639,7 +637,7 @@ class BaseRefWidget(BaseWidget):
         '''
         try:
             file_name = QtGui.QFileDialog.getOpenFileName(self, "Select a SF configuration file", "", "(*.cfg)")
-            if (str(file_name).strip() != ''):
+            if str(file_name).strip() != '':
                 if os.path.isfile(file_name):
                     self._summary.cfg_scaling_factor_file_name.setText(file_name)
                     self.retrieve_list_of_incident_medium(file_name)
@@ -919,14 +917,14 @@ class BaseRefWidget(BaseWidget):
         self._summary.norm_peak_to_pixel.setEnabled(is_checked)
 
         self._summary.norm_background_switch.setEnabled(is_checked)
-        if (not(is_checked)):
+        if not is_checked:
             self._norm_background_clicked(False)
         else:
             NormBackFlag = self._summary.norm_background_switch.isChecked()
             self._norm_background_clicked(NormBackFlag)
 
         self._summary.norm_low_res_range_switch.setEnabled(is_checked)
-        if (not(is_checked)):
+        if not is_checked:
             self._norm_low_res_clicked(False)
         else:
             LowResFlag = self._summary.norm_low_res_range_switch.isChecked()
@@ -1061,7 +1059,7 @@ class BaseRefWidget(BaseWidget):
         basename = os.path.basename(file_path)
         ws_base = "__%s" % basename
 
-        if (self.instrument_name == 'REF_L'):
+        if self.instrument_name == 'REF_L':
             ws_output_base = "Pixel Y vs TOF" + " - " + basename
         else:
             ws_output_base = "Pixel X vs TOF" + " - " + basename
@@ -1311,7 +1309,7 @@ class BaseRefWidget(BaseWidget):
                 state.q_step = float(_q_step)
 
                 state.scaling_factor_file = self._summary.cfg_scaling_factor_file_name.text()
-                if (self._summary.use_sf_config_switch.isChecked()):
+                if self._summary.use_sf_config_switch.isChecked():
                     state.scaling_factor_file_flag = True
                 else:
                     state.scaling_factor_file_flag = False
@@ -1345,7 +1343,7 @@ class BaseRefWidget(BaseWidget):
             item_widget = QtGui.QListWidgetItem(run_numbers, self._summary.angle_list)
             state.scaling_factor_file = self._summary.cfg_scaling_factor_file_name.text()
 
-            if (self._summary.use_sf_config_switch.isChecked()):
+            if self._summary.use_sf_config_switch.isChecked():
                 state.scaling_factor_file_flag = True
             else:
                 state.scaling_factor_file_flag = False

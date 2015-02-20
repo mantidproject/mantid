@@ -306,7 +306,7 @@ class RunDescriptor(PropDescriptor):
     def chop_ws_part(self,origin,tof_range,rebin,chunk_num,n_chunks):
         """ chop part of the original workspace and sets it up as new original.
             Return the old one """
-        if not(origin):
+        if not origin:
             origin = self.get_workspace()
 
         origin_name = origin.name()
@@ -446,7 +446,7 @@ class RunDescriptor(PropDescriptor):
         except RuntimeError:
             message = 'Cannot find file matching hint {0} on current search paths ' \
                        'for instrument {1}'.format(file_hint,inst_name)
-            if not ('be_quet' in kwargs):
+            if not 'be_quet' in kwargs:
                 RunDescriptor._logger(message,'warning')
             return 'ERROR:find_file: ' + message
 #--------------------------------------------------------------------------------------------------------------------
@@ -496,7 +496,7 @@ class RunDescriptor(PropDescriptor):
                 self._ws_name = None
                 ws_name = self.get_ws_name()
         #-----------------------------------
-        if ws_name in mtd and not(force):
+        if ws_name in mtd and not force:
             RunDescriptor._logger("{0} already loaded as workspace.".format(ws_name),'information')
         else:
             # If it doesn't exists as a workspace assume we have to try and

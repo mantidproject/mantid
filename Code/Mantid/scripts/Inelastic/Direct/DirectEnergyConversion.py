@@ -488,7 +488,7 @@ class DirectEnergyConversion(object):
 
 
         results_name = deltaE_ws_sample.name()
-        if out_ws_name and not(self._multirep_mode):
+        if out_ws_name and not self._multirep_mode:
             if results_name != out_ws_name:
                 RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
             result = mtd[out_ws_name]
@@ -562,7 +562,7 @@ class DirectEnergyConversion(object):
         offset = self.prop_man.motor_offset
 
         #
-        if (offset is None):
+        if offset is None:
             motor_offset = float('nan')
         else:
             motor_offset = float(offset)
@@ -1071,7 +1071,7 @@ class DirectEnergyConversion(object):
             err = data_ws.readE(i)[0]
             if sig != sig:     #ignore NaN (hopefully it will mean mask some day)
                 continue
-            if ((err <= 0) or (sig <= 0)):   # count Inf and negative||zero readings.  Presence of this indicates that
+            if (err <= 0) or (sig <= 0):   # count Inf and negative||zero readings.  Presence of this indicates that
                                             # something went wrong
                 izerc+=1
                 continue
@@ -1105,7 +1105,7 @@ class DirectEnergyConversion(object):
         # n_i is the modified signal
         signal_sum = sum(map(lambda e: e * e,error))
         weight_sum = sum(map(lambda s,e: e * e / s,signal,error))
-        if(weight_sum == 0.0):
+        if weight_sum == 0.0:
             prop_man.log("WB integral has been calculated incorrectly, look at van_int workspace: {0}".format(deltaE_wkspaceName),'error')
             raise ArithmeticError("Division by 0 weight when calculating WB integrals from workspace {0}".format(deltaE_wkspaceName))
         norm_factor['Poisson'] = signal_sum / weight_sum
@@ -1114,7 +1114,7 @@ class DirectEnergyConversion(object):
         # TGP suggestion from 12-2012
         signal_sum = sum(map(lambda s,e: s * s / (e * e),signal,error))
         weight_sum = sum(map(lambda s,e: s / (e * e),signal,error))
-        if(weight_sum == 0.0):
+        if weight_sum == 0.0:
             prop_man.log("WB integral has been calculated incorrectly, look at van_int workspace: {0}".format(deltaE_wkspaceName),'error')
             raise ArithmeticError("Division by 0 weight when calculating WB integrals from workspace {0}".format(deltaE_wkspaceName))
         norm_factor['TGP'] = signal_sum / weight_sum
@@ -1136,7 +1136,7 @@ class DirectEnergyConversion(object):
 
         # check for NaN
         if (norm_factor['LibISIS'] != norm_factor['LibISIS']) | (izerc != 0):    # It is an error, print diagnostics:
-            if (norm_factor['LibISIS'] != norm_factor['LibISIS']):
+            if norm_factor['LibISIS'] != norm_factor['LibISIS']:
                 log_value = '\n--------> Absolute normalization factor is NaN <----------------------------------------------\n'
             else:
                 log_value = '\n--------> Warning, Monovanadium has zero spectra <--------------------------------------------\n'
@@ -1386,7 +1386,7 @@ class DirectEnergyConversion(object):
         normalization to a white-beam vanadium run.
         """
 
-        if (self._do_ISIS_reduction):
+        if self._do_ISIS_reduction:
             self._do_mono_ISIS(run,ei_guess,\
                               white_run, map_file, spectra_masks, Tzero)
         else:

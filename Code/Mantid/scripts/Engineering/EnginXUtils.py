@@ -37,7 +37,7 @@ def getWsIndicesForBank(bank, ws):
     def isIndexInBank(index):
         try:
             det = ws.getDetector(index)
-            return (det.getID() in detIDs)
+            return det.getID() in detIDs
         except:
             return False
 

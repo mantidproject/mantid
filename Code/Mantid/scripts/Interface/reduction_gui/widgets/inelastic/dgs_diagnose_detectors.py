@@ -1,6 +1,5 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
-from functools import partial
+from PyQt4 import QtGui, QtCore
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.inelastic.dgs_diagnose_detectors_script import DiagnoseDetectorsScript
 import reduction_gui.widgets.util as util
@@ -33,16 +32,16 @@ class DiagnoseDetectorsWidget(BaseWidget):
 
     def initialize_content(self):
         # Constraints
-        for widget in [
-                       self._content.median_test_high_edit,
-                       self._content.median_test_low_edit,
-                       self._content.median_test_out_high_edit,
-                       self._content.median_test_out_low_edit,
-                       self._content.errorbar_crit_edit,
-                       self._content.ratio_var_crit_edit,
-                       self._content.sambkg_median_test_high_edit,
-                       self._content.sambkg_median_test_low_edit,
-                       self._content.sambkg_errorbar_crit_edit
+        for widget in [\
+                       self._content.median_test_high_edit,\
+                       self._content.median_test_low_edit,\
+                       self._content.median_test_out_high_edit,\
+                       self._content.median_test_out_low_edit,\
+                       self._content.errorbar_crit_edit,\
+                       self._content.ratio_var_crit_edit,\
+                       self._content.sambkg_median_test_high_edit,\
+                       self._content.sambkg_median_test_low_edit,\
+                       self._content.sambkg_errorbar_crit_edit\
                        ]:
 
             dvp = QtGui.QDoubleValidator(widget)

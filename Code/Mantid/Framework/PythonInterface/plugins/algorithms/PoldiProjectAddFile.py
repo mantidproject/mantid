@@ -57,7 +57,7 @@ class PoldiProjectAddFile(PythonAlgorithm):
 
         try:
             sample_info_ws_name = self.getProperty("OutputWorkspace").valueAsStr
-            if(sample_info_ws_name == ""):
+            if sample_info_ws_name == "":
                 sample_info_ws_name = "PoldiAnalysis"
             self.log().debug('Poldi Data Analysis ---- %s'%(sample_info_ws_name))
             sample_info_ws = mtd[sample_info_ws_name]
@@ -83,7 +83,7 @@ class PoldiProjectAddFile(PythonAlgorithm):
         self.log().error('Poldi -          : %s' %(sample_name))
         self.log().error('Poldi -          : %s' %(sampleExt))
 
-        if("hdf" in sampleExt):
+        if "hdf" in sampleExt:
             self.log().error('Poldi -  samples : %s' %(sample_name))
             file_path = dataFile
             sample_name_log = "%sLog" %sample_name

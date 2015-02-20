@@ -37,7 +37,7 @@ def createTubeCalibtationWorkspaceByWorkspaceIndexList ( integratedWorkspace, ou
     """
 
     nSpectra = len(workspaceIndexList)
-    if( nSpectra < 1):
+    if  nSpectra < 1:
         return
     pixelNumbers = []
     integratedPixelCounts = []
@@ -200,7 +200,7 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
     # Create input workspace for fitting
     ## get all the counts for the integrated workspace inside the tube
     countsY = numpy.array([IntegratedWorkspace.dataY(i)[0] for i in whichTube])
-    if (len(countsY) == 0):
+    if len(countsY) == 0:
         return
     getPointsWs = CreateWorkspace(range(len(countsY)),countsY,OutputWorkspace='TubePlot')
     calibPointWs = 'CalibPoint'
@@ -303,7 +303,7 @@ def correctTubeToIdealTube( tubePoints, idealTubePoints, nDets, TestMode=False, 
     #print "correctTubeToIdealTube"
 
     # Check the arguments
-    if ( len(tubePoints) != len(idealTubePoints) ):
+    if  len(tubePoints) != len(idealTubePoints) :
         print "Number of points in tube", len(tubePoints),"must equal number of points in ideal tube", len(idealTubePoints)
         return xResult
 
@@ -312,18 +312,18 @@ def correctTubeToIdealTube( tubePoints, idealTubePoints, nDets, TestMode=False, 
     usedIdealTubePoints = []
     missedTubePoints = [] # Used for diagnostic print only
     for i in range(len(tubePoints)):
-        if( tubePoints[i] > 0.0 and tubePoints[i] < nDets):
+        if  tubePoints[i] > 0.0 and tubePoints[i] < nDets:
             usedTubePoints.append( tubePoints[i] )
             usedIdealTubePoints.append ( idealTubePoints[i] )
         else:
             missedTubePoints.append(i+1)
 
     # State number of rogue slit points, if any
-    if( len(tubePoints) != len(usedTubePoints)):
+    if  len(tubePoints) != len(usedTubePoints):
         print "Only",len(usedTubePoints),"out of",len(tubePoints)," slit points used. Missed",missedTubePoints
 
     # Check number of usable points
-    if( len(usedTubePoints) < 3):
+    if  len(usedTubePoints) < 3:
         print "Too few usable points in tube",len(usedTubePoints)
         return []
 
@@ -346,7 +346,7 @@ def correctTubeToIdealTube( tubePoints, idealTubePoints, nDets, TestMode=False, 
 
     # In test mode, shove the pixels that are closest to the reckoned peaks
     # to the position of the first detector so that the resulting gaps can be seen.
-    if( TestMode ):
+    if  TestMode :
         print "TestMode code"
         for i in range( len(usedTubePoints) ):
            #print "used point",i,"shoving pixel",int(usedTubePoints[i])
@@ -377,13 +377,13 @@ def getCalibratedPixelPositions( ws, tubePts, idealTubePts, whichTube, peakTestM
     detPositions = []
     #Get position of first and last pixel of tube
     nDets = len(whichTube)
-    if( nDets < 1):
+    if  nDets < 1:
         return  detIDs, detPositions
 
     # Correct positions of detectors in tube by quadratic fit
     pixels = correctTubeToIdealTube ( tubePts, idealTubePts, nDets, TestMode=peakTestMode, polinFit=polinFit )
     #print pixels
-    if( len(pixels) != nDets):
+    if  len(pixels) != nDets:
         print "Tube correction failed."
         return detIDs, detPositions
     baseInstrument = ws.getInstrument().getBaseInstrument()
@@ -395,7 +395,7 @@ def getCalibratedPixelPositions( ws, tubePts, idealTubePts, whichTube, peakTestM
     d0pos,dNpos = det0.getPos(),detN.getPos()
     ## identical to norm of vector: |dNpos - d0pos|
     tubeLength = det0.getDistance(detN)
-    if( tubeLength <= 0.0):
+    if  tubeLength <= 0.0:
         print "Zero length tube cannot be calibrated, calibration failed."
         return detIDs, detPositions
     #unfortunatelly, the operation '/' is not defined in V3D object, so
@@ -502,13 +502,13 @@ def getCalibration( ws, tubeSet, calibTable, fitPar, iTube, peaksTable,
         all_skipped.update(skipped)
 
         print "Calibrating tube", i+1,"of",nTubes, tubeSet.getTubeName(i)
-        if ( len(wht) < 1 ):
+        if  len(wht) < 1 :
             print "Unable to get any workspace indices (spectra) for this tube. Tube",tubeSet.getTubeName(i),"not calibrated."
            #skip this tube
             continue
 
         # Calibribate the tube, if possible
-        if (tubeSet.getTubeLength(i) <= excludeShortTubes):
+        if tubeSet.getTubeLength(i) <= excludeShortTubes:
             #skip this tube
             continue
 
@@ -537,7 +537,7 @@ def getCalibration( ws, tubeSet, calibTable, fitPar, iTube, peaksTable,
 
         detIDList, detPosList = getCalibratedPixelPositions( ws, actualTube, iTube.getArray(), wht, peaksTestMode, polinFit)
         #save the detector positions to calibTable
-        if( len(detIDList) == len(wht)): # We have corrected positions
+        if  len(detIDList) == len(wht): # We have corrected positions
             for j in range(len(wht)):
                 nextRow = {'Detector ID': detIDList[j], 'Detector Position': detPosList[j] }
                 calibTable.addRow ( nextRow )
@@ -587,19 +587,19 @@ def getCalibrationFromPeakFile ( ws, calibTable, iTube,  PeakFile ):
 
         wht, _ = tube.getTube(0)
         print "Calibrating tube", i+1 ,"of", nTubes, TubeName #, " length", tubeSet.getTubeLength(i)
-        if ( len(wht) < 1 ):
+        if  len(wht) < 1 :
             print "Unable to get any workspace indices for this tube. Calibration abandoned."
             return
 
         detIDList, detPosList = getCalibratedPixelPositions( ws, actualTube, idealTube, wht)
 
         #print len(wht)
-        if( len(detIDList) == len(wht)): # We have corrected positions
+        if  len(detIDList) == len(wht): # We have corrected positions
             for j in range(len(wht)):
                 nextRow = {'Detector ID': detIDList[j], 'Detector Position': detPosList[j] }
                 calibTable.addRow ( nextRow )
 
-    if(nTubes == 0):
+    if nTubes == 0:
         return
 
     # Delete temporary workspaces for getting new detector positions
@@ -626,16 +626,16 @@ def constructIdealTubeFromRealTube( ws, tube, fitPar, funcForm ):
     idealTube = IdealTube()
 
     nTubes = tube.getNumTubes()
-    if(nTubes < 1):
+    if nTubes < 1:
         raise RuntimeError("Invalid tube specification received by constructIdealTubeFromRealTube")
-    elif(nTubes > 1):
+    elif nTubes > 1:
         print "Specification has several tubes. The ideal tube will be based on the first tube",tube.getTubeName(0)
 
     wht, _ = tube.getTube(0)
    # print wht
 
    # Check tube
-    if ( len(wht) < 1 ):
+    if  len(wht) < 1 :
         raise RuntimeError("Unable to get any workspace indices for this tube. Cannot use as ideal tube.")
 
    # Get actual tube on which ideal tube is based

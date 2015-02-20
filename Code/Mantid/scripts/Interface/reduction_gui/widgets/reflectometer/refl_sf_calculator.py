@@ -135,7 +135,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         Define configuration file name
         '''
         file_name = QtGui.QFileDialog.getOpenFileName(self, "Select config file name", "", "(*.cfg)")
-        if (str(file_name).strip() != ''):
+        if str(file_name).strip() != '':
             self._summary.cfg_scaling_factor_file_name.setText(file_name)
             self.display_preview_config_file()
 
@@ -289,7 +289,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         in_list = False
         # Check whether it's already in the list
         run_numbers = self._summary.data_run_number_edit.text()
-        if (run_numbers == ''):
+        if run_numbers == '':
             return
 
         list_items = self._summary.angle_list.findItems(run_numbers, QtCore.Qt.MatchFixedString)
@@ -404,7 +404,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self._summary.tof_max.setText(str(state.tof_max))
 
         self._summary.cfg_scaling_factor_file_name.setText(str(state.scaling_factor_file))
-        if (state.scaling_factor_file != ''):
+        if state.scaling_factor_file != '':
             self.display_preview_config_file()
 
         self._summary.data_run_number_edit.setText(str(state.data_file))

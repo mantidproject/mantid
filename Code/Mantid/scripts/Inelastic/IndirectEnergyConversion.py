@@ -34,8 +34,8 @@ def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,\
         return workspaces
 
 def createMappingFile(groupFile, ngroup, nspec, first):
-    if ( ngroup == 1 ): return 'All'
-    if ( nspec == 1 ): return 'Individual'
+    if  ngroup == 1 : return 'All'
+    if  nspec == 1 : return 'Individual'
     filename = config['defaultsave.directory']
     filename = os.path.join(filename, groupFile)
     handle = open(filename, 'w')
@@ -86,7 +86,7 @@ def getInstrumentDetails(instrument):
             if j < ( len(reflections[i][1]) -1 ):
                 message += ','
         result += message
-        if ( i < ( len(reflections) - 1) ):
+        if  i < ( len(reflections) - 1) :
             result += '\n'
     return result
 

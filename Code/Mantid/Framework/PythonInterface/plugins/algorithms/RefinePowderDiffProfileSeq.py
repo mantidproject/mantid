@@ -783,20 +783,20 @@ class RefineProfileParameters:
         self.glog.information("**** Profile workspace = %s, Reflection workspace = %s" % (
             self.inprofilewsname, self.inreflectionwsname))
 
-        api.LeBailFit(
-                Function                =   'Calculation',
-                InputWorkspace          =   self.datawsname,
-                OutputWorkspace         =   self.outwsname,
-                InputParameterWorkspace =   self.inprofilewsname,
-                OutputParameterWorkspace=   self.outprofilewsname,
-                InputHKLWorkspace       =   self.inreflectionwsname,
-                OutputPeaksWorkspace    =   self.outreflectionwsname,
-                FitRegion               =   '%f, %f' % (startx, endx),
-                PeakType                =   self.peaktype,
-                BackgroundType          =   self.bkgdtype,
-                UseInputPeakHeights     =   False,
-                PeakRadius              =   '8',
-                BackgroundParametersWorkspace   =   self.bkgdtablewsname
+        api.LeBailFit(\
+                Function                =   'Calculation',\
+                InputWorkspace          =   self.datawsname,\
+                OutputWorkspace         =   self.outwsname,\
+                InputParameterWorkspace =   self.inprofilewsname,\
+                OutputParameterWorkspace=   self.outprofilewsname,\
+                InputHKLWorkspace       =   self.inreflectionwsname,\
+                OutputPeaksWorkspace    =   self.outreflectionwsname,\
+                FitRegion               =   '%f, %f' % (startx, endx),\
+                PeakType                =   self.peaktype,\
+                BackgroundType          =   self.bkgdtype,\
+                UseInputPeakHeights     =   False,\
+                PeakRadius              =   '8',\
+                BackgroundParametersWorkspace   =   self.bkgdtablewsname\
         )
 
         return
@@ -820,29 +820,29 @@ class RefineProfileParameters:
             #         UpdatePeakParameterTableValue().  It is not a real new table workspace, but a link
             #         to the 'inprofilewsname'
             #         There must be something wrong in AnalysisDataService.
-            api.UpdatePeakParameterTableValue(
-                    InputWorkspace  =   self.inprofilewsname,
-                    Column          =   "FitOrTie",
+            api.UpdatePeakParameterTableValue(\
+                    InputWorkspace  =   self.inprofilewsname,\
+                    Column          =   "FitOrTie",\
                     NewStringValue  =   "tie")
-            api.UpdatePeakParameterTableValue(
-                    InputWorkspace  =   self.inprofilewsname,
-                    Column          =   "FitOrTie",
-                    ParameterNames  =   parameternames,
+            api.UpdatePeakParameterTableValue(\
+                    InputWorkspace  =   self.inprofilewsname,\
+                    Column          =   "FitOrTie",\
+                    ParameterNames  =   parameternames,\
                     NewStringValue  =   "fit")
 
             # Limit the range of MC
             if parameternames.count("Width") > 0:
                 #self.cwl = 1.33
-                UpdatePeakParameterTableValue(
-                        InputWorkspace  =   self.inprofilewsname,
-                        Column          =   "Min",
-                        ParameterNames  =   ["Width"],
+                UpdatePeakParameterTableValue(\
+                        InputWorkspace  =   self.inprofilewsname,\
+                        Column          =   "Min",\
+                        ParameterNames  =   ["Width"],\
                         NewFloatValue   =   0.50) #cwl*0.25)
 
-                UpdatePeakParameterTableValue(
-                        InputWorkspace  =   self.inprofilewsname,
-                        Column          =   "Max",
-                        ParameterNames  =   ["Width"],
+                UpdatePeakParameterTableValue(\
+                        InputWorkspace  =   self.inprofilewsname,\
+                        Column          =   "Max",\
+                        ParameterNames  =   ["Width"],\
                         NewFloatValue   =   1.25) #cwl*4.0)
 
             # Generate Monte carlo table
@@ -854,26 +854,26 @@ class RefineProfileParameters:
             else:
                 raise NotImplementedError("Peak type %s is not supported to set up MC table." % (self.peaktype))
 
-            api.LeBailFit(
-                    InputWorkspace                  = self.datawsname,
-                    OutputWorkspace                 = self.outwsname,
-                    InputParameterWorkspace         = self.inprofilewsname,
-                    OutputParameterWorkspace        = self.outprofilewsname,
-                    InputHKLWorkspace               = self.inreflectionwsname,
-                    OutputPeaksWorkspace            = self.outreflectionwsname,
-                    FitRegion                       = '%f, %f' % (startx, endx),
-                    Function                        = 'MonteCarlo',
-                    NumberMinimizeSteps             = numsteps,
-                    PeakType                        = self.peaktype,
-                    BackgroundType                  = self.bkgdtype,
-                    BackgroundParametersWorkspace   = self.bkgdtablewsname,
-                    UseInputPeakHeights             = False,
-                    PeakRadius                      ='8',
-                    Minimizer                       = 'Levenberg-Marquardt',
-                    MCSetupWorkspace                = str(wsname),
-                    Damping                         = '5.0',
-                    RandomSeed                      = 0,
-                    AnnealingTemperature            = 100.0,
+            api.LeBailFit(\
+                    InputWorkspace                  = self.datawsname,\
+                    OutputWorkspace                 = self.outwsname,\
+                    InputParameterWorkspace         = self.inprofilewsname,\
+                    OutputParameterWorkspace        = self.outprofilewsname,\
+                    InputHKLWorkspace               = self.inreflectionwsname,\
+                    OutputPeaksWorkspace            = self.outreflectionwsname,\
+                    FitRegion                       = '%f, %f' % (startx, endx),\
+                    Function                        = 'MonteCarlo',\
+                    NumberMinimizeSteps             = numsteps,\
+                    PeakType                        = self.peaktype,\
+                    BackgroundType                  = self.bkgdtype,\
+                    BackgroundParametersWorkspace   = self.bkgdtablewsname,\
+                    UseInputPeakHeights             = False,\
+                    PeakRadius                      ='8',\
+                    Minimizer                       = 'Levenberg-Marquardt',\
+                    MCSetupWorkspace                = str(wsname),\
+                    Damping                         = '5.0',\
+                    RandomSeed                      = 0,\
+                    AnnealingTemperature            = 100.0,\
                     DrunkenWalk                     = True)
         # ENDIF (step)
 

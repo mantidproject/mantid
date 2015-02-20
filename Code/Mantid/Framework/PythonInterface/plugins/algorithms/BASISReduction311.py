@@ -63,7 +63,7 @@ class BASISReduction311(PythonAlgorithm):
         self._groupDetOpt = self.getProperty("GroupDetectors").value
 
         datasearch = config["datasearch.searcharchive"]
-        if (datasearch != "On"):
+        if datasearch != "On":
             config["datasearch.searcharchive"] = "On"
 
         # Handle masking file override if necessary

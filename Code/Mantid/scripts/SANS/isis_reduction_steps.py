@@ -205,7 +205,7 @@ class LoadRun(object):
         If reload is True, it will try to get all the information necessary to reload this
         workspace from the data file.
         """
-        assert(isinstance(self._data_file, Workspace))
+        assert isinstance(self._data_file, Workspace)
         ws_pointer = self._data_file
 
         try:
@@ -704,7 +704,7 @@ class Mask_ISIS(ReductionStep):
                 self.time_mask = ''
                 self.time_mask_r = ''
                 self.time_mask_f = ''
-            elif (type == 'TIME' or type == 'T'):
+            elif type == 'TIME' or type == 'T':
                 parts = parts[2].split()
                 if len(parts) == 3:
                     detname = parts[0].rstrip()
@@ -1027,7 +1027,7 @@ class Mask_ISIS(ReductionStep):
                 Ys.append(flags.readY(i)[0])
                 Es.append(0)
 
-                if (vals.readY(i)[0] > maxval):
+                if vals.readY(i)[0] > maxval:
                     #don't include masked or monitors
                     if (flags.readY(i)[0] == 0) and (vals.readY(i)[0] < 5000):
                         maxval = vals.readY(i)[0]
@@ -1405,7 +1405,7 @@ class TransmissionCalc(ReductionStep):
         direct_tmp_out = self.setup_wksp(direct_raw, reducer.instrument,\
             wavbin, pre_sample, post_sample)
 
-        fittedtransws, unfittedtransws = self.get_wksp_names(
+        fittedtransws, unfittedtransws = self.get_wksp_names(\
                     trans_raw, translambda_min, translambda_max, reducer)
 
         # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
@@ -1611,7 +1611,7 @@ class CalculateNormISIS(object):
                 ConvertToHistogram(InputWorkspace=self.TMP_ISIS_NAME,OutputWorkspace= self.TMP_ISIS_NAME)
         ## try to redefine self._pixel_file to pass to CalculateNORM method calculate.
         detect_pixel_file = self.getPixelCorrFile(reducer.instrument.cur_detector().name())
-        if (detect_pixel_file != ""):
+        if detect_pixel_file != "":
             self._pixel_file = detect_pixel_file
 
         for step in self._wave_steps:
@@ -1707,7 +1707,7 @@ class ConvertToQISIS(ReductionStep):
         Calculate the normalization workspaces and then call the chosen Q conversion algorithm.
         """
         wavepixeladj = ""
-        if (reducer.wide_angle_correction and reducer.transmission_calculator.output_wksp):
+        if reducer.wide_angle_correction and reducer.transmission_calculator.output_wksp:
             #calculate the transmission wide angle correction
             _issueWarning("sans solid angle correction execution")
             SANSWideAngleCorrection(SampleData=workspace,\
@@ -1995,11 +1995,11 @@ class UserFile(ReductionStep):
             hab_str_pos = upper_line.find('HAB')
             x_pos = 0.0
             y_pos = 0.0
-            if (main_str_pos > 0):
+            if main_str_pos > 0:
                 values = upper_line[main_str_pos+5:].split() #remov the SET CENTRE/MAIN
                 x_pos = float(values[0])/1000.0
                 y_pos = float(values[1])/1000.0
-            elif (hab_str_pos > 0):
+            elif hab_str_pos > 0:
                 values = upper_line[hab_str_pos+4:].split() # remove the SET CENTRE/HAB
                 print ' convert values ',values
                 x_pos = float(values[0])/1000.0
@@ -2008,7 +2008,7 @@ class UserFile(ReductionStep):
                 values = upper_line.split()
                 x_pos = float(values[2])/1000.0
                 y_pos = float(values[3])/1000.0
-            if (hab_str_pos > 0):
+            if hab_str_pos > 0:
                 print 'Front values = ',x_pos,y_pos
                 reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos),'front')
             else:
@@ -2184,7 +2184,7 @@ class UserFile(ReductionStep):
                 _issueWarning("General wave re-bin lines are not implemented, line ignored \"" + limit_line + "\"")
                 return
             else:
-                reducer.to_wavelen.set_rebin(
+                reducer.to_wavelen.set_rebin(\
                         minval, step_type + step_size, maxval, override=False)
         elif limit_type.upper() == 'Q':
             if rebin_str:
@@ -2806,7 +2806,7 @@ class SampleGeomCor(ReductionStep):
 
     def calculate_volume(self, reducer):
         geo = reducer.get_sample().geometry
-        assert( issubclass(geo.__class__, GetSampleGeom))
+        assert  issubclass(geo.__class__, GetSampleGeom)
 
         try:
             if geo.shape == 'cylinder-axis-up':

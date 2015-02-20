@@ -54,7 +54,7 @@ start_time = time.time()
 #
 # Get the config file name and the run number to process from the command line
 #
-if (len(sys.argv) < 3):
+if len(sys.argv) < 3:
     print "You MUST give the config file name(s) and run number on the command line"
     exit(0)
 
@@ -158,9 +158,9 @@ event_ws = LoadEventNexus( Filename=full_name,
 # can not be None.  TOPAZ has one calibration file, but SNAP may have two.
 #
 if (calibration_file_1 is not None ) or (calibration_file_2 is not None):
-    if (calibration_file_1 is None ):
+    if calibration_file_1 is None :
         calibration_file_1 = ""
-    if (calibration_file_2 is None ):
+    if calibration_file_2 is None :
         calibration_file_2 = ""
     LoadIsawDetCal( event_ws,\
                   Filename=calibration_file_1, Filename2=calibration_file_2 )

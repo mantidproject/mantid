@@ -241,7 +241,7 @@ class CutMD(DataProcessorAlgorithm):
         extents, bins = self.__calculate_steps( extents, ( p1_bins, p2_bins, p3_bins ) )
 
         if not p4_bins_property.isDefault:
-            if (ndims == 4):
+            if ndims == 4:
                 n_args = len(p4_bins)
                 min, max = self.__extents_in_current_projection(to_cut, 3)
                 d_range = max - min

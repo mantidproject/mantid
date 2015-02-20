@@ -212,9 +212,9 @@ def gen_getter(keyval_dict,key):
         gen_getter(keyval_dict,A) == 10;  gen_getter(keyval_dict,B) == 20;
         and gen_getter(keyval_dict,C) == [10,20];
     """
-    if not(key in keyval_dict):
+    if not key in keyval_dict:
         name = '_'+key
-        if not(name in keyval_dict):
+        if not name in keyval_dict:
             raise KeyError('Property with name: {0} is not among the class properties '.format(key))
     else:
         name = key
@@ -239,9 +239,9 @@ def gen_setter(keyval_dict,key,val):
         and gen_getter(keyval_dict,C,[1,2]) causes keyval_dict[A] == 1 and keyval_dict[B] == 2
     """
 
-    if not(key in keyval_dict):
+    if not key in keyval_dict:
         name = '_'+key
-        if not(name in keyval_dict):
+        if not name in keyval_dict:
             raise KeyError(' Property name: {0} is not defined'.format(key))
     else:
         name = key
@@ -263,7 +263,7 @@ def check_instrument_name(old_name,new_name):
 
 
     if new_name is None:
-        if not(old_name is None):
+        if not old_name is None:
             return (None,None,str(config.getFacility()))
         else:
             raise KeyError("No instrument name is defined")

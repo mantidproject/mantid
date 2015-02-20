@@ -11,11 +11,11 @@ class Interval(object):
         self.min=minv
         self.max=maxv
     def overlap(self, other):
-        if (other.max >self.min and other.max <self.max):
+        if other.max >self.min and other.max <self.max:
             return True
-        if (other.min >self.min and other.min<self.max):
+        if other.min >self.min and other.min<self.max:
             return True
-        if (other.min<self.min and other.max>self.max):
+        if other.min<self.min and other.max>self.max:
             return True
         return False
 

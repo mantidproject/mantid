@@ -72,7 +72,7 @@ class sfCalculator(object):
 
         print '---> initialize calculation'
 
-        if (tof_range is None):
+        if tof_range is None:
             self.tof_min = 10000
             self.tof_max = 21600
         else:
@@ -386,7 +386,7 @@ class sfCalculator(object):
         index_tof_min = self._getIndex(self.tof_min, x_axis)
         index_tof_max = self._getIndex(self.tof_max, x_axis)
 
-        if (bNumerator is True):
+        if bNumerator is True:
             self.y_axis_numerator = counts_vs_tof[index_tof_min:index_tof_max].copy()
             self.y_axis_error_numerator = counts_vs_tof_error[index_tof_min:index_tof_max].copy()
             self.x_axis_ratio = self.x_axis[index_tof_min:index_tof_max].copy()
@@ -482,14 +482,14 @@ class sfCalculator(object):
         #calculate numerator
         dataNum = 0
         for i in range(sz):
-            if (data[i] != 0):
+            if data[i] != 0:
                 tmpFactor = float(data[i]) / (error[i]**2)
                 dataNum += tmpFactor
 
         #calculate denominator
         dataDen = 0
         for i in range(sz):
-            if (error[i] != 0):
+            if error[i] != 0:
                 tmpFactor = float(1) / (error[i]**2)
                 dataDen += tmpFactor
 
@@ -575,7 +575,7 @@ class sfCalculator(object):
         max_back = 0
         max_back_error = 0
 
-        for t in (range(nbr_tof-1)):
+        for t in range(nbr_tof-1):
 
             _y_slice = data[:,t]
             _y_error_slice = error[:,t]
@@ -780,7 +780,7 @@ def plotObject(instance):
              linestyle='',
              label='Exp. data')
 
-    if (instance.a is not None):
+    if instance.a is not None:
         x = linspace(10000, 22000, 100)
         _label = "%.3f + x*%.2e" % (instance.a, instance.b)
         plot(x, instance.a + instance.b * x, label=_label)
@@ -858,7 +858,7 @@ def outputFittingParameters(a, b, error_a, error_b,
     #then if it does, parse the file and check if following infos are
     #already defined:
     #  lambda_requested, S1H, S2H, S1W, S2W
-    if (bFileExist):
+    if bFileExist:
         f = open(output_file_name, 'r')
         text = f.readlines()
 #        split_lines = text.split('\n')
@@ -880,17 +880,17 @@ def outputFittingParameters(a, b, error_a, error_b,
                     _line_split = _line.split(' ')
                     _incident_medium = variable_value_splitter(_line_split[0])
 
-                    if (_incident_medium['value'].strip() == incident_medium.strip()):
+                    if _incident_medium['value'].strip() == incident_medium.strip():
                         _lambdaRequested = variable_value_splitter(_line_split[1])
-                        if (isWithinRange(_lambdaRequested['value'], lambda_requested)):
+                        if isWithinRange(_lambdaRequested['value'], lambda_requested):
                             _s1h = variable_value_splitter(_line_split[2])
-                            if (isWithinRange(_s1h['value'], S1H[i])):
+                            if isWithinRange(_s1h['value'], S1H[i]):
                                 _s2h = variable_value_splitter(_line_split[3])
-                                if (isWithinRange(_s2h['value'],S2H[i])):
+                                if isWithinRange(_s2h['value'],S2H[i]):
                                     _s1w = variable_value_splitter(_line_split[4])
-                                    if (isWithinRange(_s1w['value'],S1W[i])):
+                                    if isWithinRange(_s1w['value'],S1W[i]):
                                         _s2w = variable_value_splitter(_line_split[5])
-                                        if (isWithinRange(_s2w['value'],S2W[i])):
+                                        if isWithinRange(_s2w['value'],S2W[i]):
                                             _match = True
                                             break
 
@@ -995,7 +995,7 @@ def createIndividualList(string_list_files):
         list_files = "1000:0, 1001:1, 1002:1, 1003:2"
         return {1000:0, 1001:1, 1002:2, 1003:2}
     """
-    if (string_list_files == ''):
+    if string_list_files == '':
         return None
     first_split = string_list_files.split(',')
 
@@ -1168,7 +1168,7 @@ def isRunsSorted(list_runs, S1H, S2H):
 
         _left_formated = "%2.1f" % _left
         _right_formated = "%2.1f" % _right
-        if (_left_formated != _right_formated):
+        if _left_formated != _right_formated:
             return False
 
     return True
@@ -1199,7 +1199,7 @@ def calculateAndFit(numerator='',
     cal1.run()
     print 'Done with cal1.run()'
 
-    if (list_objects != [] and list_objects[-1] is not None):
+    if list_objects != [] and list_objects[-1] is not None:
         new_cal1 = cal1 * list_objects[-1]
         new_cal1.fit()
         return new_cal1
@@ -1251,7 +1251,7 @@ def calculate(string_runs=None,\
     list_attenuator = None
 
     #use default string files if not provided
-    if (string_runs is None):
+    if string_runs is None:
         #Input from user
 #        list_runs = ['55889', '55890', '55891', '55892', '55893', '55894',
 #                     '55895', '55896', '55897', '55898', '55899', '55900',
@@ -1280,14 +1280,14 @@ def calculate(string_runs=None,\
 
         list_attenuator = dico['list_attenuator']
 
-    if (incident_medium is None):
+    if incident_medium is None:
         incident_medium = "H20" #default value
 
-    if (list_attenuator is None):
+    if list_attenuator is None:
 #        list_attenuator = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]
         list_attenuator = [0, 1, 1, 1, 1, 1]
 
-    if (list_peak_back is None):
+    if list_peak_back is None:
         list_peak_back = zeros((len(list_runs), 4))   #[peak_min, peak_max, back_min, back_max]
 #        list_peak_back[9, ] = [128, 136, 120, 145]
 #        list_peak_back[11, ] = [125, 140, 115, 150]
@@ -1382,8 +1382,7 @@ def calculate(string_runs=None,\
 
                 recordSettings(a, b, error_a, error_b, name, cal)
 
-                if (i < (len(list_runs) - 1) and
-                         list_attenuator[i + 1] == (_attenuator+1)):
+                if i < (len(list_runs) - 1) and list_attenuator[i + 1] == (_attenuator+1):
                     list_objects.append(cal)
 
             #record S1H and S2H
