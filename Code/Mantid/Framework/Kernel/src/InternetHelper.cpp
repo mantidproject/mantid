@@ -130,12 +130,10 @@ void InternetHelper::createRequest(Poco::URI &uri) {
 
   for (auto itHeaders = m_headers.begin(); itHeaders != m_headers.end();
        ++itHeaders) {
-    if (itHeaders->first == CTName) // don't put Content-Type a 2nd time
-      continue;
     m_request->set(itHeaders->first, itHeaders->second);
   }
   
-	if (m_method == "POST") {
+  if (m_method == "POST") {
     m_request->setChunkedTransferEncoding(true);
   }
 }

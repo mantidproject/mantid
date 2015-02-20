@@ -120,12 +120,9 @@ private:
   int processRelocation(const Poco::Net::HTTPResponse &response,
                         std::ostream &responseStream);
 
-<<<<<<< HEAD
   void logDebugRequestSending(const std::string &schemeName,
                               const std::string &url) const;
 
-=======
->>>>>>> master
   Kernel::ProxyInfo m_proxyInfo;
   bool m_isProxySet;
   int m_timeout;
