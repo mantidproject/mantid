@@ -324,7 +324,7 @@ class IncidentEnergy(PropDescriptor):
        else:
          if inc_en <= 0:
             return (False,2,"Incident energy have to be positive number or list of positive numbers.\n" +
-                             "Got single negative incident energy {0} ".format(en))
+                             "Got single negative incident energy {0} ".format(inc_en))
        return (True,0,'')
 # end IncidentEnergy
 #-----------------------------------------------------------------------------------------
