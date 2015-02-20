@@ -30,7 +30,7 @@ import numpy as np
 class Porod(IFunction1D):
     """
         Provide a Porod model for SANS
-        
+
         I(q) = C/q^4 + background
     """
     def category(self):

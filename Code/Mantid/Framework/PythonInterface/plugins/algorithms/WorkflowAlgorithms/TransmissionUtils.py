@@ -269,7 +269,7 @@ def apply_transmission(self, workspace, trans_workspace):
                     "OutputWorkspace": '__trans_rebin',
                     "PreserveEvents": False
                     })
-    rebinned_ws = alg.getProperty("OutputWorkspace").value;
+    rebinned_ws = alg.getProperty("OutputWorkspace").value
 
     # Apply angle-dependent transmission correction using the zero-angle transmission
     theta_dependent = self.getProperty("ThetaDependent").value
