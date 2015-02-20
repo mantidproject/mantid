@@ -4,6 +4,7 @@
 #include <gsl/gsl_eigen.h>
 #include <gsl/gsl_complex_math.h>
 #include <boost/lexical_cast.hpp>
+#include <boost/assign.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -228,10 +229,34 @@ std::string SymmetryElementRotation::determineSymbol(
   return symbol;
 }
 
+std::map<V3R, std::string> SymmetryElementMirror::g_glideSymbolMap =
+    boost::assign::map_list_of(V3R(0, 0, 0), "m")(V3R(1, 0, 0) / 2,
+                                                  "a")(V3R(0, 1, 0) / 2, "b")(
+        V3R(0, 0, 1) / 2, "c")(V3R(1, 1, 0) / 2, "n")(V3R(1, 0, 1) / 2, "n")(
+        V3R(0, 1, 1) / 2, "n")(V3R(1, 1, 1) / 2, "n")(V3R(1, 1, 0) / 4, "d")(
+        V3R(1, 0, 1) / 4, "d")(V3R(0, 1, 1) / 4, "d")(V3R(1, 1, 1) / 4, "d");
+
 SymmetryElementMirror::SymmetryElementMirror() : SymmetryElementWithAxis() {}
 
 void SymmetryElementMirror::init(const SymmetryOperation &operation) {
   UNUSED_ARG(operation);
+}
+
+std::string SymmetryElementMirror::determineSymbol(
+    const SymmetryOperation &operation) const {
+
+  V3R rawTranslation = determineTranslation(operation);
+
+  V3R translation;
+  for (size_t i = 0; i < 3; ++i) {
+    translation[i] = rawTranslation[i] > RationalNumber(1, 2)
+                         ? rawTranslation[i] - 1
+                         : rawTranslation[i];
+  }
+
+  std::cout << Kernel::V3D(translation.getPositiveVector()) << std::endl;
+
+  return g_glideSymbolMap[translation.getPositiveVector()];
 }
 
 } // namespace Geometry

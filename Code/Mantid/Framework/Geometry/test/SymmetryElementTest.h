@@ -226,30 +226,43 @@ public:
     TestableSymmetryElementRotation element;
 
     SymmetryOperation sixFoldRotationZMinus("y,y-x,z");
+    TS_ASSERT_EQUALS(element.determineSymbol(sixFoldRotationZMinus), "6");
 
-    std::cout << element.determineSymbol(sixFoldRotationZMinus) << std::endl;
+
   }
 
   void testSymmetryElementWithAxisSpaceGroup() {
     TestableSymmetryElementRotation element;
+    TestableSymmetryElementMirror mirror;
 
     SpaceGroup_const_sptr sg =
-        SpaceGroupFactory::Instance().createSpaceGroup("P m -3");
+        SpaceGroupFactory::Instance().createSpaceGroup("F d -3 m");
 
+    /*
     PointGroup_sptr pg =
         PointGroupFactory::Instance().createPointGroupFromSpaceGroupSymbol(
             sg->hmSymbol());
-
+*/
     std::vector<SymmetryOperation> ops = sg->getSymmetryOperations();
     for (auto it = ops.begin(); it != ops.end(); ++it) {
       V3R axis = element.determineAxis((*it).matrix());
       SymmetryElementRotation::RotationSense sense =
           element.determineRotationSense(*it, axis);
+
+     std::string sym = element.determineSymbol(*it);
+
+      if(sym.substr(0,2) == "-2" && (*it).matrix().Trace() != -3) {
+
       std::cout << (*it).identifier() << ": " << (*it).order() << " "
-                << pg->getReflectionFamily(axis) << " "
+                //<< pg->getReflectionFamily(axis) << " "
+                << axis << " "
                 << element.determineSymbol(*it)
                 << (sense == SymmetryElementRotation::Positive ? "+" : "-")
+                << " " << mirror.determineTranslation(*it)
+                << " " << mirror.determineSymbol(*it)
                 << std::endl;
+      std::cout << (*it).matrix() << " " << (*it).matrix().determinant() << std::endl;
+      }
     }
   }
 
@@ -266,9 +279,15 @@ private:
 
   public:
     MOCK_METHOD1(init, void(const SymmetryOperation &operation));
+    MOCK_CONST_METHOD1(determineSymbol,
+                       std::string(const SymmetryOperation &operation));
   };
 
   class TestableSymmetryElementRotation : public SymmetryElementRotation {
+    friend class SymmetryElementTest;
+  };
+
+  class TestableSymmetryElementMirror : public SymmetryElementMirror {
     friend class SymmetryElementTest;
   };
 };

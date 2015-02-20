@@ -92,6 +92,9 @@ protected:
   V3R determineTranslation(const SymmetryOperation &operation) const;
   V3R determineAxis(const Kernel::IntMatrix &matrix) const;
 
+  virtual std::string
+  determineSymbol(const SymmetryOperation &operation) const = 0;
+
   V3R m_axis;
   V3R m_translation;
 };
@@ -127,10 +130,16 @@ protected:
 
 class MANTID_GEOMETRY_DLL SymmetryElementMirror
     : public SymmetryElementWithAxis {
+public:
   SymmetryElementMirror();
   ~SymmetryElementMirror() {}
 
   void init(const SymmetryOperation &operation);
+
+protected:
+  std::string determineSymbol(const SymmetryOperation &operation) const;
+
+  static std::map<V3R, std::string> g_glideSymbolMap;
 };
 
 MANTID_GEOMETRY_DLL gsl_matrix *getGSLMatrix(const Kernel::IntMatrix &matrix);
