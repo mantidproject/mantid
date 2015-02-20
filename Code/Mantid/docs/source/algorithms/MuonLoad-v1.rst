@@ -22,7 +22,7 @@ Specifically:
    resulting workspace.
 
 Workflow
---------
+########
 
 .. diagram:: MuonLoad-v1_wkflw.dot
 

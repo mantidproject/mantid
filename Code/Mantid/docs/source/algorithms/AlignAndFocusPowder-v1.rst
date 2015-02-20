@@ -33,7 +33,7 @@ sub-algorithms as listed below.
 #. :ref:`algm-ConvertUnits` to time-of-flight
 
 Workflow
---------
+########
 
 .. diagram:: AlignAndFocusPowder-v1_wkflw.dot
 

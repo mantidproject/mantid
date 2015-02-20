@@ -14,7 +14,7 @@ workspace. One can use the ExecuteOppositeOrder to do grouping first
 then masking.
 
 Workflow
---------
+########
 
 .. diagram:: DgsRemap-v1_wkflw.dot
 
