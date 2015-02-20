@@ -391,7 +391,8 @@ void SCARFTomoReconstruction::doLogout(const std::string &username) {
                              + std::string(ie.what()));
   }
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
-    g_log.notice() << "Logged out with response: " << ss.str() << std::endl;
+    g_log.notice() << "Logged out." << std::endl;
+    g_log.debug() << "Response from server: " << ss.str() << std::endl;
   } else {
     throw std::runtime_error("Failed to logout from the web service at: " +
                              httpsURL + ". Please check your username.");
@@ -483,7 +484,8 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
         "an error message from " << m_SCARFComputeResource << ": " <<
         extractPACErrMsg(ss.str()) << std::endl;
     } else {
-      g_log.notice() << "Submitted job with response: " << ss.str() << std::endl;
+      g_log.notice() << "Submitted job successfully." << std::endl;
+      g_log.debug() << "Response from server: " << resp << std::endl;
     }
   } else {
     throw std::runtime_error("Failed to submit a job through the web service at:" +
@@ -544,7 +546,8 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
       g_log.warning() << "Queried the status of jobs but got what looks "
         "like an error message as response: " << resp << std::endl;
     }
-    g_log.notice() << "Queried job status with response: " << resp << std::endl;
+    g_log.notice() << "Queried job status successfully." << std::endl;
+    g_log.debug() << "Response from server: " << resp << std::endl;
   } else {
     throw std::runtime_error("Failed to obtain job status information through the "
                              "web service at:" + httpsURL + ". Please check your "
@@ -602,6 +605,7 @@ void SCARFTomoReconstruction::doQueryStatusById(const std::string &username,
       setProperty("JobStatusWorkspace", ws);
       g_log.notice() << "Queried job status (Id " << jobId << " ) and stored "
         "information into the workspace " << wsName << std::endl;
+      g_log.debug() << "Response from server: " << resp << std::endl;
     } else {
       g_log.warning() << "Queried job status (Id " << jobId << " ) but got what "
         "looks like an error message as response: " << resp << std::endl;
@@ -627,8 +631,8 @@ bool SCARFTomoReconstruction::doPing() {
   // Job ping, needs these headers:
   // headers = {'Content-Type': 'application/xml', 'Accept': ACCEPT_TYPE}
   const std::string pingPath = "platform/webservice/pacclient/ping/";
-  // TODO: this should be retrieved from facilities or similar
-  // (like SCARFLoginBaseURL above)
+  // This could be retrieved from facilities or similar
+  // (like SCARFLoginBaseURL above) - TODO: clarify that in Facilities.xml
   // the port number is known only after logging in
   const std::string baseURL = "https://portal.scarf.rl.ac.uk:8443/";
 
@@ -649,8 +653,8 @@ bool SCARFTomoReconstruction::doPing() {
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     std::string resp = ss.str();
     if (std::string::npos != resp.find("Web Services are ready")) {
-      g_log.notice() << "Pinged compute resource with response: " <<
-        resp << std::endl;
+      g_log.notice() << "Pinged compute resource with apparently good response: "
+                     << resp << std::endl;
       ok = true;
     } else {
       g_log.warning() << "Pinged compute resource but got what looks like an "
@@ -710,8 +714,8 @@ void SCARFTomoReconstruction::doCancel(const std::string &username,
       g_log.warning() << "Killed job with Id" << jobId << " but got what looks like an "
         "error message as response: " << extractPACErrMsg(resp) << std::endl;
     } else if (std::string::npos != resp.find("<actionMsg>")) {
-      g_log.notice() << "Killed job with Id" << jobId << " with response: " <<
-        resp << std::endl;
+      g_log.notice() << "Killed job with Id" << jobId << "." << std::endl;
+      g_log.debug() << "Response from server: " << resp << std::endl;
     } else {
       g_log.warning() << "Killed job with Id" << jobId << " but got what a response "
         "that I do not recognize: " << resp << std::endl;
@@ -777,7 +781,7 @@ void SCARFTomoReconstruction::doUploadFile(const std::string &username,
   }
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     std::string resp = ss.str();
-    g_log.notice() << "Uploaded file with response: " << resp << std::endl;
+    g_log.notice() << "Uploaded file, response from server: " << resp << std::endl;
   } else {
     throw std::runtime_error("Failed to upload file through the web service at:" +
                              httpsURL + ". Please check your username, credentials, "
@@ -843,7 +847,24 @@ int SCARFTomoReconstruction::doSendRequestGetResponse(const std::string &url,
                                                       const std::string &method,
                                                       const std::string &body) {
   InternetHelper session;
-  return session.sendRequest(url, rss, headers, method, body);
+
+  std::string ContTypeName = "Content-Type";
+  auto it = headers.find(ContTypeName);
+  if (headers.end() != it) {
+    session.setContentType(it->second);
+  }
+  session.headers() = headers;
+  if (!method.empty())
+    session.setMethod(method);
+  if (!body.empty()) {
+    session.setBody(body);
+    // beware, the inet helper will set method=POST if body not empty!
+    // for example to download, we need a GET with non-empty body
+    if (Poco::Net::HTTPRequest::HTTP_GET == method) {
+      session.setMethod(method);
+    }
+  }
+  return session.sendRequest(url, rss);
 }
 
 /**
@@ -1233,7 +1254,6 @@ void SCARFTomoReconstruction::getOneJobFile(const std::string &jobId,
 
   std::string httpsURL = baseURL + downloadOnePath;
 
-  InternetHelper session;
   StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>("Content-Type",
                                                      "application/xml"));
@@ -1243,8 +1263,8 @@ void SCARFTomoReconstruction::getOneJobFile(const std::string &jobId,
   int code;
   std::stringstream ss;
   try {
-    code = session.sendRequest(httpsURL, ss, headers,
-                               Poco::Net::HTTPRequest::HTTP_POST, body);
+    code = doSendRequestGetResponse(httpsURL, ss, headers,
+                                    Poco::Net::HTTPRequest::HTTP_GET, body);
   } catch (Kernel::Exception::InternetError& ie) {
     throw std::runtime_error("Error while sending HTTP request to download a file: " +
                              std::string(ie.what()));
@@ -1264,7 +1284,9 @@ void SCARFTomoReconstruction::getOneJobFile(const std::string &jobId,
       std::ofstream file(outName, std::ios_base::binary);
       Poco::StreamCopier::copyStream(ss, file);
       g_log.notice() << "Downloaded remote file " << outName << " into " <<
-        localPath << std::endl;
+        localPath << "." << std::endl;
+      // do this only if you want to log the file contents!
+      // g_log.debug() << "Response from server: " << ss.str() << std::endl;
     } else {
       // log an error but potentially continue with other files
       g_log.error() << "Download failed. You may not have the required permissions "
