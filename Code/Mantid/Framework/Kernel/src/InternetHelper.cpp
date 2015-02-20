@@ -208,14 +208,12 @@ int InternetHelper::sendRequest(const std::string &url,
  */
 void InternetHelper::logDebugRequestSending(const std::string &schemeName,
                                             const std::string &url) const {
-  std::string methodStr = (HTTPRequest::HTTP_GET==m_method)?
-    "GET" : "POST";
   const std::string insecString = "password=";
   if (std::string::npos == url.find(insecString)) {
-    g_log.debug() << "Sending " << schemeName << " " << methodStr <<
+    g_log.debug() << "Sending " << schemeName << " " << m_method <<
       " request to: " << url << "\n";
   } else {
-    g_log.debug() << "Sending " << schemeName << " " << methodStr <<
+    g_log.debug() << "Sending " << schemeName << " " << m_method <<
       " request to an url where the query string seems to contain a "
       "password! (not shown for security reasons)." << "\n";
   }
