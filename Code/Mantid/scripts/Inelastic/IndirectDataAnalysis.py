@@ -286,8 +286,8 @@ def furyfitMult(inputWS, function, ftype, startx, endx, spec_min=0, spec_max=Non
 
 
 def createFuryMultiDomainFunction(function, input_ws):
-    multi= 'composite=MultiDomainFunction,NumDeriv=1;'
-    comp =  '(composite=CompositeFunction,$domains=i;' + function + ');'
+    multi= 'composite=MultiDomainFunction,NumDeriv=true;'
+    comp = '(composite=CompositeFunction,NumDeriv=true,$domains=i;' + function + ');'
 
     ties = []
     kwargs = {}
