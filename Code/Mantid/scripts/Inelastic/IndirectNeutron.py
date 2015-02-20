@@ -4,10 +4,9 @@
 from IndirectImport import *
 from mantid.simpleapi import *
 from mantid import config, logger, mtd, FileFinder
-from mantid.kernel import V3D
 import sys, math, os.path, numpy as np
 from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt
-mp = import_mantidplot()
+MTD_PLOT = import_mantidplot()
 
 #  Routines for Ascii file of raw data
 
@@ -365,7 +364,8 @@ def RejectZero(inWS,tot):
             if nout == 0:
                 RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
             else:
-                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',CheckOverlapping=False)
+                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',
+                                  CheckOverlapping=False)
             nout += 1
         else:
             logger.information('** spectrum '+str(n+1)+' rejected')
@@ -389,7 +389,7 @@ def ReadMap(path):
         map.append(val[1])
     return map
 
-def UseMap(inWS,map):
+def UseMap(inWS, map):
     nin = mtd[inWS].getNumberHistograms()                      # no. of hist/groups in sam
     nout = 0
     outWS = inWS[:-3]+'red'
@@ -400,7 +400,8 @@ def UseMap(inWS,map):
             if nout == 0:
                 RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
             else:
-                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',CheckOverlapping=False)
+                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',
+                                  CheckOverlapping=False)
             nout += 1
             logger.information('** spectrum '+str(n+1)+' mapped')
         else:
@@ -414,14 +415,14 @@ def plotForce(inWS,Plot):
         plot_list = []
         for i in range(0, nHist):
             plot_list.append(i)
-        res_plot=mp.plotSpectrum(inWS,plot_list)
+        MTD_PLOT.plotSpectrum(inWS,plot_list)
     if Plot == 'Contour' or Plot == 'Both':
-        cont_plot=mp.importMatrixWorkspace(inWS).plotGraph2D()
+        MTD_PLOT.importMatrixWorkspace(inWS).plotGraph2D()
 
 def ChangeAngles(inWS,instr,theta):
     workdir = config['defaultsave.directory']
-    file = instr+'_angles.txt'
-    path = os.path.join(workdir, file)
+    filename = instr+'_angles.txt'
+    path = os.path.join(workdir, filename)
     logger.information('Creating angles file : ' + path)
     handle = open(path, 'w')
     head = 'spectrum,theta'

@@ -32,6 +32,20 @@ from scipy.interpolate import interp1d
 
 class DSFinterp1DFit(IFunction1D):
 
+    _RegressionTypes = None
+    _minWindow = None
+    _InputWorkspaces = None
+    _LoadErrors = None
+    _WorkspaceIndex = None
+    _ParameterValues = None
+    _fmin = None
+    _fmax = None
+    _LocalRegression = None
+    _RegressionType = None
+    _RegressionWindow = None
+    _xvalues = None
+    _channelgroup = None
+
     def category(self):
         return 'QuasiElastic'
 
