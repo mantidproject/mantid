@@ -15,9 +15,8 @@ namespace API {
 using Mantid::Kernel::PropertyHistory_sptr;
 using Mantid::Kernel::PropertyHistory_const_sptr;
 
-namespace
-{
-  Mantid::Kernel::Logger g_log("ScriptBuilder");
+namespace {
+Mantid::Kernel::Logger g_log("ScriptBuilder");
 }
 
 ScriptBuilder::ScriptBuilder(boost::shared_ptr<HistoryView> view,
@@ -175,18 +174,19 @@ ScriptBuilder::buildPropertyString(PropertyHistory_const_sptr propHistory) {
   // No need to specify value for default properties
   if (!propHistory->isDefault()) {
     // Do not give values to output properties other than workspace properties
-    if (find(nonWorkspaceTypes.begin(), nonWorkspaceTypes.end(), propHistory->type()) != nonWorkspaceTypes.end()
-        && propHistory->direction() == Direction::Output) {
+    if (find(nonWorkspaceTypes.begin(), nonWorkspaceTypes.end(),
+             propHistory->type()) != nonWorkspaceTypes.end() &&
+        propHistory->direction() == Direction::Output) {
       g_log.debug() << "Ignoring property " << propHistory->name()
                     << " of type " << propHistory->type() << std::endl;
-    // Handle numerical properties
+      // Handle numerical properties
     } else if (propHistory->type() == "number") {
       prop = propHistory->name() + "=" + propHistory->value();
-    // Handle boolean properties
+      // Handle boolean properties
     } else if (propHistory->type() == "boolean") {
       std::string value = (propHistory->value() == "1" ? "True" : "False");
       prop = propHistory->name() + "=" + value;
-    // Handle all other property types
+      // Handle all other property types
     } else {
       std::string opener = "='";
       if (propHistory->value().find('\\') != std::string::npos) {
