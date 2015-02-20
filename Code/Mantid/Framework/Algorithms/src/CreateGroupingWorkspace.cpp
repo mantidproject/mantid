@@ -169,12 +169,18 @@ void makeGroupingByNumGroups(const std::string compName, int numGroups,
   // Get detectors for given instument component
   std::vector<IDetector_const_sptr> detectors;
   inst->getDetectorsInBank(detectors, compName);
+  size_t numDetectors = detectors.size();
+
+  // Sanity check for following calculation
+  if(numGroups > static_cast<int>(numDetectors))
+    throw std::runtime_error("Number of groups must be less than or "
+                             "equal to number of detectors");
 
   // Calculate number of detectors per group
-  int detectorsPerGroup = static_cast<int>(detectors.size()) / numGroups;
+  int detectorsPerGroup = static_cast<int>(numDetectors) / numGroups;
 
   // Map detectors to group
-  for (unsigned int detIndex = 0; detIndex < detectors.size(); detIndex++) {
+  for (unsigned int detIndex = 0; detIndex < numDetectors; detIndex++) {
     int detectorID = detectors[detIndex]->getID();
     int groupNum = (detIndex / detectorsPerGroup) + 1;
 
