@@ -70,14 +70,15 @@ def diagnose(white_int,**kwargs):
     hardmask_file = kwargs.get('hard_mask_file', None)
 
     # process subsequent calls to this routine, when white mask is already defined
-    white_mask= kwargs.get('white_mask',None) # and white beam is not changed
+    white= kwargs.get('white_mask',None) # and white beam is not changed
     # white mask assumed to be global so no sectors in there 
-    if white_mask and isinstance(white_mask,api.Workspace):
+    if not(white is None) and isinstance(white,RunDescriptor.RunDescriptor):
        hardmask_file = None
-       num_failed = white_mask.getRun().getLogData(NumFailedSpectraLogName ).value
+       white_mask,num_failed = white.get_masking()
        add_masking(white_int, white_mask)
        van_mask  = None
     else: # prepare workspace to keep white mask
+        white_mask = None
         van_mask = CloneWorkspace(white_int)
 
     if hardmask_file is not None:
@@ -107,15 +108,16 @@ def diagnose(white_int,**kwargs):
           DeleteWorkspace(__white_masks)
 
        # Second white beam test
-       if 'second_white' in kwargs:
-            __second_white_masks, num_failed = do_second_white_test(white_int, parser.second_white, parser.tiny, parser.huge,
+       if 'second_white' in kwargs: #NOT IMPLEMENTED 
+           raise NotImplementedError("Second white is not yet implemented")
+           __second_white_masks, num_failed = do_second_white_test(white_int, parser.second_white, parser.tiny, parser.huge,
                                                        parser.van_out_lo, parser.van_out_hi,
                                                        parser.van_lo, parser.van_hi, parser.variation,
                                                        parser.van_sig, start_index, end_index)
-            test_results[2] = [str(__second_white_masks), num_failed]
-            add_masking(white_int, __second_white_masks, start_index, end_index)
-            #TODO
-            #add_masking(van_mask, __second_white_masks, start_index, end_index)
+           test_results[2] = [str(__second_white_masks), num_failed]
+           add_masking(white_int, __second_white_masks, start_index, end_index)
+           #TODO
+           #add_masking(van_mask, __second_white_masks, start_index, end_index)
 
         #
         # Zero total count check for sample counts

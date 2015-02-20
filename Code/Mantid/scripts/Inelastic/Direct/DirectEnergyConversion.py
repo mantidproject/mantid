@@ -193,28 +193,31 @@ class DirectEnergyConversion(object):
       diag_params = self.prop_man.get_diagnostics_parameters()
 
       if self.use_hard_mask_only:
-         if mtd.doesExist('hard_mask_ws'):
-            diag_mask = mtd['hard_mask_ws']
-         else: # build hard mask
-               # in this peculiar way we can obtain working mask which
-                             # accounts for initial data grouping in the
-                             # data file.  SNS or 1 to 1 maps may probably avoid this
-                             # stuff and can load masks directly
+         # build hard mask
+         diag_mask,n_masks = white.get_masking()
+         if diag_mask is None:
+            # in this peculiar way we can obtain working mask which
+            # accounts for initial data grouping in the
+            # data file.  SNS or 1 to 1 maps may probably avoid this
+            # stuff and can load masks directly
             white_data = white.get_ws_clone('white_ws_clone')
 
             diag_mask = LoadMask(Instrument=self.instr_name,InputFile=self.hard_mask_file,
-                               OutputWorkspace='hard_mask_ws')
+                                 OutputWorkspace='hard_mask_ws')
             MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
-            DeleteWorkspace(diag_mask)
-            diag_mask,masked_list = ExtractMask(InputWorkspace=white_data)
+            white.add_masked_ws(white_data)
             DeleteWorkspace(Workspace='white_ws_clone')
-
-         return diag_mask,len(masked_list)
-
+            diag_mask,n_masks  = white.get_masking()
+         if not(out_ws_name in None):
+            dm = CloneWorkspace(diag_mask,OutputWorkspace=out_ws_name)
+            return dm,n_masks
+         else:
+            return
 
       # Get the white beam vanadium integrals
       whiteintegrals = self.do_white(white, None, None) # No grouping yet
       if self.second_white:
+        #TODO: fix  THIS DOES NOT WORK! 
          second_white = self.second_white
          other_whiteintegrals = self.do_white(PropertyManager.second_white, None, None) # No grouping yet
          self.second_white = other_whiteintegrals
@@ -222,48 +225,58 @@ class DirectEnergyConversion(object):
       # Get the background/total counts from the sample run if present
       if not(diag_sample is None): 
          diag_sample = self.get_run_descriptor(diag_sample)
-         # If the bleed test is requested then we need to pass in the
-         # sample_run as well
-         if self.bleed_test:
-            # initiate reference to reducer to be able to work with Run
-            # Descriptors
-            diagnostics.__Reducer__ = self
-            diag_params['sample_run'] = diag_sample
+         sample_mask,n_sam_masked = diag_sample.get_masking()
+         if sample_mask is None:
+            # If the bleed test is requested then we need to pass in the
+            # sample_run as well
+            if self.bleed_test:
+                # initiate reference to reducer to be able to work with Run
+                # Descriptors
+                diagnostics.__Reducer__ = self
+                diag_params['sample_run'] = diag_sample
 
-         # Set up the background integrals for diagnostic purposes
-         result_ws = self.normalise(diag_sample, self.normalise_method)
+            # Set up the background integrals for diagnostic purposes
+            result_ws = self.normalise(diag_sample, self.normalise_method)
 
-         #>>> here result workspace is being processed -- not touching
-         #result ws
-         bkgd_range = self.background_test_range
-         background_int = Integration(result_ws,
+            #>>> here result workspace is being processed -- not touching
+            #result ws
+            bkgd_range = self.background_test_range
+            background_int = Integration(result_ws,
                            RangeLower=bkgd_range[0],RangeUpper=bkgd_range[1],
                            IncludePartialBins=True)
-         total_counts = Integration(result_ws, IncludePartialBins=True)
-         background_int = ConvertUnits(background_int, Target="Energy",EMode='Elastic', AlignBins=0)
-         self.prop_man.log("Diagnose: finished convertUnits ",'information')
+            total_counts = Integration(result_ws, IncludePartialBins=True)
+            background_int = ConvertUnits(background_int, Target="Energy",EMode='Elastic', AlignBins=0)
+            self.prop_man.log("Diagnose: finished convertUnits ",'information')
 
-         background_int *= self.scale_factor
-         diagnostics.normalise_background(background_int, whiteintegrals,
+            background_int *= self.scale_factor
+            diagnostics.normalise_background(background_int, whiteintegrals,
                                            diag_params.get('second_white',None))
-         diag_params['background_int'] = background_int
-         diag_params['sample_counts']  = total_counts
+            diag_params['background_int'] = background_int
+            diag_params['sample_counts']  = total_counts
+
+
+      # extract existing white mask if one is defined and provide it for 
+      # diagnose to use instead of constantly diagnosing the same vanadium
+      white_mask,num_masked = white.get_masking()
+      if not(white_mask is None) and not(sample_mask is None):
+         # nothing to do then 
+         total_mask = sample_mask+white_mask
+         total_masked = n_sam_masked+num_masked
+         return (total_mask, total_masked)
+      else:
+         pass # have to run diagnostics after all
 
       # Check how we should run diag
       diag_spectra_blocks = self.diag_spectra
 
-      # extract existing white mask if one is defined and provide it for 
-      # diagnose to use instead of constantly diagnosing the same vanadium
-      white_mask = white.get_masking()
-
-      if white_mask:
-         diag_params['white_mask']=white_mask
+      if not(white_mask is None):
+         diag_params['white_mask']=white
       # keep white mask workspace for further usage
       if diag_spectra_blocks is None:
          # Do the whole lot at once
          white_masked_ws =diagnostics.diagnose(whiteintegrals, **diag_params)
          if white_masked_ws:
-            white.add_masking_ws(white_masked_ws)
+            white.add_masked_ws(white_masked_ws)
             DeleteWorkspace(white_masked_ws)
       else:
          for index, bank in enumerate(diag_spectra_blocks):
@@ -271,23 +284,29 @@ class DirectEnergyConversion(object):
              diag_params['end_index'] = bank[1] - 1
              white_masked_ws=diagnostics.diagnose(whiteintegrals, **diag_params)
              if white_masked_ws:
-                white.add_masking_ws(white_masked_ws)
+                white.add_masked_ws(white_masked_ws)
                 DeleteWorkspace(white_masked_ws)
-
+      if out_ws_name:
+        if not(diag_sample is None):
+            diag_sample.add_masked_ws(whiteintegrals)
+            mask,n_removed = diag_sample.get_masking()
+            diag_mask = CloneWorkspace(mask,OutputWorkspace=out_ws_name)
+        else: # either WB was diagnosed or WB masks were applied to it
+            # Extract a mask workspace
+            diag_mask, det_ids = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=out_ws_name)
+            n_removed =len(det_ids)
+      else:
+          diag_mask=None
+          n_removed =None
+      # Clean up
       if 'sample_counts' in diag_params:
           DeleteWorkspace(Workspace='background_int')
           DeleteWorkspace(Workspace='total_counts')
       if 'second_white' in diag_params:
            DeleteWorkspace(Workspace=diag_params['second_white'])
-        # Extract a mask workspace
-      if out_ws_name:
-        diag_mask, det_ids = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=out_ws_name)
-      else:
-        diag_mask=None
-        det_ids  = []
-
       DeleteWorkspace(Workspace=whiteintegrals)
-      return diag_mask,len(det_ids)
+
+      return diag_mask,n_removed
 
 #-------------------------------------------------------------------------------
     def convert_to_energy(self,wb_run=None,sample_run=None,ei_guess=None,rebin=None,map_file=None,
@@ -524,20 +543,13 @@ class DirectEnergyConversion(object):
       end_time = time.time()
       prop_man.log("*** Elapsed time = {0} sec".format(end_time - start_time),'notice')
 
-    # Hack for multirep mode?
-#    if mtd.doesExist('hard_mask_ws') == True:
- #       DeleteWorkspace(Workspace='hard_mask_ws')
-
-      #
-      # CLEAN-up (may be worth to do in separate procedure)
-      # Currently clear masks unconditionally TODO: cash masks with appropriate
-      # precautions
+      # CLEAR existing workspaces only if it is not run within loop
+      #prop_man.monovan_run = None
+      #prop_man.wb_run = None
       self.spectra_masks = None
-      #self.prop_man.wb_run = None # clean up memory of the wb run (only in
-      #case of file based wb)
+      if 'masking' in mtd:
+          DeleteWorkspace(masking)
 
-      if 'bkgr_ws_source' in mtd:
-          DeleteWorkspace('bkgr_ws_source')
 
 
       return result
@@ -1047,10 +1059,10 @@ class DirectEnergyConversion(object):
             # Store the factor for further usage
             PropertyManager.mono_correction_factor.set_val_to_cash(prop_man,anf_TGP)
             # reset current monovan run to run number (if it makes sense) --
-            # workspace is not good for further processing any more
-            mono_run_num = PropertyManager.monovan_run.run_number()
-            prop_man.monovan_run = None # delete everything from memory
-            prop_man.monovan_run = mono_run_num 
+            ## workspace is not good for further processing any more
+            #mono_run_num = PropertyManager.monovan_run.run_number()
+            #prop_man.monovan_run = None # delete everything from memory
+            #prop_man.monovan_run = mono_run_num 
         #end
         prop_man.log('*** Using {0} value : {1} of absolute units correction factor (TGP)'.format(abs_norm_factor_is,absnorm_factor),'notice')
         prop_man.log('*******************************************************************************************','notice')

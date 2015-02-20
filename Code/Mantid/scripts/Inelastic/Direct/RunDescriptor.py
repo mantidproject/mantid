@@ -295,7 +295,7 @@ class RunDescriptor(PropDescriptor):
         self._ws_name = None
         # pointer to workspace used to mask this workspace obtained at diag for
         # this ws
-        self._mask_ws = None
+        self._mask_ws_name = None
 
         self._clear_all()
 
@@ -340,9 +340,10 @@ class RunDescriptor(PropDescriptor):
         #
         self._in_cash = False
         # clear masking workspace if any available
-        if self._mask_ws:
-           DeleteWorkspace(self._mask_ws)
-           self._mask_ws = None
+        if self._mask_ws_name:
+           if self._mask_ws_name in mtd:
+              DeleteWorkspace(self._mask_ws_name)
+           self._mask_ws_name = None
 
 #--------------------------------------------------------------------------------------------------------------------
     def __get__(self,instance,owner):
@@ -436,17 +437,41 @@ class RunDescriptor(PropDescriptor):
         else:
             return self._run_number 
 #--------------------------------------------------------------------------------------------------------------------
-# Masking    #TODO: resolve stub
+# Masking   
 #--------------------------------------------------------------------------------------------------------------------
     def get_masking(self):
-        """ return masking workspace specific to this particular workspace """ 
-        return None
+        """ return masking workspace specific to this particular workspace 
+            together with number of masked spectra
+        """ 
+        if self._mask_ws_name:
+           mask_ws = mtd[self._mask_ws_name]
+           num_masked = mask_ws.getRun().getLogData('NUM_SPECTRA_Masked').value
+           return (mask_ws,num_masked)
+        else:
+           return (None,0)
 #--------------------------------------------------------------------------------------------------------------------
 
-    def add_masking_ws(self,masked_ws):
-        """ extract masking from the workspace provided and apply it to this
-            run workspace
+    def add_masked_ws(self,masked_ws):
+        """ extract masking from the workspace provided and store masks
+            to use with this run workspace 
         """ 
+        if self._mask_ws_name:
+           mask_ws = mtd[self._mask_ws_name]
+           num_masked = mask_ws.getRun().getLogData('NUM_SPECTRA_Masked').value
+           add_mask_name  = self._prop_name+'_tmp_masking'
+        else:
+           num_masked = 0
+           add_mask_name  = self._prop_name+'CurrentMasking'
+        masks,spectra=ExtractMask(InputWorkspace=masked_ws,OutputWorkspace=add_mask_name)
+
+        num_masked+=len(spectra)
+        if self._mask_ws_name:
+           mask_ws +=masks
+        else:
+            self._mask_ws_name=add_mask_name
+        AddSampleLog(Workspace=self._mask_ws_name,LogName = 'NUM_SPECTRA_Masked',
+                     LogText=str(num_masked),LogType='Number')
+
 #--------------------------------------------------------------------------------------------------------------------
     def is_monws_separate(self):
         """ """
@@ -1292,9 +1317,9 @@ class RunDescriptorDependent(RunDescriptor):
             return super(RunDescriptorDependent,self).get_masking()
          else:
             return self._host.get_masking()
-    def add_masking_ws(self,masked_ws):
+    def add_masked_ws(self,masked_ws):
          if self._has_own_value:
-            return super(RunDescriptorDependent,self).add_masking_ws(masked_ws)
+            return super(RunDescriptorDependent,self).add_masked_ws(masked_ws)
          else:
-            return self._host.add_masking_ws(masked_ws)
+            return self._host.add_masked_ws(masked_ws)
 #--------------------------------------------------------------------------------------------------------------------

@@ -437,6 +437,24 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertEqual(len(found),1)
         self.assertEqual(nf[0],11111)
 
+    def test_add_masks(self):
+       propman  = self.prop_man
+       ws=CreateSampleWorkspace(Function='Multiple Peaks',WorkspaceType='Event',
+                                NumBanks=4, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
+                                XMin=2000, XMax=20000, BinWidth=1)
+
+       PropertyManager.sample_run.add_masked_ws(ws)
+
+       masks,masked = PropertyManager.sample_run.get_masking()
+       self.assertEqual(masked,0)
+       self.assertTrue(isinstance(masks,api.MatrixWorkspace))
+       ws_name = PropertyManager.sample_run._mask_ws_name
+       self.assertTrue(ws_name in mtd)
+
+       propman.sample_run = None
+       self.assertFalse(ws_name in mtd)
+
+
        
 
 

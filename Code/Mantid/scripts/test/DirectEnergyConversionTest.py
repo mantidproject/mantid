@@ -408,7 +408,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         # Run multirep
         tReducer = DirectEnergyConversion(run.getInstrument())
-        tReducer.prop_man.run_diagnostics=False # temporary
+        tReducer.prop_man.run_diagnostics=True 
         tReducer.hard_mask_file=None
         tReducer.map_file=None
         tReducer.prop_man.background_range=[0.99*tMax,tMax]
