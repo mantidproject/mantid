@@ -7,15 +7,14 @@ namespace Mantid {
 namespace RemoteAlgorithms {
 /***
     Algorithm to initiate, query about, or cancel a tomographic
-    reconstruction on the SCARF computer cluster at RAL.
+    reconstruction job on the SCARF computer cluster at RAL.
     The algorithm can be used to send different commands to the job
     queue, for example: log in, log out, start a reconstruction job,
     retrieve information about jobs or to cancel a job.
 
-    Output Properties: None.
-    If the authentication is successfull, a cookie is received that is stored
-    internally and re-used for all subsequent interactions with the compute
-    resource.
+    If the authentication is successfull, a cookie is received that is
+    stored internally and re-used for all subsequent interactions with
+    the compute resource.
 
     Copyright &copy; 2014-2015 ISIS Rutherford Appleton Laboratory,
     NScD Oak Ridge National Laboratory & European Spallation Source

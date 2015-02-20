@@ -837,7 +837,7 @@ void SCARFTomoReconstruction::doDownload(const std::string &username,
  * Send the HHTP(S) request required to perform one of the actions.
  *
  * @param url Full URL, including request string
- * @param response Response body
+ * @param rss Response body stream
  * @param headers HTTP headers given as key-value pairs
  * @param method By default GET (Poco::Net::HTTPRequest::HTTP_POST), also accepts
  * POST (Poco::Net::HTTPRequest::HTTP_POST)
@@ -864,7 +864,7 @@ int SCARFTomoReconstruction::doSendRequestGetResponse(const std::string &url,
   if (!body.empty()) {
     session.setBody(body);
     // beware, the inet helper will set method=POST if body not empty!
-    // for example to download, we need a GET with non-empty body
+    // But here, for example to download, we need a GET with non-empty body
     if (Poco::Net::HTTPRequest::HTTP_GET == method) {
       session.setMethod(method);
     }
@@ -877,7 +877,7 @@ int SCARFTomoReconstruction::doSendRequestGetResponse(const std::string &url,
  * part of a multipart body content.
  *
  * @param body Body string being built for an HTTP request
- * @param boundary Boundary string between parameters
+ * @param boundary Boundary string between parameters, for request encoding
  * @param paramName Name of a parameter, for example INPUT_FILE
  * @param paramVal Value of the parameter
  */
@@ -895,7 +895,8 @@ void SCARFTomoReconstruction::encodeParam(std::string &body,
 }
 
 /**
- * Tiny helper to generate an integer sequence number
+ * Tiny helper to generate an integer sequence number for the job
+ * names.
  */
 int seqNo() {
   static int s = 1;
@@ -1216,6 +1217,8 @@ SCARFTomoReconstruction::Action::Type SCARFTomoReconstruction::getAction() {
  *
  * @param localPath Destination directory
  * @param fname Name of the file being downloaded
+ *
+ * @return The full patch checked
  */
 const std::string
 SCARFTomoReconstruction::checkDownloadOutputFile(const std::string &localPath,

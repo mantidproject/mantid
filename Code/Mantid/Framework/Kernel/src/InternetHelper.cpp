@@ -180,8 +180,7 @@ int InternetHelper::processRelocation(const HTTPResponse &response,
 * @param url the address to the network resource
 * @param responseStream The stream to fill with the reply on success
 * @param headers A optional key value pair map of any additional headers to
-* include in the request. A default 'Content-Type: application/json' is used
-* unless setContentType() is called.
+* include in the request.
 * @param method Generally GET (default) or POST.
 * @param body The request body to send.
 **/
@@ -203,8 +202,8 @@ int InternetHelper::sendRequest(const std::string &url,
  * Helper to log (debug level) the request being sent (careful not to
  * print blatant passwords, etc.).
  *
- * @param url url being sent (will be logged)
  * @param schemeName Normally "http" or "https"
+ * @param url url being sent (will be logged)
  */
 void InternetHelper::logDebugRequestSending(const std::string &schemeName,
                                             const std::string &url) const {
@@ -409,8 +408,7 @@ The answer, will be inserted at the local_file_path.
 url_file.
 
 @param headers [optional] : A key value pair map of any additional headers to
-include in the request. A default 'Content-Type: application/json' is used
-unless the 'Content-Type' key is included here with a different value.
+include in the request.
 
 @exception Mantid::Kernel::Exception::InternetError : For any unexpected
 behaviour.
