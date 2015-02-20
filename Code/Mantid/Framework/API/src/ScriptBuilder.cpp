@@ -4,6 +4,8 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/HistoryItem.h"
 #include "MantidAPI/ScriptBuilder.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/Logger.h"
 
 #include <boost/utility.hpp>
 
@@ -12,6 +14,11 @@ namespace API {
 
 using Mantid::Kernel::PropertyHistory_sptr;
 using Mantid::Kernel::PropertyHistory_const_sptr;
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("ScriptBuilder");
+}
 
 ScriptBuilder::ScriptBuilder(boost::shared_ptr<HistoryView> view,
                              std::string versionSpecificity)
@@ -156,13 +163,30 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
  */
 const std::string
 ScriptBuilder::buildPropertyString(PropertyHistory_const_sptr propHistory) {
+  using Mantid::Kernel::Direction;
+
+  // Create a vector of all non workspace property type names
+  std::vector<std::string> nonWorkspaceTypes;
+  nonWorkspaceTypes.push_back("number");
+  nonWorkspaceTypes.push_back("boolean");
+  nonWorkspaceTypes.push_back("string");
+
   std::string prop = "";
+  // No need to specify value for default properties
   if (!propHistory->isDefault()) {
-    if (propHistory->type() == "number") {
+    // Do not give values to output properties other than workspace properties
+    if (find(nonWorkspaceTypes.begin(), nonWorkspaceTypes.end(), propHistory->type()) != nonWorkspaceTypes.end()
+        && propHistory->direction() == Direction::Output) {
+      g_log.debug() << "Ignoring property " << propHistory->name()
+                    << " of type " << propHistory->type() << std::endl;
+    // Handle numerical properties
+    } else if (propHistory->type() == "number") {
       prop = propHistory->name() + "=" + propHistory->value();
+    // Handle boolean properties
     } else if (propHistory->type() == "boolean") {
       std::string value = (propHistory->value() == "1" ? "True" : "False");
       prop = propHistory->name() + "=" + value;
+    // Handle all other property types
     } else {
       std::string opener = "='";
       if (propHistory->value().find('\\') != std::string::npos) {
