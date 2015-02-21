@@ -1727,7 +1727,11 @@ void PlotDialog::insertTabs(int plot_type)
   if (!item || item->type() != CurveTreeItem::PlotCurveTreeItem)
     return;
 
-  const DataCurve *c = dynamic_cast<const DataCurve *>((dynamic_cast<CurveTreeItem*>(item))->plotItem());
+  CurveTreeItem *ctit = dynamic_cast<CurveTreeItem*>(item);
+  if (!ctit)
+    return;
+
+  const DataCurve *c = dynamic_cast<const DataCurve *>(ctit->plotItem());
   if (!c)
     return;
   if (c && c->type() != Graph::Function)
