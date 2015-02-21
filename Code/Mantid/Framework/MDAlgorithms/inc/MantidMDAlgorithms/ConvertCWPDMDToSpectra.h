@@ -16,8 +16,22 @@ namespace MDAlgorithms {
  * @param wavelength
  * @return
  */
-inline double calculateD(const double &theta, const double &wavelength) {
-  return (0.5 * wavelength / sin(theta));
+inline double calculateDspaceFrom2Theta(const double &twotheta,
+                                        const double &wavelength) {
+  return (0.5 * wavelength / sin(twotheta * 0.5 * M_PI / 180.));
+}
+
+//----------------------------------------------------------------------------------------------
+/** Calcualte detector's 2theta value from d-spacing value
+ * 2theta = 2*asin(lamba/2/d)
+ * @brief calculate2ThetaFromD
+ * @param dspace
+ * @param wavelengh
+ * @return
+ */
+inline double calculate2ThetaFromD(const double &dspace,
+                                   const double &wavelength) {
+  return (2.0 * asin(0.5 * wavelength / dspace) * 180. / M_PI);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -28,8 +42,21 @@ inline double calculateD(const double &theta, const double &wavelength) {
  * @param wavelength
  * @return
  */
-inline double calculateQ(const double &theta, const double &wavelength) {
-  return (4 * M_PI * sin(theta) / wavelength);
+inline double calculateQFrom2Theta(const double &twotheta,
+                                   const double &wavelength) {
+  return (4. * M_PI * sin(twotheta * 0.5 * M_PI / 180.) / wavelength);
+}
+
+//----------------------------------------------------------------------------------------------
+/** Calculate detector's 2theta value from Q
+ * 2theta = 2*asin(lambda*Q/(4pi))
+ * @brief calcualte2ThetaFromQ
+ * @param q
+ * @param wavelength
+ * @return
+ */
+inline double calcualte2ThetaFromQ(const double &q, const double &wavelength) {
+  return (2.0 * asin(q * wavelength * 0.25 / M_PI) * 180. / M_PI);
 }
 
 /** ConvertCWPDMDToSpectra : Convert one MDWorkspaces containing reactor-source

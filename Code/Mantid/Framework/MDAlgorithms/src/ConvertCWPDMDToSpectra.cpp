@@ -95,14 +95,74 @@ void ConvertCWPDMDToSpectra::exec() {
   double scaleFactor = getProperty("ScaleFactor");
   // do linear interpolation
   bool doLinearInterpolation = getProperty("LinearInterpolateZeroCounts");
+  // unit
+  std::string outputunit = getProperty("UnitOutput");
+  double wavelength = getProperty("NeutronWaveLength");
 
   // Validate inputs
+  // input data workspace and monitor workspace should match
   size_t numdataevents = inputDataWS->getNEvents();
   size_t nummonitorevents = inputMonitorWS->getNEvents();
   if (numdataevents != nummonitorevents)
     throw std::runtime_error("Input data workspace and monitor workspace have "
                              "different number of MDEvents.");
 
+  // output unit: make a map for wavelength
+  std::map<uint16_t, double> map_runWavelength;
+  if (outputunit.compare("2theta")) {
+    // set up runid and wavelength  map
+    std::string wavelengthpropertyname =
+        getProperty("NeutornWaveLengthPropertyName");
+
+    uint16_t numexpinfo = inputDataWS->getNumExperimentInfo();
+    for (uint16_t iexp = 0; iexp < numexpinfo; ++iexp) {
+      int runid = atoi(inputDataWS->getExperimentInfo(iexp)
+                           ->run()
+                           .getProperty("run")
+                           ->value()
+                           .c_str());
+      double thislambda;
+      if (inputDataWS->getExperimentInfo(iexp)->run().hasProperty(
+              wavelengthpropertyname))
+        thislambda = atof(inputDataWS->getExperimentInfo(iexp)
+                              ->run()
+                              .getProperty(wavelengthpropertyname)
+                              ->value()
+                              .c_str());
+      else if (wavelength != EMPTY_DBL())
+        thislambda = wavelength;
+      else {
+        std::stringstream errss;
+        errss << "In order to convert unit to " << outputunit
+              << ", either NeutronWaveLength "
+                 " is to be specified or property " << wavelengthpropertyname
+              << " must exist for run " << runid << ".";
+        throw std::runtime_error(errss.str());
+      }
+    }
+  }
+
+  /*
+  if ( outputunit.compare("2theta") && (wavelength == EMPTY_DBL()) ) {
+    // Find it via property
+    std::string wavelengthpropertyname =
+        getProperty("NeutornWaveLengthPropertyName");
+    if
+  (inputDataWS->getExperimentInfo(0)->run().hasProperty(wavelengthpropertyname))
+  {
+      std::stringstream errss;
+      errss << "In order to convert unit to " << outputunit
+            << ", either NeutronWaveLength "
+               " is to be specified or property " << wavelengthpropertyname
+            << " must exist.";
+      throw std::runtime_error(errss.str());
+    }
+    wavelength = atof(
+          outws->run().getProperty(wavelengthpropertyname)->value().c_str());
+  }
+  */
+
+  // bin parameters
   if (binParams.size() != 3)
     throw std::runtime_error("Binning parameters must have 3 items.");
   if (binParams[0] >= binParams[2])
@@ -124,24 +184,7 @@ void ConvertCWPDMDToSpectra::exec() {
                  << "\n";
 
   // Output units
-  std::string outputunit = getProperty("UnitOutput");
   if (outputunit.compare("2theta")) {
-    double wavelength = getProperty("NeutronWaveLength");
-    if (wavelength == EMPTY_DBL()) {
-      // Find it via property
-      std::string wavelengthpropertyname =
-          getProperty("NeutornWaveLengthPropertyName");
-      if (!outws->run().hasProperty(wavelengthpropertyname)) {
-        std::stringstream errss;
-        errss << "In order to convert unit to " << outputunit
-              << ", either NeutronWaveLength "
-                 " is to be specified or property " << wavelengthpropertyname
-              << " must exist.";
-        throw std::runtime_error(errss.str());
-      }
-      wavelength = atof(
-          outws->run().getProperty(wavelengthpropertyname)->value().c_str());
-    }
     convertUnits(outws, outputunit, wavelength);
   }
   // TODO : Implement unit for 2theta in another ticket.
@@ -312,7 +355,7 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
       if (xindex < 0)
         g_log.warning("xindex < 0");
       if (xindex >= static_cast<int>(vecy.size()) - 1) {
-        // FIXME - It may throw away all the detectors' value above Ymax
+        // If the Xmax is set too narrow, then
         g_log.error() << "This is the bug! "
                       << "xindex = " << xindex << " 2theta = " << twotheta
                       << " out of [" << vecx.front() << ", " << vecx.back()
@@ -494,9 +537,9 @@ void ConvertCWPDMDToSpectra::convertUnits(API::MatrixWorkspace_sptr matrixws,
     size_t vecsize = vecX.size();
     for (size_t j = 0; j < vecsize; ++j) {
       if (target == 'd')
-        vecX[j] = calculateD(vecX[j] * 0.5, wavelength);
+        vecX[j] = calculateDspaceFrom2Theta(vecX[j] * 0.5, wavelength);
       else
-        vecX[j] = calculateQ(vecX[j] * 0.5, wavelength);
+        vecX[j] = calculateQFrom2Theta(vecX[j] * 0.5, wavelength);
     }
   }
 
