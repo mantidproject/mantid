@@ -151,14 +151,21 @@ SymmetryElementRotation::SymmetryElementRotation()
     : SymmetryElementWithAxis() {}
 
 void SymmetryElementRotation::init(const SymmetryOperation &operation) {
-  int determinant = operation.matrix().determinant();
-  int trace = operation.matrix().Trace();
+  const Kernel::IntMatrix &matrix = operation.matrix();
+
+  int determinant = matrix.determinant();
+  int trace = matrix.Trace();
 
   if (isNotRotation(determinant, trace)) {
     throw std::invalid_argument(
         "SymmetryOperation " + operation.identifier() +
         " cannot be used to construct SymmetryElementRotation.");
   }
+
+  setAxis(determineAxis(matrix));
+  setTranslation(determineTranslation(operation));
+  setHMSymbol(determineSymbol(operation));
+  setRotationSense(determineRotationSense(operation, getAxis()));
 }
 
 SymmetryElementRotation::RotationSense
