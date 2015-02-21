@@ -330,7 +330,10 @@ void PlotDialog::showPlotAssociations(QTreeWidgetItem *item, int)
   }
 
   hide();
-  if (dynamic_cast<PlotCurve *>(it)->type() == Graph::Function)
+  PlotCurve *pc = dynamic_cast<PlotCurve *>(it);
+  if (!pc)
+    return;
+  if (pc->type() == Graph::Function)
   {
     FunctionDialog *fd = d_app->showFunctionDialog((dynamic_cast<CurveTreeItem*>(item))->graph(),
         dynamic_cast<CurveTreeItem*>(item)->plotItemIndex());
