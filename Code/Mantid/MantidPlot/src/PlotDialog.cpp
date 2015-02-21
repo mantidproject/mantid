@@ -416,6 +416,9 @@ void PlotDialog::changePlotType(int plotType)
     insertTabs(curveType);
 
     VectorCurve *v = dynamic_cast<VectorCurve*>(item->plotItem());
+    if (!v)
+      return;
+
     if (plotType)
     {
       graph->setCurveType(item->plotItemIndex(), Graph::VectXYAM);
