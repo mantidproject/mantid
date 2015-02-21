@@ -17,6 +17,11 @@ namespace Geometry {
     SymmetryElement is an interface for representing symmetry elements that
     occur for example in space and point groups.
 
+      @author Michael Wedel, Paul Scherrer Institut - SINQ
+      @date 05/02/2015
+
+    Copyright © 2015 PSI-MSS
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -137,6 +142,7 @@ public:
   void init(const SymmetryOperation &operation);
 
 protected:
+  bool isNotMirror(int determinant, int trace) const;
   std::string determineSymbol(const SymmetryOperation &operation) const;
 
   static std::map<V3R, std::string> g_glideSymbolMap;

@@ -246,7 +246,21 @@ std::map<V3R, std::string> SymmetryElementMirror::g_glideSymbolMap =
 SymmetryElementMirror::SymmetryElementMirror() : SymmetryElementWithAxis() {}
 
 void SymmetryElementMirror::init(const SymmetryOperation &operation) {
-  UNUSED_ARG(operation);
+  const Kernel::IntMatrix &matrix = operation.matrix();
+
+  if (isNotMirror(matrix.determinant(), matrix.Trace())) {
+    throw std::invalid_argument(
+        "SymmetryOperation " + operation.identifier() +
+        " cannot be used to construct SymmetryElementMirror.");
+  }
+
+  setAxis(determineAxis(matrix));
+  setTranslation(determineTranslation(operation));
+  setHMSymbol(determineSymbol(operation));
+}
+
+bool SymmetryElementMirror::isNotMirror(int determinant, int trace) const {
+  return !(determinant == -1 && trace == 1);
 }
 
 std::string SymmetryElementMirror::determineSymbol(
