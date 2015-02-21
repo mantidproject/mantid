@@ -317,7 +317,10 @@ void PlotDialog::showPlotAssociations(QTreeWidgetItem *item, int)
   if (item->type() != CurveTreeItem::PlotCurveTreeItem)
     return;
 
-  QwtPlotItem *it = dynamic_cast<QwtPlotItem *>(dynamic_cast<CurveTreeItem*>(item)->plotItem()); // crazy
+  CurveTreeItem *ctit = dynamic_cast<CurveTreeItem*>(item);
+  if (!ctit)
+    return;
+  QwtPlotItem *it = dynamic_cast<QwtPlotItem *>(ctit->plotItem());
   if (!it)
     return;
 
@@ -335,15 +338,16 @@ void PlotDialog::showPlotAssociations(QTreeWidgetItem *item, int)
     return;
   if (pc->type() == Graph::Function)
   {
-    FunctionDialog *fd = d_app->showFunctionDialog((dynamic_cast<CurveTreeItem*>(item))->graph(),
-        dynamic_cast<CurveTreeItem*>(item)->plotItemIndex());
+    FunctionDialog *fd = d_app->showFunctionDialog(ctit->graph(),
+                                                   ctit->plotItemIndex());
+
     if (fd)
       connect((QObject *) fd, SIGNAL(destroyed()), this, SLOT(show()));
   }
   else
   {
-    AssociationsDialog* ad = d_app->showPlotAssociations(
-        dynamic_cast<CurveTreeItem*>(item)->plotItemIndex());
+    AssociationsDialog* ad = d_app->showPlotAssociations(ctit->plotItemIndex());
+
     if (ad)
       connect((QObject *) ad, SIGNAL(destroyed()), this, SLOT(show()));
   }
