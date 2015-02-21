@@ -3023,8 +3023,12 @@ void PlotDialog::chooseLabelsFont()
   if (!item || item->type() != CurveTreeItem::PlotCurveTreeItem)
     return;
 
-  QwtPlotItem *i = dynamic_cast<CurveTreeItem*>(item)->plotItem();
-  Graph *graph = dynamic_cast<CurveTreeItem*>(item)->graph();
+  CurveTreeItem* ctit = dynamic_cast<CurveTreeItem*>(item);
+  if (!ctit)
+    return;
+
+  QwtPlotItem *i = ctit->plotItem();
+  Graph *graph = ctit->graph();
   if (!i || !graph)
     return;
 
