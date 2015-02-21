@@ -1444,7 +1444,11 @@ void PlotDialog::showStatistics()
   if (it->type() != CurveTreeItem::PlotCurveTreeItem)
     return;
 
-  QwtPlotItem *plotItem = dynamic_cast<QwtPlotItem *>(dynamic_cast<CurveTreeItem*>(it)->plotItem());
+  CurveTreeItem *ctit = dynamic_cast<CurveTreeItem*>(it);
+  if (!ctit)
+    return;
+
+  QwtPlotItem *plotItem = dynamic_cast<QwtPlotItem *>(ctit->plotItem());
   if (!plotItem)
     return;
 
