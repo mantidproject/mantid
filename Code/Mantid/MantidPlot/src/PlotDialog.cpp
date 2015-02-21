@@ -283,6 +283,9 @@ void PlotDialog::setEquidistantLevels()
     return;
 
   CurveTreeItem *item = dynamic_cast<CurveTreeItem*>(it);
+  if (!item)
+    return;
+
   QwtPlotItem *plotItem = dynamic_cast<QwtPlotItem *>(item->plotItem());
   if (!plotItem)
     return;
