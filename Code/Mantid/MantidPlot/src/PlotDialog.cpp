@@ -3075,6 +3075,9 @@ void LayerItem::insertCurvesList()
     {
       PlotCurve *c = dynamic_cast<PlotCurve *>(it);
       DataCurve* dc = dynamic_cast<DataCurve *>(it);
+      if (!c || !dc)
+        continue;
+
       if (dc && c->type() != Graph::Function && dc->table())
       {
         QString s = dc->plotAssociation();
