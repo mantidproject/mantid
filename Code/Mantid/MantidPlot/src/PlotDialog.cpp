@@ -1431,7 +1431,10 @@ void PlotDialog::selectCurve(int index)
   QTreeWidgetItem *item = layerItem->child(index);
   if (item)
   {
-    (dynamic_cast<CurveTreeItem*>(item))->setActive(true);
+    CurveTreeItem *ctit = dynamic_cast<CurveTreeItem*>(item);
+    if (!ctit)
+      return;
+    ctit->setActive(true);
     listBox->setCurrentItem(item);
   }
 }
