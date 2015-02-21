@@ -254,9 +254,17 @@ std::string SymmetryElementMirror::determineSymbol(
                          : rawTranslation[i];
   }
 
-  std::cout << Kernel::V3D(translation.getPositiveVector()) << std::endl;
+  std::string symbol = g_glideSymbolMap[translation.getPositiveVector()];
 
-  return g_glideSymbolMap[translation.getPositiveVector()];
+  /* Some space groups have "unconventional glides" for which there is no
+   * proper symbol, so the general symbol "g" is used for these cases.
+   * Examples can be found in No. 227 (Fd-3m).
+   */
+  if (symbol == "") {
+    return "g";
+  }
+
+  return symbol;
 }
 
 } // namespace Geometry
