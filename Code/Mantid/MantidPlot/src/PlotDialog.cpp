@@ -356,7 +356,10 @@ void PlotDialog::editCurve()
     return;
 
   int index = item->plotItemIndex();
-  int curveType = dynamic_cast<PlotCurve *>(item->plotItem())->type();
+  PlotCurve* pc = dynamic_cast<PlotCurve *>(item->plotItem());
+  if (!pc)
+    return;
+  int curveType = pc->type();
 
   hide();
 
