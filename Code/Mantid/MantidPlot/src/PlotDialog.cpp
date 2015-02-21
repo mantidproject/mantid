@@ -1499,7 +1499,12 @@ void PlotDialog::contextMenuEvent(QContextMenuEvent *e)
     return;
   if (item->type() != CurveTreeItem::PlotCurveTreeItem)
     return;
-  QwtPlotItem *it = dynamic_cast<QwtPlotItem *>(dynamic_cast<CurveTreeItem*>(item)->plotItem());
+
+  CurveTreeItem *ctit = dynamic_cast<CurveTreeItem*>(item);
+  if (!ctit)
+    return;
+
+  QwtPlotItem *it = dynamic_cast<QwtPlotItem *>(ctit->plotItem());
   if (!it)
     return;
 
@@ -1512,7 +1517,10 @@ void PlotDialog::contextMenuEvent(QContextMenuEvent *e)
 
     if (it->rtti() == QwtPlotItem::Rtti_PlotCurve)
     {
-      if (dynamic_cast<PlotCurve *>(it)->type() == Graph::Function)
+      PlotCurve *pc = dynamic_cast<PlotCurve *>(it);
+      if (!pc)
+        return;
+      if (pc->type() == Graph::Function)
         contextMenu.insertItem(tr("&Edit..."), this, SLOT(editCurve()));
       else
         contextMenu.insertItem(tr("&Plot Associations..."), this, SLOT(editCurve()));
