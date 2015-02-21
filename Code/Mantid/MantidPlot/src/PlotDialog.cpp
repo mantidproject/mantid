@@ -1569,18 +1569,32 @@ void PlotDialog::updateTabWindow(QTreeWidgetItem *currentItem, QTreeWidgetItem *
     forceClearTabs = true;
   }
 
-  if (previousItem->type() == CurveTreeItem::PlotCurveTreeItem)
-    dynamic_cast<CurveTreeItem *>(previousItem)->setActive(false);
-  else if (previousItem->type() == LayerItem::LayerTreeItem)
-    dynamic_cast<LayerItem *>(previousItem)->setActive(false);
+  if (previousItem->type() == CurveTreeItem::PlotCurveTreeItem) {
+    CurveTreeItem *prev = dynamic_cast<CurveTreeItem *>(previousItem);
+    if (!prev)
+      return;
+    prev->setActive(false);
+  } else if (previousItem->type() == LayerItem::LayerTreeItem) {
+    LayerItem *prev = dynamic_cast<LayerItem *>(previousItem);
+    if (!prev)
+      return;
+    prev->setActive(false);
+  }
 
   boxPlotType->blockSignals(true);
 
   if (currentItem->type() == CurveTreeItem::PlotCurveTreeItem)
   {
     CurveTreeItem *curveItem = dynamic_cast<CurveTreeItem *>(currentItem);
+    if (!curveItem)
+      return;
+
+    CurveTreeItem *pi = dynamic_cast<CurveTreeItem *>(previousItem);
+    if (!pi)
+      return;
+
     if (previousItem->type() != CurveTreeItem::PlotCurveTreeItem
-        || dynamic_cast<CurveTreeItem *>(previousItem)->plotItemType() != curveItem->plotItemType()
+        || pi->plotItemType() != curveItem->plotItemType()
         || forceClearTabs)
     {
       clearTabWidget();
