@@ -324,7 +324,7 @@ void PlotDialog::showPlotAssociations(QTreeWidgetItem *item, int)
   if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
   {
     Spectrogram *sp = dynamic_cast<Spectrogram*>(it);
-    if (sp->matrix())
+    if (sp && sp->matrix())
       sp->matrix()->showMaximized();
     return;
   }
