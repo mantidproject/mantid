@@ -2348,6 +2348,9 @@ bool PlotDialog::acceptParams()
     return false;
 
   CurveTreeItem *item = dynamic_cast<CurveTreeItem*>(it);
+  if (!item)
+    return false;
+
   QwtPlotItem *plotItem = dynamic_cast<QwtPlotItem *>(item->plotItem());
   if (!plotItem)
     return false;
@@ -2529,6 +2532,9 @@ bool PlotDialog::acceptParams()
   else if (privateTabWidget->currentPage() == piePage)
   {
     QwtPieCurve *pie = dynamic_cast<QwtPieCurve*>(plotItem);
+    if (!pie)
+      return false;
+
     pie->setPen(
         QPen(boxPieLineColor->color(), boxPieLineWidth->value(),
             Graph::getPenStyle(boxPieLineStyle->currentIndex())));
@@ -2538,6 +2544,9 @@ bool PlotDialog::acceptParams()
   else if (privateTabWidget->currentPage() == pieGeometryPage)
   {
     QwtPieCurve *pie = dynamic_cast<QwtPieCurve*>(plotItem);
+    if (!pie)
+      return false;
+
     pie->setViewAngle(boxPieViewAngle->value());
     pie->setThickness(boxPieThickness->value());
     pie->setRadius(boxRadius->value());
@@ -2548,6 +2557,9 @@ bool PlotDialog::acceptParams()
   else if (privateTabWidget->currentPage() == pieLabelsPage)
   {
     QwtPieCurve *pie = dynamic_cast<QwtPieCurve*>(plotItem);
+    if (!pie)
+      return false;
+
     pie->setLabelsAutoFormat(pieAutoLabelsBox->isChecked());
     pie->setLabelValuesFormat(boxPieValues->isChecked());
     pie->setLabelPercentagesFormat(boxPiePercentages->isChecked());
