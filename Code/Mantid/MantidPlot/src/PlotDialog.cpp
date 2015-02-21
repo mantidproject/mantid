@@ -3110,6 +3110,16 @@ CurveTreeItem::CurveTreeItem(QwtPlotItem *curve, LayerItem *parent, const QStrin
   setIcon(0, getQPixmap("graph_disabled_xpm"));
 }
 
+Graph* CurveTreeItem::graph()
+{
+  LayerItem *l = dynamic_cast<LayerItem *>(parent());
+  if (l) {
+    return l->graph();
+  } else {
+    return NULL;
+  }
+}
+
 void CurveTreeItem::setActive(bool on)
 {
   if (on)
