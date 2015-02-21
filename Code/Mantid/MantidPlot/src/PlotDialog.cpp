@@ -1920,6 +1920,8 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
 
     btnEditCurve->hide();
     Spectrogram *sp = dynamic_cast<Spectrogram *>(i);
+    if (!sp)
+      return;
 
     imageGroupBox->setChecked(sp->testDisplayMode(QwtPlotSpectrogram::ImageMode));
     grayScaleBox->setChecked(sp->colorMapPolicy() == Spectrogram::GrayScale);
@@ -1977,7 +1979,11 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
       privateTabWidget->showPage(labelsPage);
     return;
   }
+
   PlotCurve *c = dynamic_cast<PlotCurve*>(i);
+  if (!c)
+    return;
+
   if (c->type() == Graph::Function)
     btnEditCurve->setText(tr("&Edit..."));
   else
@@ -1987,6 +1993,8 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
   if (curveType == Graph::Pie)
   {
     QwtPieCurve *pie = dynamic_cast<QwtPieCurve*>(i);
+    if (!pie)
+      return;
     boxPiePattern->setPattern(pie->pattern());
     boxPieLineWidth->setValue(pie->pen().widthF());
     boxPieLineColor->setColor(pie->pen().color());
