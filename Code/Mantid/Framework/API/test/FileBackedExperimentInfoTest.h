@@ -82,6 +82,64 @@ public:
     TS_ASSERT(pmap.size() > 0);
   }
 
+  void test_populateInstrumentParameters_method_populate_object() {
+    auto fileBacked = createTestObject();
+    fileBacked->populateInstrumentParameters();
+    const auto &pmap = fileBacked->constInstrumentParameters();
+
+    TS_ASSERT(pmap.size() > 0);
+  }
+
+  void test_replaceInstrumentParameters_method_populate_object() {
+    using Mantid::Geometry::ParameterMap;
+    
+    auto fileBacked = createTestObject();
+    ParameterMap emptyMap;
+    fileBacked->replaceInstrumentParameters(emptyMap);
+
+    const auto &pmap = fileBacked->constInstrumentParameters();
+    TS_ASSERT_EQUALS(0, pmap.size());
+  }
+
+  void test_swapInstrumentParameters_method_populate_object() {
+    using Mantid::Geometry::ParameterMap;
+    
+    auto fileBacked = createTestObject();
+    ParameterMap emptyMap;
+    fileBacked->swapInstrumentParameters(emptyMap);
+
+    const auto &pmap = fileBacked->constInstrumentParameters();
+    TS_ASSERT_EQUALS(0, pmap.size());
+  }
+
+  void test_cacheDetectorGroupings() {
+    auto fileBacked = createTestObject();
+
+    std::vector<Mantid::detid_t> group(2, 1);
+    group[1] = 2;
+    Mantid::det2group_map mapping;
+    mapping.insert(std::make_pair(1, group));
+    fileBacked->cacheDetectorGroupings(mapping);
+  }
+
+  void test_getGroupMembers() {
+    auto fileBacked = createTestObject();
+
+    std::vector<Mantid::detid_t> group(2, 1);
+    group[1] = 2;
+    Mantid::det2group_map mapping;
+    mapping.insert(std::make_pair(1, group));
+    fileBacked->cacheDetectorGroupings(mapping);
+
+    TS_ASSERT_EQUALS(group, fileBacked->getGroupMembers(1));
+  }
+
+  void test_getDetectorByID() {
+    auto fileBacked = createTestObject();
+
+    TS_ASSERT(fileBacked->getDetectorByID(10100));
+  }
+
   //------------------------------------------------------------------------------------------------
   // Failure tests
   //------------------------------------------------------------------------------------------------

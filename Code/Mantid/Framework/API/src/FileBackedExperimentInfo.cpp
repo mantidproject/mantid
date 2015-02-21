@@ -14,9 +14,9 @@ namespace {
 
 /// static logger object
 Kernel::Logger g_log("FileBackedExperimentInfo");
+
 }
 
-//----------------------------------------------------------------------------------------------
 /**
   * Create an object based on a NeXus file and path
   * @param file A pointer to an open NeXus file object
@@ -26,8 +26,6 @@ FileBackedExperimentInfo::FileBackedExperimentInfo(::NeXus::File *file,
                                                    const std::string &path)
     : ExperimentInfo(), m_empty(true), m_file(file), m_path(path) {}
 
-//----------------------------------------------------------------------------------------------
-
 /**
  * @return A clone of the object
  */
@@ -36,15 +34,11 @@ ExperimentInfo *FileBackedExperimentInfo::cloneExperimentInfo() const {
   return ExperimentInfo::cloneExperimentInfo();
 }
 
-//----------------------------------------------------------------------------------------------
-
 /// @returns A human-readable description of the object
 const std::string FileBackedExperimentInfo::toString() const {
   checkAndPopulate();
   return ExperimentInfo::toString();
 }
-
-//----------------------------------------------------------------------------------------------
 
 /// @return A pointer to the parametrized instrument
 Geometry::Instrument_const_sptr FileBackedExperimentInfo::getInstrument() const
@@ -53,7 +47,6 @@ Geometry::Instrument_const_sptr FileBackedExperimentInfo::getInstrument() const
   return ExperimentInfo::getInstrument();
 }
 
-//----------------------------------------------------------------------------------------------
 /**
  * @return A reference to a const version of the parameter map
  */
@@ -63,7 +56,6 @@ const Geometry::ParameterMap & FileBackedExperimentInfo::instrumentParameters() 
   return ExperimentInfo::instrumentParameters();
 }
 
-//----------------------------------------------------------------------------------------------
 /**
  * @return A reference to a non-const version of the parameter map
  */
@@ -74,7 +66,6 @@ Geometry::ParameterMap &FileBackedExperimentInfo::instrumentParameters()
   
 }
 
-//----------------------------------------------------------------------------------------------
 /**
  * @return A reference to a const version of the parameter map
  */
@@ -83,6 +74,60 @@ const Geometry::ParameterMap &FileBackedExperimentInfo::constInstrumentParameter
   checkAndPopulate();
   return ExperimentInfo::constInstrumentParameters();
 }
+
+/**
+ * Populate object with instrument parameters
+ */
+void FileBackedExperimentInfo::populateInstrumentParameters() {
+  checkAndPopulate();
+  return ExperimentInfo::populateInstrumentParameters();
+}
+
+/**
+ * Populate object and then replace parameter map
+ * @param pmap The new parameter map
+ */
+void FileBackedExperimentInfo::replaceInstrumentParameters(const Geometry::ParameterMap &pmap) {
+  checkAndPopulate();
+  ExperimentInfo::replaceInstrumentParameters(pmap);
+}
+
+/**
+ * Populate object and then swap parameter map
+ * @param pmap The new parameter map
+ */
+void FileBackedExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
+  checkAndPopulate();
+  ExperimentInfo::swapInstrumentParameters(pmap);
+}
+
+/**
+ * Populate the object and cache the groupings
+ * @param mapping A set of the detector mappings
+ */
+void FileBackedExperimentInfo::cacheDetectorGroupings(const det2group_map &mapping) {
+  checkAndPopulate();
+  ExperimentInfo::cacheDetectorGroupings(mapping);
+}
+
+/**
+ * Populate the object and returns the members of the group for a given ID
+ * @param detID A detector ID to lookup
+ */
+const std::vector<detid_t> & FileBackedExperimentInfo::getGroupMembers(const detid_t detID) const {
+  checkAndPopulate();
+  return ExperimentInfo::getGroupMembers(detID);
+}
+
+/**
+ * Populate the object and return a detector by ID
+ */
+Geometry::IDetector_const_sptr FileBackedExperimentInfo::getDetectorByID(const detid_t detID) const {
+  checkAndPopulate();
+  return ExperimentInfo::getDetectorByID(detID);
+}
+
+
 
 //------------------------------------------------------------------------------------------------------
 // Private members

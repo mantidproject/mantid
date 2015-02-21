@@ -45,9 +45,12 @@ public:
   const Geometry::ParameterMap &instrumentParameters() const;
   Geometry::ParameterMap &instrumentParameters();
   const Geometry::ParameterMap &constInstrumentParameters() const;
-//  void populateInstrumentParameters();
-//  void replaceInstrumentParameters(const Geometry::ParameterMap &pmap);
-//  void swapInstrumentParameters(Geometry::ParameterMap &pmap);
+  void populateInstrumentParameters();
+  void replaceInstrumentParameters(const Geometry::ParameterMap &pmap);
+  void swapInstrumentParameters(Geometry::ParameterMap &pmap);
+  void cacheDetectorGroupings(const det2group_map &mapping);
+  const std::vector<detid_t> &getGroupMembers(const detid_t detID) const;
+  Geometry::IDetector_const_sptr getDetectorByID(const detid_t detID) const;
 
 private:
 
