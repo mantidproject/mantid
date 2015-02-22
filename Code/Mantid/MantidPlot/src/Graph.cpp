@@ -1675,11 +1675,13 @@ void Graph::deselectCurves()
   foreach(QwtPlotItem *i, curves){
     PlotCurve *c = dynamic_cast<PlotCurve *>(i);
     DataCurve *dc = dynamic_cast<DataCurve *>(i);
-    if(dc && i->rtti() != QwtPlotItem::Rtti_PlotSpectrogram &&
-        c->type() != Graph::Function &&  dc->hasSelectedLabels()  ){
-      dc->setLabelsSelected(false);
-      return;
-    }
+    if(c && dc &&
+       i->rtti() != QwtPlotItem::Rtti_PlotSpectrogram &&
+       c->type() != Graph::Function &&  dc->hasSelectedLabels()  )
+      {
+        dc->setLabelsSelected(false);
+        return;
+      }
   }
 }
 
