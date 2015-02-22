@@ -305,19 +305,33 @@ void Graph::setSelectedMarker(int _mrk, bool add)
   selectedMarker = mrk;
   if (add) {
     if (d_markers_selector) {
-      if (d_lines.contains(mrk))
-        d_markers_selector->add(dynamic_cast<ArrowMarker *>(d_plot->marker(mrk)));
-      else if (d_images.contains(mrk))
-        d_markers_selector->add(dynamic_cast<ImageMarker *>(d_plot->marker(mrk)));
-      else
+      if (d_lines.contains(mrk)) {
+        ArrowMarker *am = dynamic_cast<ArrowMarker *>(d_plot->marker(mrk));
+        if (!am)
+          return;
+        d_markers_selector->add(am);
+      } else if (d_images.contains(mrk)) {
+        ImageMarker *im = dynamic_cast<ImageMarker *>(d_plot->marker(mrk));
+        if (!im)
+          return;
+        d_markers_selector->add(im);
+      } else {
         return;
+      }
     } else {
-      if (d_lines.contains(mrk))
-        d_markers_selector = new SelectionMoveResizer(dynamic_cast<ArrowMarker *>(d_plot->marker(mrk)));
-      else if (d_images.contains(mrk))
-        d_markers_selector = new SelectionMoveResizer(dynamic_cast<ImageMarker *>(d_plot->marker(mrk)));
-      else
+      if (d_lines.contains(mrk)) {
+        ArrowMarker *am = dynamic_cast<ArrowMarker *>(d_plot->marker(mrk));
+        if (!am)
+          return;
+        d_markers_selector = new SelectionMoveResizer(am);
+      } else if (d_images.contains(mrk)) {
+        ImageMarker *im = dynamic_cast<ImageMarker *>(d_plot->marker(mrk));
+        if (!im)
+          return;
+        d_markers_selector = new SelectionMoveResizer(im);
+      } else {
         return;
+      }
 
       connect(d_markers_selector, SIGNAL(targetsChanged()), this, SIGNAL(modifiedGraph()));
     }
@@ -328,14 +342,20 @@ void Graph::setSelectedMarker(int _mrk, bool add)
           return;
         delete d_markers_selector;
       }
-      d_markers_selector = new SelectionMoveResizer(dynamic_cast<ArrowMarker *>(d_plot->marker(mrk)));
+      ArrowMarker *am = dynamic_cast<ArrowMarker *>(d_plot->marker(mrk));
+      if (!am)
+        return;
+      d_markers_selector = new SelectionMoveResizer(am);
     } else if (d_images.contains(mrk)) {
       if (d_markers_selector) {
         if (d_markers_selector->contains(dynamic_cast<ImageMarker *>(d_plot->marker(mrk))))
           return;
         delete d_markers_selector;
       }
-      d_markers_selector = new SelectionMoveResizer(dynamic_cast<ImageMarker *>(d_plot->marker(mrk)));
+      ImageMarker *im = dynamic_cast<ImageMarker *>(d_plot->marker(mrk));
+      if (!im)
+        return;
+      d_markers_selector = new SelectionMoveResizer(im);
     } else
       return;
 
