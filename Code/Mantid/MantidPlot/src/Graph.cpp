@@ -3093,9 +3093,10 @@ void Graph::removeCurve(int index)
 
     if (it->rtti() != QwtPlotItem::Rtti_PlotSpectrogram)
     {
-      if (dynamic_cast<PlotCurve *>(it)->type() == ErrorBars)
-        dynamic_cast<QwtErrorPlotCurve *>(it)->detachFromMasterCurve();
-      else if (c->type() != Function && dc){
+      if (c->type() == ErrorBars) {
+        QwtErrorPlotCurve *epc = dynamic_cast<QwtErrorPlotCurve *>(it);
+        epc->detachFromMasterCurve();
+      } else if (c->type() != Function && dc) {
         dc->clearErrorBars();
         dc->clearLabels();
       }
