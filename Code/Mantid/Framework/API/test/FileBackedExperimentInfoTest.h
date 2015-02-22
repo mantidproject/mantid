@@ -3,10 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <nexus/NeXusFile.hpp>
+
+#include "ExperimentInfoTest.h"
+
 #include "MantidAPI/FileBackedExperimentInfo.h"
 #include "MantidAPI/FileFinder.h"
-
-#include <nexus/NeXusFile.hpp>
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 
 using Mantid::API::FileBackedExperimentInfo;
 
@@ -138,6 +142,75 @@ public:
     auto fileBacked = createTestObject();
 
     TS_ASSERT(fileBacked->getDetectorByID(10100));
+  }
+
+  void test_ModeratorModelMethods() {
+    auto fileBacked = createTestObject();
+    ModeratorModel * source = new FakeSource;
+    TS_ASSERT_THROWS_NOTHING(fileBacked->setModeratorModel(source));
+    const ModeratorModel & fetched = fileBacked->moderatorModel();
+    const ModeratorModel & constInput = const_cast<const Mantid::API::ModeratorModel&>(*source);
+    TS_ASSERT_EQUALS(&fetched, &constInput);
+  }
+
+  void test_chopperModelMethods() {
+    auto fileBacked = createTestObject();
+
+    TS_ASSERT_THROWS_NOTHING(fileBacked->setChopperModel(new FakeChopper));
+    TS_ASSERT_THROWS_NOTHING(fileBacked->chopperModel(0));
+  }
+
+  void test_sample() {
+    auto fileBacked = createTestObject();
+
+    TS_ASSERT_EQUALS(m_inMemoryExptInfo->sample().getGeometryFlag(),
+                     fileBacked->sample().getGeometryFlag());
+    TS_ASSERT_EQUALS(m_inMemoryExptInfo->sample().getGeometryFlag(),
+                     fileBacked->mutableSample().getGeometryFlag());
+  }
+
+  void test_run() {
+    auto fileBacked = createTestObject();
+
+    TS_ASSERT_EQUALS(m_inMemoryExptInfo->run().getProtonCharge(),
+                     fileBacked->run().getProtonCharge())
+  }
+  
+  void test_getLog() {
+    auto fileBacked = createTestObject();
+    
+    TS_ASSERT_EQUALS(m_inMemoryExptInfo->getLogAsSingleValue("gd_prtn_chrg"),
+                     fileBacked->getLogAsSingleValue("gd_prtn_chrg"));
+
+    auto *inMemoryProp = m_inMemoryExptInfo->getLog("gd_prtn_chrg");
+    auto *fileBackedProp = fileBacked->getLog("gd_prtn_chrg");
+    TS_ASSERT_EQUALS(inMemoryProp->value(), fileBackedProp->value());
+  }
+
+  void test_getRunNumber() {
+    auto fileBacked = createTestObject();
+
+    TS_ASSERT_EQUALS(m_inMemoryExptInfo->getRunNumber(),
+                     fileBacked->getRunNumber());
+  }
+
+  void test_getEMode() {
+    auto fileBacked = createTestObject();
+
+    TS_ASSERT_EQUALS(m_inMemoryExptInfo->getEMode(),
+                     fileBacked->getEMode());
+  }
+
+  void test_getEFixed() {
+    auto fileBacked = createTestObject();
+
+    TS_ASSERT_THROWS(fileBacked->getEFixed(10100), std::runtime_error);
+  }
+
+  void test_setEFixed() {
+    auto fileBacked = createTestObject();
+      
+    TS_ASSERT_THROWS_NOTHING(fileBacked->setEFixed(10100, 12.5));
   }
 
   //------------------------------------------------------------------------------------------------

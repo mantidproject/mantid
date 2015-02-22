@@ -40,17 +40,59 @@ public:
   FileBackedExperimentInfo(::NeXus::File *file, const std::string & path);
 
   ExperimentInfo *cloneExperimentInfo() const;
+
   const std::string toString() const;
+
   Geometry::Instrument_const_sptr getInstrument() const;
+
   const Geometry::ParameterMap &instrumentParameters() const;
+
   Geometry::ParameterMap &instrumentParameters();
+
   const Geometry::ParameterMap &constInstrumentParameters() const;
+
   void populateInstrumentParameters();
+
   void replaceInstrumentParameters(const Geometry::ParameterMap &pmap);
+
   void swapInstrumentParameters(Geometry::ParameterMap &pmap);
+
   void cacheDetectorGroupings(const det2group_map &mapping);
+
   const std::vector<detid_t> &getGroupMembers(const detid_t detID) const;
+
   Geometry::IDetector_const_sptr getDetectorByID(const detid_t detID) const;
+
+  void setModeratorModel(ModeratorModel *source);
+
+  ModeratorModel &moderatorModel() const;
+
+  void setChopperModel(ChopperModel *chopper, const size_t index = 0);
+
+  ChopperModel &chopperModel(const size_t index = 0) const;
+
+  const Sample &sample() const;
+
+  Sample &mutableSample();
+
+  const Run &run() const;
+
+  Run &mutableRun();
+
+  Kernel::Property *getLog(const std::string &log) const;
+
+  double getLogAsSingleValue(const std::string &log) const;
+
+  int getRunNumber() const;
+
+  Kernel::DeltaEMode::Type getEMode() const;
+
+  double getEFixed(const detid_t detID) const;
+
+  double getEFixed(const Geometry::IDetector_const_sptr detector =
+                   Geometry::IDetector_const_sptr()) const;
+
+  void setEFixed(const detid_t detID, const double value);
 
 private:
 
