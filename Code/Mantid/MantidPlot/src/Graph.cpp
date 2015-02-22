@@ -3094,9 +3094,13 @@ void Graph::removePie()
   if (d_legend)
     d_legend->setText(QString::null);
 
-  QList <PieLabel *> labels = dynamic_cast<QwtPieCurve *>(curve(0))->labelsList();
+  QwtPieCurve *pieCurve = dynamic_cast<QwtPieCurve *>(curve(0));
+  if (!pieCurve)
+    return;
+
+  QList <PieLabel *> labels = pieCurve->labelsList();
   foreach(PieLabel *l, labels)
-  l->setPieCurve(0);
+    l->setPieCurve(0);
 
   d_plot->removeCurve(c_keys[0]);
   d_plot->replot();
