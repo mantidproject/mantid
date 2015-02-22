@@ -1182,6 +1182,9 @@ void Graph::setScale(QwtPlot::Axis axis, QwtScaleTransformation::Type scaleType)
 {
   //check if the scale is already of the desired type, 
   ScaleEngine *sc_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
+  if (!sc_engine)
+    return;
+
   QwtScaleTransformation::Type type = sc_engine->type();
   if ( scaleType == QwtScaleTransformation::Log10 )
   {
@@ -1200,8 +1203,11 @@ void Graph::setScale(QwtPlot::Axis axis, QwtScaleTransformation::Type scaleType)
   double end = QMAX(scDiv->lBound(), scDiv->hBound());
 
   ScaleEngine *scaleEng = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
+  if (!scaleEng)
+    return;
 
-  // call the QTiPlot function set scale which takes many arguments, fill the arguments with the same settings the plot already has
+  // call the QTiPlot function set scale which takes many arguments,
+  // fill the arguments with the same settings the plot already has
   setScale(axis, start, end, axisStep(axis),
       scDiv->ticks(QwtScaleDiv::MajorTick).count(),
       d_plot->axisMaxMinor(axis), scaleType,
