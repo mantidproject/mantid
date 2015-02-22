@@ -591,11 +591,16 @@ void Graph::showAxis(int axis, int type, const QString& formatInfo, Table *table
   if (!axisOn)
     return;
 
+  QwtScaleWidget *scale = dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(axis));
+  if (!scale)
+    return;
+
+  ScaleDraw *sd = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(axis));
+  if (!sd)
+    return;
+
   QList<int> majTicksTypeList = d_plot->getMajorTicksType();
   QList<int> minTicksTypeList = d_plot->getMinorTicksType();
-
-  QwtScaleWidget *scale = dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(axis));
-  ScaleDraw *sd = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(axis));
 
   if (d_plot->axisEnabled (axis) == axisOn &&
       majTicksTypeList[axis] == majTicksType &&
