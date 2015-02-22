@@ -4843,12 +4843,14 @@ void Graph::setGrayScale()
     QwtPlotItem * it = plotItem(i);
     if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
     {
-      dynamic_cast<Spectrogram*>(it)->setGrayScale();
+      Spectrogram *spec = dynamic_cast<Spectrogram*>(it);
+      if (spec)
+        spec->setGrayScale();
       continue;
     }
 
     PlotCurve *c = dynamic_cast<PlotCurve*>(it);
-    if (c->type() == ErrorBars)
+    if (!c || c->type() == ErrorBars)
       continue;
 
     QPen pen = c->pen();
@@ -4886,9 +4888,12 @@ void Graph::setGrayScale()
       continue;
 
     PlotCurve *c = dynamic_cast<PlotCurve*>(it);
-    if (c->type() == ErrorBars)
+    if (c && c->type() == ErrorBars)
     {
-      QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve*>(it); // QtiPlot: ErrorBarsCurve *er = (ErrorBarsCurve *) it;
+      // QtiPlot: ErrorBarsCurve *er = (ErrorBarsCurve *) it;
+      QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve*>(it);
+      if (!er)
+        continue;
       DataCurve* mc = er->masterCurve();
       if (mc)
         er->setColor(mc->pen().color());
