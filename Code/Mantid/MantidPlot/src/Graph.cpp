@@ -4754,7 +4754,11 @@ QString Graph::axisFormatInfo(int axis)
   if (axis < 0 || axis > QwtPlot::axisCnt)
     return QString();
 
-  return dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(axis))->formatString();
+  ScaleDraw *sd = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(axis));
+  if (sd)
+    return sd->formatString();
+  else
+    return "Not available!";
 }
 
 void Graph::updateCurveNames(const QString& oldName, const QString& newName, bool updateTableName)
