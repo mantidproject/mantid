@@ -96,7 +96,7 @@ public:
 
   void test_replaceInstrumentParameters_method_populate_object() {
     using Mantid::Geometry::ParameterMap;
-    
+
     auto fileBacked = createTestObject();
     ParameterMap emptyMap;
     fileBacked->replaceInstrumentParameters(emptyMap);
@@ -107,7 +107,7 @@ public:
 
   void test_swapInstrumentParameters_method_populate_object() {
     using Mantid::Geometry::ParameterMap;
-    
+
     auto fileBacked = createTestObject();
     ParameterMap emptyMap;
     fileBacked->swapInstrumentParameters(emptyMap);
@@ -146,10 +146,11 @@ public:
 
   void test_ModeratorModelMethods() {
     auto fileBacked = createTestObject();
-    ModeratorModel * source = new FakeSource;
+    ModeratorModel *source = new FakeSource;
     TS_ASSERT_THROWS_NOTHING(fileBacked->setModeratorModel(source));
-    const ModeratorModel & fetched = fileBacked->moderatorModel();
-    const ModeratorModel & constInput = const_cast<const Mantid::API::ModeratorModel&>(*source);
+    const ModeratorModel &fetched = fileBacked->moderatorModel();
+    const ModeratorModel &constInput =
+        const_cast<const Mantid::API::ModeratorModel &>(*source);
     TS_ASSERT_EQUALS(&fetched, &constInput);
   }
 
@@ -175,10 +176,10 @@ public:
     TS_ASSERT_EQUALS(m_inMemoryExptInfo->run().getProtonCharge(),
                      fileBacked->run().getProtonCharge())
   }
-  
+
   void test_getLog() {
     auto fileBacked = createTestObject();
-    
+
     TS_ASSERT_EQUALS(m_inMemoryExptInfo->getLogAsSingleValue("gd_prtn_chrg"),
                      fileBacked->getLogAsSingleValue("gd_prtn_chrg"));
 
@@ -197,8 +198,7 @@ public:
   void test_getEMode() {
     auto fileBacked = createTestObject();
 
-    TS_ASSERT_EQUALS(m_inMemoryExptInfo->getEMode(),
-                     fileBacked->getEMode());
+    TS_ASSERT_EQUALS(m_inMemoryExptInfo->getEMode(), fileBacked->getEMode());
   }
 
   void test_getEFixed() {
@@ -209,7 +209,7 @@ public:
 
   void test_setEFixed() {
     auto fileBacked = createTestObject();
-      
+
     TS_ASSERT_THROWS_NOTHING(fileBacked->setEFixed(10100, 12.5));
   }
 

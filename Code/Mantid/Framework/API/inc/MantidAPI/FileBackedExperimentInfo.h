@@ -37,7 +37,7 @@ namespace API {
 class MANTID_API_DLL FileBackedExperimentInfo : public ExperimentInfo {
 public:
   /// Constructor
-  FileBackedExperimentInfo(::NeXus::File *file, const std::string & path);
+  FileBackedExperimentInfo(::NeXus::File *file, const std::string &path);
 
   ExperimentInfo *cloneExperimentInfo() const;
 
@@ -90,12 +90,11 @@ public:
   double getEFixed(const detid_t detID) const;
 
   double getEFixed(const Geometry::IDetector_const_sptr detector =
-                   Geometry::IDetector_const_sptr()) const;
+                       Geometry::IDetector_const_sptr()) const;
 
   void setEFixed(const detid_t detID, const double value);
 
 private:
-
   void populateIfNotLoaded() const;
   void populateFromFile() const;
 

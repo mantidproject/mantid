@@ -213,7 +213,6 @@ FileBackedExperimentInfo::getLog(const std::string &log) const {
   return ExperimentInfo::getLog(log);
 }
 
-
 /**
  * Return a pointer to a log entry
  * @param log A string name of the log
