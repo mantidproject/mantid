@@ -1074,17 +1074,23 @@ void Graph::niceLogScales(QwtPlot::Axis axis)
   double start = QMIN(scDiv->lBound(), scDiv->hBound());
   double end = QMAX(scDiv->lBound(), scDiv->hBound());
 
-  // log scales can't represent zero or negative values, 1e-10 as a low range is enough to display all data but still be plottable on a log scale
+  // log scales can't represent zero or negative values, 1e-10 as a
+  // low range is enough to display all data but still be plottable on
+  // a log scale
   start = start < 1e-90 ? 1e-10 : start;
-  // improve the scale labelling by ensuring that the graph starts and ends on numbers that can have major ticks e.g. 0.1 or 1 or 100
+  // improve the scale labelling by ensuring that the graph starts and
+  // ends on numbers that can have major ticks e.g. 0.1 or 1 or 100
   const double exponent = floor(log10(start));
   start = pow(10.0, exponent);
   end = ceil(log10(end));
   end = pow(10.0, end);
 
   ScaleEngine *scaleEng = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
+  if (!scaleEng)
+    return;
 
-  // call the QTiPlot function set scale which takes many arguments, fill the arguments with the same settings the plot already has
+  // call the QTiPlot function set scale which takes many arguments,
+  // fill the arguments with the same settings the plot already has
   setScale(axis, start, end, axisStep(axis),
       scDiv->ticks(QwtScaleDiv::MajorTick).count(),
       d_plot->axisMaxMinor(axis),
