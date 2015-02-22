@@ -4970,7 +4970,8 @@ DataCurve* Graph::masterCurve(QwtErrorPlotCurve *er)
       continue;
     if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
       continue;
-    if (dynamic_cast<PlotCurve *>(it)->type() == Function)
+    PlotCurve *pc = dynamic_cast<PlotCurve *>(it);
+    if (!pc || pc->type() == Function)
       continue;
 
     DataCurve* dc = dynamic_cast<DataCurve *>(it);
@@ -4992,7 +4993,8 @@ DataCurve* Graph::masterCurve(const QString& xColName, const QString& yColName)
       continue;
     if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
       continue;
-    if (dynamic_cast<PlotCurve *>(it)->type() == Function)
+    PlotCurve *pc = dynamic_cast<PlotCurve *>(it);
+    if (!pc || pc->type() == Function)
       continue;
 
     DataCurve* dc = dynamic_cast<DataCurve *>(it);
