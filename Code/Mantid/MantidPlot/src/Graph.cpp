@@ -954,7 +954,7 @@ void Graph::updateSecondaryAxis(int axis)
 
     if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
       Spectrogram *sp = dynamic_cast<Spectrogram *>(it);
-      if (sp->colorScaleAxis() == axis)
+      if (!sp || sp->colorScaleAxis() == axis)
         return;
     }
 
@@ -971,7 +971,10 @@ void Graph::updateSecondaryAxis(int axis)
     return;
 
   ScaleEngine *sc_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
-  sc_engine->clone(dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(a)));
+  if (sc_engine) {
+    ScaleEngine *a_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(a));
+    sc_engine->clone(a_engine);
+  }
 
   /*QwtScaleEngine *qwtsc_engine = d_plot->axisScaleEngine(axis);
 	ScaleEngine *sc_engine=dynamic_cast<ScaleEngine*>(qwtsc_engine);
