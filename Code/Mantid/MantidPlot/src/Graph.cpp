@@ -427,7 +427,11 @@ ScaleDraw::ScaleType Graph::axisType(int axis)
   if (!d_plot->axisEnabled(axis))
     return ScaleDraw::Numeric;
 
-  return dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(axis))->scaleType();
+  ScaleDraw *sd = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(axis));
+  if (sd)
+    return sd->scaleType();
+  else // assuming this is a good default
+    return ScaleDraw::Numeric;
 }
 
 void Graph::setLabelsNumericFormat(int axis, int format, int prec, const QString& formula)
