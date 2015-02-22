@@ -1766,6 +1766,9 @@ void Graph::removeLegend()
 void Graph::updateImageMarker(int x, int y, int w, int h)
 {
   ImageMarker* mrk = dynamic_cast<ImageMarker *>(d_plot->marker(selectedMarker));
+  if (!mrk)
+    return;
+
   mrk->setRect(x, y, w, h);
   d_plot->replot();
   emit modifiedGraph();
