@@ -1,8 +1,7 @@
-import mantid.simpleapi as api
+#pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.kernel import *
 import os
-import datetime
 
 class ExportSampleLogsToCSVFile(PythonAlgorithm):
     """ Python algorithm to export sample logs to spread sheet file
@@ -42,7 +41,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         self.declareProperty("Header", "", "String in the header file.")
 
         # Time zone
-        timezones = ["UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London", "GMT+0",
+        timezones = ["UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London", "GMT+0",\
                 "Europe/Paris", "Europe/Copenhagen"]
 
         self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones))

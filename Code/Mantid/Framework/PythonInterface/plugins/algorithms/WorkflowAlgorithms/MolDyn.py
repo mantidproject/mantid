@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -70,7 +71,7 @@ class MolDyn(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(FileProperty('Filename', '',
                                           action=FileAction.OptionalLoad,
-                                          extensions=['.cdl', '.dat']),
+                                          extensions=['.cdl', '.dat']),\
                                           doc='File path for data')
 
         self.declareProperty(StringArrayProperty('Functions'),

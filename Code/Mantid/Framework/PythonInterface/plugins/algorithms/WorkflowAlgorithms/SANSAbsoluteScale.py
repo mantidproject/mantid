@@ -1,8 +1,7 @@
+#pylint: disable=no-init,invalid-name
 import os
-import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
-from reduction_workflow.instruments.sans import hfir_instrument
 from reduction_workflow.find_data import find_data
 
 class SANSAbsoluteScale(PythonAlgorithm):

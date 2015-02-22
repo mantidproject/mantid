@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from mantid.simpleapi import *
 from mantid.kernel import funcreturns
 from mantid import geometry,api
@@ -202,7 +203,7 @@ class DirectEnergyConversion(object):
                              # stuff and can load masks directly
             white_data = white.get_ws_clone('white_ws_clone')
 
-            diag_mask = LoadMask(Instrument=self.instr_name,InputFile=self.hard_mask_file,
+                diag_mask = LoadMask(Instrument=self.instr_name,InputFile=self.hard_mask_file,\
                                OutputWorkspace='hard_mask_ws')
             MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
             DeleteWorkspace(diag_mask)
@@ -236,15 +237,15 @@ class DirectEnergyConversion(object):
          #>>> here result workspace is being processed -- not touching
          #result ws
          bkgd_range = self.background_test_range
-         background_int = Integration(result_ws,
-                           RangeLower=bkgd_range[0],RangeUpper=bkgd_range[1],
+            background_int = Integration(result_ws,\
+                           RangeLower=bkgd_range[0],RangeUpper=bkgd_range[1],\
                            IncludePartialBins=True)
          total_counts = Integration(result_ws, IncludePartialBins=True)
          background_int = ConvertUnits(background_int, Target="Energy",EMode='Elastic', AlignBins=0)
          self.prop_man.log("Diagnose: finished convertUnits ",'information')
 
          background_int *= self.scale_factor
-         diagnostics.normalise_background(background_int, whiteintegrals,
+            diagnostics.normalise_background(background_int, whiteintegrals,\
                                            diag_params.get('second_white',None))
          diag_params['background_int'] = background_int
          diag_params['sample_counts'] = total_counts
@@ -344,7 +345,7 @@ class DirectEnergyConversion(object):
      # if it is set that way
       if not masks_done:
         prop_man.log("======== Run diagnose for sample run ===========================",'notice')
-        masking = self.diagnose(PropertyManager.wb_run,PropertyManager.mask_run,
+            masking = self.diagnose(PropertyManager.wb_run,PropertyManager.mask_run,\
                                 second_white=None,print_diag_results=True)
         if prop_man.use_hard_mask_only:
             header = "*** Hard mask file applied to workspace with {0:d} spectra masked {1:d} spectra"
@@ -365,7 +366,7 @@ class DirectEnergyConversion(object):
                                                                                                          # solution for that.
                         prop_man.log("======== Run diagnose for monochromatic vanadium run ===========",'notice')
 
-                        masking2 = self.diagnose(PropertyManager.wb_for_monovan_run,PropertyManager.monovan_run,
+                            masking2 = self.diagnose(PropertyManager.wb_for_monovan_run,PropertyManager.monovan_run,\
                                          second_white = None,print_diag_results=True)
                         masking +=  masking2
                         DeleteWorkspace(masking2)
@@ -443,7 +444,7 @@ class DirectEnergyConversion(object):
          #---------------
 
          #Run the conversion first on the sample
-         deltaE_ws_sample = self.mono_sample(PropertyManager.sample_run,ei_guess,PropertyManager.wb_run,
+            deltaE_ws_sample = self.mono_sample(PropertyManager.sample_run,ei_guess,PropertyManager.wb_run,\
                                              self.map_file,masking)
  
          # calculate absolute units integral and apply it to the workspace
@@ -454,18 +455,18 @@ class DirectEnergyConversion(object):
             self.check_background= False
             # what we want to do with absolute units: 
             if self.mono_correction_factor: # Correction provided. Just apply it
-                deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,
+                    deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,\
                                                                       ei_guess,PropertyManager.wb_for_monovan_run)
             elif cashed_mono_int:  # Correction cashed from previous run
                 self.mono_correction_factor = cashed_mono_int
-                deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,
+                    deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,\
                                                                       ei_guess,PropertyManager.wb_for_monovan_run)
                 self.mono_correction_factor = None
             else:   # Calculate corrections
                 if self._multirep_mode and calculate_abs_units:
-                   mono_ws_base = PropertyManager.monovan_run.chop_ws_part(mono_ws_base,tof_range,self._do_early_rebinning,
+                        mono_ws_base = PropertyManager.monovan_run.chop_ws_part(mono_ws_base,tof_range,self._do_early_rebinning,\
                                                                           cut_ind,num_ei_cuts)
-                deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,
+                    deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,\
                                                                       ei_guess,PropertyManager.wb_for_monovan_run)
             self.check_background = current_bkg_opt
          PropertyManager.monovan_run._in_cash = True # monovan run has been certainly deleted from memory
@@ -490,7 +491,7 @@ class DirectEnergyConversion(object):
 
 
       results_name = deltaE_ws_sample.name()
-      if out_ws_name and not(self._multirep_mode):
+        if out_ws_name and not self._multirep_mode:
          if results_name != out_ws_name:
             RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
          result = mtd[out_ws_name]
@@ -545,7 +546,7 @@ class DirectEnergyConversion(object):
             white_run = self.get_run_descriptor(white_run)
 
 
-        mono_s = self._do_mono(mono_run, ei_guess,
+        mono_s = self._do_mono(mono_run, ei_guess,\
                              white_run, map_file, spectra_masks, Tzero)
         # at this stage we would never need monitors for this workspace if they
         # were actually there
@@ -564,7 +565,7 @@ class DirectEnergyConversion(object):
         offset = self.prop_man.motor_offset
 
         #
-        if (offset is None):
+        if offset is None:
             motor_offset = float('nan')
         else:
             motor_offset = float(offset)
@@ -626,7 +627,7 @@ class DirectEnergyConversion(object):
            # case)
            #Find TOF range, correspondent to incident energy monitor peak
            energy_rage = self.mon2_norm_energy_range
-           self._mon2_norm_time_range = self.get_TOF_for_energies(monitor_ws,energy_rage,
+            self._mon2_norm_time_range = self.get_TOF_for_energies(monitor_ws,energy_rage,\
                                                                  [self.mon2_norm_spec],None,self._debug_mode)
         #end
         if separate_monitors:
@@ -661,7 +662,7 @@ class DirectEnergyConversion(object):
         if not spec_masks is None:
             MaskDetectors(Workspace=ws_name, MaskedWorkspace=spec_masks)
         if not map_file is None:
-            GroupDetectors(InputWorkspace=ws_name,OutputWorkspace=ws_name,
+            GroupDetectors(InputWorkspace=ws_name,OutputWorkspace=ws_name,\
                                        MapFile= map_file, KeepUngroupedSpectra=0, Behaviour='Average')
 
         return mtd[ws_name]
@@ -1073,7 +1074,7 @@ class DirectEnergyConversion(object):
            err = data_ws.readE(i)[0]
            if sig != sig:     #ignore NaN (hopefully it will mean mask some day)
                continue
-           if ((err <= 0) or (sig <= 0)):   # count Inf and negative||zero readings.  Presence of this indicates that
+            if (err <= 0) or (sig <= 0):   # count Inf and negative||zero readings.  Presence of this indicates that
                                             # something went wrong
               izerc+=1
               continue
@@ -1107,7 +1108,7 @@ class DirectEnergyConversion(object):
         # n_i is the modified signal
         signal_sum = sum(map(lambda e: e * e,error))
         weight_sum = sum(map(lambda s,e: e * e / s,signal,error))
-        if(weight_sum == 0.0):
+        if weight_sum == 0.0:
             prop_man.log("WB integral has been calculated incorrectly, look at van_int workspace: {0}".format(deltaE_wkspaceName),'error')
             raise ArithmeticError("Division by 0 weight when calculating WB integrals from workspace {0}".format(deltaE_wkspaceName))
         norm_factor['Poisson'] = signal_sum / weight_sum
@@ -1116,7 +1117,7 @@ class DirectEnergyConversion(object):
         # TGP suggestion from 12-2012
         signal_sum = sum(map(lambda s,e: s * s / (e * e),signal,error))
         weight_sum = sum(map(lambda s,e: s / (e * e),signal,error))
-        if(weight_sum == 0.0):
+        if weight_sum == 0.0:
             prop_man.log("WB integral has been calculated incorrectly, look at van_int workspace: {0}".format(deltaE_wkspaceName),'error')
             raise ArithmeticError("Division by 0 weight when calculating WB integrals from workspace {0}".format(deltaE_wkspaceName))
         norm_factor['TGP'] = signal_sum / weight_sum
@@ -1138,7 +1139,7 @@ class DirectEnergyConversion(object):
 
         # check for NaN
         if (norm_factor['LibISIS'] != norm_factor['LibISIS']) | (izerc != 0):    # It is an error, print diagnostics:
-           if (norm_factor['LibISIS'] != norm_factor['LibISIS']):
+            if norm_factor['LibISIS'] != norm_factor['LibISIS']:
                log_value = '\n--------> Absolute normalization factor is NaN <----------------------------------------------\n'
            else:
                log_value = '\n--------> Warning, Monovanadium has zero spectra <--------------------------------------------\n'
@@ -1152,7 +1153,7 @@ class DirectEnergyConversion(object):
                "--------> Abs norm factors: Sigma^2: {9}\n"\
                "--------> Abs norm factors: Poisson: {10}\n"\
                "--------> Abs norm factors: TGP    : {11}\n"\
-               .format(deltaE_wkspaceName,minmax[0],minmax[1],nhist,sum(signal),sum(error),izerc,scale_factor,
+               .format(deltaE_wkspaceName,minmax[0],minmax[1],nhist,sum(signal),sum(error),izerc,scale_factor,\
                           norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
            log_value = log_value + log1_value
            propman.log(log_value,'error')
@@ -1282,14 +1283,14 @@ class DirectEnergyConversion(object):
 #         mono-vanadium runs
 #
 # -------------------------------------------------------------------------------------------
-    def _do_mono_SNS(self, data_ws, result_name, ei_guess,
+    def _do_mono_SNS(self, data_ws, result_name, ei_guess,\
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
         # does not work -- retrieve from repo and fix
         raise NotImplementedError("Non currently implemented. Retrieve from repository"
                                   " if necessary and fix")
         return
 #-------------------------------------------------------------------------------
-    def _do_mono_ISIS(self, data_run, ei_guess,
+    def _do_mono_ISIS(self, data_run, ei_guess,\
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
 
         # Do ISIS stuff for Ei
@@ -1372,7 +1373,7 @@ class DirectEnergyConversion(object):
                                 # one needs to do appropriate shift here as well
               CopyInstrumentParameters(result_ws,bkgr_ws)
              # Adjust the TOF such that the first monitor peak is at t=0
-              ScaleX(InputWorkspace=bkgr_ws,OutputWorkspace='bkgr_ws',Operation="Add",Factor=time_shift,
+                ScaleX(InputWorkspace=bkgr_ws,OutputWorkspace='bkgr_ws',Operation="Add",Factor=time_shift,\
                      InstrumentParameter="DelayTime",Combine=True)
         else:
            bkgr_ws = Rebin(result_ws,Params=[bkg_range_min,(bkg_range_max - bkg_range_min) * 1.001,bkg_range_max],PreserveEvents=False)
@@ -1388,12 +1389,12 @@ class DirectEnergyConversion(object):
         normalization to a white-beam vanadium run.
         """
 
-        if (self._do_ISIS_reduction):
-           self._do_mono_ISIS(run,ei_guess,
+        if self._do_ISIS_reduction:
+            self._do_mono_ISIS(run,ei_guess,\
                               white_run, map_file, spectra_masks, Tzero)
         else:
           result_name = run.set_action_suffix('_spe')
-          self._do_mono_SNS(run,result_name,ei_guess,
+            self._do_mono_SNS(run,result_name,ei_guess,\
                          white_run, map_file, spectra_masks, Tzero)
           run.synchronize_ws()
 

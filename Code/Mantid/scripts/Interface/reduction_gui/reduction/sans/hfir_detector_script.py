@@ -181,28 +181,28 @@ class Detector(BaseScriptElement):
                                                                      default = Detector.sensitivity_corr)
             self.sensitivity_data = BaseScriptElement.getStringElement(instrument_dom, "sensitivity_data")
             self.sensitivity_dark = BaseScriptElement.getStringElement(instrument_dom, "sensitivity_dark")
-            self.use_sample_dark = BaseScriptElement.getBoolElement(instrument_dom, "use_sample_dark",
+            self.use_sample_dark = BaseScriptElement.getBoolElement(instrument_dom, "use_sample_dark",\
                                                                      default = Detector.use_sample_dark)
-            self.min_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_min",
+            self.min_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_min",\
                                                                 default=Detector.min_sensitivity)
-            self.max_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_max",
+            self.max_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_max",\
                                                                 default=Detector.max_sensitivity)
-            self.use_sample_beam_center = BaseScriptElement.getBoolElement(instrument_dom, "use_sample_beam_center",
+            self.use_sample_beam_center = BaseScriptElement.getBoolElement(instrument_dom, "use_sample_beam_center",\
                                                                      default = Detector.use_sample_beam_center)
 
             beam_center_list = instrument_dom.getElementsByTagName("FloodBeamFinder")
             if len(beam_center_list)>0:
                 beam_finder_dom = beam_center_list[0]
-                self.flood_x_position = BaseScriptElement.getFloatElement(beam_finder_dom, "x",
+                self.flood_x_position = BaseScriptElement.getFloatElement(beam_finder_dom, "x",\
                                                                     default=Detector.flood_x_position)
-                self.flood_y_position = BaseScriptElement.getFloatElement(beam_finder_dom, "y",
+                self.flood_y_position = BaseScriptElement.getFloatElement(beam_finder_dom, "y",\
                                                                     default=Detector.flood_y_position)
-                self.flood_use_finder = BaseScriptElement.getBoolElement(beam_finder_dom, "use_finder",
+                self.flood_use_finder = BaseScriptElement.getBoolElement(beam_finder_dom, "use_finder",\
                                                                    default = Detector.flood_use_finder)
                 self.flood_beam_file = BaseScriptElement.getStringElement(beam_finder_dom, "beam_file")
-                self.flood_beam_radius = BaseScriptElement.getFloatElement(beam_finder_dom, "beam_radius",
+                self.flood_beam_radius = BaseScriptElement.getFloatElement(beam_finder_dom, "beam_radius",\
                                                                     default=Detector.flood_beam_radius)
-                self.flood_use_direct_beam = BaseScriptElement.getBoolElement(beam_finder_dom, "use_direct_beam",
+                self.flood_use_direct_beam = BaseScriptElement.getBoolElement(beam_finder_dom, "use_direct_beam",\
                                                                    default = Detector.flood_use_direct_beam)
 
         element_list = dom.getElementsByTagName("BeamFinder")
@@ -215,9 +215,9 @@ class Detector(BaseScriptElement):
             self.use_finder = BaseScriptElement.getBoolElement(beam_finder_dom, "use_finder",
                                                                default = Detector.use_finder)
             self.beam_file = BaseScriptElement.getStringElement(beam_finder_dom, "beam_file")
-            self.beam_radius = BaseScriptElement.getFloatElement(beam_finder_dom, "beam_radius",
+            self.beam_radius = BaseScriptElement.getFloatElement(beam_finder_dom, "beam_radius",\
                                                                 default=Detector.beam_radius)
-            self.use_direct_beam = BaseScriptElement.getBoolElement(beam_finder_dom, "use_direct_beam",
+            self.use_direct_beam = BaseScriptElement.getBoolElement(beam_finder_dom, "use_direct_beam",\
                                                                default = Detector.use_direct_beam)
 
     def from_setup_info(self, xml_str):
@@ -255,19 +255,19 @@ class Detector(BaseScriptElement):
         self.flood_y_position = BaseScriptElement.getPropertyValue(alg, "SensitivityBeamCenterY",
                                                                    default=Detector.flood_y_position)
         self.flood_beam_file = BaseScriptElement.getPropertyValue(alg, "SensitivityBeamCenterFile", default='')
-        self.flood_beam_radius = BaseScriptElement.getPropertyValue(alg, "SensitivityBeamCenterRadius",
+        self.flood_beam_radius = BaseScriptElement.getPropertyValue(alg, "SensitivityBeamCenterRadius",\
                                                                    default=Detector.flood_beam_radius)
 
         # Beam center
         center_method = BaseScriptElement.getPropertyValue(alg, "BeamCenterMethod", default='None')
         self.use_finder = center_method in ['DirectBeam', 'Scattering']
         self.use_direct_beam = center_method=='DirectBeam'
-        self.x_position = BaseScriptElement.getPropertyValue(alg, "BeamCenterX",
+        self.x_position = BaseScriptElement.getPropertyValue(alg, "BeamCenterX",\
                                                                    default=Detector.x_position)
-        self.y_position = BaseScriptElement.getPropertyValue(alg, "BeamCenterY",
+        self.y_position = BaseScriptElement.getPropertyValue(alg, "BeamCenterY",\
                                                                    default=Detector.y_position)
         self.beam_file = BaseScriptElement.getPropertyValue(alg, "BeamCenterFile", default='')
-        self.beam_radius = BaseScriptElement.getPropertyValue(alg, "BeamRadius",
+        self.beam_radius = BaseScriptElement.getPropertyValue(alg, "BeamRadius",\
                                                                     default=Detector.beam_radius)
 
     def reset(self):

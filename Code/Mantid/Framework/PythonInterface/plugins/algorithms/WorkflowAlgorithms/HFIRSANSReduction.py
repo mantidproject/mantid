@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -60,8 +61,8 @@ class HFIRSANSReduction(PythonAlgorithm):
                         self.default_output_dir = head
                 else:
                     output_str += _load_data(data_file[i], '__tmp_wksp')
-                    api.Plus(LHSWorkspace=workspace,
-                         RHSWorkspace='__tmp_wksp',
+                    api.Plus(LHSWorkspace=workspace,\
+                         RHSWorkspace='__tmp_wksp',\
                          OutputWorkspace=workspace)
                     # Get the monitor and timer values
                     ws = AnalysisDataService.retrieve('__tmp_wksp')
@@ -171,7 +172,7 @@ class HFIRSANSReduction(PythonAlgorithm):
         if "BackgroundFiles" in property_list:
             background = property_manager.getProperty("BackgroundFiles").value
             background_ws = "__background_%s" % output_ws
-            msg = self._multiple_load(background, background_ws,
+            msg = self._multiple_load(background, background_ws,\
                                 property_manager, property_manager_name)
             bck_msg = "Loaded background %s\n" % background
             bck_msg += msg
@@ -232,8 +233,8 @@ class HFIRSANSReduction(PythonAlgorithm):
                                  WorkspaceToMatch=output_ws,
                                  OutputWorkspace=background_ws+'_rebin',
                                  PreserveEvents=False)
-            api.Minus(LHSWorkspace=output_ws,
-                         RHSWorkspace=background_ws,
+            api.Minus(LHSWorkspace=output_ws,\
+                         RHSWorkspace=background_ws,\
                          OutputWorkspace=output_ws)
 
             bck_msg = bck_msg.replace('\n','\n   |')

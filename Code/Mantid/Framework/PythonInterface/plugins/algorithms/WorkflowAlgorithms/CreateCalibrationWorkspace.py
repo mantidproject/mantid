@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -17,19 +18,19 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
                              doc='Comma separated list of input files')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',\
                              direction=Direction.Output),
                              doc='Output workspace for calibration data')
 
-        self.declareProperty(IntArrayProperty(name='DetectorRange', values=[0, 1],
+        self.declareProperty(IntArrayProperty(name='DetectorRange', values=[0, 1],\
                              validator=IntArrayMandatoryValidator()),
                              doc='Range of detectors')
 
-        self.declareProperty(FloatArrayProperty(name='PeakRange', values=[0.0, 100.0],
+        self.declareProperty(FloatArrayProperty(name='PeakRange', values=[0.0, 100.0],\
                              validator=FloatArrayMandatoryValidator()),
                              doc='')
 
-        self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0.0, 1000.0],
+        self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0.0, 1000.0],\
                              validator=FloatArrayMandatoryValidator()),
                              doc='')
 
@@ -79,8 +80,8 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
             (_, filename) = os.path.split(in_file)
             (root, _) = os.path.splitext(filename)
             try:
-                Load(Filename=in_file, OutputWorkspace=root,
-                    SpectrumMin=int(self._spec_range[0]), SpectrumMax=int(self._spec_range[1]),
+                Load(Filename=in_file, OutputWorkspace=root,\
+                    SpectrumMin=int(self._spec_range[0]), SpectrumMax=int(self._spec_range[1]),\
                     LoadLogFiles=False)
                 runs.append(root)
             except Exception as exc:
@@ -94,7 +95,7 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
         else:
             calib_ws_name = runs[0]
 
-        CalculateFlatBackground(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name,
+        CalculateFlatBackground(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name,\
                 StartX=self._back_range[0], EndX=self._back_range[1], Mode='Mean')
 
         from inelastic_indirect_reduction_steps import NormaliseToUnityStep
