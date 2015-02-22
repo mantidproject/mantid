@@ -238,9 +238,12 @@ void Graph::deselectMarker()
   cp->disableEditing();
 
   QObjectList lst = d_plot->children();
-  foreach(QObject *o, lst){
-    if (o->inherits("LegendWidget"))
-      dynamic_cast<LegendWidget *>(o)->setSelected(false);
+  foreach(QObject *o, lst) {
+    if (o->inherits("LegendWidget")) {
+      LegendWidget *lw = dynamic_cast<LegendWidget *>(o);
+      if (lw)
+        lw->setSelected(false);
+    }
   }
 }
 
