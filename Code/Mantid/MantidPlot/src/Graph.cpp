@@ -1720,8 +1720,9 @@ DataCurve* Graph::selectedCurveLabels()
   foreach(QwtPlotItem *i, curves){
     PlotCurve *c = dynamic_cast<PlotCurve *>(i);
     DataCurve *dc = dynamic_cast<DataCurve *>(i);
-    if(dc && i->rtti() != QwtPlotItem::Rtti_PlotSpectrogram &&
-        c->type() != Graph::Function && dc->hasSelectedLabels())
+    if(dc && c &&
+       i->rtti() != QwtPlotItem::Rtti_PlotSpectrogram &&
+       c->type() != Graph::Function && dc->hasSelectedLabels())
       return dc;
   }
   return NULL;
