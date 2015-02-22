@@ -4496,6 +4496,9 @@ void Graph::guessUniqueCurveLayout(int& colorIndex, int& symbolIndex)
   if (curve_index >= 0 && c_type[curve_index] == ErrorBars)
   {// find out the pen color of the master curve
     QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve *>(d_plot->curve(c_keys[curve_index]));
+    if (!er)
+      return;
+
     DataCurve *master_curve = er->masterCurve();
     if (master_curve){
       colorIndex = ColorBox::colorIndex(master_curve->pen().color());
