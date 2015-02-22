@@ -4095,15 +4095,22 @@ void Graph::copy(Graph* g)
     QwtPlotItem *it = (QwtPlotItem *)g->plotItem(i);
     if (it->rtti() == QwtPlotItem::Rtti_PlotCurve){
       DataCurve *cv = dynamic_cast<DataCurve *>(it);
-      if (!cv) continue;
+      if (!cv)
+        continue;
+
+      PlotCurve *pc = dynamic_cast<PlotCurve *>(it);
+      if (!pc)
+        continue;
+
       int n = cv->dataSize();
-      int style = dynamic_cast<PlotCurve *>(it)->type();
       QVector<double> x(n);
       QVector<double> y(n);
       for (int j=0; j<n; j++){
         x[j]=cv->x(j);
         y[j]=cv->y(j);
       }
+
+      int style = pc->type();
 
       PlotCurve *c = 0;
       c_keys.resize(++n_curves);
@@ -4116,43 +4123,73 @@ void Graph::copy(Graph* g)
       } else if (style == Function) {
         c = new FunctionCurve(cv->title().text());
         c_keys[i] = d_plot->insertCurve(c);
-        dynamic_cast<FunctionCurve*>(c)->copy(dynamic_cast<FunctionCurve*>(cv));
+        FunctionCurve *fc = dynamic_cast<FunctionCurve*>(c);
+        if (fc) {
+          FunctionCurve *fcCV = dynamic_cast<FunctionCurve*>(cv);
+          if (fcCV)
+            fc->copy(fcCV);
+        }
       } else if (style == VerticalBars || style == HorizontalBars) {
-        c = new QwtBarCurve(dynamic_cast<QwtBarCurve *>(cv)->orientation(), cv->table(), cv->xColumnName(),
-            cv->title().text(), cv->startRow(), cv->endRow());
-        c_keys[i] = d_plot->insertCurve(c);
-        (dynamic_cast<QwtBarCurve *>(c))->copy(dynamic_cast<const QwtBarCurve *>(cv));
+        QwtBarCurve *bc = dynamic_cast<QwtBarCurve *>(c);
+        if (bc) {
+          c = new QwtBarCurve(bc->orientation(), cv->table(), cv->xColumnName(),
+                              cv->title().text(), cv->startRow(), cv->endRow());
+          c_keys[i] = d_plot->insertCurve(c);
+
+          const QwtBarCurve *cvBC = dynamic_cast<const QwtBarCurve *>(cv);
+          if (cvBC)
+            bc->copy(cvBC);
+        }
       } else if (style == ErrorBars) {
         QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve*>(cv);
-        DataCurve *master_curve = masterCurve(er);
-        if (master_curve) {
-          c = new QwtErrorPlotCurve(cv->table(), cv->title().text());
-          c_keys[i] = d_plot->insertCurve(c);
-          dynamic_cast<QwtErrorPlotCurve*>(c)->copy(er);
-          dynamic_cast<QwtErrorPlotCurve*>(c)->setMasterCurve(master_curve);
+        if (er) {
+          DataCurve *master_curve = masterCurve(er);
+          if (master_curve) {
+            c = new QwtErrorPlotCurve(cv->table(), cv->title().text());
+            c_keys[i] = d_plot->insertCurve(c);
+            QwtErrorPlotCurve *epc = dynamic_cast<QwtErrorPlotCurve*>(c);
+            if (epc) {
+              epc->copy(er);
+              epc->setMasterCurve(master_curve);
+            }
+          }
         }
       } else if (style == Histogram) {
         QwtHistogram *h = dynamic_cast<QwtHistogram *>(cv);
-        if (h->matrix())
+        if (h && h->matrix())
           c = new QwtHistogram(h->matrix());
         else
           c = new QwtHistogram(cv->table(), cv->xColumnName(), cv->title().text(), cv->startRow(), cv->endRow());
         c_keys[i] = d_plot->insertCurve(c);
-        dynamic_cast<QwtHistogram*>(c)->copy(h);
+
+        QwtHistogram *cQH = dynamic_cast<QwtHistogram*>(c);
+        if (cQH)
+          cQH->copy(h);
       } else if (style == VectXYXY || style == VectXYAM) {
         VectorCurve::VectorStyle vs = VectorCurve::XYXY;
         if (style == VectXYAM)
           vs = VectorCurve::XYAM;
-        c = new VectorCurve(vs, cv->table(), cv->xColumnName(), cv->title().text(),
-            dynamic_cast<VectorCurve*>(cv)->vectorEndXAColName(),
-            dynamic_cast<VectorCurve*>(cv)->vectorEndYMColName(),
-            cv->startRow(), cv->endRow());
-        c_keys[i] = d_plot->insertCurve(c);
-        dynamic_cast<VectorCurve*>(c)->copy(dynamic_cast<const VectorCurve *>(cv));
+        VectorCurve *cvVC = dynamic_cast<VectorCurve *>(cv);
+        if (cvVC) {
+          c = new VectorCurve(vs, cv->table(), cv->xColumnName(), cv->title().text(),
+                              cvVC->vectorEndXAColName(),
+                              cvVC->vectorEndYMColName(),
+                              cv->startRow(), cv->endRow());
+          c_keys[i] = d_plot->insertCurve(c);
+
+          VectorCurve *cVC = dynamic_cast<VectorCurve *>(c);
+          if (cVC) // it really should be, just did 'c = new VectorCurve(...'
+            cVC->copy(cvVC);
+        }
       } else if (style == Box) {
         c = new BoxCurve(cv->table(), cv->title().text(), cv->startRow(), cv->endRow());
         c_keys[i] = d_plot->insertCurve(c);
-        dynamic_cast<BoxCurve*>(c)->copy(dynamic_cast<const BoxCurve *>(cv));
+        BoxCurve *bc = dynamic_cast<BoxCurve*>(c);
+        if (bc) {
+          const BoxCurve *cvBC = dynamic_cast<const BoxCurve *>(cv);
+          if (cvBC)
+            bc->copy(cvBC);
+        }
         QwtSingleArrayData dat(x[0], y, n);
         c->setData(dat);
       } else {
@@ -4162,11 +4199,22 @@ void Graph::copy(Graph* g)
 
       if (c_type[i] != Box && c_type[i] != ErrorBars){
         c->setData(x.data(), y.data(), n);
-        if (c->type() != Function && c->type() != Pie)
-          dynamic_cast<DataCurve*>(c)->clone(cv);
-        else if (c->type() == Pie)
-          dynamic_cast<QwtPieCurve*>(c)->clone(dynamic_cast<QwtPieCurve*>(cv));
+        if (c->type() != Function && c->type() != Pie) {
+          DataCurve *dc = dynamic_cast<DataCurve*>(c);
+          if (dc)
+            dc->clone(cv);
+        } else if (c->type() == Pie) {
+          QwtPieCurve *cPie = dynamic_cast<QwtPieCurve*>(c);
+          if (cPie) {
+            QwtPieCurve *cvPie = dynamic_cast<QwtPieCurve*>(cv);
+            if (cvPie)
+              cPie->clone(cvPie);
+          }
+        }
       }
+
+      if (!c)
+        continue;
 
       c->setPen(cv->pen());
       c->setBrush(cv->brush());
@@ -4184,8 +4232,11 @@ void Graph::copy(Graph* g)
       QList<QwtPlotCurve *>lst = g->fitCurvesList();
       if (lst.contains(dynamic_cast<QwtPlotCurve *>(it)))
         d_fit_curves << c;
-    }else if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
-      Spectrogram *sp = (dynamic_cast<Spectrogram *>(it))->copy();
+    } else if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
+      Spectrogram *spc = (dynamic_cast<Spectrogram *>(it));
+      if (!spc)
+        continue;
+      Spectrogram *sp = spc->copy();
       c_keys.resize(++n_curves);
       c_keys[i] = d_plot->insertCurve(sp);
 
@@ -4219,7 +4270,7 @@ void Graph::copy(Graph* g)
       continue;
 
     ScaleDraw *sdg = dynamic_cast<ScaleDraw *>(g->plotWidget()->axisScaleDraw (i));
-    if (sdg->hasComponent(QwtAbstractScaleDraw::Labels))
+    if (sdg && sdg->hasComponent(QwtAbstractScaleDraw::Labels))
     {
       ScaleDraw::ScaleType type = sdg->scaleType();
       if (type == ScaleDraw::Numeric)
@@ -4230,9 +4281,10 @@ void Graph::copy(Graph* g)
         setLabelsMonthFormat(i, sdg->nameFormat());
       else if (type == ScaleDraw::Time || type == ScaleDraw::Date)
         setLabelsDateTimeFormat(i, type, sdg->formatString());
-      else{
+      else {
         ScaleDraw *sd = dynamic_cast<ScaleDraw *>(plot->axisScaleDraw(i));
-        d_plot->setAxisScaleDraw(i, new ScaleDraw(d_plot, sd->labelsList(), sd->formatString(), sd->scaleType()));
+        if (sd)
+          d_plot->setAxisScaleDraw(i, new ScaleDraw(d_plot, sd->labelsList(), sd->formatString(), sd->scaleType()));
       }
     } else {
       ScaleDraw *sd = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw (i));
@@ -4244,9 +4296,6 @@ void Graph::copy(Graph* g)
     if (!se)
       continue;
 
-    ScaleEngine *sc_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(i));
-    sc_engine->clone(se);
-
     int majorTicks = plot->axisMaxMajor(i);
     int minorTicks = plot->axisMaxMinor(i);
     d_plot->setAxisMaxMajor (i, majorTicks);
@@ -4254,6 +4303,12 @@ void Graph::copy(Graph* g)
 
     double step = g->axisStep(i);
     d_user_step[i] = step;
+
+    ScaleEngine *sc_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(i));
+    if (!sc_engine)
+      continue;
+
+    sc_engine->clone(se);
     const QwtScaleDiv *sd = plot->axisScaleDiv(i);
     QwtScaleDiv div = sc_engine->divideScale (QMIN(sd->lBound(), sd->hBound()),
         QMAX(sd->lBound(), sd->hBound()), majorTicks, minorTicks, step);
@@ -6003,8 +6058,13 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
         if(plotType == Graph::Histogram)
         {
           QwtHistogram* h = dynamic_cast<QwtHistogram*>(curve(curveID));
-          h->setBinning(curveValues[17].toInt(),curveValues[18].toDouble(),curveValues[19].toDouble(),curveValues[20].toDouble());
-          h->loadData();
+          if (h) {
+            h->setBinning(curveValues[17].toInt(),
+                          curveValues[18].toDouble(),
+                          curveValues[19].toDouble(),
+                          curveValues[20].toDouble());
+            h->loadData();
+          }
         }
 
         if(plotType == Graph::VerticalBars
