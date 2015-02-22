@@ -525,6 +525,9 @@ void Graph::setAxisTicksLength(int axis, int majTicksType, int minTicksType,
   d_plot->setTickLength(minLength, majLength);
 
   ScaleDraw *sd = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(axis));
+  if (!sd)
+    return;
+
   sd->setMajorTicksStyle((ScaleDraw::TicksStyle)majTicksType);
   sd->setMinorTicksStyle((ScaleDraw::TicksStyle)minTicksType);
 
