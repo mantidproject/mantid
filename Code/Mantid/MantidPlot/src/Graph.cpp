@@ -2780,7 +2780,9 @@ PlotCurve* Graph::insertCurve(Table* w, const QString& xColName, const QString& 
     c = new QwtBarCurve(QwtBarCurve::Horizontal, w, xColName, yColName, startRow, endRow);
   } else if (style == Histogram){
     c = new QwtHistogram(w, xColName, yColName, startRow, endRow);
-    dynamic_cast<QwtHistogram *>(c)->initData(Y.data(), size);
+    QwtHistogram *histo = dynamic_cast<QwtHistogram *>(c);
+    if (histo)
+      histo->initData(Y.data(), size);
   } else
     c = new DataCurve(w, xColName, yColName, startRow, endRow);
 
