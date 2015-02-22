@@ -2006,30 +2006,36 @@ QString Graph::saveCurveLayout(int index)
 
   if(style == VerticalBars || style == HorizontalBars || style == Histogram){
     QwtBarCurve *b = dynamic_cast<QwtBarCurve *>(c);
-    s+=QString::number(b->gap())+"\t";
-    s+=QString::number(b->offset())+"\t";
+    if (b) {
+      s+=QString::number(b->gap())+"\t";
+      s+=QString::number(b->offset())+"\t";
+    }
   }
 
   if (style == Histogram){
     QwtHistogram *h = dynamic_cast<QwtHistogram *>(c);
-    s+=QString::number(h->autoBinning())+"\t";
-    s+=QString::number(h->binSize())+"\t";
-    s+=QString::number(h->begin())+"\t";
-    s+=QString::number(h->end())+"\t";
+    if (h) {
+      s+=QString::number(h->autoBinning())+"\t";
+      s+=QString::number(h->binSize())+"\t";
+      s+=QString::number(h->begin())+"\t";
+      s+=QString::number(h->end())+"\t";
+    }
   } else if(style == VectXYXY || style == VectXYAM){
     VectorCurve *v = dynamic_cast<VectorCurve *>(c);
-    s+=v->color().name()+"\t";
-    s+=QString::number(v->width())+"\t";
-    s+=QString::number(v->headLength())+"\t";
-    s+=QString::number(v->headAngle())+"\t";
-    s+=QString::number(v->filledArrowHead())+"\t";
+    if (v) {
+      s+=v->color().name()+"\t";
+      s+=QString::number(v->width())+"\t";
+      s+=QString::number(v->headLength())+"\t";
+      s+=QString::number(v->headAngle())+"\t";
+      s+=QString::number(v->filledArrowHead())+"\t";
 
-    QStringList colsList = v->plotAssociation().split(",", QString::SkipEmptyParts);
-    s+=colsList[2].remove("(X)").remove("(A)")+"\t";
-    s+=colsList[3].remove("(Y)").remove("(M)");
-    if (style == VectXYAM)
-      s+="\t"+QString::number(v->position());
-    s+="\t";
+      QStringList colsList = v->plotAssociation().split(",", QString::SkipEmptyParts);
+      s+=colsList[2].remove("(X)").remove("(A)")+"\t";
+      s+=colsList[3].remove("(Y)").remove("(M)");
+      if (style == VectXYAM)
+        s+="\t"+QString::number(v->position());
+      s+="\t";
+    }
   } else if(style == Box){
     BoxCurve *b = static_cast<BoxCurve*>(c);
     s+=QString::number(SymbolBox::symbolIndex(b->maxStyle()))+"\t";
