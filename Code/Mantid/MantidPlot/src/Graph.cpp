@@ -3056,7 +3056,9 @@ void Graph::removeCurves(const QString& s)
 
     if (it->rtti() != QwtPlotItem::Rtti_PlotCurve)
       continue;
-    if (dynamic_cast<PlotCurve *>(it)->type() == Function)
+
+    PlotCurve *pc = dynamic_cast<PlotCurve *>(it);
+    if (!pc || pc->type() == Function)
       continue;
 
     DataCurve * dc = dynamic_cast<DataCurve *>(it);
