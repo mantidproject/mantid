@@ -3685,9 +3685,13 @@ void Graph::scaleFonts(double factor)
   QObjectList lst = d_plot->children();
   foreach(QObject *o, lst){
     if (o->inherits("LegendWidget")){
-      QFont font = dynamic_cast<LegendWidget *>(o)->font();
+      LegendWidget *lw = dynamic_cast<LegendWidget *>(o);
+      if (!lw)
+        continue;
+
+      QFont font = lw->font();
       font.setPointSizeFloat(factor*font.pointSizeFloat());
-      dynamic_cast<LegendWidget *>(o)->setFont(font);
+      lw->setFont(font);
     }
   }
 
