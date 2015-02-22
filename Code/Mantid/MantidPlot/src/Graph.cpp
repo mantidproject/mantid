@@ -1969,6 +1969,9 @@ QString Graph::savePieCurveLayout()
   QString s="PieCurve\t";
 
   QwtPieCurve *pie = dynamic_cast<QwtPieCurve*>(curve(0));
+  if (!pie)
+    return s;
+
   s+= pie->title().text()+"\t";
   QPen pen = pie->pen();
   s+=QString::number(pen.widthF())+"\t";
