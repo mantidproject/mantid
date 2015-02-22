@@ -5167,8 +5167,10 @@ void Graph::setCurrentFont(const QFont& f)
     QList<QwtPlotItem *> curves = d_plot->curvesList();
     foreach(QwtPlotItem *i, curves){
       DataCurve* dc = dynamic_cast<DataCurve *>(i);
-      if(dc && i->rtti() != QwtPlotItem::Rtti_PlotSpectrogram &&
-          dynamic_cast<PlotCurve*>(i)->type() != Graph::Function){
+      PlotCurve* pc = dynamic_cast<PlotCurve*>(i);
+      if(pc && dc
+         && i->rtti() != QwtPlotItem::Rtti_PlotSpectrogram &&
+         pc->type() != Graph::Function){
         if(dc->hasSelectedLabels()){
           dc->setLabelsFont(f);
           d_plot->replot();
