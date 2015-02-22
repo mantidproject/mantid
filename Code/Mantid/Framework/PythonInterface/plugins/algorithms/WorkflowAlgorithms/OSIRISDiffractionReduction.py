@@ -1,22 +1,22 @@
+#pylint: disable=invalid-name,no-init
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 
 import itertools
-import os
 
-timeRegimeToDRange = {
-     1.17e4: tuple([ 0.7,  2.5]),
-     2.94e4: tuple([ 2.1,  3.3]),
-     4.71e4: tuple([ 3.1,  4.3]),
-     6.48e4: tuple([ 4.1,  5.3]),
-     8.25e4: tuple([ 5.2,  6.2]),
-    10.02e4: tuple([ 6.2,  7.3]),
-    11.79e4: tuple([ 7.3,  8.3]),
-    13.55e4: tuple([ 8.3,  9.5]),
-    15.32e4: tuple([ 9.4, 10.6]),
-    17.09e4: tuple([10.4, 11.6]),
-    18.86e4: tuple([11.0, 12.5])}
+timeRegimeToDRange = {\
+     1.17e4: tuple([ 0.7,  2.5]),\
+     2.94e4: tuple([ 2.1,  3.3]),\
+     4.71e4: tuple([ 3.1,  4.3]),\
+     6.48e4: tuple([ 4.1,  5.3]),\
+     8.25e4: tuple([ 5.2,  6.2]),\
+    10.02e4: tuple([ 6.2,  7.3]),\
+    11.79e4: tuple([ 7.3,  8.3]),\
+    13.55e4: tuple([ 8.3,  9.5]),\
+    15.32e4: tuple([ 9.4, 10.6]),\
+    17.09e4: tuple([10.4, 11.6]),\
+    18.86e4: tuple([11.0, 12.5])}\
 
 """ A "wrapper" class for a map, which maps workspaces from their corresponding
 time regimes.
@@ -38,7 +38,7 @@ class DRangeToWsMap(object):
         try:
             dRange = timeRegimeToDRange[timeRegime]
         except KeyError:
-            raise RuntimeError("Unable to identify the DRange of " + wsname +
+            raise RuntimeError("Unable to identify the DRange of " + wsname +\
                 ", which has a time regime of " + str(timeRegime))
 
         # Add the workspace to the map, alongside its DRange.
@@ -98,17 +98,17 @@ def findIntersectionOfTwoRanges(rangeA, rangeB):
     assert rangeA[0] < rangeA[1], "Malformed range."
     assert rangeB[0] < rangeB[1], "Malformed range."
 
-    if( rangeA[0] <= rangeA[1] <= rangeB[0] <= rangeB[1]):
+    if  rangeA[0] <= rangeA[1] <= rangeB[0] <= rangeB[1]:
         return
-    if( rangeB[0] <= rangeB[1] <= rangeA[0] <= rangeA[1]):
+    if  rangeB[0] <= rangeB[1] <= rangeA[0] <= rangeA[1]:
         return
-    if( rangeA[0] <= rangeB[0] <= rangeB[1] <= rangeA[1] ):
+    if  rangeA[0] <= rangeB[0] <= rangeB[1] <= rangeA[1] :
         return rangeB
-    if( rangeB[0] <= rangeA[0] <= rangeA[1] <= rangeB[1] ):
+    if  rangeB[0] <= rangeA[0] <= rangeA[1] <= rangeB[1] :
         return rangeA
-    if( rangeA[0] <= rangeB[0] <= rangeA[1] <= rangeB[1] ):
+    if  rangeA[0] <= rangeB[0] <= rangeA[1] <= rangeB[1] :
         return [rangeB[0], rangeA[1]]
-    if( rangeB[0] <= rangeA[0] <= rangeB[1] <= rangeA[1] ):
+    if  rangeB[0] <= rangeA[0] <= rangeB[1] <= rangeA[1] :
         return [rangeA[0], rangeB[1]]
 
     assert False, "We should never reach here ..."
@@ -149,7 +149,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         return 'Diffraction;PythonAlgorithms'
 
     def summary(self):
-      return "This Python algorithm performs the operations necessary for the reduction of diffraction data from the Osiris instrument at ISIS \
+        return "This Python algorithm performs the operations necessary for the reduction of diffraction data from the Osiris instrument at ISIS \
               into dSpacing, by correcting for the monitor and linking the various d-ranges together."
 
     def PyInit(self):

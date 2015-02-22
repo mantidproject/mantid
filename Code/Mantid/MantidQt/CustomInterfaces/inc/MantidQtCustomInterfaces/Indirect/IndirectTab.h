@@ -13,6 +13,7 @@
 
 #include <QDoubleValidator>
 #include <QMap>
+#include <QPair>
 #include <QtIntPropertyManager>
 #include <QtTreePropertyBrowser>
 
@@ -88,28 +89,10 @@ namespace CustomInterfaces
     /// Run the load algorithm with the given file name, output name and spectrum range
     bool loadFile(const QString& filename, const QString& outputName, const int specMin = -1, const int specMax = -1);
 
-    /// Function to plot a workspace to the miniplot using a workspace name
-    void plotMiniPlot(const QString& workspace, size_t index, const QString& plotID, const QString& curveID = "");
-    /// Function to plot a workspace to the miniplot using a workspace pointer
-    void plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex, const QString& plotID, const QString& curveID = "");
-    /// Function to replot a miniplot
-    void replot(const QString& plotID);
-    /// Function to remove a curve from a plot
-    void removeCurve(const QString& curveID);
-    /// Function to remove all curves from plots
-    void removeAllCurves();
-
-    /// Function to get the range of the curve displayed on the mini plot
-    std::pair<double, double> getCurveRange(const QString& plotID);
-    /// Function to set the range of an axis on a plot
-    void setAxisRange(const QString& plotID, QwtPlot::Axis axis, std::pair<double, double> range);
-    /// Function to autoscale a given axis based on the data in a curve
-    void setXAxisToCurve(const QString& plotID, const QString& curveID);
-
     /// Function to set the range limits of the plot
-    void setPlotRange(const QString& rsID, QtProperty* min, QtProperty* max, const std::pair<double, double>& bounds);
+    void setPlotPropertyRange(const QString& rsID, QtProperty* min, QtProperty* max, const QPair<double, double> & bounds);
     /// Function to set the range selector on the mini plot
-    void setMiniPlotGuides(const QString& rsID, QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds);
+    void setRangeSelector(const QString& rsID, QtProperty* lower, QtProperty* upper, const QPair<double, double> & bounds);
 
     /// Function to run an algorithm on a seperate thread
     void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
@@ -119,10 +102,6 @@ namespace CustomInterfaces
     /// Parent QWidget (if applicable)
     QWidget *m_parentWidget;
 
-    /// Plot of the input
-    std::map<QString, QwtPlot *> m_plots;
-    /// Curve on the plot
-    std::map<QString, QwtPlotCurve *> m_curves;
     /// Range selector widget for mini plot
     std::map<QString, MantidQt::MantidWidgets::RangeSelector *> m_rangeSelectors;
     /// Tree of the properties

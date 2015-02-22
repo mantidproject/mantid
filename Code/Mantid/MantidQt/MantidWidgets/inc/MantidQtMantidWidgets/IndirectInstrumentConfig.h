@@ -56,7 +56,7 @@ namespace MantidQt
       Q_PROPERTY(bool showInstrumentLabel READ isInstrumentLabelShown WRITE setShowInstrumentLabel)
 
     public:
-      IndirectInstrumentConfig(QWidget *parent = 0, bool init = true);
+      IndirectInstrumentConfig(QWidget *parent = 0);
       virtual ~IndirectInstrumentConfig();
 
       /* Getters and setters for Qt properties */

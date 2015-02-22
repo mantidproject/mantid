@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -60,10 +61,6 @@ class IndirectTransmission(PythonAlgorithm):
 
 
     def PyExec(self):
-        from IndirectCommon import StartTime, EndTime
-
-        StartTime('IndirectTransmission')
-
         instrument_name = self.getPropertyValue('Instrument')
         analyser = self.getPropertyValue('Analyser')
         reflection = self.getPropertyValue('Reflection')
@@ -149,8 +146,6 @@ class IndirectTransmission(PythonAlgorithm):
         DeleteWorkspace(workspace)
 
         self.setProperty("OutputWorkspace", table_ws)
-
-        EndTime('IndirectTransmission')
 
 
     def _create_instrument_workspace(self, instrument_name):

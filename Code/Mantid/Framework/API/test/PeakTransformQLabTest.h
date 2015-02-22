@@ -11,6 +11,16 @@ using namespace Mantid;
 using Mantid::Kernel::V3D;
 using namespace testing;
 
+namespace boost{
+  template<class CharType, class CharTrait>
+  std::basic_ostream<CharType, CharTrait>& operator<<(std::basic_ostream<CharType, CharTrait>& out, optional<double> const& maybe)
+  {
+    if (maybe)
+        out << maybe;
+    return out;
+  }
+}
+
 class PeakTransformQLabTest : public CxxTest::TestSuite
 {
 

@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from mantid.simpleapi import *
 from mantid import config,api
 from mantid.kernel import funcreturns
@@ -11,28 +12,27 @@ from abc import abstractmethod
 
 
 class ReductionWrapper(object):
-    """ Abstract class provides interface to direct inelastic reduction 
-        allowing it to be run  from Mantid, web services, or system tests 
-        using the same interface and the same run file placed in different 
+    """ Abstract class provides interface to direct inelastic reduction
+        allowing it to be run  from Mantid, web services, or system tests
+        using the same interface and the same run file placed in different
         locations.
-    """ 
+    """
     class var_holder(object):
         """ A simple wrapper class to keep web variables"""
         def __init__(self):
             self.standard_vars = None
             self.advanced_vars = None
-            pass
 
     def __init__(self,instrumentName,web_var=None):
-      """ sets properties defaults for the instrument with Name 
+      """ sets properties defaults for the instrument with Name
           and define if wrapper runs from web services or not
       """
       # internal variable, indicating if we should try to wait for input files to appear
       self._wait_for_file=False
 
-      # The variables which are set up from web interface or to be exported to 
+      # The variables which are set up from web interface or to be exported to
       # web interface
-      if web_var: 
+      if web_var:
         self._run_from_web = True
         self._wvs = web_var
       else:
@@ -46,12 +46,12 @@ class ReductionWrapper(object):
     @property
     def wait_for_file(self):
         """ If this variable set to positive value, this value
-            is interpreted as time to wait until check for specified run file 
-            if this file have not been find immediately. 
+            is interpreted as time to wait until check for specified run file
+            if this file have not been find immediately.
 
             if this variable is 0 or false and the the file have not been found,
             reduction will fail
-        """ 
+        """
         return self._wait_for_file
 
     @wait_for_file.setter
@@ -62,17 +62,17 @@ class ReductionWrapper(object):
             self._wait_for_file = False
 #
     def save_web_variables(self,FileName=None):
-        """ Method to write simple and advanced properties and help 
+        """ Method to write simple and advanced properties and help
             information  into dictionary, to use by web reduction
             interface
 
-            If no file is provided, reduce_var.py file will be written 
+            If no file is provided, reduce_var.py file will be written
             to the folder, containing current script
 
         """
         if not FileName:
             FileName = 'reduce_vars.py'
-       
+
         f=open(FileName,'w')
         f.write("standard_vars = {\n")
         str_wrapper = '         '
@@ -110,20 +110,20 @@ class ReductionWrapper(object):
         # validate properties and report result
         return self.reducer.prop_man.validate_properties(False)
 #
-#   
+#
     def validate_result(self,build_validation=False,Error=1.e-3,ToleranceRelErr=True):
-        """ Overload this using build_or_validate_result to have possibility to run or validate result """ 
+        """ Overload this using build_or_validate_result to have possibility to run or validate result """
         return True
 
     def build_or_validate_result(self,sample_run,validation_file,build_validation=False,Error=1.e-3,ToleranceRelErr=True):
-        """ Method validates results of the reduction against reference file.
+        """ Method validates results of the reduction against reference file or workspace.
 
             Inputs:
             sample_run     -- the run number to reduce or validate against existing result
             validation_file -- The name of nxs file, containing workspace, produced by reducing SampleRun,
                               or the pointer to the workspace, which is the reference workspace 
-                              for SampleRun reduction
-                              If 
+                              for SampleRun reduction.
+
             Returns:
             True   if reduction for sample_run produces result within Error from the reference file
                    as reported by CheckWorkspaceMatch.
@@ -154,7 +154,7 @@ class ReductionWrapper(object):
         # just in case, to be sure
         current_web_state = self._run_from_web
         current_wait_state= self.wait_for_file
-        # disable wait for input and 
+        # disable wait for input and
         self._run_from_web = False
         self.wait_for_file = False
         #
@@ -177,12 +177,12 @@ class ReductionWrapper(object):
         else:
             if isinstance(reduced,list): # check only first result in multirep
                 reduced = reduced[0]
-            result = CheckWorkspacesMatch(Workspace1=sample,Workspace2=reduced,
-                                      Tolerance=Error,CheckSample=False,
+            result = CheckWorkspacesMatch(Workspace1=sample,Workspace2=reduced,\
+                                      Tolerance=Error,CheckSample=False,\
                                       CheckInstrument=False,ToleranceRelErr=ToleranceRelErr)
 
         self.wait_for_file = current_wait_state
-        self._run_from_web = current_web_state 
+        self._run_from_web = current_web_state
         if result == 'Success!':
             return True,'Reference file and reduced workspace are equivalent'
         else:
@@ -191,33 +191,33 @@ class ReductionWrapper(object):
     @abstractmethod
     def def_main_properties(self):
         """ Define properties which considered to be main properties changeable by user
-            
-            Should be overwritten by special reduction and decorated with  @MainProperties decorator. 
 
-            Should return dictionary with key are the properties names and values -- the default 
+            Should be overwritten by special reduction and decorated with  @MainProperties decorator.
+
+            Should return dictionary with key are the properties names and values -- the default
             values these properties should have.
-        """ 
+        """
         raise NotImplementedError('def_main_properties  has to be implemented')
     @abstractmethod
     def def_advanced_properties(self):
         """ Define properties which considered to be advanced but still changeable by instrument scientist or advanced user
-            
-            Should be overwritten by special reduction and decorated with  @AdvancedProperties decorator. 
 
-            Should return dictionary with key are the properties names and values -- the default 
+            Should be overwritten by special reduction and decorated with  @AdvancedProperties decorator.
+
+            Should return dictionary with key are the properties names and values -- the default
             values these properties should have.
-        """ 
+        """
 
         raise NotImplementedError('def_advanced_properties  has to be implemented')
 
     #
     def reduce(self,input_file=None,output_directory=None):
-        """ The method performs all main reduction operations over 
+        """ The method performs all main reduction operations over
             single run file
-            
-            Wrap it into @iliad wrapper to switch input for 
+
+            Wrap it into @iliad wrapper to switch input for
             reduction properties between script and web variables
-        """ 
+        """
         if input_file:
            self.reducer.sample_run = str(input_file)
         if output_directory:
@@ -302,7 +302,7 @@ class ReductionWrapper(object):
 
 def MainProperties(main_prop_definition):
     """ Decorator stores properties dedicated as main and sets these properties
-        as input to reduction parameters.""" 
+        as input to reduction parameters."""
     def main_prop_wrapper(*args):
         # execute decorated function
         prop_dict = main_prop_definition(*args)
@@ -318,7 +318,7 @@ def MainProperties(main_prop_definition):
 def AdvancedProperties(adv_prop_definition):
     """ Decorator stores properties decided to be advanced and sets these properties
         as input for reduction parameters
-    """ 
+    """
     def advanced_prop_wrapper(*args):
         prop_dict = adv_prop_definition(*args)
         #print "in decorator: ",properties
@@ -332,7 +332,7 @@ def AdvancedProperties(adv_prop_definition):
 
 
 def iliad(reduce):
-    """ This decorator wraps around main procedure and switch input from 
+    """ This decorator wraps around main procedure and switch input from
         web variables to properties or vise versa depending on web variables
         presence
     """
@@ -359,7 +359,7 @@ def iliad(reduce):
         if input_file and isinstance(input_file,str):
            data_path = os.path.dirname(input_file)
            if len(data_path)>0:
-              try:               
+                try:
                  config.appendDataSearchDir(str(data_path))
                  args[1] = os.path.basename(input_file)
               except: # if mantid is not available, this should ignore config
@@ -371,27 +371,24 @@ def iliad(reduce):
             web_vars = dict(host._wvs.standard_vars.items()+host._wvs.advanced_vars.items())
             host.reducer.prop_man.set_input_parameters(**web_vars)
         else:
-            pass # we should set already set up variables using 
+            pass # we should set already set up variables using
 
- 
+
         rez = reduce(*args)
 
-        # prohibit returning workspace to web services. 
+        # prohibit returning workspace to web services.
         if host._run_from_web and not isinstance(rez,str):
             rez=""
-        else:         
+        else:
           if isinstance(rez,list):
               # multirep run, just return as it is
               return rez
           if out_ws_name and rez.name() != out_ws_name :
               rez=RenameWorkspace(InputWorkspace=rez,OutputWorkspace=out_ws_name)
-             
+
         return rez
 
     return iliad_wrapper
-
-
-
 
 if __name__=="__main__":
     pass

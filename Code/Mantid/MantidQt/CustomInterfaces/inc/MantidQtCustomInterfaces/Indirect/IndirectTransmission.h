@@ -55,6 +55,7 @@ namespace CustomInterfaces
     void dataLoaded();
     void previewPlot();
     void transAlgDone(bool error);
+    void instrumentSet();
 
   private:
     Ui::IndirectTransmission m_uiForm;

@@ -1,4 +1,5 @@
-""" File contains Descriptors used describe run for direct inelastic reduction """ 
+#pylint: disable=invalid-name
+""" File contains Descriptors used describe run for direct inelastic reduction """
 
 from mantid.simpleapi import *
 from PropertiesDescriptors import *
@@ -286,7 +287,7 @@ class RunDescriptor(PropDescriptor):
     _logger = None
     _sum_log_name = 'SumRuns'
 #--------------------------------------------------------------------------------------------------------------------
-    def __init__(self,prop_name,DocString=None): 
+    def __init__(self,prop_name,DocString=None):
         """ """
         self._prop_name = prop_name
         if not DocString is None:
@@ -347,14 +348,14 @@ class RunDescriptor(PropDescriptor):
 
 #--------------------------------------------------------------------------------------------------------------------
     def __get__(self,instance,owner):
-       """ return current run number or workspace if it is loaded""" 
+       """ return current run number or workspace if it is loaded"""
        if instance is None:
            return self
 
        if self._ws_name and self._ws_name in mtd:
            return mtd[self._ws_name]
        else:
-           return self._run_number 
+            return self._run_number
 #--------------------------------------------------------------------------------------------------------------------
     def __set__(self,instance,value):
        """ Set up Run number and define workspace name from any source """
@@ -386,7 +387,6 @@ class RunDescriptor(PropDescriptor):
                  self._set_run_list(instance,run_num,file_path,fext)
               else:
                  self._set_single_run(instance,run_num,file_path,fext,False)
-
        elif isinstance(value,list):
            self._set_run_list(instance,value,"",instance.data_file_ext)
        else:
@@ -436,7 +436,7 @@ class RunDescriptor(PropDescriptor):
             ws = mtd[self._ws_name]
             return ws.getRunNumber()
         else:
-            return self._run_number 
+            return self._run_number
 #--------------------------------------------------------------------------------------------------------------------
 # Masking   
 #--------------------------------------------------------------------------------------------------------------------
@@ -567,9 +567,9 @@ class RunDescriptor(PropDescriptor):
           return (False,not_found,found)
 #--------------------------------------------------------------------------------------------------------------------
     def set_action_suffix(self,suffix=None):
-        """ method to set part of the workspace name, which indicate some action performed over this workspace           
-            
-            e.g.: default suffix of a loaded workspace is 'RAW' but we can set it to SPE to show that conversion to 
+        """ method to set part of the workspace name, which indicate some action performed over this workspace
+
+            e.g.: default suffix of a loaded workspace is 'RAW' but we can set it to SPE to show that conversion to
             energy will be performed for this workspace.
 
             method returns the name of the workspace is will have with this suffix. 
@@ -591,14 +591,14 @@ class RunDescriptor(PropDescriptor):
         return self._build_ws_name()
 #--------------------------------------------------------------------------------------------------------------------
     def synchronize_ws(self,workspace=None):
-        """ Synchronize workspace name (after workspace may have changed due to algorithm) 
-            with internal run holder name. Accounts for the situation when 
+        """ Synchronize workspace name (after workspace may have changed due to algorithm)
+            with internal run holder name. Accounts for the situation when
 
             TODO: This method should be automatically invoked by an algorithm decorator
-            Until implemented, one have to ensure that it is correctly used together with 
+            Until implemented, one have to ensure that it is correctly used together with
             set_action_suffix to ensue one can always get expected workspace from its name
-            outside of a method visibility 
-        """ 
+            outside of a method visibility
+        """
         if not workspace:
             workspace = mtd[self._ws_name]
 
@@ -614,9 +614,9 @@ class RunDescriptor(PropDescriptor):
         self._ws_name = new_name
 #--------------------------------------------------------------------------------------------------------------------
     def get_file_ext(self):
-        """ Method returns current file extension for file to load workspace from 
+        """ Method returns current file extension for file to load workspace from
             e.g. .raw or .nxs extension
-        """ 
+        """
         if self._fext and len(self._fext)>0:
             return self._fext
         else: # return IDF default
@@ -635,7 +635,7 @@ class RunDescriptor(PropDescriptor):
 #--------------------------------------------------------------------------------------------------------------------
     @staticmethod
     def _check_calibration_source():
-         """ if user have not specified calibration as input to the script, 
+        """ if user have not specified calibration as input to the script,
              try to retrieve calibration stored in file with run properties"""
          changed_prop = RunDescriptor._holder.getChangedProperties()
          if 'det_cal_file' in changed_prop:
@@ -649,7 +649,7 @@ class RunDescriptor(PropDescriptor):
             and loads this workspace if it has not been loaded
 
             Returns Mantid pointer to the workspace, corresponding to this run number
-        """ 
+        """
         if not self._ws_name:
            self._ws_name = self._build_ws_name()
 
@@ -703,7 +703,7 @@ class RunDescriptor(PropDescriptor):
     def chop_ws_part(self,origin,tof_range,rebin,chunk_num,n_chunks):
         """ chop part of the original workspace and sets it up to this run as new original
             Return the pointer to workspace being chopped """ 
-        if not(origin):
+        if not origin:
            origin = self.get_workspace()
 
         origin_name = origin.name()
@@ -737,7 +737,7 @@ class RunDescriptor(PropDescriptor):
 
 #--------------------------------------------------------------------------------------------------------------------
     def get_monitors_ws(self,monitor_ID=None):
-        """ get pointer to a workspace containing monitors. 
+        """ get pointer to a workspace containing monitors.
 
            Explores different ways of finding monitor workspace in Mantid and returns the python pointer to the
            workspace which contains monitors.
@@ -761,10 +761,10 @@ class RunDescriptor(PropDescriptor):
 
         if monitor_ID:
            try:
-               ws_index = mon_ws.getIndexFromSpectrumNumber(monitor_ID) 
+                ws_index = mon_ws.getIndexFromSpectrumNumber(monitor_ID)
            except: #
                mon_ws = None
-        else: 
+        else:
             mon_list = self._holder.get_used_monitors_list()
             for monID in mon_list:
                 try:
@@ -786,9 +786,9 @@ class RunDescriptor(PropDescriptor):
 #--------------------------------------------------------------------------------------------------------------------
     def file_hint(self,run_num_str=None,filePath=None,fileExt=None,**kwargs):
         """ procedure to provide run file guess name from run properties
-         
+
             main purpose -- to support customized order of file extensions
-        """ 
+        """
         if not run_num_str:
            run_num_str = str(self.run_number())
 
@@ -843,19 +843,19 @@ class RunDescriptor(PropDescriptor):
         except RuntimeError:
              message = '*** Cannot find file matching hint {0} on Mantid search paths '.\
                        format(file_hint)
-             if not ('be_quet' in kwargs):
+            if not 'be_quet' in kwargs:
                 RunDescriptor._logger(message,'warning')
              return (False,message)
 #--------------------------------------------------------------------------------------------------------------------
 
     def load_file(self,inst_name,ws_name,run_number=None,load_mon_with_workspace=False,filePath=None,fileExt=None,**kwargs):
-        """ load run for the instrument name provided. If run_numner is None, look for the current run""" 
- 
+        """ load run for the instrument name provided. If run_numner is None, look for the current run"""
+
         ok,data_file = self.find_file(None,filePath,fileExt,**kwargs)
         if not ok:
            self._ws_name = None
            raise IOError(data_file)
-                       
+
         if load_mon_with_workspace:
              mon_load_option = 'Include'
         else:
@@ -889,7 +889,7 @@ class RunDescriptor(PropDescriptor):
         else:
             ws_name = self._build_ws_name()
         #-----------------------------------
-        if ws_name in mtd and not(force):
+        if ws_name in mtd and not force:
             RunDescriptor._logger("{0} already loaded as workspace.".format(ws_name),'information')
         else:
             # If it doesn't exists as a workspace assume we have to try and
@@ -900,17 +900,17 @@ class RunDescriptor(PropDescriptor):
         return loaded_ws
 #--------------------------------------------------------------------------------------------------------------------
     def apply_calibration(self,loaded_ws,calibration=None,use_ws_calibration=True):
-        """  If calibration is present, apply it to the workspace 
-        
-             use_ws_calibration -- if true, retrieve workspace property, which defines 
+        """  If calibration is present, apply it to the workspace
+
+             use_ws_calibration -- if true, retrieve workspace property, which defines
              calibration option (e.g. det_cal_file used a while ago) and try to use it
         """
 
         if not (calibration) or use_ws_calibration:
-            return 
+            return
         if not isinstance(loaded_ws, api.Workspace):
            raise RuntimeError(' Calibration can be applied to a workspace only and got object of type {0}'.format(type(loaded_ws)))
-        
+
         if loaded_ws.run().hasProperty("calibrated"):
             return # already calibrated
 
@@ -951,11 +951,11 @@ class RunDescriptor(PropDescriptor):
         this routine copies a spectrum form workspace to monitor workspace and rebins it according to monitor workspace binning
 
         @param data_ws  -- the  event workspace which detector is considered as monitor or Mantid pointer to this workspace
-        @param mon_ws   -- the  histogram workspace with monitors where one needs to place the detector's spectra 
+        @param mon_ws   -- the  histogram workspace with monitors where one needs to place the detector's spectra
         @param spectraID-- the ID of the spectra to copy.
 
        """
- 
+
        # ----------------------------
        try:
            ws_index = mon_ws.getIndexFromSpectrumNumber(spectraID)
@@ -981,8 +981,8 @@ class RunDescriptor(PropDescriptor):
        return mon_ws
 #--------------------------------------------------------------------------------------------------------------------
     def clear_monitors(self):
-        """ method removes monitor workspace form analysis data service if it is there 
-        
+        """ method removes monitor workspace form analysis data service if it is there
+
             (assuming it is not needed any more)
         """
         monWS_name = self._ws_name + '_monitors'
@@ -1029,7 +1029,7 @@ class RunDescriptor(PropDescriptor):
         else:
             ws_name = '{0}{1}{2}{3}'.format(self._prop_name,self._ws_cname,sum_ext,self._ws_suffix)
 
-        return ws_name 
+        return ws_name
 #--------------------------------------------------------------------------------------------------------------------
     @staticmethod
     def rremove(thestr, trailing):
@@ -1038,7 +1038,7 @@ class RunDescriptor(PropDescriptor):
             return thestr[:-thelen]
         return thestr
     def _split_ws_name(self,ws_name):
-        """ Method to split existing workspace name 
+        """ Method to split existing workspace name
             into parts, in such a way that _build_name would restore the same name
         """
         # Remove suffix
@@ -1072,7 +1072,7 @@ class RunDescriptor(PropDescriptor):
             instr_name = RunDescriptor._holder.short_inst_name
        else:
             instr_name = '_test_instrument'
-       return instr_name 
+        return instr_name
 
 
     def has_own_value(self):
@@ -1183,7 +1183,7 @@ class RunDescriptor(PropDescriptor):
 class RunDescriptorDependent(RunDescriptor):
     """ Simple RunDescriptor class dependent on another RunDescriptor,
         providing the host descriptor if current descriptor value is not defined
-        or usual descriptor functionality if somebody sets current descriptor up   
+        or usual descriptor functionality if somebody sets current descriptor up
     """
 
     def __init__(self,host_run,ws_preffix,DocString=None):
@@ -1210,7 +1210,6 @@ class RunDescriptorDependent(RunDescriptor):
            return
         self._has_own_value = True
         super(RunDescriptorDependent,self).__set__(instance,value)
-
 
     def has_own_value(self):
         """ interface property used to verify if

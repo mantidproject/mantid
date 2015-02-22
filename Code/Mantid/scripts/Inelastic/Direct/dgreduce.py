@@ -1,9 +1,7 @@
+#pylint: disable=invalid-name
 """ Empty class temporary left for compatibility with previous interfaces """
 import DirectEnergyConversion as DRC
-import CommonFunctions as common
-import time as time
 from mantid.simpleapi import *
-from mantid import api
 from mantid.kernel import funcreturns
 
 
@@ -32,11 +30,11 @@ def setup(instname=None,reload=False):
         instname = config['default.instrument']
 
 
-    if not (Reducer is None) :
+    if not Reducer is None :
         old_name=Reducer.prop_man.instr_name
         if  old_name.upper()[0:3] == instname.upper()[0:3] :
             if not reload :
-               return  # has been already defined
+                return  # has been already defined
 
     Reducer = DRC.setup_reducer(instname,reload)
 
@@ -137,10 +135,10 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     if sample_run:
         Reducer.sample_run = sample_run
     try:
-         n,r=funcreturns.lhs_info('both')
-         wksp_out=r[0]
+        n,r=funcreturns.lhs_info('both')
+        wksp_out=r[0]
     except:
-         wksp_out = Reducer.prop_man.get_sample_ws_name()
+        wksp_out = Reducer.prop_man.get_sample_ws_name()
     #
     res = Reducer.convert_to_energy(wb_run,sample_run,ei_guess,rebin,map_file,monovan_run,second_wb,**kwargs)
     #

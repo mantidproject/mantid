@@ -1,20 +1,16 @@
 digraph ReflectometryReductionOne {
   label = "ReflectometryReductionOneAuto polarization correction step"
-  fontname = Helvetica
-  labelloc = t
-
-  node[fontname="Helvetica", style = filled]
-  edge[fontname="Helvetica"]
+  $global_style
 
   subgraph params {
-    node[fillcolor = khaki, shape = oval]
+    $param_style
     inWL  [label="OutputWorkspaceWavelength"]
     outWL [label="OutputWorkspaceWavelength"]
     outMT [label="OutputWorkspace"]
   }
 
   subgraph algorithms {
-    node[style = "rounded,filled", fillcolor = lightskyblue, shape = rectangle]
+    $algorithm_style
     polCor        [label="PolarizationCorrection"]
     reflRedOne_0b [label="ReflectometryReductionOne"]
     reflRedOne_1b [label="ReflectometryReductionOne"]

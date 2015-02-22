@@ -9,6 +9,7 @@
 #include <queue>
 #include <fstream>
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
 namespace {
@@ -92,9 +93,10 @@ void CreateGroupingWorkspace::init() {
   declareProperty("MaxRecursionDepth", 5,
                   "Number of levels to search into the instrument (default=5)");
 
-  declareProperty("FixedGroupCount", 0, "Used to distribute the detectors of a "
-                                        "given component into a fixed number "
-                                        "of groups");
+  declareProperty("FixedGroupCount", 0,
+                  boost::make_shared<BoundedValidator<int> >(0, INT_MAX),
+                  "Used to distribute the detectors of a given component into "
+                  "a fixed number of groups");
   declareProperty("ComponentName", "", "Specify the instrument component to "
                                        "group into a fixed number of groups");
 
@@ -169,12 +171,18 @@ void makeGroupingByNumGroups(const std::string compName, int numGroups,
   // Get detectors for given instument component
   std::vector<IDetector_const_sptr> detectors;
   inst->getDetectorsInBank(detectors, compName);
+  size_t numDetectors = detectors.size();
+
+  // Sanity check for following calculation
+  if(numGroups > static_cast<int>(numDetectors))
+    throw std::runtime_error("Number of groups must be less than or "
+                             "equal to number of detectors");
 
   // Calculate number of detectors per group
-  int detectorsPerGroup = static_cast<int>(detectors.size()) / numGroups;
+  int detectorsPerGroup = static_cast<int>(numDetectors) / numGroups;
 
   // Map detectors to group
-  for (unsigned int detIndex = 0; detIndex < detectors.size(); detIndex++) {
+  for (unsigned int detIndex = 0; detIndex < numDetectors; detIndex++) {
     int detectorID = detectors[detIndex]->getID();
     int groupNum = (detIndex / detectorsPerGroup) + 1;
 

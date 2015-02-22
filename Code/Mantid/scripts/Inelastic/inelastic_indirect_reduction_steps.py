@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init
 from reduction.reducer import ReductionStep
 
 import mantid
@@ -67,7 +68,7 @@ class LoadData(ReductionStep):
         if ( self._sum ) and ( len(self._data_files) > 1 ):
             ## Sum files
             merges = []
-            if ( self._multiple_frames ):
+            if  self._multiple_frames :
                 self._sum_chopped(wsname)
             else:
                 self._sum_regular(wsname)
@@ -116,14 +117,14 @@ class LoadData(ReductionStep):
             # Quick hack for older BASIS files that only have one side
             #if (mtd[file].getRun()['run_number'] < 16693):
             #        basis_mask = "BASIS_Mask_before_16693.xml"
-            basis_mask_filename = os.path.join(config.getString('maskFiles.directory')
+            basis_mask_filename = os.path.join(config.getString('maskFiles.directory')\
                     , basis_mask)
             if os.path.isfile(basis_mask_filename):
-                    LoadMask(Instrument="BASIS", OutputWorkspace="__basis_mask",
+                LoadMask(Instrument="BASIS", OutputWorkspace="__basis_mask",\
                              InputFile=basis_mask_filename)
-                    MaskDetectors(Workspace=output_ws, MaskedWorkspace="__basis_mask")
+                MaskDetectors(Workspace=output_ws, MaskedWorkspace="__basis_mask")
             else:
-                    logger.notice("Couldn't find specified mask file : " + str(basis_mask_filename))
+                logger.notice("Couldn't find specified mask file : " + str(basis_mask_filename))
 
         if self._parameter_file != None:
             LoadParameterFile(Workspace=output_ws,Filename= self._parameter_file)
@@ -131,14 +132,14 @@ class LoadData(ReductionStep):
         self._monitor_index = self._reducer._get_monitor_index(mtd[output_ws])
 
         if self._require_chop_data(output_ws):
-            ChopData(InputWorkspace=output_ws,OutputWorkspace= output_ws,Step= 20000.0,NChops= 5, IntegrationRangeLower=5000.0,
-                IntegrationRangeUpper=10000.0,
+            ChopData(InputWorkspace=output_ws,OutputWorkspace= output_ws,Step= 20000.0,NChops= 5, IntegrationRangeLower=5000.0,\
+                IntegrationRangeUpper=10000.0,\
                 MonitorWorkspaceIndex=self._monitor_index)
             self._multiple_frames = True
         else:
             self._multiple_frames = False
 
-        if ( self._multiple_frames ):
+        if  self._multiple_frames :
             workspaces = mtd[output_ws].getNames()
         else:
             workspaces = [output_ws]
@@ -157,8 +158,8 @@ class LoadData(ReductionStep):
                     raise ValueError("Range %d - %d is not a valid detector range." % (self._detector_range_start, self._detector_range_end))
 
                 ## Crop the workspace to remove uninteresting detectors
-                CropWorkspace(InputWorkspace=ws,OutputWorkspace= ws,
-                    StartWorkspaceIndex=self._detector_range_start,
+                CropWorkspace(InputWorkspace=ws,OutputWorkspace= ws,\
+                    StartWorkspaceIndex=self._detector_range_start,\
                     EndWorkspaceIndex=self._detector_range_end)
 
     def _load_data(self, filename, output_ws):
@@ -225,7 +226,7 @@ class LoadData(ReductionStep):
                 'Workflow.ChopDataIfGreaterThan')[0]
         except IndexError:
             return False
-        if ( mtd[ws].readX(0)[mtd[ws].blocksize()] > cdigt ):
+        if  mtd[ws].readX(0)[mtd[ws].blocksize()] > cdigt :
             return True
         else:
             return False
@@ -256,7 +257,7 @@ class IdentifyBadDetectors(ReductionStep):
 
     def execute(self, reducer, file_ws):
 
-        if (self._multiple_frames):
+        if self._multiple_frames:
             try:
                 workspaces = mtd[file_ws].getNames()
             except AttributeError:
@@ -269,7 +270,7 @@ class IdentifyBadDetectors(ReductionStep):
         except IndexError:
             msk = 'None'
 
-        if (msk != 'IdentifyNoisyDetectors'):
+        if msk != 'IdentifyNoisyDetectors':
             return
 
         temp_ws_mask = '__temp_ws_mask'
@@ -278,7 +279,7 @@ class IdentifyBadDetectors(ReductionStep):
         nhist = ws.getNumberHistograms()
 
         for i in range(0, nhist):
-            if (ws.readY(i)[0] == 0.0):
+            if ws.readY(i)[0] == 0.0:
                 self._masking_detectors.append(i)
         DeleteWorkspace(Workspace=temp_ws_mask)
 
@@ -306,7 +307,7 @@ class BackgroundOperations(ReductionStep):
         self._background_end = None
 
     def execute(self, reducer, file_ws):
-        if ( self._multiple_frames ):
+        if  self._multiple_frames :
             try:
                 workspaces = mtd[file_ws].getNames()
             except AttributeError:
@@ -316,7 +317,7 @@ class BackgroundOperations(ReductionStep):
 
         for ws in workspaces:
             ConvertToDistribution(Workspace=ws)
-            CalculateFlatBackground(InputWorkspace=ws,OutputWorkspace= ws,StartX= self._background_start,
+            CalculateFlatBackground(InputWorkspace=ws,OutputWorkspace= ws,StartX= self._background_start,\
                            EndX=self._background_end, Mode='Mean')
             ConvertFromDistribution(Workspace=ws)
 
@@ -339,7 +340,7 @@ class ApplyCalibration(ReductionStep):
     def execute(self, reducer, file_ws):
         if self._calib_workspace is None: # No calibration workspace set
             return
-        if ( self._multiple_frames ):
+        if  self._multiple_frames :
             try:
                 workspaces = mtd[file_ws].getNames()
             except AttributeError:
@@ -376,7 +377,7 @@ class HandleMonitor(ReductionStep):
     def execute(self, reducer, file_ws):
         """Does everything we want to with the Monitor.
         """
-        if ( self._multiple_frames ):
+        if  self._multiple_frames :
             try:
                 workspaces = mtd[file_ws].getNames()
             except AttributeError:
@@ -413,14 +414,14 @@ class HandleMonitor(ReductionStep):
                 'Workflow.UnwrapMonitor')[0]
         except IndexError:
             return False # Default it to not unwrap
-        if ( unwrap == 'Never' ):
+        if  unwrap == 'Never' :
             return False
-        elif ( unwrap == 'Always' ):
+        elif  unwrap == 'Always' :
             return True
-        elif ( unwrap == 'BaseOnTimeRegime' ):
+        elif  unwrap == 'BaseOnTimeRegime' :
             SpecMon = mtd[ws+'_mon'].readX(0)[0]
             SpecDet = mtd[ws].readX(0)[0]
-            if ( SpecMon == SpecDet ):
+            if  SpecMon == SpecDet :
                 return True
             else:
                 return False
@@ -431,7 +432,7 @@ class HandleMonitor(ReductionStep):
         l_ref = self._get_reference_length(ws, 0)
         monitor = ws+'_mon'
         unwrapped_ws, join = UnwrapMonitor(InputWorkspace=monitor, OutputWorkspace=monitor, LRef=l_ref)
-        RemoveBins(InputWorkspace=monitor,OutputWorkspace= monitor,XMin= join-0.001,XMax= join+0.001,
+        RemoveBins(InputWorkspace=monitor,OutputWorkspace= monitor,XMin= join-0.001,XMax= join+0.001,\
             Interpolation='Linear')
         try:
             FFTSmooth(InputWorkspace=monitor,OutputWorkspace=monitor,WorkspaceIndex=0)
@@ -458,10 +459,10 @@ class HandleMonitor(ReductionStep):
             thickness = inst.getNumberParameter(montiorStr+'-Thickness')[0]
             attenuation= inst.getNumberParameter(montiorStr+'-Attenuation')[0]
         except IndexError:
-            raise ValueError('Unable to retrieve monitor thickness, area and '
+            raise ValueError('Unable to retrieve monitor thickness, area and '\
                 'attenuation from Instrument Parameter file.')
         else:
-            if ( area == -1 or thickness == -1 or attenuation == -1):
+            if  area == -1 or thickness == -1 or attenuation == -1:
                 return
             OneMinusExponentialCor(InputWorkspace=monitor,OutputWorkspace= monitor,C= (attenuation * thickness),C1= area)
 
@@ -493,7 +494,7 @@ class CorrectByMonitor(ReductionStep):
         self._emode = EMode
 
     def execute(self, reducer, file_ws):
-        if ( self._multiple_frames ):
+        if  self._multiple_frames :
             try:
                 workspaces = mtd[file_ws].getNames()
             except AttributeError:
@@ -544,7 +545,7 @@ class FoldData(ReductionStep):
         lowest = 0
         highest = 0
         for ws in wsgroup:
-            if ( unit == '' ):
+            if  unit == '' :
                 unit = mtd[ws].getAxis(0).getUnit().unitID()
             low = mtd[ws].dataX(0)[0]
             high = mtd[ws].dataX(0)[mtd[ws].blocksize()-1]
@@ -563,7 +564,7 @@ class FoldData(ReductionStep):
     def _ws_in_range(self, ranges, xval):
         result = 0
         for range in ranges:
-            if ( xval >= range[0] and xval <= range[1] ): result += 1
+            if  xval >= range[0] and xval <= range[1] : result += 1
         return result
 
 class ConvertToCm1(ReductionStep):
@@ -583,7 +584,7 @@ class ConvertToCm1(ReductionStep):
         if self._save_to_cm_1 == False:
             return
 
-        if ( self._multiple_frames ):
+        if  self._multiple_frames :
             try:
                 workspaceNames = mtd[file_ws].getNames()
             except AttributeError:
@@ -613,7 +614,7 @@ class ConvertToEnergy(ReductionStep):
         self._multiple_frames = MultipleFrames
 
     def execute(self, reducer, file_ws):
-        if ( self._multiple_frames ):
+        if  self._multiple_frames :
             try:
                 workspaces = mtd[file_ws].getNames()
             except AttributeError:
@@ -653,7 +654,7 @@ class ConvertToEnergy(ReductionStep):
             nbins = mtd[ws].blocksize()
             if nbins > nbin: nbin = nbins
         for ws in workspaces:
-            if (mtd[ws].blocksize() == nbin):
+            if mtd[ws].blocksize() == nbin:
                 Rebin(InputWorkspace=ws,OutputWorkspace= ws,Params= self._rebin_string)
             else:
                 Rebin(InputWorkspace=ws,OutputWorkspace= ws,Params= rstwo)
@@ -715,7 +716,7 @@ class DetailedBalance(ReductionStep):
 
         correction = 11.606 / ( 2 * self._temp )
 
-        if ( self._multiple_frames ):
+        if  self._multiple_frames :
             workspaces = mtd[file_ws].getNames()
         else:
             workspaces = [file_ws]
@@ -741,7 +742,7 @@ class Scaling(ReductionStep):
         if self._scale_factor is None: # Scale factor is the default value, 1.0
             return
 
-        if ( self._multiple_frames ):
+        if  self._multiple_frames :
             workspaces = mtd[file_ws].getNames()
         else:
             workspaces = [file_ws]
@@ -824,7 +825,7 @@ class Grouping(ReductionStep):
             for i in range(0, nhist):
                 if i not in self._masking_detectors:
                     wslist.append(i)
-            GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, 
+            GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace,
                            WorkspaceIndexList=wslist, Behaviour='Average')
         else:
             # We may have either a workspace name or a mapping file name here
@@ -852,10 +853,10 @@ class Grouping(ReductionStep):
             # Run GroupDetectors with a workspace if we have one
             # Otherwise try to run it with a mapping file
             if grouping_workspace is not None:
-                GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, CopyGroupingFromWorkspace=grouping_workspace, 
+                GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, CopyGroupingFromWorkspace=grouping_workspace,\
                         Behaviour='Average')
             elif os.path.isfile(grouping_filename):
-                GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, MapFile=grouping_filename, 
+                GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, MapFile=grouping_filename,\
                         Behaviour='Average')
 
         return workspace
@@ -960,7 +961,7 @@ class Naming(ReductionStep):
         elif type == 'RunTitle':
             return self._run_title(workspace)
         else:
-            raise NotImplementedError('Unknown \'Workflow.NamingConvention\''
+            raise NotImplementedError('Unknown \'Workflow.NamingConvention\''\
                 ' parameter encountered on workspace: ' + workspace)
 
     def _run_title(self, workspace):

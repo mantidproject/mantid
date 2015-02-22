@@ -16,7 +16,6 @@ class IndirectTransmissionMonitorTest(unittest.TestCase):
         self.kwargs = {}
         self.kwargs['SampleWorkspace'] = self._sample_workspace
         self.kwargs['CanWorkspace'] = self._can_workspace
-        self.kwargs['Verbose'] = True
         self.kwargs['Plot'] = False
 
     def tearDown(self):

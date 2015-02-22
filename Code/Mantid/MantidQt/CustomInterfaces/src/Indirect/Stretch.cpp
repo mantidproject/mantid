@@ -10,20 +10,14 @@ namespace MantidQt
 {
 	namespace CustomInterfaces
 	{
-		Stretch::Stretch(QWidget * parent) : 
+		Stretch::Stretch(QWidget * parent) :
 			IndirectBayesTab(parent)
 		{
 			m_uiForm.setupUi(parent);
 
-			// Create the plot
-      m_plots["StretchPlot"] = new QwtPlot(m_parentWidget);
-      m_plots["StretchPlot"]->setCanvasBackground(Qt::white);
-      m_plots["StretchPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-      m_plots["StretchPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-			m_uiForm.plotSpace->addWidget(m_plots["StretchPlot"]);
 
       // Create range selector
-      m_rangeSelectors["StretchERange"] = new MantidWidgets::RangeSelector(m_plots["StretchPlot"]);
+      m_rangeSelectors["StretchERange"] = new MantidWidgets::RangeSelector(m_uiForm.ppPlot);
       connect(m_rangeSelectors["StretchERange"], SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
       connect(m_rangeSelectors["StretchERange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
 
@@ -35,7 +29,7 @@ namespace MantidQt
 			m_properties["SampleBinning"] = m_dblManager->addProperty("Sample Binning");
 			m_properties["Sigma"] = m_dblManager->addProperty("Sigma");
 			m_properties["Beta"] = m_dblManager->addProperty("Beta");
-			
+
 			m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
 			m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
 			m_dblManager->setDecimals(m_properties["SampleBinning"], INT_DECIMALS);
@@ -69,7 +63,7 @@ namespace MantidQt
 
 		/**
 		 * Validate the form to check the program can be run
-		 * 
+		 *
 		 * @return :: Whether the form was valid
 		 */
 		bool Stretch::validate()
@@ -92,17 +86,16 @@ namespace MantidQt
 		 * Collect the settings on the GUI and build a python
 		 * script that runs Stretch
 		 */
-		void Stretch::run() 
+		void Stretch::run()
 		{
       using namespace Mantid::API;
 
 			QString save("False");
-			QString verbose("False");
 
 			QString elasticPeak("False");
 			QString sequence("False");
 
-			QString pyInput = 
+			QString pyInput =
 				"from IndirectBayes import QuestRun\n";
 
 			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
@@ -129,12 +122,11 @@ namespace MantidQt
 			nBins = "[" + nBins + ", 1]";
 
 			//Output options
-			if(m_uiForm.chkVerbose->isChecked()) { verbose = "True"; }
 			if(m_uiForm.chkSave->isChecked()) { save = "True"; }
 			QString plot = m_uiForm.cbPlot->currentText();
 
 			pyInput += "QuestRun('"+sampleName+"','"+resName+"',"+betaSig+","+eRange+","+nBins+","+fitOps+","+sequence+","
-										" Save="+save+", Plot='"+plot+"', Verbose="+verbose+")\n";
+										" Save="+save+", Plot='"+plot+"', Verbose=True)\n";
 
 			runPythonScript(pyInput);
 		}
@@ -142,7 +134,7 @@ namespace MantidQt
 		/**
 		 * Set the data selectors to use the default save directory
 		 * when browsing for input files.
-		 *  
+		 *
      * @param settings :: The current settings
 		 */
 		void Stretch::loadSettings(const QSettings& settings)
@@ -154,15 +146,15 @@ namespace MantidQt
 		/**
 		 * Plots the loaded file to the miniplot and sets the guides
 		 * and the range
-		 * 
+		 *
 		 * @param filename :: The name of the workspace to plot
 		 */
 		void Stretch::handleSampleInputReady(const QString& filename)
 		{
-			plotMiniPlot(filename, 0, "StretchPlot", "RawPlotCurve");
-			std::pair<double,double> range = getCurveRange("RawPlotCurve");
-			setMiniPlotGuides("StretchERange", m_properties["EMin"], m_properties["EMax"], range);
-			setPlotRange("StretchERange", m_properties["EMin"], m_properties["EMax"], range);
+			m_uiForm.ppPlot->addSpectrum("Sample", filename, 0);
+			QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
+			setRangeSelector("StretchERange", m_properties["EMin"], m_properties["EMax"], range);
+			setPlotPropertyRange("StretchERange", m_properties["EMin"], m_properties["EMax"], range);
 		}
 
 		/**
@@ -182,7 +174,7 @@ namespace MantidQt
 		 */
     void Stretch::maxValueChanged(double max)
     {
-			m_dblManager->setValue(m_properties["EMax"], max);	
+			m_dblManager->setValue(m_properties["EMax"], max);
     }
 
 		/**

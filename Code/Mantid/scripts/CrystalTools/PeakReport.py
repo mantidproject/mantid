@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
 This is a module for creating peak integration reports.
 """

@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -14,44 +15,44 @@ class DensityOfStates(PythonAlgorithm):
 
     def PyInit(self):
         # Declare properties
-        self.declareProperty(FileProperty('File', '', action=FileAction.Load,
-            extensions = ["phonon", "castep"]),
+        self.declareProperty(FileProperty('File', '', action=FileAction.Load,\
+            extensions = ["phonon", "castep"]),\
             doc='Filename of the file.')
 
-        self.declareProperty(name='Function',defaultValue='Gaussian',
-            validator=StringListValidator(['Gaussian', 'Lorentzian']),
+        self.declareProperty(name='Function',defaultValue='Gaussian',\
+            validator=StringListValidator(['Gaussian', 'Lorentzian']),\
             doc="Type of function to fit to peaks.")
 
-        self.declareProperty(name='PeakWidth', defaultValue=10.0,
+        self.declareProperty(name='PeakWidth', defaultValue=10.0,\
             doc='Set Gaussian/Lorentzian FWHM for broadening. Default is 10')
 
-        self.declareProperty(name='SpectrumType',defaultValue='DOS',
-            validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active']),
+        self.declareProperty(name='SpectrumType',defaultValue='DOS',\
+            validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active']),\
             doc="Type of intensities to extract and model (fundamentals-only) from .phonon.")
 
-        self.declareProperty(name='Scale', defaultValue=1.0,
+        self.declareProperty(name='Scale', defaultValue=1.0,\
             doc='Scale the intesity by the given factor. Default is no scaling.')
 
-        self.declareProperty(name='BinWidth', defaultValue=1.0,
+        self.declareProperty(name='BinWidth', defaultValue=1.0,\
             doc='Set histogram resolution for binning (eV or cm**-1). Default is 1')
 
-        self.declareProperty(name='Temperature', defaultValue=300.0,
+        self.declareProperty(name='Temperature', defaultValue=300.0,\
             doc='Temperature to use (in raman spectrum modelling). Default is 300')
 
-        self.declareProperty(name='ZeroThreshold', defaultValue=3.0,
+        self.declareProperty(name='ZeroThreshold', defaultValue=3.0,\
             doc='Ignore frequencies below the this threshold. Default is 3.0')
 
-        self.declareProperty(StringArrayProperty('Ions', Direction.Input),
+        self.declareProperty(StringArrayProperty('Ions', Direction.Input),\
             doc="List of Ions to use to calculate partial density of states. If left blank, total density of states will be calculated")
 
-        self.declareProperty(name='SumContributions', defaultValue=False,
+        self.declareProperty(name='SumContributions', defaultValue=False,\
             doc="Sum the partial density of states into a single workspace.")
 
-        self.declareProperty(name='ScaleByCrossSection', defaultValue='None',
-            validator=StringListValidator(['None', 'Total', 'Incoherent', 'Coherent']),
+        self.declareProperty(name='ScaleByCrossSection', defaultValue='None',\
+            validator=StringListValidator(['None', 'Total', 'Incoherent', 'Coherent']),\
             doc="Sum the partial density of states by the scattering cross section.")
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),\
             doc="Name to give the output workspace.")
 
         # Regex pattern for a floating point number
@@ -124,7 +125,9 @@ class DensityOfStates(PythonAlgorithm):
                 if k in self._ions:
                     partial_ions[k] = v
 
-            partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(partial_ions, frequencies, eigenvectors, weights)
+            partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(
+                                                    partial_ions, frequencies,
+                                                    eigenvectors, weights)
 
             if self._sum_contributions:
                 # Discard the partial workspaces
@@ -147,7 +150,9 @@ class DensityOfStates(PythonAlgorithm):
 
             eigenvectors = file_data[4]
 
-            partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(self._ion_dict, frequencies, eigenvectors, weights)
+            partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(
+                                                    self._ion_dict, frequencies,
+                                                    eigenvectors, weights)
 
             # Discard the partial workspaces
             for partial_ws in partial_workspaces:
@@ -288,7 +293,8 @@ class DensityOfStates(PythonAlgorithm):
                 scattering_x_section = mtd[self._ws_name].mutableSample().getMaterial().totalScatterXSection()
 
             if self._scale_by_cross_section != 'None':
-                Scale(InputWorkspace=self._ws_name, OutputWorkspace=self._ws_name, Operation='Multiply', Factor=scattering_x_section)
+                Scale(InputWorkspace=self._ws_name, OutputWorkspace=self._ws_name,
+                      Operation='Multiply', Factor=scattering_x_section)
 
             partial_workspaces.append(partial_ws_name)
             RenameWorkspace(self._ws_name, OutputWorkspace=partial_ws_name)
@@ -300,9 +306,11 @@ class DensityOfStates(PythonAlgorithm):
             sum_workspace = '__dos_sum'
 
             # Collect spectra into a single workspace
-            AppendSpectra(OutputWorkspace=sum_workspace, InputWorkspace1=partial_workspaces[0], InputWorkspace2=partial_workspaces[1])
+            AppendSpectra(OutputWorkspace=sum_workspace, InputWorkspace1=partial_workspaces[0],
+                          InputWorkspace2=partial_workspaces[1])
             for ws_idx in xrange(2, len(partial_workspaces)):
-                AppendSpectra(OutputWorkspace=sum_workspace, InputWorkspace1=sum_workspace, InputWorkspace2=partial_workspaces[ws_idx])
+                AppendSpectra(OutputWorkspace=sum_workspace, InputWorkspace1=sum_workspace,
+                              InputWorkspace2=partial_workspaces[ws_idx])
 
             # Sum all spectra
             SumSpectra(InputWorkspace=sum_workspace, OutputWorkspace=total_workspace)
