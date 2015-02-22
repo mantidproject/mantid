@@ -635,7 +635,7 @@ class RunDescriptor(PropDescriptor):
 #--------------------------------------------------------------------------------------------------------------------
     @staticmethod
     def _check_calibration_source():
-        """ if user have not specified calibration as input to the script,
+         """ if user have not specified calibration as input to the script,
              try to retrieve calibration stored in file with run properties"""
          changed_prop = RunDescriptor._holder.getChangedProperties()
          if 'det_cal_file' in changed_prop:
@@ -841,11 +841,11 @@ class RunDescriptor(PropDescriptor):
             self._run_file_path = os.path.dirname(fname)
             return (True,file)
         except RuntimeError:
-             message = '*** Cannot find file matching hint {0} on Mantid search paths '.\
+            message = '*** Cannot find file matching hint {0} on Mantid search paths '.\
                        format(file_hint)
             if not 'be_quet' in kwargs:
                 RunDescriptor._logger(message,'warning')
-             return (False,message)
+            return (False,message)
 #--------------------------------------------------------------------------------------------------------------------
 
     def load_file(self,inst_name,ws_name,run_number=None,load_mon_with_workspace=False,filePath=None,fileExt=None,**kwargs):
@@ -1072,7 +1072,7 @@ class RunDescriptor(PropDescriptor):
             instr_name = RunDescriptor._holder.short_inst_name
        else:
             instr_name = '_test_instrument'
-        return instr_name
+       return instr_name
 
 
     def has_own_value(self):

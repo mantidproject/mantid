@@ -359,7 +359,7 @@ def iliad(reduce):
         if input_file and isinstance(input_file,str):
            data_path = os.path.dirname(input_file)
            if len(data_path)>0:
-                try:
+              try:
                  config.appendDataSearchDir(str(data_path))
                  args[1] = os.path.basename(input_file)
               except: # if mantid is not available, this should ignore config

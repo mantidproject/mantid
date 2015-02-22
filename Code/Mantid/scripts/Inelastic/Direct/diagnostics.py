@@ -111,7 +111,7 @@ def diagnose(white_int,**kwargs):
        # Second white beam test
        if 'second_white' in kwargs: #NOT IMPLEMENTED 
            raise NotImplementedError("Second white is not yet implemented")
-            __second_white_masks, num_failed = do_second_white_test(white_int, parser.second_white, parser.tiny, parser.huge,\
+           __second_white_masks, num_failed = do_second_white_test(white_int, parser.second_white, parser.tiny, parser.huge,\
                                                        parser.van_out_lo, parser.van_out_hi,\
                                                        parser.van_lo, parser.van_hi, parser.variation,\
                                                        parser.van_sig, start_index, end_index)

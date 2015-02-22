@@ -98,7 +98,7 @@ class IncidentEnergy(PropDescriptor):
              else:
                 energy_list = False
              en_list = str.split(value,',')
-                if len(en_list) > 1:
+             if len(en_list) > 1:
                 rez = []
                 for en_str in en_list:
                     val = float(en_str)
@@ -409,7 +409,7 @@ class mon2NormalizationEnergyRange(PropDescriptor):
        return [self._relative_range[0] * instance.incident_energy,self._relative_range[1] * instance.incident_energy]
 
     def __set__(self,instance,val):
-        """ set detector calibration file using various formats """
+       """ set detector calibration file using various formats """
        if isinstance(val,list):
            self._relative_range = self._check_range(val,instance)
        elif isinstance(val,str):
@@ -486,7 +486,7 @@ class PropertyFromRange(PropDescriptor):
         return self._current_value
 
     def __set__(self,instance,val):
-        """ set detector calibration file using various formats """
+       """ set detector calibration file using various formats """
        if val in self._availible_values:
            self._current_value = val
        else:
@@ -506,7 +506,7 @@ class DetCalFile(PropDescriptor):
         return self._det_cal_file
 
     def __set__(self,instance,val):
-        """ set detector calibration file using various formats """
+       """ set detector calibration file using various formats """
 
        if val is None or isinstance(val,api.Workspace) or isinstance(val,str):
        # nothing provided or workspace provided or filename probably provided
@@ -591,7 +591,7 @@ class MapMaskFile(PropDescriptor):
     def __set__(self,instance,value):
         if not(value is None):
            fileName, fileExtension = os.path.splitext(value)
-            if not fileExtension:
+           if not fileExtension:
                value = value + self._file_ext
         self._file_name = value
 
@@ -624,7 +624,7 @@ class HardMaskPlus(prop_helpers.ComplexProperty):
     def __set__(self,instance,value):
         if value != None:
            fileName, fileExtension = os.path.splitext(value)
-            if not fileExtension:
+           if not fileExtension:
                value = value + '.msk'
            instance.hard_mask_file = value
            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[False,True])
@@ -784,7 +784,7 @@ class SpectraToMonitorsList(PropDescriptor):
         self._spectra_to_monitors_list = self._convert_to_list(spectra_list)
 
    def _convert_to_list(self,spectra_list):
-        """ convert any spectra_list representation into a list """
+       """ convert any spectra_list representation into a list """
        if spectra_list is None:
             return None
 
