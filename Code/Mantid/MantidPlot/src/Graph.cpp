@@ -4944,7 +4944,7 @@ void Graph::setIndexedColors()
       continue;
 
     PlotCurve *c = dynamic_cast<PlotCurve*>(it);
-    if (c->type() == ErrorBars)
+    if (!c || c->type() == ErrorBars)
       continue;
 
     QPen pen = c->pen();
