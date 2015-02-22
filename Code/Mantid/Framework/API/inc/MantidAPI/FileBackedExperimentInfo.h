@@ -54,10 +54,10 @@ public:
 
 private:
 
-  void checkAndPopulate() const;
+  void populateIfNotLoaded() const;
   void populateFromFile() const;
 
-  mutable bool m_empty;
+  mutable bool m_loaded;
   ::NeXus::File *m_file;
   std::string m_path;
 };

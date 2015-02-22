@@ -24,26 +24,26 @@ Kernel::Logger g_log("FileBackedExperimentInfo");
   */
 FileBackedExperimentInfo::FileBackedExperimentInfo(::NeXus::File *file,
                                                    const std::string &path)
-    : ExperimentInfo(), m_empty(true), m_file(file), m_path(path) {}
+    : ExperimentInfo(), m_loaded(false), m_file(file), m_path(path) {}
 
 /**
  * @return A clone of the object
  */
 ExperimentInfo *FileBackedExperimentInfo::cloneExperimentInfo() const {
-  checkAndPopulate();
+  populateIfNotLoaded();
   return ExperimentInfo::cloneExperimentInfo();
 }
 
 /// @returns A human-readable description of the object
 const std::string FileBackedExperimentInfo::toString() const {
-  checkAndPopulate();
+  populateIfNotLoaded();
   return ExperimentInfo::toString();
 }
 
 /// @return A pointer to the parametrized instrument
 Geometry::Instrument_const_sptr FileBackedExperimentInfo::getInstrument() const
 {
-  checkAndPopulate();
+  populateIfNotLoaded();
   return ExperimentInfo::getInstrument();
 }
 
@@ -52,7 +52,7 @@ Geometry::Instrument_const_sptr FileBackedExperimentInfo::getInstrument() const
  */
 const Geometry::ParameterMap & FileBackedExperimentInfo::instrumentParameters() const
 {
-  checkAndPopulate();
+  populateIfNotLoaded();
   return ExperimentInfo::instrumentParameters();
 }
 
@@ -61,7 +61,7 @@ const Geometry::ParameterMap & FileBackedExperimentInfo::instrumentParameters() 
  */
 Geometry::ParameterMap &FileBackedExperimentInfo::instrumentParameters()
 {
-  checkAndPopulate();
+  populateIfNotLoaded();
   return ExperimentInfo::instrumentParameters();
   
 }
@@ -71,7 +71,7 @@ Geometry::ParameterMap &FileBackedExperimentInfo::instrumentParameters()
  */
 const Geometry::ParameterMap &FileBackedExperimentInfo::constInstrumentParameters() const
 {
-  checkAndPopulate();
+  populateIfNotLoaded();
   return ExperimentInfo::constInstrumentParameters();
 }
 
@@ -79,7 +79,7 @@ const Geometry::ParameterMap &FileBackedExperimentInfo::constInstrumentParameter
  * Populate object with instrument parameters
  */
 void FileBackedExperimentInfo::populateInstrumentParameters() {
-  checkAndPopulate();
+  populateIfNotLoaded();
   return ExperimentInfo::populateInstrumentParameters();
 }
 
@@ -88,7 +88,7 @@ void FileBackedExperimentInfo::populateInstrumentParameters() {
  * @param pmap The new parameter map
  */
 void FileBackedExperimentInfo::replaceInstrumentParameters(const Geometry::ParameterMap &pmap) {
-  checkAndPopulate();
+  populateIfNotLoaded();
   ExperimentInfo::replaceInstrumentParameters(pmap);
 }
 
@@ -97,7 +97,7 @@ void FileBackedExperimentInfo::replaceInstrumentParameters(const Geometry::Param
  * @param pmap The new parameter map
  */
 void FileBackedExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
-  checkAndPopulate();
+  populateIfNotLoaded();
   ExperimentInfo::swapInstrumentParameters(pmap);
 }
 
@@ -106,7 +106,7 @@ void FileBackedExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &
  * @param mapping A set of the detector mappings
  */
 void FileBackedExperimentInfo::cacheDetectorGroupings(const det2group_map &mapping) {
-  checkAndPopulate();
+  populateIfNotLoaded();
   ExperimentInfo::cacheDetectorGroupings(mapping);
 }
 
@@ -115,7 +115,7 @@ void FileBackedExperimentInfo::cacheDetectorGroupings(const det2group_map &mappi
  * @param detID A detector ID to lookup
  */
 const std::vector<detid_t> & FileBackedExperimentInfo::getGroupMembers(const detid_t detID) const {
-  checkAndPopulate();
+  populateIfNotLoaded();
   return ExperimentInfo::getGroupMembers(detID);
 }
 
@@ -123,7 +123,7 @@ const std::vector<detid_t> & FileBackedExperimentInfo::getGroupMembers(const det
  * Populate the object and return a detector by ID
  */
 Geometry::IDetector_const_sptr FileBackedExperimentInfo::getDetectorByID(const detid_t detID) const {
-  checkAndPopulate();
+  populateIfNotLoaded();
   return ExperimentInfo::getDetectorByID(detID);
 }
 
@@ -136,10 +136,9 @@ Geometry::IDetector_const_sptr FileBackedExperimentInfo::getDetectorByID(const d
  * Check if the object has been populated and load the information if
  * it has not
  */
-void FileBackedExperimentInfo::checkAndPopulate() const {
-  if (m_empty) {
-    populateFromFile();
-  }
+void FileBackedExperimentInfo::populateIfNotLoaded() const {
+  if(m_loaded) return;
+  populateFromFile();
 }
 
 /**
@@ -153,7 +152,7 @@ void FileBackedExperimentInfo::populateFromFile() const {
     const_cast<FileBackedExperimentInfo*>(this)->loadExperimentInfoNexus(m_file, parameterStr);
     // readParameterMap calls getInstrument() & instrumentParameters() so make sure we
     // have marked the read as done by this point or it will keep entering this method
-    m_empty = false;
+    m_loaded = true;
     const_cast<FileBackedExperimentInfo*>(this)->readParameterMap(parameterStr);
   } catch (::NeXus::Exception &exc) {
     std::ostringstream os;
