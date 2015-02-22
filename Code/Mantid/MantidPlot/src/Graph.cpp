@@ -4981,7 +4981,11 @@ void Graph::setIndexedColors()
     PlotCurve *c = dynamic_cast<PlotCurve*>(it);
     if (c->type() == ErrorBars)
     {
-      QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve*>(it); // QtiPlot: ErrorBarsCurve *er = (ErrorBarsCurve *) it;
+      // QtiPlot: ErrorBarsCurve *er = (ErrorBarsCurve *) it;
+      QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve*>(it);
+      if (!er)
+        continue;
+
       DataCurve* mc = er->masterCurve();
       if (mc)
         er->setColor(mc->pen().color());
