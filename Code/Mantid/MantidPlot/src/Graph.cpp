@@ -448,14 +448,17 @@ void Graph::setMajorTicksType(const QList<int>& lst)
   for (int i=0;i<(int)lst.count();i++)
   {
     ScaleDraw *sd = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw (i));
+    if (!sd)
+      continue;
+
     if (lst[i]==ScaleDraw::None || lst[i]==ScaleDraw::In)
       sd->enableComponent (QwtAbstractScaleDraw::Ticks, false);
     else
     {
-      sd->enableComponent (QwtAbstractScaleDraw::Ticks);
-      sd->setTickLength  	(QwtScaleDiv::MinorTick, d_plot->minorTickLength());
-      sd->setTickLength  	(QwtScaleDiv::MediumTick, d_plot->minorTickLength());
-      sd->setTickLength  	(QwtScaleDiv::MajorTick, d_plot->majorTickLength());
+      sd->enableComponent(QwtAbstractScaleDraw::Ticks);
+      sd->setTickLength(QwtScaleDiv::MinorTick, d_plot->minorTickLength());
+      sd->setTickLength(QwtScaleDiv::MediumTick, d_plot->minorTickLength());
+      sd->setTickLength(QwtScaleDiv::MajorTick, d_plot->majorTickLength());
     }
     sd->setMajorTicksStyle((ScaleDraw::TicksStyle)lst[i]);
   }
