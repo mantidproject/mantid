@@ -13,16 +13,18 @@ using namespace Kernel;
 using namespace API;
 
 void CopyDetectorMapping::init() {
-  declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("WorkspaceToMatch", "", Direction::Input));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("WorkspaceToMatch", "",
+                                                         Direction::Input));
+
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("WorkspaceToRemap", "",
+                                                         Direction::InOut));
 
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("WorkspaceToRemap", "", Direction::InOut));
-
-  declareProperty(
-      new PropertyWithValue<bool>("IndexBySpectrumNumber", false, Direction::Input),
+      new PropertyWithValue<bool>("IndexBySpectrumNumber", false,
+                                  Direction::Input),
       "Will use mapping indexed by spectrum number rather than the default of"
-      "spectrum index (recommended when both workspaces have a vertical axis in spectrum number).");
+      "spectrum index (recommended when both workspaces have a vertical axis "
+      "in spectrum number).");
 }
 
 void CopyDetectorMapping::exec() {
@@ -37,16 +39,16 @@ void CopyDetectorMapping::exec() {
   setProperty("WorkspaceToRemap", wsToRemap);
 }
 
-std::map<std::string, std::string> CopyDetectorMapping::validateInputs()
-{
+std::map<std::string, std::string> CopyDetectorMapping::validateInputs() {
   std::map<std::string, std::string> issues;
 
   MatrixWorkspace_const_sptr wsToMatch = getProperty("WorkspaceToMatch");
   MatrixWorkspace_sptr wsToRemap = getProperty("WorkspaceToRemap");
 
   // Check histohram counts match
-  if(wsToMatch->getNumberHistograms() != wsToRemap->getNumberHistograms())
-    issues["WorkspaceToRemap"] = "Number of histograms must match WorkspaceToMatch";
+  if (wsToMatch->getNumberHistograms() != wsToRemap->getNumberHistograms())
+    issues["WorkspaceToRemap"] =
+        "Number of histograms must match WorkspaceToMatch";
 
   return issues;
 }
