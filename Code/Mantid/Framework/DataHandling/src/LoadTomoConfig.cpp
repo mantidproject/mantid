@@ -38,7 +38,8 @@ void LoadTomoConfig::init() {
 
   declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace",
                                                          "savuTomoConfig",
-                                                         Kernel::Direction::Output),
+                                                         Kernel::Direction::Output,
+                                                         PropertyMode::Mandatory),
                   "The name of the workspace to be created as output of"
                   "the algorithm, a workspace with this name will be created "
                   "and stored in the Analysis Data Service.");

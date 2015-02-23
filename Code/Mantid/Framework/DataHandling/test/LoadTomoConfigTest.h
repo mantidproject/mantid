@@ -42,18 +42,37 @@ public:
   {
     IAlgorithm_sptr testFail =
       Mantid::API::AlgorithmManager::Instance().create("LoadTomoConfig" /*, 1*/);
-    TS_ASSERT(testFail);
-    TS_ASSERT_THROWS_NOTHING(testFail->initialize());
-    // exec without filename -> should throw
-    TS_ASSERT_THROWS(testFail->execute(), std::runtime_error);
+    TS_ASSERT( testFail );
+    TS_ASSERT_THROWS_NOTHING( testFail->initialize() );
+    // exec without Filename property set -> should throw
+    TS_ASSERT_THROWS( testFail->execute(), std::runtime_error );
     // try to set empty filename
-    TS_ASSERT_THROWS(testFail->setPropertyValue("Filename",""), std::invalid_argument);
+    TS_ASSERT_THROWS( testFail->setPropertyValue("Filename",""), std::invalid_argument );
+    TS_ASSERT( !testFail->isExecuted() );
+
+    // exec with Filename but empty OutputWorkspace -> should throw
+    IAlgorithm_sptr fail2 =
+      Mantid::API::AlgorithmManager::Instance().create("LoadTomoConfig" /*, 1*/);
+    TS_ASSERT_THROWS_NOTHING( fail2->initialize() );
+    TS_ASSERT_THROWS_NOTHING( fail2->setPropertyValue("Filename", testFilename) );
+    TS_ASSERT_THROWS( fail2->setPropertyValue("OutputWorkspace", ""), std::invalid_argument );
+    TS_ASSERT_THROWS( fail2->execute(), std::runtime_error );
+    TS_ASSERT( !fail2->isExecuted() );
+
+    // exec with Filename but no OutputWorkspace -> should not finish
+    IAlgorithm_sptr fail3 =
+      Mantid::API::AlgorithmManager::Instance().create("LoadTomoConfig" /*, 1*/);
+    TS_ASSERT_THROWS_NOTHING( fail3->initialize() );
+    TS_ASSERT_THROWS_NOTHING( fail3->setPropertyValue("Filename", testFilename) );
+    TS_ASSERT_THROWS_NOTHING( fail3->execute() );
+    TS_ASSERT( !fail2->isExecuted() );
   }
 
   // one file with errors/unrecognized content
   void test_wrongContentsFile()
   {
-    // TODO: wait until we have a final spec of the format
+    // TODO: wait until we have a final spec of the format, then try to fool
+    // the loader here
   }
 
   // one example file that should load fine
@@ -61,17 +80,18 @@ public:
   {
     // Uses examples from the savu repository:
     // https://github.com/DiamondLightSource/Savu/tree/master/test_data
-    // At the moment load just one file to test basic functionality. Probably more files
-    // should be added here as we have more certainty about the format
-    std::string fname = "savu_test_data_process03.nxs";
+
+    // TODO: At the moment load just one file to test basic
+    // functionality. Probably more files should be added here as we
+    // have more certainty about the format
     std::string outWSName = "LoadTomoConfig_test_ws";
     // Load examples from https://github.com/DiamondLightSource/Savu/tree/master/test_data
-    TS_ASSERT_THROWS_NOTHING(testAlg->setPropertyValue("Filename", fname));
-    TS_ASSERT_THROWS_NOTHING(testAlg->setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING( testAlg->setPropertyValue("Filename", testFilename) );
+    TS_ASSERT_THROWS_NOTHING( testAlg->setPropertyValue("OutputWorkspace", outWSName) );
 
     if (!testAlg->isInitialized())
       testAlg->initialize();
-    TS_ASSERT(testAlg->isInitialized());
+    TS_ASSERT( testAlg->isInitialized() );
 
     TS_ASSERT_THROWS_NOTHING( testAlg->execute() );
     TS_ASSERT( testAlg->isExecuted() );
@@ -83,15 +103,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(ws = ads.retrieveWS<ITableWorkspace>(outWSName) );
 
     // general format: 3 columns (data, id, name)
-    TS_ASSERT_EQUALS( ws->columnCount(), 3) ;
-    TS_ASSERT_EQUALS( ws->rowCount(), 2 );
+    TS_ASSERT_EQUALS( ws->columnCount(), 4) ;
+    TS_ASSERT_EQUALS( ws->rowCount(), 3 );
 
     checkColumns(ws);
 
     // this example has 3 plugins: savu.plugins.timeseries_fields_corrections, savu.median_filter,
     // savu.plugins.simple_recon
     // ID
-    TS_ASSERT_EQUALS( ws->cell<std::string>(0, 0), "savu.plugins.timeseries_fields_corrections" );
+    TS_ASSERT_EQUALS( ws->cell<std::string>(0, 0), "savu.plugins.timeseries_field_corrections" );
     TS_ASSERT_EQUALS( ws->cell<std::string>(1, 0), "savu.plugins.median_filter" );
     TS_ASSERT_EQUALS( ws->cell<std::string>(2, 0), "savu.plugins.simple_recon" );
 
@@ -107,7 +127,7 @@ public:
 
     // cite information, not presently available in example files
     for (size_t i=0; i<nRows; i++) {
-      TS_ASSERT_EQUALS( ws->cell<std::string>(i, 3), "" );
+      TS_ASSERT_EQUALS( ws->cell<std::string>(i, 3), "Not available" );
     }
   }
 
@@ -128,9 +148,12 @@ private:
   LoadTomoConfig alg;
   static const size_t nRows;
   static const size_t nCols;
+  static const std::string testFilename;
+
 };
 
 const size_t LoadTomoConfigTest::nRows = 3;
 const size_t LoadTomoConfigTest::nCols = 4;
+const std::string LoadTomoConfigTest::testFilename = "savu_test_data_process03.nxs";
 
 #endif /* LOADTOMOCONFIGTEST_H__*/
