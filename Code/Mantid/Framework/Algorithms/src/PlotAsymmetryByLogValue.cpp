@@ -93,6 +93,17 @@ void PlotAsymmetryByLogValue::init() {
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the log values which will be used as the x-axis "
                   "in the output workspace.");
+
+  std::vector<std::string> optionsLog;
+  optionsLog.push_back("Mean");
+  optionsLog.push_back("Min");
+  optionsLog.push_back("Max");
+  optionsLog.push_back("First");
+  optionsLog.push_back("Last");
+  declareProperty("Function", "Last",
+    boost::make_shared<StringListValidator>(optionsLog),
+    "The function to apply: 'Mean', 'Min', 'Max', 'First' or 'Last'.");
+
   declareProperty("Red", 1, "The period number for the 'red' data.");
   declareProperty("Green", EMPTY_INT(),
                   "The period number for the 'green' data.");
@@ -103,17 +114,6 @@ void PlotAsymmetryByLogValue::init() {
   declareProperty("Type", "Integral",
                   boost::make_shared<StringListValidator>(options),
                   "The calculation type: 'Integral' or 'Differential'.");
-
-  std::vector<std::string> optionsLog;
-  optionsLog.push_back("Mean");
-  optionsLog.push_back("Min");
-  optionsLog.push_back("Max");
-  optionsLog.push_back("First");
-  optionsLog.push_back("Last");
-  declareProperty("Function", "Last",
-    boost::make_shared<StringListValidator>(optionsLog),
-    "The calculation type: 'Integral' or 'Differential'.");
-
   declareProperty(
       "TimeMin", EMPTY_DBL(),
       "The beginning of the time interval used in the calculations.");
