@@ -92,11 +92,11 @@ set ( SRC_FILES
 	src/LoadSPE.cpp
 	src/LoadSampleDetailsFromRaw.cpp
 	src/LoadSassena.cpp
+	src/LoadSavuTomoConfig.cpp
 	src/LoadSpec.cpp
 	src/LoadSpice2D.cpp
 	src/LoadSpiceAscii.cpp
 	src/LoadTOFRawNexus.cpp
-	src/LoadTomoConfig.cpp
 	src/LoadVulcanCalFile.cpp
 	src/MaskDetectors.cpp
 	src/MaskDetectorsInShape.cpp
@@ -239,11 +239,11 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSPE.h
 	inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
 	inc/MantidDataHandling/LoadSassena.h
+	inc/MantidDataHandling/LoadSavuTomoConfig.h
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/LoadSpiceAscii.h
 	inc/MantidDataHandling/LoadTOFRawNexus.h
-	inc/MantidDataHandling/LoadTomoConfig.h
 	inc/MantidDataHandling/LoadVulcanCalFile.h
 	inc/MantidDataHandling/MaskDetectors.h
 	inc/MantidDataHandling/MaskDetectorsInShape.h
@@ -382,10 +382,10 @@ set ( TEST_FILES
 	LoadSPETest.h
 	LoadSassenaTest.h
 	LoadSaveAsciiTest.h
+        LoadSavuTomoConfigTest.h
 	LoadSpice2dTest.h
 	LoadSpiceAsciiTest.h
 	LoadTOFRawNexusTest.h
-        LoadTomoConfigTest.h
 	LoadTest.h
 	LoadVulcanCalFileTest.h
 	MaskDetectorsInShapeTest.h
