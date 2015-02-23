@@ -55,12 +55,34 @@ in the experiment run.
 
 They are copied from the last ExperimentInfo object of the input MDWorkspace {\it InputWorkspace}. 
 
+
+Target Units
+############
+
+Three units are supported by this algorithm.  They are :math:`2\theta`, dSpacing and MomentumTransfer(Q). 
+
+The following equations are used to convert the units. 
+
+.. math:: \lambda = 2d\sin(\theta)
+
+.. math:: d = frac{4\pi}{Q}
+
+Therefore neutron wavelength :math:`\lambda` must be given either in sample log or via input property
+if the unit of the output workspace is targeted to be dSpacing or MomentumTransfer. 
+
+
 Binning, Normalization and Error
 ################################
 
 According to the input binning parameters, the bins in :math:`2\theta` are created as
-:math:`2\theta_{min}, 2\theta_{min}+\Delta, 2\theta_{min}+1\Delta, \cdots`. 
-For each detector, if its position falls between :math:`2\theta_i` and :math:`2\theta_{i+1}`,
+:math:`2\theta_{min}, 2\theta_{min}+\Delta, 2\theta_{min}+2\Delta, \cdots`. 
+
+If the unit of ouput workspace is specified as dSpacing or MomentrumTransfer,
+then the bins should be created as :math:`d_{min}, d_{min}+\Delta, d_{min}+2\Delta, \cdots, d_{max}`
+or :math:`q_{min}, q_{min}+\Delta, \cdots, q_{max}` respectively. 
+
+For each detector, if its position falls between :math:`2\theta_i` and :math:`2\theta_{i+1}`,,
+:math:`d_i` and :math:`d_{i+1}`, or :math:`Q_i` and :math:`Q_{i+1}`, 
 then its counts is added to :math:`Y_i` and the corresponding monitor counts is added to 
 :math:`M_i`. 
 
@@ -71,6 +93,7 @@ The singals on these bins are normalized by its monitor counts, such that
 The error (i.e., standard deviation) is defined as 
 .. math:: \frac{\Delta y_i}{y_i} = \sqrt{(\frac{\Delta Y_i}{Y_i})^2 + (\frac{\Delta M_i}{M_i})^2}
 
+
 Workflow
 --------
 
@@ -79,6 +102,16 @@ Following algorithm {\it LoadSpiceAscii}, which loads SPICE file to a TableWorks
 and {\it ConvertSpiceToRealSpace}, which converts the TableWorkspace to MDEvnetWorkspace 
 that is able to reflect all the information of the epxeriment,
 {\it ConvertCWPDMDToSpectra} goes through all the detectors' counts and rebins the data. 
+
+An Example
+##########
+
+1. LoadSpiceAscii
+2. ConvertSpiceToRealSpace
+3. Merge a few data MDWorkspaces together; merge the corresponding monitor MDWorkspaces together;
+4. ConvertCWPDMDToSpectra. 
+
+Experimental data with different neutron wavelengths can be binned together to d-spacing or momentum transfer space. 
 
 
 Usage

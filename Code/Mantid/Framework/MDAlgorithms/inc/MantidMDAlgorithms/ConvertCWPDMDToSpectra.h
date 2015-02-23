@@ -59,6 +59,18 @@ inline double calcualte2ThetaFromQ(const double &q, const double &wavelength) {
   return (2.0 * asin(q * wavelength * 0.25 / M_PI) * 180. / M_PI);
 }
 
+//----------------------------------------------------------------------------------------------
+/** Calculate 2theta value of detector postion from sample position
+ * @brief calculate2Theta
+ * @param detpos
+ * @param samplepos
+ * @return
+ */
+inline double calculate2Theta(const Kernel::V3D &detpos,
+                              const Kernel::V3D &samplepos) {
+  return detpos.angle(samplepos);
+}
+
 /** ConvertCWPDMDToSpectra : Convert one MDWorkspaces containing reactor-source
   powder diffractometer's data to single spectrum matrix workspace
   by merging and binning the detectors' counts by their 2theta value.
@@ -116,14 +128,15 @@ private:
   void exec();
 
   /// Main algorithm to reduce powder diffraction data
-  API::MatrixWorkspace_sptr
-  reducePowderData(API::IMDEventWorkspace_const_sptr dataws,
-                   API::IMDEventWorkspace_const_sptr monitorws,
-                   const double min2theta, const double max2theta,
-                   const double binsize, bool dolinearinterpolation);
+  API::MatrixWorkspace_sptr reducePowderData(
+      API::IMDEventWorkspace_const_sptr dataws,
+      API::IMDEventWorkspace_const_sptr monitorws, const std::string targetunit,
+      const std::map<int, double> &map_runwavelength, const double xmin,
+      const double xmax, const double binsize, bool dolinearinterpolation);
 
   /// Bin signals to its 2theta position
-  void binMD(API::IMDEventWorkspace_const_sptr mdws,
+  void binMD(API::IMDEventWorkspace_const_sptr mdws, const char &unitbit,
+             const std::map<int, double> &map_runlambda,
              const std::vector<double> &vecx, std::vector<double> &vecy);
 
   /// Do linear interpolation to zero counts if bin is too small
@@ -136,12 +149,15 @@ private:
 
   /// Scale reduced data
   void scaleMatrixWorkspace(API::MatrixWorkspace_sptr matrixws,
-                            const double &scalefactor);
+                            const double &scalefactor,
+                            const double &infinitesimal);
 
   /// Convert units from 2theta to d-spacing or Q
   void convertUnits(API::MatrixWorkspace_sptr matrixws,
                     const std::string &targetunit, const double &wavelength);
 
+  /// Infinitesimal value
+  double m_infitesimal;
 };
 
 } // namespace MDAlgorithms
