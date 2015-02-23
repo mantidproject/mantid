@@ -277,11 +277,12 @@ void IntegrateEllipsoids::exec() {
                                         axes_radii, inti, sigi);
       peaks[i].setIntensity(inti);
       peaks[i].setSigmaIntensity(sigi);
-      if (axes_radii.size() == 3 && (inti/sigi > cutoffIsigI || cutoffIsigI == EMPTY_DBL()))
-      {
-        principalaxis1.push_back(axes_radii[0]);
-        principalaxis2.push_back(axes_radii[1]);
-        principalaxis3.push_back(axes_radii[2]);
+      if (axes_radii.size() == 3) {
+        if (inti/sigi > cutoffIsigI || cutoffIsigI == EMPTY_DBL()){
+          principalaxis1.push_back(axes_radii[0]);
+          principalaxis2.push_back(axes_radii[1]);
+          principalaxis3.push_back(axes_radii[2]);
+        }
       }
     } else {
       peaks[i].setIntensity(0.0);
