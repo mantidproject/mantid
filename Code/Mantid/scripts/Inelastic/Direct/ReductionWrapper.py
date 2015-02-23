@@ -6,7 +6,6 @@ from mantid.kernel import funcreturns
 from PropertyManager import PropertyManager
 # this import is used by children
 from Direct.DirectEnergyConversion import DirectEnergyConversion
-#import inspect
 import os
 from abc import abstractmethod
 
@@ -29,6 +28,11 @@ class ReductionWrapper(object):
       """
       # internal variable, indicating if we should try to wait for input files to appear
       self._wait_for_file=False
+      # internal variable, used in system tests to validate workflow, 
+      # with waiting for files. It is the holder to the function
+      # used during debugging "wait for files" workflow
+      # instead of Pause algorithm
+      self._debug_wait_for_files_operation=None
 
       # The variables which are set up from web interface or to be exported to
       # web interface
@@ -209,7 +213,16 @@ class ReductionWrapper(object):
         """
 
         raise NotImplementedError('def_advanced_properties  has to be implemented')
+    #
+    def _run_pause(self,timeToWait=0):
+        """ a wrapper around pause algorithm allowing to run something 
+            instead of pause in debug mode
+        """ 
 
+        if not self._debug_wait_for_files_operation is None:
+            self._debug_wait_for_files_operation()
+        else:
+            Pause(timeToWait)
     #
     def reduce(self,input_file=None,output_directory=None):
         """ The method performs all main reduction operations over
@@ -225,13 +238,14 @@ class ReductionWrapper(object):
 
         timeToWait = self._wait_for_file
         if timeToWait>0:
-            file = PropertyManager.sample_run.find_file(be_quet=True)
-            while file.find('ERROR:')>=0:
+            Found,input_file = PropertyManager.sample_run.find_file(be_quet=True)
+            while not Found:
                 file_hint,fext = PropertyManager.sample_run.file_hint()
                 self.reducer.prop_man.log("*** Waiting {0} sec for file {1} to appear on the data search path"\
                     .format(timeToWait,file_hint),'notice')
-                Pause(timeToWait)
-                file = PropertyManager.sample_run.find_file(be_quet=True)
+
+                self._run_pause(timeToWait)
+                Found,input_file = PropertyManager.sample_run.find_file(file_hint=file_hint,be_quet=True)
             ws = self.reducer.convert_to_energy(None,input_file)
 
         else:
@@ -269,9 +283,10 @@ class ReductionWrapper(object):
                  n_found = len(found)
                  if ok: # no need to cache sum any more. All necessary files found
                     self.reducer.prop_man.cashe_sum_ws = False
+
               self.reducer.prop_man.log("*** Waiting {0} sec for runs {1} to appear on the data search path"\
                     .format(timeToWait,str(missing)),'notice')
-              Pause(timeToWait)
+              self._run_pause(timeToWait)
               ok,missing,found = self.reducer.prop_man.find_files_to_sum()
               n_found = len(found)
           #end not(ok)
@@ -290,13 +305,44 @@ class ReductionWrapper(object):
             if wait_for_file time is > 0, it will until  missing files appear on the 
             data search path
        """ 
+       try:
+         n,r = funcreturns.lhs_info('both')
+         out_ws_name = r[0]
+       except:
+         out_ws_name = None
+
        if self.reducer.sum_runs:
-          red_ws=self.sum_and_reduce() 
+# --------### sum runs provided      ------------------------------------###
+          if out_ws_name is None:
+            self.sum_and_reduce()
+            return None
+          else:
+            red_ws=self.sum_and_reduce() 
+            RenameWorkspace(InputWorkspace=red_ws,OutputWorkspace=out_ws_name)
+            return mtd[out_ws_name]
        else:
+# --------### reduce list of runs one by one ----------------------------###
          runs = PropertyManager.sample_run.get_run_list()
-         for run in runs:
-             red_ws=self.reduce(run)
-         #end
+         if out_ws_name is None:
+            for run in runs:
+                 self.reduce(run)
+            #end
+            return None
+         else:
+            results=[]
+            nruns = len(runs)
+            for num,run in enumerate(runs):
+                 red_ws=self.reduce(run)
+                 if nruns >1:
+                    out_name = out_ws_name+'#{0}of{1}'.format(num+1,nruns)
+                    RenameWorkspace(InputWorkspace=red_ws,OutputWorkspace=out_name)
+                    red_ws = mtd[out_name]
+                 results.append(red_ws)
+            #end
+            if len(results) == 1:
+               return results[0]
+            else:
+               return results
        #end
 
 
