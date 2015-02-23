@@ -256,7 +256,7 @@ public:
 
   void test_LogValueFunction ()
   {
-    const std::string ws = "Test_DeadTimeCorrection_FromRunData_Ws";
+    const std::string ws = "Test_LogValueFunction";
 
     PlotAsymmetryByLogValue alg;
 
