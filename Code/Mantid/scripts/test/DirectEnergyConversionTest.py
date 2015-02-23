@@ -416,7 +416,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer.save_format=None
         tReducer.prop_man.normalise_method='monitor-1'
         tReducer.norm_mon_integration_range=[tMin,tMax]
-        #tReducer.prop_man.
 
         result = tReducer.convert_to_energy(wb_ws,run,[67.,122.],[-2,0.02,0.8],None,mono)
 
