@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionWithLocation.h"
+#include "MantidAPI/FunctionParameterDecorator.h"
 
 namespace Mantid {
 namespace API {
@@ -70,10 +71,48 @@ public:
   virtual void functionDerivLocal(Jacobian *out, const double *xValues,
                                   const size_t nData) = 0;
 
+  /// Get name of parameter that is associated to centre.
+  std::string getCentreParameterName() const;
+
 protected:
   /// Defines the area around the centre where the peak values are to be
   /// calculated (in FWHM).
   static int s_peakRadius;
+
+private:
+  class SpecialParameterFunction : virtual public IFunction1D,
+                                   virtual public FunctionParameterDecorator {
+  public:
+    SpecialParameterFunction() : FunctionParameterDecorator() {}
+    ~SpecialParameterFunction() {}
+
+    std::string name() const { return "SpecialParameterFunction"; }
+
+    void function1D(double *out, const double *xValues,
+                    const size_t nData) const {
+      UNUSED_ARG(xValues);
+      if (nData != 4) {
+        throw std::invalid_argument("Can only work with domain of size 4.");
+      }
+
+      boost::shared_ptr<IPeakFunction> peakFunction =
+          boost::dynamic_pointer_cast<IPeakFunction>(getDecoratedFunction());
+
+      if (!peakFunction) {
+        throw std::invalid_argument(
+            "Decorated function needs to be a valid IPeakFunction.");
+      }
+
+      out[0] = peakFunction->centre();
+      out[1] = peakFunction->height();
+      out[2] = peakFunction->fwhm();
+      out[3] = peakFunction->intensity();
+    }
+
+    void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) {
+      calNumericalDeriv(domain, jacobian);
+    }
+  };
 };
 
 typedef boost::shared_ptr<IPeakFunction> IPeakFunction_sptr;

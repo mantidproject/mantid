@@ -169,5 +169,15 @@ void IPeakFunction::setIntensity(const double newIntensity) {
   setHeight(newIntensity / currentIntensity * currentHeight);
 }
 
+
+std::string IPeakFunction::getCentreParameterName() const
+{
+    FunctionParameterDecorator_sptr fn = boost::make_shared<SpecialParameterFunction>();
+    fn->setDecoratedFunction(this->name());
+
+    FunctionDomain1DVector domain(std::vector<double>(4, 0.0));
+}
+
+
 } // namespace API
 } // namespace Mantid
