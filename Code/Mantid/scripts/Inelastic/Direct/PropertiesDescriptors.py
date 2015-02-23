@@ -167,12 +167,12 @@ class SumRuns(PropDescriptor):
                          format(ind + 2,num_to_load,run_num))
            term_name = '{0}_ADDITIVE_#{1}/{2}'.format(inst_name,ind + 2,num_to_load)#
 
-            wsp = self._sample_run.load_file(inst_name,term_name,False,\
-                                            monitors_with_ws,False,file_hint=file_h)
+           wsp = self._sample_run.load_file(inst_name,term_name,False,\
+                                           monitors_with_ws,False,file_hint=file_h)
 
            wsp_name = wsp.name()
            wsp_mon_name = wsp_name + '_monitors'
-            Plus(LHSWorkspace=sum_ws_name,RHSWorkspace=wsp_name,\
+           Plus(LHSWorkspace=sum_ws_name,RHSWorkspace=wsp_name,\
                 OutputWorkspace=sum_ws_name,ClearRHSWorkspace=True)
            AddedRunNumbers+=',{0}'.format(run_num)
            if not monitors_with_ws:
@@ -716,7 +716,7 @@ class MapMaskFile(PropDescriptor):
     def __set__(self,instance,value):
         if not(value is None):
            fileName, fileExtension = os.path.splitext(value)
-            if not fileExtension:
+           if not fileExtension:
                value = value + self._file_ext
         self._file_name = value
 
@@ -749,7 +749,7 @@ class HardMaskPlus(prop_helpers.ComplexProperty):
     def __set__(self,instance,value):
         if value != None:
            fileName, fileExtension = os.path.splitext(value)
-            if not fileExtension:
+           if not fileExtension:
                value = value + '.msk'
            instance.hard_mask_file = value
            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[False,True])

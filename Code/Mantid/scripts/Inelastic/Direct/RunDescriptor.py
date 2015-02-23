@@ -458,11 +458,11 @@ class RunDescriptor(PropDescriptor):
             self._run_file_path = os.path.dirname(fname)
             return (True,file)
         except RuntimeError:
-             message = 'Cannot find file matching hint {0} on current search paths ' \
+            message = 'Cannot find file matching hint {0} on current search paths ' \
                        'for instrument {1}'.format(file_hint,inst_name)
             if not 'be_quet' in kwargs:
                 RunDescriptor._logger(message,'warning')
-             return (False,message)
+            return (False,message)
 #--------------------------------------------------------------------------------------------------------------------
 
     def load_file(self,inst_name,ws_name,run_number=None,load_mon_with_workspace=False,filePath=None,fileExt=None,**kwargs):
