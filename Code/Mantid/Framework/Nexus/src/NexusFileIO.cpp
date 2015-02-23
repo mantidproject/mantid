@@ -45,12 +45,12 @@ Logger g_log("NexusFileIO");
 }
 
 /// Empty default constructor
-NexusFileIO::NexusFileIO() : fileID(), m_filehandle(NULL),
+NexusFileIO::NexusFileIO() : fileID(), m_filehandle(),
     m_nexuscompression(NX_COMP_LZW), m_progress(0), m_filename() {
 }
 
 /// Constructor that supplies a progress object
-NexusFileIO::NexusFileIO(Progress *prog) : fileID(), m_filehandle(NULL),
+NexusFileIO::NexusFileIO(Progress *prog) : fileID(), m_filehandle(),
     m_nexuscompression(NX_COMP_LZW), m_progress(prog), m_filename() {
 }
 
