@@ -159,16 +159,12 @@ public:
         function.m_deltaT = 3.0;
         function.initializeInstrumentParameters(m_instrument);
 
-
         std::vector<double> xvalues(500, 1.0);
-
         FunctionDomain1DSpectrum domain(342, xvalues);
         TS_ASSERT_EQUALS(domain.getWorkspaceIndex(), 342);
         Mantid::CurveFitting::Jacobian jacobian(500, 3);
 
         function.functionDeriv(domain, jacobian);
-
-
 
         std::vector<double> reference;
         reference.push_back(0.214381692355321);
@@ -192,7 +188,7 @@ public:
         reference.push_back(0.102391587633906);
 
         for(size_t i = 0; i < reference.size(); ++i) {
-            //TS_ASSERT_DELTA(values[479 + i] / reference[i], 1.0, 1e-14);
+            TS_ASSERT_DELTA((jacobian.get(479 + i, 0)) / (reference[i]/ 679.59369981039407842726), 1.0, 1e-14);
         }
     }
 
