@@ -11,6 +11,20 @@ import os.path
 
 class IndirectILLReduction(DataProcessorAlgorithm):
 
+    _raw_workspace = None
+    _red_workspace = None
+    _red_left_workspace = None
+    _red_right_workspace = None
+    _map_file = None
+    _use_mirror_mode = None
+    _save = None
+    _plot = None
+    _instrument_name = None
+    _run_number = None
+    _analyser = None
+    _reflection = None
+    _run_name = None
+
     def category(self):
         return "Workflow\\MIDAS;Inelastic;PythonAlgorithms"
 

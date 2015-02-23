@@ -6,6 +6,14 @@ import os
 
 class JumpFit(PythonAlgorithm):
 
+    _in_ws = None
+    _out_name = None
+    _jump_function = None
+    _width = None
+    _q_min = None
+    _q_max = None
+    _plot = None
+    _save = None
 
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
