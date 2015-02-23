@@ -12,6 +12,25 @@ from mantid.kernel import *
 class RefinePowderDiffProfileSeq(PythonAlgorithm):
     """ Refine powder diffractometer profile by Le Bail algorithm sequentially
     """
+
+    dataws = None
+    wsindex = None
+    startx = None
+    endx = None
+    _lastStep = None
+    _projectID = None
+    functionoption = None
+    peaktype = None
+    bkgdtype = None
+    bkgdparws = None
+    profilews = None
+    braggpeakws = None
+    paramstofit = None
+    numcycles = None
+    outprojectfilename = None
+    inprojectfilename = None
+    datawsname = None
+
     def category(self):
         """ Category
         """
@@ -195,6 +214,23 @@ class SeqRefineProfile:
     4. If no further instruction, only need to set up parameters to refine
        the input/starting values should be from the last
     """
+
+    _datawsname = None
+    _profileWS = None
+    _braggpeakws = None
+    _bkgdtype = None
+    _bkgdparws = None
+    _wsgroup = None
+    datawsname = None
+    wsindex = None
+    _recordws = None
+    _recordwsLastRowValid = None
+    _lastValidStep = None
+    _lastValidRowIndex = None
+    _peakType = None
+    _bkgdType = None
+    _currstep = None
+
     def __init__(self, ID, glog):
         """
         """
@@ -712,6 +748,16 @@ def resetParametersGroups(tablews):
 class RefineProfileParameters:
     """ Class to refine profile parameters ONE step
     """
+
+    datawsname = None
+    inprofilewsname = None
+    inreflectionwsname = None
+    bkgdtype = None
+    bkgdtablewsname = None
+    outprofilewsname = None
+    outreflectionwsname = None
+    outbkgdtablewsname = None
+
     def __init__(self, glog):
         """ Initialization
         """

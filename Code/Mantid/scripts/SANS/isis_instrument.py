@@ -88,8 +88,8 @@ class BaseInstrument(object):
         return workspace_name
 
 
-class DetectorBank:
-    class _DectShape:
+class DetectorBank(object):
+    class _DectShape(object):
         """
             Stores the dimensions of the detector, normally this is a square
             which is easy, but it can have a hole in it which is harder!
@@ -128,7 +128,7 @@ class DetectorBank:
         def n_pixels(self):
             return self._n_pixels
 
-    class _RescaleAndShift:
+    class _RescaleAndShift(object):
         """
             Stores property about the detector which is used to rescale and shift
             data in the bank after data have been reduced. The scale attempts to
@@ -1179,6 +1179,7 @@ class LARMOR(ISISInstrument):
 
         return [-pos.getX(), -pos.getY()]
 
+
 class LARMOR(ISISInstrument):
     _NAME = 'LARMOR'
     WAV_RANGE_MIN = 2.2
@@ -1230,7 +1231,6 @@ class LARMOR(ISISInstrument):
         pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
 
         return [-pos.getX(), -pos.getY()]
-
 
 
 if __name__ == '__main__':

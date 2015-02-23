@@ -7,6 +7,8 @@ class CorrectLogTimes(mantid.api.PythonAlgorithm):
     """ Class to shift log times to match proton charge
     """
 
+    ws = None
+
     def category(self):
         """ Mantid required
         """

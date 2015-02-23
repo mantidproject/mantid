@@ -128,7 +128,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         white_ws = tReducer.do_white(wb_ws, None, None)
         self.assertTrue(white_ws)
- 
+
 
     def test_get_set_attributes(self):
         tReducer = self.reducer
@@ -163,17 +163,17 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer.prop_man.incident_energy = 5.
         tReducer.prop_man.monovan_integr_range=[-10,10]
 
-        (nf1,nf2,nf3,nf4) = tReducer.get_abs_normalization_factor(mono_ws.getName(),5.)        
+        (nf1,nf2,nf3,nf4) = tReducer.get_abs_normalization_factor(mono_ws.getName(),5.)
         self.assertAlmostEqual(nf1,0.58561121802167193,7)
         self.assertAlmostEqual(nf1,nf2)
         self.assertAlmostEqual(nf2,nf3)
         self.assertAlmostEqual(nf3,nf4)
 
-        # check warning. WB spectra with 0 signal indicate troubles. 
+        # check warning. WB spectra with 0 signal indicate troubles.
         mono_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000,XUnit='DeltaE',XMin=-5,XMax=15,BinWidth=0.1,function='Flat background')
         LoadInstrument(mono_ws,InstrumentName='MARI')
         sig = mono_ws.dataY(0)
-        sig[:]=0          
+        sig[:]=0
 
         (nf1,nf2,nf3,nf4) = tReducer.get_abs_normalization_factor(mono_ws.getName(),5.)
         self.assertAlmostEqual(nf1,0.585611218022,7)
@@ -204,8 +204,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
         #abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,samp_mass,ei_guess,rebin,map_file='default',monovan_mapfile='default',**kwargs):
         ws = dgreduce.abs_units(wb_ws,run_ws,None,wb_ws,10,100,8.8,[-10,0.1,7],None,None,**par)
         self.assertTrue(isinstance(ws,api.MatrixWorkspace))
-    
-  
+
+
     ##def test_diag_call(self):
     ##    tReducer = self.reducer
     ##    # should do nothing as already initialized above, but if not will initiate the instrument
@@ -215,7 +215,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_energy_to_TOF_range(self):
 
         ws = Load(Filename='MAR11001.raw',LoadMonitors='Include')
-        
+
         en_range = [0.8*13,13,1.2*13]
         detIDs=[1,2,3,10]
         red = DirectEnergyConversion()
@@ -273,7 +273,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # References used to test against ordinary reduction
         ref_ws = Rebin(run,Params=[tMin,1,tMax],PreserveEvents=False)
         ref_ws_monitors = CloneWorkspace('run_monitors')
-        # just in case, wb should work without clone too. 
+        # just in case, wb should work without clone too.
         wb_clone = CloneWorkspace(wb_ws)
 
         # Run Mono
@@ -339,7 +339,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
                                     XUnit='TOF',xMin=tMin,xMax=tMax)
         LoadInstrument(run,InstrumentName='MARI')
 
-        # do second 
+        # do second
         run2 = CloneWorkspace(run)
         run2_monitors = CloneWorkspace(run_monitors)
 
@@ -372,7 +372,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # rename samples from previous workspace to avoid deleting them on current run
         for ind,item in enumerate(result):
             result[ind]=RenameWorkspace(item,OutputWorkspace='SampleRez#'+str(ind))
-        # 
+        #
         result2 = tReducer.convert_to_energy(None,run2,[67.,122.],[-2,0.02,0.8])
 
         rez = CheckWorkspacesMatch(result[0],result2[0])
@@ -438,7 +438,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # rename samples from previous workspace to avoid deleting them on current run
         for ind,item in enumerate(result):
             result[ind]=RenameWorkspace(item,OutputWorkspace='SampleRez#'+str(ind))
-        # 
+        #
         result2 = tReducer.convert_to_energy(None,run2)
 
         rez = CheckWorkspacesMatch(result[0],result2[0])
@@ -447,6 +447,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertEqual(rez,'Success!')
 
 
-
 if __name__=="__main__":
         unittest.main()
+

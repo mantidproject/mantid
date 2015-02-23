@@ -136,6 +136,31 @@ class ISISReducer(Reducer):
     ## Path for user settings files
     _user_file_path = '.'
 
+    _can = None
+    _tidy = None
+    _conv_Q = None
+    _reduction_steps = None
+    user_settings = None
+    _out_name = None
+    event2hist = None
+    crop_detector = None
+    mask = None
+    to_wavelen = None
+    norm_mon = None
+    transmission_calculator = None
+    _corr_and_scale = None
+    prep_normalize = None
+    to_Q = None
+    _background_subtracter = None
+    geometry_correcter = None
+    _rem_nans = None
+    _sample_run = None
+    _can_run = None
+    _slices_def = None
+    _slice_index = None
+    samp_trans_load = None
+    can_trans_load = None
+
     def _to_steps(self):
         """
             Defines the steps that are run and their order
