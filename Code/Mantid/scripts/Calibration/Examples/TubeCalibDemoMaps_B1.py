@@ -16,7 +16,7 @@ rangeUpper = 10000 #
 # Set initial parameters for peak finding
 ExpectedHeight = -1000.0 # Expected Height of Gaussian Peaks (initial value of fit parameter)
 ExpectedWidth = 8.0 # Expected width of Gaussian peaks in pixels  (initial value of fit parameter)
-ExpectedPositions = [4.0, 85.0, 128.0, 161.0, 252.0] 
+ExpectedPositions = [4.0, 85.0, 128.0, 161.0, 252.0]
 # Expected positions of the edges and Gaussian peaks in pixels (initial values of fit parameters)
 
 # Set what we want to calibrate (e.g whole intrument or one door )
