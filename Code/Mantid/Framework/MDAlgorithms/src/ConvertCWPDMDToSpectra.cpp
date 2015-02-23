@@ -216,7 +216,7 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
   char unitchar = 't'; // default 2theta
   if (targetunit.compare("dSpacing") == 0)
     unitchar = 'd';
-  else if (targetunit.compare("MomentumTransfer") == 0)
+  else if (targetunit.compare("Momenum Transfer (Q)") == 0)
     unitchar = 'q';
   g_log.notice() << "[DB] Unit char = " << unitchar << " for unit "
                  << targetunit << "\n";
