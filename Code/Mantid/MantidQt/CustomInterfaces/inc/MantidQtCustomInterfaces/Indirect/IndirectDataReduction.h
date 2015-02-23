@@ -70,7 +70,7 @@ namespace MantidQt
       virtual void initLocalPython();
 
       /// Handled configuration changes
-      void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
+      void handleConfigChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
       Mantid::API::MatrixWorkspace_sptr loadInstrumentIfNotExist(std::string instrumentName,
           std::string analyser = "", std::string reflection = "");
@@ -83,6 +83,8 @@ namespace MantidQt
       void newInstrumentConfiguration();
 
     private slots:
+      /// Shows/hides tabs based on facility
+      void filterUiForFacility(QString facility);
       /// Opens the help page for the current tab
       void helpClicked();
       /// Exports the current tab algorithms as a Python script

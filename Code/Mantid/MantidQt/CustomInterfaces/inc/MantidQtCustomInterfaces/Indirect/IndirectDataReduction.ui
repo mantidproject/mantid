@@ -38,10 +38,8 @@
          <property name="techniques" stdset="0">
           <stringlist>
            <string>TOF Indirect Geometry Spectroscopy</string>
+           <string>Reactor Indirect Geometry Spectroscopy</string>
           </stringlist>
-         </property>
-         <property name="facility" stdset="0">
-          <string>ISIS</string>
          </property>
          <property name="enableDiffraction" stdset="0">
           <bool>false</bool>
@@ -62,9 +60,6 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
       <property name="currentIndex">
        <number>0</number>
       </property>
@@ -74,23 +69,23 @@
         <height>14</height>
        </size>
       </property>
-      <widget class="QWidget" name="tabEnergyTransfer">
+      <widget class="QWidget" name="tabISISEnergyTransfer">
        <attribute name="title">
-        <string>Energy Transfer</string>
+        <string>ISIS Energy Transfer</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QScrollArea" name="saEnergyTransfer">
+         <widget class="QScrollArea" name="saISISEnergyTransfer">
           <property name="widgetResizable">
            <bool>true</bool>
           </property>
-          <widget class="QWidget" name="loEnergyTransfer">
+          <widget class="QWidget" name="loISISEnergyTransfer">
            <property name="geometry">
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>100</width>
-             <height>100</height>
+             <width>656</width>
+             <height>446</height>
             </rect>
            </property>
           </widget>
@@ -98,23 +93,23 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tabCalibration">
+      <widget class="QWidget" name="tabISISCalibration">
        <attribute name="title">
-        <string>Calibration</string>
+        <string>ISIS Calibration</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QScrollArea" name="saCalibration">
+         <widget class="QScrollArea" name="saISISCalibration">
           <property name="widgetResizable">
            <bool>true</bool>
           </property>
-          <widget class="QWidget" name="loCalibration">
+          <widget class="QWidget" name="loISISCalibration">
            <property name="geometry">
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>100</width>
-             <height>100</height>
+             <width>96</width>
+             <height>26</height>
             </rect>
            </property>
           </widget>
@@ -122,23 +117,23 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tabDiagnostics">
+      <widget class="QWidget" name="tabISISDiagnostics">
        <attribute name="title">
-        <string>Diagnostics</string>
+        <string>ISIS Diagnostics</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QScrollArea" name="saDiagnostics">
+         <widget class="QScrollArea" name="saISISDiagnostics">
           <property name="widgetResizable">
            <bool>true</bool>
           </property>
-          <widget class="QWidget" name="loDiagnostics">
+          <widget class="QWidget" name="loISISDiagnostics">
            <property name="geometry">
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>100</width>
-             <height>100</height>
+             <width>96</width>
+             <height>26</height>
             </rect>
            </property>
           </widget>
@@ -161,8 +156,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>100</width>
-             <height>100</height>
+             <width>96</width>
+             <height>26</height>
             </rect>
            </property>
           </widget>
@@ -185,8 +180,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>100</width>
-             <height>100</height>
+             <width>96</width>
+             <height>26</height>
             </rect>
            </property>
           </widget>
@@ -209,8 +204,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>100</width>
-             <height>100</height>
+             <width>96</width>
+             <height>26</height>
             </rect>
            </property>
           </widget>
@@ -233,8 +228,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>100</width>
-             <height>100</height>
+             <width>96</width>
+             <height>26</height>
             </rect>
            </property>
           </widget>
