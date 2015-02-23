@@ -119,6 +119,12 @@ class ReductionWrapper(object):
         """ Overload this using build_or_validate_result to have possibility to run or validate result """
         return True
 
+    def set_custom_output_filename(self):
+      """ define custom name of output files if standard one is not satisfactory 
+          User expected to overload this method within class instantiation """
+      return None
+       
+
     def build_or_validate_result(self,sample_run,validation_file,build_validation=False,Error=1.e-3,ToleranceRelErr=True):
         """ Method validates results of the reduction against reference file or workspace.
 
@@ -419,7 +425,10 @@ def iliad(reduce):
         else:
             pass # we should set already set up variables using
 
-
+        custom_print_function = self.set_custom_output_filename()
+        if not custom_print_function is None:
+           PropertyManager.save_file_name.set_custom_print(custom_print_function)
+        #
         rez = reduce(*args)
 
         # prohibit returning workspace to web services.
