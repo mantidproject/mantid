@@ -1,5 +1,5 @@
 # This is mainly here so you don't get a complaint when running cmake
-cmake_minimum_required (VERSION 2.8.5)
+cmake_minimum_required (VERSION 2.8.12)
 
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../Build/CMake")
