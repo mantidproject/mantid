@@ -13,6 +13,16 @@ import array as  array
 
 class MainWindow(QtGui.QMainWindow):
 
+    flux_matrix = None
+    flux_energies = None
+    res_matrix = None
+    res_energies = None
+    frequencies = None
+    ei = None
+    ei_min = None
+    ei_max = None
+    interpolation = None
+
     def __init__(self, parent=None):
         QtGui.QMainWindow.__init__(self,parent)
         self.ui = Ui_MainWindow()

@@ -7,6 +7,20 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
     """ Python algorithm to export sample logs to spread sheet file
     for VULCAN
     """
+
+    _wksp = None
+    _outputfilename = None
+    _sampleloglist = None
+    _headerconten = None
+    _writeheader = None
+    _headercontent = None
+    _timezone = None
+    _timeTolerance = None
+    _maxtimestamp = None
+    _maxtime = None
+    _starttime = None
+    _localtimediff = None
+
     def category(self):
         """ Category
         """

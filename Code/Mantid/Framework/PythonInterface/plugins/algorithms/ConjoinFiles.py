@@ -13,7 +13,7 @@ class ConjoinFiles(PythonAlgorithm):
 
     def summary(self):
         return "Conjoin two file-based workspaces."
-    
+
     def __load(self, directory, instr, run, loader, exts, wksp):
         filename = None
         for ext in exts:
@@ -33,10 +33,11 @@ class ConjoinFiles(PythonAlgorithm):
     def PyInit(self):
         greaterThanZero = IntArrayBoundedValidator()
         greaterThanZero.setLower(0)
-        self.declareProperty(IntArrayProperty("RunNumbers",values=[0], validator=greaterThanZero), doc="Run numbers")
+        self.declareProperty(IntArrayProperty("RunNumbers",values=[0],
+                             validator=greaterThanZero), doc="Run numbers")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output))
         self.declareProperty(FileProperty("Directory", "", FileAction.OptionalDirectory))
-    
+
     def PyExec(self):
         # generic stuff for running
         wksp = self.getPropertyValue("OutputWorkspace")

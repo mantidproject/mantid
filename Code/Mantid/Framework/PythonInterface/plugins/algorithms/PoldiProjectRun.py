@@ -63,10 +63,6 @@ class PoldiProjectRun(PythonAlgorithm):
                              direction = Direction.Input)
 
 
-
-
-
-
     def PyExec(self):
         """ Mantid required
         """

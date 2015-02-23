@@ -2,7 +2,8 @@
 from xml.dom.minidom import getDOMImplementation
 from datetime import datetime
 import re
-class MantidGeom:
+
+class MantidGeom(object):
 
     def __init__(self, instname, valid_from=None):
         if valid_from is None:
