@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 #--------------------------------------------------------------
 # Algorithm which loads a SINQ file. It matches the instrument
 # and the right dictionary file and then goes away and calls
@@ -6,8 +7,8 @@
 # Mark Koennecke, November 2012
 #--------------------------------------------------------------
 from mantid.api import AlgorithmFactory
-from mantid.api import PythonAlgorithm, WorkspaceFactory, FileProperty, FileAction, WorkspaceProperty, FrameworkManager
-from mantid.kernel import Direction, StringListValidator, ConfigServiceImpl
+from mantid.api import PythonAlgorithm, FileProperty, FileAction, WorkspaceProperty
+from mantid.kernel import Direction, StringListValidator
 import mantid.simpleapi
 from mantid import config
 import os.path
@@ -50,7 +51,7 @@ class LoadSINQFile(PythonAlgorithm):
             "RITA-2":"rita.dic",
             "SANS":"sans.dic",
             "SANS2":"sans.dic",
-            "TRICS":"trics.dic"
+            "TRICS":"trics.dic"\
         }
         dictsearch = os.path.join(config['instrumentDefinition.directory'],"nexusdictionaries")
         dicname = os.path.join(dictsearch, diclookup[inst])
@@ -59,7 +60,7 @@ class LoadSINQFile(PythonAlgorithm):
 
         if inst == "POLDI":
             if ws.getNumberHistograms() == 800:
-               ws.maskDetectors(SpectraList=range(0,800)[::2])
+                ws.maskDetectors(SpectraList=range(0,800)[::2])
 
             config.appendDataSearchDir(config['groupingFiles.directory'])
             grp_file = "POLDI_Grouping_800to400.xml"

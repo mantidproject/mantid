@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -12,7 +13,7 @@ class ConjoinFiles(PythonAlgorithm):
 
     def summary(self):
         return "Conjoin two file-based workspaces."
-
+    
     def __load(self, directory, instr, run, loader, exts, wksp):
         filename = None
         for ext in exts:
@@ -27,7 +28,6 @@ class ConjoinFiles(PythonAlgorithm):
                 return
             except Exception, e:
                 logger.information(str(e))
-                pass
         raise RuntimeError("Failed to load run %s from file %s" % (str(run), filename))
 
     def PyInit(self):
@@ -36,7 +36,7 @@ class ConjoinFiles(PythonAlgorithm):
         self.declareProperty(IntArrayProperty("RunNumbers",values=[0], validator=greaterThanZero), doc="Run numbers")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output))
         self.declareProperty(FileProperty("Directory", "", FileAction.OptionalDirectory))
-
+    
     def PyExec(self):
         # generic stuff for running
         wksp = self.getPropertyValue("OutputWorkspace")
@@ -64,3 +64,4 @@ class ConjoinFiles(PythonAlgorithm):
         self.setProperty("OutputWorkspace", mtd[wksp])
 
 AlgorithmFactory.subscribe(ConjoinFiles)
+

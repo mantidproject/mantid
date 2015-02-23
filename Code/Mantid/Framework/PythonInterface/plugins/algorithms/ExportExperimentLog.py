@@ -1,11 +1,11 @@
-import mantid.simpleapi as api
+#pylint: disable=no-init,invalid-name
 import mantid
 from mantid.api import *
 from mantid.kernel import *
-
-import os
 import datetime
-
+import time
+import os
+        
 class ExportExperimentLog(PythonAlgorithm):
 
     """ Algorithm to export experiment log
@@ -21,11 +21,11 @@ class ExportExperimentLog(PythonAlgorithm):
         wsprop = MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input)
         self.declareProperty(wsprop, "Input workspace containing the sample log information. ")
 
-        self.declareProperty(FileProperty("OutputFilename","", FileAction.Save, ['.txt, .csv']),
+        self.declareProperty(FileProperty("OutputFilename","", FileAction.Save, ['.txt, .csv']),\
             "Output file of the experiment log.")
 
         filemodes = ["append", "fastappend", "new"]
-        self.declareProperty("FileMode", "append", mantid.kernel.StringListValidator(filemodes),
+        self.declareProperty("FileMode", "append", mantid.kernel.StringListValidator(filemodes),\
             "Optional to create a new file or append to an existing file.")
 
         lognameprop = StringArrayProperty("SampleLogNames", values=[], direction=Direction.Input)
@@ -42,15 +42,15 @@ class ExportExperimentLog(PythonAlgorithm):
                 "With this option, the posfix of the output file is .csv automatically. "
         self.declareProperty("FileFormat", "tab", mantid.kernel.StringListValidator(fileformates), des)
 
-        self.declareProperty("OrderByTitle", "", "Log file will be ordered by the value of this title from low to high.") 
+        self.declareProperty("OrderByTitle", "", "Log file will be ordered by the value of this title from low to high.")
         self.declareProperty("RemoveDuplicateRecord", False, "Coupled with OrderByTitle, duplicated record will be removed.")
 
         overrideprop = StringArrayProperty("OverrideLogValue", values=[], direction=Direction.Input)
         self.declareProperty(overrideprop, "List of paired strings as log title and value to override values from workspace.")
 
-
         # Time zone
-        timezones = ["UTC", "America/New_York"]
+        timezones = ["UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London", "GMT+0",\
+            "Europe/Paris", "Europe/Copenhagen"]
         self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones))
 
 
@@ -97,8 +97,6 @@ class ExportExperimentLog(PythonAlgorithm):
     def _processInputs(self):
         """ Process input properties
         """
-        import os
-        import os.path
 
         self._wksp = self.getProperty("InputWorkspace").value
 
@@ -160,7 +158,7 @@ class ExportExperimentLog(PythonAlgorithm):
         self._orderRecord = False
         self._titleToOrder = None
         if self._filemode != "new":
-            ordertitle = self.getProperty("OrderByTitle").value 
+            ordertitle = self.getProperty("OrderByTitle").value
             if ordertitle in self._headerTitles:
                 self._orderRecord = True
                 self._removeDupRecord = self.getProperty("RemoveDuplicateRecord").value
@@ -237,7 +235,7 @@ class ExportExperimentLog(PythonAlgorithm):
         if len(titles) != len(self._headerTitles):
             if len(self._headerTitles) == 0:
                 self._headerTitles = titles[:]
-            else: 
+            else:
                 same = False
         for ititle in xrange(len(titles)):
             title1 = titles[ititle]
@@ -254,9 +252,6 @@ class ExportExperimentLog(PythonAlgorithm):
     def _startNewFile(self):
         """ Start a new file is user wants and save the older one to a different name
         """
-        import datetime
-        import time
-        import os
 
         # Rename old file and reset the file mode
 
@@ -290,10 +285,10 @@ class ExportExperimentLog(PythonAlgorithm):
             skip = True
         else:
             skip = False
-        
+
         headertitle = None
         for il in xrange(len(self._sampleLogNames)):
-            if skip is False: 
+            if skip is False:
                 headertitle = self._headerTitles[il]
             if headertitle is not None and headertitle in self._ovrdTitleValueDict.keys():
                 # overriden
@@ -321,7 +316,7 @@ class ExportExperimentLog(PythonAlgorithm):
         return
 
     def _orderRecordFile(self):
-        """ Check and order (if necessary) record file 
+        """ Check and order (if necessary) record file
         by value of specified log by title
         """
         self.log().debug("Order Record File!")
@@ -347,12 +342,12 @@ class ExportExperimentLog(PythonAlgorithm):
                 titlelines.append(line)
             else:
                 # value line
-                try: 
+                try:
                     keyvalue = line.split(self._valuesep)[ilog].strip()
                 except IndexError:
                     self.log().error("Order record failed.")
                     return
-                if linedict.has_key(keyvalue) is False: 
+                if linedict.has_key(keyvalue) is False:
                     linedict[keyvalue] = []
                 linedict[keyvalue].append(line)
                 totnumlines += 1
@@ -363,7 +358,7 @@ class ExportExperimentLog(PythonAlgorithm):
         if linedict.keys() != sorted(linedict.keys()):
             # Re-write file
             wbuf = ""
-            
+
             # title line
             for line in titlelines:
                 wbuf += line
@@ -385,8 +380,8 @@ class ExportExperimentLog(PythonAlgorithm):
                     numlines += 1
 
                 else:
-                    # Consider all! 
-                    for line in linedict[ivalue]: 
+                    # Consider all!
+                    for line in linedict[ivalue]:
                         wbuf += line
                         # Add extra \n in case reordered
                         if numlines != totnumlines-1 and wbuf[-1] != '\n':
@@ -453,7 +448,7 @@ class ExportExperimentLog(PythonAlgorithm):
             if logclass == "StringPropertyWithValue":
                 propertyvalue = logproperty.value
                 # operationtype = self._sampleLogOperations[il]
-                if operationtype.lower() == "localtime":
+                if operationtype.lower().count("time") > 0:
                     propertyvalue = self._convertLocalTimeString(propertyvalue)
             elif logclass == "FloatPropertyWithValue":
                 propertyvalue = logproperty.value
@@ -481,26 +476,50 @@ class ExportExperimentLog(PythonAlgorithm):
         return valuedict
 
 
-    def _convertLocalTimeString(self, utctimestr):
+    def _convertLocalTimeString(self, utctimestr, addtimezone=True):
         """ Convert a UTC time in string to the local time in string
+        and add
         """
         from datetime import datetime
         from dateutil import tz
 
+        # Make certain that the input is utc time string
         utctimestr = str(utctimestr)
 
-        self.log().information("Input UTC time = %s" % (utctimestr))
+        # Return if time zone is UTC (no need to convert)
+        if self._timezone == "UTC":
+            if addtimezone is True:
+                utctimestr = "%s UTC" % (utctimestr)
+            return utctimestr
+
+        # Convert
+        self.log().debug("Input UTC time = %s" % (utctimestr))
 
         from_zone = tz.gettz('UTC')
         to_zone = tz.gettz(self._timezone)
 
+        # Determine the parsing format
+        if utctimestr.count("T") == 0:
+            srctimeformat = '%Y-%m-%d %H:%M:%S.%f'
+        else:
+            srctimeformat = '%Y-%m-%dT%H:%M:%S.%f'
+
         try:
+            extra = ""
             if utctimestr.count(".") == 1:
+                # Time format's microsecond part %.f can take only 6 digit
                 tail = utctimestr.split(".")[1]
                 extralen = len(tail)-6
-                extra = utctimestr[-extralen:]
-                utctimestr = utctimestr[0:-extralen]
-            utctime = datetime.strptime(utctimestr, '%Y-%m-%dT%H:%M:%S.%f')
+                if extralen > 0:
+                    extra = utctimestr[-extralen:]
+                    utctimestr = utctimestr[0:-extralen]
+            elif utctimestr.count(".") == 0:
+                # There is no .%f part in source time string:
+                srctimeformat = srctimeformat.split(".")[0]
+            else:
+                # Un perceived situation
+                raise NotImplementedError("Is it possible to have time as %s?" % (utctimestr))
+            utctime = datetime.strptime(utctimestr, srctimeformat)
         except ValueError as err:
             self.log().error("Unable to convert time string %s. Error message: %s" % (utctimestr, str(err)))
             raise err
@@ -509,6 +528,11 @@ class ExportExperimentLog(PythonAlgorithm):
         localtime = utctime.astimezone(to_zone)
 
         localtimestr = localtime.strftime("%Y-%m-%d %H:%M:%S.%f") + extra
+
+        # Add time zone info
+        if addtimezone is True:
+            tzn = to_zone.tzname(localtime)
+            localtimestr = "%s-%s" % (localtimestr, tzn)
 
         return localtimestr
 

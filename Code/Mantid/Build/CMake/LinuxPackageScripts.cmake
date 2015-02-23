@@ -22,10 +22,24 @@ endif()
 
 set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR};${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR} )
 
+# Tell rpm that this package does not own /opt /usr/share/{applications,pixmaps}
+# Required for Fedora >= 18 and RHEL >= 7
+set ( CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION /opt /usr/share/applications /usr/share/pixmaps )
+
 ###########################################################################
-# LD_PRELOAD libraries
+# LD_PRELOAD TCMalloc
 ###########################################################################
-set ( EXTRA_LDPRELOAD_LIBS "${TCMALLOC_LIBRARIES}" )
+# User systems will only have the libraries and not the symbolic link
+# so we must set the preload to the versioned library. We will assume it is
+# in the same location as the system that the package was built on
+if ( TCMALLOC_LIBRARIES )
+  execute_process ( COMMAND readlink --no-newline --canonicalize-existing ${TCMALLOC_LIBRARIES}
+                    OUTPUT_VARIABLE TCMALLOC_PRELOAD
+                    RESULT_VARIABLE READLINK_RESULT )
+  if ( READLINK_RESULT EQUAL 1 )
+    message ( FATAL_ERROR "Unable to find real file that tcmalloc symlink, ${TCMALLOC_LIBRARIES}, points to." )
+  endif()
+endif()
 
 ###########################################################################
 # Environment scripts (profile.d)
@@ -84,10 +98,12 @@ set ( POST_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/postrm )
 
 if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedora" ) # RHEL/Fedora
   if ( "${UNIX_CODENAME}" MATCHES "Santiago" ) # el6
-    set ( WRAPPER_COMMAND "scl enable mantidlibs" )
+    set ( WRAPPER_PREFIX "scl enable mantidlibs \"" )
+    set ( WRAPPER_POSTFIX "\"" )
     set ( EXTRA_LDPATH "/usr/lib64/paraview" )
   else()
-    set ( WRAPPER_COMMAND "eval" )
+    set ( WRAPPER_PREFIX "" )
+    set ( WRAPPER_POSTFIX "" )
   endif()
 
   if ( NOT MPI_BUILD )
@@ -106,7 +122,8 @@ if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedor
     set ( CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE ${POST_UNINSTALL_FILE} )
   endif()
 elseif ( "${UNIX_DIST}" MATCHES "Ubuntu" )
-  set ( WRAPPER_COMMAND "eval" )
+  set ( WRAPPER_PREFIX "" )
+  set ( WRAPPER_POSTFIX "" )
 
   if ( NOT MPI_BUILD )
     configure_file ( ${CMAKE_MODULE_PATH}/Packaging/deb/scripts/deb_pre_inst.in

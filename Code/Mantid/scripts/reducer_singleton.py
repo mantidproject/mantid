@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import random
 import string
 import os

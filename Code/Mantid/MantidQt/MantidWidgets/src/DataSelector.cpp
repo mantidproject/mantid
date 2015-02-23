@@ -416,6 +416,33 @@ namespace MantidQt
     }
 
     /**
+     * Gets the instrument currently set by the override property.
+     *
+     * If no override is set then the instrument set by default instrument configurtion
+     * option will be used and this function returns an empty string.
+     *
+     * @return Name of instrument, empty if not set
+     */
+    QString DataSelector::getInstrumentOverride()
+    {
+      return m_uiForm.rfFileInput->getInstrumentOverride();
+    }
+
+    /**
+     * Sets an instrument to fix the widget to.
+     *
+     * If an instrument name is geven then the widget will only look for files for that
+     * instrument, providing na empty string will remove this restriction and will search
+     * using the default instrument.
+     *
+     * @param instName Name of instrument, empty to disable override
+     */
+    void DataSelector::setInstrumentOverride(const QString & instName)
+    {
+      m_uiForm.rfFileInput->setInstrumentOverride(instName);
+    }
+
+    /**
      * Called when an item is dropped
      * @param de :: the drop event data package
      */

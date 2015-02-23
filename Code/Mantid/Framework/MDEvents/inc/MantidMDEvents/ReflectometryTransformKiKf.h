@@ -1,6 +1,8 @@
 #ifndef MANTID_MDEVENTS_REFLECTOMETRYTRANSFORMKIKF_H_
 #define MANTID_MDEVENTS_REFLECTOMETRYTRANSFORMKIKF_H_
 
+#include <cmath>
+
 #include "MantidKernel/System.h"
 #include "MantidKernel/ClassMacros.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -15,18 +17,15 @@ a theta value (in degrees) and a wavelength
 */
 class CalculateReflectometryK {
 private:
-  double to_radians_factor;
-  double two_pi;
   double m_theta;
 
 public:
   CalculateReflectometryK(double theta)
-      : to_radians_factor(3.14159265 / 180), two_pi(6.28318531),
-        m_theta(theta) {}
+      : m_theta(theta) {}
   ~CalculateReflectometryK(){};
   double execute(const double &wavelength) {
-    double wavenumber = two_pi / wavelength;
-    return wavenumber * sin(to_radians_factor * m_theta);
+    double wavenumber = 2 * M_PI / wavelength;
+    return wavenumber * sin(M_PI / 180.0 * m_theta);
   }
 };
 

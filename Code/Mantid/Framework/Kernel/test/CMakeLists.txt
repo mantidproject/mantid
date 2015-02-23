@@ -10,6 +10,9 @@ if ( CXXTEST_FOUND )
   cxxtest_add_test ( KernelTest ${TEST_FILES} )
   target_link_libraries( KernelTest Kernel ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
   add_dependencies ( FrameworkTests KernelTest )
+  # Test data
+  add_dependencies ( KernelTest StandardTestData )
+
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET KernelTest PROPERTY FOLDER "UnitTests" )
 

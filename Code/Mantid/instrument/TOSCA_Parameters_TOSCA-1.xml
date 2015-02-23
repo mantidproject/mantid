@@ -27,6 +27,9 @@
     <parameter name="save-aclimax-choice" type="string">
       <value val="Show" />
     </parameter>
+    <parameter name="fold-frames-choice" type="string">
+      <value val="true" />
+    </parameter>
 
     <!-- This parameter will be taken as a default value for the rebinning of
             the data in DeltaE. The existence of the parameter will make rebinning

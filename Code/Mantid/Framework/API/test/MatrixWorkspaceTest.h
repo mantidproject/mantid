@@ -760,7 +760,7 @@ public:
   void test_getSpecialCoordinateSystem_default()
   {
     WorkspaceTester ws;
-    TSM_ASSERT_EQUALS("Should default to no special coordinate system.", Mantid::API::None, ws.getSpecialCoordinateSystem());
+    TSM_ASSERT_EQUALS("Should default to no special coordinate system.", Mantid::Kernel::None, ws.getSpecialCoordinateSystem());
   }
 
   void test_getFirstPulseTime_getLastPulseTime()

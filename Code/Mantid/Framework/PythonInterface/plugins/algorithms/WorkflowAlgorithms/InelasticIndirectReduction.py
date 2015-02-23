@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -17,7 +18,7 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
                              doc='Comma separated list of input files')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',\
                              direction=Direction.Output),
                              doc='Workspace group for the resulting workspaces')
 
@@ -31,10 +32,10 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         self.declareProperty(name='Reflection', defaultValue='', doc='Reflection used during run',
                              validator=StringListValidator(['002', '004', '006', '111']))
 
-        self.declareProperty(WorkspaceProperty('CalibrationWorkspace', '',
+        self.declareProperty(WorkspaceProperty('CalibrationWorkspace', '',\
                              direction=Direction.Input, optional=PropertyMode.Optional), doc='Workspace contining calibration data')
 
-        self.declareProperty(IntArrayProperty(name='DetectorRange', values=[0, 1],
+        self.declareProperty(IntArrayProperty(name='DetectorRange', values=[0, 1],\
                              validator=IntArrayMandatoryValidator()),
                              doc='Comma separated range of detectors to use')
         self.declareProperty(FloatArrayProperty(name='BackgroundRange'),
@@ -69,6 +70,10 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
 
         reducer.set_instrument_name(self._instrument)
         reducer.set_parameter_file(self._param_file)
+        try:
+            reducer.set_output_path(config["defaultsave.directory"])
+        except RuntimeError:
+            pass # Use default
 
         for data_file in self._data_files:
             reducer.append_data_file(data_file)

@@ -128,6 +128,22 @@
          information_only="1"
          si_class="vtkSITimeLabelProperty">
        </StringVectorProperty>
+       <DoubleVectorProperty 
+        name="MinValue"
+        command="GetMinValue"
+        information_only="1">
+       </DoubleVectorProperty>
+       <DoubleVectorProperty 
+        name="MaxValue"
+        command="GetMaxValue"
+        information_only="1">
+       </DoubleVectorProperty>
+       <StringVectorProperty 
+        name="Instrument"
+        command="GetInstrument"
+        number_of_elements="1"
+        information_only="1">
+       </StringVectorProperty>
     </SourceProxy>
   </ProxyGroup>
   <!-- End RebinningTransformOperator -->

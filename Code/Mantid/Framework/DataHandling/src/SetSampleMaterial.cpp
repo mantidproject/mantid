@@ -219,8 +219,16 @@ void SetSampleMaterial::exec() {
   boost::scoped_ptr<Material> mat;
   if (!chemicalSymbol.empty()) {
     // Use chemical formula if given by user
-    Material::ChemicalFormula CF =
-        Material::parseChemicalFormula(chemicalSymbol);
+    Material::ChemicalFormula CF;
+    try {
+      CF = Material::parseChemicalFormula(chemicalSymbol);
+    } catch(std::runtime_error &ex) {
+      UNUSED_ARG(ex);
+      std::stringstream msg;
+      msg << "Could not parse chemical formula: " << chemicalSymbol
+          << std::endl;
+      throw std::runtime_error(msg.str());
+    }
     g_log.notice() << "Found " << CF.atoms.size() << " types of atoms in \""
                    << chemicalSymbol << "\"\n";
 

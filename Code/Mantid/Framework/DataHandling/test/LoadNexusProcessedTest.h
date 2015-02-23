@@ -17,6 +17,10 @@
 #include <Poco/File.h>
 #include <boost/lexical_cast.hpp>
 #include "MantidGeometry/IDTypes.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidDataObjects/PeakShapeSpherical.h"
+#include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
@@ -42,15 +46,16 @@ public:
     delete suite;
   }
 
-  LoadNexusProcessedTest() :
-      testFile("GEM38370_Focussed_Legacy.nxs"), output_ws("nxstest")
+  LoadNexusProcessedTest():
+      testFile("GEM38370_Focussed_Legacy.nxs"), output_ws("nxstest"),
+      m_savedTmpEventFile("")
   {
-
   }
 
   ~LoadNexusProcessedTest()
   {
     AnalysisDataService::Instance().clear();
+    clearTmpEventNexus();
   }
 
   void testFastMultiPeriodDefault()
@@ -403,6 +408,148 @@ public:
     dotest_LoadAnEventFile(WEIGHTED_NOTIME);
   }
 
+  void test_loadEventNexus_Min()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumMin", "3");
+    // this should imply 4==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 4, 2);
+  }
+
+  void test_loadEventNexus_Max()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumMax", "2");
+    // this should imply 3==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 2, 2);
+  }
+
+  void test_loadEventNexus_Min_Max()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumMin", "2");
+    alg.setPropertyValue("SpectrumMax", "4");
+    // this should imply 3==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    // in history, expect: load + LoadInst (child)
+    doCommonEventLoadChecks(alg, 3, 2);
+  }
+
+  void test_loadEventNexus_Fail()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumList", "1,3,5,89");
+    // the 89 should cause trouble, but gracefully...
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(!alg.isExecuted());
+  }
+
+  void test_loadEventNexus_List()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumList", "1,3,5");
+    // this should imply 3==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 3, 2);
+  }
+
+  void test_loadEventNexus_Min_List()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumList", "5");
+    alg.setPropertyValue("SpectrumMin", "4");
+    // this should imply 2==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 3, 2);
+  }
+
+  void test_loadEventNexus_Max_List()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumMax", "2");
+    alg.setPropertyValue("SpectrumList", "3,5");
+    // this should imply 4==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 4, 2);
+  }
+
+  void test_loadEventNexus_Min_Max_List()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumMin", "3");
+    alg.setPropertyValue("SpectrumMax", "5");
+    alg.setPropertyValue("SpectrumList", "1,2,3,5");
+    // this should imply 5(all)==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 5, 2);
+  }
+
   void test_load_saved_workspace_group()
   {
     LoadNexusProcessed alg;
@@ -632,6 +779,43 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
+  void test_peaks_workspace_with_shape_format()
+  {
+      LoadNexusProcessed loadAlg;
+      loadAlg.setChild(true);
+      loadAlg.initialize();
+      loadAlg.setPropertyValue("Filename", "SingleCrystalPeakTable.nxs");
+      loadAlg.setPropertyValue("OutputWorkspace", "dummy");
+      loadAlg.execute();
+
+      Workspace_sptr ws = loadAlg.getProperty("OutputWorkspace");
+      auto peakWS = boost::dynamic_pointer_cast<Mantid::DataObjects::PeaksWorkspace>(ws);
+      TS_ASSERT(peakWS);
+
+      TS_ASSERT_EQUALS(3, peakWS->getNumberPeaks());
+      // In this peaks workspace one of the peaks has been marked as spherically integrated.
+      TS_ASSERT_EQUALS("spherical", peakWS->getPeak(0).getPeakShape().shapeName());
+      TS_ASSERT_EQUALS("none", peakWS->getPeak(1).getPeakShape().shapeName());
+      TS_ASSERT_EQUALS("none", peakWS->getPeak(2).getPeakShape().shapeName());
+  }
+
+  /* The nexus format for this type of workspace has a legacy format with no shape information
+   * We should still be able to load that */
+  void test_peaks_workspace_no_shape_format()
+  {
+      LoadNexusProcessed loadAlg;
+      loadAlg.setChild(true);
+      loadAlg.initialize();
+      loadAlg.setPropertyValue("Filename", "SingleCrystalPeakTableLegacy.nxs");
+      loadAlg.setPropertyValue("OutputWorkspace", "dummy");
+      loadAlg.execute();
+
+      Workspace_sptr ws = loadAlg.getProperty("OutputWorkspace");
+      auto peakWS = boost::dynamic_pointer_cast<Mantid::DataObjects::PeaksWorkspace>(ws);
+      TS_ASSERT(peakWS);
+
+  }
+
   void testTableWorkspace_vectorColumn()
   {
     // Create a table we will save
@@ -664,8 +848,9 @@ public:
     saveAlg.initialize();
     saveAlg.setPropertyValue("InputWorkspace", inTableEntry.name());
     saveAlg.setPropertyValue("Filename", savedFileName);
-    TS_ASSERT_THROWS_NOTHING( saveAlg.execute());
-    TS_ASSERT( saveAlg.isExecuted());
+
+    TS_ASSERT_THROWS_NOTHING(saveAlg.execute());
+    TS_ASSERT(saveAlg.isExecuted());
 
     if (!saveAlg.isExecuted())
       return; // Nothing to check
@@ -769,6 +954,7 @@ public:
   }
 
 private:
+
   void doHistoryTest(MatrixWorkspace_sptr matrix_ws)
   {
     const WorkspaceHistory history = matrix_ws->getHistory();
@@ -784,8 +970,87 @@ private:
     }
   }
 
-  LoadNexusProcessed algToBeTested;
+  /**
+   * Do a few standard checks that are repeated in multiple tests of
+   * partial event data loading
+   *
+   * @param alg initialized and parameterized load algorithm
+   * @param nSpectra expected number of spectra
+   * @param nHistory expected number of entries in the algorithm
+   * history
+   **/
+  void doCommonEventLoadChecks(LoadNexusProcessed& alg, size_t nSpectra,
+                               size_t nHistory)
+  {
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted());
+
+    // Test basic props of the ws
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve(output_ws));
+    TS_ASSERT(workspace);
+    if (!workspace)
+      return;
+    TS_ASSERT(workspace.get());
+
+    EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    TS_ASSERT(ews);
+    if (!ews)
+      return;
+    TS_ASSERT(ews.get());
+    TS_ASSERT_EQUALS(ews->getNumberHistograms(), nSpectra);
+
+    TS_ASSERT_EQUALS(ews->getHistory().size(), nHistory);
+  }
+
+  void writeTmpEventNexus()
+  {
+    //return;
+    if (!m_savedTmpEventFile.empty() && Poco::File(m_savedTmpEventFile).exists())
+      return;
+
+    std::vector< std::vector<int> > groups(6);
+    groups[0].push_back(9);
+    groups[0].push_back(12);
+    groups[1].push_back(5);
+    groups[1].push_back(10);
+    groups[2].push_back(20);
+    groups[2].push_back(21);
+    groups[3].push_back(10);
+    groups[4].push_back(50);
+    groups[5].push_back(15);
+    groups[5].push_back(20);
+
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 30, 1.0);
+    ws->getEventList(4).clear();
+
+    TS_ASSERT_EQUALS( ws->getNumberHistograms(), groups.size());
+
+    SaveNexusProcessed alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", boost::dynamic_pointer_cast<Workspace>(ws));
+    m_savedTmpEventFile = "LoadNexusProcessed_TmpEvent.nxs";
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("Title", "Tmp test event workspace as NexusProcessed file");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+
+    // Get absolute path to the saved file
+    m_savedTmpEventFile = alg.getPropertyValue("Filename");
+  }
+
+  void clearTmpEventNexus()
+  {
+    // remove saved/re-loaded test event data file
+    if (!m_savedTmpEventFile.empty() && Poco::File(m_savedTmpEventFile).exists())
+      Poco::File(m_savedTmpEventFile).remove();
+  }
+
   std::string testFile, output_ws;
+  /// Saved using SaveNexusProcessed and re-used in several load event tests
+  std::string m_savedTmpEventFile;
+  static const EventType m_savedTmpType = TOF;
 };
 
 //------------------------------------------------------------------------------

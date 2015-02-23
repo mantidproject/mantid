@@ -52,7 +52,7 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
     TS_ASSERT_EQUALS( ws->getDimension(0)->getName(), "Q_lab_x");
-    TS_ASSERT_EQUALS( ws->getSpecialCoordinateSystem(), Mantid::API::QLab);
+    TS_ASSERT_EQUALS( ws->getSpecialCoordinateSystem(), Mantid::Kernel::QLab);
 
     //TODO: Now you can add differenc dimension types to each other, but this should be fixed
     alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace", 8,
@@ -83,7 +83,7 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
     TS_ASSERT_EQUALS( ws->getDimension(0)->getName(), "[H,0,0]");
-    TS_ASSERT_EQUALS( ws->getSpecialCoordinateSystem(), Mantid::API::HKL);
+    TS_ASSERT_EQUALS( ws->getSpecialCoordinateSystem(), Mantid::Kernel::HKL);
 
     AnalysisDataService::Instance().remove("testOutMD");
     alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace", 6,
@@ -97,7 +97,7 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
     TS_ASSERT_EQUALS( ws->getDimension(0)->getName(), "Q_sample_x");
-    TS_ASSERT_EQUALS( ws->getSpecialCoordinateSystem(), Mantid::API::QSample);
+    TS_ASSERT_EQUALS( ws->getSpecialCoordinateSystem(), Mantid::Kernel::QSample);
   }
 
   void do_test_MINITOPAZ(EventType type, size_t numTimesToAdd = 1,

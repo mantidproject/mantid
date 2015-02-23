@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Base reduction class. Hold a list of data and a list of reduction steps to apply to them.
 

@@ -107,7 +107,7 @@ protected:
   // Flag which indicates that data with 0 signal should be ignored
   bool m_ignoreZeros;
   /// Any special coordinate system used.
-  Mantid::API::SpecialCoordinateSystem m_coordinateSystem;
+  Mantid::Kernel::SpecialCoordinateSystem m_coordinateSystem;
 
 private:
   /** internal function which do one peace of work, which should be performed by

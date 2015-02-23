@@ -54,7 +54,7 @@ add_definitions ( -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG )
 find_package ( Poco 1.4.2 REQUIRED )
 include_directories( SYSTEM ${POCO_INCLUDE_DIRS} )
 
-find_package ( Nexus 4.3.0 REQUIRED )
+find_package ( Nexus 4.3.1 REQUIRED )
 include_directories ( SYSTEM ${NEXUS_INCLUDE_DIR} )
 
 find_package ( MuParser REQUIRED )
@@ -299,6 +299,35 @@ if ( SQUISH_FOUND )
   message ( STATUS "Found Squish for GUI testing" )
 else()
   message ( STATUS "Could not find Squish - GUI testing not available. Try specifying your SQUISH_INSTALL_DIR cmake variable." )
+endif()
+
+###########################################################################
+# External Data for testing
+###########################################################################
+if ( CXXTEST_FOUND OR PYUNITTEST_FOUND )
+ include ( MantidExternalData )
+
+# None of our tests reference files directly as arguments so we have to manually
+# call ExternalData_Expand_Arguments to register the files with the ExternalData
+# mechanism
+get_filename_component ( EXTERNALDATATEST_SOURCE_DIR ${PROJECT_SOURCE_DIR} ABSOLUTE )
+file( GLOB_RECURSE doctest_content_links
+  RELATIVE "${EXTERNALDATATEST_SOURCE_DIR}" "Testing/Data/DocTest/*.md5" )
+file( GLOB_RECURSE unittest_content_links
+  RELATIVE "${EXTERNALDATATEST_SOURCE_DIR}" "Testing/Data/UnitTest/*.md5" )
+set ( content_links "${doctest_content_links};${unittest_content_links}" )
+foreach(link ${content_links})
+  string( REGEX REPLACE "\\.md5$" "" link ${link} )
+  ExternalData_Expand_Arguments( StandardTestData
+    link_location
+    DATA{${link}}
+    )
+endforeach()
+
+# Create target to download data from the StandardTestData group.  This must come after
+# all tests have been added that reference the group, so we put it last.
+ExternalData_Add_Target(StandardTestData)
+set_target_properties(StandardTestData PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endif()
 
 ###########################################################################

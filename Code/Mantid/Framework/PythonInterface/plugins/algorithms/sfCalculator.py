@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 #from MantidFramework import *
 #from mantidsimple import *
 from mantid.simpleapi import *
@@ -7,7 +8,7 @@ import math
 
 PRECISION = 0.020
 
-class sfCalculator():
+class sfCalculator(object):
 
     ref_date = '2014-10-01' # when the detector has been rotated
 
@@ -71,7 +72,7 @@ class sfCalculator():
 
         print '---> initialize calculation'
 
-        if (tof_range is None):
+        if tof_range is None:
             self.tof_min = 10000
             self.tof_max = 21600
         else:
@@ -209,7 +210,7 @@ class sfCalculator():
         This function parses the output.date and returns true if this date is after the ref date
         '''
         nexus_date_acquisition = nexus_date.split('T')[0]
-        
+
         if nexus_date_acquisition > self.ref_date:
             return True
         else:
@@ -238,7 +239,7 @@ class sfCalculator():
         nexus_file_numerator = file
         print '----> loading nexus file: ' + nexus_file_numerator
         EventDataWks = LoadEventNexus(Filename=nexus_file_numerator)
-        
+
         self.is_nexus_detector_rotated_flag = self.isNexusTakeAfterRefDate(EventDataWks.getRun().getProperty('run_start').value)
 
         if self.is_nexus_detector_rotated_flag:
@@ -250,7 +251,7 @@ class sfCalculator():
 
         proton_charge = self._getProtonCharge(EventDataWks)
         print '----> rebinning '
-        HistoDataWks = Rebin(InputWorkspace=EventDataWks,
+        HistoDataWks = Rebin(InputWorkspace=EventDataWks,\
               Params=self.rebin_parameters)
 
 #        mt2 = mtd['HistoDataWks']
@@ -259,9 +260,9 @@ class sfCalculator():
         x_axis = HistoDataWks.readX(0)[:]
         self.x_axis = x_axis
 
-        OutputWorkspace = self._createIntegratedWorkspace(InputWorkspace=HistoDataWks,
-                                        proton_charge=proton_charge,
-                                        from_pixel=self.peak_pixel_min,
+        OutputWorkspace = self._createIntegratedWorkspace(InputWorkspace=HistoDataWks,\
+                                        proton_charge=proton_charge,\
+                                        from_pixel=self.peak_pixel_min,\
                                         to_pixel=self.peak_pixel_max)
 
         DataWks = self._removeBackground(InputWorkspace=OutputWorkspace,
@@ -329,7 +330,7 @@ class sfCalculator():
 
 
 #        mt3 = mtd['DataWks']
-        self._calculateFinalAxis(Workspace=DataWks,
+        self._calculateFinalAxis(Workspace=DataWks,\
                            bNumerator=bNumerator)
         print 'done with _calculateFinalAxis and back in calculatefinalaxis' #REMOVEME
 
@@ -385,7 +386,7 @@ class sfCalculator():
         index_tof_min = self._getIndex(self.tof_min, x_axis)
         index_tof_max = self._getIndex(self.tof_max, x_axis)
 
-        if (bNumerator is True):
+        if bNumerator is True:
             self.y_axis_numerator = counts_vs_tof[index_tof_min:index_tof_max].copy()
             self.y_axis_error_numerator = counts_vs_tof_error[index_tof_min:index_tof_max].copy()
             self.x_axis_ratio = self.x_axis[index_tof_min:index_tof_max].copy()
@@ -429,16 +430,16 @@ class sfCalculator():
                     index = int(y+x*304)
     #                y_axis[y, :] += InputWorkspace.readY(index)[:]
                     y_axis[y, :] += InputWorkspace.readY(index)[:]
-                    y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *
+                    y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *\
                                             (InputWorkspace.readE(index)[:]))
-            
+
         else:
             for x in range(304):
                 for y in y_range:
                     index = int(y+x*256)
     #                y_axis[y, :] += InputWorkspace.readY(index)[:]
                     y_axis[y, :] += InputWorkspace.readY(index)[:]
-                    y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *
+                    y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *\
                                             (InputWorkspace.readE(index)[:]))
 
 #        #DEBUG
@@ -467,9 +468,9 @@ class sfCalculator():
         y_axis /= (proton_charge * 1e-12)
         y_error_axis /= (proton_charge * 1e-12)
 
-        OutputWorkspace = CreateWorkspace(DataX=x_axis,
-                        DataY=y_axis,
-                        DataE=y_error_axis,
+        OutputWorkspace = CreateWorkspace(DataX=x_axis,\
+                        DataY=y_axis,\
+                        DataE=y_error_axis,\
                         Nspec=self.alpha_pixel_nbr)
 
         return OutputWorkspace
@@ -481,14 +482,14 @@ class sfCalculator():
         #calculate numerator
         dataNum = 0
         for i in range(sz):
-            if (data[i] != 0):
+            if data[i] != 0:
                 tmpFactor = float(data[i]) / (error[i]**2)
                 dataNum += tmpFactor
 
         #calculate denominator
         dataDen = 0
         for i in range(sz):
-            if (error[i] != 0):
+            if error[i] != 0:
                 tmpFactor = float(1) / (error[i]**2)
                 dataDen += tmpFactor
 
@@ -566,15 +567,15 @@ class sfCalculator():
         peak_array = zeros(nbr_tof)
         peak_array_error = zeros(nbr_tof)
 
-        bMinBack = False;
-        bMaxBack = False;
+        bMinBack = False
+        bMaxBack = False
 
-        min_back = 0;
-        min_back_error = 0;
-        max_back = 0;
-        max_back_error = 0;
+        min_back = 0
+        min_back_error = 0
+        max_back = 0
+        max_back_error = 0
 
-        for t in (range(nbr_tof-1)):
+        for t in range(nbr_tof-1):
 
             _y_slice = data[:,t]
             _y_error_slice = error[:,t]
@@ -616,17 +617,17 @@ class sfCalculator():
 
             [final_value, final_error] = self.sumWithError(new_tmp_peak, new_tmp_peak_error)
 
-            peak_array[t] = final_value;
-            peak_array_error[t] = final_error;
+            peak_array[t] = final_value
+            peak_array_error[t] = final_error
 
 
         # make new workspace
         y_axis = peak_array.flatten()
         y_error_axis = peak_array_error.flatten()
 
-        DataWks = CreateWorkspace(DataX=tof_axis[0:-1],
-                        DataY=y_axis,
-                        DataE=y_error_axis,
+        DataWks = CreateWorkspace(DataX=tof_axis[0:-1],\
+                        DataY=y_axis,\
+                        DataE=y_error_axis,\
                         Nspec=1)
 
 #         import sys
@@ -695,16 +696,16 @@ class sfCalculator():
         b coefficients (y=a+bx)
         """
 
-        DataToFit = CreateWorkspace(DataX=self.x_axis_ratio,
-                        DataY=self.y_axis_ratio,
-                        DataE=self.y_axis_error_ratio,
+        DataToFit = CreateWorkspace(DataX=self.x_axis_ratio,\
+                        DataY=self.y_axis_ratio,\
+                        DataE=self.y_axis_error_ratio,\
                         Nspec=1)
 
         print 'replaceSpecialValues'
-        DataToFit = ReplaceSpecialValues(InputWorkspace=DataToFit,
-                             NaNValue=0,
-                             NaNError=0,
-                             InfinityValue=0,
+        DataToFit = ReplaceSpecialValues(InputWorkspace=DataToFit,\
+                             NaNValue=0,\
+                             NaNError=0,\
+                             InfinityValue=0,\
                              InfinityError=0)
 
 #        ResetNegatives(InputWorkspace='DataToFit',
@@ -743,8 +744,8 @@ class sfCalculator():
             xmin = xaxis[0]
             xmax = xaxis[sz/2]
 
-            DataToFit = CropWorkspace(InputWorkspace=DataToFit,
-                         XMin=xmin,
+            DataToFit = CropWorkspace(InputWorkspace=DataToFit,\
+                         XMin=xmin,\
                          XMax=xmax)
 
             Fit(InputWorkspace=DataToFit,
@@ -779,7 +780,7 @@ def plotObject(instance):
              linestyle='',
              label='Exp. data')
 
-    if (instance.a is not None):
+    if instance.a is not None:
         x = linspace(10000, 22000, 100)
         _label = "%.3f + x*%.2e" % (instance.a, instance.b)
         plot(x, instance.a + instance.b * x, label=_label)
@@ -857,7 +858,7 @@ def outputFittingParameters(a, b, error_a, error_b,
     #then if it does, parse the file and check if following infos are
     #already defined:
     #  lambda_requested, S1H, S2H, S1W, S2W
-    if (bFileExist):
+    if bFileExist:
         f = open(output_file_name, 'r')
         text = f.readlines()
 #        split_lines = text.split('\n')
@@ -879,17 +880,17 @@ def outputFittingParameters(a, b, error_a, error_b,
                     _line_split = _line.split(' ')
                     _incident_medium = variable_value_splitter(_line_split[0])
 
-                    if (_incident_medium['value'].strip() == incident_medium.strip()):
+                    if _incident_medium['value'].strip() == incident_medium.strip():
                         _lambdaRequested = variable_value_splitter(_line_split[1])
-                        if (isWithinRange(_lambdaRequested['value'], lambda_requested)):
+                        if isWithinRange(_lambdaRequested['value'], lambda_requested):
                             _s1h = variable_value_splitter(_line_split[2])
-                            if (isWithinRange(_s1h['value'], S1H[i])):
+                            if isWithinRange(_s1h['value'], S1H[i]):
                                 _s2h = variable_value_splitter(_line_split[3])
-                                if (isWithinRange(_s2h['value'],S2H[i])):
+                                if isWithinRange(_s2h['value'],S2H[i]):
                                     _s1w = variable_value_splitter(_line_split[4])
-                                    if (isWithinRange(_s1w['value'],S1W[i])):
+                                    if isWithinRange(_s1w['value'],S1W[i]):
                                         _s2w = variable_value_splitter(_line_split[5])
-                                        if (isWithinRange(_s2w['value'],S2W[i])):
+                                        if isWithinRange(_s2w['value'],S2W[i]):
                                             _match = True
                                             break
 
@@ -899,7 +900,7 @@ def outputFittingParameters(a, b, error_a, error_b,
         except:
             #replace file because this one has the wrong format
             _content = ['#y=a+bx\n', '#\n',
-                        '#lambdaRequested[Angstroms] S1H[mm] S2H[mm] S1W[mm] S2W[mm] a b error_a error_b\n', '#\n']
+                        '#lambdaRequested[Angstroms] S1H[mm] (S2/Si)H[mm] S1W[mm] (S2/Si)W[mm] a b error_a error_b\n', '#\n']
             sz = len(a)
             for i in range(sz):
 
@@ -943,8 +944,8 @@ def outputFittingParameters(a, b, error_a, error_b,
             _error_a = "{0:}".format(float(error_a[j]))
             _error_b = "{0:}".format(float(error_b[j]))
 
-            _line += 'S1H=' + _S1H + ' ' + 'S2H=' + _S2H + ' '
-            _line += 'S1W=' + _S1W + ' ' + 'S2W=' + _S2W + ' '
+            _line += 'S1H=' + _S1H + ' ' + 'S2iH=' + _S2H + ' '
+            _line += 'S1W=' + _S1W + ' ' + 'S2iW=' + _S2W + ' '
             _line += 'a=' + _a + ' '
             _line += 'b=' + _b + ' '
             _line += 'error_a=' + _error_a + ' '
@@ -958,7 +959,7 @@ def outputFittingParameters(a, b, error_a, error_b,
     else:
 
         _content = ['#y=a+bx\n', '#\n',
-                    '#lambdaRequested[Angstroms] S1H[mm] S2H[mm] S1W[mm] S2W[mm] a b error_a error_b\n', '#\n']
+                    '#lambdaRequested[Angstroms] S1H[mm] (S2/Si)H[mm] S1W[mm] (S2/Si)W[mm] a b error_a error_b\n', '#\n']
         sz = len(a)
         for i in range(sz):
 
@@ -974,8 +975,8 @@ def outputFittingParameters(a, b, error_a, error_b,
             _error_a = "{0:}".format(float(error_a[i]))
             _error_b = "{0:}".format(float(error_b[i]))
 
-            _line += 'S1H=' + _S1H + ' ' + 'S2H=' + _S2H + ' '
-            _line += 'S1W=' + _S1W + ' ' + 'S2W=' + _S2W + ' '
+            _line += 'S1H=' + _S1H + ' ' + 'S2iH=' + _S2H + ' '
+            _line += 'S1W=' + _S1W + ' ' + 'S2iW=' + _S2W + ' '
             _line += 'a=' + _a + ' '
             _line += 'b=' + _b + ' '
             _line += 'error_a=' + _error_a + ' '
@@ -994,7 +995,7 @@ def createIndividualList(string_list_files):
         list_files = "1000:0, 1001:1, 1002:1, 1003:2"
         return {1000:0, 1001:1, 1002:2, 1003:2}
     """
-    if (string_list_files == ''):
+    if string_list_files == '':
         return None
     first_split = string_list_files.split(',')
 
@@ -1034,8 +1035,17 @@ def getSheight(mt, index):
         return the DAS hardware slits height of slits # index
     """
     mt_run = mt.getRun()
-    tag = 'S' + index + 'VHeight'
-    value = mt_run.getProperty(tag).value
+    if index == '2':
+        try:
+            tag = 'SiVHeight'
+            value = mt_run.getProperty(tag).value
+        except:
+            tag = 'S2VHeight'
+            value = mt_run.getProperty(tag).value
+    else:
+        tag = 'S1VHeight'
+        value = mt_run.getProperty(tag).value
+
     return value[0]
 
 def getS1h(mt=None):
@@ -1059,16 +1069,22 @@ def getS2h(mt=None):
     return None
 
 
-
-
 def getSwidth(mt, index):
     """
         returns the width and units of the given index slits
         defined by the DAS hardware
     """
     mt_run = mt.getRun()
-    tag = 'S' + index + 'HWidth'
-    value = mt_run.getProperty(tag).value
+    if index == '2':
+        try:
+            tag = 'SiHWidth'
+            value = mt_run.getProperty(tag).value
+        except:
+            tag = 'S2HWidth'
+            value = mt_run.getProperty(tag).value
+    else:
+        tag = 'S1HWidth'
+        value = mt_run.getProperty(tag).value
     return value[0]
 
 def getSw(mt, left_tag, right_tag):
@@ -1119,7 +1135,7 @@ def getSlitsValueAndLambda(full_list_runs,
     for i in range(_nbr_files):
         _full_file_name = full_list_runs[i]
         print '-> ' + _full_file_name
-        tmpWks = LoadEventNexus(Filename=_full_file_name,
+        tmpWks = LoadEventNexus(Filename=_full_file_name,\
                        MetaDataOnly='1')
 #        mt1 = mtd['tmpWks']
         _s1h_value = getS1h(tmpWks)
@@ -1152,7 +1168,7 @@ def isRunsSorted(list_runs, S1H, S2H):
 
         _left_formated = "%2.1f" % _left
         _right_formated = "%2.1f" % _right
-        if (_left_formated != _right_formated):
+        if _left_formated != _right_formated:
             return False
 
     return True
@@ -1183,7 +1199,7 @@ def calculateAndFit(numerator='',
     cal1.run()
     print 'Done with cal1.run()'
 
-    if (list_objects != [] and list_objects[-1] is not None):
+    if list_objects != [] and list_objects[-1] is not None:
         new_cal1 = cal1 * list_objects[-1]
         new_cal1.fit()
         return new_cal1
@@ -1203,7 +1219,7 @@ def help():
     print '                          list_'
 
 #if __name__ == '__main__':
-def calculate(string_runs=None,
+def calculate(string_runs=None,\
 #              list_attenuator=None,
               list_peak_back=None,
               incident_medium=None,
@@ -1232,10 +1248,10 @@ def calculate(string_runs=None,
 
     """
 
-    list_attenuator = None;
+    list_attenuator = None
 
     #use default string files if not provided
-    if (string_runs is None):
+    if string_runs is None:
         #Input from user
 #        list_runs = ['55889', '55890', '55891', '55892', '55893', '55894',
 #                     '55895', '55896', '55897', '55898', '55899', '55900',
@@ -1264,14 +1280,14 @@ def calculate(string_runs=None,
 
         list_attenuator = dico['list_attenuator']
 
-    if (incident_medium is None):
+    if incident_medium is None:
         incident_medium = "H20" #default value
 
-    if (list_attenuator is None):
+    if list_attenuator is None:
 #        list_attenuator = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]
-        list_attenuator = [0, 1, 1, 1, 1, 1];
+        list_attenuator = [0, 1, 1, 1, 1, 1]
 
-    if (list_peak_back is None):
+    if list_peak_back is None:
         list_peak_back = zeros((len(list_runs), 4))   #[peak_min, peak_max, back_min, back_max]
 #        list_peak_back[9, ] = [128, 136, 120, 145]
 #        list_peak_back[11, ] = [125, 140, 115, 150]
@@ -1366,8 +1382,7 @@ def calculate(string_runs=None,
 
                 recordSettings(a, b, error_a, error_b, name, cal)
 
-                if (i < (len(list_runs) - 1) and
-                         list_attenuator[i + 1] == (_attenuator+1)):
+                if i < (len(list_runs) - 1) and list_attenuator[i + 1] == (_attenuator+1):
                     list_objects.append(cal)
 
             #record S1H and S2H
@@ -1397,10 +1412,10 @@ def calculate(string_runs=None,
 
         print 'Done !'
 
-    else:
-        """
-        sort the files
-        """
-        pass
+#    else:
+#        """
+#        sort the files
+#        """
+#        pass
 
 

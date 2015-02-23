@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import os
 
 from mantid.api import *
@@ -18,13 +19,13 @@ def getDetIDsForBank(bank):
     detIDs = set()
 
     for i in range(grouping.getNumberHistograms()):
-    	if grouping.readY(i)[0] == bank:
-    		detIDs.add(grouping.getDetector(i).getID())
+        if grouping.readY(i)[0] == bank:
+            detIDs.add(grouping.getDetector(i).getID())
 
     DeleteWorkspace(grouping)
 
     if len(detIDs) == 0:
-    	raise Exception('Unknown bank')
+        raise Exception('Unknown bank')
 
     return detIDs
 
@@ -34,11 +35,12 @@ def getWsIndicesForBank(bank, ws):
     detIDs = getDetIDsForBank(bank)
 
     def isIndexInBank(index):
-    	try:
-    		det = ws.getDetector(index)
-    		return (det.getID() in detIDs)
-    	except:
-    		return False
+        try:
+            det = ws.getDetector(index)
+            return det.getID() in detIDs
+        except:
+            return False
 
     return filter(isIndexInBank, range(0, ws.getNumberHistograms()))
+
 
