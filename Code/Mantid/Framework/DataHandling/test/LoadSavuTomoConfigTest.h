@@ -1,31 +1,31 @@
-#ifndef LOADTOMOCONFIGTEST_H_
-#define LOADTOMOCONFIGTEST_H_
+#ifndef LOADSAVUTOMOCONFIGTEST_H_
+#define LOADSAVUTOMOCONFIGTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidDataHandling/LoadTomoConfig.h" 
+#include "MantidDataHandling/LoadSavuTomoConfig.h"
 
 using namespace Mantid::API;
-using Mantid::DataHandling::LoadTomoConfig;
+using Mantid::DataHandling::LoadSavuTomoConfig;
 
-class LoadTomoConfigTest : public CxxTest::TestSuite
+class LoadSavuTomoConfigTest : public CxxTest::TestSuite
 {
 public: 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadTomoConfigTest *createSuite() { return new LoadTomoConfigTest(); }
-  static void destroySuite(LoadTomoConfigTest *suite) { delete suite; }
+  static LoadSavuTomoConfigTest *createSuite() { return new LoadSavuTomoConfigTest(); }
+  static void destroySuite(LoadSavuTomoConfigTest *suite) { delete suite; }
 
   /// Tests casting, general algorithm properties: name, version, etc.
   void test_algorithm()
   {
     testAlg =
-      Mantid::API::AlgorithmManager::Instance().create("LoadTomoConfig" /*, 1*/);
+      Mantid::API::AlgorithmManager::Instance().create("LoadSavuTomoConfig" /*, 1*/);
     TS_ASSERT( testAlg );
-    TS_ASSERT_EQUALS( testAlg->name(), "LoadTomoConfig" );
+    TS_ASSERT_EQUALS( testAlg->name(), "LoadSavuTomoConfig" );
     TS_ASSERT_EQUALS( testAlg->version(), 1 );
   }
 
@@ -41,7 +41,7 @@ public:
   void test_wrongExec()
   {
     IAlgorithm_sptr testFail =
-      Mantid::API::AlgorithmManager::Instance().create("LoadTomoConfig" /*, 1*/);
+      Mantid::API::AlgorithmManager::Instance().create("LoadSavuTomoConfig" /*, 1*/);
     TS_ASSERT( testFail );
     TS_ASSERT_THROWS_NOTHING( testFail->initialize() );
     // exec without Filename property set -> should throw
@@ -52,7 +52,7 @@ public:
 
     // exec with Filename but empty OutputWorkspace -> should throw
     IAlgorithm_sptr fail2 =
-      Mantid::API::AlgorithmManager::Instance().create("LoadTomoConfig" /*, 1*/);
+      Mantid::API::AlgorithmManager::Instance().create("LoadSavuTomoConfig" /*, 1*/);
     TS_ASSERT_THROWS_NOTHING( fail2->initialize() );
     TS_ASSERT_THROWS_NOTHING( fail2->setPropertyValue("Filename", testFilename) );
     TS_ASSERT_THROWS( fail2->setPropertyValue("OutputWorkspace", ""), std::invalid_argument );
@@ -61,7 +61,7 @@ public:
 
     // exec with Filename but no OutputWorkspace -> should not finish
     IAlgorithm_sptr fail3 =
-      Mantid::API::AlgorithmManager::Instance().create("LoadTomoConfig" /*, 1*/);
+      Mantid::API::AlgorithmManager::Instance().create("LoadSavuTomoConfig" /*, 1*/);
     TS_ASSERT_THROWS_NOTHING( fail3->initialize() );
     TS_ASSERT_THROWS_NOTHING( fail3->setPropertyValue("Filename", testFilename) );
     TS_ASSERT_THROWS_NOTHING( fail3->execute() );
@@ -84,7 +84,7 @@ public:
     // TODO: At the moment load just one file to test basic
     // functionality. Probably more files should be added here as we
     // have more certainty about the format
-    std::string outWSName = "LoadTomoConfig_test_ws";
+    std::string outWSName = "LoadSavuTomoConfig_test_ws";
     // Load examples from https://github.com/DiamondLightSource/Savu/tree/master/test_data
     TS_ASSERT_THROWS_NOTHING( testAlg->setPropertyValue("Filename", testFilename) );
     TS_ASSERT_THROWS_NOTHING( testAlg->setPropertyValue("OutputWorkspace", outWSName) );
@@ -145,15 +145,14 @@ private:
   }
 
   IAlgorithm_sptr testAlg;
-  LoadTomoConfig alg;
   static const size_t nRows;
   static const size_t nCols;
   static const std::string testFilename;
 
 };
 
-const size_t LoadTomoConfigTest::nRows = 3;
-const size_t LoadTomoConfigTest::nCols = 4;
-const std::string LoadTomoConfigTest::testFilename = "savu_test_data_process03.nxs";
+const size_t LoadSavuTomoConfigTest::nRows = 3;
+const size_t LoadSavuTomoConfigTest::nCols = 4;
+const std::string LoadSavuTomoConfigTest::testFilename = "savu_test_data_process03.nxs";
 
-#endif /* LOADTOMOCONFIGTEST_H__*/
+#endif /* LOADSAVUTOMOCONFIGTEST_H__*/

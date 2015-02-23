@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_LOADTOMOCONFIG_H_
-#define MANTID_DATAHANDLING_LOADTOMOCONFIG_H_
+#ifndef MANTID_DATAHANDLING_LOADSAVUTOMOCONFIG_H_
+#define MANTID_DATAHANDLING_LOADSAVUTOMOCONFIG_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -12,8 +12,9 @@ namespace Mantid {
 namespace DataHandling {
 
 /**
-  LoadTomoConfig : Load a tomographic reconstruction parameters file (as
-  used in the savu tomography reconstructin pipeline) into a TableWorkspace
+  LoadSavuTomoConfig : Load a tomographic reconstruction parameters
+  file (as used in the savu tomography reconstructin pipeline) into a
+  TableWorkspace
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -36,14 +37,14 @@ namespace DataHandling {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LoadTomoConfig : public API::Algorithm {
+class DLLExport LoadSavuTomoConfig : public API::Algorithm {
 public:
-  LoadTomoConfig();
+  LoadSavuTomoConfig();
 
-  virtual ~LoadTomoConfig();
+  virtual ~LoadSavuTomoConfig();
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadTomoConfig"; }
+  virtual const std::string name() const { return "LoadSavuTomoConfig"; }
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
     return "Load configuration parameters from a tomographic "
@@ -75,4 +76,4 @@ private:
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif /* MANTID_DATAHANDLING_LOADTOMOCONFIG_H_ */
+#endif /* MANTID_DATAHANDLING_LOADSAVUTOMOCONFIG_H_ */

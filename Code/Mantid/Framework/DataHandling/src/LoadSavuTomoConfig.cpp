@@ -3,7 +3,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidDataHandling/LoadTomoConfig.h"
+#include "MantidDataHandling/LoadSavuTomoConfig.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 #include <nexus/NeXusException.hpp>
@@ -12,20 +12,20 @@ namespace Mantid {
 namespace DataHandling {
 
 // Register the algorithm into the algorithm factory
-DECLARE_ALGORITHM(LoadTomoConfig);
+DECLARE_ALGORITHM(LoadSavuTomoConfig);
 
 using namespace Mantid::API;
 
-LoadTomoConfig::LoadTomoConfig() {
+LoadSavuTomoConfig::LoadSavuTomoConfig() {
 }
 
-LoadTomoConfig::~LoadTomoConfig() {
+LoadSavuTomoConfig::~LoadSavuTomoConfig() {
 }
 
 /** 
  * Standard Initialisation method. Declares properties.
  */
-void LoadTomoConfig::init() {
+void LoadSavuTomoConfig::init() {
   // Required input properties
   std::vector<std::string> exts;
   exts.push_back(".nxs");
@@ -51,7 +51,7 @@ void LoadTomoConfig::init() {
  *
  * @throw runtime_error Thrown if execution fails
  */
-void LoadTomoConfig::exec() {
+void LoadSavuTomoConfig::exec() {
   progress(0, "Opening file...");
 
   // Will throw an approriate exception if there is a problem with the
@@ -84,7 +84,7 @@ void LoadTomoConfig::exec() {
  *
  * @return true if everything seems fine, false otherwise
  */
-bool LoadTomoConfig::checkOpenFile(std::string fname,
+bool LoadSavuTomoConfig::checkOpenFile(std::string fname,
                                    boost::shared_ptr<::NeXus::File> &f) {
   try {
     f = boost::make_shared<::NeXus::File>(fname);
@@ -117,7 +117,7 @@ bool LoadTomoConfig::checkOpenFile(std::string fname,
  * @return table workspace with parameters (plugins) found in the
  * loaded file
  */
-ITableWorkspace_sptr LoadTomoConfig::loadFile(std::string& fname,
+ITableWorkspace_sptr LoadSavuTomoConfig::loadFile(std::string& fname,
                                               std::string& wsName) {
   // Throws an exception if there is a problem with file access
   //Mantid::NeXus::NXRoot root(fname);
