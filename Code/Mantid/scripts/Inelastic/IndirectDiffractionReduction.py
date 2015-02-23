@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import mantid
 from msg_reducer import MSGReducer
 import inelastic_indirect_reduction_steps as steps

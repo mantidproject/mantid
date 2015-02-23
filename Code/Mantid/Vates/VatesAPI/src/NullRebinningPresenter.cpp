@@ -54,5 +54,20 @@ namespace Mantid
       UNUSED_ARG(visualDataSet);
       throw std::runtime_error("NullRebinningPresenter does not implement this method. Misused");
     }
+
+    const std::string& NullRebinningPresenter::getInstrument() const
+    {
+      throw std::runtime_error("NullRebinningPresenter does not implement this method. Misused");
+    }
+
+    double NullRebinningPresenter::getMaxValue() const
+    {
+      throw std::runtime_error("NullRebinningPresenter does not implement this method. Misused");
+    }
+
+    double NullRebinningPresenter::getMinValue() const
+    {
+      throw std::runtime_error("NullRebinningPresenter does not implement this method. Misused");
+    }
   }
 }

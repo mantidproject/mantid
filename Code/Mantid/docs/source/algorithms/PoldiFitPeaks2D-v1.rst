@@ -17,6 +17,8 @@ At the moment all profiles are calculated independently, using Gaussian function
 
 PoldiFitPeaks2D can also be used to calculate a theoretical 2D pattern from a set of peaks by limiting the iterations to 0.
 
+In addition to performing the 2D-fit, a theoretical 1D-diffractogram of the fit-function is calculated as well, which can be used in conjunction with :ref:`algm-PoldiAnalyseResiduals` to assess the quality of a fit.
+
 Usage
 -----
 
@@ -39,14 +41,14 @@ PoldiFitPeaks2D operates on a MatrixWorkspace with a valid POLDI instrument defi
 
     PoldiFitPeaks1D(InputWorkspace = correlated_6904, FwhmMultiples = 4.0,
                     PeakFunction = "Gaussian", PoldiPeakTable = peaks_6904,
-                    OutputWorkspace = "peaks_refined_6904", ResultTableWorkspace = "result_table_6904",
-                    FitCharacteristicsWorkspace = "raw_fit_results_6904",
+                    OutputWorkspace = "peaks_refined_6904",
                     FitPlotsWorkspace = "fit_plots_6904")
                     
     # Calculate a 2D spectrum using the refined peaks
     PoldiFitPeaks2D(InputWorkspace=truncated_6904,
                                 PoldiPeakWorkspace="peaks_refined_6904",
                                 RefinedPoldiPeakWorkspace="peaks_fit_2d_6904",
+                                Calculated1DSpectrum="simulated_1d_6904",
                                 OutputWorkspace="simulated_6904")
     
 After this step, there is a new workspace containing the simulated spectrum. It should look similar to the one in the following figure:
@@ -75,8 +77,7 @@ In general, there is a background in POLDI data that depends on :math:`2\theta`.
 
     PoldiFitPeaks1D(InputWorkspace = correlated_6904, FwhmMultiples = 4.0,
                     PeakFunction = "Gaussian", PoldiPeakTable = peaks_6904,
-                    OutputWorkspace = "peaks_refined_6904", ResultTableWorkspace = "result_table_6904",
-                    FitCharacteristicsWorkspace = "raw_fit_results_6904",
+                    OutputWorkspace = "peaks_refined_6904",
                     FitPlotsWorkspace = "fit_plots_6904")
 
     # Calculate a 2D spectrum using the refined peaks - with background linear in 2theta
@@ -84,6 +85,7 @@ In general, there is a background in POLDI data that depends on :math:`2\theta`.
                              PoldiPeakWorkspace="peaks_refined_6904",
                              OutputWorkspace="simulated_6904",
                              RefinedPoldiPeakWorkspace="peaks_fit_2d_6904",
+                             Calculated1DSpectrum="simulated_1d_6904",
                              LinearBackgroundParameter=0.01)
 
 Now the spectrum looks different, like in the example below.
@@ -94,5 +96,14 @@ Now the spectrum looks different, like in the example below.
    :alt: Raw POLDI data for Silicon powder standard with background (simulated).
    
    Simulated 2D-spectrum of silicon powder with background.
+
+Furthermore, a 1D diffractogram is also calculated, which shows all peaks that were used to calculate the 2D spectrum as well.
+
+.. figure:: /images/PoldiFitPeaks2D_Si_1D.png
+   :figwidth: 15 cm
+   :align: center
+   :alt: Calculated diffractogram for Silicon powder standard.
+
+   Calculated diffractogram for Silicon powder standard.
 
 .. categories::

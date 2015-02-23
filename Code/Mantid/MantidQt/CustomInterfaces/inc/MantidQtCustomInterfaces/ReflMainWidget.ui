@@ -368,6 +368,8 @@
     <addaction name="actionImportTable"/>
     <addaction name="actionExportTable"/>
     <addaction name="separator"/>
+    <addaction name="actionSlitCalculator"/>
+    <addaction name="separator"/>
     <addaction name="actionOptionsDialog"/>
    </widget>
    <widget class="QMenu" name="menuRows">
@@ -683,6 +685,15 @@
    </property>
    <property name="whatsThis">
     <string>Creates a plot of the stitched IvsQ workspaces produced by any groups any selected rows are in.</string>
+   </property>
+  </action>
+  <action name="actionSlitCalculator">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/param_range_btn.png</normaloff>:/param_range_btn.png</iconset>
+   </property>
+   <property name="text">
+    <string>Slit Calculator</string>
    </property>
   </action>
  </widget>

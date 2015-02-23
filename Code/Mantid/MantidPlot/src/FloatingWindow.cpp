@@ -260,7 +260,7 @@ void FloatingWindow::dragMouseMove(QPoint pos)
       return;
     }
 
-    QDrag *drag = new QDrag(this);
+    QDrag *drag = new QDrag(d_app);
     QMimeData *mimeData = new QMimeData;
 
     MdiSubWindow *ptr = mdiSubWindow();

@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'diffraction_filter_setup.ui'
@@ -454,7 +455,7 @@ class Ui_Frame(object):
         self.timeunit_combo.setItemText(1, QtGui.QApplication.translate("Frame", "Nanoseconds", None, QtGui.QApplication.UnicodeUTF8))
         self.mask_groupbox.setTitle(QtGui.QApplication.translate("Frame", "Filter By Log Value", None, QtGui.QApplication.UnicodeUTF8))
         self.logvaluefilter_checkBox.setToolTip(QtGui.QApplication.translate("Frame", "<html><head/><body><p>Check to enable \'filter by log value\' mode.  </p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.mask_help_label.setText(QtGui.QApplication.translate("Frame", "Filtering events by chopping data according to log values.\n"
+        self.mask_help_label.setText(QtGui.QApplication.translate("Frame", "Filtering events by chopping data according to log values.\n"\
 "(1) From user specified log value range;\n"
 "(2)Log values are separated to equal intervals.", None, QtGui.QApplication.UnicodeUTF8))
         self.label_10.setToolTip(QtGui.QApplication.translate("Frame", "<html><head/><body><p>Tolerance of the log value to be included in filter. It is used in the case to filter by multiple values. By default, it is equal to (maxlogvalue-minlogvalue)/interval. </p></body></html>", None, QtGui.QApplication.UnicodeUTF8))

@@ -33,7 +33,7 @@ data, add together the norms, and then divide
     \frac{d\sigma}{d\Omega}=\frac{\sum_i N_i}{\sum_i \Phi_i \times d\Omega_i}
   
 The summation index :math:`i` represents every detector and sample orientation 
-or repeated measurement that contribute to the scatering in the desired region 
+or repeated measurement that contribute to the scattering in the desired region 
 of the reciprocal space. 
 In a similar fashion, for inelastic scattering, the double
 differential cross section must be written as:
@@ -55,7 +55,7 @@ add raw data together, add monitors together, and only then divide.
    To correctly account for the statistical significance of the measurement
    always carry around separately the raw data and the normalization.
 
-Detector trajectories in reciprocal space for syngle crystal experiments
+Detector trajectories in reciprocal space for single crystal experiments
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    
 For direct geometry inelastic scattering, for any given experiment, all the incident
@@ -99,7 +99,7 @@ where :math:`k_I` is the momentum of the incident neutron and :math:`k_F` is the
 of the scattered neutron. R is the rotation matrix of the goniometer. For diffraction case,
 :math:`k_I = k_F =k`. For direct geometry inelastic :math:`k_I` is fixed in 
 a particular experiment, while for indirect geometry inelastic :math:`k_F` is fixed for
-the detctor. From equation :eq:`MasterEquation` one can see that the trajectories in the reciprocal
+the detector. From equation :eq:`MasterEquation` one can see that the trajectories in the reciprocal
 space are simply straight lines, parametrized by :math:`k` for diffraction, 
 :math:`k_I` for direct geometry, or :math:`k_F` for indirect geometry.
 If we calculate what the :math:`H, K, L` coordinates are for two points, say at 
@@ -125,7 +125,7 @@ contribution to this particular region in the :math:`HKL` space.
 
 A similar equation to :eq:`proportionality` can be obtained for inelastic scattering, by replacing
 :math:`k` with :math:`k_F` for direct geometry or with :math:`k_I` for the
-indirect case. We can then relate :math:`k_I` or :math:`k_F` with the enrgy
+indirect case. We can then relate :math:`k_I` or :math:`k_F` with the energy
 transfer :math:`\Delta E`, to get the intersections along the energy transfer
 direction.
 
