@@ -18,6 +18,33 @@ COMPRESS_TOL_TOF = .01
 EVENT_WORKSPACE_ID = "EventWorkspace"
 
 class SNSPowderReduction(DataProcessorAlgorithm):
+
+    _resampleX = None
+    _binning = None
+    _bin_in_dspace = None
+    _instrument = None
+    _filterBadPulses = None
+    _removePromptPulseWidth = None
+    _LRef = None
+    _DIFCref = None
+    _wavelengthMin = None
+    _vanPeakFWHM = None
+    _vanSmoothing = None
+    _scaleFactor = None
+    _outDir = None
+    _outPrefix = None
+    _outTypes = None
+    _infodict = None
+    _chunks = None
+    _splitws = None
+    _splitinfotablews = None
+    _normalisebycurrent = None
+    _lowResTOFoffset = None
+    _focusPos = None
+    _charTable = None
+    iparmFile = None
+    _info = None
+
     def category(self):
         return "Diffraction;PythonAlgorithms"
 

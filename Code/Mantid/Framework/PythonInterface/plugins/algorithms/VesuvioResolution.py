@@ -7,6 +7,9 @@ import mantid
 
 class VesuvioResolution(PythonAlgorithm):
 
+    _spectrum_index = None
+    _mass = None
+
     def category(self):
         return 'Inelastic'
 
