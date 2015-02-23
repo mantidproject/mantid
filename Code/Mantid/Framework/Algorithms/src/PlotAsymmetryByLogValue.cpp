@@ -8,6 +8,7 @@
 #include <sstream>
 
 #include "MantidAPI/FileProperty.h"
+#include <MantidAPI/FileFinder.h>
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
@@ -21,6 +22,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "Poco/File.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
@@ -353,34 +355,65 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace (MatrixWorkspace_sptr &out
 void PlotAsymmetryByLogValue::parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt)
 {
 
-  if ( firstFN.size() != lastFN.size() )
-  {
-    throw std::runtime_error("First and last runs are not in the same directory\n");
-  }
-
-  fnExt = firstFN.substr(firstFN.find_last_of("."));
-
+  // Parse first run's name
+  std::string firstExt = firstFN.substr(firstFN.find_last_of("."));
   firstFN.erase(firstFN.size() - 4);
-  lastFN.erase(lastFN.size() - 4);
 
-  fnBase = firstFN;
-  size_t i = fnBase.size() - 1;
-  while (isdigit(fnBase[i]))
+  std::string firstBase = firstFN;
+  size_t i = firstBase.size() - 1;
+  while (isdigit(firstBase[i]))
     i--;
-  if (i == fnBase.size() - 1) {
+  if (i == firstBase.size() - 1) {
     throw Exception::FileError("File name must end with a number.", firstFN);
   }
-  fnBase.erase(i + 1);
+  firstBase.erase(i + 1);
+  firstFN.erase(0, firstBase.size());
   
-  std::string fnBase2 = lastFN;
-  fnBase2.erase(i + 1);
-  if ( fnBase != fnBase2 )
-  {
-    throw std::runtime_error("First and last runs are not in the same directory\n");
-  }
+  // Parse last run's name
+  std::string lastExt = lastFN.substr(lastFN.find_last_of("."));
+  lastFN.erase(lastFN.size() - 4);
 
-  firstFN.erase(0, fnBase.size());
-  lastFN.erase(0, fnBase.size());
+  std::string lastBase = lastFN;
+  i = lastBase.size() - 1;
+  while (isdigit(lastBase[i]))
+    i--;
+  if (i == lastBase.size() - 1) {
+    throw Exception::FileError("File name must end with a number.", lastFN);
+  }
+  lastBase.erase(i + 1);
+  lastFN.erase(0, lastBase.size());
+
+  // Compare first and last
+  if ( firstBase != lastBase ) {
+    // Runs are not in the same directory
+
+    // First run number with last base name
+    std::ostringstream tempFirst;
+    tempFirst << lastBase << firstFN << firstExt << std::endl;
+    std::string pathFirst = FileFinder::Instance().getFullPath(tempFirst.str());
+    // Last run number with first base name
+    std::ostringstream tempLast;
+    tempLast << firstBase << lastFN << lastExt << std::endl;
+    std::string pathLast = FileFinder::Instance().getFullPath(tempLast.str());
+
+    // Try to correct this on the fly by 
+    // checking if the last run can be found in the first directory...
+    if ( Poco::File(pathLast).exists() ) {
+      fnBase = firstBase;
+      fnExt = firstExt;
+    } else if (Poco::File(pathFirst).exists()) {
+      // ...or viceversa
+      fnBase = lastBase;
+      fnExt = lastExt;
+    } else {
+      throw std::runtime_error("First and last runs are not in the same directory.");
+    }
+   
+  } else {
+
+    fnBase = firstBase;
+    fnExt = firstExt;
+  }
 }
 
 /**  Apply dead-time corrections. The calculation is done by ApplyDeadTimeCorr algorithm
