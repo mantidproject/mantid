@@ -41,28 +41,28 @@ class DirectReductionHelpersTest(unittest.TestCase):
 
     def test_build_subst_dictionary(self):
         self.assertEqual(dict(), helpers.build_subst_dictionary(""))
-        self.assertEqual(dict(),helpers.build_subst_dictionary())
+        self.assertEqual(dict(), helpers.build_subst_dictionary())
 
-        self.assertRaises(AttributeError,helpers.build_subst_dictionary,10)
-        self.assertRaises(AttributeError,helpers.build_subst_dictionary,"A=")
-        self.assertRaises(AttributeError,helpers.build_subst_dictionary,"B=CA=")
+        self.assertRaises(AttributeError, helpers.build_subst_dictionary, 10)
+        self.assertRaises(AttributeError, helpers.build_subst_dictionary, "A=")
+        self.assertRaises(AttributeError, helpers.build_subst_dictionary, "B=C;A=")
 
         rez=dict()
         rez['A']='B'
         self.assertEqual(rez, helpers.build_subst_dictionary(rez))
 
-        myDict =  helpers.build_subst_dictionary("A=B")
+        myDict = helpers.build_subst_dictionary("A=B")
         self.assertEqual(myDict['B'],'A')
 
-        myDict =  helpers.build_subst_dictionary("A=BC=DD")
+        myDict = helpers.build_subst_dictionary("A=B;C=DD")
         self.assertEqual(myDict['B'],'A')
         self.assertEqual(myDict['DD'],'C')
-        myDict =  helpers.build_subst_dictionary("A=B=C=DD")
+        myDict = helpers.build_subst_dictionary("A=B=C=DD")
         self.assertEqual(myDict['B'],'A')
         self.assertEqual(myDict['DD'],'A')
         self.assertEqual(myDict['C'],'A')
 
-        myDict =  helpers.build_subst_dictionary("A = B = C=DD")
+        myDict = helpers.build_subst_dictionary("A = B = C=DD")
         self.assertEqual(myDict['B'],'A')
         self.assertEqual(myDict['DD'],'A')
         self.assertEqual(myDict['C'],'A')
