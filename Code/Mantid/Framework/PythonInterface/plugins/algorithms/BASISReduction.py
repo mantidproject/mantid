@@ -1,8 +1,8 @@
+#pylint: disable=no-init
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
 from mantid import config
-import os
 
 MICROEV_TO_MILLIEV = 1000.0
 DEFAULT_BINS = [0., 0., 0.]
@@ -11,6 +11,29 @@ DEFAULT_MASK_GROUP_DIR = "/SNS/BSS/shared/autoreduce"
 DEFAULT_MASK_FILE = "BASIS_Mask.xml"
 
 class BASISReduction(PythonAlgorithm):
+
+    _short_inst = None
+    _long_inst = None
+    _extension = None
+    _doIndiv = None
+    _etBins = None
+    _qBins = None
+    _noMonNorm = None
+    _maskFile = None
+    _groupDetOpt = None
+    _overrideMask = None
+    _dMask = None
+    _doNorm = None
+    _normRange = None
+    _norm_run_list = None
+    _normWs = None
+    _normMonWs = None
+    _run_list = None
+    _samWs = None
+    _samMonWs = None
+    _samWsRun = None
+    _samSqwWs = None
+
     def category(self):
         return "Inelastic;PythonAlgorithms"
 
@@ -60,7 +83,7 @@ class BASISReduction(PythonAlgorithm):
         self._groupDetOpt = self.getProperty("GroupDetectors").value
 
         datasearch = config["datasearch.searcharchive"]
-        if (datasearch != "On"):
+        if datasearch != "On":
             config["datasearch.searcharchive"] = "On"
 
         # Handle masking file override if necessary
@@ -217,7 +240,7 @@ class BASISReduction(PythonAlgorithm):
         api.MaskDetectors(Workspace=sam_ws,
                           DetectorList=self._dMask)
                           #MaskedWorkspace='BASIS_MASK')
-        api.ModeratorTzeroLinear(InputWorkspace=sam_ws,
+        api.ModeratorTzeroLinear(InputWorkspace=sam_ws,\
                            OutputWorkspace=sam_ws)
         api.LoadParameterFile(Workspace=sam_ws,
                               Filename=config.getInstrumentDirectory() + 'BASIS_silicon_111_Parameters.xml')
@@ -226,7 +249,7 @@ class BASISReduction(PythonAlgorithm):
                          Target='Wavelength', EMode='Indirect')
 
         if not self._noMonNorm:
-            api.ModeratorTzeroLinear(InputWorkspace=mon_ws,
+            api.ModeratorTzeroLinear(InputWorkspace=mon_ws,\
                                OutputWorkspace=mon_ws)
             api.Rebin(InputWorkspace=mon_ws,
                       OutputWorkspace=mon_ws, Params='10')

@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 ##-------------------------------------------------------------------------
 ##
 ## Example: Calculating the solid angle for a spectrum with respect to the

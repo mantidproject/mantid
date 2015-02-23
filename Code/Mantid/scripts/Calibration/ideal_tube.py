@@ -5,7 +5,7 @@ import numpy
 # This class is the ideal tube, which specifies where the peaks formed by slits or edges should occur
 
 # Author: Karl Palmen ISIS
-class IdealTube:
+class IdealTube(object):
     """
    The IdealTube specifies where the peaks formed by slits or edges should occur.
 
@@ -73,7 +73,8 @@ class IdealTube:
         pixelLen = activeTubeLen/1024  # Pixel length
 
        # we then convert idealAP, idealCP and idealBP to Y coordinates and put into ideal tube array
-        self.positions = numpy.array([ idealAP*pixelLen - activeTubeLen/2,  idealCP*pixelLen - activeTubeLen/2, idealBP*pixelLen - activeTubeLen/2])
+        self.positions = numpy.array([ idealAP*pixelLen - activeTubeLen/2,\
+            idealCP*pixelLen - activeTubeLen/2, idealBP*pixelLen - activeTubeLen/2])
         self.functionalForms = [ 2, 1, 2 ]
 
 

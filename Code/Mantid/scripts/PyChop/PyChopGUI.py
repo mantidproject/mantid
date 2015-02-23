@@ -1,16 +1,10 @@
+#pylint: disable=invalid-name
 
-import sys
 from PyChopUI import Ui_MainWindow
-from PyQt4 import QtCore, uic,QtGui
-#from DirectEnergyConversion import *
-import time as time
+from PyQt4 import QtCore, QtGui
 from mantidplot import *
-import dgreduce
-import inspect
-import numpy
 from mantid import *
 from mantid.simpleapi import *
-import math
 import PyChop
 
 class MainWindow(QtGui.QMainWindow):

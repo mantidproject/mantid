@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # MUSIC : Version of Minus for MIDAS
 
 from IndirectImport import *
@@ -22,12 +23,12 @@ def CalcW0(nq,dq,disp,coeff):
         Q.append(q0)
         q02 = q0*q0
         Q2.append(q02)
-        if (disp == 'Poly'):
+        if disp == 'Poly':
             w = coeff[0]+coeff[1]*q0+coeff[2]*q02+coeff[3]*q0*q02+coeff[4]*q02*q02
-        if (disp == 'CE'):
+        if disp == 'CE':
             qk = coeff[1]*q0
             w = coeff[0]*(1.0-math.sin(qk)/qk)
-        if (disp == 'SS'):
+        if disp == 'SS':
             w0 = coeff[0]*(1.0-math.exp(coeff[1]*q02))
         w0.append(w*0.001)           #convert from mmeV to meV
         e0.append(0.0)
@@ -53,7 +54,7 @@ def CalcSqw(q0,nw2,nel,dw,w0):
             Qaxis += str(q0[i])
         else:
             Qaxis += ','+str(q0[i])
-    CreateWorkspace(OutputWorkspace='S(Q,w)', DataX=xSqw, DataY=ySqw, DataE=eSqw,
+    CreateWorkspace(OutputWorkspace='S(Q,w)', DataX=xSqw, DataY=ySqw, DataE=eSqw,\
     	Nspec=nq, UnitX='DeltaE', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
 
 def CheckCoeff(disp,coeff):
@@ -66,7 +67,7 @@ def CheckCoeff(disp,coeff):
             error = disp + ' coeff 2 is zero'
             logger.notice('ERROR *** '+error)
             sys.exit(error)
-    if (disp == 'Poly'):
+    if disp == 'Poly':
         cc = coeff[0]+coeff[1]+coeff[2]+coeff[3]+coeff[4]
         if cc < 1e-8:
             error = 'Poly coeffs all zero'
@@ -103,7 +104,7 @@ def CreateSqw(disp,coeff,grid,Verbose):
         logger.notice('Coefficients : '+str(coeff))
     nq,dq,nw,dw = CheckQw(grid)
     q0,w0,e0 = CalcW0(nq,dq,disp,coeff)
-    CreateWorkspace(OutputWorkspace=disp, DataX=q0, DataY=w0, DataE=e0,
+    CreateWorkspace(OutputWorkspace=disp, DataX=q0, DataY=w0, DataE=e0,\
     	Nspec=1, UnitX='MomentumTransfer')
     nw2 = 2*nw+1
     nel= nw+1
@@ -130,7 +131,7 @@ def ReadSqw(sqw,Verbose):
         sys.exit(error)
     nel= nw+1
     for n in range(0,nw):
-        if (Xw[n] < dw):
+        if Xw[n] < dw:
             nel = n
     dq = Q[1]-Q[0]
     if dq < 1e-5:
@@ -139,7 +140,7 @@ def ReadSqw(sqw,Verbose):
         sys.exit(error)
     if Verbose:
         logger.notice('Q : '+str(nq)+' points from '+str(Q[0])+' to '+str(Q[nq-1])+' at '+str(dq))
-        logger.notice('w : '+str(nw)+' points from '+str(Xw[0])+' to '+str(Xw[nw])+' at '+str(dw)
+        logger.notice('w : '+str(nw)+' points from '+str(Xw[0])+' to '+str(Xw[nw])+' at '+str(dw)\
     		+' ; Elastic energy at : '+str(nel))
     X0 = []
     X0 = PadArray(X0,1000)              # zeroes
@@ -241,9 +242,9 @@ def MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
 #     1 ijeom,rgeom,sam,ims,dqw,Q_in,S_in,
 #     2 totals,iw,energy,scat1,scatm,RR,S_out)
         idet = m+1
-        kill,totals,iw,energy,scat1,scatm,RR,Sqw=muscat.muscat_data(idet,lpt,llpt,sqw,lsqw,rinstr,nran,
+        kill,totals,iw,energy,scat1,scatm,RR,Sqw=muscat.muscat_data(idet,lpt,llpt,sqw,lsqw,rinstr,nran,\
     							ijeom,rgeom,sam,ims,dqw,Q_in,Sqw_in)
-        if (kill != 0):
+        if kill != 0:
             error = 'Muscat error code : '+str(kill)
             logger.notice(error)
             sys.exit(error)
@@ -310,16 +311,16 @@ def MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
     logger.notice('yTot : ' + str(len(yTot)))
     logger.notice('eTot : ' + str(len(eTot)))
     msname = sname+'_MS'
-    CreateWorkspace(OutputWorkspace=msname+'_Totals', DataX=xTot, DataY=yTot, DataE=eTot,
+    CreateWorkspace(OutputWorkspace=msname+'_Totals', DataX=xTot, DataY=yTot, DataE=eTot,\
     	Nspec=nt, UnitX='MomentumTransfer')
 #    	Nspec=nt, UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues='Taxis')
 # start output of MultScat
     eMs = np.zeros(iw*mang)
-    CreateWorkspace(OutputWorkspace=msname+'_1', DataX=xMs, DataY=yMsc1, DataE=eMs,
+    CreateWorkspace(OutputWorkspace=msname+'_1', DataX=xMs, DataY=yMsc1, DataE=eMs,\
     	Nspec=mang, UnitX='DeltaE', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
-    CreateWorkspace(OutputWorkspace=msname+'_M', DataX=xMs, DataY=yMscM, DataE=eMs,
+    CreateWorkspace(OutputWorkspace=msname+'_M', DataX=xMs, DataY=yMscM, DataE=eMs,\
     	Nspec=mang, UnitX='DeltaE', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
-    CreateWorkspace(OutputWorkspace=msname+'_R', DataX=xMs, DataY=yMr, DataE=eMs,
+    CreateWorkspace(OutputWorkspace=msname+'_R', DataX=xMs, DataY=yMr, DataE=eMs,\
     	Nspec=mang, UnitX='DeltaE', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
     group = msname+'_1,'+ msname+'_M,'+ msname+'_R'
     GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=msname+'_Scat')
@@ -365,7 +366,7 @@ def MuscatDataStart(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
     EndTime('Muscat Data')
 
 def plotMuscat(inWS,spec_list,Plot):
-    if (Plot == 'Totals' or Plot == 'All'):
+    if Plot == 'Totals' or Plot == 'All':
         tot_plot=mp.plotSpectrum(inWS+'_Totals',spec_list)
-    if (Plot == 'Scat1' or Plot == 'All'):
+    if Plot == 'Scat1' or Plot == 'All':
         mp.importMatrixWorkspace(inWS+'_1').plotGraph2D()

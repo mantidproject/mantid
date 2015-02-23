@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -6,6 +7,12 @@ import numpy as np
 
 
 class CalculateSampleTransmission(PythonAlgorithm):
+
+    _bin_params = None
+    _chemical_formula = None
+    _density = None
+    _thickness = None
+    _output_ws = None
 
     def category(self):
         return 'Sample'
@@ -52,7 +59,8 @@ class CalculateSampleTransmission(PythonAlgorithm):
         # Create the workspace and set the sample material
         CreateWorkspace(OutputWorkspace=self._output_ws, NSpec=2, DataX=[0, 0], DataY=[0, 0],
                         VerticalAxisUnit='Text', VerticalAxisValues='Transmission,Scattering')
-        Rebin(InputWorkspace=self._output_ws, OutputWorkspace=self._output_ws, Params=self._bin_params)
+        Rebin(InputWorkspace=self._output_ws, OutputWorkspace=self._output_ws,
+              Params=self._bin_params)
         SetSampleMaterial(InputWorkspace=self._output_ws, ChemicalFormula=self._chemical_formula)
         ConvertToPointData(InputWorkspace=self._output_ws, OutputWorkspace=self._output_ws)
 

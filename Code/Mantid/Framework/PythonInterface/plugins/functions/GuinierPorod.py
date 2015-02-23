@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 '''
 @author Mathieu Doucet, ORNL
 @date Oct 13, 2014
@@ -131,7 +132,7 @@ class GuinierPorod(IFunction1D):
         if qval < q1:
             return -2.0*Rg*math.pow(qval,-s)*math.exp(-qrg/n)*qval*qval/n
         else:
-            return math.pow(qval,-m)*math.exp((s-m)/2.0)*math.pow(((m-s)*n/2.0),
+            return math.pow(qval,-m)*math.exp((s-m)/2.0)*math.pow(((m-s)*n/2.0),\
                 ((m-s)/2.0))*(s-m)*math.pow(Rg,(s-m-1))
 
     def function1D(self, xvals):

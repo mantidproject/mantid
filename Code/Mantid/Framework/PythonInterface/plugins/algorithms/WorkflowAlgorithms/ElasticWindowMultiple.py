@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -21,6 +22,18 @@ def _normalize_to_lowest_temp(elt_ws_name):
 
 
 class ElasticWindowMultiple(DataProcessorAlgorithm):
+
+    _plot = None
+    _sample_log_name = None
+    _input_workspaces = None
+    _q_workspace = None
+    _q2_workspace = None
+    _elf_workspace = None
+    _elt_workspace = None
+    _range_1_start = None
+    _range_1_end = None
+    _range_2_start = None
+    _range_2_end = None
 
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'

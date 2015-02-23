@@ -1,5 +1,6 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import PythonAlgorithm, AlgorithmFactory
-from mantid.kernel import Direction, IntArrayProperty, FloatArrayProperty
+from mantid.kernel import Direction,IntArrayProperty, FloatArrayProperty
 import  mantid,math,numpy
 
 

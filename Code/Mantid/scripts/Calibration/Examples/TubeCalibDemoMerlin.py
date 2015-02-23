@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
 Tube Calibration Demonstration program for MERLIN.
 
@@ -100,9 +101,9 @@ def calibrateMerlin(filename):
   # also put peaks into PeakFile
     calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, door9pos, door9func,
         outputPeak=True,
-    margin=30,
-    rangeList=range(20) # because 20, 21, 22, 23 are defective detectors
-    )
+        margin=30,
+        rangeList=range(20) # because 20, 21, 22, 23 are defective detectors
+        )
     print "Got calibration (new positions of detectors) and put slit peaks into file TubeDemoMerlin01.txt"
     analisePeakTable(peakTable, 'door9_tube1_peaks')
 
@@ -121,10 +122,10 @@ def calibrateMerlin(filename):
     doorpos = knownPositions
     doorfunc = funcForm
     CalibratedComponent = ['MERLIN/door%d'%(i) for i in [7,6,5,4, 2, 1]]
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, doorpos,
-        doorfunc,
-    outputPeak = True,
-    calibTable = calibrationTable,
+    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, doorpos,\
+        doorfunc,\
+    outputPeak = True,\
+    calibTable = calibrationTable,\
     margin = 30)
     analisePeakTable(peakTable, 'door1to7_peaks')
 
@@ -159,11 +160,11 @@ def calibrateMerlin(filename):
     fitPar = TubeCalibFitParams([216, 527, 826, 989])
     fitPar.setAutomatic(True)
 
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, doorpos,
-    doorfunc,
-    outputPeak = True,
-    fitPar = fitPar,
-    calibTable = calibrationTable,
+    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, doorpos,\
+    doorfunc,\
+    outputPeak = True,\
+    fitPar = fitPar,\
+    calibTable = calibrationTable,\
     margin = 30)
     analisePeakTable(peakTable, 'door3_tube1_peaks')
 
@@ -180,11 +181,11 @@ def calibrateMerlin(filename):
     fitPar = TubeCalibFitParams([50, 202, 664, 815])
     fitPar.setAutomatic(True)
 
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, doorpos,
-    doorfunc,
-    outputPeak = True,
-    calibTable = calibrationTable,
-    fitPar = fitPar,
+    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, doorpos,\
+    doorfunc,\
+    outputPeak = True,\
+    calibTable = calibrationTable,\
+    fitPar = fitPar,\
     margin = 30)
 
     analisePeakTable(peakTable, 'door3_tube2_peaks')
@@ -194,10 +195,10 @@ def calibrateMerlin(filename):
     CalibratedComponent = ['MERLIN/door3/tube_3_%d'%(i) for i in [1,2,3]]
     doorpos = knownPositions[[0,1,2,3,5,6,7,8]]
     doorfunc = funcForm[[0,1,2,3,5,6,7,8]]
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, doorpos,
-    doorfunc,
-    outputPeak = True,
-    calibTable = calibrationTable,
+    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, doorpos,\
+    doorfunc,\
+    outputPeak = True,\
+    calibTable = calibrationTable,\
     margin = 30)
     analisePeakTable(peakTable, 'door3_123_peaks')
 
@@ -209,10 +210,10 @@ def calibrateMerlin(filename):
     CalibratedComponent = part_3 + part_4 + part_5
     doorpos = knownPositions
     doorfunc = funcForm
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, doorpos,
-        doorfunc,
-    outputPeak = True,
-    calibTable = calibrationTable,
+    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, doorpos,\
+        doorfunc,\
+    outputPeak = True,\
+    calibTable = calibrationTable,\
     margin = 30)
     analisePeakTable(peakTable, 'door3_peaks')
 

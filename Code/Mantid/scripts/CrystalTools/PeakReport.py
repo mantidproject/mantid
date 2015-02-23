@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
 This is a module for creating peak integration reports.
 """
@@ -8,7 +9,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import *
 
-class PeakReport:
+class PeakReport(object):
     """
     Peak Report is a class used to creating one or more peak integration reports as PDFs.
     """
