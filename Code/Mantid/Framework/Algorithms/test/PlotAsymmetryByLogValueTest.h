@@ -254,6 +254,44 @@ public:
     AnalysisDataService::Instance().remove(ws);
   }
 
+  void test_LogValueFunction ()
+  {
+    const std::string ws = "Test_DeadTimeCorrection_FromRunData_Ws";
+
+    PlotAsymmetryByLogValue alg;
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    alg.setPropertyValue("FirstRun", firstRun);
+    alg.setPropertyValue("LastRun", lastRun);
+    alg.setPropertyValue("OutputWorkspace", ws);
+    // We use 'beamlog_current' as log value because 
+    // we want to test the 'Mean' function below and this is 
+    // one of the few properties that contains different values over time
+    alg.setPropertyValue("LogValue","beamlog_current");
+    alg.setPropertyValue("Function","Mean");
+    alg.setPropertyValue("DeadTimeCorrType","None");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      AnalysisDataService::Instance().retrieve(ws));
+
+    TS_ASSERT(outWs);
+    TS_ASSERT_EQUALS(outWs->blocksize(), 2);
+    TS_ASSERT_EQUALS(outWs->getNumberHistograms(),1);
+
+    // Now we want to test X values (log values) in the output workspace
+    // rather than asymmetry (Y values)
+    const Mantid::MantidVec& X = outWs->readX(0);
+
+    TS_ASSERT_DELTA(X[0], 179.078620, 0.00001);
+    TS_ASSERT_DELTA(X[1], 178.849998, 0.00001);
+
+    AnalysisDataService::Instance().remove(ws);
+  }
+
 private:
   std::string firstRun,lastRun;
   
