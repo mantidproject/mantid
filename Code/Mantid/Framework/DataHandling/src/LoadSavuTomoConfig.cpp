@@ -85,12 +85,12 @@ void LoadSavuTomoConfig::exec() {
  * @return true if everything seems fine, false otherwise
  */
 bool LoadSavuTomoConfig::checkOpenFile(std::string fname,
-                                   boost::shared_ptr<::NeXus::File> &f) {
+                                   boost::shared_ptr<NeXus::File> &f) {
   try {
-    f = boost::make_shared<::NeXus::File>(fname);
+    f = boost::make_shared<NeXus::File>(fname);
     if (f)
       f->getEntries();
-  } catch (::NeXus::Exception &e) {
+  } catch (NeXus::Exception &e) {
     g_log.error() << "Failed to open as a NeXus file: '" << fname
                   << "', error description: " << e.what() << std::endl;
     return false;
@@ -121,7 +121,7 @@ ITableWorkspace_sptr LoadSavuTomoConfig::loadFile(std::string& fname,
                                               std::string& wsName) {
   // Throws an exception if there is a problem with file access
   //Mantid::NeXus::NXRoot root(fname);
-  boost::shared_ptr<::NeXus::File> f = NULL;
+  boost::shared_ptr<NeXus::File> f = NULL;
   if (!checkOpenFile(fname, f)) {
     throw std::runtime_error(
         "Failed to recognize this file as a NeXus file, cannot continue.");
@@ -164,7 +164,7 @@ ITableWorkspace_sptr LoadSavuTomoConfig::loadFile(std::string& fname,
     std::string entryIdx = boost::lexical_cast<std::string>(j);
     try {
       f->openGroup(entryIdx, "NXnote");
-    } catch(::NeXus::Exception &e) {
+    } catch(NeXus::Exception &e) {
       // detailed NeXus error message and throw...
       g_log.error() << "Failed to load plugin '" << j << "' from"
         "NeXus file. Error description: " << e.what() << std::endl;
@@ -185,7 +185,7 @@ ITableWorkspace_sptr LoadSavuTomoConfig::loadFile(std::string& fname,
       // cite not available for now
       // f->readData("cite", cite);
       cite = "Not available";
-    } catch(::NeXus::Exception &e) {
+    } catch(NeXus::Exception &e) {
       // permissive, just error message but carry on
       g_log.warning() << "Failed to read some fields in tomographic "
         "reconstruction plugin line. The file seems to be wrong. Error "

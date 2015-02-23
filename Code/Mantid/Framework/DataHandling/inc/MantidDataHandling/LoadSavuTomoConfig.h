@@ -70,7 +70,7 @@ private:
 
   // open file safely and carefully checking potential issues
   bool checkOpenFile(std::string fname,
-                     boost::shared_ptr<::NeXus::File> &f);
+                     boost::shared_ptr<NeXus::File> &f);
 };
 
 } // namespace DataHandling
