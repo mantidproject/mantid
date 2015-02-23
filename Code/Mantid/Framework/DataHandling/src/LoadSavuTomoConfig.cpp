@@ -121,7 +121,7 @@ ITableWorkspace_sptr LoadSavuTomoConfig::loadFile(std::string& fname,
                                               std::string& wsName) {
   // Throws an exception if there is a problem with file access
   //Mantid::NeXus::NXRoot root(fname);
-  boost::shared_ptr<NeXus::File> f = NULL;
+  boost::shared_ptr<NeXus::File> f;
   if (!checkOpenFile(fname, f)) {
     throw std::runtime_error(
         "Failed to recognize this file as a NeXus file, cannot continue.");
