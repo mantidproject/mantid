@@ -9,14 +9,14 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
-#include "MantidQtCustomInterfaces/Indirect/IndirectCalibration.h"
-#include "MantidQtCustomInterfaces/Indirect/IndirectConvertToEnergy.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectDataReductionTab.h"
-#include "MantidQtCustomInterfaces/Indirect/IndirectDiagnostics.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectMoments.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectSqw.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectSymmetrise.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectTransmission.h"
+#include "MantidQtCustomInterfaces/Indirect/ISISCalibration.h"
+#include "MantidQtCustomInterfaces/Indirect/ISISDiagnostics.h"
+#include "MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h"
 
 #include <QDesktopServices>
 #include <QDir>
@@ -116,9 +116,9 @@ void IndirectDataReduction::initLayout()
   updateRunButton(false, "Loading UI", "Initialising user interface components...");
 
   // Create the tabs
-  m_tabs["Energy Transfer"] = new IndirectConvertToEnergy(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loEnergyTransfer"));
-  m_tabs["Calibration"] = new IndirectCalibration(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loCalibration"));
-  m_tabs["Diagnostics"] = new IndirectDiagnostics(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loDiagnostics"));
+  m_tabs["Energy Transfer"] = new ISISEnergyTransfer(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loEnergyTransfer"));
+  m_tabs["Calibration"] = new ISISCalibration(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loCalibration"));
+  m_tabs["Diagnostics"] = new ISISDiagnostics(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loDiagnostics"));
   m_tabs["Transmission"] = new IndirectTransmission(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loTransmission"));
   m_tabs["Symmetrise"] = new IndirectSymmetrise(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loSymmetrise"));
   m_tabs["S(Q, w)"] = new IndirectSqw(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loSofQW"));
