@@ -11,6 +11,29 @@ DEFAULT_MASK_GROUP_DIR = "/SNS/BSS/shared/autoreduce"
 DEFAULT_MASK_FILE = "BASIS_Mask.xml"
 
 class BASISReduction(PythonAlgorithm):
+
+    _short_inst = None
+    _long_inst = None
+    _extension = None
+    _doIndiv = None
+    _etBins = None
+    _qBins = None
+    _noMonNorm = None
+    _maskFile = None
+    _groupDetOpt = None
+    _overrideMask = None
+    _dMask = None
+    _doNorm = None
+    _normRange = None
+    _norm_run_list = None
+    _normWs = None
+    _normMonWs = None
+    _run_list = None
+    _samWs = None
+    _samMonWs = None
+    _samWsRun = None
+    _samSqwWs = None
+
     def category(self):
         return "Inelastic;PythonAlgorithms"
 

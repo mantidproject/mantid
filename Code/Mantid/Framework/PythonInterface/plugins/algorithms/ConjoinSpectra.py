@@ -7,7 +7,8 @@ class ConjoinSpectra(PythonAlgorithm):
     """
     Conjoins spectra from several workspaces into a single workspace
 
-    Spectra to be conjoined must be equally binned in order for ConjoinSpectra to work. If necessary use RebinToWorkspace first.
+    Spectra to be conjoined must be equally binned in order for ConjoinSpectra
+    to work. If necessary use RebinToWorkspace first.
     """
 
     def category(self):
@@ -58,7 +59,8 @@ class ConjoinSpectra(PythonAlgorithm):
             DeleteWorkspace(Workspace=wsOutput)
         for wsName in wsNames:
             #extract the spectrum
-            ExtractSingleSpectrum(InputWorkspace=wsName,OutputWorkspace=wsTemp,WorkspaceIndex=wsIndex)
+            ExtractSingleSpectrum(InputWorkspace=wsName,OutputWorkspace=wsTemp,
+                                  WorkspaceIndex=wsIndex)
 
             labelString =""
             if labelUsing != "":
@@ -68,7 +70,9 @@ class ConjoinSpectra(PythonAlgorithm):
             ta.setLabel(loopIndex,labelString)
             loopIndex += 1
             if mtd.doesExist(wsOutput):
-                ConjoinWorkspaces(InputWorkspace1=wsOutput,InputWorkspace2=wsTemp,CheckOverlapping=False)
+                ConjoinWorkspaces(InputWorkspace1=wsOutput,
+                                  InputWorkspace2=wsTemp,
+                                  CheckOverlapping=False)
                 if mtd.doesExist(wsTemp):
                     DeleteWorkspace(Workspace=wsTemp)
             else:
