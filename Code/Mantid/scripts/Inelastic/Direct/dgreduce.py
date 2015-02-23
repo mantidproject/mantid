@@ -1,6 +1,6 @@
 #pylint: disable=invalid-name
 """ Empty class temporary left for compatibility with previous interfaces """
-import DirectEnergyConversion as DRC
+import Direct.DirectEnergyConversion as DRC
 from mantid.simpleapi import *
 from mantid.kernel import funcreturns
 

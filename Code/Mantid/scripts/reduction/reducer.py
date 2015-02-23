@@ -23,14 +23,14 @@ import sys
 import time
 import types
 import inspect
-from instrument import Instrument
+from reduction.instrument import Instrument
 import mantid
 from mantid import simpleapi
 import warnings
 import inspect
 import random
 import string
-from find_data import find_data
+from reduction.find_data import find_data
 
 
 ## Version number
@@ -538,7 +538,7 @@ class ReductionStep(object):
             @param inputworkspace: Name of the workspace to apply this step to
             @param outputworkspace: Name of the workspace to have as an output. If this is None it will be set to inputworkspace
         """
-        raise NotImplemented
+        raise NotImplementedError
 
 
 def extract_workspace_name(filepath, suffix=''):

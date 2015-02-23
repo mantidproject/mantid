@@ -5,7 +5,7 @@ ws_name = "TOPAZ_3132"
 filename = ws_name +"_event.nxs"
 ws = LoadEventNexus(Filename=filename,FilterByTofMin=3000, FilterByTofMax=16000)
 
-# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------------------
 # Part 1. Basic Reduction
 
 # Spherical Absorption and Lorentz Corrections
@@ -37,7 +37,7 @@ PeaksLattice_Integrated = IntegratePeaksMD(InputWorkspace=LabQ,PeakRadius=0.12,\
 # Save for SHELX
 SaveHKL(InputWorkspace=PeaksLattice, Filename=ws_name + '.hkl')
 
-# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------------------
 # Part 2. Alternative/Advanced Processing Steps
 
 
@@ -62,7 +62,7 @@ PeaksLatticeFFT = IntegratePeaksMD(InputWorkspace=LabQ, PeakRadius=0.12,\
 # Save for SHELX
 SaveHKL(InputWorkspace=PeaksLatticeFFT, Filename=ws_name + '.hkl')
 
-# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------------------
 # Part 3. Utilising the UB
 
 # Copy the UB matrix back to the original workspace
@@ -73,7 +73,7 @@ CopySample(InputWorkspace=PeaksLattice, OutputWorkspace=ws,\
 HKL = ConvertToDiffractionMDWorkspace(InputWorkspace=ws,\
     	OutputDimensions='HKL',LorentzCorrection='0', SplitInto='2',SplitThreshold='150')
 
-# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------------------
 # Part 4. Displaying
 
 # Bin to a regular grid

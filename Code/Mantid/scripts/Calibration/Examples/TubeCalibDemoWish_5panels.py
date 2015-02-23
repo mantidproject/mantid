@@ -18,7 +18,7 @@ import tube
 from tube_spec import TubeSpec
 
 
-def CalibrateWish( run_per_panel_list):
+def CalibrateWish(run_per_panel_list):
     '''
     :param run_per_panel_list: is a list of tuples with the run number and the associated panel
 
