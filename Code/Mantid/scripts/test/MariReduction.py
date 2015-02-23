@@ -13,7 +13,7 @@ class ReduceMARI(ReductionWrapper):
 #-------------------------------------------------------------------------------------------------#
    @MainProperties
    def def_main_properties(self):
-        """ Define main properties used in reduction """
+       """ Define main properties used in reduction """
        prop = {}
        prop['sample_run'] = 11001
        prop['wb_run'] = 11060
@@ -98,13 +98,13 @@ if __name__ == "__main__":
     # folder where input data can be found
      data_dir = 'd:/Data/Mantid_Testing/14_11_27'
      # auxiliary folder with results
-    ref_data_dir = 'd:/Data/MantidSystemTests/SystemTests/AnalysisTests/ReferenceResults'
+     ref_data_dir = 'd:/Data/MantidSystemTests/SystemTests/AnalysisTests/ReferenceResults'
      # Set input path to
      config.setDataSearchDirs('{0};{1};{2}'.format(data_dir,map_mask_dir,ref_data_dir))
      # use appendDataSearch directory to add to existing data search path
      #config.appendDataSearchDir('d:/Data/Mantid_GIT/Test/AutoTestData')
      # folder to save resulting spe/nxspe files.
-    config['defaultsave.directory'] = data_dir
+     config['defaultsave.directory'] = data_dir
 
 ###### Initialize reduction class above and set up reduction properties. Note no parameters  ######
      rd = ReduceMARI()
@@ -117,5 +117,5 @@ if __name__ == "__main__":
      #file = os.path.join(run_dir,'reduce_vars.py')
      #rd.save_web_variables(file)
 
-    rd.reduce()
+     rd.reduce()
 
