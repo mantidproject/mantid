@@ -67,6 +67,11 @@ class sfCalculator(object):
 
     is_nexus_detector_rotated_flag = True
 
+    a = None
+    b = None
+    error_a = None
+    error_b = None
+
     def __init__(self, numerator=None, denominator=None,
                  tof_range=None):
 

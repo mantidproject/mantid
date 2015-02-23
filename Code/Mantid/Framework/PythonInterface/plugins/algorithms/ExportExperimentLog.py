@@ -5,11 +5,27 @@ from mantid.kernel import *
 import datetime
 import time
 import os
-        
+
 class ExportExperimentLog(PythonAlgorithm):
 
     """ Algorithm to export experiment log
     """
+
+    _wksp = None
+    _sampleLogNames = None
+    _sampleLogOperations = None
+    _fileformat = None
+    _valuesep = None
+    _logfilename = None
+    _reorderOld = None
+    _timezone = None
+    _titleToOrder = None
+    _orderRecord = None
+    titleToOrder = None
+    _removeDupRecord = None
+    _ovrdTitleValueDict = None
+    _headerTitles = None
+    _filemode = None
 
     def summmary(self):
         return "Exports experimental log."
@@ -52,7 +68,6 @@ class ExportExperimentLog(PythonAlgorithm):
         timezones = ["UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London", "GMT+0",\
             "Europe/Paris", "Europe/Copenhagen"]
         self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones))
-
 
         return
 

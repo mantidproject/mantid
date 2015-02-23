@@ -9,6 +9,10 @@ _OUTPUTLEVEL = "NOOUTPUT"
 class LoadFullprofFile(PythonAlgorithm):
     """ Create the input TableWorkspaces for LeBail Fitting
     """
+
+    _tableWS = None
+    _dataWS = None
+
     def category(self):
         """
         """
@@ -133,7 +137,7 @@ class LoadFullprofFile(PythonAlgorithm):
 
             if hkldict.has_key(dkey):
                 if _OUTPUTLEVEL == "INFORMATION":
-                    self.warning("Warning! Duplicate HKL %d, %d, %d" (h, k, l))
+                    self.warning("Warning! Duplicate HKL %d, %d, %d" % (h, k, l))
                 continue
 
             if fwhm < 1.0E-5:
