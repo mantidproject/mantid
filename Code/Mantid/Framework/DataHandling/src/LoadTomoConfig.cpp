@@ -2,9 +2,8 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataHandling/LoadTomoConfig.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 #include <nexus/NeXusException.hpp>
@@ -29,18 +28,19 @@ LoadTomoConfig::~LoadTomoConfig() {
 void LoadTomoConfig::init() {
   // Required input properties
   std::vector<std::string> exts;
-  exts.push_back(".xml");
   exts.push_back(".nxs");
   exts.push_back(".nx5");
+  exts.push_back(".xml");
 
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "The name of the Nexus parameters file to read, as a full "
+                  "The name of the Nexus parameterization file to read, as a full"
                   "or relative path.");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
+  declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace",
+                                                         "savuTomoConfig",
                                                          Kernel::Direction::Output),
                   "The name of the workspace to be created as output of"
-                  "the algorithm.  A workspace of this name will be created "
+                  "the algorithm, a workspace with this name will be created "
                   "and stored in the Analysis Data Service.");
 }
 
@@ -62,8 +62,12 @@ void LoadTomoConfig::exec() {
   try {
     // Do the real load. Throws exception if issues found
     ws =  loadFile(fname, wsName);
+    if (ws) {
+      setProperty("OutputWorkspace", ws);
+    }
   } catch(std::exception& e) {
-    g_log.error() << "Failed to load file: " << e.what();
+    g_log.error() << "Failed to load tomography reconstruction "
+      "parameterization file: " << e.what() << std::endl;
     return;
   }
 
@@ -98,13 +102,14 @@ bool LoadTomoConfig::checkOpenFile(std::string fname,
  * workspace. The file must have the following syntax:
  *
  * <NXentry name="entry1">
- *   <NXsubentry name="processing">
- *     <NXdata name="id">
+ *   <NXprocess name="processing">
+ *     <NXnote name="id">
  *       <values id="ID VALUE" params="..." name="..." cite="...">
  *       </values>
- *     </NXdata>
- *   </NXsubentry>
+ *     </NXnote>
+ *   </NXprocess>
  * </NXentry>
+ *
  * @param fname name of the parameterization file
  * @param wsName name of workspace where to load the file data
  *
@@ -122,10 +127,10 @@ ITableWorkspace_sptr LoadTomoConfig::loadFile(std::string& fname,
   }
 
   ITableWorkspace_sptr ws =
-    API::WorkspaceFactory::Instance().createTable(wsName);
+    API::WorkspaceFactory::Instance().createTable();
   if (!ws)
-    throw std::runtime_error("Could not create TableWorkspace with name + '"
-                             + wsName + "'");
+    throw std::runtime_error("Could not create TableWorkspace for "
+                             "workspace with name '" + wsName + "'");
 
   // init workspace
   ws->setTitle("Table with tomography parameters from file " +
@@ -139,28 +144,29 @@ ITableWorkspace_sptr LoadTomoConfig::loadFile(std::string& fname,
   // 'entry1'
   // it could be more strict and demand entries.size()==1
   std::map<std::string, std::string> entries = f->getEntries();
-  auto it = entries.find("entry1");
+  std::string mainEntryName = "entry";
+  auto it = entries.find(mainEntryName);
   if (entries.end() == it) {
-    throw std::runtime_error("Could not find the 'entry1' entry. "
-      "Even though this file looks like a valid NeXus file, it is "
+    throw std::runtime_error("Could not find the '" + mainEntryName + "' "
+      "entry. Even though this file looks like a valid NeXus file, it is "
       "not in the correct format for tomography reconstruction "
       "parameterization files.");
   }
 
   // go through the input file plugin entries
-  f->openGroup("entry1", "NXentry");
-  f->openGroup("processing", "NXsubentry");
+  f->openGroup(mainEntryName, "NXentry");
+  f->openGroup("process", "NXprocess");
   size_t pluginsLen = f->getEntries().size();
   for (size_t j=0; j<pluginsLen; j++) {
     API::TableRow table = ws->appendRow();
 
     std::string entryIdx = boost::lexical_cast<std::string>(j);
     try {
-      f->openGroup(entryIdx, "NXsubentry");
+      f->openGroup(entryIdx, "NXnote");
     } catch(::NeXus::Exception &e) {
       // detailed NeXus error message and throw...
       g_log.error() << "Failed to load plugin '" << j << "' from"
-        "NeXus file. Error description: " << e.what();
+        "NeXus file. Error description: " << e.what() << std::endl;
       throw std::runtime_error("Could not load one or more plugin "
         "entries from the tomographic reconstruction parameterization "
         "file. Please check that the file is correct.");
@@ -172,15 +178,17 @@ ITableWorkspace_sptr LoadTomoConfig::loadFile(std::string& fname,
     std::string name = "";
     std::string cite = "";
     try {
-      id = f->getStrData(); // f->readData<std::string>("id", id)
-      params = f->getStrData(); // f->readData<std::string>("params", params)
-      name = f->getStrData(); // f->readData<std::string>("name", name)
-      cite = f->getStrData(); // f->readData<std::string>("cite", cite)
+      f->readData("data", params);
+      f->readData("id", id);
+      f->readData("name", name);
+      // cite not available for now
+      // f->readData("cite", cite);
+      cite = "Not available";
     } catch(::NeXus::Exception &e) {
       // permissive, just error message but carry on
       g_log.warning() << "Failed to read some fields in tomographic "
         "reconstruction plugin line. The file seems to be wrong. Error "
-        "description: " << e.what();
+        "description: " << e.what() << std::endl;
     }
 
     table << id << params << name << cite;

@@ -12,8 +12,8 @@ namespace Mantid {
 namespace DataHandling {
 
 /**
-  LoadTomoConfig : Load a tomographic reconstruction parameters file
-  into a TableWorkspace
+  LoadTomoConfig : Load a tomographic reconstruction parameters file (as
+  used in the savu tomography reconstructin pipeline) into a TableWorkspace
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
