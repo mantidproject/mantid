@@ -8,8 +8,14 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/Exception.h"
 
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+
+using ::testing::_;
+using ::testing::Mock;
 
 class FunctionParameterDecoratorTest : public CxxTest::TestSuite {
 public:
@@ -255,6 +261,15 @@ public:
                      std::invalid_argument);
   }
 
+  void testBeforeDecoratedFunctionSetIsCalled() {
+    MockTestableFunctionParameterDecorator fn;
+    EXPECT_CALL(fn, beforeDecoratedFunctionSet(_)).Times(1);
+
+    fn.setDecoratedFunction("Gaussian");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&fn));
+  }
+
 private:
   FunctionParameterDecorator_sptr getFunctionParameterDecoratorGaussian() {
     FunctionParameterDecorator_sptr fn =
@@ -286,6 +301,12 @@ private:
       IFunction_sptr fn = getDecoratedFunction();
       fn->functionDeriv(domain, jacobian);
     }
+  };
+
+  class MockTestableFunctionParameterDecorator
+      : public TestableFunctionParameterDecorator {
+  public:
+    MOCK_METHOD1(beforeDecoratedFunctionSet, void(const IFunction_sptr &));
   };
 };
 

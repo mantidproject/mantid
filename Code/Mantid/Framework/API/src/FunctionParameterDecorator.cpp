@@ -6,8 +6,12 @@ namespace API {
 
 void FunctionParameterDecorator::setDecoratedFunction(
     const std::string &wrappedFunctionName) {
-  m_wrappedFunction =
+  IFunction_sptr fn =
       FunctionFactory::Instance().createFunction(wrappedFunctionName);
+
+  beforeDecoratedFunctionSet(fn);
+
+  setDecoratedFunctionPrivate(fn);
 }
 
 IFunction_sptr FunctionParameterDecorator::getDecoratedFunction() const {
@@ -219,12 +223,14 @@ void FunctionParameterDecorator::setUpForFit() {
   m_wrappedFunction->setUpForFit();
 }
 
+/// Throws std::runtime_error when m_wrappedFunction is not set.
 void FunctionParameterDecorator::throwIfNoFunctionSet() const {
   if (!m_wrappedFunction) {
     throw std::runtime_error("No wrapped function set, aborting.");
   }
 }
 
+/// Does nothing, function does not have parameters.
 void FunctionParameterDecorator::declareParameter(
     const std::string &name, double initValue, const std::string &description) {
   UNUSED_ARG(name);
@@ -232,7 +238,28 @@ void FunctionParameterDecorator::declareParameter(
   UNUSED_ARG(description);
 }
 
+/// Does nothing.
 void FunctionParameterDecorator::addTie(ParameterTie *tie) { UNUSED_ARG(tie); }
+
+/**
+ * @brief Function that is called before the decorated function is set
+ *
+ * This function is called before the decorated function is actually set, with
+ * the function object in question as a parameter. The base implementation does
+ * nothing. Re-implementations could for example check whether the function
+ * has a certain type and throw an exception otherwise.
+ *
+ * @param fn :: Function that is going to be decorated.
+ */
+void FunctionParameterDecorator::beforeDecoratedFunctionSet(
+    const IFunction_sptr &fn) {
+  UNUSED_ARG(fn);
+}
+
+void FunctionParameterDecorator::setDecoratedFunctionPrivate(
+    const IFunction_sptr &fn) {
+  m_wrappedFunction = fn;
+}
 
 } // namespace API
 } // namespace Mantid
