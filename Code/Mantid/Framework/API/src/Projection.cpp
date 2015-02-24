@@ -8,6 +8,9 @@ Projection::Projection()
       m_units(new ProjectionUnit[m_nd]) {
   m_dimensions[0] = VMD(m_nd);
   m_dimensions[1] = VMD(m_nd);
+  //Identity
+  m_dimensions[0][0] = 1.0;
+  m_dimensions[1][1] = 1.0;
   m_offsets[0] = 0.0;
   m_offsets[1] = 0.0;
   m_units[0] = RLU;
@@ -24,6 +27,8 @@ Projection::Projection(size_t nd)
 
   for (size_t i = 0; i < m_nd; ++i) {
     m_dimensions[i] = VMD(m_nd);
+    //We default to an identity projection
+    m_dimensions[i][i] = 1.0;
     m_offsets[i] = 0.0;
     m_units[i] = RLU;
   }
