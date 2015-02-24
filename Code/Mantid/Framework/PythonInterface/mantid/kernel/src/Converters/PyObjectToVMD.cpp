@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Converters/PyObjectToVMD.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/python/extract.hpp>
 #include <boost/python/numeric.hpp>
 
