@@ -250,6 +250,42 @@ void export_Projection()
       boost::mpl::vector3<void, Projection&, VMD>()
     )
   )
+  .add_property("u",
+    make_function(
+      &Projection::U,
+      return_internal_reference<>(),
+      boost::mpl::vector2<VMD&, Projection&>()
+    ),
+    make_function(
+      boost::bind(&projSetAxis, _1, 0, _2),
+      default_call_policies(),
+      boost::mpl::vector3<void, Projection&, const object&>()
+    )
+  )
+  .add_property("v",
+    make_function(
+      &Projection::V,
+      return_internal_reference<>(),
+      boost::mpl::vector2<VMD&, Projection&>()
+    ),
+    make_function(
+      boost::bind(&projSetAxis, _1, 1, _2),
+      default_call_policies(),
+      boost::mpl::vector3<void, Projection&, const object&>()
+    )
+  )
+  .add_property("w",
+    make_function(
+      &Projection::W,
+      return_internal_reference<>(),
+      boost::mpl::vector2<VMD&, Projection&>()
+    ),
+    make_function(
+      boost::bind(&projSetAxis, _1, 2, _2),
+      default_call_policies(),
+      boost::mpl::vector3<void, Projection&, const object&>()
+    )
+  )
   .def(
     "toWorkspace",
     toWorkspace,
