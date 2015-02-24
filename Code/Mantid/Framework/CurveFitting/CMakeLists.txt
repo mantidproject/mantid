@@ -66,6 +66,7 @@ set ( SRC_FILES
 	src/NormaliseByPeakArea.cpp
 	src/PRConjugateGradientMinimizer.cpp
 	src/ParDomain.cpp
+	src/PeakParameterFunction.cpp
 	src/PlotPeakByLogValue.cpp
 	src/Polynomial.cpp
 	src/ProcessBackground.cpp
@@ -176,6 +177,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/NormaliseByPeakArea.h
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/ParDomain.h
+	inc/MantidCurveFitting/PeakParameterFunction.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
 	inc/MantidCurveFitting/Polynomial.h
 	inc/MantidCurveFitting/ProcessBackground.h
@@ -277,6 +279,7 @@ set ( TEST_FILES
 	NeutronBk2BkExpConvPVoigtTest.h
 	NormaliseByPeakAreaTest.h
 	PRConjugateGradientTest.h
+	PeakParameterFunctionTest.h
 	PlotPeakByLogValueTest.h
 	PolynomialTest.h
 	ProcessBackgroundTest.h

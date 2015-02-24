@@ -2,8 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/PeakFunctionIntegrator.h"
+#include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
 
@@ -201,7 +203,14 @@ void IPeakFunction::setIntensity(const double newIntensity) {
 
 std::string IPeakFunction::getCentreParameterName() const {
   FunctionParameterDecorator_sptr fn =
-      boost::make_shared<SpecialParameterFunction>();
+      boost::dynamic_pointer_cast<FunctionParameterDecorator>(
+          FunctionFactory::Instance().createFunction("PeakParameterFunction"));
+
+  if (!fn) {
+    throw std::runtime_error(
+        "PeakParameterFunction could not be created successfully.");
+  }
+
   fn->setDecoratedFunction(this->name());
 
   FunctionDomain1DVector domain(std::vector<double>(4, 0.0));
