@@ -108,6 +108,26 @@ public:
 
     checkColumns(ws);
 
+#if (defined __APPLE__ && defined __INTEL_COMPILER)
+    // This is a horror, an exception needed for osx 10.8 where lib nexus does not behave
+    // Bug in NeXus strings: the last character is trimmed, and " become \"
+    // TODO: remove this when osx 10.8 extinguishes  (theres a ticket being created for that).
+    // ID
+    TS_ASSERT_EQUALS( ws->cell<std::string>(0, 0), "savu.plugins.timeseries_field_correction" );
+    TS_ASSERT_EQUALS( ws->cell<std::string>(1, 0), "savu.plugins.median_filte" );
+    TS_ASSERT_EQUALS( ws->cell<std::string>(2, 0), "savu.plugins.simple_reco" );
+
+    // data entry in NeXus file (Params column)
+    TS_ASSERT_EQUALS( ws->cell<std::string>(0, 1), "{" );
+    TS_ASSERT_EQUALS( ws->cell<std::string>(1, 1), "{\\\"kernel_size\\\": [1, 3, 3]" );
+    TS_ASSERT_EQUALS( ws->cell<std::string>(2, 1), "{\\\"center_of_rotation\\\": 86" );
+
+    // name entry in NeXus file
+    TS_ASSERT_EQUALS( ws->cell<std::string>(0, 2), "Timeseries Field Correction" );
+    TS_ASSERT_EQUALS( ws->cell<std::string>(1, 2), "Median Filte" );
+    TS_ASSERT_EQUALS( ws->cell<std::string>(2, 2), "Simple Reconstructio" );
+
+#else
     // this example has 3 plugins: savu.plugins.timeseries_fields_corrections, savu.median_filter,
     // savu.plugins.simple_recon
     // ID
@@ -124,6 +144,7 @@ public:
     TS_ASSERT_EQUALS( ws->cell<std::string>(0, 2), "Timeseries Field Corrections" );
     TS_ASSERT_EQUALS( ws->cell<std::string>(1, 2), "Median Filter" );
     TS_ASSERT_EQUALS( ws->cell<std::string>(2, 2), "Simple Reconstruction" );
+#endif
 
     // cite information, not presently available in example files
     for (size_t i=0; i<nRows; i++) {

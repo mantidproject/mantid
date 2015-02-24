@@ -1,8 +1,8 @@
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataHandling/LoadSavuTomoConfig.h"
 #include "MantidKernel/PropertyWithValue.h"
 
