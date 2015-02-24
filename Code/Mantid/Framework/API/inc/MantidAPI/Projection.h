@@ -55,9 +55,11 @@ public:
   /// Four dimensional value constructor
   Projection(const VMD &u, const VMD &v, const VMD &w, const VMD &x);
   /// Five dimensional value constructor
-  Projection(const VMD &u, const VMD &v, const VMD &w, const VMD &x, const VMD &y);
+  Projection(const VMD &u, const VMD &v, const VMD &w, const VMD &x,
+             const VMD &y);
   /// Six dimensional value constructor
-  Projection(const VMD &u, const VMD &v, const VMD &w, const VMD &x, const VMD &y, const VMD &z);
+  Projection(const VMD &u, const VMD &v, const VMD &w, const VMD &x,
+             const VMD &y, const VMD &z);
   /// Copy constructor
   Projection(const Projection &other);
   /// Assignment operator

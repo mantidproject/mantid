@@ -65,7 +65,8 @@ Projection::Projection(const VMD &u, const VMD &v, const VMD &w, const VMD &x)
   }
 }
 
-Projection::Projection(const VMD &u, const VMD &v, const VMD &w, const VMD &x, const VMD &y)
+Projection::Projection(const VMD &u, const VMD &v, const VMD &w, const VMD &x,
+                       const VMD &y)
     : m_nd(5), m_dimensions(new VMD[m_nd]), m_offsets(new double[m_nd]),
       m_units(new ProjectionUnit[m_nd]) {
   m_dimensions[0] = u;
@@ -79,7 +80,8 @@ Projection::Projection(const VMD &u, const VMD &v, const VMD &w, const VMD &x, c
   }
 }
 
-Projection::Projection(const VMD &u, const VMD &v, const VMD &w, const VMD &x, const VMD &y, const VMD &z)
+Projection::Projection(const VMD &u, const VMD &v, const VMD &w, const VMD &x,
+                       const VMD &y, const VMD &z)
     : m_nd(6), m_dimensions(new VMD[m_nd]), m_offsets(new double[m_nd]),
       m_units(new ProjectionUnit[m_nd]) {
   m_dimensions[0] = u;
