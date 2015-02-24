@@ -160,11 +160,6 @@ void LoadMuonNexus1::exec() {
   const int channelsPerSpectrum = nxload.t_ntc1;
   // Read in the time bin boundaries
   const int lengthIn = channelsPerSpectrum + 1;
-  float *timeChannels = new float[lengthIn];
-  nxload.getTimeChannels(timeChannels, lengthIn);
-  // Put the read in array into a vector (inside a shared pointer)
-  boost::shared_ptr<MantidVec> timeChannelsVec(
-      new MantidVec(timeChannels, timeChannels + lengthIn));
 
   // Calculate the size of a workspace, given its number of periods & spectra to
   // read
@@ -233,7 +228,7 @@ void LoadMuonNexus1::exec() {
     for (int64_t i = m_spec_min; i < m_spec_max; ++i) {
       // Shift the histogram to read if we're not in the first period
       specid_t histToRead = static_cast<specid_t>(i + period * total_specs);
-      loadData(timeChannelsVec, counter, histToRead, nxload, lengthIn - 1,
+      loadData(counter, histToRead, nxload, lengthIn - 1,
                localWorkspace); // added -1 for NeXus
       counter++;
       progress.report();
@@ -241,7 +236,7 @@ void LoadMuonNexus1::exec() {
     // Read in the spectra in the optional list parameter, if set
     if (m_list) {
       for (size_t i = 0; i < m_spec_list.size(); ++i) {
-        loadData(timeChannelsVec, counter, m_spec_list[i], nxload, lengthIn - 1,
+        loadData(counter, m_spec_list[i], nxload, lengthIn - 1,
                  localWorkspace);
         counter++;
         progress.report();
@@ -291,8 +286,6 @@ void LoadMuonNexus1::exec() {
                 boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
   }
 
-  // Clean up
-  delete[] timeChannels;
 }
 
 /**
@@ -483,7 +476,6 @@ TableWorkspace_sptr LoadMuonNexus1::createDetectorGroupingTable(
 }
 
 /** Load in a single spectrum taken from a NeXus file
-*  @param tcbs ::     The vector containing the time bin boundaries
 *  @param hist ::     The workspace index
 *  @param i ::        The spectrum number
 *  @param nxload ::   A reference to the MuonNeXusReader object
@@ -491,8 +483,7 @@ TableWorkspace_sptr LoadMuonNexus1::createDetectorGroupingTable(
 *  @param localWorkspace :: A pointer to the workspace in which the data will be
 * stored
 */
-void LoadMuonNexus1::loadData(const MantidVecPtr::ptr_type &tcbs, size_t hist,
-                              specid_t &i, MuonNexusReader &nxload,
+void LoadMuonNexus1::loadData(size_t hist, specid_t &i, MuonNexusReader &nxload,
                               const int64_t lengthIn,
                               DataObjects::Workspace2D_sptr localWorkspace) {
   // Read in a spectrum
@@ -502,14 +493,27 @@ void LoadMuonNexus1::loadData(const MantidVecPtr::ptr_type &tcbs, size_t hist,
   MantidVec &Y = localWorkspace->dataY(hist);
   Y.assign(nxload.counts + i * lengthIn,
            nxload.counts + i * lengthIn + lengthIn);
+
   // Create and fill another vector for the errors, containing sqrt(count)
   MantidVec &E = localWorkspace->dataE(hist);
   typedef double (*uf)(double);
   uf dblSqrt = std::sqrt;
   std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
   // Populate the workspace. Loop starts from 1, hence i-1
-  localWorkspace->setX(hist, tcbs);
+
+  // Create and fill another vector for the X axis  
+  float *timeChannels = new float[lengthIn+1];
+  nxload.getTimeChannels(timeChannels, static_cast<const int>(lengthIn+1));
+  // Put the read in array into a vector (inside a shared pointer)
+  boost::shared_ptr<MantidVec> timeChannelsVec(
+    new MantidVec(timeChannels, timeChannels + lengthIn+1));
+
+  localWorkspace->setX(hist, timeChannelsVec);
   localWorkspace->getSpectrum(hist)->setSpectrumNo(static_cast<int>(hist) + 1);
+
+  // Clean up
+  delete[] timeChannels;
+
 }
 
 /**  Log the run details from the file
