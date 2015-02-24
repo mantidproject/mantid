@@ -67,7 +67,7 @@ void LoadSavuTomoConfig::exec() {
       setProperty("OutputWorkspace", ws);
     }
   } catch(std::exception& e) {
-    g_log.error() << "Failed to load tomography reconstruction "
+    g_log.error() << "Failed to load savu tomography reconstruction "
       "parameterization file: " << e.what() << std::endl;
     return;
   }
@@ -137,7 +137,7 @@ ITableWorkspace_sptr LoadSavuTomoConfig::loadFile(std::string& fname,
   ws->setTitle("Table with tomography parameters from file " +
                fname);
   ws->addColumn("str", "ID");
-  ws->addColumn("str", "Params");
+  ws->addColumn("str", "Parameterss");
   ws->addColumn("str", "Name");
   ws->addColumn("str", "Cite");
 
@@ -184,6 +184,10 @@ ITableWorkspace_sptr LoadSavuTomoConfig::loadFile(std::string& fname,
       f->readData("name", name);
       // cite not available for now
       // f->readData("cite", cite);
+      // This might be extended to an NXcite group that would be included
+      // not here but inside an "intermediate" NXcollection group. That
+      // NXcite would have 4 arrays: description, doi, endnote, bibtex.
+      // But this is what we have so far.
       cite = "Not available";
     } catch(NeXus::Exception &e) {
       // permissive, just error message but carry on
