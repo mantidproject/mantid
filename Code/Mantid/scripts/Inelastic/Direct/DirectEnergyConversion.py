@@ -914,15 +914,19 @@ class DirectEnergyConversion(object):
         Save the result workspace to the specified filename using the list of formats specified in
         formats. If formats is None then the default list is used
         """
-        if formats:
-           # clear up existing save formats as one is defined in parameters
-            self.prop_man.save_format = None
+        if formats:# clear up existing save formats as one is defined in parameters
+           self.prop_man.save_format = None
 
         self.prop_man.set_input_parameters_ignore_nan(save_file_name=save_file,save_format=formats)
-
-        #TODO: deal with this.  This all should be incorporated in sample_run
-        save_file = self.prop_man.save_file_name
         formats = self.prop_man.save_format
+
+        if save_file:
+           save_file,ext = os.path.splitext(save_file)
+           if len(ext) > 1:
+               formats.add(ext[1:])
+        else:
+           save_file = self.prop_man.save_file_name
+
         if save_file is None:
             save_file = workspace.getName()
         elif os.path.isdir(save_file):
@@ -933,20 +937,17 @@ class DirectEnergyConversion(object):
             pass
 
         prop_man = self.prop_man
-
-        save_file,ext = os.path.splitext(save_file)
-        if len(ext) > 1:
-            formats.add(ext[1:])
-
         name_orig = workspace.name()
         for file_format  in formats:
             for case in common.switch(file_format):
                 if case('nxspe'):
                    filename = save_file + '.nxspe'
+                   # nxspe can not write workspace with / in the name (something to do with folder names inside nxspe)
                    name_supported = name_orig.replace('/','of')
                    if name_supported != name_orig:
                       RenameWorkspace(InputWorkspace=name_orig,OutputWorkspace=name_supported)
-                   SaveNXSPE(InputWorkspace=name_supported,Filename= filename, KiOverKfScaling=prop_man.apply_kikf_correction,psi=prop_man.psi)
+                   SaveNXSPE(InputWorkspace=name_supported,Filename= filename,\
+                             KiOverKfScaling=prop_man.apply_kikf_correction,psi=prop_man.psi)
                    if name_supported != name_orig:
                       RenameWorkspace(InputWorkspace=name_supported,OutputWorkspace=name_orig)
                    break
@@ -959,8 +960,8 @@ class DirectEnergyConversion(object):
                    SaveNexus(InputWorkspace=workspace,Filename= filename)
                    break
                 if case(): # default, could also just omit condition or 'if True'
-                   prop_man.log("Unknown file format {0} requested to save results. No saving performed this format".format(file_format))
-
+                   prop_man.log("Unknown file format {0} requested to save results. No saving performed this format".\
+                               format(file_format))
     #########
     @property
     def prop_man(self):
