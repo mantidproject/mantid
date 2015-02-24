@@ -260,6 +260,7 @@ set ( TEST_FILES
 	GaussianTest.h
 	GramCharlierComptonProfileTest.h
 	IkedaCarpenterPVTest.h
+        IPeakFunctionCentreParameterNameTest.h
         IPeakFunctionIntensityTest.h
 	LeBailFitTest.h
 	LeBailFunctionTest.h
