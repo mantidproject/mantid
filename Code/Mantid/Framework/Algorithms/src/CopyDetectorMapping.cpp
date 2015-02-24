@@ -42,11 +42,25 @@ void CopyDetectorMapping::exec() {
 std::map<std::string, std::string> CopyDetectorMapping::validateInputs() {
   std::map<std::string, std::string> issues;
 
-  MatrixWorkspace_const_sptr wsToMatch = getProperty("WorkspaceToMatch");
+  MatrixWorkspace_sptr wsToMatch = getProperty("WorkspaceToMatch");
   MatrixWorkspace_sptr wsToRemap = getProperty("WorkspaceToRemap");
 
-  // Check histohram counts match
-  if (wsToMatch->getNumberHistograms() != wsToRemap->getNumberHistograms())
+  // Check that the workspaces actually are MatrixWorkspaces
+  bool validWorkspaces = true;
+
+  if (wsToMatch == NULL) {
+    issues["WorkspaceToMatch"] = "Must be a MatrixWorkspace";
+    validWorkspaces = false;
+  }
+
+  if (wsToRemap == NULL) {
+    issues["WorkspaceToRemap"] = "Must be a MatrixWorkspace";
+    validWorkspaces = false;
+  }
+
+  // Check histohram counts match (assuming both are MatrixWorkspaces)
+  if (validWorkspaces &&
+      wsToMatch->getNumberHistograms() != wsToRemap->getNumberHistograms())
     issues["WorkspaceToRemap"] =
         "Number of histograms must match WorkspaceToMatch";
 
