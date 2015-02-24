@@ -227,7 +227,7 @@ void LoadMuonNexus1::exec() {
     size_t counter = 0;
     for (int64_t i = m_spec_min; i < m_spec_max; ++i) {
       // Shift the histogram to read if we're not in the first period
-      specid_t histToRead = static_cast<specid_t>(i + period * total_specs);
+      specid_t histToRead = static_cast<specid_t>(i + period * nxload.t_nsp1);
       loadData(counter, histToRead, nxload, lengthIn - 1,
                localWorkspace); // added -1 for NeXus
       counter++;
@@ -236,7 +236,8 @@ void LoadMuonNexus1::exec() {
     // Read in the spectra in the optional list parameter, if set
     if (m_list) {
       for (size_t i = 0; i < m_spec_list.size(); ++i) {
-        loadData(counter, m_spec_list[i], nxload, lengthIn - 1,
+        specid_t histToRead = static_cast<specid_t>(m_spec_list[i] + period * nxload.t_nsp1);
+        loadData(counter, histToRead, nxload, lengthIn - 1,
                  localWorkspace);
         counter++;
         progress.report();
@@ -509,7 +510,7 @@ void LoadMuonNexus1::loadData(size_t hist, specid_t &i, MuonNexusReader &nxload,
     new MantidVec(timeChannels, timeChannels + lengthIn+1));
 
   localWorkspace->setX(hist, timeChannelsVec);
-  localWorkspace->getSpectrum(hist)->setSpectrumNo(static_cast<int>(hist) + 1);
+  localWorkspace->getSpectrum(hist)->setSpectrumNo(i);
 
   // Clean up
   delete[] timeChannels;
