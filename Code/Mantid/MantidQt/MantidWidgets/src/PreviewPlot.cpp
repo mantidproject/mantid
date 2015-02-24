@@ -194,7 +194,7 @@ QPair<double, double> PreviewPlot::getCurveRange(const Mantid::API::MatrixWorksp
 /**
  * Gets the X range of a curve given its name.
  *
- * @param wsName Name of curve
+ * @param curveName Name of curve
  */
 QPair<double, double> PreviewPlot::getCurveRange(const QString & curveName)
 {
@@ -217,7 +217,7 @@ QPair<double, double> PreviewPlot::getCurveRange(const QString & curveName)
  * Adds a workspace to the preview plot given a pointer to it.
  *
  * @param curveName Name of curve
- * @param wsName Name of workspace in ADS
+ * @param ws Pointer to the workspace
  * @param specIndex Spectrum index to plot
  * @param curveColour Colour of curve to plot
  */
@@ -292,7 +292,7 @@ void PreviewPlot::removeSpectrum(const MatrixWorkspace_sptr ws)
 /**
  * Removes spectra from a gievn workspace from the plot given its name.
  *
- * @param wsName Name of curve
+ * @param curveName Name of curve
  */
 void PreviewPlot::removeSpectrum(const QString & curveName)
 {
@@ -460,7 +460,7 @@ void PreviewPlot::hardReplot()
  *
  * Removes it from the plot (via removeSpectrum).
  *
- * @param pNF Poco notification
+ * @param pNf Poco notification
  */
 void PreviewPlot::handleRemoveEvent(WorkspacePreDeleteNotification_ptr pNf)
 {
@@ -625,7 +625,7 @@ QString PreviewPlot::getAxisType(int axisID)
 /**
  * Gets a list of curve names that are plotted form the given workspace.
  *
- * @param Pointer to workspace
+ * @param ws Pointer to workspace
  * @return List of curve names
  */
 QStringList PreviewPlot::getCurvesForWorkspace(const MatrixWorkspace_sptr ws)
