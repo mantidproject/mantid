@@ -10,6 +10,8 @@
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
+GCC_DIAG_OFF(strict-aliasing)
+
 namespace Mantid
 {
   namespace PythonInterface
