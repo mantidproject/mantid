@@ -661,6 +661,8 @@ namespace IDA
     plotGuess(NULL);
     // Now show the fitted curve of the mini plot
     m_uiForm.ppPlot->addSpectrum("Fit", outputNm+"_Workspace", 1, Qt::red);
+
+    m_pythonExportWsName = "";
   }
 
   void FuryFit::plotGuess(QtProperty*)
