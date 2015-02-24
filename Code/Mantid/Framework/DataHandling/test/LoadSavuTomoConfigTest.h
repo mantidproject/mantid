@@ -139,7 +139,7 @@ private:
     std::vector<std::string> names = table->getColumnNames();
     TS_ASSERT_EQUALS( names.size(), 4 );
     TS_ASSERT_EQUALS( names[0], "ID" );
-    TS_ASSERT_EQUALS( names[1], "Params" );
+    TS_ASSERT_EQUALS( names[1], "Parameters" );
     TS_ASSERT_EQUALS( names[2], "Name" );
     TS_ASSERT_EQUALS( names[3], "Cite" );
   }

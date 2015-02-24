@@ -137,7 +137,7 @@ ITableWorkspace_sptr LoadSavuTomoConfig::loadFile(std::string& fname,
   ws->setTitle("Table with tomography parameters from file " +
                fname);
   ws->addColumn("str", "ID");
-  ws->addColumn("str", "Parameterss");
+  ws->addColumn("str", "Parameters");
   ws->addColumn("str", "Name");
   ws->addColumn("str", "Cite");
 
