@@ -13,6 +13,8 @@ using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
+GCC_DIAG_OFF(strict-aliasing)
+
 namespace {
 std::string indexToName(size_t i) {
   switch (i) {
@@ -130,7 +132,6 @@ Projection_sptr projCtor6(
 
 } //anonymous namespace
 
-GCC_DIAG_OFF(strict-aliasing)
 void export_Projection()
 {
   class_<Projection>(
