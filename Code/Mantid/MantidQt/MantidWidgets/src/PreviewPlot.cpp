@@ -274,9 +274,9 @@ void PreviewPlot::addSpectrum(const QString & curveName, const QString & wsName,
 
 
 /**
- * Removes spectra from a gievn workspace from the plot given a pointer to it.
+ * Removes spectra from a given workspace from the plot given a pointer to it.
  *
- * If multiple curves are plotted form the smae workspace then all wil lbe removed.
+ * If multiple curves are plotted form the same workspace then all will be removed.
  *
  * @param ws Pointer to workspace
  */
@@ -290,7 +290,7 @@ void PreviewPlot::removeSpectrum(const MatrixWorkspace_sptr ws)
 
 
 /**
- * Removes spectra from a gievn workspace from the plot given its name.
+ * Removes spectra from a given workspace from the plot given its name.
  *
  * @param curveName Name of curve
  */
@@ -316,7 +316,7 @@ void PreviewPlot::removeSpectrum(const QString & curveName)
 
 
 /**
- * Checks to see if a given curne name is present on the plot.
+ * Checks to see if a given curve name is present on the plot.
  *
  * @param curveName Curve name
  * @return True if curve is on plot
@@ -564,7 +564,7 @@ void PreviewPlot::removeCurve(QwtPlotCurve * curve)
 
 
 /**
- * Helper function for adding a set of items to an exclusive menu oon the context menu.
+ * Helper function for adding a set of items to an exclusive menu on the context menu.
  *
  * @param menuName Name of sub menu
  * @param group Pointer to ActionGroup
@@ -598,7 +598,7 @@ QList<QAction *> PreviewPlot::addOptionsToMenus(QString menuName, QActionGroup *
 
 
 /**
- * Returns the type of axis scale specified for a giev axis.
+ * Returns the type of axis scale specified for a given axis.
  *
  * @param axisID ID of axis
  * @return Axis type as string
