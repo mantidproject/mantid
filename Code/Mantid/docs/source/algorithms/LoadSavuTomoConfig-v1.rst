@@ -48,7 +48,7 @@ Usage
     print "Cell 2,2: %s" % tws.cell(2,2)
     print "Cell 2,3: %s" % tws.cell(2,3)
 
-.. testcleanup:: LoadSavuTomoCopnfig
+.. testcleanup:: LoadSavuTomoConfig
 
     DeleteWorkspace(tws)
 
