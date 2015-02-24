@@ -1,5 +1,5 @@
 import os
-os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -359,7 +359,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         propman.background_test_range = [1000,2000]
         bkg_test_range = propman.background_test_range
-        self.assertEqual(bkg_test_range,[1000,2000])
+        self.assertEqual(bkg_test_range,(1000.,2000.))
 
     def test_check_monovan_changed(self):
         propman = self.prop_man
@@ -632,21 +632,23 @@ class DirectPropertyManagerTest(unittest.TestCase):
             ic+=1
         self.assertEqual(ic,3)
 
-    #def test_incident_energy_custom_enum(self):
-    ###### Custom enum does not work
-    #    propman = self.prop_man
-    #    en_source = [20,40,80]
-    #    propman.incident_energy=en_source
-    #    propman.energy_bins=[-2,0.1,0.8]
-    #    self.assertTrue(PropertyManager.incident_energy.multirep_mode())
+    def test_incident_energy_custom_enum(self):
+    ##### Custom enum works in a peculiar way
+        propman = self.prop_man
+        en_source = [20,40,80]
+        propman.incident_energy=en_source
+        propman.energy_bins=[-2,0.1,0.8]
+        self.assertTrue(PropertyManager.incident_energy.multirep_mode())
 
-    #    ic=0
-    #    for ind,en in enumerate(PropertyManager.incident_energy):
-    #        ic+=1
-    #        self.assertAlmostEqual(en,en_source[ind])
-    #        en_internal = PropertyManager.incident_energy.get_current()
-    #        self.assertAlmostEqual(en_internal,en_source[ind])
-    #        self.assertEqual(ind,ic-1)
+        ic=0
+        for ind,en in enumerate(PropertyManager.incident_energy):
+            ic+=1
+            # propagate current energy value to incident energy class 
+            PropertyManager.incident_energy.set_current(en,ind)
+            self.assertAlmostEqual(en,en_source[ind])
+            en_internal = PropertyManager.incident_energy.get_current()
+            self.assertAlmostEqual(en_internal,en_source[ind])
+            self.assertEqual(ind,ic-1)
 
     def test_ignore_complex_defailts_changes_fom_instrument(self) :
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
@@ -912,6 +914,45 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         PropertyManager.mono_correction_factor.set_cash_mono_run_number(11060)
         self.assertTrue(PropertyManager.mono_correction_factor.get_val_from_cash(propman) is None)
+
+    def test_mono_file_properties(self):
+        propman = self.prop_man
+        propman.wb_run = 11001
+        sw = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
+        propman.monovan_run = sw
+        propman.mask_run = CloneWorkspace(sw,OutputWorkspace='mask_clone')
+        propman.map_file = None
+        propman.hard_mask_file='testmasking.xml'
+        propman.det_cal_file=11001
+        propman.monovan_mapfile = None
+                    
+
+        file_prop = propman._get_properties_with_files()
+
+        self.assertEqual(len(file_prop),3)
+        self.assertTrue('wb_run' in file_prop)
+        self.assertFalse('monovan_run' in file_prop)
+        self.assertFalse('mask_run' in file_prop)
+        self.assertFalse('wb_for_monovan_run' in file_prop)
+
+        self.assertTrue('hard_mask_file' in file_prop)
+        self.assertTrue('det_cal_file' in file_prop)
+
+        ok,fail_list = propman._check_file_properties()
+        self.assertTrue(ok)
+
+        api.AnalysisDataService.clear()
+
+        propman.monovan_run = 11002
+        propman.mask_run = None
+        propman.wb_for_monovan_run=11001
+        propman.map_file = 'some_missing_map'
+
+        ok,fail_list = propman._check_file_properties()
+        self.assertFalse(ok)
+        self.assertEqual(len(fail_list),2)
+        self.assertTrue('monovan_run' in fail_list)
+        self.assertTrue('map_file' in fail_list)
 
 if __name__=="__main__":
     unittest.main()
