@@ -1,11 +1,10 @@
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidDataHandling/SaveTomoConfig.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include <Poco/File.h>
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/MandatoryValidator.h"
 
-#include <nexus/NeXusException.hpp>
 #include <nexus/NeXusFile.hpp>
+#include <Poco/File.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -14,9 +13,9 @@ DECLARE_ALGORITHM(SaveTomoConfig)
 
 using namespace Kernel;
 using namespace API;
-using namespace DataObjects;
 
-SaveTomoConfig::SaveTomoConfig() : API::Algorithm() { m_pluginInfoCount = 4; }
+SaveTomoConfig::SaveTomoConfig() : API::Algorithm(), m_pluginInfoCount(4)
+{ }
 
 /**
  * Initialise the algorithm
@@ -24,7 +23,8 @@ SaveTomoConfig::SaveTomoConfig() : API::Algorithm() { m_pluginInfoCount = 4; }
 void SaveTomoConfig::init() {
   // Get a list of table workspaces which contain the plugin information
   declareProperty(
-      new ArrayProperty<std::string>("InputWorkspaces", ""),
+      new ArrayProperty<std::string>("InputWorkspaces",
+      boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "The names of the table workspaces containing plugin information.");
 
   declareProperty(new API::FileProperty("Filename", "", FileProperty::Save,
@@ -40,34 +40,107 @@ void SaveTomoConfig::exec() {
   // Prepare properties for writing to file
   std::string fileName = getPropertyValue("Filename");
 
-  std::vector<std::string> workspaces = getProperty("InputWorkspaces");
-  std::vector<TableWorkspace_sptr> wsPtrs;
+  progress(0, "Checking workspace (tables)...");
 
+  std::vector<ITableWorkspace_sptr> wss = checkTables(getProperty("InputWorkspaces"));
+
+  try {
+    saveFile(fileName, wss);
+  } catch (std::exception &e) {
+    g_log.error() << "Failed to save savu tomography reconstruction parameterization "
+      "file, error description: " << e.what() << std::endl;
+    return;
+  }
+
+  progress(0, "File saved.");
+}
+
+/**
+ * Do a basic check that the table seems to be what we need to save a
+ * savu configuration file.
+ *
+ * @param tws Table workspace that should contain plugin/processing
+ * steps information (a savu configuration)
+ *
+ * @return True if the table passed seems to be a savu configuration table
+ */
+bool SaveTomoConfig::tableLooksGenuine(const ITableWorkspace_sptr &tws) {
+  // note that more columns might be added in the relatively near future
+  if (!tws->columnCount() >= m_pluginInfoCount)
+    return false;
+
+  std::vector<std::string> names = tws->getColumnNames();
+  return ( 4 <= names.size() &&
+           "ID" == names[0] &&
+           "Parameterss" == names[1] &&
+           "Name" ==  names[2] &&
+           "Cite" == names[3]);
+}
+
+/**
+ * Check that the list of workspace names identifies table workspaces
+ * with (approximately) the expected information (4 columns), and
+ * return the corresponding (table) workspace objects.
+ *
+ * @param workspaces Table workspace names that should contain plugin/processing
+ * steps information
+ *
+ * @return Table workspaces retrieved from the ADS, corresponding to
+ * the names passed
+ */
+std::vector<ITableWorkspace_sptr> SaveTomoConfig::checkTables(
+    const std::vector<std::string> &workspaces) {
+  std::vector<ITableWorkspace_sptr> wss;
   for (auto it = workspaces.begin(); it != workspaces.end(); ++it) {
     if (AnalysisDataService::Instance().doesExist(*it)) {
-      TableWorkspace_sptr table =
-          AnalysisDataService::Instance().retrieveWS<TableWorkspace>(*it);
-      // Check it's valid
-      if (table && table->columnCount() == m_pluginInfoCount) {
-        wsPtrs.push_back(table);
+      ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(*it);
+      // Check it's valid. Very permissive check for the time being
+      if (table && tableLooksGenuine(table)) {
+        wss.push_back(table);
       } else {
-        throw std::runtime_error("Invalid workspaces entered, requires table "
-                                 "with correct plugin information");
+        throw std::runtime_error("Invalid workspace provided: " +
+                                 *it + ". This algorithm requires a table "
+                                 "workspace with correct savu plugin/ "
+                                 "pipeline process information.");
       }
     } else {
       throw std::runtime_error(
-          "One or more specified table workspaces don't exist.");
+          "One or more specified table workspaces don't exist. I could not "
+          "find this one: " + *it);
     }
   }
+  return wss;
+}
 
+/**
+ * Check that the list of workspace names identifies table workspaces
+ * with (approximately) the expected information (4 columns), and
+ * return the corresponding (table) workspace objects.
+ *
+ * @param fname Destination file name (can be ammended if needed and that
+ * will be logged)
+ * @param wss Table workspaces that apparently contain plugin/processing
+ * steps information
+ */
+void SaveTomoConfig::saveFile(const std::string fname,
+              const std::vector<ITableWorkspace_sptr> &wss) {
   // Ensure it has a .nxs extension
-  if (!boost::ends_with(fileName, ".nxs"))
+  std::string fileName = fname;
+  if (!boost::ends_with(fileName, ".nxs")) {
+    const std::string ext = ".nxs";
+    g_log.notice() << "Adding extension '" << ext << "' to the output "
+      "file name given (it is a NeXus file). " << std::endl;
     fileName = fileName + ".nxs";
+  }
 
   // If file exists, delete it.
-  Poco::File file(fileName);
-  if (file.exists())
-    file.remove();
+  Poco::File f(fileName);
+  if (f.exists()) {
+    g_log.notice() << "Overwriting existing file: '" << fileName << "'" <<
+      std::endl;
+    f.remove();
+  }
 
   // Create the file handle
   NXhandle fileHandle;
@@ -76,38 +149,40 @@ void SaveTomoConfig::exec() {
   if (status == NX_ERROR)
     throw std::runtime_error("Unable to create file.");
 
-  ::NeXus::File nxFile(fileHandle);
+  NeXus::File nxFile(fileHandle);
 
-  // Make the top level entry (and open it)
-  nxFile.makeGroup("entry1", "NXentry", true);
+  std::string topLevelEntry = "entry";
+  nxFile.makeGroup(topLevelEntry, "NXentry", true);
 
-  nxFile.makeGroup("processing", "NXsubentry", true);
+  const std::string processingEntry = "processing";
+  nxFile.makeGroup(processingEntry, "NXprocess", true);
 
-  // Iterate through all plugin entries (number sub groups 0....n)
-  for (size_t i = 0; i < wsPtrs.size(); ++i) {
+  // Iterate through all plugin entries (number sub groups 0....n-1)
+  for (size_t i = 0; i < wss.size(); ++i) {
     // Column info order is [ID / Params {as json string} / name {description} /
     // citation info]
-    std::string id = wsPtrs[i]->cell<std::string>(0, 0);
-    std::string params = wsPtrs[i]->cell<std::string>(0, 1);
-    std::string name = wsPtrs[i]->cell<std::string>(0, 2);
-    std::string cite = wsPtrs[i]->cell<std::string>(0, 3);
+    std::string id = wss[i]->cell<std::string>(0, 0);
+    std::string params = wss[i]->cell<std::string>(0, 1);
+    std::string name = wss[i]->cell<std::string>(0, 2);
+    std::string cite = wss[i]->cell<std::string>(0, 3);
 
-    nxFile.makeGroup(boost::lexical_cast<std::string>(i), "NXsubentry", true);
-
+    // but in the file it goes as: data (params), id, name
+    nxFile.makeGroup(boost::lexical_cast<std::string>(i), "NXnote", true);
+    nxFile.writeData("data", params);
     nxFile.writeData("id", id);
-    nxFile.writeData("params", params);
     nxFile.writeData("name", name);
-    nxFile.writeData("cite", cite);
-
+    // Ignore citation information for now. Format not fixed yet.
+    // nxFile.writeData("cite", cite);
     nxFile.closeGroup();
   }
 
-  nxFile.closeGroup(); // processing sub-group
+  nxFile.closeGroup(); // processing NXprocess
 
-  nxFile.makeGroup("intermediate", "NXsubEntry", false);
-  nxFile.makeGroup("raw_data", "NXsubEntry", false);
+  // This seems to be required for certain extensions that can be appended
+  // to these files. Not fixed for now.
+  nxFile.makeGroup("intermediate", "NXcollection", false);
 
-  nxFile.closeGroup(); // Top level NXentry
+  nxFile.closeGroup(); // Top level entry (NXentry)
 
   nxFile.close();
 }

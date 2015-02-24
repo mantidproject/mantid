@@ -5,6 +5,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -58,13 +59,24 @@ public:
   virtual int version() const { return (1); }
 
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DataHandling\\Tomo;"; }
+  virtual const std::string category() const {
+    return "DataHandling\\Tomography;"; }
 
 private:
   /// Initialisation code
   void init();
   /// Execution code : Single workspace
   void exec();
+
+  /// basic check on a table workspace properties
+  bool tableLooksGenuine(const API::ITableWorkspace_sptr &tws);
+
+  /// get table workspaces (checking the workspace names given)
+  std::vector<API::ITableWorkspace_sptr> checkTables(
+      const std::vector<std::string> &workspaces);
+  /// write savu tomo config file
+  void saveFile(const std::string fname,
+                const std::vector<API::ITableWorkspace_sptr> &wss);
 
   // Number of info entries to read from the input table workspaces
   unsigned int m_pluginInfoCount;
