@@ -62,9 +62,6 @@ void WeightedMeanMD::execHistoHisto(
     } else if ((rhs_err > 0) && (lhs_err <= 0)) {
       signal = rhs_s;
       error_sq = rhs_err * rhs_err;
-    } else if ((lhs_err <= 0) && (rhs_err > 0)) {
-      signal = lhs_s;
-      error_sq = lhs_err * lhs_err;
     }
 
     size_t pos = lhs_it->getLinearIndex();
