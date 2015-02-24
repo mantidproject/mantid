@@ -181,6 +181,7 @@ void ConvertCWPDMDToSpectra::exec() {
  * @param dataws
  * @param monitorws
  * @param targetunit
+ * @param map_runwavelength
  * @param xmin
  * @param xmax
  * @param binsize
@@ -205,7 +206,6 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
                  << ", SizeY = " << sizey << "\n";
   std::vector<double> vecx(sizex), vecy(sizex - 1, 0), vecm(sizex - 1, 0),
       vece(sizex - 1, 0);
-  std::vector<bool> veczerocounts(sizex - 1, false);
 
   for (size_t i = 0; i < sizex; ++i) {
     vecx[i] = xmin + static_cast<double>(i) * binsize;
@@ -227,8 +227,6 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
   // Normalize by division
   double maxmonitorcounts = 0;
   for (size_t i = 0; i < vecm.size(); ++i) {
-    if (vecy[i] < 1.0E-5)
-      veczerocounts[i] = true;
     if (vecm[i] >= 1.) {
       double y = vecy[i];
       double ey = sqrt(y);
@@ -258,13 +256,32 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
   API::MatrixWorkspace_sptr pdws =
       WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
   // Set unit
+  pdws->setYUnitLabel("Intensity");
   if (unitchar == 'd')
     pdws->getAxis(0)->setUnit("dSpacing");
   else if (unitchar == 'q')
     pdws->getAxis(0)->setUnit("MomentumTransfer");
   else {
-    // TODO : Implement unit for 2theta in another ticket.
-    g_log.warning("There is no unit proper for 2theta in unit factory.");
+    // Twotheta
+    Unit_sptr xUnit = pdws->getAxis(0)->unit();
+    if (xUnit) {
+      g_log.warning("Unable to set unit to an Unit::Empty object.");
+      /*
+      boost::shared_ptr<Units::Empty> xlabel =
+          boost::dynamic_pointer_cast<Units::Empty>(xUnit);
+      if (xlabel)
+      {
+        UnitLabel twothetalabel("degree");
+        xlabel->setLabel("TwoTheta", twothetalabel);
+      }
+      else
+      {
+        g_log.error(("Unable to cast XLabel to Empty"));
+      }
+      */
+    } else {
+      throw std::runtime_error("Unable to get unit from Axis(0)");
+    }
   }
 
   MantidVec &dataX = pdws->dataX(0);
@@ -288,8 +305,10 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
 
 //----------------------------------------------------------------------------------------------
 /** Bin MD Workspace for detector's position at 2theta
- * @brief LoadHFIRPDD::binMD
+ * @brief ConvertCWPDMDToSpectra::binMD
  * @param mdws
+ * @param unitbit
+ * @param map_runlambda
  * @param vecx
  * @param vecy
  */
@@ -508,8 +527,25 @@ void ConvertCWPDMDToSpectra::setupSampleLogs(
   const std::vector<Kernel::Property *> &vec_srcprop = srcrun.getProperties();
   for (size_t i = 0; i < vec_srcprop.size(); ++i) {
     Property *p = vec_srcprop[i];
-    targetrun.addProperty(p->clone());
-    g_log.notice() << "\tCloned property " << p->name() << "\n";
+    if (p->name().compare("start_time")) {
+      targetrun.addProperty(p->clone());
+      g_log.notice() << "\tCloned property " << p->name() << "\n";
+    }
+  }
+
+  // set up the start_time property from ExperimentInfo[0]
+  if (inputmdws->getExperimentInfo(0)->run().hasProperty("start_time")) {
+    std::string starttime = inputmdws->getExperimentInfo(0)
+                                ->run()
+                                .getProperty("start_time")
+                                ->value();
+    targetrun.addProperty(
+        new PropertyWithValue<std::string>("start_time", starttime));
+  } else {
+    g_log.error() << "Input MDEvnetWorkspace " << inputmdws->name()
+                  << " does not have "
+                  << "property start_time. "
+                  << "\n";
   }
 
   return;
@@ -520,6 +556,7 @@ void ConvertCWPDMDToSpectra::setupSampleLogs(
  * @brief ConvertCWPDMDToSpectra::scaleMatrixWorkspace
  * @param matrixws
  * @param scalefactor
+ * @param infinitesimal
  */
 void
 ConvertCWPDMDToSpectra::scaleMatrixWorkspace(API::MatrixWorkspace_sptr matrixws,
@@ -544,10 +581,11 @@ ConvertCWPDMDToSpectra::scaleMatrixWorkspace(API::MatrixWorkspace_sptr matrixws,
 
 //----------------------------------------------------------------------------------------------
 /** Convert units from 2theta to d-spacing or Q
- * Equation:  	λ = 2d sinθ
+ *  Equation:  	λ = 2d sinθ
  * @brief ConvertCWPDMDToSpectra::convertUnits
  * @param matrixws
  * @param targetunit
+ * @param wavelength
  */
 void ConvertCWPDMDToSpectra::convertUnits(API::MatrixWorkspace_sptr matrixws,
                                           const std::string &targetunit,

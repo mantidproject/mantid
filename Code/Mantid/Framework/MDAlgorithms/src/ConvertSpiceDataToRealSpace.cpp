@@ -250,6 +250,10 @@ MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
       new TimeSeriesProperty<std::string>("run_start");
   proprunstart->addValue(runstart, runstart.toISO8601String());
 
+  TimeSeriesProperty<std::string> *propstarttime =
+      new TimeSeriesProperty<std::string>("start_time");
+  propstarttime->addValue(runstart, runstart.toISO8601String());
+
   g_log.debug() << "Run " << irow << ": set run start to "
                 << runstart.toISO8601String() << "\n";
   if (tempws->run().hasProperty("run_start")) {
@@ -260,6 +264,7 @@ MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
     tempws->mutableRun().removeProperty("run_start");
   }
   tempws->mutableRun().addProperty(proprunstart);
+  tempws->mutableRun().addProperty(propstarttime);
 
   int pt = tablews->cell<int>(irow, ipt);
   tempws->mutableRun().addProperty(
@@ -279,8 +284,12 @@ MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
     Geometry::IDetector_const_sptr tmpdet = tempws->getDetector(i);
     tempws->dataX(i)[0] = tmpdet->getPos().X();
     tempws->dataX(i)[0] = tmpdet->getPos().X() + 0.01;
-    tempws->dataY(i)[0] = tablews->cell<double>(irow, anodelist[i].second);
-    tempws->dataE(i)[0] = 1;
+    double yvalue = tablews->cell<double>(irow, anodelist[i].second);
+    tempws->dataY(i)[0] = yvalue;
+    if (yvalue >= 1)
+      tempws->dataE(i)[0] = sqrt(yvalue);
+    else
+      tempws->dataE(i)[0] = 1;
   }
 
   // Return duration

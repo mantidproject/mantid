@@ -11,8 +11,8 @@ namespace MDAlgorithms {
 //----------------------------------------------------------------------------------------------
 /** Calculate d-space value from detector's position (2theta/theta) and
  * wavelength
- * @brief calculateD
- * @param theta
+ * @brief calculateDspaceFrom2Theta
+ * @param twotheta
  * @param wavelength
  * @return
  */
@@ -26,7 +26,7 @@ inline double calculateDspaceFrom2Theta(const double &twotheta,
  * 2theta = 2*asin(lamba/2/d)
  * @brief calculate2ThetaFromD
  * @param dspace
- * @param wavelengh
+ * @param wavelength
  * @return
  */
 inline double calculate2ThetaFromD(const double &dspace,
@@ -36,9 +36,9 @@ inline double calculate2ThetaFromD(const double &dspace,
 
 //----------------------------------------------------------------------------------------------
 /** Calculate Q value from detector's positin (2theta/theta) and wavelength
- * q = 2 k \sin(\theta) = \frac{4 \pi}{\lambda} \sin(\theta).
+ * q = 2 k sin(theta) = (4 pi)/(lambda) * sin(theta)
  * @brief calculateQ
- * @param theta
+ * @param twotheta
  * @param wavelength
  * @return
  */
