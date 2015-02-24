@@ -2,10 +2,17 @@
 #define MANTID_DATAOBJECTS_PEAKTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MockObjects.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include <iostream>
 #include <iomanip>
+#include <gmock/gmock.h>
 
 #include "MantidDataObjects/Peak.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -16,12 +23,25 @@ using namespace Mantid::Kernel;
 
 class PeakTest : public CxxTest::TestSuite
 {
+private:
+    /// Common instrument
+    Instrument_sptr inst;
+    Instrument_sptr m_minimalInstrument;
 public:
-  /// Common instrument
-  Instrument_sptr inst;
-  void setUp()
+
+
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static PeakTest *createSuite() {
+    return new PeakTest();
+  }
+  static void destroySuite(PeakTest *suite) { delete suite; }
+
+
+  // Constructor
+  PeakTest() : inst(ComponentCreationHelper::createTestInstrumentRectangular(5, 100))
   {
-    inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 100);
+
   }
 
   void test_constructor()
@@ -110,9 +130,9 @@ public:
     TS_ASSERT_EQUALS(p.getL(), p2.getL());
     TS_ASSERT_EQUALS(p.getGoniometerMatrix(), p2.getGoniometerMatrix());
     TS_ASSERT_EQUALS(p.getRunNumber(), p2.getRunNumber());
-    TS_ASSERT_EQUALS(p.getDetector(), p2.getDetector())
-    TS_ASSERT_EQUALS(p.getInstrument(), p2.getInstrument())
-
+    TS_ASSERT_EQUALS(p.getDetector(), p2.getDetector());
+    TS_ASSERT_EQUALS(p.getInstrument(), p2.getInstrument());
+    TS_ASSERT_EQUALS(p.getPeakShape().shapeName(), p2.getPeakShape().shapeName());
     check_Contributing_Detectors(p2, std::vector<int>(1, 10102));
   }
 
@@ -251,14 +271,16 @@ public:
   void test_setQLabFrame_ThrowsIfQIsNull()
   {
     Peak p1(inst, 10000, 2.0);
-    TS_ASSERT_THROWS_ANYTHING(Peak p2(inst, V3D(0,0,0), 1.0));
-    TS_ASSERT_THROWS_ANYTHING(Peak p2(inst, V3D(1,2,0), 1.0));
+    const boost::optional<double> distance = 1.0;
+    TS_ASSERT_THROWS_ANYTHING(Peak p2(inst, V3D(0,0,0), distance));
+    TS_ASSERT_THROWS_ANYTHING(Peak p2(inst, V3D(1,2,0), distance));
   }
 
 
   /** Compare two peaks, but not the detector IDs etc. */
   void comparePeaks(Peak & p1, Peak & p2)
   {
+    // TODO. Peak should implement bool operator==(const Peak&) and that should be tested, rather than having external functionality here.
     TS_ASSERT_EQUALS( p1.getQLabFrame(), p2.getQLabFrame() );
     TS_ASSERT_EQUALS( p1.getQSampleFrame(), p2.getQSampleFrame() );
     TS_ASSERT_EQUALS( p1.getDetPos(), p2.getDetPos() );
@@ -280,12 +302,46 @@ public:
     V3D detPos1 = p1.getDetPos();
 
     // Construct using just Q
-    Peak p2(inst, Qlab1, detPos1.norm());
+    Peak p2(inst, Qlab1, boost::optional<double>(detPos1.norm()));
     comparePeaks(p1, p2);
     TS_ASSERT_EQUALS( p2.getBankName(), "None");
     TS_ASSERT_EQUALS( p2.getRow(), -1);
     TS_ASSERT_EQUALS( p2.getCol(), -1);
     TS_ASSERT_EQUALS( p2.getDetectorID(), -1);
+  }
+
+  void test_setQLabFrame2()
+  {
+      // Create fictional instrument
+      const V3D source(0,0,0);
+      const V3D sample(15, 0, 0);
+      const V3D detectorPos(20, 5, 0);
+      const V3D beam1 = sample - source;
+      const V3D beam2 = detectorPos - sample;
+      auto minimalInstrument = ComponentCreationHelper::createMinimalInstrument( source, sample, detectorPos );
+
+      // Derive distances and angles
+      const double l1 = beam1.norm();
+      const double l2 = beam2.norm();
+      const V3D qLabDir = (beam1/l1) - (beam2/l2);
+
+      const double microSecsInSec = 1e6;
+
+      // Derive QLab for diffraction
+      const double wavenumber_in_angstrom_times_tof_in_microsec =
+          (Mantid::PhysicalConstants::NeutronMass * (l1 + l2) * 1e-10 * microSecsInSec) /
+           Mantid::PhysicalConstants::h_bar;
+
+      V3D qLab = qLabDir * wavenumber_in_angstrom_times_tof_in_microsec;
+
+      Peak peak; // Everything will be default
+      peak.setInstrument(minimalInstrument); // Can't do anything without the instrument
+      peak.setQLabFrame(qLab);
+      auto detector = peak.getDetector();
+
+      TSM_ASSERT("No detector", detector);
+      TS_ASSERT_EQUALS(1, detector->getID());
+      TS_ASSERT_EQUALS(detectorPos, detector->getPos());
   }
 
   /** Create peaks using Q in sample frame + a goniometer rotation matrix*/
@@ -321,7 +377,7 @@ public:
     V3D detPos1 = p1.getDetPos();
 
     // Construct using just Q
-    Peak p2(inst, Qlab1, detPos1.norm());
+    Peak p2(inst, Qlab1, boost::optional<double>(detPos1.norm()));
     TS_ASSERT( p2.findDetector() );
     comparePeaks(p1, p2);
     TS_ASSERT_EQUALS( p2.getBankName(), "bank1");
@@ -348,8 +404,31 @@ public:
     const double wavelength = 2;
     Peak p(inst, detectorId, wavelength);
     TSM_ASSERT_THROWS_NOTHING("Nothing wrong here, detector is valid", p.getDetectorPosition());
-    p.setQLabFrame(V3D(1,1,1), 1); // This sets the detector pointer to null and detector id to -1;
+    p.setQLabFrame(V3D(1,1,1), 1.0); // This sets the detector pointer to null and detector id to -1;
     TSM_ASSERT_THROWS("Detector is not valid", p.getDetectorPosition(), Mantid::Kernel::Exception::NullPointerException&);
+  }
+
+  void test_get_peak_shape_default()
+  {
+      Peak peak;
+      const PeakShape& integratedShape = peak.getPeakShape();
+      TS_ASSERT_EQUALS("none", integratedShape.shapeName());
+  }
+
+  void test_set_peak_shape()
+  {
+      using namespace testing;
+
+      Peak peak;
+
+      MockPeakShape* replacementShape = new MockPeakShape;
+      EXPECT_CALL(*replacementShape, shapeName()).Times(1);
+      peak.setPeakShape(replacementShape);
+
+      const PeakShape& currentShape = peak.getPeakShape();
+      currentShape.shapeName();
+
+      TS_ASSERT(Mock::VerifyAndClearExpectations(replacementShape));
   }
 
 private:

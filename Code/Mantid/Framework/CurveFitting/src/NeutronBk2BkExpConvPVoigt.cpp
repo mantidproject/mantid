@@ -10,9 +10,7 @@
 #include <gsl/gsl_sf_erf.h>
 #include <boost/lexical_cast.hpp>
 
-const double PI = 3.14159265358979323846264338327950288419716939937510582;
 const double PEAKRANGE = 5.0;
-const double TWO_OVER_PI = 2. / PI;
 const double NEG_DBL_MAX = -1. * DBL_MAX;
 
 using namespace std;
@@ -466,7 +464,7 @@ double NeutronBk2BkExpConvPVoigt::calOmega(const double x, const double eta,
     std::complex<double> q(-beta * x, beta * SQRT_H_5);
     double omega2a = imag(exp(p) * Mantid::API::E1(p));
     double omega2b = imag(exp(q) * Mantid::API::E1(q));
-    omega2 = -1.0 * N * eta * (omega2a + omega2b) * TWO_OVER_PI;
+    omega2 = -1.0 * N * eta * (omega2a + omega2b) * M_2_PI;
 
     g_log.debug() << "Exp(p) = " << exp(p) << ", Exp(q) = " << exp(q) << ".\n";
 

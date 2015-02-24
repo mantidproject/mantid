@@ -70,8 +70,12 @@ namespace MantidQt
         QString getSplatterPlotView() const;
 
         QString getTechniqueDependence() const;
+        
+        double getColorScaleStandardMax();
 
         QStringList getAllInitialViews() const;
+        
+        double getLogScaleDefaultValue();
 
       private:
         QString m_generalMdColorMap;
@@ -82,6 +86,9 @@ namespace MantidQt
         QString m_threeSliceView;
         QString m_splatterPlotView;
         QString m_techniqueDependence;
+
+        const double m_colorScaleStandardMax;
+        const double m_logScaleDefaultValue;
     };
   }
 }

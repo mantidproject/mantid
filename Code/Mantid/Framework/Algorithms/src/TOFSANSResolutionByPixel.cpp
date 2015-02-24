@@ -9,9 +9,11 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/Interpolation.h"
+#include "MantidKernel/BoundedValidator.h"
 
 #include "boost/math/special_functions/fpclassify.hpp"
-#include "MantidKernel/BoundedValidator.h"
+
 
 namespace Mantid {
 namespace Algorithms {
@@ -38,8 +40,10 @@ void TOFSANSResolutionByPixel::init() {
                   "Sample aperture radius (mm).");
   declareProperty("SourceApertureRadius", 0.0, positiveDouble,
                   "Source aperture radius (mm).");
-  declareProperty("SigmaModerator", 0.0, positiveDouble,
-                  "Sigma moderator spread (microsec).");
+  declareProperty(new WorkspaceProperty<>(
+                      "SigmaModerator", "", Direction::Input,
+                      boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
+                  "Sigma moderator spread in units of microsec as a function of wavelenght.");
 }
 
 /*
@@ -59,7 +63,33 @@ void TOFSANSResolutionByPixel::exec() {
   deltaR /= 1000.0;
   R1 /= 1000.0;
   R2 /= 1000.0;
-  const double sigmaModeratorMicroSec = getProperty("SigmaModerator");
+
+  const MatrixWorkspace_sptr sigmaModeratorVSwavelength = getProperty("SigmaModerator");
+
+  // create interpolation table from sigmaModeratorVSwavelength
+  Kernel::Interpolation lookUpTable;
+
+  const MantidVec xInterpolate = sigmaModeratorVSwavelength->readX(0);
+  const MantidVec yInterpolate = sigmaModeratorVSwavelength->readY(0);
+  
+  // prefer the input to be a pointworkspace and create interpolation function
+  if ( sigmaModeratorVSwavelength->isHistogramData() )
+  {
+    g_log.notice() << "mid-points of SigmaModerator histogram bins will be used for interpolation.";
+
+    for (size_t i = 0; i < xInterpolate.size()-1; ++i)
+    {
+      const double midpoint = xInterpolate[i+1] - xInterpolate[i];
+      lookUpTable.addPoint(midpoint, yInterpolate[i]);
+    }
+  }
+  else
+  {
+    for (size_t i = 0; i < xInterpolate.size(); ++i)
+    {
+      lookUpTable.addPoint(xInterpolate[i], yInterpolate[i]);
+    }
+  }
 
   const V3D samplePos = inOutWS->getInstrument()->getSample()->getPos();
   const V3D sourcePos = inOutWS->getInstrument()->getSource()->getPos();
@@ -111,16 +141,22 @@ void TOFSANSResolutionByPixel::exec() {
     MantidVec &yIn = inOutWS->dataY(i);
     const size_t xLength = xIn.size();
 
+    // for each wavelenght bin of each pixel calculate a q-resolution
     for (size_t j = 0; j < xLength - 1; j++) {
-      // Calculate q. Alternatively q could be calculated using ConvertUnit
+      // use the midpoint of each bin
       const double wl = (xIn[j + 1] + xIn[j]) / 2.0;
+      // Calculate q. Alternatively q could be calculated using ConvertUnit
       const double q = factor / wl;
 
+      // wavelenght spread from bin assumed to be 
+      const double sigmaSpreadFromBin = xIn[j + 1] - xIn[j];
+
+      // wavelenght spread from moderatorm, converted from microseconds to wavelengths
+      const double sigmaModerator = lookUpTable.value(wl) * 3.9560 / (1000.0 * Lsum);
+
       // calculate wavelenght resolution from moderator and histogram time bin
-      // width and
-      // convert to from unit of micro-seconds to Aangstrom
-      const double sigmaLambda =
-          sigmaModeratorMicroSec * 3.9560 / (1000.0 * Lsum);
+      const double sigmaLambda = std::sqrt(sigmaSpreadFromBin*sigmaSpreadFromBin/12.0 + 
+                                           sigmaModerator*sigmaModerator);
 
       // calculate sigmaQ for a given lambda and pixel
       const double sigmaOverLambdaTimesQ = q * sigmaLambda / wl;

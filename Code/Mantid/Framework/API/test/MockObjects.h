@@ -10,8 +10,8 @@
 
 #include "MantidAPI/PeakTransform.h"
 #include "MantidAPI/PeakTransformFactory.h"
-#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include <boost/regex.hpp>
 #include <gmock/gmock.h>
 
@@ -39,7 +39,7 @@ namespace
     MOCK_CONST_METHOD1(transform, Mantid::Kernel::V3D(const Mantid::Kernel::V3D&));
     MOCK_CONST_METHOD1(transformPeak, Mantid::Kernel::V3D(const Mantid::API::IPeak&));
     MOCK_CONST_METHOD0(getFriendlyName, std::string());
-    MOCK_CONST_METHOD0(getCoordinateSystem, Mantid::API::SpecialCoordinateSystem());
+    MOCK_CONST_METHOD0(getCoordinateSystem, Mantid::Kernel::SpecialCoordinateSystem());
   };
 
   /*------------------------------------------------------------
@@ -103,9 +103,9 @@ namespace
     MOCK_METHOD0(findDetector,
       bool());
     MOCK_METHOD2(setQSampleFrame,
-      void(Mantid::Kernel::V3D QSampleFrame, double detectorDistance));
+      void(Mantid::Kernel::V3D QSampleFrame, boost::optional<double> detectorDistance));
     MOCK_METHOD2(setQLabFrame,
-      void(Mantid::Kernel::V3D QLabFrame, double detectorDistance));
+      void(Mantid::Kernel::V3D QLabFrame, boost::optional<double> detectorDistance));
     MOCK_METHOD1(setWavelength,
       void(double wavelength));
     MOCK_CONST_METHOD0(getWavelength,
@@ -156,6 +156,7 @@ namespace
       Mantid::Kernel::V3D());
     MOCK_CONST_METHOD0(getDetectorPositionNoCheck,
           Mantid::Kernel::V3D());
+    MOCK_METHOD0(getPeakShape, const Mantid::Geometry::PeakShape&());
   };
 
 

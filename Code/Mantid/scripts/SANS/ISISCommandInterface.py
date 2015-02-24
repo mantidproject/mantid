@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Enables the SANS commands (listed at http://www.mantidproject.org/SANS) to
     be run
@@ -265,7 +266,7 @@ def TransmissionSample(sample, direct, reload = True, period_t = -1, period_d = 
     """
     _printMessage('TransmissionSample("' + str(sample) + '","' + str(direct) + '")')
     ReductionSingleton().set_trans_sample(sample, direct, reload, period_t, period_d)
-    return ReductionSingleton().samp_trans_load.execute(
+    return ReductionSingleton().samp_trans_load.execute(\
                                         ReductionSingleton(), None)
 
 def TransmissionCan(can, direct, reload = True, period_t = -1, period_d = -1):
@@ -279,7 +280,7 @@ def TransmissionCan(can, direct, reload = True, period_t = -1, period_d = -1):
     """
     _printMessage('TransmissionCan("' + str(can) + '","' + str(direct) + '")')
     ReductionSingleton().set_trans_can(can, direct, reload, period_t, period_d)
-    return ReductionSingleton().can_trans_load.execute(
+    return ReductionSingleton().can_trans_load.execute(\
                                             ReductionSingleton(), None)
 
 def AssignSample(sample_run, reload = True, period = isis_reduction_steps.LoadRun.UNSET_PERIOD):
@@ -316,7 +317,7 @@ def SetCentre(xcoord, ycoord, bank = 'rear'):
     """
     _printMessage('SetCentre(' + str(xcoord) + ', ' + str(ycoord) + ')')
 
-    ReductionSingleton().set_beam_finder(isis_reduction_steps.BaseBeamFinder(
+    ReductionSingleton().set_beam_finder(isis_reduction_steps.BaseBeamFinder(\
                                 float(xcoord)/1000.0, float(ycoord)/1000.0), bank)
 
 def GetMismatchedDetList():
@@ -379,9 +380,9 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     # if the user chose to reduce front and does not require fit
     if not (com_det_option == 'front' and not fitRequired):
         reduce_rear_flag = True
-    if (com_det_option != 'rear'):
+    if com_det_option != 'rear':
         reduce_front_flag = True
-    if (com_det_option == 'merged'):
+    if com_det_option == 'merged':
         merge_flag = True
 
     #The shift and scale is always on the front detector.
@@ -407,7 +408,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     # do reduce front bank
     if reduce_front_flag:
         # it is necessary to replace the Singleton if a reduction was done before
-        if (reduce_rear_flag):
+        if reduce_rear_flag:
             # In this case, it is necessary to reload the files, in order to move the components to the
             # correct position defined by its get_beam_center. (ticket #5942)
 
@@ -415,8 +416,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             ReductionSingleton.replace(ReductionSingleton().cur_settings())
 
             # for the LOQ instrument, if the beam centers are different, we have to reload the data.
-            if (ReductionSingleton().instrument._NAME == 'LOQ' and
-               (ReductionSingleton().get_beam_center('rear') != ReductionSingleton().get_beam_center('front'))):
+            if ReductionSingleton().instrument._NAME == 'LOQ' and\
+                ReductionSingleton().get_beam_center('rear') != ReductionSingleton().get_beam_center('front'):
 
                 # It is necessary to reload sample, transmission and can files.
                 #reload sample
@@ -452,9 +453,9 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     if merge_flag:
         retWSname_merged = retWSname_rear
         if retWSname_merged.count('rear') == 1:
-          retWSname_merged = retWSname_merged.replace('rear', 'merged')
+            retWSname_merged = retWSname_merged.replace('rear', 'merged')
         else:
-          retWSname_merged = retWSname_merged + "_merged"
+            retWSname_merged = retWSname_merged + "_merged"
 
         Nf = mtd[retWSname_front+"_sumOfNormFactors"]
         Nr = mtd[retWSname_rear+"_sumOfNormFactors"]
@@ -574,26 +575,26 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
         if rAnds.qRangeUserSelected:
             Fit(InputWorkspace=rearData,
                 Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", 
+                +";name=FlatBackground",
                 Ties='f0.Scaling='+str(rAnds.scale)+',f0.Shift=0.0',
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
         else:
             Fit(InputWorkspace=rearData,
                 Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", 
+                +";name=FlatBackground",
                 Ties='f0.Scaling='+str(rAnds.scale)+',f0.Shift=0.0',
                 Output="__fitRescaleAndShift")
     elif rAnds.fitShift==False:
         if rAnds.qRangeUserSelected:
             Fit(InputWorkspace=rearData,
                 Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", 
+                +";name=FlatBackground",
                 Ties='f1.A0='+str(rAnds.shift*rAnds.scale)+',f0.Shift=0.0',
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
         else:
             Fit(InputWorkspace=rearData,
                 Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", 
+                +";name=FlatBackground",
                 Ties='f1.A0='+str(rAnds.shift*rAnds.scale)+',f0.Shift=0.0',
                 Output="__fitRescaleAndShift")
     else:
@@ -635,7 +636,7 @@ def _WavRangeReduction(name_suffix=None):
         Run a reduction that has been set up, from loading the raw data to calculating Q
     """
     def _setUpPeriod(period):
-        assert(ReductionSingleton().get_sample().loader.move2ws(period))
+        assert ReductionSingleton().get_sample().loader.move2ws(period)
         can = ReductionSingleton().get_can()
         if can and can.loader.periods_in_file > 1:
             can.loader.move2ws(period)
@@ -867,8 +868,8 @@ def LimitsR(rmin, rmax, quiet=False, reducer=None):
 def LimitsWav(lmin, lmax, step, bin_type):
     _printMessage('LimitsWav(' + str(lmin) + ', ' + str(lmax) + ', ' + str(step) + ', '  + bin_type + ')')
 
-    if ( bin_type.upper().strip() == 'LINEAR'): bin_type = 'LIN'
-    if ( bin_type.upper().strip() == 'LOGARITHMIC'): bin_type = 'LOG'
+    if  bin_type.upper().strip() == 'LINEAR': bin_type = 'LIN'
+    if  bin_type.upper().strip() == 'LOGARITHMIC': bin_type = 'LOG'
     if bin_type == 'LOG':
         bin_sym = '-'
     else:
@@ -1048,7 +1049,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
 
     if xstart or ystart:
         ReductionSingleton().set_beam_finder(
-            isis_reduction_steps.BaseBeamFinder(
+            isis_reduction_steps.BaseBeamFinder(\
             float(xstart), float(ystart)),det_bank)
 
     beamcoords = ReductionSingleton().get_beam_center()
@@ -1093,7 +1094,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
                 if not graph_handle:
                     #once we have a plot it will be updated automatically when the workspaces are updated
                     graph_handle = mantidplot.plotSpectrum(centre.QUADS, 0)
-                graph_handle.activeLayer().setTitle(
+                graph_handle.activeLayer().setTitle(\
                         centre.status_str(it, resX, resY))
             except :
                 #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot

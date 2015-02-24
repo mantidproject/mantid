@@ -14,9 +14,6 @@
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/BinMD.h"
 #include <boost/algorithm/string.hpp>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Element.h>
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidMDEvents/CoordTransformAffine.h"
 

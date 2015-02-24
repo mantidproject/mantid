@@ -149,9 +149,9 @@ public: // for the time being
   getOrientedLattice(Mantid::API::MatrixWorkspace_const_sptr inWS2D);
 
   /// Set the special coordinate system if any.
-  void setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem system);
+  void setCoordinateSystem(const Mantid::Kernel::SpecialCoordinateSystem system);
   /// @return the special coordinate system if any.
-  Mantid::API::SpecialCoordinateSystem getCoordinateSystem() const;
+  Mantid::Kernel::SpecialCoordinateSystem getCoordinateSystem() const;
   /// sets number of bins each dimension is split
   void setNumBins(const std::vector<int> &nBins);
 
@@ -191,7 +191,7 @@ protected: // until MDWSDesctiptionDepricatedExist
 
 private:
   /// Coordinate system.
-  Mantid::API::SpecialCoordinateSystem m_coordinateSystem;
+  Mantid::Kernel::SpecialCoordinateSystem m_coordinateSystem;
 };
 }
 }

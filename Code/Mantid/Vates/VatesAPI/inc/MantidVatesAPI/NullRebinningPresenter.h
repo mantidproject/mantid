@@ -27,6 +27,12 @@ namespace Mantid
 
       virtual void setAxisLabels(vtkDataSet* visualDataSet);
 
+      virtual const std::string& getInstrument() const;
+
+      virtual double getMaxValue() const;
+
+      virtual double getMinValue() const;
+
       virtual ~NullRebinningPresenter();
 
     private:

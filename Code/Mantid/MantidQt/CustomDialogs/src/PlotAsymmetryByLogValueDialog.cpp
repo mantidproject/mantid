@@ -215,5 +215,5 @@ void PlotAsymmetryByLogValueDialog::fillLogBox(const QString&)
 void PlotAsymmetryByLogValueDialog::showHideDeadTimeFileWidget(int deadTimeTypeIndex)
 {
   // Show only if "Using specified file" selected
-  m_uiForm.dtcFileContainer->setVisible(deadTimeTypeIndex == 1);
+  m_uiForm.dtcFileContainer->setVisible(deadTimeTypeIndex == 2);
 }

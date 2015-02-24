@@ -2,9 +2,14 @@
 #define MANTID_VATES_MDHW_LOADING_PRESENTER
 
 #include "MantidVatesAPI/MDLoadingPresenter.h"
+#include "MantidVatesAPI/MetadataJsonManager.h"
+#include "MantidVatesAPI/MetaDataExtractorUtils.h"
+#include "MantidVatesAPI/VatesConfigurations.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+
+#include <boost/scoped_ptr.hpp>
 
 namespace Mantid
 {
@@ -49,6 +54,10 @@ namespace Mantid
       virtual void setAxisLabels(vtkDataSet* visualDataSet);
       virtual void makeNonOrthogonal(vtkDataSet* visualDataSet);
       virtual ~MDHWLoadingPresenter();
+      virtual const std::string& getInstrument();
+      virtual double getMinValue();
+      virtual double getMaxValue();
+
     protected:
       /*---------------------------------------------------------------------------
       Common/shared operations and members for all MDHW file-type loading.
@@ -56,6 +65,7 @@ namespace Mantid
       MDLoadingView* m_view;
       
       Mantid::Geometry::MDGeometryBuilderXML<Mantid::Geometry::NoDimensionPolicy> xmlBuilder;
+
       Mantid::Geometry::IMDDimension_sptr tDimension;
       std::vector<std::string> axisLabels;
       virtual void appendMetadata(vtkDataSet* visualDataSet,
@@ -68,8 +78,12 @@ namespace Mantid
       double m_time;
       bool m_loadInMemory;
       bool m_firstLoad;
-    };
 
+      boost::scoped_ptr<MetadataJsonManager> m_metadataJsonManager;
+      boost::scoped_ptr<MetaDataExtractorUtils> m_metaDataExtractor;
+      boost::scoped_ptr<VatesConfigurations> m_vatesConfigurations;
+
+    };
   }
 }
 

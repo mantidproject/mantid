@@ -2,6 +2,7 @@
 #include "MantidQtAPI/MdConstants.h"
 #include "boost/scoped_ptr.hpp"
 #include <QSettings>
+#include <QString>
 
 using namespace MantidQt::API;
 
@@ -16,8 +17,9 @@ MdSettings::MdSettings() : m_vsiGroup("Mantid/MdPlotting/Vsi"),
                            m_lblUseLastSessionColorMap("uselastsessioncolormap"),
                            m_lblUserSettingBackgroundColor("usersettingbackgroundcolor"),
                            m_lblLastSessionBackgroundColor("lastsessionbackgroundcolor"),
-                           m_lblSliceViewerColorMap("ColormapFile"), // This is the same as in Slice Viewer !!
+                           m_lblSliceViewerColorMap("ColormapFile"), // This is the same as in Slice Viewer !!,
                            m_lblUserSettingInitialView("initialview")
+                           m_lblLastSessionLogScale("lastsessionlogscale")
 {
   m_mdConstants.initializeSettingsConstants();
 };
@@ -186,6 +188,15 @@ bool MdSettings::getUsageLastSession()
   return flag;
 }
 
+void MdSettings::setLastSessionLogScale(bool logScale)
+{
+  QSettings settings;
+
+  settings.beginGroup(m_vsiGroup);
+  settings.setValue(m_lblLastSessionLogScale, logScale);
+  settings.endGroup();
+}
+
 QString MdSettings::getUserSettingInitialView()
 {
   QSettings settings;
@@ -196,6 +207,18 @@ QString MdSettings::getUserSettingInitialView()
 
   return initialView;
 }
+
+bool MdSettings::getLastSessionLogScale()
+{
+  QSettings settings;
+
+  settings.beginGroup(m_vsiGroup);
+  bool logScale = settings.value(m_lblLastSessionLogScale, false).asBool();
+  settings.endGroup();
+
+  return logScale;
+}
+
 
 void MdSettings::setUserSettingIntialView(QString initialView)
 {

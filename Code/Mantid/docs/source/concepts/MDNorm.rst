@@ -13,6 +13,7 @@ point :math:`\mathbf{Q}` in the reciprocal space, measured with a single
 detector with a solid angle :math:`d \Omega`, is given by:
 
 .. math::
+    :label: CrossSectionSingDet
 
     \frac{d\sigma}{d\Omega}=\frac{N}{\Phi \times d\Omega}
     
@@ -23,27 +24,29 @@ volume. :math:`N` is the raw quantity, while :math:`\Phi \times d \Omega`
 is the statistical significance, or norm.
 
 If there are multiple detectors, or multiple experiments contributing to the 
-scattering in the :math:`d \mathbf{Q}` volume, one needa to add together the raw
+scattering in the :math:`d \mathbf{Q}` volume, one needs to add together the raw
 data, add together the norms, and then divide
 
 .. math::
-
+    :label: CrossSectionMultiDet
+    
     \frac{d\sigma}{d\Omega}=\frac{\sum_i N_i}{\sum_i \Phi_i \times d\Omega_i}
   
 The summation index :math:`i` represents every detector and sample orientation 
-or repeated measurement that contribute to the scatering in the desired region 
+or repeated measurement that contribute to the scattering in the desired region 
 of the reciprocal space. 
 In a similar fashion, for inelastic scattering, the double
 differential cross section must be written as:
 
 .. math::
+    :label: CrossSectionInelastic
 
     \frac{d^2 \sigma}{dE d\Omega}=\frac{\sum_i N_i}{\sum_i \Phi_i \times d\Omega_i \times dE_i}
 
 What this means is that, in the triple axes type
 of measurements for example, where we have a single detector (solid
 angle :math:`d \Omega_i` is a constant), we should not 
-normalize data by monitor and then add different experiments together. The monitor
+normalize data by monitor counts and then add different experiments together. The monitor
 count is a proxy for the incident flux. We should instead
 add raw data together, add monitors together, and only then divide.
   
@@ -52,11 +55,11 @@ add raw data together, add monitors together, and only then divide.
    To correctly account for the statistical significance of the measurement
    always carry around separately the raw data and the normalization.
 
-Detector trajectories in reciprocal space for syngle crystal experiments
+Detector trajectories in reciprocal space for single crystal experiments
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    
 For direct geometry inelastic scattering, for any given experiment, all the incident
-flux :math:`\Phi_i`  contribute to the scattering, and it is just a number. 
+flux :math:`\Phi_i`  contributes to the scattering, and it is just a number. 
 For diffraction and indirect geometry inelastic experiments one has to 
 account only for the flux that contribute to the scattering in the :math:`d \mathbf{Q}`
 region, which is detector and momentum dependent. Similarly, :math:`dE_i` is the length
@@ -73,6 +76,7 @@ the crystallographic :math:`HKL` frame by the :math:`UB` matrix. In Mantid notat
 this can be written as
 
 .. math::
+    :label: MasterEquation
 
     \left(\begin{array}{r}
         -k_F \sin(\theta) \cos(\phi)\\
@@ -95,13 +99,15 @@ where :math:`k_I` is the momentum of the incident neutron and :math:`k_F` is the
 of the scattered neutron. R is the rotation matrix of the goniometer. For diffraction case,
 :math:`k_I = k_F =k`. For direct geometry inelastic :math:`k_I` is fixed in 
 a particular experiment, while for indirect geometry inelastic :math:`k_F` is fixed for
-the detctor. From the previous equation one can see that the trajectories in the reciprocal
+the detector. From equation :eq:`MasterEquation` one can see that the trajectories in the reciprocal
 space are simply straight lines, parametrized by :math:`k` for diffraction, 
 :math:`k_I` for direct geometry, or :math:`k_F` for indirect geometry.
-If we calculate what are the :math:`H, K, L` coorinatesfor two points, say at 
+If we calculate what the :math:`H, K, L` coordinates are for two points, say at 
 :math:`k_{min}` and :math:`k_{max}`, we can then write:
 
 .. math::
+    :label: proportionality
+    
     \frac{H-H_{min}}{H_{max}-H_{min}}=\frac{K-K_{min}}{K_{max}-K_{min}}=
     \frac{L-L_{min}}{L_{max}-L_{min}}=\frac{k-k_{min}}{k_{max}-k_{min}}
 
@@ -117,9 +123,9 @@ integrate the incident flux between these two values, and then multiply with the
 angle of the detector, in order to obtain the statistical weight of this detector's 
 contribution to this particular region in the :math:`HKL` space.
 
-A similar equation can be obtained for inelastic scattering, by replacing
+A similar equation to :eq:`proportionality` can be obtained for inelastic scattering, by replacing
 :math:`k` with :math:`k_F` for direct geometry or with :math:`k_I` for the
-indirect case. We can then relate :math:`k_I` or :math:`k_F` with the enrgy
+indirect case. We can then relate :math:`k_I` or :math:`k_F` with the energy
 transfer :math:`\Delta E`, to get the intersections along the energy transfer
 direction.
 
@@ -140,9 +146,9 @@ Symmetrization
 ++++++++++++++
 
 To improve statistics in a certain region, one can use data from 
-different regions of the reciprocal space taht are related by the
+different regions of the reciprocal space that are related by the
 symmetry of the physics in the material that is being studied.
-A simple way to correctly estime the statistical weight of the
+A simple way to correctly estimate the statistical weight of the
 symmetrized data is to apply the symmetry operation on the detector 
 trajectories (apply to :math:`H, K, L` 
 at :math:`k_{min}` and :math:`k_{max}`) and recalculate the normalization. 

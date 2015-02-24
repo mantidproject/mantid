@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 '''
 @author Mathieu Doucet, ORNL
 @date Oct 13, 2014
@@ -30,7 +31,7 @@ import numpy as np
 class Lorentz(IFunction1D):
     """
         Provide a Lorentz model for SANS
-        
+
         I(q) = scale / ( 1 + q^2 L^2 ) + background
     """
 

@@ -147,13 +147,25 @@ namespace MantidQt
          * @returns The initial view
          */
         QString getUserSettingInitialView();
+        
+       /**
+        * Sets if the color scale was log in the last session
+        * @param logScale The state of the log scale.
+        */
+        void setLastSessionLogScale(bool logScale);
 
         /**
          * Set the user setting for the initial view.
          * @param initialView The selected initial view.
          */
         void setUserSettingIntialView(QString initialView);
-
+        
+        /**
+         * Retrieves the state of the last session's log scale.
+         * @returns Was a log scale state?
+         */
+         bool getLastSessionLogScale();
+         
       private:
         MdConstants m_mdConstants;
 
@@ -174,6 +186,7 @@ namespace MantidQt
         QString m_lblLastSessionBackgroundColor;
 
         QString m_lblUserSettingInitialView;
+        QString m_lblLastSessionLogScale;
     };
   }
 }

@@ -25,19 +25,19 @@ namespace MDEvents {
  * @throw std::runtime_error if outD > inD
  */
 CoordTransformAffine::CoordTransformAffine(const size_t inD, const size_t outD)
-    : CoordTransform(inD, outD), affineMatrix(outD + 1, inD + 1),
-      rawMatrix(NULL), rawMemory(NULL) {
-  affineMatrix.identityMatrix();
+    : CoordTransform(inD, outD), m_affineMatrix(outD + 1, inD + 1),
+      m_rawMatrix(NULL), m_rawMemory(NULL) {
+  m_affineMatrix.identityMatrix();
 
   // Allocate the raw matrix
-  size_t nx = affineMatrix.numRows();
-  size_t ny = affineMatrix.numCols();
+  size_t nx = m_affineMatrix.numRows();
+  size_t ny = m_affineMatrix.numCols();
   // vector of pointers
-  rawMatrix = new coord_t *[nx];
+  m_rawMatrix = new coord_t *[nx];
   // memory itself
-  rawMemory = new coord_t[nx * ny];
+  m_rawMemory = new coord_t[nx * ny];
   for (size_t i = 0; i < nx; i++)
-    rawMatrix[i] = rawMemory + (i * ny);
+    m_rawMatrix[i] = m_rawMemory + (i * ny);
   // Copy into the raw matrix (for speed)
   copyRawMatrix();
 }
@@ -46,9 +46,9 @@ CoordTransformAffine::CoordTransformAffine(const size_t inD, const size_t outD)
  * Call this after any change to affineMatrix
  */
 void CoordTransformAffine::copyRawMatrix() {
-  for (size_t x = 0; x < affineMatrix.numRows(); ++x)
-    for (size_t y = 0; y < affineMatrix.numCols(); ++y)
-      rawMatrix[x][y] = affineMatrix[x][y];
+  for (size_t x = 0; x < m_affineMatrix.numRows(); ++x)
+    for (size_t y = 0; y < m_affineMatrix.numCols(); ++y)
+      m_rawMatrix[x][y] = m_affineMatrix[x][y];
 }
 
 //----------------------------------------------------------------------------------------------
@@ -64,12 +64,12 @@ CoordTransform *CoordTransformAffine::clone() const {
 /** Destructor
  */
 CoordTransformAffine::~CoordTransformAffine() {
-  if (rawMatrix) {
-    delete[] rawMatrix;
-    delete[] rawMemory;
+  if (m_rawMatrix) {
+    delete[] * m_rawMatrix;
+    delete[] m_rawMatrix;
   }
-  rawMatrix = NULL;
-  rawMemory = NULL;
+  m_rawMatrix = NULL;
+  m_rawMemory = NULL;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -84,7 +84,7 @@ void CoordTransformAffine::setMatrix(
     throw std::runtime_error("setMatrix(): Number of rows must match!");
   if (newMatrix.numCols() != inD + 1)
     throw std::runtime_error("setMatrix(): Number of columns must match!");
-  affineMatrix = newMatrix;
+  m_affineMatrix = newMatrix;
   // Copy into the raw matrix (for speed)
   copyRawMatrix();
 }
@@ -93,12 +93,12 @@ void CoordTransformAffine::setMatrix(
 /** Return the affine matrix in the transform.
  */
 const Mantid::Kernel::Matrix<coord_t> &CoordTransformAffine::getMatrix() const {
-  return affineMatrix;
+  return m_affineMatrix;
 }
 
 /** @return the affine matrix */
 Mantid::Kernel::Matrix<coord_t> CoordTransformAffine::makeAffineMatrix() const {
-  return affineMatrix;
+  return m_affineMatrix;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -116,7 +116,7 @@ void CoordTransformAffine::addTranslation(const coord_t *translationVector) {
     translationMatrix[i][inD] = translationVector[i];
 
   // Multiply the affine matrix by the translation affine matrix to combine them
-  affineMatrix *= translationMatrix;
+  m_affineMatrix *= translationMatrix;
 
   // Copy into the raw matrix (for speed)
   copyRawMatrix();
@@ -172,7 +172,7 @@ void CoordTransformAffine::buildOrthogonal(
                              "workspace.");
 
   // Start with identity
-  affineMatrix.identityMatrix();
+  m_affineMatrix.identityMatrix();
 
   for (size_t i = 0; i < axes.size(); i++) {
     if (axes[i].length() == 0.0)
@@ -187,7 +187,7 @@ void CoordTransformAffine::buildOrthogonal(
     basis.normalize();
     // The row of the affine matrix = the unit vector
     for (size_t j = 0; j < basis.size(); j++)
-      affineMatrix[i][j] = static_cast<coord_t>(basis[j] * scaling[i]);
+      m_affineMatrix[i][j] = static_cast<coord_t>(basis[j] * scaling[i]);
 
     // Now account for the translation
     coord_t transl = 0;
@@ -195,7 +195,7 @@ void CoordTransformAffine::buildOrthogonal(
       transl += static_cast<coord_t>(
           origin[j] * basis[j]); // dot product of origin * basis aka ( X0 . U )
     // The last column of the matrix = the translation movement
-    affineMatrix[i][inD] = -transl * static_cast<coord_t>(scaling[i]);
+    m_affineMatrix[i][inD] = -transl * static_cast<coord_t>(scaling[i]);
   }
 
   // Copy into the raw matrix (for speed)
@@ -213,7 +213,7 @@ void CoordTransformAffine::apply(const coord_t *inputVector,
   // For each output dimension
   for (size_t out = 0; out < outD; ++out) {
     // Cache the row pointer to make the matrix access a bit faster
-    coord_t *rawMatrixRow = rawMatrix[out];
+    coord_t *rawMatrixRow = m_rawMatrix[out];
     coord_t outVal = 0.0;
     size_t in;
     for (in = 0; in < inD; ++in)
@@ -259,7 +259,7 @@ std::string CoordTransformAffine::toXMLString() const {
 
   // Convert the members to parameters
   AffineMatrixParameter affineMatrixParameter(inD, outD);
-  affineMatrixParameter.setMatrix(affineMatrix);
+  affineMatrixParameter.setMatrix(m_affineMatrix);
   Mantid::API::InDimParameter inD_param(inD);
   Mantid::API::OutDimParameter outD_param(outD);
 

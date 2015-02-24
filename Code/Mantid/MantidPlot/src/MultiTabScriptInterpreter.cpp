@@ -40,7 +40,8 @@
 MultiTabScriptInterpreter::MultiTabScriptInterpreter(ScriptingEnv *env, QWidget *parent)
   : QTabWidget(parent), Scripted(env), m_last_dir(""),
     m_cursor_pos(), m_reportProgress(false), m_recentScriptList(), m_nullScript(new NullScriptFileInterpreter),
-    m_current(m_nullScript), m_globalZoomLevel(0)
+    m_current(m_nullScript), m_globalZoomLevel(0), m_showWhitespace(false),
+    m_replaceTabs(true), m_tabWhitespaceCount(4), m_fontFamily(), m_codeFolding(false)
 {
   connect(this, SIGNAL(currentChanged(int)), this, SLOT(tabSelectionChanged(int)));
 }

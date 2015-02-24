@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'diffraction_adv_setup.ui'
@@ -376,7 +377,7 @@ class Ui_Frame(object):
         self.preserveevents_checkbox.setStatusTip(_translate("Frame", "Check to calculate the absolute scale factor using the direct beam method.", None))
         self.preserveevents_checkbox.setText(_translate("Frame", "Preserve Events", None))
         self.vanadium_correction_groupbox.setTitle(_translate("Frame", "Strip Vanadium Peaks", None))
-        self.mask_help_label.setText(_translate("Frame", "The following input parameters are used to control the algorithm to strip vanadium peaks.\n"
+        self.mask_help_label.setText(_translate("Frame", "The following input parameters are used to control the algorithm to strip vanadium peaks.\n"\
 "", None))
         self.stripvanpeaks_chkbox.setToolTip(_translate("Frame", "<html><head/><body><p>Check to subtract fitted vanadium peaks from the known positions. </p></body></html>", None))
         self.stripvanpeaks_chkbox.setText(_translate("Frame", "Strip Vanadium Peaks", None))

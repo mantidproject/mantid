@@ -5,14 +5,14 @@
 
 <!-- files properties : -->
 
+<!-- Specify that the detector positions should be taken from the data file (Not used TODO!) -->
+<parameter name="det-pos-source" type="string">
+  <value val="datafile"/>
+</parameter>
 <!-- The file which defines proper (calibrated) detector positions 
      if None - it is undefined -->
 <parameter name="det_cal_file" type="string">
    <value val="det_LET_cycle12-3.dat"/>
-</parameter>
-<!-- Specify that the detector positions should be taken from the data file (Not used TODO!) -->
-<parameter name="det-pos-source" type="string">
-  <value val="datafile"/>
 </parameter>
 
 <!-- The file which defines detectors to spectra mapping; File extension has to be specified here but filepath not
@@ -61,10 +61,6 @@
 <parameter name="norm-mon1-spec">
   <value val="57345"/>
 </parameter>
-<!-- Monitor after chopper used to estimate total current on the sample, if normalization is done on monitor 2  -->
-<parameter name="norm-mon2-spec"  type="int">
-    <value val="57350"/>
-</parameter>
 
 <!-- Time interval used for integration to estimate current on the sample 
     This interval is usually taken around the monitor peak-->
@@ -78,6 +74,25 @@
   <value val="norm-mon1-min:norm-mon1-max"/>
 </parameter>
 
+<!-- Monitor after chopper used to estimate total current on the sample, if normalization is done on monitor 2  -->
+<parameter name="norm-mon2-spec"  type = "int" >
+    <value val="57350"/>
+</parameter>
+
+<!-- Relative energy range (wrt. to the incident energy) in which monitor 2 signal is present and the integration to 
+     caluclate monitor-2 current occurs   -->
+<parameter name="mon2_norm_energy_range" type = "string">
+    <value val="0.8,1.2"/>
+</parameter>
+
+<!-- Usually one wants to avoid loading monitors together with data except in special cases. One of this cases is 
+     MARI which monitors numbers are in the beginning of the spectra. If one loads them separately, 
+     spectra numbers change and ISIS hard masks (msk) prepared for workspace with monitors become invalid. 
+     This parameter is actual until Mantid Masking change
+  -->
+<parameter name="load_monitors_with_workspace"  type="bool">
+<value val="False"/>
+</parameter>
 
 <!-- First spectra number (monitor number) to use when measuring incident energy
     Should be spectra with well defined energy peak -->
@@ -111,6 +126,22 @@
 <value val="False"/>
 </parameter>
 
+
+<!-- List of two spectra corresponding to the detectors which are closest and furtherest from the sample.
+     These detectors locations are used to identify TOF range, contributing into each energy range 
+     in multirep mode  -->
+<parameter name="multirep_tof_specta_list"  type="string">
+    <value val="12416,21761"/>
+</parameter>
+
+
+<!-- by default getEi looks for peaks within (1+-0.1)*TOF_GUES range where TOF_GUES is evaluated on the basis of ei guess.
+    If the peaks are very narrow, or there are a lot of them very close to each other, 
+    this value can be reduced. For example, such situation happens on MARI for very high incident energies Ei=1800.
+ -->
+<parameter name="ei_mon_peak_search_range">
+   <value val="0.1"/>
+</parameter>
 
 
 <parameter name="scale-factor">
@@ -404,7 +435,7 @@
        bleed_maxrate = diag_bleed_maxrate;
        bleed_pixels  = diag_bleed_pixels;
        deltaE_mode =  deltaE-mode;
-       ei-mon1-spec=ei_mon1_spec;       
+       ei-mon1-spec=ei_mon1_spec;
        ei-mon2-spec = test_ei2_mon_spectra=ei_mon2_spec;
        ei_mon_spectra=test_mon_spectra_composite"
     />

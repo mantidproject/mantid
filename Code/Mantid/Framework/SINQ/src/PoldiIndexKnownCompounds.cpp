@@ -1,5 +1,4 @@
 #include "MantidSINQ/PoldiIndexKnownCompounds.h"
-#include "MantidSINQ/PoldiUtilities/PeakFunctionIntegrator.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"

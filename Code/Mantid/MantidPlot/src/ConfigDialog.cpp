@@ -667,13 +667,12 @@ void ConfigDialog::initMantidPage()
   grid->addWidget(new QLabel("Facility"), 0, 0);
   grid->addWidget(facility, 0, 1);
 
-
   defInstr = new MantidQt::MantidWidgets::InstrumentSelector();
+  // Here we only want the default instrument updated if the user clicks Ok/Apply
+  defInstr->updateInstrumentOnSelection(false);
   grid->addWidget(new QLabel("Default Instrument"), 2, 0);
   grid->addWidget(defInstr, 2, 1);
   grid->setRowStretch(3,1);
-  //Here we only want the default instrument updated if the user clicks Ok/Apply
-  disconnect(defInstr, SIGNAL(currentIndexChanged(const QString&)), defInstr, SLOT(updateDefaultInstrument(const QString &)));
 
   //Ignore paraview.
   ckIgnoreParaView = new QCheckBox("Ignore ParaView");

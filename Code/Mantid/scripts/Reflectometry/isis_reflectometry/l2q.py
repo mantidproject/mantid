@@ -1,7 +1,7 @@
+#pylint: disable=invalid-name
 
 import math
 from mantid.simpleapi import *  # New API
-from mantid.geometry import ReferenceFrame
 
 def l2q(ws,whichDet,theta, sample_component_name):
     '''

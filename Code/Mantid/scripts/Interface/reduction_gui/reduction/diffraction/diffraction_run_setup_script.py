@@ -160,66 +160,66 @@ class RunSetupScript(BaseScriptElement):
             instrument_dom = element_list[0]
 
             #
-            self.runnumbers = BaseScriptElement.getStringElement(instrument_dom,
+            self.runnumbers = BaseScriptElement.getStringElement(instrument_dom,\
                     "runnumber", default=RunSetupScript.runnumbers)
 
 
-            tempbool = BaseScriptElement.getStringElement(instrument_dom,
+            tempbool = BaseScriptElement.getStringElement(instrument_dom,\
                     "sum", default=str(int(RunSetupScript.dosum)))
             self.dosum = bool(int(tempbool))
 
-            self.calibfilename = BaseScriptElement.getStringElement(instrument_dom,
+            self.calibfilename = BaseScriptElement.getStringElement(instrument_dom,\
                     "calibrationfile", default=RunSetupScript.calibfilename)
 
-            self.charfilename = BaseScriptElement.getStringElement(instrument_dom,
+            self.charfilename = BaseScriptElement.getStringElement(instrument_dom,\
                     "characterizationrunsfile", default=RunSetupScript.charfilename)
 
-            self.binning = BaseScriptElement.getFloatElement(instrument_dom,
+            self.binning = BaseScriptElement.getFloatElement(instrument_dom,\
                     "binning", default=RunSetupScript.binning)
 
-            tempbool =  BaseScriptElement.getStringElement(instrument_dom,
+            tempbool =  BaseScriptElement.getStringElement(instrument_dom,\
                     "binindspace", default=str(int(RunSetupScript.binindspace)))
             self.binindspace = bool(int(tempbool))
 
-            self.resamplex = BaseScriptElement.getIntElement(instrument_dom,
+            self.resamplex = BaseScriptElement.getIntElement(instrument_dom,\
                     "resamplex", default=RunSetupScript.resamplex)
 
-            self.saveas = BaseScriptElement.getStringElement(instrument_dom,
+            self.saveas = BaseScriptElement.getStringElement(instrument_dom,\
                     "saveas",  default=RunSetupScript.saveas)
 
-            self.outputdir = BaseScriptElement.getStringElement(instrument_dom,
+            self.outputdir = BaseScriptElement.getStringElement(instrument_dom,\
                     "outputdirectory", default=RunSetupScript.outputdir)
 
-            self.finalunits = BaseScriptElement.getStringElement(instrument_dom,
+            self.finalunits = BaseScriptElement.getStringElement(instrument_dom,\
                     "finaldataunits", default=RunSetupScript.finalunits)
 
-            tempint = BaseScriptElement.getStringElement(instrument_dom,
+            tempint = BaseScriptElement.getStringElement(instrument_dom,\
                     "backgroundnumber", default=RunSetupScript.bkgdrunnumber)
             try:
                 self.bkgdrunnumber = int(tempint)
             except ValueError:
                 self.bkgdrunnumber = None
-            tempbool = BaseScriptElement.getStringElement(instrument_dom,
+            tempbool = BaseScriptElement.getStringElement(instrument_dom,\
                     "disablebackgroundcorrection", default=str(int(RunSetupScript.disablebkgdcorrection)))
             self.disablebkgdcorrection = bool(int(tempbool))
 
-            tempint = BaseScriptElement.getStringElement(instrument_dom,
+            tempint = BaseScriptElement.getStringElement(instrument_dom,\
                     "vanadiumnumber", default=RunSetupScript.vanrunnumber)
             try:
                 self.vanrunnumber = int(tempint)
             except ValueError:
                 self.vanrunnumber = ""
-            tempbool = BaseScriptElement.getStringElement(instrument_dom,
+            tempbool = BaseScriptElement.getStringElement(instrument_dom,\
                     "disablevanadiumcorrection", default=str(int(RunSetupScript.disablevancorrection)))
             self.disablevancorrection = bool(int(tempbool))
 
-            tempint = BaseScriptElement.getStringElement(instrument_dom,
+            tempint = BaseScriptElement.getStringElement(instrument_dom,\
                     "vanadiumbackgroundnumber", default=RunSetupScript.vanbkgdrunnumber)
             try:
                 self.vanbkgdrunnumber = int(tempint)
             except ValueError:
                 self.vanbkgdrunnumber = None
-            tempbool = BaseScriptElement.getStringElement(instrument_dom,
+            tempbool = BaseScriptElement.getStringElement(instrument_dom,\
                     "disablevanadiumbackgroundcorrection", default=str(int(RunSetupScript.disablevanbkgdcorrection)))
             self.disablevanbkgdcorrection = bool(int(tempbool))
 

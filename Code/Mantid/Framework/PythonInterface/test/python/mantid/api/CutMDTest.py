@@ -221,7 +221,13 @@ class CutMDTest(unittest.TestCase):
         
         self.assertTrue(isinstance(out_md, IMDHistoWorkspace), "Expect that the output was an IMDHistoWorkspace given the NoPix flag.")
                 
-                    
+        '''
+        Process the 4D workspace again, this time with different binning
+        '''
+        out_md = CutMD(to_cut, P1Bin=[-0.5,0.5], P2Bin=[-0.1,0.1], P3Bin=[-0.3,0.3], P4Bin=[-8,1,8],  NoPix=True) 
+        self.assertEqual(16, out_md.getDimension(3).getNBins())
+        self.assertTrue(isinstance(out_md, IMDHistoWorkspace), "Expect that the output was an IMDHistoWorkspace given the NoPix flag.")
+                
 
 if __name__ == '__main__':
     unittest.main()

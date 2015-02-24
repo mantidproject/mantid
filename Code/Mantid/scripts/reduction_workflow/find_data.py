@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import os
 from mantid.kernel import ConfigService, Logger
 from mantid.api import FileFinder

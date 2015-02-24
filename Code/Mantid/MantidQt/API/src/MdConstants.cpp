@@ -8,7 +8,7 @@ namespace MantidQt
 {
   namespace API
   {
-    MdConstants::MdConstants()
+    MdConstants::MdConstants() : m_colorScaleStandardMax(0.1), m_logScaleDefaultValue(0.1)
     {
       initializeSettingsConstants();
       initializeViewConstants();
@@ -103,6 +103,16 @@ namespace MantidQt
     QString MdConstants::getSplatterPlotView() const
     {
       return m_splatterPlotView;
+    }
+    
+    double MdConstants::getColorScaleStandardMax()
+    {
+      return m_colorScaleStandardMax;
+    }
+
+    double MdConstants::getLogScaleDefaultValue()
+    {
+      return m_logScaleDefaultValue;
     }
 
      /**

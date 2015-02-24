@@ -903,10 +903,11 @@ class Screenshot(QtCore.QObject):
         through a slot if the call is from a separate
         thread
         """
-        # First save the screenshot
-        widget.resize(widget.size())
+        # Adjust the widget to a reasonable size
+        widget.adjustSize()
         QtCore.QCoreApplication.processEvents()
 
+        # Save the screenshot
         pix = QtGui.QPixmap.grabWidget(widget)
         pix.save(filename)
 

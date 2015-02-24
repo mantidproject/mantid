@@ -35,14 +35,6 @@ General properties
 |algorithms.categories.hidden  |A comma separated list of any categories of        | Mouns, Test |
 |                              |algorithms that should be hidden in Mantid.        | Category    |
 +------------------------------+---------------------------------------------------+-------------+
-|AlgorithmChaining.SwitchedOn  |Algorithm chain re-running will replay any         | 0 or 1      |
-|                              |subsequent algorithms whenever a workspace is      |             |
-|                              |replaced.                                          |             |
-|                              |                                                   |             |
-|                              |This was an early implementation and its use is    |             |
-|                              |no longer advised as it could cause race conditions|             |
-|                              |when combined with scripts.                        |             |
-+------------------------------+---------------------------------------------------+-------------+
 |MultiThreaded.MaxCores        |Sets the maximum number of cores available to be   | 0           |
 |                              |used for threads for OpenMP. If zero it will use   |             |
 |                              |one thread per logical core available.             |             |
