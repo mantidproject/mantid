@@ -303,6 +303,60 @@ public:
 
   }
 
+    void test_partial_spectra ()
+  {
+    LoadMuonNexus1 alg1;
+    LoadMuonNexus1 alg2;
+
+    // Execute alg1
+    // It will only load some spectra
+    TS_ASSERT_THROWS_NOTHING( alg1.initialize() );
+    TS_ASSERT( alg1.isInitialized() );
+    alg1.setPropertyValue("Filename", inputFile);    
+    alg1.setPropertyValue("OutputWorkspace", "outWS1");    
+    alg1.setPropertyValue("SpectrumList", "29,31");
+    alg1.setPropertyValue("SpectrumMin", "5");
+    alg1.setPropertyValue("SpectrumMax", "10");
+    TS_ASSERT_THROWS_NOTHING(alg1.execute());    
+    TS_ASSERT( alg1.isExecuted() );    
+    // Get back the saved workspace
+    MatrixWorkspace_sptr output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS1");
+    Workspace2D_sptr out1 = boost::dynamic_pointer_cast<Workspace2D>(output1);
+
+    // Execute alg2
+    // Load all the spectra
+    TS_ASSERT_THROWS_NOTHING( alg2.initialize() );
+    TS_ASSERT( alg2.isInitialized() );
+    alg2.setPropertyValue("Filename", inputFile);    
+    alg2.setPropertyValue("OutputWorkspace", "outWS2");    
+    TS_ASSERT_THROWS_NOTHING(alg2.execute());    
+    TS_ASSERT( alg2.isExecuted() );    
+    // Get back the saved workspace
+    MatrixWorkspace_sptr output2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS2");
+    Workspace2D_sptr out2 = boost::dynamic_pointer_cast<Workspace2D>(output2);
+
+    // Check common spectra
+    // X values should match
+    TS_ASSERT_EQUALS( out1->readX(0), out2->readX(0) );
+    TS_ASSERT_EQUALS( out1->readX(4), out2->readX(5) );
+    // Check some Y values
+    TS_ASSERT_EQUALS( out1->readY(0), out2->readY(4) );
+    TS_ASSERT_EQUALS( out1->readY(3), out2->readY(7) );
+    TS_ASSERT_EQUALS( out1->readY(5), out2->readY(9) );
+    TS_ASSERT_EQUALS( out1->readY(6), out2->readY(28) );
+    TS_ASSERT_EQUALS( out1->readY(7), out2->readY(30) );
+    // Check some E values
+    TS_ASSERT_EQUALS( out1->readE(0), out2->readE(4) );
+    TS_ASSERT_EQUALS( out1->readE(3), out2->readE(7) );
+    TS_ASSERT_EQUALS( out1->readE(5), out2->readE(9) );
+    TS_ASSERT_EQUALS( out1->readE(6), out2->readE(28) );
+    TS_ASSERT_EQUALS( out1->readE(7), out2->readE(30) );
+
+    AnalysisDataService::Instance().remove("outWS1");
+    AnalysisDataService::Instance().remove("outWS2");
+
+  }
+
   void test_loadingDeadTimes_singlePeriod()
   {
     const std::string outWSName = "LoadMuonNexus1Test_OutputWS";
