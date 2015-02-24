@@ -273,7 +273,7 @@ public:
     
     nxload3.setPropertyValue("Filename", inputFile);    
     nxload3.setPropertyValue("OutputWorkspace", "outWS");    
-    nxload3.setPropertyValue("SpectrumList", "29,30,31");
+    nxload3.setPropertyValue("SpectrumList", "29,30,32");
     nxload3.setPropertyValue("SpectrumMin", "5");
     nxload3.setPropertyValue("SpectrumMax", "10");
     
@@ -300,6 +300,7 @@ public:
     TS_ASSERT_EQUALS( output2D->dataE(8)[479], 12);
     // Check that the error on that value is correct
     TS_ASSERT_DELTA( output2D->dataX(8)[479], 7.410, 0.0001);
+
   }
 
   void test_loadingDeadTimes_singlePeriod()
