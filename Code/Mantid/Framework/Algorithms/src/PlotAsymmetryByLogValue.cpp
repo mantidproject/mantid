@@ -401,10 +401,14 @@ void PlotAsymmetryByLogValue::parseRunNames (std::string& firstFN, std::string& 
     if ( Poco::File(pathLast).exists() ) {
       fnBase = firstBase;
       fnExt = firstExt;
+      g_log.warning() << "First and last run are not in the same directory. File " 
+        << pathLast << " will be used instead." << std::endl;
     } else if (Poco::File(pathFirst).exists()) {
       // ...or viceversa
       fnBase = lastBase;
       fnExt = lastExt;
+      g_log.warning() << "First and last run are not in the same directory. File " 
+        << pathFirst << " will be used instead." << std::endl;
     } else {
       throw std::runtime_error("First and last runs are not in the same directory.");
     }
