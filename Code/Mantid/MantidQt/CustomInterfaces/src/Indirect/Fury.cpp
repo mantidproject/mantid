@@ -105,7 +105,6 @@ namespace IDA
     furyAlg->setProperty("NumBins", numBins);
 
     furyAlg->setProperty("Plot", plot);
-    furyAlg->setProperty("Verbose", true);
     furyAlg->setProperty("Save", save);
     furyAlg->setProperty("DryRun", false);
 
@@ -205,7 +204,6 @@ namespace IDA
     furyAlg->setProperty("NumBins", numBins);
 
     furyAlg->setProperty("Plot", false);
-    furyAlg->setProperty("Verbose", true);
     furyAlg->setProperty("Save", false);
     furyAlg->setProperty("DryRun", true);
 
