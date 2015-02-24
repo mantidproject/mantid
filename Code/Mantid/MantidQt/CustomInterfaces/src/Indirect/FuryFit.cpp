@@ -103,9 +103,9 @@ namespace IDA
     connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
     connect(m_uiForm.pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
 
-    connect(m_uiForm.dsSampleInput, SIGNAL(filesFound()), this, SLOT(plotInput()));
+    connect(m_uiForm.dsSampleInput, SIGNAL(filesFound()), this, SLOT(updatePlot()));
 
-    connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
+    connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(updatePlot()));
 
     connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this, SLOT(specMinChanged(int)));
     connect(m_uiForm.spSpectraMax, SIGNAL(valueChanged(int)), this, SLOT(specMaxChanged(int)));
@@ -171,6 +171,8 @@ namespace IDA
     QString inputWsName = QString::fromStdString(m_ffInputWS->getName());
     QString resultWsName = inputWsName.left(inputWsName.lastIndexOf("_")) + "_fury_" + fitType + specMin + "_to_" + specMax + "_Workspaces";
     m_pythonExportWsName = resultWsName.toStdString();
+
+    updatePlot();
   }
 
   bool FuryFit::validate()
@@ -218,7 +220,7 @@ namespace IDA
     m_uiForm.spSpectraMax->setMinimum(0);
     m_uiForm.spSpectraMax->setValue(maxSpecIndex);
 
-    plotInput();
+    updatePlot();
   }
 
   CompositeFunction_sptr FuryFit::createFunction(bool tie)
@@ -380,7 +382,7 @@ namespace IDA
     plotGuess(NULL);
   }
 
-  void FuryFit::plotInput()
+  void FuryFit::updatePlot()
   {
     if(!m_ffInputWS)
     {
@@ -411,6 +413,17 @@ namespace IDA
     catch(std::invalid_argument & exc)
     {
       showMessageBox(exc.what());
+    }
+
+    // If there is a result plot then plot it
+    if(AnalysisDataService::Instance().doesExist(m_pythonExportWsName))
+    {
+      WorkspaceGroup_sptr outputGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(m_pythonExportWsName);
+      if(specNo >= static_cast<int>(outputGroup->size()))
+        return;
+      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outputGroup->getItem(specNo));
+      if(ws)
+        m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
     }
   }
 
@@ -568,7 +581,7 @@ namespace IDA
     }
     QString ftype = fitTypeString();
 
-    plotInput();
+    updatePlot();
     if ( m_ffInputWS == NULL )
     {
       return;
