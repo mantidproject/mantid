@@ -29,24 +29,34 @@ void PeakParameterFunction::function1D(double *out, const double *xValues,
     throw std::invalid_argument("Can only work with domain of size 4.");
   }
 
-  boost::shared_ptr<IPeakFunction> peakFunction =
-      boost::dynamic_pointer_cast<IPeakFunction>(getDecoratedFunction());
-
-  if (!peakFunction) {
-    throw std::invalid_argument(
-        "Decorated function needs to be a valid IPeakFunction.");
+  if(!m_peakFunction) {
+      throw std::runtime_error("IPeakFunction has not been set.");
   }
 
-  out[0] = peakFunction->centre();
-  out[1] = peakFunction->height();
-  out[2] = peakFunction->fwhm();
-  out[3] = peakFunction->intensity();
+  out[0] = m_peakFunction->centre();
+  out[1] = m_peakFunction->height();
+  out[2] = m_peakFunction->fwhm();
+  out[3] = m_peakFunction->intensity();
 }
 
 /// Uses numerical derivatives to calculate Jacobian of the function.
 void PeakParameterFunction::functionDeriv(const FunctionDomain &domain,
                                           Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
+}
+
+/// Make sure the decorated function is IPeakFunction and store it.
+void
+PeakParameterFunction::beforeDecoratedFunctionSet(const IFunction_sptr &fn) {
+  boost::shared_ptr<IPeakFunction> peakFunction =
+      boost::dynamic_pointer_cast<IPeakFunction>(fn);
+
+  if (!peakFunction) {
+    throw std::invalid_argument(
+        "Decorated function needs to be an IPeakFunction.");
+  }
+
+  m_peakFunction = peakFunction;
 }
 
 } // namespace CurveFitting

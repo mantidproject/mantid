@@ -4,6 +4,7 @@
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionParameterDecorator.h"
+#include "MantidAPI/IPeakFunction.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -54,6 +55,11 @@ public:
 
   void functionDeriv(const API::FunctionDomain &domain,
                      API::Jacobian &jacobian);
+
+protected:
+  void beforeDecoratedFunctionSet(const API::IFunction_sptr &fn);
+
+  API::IPeakFunction_sptr m_peakFunction;
 };
 
 } // namespace CurveFitting
