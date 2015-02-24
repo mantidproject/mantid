@@ -406,7 +406,8 @@ class mon2NormalizationEnergyRange(PropDescriptor):
        """ Return actual energy range from internal relative range and incident energy """
        if instance is None:
            return self
-       return [self._relative_range[0] * instance.incident_energy,self._relative_range[1] * instance.incident_energy]
+       ei = owner.incident_energy.get_current()
+       return [self._relative_range[0]*ei, self._relative_range[1]*ei]
 
     def __set__(self,instance,val):
        """ set detector calibration file using various formats """

@@ -886,6 +886,24 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertAlmostEqual(range[0],9.5)
         self.assertAlmostEqual(range[1],10.5)
 
+# Test multirep mode
+        propman.incident_energy = [10,20,30]
+        range = propman.mon2_norm_energy_range
+        self.assertAlmostEqual(range[0],9.5)
+        self.assertAlmostEqual(range[1],10.5)
+
+        PropertyManager.incident_energy.next()
+        range = propman.mon2_norm_energy_range
+        self.assertAlmostEqual(range[0],2*9.5)
+        self.assertAlmostEqual(range[1],2*10.5)
+
+        PropertyManager.incident_energy.next()
+        range = propman.mon2_norm_energy_range
+        self.assertAlmostEqual(range[0],3*9.5)
+        self.assertAlmostEqual(range[1],3*10.5)
+
+
+
 
     def test_multirep_tof_specta_list(self):
         propman = self.prop_man
