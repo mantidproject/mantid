@@ -52,6 +52,9 @@ namespace Mantid
       virtual void makeNonOrthogonal(vtkDataSet* visualDataSet) = 0;
       virtual void setAxisLabels(vtkDataSet* visualDataSet) = 0;
       virtual ~MDRebinningPresenter(){}
+      virtual const std::string& getInstrument() const = 0;
+      virtual double getMaxValue() const = 0;
+      virtual double getMinValue() const = 0;
     };
 
     typedef boost::shared_ptr<MDRebinningPresenter> MDRebinningPresenter_sptr;

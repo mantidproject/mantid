@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # Perform some algorithms
 LoadRaw(Filename="GEM40979.raw",OutputWorkspace="GEM40979")
 AlignDetectors("GEM40979",OutputWorkspace="aligned",CalibrationFile="offsets_2006_cycle064.cal")

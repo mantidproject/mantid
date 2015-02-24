@@ -1390,3 +1390,31 @@ public:
 }; // end namespace MantidWidgets
 }; // end namespace MantidQt
 
+
+namespace MantidQt
+{
+namespace MantidWidgets
+{
+
+class SlitCalculator : QDialog
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/SlitCalculator.h"
+%End
+%Docstring
+
+SlitCalculator
+==============
+
+    The SlitCalculator is a control for interacting with the CalculateSlits algorithm.
+
+%End
+
+public:
+  SlitCalculator(QWidget* parent);
+  virtual ~SlitCalculator();
+
+};
+
+}; // end namespace MantidWidgets
+}; // end namespace MantidQt

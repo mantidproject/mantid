@@ -103,6 +103,21 @@ public:
     TS_ASSERT_EQUALS(y[0], 0.0);
   }
 
+  void testIntensity()
+  {
+      Mantid::CurveFitting::Lorentzian lor;
+      lor.initialize();
+      lor.setHeight(2.0);
+      lor.setCentre(3.0);
+      lor.setFwhm(1.0);
+
+      TS_ASSERT_DELTA(lor.intensity(), 1.873097930277787, 1e-10);
+      TS_ASSERT_THROWS_NOTHING(lor.setIntensity(2.0));
+
+      TS_ASSERT_DELTA(lor.intensity(), 2.0, 1e-10);
+      TS_ASSERT_EQUALS(lor.fwhm(), 1.0);
+  }
+
 private:
   
   class TestableLorentzian : public Mantid::CurveFitting::Lorentzian

@@ -756,12 +756,17 @@ void Plot::showEvent (QShowEvent * event)
   \brief Paint the plot into a given rectangle.
   Paint the contents of a QwtPlot instance into a given rectangle (Qwt modified code).
 
+  Note that this method is const so that it properly overrides
+  QwtPlot::print (coverity issue 1076125). This however requires
+  several const_casts in the code, as constness either is not
+  specified in some methods called or it is actually arguable.
+
   @param painter :: Painter
   @param plotRect :: Bounding rectangle
   @param pfilter :: Print filter
 */
 void Plot::print(QPainter *painter, const QRect &plotRect,
-        const QwtPlotPrintFilter &pfilter)
+        const QwtPlotPrintFilter &pfilter) const
 {
     int axisId;
 
@@ -787,7 +792,7 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
     // reset the widget attributes again. This way we produce a lot of
     // useless layout events ...
 
-    pfilter.apply((QwtPlot *)this);
+    pfilter.apply((QwtPlot *)const_cast<Plot*>(this));
 
     int baseLineDists[QwtPlot::axisCnt];
     if ( !(pfilter.options() & 16) ){
@@ -795,7 +800,7 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
         // the scale on the frame of the canvas.
 
         for (axisId = 0; axisId < QwtPlot::axisCnt; axisId++ ){
-            QwtScaleWidget *scaleWidget = (QwtScaleWidget *)axisWidget(axisId);
+            QwtScaleWidget *scaleWidget = const_cast<QwtScaleWidget*>(axisWidget(axisId));
             if ( scaleWidget ){
                 baseLineDists[axisId] = scaleWidget->margin();
                 scaleWidget->setMargin(0);
@@ -811,7 +816,7 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
     if ( !(pfilter.options() & QwtPlotPrintFilter::PrintLegend) )
         layoutOptions |= QwtPlotLayout::IgnoreLegend;
 
-    ((QwtPlot *)this)->plotLayout()->activate(this,
+    ((QwtPlot *)const_cast<Plot*>(this))->plotLayout()->activate(this,
         QwtPainter::metricsMap().deviceToLayout(plotRect),
         layoutOptions);
 
@@ -875,7 +880,7 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
 
 
     for ( axisId = 0; axisId < QwtPlot::axisCnt; axisId++ ){
-        QwtScaleWidget *scaleWidget = (QwtScaleWidget *)axisWidget(axisId);
+        QwtScaleWidget *scaleWidget = const_cast<QwtScaleWidget*>(axisWidget(axisId));
         if (scaleWidget){
             int baseDist = scaleWidget->margin();
 
@@ -919,21 +924,22 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
 
     
 
-    ((QwtPlot *)this)->plotLayout()->invalidate();
+    ((QwtPlot *)const_cast<Plot*>(this))->plotLayout()->invalidate();
 
     // reset all widgets with their original attributes.
     if ( !(pfilter.options() & 16) ){
         // restore the previous base line dists
         for (axisId = 0; axisId < QwtPlot::axisCnt; axisId++ ){
-            QwtScaleWidget *scaleWidget = (QwtScaleWidget *)axisWidget(axisId);
+            QwtScaleWidget *scaleWidget =
+              const_cast<QwtScaleWidget*>(axisWidget(axisId));
             if ( scaleWidget  )
                 scaleWidget->setMargin(baseLineDists[axisId]);
         }
     }
 
-    pfilter.reset((QwtPlot *)this);
+    pfilter.reset((QwtPlot *)const_cast<Plot*>(this));
     painter->restore();
-    setTitle(t);//hack used to avoid bug in Qwt::printTitle(): the title attributes are overwritten
+    const_cast<Plot*>(this)->setTitle(t);//hack used to avoid bug in Qwt::printTitle(): the title attributes are overwritten
 }
 
 

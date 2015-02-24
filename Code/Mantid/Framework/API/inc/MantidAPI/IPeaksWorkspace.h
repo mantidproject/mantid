@@ -7,6 +7,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
+#include <boost/optional.hpp>
 
 namespace Mantid {
 
@@ -98,12 +99,20 @@ public:
 
   //---------------------------------------------------------------------------------------------
   /** Create an instance of a Peak
-   * @param QLabFrame :: Q of the center of the peak, in reciprocal space
-   * @param detectorDistance :: distance between the sample and the detector.
+   * @param QLabFrame :: Q of the center of the peak in the lab frame, in reciprocal space
+   * @param detectorDistance :: Optional distance between the sample and the detector. Calculated if not provided.
    * @return a pointer to a new Peak object.
    */
   virtual IPeak *createPeak(Mantid::Kernel::V3D QLabFrame,
-                            double detectorDistance = 1.0) const = 0;
+                            boost::optional<double> detectorDistance) const = 0;
+
+
+  /**
+   * Create an instance of a peak using a V3D
+   * @param HKL V3D
+   * @return a pointer to a new Peak object.
+   */
+  virtual IPeak *createPeakHKL(Mantid::Kernel::V3D HKL) const = 0;
 
   //---------------------------------------------------------------------------------------------
   /** Determine if the workspace has been integrated using a peaks integration

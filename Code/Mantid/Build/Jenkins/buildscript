@@ -21,6 +21,14 @@ echo "SHA1=${sha1}"
 # Setup clang
 ###############################################################################
 if [[ ${JOB_NAME} == *clang* ]]; then
+  USE_CLANG=true
+elif [[ $(uname) == 'Darwin' ]] ; then
+  if [[ ! $(command -v icpc) ]] ; then
+    USE_CLANG=true
+  fi
+fi  
+
+if [[ $USE_CLANG ]]; then
   # Assuming we are using the clang compiler
   echo "Using clang/llvm compiler."
   clang --version
@@ -40,7 +48,7 @@ fi
 ###############################################################################
 # OS X 10.8 setup steps
 ###############################################################################
-if [[ $(uname) == 'Darwin' ]] && [[ ${JOB_NAME} != *clang* ]]; then
+if [[ $(uname) == 'Darwin' ]] && [[ ! $USE_CLANG ]]; then
   # Assuming we are using the Intel compiler
   cd $WORKSPACE/Code
   ./fetch_Third_Party.sh

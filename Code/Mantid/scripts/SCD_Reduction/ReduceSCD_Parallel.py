@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 
 # File: ReduceSCD_Parallel.py
 #
@@ -54,23 +55,23 @@ start_time = time.time()
 # a thread that starts a command line process to reduce one run.
 #
 class ProcessThread ( threading.Thread ):
-   command = ""
+    command = ""
 
-   def setCommand( self, command="" ):
-      self.command = command
+    def setCommand( self, command="" ):
+        self.command = command
 
-   def run ( self ):
-      print 'STARTING PROCESS: ' + self.command
-      os.system( self.command )
+    def run ( self ):
+        print 'STARTING PROCESS: ' + self.command
+        os.system( self.command )
 
 # -------------------------------------------------------------------------
 
 #
 # Get the config file name from the command line
 #
-if (len(sys.argv) < 2):
-  print "You MUST give the config file name on the command line"
-  exit(0)
+if len(sys.argv) < 2:
+    print "You MUST give the config file name on the command line"
+    exit(0)
 
 config_files = sys.argv[1:]
 
@@ -105,7 +106,7 @@ num_peaks_to_find     = params_dictionary[ "num_peaks_to_find" ]
 # determine what python executable to launch new jobs with
 python = sys.executable
 if python is None: # not all platforms define this variable
-   python = 'python'
+    python = 'python'
 
 #
 # Make the list of separate process commands.  If a slurm queue name
@@ -115,14 +116,14 @@ if python is None: # not all platforms define this variable
 list=[]
 index = 0
 for r_num in run_nums:
-  list.append( ProcessThread() )
-  cmd = '%s %s %s %s' % (python, reduce_one_run_script, " ".join(config_files), str(r_num))
-  if slurm_queue_name is not None:
-    console_file = output_directory + "/" + str(r_num) + "_output.txt"
-    cmd =  'srun -p ' + slurm_queue_name + \
+    list.append( ProcessThread() )
+    cmd = '%s %s %s %s' % (python, reduce_one_run_script, " ".join(config_files), str(r_num))
+    if slurm_queue_name is not None:
+        console_file = output_directory + "/" + str(r_num) + "_output.txt"
+        cmd =  'srun -p ' + slurm_queue_name + \
            ' --cpus-per-task=3 -J ReduceSCD_Parallel.py -o ' + console_file + ' ' + cmd
-  list[index].setCommand( cmd )
-  index = index + 1
+    list[index].setCommand( cmd )
+    index = index + 1
 
 #
 # Now create and start a thread for each command to run the commands in parallel,
@@ -131,17 +132,17 @@ for r_num in run_nums:
 all_done = False
 active_list=[]
 while not all_done:
-  if ( len(list) > 0 and len(active_list) < max_processes ):
-    thread = list[0]
-    list.remove(thread)
-    active_list.append( thread )
-    thread.start()
-  time.sleep(2)
-  for thread in active_list:
-    if not thread.isAlive():
-      active_list.remove( thread )
-  if len(list) == 0 and len(active_list) == 0 :
-    all_done = True
+    if  len(list) > 0 and len(active_list) < max_processes :
+        thread = list[0]
+        list.remove(thread)
+        active_list.append( thread )
+        thread.start()
+    time.sleep(2)
+    for thread in active_list:
+        if not thread.isAlive():
+            active_list.remove( thread )
+    if len(list) == 0 and len(active_list) == 0 :
+        all_done = True
 
 print "\n**************************************************************************************"
 print   "************** Completed Individual Runs, Starting to Combine Results ****************"
@@ -157,104 +158,104 @@ niggli_matrix_file = niggli_name + ".mat"
 
 first_time = True
 if not use_cylindrical_integration:
-  for r_num in run_nums:
-    one_run_file = output_directory + '/' + str(r_num) + '_Niggli.integrate'
-    peaks_ws = LoadIsawPeaks( Filename=one_run_file )
-    if first_time:
-      if UseFirstLattice and not read_UB:
+    for r_num in run_nums:
+        one_run_file = output_directory + '/' + str(r_num) + '_Niggli.integrate'
+        peaks_ws = LoadIsawPeaks( Filename=one_run_file )
+        if first_time:
+            if UseFirstLattice and not read_UB:
     # Find a UB (using FFT) for the first run to use in the FindUBUsingLatticeParameters
-        FindUBUsingFFT( PeaksWorkspace=peaks_ws, MinD=min_d, MaxD=max_d, Tolerance=tolerance )
-        uc_a = peaks_ws.sample().getOrientedLattice().a()
-        uc_b = peaks_ws.sample().getOrientedLattice().b()
-        uc_c = peaks_ws.sample().getOrientedLattice().c()
-        uc_alpha = peaks_ws.sample().getOrientedLattice().alpha()
-        uc_beta = peaks_ws.sample().getOrientedLattice().beta()
-        uc_gamma = peaks_ws.sample().getOrientedLattice().gamma()
-      SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=niggli_integrate_file )
+                FindUBUsingFFT( PeaksWorkspace=peaks_ws, MinD=min_d, MaxD=max_d, Tolerance=tolerance )
+                uc_a = peaks_ws.sample().getOrientedLattice().a()
+                uc_b = peaks_ws.sample().getOrientedLattice().b()
+                uc_c = peaks_ws.sample().getOrientedLattice().c()
+                uc_alpha = peaks_ws.sample().getOrientedLattice().alpha()
+                uc_beta = peaks_ws.sample().getOrientedLattice().beta()
+                uc_gamma = peaks_ws.sample().getOrientedLattice().gamma()
+            SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=niggli_integrate_file )
 
-      first_time = False
-    else:
-      SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=True, Filename=niggli_integrate_file )
+            first_time = False
+        else:
+            SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=True, Filename=niggli_integrate_file )
 
 #
 # Load the combined file and re-index all of the peaks together.
 # Save them back to the combined Niggli file (Or selcted UB file if in use...)
 #
-  peaks_ws = LoadIsawPeaks( Filename=niggli_integrate_file )
+    peaks_ws = LoadIsawPeaks( Filename=niggli_integrate_file )
 
 #
 # Find a Niggli UB matrix that indexes the peaks in this run
 # Load UB instead of Using FFT
 #Index peaks using UB from UB of initial orientation run/or combined runs from first iteration of crystal orientation refinement
-  if read_UB:
-    LoadIsawUB(InputWorkspace=peaks_ws, Filename=UB_filename)
-    if UseFirstLattice:
+    if read_UB:
+        LoadIsawUB(InputWorkspace=peaks_ws, Filename=UB_filename)
+        if UseFirstLattice:
       # Find UB using lattice parameters from the specified file
-      uc_a = peaks_ws.sample().getOrientedLattice().a()
-      uc_b = peaks_ws.sample().getOrientedLattice().b()
-      uc_c = peaks_ws.sample().getOrientedLattice().c()
-      uc_alpha = peaks_ws.sample().getOrientedLattice().alpha()
-      uc_beta = peaks_ws.sample().getOrientedLattice().beta()
-      uc_gamma = peaks_ws.sample().getOrientedLattice().gamma()
-      FindUBUsingLatticeParameters(PeaksWorkspace= peaks_ws,a=uc_a,b=uc_b,c=uc_c,alpha=uc_alpha,beta=uc_beta, gamma=uc_gamma,NumInitial=num_peaks_to_find,Tolerance=tolerance)
+            uc_a = peaks_ws.sample().getOrientedLattice().a()
+            uc_b = peaks_ws.sample().getOrientedLattice().b()
+            uc_c = peaks_ws.sample().getOrientedLattice().c()
+            uc_alpha = peaks_ws.sample().getOrientedLattice().alpha()
+            uc_beta = peaks_ws.sample().getOrientedLattice().beta()
+            uc_gamma = peaks_ws.sample().getOrientedLattice().gamma()
+            FindUBUsingLatticeParameters(PeaksWorkspace= peaks_ws,a=uc_a,b=uc_b,c=uc_c,alpha=uc_alpha,beta=uc_beta, gamma=uc_gamma,NumInitial=num_peaks_to_find,Tolerance=tolerance)
   #OptimizeCrystalPlacement(PeaksWorkspace=peaks_ws,ModifiedPeaksWorkspace=peaks_ws,FitInfoTable='CrystalPlacement_info',MaxIndexingError=tolerance)
-  elif UseFirstLattice and not read_UB:
+    elif UseFirstLattice and not read_UB:
     # Find UB using lattice parameters using the FFT results from first run if no UB file is specified
-    FindUBUsingLatticeParameters(PeaksWorkspace= peaks_ws,a=uc_a,b=uc_b,c=uc_c,alpha=uc_alpha,beta=uc_beta, gamma=uc_gamma,NumInitial=num_peaks_to_find,Tolerance=tolerance)
-  else:
-    FindUBUsingFFT( PeaksWorkspace=peaks_ws, MinD=min_d, MaxD=max_d, Tolerance=tolerance )
+        FindUBUsingLatticeParameters(PeaksWorkspace= peaks_ws,a=uc_a,b=uc_b,c=uc_c,alpha=uc_alpha,beta=uc_beta, gamma=uc_gamma,NumInitial=num_peaks_to_find,Tolerance=tolerance)
+    else:
+        FindUBUsingFFT( PeaksWorkspace=peaks_ws, MinD=min_d, MaxD=max_d, Tolerance=tolerance )
 
-  IndexPeaks( PeaksWorkspace=peaks_ws, Tolerance=tolerance )
-  SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=niggli_integrate_file )
-  SaveIsawUB( InputWorkspace=peaks_ws, Filename=niggli_matrix_file )
+    IndexPeaks( PeaksWorkspace=peaks_ws, Tolerance=tolerance )
+    SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=niggli_integrate_file )
+    SaveIsawUB( InputWorkspace=peaks_ws, Filename=niggli_matrix_file )
 
 #
 # If requested, also switch to the specified conventional cell and save the
 # corresponding matrix and integrate file
 #
 if not use_cylindrical_integration:
-  if (not cell_type is None) and (not centering is None) :
-    conv_name = output_directory + "/" + exp_name + "_" + cell_type + "_" + centering
-    conventional_integrate_file = conv_name + ".integrate"
-    conventional_matrix_file = conv_name + ".mat"
+    if (not cell_type is None) and (not centering is None) :
+        conv_name = output_directory + "/" + exp_name + "_" + cell_type + "_" + centering
+        conventional_integrate_file = conv_name + ".integrate"
+        conventional_matrix_file = conv_name + ".mat"
 
-    SelectCellOfType( PeaksWorkspace=peaks_ws, CellType=cell_type, Centering=centering,
+        SelectCellOfType( PeaksWorkspace=peaks_ws, CellType=cell_type, Centering=centering,\
                       AllowPermutations=allow_perm, Apply=True, Tolerance=tolerance )
-    SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=conventional_integrate_file )
-    SaveIsawUB( InputWorkspace=peaks_ws, Filename=conventional_matrix_file )
+        SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=conventional_integrate_file )
+        SaveIsawUB( InputWorkspace=peaks_ws, Filename=conventional_matrix_file )
 
 if use_cylindrical_integration:
-  if (not cell_type is None) or (not centering is None):
-    print "WARNING: Cylindrical profiles are NOT transformed!!!"
+    if (not cell_type is None) or (not centering is None):
+        print "WARNING: Cylindrical profiles are NOT transformed!!!"
   # Combine *.profiles files
-  filename = output_directory + '/' + exp_name + '.profiles'
-  output = open( filename, 'w' )
+    filename = output_directory + '/' + exp_name + '.profiles'
+    output = open( filename, 'w' )
 
   # Read and write the first run profile file with header.
-  r_num = run_nums[0]
-  filename = output_directory + '/' + instrument_name + '_' + r_num + '.profiles'
-  input = open( filename, 'r' )
-  file_all_lines = input.read()
-  output.write(file_all_lines)
-  input.close()
-  os.remove(filename)
+    r_num = run_nums[0]
+    filename = output_directory + '/' + instrument_name + '_' + r_num + '.profiles'
+    input = open( filename, 'r' )
+    file_all_lines = input.read()
+    output.write(file_all_lines)
+    input.close()
+    os.remove(filename)
 
   # Read and write the rest of the runs without the header.
-  for r_num in run_nums[1:]:
-      filename = output_directory + '/' + instrument_name + '_' + r_num + '.profiles'
-      input = open(filename, 'r')
-      for line in input:
-          if line[0] == '0': break
-      output.write(line)
-      for line in input:
-          output.write(line)
-      input.close()
-      os.remove(filename)
+    for r_num in run_nums[1:]:
+        filename = output_directory + '/' + instrument_name + '_' + r_num + '.profiles'
+        input = open(filename, 'r')
+        for line in input:
+            if line[0] == '0': break
+        output.write(line)
+        for line in input:
+            output.write(line)
+        input.close()
+        os.remove(filename)
 
   # Remove *.integrate file(s) ONLY USED FOR CYLINDRICAL INTEGRATION!
-  for file in os.listdir(output_directory):
-    if file.endswith('.integrate'):
-      os.remove(file)
+    for file in os.listdir(output_directory):
+        if file.endswith('.integrate'):
+            os.remove(file)
 
 end_time = time.time()
 

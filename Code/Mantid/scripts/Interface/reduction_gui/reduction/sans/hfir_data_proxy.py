@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import sys
  # Check whether Mantid is available
 try:

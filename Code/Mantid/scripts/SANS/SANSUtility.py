@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 #########################################################
 # This module contains utility functions common to the
 # SANS data reduction scripts
@@ -143,9 +144,9 @@ def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
             max_row = base + (y+1)*det_dimension - 1
             min_row = base + (y)*det_dimension
             for x in range(0,xdim):
-                 std_i = start_spec + x + (y*det_dimension)
-                 diff_s = std_i - min_row
-                 output += str(max_row - diff_s) + ','
+                std_i = start_spec + x + (y*det_dimension)
+                diff_s = std_i - min_row
+                output += str(max_row - diff_s) + ','
 
     return output.rstrip(",")
 
@@ -618,28 +619,28 @@ def ScaleByVolume(inputWS, scalefactor, geomid, width, height, thickness):
 
 @deprecated
 def StripEndZeroes(workspace, flag_value = 0.0):
-        result_ws = mtd[workspace]
-        y_vals = result_ws.readY(0)
-        length = len(y_vals)
+    result_ws = mtd[workspace]
+    y_vals = result_ws.readY(0)
+    length = len(y_vals)
         # Find the first non-zero value
-        start = 0
-        for i in range(0, length):
-                if ( y_vals[i] != flag_value ):
-                        start = i
-                        break
+    start = 0
+    for i in range(0, length):
+        if  y_vals[i] != flag_value :
+            start = i
+            break
         # Now find the last non-zero value
-        stop = 0
-        length -= 1
-        for j in range(length, 0,-1):
-                if ( y_vals[j] != flag_value ):
-                        stop = j
-                        break
+    stop = 0
+    length -= 1
+    for j in range(length, 0,-1):
+        if  y_vals[j] != flag_value :
+            stop = j
+            break
         # Find the appropriate X values and call CropWorkspace
-        x_vals = result_ws.readX(0)
-        startX = x_vals[start]
+    x_vals = result_ws.readX(0)
+    startX = x_vals[start]
         # Make sure we're inside the bin that we want to crop
-        endX = 1.001*x_vals[stop + 1]
-        CropWorkspace(InputWorkspace=workspace,OutputWorkspace=workspace,XMin=startX,XMax=endX)
+    endX = 1.001*x_vals[stop + 1]
+    CropWorkspace(InputWorkspace=workspace,OutputWorkspace=workspace,XMin=startX,XMax=endX)
 
 @deprecated
 class Orientation(object):

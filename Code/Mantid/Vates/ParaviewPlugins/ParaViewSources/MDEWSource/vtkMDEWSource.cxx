@@ -102,6 +102,69 @@ int vtkMDEWSource::GetSpecialCoordinates()
   }
 }
 
+/**
+ * Gets the minimum value of the data associated with the 
+ * workspace.
+ * @return The minimum value of the workspace data.
+ */
+double vtkMDEWSource::GetMinValue()
+{
+  if (NULL == m_presenter)
+  {
+    return 0.0;
+  }
+  try
+  {
+    return m_presenter->getMinValue();
+  }
+  catch (std::runtime_error &)
+  {
+    return 0;
+  }
+}
+
+/**
+ * Gets the maximum value of the data associated with the 
+ * workspace.
+ * @return The maximum value of the workspace data.
+ */
+double vtkMDEWSource::GetMaxValue()
+{
+  if (NULL == m_presenter)
+  {
+    return 0.0;
+  }
+  try
+  {
+    return m_presenter->getMaxValue();
+  }
+  catch (std::runtime_error &)
+  {
+    return 0;
+  }
+}
+
+/**
+ * Gets the (first) instrument which is associated with the workspace.
+ * @return The name of the instrument.
+ */
+const char* vtkMDEWSource::GetInstrument()
+{
+  if (NULL == m_presenter)
+  {
+    return "";
+  }
+  try
+  {
+    return m_presenter->getInstrument().c_str();
+  }
+  catch (std::runtime_error &)
+  {
+    return "";
+  }
+}
+
+
 int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *outputVector)
 {
   if(m_presenter->canReadFile())

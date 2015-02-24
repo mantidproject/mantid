@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'refm_reduction.ui'
@@ -1233,9 +1234,9 @@ class Ui_Frame(object):
     def retranslateUi(self, Frame):
         Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox_3.setTitle(QtGui.QApplication.translate("Frame", "Angle List", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_10.setText(QtGui.QApplication.translate("Frame", "List of runs to be \n"
+        self.label_10.setText(QtGui.QApplication.translate("Frame", "List of runs to be \n"\
 "stitched together.", None, QtGui.QApplication.UnicodeUTF8))
-        self.waiting_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+        self.waiting_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"\
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
@@ -1319,7 +1320,7 @@ class Ui_Frame(object):
         self.tof_max_label2.setText(QtGui.QApplication.translate("Frame", " µs", None, QtGui.QApplication.UnicodeUTF8))
         self.plot_tof_btn.setToolTip(QtGui.QApplication.translate("Frame", "Plot TOF distribution", None, QtGui.QApplication.UnicodeUTF8))
         self.plot_tof_btn.setText(QtGui.QApplication.translate("Frame", "TOF distribution", None, QtGui.QApplication.UnicodeUTF8))
-        self.edited_warning_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+        self.edited_warning_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"\
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
@@ -1342,7 +1343,7 @@ class Ui_Frame(object):
         self.angle_offset_unit_label.setText(QtGui.QApplication.translate("Frame", "  degrees", None, QtGui.QApplication.UnicodeUTF8))
         self.outdir_label.setText(QtGui.QApplication.translate("Frame", "Output directory", None, QtGui.QApplication.UnicodeUTF8))
         self.outdir_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
-        self.auto_reduce_help_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+        self.auto_reduce_help_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"\
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
