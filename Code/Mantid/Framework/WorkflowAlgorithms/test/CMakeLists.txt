@@ -12,6 +12,9 @@ if ( CXXTEST_FOUND )
   target_link_libraries ( WorkflowAlgorithmsTest WorkflowAlgorithms Algorithms DataHandling )
   add_dependencies ( WorkflowAlgorithmsTest CurveFitting )
   add_dependencies ( FrameworkTests WorkflowAlgorithmsTest )
+  # Test data
+  add_dependencies ( WorkflowAlgorithmsTest StandardTestData )
+
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET WorkflowAlgorithmsTest PROPERTY FOLDER "UnitTests" )
 endif ()

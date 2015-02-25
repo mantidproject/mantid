@@ -341,7 +341,7 @@ Conv Fit
 --------
 
 .. interface:: Data Analysis
-  :widget: tabConFit
+  :widget: tabConvFit
 
 Similarly to FuryFit, ConvFit provides a simplified interface for controlling
 various fitting functions (see the :ref:`Fit <algm-Fit>` algorithm for more
@@ -509,7 +509,7 @@ Calculate Corrections
 .. warning:: This interface is only available on Windows
 
 .. interface:: Data Analysis
-  :widget: tabAbsF2P
+  :widget: tabCalcCorr
 
 Calculates absorption corrections that could be applied to the data when given
 information about the sample (and optionally can) geometry.
@@ -554,7 +554,7 @@ Flat
 ####
 
 .. interface:: Data Analysis
-  :widget: absp_pageFlat
+  :widget: pageFlat
 
 Thickness
   Thickness of sample (cm).
@@ -572,7 +572,7 @@ Cylinder
 ########
 
 .. interface:: Data Analysis
-  :widget: absp_pageCylinder
+  :widget: pageCylinder
 
 Radius 1
   Sample radius 1 (cm).
@@ -623,7 +623,7 @@ Apply Corrections
 -----------------
 
 .. interface:: Data Analysis
-  :widget: tabApplyAbsorptionCorrections
+  :widget: tabApplyCorr
 
 The Apply Corrections tab applies the corrections calculated in the Calculate
 Corrections tab of the Indirect Data Analysis interface.

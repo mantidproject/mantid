@@ -86,10 +86,12 @@ namespace MantidQt
       /// Indicate that the instrument selection has changed. The parameter will contain the new name
       void instrumentSelectionChanged(const QString &);
       void configValueChanged(const QString&, const QString&, const QString&);
+      /// Signals that the list of instruments has been updated
+      void instrumentListUpdated();
 
     private slots:
-      /// Update Mantid's default instrument
-      void updateDefaultInstrument(const QString & name) const;
+      /// Handle an instrument seelction
+      void updateInstrument(const QString & name);
 
     private:
       void handleConfigChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
@@ -109,6 +111,9 @@ namespace MantidQt
       bool m_storeChanges;
       /// If the instrument list should be reloaded when the facility changes
       bool m_updateOnFacilityChange;
+      /// The last selected instrument
+      QString m_selectedInstrument;
+
     };
 
   }

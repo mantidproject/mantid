@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the DgsReduction class could
@@ -27,7 +28,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         """ Initialization
         """
         super(DiffractionReductionScripter, self).__init__(name=name, facility=facility)
-        
+
         print "[diffraction_reduction_script]  Facility = %s,  Instrument = %s" % (self.facility_name, self.instrument_name)
 
         return
@@ -160,7 +161,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
                         script += "%sMinimumLogValue    = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["MinimumLogValue"])
                     if filterdict["MaximumLogValue"] != "":
                         script += "%sMaximumLogValue    = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["MaximumLogValue"])
-                    script += "%sFilterLogValueByChangingDirection = '%s',\n" % (DiffractionReductionScripter.WIDTH,
+                    script += "%sFilterLogValueByChangingDirection = '%s',\n" % (DiffractionReductionScripter.WIDTH,\
                             filterdict["FilterLogValueByChangingDirection"])
                     if filterdict["LogValueInterval"] != "":
                         # Filter by log value interval
@@ -353,7 +354,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         if splitwsname is not None and splitwsname != "":
             script += "%sSplittersWorkspace = '%s',\n" % (DiffractionReductionScripter.WIDTH, str(splitwsname))
         if splitinfowsname is not None and splitinfowsname != "":
-            script += "%sSplitInformationWorkspace='%s',\n" % (DiffractionReductionScripter.WIDTH,
+            script += "%sSplitInformationWorkspace='%s',\n" % (DiffractionReductionScripter.WIDTH,\
                                                               str(splitinfowsname))
         script += "%s)\n" % (DiffractionReductionScripter.WIDTH)
 

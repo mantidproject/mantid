@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import random
 import string
 import os
@@ -34,7 +35,7 @@ class ReductionStep(object):
             @param inputworkspace: Name of the workspace to apply this step to
             @param outputworkspace: Name of the workspace to have as an output. If this is None it will be set to inputworkspace
         """
-        raise NotImplemented
+        raise NotImplementedError
 
 class Reducer(object):
     """
@@ -158,7 +159,7 @@ class Reducer(object):
 
 
 
-class ReductionSingleton:
+class ReductionSingleton(object):
     """ Singleton reduction class """
 
     ## storage for the instance reference

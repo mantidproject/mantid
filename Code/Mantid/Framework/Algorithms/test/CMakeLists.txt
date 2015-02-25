@@ -41,6 +41,9 @@ if ( CXXTEST_FOUND )
   target_link_libraries ( AlgorithmsTest Algorithms DataHandling MDEvents ${GMOCK_LIBRARIES} )
   add_dependencies ( AlgorithmsTest Crystal CurveFitting MDAlgorithms )
   add_dependencies ( FrameworkTests AlgorithmsTest )
+  # Test data
+  add_dependencies ( AlgorithmsTest StandardTestData )
+
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET AlgorithmsTest PROPERTY FOLDER "UnitTests" )
 endif ()

@@ -4,10 +4,15 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include <algorithm>
 #include <stdexcept>
 #include <ostream>
 #include <iostream>
+
+namespace {
+  Mantid::Kernel::Logger g_log("ObjCompAssembly");
+}
 
 namespace Mantid {
 namespace Geometry {
@@ -350,6 +355,10 @@ void ObjCompAssembly::testIntersectionWithChildren(
 boost::shared_ptr<Object> ObjCompAssembly::createOutline() {
   if (group.empty()) {
     throw Kernel::Exception::InstrumentDefinitionError("Empty ObjCompAssembly");
+  }
+
+  if (nelements() < 2) {
+    g_log.warning("Creating outline with fewer than 2 elements. The outline displayed may be inaccurate.");
   }
 
   // Get information about the shape and size of a detector

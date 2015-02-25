@@ -6,7 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
+#include <boost/optional.hpp>
 
 namespace Mantid {
 
@@ -98,12 +99,20 @@ public:
 
   //---------------------------------------------------------------------------------------------
   /** Create an instance of a Peak
-   * @param QLabFrame :: Q of the center of the peak, in reciprocal space
-   * @param detectorDistance :: distance between the sample and the detector.
+   * @param QLabFrame :: Q of the center of the peak in the lab frame, in reciprocal space
+   * @param detectorDistance :: Optional distance between the sample and the detector. Calculated if not provided.
    * @return a pointer to a new Peak object.
    */
   virtual IPeak *createPeak(Mantid::Kernel::V3D QLabFrame,
-                            double detectorDistance = 1.0) const = 0;
+                            boost::optional<double> detectorDistance) const = 0;
+
+
+  /**
+   * Create an instance of a peak using a V3D
+   * @param HKL V3D
+   * @return a pointer to a new Peak object.
+   */
+  virtual IPeak *createPeakHKL(Mantid::Kernel::V3D HKL) const = 0;
 
   //---------------------------------------------------------------------------------------------
   /** Determine if the workspace has been integrated using a peaks integration
@@ -127,7 +136,7 @@ public:
    * @param coordinateSystem : Special Q3D coordinate system to use.
    */
   virtual void setCoordinateSystem(
-      const Mantid::API::SpecialCoordinateSystem coordinateSystem) = 0;
+      const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem) = 0;
 
   //---------------------------------------------------------------------------------------------
   /**
@@ -135,7 +144,7 @@ public:
    * @returns special Q3D coordinate system to use being used by this
    * PeaksWorkspace object. Probably the one the workspace was generated with.
    */
-  virtual Mantid::API::SpecialCoordinateSystem
+  virtual Mantid::Kernel::SpecialCoordinateSystem
   getSpecialCoordinateSystem() const = 0;
   virtual std::vector<std::pair<std::string, std::string>>
   peakInfo(Kernel::V3D QFrame, bool labCoords) const = 0;

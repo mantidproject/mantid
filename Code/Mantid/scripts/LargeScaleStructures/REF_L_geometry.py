@@ -1,5 +1,5 @@
+#pylint: disable=invalid-name
 from geometry_writer import MantidGeom
-import math
 
 NUM_PIXELS_PER_TUBE = 304
 NUM_TUBES = 256
@@ -99,5 +99,5 @@ def create_geometry(file_name=None, pixel_width=None, pixel_height=None):
     det.writeGeom(xml_outfile)
 
 if __name__ == "__main__":
-    #create_geometry()
-    create_grouping()
+    create_geometry()
+    #create_grouping()

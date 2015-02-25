@@ -1,5 +1,5 @@
 Name:           mantid-developer
-Version:        1.8
+Version:        1.9
 Release:        2%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -63,6 +63,7 @@ Requires: scl-utils
 Requires: qt-devel
 Requires: qtwebkit-devel
 %endif
+Requires: graphviz
 
 BuildArch: noarch
 
@@ -85,6 +86,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Thu Feb 12 2015 Harry Jeffery <henry.jeffery@stfc.ac.uk>
+- Added graphviz dependency
+
 * Fri Jan 30 2015 Stuart Campbell <campbellsi@ornl.gov>
 - Removed conflicting specification for ipython 2.x
 

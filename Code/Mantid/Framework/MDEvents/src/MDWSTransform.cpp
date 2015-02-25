@@ -9,8 +9,8 @@ namespace {
 // logger for the algorithm workspaces
 Kernel::Logger g_Log("MDWSTransform");
 }
-
 using namespace CnvrtToMD;
+
 
 /** method to build the Q-coordinates transformation.
  *
@@ -320,21 +320,21 @@ void MDWSTransform::setQ3DDimensionsNames(
     dimNames[0] = "Q_lab_x";
     dimNames[1] = "Q_lab_y";
     dimNames[2] = "Q_lab_z";
-    TargWSDescription.setCoordinateSystem(Mantid::API::QLab);
+    TargWSDescription.setCoordinateSystem(Mantid::Kernel::QLab);
     break;
   }
   case (CnvrtToMD::SampleFrame): {
     dimNames[0] = "Q_sample_x";
     dimNames[1] = "Q_sample_y";
     dimNames[2] = "Q_sample_z";
-    TargWSDescription.setCoordinateSystem(Mantid::API::QSample);
+    TargWSDescription.setCoordinateSystem(Mantid::Kernel::QSample);
     break;
   }
   case (CnvrtToMD::HKLFrame): {
     dimNames[0] = "H";
     dimNames[1] = "K";
     dimNames[2] = "L";
-    TargWSDescription.setCoordinateSystem(Mantid::API::HKL);
+    TargWSDescription.setCoordinateSystem(Mantid::Kernel::HKL);
     break;
   }
   default:
