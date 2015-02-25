@@ -37,19 +37,16 @@ public:
   virtual ~EstimatePDDetectorResolution();
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const {
-    return "EstimatePDDetectorResolution";
-  }
+  virtual const std::string name() const;
+
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
-    return "Estimate the resolution of each detector for a powder "
-           "diffractometer. ";
-  }
+  virtual const std::string summary() const;
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  virtual int version() const;
+
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Diffraction"; }
+  virtual const std::string category() const;
 
 private:
   /// Implement abstract Algorithm methods

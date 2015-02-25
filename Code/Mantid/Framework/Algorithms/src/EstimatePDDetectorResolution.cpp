@@ -33,6 +33,21 @@ EstimatePDDetectorResolution::EstimatePDDetectorResolution() {}
  */
 EstimatePDDetectorResolution::~EstimatePDDetectorResolution() {}
 
+const std::string EstimatePDDetectorResolution::name() const {
+  return "EstimatePDDetectorResolution";
+}
+
+const std::string EstimatePDDetectorResolution::summary() const {
+  return "Estimate the resolution of each detector for a powder "
+         "diffractometer. ";
+}
+
+int EstimatePDDetectorResolution::version() const { return 1; }
+
+const std::string EstimatePDDetectorResolution::category() const {
+  return "Diffraction";
+}
+
 //----------------------------------------------------------------------------------------------
 void EstimatePDDetectorResolution::init() {
   declareProperty(
