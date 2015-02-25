@@ -4,6 +4,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/Logger.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
@@ -50,9 +51,10 @@ namespace Mantid
       Mantid::Kernel::Logger g_log("SourcesManager");
     }
 
-      SourcesManager::SourcesManager(QWidget* parent) : QWidget(parent), m_tempPostfix("_tempvsi")
+      SourcesManager::SourcesManager(QWidget* parent) : QWidget(parent), m_tempPostfix("_tempvsi"), m_tempPrefix("__")
       {
         observeAdd();
+        observePreDelete();
       }
 
       SourcesManager::~SourcesManager()
@@ -86,6 +88,42 @@ namespace Mantid
           }
 
           emit switchSources(workspaceName, sourceType);
+        }
+      }
+  
+      /**
+       * Catch the deletion of either the temporary or the original workspace.
+       * @param wsName The name of the workspace.
+       * @param ws The handle to the workspace
+       */
+      void SourcesManager::preDeleteHandle(const std::string &wsName, const boost::shared_ptr<Mantid::API::Workspace> ws)
+      {
+        // If the original workspace has been deleted, then delete the temporary
+        // source (and workspace via the listener)
+        if (m_originalWorkspaceToTemporaryWorkspace.count(wsName))
+        {
+          // Get the temporary source and destroy the entire pipeline
+          pqPipelineSource* source = getSourceForWorkspace(m_originalWorkspaceToTemporaryWorkspace[wsName]);
+
+          // Go to the end of the pipeline
+          while(source->getNumberOfConsumers() > 0)
+          {
+            source = source->getConsumer(0);
+          }
+
+          //Destroy the pipeline from the end
+          pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+          pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(source);
+
+          while (filter)
+          {
+            source = filter->getInput(0);
+            builder->destroy(filter);
+            filter = qobject_cast<pqPipelineFilter*>(source);
+          }
+
+          builder->destroy(source); // The listener takes now care of the workspace.
+          untrackWorkspaces(m_originalWorkspaceToTemporaryWorkspace[wsName]);
         }
       }
 
@@ -313,7 +351,7 @@ namespace Mantid
         if (workspaceName.find(m_tempPostfix) == std::string::npos)
         {
           inputWorkspace = workspaceName;
-          outputWorkspace = workspaceName + algorithmType + m_tempPostfix;
+          outputWorkspace =  m_tempPrefix + workspaceName + algorithmType + m_tempPostfix;
 
           // Record the workspace
           m_originalWorkspaceToTemporaryWorkspace.insert(std::pair<std::string, std::string>(inputWorkspace, outputWorkspace));
@@ -332,7 +370,7 @@ namespace Mantid
           if (m_temporaryWorkspaceToOriginalWorkspace.count(workspaceName) > 0)
           {
             inputWorkspace = m_temporaryWorkspaceToOriginalWorkspace[workspaceName];
-            outputWorkspace = inputWorkspace + algorithmType + m_tempPostfix;
+            outputWorkspace = m_tempPrefix + inputWorkspace + algorithmType + m_tempPostfix;
 
             // Map the new temporary workspace name to the old temporary workspace name
             m_temporaryWorkspaceToTemporaryWorkspace.insert(std::pair<std::string, std::string>(outputWorkspace, workspaceName));
@@ -390,8 +428,8 @@ namespace Mantid
       void SourcesManager::removeUnusedTemporaryWorkspaces()
       {
         // Iterate through all workspaces and check for ones ending with the tempIdentifier
-        std::set<std::string> workspaceNames = Mantid::API::AnalysisDataService::Instance().getObjectNames();
-
+        std::set<std::string> workspaceNames = Mantid::API::AnalysisDataService::Instance().getObjectNamesInclHidden();
+  
         for (std::set<std::string>::iterator it = workspaceNames.begin(); it != workspaceNames.end(); ++it)
         {
           // Only look at the temporary files
@@ -434,167 +472,184 @@ namespace Mantid
           untrackWorkspaces(workspaceName);
        }
 
-        /**
-         * Removes the temporary workspace from memory.
-         * @param temporaryWorkspace The name of the temporary workspace.
-         */
-        void SourcesManager::removeTemporaryWorkspace(std::string temporaryWorkspace)
-        {
-          Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace> adsHistoWorkspaceProvider;
-          Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace> adsEventWorkspaceProvider;
+      /**
+        * Removes the temporary workspace from memory.
+        * @param temporaryWorkspace The name of the temporary workspace.
+        */
+      void SourcesManager::removeTemporaryWorkspace(std::string temporaryWorkspace)
+      {
+        Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace> adsHistoWorkspaceProvider;
+        Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace> adsEventWorkspaceProvider;
 
-          if (adsHistoWorkspaceProvider.canProvideWorkspace(temporaryWorkspace))
+        if (adsHistoWorkspaceProvider.canProvideWorkspace(temporaryWorkspace))
+        {
+          adsHistoWorkspaceProvider.disposeWorkspace(temporaryWorkspace);
+        }
+        else if (adsEventWorkspaceProvider.canProvideWorkspace(temporaryWorkspace))
+        {
+          adsEventWorkspaceProvider.disposeWorkspace(temporaryWorkspace);
+        }
+      }
+
+      /**
+        * Rebuild the pipeline for the new source
+        * @param source1 The old source.
+        * @param source2 The new source.
+        */
+      void SourcesManager::rebuildPipeline(pqPipelineSource* source1, pqPipelineSource* source2)
+      {
+        // Step through all the filters in old pipeline and reproduce them
+        pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+        pqPipelineFilter* filter1 = qobject_cast<pqPipelineFilter*>(source1->getConsumer(0));
+
+        vtkSMProxy* proxy1 = NULL;
+        pqPipelineSource* newPipelineElement = NULL;
+        pqPipelineFilter* newFilter = NULL;
+
+        pqPipelineSource* endOfSource2Pipeline = source2;
+
+        while(filter1)
+        {
+          proxy1 = filter1->getProxy();
+
+          // Move source2 to its end.
+          while (endOfSource2Pipeline->getNumberOfConsumers() > 0)
           {
-            adsHistoWorkspaceProvider.disposeWorkspace(temporaryWorkspace);
+            endOfSource2Pipeline = endOfSource2Pipeline->getConsumer(0);
           }
-          else if (adsEventWorkspaceProvider.canProvideWorkspace(temporaryWorkspace))
+
+          if (QString(proxy1->GetXMLName()).contains("ScaleWorkspace"))
           {
-            adsEventWorkspaceProvider.disposeWorkspace(temporaryWorkspace);
+            // Build the source
+            newPipelineElement = builder->createFilter("filters","MantidParaViewScaleWorkspace", endOfSource2Pipeline);
+          } else if (QString(proxy1->GetXMLName()).contains("Cut"))
+          {
+            newPipelineElement = builder->createFilter("filters", "Cut", endOfSource2Pipeline);
+          }
+
+          newFilter = qobject_cast<pqPipelineFilter*>(newPipelineElement);
+
+          // Copy the properties from the old filter to the new filter.
+          copyProperties(filter1, newFilter);
+
+          if (filter1->getNumberOfConsumers() > 0)
+          {
+            filter1 = qobject_cast<pqPipelineFilter*>(filter1->getConsumer(0));
+          }
+          else 
+          {
+            filter1 = NULL;
           }
         }
+        emit triggerAcceptForNewFilters();
+      }
 
-        /**
-         * Rebuild the pipeline for the new source
-         * @param source1 The old source.
-         * @param source2 The new source.
-         */
-        void SourcesManager::rebuildPipeline(pqPipelineSource* source1, pqPipelineSource* source2)
+      /**
+        * Copy the properties of the old filter to the new filter.
+        * @param filter1 The old filter.
+        * @param filter2 The new filter.
+        */
+      void SourcesManager::copyProperties(pqPipelineFilter* filter1, pqPipelineFilter* filter2)
+      {
+        vtkSMProxy* proxy1 = filter1->getProxy();
+        vtkSMProxy* proxy2 = filter2->getProxy();
+
+        copySafe(proxy2, proxy1);
+      }
+
+      /**
+        * This method is taken from a newer version of pqCopyReaction, which contains a bug fix 
+        * for copying CutFilter properties. This is the correct way to copy proxy properties.
+        * @param dest Destination proxy.
+        * @param source Source proxy.
+        */
+      void SourcesManager::copySafe(vtkSMProxy* dest, vtkSMProxy* source)
+      {
+        if (dest && source)
         {
-          // Step through all the filters in old pipeline and reproduce them
-          pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-          pqPipelineFilter* filter1 = qobject_cast<pqPipelineFilter*>(source1->getConsumer(0));
+        BEGIN_UNDO_SET("Copy Properties");
+        dest->Copy(source, "vtkSMProxyProperty");
 
-          vtkSMProxy* proxy1 = NULL;
-          pqPipelineSource* newPipelineElement = NULL;
-          pqPipelineFilter* newFilter = NULL;
-
-          pqPipelineSource* endOfSource2Pipeline = source2;
-
-          while(filter1)
+          // handle proxy properties.
+          vtkSMPropertyIterator* destIter = dest->NewPropertyIterator();
+          for (destIter->Begin(); !destIter->IsAtEnd(); destIter->Next())
           {
-            proxy1 = filter1->getProxy();
-
-            // Move source2 to its end.
-            while (endOfSource2Pipeline->getNumberOfConsumers() > 0)
+            if (vtkSMInputProperty::SafeDownCast(destIter->GetProperty()))
             {
-             endOfSource2Pipeline = endOfSource2Pipeline->getConsumer(0);
+            // skip input properties.
+            continue;
             }
 
-            if (QString(proxy1->GetXMLName()).contains("ScaleWorkspace"))
+            vtkSMProxyProperty* destPP =  vtkSMProxyProperty::SafeDownCast(destIter->GetProperty());
+            vtkSMProxyProperty* srcPP = vtkSMProxyProperty::SafeDownCast(source->GetProperty(destIter->GetKey()));
+
+            if (!destPP || !srcPP || srcPP->GetNumberOfProxies() > 1)
             {
-              // Build the source
-              newPipelineElement = builder->createFilter("filters","MantidParaViewScaleWorkspace", endOfSource2Pipeline);
-            } else if (QString(proxy1->GetXMLName()).contains("Cut"))
-            {
-              newPipelineElement = builder->createFilter("filters", "Cut", endOfSource2Pipeline);
+            // skip non-proxy properties since those were already copied.
+            continue;
             }
 
-            newFilter = qobject_cast<pqPipelineFilter*>(newPipelineElement);
+            vtkSMProxyListDomain* destPLD = vtkSMProxyListDomain::SafeDownCast(destPP->FindDomain("vtkSMProxyListDomain"));
+            vtkSMProxyListDomain* srcPLD = vtkSMProxyListDomain::SafeDownCast(srcPP->FindDomain("vtkSMProxyListDomain"));
 
-            // Copy the properties from the old filter to the new filter.
-            copyProperties(filter1, newFilter);
-
-            if (filter1->getNumberOfConsumers() > 0)
+            if (!destPLD || !srcPLD)
             {
-              filter1 = qobject_cast<pqPipelineFilter*>(filter1->getConsumer(0));
-            }
-            else 
-            {
-              filter1 = NULL;
-            }
-          }
-          emit triggerAcceptForNewFilters();
-        }
-
-        /**
-         * Copy the properties of the old filter to the new filter.
-         * @param filter1 The old filter.
-         * @param filter2 The new filter.
-         */
-        void SourcesManager::copyProperties(pqPipelineFilter* filter1, pqPipelineFilter* filter2)
-        {
-          vtkSMProxy* proxy1 = filter1->getProxy();
-          vtkSMProxy* proxy2 = filter2->getProxy();
-
-          copySafe(proxy2, proxy1);
-        }
-
-        /**
-         * This method is taken from a newer version of pqCopyReaction, which contains a bug fix 
-         * for copying CutFilter properties. This is the correct way to copy proxy properties.
-         * @param dest Destination proxy.
-         * @param source Source proxy.
-         */
-        void SourcesManager::copySafe(vtkSMProxy* dest, vtkSMProxy* source)
-        {
-          if (dest && source)
-          {
-          BEGIN_UNDO_SET("Copy Properties");
-          dest->Copy(source, "vtkSMProxyProperty");
-
-            // handle proxy properties.
-            vtkSMPropertyIterator* destIter = dest->NewPropertyIterator();
-            for (destIter->Begin(); !destIter->IsAtEnd(); destIter->Next())
-            {
-              if (vtkSMInputProperty::SafeDownCast(destIter->GetProperty()))
-              {
-              // skip input properties.
+              // we copy proxy properties that have proxy list domains.
               continue;
-              }
+            }
 
-              vtkSMProxyProperty* destPP =  vtkSMProxyProperty::SafeDownCast(destIter->GetProperty());
-              vtkSMProxyProperty* srcPP = vtkSMProxyProperty::SafeDownCast(source->GetProperty(destIter->GetKey()));
-
-              if (!destPP || !srcPP || srcPP->GetNumberOfProxies() > 1)
-              {
-              // skip non-proxy properties since those were already copied.
+            if (srcPP->GetNumberOfProxies() == 0)
+            {
+              destPP->SetNumberOfProxies(0);
               continue;
-              }
+            }
 
-              vtkSMProxyListDomain* destPLD = vtkSMProxyListDomain::SafeDownCast(destPP->FindDomain("vtkSMProxyListDomain"));
-              vtkSMProxyListDomain* srcPLD = vtkSMProxyListDomain::SafeDownCast(srcPP->FindDomain("vtkSMProxyListDomain"));
+            vtkSMProxy* srcValue = srcPP->GetProxy(0);
+            vtkSMProxy* destValue = NULL;
 
-              if (!destPLD || !srcPLD)
+            // find srcValue type in destPLD and that's the proxy to use as destValue.
+            for (unsigned int cc=0; srcValue != NULL && cc < destPLD->GetNumberOfProxyTypes(); cc++)
+            {
+              if (srcValue->GetXMLName() && destPLD->GetProxyName(cc) &&
+                  strcmp(srcValue->GetXMLName(), destPLD->GetProxyName(cc)) == 0 &&
+                  srcValue->GetXMLGroup() && destPLD->GetProxyGroup(cc) &&
+                  strcmp(srcValue->GetXMLGroup(), destPLD->GetProxyGroup(cc)) == 0)
               {
-                // we copy proxy properties that have proxy list domains.
-                continue;
-              }
-
-              if (srcPP->GetNumberOfProxies() == 0)
-              {
-                destPP->SetNumberOfProxies(0);
-                continue;
-              }
-
-              vtkSMProxy* srcValue = srcPP->GetProxy(0);
-              vtkSMProxy* destValue = NULL;
-
-              // find srcValue type in destPLD and that's the proxy to use as destValue.
-              for (unsigned int cc=0; srcValue != NULL && cc < destPLD->GetNumberOfProxyTypes(); cc++)
-              {
-                if (srcValue->GetXMLName() && destPLD->GetProxyName(cc) &&
-                    strcmp(srcValue->GetXMLName(), destPLD->GetProxyName(cc)) == 0 &&
-                    srcValue->GetXMLGroup() && destPLD->GetProxyGroup(cc) &&
-                    strcmp(srcValue->GetXMLGroup(), destPLD->GetProxyGroup(cc)) == 0)
-                {
-                  destValue = destPLD->GetProxy(cc);
-                  break;
-                }
-              }
-
-              if (destValue)
-              {
-                Q_ASSERT(srcValue != NULL);
-                copySafe(destValue, srcValue);
-                destPP->SetProxy(0, destValue);
+                destValue = destPLD->GetProxy(cc);
+                break;
               }
             }
 
-            destIter->Delete();
-            dest->UpdateVTKObjects();
-            END_UNDO_SET();
+            if (destValue)
+            {
+              Q_ASSERT(srcValue != NULL);
+              copySafe(destValue, srcValue);
+              destPP->SetProxy(0, destValue);
+            }
           }
+
+          destIter->Delete();
+          dest->UpdateVTKObjects();
+          END_UNDO_SET();
         }
+      }
+
+      /**
+       * Check if we have a temporary source
+       * @param name The source name.
+       */
+      bool SourcesManager::isTemporarySource(std::string name)
+      {
+        if (m_temporaryWorkspaceToOriginalWorkspace.count(name) > 0)
+        {
+          return true;
+        }
+        else
+        {
+          return false;
+        }
+      }
+
     }
   }
 }

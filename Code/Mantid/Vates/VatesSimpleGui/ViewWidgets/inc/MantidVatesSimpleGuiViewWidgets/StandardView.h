@@ -77,6 +77,8 @@ public:
 public slots:
   /// React when the visibility of a representation changes
   void onSourceDestroyed();
+  /// Listen to a change in the active source.
+  void activeSourceChangeListener(pqPipelineSource* source);
 
 protected slots:
   /// Add a slice to the current dataset.

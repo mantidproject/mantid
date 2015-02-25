@@ -3,6 +3,7 @@
 
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidAPI/Workspace.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
@@ -72,12 +73,16 @@ namespace Mantid
 
           void registerTemporarySource(pqPipelineSource* source);
 
+          bool isTemporarySource(std::string name);
+
         signals:
           void switchSources(std::string temporaryWorkspaceName,  std::string sourceType);
 
           void triggerAcceptForNewFilters();
         protected:
           void addHandle(const std::string &workspaceName, const boost::shared_ptr<Mantid::API::Workspace> workspace);
+
+          void SourcesManager::preDeleteHandle(const std::string &wsName, const boost::shared_ptr<Mantid::API::Workspace> ws);
 
         private slots:
           void onTemporarySourceDestroyed();
@@ -90,6 +95,8 @@ namespace Mantid
           std::map<std::string, std::string> m_temporaryWorkspaceToTemporaryWorkspace; ///< Holds information from a temporary source to another temproary source which replaces it.
 
           std::string m_tempPostfix;
+
+          std::string m_tempPrefix;
 
           pqPipelineSource* getSourceForWorkspace(std::string workspaceName);
 

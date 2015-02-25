@@ -498,8 +498,8 @@ void MdViewerWidget::onRebin(std::string algorithmType)
  */
 void MdViewerWidget::onSwitchSoures(std::string temporaryWorkspaceName, std::string sourceType)
 {
-  // Create a new MDHisto source and display it
-  renderTemporaryWorkspace(temporaryWorkspaceName, sourceType); 
+  // Create the temporary workspace
+  prepareTemporaryWorkspace(temporaryWorkspaceName, sourceType); 
 
   try
   {
@@ -510,6 +510,9 @@ void MdViewerWidget::onSwitchSoures(std::string temporaryWorkspaceName, std::str
 
     // Remove the original source
     deleteSpecificSource(sourceToBeDeleted);
+
+    // Update the color scale
+    renderAndFinalSetup();
 
     // Set the splatterplot button explicitly
     this->currentView->setSplatterplot(true);
@@ -526,14 +529,17 @@ void MdViewerWidget::onSwitchSoures(std::string temporaryWorkspaceName, std::str
  * @param temporaryWorkspaceName The name of the temporary workspace.
  * @param sourceType The name of the source plugin. 
  */
-void MdViewerWidget::renderTemporaryWorkspace(const std::string temporaryWorkspaceName, std::string sourceType)
+void MdViewerWidget::prepareTemporaryWorkspace(const std::string temporaryWorkspaceName, std::string sourceType)
 {
   // Load a new source plugin
   pqPipelineSource* newTemporarySource = this->currentView->setPluginSource(QString::fromStdString(sourceType), QString::fromStdString(temporaryWorkspaceName));
+  
+  // It seems that the new source gets set as active before it is fully constructed. We therefore reset it.
+  pqActiveObjects::instance().setActiveSource(NULL);
   pqActiveObjects::instance().setActiveSource(newTemporarySource);
   m_temporarySourcesManager.registerTemporarySource(newTemporarySource);
 
-  this->renderAndFinalSetup();
+  //this->renderAndFinalSetup();
 }
 
 /**
@@ -1286,8 +1292,9 @@ void MdViewerWidget::afterReplaceHandle(const std::string &wsName,
 
 /**
  * This function responds to a workspace being deleted. If there are one or
- * more PeaksWorkspaces present, the requested one will be deleted. Otherwise,
- * if it is an IMDWorkspace, everything goes!
+ * more PeaksWorkspaces present, the requested one will be deleted. If the
+ * deleted source is a temporary source, then we revert back to the
+*  original source. Otherwise, if it is an IMDWorkspace, everything goes! 
  * @param wsName : Name of workspace being deleted
  * @param ws : Pointer to workspace being deleted
  */
@@ -1295,6 +1302,7 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
                                      const boost::shared_ptr<Workspace> ws)
 {
   UNUSED_ARG(ws);
+  
   pqPipelineSource *src = this->currentView->hasWorkspace(wsName.c_str());
   if (NULL != src)
   {
@@ -1308,6 +1316,14 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
         return;
       }
     }
+
+    // Check if temporary source and perform an unbinning
+    if (m_temporarySourcesManager.isTemporarySource(wsName))
+    {
+      removeRebinning(src, true);
+      return;
+    }
+
     emit this->requestClose();
   }
 }

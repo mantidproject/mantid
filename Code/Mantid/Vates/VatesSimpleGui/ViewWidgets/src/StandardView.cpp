@@ -10,6 +10,7 @@
 #include <pqObjectBuilder.h>
 #include <pqPipelineRepresentation.h>
 #include <pqPipelineSource.h>
+#include <pqPipelineFilter.h>
 #include <pqRenderView.h>
 #include <pqServerManagerModel.h>
 #include <pqServer.h>
@@ -54,6 +55,10 @@ namespace SimpleGui
   QObject::connect(this->ui.cutButton, SIGNAL(clicked()), this,
                    SLOT(onCutButtonClicked()));
 
+  // Listen to a change in the active source, to adapt our rebin buttons
+  QObject::connect(&pqActiveObjects::instance(), SIGNAL(sourceChanged(pqPipelineSource*)),
+                   this, SLOT(activeSourceChangeListener(pqPipelineSource*)));
+
   // Set the scale button to create the ScaleWorkspace operator
   QObject::connect(this->ui.scaleButton, SIGNAL(clicked()),
                    this, SLOT(onScaleButtonClicked()));
@@ -62,6 +67,8 @@ namespace SimpleGui
 
   QObject::connect(this->view.data(), SIGNAL(endRender()),
                    this, SLOT(onRenderDone()));
+
+
 }
 
 StandardView::~StandardView()
@@ -132,7 +139,7 @@ void StandardView::render()
   }
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
-  setRebinAndUnbinButtons();
+  //setRebinAndUnbinButtons();
 
   if (this->isPeaksWorkspace(this->origSrc))
   {
@@ -223,7 +230,7 @@ void StandardView::closeSubWindows()
  */
 void StandardView::onSourceDestroyed()
 {
-  setRebinAndUnbinButtons();
+  //setRebinAndUnbinButtons();
 }
 
 /**
@@ -305,6 +312,58 @@ void StandardView::onSliceMD()
 void StandardView::onCutMD()
 {
   emit rebin("CutMD");
+}
+
+/**
+  * Listen for a change of the active source in order to check if the the 
+  * active source is an MDEventSource for which we allow rebinning.
+  */
+void StandardView::activeSourceChangeListener(pqPipelineSource* source)
+{
+  // If there is no active source, then we do not allow rebinning
+  if (!source)
+  {
+    this->m_binMDAction->setEnabled(false);
+    this->m_sliceMDAction->setEnabled(false);
+    this->m_cutMDAction->setEnabled(false);
+    this->m_unbinAction->setEnabled(false);
+    return;
+  }
+
+  // If it is a filter work your way down
+  pqPipelineSource* localSource = source;
+  pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(localSource);
+
+  while(filter)
+  {
+    localSource = filter->getInput(0);
+    filter = qobject_cast<pqPipelineFilter*>(localSource);
+  }
+
+  // Important to first check the temporary source, then for MDEvent source, 
+  // as a temporary source may be an MDEventSource.
+  std::string workspaceType(localSource->getProxy()->GetXMLName());
+  if (isTemporaryWorkspace(localSource))
+  {
+    this->m_binMDAction->setEnabled(true);
+    this->m_sliceMDAction->setEnabled(true);
+    this->m_cutMDAction->setEnabled(false);
+    this->m_unbinAction->setEnabled(true);
+  }
+  else if (workspaceType.find("MDEW Source") != std::string::npos)
+  {
+    this->m_binMDAction->setEnabled(true);
+    this->m_sliceMDAction->setEnabled(true);
+    this->m_cutMDAction->setEnabled(false);
+    this->m_unbinAction->setEnabled(false);
+  }
+  else
+  {
+    this->m_binMDAction->setEnabled(false);
+    this->m_sliceMDAction->setEnabled(false);
+    this->m_cutMDAction->setEnabled(false);
+    this->m_unbinAction->setEnabled(false);
+  }
 }
 
 } // SimpleGui

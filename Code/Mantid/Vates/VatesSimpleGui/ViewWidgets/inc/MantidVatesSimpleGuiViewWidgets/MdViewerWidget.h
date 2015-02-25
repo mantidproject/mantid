@@ -187,7 +187,7 @@ private:
   /// Reset the current view to the appropriate initial view.
   void resetCurrentView(int workspaceType, const std::string& instrumentName);
   /// Render temporary workspace
-  void renderTemporaryWorkspace(const std::string temporaryWorkspaceName, std::string sourceType); 
+  void prepareTemporaryWorkspace(const std::string temporaryWorkspaceName, std::string sourceType); 
   /// Set visibility listener
   void setVisibilityListener();
   /// Render the original workspace
