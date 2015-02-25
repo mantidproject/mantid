@@ -636,8 +636,6 @@ void ConvertSpiceDataToRealSpace::appendSampleLogs(
 
     // Add log to experiment info
     eilast->mutableRun().addLogData(templog);
-
-    // Add log value to each ExperimentInfo for the first N
   }
 
   return;

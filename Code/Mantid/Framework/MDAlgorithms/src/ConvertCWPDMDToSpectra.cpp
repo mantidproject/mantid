@@ -522,8 +522,6 @@ void ConvertCWPDMDToSpectra::setupSampleLogs(
   Run &targetrun = matrixws->mutableRun();
   const Run &srcrun = lastexpinfo->run();
 
-  g_log.notice("[DB] Cloning properties.... ");
-
   const std::vector<Kernel::Property *> &vec_srcprop = srcrun.getProperties();
   for (size_t i = 0; i < vec_srcprop.size(); ++i) {
     Property *p = vec_srcprop[i];
