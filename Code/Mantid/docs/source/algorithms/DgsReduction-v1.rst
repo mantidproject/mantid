@@ -22,8 +22,7 @@ They will be detailed in the child algorithm diagrams. Items in
 parallelograms are output workspaces from their respective algorithms.
 Not all output workspaces are subsequently used by other algorithms.
 
-.. figure:: /images/DgsReductionWorkflow.png
-   :alt: DgsReductionWorkflow.png
+.. diagram:: DgsReduction-v1_wkflw.dot
 
 Usage
 -----
