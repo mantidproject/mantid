@@ -255,6 +255,7 @@ set ( TEST_FILES
 	FullprofPolynomialTest.h
 	FunctionDomain1DSpectrumCreatorTest.h
 	FunctionFactoryConstraintTest.h
+        FunctionParameterDecoratorFitTest.h
 	GSLMatrixTest.h
 	GausDecayTest.h
 	GausOscTest.h
