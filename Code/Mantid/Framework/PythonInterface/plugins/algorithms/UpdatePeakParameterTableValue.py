@@ -8,6 +8,9 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
     """ Class to generate grouping file
     """
 
+    tableColNames = None
+    parameternames = None
+
     def category(self):
         """ Mantid required
         """

@@ -3,7 +3,7 @@ from mantid.simpleapi import *
 from mantid import config,api
 from mantid.kernel import funcreturns
 
-from PropertyManager import PropertyManager
+from Direct.PropertyManager import PropertyManager
 # this import is used by children
 from Direct.DirectEnergyConversion import DirectEnergyConversion
 import os

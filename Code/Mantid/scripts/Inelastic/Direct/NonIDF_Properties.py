@@ -1,6 +1,6 @@
 #pylint: disable=invalid-name
-from PropertiesDescriptors import *
-from RunDescriptor import RunDescriptor,RunDescriptorDependent
+from Direct.PropertiesDescriptors import *
+from Direct.RunDescriptor import RunDescriptor,RunDescriptorDependent
 
 
 class NonIDF_Properties(object):

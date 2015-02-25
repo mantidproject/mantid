@@ -476,6 +476,8 @@ class mon2NormalizationEnergyRange(PropDescriptor):
 #-----------------------------------------------------------------------------------------
 class PropertyFromRange(PropDescriptor):
     """ Descriptor for property, which can have one value from a list of values """
+    _current_value = None
+
     def __init__(self,availible_values,default_value):
         self._availible_values = availible_values
         self.__set__(None,default_value)

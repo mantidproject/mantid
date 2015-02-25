@@ -32,12 +32,12 @@ class DirectPropertyManagerTest(unittest.TestCase):
         idf_file=api.ExperimentInfo.getInstrumentFilename(InstrumentName)
         tmp_ws_name = '__empty_' + InstrumentName
         if not mtd.doesExist(tmp_ws_name):
-               LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
+           LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
         return mtd[tmp_ws_name].getInstrument()
 
- 
+
     def test_init_reducer(self):
-        
+
         propman=self.prop_man
 
         self.assertEqual(propman.deltaE_mode,'direct')
@@ -50,7 +50,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         # non-existing property can not be set!
         self.assertRaises(KeyError,setattr,propman,'non_existing_property',"Something_Meaningfull")
-        # existing simple assignment works 
+        # existing simple assignment works
         propman.load_monitors_with_workspace = False
         propman.load_monitors_with_workspace = True
         self.assertTrue(propman.load_monitors_with_workspace)
@@ -154,7 +154,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         self.assertEqual(propman.ei_mon_spectra,[2,3]," Default ei monitors on MARI should be as described in MARI_Parameters.xml file")
 
- 
+
         propman.norm_mon_integration_range = [50,1050]
         range=propman.norm_mon_integration_range
         self.assertAlmostEqual(range[0],50.,7)
@@ -183,7 +183,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue("ei-mon2-spec" in prop_changed,"changing test_ei2_mon_spectra should change ei-mon2-spectra")
 
 
-        propman.test_mon_spectra_composite = [10000,2000]        
+        propman.test_mon_spectra_composite = [10000,2000]
         self.assertEqual(propman.ei_mon_spectra,[10000,2000])
 
         prop_changed = propman.getChangedProperties()
@@ -344,13 +344,13 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(len(spectra),4)
         self.assertEqual(spectra[0],(1,17280))
         self.assertEqual(spectra[3],(32257,41472))
-  
+
     def test_get_diagnostics_parameters(self):
         propman = self.prop_man
 
         params = propman.get_diagnostics_parameters()
         self.assertEqual(len(params),20)
-        
+
         bkg_test_range0 = propman.background_test_range
         bkg_test_range  = params['background_test_range']
         bkg_range = propman.background_range
@@ -362,25 +362,24 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(bkg_test_range,(1000.,2000.))
 
     def test_check_monovan_changed(self):
-         propman = self.prop_man 
-         
-         non_changed = propman._check_monovan_par_changed()
-         # nothing have changed initially 
-         self.assertEqual(len(non_changed),2)
+        propman = self.prop_man
 
-         propman.monovan_run = 102
-         propman.log_changed_values()
+        non_changed = propman._check_monovan_par_changed()
+        # nothing have changed initially
+        self.assertEqual(len(non_changed),2)
 
-         propman.sample_mass = 1
-         non_changed = propman._check_monovan_par_changed()
-         self.assertEqual(len(non_changed),1)
-         propman.sample_rmm = 200
-         non_changed = propman._check_monovan_par_changed()
-         self.assertEqual(len(non_changed),0)
+        propman.monovan_run = 102
+        propman.log_changed_values()
 
+        propman.sample_mass = 1
+        non_changed = propman._check_monovan_par_changed()
+        self.assertEqual(len(non_changed),1)
+        propman.sample_rmm = 200
+        non_changed = propman._check_monovan_par_changed()
+        self.assertEqual(len(non_changed),0)
 
-         propman.log_changed_values()
-  
+        propman.log_changed_values()
+
     def test_set_defailts_from_instrument(self) :
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=100)
 
@@ -394,7 +393,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertAlmostEqual(propman.TestParam1,3.5)
         self.assertEquals(propman.TestParam2,"initial1")
         self.assertEquals(propman.TestParam3,"initial2")
-        
+
         propman.TestParam2="gui_changed1"
         self.assertEquals(propman.TestParam2,"gui_changed1")
 
@@ -408,7 +407,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue('TestParam2' in changes)
         self.assertTrue(not('TestParam3' in changes))
 
-  
+
 
         changes = propman.update_defaults_from_instrument(ws.getInstrument())
 
@@ -460,8 +459,8 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         self.assertEqual(propman.ParaPara,'OtherVal2')
         self.assertEqual(propman.BaseParam2,'OtherVal2')
-        
-        self.assertEquals(propman.BaseParam1,"OtherVal1")     
+
+        self.assertEquals(propman.BaseParam1,"OtherVal1")
 
     def test_set_all_defaults_from_instrument(self) :
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
@@ -557,7 +556,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         propman.energy_bins = None
         self.assertFalse(propman.energy_bins)
-       
+
 
     def test_multirep_ei_iterate_over(self):
         propman = self.prop_man
@@ -617,7 +616,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
             self.assertAlmostEqual(bins[2],0.8*en)
             ic+=1
         self.assertEqual(ic,3)
-        # 
+        #
         ic=0
         for en in PropertyManager.incident_energy:
             self.assertAlmostEqual(en,eng[ic])
@@ -740,7 +739,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
        propman.incident_energy = 10
        propman.sample_run = 0
-       propman.monovan_run = None 
+       propman.monovan_run = None
 
 
        name = propman.save_file_name
@@ -783,7 +782,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue(propman.hard_mask_file is None)
 
     def test_hadmask_options_locked(self):
-        # 
+        #
         propman1 = self.prop_man
         propman1.setChangedProperties()
         propman1.hardmaskPlus = 'a_hard_mask_file'
@@ -824,7 +823,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman.sum_runs = False
         self.assertFalse(propman.sum_runs)
 
-        propman.sum_runs = 10 #TODO should we define number of runs to sum? 
+        propman.sum_runs = 10 #TODO should we define number of runs to sum?
         self.assertTrue(propman.sum_runs)
         propman.sum_runs = 0
         self.assertFalse(propman.sum_runs)
@@ -836,8 +835,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
     #    name = tReducer.make_ckpt_name('do_white',monovan,data,'t1')
     #    self.assertEqual('do_white1000t1',name)
 
-   
-   
+
 
     def test_monitors_list(self):
         propman = self.prop_man

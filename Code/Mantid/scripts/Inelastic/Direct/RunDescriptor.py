@@ -2,7 +2,7 @@
 """ File contains Descriptors used describe run for direct inelastic reduction """
 
 from mantid.simpleapi import *
-from PropertiesDescriptors import *
+from Direct.PropertiesDescriptors import *
 import re
 
 class RunList(object):
