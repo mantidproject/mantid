@@ -1,8 +1,10 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidMDEvents/IntegrateEllipsoids.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/NearestNeighbours.h"
 #include <boost/make_shared.hpp>
@@ -21,6 +23,13 @@ public:
   static IntegrateEllipsoidsTest *createSuite() {
     return new IntegrateEllipsoidsTest();
   }
+
+  IntegrateEllipsoidsTest()
+  {
+      // Because otherwise PreprocessDectectorsToMD cannot be found!
+      Mantid::API::FrameworkManager::Instance();
+  }
+
   static void destroySuite(IntegrateEllipsoidsTest *suite) { delete suite; }
 
   static ISpectrumDetectorMapping buildSpectrumDetectorMapping(const specid_t start, const specid_t end)
@@ -33,9 +42,16 @@ public:
     return map;
   }
 
-  void addFakeEllipsoid(const int& detectorId, const int& totalNPixels, const double tofExact, const int& nEvents, const NearestNeighbours& nn, EventWorkspace_sptr& eventWS)
+  void addFakeEllipsoid(const V3D& peakHKL, const int& totalNPixels, const int& nEvents, const NearestNeighbours& nn, EventWorkspace_sptr& eventWS, PeaksWorkspace_sptr& peaksWS)
   {
-      EventList& el = eventWS->getOrAddEventList(detectorId - totalNPixels);
+      // Create the peak and add it to the peaks ws
+      Peak* peak = peaksWS->createPeakHKL(peakHKL);
+      peaksWS->addPeak(*peak);
+      const double detectorId = peak->getDetectorID();
+      const double tofExact = peak->getTOF();
+      delete peak;
+
+      EventList& el = eventWS->getEventList(detectorId - totalNPixels);
       el.setDetectorID(detectorId);
       el.addEventQuickly(TofEvent(tofExact));
 
@@ -48,7 +64,7 @@ public:
       {
           const specid_t neighbourDet = (*it).first;
           const double distanceFromCentre = (*it).second.norm2(); // gives TOF delta
-          EventList neighbourEventList = eventWS->getOrAddEventList(neighbourDet - totalNPixels);
+          EventList neighbourEventList = eventWS->getEventList(neighbourDet - totalNPixels);
           neighbourEventList.setDetectorID(neighbourDet);
           for(int i = 0; i < nEvents; ++i) {
 
@@ -56,8 +72,6 @@ public:
               neighbourEventList.addEventQuickly(TofEvent(tof));
           }
       }
-
-
   }
 
   boost::tuple<EventWorkspace_sptr, PeaksWorkspace_sptr> createDiffractionData()
@@ -74,31 +88,30 @@ public:
       OrientedLattice ol(6,6,6,90,90,90);
       ol.setUFromVectors(V3D(6, 0, 0), V3D(0, 6, 0));
       peaksWS->mutableSample().setOrientedLattice(&ol);
-      // Add some peaks which should correspond to real reflections (could calculate these)
-      Peak* a = peaksWS->createPeakHKL(V3D(1, -5, -3));
-      Peak* b = peaksWS->createPeakHKL(V3D(1, -4, -4));
-      Peak* c = peaksWS->createPeakHKL(V3D(1, -3, -5));
-      peaksWS->addPeak(*c);
-      peaksWS->addPeak(*a);
-      peaksWS->addPeak(*b);
+
+
       // Make an event workspace and add fake peak data
       auto eventWS = boost::make_shared<EventWorkspace>();
       eventWS->setInstrument(inst);
       eventWS->initialize(nPixels * nPixels /*n spectra*/, 3 /* x-size */, 3 /* y-size */);
+      eventWS->getAxis(0)->setUnit("TOF");
+      // Give the spectra-detector mapping for all event lists
+      const int nPixelsTotal = nPixels*nPixels;
+      for(int i = 0; i < nPixelsTotal; ++i) {
+        EventList& el = eventWS->getOrAddEventList(i);
+        el.setDetectorID(i + nPixelsTotal);
+      }
 
       // Make a nn map, so that we can add counts in the vicinity of the actual peak centre.
-      const int nPixelsTotal = nPixels*nPixels;
       NearestNeighbours nn(inst, buildSpectrumDetectorMapping(nPixelsTotal, nPixelsTotal+inst->getNumberDetectors() - 1));
 
-      // Add a fake ellipsoid
-      addFakeEllipsoid(c->getDetectorID(), nPixelsTotal,  c->getTOF(), 10, nn, eventWS);
-      addFakeEllipsoid(a->getDetectorID(), nPixelsTotal,  a->getTOF(), 10, nn, eventWS);
-      addFakeEllipsoid(b->getDetectorID(), nPixelsTotal,  b->getTOF(), 10, nn, eventWS);
-
-      // Clean up
-      delete a;
-      delete b;
-      delete c;
+      // Add some peaks which should correspond to real reflections (could calculate these). Same function also adds a fake ellipsoid
+      addFakeEllipsoid(V3D(1, -5, -3), nPixelsTotal, 10, nn, eventWS, peaksWS);
+      addFakeEllipsoid(V3D(1, -4, -4), nPixelsTotal, 10, nn, eventWS, peaksWS);
+      addFakeEllipsoid(V3D(1, -3, -5), nPixelsTotal, 10, nn, eventWS, peaksWS);
+      addFakeEllipsoid(V3D(1, -4, -1), nPixelsTotal, 10, nn, eventWS, peaksWS);
+      addFakeEllipsoid(V3D(1, -4,  0), nPixelsTotal, 10, nn, eventWS, peaksWS);
+      addFakeEllipsoid(V3D(2, -3,  -4), nPixelsTotal, 10, nn, eventWS, peaksWS);
 
       // Return test data.
       return boost::tuple<EventWorkspace_sptr, PeaksWorkspace_sptr>(eventWS, peaksWS);
@@ -110,9 +123,25 @@ public:
       TS_ASSERT_THROWS_NOTHING(alg.initialize());
   }
 
-  void test_execution()
+  void test_execution_events()
   {
       auto out = createDiffractionData();
+      EventWorkspace_sptr eventWS = out.get<0>();
+      PeaksWorkspace_sptr peaksWS = out.get<1>();
+
+      IntegrateEllipsoids alg;
+      alg.setChild(true);
+      alg.setRethrows(true);
+      alg.initialize();
+      alg.setProperty("InputWorkspace", eventWS);
+      alg.setProperty("PeaksWorkspace", peaksWS);
+      alg.setPropertyValue("OutputWorkspace", "dummy");
+      alg.execute();
+      PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
+      TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace", integratedPeaksWS->getNumberPeaks(), peaksWS->getNumberPeaks());
+      const Peak& firstPeak = integratedPeaksWS->getPeak(0);
+      TSM_ASSERT_EQUALS("Wrong shape name", PeakShapeEllipsoid::ellipsoidShapeName(), firstPeak.getPeakShape().shapeName() );
+
   }
 
 

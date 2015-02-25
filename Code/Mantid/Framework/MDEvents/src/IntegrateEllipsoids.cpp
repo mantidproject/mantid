@@ -409,7 +409,7 @@ void IntegrateEllipsoids::initTargetWSDescr(EventWorkspace_sptr wksp) {
 
   // generate the detectors table
   Mantid::API::Algorithm_sptr childAlg =
-      createChildAlgorithm("PreprocessDetectorsToMD", 0., .5);
+      createChildAlgorithm("PreprocessDetectorsToMD", 0., .5); // HACK. soft dependency on non-dependent package.
   childAlg->setProperty("InputWorkspace", wksp);
   childAlg->executeAsChildAlg();
 
