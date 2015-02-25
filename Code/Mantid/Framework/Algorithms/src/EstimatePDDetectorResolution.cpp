@@ -5,6 +5,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
@@ -58,11 +59,14 @@ void EstimatePDDetectorResolution::init() {
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
                                                          Direction::Output),
                   "Name of the output workspace containing delta(d)/d of each "
-                  "detector/spectrum. ");
+                  "detector/spectrum.");
 
+  auto positive = boost::make_shared<BoundedValidator<double> >();
+  positive->setLower(0.);
+  positive->setLowerExclusive(true);
   declareProperty(
-      "DeltaTOF", EMPTY_DBL(),
-      "DeltaT as the resolution of TOF with unit microsecond (10^-6m). ");
+      "DeltaTOF", 0., positive,
+      "DeltaT as the resolution of TOF with unit microsecond (10^-6m).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -87,8 +91,6 @@ void EstimatePDDetectorResolution::processAlgProperties() {
   m_inputWS = getProperty("InputWorkspace");
 
   m_deltaT = getProperty("DeltaTOF");
-  if (isEmpty(m_deltaT))
-    throw runtime_error("DeltaTOF must be given!");
   m_deltaT *= 1.0E-6; // convert to meter
 }
 
