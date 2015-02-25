@@ -44,7 +44,7 @@ GCC_DIAG_OFF(cast-qual)
 #include <TopoDS_Solid.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopExp_Explorer.hxx>
-#include <BRepMesh.hxx>
+#include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
@@ -121,7 +121,7 @@ void OCGeometryGenerator::AnalyzeObject() {
     TopoDS_Shape Result = AnalyzeRule(const_cast<Rule *>(top));
     try {
       ObjSurface = new TopoDS_Shape(Result);
-      BRepMesh::Mesh(Result, 0.001);
+      BRepMesh_IncrementalMesh(Result, 0.001);
     } catch (StdFail_NotDone &) {
       g_log.error("Cannot build the geometry. Check the geometry definition");
     }

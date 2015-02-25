@@ -9,6 +9,17 @@ import os
 
 class Fury(PythonAlgorithm):
 
+    _sample = None
+    _resolution = None
+    _e_min = None
+    _e_max = None
+    _number_points_per_bin = None
+    _parameter_table = None
+    _output_workspace = None
+    _plot = None
+    _save = None
+    _dry_run = None
+
     def category(self):
         return "Workflow\\MIDAS;PythonAlgorithms"
 

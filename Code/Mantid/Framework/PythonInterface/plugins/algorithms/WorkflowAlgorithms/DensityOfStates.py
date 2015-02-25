@@ -10,6 +10,24 @@ import math
 
 class DensityOfStates(PythonAlgorithm):
 
+    _float_regex = None
+    _temperature = None
+    _bin_width = None
+    _spec_type = None
+    _peak_func = None
+    _ws_name = None
+    _peak_width = None
+    _scale = None
+    _zero_threshold = None
+    _ions = None
+    _sum_contributions = None
+    _scale_by_cross_section = None
+    _calc_partial = None
+    _ion_dict = None
+    _partial_ion_numbers = None
+    _num_ions = None
+    _num_branches = None
+
     def summary(self):
         return "Calculates phonon densities of states, Raman and IR spectrum."
 

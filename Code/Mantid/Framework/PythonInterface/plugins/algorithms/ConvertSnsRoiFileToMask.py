@@ -16,6 +16,12 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
     Class to handle reading old SNS reduction ROI files and turning it
     into a Mantid mask workspace.
     """
+
+    _roiFile = None
+    _instName = None
+    _filePrefix = None
+    _outputDir = None
+
     def category(self):
         """
         Set the category for the algorithm.

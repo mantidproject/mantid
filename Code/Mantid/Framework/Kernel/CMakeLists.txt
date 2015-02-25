@@ -196,6 +196,7 @@ set ( INC_FILES
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/ParaViewVersion.h
 	inc/MantidKernel/PhysicalConstants.h
+        inc/MantidKernel/PocoVersion.h
 	inc/MantidKernel/ProgressBase.h
 	inc/MantidKernel/ProgressText.h
 	inc/MantidKernel/Property.h
@@ -415,6 +416,13 @@ if ( NOT NOT_GIT_REPO OR NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersio
                    ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp
   )
 endif ()
+
+###########################################################################
+# This section deals with creating the PocoVersion implementation
+###########################################################################
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h.in
+                 ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h
+)
 
 ###########################################################################
 # This section deals with creating the ParaViewVersion implementation

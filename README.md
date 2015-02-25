@@ -7,7 +7,7 @@ Useful links
 ------------
  * Homepage: http://www.mantidproject.org
  * Download: http://download.mantidproject.org
- * Asking for help: http://download.mantidproject.org/webmailer/index.php
+ * Asking for help: http://www.mantidproject.org/Contact
  * Issue tracking: http://trac.mantidproject.org/mantid/
  * Build server: http://builds.mantidproject.org
  * Developer site: http://developer.mantidproject.org

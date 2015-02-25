@@ -1,7 +1,7 @@
 #pylint: disable=invalid-name
 import numpy
 
-from Ui_MainWindow import Ui_MainWindow #import line for the UI python class
+from FilterEvents.Ui_MainWindow import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -33,7 +33,7 @@ class MyPopErrorMsg(QWidget):
     def __init__(self):
         """ Init
         """
-        import Ui_ErrorMessage as errui
+        import FilterEvents.Ui_ErrorMessage as errui
         QWidget.__init__(self)
 
 
@@ -58,10 +58,10 @@ class MyPopErrorMsg(QWidget):
 
         return
 
-    def XpaintEvent(self, e):
+    def XpaintEvent(self, _):
         """ ???
         """
-        import Ui_ErrorMessage as errui
+        import FilterEvents.Ui_ErrorMessage as errui
 
         self.ui = errui.Ui_Dialog()
         self.ui.setupUi(self)
@@ -106,6 +106,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.graphicsView.setObjectName(_fromUtf8("graphicsView"))
 
     """
+
+    _errMsgWindow = None
 
     def __init__(self, parent=None):
         """ Intialization and set up
@@ -445,8 +447,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # Correct value
         resetT = True
-        if irightvalue >= 100:
-            irightvalue == 100
+        if irightvalue > 100:
+            irightvalue = 100
         elif irightvalue < self._leftSlideValue:
             irightvalue = self._leftSlideValue
         else:

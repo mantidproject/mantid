@@ -8,6 +8,26 @@ _OUTPUTLEVEL = "NOOUTPUT"
 class ExaminePowderDiffProfile(PythonAlgorithm):
     """ Create the input TableWorkspaces for LeBail Fitting
     """
+
+    loaddata = None
+    dataws = None
+    datawsname = None
+    datafilename = None
+    profiletype = None
+    loadinfofile = None
+    latticesize = None
+    irffilename = None
+    inputparamws = None
+    process_bkgd = None
+    usrbkgdpoints = None
+    bkgdwsname = None
+    bkgdtablews = None
+    backgroundtype = None
+    startx = None
+    endx = None
+    outwsname = None
+    inputbraggws = None
+
     def category(self):
         """
         """

@@ -34,8 +34,10 @@ def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,\
         return workspaces
 
 def createMappingFile(groupFile, ngroup, nspec, first):
-    if  ngroup == 1 : return 'All'
-    if  nspec == 1 : return 'Individual'
+    if ngroup == 1:
+        return 'All'
+    if nspec == 1:
+        return 'Individual'
     filename = config['defaultsave.directory']
     filename = os.path.join(filename, groupFile)
     handle = open(filename, 'w')

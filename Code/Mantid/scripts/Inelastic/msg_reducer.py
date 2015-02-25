@@ -26,6 +26,8 @@ class MSGReducer(reducer.Reducer):
     _save_formats = []
     _info_table_props = None
     _extra_load_opts = {}
+    _reduction_steps = None
+    _data_files = None
 
     def __init__(self):
         super(MSGReducer, self).__init__()

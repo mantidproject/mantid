@@ -108,7 +108,7 @@ class TubeSpec:
         """
         # We simply assume it's a tube if it has a large number of children
         if  hasattr( comp, "nelements"):
-            return comp.nelements() >= self.minNumDetsInTube 
+            return comp.nelements() >= self.minNumDetsInTube
         else:
             return False
 

@@ -69,5 +69,6 @@ def getStringProperty(workspace, property):
     inst = mantid.AnalysisDataService[workspace].getInstrument()
     try:
         prop = inst.getStringParameter(property)[0]
-    except IndexError: return ""
+    except IndexError:
+        return ""
     return prop
