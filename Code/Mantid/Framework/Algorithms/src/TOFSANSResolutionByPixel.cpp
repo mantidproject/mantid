@@ -3,14 +3,10 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/TOFSANSResolutionByPixel.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/Interpolation.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Interpolation.h"
 
 #include "boost/math/special_functions/fpclassify.hpp"
 
@@ -28,7 +24,7 @@ using namespace DataObjects;
 
 void TOFSANSResolutionByPixel::init() {
   declareProperty(new WorkspaceProperty<>(
-                      "InputWorkspace", "", Direction::InOut,
+                      "Workspace", "", Direction::InOut,
                       boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Name the workspace to calculate the resolution for, for "
                   "each pixel and wavelenght");
@@ -55,7 +51,7 @@ double TOFSANSResolutionByPixel::getTOFResolution(double wl) {
 }
 
 void TOFSANSResolutionByPixel::exec() {
-  MatrixWorkspace_sptr inOutWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inOutWS = getProperty("Workspace");
   double deltaR = getProperty("DeltaR");
   double R1 = getProperty("SourceApertureRadius");
   double R2 = getProperty("SampleApertureRadius");
@@ -99,9 +95,7 @@ void TOFSANSResolutionByPixel::exec() {
   const int numberOfSpectra = static_cast<int>(inOutWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, numberOfSpectra);
 
-  // PARALLEL_FOR1(inOutWS)
   for (int i = 0; i < numberOfSpectra; i++) {
-    // PARALLEL_START_INTERUPT_REGION
     IDetector_const_sptr det;
     try {
       det = inOutWS->getDetector(i);
@@ -109,11 +103,6 @@ void TOFSANSResolutionByPixel::exec() {
       g_log.information() << "Spectrum index " << i
                           << " has no detector assigned to it - discarding"
                           << std::endl;
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
     }
     // If no detector found or if it's masked or a monitor, skip onto the next
     // spectrum
@@ -168,7 +157,6 @@ void TOFSANSResolutionByPixel::exec() {
     }
 
     progress.report("Computing Q resolution");
-    // PARALLEL_END_INTERUPT_REGION
   }
 }
 } // namespace Algorithms
