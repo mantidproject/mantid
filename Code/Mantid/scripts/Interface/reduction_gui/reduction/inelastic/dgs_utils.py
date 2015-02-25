@@ -53,7 +53,7 @@ class InstrumentParameters(object):
             if val[0] == "None" :
                 return None
         elif type_name == "int" :
-              val = self._instrument.getIntParameter(name)
+            val = self._instrument.getIntParameter(name)
         else :
             return default
         try:

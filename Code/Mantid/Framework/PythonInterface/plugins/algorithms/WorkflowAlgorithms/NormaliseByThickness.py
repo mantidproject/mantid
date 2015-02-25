@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -14,7 +15,7 @@ class NormaliseByThickness(PythonAlgorithm):
         return "NormaliseByThickness"
 
     def summary(self):
-      return "Normalise detector counts by the sample thickness."
+        return "Normalise detector counts by the sample thickness."
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",

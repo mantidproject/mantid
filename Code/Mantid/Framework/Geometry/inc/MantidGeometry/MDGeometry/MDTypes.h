@@ -60,7 +60,7 @@ typedef double signal_t;
  * }
  *
  * @tparam MDE :: the MDLeanEvent/MDEvent type; at first, this will always be
- *MDLeanEvent<nd>
+ *                MDLeanEvent<nd>
  * @tparam nd :: the number of dimensions in the center coords. Passing this
  *               as a template argument should speed up some code.
  */

@@ -146,6 +146,14 @@ ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer, const QString 
   m_currentExecLine(0), m_completer(NULL),m_previousKey(0),
   m_findDialog(new FindReplaceDialog(this)), m_settingsGroup(settingsGroup)
 {
+  // Older versions of QScintilla still use just CR as the line ending, which is pre-OSX.
+  // New versions just use unix-style for everything but Windows.
+#if defined(Q_OS_WIN)
+  setEolMode(EolWindows);
+#else
+  setEolMode(EolUnix);
+#endif
+
   //Syntax highlighting and code completion
   setLexer(codelexer);
   readSettings();

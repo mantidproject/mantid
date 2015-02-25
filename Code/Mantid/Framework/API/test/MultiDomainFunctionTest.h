@@ -51,6 +51,43 @@ protected:
 
 DECLARE_FUNCTION(MultiDomainFunctionTest_Function);
 
+namespace {
+
+class JacobianToTestNumDeriv: public Jacobian {
+  size_t n[3];
+  size_t np;
+public:
+  double off_diag;
+  JacobianToTestNumDeriv():np(2),off_diag(0.0){
+    // sizes of the three domains
+    n[0] =  9;
+    n[1] = 10;
+    n[2] = 11;
+  }
+  void set(size_t iY, size_t iP, double value){
+    // domain index the data point #iY comes from
+    size_t jY = 2;
+    size_t size = 0;
+    for(size_t k = 0;k < 3;++k)
+    {
+      size += n[k];
+      if ( iY < size )
+      {
+        jY = k;
+        break;
+      }
+    }
+    // domain index of function that has parameter #iP
+    auto jP = iP / np;
+    if ( jY != jP ) off_diag += value;
+  }
+  double get(size_t, size_t){
+    return 0.0;
+  }
+};
+
+}
+
 class MultiDomainFunctionTest : public CxxTest::TestSuite
 {
 public:
@@ -385,6 +422,39 @@ public:
     }
     TS_ASSERT_DIFFERS(checksum,0);
 
+  }
+
+  void test_derivatives_for_tied_parameters()
+  {
+    multi.clearDomainIndices();
+    multi.setDomainIndex(0,0);
+    multi.setDomainIndex(1,1);
+    multi.setDomainIndex(2,2);
+    {
+      JacobianToTestNumDeriv jacobian;
+      multi.functionDeriv(domain,jacobian);
+      TS_ASSERT_EQUALS( jacobian.off_diag, 0.0 );
+    }
+    multi.setAttributeValue("NumDeriv",true);
+    {
+      JacobianToTestNumDeriv jacobian;
+      multi.functionDeriv(domain,jacobian);
+      TS_ASSERT_EQUALS( jacobian.off_diag, 0.0 );
+    }
+    multi.tie("f1.A","f0.A");
+    multi.tie("f2.A","f0.A");
+    multi.setAttributeValue("NumDeriv",false);
+    {
+      JacobianToTestNumDeriv jacobian;
+      multi.functionDeriv(domain,jacobian);
+      TS_ASSERT_EQUALS( jacobian.off_diag, 0.0 );
+    }
+    multi.setAttributeValue("NumDeriv",true);
+    {
+      JacobianToTestNumDeriv jacobian;
+      multi.functionDeriv(domain,jacobian);
+      TS_ASSERT_DIFFERS( jacobian.off_diag, 0.0 );
+    }
   }
 
 private:

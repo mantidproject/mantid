@@ -393,7 +393,6 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
 
     // Plot the workspace
     plotSpectrum( wsNameQ, (plotType == Logorithm) );
-
     setCurrentDataName( wsNameQ );
   }
   catch(std::exception& e)
@@ -704,6 +703,9 @@ MatrixWorkspace_sptr MuonAnalysis::getPeriodWorkspace(PeriodType periodType, Wor
 */
 void MuonAnalysis::userSelectInstrument(const QString& prefix)
 {
+  // Set file browsing to current instrument
+  m_uiForm.mwRunFiles->setInstrumentOverride(prefix);
+
   if ( prefix != m_curInterfaceSetup )
   {
     runClearGroupingButton();
@@ -1999,7 +2001,8 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
 
       s << "w = graph('%WSNAME%-1')";
       s << "if w == None:";
-      s << "  w = plotSpectrum('%WSNAME%', 0, %ERRORS%, %CONNECT%)";
+      s << "  pw = newGraph('%WSNAME%', 0)";
+      s << "  w = plotSpectrum('%WSNAME%', 0, %ERRORS%, %CONNECT%, window = pw)";
       s << "  w.setObjectName('%WSNAME%')";
       s << "else:";
       s << "  plotSpectrum('%WSNAME%', 0, %ERRORS%, %CONNECT%, window = w, clearWindow = True)";
@@ -2042,7 +2045,6 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
       pyS += "l.setAxisScale(Layer.Left, %1, %2)\n";
       pyS = pyS.arg(params["YAxisMin"]).arg(params["YAxisMax"]);
     }
-
     runPythonCode( pyS );
 }
 
@@ -2683,6 +2685,10 @@ void MuonAnalysis::changeTab(int newTabIndex)
 
   if(newTab == m_uiForm.DataAnalysis) // Entering DA tab
   {
+    // Save last fitting range
+    auto xmin = m_uiForm.fitBrowser->startX();
+    auto xmax = m_uiForm.fitBrowser->endX();
+
     // Say MantidPlot to use Muon Analysis fit prop. browser
     emit setFitPropertyBrowser(m_uiForm.fitBrowser);
 
@@ -2694,8 +2700,22 @@ void MuonAnalysis::changeTab(int newTabIndex)
     connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
                            this, SLOT(selectMultiPeak(const QString&)), Qt::QueuedConnection);
 
-    m_uiForm.fitBrowser->setStartX(m_uiForm.timeAxisStartAtInput->text().toDouble());
-    m_uiForm.fitBrowser->setEndX(m_uiForm.timeAxisFinishAtInput->text().toDouble());
+    // setFitPropertyBrowser() above changes the fitting range, so we have to
+    // either initialise it to the correct values:
+    if ( !xmin && !xmax )
+    {
+      // A previous fitting range of [0,0] means this is the first time the users goes to "Data Analysis" tab
+      // We have to initialise the fitting range
+      m_uiForm.fitBrowser->setStartX(m_uiForm.timeAxisStartAtInput->text().toDouble());
+      m_uiForm.fitBrowser->setEndX(m_uiForm.timeAxisFinishAtInput->text().toDouble());
+    }
+    // or set it to the previous values provided by the user:
+    else
+    {
+      // A previous fitting range already exists, so we use it
+      m_uiForm.fitBrowser->setStartX (xmin);
+      m_uiForm.fitBrowser->setEndX (xmax);
+    }
   }
   else if(newTab == m_uiForm.ResultsTable)
   {

@@ -24,6 +24,7 @@ set ( SRC_FILES
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
 	src/CalculateResolution.cpp
+	src/CalculateSlits.cpp
 	src/CalculateTransmission.cpp
 	src/CalculateTransmissionBeamSpreader.cpp
 	src/CalculateZscore.cpp
@@ -203,6 +204,7 @@ set ( SRC_FILES
 	src/ResetNegatives.cpp
 	src/ResizeRectangularDetector.cpp
 	src/RingProfile.cpp
+	src/RRFMuon.cpp
 	src/SANSDirectBeamScaling.cpp
 	src/SassenaFFT.cpp
 	src/SaveGSASInstrumentFile.cpp
@@ -276,6 +278,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
 	inc/MantidAlgorithms/CalculateResolution.h
+	inc/MantidAlgorithms/CalculateSlits.h
 	inc/MantidAlgorithms/CalculateTransmission.h
 	inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
 	inc/MantidAlgorithms/CalculateZscore.h
@@ -456,6 +459,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ResetNegatives.h
 	inc/MantidAlgorithms/ResizeRectangularDetector.h
 	inc/MantidAlgorithms/RingProfile.h
+	inc/MantidAlgorithms/RRFMuon.h
 	inc/MantidAlgorithms/SANSDirectBeamScaling.h
 	inc/MantidAlgorithms/SassenaFFT.h
 	inc/MantidAlgorithms/SaveGSASInstrumentFile.h
@@ -516,7 +520,7 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 set ( TEST_FILES
-	#	CalMuonDeadTimeTest.h
+	CalMuonDeadTimeTest.h
 	# CountEventsInPulsesTest.h
 	# UpdatePeakParameterTableTest.h
 	AddLogDerivativeTest.h
@@ -703,6 +707,7 @@ set ( TEST_FILES
 	ResetNegativesTest.h
 	ResizeRectangularDetectorTest.h
 	RingProfileTest.h
+	RRFMuonTest.h
 	SassenaFFTTest.h
 	SaveGSASInstrumentFileTest.h
 	ScaleTest.h
@@ -749,7 +754,12 @@ enable_precompiled_headers ( inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES 
 # Add the target for this directory
 add_library ( Algorithms ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms )
+set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms ) 
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( Algorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+endif ()
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET Algorithms PROPERTY FOLDER "MantidFramework" )
 

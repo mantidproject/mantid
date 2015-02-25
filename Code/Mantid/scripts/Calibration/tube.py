@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
 =========================
 Definition of Calibration
@@ -555,7 +556,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         for i in range(len(idealTube.getArray())):
             outputPeak.addColumn(type='float',name='Peak%d'%(i+1))
 
-    getCalibration(ws, tubeSet, calibTable, fitPar, idealTube, outputPeak,
+    getCalibration(ws, tubeSet, calibTable, fitPar, idealTube, outputPeak,\
         overridePeaks, excludeShortTubes, plotTube, rangeList, polinFit)
 
     if deletePeakTableAfter:

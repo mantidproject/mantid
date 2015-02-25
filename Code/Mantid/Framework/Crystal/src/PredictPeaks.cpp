@@ -145,7 +145,7 @@ void PredictPeaks::doHKL(const double h, const double k, const double l,
       PARALLEL_CRITICAL(PredictPeaks_numInRange) { numInRange++; }
 
       // Create the peak using the Q in the lab framewith all its info:
-      Peak p(inst, q);
+      Peak p(inst, q,  boost::optional<double>());
       if (p.findDetector()) {
         // Only add peaks that hit the detector
         p.setGoniometerMatrix(gonio);

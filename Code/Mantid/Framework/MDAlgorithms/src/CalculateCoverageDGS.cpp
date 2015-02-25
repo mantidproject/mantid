@@ -105,8 +105,8 @@ void CalculateCoverageDGS::init() {
                       boost::make_shared<InstrumentValidator>()),
                   "An input workspace.");
 
-  auto mustBe3D = boost::make_shared<ArrayLengthValidator<double>>(3);
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBe3D = boost::make_shared<ArrayLengthValidator<double> >(3);
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
 
   std::vector<double> Q1(3, 0.), Q2(3, 0), Q3(3, 0);

@@ -3,15 +3,13 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/TOFSANSResolutionByPixel.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Interpolation.h"
 
 #include "boost/math/special_functions/fpclassify.hpp"
-#include "MantidKernel/BoundedValidator.h"
+
 
 namespace Mantid {
 namespace Algorithms {
@@ -26,7 +24,7 @@ using namespace DataObjects;
 
 void TOFSANSResolutionByPixel::init() {
   declareProperty(new WorkspaceProperty<>(
-                      "InputWorkspace", "", Direction::InOut,
+                      "Workspace", "", Direction::InOut,
                       boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Name the workspace to calculate the resolution for, for "
                   "each pixel and wavelenght");
@@ -38,8 +36,10 @@ void TOFSANSResolutionByPixel::init() {
                   "Sample aperture radius (mm).");
   declareProperty("SourceApertureRadius", 0.0, positiveDouble,
                   "Source aperture radius (mm).");
-  declareProperty("SigmaModerator", 0.0, positiveDouble,
-                  "Sigma moderator spread (microsec).");
+  declareProperty(new WorkspaceProperty<>(
+                      "SigmaModerator", "", Direction::Input,
+                      boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
+                  "Sigma moderator spread in units of microsec as a function of wavelenght.");
 }
 
 /*
@@ -51,7 +51,7 @@ double TOFSANSResolutionByPixel::getTOFResolution(double wl) {
 }
 
 void TOFSANSResolutionByPixel::exec() {
-  MatrixWorkspace_sptr inOutWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inOutWS = getProperty("Workspace");
   double deltaR = getProperty("DeltaR");
   double R1 = getProperty("SourceApertureRadius");
   double R2 = getProperty("SampleApertureRadius");
@@ -59,7 +59,33 @@ void TOFSANSResolutionByPixel::exec() {
   deltaR /= 1000.0;
   R1 /= 1000.0;
   R2 /= 1000.0;
-  const double sigmaModeratorMicroSec = getProperty("SigmaModerator");
+
+  const MatrixWorkspace_sptr sigmaModeratorVSwavelength = getProperty("SigmaModerator");
+
+  // create interpolation table from sigmaModeratorVSwavelength
+  Kernel::Interpolation lookUpTable;
+
+  const MantidVec xInterpolate = sigmaModeratorVSwavelength->readX(0);
+  const MantidVec yInterpolate = sigmaModeratorVSwavelength->readY(0);
+  
+  // prefer the input to be a pointworkspace and create interpolation function
+  if ( sigmaModeratorVSwavelength->isHistogramData() )
+  {
+    g_log.notice() << "mid-points of SigmaModerator histogram bins will be used for interpolation.";
+
+    for (size_t i = 0; i < xInterpolate.size()-1; ++i)
+    {
+      const double midpoint = xInterpolate[i+1] - xInterpolate[i];
+      lookUpTable.addPoint(midpoint, yInterpolate[i]);
+    }
+  }
+  else
+  {
+    for (size_t i = 0; i < xInterpolate.size(); ++i)
+    {
+      lookUpTable.addPoint(xInterpolate[i], yInterpolate[i]);
+    }
+  }
 
   const V3D samplePos = inOutWS->getInstrument()->getSample()->getPos();
   const V3D sourcePos = inOutWS->getInstrument()->getSource()->getPos();
@@ -69,9 +95,7 @@ void TOFSANSResolutionByPixel::exec() {
   const int numberOfSpectra = static_cast<int>(inOutWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, numberOfSpectra);
 
-  // PARALLEL_FOR1(inOutWS)
   for (int i = 0; i < numberOfSpectra; i++) {
-    // PARALLEL_START_INTERUPT_REGION
     IDetector_const_sptr det;
     try {
       det = inOutWS->getDetector(i);
@@ -79,11 +103,6 @@ void TOFSANSResolutionByPixel::exec() {
       g_log.information() << "Spectrum index " << i
                           << " has no detector assigned to it - discarding"
                           << std::endl;
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
     }
     // If no detector found or if it's masked or a monitor, skip onto the next
     // spectrum
@@ -111,16 +130,22 @@ void TOFSANSResolutionByPixel::exec() {
     MantidVec &yIn = inOutWS->dataY(i);
     const size_t xLength = xIn.size();
 
+    // for each wavelenght bin of each pixel calculate a q-resolution
     for (size_t j = 0; j < xLength - 1; j++) {
-      // Calculate q. Alternatively q could be calculated using ConvertUnit
+      // use the midpoint of each bin
       const double wl = (xIn[j + 1] + xIn[j]) / 2.0;
+      // Calculate q. Alternatively q could be calculated using ConvertUnit
       const double q = factor / wl;
 
+      // wavelenght spread from bin assumed to be 
+      const double sigmaSpreadFromBin = xIn[j + 1] - xIn[j];
+
+      // wavelenght spread from moderatorm, converted from microseconds to wavelengths
+      const double sigmaModerator = lookUpTable.value(wl) * 3.9560 / (1000.0 * Lsum);
+
       // calculate wavelenght resolution from moderator and histogram time bin
-      // width and
-      // convert to from unit of micro-seconds to Aangstrom
-      const double sigmaLambda =
-          sigmaModeratorMicroSec * 3.9560 / (1000.0 * Lsum);
+      const double sigmaLambda = std::sqrt(sigmaSpreadFromBin*sigmaSpreadFromBin/12.0 + 
+                                           sigmaModerator*sigmaModerator);
 
       // calculate sigmaQ for a given lambda and pixel
       const double sigmaOverLambdaTimesQ = q * sigmaLambda / wl;
@@ -132,7 +157,6 @@ void TOFSANSResolutionByPixel::exec() {
     }
 
     progress.report("Computing Q resolution");
-    // PARALLEL_END_INTERUPT_REGION
   }
 }
 } // namespace Algorithms

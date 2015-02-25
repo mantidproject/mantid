@@ -46,6 +46,13 @@
 #define GCC_DIAG_DO_PRAGMA(x) _Pragma(#x)
 #define GCC_DIAG_PRAGMA(x) GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
 
+// the following were previously defined in Poco/Platform_POSIX.h 
+#ifdef GCC_DIAG_ON 
+#undef GCC_DIAG_ON
+#endif
+#ifdef GCC_DIAG_OFF
+#undef GCC_DIAG_OFF
+#endif
 // define macros for turning the warning suppression on/off
 #if GCC_VERSION >= 40600 // 4.6.0
 #define GCC_DIAG_OFF(x)                                                        \

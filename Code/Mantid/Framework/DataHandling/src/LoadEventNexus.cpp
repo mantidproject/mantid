@@ -266,7 +266,7 @@ public:
           if (have_weight) {
             double weight = static_cast<double>(event_weight[i]);
             double errorSq = weight * weight;
-            std::vector<Mantid::DataObjects::WeightedEvent> *eventVector =
+            LoadEventNexus::WeightedEventVector_pt eventVector =
                 alg->weightedEventVectors[detId];
             // NULL eventVector indicates a bad spectrum lookup
             if (eventVector) {
@@ -932,13 +932,27 @@ private:
 //----------------------------------------------------------------------------------------------
 /** Empty default constructor
 */
-LoadEventNexus::LoadEventNexus()
-    : IFileLoader<Kernel::NexusDescriptor>(), discarded_events(0),
-      event_id_is_spec(false) {}
+LoadEventNexus::LoadEventNexus() : IFileLoader<Kernel::NexusDescriptor>(),
+  m_filename(), filter_tof_min(0), filter_tof_max(0), m_specList(),
+  m_specMin(0), m_specMax(0), filter_time_start(), filter_time_stop(),
+  chunk(0), totalChunks(0), firstChunkForBank(0), eventsPerChunk(0),
+  m_tofMutex(), longest_tof(0), shortest_tof(0), bad_tofs(0),
+  discarded_events(0), precount(0), compressTolerance(0), eventVectors(),
+  m_eventVectorMutex(), eventid_max(0), pixelID_to_wi_vector(),
+  pixelID_to_wi_offset(), m_bankPulseTimes(), m_allBanksPulseTimes(),
+  m_top_entry_name(), m_file(NULL), splitProcessing(false),
+  m_haveWeights(false), weightedEventVectors(),
+  m_instrument_loaded_correctly(false), loadlogs(false),
+  m_logs_loaded_correctly(false), event_id_is_spec(false) {
+}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor */
-LoadEventNexus::~LoadEventNexus() {}
+LoadEventNexus::~LoadEventNexus()
+{
+  if(m_file)
+    delete m_file;
+}
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -1143,8 +1157,8 @@ void LoadEventNexus::setTopEntryName() {
   typedef std::map<std::string, std::string> string_map_t;
   try {
     string_map_t::const_iterator it;
-    ::NeXus::File file = ::NeXus::File(m_filename);
-    string_map_t entries = file.getEntries();
+    // assume we're at the top, otherwise: m_file->openPath("/");
+    string_map_t entries = m_file->getEntries();
 
     // Choose the first entry as the default
     m_top_entry_name = entries.begin()->first;
@@ -1179,6 +1193,11 @@ void LoadEventNexus::exec() {
 
   // Check to see if the monitors need to be loaded later
   bool load_monitors = this->getProperty("LoadMonitors");
+
+  // this must make absolutely sure that m_file is a valid (and open)
+  // NeXus::File object
+  safeOpenFile(m_filename);
+
   setTopEntryName();
 
   // Initialize progress reporting.
@@ -1334,10 +1353,13 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
 
 //-----------------------------------------------------------------------------
 /**
-* Load events from the file
+* Load events from the file.
 * @param prog :: A pointer to the progress reporting object
 * @param monitors :: If true the events from the monitors are loaded and not the
 * main banks
+*
+* This also loads the instrument, but only if it has not been set in the workspace
+* being used as input (WS data member). Same applies to the logs.
 */
 void LoadEventNexus::loadEvents(API::Progress *const prog,
                                 const bool monitors) {
@@ -1351,22 +1373,26 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Initialize the counter of bad TOFs
   bad_tofs = 0;
 
-  if (loadlogs) {
-    prog->doReport("Loading DAS logs");
-    m_allBanksPulseTimes = runLoadNexusLogs(m_filename, WS, *this, true);
-    run_start = WS->getFirstPulseTime();
-  } else {
-    g_log.information() << "Skipping the loading of sample logs!\n"
-                        << "Reading the start time directly from /"
-                        << m_top_entry_name << "/start_time\n";
-    // start_time is read and set
-    ::NeXus::File nxfile(m_filename);
-    nxfile.openGroup(m_top_entry_name, "NXentry");
-    std::string tmp;
-    nxfile.readData("start_time", tmp);
-    run_start = DateAndTime(tmp);
-    WS->mutableRun().addProperty("run_start", run_start.toISO8601String(),
-                                 true);
+  if (!m_logs_loaded_correctly) {
+    if (loadlogs) {
+      prog->doReport("Loading DAS logs");
+      m_allBanksPulseTimes = runLoadNexusLogs(m_filename, WS, *this, true);
+      run_start = WS->getFirstPulseTime();
+      m_logs_loaded_correctly = true;
+    } else {
+      g_log.information() << "Skipping the loading of sample logs!\n"
+                          << "Reading the start time directly from /"
+                          << m_top_entry_name << "/start_time\n";
+      // start_time is read and set
+      m_file->openPath("/");
+      m_file->openGroup(m_top_entry_name, "NXentry");
+      std::string tmp;
+      m_file->readData("start_time", tmp);
+      m_file->closeGroup();
+      run_start = DateAndTime(tmp);
+      WS->mutableRun().addProperty("run_start", run_start.toISO8601String(),
+                                   true);
+    }
   }
 
   // Make sure you have a non-NULL m_allBanksPulseTimes
@@ -1376,26 +1402,27 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     m_allBanksPulseTimes = boost::make_shared<BankPulseTimes>(temp);
   }
 
-  // Load the instrument
-  prog->report("Loading instrument");
-  instrument_loaded_correctly =
+  if (!WS->getInstrument() || !m_instrument_loaded_correctly) {
+    // Load the instrument (if not loaded before)
+    prog->report("Loading instrument");
+    m_instrument_loaded_correctly =
       loadInstrument(m_filename, WS, m_top_entry_name, this);
 
-  if (!this->instrument_loaded_correctly)
-    throw std::runtime_error(
+    if (!m_instrument_loaded_correctly)
+      throw std::runtime_error(
         "Instrument was not initialized correctly! Loading cannot continue.");
+  }
 
   // top level file information
-  ::NeXus::File file(m_filename);
-
+  m_file->openPath("/");
   // Start with the base entry
-  file.openGroup(m_top_entry_name, "NXentry");
+  m_file->openGroup(m_top_entry_name, "NXentry");
 
   // Now we want to go through all the bankN_event entries
   vector<string> bankNames;
   vector<std::size_t> bankNumEvents;
   size_t total_events = 0;
-  map<string, string> entries = file.getEntries();
+  map<string, string> entries = m_file->getEntries();
   map<string, string>::const_iterator it = entries.begin();
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
   ::NeXus::Info info;
@@ -1407,32 +1434,31 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     std::string entry_class(it->second);
     if (entry_class == classType) {
       // open the group
-      file.openGroup(entry_name, classType);
+      m_file->openGroup(entry_name, classType);
 
       // get the number of events
-      std::size_t num = numEvents(file, hasTotalCounts, oldNeXusFileNames);
+      std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames);
       bankNames.push_back(entry_name);
       bankNumEvents.push_back(num);
       total_events += num;
 
       // Look for weights in simulated file
       try {
-        file.openData("event_weight");
+        m_file->openData("event_weight");
         m_haveWeights = true;
-        file.closeData();
+        m_file->closeData();
       } catch (::NeXus::Exception &) {
         // Swallow exception since flag is already false;
       }
 
-      file.closeGroup();
+      m_file->closeGroup();
     }
   }
 
-  loadSampleDataISIScompatibility(file, WS);
+  loadSampleDataISIScompatibility(*m_file, WS);
 
-  // Close up the file
-  file.closeGroup();
-  file.close();
+  // Close the 'top entry' group (raw_data_1 for NexusProcessed, etc.)
+  m_file->closeGroup();
 
   // Delete the output workspace name if it existed
   std::string outName = getPropertyValue("OutputWorkspace");
@@ -1441,7 +1467,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   // set more properties on the workspace
   try {
-    // this is a static method that is why it is passing the file path
+    // this is a static method that is why it is passing the
+    // file object and the file path
     loadEntryMetadata(m_filename, WS, m_top_entry_name);
   } catch (std::runtime_error &e) {
     // Missing metadata is not a fatal error. Log and go on with your life
@@ -1702,7 +1729,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   WS->setAllX(axis);
 
   // if there is time_of_flight load it
-  loadTimeOfFlight(m_filename, WS, m_top_entry_name, classType);
+  loadTimeOfFlight(WS, m_top_entry_name, classType);
 }
 
 //-----------------------------------------------------------------------------
@@ -1727,9 +1754,9 @@ EventWorkspace_sptr LoadEventNexus::createEmptyEventWorkspace() {
 
 //-----------------------------------------------------------------------------
 /** Load the run number and other meta data from the given bank */
-void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename,
-                                       Mantid::API::MatrixWorkspace_sptr WS,
-                                       const std::string &entry_name) {
+  void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename,
+                                         Mantid::API::MatrixWorkspace_sptr WS,
+                                         const std::string &entry_name) {
   // Open the file
   ::NeXus::File file(nexusfilename);
   file.openGroup(entry_name, "NXentry");
@@ -2132,7 +2159,8 @@ void LoadEventNexus::deleteBanks(API::MatrixWorkspace_sptr workspace,
         for (int row = 0; row < static_cast<int>(grandchildren.size()); row++) {
           Detector *d = dynamic_cast<Detector *>(
               const_cast<IComponent *>(grandchildren[row].get()));
-          inst->removeDetector(d);
+          if (d)
+            inst->removeDetector(d);
         }
       }
       IComponent *comp = dynamic_cast<IComponent *>(detList[i].get());
@@ -2216,22 +2244,21 @@ bool LoadEventNexus::hasEventMonitors() {
   bool result(false);
   // Determine whether to load histograms or events
   try {
-    ::NeXus::File file(m_filename);
-    file.openPath(m_top_entry_name);
+    m_file->openPath("/" + m_top_entry_name);
     // Start with the base entry
     typedef std::map<std::string, std::string> string_map_t;
     // Now we want to go through and find the monitors
-    string_map_t entries = file.getEntries();
+    string_map_t entries = m_file->getEntries();
     for (string_map_t::const_iterator it = entries.begin(); it != entries.end();
          ++it) {
       if (it->second == "NXmonitor") {
-        file.openGroup(it->first, it->second);
+        m_file->openGroup(it->first, it->second);
         break;
       }
     }
-    file.openData("event_id");
+    m_file->openData("event_id");
+    m_file->closeGroup();
     result = true;
-    file.close();
   } catch (::NeXus::Exception &) {
     result = false;
   }
@@ -2244,7 +2271,7 @@ bool LoadEventNexus::hasEventMonitors() {
 * workspace. The name of the new event workspace is contructed by
 * appending '_monitors' to the base workspace name.
 *
-* This is used when the property "MnitorsAsEvents" is enabled, and
+* This is used when the property "MonitorsAsEvents" is enabled, and
 * there are monitors with events.
 *
 * @param prog :: progress reporter
@@ -2258,8 +2285,36 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
                                       // object-level workspace ptr
     // add filename
     WS->mutableRun().addProperty("Filename", m_filename);
+
+    // Re-use instrument, which has probably been loaded into the data
+    // workspace (this happens in the first call to loadEvents() (inside
+    // LoadEventNexuss::exec()). The second call to loadEvents(), immediately
+    // below, can re-use it.
+    if (m_instrument_loaded_correctly) {
+      WS->setInstrument(dataWS->getInstrument());
+      g_log.information() << "Instrument data copied into monitors workspace "
+        " from the data workspace." << std::endl;
+    }
+
     // Perform the load (only events from monitor)
     loadEvents(prog, true);
+
+    // and re-use log entries (but only after loading metadata in loadEvents()
+    // this is not strictly needed for the load to work (like the instrument is)
+    // so it can be done after loadEvents, and it doesn't throw
+    if (m_logs_loaded_correctly) {
+      g_log.information() << "Copying log data into monitors workspace from the "
+                          << "data workspace." << std::endl;
+      try {
+        copyLogs(dataWS, WS);
+        g_log.information() << "Log data copied." << std::endl;
+      } catch(std::runtime_error&) {
+        g_log.error() << "Could not copy log data into monitors workspace. Some "
+          " logs may be wrong and/or missing in the output "
+          "monitors workspace." << std::endl;
+      }
+    }
+
     std::string mon_wsname = this->getProperty("OutputWorkspace");
     mon_wsname.append("_monitors");
     this->declareProperty(
@@ -2329,14 +2384,14 @@ void LoadEventNexus::runLoadMonitors() {
 * @param entry_name :: name of the NXentry to open.
 * @returns True if the mapping was loaded or false if the block does not exist
 */
-bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
+  bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
                                         const bool monitorsOnly,
                                         const std::string &entry_name) {
-  ::NeXus::File file(filename);
+  const std::string vms_str = "/isis_vms_compat";
   try {
     g_log.debug() << "Attempting to load custom spectra mapping from '"
-                  << entry_name << "/isis_vms_compat'.\n";
-    file.openPath(entry_name + "/isis_vms_compat");
+                  << entry_name << vms_str << "'.\n";
+    m_file->openPath("/" + entry_name + vms_str);
   } catch (::NeXus::Exception &) {
     return false; // Doesn't exist
   }
@@ -2358,18 +2413,19 @@ bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
   // defines 3 spectra, where the first spectrum contains 2 detectors
 
   // UDET
-  file.openData("UDET");
+  m_file->openData("UDET");
   std::vector<int32_t> udet;
-  file.getData(udet);
-  file.closeData();
+  m_file->getData(udet);
+  m_file->closeData();
   // SPEC
-  file.openData("SPEC");
+  m_file->openData("SPEC");
   std::vector<int32_t> spec;
-  file.getData(spec);
-  file.closeData();
-  // Close
-  file.closeGroup();
-  file.close();
+  m_file->getData(spec);
+  m_file->closeData();
+  // Go up/back. this assumes one level for entry name and a second level
+  // for /isis_vms_compat, typically: /raw_data_1/isis_vms_compat
+  m_file->closeGroup();
+  m_file->closeGroup();
 
   // The spec array will contain a spectrum number for each udet but the
   // spectrum number
@@ -2473,22 +2529,21 @@ void LoadEventNexus::setTimeFilters(const bool monitors) {
 //-----------------------------------------------------------------------------
 /**
 * Check if time_of_flight can be found in the file and load it
-* @param nexusfilename :: The name of the ISIS nexus event file.
+*
 * @param WS :: The event workspace which events will be modified.
 * @param entry_name :: An NXentry tag in the file
 * @param classType :: The type of the events: either detector or monitor
 */
-void LoadEventNexus::loadTimeOfFlight(const std::string &nexusfilename,
-                                      DataObjects::EventWorkspace_sptr WS,
+void LoadEventNexus::loadTimeOfFlight(DataObjects::EventWorkspace_sptr WS,
                                       const std::string &entry_name,
                                       const std::string &classType) {
   bool done = false;
-  // Open the file
-  ::NeXus::File file(nexusfilename);
-  file.openGroup(entry_name, "NXentry");
+  // Go to the root, and then top entry
+  m_file->openPath("/");
+  m_file->openGroup(entry_name, "NXentry");
 
   typedef std::map<std::string, std::string> string_map_t;
-  string_map_t entries = file.getEntries();
+  string_map_t entries = m_file->getEntries();
 
   if (entries.find("detector_1_events") == entries.end()) { // not an ISIS file
     return;
@@ -2507,8 +2562,8 @@ void LoadEventNexus::loadTimeOfFlight(const std::string &nexusfilename,
     }
     for (size_t i = 0; i < bankNames.size(); ++i) {
       const std::string &mon = bankNames[i];
-      file.openGroup(mon, classType);
-      entries = file.getEntries();
+      m_file->openGroup(mon, classType);
+      entries = m_file->getEntries();
       string_map_t::const_iterator bins = entries.find("event_time_bins");
       if (bins == entries.end()) {
         // bins = entries.find("time_of_flight"); // I think time_of_flight
@@ -2516,35 +2571,35 @@ void LoadEventNexus::loadTimeOfFlight(const std::string &nexusfilename,
         // if (bins == entries.end())
         //{
         done = false;
-        file.closeGroup();
+        m_file->closeGroup();
         break; // done == false => use bins from the detectors
                //}
       }
       done = true;
-      loadTimeOfFlightData(file, WS, bins->first, i, i + 1);
-      file.closeGroup();
+      loadTimeOfFlightData(*m_file, WS, bins->first, i, i + 1);
+      m_file->closeGroup();
     }
   }
 
   if (!done) {
     // first check detector_1_events
-    file.openGroup("detector_1_events", "NXevent_data");
-    entries = file.getEntries();
+    m_file->openGroup("detector_1_events", "NXevent_data");
+    entries = m_file->getEntries();
     for (string_map_t::const_iterator it = entries.begin(); it != entries.end();
          ++it) {
       if (it->first == "time_of_flight" || it->first == "event_time_bins") {
-        loadTimeOfFlightData(file, WS, it->first);
+        loadTimeOfFlightData(*m_file, WS, it->first);
         done = true;
       }
     }
-    file.closeGroup(); // detector_1_events
+    m_file->closeGroup(); // detector_1_events
 
     if (!done) // if time_of_flight was not found try
                // instrument/dae/time_channels_#
     {
-      file.openGroup("instrument", "NXinstrument");
-      file.openGroup("dae", "IXdae");
-      entries = file.getEntries();
+      m_file->openGroup("instrument", "NXinstrument");
+      m_file->openGroup("dae", "IXdae");
+      entries = m_file->getEntries();
       size_t time_channels_number = 0;
       for (string_map_t::const_iterator it = entries.begin();
            it != entries.end(); ++it) {
@@ -2560,24 +2615,25 @@ void LoadEventNexus::loadTimeOfFlight(const std::string &nexusfilename,
       }
       if (time_channels_number > 0) // the numbers start with 1
       {
-        file.openGroup("time_channels_" + boost::lexical_cast<std::string>(
+        m_file->openGroup("time_channels_" + boost::lexical_cast<std::string>(
                                               time_channels_number),
                        "IXtime_channels");
-        entries = file.getEntries();
+        entries = m_file->getEntries();
         for (string_map_t::const_iterator it = entries.begin();
              it != entries.end(); ++it) {
           if (it->first == "time_of_flight" || it->first == "event_time_bins") {
-            loadTimeOfFlightData(file, WS, it->first);
+            loadTimeOfFlightData(*m_file, WS, it->first);
           }
         }
-        file.closeGroup();
+        m_file->closeGroup();
       }
-      file.closeGroup(); // dae
-      file.closeGroup(); // instrument
+      m_file->closeGroup(); // dae
+      m_file->closeGroup(); // instrument
     }
   }
 
-  file.close();
+  // close top entry (or entry given in entry_name)
+  m_file->closeGroup();
 }
 
 //-----------------------------------------------------------------------------
@@ -2670,16 +2726,16 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
   file.closeData();
 }
 
-/** Load information of the sample. It is valid only for ISIS it get the
-*information from
-*  the group isis_vms_compat.
+/**
+* Load information of the sample. It is valid only for ISIS it get the
+* information from the group isis_vms_compat.
 *
-*   If it does not find this group, it assumes that there is nothing to do.
-*   But, if the information is there, but not in the way it was expected, it
-*will log the occurrence.
+* If it does not find this group, it assumes that there is nothing to do.
+* But, if the information is there, but not in the way it was expected, it
+* will log the occurrence.
 *
-* @note: It does essentially the same thing of the method:
-*LoadISISNexus2::loadSampleData
+* @note: It does essentially the same thing of the
+* method: LoadISISNexus2::loadSampleData
 *
 * @param file : handle to the nexus file
 * @param WS : pointer to the workspace
@@ -2748,7 +2804,8 @@ void LoadEventNexus::filterDuringPause(API::MatrixWorkspace_sptr workspace) {
 * @param alg :: Handle of the algorithm
 * @param returnpulsetimes :: flag to return shared pointer for BankPulseTimes,
 *otherwise NULL.
-* @return true if successful
+*
+* @return Pulse times given in the DAS logs
 */
 boost::shared_ptr<BankPulseTimes>
 LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename,
@@ -2773,7 +2830,9 @@ LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename,
     Kernel::TimeSeriesProperty<double> *log =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
             localWorkspace->mutableRun().getProperty("proton_charge"));
-    const std::vector<Kernel::DateAndTime> temp = log->timesAsVector();
+    std::vector<Kernel::DateAndTime> temp;
+    if (log)
+      temp = log->timesAsVector();
     // if (returnpulsetimes) out = new BankPulseTimes(temp);
     if (returnpulsetimes)
       out = boost::make_shared<BankPulseTimes>(temp);
@@ -2882,6 +2941,49 @@ void LoadEventNexus::createSpectraList(int32_t min, int32_t max) {
         throw std::invalid_argument("Inconsistent range property: some of the "
                                     "selected spectra correspond to monitors.");
       }
+    }
+  }
+}
+
+/**
+ * Makes sure that m_file is a valid and open NeXus::File object.
+ * Throws if there is an exception opening the file.
+ *
+ * @param fname name of the nexus file to open
+ */
+void LoadEventNexus::safeOpenFile(const std::string fname)
+{
+  try {
+    m_file = new ::NeXus::File(m_filename, NXACC_READ);
+  } catch (std::runtime_error& e) {
+    throw std::runtime_error("Severe failure when trying to open NeXus file: " +
+                             std::string(e.what()));
+  }
+  // make sure that by no means we could dereference NULL later on
+  if (!m_file) {
+    throw std::runtime_error("An unexpected failure happened, unable to "
+                             "initialize file object when trying to open NeXus "
+                             "file: " + fname);
+  }
+}
+
+/**
+ * Copy all logData properties from the 'from' workspace to the 'to'
+ * workspace. Does not use CopyLogs as a child algorithm (this is a
+ * simple copy and the workspace is not yet in the ADS).
+ *
+ * @param from source of log entries
+ * @param to workspace where to add the log entries
+ */
+void LoadEventNexus::copyLogs(const EventWorkspace_sptr& from,
+                                  EventWorkspace_sptr& to)
+{
+  // from the logs, get all the properties that don't overwrite any
+  // prop. already set in the sink workspace (like 'filename').
+  auto props = from->mutableRun().getLogData();
+  for (size_t j=0; j<props.size(); j++) {
+    if (!to->mutableRun().hasProperty(props[j]->name())) {
+      to->mutableRun().addLogData(props[j]->clone());
     }
   }
 }

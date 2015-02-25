@@ -312,8 +312,8 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
     } else {
       m_PropertyString = temp;
     }
-
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     // there was a problem loading the file - it probably is not there
     std::cerr << "Problem loading the configuration file " << filename << " "
               << e.what() << std::endl;
@@ -395,7 +395,8 @@ void ConfigServiceImpl::configureLogging() {
           m_logFilePath = "";
         } else
           fclose(fp);
-      } catch (std::exception &) {
+      }
+      catch (std::exception &) {
         std::cerr
             << "Error writing to log file path given in properties file: \""
             << m_logFilePath << "\". Will use a default path instead."
@@ -444,7 +445,8 @@ void ConfigServiceImpl::configureLogging() {
     // Configure the logging framework
     Poco::Util::LoggingConfigurator configurator;
     configurator.configure(m_pConf);
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     std::cerr << "Trouble configuring the logging framework " << e.what()
               << std::endl;
   }
@@ -520,7 +522,8 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir,
   bool is_relative(false);
   try {
     is_relative = Poco::Path(dir).isRelative();
-  } catch (Poco::PathSyntaxException &) {
+  }
+  catch (Poco::PathSyntaxException &) {
     g_log.warning() << "Malformed path detected in the \"" << key
                     << "\" variable, skipping \"" << dir << "\"\n";
     return "";
@@ -546,7 +549,8 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir,
                     << "\" in the \"" << key << "\" variable does not exist.\n";
       converted = "";
     }
-  } catch (Poco::FileException &) {
+  }
+  catch (Poco::FileException &) {
     g_log.debug() << "Required properties path \"" << converted
                   << "\" in the \"" << key << "\" variable does not exist.\n";
     converted = "";
@@ -711,7 +715,8 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "#MantidOptions.InstrumentView.UseOpenGL=Off" << std::endl;
 
     filestr.close();
-  } catch (std::runtime_error &ex) {
+  }
+  catch (std::runtime_error &ex) {
     g_log.warning() << "Unable to write out user.properties file to "
                     << getUserPropertiesDir() << m_user_properties_file_name
                     << " error: " << ex.what() << std::endl;
@@ -764,7 +769,8 @@ void ConfigServiceImpl::reset() {
   try {
     Poco::File userFile(getUserFilename());
     userFile.remove();
-  } catch (Poco::Exception &) {
+  }
+  catch (Poco::Exception &) {
   }
   createUserPropertiesFile();
 
@@ -947,7 +953,8 @@ std::string ConfigServiceImpl::getString(const std::string &keyName,
     retVal = m_pConf->getString(keyName);
     if (retVal == m_removedFlag)
       retVal = "";
-  } catch (Poco::NotFoundException &) {
+  }
+  catch (Poco::NotFoundException &) {
     g_log.debug() << "Unable to find " << keyName << " in the properties file"
                   << std::endl;
     retVal = "";
@@ -980,11 +987,13 @@ ConfigServiceImpl::getKeys(const std::string &keyName) const {
       try {
         if (m_pConf->getString(key) == m_removedFlag)
           continue;
-      } catch (Poco::NotFoundException &) {
+      }
+      catch (Poco::NotFoundException &) {
       }
       keyVector.push_back(key);
     }
-  } catch (Poco::NotFoundException &) {
+  }
+  catch (Poco::NotFoundException &) {
     g_log.debug() << "Unable to find " << keyName << " in the properties file"
                   << std::endl;
     keyVector.clear();
@@ -1006,7 +1015,8 @@ void ConfigServiceImpl::remove(const std::string &rootName) const {
     // and RHEL use 1.3.x
     // Simulate removal by marking with a flag value
     m_pConf->setString(rootName, m_removedFlag);
-  } catch (Poco::NotFoundException &) {
+  }
+  catch (Poco::NotFoundException &) {
     g_log.debug() << "Unable to find " << rootName << " in the properties file"
                   << std::endl;
   }
@@ -1045,7 +1055,8 @@ bool ConfigServiceImpl::isExecutable(const std::string &target) const {
         return false;
     } else
       return false;
-  } catch (Poco::Exception &) {
+  }
+  catch (Poco::Exception &) {
     return false;
   }
 }
@@ -1068,7 +1079,8 @@ void ConfigServiceImpl::launchProcess(
   try {
     std::string expTarget = Poco::Path::expand(programFilePath);
     Poco::Process::launch(expTarget, programArguments);
-  } catch (Poco::SystemException &e) {
+  }
+  catch (Poco::SystemException &e) {
     throw std::runtime_error(e.what());
   }
 }
@@ -1624,7 +1636,8 @@ void ConfigServiceImpl::appendDataSearchDir(const std::string &path) {
   try {
     dirPath = Poco::Path(path);
     dirPath.makeDirectory();
-  } catch (Poco::PathSyntaxException &) {
+  }
+  catch (Poco::PathSyntaxException &) {
     return;
   }
   if (!isInDataSearchList(dirPath.toString())) {
@@ -1709,10 +1722,12 @@ bool ConfigServiceImpl::addDirectoryifExists(
       g_log.information("Unable to locate directory at: " + directoryName);
       return false;
     }
-  } catch (Poco::PathNotFoundException &) {
+  }
+  catch (Poco::PathNotFoundException &) {
     g_log.information("Unable to locate directory at: " + directoryName);
     return false;
-  } catch (Poco::FileNotFoundException &) {
+  }
+  catch (Poco::FileNotFoundException &) {
     g_log.information("Unable to locate directory at: " + directoryName);
     return false;
   }
@@ -1794,7 +1809,8 @@ ConfigServiceImpl::getInstrument(const std::string &instrumentName) const {
       g_log.debug() << "Looking for " << instrumentName << " at "
                     << defaultFacility << "." << std::endl;
       return getFacility(defaultFacility).instrument(instrumentName);
-    } catch (Exception::NotFoundError &) {
+    }
+    catch (Exception::NotFoundError &) {
       // Well the instName doesn't exist for this facility
       // Move along, there's nothing to see here...
     }
@@ -1807,7 +1823,8 @@ ConfigServiceImpl::getInstrument(const std::string &instrumentName) const {
       g_log.debug() << "Looking for " << instrumentName << " at "
                     << (**it).name() << "." << std::endl;
       return (**it).instrument(instrumentName);
-    } catch (Exception::NotFoundError &) {
+    }
+    catch (Exception::NotFoundError &) {
       // Well the instName doesn't exist for this facility...
       // Move along, there's nothing to see here...
     }
@@ -1903,8 +1920,8 @@ ConfigServiceImpl::addObserver(const Poco::AbstractObserver &observer) const {
 /**  Remove an observer
  @param observer :: Reference to the observer to remove
  */
-void ConfigServiceImpl::removeObserver(
-    const Poco::AbstractObserver &observer) const {
+void ConfigServiceImpl::removeObserver(const Poco::AbstractObserver &observer)
+    const {
   m_notificationCenter.removeObserver(observer);
 }
 
@@ -2020,7 +2037,8 @@ bool ConfigServiceImpl::quickParaViewCheck() const {
       g_log.debug(messageStream.str());
       g_log.information("ParaView is not available");
     }
-  } catch (Poco::SystemException &e) {
+  }
+  catch (Poco::SystemException &e) {
     g_log.debug(e.what());
     g_log.information("ParaView is not available");
   }
@@ -2086,6 +2104,14 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
  */
 const std::string ConfigServiceImpl::getParaViewPath() const {
   return getString("paraview.path");
+}
+
+/**
+ * Get the user-specified initial view
+ * @returns A string with the initial view or an empty string
+ */
+const std::string ConfigServiceImpl::getVsiInitialView() const {
+  return getString("vsi.initialview");
 }
 
 /// \cond TEMPLATE

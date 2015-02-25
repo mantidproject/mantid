@@ -2,10 +2,11 @@
 #define COLORUPDATER_H_
 
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
-
+#include "MantidVatesSimpleGuiViewWidgets/AutoScaleRangeGenerator.h"
 #include <QPair>
 
 class pqColorMapModel;
+class pqDataRepresentation;
 class pqPipelineRepresentation;
 
 namespace Mantid
@@ -54,10 +55,9 @@ public:
 
   /**
    * Set the color scale back to the original bounds.
-   * @param repr the representation to auto color scale
-   * @return the minimum and maximum values for the representation data range
+   * @return A struct with minimum, maximum and if log scale is used.
    */
-  QPair<double, double> autoScale(pqPipelineRepresentation *repr);
+  VsiColorScale autoScale();
   /**
    * Set the requested color map on the data.
    * @param repr the representation to change the color map on
@@ -67,12 +67,10 @@ public:
                       const pqColorMapModel *model);
   /**
    * Set the data color scale range to the requested bounds.
-   * @param repr the representation to change the color scale on
    * @param min the minimum bound for the color scale
    * @param max the maximum bound for the color scale
    */
-  void colorScaleChange(pqPipelineRepresentation *repr, double min,
-                        double max);
+  void colorScaleChange(double min, double max);
   /// Get the auto scaling state.
   bool isAutoScale();
   /// Get the logarithmic scaling state.
@@ -81,22 +79,25 @@ public:
   double getMaximumRange();
   /// Get the minimum color scaling range value.
   double getMinimumRange();
+  /// Initializes the color scale
+  void initializeColorScale();
   /**
    * Set logarithmic color scaling on the data.
-   * @param repr the representation to set logarithmic color scale
    * @param state flag to determine whether or not to use log color scaling
    */
-  void logScale(pqPipelineRepresentation *repr, int state);
+  void logScale(int state);
   /// Print internal information.
   void print();
   /// Update the internal state.
   void updateState(ColorSelectionWidget *cs);
 
 private:
+  void updateLookupTable(pqDataRepresentation* representation); ///< Updates the lookup tables.
   bool autoScaleState; ///< Holder for the auto scaling state
   bool logScaleState; ///< Holder for the log scaling state
   double minScale; ///< Holder for the minimum color range state
   double maxScale; ///< Holder for the maximum color range state
+  AutoScaleRangeGenerator autoScaleRangeGenerator; ///< Holds a range generator for auto scale.
 };
 
 }

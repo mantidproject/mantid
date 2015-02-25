@@ -86,7 +86,7 @@ public:
   MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
   MOCK_METHOD1(setMDMasking, void(Mantid::Geometry::MDImplicitFunction*));
   MOCK_METHOD0(clearMDMasking,void());
-  MOCK_CONST_METHOD0(getSpecialCoordinateSystem, Mantid::API::SpecialCoordinateSystem()); 
+  MOCK_CONST_METHOD0(getSpecialCoordinateSystem, Mantid::Kernel::SpecialCoordinateSystem()); 
 
   virtual void getLinePlot(const Mantid::Kernel::VMD & , const Mantid::Kernel::VMD & ,
     Mantid::API::MDNormalization , std::vector<Mantid::coord_t> & , std::vector<Mantid::signal_t> & , std::vector<Mantid::signal_t> & ) const

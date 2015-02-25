@@ -28,8 +28,7 @@ using namespace DataObjects;
  */
 void Integration::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<HistogramValidator>()),
+      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
       "The input workspace to integrate.");
   declareProperty(
       new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
@@ -122,11 +121,13 @@ void Integration::exec() {
     if (axisIsText) {
       Mantid::API::TextAxis *newAxis =
           dynamic_cast<Mantid::API::TextAxis *>(outputWorkspace->getAxis(1));
-      newAxis->setLabel(outWI, localworkspace->getAxis(1)->label(i));
+      if (newAxis)
+        newAxis->setLabel(outWI, localworkspace->getAxis(1)->label(i));
     } else if (axisIsNumeric) {
       Mantid::API::NumericAxis *newAxis =
           dynamic_cast<Mantid::API::NumericAxis *>(outputWorkspace->getAxis(1));
-      newAxis->setValue(outWI, (*(localworkspace->getAxis(1)))(i));
+      if (newAxis)
+        newAxis->setValue(outWI, (*(localworkspace->getAxis(1)))(i));
     }
 
     // This is the output
@@ -254,6 +255,7 @@ void Integration::exec() {
  */
 MatrixWorkspace_const_sptr Integration::getInputWorkspace() {
   MatrixWorkspace_sptr temp = getProperty("InputWorkspace");
+
   if (temp->id() == "RebinnedOutput") {
     // Clean the input workspace in the RebinnedOutput case for nan's and
     // inf's in order to treat the data correctly later.
@@ -268,6 +270,19 @@ MatrixWorkspace_const_sptr Integration::getInputWorkspace() {
     alg->executeAsChildAlg();
     temp = alg->getProperty("OutputWorkspace");
   }
+
+  // To integrate point data it will be converted to histograms
+  if ( !temp->isHistogramData() )
+  {
+    auto alg = this->createChildAlgorithm("ConvertToHistogram");
+    alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", temp);
+    std::string outName = "_" + temp->getName() + "_histogram";
+    alg->setProperty("OutputWorkspace", outName);
+    alg->executeAsChildAlg();
+    temp = alg->getProperty("OutputWorkspace");
+    temp->isDistribution(true);
+  }
+
   return temp;
 }
 

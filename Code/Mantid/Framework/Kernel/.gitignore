@@ -1,0 +1,3 @@
+inc/MantidKernel/PocoVersion.h
+src/MantidVersion.cpp
+src/ParaViewVersion.cpp

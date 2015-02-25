@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'diffraction_run_setup.ui'
@@ -436,7 +437,7 @@ class Ui_Frame(object):
         self.unit_combo.setItemText(0, _translate("Frame", "dSpacing", None))
         self.unit_combo.setItemText(1, _translate("Frame", "MomentumTransfer", None))
         self.geometry_options_groupbox.setTitle(_translate("Frame", "Overriding Characterization File", None))
-        self.experiment_parameter_help.setText(_translate("Frame", "If characterization file is given, the correction run numbers are given by the file. \n"
+        self.experiment_parameter_help.setText(_translate("Frame", "If characterization file is given, the correction run numbers are given by the file. \n"\
 "The corrections can be overriden and disabled though.", None))
         self.disablebkgdcorr_chkbox.setToolTip(_translate("Frame", "<html><head/><body><p>Disable emptry/background correction.</p></body></html>", None))
         self.disablebkgdcorr_chkbox.setStatusTip(_translate("Frame", "Select to set the detector distance offset.", None))
@@ -458,7 +459,7 @@ class Ui_Frame(object):
         self.label_10.setText(_translate("Frame", "Vanadium Run Correction", None))
         self.vanbkgdrun_edit.setToolTip(_translate("Frame", "<html><head/><body><p>Enter vanadium background run number.</p></body></html>", None))
         self.mask_groupbox.setTitle(_translate("Frame", "Binning", None))
-        self.mask_help_label.setText(_translate("Frame", "Choose a file to set your mask. Note that only the mask information, not the data, will be used in the reduction.\n"
+        self.mask_help_label.setText(_translate("Frame", "Choose a file to set your mask. Note that only the mask information, not the data, will be used in the reduction.\n"\
 "The data is only used to help you setting the mask.\n"
 "The mask information is saved separately so that your data file will NOT be modified.", None))
         self.label_9.setToolTip(_translate("Frame", "<html><head/><body><p>User specified maximum TOF of the data. </p></body></html>", None))

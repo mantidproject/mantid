@@ -205,6 +205,113 @@ public:
     return;
   }
 
+  void test_workspace()
+  {
+    // Generate file with two banks
+    string filename("TestWorskpace.irf");
+    generate2BankPrmFile(filename);
+
+    // Create workspace group to put parameters into
+    // This is a group of two workspaces
+    createWorkspaceGroup(2,"loadGSASInstrumentFileWorkspace");
+
+    // Set up algorithm to load into the workspace
+    LoadGSASInstrumentFile alg;
+    alg.initialize();
+    alg.setProperty("Filename", filename);
+    alg.setPropertyValue("Banks", "1,2");
+    alg.setProperty("Workspace", wsName);
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Check parameters in output workspace 
+    // The output workspace is a workspace group with each 
+    // member corresponding to each of the one banks in the prm file
+
+    // First, check first workspace
+    WorkspaceGroup_sptr gws;
+    gws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
+    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
+    Mantid::Geometry::ParameterMap& paramMap = ws->instrumentParameters();
+    boost::shared_ptr<const Mantid::Geometry::Instrument> instr = ws->getInstrument();
+
+    // To check parameters in workspace
+    Mantid::Geometry::FitParameter fitParam;
+    Mantid::Geometry::Parameter_sptr param;
+
+    // Check Alpha0 parameter    
+    param = paramMap.get(&(*instr), "Alpha0", "fitting");
+    fitParam = param->value<Mantid::Geometry::FitParameter>();
+    TS_ASSERT_EQUALS( boost::lexical_cast<double>(fitParam.getFormula()), 0.00);
+    // Check Alpha1 parameter
+    param = paramMap.get(&(*instr), "Alpha1", "fitting");
+    fitParam = param->value<Mantid::Geometry::FitParameter>();
+    TS_ASSERT_EQUALS( boost::lexical_cast<double>(fitParam.getFormula()), 0.21);
+    // Check Beta0 parameter
+    param = paramMap.get(&(*instr), "Beta0", "fitting");
+    fitParam = param->value<Mantid::Geometry::FitParameter>();
+    TS_ASSERT_EQUALS( boost::lexical_cast<double>(fitParam.getFormula()), 31.7927);
+    // Check Beta1 parameter
+    param = paramMap.get(&(*instr), "Kappa", "fitting");
+    fitParam = param->value<Mantid::Geometry::FitParameter>();
+    TS_ASSERT_EQUALS( boost::lexical_cast<double>(fitParam.getFormula()), 51.4205);
+    // Check SigmsSquared parameter
+    // This is a formula, so values are not exact
+    param = paramMap.get(&(*instr), "SigmaSquared", "fitting");
+    fitParam = param->value<Mantid::Geometry::FitParameter>();
+    TS_ASSERT_DELTA( fitParam.getValue(0.0), 0.01, 0.000001);
+    TS_ASSERT_DELTA( fitParam.getValue(0.5), 7814.7468, 0.000001);
+    // Check Gamma parameter
+    // Although this is a formula, all coefficients should be zero
+    // and so values should be exactly 0 as well
+    param = paramMap.get(&(*instr), "Gamma", "fitting");
+    fitParam = param->value<Mantid::Geometry::FitParameter>();
+    TS_ASSERT_EQUALS( fitParam.getValue( 0.0 ), 0.0);
+    TS_ASSERT_EQUALS( fitParam.getValue( 0.0 ), 0.0);
+
+
+    // Now check second workspace
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(1));
+    Mantid::Geometry::ParameterMap& paramMap2 = ws->instrumentParameters();
+    instr = ws->getInstrument();
+
+    // Check Alpha0 parameter
+    param = paramMap2.get(&(*instr), "Alpha0", "fitting");
+    fitParam = param->value<Mantid::Geometry::FitParameter>();
+    TS_ASSERT_EQUALS( boost::lexical_cast<double>(fitParam.getFormula()), 0.001);
+    // Check Alpha1 parameter
+    param = paramMap2.get(&(*instr), "Alpha1", "fitting");
+    fitParam = param->value<Mantid::Geometry::FitParameter>();
+    TS_ASSERT_EQUALS( boost::lexical_cast<double>(fitParam.getFormula()), 0.22);
+    // Check Beta0 parameter
+    param = paramMap2.get(&(*instr), "Beta0", "fitting");
+    fitParam = param->value<Mantid::Geometry::FitParameter>();
+    TS_ASSERT_EQUALS( boost::lexical_cast<double>(fitParam.getFormula()), 32.7927);
+    // Check Beta1 parameter
+    param = paramMap2.get(&(*instr), "Kappa", "fitting");
+    fitParam = param->value<Mantid::Geometry::FitParameter>();
+    TS_ASSERT_EQUALS( boost::lexical_cast<double>(fitParam.getFormula()), 52.4205);
+    // Check SigmsSquared parameter
+    // This is a formula, so values are not exact
+    param = paramMap2.get(&(*instr), "SigmaSquared", "fitting");
+    fitParam = param->value<Mantid::Geometry::FitParameter>();
+    TS_ASSERT_DELTA( fitParam.getValue(0.0), 0.04, 0.000001);
+    TS_ASSERT_DELTA( fitParam.getValue(0.5), 21840.741796, 0.000001);
+    // Check Gamma parameter
+    // Although this is a formula, all coefficients should be zero
+    // and so values should be exactly 0 as well
+    param = paramMap2.get(&(*instr), "Gamma", "fitting");
+    fitParam = param->value<Mantid::Geometry::FitParameter>();
+    TS_ASSERT_EQUALS( fitParam.getValue( 0.0 ), 0.0);
+    TS_ASSERT_EQUALS( fitParam.getValue( 0.0 ), 0.0);
+
+    // Clean
+    Poco::File("TestWorskpace.irf").remove();
+    AnalysisDataService::Instance().remove("loadGSASInstrumentFileWorkspace");
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Parse a TableWorkspace to a map
     */
@@ -263,6 +370,7 @@ public:
       ofile << "INS  1 ICONS    746.96     -0.24      3.04                                     \n";
       ofile << "INS  1BNKPAR    2.3696      9.39      0.00    .00000     .3000    1    1       \n";
       ofile << "INS  1I ITYP    0    1.000     25.000       2                                  \n";
+      ofile << "INS  1I HEAD   TIC 8983 on HRPD                                                \n";
       ofile << "INS  1PRCF      2   15   0.00100                                               \n";
       ofile << "COMM The next 15 parameters as in wiki page CreateIkedaCarpenterParametersGSAS \n";
       ofile << "INS  1PRCF 1   0.000000E+00   0.210000E+00   0.317927E+02   0.514205E+02       \n";
@@ -352,6 +460,28 @@ public:
     return;
   }
 
+    //----------------------------------------------------------------------------------------------
+  /** Create a workspace group with specified number of workspaces.
+    */
+  void createWorkspaceGroup( size_t numberOfWorkspaces, std::string workspaceName)
+  {
+    // create a workspace with some sample data
+    WorkspaceGroup_sptr gws(new API::WorkspaceGroup);
+
+    for (size_t i=0; i < numberOfWorkspaces; ++i)
+    {
+      Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+      Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+      gws->addWorkspace( ws2D );
+    }
+
+    // put this workspace in the analysis data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(workspaceName, gws));
+
+    // save workspace name
+    wsName = workspaceName;
+  }
+
   /* Return the number of rows the table must have
   */
   int getExpectedNumberOfRows()
@@ -360,7 +490,7 @@ public:
   }
 
   private:
-  std::string wsName;  // For Workspace property
+    std::string wsName;  // For workspace property
 
 };
 

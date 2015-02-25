@@ -2,12 +2,17 @@
 #define MANTID_VATES_vtkSplatterPlotFactory_H_
 
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidVatesAPI/MetaDataExtractorUtils.h"
 #include "MantidAPI/IMDNode.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
+#include <vtkPoints.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
+
 
 using Mantid::MDEvents::MDEventWorkspace;
 
@@ -42,6 +47,7 @@ namespace VATES
  * File change history is stored at: <https://github.com/mantidproject/mantid>
  * Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
+
 class DLLExport vtkSplatterPlotFactory : public vtkDataSetFactory
 {
 public:
@@ -76,10 +82,28 @@ public:
   /// Set the time value.
   void setTime(double timeStep);
 
+  /// Get the max value of the data set
+  virtual double getMinValue();
+
+  /// Get the min value of the data set
+  virtual double getMaxValue();
+
+  /// Getter for the instrument
+  virtual const std::string& getInstrument();
+
 private:
 
   template<typename MDE, size_t nd>
   void doCreate(typename MDEventWorkspace<MDE, nd>::sptr ws) const;
+
+  ///Check if the MDHisto workspace is 3D or 4D in nature
+  bool doMDHisto4D(Mantid::API::IMDHistoWorkspace_sptr workspace) const;
+
+  /// Generate the vtkDataSet from the objects input MDHistoWorkspace
+  void doCreateMDHisto(Mantid::API::IMDHistoWorkspace_sptr workspace) const;
+
+  /// Set the signals and the valid points which are to be displayed
+  signal_t extractScalarSignal(Mantid::API::IMDHistoWorkspace_sptr workspace, bool do4D, const int x, const int y, const int z) const;
 
   /// Template Method pattern to validate the factory before use.
   virtual void validate() const;
@@ -91,7 +115,7 @@ private:
   const std::string m_scalarName;
 
   /// Member workspace to generate vtkdataset from.
-  Mantid::API::IMDEventWorkspace_sptr m_workspace;
+  Mantid::API::IMDWorkspace_sptr m_workspace;
 
   /// Approximate number of points to plot
   size_t m_numPoints;
@@ -122,6 +146,18 @@ private:
 
   /// Time value.
   double m_time;
+
+  /// Min data value
+  mutable double m_minValue;
+
+  /// Max data value;
+  mutable double m_maxValue;
+
+  /// Instrument
+  mutable std::string m_instrument;
+
+  /// Meta data extractor
+  boost::scoped_ptr<MetaDataExtractorUtils> m_metaDataExtractor;
 };
 
 }

@@ -93,6 +93,7 @@ set ( SRC_FILES
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
+        src/PeakFunctionIntegrator.cpp
 	src/PeakTransform.cpp
 	src/PeakTransformHKL.cpp
 	src/PeakTransformQLab.cpp
@@ -252,6 +253,7 @@ set ( INC_FILES
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
+        inc/MantidAPI/PeakFunctionIntegrator.h
 	inc/MantidAPI/PeakTransform.h
 	inc/MantidAPI/PeakTransformFactory.h
 	inc/MantidAPI/PeakTransformHKL.h
@@ -272,7 +274,6 @@ set ( INC_FILES
 	inc/MantidAPI/ScriptRepositoryFactory.h
 	inc/MantidAPI/SingleValueParameter.h
 	inc/MantidAPI/SingleValueParameterParser.h
-	inc/MantidAPI/SpecialCoordinateSystem.h
 	inc/MantidAPI/SpectraAxis.h
 	inc/MantidAPI/SpectrumDetectorMapping.h
 	inc/MantidAPI/TableRow.h
@@ -349,6 +350,7 @@ set ( TEST_FILES
 	ParamFunctionAttributeHolderTest.h
 	ParameterReferenceTest.h
 	ParameterTieTest.h
+        PeakFunctionIntegratorTest.h
 	PeakTransformHKLTest.h
 	PeakTransformQLabTest.h
 	PeakTransformQSampleTest.h
@@ -398,6 +400,11 @@ add_library ( API ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( API PROPERTIES OUTPUT_NAME MantidAPI 
                                        COMPILE_DEFINITIONS IN_MANTID_API )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( API PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif ()
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 

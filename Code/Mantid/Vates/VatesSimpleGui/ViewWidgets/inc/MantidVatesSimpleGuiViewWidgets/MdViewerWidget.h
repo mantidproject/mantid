@@ -78,7 +78,7 @@ public:
   /// Filter events to check for hide.
   bool eventFilter(QObject *obj, QEvent *ev);
   /// See MantidQt::API::VatesViewerInterface
-  void renderWorkspace(QString wsname, int wstype);
+  void renderWorkspace(QString workspaceName, int workspaceType, std::string instrumentName);
   /// See MantidQt::API::VatesViewerInterface
   void setupPluginMode();
 
@@ -126,6 +126,8 @@ private:
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
   pqViewSettingsReaction *viewSettings; ///< Holder for the view settings reaction
   bool viewSwitched;
+  ModeControlWidget::Views initialView; ///< Holds the initial view
+
 
   /// Check the environmental variables.
   void checkEnvSetup();
@@ -161,6 +163,20 @@ private:
   void swapViews();
   /// Update the state of application widgets.
   void updateAppState();
+  /// Get the initial view for the current workspace and user setting
+  ModeControlWidget::Views getInitialView(int workspaceType, std::string instrumentName);
+  /// Check that the view is valid for teh workspace type
+  ModeControlWidget::Views checkViewAgainstWorkspace(ModeControlWidget::Views view, int workspaceType);
+  /// Get the technique associated with an instrument.
+  const std::string getTechniqueForInstrument(const std::string& instrumentName) const;
+  /// Get the view for a specified instrument
+  std::string getViewForInstrument(const std::string& instrument) const;
+  /// Check if a technique contains a keyword
+  bool checkIfTechniqueContainsKeyword(const std::set<std::string>& techniques, const std::string& keyword) const;
+  /// Reset the current view to the appropriate initial view.
+  void resetCurrentView(int workspaceType, const std::string& instrumentName);
+  /// Set visibility listener
+  void setVisibilityListener();
 };
 
 } // SimpleGui
