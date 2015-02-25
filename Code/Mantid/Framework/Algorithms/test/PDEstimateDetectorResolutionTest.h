@@ -1,15 +1,15 @@
-#ifndef MANTID_ALGORITHMS_ESTIMATEPDDETECTORRESOLUTIONTEST_H_
-#define MANTID_ALGORITHMS_ESTIMATEPDDETECTORRESOLUTIONTEST_H_
+#ifndef MANTID_ALGORITHMS_PDESTIMATEDETECTORRESOLUTIONTEST_H_
+#define MANTID_ALGORITHMS_PDESTIMATEDETECTORRESOLUTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAlgorithms/EstimatePDDetectorResolution.h"
+#include "MantidAlgorithms/PDEstimateDetectorResolution.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-using Mantid::Algorithms::EstimatePDDetectorResolution;
+using Mantid::Algorithms::PDEstimateDetectorResolution;
 using Mantid::DataHandling::LoadEmptyInstrument;
 
 using namespace Mantid;
@@ -17,20 +17,20 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 
-class EstimatePDDetectorResolutionTest : public CxxTest::TestSuite
+class PDEstimateDetectorResolutionTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static EstimatePDDetectorResolutionTest *createSuite() { return new EstimatePDDetectorResolutionTest(); }
-  static void destroySuite( EstimatePDDetectorResolutionTest *suite ) { delete suite; }
+  static PDEstimateDetectorResolutionTest *createSuite() { return new PDEstimateDetectorResolutionTest(); }
+  static void destroySuite( PDEstimateDetectorResolutionTest *suite ) { delete suite; }
 
 
   /** Test init
     */
   void test_Init()
   {
-    EstimatePDDetectorResolution alg;
+    PDEstimateDetectorResolution alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
   }
@@ -43,7 +43,7 @@ public:
     MatrixWorkspace_sptr ws = createInstrument();
 
     // Set up and run
-    EstimatePDDetectorResolution alg;
+    PDEstimateDetectorResolution alg;
     alg.initialize();
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", ws->name()));
@@ -98,4 +98,4 @@ public:
 };
 
 
-#endif /* MANTID_ALGORITHMS_ESTIMATEPDDETECTORRESOLUTIONTEST_H_ */
+#endif /* MANTID_ALGORITHMS_PDESTIMATEDETECTORRESOLUTIONTEST_H_ */

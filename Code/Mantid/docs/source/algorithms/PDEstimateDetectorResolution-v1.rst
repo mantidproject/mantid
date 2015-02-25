@@ -65,7 +65,7 @@ Usage
   # Load a Nexus file
   Load(Filename="PG3_2538_2k.nxs", OutputWorkspace="PG3_2538")
   # Run the algorithm to estimate detector's resolution
-  EstimatePDDetectorResolution(InputWorkspace="PG3_2538", DeltaTOF=40.0, OutputWorkspace="PG3_Resolution")
+  PDEstimateDetectorResolution(InputWorkspace="PG3_2538", DeltaTOF=40.0, OutputWorkspace="PG3_Resolution")
   resws = mtd["PG3_Resolution"]
 
   print "Size of workspace 'PG3_Resolution' = ", resws.getNumberHistograms()

@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/EstimatePDDetectorResolution.h"
+#include "MantidAlgorithms/PDEstimateDetectorResolution.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -22,35 +22,39 @@ using namespace std;
 namespace Mantid {
 namespace Algorithms {
 
-DECLARE_ALGORITHM(EstimatePDDetectorResolution)
+DECLARE_ALGORITHM(PDEstimateDetectorResolution)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-EstimatePDDetectorResolution::EstimatePDDetectorResolution() {}
+PDEstimateDetectorResolution::PDEstimateDetectorResolution() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-EstimatePDDetectorResolution::~EstimatePDDetectorResolution() {}
+PDEstimateDetectorResolution::~PDEstimateDetectorResolution() {}
 
-const std::string EstimatePDDetectorResolution::name() const {
+const std::string PDEstimateDetectorResolution::name() const {
+  return "PDEstimateDetectorResolution";
+}
+
+const std::string PDEstimateDetectorResolution::alias() const {
   return "EstimatePDDetectorResolution";
 }
 
-const std::string EstimatePDDetectorResolution::summary() const {
+const std::string PDEstimateDetectorResolution::summary() const {
   return "Estimate the resolution of each detector for a powder "
          "diffractometer. ";
 }
 
-int EstimatePDDetectorResolution::version() const { return 1; }
+int PDEstimateDetectorResolution::version() const { return 1; }
 
-const std::string EstimatePDDetectorResolution::category() const {
+const std::string PDEstimateDetectorResolution::category() const {
   return "Diffraction";
 }
 
 //----------------------------------------------------------------------------------------------
-void EstimatePDDetectorResolution::init() {
+void PDEstimateDetectorResolution::init() {
   declareProperty(
       new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
                                              Direction::Input),
@@ -72,7 +76,7 @@ void EstimatePDDetectorResolution::init() {
 //----------------------------------------------------------------------------------------------
 /**
   */
-void EstimatePDDetectorResolution::exec() {
+void PDEstimateDetectorResolution::exec() {
   processAlgProperties();
 
   retrieveInstrumentParameters();
@@ -87,7 +91,7 @@ void EstimatePDDetectorResolution::exec() {
 //----------------------------------------------------------------------------------------------
 /**
   */
-void EstimatePDDetectorResolution::processAlgProperties() {
+void PDEstimateDetectorResolution::processAlgProperties() {
   m_inputWS = getProperty("InputWorkspace");
 
   m_deltaT = getProperty("DeltaTOF");
@@ -97,7 +101,7 @@ void EstimatePDDetectorResolution::processAlgProperties() {
 //----------------------------------------------------------------------------------------------
 /**
   */
-void EstimatePDDetectorResolution::retrieveInstrumentParameters() {
+void PDEstimateDetectorResolution::retrieveInstrumentParameters() {
 #if 0
     // Call SolidAngle to get solid angles for all detectors
     Algorithm_sptr calsolidangle = createChildAlgorithm("SolidAngle", -1, -1, true);
@@ -157,7 +161,7 @@ void EstimatePDDetectorResolution::retrieveInstrumentParameters() {
 //----------------------------------------------------------------------------------------------
 /**
   */
-void EstimatePDDetectorResolution::createOutputWorkspace() {
+void PDEstimateDetectorResolution::createOutputWorkspace() {
   size_t numspec = m_inputWS->getNumberHistograms();
 
   m_outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
@@ -168,7 +172,7 @@ void EstimatePDDetectorResolution::createOutputWorkspace() {
 //----------------------------------------------------------------------------------------------
 /**
   */
-void EstimatePDDetectorResolution::estimateDetectorResolution() {
+void PDEstimateDetectorResolution::estimateDetectorResolution() {
   Instrument_const_sptr instrument = m_inputWS->getInstrument();
   V3D samplepos = instrument->getSample()->getPos();
 

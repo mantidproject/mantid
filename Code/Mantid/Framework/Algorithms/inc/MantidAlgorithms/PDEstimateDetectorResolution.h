@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_ESTIMATEPDDETECTORRESOLUTION_H_
-#define MANTID_ALGORITHMS_ESTIMATEPDDETECTORRESOLUTION_H_
+#ifndef MANTID_ALGORITHMS_PDESTIMATEDETECTORRESOLUTION_H_
+#define MANTID_ALGORITHMS_PDESTIMATEDETECTORRESOLUTION_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -8,7 +8,7 @@
 
 namespace Mantid {
 namespace Algorithms {
-/** EstimatePDDetectorResolution : TODO: DESCRIPTION
+/** PDEstimateDetectorResolution : TODO: DESCRIPTION
 
   Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -31,13 +31,16 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport EstimatePDDetectorResolution : public API::Algorithm {
+class DLLExport PDEstimateDetectorResolution : public API::Algorithm {
 public:
-  EstimatePDDetectorResolution();
-  virtual ~EstimatePDDetectorResolution();
+  PDEstimateDetectorResolution();
+  virtual ~PDEstimateDetectorResolution();
 
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const;
+
+  /// function to return any aliases to the algorithm
+  virtual const std::string alias() const;
 
   /// Summary of algorithms purpose
   virtual const std::string summary() const;
@@ -87,4 +90,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_ESTIMATEPDDETECTORRESOLUTION_H_ */
+#endif /* MANTID_ALGORITHMS_PDESTIMATEDETECTORRESOLUTION_H_ */
