@@ -3,7 +3,7 @@
 
 
 from mantid.simpleapi import *
-from PropertiesDescriptors import *
+from Direct.PropertiesDescriptors import *
 import re
 
 

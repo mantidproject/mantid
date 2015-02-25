@@ -8,6 +8,14 @@ import os.path
 
 class CreateCalibrationWorkspace(DataProcessorAlgorithm):
 
+    _input_files = None
+    _out_ws = None
+    _peak_range = None
+    _back_range = None
+    _spec_range = None
+    _intensity_scale = None
+    _plot = None
+
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
 

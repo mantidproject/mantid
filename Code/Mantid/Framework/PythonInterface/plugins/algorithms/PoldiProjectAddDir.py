@@ -13,8 +13,6 @@ from os.path import isfile, join, splitext
 import re
 
 
-
-
 class PoldiProjectAddDir(PythonAlgorithm):
 
     def category(self):
@@ -38,14 +36,9 @@ class PoldiProjectAddDir(PythonAlgorithm):
 
         self.declareProperty(ITableWorkspaceProperty("PoldiAnalysis", "PoldiAnalysis", direction=Direction.Output), "Poldi analysis main worksheet")
 
-
-
-
-
     def path_leaf(path):
         head, tail = ntpath.split(path)
         return tail
-
 
     def interpreteName(self, name):
         patern="(.*[ a-zA-Z]*/*\*)*poldi(?P<year>[0-9]*)n(?P<numero>[0-9]*)"
@@ -53,11 +46,6 @@ class PoldiProjectAddDir(PythonAlgorithm):
         year   = int(regex.group("year"))
         numero = int(regex.group("numero"))
         return (year, numero)
-
-
-
-
-
 
     def PyExec(self):
         """ Mantid required

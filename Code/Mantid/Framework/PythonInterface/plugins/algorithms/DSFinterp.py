@@ -6,6 +6,8 @@ from mantid.kernel import StringListValidator, FloatArrayProperty, FloatArrayMan
 
 class DSFinterp(PythonAlgorithm):
 
+    channelgroup = None
+
     def category(self):
         return "Transforms\\Smoothing;Utility;PythonAlgorithms"
 

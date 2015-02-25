@@ -35,6 +35,7 @@ class LoadData(ReductionStep):
     _data_files = {}
     _extra_load_opts = {}
     _contains_event_data = False
+    _reducer = None
 
     def __init__(self):
         """Initialise the ReductionStep. Constructor should set the initial
