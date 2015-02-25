@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 import mantid.simpleapi as msapi
 import mantid.api as api
 import mantid.kernel as kernel
@@ -15,6 +16,12 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
     Class to handle reading old SNS reduction ROI files and turning it
     into a Mantid mask workspace.
     """
+
+    _roiFile = None
+    _instName = None
+    _filePrefix = None
+    _outputDir = None
+
     def category(self):
         """
         Set the category for the algorithm.
@@ -37,7 +44,7 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
         self.declareProperty(api.FileProperty(name="SnsRoiFile",
                                               defaultValue="",
                                               action=api.FileAction.Load,
-                                              extensions=EXTENSIONS),
+                                              extensions=EXTENSIONS),\
                                               "SNS reduction ROI file to load.")
         allowedInstruments = kernel.StringListValidator(INSTRUMENTS)
         self.declareProperty("Instrument", "",
@@ -48,7 +55,7 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
                              +"file (Optional). Default is <inst_name>_Mask.")
         self.declareProperty(api.FileProperty(name="OutputDirectory",
                                               defaultValue=config['defaultsave.directory'],
-                                              action=api.FileAction.Directory),
+                                              action=api.FileAction.Directory),\
                                               "Directory to save mask file."\
                                               +" Default is current Mantid save directory.")
 

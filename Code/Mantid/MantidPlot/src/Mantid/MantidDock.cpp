@@ -43,6 +43,7 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   setObjectName("exploreMantid"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
   setMinimumWidth(200);
+  parent->addDockWidget( Qt::RightDockWidgetArea, this );
 
   m_appParent = parent;
 
@@ -71,13 +72,13 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   buttonLayout->addWidget(m_saveButton);
 
   m_workspaceFilter = new MantidQt::MantidWidgets::LineEditWithClear();
-  m_workspaceFilter->setPlaceholderText("Filter Workspaces");
-  m_workspaceFilter->setToolTip("Type here to filter the workspaces");
+  m_workspaceFilter->setPlaceholderText("Filter Workspaces");  
+  m_workspaceFilter->setToolTip("Type here to filter the workspaces");  
 
   connect(m_workspaceFilter, SIGNAL(textChanged(const QString&)), this, SLOT(filterWorkspaceTree(const QString&)));
 
   QVBoxLayout * layout = new QVBoxLayout();
-  f->setLayout(layout);
+  f->setLayout(layout); 
   layout->setSpacing(0);
   layout->setMargin(0);
   layout->addLayout(buttonLayout);
@@ -197,7 +198,7 @@ void MantidDockWidget::createWorkspaceMenuActions()
   connect(m_showMDPlot, SIGNAL(activated()), m_mantidUI, SLOT(showMDPlot()));
 
   m_showListData = new QAction(tr("List Data"), this);
-  connect(m_showListData, SIGNAL(activated()), m_mantidUI, SLOT(showListData()));
+  connect(m_showListData, SIGNAL(activated()), m_mantidUI, SLOT(showListData())); 
 
   m_showSpectrumViewer = new QAction(tr("Show Spectrum Viewer"), this);
   connect(m_showSpectrumViewer, SIGNAL(activated()), m_mantidUI, SLOT(showSpectrumViewer()));
@@ -682,7 +683,7 @@ void MantidDockWidget::filterWorkspaceTree(const QString &text)
 
   //show all items
   QTreeWidgetItemIterator it(m_tree);
-  while (*it)
+  while (*it) 
   {
     (*it)->setHidden(false);
     ++it;
@@ -705,7 +706,7 @@ void MantidDockWidget::filterWorkspaceTree(const QString &text)
       {
         expanded << item->text(0);
       }
-      else
+      else  
       {
         //expand everything that is at the top level (as we lazy load this is required)
         item->setExpanded(true);
@@ -714,12 +715,12 @@ void MantidDockWidget::filterWorkspaceTree(const QString &text)
 
     //filter based on the string
     QTreeWidgetItemIterator it(m_tree,QTreeWidgetItemIterator::All);
-    while (*it)
+    while (*it) 
     {
       QTreeWidgetItem *item = (*it);
       QVariant userData = item->data(0, Qt::UserRole);
 
-      if (!userData.isNull() )
+      if (!userData.isNull() ) 
       {
         Workspace_sptr workspace = userData.value<Workspace_sptr>();
         if (workspace)
@@ -770,10 +771,10 @@ void MantidDockWidget::filterWorkspaceTree(const QString &text)
     //make children of visible groups visible
     for (auto itGroup = visibleGroups.begin(); itGroup != visibleGroups.end(); ++itGroup)
     {
-      QTreeWidgetItem *group = (*itGroup);
+      QTreeWidgetItem *group = (*itGroup);  
       for (int i = 0; i < group->childCount(); i++)
       {
-        QTreeWidgetItem *child = group->child(i);
+        QTreeWidgetItem *child = group->child(i); 
         if (child->isHidden())
         {
           //I was previously hidden, show me
@@ -811,7 +812,7 @@ void MantidDockWidget::clickedWorkspace(QTreeWidgetItem* item, int)
 }
 
 void MantidDockWidget::workspaceSelected()
-{
+{ 
   QList<QTreeWidgetItem*> selectedItems=m_tree->selectedItems();
   if(selectedItems.isEmpty()) return;
 
@@ -1076,7 +1077,7 @@ void MantidDockWidget::saveToProgram(const QString & name)
   }
 
   //Check to see if mandatory information is included
-  if ((programKeysAndDetails.count("name") != 0) && (programKeysAndDetails.count("target") != 0) && (programKeysAndDetails.count("saveusing") != 0))
+  if ((programKeysAndDetails.count("name") != 0) && (programKeysAndDetails.count("target") != 0) && (programKeysAndDetails.count("saveusing") != 0))    
   {
     std::string expTarget = Poco::Path::expand(programKeysAndDetails.find("target")->second);
 
@@ -1240,7 +1241,7 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     }
 
     // Add the items that are appropriate for the type
-    if( MatrixWorkspace_const_sptr matrixWS = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(ws) )
+    if( MatrixWorkspace_const_sptr matrixWS = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(ws) ) 
     {
       addMatrixWorkspaceMenuItems(menu, matrixWS);
     }
@@ -1256,7 +1257,7 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     {
       addPeaksWorkspaceMenuItems(menu, peaksWS);
     }
-    else if( boost::dynamic_pointer_cast<const WorkspaceGroup>(ws) )
+    else if( boost::dynamic_pointer_cast<const WorkspaceGroup>(ws) ) 
     {
       addWorkspaceGroupMenuItems(menu);
     }
@@ -1303,16 +1304,16 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
           connect(m_program,SIGNAL(activated()),m_programMapper,SLOT(map()));
           //Send name of program when clicked
           m_programMapper->setMapping(m_program, name);
-          m_saveToProgram->addAction(m_program);
+          m_saveToProgram->addAction(m_program);		
 
           // Set first pass to false so that it doesn't set up another menu entry for all programs.
           firstPass = false;
         }
-      }
+      } 
     }
 
     //Tell the button what to listen for and what to do once clicked (if there is anything to connect it will be set to false)
-    if (firstPass == false)
+    if (firstPass == false)    
       connect(m_programMapper, SIGNAL(mapped(const QString &)), this, SLOT(saveToProgram(const QString &)));
 
     //Rename is valid for all workspace types
@@ -1529,11 +1530,11 @@ void MantidTreeWidget::dragEnterEvent(QDragEnterEvent *de)
 void MantidTreeWidget::dropEvent(QDropEvent *de)
 {
   QStringList filenames;
-  const QMimeData *mimeData = de->mimeData();
-  if (mimeData->hasUrls())
+  const QMimeData *mimeData = de->mimeData();  
+  if (mimeData->hasUrls()) 
   {
     QList<QUrl> urlList = mimeData->urls();
-    for (int i = 0; i < urlList.size(); ++i)
+    for (int i = 0; i < urlList.size(); ++i) 
     {
       QString fName = urlList[i].toLocalFile();
       if (fName.size()>0)
@@ -1544,7 +1545,7 @@ void MantidTreeWidget::dropEvent(QDropEvent *de)
   }
   de->acceptProposedAction();
 
-  for (int i = 0; i < filenames.size(); ++i)
+  for (int i = 0; i < filenames.size(); ++i) 
   {
     try
     {
@@ -1559,7 +1560,7 @@ void MantidTreeWidget::dropEvent(QDropEvent *de)
     catch (std::runtime_error& error)
     {
       treelog.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
-    }
+    }      
     catch (std::logic_error& error)
     {
       treelog.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
@@ -1730,7 +1731,7 @@ QMultiMap<QString,std::set<int> > MantidTreeWidget::chooseSpectrumFromSelected()
     return spectrumToPlot;
   }
 
-  // Else, one or more workspaces
+  // Else, one or more workspaces 
   MantidWSIndexDialog *dio = new MantidWSIndexDialog(m_mantidUI, 0, selectedMatrixWsNameList);
   dio->exec();
   return dio->getPlots();
@@ -1893,6 +1894,7 @@ AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w):
   setObjectName("exploreAlgorithms"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
   setMinimumWidth(200);
+  w->addDockWidget( Qt::RightDockWidgetArea, this );//*/
 
   //Add the AlgorithmSelectorWidget
   m_selector = new MantidQt::MantidWidgets::AlgorithmSelectorWidget(this);
@@ -2005,3 +2007,4 @@ void AlgorithmDockWidget::hideProgressBar()
 
 
 //--------------------  ----------------------//
+

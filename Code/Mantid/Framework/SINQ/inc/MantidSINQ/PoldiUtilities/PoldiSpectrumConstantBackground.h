@@ -38,8 +38,8 @@ namespace Poldi {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 class MANTID_SINQ_DLL PoldiSpectrumConstantBackground
-    : public API::ParamFunction,
-      public API::IFunction1D,
+    : virtual public API::ParamFunction,
+      virtual public API::IFunction1D,
       public IPoldiFunction1D {
 public:
   PoldiSpectrumConstantBackground();

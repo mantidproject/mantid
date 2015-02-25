@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 import time
 import datetime
 import numbers
@@ -36,7 +37,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
         # get log value
         # average time series over run
         # for beamlog, etc return flag=true and value to push into previous run
-        if(name=="comment"):
+        if name=="comment":
             return (ws.getComment(),False,0)
 
         try:
@@ -48,7 +49,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
             raise ValueError(message)
         try:
             times2=[]
-            if (hasattr(v,"unfiltered")):
+            if hasattr(v,"unfiltered"):
                 v=v.unfiltered()
             for tt in v.times:
                 times2.append((datetime.datetime(*(time.strptime(str(tt),"%Y-%m-%dT%H:%M:%S")[0:6]))-begin).total_seconds())
@@ -56,11 +57,11 @@ class LoadLogPropertyTable(PythonAlgorithm):
             #print "probably not a time series"
             pass
 
-        if(name[0:8]=="Beamlog_" and (name.find("Counts")>0 or name.find("Frames")>0)):
+        if name[0:8]=="Beamlog_" and (name.find("Counts")>0 or name.find("Frames")>0):
             i=bisect.bisect_right(times2,2) # allowance for "slow" clearing of DAE
             #print "returning max beam log, list cut 0:",i,":",len(times2)
             return (numpy.amax(v.value[i:]),True,numpy.amax(v.value[:i]))
-        if(v.__class__.__name__ =="TimeSeriesProperty_dbl" or v.__class__.__name__ =="FloatTimeSeriesProperty"):
+        if v.__class__.__name__ =="TimeSeriesProperty_dbl" or v.__class__.__name__ =="FloatTimeSeriesProperty":
             i=bisect.bisect_left(times2,0)
             return (numpy.average(v.value[i:]),False,0)
         return (v.value,False,0)
@@ -79,13 +80,13 @@ class LoadLogPropertyTable(PythonAlgorithm):
         while file9[j9-1].isdigit():
             j9=j9-1
         lastnum=int(file9[j9:i9])
-        if(file1[:j9] != file9[:j9]):
+        if file1[:j9] != file9[:j9]:
             raise Exception("Files from different directories or instruments")
-        if(file1[i1:] != file9[i9:]):
+        if file1[i1:] != file9[i9:]:
             raise Exception("Files of different types")
-        if(i1-j1 != i9-j9):
+        if i1-j1 != i9-j9:
             raise Exception("File numbering error")
-        if(lastnum < firstnum):
+        if lastnum < firstnum:
             raise Exception("Run numbers must increase")
 
         # table. Rows=runs, columns=logs (col 0 = run number)
@@ -103,14 +104,14 @@ class LoadLogPropertyTable(PythonAlgorithm):
                 continue
 
             #check if the return type is atuple
-            if (type(returnTuple) == tuple):
+            if type(returnTuple) == tuple:
                 loadedWs=returnTuple[0]
             else:
                 loadedWs = returnTuple
 
             #check if the ws is a group
             ws = loadedWs
-            if (ws.id() == 'WorkspaceGroup'):
+            if ws.id() == 'WorkspaceGroup':
                 ws=ws[0]
 
             begin=datetime.datetime(*(time.strptime(ws.getRun().getProperty("run_start").value,"%Y-%m-%dT%H:%M:%S")[0:6])) # start of day
@@ -123,13 +124,13 @@ class LoadLogPropertyTable(PythonAlgorithm):
                     DeleteWorkspace(loadedWs)
                     raise
                 vallist.append(cv)
-                if(ff==firstnum):
-                    if(isinstance(cv, numbers.Number)):
+                if ff==firstnum:
+                    if isinstance(cv, numbers.Number):
                         ows.addColumn("double",cc)
                     else:
                         ows.addColumn("str",cc)
-                if(leftover and ff>firstnum):
-                    if(lval>ows.cell(cc,ff-firstnum-1)):
+                if leftover and ff>firstnum:
+                    if lval>ows.cell(cc,ff-firstnum-1):
                         ows.setCell(cc,ff-firstnum-1,lval)
             ows.addRow(vallist)
             DeleteWorkspace(loadedWs)

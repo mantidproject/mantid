@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from PyQt4 import QtGui, uic, QtCore
 import reduction_gui.widgets.util as util
 import math
@@ -134,7 +135,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         Define configuration file name
         '''
         file_name = QtGui.QFileDialog.getOpenFileName(self, "Select config file name", "", "(*.cfg)")
-        if (str(file_name).strip() != ''):
+        if str(file_name).strip() != '':
             self._summary.cfg_scaling_factor_file_name.setText(file_name)
             self.display_preview_config_file()
 
@@ -288,7 +289,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         in_list = False
         # Check whether it's already in the list
         run_numbers = self._summary.data_run_number_edit.text()
-        if (run_numbers == ''):
+        if run_numbers == '':
             return
 
         list_items = self._summary.angle_list.findItems(run_numbers, QtCore.Qt.MatchFixedString)
@@ -314,7 +315,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
                 state.scaling_factor_file = self._summary.cfg_scaling_factor_file_name.text()
 
                 #incident medium
-                _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j))
+                _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j))\
                                           for j in range(self._summary.incident_medium_combobox.count())]
                 _incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
 
@@ -403,7 +404,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self._summary.tof_max.setText(str(state.tof_max))
 
         self._summary.cfg_scaling_factor_file_name.setText(str(state.scaling_factor_file))
-        if (state.scaling_factor_file != ''):
+        if state.scaling_factor_file != '':
             self.display_preview_config_file()
 
         self._summary.data_run_number_edit.setText(str(state.data_file))
@@ -429,7 +430,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         state_list = []
 
         #common incident medium
-        m.incident_medium_list = [self._summary.incident_medium_combobox.itemText(i)
+        m.incident_medium_list = [self._summary.incident_medium_combobox.itemText(i)\
                                 for i in range(self._summary.incident_medium_combobox.count())]
 
         m.incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()

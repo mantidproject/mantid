@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_instrument.ui'
@@ -536,7 +537,7 @@ class Ui_Frame(object):
         Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
         self.instr_name_label.setText(QtGui.QApplication.translate("Frame", "BIOSANS", None, QtGui.QApplication.UnicodeUTF8))
         self.reduction_options_group.setTitle(QtGui.QApplication.translate("Frame", "Reduction Options", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_6.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+        self.label_6.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"\
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Bitstream Charter\'; font-size:10pt; font-weight:400; font-style:italic;\">\n"
@@ -572,7 +573,7 @@ class Ui_Frame(object):
         self.label.setText(QtGui.QApplication.translate("Frame", "Number of Q bins  ", None, QtGui.QApplication.UnicodeUTF8))
         self.n_q_bins_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the number of Q bins for the output I(Q) distribution.", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("Frame", "Number of sub-pixels", None, QtGui.QApplication.UnicodeUTF8))
-        self.n_sub_pix_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the number of sub-pixels in each direction of a detector pixel to use for the\n"
+        self.n_sub_pix_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the number of sub-pixels in each direction of a detector pixel to use for the\n"\
 "radial averaging. For instance, entering 3 will sub-divide each detector pixel by 3\n"
 "in each direction and will create 9 sub-pixels.", None, QtGui.QApplication.UnicodeUTF8))
         self.error_weighting_check.setText(QtGui.QApplication.translate("Frame", "Error weighting", None, QtGui.QApplication.UnicodeUTF8))
@@ -587,7 +588,7 @@ class Ui_Frame(object):
         self.label_11.setText(QtGui.QApplication.translate("Frame", "Wedge offset [deg]", None, QtGui.QApplication.UnicodeUTF8))
         self.wedge_offset_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter an angular offset for the wedges, in degrees.", None, QtGui.QApplication.UnicodeUTF8))
         self.geometry_options_groupbox.setTitle(QtGui.QApplication.translate("Frame", "Experiment Parameters", None, QtGui.QApplication.UnicodeUTF8))
-        self.experiment_parameter_help.setText(QtGui.QApplication.translate("Frame", "The sample-detector distance and wavelength are updated automatically when a sample data file is selected.\n"
+        self.experiment_parameter_help.setText(QtGui.QApplication.translate("Frame", "The sample-detector distance and wavelength are updated automatically when a sample data file is selected.\n"\
 "Values can be selected by hand by checking the boxes below.", None, QtGui.QApplication.UnicodeUTF8))
         self.detector_offset_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to set the detector distance offset.", None, QtGui.QApplication.UnicodeUTF8))
         self.detector_offset_chk.setText(QtGui.QApplication.translate("Frame", "Detector distance offset [mm]", None, QtGui.QApplication.UnicodeUTF8))
@@ -608,7 +609,7 @@ class Ui_Frame(object):
         self.mask_side_front_radio.setText(QtGui.QApplication.translate("Frame", "Front", None, QtGui.QApplication.UnicodeUTF8))
         self.mask_side_back_radio.setToolTip(QtGui.QApplication.translate("Frame", "Select to mask the back panel of the detector.", None, QtGui.QApplication.UnicodeUTF8))
         self.mask_side_back_radio.setText(QtGui.QApplication.translate("Frame", "Back", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_5.setText(QtGui.QApplication.translate("Frame", "Choose a file to set your mask. Note that only the mask information, not the data, will be used in the reduction.\n"
+        self.label_5.setText(QtGui.QApplication.translate("Frame", "Choose a file to set your mask. Note that only the mask information, not the data, will be used in the reduction.\n"\
 "The data is only used to help you setting the mask.\n"
 "The mask information is saved separately so that your data file will NOT be modified.", None, QtGui.QApplication.UnicodeUTF8))
         self.mask_check.setToolTip(QtGui.QApplication.translate("Frame", "Select to apply the mask built from the specified data file.", None, QtGui.QApplication.UnicodeUTF8))

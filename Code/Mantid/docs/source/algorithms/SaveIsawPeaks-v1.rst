@@ -9,7 +9,9 @@
 Description
 -----------
 
-Save a PeaksWorkspace to a ISAW-style ASCII .peaks file.
+Save a :ref:`PeaksWorkspace <PeaksWorkspace>` to a ISAW-style ASCII .peaks file.
+
+The :ref:`PeaksWorkspace <PeaksWorkspace>` consists of individual Peaks, each of which has an individual PeakShape relating to the way the workspace has been integrated. The PeakShape information is not saved out in the ISAW peaks format. To save the full peak information, use the NeXus format :ref:`SaveNexus <algm-SaveNexus>`.
 
 Usage
 -----

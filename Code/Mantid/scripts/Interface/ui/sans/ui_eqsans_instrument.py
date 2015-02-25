@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'ui/sans/eqsans_instrument.ui'
@@ -576,7 +577,7 @@ class Ui_Frame(object):
         self.output_dir_edit.setStatusTip(QtGui.QApplication.translate("Frame", "Output directory for reduced data.", None, QtGui.QApplication.UnicodeUTF8))
         self.output_dir_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.geometry_options_groupbox.setTitle(QtGui.QApplication.translate("Frame", "Experiment Parameters", None, QtGui.QApplication.UnicodeUTF8))
-        self.experiment_parameter_help.setText(QtGui.QApplication.translate("Frame", "The sample-detector distance is updated automatically when a sample data file is selected.\n"
+        self.experiment_parameter_help.setText(QtGui.QApplication.translate("Frame", "The sample-detector distance is updated automatically when a sample data file is selected.\n"\
 "Values can be selected by hand by checking the boxes below.", None, QtGui.QApplication.UnicodeUTF8))
         self.detector_offset_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to set the detector distance offset.", None, QtGui.QApplication.UnicodeUTF8))
         self.detector_offset_chk.setStatusTip(QtGui.QApplication.translate("Frame", "Select to set the detector distance offset.", None, QtGui.QApplication.UnicodeUTF8))
@@ -592,7 +593,7 @@ class Ui_Frame(object):
         self.config_mask_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to mask detectors as specified in the configuration file, as applicable.", None, QtGui.QApplication.UnicodeUTF8))
         self.config_mask_chk.setStatusTip(QtGui.QApplication.translate("Frame", "Select to mask detectors as specified in the configuration file, as applicable.", None, QtGui.QApplication.UnicodeUTF8))
         self.config_mask_chk.setText(QtGui.QApplication.translate("Frame", "Use mask from configuration file as applicable", None, QtGui.QApplication.UnicodeUTF8))
-        self.mask_help_label.setText(QtGui.QApplication.translate("Frame", "Choose a file to set your mask. Note that only the mask information, not the data, will be used in the reduction.\n"
+        self.mask_help_label.setText(QtGui.QApplication.translate("Frame", "Choose a file to set your mask. Note that only the mask information, not the data, will be used in the reduction.\n"\
 "The data is only used to help you setting the mask.\n"
 "The mask information is saved separately so that your data file will NOT be modified.", None, QtGui.QApplication.UnicodeUTF8))
         self.mask_check.setToolTip(QtGui.QApplication.translate("Frame", "Select to apply the mask built from the specified data file.", None, QtGui.QApplication.UnicodeUTF8))
