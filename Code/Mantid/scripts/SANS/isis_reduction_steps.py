@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     This file defines what happens in each step in the data reduction, it's
     the guts of the reduction. See ISISReducer for order the steps are run
@@ -204,7 +205,7 @@ class LoadRun(object):
         If reload is True, it will try to get all the information necessary to reload this
         workspace from the data file.
         """
-        assert(isinstance(self._data_file, Workspace))
+        assert isinstance(self._data_file, Workspace)
         ws_pointer = self._data_file
 
         try:
@@ -366,6 +367,9 @@ class LoadTransmissions():
         Loads the file used to apply the transmission correction to the
         sample or can
     """
+
+    _direct_name = None
+    _trans_name = None
 
     def __init__(self, is_can=False, reload=True):
         """
@@ -703,7 +707,7 @@ class Mask_ISIS(ReductionStep):
                 self.time_mask = ''
                 self.time_mask_r = ''
                 self.time_mask_f = ''
-            elif (type == 'TIME' or type == 'T'):
+            elif type == 'TIME' or type == 'T':
                 parts = parts[2].split()
                 if len(parts) == 3:
                     detname = parts[0].rstrip()
@@ -717,7 +721,7 @@ class Mask_ISIS(ReductionStep):
                 else:
                     _issueWarning('Unrecognized masking line "' + details + '"')
         else:
-             _issueWarning('Unrecognized masking line "' + details + '"')
+            _issueWarning('Unrecognized masking line "' + details + '"')
 
     def add_mask_string(self, mask_string, detect):
         if detect.upper() == 'FRONT' or detect.upper() == 'HAB':
@@ -847,7 +851,7 @@ class Mask_ISIS(ReductionStep):
             @param angle: angle of line in xy-plane in units of degrees
             @return: return xml shape string
         '''
-        return self._finite_cylinder(startPoint, width/2000.0, length,
+        return self._finite_cylinder(startPoint, width/2000.0, length,\
                                                [math.cos(angle*math.pi/180.0),math.sin(angle*math.pi/180.0),0.0], "arm")
 
 
@@ -858,9 +862,9 @@ class Mask_ISIS(ReductionStep):
             @return 'Phi'low'_'high if it has been set
         """
         if self.mask_phi and self._lim_phi_xml != '' and (abs(self.phi_max - self.phi_min) != 180.0):
-          return 'Phi'+str(self.phi_min)+'_'+str(self.phi_max)
+            return 'Phi'+str(self.phi_min)+'_'+str(self.phi_max)
         else:
-          return ''
+            return ''
 
     def set_phi_limit(self, phimin, phimax, phimirror, override=True):
         '''
@@ -950,7 +954,7 @@ class Mask_ISIS(ReductionStep):
                 det = ws.getInstrument().getComponentByName('rear-detector')
                 det_Z = det.getPos().getZ()
                 start_point = [self.arm_x, self.arm_y, det_Z]
-                MaskDetectorsInShape(Workspace=workspace,ShapeXML=
+                MaskDetectorsInShape(Workspace=workspace,ShapeXML=\
                                  self._mask_line(start_point, 1e6, self.arm_width, self.arm_angle))
 
         output_ws, detector_list = ExtractMask(InputWorkspace=workspace, OutputWorkspace="__mask")
@@ -1026,7 +1030,7 @@ class Mask_ISIS(ReductionStep):
                 Ys.append(flags.readY(i)[0])
                 Es.append(0)
 
-                if (vals.readY(i)[0] > maxval):
+                if vals.readY(i)[0] > maxval:
                     #don't include masked or monitors
                     if (flags.readY(i)[0] == 0) and (vals.readY(i)[0] < 5000):
                         maxval = vals.readY(i)[0]
@@ -1288,8 +1292,8 @@ class TransmissionCalc(ReductionStep):
         #exclude unused spectra because the sometimes empty/sometimes not spectra can cause errors with interpolate
         spectrum1 = min(pre_monitor, post_monitor)
         spectrum2 = max(pre_monitor, post_monitor)
-        CropWorkspace(InputWorkspace=inputWS,OutputWorkspace= tmpWS,
-            StartWorkspaceIndex=self._get_index(spectrum1),
+        CropWorkspace(InputWorkspace=inputWS,OutputWorkspace= tmpWS,\
+            StartWorkspaceIndex=self._get_index(spectrum1),\
             EndWorkspaceIndex=self._get_index(spectrum2))
 
         if inst.name() == 'LOQ':
@@ -1300,7 +1304,7 @@ class TransmissionCalc(ReductionStep):
             back_start, back_end = inst.get_TOFs(spectra_number)
             if back_start and back_end:
                 index = spectra_number - spectrum1
-                CalculateFlatBackground(InputWorkspace=tmpWS,OutputWorkspace= tmpWS, StartX=back_start, EndX=back_end,
+                CalculateFlatBackground(InputWorkspace=tmpWS,OutputWorkspace= tmpWS, StartX=back_start, EndX=back_end,\
                                WorkspaceIndexList=index, Mode='Mean')
 
         ConvertUnits(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Target="Wavelength")
@@ -1399,12 +1403,12 @@ class TransmissionCalc(ReductionStep):
         wavbin +=','+str(translambda_max)
 
         #set up the input workspaces
-        trans_tmp_out = self.setup_wksp(trans_raw, reducer.instrument,
+        trans_tmp_out = self.setup_wksp(trans_raw, reducer.instrument,\
             wavbin, pre_sample, post_sample)
-        direct_tmp_out = self.setup_wksp(direct_raw, reducer.instrument,
+        direct_tmp_out = self.setup_wksp(direct_raw, reducer.instrument,\
             wavbin, pre_sample, post_sample)
 
-        fittedtransws, unfittedtransws = self.get_wksp_names(
+        fittedtransws, unfittedtransws = self.get_wksp_names(\
                     trans_raw, translambda_min, translambda_max, reducer)
 
         # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
@@ -1610,7 +1614,7 @@ class CalculateNormISIS(object):
                 ConvertToHistogram(InputWorkspace=self.TMP_ISIS_NAME,OutputWorkspace= self.TMP_ISIS_NAME)
         ## try to redefine self._pixel_file to pass to CalculateNORM method calculate.
         detect_pixel_file = self.getPixelCorrFile(reducer.instrument.cur_detector().name())
-        if (detect_pixel_file != ""):
+        if detect_pixel_file != "":
             self._pixel_file = detect_pixel_file
 
         for step in self._wave_steps:
@@ -1695,7 +1699,7 @@ class ConvertToQISIS(ReductionStep):
             self._grav_set = True
 
         if (not self._grav_set) or override:
-                self._use_gravity = bool(flag)
+            self._use_gravity = bool(flag)
         else:
             msg = "User file can't override previous gravity setting, do gravity correction remains " + str(self._use_gravity)
             print msg
@@ -1706,11 +1710,11 @@ class ConvertToQISIS(ReductionStep):
         Calculate the normalization workspaces and then call the chosen Q conversion algorithm.
         """
         wavepixeladj = ""
-        if (reducer.wide_angle_correction and reducer.transmission_calculator.output_wksp):
+        if reducer.wide_angle_correction and reducer.transmission_calculator.output_wksp:
             #calculate the transmission wide angle correction
             _issueWarning("sans solid angle correction execution")
-            SANSWideAngleCorrection(SampleData=workspace,
-                                     TransmissionData = reducer.transmission_calculator.output_wksp,
+            SANSWideAngleCorrection(SampleData=workspace,\
+                                     TransmissionData = reducer.transmission_calculator.output_wksp,\
                                      OutputWorkspace='transmissionWorkspace')
             wavepixeladj = 'transmissionWorkspace'
         #create normalization workspaces
@@ -1992,26 +1996,26 @@ class UserFile(ReductionStep):
             # SET CENTRE/HAB X Y
             main_str_pos = upper_line.find('MAIN')
             hab_str_pos = upper_line.find('HAB')
-            x_pos = 0.0;
-            y_pos = 0.0;
-            if (main_str_pos > 0):
-              values = upper_line[main_str_pos+5:].split() #remov the SET CENTRE/MAIN
-              x_pos = float(values[0])/1000.0
-              y_pos = float(values[1])/1000.0
-            elif (hab_str_pos > 0):
-              values = upper_line[hab_str_pos+4:].split() # remove the SET CENTRE/HAB
-              print ' convert values ',values
-              x_pos = float(values[0])/1000.0
-              y_pos = float(values[1])/1000.0
+            x_pos = 0.0
+            y_pos = 0.0
+            if main_str_pos > 0:
+                values = upper_line[main_str_pos+5:].split() #remov the SET CENTRE/MAIN
+                x_pos = float(values[0])/1000.0
+                y_pos = float(values[1])/1000.0
+            elif hab_str_pos > 0:
+                values = upper_line[hab_str_pos+4:].split() # remove the SET CENTRE/HAB
+                print ' convert values ',values
+                x_pos = float(values[0])/1000.0
+                y_pos = float(values[1])/1000.0
             else:
-              values = upper_line.split()
-              x_pos = float(values[2])/1000.0
-              y_pos = float(values[3])/1000.0
-            if (hab_str_pos > 0):
-              print 'Front values = ',x_pos,y_pos
-              reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos),'front')
+                values = upper_line.split()
+                x_pos = float(values[2])/1000.0
+                y_pos = float(values[3])/1000.0
+            if hab_str_pos > 0:
+                print 'Front values = ',x_pos,y_pos
+                reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos),'front')
             else:
-              reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos))
+                reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos))
 
         elif upper_line.startswith('SET SCALES'):
             values = upper_line.split()
@@ -2077,9 +2081,9 @@ class UserFile(ReductionStep):
                 reducer.transmission_calculator.loq_removePromptPeakMax = float(params[2])
             else:
                 if reducer.instrument.name() == 'LOQ':
-                  _issueWarning('Incorrectly formatted FIT/MONITOR line, %s, line ignored' % upper_line)
+                    _issueWarning('Incorrectly formatted FIT/MONITOR line, %s, line ignored' % upper_line)
                 else:
-                  _issueWarning('FIT/MONITOR line specific to LOQ instrument. Line ignored')
+                    _issueWarning('FIT/MONITOR line specific to LOQ instrument. Line ignored')
 
         elif upper_line == 'SANS2D' or upper_line == 'LOQ':
             self._check_instrument(upper_line, reducer)
@@ -2183,7 +2187,7 @@ class UserFile(ReductionStep):
                 _issueWarning("General wave re-bin lines are not implemented, line ignored \"" + limit_line + "\"")
                 return
             else:
-                reducer.to_wavelen.set_rebin(
+                reducer.to_wavelen.set_rebin(\
                         minval, step_type + step_size, maxval, override=False)
         elif limit_type.upper() == 'Q':
             if rebin_str:
@@ -2532,9 +2536,9 @@ class UserFile(ReductionStep):
         path2file = parts[1]
 
         try:
-          file_path, suggested_name = getFileAndName(path2file)
-          __calibrationWs = Load(file_path, OutputWorkspace=suggested_name)
-          reducer.instrument.setCalibrationWorkspace(__calibrationWs)
+            file_path, suggested_name = getFileAndName(path2file)
+            __calibrationWs = Load(file_path, OutputWorkspace=suggested_name)
+            reducer.instrument.setCalibrationWorkspace(__calibrationWs)
         except:
             # If we throw a runtime here, then we cannot execute 'Load Data'.
             raise RuntimeError("Invalid input for tube calibration file (" + path2file + " ).\n" \
@@ -2730,7 +2734,7 @@ class GetSampleGeom(ReductionStep):
         # For a cylinder and sphere the height=width=radius
         if (not self._shape is None) and (self._shape.startswith('cylinder')):
             self._width = self._height
-        self._use_wksp_widtht = False
+        self._use_wksp_width = False
 
     def get_height(self):
         self.raise_if_zero(self._height, "height")
@@ -2805,7 +2809,7 @@ class SampleGeomCor(ReductionStep):
 
     def calculate_volume(self, reducer):
         geo = reducer.get_sample().geometry
-        assert( issubclass(geo.__class__, GetSampleGeom))
+        assert  issubclass(geo.__class__, GetSampleGeom)
 
         try:
             if geo.shape == 'cylinder-axis-up':

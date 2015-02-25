@@ -14,15 +14,8 @@ namespace MantidQt
 		{
 			m_uiForm.setupUi(parent);
 
-			// Create the plot
-      m_plots["QuasiPlot"] = new QwtPlot(m_parentWidget);
-      m_plots["QuasiPlot"]->setCanvasBackground(Qt::white);
-      m_plots["QuasiPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-      m_plots["QuasiPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-			m_uiForm.plotSpace->addWidget(m_plots["QuasiPlot"]);
-
       // Create range selector
-      m_rangeSelectors["QuasiERange"] = new MantidWidgets::RangeSelector(m_plots["QuasiPlot"]);
+      m_rangeSelectors["QuasiERange"] = new MantidWidgets::RangeSelector(m_uiForm.ppPlot);
       connect(m_rangeSelectors["QuasiERange"], SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
       connect(m_rangeSelectors["QuasiERange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
 
@@ -197,7 +190,7 @@ namespace MantidQt
 
 			pyInput += "QLRun('"+program+"','"+sampleName+"','"+resName+"','"+resNormFile+"',"+eRange+","
 										" "+nBins+","+fitOps+",'"+fixedWidthFile+"',"+sequence+", "
-										" Save="+save+", Plot='"+plot+"', Verbose=True)\n";
+										" Save="+save+", Plot='"+plot+"')\n";
 
 			runPythonScript(pyInput);
 
@@ -213,8 +206,10 @@ namespace MantidQt
       if(!m_uiForm.dsSample->isValid())
         return;
 
+	  m_uiForm.ppPlot->clear();
+
       QString sampleName = m_uiForm.dsSample->getCurrentDataName();
-			plotMiniPlot(sampleName, m_previewSpec, "QuasiPlot", "RawPlotCurve");
+	  m_uiForm.ppPlot->addSpectrum("Sample", sampleName, m_previewSpec);
 
       // Update fit plot
 			QString program = m_uiForm.cbProgram->currentText();
@@ -250,19 +245,11 @@ namespace MantidQt
         QString specName = QString::fromStdString(axis->label(histIndex));
 
         if(specName.contains("fit"))
-        {
-          plotMiniPlot(outputWorkspace, histIndex, "QuasiPlot", specName);
-          m_curves[specName]->setPen(QColor(Qt::red));
-        }
+		  m_uiForm.ppPlot->addSpectrum(specName, outputWorkspace, histIndex, Qt::red);
 
         if(specName.contains("diff"))
-        {
-          plotMiniPlot(outputWorkspace, histIndex, "QuasiPlot", specName);
-          m_curves[specName]->setPen(QColor(Qt::green));
-        }
+		  m_uiForm.ppPlot->addSpectrum(specName, outputWorkspace, histIndex, Qt::green);
       }
-
-      replot("QuasiPlot");
     }
 
 		/**
@@ -276,12 +263,11 @@ namespace MantidQt
       MatrixWorkspace_sptr inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(filename.toStdString());
       int numHist = static_cast<int>(inWs->getNumberHistograms()) - 1;
       m_uiForm.spPreviewSpectrum->setMaximum(numHist);
-      removeAllCurves();
-      replot("QuasiPlot");
       updateMiniPlot();
-			std::pair<double,double> range = getCurveRange("RawPlotCurve");
-			setMiniPlotGuides("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
-			setPlotRange("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
+
+			QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
+			setRangeSelector("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
+			setPlotPropertyRange("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
 		}
 
 		/**

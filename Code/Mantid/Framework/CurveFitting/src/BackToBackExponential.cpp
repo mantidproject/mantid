@@ -32,9 +32,15 @@ void BackToBackExponential::init() {
 
   defineCentreParameter("X0");
   defineHeightParameter("I");
-  defineWidthParameter("S",Linear);
-  defineWidthParameter("A",Inverse);
-  defineWidthParameter("B",Inverse);
+  defineWidthParameter("S", Linear);
+  defineWidthParameter("A", Inverse);
+  defineWidthParameter("B", Inverse);
+}
+
+double BackToBackExponential::intensity() const { return getParameter("I"); }
+
+void BackToBackExponential::setIntensity(const double newIntensity) {
+  setParameter("I", newIntensity);
 }
 
 void BackToBackExponential::function1D(double *out, const double *xValues,
@@ -102,30 +108,23 @@ double BackToBackExponential::expWidth() const {
   return M_LN2 * (a + b) / (a * b);
 }
 
-std::pair<double,double> BackToBackExponential::getExtent() const
-{
+std::pair<double, double> BackToBackExponential::getExtent() const {
   double a = getParameter(1) / 5.0;
   double b = getParameter(2) / 5.0;
-  if ( a == 0.0 ) 
-  {
+  if (a == 0.0) {
     a = 1.0;
-  }
-  else
-  {
+  } else {
     a = 1.0 / a;
   }
-  if ( b == 0.0 ) 
-  {
+  if (b == 0.0) {
     b = 1.0;
-  }
-  else
-  {
+  } else {
     b = 1.0 / b;
   }
   auto c = getParameter("X0");
   auto start = c - a;
   auto end = c + b;
-  return std::make_pair( start, end );
+  return std::make_pair(start, end);
 }
 
 } // namespace CurveFitting

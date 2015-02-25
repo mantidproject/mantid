@@ -1,7 +1,7 @@
 .. _Using_XML_Schema:
 
 Using XML Schemas
-=============
+=================
 
 This page gives instructions on how to configure various editing programs for 
 writing XML with schema validation. This helps by finding errors in 

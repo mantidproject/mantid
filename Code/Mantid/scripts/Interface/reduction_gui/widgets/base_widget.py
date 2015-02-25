@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from PyQt4 import QtGui, uic, QtCore
 import os
 import types
@@ -128,8 +129,8 @@ class BaseWidget(QtGui.QWidget):
         if title is None:
             title = "Data file - Choose a data file"
         if multi:
-            qflist = QtGui.QFileDialog.getOpenFileNames(self, title,
-                                                              self._settings.data_path,
+            qflist = QtGui.QFileDialog.getOpenFileNames(self, title,\
+                                                              self._settings.data_path,\
                                                               data_type)
             if len(qflist)>0:
                 flist = []
@@ -141,8 +142,8 @@ class BaseWidget(QtGui.QWidget):
             else:
                 return None
         else:
-            fname = QtCore.QFileInfo(QtGui.QFileDialog.getOpenFileName(self, title,
-                                                              self._settings.data_path,
+            fname = QtCore.QFileInfo(QtGui.QFileDialog.getOpenFileName(self, title,\
+                                                              self._settings.data_path,\
                                                               data_type)).filePath()
             if fname:
                 # Store the location of the loaded file

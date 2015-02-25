@@ -104,55 +104,18 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_18">
       <item>
-       <layout class="QVBoxLayout" name="plotPreview">
-        <property name="sizeConstraint">
-         <enum>QLayout::SetMinimumSize</enum>
+       <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlot" native="true">
+        <property name="canvasColour" stdset="0">
+         <color>
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
+         </color>
         </property>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="loPreviewLegend">
-        <item>
-         <spacer name="horizontalSpacer_0">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLabel" name="lbPlotSample">
-          <property name="styleSheet">
-           <string notr="true">color: rgb(255, 0, 0);</string>
-          </property>
-          <property name="text">
-           <string>Sample</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lbPlotCan">
-          <property name="text">
-           <string>Background</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lbPlotTransmission">
-          <property name="styleSheet">
-           <string notr="true">color: rgb(0, 255, 0);</string>
-          </property>
-          <property name="text">
-           <string>Transmission</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+        <property name="showLegend" stdset="0">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -200,6 +163,12 @@
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/DataSelector.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::PreviewPlot</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/PreviewPlot.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -54,6 +54,8 @@ class DLLExport BackToBackExponential : public PeakParametersNumeric {
 public:
   /// Default constructor.
   BackToBackExponential() : PeakParametersNumeric() {}
+  virtual double intensity() const;
+  virtual void setIntensity(const double newIntensity);
 
   /// overwrite IFunction base class methods
   std::string name() const { return "BackToBackExponential"; }
