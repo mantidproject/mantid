@@ -86,4 +86,6 @@ Output:
   Estimated resolution of detector of spectrum 100 =  0.00323608373204
   Estimated resolution of detector of spectrum 999 =  0.00354849279137
 
+.. seealso :: Algorithms :ref:`algm-CalibrateRectangularDetectors` and :ref:`algm-GetDetOffsetsMultiPeaks`
+
 .. categories::
