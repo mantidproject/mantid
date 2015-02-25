@@ -3,8 +3,8 @@
 # GTEST_FOUND If false, do not try to use Google Test
 
 find_path ( GTEST_INCLUDE_DIR gtest/gtest.h
-            PATHS ${PROJECT_SOURCE_DIR}/TestingTools/gmock-${GMOCK_VERSION}/gtest/include
-                  ${PROJECT_SOURCE_DIR}/../TestingTools/gmock-${GMOCK_VERSION}/gtest/include 
+            PATHS ${PROJECT_SOURCE_DIR}/Testing/Tools/gmock-${GMOCK_VERSION}/gtest/include
+                  ${PROJECT_SOURCE_DIR}/../Testing/Tools/gmock-${GMOCK_VERSION}/gtest/include 
             NO_DEFAULT_PATH )
 
 # handle the QUIETLY and REQUIRED arguments and set GTEST_FOUND to TRUE if 
