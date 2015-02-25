@@ -1,5 +1,4 @@
 set ( SRC_FILES
-	${SRC_FILES} ${OPENCASCADE_SRC}
 	src/ComponentParser.cpp
 	src/Crystal/BraggScatterer.cpp
 	src/Crystal/BraggScattererFactory.cpp
@@ -354,6 +353,7 @@ endif ()
 if (NOT NO_OPENCASCADE)
   find_package ( OpenCascade REQUIRED )
   include_directories ( system ${OPENCASCADE_INCLUDE_DIR} )
+  set (SRC_FILES ${SRC_FILES} ${OPENCASCADE_SRC} )
 else ()
   add_definitions ( -DNO_OPENCASCADE )
 endif ()
