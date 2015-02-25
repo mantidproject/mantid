@@ -39,11 +39,21 @@ namespace // anonymous
  */
 template <typename T>
 bool convertLogToDouble(const Mantid::Kernel::Property *property,
-                        double &value) {
+                        double &value, const std::string& function) {
   const Mantid::Kernel::TimeSeriesProperty<T> *log =
       dynamic_cast<const Mantid::Kernel::TimeSeriesProperty<T> *>(property);
   if (log) {
-    value = static_cast<double>(log->lastValue());
+    if (function=="Mean") {
+      value = static_cast<double>(log->timeAverageValue());
+    } else if (function=="First") {
+      value = static_cast<double>(log->firstValue());
+    } else if (function=="Min") {
+      value = static_cast<double>(log->minValue());
+    } else if (function=="Max") {
+      value = static_cast<double>(log->maxValue());
+    } else { // Default
+      value = static_cast<double>(log->lastValue());
+    }
     return true;
   }
   auto tlog =
@@ -85,6 +95,17 @@ void PlotAsymmetryByLogValue::init() {
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the log values which will be used as the x-axis "
                   "in the output workspace.");
+
+  std::vector<std::string> optionsLog;
+  optionsLog.push_back("Mean");
+  optionsLog.push_back("Min");
+  optionsLog.push_back("Max");
+  optionsLog.push_back("First");
+  optionsLog.push_back("Last");
+  declareProperty("Function", "Last",
+    boost::make_shared<StringListValidator>(optionsLog),
+    "The function to apply: 'Mean', 'Min', 'Max', 'First' or 'Last'.");
+
   declareProperty("Red", 1, "The period number for the 'red' data.");
   declareProperty("Green", EMPTY_INT(),
                   "The period number for the 'green' data.");
@@ -95,7 +116,6 @@ void PlotAsymmetryByLogValue::init() {
   declareProperty("Type", "Integral",
                   boost::make_shared<StringListValidator>(options),
                   "The calculation type: 'Integral' or 'Differential'.");
-
   declareProperty(
       "TimeMin", EMPTY_DBL(),
       "The beginning of the time interval used in the calculations.");
@@ -152,6 +172,8 @@ void PlotAsymmetryByLogValue::exec() {
   // Get runs
   std::string firstFN = getProperty("FirstRun");
   std::string lastFN = getProperty("LastRun");
+  // Get function to apply to logValue
+  m_logFunc = getPropertyValue("Function");
 
   // Parse run names and get the number of runs
   std::string fnBase, fnExt;
@@ -657,24 +679,23 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
   if (!property) {
     throw std::invalid_argument("Log " + m_logName + " does not exist.");
   }
-
   double value = 0;
   // try different property types
-  if (convertLogToDouble<double>(property, value))
+  if (convertLogToDouble<double>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<float>(property, value))
+  if (convertLogToDouble<float>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<int>(property, value))
+  if (convertLogToDouble<int>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<long>(property, value))
+  if (convertLogToDouble<long>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<long long>(property, value))
+  if (convertLogToDouble<long long>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<unsigned int>(property, value))
+  if (convertLogToDouble<unsigned int>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<unsigned long>(property, value))
+  if (convertLogToDouble<unsigned long>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<unsigned long long>(property, value))
+  if (convertLogToDouble<unsigned long long>(property, value, m_logFunc))
     return value;
   // try if it's a string and can be lexically cast to double
   auto slog =

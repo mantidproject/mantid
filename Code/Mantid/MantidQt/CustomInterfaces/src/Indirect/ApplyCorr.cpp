@@ -60,7 +60,7 @@ namespace IDA
       geom = "cyl";
     }
 
-    QString pyInput = "from IndirectDataAnalysis import abscorFeeder, loadNexus\n";
+    QString pyInput = "from IndirectDataAnalysis import abscorFeeder\n";
 
     QString sample = m_uiForm.dsSample->getCurrentDataName();
     MatrixWorkspace_const_sptr sampleWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(sample.toStdString());
@@ -102,16 +102,7 @@ namespace IDA
     {
       pyInput += "useCor = True\n";
       QString corrections = m_uiForm.dsCorrections->getCurrentDataName();
-      if ( !Mantid::API::AnalysisDataService::Instance().doesExist(corrections.toStdString()) )
-      {
-        pyInput +=
-          "corrections = loadNexus(r'" + m_uiForm.dsCorrections->getFullFilePath() + "')\n";
-      }
-      else
-      {
-        pyInput +=
-          "corrections = '" + corrections + "'\n";
-      }
+      pyInput += "corrections = '" + corrections + "'\n";
     }
     else
     {
