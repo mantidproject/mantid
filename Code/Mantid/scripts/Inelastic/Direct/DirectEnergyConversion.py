@@ -88,7 +88,7 @@ class DirectEnergyConversion(object):
 
    bkgd_range  =[15000,19000]  :integration range for background tests
 
-   second_white     - If provided an additional set of tests is performed on this.
+   second_white     - If provided an additional set of tests is performed on this. 
                          (default = None)
    hardmaskPlus     - A file specifying those spectra that should be masked
                          without testing (default=None)
@@ -224,7 +224,7 @@ class DirectEnergyConversion(object):
          self.second_white = other_whiteintegrals
 
       # Get the background/total counts from the sample run if present
-      if not(diag_sample is None): 
+      if not diag_sample is None:
          diag_sample = self.get_run_descriptor(diag_sample)
          sample_mask,n_sam_masked = diag_sample.get_masking()
          if sample_mask is None:
@@ -521,7 +521,7 @@ class DirectEnergyConversion(object):
             if self._multirep_mode:
                result.append(deltaE_ws_sample)
             else:
-               results_name = deltaE_ws_sample.name()
+              results_name = deltaE_ws_sample.name()
                if results_name != out_ws_name:
                   RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
                result = mtd[out_ws_name]
@@ -762,7 +762,8 @@ class DirectEnergyConversion(object):
         else:
             kwargs['MonitorSpectrum'] = int(mon_spect) # shame TODO: change c++ algorithm, which need float monitor ID
             range_min = float(range[0] + range_offset)
-            range_max = float(range[1] + range_offset)   # Normalize to monitor 2
+            range_max = float(range[1] + range_offset)
+
         # Normalize to monitor 1
         NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name,IntegrationRangeMin=range_min,
                            IntegrationRangeMax=range_max,IncludePartialBins=True,**kwargs)
@@ -914,9 +915,10 @@ class DirectEnergyConversion(object):
         Save the result workspace to the specified filename using the list of formats specified in
         formats. If formats is None then the default list is used
         """
-        if formats:# clear up existing save formats as one is defined in parameters
+        if formats:
+           # clear up existing save formats as one is defined in parameters
            self.prop_man.save_format = None
-
+        # set up internal format variable from method parameters
         self.prop_man.set_input_parameters_ignore_nan(save_file_name=save_file,save_format=formats)
         formats = self.prop_man.save_format
 
@@ -937,7 +939,6 @@ class DirectEnergyConversion(object):
             pass
 
         prop_man = self.prop_man
-        name_orig = workspace.name()
         for file_format  in formats:
             for case in common.switch(file_format):
                 if case('nxspe'):
@@ -1037,7 +1038,8 @@ class DirectEnergyConversion(object):
             # Store the factor for further usage
             PropertyManager.mono_correction_factor.set_val_to_cash(prop_man,anf_TGP)
             # reset current monovan run to run number (if it makes sense) --
-            ## workspace is not good for further processing any more        #end
+            ## workspace is not good for further processing any more        
+        #end
         prop_man.log('*** Using {0} value : {1} of absolute units correction factor (TGP)'.format(abs_norm_factor_is,absnorm_factor),'notice')
         prop_man.log('*******************************************************************************************','notice')
 

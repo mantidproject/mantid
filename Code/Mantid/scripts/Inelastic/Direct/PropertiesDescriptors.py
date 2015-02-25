@@ -38,8 +38,6 @@ class SumRuns(PropDescriptor):
     """ Boolean property specifies if list of files provided as input for sample_run property
         should be summed.
 
-        It also specifies various auxiliary operations, defined for summing runs, so property
-        is deeply entangled with  the sample_run property
     """
     def __init__(self,sample_run_prop):
         # internal reference to sample run property
@@ -476,8 +474,6 @@ class mon2NormalizationEnergyRange(PropDescriptor):
 #-----------------------------------------------------------------------------------------
 class PropertyFromRange(PropDescriptor):
     """ Descriptor for property, which can have one value from a list of values """
-    _current_value = None
-
     def __init__(self,availible_values,default_value):
         self._availible_values = availible_values
         self.__set__(None,default_value)
@@ -489,7 +485,6 @@ class PropertyFromRange(PropDescriptor):
         return self._current_value
 
     def __set__(self,instance,val):
-       """ set detector calibration file using various formats """
        if val in self._availible_values:
            self._current_value = val
        else:
@@ -850,10 +845,10 @@ class SaveFormat(PropDescriptor):
                     return
         else:
             try:
-                 # set single default save format recursively
-                 for val in value:
-                    self.__set__(instance,val)
-                 return
+               # set single default save format recursively
+               for val in value:
+                   self.__set__(instance,val)
+               return
             except:
                raise KeyError(' Attempting to set unknown saving format {0} of type {1}. Allowed values can be spe, nxspe or nxs'\
                    .format(value,type(value)))
@@ -928,9 +923,9 @@ class BackbgroundTestRange(PropDescriptor):
            return self
 
        if self._background_test_range:
-            return self._background_test_range
+          return self._background_test_range
        else:
-            return instance.bkgd_range
+          return instance.bkgd_range
 
     def __set__(self,instance,value):
         if value is None:

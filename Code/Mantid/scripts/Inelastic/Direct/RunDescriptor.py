@@ -906,7 +906,7 @@ class RunDescriptor(PropDescriptor):
              calibration option (e.g. det_cal_file used a while ago) and try to use it
         """
 
-        if not (calibration) or use_ws_calibration:
+        if not calibration or use_ws_calibration:
             return
         if not isinstance(loaded_ws, api.Workspace):
            raise RuntimeError(' Calibration can be applied to a workspace only and got object of type {0}'.format(type(loaded_ws)))

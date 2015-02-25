@@ -114,9 +114,9 @@ class ReductionWrapper(object):
         # validate properties and report result
         return self.reducer.prop_man.validate_properties(False)
 #
-#
+#   
     def validate_result(self,build_validation=False,Error=1.e-3,ToleranceRelErr=True):
-        """ Overload this using build_or_validate_result to have possibility to run or validate result """
+        """ Overload this using build_or_validate_result to have possibility to run or validate result """ 
         return True
 
     def set_custom_output_filename(self):
