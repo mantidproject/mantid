@@ -522,9 +522,9 @@ class DirectEnergyConversion(object):
                result.append(deltaE_ws_sample)
             else:
               results_name = deltaE_ws_sample.name()
-               if results_name != out_ws_name:
+              if results_name != out_ws_name:
                   RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
-               result = mtd[out_ws_name]
+              result = mtd[out_ws_name]
          else: # delete workspace if no output is requested
             self.sample_run = None
 
@@ -538,9 +538,6 @@ class DirectEnergyConversion(object):
       self.spectra_masks = None
       if 'masking' in mtd:
           DeleteWorkspace(masking)
-
-
-
       return result
 
     def do_white(self, run, spectra_masks=None, map_file=None):
@@ -939,6 +936,7 @@ class DirectEnergyConversion(object):
             pass
 
         prop_man = self.prop_man
+        name_orig = workspace.name()
         for file_format  in formats:
             for case in common.switch(file_format):
                 if case('nxspe'):

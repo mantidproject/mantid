@@ -1,5 +1,5 @@
 import os,sys,inspect
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release"+os.environ["PATH"]
+#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -415,7 +415,6 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertEqual(len(runs),4)
         self.assertEqual(propman.sample_run,11001)
 
-<<<<<<< HEAD
         propman.sample_run = 10111
         runs = PropertyManager.sample_run.get_run_list()
         self.assertEqual(len(runs),1)
@@ -452,7 +451,7 @@ class RunDescriptorTest(unittest.TestCase):
        propman.sample_run = None
        self.assertFalse(ws_name in mtd)
 
-=======
+
     def test_runDescriptorDependant(self):
         propman  = self.prop_man
         self.assertTrue(PropertyManager.wb_run.has_own_value())
@@ -471,7 +470,7 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertTrue(PropertyManager.wb_for_monovan_run.has_own_value())
         self.assertEqual(propman.wb_run,2000)
         self.assertEqual(propman.wb_for_monovan_run,3000)
->>>>>>> master
+
 
 
 if __name__=="__main__":

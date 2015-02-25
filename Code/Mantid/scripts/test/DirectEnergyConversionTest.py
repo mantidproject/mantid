@@ -1,5 +1,5 @@
 import os, sys
-os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#os.environ["PATH"] = r"c:\Mantid\Code\builds\br_master\bin\Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -320,7 +320,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_multirep_mode(self):
         # create test workspace
         run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1,\
-                                           NumEvents=100000, XMin=3, XMax=200, BinWidth=0.1)
+                                           NumEvents=100000,XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
         LoadInstrument(run_monitors,InstrumentName='MARI')
         ConvertUnits(InputWorkspace='run_monitors', OutputWorkspace='run_monitors', Target='TOF')
         run_monitors = mtd['run_monitors']
@@ -439,9 +439,4 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
 
 if __name__=="__main__":
-<<<<<<< HEAD
    unittest.main()
-=======
-        unittest.main()
-
->>>>>>> master

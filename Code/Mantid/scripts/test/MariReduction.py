@@ -14,12 +14,9 @@ except:
 
 class ReduceMARI(ReductionWrapper):
 #-------------------------------------------------------------------------------------------------#
-   @MainProperties
-<<<<<<< HEAD
+    @MainProperties
     def def_main_properties(self):
-=======
-   def def_main_properties(self):
->>>>>>> master
+
        """ Define main properties used in reduction """
        prop = {}
        prop['sample_run'] = 11001
@@ -33,19 +30,11 @@ class ReduceMARI(ReductionWrapper):
        prop['sample_rmm'] = 435.96
        return prop
 #-------------------------------------------------------------------------------------------------#
-<<<<<<< HEAD
     @AdvancedProperties
     def def_advanced_properties(self):
       """  separation between simple and advanced properties depends
            on scientist, experiment and user.
            main properties override advanced properties.
-=======
-   @AdvancedProperties
-   def def_advanced_properties(self):
-      """  separation between simple and advanced properties depends
-           on scientist, experiment and user.
-             main properties override advanced properties.
->>>>>>> master
       """
       prop = {}
       prop['map_file'] = "mari_res.map"
@@ -56,15 +45,9 @@ class ReduceMARI(ReductionWrapper):
       return prop
       #
 #-------------------------------------------------------------------------------------------------#
-<<<<<<< HEAD
     @iliad
     def reduce(self,input_file=None,output_directory=None):
-=======
-   @iliad
-   def reduce(self,input_file=None,output_directory=None):
->>>>>>> master
       """ Method executes reduction over single file
-
           Overload only if custom reduction is needed
       """
       ws = ReductionWrapper.reduce(self,input_file,output_directory)
@@ -86,11 +69,7 @@ class ReduceMARI(ReductionWrapper):
                                                               build_validation,1.e-3)
       return rez,message
 
-<<<<<<< HEAD
     def __init__(self,web_var=None):
-=======
-   def __init__(self,web_var=None):
->>>>>>> master
        """ sets properties defaults for the instrument with Name"""
        ReductionWrapper.__init__(self,'MAR',web_var)
 #-------------------------------------------------------------------------------------------------#
@@ -141,12 +120,7 @@ if __name__ == "__main__":
      #file = os.path.join(run_dir,'reduce_vars.py')
      #rd.save_web_variables(file)
 
-<<<<<<< HEAD
-    # Web-like reduction over sequence of files
-    #rd.reduce()
+     # Web-like reduction over sequence of files
+     #rd.reduce()
 ###### Run reduction on all files provided as parameters ######
-    red_ws = rd.run_reduction()
-=======
-     rd.reduce()
-
->>>>>>> master
+     red_ws = rd.run_reduction()
