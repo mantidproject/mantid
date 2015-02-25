@@ -55,12 +55,12 @@ protected:
    * can be
    * combined by simply multiplying the matrices.
    */
-  Mantid::Kernel::Matrix<coord_t> affineMatrix;
+  Mantid::Kernel::Matrix<coord_t> m_affineMatrix;
 
   /// Raw pointer to the same underlying matrix as affineMatrix.
-  coord_t **rawMatrix;
+  coord_t **m_rawMatrix;
   /// raw pointer to the memory block, referred by the raw Matrix;
-  coord_t *rawMemory;
+  coord_t *m_rawMemory;
 
   void copyRawMatrix();
 };

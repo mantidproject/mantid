@@ -113,7 +113,18 @@
       <layout class="QVBoxLayout" name="properties"/>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="plot"/>
+      <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlot" native="true">
+       <property name="canvasColour" stdset="0">
+        <color>
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </property>
+       <property name="showLegend" stdset="0">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -160,6 +171,12 @@
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/DataSelector.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::PreviewPlot</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/PreviewPlot.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

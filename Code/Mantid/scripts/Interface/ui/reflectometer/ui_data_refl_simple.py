@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'data_refl_simple.ui'
@@ -1579,7 +1580,7 @@ class Ui_Frame(object):
         Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox_3.setTitle(QtGui.QApplication.translate("Frame", "Angle List", None, QtGui.QApplication.UnicodeUTF8))
         self.label_10.setText(QtGui.QApplication.translate("Frame", "List of runs to be stitched together.", None, QtGui.QApplication.UnicodeUTF8))
-        self.waiting_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+        self.waiting_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"\
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
@@ -1685,7 +1686,7 @@ class Ui_Frame(object):
         self.q_bins_label.setText(QtGui.QApplication.translate("Frame", "Number of bins  ", None, QtGui.QApplication.UnicodeUTF8))
         self.q_step_label.setText(QtGui.QApplication.translate("Frame", "Q steps ", None, QtGui.QApplication.UnicodeUTF8))
         self.q_step_edit.setText(QtGui.QApplication.translate("Frame", "0.02", None, QtGui.QApplication.UnicodeUTF8))
-        self.q_step_unit_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+        self.q_step_unit_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"\
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Lucida Grande\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
@@ -1703,7 +1704,7 @@ class Ui_Frame(object):
         self.overlapValueLowestErrorRadioButton.setText(QtGui.QApplication.translate("Frame", "use lowest error value", None, QtGui.QApplication.UnicodeUTF8))
         self.overlapValueMeanRadioButton.setText(QtGui.QApplication.translate("Frame", "use mean value    ", None, QtGui.QApplication.UnicodeUTF8))
         self.fourth_column_switch.setText(QtGui.QApplication.translate("Frame", "4th column (precision)", None, QtGui.QApplication.UnicodeUTF8))
-        self.dq0_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+        self.dq0_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"\
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Lucida Grande\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
@@ -1713,14 +1714,14 @@ class Ui_Frame(object):
         self.dq_over_q_label.setText(QtGui.QApplication.translate("Frame", "dQ/Q", None, QtGui.QApplication.UnicodeUTF8))
         self.dq_over_q.setText(QtGui.QApplication.translate("Frame", "0.02", None, QtGui.QApplication.UnicodeUTF8))
         self.create_ascii_button.setText(QtGui.QApplication.translate("Frame", "Create ASCII...", None, QtGui.QApplication.UnicodeUTF8))
-        self.edited_warning_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+        self.edited_warning_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"\
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;color:rgb(0,153,153);\">Click Save To List to apply your changes  →  </span></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.add_dataset_btn.setToolTip(QtGui.QApplication.translate("Frame", "Click to add the data set above to the reduction list", None, QtGui.QApplication.UnicodeUTF8))
         self.add_dataset_btn.setText(QtGui.QApplication.translate("Frame", "Save to list", None, QtGui.QApplication.UnicodeUTF8))
-        self.auto_reduce_help_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+        self.auto_reduce_help_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"\
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"

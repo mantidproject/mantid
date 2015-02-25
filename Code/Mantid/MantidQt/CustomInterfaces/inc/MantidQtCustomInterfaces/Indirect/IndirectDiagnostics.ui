@@ -107,7 +107,15 @@
        <layout class="QVBoxLayout" name="properties"/>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="plotRaw"/>
+       <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppRawPlot" native="true">
+        <property name="canvasColour" stdset="0">
+         <color>
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
+         </color>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -119,7 +127,15 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_15">
       <item>
-       <layout class="QVBoxLayout" name="plotPreview"/>
+       <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppSlicePreview" native="true">
+        <property name="canvasColour" stdset="0">
+         <color>
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
+         </color>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -172,6 +188,12 @@
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/DataSelector.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::PreviewPlot</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/PreviewPlot.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

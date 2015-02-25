@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -156,7 +157,7 @@ class SANSReduction(PythonAlgorithm):
         if "BackgroundFiles" in property_list:
             background = property_manager.getProperty("BackgroundFiles").value
             background_ws = "__background_%s" % output_ws
-            msg = self._multiple_load(background, background_ws,
+            msg = self._multiple_load(background, background_ws,\
                                 property_manager, property_manager_name)
             bck_msg = "Loaded background %s\n" % background
             bck_msg += msg
@@ -219,8 +220,8 @@ class SANSReduction(PythonAlgorithm):
                                  WorkspaceToMatch=output_ws,
                                  OutputWorkspace=background_ws+'_rebin',
                                  PreserveEvents=True)
-            api.Minus(LHSWorkspace=output_ws,
-                         RHSWorkspace=background_ws+'_rebin',
+            api.Minus(LHSWorkspace=output_ws,\
+                         RHSWorkspace=background_ws+'_rebin',\
                          OutputWorkspace=output_ws)
 
             bck_msg = bck_msg.replace('\n','\n   |')
@@ -402,17 +403,17 @@ class SANSReduction(PythonAlgorithm):
                     elif len(process_file)>0 and process_file.lower().find("none") != 0:
                         Logger("SANSReduction").error("Could not read process info file %s\n" % process_file)
                 if property_manager.existsProperty("SetupAlgorithm"):
-                        if property_manager.existsProperty('InstrumentName'):
-                            instrument_name = property_manager.getProperty('InstrumentName').value
-                        else:
-                            instrument_name = 'EQSANS'
-                        setup_info = property_manager.getProperty("SetupAlgorithm").value
-                        proc_xml += "\n<Reduction>\n"
-                        proc_xml += "  <instrument_name>%s</instrument_name>\n" % instrument_name
-                        proc_xml += "  <SetupInfo>%s</SetupInfo>\n" % setup_info
-                        filename = self.getProperty("Filename").value
-                        proc_xml += "  <Filename>%s</Filename>\n" % filename
-                        proc_xml += "</Reduction>\n"
+                    if property_manager.existsProperty('InstrumentName'):
+                        instrument_name = property_manager.getProperty('InstrumentName').value
+                    else:
+                        instrument_name = 'EQSANS'
+                    setup_info = property_manager.getProperty("SetupAlgorithm").value
+                    proc_xml += "\n<Reduction>\n"
+                    proc_xml += "  <instrument_name>%s</instrument_name>\n" % instrument_name
+                    proc_xml += "  <SetupInfo>%s</SetupInfo>\n" % setup_info
+                    filename = self.getProperty("Filename").value
+                    proc_xml += "  <Filename>%s</Filename>\n" % filename
+                    proc_xml += "</Reduction>\n"
 
                 filename = os.path.join(output_dir, iq_output+'.txt')
 
