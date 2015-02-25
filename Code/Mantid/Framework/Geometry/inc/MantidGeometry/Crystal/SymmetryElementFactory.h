@@ -8,24 +8,95 @@
 #include "MantidKernel/RegistrationHelper.h"
 
 #include <boost/make_shared.hpp>
+#include <set>
 
 namespace Mantid {
 namespace Geometry {
 
-class AbstractSymmetryElementGenerator {
+class MANTID_GEOMETRY_DLL AbstractSymmetryElementGenerator {
 public:
   virtual ~AbstractSymmetryElementGenerator() {}
 
   virtual SymmetryElement_sptr
-  generateElement(const SymmetryOperation &operation) = 0;
+  generateElement(const SymmetryOperation &operation) const = 0;
 
   virtual bool canProcess(const SymmetryOperation &operation) const = 0;
-
-protected:
 };
 
 typedef boost::shared_ptr<AbstractSymmetryElementGenerator>
 AbstractSymmetryElementGenerator_sptr;
+
+class MANTID_GEOMETRY_DLL SymmetryElementIdentityGenerator
+    : public AbstractSymmetryElementGenerator {
+public:
+  SymmetryElementIdentityGenerator() {}
+  ~SymmetryElementIdentityGenerator() {}
+
+  SymmetryElement_sptr
+  generateElement(const SymmetryOperation &operation) const;
+  bool canProcess(const SymmetryOperation &operation) const;
+};
+
+class MANTID_GEOMETRY_DLL SymmetryElementInversionGenerator
+    : public AbstractSymmetryElementGenerator {
+public:
+  SymmetryElementInversionGenerator() {}
+  ~SymmetryElementInversionGenerator() {}
+
+  SymmetryElement_sptr
+  generateElement(const SymmetryOperation &operation) const;
+  bool canProcess(const SymmetryOperation &operation) const;
+};
+
+MANTID_GEOMETRY_DLL gsl_matrix *getGSLMatrix(const Kernel::IntMatrix &matrix);
+MANTID_GEOMETRY_DLL gsl_matrix *getGSLIdentityMatrix(size_t rows, size_t cols);
+
+class MANTID_GEOMETRY_DLL SymmetryElementWithAxisGenerator
+    : public AbstractSymmetryElementGenerator {
+public:
+  ~SymmetryElementWithAxisGenerator() {}
+
+protected:
+  V3R determineTranslation(const SymmetryOperation &operation) const;
+  V3R determineAxis(const Kernel::IntMatrix &matrix) const;
+
+  virtual std::string
+  determineSymbol(const SymmetryOperation &operation) const = 0;
+};
+
+class MANTID_GEOMETRY_DLL SymmetryElementRotationGenerator
+    : public SymmetryElementWithAxisGenerator {
+public:
+  SymmetryElementRotationGenerator() {}
+  ~SymmetryElementRotationGenerator() {}
+
+  SymmetryElement_sptr
+  generateElement(const SymmetryOperation &operation) const;
+  bool canProcess(const SymmetryOperation &operation) const;
+
+protected:
+  SymmetryElementRotation::RotationSense
+  determineRotationSense(const SymmetryOperation &operation,
+                         const V3R &rotationAxis) const;
+
+  std::string determineSymbol(const SymmetryOperation &operation) const;
+};
+
+class MANTID_GEOMETRY_DLL SymmetryElementMirrorGenerator
+    : public SymmetryElementWithAxisGenerator {
+public:
+  SymmetryElementMirrorGenerator() {}
+  ~SymmetryElementMirrorGenerator() {}
+
+  SymmetryElement_sptr
+  generateElement(const SymmetryOperation &operation) const;
+  bool canProcess(const SymmetryOperation &operation) const;
+
+protected:
+  std::string determineSymbol(const SymmetryOperation &operation) const;
+
+  static std::map<V3R, std::string> g_glideSymbolMap;
+};
 
 /**
   @class SymmetryElementFactory
@@ -80,19 +151,36 @@ public:
 
   SymmetryElement_sptr createSymElem(const SymmetryOperation &operation);
 
-  template <typename T> void subscribeSymmetryElementGenerator() {
+  template <typename T>
+  void
+  subscribeSymmetryElementGenerator(const std::string &generatorClassName) {
     AbstractSymmetryElementGenerator_sptr generator = boost::make_shared<T>();
 
-    subscribe(generator);
+    if (isSubscribed(generatorClassName)) {
+      throw std::runtime_error("A generator with name '" + generatorClassName +
+                               "' is already registered.");
+    }
+
+    subscribe(generator, generatorClassName);
   }
 
 protected:
-  SymmetryElementFactoryImpl() : m_generators() {}
+  SymmetryElementFactoryImpl()
+      : m_generators(), m_generatorNames(), m_prototypes() {}
 
-  void subscribe(const AbstractSymmetryElementGenerator_sptr &generator);
+  bool isSubscribed(const std::string &generatorClassName) const;
+  void subscribe(const AbstractSymmetryElementGenerator_sptr &generator,
+                 const std::string &generatorClassName);
+
+  SymmetryElement_sptr createFromPrototype(const std::string &identifier) const;
+  AbstractSymmetryElementGenerator_sptr
+  getGenerator(const SymmetryOperation &operation) const;
+  void insertPrototype(const std::string &identifier,
+                       const SymmetryElement_sptr &prototype);
 
   std::vector<AbstractSymmetryElementGenerator_sptr> m_generators;
-  std::vector<std::string> m_generatorNames;
+  std::set<std::string> m_generatorNames;
+  std::map<std::string, SymmetryElement_sptr> m_prototypes;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<SymmetryElementFactoryImpl>;
@@ -100,7 +188,7 @@ private:
 
 #ifdef _WIN32
 template class MANTID_GEOMETRY_DLL
-    Mantid::Kernel::SingletonHolder<SymmetryElementFactoryImpl>;
+Mantid::Kernel::SingletonHolder<SymmetryElementFactoryImpl>;
 #endif
 
 typedef Mantid::Kernel::SingletonHolder<SymmetryElementFactoryImpl>
@@ -114,7 +202,7 @@ SymmetryElementFactory;
   Mantid::Kernel::RegistrationHelper                                           \
   register_symmetry_element_generator_##classname(                             \
       ((Mantid::Geometry::SymmetryElementFactory::Instance()                   \
-            .subscribeSymmetryElementGenerator<classname>()),                  \
+            .subscribeSymmetryElementGenerator<classname>(#classname)),        \
        0));                                                                    \
   }
 

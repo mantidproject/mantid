@@ -44,7 +44,7 @@ class MANTID_GEOMETRY_DLL SymmetryElement {
 public:
   virtual ~SymmetryElement() {}
 
-  virtual void init(const SymmetryOperation &operation) = 0;
+  virtual boost::shared_ptr<SymmetryElement> clone() const = 0;
 
   std::string hmSymbol() const { return m_hmSymbol; }
 
@@ -63,15 +63,17 @@ public:
   SymmetryElementIdentity();
   ~SymmetryElementIdentity() {}
 
-  void init(const SymmetryOperation &operation);
+  SymmetryElement_sptr clone() const;
 };
+
+typedef boost::shared_ptr<SymmetryElementIdentity> SymmetryElementIdentity_sptr;
 
 class MANTID_GEOMETRY_DLL SymmetryElementInversion : public SymmetryElement {
 public:
   SymmetryElementInversion(const V3R &inversionPoint);
   ~SymmetryElementInversion() {}
 
-  void init(const SymmetryOperation &operation);
+  SymmetryElement_sptr clone() const;
 
   V3R getInversionPoint() const { return m_inversionPoint; }
 
@@ -80,6 +82,9 @@ protected:
 
   V3R m_inversionPoint;
 };
+
+typedef boost::shared_ptr<SymmetryElementInversion>
+SymmetryElementInversion_sptr;
 
 class MANTID_GEOMETRY_DLL SymmetryElementWithAxis : public SymmetryElement {
 public:
@@ -95,15 +100,11 @@ protected:
   void setAxis(const V3R &axis);
   void setTranslation(const V3R &translation) { m_translation = translation; }
 
-  V3R determineTranslation(const SymmetryOperation &operation) const;
-  V3R determineAxis(const Kernel::IntMatrix &matrix) const;
-
-  virtual std::string
-  determineSymbol(const SymmetryOperation &operation) const = 0;
-
   V3R m_axis;
   V3R m_translation;
 };
+
+typedef boost::shared_ptr<SymmetryElementWithAxis> SymmetryElementWithAxis_sptr;
 
 class MANTID_GEOMETRY_DLL SymmetryElementRotation
     : public SymmetryElementWithAxis {
@@ -118,41 +119,31 @@ public:
                           const RotationSense &rotationSense);
   ~SymmetryElementRotation() {}
 
-  RotationSense getRotationSense() const { return m_rotationSense; }
+  SymmetryElement_sptr clone() const;
 
-  void init(const SymmetryOperation &operation);
+  RotationSense getRotationSense() const { return m_rotationSense; }
 
 protected:
   void setRotationSense(const RotationSense &rotationSense) {
     m_rotationSense = rotationSense;
   }
 
-  RotationSense determineRotationSense(const SymmetryOperation &operation,
-                                       const V3R &rotationAxis) const;
-
-  bool isNotRotation(int determinant, int trace) const;
-  std::string determineSymbol(const SymmetryOperation &operation) const;
-
   RotationSense m_rotationSense;
 };
+
+typedef boost::shared_ptr<SymmetryElementRotation> SymmetryElementRotation_sptr;
 
 class MANTID_GEOMETRY_DLL SymmetryElementMirror
     : public SymmetryElementWithAxis {
 public:
-  SymmetryElementMirror(const std::string &symbol, const V3R &axis, const V3R &translation);
+  SymmetryElementMirror(const std::string &symbol, const V3R &axis,
+                        const V3R &translation);
   ~SymmetryElementMirror() {}
 
-  void init(const SymmetryOperation &operation);
-
-protected:
-  bool isNotMirror(int determinant, int trace) const;
-  std::string determineSymbol(const SymmetryOperation &operation) const;
-
-  static std::map<V3R, std::string> g_glideSymbolMap;
+  SymmetryElement_sptr clone() const;
 };
 
-MANTID_GEOMETRY_DLL gsl_matrix *getGSLMatrix(const Kernel::IntMatrix &matrix);
-MANTID_GEOMETRY_DLL gsl_matrix *getGSLIdentityMatrix(size_t rows, size_t cols);
+typedef boost::shared_ptr<SymmetryElementMirror> SymmetryElementMirror_sptr;
 
 } // namespace Geometry
 } // namespace Mantid
