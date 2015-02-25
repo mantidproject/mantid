@@ -194,7 +194,7 @@ QPair<double, double> PreviewPlot::getCurveRange(const Mantid::API::MatrixWorksp
 /**
  * Gets the X range of a curve given its name.
  *
- * @param wsName Name of curve
+ * @param curveName Name of curve
  */
 QPair<double, double> PreviewPlot::getCurveRange(const QString & curveName)
 {
@@ -217,7 +217,7 @@ QPair<double, double> PreviewPlot::getCurveRange(const QString & curveName)
  * Adds a workspace to the preview plot given a pointer to it.
  *
  * @param curveName Name of curve
- * @param wsName Name of workspace in ADS
+ * @param ws Pointer to the workspace
  * @param specIndex Spectrum index to plot
  * @param curveColour Colour of curve to plot
  */
@@ -274,9 +274,9 @@ void PreviewPlot::addSpectrum(const QString & curveName, const QString & wsName,
 
 
 /**
- * Removes spectra from a gievn workspace from the plot given a pointer to it.
+ * Removes spectra from a given workspace from the plot given a pointer to it.
  *
- * If multiple curves are plotted form the smae workspace then all wil lbe removed.
+ * If multiple curves are plotted form the same workspace then all will be removed.
  *
  * @param ws Pointer to workspace
  */
@@ -290,9 +290,9 @@ void PreviewPlot::removeSpectrum(const MatrixWorkspace_sptr ws)
 
 
 /**
- * Removes spectra from a gievn workspace from the plot given its name.
+ * Removes spectra from a given workspace from the plot given its name.
  *
- * @param wsName Name of curve
+ * @param curveName Name of curve
  */
 void PreviewPlot::removeSpectrum(const QString & curveName)
 {
@@ -316,7 +316,7 @@ void PreviewPlot::removeSpectrum(const QString & curveName)
 
 
 /**
- * Checks to see if a given curne name is present on the plot.
+ * Checks to see if a given curve name is present on the plot.
  *
  * @param curveName Curve name
  * @return True if curve is on plot
@@ -460,7 +460,7 @@ void PreviewPlot::hardReplot()
  *
  * Removes it from the plot (via removeSpectrum).
  *
- * @param pNF Poco notification
+ * @param pNf Poco notification
  */
 void PreviewPlot::handleRemoveEvent(WorkspacePreDeleteNotification_ptr pNf)
 {
@@ -564,7 +564,7 @@ void PreviewPlot::removeCurve(QwtPlotCurve * curve)
 
 
 /**
- * Helper function for adding a set of items to an exclusive menu oon the context menu.
+ * Helper function for adding a set of items to an exclusive menu on the context menu.
  *
  * @param menuName Name of sub menu
  * @param group Pointer to ActionGroup
@@ -598,7 +598,7 @@ QList<QAction *> PreviewPlot::addOptionsToMenus(QString menuName, QActionGroup *
 
 
 /**
- * Returns the type of axis scale specified for a giev axis.
+ * Returns the type of axis scale specified for a given axis.
  *
  * @param axisID ID of axis
  * @return Axis type as string
@@ -625,7 +625,7 @@ QString PreviewPlot::getAxisType(int axisID)
 /**
  * Gets a list of curve names that are plotted form the given workspace.
  *
- * @param Pointer to workspace
+ * @param ws Pointer to workspace
  * @return List of curve names
  */
 QStringList PreviewPlot::getCurvesForWorkspace(const MatrixWorkspace_sptr ws)
