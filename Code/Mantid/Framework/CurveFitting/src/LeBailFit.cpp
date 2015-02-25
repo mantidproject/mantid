@@ -2297,7 +2297,7 @@ bool LeBailFit::proposeNewValues(vector<string> mcgroup, Rfactor r,
   *
   * @return :: new value in boundary
   */
-double LeBailFit::limitProposedValueInBound(Parameter param, double newvalue,
+double LeBailFit::limitProposedValueInBound(const Parameter &param, double newvalue,
                                             double direction, int choice) {
   if (choice == 0) {
     // Half distance

@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'C:\Mantid\Code\Mantid\scripts\PyChop\PyChop_LET_UI.ui'

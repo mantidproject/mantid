@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'refl_sf_calculator.ui'
@@ -536,7 +537,7 @@ class Ui_Frame(object):
         Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox_3.setTitle(QtGui.QApplication.translate("Frame", "Angle List", None, QtGui.QApplication.UnicodeUTF8))
         self.label_10.setText(QtGui.QApplication.translate("Frame", "List of direct beam scans for absolute normalization", None, QtGui.QApplication.UnicodeUTF8))
-        self.waiting_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+        self.waiting_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"\
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
@@ -557,7 +558,7 @@ class Ui_Frame(object):
         self.groupBox.setTitle(QtGui.QApplication.translate("Frame", "Direct beam scan", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("Frame", "Run number", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("Frame", "Hit [ENTER] to refresh Metadata", None, QtGui.QApplication.UnicodeUTF8))
-        self.data_run_number_processing.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+        self.data_run_number_processing.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"\
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Lucida Console\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
@@ -589,7 +590,7 @@ class Ui_Frame(object):
         self.det_angle_unit_label_7.setText(QtGui.QApplication.translate("Frame", "mm", None, QtGui.QApplication.UnicodeUTF8))
         self.label_27.setText(QtGui.QApplication.translate("Frame", "S2 width :", None, QtGui.QApplication.UnicodeUTF8))
         self.det_angle_unit_label_3.setText(QtGui.QApplication.translate("Frame", "mm", None, QtGui.QApplication.UnicodeUTF8))
-        self.edited_warning_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+        self.edited_warning_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"\
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"

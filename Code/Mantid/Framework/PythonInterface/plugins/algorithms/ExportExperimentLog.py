@@ -1,15 +1,31 @@
-import mantid.simpleapi as api
+#pylint: disable=no-init,invalid-name
 import mantid
 from mantid.api import *
 from mantid.kernel import *
-
-import os
 import datetime
+import time
+import os
 
 class ExportExperimentLog(PythonAlgorithm):
 
     """ Algorithm to export experiment log
     """
+
+    _wksp = None
+    _sampleLogNames = None
+    _sampleLogOperations = None
+    _fileformat = None
+    _valuesep = None
+    _logfilename = None
+    _reorderOld = None
+    _timezone = None
+    _titleToOrder = None
+    _orderRecord = None
+    titleToOrder = None
+    _removeDupRecord = None
+    _ovrdTitleValueDict = None
+    _headerTitles = None
+    _filemode = None
 
     def summmary(self):
         return "Exports experimental log."
@@ -21,11 +37,11 @@ class ExportExperimentLog(PythonAlgorithm):
         wsprop = MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input)
         self.declareProperty(wsprop, "Input workspace containing the sample log information. ")
 
-        self.declareProperty(FileProperty("OutputFilename","", FileAction.Save, ['.txt, .csv']),
+        self.declareProperty(FileProperty("OutputFilename","", FileAction.Save, ['.txt, .csv']),\
             "Output file of the experiment log.")
 
         filemodes = ["append", "fastappend", "new"]
-        self.declareProperty("FileMode", "append", mantid.kernel.StringListValidator(filemodes),
+        self.declareProperty("FileMode", "append", mantid.kernel.StringListValidator(filemodes),\
             "Optional to create a new file or append to an existing file.")
 
         lognameprop = StringArrayProperty("SampleLogNames", values=[], direction=Direction.Input)
@@ -49,10 +65,9 @@ class ExportExperimentLog(PythonAlgorithm):
         self.declareProperty(overrideprop, "List of paired strings as log title and value to override values from workspace.")
 
         # Time zone
-        timezones = ["UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London", "GMT+0",
+        timezones = ["UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London", "GMT+0",\
             "Europe/Paris", "Europe/Copenhagen"]
         self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones))
-
 
         return
 
@@ -97,8 +112,6 @@ class ExportExperimentLog(PythonAlgorithm):
     def _processInputs(self):
         """ Process input properties
         """
-        import os
-        import os.path
 
         self._wksp = self.getProperty("InputWorkspace").value
 
@@ -254,9 +267,6 @@ class ExportExperimentLog(PythonAlgorithm):
     def _startNewFile(self):
         """ Start a new file is user wants and save the older one to a different name
         """
-        import datetime
-        import time
-        import os
 
         # Rename old file and reset the file mode
 

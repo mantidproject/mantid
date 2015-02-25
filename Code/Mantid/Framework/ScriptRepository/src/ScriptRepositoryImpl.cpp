@@ -1308,7 +1308,7 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file,
     Kernel::InternetHelper inetHelper;
     inetHelper.setTimeout(3); // 3 seconds
     
-    std::stringstream ss;
+    //std::stringstream ss;
     int status = inetHelper.downloadFile(url_file,local_file_path);
 
     g_log.debug() << "Answer from mantid web: " << status << std::endl;

@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -149,14 +150,14 @@ def weightedMean(data_array, error_array):
     # calculate the numerator of mean
     dataNum = 0
     for i in range(sz):
-        if not (data_array[i] == 0):
+        if not data_array[i] == 0:
             tmpFactor = float(data_array[i]) / float((pow(error_array[i],2)))
             dataNum += tmpFactor
 
     # calculate denominator
     dataDen = 0
     for i in range(sz):
-        if not (error_array[i] == 0):
+        if not error_array[i] == 0:
             tmpFactor = 1./float((pow(error_array[i],2)))
             dataDen += tmpFactor
 

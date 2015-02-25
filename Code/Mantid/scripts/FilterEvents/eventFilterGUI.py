@@ -1,16 +1,12 @@
-import math
+#pylint: disable=invalid-name
 import numpy
 
-from Ui_MainWindow import Ui_MainWindow #import line for the UI python class
+from FilterEvents.Ui_MainWindow import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-import matplotlib
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-from matplotlib.figure import Figure
-from matplotlib.pyplot import gcf, setp
+from matplotlib.pyplot import setp
 
 import mantid
 import mantid.simpleapi as api
@@ -37,7 +33,7 @@ class MyPopErrorMsg(QWidget):
     def __init__(self):
         """ Init
         """
-        import Ui_ErrorMessage as errui
+        import FilterEvents.Ui_ErrorMessage as errui
         QWidget.__init__(self)
 
 
@@ -62,10 +58,10 @@ class MyPopErrorMsg(QWidget):
 
         return
 
-    def XpaintEvent(self, e):
+    def XpaintEvent(self, _):
         """ ???
         """
-        import Ui_ErrorMessage as errui
+        import FilterEvents.Ui_ErrorMessage as errui
 
         self.ui = errui.Ui_Dialog()
         self.ui.setupUi(self)
@@ -110,6 +106,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.graphicsView.setObjectName(_fromUtf8("graphicsView"))
 
     """
+
+    _errMsgWindow = None
 
     def __init__(self, parent=None):
         """ Intialization and set up
@@ -195,9 +193,9 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_8.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_8))
         self.ui.lineEdit_9.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_9))
 
-        self.connect(self.ui.lineEdit_5, QtCore.SIGNAL("textChanged(QString)"),
+        self.connect(self.ui.lineEdit_5, QtCore.SIGNAL("textChanged(QString)"),\
                 self.set_minLogValue)
-        self.connect(self.ui.lineEdit_6, QtCore.SIGNAL("textChanged(QString)"),
+        self.connect(self.ui.lineEdit_6, QtCore.SIGNAL("textChanged(QString)"),\
                 self.set_maxLogValue)
 
         dirchangeops = ["Both", "Increase", "Decrease"]
@@ -449,8 +447,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # Correct value
         resetT = True
-        if irightvalue >= 100:
-            irightvalue == 100
+        if irightvalue > 100:
+            irightvalue = 100
         elif irightvalue < self._leftSlideValue:
             irightvalue = self._leftSlideValue
         else:
@@ -658,7 +656,7 @@ class MainWindow(QtGui.QMainWindow):
     def browse_File(self):
         """ Open a file dialog to get file
         """
-        filename = QtGui.QFileDialog.getOpenFileName(self, 'Input File Dialog',
+        filename = QtGui.QFileDialog.getOpenFileName(self, 'Input File Dialog',\
             self._defaultdir, "Data (*.nxs *.dat);;All files (*.*)")
 
         self.ui.lineEdit.setText(str(filename))
@@ -959,7 +957,7 @@ class MainWindow(QtGui.QMainWindow):
 
             sumwsname = "_Summed_%s"%(str(wksp))
             if AnalysisDataService.doesExist(sumwsname) is False:
-                sumws = api.RebinByPulseTimes(InputWorkspace=wksp, OutputWorkspace = sumwsname,
+                sumws = api.RebinByPulseTimes(InputWorkspace=wksp, OutputWorkspace = sumwsname,\
                     Params="0, %f, %d"%(timeres, timeduration))
                 sumws = api.SumSpectra(InputWorkspace=sumws, OutputWorkspace=str(sumws))
                 sumws = api.ConvertToPointData(InputWorkspace=sumws, OutputWorkspace=str(sumws))
@@ -1026,11 +1024,11 @@ class MainWindow(QtGui.QMainWindow):
         print "Input workspace = ", str(self._dataWS)
          END DB """
 
-        splitws, infows = api.GenerateEventsFilter(
-                InputWorkspace      = self._dataWS,
-                UnitOfTime          = "Seconds",
-                TitleOfSplitters    = title,
-                OutputWorkspace     = splitwsname,
+        splitws, infows = api.GenerateEventsFilter(\
+                InputWorkspace      = self._dataWS,\
+                UnitOfTime          = "Seconds",\
+                TitleOfSplitters    = title,\
+                OutputWorkspace     = splitwsname,\
                 InformationWorkspace = splitinfowsname, **kwargs)
 
         self.splitWksp(splitws, infows)
@@ -1080,12 +1078,12 @@ class MainWindow(QtGui.QMainWindow):
 
         title = str(self.ui.lineEdit_title.text())
 
-        splitws, infows = api.GenerateEventsFilter(
-                InputWorkspace      = self._dataWS,
-                UnitOfTime          = "Seconds",
-                TitleOfSplitters    = title,
-                OutputWorkspace     = splitwsname,
-                LogName             = samplelog,
+        splitws, infows = api.GenerateEventsFilter(\
+                InputWorkspace      = self._dataWS,\
+                UnitOfTime          = "Seconds",\
+                TitleOfSplitters    = title,\
+                OutputWorkspace     = splitwsname,\
+                LogName             = samplelog,\
                 InformationWorkspace = splitinfowsname, **kwargs)
 
         try:
@@ -1120,17 +1118,17 @@ class MainWindow(QtGui.QMainWindow):
             outbasewsname = "tempsplitted"
             self.ui.lineEdit_outwsname.setText(outbasewsname)
 
-        api.FilterEvents(
-                InputWorkspace          = self._dataWS,
-                SplitterWorkspace       = splitws,
-                InformationWorkspace    = infows,
-                OutputWorkspaceBaseName = outbasewsname,
-                GroupWorkspaces         = dogroupws,
-                FilterByPulseTime       = filterbypulse,
-                CorrectionToSample      = corr2sample,
-                SpectrumWithoutDetector = how2skip,
-                SplitSampleLogs         = splitsamplelog,
-                OutputWorkspaceIndexedFrom1     = startfrom1,
+        api.FilterEvents(\
+                InputWorkspace          = self._dataWS,\
+                SplitterWorkspace       = splitws,\
+                InformationWorkspace    = infows,\
+                OutputWorkspaceBaseName = outbasewsname,\
+                GroupWorkspaces         = dogroupws,\
+                FilterByPulseTime       = filterbypulse,\
+                CorrectionToSample      = corr2sample,\
+                SpectrumWithoutDetector = how2skip,\
+                SplitSampleLogs         = splitsamplelog,\
+                OutputWorkspaceIndexedFrom1     = startfrom1,\
                 OutputTOFCorrectionWorkspace    = 'TOFCorrTable', **kwargs)
 
         return

@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.kernel import StringArrayProperty, Direction
 from mantid.simpleapi import *
 from mantid.api import *
@@ -102,7 +103,7 @@ class PoldiMerge(PythonAlgorithm):
         return (not self.checkInstruments) or self.instrumentParametersMatch(leftInstrument, rightInstrument)
 
     def instrumentParametersMatch(self, leftInstrument, rightInstrument):
-        if not (leftInstrument.getDetector(0).getPos() == rightInstrument.getDetector(0).getPos()):
+        if not leftInstrument.getDetector(0).getPos() == rightInstrument.getDetector(0).getPos():
             raise RuntimeError("Detector positions are not equal")
 
         for parameterTuple in self.comparedInstrumentParameters:

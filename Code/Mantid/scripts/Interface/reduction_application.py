@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Main window for reduction UIs
 """
@@ -16,7 +17,6 @@ except:
     import sip
     sip.setapi('QString',2)
     sip.setapi('QVariant',2)
-    pass
 
 from PyQt4 import QtGui, QtCore
 
@@ -392,7 +392,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             Executed when the application closes
         """
         if False:
-            reply = QtGui.QMessageBox.question(self, 'Message',
+            reply = QtGui.QMessageBox.question(self, 'Message',\
                 "Are you sure you want to quit this application?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
 
             if reply == QtGui.QMessageBox.Yes:

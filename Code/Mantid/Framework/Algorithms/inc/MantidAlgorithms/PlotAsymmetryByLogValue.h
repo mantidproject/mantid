@@ -116,6 +116,8 @@ private:
   MantidVec m_diffX, m_diffY, m_diffE;
   // LogValue name
   std::string m_logName;
+  // LogValue function
+  std::string m_logFunc;
 };
 
 } // namespace Algorithm

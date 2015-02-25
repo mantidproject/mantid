@@ -197,7 +197,7 @@ Output:
     wsOut = mtd["wsOut"]
     print "The workspace contains %i periods" % wsOut.getNumberOfEntries()
     print "Each period   contains %i spectra" % wsOut.getItem(0).getNumberHistograms()
-
+    time.sleep(1)
 
 Output:
 

@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import os
 from mantid.simpleapi import *
 from mantid.kernel import Logger
@@ -27,12 +28,12 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
 
     userEntry = runs[0]
 
-    while(True):
+    while True:
 
         isFirstDataSetEvent = False
     #we need to catch all exceptions to ensure that a dialog box is raised with the error
         try :
-            lastPath, lastFile, logFile, num_periods, isFirstDataSetEvent = _loadWS(
+            lastPath, lastFile, logFile, num_periods, isFirstDataSetEvent = _loadWS(\
         userEntry, defType, inst, 'AddFilesSumTempory', rawTypes, period)
 
       # if event data prevent loop over periods makes no sense
@@ -50,7 +51,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
 
             for i in range(len(runs)-1):
                 userEntry = runs[i+1]
-                lastPath, lastFile, logFile, dummy, isDataSetEvent = _loadWS(
+                lastPath, lastFile, logFile, dummy, isDataSetEvent = _loadWS(\
           userEntry, defType, inst,'AddFilesNewTempory', rawTypes, period)
 
                 if isDataSetEvent != isFirstDataSetEvent:
@@ -153,7 +154,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
     path,base = os.path.split(outFile)
     if path == '' or base not in os.listdir(path):
         path = config['defaultsave.directory'] + path
-        assert(base in os.listdir(path))
+        assert base in os.listdir(path)
     pathout = path
     if logFile:
         _copyLog(lastPath, logFile, pathout)
@@ -218,7 +219,7 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
       # cal time dif in seconds
             timeDif = (timeArray[i+1].total_nanoseconds()-timeArray[i].total_nanoseconds())*1e-9
             if timeDif > 172800:
-                sanslog.warning('Time increments in the proton charge log of ' + filename + ' are suspicious large.' +
+                sanslog.warning('Time increments in the proton charge log of ' + filename + ' are suspicious large.' +\
                           ' For example a time difference of ' + str(timeDif) + " seconds has been observed.")
                 break
 

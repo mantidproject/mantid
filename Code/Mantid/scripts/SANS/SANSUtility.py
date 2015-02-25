@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 #########################################################
 # This module contains utility functions common to the
 # SANS data reduction scripts
@@ -624,14 +625,14 @@ def StripEndZeroes(workspace, flag_value = 0.0):
         # Find the first non-zero value
     start = 0
     for i in range(0, length):
-        if ( y_vals[i] != flag_value ):
+        if  y_vals[i] != flag_value :
             start = i
             break
         # Now find the last non-zero value
     stop = 0
     length -= 1
     for j in range(length, 0,-1):
-        if ( y_vals[j] != flag_value ):
+        if  y_vals[j] != flag_value :
             stop = j
             break
         # Find the appropriate X values and call CropWorkspace
