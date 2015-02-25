@@ -18,6 +18,25 @@ IFunction_sptr FunctionParameterDecorator::getDecoratedFunction() const {
   return m_wrappedFunction;
 }
 
+IFunction_sptr FunctionParameterDecorator::clone() const {
+  FunctionParameterDecorator_sptr cloned =
+      boost::dynamic_pointer_cast<FunctionParameterDecorator>(
+          FunctionFactory::Instance().createFunction(name()));
+
+  if (!cloned) {
+    throw std::runtime_error(
+        "Cloned function is not of type FunctionParameterDecorator, aborting.");
+  }
+
+  IFunction_sptr decoratedFn = getDecoratedFunction();
+
+  if (decoratedFn) {
+    cloned->setDecoratedFunctionPrivate(decoratedFn->clone());
+  }
+
+  return cloned;
+}
+
 void FunctionParameterDecorator::setParameter(size_t i, const double &value,
                                               bool explicitlySet) {
   throwIfNoFunctionSet();

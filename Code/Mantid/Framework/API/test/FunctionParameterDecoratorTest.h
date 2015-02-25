@@ -17,6 +17,34 @@ using namespace Mantid::Kernel;
 using ::testing::_;
 using ::testing::Mock;
 
+class FunctionParameterDecoratorTest;
+
+class TestableFunctionParameterDecorator : public FunctionParameterDecorator {
+  friend class FunctionParameterDecoratorTest;
+
+public:
+  TestableFunctionParameterDecorator() {}
+  ~TestableFunctionParameterDecorator() {}
+
+  std::string name() const { return "TestableFunctionParameterDecorator"; }
+
+  void function(const FunctionDomain &domain, FunctionValues &values) const {
+    throwIfNoFunctionSet();
+
+    IFunction_sptr fn = getDecoratedFunction();
+    fn->function(domain, values);
+  }
+
+  void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) {
+    throwIfNoFunctionSet();
+
+    IFunction_sptr fn = getDecoratedFunction();
+    fn->functionDeriv(domain, jacobian);
+  }
+};
+
+DECLARE_FUNCTION(TestableFunctionParameterDecorator);
+
 class FunctionParameterDecoratorTest : public CxxTest::TestSuite {
 public:
   FunctionParameterDecoratorTest() { FrameworkManager::Instance(); }
@@ -270,6 +298,28 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&fn));
   }
 
+  void testClone() {
+    FunctionParameterDecorator_sptr fn =
+        getFunctionParameterDecoratorGaussian();
+
+    fn->setParameter("Height", 3.0);
+    fn->setParameter("PeakCentre", 0.5);
+    fn->setParameter("Sigma", 0.3);
+
+    IFunction_sptr cloned = fn->clone();
+
+    TS_ASSERT(cloned);
+
+    FunctionParameterDecorator_sptr castedClone =
+        boost::dynamic_pointer_cast<FunctionParameterDecorator>(cloned);
+    TS_ASSERT(castedClone);
+    TS_ASSERT_EQUALS(cloned->name(), fn->name());
+
+    TS_ASSERT_EQUALS(cloned->getParameter("Height"), 3.0);
+    TS_ASSERT_EQUALS(cloned->getParameter("PeakCentre"), 0.5);
+    TS_ASSERT_EQUALS(cloned->getParameter("Sigma"), 0.3);
+  }
+
 private:
   FunctionParameterDecorator_sptr getFunctionParameterDecoratorGaussian() {
     FunctionParameterDecorator_sptr fn =
@@ -278,30 +328,6 @@ private:
 
     return fn;
   }
-
-  class TestableFunctionParameterDecorator : public FunctionParameterDecorator {
-    friend class FunctionParameterDecoratorTest;
-
-  public:
-    TestableFunctionParameterDecorator() {}
-    ~TestableFunctionParameterDecorator() {}
-
-    std::string name() const { return "TestableFunctionParameterDecorator"; }
-
-    void function(const FunctionDomain &domain, FunctionValues &values) const {
-      throwIfNoFunctionSet();
-
-      IFunction_sptr fn = getDecoratedFunction();
-      fn->function(domain, values);
-    }
-
-    void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) {
-      throwIfNoFunctionSet();
-
-      IFunction_sptr fn = getDecoratedFunction();
-      fn->functionDeriv(domain, jacobian);
-    }
-  };
 
   class MockTestableFunctionParameterDecorator
       : public TestableFunctionParameterDecorator {

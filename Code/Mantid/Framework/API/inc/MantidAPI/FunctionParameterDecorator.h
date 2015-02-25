@@ -48,6 +48,8 @@ public:
   void setDecoratedFunction(const std::string &wrappedFunctionName);
   IFunction_sptr getDecoratedFunction() const;
 
+  IFunction_sptr clone() const;
+
   /// Set i-th parameter of decorated function.
   virtual void setParameter(size_t i, const double &value,
                             bool explicitlySet = true);
