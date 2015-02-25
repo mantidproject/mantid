@@ -97,7 +97,7 @@ namespace MantidQt
 			QString plot = m_uiForm.cbPlot->currentText();
 
 			pyInput += "ResNormRun('"+VanName+"', '"+ResName+"', "+ERange+", "+nBin+","
-										" Save="+save+", Plot='"+plot+"', Verbose=True)\n";
+										" Save="+save+", Plot='"+plot+"')\n";
 
 			runPythonScript(pyInput);
 
