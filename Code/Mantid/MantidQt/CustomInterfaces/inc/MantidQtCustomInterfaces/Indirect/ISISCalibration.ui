@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>423</width>
+    <width>500</width>
     <height>339</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>500</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
@@ -76,7 +82,7 @@
            <double>999.990000000000009</double>
           </property>
           <property name="value">
-           <double>1.0</double>
+           <double>1.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -173,7 +179,7 @@
              <double>999.990000000000009</double>
             </property>
             <property name="value">
-             <double>1.0</double>
+             <double>1.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -238,15 +244,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
-   <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
-  </customwidget>
-  <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/PreviewPlot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
