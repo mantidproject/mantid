@@ -8,9 +8,16 @@ set ( SRC_FILES
 	src/Histogram1D.cpp
 	src/MaskWorkspace.cpp
 	src/MementoTableWorkspace.cpp
+	src/NoShape.cpp
 	src/OffsetsWorkspace.cpp
 	src/Peak.cpp
 	src/PeakColumn.cpp
+	src/PeakNoShapeFactory.cpp
+	src/PeakShapeBase.cpp
+	src/PeakShapeEllipsoid.cpp
+	src/PeakShapeEllipsoidFactory.cpp
+	src/PeakShapeSpherical.cpp
+	src/PeakShapeSphericalFactory.cpp
 	src/PeaksWorkspace.cpp
 	src/RebinnedOutput.cpp
 	src/SpecialWorkspace2D.cpp
@@ -39,9 +46,17 @@ set ( INC_FILES
 	inc/MantidDataObjects/Histogram1D.h
 	inc/MantidDataObjects/MaskWorkspace.h
 	inc/MantidDataObjects/MementoTableWorkspace.h
+	inc/MantidDataObjects/NoShape.h
 	inc/MantidDataObjects/OffsetsWorkspace.h
 	inc/MantidDataObjects/Peak.h
 	inc/MantidDataObjects/PeakColumn.h
+	inc/MantidDataObjects/PeakNoShapeFactory.h
+	inc/MantidDataObjects/PeakShapeBase.h
+	inc/MantidDataObjects/PeakShapeEllipsoid.h
+	inc/MantidDataObjects/PeakShapeEllipsoidFactory.h
+	inc/MantidDataObjects/PeakShapeFactory.h
+	inc/MantidDataObjects/PeakShapeSpherical.h
+	inc/MantidDataObjects/PeakShapeSphericalFactory.h
 	inc/MantidDataObjects/PeaksWorkspace.h
 	inc/MantidDataObjects/RebinnedOutput.h
 	inc/MantidDataObjects/SpecialWorkspace2D.h
@@ -63,8 +78,14 @@ set ( TEST_FILES
 	LibraryManagerTest.h
 	MaskWorkspaceTest.h
 	MementoTableWorkspaceTest.h
+	NoShapeTest.h
 	OffsetsWorkspaceTest.h
 	PeakColumnTest.h
+	PeakNoShapeFactoryTest.h
+	PeakShapeEllipsoidFactoryTest.h
+	PeakShapeEllipsoidTest.h
+	PeakShapeSphericalFactoryTest.h
+	PeakShapeSphericalTest.h
 	PeakTest.h
 	PeaksWorkspaceTest.h
 	RebinnedOutputTest.h
@@ -95,6 +116,10 @@ add_library ( DataObjects ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( DataObjects PROPERTIES OUTPUT_NAME MantidDataObjects 
                                                COMPILE_DEFINITIONS IN_MANTID_DATAOBJECTS )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( DataObjects PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif ()
                                                
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataObjects PROPERTY FOLDER "MantidFramework" )

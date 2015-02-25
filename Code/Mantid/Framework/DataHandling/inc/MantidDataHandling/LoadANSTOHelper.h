@@ -52,19 +52,22 @@ private:
   // fields
   std::vector<size_t> &m_eventCounts;
   const std::vector<bool> &m_mask;
+  const std::vector<int> &m_offsets;
+  const size_t m_stride;
   double m_tofMin;
   double m_tofMax;
 
 public:
   // construction
-  EventCounter(std::vector<size_t> &eventCounts, const std::vector<bool> &mask);
+  EventCounter(std::vector<size_t> &eventCounts, const std::vector<bool> &mask,
+               const std::vector<int> &offsets, size_t stride);
 
   // properties
   double tofMin() const;
   double tofMax() const;
 
   // methods
-  void addEvent(size_t s, double tof);
+  void addEvent(size_t x, size_t y, double tof);
 };
 
 class EventAssigner {
@@ -72,14 +75,17 @@ private:
   // fields
   std::vector<EventVector_pt> &m_eventVectors;
   const std::vector<bool> &m_mask;
+  const std::vector<int> &m_offsets;
+  const size_t m_stride;
 
 public:
   // construction
   EventAssigner(std::vector<EventVector_pt> &eventVectors,
-                const std::vector<bool> &mask);
+                const std::vector<bool> &mask, const std::vector<int> &offsets,
+                size_t stride);
 
   // methods
-  void addEvent(size_t s, double tof);
+  void addEvent(size_t x, size_t y, double tof);
 };
 
 class FastReadOnlyFile {
@@ -184,6 +190,7 @@ public:
   size_t read(void *dst, size_t size);
   int read_byte();
 };
+
 }
 }
 }

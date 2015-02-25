@@ -349,7 +349,8 @@ int DownloadInstrument::doDownloadFile(const std::string &urlFile,
                                        const StringToStringMap &headers) {
   int retStatus = 0;
   InternetHelper inetHelper;
-  retStatus = inetHelper.downloadFile(urlFile, localFilePath, headers);
+  inetHelper.headers() = headers;
+  retStatus = inetHelper.downloadFile(urlFile, localFilePath);
   return retStatus;
 }
 

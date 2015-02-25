@@ -12,7 +12,7 @@
 #include "MantidAPI/MDGeometry.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidAPI/ITableWorkspace.h"
 
 namespace Mantid {
@@ -119,7 +119,7 @@ public:
   /// Clear existing masks
   virtual void clearMDMasking() = 0;
   ///
-  virtual Mantid::API::SpecialCoordinateSystem
+  virtual Mantid::Kernel::SpecialCoordinateSystem
   getSpecialCoordinateSystem() const = 0;
   /// if a workspace was filebacked, this should clear file-based status, delete
   /// file-based information and close related files.

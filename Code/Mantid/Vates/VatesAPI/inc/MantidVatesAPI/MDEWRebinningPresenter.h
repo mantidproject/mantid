@@ -3,7 +3,9 @@
 
 #include "MantidVatesAPI/MDRebinningPresenter.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
+#include "MantidVatesAPI/VatesConfigurations.h"
 #include "MantidVatesAPI/vtkDataSetToGeometry.h"
 #include <boost/scoped_ptr.hpp>
 #include "MantidKernel/VMD.h"
@@ -68,6 +70,12 @@ namespace Mantid
 
       virtual void setAxisLabels(vtkDataSet* visualDataSet);
 
+      virtual const std::string& getInstrument() const;
+
+      virtual double getMaxValue() const;
+
+      virtual double getMinValue() const;
+
       /*-----------------------------------End MDRebinningPresenter methods -------------------------------------*/
 
       MDEWRebinningPresenter(vtkDataSet* input, RebinningActionManager* request, MDRebinningView* view, const WorkspaceProvider& wsProvider);
@@ -121,6 +129,12 @@ namespace Mantid
       bool m_bOutputHistogramWS;
       /// Tag for the rebinned workspace
       static const std::string rb_tag;
+      /// Store for the instrument
+      mutable std::string m_instrument;
+      /// Pointer to the manager for json metadata
+      boost::scoped_ptr<MetadataJsonManager> m_metadataJsonManager;
+      /// Pointer to the vates configuration object
+      boost::scoped_ptr<VatesConfigurations> m_vatesConfigurations;
     };
   }
 }

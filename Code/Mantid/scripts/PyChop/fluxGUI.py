@@ -1,7 +1,6 @@
-import sys
+#pylint: disable=invalid-name
 from PyChop_LET_UI import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui #import others if needed
-import math
 
 from mantidplot import *
 from mantid import *
@@ -13,6 +12,16 @@ import array as  array
 
 
 class MainWindow(QtGui.QMainWindow):
+
+    flux_matrix = None
+    flux_energies = None
+    res_matrix = None
+    res_energies = None
+    frequencies = None
+    ei = None
+    ei_min = None
+    ei_max = None
+    interpolation = None
 
     def __init__(self, parent=None):
         QtGui.QMainWindow.__init__(self,parent)
@@ -29,7 +38,7 @@ class MainWindow(QtGui.QMainWindow):
         QtCore.QObject.connect(self.ui.actionMAPS,QtCore.SIGNAL("triggered()"), lambda :  self.otherInstrumentSelected('MAP'))
 
 
-        self.graph=None;
+        self.graph=None
 
         self.loadData()
 
@@ -56,7 +65,7 @@ class MainWindow(QtGui.QMainWindow):
         self.res_energies = array.array( 'f', [0.2, 0.4, 0.6, 0.8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40] )
         self.frequencies = np.arange(30,310,10)
 
-        self.ei="";
+        self.ei=""
         self.ei_min = 0.2 # max(min(self.flux_energies),min(self.res_energies))
         self.ei_max = 40. #min(max(self.flux_energies),max(self.res_energies))
 
@@ -108,10 +117,10 @@ class MainWindow(QtGui.QMainWindow):
         return result
 
     def letSelected(self):
-         QtGui.QMessageBox.warning(self, "Currently You have to switch gui to select another instrument")
-         self.ui.actionLET.setChecked(True)
+        QtGui.QMessageBox.warning(self, "Currently You have to switch gui to select another instrument")
+        self.ui.actionLET.setChecked(True)
     def otherInstrumentSelected(self,INAME):
-        reply = QtGui.QMessageBox.question(self, 'Selecting : '+INAME,
+        reply = QtGui.QMessageBox.question(self, 'Selecting : '+INAME,\
         "Do you want to switch GUI?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
         if reply == QtGui.QMessageBox.Yes:
             config['default.instrument'] = INAME
@@ -133,7 +142,7 @@ class MainWindow(QtGui.QMainWindow):
             self.ei = float (self.ei)
 
         if self.ei< self.ei_min or self.ei > self.ei_max:
-            self.ei="";
+            self.ei=""
             QtGui.QMessageBox.warning(self, "LETFlux", "Energy out of range.\n Please, Provide value between "+str(self.ei_min)+" and "+str(self.ei_max)+" meV \n")
         else:
             self.setUpTable()
@@ -142,7 +151,7 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.list.insertItem(0,string)
             string_title = 'Frequency(Hz)    Flux(n/s/cm^2)           Resolution[ueV]'
             self.ui.list.insertItem(1,string_title)
-            t=self.t;
+            t=self.t
             for i in xrange(0, len(self.frequencies)):
                 string1 = str(self.frequencies[i])+'                    '+ "%e" % t.cell(2,i+1)+'              '+ "%e"% t.cell(3,i+1)
                 self.ui.list.insertItem(2+i,string1)
@@ -171,7 +180,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.graph = newGraph("Flux and Resolution",2,1,2)
 
-        l1 = self.graph.layer(1);
+        l1 = self.graph.layer(1)
         l1.setAntialiasing()
         l1.setTitle("Flux")
         l1.setAxisTitle(Layer.Bottom, "Frequency [Hz]")
@@ -179,7 +188,7 @@ class MainWindow(QtGui.QMainWindow):
         l1.showGrid()
 #       self.graphFlux.insertCurve(self.t, "Flux/Frequency_2", Layer.Scatter)
 #       legend = self.graphFlux.newLegend(str(self.ei))
-        l2 = self.graph.layer(2);
+        l2 = self.graph.layer(2)
         l2.setAntialiasing()
         l2.setTitle("Resolution")
         l2.setAxisTitle(Layer.Bottom, "Frequency [Hz]")
@@ -188,9 +197,9 @@ class MainWindow(QtGui.QMainWindow):
 #       self.graphRes.insertCurve(self.t, "Resolution/Frequency_2", Layer.Scatter)
         l2.showGrid()
 
-        self.addPlot();
+        self.addPlot()
 
-        self.raise_();
+        self.raise_()
         self.show()
 
         return self
@@ -199,7 +208,7 @@ class MainWindow(QtGui.QMainWindow):
         """ Adds plot to an existing graph
         """
         if self.graph==None:
-            self.plotData();
+            self.plotData()
         else:
             self.calculate()
             if self.ei == "":

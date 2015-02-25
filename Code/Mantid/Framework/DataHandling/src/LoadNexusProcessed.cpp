@@ -12,24 +12,30 @@
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/PeakNoShapeFactory.h"
+#include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
-#include <nexus/NeXusFile.hpp>
+
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
 #include <cmath>
-#include <Poco/DateTimeParser.h>
 #include <Poco/Path.h>
 #include <Poco/StringTokenizer.h>
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidDataObjects/PeakNoShapeFactory.h"
+#include "MantidDataObjects/PeakShapeSphericalFactory.h"
+#include "MantidDataObjects/PeakShapeEllipsoidFactory.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -190,8 +196,8 @@ bool isMultiPeriodFile(int nWorkspaceEntries, Workspace_sptr sampleWS,
 /// Default constructor
 LoadNexusProcessed::LoadNexusProcessed()
     : m_shared_bins(false), m_xbins(), m_axis1vals(), m_list(false),
-      m_interval(false), m_spec_list(), m_spec_min(0),
-      m_spec_max(Mantid::EMPTY_INT()), m_cppFile(NULL) {}
+      m_interval(false), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT()),
+      m_spec_list(), m_filtered_spec_idxs(), m_cppFile(NULL) {}
 
 /// Delete NexusFileIO in destructor
 LoadNexusProcessed::~LoadNexusProcessed() { delete m_cppFile; }
@@ -435,7 +441,6 @@ void LoadNexusProcessed::exec() {
 
     base_name += "_";
     const std::string prop_name = "OutputWorkspace_";
-    double nWorkspaceEntries_d = static_cast<double>(nWorkspaceEntries);
 
     MatrixWorkspace_sptr tempMatrixWorkspace =
         boost::dynamic_pointer_cast<Workspace2D>(tempWS);
@@ -479,6 +484,8 @@ void LoadNexusProcessed::exec() {
             p);
       } else // Fall-back for generic loading
       {
+        const double nWorkspaceEntries_d =
+            static_cast<double>(nWorkspaceEntries);
         local_workspace =
             loadEntry(root, basename + os.str(),
                       static_cast<double>(p - 1) / nWorkspaceEntries_d,
@@ -622,13 +629,15 @@ LoadNexusProcessed::loadWorkspaceName(NXRoot &root,
 }
 
 //-------------------------------------------------------------------------------------------------
-/** Load the event_workspace field
+/**
+ * Load an event_workspace field
  *
- * @param wksp_cls
- * @param xbins
- * @param progressStart
- * @param progressRange
- * @return
+ * @param wksp_cls  Nexus data for "event_workspace"
+ * @param xbins bins on the "X" axis
+ * @param progressStart algorithm progress (from 0)
+ * @param progressRange  progress made after loading an entry
+ *
+ * @return event_workspace object with data
  */
 API::MatrixWorkspace_sptr
 LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
@@ -637,8 +646,13 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
   NXDataSetTyped<int64_t> indices_data =
       wksp_cls.openNXDataSet<int64_t>("indices");
   indices_data.load();
-  boost::shared_array<int64_t> indices = indices_data.sharedBuffer();
-  int numspec = indices_data.dim0() - 1;
+  size_t numspec = indices_data.dim0() - 1;
+
+  // process optional spectrum parameters, if set
+  checkOptionalProperties(numspec);
+  // Actual number of spectra in output workspace (if only a user-specified
+  // range and/or list was going to be loaded)
+  numspec = calculateWorkspaceSize(numspec, true);
 
   int num_xbins = xbins.dim0();
   if (num_xbins < 2)
@@ -696,14 +710,17 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
   else
     throw std::runtime_error("Could not figure out the type of event list!");
 
+  // indices of events
+  boost::shared_array<int64_t> indices = indices_data.sharedBuffer();
   // Create all the event lists
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int wi = 0; wi < numspec; wi++) {
+  for (int64_t j = 0; j < static_cast<int64_t>(m_filtered_spec_idxs.size()); j++) {
     PARALLEL_START_INTERUPT_REGION
+    size_t wi = m_filtered_spec_idxs[j] - 1;
     int64_t index_start = indices[wi];
     int64_t index_end = indices[wi + 1];
     if (index_end >= index_start) {
-      EventList &el = ws->getEventList(wi);
+      EventList &el = ws->getEventList(j);
       el.switchTo(type);
 
       // Allocate all the required memory
@@ -732,12 +749,13 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
         MantidVec x;
         x.resize(xbins.dim0());
         for (int i = 0; i < xbins.dim0(); i++)
-          x[i] = xbins(wi, i);
+          x[i] = xbins(static_cast<int>(wi), i);
         el.setX(x);
       }
     }
 
-    progress(progressStart + progressRange * (1.0 / numspec));
+    progress(progressStart + progressRange *
+             (1.0 / static_cast<double>(numspec)));
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -1114,14 +1132,244 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         peakWS->getPeak(r).setGoniometerMatrix(gm);
       }
     }
+
+    if (!str.compare("column_16")) {
+      // Read shape information
+      using namespace Mantid::DataObjects;
+
+      PeakShapeFactory_sptr peakFactoryEllipsoid = boost::make_shared<PeakShapeEllipsoidFactory>();
+      PeakShapeFactory_sptr peakFactorySphere = boost::make_shared<PeakShapeSphericalFactory>();
+      PeakShapeFactory_sptr peakFactoryNone = boost::make_shared<PeakNoShapeFactory>();
+
+      peakFactoryEllipsoid->setSuccessor(peakFactorySphere);
+      peakFactorySphere->setSuccessor(peakFactoryNone);
+
+      NXInfo info = nx_tw.getDataSetInfo(str.c_str());
+      NXChar data = nx_tw.openNXChar(str.c_str());
+
+      const int maxShapeJSONLength = info.dims[1];
+      data.load();
+      for (int i = 0; i < numberPeaks; ++i) {
+
+        // iR = peak row number
+        auto startPoint = data() + (maxShapeJSONLength * i);
+        std::string shapeJSON(startPoint, startPoint + maxShapeJSONLength);
+        boost::trim_right(shapeJSON);
+
+        // Make the shape
+        Mantid::Geometry::PeakShape* peakShape = peakFactoryEllipsoid->create(shapeJSON);
+
+        // Set the shape
+        peakWS->getPeak(i).setPeakShape(peakShape);
+
+      }
+    }
   }
 
-  return boost::static_pointer_cast<API::Workspace>(peakWS);
+return boost::static_pointer_cast<API::Workspace>(peakWS);
 }
 
 //-------------------------------------------------------------------------------------------------
 /**
- * Load a single entry into a workspace
+ * Load a Workspace2D
+ *
+ * @param wksp_cls Nexus data for "Workspace2D" (or "offsets_workspace")
+ * @param xbins bins on the "X" axis
+ * @param progressStart algorithm progress (from 0)
+ * @param progressRange progress made after loading an entry
+ * @param mtd_entry Nexus entry for "mantid_workspace_..."
+ * @param xlength bins in the "X" axis (xbins)
+ * @param workspaceType Takes values like "Workspace2D", "RebinnedOutput", etc.
+ *
+ * @return workspace object containing loaded data
+ */
+API::MatrixWorkspace_sptr
+LoadNexusProcessed::loadNonEventEntry(NXData &wksp_cls,
+                                      NXDouble &xbins,
+                                      const double &progressStart,
+                                      const double &progressRange,
+                                      const NXEntry &mtd_entry,
+                                      const int xlength,
+                                      std::string &workspaceType) {
+  // Filter the list of spectra to process, applying min/max/list options
+  NXDataSetTyped<double> data = wksp_cls.openDoubleData();
+  int64_t nchannels = data.dim1();
+  size_t nspectra = data.dim0();
+  // process optional spectrum parameters, if set
+  checkOptionalProperties(nspectra);
+  // Actual number of spectra in output workspace (if only a range was going
+  // to be loaded)
+  size_t total_specs = calculateWorkspaceSize(nspectra);
+
+  //// Create the 2D workspace for the output
+  bool hasFracArea = false;
+  if (wksp_cls.isValid("frac_area")) {
+    // frac_area entry is the signal for a RebinnedOutput workspace
+    hasFracArea = true;
+    workspaceType.clear();
+    workspaceType = "RebinnedOutput";
+  }
+
+  API::MatrixWorkspace_sptr local_workspace =
+      boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+         WorkspaceFactory::Instance().create(workspaceType, total_specs, xlength,
+                                             nchannels));
+  try {
+    local_workspace->setTitle(mtd_entry.getString("title"));
+  } catch (std::runtime_error &) {
+    g_log.debug() << "No title was found in the input file, "
+                  << getPropertyValue("Filename") << std::endl;
+  }
+
+  // Set the YUnit label
+  local_workspace->setYUnit(data.attributes("units"));
+  std::string unitLabel = data.attributes("unit_label");
+  if (unitLabel.empty())
+    unitLabel = data.attributes("units");
+  local_workspace->setYUnitLabel(unitLabel);
+
+  readBinMasking(wksp_cls, local_workspace);
+  NXDataSetTyped<double> errors = wksp_cls.openNXDouble("errors");
+  NXDataSetTyped<double> fracarea = errors;
+  if (hasFracArea) {
+    fracarea = wksp_cls.openNXDouble("frac_area");
+  }
+
+  int64_t blocksize(8);
+  // const int fullblocks = nspectra / blocksize;
+  // size of the workspace
+  int64_t fullblocks = total_specs / blocksize;
+  int64_t read_stop = (fullblocks * blocksize);
+  const double progressBegin = progressStart + 0.25 * progressRange;
+  const double progressScaler = 0.75 * progressRange;
+  int64_t hist_index = 0;
+  int64_t wsIndex = 0;
+  if (m_shared_bins) {
+    // if spectrum min,max,list properties are set
+    if (m_interval || m_list) {
+      // if spectrum max,min properties are set read the data as a
+      // block(multiple of 8) and
+      // then read the remaining data as finalblock
+      if (m_interval) {
+        // specs at the min-max interval
+        int interval_specs = static_cast<int>(m_spec_max - m_spec_min);
+        fullblocks = (interval_specs) / blocksize;
+        read_stop = (fullblocks * blocksize) + m_spec_min - 1;
+
+        if (interval_specs < blocksize) {
+          blocksize = total_specs;
+          read_stop = m_spec_max - 1;
+        }
+        hist_index = m_spec_min - 1;
+
+        for (; hist_index < read_stop;) {
+          progress(progressBegin +
+                   progressScaler * static_cast<double>(hist_index) /
+                   static_cast<double>(read_stop),
+                   "Reading workspace data...");
+          loadBlock(data, errors, fracarea, hasFracArea, blocksize, nchannels,
+                    hist_index, wsIndex, local_workspace);
+        }
+        int64_t finalblock = m_spec_max - 1 - read_stop;
+        if (finalblock > 0) {
+          loadBlock(data, errors, fracarea, hasFracArea, finalblock,
+                    nchannels, hist_index, wsIndex, local_workspace);
+        }
+      }
+      // if spectrum list property is set read each spectrum separately by
+      // setting blocksize=1
+      if (m_list) {
+        std::vector<int64_t>::iterator itr = m_spec_list.begin();
+        for (; itr != m_spec_list.end(); ++itr) {
+          int64_t specIndex = (*itr) - 1;
+          progress(progressBegin +
+                   progressScaler * static_cast<double>(specIndex) /
+                   static_cast<double>(m_spec_list.size()),
+                   "Reading workspace data...");
+          loadBlock(data, errors, fracarea, hasFracArea,
+                    static_cast<int64_t>(1), nchannels, specIndex, wsIndex,
+                    local_workspace);
+        }
+      }
+    } else {
+      for (; hist_index < read_stop;) {
+        progress(progressBegin +
+                 progressScaler * static_cast<double>(hist_index) /
+                 static_cast<double>(read_stop),
+                 "Reading workspace data...");
+        loadBlock(data, errors, fracarea, hasFracArea, blocksize, nchannels,
+                  hist_index, wsIndex, local_workspace);
+      }
+      int64_t finalblock = total_specs - read_stop;
+      if (finalblock > 0) {
+        loadBlock(data, errors, fracarea, hasFracArea, finalblock, nchannels,
+                  hist_index, wsIndex, local_workspace);
+      }
+    }
+
+  } else {
+    if (m_interval || m_list) {
+      if (m_interval) {
+        int64_t interval_specs = m_spec_max - m_spec_min;
+        fullblocks = (interval_specs) / blocksize;
+        read_stop = (fullblocks * blocksize) + m_spec_min - 1;
+
+        if (interval_specs < blocksize) {
+          blocksize = interval_specs;
+          read_stop = m_spec_max - 1;
+        }
+        hist_index = m_spec_min - 1;
+
+        for (; hist_index < read_stop;) {
+          progress(progressBegin +
+                   progressScaler * static_cast<double>(hist_index) /
+                   static_cast<double>(read_stop),
+                   "Reading workspace data...");
+          loadBlock(data, errors, fracarea, hasFracArea, xbins, blocksize,
+                    nchannels, hist_index, wsIndex, local_workspace);
+        }
+        int64_t finalblock = m_spec_max - 1 - read_stop;
+        if (finalblock > 0) {
+          loadBlock(data, errors, fracarea, hasFracArea, xbins, finalblock,
+                    nchannels, hist_index, wsIndex, local_workspace);
+        }
+      }
+      //
+      if (m_list) {
+        std::vector<int64_t>::iterator itr = m_spec_list.begin();
+        for (; itr != m_spec_list.end(); ++itr) {
+          int64_t specIndex = (*itr) - 1;
+          progress(progressBegin +
+                   progressScaler * static_cast<double>(specIndex) /
+                   static_cast<double>(read_stop),
+                   "Reading workspace data...");
+          loadBlock(data, errors, fracarea, hasFracArea, xbins, 1, nchannels,
+                    specIndex, wsIndex, local_workspace);
+        }
+      }
+    } else {
+      for (; hist_index < read_stop;) {
+        progress(progressBegin +
+                 progressScaler * static_cast<double>(hist_index) /
+                 static_cast<double>(read_stop),
+                 "Reading workspace data...");
+        loadBlock(data, errors, fracarea, hasFracArea, xbins, blocksize,
+                  nchannels, hist_index, wsIndex, local_workspace);
+      }
+      int64_t finalblock = total_specs - read_stop;
+      if (finalblock > 0) {
+        loadBlock(data, errors, fracarea, hasFracArea, xbins, finalblock,
+                  nchannels, hist_index, wsIndex, local_workspace);
+      }
+    }
+  }
+  return local_workspace;
+}
+
+//-------------------------------------------------------------------------------------------------
+/**
+ * Load a single entry into a workspace (event_workspace or workspace2d)
+ *
  * @param root :: The opened root node
  * @param entry_name :: The entry name
  * @param progressStart :: The percentage value to start the progress reporting
@@ -1186,188 +1434,17 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
   NXDouble axis2 = wksp_cls.openNXDouble("axis2");
   std::string unit2 = axis2.attributes("units");
 
-  // The workspace being worked on
+  // --- Load workspace (as event_workspace or workspace2d) ---
   API::MatrixWorkspace_sptr local_workspace;
-  size_t nspectra;
-  int64_t nchannels;
-
-  // -------- Process as event ? --------------------
   if (isEvent) {
     local_workspace =
         loadEventEntry(wksp_cls, xbins, progressStart, progressRange);
-    nspectra = local_workspace->getNumberHistograms();
-    nchannels = local_workspace->blocksize();
   } else {
-    NXDataSetTyped<double> data = wksp_cls.openDoubleData();
-    nspectra = data.dim0();
-    nchannels = data.dim1();
-    //// validate the optional spectrum parameters, if set
-    checkOptionalProperties(nspectra);
-    // Actual number of spectra in output workspace (if only a range was going
-    // to be loaded)
-    size_t total_specs = calculateWorkspacesize(nspectra);
-
-    //// Create the 2D workspace for the output
-    bool hasFracArea = false;
-    if (wksp_cls.isValid("frac_area")) {
-      // frac_area entry is the signal for a RebinnedOutput workspace
-      hasFracArea = true;
-      workspaceType.clear();
-      workspaceType = "RebinnedOutput";
-    }
-    local_workspace = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-        WorkspaceFactory::Instance().create(workspaceType, total_specs, xlength,
-                                            nchannels));
-    try {
-      local_workspace->setTitle(mtd_entry.getString("title"));
-    } catch (std::runtime_error &) {
-      g_log.debug() << "No title was found in the input file, "
-                    << getPropertyValue("Filename") << std::endl;
-    }
-
-    // Set the YUnit label
-    local_workspace->setYUnit(data.attributes("units"));
-    std::string unitLabel = data.attributes("unit_label");
-    if (unitLabel.empty())
-      unitLabel = data.attributes("units");
-    local_workspace->setYUnitLabel(unitLabel);
-
-    readBinMasking(wksp_cls, local_workspace);
-    NXDataSetTyped<double> errors = wksp_cls.openNXDouble("errors");
-    NXDataSetTyped<double> fracarea = errors;
-    if (hasFracArea) {
-      fracarea = wksp_cls.openNXDouble("frac_area");
-    }
-
-    int64_t blocksize(8);
-    // const int fullblocks = nspectra / blocksize;
-    // size of the workspace
-    int64_t fullblocks = total_specs / blocksize;
-    int64_t read_stop = (fullblocks * blocksize);
-    const double progressBegin = progressStart + 0.25 * progressRange;
-    const double progressScaler = 0.75 * progressRange;
-    int64_t hist_index = 0;
-    int64_t wsIndex = 0;
-    if (m_shared_bins) {
-      // if spectrum min,max,list properties are set
-      if (m_interval || m_list) {
-        // if spectrum max,min properties are set read the data as a
-        // block(multiple of 8) and
-        // then read the remaining data as finalblock
-        if (m_interval) {
-          // specs at the min-max interval
-          int interval_specs = static_cast<int>(m_spec_max - m_spec_min);
-          fullblocks = (interval_specs) / blocksize;
-          read_stop = (fullblocks * blocksize) + m_spec_min - 1;
-
-          if (interval_specs < blocksize) {
-            blocksize = total_specs;
-            read_stop = m_spec_max - 1;
-          }
-          hist_index = m_spec_min - 1;
-
-          for (; hist_index < read_stop;) {
-            progress(progressBegin +
-                         progressScaler * static_cast<double>(hist_index) /
-                             static_cast<double>(read_stop),
-                     "Reading workspace data...");
-            loadBlock(data, errors, fracarea, hasFracArea, blocksize, nchannels,
-                      hist_index, wsIndex, local_workspace);
-          }
-          int64_t finalblock = m_spec_max - 1 - read_stop;
-          if (finalblock > 0) {
-            loadBlock(data, errors, fracarea, hasFracArea, finalblock,
-                      nchannels, hist_index, wsIndex, local_workspace);
-          }
-        }
-        // if spectrum list property is set read each spectrum separately by
-        // setting blocksize=1
-        if (m_list) {
-          std::vector<int64_t>::iterator itr = m_spec_list.begin();
-          for (; itr != m_spec_list.end(); ++itr) {
-            int64_t specIndex = (*itr) - 1;
-            progress(progressBegin +
-                         progressScaler * static_cast<double>(specIndex) /
-                             static_cast<double>(m_spec_list.size()),
-                     "Reading workspace data...");
-            loadBlock(data, errors, fracarea, hasFracArea,
-                      static_cast<int64_t>(1), nchannels, specIndex, wsIndex,
-                      local_workspace);
-          }
-        }
-      } else {
-        for (; hist_index < read_stop;) {
-          progress(progressBegin +
-                       progressScaler * static_cast<double>(hist_index) /
-                           static_cast<double>(read_stop),
-                   "Reading workspace data...");
-          loadBlock(data, errors, fracarea, hasFracArea, blocksize, nchannels,
-                    hist_index, wsIndex, local_workspace);
-        }
-        int64_t finalblock = total_specs - read_stop;
-        if (finalblock > 0) {
-          loadBlock(data, errors, fracarea, hasFracArea, finalblock, nchannels,
-                    hist_index, wsIndex, local_workspace);
-        }
-      }
-
-    } else {
-      if (m_interval || m_list) {
-        if (m_interval) {
-          int64_t interval_specs = m_spec_max - m_spec_min;
-          fullblocks = (interval_specs) / blocksize;
-          read_stop = (fullblocks * blocksize) + m_spec_min - 1;
-
-          if (interval_specs < blocksize) {
-            blocksize = interval_specs;
-            read_stop = m_spec_max - 1;
-          }
-          hist_index = m_spec_min - 1;
-
-          for (; hist_index < read_stop;) {
-            progress(progressBegin +
-                         progressScaler * static_cast<double>(hist_index) /
-                             static_cast<double>(read_stop),
-                     "Reading workspace data...");
-            loadBlock(data, errors, fracarea, hasFracArea, xbins, blocksize,
-                      nchannels, hist_index, wsIndex, local_workspace);
-          }
-          int64_t finalblock = m_spec_max - 1 - read_stop;
-          if (finalblock > 0) {
-            loadBlock(data, errors, fracarea, hasFracArea, xbins, finalblock,
-                      nchannels, hist_index, wsIndex, local_workspace);
-          }
-        }
-        //
-        if (m_list) {
-          std::vector<int64_t>::iterator itr = m_spec_list.begin();
-          for (; itr != m_spec_list.end(); ++itr) {
-            int64_t specIndex = (*itr) - 1;
-            progress(progressBegin +
-                         progressScaler * static_cast<double>(specIndex) /
-                             static_cast<double>(read_stop),
-                     "Reading workspace data...");
-            loadBlock(data, errors, fracarea, hasFracArea, xbins, 1, nchannels,
-                      specIndex, wsIndex, local_workspace);
-          }
-        }
-      } else {
-        for (; hist_index < read_stop;) {
-          progress(progressBegin +
-                       progressScaler * static_cast<double>(hist_index) /
-                           static_cast<double>(read_stop),
-                   "Reading workspace data...");
-          loadBlock(data, errors, fracarea, hasFracArea, xbins, blocksize,
-                    nchannels, hist_index, wsIndex, local_workspace);
-        }
-        int64_t finalblock = total_specs - read_stop;
-        if (finalblock > 0) {
-          loadBlock(data, errors, fracarea, hasFracArea, xbins, finalblock,
-                    nchannels, hist_index, wsIndex, local_workspace);
-        }
-      }
-    }
-  } // end of NOT an event -------------------------------
+    local_workspace =
+        loadNonEventEntry(wksp_cls, xbins, progressStart, progressRange,
+                          mtd_entry, xlength, workspaceType);
+  }
+  size_t nspectra = local_workspace->getNumberHistograms();
 
   // Units
   bool verticalHistogram(false);
@@ -1889,13 +1966,22 @@ LoadNexusProcessed::checkOptionalProperties(const std::size_t numberofspectra) {
 
 /**
  * Calculate the size of a workspace
- * @param numberofspectra :: number of spectrums
+ *
+ * @param numberofspectra :: count of spectra found in the file being loaded
+ *
+ * @param gen_filtered_list :: process SpectrumList and SpectrumMin/Max
+ *                             and save resulting explicit list of
+ *                             spectra indices into a vector data
+ *                             member, presently used only when loading
+ *                             into event_workspace
+ *
  * @return the size of a workspace
  */
 size_t
-LoadNexusProcessed::calculateWorkspacesize(const std::size_t numberofspectra) {
+LoadNexusProcessed::calculateWorkspaceSize(const std::size_t numberofspectra,
+                                           bool gen_filtered_list) {
   // Calculate the size of a workspace, given its number of spectra to read
-  int total_specs;
+  int64_t total_specs;
   if (m_interval || m_list) {
     if (m_interval) {
       if (m_spec_min != 1 && m_spec_max == 1) {
@@ -1903,8 +1989,16 @@ LoadNexusProcessed::calculateWorkspacesize(const std::size_t numberofspectra) {
       }
       total_specs = static_cast<int>(m_spec_max - m_spec_min + 1);
       m_spec_max += 1;
-    } else
+
+      if (gen_filtered_list) {
+        m_filtered_spec_idxs.resize(total_specs);
+        size_t j = 0;
+        for(int64_t si = m_spec_min; si < m_spec_max; si++, j++)
+          m_filtered_spec_idxs[j] = si;
+      }
+    } else {
       total_specs = 0;
+    }
 
     if (m_list) {
       if (m_interval) {
@@ -1918,11 +2012,26 @@ LoadNexusProcessed::calculateWorkspacesize(const std::size_t numberofspectra) {
       if (m_spec_list.size() == 0)
         m_list = false;
       total_specs += static_cast<int>(m_spec_list.size());
+
+      if (gen_filtered_list) {
+        // range list + spare indices from list
+        // example: min: 2, max: 8, list: 3,4,5,10,12;
+        //          result: 2,3,...,7,8,10,12
+        m_filtered_spec_idxs.insert(m_filtered_spec_idxs.end(),
+                                  m_spec_list.begin(),
+                                  m_spec_list.end());
+      }
     }
   } else {
     total_specs = static_cast<int>(numberofspectra);
     m_spec_min = 1;
     m_spec_max = static_cast<int>(numberofspectra) + 1;
+
+    if (gen_filtered_list) {
+      m_filtered_spec_idxs.resize(total_specs, 0);
+      for(int64_t j = 0; j < total_specs; j++)
+        m_filtered_spec_idxs[j] = m_spec_min+j;
+    }
   }
   return total_specs;
 }

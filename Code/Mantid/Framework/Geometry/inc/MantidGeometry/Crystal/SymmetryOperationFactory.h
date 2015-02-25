@@ -13,7 +13,8 @@
 
 namespace Mantid {
 namespace Geometry {
-/** SymmetryOperationFactory
+/**
+  @class SymmetryOperationFactoryImpl
 
   A factory for symmetry operations. Symmetry operations are stored
   with respect to their identifier (see SymmetryOperation for details).
@@ -21,7 +22,7 @@ namespace Geometry {
   Creation of symmetry operations is then performed like this:
 
       SymmetryOperations inversion =
-  SymmetryOperationFactory::Instance().createSymOp("x,y,z");
+          SymmetryOperationFactory::Instance().createSymOp("x,y,z");
 
   Creating a symmetry operation object automatically registers the object
   as a prototype and subsequent creations are much more efficient because

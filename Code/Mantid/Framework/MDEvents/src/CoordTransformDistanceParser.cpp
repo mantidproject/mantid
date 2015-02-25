@@ -3,15 +3,6 @@
 #include "MantidAPI/VectorParameterParser.h"
 #include "MantidAPI/SingleValueParameterParser.h"
 
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/NodeFilter.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-
 namespace Mantid {
 namespace MDEvents {
 /// Constructor
@@ -53,39 +44,40 @@ Mantid::API::CoordTransform *CoordTransformDistanceParser::createTransform(
 
   Element *paramListElement =
       coordTransElement->getChildElement("ParameterList");
-  Poco::XML::NodeList *parameters =
+  Poco::AutoPtr<Poco::XML::NodeList> parameters =
       paramListElement->getElementsByTagName("Parameter");
 
   // Parse the in dimension parameter.
   InDimParameterParser inDimParamParser;
   Poco::XML::Element *parameter =
       dynamic_cast<Poco::XML::Element *>(parameters->item(0));
-  Mantid::API::InDimParameter *inDimParameter =
-      inDimParamParser.createWithoutDelegation(parameter);
+  boost::shared_ptr<Mantid::API::InDimParameter>
+    inDimParameter(inDimParamParser.createWithoutDelegation(parameter));
 
   // Parse the out dimension parameter.
   OutDimParameterParser outDimParamParser;
   parameter = dynamic_cast<Poco::XML::Element *>(parameters->item(1));
-  Mantid::API::OutDimParameter *outDimParameter =
-      outDimParamParser.createWithoutDelegation(parameter);
+  boost::shared_ptr<Mantid::API::OutDimParameter>
+    outDimParameter(outDimParamParser.createWithoutDelegation(parameter));
   UNUSED_ARG(outDimParameter); // not actually used as an input.
 
   // Parse the coordinate centre parameter.
   CoordCenterParser coordCenterParser;
   parameter = dynamic_cast<Poco::XML::Element *>(parameters->item(2));
-  Mantid::MDEvents::CoordCenterVectorParam *coordCenterParam =
-      coordCenterParser.createWithoutDelegation(parameter);
+  boost::shared_ptr<Mantid::MDEvents::CoordCenterVectorParam>
+    coordCenterParam(coordCenterParser.createWithoutDelegation(parameter));
 
   // Parse the dimensions used parameter.
   DimsUsedParser dimsUsedParser;
   parameter = dynamic_cast<Poco::XML::Element *>(parameters->item(3));
-  Mantid::MDEvents::DimensionsUsedVectorParam *dimsUsedVecParm =
-      dimsUsedParser.createWithoutDelegation(parameter);
+  boost::shared_ptr<Mantid::MDEvents::DimensionsUsedVectorParam>
+    dimsUsedVecParm(dimsUsedParser.createWithoutDelegation(parameter));
 
   ////Generate the coordinate transform and return
   CoordTransformDistance *transform = new CoordTransformDistance(
       inDimParameter->getValue(), coordCenterParam->getPointerToStart(),
       dimsUsedVecParm->getPointerToStart());
+
   return transform;
 }
 

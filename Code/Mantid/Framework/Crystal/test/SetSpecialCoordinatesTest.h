@@ -95,7 +95,7 @@ public:
     alg.execute();
 
     auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("inWS");
-    TS_ASSERT_EQUALS(QSample, outWS->getSpecialCoordinateSystem());
+    TS_ASSERT_EQUALS(Mantid::Kernel::QSample, outWS->getSpecialCoordinateSystem());
     AnalysisDataService::Instance().remove("inWS");
   }
 
@@ -112,7 +112,7 @@ public:
     alg.execute();
 
     auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("inWS");
-    TS_ASSERT_EQUALS(QSample, outWS->getSpecialCoordinateSystem());
+    TS_ASSERT_EQUALS(Mantid::Kernel::QSample, outWS->getSpecialCoordinateSystem());
     AnalysisDataService::Instance().remove("inWS");
   }
 
@@ -129,7 +129,7 @@ public:
     alg.execute();
 
     auto outWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>("inWS");
-    TS_ASSERT_EQUALS(QSample, outWS->getSpecialCoordinateSystem());
+    TS_ASSERT_EQUALS(Mantid::Kernel::QSample, outWS->getSpecialCoordinateSystem());
     AnalysisDataService::Instance().remove("inWS");
   }
 

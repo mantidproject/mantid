@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -47,6 +48,16 @@ def _count_monitors(raw_file):
 
 class TimeSlice(PythonAlgorithm):
 
+    _raw_files = None
+    _spectra_range = None
+    _peak_range = None
+    _output_ws_name_suffix = None
+    _background_range = None
+    _calib_ws = None
+    _out_ws_group = None
+    _plot = None
+    _save = None
+
     def category(self):
         return 'PythonAlgorithms;Inelastic'
 
@@ -59,7 +70,7 @@ class TimeSlice(PythonAlgorithm):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
                              doc='Comma separated list of input files')
 
-        self.declareProperty(WorkspaceProperty(name='CalibrationWorkspace', defaultValue='',
+        self.declareProperty(WorkspaceProperty(name='CalibrationWorkspace', defaultValue='',\
                              direction=Direction.Input, optional=PropertyMode.Optional),
                              doc='Calibration workspace')
 
@@ -72,9 +83,6 @@ class TimeSlice(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty(name='BackgroundRange'),
                              doc='Background range in time of flight')
 
-        self.declareProperty(name='Verbose', defaultValue=False,
-                             doc='Output more messages to results log')
-
         self.declareProperty(name='Plot', defaultValue=False,
                              doc='Plot result workspaces')
 
@@ -84,7 +92,7 @@ class TimeSlice(PythonAlgorithm):
         self.declareProperty(name='OutputNameSuffix', defaultValue='_slice',
                              doc='Suffix to append to raw file name for name of output workspace')
 
-        self.declareProperty(WorkspaceGroupProperty(name='OutputWorkspace', defaultValue='',
+        self.declareProperty(WorkspaceGroupProperty(name='OutputWorkspace', defaultValue='',\
                              direction=Direction.Output),
                              doc='Name of workspace group to group result workspaces into')
 
@@ -146,9 +154,7 @@ class TimeSlice(PythonAlgorithm):
                 work_dir = config['defaultsave.directory']
                 save_path = os.path.join(work_dir, slice_file + '.nxs')
                 SaveNexusProcessed(InputWorkspace=slice_file, Filename=save_path)
-
-                if self._verbose:
-                    logger.notice('Output file :' + save_path)
+                logger.information('Output file :' + save_path)
 
         all_workspaces = ','.join(out_ws_list)
         GroupWorkspaces(InputWorkspaces=all_workspaces, OutputWorkspace=self._out_ws_group)
@@ -184,7 +190,6 @@ class TimeSlice(PythonAlgorithm):
 
         self._out_ws_group = self.getPropertyValue('OutputWorkspace')
 
-        self._verbose = self.getProperty('Verbose').value
         self._plot = self.getProperty('Plot').value
         self._save = self.getProperty('Save').value
 
@@ -197,8 +202,7 @@ class TimeSlice(PythonAlgorithm):
         @returns Name of workspace loaded into
         """
 
-        if self._verbose:
-            logger.notice('Reading file :' + filename)
+        logger.information('Reading file :' + filename)
 
         # Load the raw file
         f_name = os.path.split(filename)[1]

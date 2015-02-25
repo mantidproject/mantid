@@ -69,10 +69,12 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper)
 
   //=================================== Peak Workspaces ===================================
 
-  // Forces the returns the be IEventWorkspace_sptr
+  // Forces the returns the be IPeaks_sptr
   typedef IPeaksWorkspace_sptr (*Signature1_Peaks)(const int);
+  typedef IPeaksWorkspace_sptr (*Signature2_Peaks)(const int, const bool);
 
   def("createPeaksWorkspace", (Signature1_Peaks)&createPeaksWorkspace);
+  def("createPeaksWorkspace", (Signature2_Peaks)&createPeaksWorkspace);
 
   //=================================== MD Workspaces ===================================
 
