@@ -1,4 +1,7 @@
 """ Sample MARI reduction scrip used in testing ReductionWrapper """
+import os
+os.environ["PATH"] =\
+r"c:/Mantid/Code/builds/br_10881/bin/Release;"+os.environ["PATH"]
 
 from Direct.ReductionWrapper import *
 try:
@@ -47,7 +50,7 @@ class ReduceMARI(ReductionWrapper):
 
           Overload only if custom reduction is needed
       """
-      ws = ReductionWrapper.reduce(input_file,output_directory)
+      ws = ReductionWrapper.reduce(self,input_file,output_directory)
       #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
       return ws
 #------------------------------------------------------------------------------------------------ #
