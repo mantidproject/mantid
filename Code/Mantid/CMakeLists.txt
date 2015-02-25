@@ -12,6 +12,17 @@ set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Build/CMake")
 
 # Define the project name.
 project ( Mantid )
+
+###########################################################################
+# Quick exit if we only want data targets
+###########################################################################
+if( DATA_TARGETS_ONLY )
+  include( SetupDataTargets )
+  # System test config files
+  add_subdirectory( Testing/SystemTests/scripts )
+  return()
+endif()
+
 set ( CPACK_PACKAGE_SUFFIX "" CACHE STRING "suffix used to determine the deployment type")
 set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #empty string and release are treated as the same thing
 
@@ -146,6 +157,9 @@ add_subdirectory ( MantidPlot )
 add_subdirectory ( scripts )
 
 add_subdirectory ( docs )
+
+# System test data target
+add_subdirectory ( Testing/SystemTests/scripts )
 
 ###########################################################################
 # Installation settings
