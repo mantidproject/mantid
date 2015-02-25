@@ -303,7 +303,7 @@ public:
 
   }
 
-    void test_partial_spectra ()
+    void testPartialSpectraLoading ()
   {
     LoadMuonNexus1 alg1;
     LoadMuonNexus1 alg2;
