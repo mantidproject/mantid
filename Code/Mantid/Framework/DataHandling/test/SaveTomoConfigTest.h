@@ -42,9 +42,9 @@ public:
     TS_ASSERT( testSave->isInitialized() );
   }
 
+  /// this is the first test that uses the good workspace (wsName) so it creates it
   void test_wrongExec()
   {
-    std::string wsName = "simple_table";
     ITableWorkspace_sptr ws = makeTableWorkspace(wsName);
 
     IAlgorithm_sptr testFail =
@@ -76,15 +76,51 @@ public:
 
   void test_wrongTableFormat()
   {
-    std::string wsName = "bad_table";
-    ITableWorkspace_sptr ws = makeTableWorkspace(wsName);
+    std::string badWSName = "bad_table";
+    ITableWorkspace_sptr ws = makeTableWorkspace(badWSName);
 
-    // TODO: should throw
+    // using wrong table: should fail
+    IAlgorithm_sptr fail =
+      Mantid::API::AlgorithmManager::Instance().create("SaveTomoConfig" /*, 1*/);
+    TS_ASSERT_THROWS_NOTHING( fail->initialize() );
+    TS_ASSERT_THROWS_NOTHING( fail->setPropertyValue("InputWorkspaces", wsName) );
+    TS_ASSERT_THROWS_NOTHING( fail->setPropertyValue("Filename", outFilename) );
+    TS_ASSERT_THROWS_NOTHING( fail->execute() );
+    TS_ASSERT( !fail->isExecuted() );
+
+    AnalysisDataService::Instance().remove(badWSName);
+  }
+
+  /// this is the last test that uses the good workspace (wsName) so it removes it from teh ADS
+  void test_saveOK()
+  {
+    TS_ASSERT( testSave->isInitialized() );
+    TS_ASSERT_THROWS_NOTHING( testSave->setPropertyValue("InputWorkspaces", wsName) );
+    TS_ASSERT_THROWS_NOTHING( testSave->setPropertyValue("Filename", outFilename) );
+    TS_ASSERT_THROWS_NOTHING( testSave->execute() );
+    TS_ASSERT( testSave->isExecuted() );
+
+    // very basic test, to do more than this use the sibling LoadSavuTomo algorithm
+    TS_ASSERT( Poco::File(outFilename).exists() );
+    boost::shared_ptr<NeXus::File> file;
+    // can open as NeXus and find one of the entries
+    TS_ASSERT_THROWS_NOTHING( file = boost::make_shared<NeXus::File>(outFilename) );
+    TS_ASSERT_THROWS_NOTHING( file->openPath("entry/process/0") );
+    TS_ASSERT_THROWS_NOTHING( file->close() );
+
+    cleanup();
   }
 
 private:
+  /// removes the output file and the input workspace
+  void cleanup()
+  {
+    TS_ASSERT_THROWS_NOTHING( Poco::File(outFilename).remove() );
+    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().remove(wsName) );
+  }
 
-  ITableWorkspace_sptr makeTableWorkspace(std::string &name)
+  /// helper: specific table format here for savu pipeline configurations
+  ITableWorkspace_sptr makeTableWorkspace(const std::string &name)
   {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
     AnalysisDataService::Instance().addOrReplace(name, ws);
@@ -101,8 +137,8 @@ private:
     return ws;
   }
 
-  // intentionally forgets to add some columns
-  ITableWorkspace_sptr makeWrongTableWorkspace(std::string &name)
+  // helper to build a bad table: intentionally forgets to add some columns
+  ITableWorkspace_sptr makeWrongTableWorkspace(const std::string &name)
   {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
     AnalysisDataService::Instance().addOrReplace(name, ws);
@@ -118,6 +154,11 @@ private:
   }
 
   IAlgorithm_sptr testSave;
-  std::string outFilename;
+  static const std::string outFilename;
+  static const std::string wsName;
 };
+
+const std::string SaveTomoConfigTest::wsName = "simple_table";
+const std::string SaveTomoConfigTest::outFilename = "savu_tomo_save_test.nxs";
+
 #endif /* SAVETOMOCONFIGTEST_H */
