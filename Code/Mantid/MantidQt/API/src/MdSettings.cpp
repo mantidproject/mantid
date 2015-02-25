@@ -18,13 +18,13 @@ MdSettings::MdSettings() : m_vsiGroup("Mantid/MdPlotting/Vsi"),
                            m_lblUserSettingBackgroundColor("usersettingbackgroundcolor"),
                            m_lblLastSessionBackgroundColor("lastsessionbackgroundcolor"),
                            m_lblSliceViewerColorMap("ColormapFile"), // This is the same as in Slice Viewer !!,
-                           m_lblUserSettingInitialView("initialview")
+                           m_lblUserSettingInitialView("initialview"),
                            m_lblLastSessionLogScale("lastsessionlogscale")
 {
   m_mdConstants.initializeSettingsConstants();
-};
+}
 
-MdSettings::~MdSettings(){};
+MdSettings::~MdSettings(){}
 
 QString MdSettings::getUserSettingColorMap()
 {

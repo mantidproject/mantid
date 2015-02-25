@@ -171,6 +171,11 @@ void ViewBase::onColorMapChange(const pqColorMapModel *model)
     this->colorUpdater.logScale(true);
   }
   rep->renderViewEventually();
+
+  if (this->colorUpdater.isAutoScale())
+  {
+    setAutoColorScale();
+  }
 }
 
 /**

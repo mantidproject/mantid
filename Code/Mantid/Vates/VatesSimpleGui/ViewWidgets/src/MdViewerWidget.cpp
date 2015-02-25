@@ -484,8 +484,8 @@ void MdViewerWidget::renderingDone()
 {
   if (this->viewSwitched)
   {
-    this->currentView->setColorsForView(this->ui.colorSelectionWidget);
     this->ui.colorSelectionWidget->loadColorMap(this->viewSwitched); // Load the default color map
+    this->currentView->setColorsForView(this->ui.colorSelectionWidget);
     this->viewSwitched = false;
   }
 }
