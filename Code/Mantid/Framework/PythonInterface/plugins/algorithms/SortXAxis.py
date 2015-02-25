@@ -1,9 +1,9 @@
+#pylint: disable=no-init,invalid-name
 import mantid.simpleapi as api
 
 from mantid.api import *
 from mantid.kernel import *
 import numpy as np
-
 
 class SortXAxis(PythonAlgorithm):
 

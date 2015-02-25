@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -5,6 +6,9 @@ import mantid
 
 
 class VesuvioResolution(PythonAlgorithm):
+
+    _spectrum_index = None
+    _mass = None
 
     def category(self):
         return 'Inelastic'

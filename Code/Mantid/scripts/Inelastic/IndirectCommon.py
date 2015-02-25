@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from mantid.simpleapi import *
 from mantid.api import TextAxis
 from mantid import config, logger
@@ -98,7 +99,6 @@ def checkUnitIs(ws, unit_id, axis_index=0):
     axis = mtd[ws].getAxis(axis_index)
     unit = axis.getUnit()
     return unit.unitID() == unit_id
-
 
 def getDefaultWorkingDirectory():
     """

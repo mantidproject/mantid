@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import refl_options_window
 from PyQt4 import QtCore, QtGui
 
@@ -69,7 +70,7 @@ class ReflOptions(QtGui.QDialog, refl_options_window.Ui_OptionsDialog):
         self.__group_tof_workspaces = checked
 
     def icatDownload(self):
-        return (self.__icat_download)
+        return self.__icat_download
 
     def groupTOFWorkspaces(self):
         return self.__group_tof_workspaces

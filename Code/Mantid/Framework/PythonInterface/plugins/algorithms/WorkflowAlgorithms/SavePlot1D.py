@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 import mantid,sys
 
 class SavePlot1D(mantid.api.PythonAlgorithm):
@@ -58,7 +59,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         spectra=ws.getNumberHistograms()
         if spectra>10:
             mantid.kernel.logger.warning("more than 10 spectra to plot")
-        prog_reporter=mantid.api.Progress(self,start=0.0,end=1.0,
+        prog_reporter=mantid.api.Progress(self,start=0.0,end=1.0,\
                     nreports=spectra)
 
         for j in range(spectra):

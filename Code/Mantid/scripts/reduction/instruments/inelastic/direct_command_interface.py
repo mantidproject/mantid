@@ -1,8 +1,8 @@
+#pylint: disable=invalid-name
 """
     Command set for Direct Geometry reduction
 """
 # Import the specific commands that we need
-import mantid
 from mantid.api import AlgorithmManager
 from reduction.command_interface import *
 from inelastic_reducer import InelasticReducer
@@ -10,35 +10,26 @@ from inelastic_reducer import InelasticReducer
 def ARCS():
     Clear(InelasticReducer)
 
-    pass
-
 def CNCS():
     Clear(InelasticReducer)
-    pass
 
 def HYSPEC():
     Clear(InelasticReducer)
-    pass
 
 def LET():
     Clear(InelasticReducer)
-    pass
 
 def MAPS():
     Clear(InelasticReducer)
-    pass
 
 def MARI():
     Clear(InelasticReducer)
-    pass
 
 def MERLIN():
     Clear(InelasticReducer)
-    pass
 
 def SEQUOIA():
     Clear(InelasticReducer)
-    pass
 
 def DefaultLoader():
     step = InelasticLoader()

@@ -1,5 +1,6 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import PythonAlgorithm, AlgorithmFactory,MatrixWorkspaceProperty,PropertyMode
-from mantid.kernel import Direction,IntBoundedValidator,FloatBoundedValidator
+from mantid.kernel import Direction
 import mantid.simpleapi
 import mantid
 import numpy
@@ -30,7 +31,8 @@ class DakotaChiSquared(PythonAlgorithm):
         fout=mantid.api.FileProperty("OutputFile","",mantid.api.FileAction.Save,".xml")
         self.declareProperty(fout,"Output filename containing chi^2.")
         self.declareProperty("ChiSquared",0.0,Direction.Output)
-        self.declareProperty(MatrixWorkspaceProperty("ResidualsWorkspace", "",Direction.Output,PropertyMode.Optional), "The name of the workspace that will contain residuals.")
+        self.declareProperty(MatrixWorkspaceProperty("ResidualsWorkspace", "",Direction.Output,PropertyMode.Optional),\
+            "The name of the workspace that will contain residuals.")
         return
 
     def PyExec(self):
@@ -46,19 +48,19 @@ class DakotaChiSquared(PythonAlgorithm):
         __w2=mantid.simpleapi.Load(f2)
 
 	    #validate inputs
-        if (type(__w1)!= mantid.api._api.MatrixWorkspace):
+        if type(__w1)!= mantid.api.MatrixWorkspace:
             mantid.kernel.logger.error('Wrong workspace type for data file')
             raise ValueError( 'Wrong workspace type for data file')
-        if (type(__w2)!= mantid.api._api.MatrixWorkspace):
+        if type(__w2)!= mantid.api.MatrixWorkspace:
             mantid.kernel.logger.error('Wrong workspace type for calculated file')
             raise ValueError( 'Wrong workspace type for calculated file')
-        if((__w1.blocksize()!=__w2.blocksize()) or (__w1.getNumberHistograms()!=__w2.getNumberHistograms())):
+        if __w1.blocksize()!=__w2.blocksize() or __w1.getNumberHistograms()!=__w2.getNumberHistograms():
             mantid.kernel.logger.error('The file sizes are different')
             raise ValueError( 'The file sizes are different')
 
 	    #calculate chi^2
         soeName = self.getPropertyValue("ResidualsWorkspace")
-        if (len(soeName)>0):
+        if len(soeName)>0:
             mantid.simpleapi.SignalOverError(__w1-__w2,OutputWorkspace=soeName)
             self.setProperty("ResidualsWorkspace",soeName)
             __soe=mantid.mtd[soeName]
@@ -82,7 +84,7 @@ class DakotaChiSquared(PythonAlgorithm):
         mantid.simpleapi.DeleteWorkspace(__w1.getName())
         mantid.simpleapi.DeleteWorkspace(__w2.getName())
         mantid.simpleapi.DeleteWorkspace(__soe2.getName())
-        if (len(soeName)==0):
-           mantid.simpleapi.DeleteWorkspace(__soe.getName())
+        if len(soeName)==0:
+            mantid.simpleapi.DeleteWorkspace(__soe.getName())
 
 AlgorithmFactory.subscribe(DakotaChiSquared)

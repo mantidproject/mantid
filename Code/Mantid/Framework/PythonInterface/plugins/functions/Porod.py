@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 '''
 @author Mathieu Doucet, ORNL
 @date Oct 13, 2014

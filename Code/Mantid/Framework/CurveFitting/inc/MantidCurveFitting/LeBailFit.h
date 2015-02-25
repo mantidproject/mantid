@@ -253,7 +253,7 @@ private:
                         bool prevBetterRwp);
 
   ///  Limit proposed value in the specified boundary
-  double limitProposedValueInBound(Parameter param, double newvalue,
+  double limitProposedValueInBound(const Parameter &param, double newvalue,
                                    double direction, int choice);
 
   /// Book keep the (sopposed) best MC result

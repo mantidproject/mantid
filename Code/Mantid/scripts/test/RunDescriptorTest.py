@@ -1,5 +1,5 @@
 import os,sys,inspect
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -20,7 +20,7 @@ class RunDescriptorTest(unittest.TestCase):
 
     def setUp(self):
         if self.prop_man == None or type(self.prop_man) != type(PropertyManager):
-            self.prop_man  = PropertyManager("MAR");
+            self.prop_man  = PropertyManager("MAR")
     def tearDown(self):
         pass
 
@@ -34,14 +34,14 @@ class RunDescriptorTest(unittest.TestCase):
                LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
         return mtd[tmp_ws_name].getInstrument()
 
- 
+
     def test_descr_basic(self):
         propman  = PropertyManager('MAR')
 
         self.assertTrue(propman.sample_run is None)
         self.assertTrue(PropertyManager.sample_run.get_workspace() is None)
-        
-        propman.sample_run = 10;
+
+        propman.sample_run = 10
         self.assertEqual(propman.sample_run,10)
 
         run_ws = CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=100)
@@ -67,7 +67,8 @@ class RunDescriptorTest(unittest.TestCase):
         propman  = self.prop_man
         propman.sample_run = 11001
 
-        file=PropertyManager.sample_run.find_file()
+        ok,file=PropertyManager.sample_run.find_file()
+        self.assertTrue(ok)
         self.assertTrue(len(file)>0)
 
         ext = PropertyManager.sample_run.get_file_ext()
@@ -84,7 +85,7 @@ class RunDescriptorTest(unittest.TestCase):
 
         # create two test files to check search for appropriate extension
         f=open(testFile1,'w')
-        f.write('aaaaaa');
+        f.write('aaaaaa')
         f.close()
 
         f=open(testFile2,'w')
@@ -95,10 +96,10 @@ class RunDescriptorTest(unittest.TestCase):
         propman.sample_run = 101111
         PropertyManager.sample_run.set_file_ext('nxs')
 
-        file=PropertyManager.sample_run.find_file()
+        ok,file=PropertyManager.sample_run.find_file()
         self.assertEqual(testFile1,os.path.normpath(file))
         PropertyManager.sample_run.set_file_ext('.raw')
-        file=PropertyManager.sample_run.find_file()
+        ok,file=PropertyManager.sample_run.find_file()
         self.assertEqual(testFile2,os.path.normpath(file))
 
         os.remove(testFile1)
@@ -118,8 +119,8 @@ class RunDescriptorTest(unittest.TestCase):
 
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
         self.assertTrue(isinstance(mon_ws, api.Workspace))
-        self.assertEqual(mon_ws.name(),ws.name()) 
-    
+        self.assertEqual(mon_ws.name(),ws.name())
+
     def test_copy_spectra2monitors(self):
         propman  = self.prop_man
         run_ws = CreateSampleWorkspace( Function='Multiple Peaks', WorkspaceType = 'Event',NumBanks=1, BankPixelWidth=5, NumEvents=100)
@@ -183,7 +184,7 @@ class RunDescriptorTest(unittest.TestCase):
 
         propman.sample_run = None
         self.assertFalse(ws_name+'_monitors' in mtd)
-        # name of empty property workspace 
+        # name of empty property workspace
         self.assertEqual(PropertyManager.sample_run.get_ws_name(),'SR_')
 
 
@@ -231,7 +232,7 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertEqual(ws.name(),ws_name)
 
 
-        
+
     def test_assign_fname(self):
         propman  = self.prop_man
         propman.sample_run = 'MAR11001.RAW'
@@ -330,7 +331,25 @@ class RunDescriptorTest(unittest.TestCase):
 
         api.AnalysisDataService.clear()
 
-       
+    def test_runDescriptorDependant(self):
+        propman  = self.prop_man
+        self.assertTrue(PropertyManager.wb_run.has_own_value())
+        propman.wb_for_monovan_run = None
+        self.assertFalse(PropertyManager.wb_for_monovan_run.has_own_value())
+        propman.wb_run = 2000
+        self.assertEqual(propman.wb_for_monovan_run,2000)
+        self.assertEqual(propman.wb_run,2000)
+        self.assertFalse(PropertyManager.wb_for_monovan_run.has_own_value())
+        propman.wb_for_monovan_run = None
+        self.assertEqual(propman.wb_for_monovan_run,2000)
+        self.assertEqual(propman.wb_run,2000)
+
+        
+        propman.wb_for_monovan_run = 3000
+        self.assertTrue(PropertyManager.wb_for_monovan_run.has_own_value())
+        self.assertEqual(propman.wb_run,2000)
+        self.assertEqual(propman.wb_for_monovan_run,3000)
+
 
 if __name__=="__main__":
     unittest.main()

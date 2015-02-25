@@ -1,8 +1,8 @@
+#pylint: disable=no-init,invalid-name
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
 import os
-import sys
 from reduction_workflow.find_data import find_data
 
 class SANSBeamSpreaderTransmission(PythonAlgorithm):

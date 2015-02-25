@@ -1,4 +1,5 @@
-from NonIDF_Properties import *
+#pylint: disable=invalid-name
+from Direct.NonIDF_Properties import *
 
 from collections import OrderedDict
 
@@ -98,7 +99,9 @@ class PropertyManager(NonIDF_Properties):
         object.__setattr__(self,class_dec+'file_properties',['det_cal_file','map_file','hard_mask_file'])
         object.__setattr__(self,class_dec+'abs_norm_file_properties',['monovan_mapfile'])
 
-        # properties with allowed values
+        # Clear caches on construction to make class more like usual class then singleton (and cashes are dangerous)
+        PropertyManager.mono_correction_factor.set_cash_mono_run_number(None)
+
 
     def _convert_params_to_properties(self,param_list,detine_subst_dict=True,descr_list=[]):
         """ method processes parameters obtained from IDF and modifies the IDF properties
@@ -155,16 +158,16 @@ class PropertyManager(NonIDF_Properties):
 
         # replace common substitutions for string value
         if type(val) is str :
-            val1 = val.lower()
-            if (val1 == 'none' or len(val1) == 0):
-                val = None
-            if val1 == 'default':
-                val = self.getDefaultParameterValue(name0)
+           val1 = val.lower()
+           if val1 == 'none' or len(val1) == 0:
+              val = None
+           if val1 == 'default':
+              val = self.getDefaultParameterValue(name0)
            # boolean property?
-            if val1 in ['true','yes']:
-                val = True
-            if val1 in ['false','no']:
-                val = False
+           if val1 in ['true','yes']:
+               val = True
+           if val1 in ['false','no']:
+               val = False
 
 
         if type(val) is list and len(val) == 0:
@@ -172,30 +175,30 @@ class PropertyManager(NonIDF_Properties):
 
         # set property value:
         if name in self.__descriptors:
-            super(PropertyManager,self).__setattr__(name,val)
+           super(PropertyManager,self).__setattr__(name,val)
         else:
-            other_prop=prop_helpers.gen_setter(self.__dict__,name,val)
+           other_prop=prop_helpers.gen_setter(self.__dict__,name,val)
 
         # record the fact that the property have changed
         self.__changed_properties.add(name)
 
    # ----------------------------
     def __getattr__(self,name):
-        """ Overloaded get method, disallowing non-existing properties being get but allowing
-          a property been called with  different names specified in substitution dictionary. """
+       """ Overloaded get method, disallowing non-existing properties being get but allowing
+           a property been called with  different names specified in substitution dictionary. """
 
-        if name in self.__subst_dict:
-            name = self.__subst_dict[name]
-            return getattr(self,name)
+       if name in self.__subst_dict:
+          name = self.__subst_dict[name]
+          return getattr(self,name)
        #end
 
-        if name in self.__descriptors:
+       if name in self.__descriptors:
            # This can only happen only if descriptor is called through synonims dictionary
            # This to work, all descriptors should define getter to return self on Null instance.
-            descr=getattr(PropertyManager,name)
-            return descr.__get__(self,name)
-        else:
-            return prop_helpers.gen_getter(self.__dict__,name)
+           descr=getattr(PropertyManager,name)
+           return descr.__get__(self,name)
+       else:
+           return prop_helpers.gen_getter(self.__dict__,name)
        ##end
 #----------------------------------------------------------------------------------
 #              Overloaded setters/getters
@@ -203,11 +206,11 @@ class PropertyManager(NonIDF_Properties):
     #
     det_cal_file    = DetCalFile()
     #
-    map_file        = MapMaskFile('.map',"Spectra to detector mapping file for the sample run")
+    map_file        = MapMaskFile('map_file','.map',"Spectra to detector mapping file for the sample run")
     #
-    monovan_mapfile = MapMaskFile('.map',"Spectra to detector mapping file for the monovanadium integrals calculation")
+    monovan_mapfile = MapMaskFile('monovan_map_file','.map',"Spectra to detector mapping file for the monovanadium integrals calculation")
     #
-    hard_mask_file  = MapMaskFile('.msk',"Hard mask file")
+    hard_mask_file  = MapMaskFile('hard_mask_file','.msk',"Hard mask file")
     #
     monovan_integr_range     = MonovanIntegrationRange()
     #
@@ -229,13 +232,15 @@ class PropertyManager(NonIDF_Properties):
     #
     multirep_tof_specta_list=MultirepTOFSpectraList()
     #
-    mono_correction_factor = MonoCorrectionFactor(NonIDF_Properties.incident_energy)
+    mono_correction_factor = MonoCorrectionFactor(NonIDF_Properties.incident_energy,
+                                                  NonIDF_Properties.monovan_run)
 
 #----------------------------------------------------------------------------------------------------------------
     def getChangedProperties(self):
         """ method returns set of the properties changed from defaults """
         decor_prop = '_'+type(self).__name__+'__changed_properties'
         return self.__dict__[decor_prop]
+    #
     def setChangedProperties(self,value=set([])):
         """ Method to clear changed properties list"""
         if isinstance(value,set):
@@ -243,14 +248,14 @@ class PropertyManager(NonIDF_Properties):
             self.__dict__[decor_prop] =value
         else:
             raise KeyError("Changed properties can be initialized by appropriate properties set only")
-
+    #
     @property
     def relocate_dets(self) :
         if self.det_cal_file != None:
             return True
         else:
             return False
-
+    #
     def set_input_parameters_ignore_nan(self,**kwargs):
         """ Like similar method set_input_parameters this one is used to
             set changed parameters from dictionary of parameters.
@@ -261,20 +266,18 @@ class PropertyManager(NonIDF_Properties):
             with some parameters missing.
         """
         # if sum is in parameters one needs to set it first
-        if 'sum_runs' in kwargs and not (kwargs['sum_runs'] is None):
+        if 'sum_runs' in kwargs and not kwargs['sum_runs'] is None:
             self.sum_runs = kwargs['sum_runs']
             del kwargs['sum_runs']
-        if 'sum' in kwargs and not (kwargs['sum'] is None):
+        if 'sum' in kwargs and not kwargs['sum'] is None:
             self.sum_runs = kwargs['sum']
             del kwargs['sum']
 
 
         for par_name,value in kwargs.items() :
-            if not(value is None):
+            if not value is None:
                 setattr(self,par_name,value)
-
-
-
+    #
     def set_input_parameters(self,**kwargs):
         """ Set input properties from a dictionary of parameters
 
@@ -293,7 +296,7 @@ class PropertyManager(NonIDF_Properties):
             setattr(self,par_name,value)
 
         return self.getChangedProperties()
-
+    #
     def get_used_monitors_list(self):
         """ Method returns list of monitors ID used during reduction """
 
@@ -306,14 +309,13 @@ class PropertyManager(NonIDF_Properties):
                 used_mon.add(self.mon2_norm_spec)
                 break
             if case(): # default, could also just omit condition or 'if True'
-                pass
+               pass
 
         used_mon.add(self.ei_mon1_spec)
         used_mon.add(self.ei_mon2_spec)
 
         return used_mon
-
-
+    #
     def get_diagnostics_parameters(self):
         """ Return the dictionary of the properties used in diagnostics with their values defined in IDF
 
@@ -334,7 +336,7 @@ class PropertyManager(NonIDF_Properties):
                 self.log('--- Diagnostics property {0} is not found in instrument properties. Default value: {1} is used instead \n'.format(key,value),'warning')
 
         return result
-
+    #
     def update_defaults_from_instrument(self,pInstrument,ignore_changes=False):
         """ Method used to update default parameters from the same instrument (with different parameters).
 
@@ -366,18 +368,18 @@ class PropertyManager(NonIDF_Properties):
         param_list = prop_helpers.get_default_idf_param_list(pInstrument)
         # remove old changes which are not related to IDF (not to reapply it again)
         for prop_name in old_changes:
-            if not (prop_name in param_list):
-                try:
-                    dependencies = getattr(PropertyManager,prop_name).dependencies()
-                except:
-                    dependencies = []
-                modified = False
-                for name in dependencies:
-                    if name in param_list:
-                        modified = True
-                        break
-                if not modified:
-                    del old_changes[prop_name]
+            if not prop_name in param_list:
+               try:
+                     dependencies = getattr(PropertyManager,prop_name).dependencies()
+               except:
+                     dependencies = []
+               modified = False
+               for name in dependencies:
+                   if name in param_list:
+                      modified = True
+                      break
+               if not modified:
+                  del old_changes[prop_name]
         #end
 
         param_list,descr_dict =  self._convert_params_to_properties(param_list,False,self.__descriptors)
@@ -391,19 +393,19 @@ class PropertyManager(NonIDF_Properties):
         # Assignment to descriptors should accept the form, descriptor is written in IDF
         changed_descriptors = set()
         for key,val in descr_dict.iteritems():
-            if not (key in old_changes_list):
+            if not key in old_changes_list:
                 try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains
                    # properties, not present in recent IDF.
-                    cur_val = getattr(self,key)
-                    setattr(self,key,val)
-                    new_val = getattr(self,key)
+                  cur_val = getattr(self,key)
+                  setattr(self,key,val)
+                  new_val = getattr(self,key)
                 except:
-                    self.log("property {0} have not been found in existing IDF. Ignoring this property"\
+                   self.log("property {0} have not been found in existing IDF. Ignoring this property"\
                        .format(key),'warning')
-                    continue
+                   continue
                 if isinstance(new_val,api.Workspace) and isinstance(cur_val,api.Workspace):
                 # do simplified workspace comparison which is appropriate here
-                    if new_val.name() == cur_val.name() and \
+                  if new_val.name() == cur_val.name() and \
                      new_val.getNumberHistograms() == cur_val.getNumberHistograms() and \
                      new_val.getNEvents() == cur_val.getNEvents() and \
                      new_val.getAxis(0).getUnit().unitID() == cur_val.getAxis(0).getUnit().unitID():
@@ -411,16 +413,16 @@ class PropertyManager(NonIDF_Properties):
                    #
                 #end
                 if new_val != cur_val:
-                    changed_descriptors.add(key)
+                   changed_descriptors.add(key)
                 # dependencies removed either properties are equal or not
                 try:
-                    dependencies = getattr(PropertyManager,key).dependencies()
+                     dependencies = getattr(PropertyManager,key).dependencies()
                 except:
-                    dependencies = []
+                     dependencies = []
 
                 for dep_name in dependencies:
                     if dep_name in sorted_param:
-                        del sorted_param[dep_name]
+                       del sorted_param[dep_name]
             else: # remove property from old changes list not to reapply it again?
                 pass
         #end loop
@@ -429,7 +431,7 @@ class PropertyManager(NonIDF_Properties):
 
         # Walk through the complex properties first and then through simple properties
         for key,val in sorted_param.iteritems():
-            if not(key in old_changes_list):
+            if not key in old_changes_list:
                 # complex properties change through their dependencies so we are setting them first
                 if isinstance(val,prop_helpers.ComplexProperty):
                     public_name = key[1:]
@@ -441,19 +443,19 @@ class PropertyManager(NonIDF_Properties):
 
                 try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains
                     # properties, not present in recent IDF.
-                    cur_val = getattr(self,public_name)
+                     cur_val = getattr(self,public_name)
                 except:
                     self.log("property {0} have not been found in existing IDF. Ignoring this property"\
                         .format(public_name),'warning')
                     continue
 
                 if prop_new_val !=cur_val :
-                    setattr(self,public_name,prop_new_val)
+                   setattr(self,public_name,prop_new_val)
                 # Dependencies removed either properties are equal or not
                 try:
-                    dependencies = val.dependencies()
+                     dependencies = val.dependencies()
                 except:
-                    dependencies =[]
+                     dependencies =[]
                 for dep_name in dependencies:
                     # delete dependent properties not to deal with them again
                     del sorted_param[dep_name]
@@ -482,41 +484,131 @@ class PropertyManager(NonIDF_Properties):
         else:
             return None
     #end
+    def _get_properties_with_files(self):
+        """ Method returns list of properties, which may have 
+            files as their values
+            
+            it does not include sample run, as this one will be 
+            treated separately.
+        """ 
 
-    def _check_file_exist(self,file_name):
-        file_path = FileFinder.getFullPath(file)
-        if len(file_path) == 0:
-            try:
-                file_path = common.find_file(file)
-            except:
-                file_path =''
+        run_files_prop=['wb_run','monovan_run','mask_run','wb_for_monovan_run','second_white']
+        map_mask_prop =['det_cal_file','map_file','hard_mask_file']
 
+        abs_units = not(self.monovan_run is None)
+        files_to_check =[]
+        # run files to check
+        for prop_name in run_files_prop:
+            theProp = getattr(PropertyManager,prop_name)
+            if theProp.has_own_value():
+               if theProp.is_existing_ws(): # it is loaded workspace 
+                  continue   # we do not care if it has file or not
+               val = theProp.__get__(self,PropertyManager)
+               if not(val is None) :
+                   files_to_check.append(prop_name)
 
-    def _check_necessary_files(self,monovan_run):
-        """ Method verifies if all files necessary for a run are available.
+        # other files to check:
+        for prop_name in map_mask_prop:
+            val = getattr(self,prop_name)
+            if not(val is None or isinstance(val,api.Workspace)):
+               files_to_check.append(prop_name)
+        # Absolute units files (only one?)
+        if abs_units:
+           val = self.monovan_mapfile
+           if not(val is None) :
+              files_to_check.append('monovan_mapfile')
+        #
+        return files_to_check
+    #
+    def _check_file_properties(self):
+        """ Method verifies if all files necessary for a reduction are available.
 
-           useful for long runs to check if all files necessary for it are present/accessible
+            useful for long runs to check if all files necessary for it are 
+            present/accessible before starting the run
         """
+        file_prop_names = self._get_properties_with_files()
+        file_errors={}
+        for prop_name in file_prop_names:
+            theProp = getattr(PropertyManager,prop_name)
+            ok,file = theProp.find_file(be_quet=True)
+            if not ok:
+               file_errors[prop_name]=file
+ 
+        result = (len(file_errors)==0)
+        return (result,file_errors)
+    #
+    def _check_ouptut_dir(self):
+       """ check if default save directory is accessible for writing """ 
+       targ_dir = config['defaultsave.directory']
+       test_file = os.path.join(targ_dir,'test_file.txt')
+       try:
+           fp = open(test_file,'w')
+           fp.close()
+           os.remove(test_file)
+           return (True,'')
+       except:
+           return (False,'Can not write to default save directory {0}.\n Reduction results can be lost'.format(targ_dir))
+    #
+    def validate_properties(self,fail_on_errors=True):
+        """ Method validates if some properties values for 
+            properties set up in the property manager are correct 
+        """ 
 
-        def check_files_list(files_list):
-            file_missing = False
-            for prop in files_list :
-                file = getattr(self,prop)
-                if not (file is None) and isinstance(file,str):
-                    file_path = self._check_file_exist(file)
-                    if len(file_path)==0:
-                        self.log(" Can not find file ""{0}"" for property: {1} ".format(file,prop),'error')
-                        file_missing=True
+        if self.mono_correction_factor: # disable check for monovan_run, as it is not used if mono_correction provided
+           PropertyManager.monovan_run._in_cash = True  # as soon as monovan_run is set up (mono correction disabled) 
+        # this will be dropped
+        error_list={}
+        error_level=0
 
-            return file_missing
+        ok,fail_prop = self._check_file_properties()
+        if not ok :
+           for prop in fail_prop:
+               mess = "*** ERROR  : prop: {0} -->{1}".format(prop,fail_prop[prop])
+               if fail_on_errors:
+                 self.log(mess,'warning')
+               else:
+                 error_list[prop]=mess
+           error_level=2
 
-        base_file_missing = check_files_list(self.__file_properties)
-        abs_file_missing=False
-        if not (monovan_run is None):
-            abs_file_missing = check_files_list(self.__abs_norm_file_properties)
+        ok,mess= self._check_ouptut_dir()
+        if not ok:
+           mess = '*** WARNING: saving results --> {1}'.format(mess)
+           if fail_on_errors:
+              self.log(mess,'warning')
+           else:
+               error_list['file_output']=mess
+           error_level=max(1,error_level)
 
-        if  base_file_missing or abs_file_missing:
-            raise RuntimeError(" Files needed for the run are missing ")
+        # verify interconnected properties
+        changed_prop = self.getChangedProperties()
+        for prop in changed_prop:
+            try:
+                theProp =getattr(PropertyManager,prop)
+            except: # not all changed properties are property manager properties
+                continue # we are not validating them
+            try:
+               ok,sev,message = theProp.validate(self,PropertyManager)
+               if not (ok):
+                  error_level=max(sev,error_level)
+                  if sev == 1:
+                     base = '*** WARNING: prop: {0} --> {1}'
+                  else:
+                     base = '*** ERROR  : prop: {0} --> {1}'
+                  mess =  base.format(prop,message)
+                  if fail_on_errors:
+                      self.log(mess,'warning')
+                  else:
+                      error_list[prop]=mess
+            except: # its simple dictionary value, which do not have validator or 
+               pass # other property without validator
+        #end
+        if error_level>1 and fail_on_errors:
+           raise RuntimeError('*** Invalid properties found. Can not run convert_to energy') 
+        if error_level>0:
+           OK = False
+        else:
+           OK = True
+        return (OK,error_level,error_list)
     #
     def _check_monovan_par_changed(self):
         """ method verifies, if properties necessary for monovanadium reduction have indeed been changed  from defaults """
@@ -532,62 +624,62 @@ class PropertyManager(NonIDF_Properties):
 
     #
     def log_changed_values(self,log_level='notice',display_header=True,already_changed=set()):
-        """ inform user about changed parameters and about the parameters that should be changed but have not
+      """ inform user about changed parameters and about the parameters that should be changed but have not
 
         This method is abstract method of NonIDF_Properties but is fully defined in PropertyManager
 
         display_header==True prints nice additional information about run. If False, only
         list of changed properties displayed.
       """
-        if display_header:
+      if display_header:
         # we may want to run absolute units normalization and this function has been called with monovan run or helper procedure
-            if self.monovan_run != None :
+        if self.monovan_run != None :
             # check if mono-vanadium is provided as multiple files list or just put in brackets occasionally
-                self.log("****************************************************************",'notice')
-                self.log('*** Output will be in absolute units of mb/str/mev/fu','notice')
-                non_changed = self._check_monovan_par_changed()
-                if len(non_changed) > 0:
-                    for prop in non_changed:
-                        value = getattr(self,prop)
-                        message = "\n***WARNING!: Abs units norm. parameter : {0} not changed from default val: {1}"\
+            self.log("****************************************************************",'notice')
+            self.log('*** Output will be in absolute units of mb/str/mev/fu','notice')
+            non_changed = self._check_monovan_par_changed()
+            if len(non_changed) > 0:
+                for prop in non_changed:
+                    value = getattr(self,prop)
+                    message = "\n***WARNING!: Abs units norm. parameter : {0} not changed from default val: {1}"\
                               "\n             This may need to change for correct absolute units reduction\n"
 
-                        self.log(message.format(prop,value),'warning')
+                    self.log(message.format(prop,value),'warning')
 
 
           # now let's report on normal run.
-            if PropertyManager.incident_energy.multirep_mode():
-                ei = self.incident_energy
-                mess = "*** Provisional Incident energies: {0:>8.3f}".format(ei[0])
-                for en in ei[1:]:
-                    mess += "; {0:>8.3f}".format(en)
-                mess+=" mEv"
-                self.log(mess,log_level)
-            else:
-                self.log("*** Provisional Incident energy: {0:>12.3f} mEv".format(self.incident_energy),log_level)
+        if PropertyManager.incident_energy.multirep_mode():
+            ei = self.incident_energy
+            mess = "*** Provisional Incident energies: {0:>8.3f}".format(ei[0])
+            for en in ei[1:]:
+              mess += "; {0:>8.3f}".format(en)
+            mess+=" mEv"
+            self.log(mess,log_level)
+        else:
+            self.log("*** Provisional Incident energy: {0:>12.3f} mEv".format(self.incident_energy),log_level)
       #end display_header
 
-        self.log("****************************************************************",log_level)
-        changed_Keys= self.getChangedProperties()
-        for key in changed_Keys:
-            if key in already_changed:
-                continue
-            val = getattr(self,key)
-            self.log("  Value of : {0:<25} is set to : {1:<20} ".format(key,val),log_level)
+      self.log("****************************************************************",log_level)
+      changed_Keys= self.getChangedProperties()
+      for key in changed_Keys:
+          if key in already_changed:
+              continue
+          val = getattr(self,key)
+          self.log("  Value of : {0:<25} is set to : {1:<20} ".format(key,val),log_level)
 
-        if not display_header:
-            return
+      if not display_header:
+          return
 
-        save_dir = config.getString('defaultsave.directory')
-        self.log("****************************************************************",log_level)
-        if self.monovan_run != None and not('van_mass' in changed_Keys):                                   # This output is
-            self.log("*** Monochromatic vanadium mass used : {0} ".format(self.van_mass),log_level) # Adroja request from may 2014
+      save_dir = config.getString('defaultsave.directory')
+      self.log("****************************************************************",log_level)
+      if self.monovan_run != None and not 'van_mass' in changed_Keys:                                   # This output is
+         self.log("*** Monochromatic vanadium mass used : {0} ".format(self.van_mass),log_level) # Adroja request from may 2014
       #
-        self.log("*** By default results are saved into: {0}".format(save_dir),log_level)
-        self.log("*** Output will be normalized to {0}".format(self.normalise_method),log_level)
-        if  self.map_file == None:
+      self.log("*** By default results are saved into: {0}".format(save_dir),log_level)
+      self.log("*** Output will be normalized to {0}".format(self.normalise_method),log_level)
+      if  self.map_file == None:
             self.log('*** one2one map selected',log_level)
-        self.log("****************************************************************",log_level)
+      self.log("****************************************************************",log_level)
 
 
     #def help(self,keyword=None) :
