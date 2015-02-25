@@ -49,7 +49,7 @@ public:
   std::string hmSymbol() const { return m_hmSymbol; }
 
 protected:
-  SymmetryElement();
+  SymmetryElement(const std::string &symbol);
 
   void setHMSymbol(const std::string &symbol);
 
@@ -68,7 +68,7 @@ public:
 
 class MANTID_GEOMETRY_DLL SymmetryElementInversion : public SymmetryElement {
 public:
-  SymmetryElementInversion();
+  SymmetryElementInversion(const V3R &inversionPoint);
   ~SymmetryElementInversion() {}
 
   void init(const SymmetryOperation &operation);
@@ -89,7 +89,8 @@ public:
   V3R getTranslation() const { return m_translation; }
 
 protected:
-  SymmetryElementWithAxis();
+  SymmetryElementWithAxis(const std::string &symbol, const V3R &axis,
+                          const V3R &translation);
 
   void setAxis(const V3R &axis);
   void setTranslation(const V3R &translation) { m_translation = translation; }
@@ -112,7 +113,9 @@ public:
     Negative
   };
 
-  SymmetryElementRotation();
+  SymmetryElementRotation(const std::string &symbol, const V3R &axis,
+                          const V3R &translation,
+                          const RotationSense &rotationSense);
   ~SymmetryElementRotation() {}
 
   RotationSense getRotationSense() const { return m_rotationSense; }
@@ -136,7 +139,7 @@ protected:
 class MANTID_GEOMETRY_DLL SymmetryElementMirror
     : public SymmetryElementWithAxis {
 public:
-  SymmetryElementMirror();
+  SymmetryElementMirror(const std::string &symbol, const V3R &axis, const V3R &translation);
   ~SymmetryElementMirror() {}
 
   void init(const SymmetryOperation &operation);

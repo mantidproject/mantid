@@ -236,7 +236,7 @@ public:
     TestableSymmetryElementMirror mirror;
 
     SpaceGroup_const_sptr sg =
-        SpaceGroupFactory::Instance().createSpaceGroup("F d -3 m");
+        SpaceGroupFactory::Instance().createSpaceGroup("I a -3 d");
 
     /*
     PointGroup_sptr pg =

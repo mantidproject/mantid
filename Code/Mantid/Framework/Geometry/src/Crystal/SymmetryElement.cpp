@@ -8,13 +8,14 @@
 
 namespace Mantid {
 namespace Geometry {
-SymmetryElement::SymmetryElement() : m_hmSymbol() {}
+SymmetryElement::SymmetryElement(const std::string &symbol)
+    : m_hmSymbol(symbol) {}
 
 void SymmetryElement::setHMSymbol(const std::string &symbol) {
   m_hmSymbol = symbol;
 }
 
-SymmetryElementIdentity::SymmetryElementIdentity() : SymmetryElement() {}
+SymmetryElementIdentity::SymmetryElementIdentity() : SymmetryElement("1") {}
 
 void SymmetryElementIdentity::init(const SymmetryOperation &operation) {
 
@@ -27,8 +28,8 @@ void SymmetryElementIdentity::init(const SymmetryOperation &operation) {
   setHMSymbol("1");
 }
 
-SymmetryElementInversion::SymmetryElementInversion()
-    : SymmetryElement(), m_inversionPoint() {}
+SymmetryElementInversion::SymmetryElementInversion(const V3R &inversionPoint)
+    : SymmetryElement("-1"), m_inversionPoint(inversionPoint) {}
 
 void SymmetryElementInversion::init(const SymmetryOperation &operation) {
   SymmetryOperation op =
@@ -48,7 +49,13 @@ void SymmetryElementInversion::setInversionPoint(const V3R &inversionPoint) {
   m_inversionPoint = inversionPoint;
 }
 
-SymmetryElementWithAxis::SymmetryElementWithAxis() : SymmetryElement() {}
+SymmetryElementWithAxis::SymmetryElementWithAxis(const std::string &symbol,
+                                                 const V3R &axis,
+                                                 const V3R &translation)
+    : SymmetryElement(symbol) {
+  setAxis(axis);
+  setTranslation(translation);
+}
 
 void SymmetryElementWithAxis::setAxis(const V3R &axis) {
   if (axis == V3R(0, 0, 0)) {
@@ -150,6 +157,12 @@ SymmetryElementWithAxis::determineAxis(const Kernel::IntMatrix &matrix) const {
 SymmetryElementRotation::SymmetryElementRotation()
     : SymmetryElementWithAxis() {}
 
+SymmetryElementRotation::SymmetryElementRotation(
+    const std::string &symbol, const V3R &axis, const V3R &translation,
+    const SymmetryElementRotation::RotationSense &rotationSense)
+    : SymmetryElementWithAxis(symbol, axis, translation),
+      m_rotationSense(rotationSense) {}
+
 void SymmetryElementRotation::init(const SymmetryOperation &operation) {
   const Kernel::IntMatrix &matrix = operation.matrix();
 
@@ -243,7 +256,10 @@ std::map<V3R, std::string> SymmetryElementMirror::g_glideSymbolMap =
         V3R(0, 1, 1) / 2, "n")(V3R(1, 1, 1) / 2, "n")(V3R(1, 1, 0) / 4, "d")(
         V3R(1, 0, 1) / 4, "d")(V3R(0, 1, 1) / 4, "d")(V3R(1, 1, 1) / 4, "d");
 
-SymmetryElementMirror::SymmetryElementMirror() : SymmetryElementWithAxis() {}
+SymmetryElementMirror::SymmetryElementMirror(const std::string &symbol,
+                                             const V3R &axis,
+                                             const V3R &translation)
+    : SymmetryElementWithAxis() {}
 
 void SymmetryElementMirror::init(const SymmetryOperation &operation) {
   const Kernel::IntMatrix &matrix = operation.matrix();
