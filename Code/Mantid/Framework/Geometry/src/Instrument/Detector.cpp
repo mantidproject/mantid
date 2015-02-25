@@ -45,10 +45,14 @@ Detector::~Detector() {}
  *  @returns the detector id
  */
 detid_t Detector::getID() const {
-  if (m_map)
-    return dynamic_cast<const Detector *>(m_base)->getID();
-  else
-    return m_id;
+  if (m_map) {
+    const Detector *d = dynamic_cast<const Detector *>(m_base);
+    if (d) {
+      return d->getID();
+    }
+  }
+
+  return m_id;
 }
 
 /// Get the distance between the detector and another component
@@ -137,10 +141,14 @@ bool Detector::isMasked() const {
 /// Is the detector a monitor?
 ///@return true if it is a monitor
 bool Detector::isMonitor() const {
-  if (m_map)
-    return dynamic_cast<const Detector *>(m_base)->isMonitor();
-  else
-    return m_isMonitor;
+  if (m_map) {
+    const Detector *d = dynamic_cast<const Detector *>(m_base);
+    if (d) {
+      return d->isMonitor();
+    }
+  }
+
+  return m_isMonitor;
 }
 
 /** Sets the flag for whether this detector object is a monitor

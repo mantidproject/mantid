@@ -4,10 +4,12 @@
 #
 # Notes:
 #
-# WORKSPACE, JOB_NAME & NODE_LABEL are environment variables that are set by
-# Jenkins. The last one corresponds to any labels set on a slave.
-# BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each slave.
+# WORKSPACE, JOB_NAME, NODE_LABEL GIT_COMMIT are environment variables that 
+# are set by Jenkins. The last one corresponds to any labels set on a slave.
+# BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each
+# slave.
 ###############################################################################
+SCRIPT_DIR=$(dirname "$0")
 
 ###############################################################################
 # Print out the versions of things we are using
@@ -16,51 +18,59 @@ cmake --version
 echo "SHA1=${sha1}"
 
 ###############################################################################
-# OS X setup steps
+# Setup clang
 ###############################################################################
-if [[ $(uname) == 'Darwin' ]]; then
-  if [[ ${JOB_NAME} == *clang* ]]; then
-    # Assuming we are using the clang compiler
-    echo "Using clang/llvm compiler."
-    clang --version
-  else
-    # Assuming we are using the Intel compiler
-    cd $WORKSPACE/Code
-    ./fetch_Third_Party.sh
-    cd $WORKSPACE
-    # Setup environment variables
-    source /opt/intel/bin/iccvars.sh intel64
-    export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$WORKSPACE/Code/Third_Party/lib/mac64:/Library/Frameworks
-    # Make sure we pick up the Intel compiler
-    export CC=icc
-    export CXX=icpc
-    echo "Using Intel compiler."
-    icpc --version
+if [[ ${JOB_NAME} == *clang* ]]; then
+  USE_CLANG=true
+elif [[ $(uname) == 'Darwin' ]] ; then
+  if [[ ! $(command -v icpc) ]] ; then
+    USE_CLANG=true
   fi
+fi  
+
+if [[ $USE_CLANG ]]; then
+  # Assuming we are using the clang compiler
+  echo "Using clang/llvm compiler."
+  clang --version
+  export CC=clang
+  export CXX=clang++
+  #check if CMakeCache.txt exists and if so that the cxx compiler is clang++
+  #only needed with incremental builds. Clean builds delete this directory in a later step. 
+  if [[ -e $WORKSPACE/build/CMakeCache.txt ]] && [[ ${JOB_NAME} != *clean* ]]; then
+    COMPILERFILEPATH=`grep 'CMAKE_CXX_COMPILER:FILEPATH' $WORKSPACE/build/CMakeCache.txt` 
+    if [[ $COMPILERFILEPATH != *clang++* ]]; then 
+      # Removing the build directory entirely guarantees clang is used.
+      rm -rf $WORKSPACE/build
+    fi
+  fi 
 fi
 
 ###############################################################################
-# Check whether this is a clean build (must have 'clean' in the job name)
+# OS X 10.8 setup steps
 ###############################################################################
-if [[ ${JOB_NAME} == *clean* ]]; then
-  CLEANBUILD=true
-  # Removing the build directory entirely guarantees a completely clean build
-  rm -rf $WORKSPACE/build
+if [[ $(uname) == 'Darwin' ]] && [[ ! $USE_CLANG ]]; then
+  # Assuming we are using the Intel compiler
+  cd $WORKSPACE/Code
+  ./fetch_Third_Party.sh
+  cd $WORKSPACE
+  # Setup environment variables
+  source /opt/intel/bin/iccvars.sh intel64
+  export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$WORKSPACE/Code/Third_Party/lib/mac64:/Library/Frameworks
+  # Make sure we pick up the Intel compiler
+  export CC=icc
+  export CXX=icpc
+  echo "Using Intel compiler."
+  icpc --version
+fi
 
-  # Set some variables relating to the linux packages created from clean builds
-  if [[ $(uname) != 'Darwin' ]]; then
-    # Use different suffix for linux builds
-    if [[ ${JOB_NAME} == *master* ]]; then
-      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidnightly -DCPACK_PACKAGE_SUFFIX=nightly -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
-    elif [[ ${JOB_NAME} == *develop* ]]; then
-      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable -DCPACK_PACKAGE_SUFFIX=unstable -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
-    elif [[ ${JOB_NAME} == *release* ]]; then
-      PACKAGINGVARS="-DENVVARS_ON_INSTALL=True -DCPACK_SET_DESTDIR=ON -DPACKAGE_DOCS=ON"
-    fi
-  else
-    # Mac packaging
-    PACKAGINGVARS="-DPACKAGE_DOCS=ON"
-  fi
+###############################################################################
+# Set up the location for the local object store outside of the build and
+# source tree, which can be shared by multiple builds.
+# It defaults to a MantidExternalData directory within the HOME directory.
+# It can be overridden by setting the MANTID_DATA_STORE environment variable.
+###############################################################################
+if [ -z "$MANTID_DATA_STORE" ]; then
+  export MANTID_DATA_STORE=$HOME/MantidExternalData
 fi
 
 ###############################################################################
@@ -74,10 +84,59 @@ else
 fi
 
 ###############################################################################
-# Create the build directory if it doesn't exist
+# Check job requirements from the name
 ###############################################################################
+if [[ ${JOB_NAME} == *clean* ]]; then
+  CLEANBUILD=true
+  BUILDPKG=true
+fi
+
+if [[ -e $WORKSPACE/build/CMakeCache.txt ]]; then
+  # Temporary while the builds flick between old & new TestingTools locations
+  TESTINGTOOLS_DIR=$(grep 'Code/Mantid/TestingTools/cxxtest' $WORKSPACE/build/CMakeCache.txt || true)
+  if [ ! -z "$TESTINGTOOLS_DIR"  ]; then
+    rm -fr $WORKSPACE/build
+  fi
+fi
+
+if [[ ${JOB_NAME} == *pull_requests* ]]; then
+  BUILDPKG=true
+fi
+
+###############################################################################
+# Packaging options
+###############################################################################
+if [[ "$BUILDPKG" == true ]]; then
+  # Set some variables relating to the linux packages
+  if [[ $(uname) != 'Darwin' ]]; then
+    # Use different suffix for linux builds
+    if [[ ${JOB_NAME} == *release* ]]; then
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=True -DCPACK_SET_DESTDIR=ON -DPACKAGE_DOCS=ON"
+    elif [[ ${JOB_NAME} == *master* ]]; then
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidnightly -DCPACK_PACKAGE_SUFFIX=nightly -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
+    else
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable -DCPACK_PACKAGE_SUFFIX=unstable -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
+    fi
+  else
+    # Mac packaging
+    PACKAGINGVARS="-DPACKAGE_DOCS=ON"
+  fi
+fi
+
+###############################################################################
+# Setup the build directory
+###############################################################################
+if [[ "$CLEANBUILD" == true ]]; then
+  rm -rf $WORKSPACE/build
+fi
 [ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
 cd $WORKSPACE/build
+
+###############################################################################
+# Clean up any artifacts from last build so that if it fails
+# they don't get archived again
+###############################################################################
+rm -f *.dmg *.rpm *.deb *.tar.gz
 
 ###############################################################################
 ## Check the required build configuration
@@ -93,7 +152,7 @@ fi
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DDOCS_HTML=ON ${PACKAGINGVARS} ../Code/Mantid"
+$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON ${PACKAGINGVARS} ../Code/Mantid"
 
 ###############################################################################
 # Coverity build should exit early
@@ -123,45 +182,39 @@ $SCL_ON_RHEL6 "cmake --build . --target AllTests -- -j$BUILD_THREADS"
 # Run the tests
 ###############################################################################
 # Remove any Mantid.user.properties file
-rm -f ~/.mantid/Mantid.user.properties
+userprops=~/.mantid/Mantid.user.properties
+rm -f $userprops
 $SCL_ON_RHEL6 "ctest -j$BUILD_THREADS --schedule-random --output-on-failure"
 
 ###############################################################################
-# Documentation
-# Build Qt help on all platforms for a clean build so that it can be packaged
+# Create the install kit if required. This includes building the Qt help
+# documentation
 ###############################################################################
-if [[ "$CLEANBUILD" == true ]]; then
+if [[ "$BUILDPKG" == true ]]; then
   # Workaround so that the target can find the properties file
   # CMake doesn't easily allow environment variables on custom targets
   if [[ $(uname) == 'Darwin' ]]; then
     export MANTIDPATH=$PWD/bin
   fi
   $SCL_ON_RHEL6 "cmake --build . --target docs-qthelp"
-fi
-
-###############################################################################
-# Create the install kit if this is a clean or non-Mac build
-###############################################################################
-rm -f *.dmg *.rpm *.deb *.tar.gz
-# Always build a package on linux
-if [[ $(uname) != 'Darwin' ]]; then
   $SCL_ON_RHEL6 "cpack"
-fi
 
-if [[ "$CLEANBUILD" == true ]]; then
-  # On the Mac, only create a package for clean builds
-  if [[ $(uname) == 'Darwin' ]]; then
-    $SCL_ON_RHEL6 "cpack"
-  fi
-
-  # We could build the source tarball anywhere, but we choose to do it on RHEL6
-  # We also parcel up the documentation into a tar file that is easier to move around
+  # Source tarball on clean build (arbitrarily choose rhel6)
+  # Also, parcel up the documentation into a tar file that is easier to move around
   # and labelled by the commit id it was built with. This assumes the Jenkins git plugin
   # has set the GIT_COMMIT environment variable
-  if [[ "$ON_RHEL6" == true ]]; then
+  if [[ "$CLEANBUILD" == true && "$ON_RHEL6" == true ]]; then
     $SCL_ON_RHEL6 "cmake --build . --target docs-html"
     tar -cjf mantiddocs-g${GIT_COMMIT:0:7}.tar.bz2 --exclude='*.buildinfo' --exclude="MantidProject.q*" docs/html
     # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree
     $SCL_ON_RHEL6 "cpack --config CPackSourceConfig.cmake -D CPACK_PACKAGING_INSTALL_PREFIX="
   fi
+fi
+
+###############################################################################
+# Run the system tests on RHEL6 when doing a pull request build. Run
+# from a package to have at least one Linux checks it install okay
+###############################################################################
+if [[ "${ON_RHEL6}" == true ]] && [[ ${JOB_NAME} == *pull_requests* ]]; then
+  $SCRIPT_DIR/systemtests
 fi

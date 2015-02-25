@@ -6,7 +6,7 @@ class TestSliceStringParser(unittest.TestCase):
     def checkValues(self, list1, list2):
 
         def _check_single_values( v1, v2):
-                self.assertAlmostEqual(v1, v2)
+            self.assertAlmostEqual(v1, v2)
 
         self.assertEqual(len(list1), len(list2))
         for v1,v2 in zip(list1, list2):

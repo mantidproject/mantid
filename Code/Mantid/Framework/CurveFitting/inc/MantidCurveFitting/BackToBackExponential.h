@@ -61,6 +61,10 @@ public:
   virtual void setHeight(const double h);
   virtual double fwhm() const;
   virtual void setFwhm(const double w);
+  virtual double intensity() const { return getParameter("I"); }
+  virtual void setIntensity(const double newIntensity) {
+    setParameter("I", newIntensity);
+  }
 
   /// overwrite IFunction base class methods
   std::string name() const { return "BackToBackExponential"; }

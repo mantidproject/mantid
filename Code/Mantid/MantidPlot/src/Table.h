@@ -292,8 +292,9 @@ public slots:
 	void saveToMemory();
 	void freeMemory();
 
-	bool isReadOnlyColumn(int col);
-	void setReadOnlyColumn(int col, bool on = true);
+        bool isReadOnlyColumn(int col);
+        void setReadOnlyColumn(int col, bool on = true);
+        void setReadOnlyAllColumns(bool on = true);
 
 	QString columnFormat(int col){return col_format[col];};
 	QStringList getColumnsFormat(){return col_format;};
@@ -319,6 +320,7 @@ public slots:
 
 	void restore(QString& spec);
 
+        //! This changes the general background color (color of the table widget, not the cells)
 	void setBackgroundColor(const QColor& col);
 	void setTextColor(const QColor& col);
 	void setHeaderColor(const QColor& col);

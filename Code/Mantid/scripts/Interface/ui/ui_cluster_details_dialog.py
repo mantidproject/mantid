@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'ui/cluster_details_dialog.ui'

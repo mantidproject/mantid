@@ -42,11 +42,13 @@ public:
 private:
   void copyRawMatrix();
 
-  /// Raw matrix used for speed.
-  coord_t **rawMatrix;
+  /// Raw matrix used for speed (array of pointers to columns).
+  coord_t **m_rawMatrix;
+  /// pointer to large memory block (matrix)
+  coord_t *m_rawMem;
 
   /// Affine matrix.
-  AffineMatrixType affineMatrix;
+  AffineMatrixType m_affineMatrix;
 };
 }
 }

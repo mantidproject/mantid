@@ -100,6 +100,8 @@ namespace MantidQt
       void prependRow();
       //delete row(s) from the model
       void deleteRow();
+      //find a blank row
+      int getBlankRow();
       //clear selected row(s) in the model
       void clearSelected();
       //copy selected rows to clipboard

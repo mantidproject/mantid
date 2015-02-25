@@ -147,12 +147,12 @@ public:
   const coord_t *getBinWidths() const { return m_boxLength; }
 
   /// Get the special coordinate system.
-  virtual Mantid::API::SpecialCoordinateSystem
+  virtual Mantid::Kernel::SpecialCoordinateSystem
   getSpecialCoordinateSystem() const;
 
   /// Set the special coordinate system.
   void setCoordinateSystem(
-      const Mantid::API::SpecialCoordinateSystem coordinateSystem);
+      const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem);
 
   void setTo(signal_t signal, signal_t errorSquared, signal_t numEvents);
 

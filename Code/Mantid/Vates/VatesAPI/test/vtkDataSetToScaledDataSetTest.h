@@ -2,6 +2,10 @@
 #define MANTID_VATESAPI_VTKDATASETTOSCALEDDATASETTEST_H_
 
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidVatesAPI/FieldDataToMetadata.h"
+#include "MantidVatesAPI/MetadataJsonManager.h"
+#include "MantidVatesAPI/MetadataToFieldData.h"
+#include "MantidVatesAPI/VatesConfigurations.h"
 #include "MantidVatesAPI/NoThresholdRange.h"
 #include "MantidVatesAPI/vtkDataSetToScaledDataSet.h"
 #include "MantidVatesAPI/vtkMDHexFactory.h"
@@ -10,6 +14,7 @@
 #include <cxxtest/TestSuite.h>
 #include <vtkCellData.h>
 #include <vtkDataSet.h>
+#include <vtkFieldData.h>
 #include <vtkFloatArray.h>
 #include <vtkUnsignedCharArray.h>
 #include <vtkUnstructuredGrid.h>
@@ -49,6 +54,25 @@ private:
     static unsigned char vals[1];
     uarr->GetTupleValue(index, vals);
     return vals;
+  }
+
+  vtkUnstructuredGrid  *makeDataSetWithJsonMetadata()
+  {
+     vtkUnstructuredGrid* data = makeDataSet();
+     
+      MetadataJsonManager manager;
+      std::string instrument = "OSIRIS";
+      manager.setInstrument(instrument);
+      std::string jsonString = manager.getSerializedJson();
+      
+      MetadataToFieldData convert;
+      VatesConfigurations config;
+      vtkFieldData* fieldData = data->GetFieldData();
+      convert(fieldData, jsonString, config.getMetadataIdJson().c_str());
+
+      data->SetFieldData(fieldData);
+
+      return data;
   }
 
 public:
@@ -123,6 +147,32 @@ public:
     TS_ASSERT_EQUALS(1, activeY[0]);
     unsigned char *activeZ = getRangeActiveComp(out, 2);
     TS_ASSERT_EQUALS(1, activeZ[0]);
+
+    in->Delete();
+    out->Delete();
+  }
+
+  void testJsonMetadataExtractionFromScaledDataSet()
+  {
+    // Arrange
+    vtkUnstructuredGrid *in = makeDataSetWithJsonMetadata();
+    vtkUnstructuredGrid *out = vtkUnstructuredGrid::New();
+
+    // Act
+    vtkDataSetToScaledDataSet scaler(in, out);
+    scaler.initialize(0.1, 0.5, 0.2);
+    TS_ASSERT_THROWS_NOTHING(scaler.execute());
+
+    vtkFieldData* fieldData = out->GetFieldData();
+    MetadataJsonManager manager;
+    VatesConfigurations config;
+    FieldDataToMetadata convert;
+
+    std::string jsonString = convert(fieldData, config.getMetadataIdJson());
+    manager.readInSerializedJson(jsonString);
+    
+    // Assert
+    TS_ASSERT("OSIRIS" == manager.getInstrument());
 
     in->Delete();
     out->Delete();

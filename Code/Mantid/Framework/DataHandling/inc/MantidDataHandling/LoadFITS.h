@@ -78,7 +78,7 @@ namespace DataHandling {
 
 class DLLExport LoadFITS : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
-  LoadFITS() {}
+  LoadFITS();
   virtual ~LoadFITS() {}
 
   /// Algorithm's name for identification overriding a virtual method

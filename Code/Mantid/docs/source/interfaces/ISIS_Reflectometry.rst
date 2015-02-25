@@ -120,6 +120,11 @@ The **Reflectometry** menu provides access to the following functionality:
 |                  | enabling you to save a *TableWorkspace* to a ``.tbl``    |
 |                  | file.                                                    |
 +------------------+----------------------------------------------------------+
+| Slit Calculator  | Opens the slit calculator: a tool to help calculate the  |
+|                  | correct geometry for the instruments' slits. It's powered|
+|                  | by the :ref:`CalculateSlits <algm-CalculateSlits>`       |
+|                  | algorithm.                                               |
++------------------+----------------------------------------------------------+
 | Options          | Opens the `Options`_ menu.                               |
 +------------------+----------------------------------------------------------+
 

@@ -29,6 +29,7 @@ set ( SRC_FILES
 	src/DerivMinimizer.cpp
 	src/DiffRotDiscreteCircle.cpp
 	src/DiffSphere.cpp
+	src/DynamicKuboToyabe.cpp
 	src/EndErfc.cpp
 	src/ExpDecay.cpp
 	src/ExpDecayMuon.cpp
@@ -135,6 +136,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/DiffRotDiscreteCircle.h
 	inc/MantidCurveFitting/DiffSphere.h
 	inc/MantidCurveFitting/DllConfig.h
+	inc/MantidCurveFitting/DynamicKuboToyabe.h
 	inc/MantidCurveFitting/EndErfc.h
 	inc/MantidCurveFitting/ExpDecay.h
 	inc/MantidCurveFitting/ExpDecayMuon.h
@@ -237,6 +239,7 @@ set ( TEST_FILES
 	DeltaFunctionTest.h
 	DiffRotDiscreteCircleTest.h
 	DiffSphereTest.h
+	DynamicKuboToyabeTest.h
 	EndErfcTest.h
 	ExpDecayMuonTest.h
 	ExpDecayOscTest.h
@@ -257,6 +260,7 @@ set ( TEST_FILES
 	GaussianTest.h
 	GramCharlierComptonProfileTest.h
 	IkedaCarpenterPVTest.h
+        IPeakFunctionIntensityTest.h
 	LeBailFitTest.h
 	LeBailFunctionTest.h
 	LeastSquaresTest.h
@@ -316,7 +320,13 @@ enable_precompiled_headers( inc/MantidCurveFitting/PrecompiledHeader.h SRC_FILES
 # Add the target for this directory
 add_library ( CurveFitting ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( CurveFitting PROPERTIES OUTPUT_NAME MantidCurveFitting COMPILE_DEFINITIONS IN_MANTID_CURVEFITTING)
+set_target_properties ( CurveFitting PROPERTIES OUTPUT_NAME MantidCurveFitting 
+                                     COMPILE_DEFINITIONS IN_MANTID_CURVEFITTING )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( CurveFitting PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+endif () 
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET CurveFitting PROPERTY FOLDER "MantidFramework" )
 

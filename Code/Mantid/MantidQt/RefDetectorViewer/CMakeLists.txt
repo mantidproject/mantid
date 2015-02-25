@@ -58,6 +58,10 @@ add_definitions ( -DIN_MANTIDQT_REFDETECTORVIEWER )
 # This creates the target library
 add_library ( MantidQtRefDetectorViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( MantidQtRefDetectorViewer PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif ()
+
 # ... and links to other required libs
 target_link_libraries ( MantidQtRefDetectorViewer MantidQtSpectrumViewer )
 
