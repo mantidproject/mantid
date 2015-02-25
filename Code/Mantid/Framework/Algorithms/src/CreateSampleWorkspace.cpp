@@ -396,7 +396,7 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
     int num_banks, int pixels, double pixelSpacing) {
   boost::shared_ptr<Instrument> testInst(new Instrument("basic_rect"));
   testInst->setReferenceFrame(
-      boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, X, Left, "")));
+      boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
 
   const double cylRadius(pixelSpacing / 2);
   const double cylHeight(0.0002);

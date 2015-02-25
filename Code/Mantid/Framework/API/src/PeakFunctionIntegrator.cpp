@@ -1,4 +1,4 @@
-#include "MantidSINQ/PoldiUtilities/PeakFunctionIntegrator.h"
+#include "MantidAPI/PeakFunctionIntegrator.h"
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "gsl/gsl_errno.h"
@@ -6,15 +6,13 @@
 #include <iomanip>
 
 namespace Mantid {
-namespace Poldi {
-
-using namespace API;
+namespace API {
 
 /** Constructor with required relative precision argument. The default is 1e-8.
  *  See also PeakFunctionIntegrator::setRequiredRelativePrecision.
  *
  * @param requiredRelativePrecision :: Desired relative precision of the
- *integral estimations.
+ * integral estimations.
  */
 PeakFunctionIntegrator::PeakFunctionIntegrator(double requiredRelativePrecision)
     : m_integrationWorkspace(gsl_integration_workspace_alloc(1000)),
@@ -31,8 +29,7 @@ PeakFunctionIntegrator::~PeakFunctionIntegrator() {
 }
 
 /** This method sets the desired numerical relative precision that's passed on
- *to the
- *  GSL integration-routines.
+ *  to the GSL integration-routines.
  *
  *  @param newPrecision :: Desired relative precision for integrations.
  */
@@ -47,19 +44,14 @@ double PeakFunctionIntegrator::requiredRelativePrecision() const {
 }
 
 /** Integration of peak function on the interval [-Inf, +Inf]. Internally,
- *gsl_integration_qagi is used
- *  for this. If a default constructed IPeakFunction_const_sptr is passed to the
- *function, std::invalid_argument is thrown.
- *  The results are returned as IntegrationResult-struct, which contains the
- *approximation of the integral along
- *  with other information such as an error estimate (absolute).
+ *  gsl_integration_qagi is used for this. The results are returned as
+ *  IntegrationResult-struct, which contains the approximation of the integral
+ *  along with other information such as an error estimate (absolute).
  *
  *  @param peakFunction :: Peak function to integrate.
  */
 IntegrationResult PeakFunctionIntegrator::integrateInfinity(
-    IPeakFunction_const_sptr peakFunction) const {
-  throwIfInvalid(peakFunction);
-
+    const IPeakFunction &peakFunction) const {
   IntegrationResult result;
 
   gsl_function f = getGSLFunction(peakFunction);
@@ -74,16 +66,13 @@ IntegrationResult PeakFunctionIntegrator::integrateInfinity(
 }
 
 /** Integration of peak function on the interval [a, +Inf]. Internally,
- *gsl_integration_qagiu is used
- *  for this. If a default constructed IPeakFunction_const_sptr is passed to the
- *function, std::invalid_argument is thrown.
+ *  gsl_integration_qagiu is used for this.
  *
  *  @param peakFunction :: Peak function to integrate.
+ *  @param lowerLimit :: Lower limit of the integration.
  */
 IntegrationResult PeakFunctionIntegrator::integratePositiveInfinity(
-    IPeakFunction_const_sptr peakFunction, double lowerLimit) const {
-  throwIfInvalid(peakFunction);
-
+    const IPeakFunction &peakFunction, double lowerLimit) const {
   IntegrationResult result;
 
   gsl_function f = getGSLFunction(peakFunction);
@@ -98,16 +87,13 @@ IntegrationResult PeakFunctionIntegrator::integratePositiveInfinity(
 }
 
 /** Integration of peak function on the interval [-Inf, b]. Internally,
- *gsl_integration_qagil is used
- *  for this. If a default constructed IPeakFunction_const_sptr is passed to the
- *function, std::invalid_argument is thrown.
+ *  gsl_integration_qagil is used for this.
  *
  *  @param peakFunction :: Peak function to integrate.
+ *  @param upperLimit :: Upper limit of the integration.
  */
 IntegrationResult PeakFunctionIntegrator::integrateNegativeInfinity(
-    IPeakFunction_const_sptr peakFunction, double upperLimit) const {
-  throwIfInvalid(peakFunction);
-
+    const IPeakFunction &peakFunction, double upperLimit) const {
   IntegrationResult result;
 
   gsl_function f = getGSLFunction(peakFunction);
@@ -122,17 +108,15 @@ IntegrationResult PeakFunctionIntegrator::integrateNegativeInfinity(
 }
 
 /** Integration of peak function on the interval [a, b]. Internally,
- *gsl_integration_qags is used
- *  for this. If a default constructed IPeakFunction_const_sptr is passed to the
- *function, std::invalid_argument is thrown.
+ *  gsl_integration_qags is used for this.
  *
  *  @param peakFunction :: Peak function to integrate.
+ *  @param lowerLimit :: Lower limit of the integration.
+ *  @param upperLimit :: Upper limit of the integration.
  */
 IntegrationResult
-PeakFunctionIntegrator::integrate(IPeakFunction_const_sptr peakFunction,
+PeakFunctionIntegrator::integrate(const IPeakFunction &peakFunction,
                                   double lowerLimit, double upperLimit) const {
-  throwIfInvalid(peakFunction);
-
   IntegrationResult result;
 
   gsl_function f = getGSLFunction(peakFunction);
@@ -151,24 +135,22 @@ PeakFunctionIntegrator::integrate(IPeakFunction_const_sptr peakFunction,
  *  @param peakFunction :: Peak function to wrap.
  */
 gsl_function PeakFunctionIntegrator::getGSLFunction(
-    IPeakFunction_const_sptr peakFunction) const {
+    const IPeakFunction &peakFunction) const {
   gsl_function f;
-  f.function = &Mantid::Poldi::gsl_peak_wrapper;
-  f.params = &peakFunction;
+  f.function = &Mantid::API::gsl_peak_wrapper;
+  f.params =
+      reinterpret_cast<void *>(&const_cast<IPeakFunction &>(peakFunction));
 
   return f;
 }
 
-void PeakFunctionIntegrator::throwIfInvalid(
-    IPeakFunction_const_sptr peakFunction) const {
-  if (!peakFunction) {
-    throw std::invalid_argument("Can not integrate NULL-function.");
-  }
-}
-
 double gsl_peak_wrapper(double x, void *parameters) {
-  IPeakFunction_const_sptr peakFunction =
-      *(IPeakFunction_const_sptr *)parameters;
+  IPeakFunction *peakFunction = reinterpret_cast<IPeakFunction *>(parameters);
+
+  if (!peakFunction) {
+    throw std::runtime_error(
+        "Cannot process NULL-pointer in gsl_peak_wrapper.");
+  }
 
   double y;
 

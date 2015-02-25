@@ -141,4 +141,22 @@ Output:
    Y values (asymmetry): [ 0.14542059  0.13674275  0.12017568]
    X values (sample magn. field): [ 1350.  1360.  1370.]
 
+**Example - Calculating asymmetry as a function of the sample mean temperature:**
+
+.. testcode:: ExLogValueFunction
+
+   ws = PlotAsymmetryByLogValue(FirstRun="MUSR00015189",
+                                LastRun="MUSR00015191",
+                                LogValue="sample_temp",
+                                Function="Mean")
+   print "Y values (asymmetry):", ws.readY(0)
+   print "X values (sample magn. field):", ws.readX(0)
+
+Output:
+
+.. testoutput:: ExLogValueFunction
+
+   Y values (asymmetry): [ 0.15004357  0.14289412  0.12837688]
+   X values (sample magn. field): [ 290.  290.  290.]
+
 .. categories::

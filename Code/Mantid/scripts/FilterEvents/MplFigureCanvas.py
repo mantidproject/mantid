@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from PyQt4 import QtGui
 
 import matplotlib
@@ -21,7 +22,7 @@ class Qt4MplCanvas(FigureCanvas):
         self.setParent(parent)
 
         # Set size policy to be able to expanding and resizable with frame
-        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,
+        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,\
                 QtGui.QSizePolicy.Expanding)
 
         FigureCanvas.updateGeometry(self)

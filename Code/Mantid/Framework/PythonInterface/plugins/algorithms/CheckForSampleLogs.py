@@ -1,5 +1,5 @@
+#pylint: disable=invalid-name, no-init
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty
-import mantid.simpleapi
 from mantid.kernel import Direction, logger
 
 class CheckForSampleLogs(PythonAlgorithm):
@@ -23,7 +23,8 @@ class CheckForSampleLogs(PythonAlgorithm):
         """
         self.declareProperty(WorkspaceProperty("Workspace", "",Direction.Input), "The workspace to check.")
         self.declareProperty("LogNames","","Names of the logs to look for")
-        self.declareProperty("Result","A string that will be empty if all the logs are found, otherwise will contain an error message",Direction.Output)
+        self.declareProperty("Result","A string that will be empty if all the logs are found, "\
+            "otherwise will contain an error message",Direction.Output)
         return
 
     def PyExec(self):

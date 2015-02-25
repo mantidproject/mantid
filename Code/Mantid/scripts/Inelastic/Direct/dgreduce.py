@@ -1,9 +1,7 @@
+#pylint: disable=invalid-name
 """ Empty class temporary left for compatibility with previous interfaces """
-import DirectEnergyConversion as DRC
-import CommonFunctions as common
-import time as time
+import Direct.DirectEnergyConversion as DRC
 from mantid.simpleapi import *
-from mantid import api
 from mantid.kernel import funcreturns
 
 
@@ -32,7 +30,7 @@ def setup(instname=None,reload=False):
         instname = config['default.instrument']
 
 
-    if not (Reducer is None) :
+    if not Reducer is None :
         old_name=Reducer.prop_man.instr_name
         if  old_name.upper()[0:3] == instname.upper()[0:3] :
             if not reload :

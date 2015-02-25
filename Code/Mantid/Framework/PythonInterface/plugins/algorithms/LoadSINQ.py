@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init
 #--------------------------------------------------------------
 # Algorithm which loads a SINQ file.
 # This algorithm calculates the filename from instrument
@@ -7,7 +8,7 @@
 # Mark Koennecke, November 2012
 #--------------------------------------------------------------
 from mantid.api import AlgorithmFactory
-from mantid.api import PythonAlgorithm, WorkspaceFactory, FileProperty, FileAction, WorkspaceProperty
+from mantid.api import PythonAlgorithm, WorkspaceProperty
 from mantid.kernel import Direction, StringListValidator, ConfigServiceImpl
 import mantid.simpleapi
 import datetime

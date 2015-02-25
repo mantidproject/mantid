@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the HFIRReduction class could
@@ -145,9 +146,9 @@ class SampleData(BaseScriptElement):
                 self.sample_spreader = BaseScriptElement.getStringElement(instrument_dom, "sample_spreader")
                 self.direct_scatt = BaseScriptElement.getStringElement(instrument_dom, "direct_scatt")
                 self.direct_spreader = BaseScriptElement.getStringElement(instrument_dom, "direct_spreader")
-                self.spreader_trans = BaseScriptElement.getFloatElement(instrument_dom, "spreader_trans",
+                self.spreader_trans = BaseScriptElement.getFloatElement(instrument_dom, "spreader_trans",\
                                                                      default=SampleData.BeamSpreader.spreader_trans)
-                self.spreader_trans_spread = BaseScriptElement.getFloatElement(instrument_dom, "spreader_trans_spread",
+                self.spreader_trans_spread = BaseScriptElement.getFloatElement(instrument_dom, "spreader_trans_spread",\
                                                                      default=SampleData.BeamSpreader.spreader_trans_spread)
 
         def from_setup_info(self, xml_str):
@@ -304,11 +305,11 @@ class SampleData(BaseScriptElement):
             instrument_dom = element_list[0]
             self.transmission = BaseScriptElement.getFloatElement(instrument_dom, "trans",
                                                                   default=SampleData.transmission)
-            self.transmission_spread = BaseScriptElement.getFloatElement(instrument_dom, "trans_spread",
+            self.transmission_spread = BaseScriptElement.getFloatElement(instrument_dom, "trans_spread",\
                                                                   default=SampleData.transmission_spread)
             self.calculate_transmission = BaseScriptElement.getBoolElement(instrument_dom, "calculate_trans",
                                                                            default = SampleData.calculate_transmission)
-            self.theta_dependent = BaseScriptElement.getBoolElement(instrument_dom, "theta_dependent",
+            self.theta_dependent = BaseScriptElement.getBoolElement(instrument_dom, "theta_dependent",\
                                                                            default = SampleData.theta_dependent)
             self.dark_current = BaseScriptElement.getStringElement(instrument_dom, "dark_current")
 

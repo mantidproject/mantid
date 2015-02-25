@@ -1,12 +1,11 @@
+#pylint: disable=invalid-name
 """
     List of common user commands for HFIR SANS
 """
 from reduction_workflow.command_interface import *
 from reduction_workflow.find_data import *
 from reduction_workflow.instruments.sans import hfir_instrument
-from mantid.api import AlgorithmManager
 from mantid.kernel import Logger
-import mantid.simpleapi as simpleapi
 import os
 
 ## List of user commands ######################################################
@@ -236,9 +235,9 @@ def BckDirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_de
     ReductionSingleton().reduction_properties["BckTransmissionEmptyDataFile"] = empty_file
     ReductionSingleton().reduction_properties["BckThetaDependentTransmission"] = theta_dependent
 
-def BckBeamSpreaderTransmission(sample_spreader, direct_spreader,
-                             sample_scattering, direct_scattering,
-                             spreader_transmission=1.0, spreader_transmission_err=0.0,
+def BckBeamSpreaderTransmission(sample_spreader, direct_spreader,\
+                             sample_scattering, direct_scattering,\
+                             spreader_transmission=1.0, spreader_transmission_err=0.0,\
                              theta_dependent=True ):
     sample_spreader = find_data(sample_spreader, instrument=ReductionSingleton().get_instrument())
     direct_spreader = find_data(direct_spreader, instrument=ReductionSingleton().get_instrument())

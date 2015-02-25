@@ -1,10 +1,8 @@
+#pylint: disable=no-init
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
 from mantid import config
-
-import os.path, math
-
 
 class MSGDiffractionReduction(PythonAlgorithm):
 
@@ -40,7 +38,7 @@ class MSGDiffractionReduction(PythonAlgorithm):
         self.declareProperty(name='RebinParam', defaultValue='',
                              doc='Rebin parameters.')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',\
                              direction=Direction.Output),
                              doc='Group name for the result workspaces.')
 

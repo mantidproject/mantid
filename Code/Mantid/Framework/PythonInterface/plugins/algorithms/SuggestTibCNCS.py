@@ -1,5 +1,5 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import PythonAlgorithm, AlgorithmFactory
-import mantid.simpleapi
 from mantid.kernel import FloatBoundedValidator,Direction
 from numpy import sqrt,floor
 
@@ -10,11 +10,11 @@ class Interval(object):
         self.min=minv
         self.max=maxv
     def overlap(self, other):
-        if (other.max >self.min and other.max <self.max):
+        if other.max >self.min and other.max <self.max:
             return True
-        if (other.min >self.min and other.min<self.max):
+        if other.min >self.min and other.min<self.max:
             return True
-        if (other.min<self.min and other.max>self.max):
+        if other.min<self.min and other.max>self.max:
             return True
         return False
 
@@ -39,7 +39,7 @@ class SuggestTibCNCS(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-        val=mantid.kernel.FloatBoundedValidator()
+        val=FloatBoundedValidator()
         val.setBounds(0.5,50) #reasonable incident nergy range for CNCS
         self.declareProperty("IncidentEnergy",0.,val,"Incident energy (0.5 to 50 meV)")
         self.declareProperty("TibMin",0.,Direction.Output)

@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 """
 This example reimplements a Gaussian fitting function. It is not meant to
 be used in production for fitting, it is simply provided as a relatively complete

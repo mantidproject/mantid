@@ -1,13 +1,13 @@
-import sys
+#pylint: disable=invalid-name, no-init
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 
-class QueryFlag:
+class QueryFlag(object):
     def isMasked(self, detector, yValue):
         return detector.isMasked()
 
-class QueryValue:
+class QueryValue(object):
     def isMasked(self, detector, yValue):
         return yValue == 1
 
@@ -23,8 +23,10 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
         return "Saves the masking information in a workspace to a Cal File."
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input), "The workspace containing the Masking to extract.")
-        self.declareProperty(FileProperty(name="OutputFile",defaultValue="",action=FileAction.Save,extensions=['cal']), "The file for the results.")
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),\
+            "The workspace containing the Masking to extract.")
+        self.declareProperty(FileProperty(name="OutputFile",defaultValue="",\
+            action=FileAction.Save,extensions=['cal']), "The file for the results.")
 
         self.declareProperty("Invert", False, "If True, masking is inverted in the input workspace. Default: False")
 
@@ -35,7 +37,7 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
         invert = self.getProperty("Invert").value
         mask_query = QueryFlag()
         if inputWorkspace.id() == "MaskWorkspace":
-                mask_query = QueryValue()
+            mask_query = QueryValue()
 
         #check for consistency
         if len(inputWorkspace.readX(0)) < 1:
@@ -58,7 +60,7 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
             try:
                 det = inputWorkspace.getDetector(i)
                 y_value = inputWorkspace.readY(i)[0]
-                if (mask_query.isMasked(det, y_value)): #check if masked
+                if mask_query.isMasked(det, y_value): #check if masked
                     group = masking_flag
                 else:
                     group = not_masking_flag
@@ -67,8 +69,8 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
                     detIDs = det.getDetectorIDs()
                 except:
                     detIDs = [det.getID()]
-                for id in detIDs:
-                    calFile.write(self.FormatLine(i,id,0.0,group,group))
+                for did in detIDs:
+                    calFile.write(self.FormatLine(i,did,0.0,group,group))
             except:
     			#no detector for this spectra
                 pass

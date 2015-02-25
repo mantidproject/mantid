@@ -21,6 +21,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <boost/optional.hpp>
 
 // IsamplePosition should be IsampleOrientation
 namespace Mantid {
@@ -108,9 +109,13 @@ public:
   const Peak &getPeak(int peakNum) const;
 
   API::IPeak *createPeak(Kernel::V3D QFrame,
-                         double detectorDistance = 1.0) const;
+                         boost::optional<double> detectorDistance = boost::optional<double>()) const;
   std::vector<std::pair<std::string, std::string>>
   peakInfo(Kernel::V3D qFrame, bool labCoords) const;
+
+
+  Peak *createPeakHKL(Kernel::V3D HKL) const;
+
   int peakInfoNumber(Kernel::V3D qFrame, bool labCoords) const;
 
   std::vector<Peak> &getPeaks();

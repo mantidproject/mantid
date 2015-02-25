@@ -93,6 +93,7 @@ set ( SRC_FILES
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
+        src/PeakFunctionIntegrator.cpp
 	src/PeakTransform.cpp
 	src/PeakTransformHKL.cpp
 	src/PeakTransformQLab.cpp
@@ -253,6 +254,7 @@ set ( INC_FILES
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
+        inc/MantidAPI/PeakFunctionIntegrator.h
 	inc/MantidAPI/PeakTransform.h
 	inc/MantidAPI/PeakTransformFactory.h
 	inc/MantidAPI/PeakTransformHKL.h
@@ -350,6 +352,7 @@ set ( TEST_FILES
 	ParamFunctionAttributeHolderTest.h
 	ParameterReferenceTest.h
 	ParameterTieTest.h
+        PeakFunctionIntegratorTest.h
 	PeakTransformHKLTest.h
 	PeakTransformQLabTest.h
 	PeakTransformQSampleTest.h
