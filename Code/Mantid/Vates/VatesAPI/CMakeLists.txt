@@ -40,6 +40,7 @@ src/vtkDataSetToWsName.cpp
 src/vtkDataSetToWsLocation.cpp
 src/vtkMDLineFactory.cpp
 src/vtkMDQuadFactory.cpp
+src/vtkNullUnstructuredGrid.cpp
 src/vtkSplatterPlotFactory.cpp
 src/vtkMDHexFactory.cpp
 src/vtkPeakMarkerFactory.cpp
@@ -98,6 +99,7 @@ inc/MantidVatesAPI/vtkDataSetToWsLocation.h
 inc/MantidVatesAPI/vtkMDLineFactory.h
 inc/MantidVatesAPI/vtkMDQuadFactory.h
 inc/MantidVatesAPI/vtkMDHexFactory.h
+inc/MantidVatesAPI/vtkNullUnstructuredGrid.h
 inc/MantidVatesAPI/vtkSplatterPlotFactory.h
 inc/MantidVatesAPI/vtkPeakMarkerFactory.h
 inc/MantidVatesAPI/vtkMDHistoHexFactory.h
@@ -149,6 +151,7 @@ test/IgnoreZerosThresholdRangeTest.h
 test/VatesKnowledgeSerializerTest.h
 test/vtkDataSetToScaledDataSetTest.h
 test/vtkDataSetToNonOrthogonalDataSetTest.h
+test/vtkNullUnstructuredGridTest.h
 )
 
 include_directories( inc )

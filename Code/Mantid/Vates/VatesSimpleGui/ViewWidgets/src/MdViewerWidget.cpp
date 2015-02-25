@@ -20,7 +20,7 @@
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
 #endif
-
+#include <pqApplicationCore.h>
 #include <pqActiveObjects.h>
 #include <pqAnimationManager.h>
 #include <pqAnimationScene.h>
@@ -523,7 +523,6 @@ void MdViewerWidget::onSwitchSoures(std::string temporaryWorkspaceName, std::str
   }
 }
 
-
 /**
  * Creates and renders a temporary workspace source 
  * @param temporaryWorkspaceName The name of the temporary workspace.
@@ -533,13 +532,13 @@ void MdViewerWidget::prepareTemporaryWorkspace(const std::string temporaryWorksp
 {
   // Load a new source plugin
   pqPipelineSource* newTemporarySource = this->currentView->setPluginSource(QString::fromStdString(sourceType), QString::fromStdString(temporaryWorkspaceName));
-  
+
   // It seems that the new source gets set as active before it is fully constructed. We therefore reset it.
   pqActiveObjects::instance().setActiveSource(NULL);
   pqActiveObjects::instance().setActiveSource(newTemporarySource);
   m_temporarySourcesManager.registerTemporarySource(newTemporarySource);
 
-  //this->renderAndFinalSetup();
+  this->renderAndFinalSetup();
 }
 
 /**
@@ -551,8 +550,6 @@ void MdViewerWidget::renderOriginalWorkspace(const std::string originalWorkspace
   // Load a new source plugin
   QString sourcePlugin = "MDEW Source";
   this->currentView->setPluginSource(sourcePlugin, QString::fromStdString(originalWorkspaceName));
-
-  this->renderAndFinalSetup();
 }
 
 
@@ -609,8 +606,11 @@ void MdViewerWidget::removeRebinning(pqPipelineSource* source, bool forced, Mode
       g_log.warning() << error.what();
     }
 
-    // Remove the MDHisto source
+    // Remove the temporary workspace source
     deleteSpecificSource(temporaryWorkspaceName);
+
+    // Render and final setup
+    this->renderAndFinalSetup();
 
     // Set the buttons correctly if we switch to splatterplot
     if ( view == ModeControlWidget::SPLATTERPLOT)
