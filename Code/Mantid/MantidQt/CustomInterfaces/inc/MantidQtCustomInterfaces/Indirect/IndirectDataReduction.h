@@ -10,6 +10,7 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectDataReductionTab.h"
 
+#include <QRegExp>
 #include <QScrollArea>
 
 
@@ -115,6 +116,15 @@ namespace MantidQt
       /// Set and show an instrument-specific widget
       virtual void closeEvent(QCloseEvent* close);
 
+      /**
+       * Adds a tab to the cache of tabs that can be shown.
+       *
+       * THis method is used to ensure that the tabs are always loaded and their
+       * layouts setup for the sake of screenshoting them for documentation.
+       *
+       * @param T Tab type, must be subclass of IndirectDataReductionTab
+       * @param name Name to be displayed on tab
+       */
       template <typename T>
       void addTab(const QString & name)
       {
@@ -127,6 +137,7 @@ namespace MantidQt
         tabScrollArea->setWidgetResizable(true);
 
         QWidget * tabContent = new QWidget(tabScrollArea);
+        tabContent->setObjectName("tab" + QString(name).remove(QRegExp("[ ,()]")));
         tabScrollArea->setWidget(tabContent);
         tabScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -138,7 +149,11 @@ namespace MantidQt
         connect(tabIDRContent, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
         connect(tabIDRContent, SIGNAL(updateRunButton(bool, QString, QString)), this, SLOT(updateRunButton(bool, QString, QString)));
 
+        // Add to the cache
         m_tabs[name] = qMakePair(tabWidget, tabIDRContent);
+
+        // Add all tabs to UI initially
+        m_uiForm.twIDRTabs->addTab(tabWidget, name);
       }
 
       friend class IndirectDataReductionTab;
