@@ -125,7 +125,7 @@ contribution to this particular region in the :math:`HKL` space.
 
 A similar equation to :eq:`proportionality` can be obtained for inelastic scattering, by replacing
 :math:`k` with :math:`k_F` for direct geometry or with :math:`k_I` for the
-indirect case. We can then relate :math:`k_I` or :math:`k_F` with the enrgy
+indirect case. We can then relate :math:`k_I` or :math:`k_F` with the energy
 transfer :math:`\Delta E`, to get the intersections along the energy transfer
 direction.
 

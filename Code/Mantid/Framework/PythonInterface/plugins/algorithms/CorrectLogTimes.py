@@ -1,11 +1,13 @@
+#pylint: disable=invalid-name,no-init
 import mantid.simpleapi
 import mantid.api
 import mantid.kernel
-import numpy
 
 class CorrectLogTimes(mantid.api.PythonAlgorithm):
     """ Class to shift log times to match proton charge
     """
+
+    ws = None
 
     def category(self):
         """ Mantid required

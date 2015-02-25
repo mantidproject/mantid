@@ -98,9 +98,9 @@ public:
 
     Peak pIn(inst, 1, 1.0, startPos );
     if (CoordinatesToUse == "Q (lab frame)")
-      pIn.setQLabFrame(startPos);
+      pIn.setQLabFrame(startPos, 1 /*sample to detector distance*/);
     else if (CoordinatesToUse == "Q (sample frame)")
-      pIn.setQSampleFrame(startPos);
+      pIn.setQSampleFrame(startPos,  1 /*sample to detector distance*/);
     else if (CoordinatesToUse == "HKL")
       pIn.setHKL(startPos);
     peakWS->addPeak( pIn );

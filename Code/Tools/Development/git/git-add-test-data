@@ -1,0 +1,190 @@
+#!/usr/bin/env bash
+#===============================================================================
+# Adds a content link to a test data file that will be referenced using CMake's
+# ExternalData mechanism
+# Debug mode can be requested by setting MANTID_GIT_DEBUG=1
+#===============================================================================
+# Use git supplied helpers
+USAGE="<file1> [<file2> <file3> ...]"
+OPTIONS_SPEC=
+SUBDIRECTORY_OK=Yes
+. "$(git --exec-path)/git-sh-setup"
+
+# Hashing algorithm
+HASH_ALG="MD5"
+# Extension for content link files
+CONTENT_LINK_EXTENSION=".md5"
+# Output indentation
+INDENT="    "
+
+#
+# Adds a content link for a single file
+#   @param $1 - Path to the test data that will be added
+#
+add_test_data() {
+  content_file=$1
+  if [ ! -f $content_file ]; then
+    fatal "Cannot find file '$content_file'"
+  fi
+  debug_msg "Adding data file '$content_file'"
+
+  # Compute hash
+  hash=$(hash_code $content_file)
+  debug_msg "${INDENT}${HASH_ALG} hash: $hash"
+
+  # Create content link if required
+  content_link_filename=$(content_link_filename $content_file)
+  msgs=$(create_or_check_content_link $content_link_filename $content_file $hash)
+  debug_msg $msgs
+
+  git_add $content_link_filename
+  debug_msg "${INDENT}$content_link_filename staged for commit"
+
+  renamed_file=$(rename_content $content_file $hash)
+  debug_msg "${INDENT}Content location: ${renamed_file}"
+
+  # For capture by caller
+  echo ${renamed_file}
+}
+
+#
+# Computes the hash, using the algorithm defined in HASH_ALG, of the given file.
+# Hash code is printed to stdout
+#   @param $1 - Path to the file whose hash is computed
+#   @return 1 on failure, 0 on success
+hash_code() {
+  if [ "$HASH_ALG" = "MD5" ]; then
+    echo $(md5sum $1)
+  else
+    echo "Unknown hashing algorithm '$HASH_ALG' requested"
+    return 1
+  fi
+}
+
+#
+# Computes the MD5 checksum of the given file.
+# MD5 code is printed to stdout
+#   @param $1 - Path to the file whose hash is computed
+md5sum() {
+  md5cmd="cmake -E md5sum"
+  cmake_output=$($md5cmd $1)
+  # CMake output is of form: HASH   filename
+  md5=$(echo $cmake_output | awk '{print $1}')
+  echo $md5
+}
+
+#
+# Rename a file to the hashed variant: $hash_code
+# Path to the new full path is printed to stdout
+#   @param $1 - Path to the original file
+#   @param $2 - Hash code of the file content
+rename_content() {
+  directory_name=$(dirname $1)
+  original_filename=$(basename $1)
+  hash_code=$2
+  hashed_filename=$hash_code
+  full_path=$directory_name/$hashed_filename
+  # Rename the file
+  mv $1 $full_path
+  # Allow caller to capture the value
+  echo $full_path
+}
+
+#
+# Create a text file containing the hash of the content named filename.ext.hash
+# if one does not already exist. If a file exists then verify that the checksum
+# is correct
+# Path to the new full path is printed to stdout
+#   @param $1 - New content link filename
+#   @param $2 - Real content filename
+#   @param $3 - Hash code of the file content
+#   @return 0 indicates content link was created/updated. 10 indicates file existed and was not updated.
+create_or_check_content_link() {
+  content_link_filename=$1
+  content_file=$2
+  hash=$3
+
+  # The content link file may already exist. If it does not then it is created.
+  # If the file exists then either:
+  #   - the hash in the file matches the raw content: nothing is changed.
+  #   - the hash in the file is different to the raw content: it is assume the content will be updated
+  verb="created"
+  if [ -f $content_link_filename ]; then
+    hash_in_file=$(cat $content_link_filename)
+    if [ "$hash_in_file" = "$hash" ]; then
+      echo "${INDENT}${content_file} already referenced as ${content_link_filename}"
+      return 10
+    fi
+    verb="updated"
+  fi
+
+  create_content_link $content_link_filename $hash
+  echo "${INDENT}Content link ${verb}: ${content_link_filename}"
+  return 0
+}
+
+#
+# Create a text file containing the hash of the content named filename.ext.hash
+#   @param $1 - New content link filename
+#   @param $2 - Hash code of the file content
+create_content_link() {
+  content_link_filename=$1
+  # Create file
+  echo $2 > ${content_link_filename}
+}
+
+#
+# Create the filename for the content link
+#   @param $1 Path to original file
+content_link_filename() {
+  echo ${1}${CONTENT_LINK_EXTENSION}
+}
+
+#
+# Adds the given file to git
+#   @param $1 - Path to file
+#
+git_add() {
+  git add $1
+}
+
+#
+# If in debug mode then sends all arguments to echo
+debug_msg() {
+  if [ "$MANTID_GIT_DEBUG" = "1" ]; then
+    echo "$@"
+  fi
+}
+
+#
+# Send a message to stdout
+information_msg() {
+  echo "$@"
+}
+
+#
+# Sends a fatal error message to stderr and aborts the script
+#   @param $1 Message
+fatal() {
+  echo "$@" 1>&2
+  exit 1
+}
+
+#-------------------------------------------------------------------------------
+
+# Check arguments
+if [ $# = 0 ]; then
+  usage
+fi
+
+datafiles=$*
+all_hashed_files=""
+for datafile in $datafiles; do
+  hashed_content=$(add_test_data $datafile)
+  all_hashed_files="$all_hashed_files $hashed_content"
+done
+
+information_msg "Please upload the following files to the remote store under the $HASH_ALG directory:"
+for file in $all_hashed_files; do
+  information_msg "${INDENT}$file"
+done

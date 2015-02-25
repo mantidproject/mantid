@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -8,6 +9,12 @@ import os.path
 
 
 class IndirectTransmissionMonitor(PythonAlgorithm):
+
+    _sample_ws_in = None
+    _can_ws_in = None
+    _out_ws = None
+    _plot = None
+    _save = None
 
     def category(self):
         return "Workflow\\Inelastic;PythonAlgorithms;Inelastic"
@@ -25,7 +32,6 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace group')
 
-        self.declareProperty(name='Verbose', defaultValue=False, doc='Output more verbose message to log')
         self.declareProperty(name='Plot', defaultValue=False, doc='Plot result workspace')
         self.declareProperty(name='Save', defaultValue=False, doc='Save result workspace to nexus file in the default save directory')
 
@@ -57,16 +63,14 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         self.setProperty('OutputWorkspace', self._out_ws)
 
-        if self._verbose:
-            logger.notice('Transmission : ' + str(trans))
+        logger.information('Transmission : ' + str(trans))
 
         # Save the tranmissin workspace group to a nexus file
         if self._save:
             workdir = config['defaultsave.directory']
             path = os.path.join(workdir, self._out_ws + '.nxs')
             SaveNexusProcessed(InputWorkspace=self._out_ws, Filename=path)
-            if self._verbose:
-                logger.notice('Output file created : ' + path)
+            logger.information('Output file created : ' + path)
 
         # Plot spectra from transmission workspace
         if self._plot:
@@ -83,7 +87,6 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         self._sample_ws_in = self.getPropertyValue("SampleWorkspace")
         self._can_ws_in = self.getPropertyValue("CanWorkspace")
         self._out_ws = self.getPropertyValue('OutputWorkspace')
-        self._verbose = self.getProperty("Verbose").value
         self._plot = self.getProperty("Plot").value
         self._save = self.getProperty("Save").value
 
@@ -98,8 +101,7 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         try:
             analyser = instrument.getStringParameter('analyser')[0]
             detector_1_idx = instrument.getComponentByName(analyser)[0].getID() - 1
-            if self._verbose:
-                logger.information('Got index of first detector for analyser %s: %d' % (analyser, detector_1_idx))
+            logger.information('Got index of first detector for analyser %s: %d' % (analyser, detector_1_idx))
         except IndexError:
             detector_1_idx = 2
             logger.warning('Could not determine index of first detetcor, using default value.')
@@ -113,8 +115,7 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
             else:
                 monitor_2_idx = None
 
-            if self._verbose:
-                logger.information('Got index of monitors: %d, %s' % (monitor_1_idx, str(monitor_2_idx)))
+            logger.information('Got index of monitors: %d, %s' % (monitor_1_idx, str(monitor_2_idx)))
         except IndexError:
             monitor_1_idx = 0
             monitor_2_idx = 1

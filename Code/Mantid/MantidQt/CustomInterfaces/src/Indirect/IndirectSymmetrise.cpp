@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/Indirect/IndirectSymmetrise.h"
+# include "MantidQtCustomInterfaces/Indirect/IndirectSymmetrise.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -54,9 +54,6 @@ namespace CustomInterfaces
     m_dblManager->setDecimals(m_properties["PreviewSpec"], 0);
     rawPlotProps->addSubProperty(m_properties["PreviewSpec"]);
 
-    m_properties["PreviewRange"] = m_dblManager->addProperty("X Range");
-    rawPlotProps->addSubProperty(m_properties["PreviewRange"]);
-
     // Preview Properties
     // Mainly used for display rather than getting user input
     m_properties["NegativeYValue"] = m_dblManager->addProperty("Negative Y");
@@ -71,17 +68,10 @@ namespace CustomInterfaces
     m_dblManager->setDecimals(m_properties["DeltaY"], numDecimals);
     m_propTrees["SymmPVPropTree"]->addProperty(m_properties["DeltaY"]);
 
-    // Raw plot
-    m_plots["SymmRawPlot"] = new QwtPlot(m_parentWidget);
-    m_plots["SymmRawPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-    m_plots["SymmRawPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-    m_plots["SymmRawPlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.plotRaw->addWidget(m_plots["SymmRawPlot"]);
-
     // Indicators for Y value at each EMin position
-    m_rangeSelectors["NegativeEMinYPos"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"],
+    m_rangeSelectors["NegativeEMinYPos"] = new MantidWidgets::RangeSelector(m_uiForm.ppRawPlot,
         MantidWidgets::RangeSelector::YSINGLE, true, true);
-    m_rangeSelectors["PositiveEMinYPos"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"],
+    m_rangeSelectors["PositiveEMinYPos"] = new MantidWidgets::RangeSelector(m_uiForm.ppRawPlot,
         MantidWidgets::RangeSelector::YSINGLE, true, true);
 
     m_rangeSelectors["NegativeEMinYPos"]->setColour(Qt::red);
@@ -90,7 +80,7 @@ namespace CustomInterfaces
     m_rangeSelectors["PositiveEMinYPos"]->setMinimum(0);
 
     // Indicator for centre of symmetry (x=0)
-    m_rangeSelectors["CentreMark_Raw"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"],
+    m_rangeSelectors["CentreMark_Raw"] = new MantidWidgets::RangeSelector(m_uiForm.ppRawPlot,
         MantidWidgets::RangeSelector::XSINGLE, true, true);
     m_rangeSelectors["CentreMark_Raw"]->setColour(Qt::cyan);
     m_rangeSelectors["CentreMark_Raw"]->setMinimum(0.0);
@@ -99,37 +89,26 @@ namespace CustomInterfaces
     // The user can use these to move the X range
     // Note that the max and min of the negative range selector corespond to the opposite X value
     // i.e. RS min is X max
-    m_rangeSelectors["NegativeE_Raw"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"]);
-    m_rangeSelectors["PositiveE_Raw"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"]);
+    m_rangeSelectors["NegativeE_Raw"] = new MantidWidgets::RangeSelector(m_uiForm.ppRawPlot);
+    m_rangeSelectors["PositiveE_Raw"] = new MantidWidgets::RangeSelector(m_uiForm.ppRawPlot);
 
     m_rangeSelectors["NegativeE_Raw"]->setColour(Qt::darkGreen);
     m_rangeSelectors["PositiveE_Raw"]->setColour(Qt::darkGreen);
 
-    // Preview plot
-    m_plots["SymmPreviewPlot"] = new QwtPlot(m_parentWidget);
-    m_plots["SymmPreviewPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
-    m_plots["SymmPreviewPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-    m_plots["SymmPreviewPlot"]->setCanvasBackground(Qt::white);
-    m_uiForm.plotPreview->addWidget(m_plots["SymmPreviewPlot"]);
-
     // Indicators for negative and positive X range values on X axis
-    m_rangeSelectors["NegativeE_PV"] = new MantidWidgets::RangeSelector(m_plots["SymmPreviewPlot"],
+    m_rangeSelectors["NegativeE_PV"] = new MantidWidgets::RangeSelector(m_uiForm.ppPreviewPlot,
         MantidWidgets::RangeSelector::XMINMAX, true, true);
-    m_rangeSelectors["PositiveE_PV"] = new MantidWidgets::RangeSelector(m_plots["SymmPreviewPlot"],
+    m_rangeSelectors["PositiveE_PV"] = new MantidWidgets::RangeSelector(m_uiForm.ppPreviewPlot,
         MantidWidgets::RangeSelector::XMINMAX, true, true);
 
     m_rangeSelectors["NegativeE_PV"]->setColour(Qt::darkGreen);
     m_rangeSelectors["PositiveE_PV"]->setColour(Qt::darkGreen);
 
     // Indicator for centre of symmetry (x=0)
-    m_rangeSelectors["CentreMark_PV"] = new MantidWidgets::RangeSelector(m_plots["SymmPreviewPlot"],
+    m_rangeSelectors["CentreMark_PV"] = new MantidWidgets::RangeSelector(m_uiForm.ppPreviewPlot,
         MantidWidgets::RangeSelector::XSINGLE, true, true);
     m_rangeSelectors["CentreMark_PV"]->setColour(Qt::cyan);
     m_rangeSelectors["CentreMark_PV"]->setMinimum(0.0);
-
-    // Refresh the plot windows
-    m_plots["SymmRawPlot"]->replot();
-    m_plots["SymmPreviewPlot"]->replot();
 
     // SIGNAL/SLOT CONNECTIONS
     // Validate the E range when it is changed
@@ -151,9 +130,9 @@ namespace CustomInterfaces
     m_dblManager->setValue(m_properties["EMax"], 0.5);
 
     // Set default x axis range
-    std::pair<double, double> defaultRange(-1.0, 1.0);
-    setAxisRange("SymmRawPlot", QwtPlot::xBottom, defaultRange);
-    setAxisRange("SymmPreviewPlot", QwtPlot::xBottom, defaultRange);
+    QPair<double, double> defaultRange(-1.0, 1.0);
+    m_uiForm.ppRawPlot->setAxisRange(defaultRange, QwtPlot::xBottom);
+    m_uiForm.ppPreviewPlot->setAxisRange(defaultRange, QwtPlot::xBottom);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -188,7 +167,6 @@ namespace CustomInterfaces
     QString outputWorkspaceName = workspaceName.left(workspaceName.length() - 4) + "_sym" + workspaceName.right(4);
 
     bool plot = m_uiForm.ckPlot->isChecked();
-    bool verbose = m_uiForm.ckVerbose->isChecked();
     bool save = m_uiForm.ckSave->isChecked();
 
     double e_min = m_dblManager->value(m_properties["EMin"]);
@@ -200,7 +178,6 @@ namespace CustomInterfaces
     symmetriseAlg->setProperty("XMin", e_min);
     symmetriseAlg->setProperty("XMax", e_max);
     symmetriseAlg->setProperty("Plot", plot);
-    symmetriseAlg->setProperty("Verbose", verbose);
     symmetriseAlg->setProperty("Save", save);
     symmetriseAlg->setProperty("OutputWorkspace", outputWorkspaceName.toStdString());
     symmetriseAlg->setProperty("OutputPropertiesTable", "__SymmetriseProps_temp");
@@ -227,10 +204,8 @@ namespace CustomInterfaces
     updateMiniPlots();
 
     // Set the preview range to the maximum absolute X value
-    auto axisRange = getCurveRange("SymmRawPlot");
+    QPair<double, double> axisRange = m_uiForm.ppRawPlot->getCurveRange("Raw");
     double symmRange = std::max(fabs(axisRange.first), fabs(axisRange.second));
-    g_log.information() << "Symmetrise x axis range +/- " << symmRange << std::endl;
-    m_dblManager->setValue(m_properties["PreviewRange"], symmRange);
 
     // Set valid range for range selectors
     m_rangeSelectors["NegativeE_Raw"]->setRange(-symmRange, 0);
@@ -257,19 +232,14 @@ namespace CustomInterfaces
     Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName.toStdString()));
 
-    // Set the X axis range based on the range specified by the user
-    std::pair<double, double>range;
-    range.first = -m_dblManager->value(m_properties["PreviewRange"]);
-    range.second = m_dblManager->value(m_properties["PreviewRange"]);
-    setAxisRange("SymmRawPlot", QwtPlot::xBottom, range);
-
     // Plot the spectrum chosen by the user
     size_t spectrumIndex = input->getIndexFromSpectrumNumber(spectrumNumber);
-    plotMiniPlot(input, spectrumIndex, "SymmRawPlot");
+    m_uiForm.ppRawPlot->clear();
+    m_uiForm.ppRawPlot->addSpectrum("Raw", input, spectrumIndex);
 
     // Match X axis range on preview plot
-    setAxisRange("SymmPreviewPlot", QwtPlot::xBottom, range);
-    m_plots["SymmPreviewPlot"]->replot();
+    m_uiForm.ppPreviewPlot->setAxisRange(m_uiForm.ppRawPlot->getCurveRange("Raw"), QwtPlot::xBottom);
+    m_uiForm.ppPreviewPlot->replot();
   }
 
   /**
@@ -280,17 +250,6 @@ namespace CustomInterfaces
    */
   void IndirectSymmetrise::replotNewSpectrum(QtProperty *prop, double value)
   {
-    // Validate the preview range
-    if(prop == m_properties["PreviewRange"])
-    {
-      // If preview range was set negative then set it to the absolute value of the value it was set to
-      if(value < 0)
-      {
-        m_dblManager->setValue(m_properties["PreviewRange"], fabs(value));
-        return;
-      }
-    }
-
     // Validate the preview spectra
     if(prop == m_properties["PreviewSpec"])
     {
@@ -316,7 +275,7 @@ namespace CustomInterfaces
     }
 
     // If we get this far then properties are valid so update mini plots
-    if((prop == m_properties["PreviewSpec"]) || (prop == m_properties["PreviewRange"]))
+    if(prop == m_properties["PreviewSpec"])
       updateMiniPlots();
   }
 
@@ -390,7 +349,6 @@ namespace CustomInterfaces
     if(workspaceName.isEmpty())
       return;
 
-    bool verbose = m_uiForm.ckVerbose->isChecked();
     double e_min = m_dblManager->value(m_properties["EMin"]);
     double e_max = m_dblManager->value(m_properties["EMax"]);
     long spectrumNumber = static_cast<long>(m_dblManager->value(m_properties["PreviewSpec"]));
@@ -403,7 +361,6 @@ namespace CustomInterfaces
     symmetriseAlg->setProperty("XMin", e_min);
     symmetriseAlg->setProperty("XMax", e_max);
     symmetriseAlg->setProperty("Plot", false);
-    symmetriseAlg->setProperty("Verbose", verbose);
     symmetriseAlg->setProperty("Save", false);
     symmetriseAlg->setProperty("SpectraRange", spectraRange);
     symmetriseAlg->setProperty("OutputWorkspace", "__Symmetrise_temp");
@@ -449,7 +406,8 @@ namespace CustomInterfaces
 
     // Plot preview plot
     size_t spectrumIndex = symmWS->getIndexFromSpectrumNumber(spectrumNumber);
-    plotMiniPlot("__Symmetrise_temp", spectrumIndex, "SymmPreviewPlot");
+    m_uiForm.ppPreviewPlot->clear();
+    m_uiForm.ppPreviewPlot->addSpectrum("Symmetrised", "__Symmetrise_temp", spectrumIndex);
 
     // Don't want this to trigger when the algorithm is run for all spectra
     disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(previewAlgDone(bool)));

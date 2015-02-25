@@ -1,6 +1,6 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.kernel import *
-from mantid.simpleapi import Scale
 import math
 
 class EQSANSAzimuthalAverage1D(PythonAlgorithm):

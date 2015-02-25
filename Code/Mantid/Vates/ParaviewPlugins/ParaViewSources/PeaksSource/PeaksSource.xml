@@ -45,6 +45,12 @@
           Set the size of the unintegrated peak markers.
         </Documentation>
       </DoubleVectorProperty>
+	  <StringVectorProperty
+         name="Instrument"
+         command="GetInstrument"
+         number_of_elements="1"
+         information_only="1">
+       </StringVectorProperty>
     </SourceProxy>
   </ProxyGroup>
   <!-- End PeaksSource -->

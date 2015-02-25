@@ -175,6 +175,8 @@ private:
   bool checkIfTechniqueContainsKeyword(const std::set<std::string>& techniques, const std::string& keyword) const;
   /// Reset the current view to the appropriate initial view.
   void resetCurrentView(int workspaceType, const std::string& instrumentName);
+  /// Set visibility listener
+  void setVisibilityListener();
 };
 
 } // SimpleGui

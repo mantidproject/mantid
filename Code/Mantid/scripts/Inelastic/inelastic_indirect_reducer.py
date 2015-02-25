@@ -109,7 +109,7 @@ class IndirectReducer(MSGReducer):
         self.append_step(step)
 
         # The "SaveItem" step saves the files in the requested formats.
-        if (len(self._save_formats) > 0):
+        if len(self._save_formats) > 0:
             step = steps.SaveItem()
             step.set_formats(self._save_formats)
             step.set_save_to_cm_1(self._save_to_cm_1)
