@@ -228,7 +228,8 @@ void LoadMuonNexus1::exec() {
     for (int64_t i = m_spec_min; i < m_spec_max; ++i) {
       // Shift the histogram to read if we're not in the first period
       specid_t histToRead = static_cast<specid_t>(i-1 + period * nxload.t_nsp1);
-      loadData(counter, histToRead, nxload, lengthIn - 1,
+      specid_t specNo = static_cast<specid_t>(i);
+      loadData(counter, histToRead, specNo, nxload, lengthIn - 1,
                localWorkspace); // added -1 for NeXus
       counter++;
       progress.report();
@@ -237,7 +238,8 @@ void LoadMuonNexus1::exec() {
     if (m_list) {
       for (size_t i = 0; i < m_spec_list.size(); ++i) {
         specid_t histToRead = static_cast<specid_t>(m_spec_list[i]-1 + period * nxload.t_nsp1);
-        loadData(counter, histToRead, nxload, lengthIn - 1,
+        specid_t specNo = static_cast<specid_t>(m_spec_list[i]);
+        loadData(counter, histToRead, m_spec_list[i], nxload, lengthIn - 1,
                  localWorkspace);
         counter++;
         progress.report();
@@ -484,7 +486,7 @@ TableWorkspace_sptr LoadMuonNexus1::createDetectorGroupingTable(
 *  @param localWorkspace :: A pointer to the workspace in which the data will be
 * stored
 */
-void LoadMuonNexus1::loadData(size_t hist, specid_t &i, MuonNexusReader &nxload,
+void LoadMuonNexus1::loadData(size_t hist, specid_t &i, specid_t specNo, MuonNexusReader &nxload,
                               const int64_t lengthIn,
                               DataObjects::Workspace2D_sptr localWorkspace) {
   // Read in a spectrum
@@ -510,7 +512,7 @@ void LoadMuonNexus1::loadData(size_t hist, specid_t &i, MuonNexusReader &nxload,
     new MantidVec(timeChannels, timeChannels + lengthIn+1));
 
   localWorkspace->setX(hist, timeChannelsVec);
-  localWorkspace->getSpectrum(hist)->setSpectrumNo(i+1);
+  localWorkspace->getSpectrum(hist)->setSpectrumNo(specNo);
 
   // Clean up
   delete[] timeChannels;
