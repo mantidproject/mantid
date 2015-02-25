@@ -1,8 +1,8 @@
 ###########################################################################
 # CMake version check.
-# Only versions after 2.8.5 will find the HL component for HDF5
+# Only versions after 2.8.12 will find the HL component for HDF5
 ###########################################################################
-cmake_minimum_required ( VERSION 2.8.5 )
+cmake_minimum_required ( VERSION 2.8.12 )
 
 # System package target is important for the windows builds as it allows us to package only the dlls and exes and exclude libs. Defaults to empty for other platforms.
 set ( SYSTEM_PACKAGE_TARGET "")
