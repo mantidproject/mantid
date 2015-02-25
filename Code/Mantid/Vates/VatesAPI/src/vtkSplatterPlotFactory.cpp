@@ -1,10 +1,12 @@
 #include "MantidVatesAPI/vtkSplatterPlotFactory.h"
+#include "MantidVatesAPI/MetaDataExtractorUtils.h"
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ReadLock.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/Common.h"
 
@@ -19,6 +21,7 @@
 
 #include <algorithm>
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <qwt_double_interval.h>
 
 using namespace Mantid::API;
 using namespace Mantid::MDEvents;
@@ -55,7 +58,8 @@ namespace VATES
   m_numPoints(numPoints), m_percentToUse(percentToUse),
   m_buildSortedList(true), m_wsName(""), dataSet(NULL),
   slice(false), sliceMask(NULL), sliceImplicitFunction(NULL),
-  m_time(0.0)
+  m_time(0.0),
+  m_metaDataExtractor(new MetaDataExtractorUtils())
   {
   }
 
@@ -207,7 +211,10 @@ namespace VATES
     saved_signals.reserve(numPoints);
     saved_centers.reserve(numPoints);
     saved_n_points_in_cell.reserve(numPoints);
-  
+
+    double maxSignalScalar = 0;
+    double minSignalScalar = VTK_DOUBLE_MAX;
+
     size_t pointIndex = 0;
     size_t box_index  = 0;
     bool   done       = false;
@@ -220,6 +227,8 @@ namespace VATES
         continue;
       }
       float signal_normalized = static_cast<float>(box->getSignalNormalized());
+      maxSignalScalar = maxSignalScalar > signal_normalized ? maxSignalScalar:signal_normalized;
+      minSignalScalar = minSignalScalar > signal_normalized ? signal_normalized : minSignalScalar;
       size_t newPoints = box->getNPoints();
       size_t num_from_this_box = points_per_box;
       if (num_from_this_box > newPoints)
@@ -301,7 +310,7 @@ namespace VATES
     //points->Squeeze();
     signal->Squeeze();
     visualDataSet->Squeeze();
-
+    
     // Add points and scalars
     visualDataSet->SetPoints(points);
     visualDataSet->GetCellData()->SetScalars(signal);
@@ -526,10 +535,30 @@ namespace VATES
       this->slice = false;
     }
 
+    // Macro to call the right instance of the
+    CALL_MDEVENT_FUNCTION(this->doCreate, m_workspace);
+
+
+    // Set the instrument
+    m_instrument = m_metaDataExtractor->extractInstrument(m_workspace);
+    double* range = NULL;
+
+    if (dataSet)
+    {
+      range = dataSet->GetScalarRange();
+    }
+
+    if (range)
+    {
+      m_minValue = range[0];
+      m_maxValue = range[1];
+    }
+
+
     // Check for the workspace type, i.e. if it is MDHisto or MDEvent
     IMDEventWorkspace_sptr eventWorkspace = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
     IMDHistoWorkspace_sptr histoWorkspace = boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_workspace);
-  
+
     if (eventWorkspace)
     {
       // Macro to call the right instance of the
@@ -636,5 +665,31 @@ namespace VATES
     m_time = time;
   }
 
+    /**
+    * Getter for the minimum value;
+    * @return The minimum value of the data set.
+    */
+  double vtkSplatterPlotFactory::getMinValue()
+  {
+    return m_minValue;
+  }
+
+  /**
+  * Getter for the maximum value;
+  * @return The maximum value of the data set.
+  */
+  double vtkSplatterPlotFactory::getMaxValue()
+  {
+    return m_maxValue;
+  }
+
+  /**
+  * Getter for the instrument.
+  * @returns The name of the instrument which is associated with the workspace.
+  */
+  const std::string& vtkSplatterPlotFactory::getInstrument()
+  {
+    return m_instrument;
+  }
 }
 }

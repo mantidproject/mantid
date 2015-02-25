@@ -104,7 +104,6 @@ private:
 
   /// peak radius value.
   double m_peakRadius; 
-
 };
 }
 }

@@ -17,7 +17,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
     def setUp(self):
         if self.reducer == None or type(self.reducer) != type(DirectEnergyConversion):
-            self.reducer = DirectEnergyConversion("MAPS");
+            self.reducer = DirectEnergyConversion("MAPS")
     def tearDown(self):
         pass
 
@@ -34,17 +34,17 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_set_non_default_simple_value(self):
         tReducer = self.reducer
         # should do nothing as already initialized above
-        tReducer.initialise("MAP");
+        tReducer.initialise("MAP")
 
         prop_changed=tReducer.set_input_parameters(van_mass=100,det_cal_file='det4to1_1912.dat')
         self.assertTrue("van_mass" in prop_changed)
         self.assertTrue("det_cal_file" in prop_changed)
 
-        self.assertEqual(tReducer.van_mass,100);
-        self.assertEqual(tReducer.det_cal_file,'det4to1_1912.dat');
+        self.assertEqual(tReducer.van_mass,100)
+        self.assertEqual(tReducer.det_cal_file,'det4to1_1912.dat')
 
         self.assertAlmostEqual(tReducer.van_sig,0.,7)
-        kw=dict();
+        kw=dict()
         kw["vanadium-mass"]=200
         kw["diag_van_median_sigma"]=1
         kw["det_cal_file"]=None
@@ -54,8 +54,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertTrue("van_mass" in prop_changed,"vanadium-mass should correspond to van_mass")
         self.assertTrue("van_sig" in prop_changed," diag_van_median_sigma should correspond to van_sig ")
 
-        self.assertEqual(tReducer.van_mass,200);
-        self.assertEqual(tReducer.det_cal_file,None);
+        self.assertEqual(tReducer.van_mass,200)
+        self.assertEqual(tReducer.det_cal_file,None)
         self.assertAlmostEqual(tReducer.van_sig,1.,7)
 
 
@@ -63,7 +63,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_set_non_default_complex_value(self):
         tReducer = self.reducer
         # should do nothing as already initialized above, but if not will initiate the instrument
-        tReducer.initialise("MAP");
+        tReducer.initialise("MAP")
 
         range = tReducer.norm_mon_integration_range
         self.assertAlmostEqual(range[0],1000.,7," Default integration min range on MAPS should be as described in MAPS_Parameters.xml file")
@@ -73,7 +73,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertRaises(KeyError,tReducer.set_input_parameters,mon_norm_range=1)
         self.assertRaises(KeyError,tReducer.set_input_parameters,mon_norm_range=[10,100,100])
 
-        kw=dict();
+        kw=dict()
         kw["norm_mon_integration_range"]=[50,1050]
         kw["ei-mon1-spec"]=10
         prop_changed=tReducer.set_input_parameters(**kw)
@@ -89,9 +89,9 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_set_non_default_complex_value_synonims(self):
         tReducer = self.reducer
         # should do nothing as already initialized above, but if not will initiate the instrument
-        tReducer.initialise("MAP");
+        tReducer.initialise("MAP")
         #
-        kw = dict();
+        kw = dict()
         kw["test_ei2_mon_spectra"]=10000
         prop_changed=tReducer.set_input_parameters(**kw)
 
@@ -106,7 +106,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_set_get_mono_range(self):
         tReducer = self.reducer
         # should do nothing as already initialized above, but if not will initiate the instrument
-        tReducer.initialise("MAP");
+        tReducer.initialise("MAP")
 
         energy_incident = 100
         tReducer.incident_energy = energy_incident
@@ -118,7 +118,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_comlex_get(self):
         tReducer = self.reducer
 
-        van_rmm = tReducer.van_rmm;
+        van_rmm = tReducer.van_rmm
         self.assertEqual(50.9415,van_rmm)
 
     def test_comlex_set(self):
@@ -154,7 +154,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_set_format(self):
         tReducer = self.reducer
 
-        tReducer.save_format = '';
+        tReducer.save_format = ''
         self.assertTrue(tReducer.save_format is None)
 
         #self.assertRaises(KeyError,tReducer.energy_bins=20,None)
@@ -193,30 +193,27 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
 
     def test_save_formats(self):
-        tReducer = self.reducer;
+        tReducer = self.reducer
 
         ws_name = '__empty_'+tReducer._instr_name
 
         pws = mtd[ws_name]
-        self.assertEqual(pws.name(),ws_name);
+        self.assertEqual(pws.name(),ws_name)
         self.assertTrue(tReducer.save_format is None)
         # do nothing
         tReducer.save_results(pws,'test_path')
-        tReducer.test_name='';
+        tReducer.test_name=''
         def f_spe(workspace, filename):
-                tReducer.test_name += (workspace.name()+'_file_spe_' + filename)
+            tReducer.test_name += (workspace.name()+'_file_spe_' + filename)
         def f_nxspe(workspace, filename):
-                tReducer.test_name += (workspace.name()+'_file_nxspe_' + filename)
+            tReducer.test_name += (workspace.name()+'_file_nxspe_' + filename)
         def f_nxs(workspace, filename):
-                tReducer.test_name += (workspace.name()+'_file_nxs_' + filename)
-
+            tReducer.test_name += (workspace.name()+'_file_nxs_' + filename)
 
         # redefine test save methors to produce test ouptut
-        tReducer._DirectEnergyConversion__save_formats['.spe']=lambda workspace,filename: f_spe(workspace,filename);
-        tReducer._DirectEnergyConversion__save_formats['.nxspe']=lambda workspace,filename : f_nxspe(workspace,filename);
-        tReducer._DirectEnergyConversion__save_formats['.nxs']=lambda workspace,filename : f_nxs(workspace,filename);
-
-
+        tReducer._DirectEnergyConversion__save_formats['.spe']=lambda workspace,filename: f_spe(workspace,filename)
+        tReducer._DirectEnergyConversion__save_formats['.nxspe']=lambda workspace,filename : f_nxspe(workspace,filename)
+        tReducer._DirectEnergyConversion__save_formats['.nxs']=lambda workspace,filename : f_nxs(workspace,filename)
 
         # set non-exisiting format
         tReducer.save_format = 'non-existing-format'
@@ -228,62 +225,62 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer.save_format = '.spe'
         self.assertEqual(tReducer.save_format,['.spe'])
 
-        tReducer.test_name='';
+        tReducer.test_name=''
         tReducer.save_results(pws)
         self.assertEquals(ws_name+'_file_spe_'+ws_name+'.spe',tReducer.test_name)
         file_long_name = ws_name+'_file_spe_other_file_name.spe'
 
-        tReducer.test_name='';
+        tReducer.test_name=''
         tReducer.save_results(pws,'other_file_name')
         self.assertEquals(file_long_name,tReducer.test_name)
 
         file_long_name=ws_name+'_file_nxspe_ofn.nxspe'+ws_name+'_file_nxs_ofn.nxs'
-        tReducer.test_name='';
+        tReducer.test_name=''
         tReducer.save_results(pws,'ofn',['.nxspe','.nxs'])
         self.assertEquals(file_long_name,tReducer.test_name)
 
         #clear all previous default formats
-        tReducer.save_format=[];
+        tReducer.save_format=[]
         self.assertTrue(tReducer.save_format is None)
 
         format_list = ['.nxspe','.nxs','.spe']
-        file_long_name = '';
-        tReducer.save_format = format_list;
+        file_long_name = ''
+        tReducer.save_format = format_list
         for i in xrange(len(format_list)):
-            self.assertEqual(tReducer.save_format[i],format_list[i]);
-            end = len(format_list[i]);
+            self.assertEqual(tReducer.save_format[i],format_list[i])
+            end = len(format_list[i])
             file_long_name+=ws_name+'_file_'+format_list[i][1:end]+'_ofn'+format_list[i]
 
-        tReducer.test_name='';
+        tReducer.test_name=''
         tReducer.save_results(pws,'ofn')
         self.assertEquals(file_long_name,tReducer.test_name)
 
     def test_set_spectra_to_mon(self):
-        tReducer = self.reducer;
+        tReducer = self.reducer
 
-        self.assertTrue(tReducer.spectra_to_monitors_list is None);
+        self.assertTrue(tReducer.spectra_to_monitors_list is None)
 
-        tReducer.spectra_to_monitors_list = 35;
-        self.assertTrue(isinstance(tReducer.spectra_to_monitors_list,list));
-        self.assertEquals(35,tReducer.spectra_to_monitors_list[0]);
+        tReducer.spectra_to_monitors_list = 35
+        self.assertTrue(isinstance(tReducer.spectra_to_monitors_list,list))
+        self.assertEquals(35,tReducer.spectra_to_monitors_list[0])
 
-        tReducer.spectra_to_monitors_list = None;
-        self.assertTrue(tReducer.spectra_to_monitors_list is None);
-        tReducer.spectra_to_monitors_list = 'None';
-        self.assertTrue(tReducer.spectra_to_monitors_list is None);
-        tReducer.spectra_to_monitors_list = [];
-        self.assertTrue(tReducer.spectra_to_monitors_list is None);
+        tReducer.spectra_to_monitors_list = None
+        self.assertTrue(tReducer.spectra_to_monitors_list is None)
+        tReducer.spectra_to_monitors_list = 'None'
+        self.assertTrue(tReducer.spectra_to_monitors_list is None)
+        tReducer.spectra_to_monitors_list = []
+        self.assertTrue(tReducer.spectra_to_monitors_list is None)
 
-        tReducer.spectra_to_monitors_list = '467';
-        self.assertEquals(467,tReducer.spectra_to_monitors_list[0]);
+        tReducer.spectra_to_monitors_list = '467'
+        self.assertEquals(467,tReducer.spectra_to_monitors_list[0])
 
-        tReducer.spectra_to_monitors_list = '467,444';
-        self.assertEquals(467,tReducer.spectra_to_monitors_list[0]);
-        self.assertEquals(444,tReducer.spectra_to_monitors_list[1]);
+        tReducer.spectra_to_monitors_list = '467,444'
+        self.assertEquals(467,tReducer.spectra_to_monitors_list[0])
+        self.assertEquals(444,tReducer.spectra_to_monitors_list[1])
 
-        tReducer.spectra_to_monitors_list = ['467','444'];
-        self.assertEquals(467,tReducer.spectra_to_monitors_list[0]);
-        self.assertEquals(444,tReducer.spectra_to_monitors_list[1]);
+        tReducer.spectra_to_monitors_list = ['467','444']
+        self.assertEquals(467,tReducer.spectra_to_monitors_list[0])
+        self.assertEquals(444,tReducer.spectra_to_monitors_list[1])
 
 
 
@@ -291,35 +288,35 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_process_copy_spectra_to_monitors(self):
         pass
     def test_set_get_ei_monitor(self):
-        tReducer = self.reducer;
+        tReducer = self.reducer
 
         self.assertEqual(41474,tReducer.ei_mon_spectra[0])
         self.assertEqual(41475,tReducer.ei_mon_spectra[1])
 
     # HOW TO MAKE IT WORK? it fails silently
-    #    tReducer.ei_mon_spectra[1]=100;
+    #    tReducer.ei_mon_spectra[1]=100
     #    self.assertEqual(41474,tReducer.ei_mon_spectra[0])
     #    self.assertEqual(100,tReducer.ei_mon_spectra[1])
 
 
-        tReducer.ei_mon_spectra=[100,200];
+        tReducer.ei_mon_spectra=[100,200]
         self.assertEqual(100,tReducer.ei_mon_spectra[0])
         self.assertEqual(200,tReducer.ei_mon_spectra[1])
 
-        tReducer.init_idf_params(True);
+        tReducer.init_idf_params(True)
         self.assertEqual(41474,tReducer.ei_mon_spectra[0])
         self.assertEqual(41475,tReducer.ei_mon_spectra[1])
 
     def test_load_monitors_with_workspacer(self):
-        tReducer =self.reducer;
+        tReducer =self.reducer
 
         self.assertFalse(tReducer.load_monitors_with_workspace)
 
-        tReducer.load_monitors_with_workspace=True;
+        tReducer.load_monitors_with_workspace=True
         self.assertTrue(tReducer.load_monitors_with_workspace)
-        tReducer.load_monitors_with_workspace=0;
+        tReducer.load_monitors_with_workspace=0
         self.assertFalse(tReducer.load_monitors_with_workspace)
-        tReducer.load_monitors_with_workspace=10;
+        tReducer.load_monitors_with_workspace=10
         self.assertTrue(tReducer.load_monitors_with_workspace)
 
     #def test_diag_call(self):
@@ -331,4 +328,4 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
 
 if __name__=="__main__":
-        unittest.main()
+    unittest.main()

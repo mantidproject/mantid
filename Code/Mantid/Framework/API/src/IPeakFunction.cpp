@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/Jacobian.h"
+#include "MantidAPI/PeakFunctionIntegrator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
 
@@ -128,6 +129,44 @@ void IPeakFunction::setPeakRadius(const int &r) {
     Kernel::ConfigService::Instance().setString("curvefitting.peakRadius",
                                                 setting);
   }
+}
+
+/// Returns the integral intensity of the peak function, using the peak radius
+/// to determine integration borders.
+double IPeakFunction::intensity() const {
+  double x0 = centre();
+  double dx = fabs(s_peakRadius * fwhm());
+
+  PeakFunctionIntegrator integrator;
+  IntegrationResult result = integrator.integrate(*this, x0 - dx, x0 + dx);
+
+  if (!result.success) {
+    return 0.0;
+  }
+
+  return result.result;
+}
+
+/// Sets the integral intensity of the peak by adjusting the height.
+void IPeakFunction::setIntensity(const double newIntensity) {
+  double currentHeight = height();
+  double currentIntensity = intensity();
+
+  if (currentIntensity == 0.0) {
+    // Try to set a different height first.
+    setHeight(2.0);
+
+    currentHeight = height();
+    currentIntensity = intensity();
+
+    // If the current intensity is still 0, there's nothing left to do.
+    if (currentIntensity == 0.0) {
+      throw std::invalid_argument(
+          "Cannot set new intensity, not enough information available.");
+    }
+  }
+
+  setHeight(newIntensity / currentIntensity * currentHeight);
 }
 
 } // namespace API

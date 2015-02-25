@@ -1,5 +1,5 @@
+#pylint: disable=invalid-name
 from geometry_writer import MantidGeom
-import math
 
 NUM_PIXELS_PER_TUBE = 304
 NUM_TUBES = 256

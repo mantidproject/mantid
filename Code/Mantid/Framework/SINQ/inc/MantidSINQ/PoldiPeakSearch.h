@@ -94,10 +94,12 @@ protected:
   double
   minimumPeakHeightFromBackground(UncertainValue backgroundWithSigma) const;
   std::vector<PoldiPeak_sptr>
-  getPeaks(MantidVec::const_iterator baseListStart,
+  getPeaks(const MantidVec::const_iterator &baseListStart,
+           const MantidVec::const_iterator &baseListEnd,
            std::list<MantidVec::const_iterator> peakPositions,
            const MantidVec &xData) const;
-  double getFWHMEstimate(MantidVec::const_iterator baseListStart,
+  double getFWHMEstimate(const MantidVec::const_iterator &baseListStart,
+                         const MantidVec::const_iterator &baseListEnd,
                          MantidVec::const_iterator peakPosition,
                          const MantidVec &xData) const;
 

@@ -1,16 +1,10 @@
+#pylint: disable=invalid-name
 
-import sys
 from PyChopUI import Ui_MainWindow
-from PyQt4 import QtCore, uic,QtGui
-#from DirectEnergyConversion import *
-import time as time
+from PyQt4 import QtCore, QtGui
 from mantidplot import *
-import dgreduce
-import inspect
-import numpy
 from mantid import *
 from mantid.simpleapi import *
-import math
 import PyChop
 
 class MainWindow(QtGui.QMainWindow):
@@ -40,9 +34,9 @@ class MainWindow(QtGui.QMainWindow):
         self.inst=name
         config['default.instrument']=name
         if len(self.chop)>0:
-           message,err = PyChop.setchoptype(self.inst,self.chop)
-           if err>0:
-             self.chop=''
+            message,err = PyChop.setchoptype(self.inst,self.chop)
+            if err>0:
+                self.chop=''
 
     def set_chop(self,chop_type):
         message,err = PyChop.setchoptype(self.inst,chop_type)

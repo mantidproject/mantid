@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from PyQt4 import QtGui, uic, QtCore
 import reduction_gui.widgets.util as util
 import math
@@ -120,7 +121,7 @@ class SANSInstrumentWidget(BaseWidget):
         self.connect(self._summary.log_binning_radio, QtCore.SIGNAL("clicked(bool)"), self._summary.align_check.setEnabled)
 
         self._summary.scale_edit.setText("1")
-        
+
         self._summary.n_wedges_edit.setText("2")
         self._summary.wedge_angle_edit.setText("30")
         self._summary.wedge_offset_edit.setText("0")
@@ -150,7 +151,7 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.mask_side_none_radio.hide()
             self._summary.mask_side_front_radio.hide()
             self._summary.mask_side_back_radio.hide()
-            
+
         if not self._in_mantidplot:
             self._summary.dark_plot_button.hide()
             self._summary.scale_data_plot_button.hide()
@@ -349,18 +350,18 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.align_check.setEnabled(state.log_binning)
         self._summary.align_check.setChecked(state.align_log_with_decades)
         self._summary.error_weighting_check.setChecked(state.error_weighting)
-        
+
         self._summary.n_wedges_edit.setText(str(state.n_wedges))
         self._summary.wedge_angle_edit.setText(str(state.wedge_angle))
         self._summary.wedge_offset_edit.setText(str(state.wedge_offset))
-        
+
         # Mask
         self._summary.mask_edit.setText(str(state.mask_file))
         self._summary.mask_check.setChecked(state.use_mask_file)
         self._mask_checked(state.use_mask_file)
         self._masked_detectors = state.detector_ids
         self.mask_reload = True
-        
+
         if state.masked_side == 'Front':
             self._summary.mask_side_front_radio.setChecked(True)
         elif state.masked_side == 'Back':
@@ -440,7 +441,7 @@ class SANSInstrumentWidget(BaseWidget):
             m.masked_side = 'Back'
         else:
             m.masked_side = None
-            
+
         # Mask detector IDs
         m.use_mask_file = self._summary.mask_check.isChecked()
         m.mask_file = unicode(self._summary.mask_edit.text())

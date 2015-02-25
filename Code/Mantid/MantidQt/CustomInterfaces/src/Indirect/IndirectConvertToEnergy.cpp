@@ -286,6 +286,12 @@ namespace CustomInterfaces
       bool defaultOptions = instDetails["save-ascii-choice"] == "true";
       m_uiForm.ckSaveASCII->setChecked(defaultOptions);
     }
+
+    if(!instDetails["fold-frames-choice"].isEmpty())
+    {
+      bool defaultOptions = instDetails["fold-frames-choice"] == "true";
+      m_uiForm.ckFold->setChecked(defaultOptions);
+    }
   }
 
   /**

@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 '''
 @author Mathieu Doucet, ORNL
 @date Oct 13, 2014
@@ -30,7 +31,7 @@ import numpy as np
 class Porod(IFunction1D):
     """
         Provide a Porod model for SANS
-        
+
         I(q) = C/q^4 + background
     """
     def category(self):

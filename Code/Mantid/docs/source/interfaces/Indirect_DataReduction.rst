@@ -108,9 +108,9 @@ Plot Output
   Allows the result to be plotted as either a spectrum plot or contour plot.
 
 Fold Multiple Frames
-  This option is only relevant for TOSCA. If unchecked, then reduction on
-  multiply-framed data will cease at the point where the frames would have been
-  merged.
+  This option is only relevant for TOSCA. If checked, then multiple-framed data
+  will be folded back into a single spectra, if unchecked the frames wil lbe
+  left as is with the frame number given at the end of the workspace name.
 
 Output in :math:`cm^{-1}`
   Converts the units of the energy axis from :math:`meV` to wave number

@@ -1,5 +1,5 @@
 import os
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -32,18 +32,17 @@ class DirectPropertyManagerTest(unittest.TestCase):
         idf_file=api.ExperimentInfo.getInstrumentFilename(InstrumentName)
         tmp_ws_name = '__empty_' + InstrumentName
         if not mtd.doesExist(tmp_ws_name):
-               LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
+            LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
         return mtd[tmp_ws_name].getInstrument()
 
- 
+
     def test_init_reducer(self):
-        
+
         propman=self.prop_man
 
         self.assertEqual(propman.deltaE_mode,'direct')
 
         self.assertRaises(KeyError,getattr,propman,'non_existing_property')
-
 
     def test_set_non_default_wrong_value(self):
         propman = self.prop_man
@@ -51,7 +50,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         # non-existing property can not be set!
         self.assertRaises(KeyError,setattr,propman,'non_existing_property',"Something_Meaningfull")
-        # existing simple assignment works 
+        # existing simple assignment works
         propman.load_monitors_with_workspace = False
         propman.load_monitors_with_workspace = True
         self.assertTrue(propman.load_monitors_with_workspace)
@@ -155,7 +154,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         self.assertEqual(propman.ei_mon_spectra,[2,3]," Default ei monitors on MARI should be as described in MARI_Parameters.xml file")
 
- 
+
         propman.norm_mon_integration_range = [50,1050]
         range=propman.norm_mon_integration_range
         self.assertAlmostEqual(range[0],50.,7)
@@ -184,7 +183,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue("ei-mon2-spec" in prop_changed,"changing test_ei2_mon_spectra should change ei-mon2-spectra")
 
 
-        propman.test_mon_spectra_composite = [10000,2000]        
+        propman.test_mon_spectra_composite = [10000,2000]
         self.assertEqual(propman.ei_mon_spectra,[10000,2000])
 
         prop_changed = propman.getChangedProperties()
@@ -345,13 +344,13 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(len(spectra),4)
         self.assertEqual(spectra[0],(1,17280))
         self.assertEqual(spectra[3],(32257,41472))
-  
+
     def test_get_diagnostics_parameters(self):
         propman = self.prop_man
 
         params = propman.get_diagnostics_parameters()
         self.assertEqual(len(params),20)
-        
+
         bkg_test_range0 = propman.background_test_range
         bkg_test_range  = params['background_test_range']
         bkg_range = propman.background_range
@@ -363,25 +362,24 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(bkg_test_range,[1000,2000])
 
     def test_check_monovan_changed(self):
-         propman = self.prop_man 
-         
-         non_changed = propman._check_monovan_par_changed()
-         # nothing have changed initially 
-         self.assertEqual(len(non_changed),2)
+        propman = self.prop_man
 
-         propman.monovan_run = 102
-         propman.log_changed_values()
+        non_changed = propman._check_monovan_par_changed()
+        # nothing have changed initially
+        self.assertEqual(len(non_changed),2)
 
-         propman.sample_mass = 1
-         non_changed = propman._check_monovan_par_changed()
-         self.assertEqual(len(non_changed),1)
-         propman.sample_rmm = 200
-         non_changed = propman._check_monovan_par_changed()
-         self.assertEqual(len(non_changed),0)
+        propman.monovan_run = 102
+        propman.log_changed_values()
 
+        propman.sample_mass = 1
+        non_changed = propman._check_monovan_par_changed()
+        self.assertEqual(len(non_changed),1)
+        propman.sample_rmm = 200
+        non_changed = propman._check_monovan_par_changed()
+        self.assertEqual(len(non_changed),0)
 
-         propman.log_changed_values()
-  
+        propman.log_changed_values()
+
     def test_set_defailts_from_instrument(self) :
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=100)
 
@@ -395,7 +393,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertAlmostEqual(propman.TestParam1,3.5)
         self.assertEquals(propman.TestParam2,"initial1")
         self.assertEquals(propman.TestParam3,"initial2")
-        
+
         propman.TestParam2="gui_changed1"
         self.assertEquals(propman.TestParam2,"gui_changed1")
 
@@ -409,7 +407,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue('TestParam2' in changes)
         self.assertTrue(not('TestParam3' in changes))
 
-  
+
 
         changes = propman.update_defaults_from_instrument(ws.getInstrument())
 
@@ -461,8 +459,8 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         self.assertEqual(propman.ParaPara,'OtherVal2')
         self.assertEqual(propman.BaseParam2,'OtherVal2')
-        
-        self.assertEquals(propman.BaseParam1,"OtherVal1")     
+
+        self.assertEquals(propman.BaseParam1,"OtherVal1")
 
     def test_set_all_defaults_from_instrument(self) :
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
@@ -483,6 +481,172 @@ class DirectPropertyManagerTest(unittest.TestCase):
         ei_spec = propman.ei_mon_spectra
         self.assertEqual(ei_spec[0],65542)
         self.assertEqual(ei_spec[1],5506)
+
+    def test_set_energy_bins_and_ei(self):
+
+        propman = self.prop_man
+
+        propman.incident_energy =20
+        self.assertFalse(PropertyManager.incident_energy.multirep_mode())
+        propman.energy_bins='-30,3,10'
+
+        bins = propman.energy_bins
+        self.assertAlmostEqual(bins[0],-30)
+        self.assertAlmostEqual(bins[1],3)
+        self.assertAlmostEqual(bins[2],10)
+
+        bins = PropertyManager.energy_bins.get_abs_range(propman)
+        self.assertAlmostEqual(bins[0],-30)
+        self.assertAlmostEqual(bins[1],3)
+        self.assertAlmostEqual(bins[2],10)
+
+
+        propman.incident_energy =100.01
+        propman.energy_bins=[-20,4,100]
+        bins = propman.energy_bins
+        self.assertAlmostEqual(bins[0],-20)
+        self.assertAlmostEqual(bins[1],4)
+        self.assertAlmostEqual(bins[2],100)
+        bins = PropertyManager.energy_bins.get_abs_range(propman)
+        self.assertAlmostEqual(bins[0],-20)
+        self.assertAlmostEqual(bins[1],4)
+        self.assertAlmostEqual(bins[2],100)
+
+
+
+        propman.incident_energy=10
+        self.assertAlmostEqual(propman.incident_energy,10)
+        bins = PropertyManager.energy_bins.get_abs_range(propman)
+        self.assertAlmostEqual(bins[0],-20*9.9999/100)
+        self.assertAlmostEqual(bins[1],4*9.9999/100)
+        self.assertAlmostEqual(bins[2],9.9999)
+
+
+        ei = [20,30]
+        propman.incident_energy=ei
+        got_ei = propman.incident_energy
+        for ind,en in enumerate(got_ei):
+            self.assertAlmostEqual(en,ei[ind])
+        self.assertTrue(PropertyManager.incident_energy.multirep_mode())
+        bins = PropertyManager.energy_bins.get_abs_range(propman)
+
+        self.assertAlmostEqual(bins[0],-20*20*0.99999/100)
+        self.assertAlmostEqual(bins[1],4*20*0.99999/100)
+        self.assertAlmostEqual(bins[2],20*0.99999)
+
+        propman.energy_bins=[-2,0.1,0.8]
+        bins = propman.energy_bins
+        self.assertAlmostEqual(bins[0],-2)
+        self.assertAlmostEqual(bins[1],0.1)
+        self.assertAlmostEqual(bins[2],0.8)
+
+        bins = PropertyManager.energy_bins.get_abs_range(propman)
+        self.assertAlmostEqual(bins[0],-20*2)
+        self.assertAlmostEqual(bins[1],20*0.1)
+        self.assertAlmostEqual(bins[2],20*0.8)
+
+
+        propman.incident_energy='20,30'
+        self.assertTrue(PropertyManager.incident_energy.multirep_mode())
+
+        got_ei = propman.incident_energy
+        for ind,en in enumerate(got_ei):
+            self.assertAlmostEqual(en,ei[ind])
+
+
+        propman.energy_bins = None
+        self.assertFalse(propman.energy_bins)
+
+
+    def test_multirep_ei_iterate_over(self):
+        propman = self.prop_man
+        propman.incident_energy=20
+        propman.energy_bins=[-2,0.1,0.8]
+        self.assertFalse(PropertyManager.incident_energy.multirep_mode())
+
+        ic=0
+        for en in PropertyManager.incident_energy:
+            ic+=1
+            self.assertAlmostEqual(en,20)
+            bins = propman.energy_bins
+            self.assertAlmostEqual(bins[0],-2)
+            self.assertAlmostEqual(bins[1],0.1)
+            self.assertAlmostEqual(bins[2],0.8)
+
+            bins = PropertyManager.energy_bins.get_abs_range(propman)
+            self.assertAlmostEqual(bins[0],-2)
+            self.assertAlmostEqual(bins[1],0.1)
+            self.assertAlmostEqual(bins[2],0.8)
+
+
+        self.assertEqual(ic,1)
+
+        propman.incident_energy=[20]
+        propman.energy_bins=[-2,0.1,0.8]
+        self.assertTrue(PropertyManager.incident_energy.multirep_mode())
+
+        ic=0
+        for en in PropertyManager.incident_energy:
+            ic+=1
+            self.assertAlmostEqual(en,20)
+
+            bins = propman.energy_bins
+            self.assertAlmostEqual(bins[0],-2)
+            self.assertAlmostEqual(bins[1],0.1)
+            self.assertAlmostEqual(bins[2],0.8)
+
+            bins = PropertyManager.energy_bins.get_abs_range(propman)
+
+            self.assertAlmostEqual(bins[0],-2*20)
+            self.assertAlmostEqual(bins[1],0.1*20)
+            self.assertAlmostEqual(bins[2],0.8*20)
+
+        self.assertEqual(ic,1)
+
+        eng=[20,40,60]
+        propman.incident_energy=eng
+        propman.energy_bins=[-2,0.1,0.8]
+        self.assertTrue(PropertyManager.incident_energy.multirep_mode())
+        ic=0
+        for en in PropertyManager.incident_energy:
+            self.assertAlmostEqual(en,eng[ic])
+            bins = PropertyManager.energy_bins.get_abs_range(propman)
+            self.assertAlmostEqual(bins[0],-2*en)
+            self.assertAlmostEqual(bins[1],0.1*en)
+            self.assertAlmostEqual(bins[2],0.8*en)
+            ic+=1
+        self.assertEqual(ic,3)
+        #
+        ic=0
+        for en in PropertyManager.incident_energy:
+            self.assertAlmostEqual(en,eng[ic])
+            ei_stored = PropertyManager.incident_energy.get_current()
+            self.assertAlmostEqual(en,ei_stored)
+
+            PropertyManager.incident_energy.set_current(en)
+
+            bins = PropertyManager.energy_bins.get_abs_range(propman)
+            self.assertAlmostEqual(bins[0],-2*eng[ic])
+            self.assertAlmostEqual(bins[1],0.1*eng[ic])
+            self.assertAlmostEqual(bins[2],0.8*eng[ic])
+            ic+=1
+        self.assertEqual(ic,3)
+
+    #def test_incident_energy_custom_enum(self):
+    ###### Custom enum does not work
+    #    propman = self.prop_man
+    #    en_source = [20,40,80]
+    #    propman.incident_energy=en_source
+    #    propman.energy_bins=[-2,0.1,0.8]
+    #    self.assertTrue(PropertyManager.incident_energy.multirep_mode())
+
+    #    ic=0
+    #    for ind,en in enumerate(PropertyManager.incident_energy):
+    #        ic+=1
+    #        self.assertAlmostEqual(en,en_source[ind])
+    #        en_internal = PropertyManager.incident_energy.get_current()
+    #        self.assertAlmostEqual(en_internal,en_source[ind])
+    #        self.assertEqual(ind,ic-1)
 
     def test_ignore_complex_defailts_changes_fom_instrument(self) :
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
@@ -527,56 +691,57 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertAlmostEqual(bkgd_range[0],100)
         self.assertAlmostEqual(bkgd_range[1],40)
 
+
     def test_monovan_integration_range(self):
-       propman = self.prop_man
+        propman = self.prop_man
 
-       propman.incident_energy = 10
-       propman.monovan_lo_frac = -0.6
-       propman.monovan_hi_frac =  0.7
+        propman.incident_energy = 10
+        propman.monovan_lo_frac = -0.6
+        propman.monovan_hi_frac =  0.7
 
-       range = propman.abs_units_van_range
-       self.assertAlmostEqual(range[0],-6.)
-       self.assertAlmostEqual(range[1], 7.)
+        range = propman.abs_units_van_range
+        self.assertAlmostEqual(range[0],-6.)
+        self.assertAlmostEqual(range[1], 7.)
 
-       range = propman.monovan_integr_range
-       self.assertAlmostEqual(range[0],-6.)
-       self.assertAlmostEqual(range[1], 7.)
+        range = propman.monovan_integr_range
+        self.assertAlmostEqual(range[0],-6.)
+        self.assertAlmostEqual(range[1], 7.)
 
-       propman.monovan_lo_value = -10
-       propman.monovan_hi_value = 10
+        propman.monovan_lo_value = -10
+        propman.monovan_hi_value = 10
 
-       range = propman.abs_units_van_range
-       self.assertAlmostEqual(range[0],-6.)
-       self.assertAlmostEqual(range[1], 7.)
+        range = propman.abs_units_van_range
+        self.assertAlmostEqual(range[0],-6.)
+        self.assertAlmostEqual(range[1], 7.)
 
-       propman.abs_units_van_range=[-40,40]
-       self.assertAlmostEqual(propman.monovan_lo_value,-40)
-       self.assertAlmostEqual(propman.monovan_hi_value,40)
+        propman.abs_units_van_range=[-40,40]
+        self.assertAlmostEqual(propman.monovan_lo_value,-40)
+        self.assertAlmostEqual(propman.monovan_hi_value,40)
 
-       range = propman.monovan_integr_range
-       self.assertAlmostEqual(range[0],-40)
-       self.assertAlmostEqual(range[1], 40)
+        range = propman.monovan_integr_range
+        self.assertAlmostEqual(range[0],-40)
+        self.assertAlmostEqual(range[1], 40)
 
-       propman.abs_units_van_range=None
+        propman.abs_units_van_range=None
 
-       range = propman.monovan_integr_range
-       self.assertAlmostEqual(range[0],-6.)
-       self.assertAlmostEqual(range[1], 7.)
-       #
-       propman.monovan_lo_frac = -0.7
-       range = propman.monovan_integr_range
-       self.assertAlmostEqual(range[0],-7.)
+        range = propman.monovan_integr_range
+        self.assertAlmostEqual(range[0],-6.)
+        self.assertAlmostEqual(range[1], 7.)
+        #
+        propman.monovan_lo_frac = -0.7
+        range = propman.monovan_integr_range
+        self.assertAlmostEqual(range[0],-7.)
 
     def test_save_filename(self):
-       propman = self.prop_man
+        propman = self.prop_man
 
-       propman.incident_energy = 10
-       propman.sample_run = 0
-       propman.monovan_run = None 
+        propman.incident_energy = 10
+        propman.sample_run = 0
+        propman.monovan_run = None
 
 
-       name = propman.save_file_name
-       self.assertEqual(name,'MAR00000Ei10d00meV')
+        name = propman.save_file_name
+        self.assertEqual(name,'MAR00000Ei10d00meV')
 
     def test_log_to_Mantid(self):
         propman = self.prop_man
@@ -615,7 +780,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue(propman.hard_mask_file is None)
 
     def test_hadmask_options_locked(self):
-        # 
+        #
         propman1 = self.prop_man
         propman1.setChangedProperties()
         propman1.hardmaskPlus = 'a_hard_mask_file'
@@ -649,7 +814,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue(propman1.run_diagnostics)
 
 
- 
+
     #def test_do_white(self) :
     #    tReducer = self.reducer
     #    monovan = 1000
@@ -657,44 +822,8 @@ class DirectPropertyManagerTest(unittest.TestCase):
     #    name = tReducer.make_ckpt_name('do_white',monovan,data,'t1')
     #    self.assertEqual('do_white1000t1',name)
 
-   
-   
-    def test_set_energy_bins_and_ei(self):
-        #TODO  modify and verify the energy bins for range of energies
-        propman = self.prop_man
-
-        propman.energy_bins='-30,3,10'
-        bins = propman.energy_bins
-        self.assertAlmostEqual(bins[0],-30)
-        self.assertAlmostEqual(bins[1],3)
-        self.assertAlmostEqual(bins[2],10)
 
 
-        propman.energy_bins=[-20,4,100]
-        bins = propman.energy_bins
-        self.assertAlmostEqual(bins[0],-20)
-        self.assertAlmostEqual(bins[1],4)
-        self.assertAlmostEqual(bins[2],100)
-
-
-        propman.incident_energy=10
-        self.assertAlmostEqual(propman.incident_energy,10)
-        ei = [20,30]
-        propman.incident_energy=ei
-        got_ei = propman.incident_energy
-        for ind,en in enumerate(got_ei):
-            self.assertAlmostEqual(en,ei[ind])
-
-        propman.incident_energy='20,30'
-        got_ei = propman.incident_energy
-        for ind,en in enumerate(got_ei):
-            self.assertAlmostEqual(en,ei[ind])
-
-
-        propman.energy_bins = None
-        self.assertFalse(propman.energy_bins)
-       
-        #TODO: this one is not completed. Multirep mode to come
 
     def test_monitors_list(self):
         propman = self.prop_man
@@ -743,6 +872,46 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertAlmostEqual(range[0],9.5)
         self.assertAlmostEqual(range[1],10.5)
 
+
+    def test_multirep_tof_specta_list(self):
+        propman = self.prop_man
+        sp = propman.multirep_tof_specta_list
+        self.assertTrue(len(sp)==2)
+        self.assertEqual(sp[0],5)
+
+        propman.multirep_tof_specta_list='10'
+        sp = propman.multirep_tof_specta_list
+        self.assertTrue(len(sp)==1)
+        self.assertEqual(sp[0],10)
+
+        propman.multirep_tof_specta_list='10,11,13,15'
+        sp = propman.multirep_tof_specta_list
+        self.assertTrue(len(sp)==4)
+        self.assertEqual(sp[3],15)
+
+    def test_mono_correction_factor(self):
+        propman = self.prop_man
+        propman.incident_energy=[10,20]
+        #propman.m
+
+        PropertyManager.mono_correction_factor.set_cash_mono_run_number(11015)
+
+
+        self.assertTrue(propman.mono_correction_factor is None)
+        propman.mono_correction_factor = 66.
+        self.assertAlmostEqual(propman.mono_correction_factor,66)
+
+        self.assertTrue(PropertyManager.mono_correction_factor.get_val_from_cash(propman) is None)
+        PropertyManager.mono_correction_factor.set_val_to_cash(propman,100)
+        self.assertAlmostEqual(PropertyManager.mono_correction_factor.get_val_from_cash(propman),100)
+
+        PropertyManager.incident_energy.next()
+        self.assertTrue(PropertyManager.mono_correction_factor.get_val_from_cash(propman) is None)
+        PropertyManager.mono_correction_factor.set_val_to_cash(propman,50)
+        self.assertAlmostEqual(PropertyManager.mono_correction_factor.get_val_from_cash(propman),50)
+
+        PropertyManager.mono_correction_factor.set_cash_mono_run_number(11060)
+        self.assertTrue(PropertyManager.mono_correction_factor.get_val_from_cash(propman) is None)
 
 if __name__=="__main__":
     unittest.main()

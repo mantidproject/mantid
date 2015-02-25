@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     ISIS-specific implementation of the SANS Reducer.
 
@@ -135,6 +136,31 @@ class ISISReducer(Reducer):
     ## Path for user settings files
     _user_file_path = '.'
 
+    _can = None
+    _tidy = None
+    _conv_Q = None
+    _reduction_steps = None
+    user_settings = None
+    _out_name = None
+    event2hist = None
+    crop_detector = None
+    mask = None
+    to_wavelen = None
+    norm_mon = None
+    transmission_calculator = None
+    _corr_and_scale = None
+    prep_normalize = None
+    to_Q = None
+    _background_subtracter = None
+    geometry_correcter = None
+    _rem_nans = None
+    _sample_run = None
+    _can_run = None
+    _slices_def = None
+    _slice_index = None
+    samp_trans_load = None
+    can_trans_load = None
+
     def _to_steps(self):
         """
             Defines the steps that are run and their order
@@ -182,10 +208,10 @@ class ISISReducer(Reducer):
         # so currently do not understand why it is in isis_reduction_steps
         # Also the main purpose of this class is to use it as an input argument
         # to ConvertToQ below
-        self.prep_normalize = isis_reduction_steps.CalculateNormISIS(
+        self.prep_normalize = isis_reduction_steps.CalculateNormISIS(\
                             [self.norm_mon, self.transmission_calculator])
 
-        self.to_Q =            isis_reduction_steps.ConvertToQISIS(
+        self.to_Q =            isis_reduction_steps.ConvertToQISIS(\
                                                         self.prep_normalize)
         self._background_subtracter = isis_reduction_steps.CanSubtraction()
         self.geometry_correcter =       isis_reduction_steps.SampleGeomCor()
@@ -313,7 +339,7 @@ class ISISReducer(Reducer):
         name += '_' + self.to_Q.output_type
         name += '_' + self.to_wavelen.get_range()
         if self.to_Q.get_output_type() == "1D":
-          name += self.mask.get_phi_limits_tag()
+            name += self.mask.get_phi_limits_tag()
 
         if self.getNumSlices() > 0:
             limits = self.getCurrSliceLimit()
@@ -421,7 +447,7 @@ class ISISReducer(Reducer):
         return self._reduce(init=False, post=True)
 
     def set_Q_output_type(self, out_type):
-       self.to_Q.set_output_type(out_type)
+        self.to_Q.set_output_type(out_type)
 
     def pre_process(self):
         """
@@ -566,9 +592,9 @@ class ISISReducer(Reducer):
         """
         if issubclass(finder.__class__, isis_reduction_steps.BaseBeamFinder) or finder is None:
             if det_bank == 'front':
-              self._front_beam_finder = finder
+                self._front_beam_finder = finder
             else:
-              self._beam_finder = finder
+                self._beam_finder = finder
         else:
             raise RuntimeError, "Reducer.set_beam_finder expects an object of class ReductionStep"
 
@@ -599,7 +625,7 @@ class ISISReducer(Reducer):
     def getCurrSliceLimit(self):
         if not self._slices_def:
             self._slices_def = su.sliceParser("")
-            assert(self._slice_index == 0)
+            assert self._slice_index == 0
         return self._slices_def[self._slice_index]
 
     def getNumSlices(self):

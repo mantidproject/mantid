@@ -37,7 +37,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("InputWorkspace", ws) );
     TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("OutputWorkspace", "outputWs") );
     TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("Frequency", "0") );
-    TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("Frequency units", "MHz") );
+    TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("FrequencyUnits", "MHz") );
     TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("Phase", "0") );
     // Execute
     TS_ASSERT_THROWS_NOTHING(rrfMuon.execute());
@@ -70,7 +70,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("InputWorkspace", ws) );
     TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("OutputWorkspace", "outputWs") );
     TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("Frequency", "1") );
-    TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("Frequency units", "MHz") );
+    TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("FrequencyUnits", "MHz") );
     TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("Phase", "0") );
     // Execute
     TS_ASSERT_THROWS_NOTHING(rrfMuon.execute());
@@ -115,19 +115,19 @@ public:
     TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("InputWorkspace", ws) );
     TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("OutputWorkspace", "outputWs1") );
     TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("Frequency", "1") );
-    TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("Frequency units", "MHz") );
+    TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("FrequencyUnits", "MHz") );
     TS_ASSERT_THROWS_NOTHING( rrfMuon.setProperty("Phase", "0") );
     // Second run
     TS_ASSERT_THROWS_NOTHING( rrfMuon2.setProperty("InputWorkspace", ws) );
     TS_ASSERT_THROWS_NOTHING( rrfMuon2.setProperty("OutputWorkspace", "outputWs2") );
     TS_ASSERT_THROWS_NOTHING( rrfMuon2.setProperty("Frequency", "0.159155") );
-    TS_ASSERT_THROWS_NOTHING( rrfMuon2.setProperty("Frequency units", "Mrad/s") );
+    TS_ASSERT_THROWS_NOTHING( rrfMuon2.setProperty("FrequencyUnits", "Mrad/s") );
     TS_ASSERT_THROWS_NOTHING( rrfMuon2.setProperty("Phase", "0") );
     // Third run
     TS_ASSERT_THROWS_NOTHING( rrfMuon3.setProperty("InputWorkspace", ws) );
     TS_ASSERT_THROWS_NOTHING( rrfMuon3.setProperty("OutputWorkspace", "outputWs3") );
     TS_ASSERT_THROWS_NOTHING( rrfMuon3.setProperty("Frequency", "11.742398") );
-    TS_ASSERT_THROWS_NOTHING( rrfMuon3.setProperty("Frequency units", "Gauss") );
+    TS_ASSERT_THROWS_NOTHING( rrfMuon3.setProperty("FrequencyUnits", "Gauss") );
     TS_ASSERT_THROWS_NOTHING( rrfMuon3.setProperty("Phase", "0") );
     // Execute all of them
     TS_ASSERT_THROWS_NOTHING(rrfMuon.execute());

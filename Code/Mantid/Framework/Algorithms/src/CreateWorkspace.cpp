@@ -86,12 +86,23 @@ void CreateWorkspace::exec() {
   const Property *const dataXprop = getProperty("DataX");
   const Property *const dataYprop = getProperty("DataY");
   const Property *const dataEprop = getProperty("DataE");
-  const std::vector<double> &dataX =
-      *dynamic_cast<const ArrayProperty<double> *>(dataXprop);
-  const std::vector<double> &dataY =
-      *dynamic_cast<const ArrayProperty<double> *>(dataYprop);
-  const std::vector<double> &dataE =
-      *dynamic_cast<const ArrayProperty<double> *>(dataEprop);
+
+  const ArrayProperty<double> *pCheck = NULL;
+
+  pCheck = dynamic_cast<const ArrayProperty<double> *>(dataXprop);
+  if (!pCheck)
+    throw std::invalid_argument("DataX cannot be casted to a double vector");
+  const std::vector<double> &dataX = *pCheck;
+
+  pCheck = dynamic_cast<const ArrayProperty<double> *>(dataYprop);
+  if (!pCheck)
+    throw std::invalid_argument("DataY cannot be casted to a double vector");
+  const std::vector<double> &dataY = *pCheck;
+
+  pCheck = dynamic_cast<const ArrayProperty<double> *>(dataEprop);
+  if (!pCheck)
+    throw std::invalid_argument("DataE cannot be casted to a double vector");
+  const std::vector<double> &dataE = *pCheck;
 
   const int nSpec = getProperty("NSpec");
   const std::string xUnit = getProperty("UnitX");

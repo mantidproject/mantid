@@ -119,6 +119,14 @@
     <value val="None"/>
 </parameter>
 
+<!-- List of two spectra corresponding to the detectors which are closest and furtherest from the sample.
+     These detectors locations are used to identify TOF range, contributing into each energy range 
+     in multirep mode  -->
+<parameter name="multirep_tof_specta_list"  type="string">
+    <value val="382,68353"/>
+</parameter>
+
+
 <!-- by default getEi looks for peaks within (1+-0.1)*TOF_GUES range where TOF_GUES is evaluated on the basis of ei guess.
     If the peaks are very narrow, or there are a lot of them very close to each other, 
     this value can be reduced. For example, such situation happens on MARI for very high incident energies Ei=1800.

@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -61,6 +62,15 @@ def _make_list(a, l1, l2):
 
 class MolDyn(PythonAlgorithm):
 
+    _plot = None
+    _save = None
+    _sam_path = None
+    _symmetrise = None
+    _functions = None
+    _emax = None
+    _res_ws = None
+    _out_ws = None
+
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
 
@@ -70,7 +80,7 @@ class MolDyn(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(FileProperty('Filename', '',
                                           action=FileAction.OptionalLoad,
-                                          extensions=['.cdl', '.dat']),
+                                          extensions=['.cdl', '.dat']),\
                                           doc='File path for data')
 
         self.declareProperty(StringArrayProperty('Functions'),
