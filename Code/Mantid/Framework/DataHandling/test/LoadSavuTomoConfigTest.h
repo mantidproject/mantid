@@ -84,10 +84,10 @@ public:
     // TODO: At the moment load just one file to test basic
     // functionality. Probably more files should be added here as we
     // have more certainty about the format
-    std::string outWSName = "LoadSavuTomoConfig_test_ws";
+    std::string inWSName = "LoadSavuTomoConfig_test_ws";
     // Load examples from https://github.com/DiamondLightSource/Savu/tree/master/test_data
     TS_ASSERT_THROWS_NOTHING( testAlg->setPropertyValue("Filename", testFilename) );
-    TS_ASSERT_THROWS_NOTHING( testAlg->setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( testAlg->setPropertyValue("OutputWorkspace", inWSName) );
 
     if (!testAlg->isInitialized())
       testAlg->initialize();
@@ -98,9 +98,9 @@ public:
 
     AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
 
-    TS_ASSERT( ads.doesExist(outWSName) );
+    TS_ASSERT( ads.doesExist(inWSName) );
     ITableWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(ws = ads.retrieveWS<ITableWorkspace>(outWSName) );
+    TS_ASSERT_THROWS_NOTHING(ws = ads.retrieveWS<ITableWorkspace>(inWSName) );
 
     // general format: 3 columns (data, id, name)
     TS_ASSERT_EQUALS( ws->columnCount(), 4) ;
@@ -110,7 +110,7 @@ public:
 
 #if (defined __APPLE__ && defined __INTEL_COMPILER)
     // This is a horror, an exception needed for osx 10.8 where lib nexus does not behave
-    // Bug in NeXus strings: the last character is trimmed, and " become \"
+    // Bug in NeXus strings: the last character is trimmed
     // TODO: remove this when osx 10.8 extinguishes  (theres a ticket being created for that).
     // ID
     TS_ASSERT_EQUALS( ws->cell<std::string>(0, 0), "savu.plugins.timeseries_field_correction" );
@@ -119,8 +119,8 @@ public:
 
     // data entry in NeXus file (Params column)
     TS_ASSERT_EQUALS( ws->cell<std::string>(0, 1), "{" );
-    TS_ASSERT_EQUALS( ws->cell<std::string>(1, 1), "{\\\"kernel_size\\\": [1, 3, 3]" );
-    TS_ASSERT_EQUALS( ws->cell<std::string>(2, 1), "{\\\"center_of_rotation\\\": 86" );
+    TS_ASSERT_EQUALS( ws->cell<std::string>(1, 1), "{\"kernel_size\": [1, 3, 3]" );
+    TS_ASSERT_EQUALS( ws->cell<std::string>(2, 1), "{\"center_of_rotation\": 86" );
 
     // name entry in NeXus file
     TS_ASSERT_EQUALS( ws->cell<std::string>(0, 2), "Timeseries Field Correction" );
