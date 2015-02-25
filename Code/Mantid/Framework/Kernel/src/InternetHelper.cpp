@@ -179,10 +179,6 @@ int InternetHelper::processRelocation(const HTTPResponse &response,
 /** Performs a request using http or https depending on the url
 * @param url the address to the network resource
 * @param responseStream The stream to fill with the reply on success
-* @param headers A optional key value pair map of any additional headers to
-* include in the request.
-* @param method Generally GET (default) or POST.
-* @param body The request body to send.
 **/
 int InternetHelper::sendRequest(const std::string &url,
                                 std::ostream &responseStream) {
@@ -406,9 +402,6 @@ The answer, will be inserted at the local_file_path.
 
 @param localFilePath : Provide the destination of the file downloaded at the
 url_file.
-
-@param headers [optional] : A key value pair map of any additional headers to
-include in the request.
 
 @exception Mantid::Kernel::Exception::InternetError : For any unexpected
 behaviour.

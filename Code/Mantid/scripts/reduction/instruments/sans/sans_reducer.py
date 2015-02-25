@@ -8,7 +8,6 @@ from reduction import ReductionStep
 from reduction import validate_step
 import sans_reduction_steps
 import mantid.simpleapi as api
-from mantid import simpleapi
 import warnings
 import inspect
 
@@ -152,7 +151,8 @@ class SANSReducer(Reducer):
         """
         self._mask = mask
 
-    def get_mask(self): return self._mask
+    def get_mask(self):
+        return self._mask
 
     def get_beam_center(self):
         """
@@ -186,7 +186,8 @@ class SANSReducer(Reducer):
         else:
             raise RuntimeError, "Reducer.set_data_loader expects an object of class ReductionStep"
 
-    def get_data_loader(self): return self._data_loader
+    def get_data_loader(self):
+        return self._data_loader
 
     @validate_step
     def set_sensitivity_correcter(self, correcter):
@@ -259,7 +260,8 @@ class SANSReducer(Reducer):
              @param trans: ReductionStep object
         """
         lineno = inspect.currentframe().f_code.co_firstlineno
-        warnings.warn_explicit("SANSReducer.set_bck_transmission id deprecated: use get_background().set_transmission()", DeprecationWarning, __file__, lineno)
+        warnings.warn_explicit("SANSReducer.set_bck_transmission id deprecated: use get_background().set_transmission()",\
+            DeprecationWarning, __file__, lineno)
 
         if issubclass(trans.__class__, sans_reduction_steps.BaseTransmission) or trans is None:
             self._background_subtracter.set_transmission(trans)

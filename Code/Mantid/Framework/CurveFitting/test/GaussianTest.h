@@ -160,7 +160,7 @@ public:
 		for (size_t i=0; i < 41; i++) e[i] = sqrt( y[i] );
 	}
 
-    void xtest_with_Levenberg_Marquardt()
+    void test_with_Levenberg_Marquardt()
     {
       API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector( 79292.4, 79603.6, 41));
       API::FunctionValues mockData(*domain);
@@ -346,7 +346,7 @@ public:
   }
 
 
-  void xtestAgainstMockDataSimplex2()
+  void testAgainstMockDataSimplex2()
   {
     // create mock data to test against
     std::string wsName = "GaussMockDataSimplex2";
@@ -496,6 +496,55 @@ public:
     AnalysisDataService::Instance().remove(wsName);
     // Be nice and set back to what it was before
     ConfigService::Instance().setString("curvefitting.peakRadius",priorRadius);
+  }
+
+  void testIntensity()
+  {
+      boost::shared_ptr<Gaussian> fn( new Gaussian() );
+      fn->initialize();
+      fn->setHeight(2.0);
+      fn->setFwhm(0.125);
+      fn->setCentre(-200.0);
+
+      // Area under a gaussian is height * sigma * sqrt(2 * pi)
+      TS_ASSERT_DELTA(fn->intensity(), 0.26611675485780654483, 1e-10);
+  }
+
+  void testSetIntensity()
+  {
+      boost::shared_ptr<Gaussian> fn( new Gaussian() );
+      fn->initialize();
+      fn->setHeight(2.0);
+      fn->setFwhm(0.125);
+      fn->setCentre(-200.0);
+
+      TS_ASSERT_THROWS_NOTHING(fn->setIntensity(0.5));
+
+      TS_ASSERT_DELTA(fn->intensity(), 0.5, 1e-10);
+
+      // FWHM does not change
+      TS_ASSERT_EQUALS(fn->fwhm(), 0.125);
+
+      // Height changes
+      TS_ASSERT_DELTA(fn->height(), 3.75774911479860533509, 1e-10);
+  }
+
+  void testSetIntensityDefault()
+  {
+      boost::shared_ptr<Gaussian> fn( new Gaussian() );
+      fn->initialize();
+
+      TS_ASSERT_EQUALS(fn->intensity(), 0.0);
+
+      // This does not work, because fwhm is 0 and height is 0
+      TS_ASSERT_THROWS(fn->setIntensity(20.0), std::invalid_argument);
+      TS_ASSERT_EQUALS(fn->intensity(), 0.0);
+
+      // Now, fwhm is not zero
+      fn->setFwhm(0.02);
+
+      TS_ASSERT_THROWS_NOTHING(fn->setIntensity(20.0));
+      TS_ASSERT_DELTA(fn->intensity(), 20.0, 1e-10);
   }
 
 

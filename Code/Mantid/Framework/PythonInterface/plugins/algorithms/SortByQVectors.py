@@ -1,9 +1,8 @@
+#pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import (DeleteWorkspace, ExtractSingleSpectrum, RenameWorkspace, ConjoinWorkspaces, Transpose)
 import numpy as np
-
-import os
 
 class SortByQVectors(PythonAlgorithm):
     """

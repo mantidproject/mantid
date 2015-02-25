@@ -1,7 +1,6 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.simpleapi import *
-from numpy import zeros, shape, arange
-import math
 
 # import sfCalculator
 import sys
@@ -124,7 +123,7 @@ class RefLReduction(PythonAlgorithm):
 
         #GENERAL
         TOFrangeFlag = self.getProperty("TofRangeFlag")
-        if (TOFrangeFlag):
+        if TOFrangeFlag:
             TOFrange = self.getProperty("TOFRange").value #microS
         else:
             TOFrange = [0, 200000]
@@ -137,7 +136,7 @@ class RefLReduction(PythonAlgorithm):
 
         qMin = self.getProperty("QMin").value
         qStep = self.getProperty("QStep").value
-        if (qStep > 0): #force logarithmic binning
+        if qStep > 0: #force logarithmic binning
             qStep = -qStep
 
         # angle offset
@@ -186,8 +185,8 @@ class RefLReduction(PythonAlgorithm):
         error_0 = 1. / pc
 
         # rebin data
-        ws_histo_data = wks_utility.rebinNeXus(ws_event_data,
-                              [binTOFrange[0], binTOFsteps, binTOFrange[1]],
+        ws_histo_data = wks_utility.rebinNeXus(ws_event_data,\
+                              [binTOFrange[0], binTOFsteps, binTOFrange[1]],\
                               'data')
 
         # get q range
@@ -197,18 +196,18 @@ class RefLReduction(PythonAlgorithm):
         [first_slit_size, last_slit_size] = wks_utility.getSlitsSize(ws_histo_data)
 
         # keep only TOF range
-        ws_histo_data = wks_utility.cropTOF(ws_histo_data,
-                                      TOFrange[0],
-                                      TOFrange[1],
+        ws_histo_data = wks_utility.cropTOF(ws_histo_data,\
+                                      TOFrange[0],\
+                                      TOFrange[1],\
                                       'data')
 
         # normalize by current proton charge
         ws_histo_data = wks_utility.normalizeNeXus(ws_histo_data, 'data')
 
         # integrate over low resolution range
-        [data_tof_axis, data_y_axis, data_y_error_axis] = wks_utility.integrateOverLowResRange(ws_histo_data,
-                                                            dataLowResRange,
-                                                            'data',
+        [data_tof_axis, data_y_axis, data_y_error_axis] = wks_utility.integrateOverLowResRange(ws_histo_data,\
+                                                            dataLowResRange,\
+                                                            'data',\
                                                             is_nexus_detector_rotated_flag)
 
 #        #DEBUG ONLY
@@ -248,36 +247,36 @@ class RefLReduction(PythonAlgorithm):
         error_0 = 1. / pc
 
         # rebin normalization
-        ws_histo_norm = wks_utility.rebinNeXus(ws_event_norm,
-                              [binTOFrange[0], binTOFsteps, binTOFrange[1]],
+        ws_histo_norm = wks_utility.rebinNeXus(ws_event_norm,\
+                              [binTOFrange[0], binTOFsteps, binTOFrange[1]],\
                               'normalization')
 
         # keep only TOF range
-        ws_histo_norm = wks_utility.cropTOF(ws_histo_norm,
-                                      TOFrange[0],
-                                      TOFrange[1],
+        ws_histo_norm = wks_utility.cropTOF(ws_histo_norm,\
+                                      TOFrange[0],\
+                                      TOFrange[1],\
                                       'normalization')
 
         # normalize by current proton charge
         ws_histo_norm = wks_utility.normalizeNeXus(ws_histo_norm, 'normalization')
 
         # integrate over low resolution range
-        [norm_tof_axis, norm_y_axis, norm_y_error_axis] = wks_utility.integrateOverLowResRange(ws_histo_norm,
-                                                            normLowResRange,
-                                                            'normalization',
+        [norm_tof_axis, norm_y_axis, norm_y_error_axis] = wks_utility.integrateOverLowResRange(ws_histo_norm,\
+                                                            normLowResRange,\
+                                                            'normalization',\
                                                             is_nexus_detector_rotated_flag)
 
         # substract background
-        [norm_y_axis, norm_y_error_axis] = wks_utility.substractBackground(norm_tof_axis[0:-1],
-                                                        norm_y_axis,
-                                                        norm_y_error_axis,
-                                                        normPeakRange,
-                                                        normBackFlag,
-                                                        normBackRange,
-                                                        error_0,
+        [norm_y_axis, norm_y_error_axis] = wks_utility.substractBackground(norm_tof_axis[0:-1],\
+                                                        norm_y_axis,\
+                                                        norm_y_error_axis,\
+                                                        normPeakRange,\
+                                                        normBackFlag,\
+                                                        normBackRange,\
+                                                        error_0,\
                                                         'normalization')
 
-        [av_norm, av_norm_error] = wks_utility.fullSumWithError(norm_y_axis,
+        [av_norm, av_norm_error] = wks_utility.fullSumWithError(norm_y_axis,\
                                                            norm_y_error_axis)
 
 #        ## DEBUGGING ONLY
@@ -362,7 +361,7 @@ class RefLReduction(PythonAlgorithm):
 
 
         # cleanup data
-        [final_y_axis, final_y_error_axis] = wks_utility.cleanupData1D(final_y_axis,
+        [final_y_axis, final_y_error_axis] = wks_utility.cleanupData1D(final_y_axis,\
                                                                         final_error_axis)
 
 
@@ -374,7 +373,8 @@ class RefLReduction(PythonAlgorithm):
         final_workspace = wks_utility.createFinalWorkspace(final_x_axis,
                                                            final_y_axis,
                                                            final_y_error_axis,
-                                                           name_output_ws)
+                                                           name_output_ws,
+                                                           ws_event_data)
 
         self.setProperty('OutputWorkspace', mtd[name_output_ws])
 

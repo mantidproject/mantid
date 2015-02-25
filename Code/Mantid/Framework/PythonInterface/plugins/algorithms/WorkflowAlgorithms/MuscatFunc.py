@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 # Algorithm to start Bayes programs
 from mantid.kernel import StringListValidator, StringMandatoryValidator
 from mantid.api import PythonAlgorithm, AlgorithmFactory

@@ -54,7 +54,7 @@ void SaveIsawUB::init() {
                   "Path to an ISAW-style UB matrix text file.");
 }
 
-double SaveIsawUB::getErrorVolume(OrientedLattice lattice) {
+double SaveIsawUB::getErrorVolume(const OrientedLattice &lattice) {
   double Volume;
   double latticeParams[6] = {lattice.a(),     lattice.b(),    lattice.c(),
                              lattice.alpha(), lattice.beta(), lattice.gamma()};

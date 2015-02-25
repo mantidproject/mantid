@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
 from mantid.simpleapi import *
 from mantid.kernel import StringMandatoryValidator, Direction
@@ -125,7 +126,7 @@ class FileBackedWsIterator:
         # any are missing.
         missing_files = list(ifilterfalse(os.path.exists, filenames))
         if len(missing_files) > 0:
-            raise ValueError("One or more files are missing: " +
+            raise ValueError("One or more files are missing: " +\
                 str(missing_files))
 
         self._filenames = filenames
@@ -188,11 +189,11 @@ class RetrieveRunInfo(PythonAlgorithm):
             '',
             StringMandatoryValidator(),
             doc='The range of runs to retrieve the run info for. E.g. "100-105".')
-        self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),
+        self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),\
             doc= """The name of the TableWorkspace that will be created. '''You must specify a name that does not already exist.''' """)
 
     def PyExec(self):
-        PROP_NAMES = ["inst_abrv", "run_number", "user_name", "run_title",
+        PROP_NAMES = ["inst_abrv", "run_number", "user_name", "run_title",\
             "hd_dur"]
 
         # Not all ISIS run files have the relevant prop_names, but we may as
@@ -203,7 +204,7 @@ class RetrieveRunInfo(PythonAlgorithm):
         # Ensure workspace does not already exist.
         output_ws_name = self.getPropertyValue("OutputWorkspace")
         if mtd.doesExist(output_ws_name):
-            raise ValueError("Workspace \"" + output_ws_name + "\" already "
+            raise ValueError("Workspace \"" + output_ws_name + "\" already "\
                 "exists. Either delete it, or choose another workspace name.")
 
         # Check that all run files are available.

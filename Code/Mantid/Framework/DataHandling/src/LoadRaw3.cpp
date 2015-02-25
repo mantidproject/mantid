@@ -31,8 +31,11 @@ using namespace API;
 
 /// Constructor
 LoadRaw3::LoadRaw3()
-    : m_filename(), m_noTimeRegimes(0), m_prog(0.0), m_prog_start(0.0),
-      m_prog_end(1.0), m_lengthIn(0), m_timeChannelsVec(), m_total_specs(0) {}
+  : m_filename(), m_numberOfSpectra(), m_cache_options(),
+    m_specTimeRegimes(), m_noTimeRegimes(0), m_prog(0.0),
+    m_prog_start(0.0), m_prog_end(1.0), m_lengthIn(0),
+    m_timeChannelsVec(), m_total_specs(0), m_periodList() {
+}
 
 LoadRaw3::~LoadRaw3() {}
 

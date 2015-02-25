@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 def reportUnitCell(peaks_ws):
     latt = peaks_ws.sample().getOrientedLattice()
     print "-- Unit Cell --"

@@ -1,13 +1,14 @@
+#pylint: disable=invalid-name
 from FilterEvents import eventFilterGUI
 from PyQt4 import QtGui
 import sys
 
 def qapp():
     if QtGui.QApplication.instance():
-        app = QtGui.QApplication.instance()
+        _app = QtGui.QApplication.instance()
     else:
-        app = QtGui.QApplication(sys.argv)
-    return app
+        _app = QtGui.QApplication(sys.argv)
+    return _app
 
 app = qapp()
 
