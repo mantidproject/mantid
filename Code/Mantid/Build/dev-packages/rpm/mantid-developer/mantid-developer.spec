@@ -1,6 +1,6 @@
 Name:           mantid-developer
 Version:        1.9
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
 Group:          Development/Tools
@@ -30,7 +30,6 @@ Requires: poco-devel
 Requires: PyQt4-devel
 Requires: python-devel
 Requires: python-ipython >= 1.1
-Conflicts: python-ipython >= 2.0
 Requires: python-pip
 Requires: python-sphinx
 Requires: qscintilla-devel
@@ -89,6 +88,9 @@ required for Mantid development.
 %changelog
 * Thu Feb 12 2015 Harry Jeffery <henry.jeffery@stfc.ac.uk>
 - Added graphviz dependency
+
+* Fri Jan 30 2015 Stuart Campbell <campbellsi@ornl.gov>
+- Removed conflicting specification for ipython 2.x
 
 * Wed Aug 13 2014 Peter Peterson <petersonpf@ornl.gov>
 - Merged all three distribution spec files into one
