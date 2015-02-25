@@ -192,6 +192,7 @@ void SortHKL::exec() {
   V3D hkl1;
   for (int i = 1; i < NumberPeaks; i++) {
     hkl1 = peaks[i - 1].getHKL();
+    f2Sum += peaks[i - 1].getIntensity();
     if (i == 1) {
       peakno.push_back(0);
       data.push_back(peaks[i - 1].getIntensity());
@@ -203,6 +204,7 @@ void SortHKL::exec() {
       data.push_back(peaks[i].getIntensity());
       sig2.push_back(std::pow(peaks[i].getSigmaIntensity(), 2));
       if (i == NumberPeaks - 1) {
+        f2Sum += peaks[i].getIntensity();
         if (static_cast<int>(data.size()) > 1) {
           Outliers(data, sig2);
           Statistics stats = getStatistics(data);
@@ -211,7 +213,6 @@ void SortHKL::exec() {
           std::vector<int>::iterator itpk;
           for (itpk = peakno.begin(); itpk != peakno.end(); ++itpk) {
             double F2 = peaksW->getPeaks()[*itpk].getIntensity();
-            f2Sum += F2;
             rSum += std::fabs(F2 - stats.mean);
             rpSum += std::sqrt(1.0 / double(data.size() - 1)) *
                      std::fabs(F2 - stats.mean);
@@ -234,7 +235,6 @@ void SortHKL::exec() {
         std::vector<int>::iterator itpk;
         for (itpk = peakno.begin(); itpk != peakno.end(); ++itpk) {
           double F2 = peaksW->getPeaks()[*itpk].getIntensity();
-          f2Sum += F2;
           rSum += std::fabs(F2 - stats.mean);
           rpSum += std::sqrt(1.0 / double(data.size() - 1)) *
                    std::fabs(F2 - stats.mean);
@@ -252,7 +252,6 @@ void SortHKL::exec() {
       sig2.push_back(std::pow(peaks[i].getSigmaIntensity(), 2));
     }
   }
-  multiplicity.push_back(data.size());
   Statistics statsMult = getStatistics(multiplicity);
   multiplicity.clear();
   // statistics to output table workspace

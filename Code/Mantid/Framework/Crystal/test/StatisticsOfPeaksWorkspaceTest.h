@@ -82,7 +82,7 @@ public:
     TS_ASSERT_EQUALS( tableOut->Int(0,1), 3);
     TS_ASSERT_DELTA( tableOut->Double(0,2), 1.5,.1);
     TS_ASSERT_DELTA( tableOut->Double(0,3), 3.5,.1);
-    TS_ASSERT_DELTA( tableOut->Double(0,4), 6.,.1);
+    TS_ASSERT_DELTA( tableOut->Double(0,4), 8.,.1);
     TS_ASSERT_DELTA( tableOut->Double(0,5), 1.4195,.1);
     TS_ASSERT_DELTA( tableOut->Double(0,6), 0.,.1);
     TS_ASSERT_DELTA( tableOut->Double(0,7), 0.,.1);
