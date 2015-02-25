@@ -126,7 +126,7 @@ namespace MantidQt
 			QString plot = m_uiForm.cbPlot->currentText();
 
 			pyInput += "QuestRun('"+sampleName+"','"+resName+"',"+betaSig+","+eRange+","+nBins+","+fitOps+","+sequence+","
-										" Save="+save+", Plot='"+plot+"', Verbose=True)\n";
+										" Save="+save+", Plot='"+plot+"')\n";
 
 			runPythonScript(pyInput);
 		}

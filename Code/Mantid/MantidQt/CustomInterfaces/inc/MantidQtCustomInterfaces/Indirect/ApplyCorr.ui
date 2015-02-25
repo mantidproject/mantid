@@ -97,7 +97,7 @@
          </sizepolicy>
         </property>
         <property name="autoLoad" stdset="0">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="workspaceSuffixes" stdset="0">
          <stringlist>

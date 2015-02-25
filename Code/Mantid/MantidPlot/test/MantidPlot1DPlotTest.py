@@ -41,7 +41,6 @@ class MantidPlot1DPlotTest(unittest.TestCase):
 
     def test_plotSpectrum_errorBars(self):
         g = plotSpectrum("fake", 0, error_bars=True)
-        screenshot(g, "plotSpectrum_errorBars", "Call to plotSpectrum() of 1 spectrum, with error bars.")
         self.g = g
 
     def test_plotSpectrum_fromWorkspaceProxy(self):
@@ -51,7 +50,6 @@ class MantidPlot1DPlotTest(unittest.TestCase):
 
     def test_plotSpectrum_severalSpectra(self):
         g = plotSpectrum("fake", [0, 1])
-        screenshot(g, "plotSpectrum_severalSpectra", "Call to plotSpectrum() of 2 spectra, no error bars.")
         self.g = g
 
     def test_Customized1DPlot(self):
@@ -65,7 +63,6 @@ class MantidPlot1DPlotTest(unittest.TestCase):
         l.setTitleAlignment(QtCore.Qt.AlignLeft)
         l.setScale(2, 0.0, 3.0)
         l.setAntialiasing(True)
-        screenshot(g, "Customized1DPlot", "1D plot of a spectrum, with error bars, an orange line of width 2, a custom title in red Arial font, with X from 0 to 3")
         self.g = g
 
     def test_standard_plot_command(self):
