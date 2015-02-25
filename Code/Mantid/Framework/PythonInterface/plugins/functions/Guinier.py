@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 '''
 @author Mathieu Doucet, ORNL
 @date Oct 10, 2014
@@ -30,7 +31,7 @@ import numpy as np
 class Guinier(IFunction1D):
     """
         Provide a Guinier fit function for SANS
-        
+
         I(q) = I(0) exp(-R^2 q^2 / 3)
     """
     def category(self):
@@ -58,7 +59,7 @@ class Guinier(IFunction1D):
         rg = self.getParameterValue('Rg')
         for x in xvals:
             jacobian.set(i,0, math.exp(-(rg*x)**2/3.0 ) )
-            jacobian.set(i,1, -self.getParameterValue("Scale") * math.exp(-(rg*x)**2/3.0 )*2.0/3.0*rg*x*x );
+            jacobian.set(i,1, -self.getParameterValue("Scale") * math.exp(-(rg*x)**2/3.0 )*2.0/3.0*rg*x*x )
             i += 1
 
 # Required to have Mantid recognise the new function

@@ -1,13 +1,14 @@
+#pylint: disable=invalid-name
 # IDA F2PY Absorption Corrections Wrapper
 ## Handle selection of .pyd files for absorption corrections
-import platform, sys
+import sys
 from IndirectImport import *
 
 from IndirectCommon import *
 from mantid.simpleapi import *
 from mantid import config, logger, mtd
 import math, os.path, numpy as np
-mp = import_mantidplot()
+MTD_PLOT = import_mantidplot()
 
 def WaveRange(inWS, efixed):
 # create a list of 10 equi-spaced wavelengths spanning the input data
@@ -163,7 +164,7 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Save):
                 raise ValueError('Number of steps ( ' + str(nstep) + ' ) should be >= 20')
 
             angle = det[n]
-            kill, A1, A2, A3, A4 = cylabs.cylabs(astep, beam, ncan, size,
+            kill, A1, A2, A3, A4 = cylabs.cylabs(astep, beam, ncan, size,\
                 density, sigs, siga, angle, wavelas, waves, n, wrk, 0)
 
         if kill == 0:
@@ -231,33 +232,33 @@ def plotAbs(workspaces, plotOpt):
         return
 
     if plotOpt == 'Wavelength' or plotOpt == 'Both':
-        graph = mp.plotSpectrum(workspaces, 0)
+        graph = MTD_PLOT.plotSpectrum(workspaces, 0)
 
     if plotOpt == 'Angle' or plotOpt == 'Both':
-        graph = mp.plotTimeBin(workspaces, 0)
-        graph.activeLayer().setAxisTitle(mp.Layer.Bottom, 'Angle')
+        graph = MTD_PLOT.plotTimeBin(workspaces, 0)
+        graph.activeLayer().setAxisTitle(MTD_PLOT.Layer.Bottom, 'Angle')
 
 
 def AbsRunFeeder(input_ws, can_ws, geom, ncan, size, avar, density, beam_width=None, sample_formula=None, can_formula=None, sigs=None, siga=None,
                  plot_opt='None', save=False):
     """
-        Handles the feeding of input and plotting of output for the F2PY
-        absorption correction routine.
+    Handles the feeding of input and plotting of output for the F2PY
+    absorption correction routine.
 
-        @param input_ws - workspace to generate corrections for
-        @param geom - type of geometry used (flat plate or cylinder)
-        @param beam_width - width of the beam used. If None this will be taken from the IPF
-        @param ncan - number of cans used.
-        @param size - sample & can thickness
-        @param sample_formula - optional, chemical formula for the sample
-        @param cam_formula - optional, chemical formula for the can
-        @param density - density of the sample and cans(s)
-        @param sigs - scattering for sample and can(s)
-        @param siga - absorption for sample and can(s)
-        @param avar - sample angle
-        @param plot_opt - whether to plot output
-        @param save - whether to save the output to file
-        @return The result workspace group
+    @param input_ws - workspace to generate corrections for
+    @param geom - type of geometry used (flat plate or cylinder)
+    @param beam_width - width of the beam used. If None this will be taken from the IPF
+    @param ncan - number of cans used.
+    @param size - sample & can thickness
+    @param sample_formula - optional, chemical formula for the sample
+    @param cam_formula - optional, chemical formula for the can
+    @param density - density of the sample and cans(s)
+    @param sigs - scattering for sample and can(s)
+    @param siga - absorption for sample and can(s)
+    @param avar - sample angle
+    @param plot_opt - whether to plot output
+    @param save - whether to save the output to file
+    @return The result workspace group
     """
 
     StartTime('CalculateCorrections')
@@ -288,7 +289,8 @@ def AbsRunFeeder(input_ws, can_ws, geom, ncan, size, avar, density, beam_width=N
 
     #set sample material based on input or formula
     if sample_formula is not None:
-        SetSampleMaterial(InputWorkspace=input_ws, ChemicalFormula=sample_formula, SampleNumberDensity=density[0])
+        SetSampleMaterial(InputWorkspace=input_ws, ChemicalFormula=sample_formula,
+                          SampleNumberDensity=density[0])
 
         sample = mtd[input_ws].sample()
         sam_mat = sample.getMaterial()
@@ -300,7 +302,8 @@ def AbsRunFeeder(input_ws, can_ws, geom, ncan, size, avar, density, beam_width=N
 
     if can_formula is not None and ncan == 2:
         #set can material based on input or formula
-        SetSampleMaterial(InputWorkspace=can_ws, ChemicalFormula=can_formula, SampleNumberDensity=density[1])
+        SetSampleMaterial(InputWorkspace=can_ws, ChemicalFormula=can_formula,
+                          SampleNumberDensity=density[1])
 
         can_sample = mtd[can_ws].sample()
         can_mat = can_sample.getMaterial()
@@ -323,19 +326,19 @@ def AbsRunFeeder(input_ws, can_ws, geom, ncan, size, avar, density, beam_width=N
 
 def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
     """
-        FlatAbs - calculate flat plate absorption factors
+    FlatAbs - calculate flat plate absorption factors
 
-        For more information See:
-          - MODES User Guide: http://www.isis.stfc.ac.uk/instruments/iris/data-analysis/modes-v3-user-guide-6962.pdf
-          - C J Carlile, Rutherford Laboratory report, RL-74-103 (1974)
+    For more information See:
+      - MODES User Guide: http://www.isis.stfc.ac.uk/instruments/iris/data-analysis/modes-v3-user-guide-6962.pdf
+      - C J Carlile, Rutherford Laboratory report, RL-74-103 (1974)
 
-        @param sigs - list of scattering  cross-sections
-        @param siga - list of absorption cross-sections
-        @param density - list of density
-        @param ncan - =0 no can, >1 with can
-        @param thick - list of thicknesses: sample thickness, can thickness1, can thickness2
-        @param angles - list of angles
-        @param waves - list of wavelengths
+    @param sigs - list of scattering  cross-sections
+    @param siga - list of absorption cross-sections
+    @param density - list of density
+    @param ncan - =0 no can, >1 with can
+    @param thick - list of thicknesses: sample thickness, can thickness1, can thickness2
+    @param angles - list of angles
+    @param waves - list of wavelengths
     """
     PICONV = math.pi/180.
 
@@ -355,7 +358,7 @@ def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
     acc = np.ones(nlam)
 
     # case where tsec is close to 90 degrees. CALCULATION IS UNRELIABLE
-    if (abs(abs(tsec)-90.0) < 1.0):
+    if abs(abs(tsec)-90.0) < 1.0:
         #default to 1 for everything
         return ass, assc, acsc, acc
     else:
@@ -385,7 +388,8 @@ def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
 
         sampleSec1, sampleSec2 = calcThicknessAtSec(sampleXSection, samThickness, [sec1, sec2])
 
-        if (sec2 < 0.):
+
+        if sec2 < 0.0:
             ass = fs / samThickness
         else:
             ass= np.exp(-sampleSec2) * fs / samThickness
@@ -394,7 +398,8 @@ def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
         if useCan:
             #calculate can cross section
             canXSection = (canScatt + canAbs * waves / 1.8) * canDensity
-            assc, acsc, acc = calcFlatAbsCan(ass, canXSection, canThickness1, canThickness2, sampleSec1, sampleSec2, [sec1, sec2])
+            assc, acsc, acc = calcFlatAbsCan(ass, canXSection, canThickness1, canThickness2,
+                                             sampleSec1, sampleSec2, [sec1, sec2])
 
     return ass, assc, acsc, acc
 
@@ -429,9 +434,9 @@ def calcFlatAbsCan(ass, canXSection, canThickness1, canThickness2, sampleSec1, s
     f2 = vecFact(canXSection,canThickness2,sec1,sec2)
 
     canThick1Sec1, canThick1Sec2 = calcThicknessAtSec(canXSection, canThickness1, sec)
-    canThick2Sec1, canThick2Sec2 = calcThicknessAtSec(canXSection, canThickness2, sec)
+    canThick2Sec2 = calcThicknessAtSec(canXSection, canThickness2, sec)[1]
 
-    if (sec2 < 0.):
+    if sec2 < 0.0:
         val = np.exp(-(canThick1Sec1-canThick1Sec2))
         assc = ass * val
 
@@ -452,7 +457,7 @@ def calcFlatAbsCan(ass, canXSection, canThickness1, canThickness2, sampleSec1, s
 
     canThickness = canThickness1 + canThickness2
 
-    if(canThickness > 0.):
+    if canThickness > 0.0:
         acc = (acc1 + acc2) / canThickness
         acsc = (acsc1 + acsc2) / canThickness
 

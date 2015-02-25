@@ -1,5 +1,5 @@
+#pylint: disable=no-init
 from mantid.api import PythonAlgorithm, AlgorithmFactory
-import mantid.simpleapi
 from mantid.kernel import FloatBoundedValidator,Direction,logger
 from numpy import sqrt,divide
 
@@ -25,7 +25,7 @@ class SuggestTibHYSPEC(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-        val=mantid.kernel.FloatBoundedValidator()
+        val=FloatBoundedValidator()
         val.setBounds(3,100) #reasonable incident nergy range for HYSPEC
         self.declareProperty("IncidentEnergy",0.,val,"Incident energy (3 to 100 meV)")
         self.declareProperty("TibMin",0.,Direction.Output)
@@ -54,9 +54,9 @@ class SuggestTibHYSPEC(PythonAlgorithm):
         pre_lead_us = 16667 * index_under_frame
         pre_tail_us = pre_lead_us + tail_length_us
         post_lead_us = 16667 * (1+ index_under_frame)
-        post_tail_us = post_lead_us + tail_length_us
-        E_final_meV = -1
-        E_transfer_meV = -1
+        #post_tail_us = post_lead_us + tail_length_us
+        #E_final_meV = -1
+        #E_transfer_meV = -1
         # finding an ok TIB range
         MinTIB_us = 2000.0
         slop_frac = 0.2
