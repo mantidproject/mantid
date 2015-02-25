@@ -11,6 +11,33 @@ COMPRESS_TOL_TOF = .01
 
 class CalibrateRectangularDetectors(PythonAlgorithm):
 
+    _instrument = None
+    _filterBadPulses = None
+    _xpixelbin = None
+    _ypixelbin = None
+    _grouping = None
+    _smoothoffsets = None
+    _smoothGroups = None
+    _peakpos = None
+    _peakpos1 = None
+    _peakmin = None
+    _peakmax = None
+    _peakpos2 = None
+    _peakmin2 = None
+    _peakmax2 = None
+    _peakpos3 = None
+    _peakmin3 = None
+    _peakmax3 = None
+    _lastpixel = None
+    _lastpixel2 = None
+    _lastpixel3 = None
+    _ccnumber = None
+    _maxoffset = None
+    _diffractionfocus = None
+    _outDir = None
+    _outTypes = None
+    _binning = None
+
     def category(self):
         return "Diffraction;PythonAlgorithms"
 

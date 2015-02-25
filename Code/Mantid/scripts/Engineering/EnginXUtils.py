@@ -43,4 +43,3 @@ def getWsIndicesForBank(bank, ws):
 
     return filter(isIndexInBank, range(0, ws.getNumberHistograms()))
 
-

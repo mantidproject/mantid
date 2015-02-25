@@ -368,6 +368,9 @@ class LoadTransmissions():
         sample or can
     """
 
+    _direct_name = None
+    _trans_name = None
+
     def __init__(self, is_can=False, reload=True):
         """
             Two settings can be set at initialization, if this is for
@@ -2731,7 +2734,7 @@ class GetSampleGeom(ReductionStep):
         # For a cylinder and sphere the height=width=radius
         if (not self._shape is None) and (self._shape.startswith('cylinder')):
             self._width = self._height
-        self._use_wksp_widtht = False
+        self._use_wksp_width = False
 
     def get_height(self):
         self.raise_if_zero(self._height, "height")

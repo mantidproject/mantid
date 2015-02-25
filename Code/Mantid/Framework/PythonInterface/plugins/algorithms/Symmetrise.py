@@ -13,6 +13,18 @@ import numpy as np
 
 class Symmetrise(PythonAlgorithm):
 
+    _sample = None
+    _x_min = None
+    _x_max = None
+    _plot = None
+    _save = None
+    _spectra_range = None
+    _output_workspace = None
+    _props_output_workspace = None
+    _positive_min_index = None
+    _positive_max_index = None
+    _negative_min_index = None
+
     def category(self):
         return 'PythonAlgorithms'
 

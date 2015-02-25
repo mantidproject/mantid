@@ -5,6 +5,10 @@ from mantid.kernel import *
 import os
 
 class LoadMultipleGSS(PythonAlgorithm):
+
+    __exts = None
+    __loader = None
+
     def category(self):
         return "DataHandling;PythonAlgorithms"
 
@@ -25,7 +29,7 @@ class LoadMultipleGSS(PythonAlgorithm):
                 self.log().information("Trying to load '%s'" % filename)
                 self.__loader(Filename=filename, OutputWorkspace=prefix, UseBankIDasSpectrumNumber=True)
                 return
-            except Exception, e:
+            except Exception, _:
                 pass
         raise RuntimeError("Failed to load run %s" % prefix)
 
@@ -47,7 +51,6 @@ class LoadMultipleGSS(PythonAlgorithm):
         self.__loader = LoadGSS
 
         # load things and conjoin them
-        first = True
         for run in runs:
             wksp = "%s_%d" % (prefix,run)
             self.__load(directory, wksp)

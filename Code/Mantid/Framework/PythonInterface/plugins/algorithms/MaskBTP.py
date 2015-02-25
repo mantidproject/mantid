@@ -8,6 +8,11 @@ class MaskBTP(mantid.api.PythonAlgorithm):
     """ Class to generate grouping file
     """
 
+    instname = None
+    instrument = None
+    bankmin = None
+    bankmax = None
+
     def category(self):
         """ Mantid required
         """

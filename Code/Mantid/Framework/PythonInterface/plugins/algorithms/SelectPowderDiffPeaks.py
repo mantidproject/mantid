@@ -8,6 +8,9 @@ _OUTPUTLEVEL = "NOOUTPUT"
 class SelectPowderDiffPeaks(PythonAlgorithm):
     """ Algorithm to select the powder diffraction peaks for Le Bail Fit
     """
+
+    mPeaks = None
+
     def category(self):
         """
         """
