@@ -31,18 +31,15 @@ Usage
 
    FakeMDEventData(InputWorkspace='to_cut', PeakParams=[10000,0.5,0,0,0,0.1])
     
-
    SetUB(Workspace=to_cut, a=1, b=1, c=1, alpha=90, beta=90, gamma=90)
    SetSpecialCoordinates(InputWorkspace=to_cut, SpecialCoordinates='HKL')
 
-   #3 dimensional projection
-   projection = Projection(3)
-   projection.u = VMD( 1,1,0)
-   projection.v = VMD(-1,1,0)
-   projection.w = VMD( 0,0,1)
+   projection = Projection(3) #3 dimensions specified
+   projection.u = [1,1,0]
+   projection.v = [-1,1,0]
+   #w defaults to [0,0,1]
    
    # Apply the cut
-
    out_md = CutMD(to_cut, Projection=projection.toWorkspace(), P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], P4Bin=[-5,5], NoPix=True)
    print 'number of dimensions', out_md.getNumDims()
    print 'number of dimensions not integrated', len(out_md.getNonIntegratedDimensions())
