@@ -17,6 +17,8 @@ The sample chemical formula is input for the :ref:`SetSampleMaterial
 number density & thickness is input to then calculate the percentage scattering
 & transmission.
 
+A flat plate sample which is perpendicular to the beam is assumed.
+
 Usage
 -----
 

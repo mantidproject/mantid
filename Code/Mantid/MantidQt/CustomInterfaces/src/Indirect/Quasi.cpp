@@ -190,7 +190,7 @@ namespace MantidQt
 
 			pyInput += "QLRun('"+program+"','"+sampleName+"','"+resName+"','"+resNormFile+"',"+eRange+","
 										" "+nBins+","+fitOps+",'"+fixedWidthFile+"',"+sequence+", "
-										" Save="+save+", Plot='"+plot+"', Verbose=True)\n";
+										" Save="+save+", Plot='"+plot+"')\n";
 
 			runPythonScript(pyInput);
 
