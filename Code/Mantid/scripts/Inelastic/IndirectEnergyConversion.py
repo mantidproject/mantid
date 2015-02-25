@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from mantid.simpleapi import *
 from IndirectCommon import *
 from IndirectImport import import_mantidplot
@@ -6,7 +7,7 @@ from mantid import config, logger
 import inelastic_indirect_reducer
 import sys, os.path, numpy as np
 
-def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
+def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,\
         Suffix=''):
     workspaces = []
     for file in rawfiles:
@@ -16,7 +17,7 @@ def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
             if ( SpecMin == -1 ) and ( SpecMax == -1 ):
                 Load(Filename=file, OutputWorkspace=name+Suffix, LoadLogFiles=False)
             else:
-                Load(Filename=file, OutputWorkspace=name+Suffix, SpectrumMin=SpecMin,
+                Load(Filename=file, OutputWorkspace=name+Suffix, SpectrumMin=SpecMin,\
                     SpectrumMax=SpecMax, LoadLogFiles=False)
             workspaces.append(name+Suffix)
         except ValueError, message:
@@ -33,8 +34,10 @@ def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
         return workspaces
 
 def createMappingFile(groupFile, ngroup, nspec, first):
-    if ( ngroup == 1 ): return 'All'
-    if ( nspec == 1 ): return 'Individual'
+    if ngroup == 1:
+        return 'All'
+    if nspec == 1:
+        return 'Individual'
     filename = config['defaultsave.directory']
     filename = os.path.join(filename, groupFile)
     handle = open(filename, 'w')
@@ -85,7 +88,7 @@ def getInstrumentDetails(instrument):
             if j < ( len(reflections[i][1]) -1 ):
                 message += ','
         result += message
-        if ( i < ( len(reflections) - 1) ):
+        if  i < ( len(reflections) - 1) :
             result += '\n'
     return result
 

@@ -20,7 +20,6 @@ class ReductionWrapperTest(unittest.TestCase):
     def __init__(self, methodName):
         return super(ReductionWrapperTest, self).__init__(methodName)
 
-        pass
 
     def setUp(self):
         pass
@@ -80,5 +79,5 @@ class ReductionWrapperTest(unittest.TestCase):
             os.remove(fcomp)
 
 if __name__=="__main__":
-        unittest.main()
+    unittest.main()
 

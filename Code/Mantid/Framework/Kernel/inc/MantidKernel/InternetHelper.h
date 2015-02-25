@@ -5,6 +5,7 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ProxyInfo.h"
 
+#include <ios>
 #include <map>
 
 namespace Poco {

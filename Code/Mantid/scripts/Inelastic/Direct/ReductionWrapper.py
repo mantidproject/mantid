@@ -1,8 +1,9 @@
+#pylint: disable=invalid-name
 from mantid.simpleapi import *
 from mantid import config,api
 from mantid.kernel import funcreturns
 
-from PropertyManager import PropertyManager
+from Direct.PropertyManager import PropertyManager
 # this import is used by children
 from Direct.DirectEnergyConversion import DirectEnergyConversion
 #import inspect
@@ -21,7 +22,6 @@ class ReductionWrapper(object):
         def __init__(self):
             self.standard_vars = None
             self.advanced_vars = None
-            pass
 
     def __init__(self,instrumentName,web_var=None):
         """ sets properties defaults for the instrument with Name
@@ -162,8 +162,8 @@ class ReductionWrapper(object):
         else:
             if isinstance(reduced,list): # check only first result in multirep
                 reduced = reduced[0]
-            result = CheckWorkspacesMatch(Workspace1=sample,Workspace2=reduced,
-                                      Tolerance=Error,CheckSample=False,
+            result = CheckWorkspacesMatch(Workspace1=sample,Workspace2=reduced,\
+                                      Tolerance=Error,CheckSample=False,\
                                       CheckInstrument=False,ToleranceRelErr=ToleranceRelErr)
 
         self.wait_for_file = current_wait_state

@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -17,7 +18,7 @@ class USANSSimulation(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty("TwoTheta", 0.01, "Scattering angle in degrees")
-        self.declareProperty(FloatArrayProperty("WavelengthPeaks", values=[0.72, 0.9, 1.2, 1.8, 3.6],
+        self.declareProperty(FloatArrayProperty("WavelengthPeaks", values=[0.72, 0.9, 1.2, 1.8, 3.6],\
                              direction=Direction.Input), "Wavelength peaks out of the monochromator")
         self.declareProperty("CountTime", 1000.0, "Fake count time")
 
@@ -140,7 +141,7 @@ class USANSSimulation(PythonAlgorithm):
         bes = 3.0*(math.sin(qr)-qr*math.cos(qr))/(qr*qr*qr) if not qr == 0.0 else 1.0
         vol = 4.0*math.pi/3.0*radius*radius*radius
         f2 = vol*bes*bes*1.0e-6
-        return(scale*f2+bck)
+        return scale*f2+bck
 
 #############################################################################################
 AlgorithmFactory.subscribe(USANSSimulation())

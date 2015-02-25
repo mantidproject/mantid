@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.kernel import *
 import math
@@ -17,7 +18,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
                                                      direction=Direction.Input))
 
-        self.declareProperty(FloatArrayProperty("Binning", values=[0.,0.,0.],
+        self.declareProperty(FloatArrayProperty("Binning", values=[0.,0.,0.],\
                              direction=Direction.InOut), "Positive is linear bins, negative is logarithmic")
 
         self.declareProperty("NumberOfBins", 100, validator=IntBoundedValidator(lower=1),
@@ -174,7 +175,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
                 alg.setProperty("InputWorkspace", wedge_i)
                 alg.execute()
 
-            self.declareProperty(MatrixWorkspaceProperty("WedgeWorkspace_%s" % i, "",
+            self.declareProperty(MatrixWorkspaceProperty("WedgeWorkspace_%s" % i, "",\
                                                         direction = Direction.Output))
             self.setPropertyValue("WedgeWorkspace_%s" % i, wedge_i_name)
             self.setProperty("WedgeWorkspace_%s" % i, wedge_i)

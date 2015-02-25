@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'filter_info.ui'
@@ -51,7 +52,7 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "Filter help", None, QtGui.QApplication.UnicodeUTF8))
-        self.plainTextEdit.setPlainText(QtGui.QApplication.translate("Dialog", "To use this application, you will need:\n"
+        self.plainTextEdit.setPlainText(QtGui.QApplication.translate("Dialog", "To use this application, you will need:\n"\
 "\n"
 "- Your Nexus event files ( _event.nxs)\n"
 "- The Nexus event file used in this filter setup page must be same to the data reduction page.\n"

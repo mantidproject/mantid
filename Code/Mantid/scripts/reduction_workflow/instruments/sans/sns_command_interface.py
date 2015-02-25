@@ -1,7 +1,8 @@
+#pylint: disable=invalid-name,unused-import
 """
     Command set for EQSANS reduction
 """
-# Import the specific commands that we need
+# Import the specific commands that we need - some of these are used in systemtests
 from reduction_workflow.command_interface import *
 
 from hfir_command_interface import DarkCurrent, NoDarkCurrent, NoNormalization
@@ -30,9 +31,9 @@ from hfir_command_interface import Mask, MaskRectangle, MaskDetectors, MaskDetec
 from hfir_command_interface import SetAbsoluteScale, SetDirectBeamAbsoluteScale
 from hfir_command_interface import Stitch
 
-from mantid.api import AlgorithmManager
-from mantid.kernel import Logger
-import mantid.simpleapi as simpleapi
+#from mantid.api import AlgorithmManager
+#from mantid.kernel import Logger
+#import mantid.simpleapi as simpleapi
 from reduction_workflow.find_data import find_data
 
 def EQSANS(keep_events=False, property_manager=None):

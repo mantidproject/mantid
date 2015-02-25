@@ -15,6 +15,7 @@
 #include "MantidMDEvents/UnitsConversionHelper.h"
 #include "MantidMDEvents/Integrate3DEvents.h"
 #include "MantidMDEvents/IntegrateEllipsoids.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Statistics.h"
 
 
@@ -268,7 +269,7 @@ void IntegrateEllipsoids::exec() {
 
   double inti;
   double sigi;
-  std::vector<double> r1,r2,r3;
+  std::vector<double> principalaxis1,principalaxis2,principalaxis3;
   for (size_t i = 0; i < n_peaks; i++) {
     V3D hkl(peaks[i].getH(), peaks[i].getK(), peaks[i].getL());
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
@@ -281,79 +282,106 @@ void IntegrateEllipsoids::exec() {
       peaks[i].setSigmaIntensity(sigi);
       peaks[i].setPeakShape(shape);
       if (axes_radii.size() == 3) {
-        if (inti/sigi > cutoffIsigI && !specify_size)
-        {
-        r1.push_back(axes_radii[0]);
-        r2.push_back(axes_radii[1]);
-        r3.push_back(axes_radii[2]);
+        if (inti/sigi > cutoffIsigI || cutoffIsigI == EMPTY_DBL()){
+          principalaxis1.push_back(axes_radii[0]);
+          principalaxis2.push_back(axes_radii[1]);
+          principalaxis3.push_back(axes_radii[2]);
         }
-        g_log.notice()
-            << "Radii of three axes of ellipsoid for integrating peak " << i
-            << " = ";
-        for (int i3 = 0; i3 < 3; i3++) {
-          g_log.notice() << axes_radii[i3] << "  ";
-        }
-        g_log.notice() << std::endl;
       }
     } else {
       peaks[i].setIntensity(0.0);
       peaks[i].setSigmaIntensity(0.0);
     }
   }
-  if (r1.size() > 1 && !specify_size)
-  {
-    Statistics stats = getStatistics(r1);
-    g_log.notice() << "r1: "
-        << " mean " << stats.mean
-        << " standard_deviation " << stats.standard_deviation
-        << " minimum " << stats.minimum
-        << " maximum " << stats.maximum
-        << " median " << stats.median << "\n";
-    stats = getStatistics(r2);
-    g_log.notice() << "r2: "
-        << " mean " << stats.mean
-        << " standard_deviation " << stats.standard_deviation
-        << " minimum " << stats.minimum
-        << " maximum " << stats.maximum
-        << " median " << stats.median << "\n";
-    stats = getStatistics(r3);
-    g_log.notice() << "r3: "
-        << " mean " << stats.mean
-        << " standard_deviation " << stats.standard_deviation
-        << " minimum " << stats.minimum
-        << " maximum " << stats.maximum
-        << " median " << stats.median << "\n";
-    specify_size=true;
-    peak_radius = stats.mean + numSigmas * stats.standard_deviation;
-    back_inner_radius = peak_radius;
-    back_outer_radius = peak_radius * 1.25992105; // A factor of 2 ^ (1/3) will make the background
-    // shell volume equal to the peak region volume.
-    for (size_t i = 0; i < n_peaks; i++) {
-      V3D hkl(peaks[i].getH(), peaks[i].getK(), peaks[i].getL());
-      if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
-        V3D peak_q(peaks[i].getQLabFrame());
-        std::vector<double> axes_radii;
-        integrator.ellipseIntegrateEvents(peak_q, specify_size, peak_radius,
-                                          back_inner_radius, back_outer_radius,
-                                          axes_radii, inti, sigi);
-        peaks[i].setIntensity(inti);
-        peaks[i].setSigmaIntensity(sigi);
-        if (axes_radii.size() == 3) {
-          g_log.notice()
-              << "Radii of three axes of ellipsoid for integrating peak " << i
-              << " = ";
-          for (int i3 = 0; i3 < 3; i3++) {
-            g_log.notice() << axes_radii[i3] << "  ";
+  if (principalaxis1.size() > 1 ){
+    size_t histogramNumber = 3;
+    Workspace_sptr wsProfile = WorkspaceFactory::Instance().create(
+        "Workspace2D", histogramNumber, principalaxis1.size(), principalaxis1.size());
+    Workspace2D_sptr wsProfile2D = boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
+    AnalysisDataService::Instance().addOrReplace("EllipsoidAxes", wsProfile2D);
+    for (size_t j = 0; j < principalaxis1.size(); j++) {
+      wsProfile2D->dataX(0)[j] = static_cast<double>(j);
+      wsProfile2D->dataY(0)[j] = principalaxis1[j];
+      wsProfile2D->dataE(0)[j] = std::sqrt(principalaxis1[j]);
+      wsProfile2D->dataX(1)[j] = static_cast<double>(j);
+      wsProfile2D->dataY(1)[j] = principalaxis2[j];
+      wsProfile2D->dataE(1)[j] = std::sqrt(principalaxis2[j]);
+      wsProfile2D->dataX(2)[j] = static_cast<double>(j);
+      wsProfile2D->dataY(2)[j] = principalaxis3[j];
+      wsProfile2D->dataE(2)[j] = std::sqrt(principalaxis3[j]);
+    }
+    Statistics stats1 = getStatistics(principalaxis1);
+    g_log.notice() << "principalaxis1: "
+        << " mean " << stats1.mean
+        << " standard_deviation " << stats1.standard_deviation
+        << " minimum " << stats1.minimum
+        << " maximum " << stats1.maximum
+        << " median " << stats1.median << "\n";
+    Statistics stats2 = getStatistics(principalaxis2);
+    g_log.notice() << "principalaxis2: "
+        << " mean " << stats2.mean
+        << " standard_deviation " << stats2.standard_deviation
+        << " minimum " << stats2.minimum
+        << " maximum " << stats2.maximum
+        << " median " << stats2.median << "\n";
+    Statistics stats3 = getStatistics(principalaxis3);
+    g_log.notice() << "principalaxis3: "
+        << " mean " << stats3.mean
+        << " standard_deviation " << stats3.standard_deviation
+        << " minimum " << stats3.minimum
+        << " maximum " << stats3.maximum
+        << " median " << stats3.median << "\n";
+    if (cutoffIsigI != EMPTY_DBL()){
+      principalaxis1.clear();
+      principalaxis2.clear();
+      principalaxis3.clear();
+      specify_size=true;
+      peak_radius = std::max(std::max(stats1.mean,stats2.mean),stats3.mean) + numSigmas *
+        std::max(std::max(stats1.standard_deviation,stats2.standard_deviation),stats3.standard_deviation);
+      back_inner_radius = peak_radius;
+      back_outer_radius = peak_radius * 1.25992105; // A factor of 2 ^ (1/3) will make the background
+      // shell volume equal to the peak region volume.
+      for (size_t i = 0; i < n_peaks; i++) {
+        V3D hkl(peaks[i].getH(), peaks[i].getK(), peaks[i].getL());
+        if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
+          V3D peak_q(peaks[i].getQLabFrame());
+          std::vector<double> axes_radii;
+          integrator.ellipseIntegrateEvents(peak_q, specify_size, peak_radius,
+                                            back_inner_radius, back_outer_radius,
+                                            axes_radii, inti, sigi);
+          peaks[i].setIntensity(inti);
+          peaks[i].setSigmaIntensity(sigi);
+          if (axes_radii.size() == 3){
+            principalaxis1.push_back(axes_radii[0]);
+            principalaxis2.push_back(axes_radii[1]);
+            principalaxis3.push_back(axes_radii[2]);
           }
-          g_log.notice() << std::endl;
+        } else {
+          peaks[i].setIntensity(0.0);
+          peaks[i].setSigmaIntensity(0.0);
         }
-      } else {
-        peaks[i].setIntensity(0.0);
-        peaks[i].setSigmaIntensity(0.0);
+      }
+      if (principalaxis1.size() > 1 ){
+        size_t histogramNumber = 3;
+        Workspace_sptr wsProfile2 = WorkspaceFactory::Instance().create(
+            "Workspace2D", histogramNumber, principalaxis1.size(), principalaxis1.size());
+        Workspace2D_sptr wsProfile2D2 = boost::dynamic_pointer_cast<Workspace2D>(wsProfile2);
+        AnalysisDataService::Instance().addOrReplace("EllipsoidAxes_2ndPass", wsProfile2D2);
+        for (size_t j = 0; j < principalaxis1.size(); j++) {
+          wsProfile2D2->dataX(0)[j] = static_cast<double>(j);
+          wsProfile2D2->dataY(0)[j] = principalaxis1[j];
+          wsProfile2D2->dataE(0)[j] = std::sqrt(principalaxis1[j]);
+          wsProfile2D2->dataX(1)[j] = static_cast<double>(j);
+          wsProfile2D2->dataY(1)[j] = principalaxis2[j];
+          wsProfile2D2->dataE(1)[j] = std::sqrt(principalaxis2[j]);
+          wsProfile2D2->dataX(2)[j] = static_cast<double>(j);
+          wsProfile2D2->dataY(2)[j] = principalaxis3[j];
+          wsProfile2D2->dataE(2)[j] = std::sqrt(principalaxis3[j]);
+        }
       }
     }
-
   }
+
   // This flag is used by the PeaksWorkspace to evaluate whether it has been
   // integrated.
   peak_ws->mutableRun().addProperty("PeaksIntegrated", 1, true);
