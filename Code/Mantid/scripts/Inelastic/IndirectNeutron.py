@@ -1,12 +1,12 @@
+#pylint: disable=invalid-name
 #Force for ILL backscattering raw
 #
 from IndirectImport import *
 from mantid.simpleapi import *
 from mantid import config, logger, mtd, FileFinder
-from mantid.kernel import V3D
 import sys, math, os.path, numpy as np
 from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt
-mp = import_mantidplot()
+MTD_PLOT = import_mantidplot()
 
 #  Routines for Ascii file of raw data
 
@@ -21,7 +21,7 @@ def Iblock(a,first):                                 #read Ascii block of Intege
         error = ''
     else:
         error = 'NOT an I block starting at line ' +str(first)
-        logger.notice('ERROR *** ' + error)
+        logger.information('ERROR *** ' + error)
         sys.exit(error)
     ival = []
     for m in range(0, lines):
@@ -47,7 +47,7 @@ def Fblock(a,first):                                 #read Ascii block of Floats
         error= ''
     else:
         error = 'NOT an F block starting at line ' +str(first)
-        logger.notice('ERROR *** ' + error)
+        logger.information('ERROR *** ' + error)
         sys.exit(error)
     fval = []
     for m in range(0, lines):
@@ -76,7 +76,7 @@ def ReadIbackGroup(a,first):                           #read Ascii block of spec
         error = ''
     else:
         error = 'NOT an S block starting at line ' +str(first)
-        logger.notice('ERROR *** ' + error)
+        logger.information('ERROR *** ' + error)
         sys.exit(error)
     next += 1
     next,Ival = Iblock(a,next)
@@ -94,7 +94,7 @@ def ReadIbackGroup(a,first):                           #read Ascii block of spec
 def getFilePath(run,ext,instr):
     path = None
     fname = None
-    if(os.path.isfile(run)):
+    if os.path.isfile(run):
         #using full file path
         path = run
         #base name less extension
@@ -126,14 +126,13 @@ def loadFile(path):
         error = 'ERROR *** Could not load ' + path
         sys.exit(error)
 
-def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      #Ascii start routine
+def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Plot,Save):      #Ascii start routine
     StartTime('Iback')
     workdir = config['defaultsave.directory']
 
     path, fname = getFilePath(run,'.asc',instr)
 
-    if Verbose:
-        logger.notice('Reading file : ' + path)
+    logger.information('Reading file : ' + path)
 
     asc = loadFile(path)
     lasc = len(asc)
@@ -176,8 +175,7 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      
     val = ExtractInt(asc[next+1])
     if instr == 'IN10':
         nsp = int(val[2])
-    if Verbose:
-        logger.notice('Number of spectra : ' + str(nsp))
+    logger.information('Number of spectra : ' + str(nsp))
 # read monitor
     nmon = next+nsp*lgrp
     nm,xm,ym,em = ReadIbackGroup(asc,nmon)
@@ -214,7 +212,7 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      
         eOut.append(em[mm]/10.0)
     xMon.append(2*xMon[new-1]-xMon[new-2])
     monWS = '__Mon'
-    CreateWorkspace(OutputWorkspace=monWS, DataX=xMon, DataY=yOut, DataE=eOut,
+    CreateWorkspace(OutputWorkspace=monWS, DataX=xMon, DataY=yOut, DataE=eOut,\
         Nspec=1, UnitX='DeltaE')
 #
     Qaxis = ''
@@ -225,9 +223,8 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      
     for n in range(0, nsp):
         next,xd,yd,ed = ReadIbackGroup(asc,next)
         tot.append(sum(yd))
-        if Verbose:
-            logger.notice('Spectrum ' + str(n+1) +' at angle '+ str(theta[n])+
-                ' ; Total counts = '+str(sum(yd)))
+        logger.information('Spectrum ' + str(n+1) +' at angle '+ str(theta[n])+\
+                      ' ; Total counts = '+str(sum(yd)))
         for m in range(0, new+1):
             mm = m+imin
             xDat.append(xMon[m])
@@ -239,27 +236,26 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      
         Qaxis += str(theta[n])
     ascWS = fname +'_' +ana+refl +'_asc'
     outWS = fname +'_' +ana+refl +'_red'
-    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
+    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,\
         Nspec=nsp, UnitX='DeltaE')
-    Divide(LHSWorkspace=ascWS, RHSWorkspace=monWS, OutputWorkspace=ascWS,
+    Divide(LHSWorkspace=ascWS, RHSWorkspace=monWS, OutputWorkspace=ascWS,\
         AllowDifferentNumberSpectra=True)
     DeleteWorkspace(monWS)                                # delete monitor WS
     InstrParas(ascWS,instr,ana,refl)
-    efixed = RunParas(ascWS,instr,run,title,Verbose)
-    ChangeAngles(ascWS,instr,theta,Verbose)
+    efixed = RunParas(ascWS,instr,run,title)
+    ChangeAngles(ascWS,instr,theta)
     if useM:
-        map = ReadMap(mapPath,Verbose)
-        UseMap(ascWS,map,Verbose)
+        map = ReadMap(mapPath)
+        UseMap(ascWS,map)
     if rejectZ:
-        RejectZero(ascWS,tot,Verbose)
+        RejectZero(ascWS,tot)
     if useM == False and rejectZ == False:
         CloneWorkspace(InputWorkspace=ascWS, OutputWorkspace=outWS)
     if Save:
         opath = os.path.join(workdir,outWS+'.nxs')
         SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
-        if Verbose:
-            logger.notice('Output file : ' + opath)
-    if (Plot):
+        logger.information('Output file : ' + opath)
+    if Plot:
         plotForce(outWS,Plot)
     EndTime('Iback')
 
@@ -281,14 +277,13 @@ def ReadInxGroup(asc,n,lgrp):                  # read ascii x,y,e
     npt = len(x)
     return Q,npt,x,y,e                                 #values of x,y,e as lists
 
-def InxStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):
+def InxStart(instr,run,ana,refl,rejectZ,useM,mapPath,Plot,Save):
     StartTime('Inx')
     workdir = config['defaultsave.directory']
 
     path, fname = getFilePath(run, '.inx', instr)
 
-    if Verbose:
-        logger.notice('Reading file : ' + path)
+    logger.information('Reading file : ' + path)
 
     asc = loadFile(path)
     lasc = len(asc)
@@ -299,13 +294,12 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):
     npt = int(val[7])
     title = asc[1]
     ltot = ngrp*lgrp
-    if Verbose:
-        logger.notice('Number of spectra : ' + str(ngrp))
+    logger.information('Number of spectra : ' + str(ngrp))
     if ltot == lasc:
         error = ''
     else:
         error = 'file ' +filext+ ' should be ' +str(ltot)+ ' lines'
-        logger.notice('ERROR *** ' + error)
+        logger.information('ERROR *** ' + error)
         sys.exit(error)
     Qaxis = ''
     xDat = []
@@ -317,8 +311,7 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):
     for m in range(0,ngrp):
         Qq,nd,xd,yd,ed = ReadInxGroup(asc,m,lgrp)
         tot.append(sum(yd))
-        if Verbose:
-            logger.notice('Spectrum ' + str(m+1) +' at Q= '+ str(Qq)+' ; Total counts = '+str(tot))
+        logger.information('Spectrum ' + str(m+1) +' at Q= '+ str(Qq)+' ; Total counts = '+str(tot))
         if ns != 0:
             Qaxis += ','
         Qaxis += str(Qq)
@@ -331,10 +324,10 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):
         ns += 1
     ascWS = fname +'_' +ana+refl +'_inx'
     outWS = fname +'_' +ana+refl +'_red'
-    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
+    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,\
         Nspec=ns, UnitX='DeltaE')
     InstrParas(ascWS,instr,ana,refl)
-    efixed = RunParas(ascWS,instr,0,title,Verbose)    
+    efixed = RunParas(ascWS,instr,0,title)
     pi4 = 4.0*math.pi
     wave=1.8*math.sqrt(25.2429/efixed)
     theta = []
@@ -342,55 +335,53 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):
         qw = wave*Q[n]/pi4
         ang = 2.0*math.degrees(math.asin(qw))
         theta.append(ang)
-    ChangeAngles(ascWS,instr,theta,Verbose)
+    ChangeAngles(ascWS,instr,theta)
     if useM:
-        map = ReadMap(mapPath,Verbose)
-        UseMap(ascWS,map,Verbose)
+        map = ReadMap(mapPath)
+        UseMap(ascWS,map)
     if rejectZ:
-        RejectZero(ascWS,tot,Verbose)
+        RejectZero(ascWS,tot)
     if useM == False and rejectZ == False:
         CloneWorkspace(InputWorkspace=ascWS, OutputWorkspace=outWS)
     if Save:
         opath = os.path.join(workdir,outWS+'.nxs')
         SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
-        if Verbose:
-            logger.notice('Output file : ' + opath)
-    if (Plot):
+        logger.information('Output file : ' + opath)
+    if Plot:
         plotForce(outWS,Plot)
     EndTime('Inx')
-    
+
 # General routines
 
-def RejectZero(inWS,tot,Verbose):
+def RejectZero(inWS,tot):
     nin = mtd[inWS].getNumberHistograms()                      # no. of hist/groups in sam
     nout = 0
     outWS = inWS[:-3]+'red'
     for n in range(0, nin):
         if tot[n] > 0:
-            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',
+            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',\
                 WorkspaceIndex=n)
             if nout == 0:
                 RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
             else:
-                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',CheckOverlapping=False)
+                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',
+                                  CheckOverlapping=False)
             nout += 1
         else:
-            if Verbose:
-                logger.notice('** spectrum '+str(n+1)+' rejected')
+            logger.information('** spectrum '+str(n+1)+' rejected')
 
-def ReadMap(path,Verbose):
+def ReadMap(path):
     workdir = config['defaultsave.directory']
 
     asc = loadFile(path)
 
     lasc = len(asc)
-    if Verbose:
-        logger.notice('Map file : ' + path +' ; spectra = ' +str(lasc-1))
+    logger.information('Map file : ' + path +' ; spectra = ' +str(lasc-1))
     val = ExtractInt(asc[0])
     numb = val[0]
-    if (numb != (lasc-1)):
+    if numb != (lasc-1):
         error = 'Number of lines  not equal to number of spectra'
-        logger.notice('ERROR *** ' + error)
+        logger.error(error)
         sys.exit(error)
     map = []
     for n in range(1,lasc):
@@ -398,52 +389,49 @@ def ReadMap(path,Verbose):
         map.append(val[1])
     return map
 
-def UseMap(inWS,map,Verbose):
+def UseMap(inWS, map):
     nin = mtd[inWS].getNumberHistograms()                      # no. of hist/groups in sam
     nout = 0
     outWS = inWS[:-3]+'red'
     for n in range(0, nin):
         if map[n] == 1:
-            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',
+            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',\
                 WorkspaceIndex=n)
             if nout == 0:
                 RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
             else:
-                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',CheckOverlapping=False)
+                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',
+                                  CheckOverlapping=False)
             nout += 1
-            if Verbose:
-                logger.notice('** spectrum '+str(n+1)+' mapped')
+            logger.information('** spectrum '+str(n+1)+' mapped')
         else:
-            if Verbose:
-                logger.notice('** spectrum '+str(n+1)+' skipped')
+            logger.information('** spectrum '+str(n+1)+' skipped')
 
 def plotForce(inWS,Plot):
-    if (Plot == 'Spectrum' or Plot == 'Both'):
+    if Plot == 'Spectrum' or Plot == 'Both':
         nHist = mtd[inWS].getNumberHistograms()
         if nHist > 10 :
             nHist = 10
         plot_list = []
         for i in range(0, nHist):
             plot_list.append(i)
-        res_plot=mp.plotSpectrum(inWS,plot_list)
-    if (Plot == 'Contour' or Plot == 'Both'):
-        cont_plot=mp.importMatrixWorkspace(inWS).plotGraph2D()
+        MTD_PLOT.plotSpectrum(inWS,plot_list)
+    if Plot == 'Contour' or Plot == 'Both':
+        MTD_PLOT.importMatrixWorkspace(inWS).plotGraph2D()
 
-def ChangeAngles(inWS,instr,theta,Verbose):
+def ChangeAngles(inWS,instr,theta):
     workdir = config['defaultsave.directory']
-    file = instr+'_angles.txt'
-    path = os.path.join(workdir, file)
-    if Verbose:
-        logger.notice('Creating angles file : ' + path)
+    filename = instr+'_angles.txt'
+    path = os.path.join(workdir, filename)
+    logger.information('Creating angles file : ' + path)
     handle = open(path, 'w')
     head = 'spectrum,theta'
     handle.write(head +" \n" )
     for n in range(0,len(theta)):
         handle.write(str(n+1) +'   '+ str(theta[n]) +"\n" )
-        if Verbose:
-            logger.notice('Spectrum ' +str(n+1)+ ' = '+str(theta[n]))
+        logger.information('Spectrum ' +str(n+1)+ ' = '+str(theta[n]))
     handle.close()
-    UpdateInstrumentFromFile(Workspace=inWS, Filename=path, MoveMonitors=False, IgnorePhi=False,
+    UpdateInstrumentFromFile(Workspace=inWS, Filename=path, MoveMonitors=False, IgnorePhi=False,\
         AsciiHeader=head)
 
 def InstrParas(ws,instr,ana,refl):
@@ -453,39 +441,39 @@ def InstrParas(ws,instr,ana,refl):
     ipf = idf_dir + instr + '_' + ana + '_' + refl + '_Parameters.xml'
     LoadParameterFile(Workspace=ws, Filename=ipf)
 
-def RunParas(ascWS,instr,run,title,Verbose):
+def RunParas(ascWS,instr,run,title):
     ws = mtd[ascWS]
     inst = ws.getInstrument()
     AddSampleLog(Workspace=ascWS, LogName="facility", LogType="String", LogText="ILL")
     ws.getRun()['run_number'] = run
     ws.getRun()['run_title'] = title
     efixed = inst.getNumberParameter('efixed-val')[0]
-    if Verbose:
-        facility = ws.getRun().getLogData('facility').value
-        logger.notice('Facility is ' +facility)
-        runNo = ws.getRun()['run_number'].value
-        runTitle = ws.getRun()['run_title'].value.strip()
-        logger.notice('Run : ' + str(runNo) + ' ; Title : ' + runTitle)
-        an = inst.getStringParameter('analyser')[0]
-        ref = inst.getStringParameter('reflection')[0]
-        logger.notice('Analyser : ' +an+ref +' with energy = ' + str(efixed))
+
+    facility = ws.getRun().getLogData('facility').value
+    logger.information('Facility is ' +facility)
+    runNo = ws.getRun()['run_number'].value
+    runTitle = ws.getRun()['run_title'].value.strip()
+    logger.information('Run : ' + str(runNo) + ' ; Title : ' + runTitle)
+    an = inst.getStringParameter('analyser')[0]
+    ref = inst.getStringParameter('reflection')[0]
+    logger.information('Analyser : ' +an+ref +' with energy = ' + str(efixed))
+
     return efixed
 
 # IN13 routines
 # These routines are specific to loading data for the ILL IN13 instrument
 
-def IN13Start(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      #Ascii start routine
+def IN13Start(instr,run,ana,refl,rejectZ,useM,mapPath,Plot,Save):      #Ascii start routine
     StartTime('IN13')
-    samWS = IN13Read(instr,run,ana,refl,Verbose,Plot,Save)
+    samWS = IN13Read(instr,run,ana,refl,Plot,Save)
     EndTime('IN13')
 
-def IN13Read(instr,run,ana,refl,Verbose,Plot,Save):      #Ascii start routine
+def IN13Read(instr,run,ana,refl,Plot,Save):      #Ascii start routine
     workdir = config['defaultsave.directory']
 
     path, fname = getFilePath(run,'.asc', instr)
 
-    if Verbose:
-        logger.notice('Reading file : ' + path)
+    logger.information('Reading file : ' + path)
 
     asc = loadFile(path)
     lasc = len(asc)
@@ -511,21 +499,21 @@ def IN13Read(instr,run,ana,refl,Verbose,Plot,Save):      #Ascii start routine
     if f2 >= 0.:
         ltemp = ltemp +1
     wave = 2.0*Fval[81]
-    if Verbose:
-        logger.notice('No. sub-spectra : ' + str(nsubsp))
-        logger.notice('No. spectra : ' + str(nspec))
-        logger.notice('Scan type : ' + str(int(Fval[8]))+
-            ' ; Average energy : ' + str(Fval[9]))
-        logger.notice('CaF2 lattice : ' + str(Fval[81])+
-            ' ; Graphite lattice : ' + str(Fval[82]))
-        logger.notice('Wavelength : ' + str(wave))
-        logger.notice('No. temperatures : ' + str(ntemp))
-        logger.notice('No. temperature lines : ' + str(ltemp))
+
+    logger.information('No. sub-spectra : ' + str(nsubsp))
+    logger.information('No. spectra : ' + str(nspec))
+    logger.information('Scan type : ' + str(int(Fval[8]))+\
+        ' ; Average energy : ' + str(Fval[9]))
+    logger.information('CaF2 lattice : ' + str(Fval[81])+\
+        ' ; Graphite lattice : ' + str(Fval[82]))
+    logger.information('Wavelength : ' + str(wave))
+    logger.information('No. temperatures : ' + str(ntemp))
+    logger.information('No. temperature lines : ' + str(ltemp))
+
 # para2 block
     next,Fval = Fblock(asc,next)
     angles = Fval[:nspec]
-    if Verbose:
-        logger.notice('Angles : ' + str(angles))
+    logger.information('Angles : ' + str(angles))
     lspec = 4 +ltemp
 # monitors
     psd = next + (nspec+2048)*lspec
@@ -533,8 +521,7 @@ def IN13Read(instr,run,ana,refl,Verbose,Plot,Save):      #Ascii start routine
     txt = asc[l1m1]
     l2m1 = l1m1 +3
     mon1 = ExtractFloat(asc[l2m1])
-    if Verbose:
-        logger.notice('Mon1 : Line '+str(l2m1)+' : ' + asc[l2m1])
+    logger.information('Mon1 : Line '+str(l2m1)+' : ' + asc[l2m1])
 # raw spectra
     first = next
     xDat = angles
@@ -544,8 +531,7 @@ def IN13Read(instr,run,ana,refl,Verbose,Plot,Save):      #Ascii start routine
         ylist = []
         elist = []
         l1 = first + lspec*n + 1
-        if Verbose:
-            logger.notice('Line '+str(l1)+' : ' + asc[l1])
+        logger.information('Line '+str(l1)+' : ' + asc[l1])
         for l in range(0,ltemp):
             l2 = l1 + 3 + l
             val = ExtractFloat(asc[l2])
@@ -600,30 +586,29 @@ def IN13Read(instr,run,ana,refl,Verbose,Plot,Save):      #Ascii start routine
             xDq = np.append(xDq,sorted_Q)
             yDq = np.append(yDq,y1Dq)
             eDq = np.append(eDq,e1Dq)
-    CreateWorkspace(OutputWorkspace=ascWS, DataX=xData, DataY=yData, DataE=eData,
+    CreateWorkspace(OutputWorkspace=ascWS, DataX=xData, DataY=yData, DataE=eData,\
         Nspec=3, UnitX='MomentumTransfer')
-    IN13Paras(ascWS,run,title,wave,Verbose)
-    CreateWorkspace(OutputWorkspace=outWS, DataX=xDq, DataY=yDq, DataE=eDq,
+    IN13Paras(ascWS,run,title,wave)
+    CreateWorkspace(OutputWorkspace=outWS, DataX=xDq, DataY=yDq, DataE=eDq,\
         Nspec=3, UnitX='MomentumTransfer')
-    IN13Paras(outWS,run,title,wave,Verbose)
+    IN13Paras(outWS,run,title,wave)
     if Save:
         opath = os.path.join(workdir,outWS+'.nxs')
         SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
-        if Verbose:
-            logger.notice('Output file : ' + opath)
-    if (Plot != 'None'):
+        logger.information('Output file : ' + opath)
+    if Plot != 'None':
         plotForce(outWS,Plot)
     return outWS
 
-def IN13Paras(ascWS,run,title,wave,Verbose):
+def IN13Paras(ascWS,run,title,wave):
     ws = mtd[ascWS]
     AddSampleLog(Workspace=ascWS, LogName="facility", LogType="String", LogText="ILL")
     ws.getRun()['run_number'] = run
     ws.getRun()['run_title'] = title
-    if Verbose:
-        facility = ws.getRun().getLogData('facility').value
-        logger.notice('Facility is ' +facility)
-        runNo = ws.getRun()['run_number'].value
-        runTitle = ws.getRun()['run_title'].value.strip()
-        logger.notice('Run : ' +runNo + ' ; Title : ' + runTitle)
-        logger.notice('Wavelength : ' + str(wave))
+
+    facility = ws.getRun().getLogData('facility').value
+    logger.information('Facility is ' +facility)
+    runNo = ws.getRun()['run_number'].value
+    runTitle = ws.getRun()['run_title'].value.strip()
+    logger.information('Run : ' +runNo + ' ; Title : ' + runTitle)
+    logger.information('Wavelength : ' + str(wave))

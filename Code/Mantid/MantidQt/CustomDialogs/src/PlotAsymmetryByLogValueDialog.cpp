@@ -66,6 +66,7 @@ void PlotAsymmetryByLogValueDialog::initLayout()
   tie(m_uiForm.firstRunBox, "FirstRun", m_uiForm.FirstRunLayout);
   tie(m_uiForm.lastRunBox, "LastRun", m_uiForm.LastRunLayout);
   tie(m_uiForm.logBox, "LogValue");
+  tie(m_uiForm.typeBoxLog, "Function");
   tie(m_uiForm.outWSBox, "OutputWorkspace", m_uiForm.OutputWSLayout);
   tie(m_uiForm.typeBox, "Type");
   tie(m_uiForm.redBox, "Red");
@@ -96,6 +97,7 @@ void PlotAsymmetryByLogValueDialog::initLayout()
 
   // Fill ComboBoxes with allowed values
   fillAndSetComboBox("Type", m_uiForm.typeBox);
+  fillAndSetComboBox("Function", m_uiForm.typeBoxLog);
   fillAndSetComboBox("DeadTimeCorrType", m_uiForm.dtcType);
 
   // Fill log values from the file
@@ -215,5 +217,5 @@ void PlotAsymmetryByLogValueDialog::fillLogBox(const QString&)
 void PlotAsymmetryByLogValueDialog::showHideDeadTimeFileWidget(int deadTimeTypeIndex)
 {
   // Show only if "Using specified file" selected
-  m_uiForm.dtcFileContainer->setVisible(deadTimeTypeIndex == 1);
+  m_uiForm.dtcFileContainer->setVisible(deadTimeTypeIndex == 2);
 }

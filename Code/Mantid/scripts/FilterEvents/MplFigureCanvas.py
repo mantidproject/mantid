@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from PyQt4 import QtGui
 
 import matplotlib
@@ -6,7 +7,7 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as Naviga
 from matplotlib.figure import Figure
 
 class Qt4MplCanvas(FigureCanvas):
-    """  A customized Qt widget for matplotlib figure. 
+    """  A customized Qt widget for matplotlib figure.
     It can be used to replace GraphicsView of QtGui
     """
     def __init__(self, parent):
@@ -21,7 +22,7 @@ class Qt4MplCanvas(FigureCanvas):
         self.setParent(parent)
 
         # Set size policy to be able to expanding and resizable with frame
-        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding, 
+        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,\
                 QtGui.QSizePolicy.Expanding)
 
         FigureCanvas.updateGeometry(self)
@@ -29,7 +30,7 @@ class Qt4MplCanvas(FigureCanvas):
         return
 
     def plot(self, x, y):
-        """ Plot a set of data 
+        """ Plot a set of data
         Argument:
         - x: numpy array X
         - y: numpy array Y
@@ -41,6 +42,6 @@ class Qt4MplCanvas(FigureCanvas):
         return
 
     def getPlot(self):
-        """ reture figure's axes to expose the matplotlib figure to PyQt client 
+        """ reture figure's axes to expose the matplotlib figure to PyQt client
         """
         return self.axes

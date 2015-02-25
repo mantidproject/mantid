@@ -84,8 +84,8 @@ Background Removal
   Allows removal of a background given a time-of-flight range.
 
 Plot Time
-  Can be used to create a time plot of a specific spectra range (or single
-  spectrum).
+  When clicked create a time plot of the spectra range defined in the Spectra
+  Min and Spectra Max selectors.
 
 Detailed Balance
   Gives the option to perform an exponential correction on the data once it has
@@ -108,9 +108,9 @@ Plot Output
   Allows the result to be plotted as either a spectrum plot or contour plot.
 
 Fold Multiple Frames
-  This option is only relevant for TOSCA. If unchecked, then reduction on
-  multiply-framed data will cease at the point where the frames would have been
-  merged.
+  This option is only relevant for TOSCA. If checked, then multiple-framed data
+  will be folded back into a single spectra, if unchecked the frames wil lbe
+  left as is with the frame number given at the end of the workspace name.
 
 Output in :math:`cm^{-1}`
   Converts the units of the energy axis from :math:`meV` to wave number
@@ -153,7 +153,7 @@ Single
 ######
 
 .. interface:: Data Reduction
-  :widget: pageRebinSingle
+  :widget: pgSingleRebin
 
 In this mode only a single binning range is defined as  a range and width.
 
@@ -161,7 +161,7 @@ Multiple
 ########
 
 .. interface:: Data Reduction
-  :widget: pageRebinString
+  :widget: pgMultipleRebin
 
 In this mode multiple binning ranges can be defined using he rebin string syntax
 used by the :ref:`Rebin <algm-Rebin>` algorithm.
@@ -237,7 +237,7 @@ Diagnostics
 -----------
 
 .. interface:: Data Reduction
-  :widget: tabTimeSlice
+  :widget: tabDiagnostics
 
 This tab allows you to perform an integration on a raw file over a specified
 time of flight range, and is equivalent to the Slice functionality found in
@@ -318,7 +318,7 @@ Symmetrise
 ----------
 
 .. interface:: Data Reduction
-  :widget: tabSymmetrise
+  :widget: tabSymmertrise
 
 This tab allows you to take an asymmetric reduced file and symmetrise it about
 the Y axis.

@@ -199,11 +199,11 @@ const Peak &PeaksWorkspace::getPeak(const int peakNum) const {
 //---------------------------------------------------------------------------------------------
 /** Creates an instance of a Peak BUT DOES NOT ADD IT TO THE WORKSPACE
  * @param QLabFrame :: Q of the center of the peak, in reciprocal space
- * @param detectorDistance :: distance between the sample and the detector.
+ * @param detectorDistance :: optional distance between the sample and the detector. You do NOT need to explicitly provide this distance.
  * @return a pointer to a new Peak object.
  */
 API::IPeak *PeaksWorkspace::createPeak(Kernel::V3D QLabFrame,
-                                       double detectorDistance) const {
+                                       boost::optional<double> detectorDistance) const {
   return new Peak(this->getInstrument(), QLabFrame, detectorDistance);
 }
 
@@ -299,6 +299,7 @@ PeaksWorkspace::peakInfo(Kernel::V3D qFrame, bool labCoords) const {
   }
 
   try {
+
     API::IPeak *peak = createPeak(Qlab);
 
     if (sample().hasOrientedLattice()) {
@@ -385,6 +386,40 @@ PeaksWorkspace::peakInfo(Kernel::V3D qFrame, bool labCoords) const {
   {
   }
   return Result;
+}
+
+/**
+ * Create a Peak from a HKL value provided by the client.
+ *
+ *
+ * @param HKL : reciprocal lattice vector coefficients
+ * @return Fully formed peak.
+ */
+Peak *PeaksWorkspace::createPeakHKL(V3D HKL) const
+{
+    /*
+     The following allows us to add peaks where we have a single UB to work from.
+     */
+
+    Geometry::OrientedLattice lattice = this->sample().getOrientedLattice();
+    Geometry::Goniometer  goniometer = this->run().getGoniometer();
+
+    // Calculate qLab from q HKL. As per Busing and Levy 1967, q_lab_frame = 2pi * Goniometer * UB * HKL
+    V3D qLabFrame = goniometer.getR() * lattice.getUB() * HKL * 2 * M_PI;
+
+    // create a peak using the qLab frame
+    auto peak = new Peak(this->getInstrument(), qLabFrame); // This should calculate the detector positions too.
+
+    // We need to set HKL separately to keep things consistent.
+    peak->setHKL(HKL[0], HKL[1], HKL[2]);
+
+    // Set the goniometer
+    peak->setGoniometerMatrix(goniometer.getR());
+
+    // Take the run number from this
+    peak->setRunNumber(this->getRunNumber());
+
+    return peak;
 }
 
 /**
@@ -789,7 +824,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
  * @param coordinateSystem : Option to set.
  */
 void PeaksWorkspace::setCoordinateSystem(
-    const Mantid::API::SpecialCoordinateSystem coordinateSystem) {
+    const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem) {
   this->mutableRun().addProperty("CoordinateSystem", (int)coordinateSystem,
                                  true);
 }
@@ -797,9 +832,9 @@ void PeaksWorkspace::setCoordinateSystem(
 /**
  * @return the special Q3D coordinate system.
  */
-Mantid::API::SpecialCoordinateSystem
+Mantid::Kernel::SpecialCoordinateSystem
 PeaksWorkspace::getSpecialCoordinateSystem() const {
-  Mantid::API::SpecialCoordinateSystem result = None;
+  Mantid::Kernel::SpecialCoordinateSystem result = None;
   try {
     Property *prop = this->run().getProperty("CoordinateSystem");
     PropertyWithValue<int> *p = dynamic_cast<PropertyWithValue<int> *>(prop);

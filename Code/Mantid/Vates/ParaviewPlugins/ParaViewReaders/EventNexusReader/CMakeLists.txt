@@ -9,8 +9,10 @@ add_paraview_plugin( MantidParaViewEventNexusReaderSMPlugin "1.0"
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewEventNexusReaderSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
 
+include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
+
 target_link_libraries( MantidParaViewEventNexusReaderSMPlugin 
-${MANTID_SUBPROJECT_LIBS} )
+${MANTID_SUBPROJECT_LIBS} ${QWT_LIBRARIES})
 
 # Put library into subfolder.
 SET_TARGET_OUTPUT_DIRECTORY(MantidParaViewEventNexusReaderSMPlugin ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR})

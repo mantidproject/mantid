@@ -64,7 +64,7 @@ void PoldiSpectrumDomainFunction::function1DSpectrum(
    * terminated by the position in the detector, so the index is stored.
    */
   double fwhm = getParameter("Fwhm");
-  double fwhmT = m_timeTransformer->timeTransformedWidth(fwhm, index);
+  double fwhmT = m_timeTransformer->dToTOF(fwhm);
   double fwhmChannel = fwhmT / m_deltaT;
   double sigmaChannel = fwhmChannel / (2.0 * sqrt(2.0 * log(2.0)));
 
@@ -113,6 +113,44 @@ void PoldiSpectrumDomainFunction::function1DSpectrum(
       values.addToCalculated(
           cleanChannel,
           actualFunction(xValue, centreTOffsetChannel, sigmaChannel, areaT));
+    }
+  }
+}
+
+void
+PoldiSpectrumDomainFunction::poldiFunction1D(const std::vector<int> &indices,
+                                             const FunctionDomain1D &domain,
+                                             FunctionValues &values) const {
+
+  double deltaD = domain[1] - domain[0];
+
+  double fwhm = getParameter("Fwhm");
+
+  double centre = getParameter("Centre");
+  double area = getParameter("Area");
+
+  double centreTOffsetChannel = centre / deltaD;
+  int centreChannel = static_cast<int>(centreTOffsetChannel);
+
+  int offset = static_cast<int>(domain[0] / deltaD + 0.5);
+
+  for (auto index = indices.begin(); index != indices.end(); ++index) {
+    double fwhmT = m_timeTransformer->timeTransformedWidth(fwhm, *index);
+    double fwhmChannel = fwhmT / m_deltaT;
+    double sigmaChannel = fwhmChannel / (2.0 * sqrt(2.0 * log(2.0)));
+    int widthChannels = std::max(2, static_cast<int>(fwhmChannel * 2.0));
+
+    double areaT = m_timeTransformer->timeTransformedIntensity(
+        area, centre, static_cast<size_t>(*index));
+
+    for (int i = centreChannel - widthChannels;
+         i <= centreChannel + widthChannels; ++i) {
+      double xValue = static_cast<double>(i);
+
+      values.addToCalculated(
+          i - offset,
+          actualFunction(xValue, centreTOffsetChannel, sigmaChannel, areaT) *
+              static_cast<double>(m_chopperSlitOffsets.size()));
     }
   }
 }

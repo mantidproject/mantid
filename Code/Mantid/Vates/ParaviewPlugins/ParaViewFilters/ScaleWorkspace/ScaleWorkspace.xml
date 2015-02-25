@@ -16,6 +16,9 @@
 	  <DoubleVectorProperty name="X Scaling Factor" command="SetXScaling" number_of_elements="1" default_values="1"/>
 	  <DoubleVectorProperty name="Y Scaling Factor" command="SetYScaling" number_of_elements="1" default_values="1"/>
 	  <DoubleVectorProperty name="Z Scaling Factor" command="SetZScaling" number_of_elements="1" default_values="1"/>
+    <DoubleVectorProperty name="MinValue"	command="GetMinValue" information_only="1"/>
+    <DoubleVectorProperty name="MaxValue" command="GetMaxValue" information_only="1"/>
+    <StringVectorProperty name="Instrument" command="GetInstrument" number_of_elements="1" information_only="1"/>
     </SourceProxy>
   </ProxyGroup>
   <!-- End ScaleWorkspace -->

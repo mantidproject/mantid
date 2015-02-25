@@ -12,12 +12,11 @@
 #include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidKernel/VMD.h"
-#include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MockObjects.h"
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
-using namespace Mantid::API;
 
 class PeakShapeSphericalFactoryTest : public CxxTest::TestSuite {
 public:
@@ -33,22 +32,6 @@ public:
   void test_invalid_json_with_no_successor() {
     PeakShapeSphericalFactory factory;
     TS_ASSERT_THROWS(factory.create(""), std::invalid_argument &);
-  }
-
-  void test_invalid_json_with_successor() {
-    using namespace testing;
-
-    // We expect it to try to use the deletate factory. If it cannot process the
-    // json.
-    MockPeakShapeFactory *delegate = new MockPeakShapeFactory;
-    EXPECT_CALL(*delegate, create(_)).Times(1);
-
-    PeakShapeSphericalFactory factory;
-    factory.setSuccessor(PeakShapeFactory_const_sptr(delegate));
-    // Run create with empty JSON.
-    factory.create("");
-
-    TS_ASSERT(Mock::VerifyAndClearExpectations(delegate));
   }
 
   void test_use_successor_when_different_shape_found() {
@@ -84,13 +67,38 @@ public:
                                    algorithmVersion);
 
     PeakShapeSphericalFactory factory;
-    PeakShape *productShape = factory.create(sourceShape.toJSON());
+    Mantid::Geometry::PeakShape *productShape = factory.create(sourceShape.toJSON());
 
     PeakShapeSpherical *sphericalShapeProduct =
         dynamic_cast<PeakShapeSpherical *>(productShape);
     TS_ASSERT(sphericalShapeProduct);
 
     TS_ASSERT_EQUALS(sourceShape, *sphericalShapeProduct);
+    delete productShape;
+  }
+
+  void test_create_with_multiple_radii()
+  {
+      const double radius = 2;
+      const double backgroundInnerRadius = 3;
+      const double backgroundOuterRadius = 4;
+      const SpecialCoordinateSystem frame = HKL;
+      const std::string algorithmName = "foo";
+      const int algorithmVersion = 3;
+
+      // Make a source shape with background outer and inner radius
+      PeakShapeSpherical sourceShape(radius, backgroundInnerRadius, backgroundOuterRadius, frame, algorithmName,
+                                     algorithmVersion);
+
+      PeakShapeSphericalFactory factory;
+      Mantid::Geometry::PeakShape *productShape = factory.create(sourceShape.toJSON());
+
+      PeakShapeSpherical *sphericalShapeProduct =
+          dynamic_cast<PeakShapeSpherical *>(productShape);
+      TS_ASSERT(sphericalShapeProduct);
+
+      TS_ASSERT_EQUALS(sourceShape, *sphericalShapeProduct);
+      delete productShape;
   }
 };
 

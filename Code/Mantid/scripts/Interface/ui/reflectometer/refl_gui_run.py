@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import refl_gui
 from PyQt4 import QtCore, QtGui
 
