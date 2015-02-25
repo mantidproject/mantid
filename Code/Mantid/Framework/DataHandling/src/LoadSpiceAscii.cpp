@@ -480,6 +480,7 @@ void LoadSpiceAscii::setupRunStartTime(
   // Set up property
   DateAndTime runstart(mtddatetimestr);
   addProperty<std::string>(runinfows, "run_start", runstart.toISO8601String());
+  addProperty<std::string>(runinfows, "start_time", runstart.toISO8601String());
 }
 
 //----------------------------------------------------------------------------------------------

@@ -95,7 +95,7 @@ void ConvertSpiceDataToRealSpace::exec() {
   m_instrumentName = getPropertyValue("Instrument");
 
   // Check whether parent workspace has run start
-  DateAndTime runstart(0);
+  DateAndTime runstart(10E9);
   if (parentWS->run().hasProperty("run_start")) {
     // Use parent workspace's first
     runstart = parentWS->run().getProperty("run_start")->value();
@@ -107,7 +107,7 @@ void ConvertSpiceDataToRealSpace::exec() {
     {
       g_log.warning("Run-start time is not defined either in "
                     "input parent workspace or given by user. 1990-01-01 "
-                    "00:00:00 is used");
+                    "00:00:01 is used");
     }
     else {
       runstart = DateAndTime(runstartstr);
@@ -577,17 +577,24 @@ void ConvertSpiceDataToRealSpace::appendSampleLogs(
     throw std::runtime_error("Impossible not to find Pt. in log vec map.");
   const std::vector<double> &vecrunno = miter->second;
 
-  // Add run_start to each ExperimentInfo
+  // Add run_start and start_time to each ExperimentInfo
   for (size_t i = 0; i < vectimes.size(); ++i) {
     Kernel::DateAndTime runstart = vectimes[i];
     mdws->getExperimentInfo(static_cast<uint16_t>(i))->mutableRun().addLogData(
         new PropertyWithValue<std::string>("run_start",
+                                           runstart.toFormattedString()));
+    mdws->getExperimentInfo(static_cast<uint16_t>(i))->mutableRun().addLogData(
+        new PropertyWithValue<std::string>("start_time",
                                            runstart.toFormattedString()));
   }
   mdws->getExperimentInfo(static_cast<uint16_t>(vectimes.size()))
       ->mutableRun()
       .addLogData(new PropertyWithValue<std::string>(
            "run_start", vectimes[0].toFormattedString()));
+  mdws->getExperimentInfo(static_cast<uint16_t>(vectimes.size()))
+      ->mutableRun()
+      .addLogData(new PropertyWithValue<std::string>(
+           "start_time", vectimes[0].toFormattedString()));
 
   // Add sample logs
   // get hold of last experiment info
