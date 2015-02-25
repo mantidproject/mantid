@@ -10,7 +10,6 @@
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "MantidQtMantidWidgets/IndirectInstrumentConfig.h"
 #include "IndirectTab.h"
-#include "IndirectDataReduction.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include <QDoubleValidator>
@@ -43,6 +42,8 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
+  class IndirectDataReduction;
+
   /** IndirectDataReductionTab
 
     This class defines common functionality of tabs used in the Indirect Data Reduction interface.

@@ -9,7 +9,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
-#include "MantidQtCustomInterfaces/Indirect/IndirectDataReductionTab.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectMoments.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectSqw.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectSymmetrise.h"
@@ -94,7 +93,7 @@ void IndirectDataReduction::helpClicked()
 void IndirectDataReduction::exportTabPython()
 {
   QString tabName = m_uiForm.twIDRTabs->tabText(m_uiForm.twIDRTabs->currentIndex());
-  m_tabs[tabName]->exportPythonScript();
+  m_tabs[tabName].second->exportPythonScript();
 }
 
 
@@ -105,7 +104,7 @@ void IndirectDataReduction::exportTabPython()
 void IndirectDataReduction::runClicked()
 {
   QString tabName = m_uiForm.twIDRTabs->tabText(m_uiForm.twIDRTabs->currentIndex());
-  m_tabs[tabName]->runTab();
+  m_tabs[tabName].second->runTab();
 }
 
 
@@ -120,13 +119,13 @@ void IndirectDataReduction::initLayout()
   updateRunButton(false, "Loading UI", "Initialising user interface components...");
 
   // Create the tabs
-  m_tabs["ISIS Energy Transfer"] = new ISISEnergyTransfer(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loISISEnergyTransfer"));
-  m_tabs["ISIS Calibration"] = new ISISCalibration(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loISISCalibration"));
-  m_tabs["ISIS Diagnostics"] = new ISISDiagnostics(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loISISDiagnostics"));
-  m_tabs["Transmission"] = new IndirectTransmission(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loTransmission"));
-  m_tabs["Symmetrise"] = new IndirectSymmetrise(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loSymmetrise"));
-  m_tabs["S(Q, w)"] = new IndirectSqw(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loSofQW"));
-  m_tabs["Moments"] = new IndirectMoments(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loMoments"));
+  addTab<ISISEnergyTransfer>("ISIS Energy Transfer");
+  addTab<ISISCalibration>("ISIS Calibration");
+  addTab<ISISDiagnostics>("ISIS Diagnostics");
+  addTab<IndirectTransmission>("Transmission");
+  addTab<IndirectSymmetrise>("Symmetrise");
+  addTab<IndirectSqw>("S(Q, w)");
+  addTab<IndirectMoments>("Moments");
 
   // Connect "?" (Help) Button
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
@@ -140,16 +139,6 @@ void IndirectDataReduction::initLayout()
   // Reset the Run button state when the tab is changed
   connect(m_uiForm.twIDRTabs, SIGNAL(currentChanged(int)), this, SLOT(updateRunButton()));
 
-  // Connect tab signals and run any setup code
-  for(auto it = m_tabs.begin(); it != m_tabs.end(); ++it)
-  {
-    connect(it->second, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
-    connect(it->second, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
-    connect(it->second, SIGNAL(updateRunButton(bool, QString, QString)), this, SLOT(updateRunButton(bool, QString, QString)));
-    connect(this, SIGNAL(newInstrumentConfiguration()), it->second, SIGNAL(newInstrumentConfiguration())),
-    it->second->setupTab();
-  }
-
   // Handle instrument configuration changes
   connect(m_uiForm.iicInstrumentConfiguration, SIGNAL(instrumentConfigurationUpdated(const QString &, const QString &, const QString &)),
           this, SLOT(instrumentSetupChanged(const QString &, const QString &, const QString &)));
@@ -159,6 +148,7 @@ void IndirectDataReduction::initLayout()
 
   std::string facility = Mantid::Kernel::ConfigService::Instance().getString("default.facility");
   filterUiForFacility(QString::fromStdString(facility));
+  emit newInstrumentConfiguration();
 }
 
 
@@ -485,25 +475,42 @@ void IndirectDataReduction::filterUiForFacility(QString facility)
 
   QStringList enabledTabs;
 
-  // These tabs work at any facility
-  enabledTabs << "Transmission" << "Symmetrise" << "S(Q, w)" << "Moments";
-
-  // add facility specific tabs
+  // Add facility specific tabs
   if(facility == "ISIS")
     enabledTabs << "ISIS Energy Transfer"
                 << "ISIS Calibration"
                 << "ISIS Diagnostics";
 
-  // Modify tabs as required
-  for(int i = 0; i < m_uiForm.twIDRTabs->count(); i++)
+  // These tabs work at any facility (always at end of tabs)
+  enabledTabs << "Transmission" << "Symmetrise" << "S(Q, w)" << "Moments";
+
+  // First remove all tabs
+  while(m_uiForm.twIDRTabs->count() > 0)
   {
-    QString name = m_uiForm.twIDRTabs->tabText(i);
-    bool enabled = enabledTabs.contains(name);
+    // Disconnect the instrument changed signal
+    QString tabName = m_uiForm.twIDRTabs->tabText(0);
+    disconnect(this, SIGNAL(newInstrumentConfiguration()),
+               m_tabs[tabName].second, SIGNAL(newInstrumentConfiguration()));
 
-    m_uiForm.twIDRTabs->setTabEnabled(i, enabled);
-    m_tabs[name]->blockSignals(!enabled);
+    // Remove the tab
+    m_uiForm.twIDRTabs->removeTab(0);
 
-    //TODO: handle instrument update connection
+    g_log.debug() << "Removing tab " << tabName.toStdString()
+                  << std::endl;
+  }
+
+  // Add the required tabs
+  for(auto it = enabledTabs.begin(); it != enabledTabs.end(); ++it)
+  {
+    // Connect the insturment changed signal
+    connect(this, SIGNAL(newInstrumentConfiguration()),
+            m_tabs[*it].second, SIGNAL(newInstrumentConfiguration()));
+
+    // Add the tab
+    m_uiForm.twIDRTabs->addTab(m_tabs[*it].first, *it);
+
+    g_log.debug() << "Adding tab " << (*it).toStdString()
+                  << std::endl;
   }
 }
 
