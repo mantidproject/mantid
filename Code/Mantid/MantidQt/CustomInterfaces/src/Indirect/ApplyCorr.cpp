@@ -29,13 +29,6 @@ namespace IDA
     connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(newData(const QString&)));
     connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(plotPreview(int)));
 
-    // Create the plot
-    m_plots["ApplyCorrPlot"] = new QwtPlot(m_parentWidget);
-    m_plots["ApplyCorrPlot"]->setCanvasBackground(Qt::white);
-    m_plots["ApplyCorrPlot"]->setAxisFont(QwtPlot::xBottom, m_parentWidget->font());
-    m_plots["ApplyCorrPlot"]->setAxisFont(QwtPlot::yLeft, m_parentWidget->font());
-    m_uiForm.plotPreview->addWidget(m_plots["ApplyCorrPlot"]);
-
     m_uiForm.spPreviewSpec->setMinimum(0);
     m_uiForm.spPreviewSpec->setMaximum(0);
   }
@@ -47,14 +40,12 @@ namespace IDA
    */
   void ApplyCorr::newData(const QString &dataName)
   {
-    removeCurve("CalcCurve");
-    removeCurve("CanCurve");
-    // removeCurve would usually need a replot() but this is done in plotMiniPlot()
-
-    plotMiniPlot(dataName, 0, "ApplyCorrPlot", "ApplyCorrSampleCurve");
-
-    MatrixWorkspace_const_sptr sampleWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(dataName.toStdString());
+    const MatrixWorkspace_sptr sampleWs =  AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dataName.toStdString());
     m_uiForm.spPreviewSpec->setMaximum(static_cast<int>(sampleWs->getNumberHistograms()) - 1);
+
+    // Plot the sample curve
+    m_uiForm.ppPreview->clear();
+    m_uiForm.ppPreview->addSpectrum("Sample", sampleWs, 0, Qt::black);
   }
 
   void ApplyCorr::run()
@@ -69,7 +60,7 @@ namespace IDA
       geom = "cyl";
     }
 
-    QString pyInput = "from IndirectDataAnalysis import abscorFeeder, loadNexus\n";
+    QString pyInput = "from IndirectDataAnalysis import abscorFeeder\n";
 
     QString sample = m_uiForm.dsSample->getCurrentDataName();
     MatrixWorkspace_const_sptr sampleWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(sample.toStdString());
@@ -111,16 +102,7 @@ namespace IDA
     {
       pyInput += "useCor = True\n";
       QString corrections = m_uiForm.dsCorrections->getCurrentDataName();
-      if ( !Mantid::API::AnalysisDataService::Instance().doesExist(corrections.toStdString()) )
-      {
-        pyInput +=
-          "corrections = loadNexus(r'" + m_uiForm.dsCorrections->getFullFilePath() + "')\n";
-      }
-      else
-      {
-        pyInput +=
-          "corrections = '" + corrections + "'\n";
-      }
+      pyInput += "corrections = '" + corrections + "'\n";
     }
     else
     {
@@ -149,10 +131,6 @@ namespace IDA
     pyInput += "scale = " + ScaleOrNot + "\n";
     pyInput += "scaleFactor = " + ScalingFactor + "\n";
 
-
-    if ( m_uiForm.ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-    else pyInput += "verbose = False\n";
-
     if ( m_uiForm.ckSave->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";
 
@@ -171,11 +149,11 @@ namespace IDA
     }
 
     pyInput += "plotResult = '" + plotResult + "'\n";
-    pyInput += "print abscorFeeder(sample, container, geom, useCor, corrections, Verbose=verbose, RebinCan=rebin_can, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult)\n";
+    pyInput += "print abscorFeeder(sample, container, geom, useCor, corrections, RebinCan=rebin_can, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
 
-    outputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(pyOutput.toStdString());
+    m_outputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(pyOutput.toStdString());
     plotPreview(m_uiForm.spPreviewSpec->value());
 
     // Set the result workspace for Python script export
@@ -260,33 +238,28 @@ namespace IDA
   {
     bool useCan = m_uiForm.ckUseCan->isChecked();
 
+    m_uiForm.ppPreview->clear();
+
     // Plot sample
-    QString sample = m_uiForm.dsSample->getCurrentDataName();
+    const QString sample = m_uiForm.dsSample->getCurrentDataName();
     if(AnalysisDataService::Instance().doesExist(sample.toStdString()))
     {
-      MatrixWorkspace_const_sptr sampleWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(sample.toStdString());
-      plotMiniPlot(sampleWs, specIndex, "ApplyCorrPlot", "ApplyCorrSampleCurve");
+      m_uiForm.ppPreview->addSpectrum("Sample", sample, specIndex, Qt::black);
     }
 
     // Plot result
-    if(outputWs)
+    if(m_outputWs)
     {
-      plotMiniPlot(outputWs, specIndex, "ApplyCorrPlot", "CalcCurve");
-      m_curves["CalcCurve"]->setPen(QColor(Qt::green));
+      m_uiForm.ppPreview->addSpectrum("Corrected", m_outputWs, specIndex, Qt::green);
     }
 
     // Plot can
     if(useCan)
     {
       QString container = m_uiForm.dsContainer->getCurrentDataName();
-      MatrixWorkspace_const_sptr canWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(container.toStdString());
-      plotMiniPlot(canWs, specIndex, "ApplyCorrPlot", "CanCurve");
-      m_curves["CanCurve"]->setPen(QColor(Qt::red));
+      const MatrixWorkspace_sptr canWs =  AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(container.toStdString());
+      m_uiForm.ppPreview->addSpectrum("Can", canWs, specIndex, Qt::red);
     }
-    else
-      removeCurve("CanCurve");
-
-    replot("ApplyCorrPlot");
   }
 
 } // namespace IDA

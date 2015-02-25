@@ -5,9 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_fft_complex.h>
-
+#include "MantidKernel/ListValidator.h"
 namespace Mantid
 {
   namespace Algorithms
@@ -47,7 +45,7 @@ namespace Mantid
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "RRFMuon";}
       ///Summary of algorithm's purpose
-      virtual const std::string summary() const {return "Calculate Muon polarization in the rotating reference frame (RRF).";}
+      virtual const std::string summary() const {return "Calculate Muon asymmetry in the rotating reference frame (RRF).";}
 
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;}
@@ -60,15 +58,8 @@ namespace Mantid
       void init();
       /// Run the algorithm
       void exec();
-
-      /// Frequency of the oscillations
-      double m_freq;
-      /// Phase accounting for any misalignment of the counters
-      double m_phase;
-      /// Number of data points per histogram
-      size_t m_nData;
-      /// Number of histograms
-      size_t m_nHisto;
+      /// Get conversion factor from frequency units to input workspace units
+      double unitConversionFactor(std::string uin, std::string uuser);
     };
 
   } // namespace Algorithms

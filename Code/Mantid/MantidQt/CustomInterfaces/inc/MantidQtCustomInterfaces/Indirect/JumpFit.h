@@ -19,7 +19,7 @@ namespace MantidQt
       void setup();
 			bool validate();
 			void run();
-      void runImpl(bool verbose = false, bool plot = false, bool save = false);
+      void runImpl(bool plot = false, bool save = false);
 			/// Load default settings into the interface
 			void loadSettings(const QSettings& settings);
 

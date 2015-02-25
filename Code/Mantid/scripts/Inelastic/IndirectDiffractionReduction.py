@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import mantid
 from msg_reducer import MSGReducer
 import inelastic_indirect_reduction_steps as steps
@@ -68,5 +69,6 @@ def getStringProperty(workspace, property):
     inst = mantid.AnalysisDataService[workspace].getInstrument()
     try:
         prop = inst.getStringParameter(property)[0]
-    except IndexError: return ""
+    except IndexError:
+        return ""
     return prop

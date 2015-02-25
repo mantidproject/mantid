@@ -223,6 +223,9 @@ namespace CustomInterfaces
   {
     std::map<QString, QString> instDetails = getInstrumentDetails();
 
+    // Set the search instrument for runs
+    m_uiForm.dsRunFiles->setInstrumentOverride(instDetails["instrument"]);
+
     if(instDetails["spectra-min"].isEmpty() || instDetails["spectra-max"].isEmpty())
     {
       emit showMessageBox("Could not gather necessary data from parameter file.");
@@ -282,6 +285,12 @@ namespace CustomInterfaces
     {
       bool defaultOptions = instDetails["save-ascii-choice"] == "true";
       m_uiForm.ckSaveASCII->setChecked(defaultOptions);
+    }
+
+    if(!instDetails["fold-frames-choice"].isEmpty())
+    {
+      bool defaultOptions = instDetails["fold-frames-choice"] == "true";
+      m_uiForm.ckFold->setChecked(defaultOptions);
     }
   }
 

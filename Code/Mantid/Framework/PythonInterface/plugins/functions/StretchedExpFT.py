@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 '''
 @author Jose Borreguero, NScD
 @date October 06, 2013
@@ -28,7 +29,6 @@ from mantid import logger
 import numpy as np
 import copy
 
-from pdb import set_trace as tr
 
 class StretchedExpFT(IFunction1D):
 

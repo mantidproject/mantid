@@ -121,11 +121,13 @@ void Integration::exec() {
     if (axisIsText) {
       Mantid::API::TextAxis *newAxis =
           dynamic_cast<Mantid::API::TextAxis *>(outputWorkspace->getAxis(1));
-      newAxis->setLabel(outWI, localworkspace->getAxis(1)->label(i));
+      if (newAxis)
+        newAxis->setLabel(outWI, localworkspace->getAxis(1)->label(i));
     } else if (axisIsNumeric) {
       Mantid::API::NumericAxis *newAxis =
           dynamic_cast<Mantid::API::NumericAxis *>(outputWorkspace->getAxis(1));
-      newAxis->setValue(outWI, (*(localworkspace->getAxis(1)))(i));
+      if (newAxis)
+        newAxis->setValue(outWI, (*(localworkspace->getAxis(1)))(i));
     }
 
     // This is the output

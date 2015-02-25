@@ -102,6 +102,7 @@ endif()
 ###########################################################################
 # Mac-specific installation setup
 ###########################################################################
+
 set ( CMAKE_INSTALL_PREFIX "" )
 set ( CPACK_PACKAGE_EXECUTABLES MantidPlot )
 set ( INBUNDLE MantidPlot.app/ )
@@ -119,18 +120,41 @@ set ( PVPLUGINS_DIR MantidPlot.app/pvplugins )
 set ( PVPLUGINS_SUBDIR pvplugins ) # Need to tidy these things up!
 
 if (OSX_VERSION VERSION_LESS 10.9)
+ set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR};${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR} )
  set ( PYQT4_PYTHONPATH /Library/Python/${PY_VER}/site-packages/PyQt4 )
  set ( SITEPACKAGES /Library/Python/${PY_VER}/site-packages )
 else()
+ set(CMAKE_MACOSX_RPATH 1)
  # Assume we are using homebrew for now
  # set Deployment target to 10.8
  set ( CMAKE_OSX_SYSROOT /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk )
  set ( CMAKE_OSX_ARCHITECTURES x86_64 )
  set ( CMAKE_OSX_DEPLOYMENT_TARGET 10.8 )
- set ( PYQT4_PYTHONPATH /usr/local/lib/python${PY_VER}/site-packages/PyQt4 )
- set ( SITEPACKAGES /usr/local/lib/python${PY_VER}/site-packages )
+ # Follow symlinks so cmake copies the file
+ # PYQT4_PATH, SITEPACKAGES_PATH, OPENSSL_ROOT_DIR may be defined externally (cmake -D)
+ # it would be good do not overwrite them (important for the compilation with macports)
+ if (NOT PYQT4_PATH)
+  set ( PYQT4_PATH /usr/local/lib/python${PY_VER}/site-packages/PyQt4 )
+ endif(NOT PYQT4_PATH)
+ execute_process(COMMAND readlink ${PYQT4_PATH}/Qt.so OUTPUT_VARIABLE PYQT4_SYMLINK_Qtso)
+ string(FIND "${PYQT4_SYMLINK_Qtso}" "Qt.so" STOPPOS)
+ string(SUBSTRING "${PYQT4_SYMLINK_Qtso}" 0 ${STOPPOS} PYQT4_SYMLINK)
+ set  ( PYQT4_PYTHONPATH ${PYQT4_PATH}/${PYQT4_SYMLINK} )
+ string(REGEX REPLACE "/$" "" PYQT4_PYTHONPATH "${PYQT4_PYTHONPATH}")
+
+ if (NOT SITEPACKAGES_PATH)
+   set ( SITEPACKAGES_PATH /usr/local/lib/python${PY_VER}/site-packages )
+ endif(NOT SITEPACKAGES_PATH)
+ execute_process(COMMAND readlink ${SITEPACKAGES_PATH}/sip.so OUTPUT_VARIABLE SITEPACKAGES_SYMLINK_sipso)
+ string(FIND "${SITEPACKAGES_SYMLINK_sipso}" "sip.so" STOPPOS)
+ string(SUBSTRING "${SITEPACKAGES_SYMLINK_sipso}" 0 ${STOPPOS} SITEPACKAGES_SYMLINK)
+ set  ( SITEPACKAGES ${SITEPACKAGES_PATH}/${SITEPACKAGES_SYMLINK} )
+ string(REGEX REPLACE "/$" "" SITEPACKAGES "${SITEPACKAGES}")
+
  # use homebrew OpenSSL package
- set ( OPENSSL_ROOT_DIR /usr/local/opt/openssl )
+ if (NOT OPENSSL_ROOT_DIR)
+   set ( OPENSSL_ROOT_DIR /usr/local/opt/openssl )
+ endif(NOT OPENSSL_ROOT_DIR)
 endif()
 
 # Python packages
@@ -138,8 +162,8 @@ endif()
 install ( PROGRAMS ${SITEPACKAGES}/sip.so DESTINATION ${BIN_DIR} )
 
 # Explicitly specify which PyQt libraries we want because just taking the whole
-# directory will swell the install kit unnecessarily.
-install ( FILES ${PYQT4_PYTHONPATH}/Qt.so
+#directory will swell the install kit unnecessarily.
+ install ( FILES ${PYQT4_PYTHONPATH}/Qt.so
                 ${PYQT4_PYTHONPATH}/QtCore.so
                 ${PYQT4_PYTHONPATH}/QtGui.so
                 ${PYQT4_PYTHONPATH}/QtOpenGL.so
@@ -156,16 +180,19 @@ endif ()
 
 install ( DIRECTORY ${PYQT4_PYTHONPATH}/uic DESTINATION ${BIN_DIR}/PyQt4 )
 
-# Python packages in Third_Party need copying to build directory and the final package
-file ( GLOB THIRDPARTY_PYTHON_PACKAGES ${CMAKE_LIBRARY_PATH}/Python/* )
-foreach ( PYPACKAGE ${THIRDPARTY_PYTHON_PACKAGES} )
-  if ( IS_DIRECTORY ${PYPACKAGE} )
-    install ( DIRECTORY ${PYPACKAGE} DESTINATION ${BIN_DIR} USE_SOURCE_PERMISSIONS )
-  else()
-    install ( FILES ${PYPACKAGE} DESTINATION ${BIN_DIR} )
-  endif()
-  file ( COPY ${PYPACKAGE} DESTINATION ${PROJECT_BINARY_DIR}/bin )
-endforeach( PYPACKAGE )
+# done as part of packaging step in 10.9+ builds.
+if (OSX_VERSION VERSION_LESS 10.9)
+  # Python packages in Third_Party need copying to build directory and the final package
+  file ( GLOB THIRDPARTY_PYTHON_PACKAGES ${CMAKE_LIBRARY_PATH}/Python/* )
+  foreach ( PYPACKAGE ${THIRDPARTY_PYTHON_PACKAGES} )
+    if ( IS_DIRECTORY ${PYPACKAGE} )
+      install ( DIRECTORY ${PYPACKAGE} DESTINATION ${BIN_DIR} USE_SOURCE_PERMISSIONS )
+    else()
+      install ( FILES ${PYPACKAGE} DESTINATION ${BIN_DIR} )
+    endif()
+    file ( COPY ${PYPACKAGE} DESTINATION ${PROJECT_BINARY_DIR}/bin )
+  endforeach( PYPACKAGE )
+endif ()
 
 install ( DIRECTORY ${QT_PLUGINS_DIR}/imageformats DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
 install ( DIRECTORY ${QT_PLUGINS_DIR}/sqldrivers DESTINATION MantidPlot.app/Contents/Frameworks/plugins )

@@ -70,8 +70,8 @@ Sassena
 .. interface:: Simulation
   :widget: sassena
 
-The Indirect Sassena interface is used to load simulations from the Sassena
-software.
+The Sassena interface is used to load simulations from the Sassena software.
+This is done through the :ref:`LoadSassena <algm-LoadSassena>` algorithm.
 
 Options
 ~~~~~~~
@@ -92,5 +92,78 @@ Plot Result
 Save Result
   If checked will save the loaded data as a NeXus file in the default save
   directory.
+
+DensityOfStates
+---------------
+
+.. interface:: Simulation
+  :widget: dos
+
+The DensityOfStates interface is used to load CASTEP simulations using the
+:ref:`DensityOfStates <algm-DensityOfStates>` algorithm. It supports loading
+full and partial densities of states, raman and IR spectroscopy.
+
+Options
+~~~~~~~
+
+The following options are common to each spectrun type:
+
+Spectrum Type
+  Selects the type of spectrum to extract from the file.
+
+Peak Shape
+  Selects the shape of peaks to fit over the intensities extracted from the
+  file.
+
+Peak Width
+  Sets the FWHM to which the fitted peaks should be broadened.
+
+Bin Width
+  Sets the histogram resolution for binning.
+
+Zero Threshold
+  Frequencies below this threshold will be ignored.
+
+Scale
+  Optionally apply scaling by a given factor to the output spectra.
+
+DensityOfStates
+~~~~~~~~~~~~~~~
+
+.. interface:: Simulation
+  :widget: pgDOS
+
+When loading a partial density of states (from a *.phonon* file) the following
+additional options are available (note that they will be disabled when using a
+*.castep* file):
+
+Ion List
+  Lists all the ions in a given file, individual ions can then be selected to be
+  included in a partial density of states.
+
+(De)Select All
+  Provides a quick method of selecting or deselecting all ions in the current
+  file.
+
+Sum Ion Contributions
+  If selected the contirbutions of each selected ion will be summed into a
+  single :ref:`MatrixWorkspace`, otherwise a :ref:`WorkspaceGroup` with a
+  :ref:`MatrixWorkspace` for each ion will be produced.
+
+Scale by cross sections
+  If selected the contribution for each ion will be multiplied by the given
+  scattering cross section.
+
+Raman
+~~~~~
+
+.. interface:: Simulation
+  :widget: pgRaman
+
+When loading a raman spectroscopy spectra the following additional options can
+be used:
+
+Temperature
+  Temperature to use in Kelvin.
 
 .. categories:: Interfaces Indirect

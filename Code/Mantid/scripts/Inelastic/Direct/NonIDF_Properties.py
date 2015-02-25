@@ -1,15 +1,16 @@
-from PropertiesDescriptors import *
-from RunDescriptor import RunDescriptor,RunDescriptorDependent
+#pylint: disable=invalid-name
+from Direct.PropertiesDescriptors import *
+from Direct.RunDescriptor import RunDescriptor,RunDescriptorDependent
 
 
 class NonIDF_Properties(object):
-    """ Class defines the interface for main properties, used in reduction, and not described in 
+    """ Class defines the interface for main properties, used in reduction, and not described in
         IDF ( Instrument_Properties.xml file)
 
-        These properties are main set of properties, user have to set up 
-        for reduction to work with defaults. 
+        These properties are main set of properties, user have to set up
+        for reduction to work with defaults.
 
-        The example of such properties are run numbers, energy bins and incident energies. 
+        The example of such properties are run numbers, energy bins and incident energies.
     """
 
     # logging levels available for user
@@ -21,13 +22,13 @@ class NonIDF_Properties(object):
           "debug" :       (5,lambda (msg):   logger.debug(msg))}
 
 
-    def __init__(self,Instrument,run_workspace=None): 
+    def __init__(self,Instrument,run_workspace=None):
         """ initialize main properties, defined by the class
-            @parameter Instrument  -- name or pointer to the instrument, 
+            @parameter Instrument  -- name or pointer to the instrument,
                        deployed in reduction
         """
         #
-        if not(run_workspace is None):
+        if not run_workspace is None:
             object.__setattr__(self,'sample_run',run_workspace)
 
         # Helper properties, defining logging options
@@ -35,14 +36,14 @@ class NonIDF_Properties(object):
         object.__setattr__(self,'_log_to_mantid',False)
         object.__setattr__(self,'_current_log_level',3)
 
-        
+
         object.__setattr__(self,'_psi',float('NaN'))
         # SNS motor stuff which is difficult to test as I've never seen it
         object.__setattr__(self,'_motor_name',None)
         object.__setattr__(self,'_motor_offset',0)
 
         object.__setattr__(self,'_save_file_name',None)
-   
+
         self._set_instrument_and_facility(Instrument,run_workspace)
 
         # set up descriptors holder class reference
@@ -58,13 +59,24 @@ class NonIDF_Properties(object):
         super(NonIDF_Properties,self).__setattr__('second_white',None)
         super(NonIDF_Properties,self).__setattr__('_tmp_run',None)
 
+
     #end
+    def log(self, msg,level="notice"):
+        """Send a log message to the location defined
+        """
+        lev,logger = NonIDF_Properties.log_options[level]
+        if self._log_to_mantid:
+            logger(msg)
+        else:
+        # TODO: reconcile this with Mantid.
+            if lev <= self._current_log_level:
+                print msg
     #-----------------------------------------------------------------------------
     # Complex properties with personal descriptors
     #-----------------------------------------------------------------------------
     incident_energy = IncidentEnergy()
     #
-    energy_bins = EnergyBins()
+    energy_bins = EnergyBins(incident_energy)
     #
     save_file_name = SaveFileName()
     #
@@ -82,8 +94,8 @@ class NonIDF_Properties(object):
     wb_for_monovan_run = RunDescriptorDependent(wb_run,"MV_WB_"," white beam run used to calculate monovanadium integrals.\n If not explicitly set, white beam for processing run is used")
     # TODO: do something about it.  Second white is explicitly used in
     # diagnostics but not accessed at all
-    second_white  = RunDescriptor("Second white beam currently unused in the  workflow despite being referred to in Diagnostics. Should it be used for Monovan Diagnostics?") 
-    # 
+    second_white  = RunDescriptor("Second white beam currently unused in the  workflow despite being referred to in Diagnostics. Should it be used for Monovan Diagnostics?")
+    #
     _tmp_run     = RunDescriptor("_TMP","Property used for storing intermediate run data during reduction")
     # property responsible for summing runs
     sum_runs = SumRuns(sample_run)
@@ -95,7 +107,7 @@ class NonIDF_Properties(object):
     def instrument(self):
         if self._pInstrument is None:
             raise KeyError("Attempt to use uninitialized property manager")
-        else: 
+        else:
             return self._pInstrument
     #
     #-----------------------------------------------------------------------------------
@@ -111,7 +123,7 @@ class NonIDF_Properties(object):
     # -----------------------------------------------------------------------------
     @property
     def log_to_mantid(self):
-        """ Property specify if high level log should be printed to stdout or added to common Mantid log""" 
+        """ Property specify if high level log should be printed to stdout or added to common Mantid log"""
         return self._log_to_mantid
 
     @log_to_mantid.setter
@@ -119,11 +131,11 @@ class NonIDF_Properties(object):
         object.__setattr__(self,'_log_to_mantid',bool(val))
     # -----------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------
-    @property 
+    @property
     def psi(self):
         """ rotation angle (not available from IDF)"""
         return self._psi
-    @psi.setter 
+    @psi.setter
     def psi(self,value):
         """set rotation angle (not available from IDF). This value will be saved into NXSpe file"""
         object.__setattr__(self,'_psi',value)
@@ -159,7 +171,7 @@ class NonIDF_Properties(object):
             if isinstance(Instrument,geometry._geometry.Instrument):
                 instrument = Instrument
                 instr_name = instrument.getFullName()
-                try: 
+                try:
                     new_name,full_name,facility_ = prop_helpers.check_instrument_name(None,instr_name)
                 except KeyError: # the instrument pointer is not found in any facility but we have it after all
                     new_name = instr_name
@@ -174,7 +186,7 @@ class NonIDF_Properties(object):
                 idf_file = api.ExperimentInfo.getInstrumentFilename(full_name)
                 tmp_ws_name = '__empty_' + full_name
                 if not mtd.doesExist(tmp_ws_name):
-                   LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
+                    LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
                 instrument = mtd[tmp_ws_name].getInstrument()
             else:
                 raise TypeError(' neither correct instrument name nor instrument pointer provided as instrument parameter')
@@ -184,18 +196,8 @@ class NonIDF_Properties(object):
         object.__setattr__(self,'_facility',facility_)
         object.__setattr__(self,'_short_instr_name',new_name)
 
- 
 
-    def log(self, msg,level="notice"):
-        """Send a log message to the location defined
-        """
-        lev,logger = NonIDF_Properties.log_options[level]
-        if self._log_to_mantid:
-            logger(msg)
-        else:
-        # TODO: reconcile this with Mantid.
-           if lev <= self._current_log_level:
-              print msg
+
 
 
 

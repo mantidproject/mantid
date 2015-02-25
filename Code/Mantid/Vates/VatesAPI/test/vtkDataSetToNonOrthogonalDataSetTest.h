@@ -43,7 +43,7 @@ private:
     // Set the coordinate system
     if (!wrongCoords)
     {
-      ws->setCoordinateSystem(Mantid::API::HKL);
+      ws->setCoordinateSystem(Mantid::Kernel::HKL);
     }
     else
     {

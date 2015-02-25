@@ -73,6 +73,7 @@ SliceViewer::SliceViewer(QWidget *parent)
     : QWidget(parent), m_ws(), m_firstWorkspaceOpen(false), m_dimensions(),
       m_data(NULL), m_X(), m_Y(), m_dimX(0), m_dimY(1), m_logColor(false),
       m_fastRender(true), m_rebinMode(false), m_rebinLocked(true),
+      m_logger("SliceViewer"),
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(
           boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
@@ -116,6 +117,8 @@ SliceViewer::SliceViewer(QWidget *parent)
                    SLOT(rebinParamsChanged()));
   QObject::connect(ui.btnAutoRebin, SIGNAL(toggled(bool)), this,
                    SLOT(autoRebin_toggled(bool)));
+  QObject::connect(ui.btnPeakOverlay, SIGNAL(clicked()), this,
+                   SLOT(peakOverlay_clicked()));
   // ----------- Other signals ----------------
   QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this,
                    SLOT(loadColorMapSlot()));
@@ -298,6 +301,11 @@ void SliceViewer::initMenus() {
   m_syncAutoRebin->setEnabled(false); // Cannot auto rebin by default.
   m_menuView->addAction(action);
 
+  m_menuView->addSeparator();
+
+  action = new QAction(QPixmap(), "Peak Overlay", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(peakOverlay_clicked()));
+  m_menuView->addAction(action);
   m_menuView->addSeparator();
 
   QActionGroup *group = new QActionGroup(this);
@@ -1706,8 +1714,7 @@ void SliceViewer::openFromXML(const QString &xml) {
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
   Poco::AutoPtr<Poco::XML::Document> pDoc;
-  try
-  {
+  try {
     pDoc = pParser.parseString(xml.toStdString());
   } catch (Poco::Exception &exc) {
     throw std::runtime_error(
@@ -1798,18 +1805,18 @@ void SliceViewer::openFromXML(const QString &xml) {
   int timeDim = dimMap[3];
 
   // ------- Read the plane function ------------
-  Poco::XML::Element* func = pRootElem->getChildElement("Function");
+  Poco::XML::Element *func = pRootElem->getChildElement("Function");
   if (!func)
     throw std::runtime_error(
         "SliceViewer::openFromXML(): No Function element.");
-  Poco::XML::Element* paramlist = func->getChildElement("ParameterList");
+  Poco::XML::Element *paramlist = func->getChildElement("ParameterList");
   if (!paramlist)
     throw std::runtime_error(
         "SliceViewer::openFromXML(): No ParameterList element.");
 
   Poco::AutoPtr<NodeList> params = paramlist->getElementsByTagName("Parameter");
   Poco::AutoPtr<NodeList> paramvals;
-  Node * param;
+  Node *param;
   if (!params || params->length() < 2)
     throw std::runtime_error("SliceViewer::openFromXML(): Too few parameters.");
 
@@ -2043,7 +2050,6 @@ void SliceViewer::clearPeaksWorkspaces() { this->disablePeakOverlays(); }
  */
 void SliceViewer::disablePeakOverlays() {
   // Un-check the button for consistency.
-  ui.btnPeakOverlay->setChecked(false);
   m_peaksPresenter->clear();
   emit showPeaksViewer(false);
   m_menuPeaks->setEnabled(false);
@@ -2057,18 +2063,31 @@ ProxyCompositePeaksPresenter *
 SliceViewer::setPeaksWorkspaces(const QStringList &list) {
 
   if (m_ws->getNumDims() < 2) {
-    throw std::invalid_argument("Cannot overplot a peaks workspace unless the "
-                                "base workspace has two or more dimensions");
+
+    this->m_logger.information(
+        "SliceViewer Cannot overplot a peaks workspace unless the "
+        "base workspace has two or more dimensions");
+
+    disablePeakOverlays();
+    return m_proxyPeaksPresenter.get();
   }
 
-  // Fetch the correct Peak Overlay Transform Factory;
-  const std::string xDim =
-      m_plot->axisTitle(QwtPlot::xBottom).text().toStdString();
-  const std::string yDim =
-      m_plot->axisTitle(QwtPlot::yLeft).text().toStdString();
+  PeakTransformFactory_sptr transformFactory;
+  try {
+    // Fetch the correct Peak Overlay Transform Factory;
+    const std::string xDim =
+        m_plot->axisTitle(QwtPlot::xBottom).text().toStdString();
+    const std::string yDim =
+        m_plot->axisTitle(QwtPlot::yLeft).text().toStdString();
 
-  PeakTransformFactory_sptr transformFactory =
-      m_peakTransformSelector.makeChoice(xDim, yDim);
+    transformFactory = m_peakTransformSelector.makeChoice(xDim, yDim);
+  } catch (std::invalid_argument &ex) {
+    disablePeakOverlays();
+    this->m_logger.information("SliceViewer: " + std::string(ex.what()));
+    return m_proxyPeaksPresenter.get();
+    ;
+  }
+
   // Loop through each of those peaks workspaces and display them.
   for (int i = 0; i < list.size(); ++i) {
     const std::string workspaceName = list[i].toStdString();
@@ -2096,20 +2115,36 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
           boost::make_shared<ConcretePeaksPresenter>(
               viewFactorySelector->makeSelection(), peaksWS, m_ws,
               transformFactory));
-    } catch (std::invalid_argument &) {
+    } catch (std::logic_error &ex) {
       // Incompatible PeaksWorkspace.
       disablePeakOverlays();
-      throw;
+      this->m_logger.information("SliceViewer: " + std::string(ex.what()));
+      return m_proxyPeaksPresenter.get();
     }
   }
   updatePeakOverlaySliderWidget();
   emit showPeaksViewer(true);
   m_menuPeaks->setEnabled(true);
-  // Depresses the button without raising the clicked event
-  this->ui.btnPeakOverlay->setChecked(true);
   return m_proxyPeaksPresenter.get();
 }
 
+/**
+Event handler for selection/de-selection of peak overlays.
+
+Allow user to choose a suitable input peaks workspace
+
+*/
+void SliceViewer::peakOverlay_clicked() {
+  MantidQt::MantidWidgets::SelectWorkspacesDialog dlg(this, "PeaksWorkspace");
+  int ret = dlg.exec();
+  if (ret == QDialog::Accepted) {
+    QStringList list = dlg.getSelectedNames();
+    if (!list.isEmpty()) {
+      // Fetch the correct Peak Overlay Transform Factory;
+      setPeaksWorkspaces(list);
+    }
+  }
+}
 
 /**
 Obtain the reference to a new PeakOverlay slider widget if necessary.
@@ -2171,8 +2206,7 @@ void SliceViewer::enablePeakOverlaysIfAppropriate() {
   }
 
   if (!enablePeakOverlays) {
-    ui.btnPeakOverlay->setChecked(false); // Don't leave the button depressed.
-    m_peaksPresenter->clear();            // Reset the presenter
+    m_peaksPresenter->clear(); // Reset the presenter
   }
 }
 
@@ -2211,10 +2245,7 @@ void SliceViewer::resetView() { this->resetZoom(); }
 /**
  * @brief Detach this sliceviewer from the peaksviewer
  */
-void SliceViewer::detach()
-{
-    this->disablePeakOverlays();
-}
+void SliceViewer::detach() { this->disablePeakOverlays(); }
 
 void SliceViewer::peakWorkspaceChanged(
     const std::string &wsName,
@@ -2247,24 +2278,21 @@ void SliceViewer::dropEvent(QDropEvent *e) {
       int startIndex = text.indexOf("[\"", endIndex) + 2;
       endIndex = text.indexOf("\"]", startIndex);
       QString candidate = text.mid(startIndex, endIndex - startIndex);
-      if(boost::dynamic_pointer_cast<IPeaksWorkspace>(AnalysisDataService::Instance().retrieve(candidate.toStdString())))
-      {
-          wsNames.append(candidate);
-          e->accept();
+      if (boost::dynamic_pointer_cast<IPeaksWorkspace>(
+              AnalysisDataService::Instance().retrieve(
+                  candidate.toStdString()))) {
+        wsNames.append(candidate);
+        e->accept();
+      } else {
+        e->ignore();
       }
-      else
-      {
-          e->ignore();
-      }
-
     }
-    if(!wsNames.empty()){
-        // Show these peaks workspaces
-        this->setPeaksWorkspaces(wsNames);
+    if (!wsNames.empty()) {
+      // Show these peaks workspaces
+      this->setPeaksWorkspaces(wsNames);
     }
+  }
 }
-}
-
 
 } // namespace
 }

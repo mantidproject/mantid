@@ -90,9 +90,9 @@ def diagnose(white_int,**kwargs):
 
         # Second white beam test
         if 'second_white' in kwargs:
-            __second_white_masks, num_failed = do_second_white_test(white_int, parser.second_white, parser.tiny, parser.huge,
-                                                       parser.van_out_lo, parser.van_out_hi,
-                                                       parser.van_lo, parser.van_hi, parser.variation,
+            __second_white_masks, num_failed = do_second_white_test(white_int, parser.second_white, parser.tiny, parser.huge,\
+                                                       parser.van_out_lo, parser.van_out_hi,\
+                                                       parser.van_lo, parser.van_hi, parser.variation,\
                                                        parser.van_sig, start_index, end_index)
             test_results[2] = [str(__second_white_masks), num_failed]
             add_masking(white_int, __second_white_masks, start_index, end_index)
@@ -103,8 +103,8 @@ def diagnose(white_int,**kwargs):
         zero_count_failures = 0
         if kwargs.get('sample_counts',None) is not None and kwargs.get('samp_zero',False):
             add_masking(parser.sample_counts, white_int)
-            maskZero, zero_count_failures = FindDetectorsOutsideLimits(InputWorkspace=parser.sample_counts,
-                                                                    StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index,
+            maskZero, zero_count_failures = FindDetectorsOutsideLimits(InputWorkspace=parser.sample_counts,\
+                                                                    StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index,\
                                                                    LowThreshold=1e-10, HighThreshold=1e100)
             add_masking(white_int, maskZero, start_index, end_index)
             DeleteWorkspace(maskZero)
@@ -114,7 +114,7 @@ def diagnose(white_int,**kwargs):
         #
         if hasattr(parser, 'background_int'):
             add_masking(parser.background_int, white_int)
-            __bkgd_mask, failures = do_background_test(parser.background_int, parser.samp_lo,
+            __bkgd_mask, failures = do_background_test(parser.background_int, parser.samp_lo,\
                                                            parser.samp_hi, parser.samp_sig, parser.samp_zero, start_index, end_index)
             test_results[3] = [str(__bkgd_mask), zero_count_failures + failures]
             add_masking(white_int, __bkgd_mask, start_index, end_index)
@@ -135,18 +135,18 @@ def diagnose(white_int,**kwargs):
     end_index_name=" to: end"
     default = True
     if hasattr(parser, 'print_diag_results') and parser.print_diag_results:
-            default=True
+        default=True
     if 'start_index' in kwargs:
-            default = False
-            start_index_name = "from: "+str(kwargs['start_index'])
+        default = False
+        start_index_name = "from: "+str(kwargs['start_index'])
     if 'end_index' in kwargs :
-            default = False
-            end_index_name = " to: "+str(kwargs['end_index'])
+        default = False
+        end_index_name = " to: "+str(kwargs['end_index'])
 
 
     testName=start_index_name+end_index_name
     if not default :
-       testName = " For bank: "+start_index_name+end_index_name
+        testName = " For bank: "+start_index_name+end_index_name
 
     if hasattr(parser, 'print_diag_results') and parser.print_diag_results:
         print_test_summary(test_results,testName)
@@ -185,8 +185,8 @@ def do_white_test(white_int, tiny, large, out_lo, out_hi, median_lo, median_hi, 
     # Make sure we are a MatrixWorkspace
     white_int = ConvertToMatrixWorkspace(InputWorkspace=white_int,OutputWorkspace=white_int)
     # The output workspace will have the failed detectors masked
-    white_masks,num_failed = FindDetectorsOutsideLimits(white_int, StartWorkspaceIndex=start_index,
-                                             EndWorkspaceIndex=end_index,
+    white_masks,num_failed = FindDetectorsOutsideLimits(white_int, StartWorkspaceIndex=start_index,\
+                                             EndWorkspaceIndex=end_index,\
                                              HighThreshold=large, LowThreshold=tiny)
 
     MaskDetectors(Workspace=white_int, MaskedWorkspace=white_masks,
@@ -271,15 +271,15 @@ def normalise_background(background_int, white_int, second_white_int=None):
     """
     if second_white_int is None:
         # quetly divide background integral by white beam integral not reporting about possible 0 in wb integral (they will be removed by diag anyway)
-        background_int =  Divide(LHSWorkspace=background_int,RHSWorkspace=white_int,WarnOnZeroDivide='0');
+        background_int =  Divide(LHSWorkspace=background_int,RHSWorkspace=white_int,WarnOnZeroDivide='0')
     else:
         hmean = 2.0*white_int*second_white_int/(white_int+second_white_int)
         #background_int /= hmean
-        background_int =  Divide(LHSWorkspace=background_int,RHSWorkspace=hmean,WarnOnZeroDivide='0');
+        background_int =  Divide(LHSWorkspace=background_int,RHSWorkspace=hmean,WarnOnZeroDivide='0')
         DeleteWorkspace(hmean)
 
 #------------------------------------------------------------------------------
-def do_background_test(background_int, median_lo, median_hi, sigma, mask_zero,
+def do_background_test(background_int, median_lo, median_hi, sigma, mask_zero,\
                         start_index=None, end_index=None):
     """
     Run the background tests
@@ -324,11 +324,11 @@ def do_bleed_test(sample_run, max_framerate, ignored_pixels):
     # Load the sample run
     if __Reducer__: #  Try to use generic loader which would work with files or workspaces alike
         sample_run = __Reducer__.get_run_descriptor(sample_run)
-        data_ws    = sample_run.get_workspace() # this will load data if necessary 
+        data_ws    = sample_run.get_workspace() # this will load data if necessary
         ws_name    = sample_run.get_ws_name()+'_bleed'
-    else: 
+    else:
         # may be sample run is already a run descriptor despite __Reducer__ have not been exposed
-        data_ws    = sample_run.get_workspace() # this will load data if necessary 
+        data_ws    = sample_run.get_workspace() # this will load data if necessary
         ws_name    = sample_run.get_ws_name()+'_bleed'
 
     if max_framerate is None:
