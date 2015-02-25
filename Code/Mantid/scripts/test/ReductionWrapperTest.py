@@ -2,7 +2,7 @@ import os,sys
 #os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 
 from mantid.simpleapi import *
-from mantid import api
+from mantid import api,config
 
 from Direct.ReductionWrapper import ReductionWrapper
 import MariReduction as mr
@@ -77,6 +77,56 @@ class ReductionWrapperTest(unittest.TestCase):
         fcomp = fbase+'.pyc'
         if os.path.isfile(fcomp):
             os.remove(fcomp)
+
+    def test_validate_settings(self):
+        dsp = config.getDataSearchDirs()
+        # clear all not to find any files
+        config.setDataSearchDirs('')
+
+        red = mr.ReduceMARI()
+        ok,level,errors = red.validate_settings()
+
+        self.assertFalse(ok)
+        self.assertEqual(level,2)
+        self.assertEqual(len(errors),7)
+
+
+ 
+
+        # this run should be in data search directory for basic Mantid
+        red.reducer.wb_run       = 11001
+        red.reducer.det_cal_file = '11001'
+        red.reducer.monovan_run = None
+        red.reducer.hard_mask_file = None
+        red.reducer.map_file = None
+        red.reducer.save_format = 'nxspe'
+
+        path = []
+        for item in dsp:
+            path.append(item)
+        config.setDataSearchDirs(path)
+
+
+        # hack -- let's pretend we are running from webservices 
+        # but web var are empty (not to overwrite values above)
+        red._run_from_web = True
+        red._wvs.standard_vars={}
+        red._wvs.advanced_vars={}
+        ok,level,errors = red.validate_settings()
+
+        self.assertTrue(ok)
+        self.assertEqual(level,0)
+        self.assertEqual(len(errors),0)
+
+        # this is how we set it up from web
+        red._wvs.advanced_vars={'save_format':''}
+        ok,level,errors = red.validate_settings()
+
+        self.assertFalse(ok)
+        self.assertEqual(level,1)
+        self.assertEqual(len(errors),1)
+
+
 
 if __name__=="__main__":
     unittest.main()

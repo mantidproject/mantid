@@ -31,7 +31,7 @@ class RunDescriptorTest(unittest.TestCase):
         idf_file=api.ExperimentInfo.getInstrumentFilename(InstrumentName)
         tmp_ws_name = '__empty_' + InstrumentName
         if not mtd.doesExist(tmp_ws_name):
-            LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
+               LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
         return mtd[tmp_ws_name].getInstrument()
 
 
@@ -67,7 +67,8 @@ class RunDescriptorTest(unittest.TestCase):
         propman  = self.prop_man
         propman.sample_run = 11001
 
-        file=PropertyManager.sample_run.find_file()
+        ok,file=PropertyManager.sample_run.find_file()
+        self.assertTrue(ok)
         self.assertTrue(len(file)>0)
 
         ext = PropertyManager.sample_run.get_file_ext()
@@ -95,10 +96,10 @@ class RunDescriptorTest(unittest.TestCase):
         propman.sample_run = 101111
         PropertyManager.sample_run.set_file_ext('nxs')
 
-        file=PropertyManager.sample_run.find_file()
+        ok,file=PropertyManager.sample_run.find_file()
         self.assertEqual(testFile1,os.path.normpath(file))
         PropertyManager.sample_run.set_file_ext('.raw')
-        file=PropertyManager.sample_run.find_file()
+        ok,file=PropertyManager.sample_run.find_file()
         self.assertEqual(testFile2,os.path.normpath(file))
 
         os.remove(testFile1)
@@ -330,6 +331,24 @@ class RunDescriptorTest(unittest.TestCase):
 
         api.AnalysisDataService.clear()
 
+    def test_runDescriptorDependant(self):
+        propman  = self.prop_man
+        self.assertTrue(PropertyManager.wb_run.has_own_value())
+        propman.wb_for_monovan_run = None
+        self.assertFalse(PropertyManager.wb_for_monovan_run.has_own_value())
+        propman.wb_run = 2000
+        self.assertEqual(propman.wb_for_monovan_run,2000)
+        self.assertEqual(propman.wb_run,2000)
+        self.assertFalse(PropertyManager.wb_for_monovan_run.has_own_value())
+        propman.wb_for_monovan_run = None
+        self.assertEqual(propman.wb_for_monovan_run,2000)
+        self.assertEqual(propman.wb_run,2000)
+
+        
+        propman.wb_for_monovan_run = 3000
+        self.assertTrue(PropertyManager.wb_for_monovan_run.has_own_value())
+        self.assertEqual(propman.wb_run,2000)
+        self.assertEqual(propman.wb_for_monovan_run,3000)
 
 
 if __name__=="__main__":
