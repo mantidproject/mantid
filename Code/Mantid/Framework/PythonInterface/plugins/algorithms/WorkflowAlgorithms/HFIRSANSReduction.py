@@ -7,6 +7,8 @@ import os
 
 class HFIRSANSReduction(PythonAlgorithm):
 
+    default_output_dir = None
+
     def category(self):
         return "Workflow\\SANS\\UsesPropertyManager"
 
@@ -18,7 +20,8 @@ class HFIRSANSReduction(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty('Filename', '', doc='List of input file paths')
-        self.declareProperty('ReductionProperties', '__sans_reduction_properties', validator=StringMandatoryValidator(), doc='Property manager name for the reduction')
+        self.declareProperty('ReductionProperties', '__sans_reduction_properties', validator=StringMandatoryValidator(),
+                             doc='Property manager name for the reduction')
         self.declareProperty('OutputWorkspace', '', doc='Reduced workspace')
         self.declareProperty('OutputMessage', '', direction=Direction.Output, doc='Output message')
 

@@ -132,6 +132,20 @@ class DirectEnergyConversion(object):
 
    hardmaskOnly=Filename :load a hardmask and use as only mask
    """
+
+    second_white = None
+    mono_correction_factor = None
+    _debug_mode = None
+    sample_run = None
+    __in_white_normalization = None
+    _keep_wb_workspace = None
+    _propMan = None
+    _do_ISIS_reduction = None
+    _multirep_mode = None
+    _mon2_norm_time_range = None
+    _spectra_masks = None
+    check_background = None
+
 #-------------------------------------------------------------------------------
     def diagnose(self, white,diag_sample=None,**kwargs):
         """ run diagnostics on the provided workspaces.
