@@ -183,8 +183,28 @@ public:
       double ex = I*exp(-arg/2)/sqrt(2*M_PI)/s;
       TS_ASSERT_DELTA( y[i] / ex, 1.0, 0.01 );
     }
-}
+  }
 
+  void test_width()
+  {
+    BackToBackExponential b2b; 
+    b2b.initialize();
+    //b2b.setParameter("I", 10);
+    //b2b.setParameter("A", 200.0);// large A and B make
+    //b2b.setParameter("B", 100.0);// the exponentials narrow
+    //b2b.setParameter("X0",0.0);
+    //b2b.setParameter("S", .00001);
+
+    std::cerr << "Test width " << b2b.centre() << ' ' << b2b.height() << ' ' << b2b.fwhm() << std::endl;
+
+    double vals[] = {1,2,3,4,5};
+    for(size_t i = 0; i < sizeof(vals)/sizeof(double); ++i)
+    {
+      b2b.setParameter("S", vals[i]);
+      std::cerr << "S " << vals[i] << ' ' << b2b.fwhm() << std::endl;
+    }
+
+  }
 
 };
 

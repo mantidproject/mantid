@@ -14,6 +14,7 @@ set ( SRC_FILES
 	src/CalculateGammaBackground.cpp
 	src/CalculateMSVesuvio.cpp
 	src/Chebyshev.cpp
+	src/ChebfunBase.cpp
 	src/ComptonPeakProfile.cpp
 	src/ComptonProfile.cpp
 	src/ComptonScatteringCountRate.cpp
@@ -65,6 +66,7 @@ set ( SRC_FILES
 	src/NormaliseByPeakArea.cpp
 	src/PRConjugateGradientMinimizer.cpp
 	src/ParDomain.cpp
+	src/PeakParametersNumeric.cpp
 	src/PlotPeakByLogValue.cpp
 	src/Polynomial.cpp
 	src/ProcessBackground.cpp
@@ -119,6 +121,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/CalculateGammaBackground.h
 	inc/MantidCurveFitting/CalculateMSVesuvio.h
 	inc/MantidCurveFitting/Chebyshev.h
+	inc/MantidCurveFitting/ChebfunBase.h
 	inc/MantidCurveFitting/ComptonPeakProfile.h
 	inc/MantidCurveFitting/ComptonProfile.h
 	inc/MantidCurveFitting/ComptonScatteringCountRate.h
@@ -174,6 +177,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/NormaliseByPeakArea.h
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/ParDomain.h
+	inc/MantidCurveFitting/PeakParametersNumeric.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
 	inc/MantidCurveFitting/Polynomial.h
 	inc/MantidCurveFitting/ProcessBackground.h
