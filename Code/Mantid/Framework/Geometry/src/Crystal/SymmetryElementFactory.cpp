@@ -20,6 +20,16 @@ bool SymmetryElementIdentityGenerator::canProcess(
   return !operation.hasTranslation() && operation.order() == 1;
 }
 
+SymmetryElement_sptr SymmetryElementTranslationGenerator::generateElement(
+    const SymmetryOperation &operation) const {
+  return boost::make_shared<SymmetryElementTranslation>(operation.vector());
+}
+
+bool SymmetryElementTranslationGenerator::canProcess(
+    const SymmetryOperation &operation) const {
+  return operation.order() == 1 && operation.hasTranslation();
+}
+
 SymmetryElement_sptr SymmetryElementInversionGenerator::generateElement(
     const SymmetryOperation &operation) const {
 
@@ -310,6 +320,7 @@ void SymmetryElementFactoryImpl::insertPrototype(
 }
 
 DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementIdentityGenerator);
+DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementTranslationGenerator);
 DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementInversionGenerator);
 DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementRotationGenerator);
 DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementMirrorGenerator);

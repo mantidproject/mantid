@@ -37,6 +37,17 @@ public:
   bool canProcess(const SymmetryOperation &operation) const;
 };
 
+class MANTID_GEOMETRY_DLL SymmetryElementTranslationGenerator
+    : public AbstractSymmetryElementGenerator {
+public:
+  SymmetryElementTranslationGenerator() {}
+  ~SymmetryElementTranslationGenerator() {}
+
+  SymmetryElement_sptr
+  generateElement(const SymmetryOperation &operation) const;
+  bool canProcess(const SymmetryOperation &operation) const;
+};
+
 class MANTID_GEOMETRY_DLL SymmetryElementInversionGenerator
     : public AbstractSymmetryElementGenerator {
 public:

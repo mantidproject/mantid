@@ -46,6 +46,35 @@ public:
     TS_ASSERT(!identityGenerator.canProcess(translation));
   }
 
+  void testSymmetryElementTranslationGenerator() {
+    // This generator processes Translations.
+    SymmetryOperation bodyCentering("x+1/2,y+1/2,z+1/2");
+
+    SymmetryElementTranslationGenerator translationGenerator;
+    TS_ASSERT(translationGenerator.canProcess(bodyCentering));
+    TS_ASSERT_THROWS_NOTHING(
+        translationGenerator.generateElement(bodyCentering));
+
+    SymmetryElement_sptr translationElement =
+        translationGenerator.generateElement(bodyCentering);
+
+    TS_ASSERT(translationElement);
+    TS_ASSERT_EQUALS(translationElement->hmSymbol(), "t");
+
+    SymmetryElementTranslation_sptr castedElement =
+        boost::dynamic_pointer_cast<SymmetryElementTranslation>(
+            translationElement);
+    TS_ASSERT(castedElement);
+    TS_ASSERT_EQUALS(castedElement->getTranslation(), V3R(1, 1, 1) / 2);
+
+    // But not other operations.
+    SymmetryOperation inversion("-x,-y,-z");
+    TS_ASSERT(!translationGenerator.canProcess(inversion));
+
+    SymmetryOperation identity("x,y,z");
+    TS_ASSERT(!translationGenerator.canProcess(identity));
+  }
+
   void testSymmetryElementInversionGenerator() {
     // This generator processes Inversion.
     SymmetryOperation inversion("-x,-y,-z");
@@ -355,33 +384,6 @@ public:
 
     // It should also be a mirror.
     TS_ASSERT_EQUALS(anotherMirror->hmSymbol(), "m");
-  }
-
-  void testSpaceGroup() {
-
-    SpaceGroup_const_sptr sg =
-        SpaceGroupFactory::Instance().createSpaceGroup("F d -3 m");
-
-    std::vector<SymmetryOperation> ops = sg->getSymmetryOperations();
-
-    for (auto it = ops.begin(); it != ops.end(); ++it) {
-      std::cout << (*it).identifier() << ": ";
-      try {
-      SymmetryElement_sptr element =
-          SymmetryElementFactory::Instance().createSymElem(*it);
-      std::cout << element->hmSymbol();
-
-      SymmetryElementWithAxis_sptr axisElement =
-          boost::dynamic_pointer_cast<SymmetryElementWithAxis>(element);
-      if(axisElement) {
-          std::cout << " " << V3D(axisElement->getAxis());
-      }
-      } catch(std::runtime_error) {
-          std::cout << " TRANSLATION";
-      }
-
-      std::cout << std::endl;
-    }
   }
 
 private:
