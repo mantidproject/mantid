@@ -139,7 +139,12 @@ Usage
   ConvertCWPDMDToSpectra(
         InputWorkspace = 'Exp0231DataMD',
         InputMonitorWorkspace = 'Exp0231MonitorMD',
-        OutputWorkspace = 'Exp0231Reduced')
+        OutputWorkspace = 'Exp0231Reduced',
+        BinningParams = '5, 0.1, 150',
+        UnitOutput = '2theta',
+        ScaleFactor = 100.,
+        LinearInterpolateZeroCounts = True
+        )
 
   # output
   datamdws = mtd["Exp0231DataMD"]

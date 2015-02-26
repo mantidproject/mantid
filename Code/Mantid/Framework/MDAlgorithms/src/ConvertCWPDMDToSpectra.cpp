@@ -4,7 +4,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/ExperimentInfo.h" // /ExpInfo.h"
+#include "MantidAPI/ExperimentInfo.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -139,12 +139,6 @@ void ConvertCWPDMDToSpectra::exec() {
     }
   }
 
-  std::map<int, double>::iterator miter;
-  for (miter = map_runWavelength.begin(); miter != map_runWavelength.end();
-       ++miter)
-    g_log.notice() << "[DB] Map: run = " << miter->first
-                   << ", wavelength = " << miter->second << "\n";
-
   // bin parameters
   if (binParams.size() != 3)
     throw std::runtime_error("Binning parameters must have 3 items.");
@@ -162,9 +156,7 @@ void ConvertCWPDMDToSpectra::exec() {
 
   // Set up the sample logs
   setupSampleLogs(outws, inputDataWS);
-  g_log.notice() << "[DB] output workspace has "
-                 << outws->run().getProperties().size() << " properties."
-                 << "\n";
+
   // Return
   setProperty("OutputWorkspace", outws);
 }
@@ -195,21 +187,19 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
     const double xmax, const double binsize, bool dolinearinterpolation) {
   // Get some information
   int64_t numevents = dataws->getNEvents();
-  g_log.notice() << "[DB] Number of events = " << numevents << "\n";
 
   // Create bins in 2theta (degree)
   size_t sizex, sizey;
   sizex = static_cast<size_t>((xmax - xmin) / binsize + 0.5);
   sizey = sizex - 1;
-  g_log.notice() << "[DB] "
-                 << "bin size = " << binsize << ", SizeX = " << sizex << ", "
-                 << ", SizeY = " << sizey << "\n";
+  g_log.debug() << "Number of events = " << numevents
+                << "bin size = " << binsize << ", SizeX = " << sizex << ", "
+                << ", SizeY = " << sizey << "\n";
   std::vector<double> vecx(sizex), vecy(sizex - 1, 0), vecm(sizex - 1, 0),
       vece(sizex - 1, 0);
 
   for (size_t i = 0; i < sizex; ++i) {
     vecx[i] = xmin + static_cast<double>(i) * binsize;
-    // g_log.notice() << "[DB] " << "x[" << i << "] = " << vecx[i] << "\n";
   }
 
   // Convert unit to unit char bit
@@ -218,8 +208,6 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
     unitchar = 'd';
   else if (targetunit.compare("Momenum Transfer (Q)") == 0)
     unitchar = 'q';
-  g_log.notice() << "[DB] Unit char = " << unitchar << " for unit "
-                 << targetunit << "\n";
 
   binMD(dataws, unitchar, map_runwavelength, vecx, vecy);
   binMD(monitorws, unitchar, map_runwavelength, vecx, vecm);
@@ -244,14 +232,6 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
     }
   }
 
-  /*
-  coord_t pos0 = mditer->getInnerPosition(0, 0);
-  coord_t posn = mditer->getInnerPosition(numev2 - 1, 0);
-  g_log.notice() << "[DB] "
-                 << " pos0 = " << pos0 << ", "
-                 << " pos1 = " << posn << "\n";
-                 */
-
   // Create workspace and set values
   API::MatrixWorkspace_sptr pdws =
       WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
@@ -266,19 +246,6 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
     Unit_sptr xUnit = pdws->getAxis(0)->unit();
     if (xUnit) {
       g_log.warning("Unable to set unit to an Unit::Empty object.");
-      /*
-      boost::shared_ptr<Units::Empty> xlabel =
-          boost::dynamic_pointer_cast<Units::Empty>(xUnit);
-      if (xlabel)
-      {
-        UnitLabel twothetalabel("degree");
-        xlabel->setLabel("TwoTheta", twothetalabel);
-      }
-      else
-      {
-        g_log.error(("Unable to cast XLabel to Empty"));
-      }
-      */
     } else {
       throw std::runtime_error("Unable to get unit from Axis(0)");
     }
@@ -332,14 +299,14 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
   Geometry::IComponent_const_sptr sample =
       expinfo->getInstrument()->getSample();
   const V3D samplepos = sample->getPos();
-  g_log.notice() << "[DB] Sample position is " << samplepos.X() << ", "
-                 << samplepos.Y() << ", " << samplepos.Z() << "\n";
+  g_log.debug() << "Sample position is " << samplepos.X() << ", "
+                << samplepos.Y() << ", " << samplepos.Z() << "\n";
 
   Geometry::IComponent_const_sptr source =
       expinfo->getInstrument()->getSource();
   const V3D sourcepos = source->getPos();
-  g_log.notice() << "[DB] Source position is " << sourcepos.X() << ","
-                 << sourcepos.Y() << ", " << sourcepos.Z() << "\n";
+  g_log.debug() << "Source position is " << sourcepos.X() << ","
+                << sourcepos.Y() << ", " << sourcepos.Z() << "\n";
 
   // Go through all events to find out their positions
   IMDIterator *mditer = mdws->createIterator();
@@ -350,9 +317,9 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
   while (scancell) {
     // get the number of events of this cell
     size_t numev2 = mditer->getNumEvents();
-    g_log.notice() << "[DB] MDWorkspace " << mdws->name() << " Cell " << nextindex - 1
-                   << ": Number of events = " << numev2
-                   << " Does NEXT cell exist = " << mditer->next() << "\n";
+    g_log.debug() << "MDWorkspace " << mdws->name() << " Cell " << nextindex - 1
+                  << ": Number of events = " << numev2
+                  << " Does NEXT cell exist = " << mditer->next() << "\n";
 
     // loop over all the events in current cell
     for (size_t iev = 0; iev < numev2; ++iev) {
@@ -400,13 +367,13 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
         g_log.warning("xindex < 0");
       if (xindex >= static_cast<int>(vecy.size()) - 1) {
         // If the Xmax is set too narrow, then
-        g_log.warning() << "Event is out of user-specified range "
-                        << "xindex = " << xindex << ", " << unitbit << " = "
-                        << outx << " out of [" << vecx.front() << ", "
-                        << vecx.back() << "]. dep pos = " << detpos.X() << ", "
-                        << detpos.Y() << ", " << detpos.Z()
-                        << "; sample pos = " << samplepos.X() << ", "
-                        << samplepos.Y() << ", " << samplepos.Z() << "\n";
+        g_log.information() << "Event is out of user-specified range "
+                            << "xindex = " << xindex << ", " << unitbit << " = "
+                            << outx << " out of [" << vecx.front() << ", "
+                            << vecx.back() << "]. dep pos = " << detpos.X()
+                            << ", " << detpos.Y() << ", " << detpos.Z()
+                            << "; sample pos = " << samplepos.X() << ", "
+                            << samplepos.Y() << ", " << samplepos.Z() << "\n";
         continue;
       }
 
@@ -440,8 +407,8 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
 void
 ConvertCWPDMDToSpectra::linearInterpolation(API::MatrixWorkspace_sptr matrixws,
                                             const double &infinitesimal) {
-  g_log.notice() << "Number of spectrum = " << matrixws->getNumberHistograms()
-                 << " Infinitesimal = " << infinitesimal << "\n";
+  g_log.debug() << "Number of spectrum = " << matrixws->getNumberHistograms()
+                << " Infinitesimal = " << infinitesimal << "\n";
   size_t numspec = matrixws->getNumberHistograms();
   for (size_t i = 0; i < numspec; ++i) {
     // search for the first nonzero value and last nonzero value
@@ -466,15 +433,16 @@ ConvertCWPDMDToSpectra::linearInterpolation(API::MatrixWorkspace_sptr matrixws,
       else
         --maxNonZeroIndex;
     }
-    g_log.notice() << "[DB] iMinNonZero = " << minNonZeroIndex << ", iMaxNonZero = " << maxNonZeroIndex
-                   << " Spectrum index = " << i << ", Y size = " << matrixws->readY(i).size() << "\n";
+    g_log.debug() << "iMinNonZero = " << minNonZeroIndex
+                  << ", iMaxNonZero = " << maxNonZeroIndex
+                  << " Spectrum index = " << i
+                  << ", Y size = " << matrixws->readY(i).size() << "\n";
     if (minNonZeroIndex >= maxNonZeroIndex)
       throw std::runtime_error("It is not right!");
 
 
     // Do linear interpolation for zero count values
     for (size_t j = minNonZeroIndex + 1; j < maxNonZeroIndex; ++j) {
-      // g_log.notice() << "[DB]   spectrum index i = " << i << ", Item j = " << j << "\n";
       if (matrixws->readY(i)[j] < infinitesimal) {
         // Do interpolation
         // gives y = y_0 + (y_1-y_0)\frac{x - x_0}{x_1-x_0}
@@ -526,7 +494,7 @@ void ConvertCWPDMDToSpectra::setupSampleLogs(
   for (size_t i = 0; i < vec_srcprop.size(); ++i) {
     Property *p = vec_srcprop[i];
     targetrun.addProperty(p->clone());
-    g_log.information() << "\tCloned property " << p->name() << "\n";
+    g_log.debug() << "Cloned property " << p->name() << "\n";
   }
 
   return;
@@ -556,45 +524,6 @@ ConvertCWPDMDToSpectra::scaleMatrixWorkspace(API::MatrixWorkspace_sptr matrixws,
       }
     }
   } // FOR(iws)
-
-  return;
-}
-
-//----------------------------------------------------------------------------------------------
-/** Convert units from 2theta to d-spacing or Q
- *  Equation:  	λ = 2d sinθ
- * @brief ConvertCWPDMDToSpectra::convertUnits
- * @param matrixws
- * @param targetunit
- * @param wavelength
- */
-void ConvertCWPDMDToSpectra::convertUnits(API::MatrixWorkspace_sptr matrixws,
-                                          const std::string &targetunit,
-                                          const double &wavelength) {
-  // TODO - Remove this method during final cleanup
-
-  throw std::runtime_error("Be removed!");
-  // Determine target unit
-  char target = 'd';
-  if (targetunit.compare("MomentumTransfer (Q)") == 0)
-    target = 'q';
-
-  // Loop through all X values
-  std::runtime_error("It is somehow very wrong as converting unit!  Take care of unit for wavelength (A?), and 2theta as degree of radian in pi!");
-  size_t numspec = matrixws->getNumberHistograms();
-  for (size_t i = 0; i < numspec; ++i) {
-    MantidVec &vecX = matrixws->dataX(i);
-    size_t vecsize = vecX.size();
-    for (size_t j = 0; j < vecsize; ++j) {
-      if (target == 'd')
-        vecX[j] = calculateDspaceFrom2Theta(vecX[j] * 0.5, wavelength);
-      else
-        vecX[j] = calculateQFrom2Theta(vecX[j] * 0.5, wavelength);
-    }
-  }
-
-  throw std::runtime_error("Consider whether (x,y,e) are to be re-ordered.");
-
 
   return;
 }
