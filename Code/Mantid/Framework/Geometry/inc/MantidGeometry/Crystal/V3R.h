@@ -120,6 +120,9 @@ public:
 
   V3R getPositiveVector() const;
 
+  // std::vector<double> operator
+  operator std::vector<double>() const;
+
 protected:
   RationalNumber m_x;
   RationalNumber m_y;
