@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_SAVETOMOCONFIG_H_
-#define MANTID_DATAHANDLING_SAVETOMOCONFIG_H_
+#ifndef MANTID_DATAHANDLING_SAVESAVUTOMOCONFIG_H_
+#define MANTID_DATAHANDLING_SAVESAVUTOMOCONFIG_H_
 
 //---------------------------------------------------
 // Includes
@@ -41,14 +41,14 @@ namespace DataHandling {
  * Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport SaveTomoConfig : public API::Algorithm {
+class DLLExport SaveSavuTomoConfig : public API::Algorithm {
 public:
-  SaveTomoConfig();
+  SaveSavuTomoConfig();
   /// Virtual dtor
-  virtual ~SaveTomoConfig() {}
+  virtual ~SaveSavuTomoConfig() {}
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SaveTomoConfig"; }
+  virtual const std::string name() const { return "SaveSavuTomoConfig"; }
 
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
@@ -85,4 +85,4 @@ private:
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif // MANTID_DATAHANDLING_SAVETOMOCONFIG_H_
+#endif // MANTID_DATAHANDLING_SAVESAVUTOMOCONFIG_H_

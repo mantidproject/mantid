@@ -1,5 +1,5 @@
-#ifndef SAVETOMOCONFIGTEST_H_
-#define SAVETOMOCONFIGTEST_H_
+#ifndef SAVESAVUTOMOCONFIGTEST_H_
+#define SAVESAVUTOMOCONFIGTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -8,28 +8,28 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataHandling/SaveTomoConfig.h"
+#include "MantidDataHandling/SaveSavuTomoConfig.h"
 
 #include <Poco/File.h>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
 
-class SaveTomoConfigTest : public CxxTest::TestSuite
+class SaveSavuTomoConfigTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SaveTomoConfigTest *createSuite() { return new SaveTomoConfigTest(); }
-  static void destroySuite(SaveTomoConfigTest *suite) { delete suite; }
+  static SaveSavuTomoConfigTest *createSuite() { return new SaveSavuTomoConfigTest(); }
+  static void destroySuite(SaveSavuTomoConfigTest *suite) { delete suite; }
 
   /// Tests casting, general algorithm properties: name, version, etc.
   void test_algorithm()
   {
     testSave =
-      Mantid::API::AlgorithmManager::Instance().create("SaveTomoConfig" /*, 1*/);
+      Mantid::API::AlgorithmManager::Instance().create("SaveSavuTomoConfig" /*, 1*/);
     TS_ASSERT( testSave );
-    TS_ASSERT_EQUALS( testSave->name(), "SaveTomoConfig" );
+    TS_ASSERT_EQUALS( testSave->name(), "SaveSavuTomoConfig" );
     TS_ASSERT_EQUALS( testSave->version(), 1 );
   }
 
@@ -48,7 +48,7 @@ public:
     ITableWorkspace_sptr ws = makeTableWorkspace(wsName);
 
     IAlgorithm_sptr testFail =
-      Mantid::API::AlgorithmManager::Instance().create("SaveTomoConfig" /*, 1*/);
+      Mantid::API::AlgorithmManager::Instance().create("SaveSavuTomoConfig" /*, 1*/);
     TS_ASSERT( testFail );
     TS_ASSERT_THROWS_NOTHING( testFail->initialize() );
     // exec without InputWorkspaces property set -> should throw
@@ -59,7 +59,7 @@ public:
 
     // exec with InputWorkspaces but empty Filename -> should throw
     IAlgorithm_sptr fail2 =
-      Mantid::API::AlgorithmManager::Instance().create("SaveTomoConfig" /*, 1*/);
+      Mantid::API::AlgorithmManager::Instance().create("SaveSavuTomoConfig" /*, 1*/);
     TS_ASSERT_THROWS_NOTHING( fail2->initialize() );
     TS_ASSERT_THROWS_NOTHING( fail2->setPropertyValue("InputWorkspaces", wsName) );
     TS_ASSERT_THROWS( fail2->setPropertyValue("Filename", ""), std::invalid_argument );
@@ -68,7 +68,7 @@ public:
 
     // exec with InputWorkspaces but no Filename -> should throw
     IAlgorithm_sptr fail3 =
-      Mantid::API::AlgorithmManager::Instance().create("SaveTomoConfig" /*, 1*/);
+      Mantid::API::AlgorithmManager::Instance().create("SaveSavuTomoConfig" /*, 1*/);
     TS_ASSERT_THROWS_NOTHING( fail3->initialize() );
     TS_ASSERT_THROWS_NOTHING( fail3->setPropertyValue("InputWorkspaces", wsName) );
     TS_ASSERT_THROWS( fail3->execute(), std::runtime_error );
@@ -77,13 +77,13 @@ public:
   void test_wrongTableFormat()
   {
     std::string badWSName = "bad_table";
-    ITableWorkspace_sptr ws = makeTableWorkspace(badWSName);
+    ITableWorkspace_sptr ws = makeWrongTableWorkspace(badWSName);
 
     // using wrong table: should fail
     IAlgorithm_sptr fail =
-      Mantid::API::AlgorithmManager::Instance().create("SaveTomoConfig" /*, 1*/);
+      Mantid::API::AlgorithmManager::Instance().create("SaveSavuTomoConfig" /*, 1*/);
     TS_ASSERT_THROWS_NOTHING( fail->initialize() );
-    TS_ASSERT_THROWS_NOTHING( fail->setPropertyValue("InputWorkspaces", wsName) );
+    TS_ASSERT_THROWS_NOTHING( fail->setPropertyValue("InputWorkspaces", badWSName) );
     TS_ASSERT_THROWS_NOTHING( fail->setPropertyValue("Filename", outFilename) );
     TS_ASSERT_THROWS_NOTHING( fail->execute() );
     TS_ASSERT( !fail->isExecuted() );
@@ -105,7 +105,7 @@ public:
     boost::shared_ptr<NeXus::File> file;
     // can open as NeXus and find one of the entries
     TS_ASSERT_THROWS_NOTHING( file = boost::make_shared<NeXus::File>(outFilename) );
-    TS_ASSERT_THROWS_NOTHING( file->openPath("entry/process/0") );
+    TS_ASSERT_THROWS_NOTHING( file->openPath("/entry/processing/0") );
     TS_ASSERT_THROWS_NOTHING( file->close() );
 
     cleanup();
@@ -125,8 +125,8 @@ private:
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
     AnalysisDataService::Instance().addOrReplace(name, ws);
     ws->addColumn("str","ID");
-    ws->addColumn("str","Name");
     ws->addColumn("str","Parameters");
+    ws->addColumn("str","Name");
     ws->addColumn("str","Cite");
 
     Mantid::API::TableRow row = ws->appendRow();
@@ -158,7 +158,7 @@ private:
   static const std::string wsName;
 };
 
-const std::string SaveTomoConfigTest::wsName = "simple_table";
-const std::string SaveTomoConfigTest::outFilename = "savu_tomo_save_test.nxs";
+const std::string SaveSavuTomoConfigTest::wsName = "simple_table";
+const std::string SaveSavuTomoConfigTest::outFilename = "savu_tomo_save_test.nxs";
 
-#endif /* SAVETOMOCONFIGTEST_H */
+#endif /* SAVESAVUTOMOCONFIGTEST_H */

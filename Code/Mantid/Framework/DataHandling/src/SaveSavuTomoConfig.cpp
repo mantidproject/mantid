@@ -1,5 +1,5 @@
 #include "MantidAPI/FileProperty.h"
-#include "MantidDataHandling/SaveTomoConfig.h"
+#include "MantidDataHandling/SaveSavuTomoConfig.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -9,18 +9,18 @@
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the algorithm factory
-DECLARE_ALGORITHM(SaveTomoConfig)
+DECLARE_ALGORITHM(SaveSavuTomoConfig)
 
 using namespace Kernel;
 using namespace API;
 
-SaveTomoConfig::SaveTomoConfig() : API::Algorithm(), m_pluginInfoCount(4)
+SaveSavuTomoConfig::SaveSavuTomoConfig() : API::Algorithm(), m_pluginInfoCount(4)
 { }
 
 /**
  * Initialise the algorithm
  */
-void SaveTomoConfig::init() {
+void SaveSavuTomoConfig::init() {
   // Get a list of table workspaces which contain the plugin information
   declareProperty(
       new ArrayProperty<std::string>("InputWorkspaces",
@@ -36,7 +36,7 @@ void SaveTomoConfig::init() {
 /**
  * Execute the algorithm
  */
-void SaveTomoConfig::exec() {
+void SaveSavuTomoConfig::exec() {
   // Prepare properties for writing to file
   std::string fileName = getPropertyValue("Filename");
 
@@ -64,7 +64,7 @@ void SaveTomoConfig::exec() {
  *
  * @return True if the table passed seems to be a savu configuration table
  */
-bool SaveTomoConfig::tableLooksGenuine(const ITableWorkspace_sptr &tws) {
+bool SaveSavuTomoConfig::tableLooksGenuine(const ITableWorkspace_sptr &tws) {
   // note that more columns might be added in the relatively near future
   if (!tws->columnCount() >= m_pluginInfoCount)
     return false;
@@ -72,7 +72,7 @@ bool SaveTomoConfig::tableLooksGenuine(const ITableWorkspace_sptr &tws) {
   std::vector<std::string> names = tws->getColumnNames();
   return ( 4 <= names.size() &&
            "ID" == names[0] &&
-           "Parameterss" == names[1] &&
+           "Parameters" == names[1] &&
            "Name" ==  names[2] &&
            "Cite" == names[3]);
 }
@@ -88,7 +88,7 @@ bool SaveTomoConfig::tableLooksGenuine(const ITableWorkspace_sptr &tws) {
  * @return Table workspaces retrieved from the ADS, corresponding to
  * the names passed
  */
-std::vector<ITableWorkspace_sptr> SaveTomoConfig::checkTables(
+std::vector<ITableWorkspace_sptr> SaveSavuTomoConfig::checkTables(
     const std::vector<std::string> &workspaces) {
   std::vector<ITableWorkspace_sptr> wss;
   for (auto it = workspaces.begin(); it != workspaces.end(); ++it) {
@@ -123,7 +123,7 @@ std::vector<ITableWorkspace_sptr> SaveTomoConfig::checkTables(
  * @param wss Table workspaces that apparently contain plugin/processing
  * steps information
  */
-void SaveTomoConfig::saveFile(const std::string fname,
+void SaveSavuTomoConfig::saveFile(const std::string fname,
               const std::vector<ITableWorkspace_sptr> &wss) {
   // Ensure it has a .nxs extension
   std::string fileName = fname;
@@ -140,6 +140,8 @@ void SaveTomoConfig::saveFile(const std::string fname,
     g_log.notice() << "Overwriting existing file: '" << fileName << "'" <<
       std::endl;
     f.remove();
+  } else {
+    g_log.notice() << "Creating file: '" << fileName << ";" << std::endl;
   }
 
   // Create the file handle
@@ -158,22 +160,28 @@ void SaveTomoConfig::saveFile(const std::string fname,
   nxFile.makeGroup(processingEntry, "NXprocess", true);
 
   // Iterate through all plugin entries (number sub groups 0....n-1)
+  size_t procCount = 0;
   for (size_t i = 0; i < wss.size(); ++i) {
-    // Column info order is [ID / Params {as json string} / name {description} /
-    // citation info]
-    std::string id = wss[i]->cell<std::string>(0, 0);
-    std::string params = wss[i]->cell<std::string>(0, 1);
-    std::string name = wss[i]->cell<std::string>(0, 2);
-    std::string cite = wss[i]->cell<std::string>(0, 3);
+    // Concatenate table contents, putting pipeline processing steps in the same sequence
+    // as they come in the seq of table workspaces
+    ITableWorkspace_sptr w = wss[i];
+    for (size_t ti =0; ti < w->rowCount(); ++ti) {
+      // Column info order is [ID / Params {as json string} / name {description} /
+      // citation info]
+      std::string id = w->cell<std::string>(ti, 0);
+      std::string params = w->cell<std::string>(ti, 1);
+      std::string name = w->cell<std::string>(ti, 2);
+      std::string cite = w->cell<std::string>(ti, 3);
 
-    // but in the file it goes as: data (params), id, name
-    nxFile.makeGroup(boost::lexical_cast<std::string>(i), "NXnote", true);
-    nxFile.writeData("data", params);
-    nxFile.writeData("id", id);
-    nxFile.writeData("name", name);
-    // Ignore citation information for now. Format not fixed yet.
-    // nxFile.writeData("cite", cite);
-    nxFile.closeGroup();
+      // but in the file it goes as: data (params), id, name
+      nxFile.makeGroup(boost::lexical_cast<std::string>(procCount++), "NXnote", true);
+      nxFile.writeData("data", params);
+      nxFile.writeData("id", id);
+      nxFile.writeData("name", name);
+      // Ignore citation information for now. Format not fixed yet.
+      // nxFile.writeData("cite", cite);
+      nxFile.closeGroup(); // close NXnote
+    }
   }
 
   nxFile.closeGroup(); // processing NXprocess
