@@ -4,9 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FunctionParameterDecorator.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/Exception.h"
+#include <boost/make_shared.hpp>
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
@@ -45,9 +46,52 @@ public:
 
 DECLARE_FUNCTION(TestableFunctionParameterDecorator);
 
+class FunctionWithParameters : public ParamFunction {
+public:
+  FunctionWithParameters() : ParamFunction() {}
+
+  std::string name() const { return "FunctionWithParameters"; }
+
+  void init() {
+    declareParameter("Height");
+    declareParameter("PeakCentre");
+    declareParameter("Sigma");
+  }
+
+  void function(const FunctionDomain &domain, FunctionValues &values) const {
+    UNUSED_ARG(domain);
+    UNUSED_ARG(values);
+    // Does nothing, not required for this test.
+  }
+};
+DECLARE_FUNCTION(FunctionWithParameters);
+
+class FunctionWithAttributes : public ParamFunction {
+public:
+  FunctionWithAttributes() : ParamFunction() {}
+
+  std::string name() const { return "FunctionWithAttributes"; }
+
+  void init() {
+    declareParameter("PeakCentre");
+    declareParameter("Sigma");
+    declareParameter("Height");
+
+    declareAttribute("Attribute1", IFunction::Attribute(1));
+    declareAttribute("Attribute2", IFunction::Attribute("Test"));
+  }
+
+  void function(const FunctionDomain &domain, FunctionValues &values) const {
+    UNUSED_ARG(domain);
+    UNUSED_ARG(values);
+    // Does nothing, not required for this test.
+  }
+};
+
+DECLARE_FUNCTION(FunctionWithAttributes);
+
 class FunctionParameterDecoratorTest : public CxxTest::TestSuite {
 public:
-  FunctionParameterDecoratorTest() { FrameworkManager::Instance(); }
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static FunctionParameterDecoratorTest *createSuite() {
@@ -60,11 +104,11 @@ public:
   void testSetDecoratedFunction() {
     TestableFunctionParameterDecorator fn;
 
-    TS_ASSERT_THROWS_NOTHING(fn.setDecoratedFunction("Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(fn.setDecoratedFunction("FunctionWithParameters"));
 
     IFunction_sptr decorated = fn.getDecoratedFunction();
     TS_ASSERT(decorated);
-    TS_ASSERT_EQUALS(decorated->name(), "Gaussian");
+    TS_ASSERT_EQUALS(decorated->name(), "FunctionWithParameters");
   }
 
   void testSetDecoratedFunctionInvalidName() {
@@ -77,7 +121,7 @@ public:
   void testThrowIfNoFunctionSet() {
     TestableFunctionParameterDecorator fn;
     TS_ASSERT_THROWS(fn.throwIfNoFunctionSet(), std::runtime_error);
-    fn.setDecoratedFunction("Gaussian");
+    fn.setDecoratedFunction("FunctionWithParameters");
     TS_ASSERT_THROWS_NOTHING(fn.throwIfNoFunctionSet());
   }
 
@@ -180,7 +224,7 @@ public:
     TS_ASSERT_EQUALS(fn->nAttributes(), decoratedFunction->nAttributes());
     TS_ASSERT_EQUALS(fn->nAttributes(), 0);
 
-    fn->setDecoratedFunction("Chebyshev");
+    fn->setDecoratedFunction("FunctionWithAttributes");
     decoratedFunction = fn->getDecoratedFunction();
     TS_ASSERT_EQUALS(fn->nAttributes(), decoratedFunction->nAttributes());
     TS_ASSERT_DIFFERS(fn->nAttributes(), 0);
@@ -233,21 +277,6 @@ public:
     TS_ASSERT(!tie);
   }
 
-  void testConstraints() {
-    TestableFunctionParameterDecorator invalidFn;
-    TS_ASSERT_THROWS(invalidFn.addConstraints("0<a<1"), std::runtime_error);
-    TS_ASSERT_THROWS(invalidFn.getConstraint(0), std::runtime_error);
-    TS_ASSERT_THROWS(invalidFn.removeConstraint("Height"), std::runtime_error);
-
-    FunctionParameterDecorator_sptr fn =
-        getFunctionParameterDecoratorGaussian();
-    IFunction_sptr decoratedFunction = fn->getDecoratedFunction();
-
-    TS_ASSERT_THROWS_NOTHING(fn->addConstraints("0.0<Height<10.0"));
-    TS_ASSERT_EQUALS(fn->getConstraint(0), decoratedFunction->getConstraint(0));
-    TS_ASSERT(fn->getConstraint(0));
-  }
-
   void testParameterNames() {
     FunctionParameterDecorator_sptr fn =
         getFunctionParameterDecoratorGaussian();
@@ -293,7 +322,7 @@ public:
     MockTestableFunctionParameterDecorator fn;
     EXPECT_CALL(fn, beforeDecoratedFunctionSet(_)).Times(1);
 
-    fn.setDecoratedFunction("Gaussian");
+    fn.setDecoratedFunction("FunctionWithParameters");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&fn));
   }
@@ -324,7 +353,7 @@ private:
   FunctionParameterDecorator_sptr getFunctionParameterDecoratorGaussian() {
     FunctionParameterDecorator_sptr fn =
         boost::make_shared<TestableFunctionParameterDecorator>();
-    fn->setDecoratedFunction("Gaussian");
+    fn->setDecoratedFunction("FunctionWithParameters");
 
     return fn;
   }
