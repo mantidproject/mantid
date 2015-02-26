@@ -229,7 +229,7 @@ Mantid::API::MatrixWorkspace_sptr IndirectDataReduction::loadInstrumentIfNotExis
   {
     g_log.error() << "Failed to load instrument with error: "
                   << ex.what() << std::endl;
-    return NULL;
+    return MatrixWorkspace_sptr();
   }
 }
 
@@ -344,11 +344,8 @@ void IndirectDataReduction::instrumentLoadingDone(bool error)
   if(error)
   {
     g_log.error("Instument loading failed!");
-    updateRunButton(false, "No Instrument", "No instrument is currently loaded.");
     return;
   }
-
-  updateRunButton();
 }
 
 
