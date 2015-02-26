@@ -97,14 +97,18 @@ PRIORITY_FILES = ['HYS_13658_event.nxs',
 def useDir(direc):
     """Only allow directories that aren't test output or
     reference results."""
-    if "ReferenceResults" in direc:
+    if "reference" in direc:
         return False
-    if "logs" in direc:
+    if config["defaultsave.directory"] == direc:
         return False
     return ("Data" in direc)
 
 def useFile(direc, filename):
     """Returns (useFile, abspath)"""
+    # if it is an -stamp file then assume these are cmake created files
+    if filename.endswith("-stamp"):
+        return (False, filename)
+
     # list of explicitly banned files at the top of this script
     if filename in BANNED_FILES:
         return (False, filename)

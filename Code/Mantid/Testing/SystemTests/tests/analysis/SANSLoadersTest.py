@@ -29,7 +29,7 @@ class LoadRunTest(unittest.TestCase):
 
 
     def basicChecks(self, loadRun, file_path, runnum, periods_in_file, ws_name):
-        self.assertTrue('Data/SANS2D/'+file_path in loadRun._data_file.replace('\\','/'), 'Wrong data file: ' + loadRun._data_file)
+        self.assertTrue('Data/SystemTest/SANS2D/'+file_path in loadRun._data_file.replace('\\','/'), 'Wrong data file: ' + loadRun._data_file)
         self.assertEqual(loadRun.periods_in_file, periods_in_file)
         self.assertEqual(loadRun.wksp_name, ws_name)
         self.assertEqual(loadRun.shortrun_no, runnum)

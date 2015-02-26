@@ -186,7 +186,6 @@ class SNSConvertToMDHistProjTest(stresstesting.MantidStressTest):
         return 2500
     
     def requiredFiles(self):
-        config.appendDataSearchDir("/home/builder/data/SystemTests/AnalysisTests/ReferenceResults/");
         files = [self.truth_file, DATA_FILE]
         return files	
     

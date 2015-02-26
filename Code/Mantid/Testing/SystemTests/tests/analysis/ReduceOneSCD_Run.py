@@ -39,11 +39,8 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
       instrument_name           = "TOPAZ"
       calibration_file_1        = "TOPAZ_2011_02_16.DetCal"
       calibration_file_2        = None
- #data_directory            = params_dictionary[ "data_directory" ]
  
-      import os
-      self.output_directory          =  os.path.abspath(os.path.curdir)
- #         = params_dictionary[ "output_directory" ]
+      self.output_directory          =  config["defaultsave.directory"]
       
       min_tof                   = "400"
       max_tof                   = "16666"
@@ -220,11 +217,11 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
       LoadIsawUB(InputWorkspace="XX1",Filename=self.run_conventional_matrix_file )      
       s1 = mtd["XX1"].sample()
       
-      LoadIsawPeaks(OutputWorkspace="PeaksP", Filename=os.path.join(os.path.dirname(__file__), 'ReferenceResults',"3132_Orthorhombic_P.integrate"))
-      LoadIsawUB(InputWorkspace=peaks_ws,Filename=os.path.join(os.path.dirname(__file__), 'ReferenceResults',"3132_Orthorhombic_P.mat"))
+      LoadIsawPeaks(OutputWorkspace="PeaksP", Filename="3132_Orthorhombic_P.integrate")
+      LoadIsawUB(InputWorkspace=peaks_ws,Filename="3132_Orthorhombic_P.mat")
       IndexPeaks( PeaksWorkspace=peaks_ws, Tolerance=tolerance )
       CreateSingleValuedWorkspace(OutputWorkspace="XX2",DataValue="3")
-      LoadIsawUB(InputWorkspace="XX2",Filename=os.path.join(os.path.dirname(__file__), 'ReferenceResults',"3132_Orthorhombic_P.mat"))  
+      LoadIsawUB(InputWorkspace="XX2",Filename="3132_Orthorhombic_P.mat")
       
       s2 = mtd["XX2"].sample()
       ol = s1.getOrientedLattice()
@@ -252,6 +249,3 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
    def validate(self):
       return [self.__reduced_ws_name,'PeaksP']
       
-   def requiredFiles(self):
-   
-      return [os.path.join(os.path.dirname(__file__), 'ReferenceResults',"3132_Orthorhombic_P.integrate"),os.path.join(os.path.dirname(__file__), 'ReferenceResults',"3132_Orthorhombic_P.mat")]

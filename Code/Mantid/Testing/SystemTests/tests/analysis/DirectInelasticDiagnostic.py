@@ -63,5 +63,4 @@ class DirectInelasticDiagnostic(MantidStressTest):
         return 'validateASCII'
         
     def validate(self):
-        return self.saved_diag_file, \
-            os.path.join(os.path.dirname(__file__), 'ReferenceResults','DirectInelasticDiagnostic.txt')
+        return (self.saved_diag_file,'DirectInelasticDiagnostic.txt')

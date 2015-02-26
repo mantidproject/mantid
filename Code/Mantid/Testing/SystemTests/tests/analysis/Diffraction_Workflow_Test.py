@@ -42,9 +42,6 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
         filename = ws+"_event.nxs"
         LoadEventNexus(Filename=filename,OutputWorkspace=ws,FilterByTofMin='3000',FilterByTofMax='16000')
         
-        # Load optimized DetCal file
-        #LoadIsawDetCal(InputWorkspace=ws,Filename="/SNS/TOPAZ/shared/Spectra/TOPAZ_8Sept11.DetCal")
-        
         # Spherical Absorption and Lorentz Corrections
         AnvredCorrection(InputWorkspace=ws,OutputWorkspace=ws,LinearScatteringCoef="0.451",LinearAbsorptionCoef="0.993",Radius="0.14")
         
@@ -165,8 +162,7 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
 
         # load output hkl file and the golden one
         LoadHKL(Filename="TOPAZ_3132.hkl", OutputWorkspace="TOPAZ_3132")
-        LoadHKL(Filename=os.path.join(os.path.dirname(__file__), 'ReferenceResults','TOPAZ_3132_reference.hkl'), 
-                OutputWorkspace="TOPAZ_3132_golden")
+        LoadHKL(Filename='TOPAZ_3132_reference.hkl', OutputWorkspace="TOPAZ_3132_golden")
 
     def validateMethod(self):
         return "ValidateWorkspaceToWorkspace"

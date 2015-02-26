@@ -28,11 +28,12 @@ class SpaceGroupFactoryTest(stresstesting.MantidStressTest):
     self.assertTrue(groupOperations == referenceOperations, "Problem in space group " + str(group.number()) + " (" + symbol + ")")
 
   def loadReferenceData(self):
+    from mantid.api import FileFinder
     # Reference data.
     # Dictionary has a string set for each space group number.
     separatorMatcher = re.compile("(\d+)")
 
-    fileName = os.path.join(os.path.dirname(__file__), 'ReferenceResults','SpaceGroupSymmetryOperations.txt')
+    fileName = FileFinder.Instance().getFullPath('SpaceGroupSymmetryOperations.txt')
 
     print fileName
 
