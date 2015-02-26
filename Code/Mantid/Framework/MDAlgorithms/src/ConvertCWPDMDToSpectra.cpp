@@ -525,26 +525,8 @@ void ConvertCWPDMDToSpectra::setupSampleLogs(
   const std::vector<Kernel::Property *> &vec_srcprop = srcrun.getProperties();
   for (size_t i = 0; i < vec_srcprop.size(); ++i) {
     Property *p = vec_srcprop[i];
-    if (p->name().compare("start_time")) {
-      targetrun.addProperty(p->clone());
-      g_log.information() << "\tCloned property " << p->name() << "\n";
-    }
-  }
-
-  // set up the start_time property from ExperimentInfo[0]
-  if (inputmdws->getExperimentInfo(0)->run().hasProperty("start_time")) {
-    std::string starttime = inputmdws->getExperimentInfo(0)
-                                ->run()
-                                .getProperty("start_time")
-                                ->value();
-    targetrun.addProperty(
-        new PropertyWithValue<std::string>("start_time", starttime), true);
-    g_log.notice() << "[DB] Added start_time = " << starttime << "\n";
-  } else {
-    g_log.error() << "Input MDEvnetWorkspace " << inputmdws->name()
-                  << " does not have "
-                  << "property start_time. "
-                  << "\n";
+    targetrun.addProperty(p->clone());
+    g_log.information() << "\tCloned property " << p->name() << "\n";
   }
 
   return;

@@ -250,10 +250,6 @@ MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
       new TimeSeriesProperty<std::string>("run_start");
   proprunstart->addValue(runstart, runstart.toISO8601String());
 
-  TimeSeriesProperty<std::string> *propstarttime =
-      new TimeSeriesProperty<std::string>("start_time");
-  propstarttime->addValue(runstart, runstart.toISO8601String());
-
   g_log.debug() << "Run " << irow << ": set run start to "
                 << runstart.toISO8601String() << "\n";
   if (tempws->run().hasProperty("run_start")) {
@@ -264,7 +260,6 @@ MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
     tempws->mutableRun().removeProperty("run_start");
   }
   tempws->mutableRun().addProperty(proprunstart);
-  tempws->mutableRun().addProperty(propstarttime);
 
   int pt = tablews->cell<int>(irow, ipt);
   tempws->mutableRun().addProperty(
@@ -583,18 +578,11 @@ void ConvertSpiceDataToRealSpace::appendSampleLogs(
     mdws->getExperimentInfo(static_cast<uint16_t>(i))->mutableRun().addLogData(
         new PropertyWithValue<std::string>("run_start",
                                            runstart.toFormattedString()));
-    mdws->getExperimentInfo(static_cast<uint16_t>(i))->mutableRun().addLogData(
-        new PropertyWithValue<std::string>("start_time",
-                                           runstart.toFormattedString()));
   }
   mdws->getExperimentInfo(static_cast<uint16_t>(vectimes.size()))
       ->mutableRun()
       .addLogData(new PropertyWithValue<std::string>(
            "run_start", vectimes[0].toFormattedString()));
-  mdws->getExperimentInfo(static_cast<uint16_t>(vectimes.size()))
-      ->mutableRun()
-      .addLogData(new PropertyWithValue<std::string>(
-           "start_time", vectimes[0].toFormattedString()));
 
   // Add sample logs
   // get hold of last experiment info
