@@ -147,8 +147,14 @@ Usage
         )
 
   # output
-  datamdws = mtd["Exp0231DataMD"]
-  print "Number of events = %d" % (datamdws.getNEvents())
+  ws = mtd["Exp0231Reduced"]
+  
+  vecx = ws.readX(0)
+  vecy = ws.readY(0)
+  vece = ws.readE(0)
+
+  for i in [100, 100, 1101, 1228]:
+    print "2theta = %-5f, Y = %-5f, E = %-5f" % (vecx[i], vecy[i], vece[i])
 
 .. testcleanup::  ExReduceHB2AToFullprof
 

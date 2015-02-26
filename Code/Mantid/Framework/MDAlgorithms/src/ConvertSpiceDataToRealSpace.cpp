@@ -94,24 +94,45 @@ void ConvertSpiceDataToRealSpace::exec() {
   MatrixWorkspace_const_sptr parentWS = getProperty("RunInfoWorkspace");
   m_instrumentName = getPropertyValue("Instrument");
 
-  // Check whether parent workspace has run start
+  // Check whether parent workspace has run start: order (1) parent ws, (2) user
+  // given (3) nothing
   DateAndTime runstart(1000000000);
+  bool hasrunstartset = false;
   if (parentWS->run().hasProperty("run_start")) {
     // Use parent workspace's first
-    runstart = parentWS->run().getProperty("run_start")->value();
-  } else {
+    std::string runstartstr = parentWS->run().getProperty("run_start")->value();
+    try {
+      DateAndTime temprunstart(runstartstr);
+      runstart = temprunstart;
+      hasrunstartset = true;
+    }
+    catch (...) {
+      g_log.warning() << "run_start from info matrix workspace is not correct. "
+                      << "It cannot be convert from '" << runstartstr << "'."
+                      << "\n";
+    }
+  }
+
+  // from properties
+  if (!hasrunstartset) {
     // Use user given
     std::string runstartstr = getProperty("RunStart");
-    // raise exception if user does not give a proper run start
-    if (runstartstr.size() == 0)
-    {
-      g_log.warning("Run-start time is not defined either in "
-                    "input parent workspace or given by user. 1990-01-01 "
-                    "00:00:01 is used");
+    try {
+      DateAndTime temprunstart(runstartstr);
+      runstart = temprunstart;
+      hasrunstartset = true;
     }
-    else {
-      runstart = DateAndTime(runstartstr);
+    catch (...) {
+      g_log.warning() << "RunStart from input property is not correct. "
+                      << "It cannot be convert from '" << runstartstr << "'."
+                      << "\n";
     }
+  }
+
+  if (!hasrunstartset) {
+    g_log.warning("Run-start time is not defined either in "
+                  "input parent workspace or given by user. 1990-01-01 "
+                  "00:00:01 is used");
   }
 
   // Convert table workspace to a list of 2D workspaces

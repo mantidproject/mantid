@@ -47,7 +47,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->name()));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("BinningParams", "0, 0.05, 120."));
+        alg.setPropertyValue("BinningParams", "0, 0.1, 120."));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("LinearInterpolateZeroCounts", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ReducedData"));
@@ -67,6 +67,9 @@ public:
     const Mantid::MantidVec &vecX = outws->readX(0);
     TS_ASSERT_DELTA(vecX.front(), 0.0, 0.0001);
     TS_ASSERT_DELTA(vecX.back(), 120.0 - 0.05, 0.0001);
+
+    // TODO : Test this   for i in [100, 100, 1101, 1228]:
+    // print "2theta = %-5f, Y = %-5f, E = %-5f" % (vecx[i], vecy[i], vece[i])
 
     // Sample logs: temperature
     TimeSeriesProperty<double> *tempbseries =
