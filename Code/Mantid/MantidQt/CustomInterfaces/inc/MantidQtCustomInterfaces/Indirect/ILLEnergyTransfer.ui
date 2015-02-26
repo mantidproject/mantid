@@ -77,7 +77,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfMapFIle" native="true">
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfMapFile" native="true">
             <property name="label" stdset="0">
              <string>Map File</string>
             </property>
