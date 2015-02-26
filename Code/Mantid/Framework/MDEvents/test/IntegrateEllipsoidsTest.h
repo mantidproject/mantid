@@ -1,6 +1,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidMDEvents/IntegrateEllipsoids.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -113,8 +114,15 @@ public:
       PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
       TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace", integratedPeaksWS->getNumberPeaks(), peaksWS->getNumberPeaks());
 
-      for(int i = 0; i < integratedPeaksWS->getNumberPeaks(); ++i) {
-        const Peak& peak = integratedPeaksWS->getPeak(0);
+      auto instrument = eventWS->getInstrument();
+      const V3D samplePos = instrument->getComponentByName("sample")->getPos();
+      const V3D sourcePos = instrument->getComponentByName("source")->getPos();
+      V3D beamDir = samplePos - sourcePos;
+      beamDir.normalize();
+
+      // Just test the first few peaks
+      for(int i = 0; i < 3; ++i) {
+        const Peak& peak = integratedPeaksWS->getPeak(i);
         const PeakShape& peakShape = peak.getPeakShape();
 
         TSM_ASSERT_RELATION("Peak should be integrated", std::greater<double>, peak.getIntensity(), 0);
@@ -122,7 +130,58 @@ public:
         std::stringstream stream;
         stream << "Wrong shape name for peak " << i;
         TSM_ASSERT_EQUALS(stream.str(), PeakShapeEllipsoid::ellipsoidShapeName(), peakShape.shapeName() );
+
+        // Calculate the q direction based on geometry
+        const V3D detPos = peak.getDetectorPosition();
+        V3D detDir = detPos - samplePos;
+        detDir.normalize();
+        V3D qDir = detDir - beamDir ;
+        qDir.normalize();
+
+        // Get the q-direction off the ellipsoid
+        PeakShapeEllipsoid const * const ellipsoid = dynamic_cast<const PeakShapeEllipsoid*>(&peakShape);
+        auto dirs = ellipsoid->directions();
+
+        /* We have set the fake ellipsoids up to be lines along a single detectors TOF (see setup).
+         * We therefore expect the principle axis of the ellipsoid to be the same as the q-dir!
+         */
+        TS_ASSERT_EQUALS(qDir, dirs[0]);
+
       }
+
+  }
+
+  void test_execution_histograms()
+  {
+      auto out = createDiffractionData();
+      EventWorkspace_sptr eventWS = out.get<0>();
+      PeaksWorkspace_sptr peaksWS = out.get<1>();
+
+      /*
+       Simply rebin the event workspace to a histo workspace to create the input we need.
+      */
+      auto rebinAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Rebin");
+      rebinAlg->setChild(true);
+      rebinAlg->initialize();
+      rebinAlg->setProperty("InputWorkspace", eventWS);
+      rebinAlg->setProperty("Params", std::vector<double>(1,100) );
+      rebinAlg->setProperty("PreserveEvents", false); // Make a histo workspace
+      rebinAlg->setPropertyValue("OutputWorkspace", "dummy");
+      rebinAlg->execute();
+      Mantid::API::MatrixWorkspace_sptr histoWS = rebinAlg->getProperty("OutputWorkspace");
+
+      /*
+      IntegrateEllipsoids alg;
+      alg.setChild(true);
+      alg.setRethrows(true);
+      alg.initialize();
+      alg.setProperty("InputWorkspace", histoWS);
+      alg.setProperty("PeaksWorkspace", peaksWS);
+      alg.setPropertyValue("OutputWorkspace", "dummy");
+      alg.execute();
+      PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
+      TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace", integratedPeaksWS->getNumberPeaks(), peaksWS->getNumberPeaks());
+      */
 
   }
 
