@@ -1,7 +1,6 @@
 from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
 from mantid.kernel import StringListValidator, Direction, logger
-from mantid import config
 import math, numpy as np
 
 class FlatPaalmanPingsCorrection(PythonAlgorithm):
@@ -23,20 +22,27 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
     _efixed = 0.0
     _interpolate = 'Linear'
     _output_ws_name = None
+    _angles = list()
+
 
     def category(self):
         return "Workflow\\MIDAS;PythonAlgorithms"
 
+
+    def summary(self):
+        "Calculates absorption corrections for a flat plate sample using Paalman & Pings format."
+
+
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
-                            doc="Name for the input Sample workspace.")
+                             doc="Name for the input Sample workspace.")
         self.declareProperty(name='SampleChemicalFormula', defaultValue='', doc = 'Sample chemical formula')
         self.declareProperty(name='SampleNumberDensity', defaultValue='', doc = 'Sample number density')
         self.declareProperty(name='SampleThickness', defaultValue='', doc = 'Sample thickness')
         self.declareProperty(name='SampleAngle', defaultValue=0.0, doc = 'Sample angle')
 
         self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '', direction=Direction.Input),
-                            doc="Name for the input Can workspace.")
+                             doc="Name for the input Can workspace.")
         self.declareProperty(name='CanChemicalFormula', defaultValue='', doc = 'Can chemical formula')
         self.declareProperty(name='CanNumberDensity', defaultValue='', doc = 'Can number density')
         self.declareProperty(name='CanThickness1', defaultValue='', doc = 'Can thickness1 front')
@@ -45,19 +51,17 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
 
         self.declareProperty(name='NumberWavelengths', defaultValue='10', doc = 'Number of wavelengths for calculation')
         self.declareProperty(name='Emode', defaultValue='Elastic', validator=StringListValidator(['Elastic','Indirect']),
-            doc='Emode: Elastic or Indirect')
+                             doc='Emode: Elastic or Indirect')
         self.declareProperty(name='Efixed', defaultValue=0.0, doc = 'Efixed - analyser energy')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
-                            doc='The output corrections workspace.')
+                             doc='The output corrections workspace.')
 
     def PyExec(self):
 
         self._setup()
         self._waveRange()
 
-        name = self._output_ws_name
-        ass_ws = name + '_ass'
         SetSampleMaterial(self._sample_ws_name , ChemicalFormula=self._sample_chemical_formula,
                           SampleNumberDensity=self._sample_number_density)
         sample = mtd[self._sample_ws_name].sample()
@@ -96,8 +100,8 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
         self._getAngles()
         number_angles = len(self._angles)
 
-        for n in range(number_angles):
-            angles = [self._sample_angle, self._angles[n]]
+        for angle_idx in range(number_angles):
+            angles = [self._sample_angle, self._angles[angle_idx]]
             (A1, A2, A3, A4) = self._flatAbs(ncan, size, density, sigs, siga, angles, self._waves)
 
             logger.information('Angle ' + str(n+1) + ' : ' + str(self._angles[n]) + ' successful')
@@ -112,10 +116,10 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
         dataX = self._waves * number_angles
 
         # Create the output workspaces
-        ass_ws = name + '_ass'
-        assc_ws = name + '_assc'
-        acsc_ws = name + '_acsc'
-        acc_ws = name + '_acc'
+        ass_ws = self._output_ws_name + '_ass'
+        assc_ws = self._output_ws_name + '_assc'
+        acsc_ws = self._output_ws_name + '_acsc'
+        acc_ws = self._output_ws_name + '_acc'
 
         CreateWorkspace(OutputWorkspace=ass_ws, DataX=dataX, DataY=dataA1,
                     NSpec=number_angles, UnitX='Wavelength')
@@ -142,7 +146,9 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
         else:
             workspaces = [ass_ws]
 
-        GroupWorkspaces(InputWorkspaces=workspaces.join(','), OutputWorkspace=name)
+        GroupWorkspaces(InputWorkspaces=workspaces.join(','), OutputWorkspace=self._output_ws_name)
+        self.setProperty('OutputWorkspace', self._output_ws_name)
+
 
     def _setup(self):
         self._sample_ws_name = self.getPropertyValue('SampleWorkspace')
@@ -168,25 +174,26 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
         self._efixed = float(self.getPropertyValue('Efixed'))
         self._output_ws_name = self.getPropertyValue('OutputWorkspace')
 
+
     def _getAngles(self):
         num_hist = mtd[self._sample_ws_name].getNumberHistograms()
         source_pos = mtd[self._sample_ws_name].getInstrument().getSource().getPos()
         sample_pos = mtd[self._sample_ws_name].getInstrument().getSample().getPos()
         beam_pos = sample_pos - source_pos
-        angles = []                                        # will be list of angles
+        self._angles = []
         for index in range(0, num_hist):
-            detector = mtd[self._sample_ws_name].getDetector(index)                    # get index
-            two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi        # calc angle
-            angles.append(two_theta)                        # add angle
-        self._angles = angles
+            detector = mtd[self._sample_ws_name].getDetector(index)
+            two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi  # calc angle
+            self._angles.append(two_theta)
+
 
     def _waveRange(self):
         from mantid.simpleapi import mtd, ExtractSingleSpectrum
-        self._wave_range = '__WaveRange'
-        ExtractSingleSpectrum(InputWorkspace=self._sample_ws_name, OutputWorkspace=self._wave_range, WorkspaceIndex=0)
-        Xin = mtd[self._wave_range].readX(0)
-        wave_min = mtd[self._wave_range].readX(0)[0]
-        wave_max = mtd[self._wave_range].readX(0)[len(Xin) - 1]
+        wave_range = '__WaveRange'
+        ExtractSingleSpectrum(InputWorkspace=self._sample_ws_name, OutputWorkspace=wave_range, WorkspaceIndex=0)
+        Xin = mtd[wave_range].readX(0)
+        wave_min = mtd[wave_range].readX(0)[0]
+        wave_max = mtd[wave_range].readX(0)[len(Xin) - 1]
         number_waves = self._number_wavelengths
         wave_bin = (wave_max - wave_min)/(number_waves-1)
         waves = []
@@ -196,8 +203,10 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
         if self._emode == 'Elastic':
             self._elastic = waves[int(number_waves / 2)]
         if self._emode == 'Indirect':
-            self._elastic = math.sqrt(81.787/self._efixed) # elastic wavelength
-        logger.information('Elastic lambda : ' + str(self._elastic))
+            self._elastic = math.sqrt(81.787/self._efixed)  # elastic wavelength
+        logger.information('Elastic lambda %f' % self._elastic)
+        DeleteWorkspace(wave_range)
+
 
     def _addSampleLogs(self, ws, sample_logs):
         """
@@ -219,6 +228,7 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
 
             AddSampleLog(Workspace=ws, LogName=key, LogType=log_type, LogText=str(value))
 
+
     def _flatAbs(self, ncan, thick, density, sigs, siga, angles, waves):
         """
         FlatAbs - calculate flat plate absorption factors
@@ -237,12 +247,12 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
         """
         PICONV = math.pi/180.
 
-    #can angle and detector angle
+        #can angle and detector angle
         tcan1, theta1 = angles
         canAngle = tcan1 * PICONV
         theta = theta1 * PICONV
 
-    # tsec is the angle the scattered beam makes with the normal to the sample surface.
+        # tsec is the angle the scattered beam makes with the normal to the sample surface.
         tsec = theta1-tcan1
 
         nlam = len(waves)
@@ -252,7 +262,7 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
         acsc = np.ones(nlam)
         acc = np.ones(nlam)
 
-    # case where tsec is close to 90 degrees. CALCULATION IS UNRELIABLE
+        # case where tsec is close to 90 degrees. CALCULATION IS UNRELIABLE
         if (abs(abs(tsec)-90.0) < 1.0):
         #default to 1 for everything
             return ass, assc, acsc, acc
@@ -263,7 +273,7 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
             sampleAbs, canAbs = siga[:2]
         #sample & can density
             sampleDensity, canDensity = density[:2]
-        #thickness of the sample and can
+            #thickness of the sample and can
             samThickness, canThickness1, canThickness2 = thick
 
             tsec = tsec*PICONV
@@ -271,26 +281,26 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
             sec1 = 1. / math.cos(canAngle)
             sec2 = 1. / math.cos(tsec)
 
-        #list of wavelengths
+            #list of wavelengths
             waves = np.array(waves)
 
-        #sample cross section
+            #sample cross section
             sampleXSection = (sampleScatt + sampleAbs * waves / 1.8) * sampleDensity
 
-        #vector version of fact
+            #vector version of fact
             vecFact = np.vectorize(self._fact)
             fs = vecFact(sampleXSection, samThickness, sec1, sec2)
 
             sampleSec1, sampleSec2 = self._calcThicknessAtSec(sampleXSection, samThickness, [sec1, sec2])
 
-            if (sec2 < 0.):
+            if sec2 < 0.0:
                 ass = fs / samThickness
             else:
                 ass= np.exp(-sampleSec2) * fs / samThickness
 
             useCan = (ncan > 1)
             if useCan:
-            #calculate can cross section
+                #calculate can cross section
                 canXSection = (canScatt + canAbs * waves / 1.8) * canDensity
                 assc, acsc, acc = self._calcFlatAbsCan(ass, canXSection, canThickness1, canThickness2, sampleSec1, sampleSec2, [sec1, sec2])
 
@@ -324,7 +334,7 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
 
         sec1, sec2 = sec
 
-    #vector version of fact
+        #vector version of fact
         vecFact = np.vectorize(self._fact)
         f1 = vecFact(canXSection,canThickness1,sec1,sec2)
         f2 = vecFact(canXSection,canThickness2,sec1,sec2)
@@ -332,7 +342,7 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
         canThick1Sec1, canThick1Sec2 = self._calcThicknessAtSec(canXSection, canThickness1, sec)
         canThick2Sec1, canThick2Sec2 = self._calcThicknessAtSec(canXSection, canThickness2, sec)
 
-        if (sec2 < 0.):
+        if sec2 < 0.0:
             val = np.exp(-(canThick1Sec1-canThick1Sec2))
             assc = ass * val
 
@@ -353,7 +363,7 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
 
         canThickness = canThickness1 + canThickness2
 
-        if(canThickness > 0.):
+        if canThickness > 0.0:
             acc = (acc1 + acc2) / canThickness
             acsc = (acsc1 + acsc2) / canThickness
 
