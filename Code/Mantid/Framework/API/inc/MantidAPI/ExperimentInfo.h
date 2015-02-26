@@ -34,8 +34,6 @@ class ModeratorModel;
  * - Run object (sample logs)
  * - Sample object (sample info)
  *
- * @author Janik Zikovsky
- * @date 2011-06-20
  */
 class MANTID_API_DLL ExperimentInfo {
 public:
