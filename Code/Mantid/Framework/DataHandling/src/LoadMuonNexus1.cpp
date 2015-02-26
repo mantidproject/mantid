@@ -165,6 +165,14 @@ void LoadMuonNexus1::exec() {
   // read
   int64_t total_specs;
   if (m_interval || m_list) {
+    // Remove from list possible duplicate specs
+    for (auto it=m_spec_list.begin(); it!=m_spec_list.end(); ) {
+      if ( (*it>=m_spec_min) && (*it<=m_spec_max) ) {
+        it = m_spec_list.erase(it);
+      } else {
+        ++it;
+      }
+    }
     total_specs = m_spec_list.size();
     if (m_interval) {
       total_specs += (m_spec_max - m_spec_min + 1);
@@ -240,7 +248,7 @@ void LoadMuonNexus1::exec() {
         specid_t histToRead = static_cast<specid_t>(m_spec_list[i]-1 + period * nxload.t_nsp1);
         specid_t specNo = static_cast<specid_t>(m_spec_list[i]);
         loadData(counter, histToRead, specNo, nxload, lengthIn - 1,
-                 localWorkspace);
+          localWorkspace);
         counter++;
         progress.report();
       }
