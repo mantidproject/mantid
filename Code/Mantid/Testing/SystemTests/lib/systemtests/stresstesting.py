@@ -215,7 +215,13 @@ class MantidStressTest(unittest.TestCase):
         """
         Validate ASCII files using difflib.
         """
+        from mantid.api import FileFinder
         (measured, expected) = self.validate()
+        if not os.path.isabs(measured):
+            measured = FileFinder.Instance().getFullPath(measured)
+        if not os.path.isabs(expected):
+            expected = FileFinder.Instance().getFullPath(expected)
+
         measured = self.__prepASCIIFile(measured)
         expected = self.__prepASCIIFile(expected)
 
