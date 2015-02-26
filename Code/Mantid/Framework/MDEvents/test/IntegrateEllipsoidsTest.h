@@ -6,7 +6,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Instrument/NearestNeighbours.h"
 #include <boost/make_shared.hpp>
 #include <boost/tuple/tuple.hpp>
 
@@ -32,17 +31,8 @@ public:
 
   static void destroySuite(IntegrateEllipsoidsTest *suite) { delete suite; }
 
-  static ISpectrumDetectorMapping buildSpectrumDetectorMapping(const specid_t start, const specid_t end)
-  {
-    boost::unordered_map<specid_t, std::set<detid_t>> map;
-    for ( specid_t i = start; i <= end; ++i )
-    {
-      map[i].insert(i);
-    }
-    return map;
-  }
 
-  void addFakeEllipsoid(const V3D& peakHKL, const int& totalNPixels, const int& nEvents, const NearestNeighbours& nn, EventWorkspace_sptr& eventWS, PeaksWorkspace_sptr& peaksWS)
+  void addFakeEllipsoid(const V3D& peakHKL, const int& totalNPixels, const int& nEvents, EventWorkspace_sptr& eventWS, PeaksWorkspace_sptr& peaksWS)
   {
       // Create the peak and add it to the peaks ws
       Peak* peak = peaksWS->createPeakHKL(peakHKL);
@@ -52,25 +42,11 @@ public:
       delete peak;
 
       EventList& el = eventWS->getEventList(detectorId - totalNPixels);
-      el.setDetectorID(detectorId);
-      el.addEventQuickly(TofEvent(tofExact));
 
-      // Find some neighbours,
-      std::map<specid_t, Mantid::Kernel::V3D> neighbourMap = nn.neighbours(detectorId);
-
-      typedef std::map<specid_t, Mantid::Kernel::V3D> NeighbourMap;
-      typedef NeighbourMap::iterator NeighbourMapIterator;
-      for(NeighbourMapIterator it = neighbourMap.begin(); it != neighbourMap.end(); ++it)
-      {
-          const specid_t neighbourDet = (*it).first;
-          const double distanceFromCentre = (*it).second.norm2(); // gives TOF delta
-          EventList neighbourEventList = eventWS->getEventList(neighbourDet - totalNPixels);
-          neighbourEventList.setDetectorID(neighbourDet);
-          for(int i = 0; i < nEvents; ++i) {
-
-              const double tof = (tofExact - (distanceFromCentre/2) ) + ( distanceFromCentre * double(i)/double(nEvents) );
-              neighbourEventList.addEventQuickly(TofEvent(tof));
-          }
+      // Add more events to the event list corresponding to the peak centre
+      for (int i = -nEvents/2; i < nEvents/2; ++i) {
+          const double tof = tofExact + i ;
+          el.addEventQuickly(TofEvent(tof));
       }
   }
 
@@ -102,16 +78,13 @@ public:
         el.setDetectorID(i + nPixelsTotal);
       }
 
-      // Make a nn map, so that we can add counts in the vicinity of the actual peak centre.
-      NearestNeighbours nn(inst, buildSpectrumDetectorMapping(nPixelsTotal, nPixelsTotal+inst->getNumberDetectors() - 1));
-
       // Add some peaks which should correspond to real reflections (could calculate these). Same function also adds a fake ellipsoid
-      addFakeEllipsoid(V3D(1, -5, -3), nPixelsTotal, 10, nn, eventWS, peaksWS);
-      addFakeEllipsoid(V3D(1, -4, -4), nPixelsTotal, 10, nn, eventWS, peaksWS);
-      addFakeEllipsoid(V3D(1, -3, -5), nPixelsTotal, 10, nn, eventWS, peaksWS);
-      addFakeEllipsoid(V3D(1, -4, -1), nPixelsTotal, 10, nn, eventWS, peaksWS);
-      addFakeEllipsoid(V3D(1, -4,  0), nPixelsTotal, 10, nn, eventWS, peaksWS);
-      addFakeEllipsoid(V3D(2, -3,  -4), nPixelsTotal, 10, nn, eventWS, peaksWS);
+      addFakeEllipsoid(V3D(1, -5, -3), nPixelsTotal, 10,  eventWS, peaksWS);
+      addFakeEllipsoid(V3D(1, -4, -4), nPixelsTotal, 10,  eventWS, peaksWS);
+      addFakeEllipsoid(V3D(1, -3, -5), nPixelsTotal, 10,  eventWS, peaksWS);
+      addFakeEllipsoid(V3D(1, -4, -1), nPixelsTotal, 10,  eventWS, peaksWS);
+      addFakeEllipsoid(V3D(1, -4,  0), nPixelsTotal, 10,  eventWS, peaksWS);
+      addFakeEllipsoid(V3D(2, -3,  -4), nPixelsTotal, 10, eventWS, peaksWS);
 
       // Return test data.
       return boost::tuple<EventWorkspace_sptr, PeaksWorkspace_sptr>(eventWS, peaksWS);
@@ -139,8 +112,17 @@ public:
       alg.execute();
       PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
       TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace", integratedPeaksWS->getNumberPeaks(), peaksWS->getNumberPeaks());
-      const Peak& firstPeak = integratedPeaksWS->getPeak(0);
-      TSM_ASSERT_EQUALS("Wrong shape name", PeakShapeEllipsoid::ellipsoidShapeName(), firstPeak.getPeakShape().shapeName() );
+
+      for(int i = 0; i < integratedPeaksWS->getNumberPeaks(); ++i) {
+        const Peak& peak = integratedPeaksWS->getPeak(0);
+        const PeakShape& peakShape = peak.getPeakShape();
+
+        TSM_ASSERT_RELATION("Peak should be integrated", std::greater<double>, peak.getIntensity(), 0);
+
+        std::stringstream stream;
+        stream << "Wrong shape name for peak " << i;
+        TSM_ASSERT_EQUALS(stream.str(), PeakShapeEllipsoid::ellipsoidShapeName(), peakShape.shapeName() );
+      }
 
   }
 
