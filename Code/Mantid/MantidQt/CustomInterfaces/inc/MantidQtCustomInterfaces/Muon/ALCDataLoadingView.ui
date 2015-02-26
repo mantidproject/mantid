@@ -109,7 +109,10 @@
                <property name="text">
                 <string>None</string>
                </property>
-               <attribute name="buttonGroup">
+                <property name="checked">
+                  <bool>true</bool>
+                </property>
+                <attribute name="buttonGroup">
                 <string notr="true">deadTimeCorrType</string>
                </attribute>
               </widget>
@@ -128,9 +131,6 @@
                <widget class="QRadioButton" name="fromCustomFile">
                  <property name="text">
                    <string>From Custom File</string>
-                 </property>
-                 <property name="checked">
-                   <bool>true</bool>
                  </property>
                  <attribute name="buttonGroup">
                    <string notr="true">deadTimeCorrType</string>
@@ -169,7 +169,7 @@
                       <bool>false</bool>
                     </property>
                     <property name="enabled">
-                      <bool>true</bool>
+                      <bool>false</bool>
                     </property>
                   </widget>
                 </item>
