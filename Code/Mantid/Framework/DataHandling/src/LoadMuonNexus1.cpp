@@ -239,7 +239,7 @@ void LoadMuonNexus1::exec() {
       for (size_t i = 0; i < m_spec_list.size(); ++i) {
         specid_t histToRead = static_cast<specid_t>(m_spec_list[i]-1 + period * nxload.t_nsp1);
         specid_t specNo = static_cast<specid_t>(m_spec_list[i]);
-        loadData(counter, histToRead, m_spec_list[i], nxload, lengthIn - 1,
+        loadData(counter, histToRead, specNo, nxload, lengthIn - 1,
                  localWorkspace);
         counter++;
         progress.report();
