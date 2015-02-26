@@ -97,6 +97,85 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="deadTimeGroup">
+         <property name="title">
+          <string>Dead Time Correction</string>
+         </property>
+          <layout class="QVBoxLayout" name="verticalLayoutDeadTime">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayoutDeadTime">
+             <item>
+              <widget class="QRadioButton" name="none">
+               <property name="text">
+                <string>None</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">deadTimeCorrType</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="fromDataFile">
+               <property name="text">
+                <string>From Data File</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">deadTimeCorrType</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+               <widget class="QRadioButton" name="fromCustomFile">
+                 <property name="text">
+                   <string>From Custom File</string>
+                 </property>
+                 <property name="checked">
+                   <bool>true</bool>
+                 </property>
+                 <attribute name="buttonGroup">
+                   <string notr="true">deadTimeCorrType</string>
+                 </attribute>
+               </widget>
+             </item>
+              <item>
+                <spacer name="horizontalSpacerDeadTime">
+                  <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                    <size>
+                      <width>40</width>
+                      <height>20</height>
+                    </size>
+                  </property>
+                </spacer>
+              </item>
+            </layout>
+          </item>
+            <item>
+              <layout class="QHBoxLayout" name="horizontalLayoutDeadTime_2">
+                <item>
+                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="deadTimeFile" native="true">
+                    <property name="sizePolicy">
+                      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                      </sizepolicy>
+                    </property>
+                    <property name="label" stdset="0">
+                      <string/>
+                    </property>
+                    <property name="multipleFiles" stdset="0">
+                      <bool>false</bool>
+                    </property>
+                  </widget>
+                </item>
+              </layout>
+            </item>
+          </layout>
+        </widget>
+      </item>
+        <item>
         <widget class="QGroupBox" name="groupBox_2">
          <property name="title">
           <string>Calculation</string>
