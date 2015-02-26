@@ -671,7 +671,7 @@ std::vector<int> LoadBBY::createOffsetVector(const std::string &filename,
   else {
     fileLoaded = false;
   }
-      
+    
   return result;
 }
 
