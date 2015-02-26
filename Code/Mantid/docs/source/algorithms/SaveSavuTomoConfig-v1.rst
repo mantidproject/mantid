@@ -30,10 +30,10 @@ Usage
 
 **Example**
 
-.. testcode:: SaveTomoConfig
+.. testcode:: SaveSavuTomoConfig
 
    import os.path
-   tws_name = 'saveTomoTest'
+   tws_name = 'saveSavuTomoTest'
    tws = CreateEmptyTableWorkspace(OutputWorkspace=tws_name)
    tws.addColumn('str', 'ID')
    tws.addColumn('str', 'Parameters')
@@ -41,24 +41,24 @@ Usage
    tws.addColumn('str', 'Cite')
    tws.addRow(['savu.id1', '{"param11": val1', 'plugin name1', 'cite info1'])
    tws.addRow(['savu.id2', '{"param21": val2', 'plugin name2', 'cite info2'])
-   print "Columns: ", tws.columnCount()
-   print "Rows: ", tws.rowCount()
-   out_fname = 'saveTomoTest.nxs'
-   SaveTomoConfig(Filename=out_fname, InputWorkspaces='saveTomoTest')
-   res = os.path.isfile(fname)
+   print "Columns: %d" % tws.columnCount()
+   print "Rows: %d" % tws.rowCount()
+   out_fname = 'saveSavuTomoTest.nxs'
+   SaveSavuTomoConfig(Filename=out_fname, InputWorkspaces='saveSavuTomoTest')
+   res = os.path.isfile(out_fname)
    print "Save result: ", res
 
-.. testcleanup:: SaveTomoConfig
+.. testcleanup:: SaveSavuTomoConfig
 
     DeleteWorkspace(tws)
     os.remove(out_fname)
 
 Output:
 
-.. testoutput:: SaveTomoConfig
+.. testoutput:: SaveSavuTomoConfig
 
-   Columns:  4
-   Rows:  2
+   Columns: 4
+   Rows: 2
    Save result:  True
 
 .. categories::
