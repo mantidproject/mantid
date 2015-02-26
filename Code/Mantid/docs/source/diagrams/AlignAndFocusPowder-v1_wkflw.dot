@@ -1,0 +1,99 @@
+digraph AlignAndFocusPowder {
+  label="AlignAndFocusPowder Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    InputWorkspace
+    OutputWorkspace
+    RemovePromptPulseWidth
+    CompressTolerance
+    CropWaveLengthMin
+    MaskWorkspace
+    CalFileName
+    OffsetsWorkspace
+    GroupingWorkspace
+    UnwrapRef
+    LowResRef
+    params1 [label="Params"]
+    params2 [label="Params"]
+  }
+
+  subgraph algoritms {
+    $algorithm_style
+    removePromptPulse [label="RemovePromptPulse v1"]
+    compressEvents    [label="CompressEvents v1"]
+    cropWorkspace     [label="CropWorkspace v1"]
+    maskDetectors     [label="MaskDetectors v1"]
+    rebin1            [label="Rebin v1"]
+    rebin2            [label="Rebin v1"]
+    resampleX         [label="ResampleX v1"]
+    alignDetectors    [label="AlignDetectors v1"]
+    convertUnits1     [label="ConvertUnits v1\nTime-of-Flight"]
+    convertUnits2     [label="ConvertUnits v1\nd-spacing"]
+    convertUnits3     [label="ConvertUnits v1\nTime-of-Flight"]
+    unwrapSNS         [label="UnwrapSNS v1"]
+    removeLowResTOF   [label="RemoveLowResTOF v1"]
+    diffFocus         [label="DiffractionFocussing v2"]
+    sortEvents        [label="SortEvents v1"]
+    editGeom          [label="EditInstrumentGeometry v1"]
+    loadCalFile       [label="LoadCalFile v1"]
+  }
+
+  subgraph decisions {
+    $decision_style
+    isEventWorkspace1 [label="Is event workspace?"]
+    isEventWorkspace2 [label="Is event workspace?"]
+    isDspace1         [label="Is d-space binning?"]
+    isDspace2         [label="Is d-space binning?"]
+    ifParams          [label="LRef, minwl, or\nDIFCref specified?"]
+  }
+
+
+  InputWorkspace         -> isEventWorkspace1
+
+  isEventWorkspace1      -> removePromptPulse    [label="Yes"]
+  RemovePromptPulseWidth -> removePromptPulse
+  removePromptPulse      -> compressEvents
+  CompressTolerance      -> compressEvents
+  compressEvents         -> cropWorkspace
+
+  isEventWorkspace1      -> cropWorkspace        [label="No"]
+  CropWaveLengthMin      -> cropWorkspace
+
+  cropWorkspace          -> maskDetectors
+  MaskWorkspace          -> maskDetectors
+  maskDetectors          -> isDspace1
+  isDspace1              -> resampleX            [label="Yes"]
+  resampleX              -> alignDetectors
+  isDspace1              -> rebin1               [label="No"]
+  params1                -> rebin1
+  rebin1                 -> alignDetectors
+  OffsetsWorkspace       -> alignDetectors
+  alignDetectors         -> ifParams
+
+  ifParams               -> isDspace2            [label="No"]
+  ifParams               -> convertUnits1        [label="Yes"]
+  convertUnits1          -> unwrapSNS
+  UnwrapRef              -> unwrapSNS
+  unwrapSNS              -> removeLowResTOF
+  LowResRef              -> removeLowResTOF
+  removeLowResTOF        -> convertUnits2
+  convertUnits2          -> isDspace2
+
+  isDspace2              -> diffFocus            [label="No"]
+  isDspace2              -> rebin2               [label="Yes"]
+  params2                -> rebin2
+  rebin2                 -> diffFocus
+  GroupingWorkspace      -> diffFocus
+  diffFocus              -> isEventWorkspace2
+  isEventWorkspace2      -> sortEvents           [label="Yes"]
+  isEventWorkspace2      -> editGeom             [label="No"]
+  sortEvents             -> editGeom
+  editGeom               -> convertUnits3
+  convertUnits3          -> OutputWorkspace
+
+  CalFileName            -> loadCalFile
+  loadCalFile            -> OffsetsWorkspace
+  loadCalFile            -> GroupingWorkspace
+}
