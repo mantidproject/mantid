@@ -9,14 +9,13 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
-#include "MantidQtCustomInterfaces/Indirect/IndirectCalibration.h"
-#include "MantidQtCustomInterfaces/Indirect/IndirectConvertToEnergy.h"
-#include "MantidQtCustomInterfaces/Indirect/IndirectDataReductionTab.h"
-#include "MantidQtCustomInterfaces/Indirect/IndirectDiagnostics.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectMoments.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectSqw.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectSymmetrise.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectTransmission.h"
+#include "MantidQtCustomInterfaces/Indirect/ISISCalibration.h"
+#include "MantidQtCustomInterfaces/Indirect/ISISDiagnostics.h"
+#include "MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h"
 
 #include <QDesktopServices>
 #include <QDir>
@@ -55,10 +54,12 @@ IndirectDataReduction::IndirectDataReduction(QWidget *parent) :
   m_instrument(""),
   m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
   m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
-  m_changeObserver(*this, &IndirectDataReduction::handleDirectoryChange)
+  m_changeObserver(*this, &IndirectDataReduction::handleConfigChange)
 {
   // Signals to report load instrument algo result
   connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(instrumentLoadingDone(bool)));
+
+  Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 }
 
 
@@ -67,6 +68,8 @@ IndirectDataReduction::IndirectDataReduction(QWidget *parent) :
  */
 IndirectDataReduction::~IndirectDataReduction()
 {
+  Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
+
   // Make sure no algos are running after the window has been closed
   m_algRunner->cancelRunningAlgorithm();
 
@@ -90,7 +93,7 @@ void IndirectDataReduction::helpClicked()
 void IndirectDataReduction::exportTabPython()
 {
   QString tabName = m_uiForm.twIDRTabs->tabText(m_uiForm.twIDRTabs->currentIndex());
-  m_tabs[tabName]->exportPythonScript();
+  m_tabs[tabName].second->exportPythonScript();
 }
 
 
@@ -101,7 +104,7 @@ void IndirectDataReduction::exportTabPython()
 void IndirectDataReduction::runClicked()
 {
   QString tabName = m_uiForm.twIDRTabs->tabText(m_uiForm.twIDRTabs->currentIndex());
-  m_tabs[tabName]->runTab();
+  m_tabs[tabName].second->runTab();
 }
 
 
@@ -116,13 +119,13 @@ void IndirectDataReduction::initLayout()
   updateRunButton(false, "Loading UI", "Initialising user interface components...");
 
   // Create the tabs
-  m_tabs["Energy Transfer"] = new IndirectConvertToEnergy(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loEnergyTransfer"));
-  m_tabs["Calibration"] = new IndirectCalibration(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loCalibration"));
-  m_tabs["Diagnostics"] = new IndirectDiagnostics(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loDiagnostics"));
-  m_tabs["Transmission"] = new IndirectTransmission(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loTransmission"));
-  m_tabs["Symmetrise"] = new IndirectSymmetrise(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loSymmetrise"));
-  m_tabs["S(Q, w)"] = new IndirectSqw(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loSofQW"));
-  m_tabs["Moments"] = new IndirectMoments(this, m_uiForm.twIDRTabs->findChild<QWidget *>("loMoments"));
+  addTab<ISISEnergyTransfer>("ISIS Energy Transfer");
+  addTab<ISISCalibration>("ISIS Calibration");
+  addTab<ISISDiagnostics>("ISIS Diagnostics");
+  addTab<IndirectTransmission>("Transmission");
+  addTab<IndirectSymmetrise>("Symmetrise");
+  addTab<IndirectSqw>("S(Q, w)");
+  addTab<IndirectMoments>("Moments");
 
   // Connect "?" (Help) Button
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
@@ -136,22 +139,16 @@ void IndirectDataReduction::initLayout()
   // Reset the Run button state when the tab is changed
   connect(m_uiForm.twIDRTabs, SIGNAL(currentChanged(int)), this, SLOT(updateRunButton()));
 
-  // Connect tab signals and run any setup code
-  for(auto it = m_tabs.begin(); it != m_tabs.end(); ++it)
-  {
-    connect(it->second, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
-    connect(it->second, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
-    connect(it->second, SIGNAL(updateRunButton(bool, QString, QString)), this, SLOT(updateRunButton(bool, QString, QString)));
-    connect(this, SIGNAL(newInstrumentConfiguration()), it->second, SIGNAL(newInstrumentConfiguration())),
-    it->second->setupTab();
-  }
-
   // Handle instrument configuration changes
   connect(m_uiForm.iicInstrumentConfiguration, SIGNAL(instrumentConfigurationUpdated(const QString &, const QString &, const QString &)),
           this, SLOT(instrumentSetupChanged(const QString &, const QString &, const QString &)));
 
   // Update the instrument configuration across the UI
   m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
+
+  std::string facility = Mantid::Kernel::ConfigService::Instance().getString("default.facility");
+  filterUiForFacility(QString::fromStdString(facility));
+  emit newInstrumentConfiguration();
 }
 
 
@@ -203,28 +200,37 @@ Mantid::API::MatrixWorkspace_sptr IndirectDataReduction::loadInstrumentIfNotExis
 {
   std::string idfDirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
 
-  std::string parameterFilename = idfDirectory + instrumentName + "_Definition.xml";
-  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
-  loadAlg->setChild(true);
-  loadAlg->initialize();
-  loadAlg->setProperty("Filename", parameterFilename);
-  loadAlg->setProperty("OutputWorkspace", "__IDR_Inst");
-  loadAlg->execute();
-  MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
-
-  // Load the IPF if given an analyser and reflection
-  if(!analyser.empty() && !reflection.empty())
+  try
   {
-    std::string ipfFilename = idfDirectory + instrumentName + "_" + analyser + "_" + reflection + "_Parameters.xml";
-    IAlgorithm_sptr loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
-    loadParamAlg->setChild(true);
-    loadParamAlg->initialize();
-    loadParamAlg->setProperty("Filename", ipfFilename);
-    loadParamAlg->setProperty("Workspace", instWorkspace);
-    loadParamAlg->execute();
-  }
+    std::string parameterFilename = idfDirectory + instrumentName + "_Definition.xml";
+    IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+    loadAlg->setChild(true);
+    loadAlg->initialize();
+    loadAlg->setProperty("Filename", parameterFilename);
+    loadAlg->setProperty("OutputWorkspace", "__IDR_Inst");
+    loadAlg->execute();
+    MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
 
-  return instWorkspace;
+    // Load the IPF if given an analyser and reflection
+    if(!analyser.empty() && !reflection.empty())
+    {
+      std::string ipfFilename = idfDirectory + instrumentName + "_" + analyser + "_" + reflection + "_Parameters.xml";
+      IAlgorithm_sptr loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
+      loadParamAlg->setChild(true);
+      loadParamAlg->initialize();
+      loadParamAlg->setProperty("Filename", ipfFilename);
+      loadParamAlg->setProperty("Workspace", instWorkspace);
+      loadParamAlg->execute();
+    }
+
+    return instWorkspace;
+  }
+  catch(std::exception &ex)
+  {
+    g_log.error() << "Failed to load instrument with error: "
+                  << ex.what() << std::endl;
+    return MatrixWorkspace_sptr();
+  }
 }
 
 
@@ -293,7 +299,9 @@ std::map<QString, QString> IndirectDataReduction::getInstrumentDetails()
     catch(Mantid::Kernel::Exception::NotFoundError &nfe)
     {
       UNUSED_ARG(nfe);
-      g_log.warning() << "Could not find parameter " << *it << " in instrument " << instrumentName << std::endl;
+      g_log.warning() << "Could not find parameter " << *it
+                      << " in instrument " << instrumentName
+                      << std::endl;
     }
   }
 
@@ -335,12 +343,9 @@ void IndirectDataReduction::instrumentLoadingDone(bool error)
 {
   if(error)
   {
-    g_log.error("Instument loading failed! (this can be caused by having both direct and indirect interfaces open)");
-    updateRunButton(false, "No Instrument", "No instrument is currently loaded.");
+    g_log.error("Instument loading failed!");
     return;
   }
-
-  updateRunButton();
 }
 
 
@@ -357,14 +362,28 @@ void IndirectDataReduction::closeEvent(QCloseEvent* close)
 
 
 /**
- * Reloads settings if the default sata search or save directories have been changed.
+ * Handles configuration values being changed.
+ *
+ * Currently checks for data search paths and default facility.
+ *
+ * @param pNf Poco notification
  */
-void IndirectDataReduction::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf)
+void IndirectDataReduction::handleConfigChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf)
 {
   std::string key = pNf->key();
+  std::string value = pNf->curValue();
 
   if(key == "datasearch.directories" || key == "defaultsave.directory")
+  {
     readSettings();
+  }
+  else if(key == "default.facility")
+  {
+    QString facility = QString::fromStdString(value);
+
+    m_uiForm.iicInstrumentConfiguration->setFacility(facility);
+    filterUiForFacility(facility);
+  }
 }
 
 
@@ -437,6 +456,59 @@ void IndirectDataReduction::saveSettings()
   settings.setValue("reflection-name", reflectionName);
 
   settings.endGroup();
+}
+
+
+/**
+ * Filters the displayed tabs based on the current facility.
+ *
+ * @param facility Name of facility
+ */
+void IndirectDataReduction::filterUiForFacility(QString facility)
+{
+  g_log.information() << "Facility selected: "
+                      << facility.toStdString()
+                      << std::endl;
+
+  QStringList enabledTabs;
+
+  // Add facility specific tabs
+  if(facility == "ISIS")
+    enabledTabs << "ISIS Energy Transfer"
+                << "ISIS Calibration"
+                << "ISIS Diagnostics";
+
+  // These tabs work at any facility (always at end of tabs)
+  enabledTabs << "Transmission" << "Symmetrise" << "S(Q, w)" << "Moments";
+
+  // First remove all tabs
+  while(m_uiForm.twIDRTabs->count() > 0)
+  {
+    // Disconnect the instrument changed signal
+    QString tabName = m_uiForm.twIDRTabs->tabText(0);
+    disconnect(this, SIGNAL(newInstrumentConfiguration()),
+               m_tabs[tabName].second, SIGNAL(newInstrumentConfiguration()));
+
+    // Remove the tab
+    m_uiForm.twIDRTabs->removeTab(0);
+
+    g_log.debug() << "Removing tab " << tabName.toStdString()
+                  << std::endl;
+  }
+
+  // Add the required tabs
+  for(auto it = enabledTabs.begin(); it != enabledTabs.end(); ++it)
+  {
+    // Connect the insturment changed signal
+    connect(this, SIGNAL(newInstrumentConfiguration()),
+            m_tabs[*it].second, SIGNAL(newInstrumentConfiguration()));
+
+    // Add the tab
+    m_uiForm.twIDRTabs->addTab(m_tabs[*it].first, *it);
+
+    g_log.debug() << "Adding tab " << (*it).toStdString()
+                  << std::endl;
+  }
 }
 
 

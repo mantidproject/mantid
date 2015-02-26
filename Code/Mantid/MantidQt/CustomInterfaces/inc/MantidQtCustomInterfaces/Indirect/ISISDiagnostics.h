@@ -1,8 +1,8 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTDIAGNOSTICS_H_
-#define MANTIDQTCUSTOMINTERFACES_INDIRECTDIAGNOSTICS_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_ISISDIAGNOSTICS_H_
+#define MANTIDQTCUSTOMINTERFACES_ISISDIAGNOSTICS_H_
 
 #include "IndirectDataReductionTab.h"
-#include "ui_IndirectDiagnostics.h"
+#include "ui_ISISDiagnostics.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 
@@ -28,7 +28,8 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  /** IndirectDiagnostics
+  /** ISISDiagnostics
+    Handles time integration diagnostics for ISIS instruments.
 
     @author Dan Nixon
     @date 23/07/2014
@@ -53,13 +54,13 @@ namespace CustomInterfaces
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport IndirectDiagnostics : public IndirectDataReductionTab
+  class DLLExport ISISDiagnostics : public IndirectDataReductionTab
   {
     Q_OBJECT
 
   public:
-    IndirectDiagnostics(IndirectDataReduction * idrUI, QWidget * parent = 0);
-    virtual ~IndirectDiagnostics();
+    ISISDiagnostics(IndirectDataReduction * idrUI, QWidget * parent = 0);
+    virtual ~ISISDiagnostics();
 
     virtual void setup();
     virtual void run();
@@ -79,11 +80,11 @@ namespace CustomInterfaces
     void pbRunFinished(); //< Called when the FileFinder has finished finding the files.
 
   private:
-    Ui::IndirectDiagnostics m_uiForm;
+    Ui::ISISDiagnostics m_uiForm;
     QString m_lastDiagFilename;
 
   };
 } // namespace CustomInterfaces
 } // namespace Mantid
 
-#endif //MANTIDQTCUSTOMINTERFACES_INDIRECTDIAGNOSTICS_H__
+#endif //MANTIDQTCUSTOMINTERFACES_ISISDIAGNOSTICS_H_
