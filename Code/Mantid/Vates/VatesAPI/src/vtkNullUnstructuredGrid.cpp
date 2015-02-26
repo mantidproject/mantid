@@ -2,6 +2,8 @@
 
 #include <vtkIdList.h>
 #include <vtkPoints.h>
+#include <vtkVertex.h>
+#include <vtkSmartPointer.h>
 #include <vtkUnstructuredGrid.h>
 namespace Mantid {
 namespace VATES {
@@ -21,15 +23,16 @@ vtkUnstructuredGrid *vtkNullUnstructuredGrid::createNullData() {
   vtkUnstructuredGrid *dataSet = vtkUnstructuredGrid::New();
   dataSet->Allocate(1);
 
-  vtkPoints *points = vtkPoints::New();
-  points->Allocate(1);
-  points->SetNumberOfPoints(1);
-  points->SetPoint(0, 0, 0, 0);
+  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+  vtkSmartPointer<vtkVertex> vertex = vtkSmartPointer<vtkVertex>::New();
 
-  vtkIdList *pointList = vtkIdList::New();
-  pointList->SetNumberOfIds(1);
+  Mantid::coord_t p[3] = {0.0, 0.0, 0.0};
+  points->InsertPoint(0, p);
+  vertex->GetPointIds()->SetId(0, 0);
 
+  dataSet->InsertNextCell(VTK_VERTEX, vertex->GetPointIds());
   dataSet->SetPoints(points);
+  dataSet->Squeeze();
 
   return dataSet;
 }

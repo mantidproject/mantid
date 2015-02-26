@@ -281,7 +281,7 @@ pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
   srcProxy->Modified();
   srcProxy->UpdatePipelineInformation();
   src->updatePipeline();
-  updateAnimationControls();
+
   return src;
 }
 
