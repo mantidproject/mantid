@@ -706,7 +706,9 @@ void MultiDatasetFit::initLayout()
 
 void MultiDatasetFit::createPlotToolbar()
 {
+  // ----- Main tool bar --------
   auto toolBar = new QToolBar(this);
+  toolBar->setIconSize(QSize(16,16));
   auto group = new QActionGroup(this);
  
   auto action = new QAction(this);
@@ -734,6 +736,7 @@ void MultiDatasetFit::createPlotToolbar()
   toolBar->addActions(group->actions());
 
   m_uiForm.horizontalLayout->insertWidget(3,toolBar);
+
 }
 
 /**
@@ -1128,7 +1131,7 @@ DataController::DataController(MultiDatasetFit *parent, QTableWidget *dataTable)
 }
 
 /**
- * Show a dialog to select a workspace.
+ * Show a dialog to select a workspace from the ADS.
  */
 void DataController::addWorkspace()
 {
@@ -1268,6 +1271,26 @@ int DataController::getNumberOfSpectra() const
   return m_dataTable->rowCount();
 }
 
+/**
+ * Enable global setting of fitting range (calls to setFittingRage(...)
+ * will set ranges of all datasets.)
+ * @param on :: True for global setting, false for individual.
+ */
+void DataController::setFittingRangeGlobal(bool on)
+{
+  m_isFittingRangeGlobal = on;
+}
+
+/**
+ * Set the fitting range for a data set or all data sets.
+ * @param i :: Index of a data set (spectrum). If m_isFittingRangeGlobal == true
+ *   the index is ignored and fitting range is set for all spectra.
+ * @param startX :: Start of the fitting range.
+ * @param endX :: End of the fitting range.
+ */
+void DataController::setFittingRange(int i, double startX, double endX)
+{
+}
 
 } // CustomInterfaces
 } // MantidQt

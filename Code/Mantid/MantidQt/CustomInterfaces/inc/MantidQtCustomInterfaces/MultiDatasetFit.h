@@ -1,6 +1,7 @@
 #ifndef MULTIDATASETFIT_H_
 #define MULTIDATASETFIT_H_
 
+#include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
@@ -58,7 +59,7 @@ class DataController;
  * and displaying the results.
  */
 
-class MultiDatasetFit: public API::UserSubWindow
+class MANTIDQT_CUSTOMINTERFACES_DLL MultiDatasetFit: public API::UserSubWindow
 {
   Q_OBJECT
 public:
@@ -94,11 +95,13 @@ private slots:
   void finishFit(bool);
   void updateLocalParameters(int index);
 
+
 protected:
   /// To be overridden to set the appropriate layout
   virtual void initLayout();
 
 private:
+public:
   void createPlotToolbar();
   boost::shared_ptr<Mantid::API::IFunction> createFunction() const;
   void initLocalParameter(const QString& parName)const;
@@ -242,16 +245,20 @@ public:
   int getWorkspaceIndex(int i) const;
   int getNumberOfSpectra() const;
   void checkDataSets();
+  void setFittingRange(int i, double startX, double endX);
 
 signals:
   void dataTableUpdated();
   void hasSelection(bool);
 
 public slots:
+  void setFittingRangeGlobal(bool);
+
 private slots:
   void addWorkspace();
   void workspaceSelectionChanged();
   void removeSelectedSpectra();
+
 private:
   MultiDatasetFit *owner() const {return static_cast<MultiDatasetFit*>(parent());}
   void addWorkspaceSpectrum(const QString &wsName, int wsIndex);
@@ -259,6 +266,8 @@ private:
 
   /// Table with data set names and other data.
   QTableWidget *m_dataTable;
+  /// Flag for setting the fitting range.
+  bool m_isFittingRangeGlobal;
 };
 
 } // CustomInterfaces

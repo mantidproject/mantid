@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>895</width>
-    <height>604</height>
+    <height>621</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -72,6 +72,16 @@
              <string>WS Index</string>
             </property>
            </column>
+           <column>
+            <property name="text">
+             <string>Start X</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>End X</string>
+            </property>
+           </column>
           </widget>
          </item>
          <item>
@@ -115,6 +125,9 @@
        </widget>
        <widget class="QWidget" name="verticalLayoutWidget">
         <layout class="QVBoxLayout" name="verticalLayout">
+         <property name="spacing">
+          <number>6</number>
+         </property>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout">
            <item>
@@ -152,7 +165,7 @@
            <item>
             <widget class="QPushButton" name="btnNext">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -188,6 +201,50 @@
             </spacer>
            </item>
           </layout>
+         </item>
+         <item>
+          <widget class="QStackedWidget" name="stackedWidget">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <widget class="QWidget" name="page">
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <property name="margin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QComboBox" name="comboBox"/>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox">
+               <property name="text">
+                <string>CheckBox</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="page_2"/>
+          </widget>
          </item>
          <item>
           <widget class="QwtPlot" name="plot">
@@ -231,6 +288,8 @@
   <tabstop>btnNext</tabstop>
   <tabstop>cbPlotSelector</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="../../icons/CustomInterfacesIcons.qrc"/>
+ </resources>
  <connections/>
 </ui>
