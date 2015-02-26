@@ -79,8 +79,8 @@ namespace CustomInterfaces
       load->setChild(true); // Don't want workspaces in the ADS
       load->setProperty("Filename", m_view->firstRun());
       // Don't load any data - we need logs only
-      load->setPropertyValue("SpectrumMin","0");
-      load->setPropertyValue("SpectrumMax","0");
+      load->setPropertyValue("SpectrumMin","1");
+      load->setPropertyValue("SpectrumMax","1");
       load->setPropertyValue("OutputWorkspace", "__NotUsed");
       load->execute();
 
