@@ -4,6 +4,7 @@
 #include <gsl/gsl_eigen.h>
 #include <gsl/gsl_complex_math.h>
 #include <stdexcept>
+#include <cmath>
 
 namespace Mantid {
 namespace Geometry {
@@ -50,7 +51,7 @@ SymmetryElement_sptr SymmetryElementInversionGenerator::generateElement(
 bool SymmetryElementInversionGenerator::canProcess(
     const SymmetryOperation &operation) const {
   Kernel::IntMatrix inversionMatrix(3, 3, true);
-  inversionMatrix *= -1.0;
+  inversionMatrix *= -1;
 
   return operation.matrix() == inversionMatrix;
 }
