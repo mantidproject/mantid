@@ -58,7 +58,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
         clean_up(files)
         tReducer.prop_man.save_format=''
 
-        tws =CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, NumEvents=10, XUnit='DeltaE', XMin=-10, XMax=10, BinWidth=0.1)
+        tws =CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1,\
+                NumEvents=10, XUnit='DeltaE', XMin=-10, XMax=10, BinWidth=0.1)
 
 
         self.assertTrue(len(tReducer.prop_man.save_format) ==0)
@@ -186,9 +187,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
         wb_ws   = CloneWorkspace(run_ws)
         #wb_ws=CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=10000)
 
-
-
-
         dgreduce.setup('MAR')
         par = {}
         par['ei_mon_spectra']=[4,5]
@@ -200,8 +198,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
         #abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,samp_mass,ei_guess,rebin,map_file='default',monovan_mapfile='default',**kwargs):
         ws = dgreduce.abs_units(wb_ws,run_ws,None,wb_ws,10,100,8.8,[-10,0.1,7],None,None,**par)
         self.assertTrue(isinstance(ws,api.MatrixWorkspace))
-
-
 
     ##    tReducet.di
     def test_energy_to_TOF_range(self):

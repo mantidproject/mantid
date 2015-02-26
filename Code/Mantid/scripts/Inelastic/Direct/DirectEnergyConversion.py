@@ -4,8 +4,9 @@ from mantid.kernel import funcreturns
 from mantid import geometry,api
 
 import os.path
-import copy,math,time
-
+import copy
+import math
+import time
 
 import Direct.CommonFunctions  as common
 import Direct.diagnostics      as diagnostics
@@ -134,107 +135,107 @@ class DirectEnergyConversion(object):
    """
 #-------------------------------------------------------------------------------
     def diagnose(self, white,diag_sample=None,**kwargs):
-      """ run diagnostics on the provided workspaces.
+        """run diagnostics on the provided workspaces.
 
-     this method does some additional processing before moving on to the diagnostics:
-      1) Computes the white beam integrals, converting to energy
-      2) Computes the background integral using the instrument defined range
-      3) Computes a total count from the sample
+        this method does some additional processing before moving on to the diagnostics:
+        1) Computes the white beam integrals, converting to energy
+        2) Computes the background integral using the instrument defined range
+        3) Computes a total count from the sample
 
-     these inputs are passed to the diagnostics functions
+        these inputs are passed to the diagnostics functions
 
-     required inputs:
+        required inputs:
 
-      white  - A workspace, run number or filepath of a white beam run. A workspace is assumed to
-               have simple been loaded and nothing else.
+        white  - A workspace, run number or filepath of a white beam run. A workspace is assumed to
+                 have simple been loaded and nothing else.
 
-     optional inputs:
+        optional inputs:
 
-      diag_sample - A workspace, run number or filepath of additional (sample) run used for diagnostics.
-                    A workspace is assumed to have simple been loaded and nothing else. (default = None)
+        diag_sample - A workspace, run number or filepath of additional (sample) run used for diagnostics.
+                      A workspace is assumed to have simple been loaded and nothing else. (default = None)
 
-      second_white - If provided an additional set of tests is performed on this. (default = None)
-      hard_mask    - A file specifying those spectra that should be masked without testing (default=None)
+        second_white - If provided an additional set of tests is performed on this. (default = None)
+        hard_mask    - A file specifying those spectra that should be masked without testing (default=None)
 
-      # IDF-based diagnostics parameters:
-      tiny        - Minimum threshold for acceptance (default = 1e-10)
-      huge        - Maximum threshold for acceptance (default = 1e10)
-      background_test_range - A list of two numbers indicating the background range (default=instrument defaults)
-      van_out_lo  - Lower bound defining outliers as fraction of median value (default = 0.01)
-      van_out_hi  - Upper bound defining outliers as fraction of median value (default = 100.)
-      van_lo      - Fraction of median to consider counting low for the white beam diag (default = 0.1)
-      van_hi      - Fraction of median to consider counting high for the white beam diag (default = 1.5)
-      van_sig  - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
+        # IDF-based diagnostics parameters:
+        tiny        - Minimum threshold for acceptance (default = 1e-10)
+        huge        - Maximum threshold for acceptance (default = 1e10)
+        background_test_range - A list of two numbers indicating the background range (default=instrument defaults)
+        van_out_lo  - Lower bound defining outliers as fraction of median value (default = 0.01)
+        van_out_hi  - Upper bound defining outliers as fraction of median value (default = 100.)
+        van_lo      - Fraction of median to consider counting low for the white beam diag (default = 0.1)
+        van_hi      - Fraction of median to consider counting high for the white beam diag (default = 1.5)
+        van_sig  - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
                   "difference with respect to the median value must also exceed this number of error bars (default=0.0)
-      samp_zero    - If true then zeros in the vanadium data will count as failed (default = True)
-      samp_lo      - Fraction of median to consider counting low for the white beam diag (default = 0)
-      samp_hi      - Fraction of median to consider counting high for the white beam diag (default = 2.0)
-      samp_sig  - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
-                  "difference with respect to the median value must also exceed this number of error bars (default=3.3)
-      variation  - The number of medians the ratio of the first/second white beam can deviate from
-                   the average by (default=1.1)
-      bleed_test - If true then the CreatePSDBleedMask algorithm is run
-      bleed_maxrate - If the bleed test is on then this is the maximum framerate allowed in a tube
-      bleed_pixels - If the bleed test is on then this is the number of pixels ignored within the
+        samp_zero    - If true then zeros in the vanadium data will count as failed (default = True)
+        samp_lo      - Fraction of median to consider counting low for the white beam diag (default = 0)
+        samp_hi      - Fraction of median to consider counting high for the white beam diag (default = 2.0)
+        samp_sig  - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
+                    "difference with respect to the median value must also exceed this number of error bars (default=3.3)
+        variation  - The number of medians the ratio of the first/second white beam can deviate from
+                     the average by (default=1.1)
+        bleed_test - If true then the CreatePSDBleedMask algorithm is run
+        bleed_maxrate - If the bleed test is on then this is the maximum framerate allowed in a tube
+        bleed_pixels - If the bleed test is on then this is the number of pixels ignored within the
                      bleed test diagnostic
-      """
-      # output workspace name.
-      try:
-          n,r = funcreturns.lhs_info('both')
-          out_ws_name = r[0]
-      except:
-          out_ws_name = None
-      # modify properties using input arguments
-      self.prop_man.set_input_parameters(**kwargs)
-      # obtain proper run descriptor in case it is not a run descriptor but
-      # something else
-      white = self.get_run_descriptor(white)
+        """
+        # output workspace name.
+        try:
+            n,r = funcreturns.lhs_info('both')
+            out_ws_name = r[0]
+        except:
+            out_ws_name = None
+        # modify properties using input arguments
+        self.prop_man.set_input_parameters(**kwargs)
+        # obtain proper run descriptor in case it is not a run descriptor but
+        # something else
+        white = self.get_run_descriptor(white)
 
-      # return all diagnostics parameters
-      diag_params = self.prop_man.get_diagnostics_parameters()
+        # return all diagnostics parameters
+        diag_params = self.prop_man.get_diagnostics_parameters()
 
-      if self.use_hard_mask_only:
-         # build hard mask
-         diag_mask,n_masks = white.get_masking()
-         if diag_mask is None:
+        if self.use_hard_mask_only:
+            # build hard mask
+            diag_mask,n_masks = white.get_masking()
+            if diag_mask is None:
             # in this peculiar way we can obtain working mask which
             # accounts for initial data grouping in the
             # data file.  SNS or 1 to 1 maps may probably avoid this
             # stuff and can load masks directly
-            white_data = white.get_ws_clone('white_ws_clone')
+                white_data = white.get_ws_clone('white_ws_clone')
 
             diag_mask = LoadMask(Instrument=self.instr_name,InputFile=self.hard_mask_file,\
                                  OutputWorkspace='hard_mask_ws')
             MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
             white.add_masked_ws(white_data)
             DeleteWorkspace(Workspace='white_ws_clone')
-            diag_mask,n_masks  = white.get_masking()
-         if not(out_ws_name is None):
-            dm = CloneWorkspace(diag_mask,OutputWorkspace=out_ws_name)
-            return dm
-         else:
-            return None
+            diag_mask,n_masks = white.get_masking()
+            if not(out_ws_name is None):
+                dm = CloneWorkspace(diag_mask,OutputWorkspace=out_ws_name)
+                return dm
+            else:
+                return None
 
-      # Get the white beam vanadium integrals
-      whiteintegrals = self.do_white(white, None, None) # No grouping yet
-      if self.second_white:
-        #TODO: fix  THIS DOES NOT WORK! 
-         second_white = self.second_white
-         other_whiteintegrals = self.do_white(PropertyManager.second_white, None, None) # No grouping yet
-         self.second_white = other_whiteintegrals
+        # Get the white beam vanadium integrals
+        whiteintegrals = self.do_white(white, None, None) # No grouping yet
+        if self.second_white:
+            #TODO: fix THIS DOES NOT WORK!
+            second_white = self.second_white
+            other_whiteintegrals = self.do_white(PropertyManager.second_white, None, None) # No grouping yet
+            self.second_white = other_whiteintegrals
 
-      # Get the background/total counts from the sample run if present
-      if not diag_sample is None:
-         diag_sample = self.get_run_descriptor(diag_sample)
-         sample_mask,n_sam_masked = diag_sample.get_masking()
-         if sample_mask is None:
-            # If the bleed test is requested then we need to pass in the
-            # sample_run as well
-            if self.bleed_test:
-                # initiate reference to reducer to be able to work with Run
-                # Descriptors
-                diagnostics.__Reducer__ = self
-                diag_params['sample_run'] = diag_sample
+        # Get the background/total counts from the sample run if present
+        if not diag_sample is None:
+            diag_sample = self.get_run_descriptor(diag_sample)
+            sample_mask,n_sam_masked = diag_sample.get_masking()
+            if sample_mask is None:
+                # If the bleed test is requested then we need to pass in the
+                # sample_run as well
+                if self.bleed_test:
+                    # initiate reference to reducer to be able to work with Run
+                    # Descriptors
+                    diagnostics.__Reducer__ = self
+                    diag_params['sample_run'] = diag_sample
 
             # Set up the background integrals for diagnostic purposes
             result_ws = self.normalise(diag_sample, self.normalise_method)
@@ -253,128 +254,269 @@ class DirectEnergyConversion(object):
             diagnostics.normalise_background(background_int, whiteintegrals,\
                                            diag_params.get('second_white',None))
             diag_params['background_int'] = background_int
-            diag_params['sample_counts']  = total_counts
+            diag_params['sample_counts'] = total_counts
 
 
-      # extract existing white mask if one is defined and provide it for 
-      # diagnose to use instead of constantly diagnosing the same vanadium
-      white_mask,num_masked = white.get_masking()
-      if not(white_mask is None) and not(sample_mask is None):
-         # nothing to do then 
-         total_mask = sample_mask+white_mask
-         return total_mask
-      else:
-         pass # have to run diagnostics after all
+        # extract existing white mask if one is defined and provide it for
+        # diagnose to use instead of constantly diagnosing the same vanadium
+        white_mask,num_masked = white.get_masking()
+        if not(white_mask is None) and not(sample_mask is None):
+            # nothing to do then
+            total_mask = sample_mask + white_mask
+            return total_mask
+        else:
+            pass # have to run diagnostics after all
 
-      # Check how we should run diag
-      diag_spectra_blocks = self.diag_spectra
+        # Check how we should run diag
+        diag_spectra_blocks = self.diag_spectra
 
-      if not(white_mask is None):
-         diag_params['white_mask']=white
-      # keep white mask workspace for further usage
-      if diag_spectra_blocks is None:
-         # Do the whole lot at once
-         white_masked_ws =diagnostics.diagnose(whiteintegrals, **diag_params)
-         if white_masked_ws:
-            white.add_masked_ws(white_masked_ws)
-            DeleteWorkspace(white_masked_ws)
-      else:
-         for index, bank in enumerate(diag_spectra_blocks):
-             diag_params['start_index'] = bank[0] - 1
-             diag_params['end_index'] = bank[1] - 1
-             white_masked_ws=diagnostics.diagnose(whiteintegrals, **diag_params)
-             if white_masked_ws:
+        if not(white_mask is None):
+            diag_params['white_mask'] = white
+        # keep white mask workspace for further usage
+        if diag_spectra_blocks is None:
+            # Do the whole lot at once
+            white_masked_ws = diagnostics.diagnose(whiteintegrals, **diag_params)
+            if white_masked_ws:
                 white.add_masked_ws(white_masked_ws)
                 DeleteWorkspace(white_masked_ws)
+        else:
+            for index, bank in enumerate(diag_spectra_blocks):
+                diag_params['start_index'] = bank[0] - 1
+                diag_params['end_index'] = bank[1] - 1
+                white_masked_ws = diagnostics.diagnose(whiteintegrals, **diag_params)
+                if white_masked_ws:
+                    white.add_masked_ws(white_masked_ws)
+                    DeleteWorkspace(white_masked_ws)
 
-      if out_ws_name:
-        if not(diag_sample is None):
-            diag_sample.add_masked_ws(whiteintegrals)
-            mask,n_removed = diag_sample.get_masking()
-            diag_mask = CloneWorkspace(mask,OutputWorkspace=out_ws_name)
-        else: # either WB was diagnosed or WB masks were applied to it
-            # Extract a mask workspace
-            diag_mask, det_ids = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=out_ws_name)
-      else:
-          diag_mask=None
-      # Clean up
-      if 'sample_counts' in diag_params:
-          DeleteWorkspace(Workspace='background_int')
-          DeleteWorkspace(Workspace='total_counts')
-      if 'second_white' in diag_params:
-           DeleteWorkspace(Workspace=diag_params['second_white'])
-      DeleteWorkspace(Workspace=whiteintegrals)
+        if out_ws_name:
+            if not(diag_sample is None):
+                diag_sample.add_masked_ws(whiteintegrals)
+                mask,n_removed = diag_sample.get_masking()
+                diag_mask = CloneWorkspace(mask,OutputWorkspace=out_ws_name)
+            else: # either WB was diagnosed or WB masks were applied to it
+                # Extract a mask workspace
+                diag_mask, det_ids = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=out_ws_name)
+        else:
+            diag_mask = None
+        # Clean up
+        if 'sample_counts' in diag_params:
+            DeleteWorkspace(Workspace='background_int')
+            DeleteWorkspace(Workspace='total_counts')
+        if 'second_white' in diag_params:
+            DeleteWorkspace(Workspace=diag_params['second_white'])
+        DeleteWorkspace(Workspace=whiteintegrals)
 
-      return diag_mask
-
+        return diag_mask
 #-------------------------------------------------------------------------------
     def convert_to_energy(self,wb_run=None,sample_run=None,ei_guess=None,rebin=None,map_file=None,
                           monovan_run=None,wb_for_monovan_run=None,**kwargs):
-      """ One step conversion of run into workspace containing information about energy transfer
-
-      """
-      # Support for old reduction interface:
-      self.prop_man.set_input_parameters_ignore_nan\
-           (wb_run=wb_run,sample_run=sample_run,incident_energy=ei_guess,energy_bins=rebin,
+        """ One step conversion of run into workspace containing information about energy transfer
+        """
+        # Support for old reduction interface:
+        self.prop_man.set_input_parameters_ignore_nan\
+            (wb_run=wb_run,sample_run=sample_run,incident_energy=ei_guess,energy_bins=rebin,
             map_file=map_file,monovan_run=monovan_run,wb_for_monovan_run=wb_for_monovan_run)
-      #
-      self.prop_man.set_input_parameters(**kwargs)
+        #
+        self.prop_man.set_input_parameters(**kwargs)
 
-      # output workspace name.
-      try:
-          n,r = funcreturns.lhs_info('both')
-          out_ws_name = r[0]
-      except:
-          out_ws_name = None
-      prop_man = self.prop_man
+        # output workspace name.
+        try:
+            n,r = funcreturns.lhs_info('both')
+            out_ws_name = r[0]
+        except:
+            out_ws_name = None
+        prop_man = self.prop_man
 
-     # check if reducer can find all non-run files necessary for the reduction
-     # and verify some other properties which can be wrong before starting a long run.
-      prop_man.log("****************************************************************")
-      prop_man.validate_properties()
-      prop_man.log("****************************************************************")
+        # check if reducer can find all non-run files necessary for the reduction
+        # and verify some other properties which can be wrong before starting a
+        # long run.
+        prop_man.log("****************************************************************")
+        prop_man.validate_properties()
+        prop_man.log("****************************************************************")
 
-      # inform user on what parameters have changed from script or gui
-      # if monovan present, check if abs_norm_ parameters are set
-      self.prop_man.log_changed_values('notice')
-
-
-      start_time = time.time()
+        # inform user on what parameters have changed from script or gui
+        # if monovan present, check if abs_norm_ parameters are set
+        self.prop_man.log_changed_values('notice')
 
 
-      PropertyManager.sample_run.set_action_suffix('')
-      sample_ws = PropertyManager.sample_run.get_workspace()
+        start_time = time.time()
 
-      # Update reduction properties which may change in the workspace but have
-      # not been modified from input parameters.
-      # E.g.  detector number have changed
-      oldChanges = self.prop_man.getChangedProperties()
-      allChanges = self.prop_man.update_defaults_from_instrument(sample_ws.getInstrument())
-      workspace_defined_prop = allChanges.difference(oldChanges)
-      if len(workspace_defined_prop) > 0:
-          prop_man.log("****************************************************************")
-          prop_man.log('*** Sample run {0} properties change default reduction properties: '.\
-                       format(PropertyManager.sample_run.get_workspace().name()))
-          prop_man.log_changed_values('notice',False,oldChanges)
-          prop_man.log("****************************************************************")
+        PropertyManager.sample_run.set_action_suffix('')
+        sample_ws = PropertyManager.sample_run.get_workspace()
+
+        # Update reduction properties which may change in the workspace but have
+        # not been modified from input parameters.
+        # E.g.  detector number have changed
+        oldChanges = self.prop_man.getChangedProperties()
+        allChanges = self.prop_man.update_defaults_from_instrument(sample_ws.getInstrument())
+        workspace_defined_prop = allChanges.difference(oldChanges)
+        if len(workspace_defined_prop) > 0:
+            prop_man.log("****************************************************************")
+            prop_man.log('*** Sample run {0} properties change default reduction properties: '.\
+                         format(PropertyManager.sample_run.get_workspace().name()))
+            prop_man.log_changed_values('notice',False,oldChanges)
+            prop_man.log("****************************************************************")
 
 
 
-      masking = None
-      masks_done = False
-      if not prop_man.run_diagnostics:
-          header = "*** Diagnostics including hard masking is skipped "
-          masks_done = True
-      #if Reducer.save_and_reuse_masks :
-      # SAVE AND REUSE MASKS
-      if self.spectra_masks:
-         masks_done = True
+        masking = None
+        masks_done = False
+        if not prop_man.run_diagnostics:
+            header = "*** Diagnostics including hard masking is skipped "
+            masks_done = Treu
+        #if Reducer.save_and_reuse_masks :
+        # SAVE AND REUSE MASKS
+        if self.spectra_masks:
+            masks_done = True
 #--------------------------------------------------------------------------------------------------
 #  Diagnostics here
 # -------------------------------------------------------------------------------------------------
-     # diag the sample and detector vanadium.  It will deal with hard mask only
-     # if it is set that way
-      if not masks_done:
+        # diag the sample and detector vanadium.  It will deal with hard mask only
+        # if it is set that way
+        if not masks_done:
+            masking,header = self._run_diagnostics(prop_man)
+        else:
+            header = '*** Using stored mask file for workspace with {0} spectra and {1} masked spectra'
+            masking = self.spectra_masks 
+
+        # estimate and report the number of failing detectors
+        nMaskedSpectra = get_failed_spectra_list_from_masks(masking)
+        if masking:
+            nSpectra = masking.getNumberHistograms()
+        else:
+            nSpectra = 0
+        prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice')
+#--------------------------------------------------------------------------------------------------
+#  now reduction
+#--------------------------------------------------------------------------------------------------
+        # SNS or GUI motor stuff
+        self.calculate_rotation(PropertyManager.sample_run.get_workspace())
+        #
+        if self.monovan_run != None:
+            MonovanCashNum = PropertyManager.monovan_run.run_number()
+            if self.mono_correction_factor:
+                calculate_abs_units = False # correction factor given, so no calculations
+            else:
+                calculate_abs_units = True
+        else:
+            MonovanCashNum = None
+            calculate_abs_units = False
+        PropertyManager.mono_correction_factor.set_cash_mono_run_number(MonovanCashNum)
+
+
+        if PropertyManager.incident_energy.multirep_mode():
+            self._multirep_mode = True
+            ws_base = None
+            mono_ws_base = None
+            num_ei_cuts = len(self.incident_energy)
+            if self.check_background:
+                # find the count rate seen in the regions of the histograms defined
+                # as the background regions, if the user defined such region
+                ws_base = PropertyManager.sample_run.get_workspace()
+                bkgd_range = self.bkgd_range
+                bkgr_ws = self._find_or_build_bkgr_ws(ws_base,bkgd_range[0],bkgd_range[1])
+            RenameWorkspace(InputWorkspace=bkgr_ws, OutputWorkspace='bkgr_ws_source')
+            # initialize list to store resulting workspaces to return
+            result = []
+        else:
+            self._multirep_mode = False
+            num_ei_cuts = 0
+
+        cut_ind = 0 # do not do enumerate if it generates all sequence at once
+        #  -- code below uses current energy state from PropertyManager.incident_energy
+        for ei_guess in PropertyManager.incident_energy:
+            cut_ind +=1
+            #---------------
+            if self._multirep_mode:
+                tof_range = self.find_tof_range_for_multirep(ws_base)
+                ws_base = PropertyManager.sample_run.chop_ws_part(ws_base,tof_range,self._do_early_rebinning,cut_ind,num_ei_cuts)
+                prop_man.log("*** Processing multirep chunk: #{0}/{1} for provisional energy: {2} meV".\
+                    format(cut_ind,num_ei_cuts,ei_guess),'notice')
+            else:
+                pass # single energy uses single workspace
+            #---------------
+            #
+            #Run the conversion first on the sample
+            deltaE_ws_sample = self.mono_sample(PropertyManager.sample_run,ei_guess,PropertyManager.wb_run,\
+                                                self.map_file,masking)
+            #
+
+            ei = (deltaE_ws_sample.getRun().getLogData("Ei").value)
+            # PropertyManager.incident_energy.set_current(ei) let's not do it --
+            # this makes subsequent calls to this method depend on previous calls
+            prop_man.log("*** Incident energy found for sample run: {0} meV".format(ei),'notice')
+            #
+            # calculate absolute units integral and apply it to the workspace
+            #
+            cashed_mono_int = PropertyManager.mono_correction_factor.get_val_from_cash(prop_man)
+            if MonovanCashNum != None or self.mono_correction_factor or cashed_mono_int:
+                deltaE_ws_sample=self._do_abs_corrections(deltaE_ws_sample,cashed_mono_int,ei_guess)
+            else:
+                pass # no absolute units corrections
+            # ensure that the sample_run name is intact with workspace
+            PropertyManager.sample_run.synchronize_ws(deltaE_ws_sample)
+            #
+            #
+            self.save_results(deltaE_ws_sample)
+
+            # prepare output workspace
+            if out_ws_name:
+                if self._multirep_mode:
+                    result.append(deltaE_ws_sample)
+                else:
+                    results_name = deltaE_ws_sample.name()
+                if results_name != out_ws_name:
+                    RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
+                    result = mtd[out_ws_name]
+            else: # delete workspace if no output is requested
+                self.sample_run = None
+        #end_for
+
+        end_time = time.time()
+        prop_man.log("*** Elapsed time = {0} sec".format(end_time - start_time),'notice')
+
+        # CLEAR existing workspaces only if it is not run within loop
+        #prop_man.monovan_run = None
+        #prop_man.wb_run = None
+        # clear combined mask
+        self.spectra_masks = None
+        if 'masking' in mtd:
+            DeleteWorkspace(masking)
+        return result
+
+    def _do_absolute_corrections(self,deltaE_ws_sample,cashed_mono_int,ei_guess):
+        # do not remove background from vanadium (sample background is not
+        # fit for that anyway)
+        current_bkg_opt = self.check_background
+        self.check_background = False
+        # what we want to do with absolute units:
+        if self.mono_correction_factor: # Correction provided.  Just apply it
+            deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,\
+                                                            ei_guess,PropertyManager.wb_for_monovan_run,
+                                                            ' provided ')
+        elif cashed_mono_int:  # Correction cashed from previous run
+            self.mono_correction_factor = cashed_mono_int
+            deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,\
+                                                            ei_guess,PropertyManager.wb_for_monovan_run,
+                                                             ' -cached- ')
+            self.mono_correction_factor = None
+        else:   # Calculate corrections
+            if self._multirep_mode and calculate_abs_units:
+                mono_ws_base = PropertyManager.monovan_run.chop_ws_part(mono_ws_base,tof_range,\
+                               self._do_early_rebinning, cut_ind,num_ei_cuts)
+            deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,\
+                                                                ei_guess,PropertyManager.wb_for_monovan_run,
+                                                                'calculated')
+        # monovan workspace has been certainly deleted from memory after
+        # calculations
+        PropertyManager.monovan_run._in_cash = True
+        self.check_background = current_bkg_opt
+        return deltaE_ws_sample
+
+
+    def _run_diagnostics(self,prop_man):
+        """Internal diagnostics procedure used over two workspaces, used by convert_to_energy"""
+
         prop_man.log("======== Run diagnose for sample run ===========================",'notice')
         masking = self.diagnose(PropertyManager.wb_run,PropertyManager.mask_run,\
                                 second_white=None,print_diag_results=True)
@@ -383,19 +525,18 @@ class DirectEnergyConversion(object):
         else:
             header = "*** Diagnostics processed workspace with {0:d} spectra and masked {1:d} bad spectra"
 
-
         # diagnose absolute units:
         if self.monovan_run != None :
             if self.mono_correction_factor == None :
                 if self.use_sam_msk_on_monovan == True:
                     prop_man.log('  Applying sample run mask to mono van')
                 else:
-                    if not self.use_hard_mask_only : # in this case the masking2 is different but
-                                                     # points to the same workspace
-                                                     # Should be better solution for that.
+                    # in this case the masking2 is different but points to the
+                    # same  workspace Should be better solution for that
+                    if not self.use_hard_mask_only : 
                         prop_man.log("======== Run diagnose for monochromatic vanadium run ===========",'notice')
                         masking2 = self.diagnose(PropertyManager.wb_for_monovan_run,PropertyManager.monovan_run,\
-                                         second_white = None,print_diag_results=True)
+                                        second_white = None,print_diag_results=True)
                         masking +=  masking2
                         DeleteWorkspace(masking2)
             else: # if Reducer.mono_correction_factor != None :
@@ -406,139 +547,11 @@ class DirectEnergyConversion(object):
         # convert_to_energy.
         # This property is also directly accessible from GUI.
         self.spectra_masks = masking
-         # save mask if it does not exist and has been already loaded
-         #if Reducer.save_and_reuse_masks and not masks_done:
-         #    SaveMask(InputWorkspace=masking,OutputFile =
-         #    mask_file_name,GroupedDetectors=True)
-      else:
-          header = '*** Using stored mask file for workspace with  {0} spectra and {1} masked spectra'
-          masking = self.spectra_masks 
-
-      # estimate and report the number of failing detectors
-      nMaskedSpectra = get_failed_spectra_list_from_masks(masking)
-      if masking:
-         nSpectra = masking.getNumberHistograms()
-      else:
-         nSpectra = 0
-      prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice')
-
-#--------------------------------------------------------------------------------------------------
-#  now reduction
-#--------------------------------------------------------------------------------------------------
-      # SNS or GUI motor stuff
-      self.calculate_rotation(PropertyManager.sample_run.get_workspace())
-      #
-      if self.monovan_run != None:
-         MonovanCashNum = PropertyManager.monovan_run.run_number()
-         if self.mono_correction_factor:
-            calculate_abs_units = False # correction factor given, so no calculations
-         else:
-            calculate_abs_units = True
-      else:
-          MonovanCashNum = None
-          calculate_abs_units = False
-      PropertyManager.mono_correction_factor.set_cash_mono_run_number(MonovanCashNum)
-
-
-      if PropertyManager.incident_energy.multirep_mode():
-         self._multirep_mode = True
-         ws_base = None
-         mono_ws_base = None
-         num_ei_cuts = len(self.incident_energy)
-         if self.check_background:
-            # find the count rate seen in the regions of the histograms
-            # defined as the background regions, if the user defined such
-            # region
-            ws_base = PropertyManager.sample_run.get_workspace()
-            bkgd_range = self.bkgd_range
-            bkgr_ws=self._find_or_build_bkgr_ws(ws_base,bkgd_range[0],bkgd_range[1])
-            RenameWorkspace(InputWorkspace=bkgr_ws, OutputWorkspace='bkgr_ws_source')
-         # initialize list to store resulting workspaces to return
-         result = []
-      else:
-         self._multirep_mode = False
-         num_ei_cuts = 0
-
-      cut_ind = 0 # do not do enumerate if it generates all sequence at once
-      #  -- code below uses current energy state from
-                       #  PropertyManager.incident_energy
-      for ei_guess in PropertyManager.incident_energy:
-         cut_ind +=1
-         #---------------
-         if self._multirep_mode:
-            tof_range = self.find_tof_range_for_multirep(ws_base)
-            ws_base = PropertyManager.sample_run.chop_ws_part(ws_base,tof_range,self._do_early_rebinning,cut_ind,num_ei_cuts)
-            prop_man.log("*** Processing multirep chunk: #{0}/{1} for provisional energy: {2} meV".format(cut_ind,num_ei_cuts,ei_guess),'notice')
-         #---------------
-
-         #Run the conversion first on the sample
-         deltaE_ws_sample = self.mono_sample(PropertyManager.sample_run,ei_guess,PropertyManager.wb_run,\
-                                             self.map_file,masking)
-
-         # calculate absolute units integral and apply it to the workspace
-         cashed_mono_int = PropertyManager.mono_correction_factor.get_val_from_cash(prop_man)
-         if MonovanCashNum != None or self.mono_correction_factor or cashed_mono_int :
-            # do not remove background from vanadium (sample background is not fit for that anyway)
-            current_bkg_opt = self.check_background
-            self.check_background= False
-            # what we want to do with absolute units:
-            if self.mono_correction_factor: # Correction provided. Just apply it
-               deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,\
-                                                                    ei_guess,PropertyManager.wb_for_monovan_run,
-                                                                    ' provided ')
-            elif cashed_mono_int:  # Correction cashed from previous run
-               self.mono_correction_factor = cashed_mono_int
-               deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,\
-                                                                    ei_guess,PropertyManager.wb_for_monovan_run,
-                                                                     ' -cached- ')
-               self.mono_correction_factor = None
-            else:   # Calculate corrections
-               if self._multirep_mode and calculate_abs_units:
-                   mono_ws_base = PropertyManager.monovan_run.chop_ws_part(mono_ws_base,tof_range,self._do_early_rebinning,\
-                                                                           cut_ind,num_ei_cuts)
-               deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,\
-                                                                    ei_guess,PropertyManager.wb_for_monovan_run,
-                                                                    'calculated')
-               # monovan workspace has been certainly deleted from memory after calculations
-               PropertyManager.monovan_run._in_cash = True
-            self.check_background = current_bkg_opt
-
-
-
-         # ensure that the sample_run name is intact with workspace
-         PropertyManager.sample_run.synchronize_ws(deltaE_ws_sample)
-         #
-         ei = (deltaE_ws_sample.getRun().getLogData("Ei").value)
-         # PropertyManager.incident_energy.set_current(ei) # let's not do it --
-         # this makes subsequent calls to this method depend on
-         #                                                 # previous calls
-
-         prop_man.log("*** Incident energy found for sample run: {0} meV".format(ei),'notice')
-         #
-         self.save_results(deltaE_ws_sample)
-         # prepare output workspace
-         if out_ws_name:
-            if self._multirep_mode:
-               result.append(deltaE_ws_sample)
-            else:
-              results_name = deltaE_ws_sample.name()
-              if results_name != out_ws_name:
-                  RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
-              result = mtd[out_ws_name]
-         else: # delete workspace if no output is requested
-            self.sample_run = None
-
-
-      end_time = time.time()
-      prop_man.log("*** Elapsed time = {0} sec".format(end_time - start_time),'notice')
-
-      # CLEAR existing workspaces only if it is not run within loop
-      #prop_man.monovan_run = None
-      #prop_man.wb_run = None
-      self.spectra_masks = None
-      if 'masking' in mtd:
-          DeleteWorkspace(masking)
-      return result
+        # save mask if it does not exist and has been already loaded
+        #if Reducer.save_and_reuse_masks and not masks_done:
+        #    SaveMask(InputWorkspace=masking,OutputFile =
+        #    mask_file_name,GroupedDetectors=True)
+        return masking,header
 
     def do_white(self, run, spectra_masks=None, map_file=None):
         """
@@ -783,7 +796,7 @@ class DirectEnergyConversion(object):
                                              # have monitors
               self.normalise(run,'current',range_offset)
               ws = run.get_workspace()
-              new_name =ws.name()
+              new_name = ws.name()
               return ('current',new_name)
            else:
               ws = run.get_workspace()
@@ -941,7 +954,8 @@ class DirectEnergyConversion(object):
             for case in common.switch(file_format):
                 if case('nxspe'):
                    filename = save_file + '.nxspe'
-                   # nxspe can not write workspace with / in the name (something to do with folder names inside nxspe)
+                   # nxspe can not write workspace with / in the name
+                   # (something to do with folder names inside nxspe)
                    name_supported = name_orig.replace('/','of')
                    if name_supported != name_orig:
                       RenameWorkspace(InputWorkspace=name_orig,OutputWorkspace=name_supported)
@@ -1036,7 +1050,7 @@ class DirectEnergyConversion(object):
             # Store the factor for further usage
             PropertyManager.mono_correction_factor.set_val_to_cash(prop_man,anf_TGP)
             # reset current monovan run to run number (if it makes sense) --
-            ## workspace is not good for further processing any more        
+            ## workspace is not good for further processing any more
         #end
         prop_man.log('*** Using {0} value : {1} of absolute units correction factor (TGP)'.format(abs_norm_factor_is,absnorm_factor),'notice')
         prop_man.log('*******************************************************************************************','notice')
@@ -1091,7 +1105,7 @@ class DirectEnergyConversion(object):
            err = data_ws.readE(i)[0]
            if sig != sig:     #ignore NaN (hopefully it will mean mask some day)
                continue
-           if (err <= 0) or (sig <= 0):  # count Inf and negative||zero readings.  
+           if (err <= 0) or (sig <= 0):  # count Inf and negative||zero readings.
               izerc+=1                   # Presence of this indicates that
               continue                   # something went wrong
            signal.append(sig)
@@ -1378,12 +1392,14 @@ class DirectEnergyConversion(object):
         bkg_range_min += time_shift
         bkg_range_max += time_shift
 
-        # has to have specific name for this all working. This ws is build at the beginning of
+        # has to have specific name for this all working.  This ws is build at
+        # the beginning of
         # multirep run
         if 'bkgr_ws_source' in mtd:
             bkgr_ws = CloneWorkspace(InputWorkspace='bkgr_ws_source',OutputWorkspace='bkgr_ws')
             if time_shift != 0: # Workspace has probably been shifted, so to have correct units conversion
-                                # one needs to do appropriate shift here as well
+                                # one needs to do appropriate shift here as
+                                                               # well
               CopyInstrumentParameters(result_ws,bkgr_ws)
              # Adjust the TOF such that the first monitor peak is at t=0
               ScaleX(InputWorkspace=bkgr_ws,OutputWorkspace='bkgr_ws',Operation="Add",Factor=time_shift,\
@@ -1443,7 +1459,9 @@ class DirectEnergyConversion(object):
         return result_ws
 #-------------------------------------------------------------------------------
     def _get_wb_inegrals(self,run):
-        """ """
+        """Obtain white bean vanadium integrals either by integrating 
+           workspace in question or cashed value
+        """
         run = self.get_run_descriptor(run)
         white_ws = run.get_workspace()
         # This both integrates the workspace into one bin spectra and sets up
@@ -1501,7 +1519,7 @@ class DirectEnergyConversion(object):
         return result
 #-------------------------------------------------------------------------------
     def _build_white_tag(self):
-        """ build tag indicating wb-integration ranges """
+        """build tag indicating wb-integration ranges """
         low,upp = self.wb_integr_range
         white_tag = 'NormBy:{0}_IntergatedIn:{1:0>10.2f}:{2:0>10.2f}'.format(self.normalise_method,low,upp)
         return white_tag
