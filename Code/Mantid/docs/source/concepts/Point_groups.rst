@@ -70,9 +70,9 @@ Using these identifiers, ``SymmetryOperation``-objects can be created through a 
 
 .. testcode :: ExSymmetryOperation
 
-    from mantid.geometry import SymmetryOperation, SymmetryOperationFactoryImpl
+    from mantid.geometry import SymmetryOperation, SymmetryOperationFactory
     
-    symOp = SymmetryOperationFactoryImpl.Instance().createSymOp("x,y,-z")
+    symOp = SymmetryOperationFactory.createSymOp("x,y,-z")
     
     hkl = [1, -1, 3]
     hklPrime = symOp.apply(hkl)
@@ -85,6 +85,28 @@ The above code will print the mirrored index:
 
     Mirrored hkl: [1,-1,-3]
 
+Sometimes it is easier to think about symmetry in terms of the elements that cause certain symmetry. These are commonly described with Herrman-Mauguin symbols. A symmetry element can be derived from the matrix/vector pair that described the symmetry operation, according to the International Tables for Crystallography A, section 11.2. Expanding a bit on the above example, it's possible to get information about the symmetry element associated to the operation ``x,y,-z``:
+
+.. testcode :: ExSymmetryElement
+
+    from mantid.geometry import SymmetryOperation, SymmetryOperationFactory
+    from mantid.geometry import SymmetryElement, SymmetryElementFactory
+
+    symOp = SymmetryOperationFactory.createSymOp("x,y,-z")
+    element = SymmetryElementFactory.createSymElement(symOp)
+
+    print "The element corresponding to 'x,y,-z' has the following symbol:", element.hmSymbol()
+    print "The mirror plane is perpendicular to:", element.getAxis()
+
+Executing this code yields the following output:
+
+.. testoutput :: ExSymmetryOperation
+
+    The element corresponding to 'x,y,-z' has the following symbol: m
+    The mirror plane is perpendicular to: [0,0,1]
+
+Some symmetry elements (identity, inversion center, translation) do not have an axis. In these cases, ``[0,0,0]`` is returned from that method.
+
 The corresponding code in C++ looks very similar and usage examples can be found in the code base, mainly in the implementation of ``PointGroup``, which will be the next topic.
 
 Using point groups
@@ -94,9 +116,9 @@ Point groups are represented in Mantid by the ``PointGroup``-interface, which is
 
 .. testcode :: ExInformation
 
-    from mantid.geometry import PointGroup, PointGroupFactoryImpl
+    from mantid.geometry import PointGroup, PointGroupFactory
     
-    pg = PointGroupFactoryImpl.Instance().createPointGroup("-1")
+    pg = PointGroupFactory.createPointGroup("-1")
     
     print "Name:", pg.getName()
     print "Hermann-Mauguin symbol:", pg.getSymbol()
@@ -114,11 +136,11 @@ It's possible to query the factory about available point groups. One option retu
 
 .. testcode :: ExQueryPointGroups
 
-    from mantid.geometry import PointGroup, PointGroupFactoryImpl
+    from mantid.geometry import PointGroup, PointGroupFactory
     
-    print "All point groups:", PointGroupFactoryImpl.Instance().getAllPointGroupSymbols()
-    print "Cubic point groups:", PointGroupFactoryImpl.Instance().getPointGroupSymbols(PointGroup.CrystalSystem.Cubic)
-    print "Tetragonal point groups:", PointGroupFactoryImpl.Instance().getPointGroupSymbols(PointGroup.CrystalSystem.Tetragonal)
+    print "All point groups:", PointGroupFactory.getAllPointGroupSymbols()
+    print "Cubic point groups:", PointGroupFactory.getPointGroupSymbols(PointGroup.CrystalSystem.Cubic)
+    print "Tetragonal point groups:", PointGroupFactory.getPointGroupSymbols(PointGroup.CrystalSystem.Tetragonal)
     
 Which results in the following output:
 
@@ -132,9 +154,9 @@ After having obtained a ``PointGroup``-object, it can be used for working with r
 
 .. testcode :: ExIsEquivalent
 
-    from mantid.geometry import PointGroup, PointGroupFactoryImpl
+    from mantid.geometry import PointGroup, PointGroupFactory
 
-    pg = PointGroupFactoryImpl.Instance().createPointGroup("m-3m")
+    pg = PointGroupFactory.createPointGroup("m-3m")
 
     hkl1 = [2, 0, 0]
     hkl2 = [0, 0, -2]
@@ -152,9 +174,9 @@ Another common task is to find all symmetry equivalents of a reflection, for exa
 
 .. testcode :: ExGetEquivalents
 
-    from mantid.geometry import PointGroup, PointGroupFactoryImpl
+    from mantid.geometry import PointGroup, PointGroupFactory
 
-    pg = PointGroupFactoryImpl.Instance().createPointGroup("m-3m")
+    pg = PointGroupFactory.createPointGroup("m-3m")
 
     hkl1 = [2, 0, 0]
     equivalents1 = pg.getEquivalents(hkl1)
@@ -183,9 +205,9 @@ Sometimes, a list of reflections needs to be reduced to a set of symmetry indepe
 
 .. testcode :: ExIndependentReflections
 
-    from mantid.geometry import PointGroup, PointGroupFactoryImpl
+    from mantid.geometry import PointGroup, PointGroupFactory
 
-    pg = PointGroupFactoryImpl.Instance().createPointGroup("m-3m")
+    pg = PointGroupFactory.createPointGroup("m-3m")
 
     hklList = [[1, 0, 0], [0, 1, 0], [-1, 0, 0],    # Equivalent to [1,0,0]
                [1, 1, 1], [-1, 1, 1],               # Equivalent to [1,1,1]
