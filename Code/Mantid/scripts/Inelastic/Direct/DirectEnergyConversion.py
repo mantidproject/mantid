@@ -7,6 +7,7 @@ import os.path
 import copy
 import math
 import time
+import numpy as np
 
 import Direct.CommonFunctions  as common
 import Direct.diagnostics      as diagnostics
@@ -237,24 +238,24 @@ class DirectEnergyConversion(object):
                     diagnostics.__Reducer__ = self
                     diag_params['sample_run'] = diag_sample
 
-            # Set up the background integrals for diagnostic purposes
-            result_ws = self.normalise(diag_sample, self.normalise_method)
+                # Set up the background integrals for diagnostic purposes
+                result_ws = self.normalise(diag_sample, self.normalise_method)
 
-            #>>> here result workspace is being processed -- not touching
-            #result ws
-            bkgd_range = self.background_test_range
-            background_int = Integration(result_ws,\
+                #>>> here result workspace is being processed 
+                #-- not touching result ws
+                bkgd_range = self.background_test_range
+                background_int = Integration(result_ws,\
                            RangeLower=bkgd_range[0],RangeUpper=bkgd_range[1],\
                            IncludePartialBins=True)
-            total_counts = Integration(result_ws, IncludePartialBins=True)
-            background_int = ConvertUnits(background_int, Target="Energy",EMode='Elastic', AlignBins=0)
-            self.prop_man.log("Diagnose: finished convertUnits ",'information')
+                total_counts = Integration(result_ws, IncludePartialBins=True)
+                background_int = ConvertUnits(background_int, Target="Energy",EMode='Elastic', AlignBins=0)
+                self.prop_man.log("Diagnose: finished convertUnits ",'information')
 
-            background_int *= self.scale_factor
-            diagnostics.normalise_background(background_int, whiteintegrals,\
+                background_int *= self.scale_factor
+                diagnostics.normalise_background(background_int, whiteintegrals,\
                                            diag_params.get('second_white',None))
-            diag_params['background_int'] = background_int
-            diag_params['sample_counts'] = total_counts
+                diag_params['background_int'] = background_int
+                diag_params['sample_counts'] = total_counts
 
 
         # extract existing white mask if one is defined and provide it for
@@ -357,8 +358,6 @@ class DirectEnergyConversion(object):
             prop_man.log_changed_values('notice',False,oldChanges)
             prop_man.log("****************************************************************")
 
-
-
         masking = None
         masks_done = False
         if not prop_man.run_diagnostics:
@@ -389,25 +388,31 @@ class DirectEnergyConversion(object):
 #--------------------------------------------------------------------------------------------------
 #  now reduction
 #--------------------------------------------------------------------------------------------------
-        # SNS or GUI motor stuff
-        self.calculate_rotation(PropertyManager.sample_run.get_workspace())
+        # ISIS or GUI motor stuff
+        psi = PropertyManager.psi.read_psi_from_workspace(sample_ws)
+        if not prop_man.motor_offset is None and np.isnan(psi):
+            #logs have a problem
+            prop_man.log('*** Can not retrieve rotation value from sample environment logs: {0}.\n' + \
+                '    Rotation angle remains undefined'.\
+                format(prop_man.motor_log_names))
+            PropertyManager.psi = None # Just in case
+        else:
+            # store psi in property not to retrieve it from workspace again
+            prop_man.psi = psi
+        #end
         #
         if self.monovan_run != None:
             MonovanCashNum = PropertyManager.monovan_run.run_number()
-            if self.mono_correction_factor:
-                calculate_abs_units = False # correction factor given, so no calculations
-            else:
-                calculate_abs_units = True
         else:
             MonovanCashNum = None
-            calculate_abs_units = False
+        # Set or clear monovan run number to use in cash ID to return correct 
+        # cashed value of monovan integral
         PropertyManager.mono_correction_factor.set_cash_mono_run_number(MonovanCashNum)
 
-
+        mono_ws_base = None
         if PropertyManager.incident_energy.multirep_mode():
             self._multirep_mode = True
             ws_base = None
-            mono_ws_base = None
             num_ei_cuts = len(self.incident_energy)
             if self.check_background:
                 # find the count rate seen in the regions of the histograms defined
@@ -429,11 +434,13 @@ class DirectEnergyConversion(object):
             #---------------
             if self._multirep_mode:
                 tof_range = self.find_tof_range_for_multirep(ws_base)
-                ws_base = PropertyManager.sample_run.chop_ws_part(ws_base,tof_range,self._do_early_rebinning,cut_ind,num_ei_cuts)
+                ws_base = PropertyManager.sample_run.chop_ws_part(ws_base,tof_range,self._do_early_rebinning,\
+                                                                  cut_ind,num_ei_cuts)
                 prop_man.log("*** Processing multirep chunk: #{0}/{1} for provisional energy: {2} meV".\
                     format(cut_ind,num_ei_cuts,ei_guess),'notice')
             else:
-                pass # single energy uses single workspace
+                # single energy uses single workspace and all TOF are used
+                tof_range = None
             #---------------
             #
             #Run the conversion first on the sample
@@ -447,10 +454,11 @@ class DirectEnergyConversion(object):
             prop_man.log("*** Incident energy found for sample run: {0} meV".format(ei),'notice')
             #
             # calculate absolute units integral and apply it to the workspace
-            #
+            # or use previously cashed value
             cashed_mono_int = PropertyManager.mono_correction_factor.get_val_from_cash(prop_man)
             if MonovanCashNum != None or self.mono_correction_factor or cashed_mono_int:
-                deltaE_ws_sample=self._do_abs_corrections(deltaE_ws_sample,cashed_mono_int,ei_guess)
+                deltaE_ws_sample,mono_ws_base=self._do_abs_corrections(deltaE_ws_sample,cashed_mono_int,\
+                    ei_guess,mono_ws_base,tof_range, cut_ind,num_ei_cuts)
             else:
                 pass # no absolute units corrections
             # ensure that the sample_run name is intact with workspace
@@ -465,9 +473,9 @@ class DirectEnergyConversion(object):
                     result.append(deltaE_ws_sample)
                 else:
                     results_name = deltaE_ws_sample.name()
-                if results_name != out_ws_name:
-                    RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
-                    result = mtd[out_ws_name]
+                    if results_name != out_ws_name:
+                        RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
+                        result = mtd[out_ws_name]
             else: # delete workspace if no output is requested
                 self.sample_run = None
         #end_for
@@ -484,7 +492,11 @@ class DirectEnergyConversion(object):
             DeleteWorkspace(masking)
         return result
 
-    def _do_absolute_corrections(self,deltaE_ws_sample,cashed_mono_int,ei_guess):
+    def _do_abs_corrections(self,deltaE_ws_sample,cashed_mono_int,ei_guess,\
+        mono_ws_base,tof_range, cut_ind,num_ei_cuts):
+        """Do absolute corrections using various sources of such corrections
+           cashed, provided or calculated from monovan ws
+        """
         # do not remove background from vanadium (sample background is not
         # fit for that anyway)
         current_bkg_opt = self.check_background
@@ -492,26 +504,28 @@ class DirectEnergyConversion(object):
         # what we want to do with absolute units:
         if self.mono_correction_factor: # Correction provided.  Just apply it
             deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,\
-                                                            ei_guess,PropertyManager.wb_for_monovan_run,
+                                                            ei_guess,PropertyManager.wb_for_monovan_run,\
                                                             ' provided ')
         elif cashed_mono_int:  # Correction cashed from previous run
             self.mono_correction_factor = cashed_mono_int
             deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,\
-                                                            ei_guess,PropertyManager.wb_for_monovan_run,
+                                                            ei_guess,PropertyManager.wb_for_monovan_run,\
                                                              ' -cached- ')
             self.mono_correction_factor = None
         else:   # Calculate corrections
-            if self._multirep_mode and calculate_abs_units:
+            if self._multirep_mode:
                 mono_ws_base = PropertyManager.monovan_run.chop_ws_part(mono_ws_base,tof_range,\
                                self._do_early_rebinning, cut_ind,num_ei_cuts)
             deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,\
-                                                                ei_guess,PropertyManager.wb_for_monovan_run,
+                                                                ei_guess,PropertyManager.wb_for_monovan_run,\
                                                                 'calculated')
-        # monovan workspace has been certainly deleted from memory after
-        # calculations
-        PropertyManager.monovan_run._in_cash = True
+            # monovan workspace has been corrupted in memory after
+            # calculations and result placed in cash. Workspace unsuitable
+            # for further calculations. Mark it cashed not to verify presence on consecutive runs
+            # with the same monovan ws
+            PropertyManager.monovan_run._in_cash = True
         self.check_background = current_bkg_opt
-        return deltaE_ws_sample
+        return deltaE_ws_sample,mono_ws_base
 
 
     def _run_diagnostics(self,prop_man):
@@ -587,34 +601,6 @@ class DirectEnergyConversion(object):
         mono_run.clear_monitors()
         return mono_s
 
-#-------------------------------------------------------------------------------
-    def calculate_rotation(self,sample_wkspace,motor=None, offset=None):
-        """calculate psi from sample environment motor and offset
-
-           TODO: should probably go to properties
-        """
-
-        self.prop_man.set_input_parameters_ignore_nan(motor_name=motor,offset=offset)
-        motor = self.prop_man.motor_name
-        offset = self.prop_man.motor_offset
-
-        #
-        if offset is None:
-            motor_offset = float('nan')
-        else:
-            motor_offset = float(offset)
-
-        if motor:
-        # Check if motor name exists
-            if sample_wkspace.getRun().hasProperty(motor):
-                motor_rotation = sample_wkspace.getRun()[motor].value[0]
-                self.prop_man.log("Motor {0} rotation is {1}".format(motor,motor_rotation))
-            else:
-                self.prop_man.log("Could not find such sample environment log. Will use psi=motor_offset")
-                motor_rotation = 0
-        else:
-           motor_rotation = float('nan')
-        self.prop_man.psi = motor_rotation + motor_offset
 #-------------------------------------------------------------------------------
     def get_ei(self, data_run, ei_guess):
         """ Calculate incident energy of neutrons and the time of the of the

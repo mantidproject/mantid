@@ -339,8 +339,14 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         sample_ws = CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1,\
                                            NumEvents=10,XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
-        AddSampleLog(Workspace=sample_ws,LogName='Rot',LogText='20.', LogType='Number Series')
 
+        propman.motor_offset = 10
+        psi = PropertyManager.psi.read_psi_from_workspace(sample_ws)
+        self.assertTrue(np.isnan(psi))
+
+
+        AddSampleLog(Workspace=sample_ws,LogName='Rot',LogText='20.', LogType='Number Series')
+        propman.motor_offset = None
         psi = PropertyManager.psi.read_psi_from_workspace(sample_ws)
         self.assertTrue(np.isnan(psi))
 

@@ -1095,9 +1095,12 @@ class MotorOffset(PropDescriptor):
        return self._offset
 
     def __set__(self,instance,value):
-       # we do not need to analyze for None or empty list
-       # as all this is implemented within generic setter
-       self._offset = float(value)
+        # we do not need to analyze for None or empty list
+        # as all this is implemented within generic setter
+        if value is None:
+            self._offset = None
+        else:
+            self._offset = float(value)
 #end MotorOffset
 
 class RotationAngle(PropDescriptor):
