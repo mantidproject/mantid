@@ -32,7 +32,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         idf_file=api.ExperimentInfo.getInstrumentFilename(InstrumentName)
         tmp_ws_name = '__empty_' + InstrumentName
         if not mtd.doesExist(tmp_ws_name):
-            LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
+           LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
         return mtd[tmp_ws_name].getInstrument()
 
 
@@ -695,55 +695,55 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
 
     def test_monovan_integration_range(self):
-        propman = self.prop_man
+       propman = self.prop_man
 
-        propman.incident_energy = 10
-        propman.monovan_lo_frac = -0.6
-        propman.monovan_hi_frac =  0.7
+       propman.incident_energy = 10
+       propman.monovan_lo_frac = -0.6
+       propman.monovan_hi_frac =  0.7
 
-        range = propman.abs_units_van_range
-        self.assertAlmostEqual(range[0],-6.)
-        self.assertAlmostEqual(range[1], 7.)
+       range = propman.abs_units_van_range
+       self.assertAlmostEqual(range[0],-6.)
+       self.assertAlmostEqual(range[1], 7.)
 
-        range = propman.monovan_integr_range
-        self.assertAlmostEqual(range[0],-6.)
-        self.assertAlmostEqual(range[1], 7.)
+       range = propman.monovan_integr_range
+       self.assertAlmostEqual(range[0],-6.)
+       self.assertAlmostEqual(range[1], 7.)
 
-        propman.monovan_lo_value = -10
-        propman.monovan_hi_value = 10
+       propman.monovan_lo_value = -10
+       propman.monovan_hi_value = 10
 
-        range = propman.abs_units_van_range
-        self.assertAlmostEqual(range[0],-6.)
-        self.assertAlmostEqual(range[1], 7.)
+       range = propman.abs_units_van_range
+       self.assertAlmostEqual(range[0],-6.)
+       self.assertAlmostEqual(range[1], 7.)
 
-        propman.abs_units_van_range=[-40,40]
-        self.assertAlmostEqual(propman.monovan_lo_value,-40)
-        self.assertAlmostEqual(propman.monovan_hi_value,40)
+       propman.abs_units_van_range=[-40,40]
+       self.assertAlmostEqual(propman.monovan_lo_value,-40)
+       self.assertAlmostEqual(propman.monovan_hi_value,40)
 
-        range = propman.monovan_integr_range
-        self.assertAlmostEqual(range[0],-40)
-        self.assertAlmostEqual(range[1], 40)
+       range = propman.monovan_integr_range
+       self.assertAlmostEqual(range[0],-40)
+       self.assertAlmostEqual(range[1], 40)
 
-        propman.abs_units_van_range=None
+       propman.abs_units_van_range=None
 
-        range = propman.monovan_integr_range
-        self.assertAlmostEqual(range[0],-6.)
-        self.assertAlmostEqual(range[1], 7.)
-        #
-        propman.monovan_lo_frac = -0.7
-        range = propman.monovan_integr_range
-        self.assertAlmostEqual(range[0],-7.)
+       range = propman.monovan_integr_range
+       self.assertAlmostEqual(range[0],-6.)
+       self.assertAlmostEqual(range[1], 7.)
+       #
+       propman.monovan_lo_frac = -0.7
+       range = propman.monovan_integr_range
+       self.assertAlmostEqual(range[0],-7.)
 
     def test_save_filename(self):
-        propman = self.prop_man
+       propman = self.prop_man
 
-        propman.incident_energy = 10
-        propman.sample_run = 0
-        propman.monovan_run = None
+       propman.incident_energy = 10
+       propman.sample_run = 0
+       propman.monovan_run = None
 
 
-        name = propman.save_file_name
-        self.assertEqual(name,'MAR00000Ei10d00meV')
+       name = propman.save_file_name
+       self.assertEqual(name,'MAR00000Ei10d00meV')
 
     def test_log_to_Mantid(self):
         propman = self.prop_man
@@ -816,14 +816,24 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue(propman1.run_diagnostics)
 
 
+    def test_sum_runs(self):
+        propman = self.prop_man
+        propman.sum_runs = True
+        self.assertTrue(propman.sum_runs)
+        propman.sum_runs = False
+        self.assertFalse(propman.sum_runs)
 
+        propman.sum_runs = 10 #TODO should we define number of runs to sum?
+        self.assertTrue(propman.sum_runs)
+        propman.sum_runs = 0
+        self.assertFalse(propman.sum_runs)
+ 
     #def test_do_white(self) :
     #    tReducer = self.reducer
     #    monovan = 1000
     #    data = None
     #    name = tReducer.make_ckpt_name('do_white',monovan,data,'t1')
     #    self.assertEqual('do_white1000t1',name)
-
 
 
 
@@ -873,6 +883,24 @@ class DirectPropertyManagerTest(unittest.TestCase):
         range = propman.mon2_norm_energy_range
         self.assertAlmostEqual(range[0],9.5)
         self.assertAlmostEqual(range[1],10.5)
+
+# Test multirep mode
+        propman.incident_energy = [10,20,30]
+        range = propman.mon2_norm_energy_range
+        self.assertAlmostEqual(range[0],9.5)
+        self.assertAlmostEqual(range[1],10.5)
+
+        PropertyManager.incident_energy.next()
+        range = propman.mon2_norm_energy_range
+        self.assertAlmostEqual(range[0],2*9.5)
+        self.assertAlmostEqual(range[1],2*10.5)
+
+        PropertyManager.incident_energy.next()
+        range = propman.mon2_norm_energy_range
+        self.assertAlmostEqual(range[0],3*9.5)
+        self.assertAlmostEqual(range[1],3*10.5)
+
+
 
 
     def test_multirep_tof_specta_list(self):
@@ -953,6 +981,54 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(len(fail_list),2)
         self.assertTrue('monovan_run' in fail_list)
         self.assertTrue('map_file' in fail_list)
+
+    def test_find_files2sum(self):
+        propman = self.prop_man
+        propman.sample_run = [11001,11111]
+
+        propman.sum_runs =False
+        ok,not_found,found = propman.find_files_to_sum()
+        self.assertTrue(ok)
+        self.assertEqual(len(not_found),0)
+        self.assertEqual(len(found),0)
+
+        propman.sum_runs =True
+        ok,not_found,found = propman.find_files_to_sum()
+        self.assertFalse(ok)
+        self.assertEqual(len(not_found),1)
+        self.assertEqual(len(found),1)
+        self.assertEqual(not_found[0],11111)
+        self.assertEqual(found[0],11001)
+
+
+        ok,err_list=propman._check_file_properties()
+        self.assertFalse(ok)
+        self.assertEqual(len(err_list),2)
+        self.assertTrue('missing_runs_toSum' in err_list)
+        self.assertEqual(err_list['missing_runs_toSum'],'[11111]')
+
+    def test_custom_print(self):
+
+       propman = self.prop_man
+       propman.sample_run = 1000
+       propman.incident_energy = 20.
+
+       def custom_print(propman,PropertyManager):
+
+           ei = propman.incident_energy
+           run_n = PropertyManager.sample_run.run_number()
+           name = "RUN{0}atEi{1:<4.1f}meV_One2One".format(run_n,ei)
+           return name
+
+       PropertyManager.save_file_name.set_custom_print(custom_print)
+
+                                               
+       self.assertEqual(propman.save_file_name,'RUN1000atEi20.0meV_One2One')
+
+       propman.sample_run = 2000
+       self.assertEqual(propman.save_file_name,'RUN2000atEi20.0meV_One2One')
+       # clean up
+       PropertyManager.save_file_name.set_custom_print(None)
 
 if __name__=="__main__":
     unittest.main()
