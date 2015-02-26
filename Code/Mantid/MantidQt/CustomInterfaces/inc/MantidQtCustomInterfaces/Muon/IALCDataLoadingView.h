@@ -53,6 +53,12 @@ namespace CustomInterfaces
     /// @return Log name
     virtual std::string log() const = 0;
 
+    /// @return dead time correction type to use
+    virtual std::string deadTimeType() const = 0;
+
+    /// @return dead time correction file
+    virtual std::string deadTimeFile() const = 0;
+
     /// @return Selected calculation type - "Integral" or "Differential"
     virtual std::string calculationType() const = 0;
 

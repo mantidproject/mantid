@@ -404,5 +404,6 @@
  </connections>
  <buttongroups>
   <buttongroup name="calculationType"/>
+  <buttongroup name="deadTimeCorrType"/>
  </buttongroups>
 </ui>
