@@ -78,7 +78,9 @@ namespace CustomInterfaces
       IAlgorithm_sptr load = AlgorithmManager::Instance().create("LoadMuonNexus");
       load->setChild(true); // Don't want workspaces in the ADS
       load->setProperty("Filename", m_view->firstRun());
-      // Don't load any data - we need logs only
+      // We need logs only but we have to use LoadMuonNexus 
+      // (can't use LoadMuonLogs as not all the logs would be 
+      // loaded), so we load the minimum amount of data, i.e., one spectrum
       load->setPropertyValue("SpectrumMin","1");
       load->setPropertyValue("SpectrumMax","1");
       load->setPropertyValue("OutputWorkspace", "__NotUsed");
