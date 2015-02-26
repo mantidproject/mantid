@@ -24,6 +24,14 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(PDEstimateDetectorResolution)
 
+namespace { // hide these constants
+  ///
+  const double MICROSEC_TO_SEC=1.0E-6;
+  ///
+  const double WAVELENGTH_TO_VELOCITY=1.0E-10 *
+      PhysicalConstants::h / PhysicalConstants::NeutronMass;
+}
+
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
@@ -95,60 +103,43 @@ void PDEstimateDetectorResolution::processAlgProperties() {
   m_inputWS = getProperty("InputWorkspace");
 
   m_deltaT = getProperty("DeltaTOF");
-  m_deltaT *= 1.0E-6; // convert to meter
+  m_deltaT *= MICROSEC_TO_SEC; // convert to meter
+}
+
+///
+double getWavelength(const API::MatrixWorkspace_sptr ws) {
+  Property *cwlproperty = ws->run().getProperty("LambdaRequest");
+  if (!cwlproperty)
+    throw runtime_error(
+        "Unable to locate property LambdaRequest as central wavelength. ");
+
+  TimeSeriesProperty<double> *cwltimeseries =
+      dynamic_cast<TimeSeriesProperty<double> *>(cwlproperty);
+
+  if (!cwltimeseries)
+    throw runtime_error(
+        "LambdaReqeust is not a TimeSeriesProperty in double. ");
+
+  string unit = cwltimeseries->units();
+  if (unit.compare("Angstrom") != 0) {
+    throw runtime_error("Unit is not recognized: "+unit);
+  }
+
+  return cwltimeseries->timeAverageValue();
 }
 
 //----------------------------------------------------------------------------------------------
 /**
   */
 void PDEstimateDetectorResolution::retrieveInstrumentParameters() {
-#if 0
-    // Call SolidAngle to get solid angles for all detectors
-    Algorithm_sptr calsolidangle = createChildAlgorithm("SolidAngle", -1, -1, true);
-    calsolidangle->initialize();
-
-    calsolidangle->setProperty("InputWorkspace", m_inputWS);
-
-    calsolidangle->execute();
-    if (!calsolidangle->isExecuted())
-      throw runtime_error("Unable to run solid angle. ");
-
-    m_solidangleWS = calsolidangle->getProperty("OutputWorkspace");
-    if (!m_solidangleWS)
-      throw runtime_error("Unable to get solid angle workspace from SolidAngle(). ");
-
-
-    size_t numspec = m_solidangleWS->getNumberHistograms();
-    for (size_t i = 0; i < numspec; ++i)
-      g_log.debug() << "[DB]: " << m_solidangleWS->readY(i)[0] << "\n";
-#endif
+  double centrewavelength = getWavelength(m_inputWS);
+  g_log.notice() << "Centre wavelength = " << centrewavelength << "\n";
 
   // Calculate centre neutron velocity
-  Property *cwlproperty = m_inputWS->run().getProperty("LambdaRequest");
-  if (!cwlproperty)
-    throw runtime_error(
-        "Unable to locate property LambdaRequest as central wavelength. ");
-  TimeSeriesProperty<double> *cwltimeseries =
-      dynamic_cast<TimeSeriesProperty<double> *>(cwlproperty);
-  if (!cwltimeseries)
-    throw runtime_error(
-        "LambdaReqeust is not a TimeSeriesProperty in double. ");
-  if (cwltimeseries->size() != 1)
-    throw runtime_error("LambdaRequest should contain 1 and only 1 entry. ");
+  m_centreVelocity = WAVELENGTH_TO_VELOCITY / centrewavelength;
+  g_log.notice() << "Centre neutron velocity = " << m_centreVelocity << "\n";
 
-  double centrewavelength = cwltimeseries->nthValue(0);
-  string unit = cwltimeseries->units();
-  if (unit.compare("Angstrom") == 0)
-    centrewavelength *= 1.0E-10;
-  else
-    throw runtime_error("Unit is not recognized");
-
-  m_centreVelocity =
-      PhysicalConstants::h / PhysicalConstants::NeutronMass / centrewavelength;
-  g_log.notice() << "Centre wavelength = " << centrewavelength
-                 << ", Centre neutron velocity = " << m_centreVelocity << "\n";
-
-  // Calcualte L1 sample to source
+  // Calculate L1 sample to source
   Instrument_const_sptr instrument = m_inputWS->getInstrument();
   V3D samplepos = instrument->getSample()->getPos();
   V3D sourcepos = instrument->getSource()->getPos();
@@ -166,7 +157,9 @@ void PDEstimateDetectorResolution::createOutputWorkspace() {
 
   m_outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", numspec, 1, 1));
-
+  // Copy geometry over.
+  API::WorkspaceFactory::Instance().initializeFromParent(m_inputWS, m_outputWS,
+                                                         false);
   return;
 }
 //----------------------------------------------------------------------------------------------
