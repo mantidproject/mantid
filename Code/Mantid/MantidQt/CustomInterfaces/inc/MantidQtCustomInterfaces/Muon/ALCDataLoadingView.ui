@@ -168,6 +168,9 @@
                     <property name="multipleFiles" stdset="0">
                       <bool>false</bool>
                     </property>
+                    <property name="enabled">
+                      <bool>true</bool>
+                    </property>
                   </widget>
                 </item>
               </layout>
@@ -392,6 +395,12 @@
     </hint>
    </hints>
   </connection>
+   <connection>
+     <sender>fromCustomFile</sender>
+     <signal>toggled(bool)</signal>
+     <receiver>deadTimeFile</receiver>
+     <slot>setEnabled(bool)</slot>
+   </connection>
  </connections>
  <buttongroups>
   <buttongroup name="calculationType"/>
