@@ -4,7 +4,7 @@
 #include <gsl/gsl_eigen.h>
 #include <gsl/gsl_complex_math.h>
 #include <stdexcept>
-#include <cmath>
+#include <boost/math/special_functions/round.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -195,7 +195,7 @@ V3R SymmetryElementWithAxisGenerator::determineAxis(
 
   V3R axis;
   for (size_t i = 0; i < eigenVector.size(); ++i) {
-    axis[i] = static_cast<int>(round(eigenVector[i] / min));
+    axis[i] = static_cast<int>(boost::math::round(eigenVector[i] / min));
   }
 
   return axis;
