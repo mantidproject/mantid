@@ -16,6 +16,7 @@
 #include "MantidQtCustomInterfaces/Indirect/ISISCalibration.h"
 #include "MantidQtCustomInterfaces/Indirect/ISISDiagnostics.h"
 #include "MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h"
+#include "MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.h"
 
 #include <QDesktopServices>
 #include <QDir>
@@ -126,6 +127,7 @@ void IndirectDataReduction::initLayout()
   addTab<IndirectSymmetrise>("Symmetrise");
   addTab<IndirectSqw>("S(Q, w)");
   addTab<IndirectMoments>("Moments");
+  addTab<ILLEnergyTransfer>("ILL Energy Transfer");
 
   // Connect "?" (Help) Button
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
@@ -381,8 +383,8 @@ void IndirectDataReduction::handleConfigChange(Mantid::Kernel::ConfigValChangeNo
   {
     QString facility = QString::fromStdString(value);
 
-    m_uiForm.iicInstrumentConfiguration->setFacility(facility);
     filterUiForFacility(facility);
+    m_uiForm.iicInstrumentConfiguration->setFacility(facility);
   }
 }
 
@@ -477,6 +479,8 @@ void IndirectDataReduction::filterUiForFacility(QString facility)
     enabledTabs << "ISIS Energy Transfer"
                 << "ISIS Calibration"
                 << "ISIS Diagnostics";
+  else if(facility == "ILL")
+    enabledTabs << "ILL Energy Transfer";
 
   // These tabs work at any facility (always at end of tabs)
   enabledTabs << "Transmission" << "Symmetrise" << "S(Q, w)" << "Moments";
