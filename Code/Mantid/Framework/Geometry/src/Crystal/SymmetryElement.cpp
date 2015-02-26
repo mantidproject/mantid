@@ -2,6 +2,7 @@
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
 #include <boost/make_shared.hpp>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Geometry {

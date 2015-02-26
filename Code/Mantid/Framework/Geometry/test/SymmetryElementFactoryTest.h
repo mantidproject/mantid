@@ -371,7 +371,7 @@ public:
     TS_ASSERT(castedGenerator);
 
     // Now we can create the corresponding element
-    SymmetryElement_sptr mirrorElement = factory.createSymElem(mirror);
+    SymmetryElement_sptr mirrorElement = factory.createSymElement(mirror);
 
     // Make sure it's correct.
     TS_ASSERT(mirrorElement);

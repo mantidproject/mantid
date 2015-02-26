@@ -3,10 +3,12 @@
 #include <boost/lexical_cast.hpp>
 #include <gsl/gsl_eigen.h>
 #include <gsl/gsl_complex_math.h>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Geometry {
 
+/// Generates an instance of SymmetryElementIdentity.
 SymmetryElement_sptr SymmetryElementIdentityGenerator::generateElement(
     const SymmetryOperation &operation) const {
   UNUSED_ARG(operation);
@@ -14,28 +16,37 @@ SymmetryElement_sptr SymmetryElementIdentityGenerator::generateElement(
   return boost::make_shared<SymmetryElementIdentity>();
 }
 
+/// Checks that the SymmetryOperation has no translation and the matrix is of
+/// order 1.
 bool SymmetryElementIdentityGenerator::canProcess(
     const SymmetryOperation &operation) const {
 
   return !operation.hasTranslation() && operation.order() == 1;
 }
 
+/// Generates an instance of SymmetryElementTranslation with the vector of the
+/// operation as translation vector.
 SymmetryElement_sptr SymmetryElementTranslationGenerator::generateElement(
     const SymmetryOperation &operation) const {
   return boost::make_shared<SymmetryElementTranslation>(operation.vector());
 }
 
+/// Checks that the order of the matrix is 1 and the operation has a
+/// translation.
 bool SymmetryElementTranslationGenerator::canProcess(
     const SymmetryOperation &operation) const {
   return operation.order() == 1 && operation.hasTranslation();
 }
 
+/// Generates an instance of SymmetryElementInversion with the inversion point
+/// equal to the vector of the operation divided by two.
 SymmetryElement_sptr SymmetryElementInversionGenerator::generateElement(
     const SymmetryOperation &operation) const {
 
   return boost::make_shared<SymmetryElementInversion>(operation.vector() / 2);
 }
 
+/// Checks that the matrix is identity matrix multiplied with -1.
 bool SymmetryElementInversionGenerator::canProcess(
     const SymmetryOperation &operation) const {
   Kernel::IntMatrix inversionMatrix(3, 3, true);
@@ -44,6 +55,31 @@ bool SymmetryElementInversionGenerator::canProcess(
   return operation.matrix() == inversionMatrix;
 }
 
+/**
+ * @brief SymmetryElementWithAxisGenerator::determineTranslation
+ *
+ * According to ITA, 11.2, the translation component of a symmetry operation
+ * can be termined with the following algorithm. First, a matrix \f$W\f$ is
+ * calculated using the symmetry operation \f$S\f$ and its powers up to its
+ * order \f$k\f$, adding the matrices of the resulting operations:
+ *
+ * \f[
+ *  W = W_1(S^0) + W_2(S^1) + \dots + W_k(S^{k-1})
+ * \f]
+ *
+ * The translation vector is then calculation from the vector \f$w\f$ of the
+ * operation:
+ *
+ * \f[
+ *  t = \frac{1}{k}\cdot (W \times w)
+ * \f]
+ *
+ * For operations which do not have translation components, this algorithm
+ * returns a 0-vector.
+ *
+ * @param operation :: Symmetry operation, possibly with translation vector.
+ * @return Translation vector.
+ */
 V3R SymmetryElementWithAxisGenerator::determineTranslation(
     const SymmetryOperation &operation) const {
   Kernel::IntMatrix translationMatrix(3, 3, false);
@@ -56,6 +92,16 @@ V3R SymmetryElementWithAxisGenerator::determineTranslation(
          RationalNumber(1, static_cast<int>(operation.order()));
 }
 
+/**
+ * Returns a GSL-matrix for the given IntMatrix
+ *
+ * This free function takes an IntMatrix and returns a GSL-matrix with the data.
+ * It allocates the memory using gsl_matrix_alloc and the caller of the function
+ * is responsible for freeing the memory again.
+ *
+ * @param matrix :: Kernel::IntMatrix.
+ * @return GSL-matrix containing the same data as the input matrix.
+ */
 gsl_matrix *getGSLMatrix(const Kernel::IntMatrix &matrix) {
   gsl_matrix *gslMatrix = gsl_matrix_alloc(matrix.numRows(), matrix.numCols());
 
@@ -68,6 +114,17 @@ gsl_matrix *getGSLMatrix(const Kernel::IntMatrix &matrix) {
   return gslMatrix;
 }
 
+/**
+ * Returns a GSL-indentity matrix.
+ *
+ * This free function returns a GSL-matrix with the provided dimensions.
+ * It allocates the memory using gsl_matrix_alloc and the caller of the function
+ * is responsible for freeing the memory again.
+ *
+ * @param rows :: Number of rows in the matrix.
+ * @param cols :: Number of columns in the matrix.
+ * @return Identity matrix with dimensions (rows, columns).
+ */
 gsl_matrix *getGSLIdentityMatrix(size_t rows, size_t cols) {
   gsl_matrix *gslMatrix = gsl_matrix_alloc(rows, cols);
 
@@ -76,6 +133,17 @@ gsl_matrix *getGSLIdentityMatrix(size_t rows, size_t cols) {
   return gslMatrix;
 }
 
+/**
+ * Returns the symmetry axis for the given matrix
+ *
+ * According to ITA, 11.2 the axis of a symmetry operation can be determined by
+ * solving the Eigenvalue problem \f$Wu = u\f$ for rotations or \f$Wu = -u\f$
+ * for rotoinversions. This is implemented using the general real non-symmetric
+ * eigen-problem solver provided by the GSL.
+ *
+ * @param matrix :: Matrix of a SymmetryOperation
+ * @return Axis of symmetry element.
+ */
 V3R SymmetryElementWithAxisGenerator::determineAxis(
     const Kernel::IntMatrix &matrix) const {
   gsl_matrix *eigenMatrix = getGSLMatrix(matrix);
@@ -132,6 +200,8 @@ V3R SymmetryElementWithAxisGenerator::determineAxis(
   return axis;
 }
 
+/// Generates an instance of SymmetryElementRotation with the corresponding
+/// symbol, axis, translation vector and rotation sense.
 SymmetryElement_sptr SymmetryElementRotationGenerator::generateElement(
     const SymmetryOperation &operation) const {
   const Kernel::IntMatrix &matrix = operation.matrix();
@@ -146,6 +216,8 @@ SymmetryElement_sptr SymmetryElementRotationGenerator::generateElement(
                                                      rotationSense);
 }
 
+/// Checks the trace and determinat of the matrix to determine if the matrix
+/// belongs to a rotation.
 bool SymmetryElementRotationGenerator::canProcess(
     const SymmetryOperation &operation) const {
   const Kernel::IntMatrix &matrix = operation.matrix();
@@ -155,6 +227,7 @@ bool SymmetryElementRotationGenerator::canProcess(
   return (abs(trace) != 3) && !(trace == 1 && determinant == -1);
 }
 
+/// Determines the rotation sense according to the description in ITA 11.2.
 SymmetryElementRotation::RotationSense
 SymmetryElementRotationGenerator::determineRotationSense(
     const SymmetryOperation &operation, const V3R &rotationAxis) const {
@@ -177,6 +250,8 @@ SymmetryElementRotationGenerator::determineRotationSense(
   }
 }
 
+/// Determines the Hermann-Mauguin symbol of the rotation-, rotoinversion- or
+/// screw-axis.
 std::string SymmetryElementRotationGenerator::determineSymbol(
     const SymmetryOperation &operation) const {
   const Kernel::IntMatrix &matrix = operation.matrix();
@@ -214,6 +289,8 @@ std::map<V3R, std::string> SymmetryElementMirrorGenerator::g_glideSymbolMap =
         V3R(0, 1, 1) / 2, "n")(V3R(1, 1, 1) / 2, "n")(V3R(1, 1, 0) / 4, "d")(
         V3R(1, 0, 1) / 4, "d")(V3R(0, 1, 1) / 4, "d")(V3R(1, 1, 1) / 4, "d");
 
+/// Generates an instance of SymmetryElementMirror with the corresponding
+/// symbol, axis and translation vector.
 SymmetryElement_sptr SymmetryElementMirrorGenerator::generateElement(
     const SymmetryOperation &operation) const {
   const Kernel::IntMatrix &matrix = operation.matrix();
@@ -225,6 +302,7 @@ SymmetryElement_sptr SymmetryElementMirrorGenerator::generateElement(
   return boost::make_shared<SymmetryElementMirror>(symbol, axis, translation);
 }
 
+/// Checks that the trace of the matrix is 1 and the determinant is -1.
 bool SymmetryElementMirrorGenerator::canProcess(
     const SymmetryOperation &operation) const {
   const Kernel::IntMatrix &matrix = operation.matrix();
@@ -232,6 +310,7 @@ bool SymmetryElementMirrorGenerator::canProcess(
   return matrix.Trace() == 1 && matrix.determinant() == -1;
 }
 
+/// Determines the symbol from the translation vector using a map.
 std::string SymmetryElementMirrorGenerator::determineSymbol(
     const SymmetryOperation &operation) const {
   V3R rawTranslation = determineTranslation(operation);
@@ -256,8 +335,19 @@ std::string SymmetryElementMirrorGenerator::determineSymbol(
   return symbol;
 }
 
-SymmetryElement_sptr
-SymmetryElementFactoryImpl::createSymElem(const SymmetryOperation &operation) {
+/**
+ * Creates a SymmetryElement from a SymmetryOperation
+ *
+ * As detailed in the class description, the method checks whether there is
+ * already a prototype SymmetryElement for the provided SymmetryOperation. If
+ * not, it tries to find an appropriate generator and uses that to create
+ * the prototype. Then it returns a clone of the prototype.
+ *
+ * @param operation :: SymmetryOperation for which to generate the element.
+ * @return SymmetryElement for the supplied operation.
+ */
+SymmetryElement_sptr SymmetryElementFactoryImpl::createSymElement(
+    const SymmetryOperation &operation) {
   std::string operationIdentifier = operation.identifier();
 
   SymmetryElement_sptr element = createFromPrototype(operationIdentifier);
@@ -278,12 +368,14 @@ SymmetryElementFactoryImpl::createSymElem(const SymmetryOperation &operation) {
   return createFromPrototype(operationIdentifier);
 }
 
+/// Checks whether a generator with that class name is already subscribed.
 bool SymmetryElementFactoryImpl::isSubscribed(
     const std::string &generatorClassName) const {
   return (std::find(m_generatorNames.begin(), m_generatorNames.end(),
                     generatorClassName) != m_generatorNames.end());
 }
 
+/// Subscribes a generator and stores its class name for later checks.
 void SymmetryElementFactoryImpl::subscribe(
     const AbstractSymmetryElementGenerator_sptr &generator,
     const std::string &generatorClassName) {
@@ -291,6 +383,7 @@ void SymmetryElementFactoryImpl::subscribe(
   m_generatorNames.insert(generatorClassName);
 }
 
+/// Creates a SymmetryElement from an internally stored prototype.
 SymmetryElement_sptr SymmetryElementFactoryImpl::createFromPrototype(
     const std::string &identifier) const {
   auto prototypeIterator = m_prototypes.find(identifier);
@@ -302,6 +395,8 @@ SymmetryElement_sptr SymmetryElementFactoryImpl::createFromPrototype(
   return SymmetryElement_sptr();
 }
 
+/// Returns a generator that can process the supplied symmetry operation or an
+/// invalid pointer if no appropriate generator is found.
 AbstractSymmetryElementGenerator_sptr SymmetryElementFactoryImpl::getGenerator(
     const SymmetryOperation &operation) const {
   for (auto generator = m_generators.begin(); generator != m_generators.end();
@@ -314,6 +409,7 @@ AbstractSymmetryElementGenerator_sptr SymmetryElementFactoryImpl::getGenerator(
   return AbstractSymmetryElementGenerator_sptr();
 }
 
+/// Inserts the provided prototype into the factory.
 void SymmetryElementFactoryImpl::insertPrototype(
     const std::string &identifier, const SymmetryElement_sptr &prototype) {
   m_prototypes.insert(std::make_pair(identifier, prototype));

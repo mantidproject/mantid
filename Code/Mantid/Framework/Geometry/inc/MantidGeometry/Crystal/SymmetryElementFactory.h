@@ -13,19 +13,41 @@
 namespace Mantid {
 namespace Geometry {
 
+/** @class AbstractSymmetryElementGenerator
+
+    SymmetryElementFactoryImpl does not generate SymmetryElement objects
+    directly. Instead, in order to stay as flexible as possible, it stores
+    instances of AbstractSymmetryElementGenerator. Each subclass of
+    AbstractSymmetryElementGenerator can be registered once into the factory,
+    which then uses the canProcess-method to determine whether a certain
+    generator can be used to derive the SymmetryElement that corresponds to
+    the SymmetryOperation.
+
+    More about how the symmetry elements are derived from matrix/vector pairs
+    can be found in the International Tables for Crystallography A,
+    section 11.2.
+ */
 class MANTID_GEOMETRY_DLL AbstractSymmetryElementGenerator {
 public:
   virtual ~AbstractSymmetryElementGenerator() {}
 
+  /// Must generate a valid SymmetryElement from the given operation.
   virtual SymmetryElement_sptr
   generateElement(const SymmetryOperation &operation) const = 0;
 
+  /// Should return true if the generator can produce a valid SymmetryElement
+  /// from the provided SymmetryOperation.
   virtual bool canProcess(const SymmetryOperation &operation) const = 0;
 };
 
 typedef boost::shared_ptr<AbstractSymmetryElementGenerator>
 AbstractSymmetryElementGenerator_sptr;
 
+/** @class SymmetryElementIdentityGenerator
+
+    This implementation of AbstractSymmetryElementGenerator produces only
+    identity elements.
+ */
 class MANTID_GEOMETRY_DLL SymmetryElementIdentityGenerator
     : public AbstractSymmetryElementGenerator {
 public:
@@ -37,6 +59,11 @@ public:
   bool canProcess(const SymmetryOperation &operation) const;
 };
 
+/** @class SymmetryElementTranslationGenerator
+
+    This implementation of AbstractSymmetryElementGenerator produces only
+    translation elements.
+ */
 class MANTID_GEOMETRY_DLL SymmetryElementTranslationGenerator
     : public AbstractSymmetryElementGenerator {
 public:
@@ -48,6 +75,11 @@ public:
   bool canProcess(const SymmetryOperation &operation) const;
 };
 
+/** @class SymmetryElementInversionGenerator
+
+    This implementation of AbstractSymmetryElementGenerator produces only
+    inversion elements.
+ */
 class MANTID_GEOMETRY_DLL SymmetryElementInversionGenerator
     : public AbstractSymmetryElementGenerator {
 public:
@@ -62,6 +94,20 @@ public:
 MANTID_GEOMETRY_DLL gsl_matrix *getGSLMatrix(const Kernel::IntMatrix &matrix);
 MANTID_GEOMETRY_DLL gsl_matrix *getGSLIdentityMatrix(size_t rows, size_t cols);
 
+/** @class SymmetryElementWithAxisGenerator
+
+    SymmetryElementWithAxisGenerator does not create any elements directly, it
+    serves as a base for SymmetryElementRotationGenerator and
+    SymmetryAxisMirrorGenerator, which have in common that the axis of the
+    symmetry element as well as any potential translations must be determined.
+
+    These are implemented according to the algorithms found in the International
+    Tables for Crystallography A, section 11.2.
+
+    Subclasses must implement the method to determine the Hermann-Mauguin
+    symbol, as that algorithm is different for example for rotation-axes and
+    mirror-planes.
+ */
 class MANTID_GEOMETRY_DLL SymmetryElementWithAxisGenerator
     : public AbstractSymmetryElementGenerator {
 public:
@@ -75,6 +121,13 @@ protected:
   determineSymbol(const SymmetryOperation &operation) const = 0;
 };
 
+/** @class SymmetryElementRotationGenerator
+
+    SymmetryElementRotationGenerator inherits from
+    SymmetryElementWithAxisGenerator, using its methods for determination of
+    rotation axis and translations in case of screw axes. Furthermore it
+    determines the rotation sense and of course the Hermann-Mauguin symbol.
+ */
 class MANTID_GEOMETRY_DLL SymmetryElementRotationGenerator
     : public SymmetryElementWithAxisGenerator {
 public:
@@ -93,6 +146,15 @@ protected:
   std::string determineSymbol(const SymmetryOperation &operation) const;
 };
 
+/** @class SymmetryElementMirrorGenerator
+
+    SymmetryElementMirrorGenerator also inherits from
+    SymmetryElementWithAxisGenerator. In addition to that, it determines the
+    Herrman-Mauguin symbol of the symmetry element. According to the
+    International Tables for Crystallography there are some unconventional
+    glide planes which do not have a dedicated symbol. Instead, these are
+    labeled with the letter "g".
+ */
 class MANTID_GEOMETRY_DLL SymmetryElementMirrorGenerator
     : public SymmetryElementWithAxisGenerator {
 public:
@@ -110,17 +172,18 @@ protected:
 };
 
 /**
-  @class SymmetryElementFactory
+  @class SymmetryElementFactoryImpl
 
   This factory takes a SymmetryOperation and generates the corresponding
   SymmetryElement. It determines what type of element it is (rotation, mirror or
   glide plane, ...) and creates the correct object. An example would be this:
 
+  \code
     // Mirror plane perpendicular to z-axis
     SymmetryOperation mirrorZ("x,y,-z");
 
     SymmetryElement_sptr element =
-            SymmetryElementFactor::Instance().createSymElem(mirrorZ);
+            SymmetryElementFactor::Instance().createSymElement(mirrorZ);
 
     // Prints "m"
     std::cout << element->hmSymbol() << std::endl;
@@ -130,8 +193,20 @@ protected:
 
     // Prints [0,0,1]
     std::cout << mirrorElement->getAxis() << std::endl;
+  \endcode
 
   Please see also the additional documentation for SymmetryElement.
+
+  The factory itself stores generators that can generate a SymmetryElement from
+  a provided SymmetryOperation. Each time createSymElement is called, the
+  factory checks if an operation with that identifier-string has been processed
+  before. If that's not the case, it tries to find an
+  AbstractSymmetryElementGenerator that is able to process that operation. The
+  SymmetryElement that is generated by the generator is not returned directly,
+  instead it is stored as a prototype object, so that subsequent calls with the
+  same SymmetryOperation do not have to go through the derivation algorithm
+  again. Finally a clone of the now available prototype is returned. This way,
+  symmetry elements are only derived once.
 
     @author Michael Wedel, Paul Scherrer Institut - SINQ
     @date 25/02/2015
@@ -160,8 +235,11 @@ class MANTID_GEOMETRY_DLL SymmetryElementFactoryImpl {
 public:
   virtual ~SymmetryElementFactoryImpl() {}
 
-  SymmetryElement_sptr createSymElem(const SymmetryOperation &operation);
+  SymmetryElement_sptr createSymElement(const SymmetryOperation &operation);
 
+  /// Subscribes the generator of type T with its class name into the factory,
+  /// throws std::runtime_error if a class with the same name has already been
+  /// registered.
   template <typename T>
   void
   subscribeSymmetryElementGenerator(const std::string &generatorClassName) {
