@@ -7,6 +7,7 @@ import os
 from mantid.simpleapi import *
 from mantid.kernel import funcreturns
 from mantid import api,geometry,config
+import numpy as np
 
 import Direct.ReductionHelpers as prop_helpers
 import Direct.CommonFunctions as common
@@ -16,20 +17,20 @@ import Direct.CommonFunctions as common
 # class
 #-----------------------------------------------------------------------------------------
 class PropDescriptor(object):
-    """ Class provides common custom interface for property descriptors """
+    """Class provides common custom interface for property descriptors """
     def dependencies(self):
-        """ Returns the list of other properties names, this property depends on"""
+        """Returns the list of other properties names, this property depends on"""
         return []
     def validate(self,instance, owner):
-        """ Interface to validate property descriptor,
-            provided to check properties interaction before long run
+        """Interface to validate property descriptor,
+           provided to check properties interaction before long run
 
-            Return validation result, errors severity (0 -- fine, 1 -- warning, 2-- error)
-            and error message if any
+           Return validation result, errors severity (0 -- fine, 1 -- warning, 2-- error)
+           and error message if any
         """
         return (True,0,'')
-
 # end PropDescriptor
+
 #-----------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------
@@ -1055,6 +1056,7 @@ class MonoCorrectionFactor(PropDescriptor):
          return (False,2,'Mono-correction factor has to be positive if specified: {0}'.format(self._cor_factor))
       return (True,0,'')
 #end MonoCorrectionFactor
+
 class MotorLogName(PropDescriptor):
     """ The list of possible log names, for logs containing information
         on crystal rotation. First log found with current workspace
@@ -1116,43 +1118,41 @@ class RotationAngle(PropDescriptor):
 
     #
     def __get__(self,instance,type):
-       if instance is None:
-           return self
+        if instance is None:
+            return self
 
-       if self._own_psi_value:
-          return self._own_value
-       offset = self._mot_offset.__get__(instance,type)
-       if offset is None:
-          return None
-       motor_value = self._read_ws_logs()
-       if motor_value is None:
-            return None
-       else:
-            return offset + motor_value
+        if self._own_psi_value:
+            return self._own_psi_value
+        return self.read_psi_from_workspace(self._log_ws_name)
 
     def __set__(self,instance,value):
-       if isinstance(value,str):
+        if isinstance(value,str):
             if value in mtd: ## its workspace
-               self._log_ws_name = value
+                self._log_ws_name = value
+                self._own_psi_value = None
             else: # it is string representation of psi.  Should be
                 # convertible to number.
                 self._own_psi_value = float(value)
-       elif isinstance(value,api.Workspace):
-           self._log_ws_name = value.name()
-       elif value is None: # clear all
-           self._own_psi_value = None
-       else: #own psi value
-          self._own_psi_value = float(value)
+        elif isinstance(value,api.Workspace):
+            self._log_ws_name = value.name()
+            self._own_psi_value = None
+        elif value is None: # clear all
+            self._own_psi_value = None
+        else: #own psi value
+            self._own_psi_value = float(value)
 
     def _read_ws_logs(self,external_ws=None):
         """read specified workspace logs from workspace
            provided either internally or externally
         """
         working_ws = external_ws
-        if working_ws in None:
+        if working_ws is None:
             working_ws = mtd[self._log_ws_name]
-        if working_ws in None:
-           raise RuntimeError("No workspace provided. Can not read logs")
+        if working_ws is None:
+           raise RuntimeError("No workspace provided. Can not read logs to identify psi")
+        else:
+            if isinstance(external_ws,str):
+                working_ws = mtd[external_ws]
 
         value = None
         log_names = self._motor_log._log_names
@@ -1170,12 +1170,15 @@ class RotationAngle(PropDescriptor):
       """
       offset = self._mot_offset._offset
       if offset is None:
-        return None
+        return np.NaN
       log_val = self._read_ws_logs(workspace)
       if log_val is None:
-         return None
+         return np.NaN
       else:
          return offset + log_val
+
+    def dependencies(self):
+        return ['motor_log_names','motor_offset']
 #end RotationAngle
 
 #-----------------------------------------------------------------------------------------

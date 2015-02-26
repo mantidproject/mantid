@@ -394,7 +394,7 @@
    <value val="CCR_ROT;wccr"/>
 </parameter>
 <!-- Initial value used to identify crytsal rotation angle psi=motor_offset+wccr.timeAverageValue()  -->
-<parameter name="motor_offset" ">
+<parameter name="motor_offset">
    <value val="None"/>
 </parameter>
 
