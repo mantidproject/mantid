@@ -395,7 +395,7 @@ if ( GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5" )
  target_link_libraries ( Kernel stdc++ )
 endif()
 target_link_libraries ( Kernel ${NEXUS_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES} 
-                        ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} )
+                        ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} -ltsan -lasan )
 if ( WIN32 )
   target_link_libraries ( Kernel Psapi.lib ) # For memory usage queries
 endif()
