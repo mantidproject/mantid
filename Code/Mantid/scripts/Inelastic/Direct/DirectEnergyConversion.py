@@ -739,6 +739,7 @@ class DirectEnergyConversion(object):
               new_name = ws.name()
               return ('current',new_name)
            else:
+              ws = run.get_workspace()
               raise RuntimeError('Normalise by monitor-1:: Workspace {0} for run {1} does not have monitors in it'\
                    .format(ws.name(),run.run_number()))
 
