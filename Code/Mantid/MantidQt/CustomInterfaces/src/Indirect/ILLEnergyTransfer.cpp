@@ -64,15 +64,17 @@ namespace CustomInterfaces
 
   void ILLEnergyTransfer::run()
   {
+    std::map<QString, QString> instDetails = getInstrumentDetails();
+
     IAlgorithm_sptr reductionAlg = AlgorithmManager::Instance().create("IndirectILLReduction");
     reductionAlg->initialize();
 
-    reductionAlg->setProperty("Analyser", getInstrumentConfiguration()->getAnalyserName().toStdString());
-    reductionAlg->setProperty("Reflection", getInstrumentConfiguration()->getReflectionName().toStdString());
+    reductionAlg->setProperty("Analyser", instDetails["analyser"].toStdString());
+    reductionAlg->setProperty("Reflection", instDetails["reflection"].toStdString());
 
     // Handle einput files
-    QString filename = m_uiForm.rfInput->getFirstFilename();
-    reductionAlg->setProperty("Run", filename.toStdString());
+    QString runFilename = m_uiForm.rfInput->getFirstFilename();
+    reductionAlg->setProperty("Run", runFilename.toStdString());
 
     // Handle mapping file
     bool useMapFile = m_uiForm.cbGroupingType->currentText() == "Map File";
@@ -86,16 +88,23 @@ namespace CustomInterfaces
     bool mirrorMode = m_uiForm.ckMirrorMode->isChecked();
     reductionAlg->setProperty("MirrorMode", mirrorMode);
 
+    // Get the name format for output files
+    QFileInfo runFileInfo(runFilename);
+    QString outputFilenameBase = runFileInfo.baseName() +
+                                 "_" + instDetails["analyser"] +
+                                 "_" + instDetails["reflection"];
+    std::string outputFilenameBaseStd = outputFilenameBase.toStdString();
+
     // Set left and right workspaces when using mirror mode
     if(mirrorMode)
     {
-      reductionAlg->setProperty("LeftWorkspace", "l"); //TODO
-      reductionAlg->setProperty("RightWorkspace", "r"); //TODO
+      reductionAlg->setProperty("LeftWorkspace", outputFilenameBaseStd + "_left");
+      reductionAlg->setProperty("RightWorkspace", outputFilenameBaseStd + "_right");
     }
 
     // Set output workspace properties
-    reductionAlg->setProperty("RawWorkspace", "raw"); //TODO
-    reductionAlg->setProperty("ReducedWorkspace", "red"); //TODO
+    reductionAlg->setProperty("RawWorkspace", outputFilenameBaseStd + "_raw");
+    reductionAlg->setProperty("ReducedWorkspace", outputFilenameBaseStd + "_red");
 
     // Set output options
     reductionAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
