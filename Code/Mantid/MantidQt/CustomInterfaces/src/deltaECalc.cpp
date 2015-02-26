@@ -38,7 +38,7 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
                                         const QStringList &absRunFiles, const QString &absWhiteBeam,
                                         const QString & saveName)
 { 
-  QString pyCode = "import DirectEnergyConversion as direct\n";
+  QString pyCode = "import Direct.DirectEnergyConversion as direct\n";
   pyCode += QString("mono_sample = direct.DirectEnergyConversion('%1')\n").arg(m_sets.cbInst->currentText());
   //Turn off printing to stdout
   pyCode += QString("mono_sample.prop_man.log_to_mantid = True\n");

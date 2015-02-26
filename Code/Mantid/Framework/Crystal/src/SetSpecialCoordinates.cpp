@@ -40,11 +40,11 @@ SetSpecialCoordinates::SetSpecialCoordinates() {
   m_specialCoordinatesNames.push_back(SetSpecialCoordinates::HKLOption());
 
   m_specialCoordinatesMap.insert(
-      std::make_pair(SetSpecialCoordinates::QLabOption(), Mantid::API::QLab));
+      std::make_pair(SetSpecialCoordinates::QLabOption(), Mantid::Kernel::QLab));
   m_specialCoordinatesMap.insert(std::make_pair(
-      SetSpecialCoordinates::QSampleOption(), Mantid::API::QSample));
+      SetSpecialCoordinates::QSampleOption(), Mantid::Kernel::QSample));
   m_specialCoordinatesMap.insert(
-      std::make_pair(SetSpecialCoordinates::HKLOption(), Mantid::API::HKL));
+      std::make_pair(SetSpecialCoordinates::HKLOption(), Mantid::Kernel::HKL));
 }
 
 //----------------------------------------------------------------------------------------------

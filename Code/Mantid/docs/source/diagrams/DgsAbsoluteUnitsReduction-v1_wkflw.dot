@@ -1,0 +1,76 @@
+digraph DgsReduction {
+  label = "DgsAbsoluteUnitsReduction Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    absUDWS [label="Absolute Units\nDetector Vanadium\nWorkspace"]
+    absUSWS [label="Absolute Units\nSample Workspace"]
+    absUMWS [label="Absolute Units\nMask Workspace"]
+    detDiagParam [label="Detector\nDiagnostic\nParameters"]
+    AbsUnitsIncidentEnergy
+    VanadiumMass
+    VanadiumRmm
+    AbsUnitsMinimumEnergy
+    AbsUnitsMaximumEnergy
+    MaskWorkspace
+    GroupingWorkspace
+    OutputWorkspace
+  }
+
+  subgraph decisions {
+    $decision_style
+    isIAUDV [label="Is Integrated\nAbsolute Units\nDetector Vanadium?"]
+  }
+
+  subgraph values {
+    $value_style
+    procSample [label="Processed\nSample\nWorkspace"]
+    pauw [label="Processed Absolute\nUnits Workspace"]
+    sampleCoeff [label="SampleMass\ndivided by\nSampleRmm\ndivided by\nScattering XSec"]
+    IAUDV [label="Integrated\nAbsolute Units\nDetector Vanadium"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    DgsProcessDetectorVanadium
+    DgsConvertToEnergyTransfer
+    Divide
+    Rebin [label="Rebin (as integration)"]
+    ConvertToMatrixWorkspace
+    DetectorDiagnostic
+    MaskDetectors
+    ConvertFromDistribution
+    WeightedMeanOfWorkspace
+    Multiply
+  }
+
+  absUDWS -> DgsProcessDetectorVanadium
+  MaskWorkspace -> DgsConvertToEnergyTransfer
+  MaskWorkspace -> DgsProcessDetectorVanadium
+  DgsProcessDetectorVanadium -> IAUDV
+  GroupingWorkspace -> DgsConvertToEnergyTransfer
+  absUSWS -> DgsConvertToEnergyTransfer
+  AbsUnitsIncidentEnergy -> DgsConvertToEnergyTransfer
+  IAUDV -> DgsConvertToEnergyTransfer
+  DgsConvertToEnergyTransfer -> Divide
+  VanadiumMass -> Divide
+  VanadiumRmm -> Divide
+  Divide -> Rebin
+  AbsUnitsMinimumEnergy -> Rebin
+  AbsUnitsMaximumEnergy -> Rebin
+  Rebin -> ConvertToMatrixWorkspace
+  ConvertToMatrixWorkspace -> DetectorDiagnostic
+  detDiagParam -> DetectorDiagnostic
+  DetectorDiagnostic -> procSample
+  procSample -> absUMWS
+  procSample -> MaskDetectors
+  MaskDetectors -> ConvertFromDistribution
+  ConvertFromDistribution -> WeightedMeanOfWorkspace
+  WeightedMeanOfWorkspace -> isIAUDV
+  sampleCoeff -> Multiply
+  isIAUDV -> Multiply [label="Yes"]
+  isIAUDV -> pauw [label="No"]
+  Multiply -> pauw
+  pauw -> OutputWorkspace
+}

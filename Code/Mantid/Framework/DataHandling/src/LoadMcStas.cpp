@@ -543,24 +543,24 @@ void LoadMcStas::readHistogramData(
  */
 int LoadMcStas::confidence(Kernel::NexusDescriptor &descriptor) const {
   using namespace ::NeXus;
-  // We will look at the first entry and check for a
-  // simulation class that contains a name attribute with the value=mcstas
+  // look at to see if entry1/simulation/name exist first and then
+  // if its value = mccode
   int confidence(0);
-  try {
-    ::NeXus::File file = ::NeXus::File(descriptor.filename());
-    auto entries = file.getEntries();
-    if (!entries.empty()) {
-      auto firstIt = entries.begin();
-      file.openGroup(firstIt->first, firstIt->second);
-      file.openGroup("simulation", "NXnote");
-      std::string nameAttrValue;
-      file.readData("name", nameAttrValue);
-      if (boost::iequals(nameAttrValue, "mccode"))
-        confidence = 98;
-      file.closeGroup();
-      file.closeGroup();
+  if(descriptor.pathExists("/entry1/simulation/name")) {
+    try {
+        // need to look inside file to check value of entry1/simulation/name 
+        ::NeXus::File file = ::NeXus::File(descriptor.filename());
+        file.openGroup( descriptor.firstEntryNameType().first, descriptor.firstEntryNameType().second);
+        file.openGroup("simulation", "NXnote");
+        std::string value;
+        // check if entry1/simulation/name equals mccode
+        file.readData("name", value);
+        if (boost::iequals(value, "mccode"))
+          confidence = 98;
+        file.closeGroup();
+        file.closeGroup();
+    } catch (::NeXus::Exception &) {
     }
-  } catch (::NeXus::Exception &) {
   }
   return confidence;
 }

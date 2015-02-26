@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Base class for instrument-specific user interface
 """

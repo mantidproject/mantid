@@ -35,7 +35,9 @@ using namespace Mantid::Kernel;
 
 //---- Constructors
 //-------------------------------------------------------------------
-EventWorkspace::EventWorkspace() : mru(new EventWorkspaceMRU) {}
+EventWorkspace::EventWorkspace() : data(), m_noVectors(),
+  mru(new EventWorkspaceMRU) {
+}
 
 EventWorkspace::~EventWorkspace() {
   delete mru;

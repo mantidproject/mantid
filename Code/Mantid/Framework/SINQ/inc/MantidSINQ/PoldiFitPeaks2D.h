@@ -73,10 +73,9 @@ protected:
 
   PoldiPeakCollection_sptr
   getPeakCollectionFromFunction(const API::IFunction_sptr &fitFunction) const;
-  boost::shared_ptr<Poldi2DFunction> getFunctionFromPeakCollection(
+  Poldi2DFunction_sptr getFunctionFromPeakCollection(
       const PoldiPeakCollection_sptr &peakCollection) const;
-  void
-  addBackgroundTerms(boost::shared_ptr<Poldi2DFunction> poldi2DFunction) const;
+  void addBackgroundTerms(Poldi2DFunction_sptr poldi2DFunction) const;
 
   API::IAlgorithm_sptr
   calculateSpectrum(const PoldiPeakCollection_sptr &peakCollection,
@@ -86,6 +85,15 @@ protected:
   API::IFunction_sptr
   getFunction(const API::IAlgorithm_sptr &fitAlgorithm) const;
 
+  API::MatrixWorkspace_sptr
+  get1DSpectrum(const API::IFunction_sptr &fitFunction,
+                const API::MatrixWorkspace_sptr &workspace) const;
+
+  API::MatrixWorkspace_sptr
+  getQSpectrum(const API::FunctionDomain1D &domain,
+               const API::FunctionValues &values) const;
+
+  void setPoldiInstrument(const PoldiInstrumentAdapter_sptr &instrument);
   void setTimeTransformerFromInstrument(
       const PoldiInstrumentAdapter_sptr &poldiInstrument);
   void
@@ -97,6 +105,7 @@ protected:
 
   void throwOnInsufficientState();
 
+  PoldiInstrumentAdapter_sptr m_poldiInstrument;
   PoldiTimeTransformer_sptr m_timeTransformer;
   double m_deltaT;
 

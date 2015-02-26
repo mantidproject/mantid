@@ -55,7 +55,7 @@ private:
   void init();
   void exec();
   std::vector<std::string> m_specialCoordinatesNames;
-  typedef std::map<std::string, Mantid::API::SpecialCoordinateSystem>
+  typedef std::map<std::string, Mantid::Kernel::SpecialCoordinateSystem>
       SpecialCoordinatesNameMap;
   SpecialCoordinatesNameMap m_specialCoordinatesMap;
   static const std::string QLabOption();
@@ -63,13 +63,13 @@ private:
   static const std::string HKLOption();
   bool writeCoordinatesToMDEventWorkspace(
       Mantid::API::Workspace_sptr inWS,
-      Mantid::API::SpecialCoordinateSystem coordinateSystem);
+      Mantid::Kernel::SpecialCoordinateSystem coordinateSystem);
   bool writeCoordinatesToMDHistoWorkspace(
       Mantid::API::Workspace_sptr inWS,
-      Mantid::API::SpecialCoordinateSystem coordinateSystem);
+      Mantid::Kernel::SpecialCoordinateSystem coordinateSystem);
   bool writeCoordinatesToPeaksWorkspace(
       Mantid::API::Workspace_sptr inWS,
-      Mantid::API::SpecialCoordinateSystem coordinateSystem);
+      Mantid::Kernel::SpecialCoordinateSystem coordinateSystem);
 };
 
 } // namespace Crystal

@@ -52,9 +52,8 @@ bool BraggScatterer::isPropertyExposedToComposite(Property *property) const {
  * Exposes the property with the supplied name to BraggScattererComposite
  *
  * When a property is marked to be exposed to BraggScattererComposite, the
- *composite
- * also declares this property and tries to propagate the value assigned to the
- * composite's property to all its members.
+ * composite also declares this property and tries to propagate the value
+ * assigned to the composite's property to all its members.
  *
  * @param propertyName :: Name of the parameter that should be exposed.
  */

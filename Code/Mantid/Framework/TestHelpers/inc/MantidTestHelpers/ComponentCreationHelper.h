@@ -150,6 +150,9 @@ createTestInstrumentRectangular(int num_banks, int pixels,
 Mantid::Geometry::Instrument_sptr
 createTestInstrumentRectangular2(int num_banks, int pixels,
                                  double pixelSpacing = 0.008);
+
+/// Creates a mimimal valid virtual instrument.
+Mantid::Geometry::Instrument_sptr createMinimalInstrument(const Mantid::Kernel::V3D& sourcePos, const Mantid::Kernel::V3D& samplePos, const Mantid::Kernel::V3D& detectorPos );
 }
 
 #endif // COMPONENTCREATIONHELPERS_H_
