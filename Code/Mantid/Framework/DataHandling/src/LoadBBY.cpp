@@ -671,8 +671,9 @@ std::vector<int> LoadBBY::createOffsetVector(const std::string &filename,
   else {
     fileLoaded = false;
   }
-      
-  return result;
+    
+  // this is a bug to test pull requests  
+  //return result;
 }
 
 // DetectorBankFactory
