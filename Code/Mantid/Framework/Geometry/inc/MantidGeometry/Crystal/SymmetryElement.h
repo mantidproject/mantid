@@ -51,8 +51,6 @@ public:
 protected:
   SymmetryElement(const std::string &symbol);
 
-  void setHMSymbol(const std::string &symbol);
-
   std::string m_hmSymbol;
 };
 
@@ -70,7 +68,7 @@ typedef boost::shared_ptr<SymmetryElementIdentity> SymmetryElementIdentity_sptr;
 
 class MANTID_GEOMETRY_DLL SymmetryElementInversion : public SymmetryElement {
 public:
-  SymmetryElementInversion(const V3R &inversionPoint);
+  SymmetryElementInversion(const V3R &inversionPoint = V3R(0,0,0));
   ~SymmetryElementInversion() {}
 
   SymmetryElement_sptr clone() const;
@@ -78,13 +76,27 @@ public:
   V3R getInversionPoint() const { return m_inversionPoint; }
 
 protected:
-  void setInversionPoint(const V3R &inversionPoint);
-
   V3R m_inversionPoint;
 };
 
 typedef boost::shared_ptr<SymmetryElementInversion>
 SymmetryElementInversion_sptr;
+
+class MANTID_GEOMETRY_DLL SymmetryElementTranslation : public SymmetryElement {
+public:
+  SymmetryElementTranslation(const V3R &translation);
+  ~SymmetryElementTranslation() {}
+
+  V3R getTranslation() const { return m_translation; }
+
+  SymmetryElement_sptr clone() const;
+
+protected:
+  V3R m_translation;
+};
+
+typedef boost::shared_ptr<SymmetryElementTranslation>
+SymmetryElementTranslation_sptr;
 
 class MANTID_GEOMETRY_DLL SymmetryElementWithAxis : public SymmetryElement {
 public:
@@ -98,7 +110,6 @@ protected:
                           const V3R &translation);
 
   void setAxis(const V3R &axis);
-  void setTranslation(const V3R &translation) { m_translation = translation; }
 
   V3R m_axis;
   V3R m_translation;
@@ -115,8 +126,8 @@ public:
   };
 
   SymmetryElementRotation(const std::string &symbol, const V3R &axis,
-                          const V3R &translation,
-                          const RotationSense &rotationSense);
+                          const V3R &translation = V3R(0,0,0),
+                          const RotationSense &rotationSense = Positive);
   ~SymmetryElementRotation() {}
 
   SymmetryElement_sptr clone() const;
@@ -124,10 +135,6 @@ public:
   RotationSense getRotationSense() const { return m_rotationSense; }
 
 protected:
-  void setRotationSense(const RotationSense &rotationSense) {
-    m_rotationSense = rotationSense;
-  }
-
   RotationSense m_rotationSense;
 };
 
@@ -137,7 +144,7 @@ class MANTID_GEOMETRY_DLL SymmetryElementMirror
     : public SymmetryElementWithAxis {
 public:
   SymmetryElementMirror(const std::string &symbol, const V3R &axis,
-                        const V3R &translation);
+                        const V3R &translation = V3R(0,0,0));
   ~SymmetryElementMirror() {}
 
   SymmetryElement_sptr clone() const;

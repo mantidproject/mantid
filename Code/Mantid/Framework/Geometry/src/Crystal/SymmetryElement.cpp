@@ -8,10 +8,6 @@ namespace Geometry {
 SymmetryElement::SymmetryElement(const std::string &symbol)
     : m_hmSymbol(symbol) {}
 
-void SymmetryElement::setHMSymbol(const std::string &symbol) {
-  m_hmSymbol = symbol;
-}
-
 SymmetryElementIdentity::SymmetryElementIdentity() : SymmetryElement("1") {}
 
 SymmetryElement_sptr SymmetryElementIdentity::clone() const {
@@ -25,21 +21,16 @@ SymmetryElement_sptr SymmetryElementInversion::clone() const {
   return boost::make_shared<SymmetryElementInversion>(m_inversionPoint);
 }
 
-void SymmetryElementInversion::setInversionPoint(const V3R &inversionPoint) {
-  m_inversionPoint = inversionPoint;
-}
-
 SymmetryElementWithAxis::SymmetryElementWithAxis(const std::string &symbol,
                                                  const V3R &axis,
                                                  const V3R &translation)
-    : SymmetryElement(symbol) {
+    : SymmetryElement(symbol), m_translation(translation) {
   setAxis(axis);
-  setTranslation(translation);
 }
 
 void SymmetryElementWithAxis::setAxis(const V3R &axis) {
   if (axis == V3R(0, 0, 0)) {
-    throw std::invalid_argument("Axis cannot be 0.");
+    throw std::invalid_argument("Axis cannot be (0,0,0).");
   }
 
   m_axis = axis;
@@ -64,6 +55,13 @@ SymmetryElementMirror::SymmetryElementMirror(const std::string &symbol,
 SymmetryElement_sptr SymmetryElementMirror::clone() const {
   return boost::make_shared<SymmetryElementMirror>(m_hmSymbol, m_axis,
                                                    m_translation);
+}
+
+SymmetryElementTranslation::SymmetryElementTranslation(const V3R &translation)
+    : SymmetryElement("t"), m_translation(translation) {}
+
+SymmetryElement_sptr SymmetryElementTranslation::clone() const {
+  return boost::make_shared<SymmetryElementTranslation>(m_translation);
 }
 
 } // namespace Geometry
