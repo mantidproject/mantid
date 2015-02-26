@@ -34,14 +34,8 @@ class NonIDF_Properties(object):
         # Helper properties, defining logging options
         object.__setattr__(self,'_log_level','notice')
         object.__setattr__(self,'_log_to_mantid',False)
+
         object.__setattr__(self,'_current_log_level',3)
-
-
-        object.__setattr__(self,'_psi',float('NaN'))
-        # SNS motor stuff which is difficult to test as I've never seen it
-        object.__setattr__(self,'_motor_name',None)
-        object.__setattr__(self,'_motor_offset',0)
-
         object.__setattr__(self,'_save_file_name',None)
 
         self._set_instrument_and_facility(Instrument,run_workspace)
@@ -138,31 +132,7 @@ class NonIDF_Properties(object):
     @log_to_mantid.setter
     def log_to_mantid(self,val):
         object.__setattr__(self,'_log_to_mantid',bool(val))
-    # -----------------------------------------------------------------------------
-    #-----------------------------------------------------------------------------------
-    @property
-    def psi(self):
-        """ rotation angle (not available from IDF)"""
-        return self._psi
-    @psi.setter
-    def psi(self,value):
-        """set rotation angle (not available from IDF). This value will be saved into NXSpe file"""
-        object.__setattr__(self,'_psi',value)
-    # -----------------------------------------------------------------------------
-    @property
-    def motor_name(self):
-        return self._motor_name
-    @motor_name.setter
-    def motor_name(self,val):
-        object.__setattr__(self,'_motor_name',val)
-    #
-    @property
-    def motor_offset(self):
-        return self._motor_offset
-    @motor_offset.setter
-    def motor_offset(self,val):
-        object.__setattr__(self,'_motor_offset',val)
-
+ 
     # -----------------------------------------------------------------------------
     # Service properties (used by class itself)
     #
