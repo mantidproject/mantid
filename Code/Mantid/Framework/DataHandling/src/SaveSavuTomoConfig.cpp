@@ -66,7 +66,7 @@ void SaveSavuTomoConfig::exec() {
  */
 bool SaveSavuTomoConfig::tableLooksGenuine(const ITableWorkspace_sptr &tws) {
   // note that more columns might be added in the relatively near future
-  if (!tws->columnCount() >= m_pluginInfoCount)
+  if (!(tws->columnCount() >= m_pluginInfoCount))
     return false;
 
   std::vector<std::string> names = tws->getColumnNames();
