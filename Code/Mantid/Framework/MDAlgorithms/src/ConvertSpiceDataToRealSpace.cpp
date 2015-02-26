@@ -95,7 +95,7 @@ void ConvertSpiceDataToRealSpace::exec() {
   m_instrumentName = getPropertyValue("Instrument");
 
   // Check whether parent workspace has run start
-  DateAndTime runstart(10E9);
+  DateAndTime runstart(1000000000);
   if (parentWS->run().hasProperty("run_start")) {
     // Use parent workspace's first
     runstart = parentWS->run().getProperty("run_start")->value();
