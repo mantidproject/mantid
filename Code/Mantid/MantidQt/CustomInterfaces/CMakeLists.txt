@@ -1,5 +1,7 @@
 set ( SRC_FILES
+	src/background.cpp
   src/DataComparison.cpp
+	src/deltaECalc.cpp
 	src/DirectConvertToEnergy.cpp
 	src/Homer.cpp
 	src/Indirect/ApplyCorr.cpp
@@ -70,15 +72,15 @@ set ( SRC_FILES
 	src/SANSPlotSpecial.cpp
 	src/SANSRunWindow.cpp
 	src/StepScan.cpp
+	src/TomoReconstruction.cpp
 	src/UserInputValidator.cpp
-	src/background.cpp
-	src/deltaECalc.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Background.h
   inc/MantidQtCustomInterfaces/DataComparison.h
+	inc/MantidQtCustomInterfaces/deltaECalc.h
 	inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/DllConfig.h
 	inc/MantidQtCustomInterfaces/Homer.h
@@ -152,16 +154,16 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/QReflTableModel.h
 	inc/MantidQtCustomInterfaces/QtReflMainView.h
 	inc/MantidQtCustomInterfaces/QtReflOptionsDialog.h
-  inc/MantidQtCustomInterfaces/SampleTransmission.h
+        inc/MantidQtCustomInterfaces/SampleTransmission.h
 	inc/MantidQtCustomInterfaces/SANSAddFiles.h
 	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
 	inc/MantidQtCustomInterfaces/SANSEventSlicing.h
 	inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
 	inc/MantidQtCustomInterfaces/SANSRunWindow.h
 	inc/MantidQtCustomInterfaces/StepScan.h
+	inc/MantidQtCustomInterfaces/TomoReconstruction.h
 	inc/MantidQtCustomInterfaces/Updateable.h
 	inc/MantidQtCustomInterfaces/UserInputValidator.h
-	inc/MantidQtCustomInterfaces/deltaECalc.h
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
@@ -205,6 +207,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Indirect/Quasi.h
                 inc/MantidQtCustomInterfaces/Indirect/ResNorm.h
                 inc/MantidQtCustomInterfaces/Indirect/Stretch.h
+                inc/MantidQtCustomInterfaces/MantidEV.h
                 inc/MantidQtCustomInterfaces/MultiDatasetFit.h
                 inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h
                 inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.h
@@ -231,13 +234,14 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSEventSlicing.h              
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
-                inc/MantidQtCustomInterfaces/MantidEV.h
                 inc/MantidQtCustomInterfaces/StepScan.h
+                inc/MantidQtCustomInterfaces/TomoReconstruction.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
                inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.ui
+	       inc/MantidQtCustomInterfaces/EditLocalParameterDialog.ui
                inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.ui
                inc/MantidQtCustomInterfaces/Indirect/CalcCorr.ui
                inc/MantidQtCustomInterfaces/Indirect/ConvFit.ui
@@ -267,6 +271,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
                inc/MantidQtCustomInterfaces/Indirect/Quasi.ui
                inc/MantidQtCustomInterfaces/Indirect/ResNorm.ui
                inc/MantidQtCustomInterfaces/Indirect/Stretch.ui
+               inc/MantidQtCustomInterfaces/MantidEV.ui
                inc/MantidQtCustomInterfaces/MultiDatasetFit.ui
                inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.ui
                inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingView.ui
@@ -280,9 +285,8 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
                inc/MantidQtCustomInterfaces/SANSPlotSpecial.ui
                inc/MantidQtCustomInterfaces/SANSRunWindow.ui  
                inc/MantidQtCustomInterfaces/SANSEventSlicing.ui
-               inc/MantidQtCustomInterfaces/MantidEV.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
-			   inc/MantidQtCustomInterfaces/EditLocalParameterDialog.ui
+               inc/MantidQtCustomInterfaces/TomoReconstruction.ui
 )
 
 set ( TEST_FILES
