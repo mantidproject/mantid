@@ -64,9 +64,18 @@ public:
     // Check output
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1);
 
+    // X, Y and E values
     const Mantid::MantidVec &vecX = outws->readX(0);
+    const Mantid::MantidVec &vecY = outws->readY(0);
+    const Mantid::MantidVec &vecE = outws->readE(0);
+
     TS_ASSERT_DELTA(vecX.front(), 0.0, 0.0001);
     TS_ASSERT_DELTA(vecX.back(), 120.0 - 0.05, 0.0001);
+
+    double y1101 = vecY[1101];
+    double e1101 = vecE[1101];
+    TS_ASSERT_DELTA(y1101, 1.8, 0.001);
+    TS_ASSERT_DELTA(e1101, sqrt(y1101), 0.0001);
 
     // TODO : Test this   for i in [100, 100, 1101, 1228]:
     // print "2theta = %-5f, Y = %-5f, E = %-5f" % (vecx[i], vecy[i], vece[i])
@@ -89,7 +98,7 @@ public:
   /** Unit test to reduce/bin the HB2A data with more options
    * @brief test_ReduceHB2AData
    */
-  void test_ReduceHB2ADataMoreOptions() {
+  void Xtest_ReduceHB2ADataMoreOptions() {
     // Init
     ConvertCWPDMDToSpectra alg;
     alg.initialize();
