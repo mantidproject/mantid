@@ -13,6 +13,7 @@ class Fury(PythonAlgorithm):
     _resolution = None
     _e_min = None
     _e_max = None
+    _e_width = None
     _number_points_per_bin = None
     _parameter_table = None
     _output_workspace = None
@@ -37,7 +38,8 @@ class Fury(PythonAlgorithm):
         self.declareProperty(name='EnergyMax', defaultValue=0.5,
                              doc='Maximum energy for fit. Default=0.5')
         self.declareProperty(name='NumBins', defaultValue=1,
-                             doc='Decrease total number of spectrum points by this ratio through merging of intensities from neighbouring bins. Default=1')
+                             doc='Decrease total number of spectrum points by this ratio through merging of '
+                                 'intensities from neighbouring bins. Default=1')
 
         self.declareProperty(MatrixWorkspaceProperty('ParameterWorkspace', '',\
                              direction=Direction.Output, optional=PropertyMode.Optional),

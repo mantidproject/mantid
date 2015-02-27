@@ -49,6 +49,27 @@ class DesignerMainWindow(QtGui.QMainWindow):
     x2=None
     y1=None
     y2=None
+    topHorizontalLayout = None
+    topHorizontalLayoutPeak = None
+    peakTo = None
+    peakFrom = None
+    topHorizontalLayoutBack = None
+    label = None
+    backTo = None
+    backFrom = None
+    topHorizontalLayoutLowres = None
+    lowresTo = None
+    lowresFrom = None
+    topHorizontalLayoutRight = None
+    log = None
+    linear = None
+    main_frame = None
+    mpl_toolbar = None
+    dpi = None
+    fig = None
+    canvas = None
+    bottomHorizontalLayout = None
+    _file_menu = None
 
     def __init__(self, wk1=None, wk2=None, parent=None, type='data'):
 
