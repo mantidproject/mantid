@@ -104,10 +104,11 @@ void SortHKL::exec() {
   std::string name = getProperty("RowName");
   newrow << name;
 
+  std::vector<Peak> &peaks = peaksW->getPeaks();
   int NumberPeaks = peaksW->getNumberPeaks();
   for (int i = 0; i < NumberPeaks; i++) {
-    V3D hkl1 = round(peaksW->getPeaks()[i].getHKL());
-    peaksW->getPeaks()[i].setHKL(hkl1);
+    V3D hkl1 = round(peaks[i].getHKL());
+    peaks[i].setHKL(hkl1);
   }
   // Use the primitive by default
   PointGroup_sptr pointGroup(new PointGroupLaue1());
@@ -118,10 +119,9 @@ void SortHKL::exec() {
       pointGroup = m_pointGroups[i];
 
   double Chisq = 0.0;
-  std::vector<Peak> &peaks = peaksW->getPeaks();
-  for (int i = int(peaksW->getNumberPeaks()) - 1; i >= 0; --i) {
+  for (int i = int(NumberPeaks) - 1; i >= 0; --i) {
     if (peaks[i].getIntensity() == 0.0 ||
-        peaksW->getPeaks()[i].getHKL() == V3D(0, 0, 0))
+        peaks[i].getHKL() == V3D(0, 0, 0))
       peaksW->removePeak(i);
   }
   NumberPeaks = peaksW->getNumberPeaks();
@@ -153,7 +153,7 @@ void SortHKL::exec() {
          << peaks[NumberPeaks - 1].getWavelength();
 
   int predictedPeaks = 0;
-  if (name.substr(0,4) != "bank")
+ /* if (name.substr(0,4) != "bank")
   {
     API::IAlgorithm_sptr predictAlg = createChildAlgorithm("PredictPeaks");
     predictAlg->setProperty("InputWorkspace", InPeaksW);
@@ -169,7 +169,7 @@ void SortHKL::exec() {
     PeaksWorkspace_sptr predictedWksp =
         predictAlg->getProperty("OutputWorkspace");
     predictedPeaks = predictedWksp->getNumberPeaks();
-  }
+  }*/
 
   criteria.clear();
   // Sort by HKL
@@ -205,41 +205,40 @@ void SortHKL::exec() {
       sig2.push_back(std::pow(peaks[i].getSigmaIntensity(), 2));
       if (i == NumberPeaks - 1) {
         f2Sum += peaks[i].getIntensity();
+        Outliers(data, sig2);
         if (static_cast<int>(data.size()) > 1) {
-          Outliers(data, sig2);
           Statistics stats = getStatistics(data);
           Chisq += stats.standard_deviation / stats.mean;
           Statistics stats2 = getStatistics(sig2);
           std::vector<int>::iterator itpk;
           for (itpk = peakno.begin(); itpk != peakno.end(); ++itpk) {
-            double F2 = peaksW->getPeaks()[*itpk].getIntensity();
+            double F2 = peaks[*itpk].getIntensity();
             rSum += std::fabs(F2 - stats.mean);
             rpSum += std::sqrt(1.0 / double(data.size() - 1)) *
                      std::fabs(F2 - stats.mean);
-            peaksW->getPeaks()[*itpk].setIntensity(stats.mean);
-            peaksW->getPeaks()[*itpk].setSigmaIntensity(std::sqrt(stats2.mean));
+            peaks[*itpk].setIntensity(stats.mean);
+            peaks[*itpk].setSigmaIntensity(std::sqrt(stats2.mean));
           }
         }
-        Outliers(data, sig2);
         multiplicity.push_back(data.size());
         peakno.clear();
         data.clear();
         sig2.clear();
       }
     } else {
+      Outliers(data, sig2);
       if (static_cast<int>(data.size()) > 1) {
-        Outliers(data, sig2);
         Statistics stats = getStatistics(data);
         Chisq += stats.standard_deviation / stats.mean;
         Statistics stats2 = getStatistics(sig2);
         std::vector<int>::iterator itpk;
         for (itpk = peakno.begin(); itpk != peakno.end(); ++itpk) {
-          double F2 = peaksW->getPeaks()[*itpk].getIntensity();
+          double F2 = peaks[*itpk].getIntensity();
           rSum += std::fabs(F2 - stats.mean);
           rpSum += std::sqrt(1.0 / double(data.size() - 1)) *
                    std::fabs(F2 - stats.mean);
-          peaksW->getPeaks()[*itpk].setIntensity(stats.mean);
-          peaksW->getPeaks()[*itpk].setSigmaIntensity(std::sqrt(stats2.mean));
+          peaks[*itpk].setIntensity(stats.mean);
+          peaks[*itpk].setSigmaIntensity(std::sqrt(stats2.mean));
         }
       }
       multiplicity.push_back(data.size());
@@ -255,6 +254,7 @@ void SortHKL::exec() {
   Statistics statsMult = getStatistics(multiplicity);
   multiplicity.clear();
   // statistics to output table workspace
+  g_log.notice() << "Rmerge:" << rSum << "  "  << f2Sum << "\n";
   newrow << statsMult.mean << statsIsigI.mean << 100.0 * rSum / f2Sum
          << 100.0 * rpSum / f2Sum
          << double(NumberPeaks) / double(predictedPeaks);
@@ -270,12 +270,19 @@ void SortHKL::exec() {
   AnalysisDataService::Instance().addOrReplace(tableName, tablews);
 }
 void SortHKL::Outliers(std::vector<double> &data, std::vector<double> &sig2) {
+  if (data.size() < 3)return;
   std::vector<double> Zscore = getZscore(data);
   std::vector<size_t> banned;
   for (size_t i = 0; i < data.size(); ++i) {
     if (Zscore[i] > 3.0) {
       banned.push_back(i);
-      continue;
+      g_log.notice() << "Data (I):";
+      for (size_t j = 0; j < data.size(); ++j)
+         g_log.notice() << data[j] << "  " ;
+      g_log.notice() << "\nData (sigI^2):";
+      for (size_t j = 0; j < data.size(); ++j)
+         g_log.notice() << data[j] << "  "  << sig2[j] ;
+      g_log.notice() << "\nOutlier removed (I and sigI^2):" << data[i] << "  "  << sig2[i] << "\n";
     }
   }
   // delete banned peaks
