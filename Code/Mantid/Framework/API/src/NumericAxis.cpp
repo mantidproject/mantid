@@ -11,11 +11,14 @@
 namespace {
 Mantid::Kernel::Logger g_log("NumericAxis");
 
-// For variable tolerance comparison for axis values
-double g_tolerance;
-bool withinTolerance(double a, double b) {
-  return std::abs(a - b) <= g_tolerance;
-}
+class EqualWithinTolerance {
+public:
+  EqualWithinTolerance(double tolerance) : m_tolerance(tolerance) {};
+  bool operator()(double a, double b) { return std::abs(a - b) <= m_tolerance; }
+
+private:
+  double m_tolerance;
+};
 }
 
 namespace Mantid {
@@ -164,9 +167,9 @@ bool NumericAxis::equalWithinTolerance(const Axis &axis2,
     return false;
   }
   // Check each value is within tolerance
-  g_tolerance = tolerance;
+  EqualWithinTolerance comparison(tolerance);
   return std::equal(m_values.begin(), m_values.end(), spec2->m_values.begin(),
-                    withinTolerance);
+                    comparison);
 }
 
 /** Returns a text label which shows the value at index and identifies the
