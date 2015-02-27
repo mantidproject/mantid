@@ -225,9 +225,7 @@ void PDEstimateDetectorResolution::estimateDetectorResolution() {
     double centraltof = (m_L1 + l2) / m_centreVelocity;
 
     // Angle
-    double r, twotheta, phi;
-    detpos.getSpherical(r, twotheta, phi);
-    double theta = (twotheta * 0.5) * M_PI / 180.;
+    double theta = 0.5*m_inputWS->detectorTwoTheta(det);
 
     // double solidangle = m_solidangleWS->readY(i)[0];
     double solidangle = det->solidAngle(samplepos);
