@@ -87,7 +87,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              "Maximum absolute value of offsets; default is 1")
         self.declareProperty("CrossCorrelation", True,
                              "CrossCorrelation if True; minimize using many peaks if False.")
-        self.declareProperty("PeakPositions", "",
+        validator = FloatArrayBoundedValidator()
+        validator.setLower(0.)
+        self.declareProperty(FloatArrayProperty("PeakPositions", []),
                              "Comma delimited d-space positions of reference peaks.  Use 1-3 for Cross Correlation.  Unlimited for many peaks option.")
         self.declareProperty("PeakWindowMax", 0.,
                              "Maximum window around a peak to search for it. Optional.")
@@ -106,7 +108,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              "Type of peak to fit. Used only with CrossCorrelation=False")
         self.declareProperty("BackgroundType", "Flat", StringListValidator(['Flat', 'Linear', 'Quadratic']),
                              "Used only with CrossCorrelation=False")
-        self.declareProperty("DetectorsPeaks", "",
+        self.declareProperty(IntArrayProperty("DetectorsPeaks", []),
                              "Comma delimited numbers of detector banks for each peak if using 2-3 peaks for Cross Correlation.  Default is all.")
         self.declareProperty("PeakHalfWidth", 0.05,
                              "Half width of d-space around peaks for Cross Correlation. Default is 0.05")
@@ -134,10 +136,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
     def validateInputs(self):
         messages = {}
 
-        detectors = self.getProperty("DetectorsPeaks").value.strip()
+        detectors = self.getProperty("DetectorsPeaks").value
         if self.getProperty("CrossCorrelation").value:
-            positions = self.getProperty("PeakPositions").value.strip()
-            positions = positions.split(',')
+            positions = self.getProperty("PeakPositions").value
             if not bool(detectors):
                 if len(positions) != 1:
                     messages["PeakPositions"] = "Can only have one cross correlation peak without specifying 'DetectorsPeaks'"
@@ -151,7 +152,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                     messages["DetectorsPeaks"] = "Up to 3 peaks are supported"
         elif bool(detectors):
             messages["DetectorsPeaks"] = "Only allowed for CrossCorrelation=True"
-            prop = self.getProperty("CrossCorrelationPoints")
 
         return messages
 
@@ -493,9 +493,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self._smoothoffsets = self.getProperty("SmoothSummedOffsets").value
         self._smoothGroups = self.getProperty("SmoothGroups").value
         self._peakpos = self.getProperty("PeakPositions").value
-        positions = self._peakpos.strip().split(',')
+        positions = self._peakpos
         if self.getProperty("CrossCorrelation").value:
-            self._peakpos1 = float(positions[0])
+            self._peakpos1 = self._peakpos[0]
             self._peakpos2 = 0
             self._peakpos3 = 0
             self._lastpixel = 0
@@ -504,12 +504,12 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             peakhalfwidth = self.getProperty("PeakHalfWidth").value
             self._peakmin = self._peakpos1-peakhalfwidth
             self._peakmax = self._peakpos1+peakhalfwidth
-            if len(positions) >= 2:
-                self._peakpos2 = float(positions[1])
+            if len(self._peakpos) >= 2:
+                self._peakpos2 = self._peakpos[1]
                 self._peakmin2 = self._peakpos2-peakhalfwidth
                 self._peakmax2 = self._peakpos2+peakhalfwidth
-            if len(positions) >= 3:
-                self._peakpos3 = float(positions[1])
+            if len(self._peakpos) >= 3:
+                self._peakpos3 = self._peakpos[2]
                 self._peakmin3 = self._peakpos3-peakhalfwidth
                 self._peakmax3 = self._peakpos3+peakhalfwidth
             detectors = self.getProperty("DetectorsPeaks").value.strip().split(',')
