@@ -33,14 +33,14 @@ void LoadSavuTomoConfig::init() {
   exts.push_back(".xml");
 
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                  "The name of the Nexus parameterization file to read, as a full"
+                  "The name of the Nexus parameterization file to read, as a full "
                   "or relative path.");
 
   declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace",
                                                          "savuTomoConfig",
                                                          Kernel::Direction::Output,
                                                          PropertyMode::Mandatory),
-                  "The name of the workspace to be created as output of"
+                  "The name of the workspace to be created as output of "
                   "the algorithm, a workspace with this name will be created "
                   "and stored in the Analysis Data Service.");
 }
