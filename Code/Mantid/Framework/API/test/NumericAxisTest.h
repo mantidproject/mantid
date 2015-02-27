@@ -172,6 +172,23 @@ public:
     TS_ASSERT_EQUALS(4, axis.indexOfValue(5.4));
   }
 
+  /**
+   * Default equality is tested to a tolerance of 1e-15.
+   */
+  void test_equal()
+  {
+    double points1[] = {1.0, 2.0, 10e-16, 4.0, 5.0};
+    double points2[] = {1.0, 2.0, 20e-16, 4.0, 5.0}; // Just inside the tolerance
+    double points3[] = {1.0, 2.0, 21e-16, 4.0, 5.0}; // Just outsie the tolerance
+    const size_t npoints(5);
+    NumericAxis axis1(std::vector<double>(points1, points1 + npoints));
+    NumericAxis axis2(std::vector<double>(points2, points2 + npoints));
+    NumericAxis axis3(std::vector<double>(points3, points3 + npoints));
+
+    TS_ASSERT( axis1 == axis2 );
+    TS_ASSERT( !(axis1 == axis3) );
+  }
+
   void test_equalWithinTolerance()
   {
     double points1[] = {1.0, 2.0, 3.0, 4.0, 5.0};

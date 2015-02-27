@@ -146,14 +146,7 @@ size_t NumericAxis::indexOfValue(const double value) const {
  *  @return true if self and second axis are equal
  */
 bool NumericAxis::operator==(const Axis &axis2) const {
-  if (length() != axis2.length()) {
-    return false;
-  }
-  const NumericAxis *spec2 = dynamic_cast<const NumericAxis *>(&axis2);
-  if (!spec2) {
-    return false;
-  }
-  return std::equal(m_values.begin(), m_values.end(), spec2->m_values.begin());
+  return equalWithinTolerance(axis2, 1e-15);
 }
 
 /** Check if two numeric axis are equivalent to a given tolerance
@@ -163,21 +156,16 @@ bool NumericAxis::operator==(const Axis &axis2) const {
  */
 bool NumericAxis::equalWithinTolerance(const Axis &axis2,
                                        const double tolerance) const {
+  if (length() != axis2.length()) {
+    return false;
+  }
   const NumericAxis *spec2 = dynamic_cast<const NumericAxis *>(&axis2);
   if (!spec2) {
     return false;
   }
-
-  const std::vector<double> otherValues = spec2->getValues();
-
-  // Fail comparison if number of values differs
-  if (m_values.size() != otherValues.size()) {
-    return false;
-  }
-
   // Check each value is within tolerance
   g_tolerance = tolerance;
-  return std::equal(m_values.begin(), m_values.end(), otherValues.begin(),
+  return std::equal(m_values.begin(), m_values.end(), spec2->m_values.begin(),
                     withinTolerance);
 }
 
