@@ -10,6 +10,12 @@
 #include "MantidKernel/Logger.h"
 namespace {
 Mantid::Kernel::Logger g_log("NumericAxis");
+
+// For variable tolerance comparison for axis values
+double g_tolerance;
+bool withinTolerance(double a, double b) {
+  return std::abs(a - b) <= g_tolerance;
+}
 }
 
 namespace Mantid {
@@ -170,13 +176,9 @@ bool NumericAxis::equalWithinTolerance(const Axis &axis2,
   }
 
   // Check each value is within tolerance
-  for (size_t i = 0; i < m_values.size(); i++) {
-    if (std::abs(m_values[i] - otherValues[i]) > tolerance) {
-      return false;
-    }
-  }
-
-  return true;
+  g_tolerance = tolerance;
+  return std::equal(m_values.begin(), m_values.end(), otherValues.begin(),
+                    withinTolerance);
 }
 
 /** Returns a text label which shows the value at index and identifies the

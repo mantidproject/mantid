@@ -187,6 +187,34 @@ public:
     TS_ASSERT( !axis1.equalWithinTolerance(axis2, 0.0001) );
   }
 
+  void test_equalWithinTolerance_Nan()
+  {
+    double points1[] = {1.0, 2.0, FP_NAN, 4.0, 5.0};
+    double points2[] = {1.0, 2.0, FP_NAN, 4.0, 5.0};
+    double points3[] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    const size_t npoints(5);
+    NumericAxis axis1(std::vector<double>(points1, points1 + npoints));
+    NumericAxis axis2(std::vector<double>(points2, points2 + npoints));
+    NumericAxis axis3(std::vector<double>(points3, points3 + npoints));
+
+    TS_ASSERT( axis1.equalWithinTolerance(axis2, 0.01) );
+    TS_ASSERT( !axis1.equalWithinTolerance(axis3, 0.01) );
+  }
+
+  void test_equalWithinTolerance_Inf()
+  {
+    double points1[] = {1.0, 2.0, FP_INFINITE, 4.0, 5.0};
+    double points2[] = {1.0, 2.0, FP_INFINITE, 4.0, 5.0};
+    double points3[] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    const size_t npoints(5);
+    NumericAxis axis1(std::vector<double>(points1, points1 + npoints));
+    NumericAxis axis2(std::vector<double>(points2, points2 + npoints));
+    NumericAxis axis3(std::vector<double>(points3, points3 + npoints));
+
+    TS_ASSERT( axis1.equalWithinTolerance(axis2, 0.01) );
+    TS_ASSERT( !axis1.equalWithinTolerance(axis3, 0.01) );
+  }
+
   //-------------------------------- Failure cases ----------------------------
 
   void test_indexOfValue_Throws_When_Input_Not_In_Axis_Range()
