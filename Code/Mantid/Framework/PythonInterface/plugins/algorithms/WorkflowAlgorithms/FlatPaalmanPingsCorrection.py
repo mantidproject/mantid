@@ -82,33 +82,14 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
         self._setup()
         self._wave_range()
 
+        # Set sample material form chemical formula
         SetSampleMaterial(self._sample_ws_name , ChemicalFormula=self._sample_chemical_formula,
                           SampleNumberDensity=self._sample_number_density)
-        sample = mtd[self._sample_ws_name].sample()
-        sam_material = sample.getMaterial()
-        # total scattering x-section
-        sigs = [sam_material.totalScatterXSection()]
-        # absorption x-section
-        siga = [sam_material.absorbXSection()]
-        size = [self._sample_thickness]
-        density = [self._sample_number_density]
 
+        # If using a can, set sample material using chemical formula
         if self._usecan:
             SetSampleMaterial(InputWorkspace=self._can_ws_name, ChemicalFormula=self._can_chemical_formula,
                               SampleNumberDensity=self._can_number_density)
-            can_sample = mtd[self._can_ws_name].sample()
-            can_material = can_sample.getMaterial()
-
-            # total scattering x-section for can
-            sigs.append(can_material.totalScatterXSection())
-            sigs.append(can_material.totalScatterXSection())
-            # absorption x-section for can
-            siga.append(can_material.absorbXSection())
-            siga.append(can_material.absorbXSection())
-            size.append(self._can_thickness1)
-            size.append(self._can_thickness2)
-            density.append(self._can_number_density)
-            density.append(self._can_number_density)
 
         dataA1 = []
         dataA2 = []
@@ -116,11 +97,11 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
         dataA4 = []
 
         self._get_angles()
-        number_angles = len(self._angles)
+        num_angles = len(self._angles)
 
-        for angle_idx in range(number_angles):
-            angles = [self._sample_angle, self._angles[angle_idx]]
-            (A1, A2, A3, A4) = self._flatAbs(size, density, sigs, siga, angles, self._waves)
+        for angle_idx in range(num_angles):
+            angle = self._angles[angle_idx]
+            (A1, A2, A3, A4) = self._flatAbs(angle)
 
             logger.information('Angle ' + str(angle_idx+1) + ' : ' + str(self._angles[angle_idx]) + ' successful')
 
@@ -131,12 +112,12 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
 
         sample_logs = {'sample_shape': 'flatplate', 'sample_filename': self._sample_ws_name,
                         'sample_thickness': self._sample_thickness, 'sample_angle': self._sample_angle}
-        dataX = self._waves * number_angles
+        dataX = self._waves * num_angles
 
         # Create the output workspaces
         ass_ws = self._output_ws_name + '_ass'
         CreateWorkspace(OutputWorkspace=ass_ws, DataX=dataX, DataY=dataA1,
-                        NSpec=number_angles, UnitX='Wavelength')
+                        NSpec=num_angles, UnitX='Wavelength')
         self._addSampleLogs(ass_ws, sample_logs)
 
         workspaces = [ass_ws]
@@ -147,21 +128,21 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
             assc_ws = self._output_ws_name + '_assc'
             workspaces.append(assc_ws)
             CreateWorkspace(OutputWorkspace=assc_ws, DataX=dataX, DataY=dataA2,
-                            NSpec=number_angles, UnitX='Wavelength')
+                            NSpec=num_angles, UnitX='Wavelength')
             self._addSampleLogs(assc_ws, sample_logs)
             AddSampleLog(Workspace=assc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
 
             acsc_ws = self._output_ws_name + '_acsc'
             workspaces.append(acsc_ws)
             CreateWorkspace(OutputWorkspace=acsc_ws, DataX=dataX, DataY=dataA3,
-                            NSpec=number_angles, UnitX='Wavelength')
+                            NSpec=num_angles, UnitX='Wavelength')
             self._addSampleLogs(acsc_ws, sample_logs)
             AddSampleLog(Workspace=acsc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
 
             acc_ws = self._output_ws_name + '_acc'
             workspaces.append(acc_ws)
             CreateWorkspace(OutputWorkspace=acc_ws, DataX=dataX, DataY=dataA4,
-                            NSpec=number_angles, UnitX='Wavelength')
+                            NSpec=num_angles, UnitX='Wavelength')
             self._addSampleLogs(acc_ws, sample_logs)
             AddSampleLog(Workspace=acc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
 
@@ -220,7 +201,7 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
         if self._emode == 'Indirect':
             self._elastic = math.sqrt(81.787/self._efixed)  # elastic wavelength
         logger.information('Elastic lambda %f' % self._elastic)
-        # DeleteWorkspace(wave_range)
+        DeleteWorkspace(wave_range)
 
 
     def _addSampleLogs(self, ws, sample_logs):
@@ -244,7 +225,7 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
             AddSampleLog(Workspace=ws, LogName=key, LogType=log_type, LogText=str(value))
 
 
-    def _flatAbs(self, thick, density, sigs, siga, angles, waves):
+    def _flatAbs(self, angle):
         """
         FlatAbs - calculate flat plate absorption factors
 
@@ -252,69 +233,60 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
           - MODES User Guide: http://www.isis.stfc.ac.uk/instruments/iris/data-analysis/modes-v3-user-guide-6962.pdf
           - C J Carlile, Rutherford Laboratory report, RL-74-103 (1974)
 
-        @param sigs - list of scattering  cross-sections
-        @param siga - list of absorption cross-sections
-        @param density - list of density
-        @param thick - list of thicknesses: sample thickness, can thickness1, can thickness2
-        @param angles - list of angles
-        @param waves - list of wavelengths
+        @param angle - angle
         """
         PICONV = math.pi / 180.0
 
-        #can angle and detector angle
-        tcan1, theta1 = angles
-        canAngle = tcan1 * PICONV
+        canAngle = self._sample_angle * PICONV
 
         # tsec is the angle the scattered beam makes with the normal to the sample surface.
-        tsec = theta1-tcan1
+        tsec = angle - self._sample_angle
 
-        nlam = len(waves)
+        nlam = len(self._waves)
 
         ass = np.ones(nlam)
         assc = np.ones(nlam)
         acsc = np.ones(nlam)
         acc = np.ones(nlam)
 
-        # case where tsec is close to 90 degrees. CALCULATION IS UNRELIABLE
-        if abs(abs(tsec)-90.0) < 1.0:
-            #default to 1 for everything
+        # Case where tsec is close to 90 degrees.
+        # CALCULATION IS UNRELIABLE
+        # Default to 1 for everything
+        if abs(abs(tsec) - 90.0) < 1.0:
             return ass, assc, acsc, acc
+
+        sample = mtd[self._sample_ws_name].sample()
+        sam_material = sample.getMaterial()
+
+        tsec = tsec * PICONV
+
+        sec1 = 1.0 / math.cos(canAngle)
+        sec2 = 1.0 / math.cos(tsec)
+
+        #list of wavelengths
+        waves = np.array(self._waves)
+
+        #sample cross section
+        sampleXSection = (sam_material.totalScatterXSection() + sam_material.absorbXSection() * waves / 1.8) * self._sample_number_density
+
+        #vector version of fact
+        vecFact = np.vectorize(self._fact)
+        fs = vecFact(sampleXSection, self._sample_thickness, sec1, sec2)
+
+        sampleSec1, sampleSec2 = self._calc_thickness_at_x_sect(sampleXSection, self._sample_thickness, [sec1, sec2])
+
+        if sec2 < 0.0:
+            ass = fs / self._sample_thickness
         else:
-            #sample & can scattering x-section
-            sampleScatt, canScatt = sigs[:2]
-            #sample & can absorption x-section
-            sampleAbs, canAbs = siga[:2]
-            #sample & can density
-            sampleDensity, canDensity = density[:2]
-            #thickness of the sample and can
-            samThickness, canThickness1, canThickness2 = thick
+            ass= np.exp(-sampleSec2) * fs / self._sample_thickness
 
-            tsec = tsec * PICONV
+        if self._usecan:
+            can_sample = mtd[self._can_ws_name].sample()
+            can_material = can_sample.getMaterial()
 
-            sec1 = 1.0 / math.cos(canAngle)
-            sec2 = 1.0 / math.cos(tsec)
-
-            #list of wavelengths
-            waves = np.array(waves)
-
-            #sample cross section
-            sampleXSection = (sampleScatt + sampleAbs * waves / 1.8) * sampleDensity
-
-            #vector version of fact
-            vecFact = np.vectorize(self._fact)
-            fs = vecFact(sampleXSection, samThickness, sec1, sec2)
-
-            sampleSec1, sampleSec2 = self._calc_thickness_at_x_sect(sampleXSection, samThickness, [sec1, sec2])
-
-            if sec2 < 0.0:
-                ass = fs / samThickness
-            else:
-                ass= np.exp(-sampleSec2) * fs / samThickness
-
-            if self._usecan:
-                #calculate can cross section
-                canXSection = (canScatt + canAbs * waves / 1.8) * canDensity
-                assc, acsc, acc = self._calculate_can(ass, canXSection, canThickness1, canThickness2, sampleSec1, sampleSec2, [sec1, sec2])
+            #calculate can cross section
+            canXSection = (can_material.totalScatterXSection() + can_material.absorbXSection() * waves / 1.8) * self._can_number_density
+            assc, acsc, acc = self._calculate_can(ass, canXSection, self._can_thickness1, self._can_thickness2, sampleSec1, sampleSec2, [sec1, sec2])
 
         return ass, assc, acsc, acc
 
@@ -348,8 +320,8 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
 
         #vector version of fact
         vecFact = np.vectorize(self._fact)
-        f1 = vecFact(canXSection,canThickness1,sec1,sec2)
-        f2 = vecFact(canXSection,canThickness2,sec1,sec2)
+        f1 = vecFact(canXSection, canThickness1, sec1, sec2)
+        f2 = vecFact(canXSection, canThickness2, sec1, sec2)
 
         canThick1Sec1, canThick1Sec2 = self._calc_thickness_at_x_sect(canXSection, canThickness1, sec)
         _, canThick2Sec2 = self._calc_thickness_at_x_sect(canXSection, canThickness2, sec)
@@ -363,6 +335,7 @@ class FlatPaalmanPingsCorrection(PythonAlgorithm):
 
             acsc1 = acc1
             acsc2 = acc2 * np.exp(-(sampleSec1 - sampleSec2))
+
         else:
             val = np.exp(-(canThick1Sec1 + canThick2Sec2))
             assc = ass * val
