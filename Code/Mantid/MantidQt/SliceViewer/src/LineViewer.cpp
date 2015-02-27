@@ -656,6 +656,8 @@ bool LineViewer::getFixedBinWidthMode() const
  * @param ws :: IMDWorkspace */
 void LineViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 {
+  if(!ws)
+    throw std::runtime_error("LineViewer::setWorkspace(): Invalid workspace.");
   m_ws = ws;
   m_thickness = VMD(ws->getNumDims());
   createDimensionWidgets();

@@ -141,7 +141,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
         elif (prop.isValid == ""):
             default_prop = self._create_property_default_string(prop)
         else:
-            default_prop = "Mandatory"
+            default_prop = "*Mandatory*"
         return default_prop
 
     def _create_property_default_string(self, prop):
@@ -162,14 +162,14 @@ class PropertiesDirective(AlgorithmBaseDirective):
         try:
             val = int(default)
             if (val >= 2147483647):
-                defaultstr = "Optional"
+                defaultstr = "*Optional*"
             else:
                 defaultstr = str(val)
         except:
             try:
                 val = float(default)
                 if (val >= 1e+307):
-                    defaultstr = "Optional"
+                    defaultstr = "*Optional*"
                 else:
                     defaultstr = str(val)
             except:
@@ -190,7 +190,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
         if (defaultstr == "8.9884656743115785e+307") or \
            (defaultstr == "1.7976931348623157e+308") or \
            (defaultstr == "2147483647"):
-            defaultstr = "Optional"
+            defaultstr = "*Optional*"
 
         if str(prop.type) == "boolean":
             if defaultstr == "1":
