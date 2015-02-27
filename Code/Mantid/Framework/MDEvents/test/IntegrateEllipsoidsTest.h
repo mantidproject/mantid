@@ -26,7 +26,7 @@ void addFakeEllipsoid(const V3D &peakHKL, const int &totalNPixels,
   // Create the peak and add it to the peaks ws
   Peak *peak = peaksWS->createPeakHKL(peakHKL);
   peaksWS->addPeak(*peak);
-  const double detectorId = peak->getDetectorID();
+  const int detectorId = peak->getDetectorID();
   const double tofExact = peak->getTOF();
   delete peak;
 
@@ -142,9 +142,10 @@ private:
     }
   }
 
+public:
+
   static void destroySuite(IntegrateEllipsoidsTest *suite) { delete suite; }
 
-public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static IntegrateEllipsoidsTest *createSuite() {
@@ -257,16 +258,19 @@ public:
 
 class IntegrateEllipsoidsTestPerformance : public CxxTest::TestSuite {
 
-  static void destroySuite(IntegrateEllipsoidsTestPerformance *suite) {
-    delete suite;
-  }
-
 private:
+
   Mantid::API::MatrixWorkspace_sptr m_eventWS;
   Mantid::DataObjects::PeaksWorkspace_sptr m_peaksWS;
   Mantid::API::MatrixWorkspace_sptr m_histoWS;
 
 public:
+
+  static void destroySuite(IntegrateEllipsoidsTestPerformance *suite) {
+    delete suite;
+  }
+
+
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static IntegrateEllipsoidsTestPerformance *createSuite() {
