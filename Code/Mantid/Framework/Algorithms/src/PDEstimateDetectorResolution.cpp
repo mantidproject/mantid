@@ -225,7 +225,8 @@ void PDEstimateDetectorResolution::estimateDetectorResolution() {
     double centraltof = (m_L1 + l2) / m_centreVelocity;
 
     // Angle
-    double theta = 0.5*m_inputWS->detectorTwoTheta(det);
+    double twotheta = m_inputWS->detectorTwoTheta(det);
+    double theta = 0.5 * twotheta;
 
     // double solidangle = m_solidangleWS->readY(i)[0];
     double solidangle = det->solidAngle(samplepos);
