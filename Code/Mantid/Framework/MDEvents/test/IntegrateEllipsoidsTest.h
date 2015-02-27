@@ -6,6 +6,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <boost/make_shared.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -16,84 +17,87 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 
+namespace {
+// Add A Fake 'Peak' to both the event data and to the peaks workspace
+void addFakeEllipsoid(const V3D &peakHKL, const int &totalNPixels,
+                      const int &nEvents, const double tofGap,
+                      EventWorkspace_sptr &eventWS,
+                      PeaksWorkspace_sptr &peaksWS) {
+  // Create the peak and add it to the peaks ws
+  Peak *peak = peaksWS->createPeakHKL(peakHKL);
+  peaksWS->addPeak(*peak);
+  const double detectorId = peak->getDetectorID();
+  const double tofExact = peak->getTOF();
+  delete peak;
+
+  EventList &el = eventWS->getEventList(detectorId - totalNPixels);
+
+  // Add more events to the event list corresponding to the peak centre
+  double start = tofExact - (double(nEvents) / 2 * tofGap);
+  for (int i = 0; i < nEvents; ++i) {
+    const double tof = start + (i * tofGap);
+    el.addEventQuickly(TofEvent(tof));
+  }
+}
+
+// Create diffraction data for test schenarios
+boost::tuple<EventWorkspace_sptr, PeaksWorkspace_sptr>
+createDiffractionData(const int nPixels = 100, const int nEventsPerPeak = 20,
+                      const double tofGapBetweenEvents = 10) {
+  Mantid::Geometry::Instrument_sptr inst =
+      ComponentCreationHelper::createTestInstrumentRectangular(
+          1 /*num_banks*/, nPixels /*pixels in each direction yields n by n*/,
+          0.01, 1.0);
+
+  // Create a peaks workspace
+  auto peaksWS = boost::make_shared<PeaksWorkspace>();
+  // Set the instrument to be the fake rectangular bank above.
+  peaksWS->setInstrument(inst);
+  // Set the oriented lattice for a cubic crystal
+  OrientedLattice ol(6, 6, 6, 90, 90, 90);
+  ol.setUFromVectors(V3D(6, 0, 0), V3D(0, 6, 0));
+  peaksWS->mutableSample().setOrientedLattice(&ol);
+
+  // Make an event workspace and add fake peak data
+  auto eventWS = boost::make_shared<EventWorkspace>();
+  eventWS->setInstrument(inst);
+  eventWS->initialize(nPixels * nPixels /*n spectra*/, 3 /* x-size */,
+                      3 /* y-size */);
+  eventWS->getAxis(0)->setUnit("TOF");
+  // Give the spectra-detector mapping for all event lists
+  const int nPixelsTotal = nPixels * nPixels;
+  for (int i = 0; i < nPixelsTotal; ++i) {
+    EventList &el = eventWS->getOrAddEventList(i);
+    el.setDetectorID(i + nPixelsTotal);
+  }
+
+  // Add some peaks which should correspond to real reflections (could
+  // calculate these). Same function also adds a fake ellipsoid
+  addFakeEllipsoid(V3D(1, -5, -3), nPixelsTotal, nEventsPerPeak,
+                   tofGapBetweenEvents, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(1, -4, -4), nPixelsTotal, nEventsPerPeak,
+                   tofGapBetweenEvents, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(1, -3, -5), nPixelsTotal, nEventsPerPeak,
+                   tofGapBetweenEvents, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(1, -4, -1), nPixelsTotal, nEventsPerPeak,
+                   tofGapBetweenEvents, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(1, -4, 0), nPixelsTotal, nEventsPerPeak,
+                   tofGapBetweenEvents, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(2, -3, -4), nPixelsTotal, nEventsPerPeak,
+                   tofGapBetweenEvents, eventWS, peaksWS);
+
+  // Return test data.
+  return boost::tuple<EventWorkspace_sptr, PeaksWorkspace_sptr>(eventWS,
+                                                                peaksWS);
+}
+}
+
 class IntegrateEllipsoidsTest : public CxxTest::TestSuite {
 
 private:
-
-  // Add A Fake 'Peak' to both the event data and to the peaks workspace
-  void addFakeEllipsoid(const V3D &peakHKL, const int &totalNPixels,
-                        const int &nEvents, const double tofGap,
-                        EventWorkspace_sptr &eventWS,
-                        PeaksWorkspace_sptr &peaksWS) {
-    // Create the peak and add it to the peaks ws
-    Peak *peak = peaksWS->createPeakHKL(peakHKL);
-    peaksWS->addPeak(*peak);
-    const double detectorId = peak->getDetectorID();
-    const double tofExact = peak->getTOF();
-    delete peak;
-
-    EventList &el = eventWS->getEventList(detectorId - totalNPixels);
-
-    // Add more events to the event list corresponding to the peak centre
-    double start = tofExact - (double(nEvents) / 2 * tofGap);
-    for (int i = 0; i < nEvents; ++i) {
-      const double tof = start + (i * tofGap);
-      el.addEventQuickly(TofEvent(tof));
-    }
-  }
-
-  // Create diffraction data for test schenarios
-  boost::tuple<EventWorkspace_sptr, PeaksWorkspace_sptr>
-  createDiffractionData() {
-    const int nPixels = 100;
-    Mantid::Geometry::Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(
-            1 /*num_banks*/, nPixels /*pixels in each direction yields n by n*/,
-            0.01, 1.0);
-
-    // Create a peaks workspace
-    auto peaksWS = boost::make_shared<PeaksWorkspace>();
-    // Set the instrument to be the fake rectangular bank above.
-    peaksWS->setInstrument(inst);
-    // Set the oriented lattice for a cubic crystal
-    OrientedLattice ol(6, 6, 6, 90, 90, 90);
-    ol.setUFromVectors(V3D(6, 0, 0), V3D(0, 6, 0));
-    peaksWS->mutableSample().setOrientedLattice(&ol);
-
-    // Make an event workspace and add fake peak data
-    auto eventWS = boost::make_shared<EventWorkspace>();
-    eventWS->setInstrument(inst);
-    eventWS->initialize(nPixels * nPixels /*n spectra*/, 3 /* x-size */,
-                        3 /* y-size */);
-    eventWS->getAxis(0)->setUnit("TOF");
-    // Give the spectra-detector mapping for all event lists
-    const int nPixelsTotal = nPixels * nPixels;
-    for (int i = 0; i < nPixelsTotal; ++i) {
-      EventList &el = eventWS->getOrAddEventList(i);
-      el.setDetectorID(i + nPixelsTotal);
-    }
-
-    // Add some peaks which should correspond to real reflections (could
-    // calculate these). Same function also adds a fake ellipsoid
-    const int nEventsPerPeak = 20;
-    const double tofGapBetweenEvents = 10; // microseconds
-    addFakeEllipsoid(V3D(1, -5, -3), nPixelsTotal, nEventsPerPeak,
-                     tofGapBetweenEvents, eventWS, peaksWS);
-    addFakeEllipsoid(V3D(1, -4, -4), nPixelsTotal, nEventsPerPeak,
-                     tofGapBetweenEvents, eventWS, peaksWS);
-    addFakeEllipsoid(V3D(1, -3, -5), nPixelsTotal, nEventsPerPeak,
-                     tofGapBetweenEvents, eventWS, peaksWS);
-    addFakeEllipsoid(V3D(1, -4, -1), nPixelsTotal, nEventsPerPeak,
-                     tofGapBetweenEvents, eventWS, peaksWS);
-    addFakeEllipsoid(V3D(1, -4, 0), nPixelsTotal, nEventsPerPeak,
-                     tofGapBetweenEvents, eventWS, peaksWS);
-    addFakeEllipsoid(V3D(2, -3, -4), nPixelsTotal, nEventsPerPeak,
-                     tofGapBetweenEvents, eventWS, peaksWS);
-
-    // Return test data.
-    return boost::tuple<EventWorkspace_sptr, PeaksWorkspace_sptr>(eventWS,
-                                                                  peaksWS);
-  }
+  Mantid::DataObjects::EventWorkspace_sptr m_eventWS;
+  Mantid::DataObjects::PeaksWorkspace_sptr m_peaksWS;
+  Mantid::API::MatrixWorkspace_sptr m_histoWS;
 
   // Check that n-peaks from the workspace are integrated as we expect
   void do_test_n_peaks(PeaksWorkspace_sptr &integratedPeaksWS,
@@ -148,40 +152,14 @@ public:
   }
 
   IntegrateEllipsoidsTest() {
-    // Because otherwise PreprocessDectectorsToMD cannot be found!
+
+    // Need to get and run algorithms from elsewhere in the framework.
     Mantid::API::FrameworkManager::Instance();
-  }
 
-  void test_init() {
-    Mantid::MDEvents::IntegrateEllipsoids alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-  }
+    auto data = createDiffractionData();
 
-  void test_execution_events() {
-    auto out = createDiffractionData();
-    EventWorkspace_sptr eventWS = out.get<0>();
-    PeaksWorkspace_sptr peaksWS = out.get<1>();
-
-    IntegrateEllipsoids alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", eventWS);
-    alg.setProperty("PeaksWorkspace", peaksWS);
-    alg.setPropertyValue("OutputWorkspace", "dummy");
-    alg.execute();
-    PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
-    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
-                      integratedPeaksWS->getNumberPeaks(),
-                      peaksWS->getNumberPeaks());
-
-    do_test_n_peaks(integratedPeaksWS, 3 /*check first 3 peaks*/);
-  }
-
-  void test_execution_histograms() {
-    auto out = createDiffractionData();
-    EventWorkspace_sptr eventWS = out.get<0>();
-    PeaksWorkspace_sptr peaksWS = out.get<1>();
+    m_eventWS = data.get<0>();
+    m_peaksWS = data.get<1>();
 
     /*
      Simply rebin the event workspace to a histo workspace to create the input
@@ -191,7 +169,7 @@ public:
         Mantid::API::AlgorithmManager::Instance().createUnmanaged("Rebin");
     rebinAlg->setChild(true);
     rebinAlg->initialize();
-    rebinAlg->setProperty("InputWorkspace", eventWS);
+    rebinAlg->setProperty("InputWorkspace", m_eventWS);
     auto params = std::vector<double>();
     params.push_back(950);
     params.push_back(10);
@@ -200,23 +178,164 @@ public:
     rebinAlg->setProperty("PreserveEvents", false); // Make a histo workspace
     rebinAlg->setPropertyValue("OutputWorkspace", "dummy");
     rebinAlg->execute();
-    Mantid::API::MatrixWorkspace_sptr histoWS =
-        rebinAlg->getProperty("OutputWorkspace");
+
+    m_histoWS = rebinAlg->getProperty("OutputWorkspace");
+  }
+
+  void test_init() {
+    Mantid::MDEvents::IntegrateEllipsoids alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+  }
+
+  void test_ws_has_instrument()
+  {
+      auto inputWorkspaceNoInstrument =
+          boost::make_shared<EventWorkspace>();
+
+      IntegrateEllipsoids alg;
+      alg.setChild(true);
+      alg.setRethrows(true);
+      alg.initialize();
+      TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", inputWorkspaceNoInstrument), std::invalid_argument&);
+  }
+
+
+  void test_event_or_workspace2d_inputs_only() {
+
+    auto otherMatrixWorkspaceInstance =
+        boost::make_shared<WorkspaceSingleValue>();
+    otherMatrixWorkspaceInstance->setInstrument(m_eventWS->getInstrument());
 
     IntegrateEllipsoids alg;
     alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
-    alg.setProperty("InputWorkspace", histoWS);
-    alg.setProperty("PeaksWorkspace", peaksWS);
+    alg.setProperty("InputWorkspace", otherMatrixWorkspaceInstance);
+    alg.setProperty("PeaksWorkspace", m_peaksWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+
+    TSM_ASSERT_THROWS("Only these two subtypes of Matrix workspace allowed",
+                     alg.execute(), std::runtime_error &);
+  }
+
+  void test_execution_events() {
+
+    IntegrateEllipsoids alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_eventWS);
+    alg.setProperty("PeaksWorkspace", m_peaksWS);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
     TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
                       integratedPeaksWS->getNumberPeaks(),
-                      peaksWS->getNumberPeaks());
+                      m_peaksWS->getNumberPeaks());
 
     do_test_n_peaks(integratedPeaksWS, 3 /*check first 3 peaks*/);
+  }
 
+  void test_execution_histograms() {
+
+    IntegrateEllipsoids alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_histoWS);
+    alg.setProperty("PeaksWorkspace", m_peaksWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
+                      integratedPeaksWS->getNumberPeaks(),
+                      m_peaksWS->getNumberPeaks());
+
+    do_test_n_peaks(integratedPeaksWS, 3 /*check first 3 peaks*/);
+  }
+};
+
+class IntegrateEllipsoidsTestPerformance : public CxxTest::TestSuite {
+
+  static void destroySuite(IntegrateEllipsoidsTestPerformance *suite) {
+    delete suite;
+  }
+
+private:
+  Mantid::API::MatrixWorkspace_sptr m_eventWS;
+  Mantid::DataObjects::PeaksWorkspace_sptr m_peaksWS;
+  Mantid::API::MatrixWorkspace_sptr m_histoWS;
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static IntegrateEllipsoidsTestPerformance *createSuite() {
+    return new IntegrateEllipsoidsTestPerformance();
+  }
+
+  IntegrateEllipsoidsTestPerformance() {
+    // Need to get and run algorithms from elsewhere in the framework.
+    Mantid::API::FrameworkManager::Instance();
+
+    auto data = createDiffractionData(200 /*sqrt total pixels*/,
+                                      60 /*events per peak*/, 2 /*tof gap*/);
+
+    m_eventWS = data.get<0>();
+    m_peaksWS = data.get<1>();
+
+    /*
+     Simply rebin the event workspace to a histo workspace to create the input
+     we need.
+    */
+    auto rebinAlg =
+        Mantid::API::AlgorithmManager::Instance().createUnmanaged("Rebin");
+    rebinAlg->setChild(true);
+    rebinAlg->initialize();
+    rebinAlg->setProperty("InputWorkspace", m_eventWS);
+    auto params = std::vector<double>();
+    params.push_back(950);
+    params.push_back(5);
+    params.push_back(2500);
+    rebinAlg->setProperty("Params", params);
+    rebinAlg->setProperty("PreserveEvents", false); // Make a histo workspace
+    rebinAlg->setPropertyValue("OutputWorkspace", "dummy");
+    rebinAlg->execute();
+
+    m_histoWS = rebinAlg->getProperty("OutputWorkspace");
+  }
+
+  void test_execution_events() {
+
+    IntegrateEllipsoids alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_eventWS);
+    alg.setProperty("PeaksWorkspace", m_peaksWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+
+    PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
+
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
+                      integratedPeaksWS->getNumberPeaks(),
+                      m_peaksWS->getNumberPeaks());
+  }
+
+  void test_execution_histograms() {
+
+    IntegrateEllipsoids alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_histoWS);
+    alg.setProperty("PeaksWorkspace", m_peaksWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
+
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
+                      integratedPeaksWS->getNumberPeaks(),
+                      m_peaksWS->getNumberPeaks());
   }
 };
