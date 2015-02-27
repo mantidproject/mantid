@@ -97,6 +97,17 @@ private:
   /// Cached typename.
   std::string typeName;
 
+
+  // This is part of a workaround for a ParaView providing not the start time of 
+  // of current data set. 
+  ///Startup flag
+  bool m_isStartup;
+
+  // This is part of a workaround for a ParaView providing not the start time of 
+  // of current data set. 
+  /// Startup time value
+  double m_startupTimeValue;
+
   vtkMDEWSource(const vtkMDEWSource&);
   void operator = (const vtkMDEWSource&);
   void setTimeRange(vtkInformationVector* outputVector);

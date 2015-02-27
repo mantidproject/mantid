@@ -1,4 +1,4 @@
-#include "MantidVatesSimpleGuiViewWidgets/SourcesManager.h"
+#include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -48,27 +48,27 @@ namespace Mantid
 
     namespace
     {
-      Mantid::Kernel::Logger g_log("SourcesManager");
+      Mantid::Kernel::Logger g_log("RebinnedSourcesManager");
     }
 
-      SourcesManager::SourcesManager(QWidget* parent) : QWidget(parent), m_tempPostfix("_tempvsi"), m_tempPrefix("__")
+      RebinnedSourcesManager::RebinnedSourcesManager(QWidget* parent) : QWidget(parent), m_tempPostfix("_tempvsi"), m_tempPrefix("__")
       {
         observeAdd();
         observePreDelete();
       }
 
-      SourcesManager::~SourcesManager()
+      RebinnedSourcesManager::~RebinnedSourcesManager()
       {
       }
 
       /**
-       * Checks if a temporary MDHisto workspace was added and invokes a replacement procedure
+       * Checks if a rebinned MDHisto workspace was added and invokes a replacement procedure
        * @param workspaceName Name of the workspace.
        * @param workspace A pointer to the added workspace.
        */
-      void SourcesManager::addHandle(const std::string &workspaceName, Mantid::API::Workspace_sptr workspace)
+      void RebinnedSourcesManager::addHandle(const std::string &workspaceName, Mantid::API::Workspace_sptr workspace)
       {
-        if (m_temporaryWorkspaceToOriginalWorkspace.count(workspaceName) > 0 || m_temporaryWorkspaceToTemporaryWorkspace.count(workspaceName) > 0)
+        if (m_rebinnedWorkspaceToOriginalWorkspace.count(workspaceName) > 0 || m_rebinnedWorkspaceToRebinnedWorkspace.count(workspaceName) > 0)
         {
           std::string sourceType;
           Mantid::API::IMDEventWorkspace_sptr eventWorkspace = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(workspace);
@@ -92,18 +92,18 @@ namespace Mantid
       }
   
       /**
-       * Catch the deletion of either the temporary or the original workspace.
+       * Catch the deletion of either the rebinned or the original workspace.
        * @param wsName The name of the workspace.
        * @param ws The handle to the workspace
        */
-      void SourcesManager::preDeleteHandle(const std::string &wsName, const boost::shared_ptr<Mantid::API::Workspace> ws)
+      void RebinnedSourcesManager::preDeleteHandle(const std::string &wsName, const boost::shared_ptr<Mantid::API::Workspace> ws)
       {
-        // If the original workspace has been deleted, then delete the temporary
+        // If the original workspace has been deleted, then delete the rebinned
         // source (and workspace via the listener)
-        if (m_originalWorkspaceToTemporaryWorkspace.count(wsName))
+        if (m_originalWorkspaceToRebinnedWorkspace.count(wsName))
         {
-          // Get the temporary source and destroy the entire pipeline
-          pqPipelineSource* source = getSourceForWorkspace(m_originalWorkspaceToTemporaryWorkspace[wsName]);
+          // Get the rebinned source and destroy the entire pipeline
+          pqPipelineSource* source = getSourceForWorkspace(m_originalWorkspaceToRebinnedWorkspace[wsName]);
 
           // Go to the end of the pipeline
           while(source->getNumberOfConsumers() > 0)
@@ -123,7 +123,7 @@ namespace Mantid
           }
 
           builder->destroy(source); // The listener takes now care of the workspace.
-          untrackWorkspaces(m_originalWorkspaceToTemporaryWorkspace[wsName]);
+          untrackWorkspaces(m_originalWorkspaceToRebinnedWorkspace[wsName]);
         }
       }
 
@@ -132,9 +132,9 @@ namespace Mantid
        * @param source The pipeline source.
        * @param inputWorkspace Reference for the name of the input workspace.
        * @param outputWorkspace Reference for the name of the output workspace.
-       * @param algorithmType The type of the algorithm which will be used to create the temporary source.
+       * @param algorithmType The type of the algorithm which will be used to create the rebinned source.
        */
-      void SourcesManager::checkSource(pqPipelineSource* source, std::string& inputWorkspace, std::string& outputWorkspace, std::string algorithmType)
+      void RebinnedSourcesManager::checkSource(pqPipelineSource* source, std::string& inputWorkspace, std::string& outputWorkspace, std::string algorithmType)
       {
         std::string workspaceName;
         std::string workspaceType;
@@ -156,7 +156,7 @@ namespace Mantid
        * @param workspaceName Reference to workspace name.
        * @param workspaceType Reference to workspace type.
        */
-      void SourcesManager::getWorkspaceInfo(pqPipelineSource* source, std::string& workspaceName, std::string& workspaceType)
+      void RebinnedSourcesManager::getWorkspaceInfo(pqPipelineSource* source, std::string& workspaceName, std::string& workspaceType)
       {
         // Make sure that the input source exists. Note that this can happen when there is no active view
         if (!source)
@@ -196,53 +196,53 @@ namespace Mantid
       }
 
       /**
-       * Creates the pipeline for the temporary source.
-       * @param temporarySource The name of the temporary source.
+       * Creates the pipeline for the rebinned source.
+       * @param rebinnedSource The name of the rebinned source.
        * @param sourceToBeDeleted The name of the sources which needs to be removed from the pipeline browser.
        */
-      void SourcesManager::repipeTemporarySource(std::string temporarySource, std::string& sourceToBeDeleted)
+      void RebinnedSourcesManager::repipeRebinnedSource(std::string rebinnedSource, std::string& sourceToBeDeleted)
       {
         // We need to check if the source from which we receive our filters is the original source or 
-        // a temporary source.
-        if (m_temporaryWorkspaceToTemporaryWorkspace.count(temporarySource) == 0)
+        // a rebinned source.
+        if (m_rebinnedWorkspaceToRebinnedWorkspace.count(rebinnedSource) == 0)
         {
-          std::string originalSource = m_temporaryWorkspaceToOriginalWorkspace[temporarySource];
+          std::string originalSource = m_rebinnedWorkspaceToOriginalWorkspace[rebinnedSource];
 
           // Swap with the original source
-          swapSources(originalSource, temporarySource);
+          swapSources(originalSource, rebinnedSource);
 
           sourceToBeDeleted = originalSource;
         }
         else
         {
-          std::string oldTemporarySource = m_temporaryWorkspaceToTemporaryWorkspace[temporarySource];
-          std::string originalSource = m_temporaryWorkspaceToOriginalWorkspace[oldTemporarySource];
+          std::string oldRebinnedSource = m_rebinnedWorkspaceToRebinnedWorkspace[rebinnedSource];
+          std::string originalSource = m_rebinnedWorkspaceToOriginalWorkspace[oldRebinnedSource];
 
-          // Swap with the other temporary source
-          swapSources(oldTemporarySource, temporarySource);
+          // Swap with the other rebinned source
+          swapSources(oldRebinnedSource, rebinnedSource);
           
-          sourceToBeDeleted = oldTemporarySource;
+          sourceToBeDeleted = oldRebinnedSource;
 
-          m_originalWorkspaceToTemporaryWorkspace.insert(std::pair<std::string, std::string>(originalSource, temporarySource));
-          m_temporaryWorkspaceToOriginalWorkspace.insert(std::pair<std::string, std::string>(temporarySource, originalSource));
+          m_originalWorkspaceToRebinnedWorkspace.insert(std::pair<std::string, std::string>(originalSource, rebinnedSource));
+          m_rebinnedWorkspaceToOriginalWorkspace.insert(std::pair<std::string, std::string>(rebinnedSource, originalSource));
 
-          // Unregister the connection between the two temporary sources.
-          m_temporaryWorkspaceToTemporaryWorkspace.erase(temporarySource);
+          // Unregister the connection between the two rebinned sources.
+          m_rebinnedWorkspaceToRebinnedWorkspace.erase(rebinnedSource);
         }
       }
 
       /**
        * Creates the pipeline for the original source.
-       * @param temporarySource The name of the temporary source.
+       * @param rebinnedSource The name of the rebinned source.
        * @param originalSource The name of the original source.
        */
-      void SourcesManager::repipeOriginalSource(std::string temporarySource, std::string originalSource)
+      void RebinnedSourcesManager::repipeOriginalSource(std::string rebinnedSource, std::string originalSource)
       {
-        // Swap source from temporary source to original source.
-        swapSources(temporarySource, originalSource);
+        // Swap source from rebinned source to original source.
+        swapSources(rebinnedSource, originalSource);
 
-        m_originalWorkspaceToTemporaryWorkspace.erase(originalSource);
-        m_temporaryWorkspaceToOriginalWorkspace.erase(temporarySource);
+        m_originalWorkspaceToRebinnedWorkspace.erase(originalSource);
+        m_rebinnedWorkspaceToOriginalWorkspace.erase(rebinnedSource);
       }
 
       /**
@@ -250,14 +250,14 @@ namespace Mantid
        * @param source1 First source.
        * @param source2 Second source.
        */
-      void SourcesManager::swapSources(std::string source1, std::string source2)
+      void RebinnedSourcesManager::swapSources(std::string source1, std::string source2)
       {
         pqPipelineSource* src1= getSourceForWorkspace(source1);
         pqPipelineSource* src2 = getSourceForWorkspace(source2);
 
         if (!src1 || !src2)
         {
-          throw std::runtime_error("VSI error: Either the original or temporary source don't seem to exist.");
+          throw std::runtime_error("VSI error: Either the original or rebinned source don't seem to exist.");
         }
 
         // Check that both sources contain non-empty data sets
@@ -265,6 +265,8 @@ namespace Mantid
         // Check if the original source has a filter if such then repipe otherwise we are done
         if ((src1->getAllConsumers()).size() <= 0)
         {
+          // Need to press apply to finalize the internal setup of the source.
+          //emit triggerAcceptForNewFilters();
           return;
         }
 
@@ -279,9 +281,9 @@ namespace Mantid
        * Get the stored workspace names assoicated with a source.
        * @param source The name of the source.
        * @param originalWorkspaceName The name of the original workspace.
-       * @param temporaryWorkspaceName The name of the temporary workspace.
+       * @param rebinnedWorkspaceName The name of the rebinned workspace.
        */
-      void SourcesManager::getStoredWorkspaceNames(pqPipelineSource* source, std::string& originalWorkspaceName, std::string& temporaryWorkspaceName)
+      void RebinnedSourcesManager::getStoredWorkspaceNames(pqPipelineSource* source, std::string& originalWorkspaceName, std::string& rebinnedWorkspaceName)
       {
         if (!source)
         {
@@ -293,15 +295,15 @@ namespace Mantid
         std::string workspaceType;
         getWorkspaceInfo(source, workspaceName, workspaceType);
 
-        // The input can either be a temporary source or a 
-        if (m_temporaryWorkspaceToOriginalWorkspace.count(workspaceName) > 0)
+        // The input can either be a rebinned source or a 
+        if (m_rebinnedWorkspaceToOriginalWorkspace.count(workspaceName) > 0)
         {
-          originalWorkspaceName = m_temporaryWorkspaceToOriginalWorkspace[workspaceName];
-          temporaryWorkspaceName = workspaceName;
-        } else if (m_originalWorkspaceToTemporaryWorkspace.count(workspaceName) > 0)
+          originalWorkspaceName = m_rebinnedWorkspaceToOriginalWorkspace[workspaceName];
+          rebinnedWorkspaceName = workspaceName;
+        } else if (m_originalWorkspaceToRebinnedWorkspace.count(workspaceName) > 0)
         {
           originalWorkspaceName = workspaceName;
-          temporaryWorkspaceName = m_originalWorkspaceToTemporaryWorkspace[workspaceName];
+          rebinnedWorkspaceName = m_originalWorkspaceToRebinnedWorkspace[workspaceName];
         }
       }
 
@@ -309,7 +311,7 @@ namespace Mantid
        * Get the desired source
        * @param workspaceName The workspace name associated with the source.
        */
-      pqPipelineSource* SourcesManager::getSourceForWorkspace(std::string workspaceName)
+      pqPipelineSource* RebinnedSourcesManager::getSourceForWorkspace(std::string workspaceName)
       {
         pqServer *server = pqActiveObjects::instance().activeServer();
         pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
@@ -343,9 +345,9 @@ namespace Mantid
        * @param inputWorkspace Reference to the input workpspace.
        * @param outputWorkspace Reference to the output workspace.
        * @param workspaceName The name of the workspace of the current source.
-       * @param algorithmType The algorithm which creates the temporary source.
+       * @param algorithmType The algorithm which creates the rebinned source.
        */
-      void SourcesManager::processWorkspaceNames(std::string& inputWorkspace, std::string& outputWorkspace, std::string workspaceName, std::string algorithmType)
+      void RebinnedSourcesManager::processWorkspaceNames(std::string& inputWorkspace, std::string& outputWorkspace, std::string workspaceName, std::string algorithmType)
       {
         // If the workspace is the original workspace
         if (workspaceName.find(m_tempPostfix) == std::string::npos)
@@ -354,56 +356,56 @@ namespace Mantid
           outputWorkspace =  m_tempPrefix + workspaceName + algorithmType + m_tempPostfix;
 
           // Record the workspace
-          m_originalWorkspaceToTemporaryWorkspace.insert(std::pair<std::string, std::string>(inputWorkspace, outputWorkspace));
-          m_temporaryWorkspaceToOriginalWorkspace.insert(std::pair<std::string, std::string>(outputWorkspace, inputWorkspace));
-        } // If the workspace is temporary and was created with the same algorithm as the currently selected one.
+          m_originalWorkspaceToRebinnedWorkspace.insert(std::pair<std::string, std::string>(inputWorkspace, outputWorkspace));
+          m_rebinnedWorkspaceToOriginalWorkspace.insert(std::pair<std::string, std::string>(outputWorkspace, inputWorkspace));
+        } // If the workspace is rebinned and was created with the same algorithm as the currently selected one.
         else if (workspaceName.find(algorithmType) != std::string::npos) 
         {
-          if (m_temporaryWorkspaceToOriginalWorkspace.count(workspaceName) > 0)
+          if (m_rebinnedWorkspaceToOriginalWorkspace.count(workspaceName) > 0)
           {
-            inputWorkspace = m_temporaryWorkspaceToOriginalWorkspace[workspaceName];
+            inputWorkspace = m_rebinnedWorkspaceToOriginalWorkspace[workspaceName];
             outputWorkspace = workspaceName;
           }
         }
-        else // If the workspace is temporary but was not created with the same algorithm as the currently selected one.
+        else // If the workspace is rebinned but was not created with the same algorithm as the currently selected one.
         {
-          if (m_temporaryWorkspaceToOriginalWorkspace.count(workspaceName) > 0)
+          if (m_rebinnedWorkspaceToOriginalWorkspace.count(workspaceName) > 0)
           {
-            inputWorkspace = m_temporaryWorkspaceToOriginalWorkspace[workspaceName];
+            inputWorkspace = m_rebinnedWorkspaceToOriginalWorkspace[workspaceName];
             outputWorkspace = m_tempPrefix + inputWorkspace + algorithmType + m_tempPostfix;
 
-            // Map the new temporary workspace name to the old temporary workspace name
-            m_temporaryWorkspaceToTemporaryWorkspace.insert(std::pair<std::string, std::string>(outputWorkspace, workspaceName));
+            // Map the new rebinned workspace name to the old rebinned workspace name
+            m_rebinnedWorkspaceToRebinnedWorkspace.insert(std::pair<std::string, std::string>(outputWorkspace, workspaceName));
           }
         }
       }
 
       /**
        * Stop keeping tabs on the specific workspace pair
-       * @param temporaryWorspace The name of the temporary workspace.
+       * @param rebinnedWorspace The name of the rebinned workspace.
        */
-      void SourcesManager::untrackWorkspaces(std::string temporaryWorkspace)
+      void RebinnedSourcesManager::untrackWorkspaces(std::string rebinnedWorkspace)
       {
-        std::string originalWorkspace = m_temporaryWorkspaceToOriginalWorkspace[temporaryWorkspace];
+        std::string originalWorkspace = m_rebinnedWorkspaceToOriginalWorkspace[rebinnedWorkspace];
 
-        // Remove the mapping ofthe temporary workspace to the original workspace.
-        if (m_temporaryWorkspaceToOriginalWorkspace.count(temporaryWorkspace) > 0)
+        // Remove the mapping ofthe rebinned workspace to the original workspace.
+        if (m_rebinnedWorkspaceToOriginalWorkspace.count(rebinnedWorkspace) > 0)
         {
-          m_temporaryWorkspaceToOriginalWorkspace.erase(temporaryWorkspace);
+          m_rebinnedWorkspaceToOriginalWorkspace.erase(rebinnedWorkspace);
         }
 
-        // Remove the mapping of the original workspace to the temporary workspace, if the mapping is still intact.
-        if (m_originalWorkspaceToTemporaryWorkspace.count(originalWorkspace) > 0 && m_originalWorkspaceToTemporaryWorkspace[originalWorkspace] == temporaryWorkspace)
+        // Remove the mapping of the original workspace to the rebinned workspace, if the mapping is still intact.
+        if (m_originalWorkspaceToRebinnedWorkspace.count(originalWorkspace) > 0 && m_originalWorkspaceToRebinnedWorkspace[originalWorkspace] == rebinnedWorkspace)
         {
-          m_originalWorkspaceToTemporaryWorkspace.erase(originalWorkspace);
+          m_originalWorkspaceToRebinnedWorkspace.erase(originalWorkspace);
         }
       }
 
       /**
-       * Register the temporary source. Specifically, connect to the destroyed signal of the temporary source.
-       * @param source The temporary source.
+       * Register the rebinned source. Specifically, connect to the destroyed signal of the rebinned source.
+       * @param source The rebinned source.
        */
-      void SourcesManager::registerTemporarySource(pqPipelineSource* source)
+      void RebinnedSourcesManager::registerRebinnedSource(pqPipelineSource* source)
       {
         if (!source)
         {
@@ -411,28 +413,28 @@ namespace Mantid
         }
 
         QObject::connect(source, SIGNAL(destroyed()),
-                         this, SLOT(onTemporarySourceDestroyed()));
+                         this, SLOT(onRebinnedSourceDestroyed()));
       }
 
       /**
-       * React to the deletion of a temporary source.
+       * React to the deletion of a rebinned source.
        */
-      void SourcesManager::onTemporarySourceDestroyed()
+      void RebinnedSourcesManager::onRebinnedSourceDestroyed()
       {
-        removeUnusedTemporaryWorkspaces();
+        removeUnusedRebinnedWorkspaces();
       }
 
       /**
-       * Remove unused temporary workspaces, by comparing the workspaces against the sources.
+       * Remove unused rebinned workspaces, by comparing the workspaces against the sources.
        */
-      void SourcesManager::removeUnusedTemporaryWorkspaces()
+      void RebinnedSourcesManager::removeUnusedRebinnedWorkspaces()
       {
         // Iterate through all workspaces and check for ones ending with the tempIdentifier
         std::set<std::string> workspaceNames = Mantid::API::AnalysisDataService::Instance().getObjectNamesInclHidden();
   
         for (std::set<std::string>::iterator it = workspaceNames.begin(); it != workspaceNames.end(); ++it)
         {
-          // Only look at the temporary files
+          // Only look at the rebinned files
           if (it->find(m_tempPostfix) != std::string::npos)
           {
               compareToSources(*it);
@@ -444,7 +446,7 @@ namespace Mantid
         * Compare if the workspace name exists among the sources. If it doesnt't exist, remove it.
         * @param workspaceName The name of the workspace
         */
-       void SourcesManager::compareToSources(std::string workspaceName)
+       void RebinnedSourcesManager::compareToSources(std::string workspaceName)
        {
           pqServer *server = pqActiveObjects::instance().activeServer();
           pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
@@ -459,7 +461,7 @@ namespace Mantid
               std::string name(vtkSMPropertyHelper((*source)->getProxy(),
                                                     "WorkspaceName", true).GetAsString());
 
-              // If the temporary workspace has a source equivalent, then exit
+              // If the rebinned workspace has a source equivalent, then exit
               if (name==workspaceName)
               {
                 return;
@@ -468,26 +470,26 @@ namespace Mantid
           }
 
           // There is no source which corresponds to the workspace, hence delete and unregister the workspace.
-          removeTemporaryWorkspace(workspaceName);
+          removeRebinnedWorkspace(workspaceName);
           untrackWorkspaces(workspaceName);
        }
 
       /**
-        * Removes the temporary workspace from memory.
-        * @param temporaryWorkspace The name of the temporary workspace.
+        * Removes the rebinned workspace from memory.
+        * @param rebinnedWorkspace The name of the rebinned workspace.
         */
-      void SourcesManager::removeTemporaryWorkspace(std::string temporaryWorkspace)
+      void RebinnedSourcesManager::removeRebinnedWorkspace(std::string rebinnedWorkspace)
       {
         Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace> adsHistoWorkspaceProvider;
         Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace> adsEventWorkspaceProvider;
 
-        if (adsHistoWorkspaceProvider.canProvideWorkspace(temporaryWorkspace))
+        if (adsHistoWorkspaceProvider.canProvideWorkspace(rebinnedWorkspace))
         {
-          adsHistoWorkspaceProvider.disposeWorkspace(temporaryWorkspace);
+          adsHistoWorkspaceProvider.disposeWorkspace(rebinnedWorkspace);
         }
-        else if (adsEventWorkspaceProvider.canProvideWorkspace(temporaryWorkspace))
+        else if (adsEventWorkspaceProvider.canProvideWorkspace(rebinnedWorkspace))
         {
-          adsEventWorkspaceProvider.disposeWorkspace(temporaryWorkspace);
+          adsEventWorkspaceProvider.disposeWorkspace(rebinnedWorkspace);
         }
       }
 
@@ -496,7 +498,7 @@ namespace Mantid
         * @param source1 The old source.
         * @param source2 The new source.
         */
-      void SourcesManager::rebuildPipeline(pqPipelineSource* source1, pqPipelineSource* source2)
+      void RebinnedSourcesManager::rebuildPipeline(pqPipelineSource* source1, pqPipelineSource* source2)
       {
         // Step through all the filters in old pipeline and reproduce them
         pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
@@ -549,7 +551,7 @@ namespace Mantid
         * @param filter1 The old filter.
         * @param filter2 The new filter.
         */
-      void SourcesManager::copyProperties(pqPipelineFilter* filter1, pqPipelineFilter* filter2)
+      void RebinnedSourcesManager::copyProperties(pqPipelineFilter* filter1, pqPipelineFilter* filter2)
       {
         vtkSMProxy* proxy1 = filter1->getProxy();
         vtkSMProxy* proxy2 = filter2->getProxy();
@@ -563,7 +565,7 @@ namespace Mantid
         * @param dest Destination proxy.
         * @param source Source proxy.
         */
-      void SourcesManager::copySafe(vtkSMProxy* dest, vtkSMProxy* source)
+      void RebinnedSourcesManager::copySafe(vtkSMProxy* dest, vtkSMProxy* source)
       {
         if (dest && source)
         {
@@ -635,12 +637,12 @@ namespace Mantid
       }
 
       /**
-       * Check if we have a temporary source
+       * Check if we have a rebinned source
        * @param name The source name.
        */
-      bool SourcesManager::isTemporarySource(std::string name)
+      bool RebinnedSourcesManager::isRebinnedSource(std::string name)
       {
-        if (m_temporaryWorkspaceToOriginalWorkspace.count(name) > 0)
+        if (m_rebinnedWorkspaceToOriginalWorkspace.count(name) > 0)
         {
           return true;
         }

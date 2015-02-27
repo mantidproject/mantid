@@ -1,4 +1,4 @@
-#include "MantidVatesSimpleGuiViewWidgets/RebinManager.h"
+#include "MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidQtAPI/InterfaceManager.h"
@@ -34,19 +34,20 @@ namespace Mantid
 
     namespace
     {
-      Mantid::Kernel::Logger g_log("RebinManager");
+      Mantid::Kernel::Logger g_log("RebinAlgorithmDialogProvider");
     }
 
-      RebinManager::RebinManager(QWidget* parent) : QWidget(parent), 
+      RebinAlgorithmDialogProvider::RebinAlgorithmDialogProvider(QWidget* parent) : 
                                                     m_binMdVersion(1),
                                                     m_binMdName("BinMD"),
                                                     m_lblInputWorkspace("InputWorkspace"),
                                                     m_lblOutputWorkspace("OutputWorkspace"),
-                                                    m_binCutOffValue(50)
+                                                    m_binCutOffValue(50),
+                                                    m_parent(parent)
       {
       }
 
-      RebinManager::~RebinManager()
+      RebinAlgorithmDialogProvider::~RebinAlgorithmDialogProvider()
       {
       }
 
@@ -56,7 +57,7 @@ namespace Mantid
        * @param outputWorkspace The name of the output workspace.
        * @param algorithmType The type of algorithm which is to be used for rebinning.
        */
-      void RebinManager::showDialog(std::string inputWorkspace, std::string outputWorkspace, std::string algorithmType)
+      void RebinAlgorithmDialogProvider::showDialog(std::string inputWorkspace, std::string outputWorkspace, std::string algorithmType)
       {
         if (inputWorkspace.empty() || outputWorkspace.empty())
         {
@@ -83,7 +84,7 @@ namespace Mantid
        * @param workspaceName The name of the input workspace.
        * @returns A pointer to the current event workspace
        */
-      Mantid::API::IMDEventWorkspace_sptr RebinManager::getWorkspace(std::string workspaceName)
+      Mantid::API::IMDEventWorkspace_sptr RebinAlgorithmDialogProvider::getWorkspace(std::string workspaceName)
       {
         Mantid::API::IMDEventWorkspace_sptr eventWorkspace;
 
@@ -107,7 +108,7 @@ namespace Mantid
        * @param version The version of the algorithm
        * @returns A pointer to the newly created algorithm.
        */
-      Mantid::API::IAlgorithm_sptr RebinManager::createAlgorithm(const std::string& algorithmName, int version)
+      Mantid::API::IAlgorithm_sptr RebinAlgorithmDialogProvider::createAlgorithm(const std::string& algorithmName, int version)
       {
         Mantid::API::IAlgorithm_sptr alg;
         try
@@ -128,7 +129,7 @@ namespace Mantid
        * @param outputWorkspace The name of the output workspace.
        * @returns The algorithm dialog
        */
-      MantidQt::API::AlgorithmDialog* RebinManager::createDialog(Mantid::API::IAlgorithm_sptr algorithm,
+      MantidQt::API::AlgorithmDialog* RebinAlgorithmDialogProvider::createDialog(Mantid::API::IAlgorithm_sptr algorithm,
                                                                  std::string inputWorkspace,
                                                                  std::string outputWorkspace,
                                                                  std::string algorithmType)
@@ -143,16 +144,16 @@ namespace Mantid
         // Set the correct algorithm dialog
         if (algorithmType == "BinMD")
         {
-          dialog = new MantidQt::MantidWidgets::BinMDDialog(this);
+          dialog = new MantidQt::MantidWidgets::BinMDDialog(m_parent);
           getPresetsForSliceMDAlgorithmDialog(inputWorkspace, outputWorkspace, presets);
         }
         else if (algorithmType == "SliceMD")
         {
-          dialog = new MantidQt::MantidWidgets::SliceMDDialog(this);
+          dialog = new MantidQt::MantidWidgets::SliceMDDialog(m_parent);
           getPresetsForSliceMDAlgorithmDialog(inputWorkspace, outputWorkspace, presets);
         } else if (algorithmType == "CutMD")
         {
-
+          return dialog;
         } else
         {
 
@@ -160,7 +161,7 @@ namespace Mantid
         }
 
         // The parent so that the dialog appears on top of it
-        dialog->setParent(this);
+        dialog->setParent(m_parent);
         dialog->setAttribute(Qt::WA_DeleteOnClose, true);
 
         // Set the QDialog window flags to ensure the dialog ends up on top
@@ -203,7 +204,7 @@ namespace Mantid
         * @param outputWorkspace The name of the output workspace.
         * @param presets A container for the preset values.
         */
-      void RebinManager::getPresetsForSliceMDAlgorithmDialog(std::string inputWorkspace, std::string outputWorkspace, QHash<QString, QString>& presets)
+      void RebinAlgorithmDialogProvider::getPresetsForSliceMDAlgorithmDialog(std::string inputWorkspace, std::string outputWorkspace, QHash<QString, QString>& presets)
       {
         // Set the input workspace
         presets.insert(QString(m_lblInputWorkspace),QString::fromStdString(inputWorkspace));
@@ -217,7 +218,7 @@ namespace Mantid
        * @param dialog A pointer to the SliceMDDialog
        * @param inputWorkspace The name of the input workspace.
        */
-      void RebinManager::setAxisDimensions(MantidQt::MantidWidgets::SlicingAlgorithmDialog* dialog, std::string inputWorkspace)
+      void RebinAlgorithmDialogProvider::setAxisDimensions(MantidQt::MantidWidgets::SlicingAlgorithmDialog* dialog, std::string inputWorkspace)
       {
         Mantid::API::IMDEventWorkspace_sptr  eventWorkspace = getWorkspace(inputWorkspace);
 

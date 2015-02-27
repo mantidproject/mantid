@@ -1,15 +1,13 @@
-#ifndef REBINMANAGER_H_
-#define REBINMANAGER_H_
+#ifndef REBINALGORITHMDIALOGPROVIDER_H_
+#define REBINALGORITHMDIALOGPROVIDER_H_
 
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtMantidWidgets/SlicingAlgorithmDialog.h"
-
-#include <QWidget>
-
 
 namespace Mantid
 {
@@ -44,13 +42,12 @@ namespace Mantid
        File change history is stored at: <https://github.com/mantidproject/mantid>
        Code Documentation is available at: <http://doxygen.mantidproject.org>
        */
-      class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS RebinManager : public QWidget
+      class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS RebinAlgorithmDialogProvider
       {
-        Q_OBJECT
         public:
-          RebinManager(QWidget* parent = 0);
+          RebinAlgorithmDialogProvider(QWidget* parent);
 
-          ~RebinManager();
+          ~RebinAlgorithmDialogProvider();
 
           void showDialog(std::string inputWorkspace, std::string outputWorkspace, std::string algorithmType);
 
@@ -72,6 +69,7 @@ namespace Mantid
           QString m_lblInputWorkspace;
           QString m_lblOutputWorkspace;
           size_t m_binCutOffValue;
+          QWidget* m_parent;
       };
 
     } // SimpleGui

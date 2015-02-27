@@ -9,7 +9,6 @@
 #include "MantidVatesSimpleGuiViewWidgets/StandardView.h"
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h"
-
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/Logger.h"
@@ -122,7 +121,7 @@ REGISTER_VATESGUI(MdViewerWidget)
  */
 MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   dataLoader(NULL), hiddenView(NULL), lodAction(NULL), screenShot(NULL), viewLayout(NULL),
-  viewSettings(NULL), m_temporaryWorkspaceIdentifier("_tempvsi")
+  viewSettings(NULL), m_rebinAlgorithmDialogProvider(this), m_rebinnedWorkspaceIdentifier("_tempvsi")
 {
   // Calling workspace observer functions.
   observeAfterReplace();
@@ -131,8 +130,8 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
 
   this->internalSetup(true);
 
-  // Connect the temporary sources manager
-  QObject::connect(&m_temporarySourcesManager, SIGNAL(switchSources(std::string, std::string)),
+  // Connect the rebinned sources manager
+  QObject::connect(&m_rebinnedSourcesManager, SIGNAL(switchSources(std::string, std::string)),
                    this, SLOT(onSwitchSoures(std::string, std::string)));
 }
 
@@ -140,7 +139,7 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
  * This constructor is used in the standalone mode operation of the VSI.
  * @param parent the parent widget for the main window
  */
-MdViewerWidget::MdViewerWidget(QWidget *parent) : VatesViewerInterface(parent)
+MdViewerWidget::MdViewerWidget(QWidget *parent) : VatesViewerInterface(parent), m_rebinAlgorithmDialogProvider(this)
 {
   this->checkEnvSetup();
   // We're in the standalone application mode
@@ -214,8 +213,8 @@ void MdViewerWidget::setupUiAndConnections()
                    this,
                    SLOT(onRotationPoint()));
 
-  // Connect the temporary sources manager
-  QObject::connect(&m_temporarySourcesManager,
+  // Connect the rebinned sources manager
+  QObject::connect(&m_rebinnedSourcesManager,
                    SIGNAL(triggerAcceptForNewFilters()),
                    this->ui.propertiesPanel,
                    SLOT(apply()));
@@ -486,33 +485,32 @@ void MdViewerWidget::onRebin(std::string algorithmType)
 
   std::string inputWorkspaceName;
   std::string outputWorkspaceName;
-
-  m_temporarySourcesManager.checkSource(source, inputWorkspaceName, outputWorkspaceName, algorithmType);
-  m_rebinManager.showDialog(inputWorkspaceName, outputWorkspaceName, algorithmType);
+  m_rebinnedSourcesManager.checkSource(source, inputWorkspaceName, outputWorkspaceName, algorithmType);
+  m_rebinAlgorithmDialogProvider.showDialog(inputWorkspaceName, outputWorkspaceName, algorithmType);
 }
 
 /**
  * Switch a source.
- * @param temporaryWorkspaceName The name of the temporary  workspace.
+ * @param rebinnedWorkspaceName The name of the rebinned  workspace.
  * @param sourceType The type of the source.
  */
-void MdViewerWidget::onSwitchSoures(std::string temporaryWorkspaceName, std::string sourceType)
+void MdViewerWidget::onSwitchSoures(std::string rebinnedWorkspaceName, std::string sourceType)
 {
-  // Create the temporary workspace
-  prepareTemporaryWorkspace(temporaryWorkspaceName, sourceType); 
+  // Create the rebinned workspace
+  prepareRebinnedWorkspace(rebinnedWorkspaceName, sourceType); 
 
   try
   {
     std::string sourceToBeDeleted;
 
-    // Repipe the filters to the temporary source
-    m_temporarySourcesManager.repipeTemporarySource(temporaryWorkspaceName, sourceToBeDeleted);
+    // Repipe the filters to the rebinned source
+    m_rebinnedSourcesManager.repipeRebinnedSource(rebinnedWorkspaceName, sourceToBeDeleted);
 
     // Remove the original source
     deleteSpecificSource(sourceToBeDeleted);
 
     // Update the color scale
-    renderAndFinalSetup();
+    this->currentView->onAutoScale(this->ui.colorSelectionWidget);
 
     // Set the splatterplot button explicitly
     this->currentView->setSplatterplot(true);
@@ -524,21 +522,23 @@ void MdViewerWidget::onSwitchSoures(std::string temporaryWorkspaceName, std::str
 }
 
 /**
- * Creates and renders a temporary workspace source 
- * @param temporaryWorkspaceName The name of the temporary workspace.
+ * Creates and renders a rebinned workspace source 
+ * @param rebinnedWorkspaceName The name of the rebinned workspace.
  * @param sourceType The name of the source plugin. 
  */
-void MdViewerWidget::prepareTemporaryWorkspace(const std::string temporaryWorkspaceName, std::string sourceType)
+void MdViewerWidget::prepareRebinnedWorkspace(const std::string rebinnedWorkspaceName, std::string sourceType)
 {
   // Load a new source plugin
-  pqPipelineSource* newTemporarySource = this->currentView->setPluginSource(QString::fromStdString(sourceType), QString::fromStdString(temporaryWorkspaceName));
+  pqPipelineSource* newRebinnedSource = this->currentView->setPluginSource(QString::fromStdString(sourceType), QString::fromStdString(rebinnedWorkspaceName));
 
   // It seems that the new source gets set as active before it is fully constructed. We therefore reset it.
   pqActiveObjects::instance().setActiveSource(NULL);
-  pqActiveObjects::instance().setActiveSource(newTemporarySource);
-  m_temporarySourcesManager.registerTemporarySource(newTemporarySource);
+  pqActiveObjects::instance().setActiveSource(newRebinnedSource);
+  m_rebinnedSourcesManager.registerRebinnedSource(newRebinnedSource);
 
   this->renderAndFinalSetup();
+
+  this->currentView->onAutoScale(this->ui.colorSelectionWidget);
 }
 
 /**
@@ -550,6 +550,9 @@ void MdViewerWidget::renderOriginalWorkspace(const std::string originalWorkspace
   // Load a new source plugin
   QString sourcePlugin = "MDEW Source";
   this->currentView->setPluginSource(sourcePlugin, QString::fromStdString(originalWorkspaceName));
+
+  // Render and final setup
+  this->renderAndFinalSetup();
 }
 
 
@@ -576,12 +579,12 @@ void MdViewerWidget::removeRebinning(pqPipelineSource* source, bool forced, Mode
   if (forced || view == ModeControlWidget::SPLATTERPLOT)
   {
     std::string originalWorkspaceName;
-    std::string temporaryWorkspaceName;
-    m_temporarySourcesManager.getStoredWorkspaceNames(source, originalWorkspaceName, temporaryWorkspaceName);
+    std::string rebinnedWorkspaceName;
+    m_rebinnedSourcesManager.getStoredWorkspaceNames(source, originalWorkspaceName, rebinnedWorkspaceName);
 
     // If the active source has not been rebinned, then send a reminder to the user that only rebinned sources 
     // can be unbinned
-    if (originalWorkspaceName.empty() || temporaryWorkspaceName.empty())
+    if (originalWorkspaceName.empty() || rebinnedWorkspaceName.empty())
     {
       if (forced == true)
       {
@@ -599,18 +602,18 @@ void MdViewerWidget::removeRebinning(pqPipelineSource* source, bool forced, Mode
     // Repipe the filters to the original source
     try
     {
-      m_temporarySourcesManager.repipeOriginalSource(temporaryWorkspaceName, originalWorkspaceName);
+      m_rebinnedSourcesManager.repipeOriginalSource(rebinnedWorkspaceName, originalWorkspaceName);
     }
     catch (const std::runtime_error& error)
     {
       g_log.warning() << error.what();
     }
 
-    // Remove the temporary workspace source
-    deleteSpecificSource(temporaryWorkspaceName);
+    // Remove the rebinned workspace source
+    deleteSpecificSource(rebinnedWorkspaceName);
 
     // Render and final setup
-    this->renderAndFinalSetup();
+    pqActiveObjects::instance().activeView()->forceRender();
 
     // Set the buttons correctly if we switch to splatterplot
     if ( view == ModeControlWidget::SPLATTERPLOT)
@@ -627,7 +630,7 @@ void MdViewerWidget::removeRebinning(pqPipelineSource* source, bool forced, Mode
  */
 void MdViewerWidget::removeAllRebinning(ModeControlWidget::Views view)
 {
-  // Iterate over all temporary sources and remove them
+  // Iterate over all rebinned sources and remove them
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
   QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
@@ -703,11 +706,11 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
     sourcePlugin = "MDEW Source";
   }
 
-  // Make sure that we are not loading a temporary vsi workspace.
-  if (workspaceName.contains(m_temporaryWorkspaceIdentifier))
+  // Make sure that we are not loading a rebinned vsi workspace.
+  if (workspaceName.contains(m_rebinnedWorkspaceIdentifier))
   {
     QMessageBox::information(this, QApplication::tr("Loading Source Warning"),
-                             QApplication::tr("You cannot laod a temporary vsi source. \n "\
+                             QApplication::tr("You cannot load a rebinned rebinned vsi source. \n "\
                                               "Please select another source."));
 
     return;
@@ -1293,7 +1296,7 @@ void MdViewerWidget::afterReplaceHandle(const std::string &wsName,
 /**
  * This function responds to a workspace being deleted. If there are one or
  * more PeaksWorkspaces present, the requested one will be deleted. If the
- * deleted source is a temporary source, then we revert back to the
+ * deleted source is a rebinned source, then we revert back to the
 *  original source. Otherwise, if it is an IMDWorkspace, everything goes! 
  * @param wsName : Name of workspace being deleted
  * @param ws : Pointer to workspace being deleted
@@ -1317,8 +1320,8 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
       }
     }
 
-    // Check if temporary source and perform an unbinning
-    if (m_temporarySourcesManager.isTemporarySource(wsName))
+    // Check if rebinned source and perform an unbinning
+    if (m_rebinnedSourcesManager.isRebinnedSource(wsName))
     {
       removeRebinning(src, true);
       return;

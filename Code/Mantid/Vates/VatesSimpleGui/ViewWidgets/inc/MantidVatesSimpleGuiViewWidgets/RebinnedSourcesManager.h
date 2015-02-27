@@ -1,5 +1,5 @@
-#ifndef SOURCESMANAGER_H_
-#define SOURCESMANAGER_H_
+#ifndef REBINNEDSOURCESMANAGER_H_
+#define REBINNEDSOURCESMANAGER_H_
 
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
@@ -30,8 +30,8 @@ namespace Mantid
     {
       /**
        *
-       This class  keeps track of the MDEvent workspaces and associated temporary MDHisto workspaces. Rebinning requires temporary MDHisto workspaces instead of
-       the MDEvent workspaces. This class switches between these types of sources.
+       This class  keeps track of the MDEvent workspaces and associated rebinned workspaces. Rebinning requires temporary workspaces instead of
+       the original MDEvent workspaces. This class switches between these types of sources.
 
        @date 21/01/2015
 
@@ -55,44 +55,44 @@ namespace Mantid
        File change history is stored at: <https://github.com/mantidproject/mantid>
        Code Documentation is available at: <http://doxygen.mantidproject.org>
        */
-      class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS SourcesManager :public QWidget, MantidQt::API::WorkspaceObserver
+      class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS RebinnedSourcesManager :public QWidget, MantidQt::API::WorkspaceObserver
       {
         Q_OBJECT
         public:
-          SourcesManager(QWidget* parent = 0);
+          RebinnedSourcesManager(QWidget* parent = 0);
 
-          ~SourcesManager();
+          ~RebinnedSourcesManager();
 
           void checkSource(pqPipelineSource* source, std::string& inputWorkspace, std::string& outputWorkspace,  std::string algorithmType);
 
-          void repipeTemporarySource(std::string temporarySource, std::string& sourceToBeDeleted);
+          void repipeRebinnedSource(std::string rebinnedSource, std::string& sourceToBeDeleted);
 
-          void repipeOriginalSource(std::string temporarySource, std::string originalSource);
+          void repipeOriginalSource(std::string rebinnedSource, std::string originalSource);
 
-          void getStoredWorkspaceNames(pqPipelineSource* source, std::string& originalWorkspaceName, std::string& temporaryWorkspaceName);
+          void getStoredWorkspaceNames(pqPipelineSource* source, std::string& originalWorkspaceName, std::string& rebinnedWorkspaceName);
 
-          void registerTemporarySource(pqPipelineSource* source);
+          void registerRebinnedSource(pqPipelineSource* source);
 
-          bool isTemporarySource(std::string name);
+          bool isRebinnedSource(std::string name);
 
         signals:
-          void switchSources(std::string temporaryWorkspaceName,  std::string sourceType);
+          void switchSources(std::string rebinnedWorkspaceName,  std::string sourceType);
 
           void triggerAcceptForNewFilters();
         protected:
           void addHandle(const std::string &workspaceName, const boost::shared_ptr<Mantid::API::Workspace> workspace);
 
-          void SourcesManager::preDeleteHandle(const std::string &wsName, const boost::shared_ptr<Mantid::API::Workspace> ws);
+          void preDeleteHandle(const std::string &wsName, const boost::shared_ptr<Mantid::API::Workspace> ws);
 
         private slots:
-          void onTemporarySourceDestroyed();
+          void onRebinnedSourceDestroyed();
 
         private:
-          std::map<std::string, std::string> m_originalWorkspaceToTemporaryWorkspace; ///< Holds the mapping from the original source to the temporary source
+          std::map<std::string, std::string> m_originalWorkspaceToRebinnedWorkspace; ///< Holds the mapping from the original source to the rebinned source
 
-          std::map<std::string, std::string> m_temporaryWorkspaceToOriginalWorkspace; ///< Holds the mapping from the temporary source to the original source
+          std::map<std::string, std::string> m_rebinnedWorkspaceToOriginalWorkspace; ///< Holds the mapping from the rebinned source to the original source
 
-          std::map<std::string, std::string> m_temporaryWorkspaceToTemporaryWorkspace; ///< Holds information from a temporary source to another temproary source which replaces it.
+          std::map<std::string, std::string> m_rebinnedWorkspaceToRebinnedWorkspace; ///< Holds information from a rebinned source to another temproary source which replaces it.
 
           std::string m_tempPostfix;
 
@@ -106,11 +106,11 @@ namespace Mantid
 
           void processWorkspaceNames(std::string& inputWorkspace, std::string& outputWorkspace, std::string workspaceName, std::string algorithmType);
 
-          void removeUnusedTemporaryWorkspaces();
+          void removeUnusedRebinnedWorkspaces();
 
-          void untrackWorkspaces(std::string temporarySource);
+          void untrackWorkspaces(std::string rebinnedSource);
 
-          void removeTemporaryWorkspace(std::string temporaryWorkspace);
+          void removeRebinnedWorkspace(std::string rebinnedWorkspace);
 
           void compareToSources(std::string workspaceName);
 
