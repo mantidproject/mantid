@@ -141,6 +141,7 @@ set ( SRC_FILES
 	src/SaveReflCustomAscii.cpp
 	src/SaveReflTBL.cpp
 	src/SaveReflThreeColumnAscii.cpp
+        src/SaveSavuTomoConfig.cpp
 	src/SaveSPE.cpp
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
@@ -288,6 +289,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveReflCustomAscii.h
 	inc/MantidDataHandling/SaveReflTBL.h
 	inc/MantidDataHandling/SaveReflThreeColumnAscii.h
+        inc/MantidDataHandling/SaveSavuTomoConfig.h
 	inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
@@ -430,6 +432,7 @@ set ( TEST_FILES
 	SaveReflCustomAsciiTest.h
 	SaveReflTBLTest.h
 	SaveReflThreeColumnAsciiTest.h
+	SaveSavuTomoConfigTest.h
 	SaveSPETest.h
 	SaveToSNSHistogramNexusTest.h
 	SetSampleMaterialTest.h
