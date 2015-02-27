@@ -1,7 +1,8 @@
 from mantid.simpleapi import *
-from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, StringMandatoryValidator,\
-                       MatrixWorkspaceProperty, WorkspaceGroupProperty
-from mantid.kernel import StringListValidator, Direction, logger
+from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty, \
+                       WorkspaceGroupProperty
+from mantid.kernel import StringListValidator, StringMandatoryValidator, IntBoundedValidator, \
+                          FloatBoundedValidator, Direction, logger
 import math, numpy as np
 
 
@@ -39,47 +40,68 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
                              direction=Direction.Input),
-                             doc='Name for the input Sample workspace.')
+                             doc='Name for the input sample workspace')
 
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
                              validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
         self.declareProperty(name='SampleNumberDensity', defaultValue=0.1,
-                             doc='Sample number density')
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Sample number density in atoms/Angstrom3')
         self.declareProperty(name='SampleThickness', defaultValue=0.0,
-                             doc='Sample thickness')
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Sample thickness in cm')
         self.declareProperty(name='SampleAngle', defaultValue=0.0,
-                             doc='Sample angle')
+                             doc='Sample angle in degrees')
 
         self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '',
                              direction=Direction.Input,
                              optional=PropertyMode.Optional),
-                             doc="Name for the input Can workspace.")
+                             doc="Name for the input container workspace")
 
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
-                             doc='Can chemical formula')
+                             doc='Container chemical formula')
         self.declareProperty(name='CanNumberDensity', defaultValue=0.1,
-                             doc='Can number density')
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Container number density in atoms/Angstrom3')
 
         self.declareProperty(name='CanFrontThickness', defaultValue=0.0,
-                             doc='Can thickness1 front')
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Container front thickness in cm')
         self.declareProperty(name='CanBackThickness', defaultValue=0.0,
-                             doc='Can thickness2 back')
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Container back thickness in cm')
 
         self.declareProperty(name='CanScaleFactor', defaultValue=1.0,
                              doc='Scale factor to multiply can data')
 
         self.declareProperty(name='NumberWavelengths', defaultValue=10,
+                             validator=IntBoundedValidator(0),
                              doc='Number of wavelengths for calculation')
         self.declareProperty(name='Emode', defaultValue='Elastic',
-                             validator=StringListValidator(['Elastic','Indirect']),
+                             validator=StringListValidator(['Elastic', 'Indirect']),
                              doc='Emode: Elastic or Indirect')
         self.declareProperty(name='Efixed', defaultValue=0.0,
-                             doc='Efixed - analyser energy')
+                             doc='Analyser energy')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                              direction=Direction.Output),
-                             doc='The output corrections workspace group.')
+                             doc='The output corrections workspace group')
+
+
+    def validateInputs(self):
+        issues = dict()
+
+        can_ws_name = self.getPropertyValue('CanWorkspace')
+        use_can = can_ws_name != ''
+
+        # Ensure that a can chemical formula is given when using a can workspace
+        if use_can:
+            can_chemical_formula = self.getPropertyValue('CanChemicalFormula')
+            if can_chemical_formula == '':
+                issues['CanChemicalFormula'] = 'Must provide a chemical foruma when providing a can workspace'
+
+        return issues
 
 
     def PyExec(self):
