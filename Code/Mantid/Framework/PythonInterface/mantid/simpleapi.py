@@ -86,7 +86,15 @@ def Load(*args, **kwargs):
     # Create and execute
     algm = _create_algorithm_object('Load')
     _set_logging_option(algm, kwargs)
-    algm.setProperty('Filename', filename) # Must be set first
+    try:
+        algm.setProperty('Filename', filename) # Must be set first
+    except ValueError as ve:
+        raise ValueError('Problem when setting Filename. This is the detailed error '
+                         'description: ' + str(ve) + '\nIf the file has been found '
+                         'but you got this error, you might not have read permissions '
+                         'or the file might be corrupted.\nIf the file has not been found, '
+                         'you might have forgotten to add its location in the data search '
+                         'directories.')
     # Remove from keywords so it is not set twice
     try:
         del kwargs['Filename']
