@@ -377,7 +377,7 @@ void IntegrateEllipsoids::exec() {
 
   double inti;
   double sigi;
-  std::vector<double> r1,r2,r3;
+  std::vector<double> principalaxis1,principalaxis2,principalaxis3;
   for (size_t i = 0; i < n_peaks; i++) {
     V3D hkl(peaks[i].getH(), peaks[i].getK(), peaks[i].getL());
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {

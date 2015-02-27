@@ -9,7 +9,7 @@
 Description
 -----------
 
-Adds a peak to a :ref:`PeaksWorkspace <PeaksWorkspace>`.
+Adds a peak to a :ref:`PeaksWorkspace <PeaksWorkspace>`__.
 
 Usage
 -----

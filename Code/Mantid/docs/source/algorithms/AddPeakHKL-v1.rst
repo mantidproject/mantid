@@ -10,7 +10,7 @@
 Description
 -----------
 
-Add a peak in the HKL frame to an existing :ref:`PeaksWorkspace <PeaksWorkspace>`. The OrientedLattice must be provided and the Goniometer should be set correctly before running the algorithm. 
+Add a peak in the HKL frame to an existing :ref:`PeaksWorkspace <PeaksWorkspace>`__. The OrientedLattice must be provided and the Goniometer should be set correctly before running the algorithm. 
 
 The peak is added to the existing PeaksWorkspace. Run information and goniometer setting and the UB matrix are taken from the provided PeaksWorkspace.
 
