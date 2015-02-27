@@ -121,7 +121,7 @@ namespace IDA
     bgTypeSelection(m_uiForm.cbBackground->currentIndex());
 
     // Replot input automatically when file / spec no changes
-    connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
+    connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(updatePlot()));
     connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(newDataLoaded(const QString&)));
 
     connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this, SLOT(specMinChanged(int)));
@@ -203,6 +203,8 @@ namespace IDA
     QString inputWsName = QString::fromStdString(m_cfInputWS->getName());
     QString resultWsName = inputWsName.left(inputWsName.lastIndexOf("_")) + "_conv_" + fitType + bgType + specMin + "_to_" + specMax + "_Workspaces";
     m_pythonExportWsName = resultWsName.toStdString();
+
+    updatePlot();
   }
 
   /**
@@ -260,7 +262,7 @@ namespace IDA
     m_uiForm.spSpectraMax->setMinimum(0);
     m_uiForm.spSpectraMax->setValue(maxSpecIndex);
 
-    plotInput();
+    updatePlot();
   }
 
   namespace
@@ -670,7 +672,7 @@ namespace IDA
     }
   }
 
-  void ConvFit::plotInput()
+  void ConvFit::updatePlot()
   {
     using Mantid::Kernel::Exception::NotFoundError;
 
@@ -707,6 +709,17 @@ namespace IDA
       m_dblManager->setValue(m_properties["Lorentzian 1.FWHM"], resolution);
       m_dblManager->setValue(m_properties["Lorentzian 2.FWHM"], resolution);
     }
+
+    // If there is a result plot then plot it
+    if(AnalysisDataService::Instance().doesExist(m_pythonExportWsName))
+    {
+      WorkspaceGroup_sptr outputGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(m_pythonExportWsName);
+      if(specNo >= static_cast<int>(outputGroup->size()))
+        return;
+      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outputGroup->getItem(specNo));
+      if(ws)
+        m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
+    }
   }
 
   void ConvFit::plotGuess()
@@ -723,7 +736,7 @@ namespace IDA
 
     if ( m_cfInputWS == NULL )
     {
-      plotInput();
+      updatePlot();
     }
 
     const size_t binIndexLow = m_cfInputWS->binIndexOf(m_dblManager->value(m_properties["StartX"]));
@@ -777,7 +790,7 @@ namespace IDA
     if(!validate())
       return;
 
-    plotInput();
+    updatePlot();
 
     m_uiForm.ckPlotGuess->setChecked(false);
 
@@ -897,6 +910,8 @@ namespace IDA
       m_dblManager->setValue(m_properties["Lorentzian 2.PeakCentre"], parameters[pref+"PeakCentre"]);
       m_dblManager->setValue(m_properties["Lorentzian 2.FWHM"], parameters[pref+"FWHM"]);
     }
+
+    m_pythonExportWsName = "";
   }
 
   /**
