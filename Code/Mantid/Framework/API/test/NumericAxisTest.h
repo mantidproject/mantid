@@ -206,8 +206,8 @@ public:
 
   void test_equalWithinTolerance_Nan()
   {
-    double points1[] = {1.0, 2.0, FP_NAN, 4.0, 5.0};
-    double points2[] = {1.0, 2.0, FP_NAN, 4.0, 5.0};
+    double points1[] = {1.0, 2.0, NAN, 4.0, 5.0};
+    double points2[] = {1.0, 2.0, NAN, 4.0, 5.0};
     double points3[] = {1.0, 2.0, 3.0, 4.0, 5.0};
     const size_t npoints(5);
     NumericAxis axis1(std::vector<double>(points1, points1 + npoints));
@@ -220,8 +220,8 @@ public:
 
   void test_equalWithinTolerance_Inf()
   {
-    double points1[] = {1.0, 2.0, FP_INFINITE, 4.0, 5.0};
-    double points2[] = {1.0, 2.0, FP_INFINITE, 4.0, 5.0};
+    double points1[] = {1.0, 2.0, INFINITY, 4.0, 5.0};
+    double points2[] = {1.0, 2.0, INFINITY, 4.0, 5.0};
     double points3[] = {1.0, 2.0, 3.0, 4.0, 5.0};
     const size_t npoints(5);
     NumericAxis axis1(std::vector<double>(points1, points1 + npoints));

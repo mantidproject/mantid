@@ -6,6 +6,7 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include <boost/format.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 #include "MantidKernel/Logger.h"
 namespace {
@@ -14,7 +15,13 @@ Mantid::Kernel::Logger g_log("NumericAxis");
 class EqualWithinTolerance {
 public:
   EqualWithinTolerance(double tolerance) : m_tolerance(tolerance) {};
-  bool operator()(double a, double b) { return std::abs(a - b) <= m_tolerance; }
+  bool operator()(double a, double b) {
+    if (boost::math::isnan(a) && boost::math::isnan(b))
+      return true;
+    if (boost::math::isinf(a) && boost::math::isinf(b))
+      return true;
+    return std::abs(a - b) <= m_tolerance;
+  }
 
 private:
   double m_tolerance;
