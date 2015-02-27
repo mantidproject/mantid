@@ -493,7 +493,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self._smoothoffsets = self.getProperty("SmoothSummedOffsets").value
         self._smoothGroups = self.getProperty("SmoothGroups").value
         self._peakpos = self.getProperty("PeakPositions").value
-        positions = self._peakpos
         if self.getProperty("CrossCorrelation").value:
             self._peakpos1 = self._peakpos[0]
             self._peakpos2 = 0
