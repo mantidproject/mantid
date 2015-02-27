@@ -176,10 +176,6 @@ class NonIDF_Properties(object):
         object.__setattr__(self,'_short_instr_name',new_name)
 
 
-
-
-
-
 if __name__ == "__main__":
     pass
 
