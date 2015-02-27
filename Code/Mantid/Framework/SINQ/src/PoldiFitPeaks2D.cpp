@@ -18,7 +18,7 @@ use the Build/wiki_maker.py script to generate your full wiki page.
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
-#include "MantidSINQ/PoldiUtilities/PeakFunctionIntegrator.h"
+#include "MantidAPI/PeakFunctionIntegrator.h"
 #include "MantidAPI/IPeakFunction.h"
 
 #include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
@@ -571,7 +571,7 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getIntegratedPeakCollection(
     profileFunction->setCentre(0.0);
 
     IntegrationResult integration =
-        peakIntegrator.integrateInfinity(profileFunction);
+        peakIntegrator.integrateInfinity(*profileFunction);
 
     if (!integration.success) {
       throw std::runtime_error("Problem during peak integration. Aborting.");

@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the HFIRReduction class could
@@ -203,20 +204,20 @@ class Background(BaseScriptElement):
                                                                       default = Background.dark_current_corr)
             self.dark_current_file = BaseScriptElement.getStringElement(instrument_dom, "dark_current_file")
 
-            self.background_corr = BaseScriptElement.getBoolElement(instrument_dom, "background_corr",
+            self.background_corr = BaseScriptElement.getBoolElement(instrument_dom, "background_corr",\
                                                                       default = Background.background_corr)
             self.background_file = BaseScriptElement.getStringElement(instrument_dom, "background_file")
 
-            self.bck_transmission_enabled = BaseScriptElement.getBoolElement(instrument_dom, "bck_trans_enabled",
+            self.bck_transmission_enabled = BaseScriptElement.getBoolElement(instrument_dom, "bck_trans_enabled",\
                                                                            default = Background.bck_transmission_enabled)
 
-            self.bck_transmission = BaseScriptElement.getFloatElement(instrument_dom, "bck_trans",
+            self.bck_transmission = BaseScriptElement.getFloatElement(instrument_dom, "bck_trans",\
                                                                   default=Background.bck_transmission)
-            self.bck_transmission_spread = BaseScriptElement.getFloatElement(instrument_dom, "bck_trans_spread",
+            self.bck_transmission_spread = BaseScriptElement.getFloatElement(instrument_dom, "bck_trans_spread",\
                                                                   default=Background.bck_transmission_spread)
             self.calculate_transmission = BaseScriptElement.getBoolElement(instrument_dom, "calculate_trans",
                                                                            default = Background.calculate_transmission)
-            self.theta_dependent = BaseScriptElement.getBoolElement(instrument_dom, "theta_dependent",
+            self.theta_dependent = BaseScriptElement.getBoolElement(instrument_dom, "theta_dependent",\
                                                                            default = Background.theta_dependent)
             self.trans_dark_current = BaseScriptElement.getStringElement(instrument_dom, "trans_dark_current")
 

@@ -6,6 +6,8 @@
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
 
 #include <Poco/ActiveResult.h>
 
@@ -64,6 +66,21 @@ void StartLiveData::init() {
       "Frequency of updates, in seconds. Default 60.\n"
       "If you specify 0, MonitorLiveData will not launch and you will get only "
       "one chunk.");
+
+  // Properties used with ISISHistoDataListener
+  declareProperty(new ArrayProperty<specid_t>("SpectraList"),
+                  "An optional list of spectra to load. If blank, all "
+                  "available spectra will be loaded. Applied to ISIS histogram"
+                  " data only.");
+  getPointerToProperty("SpectraList")->setGroup(listenerPropertyGroup);
+
+  auto validator = boost::make_shared<ArrayBoundedValidator<int>>();
+  validator->setLower(1);
+  declareProperty(new ArrayProperty<int>("PeriodList", validator),
+                  "An optional list of periods to load. If blank, all "
+                  "available periods will be loaded. Applied to ISIS histogram"
+                  " data only.");
+  getPointerToProperty("PeriodList")->setGroup(listenerPropertyGroup);
 
   // Initialize the properties common to LiveDataAlgorithm.
   initProps();
@@ -187,35 +204,6 @@ void StartLiveData::exec() {
     // Set the output property that passes back a handle to the ongoing live
     // algorithm
     setProperty("MonitorLiveData", algBase);
-  }
-}
-
-/**
- * After Instrument property is set copy any properties that the instrument's
- * listener may have to this algorithm.
- */
-void StartLiveData::afterPropertySet(const std::string &propName) {
-  if (propName == "Instrument") {
-    // remove old listener's properties
-    auto properties = getProperties();
-    for (auto prop = properties.begin(); prop != properties.end(); ++prop) {
-      if ((**prop).getGroup() == listenerPropertyGroup) {
-        removeProperty((**prop).name());
-      }
-    }
-    // add new listener's properties
-    auto listener = LiveListenerFactory::Instance().create(
-        getPropertyValue(propName), false);
-    auto propertyManagerListener =
-        boost::dynamic_pointer_cast<IPropertyManager>(listener);
-    if (propertyManagerListener) {
-      auto properties = propertyManagerListener->getProperties();
-      for (auto prop = properties.begin(); prop != properties.end(); ++prop) {
-        propertyManagerListener->removeProperty((**prop).name(), false);
-        declareProperty(*prop);
-        (**prop).setGroup(listenerPropertyGroup);
-      }
-    }
   }
 }
 

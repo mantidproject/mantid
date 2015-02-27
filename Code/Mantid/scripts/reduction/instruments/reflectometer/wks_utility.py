@@ -1,9 +1,9 @@
-from numpy import zeros, ones, arctan2, arange, shape, sqrt, fliplr, asfarray, where, mean, sum, empty, NAN
+#pylint: disable=invalid-name
+from numpy import zeros, arctan2, arange, shape, sqrt, fliplr, asfarray, mean, sum, NAN
 from mantid.simpleapi import *
 # from MantidFramework import *
 import math
 import os.path
-import sys
 
 h = 6.626e-34 #m^2 kg s^-1
 m = 1.675e-27 #kg
@@ -82,7 +82,7 @@ def getSheight(mt, index):
     else:
         tag = 'S1VHeight'
         value = mt_run.getProperty(tag).value
-        
+
     return value[0]
 
 def getS1h(mt=None):
@@ -218,9 +218,9 @@ def findQaxisMinMax(q_axis):
     for i in arange(nbr_row - 1) + 1:
         _q_min = q_axis[i][-1]
         _q_max = q_axis[i][0]
-        if (_q_min > q_min):
+        if _q_min > q_min:
             q_min = _q_min
-        if (_q_max < q_max):
+        if _q_max < q_max:
             q_max = _q_max
 
     #find now the index of those min and max in each row
@@ -386,13 +386,13 @@ def convertWorkspaceToQ(ws_data,
 
             #keep only the overlap region of Qs
             _q_min = _q_axis_min_max_index[_q_index, 0]
-            if (_q_min != 0):
+            if _q_min != 0:
                 _y_axis_tmp[0:_q_min] = 0
                 _y_error_axis_tmp[0:_q_min] = 0
 
             _q_max = int(_q_axis_min_max_index[_q_index, 1])
             sz = shape(_y_axis_tmp)[0]
-            if (_q_max != sz):
+            if _q_max != sz:
                 _index_q_max_range = arange(sz - _q_max) + _q_max
                 for i in _index_q_max_range:
                     _y_axis_tmp[i] = 0
@@ -414,7 +414,7 @@ def convertWorkspaceToQ(ws_data,
 
         outputWorkspace.setDistribution(True)
 
-        outputWorkspace = Rebin(InputWorkspace=outputWorkspace,
+        outputWorkspace = Rebin(InputWorkspace=outputWorkspace,\
               Params=q_binning)
 
     else:
@@ -437,7 +437,7 @@ def convertWorkspaceToQ(ws_data,
             a = y_range[y]
 
             _tmp_y_axis = mt1.readY(int(a))[:]
-            _y_axis[int(y), :] = _tmp_y_axis;
+            _y_axis[int(y), :] = _tmp_y_axis
             _tmp_y_error_axis = mt1.readE(int(a))[:]
             _y_error_axis[int(y),:] = _tmp_y_error_axis
 
@@ -459,7 +459,7 @@ def convertWorkspaceToQ(ws_data,
 
         outputWorkspace.setDistribution(True)
 
-        outputWorkspace = Rebin(InputWorkspace=outputWorkspace,
+        outputWorkspace = Rebin(InputWorkspace=outputWorkspace,\
               Params=q_binning)
 
     return outputWorkspace
@@ -502,20 +502,20 @@ def angleUnitConversion(value, from_units='degree', to_units='rad'):
 
     """
 
-    if (from_units == to_units):
-        return value;
+    if from_units == to_units:
+        return value
 
-    from_factor = 1;
+    from_factor = 1
     #convert everything into rad
-    if (from_units == 'degree'):
-        from_factor = 1.745329252e-2;
-    value_rad = from_factor * value;
+    if from_units == 'degree':
+        from_factor = 1.745329252e-2
+    value_rad = from_factor * value
 
-    if (to_units == 'rad'):
-        return value_rad;
+    if to_units == 'rad':
+        return value_rad
     else:
-        to_factor = 57.2957795;
-        return to_factor * value_rad;
+        to_factor = 57.2957795
+        return to_factor * value_rad
 
 def convertToThetaVsLambda(_tof_axis,
                            _pixel_axis,
@@ -723,7 +723,7 @@ def ref_beamdiv_correct(cpix, det_secondary,
         xI = xF
         yI = yF
 
-    if (len(int_poly_x) > 2):
+    if len(int_poly_x) > 2:
         int_poly_x.append(int_poly_x[0])
         int_poly_y.append(int_poly_y[0])
         int_poly_x.append(int_poly_x[1])
@@ -800,13 +800,13 @@ def applySF(InputWorkspace,
     """
 
     #check if config file is there
-    if (os.path.isfile(sfFile)):
+    if os.path.isfile(sfFile):
 
         #parse file and put info into array
         f = open(sfFile, 'r')
         sfFactorTable = []
         for line in f.read().split('\n'):
-            if (len(line) > 0 and line[0] != '#'):
+            if len(line) > 0 and line[0] != '#':
                 sfFactorTable.append(line.split(' '))
         f.close()
 
@@ -840,12 +840,12 @@ def applySF(InputWorkspace,
         print '--> Data S2H: {0:2f}'.format(s2h_value)
         print '--> Data S1W: {0:2f}'.format(s1w_value)
         print '--> Data S2W: {0:2f}'.format(s2w_value)
-        
+
         print 'mERDDEEEEDEDEED'
         for i in range(nbr_row):
 
             _file_incidentMedium = getFieldValue(sfFactorTable,i,0)
-            if (_file_incidentMedium.strip() == _incidentMedium.strip()):
+            if _file_incidentMedium.strip() == _incidentMedium.strip():
                 print '--- incident medium match ---'
                 _file_lambdaRequested = getFieldValue(sfFactorTable,i,1)
                 if (isWithinPrecisionRange(_file_lambdaRequested,
@@ -862,7 +862,7 @@ def applySF(InputWorkspace,
                                                   s2h_value,
                                                   valuePrecision)):
                             print '--- S2H match ---'
-                            if (slitsWidthFlag):
+                            if slitsWidthFlag:
                                 print '--- (with Width flag) ----'
                                 _file_s1w = getFieldValue(sfFactorTable,i,4)
                                 if(isWithinPrecisionRange(_file_s1w,
@@ -946,7 +946,7 @@ def loadNeXus(runNumbers, type):
     """
 
     wks_name = ''
-    if (type == 'data'):
+    if type == 'data':
         wks_name = 'ws_event_data'
     else:
         wks_name = 'ws_event_norm'
@@ -1005,7 +1005,7 @@ def rebinNeXus(inputWorkspace, params, type):
     print '--> rebin ', type
     ws_histo_data = Rebin(InputWorkspace=inputWorkspace,
                           Params=params,
-                          PreserveEvents=True);
+                          PreserveEvents=True)
     return ws_histo_data
 
 def cropTOF(inputWorkspace, min, max, type):
@@ -1014,8 +1014,8 @@ def cropTOF(inputWorkspace, min, max, type):
     used here to crop the TOF range
     """
     print '--> crop ' , type , ' workspace in TOF'
-    ws_histo_data = CropWorkspace(InputWorkspace = inputWorkspace,
-                                      XMin = min,
+    ws_histo_data = CropWorkspace(InputWorkspace = inputWorkspace,\
+                                      XMin = min,\
                                       XMax = max)
     return ws_histo_data
 
@@ -1027,9 +1027,9 @@ def normalizeNeXus(inputWorkspace, type):
     ws_histo_data = NormaliseByCurrent(InputWorkspace=inputWorkspace)
     return ws_histo_data
 
-def integrateOverLowResRange(mt1,
-                            dataLowResRange,
-                            type,
+def integrateOverLowResRange(mt1,\
+                            dataLowResRange,\
+                            type,\
                             is_nexus_detector_rotated_flag):
     """
         This creates the integrated workspace over the low resolution range leaving
@@ -1133,7 +1133,7 @@ def substractBackground(tof_axis, y_axis, y_error_axis,
             bMinBack = True
             _backMinArray = y_axis[backMin:peakMin, t]
             _backMinErrorArray = y_error_axis[backMin:peakMin, t]
-            [_backMin, _backMinError] = weightedMean(_backMinArray,
+            [_backMin, _backMinError] = weightedMean(_backMinArray,\
                                                           _backMinErrorArray, error_0)
 
         if (peakMax) < backMax:
@@ -1170,18 +1170,18 @@ def weightedMean(data_array, error_array, error_0):
     sz = len(data_array)
 
     # calculate the numerator of mean
-    dataNum = 0;
+    dataNum = 0
     for i in range(sz):
-        if (error_array[i] == 0):
+        if error_array[i] == 0:
             error_array[i] = error_0
 
         tmpFactor = float(data_array[i]) / float((pow(error_array[i],2)))
         dataNum += tmpFactor
 
     # calculate denominator
-    dataDen = 0;
+    dataDen = 0
     for i in range(sz):
-        if (error_array[i] == 0):
+        if error_array[i] == 0:
             error_array[i] = error_0
         tmpFactor = 1./float((pow(error_array[i],2)))
         dataDen += tmpFactor
@@ -1334,7 +1334,7 @@ def ouput_ascii_file(file_name,
 
     sz_x_axis = len(x_axis)
     for i in range(sz_x_axis-1):
-        f.write(str(x_axis[i]) + "," + str(y_axis[i]) + "," + str(y_error_axis[i]) + "\n");
+        f.write(str(x_axis[i]) + "," + str(y_axis[i]) + "," + str(y_error_axis[i]) + "\n")
 
     f.close
 
@@ -1361,9 +1361,9 @@ def ouput_big_ascii_file(file_name,
 
 
 
-def ouput_big_Q_ascii_file(file_name,
-                         x_axis,
-                         y_axis,
+def ouput_big_Q_ascii_file(file_name,\
+                         x_axis,\
+                         y_axis,\
                          y_error_axis):
 
     f=open(file_name,'w')
@@ -1419,7 +1419,7 @@ def applyScalingFactor(tof_axis,
     file created by the sfCalculator procedure
     """
     #sf_file = 'NaN'
-    if (os.path.isfile(sf_file)):
+    if os.path.isfile(sf_file):
 
         print '-> scaling factor file FOUND! (', sf_file, ')'
 
@@ -1427,7 +1427,7 @@ def applyScalingFactor(tof_axis,
         f = open(sf_file, 'r')
         sfFactorTable = []
         for line in f.read().split('\n'):
-            if (len(line) > 0 and line[0] != '#'):
+            if len(line) > 0 and line[0] != '#':
                 sfFactorTable.append(line.split(' '))
         f.close()
 
@@ -1463,7 +1463,7 @@ def applyScalingFactor(tof_axis,
         for i in range(nbr_row):
 
             _file_incidentMedium = getFieldValue(sfFactorTable,i,0)
-            if (_file_incidentMedium.strip() == _incidentMedium.strip()):
+            if _file_incidentMedium.strip() == _incidentMedium.strip():
                 print '*** incident medium match ***'
                 _file_lambdaRequested = getFieldValue(sfFactorTable,i,1)
                 if (isWithinPrecisionRange(_file_lambdaRequested,
@@ -1480,7 +1480,7 @@ def applyScalingFactor(tof_axis,
                                                   s2h_value,
                                                   valuePrecision)):
                             print '*** s2h match ***'
-                            if (slitsWidthFlag):
+                            if slitsWidthFlag:
                                 print '*** (with slits width flag) ***'
                                 _file_s1w = getFieldValue(sfFactorTable,i,4)
                                 if(isWithinPrecisionRange(_file_s1w,
@@ -1709,7 +1709,7 @@ def getQrange(ws_histo_data, theta, dMD, q_min, q_step):
         _Q = _const * math.sin(theta) / (tofm*1e-6)
         _q_axis[t] = _Q*1e-10
     q_max = max(_q_axis)
-    if (q_min >= q_max):
+    if q_min >= q_max:
         q_min = min(_q_axis)
     print '----> q_min: ', q_min
     print '----> q_step: ', q_step
@@ -1767,13 +1767,13 @@ def convertToQ(tof_axis,
 
         # keep only the overlap region of Qs
         _q_min = _q_axis_min_max_index[_y_index, 0]
-        if (_q_min != 0):
+        if _q_min != 0:
             _y_axis_tmp[0:_q_min] = 0
             _y_error_axis_tmp[0:_q_min] = 0
 
         _q_max = int(_q_axis_min_max_index[_y_index, 1])
         sz = shape(_y_axis_tmp)[0]
-        if (_q_max != sz):
+        if _q_max != sz:
             _index_q_max_range = arange(sz - _q_max) + _q_max
             for i in _index_q_max_range:
                 _y_axis_tmp[i] = 0
@@ -1787,14 +1787,14 @@ def convertToQ(tof_axis,
 
     return [q_axis_reverse, _y_axis, _y_error_axis]
 
-def convertToQWithoutCorrection(tof_axis,
-               y_axis,
-               y_error_axis,
-               peak_range = None,
-               source_to_detector_distance = None,
-               sample_to_detector_distance = None,
-               theta = None,
-               first_slit_size = None,
+def convertToQWithoutCorrection(tof_axis,\
+               y_axis,\
+               y_error_axis,\
+               peak_range = None,\
+               source_to_detector_distance = None,\
+               sample_to_detector_distance = None,\
+               theta = None,\
+               first_slit_size = None,\
                last_slit_size = None):
     """
     will convert the tof_axis into q_axis according to q range specified
@@ -1927,23 +1927,24 @@ def createQworkspace(q_axis, y_axis, y_error_axis):
     y_axis_1d = y_axis.flatten()
     y_error_axis_1d = y_error_axis.flatten()
 
-    q_workspace = CreateWorkspace(DataX=q_axis_1d,
-                           DataY=y_axis_1d,
-                           DataE=y_error_axis_1d,
-                           Nspec=nbr_pixel,
+    q_workspace = CreateWorkspace(DataX=q_axis_1d,\
+                           DataY=y_axis_1d,\
+                           DataE=y_error_axis_1d,\
+                           Nspec=nbr_pixel,\
                            UnitX="Wavelength")
     q_workspace.setDistribution(True)
 
     return q_workspace
 
-def createFinalWorkspace(q_axis, final_y_axis, final_error_axis, name_output_ws):
+def createFinalWorkspace(q_axis, final_y_axis, final_error_axis, name_output_ws, parent_workspace):
 
     final_workspace = CreateWorkspace(OutputWorkspace=name_output_ws,
                                       DataX=q_axis,
                                       DataY=final_y_axis,
                                       DataE=final_error_axis,
                                       Nspec=1,
-                                      UnitX="Wavelength")
+                                      UnitX="Wavelength",
+                                      ParentWorkspace=parent_workspace)
     final_workspace.setDistribution(True)
 
     return final_workspace
@@ -1957,8 +1958,8 @@ def cropAxisToOnlyNonzeroElements(q_rebin, dataPeakRange):
     x_axis = q_rebin.readX(0)[:]
     sz = x_axis.shape[0]-1
 
-    index_first_non_zero_value = sz;
-    index_last_non_zero_value = 0;
+    index_first_non_zero_value = sz
+    index_last_non_zero_value = 0
 
     for x in range(nbrPixel):
         _pixel_axis = q_rebin.readY(x)[:]
@@ -2043,7 +2044,7 @@ def cleanupData1D(final_data_y_axis, final_data_y_error_axis):
     sz = final_data_y_axis.shape
     nbrTof = sz[0]
 
-    notYetRemoved = True;
+    notYetRemoved = True
 
     for t in range(nbrTof):
 
@@ -2060,7 +2061,7 @@ def cleanupData1D(final_data_y_axis, final_data_y_error_axis):
         if abs(_error) >= abs(_data):
             _data_tmp = 0
             _error_tmp = 1
-        elif (_data< 1e-12):
+        elif _data< 1e-12:
         # if value is below 10^-12
             _data_tmp = 0
             _error_tmp = 1
@@ -2076,15 +2077,15 @@ def cleanupData1D(final_data_y_axis, final_data_y_error_axis):
     return [final_data_y_axis, final_data_y_error_axis]
 
 def isNexusTakeAfterRefDate(nexus_date):
-   '''
+    '''
    This function parses the output.date and returns true if this date is after the ref date
    '''
-   nexus_date_acquistion = nexus_date.split('T')[0]
-   
-   if nexus_date_acquistion > ref_date:
-     return True
-   else:
-     return False
+    nexus_date_acquistion = nexus_date.split('T')[0]
+
+    if nexus_date_acquistion > ref_date:
+        return True
+    else:
+        return False
 
 
 

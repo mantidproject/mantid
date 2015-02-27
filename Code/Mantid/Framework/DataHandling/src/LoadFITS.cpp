@@ -41,6 +41,16 @@ namespace DataHandling {
 DECLARE_FILELOADER_ALGORITHM(LoadFITS);
 
 /**
+ * Constructor. Just initialize everything to prevent issues.
+ */
+LoadFITS::LoadFITS(): m_headerScaleKey(), m_headerOffsetKey(),
+                      m_headerBitDepthKey(), m_headerRotationKey(),
+                      m_headerImageKeyKey(), m_mapFile(),
+                      m_headerAxisNameKeys(),  m_baseName(),
+                      m_spectraCount(0), m_progress(NULL) {
+}
+
+/**
 * Return the confidence with with this algorithm can load the file
 * @param descriptor A descriptor for the file
 * @returns An integer specifying the confidence level. 0 indicates it will not
@@ -123,8 +133,6 @@ void LoadFITS::exec() {
   std::vector<std::string> paths;
   string fName = getPropertyValue("Filename");
   boost::split(paths, fName, boost::is_any_of(","));
-  m_baseName = "";
-  m_spectraCount = 0;
 
   // If paths contains a non fits file, assume (for now) that it contains
   // information about the rotations
