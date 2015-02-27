@@ -100,7 +100,7 @@ Sometimes it is easier to think about symmetry in terms of the elements that cau
 
 Executing this code yields the following output:
 
-.. testoutput :: ExSymmetryOperation
+.. testoutput :: ExSymmetryElement
 
     The element corresponding to 'x,y,-z' has the following symbol: m
     The mirror plane is perpendicular to: [0,0,1]
