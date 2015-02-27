@@ -30,6 +30,8 @@ namespace { // hide these constants
   ///
   const double WAVELENGTH_TO_VELOCITY=1.0E-10 *
       PhysicalConstants::h / PhysicalConstants::NeutronMass;
+  /// This is an absurd number for even ultra cold neutrons
+  const double WAVELENGTH_MAX = 1000.;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -73,12 +75,19 @@ void PDEstimateDetectorResolution::init() {
                   "Name of the output workspace containing delta(d)/d of each "
                   "detector/spectrum.");
 
-  auto positive = boost::make_shared<BoundedValidator<double> >();
-  positive->setLower(0.);
-  positive->setLowerExclusive(true);
+  auto positiveDeltaTOF = boost::make_shared<BoundedValidator<double> >();
+  positiveDeltaTOF->setLower(0.);
+  positiveDeltaTOF->setLowerExclusive(true);
   declareProperty(
-      "DeltaTOF", 0., positive,
+      "DeltaTOF", 0., positiveDeltaTOF,
       "DeltaT as the resolution of TOF with unit microsecond (10^-6m).");
+
+  auto positiveWavelength = boost::make_shared<BoundedValidator<double> >();
+  positiveWavelength->setLower(0.);
+  positiveWavelength->setLowerExclusive(true);
+  declareProperty(
+      "Wavelength", EMPTY_DBL(), positiveWavelength,
+      "Wavelength setting in Angstroms. This overrides what is in the dataset.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -106,9 +115,14 @@ void PDEstimateDetectorResolution::processAlgProperties() {
   m_deltaT *= MICROSEC_TO_SEC; // convert to meter
 }
 
-///
-double getWavelength(const API::MatrixWorkspace_sptr ws) {
-  Property *cwlproperty = ws->run().getProperty("LambdaRequest");
+double PDEstimateDetectorResolution::getWavelength() {
+  double wavelength = getProperty("Wavelength");
+  if (!isEmpty(wavelength))
+  {
+    return wavelength;
+  }
+
+  Property *cwlproperty = m_inputWS->run().getProperty("LambdaRequest");
   if (!cwlproperty)
     throw runtime_error(
         "Unable to locate property LambdaRequest as central wavelength. ");
@@ -132,8 +146,12 @@ double getWavelength(const API::MatrixWorkspace_sptr ws) {
 /**
   */
 void PDEstimateDetectorResolution::retrieveInstrumentParameters() {
-  double centrewavelength = getWavelength(m_inputWS);
+  double centrewavelength = getWavelength();
   g_log.notice() << "Centre wavelength = " << centrewavelength << "\n";
+  if (centrewavelength > WAVELENGTH_MAX)
+  {
+    throw runtime_error("unphysical wavelength used");
+  }
 
   // Calculate centre neutron velocity
   m_centreVelocity = WAVELENGTH_TO_VELOCITY / centrewavelength;

@@ -57,6 +57,9 @@ private:
   /// Implement abstract Algorithm methods
   void exec();
 
+  /// Returns the wavelength from either the property or the input workspace
+  double getWavelength();
+
   /// Process input properties for algorithm
   void processAlgProperties();
 
