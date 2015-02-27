@@ -48,7 +48,7 @@ public: // public constructor, destructor and functions
   /// Destructor
   ~TomoReconstruction() {}
   /// Interface name
-  static std::string name() { return "Tomographic Reconstruction"; }
+  static std::string name() { return "Tomography Reconstruction"; }
   /// This interface's categories.
   static QString categoryInfo() { return "Diffraction"; }
   /// Setup tab UI
@@ -67,7 +67,17 @@ private slots:
   void paramValModified(QTreeWidgetItem *, int);
   void expandedItem(QTreeWidgetItem *);
 
+  /// for buttons, run tab
+  void reconstructClicked();
+  void toolSetupClicked();
+  void runVisualizeClicked();
+  void jobCancelClicked();
+
 private:
+  void doSetupSectionSetup();
+  void doSetupSectionParameters();
+  void doSetupSectionRun();
+
   /// Load default interface settings for each tab
   void loadSettings();
 
@@ -79,9 +89,11 @@ private:
 
   QString tableWSToString(Mantid::API::ITableWorkspace_sptr table);
 
-  void loadTomoConfig(
+  void loadSavuTomoConfig(
       std::string &filePath,
       std::vector<Mantid::API::ITableWorkspace_sptr> &currentPlugins);
+
+  void userWarning(std::string err, std::string description);
 
   std::string createUniqueNameHidden();
 

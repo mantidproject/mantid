@@ -14,8 +14,6 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(TomoReconstruction);
-}
-}
 
 class OwnTreeWidgetItem : public QTreeWidgetItem {
 public:
@@ -52,9 +50,128 @@ TomoReconstruction::TomoReconstruction(QWidget *parent)
   m_currentParamPath = "";
 }
 
-void TomoReconstruction::initLayout() {
+/**
+ * Load the setting for each tab on the interface.
+ *
+ * This includes setting the default browsing directory to be the default save
+ *directory.
+ */
+void TomoReconstruction::loadSettings() {
+  // TODO:
+}
+
+/**
+ * Load a savu tomo config file into the current plugin list, overwriting it.
+ * Uses the algorithm LoadSavuTomoConfig
+ */
+void TomoReconstruction::loadSavuTomoConfig(
+    std::string &filePath,
+    std::vector<Mantid::API::ITableWorkspace_sptr> &currentPlugins) {
+  // try to load tomo reconstruction parametereization file
+  auto alg = Algorithm::fromString("LoadSavuTomoConfig");
+  alg->initialize();
+  alg->setPropertyValue("Filename", filePath);
+  alg->setPropertyValue("OutputWorkspace", createUniqueNameHidden());
+  try {
+    alg->execute();
+  } catch (std::runtime_error &e) {
+    throw std::runtime_error(
+        std::string("Error when trying to load tomography reconstruction "
+                    "parameter file: ") +
+        e.what());
+  }
+
+  // Clear the plugin list and remove any item in the ADS entries
+  for (auto it = currentPlugins.begin(); it != currentPlugins.end(); ++it) {
+    ITableWorkspace_sptr curr =
+        boost::dynamic_pointer_cast<ITableWorkspace>((*it));
+    if (AnalysisDataService::Instance().doesExist(curr->getName())) {
+      AnalysisDataService::Instance().remove(curr->getName());
+    }
+  }
+  currentPlugins.clear();
+
+  // new processing plugins list
+  ITableWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
+  currentPlugins.push_back(ws);
+}
+
+// Build a unique (and hidden) name for the table ws
+std::string TomoReconstruction::createUniqueNameHidden() {
+  std::string name;
+  do {
+    // with __ prefix => hidden
+    name = "__TomoConfigTableWS_Seq_" +
+           boost::lexical_cast<std::string>(nameSeqNo++);
+  } while (AnalysisDataService::Instance().doesExist(name));
+
+  return name;
+}
+
+void TomoReconstruction::doSetupSectionRun() {
+  // geometry, etc. niceties
+  // on the left (just plugin names) 1/2, right: 2/3
+  QList<int> sizes;
+  sizes.push_back(450);
+  sizes.push_back(50);
+  m_uiForm.splitter_run_main_vertical->setSizes(sizes);
+
+  sizes.clear();
+  sizes.push_back(400);
+  sizes.push_back(100);
+  m_uiForm.splitter_image_resource->setSizes(sizes);
+
+  sizes.clear();
+  sizes.push_back(450);
+  sizes.push_back(50);
+  m_uiForm.splitter_run_jobs->setSizes(sizes);
+
+  // Button signals
+  connect(m_uiForm.pushButton_reconstruct, SIGNAL(released()), this,
+          SLOT(reconstructClicked()));
+  connect(m_uiForm.pushButton_run_tool_setup, SIGNAL(released()), this,
+          SLOT(toolSetupClicked()));
+  connect(m_uiForm.pushButton_run_job_visualize, SIGNAL(released()), this,
+          SLOT(runVisualizeClicked()));
+  connect(m_uiForm.pushButton_run_job_cancel, SIGNAL(released()), this,
+          SLOT(jobCancelClicked()));
+}
+
+void TomoReconstruction::reconstructClicked() {
+
+}
+
+void TomoReconstruction::toolSetupClicked() {
+
+}
+
+void TomoReconstruction::runVisualizeClicked() {
+}
+
+void TomoReconstruction::jobCancelClicked()
+{
+  // TODO
+  // TODO get current job id
+
+  auto alg = Algorithm::fromString("EndRemoteTransaction");
+  alg->initialize();
+  alg->setPropertyValue("Username", "invalid");
+  alg->setPropertyValue("JobID", "0");
+  try {
+    alg->execute();
+  } catch (std::runtime_error &e) {
+    throw std::runtime_error(
+        "Error when trying to cancel a reconstruction job: " +
+        std::string(e.what()));
+  }
+}
+
+void TomoReconstruction::doSetupSectionSetup() {
+
+}
+
+void TomoReconstruction::doSetupSectionParameters() {
   // TODO: should split the tabs out into their own files
-  m_uiForm.setupUi(this);
 
   // geometry, etc. niceties
   // on the left (just plugin names) 1/2, right: 2/3
@@ -66,11 +183,6 @@ void TomoReconstruction::initLayout() {
   // Setup Parameter editor tab
   loadAvailablePlugins();
   m_uiForm.treeCurrentPlugins->setHeaderHidden(true);
-
-  // Setup the setup tab
-
-  // Setup Run tab
-  loadSettings();
 
   // Connect slots
   // Menu Items
@@ -98,14 +210,14 @@ void TomoReconstruction::initLayout() {
   connect(m_uiForm.btnRemove, SIGNAL(released()), this, SLOT(removeClicked()));
 }
 
-/**
- * Load the setting for each tab on the interface.
- *
- * This includes setting the default browsing directory to be the default save
- *directory.
- */
-void TomoReconstruction::loadSettings() {
-  // TODO:
+void TomoReconstruction::initLayout() {
+  // TODO: should split the tabs out into their own files
+  m_uiForm.setupUi(this);
+
+  loadSettings();
+
+  doSetupSectionSetup();
+
 }
 
 void TomoReconstruction::loadAvailablePlugins() {
@@ -296,7 +408,7 @@ void TomoReconstruction::menuOpenClicked() {
     }
 
     if (opening) {
-      loadTomoConfig(returned, m_currPlugins);
+      loadSavuTomoConfig(returned, m_currPlugins);
 
       m_currentParamPath = returned;
       refreshCurrentPluginListUI();
@@ -355,52 +467,6 @@ QString TomoReconstruction::tableWSToString(ITableWorkspace_sptr table) {
       << "Name: " << table->cell<std::string>(0, 2) << std::endl
       << "Cite: " << table->cell<std::string>(0, 3);
   return QString::fromStdString(msg.str());
-}
-
-/// Load a tomo config file into the current plugin list, overwriting it.
-/// Uses the algorithm LoadTomoConfig
-void TomoReconstruction::loadTomoConfig(
-    std::string &filePath,
-    std::vector<Mantid::API::ITableWorkspace_sptr> &currentPlugins) {
-  // try to load tomo reconstruction parametereization file
-  auto alg = Algorithm::fromString("LoadTomoConfig");
-  alg->initialize();
-  alg->setPropertyValue("Filename", filePath);
-  alg->setPropertyValue("OutputWorkspaces", createUniqueNameHidden());
-  try {
-    alg->execute();
-  } catch (std::runtime_error &e) {
-    throw std::runtime_error(
-        std::string("Error when trying to save tomographic reconstruction "
-                    "parameter file: ") +
-        e.what());
-  }
-
-  // Clear the plugin list and remove any item in the ADS entries
-  for (auto it = currentPlugins.begin(); it != currentPlugins.end(); ++it) {
-    ITableWorkspace_sptr curr =
-        boost::dynamic_pointer_cast<ITableWorkspace>((*it));
-    if (AnalysisDataService::Instance().doesExist(curr->getName())) {
-      AnalysisDataService::Instance().remove(curr->getName());
-    }
-  }
-  currentPlugins.clear();
-
-  // new processing plugins list
-  ITableWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
-  currentPlugins.push_back(ws);
-}
-
-// Build a unique (and hidden) name for the table ws
-std::string TomoReconstruction::createUniqueNameHidden() {
-  std::string name;
-  do {
-    // with __ prefix => hidden
-    name = "__TomoConfigTableWS_Seq_" +
-           boost::lexical_cast<std::string>(nameSeqNo++);
-  } while (AnalysisDataService::Instance().doesExist(name));
-
-  return name;
 }
 
 // Creates a treewidget item for a table workspace
@@ -475,3 +541,17 @@ void TomoReconstruction::createPluginTreeEntry(
   pluginBaseItem->addChildren(items);
   m_uiForm.treeCurrentPlugins->addTopLevelItem(pluginBaseItem);
 }
+
+/**
+ * Show a warning message to the user (pop up)
+ * @param err Basic error title
+ * @param description More detailed explanation, hints, additional information, etc.
+ */
+void TomoReconstruction::userWarning(std::string err, std::string description) {
+  QMessageBox::warning(this, QString(err.c_str()), QString(description.c_str()),
+                       QMessageBox::Ok, QMessageBox::Ok);
+}
+
+
+} // namespace CustomInterfaces
+} // namespace MantidQt
