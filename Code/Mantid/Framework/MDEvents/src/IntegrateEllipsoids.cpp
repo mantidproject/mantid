@@ -12,6 +12,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/V3D.h"
 #include "MantidMDEvents/MDTransfFactory.h"
 #include "MantidMDEvents/UnitsConversionHelper.h"
 #include "MantidMDEvents/Integrate3DEvents.h"
@@ -75,7 +76,7 @@ void qListFromEventWS(Integrate3DEvents &integrator, Progress &prog,
     double errorSq(1.); // ignorable garbage
     const std::vector<WeightedEventNoTime> &raw_events =
         events.getWeightedEventsNoTime();
-    std::vector<V3D> qList;
+    std::vector<Mantid::Kernel::V3D> qList;
     for (auto event = raw_events.begin(); event != raw_events.end(); ++event) {
       double val = unitConverter.convertUnits(event->tof());
       qConverter->calcMatrixCoord(val, locCoord, signal, errorSq);
