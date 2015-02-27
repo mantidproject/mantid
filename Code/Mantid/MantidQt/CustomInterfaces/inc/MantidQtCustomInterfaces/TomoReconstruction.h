@@ -54,6 +54,19 @@ public: // public constructor, destructor and functions
   /// Setup tab UI
   virtual void initLayout();
 
+protected slots:
+  /// for buttons, run tab
+  void reconstructClicked();
+  void toolSetupClicked();
+  void runVisualizeClicked();
+  void jobCancelClicked();
+
+protected:
+  void doPing();
+  void doLogin();
+  void doQueryJobStatus();
+  void doSubmitReconstructionJob();
+
 private slots:
   void menuSaveClicked();
   void menuSaveAsClicked();
@@ -66,12 +79,6 @@ private slots:
   void menuOpenClicked();
   void paramValModified(QTreeWidgetItem *, int);
   void expandedItem(QTreeWidgetItem *);
-
-  /// for buttons, run tab
-  void reconstructClicked();
-  void toolSetupClicked();
-  void runVisualizeClicked();
-  void jobCancelClicked();
 
 private:
   void doSetupSectionSetup();

@@ -112,18 +112,16 @@ void TomoReconstruction::doSetupSectionRun() {
   // geometry, etc. niceties
   // on the left (just plugin names) 1/2, right: 2/3
   QList<int> sizes;
-  sizes.push_back(450);
-  sizes.push_back(50);
+  sizes.push_back(460);
+  sizes.push_back(40);
   m_uiForm.splitter_run_main_vertical->setSizes(sizes);
 
-  sizes.clear();
-  sizes.push_back(400);
-  sizes.push_back(100);
+  sizes[0] = 460;
+  sizes[1] = 60;
   m_uiForm.splitter_image_resource->setSizes(sizes);
 
-  sizes.clear();
-  sizes.push_back(450);
-  sizes.push_back(50);
+  sizes[0] = 420;
+  sizes[1] = 80;
   m_uiForm.splitter_run_jobs->setSizes(sizes);
 
   // Button signals
@@ -135,10 +133,55 @@ void TomoReconstruction::doSetupSectionRun() {
           SLOT(runVisualizeClicked()));
   connect(m_uiForm.pushButton_run_job_cancel, SIGNAL(released()), this,
           SLOT(jobCancelClicked()));
+
+  m_uiForm.pushButton_reconstruct->setEnabled(false);
+  m_uiForm.pushButton_run_tool_setup->setEnabled(false);
+  m_uiForm.pushButton_run_job_cancel->setEnabled(false);
+  m_uiForm.pushButton_run_job_visualize->setEnabled(false);
+}
+
+void TomoReconstruction::doLogin() {
+  // TODO: once the remote algorithms are rearranged into the
+  // 'RemoteJobManager' design, this will use...
+  // auto alg = Algorithm::fromString("Authenticate");
+}
+
+void TomoReconstruction::doPing() {
+  // TODO: once the remote algorithms are rearranged into the
+  // 'RemoteJobManager' design, this will use...
+  // auto alg = Algorithm::fromString("???");
+}
+
+void TomoReconstruction::doQueryJobStatus() {
+  // TODO: once the remote algorithms are rearranged into the
+  // 'RemoteJobManager' design, this will use...
+  // auto alg = Algorithm::fromString("QueryAllRemoteJobs");
+  // and
+  // auto alg = Algorithm::fromString("QueryRemoteJob");
+}
+
+void TomoReconstruction::doSubmitReconstructionJob() {
+  // TODO: once the remote algorithms are rearranged into the
+  // 'RemoteJobManager' design, this will use...
+  // auto transAlg = Algorithm::fromString("StartRemoteTransaction");
+  // auto submitAlg = Algorithm::fromString("SubmitRemoteJob");
+
+  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
+  alg->initialize();
+  alg->setPropertyValue("Username", "invalid");
+  alg->setPropertyValue("JobID", "0");
+  try {
+    alg->execute();
+  } catch (std::runtime_error &e) {
+    throw std::runtime_error(
+        "Error when trying to cancel a reconstruction job: " +
+        std::string(e.what()));
+  }
 }
 
 void TomoReconstruction::reconstructClicked() {
-
+  // TODO: check required inputs, setup, etc.
+  doSubmitReconstructionJob();
 }
 
 void TomoReconstruction::toolSetupClicked() {
@@ -150,10 +193,12 @@ void TomoReconstruction::runVisualizeClicked() {
 
 void TomoReconstruction::jobCancelClicked()
 {
-  // TODO
-  // TODO get current job id
+  // TODO: once the remote algorithms are rearranged into the
+  // 'RemoteJobManager' design, this will use...
+  // auto alg = Algorithm::fromString("EndRemoteTransaction");
 
-  auto alg = Algorithm::fromString("EndRemoteTransaction");
+  // TODO get current job id
+  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
   alg->initialize();
   alg->setPropertyValue("Username", "invalid");
   alg->setPropertyValue("JobID", "0");
@@ -216,8 +261,9 @@ void TomoReconstruction::initLayout() {
 
   loadSettings();
 
+  doSetupSectionParameters();
   doSetupSectionSetup();
-
+  doSetupSectionRun();
 }
 
 void TomoReconstruction::loadAvailablePlugins() {

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1075</width>
-    <height>791</height>
+    <width>1059</width>
+    <height>705</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -375,7 +375,7 @@ Double-click on them to modify their values.</string>
       </widget>
       <widget class="QWidget" name="setupTab">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <attribute name="title">
         <string>Setup</string>
@@ -846,7 +846,7 @@ Double-click on them to modify their values.</string>
       </widget>
       <widget class="QWidget" name="runTab">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <attribute name="title">
         <string>Run</string>
