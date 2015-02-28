@@ -153,7 +153,7 @@ void SortHKL::exec() {
          << peaks[NumberPeaks - 1].getWavelength();
 
   int predictedPeaks = 0;
- /* if (name.substr(0,4) != "bank")
+ if (name.substr(0,4) != "bank")
   {
     API::IAlgorithm_sptr predictAlg = createChildAlgorithm("PredictPeaks");
     predictAlg->setProperty("InputWorkspace", InPeaksW);
@@ -169,7 +169,7 @@ void SortHKL::exec() {
     PeaksWorkspace_sptr predictedWksp =
         predictAlg->getProperty("OutputWorkspace");
     predictedPeaks = predictedWksp->getNumberPeaks();
-  }*/
+  }
 
   criteria.clear();
   // Sort by HKL
@@ -257,7 +257,7 @@ void SortHKL::exec() {
   g_log.notice() << "Rmerge:" << rSum << "  "  << f2Sum << "\n";
   newrow << statsMult.mean << statsIsigI.mean << 100.0 * rSum / f2Sum
          << 100.0 * rpSum / f2Sum
-         << double(NumberPeaks) / double(predictedPeaks);
+         << 100.0 * double(unique) / double(predictedPeaks);
   data.clear();
   sig2.clear();
   // Reset hkl of equivalent peaks to original value
