@@ -20,9 +20,11 @@ except in the situation that two entries with time stamps within time tolerance.
 Time Zone
 ---------
 
-The time stamps of sample logs are recorded as UTC time.
+The time stamps of sample logs are recorded as UTC time in SNS.
 Some users wants to see the exported sample log as the neutron facility's local time.
 So the input property 'TimeZone' is for this purpose.
+
+For 
 
 
 Header file
