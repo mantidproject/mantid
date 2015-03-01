@@ -2,15 +2,13 @@
 #define MANTID_API_FILEBACKEDEXPERIMENTINFOTEST_H_
 
 #include <cxxtest/TestSuite.h>
-
-#include <nexus/NeXusFile.hpp>
-
 #include "ExperimentInfoTest.h"
-
 #include "MantidAPI/FileBackedExperimentInfo.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+
+#include <nexus/NeXusFile.hpp>
 
 using Mantid::API::FileBackedExperimentInfo;
 
