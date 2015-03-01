@@ -67,20 +67,15 @@ bool PointGroup::groupHasNoTranslations(const Group &group) const {
 /// Protected constructor - can not be used directly.
 PointGroup::PointGroup(const std::string &symbolHM, const Group &group,
                        const std::string &name)
-    : Group(group), m_permutations(), m_symbolHM(symbolHM), m_name(name) {
-  createPermutationsFromOperations();
+    : Group(group), m_symbolHM(symbolHM), m_name(name) {
 }
 
 PointGroup::PointGroup(const PointGroup &other)
-    : Group(other), m_permutations(), m_symbolHM(other.m_symbolHM),
-      m_name(other.m_name) {
-  createPermutationsFromOperations();
+    : Group(other), m_symbolHM(other.m_symbolHM), m_name(other.m_name) {
 }
 
 PointGroup &PointGroup::operator=(const PointGroup &other) {
   Group::operator=(other);
-
-  createPermutationsFromOperations();
 
   m_symbolHM = other.m_symbolHM;
   m_name = other.m_name;
@@ -115,10 +110,10 @@ bool PointGroup::isEquivalent(const Kernel::V3D &hkl,
  */
 std::vector<V3D> PointGroup::getEquivalentSet(const Kernel::V3D &hkl) const {
   std::vector<V3D> equivalents;
-  equivalents.reserve(m_permutations.size());
+  equivalents.reserve(m_allOperations.size());
 
-  for (auto op = m_permutations.begin(); op != m_permutations.end(); ++op) {
-    equivalents.push_back((*op).getPermutation(hkl));
+  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
+    equivalents.push_back((*op) * hkl);
   }
 
   std::sort(equivalents.begin(), equivalents.end());
@@ -127,15 +122,6 @@ std::vector<V3D> PointGroup::getEquivalentSet(const Kernel::V3D &hkl) const {
                     equivalents.end());
 
   return equivalents;
-}
-
-void PointGroup::createPermutationsFromOperations() {
-  m_permutations.clear();
-
-  const std::vector<SymmetryOperation> &symOps = getSymmetryOperations();
-  for (auto op = symOps.begin(); op != symOps.end(); ++op) {
-    m_permutations.push_back((*op).matrix());
-  }
 }
 
 /** @return a vector with all possible PointGroup objects */

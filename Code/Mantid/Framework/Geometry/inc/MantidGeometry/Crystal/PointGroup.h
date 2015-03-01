@@ -17,45 +17,6 @@
 namespace Mantid {
 namespace Geometry {
 
-class MANTID_GEOMETRY_DLL IndexPermutation {
-public:
-  IndexPermutation(const Kernel::IntMatrix &matrix) : m_factors() {
-    for (size_t i = 0; i < matrix.numRows(); ++i) {
-      m_factors.push_back(IndexSum(i, matrix[i]));
-    }
-  }
-
-  Kernel::V3D getPermutation(const Kernel::V3D &hkl) const {
-    Kernel::V3D hklPrime(0, 0, 0);
-    for (auto it = m_factors.begin(); it != m_factors.end(); ++it) {
-      hklPrime[(*it).getIndex()] = (*it).transformed(hkl);
-    }
-
-    return hklPrime;
-  }
-
-private:
-  class IndexSum {
-  public:
-    IndexSum(size_t index, const int *matrixRow)
-        : m_index(index), m_f1(static_cast<double>(matrixRow[0])),
-          m_f2(static_cast<double>(matrixRow[1])),
-          m_f3(static_cast<double>(matrixRow[2])) {}
-
-    size_t getIndex() const { return m_index; }
-
-    double transformed(const Kernel::V3D &hkl) const {
-      return m_f1 * hkl[0] + m_f2 * hkl[1] + m_f3 * hkl[2];
-    }
-
-  private:
-    size_t m_index;
-    double m_f1, m_f2, m_f3;
-  };
-
-  std::vector<IndexSum> m_factors;
-};
-
 /** A class containing the Point Groups for a crystal.
  *
  * @author Vickie Lynch
@@ -100,10 +61,6 @@ protected:
   bool groupHasNoTranslations(const Group &group) const;
 
   std::vector<Kernel::V3D> getEquivalentSet(const Kernel::V3D &hkl) const;
-
-  void createPermutationsFromOperations();
-
-  std::vector<IndexPermutation> m_permutations;
 
   std::string m_symbolHM;
   std::string m_name;
