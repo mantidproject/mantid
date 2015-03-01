@@ -217,7 +217,39 @@ public:
       TS_ASSERT_EQUALS(pg.getEquivalents(V3D(1, 2, 3)).size(), 48);
   }
 
+  void testPerformance()
+  {
+      PointGroup_sptr pg =PointGroupFactory::Instance().createPointGroup("-1");
+      checkPointGroupPerformance(pg);
+  }
+
 private:
+  void checkPointGroupPerformance(const PointGroup_sptr &pointGroup)
+  {
+      V3D equiv[] = {V3D(1,2,3),V3D(-1,-2,3),V3D(-1,2,-3),V3D(1,-2,-3),V3D(3,1,2),V3D(3,-1,-2),V3D(-3,-1,2),V3D(-3,1,-2),V3D(2,3,1),V3D(-2,3,-1),V3D(2,-3,-1),V3D(-2,-3,1),V3D(2,1,-3),V3D(-2,-1,-3),V3D(2,-1,3),V3D(-2,1,3),V3D(1,3,-2),V3D(-1,3,2),V3D(-1,-3,-2),V3D(1,-3,2),V3D(3,2,-1),V3D(3,-2,1),V3D(-3,2,1),V3D(-3,-2,-1),V3D(-1,-2,-3),V3D(1,2,-3),V3D(1,-2,3),V3D(-1,2,3),V3D(-3,-1,-2),V3D(-3,1,2),V3D(3,1,-2),V3D(3,-1,2),V3D(-2,-3,-1),V3D(2,-3,1),V3D(-2,3,1),V3D(2,3,-1),V3D(-2,-1,3),V3D(2,1,3),V3D(-2,1,-3),V3D(2,-1,-3),V3D(-1,-3,2),V3D(1,-3,-2),V3D(1,3,2),V3D(-1,3,-2),V3D(-3,-2,1),V3D(-3,2,-1),V3D(3,-2,-1),V3D(3,2,1)};
+      std::vector<V3D> hkls(equiv, equiv + 48);
+
+      Timer t;
+
+      V3D base(1, 2, 3);
+
+      t.reset();
+      int h = 0;
+      for(size_t i = 0; i < 1000; ++i) {
+          for(auto hkl = hkls.begin(); hkl != hkls.end(); ++hkl) {
+              bool eq = pointGroup->isEquivalent(base, *hkl);
+              if(eq) {
+                ++h;
+              }
+          }
+      }
+
+      float time = t.elapsed();
+
+      std::cout << "Eq: " << h << ", Time: " << time / 1000.0 << std::endl;
+
+  }
+
   class TestablePointGroup : public PointGroup
   {
       friend class PointGroupTest;
