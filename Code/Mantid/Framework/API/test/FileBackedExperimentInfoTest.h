@@ -35,7 +35,7 @@ public:
     }
 
     m_inMemoryExptInfo = boost::make_shared<ExperimentInfo>();
-    m_nexusFile = boost::make_shared<::NeXus::File>(m_filename, NXACC_READ);
+    m_nexusFile = boost::make_shared< ::NeXus::File >(m_filename, NXACC_READ);
     m_nexusFile->openGroup("mantid_workspace_1", "NXentry");
     std::string paramString;
     m_inMemoryExptInfo->loadExperimentInfoNexus(m_nexusFile.get(), paramString);
@@ -237,7 +237,7 @@ private:
                                                         "/mantid_workspace_1");
   }
 
-  boost::shared_ptr<::NeXus::File> m_nexusFile;
+  boost::shared_ptr< ::NeXus::File > m_nexusFile;
   Mantid::API::ExperimentInfo_sptr m_inMemoryExptInfo;
   std::string m_filename;
 };
