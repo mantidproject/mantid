@@ -12,6 +12,7 @@
 #include <set>
 
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
+#include "MantidGeometry/Crystal/Group.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -20,7 +21,7 @@ namespace Geometry {
  * @author Vickie Lynch
  * @date 2012-02-02
  */
-class MANTID_GEOMETRY_DLL PointGroup {
+class MANTID_GEOMETRY_DLL PointGroup : public Group {
 public:
   enum CrystalSystem {
     Triclinic,
@@ -32,45 +33,42 @@ public:
     Cubic
   };
 
+  PointGroup(const std::string &symbolHM, const Group &group,
+             const std::string &name);
+
+  PointGroup(const PointGroup &other);
+  PointGroup &operator=(const PointGroup &other);
+
   virtual ~PointGroup() {}
   /// Name of the point group
-  virtual std::string getName() const = 0;
+  std::string getName() const { return m_name; }
   /// Hermann-Mauguin symbol
   std::string getSymbol() const;
 
-  virtual CrystalSystem crystalSystem() const = 0;
+  CrystalSystem crystalSystem() const { return Cubic; }
 
   /// Return true if the hkls are in same group
-  virtual bool isEquivalent(const Kernel::V3D &hkl,
-                            const Kernel::V3D &hkl2) const = 0;
+  bool isEquivalent(const Kernel::V3D &hkl,
+                            const Kernel::V3D &hkl2) const;
 
   /// Returns a vector with all equivalent hkls
   std::vector<Kernel::V3D> getEquivalents(const Kernel::V3D &hkl) const;
   /// Returns the same hkl for all equivalent hkls
   Kernel::V3D getReflectionFamily(const Kernel::V3D &hkl) const;
 
-  /// In this method symmetry operations should be defined. It's called by the
-  /// factory after construction of the object.
-  virtual void init() = 0;
+  void init() { }
 
 protected:
-  PointGroup(const std::string &symbolHM);
-
-  void setSymmetryOperations(const std::vector<SymmetryOperation> &generators);
-  void addSymmetryOperation(const SymmetryOperation &symmetryOperation);
-  std::vector<SymmetryOperation> getSymmetryOperations() const;
-
-  std::vector<SymmetryOperation> generateSymmetryOperations(
-      const std::vector<SymmetryOperation> &symmetryOperations);
+  bool groupHasNoTranslations(const Group &group) const;
 
   std::set<Kernel::V3D> getEquivalentSet(const Kernel::V3D &hkl) const;
 
-  std::vector<SymmetryOperation> m_symmetryOperations;
   std::string m_symbolHM;
+  std::string m_name;
 };
 
 //------------------------------------------------------------------------
-/** -1 (Triclinic) PointGroup */
+/** -1 (Triclinic) PointGroup
 class MANTID_GEOMETRY_DLL PointGroupLaue1 : public PointGroup {
 public:
   PointGroupLaue1();
@@ -85,7 +83,7 @@ public:
 };
 
 //------------------------------------------------------------------------
-/** 1 2/m 1 (Monoclinic, unique axis b) PointGroup */
+/** 1 2/m 1 (Monoclinic, unique axis b) PointGroup
 class MANTID_GEOMETRY_DLL PointGroupLaue2 : public PointGroup {
 public:
   PointGroupLaue2();
@@ -100,7 +98,7 @@ public:
 };
 
 //------------------------------------------------------------------------
-/** 1 1 2/m (Monoclinic, unique axis c) PointGroup */
+/** 1 1 2/m (Monoclinic, unique axis c) PointGroup
 class MANTID_GEOMETRY_DLL PointGroupLaue3 : public PointGroup {
 public:
   PointGroupLaue3();
@@ -115,7 +113,7 @@ public:
 };
 
 //------------------------------------------------------------------------
-/** mmm (Orthorombic) PointGroup */
+/** mmm (Orthorombic) PointGroup
 class MANTID_GEOMETRY_DLL PointGroupLaue4 : public PointGroup {
 public:
   PointGroupLaue4();
@@ -130,7 +128,7 @@ public:
 };
 
 //------------------------------------------------------------------------
-/** 4/m (Tetragonal) PointGroup */
+/** 4/m (Tetragonal) PointGroup
 class MANTID_GEOMETRY_DLL PointGroupLaue5 : public PointGroup {
 public:
   PointGroupLaue5();
@@ -145,7 +143,7 @@ public:
 };
 
 //------------------------------------------------------------------------
-/** 4/mmm (Tetragonal) PointGroup */
+/** 4/mmm (Tetragonal) PointGroup
 class MANTID_GEOMETRY_DLL PointGroupLaue6 : public PointGroup {
 public:
   PointGroupLaue6();
@@ -160,7 +158,7 @@ public:
 };
 
 //------------------------------------------------------------------------
-/** -3 (Trigonal - Hexagonal) PointGroup */
+/** -3 (Trigonal - Hexagonal) PointGroup
 class MANTID_GEOMETRY_DLL PointGroupLaue7 : public PointGroup {
 public:
   PointGroupLaue7();
@@ -175,7 +173,7 @@ public:
 };
 
 //------------------------------------------------------------------------
-/** -3m1 (Trigonal - Rhombohedral) PointGroup */
+/** -3m1 (Trigonal - Rhombohedral) PointGroup
 class MANTID_GEOMETRY_DLL PointGroupLaue8 : public PointGroup {
 public:
   PointGroupLaue8();
@@ -190,7 +188,7 @@ public:
 };
 
 //------------------------------------------------------------------------
-/** -31m (Trigonal - Rhombohedral) PointGroup */
+/** -31m (Trigonal - Rhombohedral) PointGroup
 class MANTID_GEOMETRY_DLL PointGroupLaue9 : public PointGroup {
 public:
   PointGroupLaue9();
@@ -205,7 +203,7 @@ public:
 };
 
 //------------------------------------------------------------------------
-/**  6/m (Hexagonal) PointGroup */
+/**  6/m (Hexagonal) PointGroup
 class MANTID_GEOMETRY_DLL PointGroupLaue10 : public PointGroup {
 public:
   PointGroupLaue10();
@@ -220,7 +218,7 @@ public:
 };
 
 //------------------------------------------------------------------------
-/** 6/mmm (Hexagonal) PointGroup */
+/** 6/mmm (Hexagonal) PointGroup
 class MANTID_GEOMETRY_DLL PointGroupLaue11 : public PointGroup {
 public:
   PointGroupLaue11();
@@ -235,7 +233,7 @@ public:
 };
 
 //------------------------------------------------------------------------
-/** m-3 (Cubic) PointGroup */
+/** m-3 (Cubic) PointGroup
 class MANTID_GEOMETRY_DLL PointGroupLaue12 : public PointGroup {
 public:
   PointGroupLaue12();
@@ -250,7 +248,7 @@ public:
 };
 
 //------------------------------------------------------------------------
-/** m-3m (Cubic) PointGroup */
+/** m-3m (Cubic) PointGroup
 class MANTID_GEOMETRY_DLL PointGroupLaue13 : public PointGroup {
 public:
   PointGroupLaue13();
@@ -263,14 +261,14 @@ public:
 
   virtual void init();
 };
-
+*/
 /// Shared pointer to a PointGroup
 typedef boost::shared_ptr<PointGroup> PointGroup_sptr;
 
 MANTID_GEOMETRY_DLL std::vector<PointGroup_sptr> getAllPointGroups();
 
 typedef std::multimap<PointGroup::CrystalSystem, PointGroup_sptr>
-    PointGroupCrystalSystemMap;
+PointGroupCrystalSystemMap;
 MANTID_GEOMETRY_DLL PointGroupCrystalSystemMap getPointGroupsByCrystalSystem();
 
 } // namespace Mantid

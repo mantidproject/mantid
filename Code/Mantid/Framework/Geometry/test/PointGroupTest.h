@@ -110,15 +110,15 @@ public:
       check_point_group("-4m2", V3D(1,2,3), 8, equiv); }
     }
   }
-
-  void testConstruction()
+/*
+  void xtestConstruction()
   {
       TestablePointGroup defaultPointgroup;
 
       TS_ASSERT_EQUALS(defaultPointgroup.m_symmetryOperations.size(), 0);
   }
 
-  void testAddSymmetryOperation()
+  void xtestAddSymmetryOperation()
   {
       TestablePointGroup pg;
 
@@ -133,7 +133,7 @@ public:
       TS_ASSERT_EQUALS(ops[0], symOp);
   }
 
-  void testGenerateTransformationMatrices()
+  void xtestGenerateTransformationMatrices()
   {
       TestablePointGroup pg;
 
@@ -166,7 +166,7 @@ public:
       TS_ASSERT_DIFFERS(matrices[0], matrices[1]);
   }
 
-  void testCrystalSystems()
+  void xtestCrystalSystems()
   {
       std::map<std::string, PointGroup::CrystalSystem> crystalSystemsMap;
       crystalSystemsMap["-1 (Triclinic)"] = PointGroup::Triclinic;
@@ -190,7 +190,7 @@ public:
       }
   }
 
-  void testCrystalSystemMap()
+  void xtestCrystalSystemMap()
   {
       std::vector<PointGroup_sptr> pointgroups = getAllPointGroups();
       PointGroupCrystalSystemMap pgMap = getPointGroupsByCrystalSystem();
@@ -206,7 +206,7 @@ public:
       TS_ASSERT_EQUALS(pgMap.count(PointGroup::Cubic), 2);
   }
 
-  void testInit()
+  void xtestInit()
   {
       PointGroupLaue13 pg;
 
@@ -216,10 +216,10 @@ public:
 
       TS_ASSERT_EQUALS(pg.getEquivalents(V3D(1, 2, 3)).size(), 48);
   }
-
+*/
   void testPerformance()
   {
-      PointGroup_sptr pg =PointGroupFactory::Instance().createPointGroup("-1");
+      PointGroup_sptr pg =PointGroupFactory::Instance().createPointGroup("m-3m");
       checkPointGroupPerformance(pg);
   }
 
@@ -250,6 +250,7 @@ private:
 
   }
 
+  /*
   class TestablePointGroup : public PointGroup
   {
       friend class PointGroupTest;
@@ -265,7 +266,7 @@ private:
 
       void init() { }
   };
-
+*/
 };
 
 
