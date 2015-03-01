@@ -113,7 +113,7 @@ std::vector<V3D> PointGroup::getEquivalentSet(const Kernel::V3D &hkl) const {
   equivalents.reserve(m_allOperations.size());
 
   for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
-    equivalents.push_back((*op) * hkl);
+    equivalents.push_back((*op).matrix() * hkl);
   }
 
   std::sort(equivalents.begin(), equivalents.end());
