@@ -81,6 +81,11 @@
             <property name="label" stdset="0">
              <string>Map File</string>
             </property>
+            <property name="fileExtensions" stdset="0">
+             <stringlist>
+              <string>.map</string>
+             </stringlist>
+            </property>
            </widget>
           </item>
          </layout>
