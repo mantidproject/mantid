@@ -43,19 +43,21 @@ Usage
    ws = LoadMuonNexus('EMU00006473.nxs')
 
    # Create a PhaseList file with some arbitrary detector information
-   file = open('PhaseList.txt','w')
-   file.write("MuSR\n")
-   file.write("Dummy line\n")
-   file.write("Dummy line\n")
-   file.write("Dummy line\n")
-   file.write("Dummy line\n")
-   file.write("32 0 60 0.0\n")
+   import os
+   phaselist_path = os.path.join(os.path.expanduser("~"),"PhaseList.txt")
+   phaselist_file = open(phaselist_path,'w')
+   phaselist_file.write("MuSR\n")
+   phaselist_file.write("Dummy line\n")
+   phaselist_file.write("Dummy line\n")
+   phaselist_file.write("Dummy line\n")
+   phaselist_file.write("Dummy line\n")
+   phaselist_file.write("32 0 60 0.0\n")
    for i in range(0,16):
-        file.write("1 50.0 0.00 0 0 1\n")
-        file.write("1 50.0 1.57 0 0 1\n")
-   file.close()
+        phaselist_file.write("1 50.0 0.00 0 0 1\n")
+        phaselist_file.write("1 50.0 1.57 0 0 1\n")
+   phaselist_file.close()
 
-   ows = PhaseQuad(InputWorkspace='ws',PhaseList='PhaseList.txt')
+   ows = PhaseQuad(InputWorkspace='ws',PhaseList=phaselist_path)
    print "Output workspace contains", ows.getNumberHistograms(), "histograms"
 
 Output:
@@ -66,11 +68,11 @@ Output:
 
 .. testcleanup:: ExPhaseQuadList
 
-  import os
-  try:
-      os.remove('PhaseList.txt')
-  except OSError:
-      pass
+   import os
+   try:
+       os.remove(phaselist_path)
+   except OSError:
+       pass
 
 **Example - Computing squashograms from PhaseTable:**
 
