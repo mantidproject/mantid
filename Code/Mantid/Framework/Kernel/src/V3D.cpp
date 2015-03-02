@@ -289,6 +289,12 @@ bool V3D::operator<(const V3D &V) const {
   return z < V.z;
 }
 
+/// Comparison operator greater than.
+bool V3D::operator>(const V3D &rhs) const
+{
+    return rhs < *this;
+}
+
 /**
   Sets the vector position from a triplet of doubles x,y,z
   @param xx :: The X coordinate
