@@ -64,17 +64,17 @@ public:
     { V3D equiv[] = {V3D(1,2,3),V3D(-1,-2,3), V3D(-2,1,3), V3D(2,-1,3), V3D(-1,2,-3), V3D(1,-2,-3), V3D(2,1,-3), V3D(-2,-1,-3), V3D(-1,-2,-3), V3D(1,2,-3), V3D(2,-1,-3), V3D(-2,1,-3), V3D(1,-2,3), V3D(-1,2,3),V3D(-2,-1,3), V3D(2,1,3)};
     check_point_group("4/mmm", V3D(1,2,3), 16, equiv); }
     { V3D equiv[] = {V3D(1,2,3),V3D(-2,1-2,3), V3D(-1+2,-1,3), V3D(-1,-2,-3), V3D(2,-1+2,-3), V3D(1-2,1,-3)};
-    check_point_group("-3", V3D(1,2,3), 6, equiv); }
-    { V3D equiv[] = {V3D(1,2,3),V3D(-2,1-2,3),V3D(-1+2,-1,3),V3D(2,1,-3),V3D(1-2,-2,-3),V3D(-1,-1+2,-3),V3D(-1,-2,-3),V3D(2,-1+2,-3),V3D(1-2,1,-3),V3D(-2,-1,3),V3D(-1+2,2,3),V3D(1,1-2,3)};
-    check_point_group("-3m1", V3D(1,2,3), 12, equiv); }
+    check_point_group("-3 h", V3D(1,2,3), 6, equiv); }
+    { V3D equiv[] = {V3D(7,2,3),V3D(-2,7-2,3),V3D(-7+2,-7,3),V3D(2,7,-3),V3D(7-2,-2,-3),V3D(-7,-7+2,-3),V3D(-7,-2,-3),V3D(2,-7+2,-3),V3D(7-2,7,-3),V3D(-2,-7,3),V3D(-7+2,2,3),V3D(7,7-2,3)};
+    check_point_group("-3m1 h", V3D(7,2,3), 12, equiv); }
     { V3D equiv[] = {
-        V3D(1,2,3),V3D(-2,1-2,3),V3D(-1+2,-1,3),
-        V3D(-2,-1,-3),V3D(-1+2,2,-3),V3D(1,1-2,-3),
-        V3D(-1,-2,-3),V3D(2,-1+2,-3),V3D(1-2,1,-3),
-        V3D(2,1,3),V3D(1-2,-2,3),V3D(-1,-1+2,3)};
-    check_point_group("-31m", V3D(1,2,3), 12, equiv); }
-    { V3D equiv[] = {V3D(1,2,3),V3D(-2,1-2,3),V3D(-1+2,-1,3),V3D(-1,-2,3),V3D(2,-1+2,3),V3D(1-2,1,3),V3D(-1,-2,-3),V3D(2,-1+2,-3),V3D(1-2,1,-3),V3D(1,2,-3),V3D(-2,1-2,-3),V3D(-1+2,-1,-3)};
-    check_point_group("6/m", V3D(1,2,3), 12, equiv); }
+        V3D(7,2,3),V3D(-2,7-2,3),V3D(-7+2,-7,3),
+        V3D(-2,-7,-3),V3D(-7+2,2,-3),V3D(7,7-2,-3),
+        V3D(-7,-2,-3),V3D(2,-7+2,-3),V3D(7-2,7,-3),
+        V3D(2,7,3),V3D(7-2,-2,3),V3D(-7,-7+2,3)};
+    check_point_group("-31m h", V3D(7,2,3), 12, equiv); }
+    { V3D equiv[] = {V3D(7,2,3),V3D(-2,7-2,3),V3D(-7+2,-7,3),V3D(-7,-2,3),V3D(2,-7+2,3),V3D(7-2,7,3),V3D(-7,-2,-3),V3D(2,-7+2,-3),V3D(7-2,7,-3),V3D(7,2,-3),V3D(-2,7-2,-3),V3D(-7+2,-7,-3)};
+    check_point_group("6/m", V3D(7,2,3), 12, equiv); }
     { V3D equiv[] = {V3D(7,2,3),V3D(-2,7-2,3),V3D(-7+2,-7,3),V3D(-7,-2,3),V3D(2,-7+2,3),V3D(7-2,7,3),V3D(2,7,-3),V3D(7-2,-2,-3),V3D(-7,-7+2,-3),V3D(-2,-7,-3),V3D(-7+2,2,-3),V3D(7,7-2,-3),V3D(-7,-2,-3),V3D(2,-7+2,-3),V3D(7-2,7,-3),V3D(7,2,-3),V3D(-2,7-2,-3),V3D(-7+2,-7,-3),V3D(-2,-7,3),V3D(-7+2,2,3),V3D(7,7-2,3),V3D(2,7,3),V3D(7-2,-2,3),V3D(-7,-7+2,3)};
     check_point_group("6/mmm", V3D(7,2,3), 24, equiv); }
     { V3D equiv[] = {V3D(1,2,3),V3D(-1,-2,3),V3D(-1,2,-3),V3D(1,-2,-3),V3D(3,1,2),V3D(3,-1,-2),V3D(-3,-1,2),V3D(-3,1,-2),V3D(2,3,1),V3D(-2,3,-1),V3D(2,-3,-1),V3D(-2,-3,1),V3D(-1,-2,-3),V3D(1,2,-3),V3D(1,-2,3),V3D(-1,2,3),V3D(-3,-1,-2),V3D(-3,1,2),V3D(3,1,-2),V3D(3,-1,2),V3D(-2,-3,-1),V3D(2,-3,1),V3D(-2,3,1),V3D(2,3,-1)};
@@ -115,24 +115,60 @@ public:
   void testCrystalSystems()
   {
       std::map<std::string, PointGroup::CrystalSystem> crystalSystemsMap;
-      crystalSystemsMap["-1 (Triclinic)"] = PointGroup::Triclinic;
-      crystalSystemsMap["2/m (Monoclinic, unique axis b)"] = PointGroup::Monoclinic;
-      crystalSystemsMap["112/m (Monoclinic, unique axis c)"] = PointGroup::Monoclinic;
-      crystalSystemsMap["mmm (Orthorombic)"] = PointGroup::Orthorhombic;
-      crystalSystemsMap["4/m (Tetragonal)"] = PointGroup::Tetragonal;
-      crystalSystemsMap["4/mmm (Tetragonal)"] = PointGroup::Tetragonal;
-      crystalSystemsMap["-3 (Trigonal - Hexagonal)"] = PointGroup::Trigonal;
-      crystalSystemsMap["-3m1 (Trigonal - Rhombohedral)"] = PointGroup::Trigonal;
-      crystalSystemsMap["-31m (Trigonal - Rhombohedral)"] = PointGroup::Trigonal;
-      crystalSystemsMap["6/m (Hexagonal)"] = PointGroup::Hexagonal;
-      crystalSystemsMap["6/mmm (Hexagonal)"] = PointGroup::Hexagonal;
-      crystalSystemsMap["m-3 (Cubic)"] = PointGroup::Cubic;
-      crystalSystemsMap["m-3m (Cubic)"] = PointGroup::Cubic;
+      crystalSystemsMap["1"] = PointGroup::Triclinic;
+      crystalSystemsMap["-1"] = PointGroup::Triclinic;
+
+      crystalSystemsMap["2"] = PointGroup::Monoclinic;
+      crystalSystemsMap["m"] = PointGroup::Monoclinic;
+      crystalSystemsMap["2/m"] = PointGroup::Monoclinic;
+      crystalSystemsMap["112/m"] = PointGroup::Monoclinic;
+
+      crystalSystemsMap["222"] = PointGroup::Orthorhombic;
+      crystalSystemsMap["mm2"] = PointGroup::Orthorhombic;
+      crystalSystemsMap["mmm"] = PointGroup::Orthorhombic;
+
+      crystalSystemsMap["4"] = PointGroup::Tetragonal;
+      crystalSystemsMap["-4"] = PointGroup::Tetragonal;
+      crystalSystemsMap["4/m"] = PointGroup::Tetragonal;
+      crystalSystemsMap["422"] = PointGroup::Tetragonal;
+      crystalSystemsMap["4mm"] = PointGroup::Tetragonal;
+      crystalSystemsMap["-42m"] = PointGroup::Tetragonal;
+      crystalSystemsMap["-4m2"] = PointGroup::Tetragonal;
+      crystalSystemsMap["4/mmm"] = PointGroup::Tetragonal;
+
+      crystalSystemsMap["3 h"] = PointGroup::Trigonal;
+      crystalSystemsMap["-3 h"] = PointGroup::Trigonal;
+      crystalSystemsMap["321 h"] = PointGroup::Trigonal;
+      crystalSystemsMap["312 h"] = PointGroup::Trigonal;
+      crystalSystemsMap["3m1 h"] = PointGroup::Trigonal;
+      crystalSystemsMap["31m h"] = PointGroup::Trigonal;
+      crystalSystemsMap["-3m1 h"] = PointGroup::Trigonal;
+      crystalSystemsMap["-31m h"] = PointGroup::Trigonal;
+      crystalSystemsMap["3"] = PointGroup::Trigonal;
+      crystalSystemsMap["-3"] = PointGroup::Trigonal;
+      crystalSystemsMap["32"] = PointGroup::Trigonal;
+      crystalSystemsMap["3m"] = PointGroup::Trigonal;
+      crystalSystemsMap["-3m"] = PointGroup::Trigonal;
+
+      crystalSystemsMap["6"] = PointGroup::Hexagonal;
+      crystalSystemsMap["-6"] = PointGroup::Hexagonal;
+      crystalSystemsMap["6/m"] = PointGroup::Hexagonal;
+      crystalSystemsMap["622"] = PointGroup::Hexagonal;
+      crystalSystemsMap["6mm"] = PointGroup::Hexagonal;
+      crystalSystemsMap["-62m"] = PointGroup::Hexagonal;
+      crystalSystemsMap["-6m2"] = PointGroup::Hexagonal;
+      crystalSystemsMap["6/mmm"] = PointGroup::Hexagonal;
+
+      crystalSystemsMap["23"] = PointGroup::Cubic;
+      crystalSystemsMap["m-3"] = PointGroup::Cubic;
+      crystalSystemsMap["432"] = PointGroup::Cubic;
+      crystalSystemsMap["-43m"] = PointGroup::Cubic;
+      crystalSystemsMap["m-3m"] = PointGroup::Cubic;
 
       std::vector<PointGroup_sptr> pointgroups = getAllPointGroups();
 
       for(size_t i = 0; i < pointgroups.size(); ++i) {
-          TSM_ASSERT_EQUALS(pointgroups[i]->getName() + ": Unexpected crystal system.", pointgroups[i]->crystalSystem(), crystalSystemsMap[pointgroups[i]->getName()]);
+          TSM_ASSERT_EQUALS(pointgroups[i]->getSymbol() + ": Unexpected crystal system.", pointgroups[i]->crystalSystem(), crystalSystemsMap[pointgroups[i]->getSymbol()]);
       }
   }
 
@@ -143,13 +179,17 @@ public:
 
       TS_ASSERT_EQUALS(pointgroups.size(), pgMap.size());
 
-      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Triclinic), 1);
-      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Monoclinic), 2);
-      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Orthorhombic), 1);
-      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Tetragonal), 2);
-      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Trigonal), 3);
-      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Hexagonal), 2);
-      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Cubic), 2);
+      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Triclinic), 2);
+
+      // 2/m with axis b and c, so one more
+      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Monoclinic), 3 + 1);
+      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Orthorhombic), 3);
+      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Tetragonal), 8);
+
+      // 5 with rhombohedral axes and 8 with hexagonal
+      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Trigonal), 5 + 8);
+      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Hexagonal), 8);
+      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Cubic), 5);
   }
 
   void testPerformance()

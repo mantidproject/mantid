@@ -169,22 +169,54 @@ PointGroup_sptr PointGroupGenerator::generatePrototype() {
                                         m_description);
 }
 
-//DECLARE_POINTGROUP("1", "x,y,z", "Triclinic")
+DECLARE_POINTGROUP("1", "x,y,z", "Triclinic")
 DECLARE_POINTGROUP("-1", "-x,-y,-z", "Triclinic")
-DECLARE_POINTGROUP("2/m", "-x,y,-z; x,-y,z", "Monoclinic, unique axis b")
+DECLARE_POINTGROUP("2", "-x,y,-z", "Monoclinic, unique axis b")
+DECLARE_POINTGROUP("m", "x,-y,z", "Monoclinic, unique axis b")
+DECLARE_POINTGROUP("2/m", "-x,y,-z; -x,-y,-z", "Monoclinic, unique axis b")
 DECLARE_POINTGROUP("112/m", "-x,-y,z; x,y,-z", "Monoclinic, unique axis c")
-DECLARE_POINTGROUP("mmm", "x,-y,-z; -x,y,-z; x,y,-z", "Orthorombic")
-DECLARE_POINTGROUP("4/m", "-y,x,z; x,y,-z", "Tetragonal")
+DECLARE_POINTGROUP("222", "-x,-y,z; x,-y,-z", "Orthorombic")
+DECLARE_POINTGROUP("mm2", "-x,-y,z; -x,y,z", "Orthorombic")
+DECLARE_POINTGROUP("mmm", "-x,-y,-z; -x,-y,z; x,-y,-z", "Orthorombic")
+DECLARE_POINTGROUP("4", "-y,x,z", "Tetragonal")
+DECLARE_POINTGROUP("-4", "y,-x,-z", "Tetragonal")
+DECLARE_POINTGROUP("4/m", "-y,x,z; -x,-y,-z", "Tetragonal")
+DECLARE_POINTGROUP("422", "-y,x,z; x,-y,-z", "Tetragonal")
+DECLARE_POINTGROUP("4mm", "-y,x,z; -x,y,z", "Tetragonal")
+DECLARE_POINTGROUP("-42m", "y,-x,-z; x,-y,-z", "Tetragonal")
+DECLARE_POINTGROUP("-4m2", "y,-x,-z; y,x,-z", "Tetragonal")
 DECLARE_POINTGROUP("4/mmm", "-y,x,z; x,y,-z; x,-y,-z", "Tetragonal")
-DECLARE_POINTGROUP("-3", "-y,x-y,z; -x,-y,-z", "Trigonal - Hexagonal")
-DECLARE_POINTGROUP("-3m1", "-y,x-y,z; -x,-y,-z; -x,y-x,z",
-                   "Trigonal - Rhombohedral")
-DECLARE_POINTGROUP("-31m", "-y,x-y,z; -x,-y,-z; -x,y-x,z",
-                   "Trigonal - Rhombohedral")
+
+DECLARE_POINTGROUP("3 h", "-y,x-y,z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("-3 h", "y,y-x,-z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("321 h", "-y,x-y,z; x-y,-y,-z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("312 h", "-y,x-y,z; x,x-y,-z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("3m1 h", "-y,x-y,z; y-x,y,z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("31m h", "-y,x-y,z; -x,y-x,z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("-3m1 h", "y,y-x,-z; x-y,-y,-z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("-31m h", "y,y-x,-z; x,x-y,-z", "Trigonal - Hexagonal")
+
+DECLARE_POINTGROUP("3", "z,x,y", "Trigonal - Rhombohedral")
+DECLARE_POINTGROUP("-3", "-z,-x,-y", "Trigonal - Rhombohedral")
+DECLARE_POINTGROUP("32", "z,x,y; -y,-x,-z", "Trigonal - Rhombohedral")
+DECLARE_POINTGROUP("3m", "z,x,y; y,x,z", "Trigonal - Rhombohedral")
+DECLARE_POINTGROUP("-3m", "-z,-x,-y; y,x,z", "Trigonal - Rhombohedral")
+
+DECLARE_POINTGROUP("6", "x-y,x,z", "Hexagonal")
+DECLARE_POINTGROUP("-6", "y-x,-x,-z", "Hexagonal")
 DECLARE_POINTGROUP("6/m", "x-y,x,z; -x,-y,-z", "Hexagonal")
-DECLARE_POINTGROUP("6/mmm", "x-y,x,z; x-y,-y,-z; x,y,-z", "Hexagonal")
-DECLARE_POINTGROUP("m-3", "z,x,y; -x,-y,z; x,-y,z; -x,-y,-z", "Cubic")
-DECLARE_POINTGROUP("m-3m", "z,x,y; -y,x,z; x,-y,z; -x,-y,-z", "Cubic")
+DECLARE_POINTGROUP("622", "x-y,x,z; x-y,-y,-z", "Hexagonal")
+DECLARE_POINTGROUP("6mm", "x-y,x,z; y-x,y,z", "Hexagonal")
+DECLARE_POINTGROUP("-62m", "y-x,-x,-z; x-y,-y,-z", "Hexagonal")
+DECLARE_POINTGROUP("-6m2", "y-x,-x,-z; y-x,y,z", "Hexagonal")
+DECLARE_POINTGROUP("6/mmm", "x-y,x,z; x-y,-y,-z; -x,-y,-z", "Hexagonal")
+
+
+DECLARE_POINTGROUP("23", "z,x,y; -x,-y,z; x,-y,-z", "Cubic")
+DECLARE_POINTGROUP("m-3", "-z,-x,-y; -x,-y,z; x,-y,-z", "Cubic")
+DECLARE_POINTGROUP("432", "z,x,y; -y,x,z; x,-y,-z", "Cubic")
+DECLARE_POINTGROUP("-43m", "z,x,y; y,-x,-z; -y,-x,z", "Cubic")
+DECLARE_POINTGROUP("m-3m", "-z,-x,-y; -y,x,z; y,x,-z", "Cubic")
 
 } // namespace Geometry
 } // namespace Mantid
