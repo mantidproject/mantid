@@ -82,7 +82,7 @@ namespace Mantid
         protected:
           void addHandle(const std::string &workspaceName, const boost::shared_ptr<Mantid::API::Workspace> workspace);
 
-          void preDeleteHandle(const std::string &wsName, const boost::shared_ptr<Mantid::API::Workspace> ws);
+          void preDeleteHandle(const std::string &wsName, const boost::shared_ptr<Mantid::API::Workspace> );
 
         private slots:
           void onRebinnedSourceDestroyed();

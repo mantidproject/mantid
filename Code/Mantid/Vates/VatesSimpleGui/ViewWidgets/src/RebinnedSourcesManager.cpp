@@ -96,7 +96,7 @@ namespace Mantid
        * @param wsName The name of the workspace.
        * @param ws The handle to the workspace
        */
-      void RebinnedSourcesManager::preDeleteHandle(const std::string &wsName, const boost::shared_ptr<Mantid::API::Workspace> ws)
+      void RebinnedSourcesManager::preDeleteHandle(const std::string &wsName, const boost::shared_ptr<Mantid::API::Workspace>)
       {
         // If the original workspace has been deleted, then delete the rebinned
         // source (and workspace via the listener)
