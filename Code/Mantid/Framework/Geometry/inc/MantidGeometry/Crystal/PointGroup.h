@@ -46,7 +46,7 @@ public:
   /// Hermann-Mauguin symbol
   std::string getSymbol() const;
 
-  CrystalSystem crystalSystem() const { return Cubic; }
+  CrystalSystem crystalSystem() const { return m_crystalSystem; }
 
   /// Return true if the hkls are in same group
   bool isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) const;
@@ -56,14 +56,16 @@ public:
   /// Returns the same hkl for all equivalent hkls
   Kernel::V3D getReflectionFamily(const Kernel::V3D &hkl) const;
 
-
 protected:
   bool groupHasNoTranslations(const Group &group) const;
 
   std::vector<Kernel::V3D> getEquivalentSet(const Kernel::V3D &hkl) const;
 
+  CrystalSystem getCrystalSystemFromGroup() const;
+
   std::string m_symbolHM;
   std::string m_name;
+  CrystalSystem m_crystalSystem;
 };
 
 /// Shared pointer to a PointGroup

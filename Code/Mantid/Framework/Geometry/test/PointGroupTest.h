@@ -110,68 +110,14 @@ public:
       check_point_group("-4m2", V3D(1,2,3), 8, equiv); }
     }
   }
-/*
-  void xtestConstruction()
-  {
-      TestablePointGroup defaultPointgroup;
 
-      TS_ASSERT_EQUALS(defaultPointgroup.m_symmetryOperations.size(), 0);
-  }
 
-  void xtestAddSymmetryOperation()
-  {
-      TestablePointGroup pg;
-
-      TS_ASSERT_EQUALS(pg.getSymmetryOperations().size(), 0);
-
-      SymmetryOperation symOp = SymmetryOperationFactory::Instance().createSymOp("x,y,z");
-      pg.addSymmetryOperation(symOp);
-
-      std::vector<SymmetryOperation> ops = pg.getSymmetryOperations();
-
-      TS_ASSERT_EQUALS(ops.size(), 1);
-      TS_ASSERT_EQUALS(ops[0], symOp);
-  }
-
-  void xtestGenerateTransformationMatrices()
-  {
-      TestablePointGroup pg;
-
-      SymmetryOperation identity = SymmetryOperationFactory::Instance().createSymOp("x,y,z");
-      SymmetryOperation inversion = SymmetryOperationFactory::Instance().createSymOp("x,y,z");
-      SymmetryOperation mirror = SymmetryOperationFactory::Instance().createSymOp("x,y,-z");
-      SymmetryOperation twoFold = SymmetryOperationFactory::Instance().createSymOp("-x,-y,z");
-
-      pg.addSymmetryOperation(mirror);
-      pg.addSymmetryOperation(twoFold);
-
-      std::vector<SymmetryOperation> ops = pg.getSymmetryOperations();
-      TS_ASSERT_EQUALS(ops.size(), 2);
-
-      std::vector<SymmetryOperation> matrices = pg.generateSymmetryOperations(ops);
-
-      // Mirror and 2-fold axis generate inversion, identity is implicit.
-      TS_ASSERT_EQUALS(matrices.size(), 4);
-
-      auto matrixVectorBegin = matrices.begin();
-      auto matrixVectorEnd = matrices.end();
-
-      SymmetryOperation identityOp = SymmetryOperationFactory::Instance().createSymOp("x,y,z");
-
-      TS_ASSERT_DIFFERS(std::find(matrixVectorBegin, matrixVectorEnd, identity * identityOp), matrixVectorEnd);
-      TS_ASSERT_DIFFERS(std::find(matrixVectorBegin, matrixVectorEnd, inversion * identityOp), matrixVectorEnd);
-      TS_ASSERT_DIFFERS(std::find(matrixVectorBegin, matrixVectorEnd, mirror * identityOp), matrixVectorEnd);
-      TS_ASSERT_DIFFERS(std::find(matrixVectorBegin, matrixVectorEnd, twoFold * identityOp), matrixVectorEnd);
-
-      TS_ASSERT_DIFFERS(matrices[0], matrices[1]);
-  }
-
-  void xtestCrystalSystems()
+  void testCrystalSystems()
   {
       std::map<std::string, PointGroup::CrystalSystem> crystalSystemsMap;
       crystalSystemsMap["-1 (Triclinic)"] = PointGroup::Triclinic;
-      crystalSystemsMap["1 2/m 1 (Monoclinic, unique axis b)"] = PointGroup::Monoclinic;
-      crystalSystemsMap["1 1 2/m (Monoclinic, unique axis c)"] = PointGroup::Monoclinic;
+      crystalSystemsMap["2/m (Monoclinic, unique axis b)"] = PointGroup::Monoclinic;
+      crystalSystemsMap["112/m (Monoclinic, unique axis c)"] = PointGroup::Monoclinic;
       crystalSystemsMap["mmm (Orthorombic)"] = PointGroup::Orthorhombic;
       crystalSystemsMap["4/m (Tetragonal)"] = PointGroup::Tetragonal;
       crystalSystemsMap["4/mmm (Tetragonal)"] = PointGroup::Tetragonal;
@@ -190,7 +136,7 @@ public:
       }
   }
 
-  void xtestCrystalSystemMap()
+  void testCrystalSystemMap()
   {
       std::vector<PointGroup_sptr> pointgroups = getAllPointGroups();
       PointGroupCrystalSystemMap pgMap = getPointGroupsByCrystalSystem();
@@ -206,17 +152,6 @@ public:
       TS_ASSERT_EQUALS(pgMap.count(PointGroup::Cubic), 2);
   }
 
-  void xtestInit()
-  {
-      PointGroupLaue13 pg;
-
-      TS_ASSERT_EQUALS(pg.getEquivalents(V3D(1, 2, 3)).size(), 1);
-
-      pg.init();
-
-      TS_ASSERT_EQUALS(pg.getEquivalents(V3D(1, 2, 3)).size(), 48);
-  }
-*/
   void testPerformance()
   {
       PointGroup_sptr pg =PointGroupFactory::Instance().createPointGroup("m-3m");

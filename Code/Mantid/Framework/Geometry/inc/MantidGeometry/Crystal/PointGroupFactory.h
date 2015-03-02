@@ -87,7 +87,7 @@ public:
 
   std::vector<std::string> getAllPointGroupSymbols() const;
   std::vector<std::string>
-  getPointGroupSymbols(const PointGroup::CrystalSystem &crystalSystem) const;
+  getPointGroupSymbols(const PointGroup::CrystalSystem &crystalSystem);
 
   void subscribePointGroup(const std::string &hmSymbol,
                            const std::string &generatorString,

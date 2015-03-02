@@ -7,6 +7,7 @@
 
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
+#include "MantidGeometry/Crystal/SymmetryElementFactory.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -49,7 +50,7 @@ std::vector<V3D> PointGroup::getEquivalents(const V3D &hkl) const {
  * @return :: hkl specific to a family of index-triplets
  */
 V3D PointGroup::getReflectionFamily(const Kernel::V3D &hkl) const {
-  return *getEquivalentSet(hkl).rbegin();
+  return *getEquivalentSet(hkl).begin();
 }
 
 bool PointGroup::groupHasNoTranslations(const Group &group) const {
@@ -68,16 +69,20 @@ bool PointGroup::groupHasNoTranslations(const Group &group) const {
 PointGroup::PointGroup(const std::string &symbolHM, const Group &group,
                        const std::string &description)
     : Group(group), m_symbolHM(symbolHM),
-      m_name(symbolHM + " (" + description + ")") {}
+      m_name(symbolHM + " (" + description + ")") {
+  m_crystalSystem = getCrystalSystemFromGroup();
+}
 
 PointGroup::PointGroup(const PointGroup &other)
-    : Group(other), m_symbolHM(other.m_symbolHM), m_name(other.m_name) {}
+    : Group(other), m_symbolHM(other.m_symbolHM), m_name(other.m_name),
+      m_crystalSystem(other.m_crystalSystem) {}
 
 PointGroup &PointGroup::operator=(const PointGroup &other) {
   Group::operator=(other);
 
   m_symbolHM = other.m_symbolHM;
   m_name = other.m_name;
+  m_crystalSystem = other.m_crystalSystem;
 
   return *this;
 }
@@ -115,12 +120,66 @@ std::vector<V3D> PointGroup::getEquivalentSet(const Kernel::V3D &hkl) const {
     equivalents.push_back((*op).matrix() * hkl);
   }
 
-  std::sort(equivalents.begin(), equivalents.end());
+  std::sort(equivalents.begin(), equivalents.end(), std::greater<V3D>());
 
   equivalents.erase(std::unique(equivalents.begin(), equivalents.end()),
                     equivalents.end());
 
   return equivalents;
+}
+
+PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
+  std::map<std::string, std::set<V3D> > symbolMap;
+
+  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
+    SymmetryElementWithAxis_sptr element =
+        boost::dynamic_pointer_cast<SymmetryElementWithAxis>(
+            SymmetryElementFactory::Instance().createSymElement(*op));
+
+    if (element) {
+      std::string symbol = element->hmSymbol();
+      V3D axis = element->getAxis();
+
+      symbolMap[symbol].insert(axis);
+    }
+  }
+
+  if (symbolMap["3"].size() == 4) {
+    return Cubic;
+  }
+
+  if (symbolMap["6"].size() == 1) {
+    return Hexagonal;
+  }
+
+  if (symbolMap["3"].size() == 1) {
+    return Trigonal;
+  }
+
+  if (symbolMap["4"].size() == 1) {
+    return Tetragonal;
+  }
+
+  if (symbolMap["2"].size() == 3 ||
+      (symbolMap["2"].size() == 1 && symbolMap["m"].size() == 2)) {
+    return Orthorhombic;
+  }
+
+  if (symbolMap["2"].size() == 1 || symbolMap["m"].size() == 1) {
+    return Monoclinic;
+  }
+
+  return Triclinic;
+
+  std::cout << getName() << ": " << std::endl;
+  for (auto it = symbolMap.begin(); it != symbolMap.end(); ++it) {
+    std::cout << it->first << " ";
+    for (auto k = it->second.begin(); k != it->second.end(); ++k) {
+      std::cout << *k << " ";
+    }
+    std::cout << std::endl;
+  }
+  std::cout << "---------" << std::endl;
 }
 
 /** @return a vector with all possible PointGroup objects */

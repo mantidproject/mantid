@@ -33,8 +33,7 @@ std::vector<std::string>
 PointGroupFactoryImpl::getAllPointGroupSymbols() const {
   std::vector<std::string> pointGroups;
 
-  for (auto it = m_generatorMap.begin(); it != m_generatorMap.end();
-       ++it) {
+  for (auto it = m_generatorMap.begin(); it != m_generatorMap.end(); ++it) {
     pointGroups.push_back(it->first);
   }
 
@@ -44,12 +43,13 @@ PointGroupFactoryImpl::getAllPointGroupSymbols() const {
 /// Returns the Hermann-Mauguin symbols of all point groups that belong to a
 /// certain crystal system.
 std::vector<std::string> PointGroupFactoryImpl::getPointGroupSymbols(
-    const PointGroup::CrystalSystem &crystalSystem) const {
+    const PointGroup::CrystalSystem &crystalSystem) {
   std::vector<std::string> pointGroups;
 
-  for (auto it = m_crystalSystemMap.begin(); it != m_crystalSystemMap.end();
-       ++it) {
-    if (it->second == crystalSystem) {
+  for (auto it = m_generatorMap.begin(); it != m_generatorMap.end(); ++it) {
+    PointGroup_sptr pointGroup = getPrototype(it->first);
+
+    if (pointGroup->crystalSystem() == crystalSystem) {
       pointGroups.push_back(it->first);
     }
   }
@@ -184,7 +184,7 @@ PointGroup_sptr PointGroupGenerator::generatePrototype() {
                                         m_description);
 }
 
-DECLARE_POINTGROUP("1", "x,y,z", "Triclinic")
+//DECLARE_POINTGROUP("1", "x,y,z", "Triclinic")
 DECLARE_POINTGROUP("-1", "-x,-y,-z", "Triclinic")
 DECLARE_POINTGROUP("2/m", "-x,y,-z; x,-y,z", "Monoclinic, unique axis b")
 DECLARE_POINTGROUP("112/m", "-x,-y,z; x,y,-z", "Monoclinic, unique axis c")
