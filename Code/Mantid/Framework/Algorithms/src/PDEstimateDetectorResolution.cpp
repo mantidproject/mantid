@@ -28,7 +28,7 @@ namespace { // hide these constants
   ///
   const double MICROSEC_TO_SEC=1.0E-6;
   ///
-  const double WAVELENGTH_TO_VELOCITY=1.0E-10 *
+  const double WAVELENGTH_TO_VELOCITY=1.0E10 *
       PhysicalConstants::h / PhysicalConstants::NeutronMass;
   /// This is an absurd number for even ultra cold neutrons
   const double WAVELENGTH_MAX = 1000.;
@@ -147,7 +147,7 @@ double PDEstimateDetectorResolution::getWavelength() {
   */
 void PDEstimateDetectorResolution::retrieveInstrumentParameters() {
   double centrewavelength = getWavelength();
-  g_log.notice() << "Centre wavelength = " << centrewavelength << "\n";
+  g_log.notice() << "Centre wavelength = " << centrewavelength << " Angstrom\n";
   if (centrewavelength > WAVELENGTH_MAX)
   {
     throw runtime_error("unphysical wavelength used");
