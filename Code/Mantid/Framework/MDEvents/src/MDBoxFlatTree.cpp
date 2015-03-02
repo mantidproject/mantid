@@ -449,8 +449,9 @@ void MDBoxFlatTree::loadExperimentInfos(
     std::string groupName = "experiment" + Kernel::Strings::toString(*itr);
     if (lazy) {
       auto ei = boost::make_shared<API::FileBackedExperimentInfo>(
-        file, file->getPath() + "/" + groupName
-        );
+        file, file->getPath() + "/" + groupName);
+      // And add it to the mutliple experiment info.
+      mei->addExperimentInfo(ei);
      }
     else {
       auto ei = boost::make_shared<API::ExperimentInfo>();
