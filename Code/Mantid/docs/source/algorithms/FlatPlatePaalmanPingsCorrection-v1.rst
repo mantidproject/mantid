@@ -16,6 +16,10 @@ absorption in sample and container), :math:`A_{c,sc}` (scattering in container
 and absorption in sample and container) and  :math:`A_{c,c}` (scattering and
 absorption in container).
 
+Details of the analytical method used to calculate the correction factors is
+available in `RAL Technical Report 74-103
+<http://purl.org/net/epubs/work/64111>`__.
+
 Restrictions on the input workspace
 ###################################
 
