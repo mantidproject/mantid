@@ -58,6 +58,8 @@ class AdvancedSetupScript(BaseScriptElement):
     outputfileprefix = ""
     scaledata = ""
 
+    parnamelist = None
+
     def __init__(self, inst_name):
         """ Initialization
         """

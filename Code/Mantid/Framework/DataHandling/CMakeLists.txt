@@ -92,6 +92,7 @@ set ( SRC_FILES
 	src/LoadSPE.cpp
 	src/LoadSampleDetailsFromRaw.cpp
 	src/LoadSassena.cpp
+	src/LoadSavuTomoConfig.cpp
 	src/LoadSpec.cpp
 	src/LoadSpice2D.cpp
 	src/LoadSpiceAscii.cpp
@@ -140,6 +141,7 @@ set ( SRC_FILES
 	src/SaveReflCustomAscii.cpp
 	src/SaveReflTBL.cpp
 	src/SaveReflThreeColumnAscii.cpp
+        src/SaveSavuTomoConfig.cpp
 	src/SaveSPE.cpp
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
@@ -238,6 +240,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSPE.h
 	inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
 	inc/MantidDataHandling/LoadSassena.h
+	inc/MantidDataHandling/LoadSavuTomoConfig.h
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/LoadSpiceAscii.h
@@ -286,6 +289,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveReflCustomAscii.h
 	inc/MantidDataHandling/SaveReflTBL.h
 	inc/MantidDataHandling/SaveReflThreeColumnAscii.h
+        inc/MantidDataHandling/SaveSavuTomoConfig.h
 	inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
@@ -380,6 +384,7 @@ set ( TEST_FILES
 	LoadSPETest.h
 	LoadSassenaTest.h
 	LoadSaveAsciiTest.h
+        LoadSavuTomoConfigTest.h
 	LoadSpice2dTest.h
 	LoadSpiceAsciiTest.h
 	LoadTOFRawNexusTest.h
@@ -427,6 +432,7 @@ set ( TEST_FILES
 	SaveReflCustomAsciiTest.h
 	SaveReflTBLTest.h
 	SaveReflThreeColumnAsciiTest.h
+	SaveSavuTomoConfigTest.h
 	SaveSPETest.h
 	SaveToSNSHistogramNexusTest.h
 	SetSampleMaterialTest.h

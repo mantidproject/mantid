@@ -34,8 +34,6 @@ class ModeratorModel;
  * - Run object (sample logs)
  * - Sample object (sample info)
  *
- * @author Janik Zikovsky
- * @date 2011-06-20
  */
 class MANTID_API_DLL ExperimentInfo {
 public:
@@ -48,94 +46,94 @@ public:
   /// Copy everything from the given experiment object
   void copyExperimentInfoFrom(const ExperimentInfo *other);
   /// Clone us
-  ExperimentInfo *cloneExperimentInfo() const;
+  virtual ExperimentInfo *cloneExperimentInfo() const;
 
   /// Returns a string description of the object
-  const std::string toString() const;
+  virtual const std::string toString() const;
 
   /// Instrument accessors
   void setInstrument(const Geometry::Instrument_const_sptr &instr);
   /// Returns the parameterized instrument
-  Geometry::Instrument_const_sptr getInstrument() const;
+  virtual Geometry::Instrument_const_sptr getInstrument() const;
 
   /// Returns the set of parameters modifying the base instrument
   /// (const-version)
-  const Geometry::ParameterMap &instrumentParameters() const;
+  virtual const Geometry::ParameterMap &instrumentParameters() const;
   /// Returns a modifiable set of instrument parameters
-  Geometry::ParameterMap &instrumentParameters();
+  virtual Geometry::ParameterMap &instrumentParameters();
   /// Const version
-  const Geometry::ParameterMap &constInstrumentParameters() const;
+  virtual const Geometry::ParameterMap &constInstrumentParameters() const;
   // Add parameters to the instrument parameter map
   virtual void populateInstrumentParameters();
 
   /// Replaces current parameter map with copy of given map
-  void replaceInstrumentParameters(const Geometry::ParameterMap &pmap);
+  virtual void replaceInstrumentParameters(const Geometry::ParameterMap &pmap);
   /// exchange contents of current parameter map with contents of other map)
-  void swapInstrumentParameters(Geometry::ParameterMap &pmap);
+  virtual void swapInstrumentParameters(Geometry::ParameterMap &pmap);
 
   /// Cache a lookup of grouped detIDs to member IDs
-  void cacheDetectorGroupings(const det2group_map &mapping);
+  virtual void cacheDetectorGroupings(const det2group_map &mapping);
   /// Returns the detector IDs that make up the group that this ID is part of
-  const std::vector<detid_t> &getGroupMembers(const detid_t detID) const;
+  virtual const std::vector<detid_t> &getGroupMembers(const detid_t detID) const;
   /// Get a detector or detector group from an ID
-  Geometry::IDetector_const_sptr getDetectorByID(const detid_t detID) const;
+  virtual  Geometry::IDetector_const_sptr getDetectorByID(const detid_t detID) const;
 
   /// Set an object describing the source properties and take ownership
-  void setModeratorModel(ModeratorModel *source);
+  virtual void setModeratorModel(ModeratorModel *source);
   /// Returns a reference to the source properties object
-  ModeratorModel &moderatorModel() const;
+  virtual ModeratorModel &moderatorModel() const;
 
   /// Set a chopper description specified by index where 0 is closest to the
   /// source
-  void setChopperModel(ChopperModel *chopper, const size_t index = 0);
+  virtual void setChopperModel(ChopperModel *chopper, const size_t index = 0);
   /// Returns a reference to a chopper description
-  ChopperModel &chopperModel(const size_t index = 0) const;
+  virtual ChopperModel &chopperModel(const size_t index = 0) const;
 
   /// Sample accessors
-  const Sample &sample() const;
+  virtual const Sample &sample() const;
   /// Writable version of the sample object
-  Sample &mutableSample();
+  virtual Sample &mutableSample();
 
   /// Run details object access
-  const Run &run() const;
+  virtual const Run &run() const;
   /// Writable version of the run object
-  Run &mutableRun();
+  virtual Run &mutableRun();
   /// Access a log for this experiment.
-  Kernel::Property *getLog(const std::string &log) const;
+  virtual Kernel::Property *getLog(const std::string &log) const;
   /// Access a single value from a log for this experiment.
-  double getLogAsSingleValue(const std::string &log) const;
+  virtual double getLogAsSingleValue(const std::string &log) const;
 
   /// Utility method to get the run number
-  int getRunNumber() const;
+  virtual int getRunNumber() const;
   /// Returns the emode for this run
-  Kernel::DeltaEMode::Type getEMode() const;
+  virtual Kernel::DeltaEMode::Type getEMode() const;
   /// Easy access to the efixed value for this run & detector ID
-  double getEFixed(const detid_t detID) const;
+  virtual double getEFixed(const detid_t detID) const;
   /// Easy access to the efixed value for this run & optional detector
-  double getEFixed(const Geometry::IDetector_const_sptr detector =
+  virtual double getEFixed(const Geometry::IDetector_const_sptr detector =
                        Geometry::IDetector_const_sptr()) const;
   /// Set the efixed value for a given detector ID
-  void setEFixed(const detid_t detID, const double value);
+  virtual void setEFixed(const detid_t detID, const double value);
 
   /// Saves this experiment description to the open NeXus file
-  void saveExperimentInfoNexus(::NeXus::File *file) const;
+  virtual void saveExperimentInfoNexus(::NeXus::File *file) const;
   /// Loads an experiment description from the open NeXus file
-  void loadExperimentInfoNexus(::NeXus::File *file, std::string &parameterStr);
+  virtual void loadExperimentInfoNexus(::NeXus::File *file, std::string &parameterStr);
   /// Load the instrument from an open NeXus file.
-  void loadInstrumentInfoNexus(::NeXus::File *file, std::string &parameterStr);
+  virtual void loadInstrumentInfoNexus(::NeXus::File *file, std::string &parameterStr);
   /// Load the sample and log info from an open NeXus file.
-  void loadSampleAndLogInfoNexus(::NeXus::File *file);
+  virtual void loadSampleAndLogInfoNexus(::NeXus::File *file);
   /// Populate the parameter map given a string
-  void readParameterMap(const std::string &parameterStr);
+  virtual void readParameterMap(const std::string &parameterStr);
 
   /// Returns the start date for this experiment (or current time if no info
   /// available)
-  std::string getWorkspaceStartDate() const;
+  virtual std::string getWorkspaceStartDate() const;
 
   // run/experiment stat time if available, empty otherwise
-  std::string getAvailableWorkspaceStartDate() const;
+  virtual std::string getAvailableWorkspaceStartDate() const;
   // run end time if available, empty otherwise
-  std::string getAvailableWorkspaceEndDate() const;
+  virtual std::string getAvailableWorkspaceEndDate() const;
 
   /// Utility to retrieve the validity dates for the given IDF
   static void getValidFromTo(const std::string &IDFfilename,

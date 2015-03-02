@@ -212,6 +212,8 @@ class StitcherWidget(BaseWidget):
     ## Widget name
     name = "Data Stitching"
 
+    radio_group = None
+
     def __init__(self, parent=None, state=None, settings=None):
         super(StitcherWidget, self).__init__(parent, state, settings)
 

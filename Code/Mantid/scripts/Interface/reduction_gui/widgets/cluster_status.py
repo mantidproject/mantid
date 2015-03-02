@@ -25,6 +25,8 @@ class RemoteJobsWidget(BaseWidget):
     ## Widget name
     name = "Remote Jobs"
 
+    copyAction = None
+
     def __init__(self, parent=None, state=None, settings=None):
         super(RemoteJobsWidget, self).__init__(parent, state, settings)
 
