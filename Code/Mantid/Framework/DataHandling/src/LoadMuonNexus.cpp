@@ -50,14 +50,13 @@ void LoadMuonNexus::init() {
       "generated for each period");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int64_t>>();
-  mustBePositive->setLower(0);
-  declareProperty("SpectrumMin", (int64_t)0, mustBePositive,
-                  "Index number of the first spectrum to read, only used if\n"
-                  "spectrum_max is set and only for single period data\n"
-                  "(default 0)");
+  mustBePositive->setLower(1);
+  declareProperty("SpectrumMin", (int64_t)EMPTY_INT(), mustBePositive,
+                  "Index number of the first spectrum to read\n"
+                  "(default 1)");
   declareProperty(
       "SpectrumMax", (int64_t)EMPTY_INT(), mustBePositive,
-      "Index of last spectrum to read, only for single period data\n"
+      "Index of last spectrum to read\n"
       "(default the last spectrum)");
 
   declareProperty(new ArrayProperty<specid_t>("SpectrumList"),
@@ -68,7 +67,9 @@ void LoadMuonNexus::init() {
                   "together based on the groupings in the NeXus file, only\n"
                   "for single period data (default no)");
 
-  declareProperty("EntryNumber", (int64_t)0, mustBePositive,
+  auto mustBeNonNegative = boost::make_shared<BoundedValidator<int64_t>>();
+  mustBeNonNegative->setLower(0);
+  declareProperty("EntryNumber", (int64_t)0, mustBeNonNegative,
                   "The particular entry number to read (default: Load all "
                   "workspaces and creates a workspace group)");
 

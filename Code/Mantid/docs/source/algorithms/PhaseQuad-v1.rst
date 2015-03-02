@@ -61,6 +61,6 @@ Output:
 
 .. testoutput:: ExCompSquash
 
-   Counts:  3.0
+   Counts:  4.0
 
 .. categories::

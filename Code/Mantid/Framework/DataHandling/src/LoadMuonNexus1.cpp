@@ -160,16 +160,19 @@ void LoadMuonNexus1::exec() {
   const int channelsPerSpectrum = nxload.t_ntc1;
   // Read in the time bin boundaries
   const int lengthIn = channelsPerSpectrum + 1;
-  float *timeChannels = new float[lengthIn];
-  nxload.getTimeChannels(timeChannels, lengthIn);
-  // Put the read in array into a vector (inside a shared pointer)
-  boost::shared_ptr<MantidVec> timeChannelsVec(
-      new MantidVec(timeChannels, timeChannels + lengthIn));
 
   // Calculate the size of a workspace, given its number of periods & spectra to
   // read
   int64_t total_specs;
   if (m_interval || m_list) {
+    // Remove from list possible duplicate specs
+    for (auto it=m_spec_list.begin(); it!=m_spec_list.end(); ) {
+      if ( (*it>=m_spec_min) && (*it<=m_spec_max) ) {
+        it = m_spec_list.erase(it);
+      } else {
+        ++it;
+      }
+    }
     total_specs = m_spec_list.size();
     if (m_interval) {
       total_specs += (m_spec_max - m_spec_min + 1);
@@ -178,8 +181,8 @@ void LoadMuonNexus1::exec() {
   } else {
     total_specs = m_numberOfSpectra;
     // for nexus return all spectra
-    m_spec_min = 0;                 // changed to 0 for NeXus, was 1 for Raw
-    m_spec_max = m_numberOfSpectra; // was +1?
+    m_spec_min = 1;
+    m_spec_max = m_numberOfSpectra+1; // Add +1 to iterate
   }
 
   // Create the 2D workspace for the output
@@ -232,8 +235,9 @@ void LoadMuonNexus1::exec() {
     size_t counter = 0;
     for (int64_t i = m_spec_min; i < m_spec_max; ++i) {
       // Shift the histogram to read if we're not in the first period
-      specid_t histToRead = static_cast<specid_t>(i + period * total_specs);
-      loadData(timeChannelsVec, counter, histToRead, nxload, lengthIn - 1,
+      specid_t histToRead = static_cast<specid_t>(i-1 + period * nxload.t_nsp1);
+      specid_t specNo = static_cast<specid_t>(i);
+      loadData(counter, histToRead, specNo, nxload, lengthIn - 1,
                localWorkspace); // added -1 for NeXus
       counter++;
       progress.report();
@@ -241,8 +245,10 @@ void LoadMuonNexus1::exec() {
     // Read in the spectra in the optional list parameter, if set
     if (m_list) {
       for (size_t i = 0; i < m_spec_list.size(); ++i) {
-        loadData(timeChannelsVec, counter, m_spec_list[i], nxload, lengthIn - 1,
-                 localWorkspace);
+        specid_t histToRead = static_cast<specid_t>(m_spec_list[i]-1 + period * nxload.t_nsp1);
+        specid_t specNo = static_cast<specid_t>(m_spec_list[i]);
+        loadData(counter, histToRead, specNo, nxload, lengthIn - 1,
+          localWorkspace);
         counter++;
         progress.report();
       }
@@ -291,8 +297,6 @@ void LoadMuonNexus1::exec() {
                 boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
   }
 
-  // Clean up
-  delete[] timeChannels;
 }
 
 /**
@@ -483,7 +487,6 @@ TableWorkspace_sptr LoadMuonNexus1::createDetectorGroupingTable(
 }
 
 /** Load in a single spectrum taken from a NeXus file
-*  @param tcbs ::     The vector containing the time bin boundaries
 *  @param hist ::     The workspace index
 *  @param i ::        The spectrum number
 *  @param nxload ::   A reference to the MuonNeXusReader object
@@ -491,8 +494,7 @@ TableWorkspace_sptr LoadMuonNexus1::createDetectorGroupingTable(
 *  @param localWorkspace :: A pointer to the workspace in which the data will be
 * stored
 */
-void LoadMuonNexus1::loadData(const MantidVecPtr::ptr_type &tcbs, size_t hist,
-                              specid_t &i, MuonNexusReader &nxload,
+void LoadMuonNexus1::loadData(size_t hist, specid_t &i, specid_t specNo, MuonNexusReader &nxload,
                               const int64_t lengthIn,
                               DataObjects::Workspace2D_sptr localWorkspace) {
   // Read in a spectrum
@@ -502,14 +504,27 @@ void LoadMuonNexus1::loadData(const MantidVecPtr::ptr_type &tcbs, size_t hist,
   MantidVec &Y = localWorkspace->dataY(hist);
   Y.assign(nxload.counts + i * lengthIn,
            nxload.counts + i * lengthIn + lengthIn);
+
   // Create and fill another vector for the errors, containing sqrt(count)
   MantidVec &E = localWorkspace->dataE(hist);
   typedef double (*uf)(double);
   uf dblSqrt = std::sqrt;
   std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
   // Populate the workspace. Loop starts from 1, hence i-1
-  localWorkspace->setX(hist, tcbs);
-  localWorkspace->getSpectrum(hist)->setSpectrumNo(static_cast<int>(hist) + 1);
+
+  // Create and fill another vector for the X axis  
+  float *timeChannels = new float[lengthIn+1];
+  nxload.getTimeChannels(timeChannels, static_cast<const int>(lengthIn+1));
+  // Put the read in array into a vector (inside a shared pointer)
+  boost::shared_ptr<MantidVec> timeChannelsVec(
+    new MantidVec(timeChannels, timeChannels + lengthIn+1));
+
+  localWorkspace->setX(hist, timeChannelsVec);
+  localWorkspace->getSpectrum(hist)->setSpectrumNo(specNo);
+
+  // Clean up
+  delete[] timeChannels;
+
 }
 
 /**  Log the run details from the file
