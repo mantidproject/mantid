@@ -31,6 +31,43 @@ double ZFKT (const double x, const double G){
   return (0.3333333333 + 0.6666666667*exp(-0.5*q)*(1-q));
 }
 
+// Static non-zero field Kubo Toyabe relaxation function
+double HKT (const double x, const double G, const double F) {
+
+  const double q = G*G*x*x;
+  const double gm = 2*M_PI*0.01355342; // Muon gyromagnetic ratio * 2 * PI
+  
+  double w;
+  if (F>2*G) {
+    // Use F
+    w = gm * F;
+  } else {
+    // Use G
+    w = gm * 2 * G;
+  }
+  
+  const double r = G*G/w/w;
+  
+  double ig;
+  if ( x>0 && r>0 ) {
+    // Compute integral
+    ig = integral(f1,0.0,x,G,w);
+  } else {
+    // Integral is 0
+    ig = 0;
+  }
+  
+  const double ktb=(1-2*r*(1-exp(-q/2)*cos(w*x))+2*r*r*w*ig);
+  
+  if ( F>2*G ) {
+    return ktb;
+  } else {
+    const double kz = ZFKT(x,G);
+    return kz+F/2/G*(ktb-kz);
+  }
+  
+}
+
 // Dynamic Kubo-Toyabe
 double getDKT (double t, double G, double v){
 
