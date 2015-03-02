@@ -11,11 +11,13 @@ The Indirect Data Reduction interface provides the initial reduction that
 is used to convert raw instrument data to S(Q, w) for analysis in the
 Indirect Data Analysis and Indirect Bayes interfaces.
 
+The tabs shown on this interface will vary depending on the current default
+facility such that only tabs that will work with data from the facility are
+shown, this page describes all the tabs which can possibly be shown.
+
 .. interface:: Data Reduction
   :align: right
   :width: 350
-
-.. warning:: Currently this interface only supports ISIS instruments.
 
 Instrument Options
 ~~~~~~~~~~~~~~~~~~
@@ -49,11 +51,11 @@ Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
   and default save directory and enable/disable data archive search.
 
-Energy Transfer
----------------
+ISIS Energy Transfer
+--------------------
 
 .. interface:: Data Reduction
-  :widget: tabEnergyTransfer
+  :widget: tabISISEnergyTransfer
 
 This tab provides you with the functionality to convert the raw data from the
 experiment run into units of :math:`\Delta E`.
@@ -166,11 +168,11 @@ Multiple
 In this mode multiple binning ranges can be defined using he rebin string syntax
 used by the :ref:`Rebin <algm-Rebin>` algorithm.
 
-Calibration & Resolution
-------------------------
+ISIS Calibration & Resolution
+-----------------------------
 
 .. interface:: Data Reduction
-  :widget: tabCalibration
+  :widget: tabISISCalibration
 
 This tab gives you the ability to create Calibration and Resolution files.
 
@@ -233,11 +235,11 @@ Background Start & Background End
 Low, Width & High
   Binning parameters used to rebin the resolution curve.
 
-Diagnostics
------------
+ISIS Diagnostics
+----------------
 
 .. interface:: Data Reduction
-  :widget: tabDiagnostics
+  :widget: tabISISDiagnostics
 
 This tab allows you to perform an integration on a raw file over a specified
 time of flight range, and is equivalent to the Slice functionality found in
@@ -318,7 +320,7 @@ Symmetrise
 ----------
 
 .. interface:: Data Reduction
-  :widget: tabSymmertrise
+  :widget: tabSymmetrise
 
 This tab allows you to take an asymmetric reduced file and symmetrise it about
 the Y axis.
@@ -379,7 +381,7 @@ S(Q, w)
 -------
 
 .. interface:: Data Reduction
-  :widget: tabSofQW
+  :widget: tabSQw
 
 Provides an interface for running the SofQW algorithms.
 

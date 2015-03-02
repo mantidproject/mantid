@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectDiagnostics</class>
- <widget class="QWidget" name="IndirectDiagnostics">
+ <class>ISISDiagnostics</class>
+ <widget class="QWidget" name="ISISDiagnostics">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -9,6 +9,12 @@
     <width>524</width>
     <height>448</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>500</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
@@ -180,11 +186,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
-   <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
-  </customwidget>
-  <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/DataSelector.h</header>
@@ -194,6 +195,11 @@
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/PreviewPlot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
