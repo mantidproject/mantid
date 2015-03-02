@@ -119,14 +119,6 @@ void SCARFTomoReconstruction::init() {
                   "Strings describing the current status of the jobs");
   declareProperty(new ArrayProperty<std::string>("RemoteJobsCommands", Direction::Output),
                   "Strings with the command line run for the jobs");
-  setPropertySettings("RemoteJobsID", new VisibleWhenProperty("Action", IS_EQUAL_TO,
-                                                              "JobStatus"));
-  setPropertySettings("RemoteJobsNames", new VisibleWhenProperty("Action", IS_EQUAL_TO,
-                                                                "JobStatus"));
-  setPropertySettings("RemoteJobsStatus", new VisibleWhenProperty("Action", IS_EQUAL_TO,
-                                                                  "JobStatus"));
-  setPropertySettings("RemoteJobsCommands", new VisibleWhenProperty("Action", IS_EQUAL_TO,
-                                                                   "JobStatus"));
 
   // - Action: query status and info by ID
   declareProperty(
@@ -142,12 +134,6 @@ void SCARFTomoReconstruction::init() {
                   "(running, exited, etc.)", Direction::Output);
   declareProperty("RemoteJobCommand", "", nullV, "Command line run remotely "
                   "for this job ", Direction::Output);
-  setPropertySettings("RemoteJobName", new VisibleWhenProperty("Action", IS_EQUAL_TO,
-                                                               "JobStatusByID"));
-  setPropertySettings("RemoteJobStatus", new VisibleWhenProperty("Action", IS_EQUAL_TO,
-                                                                 "JobStatusByID"));
-  setPropertySettings("RemoteJobCommand", new VisibleWhenProperty("Action", IS_EQUAL_TO,
-                                                                "JobStatusByID"));
 
   // - Action: download file
   declareProperty(new PropertyWithValue<std::string>("RemoteJobFilename", "",
