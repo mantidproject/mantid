@@ -156,7 +156,7 @@ PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
     return Trigonal;
   }
 
-  if (symbolMap["4"].size() == 1) {
+  if (symbolMap["4"].size() == 1 || symbolMap["-4"].size() == 1) {
     return Tetragonal;
   }
 
