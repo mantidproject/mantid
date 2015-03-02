@@ -14,12 +14,14 @@ namespace Geometry {
 class MANTID_GEOMETRY_DLL PointGroupGenerator {
 public:
   PointGroupGenerator(const std::string &hmSymbol,
-                      const std::string &generatorInformation);
+                      const std::string &generatorInformation,
+                      const std::string &description);
 
   ~PointGroupGenerator() {}
 
   inline std::string getHMSymbol() const { return m_hmSymbol; }
   inline std::string getGeneratorString() const { return m_generatorString; }
+  inline std::string getDescription() const { return m_description; }
 
   PointGroup_sptr getPrototype();
 
@@ -32,6 +34,7 @@ private:
 
   std::string m_hmSymbol;
   std::string m_generatorString;
+  std::string m_description;
 
   PointGroup_sptr m_prototype;
 };
@@ -87,7 +90,8 @@ public:
   getPointGroupSymbols(const PointGroup::CrystalSystem &crystalSystem) const;
 
   void subscribePointGroup(const std::string &hmSymbol,
-                           const std::string &generatorString);
+                           const std::string &generatorString,
+                           const std::string &description);
 
   /// Unsubscribes a point group from the factory
   void unsubscribePointGroup(const std::string &hmSymbol) {
@@ -135,13 +139,13 @@ PointGroupFactory;
 #define PGF_CONCAT_IMPL(x, y) x##y
 #define PGF_CONCAT(x, y) PGF_CONCAT_IMPL(x, y)
 
-#define DECLARE_POINTGROUP(hmSymbol, generators)                               \
+#define DECLARE_POINTGROUP(hmSymbol, generators, description)                  \
   namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper                                           \
-  PGF_CONCAT(register_pointgroup,                                              \
-             __COUNTER__)(((Mantid::Geometry::PointGroupFactory::Instance()    \
-                                .subscribePointGroup(hmSymbol, generators)),   \
-                           0));                                                \
+  Mantid::Kernel::RegistrationHelper PGF_CONCAT(register_pointgroup,           \
+                                                __COUNTER__)(                  \
+      ((Mantid::Geometry::PointGroupFactory::Instance().subscribePointGroup(   \
+           hmSymbol, generators, description)),                                \
+       0));                                                                    \
   }
 
 #endif /* MANTID_GEOMETRY_POINTGROUPFACTORY_H_ */

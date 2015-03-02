@@ -33,7 +33,7 @@ std::vector<std::string>
 PointGroupFactoryImpl::getAllPointGroupSymbols() const {
   std::vector<std::string> pointGroups;
 
-  for (auto it = m_crystalSystemMap.begin(); it != m_crystalSystemMap.end();
+  for (auto it = m_generatorMap.begin(); it != m_generatorMap.end();
        ++it) {
     pointGroups.push_back(it->first);
   }
@@ -59,14 +59,15 @@ std::vector<std::string> PointGroupFactoryImpl::getPointGroupSymbols(
 
 void
 PointGroupFactoryImpl::subscribePointGroup(const std::string &hmSymbol,
-                                           const std::string &generatorString) {
+                                           const std::string &generatorString,
+                                           const std::string &description) {
   if (isSubscribed(hmSymbol)) {
     throw std::invalid_argument(
         "Point group with this symbol is already registered.");
   }
 
-  PointGroupGenerator_sptr generator =
-      boost::make_shared<PointGroupGenerator>(hmSymbol, generatorString);
+  PointGroupGenerator_sptr generator = boost::make_shared<PointGroupGenerator>(
+      hmSymbol, generatorString, description);
 
   subscribe(generator);
 }
@@ -157,8 +158,10 @@ PointGroupFactoryImpl::removeFromCrystalSystemMap(const std::string &hmSymbol) {
 }
 
 PointGroupGenerator::PointGroupGenerator(
-    const std::string &hmSymbol, const std::string &generatorInformation)
-    : m_hmSymbol(hmSymbol), m_generatorString(generatorInformation) {}
+    const std::string &hmSymbol, const std::string &generatorInformation,
+    const std::string &description)
+    : m_hmSymbol(hmSymbol), m_generatorString(generatorInformation),
+      m_description(description) {}
 
 PointGroup_sptr PointGroupGenerator::getPrototype() {
   if (!hasValidPrototype()) {
@@ -177,24 +180,26 @@ PointGroup_sptr PointGroupGenerator::generatePrototype() {
         "Could not create group from supplied symmetry operations.");
   }
 
-  return boost::make_shared<PointGroup>(m_hmSymbol, *generatingGroup, "");
+  return boost::make_shared<PointGroup>(m_hmSymbol, *generatingGroup,
+                                        m_description);
 }
 
-DECLARE_POINTGROUP("1", "x,y,z")
-DECLARE_POINTGROUP("-1", "-x,-y,-z")
-DECLARE_POINTGROUP("2/m", "-x,y,-z; x,-y,z")
-DECLARE_POINTGROUP("112/m", "-x,-y,z; x,y,-z")
-DECLARE_POINTGROUP("mmm", "x,-y,-z; -x,y,-z; x,y,-z")
-DECLARE_POINTGROUP("4/m", "-y,x,z; x,y,-z")
-DECLARE_POINTGROUP("4/mmm", "-y,x,z; x,y,-z; x,-y,-z")
-DECLARE_POINTGROUP("-3", "-y,x-y,z; -x,-y,-z")
-DECLARE_POINTGROUP("-3m1", "-y,x-y,z; -x,-y,-z; -x,y-x,z")
-DECLARE_POINTGROUP("-31m", "-y,x-y,z; -x,-y,-z; -x,y-x,z")
-DECLARE_POINTGROUP("6/m", "x-y,x,z; -x,-y,-z")
-DECLARE_POINTGROUP("6/mmm", "x-y,x,z; x-y,-y,-z; x,y,-z")
-DECLARE_POINTGROUP("m-3", "z,x,y; -x,-y,z; x,-y,z; -x,-y,-z")
-DECLARE_POINTGROUP("m-3m", "z,x,y; -y,x,z; x,-y,z; -x,-y,-z")
-
+DECLARE_POINTGROUP("1", "x,y,z", "Triclinic")
+DECLARE_POINTGROUP("-1", "-x,-y,-z", "Triclinic")
+DECLARE_POINTGROUP("2/m", "-x,y,-z; x,-y,z", "Monoclinic, unique axis b")
+DECLARE_POINTGROUP("112/m", "-x,-y,z; x,y,-z", "Monoclinic, unique axis c")
+DECLARE_POINTGROUP("mmm", "x,-y,-z; -x,y,-z; x,y,-z", "Orthorombic")
+DECLARE_POINTGROUP("4/m", "-y,x,z; x,y,-z", "Tetragonal")
+DECLARE_POINTGROUP("4/mmm", "-y,x,z; x,y,-z; x,-y,-z", "Tetragonal")
+DECLARE_POINTGROUP("-3", "-y,x-y,z; -x,-y,-z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("-3m1", "-y,x-y,z; -x,-y,-z; -x,y-x,z",
+                   "Trigonal - Rhombohedral")
+DECLARE_POINTGROUP("-31m", "-y,x-y,z; -x,-y,-z; -x,y-x,z",
+                   "Trigonal - Rhombohedral")
+DECLARE_POINTGROUP("6/m", "x-y,x,z; -x,-y,-z", "Hexagonal")
+DECLARE_POINTGROUP("6/mmm", "x-y,x,z; x-y,-y,-z; x,y,-z", "Hexagonal")
+DECLARE_POINTGROUP("m-3", "z,x,y; -x,-y,z; x,-y,z; -x,-y,-z", "Cubic")
+DECLARE_POINTGROUP("m-3m", "z,x,y; -y,x,z; x,-y,z; -x,-y,-z", "Cubic")
 
 } // namespace Geometry
 } // namespace Mantid

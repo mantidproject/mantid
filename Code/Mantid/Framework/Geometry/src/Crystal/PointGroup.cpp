@@ -66,13 +66,12 @@ bool PointGroup::groupHasNoTranslations(const Group &group) const {
 
 /// Protected constructor - can not be used directly.
 PointGroup::PointGroup(const std::string &symbolHM, const Group &group,
-                       const std::string &name)
-    : Group(group), m_symbolHM(symbolHM), m_name(name) {
-}
+                       const std::string &description)
+    : Group(group), m_symbolHM(symbolHM),
+      m_name(symbolHM + " (" + description + ")") {}
 
 PointGroup::PointGroup(const PointGroup &other)
-    : Group(other), m_symbolHM(other.m_symbolHM), m_name(other.m_name) {
-}
+    : Group(other), m_symbolHM(other.m_symbolHM), m_name(other.m_name) {}
 
 PointGroup &PointGroup::operator=(const PointGroup &other) {
   Group::operator=(other);
