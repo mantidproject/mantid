@@ -519,8 +519,8 @@ ConvertCWPDMDToSpectra::scaleMatrixWorkspace(API::MatrixWorkspace_sptr matrixws,
     for (size_t i = 0; i < numelements; ++i) {
       // bin with zero counts is not scaled up
       if (datay[i] >= infinitesimal) {
-        datae[i] *= sqrt(scalefactor);
         datay[i] *= scalefactor;
+        datae[i] *= scalefactor;
       }
     }
   } // FOR(iws)

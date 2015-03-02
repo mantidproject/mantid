@@ -24,15 +24,17 @@ public:
   }
   static void destroySuite(ConvertCWPDMDToSpectraTest *suite) { delete suite; }
 
+  //----------------------------------------------------------------------------------------------
   void test_Init() {
-    ConvertCWPDMDToSpectra alg;
-    alg.initialize();
-    TS_ASSERT(alg.isInitialized());
+    ConvertCWPDMDToSpectra tetalg;
+    tetalg.initialize();
+    TS_ASSERT(tetalg.isInitialized());
 
     // Create test workspaces
     createTestWorkspaces();
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Unit test to reduce/bin the HB2A data
    * @brief test_ReduceHB2AData
    */
@@ -50,6 +52,7 @@ public:
         alg.setPropertyValue("BinningParams", "0, 0.1, 120."));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("LinearInterpolateZeroCounts", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ScaleFactor", 65000.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ReducedData"));
 
     // Execute
@@ -70,15 +73,13 @@ public:
     const Mantid::MantidVec &vecE = outws->readE(0);
 
     TS_ASSERT_DELTA(vecX.front(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(vecX.back(), 120.0 - 0.05, 0.0001);
+    TS_ASSERT_DELTA(vecX.back(), 120.0 - 0.1, 0.0001);
 
     double y1101 = vecY[1101];
     double e1101 = vecE[1101];
-    TS_ASSERT_DELTA(y1101, 1.8, 0.001);
-    TS_ASSERT_DELTA(e1101, sqrt(y1101), 0.0001);
-
-    // TODO : Test this   for i in [100, 100, 1101, 1228]:
-    // print "2theta = %-5f, Y = %-5f, E = %-5f" % (vecx[i], vecy[i], vece[i])
+    TS_ASSERT_DELTA(y1101, 186.0716, 0.0001);
+    TS_ASSERT(e1101 > sqrt(y1101));
+    TS_ASSERT(e1101 < sqrt(y1101 * 1.05));
 
     // Sample logs: temperature
     TimeSeriesProperty<double> *tempbseries =
@@ -95,10 +96,11 @@ public:
     AnalysisDataService::Instance().remove("ReducedData");
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Unit test to reduce/bin the HB2A data with more options
    * @brief test_ReduceHB2AData
    */
-  void Xtest_ReduceHB2ADataMoreOptions() {
+  void test_ReduceHB2ADataMoreOptions() {
     // Init
     ConvertCWPDMDToSpectra alg;
     alg.initialize();
@@ -142,11 +144,7 @@ public:
 
   }
 
-  void test_Clean() {
-    AnalysisDataService::Instance().remove(m_dataMD->name());
-    AnalysisDataService::Instance().remove(m_monitorMD->name());
-  }
-
+  //----------------------------------------------------------------------------------------------
   /** Create workspaces for testing
    * @brief createTestWorkspaces
    */
@@ -195,13 +193,21 @@ public:
     m_dataMD = boost::dynamic_pointer_cast<IMDEventWorkspace>(
         AnalysisDataService::Instance().retrieve("HB2A_MD"));
     m_monitorMD = boost::dynamic_pointer_cast<IMDEventWorkspace>(
-        AnalysisDataService::Instance().retrieve("HB2A_MD"));
+        AnalysisDataService::Instance().retrieve("MonitorMDW"));
     TS_ASSERT(m_dataMD);
     TS_ASSERT(m_monitorMD);
 
     // Clean
     AnalysisDataService::Instance().remove(datatablews->name());
     AnalysisDataService::Instance().remove(parentlogws->name());
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Clean the testing workspaces
+   */
+  void test_Clean() {
+    AnalysisDataService::Instance().remove(m_dataMD->name());
+    AnalysisDataService::Instance().remove(m_monitorMD->name());
   }
 
 private:
