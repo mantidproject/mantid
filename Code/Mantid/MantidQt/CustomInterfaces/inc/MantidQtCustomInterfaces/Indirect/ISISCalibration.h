@@ -1,16 +1,17 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTCONVERTTOENERGY_H_
-#define MANTIDQTCUSTOMINTERFACES_INDIRECTCONVERTTOENERGY_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_ISISCALIBRATION_H_
+#define MANTIDQTCUSTOMINTERFACES_ISISCALIBRATION_H_
 
 #include "IndirectDataReductionTab.h"
-#include "ui_IndirectConvertToEnergy.h"
+#include "ui_ISISCalibration.h"
 #include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/Background.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  /** IndirectConvertToEnergy
+  /** ISISCalibration
+    Handles vanadium run calibration for ISIS instruments.
 
     @author Dan Nixon
     @date 23/07/2014
@@ -35,38 +36,40 @@ namespace CustomInterfaces
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport IndirectConvertToEnergy : public IndirectDataReductionTab
+  class DLLExport ISISCalibration : public IndirectDataReductionTab
   {
     Q_OBJECT
 
   public:
-    IndirectConvertToEnergy(IndirectDataReduction * idrUI, QWidget * parent = 0);
-    virtual ~IndirectConvertToEnergy();
+    ISISCalibration(IndirectDataReduction * idrUI, QWidget * parent = 0);
+    virtual ~ISISCalibration();
 
     virtual void setup();
     virtual void run();
-
-  public slots:
     virtual bool validate();
 
   private slots:
     void algorithmComplete(bool error);
-    void setInstrumentDefault(); ///< Sets default parameters for current instrument
-    void mappingOptionSelected(const QString& groupType); ///< change ui to display appropriate options
-    void plotRaw(); ///< plot raw data from instrument
+    void calPlotRaw();
+    void calPlotEnergy();
+    void calMinChanged(double);
+    void calMaxChanged(double);
+    void calUpdateRS(QtProperty*, double);
+    void calSetDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws);
+    void resCheck(bool state); ///< handles checking/unchecking of "Create RES File" checkbox
+    void setDefaultInstDetails();
     void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
     void pbRunFinding();  //< Called when the FileFinder starts finding the files.
     void pbRunFinished(); //< Called when the FileFinder has finished finding the files.
-    void plotRawComplete(bool error); //< Called when the Plot Raw algorithmm chain completes
 
   private:
-    Ui::IndirectConvertToEnergy m_uiForm;
+    void createRESfile(const QString& file);
 
-    QString createMapFile(const QString& groupType); ///< create the mapping file with which to group results
-    std::vector<std::string> getSaveFormats(); ///< get a vector of save formats
+    Ui::ISISCalibration m_uiForm;
+    QString m_lastCalPlotFilename;
 
   };
 } // namespace CustomInterfaces
 } // namespace Mantid
 
-#endif //MANTIDQTCUSTOMINTERFACES_INDIRECTCONVERTTOENERGY_H_
+#endif //MANTIDQTCUSTOMINTERFACES_ISISCALIBRATION_H_
