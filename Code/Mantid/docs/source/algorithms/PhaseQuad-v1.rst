@@ -64,6 +64,14 @@ Output:
 
    Output workspace contains 2 histograms
 
+.. testcleanup:: ExPhaseQuadList
+
+  import os
+  try:
+      os.remove('PhaseList.txt')
+  except OSError:
+      pass
+
 **Example - Computing squashograms from PhaseTable:**
 
 .. testcode:: ExPhaseQuadTable
