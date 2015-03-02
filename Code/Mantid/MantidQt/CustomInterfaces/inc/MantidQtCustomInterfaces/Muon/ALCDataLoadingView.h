@@ -53,6 +53,8 @@ namespace CustomInterfaces
     std::string firstRun() const;
     std::string lastRun() const;
     std::string log() const;
+    std::string deadTimeType() const;
+    std::string deadTimeFile() const;
     std::string calculationType() const;
     boost::optional< std::pair<double,double> > timeRange() const;
 
