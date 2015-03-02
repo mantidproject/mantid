@@ -66,7 +66,7 @@ public:
   size_t indexOfValue(const double value) const;
   virtual bool operator==(const Axis &) const;
   virtual bool equalWithinTolerance(const Axis &axis2,
-                                    const double tolerance = 0.0) const;
+                                    const double tolerance) const;
   std::string label(const std::size_t &index) const;
   /// Create bin boundaries from the point values
   virtual std::vector<double> createBinBoundaries() const;
