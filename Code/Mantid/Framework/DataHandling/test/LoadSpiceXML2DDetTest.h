@@ -31,6 +31,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(
         loader.setProperty("OutputWorkspace", "Exp0335_S0038"));
+    std::vector<size_t> sizelist(2);
+    sizelist[0] = 256;
+    sizelist[1] = 256;
+    loader.setProperty("DetectorGeometry", sizelist);
 
     loader.execute();
     TS_ASSERT(loader.isExecuted());

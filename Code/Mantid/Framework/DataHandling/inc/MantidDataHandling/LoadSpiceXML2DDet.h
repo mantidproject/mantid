@@ -8,6 +8,40 @@
 namespace Mantid {
 namespace DataHandling {
 
+class SpiceXMLNode {
+public:
+  SpiceXMLNode(const std::string &nodename);
+  ~SpiceXMLNode();
+
+  void setValues(const std::string &nodetype, const std::string &nodeunit,
+                 const std::string &nodedescription);
+  void setValue(const std::string &strvalue);
+
+  const bool hasUnit() const;
+  const bool hasValue() const;
+
+  const bool isString() const;
+  const bool isInteger() const;
+  const bool isDouble() const;
+
+  const std::string getName() const;
+  const std::string getUnit() const;
+  const std::string getDescription() const;
+  const std::string getValue() const;
+
+  /*
+  template<typename T>
+  const T getValue() const;
+  */
+
+  std::string m_name;
+  std::string m_value;
+  std::string m_unit;
+  char m_typechar;
+  std::string m_typefullname;
+  std::string m_description;
+};
+
 /** LoadSpiceXML2DDet : Load 2D detector data in XML format form SPICE
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -48,10 +82,17 @@ private:
   void exec();
 
   ///
-  void parseSpiceXML(const std::string &xmlfilename);
+  void parseSpiceXML(const std::string &xmlfilename,
+                     const std::string &detlogname, std::string &detstring,
+                     std::map<std::string, std::string> &logstringmap);
 
   ///
   API::MatrixWorkspace_sptr createMatrixWorkspace();
+
+  void convertNode(const std::string &nodetype, bool &isdouble, double &dvalue,
+                   bool &isint, int &ivalue);
+
+  std::map<std::string, SpiceXMLNode> m_NodeMap;
 };
 
 } // namespace DataHandling
