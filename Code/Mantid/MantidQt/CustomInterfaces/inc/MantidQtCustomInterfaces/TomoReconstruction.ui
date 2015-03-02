@@ -426,6 +426,9 @@ Double-click on them to modify their values.</string>
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
+                   <property name="text">
+                    <string>imat</string>
+                   </property>
                   </widget>
                  </item>
                  <item row="0" column="3">
@@ -449,7 +452,11 @@ Double-click on them to modify their values.</string>
                   </widget>
                  </item>
                  <item row="1" column="1" colspan="3">
-                  <widget class="QLineEdit" name="lineEdit_12"/>
+                  <widget class="QLineEdit" name="lineEdit_12">
+                   <property name="text">
+                    <string>/work/imat/test/cycle/</string>
+                   </property>
+                  </widget>
                  </item>
                  <item row="2" column="0">
                   <widget class="QLabel" name="label_23">
@@ -459,7 +466,10 @@ Double-click on them to modify their values.</string>
                   </widget>
                  </item>
                  <item row="2" column="1">
-                  <widget class="QSpinBox" name="spinBox_5">
+                  <widget class="QSpinBox" name="spinBox_SCARFnumNodes">
+                   <property name="minimum">
+                    <number>1</number>
+                   </property>
                    <property name="maximum">
                     <number>99</number>
                    </property>
@@ -489,7 +499,10 @@ Double-click on them to modify their values.</string>
                   </widget>
                  </item>
                  <item row="3" column="1">
-                  <widget class="QSpinBox" name="spinBox_6">
+                  <widget class="QSpinBox" name="spinBox_SCARFnumCores">
+                   <property name="minimum">
+                    <number>1</number>
+                   </property>
                    <property name="maximum">
                     <number>99</number>
                    </property>
@@ -543,7 +556,7 @@ Double-click on them to modify their values.</string>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QSpinBox" name="spinBox_7">
+                  <widget class="QSpinBox" name="spinBox_localNumCores">
                    <property name="maximum">
                     <number>99</number>
                    </property>
@@ -807,15 +820,15 @@ Double-click on them to modify their values.</string>
               <item row="0" column="0">
                <widget class="QLabel" name="label_2">
                 <property name="text">
-                 <string>Parameter File:</string>
+                 <string>Savu config file:</string>
                 </property>
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QLineEdit" name="lineEdit"/>
+               <widget class="QLineEdit" name="lineEdit_savuConfigFile"/>
               </item>
               <item row="0" column="2">
-               <widget class="QPushButton" name="pushButton_5">
+               <widget class="QPushButton" name="pushButton_savuConfigFile">
                 <property name="text">
                  <string>Browse...</string>
                 </property>
