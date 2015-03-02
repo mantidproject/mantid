@@ -89,7 +89,7 @@ void SCARFTomoReconstruction::init() {
                       "/work/imat/webservice_test/remote_output/test_",
                       Direction::Input),
                   "Options for the job command line, application dependent. It "
-                  "can inclue for example the NXTomo input file when using savu "
+                  "can include for example the NXTomo input file when using savu "
                   "for tomographic reconstruction.");
   setPropertySettings("JobOptions",
                       new VisibleWhenProperty("Action", IS_EQUAL_TO, "SubmitJob"));
