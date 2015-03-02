@@ -1,13 +1,9 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMORECONSTRUCTION_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMORECONSTRUCTION_H_
 
-//----------------------
-// Includes
-//----------------------
 #include "ui_TomoReconstruction.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/ScopedWorkspace.h"
 
 class QTreeWidgetItem;
 
@@ -65,9 +61,12 @@ protected:
   void doPing();
   void doLogin();
   void doQueryJobStatus();
-  void doSubmitReconstructionJob();
+  void doSubmitReconstructionJob(const std::string &res);
+  void doCancelJob(const std::string &id);
 
 private slots:
+  void voidBrowseClicked();
+
   void menuSaveClicked();
   void menuSaveAsClicked();
   void availablePluginSelected();
@@ -85,6 +84,9 @@ private:
   void doSetupSectionParameters();
   void doSetupSectionRun();
 
+  void setupComputeResource();
+  void setupRunTool();
+
   /// Load default interface settings for each tab
   void loadSettings();
 
@@ -100,14 +102,29 @@ private:
       std::string &filePath,
       std::vector<Mantid::API::ITableWorkspace_sptr> &currentPlugins);
 
+  std::string validateCompResource(const std::string &res);
+
+  std::string getComputeResource();
+
   void userWarning(std::string err, std::string description);
+
+  void userError(std::string err, std::string description);
 
   std::string createUniqueNameHidden();
 
   void createPluginTreeEntry(Mantid::API::ITableWorkspace_sptr table);
 
   /// Main interface window
-  Ui::TomoReconstruction m_uiForm;
+  Ui::TomoReconstruction m_ui;
+
+  /// facility for the remote compute resource
+  const std::string m_facility;
+  /// compute resources (remote ones, clusters, etc.)
+  std::vector<std::string> m_computeRes;
+  /// display name of the "local" compute resource
+  const std::string m_localCompName;
+
+  // plugins for savu config files
   std::vector<Mantid::API::ITableWorkspace_sptr> m_availPlugins;
   std::vector<Mantid::API::ITableWorkspace_sptr> m_currPlugins;
   std::string m_currentParamPath;
@@ -116,4 +133,4 @@ private:
 }
 }
 
-#endif
+#endif // MANTIDQTCUSTOMINTERFACES_TOMORECONSTRUCTION_H_
