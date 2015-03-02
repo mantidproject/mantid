@@ -20,7 +20,6 @@ using namespace Mantid::Geometry;
 class PointGroupTest : public CxxTest::TestSuite
 {
 public:
-
     void check_point_group(std::string name, V3D hkl, size_t numEquiv, V3D * equiv)
     {
         PointGroup_sptr testedPointGroup = PointGroupFactory::Instance().createPointGroup(name);
@@ -66,13 +65,13 @@ public:
     { V3D equiv[] = {V3D(1,2,3),V3D(-2,1-2,3), V3D(-1+2,-1,3), V3D(-1,-2,-3), V3D(2,-1+2,-3), V3D(1-2,1,-3)};
     check_point_group("-3 h", V3D(1,2,3), 6, equiv); }
     { V3D equiv[] = {V3D(7,2,3),V3D(-2,7-2,3),V3D(-7+2,-7,3),V3D(2,7,-3),V3D(7-2,-2,-3),V3D(-7,-7+2,-3),V3D(-7,-2,-3),V3D(2,-7+2,-3),V3D(7-2,7,-3),V3D(-2,-7,3),V3D(-7+2,2,3),V3D(7,7-2,3)};
-    check_point_group("-3m1 h", V3D(7,2,3), 12, equiv); }
+    check_point_group("-3m1", V3D(7,2,3), 12, equiv); }
     { V3D equiv[] = {
         V3D(7,2,3),V3D(-2,7-2,3),V3D(-7+2,-7,3),
         V3D(-2,-7,-3),V3D(-7+2,2,-3),V3D(7,7-2,-3),
         V3D(-7,-2,-3),V3D(2,-7+2,-3),V3D(7-2,7,-3),
         V3D(2,7,3),V3D(7-2,-2,3),V3D(-7,-7+2,3)};
-    check_point_group("-31m h", V3D(7,2,3), 12, equiv); }
+    check_point_group("-31m", V3D(7,2,3), 12, equiv); }
     { V3D equiv[] = {V3D(7,2,3),V3D(-2,7-2,3),V3D(-7+2,-7,3),V3D(-7,-2,3),V3D(2,-7+2,3),V3D(7-2,7,3),V3D(-7,-2,-3),V3D(2,-7+2,-3),V3D(7-2,7,-3),V3D(7,2,-3),V3D(-2,7-2,-3),V3D(-7+2,-7,-3)};
     check_point_group("6/m", V3D(7,2,3), 12, equiv); }
     { V3D equiv[] = {V3D(7,2,3),V3D(-2,7-2,3),V3D(-7+2,-7,3),V3D(-7,-2,3),V3D(2,-7+2,3),V3D(7-2,7,3),V3D(2,7,-3),V3D(7-2,-2,-3),V3D(-7,-7+2,-3),V3D(-2,-7,-3),V3D(-7+2,2,-3),V3D(7,7-2,-3),V3D(-7,-2,-3),V3D(2,-7+2,-3),V3D(7-2,7,-3),V3D(7,2,-3),V3D(-2,7-2,-3),V3D(-7+2,-7,-3),V3D(-2,-7,3),V3D(-7+2,2,3),V3D(7,7-2,3),V3D(2,7,3),V3D(7-2,-2,3),V3D(-7,-7+2,3)};
@@ -135,12 +134,12 @@ public:
 
       crystalSystemsMap["3 h"] = PointGroup::Trigonal;
       crystalSystemsMap["-3 h"] = PointGroup::Trigonal;
-      crystalSystemsMap["321 h"] = PointGroup::Trigonal;
-      crystalSystemsMap["312 h"] = PointGroup::Trigonal;
-      crystalSystemsMap["3m1 h"] = PointGroup::Trigonal;
-      crystalSystemsMap["31m h"] = PointGroup::Trigonal;
-      crystalSystemsMap["-3m1 h"] = PointGroup::Trigonal;
-      crystalSystemsMap["-31m h"] = PointGroup::Trigonal;
+      crystalSystemsMap["321"] = PointGroup::Trigonal;
+      crystalSystemsMap["312"] = PointGroup::Trigonal;
+      crystalSystemsMap["3m1"] = PointGroup::Trigonal;
+      crystalSystemsMap["31m"] = PointGroup::Trigonal;
+      crystalSystemsMap["-3m1"] = PointGroup::Trigonal;
+      crystalSystemsMap["-31m"] = PointGroup::Trigonal;
       crystalSystemsMap["3"] = PointGroup::Trigonal;
       crystalSystemsMap["-3"] = PointGroup::Trigonal;
       crystalSystemsMap["32"] = PointGroup::Trigonal;
