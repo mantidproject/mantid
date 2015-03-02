@@ -170,16 +170,6 @@ PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
   }
 
   return Triclinic;
-
-  std::cout << getName() << ": " << std::endl;
-  for (auto it = symbolMap.begin(); it != symbolMap.end(); ++it) {
-    std::cout << it->first << " ";
-    for (auto k = it->second.begin(); k != it->second.end(); ++k) {
-      std::cout << *k << " ";
-    }
-    std::cout << std::endl;
-  }
-  std::cout << "---------" << std::endl;
 }
 
 /** @return a vector with all possible PointGroup objects */
