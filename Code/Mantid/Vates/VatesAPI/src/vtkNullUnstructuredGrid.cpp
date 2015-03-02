@@ -26,8 +26,13 @@ vtkUnstructuredGrid *vtkNullUnstructuredGrid::createNullData() {
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
   vtkSmartPointer<vtkVertex> vertex = vtkSmartPointer<vtkVertex>::New();
 
-  Mantid::coord_t p[3] = {0.0, 0.0, 0.0};
+  double p[3];
+  p[0] = 0.0;
+  p[1] = 0.0;
+  p[2] = 0.0;
+
   points->InsertPoint(0, p);
+
   vertex->GetPointIds()->SetId(0, 0);
 
   dataSet->InsertNextCell(VTK_VERTEX, vertex->GetPointIds());
