@@ -19,70 +19,6 @@ using namespace Mantid::Geometry;
  * When the test is destroyed, these are explicitly unregistered,
  * so they don't interfere with other tests.
  */
-/*
-class TestPointGroupCubicA : public PointGroup
-{
-public:
-    TestPointGroupCubicA() : PointGroup("cubicA")
-    { }
-    ~TestPointGroupCubicA() { }
-
-    std::string getName() const { return "cubicA (test)"; }
-    bool isEquivalent(const Mantid::Kernel::V3D &hkl, const Mantid::Kernel::V3D &hkl2) const
-    {
-        UNUSED_ARG(hkl);
-        UNUSED_ARG(hkl2);
-
-        return false;
-    }
-
-    PointGroup::CrystalSystem crystalSystem() const { return PointGroup::Cubic; }
-
-    void init() { }
-};
-
-class TestPointGroupCubicB : public PointGroup
-{
-public:
-    TestPointGroupCubicB() : PointGroup("cubicB")
-    { }
-    ~TestPointGroupCubicB() { }
-
-    std::string getName() const { return "cubicB (test)"; }
-    bool isEquivalent(const Mantid::Kernel::V3D &hkl, const Mantid::Kernel::V3D &hkl2) const
-    {
-        UNUSED_ARG(hkl);
-        UNUSED_ARG(hkl2);
-
-        return false;
-    }
-
-    PointGroup::CrystalSystem crystalSystem() const { return PointGroup::Cubic; }
-
-    void init() { }
-};
-
-class TestPointGroupTriclinic : public PointGroup
-{
-public:
-    TestPointGroupTriclinic() : PointGroup("triclinic")
-    { }
-    ~TestPointGroupTriclinic() { }
-
-    std::string getName() const { return "triclinic (test)"; }
-    bool isEquivalent(const Mantid::Kernel::V3D &hkl, const Mantid::Kernel::V3D &hkl2) const
-    {
-        UNUSED_ARG(hkl);
-        UNUSED_ARG(hkl2);
-
-        return false;
-    }
-
-    PointGroup::CrystalSystem crystalSystem() const { return PointGroup::Triclinic; }
-
-    void init() { }
-};
-*/
 class PointGroupFactoryTest : public CxxTest::TestSuite
 {
 public:
@@ -91,64 +27,63 @@ public:
   static PointGroupFactoryTest *createSuite() { return new PointGroupFactoryTest(); }
   static void destroySuite( PointGroupFactoryTest *suite ) { delete suite; }
 
-  /*
   PointGroupFactoryTest()
   {
-      PointGroupFactory::Instance().subscribePointGroup<TestPointGroupCubicA>();
-      PointGroupFactory::Instance().subscribePointGroup<TestPointGroupCubicB>();
-      PointGroupFactory::Instance().subscribePointGroup<TestPointGroupTriclinic>();
+      PointGroupFactory::Instance().subscribePointGroup("monoclinicA", "x,y,-z", "test");
+      PointGroupFactory::Instance().subscribePointGroup("monoclinicB", "x,-y,-z", "test");
+      PointGroupFactory::Instance().subscribePointGroup("triclinic", "-x,-y,-z", "test");
   }
 
   ~PointGroupFactoryTest()
   {
       // Unsubscribing the fake point groups
-      PointGroupFactory::Instance().unsubscribePointGroup("cubicA");
-      PointGroupFactory::Instance().unsubscribePointGroup("cubicB");
+      PointGroupFactory::Instance().unsubscribePointGroup("monoclinicA");
+      PointGroupFactory::Instance().unsubscribePointGroup("monoclinicB");
       PointGroupFactory::Instance().unsubscribePointGroup("triclinic");
   }
-  */
 
-  void xtestCreatePointGroup()
+  void testCreatePointGroup()
   {
-      TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("cubicA"));
-      TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("cubicB"));
+      TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("monoclinicA"));
+      TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("monoclinicB"));
       TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("triclinic"));
 
-      TS_ASSERT_THROWS(PointGroupFactory::Instance().createPointGroup("cubicC"), Mantid::Kernel::Exception::NotFoundError);
+      TS_ASSERT_THROWS(PointGroupFactory::Instance().createPointGroup("cubicC"), std::invalid_argument);
   }
 
-  void xtestGetAllPointGroupSymbols()
+  void testGetAllPointGroupSymbols()
   {
       std::vector<std::string> symbols = PointGroupFactory::Instance().getAllPointGroupSymbols();
 
-      TS_ASSERT_DIFFERS(findString(symbols, "cubicA"), symbols.end());
-      TS_ASSERT_DIFFERS(findString(symbols, "cubicB"), symbols.end());
+      TS_ASSERT_DIFFERS(findString(symbols, "monoclinicA"), symbols.end());
+      TS_ASSERT_DIFFERS(findString(symbols, "monoclinicB"), symbols.end());
       TS_ASSERT_DIFFERS(findString(symbols, "triclinic"), symbols.end());
   }
 
-  void xestGetAllPointGroupSymbolsCrystalSystems()
+  void testGetAllPointGroupSymbolsCrystalSystems()
   {
-      std::vector<std::string> cubic = PointGroupFactory::Instance().getPointGroupSymbols(PointGroup::Cubic);
-      TS_ASSERT_DIFFERS(findString(cubic, "cubicA"), cubic.end());
-      TS_ASSERT_DIFFERS(findString(cubic, "cubicB"), cubic.end());
+      std::vector<std::string> cubic = PointGroupFactory::Instance().getPointGroupSymbols(PointGroup::Monoclinic);
+
+      TS_ASSERT_DIFFERS(findString(cubic, "monoclinicA"), cubic.end());
+      TS_ASSERT_DIFFERS(findString(cubic, "monoclinicB"), cubic.end());
 
       std::vector<std::string> triclinic = PointGroupFactory::Instance().getPointGroupSymbols(PointGroup::Triclinic);
       TS_ASSERT_DIFFERS(findString(triclinic, "triclinic"), triclinic.end());
   }
 
-  void xtestUnsubscribePointGroup()
+  void testUnsubscribePointGroup()
   {
-      TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("cubicA"));
+      TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("monoclinicA"));
 
-      PointGroupFactory::Instance().unsubscribePointGroup("cubicA");
+      PointGroupFactory::Instance().unsubscribePointGroup("monoclinicA");
 
       std::vector<std::string> allSymbols = PointGroupFactory::Instance().getAllPointGroupSymbols();
-      TS_ASSERT_EQUALS(findString(allSymbols, "cubicA"), allSymbols.end());
+      TS_ASSERT_EQUALS(findString(allSymbols, "monoclinicA"), allSymbols.end());
 
-      TS_ASSERT_THROWS(PointGroupFactory::Instance().createPointGroup("cubicA"), Mantid::Kernel::Exception::NotFoundError);
+      TS_ASSERT_THROWS(PointGroupFactory::Instance().createPointGroup("monoclinicA"), std::invalid_argument);
 
-      //PointGroupFactory::Instance().subscribePointGroup<TestPointGroupCubicA>();
-      TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("cubicA"));
+      PointGroupFactory::Instance().subscribePointGroup("monoclinicA", "x,y,-z", "test");
+      TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("monoclinicA"));
   }
 
   void testPointGroupSymbolCreation()

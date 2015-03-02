@@ -95,17 +95,13 @@ public:
 
   /// Unsubscribes a point group from the factory
   void unsubscribePointGroup(const std::string &hmSymbol) {
-    // unsubscribe(hmSymbol);
-    removeFromCrystalSystemMap(hmSymbol);
+    m_generatorMap.erase(hmSymbol);
   }
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<PointGroupFactoryImpl>;
 
   PointGroupFactoryImpl();
-  void addToCrystalSystemMap(const PointGroup::CrystalSystem &crystalSystem,
-                             const std::string &hmSymbol);
-  void removeFromCrystalSystemMap(const std::string &hmSymbol);
 
   std::string pointGroupSymbolFromSpaceGroupSymbol(
       const std::string &spaceGroupSymbol) const;

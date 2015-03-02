@@ -142,21 +142,6 @@ PointGroupFactoryImpl::PointGroupFactoryImpl()
   Kernel::LibraryManager::Instance();
 }
 
-/// Adds a point group to a map that stores pairs of Hermann-Mauguin symbol and
-/// crystal system.
-void PointGroupFactoryImpl::addToCrystalSystemMap(
-    const PointGroup::CrystalSystem &crystalSystem,
-    const std::string &hmSymbol) {
-  m_crystalSystemMap.insert(std::make_pair(hmSymbol, crystalSystem));
-}
-
-/// Removes point group from internal crystal system map.
-void
-PointGroupFactoryImpl::removeFromCrystalSystemMap(const std::string &hmSymbol) {
-  auto it = m_crystalSystemMap.find(hmSymbol);
-  m_crystalSystemMap.erase(it);
-}
-
 PointGroupGenerator::PointGroupGenerator(
     const std::string &hmSymbol, const std::string &generatorInformation,
     const std::string &description)
