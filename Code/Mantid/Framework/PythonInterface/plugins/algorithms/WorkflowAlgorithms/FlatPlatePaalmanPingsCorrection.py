@@ -76,12 +76,12 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                              doc='Scale factor to multiply can data')
 
         self.declareProperty(name='NumberWavelengths', defaultValue=10,
-                             validator=IntBoundedValidator(0),
+                             validator=IntBoundedValidator(1),
                              doc='Number of wavelengths for calculation')
         self.declareProperty(name='Emode', defaultValue='Elastic',
                              validator=StringListValidator(['Elastic', 'Indirect']),
                              doc='Emode: Elastic or Indirect')
-        self.declareProperty(name='Efixed', defaultValue=0.0,
+        self.declareProperty(name='Efixed', defaultValue=1.0,
                              doc='Analyser energy')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
@@ -225,7 +225,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             self._waves.append(wave_min + idx * wave_bin)
 
         if self._emode == 'Elastic':
-            self._elastic = waves[int(number_waves / 2)]
+            self._elastic = self._waves[int(number_waves / 2)]
         elif self._emode == 'Indirect':
             self._elastic = math.sqrt(81.787 / self._efixed)  # elastic wavelength
 

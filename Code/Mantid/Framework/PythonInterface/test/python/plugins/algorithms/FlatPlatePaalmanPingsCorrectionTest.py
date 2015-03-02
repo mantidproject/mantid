@@ -32,7 +32,9 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
 
         DeleteWorkspace(self._sample_ws)
         DeleteWorkspace(self._can_ws)
-        DeleteWorkspace(self._corrections_ws_name)
+
+        if self._corrections_ws_name in mtd:
+            DeleteWorkspace(self._corrections_ws_name)
 
 
     def _verify_workspace(self, ws_name):
@@ -114,6 +116,39 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
                                         Efixed=1.845)
 
         self._verify_workspaces_for_can()
+
+
+    def test_sampleAndCanDefaults(self):
+        """
+        Test simple run with sample and can workspace using the default values.
+        """
+
+        FlatPlatePaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
+                                        SampleWorkspace=self._sample_ws,
+                                        SampleChemicalFormula='H2-O',
+                                        CanWorkspace=self._can_ws,
+                                        CanChemicalFormula='V')
+
+        self._verify_workspaces_for_can()
+
+
+    def test_validationNoCanFormula(self):
+        """
+        Tests validation for no chemical formula for can when a can WS is provided.
+        """
+
+        with self.assertRaises(RuntimeError):
+            FlatPlatePaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
+                                            SampleWorkspace=self._sample_ws,
+                                            SampleChemicalFormula='H2-O',
+                                            SampleThickness=0.1,
+                                            SampleAngle=45,
+                                            CanWorkspace=self._can_ws,
+                                            CanFrontThickness=0.1,
+                                            CanBackThickness=0.1,
+                                            NumberWavelengths=10,
+                                            Emode='Indirect',
+                                            Efixed=1.845)
 
 
 if __name__=="__main__":
