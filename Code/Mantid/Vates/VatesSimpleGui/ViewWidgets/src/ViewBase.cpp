@@ -46,7 +46,7 @@ namespace SimpleGui
  * Default constructor.
  * @param parent the parent widget for the view
  */
-ViewBase::ViewBase(QWidget *parent) : QWidget(parent)
+ViewBase::ViewBase(QWidget *parent) : QWidget(parent), m_currentColorMapModel(NULL)
 {
 }
 
@@ -176,6 +176,9 @@ void ViewBase::onColorMapChange(const pqColorMapModel *model)
   {
     setAutoColorScale();
   }
+
+  // Workaround for colormap but when changing the visbility of a source
+  this->m_currentColorMapModel = model;
 }
 
 /**
@@ -723,6 +726,10 @@ void ViewBase::onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)
   // Reset the colorscale if it is set to autoscale
   if (colorUpdater.isAutoScale())
   {
+    // Workaround: A ParaView bug requires us to reload the ColorMap when the visibility changes.
+    if (m_currentColorMapModel) {
+      onColorMapChange(m_currentColorMapModel);
+    }
     this->setAutoColorScale();
   }
 }

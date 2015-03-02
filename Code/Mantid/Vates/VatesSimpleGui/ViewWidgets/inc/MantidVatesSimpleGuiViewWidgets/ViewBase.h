@@ -220,6 +220,7 @@ private:
 
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
   BackgroundRgbProvider backgroundRgbProvider; /// < Holds the manager for background color related tasks.
+   const pqColorMapModel* m_currentColorMapModel;
 };
 
 }
