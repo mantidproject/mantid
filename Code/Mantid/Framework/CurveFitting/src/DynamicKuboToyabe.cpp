@@ -255,26 +255,19 @@ void DynamicKuboToyabe::function1D(double* out, const double* xValues, const siz
     }
     // Non-zero external field
     else{
-      throw std::runtime_error("HKT() not implemented yet");
+      for (size_t i = 0; i < nData; i++) {
+        out[i] = A*HKT(xValues[i],G,F);
+      }
     }
   } 
 
   // Non-zero hopping rate
   else {
 
-    if ( F==0.0 ) {
-
-      for (size_t i = 0; i<nData; i++){
-        out[i] = A*getDKT(xValues[i],G,v,F);
-      }
-
-    } else {
-
-      // Non-zero field
-      throw std::runtime_error("HKT() not implemented yet");
+    for (size_t i = 0; i<nData; i++){
+      out[i] = A*getDKT(xValues[i],G,F,v);
     }
-
-  } // else hopping rate != 0
+  }
 
 
 }
