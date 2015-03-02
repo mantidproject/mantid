@@ -148,7 +148,7 @@ PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
     return Cubic;
   }
 
-  if (symbolMap["6"].size() == 1) {
+  if (symbolMap["6"].size() == 1 || symbolMap["-6"].size() == 1) {
     return Hexagonal;
   }
 
