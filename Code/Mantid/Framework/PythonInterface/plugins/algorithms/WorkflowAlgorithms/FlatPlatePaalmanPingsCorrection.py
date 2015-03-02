@@ -204,7 +204,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         source_pos = mtd[self._sample_ws_name].getInstrument().getSource().getPos()
         sample_pos = mtd[self._sample_ws_name].getInstrument().getSample().getPos()
         beam_pos = sample_pos - source_pos
-        self._angles = []
+        self._angles = list()
         for index in range(0, num_hist):
             detector = mtd[self._sample_ws_name].getDetector(index)
             two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi  # calc angle
@@ -220,6 +220,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         number_waves = self._number_wavelengths
         wave_bin = (wave_max - wave_min) / (number_waves-1)
 
+        self._waves = list()
         for idx in range(0, number_waves):
             self._waves.append(wave_min + idx * wave_bin)
 

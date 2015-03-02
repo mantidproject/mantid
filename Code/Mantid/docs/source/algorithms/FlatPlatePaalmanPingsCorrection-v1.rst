@@ -39,23 +39,23 @@ Usage
     can = Scale(InputWorkspace=can, Factor=1.2)
 
     # Calculate absorption corrections
-    abs = FlatPlatePaalmanPingsCorrection(SampleWorkspace=sample,
-                                          SampleChemicalFormula='H2-O',
-                                          SampleThickness=0.1,
-                                          SampleAngle=45,
-                                          CanWorkspace=can,
-                                          CanChemicalFormula='V',
-                                          CanFrontThickness=0.01,
-                                          CanBackThickness=0.01,
-                                          Emode='Indirect',
-                                          Efixed=1.845)
+    corr = FlatPlatePaalmanPingsCorrection(SampleWorkspace=sample,
+                                           SampleChemicalFormula='H2-O',
+                                           SampleThickness=0.1,
+                                           SampleAngle=45,
+                                           CanWorkspace=can,
+                                           CanChemicalFormula='V',
+                                           CanFrontThickness=0.01,
+                                           CanBackThickness=0.01,
+                                           Emode='Indirect',
+                                           Efixed=1.845)
 
-    print 'Correction workspaces: %s' % ', '.join(abs.getNames())
+    print 'Correction workspaces: %s' % (', '.join(corr.getNames()))
 
 Output:
 
 .. testoutput:: exSampleAndCan
 
-    Correction workspaces: abs_ass, abs_assc, abs_acsc, abs_acc
+    Correction workspaces: corr_ass, corr_assc, corr_acsc, corr_acc
 
 .. categories::
