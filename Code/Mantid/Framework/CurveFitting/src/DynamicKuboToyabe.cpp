@@ -24,6 +24,11 @@ void DynamicKuboToyabe::init()
   declareParameter("Nu",    0.0, "Hopping rate");
 }
 
+// f1: function to integrate
+double f1(const double x, const double G, const double w0) {
+  return( exp(-G*G*x*x/2)*sin(w0*x));
+}
+
 // Static Zero Field Kubo Toyabe relaxation function
 double ZFKT (const double x, const double G){
 
