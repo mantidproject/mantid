@@ -146,9 +146,9 @@ Which results in the following output:
 
 .. testoutput :: ExQueryPointGroups
 
-    All point groups: ['-1','-3','-31m','-3m1','112/m','2/m','4/m','4/mmm','6/m','6/mmm','m-3','m-3m','mmm']
-    Cubic point groups: ['m-3','m-3m']
-    Tetragonal point groups: ['4/m','4/mmm']
+    All point groups: ['-1','-3','-3 h','-31m h','-3m','-3m1 h','-4','-42m','-43m','-4m2','-6','-62m','-6m2','1','112/m','2','2/m','222','23','3','3 h','312 h','31m h','32','321 h','3m','3m1 h','4','4/m','4/mmm','422','432','4mm','6','6/m','6/mmm','622','6mm','m','m-3','m-3m','mm2','mmm']
+    Cubic point groups: ['-43m','23','432','m-3','m-3m']
+    Tetragonal point groups: ['-4','-42m','-4m2','4','4/m','4/mmm','422','4mm']
 
 After having obtained a ``PointGroup``-object, it can be used for working with reflection data, more specifically :math:`hkl`-indices. It's possible to check whether two reflections are equivalent in a certain point group:
 
