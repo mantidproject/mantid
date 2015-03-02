@@ -137,18 +137,19 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
         Tests validation for no chemical formula for can when a can WS is provided.
         """
 
-        with self.assertRaises(RuntimeError):
-            FlatPlatePaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
-                                            SampleWorkspace=self._sample_ws,
-                                            SampleChemicalFormula='H2-O',
-                                            SampleThickness=0.1,
-                                            SampleAngle=45,
-                                            CanWorkspace=self._can_ws,
-                                            CanFrontThickness=0.1,
-                                            CanBackThickness=0.1,
-                                            NumberWavelengths=10,
-                                            Emode='Indirect',
-                                            Efixed=1.845)
+        self.assertRaises(RuntimeError,
+                          FlatPlatePaalmanPingsCorrection,
+                          OutputWorkspace=self._corrections_ws_name,
+                          SampleWorkspace=self._sample_ws,
+                          SampleChemicalFormula='H2-O',
+                          SampleThickness=0.1,
+                          SampleAngle=45,
+                          CanWorkspace=self._can_ws,
+                          CanFrontThickness=0.1,
+                          CanBackThickness=0.1,
+                          NumberWavelengths=10,
+                          Emode='Indirect',
+                          Efixed=1.845)
 
 
 if __name__=="__main__":
