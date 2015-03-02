@@ -1,6 +1,7 @@
 import stresstesting
 from mantid.simpleapi import *
 from mantid.api import Workspace
+import os,shutil
 
 from abc import ABCMeta, abstractmethod
 from Direct.PropertyManager  import PropertyManager
@@ -95,6 +96,66 @@ class MARIReductionFromFile(ISISDirectInelasticReduction):
       return "outWS"   
   def get_reference_file(self):
     return "MARIReduction.nxs"
+    
+class MARIReductionFromFileCache(ISISDirectInelasticReduction):
+
+  def __init__(self):
+    ISISDirectInelasticReduction.__init__(self)
+    self.tolerance = 1e-9
+    from ISIS_MariReduction import ReduceMARIFromFile
+
+    self.red = ReduceMARIFromFile()
+    self.red.def_advanced_properties()
+    self.red.def_main_properties()
+
+  def prepare_test_file(self):
+      """ This method will run instead of pause and 
+          would copy run file 11001 into 11002 emulating
+          appearance of this file from instrument
+      """ 
+      self._counter+=1
+      if self._counter>= 3:
+        source =  FileFinder.findRuns('11001')[0]
+        targ_path = config['defaultsave.directory']
+        targ_file = os.path.join(targ_path,'MAR11002.raw')
+        shutil.copy2(source ,targ_file )
+
+        self._file_to_clear = targ_file
+        self._counter = 0
+      
+
+
+  def runTest(self):
+       self.red.wait_for_file = 10
+       self.red._debug_wait_for_files_operation = self.prepare_test_file
+       self._counter=0
+
+       self.red.reducer.prop_man.sample_run = [11001,11002]
+       MARreducedRuns = self.red.run_reduction()
+
+       RenameWorkspace(InputWorkspace=MARreducedRuns[0],OutputWorkspace='MARreducedFromFile')
+       RenameWorkspace(InputWorkspace=MARreducedRuns[1],OutputWorkspace='MARreducedWithCach')
+
+       self.red.wait_for_file =0
+       self.red._debug_wait_for_files_operation = None
+       os.remove(self._file_to_clear)
+
+  def validate(self):
+      """Returns the name of the workspace & file to compare"""
+      super(MARIReductionFromFileCache,self).validate()
+      self.tolerance = 1e-9
+      return 'MARreducedFromFile', 'MARreducedWithCach'
+
+  def validateMethod(self):
+      return "validateWorkspaceToWorkspace"
+
+
+  def get_result_workspace(self):
+      """Returns the result workspace to be checked"""
+      return "outWS"   
+  def get_reference_file(self):
+    return "MARIReduction.nxs"
+
     
 class MARIReductionFromWorkspace(ISISDirectInelasticReduction):
 
@@ -205,6 +266,56 @@ class MARIReductionSum(ISISDirectInelasticReduction):
       """
       outWS=self.red.reduce()
       #outWS*=1.00001556766686
+    
+  def get_result_workspace(self):
+      """Returns the result workspace to be checked"""
+      return "outWS"
+
+  def get_reference_file(self):
+    return "MARIReductionSum.nxs"
+
+class MARIReductionWaitAndSum(ISISDirectInelasticReduction):
+
+  def __init__(self):
+
+    ISISDirectInelasticReduction.__init__(self)
+    from ISIS_MariReduction import MARIReductionSum
+
+    self.red = MARIReductionSum()
+    self.red.def_advanced_properties()
+    self.red.def_main_properties()
+
+  def prepare_test_file(self):
+      """ This method will run instead of pause and 
+          would copy run file 11015 into 11002 emulating
+          appearance of this file from instrument
+      """ 
+      self._counter+=1
+      if self._counter>= 3:
+        source =  FileFinder.findRuns('11015')[0]
+        targ_path = config['defaultsave.directory']
+        targ_file = os.path.join(targ_path,'MAR11002.raw')
+        shutil.copy2(source ,targ_file )
+
+        self._file_to_clear = targ_file
+        self._counter = 0
+
+  def runTest(self):
+      """Defines the workflow for the test
+      It verifies operation on summing two files on demand. with wait for 
+      files appearing on data search path
+      """
+      self.red.wait_for_file = 100
+      self.red._debug_wait_for_files_operation = self.prepare_test_file
+      self._counter=0
+
+      self.red.reducer.prop_man.sample_run=[11001,11002]
+      outWS = self.red.run_reduction()
+
+      self.red.wait_for_file =0
+      self.red._debug_wait_for_files_operation = None
+      os.remove(self._file_to_clear)
+
     
   def get_result_workspace(self):
       """Returns the result workspace to be checked"""

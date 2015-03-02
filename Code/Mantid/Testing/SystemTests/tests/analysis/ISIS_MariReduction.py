@@ -19,6 +19,8 @@ class ReduceMARIFromFile(ReductionWrapper):
        prop['incident_energy'] = 12
        prop['energy_bins'] = [-11,0.05,11]
 
+       #prop['sum_runs'] = False
+
       # Absolute units reduction properties.
        prop['monovan_run'] = 11015
        prop['sample_mass'] = 10
@@ -47,10 +49,7 @@ class ReduceMARIFromFile(ReductionWrapper):
      outWS = ReductionWrapper.reduce(self,input_file,output_directory)
      #SaveNexus(outWS,Filename = 'MARNewReduction.nxs')
      return outWS
-   #
-   def validate_result(self,build_vaidatrion=False):
-       """ overloaded function provides filename for validation""" 
-       return 
+ 
    def validate_result(self,build_validation=False):
       """ Change this method to verify different results     """
       # build_validation -- if true, build and save new workspace rather then validating the old one
@@ -60,7 +59,9 @@ class ReduceMARIFromFile(ReductionWrapper):
    def __init__(self,web_var=None):
        """ sets properties defaults for the instrument with Name"""
        ReductionWrapper.__init__(self,'MAR',web_var)
-#----------------------------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------------#
+#-------------------------------------------------------------------------------------------------#
+#-------------------------------------------------------------------------------------------------#
 def main(input_file=None,output_directory=None):
         """ This method is used to run code from web service
             and should not be touched except changing the name of the
@@ -285,22 +286,25 @@ if __name__ == "__main__":
      config['defaultsave.directory'] = data_dir # folder to save resulting spe/nxspe files.  Defaults are in
 
      # execute stuff from Mantid
-     rd = ReduceMARIFromFile()
+     #rd = ReduceMARIFromFile()
      #rd= ReduceMARIMon2Norm()
-     #rd = ReduceMARIMonitorsSeparate()
+     rd = ReduceMARIMonitorsSeparate()
+     #rd = ReduceMARIFromWorkspace()
      rd.def_advanced_properties()
      rd.def_main_properties()
 
+     # Save web variables
+     run_dir = os.path.dirname(os.path.realpath(__file__))
+     file = os.path.join(run_dir,'reduce_vars.py')
+     rd.save_web_variables(file)
+#### Set up time interval (sec) for reducer to check for input data file.         ####
+     #  If this file is not present and this value is 0,reduction fails 
+     #  if this value >0 the reduction wait until file appears on the data 
+     #  search path checking after time specified below.
+     rd.wait_for_file = 0  # waiting time interval
 
-     #run_dir = os.path.dirname(os.path.realpath(__file__))
-     #file = os.path.join(run_dir,'reduce_vars.py')
-     #rd.save_web_variables(file)
+###### Run reduction over all run numbers or files assigned to                   ######
+     # sample_run  variable 
+     red_ws = rd.run_reduction()
 
-     if rd.reducer.sum_runs:
-       red_ws=rd.reduce() 
-     else:
-       runs = PropertyManager.sample_run.get_run_list()
-       for run in runs:
-         red_ws=rd.reduce(run)
-       #end
 

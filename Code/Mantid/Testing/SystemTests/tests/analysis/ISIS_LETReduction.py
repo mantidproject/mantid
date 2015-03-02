@@ -402,8 +402,8 @@ if __name__=="__main__":
      config['defaultsave.directory'] = data_dir # folder to save resulting spe/nxspe files. Defaults are in
 
      # execute stuff from Mantid
-     rd =ReduceLET_MultiRep2015()
-     #rd =ReduceLET_MultiRep2014()
+     #rd =ReduceLET_MultiRep2015()
+     rd =ReduceLET_MultiRep2014()
      #rd = ReduceLET_OneRep()
      rd.def_advanced_properties()
      rd.def_main_properties()
@@ -415,4 +415,6 @@ if __name__=="__main__":
      #   file = os.path.join(run_dir,'reduce_vars.py')
      #   rd.export_changed_values(file)
 
-     rd.reduce()
+###### Run reduction over all files provided as parameters ######
+     red_ws = rd.run_reduction()
+

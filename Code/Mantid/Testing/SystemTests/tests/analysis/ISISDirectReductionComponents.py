@@ -50,10 +50,14 @@ class ISIS_ReductionWebLike(stresstesting.MantidStressTest):
 
     def get_result_workspace(self):
        """Returns the result workspace to be checked"""
+       if 'outWS' in mtd:
+           return 'outWS'
        saveFileName = self.rd.reducer.save_file_name
        outWS = Load(Filename=saveFileName+'.nxs')
        outWS *= 0.997979227566217
-       return "outWS"   
+       fullRezPath =FileFinder.getFullPath(saveFileName+'.nxs')
+       os.remove(fullRezPath)
+       return 'outWS' 
     def get_reference_file(self):
         return "MARIReduction.nxs"
 
@@ -120,8 +124,6 @@ class ISISLoadFilesRAW(stresstesting.MantidStressTest):
 
         self.assertEqual(ws.getNumberHistograms(),919)
         self.assertEqual(mon_ws.getNumberHistograms(),3)
-        wsName = ws.name()
-        self.assertEqual(wsName,PropertyManager.sample_run.get_ws_name())
 
         #
         propman = PropertyManager('MAPS')
