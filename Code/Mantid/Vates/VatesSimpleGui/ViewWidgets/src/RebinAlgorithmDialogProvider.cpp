@@ -38,8 +38,6 @@ namespace Mantid
     }
 
       RebinAlgorithmDialogProvider::RebinAlgorithmDialogProvider(QWidget* parent) : 
-                                                    m_binMdVersion(1),
-                                                    m_binMdName("BinMD"),
                                                     m_lblInputWorkspace("InputWorkspace"),
                                                     m_lblOutputWorkspace("OutputWorkspace"),
                                                     m_binCutOffValue(50),

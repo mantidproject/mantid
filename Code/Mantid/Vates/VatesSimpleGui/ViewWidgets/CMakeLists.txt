@@ -8,7 +8,7 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
-  inc/MantidVatesSImpleGuiViewWidgets/RebinAlgorithmDialogProvider.h
+  inc/MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h
   inc/MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h
   inc/MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h

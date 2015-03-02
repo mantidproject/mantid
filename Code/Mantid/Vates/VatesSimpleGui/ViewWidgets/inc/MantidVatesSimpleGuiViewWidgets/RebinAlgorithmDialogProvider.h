@@ -64,8 +64,6 @@ namespace Mantid
 
           Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace> m_adsWorkspaceProvider;
 
-          int m_binMdVersion;
-          QString m_binMdName;
           QString m_lblInputWorkspace;
           QString m_lblOutputWorkspace;
           size_t m_binCutOffValue;
