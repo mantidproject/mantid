@@ -119,8 +119,12 @@ class MantidStressTest(unittest.TestCase):
         '''
         Send a result to be stored as a name,value pair
         '''
-        print self.PREFIX + self.DELIMITER + name + self.DELIMITER + str(value) + '\n',
-        
+        output = self.PREFIX + self.DELIMITER + name + self.DELIMITER + str(value) + "\n"
+        # Ensure that this is all printed together and not mixed with stderr
+        sys.stdout.flush()
+        sys.stdout.write(output)
+        sys.stdout.flush()
+
     def __verifyRequiredFile(self, filename):
         '''Return True if the specified file name is findable by Mantid.'''
         from mantid.api import FileFinder
