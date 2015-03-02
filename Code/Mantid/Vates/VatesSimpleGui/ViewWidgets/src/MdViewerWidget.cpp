@@ -635,15 +635,25 @@ void MdViewerWidget::removeAllRebinning(ModeControlWidget::Views view)
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
   QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
 
+  // We need to record all true sources, The filters will be removed in the removeRebinning step
+  // Hence the iterator will not point to a valid object anymore.
+  QList<pqPipelineSource*> sourcesToAlter;
+
   for (QList<pqPipelineSource *>::Iterator source = sources.begin(); source != sources.end(); ++source)
   {
     const QString srcProxyName = (*source)->getProxy()->GetXMLGroup();
 
     if (srcProxyName == QString("sources"))
     {
-      removeRebinning(*source, false, view);
+      sourcesToAlter.push_back(*source);
     }
   }
+
+  for (QList<pqPipelineSource *>::Iterator source = sourcesToAlter.begin(); source!= sourcesToAlter.end(); ++source)
+  {
+    removeRebinning(*source, false, view);
+  }
+
 }
 
 /**
