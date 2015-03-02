@@ -68,6 +68,109 @@ TomoReconstruction::TomoReconstruction(QWidget *parent)
   m_computeRes.push_back("SCARF@STFC");
 }
 
+void TomoReconstruction::doSetupSectionParameters() {
+  // TODO: should split the tabs out into their own files
+
+  // geometry, etc. niceties
+  // on the left (just plugin names) 1/2, right: 2/3
+  QList<int> sizes;
+  sizes.push_back(100);
+  sizes.push_back(200);
+  m_ui.splitterPlugins->setSizes(sizes);
+
+  // Setup Parameter editor tab
+  loadAvailablePlugins();
+  m_ui.treeCurrentPlugins->setHeaderHidden(true);
+
+  // Connect slots
+  // Menu Items
+  connect(m_ui.actionOpen, SIGNAL(triggered()), this,
+          SLOT(menuOpenClicked()));
+  connect(m_ui.actionSave, SIGNAL(triggered()), this,
+          SLOT(menuSaveClicked()));
+  connect(m_ui.actionSaveAs, SIGNAL(triggered()), this,
+          SLOT(menuSaveAsClicked()));
+
+  // Lists/trees
+  connect(m_ui.listAvailablePlugins, SIGNAL(itemSelectionChanged()), this,
+          SLOT(availablePluginSelected()));
+  connect(m_ui.treeCurrentPlugins, SIGNAL(itemSelectionChanged()), this,
+          SLOT(currentPluginSelected()));
+  connect(m_ui.treeCurrentPlugins, SIGNAL(itemExpanded(QTreeWidgetItem *)),
+          this, SLOT(expandedItem(QTreeWidgetItem *)));
+
+  // Buttons
+  connect(m_ui.btnTransfer, SIGNAL(released()), this,
+          SLOT(transferClicked()));
+  connect(m_ui.btnMoveUp, SIGNAL(released()), this, SLOT(moveUpClicked()));
+  connect(m_ui.btnMoveDown, SIGNAL(released()), this,
+          SLOT(moveDownClicked()));
+  connect(m_ui.btnRemove, SIGNAL(released()), this, SLOT(removeClicked()));
+}
+
+void TomoReconstruction::doSetupSectionSetup() {
+  // disable 'local' for now
+  m_ui.tabWidget_comp_resource->setTabEnabled(false, 1);
+
+  // 'browse' buttons
+  connect(m_ui.pushButton_savu_config_file, SIGNAL(released()), this,
+          SLOT(voidBrowseClicked()));
+  connect(m_ui.pushButton_fits_dir, SIGNAL(released()), this,
+          SLOT(voidBrowseClicked()));
+  connect(m_ui.pushButton_flat_dir, SIGNAL(released()), this,
+          SLOT(voidBrowseClicked()));
+  connect(m_ui.pushButton_dark_dir, SIGNAL(released()), this,
+          SLOT(voidBrowseClicked()));
+}
+
+void TomoReconstruction::doSetupSectionRun() {
+  // geometry, etc. niceties
+  // on the left (just plugin names) 1/2, right: 2/3
+  QList<int> sizes;
+  sizes.push_back(460);
+  sizes.push_back(40);
+  m_ui.splitter_run_main_vertical->setSizes(sizes);
+
+  sizes[0] = 460;
+  sizes[1] = 40;
+  m_ui.splitter_image_resource->setSizes(sizes);
+
+  sizes[0] = 420;
+  sizes[1] = 80;
+  m_ui.splitter_run_jobs->setSizes(sizes);
+
+  setupComputeResource();
+  setupRunTool();
+
+  // Button signals
+  connect(m_ui.pushButton_reconstruct, SIGNAL(released()), this,
+          SLOT(reconstructClicked()));
+  connect(m_ui.pushButton_run_tool_setup, SIGNAL(released()), this,
+          SLOT(toolSetupClicked()));
+  connect(m_ui.pushButton_run_refresh, SIGNAL(released()), this,
+          SLOT(jobTableRefreshClicked()));
+  connect(m_ui.pushButton_run_job_visualize, SIGNAL(released()), this,
+          SLOT(runVisualizeClicked()));
+  connect(m_ui.pushButton_run_job_cancel, SIGNAL(released()), this,
+          SLOT(jobCancelClicked()));
+
+  m_ui.pushButton_reconstruct->setEnabled(false);
+  m_ui.pushButton_run_tool_setup->setEnabled(false);
+  m_ui.pushButton_run_job_cancel->setEnabled(false);
+  m_ui.pushButton_run_job_visualize->setEnabled(false);
+}
+
+void TomoReconstruction::initLayout() {
+  // TODO: should split the tabs out into their own files
+  m_ui.setupUi(this);
+
+  loadSettings();
+
+  doSetupSectionParameters();
+  doSetupSectionSetup();
+  doSetupSectionRun();
+}
+
 /**
  * Load the setting for each tab on the interface.
  *
@@ -207,76 +310,66 @@ void TomoReconstruction::setupRunTool() {
   }
 }
 
-void TomoReconstruction::doSetupSectionRun() {
-  // geometry, etc. niceties
-  // on the left (just plugin names) 1/2, right: 2/3
-  QList<int> sizes;
-  sizes.push_back(460);
-  sizes.push_back(40);
-  m_ui.splitter_run_main_vertical->setSizes(sizes);
-
-  sizes[0] = 460;
-  sizes[1] = 40;
-  m_ui.splitter_image_resource->setSizes(sizes);
-
-  sizes[0] = 420;
-  sizes[1] = 80;
-  m_ui.splitter_run_jobs->setSizes(sizes);
-
-  setupComputeResource();
-  setupRunTool();
-
-  // Button signals
-  connect(m_ui.pushButton_reconstruct, SIGNAL(released()), this,
-          SLOT(reconstructClicked()));
-  connect(m_ui.pushButton_run_tool_setup, SIGNAL(released()), this,
-          SLOT(toolSetupClicked()));
-  connect(m_ui.pushButton_run_job_visualize, SIGNAL(released()), this,
-          SLOT(runVisualizeClicked()));
-  connect(m_ui.pushButton_run_job_cancel, SIGNAL(released()), this,
-          SLOT(jobCancelClicked()));
-
-  m_ui.pushButton_reconstruct->setEnabled(false);
-  m_ui.pushButton_run_tool_setup->setEnabled(false);
-  m_ui.pushButton_run_job_cancel->setEnabled(false);
-  m_ui.pushButton_run_job_visualize->setEnabled(false);
-}
-
-void TomoReconstruction::doLogin() {
+/**
+ * Log into remote compute resource.
+ *
+ * @param pw Password/authentication credentials as a string
+ */
+void TomoReconstruction::doLogin(const std::string &pw) {
   // TODO: once the remote algorithms are rearranged into the
   // 'RemoteJobManager' design, this will use...
   // auto alg = Algorithm::fromString("Authenticate");
+  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
+  alg->initialize();
+  const std::string user = getUsername();
+  alg->setPropertyValue("UserName", user);
+  alg->setPropertyValue("Action", "LogIn");
+  alg->setPropertyValue("Password", pw);
+  try {
+    alg->execute();
+  } catch (std::runtime_error &e) {
+    throw std::runtime_error(
+        "Error when trying to log into the remote compute resource " +
+        getComputeResource() + " with username " + user + ": " + e.what());
+  }
 }
 
-void TomoReconstruction::doPing() {
+/**
+ * Ping the compute resource / server to check if it's alive and
+ * responding.
+ *
+ * @return True if ping succeeded
+ */
+bool TomoReconstruction::doPing() {
   // TODO: once the remote algorithms are rearranged into the
   // 'RemoteJobManager' design, this will use...
   // auto alg = Algorithm::fromString("???");
-}
-
-void TomoReconstruction::doQueryJobStatus() {
-  // TODO: once the remote algorithms are rearranged into the
-  // 'RemoteJobManager' design, this will use...
-  // auto alg = Algorithm::fromString("QueryAllRemoteJobs");
-  // and
-  // auto alg = Algorithm::fromString("QueryRemoteJob");
+  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
+  alg->initialize();
+  alg->setPropertyValue("UserName", getUsername());
+  alg->setPropertyValue("Action", "Ping");
+  try {
+    alg->execute();
+  } catch (std::runtime_error &e) {
+    throw std::runtime_error(
+        "Error when trying to ping the remote compute resource " +
+        getComputeResource() + ": " + e.what());
+  }
+  return true;
 }
 
 /**
  * Handle the job submission request relies on a submit algorithm.
- *
- * @param res Remote compute resource (like SCARF, etc.)
  */
-void TomoReconstruction::doSubmitReconstructionJob(const std::string &res) {
+void TomoReconstruction::doSubmitReconstructionJob() {
   // TODO: once the remote algorithms are rearranged into the
   // 'RemoteJobManager' design, this will use...
   // auto transAlg = Algorithm::fromString("StartRemoteTransaction");
   // auto submitAlg = Algorithm::fromString("SubmitRemoteJob");
   // submitAlg->setPropertyValue("ComputeResource", res);
-  UNUSED_ARG(res)
   auto alg = Algorithm::fromString("SCARFTomoReconstruction");
   alg->initialize();
-  alg->setPropertyValue("Username", "invalid");
+  alg->setPropertyValue("UserName", getUsername());
   alg->setPropertyValue("JobID", "0");
   try {
     alg->execute();
@@ -287,15 +380,32 @@ void TomoReconstruction::doSubmitReconstructionJob(const std::string &res) {
   }
 }
 
-void TomoReconstruction::reconstructClicked() {
-  const std::string &resource = getComputeResource();
-
-  if (m_localCompName != resource) {
-    doSubmitReconstructionJob(resource);
+void TomoReconstruction::doCancelJob(const std::string &id) {
+  // TODO: once the remote algorithms are rearranged into the
+  // 'RemoteJobManager' design, this will use...
+  // auto alg = Algorithm::fromString("EndRemoteTransaction");
+  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
+  alg->initialize();
+  alg->setPropertyValue("UserName", getUsername());
+  alg->setPropertyValue("JobID", id);
+  try {
+    alg->execute();
+  } catch (std::runtime_error &e) {
+    throw std::runtime_error(
+        "Error when trying to cancel a reconstruction job: " +
+        std::string(e.what()));
   }
 }
 
 void TomoReconstruction::toolSetupClicked() {
+}
+
+void TomoReconstruction::reconstructClicked() {
+  const std::string &resource = getComputeResource();
+
+  if (m_localCompName != resource) {
+    doSubmitReconstructionJob();
+  }
 }
 
 void TomoReconstruction::runVisualizeClicked() {
@@ -321,23 +431,6 @@ void TomoReconstruction::runVisualizeClicked() {
       id << std::endl;
 }
 
-void TomoReconstruction::doCancelJob(const std::string &id) {
-  // TODO: once the remote algorithms are rearranged into the
-  // 'RemoteJobManager' design, this will use...
-  // auto alg = Algorithm::fromString("EndRemoteTransaction");
-  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
-  alg->initialize();
-  alg->setPropertyValue("Username", "invalid");
-  alg->setPropertyValue("JobID", id);
-  try {
-    alg->execute();
-  } catch (std::runtime_error &e) {
-    throw std::runtime_error(
-        "Error when trying to cancel a reconstruction job: " +
-        std::string(e.what()));
-  }
-}
-
 /// processes (cancels) all the jobs selected in the table
 void TomoReconstruction::jobCancelClicked()
 {
@@ -361,70 +454,40 @@ void TomoReconstruction::jobCancelClicked()
   }
 }
 
-void TomoReconstruction::doSetupSectionSetup() {
-  // disable 'local' for now
-  m_ui.tabWidget_comp_resource->setTabEnabled(false, 1);
+void TomoReconstruction::doQueryJobStatus(std::vector<std::string> ids,
+                                          std::vector<std::string> names,
+                                          std::vector<std::string> status,
+                                          std::vector<std::string> cmds) {
+  // TODO: once the remote algorithms are rearranged into the
+  // 'RemoteJobManager' design, this will use...
+  // auto alg = Algorithm::fromString("QueryAllRemoteJobs");
+  // and
+  // auto alg = Algorithm::fromString("QueryRemoteJob");
 
-  // 'browse' buttons
-  connect(m_ui.pushButton_savu_config_file, SIGNAL(released()), this,
-          SLOT(voidBrowseClicked()));
-  connect(m_ui.pushButton_fits_dir, SIGNAL(released()), this,
-          SLOT(voidBrowseClicked()));
-  connect(m_ui.pushButton_flat_dir, SIGNAL(released()), this,
-          SLOT(voidBrowseClicked()));
-  connect(m_ui.pushButton_dark_dir, SIGNAL(released()), this,
-          SLOT(voidBrowseClicked()));
+  // output properties to get: RemoteJobsID, RemoteJobsNames,
+  //    RemoteJobsStatus, RemoteJobsCommands
+  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
+  alg->initialize();
+  alg->setPropertyValue("UserName", getUsername());
+  alg->setPropertyValue("Action", "JobStatus");
+  try {
+    alg->execute();
+  } catch (std::runtime_error &e) {
+    throw std::runtime_error(
+        "Error when trying to query the status of jobs in " +
+        getComputeResource() + ": " + e.what());
+  }
+  ids = alg->getProperty("RemoteJobsID");
+  names = alg->getProperty("RemoteJobsID");
+  status = alg->getProperty("RemoteJobsStatus");
+  cmds = alg->getProperty("RemoteJobsCommands");
 }
 
-void TomoReconstruction::doSetupSectionParameters() {
-  // TODO: should split the tabs out into their own files
+void  TomoReconstruction::jobTableRefreshClicked() {
+  std::vector<std::string> ids, names, status, cmds;
+  doQueryJobStatus(ids, names, status, cmds);
 
-  // geometry, etc. niceties
-  // on the left (just plugin names) 1/2, right: 2/3
-  QList<int> sizes;
-  sizes.push_back(100);
-  sizes.push_back(200);
-  m_ui.splitterPlugins->setSizes(sizes);
-
-  // Setup Parameter editor tab
-  loadAvailablePlugins();
-  m_ui.treeCurrentPlugins->setHeaderHidden(true);
-
-  // Connect slots
-  // Menu Items
-  connect(m_ui.actionOpen, SIGNAL(triggered()), this,
-          SLOT(menuOpenClicked()));
-  connect(m_ui.actionSave, SIGNAL(triggered()), this,
-          SLOT(menuSaveClicked()));
-  connect(m_ui.actionSaveAs, SIGNAL(triggered()), this,
-          SLOT(menuSaveAsClicked()));
-
-  // Lists/trees
-  connect(m_ui.listAvailablePlugins, SIGNAL(itemSelectionChanged()), this,
-          SLOT(availablePluginSelected()));
-  connect(m_ui.treeCurrentPlugins, SIGNAL(itemSelectionChanged()), this,
-          SLOT(currentPluginSelected()));
-  connect(m_ui.treeCurrentPlugins, SIGNAL(itemExpanded(QTreeWidgetItem *)),
-          this, SLOT(expandedItem(QTreeWidgetItem *)));
-
-  // Buttons
-  connect(m_ui.btnTransfer, SIGNAL(released()), this,
-          SLOT(transferClicked()));
-  connect(m_ui.btnMoveUp, SIGNAL(released()), this, SLOT(moveUpClicked()));
-  connect(m_ui.btnMoveDown, SIGNAL(released()), this,
-          SLOT(moveDownClicked()));
-  connect(m_ui.btnRemove, SIGNAL(released()), this, SLOT(removeClicked()));
-}
-
-void TomoReconstruction::initLayout() {
-  // TODO: should split the tabs out into their own files
-  m_ui.setupUi(this);
-
-  loadSettings();
-
-  doSetupSectionParameters();
-  doSetupSectionSetup();
-  doSetupSectionRun();
+  // TODO: sort out table modification process
 }
 
 void TomoReconstruction::loadAvailablePlugins() {
@@ -808,6 +871,15 @@ std::string TomoReconstruction::getComputeResource() {
   QComboBox *cb = m_ui.comboBox_run_compute_resource;
   QString rs = cb->currentText();
   return validateCompResource(rs.toStdString());
+}
+
+/**
+ * Retrieve the username being used for the selected compute resource.
+ *
+ * @return Username ready to be used in remote queries
+ */
+std::string TomoReconstruction::getUsername() {
+  return "invalid";
 }
 
 /**

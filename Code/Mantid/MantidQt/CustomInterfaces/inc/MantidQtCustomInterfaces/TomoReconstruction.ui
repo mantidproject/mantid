@@ -21,7 +21,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="editParamTab">
        <attribute name="title">
@@ -1187,6 +1187,20 @@ Double-click on them to modify their values.</string>
               <widget class="QWidget" name="layoutWidget_8">
                <layout class="QGridLayout" name="gridLayout_16">
                 <item row="2" column="0">
+                 <widget class="QPushButton" name="pushButton_run_job_visualize">
+                  <property name="text">
+                   <string>Visualize</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="0">
+                 <widget class="QPushButton" name="pushButton_run_job_cancel">
+                  <property name="text">
+                   <string>Cancel</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="0">
                  <spacer name="verticalSpacer_5">
                   <property name="orientation">
                    <enum>Qt::Vertical</enum>
@@ -1200,16 +1214,9 @@ Double-click on them to modify their values.</string>
                  </spacer>
                 </item>
                 <item row="1" column="0">
-                 <widget class="QPushButton" name="pushButton_run_job_visualize">
+                 <widget class="QPushButton" name="pushButton_run_refresh">
                   <property name="text">
-                   <string>Visualize</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="0">
-                 <widget class="QPushButton" name="pushButton_run_job_cancel">
-                  <property name="text">
-                   <string>Cancel</string>
+                   <string>Refresh</string>
                   </property>
                  </widget>
                 </item>

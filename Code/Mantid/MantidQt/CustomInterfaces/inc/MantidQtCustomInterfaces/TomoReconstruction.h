@@ -56,13 +56,20 @@ protected slots:
   void toolSetupClicked();
   void runVisualizeClicked();
   void jobCancelClicked();
+  void jobTableRefreshClicked();
 
 protected:
-  void doPing();
-  void doLogin();
-  void doQueryJobStatus();
-  void doSubmitReconstructionJob(const std::string &res);
+  bool doPing();
+  void doLogin(const std::string &pw);
+  void doQueryJobStatus(std::vector<std::string> ids,
+                        std::vector<std::string> names,
+                        std::vector<std::string> status,
+                        std::vector<std::string> cmds);
+  void doSubmitReconstructionJob();
   void doCancelJob(const std::string &id);
+
+  std::string getComputeResource();
+  std::string getUsername();
 
 private slots:
   void voidBrowseClicked();
@@ -103,8 +110,6 @@ private:
       std::vector<Mantid::API::ITableWorkspace_sptr> &currentPlugins);
 
   std::string validateCompResource(const std::string &res);
-
-  std::string getComputeResource();
 
   void userWarning(std::string err, std::string description);
 
