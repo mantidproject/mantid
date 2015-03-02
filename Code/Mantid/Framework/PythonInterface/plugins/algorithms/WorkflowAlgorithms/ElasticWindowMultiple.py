@@ -34,6 +34,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
     _range_1_end = None
     _range_2_start = None
     _range_2_end = None
+    _mtd_plot = None
 
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'

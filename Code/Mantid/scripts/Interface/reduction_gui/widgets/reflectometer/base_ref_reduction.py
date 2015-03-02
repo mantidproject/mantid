@@ -41,6 +41,9 @@ class BaseRefWidget(BaseWidget):
 
     bDEBUG = False
 
+    _run_number_first_edit = None
+    ref_det_view = None
+
     def __init__(self, parent=None, state=None, settings=None, name="", data_proxy=None):
         super(BaseRefWidget, self).__init__(parent, state, settings, data_proxy=data_proxy)
 

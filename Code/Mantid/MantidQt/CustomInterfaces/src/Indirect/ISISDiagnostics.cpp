@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/Indirect/IndirectDiagnostics.h"
+#include "MantidQtCustomInterfaces/Indirect/ISISDiagnostics.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
@@ -10,7 +10,7 @@ using namespace Mantid::API;
 
 namespace
 {
-  Mantid::Kernel::Logger g_log("IndirectDiagnostics");
+  Mantid::Kernel::Logger g_log("ISISDiagnostics");
 }
 
 namespace MantidQt
@@ -20,7 +20,7 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  IndirectDiagnostics::IndirectDiagnostics(IndirectDataReduction * idrUI, QWidget * parent) :
+  ISISDiagnostics::ISISDiagnostics(IndirectDataReduction * idrUI, QWidget * parent) :
     IndirectDataReductionTab(idrUI, parent),
     m_lastDiagFilename("")
   {
@@ -111,15 +111,15 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  IndirectDiagnostics::~IndirectDiagnostics()
+  ISISDiagnostics::~ISISDiagnostics()
   {
   }
 
-  void IndirectDiagnostics::setup()
+  void ISISDiagnostics::setup()
   {
   }
 
-  void IndirectDiagnostics::run()
+  void ISISDiagnostics::run()
   {
     QString suffix = "_" + getInstrumentConfiguration()->getAnalyserName()
                      + getInstrumentConfiguration()->getReflectionName() + "_slice";
@@ -161,7 +161,7 @@ namespace CustomInterfaces
     runAlgorithm(sliceAlg);
   }
 
-  bool IndirectDiagnostics::validate()
+  bool ISISDiagnostics::validate()
   {
     UserInputValidator uiv;
 
@@ -200,7 +200,7 @@ namespace CustomInterfaces
   /**
    * Sets default spectra, peak and background ranges.
    */
-  void IndirectDiagnostics::setDefaultInstDetails()
+  void ISISDiagnostics::setDefaultInstDetails()
   {
     //Get spectra, peak and background details
     std::map<QString, QString> instDetails = getInstrumentDetails();
@@ -225,7 +225,7 @@ namespace CustomInterfaces
   /**
    * Redraw the raw input plot
    */
-  void IndirectDiagnostics::slicePlotRaw()
+  void ISISDiagnostics::slicePlotRaw()
   {
     QString filename = m_uiForm.dsInputFiles->getFirstFilename();
 
@@ -284,7 +284,7 @@ namespace CustomInterfaces
    *
    * @param state :: True to show the second range selectors, false to hide
    */
-  void IndirectDiagnostics::sliceTwoRanges(QtProperty*, bool state)
+  void ISISDiagnostics::sliceTwoRanges(QtProperty*, bool state)
   {
     m_rangeSelectors["SliceBackground"]->setVisible(state);
   }
@@ -294,12 +294,12 @@ namespace CustomInterfaces
    *
    * @param state :: True to enable calibration file, false otherwise
    */
-  void IndirectDiagnostics::sliceCalib(bool state)
+  void ISISDiagnostics::sliceCalib(bool state)
   {
     m_uiForm.dsCalibration->setEnabled(state);
   }
 
-  void IndirectDiagnostics::rangeSelectorDropped(double min, double max)
+  void ISISDiagnostics::rangeSelectorDropped(double min, double max)
   {
     MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
 
@@ -321,7 +321,7 @@ namespace CustomInterfaces
    * @param prop :: Pointer to the QtProperty
    * @param val :: New value of the range selector
    */
-  void IndirectDiagnostics::sliceUpdateRS(QtProperty* prop, double val)
+  void ISISDiagnostics::sliceUpdateRS(QtProperty* prop, double val)
   {
     if(prop == m_properties["PeakStart"])             m_rangeSelectors["SlicePeak"]->setMinimum(val);
     else if(prop == m_properties["PeakEnd"])          m_rangeSelectors["SlicePeak"]->setMaximum(val);
@@ -332,7 +332,7 @@ namespace CustomInterfaces
   /**
    * Runs the slice algorithm with preview properties.
    */
-  void IndirectDiagnostics::updatePreviewPlot()
+  void ISISDiagnostics::updatePreviewPlot()
   {
     QString suffix = getInstrumentConfiguration()->getAnalyserName()
                      + getInstrumentConfiguration()->getReflectionName() + "_slice";
@@ -381,7 +381,7 @@ namespace CustomInterfaces
    *
    * @param error True if the algorithm was stopped due to error, false otherwise
    */
-  void IndirectDiagnostics::sliceAlgDone(bool error)
+  void ISISDiagnostics::sliceAlgDone(bool error)
   {
     if(error)
       return;
@@ -420,7 +420,7 @@ namespace CustomInterfaces
   /**
    * Called when a user starts to type / edit the runs to load.
    */
-  void IndirectDiagnostics::pbRunEditing()
+  void ISISDiagnostics::pbRunEditing()
   {
     emit updateRunButton(false, "Editing...", "Run numbers are curently being edited.");
   }
@@ -428,7 +428,7 @@ namespace CustomInterfaces
   /**
    * Called when the FileFinder starts finding the files.
    */
-  void IndirectDiagnostics::pbRunFinding()
+  void ISISDiagnostics::pbRunFinding()
   {
     emit updateRunButton(false, "Finding files...", "Searchig for data files for the run numbers entered...");
     m_uiForm.dsInputFiles->setEnabled(false);
@@ -437,7 +437,7 @@ namespace CustomInterfaces
   /**
    * Called when the FileFinder has finished finding the files.
    */
-  void IndirectDiagnostics::pbRunFinished()
+  void ISISDiagnostics::pbRunFinished()
   {
     if(!m_uiForm.dsInputFiles->isValid())
     {

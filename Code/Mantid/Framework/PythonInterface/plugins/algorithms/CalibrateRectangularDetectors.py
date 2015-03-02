@@ -66,7 +66,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         validator.setLower(0)
         self.declareProperty(IntArrayProperty("Background", values=[0], direction=Direction.Input,
                                               validator=validator))
-        extensions = [ "_event.nxs", "_runinfo.xml"]
+        extensions = [ "_event.nxs", "_runinfo.xml", ".nxs.h5"]
         self.declareProperty("Extension", "_event.nxs",
                              StringListValidator(extensions))
         self.declareProperty("CompressOnRead", False,
@@ -216,7 +216,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if  runnumber is None or runnumber <= 0:
             return None
 
-        if extension.endswith("_event.nxs"):
+        if extension.endswith("_event.nxs") or extension.endswith(".nxs.h5"):
             wksp = self._loadEventNeXusData(runnumber, extension, **filter)
         else:
             wksp = self._loadPreNeXusData(runnumber, extension, **filter)

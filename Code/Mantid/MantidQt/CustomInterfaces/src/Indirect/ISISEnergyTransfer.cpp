@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/Indirect/IndirectConvertToEnergy.h"
+#include "MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h"
 
 #include "MantidQtCustomInterfaces/Background.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
@@ -15,7 +15,7 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  IndirectConvertToEnergy::IndirectConvertToEnergy(IndirectDataReduction * idrUI, QWidget * parent) :
+  ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction * idrUI, QWidget * parent) :
       IndirectDataReductionTab(idrUI, parent)
   {
     m_uiForm.setupUi(parent);
@@ -50,17 +50,17 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  IndirectConvertToEnergy::~IndirectConvertToEnergy()
+  ISISEnergyTransfer::~ISISEnergyTransfer()
   {
   }
 
 
-  void IndirectConvertToEnergy::setup()
+  void ISISEnergyTransfer::setup()
   {
   }
 
 
-  bool IndirectConvertToEnergy::validate()
+  bool ISISEnergyTransfer::validate()
   {
     UserInputValidator uiv;
 
@@ -103,7 +103,7 @@ namespace CustomInterfaces
   }
 
 
-  void IndirectConvertToEnergy::run()
+  void ISISEnergyTransfer::run()
   {
     using MantidQt::API::BatchAlgorithmRunner;
 
@@ -196,7 +196,7 @@ namespace CustomInterfaces
    *
    * @param error True if the algorithm was stopped due to error, false otherwise
    */
-  void IndirectConvertToEnergy::algorithmComplete(bool error)
+  void ISISEnergyTransfer::algorithmComplete(bool error)
   {
     disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
@@ -219,7 +219,7 @@ namespace CustomInterfaces
   /**
    * Called when the instrument has changed, used to update default values.
    */
-  void IndirectConvertToEnergy::setInstrumentDefault()
+  void ISISEnergyTransfer::setInstrumentDefault()
   {
     std::map<QString, QString> instDetails = getInstrumentDetails();
 
@@ -298,7 +298,7 @@ namespace CustomInterfaces
    * This function runs when the user makes a selection on the cbGroupingOptions QComboBox.
    * @param groupType :: Value of selection made by user.
    */
-  void IndirectConvertToEnergy::mappingOptionSelected(const QString& groupType)
+  void ISISEnergyTransfer::mappingOptionSelected(const QString& groupType)
   {
     if ( groupType == "File" )
     {
@@ -319,7 +319,7 @@ namespace CustomInterfaces
    * @param groupType :: Type of grouping (All, Group, Indiviual)
    * @return path to mapping file, or an empty string if file could not be created.
    */
-  QString IndirectConvertToEnergy::createMapFile(const QString& groupType)
+  QString ISISEnergyTransfer::createMapFile(const QString& groupType)
   {
     QString specRange = m_uiForm.spSpectraMin->text() + "," + m_uiForm.spSpectraMax->text();
 
@@ -361,7 +361,7 @@ namespace CustomInterfaces
    *
    * @return A vector of save formats
    */
-  std::vector<std::string> IndirectConvertToEnergy::getSaveFormats()
+  std::vector<std::string> ISISEnergyTransfer::getSaveFormats()
   {
     std::vector<std::string> fileFormats;
 
@@ -384,7 +384,7 @@ namespace CustomInterfaces
   /**
    * Plots raw time data from .raw file before any data conversion has been performed.
    */
-  void IndirectConvertToEnergy::plotRaw()
+  void ISISEnergyTransfer::plotRaw()
   {
     using MantidQt::API::BatchAlgorithmRunner;
 
@@ -461,7 +461,7 @@ namespace CustomInterfaces
    *
    * @param error Indicates if the algorithm chain failed
    */
-  void IndirectConvertToEnergy::plotRawComplete(bool error)
+  void ISISEnergyTransfer::plotRawComplete(bool error)
   {
     disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
 
@@ -479,7 +479,7 @@ namespace CustomInterfaces
   /**
    * Called when a user starts to type / edit the runs to load.
    */
-  void IndirectConvertToEnergy::pbRunEditing()
+  void ISISEnergyTransfer::pbRunEditing()
   {
     emit updateRunButton(false, "Editing...", "Run numbers are curently being edited.");
   }
@@ -487,7 +487,7 @@ namespace CustomInterfaces
   /**
    * Called when the FileFinder starts finding the files.
    */
-  void IndirectConvertToEnergy::pbRunFinding()
+  void ISISEnergyTransfer::pbRunFinding()
   {
     emit updateRunButton(false, "Finding files...", "Searchig for data files for the run numbers entered...");
     m_uiForm.dsRunFiles->setEnabled(false);
@@ -496,7 +496,7 @@ namespace CustomInterfaces
   /**
    * Called when the FileFinder has finished finding the files.
    */
-  void IndirectConvertToEnergy::pbRunFinished()
+  void ISISEnergyTransfer::pbRunFinished()
   {
     if(!m_uiForm.dsRunFiles->isValid())
     {
