@@ -420,7 +420,7 @@ class DirectEnergyConversion(object):
                 ws_base = PropertyManager.sample_run.get_workspace()
                 bkgd_range = self.bkgd_range
                 bkgr_ws = self._find_or_build_bkgr_ws(ws_base,bkgd_range[0],bkgd_range[1])
-            RenameWorkspace(InputWorkspace=bkgr_ws, OutputWorkspace='bkgr_ws_source')
+                RenameWorkspace(InputWorkspace=bkgr_ws, OutputWorkspace='bkgr_ws_source')
             # initialize list to store resulting workspaces to return
             result = []
         else:
