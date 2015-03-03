@@ -2,7 +2,6 @@
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
-import numpy as np
 
 
 class TOSCABankCorrection(DataProcessorAlgorithm):
@@ -46,10 +45,6 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty(name='OutputWorkspace', defaultValue='',
                              direction=Direction.Output),
                              doc='Output corrected workspace')
-
-        self.declareProperty(name='CalculatedOffset', defaultValue=0.0,
-                             direction=Direction.Output,
-                             doc='Calculated spectrum offset')
 
 
     def _validate_range(self, name):
@@ -98,15 +93,18 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
             raise RuntimeError('Could not find any peaks. Try increasing \
                                 width of SearchRange and/or ClosePeakTolerance')
 
-        delta = self._get_delta(peaks)
-        offset = delta / 2
+        peak = peaks[0]
 
-        logger.information('Offset for each spectrum is %f' % offset)
+        target_centre = (peak[0] + peak[1]) / 2.0
+        bank_1_scale_factor = target_centre / peak[0]
+        bank_2_scale_factor = target_centre / peak[1]
 
-        self._apply_correction(offset)
+        logger.information('Bank 1 scale factor: %f' % bank_1_scale_factor)
+        logger.information('Bank 2 scale factor: %f' % bank_2_scale_factor)
+
+        self._apply_correction(bank_1_scale_factor, bank_2_scale_factor)
 
         self.setPropertyValue('OutputWorkspace', self._output_ws)
-        self.setProperty('CalculatedOffset', offset)
 
 
     def _get_properties(self):
@@ -168,32 +166,12 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
         return matching_peaks
 
 
-    def _get_delta(self, peaks):
-        """
-        Gets the offset given a set of peaks.
-
-        @param peaks List of peaks
-        @return Spectrum offset
-        """
-
-        # Just use the first peak
-        if self._mode == 'TallestPeak':
-            delta = abs(peaks[0][1] - peaks[0][0])
-
-        # Average difference of all peaks
-        elif self._mode == 'Average':
-            all_deltas = [abs(peak[1] - peak[0]) for peak in peaks]
-            delta = np.average(all_deltas)
-
-        logger.information('Calculated delta %f using method %s' % (delta, self._mode))
-        return delta
-
-
-    def _apply_correction(self, offset):
+    def _apply_correction(self, bank_1_sf, bank_2_sf):
         """
         Applies correction to a copy of the input workspace.
 
-        @param offset Spectrum offset
+        @param bank_1_sf Bank 1 scale factor
+        @param bank_2_sf Bank 2 scale factor
         """
 
         # Get the spectra for each bank plus sum of all banks
@@ -212,11 +190,11 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
         # Correct with shift in X
         ConvertAxisByFormula(InputWorkspace='__bank_1',
                              OutputWorkspace='__bank_1',
-                             Axis='X', Formula='x=x+%f' % offset)
+                             Axis='X', Formula='x=x*%f' % bank_1_sf)
 
         ConvertAxisByFormula(InputWorkspace='__bank_2',
                              OutputWorkspace='__bank_2',
-                             Axis='X', Formula='x=x-%f' % offset)
+                             Axis='X', Formula='x=x*%f' % bank_2_sf)
 
         # Rebin the two corrected spectra to the original workspace binning
         RebinToWorkspace(WorkspaceToRebin='__bank_1',
