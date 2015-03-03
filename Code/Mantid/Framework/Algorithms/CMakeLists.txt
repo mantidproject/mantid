@@ -91,7 +91,6 @@ set ( SRC_FILES
 	src/EQSANSTofStructure.cpp
 	src/EditInstrumentGeometry.cpp
 	src/ElasticWindow.cpp
-	src/EstimatePDDetectorResolution.cpp
 	src/Exponential.cpp
 	src/ExponentialCorrection.cpp
 	src/ExportTimeSeriesLog.cpp
@@ -162,6 +161,7 @@ set ( SRC_FILES
 	src/OneMinusExponentialCor.cpp
 	src/PDFFourierTransform.cpp
 	src/Pause.cpp
+	src/PDEstimateDetectorResolution.cpp
 	src/PerformIndexOperations.cpp
 	src/PhaseQuadMuon.cpp
 	src/PlotAsymmetryByLogValue.cpp
@@ -346,7 +346,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/EQSANSTofStructure.h
 	inc/MantidAlgorithms/EditInstrumentGeometry.h
 	inc/MantidAlgorithms/ElasticWindow.h
-	inc/MantidAlgorithms/EstimatePDDetectorResolution.h
 	inc/MantidAlgorithms/Exponential.h
 	inc/MantidAlgorithms/ExponentialCorrection.h
 	inc/MantidAlgorithms/ExportTimeSeriesLog.h
@@ -418,6 +417,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/OneMinusExponentialCor.h
 	inc/MantidAlgorithms/PDFFourierTransform.h
 	inc/MantidAlgorithms/Pause.h
+	inc/MantidAlgorithms/PDEstimateDetectorResolution.h
 	inc/MantidAlgorithms/PerformIndexOperations.h
 	inc/MantidAlgorithms/PhaseQuadMuon.h
 	inc/MantidAlgorithms/PlotAsymmetryByLogValue.h
@@ -607,8 +607,7 @@ set ( TEST_FILES
 	DiffractionFocussingTest.h
 	DivideTest.h
 	EditInstrumentGeometryTest.h
-  ElasticWindowTest.h
-	EstimatePDDetectorResolutionTest.h
+    ElasticWindowTest.h
 	ExponentialCorrectionTest.h
 	ExponentialTest.h
 	ExportTimeSeriesLogTest.h
@@ -671,8 +670,9 @@ set ( TEST_FILES
 	OneMinusExponentialCorTest.h
 	PDFFourierTransformTest.h
 	PauseTest.h
+	PDEstimateDetectorResolutionTest.h
 	PerformIndexOperationsTest.h
-  PhaseQuadMuonTest.h
+    PhaseQuadMuonTest.h
 	PlotAsymmetryByLogValueTest.h
 	PlusTest.h
 	PointByPointVCorrectionTest.h

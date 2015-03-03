@@ -11,6 +11,7 @@ set ( SRC_FILES
 	src/Indirect/FuryFit.cpp
 	src/Indirect/IDATab.cpp
   src/Indirect/ILLCalibration.cpp
+  src/Indirect/ILLEnergyTransfer.cpp
   src/Indirect/IndirectBayes.cpp
 	src/Indirect/IndirectBayesTab.cpp
 	src/Indirect/IndirectDataAnalysis.cpp
@@ -92,6 +93,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Indirect/Fury.h
 	inc/MantidQtCustomInterfaces/Indirect/FuryFit.h
   inc/MantidQtCustomInterfaces/Indirect/ILLCalibration.h
+  inc/MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectBayesTab.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectDataAnalysis.h
@@ -181,6 +183,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Indirect/Fury.h
                 inc/MantidQtCustomInterfaces/Indirect/FuryFit.h
                 inc/MantidQtCustomInterfaces/Indirect/ILLCalibration.h
+                inc/MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectBayesTab.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectDataAnalysis.h
@@ -249,6 +252,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
                inc/MantidQtCustomInterfaces/Indirect/Fury.ui
                inc/MantidQtCustomInterfaces/Indirect/FuryFit.ui
                inc/MantidQtCustomInterfaces/Indirect/ILLCalibration.ui
+               inc/MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectDataAnalysis.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectDataReduction.ui
