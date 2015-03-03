@@ -500,7 +500,6 @@ API::IMDEventWorkspace_sptr ConvertToMD::createNewMDWorkspace(
  */
 void ConvertToMD::performInitialSplitting(API::IMDEventWorkspace_sptr spws, Mantid::API::BoxController_sptr bc)
 {
-  
   const size_t initialSplitSetting = 50;
   const size_t dimCutoff = 3;
 
