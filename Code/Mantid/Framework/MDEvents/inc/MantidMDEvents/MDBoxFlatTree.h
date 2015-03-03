@@ -137,7 +137,8 @@ public:
   // function
   static void loadExperimentInfos(
       ::NeXus::File *const file,
-      boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ei);
+      boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ei,
+      bool lazy = false);
 
   static void saveAffineTransformMatricies(::NeXus::File *const file,
                                            API::IMDWorkspace_const_sptr ws);

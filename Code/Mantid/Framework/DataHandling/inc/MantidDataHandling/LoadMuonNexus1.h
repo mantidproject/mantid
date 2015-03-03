@@ -100,7 +100,7 @@ protected:
   void exec();
 
 private:
-  void loadData(const MantidVecPtr::ptr_type &tcbs, size_t hist, specid_t &i,
+  void loadData(size_t hist, specid_t &i, specid_t specNo, 
                 MuonNexusReader &nxload, const int64_t lengthIn,
                 DataObjects::Workspace2D_sptr localWorkspace);
   void runLoadMappingTable(DataObjects::Workspace2D_sptr);

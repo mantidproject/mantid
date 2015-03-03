@@ -2,16 +2,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/InternetHelper.h"
+#include "MantidKernel/Exception.h"
 #include "MantidDataHandling/SNSDataArchive.h"
 #include "MantidAPI/ArchiveSearchFactory.h"
 
 #include <Poco/File.h>
-#include <Poco/Net/HTTPClientSession.h>
-#include <Poco/Net/HTTPRequest.h>
-#include <Poco/Net/HTTPResponse.h>
-#include <Poco/Net/Context.h>
-#include <Poco/Net/NetException.h>
-#include <Poco/URI.h>
 #include <boost/algorithm/string.hpp>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -23,9 +19,8 @@
 #include "Poco/DOM/AutoPtr.h"
 
 #include <iostream>
+#include <sstream>
 
-using Poco::Net::ConnectionRefusedException;
-using Poco::URI;
 
 namespace Mantid {
 namespace DataHandling {
@@ -62,28 +57,24 @@ SNSDataArchive::getArchivePath(const std::set<std::string> &filenames,
   const std::string URL(BASE_URL + filename);
   g_log.debug() << "URL: " << URL << "\n";
 
-  Poco::URI uri(URL);
-  std::string path(uri.getPathAndQuery());
 
-  Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
-  Poco::Net::HTTPRequest req(Poco::Net::HTTPRequest::HTTP_GET, path,
-                             Poco::Net::HTTPMessage::HTTP_1_1);
-  session.sendRequest(req);
+  Kernel::InternetHelper inetHelper;
+  std::ostringstream rs;
 
-  Poco::Net::HTTPResponse res;
-  std::istream &rs = session.receiveResponse(res);
-  g_log.debug() << "res.getStatus(): " << res.getStatus() << "\n";
+
+  int status = inetHelper.sendRequest(URL,rs);
+
 
   // Create a DOM document from the response.
   Poco::XML::DOMParser parser;
-  Poco::XML::InputSource source(rs);
+  Poco::XML::InputSource source(rs.str());
   Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parse(&source);
 
   std::vector<std::string> locations;
 
-  // If everything went fine, return the XML document.
+  // Everything went fine, return the XML document.
   // Otherwise look for an error message in the XML document.
-  if (res.getStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
+  if (status == Kernel::InternetHelper::HTTP_OK) {
     std::string location;
     Poco::AutoPtr<Poco::XML::NodeList> pList =
         pDoc->getElementsByTagName("location");
@@ -92,9 +83,6 @@ SNSDataArchive::getArchivePath(const std::set<std::string> &filenames,
       g_log.debug() << "location: " << location << "\n";
       locations.push_back(location);
     }
-  } else {
-    std::string error(res.getReason());
-    throw Poco::ApplicationException("HTTPRequest Error", error);
   }
 
   std::vector<std::string>::const_iterator ext = exts.begin();

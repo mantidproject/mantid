@@ -8,7 +8,9 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
+  inc/MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h
   inc/MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h
+  inc/MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h
   inc/MantidVatesSimpleGuiViewWidgets/ThreesliceView.h
@@ -23,7 +25,9 @@ set( SOURCE_FILES
   src/ColorUpdater.cpp
   src/MdViewerWidget.cpp
   src/MultisliceView.cpp
+  src/RebinAlgorithmDialogProvider.cpp
   src/SaveScreenshotReaction.cpp
+  src/RebinnedSourcesManager.cpp
   src/StandardView.cpp
   src/SplatterPlotView.cpp
   src/ThreesliceView.cpp
@@ -38,6 +42,7 @@ qt4_wrap_cpp( MOC_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
   inc/MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h
+  inc/MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h
   inc/MantidVatesSimpleGuiViewWidgets/ThreesliceView.h
@@ -65,6 +70,7 @@ include_directories(
   inc
   ${CMAKE_SOURCE_DIR}/MantidQt/API/inc
   ${CMAKE_SOURCE_DIR}/MantidQt/MantidWidgets/inc
+  ${CMAKE_BINARY_DIR}/MantidQt/MantidWidgets
   ${CMAKE_SOURCE_DIR}/MantidQt/SliceViewer/inc
   ${CMAKE_BINARY_DIR}/MantidQt/SliceViewer
   ${CMAKE_SOURCE_DIR}/MantidQt/Factory/inc
@@ -105,6 +111,7 @@ VatesAPI
 ${MANTID_SUBPROJECT_LIBS}
 MantidQtSliceViewer
 MantidQtFactory
+MantidWidgets
 )
 
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h.in

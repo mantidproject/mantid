@@ -37,7 +37,7 @@ namespace IDA
   private slots:
     void typeSelection(int index);
     void newDataLoaded(const QString wsName);
-    void plotInput();
+    void updatePlot();
     void specMinChanged(int value);
     void specMaxChanged(int value);
     void xMinSelected(double val);

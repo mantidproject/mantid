@@ -160,6 +160,9 @@ class DetectorBank(object):
             else:
                 self.qRangeUserSelected = True
 
+    _first_spec_num = None
+    last_spec_num = None
+
 
     def __init__(self, instr, det_type):
         #detectors are known by many names, the 'uni' name is an instrument independent alias the 'long' name is the instrument view name and 'short' name often used for convenience
@@ -409,6 +412,8 @@ class DetectorBank(object):
                              + str(sys.exc_info()))
 
 class ISISInstrument(BaseInstrument):
+    lowAngDetSet = None
+
     def __init__(self, filename=None):
         """
             Reads the instrument definition xml file

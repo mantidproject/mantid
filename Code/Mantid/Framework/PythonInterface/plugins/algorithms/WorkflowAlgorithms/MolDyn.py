@@ -70,6 +70,7 @@ class MolDyn(PythonAlgorithm):
     _emax = None
     _res_ws = None
     _out_ws = None
+    _mtd_plot = None
 
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'

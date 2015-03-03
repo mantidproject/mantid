@@ -3,7 +3,7 @@
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidAPI/BoxController.h"
-#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/FileBackedExperimentInfo.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include <Poco/File.h>
 
@@ -397,10 +397,13 @@ void MDBoxFlatTree::saveExperimentInfos(::NeXus::File *const file,
 *experiment info groups can be found.
 * @param mei :: MDEventWorkspace/MDHisto to load experiment infos to or rather
 *pointer to the base class of this workspaces (which is an experimentInfo)
+* @param lazy :: If true, use the FileBackedExperimentInfo class to only load
+* the data from the file when it is requested
 */
 void MDBoxFlatTree::loadExperimentInfos(
     ::NeXus::File *const file,
-    boost::shared_ptr<Mantid::API::MultipleExperimentInfos> mei) {
+    boost::shared_ptr<Mantid::API::MultipleExperimentInfos> mei,
+    bool lazy) {
   // First, find how many experimentX blocks there are
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
@@ -443,25 +446,31 @@ void MDBoxFlatTree::loadExperimentInfos(
   // Now go through in order, loading and adding
   itr = ExperimentBlockNum.begin();
   for (; itr != ExperimentBlockNum.end(); itr++) {
-
     std::string groupName = "experiment" + Kernel::Strings::toString(*itr);
-
-    file->openGroup(groupName, "NXgroup");
-    API::ExperimentInfo_sptr ei(new API::ExperimentInfo);
-    std::string parameterStr;
-    try {
-      // Get the sample, logs, instrument
-      ei->loadExperimentInfoNexus(file, parameterStr);
-      // Now do the parameter map
-      ei->readParameterMap(parameterStr);
+    if (lazy) {
+      auto ei = boost::make_shared<API::FileBackedExperimentInfo>(
+        file, file->getPath() + "/" + groupName);
       // And add it to the mutliple experiment info.
       mei->addExperimentInfo(ei);
-    } catch (std::exception &e) {
-      g_log.information("Error loading section '" + groupName +
-                        "' of nxs file.");
-      g_log.information(e.what());
+     }
+    else {
+      auto ei = boost::make_shared<API::ExperimentInfo>();
+      file->openGroup(groupName, "NXgroup");
+      std::string parameterStr;
+      try {
+        // Get the sample, logs, instrument
+        ei->loadExperimentInfoNexus(file, parameterStr);
+        // Now do the parameter map
+        ei->readParameterMap(parameterStr);
+        // And add it to the mutliple experiment info.
+        mei->addExperimentInfo(ei);
+      } catch (std::exception &e) {
+        g_log.information("Error loading section '" + groupName +
+                          "' of nxs file.");
+        g_log.information(e.what());
+      }
+      file->closeGroup();
     }
-    file->closeGroup();
   }
 }
 /**Export existing experiment info defined in the box structure to target
