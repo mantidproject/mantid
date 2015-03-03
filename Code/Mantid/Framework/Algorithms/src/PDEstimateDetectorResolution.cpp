@@ -1,10 +1,11 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/EstimatePDDetectorResolution.h"
+#include "MantidAlgorithms/PDEstimateDetectorResolution.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
@@ -21,20 +22,49 @@ using namespace std;
 namespace Mantid {
 namespace Algorithms {
 
-DECLARE_ALGORITHM(EstimatePDDetectorResolution)
+DECLARE_ALGORITHM(PDEstimateDetectorResolution)
+
+namespace { // hide these constants
+  ///
+  const double MICROSEC_TO_SEC=1.0E-6;
+  ///
+  const double WAVELENGTH_TO_VELOCITY=1.0E10 *
+      PhysicalConstants::h / PhysicalConstants::NeutronMass;
+  /// This is an absurd number for even ultra cold neutrons
+  const double WAVELENGTH_MAX = 1000.;
+}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-EstimatePDDetectorResolution::EstimatePDDetectorResolution() {}
+PDEstimateDetectorResolution::PDEstimateDetectorResolution() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-EstimatePDDetectorResolution::~EstimatePDDetectorResolution() {}
+PDEstimateDetectorResolution::~PDEstimateDetectorResolution() {}
+
+const std::string PDEstimateDetectorResolution::name() const {
+  return "PDEstimateDetectorResolution";
+}
+
+const std::string PDEstimateDetectorResolution::alias() const {
+  return "EstimatePDDetectorResolution";
+}
+
+const std::string PDEstimateDetectorResolution::summary() const {
+  return "Estimate the resolution of each detector for a powder "
+         "diffractometer. ";
+}
+
+int PDEstimateDetectorResolution::version() const { return 1; }
+
+const std::string PDEstimateDetectorResolution::category() const {
+  return "Diffraction";
+}
 
 //----------------------------------------------------------------------------------------------
-void EstimatePDDetectorResolution::init() {
+void PDEstimateDetectorResolution::init() {
   declareProperty(
       new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
                                              Direction::Input),
@@ -43,17 +73,27 @@ void EstimatePDDetectorResolution::init() {
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
                                                          Direction::Output),
                   "Name of the output workspace containing delta(d)/d of each "
-                  "detector/spectrum. ");
+                  "detector/spectrum.");
 
+  auto positiveDeltaTOF = boost::make_shared<BoundedValidator<double> >();
+  positiveDeltaTOF->setLower(0.);
+  positiveDeltaTOF->setLowerExclusive(true);
   declareProperty(
-      "DeltaTOF", EMPTY_DBL(),
-      "DeltaT as the resolution of TOF with unit microsecond (10^-6m). ");
+      "DeltaTOF", 0., positiveDeltaTOF,
+      "DeltaT as the resolution of TOF with unit microsecond (10^-6m).");
+
+  auto positiveWavelength = boost::make_shared<BoundedValidator<double> >();
+  positiveWavelength->setLower(0.);
+  positiveWavelength->setLowerExclusive(true);
+  declareProperty(
+      "Wavelength", EMPTY_DBL(), positiveWavelength,
+      "Wavelength setting in Angstroms. This overrides what is in the dataset.");
 }
 
 //----------------------------------------------------------------------------------------------
 /**
   */
-void EstimatePDDetectorResolution::exec() {
+void PDEstimateDetectorResolution::exec() {
   processAlgProperties();
 
   retrieveInstrumentParameters();
@@ -68,66 +108,56 @@ void EstimatePDDetectorResolution::exec() {
 //----------------------------------------------------------------------------------------------
 /**
   */
-void EstimatePDDetectorResolution::processAlgProperties() {
+void PDEstimateDetectorResolution::processAlgProperties() {
   m_inputWS = getProperty("InputWorkspace");
 
   m_deltaT = getProperty("DeltaTOF");
-  if (isEmpty(m_deltaT))
-    throw runtime_error("DeltaTOF must be given!");
-  m_deltaT *= 1.0E-6; // convert to meter
+  m_deltaT *= MICROSEC_TO_SEC; // convert to meter
+}
+
+double PDEstimateDetectorResolution::getWavelength() {
+  double wavelength = getProperty("Wavelength");
+  if (!isEmpty(wavelength))
+  {
+    return wavelength;
+  }
+
+  Property *cwlproperty = m_inputWS->run().getProperty("LambdaRequest");
+  if (!cwlproperty)
+    throw runtime_error(
+        "Unable to locate property LambdaRequest as central wavelength. ");
+
+  TimeSeriesProperty<double> *cwltimeseries =
+      dynamic_cast<TimeSeriesProperty<double> *>(cwlproperty);
+
+  if (!cwltimeseries)
+    throw runtime_error(
+        "LambdaReqeust is not a TimeSeriesProperty in double. ");
+
+  string unit = cwltimeseries->units();
+  if (unit.compare("Angstrom") != 0) {
+    throw runtime_error("Unit is not recognized: "+unit);
+  }
+
+  return cwltimeseries->timeAverageValue();
 }
 
 //----------------------------------------------------------------------------------------------
 /**
   */
-void EstimatePDDetectorResolution::retrieveInstrumentParameters() {
-#if 0
-    // Call SolidAngle to get solid angles for all detectors
-    Algorithm_sptr calsolidangle = createChildAlgorithm("SolidAngle", -1, -1, true);
-    calsolidangle->initialize();
-
-    calsolidangle->setProperty("InputWorkspace", m_inputWS);
-
-    calsolidangle->execute();
-    if (!calsolidangle->isExecuted())
-      throw runtime_error("Unable to run solid angle. ");
-
-    m_solidangleWS = calsolidangle->getProperty("OutputWorkspace");
-    if (!m_solidangleWS)
-      throw runtime_error("Unable to get solid angle workspace from SolidAngle(). ");
-
-
-    size_t numspec = m_solidangleWS->getNumberHistograms();
-    for (size_t i = 0; i < numspec; ++i)
-      g_log.debug() << "[DB]: " << m_solidangleWS->readY(i)[0] << "\n";
-#endif
+void PDEstimateDetectorResolution::retrieveInstrumentParameters() {
+  double centrewavelength = getWavelength();
+  g_log.notice() << "Centre wavelength = " << centrewavelength << " Angstrom\n";
+  if (centrewavelength > WAVELENGTH_MAX)
+  {
+    throw runtime_error("unphysical wavelength used");
+  }
 
   // Calculate centre neutron velocity
-  Property *cwlproperty = m_inputWS->run().getProperty("LambdaRequest");
-  if (!cwlproperty)
-    throw runtime_error(
-        "Unable to locate property LambdaRequest as central wavelength. ");
-  TimeSeriesProperty<double> *cwltimeseries =
-      dynamic_cast<TimeSeriesProperty<double> *>(cwlproperty);
-  if (!cwltimeseries)
-    throw runtime_error(
-        "LambdaReqeust is not a TimeSeriesProperty in double. ");
-  if (cwltimeseries->size() != 1)
-    throw runtime_error("LambdaRequest should contain 1 and only 1 entry. ");
+  m_centreVelocity = WAVELENGTH_TO_VELOCITY / centrewavelength;
+  g_log.notice() << "Centre neutron velocity = " << m_centreVelocity << "\n";
 
-  double centrewavelength = cwltimeseries->nthValue(0);
-  string unit = cwltimeseries->units();
-  if (unit.compare("Angstrom") == 0)
-    centrewavelength *= 1.0E-10;
-  else
-    throw runtime_error("Unit is not recognized");
-
-  m_centreVelocity =
-      PhysicalConstants::h / PhysicalConstants::NeutronMass / centrewavelength;
-  g_log.notice() << "Centre wavelength = " << centrewavelength
-                 << ", Centre neutron velocity = " << m_centreVelocity << "\n";
-
-  // Calcualte L1 sample to source
+  // Calculate L1 sample to source
   Instrument_const_sptr instrument = m_inputWS->getInstrument();
   V3D samplepos = instrument->getSample()->getPos();
   V3D sourcepos = instrument->getSource()->getPos();
@@ -140,18 +170,20 @@ void EstimatePDDetectorResolution::retrieveInstrumentParameters() {
 //----------------------------------------------------------------------------------------------
 /**
   */
-void EstimatePDDetectorResolution::createOutputWorkspace() {
+void PDEstimateDetectorResolution::createOutputWorkspace() {
   size_t numspec = m_inputWS->getNumberHistograms();
 
   m_outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", numspec, 1, 1));
-
+  // Copy geometry over.
+  API::WorkspaceFactory::Instance().initializeFromParent(m_inputWS, m_outputWS,
+                                                         false);
   return;
 }
 //----------------------------------------------------------------------------------------------
 /**
   */
-void EstimatePDDetectorResolution::estimateDetectorResolution() {
+void PDEstimateDetectorResolution::estimateDetectorResolution() {
   Instrument_const_sptr instrument = m_inputWS->getInstrument();
   V3D samplepos = instrument->getSample()->getPos();
 
@@ -193,9 +225,8 @@ void EstimatePDDetectorResolution::estimateDetectorResolution() {
     double centraltof = (m_L1 + l2) / m_centreVelocity;
 
     // Angle
-    double r, twotheta, phi;
-    detpos.getSpherical(r, twotheta, phi);
-    double theta = (twotheta * 0.5) * M_PI / 180.;
+    double twotheta = m_inputWS->detectorTwoTheta(det);
+    double theta = 0.5 * twotheta;
 
     // double solidangle = m_solidangleWS->readY(i)[0];
     double solidangle = det->solidAngle(samplepos);
