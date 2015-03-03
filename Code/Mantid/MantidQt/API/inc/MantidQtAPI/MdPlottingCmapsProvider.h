@@ -3,6 +3,7 @@
 
 #include "DllOption.h"
 #include <QString>
+#include <vector>
 
 class QStringList;
 

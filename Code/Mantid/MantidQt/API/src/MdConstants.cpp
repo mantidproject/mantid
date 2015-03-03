@@ -2,7 +2,7 @@
 #include <QSettings>
 #include <QString>
 #include <QStringList>
-#include <Qcolor>
+#include <QColor>
 
 namespace MantidQt
 {
