@@ -43,12 +43,16 @@ namespace CustomInterfaces
       alg->setProperty("LastRun", m_view->lastRun());
       alg->setProperty("LogValue", m_view->log());
       alg->setProperty("Type", m_view->calculationType());
+      alg->setProperty("DeadTimeCorrType",m_view->deadTimeType());
 
       // If time limiting requested, set min/max times
       if (auto timeRange = m_view->timeRange())
       {
         alg->setProperty("TimeMin", timeRange->first);
         alg->setProperty("TimeMax", timeRange->second);
+      }
+      if (m_view->deadTimeType() == "FromSpecifiedFile") {
+        alg->setProperty("DeadTimeCorrFile",m_view->deadTimeFile());
       }
 
       alg->setPropertyValue("OutputWorkspace", "__NotUsed");
