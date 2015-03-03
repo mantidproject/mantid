@@ -153,9 +153,6 @@ void LoadMuonNexus1::exec() {
   // Call private method to validate the optional parameters, if set
   checkOptionalProperties();
 
-  // Try to load dead time info
-  loadDeadTimes(root);
-
   // Read the number of time channels (i.e. bins) from the Nexus file
   const int channelsPerSpectrum = nxload.t_ntc1;
   // Read in the time bin boundaries
@@ -184,6 +181,9 @@ void LoadMuonNexus1::exec() {
     m_spec_min = 1;
     m_spec_max = m_numberOfSpectra+1; // Add +1 to iterate
   }
+
+  // Try to load dead time info
+  loadDeadTimes(root);
 
   // Create the 2D workspace for the output
   DataObjects::Workspace2D_sptr localWorkspace =
@@ -331,7 +331,9 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
       }
     } else {
       // Load all the spectra
-      for (int i=0; i<numDeadTimes; i++)
+      // Start from 1 to N+1 to be consistent with 
+      // the case where spectra are specified
+      for (int i=1; i<numDeadTimes/m_numberOfPeriods+1; i++)
         specToLoad.push_back(i);
     }
 
