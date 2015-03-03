@@ -323,6 +323,27 @@ public:
       }
   }
 
+  void testHexagonal()
+  {
+      UnitCell cellMg(3.2094, 3.2094, 5.2108, 90.0, 90.0, 120.0);
+      CompositeBraggScatterer_sptr scatterers = CompositeBraggScatterer::create();
+      scatterers->addScatterer(BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=Mg;Position=[0.333333,0.666667,0.25];U=0.005"));
+      SpaceGroup_const_sptr sgMg = SpaceGroupFactory::Instance().createSpaceGroup("P 63/m m c");
+
+      CrystalStructure mg(cellMg, sgMg, scatterers);
+
+      std::vector<V3D> hkls = mg.getUniqueHKLs(0.5, 10.0, CrystalStructure::UseStructureFactor);
+      for(size_t i = 0; i < hkls.size(); ++i) {
+          TS_ASSERT_LESS_THAN(0.5, cellMg.d(hkls[i]));
+      }
+
+      std::vector<double> dValues = mg.getDValues(hkls);
+      for(size_t i = 0; i < hkls.size(); ++i) {
+          TS_ASSERT_LESS_THAN(0.5, dValues[i]);
+      }
+
+  }
+
 private:
     UnitCell m_CsCl;
     PointGroup_sptr m_pg;
