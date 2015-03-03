@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_MDEVENTFACTORYTEST_H_
-#define MANTID_MDEVENTS_MDEVENTFACTORYTEST_H_
+#ifndef MANTID_DATAOBJECTS_MDEVENTFACTORYTEST_H_
+#define MANTID_DATAOBJECTS_MDEVENTFACTORYTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include <MantidKernel/Timer.h>
@@ -10,7 +10,7 @@
 #include <MantidDataObjects/MDEventFactory.h>
 
 
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
 class MDEventFactoryTest : public CxxTest::TestSuite
@@ -103,5 +103,5 @@ public:
 };
 
 
-#endif /* MANTID_MDEVENTS_MDEVENTFACTORYTEST_H_ */
+#endif /* MANTID_DATAOBJECTS_MDEVENTFACTORYTEST_H_ */
 

@@ -12,17 +12,17 @@
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidAPI/BoxController.h"
-#include "MantidMDEvents/CoordTransformDistance.h"
-#include "MantidMDEvents/MDBin.h"
+#include "MantidDataObjects/CoordTransformDistance.h"
+#include "MantidDataObjects/MDBin.h"
 #include "MantidDataObjects/MDBox.h"
-#include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 class MDBoxTest : public CxxTest::TestSuite
 {

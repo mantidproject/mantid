@@ -1,17 +1,17 @@
-#ifndef MANTID_MDEVENTS_MDBOX_FLATTREE_H_
-#define MANTID_MDEVENTS_MDBOX_FLATTREE_H_
+#ifndef MANTID_DATAOBJECTS_MDBOX_FLATTREE_H_
+#define MANTID_DATAOBJECTS_MDBOX_FLATTREE_H_
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/MDBoxFlatTree.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidAPI/BoxController.h"
 
 #include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 class MDBoxFlatTreeTest :public CxxTest::TestSuite
 {

@@ -3,8 +3,8 @@
 
 #include "MantidAPI/IMDNode.h"
 #include <iosfwd>
-#include "MantidMDEvents/MDBin.h"
-#include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidDataObjects/MDBin.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/CoordTransform.h"

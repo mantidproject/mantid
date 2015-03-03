@@ -1,7 +1,7 @@
 #include "MantidAPI/SingleValueParameterParser.h"
-#include "MantidMDEvents/AffineMatrixParameterParser.h"
+#include "MantidDataObjects/AffineMatrixParameterParser.h"
 #include "MantidAPI/CoordTransform.h"
-#include "MantidMDEvents/CoordTransformAffine.h"
+#include "MantidDataObjects/CoordTransformAffine.h"
 #include "MantidDataObjects/CoordTransformAffineParser.h"
 
 #include <Poco/DOM/Element.h>

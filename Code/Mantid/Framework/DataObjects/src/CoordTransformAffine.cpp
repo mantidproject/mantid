@@ -6,7 +6,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include "MantidKernel/VectorHelper.h"
-#include "MantidMDEvents/CoordTransformAligned.h"
+#include "MantidDataObjects/CoordTransformAligned.h"
 #include "MantidAPI/CoordTransform.h"
 #include <iostream>
 

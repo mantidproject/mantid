@@ -1,16 +1,16 @@
 #include <boost/shared_ptr.hpp>
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 
-#include "MantidMDEvents/MDBoxBase.h"
-#include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDGridBox.h"
-#include "MantidMDEvents/MDBin.h"
-#include "MantidMDEvents/MDBoxIterator.h"
-#include "MantidMDEvents/MDEvent.h"
-#include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidDataObjects/MDBoxBase.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDGridBox.h"
+#include "MantidDataObjects/MDBin.h"
+#include "MantidDataObjects/MDBoxIterator.h"
+#include "MantidDataObjects/MDEvent.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 
 // We need to include the .cpp files so that the declarations are picked up
 // correctly. Weird, I know.

@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_MDBOXITERATORTEST_H_
-#define MANTID_MDEVENTS_MDBOXITERATORTEST_H_
+#ifndef MANTID_DATAOBJECTS_MDBOXITERATORTEST_H_
+#define MANTID_DATAOBJECTS_MDBOXITERATORTEST_H_
 
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
@@ -7,16 +7,16 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidDataObjects/MDBoxIterator.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDGridBox.h"
-#include "MantidMDEvents/MDBox.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDGridBox.h"
+#include "MantidDataObjects/MDBox.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
 #include <gmock/gmock.h>
 
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -757,5 +757,5 @@ public:
 };
 
 
-#endif /* MANTID_MDEVENTS_MDBOXITERATORTEST_H_ */
+#endif /* MANTID_DATAOBJECTS_MDBOXITERATORTEST_H_ */
 #undef RUN_CXX_PERFORMANCE_TEST_EMBEDDED

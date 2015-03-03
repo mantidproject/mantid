@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_MDLEANEVENTTEST_H_
-#define MANTID_MDEVENTS_MDLEANEVENTTEST_H_
+#ifndef MANTID_DATAOBJECTS_MDLEANEVENTTEST_H_
+#define MANTID_DATAOBJECTS_MDLEANEVENTTEST_H_
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -9,7 +9,7 @@
 #include <iostream>
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 class MDLeanEventTest : public CxxTest::TestSuite
 {
@@ -116,5 +116,5 @@ public:
 };
 
 
-#endif /* MANTID_MDEVENTS_MDLEANEVENTTEST_H_ */
+#endif /* MANTID_DATAOBJECTS_MDLEANEVENTTEST_H_ */
 

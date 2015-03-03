@@ -3,9 +3,9 @@
 
 #include "MantidKernel/Matrix.h"
 #include "MantidAPI/BoxController.h"
-#include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDGridBox.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDGridBox.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 
 namespace Mantid {
 namespace DataObjects {

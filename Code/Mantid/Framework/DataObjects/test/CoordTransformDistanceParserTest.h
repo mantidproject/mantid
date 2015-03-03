@@ -1,8 +1,8 @@
-#ifndef MANTID_MDEVENTS_COORDTRANSFORMDISTANCEPARSERTEST_H_
-#define MANTID_MDEVENTS_COORDTRANSFORMDISTANCEPARSERTEST_H_
+#ifndef MANTID_DATAOBJECTS_COORDTRANSFORMDISTANCEPARSERTEST_H_
+#define MANTID_DATAOBJECTS_COORDTRANSFORMDISTANCEPARSERTEST_H_
 
 #include "MantidDataObjects/CoordTransformDistanceParser.h"
-#include "MantidMDEvents/CoordTransformDistance.h"
+#include "MantidDataObjects/CoordTransformDistance.h"
 #include <cxxtest/TestSuite.h>
 
 #include <Poco/DOM/DOMParser.h>
@@ -13,9 +13,9 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include "MantidMDEvents/CoordTransformAffine.h"
+#include "MantidDataObjects/CoordTransformAffine.h"
 
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 class CoordTransformDistanceParserTest : public CxxTest::TestSuite
 {

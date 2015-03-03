@@ -1,10 +1,10 @@
 #include "MantidKernel/Strings.h"
 #include "MantidDataObjects/MDBoxFlatTree.h"
-#include "MantidMDEvents/MDEvent.h"
-#include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidDataObjects/MDEvent.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include <Poco/File.h>
 
 #if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 // libstdc++-4.4.3

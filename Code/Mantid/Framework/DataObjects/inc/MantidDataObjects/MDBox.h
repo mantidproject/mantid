@@ -7,9 +7,9 @@
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidMDEvents/MDBoxBase.h"
-#include "MantidMDEvents/MDDimensionStats.h"
-#include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidDataObjects/MDBoxBase.h"
+#include "MantidDataObjects/MDDimensionStats.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 
 namespace Mantid {
 namespace DataObjects {

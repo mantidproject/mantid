@@ -5,7 +5,7 @@
 #include "MantidDataObjects/AffineMatrixParameter.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid;
 
 class AffineMatrixParameterTest :    public CxxTest::TestSuite

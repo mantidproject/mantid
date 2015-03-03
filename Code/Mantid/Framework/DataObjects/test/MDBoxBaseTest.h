@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_MDBOXBASETEST_H_
-#define MANTID_MDEVENTS_MDBOXBASETEST_H_
+#ifndef MANTID_DATAOBJECTS_MDBOXBASETEST_H_
+#define MANTID_DATAOBJECTS_MDBOXBASETEST_H_
 
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/ConfigService.h"
@@ -13,7 +13,7 @@
 #include "MantidAPI/CoordTransform.h"
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using Mantid::Kernel::ConfigService;
 
 /** Tester class that implements the minimum MDBoxBase to
@@ -541,5 +541,5 @@ public:
 };
 
 
-#endif /* MANTID_MDEVENTS_MDBOXBASETEST_H_ */
+#endif /* MANTID_DATAOBJECTS_MDBOXBASETEST_H_ */
 

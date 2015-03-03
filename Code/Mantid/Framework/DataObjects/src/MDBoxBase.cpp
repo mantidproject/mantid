@@ -1,5 +1,5 @@
 #include "MantidDataObjects/MDBoxBase.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidDataObjects/MDEvent.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 #include <limits>

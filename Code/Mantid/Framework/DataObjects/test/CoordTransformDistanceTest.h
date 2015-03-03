@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_COORDTRANSFORMDISTANCETEST_H_
-#define MANTID_MDEVENTS_COORDTRANSFORMDISTANCETEST_H_
+#ifndef MANTID_DATAOBJECTS_COORDTRANSFORMDISTANCETEST_H_
+#define MANTID_DATAOBJECTS_COORDTRANSFORMDISTANCETEST_H_
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -10,7 +10,7 @@
 #include "MantidAPI/CoordTransform.h"
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using Mantid::API::CoordTransform;
 
 class CoordTransformDistanceTest : public CxxTest::TestSuite
@@ -170,5 +170,5 @@ public:
 };
 
 
-#endif /* MANTID_MDEVENTS_COORDTRANSFORMDISTANCETEST_H_ */
+#endif /* MANTID_DATAOBJECTS_COORDTRANSFORMDISTANCETEST_H_ */
 

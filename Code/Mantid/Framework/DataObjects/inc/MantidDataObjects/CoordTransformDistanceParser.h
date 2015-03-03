@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
-#include "MantidMDEvents/CoordTransformAffineParser.h"
+#include "MantidDataObjects/CoordTransformAffineParser.h"
 
 namespace Mantid {
 namespace DataObjects {

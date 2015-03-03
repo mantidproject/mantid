@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_COORDTRANSFORMAFFINETEST_H_
-#define MANTID_MDEVENTS_COORDTRANSFORMAFFINETEST_H_
+#ifndef MANTID_DATAOBJECTS_COORDTRANSFORMAFFINETEST_H_
+#define MANTID_DATAOBJECTS_COORDTRANSFORMAFFINETEST_H_
 
 #include "MantidAPI/CoordTransform.h"
 #include "MantidKernel/Quat.h"
@@ -7,16 +7,16 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VMD.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
-#include "MantidMDEvents/CoordTransformAligned.h"
-#include "MantidMDEvents/CoordTransformDistance.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/CoordTransformAligned.h"
+#include "MantidDataObjects/CoordTransformDistance.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using Mantid::API::CoordTransform;
 
 class CoordTransformAffineTest : public CxxTest::TestSuite
@@ -433,5 +433,5 @@ public:
 
 
 
-#endif /* MANTID_MDEVENTS_COORDTRANSFORMAFFINETEST_H_ */
+#endif /* MANTID_DATAOBJECTS_COORDTRANSFORMAFFINETEST_H_ */
 

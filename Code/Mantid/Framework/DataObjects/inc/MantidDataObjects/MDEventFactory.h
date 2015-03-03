@@ -2,14 +2,13 @@
 #define MANTID_DATAOBJECTS_MDEVENTFACTORY_H_
 
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidMDEvents/MDBin.h"
-#include "MantidMDEvents/MDEvent.h"
-#include "MantidMDEvents/MDLeanEvent.h"
+
+#include "MantidDataObjects/MDBin.h"
+#include "MantidDataObjects/MDEvent.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
-#include "MantidMDEvents/MDWSDescription.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {

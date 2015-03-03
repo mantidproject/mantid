@@ -1,5 +1,5 @@
 #include "MantidDataObjects/CoordTransformDistanceParser.h"
-#include "MantidMDEvents/CoordTransformDistance.h"
+#include "MantidDataObjects/CoordTransformDistance.h"
 #include "MantidAPI/VectorParameterParser.h"
 #include "MantidAPI/SingleValueParameterParser.h"
 
@@ -64,13 +64,13 @@ Mantid::API::CoordTransform *CoordTransformDistanceParser::createTransform(
   // Parse the coordinate centre parameter.
   CoordCenterParser coordCenterParser;
   parameter = dynamic_cast<Poco::XML::Element *>(parameters->item(2));
-  boost::shared_ptr<Mantid::MDEvents::CoordCenterVectorParam>
+  boost::shared_ptr<Mantid::DataObjects::CoordCenterVectorParam>
     coordCenterParam(coordCenterParser.createWithoutDelegation(parameter));
 
   // Parse the dimensions used parameter.
   DimsUsedParser dimsUsedParser;
   parameter = dynamic_cast<Poco::XML::Element *>(parameters->item(3));
-  boost::shared_ptr<Mantid::MDEvents::DimensionsUsedVectorParam>
+  boost::shared_ptr<Mantid::DataObjects::DimensionsUsedVectorParam>
     dimsUsedVecParm(dimsUsedParser.createWithoutDelegation(parameter));
 
   ////Generate the coordinate transform and return

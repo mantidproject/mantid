@@ -2,7 +2,7 @@
 #define MANTID_DATAOBJECTS_MDDIMENSIONSTATS_H_
 
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 
 namespace Mantid {
 namespace DataObjects {

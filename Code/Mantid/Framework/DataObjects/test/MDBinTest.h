@@ -1,16 +1,16 @@
-#ifndef MANTID_MDEVENTS_MDBINTEST_H_
-#define MANTID_MDEVENTS_MDBINTEST_H_
+#ifndef MANTID_DATAOBJECTS_MDBINTEST_H_
+#define MANTID_DATAOBJECTS_MDBINTEST_H_
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidDataObjects/MDBin.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 class MDBinTest : public CxxTest::TestSuite
 {
@@ -31,5 +31,5 @@ public:
 };
 
 
-#endif /* MANTID_MDEVENTS_MDBINTEST_H_ */
+#endif /* MANTID_DATAOBJECTS_MDBINTEST_H_ */
 

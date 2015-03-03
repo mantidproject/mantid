@@ -1,11 +1,10 @@
 #ifndef MANTID_DATAOBJECTS_MDSPLITBOX_H_
 #define MANTID_DATAOBJECTS_MDSPLITBOX_H_
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/ThreadScheduler.h"
-#include "MantidMDEvents/MDBoxBase.h"
-#include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidDataObjects/MDBoxBase.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 
 namespace Mantid {
 namespace DataObjects {

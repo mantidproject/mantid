@@ -4,7 +4,7 @@
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/VMD.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspaceIterator.h"
+#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include <map>

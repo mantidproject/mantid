@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 
 namespace Mantid {
 namespace DataObjects {

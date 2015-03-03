@@ -1,9 +1,9 @@
-#ifndef MANTID_MDEVENTS_AFFINE_MATRIX_PARAMETER_PARSER
-#define MANTID_MDEVENTS_AFFINE_MATRIX_PARAMETER_PARSER
+#ifndef MANTID_DATAOBJECTS_AFFINE_MATRIX_PARAMETER_PARSER
+#define MANTID_DATAOBJECTS_AFFINE_MATRIX_PARAMETER_PARSER
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
-#include "MantidMDEvents/AffineMatrixParameter.h"
+#include "MantidDataObjects/AffineMatrixParameter.h"
 
 namespace Mantid {
 namespace DataObjects {

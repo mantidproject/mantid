@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_MDEVENTINSERTERTEST_H_
-#define MANTID_MDEVENTS_MDEVENTINSERTERTEST_H_
+#ifndef MANTID_DATAOBJECTS_MDEVENTINSERTERTEST_H_
+#define MANTID_DATAOBJECTS_MDEVENTINSERTERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
@@ -9,8 +9,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEvent.h"
 #include <iostream>
 #include <iomanip>
 
@@ -18,7 +18,7 @@
 
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
 class MDEventInserterTest : public CxxTest::TestSuite
@@ -125,4 +125,4 @@ public:
 };
 
 
-#endif /* MANTID_MDEVENTS_MDEVENTINSERTERTEST_H_ */
+#endif /* MANTID_DATAOBJECTS_MDEVENTINSERTERTEST_H_ */

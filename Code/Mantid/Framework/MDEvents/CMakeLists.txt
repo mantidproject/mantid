@@ -59,8 +59,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/Integrate3DEvents.h
 	inc/MantidMDEvents/IntegrateEllipsoids.h
         inc/MantidMDEvents/MDEventWSWrapper.h
-	inc/MantidMDEvents/MDDimensionStats.h
-	inc/MantidMDEvents/MDEvent.h
 	inc/MantidMDEvents/MDTransfAxisNames.h
 	inc/MantidMDEvents/MDTransfFactory.h
 	inc/MantidMDEvents/MDTransfInterface.h
@@ -76,7 +74,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/ReflectometryTransformP.h
 	inc/MantidMDEvents/ReflectometryTransformQxQz.h
 	inc/MantidMDEvents/SaveIsawQvector.h
-	inc/MantidMDEvents/SkippingPolicy.h
 	inc/MantidMDEvents/UnitsConversionHelper.h
 	inc/MantidMDEvents/UserFunctionMD.h
 )
@@ -89,9 +86,7 @@ set ( TEST_FILES
 	ImportMDEventWorkspaceTest.h
 	ImportMDHistoWorkspaceTest.h
 	Integrate3DEventsTest.h
-	MDDimensionStatsTest.h
         MDEventWSWrapperTest.h
-	MDEventTest.h
 	MDTransfAxisNamesTest.h
 	MDTransfFactoryTest.h
 	MDTransfModQTest.h

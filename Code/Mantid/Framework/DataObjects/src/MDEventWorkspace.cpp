@@ -9,16 +9,16 @@
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Utils.h"
-#include "MantidMDEvents/MDBoxBase.h"
-#include "MantidMDEvents/MDBox.h"
+#include "MantidDataObjects/MDBoxBase.h"
+#include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidMDEvents/MDGridBox.h"
-#include "MantidMDEvents/MDLeanEvent.h"
-#include "MantidMDEvents/MDSplitBox.h"
+#include "MantidDataObjects/MDGridBox.h"
+#include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidDataObjects/MDSplitBox.h"
 #include <iomanip>
 #include <functional>
 #include <algorithm>
-#include "MantidMDEvents/MDBoxIterator.h"
+#include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/Exception.h"
 

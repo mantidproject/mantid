@@ -1,8 +1,8 @@
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
-#include "MantidMDEvents/MDBoxFlatTree.h"
+#include "MantidDataObjects/MDBoxFlatTree.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FileFinder.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidDataObjects/MDEvent.h"
 
 #include <string>
 

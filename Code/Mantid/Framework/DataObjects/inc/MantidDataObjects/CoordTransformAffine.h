@@ -8,7 +8,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
-#include "MantidMDEvents/AffineMatrixParameter.h"
+#include "MantidDataObjects/AffineMatrixParameter.h"
 
 namespace Mantid {
 namespace DataObjects {

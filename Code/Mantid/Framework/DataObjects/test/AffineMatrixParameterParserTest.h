@@ -13,7 +13,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/AffineMatrixParameterParser.h"
 
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 class AffineMatrixParameterParserTest :    public CxxTest::TestSuite
 {

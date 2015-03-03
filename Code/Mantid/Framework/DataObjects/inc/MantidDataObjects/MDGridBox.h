@@ -8,9 +8,9 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/ThreadScheduler.h"
-#include "MantidMDEvents/MDBoxBase.h"
-#include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidDataObjects/MDBoxBase.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 
 namespace Mantid {
 namespace DataObjects {

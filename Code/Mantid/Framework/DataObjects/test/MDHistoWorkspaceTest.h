@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_MDHISTOWORKSPACETEST_H_
-#define MANTID_MDEVENTS_MDHISTOWORKSPACETEST_H_
+#ifndef MANTID_DATAOBJECTS_MDHISTOWORKSPACETEST_H_
+#define MANTID_DATAOBJECTS_MDHISTOWORKSPACETEST_H_
 
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -10,7 +10,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VMD.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspaceIterator.h"
+#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <cxxtest/TestSuite.h>
@@ -20,7 +20,7 @@
 #include "MantidKernel/Strings.h"
 
 using namespace Mantid::DataObjects;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -974,5 +974,5 @@ public:
 };
 
 
-#endif /* MANTID_MDEVENTS_MDHISTOWORKSPACETEST_H_ */
+#endif /* MANTID_DATAOBJECTS_MDHISTOWORKSPACETEST_H_ */
 

@@ -1,10 +1,10 @@
-#ifndef MANTID_MDEVENTS_MDHISTOWORKSPACEITERATORTEST_H_
-#define MANTID_MDEVENTS_MDHISTOWORKSPACEITERATORTEST_H_
+#ifndef MANTID_DATAOBJECTS_MDHISTOWORKSPACEITERATORTEST_H_
+#define MANTID_DATAOBJECTS_MDHISTOWORKSPACEITERATORTEST_H_
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -17,7 +17,7 @@
 #include <boost/function.hpp>
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::Kernel::VMD;
@@ -32,11 +32,11 @@ class MDHistoWorkspaceIteratorTest: public CxxTest::TestSuite
 private:
 
   /// Helper type allows masking to take place directly on MDHistoWorkspaces for testing purposes.
-  class WritableHistoWorkspace: public Mantid::MDEvents::MDHistoWorkspace
+  class WritableHistoWorkspace: public Mantid::DataObjects::MDHistoWorkspace
   {
   public:
     WritableHistoWorkspace(MDHistoDimension_sptr x) :
-        Mantid::MDEvents::MDHistoWorkspace(x)
+        Mantid::DataObjects::MDHistoWorkspace(x)
     {
     }
     void setMaskValueAt(size_t at, bool value)
@@ -267,7 +267,7 @@ public:
     ws->setMaskValueAt(4, true);  //Mask the second bin
     ws->setMaskValueAt(5, false);  //NOT MASKED
 
-    Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);
+    Mantid::DataObjects::MDHistoWorkspace_sptr ws_sptr(ws);
 
     MDHistoWorkspaceIterator* histoIt =
         dynamic_cast<MDHistoWorkspaceIterator*>(ws_sptr->createIterator());
@@ -801,5 +801,5 @@ public:
 
 };
 
-#endif /* MANTID_MDEVENTS_MDHISTOWORKSPACEITERATORTEST_H_ */
+#endif /* MANTID_DATAOBJECTS_MDHISTOWORKSPACEITERATORTEST_H_ */
 

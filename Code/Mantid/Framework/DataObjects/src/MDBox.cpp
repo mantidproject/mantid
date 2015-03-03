@@ -1,9 +1,9 @@
 #include "MantidDataObjects/MDBox.h"
-#include "MantidMDEvents/MDBoxSaveable.h"
-#include "MantidMDEvents/MDEvent.h"
-#include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidDataObjects/MDBoxSaveable.h"
+#include "MantidDataObjects/MDEvent.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidKernel/DiskBuffer.h"
-#include "MantidMDEvents/MDGridBox.h"
+#include "MantidDataObjects/MDGridBox.h"
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 

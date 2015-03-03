@@ -5,7 +5,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/BoxController.h"
-#include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 #include <cmath>
 #include <numeric>
 

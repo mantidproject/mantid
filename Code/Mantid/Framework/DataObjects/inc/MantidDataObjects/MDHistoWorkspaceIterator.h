@@ -3,9 +3,9 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidMDEvents/SkippingPolicy.h"
+#include "MantidDataObjects/SkippingPolicy.h"
 
 namespace Mantid {
 namespace DataObjects {

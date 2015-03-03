@@ -1,8 +1,8 @@
 #include "MantidDataObjects/MDSplitBox.h"
-#include "MantidKernel/System.h"
+
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/FunctionTask.h"
 
-using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -84,7 +84,7 @@ TMDE(void MDSplitBox)::initBoxes(MDBoxBase<MDE, nd> *box) {
   left = new MDBox<MDE, nd>(box->getBoxController(), box->getDepth() + 1);
   right = new MDBox<MDE, nd>(box->getBoxController(), box->getDepth() + 1);
   for (size_t d = 0; d < nd; d++) {
-    Mantid::Geometry::MDDimensionExtents ext = box->getExtents(d);
+    const auto & ext = box->getExtents(d);
     if (d == dimSplit) {
       // Split this dimension down along splitPoint
       left->setExtents(d, ext.min, splitPoint);

@@ -1,6 +1,6 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDBoxBase.h"
+#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDBoxIterator.h"
 
 using namespace Mantid;

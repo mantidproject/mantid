@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_COORDTRANSFORMPARSERTEST_H_
-#define MANTID_MDEVENTS_COORDTRANSFORMPARSERTEST_H_
+#ifndef MANTID_DATAOBJECTS_COORDTRANSFORMPARSERTEST_H_
+#define MANTID_DATAOBJECTS_COORDTRANSFORMPARSERTEST_H_
 
 #include "MantidDataObjects/CoordTransformAffineParser.h"
 #include "MantidAPI/CoordTransform.h"
@@ -13,9 +13,9 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include "MantidMDEvents/CoordTransformAffine.h"
+#include "MantidDataObjects/CoordTransformAffine.h"
 
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 class CoordTransformAffineParserTest : public CxxTest::TestSuite
 {

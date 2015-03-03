@@ -2,6 +2,7 @@
 #define MANTID_DATAOBJECTS_MDEVENTINSERTER_H_
 
 #include "MantidKernel/System.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 
 namespace Mantid {
 namespace DataObjects {

@@ -6,8 +6,8 @@
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include <boost/math/special_functions/round.hpp>
 #include <ostream>

@@ -1,5 +1,5 @@
 #include "MantidDataObjects/MDBoxSaveable.h"
-#include "MantidMDEvents/MDBox.h"
+#include "MantidDataObjects/MDBox.h"
 
 namespace Mantid {
 namespace DataObjects {

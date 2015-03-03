@@ -4,10 +4,10 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDBoxBase.h"
-#include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDLeanEvent.h"
-#include "MantidMDEvents/SkippingPolicy.h"
+#include "MantidDataObjects/MDBoxBase.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidDataObjects/SkippingPolicy.h"
 
 namespace Mantid {
 namespace DataObjects {

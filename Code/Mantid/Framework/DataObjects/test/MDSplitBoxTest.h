@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_MDSPLITBOXTEST_H_
-#define MANTID_MDEVENTS_MDSPLITBOXTEST_H_
+#ifndef MANTID_DATAOBJECTS_MDSPLITBOXTEST_H_
+#define MANTID_DATAOBJECTS_MDSPLITBOXTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
@@ -8,11 +8,11 @@
 #include <iomanip>
 
 #include "MantidDataObjects/MDSplitBox.h"
-#include "MantidMDEvents/MDBox.h"
+#include "MantidDataObjects/MDBox.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
 class MDSplitBoxTest : public CxxTest::TestSuite
@@ -146,5 +146,5 @@ public:
   }
 };
 
-#endif /* MANTID_MDEVENTS_MDSPLITBOXTEST_H_ */
+#endif /* MANTID_DATAOBJECTS_MDSPLITBOXTEST_H_ */
 

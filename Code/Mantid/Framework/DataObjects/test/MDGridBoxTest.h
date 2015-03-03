@@ -13,9 +13,9 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Utils.h"
 #include "MantidAPI/BoxController.h"
-#include "MantidMDEvents/CoordTransformDistance.h"
-#include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidDataObjects/CoordTransformDistance.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include <nexus/NeXusFile.hpp>
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -36,7 +36,7 @@
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace testing;

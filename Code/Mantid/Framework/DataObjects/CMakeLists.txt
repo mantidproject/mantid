@@ -21,7 +21,6 @@ set ( SRC_FILES
 	src/MDBoxIterator.cpp
 	src/MDBoxSaveable.cpp
 	src/MDEventFactory.cpp
-	src/MDEventInserter.cpp
 	src/MDEventWorkspace.cpp
 	src/MDGridBox.cpp
 	src/MDHistoWorkspace.cpp
@@ -80,6 +79,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/MDBoxFlatTree.h
 	inc/MantidDataObjects/MDBoxIterator.h
 	inc/MantidDataObjects/MDBoxSaveable.h
+        inc/MantidDataObjects/MDDimensionStats.h
 	inc/MantidDataObjects/MDEventFactory.h
 	inc/MantidDataObjects/MDEventInserter.h
 	inc/MantidDataObjects/MDEventWorkspace.h
@@ -134,6 +134,8 @@ set ( TEST_FILES
 	MDBoxIteratorTest.h
 	MDBoxSaveableTest.h
 	MDBoxTest.h
+        MDDimensionStatsTest.h
+        MDEventTest.h
 	MDEventFactoryTest.h
 	MDEventInserterTest.h
 	MDEventWorkspaceTest.h
