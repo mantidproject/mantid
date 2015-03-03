@@ -6,6 +6,10 @@
     <archiveSearch plugin="ISISDataSearch" />
   </archive>
   
+  <computeResource name="SCARF@STFC">
+    <baseURL>https://portal.scarf.rl.ac.uk</baseURL>
+  </computeResource>
+
   <catalog name="ICat4Catalog">
     <soapendpoint url="https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
     <externaldownload url="https://isisicatds.stfc.ac.uk/idsbeta/"></externaldownload>
