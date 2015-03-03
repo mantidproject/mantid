@@ -122,9 +122,6 @@ void LoadMuonNexus1::exec() {
     m_numberOfPeriods = nxload.t_nper;
   }
 
-  // Try to load dead time info
-  loadDeadTimes(root);
-
   bool autoGroup = getProperty("AutoGroup");
 
   // Grouping info should be returned if user has set the property
@@ -155,6 +152,9 @@ void LoadMuonNexus1::exec() {
 
   // Call private method to validate the optional parameters, if set
   checkOptionalProperties();
+
+  // Try to load dead time info
+  loadDeadTimes(root);
 
   // Read the number of time channels (i.e. bins) from the Nexus file
   const int channelsPerSpectrum = nxload.t_ntc1;
