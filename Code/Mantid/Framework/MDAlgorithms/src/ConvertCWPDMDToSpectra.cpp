@@ -463,6 +463,7 @@ ConvertCWPDMDToSpectra::linearInterpolation(API::MatrixWorkspace_sptr matrixws,
         double curinterpoy =
             lefty + (righty - lefty) * (curx - leftx) / (rightx - leftx);
         matrixws->dataY(i)[j] = curinterpoy;
+        matrixws->dataE(i)[j] = sqrt(curinterpoy);
       }
     }
 

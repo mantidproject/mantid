@@ -59,13 +59,14 @@ They are copied from the last ExperimentInfo object of the input MDWorkspace {\i
 Target Units
 ############
 
-Three units are supported by this algorithm.  They are :math:`2\theta`, dSpacing and MomentumTransfer(Q). 
+Three units are supported by this algorithm via property *UnitOutput*.  
+They are :math:`2\theta`, dSpacing and MomentumTransfer(Q). 
 
 The following equations are used to convert the units. 
 
 .. math:: \lambda = 2d\sin(\theta)
 
-.. math:: d = frac{4\pi}{Q}
+.. math:: d = \frac{4\pi}{Q}
 
 Therefore neutron wavelength :math:`\lambda` must be given either in sample log or via input property
 if the unit of the output workspace is targeted to be dSpacing or MomentumTransfer. 
@@ -87,10 +88,12 @@ then its counts is added to :math:`Y_i` and the corresponding monitor counts is 
 :math:`M_i`. 
 
 The singals on these bins are normalized by its monitor counts, such that 
+
 .. math:: y_i = \frac{Y_i}{M_i}
 
 
 The error (i.e., standard deviation) is defined as 
+
 .. math:: \frac{\Delta y_i}{y_i} = \sqrt{(\frac{\Delta Y_i}{Y_i})^2 + (\frac{\Delta M_i}{M_i})^2}
 
 Scaling
@@ -101,8 +104,12 @@ In most cases, the scaling factor is equal to average monitor counts of all meas
 
 If the scaling factor is specified, then
 the standard error of data point :math:`i` will be converted to 
-.. math:: \sigma_i = f \times \sigma^{(n)}_i
-where :math:`f` is the scaling factor. 
+
+.. math:: \sigma^{(s)}_i = f \times \sigma^{(n)}_i
+
+where :math:`f` is the scaling factor, :math:`\sigma^{(n)}_i` is the standard error of the normalized signal
+of data point :math:`i`, and 
+:math:`\sigma^{(s)}_i` is the standard error of the signal scaled up. 
 
 Linear Interpolation
 ####################
@@ -122,7 +129,7 @@ Workflow
 --------
 
 This algorithm is the third step to reduce powder diffraction data from a SPICE file.
-Following algorithm {\it LoadSpiceAscii}, which loads SPICE file to a TableWorkspace
+Following algorithm *LoadSpiceAscii*, which loads SPICE file to a TableWorkspace
 and {\it ConvertSpiceToRealSpace}, which converts the TableWorkspace to MDEvnetWorkspace 
 that is able to reflect all the information of the epxeriment,
 {\it ConvertCWPDMDToSpectra} goes through all the detectors' counts and rebins the data. 
@@ -191,6 +198,9 @@ Output:
 
 .. testoutput:: ExReduceHB2AToFullprof
 
-  Number of events = 2684
+  2theta = 15.000000, Y = 0.386563, E = 0.024744
+  2theta = 15.000000, Y = 0.386563, E = 0.024744
+  2theta = 115.100000, Y = 1.846279, E = 0.054287
+  2theta = 127.800000, Y = 0.237738, E = 0.027303
 
 .. categories::
