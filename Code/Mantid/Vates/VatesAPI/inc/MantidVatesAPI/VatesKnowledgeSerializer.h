@@ -1,5 +1,5 @@
-#ifndef VATES_REBINNING_KNOWLEDGE_SERIALIZER_H
-#define VATES_REBINNING_KNOWLEDGE_SERIALIZER_H
+#ifndef VATES_KNOWLEDGE_SERIALIZER_H
+#define VATES_KNOWLEDGE_SERIALIZER_H
 
 #include <boost/shared_ptr.hpp>
 #include <string>
@@ -24,8 +24,7 @@ enum LocationPolicy{LocationMandatory, LocationNotRequired};
 
 /**
 
- This type assists with the generation of well-formed xml meeting the xsd scehema layed-out for
- Rebinning/cutting type operations. The individual components utilised here may not be able to form well-formed
+ This type assists with the generation of well-formed xml meeting the xsd scehema. The individual components utilised here may not be able to form well-formed
  xml in their own right and therefore do not have a toXMLString method.
 
  This implementation is based on a builder pattern using the create mechanism for xml string generation.
@@ -53,7 +52,7 @@ enum LocationPolicy{LocationMandatory, LocationNotRequired};
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org> */
 
-class DLLExport RebinningKnowledgeSerializer
+class DLLExport VatesKnowledgeSerializer
 {
 
 private:
@@ -66,7 +65,7 @@ private:
   LocationPolicy m_locationPolicy;
 public:
 
-  RebinningKnowledgeSerializer(LocationPolicy locationPolicy=LocationMandatory);
+  VatesKnowledgeSerializer(LocationPolicy locationPolicy=LocationMandatory);
 
   /// Set the implicit function to use called.
   void setImplicitFunction(boost::shared_ptr<const Mantid::Geometry::MDImplicitFunction> spFunction);

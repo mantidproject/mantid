@@ -4,8 +4,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
-#include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
-#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/VatesKnowledgeSerializer.h"
+#include "MantidVatesAPI/VatesXMLDefinitions.h"
 
 using Mantid::Geometry::MDGeometryXMLDefinitions;
 namespace Mantid
@@ -13,7 +13,7 @@ namespace Mantid
 namespace VATES
 {
 
-RebinningKnowledgeSerializer::RebinningKnowledgeSerializer(LocationPolicy locationPolicy) : 
+VatesKnowledgeSerializer::VatesKnowledgeSerializer(LocationPolicy locationPolicy) : 
   m_wsLocationXML(""), 
   m_wsNameXML(""), 
   m_wsName(""), 
@@ -22,13 +22,13 @@ RebinningKnowledgeSerializer::RebinningKnowledgeSerializer(LocationPolicy locati
 {
 }
 
-void RebinningKnowledgeSerializer::setImplicitFunction(boost::shared_ptr<const Mantid::Geometry::MDImplicitFunction> spFunction)
+void VatesKnowledgeSerializer::setImplicitFunction(boost::shared_ptr<const Mantid::Geometry::MDImplicitFunction> spFunction)
 {
   this->m_spFunction = spFunction;
 }
 
 /// Set the workspace name to apply.
-void RebinningKnowledgeSerializer::setWorkspace(boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace)
+void VatesKnowledgeSerializer::setWorkspace(boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace)
 {
   
   this->m_wsNameXML =  MDGeometryXMLDefinitions::workspaceNameXMLTagStart() + workspace->getName() + MDGeometryXMLDefinitions::workspaceNameXMLTagEnd();
@@ -36,19 +36,19 @@ void RebinningKnowledgeSerializer::setWorkspace(boost::shared_ptr<const Mantid::
   this->m_geomXML = workspace->getGeometryXML();
 }
 
-void RebinningKnowledgeSerializer::setWorkspaceName(std::string wsName)
+void VatesKnowledgeSerializer::setWorkspaceName(std::string wsName)
 {
   this->m_wsName = wsName;
   this->m_wsNameXML =   std::string(MDGeometryXMLDefinitions::workspaceNameXMLTagStart()  + wsName + MDGeometryXMLDefinitions::workspaceNameXMLTagEnd());
 }
 
-void RebinningKnowledgeSerializer::setGeometryXML(std::string geomXML)
+void VatesKnowledgeSerializer::setGeometryXML(std::string geomXML)
 {
   this->m_geomXML = geomXML;
 }
 
 /// Create the xml string correponding to the set values.
-std::string RebinningKnowledgeSerializer::createXMLString() const
+std::string VatesKnowledgeSerializer::createXMLString() const
 {
 
   if(true == this->m_geomXML.empty())
@@ -72,22 +72,22 @@ std::string RebinningKnowledgeSerializer::createXMLString() const
   }
 }
 
-const std::string& RebinningKnowledgeSerializer::getWorkspaceName() const
+const std::string& VatesKnowledgeSerializer::getWorkspaceName() const
 {
   return this->m_wsName;
 }
 
-const std::string& RebinningKnowledgeSerializer::getWorkspaceGeometry() const
+const std::string& VatesKnowledgeSerializer::getWorkspaceGeometry() const
 {
   return this->m_geomXML;
 }
 
- bool RebinningKnowledgeSerializer::hasFunctionInfo() const
+ bool VatesKnowledgeSerializer::hasFunctionInfo() const
  {
    return NULL != m_spFunction.get();
  }
 
- bool RebinningKnowledgeSerializer::hasGeometryInfo() const
+ bool VatesKnowledgeSerializer::hasGeometryInfo() const
  {
    return  !m_geomXML.empty() && !m_wsName.empty();
  }
