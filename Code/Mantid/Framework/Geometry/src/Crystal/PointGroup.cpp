@@ -71,11 +71,13 @@ PointGroup::PointGroup(const std::string &symbolHM, const Group &group,
     : Group(group), m_symbolHM(symbolHM),
       m_name(symbolHM + " (" + description + ")") {
   m_crystalSystem = getCrystalSystemFromGroup();
+  m_hklTransformationMatrices = getHKLTranformationMatrices();
 }
 
 PointGroup::PointGroup(const PointGroup &other)
     : Group(other), m_symbolHM(other.m_symbolHM), m_name(other.m_name),
-      m_crystalSystem(other.m_crystalSystem) {}
+      m_crystalSystem(other.m_crystalSystem),
+      m_hklTransformationMatrices(other.m_hklTransformationMatrices) {}
 
 PointGroup &PointGroup::operator=(const PointGroup &other) {
   Group::operator=(other);
@@ -83,6 +85,7 @@ PointGroup &PointGroup::operator=(const PointGroup &other) {
   m_symbolHM = other.m_symbolHM;
   m_name = other.m_name;
   m_crystalSystem = other.m_crystalSystem;
+  m_hklTransformationMatrices = other.m_hklTransformationMatrices;
 
   return *this;
 }
@@ -114,10 +117,10 @@ bool PointGroup::isEquivalent(const Kernel::V3D &hkl,
  */
 std::vector<V3D> PointGroup::getEquivalentSet(const Kernel::V3D &hkl) const {
   std::vector<V3D> equivalents;
-  equivalents.reserve(m_allOperations.size());
+  equivalents.reserve(m_hklTransformationMatrices.size());
 
-  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
-    equivalents.push_back((*op).matrix() * hkl);
+  for (auto op = m_hklTransformationMatrices.begin(); op != m_hklTransformationMatrices.end(); ++op) {
+    equivalents.push_back((*op) * hkl);
   }
 
   std::sort(equivalents.begin(), equivalents.end(), std::greater<V3D>());
@@ -170,6 +173,27 @@ PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
   }
 
   return Triclinic;
+}
+
+/**
+ * Returns transformation matrices for HKLs
+ *
+ * The transformation matrices for points must be transposed in order to get
+ * correct results for transformation of miller indices. This is important
+ * in case of hexagonal transformation matrices.
+ *
+ * @return
+ */
+std::vector<Kernel::IntMatrix> PointGroup::getHKLTranformationMatrices() const {
+  std::vector<Kernel::IntMatrix> matrices;
+  matrices.reserve(m_allOperations.size());
+
+  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
+    Kernel::IntMatrix matrix = (*op).matrix();
+    matrices.push_back(matrix.Transpose());
+  }
+
+  return matrices;
 }
 
 /** @return a vector with all possible PointGroup objects */
