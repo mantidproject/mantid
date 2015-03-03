@@ -2,6 +2,7 @@ set ( SRC_FILES
 	#	src/CostFuncIgnorePosPeaks.cpp
 	#	src/SCDPanelErrors.cpp
 	# src/ChebyshevPolynomialBackground.cpp
+	#src/RefinePowderInstrumentParameters.cpp
 	src/Abragam.cpp
 	src/AugmentedLagrangianOptimizer.cpp
 	src/BFGS_Minimizer.cpp
@@ -72,8 +73,8 @@ set ( SRC_FILES
 	src/ProductFunction.cpp
 	src/ProductLinearExp.cpp
 	src/ProductQuadraticExp.cpp
+	src/PseudoVoigt.cpp
 	src/Quadratic.cpp
-	#src/RefinePowderInstrumentParameters.cpp
 	src/RefinePowderInstrumentParameters3.cpp
 	src/ReflectivityMulf.cpp
 	src/Resolution.cpp
@@ -98,7 +99,7 @@ set ( SRC_FILES
 	src/ThermalNeutronDtoTOFFunction.cpp
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
-  src/VesuvioResolution.cpp
+	src/VesuvioResolution.cpp
 	src/Voigt.cpp
 )
 
@@ -108,6 +109,7 @@ set ( INC_FILES
 	#	inc/MantidCurveFitting/CostFuncIgnorePosPeaks.h
 	#	inc/MantidCurveFitting/SCDPanelErrors.h
 	# inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
+	#inc/MantidCurveFitting/RefinePowderInstrumentParameters.h
 	inc/MantidCurveFitting/Abragam.h
 	inc/MantidCurveFitting/AugmentedLagrangianOptimizer.h
 	inc/MantidCurveFitting/BFGS_Minimizer.h
@@ -182,8 +184,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ProductFunction.h
 	inc/MantidCurveFitting/ProductLinearExp.h
 	inc/MantidCurveFitting/ProductQuadraticExp.h
+	inc/MantidCurveFitting/PseudoVoigt.h
 	inc/MantidCurveFitting/Quadratic.h
-	#inc/MantidCurveFitting/RefinePowderInstrumentParameters.h
 	inc/MantidCurveFitting/RefinePowderInstrumentParameters3.h
 	inc/MantidCurveFitting/ReflectivityMulf.h
 	inc/MantidCurveFitting/Resolution.h
@@ -208,7 +210,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ThermalNeutronDtoTOFFunction.h
 	inc/MantidCurveFitting/UserFunction.h
 	inc/MantidCurveFitting/UserFunction1D.h
-  inc/MantidCurveFitting/VesuvioResolution.h
+	inc/MantidCurveFitting/VesuvioResolution.h
 	inc/MantidCurveFitting/Voigt.h
 )
 
@@ -246,9 +248,9 @@ set ( TEST_FILES
 	ExpDecayTest.h
 	FABADAMinimizerTest.h
 	FRConjugateGradientTest.h
-  FitMWTest.h
-  FitTest.h
-  FitPowderDiffPeaksTest.h
+	FitMWTest.h
+	FitPowderDiffPeaksTest.h
+	FitTest.h
 	FlatBackgroundTest.h
 	FullprofPolynomialTest.h
 	FunctionDomain1DSpectrumCreatorTest.h
@@ -259,8 +261,8 @@ set ( TEST_FILES
 	GaussianComptonProfileTest.h
 	GaussianTest.h
 	GramCharlierComptonProfileTest.h
+	IPeakFunctionIntensityTest.h
 	IkedaCarpenterPVTest.h
-        IPeakFunctionIntensityTest.h
 	LeBailFitTest.h
 	LeBailFunctionTest.h
 	LeastSquaresTest.h
@@ -282,6 +284,7 @@ set ( TEST_FILES
 	ProductFunctionTest.h
 	ProductLinearExpTest.h
 	ProductQuadraticExpTest.h
+	PseudoVoigtTest.h
 	QuadraticTest.h
 	RefinePowderInstrumentParameters3Test.h
 	ReflectivityMulfTest.h
@@ -305,7 +308,7 @@ set ( TEST_FILES
 	ThermalNeutronDtoTOFFunctionTest.h
 	UserFunction1DTest.h
 	UserFunctionTest.h
-  VesuvioResolutionTest.h
+	VesuvioResolutionTest.h
 	VoigtTest.h
 )
 
