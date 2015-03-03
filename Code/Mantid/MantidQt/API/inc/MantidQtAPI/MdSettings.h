@@ -175,15 +175,15 @@ namespace MantidQt
 
         QString m_lblUserSettingColorMap;
         QString m_lblLastSessionColorMap;
-        QString m_lblUseLastSessionColorMap;
         QString m_lblGeneralMdColorMap;
-        QString m_lblUseGeneralMdColorMap;
         QString m_lblGeneralMdColorMapName;
-
-        QString m_lblSliceViewerColorMap;
+        QString m_lblUseGeneralMdColorMap;
+        QString m_lblUseLastSessionColorMap;
 
         QString m_lblUserSettingBackgroundColor;
         QString m_lblLastSessionBackgroundColor;
+
+        QString m_lblSliceViewerColorMap;
 
         QString m_lblUserSettingInitialView;
         QString m_lblLastSessionLogScale;

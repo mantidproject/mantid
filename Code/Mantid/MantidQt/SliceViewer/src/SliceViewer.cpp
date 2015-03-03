@@ -78,8 +78,8 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(
       boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
-      m_peaksSliderWidget(NULL),
-      m_mdSettings(new MantidQt::API::MdSettings()){
+      m_mdSettings(new MantidQt::API::MdSettings()),
+      m_peaksSliderWidget(NULL){
       
   ui.setupUi(this);
 

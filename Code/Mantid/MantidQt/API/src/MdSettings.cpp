@@ -10,10 +10,10 @@ MdSettings::MdSettings() : m_vsiGroup("Mantid/MdPlotting/Vsi"),
                            m_generalMdGroup("Mantid/MdPlotting/General"),
                            m_sliceViewerGroup("Mantid/SliceViewer"),// This is the same as in Slice Viewer !!
                            m_lblUserSettingColorMap("usersettingcolormap"),
+                           m_lblLastSessionColorMap("lastsessioncolormap"),
                            m_lblGeneralMdColorMap("generalcolormap"),
                            m_lblGeneralMdColorMapName("generalcolormapname"),
                            m_lblUseGeneralMdColorMap("usegeneralcolormap"),
-                           m_lblLastSessionColorMap("lastsessioncolormap"),
                            m_lblUseLastSessionColorMap("uselastsessioncolormap"),
                            m_lblUserSettingBackgroundColor("usersettingbackgroundcolor"),
                            m_lblLastSessionBackgroundColor("lastsessionbackgroundcolor"),
@@ -120,7 +120,6 @@ void MdSettings::setGeneralMdColorMap(QString colorMapName, QString colorMapFile
   settings.beginGroup(m_generalMdGroup);
   settings.setValue(m_lblGeneralMdColorMapName, colorMapName);
   settings.setValue(m_lblGeneralMdColorMap, colorMapFile);
-  bool generalMdPlotting = settings.value(m_lblUseGeneralMdColorMap, false).asBool();
   settings.endGroup();
 }
 

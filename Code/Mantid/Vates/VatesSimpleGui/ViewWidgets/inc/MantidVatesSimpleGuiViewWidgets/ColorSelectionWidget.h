@@ -126,9 +126,10 @@ private:
   /// Set min smaller max 
   void setMinSmallerMax(double& min, double& max);
 
+  boost::scoped_ptr<ColorMapManager> colorMapManager; ///< Keeps track of the available color maps.
+
   QDoubleValidator* m_minValidator;
   QDoubleValidator* m_maxValidator;
-
   double m_minHistoric;
   double m_maxHistoric;
 
@@ -136,8 +137,6 @@ private:
 
   pqColorPresetManager *presets; ///< Dialog for choosing color presets
   Ui::ColorSelectionWidgetClass ui; ///< The mode control widget's UI form
-
-  boost::scoped_ptr<ColorMapManager> colorMapManager; ///< Keeps track of the available color maps.
 };
 
 } // SimpleGui
