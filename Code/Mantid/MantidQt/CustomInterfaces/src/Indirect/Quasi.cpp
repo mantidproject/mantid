@@ -247,12 +247,12 @@ namespace MantidQt
 
         if(specName.contains("fit.1"))
           curveColour = Qt::red;
-        else if(specName.contains("fit.1"))
+        else if(specName.contains("fit.2"))
           curveColour = Qt::magenta;
 
         else if(specName.contains("diff.1"))
           curveColour = Qt::green;
-        else if(specName.contains("diff.1"))
+        else if(specName.contains("diff.2"))
           curveColour = Qt::cyan;
 
         else
