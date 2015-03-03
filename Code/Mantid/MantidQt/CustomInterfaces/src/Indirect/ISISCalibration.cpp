@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/Indirect/IndirectCalibration.h"
+#include "MantidQtCustomInterfaces/Indirect/ISISCalibration.h"
 
 #include "MantidKernel/Logger.h"
 
@@ -8,7 +8,7 @@ using namespace Mantid::API;
 
 namespace
 {
-  Mantid::Kernel::Logger g_log("IndirectCalibration");
+  Mantid::Kernel::Logger g_log("ISISCalibration");
 }
 
 using namespace Mantid::API;
@@ -21,7 +21,7 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  IndirectCalibration::IndirectCalibration(IndirectDataReduction * idrUI, QWidget * parent) :
+  ISISCalibration::ISISCalibration(IndirectDataReduction * idrUI, QWidget * parent) :
     IndirectDataReductionTab(idrUI, parent),
     m_lastCalPlotFilename("")
   {
@@ -143,15 +143,15 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  IndirectCalibration::~IndirectCalibration()
+  ISISCalibration::~ISISCalibration()
   {
   }
 
-  void IndirectCalibration::setup()
+  void ISISCalibration::setup()
   {
   }
 
-  void IndirectCalibration::run()
+  void ISISCalibration::run()
   {
     // Get properties
     QString firstFile = m_uiForm.leRunNo->getFirstFilename();
@@ -281,7 +281,7 @@ namespace CustomInterfaces
     m_batchAlgoRunner->executeBatchAsync();
   }
 
-  void IndirectCalibration::algorithmComplete(bool error)
+  void ISISCalibration::algorithmComplete(bool error)
   {
     if(error)
       return;
@@ -294,7 +294,7 @@ namespace CustomInterfaces
     }
   }
 
-  bool IndirectCalibration::validate()
+  bool ISISCalibration::validate()
   {
     MantidQt::CustomInterfaces::UserInputValidator uiv;
 
@@ -330,7 +330,7 @@ namespace CustomInterfaces
   /**
    * Sets default spectra, peak and background ranges.
    */
-  void IndirectCalibration::setDefaultInstDetails()
+  void ISISCalibration::setDefaultInstDetails()
   {
     // Get spectra, peak and background details
     std::map<QString, QString> instDetails = getInstrumentDetails();
@@ -355,7 +355,7 @@ namespace CustomInterfaces
   /**
    * Replots the raw data mini plot and the energy mini plot
    */
-  void IndirectCalibration::calPlotRaw()
+  void ISISCalibration::calPlotRaw()
   {
     setDefaultInstDetails();
 
@@ -408,7 +408,7 @@ namespace CustomInterfaces
   /**
    * Replots the energy mini plot
    */
-  void IndirectCalibration::calPlotEnergy()
+  void ISISCalibration::calPlotEnergy()
   {
     if ( ! m_uiForm.leRunNo->isValid() )
     {
@@ -473,7 +473,7 @@ namespace CustomInterfaces
    *
    * @param ws :: Mantid workspace containing the loaded instument
    */
-  void IndirectCalibration::calSetDefaultResolution(MatrixWorkspace_const_sptr ws)
+  void ISISCalibration::calSetDefaultResolution(MatrixWorkspace_const_sptr ws)
   {
     auto inst = ws->getInstrument();
     auto analyser = inst->getStringParameter("analyser");
@@ -509,7 +509,7 @@ namespace CustomInterfaces
    *
    * @param val :: New minumum value
    */
-  void IndirectCalibration::calMinChanged(double val)
+  void ISISCalibration::calMinChanged(double val)
   {
     MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
     if ( from == m_rangeSelectors["CalPeak"] )
@@ -536,7 +536,7 @@ namespace CustomInterfaces
    *
    * @param val :: New maxumum value
    */
-  void IndirectCalibration::calMaxChanged(double val)
+  void ISISCalibration::calMaxChanged(double val)
   {
     MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
     if ( from == m_rangeSelectors["CalPeak"] )
@@ -563,7 +563,7 @@ namespace CustomInterfaces
    * @param prop :: The property to update
    * @param val :: New value for property
    */
-  void IndirectCalibration::calUpdateRS(QtProperty* prop, double val)
+  void ISISCalibration::calUpdateRS(QtProperty* prop, double val)
   {
     if ( prop == m_properties["CalPeakMin"] ) m_rangeSelectors["CalPeak"]->setMinimum(val);
     else if ( prop == m_properties["CalPeakMax"] ) m_rangeSelectors["CalPeak"]->setMaximum(val);
@@ -580,7 +580,7 @@ namespace CustomInterfaces
   *
   * @param state :: whether checkbox is checked or unchecked
   */
-  void IndirectCalibration::resCheck(bool state)
+  void ISISCalibration::resCheck(bool state)
   {
     m_rangeSelectors["ResPeak"]->setVisible(state);
     m_rangeSelectors["ResBackground"]->setVisible(state);
@@ -593,7 +593,7 @@ namespace CustomInterfaces
   /**
    * Called when a user starts to type / edit the runs to load.
    */
-  void IndirectCalibration::pbRunEditing()
+  void ISISCalibration::pbRunEditing()
   {
     emit updateRunButton(false, "Editing...", "Run numbers are curently being edited.");
   }
@@ -601,7 +601,7 @@ namespace CustomInterfaces
   /**
    * Called when the FileFinder starts finding the files.
    */
-  void IndirectCalibration::pbRunFinding()
+  void ISISCalibration::pbRunFinding()
   {
     emit updateRunButton(false, "Finding files...", "Searchig for data files for the run numbers entered...");
     m_uiForm.leRunNo->setEnabled(false);
@@ -610,7 +610,7 @@ namespace CustomInterfaces
   /**
    * Called when the FileFinder has finished finding the files.
    */
-  void IndirectCalibration::pbRunFinished()
+  void ISISCalibration::pbRunFinished()
   {
     if(!m_uiForm.leRunNo->isValid())
     {
