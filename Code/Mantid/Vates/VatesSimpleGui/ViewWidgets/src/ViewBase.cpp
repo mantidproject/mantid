@@ -640,8 +640,6 @@ bool ViewBase::isTemporaryWorkspace(pqPipelineSource *src)
   QString wsName(vtkSMPropertyHelper(src->getProxy(),
                                     "WorkspaceName", true).GetAsString());
 
-  std::string name = wsName.toStdString();
-
   if (wsName.contains(m_temporaryWorkspaceIdentifier))
   {
     return true;

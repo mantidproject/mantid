@@ -504,14 +504,15 @@ namespace Mantid
         pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
         pqPipelineFilter* filter1 = qobject_cast<pqPipelineFilter*>(source1->getConsumer(0));
 
-        vtkSMProxy* proxy1 = NULL;
         pqPipelineSource* newPipelineElement = NULL;
-        pqPipelineFilter* newFilter = NULL;
 
         pqPipelineSource* endOfSource2Pipeline = source2;
 
         while(filter1)
         {
+          vtkSMProxy* proxy1 = NULL;
+          pqPipelineFilter* newFilter = NULL;
+
           proxy1 = filter1->getProxy();
 
           // Move source2 to its end.
