@@ -216,24 +216,6 @@ private:
       std::cout << "Eq: " << h << ", Time: " << time / 1000.0 << std::endl;
 
   }
-
-  /*
-  class TestablePointGroup : public PointGroup
-  {
-      friend class PointGroupTest;
-
-  public:
-      TestablePointGroup() : PointGroup("")
-      { }
-      ~TestablePointGroup() {}
-
-      MOCK_CONST_METHOD0(getName, std::string());
-      MOCK_CONST_METHOD2(isEquivalent, bool(const V3D &hkl, const V3D &hkl2));
-      MOCK_CONST_METHOD0(crystalSystem, PointGroup::CrystalSystem());
-
-      void init() { }
-  };
-*/
 };
 
 

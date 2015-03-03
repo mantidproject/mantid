@@ -57,8 +57,6 @@ public:
   Kernel::V3D getReflectionFamily(const Kernel::V3D &hkl) const;
 
 protected:
-  bool groupHasNoTranslations(const Group &group) const;
-
   std::vector<Kernel::V3D> getEquivalentSet(const Kernel::V3D &hkl) const;
 
   CrystalSystem getCrystalSystemFromGroup() const;

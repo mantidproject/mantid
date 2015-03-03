@@ -32,8 +32,6 @@ using Kernel::IntMatrix;
  */
 std::vector<V3D> PointGroup::getEquivalents(const V3D &hkl) const {
   return getEquivalentSet(hkl);
-
-  // return std::vector<V3D>(equivalents.rbegin(), equivalents.rend());
 }
 
 /**
@@ -51,18 +49,6 @@ std::vector<V3D> PointGroup::getEquivalents(const V3D &hkl) const {
  */
 V3D PointGroup::getReflectionFamily(const Kernel::V3D &hkl) const {
   return *getEquivalentSet(hkl).begin();
-}
-
-bool PointGroup::groupHasNoTranslations(const Group &group) const {
-  const std::vector<SymmetryOperation> &symOps = group.getSymmetryOperations();
-
-  for (auto op = symOps.begin(); op != symOps.end(); ++op) {
-    if ((*op).hasTranslation()) {
-      return false;
-    }
-  }
-
-  return true;
 }
 
 /// Protected constructor - can not be used directly.
@@ -182,7 +168,7 @@ PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
  * correct results for transformation of miller indices. This is important
  * in case of hexagonal transformation matrices.
  *
- * @return
+ * @return :: Transformation matrices for hkls.
  */
 std::vector<Kernel::IntMatrix> PointGroup::getHKLTranformationMatrices() const {
   std::vector<Kernel::IntMatrix> matrices;
