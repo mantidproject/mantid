@@ -8,10 +8,11 @@
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
+#include "WidgetDllOption.h"
 
 namespace MantidQt
 {
-namespace CustomDialogs
+namespace MantidWidgets
 {
 
 typedef QMap<QString, QString> PropertyDimensionMap;
@@ -26,7 +27,7 @@ This custom dialog provides two advantages over the default custom generated one
 2) It pre-populates those dimension input controls based on existing values.
 
 */
-class SlicingAlgorithmDialog : public MantidQt::API::AlgorithmDialog
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SlicingAlgorithmDialog : public MantidQt::API::AlgorithmDialog
 {
   Q_OBJECT
 public:
@@ -37,6 +38,12 @@ public:
   /// Destructor
   ~SlicingAlgorithmDialog();
 
+  // Customisation for the VSI
+  void customiseLayoutForVsi(std::string initialWorkspace);
+
+  ///Reset the aligned dim values for the VSI
+  void resestAlignedDimProperty(size_t index, QString propertyValue);
+
 protected:
 
   /// view
@@ -44,6 +51,9 @@ protected:
 
   /// Common slice md setup
   void commonSliceMDSetup(const bool);
+
+  /// Build dimension inputs.
+  void buildDimensionInputs(const bool bForceForget=false);
 
 protected slots:
 
@@ -81,9 +91,6 @@ private:
   QString getCurrentOutputWorkspaceName() const;
 
   /// Build dimension inputs.
-  void buildDimensionInputs(const bool bForceForget=false);
-
-  /// Build dimension inputs.
   void makeDimensionInputs(const QString& propertyPrefix, QLayout* owningLayout, QString(*format)(Mantid::Geometry::IMDDimension_const_sptr), History history);
 
   /// Determine if history should be used.
@@ -116,13 +123,14 @@ private:
 Class SliceMDDialog
 Concrete SlicingAlgorithm Dialog geared for SliceMD
 */
-class SliceMDDialog : public SlicingAlgorithmDialog
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SliceMDDialog : public SlicingAlgorithmDialog
 {
     Q_OBJECT
 public:
   SliceMDDialog(QWidget* parent=NULL) : SlicingAlgorithmDialog(parent)
   {
   }
+
   ~SliceMDDialog(){}
 
   void customiseInitLayout();
@@ -132,7 +140,7 @@ public:
 Class BinMDDialog
 Concrete BinMDDialog Dialog geared for BinMD
 */
-class BinMDDialog : public SlicingAlgorithmDialog
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS BinMDDialog : public SlicingAlgorithmDialog
 {
     Q_OBJECT
 public:
