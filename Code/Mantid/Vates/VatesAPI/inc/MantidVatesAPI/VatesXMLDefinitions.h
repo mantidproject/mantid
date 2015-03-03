@@ -1,5 +1,5 @@
-#ifndef REBINNINGCUTTERXMLDEFINITIONS_H_
-#define REBINNINGCUTTERXMLDEFINITIONS_H_
+#ifndef VATESXMLDEFINITIONS_H_
+#define VATESXMLDEFINITIONS_H_
 
 #include <string>
 #include "MantidKernel/System.h"
@@ -10,7 +10,7 @@ namespace VATES
 
 /**
 
- This type contains definitions that will be found in the xml schema for the rebinning instructions, but must be used in
+ This type contains definitions that will be found in the xml schema of VATES, but must be used in
  code as part of the peristance/fetching routines. This file provides a single location for definitions to aid future maintenance.
 
  @author Owen Arnold, Tessella plc

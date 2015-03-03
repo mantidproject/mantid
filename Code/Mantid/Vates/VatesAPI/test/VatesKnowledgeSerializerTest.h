@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 #include <cxxtest/TestSuite.h>
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
-#include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
+#include "MantidVatesAPI/VatesKnowledgeSerializer.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
@@ -15,7 +15,7 @@
 
 using namespace Mantid::VATES;
 
-class RebinningKnowledgeSerializerTest: public CxxTest::TestSuite
+class VatesKnowledgeSerializerTest: public CxxTest::TestSuite
 {
 private:
 
@@ -39,7 +39,7 @@ public:
 
 void testNoWorkspaceThrows()
 {
-  RebinningKnowledgeSerializer generator;
+  VatesKnowledgeSerializer generator;
   Mantid::Geometry::MDImplicitFunction_sptr impFunction(new MockImplicitFunction);
   generator.setImplicitFunction(impFunction);
   TSM_ASSERT_THROWS("Cannot generate the xml without the workspace", generator.createXMLString(), std::runtime_error);
@@ -55,7 +55,7 @@ void testNoLocationDoesNotThrow()
   EXPECT_CALL(*pImpFunction, toXMLString()).Times(1).WillRepeatedly(testing::Return("<ImplicitFunction/>"));
   Mantid::Geometry::MDImplicitFunction_sptr impFunction(pImpFunction);
   
-  RebinningKnowledgeSerializer generator(LocationNotRequired); //Location is not required.
+  VatesKnowledgeSerializer generator(LocationNotRequired); //Location is not required.
   generator.setImplicitFunction(impFunction);
   generator.setWorkspace(workspace);
 
@@ -68,7 +68,7 @@ void testNoNameThrows()
   Mantid::Geometry::MDImplicitFunction_sptr impFunction(new MockImplicitFunction);
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
   boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
-  RebinningKnowledgeSerializer generator;
+  VatesKnowledgeSerializer generator;
   generator.setImplicitFunction(impFunction);
   generator.setWorkspace(workspace);
 
@@ -83,7 +83,7 @@ void testCreateXMLWithComponents() //Uses individual setters for geometry, locat
   EXPECT_CALL(*pImpFunction, toXMLString()).Times(1).WillRepeatedly(testing::Return("<ImplicitFunction/>"));
   Mantid::Geometry::MDImplicitFunction_sptr impFunction(pImpFunction);
 
-  RebinningKnowledgeSerializer generator;
+  VatesKnowledgeSerializer generator;
   //Apply setters.
   generator.setImplicitFunction(impFunction);
   generator.setWorkspaceName("name");
@@ -96,7 +96,7 @@ void testCreateXMLWithComponents() //Uses individual setters for geometry, locat
 
 void testCreateXMLWithoutFunction()
 {
-  RebinningKnowledgeSerializer generator;
+  VatesKnowledgeSerializer generator;
   //Apply setters.
   generator.setWorkspaceName("name");
   generator.setGeometryXML("<DimensionSet/>");
@@ -107,7 +107,7 @@ void testCreateXMLWithoutFunction()
 
 void testGetGeometryXML()
 {
-  RebinningKnowledgeSerializer generator;
+  VatesKnowledgeSerializer generator;
   generator.setWorkspaceName("name");
   std::string dimensionXMLString = "<DimensionSet/>";
   generator.setGeometryXML(dimensionXMLString);
@@ -118,8 +118,8 @@ void testGetGeometryXML()
 
 void testHasFunction()
 {
-  RebinningKnowledgeSerializer withoutFunction;
-  RebinningKnowledgeSerializer withFunction;
+  VatesKnowledgeSerializer withoutFunction;
+  VatesKnowledgeSerializer withFunction;
   Mantid::Geometry::MDImplicitFunction_sptr impFunction(new MockImplicitFunction);
   withFunction.setImplicitFunction(impFunction);
 
@@ -130,21 +130,21 @@ void testHasFunction()
 void testHasGeometryInfoWithoutGeometry()
 {
   //Note that functions do not apply to this test set.
-  RebinningKnowledgeSerializer withoutGeometry;
+  VatesKnowledgeSerializer withoutGeometry;
   withoutGeometry.setWorkspaceName("-");
   TSM_ASSERT_EQUALS("No Geometry provided. ::hasGeometryInfo() should return false.", false, withoutGeometry.hasGeometryInfo());
 }
 
 void testHasGeometryInfoWithoutWSName()
 {
-  RebinningKnowledgeSerializer withoutWSName;
+  VatesKnowledgeSerializer withoutWSName;
   withoutWSName.setGeometryXML("-");
   TSM_ASSERT_EQUALS("No WS name provided. ::hasGeometryInfo() should return false.", false, withoutWSName.hasGeometryInfo());
 }
 
 void testHasGeometryAndWSInfo()
 {
-  RebinningKnowledgeSerializer withFullGeometryAndWSInfo;
+  VatesKnowledgeSerializer withFullGeometryAndWSInfo;
   withFullGeometryAndWSInfo.setGeometryXML("-");
   withFullGeometryAndWSInfo.setWorkspaceName("-");
   TSM_ASSERT_EQUALS("All geometry and ws information has been provided. ::hasGeometryInfo() should return true.", true, withFullGeometryAndWSInfo.hasGeometryInfo());

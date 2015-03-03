@@ -46,7 +46,7 @@ namespace SimpleGui
  * Default constructor.
  * @param parent the parent widget for the view
  */
-ViewBase::ViewBase(QWidget *parent) : QWidget(parent), m_currentColorMapModel(NULL)
+ViewBase::ViewBase(QWidget *parent) : QWidget(parent), m_currentColorMapModel(NULL), m_temporaryWorkspaceIdentifier("tempvsi")
 {
 }
 
@@ -249,7 +249,7 @@ bool ViewBase::isPeaksWorkspace(pqPipelineSource *src)
   }
   QString wsType(vtkSMPropertyHelper(src->getProxy(),
                                      "WorkspaceTypeName", true).GetAsString());
-  // This must be a Mantid rebinner filter if the property is empty.
+
   if (wsType.isEmpty())
   {
     wsType = src->getSMName();
@@ -274,7 +274,7 @@ pqPipelineRepresentation *ViewBase::getPvActiveRep()
  * @param pluginName name of the ParaView plugin
  * @param wsName name of the Mantid workspace to pass to the plugin
  */
-void ViewBase::setPluginSource(QString pluginName, QString wsName)
+pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
 {
   // Create the source from the plugin
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
@@ -290,6 +290,8 @@ void ViewBase::setPluginSource(QString pluginName, QString wsName)
   srcProxy->Modified();
   srcProxy->UpdatePipelineInformation();
   src->updatePipeline();
+
+  return src;
 }
 
 /**
@@ -326,13 +328,30 @@ void ViewBase::checkView(ModeControlWidget::Views initialView)
 }
 
 /**
+ * This metod sets the status of the splatterplot button explictly to a desired value
+ * @param visiblity The state of the the splatterplot view button.
+ */
+void ViewBase::setSplatterplot(bool visibility)
+{
+    emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, visibility);
+}
+
+/**
+ * This metod sets the status of the standard view button explictly to a desired value
+ * @param visiblity The state of the the standard view button.
+ */
+void ViewBase::setStandard(bool visibility)
+{
+    emit this->setViewStatus(ModeControlWidget::STANDARD, visibility);
+}
+
+/**
  * This function sets the status for the view mode control buttons when the
  * view switches.
  */
 void ViewBase::checkViewOnSwitch()
 {
-  if (this->hasWorkspaceType("MDHistoWorkspace") ||
-      this->hasFilter("MantidRebinning"))
+  if (this->hasWorkspaceType("MDHistoWorkspace"))
   {
     emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, false);
   }
@@ -590,12 +609,47 @@ bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src)
   }
   QString wsType(vtkSMPropertyHelper(src->getProxy(),
                                      "WorkspaceTypeName", true).GetAsString());
-  // This must be a Mantid rebinner filter if the property is empty.
+
   if (wsType.isEmpty())
   {
     wsType = src->getSMName();
   }
   return wsType.contains("MDHistoWorkspace");
+}
+
+/**
+ * This function checks if a pqPipelineSource is a temporary workspace.
+ * @return true if the source is a temporary workspace;
+ */
+bool ViewBase::isTemporaryWorkspace(pqPipelineSource *src)
+{
+  if (NULL == src)
+  {
+    return false;
+  }
+
+  QString wsType(vtkSMPropertyHelper(src->getProxy(),
+                                     "WorkspaceTypeName", true).GetAsString());
+
+  if (wsType.isEmpty())
+  {
+    wsType = src->getSMName();
+  }
+  
+
+  QString wsName(vtkSMPropertyHelper(src->getProxy(),
+                                    "WorkspaceName", true).GetAsString());
+
+  std::string name = wsName.toStdString();
+
+  if (wsName.contains(m_temporaryWorkspaceIdentifier))
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 /**
@@ -690,7 +744,7 @@ bool ViewBase::hasWorkspaceType(const QString &wsTypeName)
   {
     QString wsType(vtkSMPropertyHelper((*source)->getProxy(),
                                        "WorkspaceTypeName", true).GetAsString());
-    // This must be a Mantid rebinner filter if the property is empty.
+
     if (wsType.isEmpty())
     {
       wsType = (*source)->getSMName();
@@ -740,6 +794,13 @@ void ViewBase::onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)
 void ViewBase::initializeColorScale()
 {
   colorUpdater.initializeColorScale();
+}
+
+/**
+ * This function reacts to a destroyed source.
+ */
+void ViewBase::onSourceDestroyed()
+{
 }
 
 } // namespace SimpleGui
