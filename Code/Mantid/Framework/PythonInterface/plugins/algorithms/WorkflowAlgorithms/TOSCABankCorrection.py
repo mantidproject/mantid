@@ -10,7 +10,7 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
     _output_ws = None
     _search_range = None
     _peak_tolerance = None
-    _mode = None
+    _peak_position = None
     _peak_function = None
 
 
@@ -31,12 +31,11 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
                                                 values=[200, 2000]),
                              doc='Range over which to find peaks')
 
+        self.declareProperty(name='PeakPosition', defaultValue='',
+                             doc='Specify a particular peak to use')
+
         self.declareProperty(name='ClosePeakTolerance', defaultValue=20.0,
                              doc='Tolerance under which peaks are considered to be the same')
-
-        self.declareProperty(name='CorrectionMode', defaultValue='Average',
-                             validator=StringListValidator(['Average', 'TallestPeak']),
-                             doc='Type of correction to use')
 
         self.declareProperty(name='PeakFunction', defaultValue='Lorentzian',
                              validator=StringListValidator(['Lorentzian', 'Gaussian']),
@@ -114,8 +113,12 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
         self._search_range = self.getProperty('SearchRange').value
         self._peak_tolerance = self.getProperty('ClosePeakTolerance').value
 
-        self._mode = self.getPropertyValue('CorrectionMode')
         self._peak_function = self.getPropertyValue('PeakFunction')
+
+        try:
+            self._peak_position = float(self.getPropertyValue('PeakPosition'))
+        except:
+            self._peak_position = None
 
 
     def _get_peaks(self, search_ws):
@@ -140,7 +143,7 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
         # Sort peaks by height, prefer to match tall peaks
         SortTableWorkspace(InputWorkspace='__bank_1_peaks',
                            OutputWorkspace='__bank_1_peaks',
-                           Columns='height',
+                           Columns='centre',
                            Ascending=False)
 
         bank_1_ws = mtd['__bank_1_peaks']
