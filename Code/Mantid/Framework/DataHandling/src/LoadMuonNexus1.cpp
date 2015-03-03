@@ -317,21 +317,29 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
 
     int numDeadTimes = deadTimesData.dim0();
 
+    std::vector<int> specToLoad;
     std::vector<double> deadTimes;
+    specToLoad.reserve(numDeadTimes);
     deadTimes.reserve(numDeadTimes);
 
-    for (int i = 0; i < numDeadTimes; i++)
-      deadTimes.push_back(deadTimesData[i]);
 
     if (numDeadTimes < m_numberOfSpectra) {
+      // Check number of dead time entries match the number of 
+      // spectra in the nexus file
       throw Exception::FileError(
           "Number of dead times specified is less than number of spectra",
           m_filename);
     } else if (numDeadTimes == m_numberOfSpectra) {
       // Simpliest case - one dead time for one detector
 
+      // Populate specToLoad and deadTimes
+      for (int i = 0; i < numDeadTimes; i++) {
+        specToLoad.push_back(i);
+        deadTimes.push_back(deadTimesData[i]);
+      }
+      // Load into table
       TableWorkspace_sptr table =
-          createDeadTimeTable(deadTimes.begin(), deadTimes.end());
+          createDeadTimeTable(specToLoad, deadTimes);
       setProperty("DeadTimeTable", table);
     } else {
       // More complex case - different dead times for different periods
@@ -344,10 +352,14 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
 
       WorkspaceGroup_sptr tableGroup = boost::make_shared<WorkspaceGroup>();
 
-      for (auto it = deadTimes.begin(); it != deadTimes.end();
-           it += m_numberOfSpectra) {
-        TableWorkspace_sptr table =
-            createDeadTimeTable(it, it + m_numberOfSpectra);
+      // Populate specToLoad and deadTimes
+      for (int i = 0; i < numDeadTimes; i++) {
+        specToLoad.push_back(i);
+        deadTimes.push_back(deadTimesData[i]);
+      }
+      // Load into table
+      for (size_t i=0; i<m_numberOfPeriods; i++) {
+        TableWorkspace_sptr table = createDeadTimeTable(specToLoad,deadTimes);
 
         tableGroup->addWorkspace(table);
       }
@@ -433,8 +445,8 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
  * @return Dead Time Table create using the data
  */
 TableWorkspace_sptr
-LoadMuonNexus1::createDeadTimeTable(std::vector<double>::const_iterator begin,
-                                    std::vector<double>::const_iterator end) {
+LoadMuonNexus1::createDeadTimeTable(std::vector<int> specToLoad,
+                                    std::vector<double> deadTimes) {
   TableWorkspace_sptr deadTimeTable =
       boost::dynamic_pointer_cast<TableWorkspace>(
           WorkspaceFactory::Instance().createTable("TableWorkspace"));
@@ -444,9 +456,9 @@ LoadMuonNexus1::createDeadTimeTable(std::vector<double>::const_iterator begin,
 
   int s = 1; // Current spectrum
 
-  for (auto it = begin; it != end; it++) {
+  for (size_t i = 0; i<specToLoad.size(); i++) {
     TableRow row = deadTimeTable->appendRow();
-    row << s++ << *it;
+    row << specToLoad[i] << deadTimes[i];
   }
 
   return deadTimeTable;
