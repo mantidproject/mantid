@@ -93,6 +93,30 @@ The singals on these bins are normalized by its monitor counts, such that
 The error (i.e., standard deviation) is defined as 
 .. math:: \frac{\Delta y_i}{y_i} = \sqrt{(\frac{\Delta Y_i}{Y_i})^2 + (\frac{\Delta M_i}{M_i})^2}
 
+Scaling
+#######
+
+The normalized histogram can be scaled up by a factor specified by  *ScaleFactor*. 
+In most cases, the scaling factor is equal to average monitor counts of all measurements. 
+
+If the scaling factor is specified, then
+the standard error of data point :math:`i` will be converted to 
+.. math:: \sigma_i = f \times \sigma^{(n)}_i
+where :math:`f` is the scaling factor. 
+
+Linear Interpolation
+####################
+
+If a user specifies a bin size that is smaller than the resolution of the instrument, 
+then it is very likely to occur that some bins have zero count, while their neighboring
+bins have counts that are significantly larger than noise. 
+In this case, an option to do linear interpolation to the zero count bins 
+in the histogram is provided. 
+Property *LinearInterpolateZeroCounts* is used to set the flag to do linear interpolation. 
+
+The linear interpolation will be only applied to those zero-count bins within
+the measuring range. 
+
 
 Workflow
 --------
