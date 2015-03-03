@@ -82,7 +82,7 @@ namespace MantidQt{
     void MdPlottingCmapsProvider::appendVSIColorMaps(QStringList& colorMapNames,  QString fullFilePath)
     {
       std::string path = fullFilePath.toStdString();
-      std::ifstream input(path, std::ifstream::in);
+      std::ifstream input(path.c_str(), std::ifstream::in);
 
       Poco::XML::InputSource source(input);
 
