@@ -1,11 +1,12 @@
+#pylint: disable=invalid-name
 import time as time
 import math
 import numpy
 from mantid.simpleapi import *
 try:
-  from mantidplot import *
+    from mantidplot import *
 except ImportError:
-  pass
+    pass
 '''
 chop(inst,ei,chop_type,frequency):
 python implementation of CHOP ver 1.0
@@ -193,39 +194,39 @@ def calculate(ei,frequency,**kwargs):
 
     if instname=='maps' or instname=='map' or instname=='MAP'or instname=='MAPS':
          #For MAPS
-         x0 = 10.1000
-         xa = 8.1100
-         x1 = 1.9000
-         x2 = 6.0000
-         wa_mm = 70.130
-         ha_mm = 70.130
-         wa = ha_mm / 1000.00
-         ha = ha_mm / 1000.00
+        x0 = 10.1000
+        xa = 8.1100
+        x1 = 1.9000
+        x2 = 6.0000
+        wa_mm = 70.130
+        ha_mm = 70.130
+        wa = ha_mm / 1000.00
+        ha = ha_mm / 1000.00
 
          # chopper details
          # now some moderator details
          # for 300K H2O
-         s=numpy.zeros(6)
-         s[1] = 38.60
-         s[2] = 0.52260
-         s[3] = 0.00
-         s[4] = 0.00
-         s[5] = 0.00
-         th_deg = 32.00
-         imod = 2
-         mod_type = 'AP'
+        s=numpy.zeros(6)
+        s[1] = 38.60
+        s[2] = 0.52260
+        s[3] = 0.00
+        s[4] = 0.00
+        s[5] = 0.00
+        th_deg = 32.00
+        imod = 2
+        mod_type = 'AP'
          # sample details
-         sx_mm = 2.00
-         sy_mm = 50.00
-         sz_mm = 50.00
-         isam = 0
-         gam_deg = 0.00
-         ia = 0
-         ix = 0
+        sx_mm = 2.00
+        sy_mm = 50.00
+        sz_mm = 50.00
+        isam = 0
+        gam_deg = 0.00
+        ia = 0
+        ix = 0
          # detector details
-         idet    = 1
-         dd_mm   = 250
-         tbin_us = 0.00
+        idet    = 1
+        dd_mm   = 250
+        tbin_us = 0.00
 
          #chop_par,titledata=setchoptype(instname,chop_type)
          # end of maps parameters
@@ -432,7 +433,7 @@ def van_var(*args):
 #!  chopper:
     tsqchp,ifail=tchop(omega, ei)
     ifail
-    if (ifail <> 0):
+    if ifail <> 0:
         tsqchp = 0.0
 
 
@@ -467,7 +468,7 @@ def tikeda(S1,S2,B1,B2,EMOD,ei):
     SIG=math.sqrt( (S1*S1) + ((S2*S2*81.8048)/ei) )
     A = 4.37392e-4 * SIG * math.sqrt(ei)
     for j in range(len(ei)):
-        if (ei[j] > 130.0):
+        if ei[j] > 130.0:
             B[j]=B2
         else:
             B[j]=B1
@@ -508,7 +509,7 @@ def tchop(omega,ei):
     w=omega
     ei=ei
 
-    if (p == 0.00 and R == 0.00 and rho == 0.00):
+    if p == 0.00 and R == 0.00 and rho == 0.00:
         ierr=1
         tausqr = 0.00
 
@@ -522,12 +523,12 @@ def tchop(omega,ei):
 #! -------------------------------------
     #for j in range(len(ei)):
     groot=0
-    if (gammm >= 4.00):
+    if gammm >= 4.00:
         ierr=1
         tausqr=0.00
     else:
         ierr=0
-    if (gammm <= 1.00):
+    if gammm <= 1.00:
         gsqr=(1.00-(gammm**2)**2 /10.00) / (1.00-(gammm**2)/6.00)
     else:
         groot=math.sqrt(gammm)
@@ -771,7 +772,7 @@ def achop(ei,omega):
 
     #for j in range(numpy.size(ei)):
     groot=0
-    if (gamm >= 4.00):
+    if gamm >= 4.00:
         f1=0
         print 'no transmission at ', ei, 'meV at ',omega/(2*math.pi), 'Hz'
     else:
@@ -788,7 +789,7 @@ def achop(ei,omega):
     return area
 
 def frange(limit1, limit2 = None, increment = 1.):
-  """
+    """
   Range function that accepts floats (and integers).
 
   Usage:
@@ -799,10 +800,10 @@ def frange(limit1, limit2 = None, increment = 1.):
   The returned value is an iterator.  Use list(frange) for a list.
   """
 
-  if limit2 is None:
-    limit2, limit1 = limit1, 0.
-  else:
-    limit1 = float(limit1)
+    if limit2 is None:
+        limit2, limit1 = limit1, 0.
+    else:
+        limit1 = float(limit1)
 
-  count = int(math.ceil(limit2 - limit1)/increment)
-  return (limit1 + n*increment for n in range(count))
+    count = int(math.ceil(limit2 - limit1)/increment)
+    return (limit1 + n*increment for n in range(count))

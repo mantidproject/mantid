@@ -1,12 +1,15 @@
+#pylint: disable=no-init,invalid-name
 import mantid
 import mantid.api
 import mantid.kernel
 import mantid.simpleapi
-from numpy import arange
 
 class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
     """ Class to generate grouping file
     """
+
+    tableColNames = None
+    parameternames = None
 
     def category(self):
         """ Mantid required
@@ -74,7 +77,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         if colnamedict.has_key(colname):
             icolumn = colnamedict[colname]
         else:
-            raise NotImplementedError("Column name %s does not exist in TableWorkspace %s"
+            raise NotImplementedError("Column name %s does not exist in TableWorkspace %s"\
                     % (colname, tablews.name()))
 
         # 3. Set value

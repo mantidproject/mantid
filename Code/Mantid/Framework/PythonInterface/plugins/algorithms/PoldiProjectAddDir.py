@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.api import (PythonAlgorithm,
                         AlgorithmFactory)
 from mantid.api import (FileProperty,
@@ -10,8 +11,6 @@ from os import listdir
 from os.path import isfile, join, splitext
 
 import re
-
-
 
 
 class PoldiProjectAddDir(PythonAlgorithm):
@@ -37,14 +36,9 @@ class PoldiProjectAddDir(PythonAlgorithm):
 
         self.declareProperty(ITableWorkspaceProperty("PoldiAnalysis", "PoldiAnalysis", direction=Direction.Output), "Poldi analysis main worksheet")
 
-
-
-
-
     def path_leaf(path):
         head, tail = ntpath.split(path)
         return tail
-
 
     def interpreteName(self, name):
         patern="(.*[ a-zA-Z]*/*\*)*poldi(?P<year>[0-9]*)n(?P<numero>[0-9]*)"
@@ -52,11 +46,6 @@ class PoldiProjectAddDir(PythonAlgorithm):
         year   = int(regex.group("year"))
         numero = int(regex.group("numero"))
         return (year, numero)
-
-
-
-
-
 
     def PyExec(self):
         """ Mantid required
@@ -68,7 +57,7 @@ class PoldiProjectAddDir(PythonAlgorithm):
 
         try:
             sample_info_ws_name = self.getProperty("PoldiAnalysis").value
-            if(sample_info_ws_name == ""):
+            if sample_info_ws_name == "":
                 sample_info_ws_name = "PoldiAnalysis"
             self.log().debug('Poldi Data Analysis ---- %s'%(sample_info_ws_name))
             sample_info_ws = mtd["PoldiAnalysis"]
@@ -107,7 +96,7 @@ class PoldiProjectAddDir(PythonAlgorithm):
 
 
 
-            if("hdf" in sampleExt):
+            if "hdf" in sampleExt:
                 self.log().error('Poldi -  samples : %s' %(sample_name))
                 file_path = join(directory,dataFile)
                 sample_name_log = "%sLog" %sample_name
@@ -127,7 +116,7 @@ class PoldiProjectAddDir(PythonAlgorithm):
 
 
 
-        if(load_data_at_the_end):
+        if load_data_at_the_end:
             self.setProperty("PoldiAnalysis", sample_info_ws)
 
 

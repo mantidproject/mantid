@@ -20,7 +20,7 @@
    <value val="4to1.map"/>
 </parameter>
 
-<!-- Prefered extension of the data files obtained from DAE, e.g. what to prefer if two 
+<!-- Preferred extension of the data files obtained from DAE, e.g. what to prefer if two 
      files with the same name and different extension are found
  -->
 <parameter name="data_file_ext" type="string">
@@ -81,7 +81,7 @@
     <value val="41474"/>
 </parameter>
 <!-- Relative energy range (wrt. to the incident energy) in which monitor 2 signal is present and the integration to 
-     caluclate monitor-2 current occurs   -->
+     calculate monitor-2 current occurs   -->
 <parameter name="mon2_norm_energy_range" type = "string">
     <value val="0.8,1.2"/>
 </parameter>
@@ -118,6 +118,14 @@
 <parameter name="spectra_to_monitors_list"  type="string">
     <value val="None"/>
 </parameter>
+
+<!-- List of two spectra corresponding to the detectors which are closest and furtherest from the sample.
+     These detectors locations are used to identify TOF range, contributing into each energy range 
+     in multirep mode  -->
+<parameter name="multirep_tof_specta_list"  type="string">
+    <value val="160,20353"/>
+</parameter>
+
 
 <!-- by default getEi looks for peaks within (1+-0.1)*TOF_GUES range where TOF_GUES is evaluated on the basis of ei guess.
     If the peaks are very narrow, or there are a lot of them very close to each other, 

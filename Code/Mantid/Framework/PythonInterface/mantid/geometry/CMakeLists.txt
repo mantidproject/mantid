@@ -29,6 +29,8 @@ set ( EXPORT_FILES
   src/Exports/PointGroupFactory.cpp
   src/Exports/SpaceGroup.cpp
   src/Exports/SpaceGroupFactory.cpp
+  src/Exports/SymmetryElement.cpp
+  src/Exports/SymmetryElementFactory.cpp
   src/Exports/SymmetryOperation.cpp
   src/Exports/SymmetryOperationFactory.cpp
 )
@@ -41,6 +43,7 @@ set ( INC_FILES
 
 set ( PY_FILES
   __init__.py
+  _aliases.py
 )
 
 #############################################################################################

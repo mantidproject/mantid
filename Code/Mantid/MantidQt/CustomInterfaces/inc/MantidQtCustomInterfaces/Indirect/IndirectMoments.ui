@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>444</width>
+    <width>500</width>
     <height>398</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>500</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
@@ -96,7 +102,15 @@
        <layout class="QHBoxLayout" name="properties"/>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="plotRaw"/>
+       <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppRawPlot" native="true">
+        <property name="canvasColour" stdset="0">
+         <color>
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
+         </color>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -117,54 +131,18 @@
        <number>6</number>
       </property>
       <item>
-       <layout class="QVBoxLayout" name="plotPreview"/>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="loPlotLegend">
-        <item>
-         <widget class="QLabel" name="lbM0">
-          <property name="styleSheet">
-           <string notr="true">color: green;</string>
-          </property>
-          <property name="text">
-           <string>M0</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lbM2">
-          <property name="styleSheet">
-           <string notr="true">color: black;</string>
-          </property>
-          <property name="text">
-           <string>M2</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lbM4">
-          <property name="styleSheet">
-           <string notr="true">color: red;</string>
-          </property>
-          <property name="text">
-           <string>M4</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="verticalSpacer_0">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
+       <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppMomentsPreview" native="true">
+        <property name="canvasColour" stdset="0">
+         <color>
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
+         </color>
+        </property>
+        <property name="showLegend" stdset="0">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -212,6 +190,12 @@
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/DataSelector.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::PreviewPlot</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/PreviewPlot.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

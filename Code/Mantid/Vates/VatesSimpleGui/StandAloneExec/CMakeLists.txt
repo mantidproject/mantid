@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 2.8 )
+cmake_minimum_required( VERSION 2.8.12 )
 project( VatesSimpleGui )
 set( PROJECT_NAME VatesSimpleGui )
 
@@ -9,6 +9,8 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets
   ${CMAKE_CURRENT_BINARY_DIR}/../ViewWidgets
+  ${CMAKE_SOURCE_DIR}/MantidQt/MantidWidgets/inc
+  ${CMAKE_BINARY_DIR}/MantidQt/MantidWidgets
 )
 
 # These are the C++ files to be compiled.

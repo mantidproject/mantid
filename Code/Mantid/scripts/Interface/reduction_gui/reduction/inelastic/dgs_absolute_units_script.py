@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the DgsReduction class could
@@ -26,6 +27,7 @@ class AbsoluteUnitsScript(BaseScriptElement):
     absunits_median_test_out_high = 100
     absunits_median_test_out_low = 0.01
     absunits_errorbar_criterion = 0.0
+    find_bad_detectors = None
 
     def __init__(self, inst_name):
         super(AbsoluteUnitsScript, self).__init__()

@@ -1,12 +1,12 @@
+#pylint: disable=invalid-name
 #Force for ILL backscattering raw
 #
 from IndirectImport import *
 from mantid.simpleapi import *
 from mantid import config, logger, mtd, FileFinder
-from mantid.kernel import V3D
 import sys, math, os.path, numpy as np
 from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt
-mp = import_mantidplot()
+MTD_PLOT = import_mantidplot()
 
 #  Routines for Ascii file of raw data
 
@@ -94,7 +94,7 @@ def ReadIbackGroup(a,first):                           #read Ascii block of spec
 def getFilePath(run,ext,instr):
     path = None
     fname = None
-    if(os.path.isfile(run)):
+    if os.path.isfile(run):
         #using full file path
         path = run
         #base name less extension
@@ -212,7 +212,7 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Plot,Save):      #Ascii s
         eOut.append(em[mm]/10.0)
     xMon.append(2*xMon[new-1]-xMon[new-2])
     monWS = '__Mon'
-    CreateWorkspace(OutputWorkspace=monWS, DataX=xMon, DataY=yOut, DataE=eOut,
+    CreateWorkspace(OutputWorkspace=monWS, DataX=xMon, DataY=yOut, DataE=eOut,\
         Nspec=1, UnitX='DeltaE')
 #
     Qaxis = ''
@@ -223,7 +223,7 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Plot,Save):      #Ascii s
     for n in range(0, nsp):
         next,xd,yd,ed = ReadIbackGroup(asc,next)
         tot.append(sum(yd))
-        logger.information('Spectrum ' + str(n+1) +' at angle '+ str(theta[n])+
+        logger.information('Spectrum ' + str(n+1) +' at angle '+ str(theta[n])+\
                       ' ; Total counts = '+str(sum(yd)))
         for m in range(0, new+1):
             mm = m+imin
@@ -236,9 +236,9 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Plot,Save):      #Ascii s
         Qaxis += str(theta[n])
     ascWS = fname +'_' +ana+refl +'_asc'
     outWS = fname +'_' +ana+refl +'_red'
-    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
+    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,\
         Nspec=nsp, UnitX='DeltaE')
-    Divide(LHSWorkspace=ascWS, RHSWorkspace=monWS, OutputWorkspace=ascWS,
+    Divide(LHSWorkspace=ascWS, RHSWorkspace=monWS, OutputWorkspace=ascWS,\
         AllowDifferentNumberSpectra=True)
     DeleteWorkspace(monWS)                                # delete monitor WS
     InstrParas(ascWS,instr,ana,refl)
@@ -255,7 +255,7 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Plot,Save):      #Ascii s
         opath = os.path.join(workdir,outWS+'.nxs')
         SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
         logger.information('Output file : ' + opath)
-    if (Plot):
+    if Plot:
         plotForce(outWS,Plot)
     EndTime('Iback')
 
@@ -324,7 +324,7 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,mapPath,Plot,Save):
         ns += 1
     ascWS = fname +'_' +ana+refl +'_inx'
     outWS = fname +'_' +ana+refl +'_red'
-    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
+    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,\
         Nspec=ns, UnitX='DeltaE')
     InstrParas(ascWS,instr,ana,refl)
     efixed = RunParas(ascWS,instr,0,title)
@@ -347,7 +347,7 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,mapPath,Plot,Save):
         opath = os.path.join(workdir,outWS+'.nxs')
         SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
         logger.information('Output file : ' + opath)
-    if (Plot):
+    if Plot:
         plotForce(outWS,Plot)
     EndTime('Inx')
 
@@ -359,12 +359,13 @@ def RejectZero(inWS,tot):
     outWS = inWS[:-3]+'red'
     for n in range(0, nin):
         if tot[n] > 0:
-            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',
+            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',\
                 WorkspaceIndex=n)
             if nout == 0:
                 RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
             else:
-                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',CheckOverlapping=False)
+                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',
+                                  CheckOverlapping=False)
             nout += 1
         else:
             logger.information('** spectrum '+str(n+1)+' rejected')
@@ -378,7 +379,7 @@ def ReadMap(path):
     logger.information('Map file : ' + path +' ; spectra = ' +str(lasc-1))
     val = ExtractInt(asc[0])
     numb = val[0]
-    if (numb != (lasc-1)):
+    if numb != (lasc-1):
         error = 'Number of lines  not equal to number of spectra'
         logger.error(error)
         sys.exit(error)
@@ -388,39 +389,40 @@ def ReadMap(path):
         map.append(val[1])
     return map
 
-def UseMap(inWS,map):
+def UseMap(inWS, map):
     nin = mtd[inWS].getNumberHistograms()                      # no. of hist/groups in sam
     nout = 0
     outWS = inWS[:-3]+'red'
     for n in range(0, nin):
         if map[n] == 1:
-            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',
+            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',\
                 WorkspaceIndex=n)
             if nout == 0:
                 RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
             else:
-                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',CheckOverlapping=False)
+                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',
+                                  CheckOverlapping=False)
             nout += 1
             logger.information('** spectrum '+str(n+1)+' mapped')
         else:
             logger.information('** spectrum '+str(n+1)+' skipped')
 
 def plotForce(inWS,Plot):
-    if (Plot == 'Spectrum' or Plot == 'Both'):
+    if Plot == 'Spectrum' or Plot == 'Both':
         nHist = mtd[inWS].getNumberHistograms()
         if nHist > 10 :
             nHist = 10
         plot_list = []
         for i in range(0, nHist):
             plot_list.append(i)
-        res_plot=mp.plotSpectrum(inWS,plot_list)
-    if (Plot == 'Contour' or Plot == 'Both'):
-        cont_plot=mp.importMatrixWorkspace(inWS).plotGraph2D()
+        MTD_PLOT.plotSpectrum(inWS,plot_list)
+    if Plot == 'Contour' or Plot == 'Both':
+        MTD_PLOT.importMatrixWorkspace(inWS).plotGraph2D()
 
 def ChangeAngles(inWS,instr,theta):
     workdir = config['defaultsave.directory']
-    file = instr+'_angles.txt'
-    path = os.path.join(workdir, file)
+    filename = instr+'_angles.txt'
+    path = os.path.join(workdir, filename)
     logger.information('Creating angles file : ' + path)
     handle = open(path, 'w')
     head = 'spectrum,theta'
@@ -429,7 +431,7 @@ def ChangeAngles(inWS,instr,theta):
         handle.write(str(n+1) +'   '+ str(theta[n]) +"\n" )
         logger.information('Spectrum ' +str(n+1)+ ' = '+str(theta[n]))
     handle.close()
-    UpdateInstrumentFromFile(Workspace=inWS, Filename=path, MoveMonitors=False, IgnorePhi=False,
+    UpdateInstrumentFromFile(Workspace=inWS, Filename=path, MoveMonitors=False, IgnorePhi=False,\
         AsciiHeader=head)
 
 def InstrParas(ws,instr,ana,refl):
@@ -500,9 +502,9 @@ def IN13Read(instr,run,ana,refl,Plot,Save):      #Ascii start routine
 
     logger.information('No. sub-spectra : ' + str(nsubsp))
     logger.information('No. spectra : ' + str(nspec))
-    logger.information('Scan type : ' + str(int(Fval[8]))+
+    logger.information('Scan type : ' + str(int(Fval[8]))+\
         ' ; Average energy : ' + str(Fval[9]))
-    logger.information('CaF2 lattice : ' + str(Fval[81])+
+    logger.information('CaF2 lattice : ' + str(Fval[81])+\
         ' ; Graphite lattice : ' + str(Fval[82]))
     logger.information('Wavelength : ' + str(wave))
     logger.information('No. temperatures : ' + str(ntemp))
@@ -584,17 +586,17 @@ def IN13Read(instr,run,ana,refl,Plot,Save):      #Ascii start routine
             xDq = np.append(xDq,sorted_Q)
             yDq = np.append(yDq,y1Dq)
             eDq = np.append(eDq,e1Dq)
-    CreateWorkspace(OutputWorkspace=ascWS, DataX=xData, DataY=yData, DataE=eData,
+    CreateWorkspace(OutputWorkspace=ascWS, DataX=xData, DataY=yData, DataE=eData,\
         Nspec=3, UnitX='MomentumTransfer')
     IN13Paras(ascWS,run,title,wave)
-    CreateWorkspace(OutputWorkspace=outWS, DataX=xDq, DataY=yDq, DataE=eDq,
+    CreateWorkspace(OutputWorkspace=outWS, DataX=xDq, DataY=yDq, DataE=eDq,\
         Nspec=3, UnitX='MomentumTransfer')
     IN13Paras(outWS,run,title,wave)
     if Save:
         opath = os.path.join(workdir,outWS+'.nxs')
         SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
         logger.information('Output file : ' + opath)
-    if (Plot != 'None'):
+    if Plot != 'None':
         plotForce(outWS,Plot)
     return outWS
 

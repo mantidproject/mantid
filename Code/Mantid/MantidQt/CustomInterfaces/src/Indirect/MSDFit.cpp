@@ -44,15 +44,7 @@ namespace IDA
     m_msdTree->addProperty(m_properties["Start"]);
     m_msdTree->addProperty(m_properties["End"]);
 
-    m_plots["MSDPlot"] = new QwtPlot(m_parentWidget);
-    m_uiForm.plot->addWidget(m_plots["MSDPlot"]);
-
-    // Cosmetics
-    m_plots["MSDPlot"]->setAxisFont(QwtPlot::xBottom, m_parentWidget->font());
-    m_plots["MSDPlot"]->setAxisFont(QwtPlot::yLeft, m_parentWidget->font());
-    m_plots["MSDPlot"]->setCanvasBackground(Qt::white);
-
-    m_rangeSelectors["MSDRange"] = new MantidWidgets::RangeSelector(m_plots["MSDPlot"]);
+    m_rangeSelectors["MSDRange"] = new MantidWidgets::RangeSelector(m_uiForm.ppPlot);
 
     connect(m_rangeSelectors["MSDRange"], SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
     connect(m_rangeSelectors["MSDRange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
@@ -61,6 +53,7 @@ namespace IDA
     connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(newDataLoaded(const QString&)));
     connect(m_uiForm.pbSingleFit, SIGNAL(clicked()), this, SLOT(singleFit()));
     connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
+    connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotFit()));
 
     connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this, SLOT(specMinChanged(int)));
     connect(m_uiForm.spSpectraMax, SIGNAL(valueChanged(int)), this, SLOT(specMaxChanged(int)));
@@ -91,6 +84,9 @@ namespace IDA
     // Set the result workspace for Python script export
     QString dataName = m_uiForm.dsSampleInput->getCurrentDataName();
     m_pythonExportWsName = dataName.left(dataName.lastIndexOf("_")).toStdString() + "_msd";
+
+    // Plot the fit result
+    plotFit();
   }
 
   void MSDFit::singleFit()
@@ -111,7 +107,7 @@ namespace IDA
       "print output \n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
-    plotFit(pyOutput);
+    plotFit(pyOutput, 0);
   }
 
   bool MSDFit::validate()
@@ -139,17 +135,39 @@ namespace IDA
     m_uiForm.dsSampleInput->readSettings(settings.group());
   }
 
-  void MSDFit::plotFit(QString wsName)
+  /**
+   * Plots fitted data on the mini plot.
+   *
+   * @param wsName Name of fit _Workspaces workspace group (defaults to
+   *               Python export WS name + _Workspaces)
+   * @param specNo Spectrum number relating to input workspace to plot fit
+   *               for (defaults to value of preview spectrum index)
+   */
+  void MSDFit::plotFit(QString wsName, int specNo)
   {
+    if(wsName.isEmpty())
+      wsName = QString::fromStdString(m_pythonExportWsName) + "_Workspaces";
+
+    if(specNo == -1)
+      specNo = m_uiForm.spPlotSpectrum->value();
+
     if(Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()))
     {
-      //read the fit from the workspace
+      // Remove the old fit
+      m_uiForm.ppPlot->removeSpectrum("Fit");
+
+      // Get the workspace
       auto groupWs = Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::WorkspaceGroup>(wsName.toStdString());
-      auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(groupWs->getItem(0));
-      plotMiniPlot(ws, 1, "MSDPlot", "MSDFitCurve");
-      QPen fitPen(Qt::red, Qt::SolidLine);
-      m_curves["MSDFitCurve"]->setPen(fitPen);
-      replot("MSDPlot");
+
+      // If the user has just done a single fit then we probably havent got a workspace to plot
+      // when the change the spectrum selector
+      if(specNo >= static_cast<int>(groupWs->size()))
+        return;
+
+      auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(groupWs->getItem(specNo));
+
+      // Plot the new fit
+      m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
     }
   }
 
@@ -181,6 +199,8 @@ namespace IDA
 
   void MSDFit::plotInput()
   {
+    m_uiForm.ppPlot->clear();
+
     QString wsname = m_uiForm.dsSampleInput->getCurrentDataName();
 
     if(!AnalysisDataService::Instance().doesExist(wsname.toStdString()))
@@ -189,18 +209,15 @@ namespace IDA
       return;
     }
 
-    auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsname.toStdString());
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname.toStdString());
 
     int wsIndex = m_uiForm.spPlotSpectrum->value();
-    plotMiniPlot(ws, wsIndex, "MSDPlot", "MSDDataCurve");
+    m_uiForm.ppPlot->addSpectrum("Sample", ws, wsIndex);
 
     try
     {
-      const std::pair<double, double> range = getCurveRange("MSDDataCurve");
+      QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
       m_rangeSelectors["MSDRange"]->setRange(range.first, range.second);
-
-      // Replot
-      replot("MSDPlot");
     }
     catch(std::invalid_argument & exc)
     {
@@ -208,10 +225,6 @@ namespace IDA
     }
 
     m_currentWsName = wsname;
-
-    // Remove the old fit curve
-    removeCurve("MSDFitCurve");
-    replot("MSDPlot");
   }
 
   /**
@@ -253,6 +266,7 @@ namespace IDA
     if ( prop == m_properties["Start"] ) m_rangeSelectors["MSDRange"]->setMinimum(val);
     else if ( prop == m_properties["End"] ) m_rangeSelectors["MSDRange"]->setMaximum(val);
   }
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

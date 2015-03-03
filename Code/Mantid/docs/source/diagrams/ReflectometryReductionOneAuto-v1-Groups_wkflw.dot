@@ -1,0 +1,32 @@
+digraph ReflectometryReductionOne {
+  label = "ReflectometryReductionOneAuto on a WorkspaceGroup Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    inputWorkspace    [label="InputWorkspace"]
+    outputWorkspaceWL [label="OutputWorkspaceWavelength"]
+    outputWorkspaceMT [label="OutputWorkspace"]
+    thetaOut          [label="ThetaOut"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    reflRedOne   [label="ReflectometryReductionOne"]
+    reflRedOne_0 [label="ReflectometryReductionOne"]
+    reflRedOne_1 [label="ReflectometryReductionOne"]
+    groupIvQ     [label="GroupWorkspaces"]
+    groupIvLam   [label="GroupWorkspaces"]
+  }
+
+  inputWorkspace -> reflRedOne
+  reflRedOne     -> reflRedOne_0      [label="InputWorkspace[0]"]
+  reflRedOne     -> reflRedOne_1      [label="InputWorkspace[1]"]
+  reflRedOne_0   -> thetaOut          [label="&theta;"]
+  reflRedOne_0   -> groupIvQ          [label="IvQ"]
+  reflRedOne_1   -> groupIvQ          [label="IvQ"]
+  reflRedOne_0   -> groupIvLam        [label="Iv&lambda;"]
+  reflRedOne_1   -> groupIvLam        [label="Iv&lambda;"]
+  groupIvQ       -> outputWorkspaceMT [label="IvQ"]
+  groupIvLam     -> outputWorkspaceWL [label="Iv&lambda;"]
+}

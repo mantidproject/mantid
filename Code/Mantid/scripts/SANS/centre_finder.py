@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import isis_reducer
 from isis_reduction_steps import StripEndNans
 from mantid.simpleapi import *
@@ -98,10 +99,10 @@ class CentreFinder(object):
         """
         x = -x
         y = -y
-        MoveInstrumentComponent(Workspace=setup.get_sample().wksp_name,
+        MoveInstrumentComponent(Workspace=setup.get_sample().wksp_name,\
             ComponentName=self.detector, X=x, Y=y, RelativePosition=True)
         if setup.get_can():
-            MoveInstrumentComponent(Workspace=setup.get_can().wksp_name,
+            MoveInstrumentComponent(Workspace=setup.get_can().wksp_name,\
                 ComponentName=self.detector, X=x, Y=y, RelativePosition=True)
 
     # Create a workspace with a quadrant value in it

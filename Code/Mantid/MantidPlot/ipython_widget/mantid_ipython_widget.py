@@ -3,6 +3,13 @@ import types
 
 from PyQt4 import QtGui
 
+# IPython monkey patches the  pygments.lexer.RegexLexer.get_tokens_unprocessed method
+# and breaks Sphinx when running within MantidPlot.
+# We store the original method definition here on the pygments module before importing IPython
+from pygments.lexer import RegexLexer
+# Monkeypatch!
+RegexLexer.get_tokens_unprocessed_unpatched = RegexLexer.get_tokens_unprocessed
+
 from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
 from IPython.qt.inprocess import QtInProcessKernelManager
 

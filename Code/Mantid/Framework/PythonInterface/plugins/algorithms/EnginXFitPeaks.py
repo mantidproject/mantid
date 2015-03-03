@@ -1,35 +1,35 @@
+#pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
 
 import math
-import numpy as np
 
 class EnginXFitPeaks(PythonAlgorithm):
     def category(self):
-    	return "Diffraction\Engineering;PythonAlgorithms"
+        return "Diffraction\Engineering;PythonAlgorithms"
 
     def name(self):
-    	return "EnginXFitPeaks"
+        return "EnginXFitPeaks"
 
     def summary(self):
-    	return "The algorithm fits an expected diffraction pattern to a workpace spectrum by performing single peak fits."
+        return "The algorithm fits an expected diffraction pattern to a workpace spectrum by performing single peak fits."
 
     def PyInit(self):
-    	self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),\
     		"Workspace to fit peaks in. ToF is expected X unit.")
 
-    	self.declareProperty("WorkspaceIndex", 0,
+        self.declareProperty("WorkspaceIndex", 0,\
     		"Index of the spectra to fit peaks in")
 
-    	self.declareProperty(FloatArrayProperty("ExpectedPeaks", (self._getDefaultPeaks())),
+        self.declareProperty(FloatArrayProperty("ExpectedPeaks", (self._getDefaultPeaks())),\
     		"A list of dSpacing values to be translated into TOF to find expected peaks.")
-    	
-    	self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",action=FileAction.OptionalLoad,extensions = [".csv"]),"Load from file a list of dSpacing values to be translated into TOF to find expected peaks.")
 
-    	self.declareProperty("Difc", 0.0, direction = Direction.Output,
+        self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",action=FileAction.OptionalLoad,extensions = [".csv"]),"Load from file a list of dSpacing values to be translated into TOF to find expected peaks.")
+
+        self.declareProperty("Difc", 0.0, direction = Direction.Output,\
     		doc = "Fitted Difc value")
 
-    	self.declareProperty("Zero", 0.0, direction = Direction.Output,
+        self.declareProperty("Zero", 0.0, direction = Direction.Output,\
     		doc = "Fitted Zero value")
 
     def PyExec(self):
@@ -39,7 +39,7 @@ class EnginXFitPeaks(PythonAlgorithm):
         # so we can match them with fitted centres later.
         expectedPeaksTof = sorted(expectedPeaksTof)
         expectedPeaksD = self._readInExpectedPeaks()
-      
+
         # Find approximate peak positions, asumming Gaussian shapes
         findPeaksAlg = self.createChildAlgorithm('FindPeaks')
         findPeaksAlg.setProperty('InputWorkspace', self.getProperty("InputWorkspace").value)
@@ -49,7 +49,7 @@ class EnginXFitPeaks(PythonAlgorithm):
         findPeaksAlg.execute()
         foundPeaks = findPeaksAlg.getProperty('PeaksList').value
 
-        if (foundPeaks.rowCount() < len(expectedPeaksTof)):
+        if foundPeaks.rowCount() < len(expectedPeaksTof):
             raise Exception("Some peaks were not found")
 
         fittedPeaks = self._createFittedPeaksTable()
@@ -118,83 +118,83 @@ class EnginXFitPeaks(PythonAlgorithm):
             if exPeakArray == []:
                 print "File could not be read. Defaults being used."
                 expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
-            else: 
+            else:
                 print "using file"
                 expectedPeaksD = sorted(exPeakArray)
         else:
             expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
-        return expectedPeaksD              
+        return expectedPeaksD
 
     def _getDefaultPeaks(self):
         """ Gets default peaks for EnginX algorithm. Values from CeO2 """
-        defaultPeak = [3.1243, 2.7057, 1.9132, 1.6316, 1.5621, 1.3529, 1.2415, 1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, 0.8556, 0.8252, 0.8158, 0.7811]   
+        defaultPeak = [3.1243, 2.7057, 1.9132, 1.6316, 1.5621, 1.3529, 1.2415, 1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, 0.8556, 0.8252, 0.8158, 0.7811]
         return defaultPeak
 
     def _fitDSpacingToTOF(self, fittedPeaksTable):
-    	""" Fits a linear background to the dSpacing <-> TOF relationship and returns fitted difc
+        """ Fits a linear background to the dSpacing <-> TOF relationship and returns fitted difc
     		and zero values.
     	"""
-    	convertTableAlg = self.createChildAlgorithm('ConvertTableToMatrixWorkspace')
-    	convertTableAlg.setProperty('InputWorkspace', fittedPeaksTable)
-    	convertTableAlg.setProperty('ColumnX', 'dSpacing')
-    	convertTableAlg.setProperty('ColumnY', 'X0')
-    	convertTableAlg.execute()
-    	dSpacingVsTof = convertTableAlg.getProperty('OutputWorkspace').value
+        convertTableAlg = self.createChildAlgorithm('ConvertTableToMatrixWorkspace')
+        convertTableAlg.setProperty('InputWorkspace', fittedPeaksTable)
+        convertTableAlg.setProperty('ColumnX', 'dSpacing')
+        convertTableAlg.setProperty('ColumnY', 'X0')
+        convertTableAlg.execute()
+        dSpacingVsTof = convertTableAlg.getProperty('OutputWorkspace').value
 
     	# Fit the curve to get linear coefficients of TOF <-> dSpacing relationship for the detector
-    	fitAlg = self.createChildAlgorithm('Fit')
-    	fitAlg.setProperty('Function', 'name=LinearBackground')
-    	fitAlg.setProperty('InputWorkspace', dSpacingVsTof)
-    	fitAlg.setProperty('WorkspaceIndex', 0)
-    	fitAlg.setProperty('CreateOutput', True)
-    	fitAlg.execute()
-    	paramTable = fitAlg.getProperty('OutputParameters').value
+        fitAlg = self.createChildAlgorithm('Fit')
+        fitAlg.setProperty('Function', 'name=LinearBackground')
+        fitAlg.setProperty('InputWorkspace', dSpacingVsTof)
+        fitAlg.setProperty('WorkspaceIndex', 0)
+        fitAlg.setProperty('CreateOutput', True)
+        fitAlg.execute()
+        paramTable = fitAlg.getProperty('OutputParameters').value
 
-    	zero = paramTable.cell('Value', 0) # A0
-    	difc = paramTable.cell('Value', 1) # A1
+        zero = paramTable.cell('Value', 0) # A0
+        difc = paramTable.cell('Value', 1) # A1
 
-    	return (difc, zero)
+        return (difc, zero)
 
 
     def _expectedPeaksInTOF(self):
-    	""" Converts expected peak dSpacing values to TOF values for the detector
+        """ Converts expected peak dSpacing values to TOF values for the detector
     	"""
-    	ws = self.getProperty("InputWorkspace").value
-    	wsIndex = self.getProperty("WorkspaceIndex").value
+        ws = self.getProperty("InputWorkspace").value
+        wsIndex = self.getProperty("WorkspaceIndex").value
 
     	# Detector for specified spectrum
-    	det = ws.getDetector(wsIndex)
+        det = ws.getDetector(wsIndex)
 
     	# Current detector parameters
-    	detL2 = det.getDistance(ws.getInstrument().getSample())
-    	detTwoTheta = ws.detectorTwoTheta(det)
+        detL2 = det.getDistance(ws.getInstrument().getSample())
+        detTwoTheta = ws.detectorTwoTheta(det)
 
     	# Function for converting dSpacing -> TOF for the detector
-    	dSpacingToTof = lambda d: 252.816 * 2 * (50 + detL2) * math.sin(detTwoTheta / 2.0) * d
-    	expectedPeaks = self._readInExpectedPeaks()
+        dSpacingToTof = lambda d: 252.816 * 2 * (50 + detL2) * math.sin(detTwoTheta / 2.0) * d
+        expectedPeaks = self._readInExpectedPeaks()
 
     	# Expected peak positions in TOF for the detector
-    	expectedPeaksTof = map(dSpacingToTof, expectedPeaks)
+        expectedPeaksTof = map(dSpacingToTof, expectedPeaks)
 
-    	return expectedPeaksTof
+        return expectedPeaksTof
 
 
     def _createFittedPeaksTable(self):
-    	""" Creates a table where to put peak fitting results to
+        """ Creates a table where to put peak fitting results to
     	"""
-    	alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
-    	alg.execute()
-    	table = alg.getProperty('OutputWorkspace').value
+        alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
+        alg.execute()
+        table = alg.getProperty('OutputWorkspace').value
 
-    	table.addColumn('double', 'dSpacing')
+        table.addColumn('double', 'dSpacing')
 
-    	for name in ['A0', 'A1', 'X0', 'A', 'B', 'S', 'I']:
-    		table.addColumn('double', name)
-    		table.addColumn('double', name + '_Err')
+        for name in ['A0', 'A1', 'X0', 'A', 'B', 'S', 'I']:
+            table.addColumn('double', name)
+            table.addColumn('double', name + '_Err')
 
-    	table.addColumn('double', 'Chi')
+        table.addColumn('double', 'Chi')
 
-    	return table
+        return table
 
     def _addParametersToMap(self, paramMap, paramTable):
         """ Reads parameters from the Fit Parameter table, and add their values and errors to the map

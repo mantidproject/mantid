@@ -67,6 +67,12 @@ public:
   const char* GetWorkspaceName();
   /// Getter for the workspace type
   char* GetWorkspaceTypeName();
+  /// Getter for the minimum value of the workspace data.
+  double GetMinValue();
+  /// Getter for the maximum value of the workspace data.
+  double GetMaxValue();
+  /// Getter for the instrument associated with the workspace data.
+  const char* GetInstrument();
 
 protected:
   vtkMDEWSource();
@@ -90,6 +96,17 @@ private:
 
   /// Cached typename.
   std::string typeName;
+
+
+  // This is part of a workaround for a ParaView providing not the start time of 
+  // of current data set. 
+  ///Startup flag
+  bool m_isStartup;
+
+  // This is part of a workaround for a ParaView providing not the start time of 
+  // of current data set. 
+  /// Startup time value
+  double m_startupTimeValue;
 
   vtkMDEWSource(const vtkMDEWSource&);
   void operator = (const vtkMDEWSource&);

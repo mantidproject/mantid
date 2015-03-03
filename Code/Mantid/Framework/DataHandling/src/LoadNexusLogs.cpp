@@ -133,9 +133,6 @@ void LoadNexusLogs::exec() {
   // the code below will allow current SANS2D files to load
   if (workspace->mutableRun().hasProperty("proton_log")) {
     std::vector<int> event_frame_number;
-    Kernel::TimeSeriesProperty<double> *plog =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-            workspace->mutableRun().getProperty("proton_log"));
     this->getLogger().notice()
         << "Using old ISIS proton_log and event_frame_number indirection..."
         << std::endl;
@@ -167,6 +164,12 @@ void LoadNexusLogs::exec() {
     file.openPath("/" + entry_name);
     if (!event_frame_number.empty()) // ISIS indirection - see above comments
     {
+      Kernel::TimeSeriesProperty<double> *plog =
+          dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+              workspace->mutableRun().getProperty("proton_log"));
+      if (!plog)
+        throw std::runtime_error("Could not cast (interpret) proton_log as a time "
+                                 "series property. Cannot continue.");
       Kernel::TimeSeriesProperty<double> *pcharge =
           new Kernel::TimeSeriesProperty<double>("proton_charge");
       std::vector<double> pval;

@@ -27,7 +27,7 @@ class ScriptBuilderTest : public CxxTest::TestSuite
     const std::string workspaceMethodName() const { return "methodname"; }
     const std::string workspaceMethodOnTypes() const { return "MatrixWorkspace;ITableWorkspace"; }
     const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
-    
+
     void init()
     {
       declareProperty("PropertyA", "Hello");
@@ -52,11 +52,12 @@ class ScriptBuilderTest : public CxxTest::TestSuite
     const std::string workspaceMethodName() const { return "methodname"; }
     const std::string workspaceMethodOnTypes() const { return "MatrixWorkspace;ITableWorkspace"; }
     const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
-    
+
     void init()
     {
       declareProperty("PropertyA", "Hello");
       declareProperty("PropertyB", "World");
+      declareProperty("PropertyC", "", Direction::Output);
     }
     void exec()
     {
@@ -65,6 +66,7 @@ class ScriptBuilderTest : public CxxTest::TestSuite
       alg->initialize();
       alg->setProperty("PropertyA", "I Don't exist!");
       alg->execute();
+      setProperty("PropertyC", "I have been set!");
     }
   };
 
@@ -81,7 +83,7 @@ class ScriptBuilderTest : public CxxTest::TestSuite
     const std::string workspaceMethodName() const { return "methodname"; }
     const std::string workspaceMethodOnTypes() const { return "MatrixWorkspace;ITableWorkspace"; }
     const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
-    
+
     void init()
     {
       declareProperty("PropertyA", 13);
@@ -115,7 +117,7 @@ class ScriptBuilderTest : public CxxTest::TestSuite
     const std::string workspaceMethodName() const { return "methodname"; }
     const std::string workspaceMethodOnTypes() const { return "Workspace;MatrixWorkspace;ITableWorkspace"; }
     const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
-    
+
     void init()
     {
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input));
@@ -137,7 +139,7 @@ class ScriptBuilderTest : public CxxTest::TestSuite
   };
 
 private:
-  
+
 public:
 
   void setUp()
@@ -155,7 +157,7 @@ public:
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("BasicAlgorithm",1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("SubAlgorithm",1);
   }
-  
+
   void test_Build_Simple()
   {
     std::string result[] = {
@@ -220,7 +222,7 @@ public:
     alg->setRethrows(true);
     alg->setProperty("InputWorkspace", input);
     alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
-    alg->execute();    
+    alg->execute();
 
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
@@ -280,7 +282,7 @@ public:
     alg->setProperty("InputWorkspace", "test_output_workspace");
     alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
     alg->execute();
-    
+
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
     auto view = wsHist.createView();
@@ -305,7 +307,7 @@ public:
     AnalysisDataService::Instance().remove("test_input_workspace");
   }
 
-    
+
   void test_Build_Simple_with_backslash()
   {
     //checks that property values with \ get prefixed with r, eg. filename=r'c:\test\data.txt'

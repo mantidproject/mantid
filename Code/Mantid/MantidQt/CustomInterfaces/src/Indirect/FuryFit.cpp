@@ -47,18 +47,11 @@ namespace IDA
     m_ffTree = new QtTreePropertyBrowser(m_parentWidget);
     m_uiForm.properties->addWidget(m_ffTree);
 
-    // Setup FuryFit Plot Window
-    m_plots["FuryFitPlot"] = new QwtPlot(m_parentWidget);
-    m_plots["FuryFitPlot"]->setAxisFont(QwtPlot::xBottom, m_parentWidget->font());
-    m_plots["FuryFitPlot"]->setAxisFont(QwtPlot::yLeft, m_parentWidget->font());
-    m_uiForm.vlPlot->addWidget(m_plots["FuryFitPlot"]);
-    m_plots["FuryFitPlot"]->setCanvasBackground(QColor(255,255,255));
-
-    m_rangeSelectors["FuryFitRange"] = new MantidQt::MantidWidgets::RangeSelector(m_plots["FuryFitPlot"]);
+    m_rangeSelectors["FuryFitRange"] = new MantidQt::MantidWidgets::RangeSelector(m_uiForm.ppPlot);
     connect(m_rangeSelectors["FuryFitRange"], SIGNAL(minValueChanged(double)), this, SLOT(xMinSelected(double)));
     connect(m_rangeSelectors["FuryFitRange"], SIGNAL(maxValueChanged(double)), this, SLOT(xMaxSelected(double)));
 
-    m_rangeSelectors["FuryFitBackground"] = new MantidQt::MantidWidgets::RangeSelector(m_plots["FuryFitPlot"],
+    m_rangeSelectors["FuryFitBackground"] = new MantidQt::MantidWidgets::RangeSelector(m_uiForm.ppPlot,
       MantidQt::MantidWidgets::RangeSelector::YSINGLE);
     m_rangeSelectors["FuryFitBackground"]->setRange(0.0,1.0);
     m_rangeSelectors["FuryFitBackground"]->setColour(Qt::darkGreen);
@@ -102,7 +95,7 @@ namespace IDA
 
     typeSelection(m_uiForm.cbFitType->currentIndex());
 
-    // Connect to PlotGuess checkbox
+    // Update guess curve on property change
     connect(m_dblManager, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(plotGuess(QtProperty*)));
 
     // Signal/slot ui connections
@@ -110,9 +103,9 @@ namespace IDA
     connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
     connect(m_uiForm.pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
 
-    connect(m_uiForm.dsSampleInput, SIGNAL(filesFound()), this, SLOT(plotInput()));
+    connect(m_uiForm.dsSampleInput, SIGNAL(filesFound()), this, SLOT(updatePlot()));
 
-    connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
+    connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(updatePlot()));
 
     connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this, SLOT(specMinChanged(int)));
     connect(m_uiForm.spSpectraMax, SIGNAL(valueChanged(int)), this, SLOT(specMaxChanged(int)));
@@ -178,6 +171,8 @@ namespace IDA
     QString inputWsName = QString::fromStdString(m_ffInputWS->getName());
     QString resultWsName = inputWsName.left(inputWsName.lastIndexOf("_")) + "_fury_" + fitType + specMin + "_to_" + specMax + "_Workspaces";
     m_pythonExportWsName = resultWsName.toStdString();
+
+    updatePlot();
   }
 
   bool FuryFit::validate()
@@ -210,7 +205,7 @@ namespace IDA
   void FuryFit::newDataLoaded(const QString wsName)
   {
     m_ffInputWSName = wsName;
-    m_ffInputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(m_ffInputWSName.toStdString());
+    m_ffInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_ffInputWSName.toStdString());
 
     int maxSpecIndex = static_cast<int>(m_ffInputWS->getNumberHistograms()) - 1;
 
@@ -225,7 +220,7 @@ namespace IDA
     m_uiForm.spSpectraMax->setMinimum(0);
     m_uiForm.spSpectraMax->setValue(maxSpecIndex);
 
-    plotInput();
+    updatePlot();
   }
 
   CompositeFunction_sptr FuryFit::createFunction(bool tie)
@@ -387,7 +382,7 @@ namespace IDA
     plotGuess(NULL);
   }
 
-  void FuryFit::plotInput()
+  void FuryFit::updatePlot()
   {
     if(!m_ffInputWS)
     {
@@ -396,11 +391,14 @@ namespace IDA
     }
 
     int specNo = m_uiForm.spPlotSpectrum->value();
-    plotMiniPlot(m_ffInputWS, specNo, "FuryFitPlot", "FF_DataCurve");
+
+    m_uiForm.ppPlot->clear();
+    m_uiForm.ppPlot->addSpectrum("Sample", m_ffInputWS, specNo);
 
     try
     {
-      const std::pair<double, double> range = getCurveRange("FF_DataCurve");
+      const QPair<double, double> curveRange = m_uiForm.ppPlot->getCurveRange("Sample");
+      const std::pair<double, double> range(curveRange.first, curveRange.second);
       m_rangeSelectors["FuryFitRange"]->setRange(range.first, range.second);
       m_ffRangeManager->setRange(m_properties["StartX"], range.first, range.second);
       m_ffRangeManager->setRange(m_properties["EndX"], range.first, range.second);
@@ -409,13 +407,23 @@ namespace IDA
       setDefaultParameters("Exponential2");
       setDefaultParameters("StretchedExp");
 
-      m_plots["FuryFitPlot"]->setAxisScale(QwtPlot::xBottom, range.first, range.second);
-      m_plots["FuryFitPlot"]->setAxisScale(QwtPlot::yLeft, 0.0, 1.0);
-      replot("FuryFitPlot");
+      m_uiForm.ppPlot->resizeX();
+      m_uiForm.ppPlot->setAxisRange(qMakePair(0.0, 1.0), QwtPlot::yLeft);
     }
     catch(std::invalid_argument & exc)
     {
       showMessageBox(exc.what());
+    }
+
+    // If there is a result plot then plot it
+    if(AnalysisDataService::Instance().doesExist(m_pythonExportWsName))
+    {
+      WorkspaceGroup_sptr outputGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(m_pythonExportWsName);
+      if(specNo >= static_cast<int>(outputGroup->size()))
+        return;
+      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outputGroup->getItem(specNo));
+      if(ws)
+        m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
     }
   }
 
@@ -548,6 +556,9 @@ namespace IDA
     if(!validate())
       return;
 
+    // Don't plot a new guess curve until there is a fit
+    disconnect(m_dblManager, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(plotGuess(QtProperty*)));
+
     // First create the function
     auto function = createFunction();
 
@@ -570,7 +581,7 @@ namespace IDA
     }
     QString ftype = fitTypeString();
 
-    plotInput();
+    updatePlot();
     if ( m_ffInputWS == NULL )
     {
       return;
@@ -601,12 +612,6 @@ namespace IDA
       showMessageBox(msg);
       return;
     }
-
-    // Now show the fitted curve of the mini plot
-    plotMiniPlot(outputNm+"_Workspace", 1, "FuryFitPlot", "FF_FitCurve");
-    QPen fitPen(Qt::red, Qt::SolidLine);
-    m_curves["FF_FitCurve"]->setPen(fitPen);
-    replot("FuryFitPlot");
 
     IFunction_sptr outputFunc = alg->getProperty("Function");
 
@@ -648,14 +653,23 @@ namespace IDA
       m_dblManager->setValue(m_properties["StretchedExp.Tau"], parameters[fval+"Tau"]);
       m_dblManager->setValue(m_properties["StretchedExp.Beta"], parameters[fval+"Beta"]);
     }
+
+    // Can start upddating the guess curve again
+    connect(m_dblManager, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(plotGuess(QtProperty*)));
+
+    // Plot the guess first so that it is under the fit
+    plotGuess(NULL);
+    // Now show the fitted curve of the mini plot
+    m_uiForm.ppPlot->addSpectrum("Fit", outputNm+"_Workspace", 1, Qt::red);
+
+    m_pythonExportWsName = "";
   }
 
   void FuryFit::plotGuess(QtProperty*)
   {
-    if ( m_curves["FF_DataCurve"] == NULL )
-    {
+    // Do nothing if there is no sample data curve
+    if(!m_uiForm.ppPlot->hasCurve("Sample"))
       return;
-    }
 
     CompositeFunction_sptr function = createFunction(true);
 
@@ -690,15 +704,18 @@ namespace IDA
       dataX.append(inputXData[i]);
       dataY.append(outputData.getCalculated(i));
     }
+    IAlgorithm_sptr createWsAlg = AlgorithmManager::Instance().create("CreateWorkspace");
+    createWsAlg->initialize();
+    createWsAlg->setChild(true);
+    createWsAlg->setLogging(false);
+    createWsAlg->setProperty("OutputWorkspace", "__GuessAnon");
+    createWsAlg->setProperty("NSpec", 1);
+    createWsAlg->setProperty("DataX", dataX.toStdVector());
+    createWsAlg->setProperty("DataY", dataY.toStdVector());
+    createWsAlg->execute();
+    MatrixWorkspace_sptr guessWs = createWsAlg->getProperty("OutputWorkspace");
 
-    // Create the curve
-    removeCurve("FF_FitCurve");
-    m_curves["FF_FitCurve"] = new QwtPlotCurve();
-    m_curves["FF_FitCurve"]->setData(dataX, dataY);
-    m_curves["FF_FitCurve"]->attach(m_plots["FuryFitPlot"]);
-    QPen fitPen(Qt::red, Qt::SolidLine);
-    m_curves["FF_FitCurve"]->setPen(fitPen);
-    replot("FuryFitPlot");
+    m_uiForm.ppPlot->addSpectrum("Guess", guessWs, 0, Qt::green);
   }
 
   void FuryFit::fitContextMenu(const QPoint &)

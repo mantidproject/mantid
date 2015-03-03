@@ -1,6 +1,9 @@
+#pylint: disable=no-init,invalid-name
 import mantid,sys
 
 class SavePlot1D(mantid.api.PythonAlgorithm):
+
+    _wksp = None
 
     def category(self):
         """ Category
@@ -21,7 +24,8 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
     def PyInit(self):
         #declare properties
         self.declareProperty(mantid.api.WorkspaceProperty("InputWorkspace","",mantid.kernel.Direction.Input),"Workspace to plot")
-        self.declareProperty(mantid.api.FileProperty('OutputFilename', '', action=mantid.api.FileAction.Save, extensions = ["png"]), doc='Name of the image file to savefile.')
+        self.declareProperty(mantid.api.FileProperty('OutputFilename', '', action=mantid.api.FileAction.Save, extensions = ["png"]),
+                             doc='Name of the image file to savefile.')
         self.declareProperty("XLabel","","Label on the X axis. If empty, it will be taken from workspace")
         self.declareProperty("YLabel","","Label on the Y axis. If empty, it will be taken from workspace")
 
@@ -58,7 +62,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         spectra=ws.getNumberHistograms()
         if spectra>10:
             mantid.kernel.logger.warning("more than 10 spectra to plot")
-        prog_reporter=mantid.api.Progress(self,start=0.0,end=1.0,
+        prog_reporter=mantid.api.Progress(self,start=0.0,end=1.0,\
                     nreports=spectra)
 
         for j in range(spectra):

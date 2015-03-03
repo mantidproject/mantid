@@ -49,6 +49,12 @@ public:
   /// Sets the parameters such that FWHM = w
   virtual void setFwhm(const double w) = 0;
 
+  /// Returns the integral intensity of the peak
+  virtual double intensity() const;
+
+  /// Sets the integral intensity of the peak
+  virtual void setIntensity(const double newIntensity);
+
   /// General implementation of the method for all peaks.
   void function1D(double *out, const double *xValues, const size_t nData) const;
   /// General implementation of the method for all peaks.
@@ -63,6 +69,9 @@ public:
   /// Derivative evaluation method to be implemented in the inherited classes
   virtual void functionDerivLocal(Jacobian *out, const double *xValues,
                                   const size_t nData) = 0;
+
+  /// Get name of parameter that is associated to centre.
+  std::string getCentreParameterName() const;
 
 protected:
   /// Defines the area around the centre where the peak values are to be
