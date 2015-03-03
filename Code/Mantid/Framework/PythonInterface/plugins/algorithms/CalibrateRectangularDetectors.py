@@ -139,11 +139,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         detectors = self.getProperty("DetectorsPeaks").value
         if self.getProperty("CrossCorrelation").value:
             positions = self.getProperty("PeakPositions").value
-            if not bool(detectors):
+            if len(detectors) <= 1:
                 if len(positions) != 1:
                     messages["PeakPositions"] = "Can only have one cross correlation peak without specifying 'DetectorsPeaks'"
             else:
-                detectors = detectors.split(',')
                 if len(detectors) != len(positions):
                     messages["PeakPositions"] = "Must be the same length as 'DetectorsPeaks' (%d != %d)" \
                         % (len(positions), len(detectors))
@@ -511,7 +510,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 self._peakpos3 = self._peakpos[2]
                 self._peakmin3 = self._peakpos3-peakhalfwidth
                 self._peakmax3 = self._peakpos3+peakhalfwidth
-            detectors = self.getProperty("DetectorsPeaks").value.strip().split(',')
+            detectors = self.getProperty("DetectorsPeaks").value
             if detectors[0]:
                 self._lastpixel = int(detectors[0])
                 self._lastpixel3 = self._lastpixel
@@ -520,7 +519,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 self._lastpixel3 = self._lastpixel2
             if len(detectors) >= 3:
                 self._lastpixel3 = self._lastpixel2+int(detectors[2])
-            pixelbin2 = self._xpixelbin*self._ypixelbin
             self._ccnumber = self.getProperty("CrossCorrelationPoints").value
         self._maxoffset = self.getProperty("MaxOffset").value
         self._diffractionfocus = self.getProperty("DiffractionFocusWorkspace").value
