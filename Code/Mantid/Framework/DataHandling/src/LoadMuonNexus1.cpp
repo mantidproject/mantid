@@ -319,8 +319,21 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
 
     std::vector<int> specToLoad;
     std::vector<double> deadTimes;
-    specToLoad.reserve(numDeadTimes);
-    deadTimes.reserve(numDeadTimes);
+
+    // Set the spectrum list that should be loaded
+    if ( m_interval || m_list ) {
+      // Load only selected spectra
+      for (int i=m_spec_min; i<m_spec_max; i++) {
+        specToLoad.push_back(i);
+      }
+      for (auto it=m_spec_list.begin(); it!=m_spec_list.end(); ++it) {
+        specToLoad.push_back(*it);
+      }
+    } else {
+      // Load all the spectra
+      for (int i=0; i<numDeadTimes; i++)
+        specToLoad.push_back(i);
+    }
 
 
     if (numDeadTimes < m_numberOfSpectra) {
@@ -329,12 +342,13 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
       throw Exception::FileError(
           "Number of dead times specified is less than number of spectra",
           m_filename);
+
     } else if (numDeadTimes == m_numberOfSpectra) {
+
       // Simpliest case - one dead time for one detector
 
       // Populate specToLoad and deadTimes
       for (int i = 0; i < numDeadTimes; i++) {
-        specToLoad.push_back(i);
         deadTimes.push_back(deadTimesData[i]);
       }
       // Load into table
@@ -342,6 +356,7 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
           createDeadTimeTable(specToLoad, deadTimes);
       setProperty("DeadTimeTable", table);
     } else {
+
       // More complex case - different dead times for different periods
 
       if (numDeadTimes != m_numberOfSpectra * m_numberOfPeriods) {
@@ -354,7 +369,6 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
 
       // Populate specToLoad and deadTimes
       for (int i = 0; i < numDeadTimes; i++) {
-        specToLoad.push_back(i);
         deadTimes.push_back(deadTimesData[i]);
       }
       // Load into table
