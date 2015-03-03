@@ -127,6 +127,9 @@ void LoadMuonNexus1::exec() {
   // Grouping info should be returned if user has set the property
   bool returnGrouping = !getPropertyValue("DetectorGroupingTable").empty();
 
+  // Call private method to validate the optional parameters, if set
+  checkOptionalProperties();
+
   Workspace_sptr loadedGrouping;
 
   // Try to load detector grouping info, if needed for auto-grouping or user
@@ -149,9 +152,6 @@ void LoadMuonNexus1::exec() {
   // If multiperiod, will need to hold the Instrument & Sample for copying
   boost::shared_ptr<Instrument> instrument;
   boost::shared_ptr<Sample> sample;
-
-  // Call private method to validate the optional parameters, if set
-  checkOptionalProperties();
 
   // Read the number of time channels (i.e. bins) from the Nexus file
   const int channelsPerSpectrum = nxload.t_ntc1;
