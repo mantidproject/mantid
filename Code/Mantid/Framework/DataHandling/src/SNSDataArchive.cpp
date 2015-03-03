@@ -67,7 +67,8 @@ SNSDataArchive::getArchivePath(const std::set<std::string> &filenames,
 
   // Create a DOM document from the response.
   Poco::XML::DOMParser parser;
-  Poco::XML::InputSource source(rs.str());
+  std::istringstream istrsource(rs.str());
+  Poco::XML::InputSource source(istrsource);
   Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parse(&source);
 
   std::vector<std::string> locations;
