@@ -199,18 +199,18 @@ class DirectEnergyConversion(object):
             # build hard mask
             diag_mask,n_masks = white.get_masking()
             if diag_mask is None:
-            # in this peculiar way we can obtain working mask which
-            # accounts for initial data grouping in the
-            # data file.  SNS or 1 to 1 maps may probably avoid this
-            # stuff and can load masks directly
+                # in this peculiar way we can obtain working mask which
+                # accounts for initial data grouping in the
+                # data file.  SNS or 1 to 1 maps may probably avoid this
+                # stuff and can load masks directly
                 white_data = white.get_ws_clone('white_ws_clone')
 
-            diag_mask = LoadMask(Instrument=self.instr_name,InputFile=self.hard_mask_file,\
+                diag_mask = LoadMask(Instrument=self.instr_name,InputFile=self.hard_mask_file,\
                                  OutputWorkspace='hard_mask_ws')
-            MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
-            white.add_masked_ws(white_data)
-            DeleteWorkspace(Workspace='white_ws_clone')
-            diag_mask,n_masks = white.get_masking()
+                MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
+                white.add_masked_ws(white_data)
+                DeleteWorkspace(Workspace='white_ws_clone')
+                diag_mask,n_masks = white.get_masking()
             if not(out_ws_name is None):
                 dm = CloneWorkspace(diag_mask,OutputWorkspace=out_ws_name)
                 return dm

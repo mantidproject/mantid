@@ -336,7 +336,7 @@ class ReductionWrapper(object):
             return None
          else:
             results=[]
-            nruns = len(runs)
+            nruns = len(runfiles)
             for num,file in enumerate(runfiles):
                  red_ws=self.reduce(file)
                  if nruns >1:
