@@ -16,7 +16,7 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
 
 
     def category(self):
-        return 'PythonAlgorithms;Inelastic'
+        return 'PythonAlgorithms;Inelastic;CorrectionFunctions'
 
 
     def summary(self):
@@ -28,7 +28,8 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
                              direction=Direction.Input),
                              doc='Input reduced workspace')
 
-        self.declareProperty(FloatArrayProperty(name='SearchRange'),
+        self.declareProperty(FloatArrayProperty(name='SearchRange',
+                                                values=[200, 2000]),
                              doc='Range over which to find peaks')
 
         self.declareProperty(name='ClosePeakTolerance', defaultValue=20.0,
@@ -91,6 +92,11 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
 
         peaks = self._get_peaks('__search_ws')
         DeleteWorkspace('__search_ws')
+
+        # Ensure there is at least one peak found
+        if len(peaks) < 1:
+            raise RuntimeError('Could not find any peaks. Try increasing \
+                                width of SearchRange and/or ClosePeakTolerance')
 
         delta = self._get_delta(peaks)
         offset = delta / 2
