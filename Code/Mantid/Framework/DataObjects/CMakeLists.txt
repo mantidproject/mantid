@@ -1,4 +1,12 @@
 set ( SRC_FILES
+	src/AffineMatrixParameter.cpp
+	src/AffineMatrixParameterParser.cpp
+	src/BoxControllerNeXusIO.cpp
+	src/CoordTransformAffine.cpp
+	src/CoordTransformAffineParser.cpp
+	src/CoordTransformAligned.cpp
+	src/CoordTransformDistance.cpp
+	src/CoordTransformDistanceParser.cpp
 	src/EventList.cpp
 	src/EventWorkspace.cpp
 	src/EventWorkspaceHelpers.cpp
@@ -6,6 +14,20 @@ set ( SRC_FILES
 	src/Events.cpp
 	src/GroupingWorkspace.cpp
 	src/Histogram1D.cpp
+	src/MDBin.cpp
+	src/MDBox.cpp
+	src/MDBoxBase.cpp
+	src/MDBoxFlatTree.cpp
+	src/MDBoxIterator.cpp
+	src/MDBoxSaveable.cpp
+	src/MDEventFactory.cpp
+	src/MDEventInserter.cpp
+	src/MDEventWorkspace.cpp
+	src/MDGridBox.cpp
+	src/MDHistoWorkspace.cpp
+	src/MDHistoWorkspaceIterator.cpp
+	src/MDLeanEvent.cpp
+	src/MDSplitBox.cpp
 	src/MaskWorkspace.cpp
 	src/MementoTableWorkspace.cpp
 	src/NoShape.cpp
@@ -36,6 +58,14 @@ set ( SRC_UNITY_IGNORE_FILES
 )
 
 set ( INC_FILES
+	inc/MantidDataObjects/AffineMatrixParameter.h
+	inc/MantidDataObjects/AffineMatrixParameterParser.h
+	inc/MantidDataObjects/BoxControllerNeXusIO.h
+	inc/MantidDataObjects/CoordTransformAffine.h
+	inc/MantidDataObjects/CoordTransformAffineParser.h
+	inc/MantidDataObjects/CoordTransformAligned.h
+	inc/MantidDataObjects/CoordTransformDistance.h
+	inc/MantidDataObjects/CoordTransformDistanceParser.h
 	inc/MantidDataObjects/DllConfig.h
 	inc/MantidDataObjects/EventList.h
 	inc/MantidDataObjects/EventWorkspace.h
@@ -44,6 +74,20 @@ set ( INC_FILES
 	inc/MantidDataObjects/Events.h
 	inc/MantidDataObjects/GroupingWorkspace.h
 	inc/MantidDataObjects/Histogram1D.h
+	inc/MantidDataObjects/MDBin.h
+	inc/MantidDataObjects/MDBox.h
+	inc/MantidDataObjects/MDBoxBase.h
+	inc/MantidDataObjects/MDBoxFlatTree.h
+	inc/MantidDataObjects/MDBoxIterator.h
+	inc/MantidDataObjects/MDBoxSaveable.h
+	inc/MantidDataObjects/MDEventFactory.h
+	inc/MantidDataObjects/MDEventInserter.h
+	inc/MantidDataObjects/MDEventWorkspace.h
+	inc/MantidDataObjects/MDGridBox.h
+	inc/MantidDataObjects/MDHistoWorkspace.h
+	inc/MantidDataObjects/MDHistoWorkspaceIterator.h
+	inc/MantidDataObjects/MDLeanEvent.h
+	inc/MantidDataObjects/MDSplitBox.h
 	inc/MantidDataObjects/MaskWorkspace.h
 	inc/MantidDataObjects/MementoTableWorkspace.h
 	inc/MantidDataObjects/NoShape.h
@@ -69,6 +113,14 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+	AffineMatrixParameterParserTest.h
+	AffineMatrixParameterTest.h
+	BoxControllerNeXusIOTest.h
+	CoordTransformAffineParserTest.h
+	CoordTransformAffineTest.h
+	CoordTransformAlignedTest.h
+	CoordTransformDistanceParserTest.h
+	CoordTransformDistanceTest.h
 	EventListTest.h
 	EventWorkspaceMRUTest.h
 	EventWorkspaceTest.h
@@ -76,6 +128,20 @@ set ( TEST_FILES
 	GroupingWorkspaceTest.h
 	Histogram1DTest.h
 	LibraryManagerTest.h
+	MDBinTest.h
+	MDBoxBaseTest.h
+	MDBoxFlatTreeTest.h
+	MDBoxIteratorTest.h
+	MDBoxSaveableTest.h
+	MDBoxTest.h
+	MDEventFactoryTest.h
+	MDEventInserterTest.h
+	MDEventWorkspaceTest.h
+	MDGridBoxTest.h
+	MDHistoWorkspaceIteratorTest.h
+	MDHistoWorkspaceTest.h
+	MDLeanEventTest.h
+	MDSplitBoxTest.h
 	MaskWorkspaceTest.h
 	MementoTableWorkspaceTest.h
 	NoShapeTest.h
