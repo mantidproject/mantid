@@ -61,6 +61,7 @@ protected slots:
 protected:
   bool doPing();
   void doLogin(const std::string &pw);
+  void doLogout();
   void doQueryJobStatus(std::vector<std::string> ids,
                         std::vector<std::string> names,
                         std::vector<std::string> status,
@@ -70,8 +71,12 @@ protected:
 
   std::string getComputeResource();
   std::string getUsername();
+  std::string getPassword();
 
 private slots:
+  void compResourceIndexChanged(int);
+  void SCARFLoginClicked();
+  void SCARFLogoutClicked();
   void voidBrowseClicked();
 
   void menuSaveClicked();
@@ -93,6 +98,8 @@ private:
 
   void setupComputeResource();
   void setupRunTool();
+
+  void enableLoggedActions(bool enable);
 
   /// Load default interface settings for each tab
   void loadSettings();
@@ -122,18 +129,25 @@ private:
   /// Main interface window
   Ui::TomoReconstruction m_ui;
 
+  /// login status (from local perspective)
+  bool m_loggedIn;
+
   /// facility for the remote compute resource
   const std::string m_facility;
-  /// compute resources (remote ones, clusters, etc.)
+  /// compute resources suppoted by this GUI (remote ones, clusters, etc.)
   std::vector<std::string> m_computeRes;
   /// display name of the "local" compute resource
   const std::string m_localCompName;
+
+  /// reduction tools
+  std::vector<std::string> m_SCARFtools;
 
   // plugins for savu config files
   std::vector<Mantid::API::ITableWorkspace_sptr> m_availPlugins;
   std::vector<Mantid::API::ITableWorkspace_sptr> m_currPlugins;
   std::string m_currentParamPath;
-  static size_t nameSeqNo;
+  static size_t m_nameSeqNo;
+  static std::string m_SCARFName;
 };
 }
 }

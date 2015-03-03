@@ -52,8 +52,8 @@ private:
 
 using namespace MantidQt::CustomInterfaces;
 
-size_t TomoReconstruction::nameSeqNo = 0;
-
+size_t TomoReconstruction::m_nameSeqNo = 0;
+std::string TomoReconstruction::m_SCARFName = "SCARF@STFC";
 /**
  * Almost default constructor, but note that this interface currently
  * relies on the SCARF cluster (only in ISIS facility) as the only
@@ -62,10 +62,17 @@ size_t TomoReconstruction::nameSeqNo = 0;
  * @param parent Parent window (most likely the Mantid main app window).
  */
 TomoReconstruction::TomoReconstruction(QWidget *parent)
-  : UserSubWindow(parent), m_facility("ISIS"), m_computeRes(),
-    m_localCompName("Local"), m_availPlugins(), m_currPlugins(),
-    m_currentParamPath() {
-  m_computeRes.push_back("SCARF@STFC");
+  : UserSubWindow(parent), m_loggedIn(false), m_facility("ISIS"),
+    m_computeRes(), m_localCompName("Local"), m_SCARFtools(),
+    m_availPlugins(), m_currPlugins(), m_currentParamPath() {
+
+  m_computeRes.push_back(m_SCARFName);
+
+  m_SCARFtools.push_back("TomoPy");
+  m_SCARFtools.push_back("Astra");
+  m_SCARFtools.push_back("CCPi CGLS");
+  m_SCARFtools.push_back("Savu");
+  m_SCARFtools.push_back("Custom command");
 }
 
 void TomoReconstruction::doSetupSectionParameters() {
@@ -112,6 +119,11 @@ void TomoReconstruction::doSetupSectionSetup() {
   // disable 'local' for now
   m_ui.tabWidget_comp_resource->setTabEnabled(false, 1);
 
+  connect(m_ui.pushButton_SCARF_login, SIGNAL(released()), this,
+          SLOT(SCARFLoginClicked()));
+  connect(m_ui.pushButton_SCARF_logout, SIGNAL(released()), this,
+          SLOT(SCARFLogoutClicked()));
+
   // 'browse' buttons
   connect(m_ui.pushButton_savu_config_file, SIGNAL(released()), this,
           SLOT(voidBrowseClicked()));
@@ -142,6 +154,8 @@ void TomoReconstruction::doSetupSectionRun() {
   setupComputeResource();
   setupRunTool();
 
+  enableLoggedActions(m_loggedIn);
+
   // Button signals
   connect(m_ui.pushButton_reconstruct, SIGNAL(released()), this,
           SLOT(reconstructClicked()));
@@ -153,6 +167,10 @@ void TomoReconstruction::doSetupSectionRun() {
           SLOT(runVisualizeClicked()));
   connect(m_ui.pushButton_run_job_cancel, SIGNAL(released()), this,
           SLOT(jobCancelClicked()));
+
+  // update tools for a resource
+  connect(m_ui.comboBox_run_compute_resource, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(compResourceIndexChanged(int)));
 
   m_ui.pushButton_reconstruct->setEnabled(false);
   m_ui.pushButton_run_tool_setup->setEnabled(false);
@@ -169,6 +187,52 @@ void TomoReconstruction::initLayout() {
   doSetupSectionParameters();
   doSetupSectionSetup();
   doSetupSectionRun();
+}
+
+/**
+ * Enables/disables buttons that require the user to be logged into
+ * the (remote) compute resource, for example: reconstruct (submit job),
+ * cancel job, etc.
+ */
+void TomoReconstruction::enableLoggedActions(bool enable) {
+  // TODO: this may not make sense anymore when/if the "Local" compute
+  // resource is used in the future (except when none of the tools
+  // supported are available/detected on "Local")
+  std::vector<QPushButton*> buttons;
+  buttons.push_back(m_ui.pushButton_run_refresh);
+  buttons.push_back(m_ui.pushButton_run_job_cancel);
+  buttons.push_back(m_ui.pushButton_run_job_visualize);
+
+  for (size_t i=0; i<buttons.size(); ++i) {
+    buttons[i]->setEnabled(enable);
+  }
+}
+void TomoReconstruction::SCARFLoginClicked() {
+  try {
+    doLogin(getPassword());
+  } catch(std::exception &e) {
+    throw e;
+  }
+
+  enableLoggedActions(true);
+  m_loggedIn = true;
+
+  m_ui.pushButton_SCARF_login->setEnabled(false);
+  m_ui.pushButton_SCARF_login->setEnabled(true);
+}
+
+void TomoReconstruction::SCARFLogoutClicked() {
+  try {
+    doLogout();
+  } catch(std::exception &e) {
+    throw e;
+  }
+
+  enableLoggedActions(false);
+  m_loggedIn = false;
+
+  m_ui.pushButton_SCARF_login->setEnabled(true);
+  m_ui.pushButton_SCARF_logout->setEnabled(false);
 }
 
 /**
@@ -223,7 +287,7 @@ std::string TomoReconstruction::createUniqueNameHidden() {
   do {
     // with __ prefix => hidden
     name = "__TomoConfigTableWS_Seq_" +
-           boost::lexical_cast<std::string>(nameSeqNo++);
+           boost::lexical_cast<std::string>(m_nameSeqNo++);
   } while (AnalysisDataService::Instance().doesExist(name));
 
   return name;
@@ -245,7 +309,7 @@ void TomoReconstruction::setupComputeResource() {
       Mantid::Kernel::ConfigService::Instance().getFacility();
     if (fac.name() != m_facility) {
       userError("Facility not supported", "This interface is designed "
-                "to be used at " + m_facility = ". You will probably not be "
+                "to be used at " + m_facility + ". You will probably not be "
                 "able to use it in a useful way because your facility "
                 "is " + fac.name() + ". If you have set that facility "
                 "facility by mistake in your settings, please update it.");
@@ -288,26 +352,34 @@ void TomoReconstruction::setupRunTool() {
   // set up the reconstruction tool
   QComboBox *rt = m_ui.comboBox_run_tool;
   if (rt) {
-    std::vector<std::string> clusters;
-    // catch all the useable/relevant compute resources. For the time
-    // being this is rather simple (just SCARF) and will probably stay
-    // like this for a while.
+    std::vector<std::string> tools;
+    // catch all the useable/relevant tools for the compute
+    // resources. For the time being this is rather simple (just
+    // SCARF) and will probably stay like this for a while.
     const std::string res = getComputeResource();
     if ("ISIS" == m_facility && "SCARF@STFC" == res) {
-      clusters.push_back(res);
+      tools = m_SCARFtools;
     }
     // others would/could come here
 
     rt->clear();
-    for (size_t i=0; i<clusters.size(); i++) {
-      rt->addItem(QString::fromStdString(clusters[i].c_str()));
+    for (size_t i=0; i<tools.size(); i++) {
+      rt->addItem(QString::fromStdString(tools[i].c_str()));
+
+      // put savu but disable, as it's not yet sorted out
+      if ("Savu" == tools[i]) {
+        QModelIndex idx = rt->model()->index(static_cast<int>(i), 0);
+        QVariant disabled(0);
+        rt->model()->setData(idx, disabled, Qt::UserRole - 1);
+      }
     }
-    // put local but disable, as it's not yet sorted out
-    rt->addItem(QString("Local"));
-    QModelIndex idx = rt->model()->index(1, 0);
-    QVariant disabled(0);
-    rt->model()->setData(idx, disabled, Qt::UserRole - 1);
   }
+}
+
+/// needs to at least update the 'tool' combo box
+void TomoReconstruction::compResourceIndexChanged(int i) {
+  UNUSED_ARG(i);
+  setupRunTool();
 }
 
 /**
@@ -330,6 +402,24 @@ void TomoReconstruction::doLogin(const std::string &pw) {
   } catch (std::runtime_error &e) {
     throw std::runtime_error(
         "Error when trying to log into the remote compute resource " +
+        getComputeResource() + " with username " + user + ": " + e.what());
+  }
+}
+
+void TomoReconstruction::doLogout() {
+  // TODO: once the remote algorithms are rearranged into the
+  // 'RemoteJobManager' design, this will use...
+  // auto alg = Algorithm::fromString("???"); - need an alg for this
+  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
+  alg->initialize();
+  const std::string user = getUsername();
+  alg->setPropertyValue("UserName", user);
+  alg->setPropertyValue("Action", "LogOut");
+  try {
+    alg->execute();
+  } catch (std::runtime_error &e) {
+    throw std::runtime_error(
+        "Error when trying to log out from the remote compute resource " +
         getComputeResource() + " with username " + user + ": " + e.what());
   }
 }
@@ -363,7 +453,7 @@ bool TomoReconstruction::doPing() {
  */
 void TomoReconstruction::doSubmitReconstructionJob() {
   // TODO: once the remote algorithms are rearranged into the
-  // 'RemoteJobManager' design, this will use...
+  // 'RemoteJobManager' design, this will use:
   // auto transAlg = Algorithm::fromString("StartRemoteTransaction");
   // auto submitAlg = Algorithm::fromString("SubmitRemoteJob");
   // submitAlg->setPropertyValue("ComputeResource", res);
@@ -382,7 +472,7 @@ void TomoReconstruction::doSubmitReconstructionJob() {
 
 void TomoReconstruction::doCancelJob(const std::string &id) {
   // TODO: once the remote algorithms are rearranged into the
-  // 'RemoteJobManager' design, this will use...
+  // 'RemoteJobManager' design, this will use:
   // auto alg = Algorithm::fromString("EndRemoteTransaction");
   auto alg = Algorithm::fromString("SCARFTomoReconstruction");
   alg->initialize();
@@ -398,6 +488,7 @@ void TomoReconstruction::doCancelJob(const std::string &id) {
 }
 
 void TomoReconstruction::toolSetupClicked() {
+  // big TODO: handle tool specific options / config files
 }
 
 void TomoReconstruction::reconstructClicked() {
@@ -879,7 +970,24 @@ std::string TomoReconstruction::getComputeResource() {
  * @return Username ready to be used in remote queries
  */
 std::string TomoReconstruction::getUsername() {
-  return "invalid";
+  if (m_SCARFName ==
+      m_ui.comboBox_run_compute_resource->currentText().toStdString())
+    return m_ui.lineEdit_SCARF_username->text().toStdString();
+  else
+    return "invalid";
+}
+
+/**
+ * Retrieve the username being used for the selected compute resource.
+ *
+ * @return Username ready to be used in remote queries
+ */
+std::string TomoReconstruction::getPassword() {
+  if (m_SCARFName ==
+      m_ui.comboBox_run_compute_resource->currentText().toStdString())
+    return m_ui.lineEdit_SCARF_password->text().toStdString();
+  else
+    return "none";
 }
 
 /**
