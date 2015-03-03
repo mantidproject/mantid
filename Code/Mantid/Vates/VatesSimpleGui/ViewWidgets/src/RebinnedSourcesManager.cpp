@@ -28,12 +28,12 @@
 #include <vtkSMInputProperty.h>
 #include <vtkSMProxyProperty.h>
 #include <vtkSMProxyListDomain.h>
-#include <QList>
+
 
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1170
 #endif
-
+#include <QList>
 #include "boost/shared_ptr.hpp"
 #include <Poco/ActiveResult.h>
 

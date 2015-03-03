@@ -51,7 +51,7 @@ namespace MantidQt{
 
       std::vector<int> indexList = getSliceViewerIndicesForCommonColorMaps(colorMapNamesSliceViewer, colorMapNamesVsi);
 
-      for (std::vector<int>::iterator it = indexList.begin(); it < indexList.end(); ++it)
+      for (std::vector<int>::iterator it = indexList.begin(); it != indexList.end(); ++it)
       {
         colorMapNames.append(colorMapNamesSliceViewer[*it]);
         colorMapFiles.append(colorMapFilesSliceViewer[*it]);
@@ -73,7 +73,7 @@ namespace MantidQt{
       // Extract all file names 
       appendAllFileNamesForFileType(colorMapXMLNames, colormapXMLFiles, colorMapDirectory, "xml");
 
-      for (QStringList::iterator it = colormapXMLFiles.begin(); it < colormapXMLFiles.end(); ++it)
+      for (QStringList::iterator it = colormapXMLFiles.begin(); it != colormapXMLFiles.end(); ++it)
       {
         appendVSIColorMaps(colorMapNames, *it);
       }
@@ -123,7 +123,7 @@ namespace MantidQt{
 
       QFileInfoList info = directory.entryInfoList(filter, QDir::Files);
 
-      for (QFileInfoList::iterator it = info.begin(); it < info.end(); ++it)
+      for (QFileInfoList::iterator it = info.begin(); it != info.end(); ++it)
       {
         colorMapNames.append(it->baseName());
         colorMapFiles.append(it->absFilePath());
@@ -136,7 +136,7 @@ namespace MantidQt{
 
       std::vector<int> indexVector;
 
-      for (QStringList::iterator it = colorMapNamesSliceViewer.begin(); it < colorMapNamesSliceViewer.end(); ++it)
+      for (QStringList::iterator it = colorMapNamesSliceViewer.begin(); it != colorMapNamesSliceViewer.end(); ++it)
       {
         if (colorMapNamesVsi.indexOf(*it) != -1)
         {

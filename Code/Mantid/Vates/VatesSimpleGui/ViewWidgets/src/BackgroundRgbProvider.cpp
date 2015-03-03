@@ -1,8 +1,12 @@
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidQtAPI/MdSettings.h"
 #include "MantidKernel/Logger.h"
-
 #include <vector>
+
+// Have to deal with ParaView warnings and Intel compiler the hard way.
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1170
+#endif
 #include <pqRenderView.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMViewProxy.h>
@@ -10,9 +14,8 @@
 #include <vtkCallbackCommand.h>
 #include <vtkSmartPointer.h>
 
-// Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
-  #pragma warning disable 1170
+  #pragma warning enable 1170
 #endif
 
 namespace Mantid

@@ -6,7 +6,16 @@
 #include <vector>
 #include <map>
 #include <string>
+
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1170
+#endif
+
 #include <pqRenderView.h>
+
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1170
+#endif
 
 class vtkObject;
 

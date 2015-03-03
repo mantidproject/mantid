@@ -4,10 +4,6 @@
 #include <map>
 #include <string>
 
-// Have to deal with ParaView warnings and Intel compiler the hard way.
-#if defined(__INTEL_COMPILER)
-  #pragma warning disable 1170
-#endif
 
 namespace Mantid
 {
