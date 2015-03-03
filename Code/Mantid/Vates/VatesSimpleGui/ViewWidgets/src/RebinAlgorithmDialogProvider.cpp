@@ -139,7 +139,7 @@ namespace Mantid
 
         MantidQt::API::AlgorithmDialog* dialog = NULL;
 
-        // Set the correct algorithm dialog
+        // Set the correct algorithm dialog, Add CutMD here once it is ready.
         if (algorithmType == "BinMD")
         {
           dialog = new MantidQt::MantidWidgets::BinMDDialog(m_parent);
@@ -149,12 +149,9 @@ namespace Mantid
         {
           dialog = new MantidQt::MantidWidgets::SliceMDDialog(m_parent);
           getPresetsForSliceMDAlgorithmDialog(inputWorkspace, outputWorkspace, presets);
-        } else if (algorithmType == "CutMD")
+        }
+        else
         {
-          return dialog;
-        } else
-        {
-
           return dialog;
         }
 
