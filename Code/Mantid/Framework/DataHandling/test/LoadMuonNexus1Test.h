@@ -308,6 +308,8 @@ public:
     LoadMuonNexus1 alg1;
     LoadMuonNexus1 alg2;
 
+    const std::string deadTimeWSName = "LoadMuonNexus1Test_DeadTimes";
+
     // Execute alg1
     // It will only load some spectra
     TS_ASSERT_THROWS_NOTHING( alg1.initialize() );
@@ -317,6 +319,7 @@ public:
     alg1.setPropertyValue("SpectrumList", "29,31");
     alg1.setPropertyValue("SpectrumMin", "5");
     alg1.setPropertyValue("SpectrumMax", "10");
+    alg1.setPropertyValue("DeadTimeTable", deadTimeWSName);
     TS_ASSERT_THROWS_NOTHING(alg1.execute());    
     TS_ASSERT( alg1.isExecuted() );    
     // Get back the saved workspace
@@ -354,6 +357,25 @@ public:
 
     AnalysisDataService::Instance().remove("outWS1");
     AnalysisDataService::Instance().remove("outWS2");
+
+    // Check dead time table
+    TableWorkspace_sptr deadTimeTable;
+    TS_ASSERT_THROWS_NOTHING( deadTimeTable = 
+      AnalysisDataService::Instance().retrieveWS<TableWorkspace>( deadTimeWSName ) );
+    TS_ASSERT( deadTimeTable );
+    // Check number of rows and columns
+    TS_ASSERT_EQUALS( deadTimeTable->columnCount(), 2 );
+    TS_ASSERT_EQUALS( deadTimeTable->rowCount(), 8 );
+    // Check spectrum numbers
+    TS_ASSERT_EQUALS( deadTimeTable->Int(0,0), 5 );
+    TS_ASSERT_EQUALS( deadTimeTable->Int(4,0), 9 );
+    TS_ASSERT_EQUALS( deadTimeTable->Int(7,0), 31);
+    // Check dead time values
+    TS_ASSERT_DELTA( deadTimeTable->Double(0,1), 0.00161112, 0.00000001 );
+    TS_ASSERT_DELTA( deadTimeTable->Double(3,1), 0.00431686, 0.00000001 );
+    TS_ASSERT_DELTA( deadTimeTable->Double(6,1), 0.00254914, 0.00000001 );
+    AnalysisDataService::Instance().remove(deadTimeWSName);
+
 
   }
 
