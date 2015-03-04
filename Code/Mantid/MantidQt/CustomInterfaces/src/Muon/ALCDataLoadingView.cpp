@@ -137,6 +137,20 @@ namespace CustomInterfaces
     }
   }
 
+  void ALCDataLoadingView::setAvailablePeriods(const std::vector<std::string>& periods)
+  {
+    // Clear previous list
+    m_ui.redPeriod->clear();
+    m_ui.greenPeriod->clear();
+
+    // Add new items
+    for (auto it=periods.begin(); it!=periods.end(); ++it)
+    {
+      m_ui.redPeriod->addItem(QString::fromStdString(*it));
+      m_ui.greenPeriod->addItem(QString::fromStdString(*it));
+    }
+  }
+
   void ALCDataLoadingView::setWaitingCursor()
   {
     QApplication::setOverrideCursor(Qt::WaitCursor);

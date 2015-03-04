@@ -64,6 +64,7 @@ namespace CustomInterfaces
     void setDataCurve(const QwtData& data);
     void displayError(const std::string &error);
     void setAvailableLogs(const std::vector<std::string> &logs);
+    void setAvailablePeriods(const std::vector<std::string> &periods);
     void setWaitingCursor();
     void restoreCursor();
 

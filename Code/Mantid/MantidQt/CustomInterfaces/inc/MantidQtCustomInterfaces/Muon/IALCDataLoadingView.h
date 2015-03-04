@@ -90,6 +90,10 @@ namespace CustomInterfaces
     /// @param logs :: New list of log names
     virtual void setAvailableLogs(const std::vector<std::string>& logs) = 0;
 
+    /// Update the list of periods user can select
+    /// @param periods :: New list of periods
+    virtual void setAvailablePeriods(const std::vector<std::string>& periods) = 0;
+
     /// Set waiting cursor for long operation
     virtual void setWaitingCursor() = 0;
 

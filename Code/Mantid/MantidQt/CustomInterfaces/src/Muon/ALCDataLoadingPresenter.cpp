@@ -100,9 +100,11 @@ namespace CustomInterfaces
     catch(...)
     {
       m_view->setAvailableLogs(std::vector<std::string>()); // Empty logs list
+      m_view->setAvailablePeriods(std::vector<std::string>()); // Empty period list
       return;
     }
 
+    // Set logs
     MatrixWorkspace_const_sptr ws = MuonAnalysisHelper::firstPeriod(loadedWs);
     std::vector<std::string> logs;
 
@@ -111,8 +113,16 @@ namespace CustomInterfaces
     {
       logs.push_back((*it)->name());
     }
-
     m_view->setAvailableLogs(logs);
+
+    // Set periods
+    size_t numPeriods = MuonAnalysisHelper::numPeriods(loadedWs);
+    std::vector<std::string> periods;
+    for (size_t i=0; i<numPeriods; i++)
+    {
+      periods.push_back(std::to_string(i+1));
+    }
+    m_view->setAvailablePeriods(periods);
   }
 
 } // namespace CustomInterfaces
