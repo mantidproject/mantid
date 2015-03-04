@@ -26,7 +26,6 @@ set ( SRC_FILES
 	src/MDHistoWorkspace.cpp
 	src/MDHistoWorkspaceIterator.cpp
 	src/MDLeanEvent.cpp
-	src/MDSplitBox.cpp
 	src/MaskWorkspace.cpp
 	src/MementoTableWorkspace.cpp
 	src/NoShape.cpp
@@ -79,7 +78,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/MDBoxFlatTree.h
 	inc/MantidDataObjects/MDBoxIterator.h
 	inc/MantidDataObjects/MDBoxSaveable.h
-        inc/MantidDataObjects/MDDimensionStats.h
+	inc/MantidDataObjects/MDDimensionStats.h
 	inc/MantidDataObjects/MDEventFactory.h
 	inc/MantidDataObjects/MDEventInserter.h
 	inc/MantidDataObjects/MDEventWorkspace.h
@@ -87,7 +86,6 @@ set ( INC_FILES
 	inc/MantidDataObjects/MDHistoWorkspace.h
 	inc/MantidDataObjects/MDHistoWorkspaceIterator.h
 	inc/MantidDataObjects/MDLeanEvent.h
-	inc/MantidDataObjects/MDSplitBox.h
 	inc/MantidDataObjects/MaskWorkspace.h
 	inc/MantidDataObjects/MementoTableWorkspace.h
 	inc/MantidDataObjects/NoShape.h
@@ -134,8 +132,8 @@ set ( TEST_FILES
 	MDBoxIteratorTest.h
 	MDBoxSaveableTest.h
 	MDBoxTest.h
-        MDDimensionStatsTest.h
-        MDEventTest.h
+	MDDimensionStatsTest.h
+	MDEventTest.h
 	MDEventFactoryTest.h
 	MDEventInserterTest.h
 	MDEventWorkspaceTest.h
@@ -143,7 +141,6 @@ set ( TEST_FILES
 	MDHistoWorkspaceIteratorTest.h
 	MDHistoWorkspaceTest.h
 	MDLeanEventTest.h
-	MDSplitBoxTest.h
 	MaskWorkspaceTest.h
 	MementoTableWorkspaceTest.h
 	NoShapeTest.h

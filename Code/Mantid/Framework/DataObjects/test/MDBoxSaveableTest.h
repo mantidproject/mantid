@@ -738,6 +738,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
    */
   void test_splitAllIfNeeded_fileBacked()
   {
+    using Mantid::DataObjects::BoxControllerNeXusIO;
     typedef MDLeanEvent<2> MDE;
 
    
@@ -747,7 +748,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     BoxController_sptr spBc = boost::shared_ptr<BoxController >(b->getBoxController());
 
 
-    auto fbc =boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNeXusIO(spBc.get()));
+    auto fbc =boost::shared_ptr<API::IBoxControllerIO>(new BoxControllerNeXusIO(spBc.get()));
     spBc->setSplitThreshold(100);
     spBc->setMaxDepth(4);
     spBc->setFileBacked(fbc,"MDGridBoxTest.nxs");

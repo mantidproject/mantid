@@ -121,7 +121,7 @@ private:
     /// with. )
   } m_EventType;
 
-  /// The version of the MDEvents data block
+  /// The version of the md events data block
   std::string m_EventsVersion;
   /// the symblolic description of the event types currently supported by the
   /// class

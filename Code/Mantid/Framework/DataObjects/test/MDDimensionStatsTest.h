@@ -1,15 +1,13 @@
-#ifndef MANTID_MDEVENTS_MDDIMENSIONSTATSTEST_H_
-#define MANTID_MDEVENTS_MDDIMENSIONSTATSTEST_H_
+#ifndef MANTID_DATAOBJECTS_MDDIMENSIONSTATSTEST_H_
+#define MANTID_DATAOBJECTS_MDDIMENSIONSTATSTEST_H_
+
+#include "MantidDataObjects/MDDimensionStats.h"
+
+#include "MantidKernel/Timer.h"
 
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
 
-#include "MantidMDEvents/MDDimensionStats.h"
-
-using namespace Mantid::MDEvents;
+using Mantid::DataObjects::MDDimensionStats;
 
 class MDDimensionStatsTest : public CxxTest::TestSuite
 {
@@ -42,5 +40,5 @@ public:
 };
 
 
-#endif /* MANTID_MDEVENTS_MDDIMENSIONSTATSTEST_H_ */
+#endif /* MANTID_DATAOBJECTS_MDDIMENSIONSTATSTEST_H_ */
 

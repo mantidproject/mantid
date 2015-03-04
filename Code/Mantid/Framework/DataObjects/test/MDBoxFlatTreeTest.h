@@ -1,17 +1,15 @@
 #ifndef MANTID_DATAOBJECTS_MDBOX_FLATTREE_H_
 #define MANTID_DATAOBJECTS_MDBOX_FLATTREE_H_
 
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/MDBoxFlatTree.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidDataObjects/MDLeanEvent.h"
-#include "MantidAPI/BoxController.h"
 
+#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
 
-using namespace Mantid;
-using namespace Mantid::DataObjects;
+using Mantid::DataObjects::MDBoxFlatTree;
 
 class MDBoxFlatTreeTest :public CxxTest::TestSuite
 {
@@ -23,10 +21,9 @@ public:
 
   MDBoxFlatTreeTest()
   {
-    // load dependent DLL, which are used in MDEventsTestHelper (e.g. MDAlgorithms to create MD workspace)
-    // Mantid::API::FrameworkManager::Instance();
+    using Mantid::DataObjects::MDEventsTestHelper::makeFakeMDEventWorkspace;
     // make non-file backet mdEv workspace with 10000 events
-     spEw3 = MDEventsTestHelper::makeFileBackedMDEW("TestLeanEvWS", false,10000);
+    spEw3 = makeFakeMDEventWorkspace("TestLeanEvWS", 10000);
   }
 
   void testFlatTreeOperations()
@@ -57,18 +54,18 @@ public:
     TS_ASSERT_THROWS_NOTHING(BoxStoredTree.loadBoxStructure("someFile.nxs",nDims,"MDLeanEvent"));
 
     size_t nDim = size_t(BoxStoredTree.getNDims());
-    API::BoxController_sptr new_bc = boost::shared_ptr<API::BoxController>(new API::BoxController(nDim));    
+    auto new_bc = boost::make_shared<Mantid::API::BoxController>(nDim);
     new_bc->fromXMLString(BoxStoredTree.getBCXMLdescr());
 
     TSM_ASSERT("Should restore the box controller equal to the one before saving ",*(spEw3->getBoxController())==*(new_bc));
 
-    std::vector<API::IMDNode *>Boxes;
+    std::vector<Mantid::API::IMDNode *>Boxes;
     TS_ASSERT_THROWS_NOTHING(BoxStoredTree.restoreBoxTree(Boxes ,new_bc, false,false));
 
-    std::vector<API::IMDNode *>OldBoxes;
+    std::vector<Mantid::API::IMDNode *>OldBoxes;
     TS_ASSERT_THROWS_NOTHING(spEw3->getBoxes(OldBoxes, 1000, false));
     // just in case, should be already sorted
-    API::IMDNode::sortObjByID(OldBoxes);
+    Mantid::API::IMDNode::sortObjByID(OldBoxes);
 
     for(size_t i=0;i<OldBoxes.size();i++)
     {

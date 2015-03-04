@@ -1,42 +1,37 @@
 #ifndef BOXCONTROLLER_NEXUS_IO_TEST_H
 #define BOXCONTROLLER_NEXUS_IO_TEST_H
 
-#include <cxxtest/TestSuite.h>
 #include <map>
 #include <memory>
-#include <Poco/File.h>
-#include <nexus/NeXusFile.hpp>
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidDataObjects/BoxControllerNeXusIO.h"
-#include "MantidAPI/FileFinder.h"
 
-using namespace Mantid;
-using namespace Mantid::Geometry;
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
-//using namespace Mantid::MDEvens;
+#include <cxxtest/TestSuite.h>
+#include <nexus/NeXusFile.hpp>
+#include <Poco/File.h>
+
+#include "MantidAPI/FileFinder.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 class BoxControllerNeXusIOTest : public CxxTest::TestSuite
 {
-    BoxController_sptr sc;
-    std::string xxfFileName;
-
-
-    BoxControllerNeXusIOTest()
-    {
-        sc = BoxController_sptr(new BoxController(4));
-        xxfFileName= "BoxCntrlNexusIOxxfFile.nxs";
-    }
-
-
-
 public:
-static BoxControllerNeXusIOTest *createSuite() { return new BoxControllerNeXusIOTest(); }
-static void destroySuite(BoxControllerNeXusIOTest * suite) { delete suite; }    
+
+  static BoxControllerNeXusIOTest *createSuite() { return new BoxControllerNeXusIOTest(); }
+  static void destroySuite(BoxControllerNeXusIOTest * suite) { delete suite; }
+
+  Mantid::API::BoxController_sptr sc;
+  std::string xxfFileName;
+
+
+  BoxControllerNeXusIOTest()
+  {
+    sc = Mantid::API::BoxController_sptr(new Mantid::API::BoxController(4));
+    xxfFileName= "BoxCntrlNexusIOxxfFile.nxs";
+  }
 
 void setUp()
 {
-    std::string FullPathFile = API::FileFinder::Instance().getFullPath(this->xxfFileName);
+    std::string FullPathFile = Mantid::API::FileFinder::Instance().getFullPath(this->xxfFileName);
     if(!FullPathFile.empty())
             Poco::File(FullPathFile).remove();   
 
@@ -44,9 +39,10 @@ void setUp()
 
  void test_contstructor_setters()
  {
+     using Mantid::DataObjects::BoxControllerNeXusIO;
 
-     MDEvents::BoxControllerNeXusIO *pSaver(NULL);
-     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNeXusIO(sc.get()));
+     BoxControllerNeXusIO *pSaver(NULL);
+     TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
 
      size_t CoordSize;
      std::string typeName;
@@ -75,12 +71,18 @@ void setUp()
 
  void test_CreateOrOpenFile()
  {
-     MDEvents::BoxControllerNeXusIO *pSaver(NULL);
-     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNeXusIO(sc.get()));
+     using Mantid::coord_t;
+     using Mantid::API::FileFinder;
+     using Mantid::DataObjects::BoxControllerNeXusIO;
+     using Mantid::Kernel::Exception::FileError;
+
+     BoxControllerNeXusIO *pSaver(NULL);
+     TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
      pSaver->setDataType(sizeof(coord_t),"MDLeanEvent");
      std::string FullPathFile;
 
-     TSM_ASSERT_THROWS("new file does not open in read mode",pSaver->openFile(this->xxfFileName,"r"), Kernel::Exception::FileError);
+     TSM_ASSERT_THROWS("new file does not open in read mode",
+                       pSaver->openFile(this->xxfFileName,"r"), FileError);
 
      TS_ASSERT_THROWS_NOTHING(pSaver->openFile(this->xxfFileName,"w"));
      TS_ASSERT_THROWS_NOTHING(FullPathFile = pSaver->getFileName());
@@ -88,7 +90,7 @@ void setUp()
      TS_ASSERT_THROWS_NOTHING(pSaver->closeFile());
      TS_ASSERT(!pSaver->isOpened());
 
-     TSM_ASSERT("file created ",!API::FileFinder::Instance().getFullPath(FullPathFile).empty());
+     TSM_ASSERT("file created ",!FileFinder::Instance().getFullPath(FullPathFile).empty());
 
      // now I can open this file for reading 
      TS_ASSERT_THROWS_NOTHING(pSaver->openFile(FullPathFile,"r"));
@@ -106,13 +108,15 @@ void setUp()
 
      delete pSaver;
      if(Poco::File(FullPathFile).exists())
-         Poco::File(FullPathFile).remove();   
+         Poco::File(FullPathFile).remove();
  }
 
  void test_free_space_index_is_written_out_and_read_in()
  {
-     MDEvents::BoxControllerNeXusIO *pSaver(NULL);
-     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNeXusIO(sc.get()));
+     using Mantid::DataObjects::BoxControllerNeXusIO;
+   
+     BoxControllerNeXusIO *pSaver(NULL);
+     TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
      std::string FullPathFile;
 
      TS_ASSERT_THROWS_NOTHING(pSaver->openFile(this->xxfFileName,"w"));
@@ -148,7 +152,8 @@ void setUp()
  struct IF   // if in/out formats are different we can not read different data format from it
  {
  public:
-     static void compareReadTheSame(API::IBoxControllerIO *pSaver,const std::vector<FROM> &/*inputData*/,size_t /*nEvents*/,size_t /*nColumns*/)
+     static void compareReadTheSame(Mantid::API::IBoxControllerIO *pSaver,
+                                    const std::vector<FROM> &/*inputData*/,size_t /*nEvents*/,size_t /*nColumns*/)
      {
          TS_ASSERT(pSaver->isOpened());
          TS_ASSERT_THROWS_NOTHING(pSaver->closeFile());
@@ -160,7 +165,7 @@ void setUp()
  struct IF<FROM,FROM>    // if in/out formats are the same, we can read what was written earlier
  {
  public:
-     static void compareReadTheSame(API::IBoxControllerIO *pSaver,const std::vector<FROM> &inputData,size_t nEvents,size_t nColumns)
+     static void compareReadTheSame(Mantid::API::IBoxControllerIO *pSaver,const std::vector<FROM> &inputData,size_t nEvents,size_t nColumns)
      {
         std::vector<FROM> toRead;
         TS_ASSERT_THROWS_NOTHING(pSaver->loadBlock(toRead,100,nEvents));
@@ -179,8 +184,10 @@ void setUp()
  template<typename FROM,typename TO>
  void WriteReadRead()
  {
-     MDEvents::BoxControllerNeXusIO *pSaver(NULL);
-     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNeXusIO(sc.get()));
+     using Mantid::DataObjects::BoxControllerNeXusIO;
+
+     BoxControllerNeXusIO *pSaver(NULL);
+     TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
      pSaver->setDataType(sizeof(FROM),"MDEvent");
      std::string FullPathFile;
 
@@ -237,5 +244,13 @@ void test_WriteFloatReadReadDouble()
  {
      this->WriteReadRead<float,double>();
  }
+ 
+private:
+ /// Create a test box controller. Ownership is passed to the caller
+ Mantid::DataObjects::BoxControllerNeXusIO * createTestBoxController()
+ {
+   return new Mantid::DataObjects::BoxControllerNeXusIO(sc.get());
+ }
+
 };
 #endif
