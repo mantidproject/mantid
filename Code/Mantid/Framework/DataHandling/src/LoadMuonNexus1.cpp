@@ -323,7 +323,7 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
     // Set the spectrum list that should be loaded
     if ( m_interval || m_list ) {
       // Load only selected spectra
-      for (size_t i=m_spec_min; i<m_spec_max; i++) {
+      for (int64_t i=m_spec_min; i<m_spec_max; i++) {
         specToLoad.push_back(static_cast<int>(i));
       }
       for (auto it=m_spec_list.begin(); it!=m_spec_list.end(); ++it) {
@@ -368,7 +368,7 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
 
       WorkspaceGroup_sptr tableGroup = boost::make_shared<WorkspaceGroup>();
 
-      for (size_t i=0; i<m_numberOfPeriods; i++) {
+      for (int64_t i=0; i<m_numberOfPeriods; i++) {
 
         // Populate deadTimes
         for (auto it=specToLoad.begin(); it!=specToLoad.end(); ++it) {
