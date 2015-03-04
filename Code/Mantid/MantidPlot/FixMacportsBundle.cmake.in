@@ -28,6 +28,11 @@ function(gp_resolved_file_type_override resolved_file type_var)
 #    message(STATUS "resolving ParaView dependency ${file} as system")
 #    set(${type_var} system PARENT_SCOPE)
 #  endif()
+  # resolve python framework as system
+  if(file MATCHES "Python.framework")
+    message("resolving ${file} as system")
+    set(${type_var} system PARENT_SCOPE)
+  endif()
 endfunction()
 
 # gp_item_default_embedded_path_override item default_embedded_path_var
