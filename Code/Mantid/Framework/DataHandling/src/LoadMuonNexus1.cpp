@@ -472,8 +472,6 @@ LoadMuonNexus1::createDeadTimeTable(std::vector<int> specToLoad,
   deadTimeTable->addColumn("int", "spectrum");
   deadTimeTable->addColumn("double", "dead-time");
 
-  int s = 1; // Current spectrum
-
   for (size_t i = 0; i<specToLoad.size(); i++) {
     TableRow row = deadTimeTable->appendRow();
     row << specToLoad[i] << deadTimes[i];
