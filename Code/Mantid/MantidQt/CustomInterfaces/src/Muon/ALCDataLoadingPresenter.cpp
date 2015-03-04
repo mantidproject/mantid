@@ -28,7 +28,7 @@ namespace CustomInterfaces
     m_view->initialize();
 
     connect(m_view, SIGNAL(loadRequested()), SLOT(load()));
-    connect(m_view, SIGNAL(firstRunSelected()), SLOT(updateAvailableLogs()));
+    connect(m_view, SIGNAL(firstRunSelected()), SLOT(updateAvailableInfo()));
   }
 
   void ALCDataLoadingPresenter::load()
@@ -78,7 +78,7 @@ namespace CustomInterfaces
     m_view->restoreCursor();
   }
 
-  void ALCDataLoadingPresenter::updateAvailableLogs()
+  void ALCDataLoadingPresenter::updateAvailableInfo()
   {
     Workspace_sptr loadedWs;
 
