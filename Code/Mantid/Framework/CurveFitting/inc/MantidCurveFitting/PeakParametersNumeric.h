@@ -66,7 +66,7 @@ protected:
                                           std::vector<double> &p,
                                           std::vector<double> &a) const;
 
-  enum WidthParamType {Linear, Inverse};
+  enum WidthParamType {Linear, Square, Inverse};
 
   void defineHeightParameter(const std::string& parName);
   void defineCentreParameter(const std::string& parName);

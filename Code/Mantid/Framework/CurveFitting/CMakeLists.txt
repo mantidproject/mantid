@@ -162,6 +162,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Gaussian.h
 	inc/MantidCurveFitting/GaussianComptonProfile.h
 	inc/MantidCurveFitting/GramCharlierComptonProfile.h
+	inc/MantidCurveFitting/HalfComplex.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/Jacobian.h
 	inc/MantidCurveFitting/LeBailFit.h
@@ -230,6 +231,7 @@ set ( TEST_FILES
 	BoundaryConstraintTest.h
 	CalculateGammaBackgroundTest.h
 	CalculateMSVesuvioTest.h
+	ChebfunBaseTest.h
 	ChebyshevTest.h
 	CompositeFunctionTest.h
 	ComptonPeakProfileTest.h

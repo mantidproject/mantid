@@ -89,6 +89,9 @@ void PeakParametersNumeric::setFwhm(const double w) {
     size_t index = m_widthIndices[i];
     double value = getParameter(index);
     switch (m_widthParTypes[i]) {
+    case Square:
+      value *= factor * factor;
+      break;
     case Inverse:
       value /= factor;
       break;
@@ -142,7 +145,7 @@ void PeakParametersNumeric::updateCache() const {
   double start = interval.first;
   double end = interval.second;
 
-  ChebfunVec a, p, ad;
+  std::vector<double> a, p, ad;
 
   bool baseBuilt = false;
 
