@@ -4,6 +4,7 @@
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidKernel/ReadLock.h"
 
@@ -280,6 +281,15 @@ namespace VATES
     delete [] pointIDs;
     delete [] voxelShown;
     delete [] pointNeeded;
+
+    // Hedge against empty data sets
+    if (visualDataSet->GetNumberOfPoints() <= 0)
+    {
+      visualDataSet->Delete();
+      vtkNullUnstructuredGrid nullGrid;
+      visualDataSet = nullGrid.createNullData();
+    }
+
     return visualDataSet;
   }
 

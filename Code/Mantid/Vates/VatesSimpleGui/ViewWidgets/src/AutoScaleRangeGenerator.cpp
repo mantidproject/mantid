@@ -4,6 +4,7 @@
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
 #endif
+
 #include <pqServer.h>
 #include <pqActiveObjects.h>
 #include <pqServerManagerModel.h>
@@ -16,6 +17,10 @@
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
 #include <vtkSMDoubleVectorProperty.h>
+
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1170
+#endif
 
 #include <cfloat>
 #include <QPair>

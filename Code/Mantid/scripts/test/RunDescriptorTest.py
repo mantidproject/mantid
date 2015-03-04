@@ -1,5 +1,5 @@
 import os,sys,inspect
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#os.environ["PATH"] = r"d:\Data\Mantid_GIT_test\Code\builds\br_master\bin\Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -52,6 +52,12 @@ class RunDescriptorTest(unittest.TestCase):
         rez = CheckWorkspacesMatch(Workspace1=run_ws,Workspace2=stor_ws)
 
         self.assertEqual(rez,'Success!')
+
+        propman.sample_run='MAR11001.RAW'
+        self.assertFalse('run_ws' in mtd)
+        self.assertEqual(PropertyManager.sample_run.run_number(),11001)
+        self.assertEqual(PropertyManager.sample_run._fext,'.RAW')
+
 
 
     def test_descr_dependend(self):
@@ -428,11 +434,17 @@ class RunDescriptorTest(unittest.TestCase):
     def test_find_runfiles(self):
         propman = self.prop_man
         propman.sample_run = [11001,11111]
+        files = PropertyManager.sample_run.get_run_file_list()
+        self.assertEqual(len(files),2)
+
 
         nf,found=PropertyManager.sample_run._run_list.find_run_files('MAR')
         self.assertEqual(len(nf),1)
         self.assertEqual(len(found),1)
         self.assertEqual(nf[0],11111)
+
+        files = PropertyManager.sample_run.get_run_file_list()
+        self.assertEqual(len(files),2)
 
     def test_add_masks(self):
        propman  = self.prop_man

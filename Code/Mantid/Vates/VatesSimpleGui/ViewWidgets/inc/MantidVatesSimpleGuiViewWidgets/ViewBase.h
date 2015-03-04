@@ -1,9 +1,9 @@
 #ifndef VIEWBASE_H_
 #define VIEWBASE_H_
 
+#include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
-
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 
 #include <QPointer>
@@ -97,6 +97,8 @@ public:
   virtual bool hasWorkspaceType(const QString &wsTypeName);
   /// Check if file/workspace is a MDHistoWorkspace.
   virtual bool isMDHistoWorkspace(pqPipelineSource *src);
+  /// Check if file/workspace is a temporary workspace
+  virtual bool isTemporaryWorkspace(pqPipelineSource* src);
   /// Check if file/workspace is a Peaks one.
   virtual bool isPeaksWorkspace(pqPipelineSource *src);
   /// Prints properties for given source.
@@ -112,14 +114,21 @@ public:
   /// Set the current color scale state
   virtual void setColorScaleState(ColorSelectionWidget *cs);
   /// Create source for plugin mode.
-  virtual void setPluginSource(QString pluginName, QString wsName);
+  virtual pqPipelineSource* setPluginSource(QString pluginName, QString wsName);
   /// Determines if source has timesteps (4D).
   virtual bool srcHasTimeSteps(pqPipelineSource *src);
+  /// Set the the background color for the view
+  virtual void setColorForBackground(bool viewSwitched);
+  /// Sets the splatterplot button to the desired visibility.
+  virtual void setSplatterplot(bool visibility);
   /// Initializes the settings of the color scale 
   virtual void initializeColorScale();
-
+  /// Sets the standard veiw button to the desired visibility.
+  virtual void setStandard(bool visibility);
   /// Enumeration for Cartesian coordinates
   enum Direction {X, Y, Z};
+  /// Update settings
+  virtual void updateSettings();
 
   QPointer<pqPipelineSource> origSrc; ///< The original source
   QPointer<pqPipelineRepresentation> origRep; ///< The original source representation
@@ -149,6 +158,7 @@ public slots:
   virtual void updateView();
   /// React when the visibility of a representation changes
   virtual void onVisibilityChanged(pqPipelineSource *source, pqDataRepresentation *representation);
+  virtual void onSourceDestroyed();
 
 signals:
   /**
@@ -186,10 +196,20 @@ signals:
   void setViewStatus(ModeControlWidget::Views mode, bool state);
   /**
    * Signal to set the status of the view mode buttons.
-	 * @param view The initial view.
+   * @param view The initial view.
    * @param state Whether or not to enable to view mode buttons.
    */
   void setViewsStatus(ModeControlWidget::Views view, bool state);
+  /**
+   * Signal to perform a possible rebin.
+   * @param algorithmType The type of rebinning algorithm.
+   */
+  void rebin(std::string algorithmType);
+   /**
+   * Signal to perform a possible unbin on a sources which has been
+   * rebinned in the VSI.
+   */
+  void unbin();
   /**
    * Singal to tell other elements that the log scale was altered programatically
    * @param state flag wheter or not to enable the 
@@ -215,6 +235,10 @@ private:
   void handleTimeInfo(vtkSMDoubleVectorProperty *dvp);
 
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
+  BackgroundRgbProvider backgroundRgbProvider; /// < Holds the manager for background color related tasks.
+   const pqColorMapModel* m_currentColorMapModel;
+
+  QString m_temporaryWorkspaceIdentifier;
 };
 
 }
