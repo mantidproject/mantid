@@ -2106,14 +2106,6 @@ const std::string ConfigServiceImpl::getParaViewPath() const {
   return getString("paraview.path");
 }
 
-/**
- * Get the user-specified initial view
- * @returns A string with the initial view or an empty string
- */
-const std::string ConfigServiceImpl::getVsiInitialView() const {
-  return getString("vsi.initialview");
-}
-
 /// \cond TEMPLATE
 template DLLExport int ConfigServiceImpl::getValue(const std::string &,
                                                    double &);

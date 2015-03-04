@@ -265,6 +265,6 @@ Output
 
   os.remove( calFilePath )
 
-.. seealso :: Algorithm :ref:`algm-PDEstimateDetectorResolution`
+.. seealso :: Algorithm :ref:`algm-EstimateResolutionDiffraction`
 
 .. categories::
