@@ -16,6 +16,7 @@
 #include "MantidQtCustomInterfaces/Indirect/ISISCalibration.h"
 #include "MantidQtCustomInterfaces/Indirect/ISISDiagnostics.h"
 #include "MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h"
+#include "MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.h"
 
 #include <QDesktopServices>
 #include <QDir>
@@ -126,6 +127,7 @@ void IndirectDataReduction::initLayout()
   addTab<IndirectSymmetrise>("Symmetrise");
   addTab<IndirectSqw>("S(Q, w)");
   addTab<IndirectMoments>("Moments");
+  addTab<ILLEnergyTransfer>("ILL Energy Transfer");
 
   // Connect "?" (Help) Button
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
@@ -343,7 +345,7 @@ void IndirectDataReduction::instrumentLoadingDone(bool error)
 {
   if(error)
   {
-    g_log.error("Instument loading failed!");
+    g_log.error("Instument loading failed! This instrument (or analyser/reflection configuration) may not be supported by the interface.");
     return;
   }
 }
@@ -352,7 +354,7 @@ void IndirectDataReduction::instrumentLoadingDone(bool error)
 /**
  * Remove the Poco observer on the config service when the interfaces is closed.
  *
- * @param close CLose event (unused)
+ * @param close Close event (unused)
  */
 void IndirectDataReduction::closeEvent(QCloseEvent* close)
 {
@@ -381,8 +383,8 @@ void IndirectDataReduction::handleConfigChange(Mantid::Kernel::ConfigValChangeNo
   {
     QString facility = QString::fromStdString(value);
 
-    m_uiForm.iicInstrumentConfiguration->setFacility(facility);
     filterUiForFacility(facility);
+    m_uiForm.iicInstrumentConfiguration->setFacility(facility);
   }
 }
 
@@ -471,12 +473,20 @@ void IndirectDataReduction::filterUiForFacility(QString facility)
                       << std::endl;
 
   QStringList enabledTabs;
+  QStringList disabledInstruments;
 
-  // Add facility specific tabs
+  // Add facility specific tabs and disable instruments
   if(facility == "ISIS")
+  {
     enabledTabs << "ISIS Energy Transfer"
                 << "ISIS Calibration"
                 << "ISIS Diagnostics";
+  }
+  else if(facility == "ILL")
+  {
+    enabledTabs << "ILL Energy Transfer";
+    disabledInstruments << "IN10" << "IN13" << "IN16";
+  }
 
   // These tabs work at any facility (always at end of tabs)
   enabledTabs << "Transmission" << "Symmetrise" << "S(Q, w)" << "Moments";
@@ -509,6 +519,9 @@ void IndirectDataReduction::filterUiForFacility(QString facility)
     g_log.debug() << "Adding tab " << (*it).toStdString()
                   << std::endl;
   }
+
+  // Disable instruments as required
+  m_uiForm.iicInstrumentConfiguration->setDisabledInstruments(disabledInstruments);
 }
 
 

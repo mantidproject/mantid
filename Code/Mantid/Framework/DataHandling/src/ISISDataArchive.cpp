@@ -3,12 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/ISISDataArchive.h"
 #include "MantidAPI/ArchiveSearchFactory.h"
+#include "MantidKernel/InternetHelper.h"
+#include "MantidKernel/Exception.h"
 
-#include <Poco/Net/HTTPClientSession.h>
-#include <Poco/Net/HTTPRequest.h>
-#include <Poco/Net/HTTPResponse.h>
-#include <Poco/StreamCopier.h>
-#include <Poco/URI.h>
 #include <Poco/Path.h>
 #include <Poco/File.h>
 #include <Poco/StringTokenizer.h>
@@ -16,12 +13,6 @@
 
 #include <sstream>
 #include <iostream>
-
-using Poco::Net::HTTPClientSession;
-using Poco::Net::HTTPRequest;
-using Poco::Net::HTTPResponse;
-using Poco::Net::HTTPMessage;
-using Poco::URI;
 
 namespace Mantid {
 namespace DataHandling {
@@ -85,20 +76,11 @@ std::string ISISDataArchive::getPath(const std::string &fName) const {
   if (fName.empty())
     return ""; // Avoid pointless call to service
 
-  URI uri(URL_PREFIX + fName);
-  std::string path(uri.getPathAndQuery());
+  Kernel::InternetHelper inetHelper;
+  std::ostringstream os;
+  try {
+    inetHelper.sendRequest(URL_PREFIX + fName,os);
 
-  HTTPClientSession session(uri.getHost(), uri.getPort());
-  HTTPRequest req(HTTPRequest::HTTP_GET, path, HTTPMessage::HTTP_1_1);
-  session.sendRequest(req);
-
-  HTTPResponse res;
-  std::istream &rs = session.receiveResponse(res);
-  const HTTPResponse::HTTPStatus status = res.getStatus();
-  g_log.debug() << "HTTP response=" << res.getStatus() << "\n";
-  if (status == HTTPResponse::HTTP_OK) {
-    std::ostringstream os;
-    Poco::StreamCopier::copyStream(rs, os);
     os << Poco::Path::separator() << fName;
     try {
       const std::string expectedPath = os.str();
@@ -107,6 +89,12 @@ std::string ISISDataArchive::getPath(const std::string &fName) const {
     } catch (Poco::Exception &) {
     }
   }
+  catch (Kernel::Exception::InternetError& ie) {
+    g_log.warning() 
+      << "Could not access archive index " 
+      << ie.what();
+  }
+
   return "";
 }
 
