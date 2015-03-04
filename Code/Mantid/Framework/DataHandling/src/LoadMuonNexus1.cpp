@@ -543,7 +543,7 @@ void LoadMuonNexus1::loadData(size_t hist, specid_t &i, specid_t specNo, MuonNex
   // Populate the workspace. Loop starts from 1, hence i-1
 
   // Create and fill another vector for the X axis  
-  float *timeChannels = new float[lengthIn+1];
+  float *timeChannels = new float[lengthIn+1]();
   nxload.getTimeChannels(timeChannels, static_cast<const int>(lengthIn+1));
   // Put the read in array into a vector (inside a shared pointer)
   boost::shared_ptr<MantidVec> timeChannelsVec(
