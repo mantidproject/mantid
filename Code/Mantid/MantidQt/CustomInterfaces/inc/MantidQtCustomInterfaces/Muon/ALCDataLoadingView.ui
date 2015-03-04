@@ -516,5 +516,6 @@
   <buttongroups>
     <buttongroup name="calculationType"/>
     <buttongroup name="deadTimeCorrType"/>
+    <buttongroup name="detectorGroupingType"/>
   </buttongroups>
 </ui>
