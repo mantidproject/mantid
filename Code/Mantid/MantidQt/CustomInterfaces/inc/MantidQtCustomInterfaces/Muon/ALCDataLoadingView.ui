@@ -266,6 +266,50 @@
                 </widget>
               </item>
               <item>
+                <widget class="QGroupBox" name="periodsGroup">
+                  <property name="title">
+                    <string>Periods</string>
+                  </property>
+                  <layout class="QVBoxLayout" name="verticalLayoutPeriods">
+                    <item>
+                      <layout class="QHBoxLayout" name="horizontalLayoutPeriods">
+                        <item>
+                          <widget class="QComboBox" name="redPeriod">
+                          </widget>
+                        </item>
+                        <item>
+                          <widget class="QCheckBox" name="subtractCheckbox">
+                            <property name="text">
+                              <string>Subtract</string>
+                            </property>
+                          </widget>
+                        </item>
+                        <item>
+                          <widget class="QComboBox" name="greenPeriod">
+                            <property name="enabled">
+                              <bool>false</bool>
+                            </property>
+                          </widget>
+                        </item>
+                        <item>
+                          <spacer name="hSpacerPeriods">
+                            <property name="orientation">
+                              <enum>Qt::Horizontal</enum>
+                            </property>
+                            <property name="sizeHint" stdset="0">
+                              <size>
+                                <width>40</width>
+                                <height>20</height>
+                              </size>
+                            </property>
+                          </spacer>
+                        </item>
+                      </layout>
+                    </item>
+                  </layout>
+                </widget>
+              </item>
+              <item>
                 <widget class="QGroupBox" name="groupBox_2">
                   <property name="title">
                     <string>Calculation</string>
@@ -510,6 +554,12 @@
       <sender>customGroupingButton</sender>
       <signal>toggled(bool)</signal>
       <receiver>backwardEdit</receiver>
+      <slot>setEnabled(bool)</slot>
+    </connection>
+    <connection>
+      <sender>subtractCheckbox</sender>
+      <signal>toggled(bool)</signal>
+      <receiver>greenPeriod</receiver>
       <slot>setEnabled(bool)</slot>
     </connection>
   </connections>
