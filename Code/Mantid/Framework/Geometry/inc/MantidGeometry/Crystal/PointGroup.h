@@ -60,13 +60,10 @@ protected:
   std::vector<Kernel::V3D> getEquivalentSet(const Kernel::V3D &hkl) const;
 
   CrystalSystem getCrystalSystemFromGroup() const;
-  std::vector<Kernel::IntMatrix> getHKLTranformationMatrices() const;
 
   std::string m_symbolHM;
   std::string m_name;
   CrystalSystem m_crystalSystem;
-
-  std::vector<Kernel::IntMatrix> m_hklTransformationMatrices;
 };
 
 /// Shared pointer to a PointGroup

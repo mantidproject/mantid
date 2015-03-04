@@ -95,6 +95,19 @@ bool SymmetryOperation::isIdentity() const {
 bool SymmetryOperation::hasTranslation() const { return m_vector != 0; }
 
 /**
+ * Transforms an index triplet hkl
+ *
+ * Unlike points, vectors are transformed using the transposed transformation
+ * matrix. This method performs the multiplication with the transposed matrix.
+ *
+ * @param hkl :: HKL index triplet to transform
+ * @return :: Transformed index triplet.
+ */
+Kernel::V3D SymmetryOperation::transformHKL(const Kernel::V3D &hkl) const {
+  return multiplyTransposed(m_matrix, hkl);
+}
+
+/**
  * Multiplication operator for combining symmetry operations
  *
  * This operator constructs from S1 (this) and S2 (other) a new symmetry
@@ -246,6 +259,17 @@ Kernel::V3D getWrappedVector(const Kernel::V3D &vector) {
   }
 
   return wrappedVector;
+}
+
+/// Multiplies the transposed 3x3-matrix with the vector.
+Kernel::V3D multiplyTransposed(const Kernel::IntMatrix &matrix,
+                               const Kernel::V3D &vector) {
+  return Kernel::V3D(matrix[0][0] * vector.X() + matrix[1][0] * vector.Y() +
+                 matrix[2][0] * vector.Z(),
+             matrix[0][1] * vector.X() + matrix[1][1] * vector.Y() +
+                 matrix[2][1] * vector.Z(),
+             matrix[0][2] * vector.X() + matrix[1][2] * vector.Y() +
+                 matrix[2][2] * vector.Z());
 }
 
 } // namespace Geometry
