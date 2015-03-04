@@ -64,6 +64,12 @@ public:
   /// Set description of parameter of decorated function by name.
   virtual void setParameterDescription(const std::string &name,
                                        const std::string &description);
+
+  /// Value of i-th active parameter of the decorated function.
+  virtual double activeParameter(size_t i) const;
+  /// Set new value of i-th active parameter of the decorated function.
+  virtual void setActiveParameter(size_t i, double value);
+
   /// Get parameter of decorated function by name.
   virtual double getParameter(const std::string &name) const;
   /// Total number of parameters of decorated function.

@@ -72,6 +72,18 @@ void FunctionParameterDecorator::setParameterDescription(
   m_wrappedFunction->setParameterDescription(name, description);
 }
 
+double FunctionParameterDecorator::activeParameter(size_t i) const {
+  throwIfNoFunctionSet();
+
+  return m_wrappedFunction->activeParameter(i);
+}
+
+void FunctionParameterDecorator::setActiveParameter(size_t i, double value) {
+  throwIfNoFunctionSet();
+
+  m_wrappedFunction->setActiveParameter(i, value);
+}
+
 double FunctionParameterDecorator::getParameter(const std::string &name) const {
   throwIfNoFunctionSet();
 
