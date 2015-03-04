@@ -46,8 +46,8 @@ if not EXIST %WORKSPACE%\build\CMakeCache.txt (
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build step
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-msbuild /nologo nr:false /p:Configuration=Release StandardTestData.vcxproj
-msbuild /nologo nr:false /p:Configuration=Release SystemTestData.vcxproj
+msbuild /nologo /nr:false /p:Configuration=Release StandardTestData.vcxproj
+msbuild /nologo /nr:false /p:Configuration=Release SystemTestData.vcxproj
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Run the tests
