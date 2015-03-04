@@ -77,6 +77,7 @@ void PseudoVoigt::init() {
 
   BoundaryConstraint *mixingConstraint =
       new BoundaryConstraint(this, "Mixing", 0.0, 1.0, true);
+  mixingConstraint->setPenaltyFactor(1e7);
 
   addConstraint(mixingConstraint);
 }
