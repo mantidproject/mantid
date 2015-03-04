@@ -139,7 +139,7 @@ namespace Mantid
 
         MantidQt::API::AlgorithmDialog* dialog = NULL;
 
-        // Set the correct algorithm dialog. Once the CutMD can be added, it needs to be added here.
+        // Set the correct algorithm dialog, Add CutMD here once it is ready.
         if (algorithmType == "BinMD")
         {
           dialog = new MantidQt::MantidWidgets::BinMDDialog(m_parent);

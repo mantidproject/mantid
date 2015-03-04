@@ -504,8 +504,6 @@ namespace Mantid
         pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
         pqPipelineFilter* filter1 = qobject_cast<pqPipelineFilter*>(source1->getConsumer(0));
 
-        pqPipelineSource* newPipelineElement = NULL;
-
         pqPipelineSource* endOfSource2Pipeline = source2;
 
         while(filter1)
@@ -514,6 +512,8 @@ namespace Mantid
           pqPipelineFilter* newFilter = NULL;
 
           proxy1 = filter1->getProxy();
+          pqPipelineFilter* newFilter = NULL;
+          pqPipelineSource* newPipelineElement = NULL;
 
           // Move source2 to its end.
           while (endOfSource2Pipeline->getNumberOfConsumers() > 0)

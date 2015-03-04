@@ -168,6 +168,39 @@ Multiple
 In this mode multiple binning ranges can be defined using he rebin string syntax
 used by the :ref:`Rebin <algm-Rebin>` algorithm.
 
+ILL Energy Transfer
+-------------------
+
+.. interface:: Data Reduction
+  :widget: tabILLEnergyTransfer
+
+This tab handles the reduction of data from the IN16B instrument at the ILL.
+
+This will output the raw (*_raw*) data read from the file and reduced (*_red*)
+workspace by default, with mirror mode enabled you will also get the left
+(*_left*) and right (*_right*) hand components of the data as separate
+workspaces.
+
+Options
+~~~~~~~
+
+Input
+  Used to select the raw data in *.nxs* format
+
+Grouping
+  Used to switch between grouping as per the IDF (*Default*) or grouping using a
+  mapping file (*Map FIle*).
+
+Mirror Mode
+  Enable to reduce data that has been captured with mirror mode enabled.
+
+Plot
+  If enabled will plot the result as a spectra plot.
+
+Save
+  If enabled the result will be saved as a NeXus file in the default save
+  directory.
+
 ISIS Calibration & Resolution
 -----------------------------
 
