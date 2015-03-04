@@ -10,7 +10,7 @@
 #include "vtkCharArray.h"
 #include "MantidVatesAPI/vtkRectilinearGrid_Silent.h"
 
-#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/VatesXMLDefinitions.h"
 
 class vtkDataSetToGeometryTest : public CxxTest::TestSuite
 {

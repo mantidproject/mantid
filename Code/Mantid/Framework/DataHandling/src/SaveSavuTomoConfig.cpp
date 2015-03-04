@@ -171,7 +171,8 @@ void SaveSavuTomoConfig::saveFile(const std::string fname,
       std::string id = w->cell<std::string>(ti, 0);
       std::string params = w->cell<std::string>(ti, 1);
       std::string name = w->cell<std::string>(ti, 2);
-      std::string cite = w->cell<std::string>(ti, 3);
+      // Unused for now, until file format is finalized/documented.
+      // std::string cite = w->cell<std::string>(ti, 3);
 
       // but in the file it goes as: data (params), id, name
       nxFile.makeGroup(boost::lexical_cast<std::string>(procCount++), "NXnote", true);
