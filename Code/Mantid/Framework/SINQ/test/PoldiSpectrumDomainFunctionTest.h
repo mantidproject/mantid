@@ -52,8 +52,9 @@ public:
         PoldiSpectrumDomainFunction function;
         TS_ASSERT_THROWS_NOTHING(function.initialize());
 
-        // Function has one attribute, "ProfileFunction"
-        TS_ASSERT_EQUALS(function.getAttributeNames().size(), 1);
+        // Function has no parameters/attributes
+        TS_ASSERT_EQUALS(function.nParams(), 0);
+        TS_ASSERT_EQUALS(function.nAttributes(), 0);
     }
 
     void testProfileFunctionAttribute()
@@ -63,7 +64,7 @@ public:
 
         TS_ASSERT_EQUALS(function.nParams(), 0);
 
-        TS_ASSERT_THROWS_NOTHING(function.setAttributeValue("ProfileFunction", "Gaussian"));
+        TS_ASSERT_THROWS_NOTHING(function.setDecoratedFunction("Gaussian"));
 
         // Make sure the parameters are exposed correctly
         IFunction_sptr gaussian = FunctionFactory::Instance().createFunction("Gaussian");
@@ -72,7 +73,7 @@ public:
             TS_ASSERT_EQUALS(function.parameterName(i), gaussian->parameterName(i));
         }
 
-        TS_ASSERT_THROWS_NOTHING(function.setAttributeValue("ProfileFunction", "DeltaFunction"));
+        TS_ASSERT_THROWS_NOTHING(function.setDecoratedFunction("DeltaFunction"));
         IFunction_sptr delta = FunctionFactory::Instance().createFunction("DeltaFunction");
         TS_ASSERT_EQUALS(function.nParams(), delta->nParams());
         for(size_t i = 0; i < delta->nParams(); ++i) {
@@ -103,7 +104,7 @@ public:
     {
         TestablePoldiSpectrumDomainFunction function;
         function.initialize();
-        function.setAttributeValue("ProfileFunction", "Gaussian");
+        function.setDecoratedFunction("Gaussian");
         function.setParameter("Height", 679.59369981039407842726);//1.9854805);
         function.setParameter("Sigma", 0.0027446316797104233 / (2.0 * sqrt(2.0 * log(2.0))));
         function.setParameter("PeakCentre", 1.1086444);
@@ -151,7 +152,7 @@ public:
     {
         TestablePoldiSpectrumDomainFunction function;
         function.initialize();
-        function.setAttributeValue("ProfileFunction", "Gaussian");
+        function.setDecoratedFunction("Gaussian");
         function.setParameter("Height", 679.59369981039407842726);//1.9854805);
         function.setParameter("Sigma", 0.0027446316797104233 / (2.0 * sqrt(2.0 * log(2.0))));
         function.setParameter("PeakCentre", 1.1086444);
@@ -196,7 +197,7 @@ public:
     {
         TestablePoldiSpectrumDomainFunction *function = new TestablePoldiSpectrumDomainFunction();
         function->initialize();
-        function->setAttributeValue("ProfileFunction", "Gaussian");
+        function->setDecoratedFunction("Gaussian");
         function->setParameter("Height", 1.9854805);
         function->setParameter("Sigma", 0.0027446316797104233 / (2.0 * sqrt(2.0 * log(2.0))));
         function->setParameter("PeakCentre", 1.1086444);
