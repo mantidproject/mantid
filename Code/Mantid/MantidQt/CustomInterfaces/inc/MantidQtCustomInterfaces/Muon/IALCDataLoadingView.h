@@ -59,6 +59,15 @@ namespace CustomInterfaces
     /// @return dead time correction file
     virtual std::string deadTimeFile() const = 0;
 
+    /// @return detector grouping type
+    virtual std::string detectorGroupingType() const = 0;
+
+    /// @return forward grouping
+    virtual std::string getForwardGrouping() const = 0;
+
+    /// @return backward grouping
+    virtual std::string getBackwardGrouping() const = 0;
+
     /// @return Selected calculation type - "Integral" or "Differential"
     virtual std::string calculationType() const = 0;
 

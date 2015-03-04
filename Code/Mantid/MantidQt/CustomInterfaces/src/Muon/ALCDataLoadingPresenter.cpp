@@ -55,6 +55,11 @@ namespace CustomInterfaces
         alg->setProperty("DeadTimeCorrFile",m_view->deadTimeFile());
       }
 
+      if ( m_view->detectorGroupingType() == "Custom" ) {
+        alg->setProperty("ForwardSpectra",m_view->getForwardGrouping());
+        alg->setProperty("BackwardSpectra",m_view->getBackwardGrouping());
+      }
+
       alg->setPropertyValue("OutputWorkspace", "__NotUsed");
       alg->execute();
 

@@ -55,6 +55,9 @@ namespace CustomInterfaces
     std::string log() const;
     std::string deadTimeType() const;
     std::string deadTimeFile() const;
+    std::string detectorGroupingType() const;
+    std::string getForwardGrouping() const;
+    std::string getBackwardGrouping() const;
     std::string calculationType() const;
     boost::optional< std::pair<double,double> > timeRange() const;
 

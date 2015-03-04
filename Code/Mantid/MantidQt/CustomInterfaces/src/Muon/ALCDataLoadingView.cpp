@@ -85,6 +85,22 @@ namespace CustomInterfaces
     }
   }
 
+  std::string ALCDataLoadingView::detectorGroupingType() const
+  {
+    std::string checkedButton = m_ui.detectorGroupingType->checkedButton()->text().toStdString();
+    return checkedButton;
+  }
+
+  std::string ALCDataLoadingView::getForwardGrouping() const
+  {
+    return m_ui.forwardEdit->text().toStdString();
+  }
+
+  std::string ALCDataLoadingView::getBackwardGrouping() const
+  {
+    return m_ui.backwardEdit->text().toStdString();
+  }
+
   boost::optional< std::pair<double,double> > ALCDataLoadingView::timeRange() const
   {
     if (m_ui.timeLimit->isChecked())
