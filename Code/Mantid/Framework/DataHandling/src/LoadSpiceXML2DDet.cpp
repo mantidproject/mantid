@@ -65,15 +65,15 @@ void SpiceXMLNode::setValues(const std::string &nodetype,
   return;
 }
 
-const bool SpiceXMLNode::hasUnit() const { return (m_unit.size() > 0); }
+bool SpiceXMLNode::hasUnit() const { return (m_unit.size() > 0); }
 
-const bool SpiceXMLNode::hasValue() const { return (m_value.size() > 0); }
+bool SpiceXMLNode::hasValue() const { return (m_value.size() > 0); }
 
-const bool SpiceXMLNode::isString() const { return (m_typechar == STRING); }
+bool SpiceXMLNode::isString() const { return (m_typechar == STRING); }
 
-const bool SpiceXMLNode::isInteger() const { return (m_typechar == INT32); }
+bool SpiceXMLNode::isInteger() const { return (m_typechar == INT32); }
 
-const bool SpiceXMLNode::isDouble() const { return (m_typechar == FLOAT32); }
+bool SpiceXMLNode::isDouble() const { return (m_typechar == FLOAT32); }
 
 const std::string SpiceXMLNode::getName() const { return m_name; }
 const std::string SpiceXMLNode::getUnit() const { return m_unit; }
@@ -132,7 +132,7 @@ void LoadSpiceXML2DDet::exec() {
   // Parse
   std::map<std::string, SpiceXMLNode> map_xmlnode;
   std::string detvaluestr("");
-  parseSpiceXML(xmlfilename, detlogname, detvaluestr, map_xmlnode);
+  parseSpiceXML(xmlfilename, map_xmlnode);
 
   size_t n = std::count(detvaluestr.begin(), detvaluestr.end(), '\n');
   g_log.notice() << "[DB] detector string value = " << n << "\n" << detvaluestr
@@ -146,8 +146,8 @@ void LoadSpiceXML2DDet::exec() {
 }
 
 void LoadSpiceXML2DDet::parseSpiceXML(
-    const std::string &xmlfilename, const std::string &detlogname,
-    std::string &detstring, std::map<std::string, SpiceXMLNode> &logstringmap) {
+    const std::string &xmlfilename,
+    std::map<std::string, SpiceXMLNode> &logstringmap) {
   // Open file
   std::ifstream ifs;
   ifs.open(xmlfilename.c_str());
@@ -246,7 +246,8 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
     // Get node value string (256x256 as a whole)
     SpiceXMLNode detnode = miter->second;
     const std::string detvaluestr = detnode.getValue();
-    int numlines = std::count(detvaluestr.begin(), detvaluestr.end(), '\n');
+    size_t numlines = static_cast<size_t>(
+        std::count(detvaluestr.begin(), detvaluestr.end(), '\n'));
     g_log.notice() << "[DB] Detector counts string contains " << numlines
                    << "\n";
 

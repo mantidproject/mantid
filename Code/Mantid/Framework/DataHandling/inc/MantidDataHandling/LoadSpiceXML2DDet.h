@@ -17,12 +17,12 @@ public:
                  const std::string &nodedescription);
   void setValue(const std::string &strvalue);
 
-  const bool hasUnit() const;
-  const bool hasValue() const;
+  bool hasUnit() const;
+  bool hasValue() const;
 
-  const bool isString() const;
-  const bool isInteger() const;
-  const bool isDouble() const;
+  bool isString() const;
+  bool isInteger() const;
+  bool isDouble() const;
 
   const std::string getName() const;
   const std::string getUnit() const;
@@ -83,7 +83,6 @@ private:
 
   ///
   void parseSpiceXML(const std::string &xmlfilename,
-                     const std::string &detlogname, std::string &detstring,
                      std::map<std::string, SpiceXMLNode> &logstringmap);
 
   ///
