@@ -200,14 +200,15 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(
 
     boost::shared_ptr<PoldiSpectrumDomainFunction> peakFunction =
         boost::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(
-            FunctionFactory::Instance().createInitialized(
-                "name=PoldiSpectrumDomainFunction,ProfileFunction=" +
-                profileFunctionName));
+            FunctionFactory::Instance().createFunction(
+                "PoldiSpectrumDomainFunction"));
 
     if (!peakFunction) {
       throw std::invalid_argument(
           "Cannot process null pointer poldi function.");
     }
+
+    peakFunction->setDecoratedFunction(profileFunctionName);
 
     IPeakFunction_sptr wrappedProfile =
         boost::dynamic_pointer_cast<IPeakFunction>(

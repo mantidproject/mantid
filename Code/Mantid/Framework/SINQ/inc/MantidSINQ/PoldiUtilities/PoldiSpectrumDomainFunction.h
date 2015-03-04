@@ -2,7 +2,7 @@
 #define MANTID_SINQ_POLDISPECTRUMDOMAINFUNCTION_H_
 
 #include "MantidSINQ/DllConfig.h"
-#include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidAPI/IFunction1DSpectrum.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include <string>
@@ -207,7 +207,7 @@ protected:
   */
 
 class MANTID_SINQ_DLL PoldiSpectrumDomainFunction
-    : virtual public API::ParamFunction,
+    : virtual public API::FunctionParameterDecorator,
       virtual public API::IFunction1DSpectrum,
       public IPoldiFunction1D {
 public:
@@ -228,19 +228,6 @@ public:
                        const API::FunctionDomain1D &domain,
                        API::FunctionValues &values) const;
 
-  virtual void setActiveParameter(size_t i, double value);
-  virtual double activeParameter(size_t i) const;
-
-  virtual void setParameter(size_t i, const double &value,
-                            bool explicitlySet = true);
-  virtual void setParameter(const std::string &name, const double &value,
-                            bool explicitlySet = true);
-  virtual double getParameter(size_t i) const;
-  virtual double getParameter(const std::string &name) const;
-
-  virtual void setAttribute(const std::string &attName,
-                            const API::IFunction::Attribute &attValue);
-
   API::IPeakFunction_sptr getProfileFunction() const;
 
 protected:
@@ -251,9 +238,8 @@ protected:
   void initializeInstrumentParameters(
       const PoldiInstrumentAdapter_sptr &poldiInstrument);
 
+  void beforeDecoratedFunctionSet(const API::IFunction_sptr &fn);
   void setProfileFunction(const std::string &profileFunctionName);
-
-  void exposeFunctionParameters(const API::IFunction_sptr &function);
 
   std::vector<double>
   getChopperSlitOffsets(const PoldiAbstractChopper_sptr &chopper);

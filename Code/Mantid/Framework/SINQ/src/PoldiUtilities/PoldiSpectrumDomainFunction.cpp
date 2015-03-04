@@ -16,7 +16,7 @@ using namespace API;
 DECLARE_FUNCTION(PoldiSpectrumDomainFunction)
 
 PoldiSpectrumDomainFunction::PoldiSpectrumDomainFunction()
-    : ParamFunction(), m_chopperSlitOffsets(), m_deltaT(0.0),
+    : FunctionParameterDecorator(), m_chopperSlitOffsets(), m_deltaT(0.0),
       m_timeTransformer(), m_2dHelpers(), m_profileFunction() {}
 
 /**
@@ -188,99 +188,13 @@ PoldiSpectrumDomainFunction::poldiFunction1D(const std::vector<int> &indices,
   }
 }
 
-/// Sets the active parameter i on the wrapped IPeakFunction.
-void PoldiSpectrumDomainFunction::setActiveParameter(size_t i, double value) {
-  m_profileFunction->setActiveParameter(i, value);
-}
-
-/// Returns the value of the active parameter i of the wrapped IPeakFunction.
-double PoldiSpectrumDomainFunction::activeParameter(size_t i) const {
-  return m_profileFunction->activeParameter(i);
-}
-
-/// Sets the i-th parameter of the wrapped IPeakFunction.
-void PoldiSpectrumDomainFunction::setParameter(size_t i, const double &value,
-                                               bool explicitlySet) {
-  m_profileFunction->setParameter(i, value, explicitlySet);
-}
-
-/// Sets the value of the named parameter of the wrapped IPeakFunction.
-void PoldiSpectrumDomainFunction::setParameter(const std::string &name,
-                                               const double &value,
-                                               bool explicitlySet) {
-  ParamFunction::setParameter(name, value, explicitlySet);
-}
-
-/// Returns the value of the i-th parameter of the wrapped IPeakFunction.
-double PoldiSpectrumDomainFunction::getParameter(size_t i) const {
-  return m_profileFunction->getParameter(i);
-}
-
-/// Returns the value of the named parameter of the wrapped IPeakFunction.
-double
-PoldiSpectrumDomainFunction::getParameter(const std::string &name) const {
-  return getParameter(parameterIndex(name));
-}
-
-/**
- * @brief Sets the attribute value and constructs a wrapped profile function
- *
- * If the "ProfileFunction"-attribute is set, all parameters of this function
- * are cleared and the new profile function is created. If successfull, its
- * parameters are exposed.
- *
- * @param attName :: Name of the attribute.
- * @param attValue :: Value of the attribute.
- */
-void PoldiSpectrumDomainFunction::setAttribute(
-    const std::string &attName, const IFunction::Attribute &attValue) {
-  ParamFunction::setAttribute(attName, attValue);
-
-  if (attName == "ProfileFunction") {
-    clearAllParameters();
-
-    setProfileFunction(attValue.asString());
-    exposeFunctionParameters(getProfileFunction());
-  }
-}
-
-/// Sets the wrapped profile function and constructs an instance of it.
-void PoldiSpectrumDomainFunction::setProfileFunction(
-    const std::string &profileFunctionName) {
-  try {
-    m_profileFunction = boost::dynamic_pointer_cast<IPeakFunction>(
-        FunctionFactory::Instance().createFunction(profileFunctionName));
-  }
-  catch (std::runtime_error) {
-    throw std::invalid_argument("Could not construct function from name " +
-                                profileFunctionName + ".");
-  }
-}
-
 /// Returns a smart pointer to the wrapped profile function.
 IPeakFunction_sptr PoldiSpectrumDomainFunction::getProfileFunction() const {
   return m_profileFunction;
 }
 
-/// Exposes the parameters of the supplied function as if they were declared
-/// on this function.
-void PoldiSpectrumDomainFunction::exposeFunctionParameters(
-    const IFunction_sptr &function) {
-
-  if (!function) {
-    throw std::invalid_argument(
-        "Cannot expose parameters of null function pointer.");
-  }
-
-  for (size_t i = 0; i < function->nParams(); ++i) {
-    declareParameter(function->parameterName(i));
-  }
-}
-
-/// Initialize ProfileFunction attribute.
-void PoldiSpectrumDomainFunction::init() {
-  declareAttribute("ProfileFunction", Attribute(""));
-}
+/// Does nothing.
+void PoldiSpectrumDomainFunction::init() {}
 
 /**
  * Extracts the time difference as well as instrument information
@@ -343,6 +257,18 @@ void PoldiSpectrumDomainFunction::initializeInstrumentParameters(
 
     m_2dHelpers.push_back(curr);
   }
+}
+
+void PoldiSpectrumDomainFunction::beforeDecoratedFunctionSet(
+    const IFunction_sptr &fn) {
+  IPeakFunction_sptr peakFunction =
+      boost::dynamic_pointer_cast<IPeakFunction>(fn);
+
+  if (!peakFunction) {
+    throw std::invalid_argument("Function is not a peak function.");
+  }
+
+  m_profileFunction = peakFunction;
 }
 
 /**
