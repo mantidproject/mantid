@@ -3,9 +3,6 @@
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::Kernel::Direction;
-using Mantid::API::WorkspaceProperty;
-
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Segfault)
 
@@ -51,9 +48,16 @@ void Segfault::exec() {
   g_log.error("Crashing mantid now");
 
   if (!dryrun) {
+#if __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wc++11-compat-deprecated-writable-strings"
+#endif
     // writing to read-only memory
     char *s = "hello world";
     *s = 'H';
+#if __clang__
+#pragma clang diagnostic pop
+#endif
   }
 }
 
