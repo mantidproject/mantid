@@ -84,15 +84,13 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
                       XMin=self._search_range[0],
                       XMax=self._search_range[1])
 
-        peaks = self._get_peaks('__search_ws')
+        peak = self._get_peak('__search_ws')
         DeleteWorkspace('__search_ws')
 
         # Ensure there is at least one peak found
-        if len(peaks) < 1:
+        if peak is None:
             raise RuntimeError('Could not find any peaks. Try increasing \
                                 width of SearchRange and/or ClosePeakTolerance')
-
-        peak = peaks[0]
 
         target_centre = (peak[0] + peak[1]) / 2.0
         bank_1_scale_factor = target_centre / peak[0]
@@ -121,24 +119,30 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
             self._peak_position = None
 
 
-    def _get_peaks(self, search_ws):
+    def _get_peak(self, search_ws):
         """
-        Finds matching peaks over the two banks.
+        Finds a matching peak over the two banks.
 
         @param search_ws Workspace to search
-        @return List of peak centres for matching peaks over both banks
+        @return Peak centres for matching peak over both banks
         """
+
+        find_peak_args = dict()
+        if self._peak_position is not None:
+            find_peak_args['PeakPositions'] = [self._peak_position]
 
         # Find the peaks in each bank
         FindPeaks(InputWorkspace=search_ws,
                   PeaksList='__bank_1_peaks',
                   WorkspaceIndex=0,
-                  PeakFunction=self._peak_function)
+                  PeakFunction=self._peak_function,
+                  **find_peak_args)
 
         FindPeaks(InputWorkspace=search_ws,
                   PeaksList='__bank_2_peaks',
                   WorkspaceIndex=1,
-                  PeakFunction=self._peak_function)
+                  PeakFunction=self._peak_function,
+                  **find_peak_args)
 
         # Sort peaks by height, prefer to match tall peaks
         SortTableWorkspace(InputWorkspace='__bank_1_peaks',
@@ -165,8 +169,10 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
         DeleteWorkspace('__bank_1_peaks')
         DeleteWorkspace('__bank_2_peaks')
 
-        logger.debug('Found matching peaks at: %s' % (str(matching_peaks)))
-        return matching_peaks
+        selected_peak = matching_peaks[0]
+        logger.debug('Found matching peak: %s' % (str(selected_peak)))
+
+        return selected_peak
 
 
     def _apply_correction(self, bank_1_sf, bank_2_sf):
