@@ -3,12 +3,12 @@
 #include "MantidAPI/FrameworkManager.h"
 
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
-#include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
+#include "MantidVatesAPI/VatesKnowledgeSerializer.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
+#include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include "MantidVatesAPI/VatesConfigurations.h"
-#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/Common.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -155,7 +155,7 @@ namespace Mantid
       vtkFieldData* outputFD = vtkFieldData::New();
       
       //Serialize metadata
-      RebinningKnowledgeSerializer serializer(LocationNotRequired);
+      VatesKnowledgeSerializer serializer(LocationNotRequired);
       serializer.setWorkspaceName(wsName);
       serializer.setGeometryXML(xmlBuilder.create());
       serializer.setImplicitFunction( Mantid::Geometry::MDImplicitFunction_sptr(new Mantid::Geometry::NullImplicitFunction()));

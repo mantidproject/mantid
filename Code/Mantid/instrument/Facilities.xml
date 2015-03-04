@@ -6,6 +6,10 @@
     <archiveSearch plugin="ISISDataSearch" />
   </archive>
   
+  <computeResource name="SCARF@STFC">
+    <baseURL>https://portal.scarf.rl.ac.uk</baseURL>
+  </computeResource>
+
   <catalog name="ICat4Catalog">
     <soapendpoint url="https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
     <externaldownload url="https://isisicatds.stfc.ac.uk/idsbeta/"></externaldownload>
@@ -389,7 +393,7 @@
    <instrument name="CORELLI" beamline="9"> 
 	<technique>Neutron Diffraction</technique>
 	<technique>Diffuse Scattering</technique>
-	<livedata address="corelli-sms.sns.gov:31415" />
+	<livedata address="corelli-daq1.sns.gov:31415" />
    </instrument> 
       
    <instrument name="POWGEN" shortname="PG3" beamline="11A"> 
@@ -417,7 +421,7 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Indirect Geometry Spectroscopy</technique>
     <technique>Neutron Diffraction</technique>
-    <livedata address="vision-sms.sns.gov:31415" />
+    <livedata address="vision-daq1.sns.gov:31415" />
   </instrument>
 
    <instrument name="SEQUOIA" shortname="SEQ" beamline="17"> 

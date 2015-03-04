@@ -7,6 +7,7 @@ import os
 from mantid.simpleapi import *
 from mantid.kernel import funcreturns
 from mantid import api,geometry,config
+import numpy as np
 
 import Direct.ReductionHelpers as prop_helpers
 import Direct.CommonFunctions as common
@@ -16,20 +17,20 @@ import Direct.CommonFunctions as common
 # class
 #-----------------------------------------------------------------------------------------
 class PropDescriptor(object):
-    """ Class provides common custom interface for property descriptors """
+    """Class provides common custom interface for property descriptors """
     def dependencies(self):
-        """ Returns the list of other properties names, this property depends on"""
+        """Returns the list of other properties names, this property depends on"""
         return []
     def validate(self,instance, owner):
-        """ Interface to validate property descriptor,
-            provided to check properties interaction before long run
+        """Interface to validate property descriptor,
+           provided to check properties interaction before long run
 
-            Return validation result, errors severity (0 -- fine, 1 -- warning, 2-- error)
-            and error message if any
+           Return validation result, errors severity (0 -- fine, 1 -- warning, 2-- error)
+           and error message if any
         """
         return (True,0,'')
-
 # end PropDescriptor
+
 #-----------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------
@@ -187,16 +188,13 @@ class IncidentEnergy(PropDescriptor):
        if isinstance(inc_en,list):
            for ind,en in enumerate(inc_en):
              if en <= 0:
-               return (False,2,"Incident energy have to be positive number or list of positive numbers.\n" +
-                               "For input argument {0} got negative energy {1}".format(ind,en))
+               return (False,2,"Incident energy have to be positive number or list of positive numbers.\n" + "For input argument {0} got negative energy {1}".format(ind,en))
        else:
          if inc_en <= 0:
-            return (False,2,"Incident energy have to be positive number or list of positive numbers.\n" +
-                             "Got single negative incident energy {0} ".format(inc_en))
+            return (False,2,"Incident energy have to be positive number or list of positive numbers.\n" + "Got single negative incident energy {0} ".format(inc_en))
        return (True,0,'')
 # end IncidentEnergy
 #-----------------------------------------------------------------------------------------
-
 class EnergyBins(PropDescriptor):
     """ Energy binning, requested for final converted to energy transfer workspace.
 
@@ -294,8 +292,8 @@ class EnergyBins(PropDescriptor):
         ei = instance.incident_energy
         ebin = instance.energy_bins
         if isinstance(ei,list): # ebin expected to be relative
-           if ebin[2]>1:
-              return(False,1,"Binning for multiple energy range should be relative to incident energy. Got ebin_max={0} > 1\n"+\
+           if ebin[2] > 1:
+              return(False,1,"Binning for multiple energy range should be relative to incident energy. Got ebin_max={0} > 1\n" + \
                              "Energy range will be normalized and treated as relative range")
         else:
             if ebin[2] > ei:
@@ -405,7 +403,7 @@ class mon2NormalizationEnergyRange(PropDescriptor):
        if instance is None:
            return self
        ei = owner.incident_energy.get_current()
-       return [self._relative_range[0]*ei, self._relative_range[1]*ei]
+       return [self._relative_range[0] * ei, self._relative_range[1] * ei]
 
     def __set__(self,instance,val):
        """ set detector calibration file using various formats """
@@ -424,7 +422,7 @@ class mon2NormalizationEnergyRange(PropDescriptor):
         if len(val) != 2:
            raise KeyError("mon2_norm_energy_range needs to be initialized by lost of two values. Got {0}".format(len(val)))
         self._relative_range = (float(val[0]),float(val[1]))
-        ok,sev,message=self.validate(instance)
+        ok,sev,message = self.validate(instance)
         if not ok:
            if sev == 1:
                instance.log(message,'warning')
@@ -442,7 +440,7 @@ class mon2NormalizationEnergyRange(PropDescriptor):
     def validate(self,instance,owner=None):
         """ function verifies if the energy range is consistent with incident energies """ 
         range = self._relative_range
-        if len(range ) != 2:
+        if len(range) != 2:
            return(False,2,'mon2_normalization_energy_range can be initialized by list of two values only. Got {0} values'.format(len(range)))
 
         result = (True,0,'')
@@ -465,7 +463,7 @@ class mon2NormalizationEnergyRange(PropDescriptor):
               if result[0]:
                 result = (False,1,message)
               else:
-                result = (False,1,result[2]+message)
+                result = (False,1,result[2] + message)
            else:
               return (False,2,message)
 
@@ -555,7 +553,7 @@ class DetCalFile(PropDescriptor):
            self._det_cal_file = file_name
            return (True,file_name)
         if isinstance(self._det_cal_file,api.Workspace): 
-        # nothing to do. Workspace used for calibration
+        # nothing to do.  Workspace used for calibration
            return (True,'Workspace {0} used for detectors calibration'.format(self._det_cal_file.name()))
         # string can be a run number or a file name:
         file_name = prop_helpers.findFile(self._det_cal_file)
@@ -566,7 +564,7 @@ class DetCalFile(PropDescriptor):
               return (False,"Can not find file or run file corresponding to name : {0}".format(self._det_cal_file))
         else:
             pass
-        self._det_cal_file=file_name
+        self._det_cal_file = file_name
         return (True,file_name) 
 #end DetCalFile
 #-----------------------------------------------------------------------------------------
@@ -575,7 +573,7 @@ class MapMaskFile(PropDescriptor):
     def __init__(self,prop_name,file_ext,doc_string=None):
         self._file_name = None
         self._file_ext = file_ext
-        self._prop_name=prop_name
+        self._prop_name = prop_name
 
         if not(doc_string is None):
             self.__doc__ = doc_string
@@ -750,9 +748,9 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
 
         range = sepf.__get__(instance,owner)
         ei = instance.incident_energy
-        if range[0]>=range[1]:
+        if range[0] >= range[1]:
            return (False,2,'monovan integration range limits = [{0}:{1}] are wrong'.format(range[0],range[1]))
-        if range[0]<-100*ei or range[0]>100*ei:
+        if range[0] < -100 * ei or range[0] > 100 * ei:
           return (False,1,'monovan integration is suspiciously wide: [{0}:{1}]. This may be incorrect'.format(range[0],range[1]))
         return (True,0,'')
 
@@ -942,11 +940,11 @@ class BackbgroundTestRange(PropDescriptor):
        range = self.__get__(instance,owner)
        if range is None:
           return (True,0,'')
-       if range[0]>=range[1]:
+       if range[0] >= range[1]:
           return (False,2,' Background test range: [{0}:{1}] is incorrect '.format(range[0],range[1]))
-       if range[0]<0:
+       if range[0] < 0:
           return (False,2,' Background test range is TOF range, so it can not be negative={0}'.format(range[0]))
-       if range[1]>20000:
+       if range[1] > 20000:
           return (False,1,' Background test range is TOF range, its max value looks suspiciously big={0}'.format(range[1]))
        return (True,0,'')
 #end BackbgroundTestRange
@@ -984,7 +982,6 @@ class MultirepTOFSpectraList(PropDescriptor):
             rez = [int(value)]
         self._spectra_list = rez
 #end MultirepTOFSpectraList
-
 class MonoCorrectionFactor(PropDescriptor):
     """ property contains correction factor, used to convert
         experimental scattering cross-section into absolute
@@ -1004,7 +1001,7 @@ class MonoCorrectionFactor(PropDescriptor):
         self._mono_run_number = None
         self._ei_prop = ei_prop
         self.cashed_values = {}
-        self._mono_run_prop=monovan_run_prop
+        self._mono_run_prop = monovan_run_prop
 
     def __get__(self,instance,type):
        if instance is None:
@@ -1016,7 +1013,7 @@ class MonoCorrectionFactor(PropDescriptor):
        self._cor_factor = value
     #
        if value is None:
-          self._mono_run_prop._in_cash=False # enable monovan run validation if any
+          self._mono_run_prop._in_cash = False # enable monovan run validation if any
     #
     def set_val_to_cash(self,instance,value):
         """ """
@@ -1055,11 +1052,138 @@ class MonoCorrectionFactor(PropDescriptor):
 
       if self._cor_factor is None:
           return (True,0,'')
-      if self._cor_factor<=0:
+      if self._cor_factor <= 0:
          return (False,2,'Mono-correction factor has to be positive if specified: {0}'.format(self._cor_factor))
       return (True,0,'')
+#end MonoCorrectionFactor
+
+class MotorLogName(PropDescriptor):
+    """ The list of possible log names, for logs containing information
+        on crystal rotation. First log found with current workspace
+        will be used together with motor_offset to identify crystal
+        rotation (psi in Horace)
+    """
+    def __init__(self):
+       self._log_names = []
+
+    def __get__(self,instance,type):
+       if instance is None:
+           return self
+       return self._log_names
+
+    def __set__(self,instance,value):
+       if isinstance(value,str):
+          val_list = value.split(';')
+       elif isinstance(value,list):
+           val_list = []
+           for val in value:
+               val_list.append(str(val))
+       else:
+           val_list = [str(value)]
+       self._log_names = val_list
+#end MotorLogName
+
+class MotorOffset(PropDescriptor):
+    """ Initial value used to identify crystal rotation angle
+        psi=motor_offset+wccr.timeAverageValue()
+    """
+    def __init__(self):
+       self._offset = None
+    def __get__(self,instance,type):
+       if instance is None:
+           return self
+       return self._offset
+
+    def __set__(self,instance,value):
+        # we do not need to analyze for None or empty list
+        # as all this is implemented within generic setter
+        if value is None:
+            self._offset = None
+        else:
+            self._offset = float(value)
+#end MotorOffset
+
+class RotationAngle(PropDescriptor):
+    """Class used to identify rotation angle:
+       psi=motor_offset+wccr.timeAverageValue()
+    """
+    def __init__(self,MotorLogNamesClass,MotorOffset):
+       self._mot_offset = MotorOffset
+       self._motor_log = MotorLogNamesClass
+       # user may override value derived
+       # from log, by providing its own value
+       # this value would be used instead of
+       # calculations
+       self._own_psi_value = None
+       # user should define workspace, which contain rotation logs
+       # Motor log will be read from this workspace
+       self._log_ws_name = None
+
+    #
+    def __get__(self,instance,type):
+        if instance is None:
+            return self
+
+        if self._own_psi_value:
+            return self._own_psi_value
+        return self.read_psi_from_workspace(self._log_ws_name)
+
+    def __set__(self,instance,value):
+        if isinstance(value,str):
+            if value in mtd: ## its workspace
+                self._log_ws_name = value
+                self._own_psi_value = None
+            else: # it is string representation of psi.  Should be
+                # convertible to number.
+                self._own_psi_value = float(value)
+        elif isinstance(value,api.Workspace):
+            self._log_ws_name = value.name()
+            self._own_psi_value = None
+        elif value is None: # clear all
+            self._own_psi_value = None
+        else: #own psi value
+            self._own_psi_value = float(value)
+
+    def _read_ws_logs(self,external_ws=None):
+        """read specified workspace logs from workspace
+           provided either internally or externally
+        """
+        working_ws = external_ws
+        if working_ws is None:
+            working_ws = mtd[self._log_ws_name]
+        if working_ws is None:
+           raise RuntimeError("No workspace provided. Can not read logs to identify psi")
+        else:
+            if isinstance(external_ws,str):
+                working_ws = mtd[external_ws]
+
+        value = None
+        log_names = self._motor_log._log_names
+        for name in log_names:
+            try:
+                value = working_ws.getRun().getLogData(name).timeAverageValue()
+                break
+            except:
+                pass
+        return value
+
+    def read_psi_from_workspace(self,workspace):
+      """Independent method to read rotation angle from workspace and 
+         previously set log and offset parameters
+      """
+      offset = self._mot_offset._offset
+      if offset is None:
+        return np.NaN
+      log_val = self._read_ws_logs(workspace)
+      if log_val is None:
+         return np.NaN
+      else:
+         return offset + log_val
+
+    def dependencies(self):
+        return ['motor_log_names','motor_offset']
+#end RotationAngle
+
 #-----------------------------------------------------------------------------------------
 # END Descriptors for PropertyManager itself
 #-----------------------------------------------------------------------------------------
-
-
