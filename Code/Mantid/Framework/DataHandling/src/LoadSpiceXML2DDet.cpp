@@ -17,8 +17,8 @@
 #include "Poco/DOM/NamedNodeMap.h"
 
 #include <algorithm>
-
 #include <fstream>
+#include <boost/algorithm/string.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -105,7 +105,7 @@ void LoadSpiceXML2DDet::init() {
                                                          Direction::Output),
                   "Name of output matrix workspace. ");
 
-  declareProperty("DetectorLogName", "detector",
+  declareProperty("DetectorLogName", "Detector",
                   "Log name for detector counts.");
 
   declareProperty(
@@ -130,23 +130,24 @@ void LoadSpiceXML2DDet::exec() {
   size_t numpixelY = vec_pixelgeom[1];
 
   // Parse
-  std::map<std::string, std::string> map_logstr;
+  std::map<std::string, SpiceXMLNode> map_xmlnode;
   std::string detvaluestr("");
-  parseSpiceXML(xmlfilename, detlogname, detvaluestr, map_logstr);
+  parseSpiceXML(xmlfilename, detlogname, detvaluestr, map_xmlnode);
 
   size_t n = std::count(detvaluestr.begin(), detvaluestr.end(), '\n');
   g_log.notice() << "[DB] detector string value = " << n << "\n" << detvaluestr
                  << "\n";
 
   // Create output workspace
-  MatrixWorkspace_sptr outws = createMatrixWorkspace();
+  MatrixWorkspace_sptr outws =
+      createMatrixWorkspace(map_xmlnode, numpixelX, numpixelY, detlogname);
 
   setProperty("OutputWorkspace", outws);
 }
 
 void LoadSpiceXML2DDet::parseSpiceXML(
     const std::string &xmlfilename, const std::string &detlogname,
-    std::string &detstring, std::map<std::string, std::string> &logstringmap) {
+    std::string &detstring, std::map<std::string, SpiceXMLNode> &logstringmap) {
   // Open file
   std::ifstream ifs;
   ifs.open(xmlfilename.c_str());
@@ -176,41 +177,44 @@ void LoadSpiceXML2DDet::parseSpiceXML(
                      << " children."
                      << "\n";
     } else if (numchildren == 1) {
+      std::string innertext = pNode->innerText();
       size_t numattr = pNode->attributes()->length();
       g_log.notice() << "  Child node " << nodename << "'s attributes: "
                      << "\n";
+
+      SpiceXMLNode xmlnode(nodename);
+      std::string nodetype("");
+      std::string nodeunit("");
+      std::string nodedescription("");
+
       for (size_t j = 0; j < numattr; ++j) {
         std::string atttext = pNode->attributes()->item(j)->innerText();
         std::string attname = pNode->attributes()->item(j)->nodeName();
         g_log.notice() << "     attribute " << j << " name = " << attname
                        << ", "
                        << "value = " << atttext << "\n";
+        if (attname.compare("type") == 0) {
+          // type
+          nodetype = atttext;
+        } else if (attname.compare("unit") == 0) {
+          // unit
+          nodeunit = atttext;
+        } else if (attname.compare("description") == 0) {
+          // description
+          nodedescription = atttext;
+        }
       }
+      xmlnode.setValues(nodetype, nodeunit, nodedescription);
+      xmlnode.setValue(innertext);
+
+      logstringmap.insert(std::make_pair(nodename, xmlnode));
     } else {
       g_log.error("Funny... No child node.");
     }
 
-    std::string innertext = pNode->innerText();
-
-    if (pNode->childNodes()->length() == 1) {
-      if (pNode->childNodes()->item(0)) {
-        std::string childnodevalue =
-            pNode->childNodes()->item(0)->getNodeValue();
-        // g_log.notice() << "[DB] " << "Single child node value = " <<
-        // childnodevalue << "\n";
-      }
-    }
-
+    // Move to next node
     pNode = nodeIter.nextNode();
-
-    if (nodename.compare(detlogname) == 0) {
-      // it is a detector value string
-      detstring = innertext;
-    } else {
-      // it is a log value string
-      logstringmap.insert(std::make_pair(nodename, innertext));
-    }
-  }
+  } // ENDWHILE
 
   // Close file
   ifs.close();
@@ -218,10 +222,90 @@ void LoadSpiceXML2DDet::parseSpiceXML(
   return;
 }
 
-MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace() {
+MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
+    const std::map<std::string, SpiceXMLNode> &mapxmlnode,
+    const size_t &numpixelx, const size_t &numpixely,
+    const std::string &detnodename) {
 
+  // Create matrix workspace
   MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1));
+      WorkspaceFactory::Instance().create("Workspace2D", numpixely, numpixelx,
+                                          numpixelx));
+
+  // Examine xml nodes
+  std::map<std::string, SpiceXMLNode>::const_iterator miter;
+  for (miter = mapxmlnode.begin(); miter != mapxmlnode.end(); ++miter) {
+    SpiceXMLNode xmlnode = miter->second;
+    g_log.notice() << "[DB] Log name / xml node : " << xmlnode.getName()
+                   << "\n";
+  }
+
+  // Parse the detector counts node
+  miter = mapxmlnode.find(detnodename);
+  if (miter != mapxmlnode.end()) {
+    // Get node value string (256x256 as a whole)
+    SpiceXMLNode detnode = miter->second;
+    const std::string detvaluestr = detnode.getValue();
+    int numlines = std::count(detvaluestr.begin(), detvaluestr.end(), '\n');
+    g_log.notice() << "[DB] Detector counts string contains " << numlines
+                   << "\n";
+
+    // Split
+    std::vector<std::string> vecLines;
+    boost::split(vecLines, detvaluestr, boost::algorithm::is_any_of("\n"));
+    g_log.notice() << "There are " << vecLines.size() << " lines"
+                   << "\n";
+
+    size_t irow = 0;
+    for (size_t i = 0; i < vecLines.size(); ++i) {
+      std::string &line = vecLines[i];
+
+      // Skip empty line
+      if (line.size() == 0) {
+        g_log.notice() << "Empty Line at " << i << "\n";
+        continue;
+      }
+
+      // Check whether it exceeds boundary
+      if (irow == numpixely) {
+        throw std::runtime_error("Number of non-empty rows in detector data "
+                                 "exceeds user defined geometry size.");
+      }
+
+      // Split line
+      std::vector<std::string> veccounts;
+      boost::split(veccounts, line, boost::algorithm::is_any_of(" \t"));
+      // g_log.notice() << "Number of items of line " << i << " is " <<
+      // veccounts.size() << "\n";
+
+      // check
+      if (veccounts.size() != numpixelx) {
+        std::stringstream errss;
+        errss << "Row " << irow << " contains " << veccounts.size()
+              << " items other than " << numpixelx
+              << " counts specified by user.";
+        throw std::runtime_error(errss.str());
+      }
+
+      for (size_t j = 0; j < veccounts.size(); ++j) {
+        double y = atof(veccounts[j].c_str());
+        outws->dataX(irow)[j] = static_cast<double>(j);
+        outws->dataY(irow)[j] = y;
+        if (y > 0)
+          outws->dataE(irow)[j] = sqrt(y);
+        else
+          outws->dataE(irow)[j] = 1.0;
+      }
+
+      // Update irow
+      irow += 1;
+    }
+  } else {
+    std::stringstream errss;
+    errss << "Unable to find an XML node of name " << detnodename
+          << ". Unable to load 2D detector XML file.";
+    throw std::runtime_error(errss.str());
+  }
 
   return outws;
 }

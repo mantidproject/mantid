@@ -84,10 +84,13 @@ private:
   ///
   void parseSpiceXML(const std::string &xmlfilename,
                      const std::string &detlogname, std::string &detstring,
-                     std::map<std::string, std::string> &logstringmap);
+                     std::map<std::string, SpiceXMLNode> &logstringmap);
 
   ///
-  API::MatrixWorkspace_sptr createMatrixWorkspace();
+  API::MatrixWorkspace_sptr
+  createMatrixWorkspace(const std::map<std::string, SpiceXMLNode> &mapxmlnode,
+                        const size_t &numpixelx, const size_t &numpixely,
+                        const std::string &detnodename);
 
   void convertNode(const std::string &nodetype, bool &isdouble, double &dvalue,
                    bool &isint, int &ivalue);
