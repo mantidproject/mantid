@@ -127,7 +127,7 @@ public:
 
   void testNParams() {
     TestableFunctionParameterDecorator invalidFn;
-    TS_ASSERT_THROWS(invalidFn.nParams(), std::runtime_error);
+    TS_ASSERT_EQUALS(invalidFn.nParams(), 0);
 
     FunctionParameterDecorator_sptr fn =
         getFunctionParameterDecoratorGaussian();
@@ -215,7 +215,7 @@ public:
 
   void testAttributes() {
     TestableFunctionParameterDecorator invalidFn;
-    TS_ASSERT_THROWS(invalidFn.nAttributes(), std::runtime_error);
+    TS_ASSERT_EQUALS(invalidFn.nAttributes(), 0);
 
     FunctionParameterDecorator_sptr fn =
         getFunctionParameterDecoratorGaussian();
