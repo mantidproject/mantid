@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -5,6 +6,8 @@ from reduction_workflow.find_data import find_data
 import os
 
 class HFIRSANSReduction(PythonAlgorithm):
+
+    default_output_dir = None
 
     def category(self):
         return "Workflow\\SANS\\UsesPropertyManager"
@@ -17,7 +20,8 @@ class HFIRSANSReduction(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty('Filename', '', doc='List of input file paths')
-        self.declareProperty('ReductionProperties', '__sans_reduction_properties', validator=StringMandatoryValidator(), doc='Property manager name for the reduction')
+        self.declareProperty('ReductionProperties', '__sans_reduction_properties', validator=StringMandatoryValidator(),
+                             doc='Property manager name for the reduction')
         self.declareProperty('OutputWorkspace', '', doc='Reduced workspace')
         self.declareProperty('OutputMessage', '', direction=Direction.Output, doc='Output message')
 
@@ -60,8 +64,8 @@ class HFIRSANSReduction(PythonAlgorithm):
                         self.default_output_dir = head
                 else:
                     output_str += _load_data(data_file[i], '__tmp_wksp')
-                    api.Plus(LHSWorkspace=workspace,
-                         RHSWorkspace='__tmp_wksp',
+                    api.Plus(LHSWorkspace=workspace,\
+                         RHSWorkspace='__tmp_wksp',\
                          OutputWorkspace=workspace)
                     # Get the monitor and timer values
                     ws = AnalysisDataService.retrieve('__tmp_wksp')
@@ -171,7 +175,7 @@ class HFIRSANSReduction(PythonAlgorithm):
         if "BackgroundFiles" in property_list:
             background = property_manager.getProperty("BackgroundFiles").value
             background_ws = "__background_%s" % output_ws
-            msg = self._multiple_load(background, background_ws,
+            msg = self._multiple_load(background, background_ws,\
                                 property_manager, property_manager_name)
             bck_msg = "Loaded background %s\n" % background
             bck_msg += msg
@@ -232,8 +236,8 @@ class HFIRSANSReduction(PythonAlgorithm):
                                  WorkspaceToMatch=output_ws,
                                  OutputWorkspace=background_ws+'_rebin',
                                  PreserveEvents=False)
-            api.Minus(LHSWorkspace=output_ws,
-                         RHSWorkspace=background_ws,
+            api.Minus(LHSWorkspace=output_ws,\
+                         RHSWorkspace=background_ws,\
                          OutputWorkspace=output_ws)
 
             bck_msg = bck_msg.replace('\n','\n   |')
@@ -395,7 +399,7 @@ class HFIRSANSReduction(PythonAlgorithm):
             @param property_manager: property manager object
         """
         output_msg = ""
-                
+
         def _save_ws(iq_ws):
             if AnalysisDataService.doesExist(iq_ws):
                 proc_xml = ""
@@ -407,14 +411,14 @@ class HFIRSANSReduction(PythonAlgorithm):
                     elif len(process_file)>0:
                         Logger("HFIRSANSReduction").error("Could not read %s\n" % process_file)
                 if property_manager.existsProperty("SetupAlgorithm"):
-                        setup_info = property_manager.getProperty("SetupAlgorithm").value
-                        proc_xml += "\n<Reduction>\n"
+                    setup_info = property_manager.getProperty("SetupAlgorithm").value
+                    proc_xml += "\n<Reduction>\n"
                         # The instrument name refers to the UI, which is named BIOSANS for all HFIR SANS
-                        proc_xml += "  <instrument_name>BIOSANS</instrument_name>\n"
-                        proc_xml += "  <SetupInfo>%s</SetupInfo>\n" % setup_info
-                        filename = self.getProperty("Filename").value
-                        proc_xml += "  <Filename>%s</Filename>\n" % filename
-                        proc_xml += "</Reduction>\n"
+                    proc_xml += "  <instrument_name>BIOSANS</instrument_name>\n"
+                    proc_xml += "  <SetupInfo>%s</SetupInfo>\n" % setup_info
+                    filename = self.getProperty("Filename").value
+                    proc_xml += "  <Filename>%s</Filename>\n" % filename
+                    proc_xml += "</Reduction>\n"
 
                 filename = os.path.join(output_dir, iq_ws+'.txt')
 
@@ -448,7 +452,7 @@ class HFIRSANSReduction(PythonAlgorithm):
                 filename = _save_ws(item)
                 if filename is not None:
                     output_msg += "I(Q) saved in %s\n" % (filename)
-                    
+
         # Save I(Qx,Qy)
         if iqxy_output is not None:
             if AnalysisDataService.doesExist(iqxy_output):

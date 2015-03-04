@@ -233,6 +233,14 @@ void DirectConvertToEnergy::instrumentLoadingDone(bool error)
  */
 void DirectConvertToEnergy::userSelectInstrument(const QString& prefix) 
 {
+  // Search for files for the current selected instrument
+  m_uiForm.runFiles->setInstrumentOverride(prefix);
+  m_uiForm.mapFile->setInstrumentOverride(prefix);
+  m_uiForm.whiteBeamFile->setInstrumentOverride(prefix);
+  m_uiForm.absRunFiles->setInstrumentOverride(prefix);
+  m_uiForm.absMapFile->setInstrumentOverride(prefix);
+  m_uiForm.absWhiteFile->setInstrumentOverride(prefix);
+
   if ( prefix != m_curInterfaceSetup )
   {
     // Remove the old empty instrument workspace if it is there

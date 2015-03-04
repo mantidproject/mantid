@@ -7,6 +7,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include <boost/optional.hpp>
 
 namespace Mantid {
 namespace API {
@@ -50,9 +51,9 @@ public:
   virtual bool findDetector() = 0;
 
   virtual void setQSampleFrame(Mantid::Kernel::V3D QSampleFrame,
-                               double detectorDistance = 1.0) = 0;
+                               boost::optional<double> detectorDistance) = 0;
   virtual void setQLabFrame(Mantid::Kernel::V3D QLabFrame,
-                            double detectorDistance = 1.0) = 0;
+                            boost::optional<double> detectorDistance) = 0;
 
   virtual void setWavelength(double wavelength) = 0;
   virtual double getWavelength() const = 0;

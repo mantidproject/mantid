@@ -1,6 +1,6 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.kernel import *
-import os
 import sys
 import numpy as np
 
@@ -18,11 +18,11 @@ class SANSWideAngleCorrection(PythonAlgorithm):
         return "Calculate the Wide Angle correction for SANS transmissions."
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("SampleData", "", direction = Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("SampleData", "", direction = Direction.Input),\
     	"A workspace cropped to the detector to be reduced (the SAME as the input to [[Q1D]]); used to verify the solid angle. The workspace is not modified, just inspected.")
-        self.declareProperty(MatrixWorkspaceProperty("TransmissionData","",direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("TransmissionData","",direction=Direction.Input),\
                                       "The transmission data calculated, referred to as <math>T_0</math> in equations in discussion section")
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace","",direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace","",direction=Direction.Output),\
                                       "The transmission corrected SANS data, normalised (divided) by <math>T_0</math>, see discussion section")
 
     def PyExec(self):
@@ -33,7 +33,7 @@ class SANSWideAngleCorrection(PythonAlgorithm):
         trans = self.getProperty("TransmissionData").value
 
         # check transmission input workspace
-        if (len(trans.dataX(0)) != len(wd.dataX(0))):
+        if len(trans.dataX(0)) != len(wd.dataX(0)):
             raise RuntimeError("Uncompatible sizes. Transmission must have the same bins of sample values")
         if min(trans.dataY(0)) < 0:
             raise RuntimeError("Invalid workspace for transmission, it does not accept negative values.")

@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.api import PythonAlgorithm
 from mantid.api import ITableWorkspaceProperty
 from mantid.api import AlgorithmFactory, WorkspaceFactory
@@ -12,8 +13,8 @@ from mantid.simpleapi import (LoadSINQFile,
                               PoldiLoadChopperSlits,
                               PoldiLoadSpectra,
                               PoldiLoadIPP,
-                              PoldiAutoCorrelation,
-                              PoldiPeakDetection,
+                              #PoldiAutoCorrelation,
+                              #PoldiPeakDetection,
                               GroupWorkspaces,
                               RenameWorkspace)
 import os.path
@@ -42,7 +43,7 @@ class PoldiProjectRun(PythonAlgorithm):
         self.declareProperty(ITableWorkspaceProperty("InputWorkspace", "PoldiAnalysis", direction=Direction.Input),
                              "Poldi analysis main worksheet")
 
-        self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "PoldiIPPmanager", direction=Direction.Output),
+        self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "PoldiIPPmanager", direction=Direction.Output),\
                               "Poldi IPP table manager")
 
         self.declareProperty("wlenmin", 1.1,
@@ -62,10 +63,6 @@ class PoldiProjectRun(PythonAlgorithm):
                              direction = Direction.Input)
 
 
-
-
-
-
     def PyExec(self):
         """ Mantid required
         """
@@ -76,7 +73,7 @@ class PoldiProjectRun(PythonAlgorithm):
         load_data_at_the_end = False
         try:
             sample_ipp_ws_name = self.getProperty("OutputWorkspace").value
-            if(sample_ipp_ws_name == ""):
+            if sample_ipp_ws_name == "":
                 sample_ipp_ws_name = "PoldiIPPmanager"
             self.log().debug('Poldi IPP manager ---- %s'%(sample_info_ws_name))
             sample_ipp_ws = mtd["PoldiIPPmanager"]
@@ -141,9 +138,9 @@ class PoldiProjectRun(PythonAlgorithm):
 
             add_this_ipp = True
             for ipp in range(sample_ipp_ws.rowCount()):
-                if(sample_ipp_ws.column("ipp version")[ipp] == ipp_version):
+                if sample_ipp_ws.column("ipp version")[ipp] == ipp_version:
                     add_this_ipp = False
-            if(add_this_ipp):
+            if add_this_ipp:
                 sample_ipp_ws.addRow([sampleName, ipp_version])
 
 
@@ -194,7 +191,7 @@ class PoldiProjectRun(PythonAlgorithm):
             RenameWorkspace(InputWorkspace=groupedResults,
                             OutputWorkspace="%s_Metadata" % sampleName)
 
-        if(load_data_at_the_end):
+        if load_data_at_the_end:
             self.setProperty("OutputWorkspace", sample_ipp_ws)
 
 AlgorithmFactory.subscribe(PoldiProjectRun)

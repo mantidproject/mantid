@@ -77,6 +77,9 @@ Description          : Preferences dialog
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidQtMantidWidgets/InstrumentSelector.h"
+#include "MantidQtAPI/MdConstants.h"
+#include "MantidQtAPI/MdSettings.h"
+#include "MantidQtAPI/MdPlottingCmapsProvider.h"
 
 #include <limits>
 
@@ -109,6 +112,7 @@ ConfigDialog::ConfigDialog( QWidget* parent, Qt::WFlags fl )
   initPlotsPage();
   initPlots3DPage();
   initFittingPage();
+  initMdPlottingPage();
 
   generalDialog->addWidget(appTabWidget);
   generalDialog->addWidget(mtdTabWidget);
@@ -116,6 +120,7 @@ ConfigDialog::ConfigDialog( QWidget* parent, Qt::WFlags fl )
   generalDialog->addWidget(plotsTabWidget);
   generalDialog->addWidget(plots3D);
   generalDialog->addWidget(fitPage);
+  generalDialog->addWidget(mdPlottingTabWidget);
 
   QVBoxLayout * rightLayout = new QVBoxLayout();
   lblPageHeader = new QLabel();
@@ -662,13 +667,12 @@ void ConfigDialog::initMantidPage()
   grid->addWidget(new QLabel("Facility"), 0, 0);
   grid->addWidget(facility, 0, 1);
 
-
   defInstr = new MantidQt::MantidWidgets::InstrumentSelector();
+  // Here we only want the default instrument updated if the user clicks Ok/Apply
+  defInstr->updateInstrumentOnSelection(false);
   grid->addWidget(new QLabel("Default Instrument"), 2, 0);
   grid->addWidget(defInstr, 2, 1);
   grid->setRowStretch(3,1);
-  //Here we only want the default instrument updated if the user clicks Ok/Apply
-  disconnect(defInstr, SIGNAL(currentIndexChanged(const QString&)), defInstr, SLOT(updateDefaultInstrument(const QString &)));
 
   //Ignore paraview.
   ckIgnoreParaView = new QCheckBox("Ignore ParaView");
@@ -703,8 +707,201 @@ void ConfigDialog::initMantidPage()
   initCurveFittingTab();
   initSendToProgramTab();
   initMantidOptionsTab();
-
 }
+
+/**
+ * Configure a MD Plotting Page
+ */
+void ConfigDialog::initMdPlottingPage()
+{
+  mdPlottingTabWidget = new QTabWidget(generalDialog);
+  mdPlottingTabWidget->setUsesScrollButtons(false);
+
+  // General MD Plotting tab
+  initMdPlottingGeneralTab();
+
+  // VSI tab
+  initMdPlottingVsiTab();
+
+  // Set the connections 
+  setupMdPlottingConnections();
+
+  // Update the visibility of the Vsi tab if the General Md Color Map was selected the last time
+  if (m_mdSettings.getUsageGeneralMdColorMap())
+  {
+    changeUsageGeneralMdColorMap(true);
+  }
+
+  // Update the visibility of the Vsi tab if the last session checkbox was selected.
+  if (m_mdSettings.getUsageLastSession())
+  {
+    changeUsageLastSession(true);
+  }
+}
+
+/**
+ * Configure the general MD Plotting tab
+ */
+void ConfigDialog::initMdPlottingGeneralTab()
+{
+  // Ask if uniform colormap
+  mdPlottingGeneralPage = new QWidget();
+  QVBoxLayout *generalTabLayout = new QVBoxLayout(mdPlottingGeneralPage);
+  mdPlottingGeneralFrame = new QGroupBox(mdPlottingGeneralPage);
+  generalTabLayout->addWidget(mdPlottingGeneralFrame );
+  mdPlottingTabWidget->addTab(mdPlottingGeneralPage, QString());
+
+  // Color Map
+  mdPlottingGeneralFrame->setTitle("Use common Color Map for Slice Viewer and VSI");
+  mdPlottingGeneralFrame->setCheckable(true);
+  mdPlottingGeneralFrame->setChecked(m_mdSettings.getUsageGeneralMdColorMap());
+
+  QGridLayout *gridVsiGeneralDefaultColorMap = new QGridLayout(mdPlottingGeneralFrame);
+  mdPlottingGeneralColorMap = new QComboBox();
+  lblGeneralDefaultColorMap = new QLabel();
+  gridVsiGeneralDefaultColorMap->addWidget(lblGeneralDefaultColorMap, 1, 0);
+  gridVsiGeneralDefaultColorMap->addWidget(mdPlottingGeneralColorMap, 1, 1);
+
+  gridVsiGeneralDefaultColorMap->setRowStretch(2,1);
+
+  QLabel* label = new QLabel("<span style=\"font-weight:600;\">Note: Changes will not take effect until MantidPlot has been restarted.</span>");
+  generalTabLayout->addWidget(label);
+
+  // Set the color maps
+  MantidQt::API::MdPlottingCmapsProvider mdPlottingCmapsProvider;
+  QStringList colorMapNames;
+  QStringList colorMapFiles;
+  mdPlottingCmapsProvider.getColorMapsForMdPlotting(colorMapNames, colorMapFiles);
+
+  if (colorMapNames.size() == colorMapFiles.size())
+  {
+    for (int index = 0; index < colorMapNames.size(); ++index)
+    {
+      mdPlottingGeneralColorMap->addItem(colorMapNames[index], colorMapFiles[index]);
+    }
+  }
+
+  int currentIndex = mdPlottingGeneralColorMap->findData(m_mdSettings.getGeneralMdColorMapName(), Qt::DisplayRole);
+  if (currentIndex != -1)
+  {
+    mdPlottingGeneralColorMap->setCurrentIndex(currentIndex);
+  }
+}
+
+/**
+ * Configure the VSI tab
+ */
+void ConfigDialog::initMdPlottingVsiTab()
+{
+  vsiPage = new QWidget();
+  QVBoxLayout *vsiTabLayout = new QVBoxLayout(vsiPage);
+  QGroupBox *frame = new QGroupBox();
+  vsiTabLayout->addWidget(frame);
+  QGridLayout *grid = new QGridLayout(frame);
+  mdPlottingTabWidget->addTab(vsiPage, QString());
+
+  // Usage of the last setting
+  vsiLastSession = new QCheckBox();
+  lblVsiLastSession = new QLabel();
+  grid->addWidget(lblVsiLastSession , 0, 0);
+  grid->addWidget(vsiLastSession , 0, 1);
+  vsiLastSession->setChecked(m_mdSettings.getUsageLastSession());
+
+  // Color Map
+  vsiDefaultColorMap = new QComboBox();
+  lblVsiDefaultColorMap = new QLabel();
+  grid->addWidget(lblVsiDefaultColorMap, 1, 0);
+  grid->addWidget(vsiDefaultColorMap, 1, 1);
+
+  // Background Color
+  vsiDefaultBackground = new ColorButton();
+  lblVsiDefaultBackground = new QLabel();
+  grid->addWidget(lblVsiDefaultBackground, 2, 0);
+  grid->addWidget(vsiDefaultBackground, 2, 1);
+
+  const QColor backgroundColor = m_mdSettings.getUserSettingBackgroundColor();
+  vsiDefaultBackground->setColor(backgroundColor);
+
+  // Initial View when loading into the VSI
+  vsiInitialView = new QComboBox();
+  lblVsiInitialView = new QLabel();
+  grid->addWidget(lblVsiInitialView, 3, 0);
+  grid->addWidget(vsiInitialView, 3, 1);
+
+  grid->setRowStretch(4,1);
+
+  QLabel* label1 = new QLabel("<span style=\"font-weight:600;\">Note: The General Tab settings take precedence over the VSI Tab settings.</span>");
+  vsiTabLayout->addWidget(label1);
+  QLabel* label2 = new QLabel("<span style=\"font-weight:600;\">Note: Changes will not take effect until the VSI has been restarted.</span>");
+  vsiTabLayout->addWidget(label2);
+
+  // Set the color map selection for the VSI
+  QStringList maps;
+  MantidQt::API::MdPlottingCmapsProvider mdPlottingCmapsProvider;
+  mdPlottingCmapsProvider.getColorMapsForVSI(maps);
+
+  MantidQt::API::MdConstants mdConstants;
+  vsiDefaultColorMap->addItems(mdConstants.getVsiColorMaps());
+  vsiDefaultColorMap->addItems(maps);
+
+  int index = vsiDefaultColorMap->findData(m_mdSettings.getUserSettingColorMap(), Qt::DisplayRole);
+  if (index != -1)
+  {
+    vsiDefaultColorMap->setCurrentIndex(index);
+  }
+
+  // Set the initial view selection for the VSI
+  QStringList views;
+
+  views = mdConstants.getAllInitialViews();
+  vsiInitialView->addItems(views);
+
+  int indexInitialView = vsiInitialView->findData(m_mdSettings.getUserSettingInitialView(), Qt::DisplayRole);
+
+  if (index != -1)
+  {
+    vsiInitialView->setCurrentIndex(indexInitialView);
+  }
+}
+
+/**
+ * Set up the connections for Md Plotting 
+ */
+void ConfigDialog::setupMdPlottingConnections()
+{
+  QObject::connect(this->mdPlottingGeneralFrame, SIGNAL(toggled(bool)), this, SLOT(changeUsageGeneralMdColorMap(bool)));
+  QObject::connect(this->vsiLastSession, SIGNAL(toggled(bool)), this, SLOT(changeUsageLastSession(bool)));
+}
+
+/**
+ * Handle a change of the General Md Color Map selection.
+ * @param The state of the general MD color map checkbox
+ */
+void ConfigDialog::changeUsageGeneralMdColorMap(bool state)
+{
+  // Set the visibility of the default color map of the VSI
+  vsiDefaultColorMap->setDisabled(state);
+  lblVsiDefaultColorMap->setDisabled(state);
+}
+
+/**
+ * Handle a change of the Last Session selection.
+  * @param The state of the last session checkbox.
+ */
+void ConfigDialog::changeUsageLastSession(bool state)
+{
+  // Set the visibility of the default color map of the VSI
+  if (!mdPlottingGeneralFrame->isChecked())
+  {
+    vsiDefaultColorMap->setDisabled(state);
+    lblVsiDefaultColorMap->setDisabled(state);
+  }
+
+  // Set the visibility of the background color button of the VSI
+  vsiDefaultBackground->setDisabled(state);
+  lblVsiDefaultBackground->setDisabled(state);
+}
+
 
 /**
 * Configure a Mantid Options page on the config dialog
@@ -1725,6 +1922,7 @@ void ConfigDialog::languageChange()
   itemsList->addItem( tr( "2D Plots" ) );
   itemsList->addItem( tr( "3D Plots" ) );
   itemsList->addItem( tr( "Fitting" ) );
+  itemsList->addItem( tr( "MD Plotting" ) );
   itemsList->setCurrentRow(0);
   itemsList->item(0)->setIcon(QIcon(getQPixmap("general_xpm")));
   itemsList->item(1)->setIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
@@ -1732,6 +1930,7 @@ void ConfigDialog::languageChange()
   itemsList->item(3)->setIcon(QIcon(getQPixmap("config_curves_xpm")));
   itemsList->item(4)->setIcon(QIcon(getQPixmap("logo_xpm")));
   itemsList->item(5)->setIcon(QIcon(getQPixmap("fit_xpm")));
+  itemsList->item(6)->setIcon(QIcon(":/mdPlotting32x32.png"));
   itemsList->setIconSize(QSize(32,32));
   // calculate a sensible width for the items list
   // (default QListWidget size is 256 which looks too big)
@@ -1987,6 +2186,16 @@ void ConfigDialog::languageChange()
   scaleErrorsBox->setText(tr("Scale Errors with sqrt(Chi^2/doF)"));
   groupBoxMultiPeak->setTitle(tr("Display Peak Curves for Multi-peak Fits"));
   lblPeaksColor->setText(tr("Peaks Color"));
+
+  // MDPlotting change
+  mdPlottingTabWidget->setTabText(mdPlottingTabWidget->indexOf(vsiPage), tr("VSI"));
+  lblVsiDefaultColorMap->setText(tr("Default Color Map"));
+  lblVsiDefaultBackground->setText(tr("Background Color"));
+  lblVsiLastSession->setText(tr("Use the settings of the last VSI session"));
+  lblVsiInitialView->setText(tr("Initial View"));
+
+  mdPlottingTabWidget->setTabText(mdPlottingTabWidget->indexOf(mdPlottingGeneralPage), tr("General"));
+  lblGeneralDefaultColorMap->setText(tr("General Color Map"));
 }
 
 void ConfigDialog::accept()
@@ -2215,6 +2424,61 @@ void ConfigDialog::apply()
     QMessageBox::warning(this, "MantidPlot", 
       "Unable to update Mantid user properties file.\n"
       "Configuration will not be saved.");
+  }
+
+  // MD Plotting
+ updateMdPlottingSettings();
+}
+
+/**
+ * Update the MD Plotting settings
+ */
+void ConfigDialog::updateMdPlottingSettings()
+{
+  //////// GENERAL TAB 
+
+  // Read the common color map check box 
+  if (mdPlottingGeneralFrame->isChecked())
+  {
+    m_mdSettings.setUsageGeneralMdColorMap(true);
+  }
+  else
+  {
+    m_mdSettings.setUsageGeneralMdColorMap(false);
+  }
+
+  if (mdPlottingGeneralColorMap)
+  {
+    QString generalTabColorMapName  = mdPlottingGeneralColorMap->currentText();
+    QString generalTabColorMapFile = mdPlottingGeneralColorMap->itemData(mdPlottingGeneralColorMap->currentIndex()).toString();
+
+    m_mdSettings.setGeneralMdColorMap(generalTabColorMapName, generalTabColorMapFile);
+  }
+
+  ///// VSI TAB
+
+  // Read the Vsi color map
+  if (vsiDefaultColorMap)
+  {
+    m_mdSettings.setUserSettingColorMap(vsiDefaultColorMap->currentText());
+  }
+
+  // Read if the usage of the last color map should be performed
+  if (vsiLastSession)
+  {
+    m_mdSettings.setUsageLastSession(vsiLastSession->isChecked());
+  }
+
+  // Read the background selection
+  if (vsiDefaultBackground)
+  {
+    m_mdSettings.setUserSettingBackgroundColor(vsiDefaultBackground->color());
+  }
+
+  // Read the initial view selection
+  if (vsiInitialView)
+  {
+    m_mdSettings.setUserSettingIntialView(vsiInitialView->currentText());
   }
 }
 
