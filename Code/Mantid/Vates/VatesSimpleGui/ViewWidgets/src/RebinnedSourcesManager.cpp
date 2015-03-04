@@ -509,12 +509,9 @@ namespace Mantid
         while(filter1)
         {
           vtkSMProxy* proxy1 = NULL;
-          pqPipelineFilter* newFilter = NULL;
-
           proxy1 = filter1->getProxy();
-          pqPipelineFilter* newFilter = NULL;
           pqPipelineSource* newPipelineElement = NULL;
-
+          pqPipelineFilter* newFilter = NULL;
           // Move source2 to its end.
           while (endOfSource2Pipeline->getNumberOfConsumers() > 0)
           {
