@@ -1,4 +1,5 @@
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
+#include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -45,7 +46,7 @@ namespace SimpleGui
  * Default constructor.
  * @param parent the parent widget for the view
  */
-ViewBase::ViewBase(QWidget *parent) : QWidget(parent), m_temporaryWorkspaceIdentifier("tempvsi")
+ViewBase::ViewBase(QWidget *parent) : QWidget(parent), m_currentColorMapModel(NULL), m_temporaryWorkspaceIdentifier("tempvsi")
 {
 }
 
@@ -170,6 +171,14 @@ void ViewBase::onColorMapChange(const pqColorMapModel *model)
     this->colorUpdater.logScale(true);
   }
   rep->renderViewEventually();
+
+  if (this->colorUpdater.isAutoScale())
+  {
+    setAutoColorScale();
+  }
+
+  // Workaround for colormap but when changing the visbility of a source
+  this->m_currentColorMapModel = model;
 }
 
 /**
@@ -656,6 +665,13 @@ void ViewBase::updateView()
 {
 }
 
+/// This function is used to update settings, such as background color etc.
+void ViewBase::updateSettings()
+{
+  this->backgroundRgbProvider.update();
+}
+
+
 /**
  * This function checks the current pipeline for a filter with the specified
  * name. The function works for generic filter names only.
@@ -741,6 +757,16 @@ bool ViewBase::hasWorkspaceType(const QString &wsTypeName)
 }
 
 /**
+ * This function sets the default colors for the background and connects a tracker for changes of the background color by the user.
+ * @param viewSwitched If the view was switched or created.
+ */
+void ViewBase::setColorForBackground(bool viewSwitched)
+{
+  backgroundRgbProvider.setBackgroundColor(this->getView(), viewSwitched);
+  backgroundRgbProvider.observe(this->getView());
+}
+
+/**
  * React to a change of the visibility of a representation of a source.
  * This can be a change of the status if the "eye" symbol in the PipelineBrowserWidget
  * as well as the addition or removal of a representation. 
@@ -752,6 +778,10 @@ void ViewBase::onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)
   // Reset the colorscale if it is set to autoscale
   if (colorUpdater.isAutoScale())
   {
+    // Workaround: A ParaView bug requires us to reload the ColorMap when the visibility changes.
+    if (m_currentColorMapModel) {
+      onColorMapChange(m_currentColorMapModel);
+    }
     this->setAutoColorScale();
   }
 }
