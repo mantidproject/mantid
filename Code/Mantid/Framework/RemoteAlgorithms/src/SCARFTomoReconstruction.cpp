@@ -316,10 +316,10 @@ void SCARFTomoReconstruction::doLogin(const std::string &username,
 
   std::string httpsURL = SCARFLoginBaseURL + SCARFLoginPath + "?username=" +
     username + "&password=" + password;
-
+  int code;
   std::stringstream ss;
   try {
-    doSendRequestGetResponse(httpsURL, ss);
+    code = doSendRequestGetResponse(httpsURL, ss);
   } catch (Kernel::Exception::InternetError& ie) {
     throw std::runtime_error("Error while sending HTTP request to authenticate "
                              "(log in): " + std::string(ie.what()));
@@ -329,7 +329,8 @@ void SCARFTomoReconstruction::doLogin(const std::string &username,
   // request is well formed. So this is how to know if authentication succeeded:
   const std::string expectedSubstr = "https://portal.scarf.rl.ac.uk";
   std::string resp = ss.str();
-  if (resp.find(expectedSubstr) != std::string::npos) {
+  if (InternetHelper::HTTP_OK == code &&
+      resp.find(expectedSubstr) != std::string::npos) {
     // it went fine, stash cookie/token which looks like this (2 lines):
     // https://portal.scarf.rl.ac.uk:8443/platform/
     // scarf362"2015-02-10T18:50:00Z"Mv2ncX8Z0TpH0lZHxMyXNVCb7ucT6jHNOx...
@@ -1029,7 +1030,6 @@ std::string SCARFTomoReconstruction::buildUploadBody(const std::string &boundary
   // Content-ID: <bar.txt>
   //
   body += "--" + boundary + "\r\n";
-  const std::string boundaryInner = "_Part_1_701508.1145579811786";
   body += "Content-Disposition: form-data; name=\"" + upName  +"\"\r\n";
   body += "Content-Type: application/octet-stream \r\n";
   body += "Content-Transfer-Encoding: UTF-8\r\n";
