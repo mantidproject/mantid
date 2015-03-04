@@ -69,6 +69,7 @@ protected:
   void doSubmitReconstructionJob();
   void doCancelJob(const std::string &id);
 
+  void makeRunnableWithOptions(std::string &run, std::string &opt);
   std::string getComputeResource();
   std::string getUsername();
   std::string getPassword();
@@ -147,7 +148,14 @@ private:
   std::vector<Mantid::API::ITableWorkspace_sptr> m_currPlugins;
   std::string m_currentParamPath;
   static size_t m_nameSeqNo;
-  static std::string m_SCARFName;
+  static const std::string m_SCARFName;
+
+  // Names of image reconstruction tools
+  static const std::string m_TomoPyTool;
+  static const std::string m_AstraTool;
+  static const std::string m_CCPiTool;
+  static const std::string m_SavuTool;
+  static const std::string m_CustomCmdTool;
 };
 }
 }

@@ -53,7 +53,17 @@ private:
 using namespace MantidQt::CustomInterfaces;
 
 size_t TomoReconstruction::m_nameSeqNo = 0;
-std::string TomoReconstruction::m_SCARFName = "SCARF@STFC";
+
+// names by which we know compute resourcess
+const td::string TomoReconstruction::m_SCARFName = "SCARF@STFC";
+
+// names by which we knoe image/tomography reconstruction tools (3rd party)
+const std::string TomoReconstruction::m_TomoPyTool = "TomoPy";
+const std::string TomoReconstruction::m_AstraTool = "Astra";
+const std::string TomoReconstruction::m_CCPiTool = "CCPi CGLS";
+const std::string TomoReconstruction::m_SavuTool = "Savu";
+const std::string TomoReconstruction::m_CustomCmdTool = "Custom command";
+
 /**
  * Almost default constructor, but note that this interface currently
  * relies on the SCARF cluster (only in ISIS facility) as the only
@@ -68,11 +78,11 @@ TomoReconstruction::TomoReconstruction(QWidget *parent)
 
   m_computeRes.push_back(m_SCARFName);
 
-  m_SCARFtools.push_back("TomoPy");
-  m_SCARFtools.push_back("Astra");
-  m_SCARFtools.push_back("CCPi CGLS");
-  m_SCARFtools.push_back("Savu");
-  m_SCARFtools.push_back("Custom command");
+  m_SCARFtools.push_back(m_TomoPyTool);
+  m_SCARFtools.push_back(m_AstraTool);
+  m_SCARFtools.push_back(m_CCPiTool);
+  m_SCARFtools.push_back(m_SavuTool);
+  m_SCARFtools.push_back(m_CustomCmdTool);
 }
 
 void TomoReconstruction::doSetupSectionParameters() {
@@ -459,14 +469,53 @@ void TomoReconstruction::doSubmitReconstructionJob() {
   // submitAlg->setPropertyValue("ComputeResource", res);
   auto alg = Algorithm::fromString("SCARFTomoReconstruction");
   alg->initialize();
+  alg->setPropertyValue("Action", "SubmitJob");
   alg->setPropertyValue("UserName", getUsername());
-  alg->setPropertyValue("JobID", "0");
+
+  std::string run, opt;
+  makeRunnableWithOptions(run, opt);
+  alg->setProperty("RunnablePath", run);
+  alg->setProperty("JobOptions", opt);
+
   try {
     alg->execute();
   } catch (std::runtime_error &e) {
     throw std::runtime_error(
         "Error when trying to cancel a reconstruction job: " +
         std::string(e.what()));
+  }
+}
+
+/**
+ * Build the components of the command line to run on the remote
+ * compute resource.Produces a (normally full) path to a runnable, and
+ * the options (quite like $0 and $* in scripts).
+ *
+ * @param run Path to a runnable application (script, python module, etc.)
+ * @param opt Command line parameters to the application
+ */
+void TomoReconstruction::makeRunnableWithOptions(std::string &run,
+                                                 std::string &opt) {
+  // For now we only know how to run commands on SCARF
+  if (m_SCARFName ==
+      m_ui.comboBox_run_compute_resource->currentText().toStdString()) {
+    const std::string tool = m_ui.comboBox_run_tool->test().toStdString();
+    if (tool = m_TomoPyTool) {
+      run = "/work/imat/scripts/tomopy/imat_recon_FBP.py"
+      opt = m_SCARF_path;
+    } else if (tool == m_AstraTool) {
+      run = "/work/imat/scripts/astra/astra-3d-SIRT3D.py";
+      opt = m_SCARF_path;
+    } else {
+      userWarning("Unable to use this tool",
+                  "I do not know how to submit jobs to use this tool: " +
+                   + tool + ". It seems that this interface is "
+                  "misconfigured or there has been an unexpected "
+                  "failure.");
+    }
+  } else {
+    run = "error_dont_know_what_to_do";
+    opt = "no_options_known";
   }
 }
 
