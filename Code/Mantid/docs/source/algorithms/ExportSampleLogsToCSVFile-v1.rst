@@ -29,9 +29,9 @@ to be exported.
 
 Here is the definition for the columns. 
 
--  Column 0: Absolute time in second
--  Column 1: Relative to first log entry's time
--  Column 2 to (2 + n) - 1: log values in the order determined by input
+-  Column 1: Absolute time (with respect to the Unix epoch) in seconds
+-  Column 2: Relative to first log entry's time
+-  Column 3 to (2 + n): log values in the order determined by input
    *SampleLogNames*
 
 Header file
@@ -40,9 +40,9 @@ Header file
 A sample log header file can be generated optionally.  
 It contains theree lines described as below. 
 
--  Line 0: Test date: [Test date in string]
--  Line 1: Test description: [Description of this log file]
--  Line 2: Header content given by user via input property *Header*.
+-  Line 1: Test date: [Test date in string]
+-  Line 2: Test description: [Description of this log file]
+-  Line 3: Header content given by user via input property *Header*.
    Usually it is the column names in the .csv file
 
 Time Zone
