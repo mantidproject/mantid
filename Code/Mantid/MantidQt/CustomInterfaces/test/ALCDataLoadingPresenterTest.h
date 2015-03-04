@@ -36,6 +36,9 @@ public:
   MOCK_CONST_METHOD0(timeRange, boost::optional<PAIR_OF_DOUBLES>());
   MOCK_CONST_METHOD0(deadTimeType, std::string());
   MOCK_CONST_METHOD0(deadTimeFile, std::string());
+  MOCK_CONST_METHOD0(detectorGroupingType, std::string());
+  MOCK_CONST_METHOD0(getForwardGrouping, std::string());
+  MOCK_CONST_METHOD0(getBackwardGrouping, std::string());
 
   MOCK_METHOD0(initialize, void());
   MOCK_METHOD1(setDataCurve, void(const QwtData&));
@@ -80,6 +83,7 @@ public:
     ON_CALL(*m_view, log()).WillByDefault(Return("sample_magn_field"));
     ON_CALL(*m_view, timeRange()).WillByDefault(Return(boost::none));
     ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("None"));
+    ON_CALL(*m_view, detectorGroupingType()).WillByDefault(Return("Auto"));
   }
 
   void tearDown()
@@ -213,6 +217,24 @@ public:
     EXPECT_CALL(*m_view, deadTimeType()).Times(2);
     EXPECT_CALL(*m_view, deadTimeFile()).Times(1);
     EXPECT_CALL(*m_view, restoreCursor()).Times(1);
+    m_view->requestLoading();
+  }
+
+  void test_customGrouping ()
+  {
+    // Change grouping type to 'Custom'
+    ON_CALL(*m_view, detectorGroupingType()).WillByDefault(Return("Custom"));
+    // Set grouping, the same as the default
+    ON_CALL(*m_view, getForwardGrouping()).WillByDefault(Return("33-64"));
+    ON_CALL(*m_view, getBackwardGrouping()).WillByDefault(Return("1-32"));
+    EXPECT_CALL(*m_view, getForwardGrouping()).Times(1);
+    EXPECT_CALL(*m_view, getBackwardGrouping()).Times(1);
+    EXPECT_CALL(*m_view, restoreCursor()).Times(1);
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3), QwtDataX(0, 1350, 1E-8),
+                           QwtDataX(1, 1360, 1E-8), QwtDataX(2, 1370, 1E-8),
+                           QwtDataY(0, 0.150, 1E-3), QwtDataY(1, 0.143, 1E-3),
+                           QwtDataY(2, 0.128, 1E-3))));
+
     m_view->requestLoading();
   }
 };
