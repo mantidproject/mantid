@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/PDEstimateDetectorResolution.h"
+#include "MantidAlgorithms/EstimateResolutionDiffraction.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -22,7 +22,7 @@ using namespace std;
 namespace Mantid {
 namespace Algorithms {
 
-DECLARE_ALGORITHM(PDEstimateDetectorResolution)
+DECLARE_ALGORITHM(EstimateResolutionDiffraction)
 
 namespace { // hide these constants
   ///
@@ -37,34 +37,34 @@ namespace { // hide these constants
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-PDEstimateDetectorResolution::PDEstimateDetectorResolution() {}
+EstimateResolutionDiffraction::EstimateResolutionDiffraction() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-PDEstimateDetectorResolution::~PDEstimateDetectorResolution() {}
+EstimateResolutionDiffraction::~EstimateResolutionDiffraction() {}
 
-const std::string PDEstimateDetectorResolution::name() const {
-  return "PDEstimateDetectorResolution";
+const std::string EstimateResolutionDiffraction::name() const {
+  return "EstimateResolutionDiffraction";
 }
 
-const std::string PDEstimateDetectorResolution::alias() const {
+const std::string EstimateResolutionDiffraction::alias() const {
   return "EstimatePDDetectorResolution";
 }
 
-const std::string PDEstimateDetectorResolution::summary() const {
+const std::string EstimateResolutionDiffraction::summary() const {
   return "Estimate the resolution of each detector for a powder "
          "diffractometer. ";
 }
 
-int PDEstimateDetectorResolution::version() const { return 1; }
+int EstimateResolutionDiffraction::version() const { return 1; }
 
-const std::string PDEstimateDetectorResolution::category() const {
+const std::string EstimateResolutionDiffraction::category() const {
   return "Diffraction";
 }
 
 //----------------------------------------------------------------------------------------------
-void PDEstimateDetectorResolution::init() {
+void EstimateResolutionDiffraction::init() {
   declareProperty(
       new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
                                              Direction::Input),
@@ -93,7 +93,7 @@ void PDEstimateDetectorResolution::init() {
 //----------------------------------------------------------------------------------------------
 /**
   */
-void PDEstimateDetectorResolution::exec() {
+void EstimateResolutionDiffraction::exec() {
   processAlgProperties();
 
   retrieveInstrumentParameters();
@@ -108,14 +108,14 @@ void PDEstimateDetectorResolution::exec() {
 //----------------------------------------------------------------------------------------------
 /**
   */
-void PDEstimateDetectorResolution::processAlgProperties() {
+void EstimateResolutionDiffraction::processAlgProperties() {
   m_inputWS = getProperty("InputWorkspace");
 
   m_deltaT = getProperty("DeltaTOF");
   m_deltaT *= MICROSEC_TO_SEC; // convert to meter
 }
 
-double PDEstimateDetectorResolution::getWavelength() {
+double EstimateResolutionDiffraction::getWavelength() {
   double wavelength = getProperty("Wavelength");
   if (!isEmpty(wavelength))
   {
@@ -145,7 +145,7 @@ double PDEstimateDetectorResolution::getWavelength() {
 //----------------------------------------------------------------------------------------------
 /**
   */
-void PDEstimateDetectorResolution::retrieveInstrumentParameters() {
+void EstimateResolutionDiffraction::retrieveInstrumentParameters() {
   double centrewavelength = getWavelength();
   g_log.notice() << "Centre wavelength = " << centrewavelength << " Angstrom\n";
   if (centrewavelength > WAVELENGTH_MAX)
@@ -170,7 +170,7 @@ void PDEstimateDetectorResolution::retrieveInstrumentParameters() {
 //----------------------------------------------------------------------------------------------
 /**
   */
-void PDEstimateDetectorResolution::createOutputWorkspace() {
+void EstimateResolutionDiffraction::createOutputWorkspace() {
   size_t numspec = m_inputWS->getNumberHistograms();
 
   m_outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
@@ -183,7 +183,7 @@ void PDEstimateDetectorResolution::createOutputWorkspace() {
 //----------------------------------------------------------------------------------------------
 /**
   */
-void PDEstimateDetectorResolution::estimateDetectorResolution() {
+void EstimateResolutionDiffraction::estimateDetectorResolution() {
   Instrument_const_sptr instrument = m_inputWS->getInstrument();
   V3D samplepos = instrument->getSample()->getPos();
 

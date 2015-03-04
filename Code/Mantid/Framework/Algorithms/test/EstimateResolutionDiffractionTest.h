@@ -1,15 +1,15 @@
-#ifndef MANTID_ALGORITHMS_PDESTIMATEDETECTORRESOLUTIONTEST_H_
-#define MANTID_ALGORITHMS_PDESTIMATEDETECTORRESOLUTIONTEST_H_
+#ifndef MANTID_ALGORITHMS_ESTIMATERESOLUTIONDIFFRACTIONTEST_H_
+#define MANTID_ALGORITHMS_ESTIMATERESOLUTIONDIFFRACTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAlgorithms/PDEstimateDetectorResolution.h"
+#include "MantidAlgorithms/EstimateResolutionDiffraction.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-using Mantid::Algorithms::PDEstimateDetectorResolution;
+using Mantid::Algorithms::EstimateResolutionDiffraction;
 using Mantid::DataHandling::LoadEmptyInstrument;
 
 using namespace Mantid;
@@ -17,21 +17,21 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 
-class PDEstimateDetectorResolutionTest : public CxxTest::TestSuite {
+class EstimateResolutionDiffractionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PDEstimateDetectorResolutionTest *createSuite() {
-    return new PDEstimateDetectorResolutionTest();
+  static EstimateResolutionDiffractionTest *createSuite() {
+    return new EstimateResolutionDiffractionTest();
   }
-  static void destroySuite(PDEstimateDetectorResolutionTest *suite) {
+  static void destroySuite(EstimateResolutionDiffractionTest *suite) {
     delete suite;
   }
 
   /** Test init
     */
   void test_Init() {
-    PDEstimateDetectorResolution alg;
+    EstimateResolutionDiffraction alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
   }
@@ -43,7 +43,7 @@ public:
     MatrixWorkspace_sptr ws = createInstrument();
 
     // Set up and run
-    PDEstimateDetectorResolution alg;
+    EstimateResolutionDiffraction alg;
     alg.initialize();
 
     TS_ASSERT_THROWS_NOTHING(
@@ -98,4 +98,4 @@ public:
   }
 };
 
-#endif /* MANTID_ALGORITHMS_PDESTIMATEDETECTORRESOLUTIONTEST_H_ */
+#endif /* MANTID_ALGORITHMS_ESTIMATERESOLUTIONDIFFRACTIONTEST_H_ */
