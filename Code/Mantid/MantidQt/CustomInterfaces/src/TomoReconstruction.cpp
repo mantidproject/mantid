@@ -77,6 +77,11 @@ const std::string TomoReconstruction::m_CustomCmdTool = "Custom command";
 TomoReconstruction::TomoReconstruction(QWidget *parent)
   : UserSubWindow(parent), m_loggedIn(false), m_facility("ISIS"),
     m_computeRes(), m_localCompName("Local"), m_SCARFtools(),
+    m_pathSCARFbase("/work/imat/recon/"),
+    m_pathFITS(m_pathSCARFbase + "data/fits"),
+    m_pathFlat(m_pathSCARFbase + "data/flat"),
+    m_pathDark(m_pathSCARFbase + "data/dark"),
+    m_pathSavuConfigFile(m_pathSCARFbase),
     m_availPlugins(), m_currPlugins(), m_currentParamPath() {
 
   m_computeRes.push_back(m_SCARFName);
@@ -138,14 +143,14 @@ void TomoReconstruction::doSetupSectionSetup() {
           SLOT(SCARFLogoutClicked()));
 
   // 'browse' buttons
-  connect(m_ui.pushButton_savu_config_file, SIGNAL(released()), this,
-          SLOT(voidBrowseClicked()));
   connect(m_ui.pushButton_fits_dir, SIGNAL(released()), this,
-          SLOT(voidBrowseClicked()));
+          SLOT(fitsPathBrowseClicked()));
   connect(m_ui.pushButton_flat_dir, SIGNAL(released()), this,
-          SLOT(voidBrowseClicked()));
+          SLOT(flatPathBrowseClicked()));
   connect(m_ui.pushButton_dark_dir, SIGNAL(released()), this,
-          SLOT(voidBrowseClicked()));
+          SLOT(darPathBrowseClicked()));
+  connect(m_ui.pushButton_savu_config_file, SIGNAL(released()), this,
+          SLOT(savuConfigFileBrowseClicked()));
 }
 
 void TomoReconstruction::doSetupSectionRun() {
@@ -919,7 +924,47 @@ void TomoReconstruction::menuOpenClicked() {
   }
 }
 
-void TomoReconstruction::voidBrowseClicked() {
+/**
+ * Get path from user and update a line edit and a variable.
+ *
+ * @param le a line edit where the path is shown.
+ * @param data variable where the path is stored (in addition to the line
+ * edit object).
+ */
+void TomoReconstruction::processPathBrowseClick(QLineEdit *le,
+                                                std::string &data) {
+  QString algPrev = MantidQt::API::AlgorithmInputHistory::Instance().
+      getPreviousDirectory();
+  QString prev;
+  if (le->text().isEmpty()) {
+    prev = algPrev;
+  } else {
+    prev = le->text();
+  }
+
+  QString path(QFileDialog::getExistingDirectory(this,
+      tr("Open directory/folder"), prev));
+
+  if (!path.isEmpty()) {
+    le->setText(path);
+    data = path.toStdString();
+  }
+}
+
+void TomoReconstruction::fitsPathBrowseClicked() {
+  processPathBrowseClick(m_ui.lineEdit_path_FITS, m_pathFITS);
+}
+
+void TomoReconstruction::flatPathBrowseClicked() {
+  processPathBrowseClick(m_ui.lineEdit_path_flat, m_pathFlat);
+}
+
+void TomoReconstruction::darkPathBrowseClicked() {
+  processPathBrowseClick(m_ui.lineEdit_path_dark, m_pathDark);
+}
+
+void TomoReconstruction::SavuConfigFileClicked() {
+  processPathBrowseClick(m_ui.lineEdit_savu_config_file, m_pathSavuConfigFile);
 }
 
 void TomoReconstruction::menuSaveClicked() {

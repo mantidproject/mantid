@@ -799,7 +799,7 @@ Double-click on them to modify their values.</string>
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QLineEdit" name="lineEdit_3"/>
+            <widget class="QLineEdit" name="lineEdit_path_FITS"/>
            </item>
            <item row="0" column="2">
             <widget class="QPushButton" name="pushButton_fits_dir">
@@ -828,7 +828,7 @@ Double-click on them to modify their values.</string>
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QLineEdit" name="lineEdit_4"/>
+            <widget class="QLineEdit" name="lineEdit_path_flat"/>
            </item>
            <item row="1" column="2">
             <widget class="QPushButton" name="pushButton_flat_dir">
@@ -857,7 +857,7 @@ Double-click on them to modify their values.</string>
             </widget>
            </item>
            <item row="2" column="1">
-            <widget class="QLineEdit" name="lineEdit_5"/>
+            <widget class="QLineEdit" name="lineEdit_path_dark"/>
            </item>
            <item row="2" column="2">
             <widget class="QPushButton" name="pushButton_dark_dir">
@@ -873,9 +873,9 @@ Double-click on them to modify their values.</string>
             </widget>
            </item>
           </layout>
-          <zorder>lineEdit_3</zorder>
-          <zorder>lineEdit_4</zorder>
-          <zorder>lineEdit_5</zorder>
+          <zorder>lineEdit_path_FITS</zorder>
+          <zorder>lineEdit_path_flat</zorder>
+          <zorder>lineEdit_path_dark</zorder>
           <zorder>label_5</zorder>
           <zorder>label_6</zorder>
           <zorder>label_7</zorder>
@@ -1505,9 +1505,9 @@ Double-click on them to modify their values.</string>
   <tabstop>spinBox_SCARFnumNodes</tabstop>
   <tabstop>spinBox_SCARFnumCores</tabstop>
   <tabstop>pushButton_SCARF_login</tabstop>
-  <tabstop>lineEdit_3</tabstop>
-  <tabstop>lineEdit_4</tabstop>
-  <tabstop>lineEdit_5</tabstop>
+  <tabstop>lineEdit_path_FITS</tabstop>
+  <tabstop>lineEdit_path_flat</tabstop>
+  <tabstop>lineEdit_path_dark</tabstop>
   <tabstop>tabWidget_comp_resource</tabstop>
   <tabstop>btnMoveDown</tabstop>
   <tabstop>pushButton_SCARF_logout</tabstop>

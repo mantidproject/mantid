@@ -7,6 +7,7 @@
 #include "MantidQtAPI/UserSubWindow.h"
 
 class QTreeWidgetItem;
+class QLineEdit;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -81,7 +82,11 @@ private slots:
   void SCARFLogoutClicked();
 
   void browseImageClicked();
-  void voidBrowseClicked();
+
+  void fitsPathBrowseClicked();
+  void flatPathBrowseClicked();
+  void darkPathBrowseClicked();
+  void SavuConfigFileClicked();
 
   void menuSaveClicked();
   void menuSaveAsClicked();
@@ -104,6 +109,8 @@ private:
   void setupRunTool();
 
   void enableLoggedActions(bool enable);
+
+  void processPathBrowseClick(QLineEdit *le, std::string &data);
 
   /// Load default interface settings for each tab
   void loadSettings();
@@ -147,6 +154,17 @@ private:
 
   /// reduction tools
   std::vector<std::string> m_SCARFtools;
+
+  /// file paths, base dir on scarf
+  std::string m_pathSCARFbase;
+  /// path to fits file (sample data)
+  std::string m_pathFITS;
+  /// path to flat/bright image
+  std::string m_pathFlat;
+  /// path to dark image
+  std::string m_pathDark;
+  /// path to an tomography config file (savu NX format)
+  std::string m_pathSavuConfigFile;
 
   // plugins for savu config files
   std::vector<Mantid::API::ITableWorkspace_sptr> m_availPlugins;
