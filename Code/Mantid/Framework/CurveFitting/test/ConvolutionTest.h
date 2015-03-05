@@ -7,6 +7,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCurveFitting/Convolution.h"
 #include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/HalfComplex.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -320,7 +321,7 @@ public:
     conv.function(xView,values);
 
     // Check that the transform is correct: F( exp(-a*x^2) ) == sqrt(pi/a)*exp(-(pi*x)^2/a)
-    Convolution::HalfComplex hout(values.getPointerToCalculated(0),N);
+    HalfComplex hout(values.getPointerToCalculated(0),N);
     double df = 1./Dx; // this is the x-step of the transformed data
     double pi= acos(0.)*2;
     double cc = pi*pi*df*df/a;
