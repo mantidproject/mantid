@@ -74,8 +74,15 @@ namespace CustomInterfaces
 
       m_loadedData = alg->getProperty("OutputWorkspace");
 
-      assert(m_loadedData); // If errors are properly caught, shouldn't happen
-      assert(m_loadedData->getNumberHistograms() == 1); // PlotAsymmetryByLogValue guarantees that
+      // If errors are properly caught, shouldn't happen
+      assert(m_loadedData);
+      // If subtract is not checked, only one spectrum,
+      // else four spectra
+      if ( !m_view->subtractIsChecked() ) {
+        assert(m_loadedData->getNumberHistograms() == 1);
+      } else {
+        assert(m_loadedData->getNumberHistograms() == 4);
+      }
 
       m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_loadedData, 0)));
     }
