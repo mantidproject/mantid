@@ -162,6 +162,9 @@ void SplatterPlotView::render()
   {
     this->peaksSource.append(src);
     renderType = "Wireframe";
+    // Connect the peak source to a listener, to detect its destruction
+    QObject::connect(src, SIGNAL(destroyed()),
+                     this, SLOT(onPeakSourceDestroyed()));
   }
 
   // Show the data
@@ -306,6 +309,35 @@ void SplatterPlotView::destroyPeakSources()
     }
   }
   this->peaksSource.clear();
+}
+
+/**
+ * React to the destruction of a peak source, mainly unregister it from the peakSource container
+ */
+void SplatterPlotView::onPeakSourceDestroyed() {
+  // Check for each source in the peakSource container, if it still is an existing source
+  for (QList<QPointer<pqPipelineSource>>::Iterator it = peaksSource.begin(); it != peaksSource.end(); ++it) {
+    pqServer *server = pqActiveObjects::instance().activeServer();
+    pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+    QList<pqPipelineSource *> sources;
+    sources = smModel->findItems<pqPipelineSource *>(server);
+
+    bool foundSource = false;
+    for (QList<pqPipelineSource*>::iterator source = sources.begin(); source != sources.end(); ++source) {
+      // Check if the source registered in PV matches our current peak source
+      if ((*source) == (*it)) {
+        foundSource = true;
+        break;
+      }
+    }
+
+    if (!foundSource) {
+      it = peaksSource.erase(it);
+    }
+    else {
+      ++it;
+    }
+  }
 }
 
 /**
