@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/EventWorkspaceHelpers.cpp
 	src/EventWorkspaceMRU.cpp
 	src/Events.cpp
+	src/FakeMD.cpp
 	src/GroupingWorkspace.cpp
 	src/Histogram1D.cpp
 	src/MDBin.cpp
@@ -70,6 +71,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/EventWorkspaceHelpers.h
 	inc/MantidDataObjects/EventWorkspaceMRU.h
 	inc/MantidDataObjects/Events.h
+	inc/MantidDataObjects/FakeMD.h
 	inc/MantidDataObjects/GroupingWorkspace.h
 	inc/MantidDataObjects/Histogram1D.h
 	inc/MantidDataObjects/MDBin.h
@@ -123,6 +125,7 @@ set ( TEST_FILES
 	EventWorkspaceMRUTest.h
 	EventWorkspaceTest.h
 	EventsTest.h
+	FakeMDTest.h
 	GroupingWorkspaceTest.h
 	Histogram1DTest.h
 	LibraryManagerTest.h
@@ -133,9 +136,9 @@ set ( TEST_FILES
 	MDBoxSaveableTest.h
 	MDBoxTest.h
 	MDDimensionStatsTest.h
-	MDEventTest.h
 	MDEventFactoryTest.h
 	MDEventInserterTest.h
+	MDEventTest.h
 	MDEventWorkspaceTest.h
 	MDGridBoxTest.h
 	MDHistoWorkspaceIteratorTest.h

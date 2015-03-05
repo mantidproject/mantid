@@ -139,22 +139,22 @@ makeAnyMDEW(size_t splitInto, coord_t min, coord_t max,
 /** Make a MDEventWorkspace with MDLeanEvents */
 template <size_t nd>
 boost::shared_ptr<
-    Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDLeanEvent<nd>, nd>>
+    MDEventWorkspace<MDLeanEvent<nd>, nd>>
 makeMDEW(size_t splitInto, coord_t min, coord_t max,
          size_t numEventsPerBox = 0) {
-  return makeAnyMDEW<Mantid::DataObjects::MDLeanEvent<nd>, nd>(splitInto, min, max,
-                                                            numEventsPerBox);
+  return makeAnyMDEW<MDLeanEvent<nd>, nd>(splitInto, min, max,
+                                          numEventsPerBox);
 }
 
 /** Make a MDEventWorkspace with MDEvents  - updated to split dims by splitInto,
  * not 10 */
 template <size_t nd>
 boost::shared_ptr<
-    Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<nd>, nd>>
+    MDEventWorkspace<MDEvent<nd>, nd>>
 makeMDEWFull(size_t splitInto, coord_t min, coord_t max,
              size_t numEventsPerBox = 0) {
-  return makeAnyMDEW<Mantid::DataObjects::MDEvent<nd>, nd>(splitInto, min, max,
-                                                        numEventsPerBox);
+  return makeAnyMDEW<MDEvent<nd>, nd>(splitInto, min, max,
+                                      numEventsPerBox);
 }
 
 //=====================================================================================
