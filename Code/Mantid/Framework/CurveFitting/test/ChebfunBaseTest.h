@@ -1,5 +1,5 @@
-#ifndef CHEBYSHEVTEST_H_
-#define CHEBYSHEVTEST_H_
+#ifndef CHEBFUNBASETEST_H_
+#define CHEBFUNBASETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -249,4 +249,4 @@ private:
   }
 };
 
-#endif /*CHEBYSHEVTEST_H_*/
+#endif /*CHEBFUNBASETEST_H_*/

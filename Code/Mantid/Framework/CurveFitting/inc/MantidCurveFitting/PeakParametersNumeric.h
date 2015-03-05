@@ -14,7 +14,7 @@ class ChebfunBase;
 /**
 
 Implements IPeakFunction's getters and setters for the peak centre, height and
-fwhm.
+fwhm. The parameters are calculated numerically.
 
 Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -57,6 +57,11 @@ public:
                             bool explicitlySet = true);
   using API::IPeakFunction::setParameter;
 
+  /// Get boundaries for an interval within which the peak has 
+  /// significant values. The interval must contain the maximum
+  /// point and points below the half-maximum on both side
+  /// from the centre. Ideally the interval should exclude
+  /// points with values below 1% of the maximum.
   virtual std::pair<double, double> getExtent() const = 0;
 
 protected:
@@ -66,25 +71,35 @@ protected:
                                           std::vector<double> &p,
                                           std::vector<double> &a) const;
 
+  /// Enumerates possible effects of parameters on the width
   enum WidthParamType {Linear, Square, Inverse};
 
   void defineHeightParameter(const std::string& parName);
   void defineCentreParameter(const std::string& parName);
   void defineWidthParameter(const std::string& parName, WidthParamType wType);
 
-  mutable bool m_invalidateCache;
-  mutable double m_centre;
-  mutable double m_width;
-  mutable double m_height;
+  // setter helpers
+
+  /// Index of parameter proportional to the height
+  size_t m_heightIndex;
+  /// Index of parameter which shifts the centre
+  size_t m_centreIndex;
+  /// Indices of parameters which affect the width
+  std::vector<size_t> m_widthIndices;
+  /// Types of the width parameter effects
+  std::vector<WidthParamType> m_widthParTypes;
+
+  // cached values
+
+  mutable bool m_invalidateCache; ///< dirty flag
+  mutable double m_centre;        ///< peak centre (the maximum point)
+  mutable double m_width;         ///< FWHM
+  mutable double m_height;        ///< the maximum value
 
   mutable double m_start;
   mutable double m_end;
-  mutable boost::shared_ptr<ChebfunBase> m_base;
+  mutable boost::shared_ptr<ChebfunBase> m_base; ///< function approximator
 
-  size_t m_heightIndex;
-  size_t m_centreIndex;
-  std::vector<size_t> m_widthIndices;
-  std::vector<WidthParamType> m_widthParTypes;
 };
 
 } // namespace CurveFitting

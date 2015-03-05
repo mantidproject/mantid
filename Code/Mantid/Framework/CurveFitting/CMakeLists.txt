@@ -281,6 +281,7 @@ set ( TEST_FILES
 	MuonFInteractionTest.h
 	NeutronBk2BkExpConvPVoigtTest.h
 	NormaliseByPeakAreaTest.h
+	PeakParametersNumericTest.h
 	PRConjugateGradientTest.h
 	PlotPeakByLogValueTest.h
 	PolynomialTest.h
