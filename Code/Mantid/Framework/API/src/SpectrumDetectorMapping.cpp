@@ -8,7 +8,8 @@ namespace API {
  *  @throws std::invalid_argument if a null workspace pointer is passed in
  */
 SpectrumDetectorMapping::SpectrumDetectorMapping(
-    const MatrixWorkspace *const workspace) {
+    const MatrixWorkspace *const workspace,
+    bool useSpecNoIndex): m_indexIsSpecNo(useSpecNoIndex) {
   if (!workspace) {
     throw std::invalid_argument(
         "SpectrumDetectorMapping: Null workspace pointer passed");
@@ -16,7 +17,14 @@ SpectrumDetectorMapping::SpectrumDetectorMapping(
 
   for (size_t i = 0; i < workspace->getNumberHistograms(); ++i) {
     auto spectrum = workspace->getSpectrum(i);
-    m_mapping[spectrum->getSpectrumNo()] = spectrum->getDetectorIDs();
+
+    int index;
+    if(m_indexIsSpecNo)
+      index = spectrum->getSpectrumNo();
+    else
+      index = static_cast<int>(i);
+
+    m_mapping[index] = spectrum->getDetectorIDs();
   }
 }
 
@@ -28,7 +36,8 @@ SpectrumDetectorMapping::SpectrumDetectorMapping(
 SpectrumDetectorMapping::SpectrumDetectorMapping(
     const std::vector<specid_t> &spectrumNumbers,
     const std::vector<detid_t> &detectorIDs,
-    const std::vector<detid_t> &ignoreDetIDs) {
+    const std::vector<detid_t> &ignoreDetIDs):
+    m_indexIsSpecNo(true) {
   if (spectrumNumbers.size() != detectorIDs.size()) {
     throw std::invalid_argument("SpectrumDetectorMapping: Different length "
                                 "spectrum number & detector ID array passed");
@@ -43,7 +52,7 @@ SpectrumDetectorMapping::SpectrumDetectorMapping(
  */
 SpectrumDetectorMapping::SpectrumDetectorMapping(
     const specid_t *const spectrumNumbers, const detid_t *const detectorIDs,
-    size_t arrayLengths) {
+    size_t arrayLengths): m_indexIsSpecNo(true) {
   if (spectrumNumbers == NULL || detectorIDs == NULL) {
     throw std::invalid_argument(
         "SpectrumDetectorMapping: Null array pointer passed");
@@ -93,12 +102,25 @@ std::set<specid_t> SpectrumDetectorMapping::getSpectrumNumbers() const {
 
 const std::set<detid_t> &SpectrumDetectorMapping::getDetectorIDsForSpectrumNo(
     const specid_t spectrumNo) const {
+  if(!m_indexIsSpecNo)
+    throw std::runtime_error("Indicies are in spectrum index, not number.");
   return m_mapping.at(spectrumNo);
+}
+
+const std::set<detid_t> &SpectrumDetectorMapping::getDetectorIDsForSpectrumIndex(
+    const size_t spectrumIndex) const {
+  if(m_indexIsSpecNo)
+    throw std::runtime_error("Indicies are in spectrum number, not index.");
+  return m_mapping.at(static_cast<int>(spectrumIndex));
 }
 
 const SpectrumDetectorMapping::sdmap &
 SpectrumDetectorMapping::getMapping() const {
   return m_mapping;
+}
+
+bool SpectrumDetectorMapping::indexIsSpecNumber() const {
+  return m_indexIsSpecNo;
 }
 
 } // namespace API

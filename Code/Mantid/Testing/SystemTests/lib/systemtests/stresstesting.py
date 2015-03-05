@@ -119,8 +119,12 @@ class MantidStressTest(unittest.TestCase):
         '''
         Send a result to be stored as a name,value pair
         '''
-        print self.PREFIX + self.DELIMITER + name + self.DELIMITER + str(value) + '\n',
-        
+        output = self.PREFIX + self.DELIMITER + name + self.DELIMITER + str(value) + "\n"
+        # Ensure that this is all printed together and not mixed with stderr
+        sys.stdout.flush()
+        sys.stdout.write(output)
+        sys.stdout.flush()
+
     def __verifyRequiredFile(self, filename):
         '''Return True if the specified file name is findable by Mantid.'''
         from mantid.api import FileFinder
@@ -215,7 +219,13 @@ class MantidStressTest(unittest.TestCase):
         """
         Validate ASCII files using difflib.
         """
+        from mantid.api import FileFinder
         (measured, expected) = self.validate()
+        if not os.path.isabs(measured):
+            measured = FileFinder.Instance().getFullPath(measured)
+        if not os.path.isabs(expected):
+            expected = FileFinder.Instance().getFullPath(expected)
+
         measured = self.__prepASCIIFile(measured)
         expected = self.__prepASCIIFile(expected)
 

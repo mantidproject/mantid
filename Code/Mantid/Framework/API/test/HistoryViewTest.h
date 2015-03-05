@@ -13,6 +13,14 @@ using Mantid::Kernel::DateAndTime;
 class HistoryViewTest : public CxxTest::TestSuite
 {
 
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static HistoryViewTest *createSuite() { return new HistoryViewTest(); }
+  static void destroySuite( HistoryViewTest *suite ) { delete suite; }
+
+private:
+
   // 'Empty' algorithm class for tests
   class testalg : public Algorithm
   {

@@ -34,12 +34,12 @@ public:
     numericAxis = new NumericAxis(5);
     numericAxis->title() = "A numeric axis";
   }
-  
+
   ~NumericAxisTest()
   {
     delete numericAxis;
   }
-  
+
   void testConstructor()
   {
     TS_ASSERT_EQUALS( numericAxis->title(), "A numeric axis" );
@@ -56,7 +56,7 @@ public:
     axistester.title() = "tester";
     axistester.unit() = UnitFactory::Instance().create("Wavelength");
     axistester.setValue(0,5.5);
-    
+
     NumericAxisTester copiedAxis = axistester;
     TS_ASSERT_EQUALS( copiedAxis.title(), "tester" );
     TS_ASSERT_EQUALS( copiedAxis.unit()->unitID(), "Wavelength" );
@@ -64,7 +64,7 @@ public:
     TS_ASSERT_EQUALS( copiedAxis(0), 5.5 );
     TS_ASSERT_THROWS( copiedAxis(1), Exception::IndexError );
   }
-  
+
   void testClone()
   {
     WorkspaceTester ws; // Fake workspace to pass to clone
@@ -72,7 +72,7 @@ public:
     TS_ASSERT_DIFFERS( newNumAxis, numericAxis );
     delete newNumAxis;
   }
-  
+
   void testCloneDifferentLength()
   {
     numericAxis->setValue(0,9.9);
@@ -124,7 +124,7 @@ public:
   {
     TS_ASSERT_THROWS( numericAxis->setValue(-1, 1.1), Exception::IndexError );
     TS_ASSERT_THROWS( numericAxis->setValue(5, 1.1), Exception::IndexError );
-    
+
     for (int i=0; i<5; ++i)
     {
       TS_ASSERT_THROWS_NOTHING( numericAxis->setValue(i, i+0.5) );
@@ -146,7 +146,7 @@ public:
     {
       axis.setValue(i, static_cast<double>(i));
     }
-    
+
     std::vector<double> boundaries = axis.createBinBoundaries();
     const size_t nvalues(boundaries.size());
     TS_ASSERT_EQUALS(nvalues, npoints + 1);
@@ -170,6 +170,66 @@ public:
     TS_ASSERT_EQUALS(3, axis.indexOfValue(3.7));
     TS_ASSERT_EQUALS(3, axis.indexOfValue(4.0)); //exact value
     TS_ASSERT_EQUALS(4, axis.indexOfValue(5.4));
+  }
+
+  /**
+   * Default equality is tested to a tolerance of 1e-15.
+   */
+  void test_equal()
+  {
+    double points1[] = {1.0, 2.0, 10e-16, 4.0, 5.0};
+    double points2[] = {1.0, 2.0, 20e-16, 4.0, 5.0}; // Just inside the tolerance
+    double points3[] = {1.0, 2.0, 21e-16, 4.0, 5.0}; // Just outsie the tolerance
+    const size_t npoints(5);
+    NumericAxis axis1(std::vector<double>(points1, points1 + npoints));
+    NumericAxis axis2(std::vector<double>(points2, points2 + npoints));
+    NumericAxis axis3(std::vector<double>(points3, points3 + npoints));
+
+    TS_ASSERT( axis1 == axis2 );
+    TS_ASSERT( !(axis1 == axis3) );
+  }
+
+  void test_equalWithinTolerance()
+  {
+    double points1[] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double points2[] = {1.0, 2.0, 3.0, 4.0, 5.001};
+    const size_t npoints(5);
+    NumericAxis axis1(std::vector<double>(points1, points1 + npoints));
+    NumericAxis axis2(std::vector<double>(points2, points2 + npoints));
+
+    // Difference (0.001) < tolerance (0.01), should be equal
+    TS_ASSERT( axis1.equalWithinTolerance(axis2, 0.01) );
+
+    // Difference (0.001) > tolerance (0.0001), should not be equal
+    TS_ASSERT( !axis1.equalWithinTolerance(axis2, 0.0001) );
+  }
+
+  void test_equalWithinTolerance_Nan()
+  {
+    double points1[] = {1.0, 2.0, NAN, 4.0, 5.0};
+    double points2[] = {1.0, 2.0, NAN, 4.0, 5.0};
+    double points3[] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    const size_t npoints(5);
+    NumericAxis axis1(std::vector<double>(points1, points1 + npoints));
+    NumericAxis axis2(std::vector<double>(points2, points2 + npoints));
+    NumericAxis axis3(std::vector<double>(points3, points3 + npoints));
+
+    TS_ASSERT( axis1.equalWithinTolerance(axis2, 0.01) );
+    TS_ASSERT( !axis1.equalWithinTolerance(axis3, 0.01) );
+  }
+
+  void test_equalWithinTolerance_Inf()
+  {
+    double points1[] = {1.0, 2.0, INFINITY, 4.0, 5.0};
+    double points2[] = {1.0, 2.0, INFINITY, 4.0, 5.0};
+    double points3[] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    const size_t npoints(5);
+    NumericAxis axis1(std::vector<double>(points1, points1 + npoints));
+    NumericAxis axis2(std::vector<double>(points2, points2 + npoints));
+    NumericAxis axis3(std::vector<double>(points3, points3 + npoints));
+
+    TS_ASSERT( axis1.equalWithinTolerance(axis2, 0.01) );
+    TS_ASSERT( !axis1.equalWithinTolerance(axis3, 0.01) );
   }
 
   //-------------------------------- Failure cases ----------------------------
