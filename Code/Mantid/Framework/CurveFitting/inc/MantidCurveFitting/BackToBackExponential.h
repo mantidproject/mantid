@@ -4,11 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/PeakParametersNumeric.h"
+#include "MantidAPI/IPeakFunction.h"
 
 namespace Mantid {
 namespace CurveFitting {
-
 /**
 Provide BackToBackExponential peak shape function interface to IPeakFunction.
 That is the function:
@@ -50,12 +49,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport BackToBackExponential : public PeakParametersNumeric {
+class DLLExport BackToBackExponential : public API::IPeakFunction {
 public:
   /// Default constructor.
-  BackToBackExponential() : PeakParametersNumeric() {}
-  virtual double intensity() const;
-  virtual void setIntensity(const double newIntensity);
+  BackToBackExponential() : API::IPeakFunction() {}
+
+  /// overwrite IPeakFunction base class methods
+  virtual double centre() const { return getParameter("X0"); }
+  virtual void setCentre(const double c) { setParameter("X0", c); }
+  virtual double height() const;
+  virtual void setHeight(const double h);
+  virtual double fwhm() const;
+  virtual void setFwhm(const double w);
+  virtual double intensity() const { return getParameter("I"); }
+  virtual void setIntensity(const double newIntensity) {
+    setParameter("I", newIntensity);
+  }
 
   /// overwrite IFunction base class methods
   std::string name() const { return "BackToBackExponential"; }
@@ -64,8 +73,6 @@ public:
                           const size_t nData) const;
   virtual void functionDeriv1D(API::Jacobian *out, const double *xValues,
                                const size_t nData);
-
-  std::pair<double,double> getExtent() const;
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters
