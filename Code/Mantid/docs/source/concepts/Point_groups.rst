@@ -42,9 +42,9 @@ As mentioned before, point groups can describe the symmetry of a lattice, includ
 To describe the rotational and translational components of the symmetry operation, a matrix :math:`\mathbf{W}_i` and a vector :math:`\mathbf{w}_i` are used. In three dimensions :math:`\mathbf{h}` has three elements, so :math:`\mathbf{W}_i` is a :math:`3\times3`-matrix and the symmetry operation is applied like this:
 
 .. math::
-    \mathbf{h}' = \mathbf{W}_i^T \cdot \mathbf{h}
+    \mathbf{h}' = \mathbf{W}_i^{-1}^T \cdot \mathbf{h}
 
-Note that the translational component is not used for transforming HKLs and :math:`\mathbf{W}_i` is transposed. Coordinates :math:`\mathbf{x}` are transformed differently, they are affected by the translational component:
+Note that the translational component is not used for transforming HKLs and :math:`\mathbf{W}_i` is inverted and transposed. Coordinates :math:`\mathbf{x}` are transformed differently, they are affected by the translational component:
 
 .. math::
     \mathbf{x}' = \mathbf{W}_i \cdot \mathbf{h} + \mathbf{w}_i

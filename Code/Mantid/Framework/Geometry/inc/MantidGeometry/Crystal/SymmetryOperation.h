@@ -165,14 +165,13 @@ protected:
 
   size_t m_order;
   Kernel::IntMatrix m_matrix;
+  Kernel::IntMatrix m_inverseMatrix;
   V3R m_vector;
   std::string m_identifier;
 };
 
 MANTID_GEOMETRY_DLL V3R getWrappedVector(const V3R &vector);
 MANTID_GEOMETRY_DLL Kernel::V3D getWrappedVector(const Kernel::V3D &vector);
-MANTID_GEOMETRY_DLL Kernel::V3D
-multiplyTransposed(const Kernel::IntMatrix &matrix, const Kernel::V3D &vector);
 
 } // namespace Geometry
 } // namespace Mantid

@@ -255,7 +255,7 @@ public:
         // 6-fold rotation around [001] in hexagonal
         SymmetryOperation sixFoldZOp("x-y , x, z");
         testSymmetryOperation(sixFoldZOp,
-                              6, V3D((m_h+m_k), -m_h, m_l), "x-y,x,z");
+                              6, V3D(-m_k, (m_h+m_k), m_l), "x-y,x,z");
 
     }
 
@@ -274,26 +274,6 @@ public:
         TS_ASSERT_EQUALS(fourFoldZ^1, fourFoldZ);
         TS_ASSERT_EQUALS(fourFoldZ^2, twoFoldZ);
         TS_ASSERT_EQUALS(fourFoldZ^4, identity);
-    }
-
-    void checkTransposedMatrixMultiply()
-    {
-       IntMatrix matrix(3, 3, true);
-       matrix[1][2] = 3;
-       matrix[2][0] = -2;
-       matrix[1][0] = 5;
-
-       IntMatrix transposed = matrix.Transpose();
-
-       TS_ASSERT_DIFFERS(transposed, matrix);
-
-       V3D vector(2, 3, 7);
-
-       V3D transposedProduct = transposed * vector;
-       V3D testProduct = multiplyTransposed(matrix, vector);
-
-       TS_ASSERT_EQUALS(transposedProduct, testProduct);
-
     }
 
 private:
