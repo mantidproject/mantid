@@ -139,7 +139,7 @@ namespace CustomInterfaces
     std::vector<std::string> periods;
     for (size_t i=0; i<numPeriods; i++)
     {
-      periods.push_back(std::to_string(static_cast<int>(i)+1));
+      periods.push_back(std::to_string(static_cast<long long int>(i)+1));
     }
     m_view->setAvailablePeriods(periods);
   }
