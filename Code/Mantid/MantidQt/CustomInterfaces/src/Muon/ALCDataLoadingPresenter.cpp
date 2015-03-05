@@ -84,7 +84,10 @@ namespace CustomInterfaces
         assert(m_loadedData->getNumberHistograms() == 4);
       }
 
+      // Plot spectrum 0. It is either red period (if subtract is unchecked) or 
+      // red - green (if subtract is checked)
       m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_loadedData, 0)));
+
     }
     catch(std::exception& e)
     {
