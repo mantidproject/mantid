@@ -293,18 +293,39 @@ if __name__ == "__main__":
      rd.def_advanced_properties()
      rd.def_main_properties()
 
-     # Save web variables
+#### uncomment rows below to generate web variables and save then to transfer to   ###
+    ## web services.
      run_dir = os.path.dirname(os.path.realpath(__file__))
      file = os.path.join(run_dir,'reduce_vars.py')
      rd.save_web_variables(file)
+
 #### Set up time interval (sec) for reducer to check for input data file.         ####
      #  If this file is not present and this value is 0,reduction fails 
      #  if this value >0 the reduction wait until file appears on the data 
      #  search path checking after time specified below.
      rd.wait_for_file = 0  # waiting time interval
 
+####get reduction parameters from properties above, override what you want locally ###
+   # and run reduction. Overriding would have form:
+   # rd.reducer.property_name (from the dictionary above) = new value e.g. 
+   # rd.reducer.energy_bins = [-40,2,40]
+   # or 
+   ## rd.reducer.sum_runs = False
+
 ###### Run reduction over all run numbers or files assigned to                   ######
      # sample_run  variable 
-     red_ws = rd.run_reduction()
+
+    # return output workspace only if you are going to do 
+    # something with it here. Running range of runs will return the array 
+    # of workspace pointers.
+    #red_ws = rd.run_reduction()
+    # usual way to go is to reduce workspace and save it internally
+     rd.run_reduction()
 
 
+#### Validate reduction result against known result, obtained earlier  ###
+    #rez,mess=rd.validate_result()
+    #if not rez:
+    #   raise RuntimeError("validation failed with error: {0}".format(mess))
+    #else:
+    #   print "ALL Fine" 

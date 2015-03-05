@@ -96,7 +96,7 @@ class MARIReductionFromFile(ISISDirectInelasticReduction):
       return "outWS"   
   def get_reference_file(self):
     return "MARIReduction.nxs"
-    
+
 class MARIReductionFromFileCache(ISISDirectInelasticReduction):
 
   def __init__(self):
