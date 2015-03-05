@@ -6,8 +6,6 @@
 #include "MantidCurveFitting/ChebfunBase.h"
 #include <cmath>
 
-#include "C:/Users/hqs74821/Work/Mantid_stuff/Testing/class/MyTestDef.h"
-
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;

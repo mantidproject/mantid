@@ -95,6 +95,8 @@ double PeakParametersNumeric::fwhm() const {
 /// to defineWidthParameter(...).
 /// @param w :: New value for the width.
 void PeakParametersNumeric::setFwhm(const double w) {
+  const double c = centre();
+  const double h = height();
   double wOld = fwhm();
   double factor = w / wOld;
   for (size_t i = 0; i < m_widthIndices.size(); ++i) {
@@ -113,6 +115,10 @@ void PeakParametersNumeric::setFwhm(const double w) {
     }
     setParameter(index, value);
   }
+  // The width parameters can shift the centre and height,
+  // restore them.
+  setCentre(c);
+  setHeight(h);
 }
 
 /// Calculate function value for a single argument.

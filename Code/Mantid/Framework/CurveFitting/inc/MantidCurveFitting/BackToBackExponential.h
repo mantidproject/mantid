@@ -65,7 +65,6 @@ public:
   virtual void functionDeriv1D(API::Jacobian *out, const double *xValues,
                                const size_t nData);
 
-  //double operator()(double) const;
   std::pair<double,double> getExtent() const;
 
 protected:
