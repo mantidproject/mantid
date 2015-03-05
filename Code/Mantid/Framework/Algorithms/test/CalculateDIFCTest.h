@@ -4,9 +4,14 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/CalculateDIFC.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::CalculateDIFC;
+using Mantid::DataObjects::OffsetsWorkspace;
+using Mantid::DataObjects::OffsetsWorkspace_sptr;
+using Mantid::DataObjects::Workspace2D_sptr;
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 class CalculateDIFCTest : public CxxTest::TestSuite {
 public:
@@ -15,21 +20,23 @@ public:
   static CalculateDIFCTest *createSuite() { return new CalculateDIFCTest(); }
   static void destroySuite(CalculateDIFCTest *suite) { delete suite; }
 
+  const double OFFSET = .1;
+  const int NUM_SPEC = 3;
+
   void test_Init() {
     CalculateDIFC alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_exec() {
-    // Name of the output workspace.
-    std::string outWSName("CalculateDIFCTest_OutputWS");
+  void runTest(Workspace2D_sptr inputWS, OffsetsWorkspace_sptr offsetsWS,
+               std::string &outWSName) {
 
     CalculateDIFC alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OffsetsWorkspace", offsetsWS));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -37,20 +44,48 @@ public:
 
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
-    Workspace_sptr ws;
+    MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName));
+        ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(outWSName)));
     TS_ASSERT(ws);
     if (!ws)
       return;
 
-    // TODO: Check the results
+    // should only be NUM_SPEC
+    double factor = 1.;
+    if (offsetsWS)
+      factor = 1. / (1. + OFFSET);
+    TS_ASSERT_DELTA(ws->readY(0)[0], factor * 0., 1.);
+    TS_ASSERT_DELTA(ws->readY(1)[0], factor * 126., 1.);
+    TS_ASSERT_DELTA(ws->readY(2)[0], factor * 252., 1.);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
 
-  void test_Something() { TSM_ASSERT("You forgot to write a test!", 0); }
+  void test_withoutOffsets() {
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        NUM_SPEC, 1);
+    std::string outWSName("CalculateDIFCTest_withoutOffsets_OutputWS");
+
+    runTest(inputWS, OffsetsWorkspace_sptr(), outWSName);
+  }
+
+  void test_withOffsets() {
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        NUM_SPEC, 1);
+    std::string outWSName("CalculateDIFCTest_withOffsets_OutputWS");
+
+    auto offsetsWS =
+        OffsetsWorkspace_sptr(new OffsetsWorkspace(inputWS->getInstrument()));
+    for (size_t i = 0; i < NUM_SPEC; ++i) {
+      IDetector_const_sptr det = inputWS->getDetector(i);
+      offsetsWS->setValue(det->getID(), OFFSET);
+    }
+
+    runTest(inputWS, offsetsWS, outWSName);
+  }
 };
 
 #endif /* MANTID_ALGORITHMS_CALCULATEDIFCTEST_H_ */
