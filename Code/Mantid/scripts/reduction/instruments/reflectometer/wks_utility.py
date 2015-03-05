@@ -73,12 +73,15 @@ def getSheight(mt, index):
     """
     mt_run = mt.getRun()
     if index == 2:
+        isSi = False
         try:
             tag = 'SiVHeight'
             value = mt_run.getProperty(tag).value
+            isSi = True
         except:
             tag = 'S2VHeight'
             value = mt_run.getProperty(tag).value
+        return [isSi, value[0]]
     else:
         tag = 'S1VHeight'
         value = mt_run.getProperty(tag).value
@@ -91,7 +94,7 @@ def getS1h(mt=None):
     """
     if mt != None:
 #        _h, units = getSh(mt, 's1t', 's1b')
-        _h = getSheight(mt, '1')
+        _h = getSheight(mt, 1)
         return _h
     return None
 
@@ -100,13 +103,9 @@ def getS2h(mt=None):
         returns the height and units of the slit #2
     """
     if mt != None:
-#        _h, units = getSh(mt, 's2t', 's2b')
-        _h = getSheight(mt, '2')
-        return _h
-    return None
-
-
-
+        [isSi, _h] = getSheight(mt, 2)
+        return [isSi,_h]
+    return [False, None]
 
 def getSwidth(mt, index):
     """
@@ -115,12 +114,15 @@ def getSwidth(mt, index):
     """
     mt_run = mt.getRun()
     if index==2:
+        isSi = False
         try:
             tag = 'SiHWidth'
             value = mt_run.getProperty(tag).value
+            isSi = True
         except:
             tag = 'S2HWidth'
             value = mt_run.getProperty(tag).value
+        return [isSi, value[0]]
     else:
         tag = 'S1HWidth'
         value = mt_run.getProperty(tag).value
@@ -143,7 +145,7 @@ def getS1w(mt=None):
     """
     if mt != None:
 #        _w, units = getSw(mt, 's1l', 's1r')
-        _w = getSwidth(mt, '1')
+        _w = getSwidth(mt, 1)
         return _w
     return None
 
@@ -152,10 +154,9 @@ def getS2w(mt=None):
         returns the width and units of the slit #2
     """
     if mt != None:
-#        _w, units = getSh(mt, 's2l', 's2r')
-        _w = getSwidth(mt, '2')
-        return _w
-    return None
+        [isSi, _w] = getSwidth(mt, 2)
+        return [isSi,_w]
+    return [False,None]
 
 
 def getLambdaValue(mt_name):
@@ -789,121 +790,121 @@ def isWithinPrecisionRange(value_file, value_run, precision):
     else:
         return False
 
-def applySF(InputWorkspace,
-            incidentMedium,
-            sfFile,
-            valuePrecision,
-            slitsWidthFlag):
-    """
-    Function that apply scaling factor to data using sfCalculator.txt
-    file created by the sfCalculator procedure
-    """
+#def applySF(InputWorkspace,
+            #incidentMedium,
+            #sfFile,
+            #valuePrecision,
+            #slitsWidthFlag):
+    #"""
+    #Function that apply scaling factor to data using sfCalculator.txt
+    #file created by the sfCalculator procedure
+    #"""
 
-    #check if config file is there
-    if os.path.isfile(sfFile):
+    ##check if config file is there
+    #if os.path.isfile(sfFile):
 
-        #parse file and put info into array
-        f = open(sfFile, 'r')
-        sfFactorTable = []
-        for line in f.read().split('\n'):
-            if len(line) > 0 and line[0] != '#':
-                sfFactorTable.append(line.split(' '))
-        f.close()
+        ##parse file and put info into array
+        #f = open(sfFile, 'r')
+        #sfFactorTable = []
+        #for line in f.read().split('\n'):
+            #if len(line) > 0 and line[0] != '#':
+                #sfFactorTable.append(line.split(' '))
+        #f.close()
 
-        sz_table = shape(sfFactorTable)
-        nbr_row = sz_table[0]
+        #sz_table = shape(sfFactorTable)
+        #nbr_row = sz_table[0]
 
-        _incidentMedium = incidentMedium.strip()
+        #_incidentMedium = incidentMedium.strip()
 
-        _lr = getLambdaValue(mtd[InputWorkspace])
-        _lr_value = _lr[0]
-        _lr_value = float("{0:.2f}".format(_lr_value))
+        #_lr = getLambdaValue(mtd[InputWorkspace])
+        #_lr_value = _lr[0]
+        #_lr_value = float("{0:.2f}".format(_lr_value))
 
-        #retrieve s1h and s2h values
-        s1h = getS1h(mtd[InputWorkspace])
-        s2h = getS2h(mtd[InputWorkspace])
+        ##retrieve s1h and s2h values
+        #s1h = getS1h(mtd[InputWorkspace])
+        #s2h = getS2h(mtd[InputWorkspace])
 
-        s1h_value = abs(s1h)
-        s2h_value = abs(s2h)
+        #s1h_value = abs(s1h)
+        #s2h_value = abs(s2h)
 
-        #retrieve s1w and s2w values
-        s1w = getS1w(mtd[InputWorkspace])
-        s2w = getS2w(mtd[InputWorkspace])
+        ##retrieve s1w and s2w values
+        #s1w = getS1w(mtd[InputWorkspace])
+        #s2w = getS2w(mtd[InputWorkspace])
 
-        s1w_value = abs(s1w)
-        s2w_value = abs(s2w)
+        #s1w_value = abs(s1w)
+        #s2w_value = abs(s2w)
 
-#        print sfFactorTable
+##        print sfFactorTable
 
-        print '--> Data Lambda Requested: {0:2f}'.format(_lr_value)
-        print '--> Data S1H: {0:2f}'.format(s1h_value)
-        print '--> Data S2H: {0:2f}'.format(s2h_value)
-        print '--> Data S1W: {0:2f}'.format(s1w_value)
-        print '--> Data S2W: {0:2f}'.format(s2w_value)
+        #print '--> Data Lambda Requested: {0:2f}'.format(_lr_value)
+        #print '--> Data S1H: {0:2f}'.format(s1h_value)
+        #print '--> Data S2H: {0:2f}'.format(s2h_value)
+        #print '--> Data S1W: {0:2f}'.format(s1w_value)
+        #print '--> Data S2W: {0:2f}'.format(s2w_value)
 
-        print 'mERDDEEEEDEDEED'
-        for i in range(nbr_row):
+        #print 'mERDDEEEEDEDEED'
+        #for i in range(nbr_row):
 
-            _file_incidentMedium = getFieldValue(sfFactorTable,i,0)
-            if _file_incidentMedium.strip() == _incidentMedium.strip():
-                print '--- incident medium match ---'
-                _file_lambdaRequested = getFieldValue(sfFactorTable,i,1)
-                if (isWithinPrecisionRange(_file_lambdaRequested,
-                                           _lr_value,
-                                           valuePrecision)):
-                    print '--- lambda requested match ---'
-                    _file_s1h = getFieldValue(sfFactorTable,i,2)
-                    if(isWithinPrecisionRange(_file_s1h,
-                                              s1h_value,
-                                              valuePrecision)):
-                        print '--- S1H match ---'
-                        _file_s2h = getFieldValue(sfFactorTable,i,3)
-                        if(isWithinPrecisionRange(_file_s2h,
-                                                  s2h_value,
-                                                  valuePrecision)):
-                            print '--- S2H match ---'
-                            if slitsWidthFlag:
-                                print '--- (with Width flag) ----'
-                                _file_s1w = getFieldValue(sfFactorTable,i,4)
-                                if(isWithinPrecisionRange(_file_s1w,
-                                                          s1w_value,
-                                                          valuePrecision)):
-                                    print '--- S1W match ---'
-                                    _file_s2w = getFieldValue(sfFactorTable,i,5)
-                                    if(isWithinPrecisionRange(_file_s2w,
-                                                              s2w_value,
-                                                              valuePrecision)):
-                                        print '--- S2W match ---'
+            #_file_incidentMedium = getFieldValue(sfFactorTable,i,0)
+            #if _file_incidentMedium.strip() == _incidentMedium.strip():
+                #print '--- incident medium match ---'
+                #_file_lambdaRequested = getFieldValue(sfFactorTable,i,1)
+                #if (isWithinPrecisionRange(_file_lambdaRequested,
+                                           #_lr_value,
+                                           #valuePrecision)):
+                    #print '--- lambda requested match ---'
+                    #_file_s1h = getFieldValue(sfFactorTable,i,2)
+                    #if(isWithinPrecisionRange(_file_s1h,
+                                              #s1h_value,
+                                              #valuePrecision)):
+                        #print '--- S1H match ---'
+                        #_file_s2h = getFieldValue(sfFactorTable,i,3)
+                        #if(isWithinPrecisionRange(_file_s2h,
+                                                  #s2h_value,
+                                                  #valuePrecision)):
+                            #print '--- S2H match ---'
+                            #if slitsWidthFlag:
+                                #print '--- (with Width flag) ----'
+                                #_file_s1w = getFieldValue(sfFactorTable,i,4)
+                                #if(isWithinPrecisionRange(_file_s1w,
+                                                          #s1w_value,
+                                                          #valuePrecision)):
+                                    #print '--- S1W match ---'
+                                    #_file_s2w = getFieldValue(sfFactorTable,i,5)
+                                    #if(isWithinPrecisionRange(_file_s2w,
+                                                              #s2w_value,
+                                                              #valuePrecision)):
+                                        #print '--- S2W match ---'
 
-                                        print '--> Found a perfect match'
-                                        a = float(getFieldValue(sfFactorTable,i,6))
-                                        b = float(getFieldValue(sfFactorTable,i,7))
-                                        a_error = float(getFieldValue(sfFactorTable,i,8))
-                                        b_error = float(getFieldValue(sfFactorTable,i,9))
+                                        #print '--> Found a perfect match'
+                                        #a = float(getFieldValue(sfFactorTable,i,6))
+                                        #b = float(getFieldValue(sfFactorTable,i,7))
+                                        #a_error = float(getFieldValue(sfFactorTable,i,8))
+                                        #b_error = float(getFieldValue(sfFactorTable,i,9))
 
-                                        OutputWorkspace = _applySFtoArray(InputWorkspace,
-                                                                          a, b, a_error, b_error)
+                                        #OutputWorkspace = _applySFtoArray(InputWorkspace,
+                                                                          #a, b, a_error, b_error)
 
-                                        return OutputWorkspace
+                                        #return OutputWorkspace
 
-                            else:
+                            #else:
 
-                                print '--> Found a perfect match'
-                                a = float(getFieldValue(sfFactorTable,i,6))
-                                b = float(getFieldValue(sfFactorTable,i,7))
-                                a_error = float(getFieldValue(sfFactorTable,i,8))
-                                b_error = float(getFieldValue(sfFactorTable,i,9))
+                                #print '--> Found a perfect match'
+                                #a = float(getFieldValue(sfFactorTable,i,6))
+                                #b = float(getFieldValue(sfFactorTable,i,7))
+                                #a_error = float(getFieldValue(sfFactorTable,i,8))
+                                #b_error = float(getFieldValue(sfFactorTable,i,9))
 
-                                OutputWorkspace = _applySFtoArray(InputWorkspace,
-                                                                  a, b, a_error, b_error)
+                                #OutputWorkspace = _applySFtoArray(InputWorkspace,
+                                                                  #a, b, a_error, b_error)
 
-                                return OutputWorkspace
+                                #return OutputWorkspace
 
-    else:
+    #else:
 
-        print '-> scaling factor file for requested lambda NOT FOUND!'
+        #print '-> scaling factor file for requested lambda NOT FOUND!'
 
-    return InputWorkspace
+    #return InputWorkspace
 
 def _applySFtoArray(workspace, a, b, a_error, b_error):
     """
@@ -1442,24 +1443,30 @@ def applyScalingFactor(tof_axis,
 
         #retrieve s1h and s2h or sih values
         s1h = getS1h(mtd['ws_event_data'])
-        s2h = getS2h(mtd['ws_event_data'])
+        [isSih, s2h] = getS2h(mtd['ws_event_data'])
 
         s1h_value = abs(s1h)
         s2h_value = abs(s2h)
 
         #retrieve s1w and s2w values
         s1w = getS1w(mtd['ws_event_data'])
-        s2w = getS2w(mtd['ws_event_data'])
+        [isSiw, s2w] = getS2w(mtd['ws_event_data'])
 
         s1w_value = abs(s1w)
         s2w_value = abs(s2w)
 
         print '--> Data Lambda Requested: {0:2f}'.format(_lr_value)
         print '--> Data S1H: {0:2f}'.format(s1h_value)
-        print '--> Data S2H: {0:2f}'.format(s2h_value)
+        if isSih:
+            print '--> Data SiH: {0:2f}'.format(s2h_value)
+        else:
+            print '--> Data S2H: {0:2f}'.format(s2h_value)
         print '--> Data S1W: {0:2f}'.format(s1w_value)
-        print '--> Data S2W: {0:2f}'.format(s2w_value)
-
+        if isSiw:
+            print '--> Data SiW: {0:2f}'.format(s2w_value)
+        else:
+            print '--> Data S2W: {0:2f}'.format(s2w_value)
+            
         for i in range(nbr_row):
 
             _file_incidentMedium = getFieldValue(sfFactorTable,i,0)

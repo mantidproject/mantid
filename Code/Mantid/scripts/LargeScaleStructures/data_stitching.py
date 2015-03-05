@@ -15,12 +15,13 @@ class RangeSelector(object):
         Brings up range selector window and connects the user selection to
         a call-back function.
     """
-    __instance=None
+    __instance = None
 
     class _Selector(object):
 
         def __init__(self):
             self._call_back = None
+            self._ws_output_base = None
             self._graph = "Range Selector"
 
         def disconnect(self):

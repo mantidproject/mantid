@@ -64,6 +64,27 @@ namespace CustomInterfaces
     return m_ui.calculationType->checkedButton()->text().toStdString();
   }
 
+  std::string ALCDataLoadingView::deadTimeType() const
+  {
+    std::string checkedButton = m_ui.deadTimeCorrType->checkedButton()->text().toStdString();
+    if ( checkedButton == "From Data File" ) {
+        return std::string("FromRunData");
+    } else if ( checkedButton == "From Custom File" ) {
+      return std::string("FromSpecifiedFile");
+    } else {
+      return checkedButton;
+    }
+  }
+
+  std::string ALCDataLoadingView::deadTimeFile() const
+  {
+    if (deadTimeType()=="FromSpecifiedFile") {
+      return m_ui.deadTimeFile->getFirstFilename().toStdString();
+    } else {
+      return "";
+    }
+  }
+
   boost::optional< std::pair<double,double> > ALCDataLoadingView::timeRange() const
   {
     if (m_ui.timeLimit->isChecked())

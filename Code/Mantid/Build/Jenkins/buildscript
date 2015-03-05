@@ -10,6 +10,8 @@
 # slave.
 ###############################################################################
 SCRIPT_DIR=$(dirname "$0")
+# Package by default
+BUILDPKG=true
 
 ###############################################################################
 # Print out the versions of things we are using
@@ -88,7 +90,6 @@ fi
 ###############################################################################
 if [[ ${JOB_NAME} == *clean* ]]; then
   CLEANBUILD=true
-  BUILDPKG=true
 fi
 
 if [[ -e $WORKSPACE/build/CMakeCache.txt ]]; then
@@ -97,10 +98,6 @@ if [[ -e $WORKSPACE/build/CMakeCache.txt ]]; then
   if [ ! -z "$TESTINGTOOLS_DIR"  ]; then
     rm -fr $WORKSPACE/build
   fi
-fi
-
-if [[ ${JOB_NAME} == *pull_requests* ]]; then
-  BUILDPKG=true
 fi
 
 ###############################################################################
