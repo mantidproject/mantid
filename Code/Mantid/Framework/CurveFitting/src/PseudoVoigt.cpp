@@ -2,6 +2,8 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 
+#include <cmath>
+
 namespace Mantid {
 namespace CurveFitting {
 
