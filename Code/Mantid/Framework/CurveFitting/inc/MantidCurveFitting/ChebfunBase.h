@@ -123,7 +123,7 @@ public:
   boost::shared_ptr<ChebfunBase> integral(const std::vector<double> &a,
                                           std::vector<double> &aout) const;
   /// Find all roots of a function on this interval
-  std::vector<double> ChebfunBase::roots(const std::vector<double> &a) const;
+  std::vector<double> roots(const std::vector<double> &a) const;
 
   /// Fit a function until full convergence
   static boost::shared_ptr<ChebfunBase>
