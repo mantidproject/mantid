@@ -166,15 +166,15 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     peakWS = inPeakWS->clone();
   // This only fails in the unit tests which say that MaskBTP is not registered
   try {
-    runMaskDetectors(peakWS, "Tube", "edges");
-    runMaskDetectors(peakWS, "Pixel", "edges");
+    runMaskDetectors(inPeakWS, "Tube", "edges");
+    runMaskDetectors(inPeakWS, "Pixel", "edges");
   } catch (...) {
     g_log.error("Can't execute MaskBTP algorithm for this instrument to set "
                 "edge for IntegrateIfOnEdge option");
   }
 
   // Get the instrument and its detectors
-  Geometry::Instrument_const_sptr inst = peakWS->getInstrument();
+  Geometry::Instrument_const_sptr inst = inPeakWS->getInstrument();
   calculateE1(inst);  //fill E1Vec for use in detectorQ
   Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse = ws->getSpecialCoordinateSystem();
 
