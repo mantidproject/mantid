@@ -67,11 +67,11 @@ namespace CustomInterfaces
     virtual bool validate();
 
   private slots:
-    void slicePlotRaw();
+    void handleNewFile();
     void sliceTwoRanges(QtProperty*, bool);
     void sliceCalib(bool state);
     void rangeSelectorDropped(double, double);
-    void sliceUpdateRS(QtProperty*, double);
+    void doublePropertyChanged(QtProperty*, double);
     void setDefaultInstDetails();
     void updatePreviewPlot();
     void sliceAlgDone(bool error);
@@ -81,7 +81,6 @@ namespace CustomInterfaces
 
   private:
     Ui::ISISDiagnostics m_uiForm;
-    QString m_lastDiagFilename;
 
   };
 } // namespace CustomInterfaces

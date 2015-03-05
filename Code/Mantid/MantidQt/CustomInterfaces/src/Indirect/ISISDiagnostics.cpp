@@ -21,8 +21,7 @@ namespace CustomInterfaces
   /** Constructor
    */
   ISISDiagnostics::ISISDiagnostics(IndirectDataReduction * idrUI, QWidget * parent) :
-    IndirectDataReductionTab(idrUI, parent),
-    m_lastDiagFilename("")
+    IndirectDataReductionTab(idrUI, parent)
   {
     m_uiForm.setupUi(parent);
 
@@ -37,12 +36,17 @@ namespace CustomInterfaces
     m_propTrees["SlicePropTree"]->setFactoryForManager(m_blnManager, checkboxFactory);
 
     // Create Properties
-    m_properties["SpecMin"] = m_dblManager->addProperty("Spectra Min");
-    m_properties["SpecMax"] = m_dblManager->addProperty("Spectra Max");
+    m_properties["PreviewSpec"] = m_dblManager->addProperty("Preview Spectrum");
+    m_dblManager->setDecimals(m_properties["PreviewSpec"], 0);
+    m_dblManager->setMinimum(m_properties["PreviewSpec"], 1);
 
+    m_properties["SpecMin"] = m_dblManager->addProperty("Spectra Min");
     m_dblManager->setDecimals(m_properties["SpecMin"], 0);
     m_dblManager->setMinimum(m_properties["SpecMin"], 1);
+
+    m_properties["SpecMax"] = m_dblManager->addProperty("Spectra Max");
     m_dblManager->setDecimals(m_properties["SpecMax"], 0);
+    m_dblManager->setMinimum(m_properties["SpecMax"], 1);
 
     m_properties["PeakStart"] = m_dblManager->addProperty("Start");
     m_properties["PeakEnd"] = m_dblManager->addProperty("End");
@@ -52,19 +56,20 @@ namespace CustomInterfaces
 
     m_properties["UseTwoRanges"] = m_blnManager->addProperty("Use Two Ranges");
 
-    m_properties["Range1"] = m_grpManager->addProperty("Peak");
-    m_properties["Range1"]->addSubProperty(m_properties["PeakStart"]);
-    m_properties["Range1"]->addSubProperty(m_properties["PeakEnd"]);
+    m_properties["PeakRange"] = m_grpManager->addProperty("Peak");
+    m_properties["PeakRange"]->addSubProperty(m_properties["PeakStart"]);
+    m_properties["PeakRange"]->addSubProperty(m_properties["PeakEnd"]);
 
-    m_properties["Range2"] = m_grpManager->addProperty("Background");
-    m_properties["Range2"]->addSubProperty(m_properties["BackgroundStart"]);
-    m_properties["Range2"]->addSubProperty(m_properties["BackgroundEnd"]);
+    m_properties["BackgroundRange"] = m_grpManager->addProperty("Background");
+    m_properties["BackgroundRange"]->addSubProperty(m_properties["BackgroundStart"]);
+    m_properties["BackgroundRange"]->addSubProperty(m_properties["BackgroundEnd"]);
 
+    m_propTrees["SlicePropTree"]->addProperty(m_properties["PreviewSpec"]);
     m_propTrees["SlicePropTree"]->addProperty(m_properties["SpecMin"]);
     m_propTrees["SlicePropTree"]->addProperty(m_properties["SpecMax"]);
-    m_propTrees["SlicePropTree"]->addProperty(m_properties["Range1"]);
+    m_propTrees["SlicePropTree"]->addProperty(m_properties["PeakRange"]);
     m_propTrees["SlicePropTree"]->addProperty(m_properties["UseTwoRanges"]);
-    m_propTrees["SlicePropTree"]->addProperty(m_properties["Range2"]);
+    m_propTrees["SlicePropTree"]->addProperty(m_properties["BackgroundRange"]);
 
     // Slice plot
     m_rangeSelectors["SlicePeak"] = new MantidWidgets::RangeSelector(m_uiForm.ppRawPlot);
@@ -84,20 +89,23 @@ namespace CustomInterfaces
     connect(m_rangeSelectors["SliceBackground"], SIGNAL(selectionChangedLazy(double, double)), this, SLOT(rangeSelectorDropped(double, double)));
 
     // Update range selctors when a property is changed
-    connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(sliceUpdateRS(QtProperty*, double)));
+    connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(doublePropertyChanged(QtProperty*, double)));
     // Enable/disable second range options when checkbox is toggled
     connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(sliceTwoRanges(QtProperty*, bool)));
     // Enables/disables calibration file selection when user toggles Use Calibratin File checkbox
     connect(m_uiForm.ckUseCalibration, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
 
     // Plot slice miniplot when file has finished loading
-    connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(slicePlotRaw()));
+    connect(m_uiForm.dsInputFiles, SIGNAL(filesFoundChanged()), this, SLOT(handleNewFile()));
+    connect(m_uiForm.dsInputFiles, SIGNAL(filesFoundChanged()), this, SLOT(updatePreviewPlot()));
     // Shows message on run buton when user is inputting a run number
     connect(m_uiForm.dsInputFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
     // Shows message on run button when Mantid is finding the file for a given run number
     connect(m_uiForm.dsInputFiles, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
     // Reverts run button back to normal when file finding has finished
     connect(m_uiForm.dsInputFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
+
+    connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(updatePreviewPlot()));
 
     // Update preview plot when slice algorithm completes
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(sliceAlgDone(bool)));
@@ -202,17 +210,29 @@ namespace CustomInterfaces
    */
   void ISISDiagnostics::setDefaultInstDetails()
   {
-    //Get spectra, peak and background details
+    // Get spectra, peak and background details
     std::map<QString, QString> instDetails = getInstrumentDetails();
 
     // Set the search instrument for runs
     m_uiForm.dsInputFiles->setInstrumentOverride(instDetails["instrument"]);
 
-    //Set spectra range
-    m_dblManager->setValue(m_properties["SpecMin"], instDetails["spectra-min"].toDouble());
-    m_dblManager->setValue(m_properties["SpecMax"], instDetails["spectra-max"].toDouble());
+    double specMin = instDetails["spectra-min"].toDouble();
+    double specMax = instDetails["spectra-max"].toDouble();
 
-    //Set peak and background ranges
+    // Set spectra range
+    m_dblManager->setMinimum(m_properties["SpecMin"], specMin);
+    m_dblManager->setMaximum(m_properties["SpecMin"], specMax);
+    m_dblManager->setValue(m_properties["SpecMin"], specMin);
+
+    m_dblManager->setMinimum(m_properties["SpecMax"], specMin);
+    m_dblManager->setMaximum(m_properties["SpecMax"], specMax);
+    m_dblManager->setValue(m_properties["SpecMax"], specMax);
+
+    m_dblManager->setMinimum(m_properties["PreviewSpec"], specMin);
+    m_dblManager->setMaximum(m_properties["PreviewSpec"], specMax);
+    m_dblManager->setValue(m_properties["PreviewSpec"], specMin);
+
+    // Set peak and background ranges
     if(instDetails.size() >= 8)
     {
       setRangeSelector("SlicePeak", m_properties["PeakStart"], m_properties["PeakEnd"],
@@ -222,61 +242,39 @@ namespace CustomInterfaces
     }
   }
 
-  /**
-   * Redraw the raw input plot
-   */
-  void ISISDiagnostics::slicePlotRaw()
+  void ISISDiagnostics::handleNewFile()
   {
-    QString filename = m_uiForm.dsInputFiles->getFirstFilename();
-
-    // Only update if we have a different file
-    if(filename == m_lastDiagFilename)
+    if(!m_uiForm.dsInputFiles->isValid())
       return;
 
-    m_lastDiagFilename = filename;
+    QString filename = m_uiForm.dsInputFiles->getFirstFilename();
 
-    disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePreviewPlot()));
-    disconnect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(updatePreviewPlot()));
+    QFileInfo fi(filename);
+    QString wsname = fi.baseName();
 
-    setDefaultInstDetails();
+    int specMin = static_cast<int>(m_dblManager->value(m_properties["SpecMin"]));
+    int specMax = static_cast<int>(m_dblManager->value(m_properties["SpecMax"]));
 
-    if ( m_uiForm.dsInputFiles->isValid() )
+    if(!loadFile(filename, wsname, specMin, specMax))
     {
-      QFileInfo fi(filename);
-      QString wsname = fi.baseName();
-
-      int specMin = static_cast<int>(m_dblManager->value(m_properties["SpecMin"]));
-      int specMax = static_cast<int>(m_dblManager->value(m_properties["SpecMax"]));
-
-      if(!loadFile(filename, wsname, specMin, specMax))
-      {
-        emit showMessageBox("Unable to load file.\nCheck whether your file exists and matches the selected instrument in the EnergyTransfer tab.");
-        return;
-      }
-
-      Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-          Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
-
-      const Mantid::MantidVec & dataX = input->readX(0);
-      QPair<double, double> range(dataX.front(), dataX.back());
-
-      m_uiForm.ppRawPlot->clear();
-      m_uiForm.ppRawPlot->addSpectrum("Raw", input, 0);
-
-      setPlotPropertyRange("SlicePeak", m_properties["PeakStart"], m_properties["PeakEnd"], range);
-      setPlotPropertyRange("SliceBackground", m_properties["BackgroundStart"], m_properties["BackgroundEnd"], range);
-
-      m_uiForm.ppRawPlot->resizeX();
-    }
-    else
-    {
-      emit showMessageBox("Selected input files are invalid.");
+      emit showMessageBox("Unable to load file.\nCheck whether your file exists and matches the selected instrument in the EnergyTransfer tab.");
+      return;
     }
 
-    connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePreviewPlot()));
-    connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(updatePreviewPlot()));
+    Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
 
-    updatePreviewPlot();
+    const Mantid::MantidVec & dataX = input->readX(0);
+    QPair<double, double> range(dataX.front(), dataX.back());
+    int previewSpec = static_cast<int>(m_dblManager->value(m_properties["PreviewSpec"])) - specMin;
+
+    m_uiForm.ppRawPlot->clear();
+    m_uiForm.ppRawPlot->addSpectrum("Raw", input, previewSpec);
+
+    setPlotPropertyRange("SlicePeak", m_properties["PeakStart"], m_properties["PeakEnd"], range);
+    setPlotPropertyRange("SliceBackground", m_properties["BackgroundStart"], m_properties["BackgroundEnd"], range);
+
+    m_uiForm.ppRawPlot->resizeX();
   }
 
   /**
@@ -316,17 +314,21 @@ namespace CustomInterfaces
   }
 
   /**
-   * Update the value of a range selector given a QtProperty
+   * Handles a double property being changed in the property browser.
    *
    * @param prop :: Pointer to the QtProperty
-   * @param val :: New value of the range selector
+   * @param val :: New value
    */
-  void ISISDiagnostics::sliceUpdateRS(QtProperty* prop, double val)
+  void ISISDiagnostics::doublePropertyChanged(QtProperty* prop, double val)
   {
     if(prop == m_properties["PeakStart"])             m_rangeSelectors["SlicePeak"]->setMinimum(val);
     else if(prop == m_properties["PeakEnd"])          m_rangeSelectors["SlicePeak"]->setMaximum(val);
     else if(prop == m_properties["BackgroundStart"])  m_rangeSelectors["SliceBackground"]->setMinimum(val);
     else if(prop == m_properties["BackgroundEnd"])    m_rangeSelectors["SliceBackground"]->setMaximum(val);
+    else if(prop == m_properties["PreviewSpec"])      handleNewFile();
+
+    if(prop != m_properties["PreviewSpec"])
+      updatePreviewPlot();
   }
 
   /**
@@ -334,6 +336,9 @@ namespace CustomInterfaces
    */
   void ISISDiagnostics::updatePreviewPlot()
   {
+    if (!m_uiForm.dsInputFiles->isValid())
+      return;
+
     QString suffix = getInstrumentConfiguration()->getAnalyserName()
                      + getInstrumentConfiguration()->getReflectionName() + "_slice";
     QString filenames = m_uiForm.dsInputFiles->getFilenames().join(",");
