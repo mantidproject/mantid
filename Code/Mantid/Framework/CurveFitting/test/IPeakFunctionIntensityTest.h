@@ -75,7 +75,7 @@ public:
                 "), but intensity changed from " + DBL2STR(oldIntensity) +
                 " to " + DBL2STR(newIntensity) + " (ratio " +
                 DBL2STR(intensityRatio) + ").",
-            intensityRatio, heightRatio, 1e-8);
+            intensityRatio, heightRatio, 1e-10);
       }
 
       initialIntensities = newIntensities;

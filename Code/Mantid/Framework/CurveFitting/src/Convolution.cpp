@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Convolution.h"
 #include "MantidCurveFitting/DeltaFunction.h"
-#include "MantidCurveFitting/HalfComplex.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionFactory.h"
 
