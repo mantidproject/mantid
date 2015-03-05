@@ -44,6 +44,7 @@ namespace CustomInterfaces
       alg->setProperty("LogValue", m_view->log());
       alg->setProperty("Type", m_view->calculationType());
       alg->setProperty("DeadTimeCorrType",m_view->deadTimeType());
+      alg->setProperty("Red",m_view->redPeriod());
 
       // If time limiting requested, set min/max times
       if (auto timeRange = m_view->timeRange())
@@ -51,13 +52,21 @@ namespace CustomInterfaces
         alg->setProperty("TimeMin", timeRange->first);
         alg->setProperty("TimeMax", timeRange->second);
       }
+
+      // If corrections from custom file requested, set file property
       if (m_view->deadTimeType() == "FromSpecifiedFile") {
         alg->setProperty("DeadTimeCorrFile",m_view->deadTimeFile());
       }
 
+      // If custom grouping requested, set forward/backward groupings
       if ( m_view->detectorGroupingType() == "Custom" ) {
         alg->setProperty("ForwardSpectra",m_view->getForwardGrouping());
         alg->setProperty("BackwardSpectra",m_view->getBackwardGrouping());
+      }
+
+      // If Subtract checkbox is selected, set green period
+      if ( m_view->subtractIsChecked() ) {
+        alg->setProperty("Green",m_view->greenPeriod());
       }
 
       alg->setPropertyValue("OutputWorkspace", "__NotUsed");
