@@ -376,6 +376,3 @@ def parse_run_file_name(run_string):
         fext     = fext[0]
     # extensions should be either all the same or all defined
     return (filepath,filenum,fext)
-
-
-

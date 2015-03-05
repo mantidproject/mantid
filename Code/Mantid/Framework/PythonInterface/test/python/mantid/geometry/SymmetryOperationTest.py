@@ -1,21 +1,21 @@
 import unittest
-from mantid.geometry import SymmetryOperation, SymmetryOperationFactoryImpl
+from mantid.geometry import SymmetryOperation, SymmetryOperationFactory
 from mantid.kernel import V3D
 
 class SymmetryOperationTest(unittest.TestCase):
 
     def test_creation(self):
-        self.assertRaises(RuntimeError, SymmetryOperationFactoryImpl.Instance().createSymOp, "none")
+        self.assertRaises(RuntimeError, SymmetryOperationFactory.createSymOp, "none")
 
-        SymmetryOperationFactoryImpl.Instance().createSymOp("x,y,-z")
+        SymmetryOperationFactory.createSymOp("x,y,-z")
 
     def test_getInfo(self):
-        symOp = SymmetryOperationFactoryImpl.Instance().createSymOp("x, y, -z")
+        symOp = SymmetryOperationFactory.createSymOp("x, y, -z")
         self.assertEquals(symOp.order(), 2)
         self.assertEquals(symOp.identifier(), "x,y,-z")
 
     def test_apply(self):
-        symOp = SymmetryOperationFactoryImpl.Instance().createSymOp("x,y,-z")
+        symOp = SymmetryOperationFactory.createSymOp("x,y,-z")
 
         hkl1 = V3D(1, 1, 1)
         hkl2 = symOp.apply(hkl1)

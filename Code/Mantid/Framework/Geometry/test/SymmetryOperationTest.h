@@ -258,6 +258,23 @@ public:
                               2, V3D(m_h, m_h-m_k, -m_l), "x,x-y,-z");
     }
 
+    void testPower()
+    {
+        SymmetryOperation mirror("x,-y,z");
+        SymmetryOperation identity;
+
+        TS_ASSERT_EQUALS(mirror^0, identity);
+        TS_ASSERT_EQUALS(mirror^1, mirror);
+        TS_ASSERT_EQUALS(mirror^2, identity);
+
+        SymmetryOperation twoFoldZ("-x,-y,z");
+        SymmetryOperation fourFoldZ("-y,x,z");
+        TS_ASSERT_EQUALS(fourFoldZ^0, identity);
+        TS_ASSERT_EQUALS(fourFoldZ^1, fourFoldZ);
+        TS_ASSERT_EQUALS(fourFoldZ^2, twoFoldZ);
+        TS_ASSERT_EQUALS(fourFoldZ^4, identity);
+    }
+
 private:
     V3D applyOrderTimes(const SymmetryOperation &symOp, const V3D &vector)
     {

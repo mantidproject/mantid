@@ -670,6 +670,8 @@ def plotSlice(source, label="", xydim=None, slicepoint=None,
         SliceViewer, e.g. setting the view and slice point.
     """
     workspace_names = getWorkspaceNames(source)
+    __checkPlotSliceWorkspaces(workspace_names)
+
     try:
         import mantidqtpython
     except:
@@ -1031,5 +1033,38 @@ def __checkPlotMDWorkspaces(workspace_names):
     for name in workspace_names:
         if not isinstance(mantid.api.mtd[name], mantid.api.IMDWorkspace):
             raise ValueError("Workspace '%s' is not an IMDWorkspace" % name)
+
+
+def __checkPlotSliceWorkspaces(ws_names):
+    """Checks that a list of workspaces is valid as input to plotSlice.
+    That means that the list should not be empty, all the workspaces
+    given must be present in the analysis data service, and all of
+    them must be MDworkspace. If any of these conditions is not met,
+    it raises an exception with specific error message.
+
+    Throws Python-level exceptions (ValueError) if the list is empty
+    or any of the spaces don't exist or are not of IMDWorkspace type.
+
+    Args:
+        ws_names: list of names of workspace(s)
+
+    Returns:
+        Nothing, just throws exceptions in case of error/inconsistent input
+
+    """
+    if len(ws_names) == 0:
+        raise ValueError("No workspace name(s) given. You need to specify at least one.")
+    for name in ws_names:
+        if not mantid.api.mtd.doesExist(name):
+            raise ValueError("Workspace '%s' does not exist in the workspace list" % name)
+
+        if not isinstance(mantid.api.mtd[name], mantid.api.IMDWorkspace):
+            if isinstance(mantid.api.mtd[name], mantid.api.IPeaksWorkspace):
+                raise ValueError("'%s' is not an IMDWorkspace as expected, but an "
+                                 "IPeaksWorkspace instead. Hint: if you want to overlay "
+                                 "peaks and use the Peaks Viewer, maybe "
+                                 "setPeaksWorkspaces is what you need?" % name)
+            else:
+                raise ValueError("%s is not an IMDWorkspace as expected." % name)
 
 #-----------------------------------------------------------------------------

@@ -1,15 +1,15 @@
 import unittest
-from mantid.geometry import SpaceGroup, SpaceGroupFactoryImpl
+from mantid.geometry import SpaceGroup, SpaceGroupFactory
 
 class SpaceGroupTest(unittest.TestCase):
 
     def test_creation(self):
-        self.assertRaises(ValueError, SpaceGroupFactoryImpl.Instance().createSpaceGroup, "none")
+        self.assertRaises(ValueError, SpaceGroupFactory.createSpaceGroup, "none")
 
-        SpaceGroupFactoryImpl.Instance().createSpaceGroup("I m -3 m")
+        SpaceGroupFactory.createSpaceGroup("I m -3 m")
 
     def test_interface(self):
-        spaceGroup = SpaceGroupFactoryImpl.Instance().createSpaceGroup("P -1")
+        spaceGroup = SpaceGroupFactory.createSpaceGroup("P -1")
         self.assertEquals(spaceGroup.hmSymbol(), "P -1")
         self.assertEquals(spaceGroup.order(), 2)
 
@@ -20,7 +20,7 @@ class SpaceGroupTest(unittest.TestCase):
         self.assertTrue("-x,-y,-z" in symOpStrings)
 
     def test_equivalentPositions(self):
-        spaceGroup = SpaceGroupFactoryImpl.Instance().createSpaceGroup("P -1")
+        spaceGroup = SpaceGroupFactory.createSpaceGroup("P -1")
 
         position = [0.34, 0.3, 0.4]
         equivalentPositions = spaceGroup.getEquivalentPositions(position)

@@ -185,7 +185,8 @@ class PropertyManager(NonIDF_Properties):
    # ----------------------------
     def __getattr__(self,name):
        """ Overloaded get method, disallowing non-existing properties being get but allowing
-           a property been called with  different names specified in substitution dictionary. """
+          a property been called with  different names specified in substitution dictionary.
+       """
 
        if name in self.__subst_dict:
           name = self.__subst_dict[name]
@@ -234,7 +235,12 @@ class PropertyManager(NonIDF_Properties):
     #
     mono_correction_factor = MonoCorrectionFactor(NonIDF_Properties.incident_energy,
                                                   NonIDF_Properties.monovan_run)
-
+    # property responsible for summing runs
+    sum_runs = SumRuns(NonIDF_Properties.sample_run)
+    # properties responsible for rotation angle
+    motor_log_names= MotorLogName()
+    motor_offset   = MotorOffset()
+    psi = RotationAngle(motor_log_names,motor_offset)
 #----------------------------------------------------------------------------------------------------------------
     def getChangedProperties(self):
         """ method returns set of the properties changed from defaults """
@@ -264,16 +270,8 @@ class PropertyManager(NonIDF_Properties):
             with value  equal to None. As such, this method is used as interface to
             set data from a function with a list of given parameters (*args vrt **kwargs),
             with some parameters missing.
-        """
-        # if sum is in parameters one needs to set it first
-        if 'sum_runs' in kwargs and not kwargs['sum_runs'] is None:
-            self.sum_runs = kwargs['sum_runs']
-            del kwargs['sum_runs']
-        if 'sum' in kwargs and not kwargs['sum'] is None:
-            self.sum_runs = kwargs['sum']
-            del kwargs['sum']
-
-
+        """   
+  
         for par_name,value in kwargs.items() :
             if not value is None:
                 setattr(self,par_name,value)
@@ -282,16 +280,6 @@ class PropertyManager(NonIDF_Properties):
         """ Set input properties from a dictionary of parameters
 
         """
-        # if sum is in parameters one needs to set it first to interpret
-        #
-        if 'sum_runs' in kwargs :
-            self.sum_runs = kwargs['sum_runs']
-            del kwargs['sum_runs']
-        if 'sum' in kwargs :
-            self.sum_runs = kwargs['sum']
-            del kwargs['sum']
-
-
         for par_name,value in kwargs.items() :
             setattr(self,par_name,value)
 
@@ -520,6 +508,22 @@ class PropertyManager(NonIDF_Properties):
         #
         return files_to_check
     #
+    def find_files_to_sum(self,num_files=None):
+        """ method searches for run files in run list to sum and returns 
+            list of runs with run-files missing or ok and empty list if all files 
+            are there 
+
+            if num_files is not None, find specified number of files out of total 
+            file list to sum
+        """ 
+        # this returns only runs, left to sum with current sample_run sum settings
+        runs,sum_ws,added      = PropertyManager.sample_run.get_runs_to_sum(None,num_files)
+        if len(runs) == 0:
+           return (True,[],[])
+
+        ok,not_found_list,found_list = PropertyManager.sample_run.find_run_files(runs)     
+        return (ok,not_found_list,found_list)
+    #
     def _check_file_properties(self):
         """ Method verifies if all files necessary for a reduction are available.
 
@@ -533,7 +537,12 @@ class PropertyManager(NonIDF_Properties):
             ok,file = theProp.find_file(be_quet=True)
             if not ok:
                file_errors[prop_name]=file
- 
+
+        if self.sum_runs :
+           ok,missing,found=self.find_files_to_sum()
+           if not ok and not self.cashe_sum_ws:
+              file_errors['missing_runs_toSum']=str(missing)
+
         result = (len(file_errors)==0)
         return (result,file_errors)
     #
@@ -563,7 +572,7 @@ class PropertyManager(NonIDF_Properties):
         ok,fail_prop = self._check_file_properties()
         if not ok :
            for prop in fail_prop:
-               mess = "*** ERROR  : prop: {0} -->{1}".format(prop,fail_prop[prop])
+               mess = "*** ERROR  : properties : {0} -->{1}".format(prop,fail_prop[prop])
                if fail_on_errors:
                  self.log(mess,'warning')
                else:
@@ -572,7 +581,8 @@ class PropertyManager(NonIDF_Properties):
 
         ok,mess= self._check_ouptut_dir()
         if not ok:
-           mess = '*** WARNING: saving results --> {1}'.format(mess)
+           mess = '*** WARNING: saving results: --> {1}'.format(mess)
+
            if fail_on_errors:
               self.log(mess,'warning')
            else:
@@ -591,9 +601,9 @@ class PropertyManager(NonIDF_Properties):
                if not (ok):
                   error_level=max(sev,error_level)
                   if sev == 1:
-                     base = '*** WARNING: prop: {0} --> {1}'
+                     base = '*** WARNING: properties : {0} --> {1}'
                   else:
-                     base = '*** ERROR  : prop: {0} --> {1}'
+                     base = '*** ERROR  : properties : {0} --> {1}'
                   mess =  base.format(prop,message)
                   if fail_on_errors:
                       self.log(mess,'warning')
@@ -672,8 +682,8 @@ class PropertyManager(NonIDF_Properties):
 
       save_dir = config.getString('defaultsave.directory')
       self.log("****************************************************************",log_level)
-      if self.monovan_run != None and not 'van_mass' in changed_Keys:                                   # This output is
-         self.log("*** Monochromatic vanadium mass used : {0} ".format(self.van_mass),log_level) # Adroja request from may 2014
+      if self.monovan_run != None and not 'van_mass' in changed_Keys:  # This output is Adroja request from may 2014
+         self.log("*** Monochromatic vanadium mass used : {0} ".format(self.van_mass),log_level)
       #
       self.log("*** By default results are saved into: {0}".format(save_dir),log_level)
       self.log("*** Output will be normalized to {0}".format(self.normalise_method),log_level)

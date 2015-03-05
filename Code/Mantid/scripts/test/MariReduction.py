@@ -14,8 +14,9 @@ except:
 
 class ReduceMARI(ReductionWrapper):
 #-------------------------------------------------------------------------------------------------#
-   @MainProperties
-   def def_main_properties(self):
+    @MainProperties
+    def def_main_properties(self):
+
        """ Define main properties used in reduction """
        prop = {}
        prop['sample_run'] = 11001
@@ -29,11 +30,11 @@ class ReduceMARI(ReductionWrapper):
        prop['sample_rmm'] = 435.96
        return prop
 #-------------------------------------------------------------------------------------------------#
-   @AdvancedProperties
-   def def_advanced_properties(self):
+    @AdvancedProperties
+    def def_advanced_properties(self):
       """  separation between simple and advanced properties depends
            on scientist, experiment and user.
-             main properties override advanced properties.
+           main properties override advanced properties.
       """
       prop = {}
       prop['map_file'] = "mari_res.map"
@@ -44,17 +45,16 @@ class ReduceMARI(ReductionWrapper):
       return prop
       #
 #-------------------------------------------------------------------------------------------------#
-   @iliad
-   def reduce(self,input_file=None,output_directory=None):
+    @iliad
+    def reduce(self,input_file=None,output_directory=None):
       """ Method executes reduction over single file
-
           Overload only if custom reduction is needed
       """
       ws = ReductionWrapper.reduce(self,input_file,output_directory)
       #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
       return ws
 #------------------------------------------------------------------------------------------------ #
-   def validate_result(self,build_validation=False):
+    def validate_result(self,build_validation=False):
       """ Change this method to verify different results     """
 
       # Two commented code rows below define location of the validation file in this script folder 
@@ -69,7 +69,7 @@ class ReduceMARI(ReductionWrapper):
                                                               build_validation,1.e-3)
       return rez,message
 
-   def __init__(self,web_var=None):
+    def __init__(self,web_var=None):
        """ sets properties defaults for the instrument with Name"""
        ReductionWrapper.__init__(self,'MAR',web_var)
 #-------------------------------------------------------------------------------------------------#
@@ -120,5 +120,7 @@ if __name__ == "__main__":
      #file = os.path.join(run_dir,'reduce_vars.py')
      #rd.save_web_variables(file)
 
-     rd.reduce()
-
+     # Web-like reduction over sequence of files
+     #rd.reduce()
+###### Run reduction on all files provided as parameters ######
+     red_ws = rd.run_reduction()

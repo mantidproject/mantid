@@ -33,6 +33,7 @@ class DataReflWidget(BaseWidget):
     short_name = 'REFL'
     peak_pixel_range = []
     background_pixel_range = []
+    _run_number_first_edit = None
 
     def __init__(self, parent=None, state=None, settings=None, name="REFL", data_proxy=None):
         super(DataReflWidget, self).__init__(parent, state, settings, data_proxy=data_proxy)

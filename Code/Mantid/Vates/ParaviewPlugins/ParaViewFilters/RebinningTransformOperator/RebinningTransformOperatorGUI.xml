@@ -1,6 +1,0 @@
-  <ParaViewFilters>
-    <Category name="Mantid" menu_label="&amp;Mantid">
-      <!-- adds a new category and then adds our filter to it -->
-      <Filter name="RebinningTransformOperator" icon=":/RebinningTransformOperator.png" /> />
-    </Category>
-  </ParaViewFilters>

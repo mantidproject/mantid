@@ -34,6 +34,58 @@ _LOGGING_ = False
 
 class LoadVesuvio(PythonAlgorithm):
 
+    _ws_index = None
+    _spectrum_no = None
+    foil_map = None
+    _inst_prefix = None
+    _mon_spectra = None
+    _mon_index = None
+    _backward_spectra_list = None
+    _forward_spectra_list = None
+    _mon_scale = None
+    _beta = None
+    _tof_max = None
+    _mon_tof_max = None
+    _back_mon_norm = None
+    _back_period_sum1 = None
+    _back_period_sum2 = None
+    _back_foil_out_norm = None
+    _forw_mon_norm = None
+    _forw_period_sum1 = None
+    _forw_period_sum2 = None
+    _forw_foil_out_norm = None
+    _diff_opt = None
+    _spectra = None
+    _sumspectra = None
+    _raw_grp = None
+    _raw_monitors = None
+    _nperiods = None
+    _goodframes = None
+    pt_times = None
+    delta_t = None
+    mon_pt_times = None
+    delta_tmon = None
+    summed_ws = None
+    summed_mon = None
+    _spectra_type = None
+    _mon_norm_start = None
+    _mon_norm_end = None
+    _period_sum1_start = None
+    _period_sum1_end = None
+    _period_sum2_start = None
+    _period_sum2_end = None
+    _foil_out_norm_start = None
+    _foil_out_norm_end = None
+    sum1 = None
+    sum2 = None
+    sum3 = None
+    foil_thin = None
+    mon_out = None
+    mon_thin = None
+    foil_thick = None
+    mon_thick = None
+    foil_out = None
+
     def summary(self):
         return "Loads raw data produced by the Vesuvio instrument at ISIS."
 
