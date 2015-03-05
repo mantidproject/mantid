@@ -29,7 +29,7 @@ void PseudoVoigt::functionLocal(double *out, const double *xValues,
     double xDiffSquared = (xValues[i] - x0) * (xValues[i] - x0);
 
     out[i] = h * (gFraction * exp(-0.5 * xDiffSquared / sSquared) +
-             (lFraction * gSquared / (xDiffSquared + gSquared)));
+                  (lFraction * gSquared / (xDiffSquared + gSquared)));
   }
 }
 
@@ -59,25 +59,24 @@ void PseudoVoigt::functionDerivLocal(Jacobian *out, const double *xValues,
 
     out->set(i, 0, h * (expTerm - lorentzTerm));
     out->set(i, 1, gFraction * expTerm + lFraction * lorentzTerm);
-    out->set(i, 2, h * (gFraction * expTerm * xDiff / sSquared +
-                        lFraction * lorentzTerm * xDiff * 2.0 /
-                            (xDiffSquared + gSquared)));
-    out->set(i, 3,
-             gFraction * h * expTerm * xDiffSquared / sSquared / f +
-                 lFraction * h * (lorentzTerm / g -
-                                  lorentzTerm * g / (xDiffSquared + gSquared)));
+    out->set(i, 2, h * xDiff * (gFraction * expTerm / sSquared +
+                                lFraction * lorentzTerm * 2.0 /
+                                    (xDiffSquared + gSquared)));
+    out->set(i, 3, h * (gFraction * expTerm * xDiffSquared / sSquared / f +
+                        lFraction * lorentzTerm *
+                            (1.0 / g - g / (xDiffSquared + gSquared))));
   }
 }
 
 void PseudoVoigt::init() {
-  declareParameter("Mixing");
+  declareParameter("Mixing", 1.0);
   declareParameter("Height");
   declareParameter("PeakCentre");
   declareParameter("FWHM");
 
   BoundaryConstraint *mixingConstraint =
       new BoundaryConstraint(this, "Mixing", 0.0, 1.0, true);
-  mixingConstraint->setPenaltyFactor(1e7);
+  mixingConstraint->setPenaltyFactor(1e9);
 
   addConstraint(mixingConstraint);
 }

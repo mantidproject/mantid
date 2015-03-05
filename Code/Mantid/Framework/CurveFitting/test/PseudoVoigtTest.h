@@ -8,8 +8,17 @@
 #include "MantidCurveFitting/Jacobian.h"
 #include <boost/make_shared.hpp>
 
+#include "MantidCurveFitting/Gaussian.h"
+#include "MantidCurveFitting/Lorentzian.h"
+#include "MantidAPI/AlgorithmManager.h"
+
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/MersenneTwister.h"
+
 using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 class PseudoVoigtTest : public CxxTest::TestSuite {
 public:
@@ -180,6 +189,94 @@ public:
       TS_ASSERT_DELTA(jacobian.get(i, 2), m_dfdx0[i], 1e-11);
       TS_ASSERT_DELTA(jacobian.get(i, 3), m_dfdf[i], 1e-11);
     }
+  }
+
+  void testGaussianEdge() {
+    IFunction_sptr pv = getInitializedPV(1.0, 4.78, 0.05, 1.0);
+
+    Gaussian gaussian;
+    gaussian.initialize();
+    gaussian.setCentre(1.0);
+    gaussian.setHeight(4.78);
+    gaussian.setFwhm(0.05);
+
+    FunctionDomain1DVector domain(m_xValues);
+    FunctionValues valuesPV(domain);
+    FunctionValues valuesGaussian(domain);
+
+    pv->function(domain, valuesPV);
+    gaussian.function(domain, valuesGaussian);
+
+    for (size_t i = 0; i < valuesPV.size(); ++i) {
+      TS_ASSERT_DELTA(valuesPV[i], valuesGaussian[i], 1e-15);
+    }
+  }
+
+  void testLorentzianEdge() {
+    IFunction_sptr pv = getInitializedPV(1.0, 4.78, 0.05, 0.0);
+
+    Lorentzian lorentzian;
+    lorentzian.initialize();
+    lorentzian.setCentre(1.0);
+    lorentzian.setFwhm(0.05);
+    lorentzian.setHeight(4.78);
+
+    FunctionDomain1DVector domain(m_xValues);
+    FunctionValues valuesPV(domain);
+    FunctionValues valuesLorentzian(domain);
+
+    pv->function(domain, valuesPV);
+    lorentzian.function(domain, valuesLorentzian);
+
+    for (size_t i = 0; i < valuesPV.size(); ++i) {
+      TS_ASSERT_DELTA(valuesPV[i], valuesLorentzian[i], 1e-15);
+    }
+  }
+
+  void testFit() {
+    // Generating a workspace with function values
+    Workspace2D_sptr ws =
+        WorkspaceCreationHelper::Create1DWorkspaceConstant(100, 0.0, 0.0);
+
+    std::vector<double> &x = ws->dataX(0);
+    for (size_t i = 0; i < 100; ++i) {
+      x[i] = static_cast<double>(i) * 0.01 - 0.5;
+    }
+
+    FunctionDomain1DVector domain(x);
+
+    IFunction_sptr generatingPV = getInitializedPV(0.0, 112.78, 0.15, 0.7);
+    FunctionValues generatingValues(domain);
+    generatingPV->function(domain, generatingValues);
+
+    Mantid::Kernel::MersenneTwister rng(2, -0.5, 0.5);
+    std::vector<double> &y = ws->dataY(0);
+    std::vector<double> &e = ws->dataE(0);
+    for (size_t i = 0; i < 100; ++i) {
+      y[i] = rng.nextValue() + generatingValues[i];
+      e[i] = sqrt(fabs(y[i]));
+    }
+    // Some starting values for the fit
+    IFunction_sptr pv = getInitializedPV(0.03, 120.03, 0.1, 0.5);
+
+    IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
+    fit->setProperty("Function", pv);
+    fit->setProperty("InputWorkspace", ws);
+    fit->execute();
+
+    TS_ASSERT(fit->isExecuted());
+
+    IFunction_sptr fitted = fit->getProperty("Function");
+
+    TS_ASSERT_DELTA(fitted->getError(0), 0.0, 1e-6);
+    TS_ASSERT_DELTA(fitted->getError(2), 0.0, 1e-6);
+    TS_ASSERT_DELTA(fitted->getError(1), 0.0, 1e-6);
+    TS_ASSERT_DELTA(fitted->getError(3), 0.0, 1e-6);
+
+    TS_ASSERT_DELTA(fitted->getParameter("Mixing"), 0.7, 1e-2);
+    TS_ASSERT_DELTA(fitted->getParameter("PeakCentre"), 0.0, 1e-4);
+    TS_ASSERT_DELTA(fitted->getParameter("Height"), 112.78, 0.5);
+    TS_ASSERT_DELTA(fitted->getParameter("FWHM"), 0.15, 1e-2);
   }
 
 private:

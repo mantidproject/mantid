@@ -68,11 +68,6 @@ protected:
   void functionDerivLocal(API::Jacobian *out, const double *xValues,
                           const size_t nData);
 
-  //  void functionDeriv(const API::FunctionDomain &domain,
-  //                     API::Jacobian &jacobian) {
-  //      calNumericalDeriv(domain, jacobian);
-  //  }
-
   void init();
 };
 
