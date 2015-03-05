@@ -106,6 +106,11 @@ namespace CustomInterfaces
     return m_ui.redPeriod->currentText().toStdString();
   }
 
+  bool ALCDataLoadingView::subtractIsChecked() const
+  {
+    return m_ui.subtractCheckbox->isChecked();
+  }
+
   boost::optional< std::pair<double,double> > ALCDataLoadingView::timeRange() const
   {
     if (m_ui.timeLimit->isChecked())

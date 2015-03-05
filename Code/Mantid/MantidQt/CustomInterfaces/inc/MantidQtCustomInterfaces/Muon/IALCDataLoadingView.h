@@ -71,6 +71,9 @@ namespace CustomInterfaces
     /// @return red period
     virtual std::string redPeriod() const = 0;
 
+    /// @return subtract checkbox
+    virtual bool subtractIsChecked() const =0;
+
     /// @return Selected calculation type - "Integral" or "Differential"
     virtual std::string calculationType() const = 0;
 
