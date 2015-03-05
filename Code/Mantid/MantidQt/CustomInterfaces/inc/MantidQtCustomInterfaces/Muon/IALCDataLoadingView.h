@@ -71,6 +71,9 @@ namespace CustomInterfaces
     /// @return red period
     virtual std::string redPeriod() const = 0;
 
+    /// @return green period
+    virtual std::string greenPeriod() const = 0;
+
     /// @return subtract checkbox
     virtual bool subtractIsChecked() const =0;
 

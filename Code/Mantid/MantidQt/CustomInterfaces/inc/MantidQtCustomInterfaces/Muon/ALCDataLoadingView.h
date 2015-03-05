@@ -59,6 +59,7 @@ namespace CustomInterfaces
     std::string getForwardGrouping() const;
     std::string getBackwardGrouping() const;
     std::string redPeriod() const;
+    std::string greenPeriod() const;
     bool subtractIsChecked() const;
     std::string calculationType() const;
     boost::optional< std::pair<double,double> > timeRange() const;

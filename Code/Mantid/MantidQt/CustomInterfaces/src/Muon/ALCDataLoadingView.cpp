@@ -106,6 +106,11 @@ namespace CustomInterfaces
     return m_ui.redPeriod->currentText().toStdString();
   }
 
+  std::string ALCDataLoadingView::greenPeriod() const
+  {
+    return m_ui.greenPeriod->currentText().toStdString();
+  }
+
   bool ALCDataLoadingView::subtractIsChecked() const
   {
     return m_ui.subtractCheckbox->isChecked();
