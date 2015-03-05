@@ -68,6 +68,9 @@ namespace CustomInterfaces
     /// @return backward grouping
     virtual std::string getBackwardGrouping() const = 0;
 
+    /// @return red period
+    virtual std::string redPeriod() const = 0;
+
     /// @return Selected calculation type - "Integral" or "Differential"
     virtual std::string calculationType() const = 0;
 

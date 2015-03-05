@@ -101,6 +101,11 @@ namespace CustomInterfaces
     return m_ui.backwardEdit->text().toStdString();
   }
 
+  std::string ALCDataLoadingView::redPeriod() const
+  {
+    return m_ui.redPeriod->currentText().toStdString();
+  }
+
   boost::optional< std::pair<double,double> > ALCDataLoadingView::timeRange() const
   {
     if (m_ui.timeLimit->isChecked())
