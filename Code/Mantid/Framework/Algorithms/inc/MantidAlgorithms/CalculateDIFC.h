@@ -3,11 +3,12 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-/** CalculateDIFC : TODO: DESCRIPTION
+/** CalculateDIFC : Calculate the DIFC for every pixel
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -43,6 +44,21 @@ public:
 private:
   void init();
   void exec();
+
+  /// Create output workspace
+  void createOutputWorkspace();
+
+  /// Calculate the DIFC for every pixel
+  void calculate();
+
+  /// Input workspace
+  API::MatrixWorkspace_sptr m_inputWS;
+
+  /// Offsets workspace
+  DataObjects::OffsetsWorkspace_sptr m_offsetsWS;
+
+  /// Output workspace
+  API::MatrixWorkspace_sptr m_outputWS;
 };
 
 } // namespace Algorithms
