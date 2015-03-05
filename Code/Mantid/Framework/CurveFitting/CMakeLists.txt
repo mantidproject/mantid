@@ -14,6 +14,7 @@ set ( SRC_FILES
 	src/CalculateGammaBackground.cpp
 	src/CalculateMSVesuvio.cpp
 	src/Chebyshev.cpp
+	src/ChebfunBase.cpp
 	src/ComptonPeakProfile.cpp
 	src/ComptonProfile.cpp
 	src/ComptonScatteringCountRate.cpp
@@ -66,6 +67,7 @@ set ( SRC_FILES
 	src/NormaliseByPeakArea.cpp
 	src/PRConjugateGradientMinimizer.cpp
 	src/ParDomain.cpp
+	src/PeakParametersNumeric.cpp
 	src/PeakParameterFunction.cpp
 	src/PlotPeakByLogValue.cpp
 	src/Polynomial.cpp
@@ -121,6 +123,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/CalculateGammaBackground.h
 	inc/MantidCurveFitting/CalculateMSVesuvio.h
 	inc/MantidCurveFitting/Chebyshev.h
+	inc/MantidCurveFitting/ChebfunBase.h
 	inc/MantidCurveFitting/ComptonPeakProfile.h
 	inc/MantidCurveFitting/ComptonProfile.h
 	inc/MantidCurveFitting/ComptonScatteringCountRate.h
@@ -160,6 +163,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Gaussian.h
 	inc/MantidCurveFitting/GaussianComptonProfile.h
 	inc/MantidCurveFitting/GramCharlierComptonProfile.h
+	inc/MantidCurveFitting/HalfComplex.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/Jacobian.h
 	inc/MantidCurveFitting/LeBailFit.h
@@ -177,6 +181,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/NormaliseByPeakArea.h
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/ParDomain.h
+	inc/MantidCurveFitting/PeakParametersNumeric.h
 	inc/MantidCurveFitting/PeakParameterFunction.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
 	inc/MantidCurveFitting/Polynomial.h
@@ -228,6 +233,7 @@ set ( TEST_FILES
 	BoundaryConstraintTest.h
 	CalculateGammaBackgroundTest.h
 	CalculateMSVesuvioTest.h
+	ChebfunBaseTest.h
 	ChebyshevTest.h
 	CompositeFunctionTest.h
 	ComptonPeakProfileTest.h
@@ -279,6 +285,7 @@ set ( TEST_FILES
 	MuonFInteractionTest.h
 	NeutronBk2BkExpConvPVoigtTest.h
 	NormaliseByPeakAreaTest.h
+	PeakParametersNumericTest.h
 	PRConjugateGradientTest.h
 	PeakParameterFunctionTest.h
 	PlotPeakByLogValueTest.h
