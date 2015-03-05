@@ -112,8 +112,7 @@ private:
 
   /// Creates Dead Time Table using all the data between begin and end
   DataObjects::TableWorkspace_sptr
-  createDeadTimeTable(std::vector<double>::const_iterator begin,
-                      std::vector<double>::const_iterator end);
+  createDeadTimeTable(std::vector<int> specToLoad, std::vector<double> deadTimes);
 
   /// Loads detector grouping information
   API::Workspace_sptr loadDetectorGrouping(Mantid::NeXus::NXRoot &root);
