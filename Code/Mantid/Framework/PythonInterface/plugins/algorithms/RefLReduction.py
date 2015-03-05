@@ -92,6 +92,28 @@ class RefLReduction(PythonAlgorithm):
         # retrieve settings from GUI
         print '-> Retrieving settings from GUI'
 
+        #print 'RunNumbers: '  + str(self.getProperty("RunNumbers").value)
+        #print 'NormalizationRunNumber: ' + str(self.getProperty("NormalizationRunNumber").value)
+        #print 'SignalPeakPixelRange: ' + str(self.getProperty("SignalPeakPixelRange").value)
+        #print 'SubtractSignalBackground: ' + str(self.getProperty("SubtractSignalBackground").value)
+        #print 'SignalBackgroundPixelRange: ' + str(self.getProperty("SignalBackgroundPixelRange").value)
+        #print "NormFlag: " + str(self.getProperty("NormFlag").value)
+        #print "NormPeakPixelRange: " + str(self.getProperty("NormPeakPixelRange").value)
+        #print "NormBackgroundPixelRange: " + str(self.getProperty("NormBackgroundPixelRange").value)
+        #print "SubtractNormBackground: " + str(self.getProperty("SubtractNormBackground").value)
+        #print "LowResDataAxisPixelRangeFlag: " + str(self.getProperty("LowResDataAxisPixelRangeFlag").value)
+        #print "LowResDataAxisPixelRange: " + str(self.getProperty("LowResDataAxisPixelRange").value)
+        #print "LowResNormAxisPixelRangeFlag: " + str(self.getProperty("LowResNormAxisPixelRangeFlag").value)
+        #print "LowResNormAxisPixelRange: " + str(self.getProperty("LowResNormAxisPixelRange").value)
+        #print "TOFRange: " + str(self.getProperty("TOFRange").value)
+        #print "IncidentMediumSelected: " + str(self.getProperty("incidentMediumSelected").value)
+        #print "GeometryCorrectionFlag: " + str(self.getProperty("GeometryCorrectionFlag").value)
+        #print "QMin: " + str(self.getProperty("QMin").value)
+        #print "QStep: " + str(self.getProperty("QStep").value)
+        #print "ScalingFactorFile: " + str(self.getProperty("ScalingFactorFile").value)
+        #print "SlitsWidthFlag: " + str(self.getProperty("SlitsWidthFlag").value)
+        #print "OutputWorkspace: " + str(self.getProperty("OutputWorkspace").value)
+
         # DATA
         dataRunNumbers = self.getProperty("RunNumbers").value
         dataPeakRange = self.getProperty("SignalPeakPixelRange").value
@@ -297,7 +319,7 @@ class RefLReduction(PythonAlgorithm):
 #                                         final_data_y_error_axis)
 
         # apply Scaling factor
-        [tof_axis_full, y_axis, y_error_axis] = wks_utility.applyScalingFactor(tof_axis_full,
+        [tof_axis_full, y_axis, y_error_axis, isSFfound] = wks_utility.applyScalingFactor(tof_axis_full,
                                                                                final_data_y_axis,
                                                                                final_data_y_error_axis,
                                                                                incidentMedium,
@@ -375,8 +397,10 @@ class RefLReduction(PythonAlgorithm):
                                                            final_y_error_axis,
                                                            name_output_ws,
                                                            ws_event_data)
+        AddSampleLog(Workspace=name_output_ws,
+                     LogName='isSFfound',
+                     LOgText=str(isSFfound))
 
         self.setProperty('OutputWorkspace', mtd[name_output_ws])
-
 
 AlgorithmFactory.subscribe(RefLReduction)
