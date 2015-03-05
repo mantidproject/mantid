@@ -315,19 +315,18 @@ void SplatterPlotView::destroyPeakSources()
  * React to the destruction of a peak source, mainly unregister it from the peakSource container
  */
 void SplatterPlotView::onPeakSourceDestroyed() {
-  // Check for each source in the peakSource container, if it still is an existing source
-  for (QList<QPointer<pqPipelineSource>>::Iterator it = peaksSource.begin(); it != peaksSource.end(); ++it) {
     pqServer *server = pqActiveObjects::instance().activeServer();
     pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
     QList<pqPipelineSource *> sources;
     sources = smModel->findItems<pqPipelineSource *>(server);
 
+  // Check for each source in the peakSource container, if it still is an existing source
+  for (QList<QPointer<pqPipelineSource>>::Iterator it = peaksSource.begin(); it != peaksSource.end();) {
     bool foundSource = false;
-    for (QList<pqPipelineSource*>::iterator source = sources.begin(); source != sources.end(); ++source) {
+    for (QList<pqPipelineSource*>::Iterator source = sources.begin(); source != sources.end(); ++source) {
       // Check if the source registered in PV matches our current peak source
       if ((*source) == (*it)) {
         foundSource = true;
-        break;
       }
     }
 
