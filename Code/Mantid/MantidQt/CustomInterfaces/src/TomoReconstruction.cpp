@@ -1,14 +1,16 @@
-#include "MantidQtAPI/AlgorithmRunner.h"
-#include "MantidQtCustomInterfaces/TomoReconstruction.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/RemoteJobManager.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtCustomInterfaces/TomoReconstruction.h"
 
 #include <boost/lexical_cast.hpp>
 #include <jsoncpp/json/json.h>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QPainter>
 
 using namespace Mantid::API;
 
@@ -55,7 +57,7 @@ using namespace MantidQt::CustomInterfaces;
 size_t TomoReconstruction::m_nameSeqNo = 0;
 
 // names by which we know compute resourcess
-const td::string TomoReconstruction::m_SCARFName = "SCARF@STFC";
+const std::string TomoReconstruction::m_SCARFName = "SCARF@STFC";
 
 // names by which we knoe image/tomography reconstruction tools (3rd party)
 const std::string TomoReconstruction::m_TomoPyTool = "TomoPy";
@@ -71,6 +73,7 @@ const std::string TomoReconstruction::m_CustomCmdTool = "Custom command";
  *
  * @param parent Parent window (most likely the Mantid main app window).
  */
+#include "MantidKernel/cow_ptr.h"
 TomoReconstruction::TomoReconstruction(QWidget *parent)
   : UserSubWindow(parent), m_loggedIn(false), m_facility("ISIS"),
     m_computeRes(), m_localCompName("Local"), m_SCARFtools(),
@@ -164,9 +167,13 @@ void TomoReconstruction::doSetupSectionRun() {
   setupComputeResource();
   setupRunTool();
 
+  m_ui.label_image_name->setText("none");
+
   enableLoggedActions(m_loggedIn);
 
   // Button signals
+  connect(m_ui.pushButton_browse_image, SIGNAL(released()), this,
+          SLOT(browseImageClicked()));
   connect(m_ui.pushButton_reconstruct, SIGNAL(released()), this,
           SLOT(reconstructClicked()));
   connect(m_ui.pushButton_run_tool_setup, SIGNAL(released()), this,
@@ -499,16 +506,17 @@ void TomoReconstruction::makeRunnableWithOptions(std::string &run,
   // For now we only know how to run commands on SCARF
   if (m_SCARFName ==
       m_ui.comboBox_run_compute_resource->currentText().toStdString()) {
-    const std::string tool = m_ui.comboBox_run_tool->test().toStdString();
-    if (tool = m_TomoPyTool) {
-      run = "/work/imat/scripts/tomopy/imat_recon_FBP.py"
-      opt = m_SCARF_path;
+    const std::string tool =
+        m_ui.comboBox_run_tool->currentText().toStdString();
+    if (tool == m_TomoPyTool) {
+      run = "/work/imat/scripts/tomopy/imat_recon_FBP.py";
+      opt = m_ui.lineEdit_SCARF_path->text().toStdString();
     } else if (tool == m_AstraTool) {
       run = "/work/imat/scripts/astra/astra-3d-SIRT3D.py";
-      opt = m_SCARF_path;
+      opt = m_ui.lineEdit_SCARF_path->text().toStdString();
     } else {
       userWarning("Unable to use this tool",
-                  "I do not know how to submit jobs to use this tool: " +
+                  "I do not know how to submit jobs to use this tool: "
                    + tool + ". It seems that this interface is "
                   "misconfigured or there has been an unexpected "
                   "failure.");
@@ -627,7 +635,92 @@ void  TomoReconstruction::jobTableRefreshClicked() {
   std::vector<std::string> ids, names, status, cmds;
   doQueryJobStatus(ids, names, status, cmds);
 
-  // TODO: sort out table modification process
+  size_t jobMax = ids.size();
+  if ( ids.size() != names.size() || ids.size() != status.size() ||
+       ids.size() != cmds.size() ) {
+    // this should not really happen
+    jobMax = std::min(ids.size(), names.size());
+    jobMax = std::min(jobMax, status.size());
+    jobMax = std::min(jobMax, cmds.size());
+    userWarning("Problem retrieving job status information",
+                "The response from the compute resource did not seem "
+                "correct. The table of jobs may not be fully up to date.");
+  }
+
+  QTableWidget *t = m_ui.tableWidget_run_jobs;
+  bool sort = t->isSortingEnabled();
+  t->setRowCount(static_cast<int>(ids.size()));
+  for (size_t i=0; i<jobMax; ++i) {
+    t->setItem(static_cast<int>(i), 0,
+               new QTableWidgetItem(QString::fromStdString(names[i])));
+    t->setItem(static_cast<int>(i), 1,
+               new QTableWidgetItem(QString::fromStdString(ids[i])));
+    t->setItem(static_cast<int>(i), 2,
+               new QTableWidgetItem(QString::fromStdString(status[i])));
+    t->setItem(static_cast<int>(i), 3,
+               new QTableWidgetItem(QString::fromStdString(cmds[i])));
+  }
+  t->setSortingEnabled(sort);
+}
+
+void TomoReconstruction::browseImageClicked() {
+  // get path
+  QString fitsStr = QString("FITS, Flexible Image Transport System images "
+                            "(*.fits *.fit);;Other extensions/all files (*.*)");
+  // Note that this could be done using UserSubWindow::openFileDialog(),
+  // but that method doesn't give much control over the text used for the
+  // allowed extensions.
+  QString prevPath = MantidQt::API::AlgorithmInputHistory::Instance().
+      getPreviousDirectory();
+  QString path(QFileDialog::getOpenFileName(this, tr("Open image file"),
+                                            prevPath, fitsStr));
+  if(!path.isEmpty()) {
+    MantidQt::API::AlgorithmInputHistory::Instance().
+        setPreviousDirectory(QFileInfo(path).absoluteDir().path());
+  } else {
+    return;
+  }
+
+  // get fits file into workspace and retrieve it from the ADS
+  auto alg = Algorithm::fromString("LoadFITS");
+  alg->initialize();
+  alg->setPropertyValue("Filename", path.toStdString());
+  alg->setProperty("ImageKey", "0");
+  std::string wsName = "__fits_ws_imat_tomography_gui";
+  alg->setProperty("OutputWorkspace", wsName);
+  try {
+    alg->execute();
+  } catch(std::exception &e) {
+    userWarning("Failed to load image","Could not load this file as a "
+                "FITS image: " + std::string(e.what()));
+    return;
+  }
+  if (!alg->isExecuted()) {
+    userWarning("Failed to load image correctly","Note that even though "
+                "the image file has been loaded it seems to contain "
+                "errors.");
+  }
+  WorkspaceGroup_sptr wsg;
+  MatrixWorkspace_sptr ws;
+  try {
+    wsg =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
+    ws =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsg->getNames()[0]);
+  } catch(std::exception &e) {
+    userWarning("Could not load image contents","An unrecoverable error "
+                "happened when trying to load the image contents. Cannot "
+                "display it. Error details: " + std::string(e.what()));
+    return;
+  }
+
+  // draw image from workspace
+  if (wsg && ws
+      && Mantid::API::AnalysisDataService::Instance().doesExist(ws->name())) {
+    drawImage(ws);
+    m_ui.label_image_name->setText(path);
+  }
+  AnalysisDataService::Instance().remove(wsg->getName());
 }
 
 void TomoReconstruction::loadAvailablePlugins() {
@@ -1037,6 +1130,98 @@ std::string TomoReconstruction::getPassword() {
     return m_ui.lineEdit_SCARF_password->text().toStdString();
   else
     return "none";
+}
+
+/**
+ * draw an image on screen using Qt's QPixmap and QImage. It assumes
+ * that the workspace contains an image in the form in which LoadFITS
+ * loads FITS images. Checks dimensions and workspace structure and
+ * shows user warning/error messages appropriately. But in principle
+ * it should not raise any exceptions under reasonable circumstances.
+ */
+void TomoReconstruction::drawImage(const MatrixWorkspace_sptr &ws) {
+  // From logs we expect a name "run_title", width "Axis1" and height "Axis2"
+  size_t width, height;
+  try {
+    width =
+      boost::lexical_cast<size_t>(ws->run().getLogData("Axis1")->value());
+  } catch(std::exception &e) {
+    userError("Cannot load image", "There was a problem while trying to "
+              "find the width of the image: " + std::string(e.what()));
+    return;
+  }
+  try {
+    height =
+      boost::lexical_cast<size_t>(ws->run().getLogData("Axis2")->value());
+  } catch(std::exception &e) {
+    userError("Cannot load image", "There was a problem while trying to "
+              "find the height of the image: " + std::string(e.what()));
+    return;
+  }
+  std::string name;
+  try {
+    name = ws->run().getLogData("run_title")->value();
+  } catch(std::exception &e) {
+    userWarning("Cannot load image information", "There was a problem while "
+                " trying to find the name of the image: " +
+                std::string(e.what()));
+  }
+
+  // images are loaded as 1 histogram == 1 pixel (1 bin per histogram):
+  if ((width*height) != ws->getNumberHistograms()) {
+    userError("Image dimensions do not match", "Could not load the expected "
+              "number of pixels.");
+    return;
+  }
+  // find min and max to scale pixel values
+  double min = std::numeric_limits<double>::max(),
+    max = std::numeric_limits<double>::min();
+  for (size_t i=0; i<ws->getNumberHistograms(); ++i) {
+    const double &v = ws->readY(i)[0];
+    if (v < min)
+      min = v;
+    if (v > max)
+      max = v;
+  }
+  if (min >= max) {
+    userWarning("Empty image!", "The image could be loaded but it contains "
+                "effectively no information, all pixels have the same value.");
+    // black picture
+    QPixmap pix(static_cast<int>(width), static_cast<int>(height));
+    pix.fill(QColor(0, 0, 0));
+    m_ui.label_image->setPixmap(pix);
+    m_ui.label_image->show();
+    return;
+  }
+
+  // load / transfer image into a QImage
+  QImage rawImg(QSize(static_cast<int>(width),
+                      static_cast<int>(height)),
+                QImage::Format_RGB32);
+  size_t i = 0;
+  double max_min = max - min;
+  for (size_t yi=0; yi<width; ++yi) {
+    for (size_t xi=0; xi<width; ++xi) {
+      const double &v = ws->readY(i)[0];
+      // color the range min-max in gray scale. To apply different color
+      // maps you'd need to use rawImg.setColorTable() or similar.
+      int scaled = static_cast<int>(255.0 *
+                                    (v - min)/max_min);
+      QRgb vRgb = qRgb(scaled, scaled, scaled);
+      rawImg.setPixel(static_cast<int>(xi),
+                      static_cast<int>(yi), vRgb);
+      ++i;
+    }
+  }
+
+  // paint and show image
+  QPainter painter;
+  QPixmap pix(static_cast<int>(width), static_cast<int>(height));
+  painter.begin(&pix);
+  painter.drawImage(0, 0, rawImg);
+  painter.end();
+  m_ui.label_image->setPixmap(pix);
+  m_ui.label_image->show();
 }
 
 /**

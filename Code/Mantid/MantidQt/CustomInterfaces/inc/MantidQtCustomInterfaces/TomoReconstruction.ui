@@ -386,21 +386,39 @@ Double-click on them to modify their values.</string>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
+            <verstretch>1</verstretch>
            </sizepolicy>
           </property>
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>40</height>
+            <height>0</height>
            </size>
           </property>
           <property name="title">
            <string>Compute resource</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_25">
+           <property name="margin">
+            <number>3</number>
+           </property>
+           <property name="spacing">
+            <number>2</number>
+           </property>
            <item row="0" column="0">
             <widget class="QTabWidget" name="tabWidget_comp_resource">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>1</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="currentIndex">
               <number>0</number>
              </property>
@@ -411,10 +429,94 @@ Double-click on them to modify their values.</string>
               <layout class="QGridLayout" name="gridLayout_26">
                <item row="0" column="0">
                 <layout class="QGridLayout" name="gridLayout_27">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_21">
+                   <property name="text">
+                    <string>Username:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_SCARF_password">
+                   <property name="text">
+                    <string>Password:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QLineEdit" name="lineEdit_SCARF_password">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>imat</string>
+                   </property>
+                   <property name="echoMode">
+                    <enum>QLineEdit::Password</enum>
+                   </property>
+                   <property name="cursorPosition">
+                    <number>4</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1" colspan="3">
+                  <widget class="QLineEdit" name="lineEdit_SCARF_path">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>/work/imat/test/cycle/</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_22">
+                   <property name="text">
+                    <string>Path on SCARF:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="2" colspan="2">
+                  <spacer name="horizontalSpacer_17">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
                  <item row="5" column="0" colspan="4">
                   <layout class="QHBoxLayout" name="horizontalLayout_8">
                    <item>
                     <widget class="QPushButton" name="pushButton_SCARF_login">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="minimumSize">
+                      <size>
+                       <width>0</width>
+                       <height>20</height>
+                      </size>
+                     </property>
                      <property name="text">
                       <string>Log in</string>
                      </property>
@@ -422,6 +524,18 @@ Double-click on them to modify their values.</string>
                    </item>
                    <item>
                     <widget class="QPushButton" name="pushButton_SCARF_logout">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="minimumSize">
+                      <size>
+                       <width>0</width>
+                       <height>20</height>
+                      </size>
+                     </property>
                      <property name="text">
                       <string>Log out</string>
                      </property>
@@ -442,15 +556,14 @@ Double-click on them to modify their values.</string>
                    </item>
                   </layout>
                  </item>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_21">
-                   <property name="text">
-                    <string>Username:</string>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="3" column="1">
                   <widget class="QSpinBox" name="spinBox_SCARFnumNodes">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>20</height>
+                    </size>
+                   </property>
                    <property name="minimum">
                     <number>1</number>
                    </property>
@@ -475,45 +588,6 @@ Double-click on them to modify their values.</string>
                    </property>
                   </spacer>
                  </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="label_23">
-                   <property name="text">
-                    <string>Number of nodes:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="1">
-                  <widget class="QSpinBox" name="spinBox_SCARFnumCores">
-                   <property name="minimum">
-                    <number>1</number>
-                   </property>
-                   <property name="maximum">
-                    <number>99</number>
-                   </property>
-                   <property name="value">
-                    <number>8</number>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QLineEdit" name="lineEdit_SCARF_password">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>imat</string>
-                   </property>
-                   <property name="echoMode">
-                    <enum>QLineEdit::Password</enum>
-                   </property>
-                   <property name="cursorPosition">
-                    <number>4</number>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="0" column="1" colspan="2">
                   <widget class="QLineEdit" name="lineEdit_SCARF_username">
                    <property name="sizePolicy">
@@ -521,6 +595,12 @@ Double-click on them to modify their values.</string>
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>20</height>
+                    </size>
                    </property>
                    <property name="text">
                     <string>imat</string>
@@ -540,37 +620,29 @@ Double-click on them to modify their values.</string>
                    </property>
                   </spacer>
                  </item>
-                 <item row="4" column="2" colspan="2">
-                  <spacer name="horizontalSpacer_17">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
+                 <item row="4" column="1">
+                  <widget class="QSpinBox" name="spinBox_SCARFnumCores">
+                   <property name="minimumSize">
                     <size>
-                     <width>40</width>
+                     <width>0</width>
                      <height>20</height>
                     </size>
                    </property>
-                  </spacer>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QLabel" name="label_SCARF_password">
-                   <property name="text">
-                    <string>Password:</string>
+                   <property name="minimum">
+                    <number>1</number>
+                   </property>
+                   <property name="maximum">
+                    <number>99</number>
+                   </property>
+                   <property name="value">
+                    <number>8</number>
                    </property>
                   </widget>
                  </item>
-                 <item row="2" column="1" colspan="3">
-                  <widget class="QLineEdit" name="lineEdit_SCARF_path">
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="label_23">
                    <property name="text">
-                    <string>/work/imat/test/cycle/</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_22">
-                   <property name="text">
-                    <string>Path on SCARF:</string>
+                    <string>Number of nodes:</string>
                    </property>
                   </widget>
                  </item>
@@ -590,6 +662,19 @@ Double-click on them to modify their values.</string>
                     <size>
                      <width>40</width>
                      <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item row="6" column="0" colspan="4">
+                  <spacer name="verticalSpacer">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
                     </size>
                    </property>
                   </spacer>
@@ -627,6 +712,12 @@ Double-click on them to modify their values.</string>
                  </item>
                  <item>
                   <widget class="QSpinBox" name="spinBox_localNumCores">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>10</height>
+                    </size>
+                   </property>
                    <property name="maximum">
                     <number>99</number>
                    </property>
@@ -672,16 +763,28 @@ Double-click on them to modify their values.</string>
         </item>
         <item>
          <widget class="QGroupBox" name="groupBox_2">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>230</height>
+            <height>100</height>
            </size>
           </property>
           <property name="title">
            <string>Select Folders</string>
           </property>
           <layout class="QGridLayout" name="gridLayout">
+           <property name="margin">
+            <number>3</number>
+           </property>
+           <property name="spacing">
+            <number>2</number>
+           </property>
            <item row="0" column="0">
             <widget class="QLabel" name="label_5">
              <property name="maximumSize">
@@ -783,16 +886,28 @@ Double-click on them to modify their values.</string>
         </item>
         <item>
          <widget class="QGroupBox" name="groupBox_3">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>180</height>
+            <height>100</height>
            </size>
           </property>
           <property name="title">
            <string>Run Configuration</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_2">
+           <property name="margin">
+            <number>3</number>
+           </property>
+           <property name="spacing">
+            <number>2</number>
+           </property>
            <item row="0" column="0">
             <widget class="QFrame" name="frame">
              <property name="enabled">
@@ -886,7 +1001,13 @@ Double-click on them to modify their values.</string>
              <property name="checked">
               <bool>true</bool>
              </property>
-             <layout class="QGridLayout" name="gridLayout_3">
+             <layout class="QGridLayout" name="gridLayout_3" rowstretch="0">
+              <property name="margin">
+               <number>3</number>
+              </property>
+              <property name="spacing">
+               <number>2</number>
+              </property>
               <item row="0" column="0">
                <widget class="QLabel" name="label_2">
                 <property name="text">
@@ -941,6 +1062,12 @@ Double-click on them to modify their values.</string>
            <enum>Qt::Vertical</enum>
           </property>
           <widget class="QSplitter" name="splitter_image_resource">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -952,7 +1079,27 @@ Double-click on them to modify their values.</string>
              <item row="0" column="0">
               <layout class="QGridLayout" name="gridLayout_12">
                <item row="0" column="0">
-                <widget class="QLabel" name="label_10">
+                <widget class="QLabel" name="label_image_title">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Image:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="2">
+                <widget class="QPushButton" name="pushButton_browse_image">
+                 <property name="text">
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLabel" name="label_image_name">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                    <horstretch>1</horstretch>
@@ -960,21 +1107,14 @@ Double-click on them to modify their values.</string>
                   </sizepolicy>
                  </property>
                  <property name="text">
-                  <string>Image: none</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1">
-                <widget class="QPushButton" name="pushButton_4">
-                 <property name="text">
-                  <string>Browse</string>
+                  <string>none</string>
                  </property>
                 </widget>
                </item>
               </layout>
              </item>
              <item row="1" column="0">
-              <widget class="QFrame" name="frame_6">
+              <widget class="QFrame" name="frame_image">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                  <horstretch>2</horstretch>
@@ -988,8 +1128,46 @@ Double-click on them to modify their values.</string>
                 <enum>QFrame::Raised</enum>
                </property>
                <layout class="QGridLayout" name="gridLayout_13">
+                <property name="margin">
+                 <number>3</number>
+                </property>
+                <property name="spacing">
+                 <number>2</number>
+                </property>
                 <item row="0" column="0">
-                 <widget class="QWidget" name="widget_2" native="true"/>
+                 <widget class="QScrollArea" name="scrollArea_image">
+                  <property name="widgetResizable">
+                   <bool>true</bool>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <widget class="QWidget" name="scrollAreaWidgetContents">
+                   <property name="geometry">
+                    <rect>
+                     <x>0</x>
+                     <y>0</y>
+                     <width>370</width>
+                     <height>289</height>
+                    </rect>
+                   </property>
+                   <layout class="QGridLayout" name="gridLayout_5">
+                    <property name="margin">
+                     <number>0</number>
+                    </property>
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="label_image">
+                      <property name="text">
+                       <string/>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </widget>
                 </item>
                </layout>
               </widget>
@@ -1320,6 +1498,47 @@ Double-click on them to modify their values.</string>
    </property>
   </action>
  </widget>
+ <tabstops>
+  <tabstop>lineEdit_SCARF_username</tabstop>
+  <tabstop>lineEdit_SCARF_password</tabstop>
+  <tabstop>lineEdit_SCARF_path</tabstop>
+  <tabstop>spinBox_SCARFnumNodes</tabstop>
+  <tabstop>spinBox_SCARFnumCores</tabstop>
+  <tabstop>pushButton_SCARF_login</tabstop>
+  <tabstop>lineEdit_3</tabstop>
+  <tabstop>lineEdit_4</tabstop>
+  <tabstop>lineEdit_5</tabstop>
+  <tabstop>tabWidget_comp_resource</tabstop>
+  <tabstop>btnMoveDown</tabstop>
+  <tabstop>pushButton_SCARF_logout</tabstop>
+  <tabstop>availablePluginDesc</tabstop>
+  <tabstop>btnMoveUp</tabstop>
+  <tabstop>btnTransfer</tabstop>
+  <tabstop>tabMain</tabstop>
+  <tabstop>btnRemove</tabstop>
+  <tabstop>spinBox_localNumCores</tabstop>
+  <tabstop>listAvailablePlugins</tabstop>
+  <tabstop>pushButton_fits_dir</tabstop>
+  <tabstop>treeCurrentPlugins</tabstop>
+  <tabstop>pushButton_flat_dir</tabstop>
+  <tabstop>currentPluginDesc</tabstop>
+  <tabstop>pushButton_dark_dir</tabstop>
+  <tabstop>checkBox</tabstop>
+  <tabstop>spinBox</tabstop>
+  <tabstop>groupBox_4</tabstop>
+  <tabstop>lineEdit_savu_config_file</tabstop>
+  <tabstop>pushButton_savu_config_file</tabstop>
+  <tabstop>pushButton_browse_image</tabstop>
+  <tabstop>pushButton_reconstruct</tabstop>
+  <tabstop>pushButton_13</tabstop>
+  <tabstop>comboBox_run_compute_resource</tabstop>
+  <tabstop>comboBox_run_tool</tabstop>
+  <tabstop>pushButton_run_tool_setup</tabstop>
+  <tabstop>tableWidget_run_jobs</tabstop>
+  <tabstop>pushButton_run_job_visualize</tabstop>
+  <tabstop>pushButton_run_job_cancel</tabstop>
+  <tabstop>pushButton_run_refresh</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

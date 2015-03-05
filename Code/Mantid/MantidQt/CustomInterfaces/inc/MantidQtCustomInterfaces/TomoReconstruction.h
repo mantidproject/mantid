@@ -2,8 +2,9 @@
 #define MANTIDQTCUSTOMINTERFACES_TOMORECONSTRUCTION_H_
 
 #include "ui_TomoReconstruction.h"
-#include "MantidQtAPI/UserSubWindow.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtAPI/UserSubWindow.h"
 
 class QTreeWidgetItem;
 
@@ -78,6 +79,8 @@ private slots:
   void compResourceIndexChanged(int);
   void SCARFLoginClicked();
   void SCARFLogoutClicked();
+
+  void browseImageClicked();
   void voidBrowseClicked();
 
   void menuSaveClicked();
@@ -118,6 +121,8 @@ private:
       std::vector<Mantid::API::ITableWorkspace_sptr> &currentPlugins);
 
   std::string validateCompResource(const std::string &res);
+
+  void drawImage(const Mantid::API::MatrixWorkspace_sptr &ws);
 
   void userWarning(std::string err, std::string description);
 
