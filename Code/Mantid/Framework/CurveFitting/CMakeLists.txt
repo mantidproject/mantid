@@ -68,6 +68,7 @@ set ( SRC_FILES
 	src/PRConjugateGradientMinimizer.cpp
 	src/ParDomain.cpp
 	src/PeakParametersNumeric.cpp
+	src/PeakParameterFunction.cpp
 	src/PlotPeakByLogValue.cpp
 	src/Polynomial.cpp
 	src/ProcessBackground.cpp
@@ -181,6 +182,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/ParDomain.h
 	inc/MantidCurveFitting/PeakParametersNumeric.h
+	inc/MantidCurveFitting/PeakParameterFunction.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
 	inc/MantidCurveFitting/Polynomial.h
 	inc/MantidCurveFitting/ProcessBackground.h
@@ -259,6 +261,7 @@ set ( TEST_FILES
 	FullprofPolynomialTest.h
 	FunctionDomain1DSpectrumCreatorTest.h
 	FunctionFactoryConstraintTest.h
+        FunctionParameterDecoratorFitTest.h
 	GSLMatrixTest.h
 	GausDecayTest.h
 	GausOscTest.h
@@ -266,6 +269,7 @@ set ( TEST_FILES
 	GaussianTest.h
 	GramCharlierComptonProfileTest.h
 	IkedaCarpenterPVTest.h
+        IPeakFunctionCentreParameterNameTest.h
         IPeakFunctionIntensityTest.h
 	LeBailFitTest.h
 	LeBailFunctionTest.h
@@ -283,6 +287,7 @@ set ( TEST_FILES
 	NormaliseByPeakAreaTest.h
 	PeakParametersNumericTest.h
 	PRConjugateGradientTest.h
+	PeakParameterFunctionTest.h
 	PlotPeakByLogValueTest.h
 	PolynomialTest.h
 	ProcessBackgroundTest.h

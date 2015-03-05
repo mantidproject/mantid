@@ -111,8 +111,6 @@ namespace IDA
     connect(m_uiForm.cbShape, SIGNAL(currentIndexChanged(int)), this, SLOT(shape(int)));
     connect(m_uiForm.ckUseCan, SIGNAL(toggled(bool)), this, SLOT(useCanChecked(bool)));
     connect(m_uiForm.letc1, SIGNAL(editingFinished()), this, SLOT(tcSync()));
-    connect(m_uiForm.cbSampleInputType, SIGNAL(currentIndexChanged(int)), m_uiForm.swSampleInputType, SLOT(setCurrentIndex(int)));
-    connect(m_uiForm.cbCanInputType, SIGNAL(currentIndexChanged(int)), m_uiForm.swCanInputType, SLOT(setCurrentIndex(int)));
     connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(getBeamWidthFromWorkspace(const QString&)));
 
     // Sort the fields into various lists.
