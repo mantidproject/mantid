@@ -79,7 +79,9 @@ double FunctionParameterDecorator::getParameter(const std::string &name) const {
 }
 
 size_t FunctionParameterDecorator::nParams() const {
-  throwIfNoFunctionSet();
+  if(!m_wrappedFunction) {
+      return 0;
+  }
 
   return m_wrappedFunction->nParams();
 }
@@ -147,7 +149,9 @@ size_t FunctionParameterDecorator::getParameterIndex(
 }
 
 size_t FunctionParameterDecorator::nAttributes() const {
-  throwIfNoFunctionSet();
+  if(!m_wrappedFunction) {
+      return 0;
+  }
 
   return m_wrappedFunction->nAttributes();
 }

@@ -328,17 +328,17 @@ class ReductionWrapper(object):
             return mtd[out_ws_name]
        else:
 # --------### reduce list of runs one by one ----------------------------###
-         runs = PropertyManager.sample_run.get_run_list()
+         runfiles = PropertyManager.sample_run.get_run_file_list()
          if out_ws_name is None:
-            for run in runs:
-                 self.reduce(run)
+            for file in runfiles:
+                 self.reduce(file)
             #end
             return None
          else:
             results=[]
-            nruns = len(runs)
-            for num,run in enumerate(runs):
-                 red_ws=self.reduce(run)
+            nruns = len(runfiles)
+            for num,file in enumerate(runfiles):
+                 red_ws=self.reduce(file)
                  if nruns >1:
                     out_name = out_ws_name+'#{0}of{1}'.format(num+1,nruns)
                     RenameWorkspace(InputWorkspace=red_ws,OutputWorkspace=out_name)

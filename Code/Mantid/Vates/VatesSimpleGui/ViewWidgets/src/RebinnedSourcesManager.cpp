@@ -28,12 +28,12 @@
 #include <vtkSMInputProperty.h>
 #include <vtkSMProxyProperty.h>
 #include <vtkSMProxyListDomain.h>
-#include <QList>
+
 
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1170
 #endif
-
+#include <QList>
 #include "boost/shared_ptr.hpp"
 #include <Poco/ActiveResult.h>
 
@@ -510,9 +510,8 @@ namespace Mantid
         {
           vtkSMProxy* proxy1 = NULL;
           proxy1 = filter1->getProxy();
-          pqPipelineFilter* newFilter = NULL;
           pqPipelineSource* newPipelineElement = NULL;
-
+          pqPipelineFilter* newFilter = NULL;
           // Move source2 to its end.
           while (endOfSource2Pipeline->getNumberOfConsumers() > 0)
           {
