@@ -107,10 +107,10 @@ void ChebfunBase::calcX() {
   }
   const double x0 = (m_start + m_end) / 2;
   const double b = (m_end - m_start) / 2;
-  const double pin = M_PI / m_n;
+  const double pin = M_PI / double(m_n);
   for (size_t i = 0; i <= m_n; ++i) {
     size_t j = m_n - i;
-    m_x[i] = x0 + b * cos(j * pin);
+    m_x[i] = x0 + b * cos(double(j) * pin);
   }
 }
 
@@ -134,9 +134,9 @@ void ChebfunBase::calcIntegrationWeights() const {
   for (size_t i = 0; i < n; ++i) {
     double b = 0.0;
     for (size_t j = 0; j < n; ++j) {
-      b += w[j] * cos(M_PI * i * j / m_n);
+      b += w[j] * cos(M_PI * double(i * j) / double(m_n));
     }
-    b /= m_n;
+    b /= double(m_n);
     if (i > 0 && i != m_n) {
       b *= 2;
     }
@@ -296,9 +296,9 @@ void ChebfunBase::derivative(const std::vector<double> &a,
   }
   aout.resize(m_n + 1);
   aout.back() = 0.0;
-  aout[m_n - 1] = 2.0 * m_n * a.back();
+  aout[m_n - 1] = 2.0 * double(m_n) * a.back();
   for (size_t k = m_n - 1; k > 1; --k) {
-    aout[k - 1] = aout[k + 1] + 2.0 * k * a[k];
+    aout[k - 1] = aout[k + 1] + 2.0 * double(k) * a[k];
   }
   if (m_n > 2) {
     aout.front() = aout[2] / 2 + a[1];
@@ -324,10 +324,10 @@ ChebfunBase_sptr ChebfunBase::integral(const std::vector<double> &a,
   aout.resize(m_n + 2);
   aout.front() = 0.0;
   for (size_t k = 1; k < m_n; ++k) {
-    aout[k] = (a[k - 1] - a[k + 1]) / (2 * k);
+    aout[k] = (a[k - 1] - a[k + 1]) / double(2 * k);
   }
-  aout[m_n] = a[m_n - 1] / (2 * m_n);
-  aout[m_n + 1] = a[m_n] / (2 * (m_n + 1));
+  aout[m_n] = a[m_n - 1] / double(2 * m_n);
+  aout[m_n + 1] = a[m_n] / double(2 * (m_n + 1));
   double d = (m_end - m_start) / 2;
   std::transform(aout.begin(), aout.end(), aout.begin(),
                  std::bind(std::multiplies<double>(), _1, d));
@@ -462,7 +462,7 @@ ChebfunBase_sptr ChebfunBase::bestFit(double start, double end,
 std::vector<double> ChebfunBase::linspace(size_t n) const {
   std::vector<double> space(n);
   double x = m_start;
-  const double dx = width() / (n - 1);
+  const double dx = width() / double(n - 1);
   for (auto s = space.begin(); s != space.end(); ++s) {
     *s = x;
     x += dx;
@@ -520,7 +520,7 @@ std::vector<double> ChebfunBase::calcA(const std::vector<double> &p) const {
 
     HalfComplex fc(&tmp[0], tmp.size());
     for (size_t i = 0; i < nn; ++i) {
-      a[i] = fc.real(i) / m_n;
+      a[i] = fc.real(i) / double(m_n);
     }
     a[0] /= 2;
     a[m_n] /= 2;
