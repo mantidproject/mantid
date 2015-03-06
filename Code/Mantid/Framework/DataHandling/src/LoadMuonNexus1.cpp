@@ -129,6 +129,30 @@ void LoadMuonNexus1::exec() {
 
   // Call private method to validate the optional parameters, if set
   checkOptionalProperties();
+  // Calculate the size of a workspace, given its number of periods & spectra to
+  // read
+  int64_t total_specs;
+  if (m_interval || m_list) {
+    // Remove from list possible duplicate specs
+    for (auto it=m_spec_list.begin(); it!=m_spec_list.end(); ) {
+      if ( (*it>=m_spec_min) && (*it<=m_spec_max) ) {
+        it = m_spec_list.erase(it);
+      } else {
+        ++it;
+      }
+    }
+    total_specs = m_spec_list.size();
+    if (m_interval) {
+      total_specs += (m_spec_max - m_spec_min + 1);
+      m_spec_max += 1;
+    }
+  } else {
+    total_specs = m_numberOfSpectra;
+    // for nexus return all spectra
+    m_spec_min = 1;
+    m_spec_max = m_numberOfSpectra+1; // Add +1 to iterate
+  }
+
 
   Workspace_sptr loadedGrouping;
 
@@ -157,30 +181,6 @@ void LoadMuonNexus1::exec() {
   const int channelsPerSpectrum = nxload.t_ntc1;
   // Read in the time bin boundaries
   const int lengthIn = channelsPerSpectrum + 1;
-
-  // Calculate the size of a workspace, given its number of periods & spectra to
-  // read
-  int64_t total_specs;
-  if (m_interval || m_list) {
-    // Remove from list possible duplicate specs
-    for (auto it=m_spec_list.begin(); it!=m_spec_list.end(); ) {
-      if ( (*it>=m_spec_min) && (*it<=m_spec_max) ) {
-        it = m_spec_list.erase(it);
-      } else {
-        ++it;
-      }
-    }
-    total_specs = m_spec_list.size();
-    if (m_interval) {
-      total_specs += (m_spec_max - m_spec_min + 1);
-      m_spec_max += 1;
-    }
-  } else {
-    total_specs = m_numberOfSpectra;
-    // for nexus return all spectra
-    m_spec_min = 1;
-    m_spec_max = m_numberOfSpectra+1; // Add +1 to iterate
-  }
 
   // Try to load dead time info
   loadDeadTimes(root);
