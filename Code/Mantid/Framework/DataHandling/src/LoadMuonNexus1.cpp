@@ -406,8 +406,25 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
 
     int numGroupingEntries = groupingData.dim0();
 
+    std::vector<int> specToLoad;
     std::vector<int> grouping;
-    grouping.reserve(numGroupingEntries);
+
+    // Set the spectrum list that should be loaded
+    if ( m_interval || m_list ) {
+      // Load only selected spectra
+      for (int64_t i=m_spec_min; i<m_spec_max; i++) {
+        specToLoad.push_back(static_cast<int>(i));
+      }
+      for (auto it=m_spec_list.begin(); it!=m_spec_list.end(); ++it) {
+        specToLoad.push_back(*it);
+      }
+    } else {
+      // Load all the spectra
+      // Start from 1 to N+1 to be consistent with 
+      // the case where spectra are specified
+      for (int i=1; i<m_numberOfSpectra+1; i++)
+        specToLoad.push_back(i);
+    }
 
     for (int i = 0; i < numGroupingEntries; i++)
       grouping.push_back(groupingData[i]);
