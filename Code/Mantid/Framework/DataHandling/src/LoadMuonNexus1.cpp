@@ -463,6 +463,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
         for (int i=0; i<m_numberOfPeriods; i++) {
 
           // Get the grouping
+          grouping.clear();
           for (auto it=specToLoad.begin(); it!=specToLoad.end(); ++it) {
             int index = *it - 1 + i * static_cast<int>(m_numberOfSpectra);
             grouping.push_back(groupingData[index]);
