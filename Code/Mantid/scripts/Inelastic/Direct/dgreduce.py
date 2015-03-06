@@ -240,10 +240,10 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
 
     if sample_run:
         Reducer.sample_run = sample_run
+
     try:
         n,r=funcreturns.lhs_info('both')
         results_name=r[0]
-
     except:
         results_name = Reducer.prop_man.get_sample_ws_name()
     if wb_for_run == wb_for_monovanadium: # wb_for_monovanadium property does not accept duplicated workspace

@@ -186,9 +186,12 @@ Property *loadProperty(::NeXus::File *file, const std::string &group) {
     break;
   }
 
-  try {
-    file->getAttr("units", unitsStr);
-  } catch (::NeXus::Exception &) {
+  if(file->hasAttr("units"))
+  {
+    try {
+      file->getAttr("units", unitsStr);
+    } catch (::NeXus::Exception &) {
+    }
   }
   file->closeData();
   file->closeGroup();

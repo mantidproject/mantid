@@ -100,7 +100,7 @@ protected:
   void exec();
 
 private:
-  void loadData(const MantidVecPtr::ptr_type &tcbs, size_t hist, specid_t &i,
+  void loadData(size_t hist, specid_t &i, specid_t specNo, 
                 MuonNexusReader &nxload, const int64_t lengthIn,
                 DataObjects::Workspace2D_sptr localWorkspace);
   void runLoadMappingTable(DataObjects::Workspace2D_sptr);
@@ -112,8 +112,7 @@ private:
 
   /// Creates Dead Time Table using all the data between begin and end
   DataObjects::TableWorkspace_sptr
-  createDeadTimeTable(std::vector<double>::const_iterator begin,
-                      std::vector<double>::const_iterator end);
+  createDeadTimeTable(std::vector<int> specToLoad, std::vector<double> deadTimes);
 
   /// Loads detector grouping information
   API::Workspace_sptr loadDetectorGrouping(Mantid::NeXus::NXRoot &root);

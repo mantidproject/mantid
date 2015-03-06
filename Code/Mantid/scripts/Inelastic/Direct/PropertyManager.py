@@ -237,6 +237,10 @@ class PropertyManager(NonIDF_Properties):
                                                   NonIDF_Properties.monovan_run)
     # property responsible for summing runs
     sum_runs = SumRuns(NonIDF_Properties.sample_run)
+    # properties responsible for rotation angle
+    motor_log_names= MotorLogName()
+    motor_offset   = MotorOffset()
+    psi = RotationAngle(motor_log_names,motor_offset)
 #----------------------------------------------------------------------------------------------------------------
     def getChangedProperties(self):
         """ method returns set of the properties changed from defaults """
