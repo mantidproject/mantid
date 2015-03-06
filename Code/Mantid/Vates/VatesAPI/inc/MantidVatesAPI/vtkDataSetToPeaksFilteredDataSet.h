@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidVatesAPI/ProgressAction.h"
 #include <string>
 
 class vtkUnstructuredGrid;
@@ -45,18 +46,24 @@ namespace VATES
       vtkDataSetToPeaksFilteredDataSet(vtkUnstructuredGrid *input, vtkUnstructuredGrid *output);
       virtual ~vtkDataSetToPeaksFilteredDataSet();
       /// Set the name of the peaks workspace
-      void initialize(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, double radiusNoShape, int radiusType);
+      void initialize(std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces, double radiusNoShape, int radiusType);
       /// Apply the peak filtering
-      void execute();
+      void execute(ProgressAction& progressUpdating);
+      /// Get radius of no shape
+      double vtkDataSetToPeaksFilteredDataSet::getRadiusNoShape();
+      /// Get radius factor
+      double getRadiusFactor();
     private:
       vtkDataSetToPeaksFilteredDataSet& operator=(const vtkDataSetToPeaksFilteredDataSet& other);
-      std::vector<std::pair<Mantid::Kernel::V3D, double>> getPeaksInfo();
+      std::vector<std::pair<Mantid::Kernel::V3D, double>> getPeaksInfo(std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces);
+      void addSinglePeak(Mantid::API::IPeak* peak, const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem, std::vector<std::pair<Mantid::Kernel::V3D, double>>& peaksInfo,  size_t index);
       vtkUnstructuredGrid *m_inputData; ///< Data to peak filter
       vtkUnstructuredGrid *m_outputData; ///< Peak filtered data
-      Mantid::API::IPeaksWorkspace_sptr m_peaksWorkspace; ///< The name of the peaks workspace.
+      std::vector<Mantid::API::IPeaksWorkspace_sptr> m_peaksWorkspaces; ///< A list of peaks workspace names.
       bool m_isInitialised; ///<Flag if the filter is initialized
       double m_radiusNoShape; ///< The radius for peaks with no peak shape.
       int m_radiusType;
+      double m_radiusFactor;///< By how much we want to trim the data set.
   };
 }
 }

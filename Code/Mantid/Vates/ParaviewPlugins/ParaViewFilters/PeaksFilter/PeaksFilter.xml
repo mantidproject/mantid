@@ -13,7 +13,7 @@
           <DataType value="vtkUnstructuredGrid"/>
         </DataTypeDomain>
       </InputProperty>
-	  <StringVectorProperty name="PeaksWorkspace" command="SetPeaksWorkspace" number_of_elements="1"/>
+	  <StringVectorProperty name="PeaksWorkspace" command="SetPeaksWorkspace" number_of_elements="1" panel_visibility="never"/>
     <DoubleVectorProperty name="RadiusNoShape" command="SetRadiusNoShape" number_of_elements="1" default_values="0.5">
       <DoubleRangeDomain name="range" min="0.001" max="10" />
       <Documentation>
@@ -30,6 +30,10 @@
         Set the radius type.
       </Documentation>
     </IntVectorProperty>
+    <StringVectorProperty name="Delimiter" command="SetDelimiter" number_of_elements="1" panel_visibility="never"/>
+	<DoubleVectorProperty name="MinValue"	command="GetMinValue" information_only="1"/>
+    <DoubleVectorProperty name="MaxValue" command="GetMaxValue" information_only="1"/>
+	<StringVectorProperty name="Instrument" command="GetInstrument" number_of_elements="1" information_only="1"/>
     </SourceProxy>
   </ProxyGroup>
   <!-- End ScaleWorkspace -->

@@ -1,5 +1,6 @@
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
 #include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/vtkEllipsoidTransformer.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -27,6 +28,7 @@
 #include <vtkPVGlyphFilter.h>
 #include <vtkSmartPointer.h>
 
+#include <vtkLineSource.h>
 #include <cmath>
 
 using Mantid::API::IPeaksWorkspace;
@@ -121,8 +123,9 @@ namespace VATES
    // Acquire a scoped read-only lock to the workspace (prevent segfault from algos modifying ws)
     Mantid::Kernel::ReadLock lock(*m_workspace);
 
-    const int resolution = 6;
+    vtkEllipsoidTransformer ellipsoidTransformer;
 
+    const int resolution = 8;
     double progressFactor = 1.0/double(numPeaks);
 
     vtkAppendPolyData* appendFilter = vtkAppendPolyData::New();
@@ -142,7 +145,7 @@ namespace VATES
 
       // What we'll return
       vtkUnstructuredGrid *peakDataSet = vtkUnstructuredGrid::New();
-      peakDataSet->Allocate(numPeaks);
+      peakDataSet->Allocate(1);
       peakDataSet->SetPoints(peakPoint);
       peakDataSet->GetCellData()->SetScalars(peakSignal);
 
@@ -181,6 +184,12 @@ namespace VATES
       peakPoint->Squeeze();
       peakDataSet->Squeeze();
 
+      //TEST ARENA ..............
+      double testRadius;
+      Mantid::Kernel::V3D mainAxis;
+      std::string json;
+      // TESTARENA ...............
+
       // Add a glyph and append to the appendFilter
       const Mantid::Geometry::PeakShape& shape = m_workspace->getPeakPtr(i)->getPeakShape();
       std::string name = shape.shapeName();
@@ -199,10 +208,35 @@ namespace VATES
       else if (shape.shapeName() == Mantid::DataObjects::PeakShapeEllipsoid::ellipsoidShapeName())
       {
         const Mantid::DataObjects::PeakShapeEllipsoid& ellipticalShape = dynamic_cast<const Mantid::DataObjects::PeakShapeEllipsoid&>(shape);
-
         std::vector<double> radii = ellipticalShape.abcRadii();
-        std::vector<Mantid::Kernel::V3D> directions = ellipticalShape.directions();
-
+        std::vector<Mantid::Kernel::V3D> directions;
+        testRadius = radii[0];
+        json = ellipticalShape.toJSON();
+        switch (m_dimensionToShow)
+        {
+          case Peak_in_Q_lab:
+            directions = ellipticalShape.directions();
+            break;
+          case Peak_in_Q_sample:
+          {
+            Mantid::Kernel::Matrix<double> goniometerMatrix = peak.getGoniometerMatrix();
+            if (goniometerMatrix.Invert())
+            {
+              directions = ellipticalShape.getDirectionInSpecificFrame(goniometerMatrix);
+            }
+            else
+            {
+              directions = ellipticalShape.directions();
+            }
+          }
+          break;
+        case Peak_in_HKL:
+          directions = ellipticalShape.directions();
+          break;
+        default:
+          directions = ellipticalShape.directions();
+        }
+#if 1
         vtkParametricEllipsoid* ellipsoid = vtkParametricEllipsoid::New();
         ellipsoid->SetXRadius(radii[0]);
         ellipsoid->SetYRadius(radii[1]);
@@ -214,16 +248,19 @@ namespace VATES
         ellipsoidSource->SetVResolution(resolution);
         ellipsoidSource->SetWResolution(resolution);
         ellipsoidSource->Update();
-
-#if 0
-        vtkTransform* transform = vtkTransform::New();
-        const double rotationDegrees = 0;
-        transform->RotateX(rotationDegrees);
-        transform->RotateY(rotationDegrees);
-        transform->RotateZ(rotationDegrees);
 #else
-        vtkSmartPointer<vtkTransform> transform = createEllipsoidTransform(directions);
+        vtkLineSource* ellipsoidSource = vtkLineSource::New();
+        double point1[3] = {0,0,0};
+        double point2[3] = {radii[0], 0, 0};
+
+        testRadius= radii[0];
+        mainAxis = directions[0];
+
+        ellipsoidSource->SetPoint1(point1);
+        ellipsoidSource->SetPoint2(point2);
 #endif
+        vtkSmartPointer<vtkTransform> transform = ellipsoidTransformer.generateTransform(directions);
+
         vtkTransformPolyDataFilter* transformFilter = vtkTransformPolyDataFilter::New();
         transformFilter->SetTransform(transform);
         transformFilter->SetInputConnection(ellipsoidSource->GetOutputPort());
@@ -255,70 +292,48 @@ namespace VATES
       glyphFilter->Update();
       vtkPolyData *glyphed = glyphFilter->GetOutput();
 
+      // TEST ARENA
+      double p1[3] = {0.0,0.0,0.0};
+      double p2[3] = {0.0,0.0,0.0};
+      glyphed->GetPoint(0, p1);
+      glyphed->GetPoint(1, p2);
+
+      // Evaluate the output
+      double corr1[3];
+      double corr2[3];
+      for (int j = 0; j < 3; j++)
+      {
+        corr1[j] = 0;
+        corr2[j] = (p2[j] -p1[j])/testRadius;
+      }
+      
+      bool isEqual = true;
+      const double tol = 1e-6;
+      for (int j = 0; j < 3; j++)
+      {
+         double diff = abs(corr2[j] - mainAxis[j]);
+         if (diff > tol)
+         {
+           isEqual = false;
+         }
+      }
+
+      if (!isEqual)
+      {
+        int a= 1;
+      }
+      // TEST ARENA END
       appendFilter->AddInputData(glyphed);
     } // for each peak
 
     appendFilter->Update();
     vtkPolyData* polyData = appendFilter->GetOutput();
+
     return polyData;
   }
 
   vtkPeakMarkerFactory::~vtkPeakMarkerFactory()
   {
-  }
-
-  /**
-   * Generates a transform based on the directions of the ellipsoid
-   * @param directions The directions of the ellipsoid.
-   * @returns A transform for the ellipsoid.
-   */
-  vtkSmartPointer<vtkTransform> vtkPeakMarkerFactory::createEllipsoidTransform(std::vector<Mantid::Kernel::V3D> directions) const
-  {
-    // The original ellipsoid is oriented along the y axis
-    Mantid::Kernel::V3D principalAxisOriginal(0.0, 1.0, 0.0);
-    Mantid::Kernel::V3D principalAxisTransformed(directions[0]);
-    Mantid::Kernel::V3D minorAxisOriginal(1.0, 0.0, 0.0);
-    Mantid::Kernel::V3D minorAxisTransformed(directions[1]);
-
-    // Compute the axis of rotation. This is the normal between the original and the transformed direction
-    Mantid::Kernel::V3D rotationAxis1 = principalAxisOriginal.cross_prod(principalAxisTransformed);
-    // Compute the angle of rotation, i.e. the angle between the original and the transformed axis.
-    double angle1 = acos(principalAxisOriginal.scalar_prod(principalAxisTransformed));
-
-    // After the prinicpal axis is rotated into its right position we need to rotate the (rotated) minor axis
-    // into its right position. The rotation axis is given by the new prinicipal rotation axis
-    Mantid::Kernel::V3D minorAxisOriginalRotated(rotateVector(minorAxisOriginal, rotationAxis1, angle1));
-
-    Mantid::Kernel::V3D rotationAxis2(principalAxisTransformed);
-    double angle2 = acos(minorAxisOriginalRotated.scalar_prod(minorAxisTransformed));
-
-    vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
-
-    double angle1Degree = angle1*180/3.1415;
-    double angle2Degree = angle2*180/3.1415;
-    transform->RotateWXYZ(angle1Degree, rotationAxis1[0], rotationAxis1[1], rotationAxis1[2]);
-    transform->RotateWXYZ(angle2Degree, rotationAxis2[0], rotationAxis2[1], rotationAxis2[2]);
-
-    return transform;
-  }
-
-  /**
-   * Rotate the a given vector around a specified axis by a specified angle. See http://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
-   * @param original The original vector
-   * @param rotationAxis The axis around which to rotate.
-   * @param angle The rotation angle.
-   * @returns The rotated vector.
-   */
-  Mantid::Kernel::V3D vtkPeakMarkerFactory::rotateVector(Mantid::Kernel::V3D original, Mantid::Kernel::V3D rotationAxis, double angle) const
-  {
-    Mantid::Kernel::V3D cross(rotationAxis.cross_prod(original));
-    double scalar = rotationAxis.scalar_prod(original);
-    double cos = std::cos(angle);
-    double sin = std::sin(angle);
-
-    Mantid::Kernel::V3D rotated = original*cos + cross*sin + rotationAxis*(scalar)*(1-cos);
-
-    return rotated;
   }
 }
 }

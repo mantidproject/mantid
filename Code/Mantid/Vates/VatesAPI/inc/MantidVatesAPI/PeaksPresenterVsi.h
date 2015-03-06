@@ -26,6 +26,9 @@ class DLLExport PeaksPresenterVsi
     virtual void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row,
                               Mantid::Kernel::V3D& position, double& radius) = 0;
 };
+
+typedef boost::shared_ptr<PeaksPresenterVsi> PeaksPresenterVsi_sptr;
+typedef boost::shared_ptr<const PeaksPresenterVsi> PeaksPresenterVsi_const_sptr;
 }
 }
 #endif

@@ -15,6 +15,7 @@
 #include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidDataObjects/NoShape.h"
 #include "MantidKernel/V3D.h"
 #include "MockObjects.h"
 #include <gmock/gmock.h>
@@ -71,7 +72,7 @@ public:
   static vtkDataSetToPeaksFilteredDataSetTest *createSuite() { return new vtkDataSetToPeaksFilteredDataSetTest(); }
   static void destroySuite( vtkDataSetToPeaksFilteredDataSetTest *suite ) { delete suite; }
 
-  void do_test_peak_inSphere(vtkPoints* points,int numberOfPoints, double radius, Mantid::Kernel::V3D position, int& inside, int& outside, bool testingOutput)
+  void do_test_peak_inSphere(vtkPoints* points,int numberOfPoints, double radius, Mantid::Kernel::V3D position, int& inside, int& outside, bool testingOutput, double radiusFactor)
   {
     for (int i = 0; i < numberOfPoints; i++)
     {
@@ -85,7 +86,7 @@ public:
         diffSquared += (position[k]-point[k])*(position[k]-point[k]);
       }
 
-      bool isInSphere = ((radius*radius - diffSquared) >= 0) ? true : false;
+      bool isInSphere = ((radius*radius*radiusFactor*radiusFactor - diffSquared) >= 0) ? true : false;
       isInSphere ? (inside++) : (outside++);
 
       // We expect only for the output, that all points are within the sphere
@@ -96,21 +97,24 @@ public:
     }
   }
 
-  void do_test_peaks(vtkUnstructuredGrid* in, vtkUnstructuredGrid* out, Mantid::Kernel::V3D position, double radius)
+  void do_test_peaks(vtkUnstructuredGrid* in, vtkUnstructuredGrid* out, Mantid::Kernel::V3D position, double radius, double radiusFactor)
   {
     vtkPoints* inPoints = in->GetPoints();
     vtkPoints* outPoints = out->GetPoints();
-
+    
     int numberOfInPoints = inPoints->GetNumberOfPoints();
     int numberOfOutPoints = outPoints->GetNumberOfPoints();
 
+    int numCellsIn = in->GetNumberOfCells();
+    int numCellsOut = out->GetNumberOfCells();
+
     int insideSphereInput = 0;
     int outsideSphereInput = 0;
-    do_test_peak_inSphere(inPoints, numberOfInPoints, radius, position, insideSphereInput , outsideSphereInput, false);
+    do_test_peak_inSphere(inPoints, numberOfInPoints, radius, position, insideSphereInput , outsideSphereInput, false, radiusFactor);
 
     int insideSphereOutput = 0;
     int outsideSphereOutput = 0;
-    do_test_peak_inSphere(outPoints, numberOfOutPoints, radius, position, insideSphereOutput , outsideSphereOutput, true);
+    do_test_peak_inSphere(outPoints, numberOfOutPoints, radius, position, insideSphereOutput , outsideSphereOutput, true, radiusFactor);
 
     TSM_ASSERT("The number of elements inside the sphere should be the same for input and output.", insideSphereInput == insideSphereOutput);
   }
@@ -143,12 +147,16 @@ public:
     boost::shared_ptr<MockPeaksWorkspace> pw_ptr(new MockPeaksWorkspace());
     MockPeaksWorkspace & pw = *pw_ptr;
 
-    EXPECT_CALL(pw, getNumberPeaks()).WillOnce(Return(1));
+    EXPECT_CALL(pw, getNumberPeaks()).Times(2).WillRepeatedly(Return(1));
     EXPECT_CALL(pw, getPeak(_)).WillOnce(ReturnRef(peak));
     EXPECT_CALL(pw, getSpecialCoordinateSystem()).WillOnce(Return(coordinateSystem));
 
-    peaksFilter.initialize(pw_ptr, 0.5, 0);
-    TSM_ASSERT_THROWS_NOTHING("Should execute regularly.", peaksFilter.execute());
+    std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksContainer;
+    peaksContainer.push_back(pw_ptr);
+
+    peaksFilter.initialize(peaksContainer, 0.5, 0);
+    FakeProgressAction updateProgress;
+    TSM_ASSERT_THROWS_NOTHING("Should execute regularly.", peaksFilter.execute(updateProgress));
   }
 
   void testThrowIfInputNull()
@@ -170,7 +178,8 @@ public:
     vtkUnstructuredGrid *in = vtkUnstructuredGrid::New();
     vtkUnstructuredGrid *out = vtkUnstructuredGrid::New();
     vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out);
-    TS_ASSERT_THROWS(peaksFilter.execute(), std::runtime_error);
+    FakeProgressAction updateProgress;
+    TS_ASSERT_THROWS(peaksFilter.execute(updateProgress), std::runtime_error);
   }
 
   void testExecutionWithSingleSphericalPeakInQSample()
@@ -181,7 +190,9 @@ public:
     vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out);
 
     Mantid::Kernel::V3D coordinate(0,0,0);
-    double peakRadius = 10;
+    // Note that the peak radius is not a 1-1 measure for which peaks will be culled and which not. 
+    // The actual radius is multiplied by the radius factor.
+    double peakRadius = 5;
     Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = Mantid::Kernel::SpecialCoordinateSystem::QSample;
     Mantid::Geometry::PeakShape_sptr shape(new Mantid::DataObjects::PeakShapeSpherical(peakRadius, coordinateSystem, "test", 1));
     MockPeak peak;
@@ -191,7 +202,7 @@ public:
     do_test_execute(peaksFilter, peak, coordinate, coordinateSystem);
 
     // Assert
-    do_test_peaks(in, out, coordinate, peakRadius);
+    do_test_peaks(in, out, coordinate, peakRadius, peaksFilter.getRadiusFactor());
 
     in->Delete();
     out->Delete();
@@ -205,11 +216,11 @@ public:
     vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out);
 
     Mantid::Kernel::V3D coordinate(0,0,0);
-    double peakRadiusMax = 10;
+    double peakRadiusMax = 7;
     std::vector<double> radii;
     radii.push_back(peakRadiusMax);
-    radii.push_back(9);
     radii.push_back(6);
+    radii.push_back(5);
 
     std::vector<Mantid::Kernel::V3D> directions;
     directions.push_back(Mantid::Kernel::V3D(0.0,1.0,0.0));
@@ -225,17 +236,35 @@ public:
     do_test_execute(peaksFilter, peak, coordinate, coordinateSystem);
 
     // Assert
-    do_test_peaks(in, out, coordinate, peakRadiusMax);
+    do_test_peaks(in, out, coordinate, peakRadiusMax, peaksFilter.getRadiusFactor());
 
     in->Delete();
     out->Delete();
   }
 
-  void testJsonMetadataExtractionFromScaledDataSet()
+  void testExecutionWithSingleNoShapePeakInQSample()
   {
+    // Arrange
+    vtkUnstructuredGrid *in = makeSplatterSourceGrid();
+    vtkUnstructuredGrid *out = vtkUnstructuredGrid::New();
+    vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out);
 
+    Mantid::Kernel::V3D coordinate(0,0,0);
+
+    Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = Mantid::Kernel::SpecialCoordinateSystem::QSample;
+    double radius = peaksFilter.getRadiusNoShape();
+    Mantid::Geometry::PeakShape_sptr shape(new Mantid::DataObjects::NoShape());
+    MockPeak peak;
+    peak.setPeakShape(shape);
+
+    // Act
+    do_test_execute(peaksFilter, peak, coordinate, coordinateSystem);
+
+    // Assert
+    do_test_peaks(in, out, coordinate, radius, peaksFilter.getRadiusFactor());
+
+    in->Delete();
+    out->Delete();
   }
 };
-
-
 #endif

@@ -12,8 +12,9 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
   inc/MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h
-  inc/MantidVatesSimpleGuiViewWidgets/PeakViewerVsi.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h
   inc/MantidVatesSimpleGuiViewWidgets/PeaksWidget.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h
   inc/MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
@@ -34,7 +35,8 @@ set( SOURCE_FILES
   src/MdViewerWidget.cpp
   src/MultisliceView.cpp
   src/RebinAlgorithmDialogProvider.cpp
-  src/PeakViewerVsi.cpp
+  src/PeaksTableControllerVsi.cpp
+  src/PeaksTabWidget.cpp
   src/PeaksWidget.cpp
   src/SaveScreenshotReaction.cpp
   src/RebinnedSourcesManager.cpp
@@ -55,8 +57,9 @@ qt4_wrap_cpp( MOC_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
-  inc/MantidVatesSimpleGuiViewWidgets/PeakViewerVsi.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h
   inc/MantidVatesSimpleGuiViewWidgets/PeaksWidget.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h
   inc/MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
@@ -73,6 +76,7 @@ qt4_wrap_ui( UI_BUILT_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.ui
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.ui
   inc/MantidVatesSimpleGuiViewWidgets/PeaksWidget.ui
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.ui
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.ui
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.ui
   inc/MantidVatesSimpleGuiViewWidgets/ThreesliceView.ui

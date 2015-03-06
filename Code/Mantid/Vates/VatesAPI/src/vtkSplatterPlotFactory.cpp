@@ -9,6 +9,12 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/Common.h"
+#include "MantidVatesAPI/MetadataToFieldData.h"
+#include "MantidVatesAPI/FieldDataToMetadata.h"
+#include "MantidVatesAPI/MetaDataExtractorUtils.h"
+#include "MantidVatesAPI/MetadataJsonManager.h"
+#include "MantidVatesAPI/VatesConfigurations.h"
+#include "MantidVatesAPI/VatesXMLDefinitions.h"
 
 #include <vtkCellData.h>
 #include <vtkFloatArray.h>
@@ -59,7 +65,9 @@ namespace VATES
   m_buildSortedList(true), m_wsName(""), dataSet(NULL),
   slice(false), sliceMask(NULL), sliceImplicitFunction(NULL),
   m_time(0.0),
-  m_metaDataExtractor(new MetaDataExtractorUtils())
+  m_metaDataExtractor(new MetaDataExtractorUtils()),
+  m_metadataJsonManager(new MetadataJsonManager()),
+  m_vatesConfigurations(new VatesConfigurations())
   {
   }
 
@@ -576,6 +584,9 @@ namespace VATES
       delete this->sliceImplicitFunction;
     }
 
+    // Add metadata in json format
+    this->addMetadata();
+
     // The macro does not allow return calls, so we used a member variable.
     return this->dataSet;
   }
@@ -617,6 +628,65 @@ namespace VATES
       throw std::runtime_error("Workspace is neither an IMDHistoWorkspace nor an IMDEventWorkspace.");
     }
   }
+
+  /**
+   * Add meta data to the visual data set.
+   */ 
+  void vtkSplatterPlotFactory::addMetadata() const {
+    const double defaultValue = 0.1;
+
+    if (this->dataSet)
+    {
+      double* range = NULL;
+      range = dataSet->GetScalarRange();
+
+      if (range)
+      {
+        m_minValue = range[0];
+        m_maxValue = range[1];
+      }
+      else
+      {
+        m_minValue = defaultValue;
+        m_maxValue = defaultValue;
+      }
+
+      m_metadataJsonManager->setMinValue(m_minValue);
+      m_metadataJsonManager->setMaxValue(m_maxValue);
+      m_metadataJsonManager->setInstrument(m_metaDataExtractor->extractInstrument(m_workspace));
+
+      // Append metadata
+      std::string jsonString = m_metadataJsonManager->getSerializedJson();
+      vtkFieldData* outputFD = vtkFieldData::New();
+
+      //Add metadata to dataset.
+      MetadataToFieldData convert;
+      convert(outputFD, jsonString, m_vatesConfigurations->getMetadataIdJson().c_str());
+      dataSet->SetFieldData(outputFD);
+
+      outputFD->Delete();
+    } 
+  }
+
+  /**
+  * Write the xml metadata from the underlying source into the vktArray of the 
+  * @param fieldData The field data from the underlying source
+  * @param dataSet The splatterplot data set.
+  */
+  void vtkSplatterPlotFactory::setMetadata(vtkFieldData* fieldData, vtkDataSet* dataSet) {
+    // Extract the xml-metadata part of the fieldData and the json-metadata from the dataset
+    FieldDataToMetadata convertFtoM;
+    std::string xmlString = convertFtoM(fieldData, XMLDefinitions::metaDataId());
+    std::string jsonString = convertFtoM(dataSet->GetFieldData(), m_vatesConfigurations->getMetadataIdJson().c_str());
+
+    // Create a new field data array 
+    MetadataToFieldData convertMtoF;
+    vtkFieldData* outputFD = vtkFieldData::New();
+    convertMtoF(outputFD, xmlString, XMLDefinitions::metaDataId().c_str());
+    convertMtoF(outputFD, jsonString, m_vatesConfigurations->getMetadataIdJson().c_str());
+    dataSet->SetFieldData(outputFD);
+    outputFD->Delete();
+ }
 
   /**
    * Sets the number of points to show

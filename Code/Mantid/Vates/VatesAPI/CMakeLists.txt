@@ -6,6 +6,7 @@ project( VatesAPI )
 set( SRC_FILES 
 src/ADSWorkspaceProvider.cpp
 src/Common.cpp
+src/CompositePeaksPresenterVsi.cpp
 src/ConcretePeaksPresenterVsi.cpp
 src/DimensionPresenter.cpp
 src/EventNexusLoadingPresenter.cpp
@@ -42,6 +43,7 @@ src/vtkDataSetToPeaksFilteredDataSet.cpp
 src/vtkDataSetToScaledDataSet.cpp
 src/vtkDataSetToWsName.cpp
 src/vtkDataSetToWsLocation.cpp
+src/vtkEllipsoidTransformer.cpp
 src/vtkMDLineFactory.cpp
 src/vtkMDQuadFactory.cpp
 src/vtkNullUnstructuredGrid.cpp
@@ -52,12 +54,14 @@ src/vtkMDHistoHexFactory.cpp
 src/vtkMDHistoLineFactory.cpp
 src/vtkMDHistoQuadFactory.cpp
 src/vtkMDHistoHex4DFactory.cpp
+src/vtkSinglePeakMarker.cpp
 src/SQWLoadingPresenter.cpp
 )
 
 set( INC_FILES 
 inc/MantidVatesAPI/ADSWorkspaceProvider.h
 inc/MantidVatesAPI/Common.h
+inc/MantidVatesAPI/CompositePeaksPresenterVsi.h
 inc/MantidVatesAPI/ConcretePeaksPresenterVsi.h
 inc/MantidVatesAPI/DimensionPresenter.h
 inc/MantidVatesAPI/DimensionView.h
@@ -105,6 +109,7 @@ inc/MantidVatesAPI/vtkDataSetToPeaksFilteredDataSet.h
 inc/MantidVatesAPI/vtkDataSetToScaledDataSet.h
 inc/MantidVatesAPI/vtkDataSetToWsName.h
 inc/MantidVatesAPI/vtkDataSetToWsLocation.h
+inc/MantidVatesAPI/vtkEllipsoidTransformer.h
 inc/MantidVatesAPI/vtkMDLineFactory.h
 inc/MantidVatesAPI/vtkMDQuadFactory.h
 inc/MantidVatesAPI/vtkMDHexFactory.h
@@ -115,6 +120,7 @@ inc/MantidVatesAPI/vtkMDHistoHexFactory.h
 inc/MantidVatesAPI/vtkMDHistoLineFactory.h
 inc/MantidVatesAPI/vtkMDHistoQuadFactory.h
 inc/MantidVatesAPI/vtkMDHistoHex4DFactory.h
+inc/MantidVatesAPI/vtkSinglePeakMarker.h
 inc/MantidVatesAPI/WorkspaceProvider.h
 )
 
@@ -163,6 +169,10 @@ test/vtkDataSetToScaledDataSetTest.h
 test/vtkDataSetToPeaksFilteredDataSetTest.h
 test/vtkDataSetToNonOrthogonalDataSetTest.h
 test/vtkNullUnstructuredGridTest.h
+test/vtkEllipsoidTransformerTest.h
+test/NullPeaksPresenterVsiTest.h
+test/ConcretePeaksPresenterVsiTest.h
+test/CompositePeaksPresenterVsiTest.h
 )
 
 include_directories( inc )

@@ -201,7 +201,9 @@ namespace SimpleGui
     // Check if source is custom filter
     if (QString(proxy->GetXMLName()).contains("MantidParaViewScaleWorkspace") ||
         QString(proxy->GetXMLName()).contains("MDEWRebinningCutter") ||
-        QString(proxy->GetXMLName()).contains("MantidParaViewSplatterPlot"))
+        QString(proxy->GetXMLName()).contains("MantidParaViewSplatterPlot") ||
+        QString(proxy->GetXMLName()).contains("MantidParaViewPeaksFilter"))
+
     {
       minValue = vtkSMPropertyHelper(proxy,"MinValue").GetAsDouble();
       maxValue = vtkSMPropertyHelper(proxy,"MaxValue").GetAsDouble();

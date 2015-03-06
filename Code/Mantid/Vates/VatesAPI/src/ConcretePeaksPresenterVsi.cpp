@@ -15,6 +15,8 @@ namespace VATES
   /**
    * Constructor
    * @param peaksWorkspace The peaks workspace.
+   * @param frustum The view frustum
+   * @param frame The coordinate frame
    */
   ConcretePeaksPresenterVsi::ConcretePeaksPresenterVsi(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
                                                        ViewFrustum frustum,
@@ -31,6 +33,7 @@ namespace VATES
 
   /**
    * Update the view frustum
+   * @param frustum The view frustum.
    */
   void ConcretePeaksPresenterVsi::updateViewFrustum(ViewFrustum frustum)
   {

@@ -5,9 +5,10 @@
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidVatesSimpleGuiViewWidgets/CameraManager.h"
-#include "MantidVatesSimpleGuiViewWidgets/PeakViewerVsi.h"
+#include "MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h"
 #include <boost/shared_ptr.hpp>
 
+#include <string>
 #include <QList>
 #include <QPointer>
 
@@ -100,9 +101,9 @@ public slots:
   /// Check the coordinates for the peaks overlay if necessary
   void checkPeaksCoordinates();
   /// Show the visible peaks table.
-  void onShowVisiblePeaksTable();
+  void onShowPeaksTable();
   /// Remove the visible peaks table.
-  void onRemoveVisiblePeaksTable();
+  void onRemovePeaksTable();
   /// Show all peaks in table.
   void onShowAllPeaksTable();
 
@@ -115,6 +116,10 @@ protected slots:
    * Create and apply a threshold filter to the data.
    */
   void onThresholdButtonClicked();
+  /// On peaks source destroyed
+  void onPeakSourceDestroyed(QObject*);
+  /// On peaks filter destroyed
+  void onPeaksFilterDestroyed();
 
 private:
   Q_DISABLE_COPY(SplatterPlotView)
@@ -131,6 +136,15 @@ private:
   void setupVisiblePeaksButtons();
   /// Create the peaks filter
   void createPeaksFilter();
+  /// Set the state of the peak button
+  void setPeakButton(bool state);
+  /// Set the frame for the peaks
+  void setPeakSourceFrame(pqPipelineSource* source);
+  /// Check if a peaks workspace is already part of the recorded peaks sources.
+  bool checkIfPeaksWorkspaceIsAlreadyBeingTracked(pqPipelineSource* source);
+  /// Update the peaks filter
+  void updatePeaksFilter(pqPipelineSource* filter);
+
 
   bool noOverlay; ///< Flag to respond to overlay situation correctly
   QList<QPointer<pqPipelineSource> > peaksSource; ///< A list of peaks sources
@@ -142,10 +156,11 @@ private:
   Ui::SplatterPlotView ui; ///< The splatter plot view'a UI form
   QPointer<pqRenderView> view; ///< The main view area
   boost::shared_ptr<CameraManager> m_cameraManager; ///< The camera manager
-  PeaksViewerVsi* m_peaksViewer; ///< The peaks presenter
+  PeaksTableControllerVsi* m_peaksTableController; ///< The peaks table controller
   QAction* m_allPeaksAction;///<The action for showing all peaks in the table.
   QAction* m_removePeaksAction; ///<The action for removing the peaks table.
   QAction*  m_visiblePeaksAction; ///<The action for adding the visible peaks table.
+  std::string m_peaksWorkspaceNameDelimiter;///<Delimiter for peaks workspace strings.
 };
 
 } // SimpleGui

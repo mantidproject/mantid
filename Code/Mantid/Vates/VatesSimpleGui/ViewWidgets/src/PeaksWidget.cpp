@@ -4,6 +4,9 @@
 #include <QWidget>
 #include <QItemSelectionModel>
 #include <QModelIndex>
+#include <vector>
+#include <string>
+#include <map>
 
 namespace Mantid
 {
@@ -24,11 +27,12 @@ PeaksWidget::PeaksWidget(Mantid::API::IPeaksWorkspace_sptr ws, const std::string
 
 /**
  * Setup the Table model 
- * @param visiblePeaks : A list of visible peaks
+ * @param visiblePeaks : A vector of lists of visible peaks for each peak workspace
  */
 void PeaksWidget::setupMvc(std::vector<bool> visiblePeaks)
 {
-  MantidQt::SliceViewer::QPeaksTableModel* model = new  MantidQt::SliceViewer::QPeaksTableModel(this->m_ws);
+  // Create new table view
+  MantidQt::SliceViewer::QPeaksTableModel* model = new  MantidQt::SliceViewer::QPeaksTableModel(m_ws);
   ui.tblPeaks->setModel(model);
   const std::vector<int> hideCols = model->defaultHideCols();
   for (auto it = hideCols.begin(); it != hideCols.end(); ++it)
@@ -49,19 +53,16 @@ void PeaksWidget::setupMvc(std::vector<bool> visiblePeaks)
     ui.tblPeaks->horizontalHeader()->resizeSection(i, static_cast<int>(width));
   }
 
-  // Hide the rows which are invisible
-  for (int i = 0; i < ui.tblPeaks->model()->rowCount(); i++)
-  {
-    if (visiblePeaks[i])
-    {
+  // Set the visible rows 
+  for (int i = 0; i < visiblePeaks.size(); i++) {
+    if (visiblePeaks[i]){
       ui.tblPeaks->showRow(i);
     }
     else
     {
       ui.tblPeaks->hideRow(i);
-    }  
+    } 
   }
-
   QItemSelectionModel* selectionModel = ui.tblPeaks->selectionModel();
   connect(selectionModel, SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(onCurrentChanged(QModelIndex, QModelIndex)));
 }
@@ -74,9 +75,26 @@ void PeaksWidget::onCurrentChanged(QModelIndex current, QModelIndex)
 {
   if (current.isValid()) 
   {
-    emit zoomToPeak(this->m_ws, current.row());
+    emit zoomToPeak(m_ws, current.row());
   }
 }
+
+/**
+ * Update the visibility of the underlying model
+ * @param visiblePeaks A vector indicating which peaks are visible.
+ */
+void PeaksWidget::updateModel(std::vector<bool> visiblePeaks) {
+  for (int i = 0; i < visiblePeaks.size(); i++) {
+    if (visiblePeaks[i]){
+      ui.tblPeaks->showRow(i);
+    }
+    else
+    {
+      ui.tblPeaks->hideRow(i);
+    } 
+  }
+}
+
 } // namespace
 }
 }

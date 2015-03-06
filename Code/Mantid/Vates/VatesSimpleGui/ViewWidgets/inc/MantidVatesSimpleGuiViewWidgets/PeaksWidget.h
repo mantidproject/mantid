@@ -6,6 +6,8 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include <QWidget>
 #include <string>
+#include <vector>
+#include <map>
 
 namespace Mantid
 {
@@ -18,7 +20,8 @@ namespace SimpleGui
     Q_OBJECT
   public:
     PeaksWidget(Mantid::API::IPeaksWorkspace_sptr ws, const std::string& coordinateSystem, QWidget *parent = 0);
-    void PeaksWidget::setupMvc(std::vector<bool> visiblePeaks);
+    void setupMvc(std::vector<bool> visiblePeaks);
+    void updateModel(std::vector<bool> visiblePeaks);
   signals:
     void zoomToPeak(Mantid::API::IPeaksWorkspace_sptr ws, int row);
   public slots:

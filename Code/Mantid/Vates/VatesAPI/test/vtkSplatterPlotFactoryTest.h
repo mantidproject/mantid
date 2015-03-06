@@ -161,6 +161,18 @@ public:
     product->Delete();
   }
 
+  void test_MetadataIsAddedCorrectly() 
+  {
+    FakeProgressAction progressUpdate;
+    Mantid::MDEvents::MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    factory.initialize(ws);
+    vtkDataSet* product = NULL;
+
+    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
+
+
+  }
 };
 
 #endif

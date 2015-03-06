@@ -35,11 +35,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
-#include <vtkSmartPointer.h>
-
-class vtkTransform;
 class vtkPolyData;
-
 
 namespace Mantid
 {
@@ -94,11 +90,6 @@ protected:
   virtual void validate() const;
 
 private:
-
-  vtkSmartPointer<vtkTransform>  vtkPeakMarkerFactory::createEllipsoidTransform(std::vector<Mantid::Kernel::V3D> directions) const;
-
-  Mantid::Kernel::V3D rotateVector(Mantid::Kernel::V3D original, Mantid::Kernel::V3D rotationAxis, double angle) const;
-
   void validateWsNotNull() const;
 
   void validateDimensionsPresent() const;
