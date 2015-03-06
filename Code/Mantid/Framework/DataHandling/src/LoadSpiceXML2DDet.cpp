@@ -32,18 +32,38 @@ const char STRING = 's';
 const char FLOAT32 = 'f';
 const char INT32 = 'i';
 
+//----------------------------------------------------------------------------------------------
+/** Constructor for SpiceXMLNode
+ * @brief SpiceXMLNode::SpiceXMLNode
+ * @param nodename
+ */
 SpiceXMLNode::SpiceXMLNode(const std::string &nodename)
     : m_value(""), m_unit(""), m_typechar('s'), m_typefullname("") {
   m_name = nodename;
 }
 
+//----------------------------------------------------------------------------------------------
+/** Destructor
+ */
 SpiceXMLNode::~SpiceXMLNode() {}
 
+//----------------------------------------------------------------------------------------------
+/** Set node value in string format
+ * @brief SpiceXMLNode::setValue
+ * @param strvalue
+ */
 void SpiceXMLNode::setValue(const std::string &strvalue) { m_value = strvalue; }
 
-void SpiceXMLNode::setValues(const std::string &nodetype,
-                             const std::string &nodeunit,
-                             const std::string &nodedescription) {
+//----------------------------------------------------------------------------------------------
+/** Set XML node parameters
+ * @brief SpiceXMLNode::setValues
+ * @param nodetype
+ * @param nodeunit
+ * @param nodedescription
+ */
+void SpiceXMLNode::setParameters(const std::string &nodetype,
+                                 const std::string &nodeunit,
+                                 const std::string &nodedescription) {
   // data type
   if (nodetype.compare("FLOAT32") == 0) {
     m_typefullname = nodetype;
@@ -65,19 +85,65 @@ void SpiceXMLNode::setValues(const std::string &nodetype,
   return;
 }
 
+//----------------------------------------------------------------------------------------------
+/** Check whether XML has unit set
+ */
 bool SpiceXMLNode::hasUnit() const { return (m_unit.size() > 0); }
 
+//----------------------------------------------------------------------------------------------
+/** Check whether XML node has value set
+ * @brief SpiceXMLNode::hasValue
+ * @return
+ */
 bool SpiceXMLNode::hasValue() const { return (m_value.size() > 0); }
 
+//----------------------------------------------------------------------------------------------
+/** Is this node of string type?
+ * @brief SpiceXMLNode::isString
+ * @return
+ */
 bool SpiceXMLNode::isString() const { return (m_typechar == STRING); }
 
+//----------------------------------------------------------------------------------------------
+/** Is this node of integer type?
+ * @brief SpiceXMLNode::isInteger
+ * @return
+ */
 bool SpiceXMLNode::isInteger() const { return (m_typechar == INT32); }
 
+//----------------------------------------------------------------------------------------------
+/** Is this node of double type?
+ * @brief SpiceXMLNode::isDouble
+ * @return
+ */
 bool SpiceXMLNode::isDouble() const { return (m_typechar == FLOAT32); }
 
+//----------------------------------------------------------------------------------------------
+/** Get name of XML node
+ * @brief SpiceXMLNode::getName
+ * @return
+ */
 const std::string SpiceXMLNode::getName() const { return m_name; }
+
+//----------------------------------------------------------------------------------------------
+/** Get unit of XML node
+ * @brief SpiceXMLNode::getUnit
+ * @return
+ */
 const std::string SpiceXMLNode::getUnit() const { return m_unit; }
+
+//----------------------------------------------------------------------------------------------
+/** Get node's description
+ * @brief SpiceXMLNode::getDescription
+ * @return
+ */
 const std::string SpiceXMLNode::getDescription() const { return m_description; }
+
+//----------------------------------------------------------------------------------------------
+/** Get node's value in string
+ * @brief SpiceXMLNode::getValue
+ * @return
+ */
 const std::string SpiceXMLNode::getValue() const { return m_value; }
 
 //----------------------------------------------------------------------------------------------
@@ -91,7 +157,23 @@ LoadSpiceXML2DDet::LoadSpiceXML2DDet() {}
 LoadSpiceXML2DDet::~LoadSpiceXML2DDet() {}
 
 //----------------------------------------------------------------------------------------------
-/**
+const std::string LoadSpiceXML2DDet::name() const {
+  return "LoadSpiceXML2DDet";
+}
+
+//----------------------------------------------------------------------------------------------
+int LoadSpiceXML2DDet::version() const { return 1; }
+
+//----------------------------------------------------------------------------------------------
+const std::string LoadSpiceXML2DDet::category() const { return "DataHandling"; }
+
+//----------------------------------------------------------------------------------------------
+const std::string LoadSpiceXML2DDet::summary() const {
+  return "Load 2-dimensional detector data file in XML format from SPICE. ";
+}
+
+//----------------------------------------------------------------------------------------------
+/** Declare properties
  * @brief LoadSpiceXML2DDet::init
  */
 void LoadSpiceXML2DDet::init() {
@@ -115,7 +197,7 @@ void LoadSpiceXML2DDet::init() {
 }
 
 //----------------------------------------------------------------------------------------------
-/**
+/** Main execution
  * @brief LoadSpiceXML2DDet::exec
  */
 void LoadSpiceXML2DDet::exec() {
@@ -130,9 +212,9 @@ void LoadSpiceXML2DDet::exec() {
   size_t numpixelY = vec_pixelgeom[1];
 
   // Parse
-  std::map<std::string, SpiceXMLNode> map_xmlnode;
+  std::vector<SpiceXMLNode> vec_xmlnode;
   std::string detvaluestr("");
-  parseSpiceXML(xmlfilename, map_xmlnode);
+  parseSpiceXML(xmlfilename, vec_xmlnode);
 
   size_t n = std::count(detvaluestr.begin(), detvaluestr.end(), '\n');
   g_log.notice() << "[DB] detector string value = " << n << "\n" << detvaluestr
@@ -140,14 +222,19 @@ void LoadSpiceXML2DDet::exec() {
 
   // Create output workspace
   MatrixWorkspace_sptr outws =
-      createMatrixWorkspace(map_xmlnode, numpixelX, numpixelY, detlogname);
+      createMatrixWorkspace(vec_xmlnode, numpixelX, numpixelY, detlogname);
 
   setProperty("OutputWorkspace", outws);
 }
 
-void LoadSpiceXML2DDet::parseSpiceXML(
-    const std::string &xmlfilename,
-    std::map<std::string, SpiceXMLNode> &logstringmap) {
+//----------------------------------------------------------------------------------------------
+/** Parse SPICE XML file for one Pt./measurement
+ * @brief LoadSpiceXML2DDet::parseSpiceXML
+ * @param xmlfilename
+ * @param logstringmap
+ */
+void LoadSpiceXML2DDet::parseSpiceXML(const std::string &xmlfilename,
+                                      std::vector<SpiceXMLNode> &vecspicenode) {
   // Open file
   std::ifstream ifs;
   ifs.open(xmlfilename.c_str());
@@ -204,11 +291,12 @@ void LoadSpiceXML2DDet::parseSpiceXML(
           nodedescription = atttext;
         }
       }
-      xmlnode.setValues(nodetype, nodeunit, nodedescription);
+      xmlnode.setParameters(nodetype, nodeunit, nodedescription);
       xmlnode.setValue(innertext);
 
-      logstringmap.insert(std::make_pair(nodename, xmlnode));
+      vecspicenode.push_back(xmlnode);
     } else {
+      // An unexpected case but no guarantee for not happening
       g_log.error("Funny... No child node.");
     }
 
@@ -223,85 +311,109 @@ void LoadSpiceXML2DDet::parseSpiceXML(
 }
 
 MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
-    const std::map<std::string, SpiceXMLNode> &mapxmlnode,
-    const size_t &numpixelx, const size_t &numpixely,
-    const std::string &detnodename) {
+    const std::vector<SpiceXMLNode> &vecxmlnode, const size_t &numpixelx,
+    const size_t &numpixely, const std::string &detnodename) {
 
   // Create matrix workspace
   MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", numpixely, numpixelx,
                                           numpixelx));
 
-  // Examine xml nodes
-  std::map<std::string, SpiceXMLNode>::const_iterator miter;
-  for (miter = mapxmlnode.begin(); miter != mapxmlnode.end(); ++miter) {
-    SpiceXMLNode xmlnode = miter->second;
-    g_log.notice() << "[DB] Log name / xml node : " << xmlnode.getName()
-                   << "\n";
+  // Go through all XML nodes to process
+  size_t numxmlnodes = vecxmlnode.size();
+  bool parsedDet = false;
+  for (size_t n = 0; n < numxmlnodes; ++n) {
+    // Process node for detector's count
+    const SpiceXMLNode &xmlnode = vecxmlnode[n];
+    if (xmlnode.getName().compare(detnodename) == 0) {
+      // Get node value string (256x256 as a whole)
+      const std::string detvaluestr = xmlnode.getValue();
+      size_t numlines = static_cast<size_t>(
+          std::count(detvaluestr.begin(), detvaluestr.end(), '\n'));
+      g_log.notice() << "[DB] Detector counts string contains " << numlines
+                     << "\n";
+
+      // Split
+      std::vector<std::string> vecLines;
+      boost::split(vecLines, detvaluestr, boost::algorithm::is_any_of("\n"));
+      g_log.notice() << "There are " << vecLines.size() << " lines"
+                     << "\n";
+
+      size_t irow = 0;
+      for (size_t i = 0; i < vecLines.size(); ++i) {
+        std::string &line = vecLines[i];
+
+        // Skip empty line
+        if (line.size() == 0) {
+          g_log.notice() << "Empty Line at " << i << "\n";
+          continue;
+        }
+
+        // Check whether it exceeds boundary
+        if (irow == numpixely) {
+          throw std::runtime_error("Number of non-empty rows in detector data "
+                                   "exceeds user defined geometry size.");
+        }
+
+        // Split line
+        std::vector<std::string> veccounts;
+        boost::split(veccounts, line, boost::algorithm::is_any_of(" \t"));
+        // g_log.notice() << "Number of items of line " << i << " is " <<
+        // veccounts.size() << "\n";
+
+        // check
+        if (veccounts.size() != numpixelx) {
+          std::stringstream errss;
+          errss << "Row " << irow << " contains " << veccounts.size()
+                << " items other than " << numpixelx
+                << " counts specified by user.";
+          throw std::runtime_error(errss.str());
+        }
+
+        for (size_t j = 0; j < veccounts.size(); ++j) {
+          double y = atof(veccounts[j].c_str());
+          outws->dataX(irow)[j] = static_cast<double>(j);
+          outws->dataY(irow)[j] = y;
+          if (y > 0)
+            outws->dataE(irow)[j] = sqrt(y);
+          else
+            outws->dataE(irow)[j] = 1.0;
+        }
+
+        // Update irow
+        irow += 1;
+      }
+
+      // Set flag
+      parsedDet = true;
+    } else {
+      // Parse to log: because there is no start time.  so all logs are single
+      // value type
+      const std::string nodename = xmlnode.getName();
+      const std::string nodevalue = xmlnode.getValue();
+      if (xmlnode.isDouble()) {
+        double dvalue = atof(nodevalue.c_str());
+        outws->mutableRun().addProperty(
+            new PropertyWithValue<double>(nodename, dvalue));
+        g_log.notice() << "[DB] Log name / xml node : " << xmlnode.getName()
+                       << " (double) value = " << dvalue << "\n";
+      } else if (xmlnode.isInteger()) {
+        int ivalue = atoi(nodevalue.c_str());
+        outws->mutableRun().addProperty(
+            new PropertyWithValue<int>(nodename, ivalue));
+        g_log.notice() << "[DB] Log name / xml node : " << xmlnode.getName()
+                       << " (int) value = " << ivalue << "\n";
+      } else {
+        outws->mutableRun().addProperty(
+            new PropertyWithValue<std::string>(nodename, nodevalue));
+        g_log.notice() << "[DB] Log name / xml node : " << xmlnode.getName()
+                       << " (string) value = " << nodevalue << "\n";
+      }
+    }
   }
 
-  // Parse the detector counts node
-  miter = mapxmlnode.find(detnodename);
-  if (miter != mapxmlnode.end()) {
-    // Get node value string (256x256 as a whole)
-    SpiceXMLNode detnode = miter->second;
-    const std::string detvaluestr = detnode.getValue();
-    size_t numlines = static_cast<size_t>(
-        std::count(detvaluestr.begin(), detvaluestr.end(), '\n'));
-    g_log.notice() << "[DB] Detector counts string contains " << numlines
-                   << "\n";
-
-    // Split
-    std::vector<std::string> vecLines;
-    boost::split(vecLines, detvaluestr, boost::algorithm::is_any_of("\n"));
-    g_log.notice() << "There are " << vecLines.size() << " lines"
-                   << "\n";
-
-    size_t irow = 0;
-    for (size_t i = 0; i < vecLines.size(); ++i) {
-      std::string &line = vecLines[i];
-
-      // Skip empty line
-      if (line.size() == 0) {
-        g_log.notice() << "Empty Line at " << i << "\n";
-        continue;
-      }
-
-      // Check whether it exceeds boundary
-      if (irow == numpixely) {
-        throw std::runtime_error("Number of non-empty rows in detector data "
-                                 "exceeds user defined geometry size.");
-      }
-
-      // Split line
-      std::vector<std::string> veccounts;
-      boost::split(veccounts, line, boost::algorithm::is_any_of(" \t"));
-      // g_log.notice() << "Number of items of line " << i << " is " <<
-      // veccounts.size() << "\n";
-
-      // check
-      if (veccounts.size() != numpixelx) {
-        std::stringstream errss;
-        errss << "Row " << irow << " contains " << veccounts.size()
-              << " items other than " << numpixelx
-              << " counts specified by user.";
-        throw std::runtime_error(errss.str());
-      }
-
-      for (size_t j = 0; j < veccounts.size(); ++j) {
-        double y = atof(veccounts[j].c_str());
-        outws->dataX(irow)[j] = static_cast<double>(j);
-        outws->dataY(irow)[j] = y;
-        if (y > 0)
-          outws->dataE(irow)[j] = sqrt(y);
-        else
-          outws->dataE(irow)[j] = 1.0;
-      }
-
-      // Update irow
-      irow += 1;
-    }
-  } else {
+  // Raise exception if no detector node is found
+  if (!parsedDet) {
     std::stringstream errss;
     errss << "Unable to find an XML node of name " << detnodename
           << ". Unable to load 2D detector XML file.";
@@ -309,36 +421,6 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
   }
 
   return outws;
-}
-
-/** Parse a node containing 'type'.  Conver the value to the proper type
- * indicated by type
- * If type is not specified as either INT32 or FLOAT32, then it will be string
- * and no conversion
- * is applied.
- * @brief LoadSpiceXML2DDet::convertNode
- * @param nodetype
- * @param isdouble
- * @param dvalue
- * @param isint
- * @param ivalue
- */
-void LoadSpiceXML2DDet::convertNode(const std::string &nodetype, bool &isdouble,
-                                    double &dvalue, bool &isint, int &ivalue) {
-  if (nodetype.compare("FLOAT32") == 0) {
-    dvalue = atof(nodetype.c_str());
-    isdouble = true;
-    isint = false;
-  } else if (nodetype.compare("INT32") == 0) {
-    ivalue = atoi(nodetype.c_str());
-    isdouble = false;
-    isint = true;
-  } else {
-    isdouble = false;
-    isint = false;
-  }
-
-  return;
 }
 
 } // namespace DataHandling

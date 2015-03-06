@@ -13,8 +13,8 @@ public:
   SpiceXMLNode(const std::string &nodename);
   ~SpiceXMLNode();
 
-  void setValues(const std::string &nodetype, const std::string &nodeunit,
-                 const std::string &nodedescription);
+  void setParameters(const std::string &nodetype, const std::string &nodeunit,
+                     const std::string &nodedescription);
   void setValue(const std::string &strvalue);
 
   bool hasUnit() const;
@@ -28,11 +28,6 @@ public:
   const std::string getUnit() const;
   const std::string getDescription() const;
   const std::string getValue() const;
-
-  /*
-  template<typename T>
-  const T getValue() const;
-  */
 
   std::string m_name;
   std::string m_value;
@@ -70,31 +65,31 @@ public:
   LoadSpiceXML2DDet();
   virtual ~LoadSpiceXML2DDet();
 
-  virtual const std::string name() const { return "LoadSpiceXML2DDet"; }
-  virtual int version() const { return 1; }
-  virtual const std::string category() const { return "DataHandling"; }
-  virtual const std::string summary() const {
-    return "Load 2-dimensional detector data file in XML format from SPICE. ";
-  }
+  /// Algoriothm name
+  virtual const std::string name() const;
+
+  /// Algorithm version
+  virtual int version() const;
+
+  /// Category
+  virtual const std::string category() const;
+
+  /// Summary
+  virtual const std::string summary() const;
 
 private:
   void init();
   void exec();
 
-  ///
+  /// Parse SPICE XML file
   void parseSpiceXML(const std::string &xmlfilename,
-                     std::map<std::string, SpiceXMLNode> &logstringmap);
+                     std::vector<SpiceXMLNode> &vecspicenode);
 
-  ///
+  /// Create output MatrixWorkspace
   API::MatrixWorkspace_sptr
-  createMatrixWorkspace(const std::map<std::string, SpiceXMLNode> &mapxmlnode,
+  createMatrixWorkspace(const std::vector<SpiceXMLNode> &vecxmlnode,
                         const size_t &numpixelx, const size_t &numpixely,
                         const std::string &detnodename);
-
-  void convertNode(const std::string &nodetype, bool &isdouble, double &dvalue,
-                   bool &isint, int &ivalue);
-
-  std::map<std::string, SpiceXMLNode> m_NodeMap;
 };
 
 } // namespace DataHandling
