@@ -260,8 +260,8 @@ void LoadSpiceXML2DDet::parseSpiceXML(const std::string &xmlfilename,
                     << "\n";
       if (nodename.compare("SPICErack") == 0) {
         // SPICErack is the main parent node.  start_time and end_time are there
-        size_t numattr = pNode->attributes()->length();
-        for (size_t j = 0; j < numattr; ++j) {
+        unsigned long numattr = pNode->attributes()->length();
+        for (unsigned long j = 0; j < numattr; ++j) {
           std::string attname = pNode->attributes()->item(j)->nodeName();
           std::string attvalue = pNode->attributes()->item(j)->innerText();
           SpiceXMLNode xmlnode(attname);
