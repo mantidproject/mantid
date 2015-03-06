@@ -87,8 +87,8 @@ void ConvertToMD::init() {
   setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
   declareProperty(
-       new PropertyWithValue<bool>("InitialSplitting", false, Direction::Input),
-       "This option causes an initial split of 50 for the first three dimensions at level 0.");
+       new PropertyWithValue<bool>("InitialSplitting", 0, Direction::Input),
+       "This option causes an initial split of 50 for the first four dimensions at level 0.");
 }
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -501,7 +501,7 @@ API::IMDEventWorkspace_sptr ConvertToMD::createNewMDWorkspace(
 void ConvertToMD::performInitialSplitting(API::IMDEventWorkspace_sptr spws, Mantid::API::BoxController_sptr bc)
 {
   const size_t initialSplitSetting = 50;
-  const size_t dimCutoff = 3;
+  const size_t dimCutoff = 4;
 
   // Record the split settings of the box controller in a buffer and set the new value
   std::vector<size_t> splitBuffer;

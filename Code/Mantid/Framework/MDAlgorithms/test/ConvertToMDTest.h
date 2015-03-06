@@ -201,8 +201,8 @@ void testInitialSplittingEnabled()
 
     // Check depth 0
     TSM_ASSERT_EQUALS("Should have no MDBoxes at level 0", 0, numMDBoxes[0]);
-    // Check depth 1. The boxController is set to split with 50, 50, 50, 5, 5, 5
-    TSM_ASSERT_EQUALS("Should have 15625000 MDBoxes at level 1", 15625000, numMDBoxes[1]);
+    // Check depth 1. The boxController is set to split with 50, 50, 50, 50, 5, 5
+    TSM_ASSERT_EQUALS("Should have 15625000 MDBoxes at level 1", 156250000, numMDBoxes[1]);
 
     auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS5DQ3D");
     TS_ASSERT_EQUALS(Mantid::Kernel::HKL, outWS->getSpecialCoordinateSystem());
