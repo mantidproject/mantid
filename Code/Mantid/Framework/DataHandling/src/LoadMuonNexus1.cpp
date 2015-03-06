@@ -460,7 +460,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
         }
 
         TableWorkspace_sptr table =
-          createDetectorGroupingTable(grouping.begin(), grouping.end());
+          createDetectorGroupingTable(specToLoad,grouping);
 
         if (table->rowCount() != 0)
           return table;
@@ -481,7 +481,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
 
           // Set table for period i
           TableWorkspace_sptr table =
-            createDetectorGroupingTable(grouping.begin(), grouping.end());
+            createDetectorGroupingTable(specToLoad,grouping);
 
           // Add table to group
           if (table->rowCount() != 0)
@@ -533,22 +533,22 @@ LoadMuonNexus1::createDeadTimeTable(std::vector<int> specToLoad,
  * @return Detector Grouping Table create using the data
  */
 TableWorkspace_sptr LoadMuonNexus1::createDetectorGroupingTable(
-    std::vector<int>::const_iterator begin,
-    std::vector<int>::const_iterator end) {
+    std::vector<int> specToLoad,
+    std::vector<int> grouping) {
   auto detectorGroupingTable = boost::dynamic_pointer_cast<TableWorkspace>(
       WorkspaceFactory::Instance().createTable("TableWorkspace"));
 
   detectorGroupingTable->addColumn("vector_int", "Detectors");
 
-  std::map<int, std::vector<int>> grouping;
+  std::map<int, std::vector<int>> groupingMap;
 
-  for (auto it = begin; it != end; ++it) {
+  for (size_t i=0; i<specToLoad.size(); i++) {
     // Add detector ID to the list of group detectors. Detector ID is always
     // spectra index + 1
-    grouping[*it].push_back(static_cast<int>(std::distance(begin, it)) + 1);
+    groupingMap[grouping[i]].push_back(specToLoad[i]);
   }
 
-  for (auto it = grouping.begin(); it != grouping.end(); ++it) {
+  for (auto it = groupingMap.begin(); it != groupingMap.end(); ++it) {
     if (it->first != 0) // Skip 0 group
     {
       TableRow newRow = detectorGroupingTable->appendRow();
