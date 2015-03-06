@@ -342,50 +342,51 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
       // Check number of dead time entries match the number of 
       // spectra in the nexus file
       throw Exception::FileError(
-          "Number of dead times specified is less than number of spectra",
-          m_filename);
+        "Number of dead times specified is less than number of spectra",
+        m_filename);
 
-    } else if (numDeadTimes == m_numberOfSpectra) {
+    } else if (numDeadTimes % m_numberOfSpectra) {
 
-      // Simpliest case - one dead time for one detector
-
-      // Populate deadTimes
-      for (auto it=specToLoad.begin(); it!=specToLoad.end(); ++it) {
-        deadTimes.push_back(deadTimesData[*it-1]);
-      }
-      // Load into table
-      TableWorkspace_sptr table = createDeadTimeTable(specToLoad, deadTimes);
-      setProperty("DeadTimeTable", table);
+      // At least, number of dead times should cover the number of spectra
+      throw Exception::FileError(
+        "Number of dead times doesn't cover every spectra in every period",
+        m_filename);
     } else {
 
-      // More complex case - different dead times for different periods
-
-      if (numDeadTimes != m_numberOfSpectra * m_numberOfPeriods) {
-        throw Exception::FileError(
-            "Number of dead times doesn't cover every spectra in every period",
-            m_filename);
-      }
-
-      WorkspaceGroup_sptr tableGroup = boost::make_shared<WorkspaceGroup>();
-
-      for (int64_t i=0; i<m_numberOfPeriods; i++) {
+      if ( m_numberOfPeriods == 1 ) {
+        // Simpliest case - one dead time for one detector
 
         // Populate deadTimes
         for (auto it=specToLoad.begin(); it!=specToLoad.end(); ++it) {
-          int index = static_cast<int>(*it -1 + i*m_numberOfSpectra);
-          deadTimes.push_back(deadTimesData[index]);
+          deadTimes.push_back(deadTimesData[*it-1]);
+        }
+        // Load into table
+        TableWorkspace_sptr table = createDeadTimeTable(specToLoad, deadTimes);
+        setProperty("DeadTimeTable", table);
+
+      } else {
+        // More complex case - different dead times for different periods
+
+        WorkspaceGroup_sptr tableGroup = boost::make_shared<WorkspaceGroup>();
+
+        for (int64_t i=0; i<m_numberOfPeriods; i++) {
+
+          // Populate deadTimes
+          for (auto it=specToLoad.begin(); it!=specToLoad.end(); ++it) {
+            int index = static_cast<int>(*it -1 + i*m_numberOfSpectra);
+            deadTimes.push_back(deadTimesData[index]);
+          }
+
+          // Load into table
+          TableWorkspace_sptr table = createDeadTimeTable(specToLoad,deadTimes);
+
+          tableGroup->addWorkspace(table);
         }
 
-        // Load into table
-        TableWorkspace_sptr table = createDeadTimeTable(specToLoad,deadTimes);
-
-        tableGroup->addWorkspace(table);
+        setProperty("DeadTimeTable", tableGroup);
       }
-
-      setProperty("DeadTimeTable", tableGroup);
     }
   }
-
   // It is expected that file might not contain any dead times, so not finding
   // them is not an
   // error
