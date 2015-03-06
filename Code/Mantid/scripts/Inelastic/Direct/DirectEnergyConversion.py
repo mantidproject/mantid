@@ -197,7 +197,7 @@ class DirectEnergyConversion(object):
 
         if self.use_hard_mask_only:
             # build hard mask
-            diag_mask,n_masks = white.get_masking()
+            diag_mask = white.get_masking(1)
             if diag_mask is None:
                 # in this peculiar way we can obtain working mask which
                 # accounts for initial data grouping in the
@@ -210,7 +210,8 @@ class DirectEnergyConversion(object):
                 MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
                 white.add_masked_ws(white_data)
                 DeleteWorkspace(Workspace='white_ws_clone')
-                diag_mask,n_masks = white.get_masking()
+                DeleteWorkspace(Workspace='hard_mask_ws')
+                diag_mask = white.get_masking(1)
             if not out_ws_name is None:
                 dm = CloneWorkspace(diag_mask,OutputWorkspace=out_ws_name)
                 return dm
@@ -228,7 +229,7 @@ class DirectEnergyConversion(object):
         # Get the background/total counts from the sample run if present
         if not diag_sample is None:
             diag_sample = self.get_run_descriptor(diag_sample)
-            sample_mask,n_sam_masked = diag_sample.get_masking()
+            sample_mask = diag_sample.get_masking(1)
             if sample_mask is None:
                 # If the bleed test is requested then we need to pass in the
                 # sample_run as well
@@ -260,7 +261,7 @@ class DirectEnergyConversion(object):
 
         # extract existing white mask if one is defined and provide it for
         # diagnose to use instead of constantly diagnosing the same vanadium
-        white_mask,num_masked = white.get_masking()
+        white_mask = white.get_masking(1)
         if white_mask is None or sample_mask is None:
             pass # have to run diagnostics
         else:
@@ -295,7 +296,7 @@ class DirectEnergyConversion(object):
         if out_ws_name:
             if not(diag_sample is None):
                 diag_sample.add_masked_ws(whiteintegrals)
-                mask,n_removed = diag_sample.get_masking()
+                mask = diag_sample.get_masking(1)
                 diag_mask = CloneWorkspace(mask,OutputWorkspace=out_ws_name)
             else: # either WB was diagnosed or WB masks were applied to it
                 # Extract a mask workspace

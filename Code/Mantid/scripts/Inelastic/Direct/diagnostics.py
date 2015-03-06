@@ -74,7 +74,7 @@ def diagnose(white_int,**kwargs):
     #white mask assumed to be global so no sectors in there
     if not white is None and isinstance(white,RunDescriptor.RunDescriptor):
         hardmask_file = None
-        white_mask,num_failed = white.get_masking()
+        white_mask,num_failed = white.get_masking(2)
         add_masking(white_int, white_mask)
         van_mask  = None
     else: # prepare workspace to keep white mask

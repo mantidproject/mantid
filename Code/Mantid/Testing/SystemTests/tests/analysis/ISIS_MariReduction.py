@@ -1,6 +1,6 @@
 import os
-os.environ["PATH"] =\
-r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#os.environ["PATH"] =\
+#r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 """ Sample MARI reduction scrip used in testing ReductionWrapper """
 from Direct.ReductionWrapper import *
 try:

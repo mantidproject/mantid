@@ -444,19 +444,34 @@ class RunDescriptor(PropDescriptor):
 #--------------------------------------------------------------------------------------------------------------------
 # Masking
 #--------------------------------------------------------------------------------------------------------------------
-    def get_masking(self):
-        """Return masking workspace specific to this particular workspace 
-           together with number of masked spectra
+    def get_masking(self,noutputs=None):
+        """Return masking workspace specific to this particular workspace
+           together with number of masked spectra if requested.
+
+           noutputs is provided as argument, as funcreturn does not propagate
+           through inheritance and overloaded functions
         """
+        if not noutputs:
+            try:
+                noutputs,r = funcreturns.lhs_info('both')
+            except:
+                noutputs=0
+
         if self._mask_ws_name:
             mask_ws = mtd[self._mask_ws_name]
             #TODO: need normal exposure of getNumberMasked() method of masks workspace
-            __tmp_masks,spectra = ExtractMask(self._mask_ws_name)
-            num_masked = len(spectra)
-            DeleteWorkspace(__tmp_masks)
-            return (mask_ws,num_masked)
+            if noutputs>1:
+                __tmp_masks,spectra = ExtractMask(self._mask_ws_name)
+                num_masked = len(spectra)
+                DeleteWorkspace(__tmp_masks)
+                return (mask_ws,num_masked)
+            else:
+                return mask_ws
         else:
-            return (None,0)
+            if noutputs>1:
+                return (None,0)
+            else:
+                return None
 #--------------------------------------------------------------------------------------------------------------------
     def add_masked_ws(self,masked_ws):
         """Extract masking from the workspace provided and store masks
@@ -1347,11 +1362,11 @@ class RunDescriptorDependent(RunDescriptor):
             return super(RunDescriptorDependent,self).clear_monitors()
         else:
             return self._host.clear_monitors()
-    def get_masking(self):
+    def get_masking(self,noutputs=None):
         if self._has_own_value:
-            return super(RunDescriptorDependent,self).get_masking()
+            return super(RunDescriptorDependent,self).get_masking(noutputs)
         else:
-            return self._host.get_masking()
+            return self._host.get_masking(noutputs)
     def add_masked_ws(self,masked_ws):
         if self._has_own_value:
             return super(RunDescriptorDependent,self).add_masked_ws(masked_ws)
