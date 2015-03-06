@@ -56,6 +56,7 @@ public:
   virtual void setParameter(size_t, const double &value,
                             bool explicitlySet = true);
   using API::IPeakFunction::setParameter;
+  std::string getCentreParameterName() const;
 
   /// Get boundaries for an interval within which the peak has 
   /// significant values. The interval must contain the maximum

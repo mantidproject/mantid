@@ -228,13 +228,11 @@ public:
     TS_ASSERT_DELTA(fun.centre(), -1.0, tol);
     TS_ASSERT_DELTA(fun.height(), 1.0, tol);
     TS_ASSERT_DELTA(fun.fwhm(), 0.4027, tol);
-    std::cerr << fun.intensity() << std::endl;
 
     fun.setHeight(10.0);
     TS_ASSERT_DELTA(fun.centre(), -1.0, tol);
     TS_ASSERT_DELTA(fun.height(), 10.0, tol);
     TS_ASSERT_DELTA(fun.fwhm(), 0.4027, tol);
-    std::cerr << fun.intensity() << std::endl;
 
     fun.setFwhm(1.0);
     TS_ASSERT_DELTA(fun.centre(), -1.0, tol);

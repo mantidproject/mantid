@@ -55,7 +55,7 @@ double PeakParametersNumeric::height() const {
 void PeakParametersNumeric::setHeight(const double h) {
   double h0 = height();
   if (h0 == 0.0) {
-    setParameter(m_heightIndex, 1e-6);
+    setParameter(m_heightIndex, 1.0);
     h0 = height();
   }
   double parValue = getParameter(m_heightIndex);
@@ -96,7 +96,11 @@ double PeakParametersNumeric::fwhm() const {
 /// @param w :: New value for the width.
 void PeakParametersNumeric::setFwhm(const double w) {
   const double c = centre();
-  const double h = height();
+  double h = height();
+  if (h == 0.0) {
+    setHeight(1.0);
+    h = 1.0;
+  }
   double wOld = fwhm();
   double factor = w / wOld;
   for (size_t i = 0; i < m_widthIndices.size(); ++i) {
@@ -249,6 +253,12 @@ void PeakParametersNumeric::updateCache() const {
   } else {
     m_width = fabs(roots[1] - roots[0]);
   }
+}
+
+/// Override the base class implementation
+std::string PeakParametersNumeric::getCentreParameterName() const
+{
+  return parameterName(m_centreIndex);
 }
 
 } // namespace CurveFitting
