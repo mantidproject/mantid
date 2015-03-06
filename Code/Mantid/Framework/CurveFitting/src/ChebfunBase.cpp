@@ -10,6 +10,7 @@
 #include <cmath>
 #include <algorithm>
 #include <numeric>
+#include <limits>
 #include <functional>
 #include <assert.h>
 #include <sstream>
@@ -157,9 +158,12 @@ bool ChebfunBase::hasConverged(const std::vector<double> &a, double maxA,
   if (a.empty())
     return true;
   if (maxA == 0.0) {
-    maxA = fabs(*std::max_element(a.begin(), a.end(),
-                                  [](double a, double b)
-                                      -> bool { return fabs(a) < fabs(b); }));
+    for (auto it = a.begin(); it != a.end(); ++it) {
+      double tmp = fabs(*it);
+      if (tmp > maxA) {
+        maxA = tmp;
+      }
+    }
   }
   if (maxA < tolerance || a.size() < 3) {
     return true;
@@ -374,10 +378,13 @@ ChebfunBase::bestFitTempl(double start, double end, FunctionType f,
     }
     a = base.calcA(p2);
     if (calcMaxA) {
-      maxA =
-          fabs(*std::max_element(a.begin(), a.end(), [](double a1, double a2) {
-            return fabs(a1) < fabs(a2);
-          }));
+      maxA = 0.0;
+      for (auto it = a.begin(); it != a.end(); ++it) {
+        double tmp = fabs(*it);
+        if (tmp > maxA) {
+          maxA = tmp;
+        }
+      }
     }
     if (ChebfunBase::hasConverged(a, maxA, tolerance)) {
       // cut off the trailing a-values that are below the tolerance
