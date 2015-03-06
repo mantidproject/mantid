@@ -460,13 +460,21 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
 
         WorkspaceGroup_sptr tableGroup = boost::make_shared<WorkspaceGroup>();
 
-        for (auto it = grouping.begin(); it != grouping.end();
-          it += m_numberOfSpectra) {
-            TableWorkspace_sptr table =
-              createDetectorGroupingTable(it, it + m_numberOfSpectra);
+        for (int i=0; i<m_numberOfPeriods; i++) {
 
-            if (table->rowCount() != 0)
-              tableGroup->addWorkspace(table);
+          // Get the grouping
+          for (auto it=specToLoad.begin(); it!=specToLoad.end(); ++it) {
+            int index = *it - 1 + i * static_cast<int>(m_numberOfSpectra);
+            grouping.push_back(groupingData[index]);
+          }
+
+          // Set table for period i
+          TableWorkspace_sptr table =
+            createDetectorGroupingTable(grouping.begin(), grouping.end());
+
+          // Add table to group
+          if (table->rowCount() != 0)
+            tableGroup->addWorkspace(table);
         }
 
         if (tableGroup->size() != 0) {
