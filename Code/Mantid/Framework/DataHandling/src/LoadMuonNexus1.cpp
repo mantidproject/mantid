@@ -426,8 +426,8 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
         specToLoad.push_back(i);
     }
 
-    for (int i = 0; i < numGroupingEntries; i++)
-      grouping.push_back(groupingData[i]);
+    for (auto it=specToLoad.begin(); it!=specToLoad.end(); ++it)
+      grouping.push_back(groupingData[*it-1]);
 
     if (numGroupingEntries < m_numberOfSpectra) {
       // Check number of dead time entries match the number of 
