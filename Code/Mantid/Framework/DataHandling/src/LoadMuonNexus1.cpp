@@ -122,13 +122,13 @@ void LoadMuonNexus1::exec() {
     m_numberOfPeriods = nxload.t_nper;
   }
 
-  // Try to load dead time info
-  loadDeadTimes(root);
-
   bool autoGroup = getProperty("AutoGroup");
 
   // Grouping info should be returned if user has set the property
   bool returnGrouping = !getPropertyValue("DetectorGroupingTable").empty();
+
+  // Call private method to validate the optional parameters, if set
+  checkOptionalProperties();
 
   Workspace_sptr loadedGrouping;
 
@@ -152,9 +152,6 @@ void LoadMuonNexus1::exec() {
   // If multiperiod, will need to hold the Instrument & Sample for copying
   boost::shared_ptr<Instrument> instrument;
   boost::shared_ptr<Sample> sample;
-
-  // Call private method to validate the optional parameters, if set
-  checkOptionalProperties();
 
   // Read the number of time channels (i.e. bins) from the Nexus file
   const int channelsPerSpectrum = nxload.t_ntc1;
@@ -184,6 +181,9 @@ void LoadMuonNexus1::exec() {
     m_spec_min = 1;
     m_spec_max = m_numberOfSpectra+1; // Add +1 to iterate
   }
+
+  // Try to load dead time info
+  loadDeadTimes(root);
 
   // Create the 2D workspace for the output
   DataObjects::Workspace2D_sptr localWorkspace =
@@ -317,23 +317,47 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
 
     int numDeadTimes = deadTimesData.dim0();
 
+    std::vector<int> specToLoad;
     std::vector<double> deadTimes;
-    deadTimes.reserve(numDeadTimes);
 
-    for (int i = 0; i < numDeadTimes; i++)
-      deadTimes.push_back(deadTimesData[i]);
+    // Set the spectrum list that should be loaded
+    if ( m_interval || m_list ) {
+      // Load only selected spectra
+      for (int64_t i=m_spec_min; i<m_spec_max; i++) {
+        specToLoad.push_back(static_cast<int>(i));
+      }
+      for (auto it=m_spec_list.begin(); it!=m_spec_list.end(); ++it) {
+        specToLoad.push_back(*it);
+      }
+    } else {
+      // Load all the spectra
+      // Start from 1 to N+1 to be consistent with 
+      // the case where spectra are specified
+      for (int i=1; i<numDeadTimes/m_numberOfPeriods+1; i++)
+        specToLoad.push_back(i);
+    }
+
 
     if (numDeadTimes < m_numberOfSpectra) {
+      // Check number of dead time entries match the number of 
+      // spectra in the nexus file
       throw Exception::FileError(
           "Number of dead times specified is less than number of spectra",
           m_filename);
+
     } else if (numDeadTimes == m_numberOfSpectra) {
+
       // Simpliest case - one dead time for one detector
 
-      TableWorkspace_sptr table =
-          createDeadTimeTable(deadTimes.begin(), deadTimes.end());
+      // Populate deadTimes
+      for (auto it=specToLoad.begin(); it!=specToLoad.end(); ++it) {
+        deadTimes.push_back(deadTimesData[*it-1]);
+      }
+      // Load into table
+      TableWorkspace_sptr table = createDeadTimeTable(specToLoad, deadTimes);
       setProperty("DeadTimeTable", table);
     } else {
+
       // More complex case - different dead times for different periods
 
       if (numDeadTimes != m_numberOfSpectra * m_numberOfPeriods) {
@@ -344,10 +368,16 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
 
       WorkspaceGroup_sptr tableGroup = boost::make_shared<WorkspaceGroup>();
 
-      for (auto it = deadTimes.begin(); it != deadTimes.end();
-           it += m_numberOfSpectra) {
-        TableWorkspace_sptr table =
-            createDeadTimeTable(it, it + m_numberOfSpectra);
+      for (int64_t i=0; i<m_numberOfPeriods; i++) {
+
+        // Populate deadTimes
+        for (auto it=specToLoad.begin(); it!=specToLoad.end(); ++it) {
+          int index = static_cast<int>(*it -1 + i*m_numberOfSpectra);
+          deadTimes.push_back(deadTimesData[index]);
+        }
+
+        // Load into table
+        TableWorkspace_sptr table = createDeadTimeTable(specToLoad,deadTimes);
 
         tableGroup->addWorkspace(table);
       }
@@ -433,8 +463,8 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
  * @return Dead Time Table create using the data
  */
 TableWorkspace_sptr
-LoadMuonNexus1::createDeadTimeTable(std::vector<double>::const_iterator begin,
-                                    std::vector<double>::const_iterator end) {
+LoadMuonNexus1::createDeadTimeTable(std::vector<int> specToLoad,
+                                    std::vector<double> deadTimes) {
   TableWorkspace_sptr deadTimeTable =
       boost::dynamic_pointer_cast<TableWorkspace>(
           WorkspaceFactory::Instance().createTable("TableWorkspace"));
@@ -442,11 +472,9 @@ LoadMuonNexus1::createDeadTimeTable(std::vector<double>::const_iterator begin,
   deadTimeTable->addColumn("int", "spectrum");
   deadTimeTable->addColumn("double", "dead-time");
 
-  int s = 1; // Current spectrum
-
-  for (auto it = begin; it != end; it++) {
+  for (size_t i = 0; i<specToLoad.size(); i++) {
     TableRow row = deadTimeTable->appendRow();
-    row << s++ << *it;
+    row << specToLoad[i] << deadTimes[i];
   }
 
   return deadTimeTable;
@@ -513,7 +541,7 @@ void LoadMuonNexus1::loadData(size_t hist, specid_t &i, specid_t specNo, MuonNex
   // Populate the workspace. Loop starts from 1, hence i-1
 
   // Create and fill another vector for the X axis  
-  float *timeChannels = new float[lengthIn+1];
+  float *timeChannels = new float[lengthIn+1]();
   nxload.getTimeChannels(timeChannels, static_cast<const int>(lengthIn+1));
   // Put the read in array into a vector (inside a shared pointer)
   boost::shared_ptr<MantidVec> timeChannelsVec(
