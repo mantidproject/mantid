@@ -158,7 +158,7 @@ public:
 
   void test_roots_SinCos()
   {
-    do_test_roots(SinCos,-M_PI,M_PI,2, 1e-10);
+    do_test_roots(SinCos,-M_PI,M_PI,2, 1e-5);
   }
 
 private:
