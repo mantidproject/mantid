@@ -429,49 +429,6 @@ class LETReduction(stresstesting.MantidStressTest):
 
       return "outWS", "LETReduction.nxs"
 
-class LETReductionEvent2014Multirep(stresstesting.MantidStressTest):
-  """
-  written in a hope that most of the stuff find here will eventually find its way into main reduction routines
-  """
-
-  def requiredMemoryMB(self):
-      """Far too slow for managed workspaces. They're tested in other places. Requires 20Gb"""
-      return 20000
-
-  def runTest(self):
-      """
-      Run the LET reduction with event NeXus files
-      
-      Relies on LET_Parameters.xml file from June 2013
-      """
-      #from ISIS_LETReduction import ReduceLET_MultiRep2014
-      #red = ReduceLET_MultiRep2014()
-
-      #red.def_advanced_properties()
-      #red.def_main_properties()
-
-
-      #out_ws_list=red.reduce()
-
-      ##mults =[41.178539329370217/41.178300987983413,72.235863046309746/72.231475173892022]
-      ##New normalization for 3.4 meV: 41.178539329370217
-      ##Old normalization for 3.4 meV: 41.178300987983413
-      ##New normalization for 8 meV: 72.235863046309746
-      ##Old normalization for 8 meV: 72.231475173892022
-      ##for ind,ws in enumerate(out_ws_list):
-      ##  ws *=mults[ind]
-
-
-
-
-
-  def validate(self):
-      self.tolerance = 1e-6
-      self.tolerance_is_reller=False
-      self.disableChecking.append('SpectraMap')
-      self.disableChecking.append('Instrument')
-      return True
-      #return "LETreducedEi3.4","LET14305_3_4mev.nxs","LETreducedEi8.0", "LET14305_8_0mev.nxs"
 
 class LETReductionEvent2015Multirep(stresstesting.MantidStressTest):
   """
