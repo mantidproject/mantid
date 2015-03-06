@@ -210,10 +210,6 @@ private:
   void setDestroyedListener();
   /// Undo visibiltiy listener
   void removeVisibilityListener();
-  /// Destroy all sources and filters
-  void destroyAllSourcesAndFilters();
-  /// Destroy a single linear pipeline
-  void destroySinglePipeline(pqPipelineSource * source);
 };
 
 } // SimpleGui

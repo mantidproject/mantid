@@ -129,6 +129,10 @@ public:
   enum Direction {X, Y, Z};
   /// Update settings
   virtual void updateSettings();
+  // Destroy all sources in the view.
+  virtual void destroyAllSourcesInView();
+  // Destroy all sources in a single linear pipeline.
+  virtual void destroySinglePipeline(pqPipelineSource * source);
 
   QPointer<pqPipelineSource> origSrc; ///< The original source
   QPointer<pqPipelineRepresentation> origRep; ///< The original source representation

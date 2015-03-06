@@ -110,7 +110,10 @@ int vtkSplatterPlot::RequestData(vtkInformation *,
     FilterUpdateProgressAction<vtkSplatterPlot> drawUpdateProgress(this,
                                                                    "Drawing...");
     vtkDataSet* product = m_presenter->create(drawUpdateProgress);
-    product->SetFieldData(input->GetFieldData());
+
+    // Extract the relevant metadata from the underlying source
+    m_presenter->setMetadata(input->GetFieldData(), product);
+
     output->ShallowCopy(product);
 
     try

@@ -31,7 +31,7 @@
       </Documentation>
     </IntVectorProperty>
     <StringVectorProperty name="Delimiter" command="SetDelimiter" number_of_elements="1" panel_visibility="never"/>
-	<DoubleVectorProperty name="MinValue"	command="GetMinValue" information_only="1"/>
+	 <DoubleVectorProperty name="MinValue"	command="GetMinValue" information_only="1"/>
     <DoubleVectorProperty name="MaxValue" command="GetMaxValue" information_only="1"/>
 	<StringVectorProperty name="Instrument" command="GetInstrument" number_of_elements="1" information_only="1"/>
     </SourceProxy>

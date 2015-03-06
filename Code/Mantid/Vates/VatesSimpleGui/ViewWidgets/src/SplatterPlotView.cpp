@@ -129,28 +129,10 @@ bool SplatterPlotView::eventFilter(QObject *obj, QEvent *ev)
 
 void SplatterPlotView::destroyView()
 {
+  destroyFiltersForSplatterPlotView();
+
+  // Destroy the view.
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  if (this->m_peaksFilter)
-  {
-    builder->destroy(this->m_peaksFilter);
-  }
-  if (!this->peaksSource.isEmpty())
-  {
-    this->destroyPeakSources();
-    pqActiveObjects::instance().setActiveSource(this->origSrc);
-  }
-  if (this->probeSource)
-  {
-    builder->destroy(this->probeSource);
-  }
-  if (this->threshSource)
-  {
-    builder->destroy(this->threshSource);
-  }
-  if (this->splatSource)
-  {
-    builder->destroy(this->splatSource);
-  }
   builder->destroy(this->view);
 }
 
@@ -670,7 +652,43 @@ void SplatterPlotView::onPeaksFilterDestroyed() {
   m_peaksFilter = NULL;
 }
 
+/**
+ * Destroy all sources in the splatterplot view. We need to delete the filters before 
+ * we can delete the underlying sources
+ */
+void SplatterPlotView::destroyAllSourcesInView() {
+  destroyFiltersForSplatterPlotView();
 
+  // Destroy the remaning sources and filters
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  builder->destroySources();
+}
+
+
+void SplatterPlotView::destroyFiltersForSplatterPlotView(){
+   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  if (this->m_peaksFilter)
+  {
+    builder->destroy(this->m_peaksFilter);
+  }
+  if (!this->peaksSource.isEmpty())
+  {
+    this->destroyPeakSources();
+    pqActiveObjects::instance().setActiveSource(this->origSrc);
+  }
+  if (this->probeSource)
+  {
+    builder->destroy(this->probeSource);
+  }
+  if (this->threshSource)
+  {
+    builder->destroy(this->threshSource);
+  }
+  if (this->splatSource)
+  {
+    builder->destroy(this->splatSource);
+  }
+}
 
 } // SimpleGui
 } // Vates

@@ -90,6 +90,10 @@ public:
    * ViewBase::resetDisplay()
    */
   void resetDisplay();
+  /**
+   * Destroy all sources in the view. 
+   */
+  virtual void destroyAllSourcesInView();
 
 signals:
   /// Reset to the Standard View
@@ -144,7 +148,8 @@ private:
   bool checkIfPeaksWorkspaceIsAlreadyBeingTracked(pqPipelineSource* source);
   /// Update the peaks filter
   void updatePeaksFilter(pqPipelineSource* filter);
-
+  /// Destroy splatter plot specific sources and filters
+  void destroyFiltersForSplatterPlotView();
 
   bool noOverlay; ///< Flag to respond to overlay situation correctly
   QList<QPointer<pqPipelineSource> > peaksSource; ///< A list of peaks sources
