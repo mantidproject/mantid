@@ -38,6 +38,8 @@ class RunSetupScript(BaseScriptElement):
     disablevanbkgdcorrection = False
     doresamplex = False
 
+    parnamelist = None
+
 
     def __init__(self, inst_name):
         """ Initialization

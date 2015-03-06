@@ -59,10 +59,10 @@ void WeightedMeanMD::execHistoHisto(
       double e = rhs_err_sq * lhs_err_sq / (rhs_err_sq + lhs_err_sq);
       signal = s * e;
       error_sq = e;
-    } else if ((rhs_err > 0) && (lhs_err <= 0)) {
+    } else if ((rhs_err > 0) && (lhs_err == 0)) {
       signal = rhs_s;
       error_sq = rhs_err * rhs_err;
-    } else if ((lhs_err <= 0) && (rhs_err > 0)) {
+    } else if ((lhs_err > 0) && (rhs_err == 0)) {
       signal = lhs_s;
       error_sq = lhs_err * lhs_err;
     }

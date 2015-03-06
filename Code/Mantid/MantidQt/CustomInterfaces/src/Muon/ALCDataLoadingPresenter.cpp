@@ -43,12 +43,16 @@ namespace CustomInterfaces
       alg->setProperty("LastRun", m_view->lastRun());
       alg->setProperty("LogValue", m_view->log());
       alg->setProperty("Type", m_view->calculationType());
+      alg->setProperty("DeadTimeCorrType",m_view->deadTimeType());
 
       // If time limiting requested, set min/max times
       if (auto timeRange = m_view->timeRange())
       {
         alg->setProperty("TimeMin", timeRange->first);
         alg->setProperty("TimeMax", timeRange->second);
+      }
+      if (m_view->deadTimeType() == "FromSpecifiedFile") {
+        alg->setProperty("DeadTimeCorrFile",m_view->deadTimeFile());
       }
 
       alg->setPropertyValue("OutputWorkspace", "__NotUsed");
@@ -78,9 +82,11 @@ namespace CustomInterfaces
       IAlgorithm_sptr load = AlgorithmManager::Instance().create("LoadMuonNexus");
       load->setChild(true); // Don't want workspaces in the ADS
       load->setProperty("Filename", m_view->firstRun());
-      // Don't load any data - we need logs only
-      load->setPropertyValue("SpectrumMin","0");
-      load->setPropertyValue("SpectrumMax","0");
+      // We need logs only but we have to use LoadMuonNexus 
+      // (can't use LoadMuonLogs as not all the logs would be 
+      // loaded), so we load the minimum amount of data, i.e., one spectrum
+      load->setPropertyValue("SpectrumMin","1");
+      load->setPropertyValue("SpectrumMax","1");
       load->setPropertyValue("OutputWorkspace", "__NotUsed");
       load->execute();
 

@@ -124,7 +124,7 @@ std::string EQSANSLoad::findConfigFile(const int &run) {
 
   int max_run_number = 0;
   std::string config_file = "";
-  static boost::regex re1("eqsans_configuration\\.([0-9]+)");
+  static boost::regex re1("eqsans_configuration\\.([0-9]+)$");
   boost::smatch matches;
   for (; it != searchPaths.end(); ++it) {
     Poco::DirectoryIterator file_it(*it);
