@@ -20,14 +20,14 @@ DECLARE_FUNCTION(BackToBackExponential)
 
 void BackToBackExponential::init() {
   // Do not change the order of these parameters!
-  declareParameter("I", 1.0, "integrated intensity of the peak"); // 0
-  declareParameter("A", 10.0,
+  declareParameter("I", 0.0, "integrated intensity of the peak"); // 0
+  declareParameter("A", 1.0,
                    "exponential constant of rising part of neutron pulse"); // 1
   declareParameter(
-      "B", 5.05, "exponential constant of decaying part of neutron pulse"); // 2
+      "B", 0.05, "exponential constant of decaying part of neutron pulse"); // 2
   declareParameter("X0", 0.0, "peak position");                             // 3
   declareParameter(
-      "S", .1,
+      "S", 1.0,
       "standard deviation of gaussian part of peakshape function"); // 4
 
   defineCentreParameter("X0");
