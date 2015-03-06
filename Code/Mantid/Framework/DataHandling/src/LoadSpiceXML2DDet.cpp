@@ -213,12 +213,7 @@ void LoadSpiceXML2DDet::exec() {
 
   // Parse
   std::vector<SpiceXMLNode> vec_xmlnode;
-  std::string detvaluestr("");
   parseSpiceXML(xmlfilename, vec_xmlnode);
-
-  size_t n = std::count(detvaluestr.begin(), detvaluestr.end(), '\n');
-  g_log.notice() << "[DB] detector string value = " << n << "\n" << detvaluestr
-                 << "\n";
 
   // Create output workspace
   MatrixWorkspace_sptr outws =
@@ -260,26 +255,39 @@ void LoadSpiceXML2DDet::parseSpiceXML(const std::string &xmlfilename,
     // get number of children
     size_t numchildren = pNode->childNodes()->length();
     if (numchildren > 1) {
-      g_log.notice() << "Parent node " << nodename << " has " << numchildren
-                     << " children."
-                     << "\n";
+      g_log.debug() << "Parent node " << nodename << " has " << numchildren
+                    << " children."
+                    << "\n";
+      if (nodename.compare("SPICErack") == 0) {
+        // SPICErack is the main parent node.  start_time and end_time are there
+        size_t numattr = pNode->attributes()->length();
+        for (size_t j = 0; j < numattr; ++j) {
+          std::string attname = pNode->attributes()->item(j)->nodeName();
+          std::string attvalue = pNode->attributes()->item(j)->innerText();
+          SpiceXMLNode xmlnode(attname);
+          xmlnode.setValue(attvalue);
+          vecspicenode.push_back(xmlnode);
+          g_log.debug() << "SPICErack attribute " << j << " Name = " << attname
+                        << ", Value = " << attvalue << "\n";
+        }
+      }
+
     } else if (numchildren == 1) {
       std::string innertext = pNode->innerText();
-      size_t numattr = pNode->attributes()->length();
-      g_log.notice() << "  Child node " << nodename << "'s attributes: "
-                     << "\n";
+      unsigned long numattr = pNode->attributes()->length();
+      g_log.debug() << "  Child node " << nodename << "'s attributes: "
+                    << "\n";
 
       SpiceXMLNode xmlnode(nodename);
       std::string nodetype("");
       std::string nodeunit("");
       std::string nodedescription("");
 
-      for (size_t j = 0; j < numattr; ++j) {
+      for (unsigned long j = 0; j < numattr; ++j) {
         std::string atttext = pNode->attributes()->item(j)->innerText();
         std::string attname = pNode->attributes()->item(j)->nodeName();
-        g_log.notice() << "     attribute " << j << " name = " << attname
-                       << ", "
-                       << "value = " << atttext << "\n";
+        g_log.debug() << "     attribute " << j << " name = " << attname << ", "
+                      << "value = " << atttext << "\n";
         if (attname.compare("type") == 0) {
           // type
           nodetype = atttext;
@@ -328,16 +336,12 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
     if (xmlnode.getName().compare(detnodename) == 0) {
       // Get node value string (256x256 as a whole)
       const std::string detvaluestr = xmlnode.getValue();
-      size_t numlines = static_cast<size_t>(
-          std::count(detvaluestr.begin(), detvaluestr.end(), '\n'));
-      g_log.notice() << "[DB] Detector counts string contains " << numlines
-                     << "\n";
 
       // Split
       std::vector<std::string> vecLines;
       boost::split(vecLines, detvaluestr, boost::algorithm::is_any_of("\n"));
-      g_log.notice() << "There are " << vecLines.size() << " lines"
-                     << "\n";
+      g_log.debug() << "There are " << vecLines.size() << " lines"
+                    << "\n";
 
       size_t irow = 0;
       for (size_t i = 0; i < vecLines.size(); ++i) {
@@ -345,21 +349,22 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
 
         // Skip empty line
         if (line.size() == 0) {
-          g_log.notice() << "Empty Line at " << i << "\n";
+          g_log.debug() << "\tFound empty Line at " << i << "\n";
           continue;
         }
 
         // Check whether it exceeds boundary
         if (irow == numpixely) {
-          throw std::runtime_error("Number of non-empty rows in detector data "
-                                   "exceeds user defined geometry size.");
+          std::stringstream errss;
+          errss << "Number of non-empty rows (" << irow + 1
+                << ") in detector data "
+                << "exceeds user defined geometry size " << numpixely << ".";
+          throw std::runtime_error(errss.str());
         }
 
         // Split line
         std::vector<std::string> veccounts;
         boost::split(veccounts, line, boost::algorithm::is_any_of(" \t"));
-        // g_log.notice() << "Number of items of line " << i << " is " <<
-        // veccounts.size() << "\n";
 
         // check
         if (veccounts.size() != numpixelx) {
@@ -395,19 +400,19 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
         double dvalue = atof(nodevalue.c_str());
         outws->mutableRun().addProperty(
             new PropertyWithValue<double>(nodename, dvalue));
-        g_log.notice() << "[DB] Log name / xml node : " << xmlnode.getName()
-                       << " (double) value = " << dvalue << "\n";
+        g_log.debug() << "Log name / xml node : " << xmlnode.getName()
+                      << " (double) value = " << dvalue << "\n";
       } else if (xmlnode.isInteger()) {
         int ivalue = atoi(nodevalue.c_str());
         outws->mutableRun().addProperty(
             new PropertyWithValue<int>(nodename, ivalue));
-        g_log.notice() << "[DB] Log name / xml node : " << xmlnode.getName()
-                       << " (int) value = " << ivalue << "\n";
+        g_log.debug() << "Log name / xml node : " << xmlnode.getName()
+                      << " (int) value = " << ivalue << "\n";
       } else {
         outws->mutableRun().addProperty(
             new PropertyWithValue<std::string>(nodename, nodevalue));
-        g_log.notice() << "[DB] Log name / xml node : " << xmlnode.getName()
-                       << " (string) value = " << nodevalue << "\n";
+        g_log.debug() << "Log name / xml node : " << xmlnode.getName()
+                      << " (string) value = " << nodevalue << "\n";
       }
     }
   }

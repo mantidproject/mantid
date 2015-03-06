@@ -89,8 +89,13 @@ public:
     double _phi = atof(outws->run().getProperty("_phi")->value().c_str());
     TS_ASSERT_DELTA(_phi, 144.714218, 0.0000001);
 
+    // check start_time and end_time
+    TS_ASSERT(outws->run().hasProperty("start_time"));
+    std::string start_time = outws->run().getProperty("start_time")->value();
+    TS_ASSERT_EQUALS(start_time, "2015-01-17 13:36:45");
+
     // Clean
-    AnalysisDataService::Instance().remove("xp0335_S0038");
+    AnalysisDataService::Instance().remove("Exp0335_S0038");
   }
 };
 
