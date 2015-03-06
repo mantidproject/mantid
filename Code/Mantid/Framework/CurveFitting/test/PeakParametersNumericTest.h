@@ -156,23 +156,30 @@ public:
 
   void test_GaussLinearW()
   {
-    do_test_Gauss(GaussLinearW(),1e-7);
+    GaussLinearW fun;
+    do_test_Gauss(fun,1e-7);
   }
 
   void test_GaussInverseW()
   {
-    do_test_Gauss(GaussInverseW(),1e-4);
+    GaussInverseW fun;
+    do_test_Gauss(fun,1e-4);
   }
 
   void test_GaussSquaredW()
   {
-    do_test_Gauss(GaussSquaredW(),1e-7);
+    GaussSquaredW fun;
+    do_test_Gauss(fun,1e-7);
   }
 
   void test_Back2Back()
   {
     BackToBackExponential fun;
     fun.initialize();
+    fun.setParameter("I",1.0);
+    fun.setParameter("A",10.0);
+    fun.setParameter("B",5.05);
+    fun.setParameter("S",0.1);
     double tol = 1e-4;
     TS_ASSERT_DELTA(fun.centre(), 0.0335, tol);
     TS_ASSERT_DELTA(fun.height(), 2.0953, tol);
