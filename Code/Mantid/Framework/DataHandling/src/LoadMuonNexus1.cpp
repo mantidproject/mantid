@@ -413,46 +413,52 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
       grouping.push_back(groupingData[i]);
 
     if (numGroupingEntries < m_numberOfSpectra) {
+      // Check number of dead time entries match the number of 
+      // spectra in the nexus file
       throw Exception::FileError(
           "Number of grouping entries is less than number of spectra",
           m_filename);
-    } else if (numGroupingEntries == m_numberOfSpectra) {
-      // Simpliest case - one grouping entry per spectra
-      TableWorkspace_sptr table =
+
+    } else if (numGroupingEntries % m_numberOfSpectra) {
+      // At least the number of entries should cover all the spectra
+      throw Exception::FileError("Number of grouping entries doesn't cover "
+        "every spectra in every period",
+        m_filename);
+
+    } else {
+
+      if ( m_numberOfPeriods==1 ) {
+        // Simpliest case - one grouping entry per spectra
+        TableWorkspace_sptr table =
           createDetectorGroupingTable(grouping.begin(), grouping.end());
 
-      if (table->rowCount() != 0)
-        return table;
-    } else {
-      // More complex case - grouping information for every period
-
-      if (numGroupingEntries != m_numberOfSpectra * m_numberOfPeriods) {
-        throw Exception::FileError("Number of grouping entries doesn't cover "
-                                   "every spectra in every period",
-                                   m_filename);
-      }
-
-      WorkspaceGroup_sptr tableGroup = boost::make_shared<WorkspaceGroup>();
-
-      for (auto it = grouping.begin(); it != grouping.end();
-           it += m_numberOfSpectra) {
-        TableWorkspace_sptr table =
-            createDetectorGroupingTable(it, it + m_numberOfSpectra);
-
         if (table->rowCount() != 0)
-          tableGroup->addWorkspace(table);
-      }
+          return table;
 
-      if (tableGroup->size() != 0) {
-        if (tableGroup->size() != static_cast<size_t>(m_numberOfPeriods))
-          throw Exception::FileError("Zero grouping for some of the periods",
-                                     m_filename);
+      } else {
+        // More complex case - grouping information for every period
 
-        return tableGroup;
+        WorkspaceGroup_sptr tableGroup = boost::make_shared<WorkspaceGroup>();
+
+        for (auto it = grouping.begin(); it != grouping.end();
+          it += m_numberOfSpectra) {
+            TableWorkspace_sptr table =
+              createDetectorGroupingTable(it, it + m_numberOfSpectra);
+
+            if (table->rowCount() != 0)
+              tableGroup->addWorkspace(table);
+        }
+
+        if (tableGroup->size() != 0) {
+          if (tableGroup->size() != static_cast<size_t>(m_numberOfPeriods))
+            throw Exception::FileError("Zero grouping for some of the periods",
+            m_filename);
+
+          return tableGroup;
+        }
       }
     }
   }
-
   return Workspace_sptr();
 }
 
