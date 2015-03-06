@@ -444,9 +444,19 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
       if ( m_numberOfPeriods==1 ) {
         // Simpliest case - one grouping entry per spectra
 
-        for (auto it=specToLoad.begin(); it!=specToLoad.end(); ++it) {
-          int index = *it - 1 + static_cast<int>((m_entrynumber-1) * m_numberOfSpectra);
-          grouping.push_back(groupingData[index]);
+        if ( !m_entrynumber ) {
+          // m_entrynumber = 0 && m_numberOfPeriods = 1 means that user did not select 
+          // any periods but there is only one in the dataset
+          for (auto it=specToLoad.begin(); it!=specToLoad.end(); ++it) {
+            int index = *it - 1;
+            grouping.push_back(groupingData[index]);
+          }
+        } else {
+          // User selected an entry number
+          for (auto it=specToLoad.begin(); it!=specToLoad.end(); ++it) {
+            int index = *it - 1 + static_cast<int>((m_entrynumber-1) * m_numberOfSpectra);
+            grouping.push_back(groupingData[index]);
+          }
         }
 
         TableWorkspace_sptr table =
