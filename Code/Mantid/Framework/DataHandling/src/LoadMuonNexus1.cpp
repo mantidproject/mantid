@@ -426,9 +426,6 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
         specToLoad.push_back(i);
     }
 
-    for (auto it=specToLoad.begin(); it!=specToLoad.end(); ++it)
-      grouping.push_back(groupingData[*it-1]);
-
     if (numGroupingEntries < m_numberOfSpectra) {
       // Check number of dead time entries match the number of 
       // spectra in the nexus file
@@ -446,6 +443,12 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
 
       if ( m_numberOfPeriods==1 ) {
         // Simpliest case - one grouping entry per spectra
+
+        for (auto it=specToLoad.begin(); it!=specToLoad.end(); ++it) {
+          int index = *it - 1 + static_cast<int>((m_entrynumber-1) * m_numberOfSpectra);
+          grouping.push_back(groupingData[index]);
+        }
+
         TableWorkspace_sptr table =
           createDetectorGroupingTable(grouping.begin(), grouping.end());
 
