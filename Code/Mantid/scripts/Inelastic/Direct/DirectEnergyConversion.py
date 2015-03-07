@@ -197,7 +197,7 @@ class DirectEnergyConversion(object):
 
         if self.use_hard_mask_only:
             # build hard mask
-            diag_mask,n_masks = white.get_masking()
+            diag_mask = white.get_masking(1)
             if diag_mask is None:
                 # in this peculiar way we can obtain working mask which
                 # accounts for initial data grouping in the
@@ -210,8 +210,9 @@ class DirectEnergyConversion(object):
                 MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
                 white.add_masked_ws(white_data)
                 DeleteWorkspace(Workspace='white_ws_clone')
-                diag_mask,n_masks = white.get_masking()
-            if not(out_ws_name is None):
+                DeleteWorkspace(Workspace='hard_mask_ws')
+                diag_mask = white.get_masking(1)
+            if not out_ws_name is None:
                 dm = CloneWorkspace(diag_mask,OutputWorkspace=out_ws_name)
                 return dm
             else:
@@ -228,7 +229,7 @@ class DirectEnergyConversion(object):
         # Get the background/total counts from the sample run if present
         if not diag_sample is None:
             diag_sample = self.get_run_descriptor(diag_sample)
-            sample_mask,n_sam_masked = diag_sample.get_masking()
+            sample_mask = diag_sample.get_masking(1)
             if sample_mask is None:
                 # If the bleed test is requested then we need to pass in the
                 # sample_run as well
@@ -241,7 +242,7 @@ class DirectEnergyConversion(object):
                 # Set up the background integrals for diagnostic purposes
                 result_ws = self.normalise(diag_sample, self.normalise_method)
 
-                #>>> here result workspace is being processed 
+                #>>>here result workspace is being processed
                 #-- not touching result ws
                 bkgd_range = self.background_test_range
                 background_int = Integration(result_ws,\
@@ -260,13 +261,16 @@ class DirectEnergyConversion(object):
 
         # extract existing white mask if one is defined and provide it for
         # diagnose to use instead of constantly diagnosing the same vanadium
-        white_mask,num_masked = white.get_masking()
-        if not(white_mask is None) and not(sample_mask is None):
-            # nothing to do then
+        white_mask = white.get_masking(1)
+        if white_mask is None or sample_mask is None:
+            pass # have to run diagnostics
+        else:
+            #Sample mask and white masks are defined.
+            #nothing to do then
             total_mask = sample_mask + white_mask
             return total_mask
-        else:
-            pass # have to run diagnostics after all
+
+
 
         # Check how we should run diag
         diag_spectra_blocks = self.diag_spectra
@@ -292,7 +296,7 @@ class DirectEnergyConversion(object):
         if out_ws_name:
             if not(diag_sample is None):
                 diag_sample.add_masked_ws(whiteintegrals)
-                mask,n_removed = diag_sample.get_masking()
+                mask = diag_sample.get_masking(1)
                 diag_mask = CloneWorkspace(mask,OutputWorkspace=out_ws_name)
             else: # either WB was diagnosed or WB masks were applied to it
                 # Extract a mask workspace
@@ -376,7 +380,7 @@ class DirectEnergyConversion(object):
             masking,header = self._run_diagnostics(prop_man)
         else:
             header = '*** Using stored mask file for workspace with {0} spectra and {1} masked spectra'
-            masking = self.spectra_masks 
+            masking = self.spectra_masks
 
         # estimate and report the number of failing detectors
         nMaskedSpectra = get_failed_spectra_list_from_masks(masking)
@@ -405,8 +409,8 @@ class DirectEnergyConversion(object):
             MonovanCashNum = PropertyManager.monovan_run.run_number()
         else:
             MonovanCashNum = None
-        # Set or clear monovan run number to use in cash ID to return correct 
-        # cashed value of monovan integral
+        #Set or clear monovan run number to use in cash ID to return correct
+        #cashed value of monovan integral
         PropertyManager.mono_correction_factor.set_cash_mono_run_number(MonovanCashNum)
 
         mono_ws_base = None
@@ -457,7 +461,7 @@ class DirectEnergyConversion(object):
             # or use previously cashed value
             cashed_mono_int = PropertyManager.mono_correction_factor.get_val_from_cash(prop_man)
             if MonovanCashNum != None or self.mono_correction_factor or cashed_mono_int:
-                deltaE_ws_sample,mono_ws_base=self._do_abs_corrections(deltaE_ws_sample,cashed_mono_int,\
+                deltaE_ws_sample,mono_ws_base = self._do_abs_corrections(deltaE_ws_sample,cashed_mono_int,\
                     ei_guess,mono_ws_base,tof_range, cut_ind,num_ei_cuts)
             else:
                 pass # no absolute units corrections
