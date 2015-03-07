@@ -82,7 +82,7 @@ TomoReconstruction::TomoReconstruction(QWidget *parent)
     m_pathFlat(m_pathSCARFbase + "data/flat"),
     m_pathDark(m_pathSCARFbase + "data/dark"),
     m_pathSavuConfigFile(m_pathSCARFbase),
-    m_availPlugins(), m_currPlugins(), m_currentParamPath() {
+    m_currentParamPath() {
 
   m_computeRes.push_back(m_SCARFName);
 
@@ -91,6 +91,11 @@ TomoReconstruction::TomoReconstruction(QWidget *parent)
   m_SCARFtools.push_back(m_CCPiTool);
   m_SCARFtools.push_back(m_SavuTool);
   m_SCARFtools.push_back(m_CustomCmdTool);
+
+  m_availPlugins = Mantid::API::WorkspaceFactory::Instance().createTable();
+  m_availPlugins->addColumns("str", "name", 4);
+  m_currPlugins = Mantid::API::WorkspaceFactory::Instance().createTable();
+  m_currPlugins->addColumns("str", "name", 4);
 }
 
 void TomoReconstruction::doSetupSectionParameters() {
@@ -137,6 +142,10 @@ void TomoReconstruction::doSetupSectionSetup() {
   // disable 'local' for now
   m_ui.tabWidget_comp_resource->setTabEnabled(false, 1);
 
+  m_ui.groupBox_saved_savu_config->setChecked(false);
+  m_ui.groupBox_saved_savu_config->setEnabled(false);
+  m_ui.groupBox_run_config->setEnabled(false);
+
   connect(m_ui.pushButton_SCARF_login, SIGNAL(released()), this,
           SLOT(SCARFLoginClicked()));
   connect(m_ui.pushButton_SCARF_logout, SIGNAL(released()), this,
@@ -148,7 +157,7 @@ void TomoReconstruction::doSetupSectionSetup() {
   connect(m_ui.pushButton_flat_dir, SIGNAL(released()), this,
           SLOT(flatPathBrowseClicked()));
   connect(m_ui.pushButton_dark_dir, SIGNAL(released()), this,
-          SLOT(darPathBrowseClicked()));
+          SLOT(darkPathBrowseClicked()));
   connect(m_ui.pushButton_savu_config_file, SIGNAL(released()), this,
           SLOT(savuConfigFileBrowseClicked()));
 }
@@ -224,11 +233,34 @@ void TomoReconstruction::enableLoggedActions(bool enable) {
   buttons.push_back(m_ui.pushButton_run_refresh);
   buttons.push_back(m_ui.pushButton_run_job_cancel);
   buttons.push_back(m_ui.pushButton_run_job_visualize);
+  buttons.push_back(m_ui.pushButton_reconstruct);
 
   for (size_t i=0; i<buttons.size(); ++i) {
     buttons[i]->setEnabled(enable);
   }
 }
+
+/**
+ * Handle display of the current status of the remote/local compute resource
+ * that is selected by the user.
+ *
+ * @param online whether to show good/working/online status
+ */
+void TomoReconstruction::updateCompResourceStatus(bool online) {
+  const std::string res = getComputeResource();
+  if (res == m_SCARFName) {
+    if (online)
+      m_ui.pushButton_remote_status->setText("Online");
+    else
+      m_ui.pushButton_remote_status->setText("Offline");
+  } else if (res == m_localCompName) {
+    if (online)
+      m_ui.pushButton_remote_status->setText("Tools available");
+    else
+      m_ui.pushButton_remote_status->setText("No tools available!");
+  }
+}
+
 void TomoReconstruction::SCARFLoginClicked() {
   try {
     doLogin(getPassword());
@@ -237,6 +269,7 @@ void TomoReconstruction::SCARFLoginClicked() {
   }
 
   enableLoggedActions(true);
+  updateCompResourceStatus(true);
   m_loggedIn = true;
 
   m_ui.pushButton_SCARF_login->setEnabled(false);
@@ -273,7 +306,7 @@ void TomoReconstruction::loadSettings() {
  */
 void TomoReconstruction::loadSavuTomoConfig(
     std::string &filePath,
-    std::vector<Mantid::API::ITableWorkspace_sptr> &currentPlugins) {
+    Mantid::API::ITableWorkspace_sptr &currentPlugins) {
   // try to load tomo reconstruction parametereization file
   auto alg = Algorithm::fromString("LoadSavuTomoConfig");
   alg->initialize();
@@ -288,19 +321,13 @@ void TomoReconstruction::loadSavuTomoConfig(
         e.what());
   }
 
-  // Clear the plugin list and remove any item in the ADS entries
-  for (auto it = currentPlugins.begin(); it != currentPlugins.end(); ++it) {
-    ITableWorkspace_sptr curr =
-        boost::dynamic_pointer_cast<ITableWorkspace>((*it));
-    if (AnalysisDataService::Instance().doesExist(curr->getName())) {
-      AnalysisDataService::Instance().remove(curr->getName());
-    }
-  }
-  currentPlugins.clear();
-
   // new processing plugins list
-  ITableWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
-  currentPlugins.push_back(ws);
+  try {
+    currentPlugins = alg->getProperty("OutputWorkspace");
+  } catch(std::exception &e) {
+      userError("Could not load config file", "Failed to load the file "
+                "with the following error: " + std::string(e.what()));
+  }
 }
 
 // Build a unique (and hidden) name for the table ws
@@ -379,7 +406,7 @@ void TomoReconstruction::setupRunTool() {
     // resources. For the time being this is rather simple (just
     // SCARF) and will probably stay like this for a while.
     const std::string res = getComputeResource();
-    if ("ISIS" == m_facility && "SCARF@STFC" == res) {
+    if ("ISIS" == m_facility && m_SCARFName == res) {
       tools = m_SCARFtools;
     }
     // others would/could come here
@@ -508,17 +535,22 @@ void TomoReconstruction::doSubmitReconstructionJob() {
  */
 void TomoReconstruction::makeRunnableWithOptions(std::string &run,
                                                  std::string &opt) {
-  // For now we only know how to run commands on SCARF
+  // For now we only know how to 'aproximately' run commands on SCARF
   if (m_SCARFName ==
       m_ui.comboBox_run_compute_resource->currentText().toStdString()) {
     const std::string tool =
         m_ui.comboBox_run_tool->currentText().toStdString();
+    std::string base = currentPathSCARF() + "/";
     if (tool == m_TomoPyTool) {
       run = "/work/imat/scripts/tomopy/imat_recon_FBP.py";
-      opt = m_ui.lineEdit_SCARF_path->text().toStdString();
+      opt = "--input_dir " + base + currentPathFITS() +
+        " " +
+        "--dark " + base + currentPathDark() +
+        " " +
+        "--white " + base + currentPathFlat();
     } else if (tool == m_AstraTool) {
       run = "/work/imat/scripts/astra/astra-3d-SIRT3D.py";
-      opt = m_ui.lineEdit_SCARF_path->text().toStdString();
+      opt = base + currentPathFITS();
     } else {
       userWarning("Unable to use this tool",
                   "I do not know how to submit jobs to use this tool: "
@@ -607,10 +639,10 @@ void TomoReconstruction::jobCancelClicked()
   }
 }
 
-void TomoReconstruction::doQueryJobStatus(std::vector<std::string> ids,
-                                          std::vector<std::string> names,
-                                          std::vector<std::string> status,
-                                          std::vector<std::string> cmds) {
+void TomoReconstruction::doQueryJobStatus(std::vector<std::string> &ids,
+                                          std::vector<std::string> &names,
+                                          std::vector<std::string> &status,
+                                          std::vector<std::string> &cmds) {
   // TODO: once the remote algorithms are rearranged into the
   // 'RemoteJobManager' design, this will use...
   // auto alg = Algorithm::fromString("QueryAllRemoteJobs");
@@ -631,7 +663,7 @@ void TomoReconstruction::doQueryJobStatus(std::vector<std::string> ids,
         getComputeResource() + ": " + e.what());
   }
   ids = alg->getProperty("RemoteJobsID");
-  names = alg->getProperty("RemoteJobsID");
+  names = alg->getProperty("RemoteJobsNames");
   status = alg->getProperty("RemoteJobsStatus");
   cmds = alg->getProperty("RemoteJobsCommands");
 }
@@ -729,29 +761,37 @@ void TomoReconstruction::browseImageClicked() {
 }
 
 void TomoReconstruction::loadAvailablePlugins() {
-  // TODO:: load actual plugins -
-  // creating a couple of test choices for now (should fetch from remote api
-  // when implemented)
+  // TODO:: load actual plugins when we know them
+  // creating a few relatively realistic choices for now (should crossh check
+  //  with the savu api when finalized).
   // - Should also verify the param string is valid json when setting
-  // Create plugin tables
 
-  auto plug1 = Mantid::API::WorkspaceFactory::Instance().createTable();
-  auto plug2 = Mantid::API::WorkspaceFactory::Instance().createTable();
-  plug1->addColumns("str", "name", 4);
-  plug2->addColumns("str", "name", 4);
-  Mantid::API::TableRow plug1row = plug1->appendRow();
-  Mantid::API::TableRow plug2row = plug2->appendRow();
-  plug1row << "10001"
-           << "{\"key\":\"val\",\"key2\":\"val2\"}"
-           << "Plugin #1"
-           << "Citation info";
-  plug2row << "10002"
-           << "{\"key\":\"val\",\"key2\":\"val2\"}"
-           << "Plugin #2"
-           << "Citation info";
+  // Create plugin table
+  Mantid::API::TableRow row = m_availPlugins->appendRow();
+  row << "savu.plugins.timeseries_field_corrections"
+      << "{}"
+      << "Time Series Field Corrections" << "Citation info";
 
-  m_availPlugins.push_back(plug1);
-  m_availPlugins.push_back(plug2);
+  row = m_availPlugins->appendRow();
+  row << "savu.plugins.median_filter"
+      << "{\"kernel_size\":[1, 3, 3]}"
+      << "Median Filter" << "Citation info";
+
+  row = m_availPlugins->appendRow();
+  row << "savu.plugins.vo_centering"
+      << "{}"
+      << "Vo Centering" << "Citation info";
+
+  row = m_availPlugins->appendRow();
+  row << "savu.plugins.simple_recon"
+      << "{\"center_of_rotation\":86}"
+      << "Simple Reconstruction" << "Citation info";
+
+  row = m_availPlugins->appendRow();
+  row << "savu.plugins.astra_recon"
+      << "{\"center_of_rotation\":\"86\", "
+    "\"reconsturction_type\":\"SIRT\", \"number_of_iterations\":5}"
+      << "Simple Reconstruction" << "Citation info";
 
   // Update the UI
   refreshAvailablePluginListUI();
@@ -762,8 +802,8 @@ void TomoReconstruction::loadAvailablePlugins() {
 void TomoReconstruction::refreshAvailablePluginListUI() {
   // Table WS structure, id/params/name/cite
   m_ui.listAvailablePlugins->clear();
-  for (auto it = m_availPlugins.begin(); it != m_availPlugins.end(); ++it) {
-    QString str = QString::fromStdString((*it)->cell<std::string>(0, 2));
+  for (size_t i=0; i<m_availPlugins->rowCount(); ++i) {
+    QString str = QString::fromStdString(m_availPlugins->cell<std::string>(i, 2));
     m_ui.listAvailablePlugins->addItem(str);
   }
 }
@@ -773,17 +813,18 @@ void TomoReconstruction::refreshAvailablePluginListUI() {
 void TomoReconstruction::refreshCurrentPluginListUI() {
   // Table WS structure, id/params/name/cite
   m_ui.treeCurrentPlugins->clear();
-  for (auto it = m_currPlugins.begin(); it != m_currPlugins.end(); ++it) {
-    createPluginTreeEntry(*it);
-  }
+  createPluginTreeEntries(m_currPlugins);
 }
 
 // Updates the selected plugin info from Available plugins list.
 void TomoReconstruction::availablePluginSelected() {
   if (m_ui.listAvailablePlugins->selectedItems().count() != 0) {
-    int currInd = m_ui.listAvailablePlugins->currentIndex().row();
-    m_ui.availablePluginDesc->setText(
-        tableWSToString(m_availPlugins[currInd]));
+    size_t idx = static_cast<size_t>(
+        m_ui.listAvailablePlugins->currentIndex().row());
+    if (idx < m_availPlugins->rowCount()) {
+      m_ui.availablePluginDesc->setText(
+          tableWSRowToString(m_availPlugins, idx));
+    }
   }
 }
 
@@ -799,7 +840,7 @@ void TomoReconstruction::currentPluginSelected() {
         m_ui.treeCurrentPlugins->indexOfTopLevelItem(currItem);
 
     m_ui.currentPluginDesc->setText(
-        tableWSToString(m_currPlugins[topLevelIndex]));
+        tableWSRowToString(m_currPlugins, topLevelIndex));
   }
 }
 
@@ -817,7 +858,7 @@ void TomoReconstruction::paramValModified(QTreeWidgetItem *item,
   if (topLevelIndex != -1) {
     // Recreate the json string from the nodes and write back
     ::Json::Value root;
-    std::string json = m_currPlugins[topLevelIndex]->cell<std::string>(0, 1);
+    std::string json = m_currPlugins->cell<std::string>(topLevelIndex, 1);
     ::Json::Reader r;
 
     if (r.parse(json, root)) {
@@ -825,7 +866,7 @@ void TomoReconstruction::paramValModified(QTreeWidgetItem *item,
       root[ownItem->getKey()] = ownItem->text(0).toStdString();
     }
 
-    m_currPlugins[topLevelIndex]->cell<std::string>(0, 1) =
+    m_currPlugins->cell<std::string>(topLevelIndex, 1) =
         ::Json::FastWriter().write(root);
     currentPluginSelected();
   }
@@ -841,40 +882,49 @@ void TomoReconstruction::expandedItem(QTreeWidgetItem *item) {
   }
 }
 
-// Clones the selected available plugin object into the current plugin vector
-// and refreshes the UI.
+// Adds one plugin from the available plugins list into the list of
+// current plugins
 void TomoReconstruction::transferClicked() {
   if (m_ui.listAvailablePlugins->selectedItems().count() != 0) {
-    int currInd = m_ui.listAvailablePlugins->currentIndex().row();
-
-    ITableWorkspace_sptr newPlugin(m_availPlugins.at(currInd)->clone());
-
-    // Creates a hidden ws entry (with name) in the ADS
-    AnalysisDataService::Instance().add(createUniqueNameHidden(), newPlugin);
-
-    m_currPlugins.push_back(newPlugin);
-
-    createPluginTreeEntry(newPlugin);
+    int idx = m_ui.listAvailablePlugins->currentIndex().row();
+    Mantid::API::TableRow row = m_currPlugins->appendRow();
+    for (size_t j=0; j<m_currPlugins->columnCount(); ++j) {
+      row << m_availPlugins->cell<std::string>(idx, j);
+    }
+    createPluginTreeEntry(row);
   }
 }
 
 void TomoReconstruction::moveUpClicked() {
   if (m_ui.treeCurrentPlugins->selectedItems().count() != 0) {
-    int currInd = m_ui.treeCurrentPlugins->currentIndex().row();
-    if (currInd > 0) {
-      std::iter_swap(m_currPlugins.begin() + currInd,
-                     m_currPlugins.begin() + currInd - 1);
+    size_t idx = static_cast<size_t>(
+        m_ui.treeCurrentPlugins->currentIndex().row());
+    if (idx > 0 && idx < m_currPlugins->rowCount()) {
+      // swap row, all columns
+      for (size_t j=0; j<m_currPlugins->columnCount(); ++j) {
+        std::string swap = m_currPlugins->cell<std::string>(idx, j);
+        m_currPlugins->cell<std::string>(idx, j) =
+          m_currPlugins->cell<std::string>(idx-1, j);
+        m_currPlugins->cell<std::string>(idx-1, j) = swap;
+      }
       refreshCurrentPluginListUI();
     }
   }
 }
 
 void TomoReconstruction::moveDownClicked() {
+  // TODO: this can be done with the same function as above...
   if (m_ui.treeCurrentPlugins->selectedItems().count() != 0) {
-    unsigned int currInd = m_ui.treeCurrentPlugins->currentIndex().row();
-    if (currInd < m_currPlugins.size() - 1) {
-      std::iter_swap(m_currPlugins.begin() + currInd,
-                     m_currPlugins.begin() + currInd + 1);
+    size_t idx = static_cast<size_t>(
+        m_ui.treeCurrentPlugins->currentIndex().row());
+    if (idx < m_currPlugins->rowCount() - 1) {
+      // swap all columns
+      for (size_t j=0; j<m_currPlugins->columnCount(); ++j) {
+        std::string swap = m_currPlugins->cell<std::string>(idx, j);
+        m_currPlugins->cell<std::string>(idx, j) =
+          m_currPlugins->cell<std::string>(idx+1, j);
+        m_currPlugins->cell<std::string>(idx+1, j) = swap;
+      }
       refreshCurrentPluginListUI();
     }
   }
@@ -883,13 +933,8 @@ void TomoReconstruction::moveDownClicked() {
 void TomoReconstruction::removeClicked() {
   // Also clear ADS entries
   if (m_ui.treeCurrentPlugins->selectedItems().count() != 0) {
-    int currInd = m_ui.treeCurrentPlugins->currentIndex().row();
-    auto curr = *(m_currPlugins.begin() + currInd);
-
-    if (AnalysisDataService::Instance().doesExist(curr->getName())) {
-      AnalysisDataService::Instance().remove(curr->getName());
-    }
-    m_currPlugins.erase(m_currPlugins.begin() + currInd);
+    int idx = m_ui.treeCurrentPlugins->currentIndex().row();
+    m_currPlugins->removeRow(idx);
 
     refreshCurrentPluginListUI();
   }
@@ -904,7 +949,7 @@ void TomoReconstruction::menuOpenClicked() {
   if (returned != "") {
     bool opening = true;
 
-    if (m_currPlugins.size() > 0) {
+    if (m_currPlugins->rowCount() > 0) {
       QMessageBox::StandardButton reply = QMessageBox::question(
           this, "Open file confirmation",
           "Opening the configuration file will clear the current list."
@@ -924,62 +969,15 @@ void TomoReconstruction::menuOpenClicked() {
   }
 }
 
-/**
- * Get path from user and update a line edit and a variable.
- *
- * @param le a line edit where the path is shown.
- * @param data variable where the path is stored (in addition to the line
- * edit object).
- */
-void TomoReconstruction::processPathBrowseClick(QLineEdit *le,
-                                                std::string &data) {
-  QString algPrev = MantidQt::API::AlgorithmInputHistory::Instance().
-      getPreviousDirectory();
-  QString prev;
-  if (le->text().isEmpty()) {
-    prev = algPrev;
-  } else {
-    prev = le->text();
-  }
-
-  QString path(QFileDialog::getExistingDirectory(this,
-      tr("Open directory/folder"), prev));
-
-  if (!path.isEmpty()) {
-    le->setText(path);
-    data = path.toStdString();
-  }
-}
-
-void TomoReconstruction::fitsPathBrowseClicked() {
-  processPathBrowseClick(m_ui.lineEdit_path_FITS, m_pathFITS);
-}
-
-void TomoReconstruction::flatPathBrowseClicked() {
-  processPathBrowseClick(m_ui.lineEdit_path_flat, m_pathFlat);
-}
-
-void TomoReconstruction::darkPathBrowseClicked() {
-  processPathBrowseClick(m_ui.lineEdit_path_dark, m_pathDark);
-}
-
-void TomoReconstruction::SavuConfigFileClicked() {
-  processPathBrowseClick(m_ui.lineEdit_savu_config_file, m_pathSavuConfigFile);
-}
-
 void TomoReconstruction::menuSaveClicked() {
   if (m_currentParamPath == "") {
     menuSaveAsClicked();
     return;
   }
 
-  if (m_currPlugins.size() != 0) {
-    std::string csvWorkspaceNames = "";
-    for (auto it = m_currPlugins.begin(); it != m_currPlugins.end(); ++it) {
-      csvWorkspaceNames = csvWorkspaceNames + (*it)->name();
-      if (it != m_currPlugins.end() - 1)
-        csvWorkspaceNames = csvWorkspaceNames + ",";
-    }
+  if (m_currPlugins->rowCount() != 0) {
+    AnalysisDataService::Instance().add(createUniqueNameHidden(), m_currPlugins);
+    std::string csvWorkspaceNames = m_currPlugins->name();
 
     auto alg = Algorithm::fromString("SaveTomoConfig");
     alg->initialize();
@@ -1010,26 +1008,29 @@ void TomoReconstruction::menuSaveAsClicked() {
   }
 }
 
-QString TomoReconstruction::tableWSToString(ITableWorkspace_sptr table) {
+QString TomoReconstruction::tableWSRowToString(ITableWorkspace_sptr table,
+                                               size_t i) {
   std::stringstream msg;
-  TableRow row = table->getFirstRow();
-  msg << "ID: " << table->cell<std::string>(0, 0) << std::endl
-      << "Params: " << table->cell<std::string>(0, 1) << std::endl
-      << "Name: " << table->cell<std::string>(0, 2) << std::endl
-      << "Cite: " << table->cell<std::string>(0, 3);
+  msg << "ID: " << table->cell<std::string>(i, 0) << std::endl
+      << "Params: " << table->cell<std::string>(i, 1) << std::endl
+      << "Name: " << table->cell<std::string>(i, 2) << std::endl
+      << "Cite: " << table->cell<std::string>(i, 3);
   return QString::fromStdString(msg.str());
 }
 
-// Creates a treewidget item for a table workspace
-void TomoReconstruction::createPluginTreeEntry(
-    Mantid::API::ITableWorkspace_sptr table) {
+/**
+ * Creates a treewidget item for a row of a table workspace.
+ *
+ * @param row Row from a table workspace with each row specfying a savu plugin
+ */
+void TomoReconstruction::createPluginTreeEntry(TableRow &row) {
   QStringList idStr, nameStr, citeStr, paramsStr;
   idStr.push_back(
-      QString::fromStdString("ID: " + table->cell<std::string>(0, 0)));
+      QString::fromStdString("ID: " + row.cell<std::string>(0)));
   nameStr.push_back(
-      QString::fromStdString("Name: " + table->cell<std::string>(0, 2)));
+      QString::fromStdString("Name: " + row.cell<std::string>(2)));
   citeStr.push_back(
-      QString::fromStdString("Cite: " + table->cell<std::string>(0, 3)));
+      QString::fromStdString("Cite: " + row.cell<std::string>(3)));
   paramsStr.push_back(QString::fromStdString("Params:"));
 
   // Setup editable tree items
@@ -1050,7 +1051,7 @@ void TomoReconstruction::createPluginTreeEntry(
   // Params will be a json string which needs splitting into child tree items
   // [key/value]
   ::Json::Value root;
-  std::string json = table->cell<std::string>(0, 1);
+  std::string json = row.cell<std::string>(1);
   ::Json::Reader r;
   if (r.parse(json, root)) {
     auto members = root.getMemberNames();
@@ -1091,6 +1092,55 @@ void TomoReconstruction::createPluginTreeEntry(
 
   pluginBaseItem->addChildren(items);
   m_ui.treeCurrentPlugins->addTopLevelItem(pluginBaseItem);
+}
+
+void TomoReconstruction::createPluginTreeEntries(ITableWorkspace_sptr table) {
+  for (size_t i=0; i<table->rowCount(); ++i) {
+    TableRow r = table->getRow(i);
+    createPluginTreeEntry(r);
+  }
+}
+/**
+ * Get path from user and update a line edit and a variable.
+ *
+ * @param le a line edit where the path is shown.
+ * @param data variable where the path is stored (in addition to the line
+ * edit object).
+ */
+void TomoReconstruction::processPathBrowseClick(QLineEdit *le,
+                                                std::string &data) {
+  QString algPrev = MantidQt::API::AlgorithmInputHistory::Instance().
+      getPreviousDirectory();
+  QString prev;
+  if (le->text().isEmpty()) {
+    prev = algPrev;
+  } else {
+    prev = le->text();
+  }
+
+  QString path(QFileDialog::getExistingDirectory(this,
+      tr("Open directory/folder"), prev));
+
+  if (!path.isEmpty()) {
+    le->setText(path);
+    data = path.toStdString();
+  }
+}
+
+void TomoReconstruction::fitsPathBrowseClicked() {
+  processPathBrowseClick(m_ui.lineEdit_path_FITS, m_pathFITS);
+}
+
+void TomoReconstruction::flatPathBrowseClicked() {
+  processPathBrowseClick(m_ui.lineEdit_path_flat, m_pathFlat);
+}
+
+void TomoReconstruction::darkPathBrowseClicked() {
+  processPathBrowseClick(m_ui.lineEdit_path_dark, m_pathDark);
+}
+
+void TomoReconstruction::savuConfigFileBrowseClicked() {
+  processPathBrowseClick(m_ui.lineEdit_savu_config_file, m_pathSavuConfigFile);
 }
 
 /**
@@ -1162,6 +1212,26 @@ std::string TomoReconstruction::getUsername() {
     return m_ui.lineEdit_SCARF_username->text().toStdString();
   else
     return "invalid";
+}
+
+std::string TomoReconstruction::currentPathSCARF() {
+  return m_ui.lineEdit_SCARF_path->text().toStdString();
+}
+
+std::string TomoReconstruction::currentPathFITS() {
+  return m_ui.lineEdit_path_FITS->text().toStdString();
+}
+
+std::string TomoReconstruction::currentPathFlat() {
+  return m_ui.lineEdit_path_flat->text().toStdString();
+}
+
+std::string TomoReconstruction::currentPathDark() {
+  return m_ui.lineEdit_path_dark->text().toStdString();
+}
+
+std::string TomoReconstruction::currentPathSavuConfig() {
+  return m_ui.lineEdit_savu_config_file->text().toStdString();
 }
 
 /**

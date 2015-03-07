@@ -2,8 +2,8 @@
 #define MANTIDQTCUSTOMINTERFACES_TOMORECONSTRUCTION_H_
 
 #include "ui_TomoReconstruction.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
 class QTreeWidgetItem;
@@ -64,10 +64,10 @@ protected:
   bool doPing();
   void doLogin(const std::string &pw);
   void doLogout();
-  void doQueryJobStatus(std::vector<std::string> ids,
-                        std::vector<std::string> names,
-                        std::vector<std::string> status,
-                        std::vector<std::string> cmds);
+  void doQueryJobStatus(std::vector<std::string> &ids,
+                        std::vector<std::string> &names,
+                        std::vector<std::string> &status,
+                        std::vector<std::string> &cmds);
   void doSubmitReconstructionJob();
   void doCancelJob(const std::string &id);
 
@@ -75,6 +75,13 @@ protected:
   std::string getComputeResource();
   std::string getUsername();
   std::string getPassword();
+
+  // current paths set by the user
+  std::string currentPathSCARF();
+  std::string currentPathFITS();
+  std::string currentPathFlat();
+  std::string currentPathDark();
+  std::string currentPathSavuConfig();
 
 private slots:
   void compResourceIndexChanged(int);
@@ -86,7 +93,7 @@ private slots:
   void fitsPathBrowseClicked();
   void flatPathBrowseClicked();
   void darkPathBrowseClicked();
-  void SavuConfigFileClicked();
+  void savuConfigFileBrowseClicked();
 
   void menuSaveClicked();
   void menuSaveAsClicked();
@@ -109,23 +116,12 @@ private:
   void setupRunTool();
 
   void enableLoggedActions(bool enable);
+  void updateCompResourceStatus(bool online);
 
   void processPathBrowseClick(QLineEdit *le, std::string &data);
 
   /// Load default interface settings for each tab
   void loadSettings();
-
-  void loadAvailablePlugins();
-
-  void refreshAvailablePluginListUI();
-
-  void refreshCurrentPluginListUI();
-
-  QString tableWSToString(Mantid::API::ITableWorkspace_sptr table);
-
-  void loadSavuTomoConfig(
-      std::string &filePath,
-      std::vector<Mantid::API::ITableWorkspace_sptr> &currentPlugins);
 
   std::string validateCompResource(const std::string &res);
 
@@ -135,9 +131,25 @@ private:
 
   void userError(std::string err, std::string description);
 
+  /// to load plugins (savu classification / API)
+  void loadAvailablePlugins();
+
+  /// refresh the list/tree of savu plugins
+  void refreshAvailablePluginListUI();
+
+  void refreshCurrentPluginListUI();
+
+  /// make a tree entry from a row of a table of savu plugins
+  void createPluginTreeEntry(Mantid::API::TableRow &row);
+  void createPluginTreeEntries(Mantid::API::ITableWorkspace_sptr table);
+
   std::string createUniqueNameHidden();
 
-  void createPluginTreeEntry(Mantid::API::ITableWorkspace_sptr table);
+  QString tableWSRowToString(Mantid::API::ITableWorkspace_sptr table,
+                             size_t i);
+
+  void loadSavuTomoConfig(std::string &filePath,
+                          Mantid::API::ITableWorkspace_sptr &currentPlugins);
 
   /// Main interface window
   Ui::TomoReconstruction m_ui;
@@ -166,11 +178,6 @@ private:
   /// path to an tomography config file (savu NX format)
   std::string m_pathSavuConfigFile;
 
-  // plugins for savu config files
-  std::vector<Mantid::API::ITableWorkspace_sptr> m_availPlugins;
-  std::vector<Mantid::API::ITableWorkspace_sptr> m_currPlugins;
-  std::string m_currentParamPath;
-  static size_t m_nameSeqNo;
   static const std::string m_SCARFName;
 
   // Names of image reconstruction tools
@@ -179,6 +186,14 @@ private:
   static const std::string m_CCPiTool;
   static const std::string m_SavuTool;
   static const std::string m_CustomCmdTool;
+
+  // plugins for savu config files
+  //std::vector<Mantid::API::ITableWorkspace_sptr> m_availPlugins;
+  Mantid::API::ITableWorkspace_sptr m_availPlugins;
+  //std::vector<Mantid::API::ITableWorkspace_sptr> m_currPlugins;
+  Mantid::API::ITableWorkspace_sptr m_currPlugins;
+  std::string m_currentParamPath;
+  static size_t m_nameSeqNo;
 };
 }
 }

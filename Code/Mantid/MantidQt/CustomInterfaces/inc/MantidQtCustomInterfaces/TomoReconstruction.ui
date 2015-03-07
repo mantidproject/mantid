@@ -885,7 +885,7 @@ Double-click on them to modify their values.</string>
          </widget>
         </item>
         <item>
-         <widget class="QGroupBox" name="groupBox_3">
+         <widget class="QGroupBox" name="groupBox_run_config">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -988,7 +988,7 @@ Double-click on them to modify their values.</string>
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QGroupBox" name="groupBox_4">
+            <widget class="QGroupBox" name="groupBox_saved_savu_config">
              <property name="toolTip">
               <string>If checked, a saved parameter file will be used. Otherwise the open configuration is selected.</string>
              </property>
@@ -1029,7 +1029,7 @@ Double-click on them to modify their values.</string>
             </widget>
            </item>
           </layout>
-          <zorder>groupBox_4</zorder>
+          <zorder>groupBox_saved_savu_config</zorder>
           <zorder>frame</zorder>
          </widget>
         </item>
@@ -1190,11 +1190,6 @@ Double-click on them to modify their values.</string>
                  <height>16777215</height>
                 </size>
                </property>
-               <property name="font">
-                <font>
-                 <pointsize>12</pointsize>
-                </font>
-               </property>
                <property name="text">
                 <string>Reconstruct</string>
                </property>
@@ -1267,7 +1262,7 @@ Double-click on them to modify their values.</string>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="pushButton_13">
+                   <widget class="QPushButton" name="pushButton_remote_status">
                     <property name="text">
                      <string>Offline</string>
                     </property>
@@ -1525,12 +1520,12 @@ Double-click on them to modify their values.</string>
   <tabstop>pushButton_dark_dir</tabstop>
   <tabstop>checkBox</tabstop>
   <tabstop>spinBox</tabstop>
-  <tabstop>groupBox_4</tabstop>
+  <tabstop>groupBox_saved_savu_config</tabstop>
   <tabstop>lineEdit_savu_config_file</tabstop>
   <tabstop>pushButton_savu_config_file</tabstop>
   <tabstop>pushButton_browse_image</tabstop>
   <tabstop>pushButton_reconstruct</tabstop>
-  <tabstop>pushButton_13</tabstop>
+  <tabstop>pushButton_remote_status</tabstop>
   <tabstop>comboBox_run_compute_resource</tabstop>
   <tabstop>comboBox_run_tool</tabstop>
   <tabstop>pushButton_run_tool_setup</tabstop>
