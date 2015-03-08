@@ -125,7 +125,6 @@ if ( CXXTEST_FOUND )
 endif ()
 
 add_subdirectory (MDAlgorithms)
-add_subdirectory (MDEvents)
 add_subdirectory (Doxygen)
 add_subdirectory (ScriptRepository)
 add_subdirectory (ISISLiveData)

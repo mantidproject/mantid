@@ -13,15 +13,15 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 
-#include "MantidMDEvents/MDWSTransform.h"
+#include "MantidDataObjects/MDWSTransform.h"
 //
 
-#include "MantidMDEvents/ConvToMDSelector.h"
+#include "MantidDataObjects/ConvToMDSelector.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
-using namespace Mantid::MDEvents::CnvrtToMD;
+using namespace Mantid::DataObjects;
+using namespace Mantid::DataObjects::CnvrtToMD;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -44,7 +44,7 @@ void ConvertToMDParent::init() {
                   "An input Matrix Workspace (2DMatrix or Event workspace) ");
 
   std::vector<std::string> Q_modes =
-      MDEvents::MDTransfFactory::Instance().getKeys();
+      DataObjects::MDTransfFactory::Instance().getKeys();
   // something to do with different moments of time when algorithm or test loads
   // library. To avoid empty factory always do this.
   if (Q_modes.empty())
@@ -71,7 +71,7 @@ void ConvertToMDParent::init() {
                   "*MD Transformation factory* for further details.",
                   Direction::InOut);
 
-  MDEvents::MDWSTransform QSclAndFrames;
+  DataObjects::MDWSTransform QSclAndFrames;
   std::vector<std::string> TargFrames = QSclAndFrames.getTargetFrames();
   declareProperty(
       "Q3DFrames", TargFrames[CnvrtToMD::AutoSelect],

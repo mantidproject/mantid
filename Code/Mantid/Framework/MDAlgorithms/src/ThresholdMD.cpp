@@ -1,6 +1,6 @@
 #include "MantidMDAlgorithms/ThresholdMD.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -10,7 +10,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace MDAlgorithms {

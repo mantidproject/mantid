@@ -2,8 +2,8 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -11,7 +11,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::DataObjects;
 using Mantid::Geometry::IMDDimension_const_sptr;
 

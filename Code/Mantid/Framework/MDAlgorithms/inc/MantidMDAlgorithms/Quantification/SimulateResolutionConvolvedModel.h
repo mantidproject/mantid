@@ -2,7 +2,7 @@
 #define MANTID_MDALGORITHMS_SIMULATERESOLUTIONCONVOLVEDMODEL_H_
 
 #include "MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 
 namespace Mantid {
 namespace API {

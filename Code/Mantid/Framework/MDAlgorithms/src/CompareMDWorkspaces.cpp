@@ -3,13 +3,13 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/CompareMDWorkspaces.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //=============================================================================
@@ -158,8 +158,8 @@ CompareMDWorkspaces::compareMDGeometry(Mantid::API::IMDWorkspace_sptr ws1,
 /** Compare the dimensions etc. of two MDWorkspaces
 */
 void CompareMDWorkspaces::compareMDHistoWorkspaces(
-    Mantid::MDEvents::MDHistoWorkspace_sptr ws1,
-    Mantid::MDEvents::MDHistoWorkspace_sptr ws2) {
+    Mantid::DataObjects::MDHistoWorkspace_sptr ws1,
+    Mantid::DataObjects::MDHistoWorkspace_sptr ws2) {
   compare(ws1->getNumDims(), ws2->getNumDims(),
           "Workspaces have a different number of dimensions");
   compare(ws1->getNPoints(), ws2->getNPoints(),

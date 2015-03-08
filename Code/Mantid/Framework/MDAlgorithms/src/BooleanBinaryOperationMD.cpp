@@ -63,7 +63,7 @@ void BooleanBinaryOperationMD::execEvent() {
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
 void BooleanBinaryOperationMD::execHistoScalar(
-    Mantid::MDEvents::MDHistoWorkspace_sptr /*out*/,
+    Mantid::DataObjects::MDHistoWorkspace_sptr /*out*/,
     Mantid::DataObjects::WorkspaceSingleValue_const_sptr /*scalar*/) {
   throw std::runtime_error("Cannot perform the " + this->name() +
                            " operation on a WorkspaceSingleValue.");

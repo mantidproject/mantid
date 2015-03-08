@@ -30,15 +30,15 @@ int LessThanMD::version() const { return 1; };
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand
 void LessThanMD::execHistoHisto(
-    Mantid::MDEvents::MDHistoWorkspace_sptr out,
-    Mantid::MDEvents::MDHistoWorkspace_const_sptr operand) {
+    Mantid::DataObjects::MDHistoWorkspace_sptr out,
+    Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
   out->lessThan(*operand);
 }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and a scalar on the RHS
 void LessThanMD::execHistoScalar(
-    Mantid::MDEvents::MDHistoWorkspace_sptr out,
+    Mantid::DataObjects::MDHistoWorkspace_sptr out,
     Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
   out->lessThan(scalar->dataY(0)[0]);
 }

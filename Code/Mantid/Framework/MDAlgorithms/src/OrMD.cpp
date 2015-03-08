@@ -30,8 +30,8 @@ int OrMD::version() const { return 1; };
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand
 void
-OrMD::execHistoHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out,
-                     Mantid::MDEvents::MDHistoWorkspace_const_sptr operand) {
+OrMD::execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                     Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
   out->operator|=(*operand);
 }
 

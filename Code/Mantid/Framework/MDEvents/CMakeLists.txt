@@ -1,35 +1,15 @@
 # Source files
 set ( SRC_FILES
 	#
-	src/BoxControllerSettingsAlgorithm.cpp
 	src/CalculateReflectometryQBase.cpp
-	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
 	src/ConvToMDHistoWS.cpp
 	src/ConvToMDSelector.cpp
-	src/ConvertToReflectometryQ.cpp
-	src/FitMD.cpp
-	src/ImportMDEventWorkspace.cpp
-	src/ImportMDHistoWorkspace.cpp
 	src/ImportMDHistoWorkspaceBase.cpp
-	src/Integrate3DEvents.cpp
 	src/IntegrateEllipsoids.cpp
-        src/MDEventWSWrapper.cpp
-	src/MDTransfAxisNames.cpp
-	src/MDTransfFactory.cpp
-	src/MDTransfModQ.cpp
 	src/MDTransfNoQ.cpp
-	src/MDTransfQ3D.cpp
-	src/MDWSDescription.cpp
 	src/MDWSTransform.cpp
-	src/OneStepMDEW.cpp
-	src/QueryMDWorkspace.cpp
 	src/ReflectometryTransform.cpp
-	src/ReflectometryTransformKiKf.cpp
-	src/ReflectometryTransformP.cpp
-	src/ReflectometryTransformQxQz.cpp
-	src/SaveIsawQvector.cpp
-	src/UnitsConversionHelper.cpp
 	src/UserFunctionMD.cpp
 )
 
@@ -45,62 +25,23 @@ set ( SRC_UNITY_IGNORE_FILES
 # Header files
 set ( INC_FILES
 	#
-	inc/MantidMDEvents/BoxControllerSettingsAlgorithm.h
 	inc/MantidMDEvents/CalculateReflectometryQBase.h
-	inc/MantidMDEvents/ConvToMDBase.h
 	inc/MantidMDEvents/ConvToMDEventsWS.h
 	inc/MantidMDEvents/ConvToMDHistoWS.h
 	inc/MantidMDEvents/ConvToMDSelector.h
-	inc/MantidMDEvents/ConvertToReflectometryQ.h
-	inc/MantidMDEvents/FitMD.h
-	inc/MantidMDEvents/ImportMDEventWorkspace.h
-	inc/MantidMDEvents/ImportMDHistoWorkspace.h
 	inc/MantidMDEvents/ImportMDHistoWorkspaceBase.h
-	inc/MantidMDEvents/Integrate3DEvents.h
 	inc/MantidMDEvents/IntegrateEllipsoids.h
-        inc/MantidMDEvents/MDEventWSWrapper.h
-	inc/MantidMDEvents/MDTransfAxisNames.h
-	inc/MantidMDEvents/MDTransfFactory.h
 	inc/MantidMDEvents/MDTransfInterface.h
-	inc/MantidMDEvents/MDTransfModQ.h
 	inc/MantidMDEvents/MDTransfNoQ.h
-	inc/MantidMDEvents/MDTransfQ3D.h
-	inc/MantidMDEvents/MDWSDescription.h
 	inc/MantidMDEvents/MDWSTransform.h
-	inc/MantidMDEvents/OneStepMDEW.h
-	inc/MantidMDEvents/QueryMDWorkspace.h
 	inc/MantidMDEvents/ReflectometryTransform.h
-	inc/MantidMDEvents/ReflectometryTransformKiKf.h
-	inc/MantidMDEvents/ReflectometryTransformP.h
-	inc/MantidMDEvents/ReflectometryTransformQxQz.h
-	inc/MantidMDEvents/SaveIsawQvector.h
-	inc/MantidMDEvents/UnitsConversionHelper.h
 	inc/MantidMDEvents/UserFunctionMD.h
 )
 
 # Test files.
 set ( TEST_FILES
-	BoxControllerSettingsAlgorithmTest.h
-	ConvertToReflectometryQTest.h
-	FitMDTest.h
-	ImportMDEventWorkspaceTest.h
-	ImportMDHistoWorkspaceTest.h
-	Integrate3DEventsTest.h
-        MDEventWSWrapperTest.h
-	MDTransfAxisNamesTest.h
-	MDTransfFactoryTest.h
-	MDTransfModQTest.h
-	MDTransfQ3DTest.h
-	MDWSDescriptionTest.h
 	MDWSTransfTest.h
-	OneStepMDEWTest.h
-	QueryMDWorkspaceTest.h
-	ReflectometryTransformKiKfTest.h
-	ReflectometryTransformPTest.h
-	ReflectometryTransformQxQzTest.h
-	SaveIsawQvectorTest.h
 	SkippingPolicyTest.h
-	UnitsConversionHelperTest.h
 )
 
 

@@ -38,8 +38,8 @@ void EqualToMD::initExtraProperties() {
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand
 void EqualToMD::execHistoHisto(
-    Mantid::MDEvents::MDHistoWorkspace_sptr out,
-    Mantid::MDEvents::MDHistoWorkspace_const_sptr operand) {
+    Mantid::DataObjects::MDHistoWorkspace_sptr out,
+    Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
   double tolerance = getProperty("Tolerance");
   out->equalTo(*operand, tolerance);
 }
@@ -47,7 +47,7 @@ void EqualToMD::execHistoHisto(
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and a scalar on the RHS
 void EqualToMD::execHistoScalar(
-    Mantid::MDEvents::MDHistoWorkspace_sptr out,
+    Mantid::DataObjects::MDHistoWorkspace_sptr out,
     Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
   double tolerance = getProperty("Tolerance");
   out->equalTo(scalar->dataY(0)[0], tolerance);

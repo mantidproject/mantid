@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_CONVERTTODIFFRACTIONMDWORKSPACE_H_
-#define MANTID_MDEVENTS_CONVERTTODIFFRACTIONMDWORKSPACE_H_
+#ifndef MANTID_MDALGORITHMS_CONVERTTODIFFRACTIONMDWORKSPACE_H_
+#define MANTID_MDALGORITHMS_CONVERTTODIFFRACTIONMDWORKSPACE_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -10,9 +10,9 @@
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
-#include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/BoxControllerSettingsAlgorithm.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -25,7 +25,7 @@ namespace MDAlgorithms {
  * @date 2011-03-01 13:14:48.236513
  */
 class DLLExport ConvertToDiffractionMDWorkspace
-    : public MDEvents::BoxControllerSettingsAlgorithm {
+    : public DataObjects::BoxControllerSettingsAlgorithm {
 public:
   ConvertToDiffractionMDWorkspace();
   ~ConvertToDiffractionMDWorkspace(){};
@@ -61,7 +61,7 @@ private:
   DataObjects::EventWorkspace_sptr m_inEventWS;
 
   /// The output MDEventWorkspace<3>
-  MDEvents::MDEventWorkspace3Lean::sptr ws;
+  DataObjects::MDEventWorkspace3Lean::sptr ws;
   /// Do we clear events on the input during loading?
   bool ClearInputWorkspace;
   /// Use the histogram representation with one event per bin
@@ -97,6 +97,6 @@ private:
 };
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects
 
-#endif /* MANTID_MDEVENTS_CONVERTTODIFFRACTIONMDWORKSPACE_H_ */
+#endif /* MANTID_MDALGORITHMS_CONVERTTODIFFRACTIONMDWORKSPACE_H_ */

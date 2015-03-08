@@ -1,33 +1,30 @@
 #include "MantidMDAlgorithms/ConvertToMD.h"
 
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/ProgressText.h"
-#include "MantidKernel/IPropertyManager.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/IPropertySettings.h"
-#include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/VisibleWhenProperty.h"
-//
+#include <algorithm>
+
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidMDEvents/MDWSTransform.h"
-//
+
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/VisibleWhenProperty.h"
+
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-#include <algorithm>
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidMDEvents/ConvToMDSelector.h"
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidMDAlgorithms/ConvToMDSelector.h"
+#include "MantidMDAlgorithms/MDWSTransform.h"
 
-using namespace Mantid;
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
-using namespace Mantid::Geometry;
-using namespace Mantid::MDEvents;
-using namespace Mantid::MDEvents::CnvrtToMD;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -35,6 +32,7 @@ namespace MDAlgorithms {
 //
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToMD)
+
 void ConvertToMD::init() {
   ConvertToMDParent::init();
   declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
@@ -137,8 +135,8 @@ void ConvertToMD::exec() {
   // initiate class which would deal with any dimension workspaces requested by
   // algorithm parameters
   if (!m_OutWSWrapper)
-    m_OutWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(
-        new MDEvents::MDEventWSWrapper());
+    m_OutWSWrapper = boost::shared_ptr<MDEventWSWrapper>(
+        new MDEventWSWrapper());
 
   // -------- get Input workspace
   m_InWS2D = getProperty("InputWorkspace");
@@ -167,7 +165,7 @@ void ConvertToMD::exec() {
 
   // Build the target ws description as function of the input & output ws and
   // the parameters, supplied to the algorithm
-  MDEvents::MDWSDescription targWSDescr;
+  MDWSDescription targWSDescr;
   // get workspace parameters and build target workspace description, report if
   // there is need to build new target MD workspace
   bool createNewTargetWs =
@@ -232,7 +230,7 @@ void ConvertToMD::exec() {
  */
 void
 ConvertToMD::addExperimentInfo(API::IMDEventWorkspace_sptr &mdEventWS,
-                               MDEvents::MDWSDescription &targWSDescr) const {
+                               MDWSDescription &targWSDescr) const {
   // Copy ExperimentInfo (instrument, run, sample) to the output WS
   API::ExperimentInfo_sptr ei(m_InWS2D->cloneExperimentInfo());
 
@@ -356,7 +354,7 @@ bool ConvertToMD::buildTargetWSDescription(
     const std::string &dEModReq, const std::vector<std::string> &otherDimNames,
     std::vector<double> &dimMin, std::vector<double> &dimMax,
     const std::string &QFrame, const std::string &convertTo_,
-    MDEvents::MDWSDescription &targWSDescr) {
+    MDAlgorithms::MDWSDescription &targWSDescr) {
   // ------- Is there need to create new output workspace?
   bool createNewTargetWs = doWeNeedNewTargetWorkspace(spws);
   std::vector<int> split_into;
@@ -395,7 +393,7 @@ bool ConvertToMD::buildTargetWSDescription(
   targWSDescr.setLorentsCorr(LorentzCorrections);
 
   // instantiate class, responsible for defining Mslice-type projection
-  MDEvents::MDWSTransform MsliceProj;
+  MDAlgorithms::MDWSTransform MsliceProj;
   // identify if u,v are present among input parameters and use defaults if not
   std::vector<double> ut = getProperty("UProj");
   std::vector<double> vt = getProperty("VProj");
@@ -420,7 +418,7 @@ bool ConvertToMD::buildTargetWSDescription(
   {
     // dimensions are already build, so build MDWS description from existing
     // workspace
-    MDEvents::MDWSDescription oldWSDescr;
+    MDAlgorithms::MDWSDescription oldWSDescr;
     oldWSDescr.buildFromMDWS(spws);
 
     // some conversion parameters can not be defined by the target workspace.
@@ -447,7 +445,7 @@ bool ConvertToMD::buildTargetWSDescription(
 * @return
 */
 API::IMDEventWorkspace_sptr ConvertToMD::createNewMDWorkspace(
-    const MDEvents::MDWSDescription &targWSDescr) {
+    const MDWSDescription &targWSDescr) {
   // create new md workspace and set internal shared pointer of m_OutWSWrapper
   // to this workspace
   API::IMDEventWorkspace_sptr spws =

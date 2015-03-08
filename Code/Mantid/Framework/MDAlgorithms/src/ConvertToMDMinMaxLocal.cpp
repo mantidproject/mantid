@@ -4,9 +4,9 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidAPI/IMDNode.h"
-#include "MantidMDEvents/MDWSTransform.h"
-#include "MantidMDEvents/ConvToMDSelector.h"
-#include "MantidMDEvents/UnitsConversionHelper.h"
+#include "MantidDataObjects/MDWSTransform.h"
+#include "MantidDataObjects/ConvToMDSelector.h"
+#include "MantidDataObjects/UnitsConversionHelper.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MultiThreaded.h"
 
@@ -73,12 +73,12 @@ void ConvertToMDMinMaxLocal::exec() {
 
   // Build the target ws description as function of the input & output ws and
   // the parameters, supplied to the algorithm
-  MDEvents::MDWSDescription targWSDescr;
+  DataObjects::MDWSDescription targWSDescr;
 
   // get raw pointer to Q-transformation (do not delete this pointer, it's held
   // by MDTransfFactory!)
-  MDEvents::MDTransfInterface *pQtransf =
-      MDEvents::MDTransfFactory::Instance().create(QModReq).get();
+  DataObjects::MDTransfInterface *pQtransf =
+      DataObjects::MDTransfFactory::Instance().create(QModReq).get();
   // get number of dimensions this Q transformation generates from the
   // workspace.
   auto iEmode = Kernel::DeltaEMode().fromString(dEModReq);
@@ -99,7 +99,7 @@ void ConvertToMDMinMaxLocal::exec() {
   targWSDescr.addProperty("RUN_INDEX", uint16_t(0), true);
 
   // instantiate class, responsible for defining Mslice-type projection
-  MDEvents::MDWSTransform MsliceProj;
+  DataObjects::MDWSTransform MsliceProj;
   // identify if u,v are present among input parameters and use defaults if not
   std::vector<double> ut = getProperty("UProj");
   std::vector<double> vt = getProperty("VProj");
@@ -130,12 +130,12 @@ void ConvertToMDMinMaxLocal::exec() {
 }
 
 void ConvertToMDMinMaxLocal::findMinMaxValues(
-    MDEvents::MDWSDescription &WSDescription,
-    MDEvents::MDTransfInterface *const pQtransf,
+    DataObjects::MDWSDescription &WSDescription,
+    DataObjects::MDTransfInterface *const pQtransf,
     Kernel::DeltaEMode::Type iEMode, std::vector<double> &MinValues,
     std::vector<double> &MaxValues) {
 
-  MDEvents::UnitsConversionHelper unitsConverter;
+  DataObjects::UnitsConversionHelper unitsConverter;
   double signal(1), errorSq(1);
   //
   size_t nDims = MinValues.size();

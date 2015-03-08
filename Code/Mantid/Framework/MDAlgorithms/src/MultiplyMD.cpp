@@ -1,13 +1,13 @@
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/MultiplyMD.h"
-#include "MantidMDEvents/MDBoxBase.h"
-#include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDBoxBase.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -120,15 +120,15 @@ void MultiplyMD::execEvent() {
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand
 void MultiplyMD::execHistoHisto(
-    Mantid::MDEvents::MDHistoWorkspace_sptr out,
-    Mantid::MDEvents::MDHistoWorkspace_const_sptr operand) {
+    Mantid::DataObjects::MDHistoWorkspace_sptr out,
+    Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
   out->multiply(*operand);
 }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
 void MultiplyMD::execHistoScalar(
-    Mantid::MDEvents::MDHistoWorkspace_sptr out,
+    Mantid::DataObjects::MDHistoWorkspace_sptr out,
     Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
   out->multiply(scalar->dataY(0)[0], scalar->dataE(0)[0]);
 }
