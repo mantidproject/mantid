@@ -1,5 +1,5 @@
 import os,sys,inspect
-#os.environ["PATH"] = r"d:\Data\Mantid_GIT_test\Code\builds\br_master\bin\Release;"+os.environ["PATH"]
+#os.environ["PATH"] =r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -459,6 +459,16 @@ class RunDescriptorTest(unittest.TestCase):
        self.assertTrue(isinstance(masks,api.MatrixWorkspace))
        ws_name = PropertyManager.sample_run._mask_ws_name
        self.assertTrue(ws_name in mtd)
+
+       masks = PropertyManager.sample_run.get_masking()
+       self.assertTrue(isinstance(masks,api.MatrixWorkspace))
+       ws_name = masks.name()
+       self.assertTrue(ws_name in mtd)
+
+       masks1 = PropertyManager.sample_run.get_masking(1)
+       self.assertTrue(isinstance(masks1,api.MatrixWorkspace))
+
+
 
        propman.sample_run = None
        self.assertFalse(ws_name in mtd)
