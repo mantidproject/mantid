@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/CalculateDIFC.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
@@ -8,6 +9,8 @@ using Mantid::API::MatrixWorkspace;
 using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::OffsetsWorkspace;
 using Mantid::DataObjects::OffsetsWorkspace_sptr;
+using Mantid::DataObjects::SpecialWorkspace2D;
+using Mantid::DataObjects::SpecialWorkspace2D_sptr;
 using Mantid::Geometry::Instrument_const_sptr;
 using Mantid::Kernel::Direction;
 
@@ -76,38 +79,45 @@ void CalculateDIFC::exec() {
 
 void CalculateDIFC::createOutputWorkspace() {
   m_inputWS = getProperty("InputWorkspace");
-  size_t numspec = m_inputWS->getNumberHistograms();
 
-  m_outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      API::WorkspaceFactory::Instance().create("Workspace2D", numspec, 1, 1));
-  // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(m_inputWS, m_outputWS,
-                                                         false);
+  m_outputWS =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(SpecialWorkspace2D_sptr(
+          new SpecialWorkspace2D(m_inputWS->getInstrument())));
+  m_outputWS->setTitle("DIFC workspace");
+
   return;
 }
 
 void CalculateDIFC::calculate() {
   Instrument_const_sptr instrument = m_inputWS->getInstrument();
 
+  SpecialWorkspace2D_sptr localWS =
+      boost::dynamic_pointer_cast<SpecialWorkspace2D>(m_outputWS);
+
   double l1;
   Kernel::V3D beamline, samplePos;
   double beamline_norm;
   instrument->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
 
-  const size_t NUM_SPEC = m_outputWS->getNumberHistograms();
-  for (size_t i = 0; i < NUM_SPEC; ++i) {
-    Geometry::IDetector_const_sptr det = m_inputWS->getDetector(i);
+  // To get all the detector ID's
+  detid2det_map allDetectors;
+  instrument->getDetectors(allDetectors);
 
-    double offset = 0.;
-    if (m_offsetsWS)
-      offset = m_offsetsWS->getValue(det->getID(), 0.);
+  // Now go through all
+  detid2det_map::const_iterator it = allDetectors.begin();
+  for (; it != allDetectors.end(); ++it) {
+    Geometry::IDetector_const_sptr det = it->second;
+    if ((!det->isMasked()) && (!det->isMonitor())) {
+      const detid_t detID = it->first;
+      double offset = 0.;
+      if (m_offsetsWS)
+        offset = m_offsetsWS->getValue(detID, 0.);
 
-    double difc = Geometry::Instrument::calcConversion(l1, beamline, beamline_norm,
-                                               samplePos, det, offset);
-    difc = 1./difc; // calcConversion gives 1/DIFC
-
-    m_outputWS->dataX(i)[0] = static_cast<double>(i);
-    m_outputWS->dataY(i)[0] = difc;
+      double difc = Geometry::Instrument::calcConversion(
+          l1, beamline, beamline_norm, samplePos, det, offset);
+      difc = 1. / difc; // calcConversion gives 1/DIFC
+      localWS->setValue(detID, difc);
+    }
   }
 
 }
