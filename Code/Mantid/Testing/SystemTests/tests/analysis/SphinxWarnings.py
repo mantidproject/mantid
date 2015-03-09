@@ -1,6 +1,7 @@
+#pylint: disable=invalid-name
 """
 Some of the sphinx warnings come from the C++ code, from the properties of the algorithms or from the summary string
-This test tries to detect the most common such errors. 
+This test tries to detect the most common such errors.
 It also detects if a new category is created (i.e. someone uses Utilities instead of Utility)
 """
 import stresstesting
@@ -40,40 +41,40 @@ class SphinxWarnings(stresstesting.MantidStressTest):
         tocheck=s
         outputString=''
         #replace strong emphasis: Space**NotSpaceText**
-        sub=re.compile(r' \*\*[^ ].+?\*\*') 
+        sub=re.compile(r' \*\*[^ ].+?\*\*')
         for i in sub.findall(tocheck):
             tocheck=tocheck.replace(i," ")
         #replace emphasis: Space*NotSpaceText*
-        sub=re.compile(r' \*[^ ].+?\*')     
+        sub=re.compile(r' \*[^ ].+?\*')
         for i in sub.findall(tocheck):
             tocheck=tocheck.replace(i," ")
         #replace correctly named hyperlinks: Space`Name link>`__
         sub=re.compile(r' \`.+? <.+?.\`__')
         for i in sub.findall(tocheck):
-            tocheck=tocheck.replace(i," ")    
-    
+            tocheck=tocheck.replace(i," ")
+
         #find strong emphasis errors
-        sub=re.compile(r' \*\*[^ ]+') 
+        sub=re.compile(r' \*\*[^ ]+')
         result=sub.findall(tocheck)
         if len(result)>0:
             outputString+="Strong emphasis error: "+str(result)+"\n"
         #find emphasis errors
-        sub=re.compile(r' \*[^ ]+') 
+        sub=re.compile(r' \*[^ ]+')
         result=sub.findall(tocheck)
         if len(result)>0:
             outputString+="Emphasis error: "+str(result)+"\n"
-        #find potentially duplicate named hyperlinks 
-        sub=re.compile(r' \`.+? <.+?.\`_')  
-        result=sub.findall(tocheck) 
+        #find potentially duplicate named hyperlinks
+        sub=re.compile(r' \`.+? <.+?.\`_')
+        result=sub.findall(tocheck)
         if len(result)>0:
-            outputString+="Potentially unsafe named hyperlink: "+str(result)+"\n"    
+            outputString+="Potentially unsafe named hyperlink: "+str(result)+"\n"
         #find potentially wrong substitutions
         sub=re.compile(r'\|.+?\|')
         result=sub.findall(tocheck)
         if len(result)>0:
-            outputString+="Potentially unsafe substitution: "+str(result)+"\n"   
+            outputString+="Potentially unsafe substitution: "+str(result)+"\n"
         return outputString
-    
+
     def runTest(self):
         algs = mantid.AlgorithmFactory.getRegisteredAlgorithms(True)
         for (name, versions) in algs.iteritems():
@@ -93,15 +94,15 @@ class SphinxWarnings(stresstesting.MantidStressTest):
                     #check properties
                     properties=alg.getProperties()
                     for prop in properties:
-                        propName=prop.name           
+                        propName=prop.name
                         propDoc=prop.documentation
                         result=self.checkString(propDoc)
                         if len(result)>0:
-                            self.errorMessage+=name+" "+str(version)+" Property: "+propName+" Documentation: "+result +"\n"  
-    
+                            self.errorMessage+=name+" "+str(version)+" Property: "+propName+" Documentation: "+result +"\n"
+
     def validate(self):
         if self.errorMessage!="":
             print "Found the following errors:\n",self.errorMessage
             return False
 
-        return True   
+        return True

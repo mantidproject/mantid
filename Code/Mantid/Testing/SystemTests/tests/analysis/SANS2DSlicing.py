@@ -1,13 +1,14 @@
+#pylint: disable=invalid-name
 import sys
 
 if __name__ == "__main__":
   # it is just to allow running this test in Mantid, allowing the following import
-  sys.path.append('/apps/mantid/systemtests/StressTestFramework/')
+    sys.path.append('/apps/mantid/systemtests/StressTestFramework/')
 
 import stresstesting
 
-from mantid.simpleapi import * 
-import ISISCommandInterface as i    
+from mantid.simpleapi import *
+import ISISCommandInterface as i
 
 MASKFILE = FileFinder.getFullPath('MaskSANS2DReductionGUI.txt')
 BATCHFILE = FileFinder.getFullPath('sans2d_reduction_gui_batch.csv')
@@ -22,7 +23,7 @@ class SANS2DMinimalBatchReductionSliced(stresstesting.MantidStressTest):
         i.MaskFile(MASKFILE)
         i.SetEventSlices("0.0-451, 5-10")
         fit_settings = batch.BatchReduce(BATCHFILE, '.nxs',saveAlgs={}, combineDet='rear')
-        
+
     def validate(self):
         self.tolerance = 0.02
         self.tolerance_is_reller=True
@@ -38,7 +39,7 @@ class SANS2DMinimalSingleReductionSliced(SANS2DMinimalBatchReductionSliced):
         i.TransmissionCan('22024', '22024')
         i.SetEventSlices("0.0-450, 5-10")
         reduced = i.WavRangeReduction()
-        RenameWorkspace(reduced, OutputWorkspace='trans_test_rear')    
+        RenameWorkspace(reduced, OutputWorkspace='trans_test_rear')
 
 
 if __name__ == "__main__":

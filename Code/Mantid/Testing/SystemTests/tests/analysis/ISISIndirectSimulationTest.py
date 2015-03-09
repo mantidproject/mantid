@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 import stresstesting
 import os
 from mantid.simpleapi import *
@@ -28,7 +29,7 @@ class MolDynCdlTest(stresstesting.MantidStressTest):
         ws1Match = self.checkWorkspacesMatch('DISF_NaF_Fqt-total', 'ISISIndirectSimulation_MolDynCDL')
         ws2Match = self.checkWorkspacesMatch('DISF_NaF_Sqw-total', 'ISISIndirectSimulation_MolDynCDL_SQW')
 
-        return ( ws1Match and ws2Match )
+        return  ws1Match and ws2Match 
 
 
     def checkWorkspacesMatch(self, ws1, ws2):

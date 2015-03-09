@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import os
 #os.environ["PATH"] =\
 #r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
@@ -12,7 +13,7 @@ except:
 class ReduceMARIFromFile(ReductionWrapper):
     @MainProperties
     def def_main_properties(self):
-        """ Define main properties used in reduction """ 
+        """ Define main properties used in reduction """
         prop = {}
         prop['sample_run'] = 11001
         prop['wb_run'] = 11060
@@ -31,7 +32,7 @@ class ReduceMARIFromFile(ReductionWrapper):
     def def_advanced_properties(self):
         """  separation between simple and advanced properties depends
            on scientist, experiment and user.
-           main properties override advanced properties.      
+           main properties override advanced properties.
         """
         prop = {}
         prop['map_file'] = "mari_res.map"
@@ -49,7 +50,7 @@ class ReduceMARIFromFile(ReductionWrapper):
         outWS = ReductionWrapper.reduce(self,input_file,output_directory)
         #SaveNexus(outWS,Filename = 'MARNewReduction.nxs')
         return outWS
- 
+
     def validate_result(self,build_validation=False):
         """Change this method to verify different results     """
         # build_validation -- if true, build and save new workspace rather then validating the old one
@@ -57,10 +58,10 @@ class ReduceMARIFromFile(ReductionWrapper):
         return rez,message
 
     def set_custom_output_filename(self):
-        """ define custom name of output files if standard one is not satisfactory 
-          In addition to that, example of accessing reduction properties 
+        """ define custom name of output files if standard one is not satisfactory
+          In addition to that, example of accessing reduction properties
           Changing them if necessary
-        """ 
+        """
         def custom_name(prop_man):
             """Sample function which builds filename from
               incident energy and run number and adds some auxiliary information
@@ -74,7 +75,7 @@ class ReduceMARIFromFile(ReductionWrapper):
             run_num = PropertyManager.sample_run.run_number()
             name = "RUN{0}atEi{1:<4.1f}meV_One2One".format(run_num ,ei)
             return name
-       
+
         # Uncomment this to use custom filename function
         # Note: the properties are stored in prop_man class accessed as
         # below.
@@ -84,8 +85,8 @@ class ReduceMARIFromFile(ReductionWrapper):
 
 
     def __init__(self,web_var=None):
-       """ sets properties defaults for the instrument with Name"""
-       ReductionWrapper.__init__(self,'MAR',web_var)
+        """ sets properties defaults for the instrument with Name"""
+        ReductionWrapper.__init__(self,'MAR',web_var)
 #-------------------------------------------------------------------------------------------------#
 #-------------------------------------------------------------------------------------------------#
 #-------------------------------------------------------------------------------------------------#
@@ -97,7 +98,7 @@ def main(input_file=None,output_directory=None):
         You can also change the output folder to save data to
         where web services will copy data
 
-        This method will go when web service implements proper factory 
+        This method will go when web service implements proper factory
     """
     # note web variables initialization
     rd = ReduceMARIFromFile(web_var)
@@ -108,199 +109,199 @@ def main(input_file=None,output_directory=None):
 #----------------------------------------------------------------------------------------------------------------------
 class ReduceMARIFromWorkspace(ReductionWrapper):
 
-   @MainProperties
-   def def_main_properties(self):
-       """Define main properties used in reduction """
-       prop = {}
-       prop['sample_run'] = Load(Filename='MAR11001.RAW',OutputWorkspace='MAR11001.RAW')
+    @MainProperties
+    def def_main_properties(self):
+        """Define main properties used in reduction """
+        prop = {}
+        prop['sample_run'] = Load(Filename='MAR11001.RAW',OutputWorkspace='MAR11001.RAW')
        # WB workspace
-       prop['wb_run'] = Load(Filename='MAR11060.RAW',OutputWorkspace='MAR11060.RAW')
-       prop['incident_energy'] = 12
-       prop['energy_bins'] = [-11,0.05,11]
+        prop['wb_run'] = Load(Filename='MAR11060.RAW',OutputWorkspace='MAR11060.RAW')
+        prop['incident_energy'] = 12
+        prop['energy_bins'] = [-11,0.05,11]
 
       # Absolute units reduction properties.
-       prop['monovan_run'] = Load(Filename='MAR11015.RAW',OutputWorkspace='MAR11015.RAW')
-       prop['sample_mass'] = 10
-       prop['sample_rmm'] = 435.96
+        prop['monovan_run'] = Load(Filename='MAR11015.RAW',OutputWorkspace='MAR11015.RAW')
+        prop['sample_mass'] = 10
+        prop['sample_rmm'] = 435.96
 
 
-       return prop
+        return prop
 
-   @AdvancedProperties
-   def def_advanced_properties(self):
-      """  separation between simple and advanced properties depends
+    @AdvancedProperties
+    def def_advanced_properties(self):
+        """  separation between simple and advanced properties depends
            on scientist, experiment and user.
-           main properties override advanced properties.      
+           main properties override advanced properties.
       """
-      prop = {}
-      prop['map_file'] = "mari_res.map"
-      prop['monovan_mapfile'] = "mari_res.map"
-      prop['hard_mask_file'] = "mar11015.msk"
+        prop = {}
+        prop['map_file'] = "mari_res.map"
+        prop['monovan_mapfile'] = "mari_res.map"
+        prop['hard_mask_file'] = "mar11015.msk"
       # MARI calibration uses one of data files defined on instrument.  Here
       # vanadium run is used for calibration
       # TODO: Why not workspace?
-      prop['det_cal_file'] = "11060"
-      prop['save_format'] = ''
-      return prop
+        prop['det_cal_file'] = "11060"
+        prop['save_format'] = ''
+        return prop
       #
-   @iliad
-   def reduce(self,input_file=None,output_directory=None):
-     """ Method executes reduction over single file
+    @iliad
+    def reduce(self,input_file=None,output_directory=None):
+        """ Method executes reduction over single file
          Overload only if custom reduction is needed
      """
-     ws = ReductionWrapper.reduce(self,input_file,output_directory)
+        ws = ReductionWrapper.reduce(self,input_file,output_directory)
      #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
-     return ws
+        return ws
 
-   def __init__(self,web_var=None):
-       """ sets properties defaults for the instrument with Name"""
-       ReductionWrapper.__init__(self,'MAR',web_var)
+    def __init__(self,web_var=None):
+        """ sets properties defaults for the instrument with Name"""
+        ReductionWrapper.__init__(self,'MAR',web_var)
 #----------------------------------------------------------------------------------------------------------------------
 class ReduceMARIMon2Norm(ReductionWrapper):
 
-   @MainProperties
-   def def_main_properties(self):
-       """ Define main properties used in reduction """ 
-       prop = {}
-       prop['sample_run'] = Load(Filename='MAR11001.RAW',OutputWorkspace='MAR11001.RAW')
+    @MainProperties
+    def def_main_properties(self):
+        """ Define main properties used in reduction """
+        prop = {}
+        prop['sample_run'] = Load(Filename='MAR11001.RAW',OutputWorkspace='MAR11001.RAW')
        # WB workspace
-       prop['wb_run'] = Load(Filename='MAR11060.RAW',OutputWorkspace='MAR11060.RAW')
-       prop['incident_energy'] = 12
-       prop['energy_bins'] = [-11,0.05,11]
+        prop['wb_run'] = Load(Filename='MAR11060.RAW',OutputWorkspace='MAR11060.RAW')
+        prop['incident_energy'] = 12
+        prop['energy_bins'] = [-11,0.05,11]
 
       # Absolute units reduction properties.
-       prop['monovan_run'] = 11015 #Load(Filename='MAR11015.RAW',OutputWorkspace='MAR11015.RAW')
-       prop['sample_mass'] = 10
-       prop['sample_rmm'] = 435.96
+        prop['monovan_run'] = 11015 #Load(Filename='MAR11015.RAW',OutputWorkspace='MAR11015.RAW')
+        prop['sample_mass'] = 10
+        prop['sample_rmm'] = 435.96
 
-       return prop
+        return prop
 
-   @AdvancedProperties
-   def def_advanced_properties(self):
-      """  separation between simple and advanced properties depends
+    @AdvancedProperties
+    def def_advanced_properties(self):
+        """  separation between simple and advanced properties depends
            on scientist, experiment and user.
-           main properties override advanced properties.      
+           main properties override advanced properties.
       """
-      prop = {}
-      prop['map_file'] = "mari_res.map"
-      prop['monovan_mapfile'] = "mari_res.map"
-      prop['hard_mask_file'] = "mar11015.msk"
+        prop = {}
+        prop['map_file'] = "mari_res.map"
+        prop['monovan_mapfile'] = "mari_res.map"
+        prop['hard_mask_file'] = "mar11015.msk"
       #prop['hardmaskOnly'] ="mar11015.msk"
-      prop['normalise_method'] = 'monitor-2'
+        prop['normalise_method'] = 'monitor-2'
       # reduction from workspace currently needs detector_calibration file
       # MARI calibration uses one of data files defined on instrument.  Here
       # vanadium run is used for calibration
       # TODO: Why not workspace?, check it
-      prop['det_cal_file'] = "11060"
-      prop['save_format'] = []
-      return prop
+        prop['det_cal_file'] = "11060"
+        prop['save_format'] = []
+        return prop
       #
-   @iliad
-   def reduce(self,input_file=None,output_directory=None):
-     """ Method executes reduction over single file
+    @iliad
+    def reduce(self,input_file=None,output_directory=None):
+        """ Method executes reduction over single file
          Overload only if custom reduction is needed
      """
-     outWS = ReductionWrapper.reduce(self,input_file,output_directory)
+        outWS = ReductionWrapper.reduce(self,input_file,output_directory)
      #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
-     return outWS
+        return outWS
 
-   def __init__(self,web_var=None):
-       """ sets properties defaults for the instrument with Name"""
-       ReductionWrapper.__init__(self,'MAR',web_var)
+    def __init__(self,web_var=None):
+        """ sets properties defaults for the instrument with Name"""
+        ReductionWrapper.__init__(self,'MAR',web_var)
 #----------------------------------------------------------------------------------------------------------------------
 class MARIReductionSum(ReductionWrapper):
-   @MainProperties
-   def def_main_properties(self):
-       """ Define main properties used in reduction """ 
-       prop = {}
-       prop['sample_run'] = [11001,11015]
-       prop['wb_run'] = 11060
-       prop['incident_energy'] = 11
-       prop['energy_bins'] = [-11,0.05,11]
-       prop['sum_runs'] = True
+    @MainProperties
+    def def_main_properties(self):
+        """ Define main properties used in reduction """
+        prop = {}
+        prop['sample_run'] = [11001,11015]
+        prop['wb_run'] = 11060
+        prop['incident_energy'] = 11
+        prop['energy_bins'] = [-11,0.05,11]
+        prop['sum_runs'] = True
 
       # Absolute units reduction properties.
        #prop['monovan_run'] = 11015
        #prop['sample_mass'] = 32.58
        #prop['sample_rmm'] = 50.9415# 435.96
-       return prop
+        return prop
 
-   @AdvancedProperties
-   def def_advanced_properties(self):
-      """  separation between simple and advanced properties depends
+    @AdvancedProperties
+    def def_advanced_properties(self):
+        """  separation between simple and advanced properties depends
            on scientist, experiment and user.
-           main properties override advanced properties.      
+           main properties override advanced properties.
       """
-      prop = {}
-      prop['map_file'] = "mari_res.map"
-      prop['monovan_mapfile'] = "mari_res.map"
-      prop['hard_mask_file'] = "mar11015.msk"
+        prop = {}
+        prop['map_file'] = "mari_res.map"
+        prop['monovan_mapfile'] = "mari_res.map"
+        prop['hard_mask_file'] = "mar11015.msk"
       #prop['det_cal_file'] =11060
-      prop['save_format'] = ''
-      return prop
+        prop['save_format'] = ''
+        return prop
       #
-   @iliad
-   def reduce(self,input_file=None,output_directory=None):
-     """ Method executes reduction over single file
+    @iliad
+    def reduce(self,input_file=None,output_directory=None):
+        """ Method executes reduction over single file
          Overload only if custom reduction is needed
      """
-     ws = ReductionWrapper.reduce(self,input_file,output_directory)
+        ws = ReductionWrapper.reduce(self,input_file,output_directory)
      #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
-     return ws
+        return ws
 
-   def __init__(self,web_var=None):
-       """ sets properties defaults for the instrument with Name"""
-       ReductionWrapper.__init__(self,'MAR',web_var)
+    def __init__(self,web_var=None):
+        """ sets properties defaults for the instrument with Name"""
+        ReductionWrapper.__init__(self,'MAR',web_var)
 #----------------------------------------------------------------------------------------------------------------------
 class ReduceMARIMonitorsSeparate(ReductionWrapper):
 
-   @MainProperties
-   def def_main_properties(self):
-       """ Define main properties used in reduction """ 
-       prop = {}
-       prop['sample_run'] = 11001 #
+    @MainProperties
+    def def_main_properties(self):
+        """ Define main properties used in reduction """
+        prop = {}
+        prop['sample_run'] = 11001 #
        # WB workspace Simulate workspace without monitors
-       prop['wb_run'] = Load(Filename='MAR11060.RAW',OutputWorkspace='MAR11060.RAW',LoadMonitors='Exclude')
-       prop['incident_energy'] = 12
-       prop['energy_bins'] = [-11,0.05,11]
+        prop['wb_run'] = Load(Filename='MAR11060.RAW',OutputWorkspace='MAR11060.RAW',LoadMonitors='Exclude')
+        prop['incident_energy'] = 12
+        prop['energy_bins'] = [-11,0.05,11]
 
       # Absolute units reduction properties.
-       prop['monovan_run'] = 11015 #
-       prop['sample_mass'] = 10
-       prop['sample_rmm'] = 435.96
+        prop['monovan_run'] = 11015 #
+        prop['sample_mass'] = 10
+        prop['sample_rmm'] = 435.96
 
-       return prop
+        return prop
 
-   @AdvancedProperties
-   def def_advanced_properties(self):
-      """  separation between simple and advanced properties depends
+    @AdvancedProperties
+    def def_advanced_properties(self):
+        """  separation between simple and advanced properties depends
            on scientist, experiment and user.
-           main properties override advanced properties.      
+           main properties override advanced properties.
       """
-      prop = {}
-      prop['map_file'] = "mari_res.map"
-      prop['monovan_mapfile'] = "mari_res.map"
-      prop['hard_mask_file'] = "mar11015.msk"
+        prop = {}
+        prop['map_file'] = "mari_res.map"
+        prop['monovan_mapfile'] = "mari_res.map"
+        prop['hard_mask_file'] = "mar11015.msk"
       # MARI calibration uses one of data files defined on instrument.  Here
       # vanadium run is used for calibration
       # TODO: Why not workspace?
-      prop['det_cal_file'] = "11060"
-      prop['save_format'] = ''
-      prop['load_monitors_with_workspace'] = False
-      return prop
+        prop['det_cal_file'] = "11060"
+        prop['save_format'] = ''
+        prop['load_monitors_with_workspace'] = False
+        return prop
       #
-   @iliad
-   def reduce(self,input_file=None,output_directory=None):
-     """ Method executes reduction over single file
+    @iliad
+    def reduce(self,input_file=None,output_directory=None):
+        """ Method executes reduction over single file
          Overload only if custom reduction is needed
      """
-     outWS = ReductionWrapper.reduce(self,input_file,output_directory)
+        outWS = ReductionWrapper.reduce(self,input_file,output_directory)
      #SaveNexus(outWS,Filename = 'MARNewReduction.nxs')
-     return outWS
+        return outWS
 
-   def __init__(self,web_var=None):
-       """ sets properties defaults for the instrument with Name"""
-       ReductionWrapper.__init__(self,'MAR',web_var)
+    def __init__(self,web_var=None):
+        """ sets properties defaults for the instrument with Name"""
+        ReductionWrapper.__init__(self,'MAR',web_var)
 
 
 if __name__ == "__main__":
@@ -356,4 +357,4 @@ if __name__ == "__main__":
     #if not rez:
     #   raise RuntimeError("validation failed with error: {0}".format(mess))
     #else:
-    #   print "ALL Fine" 
+    #   print "ALL Fine"
