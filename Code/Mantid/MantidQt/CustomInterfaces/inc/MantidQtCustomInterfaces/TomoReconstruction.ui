@@ -25,7 +25,7 @@
       </property>
       <widget class="QWidget" name="editParamTab">
        <attribute name="title">
-        <string>Parameters</string>
+        <string>Savu Config</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout">
         <property name="spacing">
@@ -236,7 +236,7 @@
                        </font>
                       </property>
                       <property name="text">
-                       <string>Current Parameters</string>
+                       <string>Current configuration</string>
                       </property>
                      </widget>
                     </item>
