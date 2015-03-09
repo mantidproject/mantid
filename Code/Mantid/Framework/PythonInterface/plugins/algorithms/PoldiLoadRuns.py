@@ -58,6 +58,10 @@ class PoldiLoadRuns(PythonAlgorithm):
         if not lastRunProperty.isDefault:
             lastRun = lastRunProperty.value
 
+        # If lastRun is smaller than firstRun, just swap and continue
+        if firstRun > lastRun:
+            firstRun, lastRun = lastRun, firstRun
+
         # Get mergewidth
         mergeWidth = self.getProperty('MergeWidth').value
 
@@ -81,7 +85,7 @@ class PoldiLoadRuns(PythonAlgorithm):
         mergeRange = self.getActualMergeRange(firstRun, lastRun, mergeWidth)
 
         # Get a list of output workspace names.
-        outputWorkspaces = self.getLoadedWorkspaceNames(mergeRange, mergeWidth, nameTemplate)
+        outputWorkspaces = self.getLoadedWorkspaceNames(year, mergeRange, mergeWidth, nameTemplate)
 
         # No workspaces, return - the algorithm will fail with an error. Additional log entry.
         if len(outputWorkspaces) == 0:
@@ -127,7 +131,7 @@ class PoldiLoadRuns(PythonAlgorithm):
         return (firstRun, actualLastRun)
 
     # Load workspaces and return a list of workspaces that were actually loaded.
-    def getLoadedWorkspaceNames(self, mergeRange, mergeWidth, nameTemplate):
+    def getLoadedWorkspaceNames(self, year, mergeRange, mergeWidth, nameTemplate):
         outputWorkspaces = []
         for i in range(mergeRange[0], mergeRange[1] + 1, mergeWidth):
             # The name of the possibly merged workspace is this the last name of the merged series.
@@ -140,7 +144,7 @@ class PoldiLoadRuns(PythonAlgorithm):
 
                 # Errors are handled by writing a message to the log, so the user can check the files.
                 try:
-                    self.loadAndTruncateData(currentWsName, j)
+                    self.loadAndTruncateData(currentWsName, year, j)
                     workspaceNames.append(currentWsName)
                 except:
                     self.log().warning("Could not load run no. " + str(j) + ", skipping.")
@@ -165,8 +169,8 @@ class PoldiLoadRuns(PythonAlgorithm):
         return outputWorkspaces
 
     # Execute LoadSINQ, LoadInstrument and PoldiTruncateData
-    def loadAndTruncateData(self, workspaceName, j):
-        LoadSINQ("POLDI", 2014, j, OutputWorkspace=workspaceName)
+    def loadAndTruncateData(self, workspaceName, year, j):
+        LoadSINQ("POLDI", year, j, OutputWorkspace=workspaceName)
         LoadInstrument(workspaceName, InstrumentName="POLDI")
         PoldiTruncateData(InputWorkspace=workspaceName, OutputWorkspace=workspaceName)
 
