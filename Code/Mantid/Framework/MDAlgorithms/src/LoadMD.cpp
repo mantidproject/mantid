@@ -442,7 +442,7 @@ CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name) {
   outD--;
   Matrix<coord_t> mat(vec);
   CoordTransform *transform = NULL;
-  if ("CoordTransformAffine" == type) {
+  if (("CoordTransformAffine" == type)||("CoordTransformAligned" == type)) {
     CoordTransformAffine *affine = new CoordTransformAffine(inD, outD);
     affine->setMatrix(mat);
     transform = affine;
