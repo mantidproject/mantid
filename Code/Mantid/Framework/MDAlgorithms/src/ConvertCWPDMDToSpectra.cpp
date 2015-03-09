@@ -15,6 +15,8 @@ using namespace Mantid::MDAlgorithms;
 
 DECLARE_ALGORITHM(ConvertCWPDMDToSpectra)
 
+const double BIGNUMBER = 1.0E100;
+
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
@@ -140,16 +142,33 @@ void ConvertCWPDMDToSpectra::exec() {
   }
 
   // bin parameters
-  if (binParams.size() != 3)
-    throw std::runtime_error("Binning parameters must have 3 items.");
-  if (binParams[0] >= binParams[2])
+  double xmin, xmax, binsize;
+  xmin = xmax = binsize = -1;
+  if (binParams.size() == 1) {
+    binsize = binParams[0];
+    g_log.warning()
+        << "Only bin size " << binParams[0]
+        << " is specified.  Xmin and Xmax "
+           " will be calcualted from motor positions and wavelength.  "
+           "More CPU time will be used."
+        << "\n";
+  } else if (binParams.size() == 3) {
+    xmin = binParams[0];
+    binsize = binParams[1];
+    xmax = binParams[2];
+    if (xmin >= xmax)
+      throw std::runtime_error(
+          "Min value of the bin must be smaller than maximum value.");
+  } else {
+    // Either 1 or 3 parameters.  Throw exception
     throw std::runtime_error(
-        "Min value of the bin must be smaller than maximum value.");
+        "Binning parameters must have either 1 or 3 items.");
+  }
 
   // Rebin
   API::MatrixWorkspace_sptr outws = reducePowderData(
-      inputDataWS, inputMonitorWS, outputunit, map_runWavelength, binParams[0],
-      binParams[2], binParams[1], doLinearInterpolation);
+      inputDataWS, inputMonitorWS, outputunit, map_runWavelength, xmin, xmax,
+      binsize, doLinearInterpolation);
 
   // Scale
   scaleMatrixWorkspace(outws, scaleFactor, m_infitesimal);
@@ -188,9 +207,24 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
   // Get some information
   int64_t numevents = dataws->getNEvents();
 
+  // check xmin and xmax
+  double lowerboundary, upperboundary;
+  if (xmin < 0 || xmax < 0) {
+    // xmin or xmax cannot be negative (2theta, dspace and q are always
+    // positive)
+    findXBoundary(dataws, targetunit, map_runwavelength, lowerboundary,
+                  upperboundary);
+  } else {
+    lowerboundary = xmin;
+    upperboundary = xmax;
+  }
+
+  g_log.notice() << "[DB] Binning  from " << lowerboundary << " to "
+                 << upperboundary << "\n";
+
   // Create bins in 2theta (degree)
   size_t sizex, sizey;
-  sizex = static_cast<size_t>((xmax - xmin) / binsize + 0.5);
+  sizex = static_cast<size_t>((upperboundary - lowerboundary) / binsize + 0.5);
   sizey = sizex - 1;
   g_log.debug() << "Number of events = " << numevents
                 << "bin size = " << binsize << ", SizeX = " << sizex << ", "
@@ -199,7 +233,7 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
       vece(sizex - 1, 0);
 
   for (size_t i = 0; i < sizex; ++i) {
-    vecx[i] = xmin + static_cast<double>(i) * binsize;
+    vecx[i] = lowerboundary + static_cast<double>(i) * binsize;
   }
 
   // Convert unit to unit char bit
@@ -268,6 +302,115 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
     linearInterpolation(pdws, m_infitesimal);
 
   return pdws;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Find the binning boundaries for 2theta (det position), d-spacing or Q.
+ * @brief ConvertCWPDMDToSpectra::findXBoundary
+ * @param dataws
+ * @param targetunit
+ * @param wavelength
+ * @param xmin :: (output) lower binning boundary
+ * @param xmax :: (output) upper binning boundary
+ */
+void ConvertCWPDMDToSpectra::findXBoundary(
+    API::IMDEventWorkspace_const_sptr dataws, const std::string &targetunit,
+    const std::map<int, double> &map_runwavelength, double &xmin,
+    double &xmax) {
+  // Go through all instruments
+  uint16_t numruns = dataws->getNumExperimentInfo();
+  g_log.notice() << "[DB] Tota number of ExperimentInfo = " << numruns << "\n";
+
+  xmin = BIGNUMBER;
+  xmax = -1;
+
+  for (uint16_t irun = 0; irun < numruns; ++irun) {
+    // Skip the Experiment Information does not have run
+    if (!dataws->getExperimentInfo(irun)->getInstrument()) {
+      g_log.warning() << "iRun = " << irun << " of total " << numruns
+                      << " does not have instrument associated"
+                      << "\n";
+      continue;
+    }
+
+    // Get run number
+    int runnumber = dataws->getExperimentInfo(irun)->getRunNumber();
+    g_log.notice() << "Run " << runnumber << ": ";
+    std::map<int, double>::const_iterator miter =
+        map_runwavelength.find(runnumber);
+    double wavelength = -1;
+    if (miter != map_runwavelength.end()) {
+      wavelength = miter->second;
+      g_log.notice() << " wavelength = " << wavelength << "\n";
+    } else {
+      g_log.notice() << " no matched wavelength."
+                     << "\n";
+    }
+
+    // Get source and sample position
+    std::vector<detid_t> vec_detid =
+        dataws->getExperimentInfo(irun)->getInstrument()->getDetectorIDs(true);
+    if (vec_detid.size() == 0) {
+      g_log.notice() << "[DB] Run " << runnumber << " has no detectors."
+                     << "\n";
+      continue;
+    }
+    const V3D samplepos =
+        dataws->getExperimentInfo(irun)->getInstrument()->getSample()->getPos();
+    const V3D sourcepos =
+        dataws->getExperimentInfo(irun)->getInstrument()->getSource()->getPos();
+
+    // Get all detectors
+    // std::vector<detid_t> vec_detid =
+    // dataws->getExperimentInfo(irun)->getInstrument()->getDetectorIDs(true);
+    std::vector<Geometry::IDetector_const_sptr> vec_det =
+        dataws->getExperimentInfo(irun)->getInstrument()->getDetectors(
+            vec_detid);
+    size_t numdets = vec_det.size();
+    g_log.notice() << "[DB] Run = " << runnumber
+                   << ": Number of detectors = " << numdets << "\n";
+
+    // Scan all the detectors to get Xmin and Xmax
+    for (size_t idet = 0; idet < numdets; ++idet) {
+      Geometry::IDetector_const_sptr tmpdet = vec_det[idet];
+      const V3D detpos = tmpdet->getPos();
+
+      double R, theta, phi;
+      detpos.getSpherical(R, theta, phi);
+      if (R < 0.0001)
+        g_log.error("Invalid detector position");
+
+      Kernel::V3D v_det_sample = detpos - samplepos;
+      Kernel::V3D v_sample_src = samplepos - sourcepos;
+      double twotheta =
+          calculate2Theta(v_det_sample, v_sample_src) / M_PI * 180.;
+
+      // convert unit optionally
+      double outx = -1;
+      if (targetunit.compare("2tehta") == 0)
+        outx = twotheta;
+      else {
+        if (wavelength <= 0)
+          throw std::runtime_error("Wavelength is not defined!");
+
+        if (targetunit.compare("dSpacing") == 0)
+          outx = calculateDspaceFrom2Theta(twotheta, wavelength);
+        else if (targetunit.compare("Q") == 0)
+          outx = calculateQFrom2Theta(twotheta, wavelength);
+        else
+          throw std::runtime_error("Unrecognized unit.");
+      }
+
+      // Compare with xmin and xmax
+      if (outx < xmin)
+        xmin = outx;
+      else if (outx > xmax)
+        xmax = outx;
+    }
+  }
+
+  g_log.notice() << "[DB] Auto boundary: [" << xmin << ", " << xmax << "]"
+                 << "\n";
 }
 
 //----------------------------------------------------------------------------------------------

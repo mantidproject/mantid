@@ -38,7 +38,7 @@ public:
   /** Unit test to reduce/bin the HB2A data
    * @brief test_ReduceHB2AData
    */
-  void test_ReduceHB2AData() {
+  void Ptest_ReduceHB2AData() {
     // Init
     ConvertCWPDMDToSpectra alg;
     alg.initialize();
@@ -100,7 +100,7 @@ public:
   /** Unit test to reduce/bin the HB2A data with more options
    * @brief test_ReduceHB2AData
    */
-  void test_ReduceHB2ADataMoreOptions() {
+  void Ptest_ReduceHB2ADataMoreOptions() {
     // Init
     ConvertCWPDMDToSpectra alg;
     alg.initialize();
@@ -118,6 +118,51 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ScaleFactor", 10.0));
     TS_ASSERT_THROWS_NOTHING(
           alg.setProperty("NeutronWaveLength", 2.41));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ReducedData"));
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Get ouput
+    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("ReducedData"));
+    TS_ASSERT(outws);
+
+    // Check unit and range of X
+    std::string unit = outws->getAxis(0)->unit()->unitID();
+    TS_ASSERT_EQUALS(unit, "dSpacing");
+
+    const Mantid::MantidVec &vecX = outws->readX(0);
+    TS_ASSERT_DELTA(vecX.front(), 0.5, 0.0001);
+    TS_ASSERT_DELTA(vecX.back(), 4.99, 0.0001);
+
+    // Check statistics
+
+    // Clean
+    AnalysisDataService::Instance().remove("ReducedData");
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Unit test to reduce/bin the HB2A data with more options
+   * @brief test_ReduceHB2AData
+   */
+  void test_ReduceHB2ADataAutoBinBoundary() {
+    // Init
+    ConvertCWPDMDToSpectra alg;
+    alg.initialize();
+
+    // Set properties
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", m_dataMD->name()));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->name()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOutput", "dSpacing"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParams", "0.01"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("LinearInterpolateZeroCounts", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ScaleFactor", 10.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronWaveLength", 2.41));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ReducedData"));
 
     // Execute
