@@ -1,15 +1,10 @@
-#ifndef MANTID_MDEVENTS_SKIPPINGPOLICYTEST_H_
-#define MANTID_MDEVENTS_SKIPPINGPOLICYTEST_H_
+#ifndef MANTID_DATAOBJECTS_SKIPPINGPOLICYTEST_H_
+#define MANTID_DATAOBJECTS_SKIPPINGPOLICYTEST_H_
 
+#include "MantidDataObjects/SkippingPolicy.h"
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
 
-#include "MantidMDEvents/SkippingPolicy.h"
-
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 class SkippingPolicyTest : public CxxTest::TestSuite
 {
@@ -30,4 +25,4 @@ public:
 };
 
 
-#endif /* MANTID_MDEVENTS_SKIPPINGPOLICYTEST_H_ */
+#endif /* MANTID_DATAOBJECTS_SKIPPINGPOLICYTEST_H_ */

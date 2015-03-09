@@ -158,6 +158,7 @@ set ( TEST_FILES
 	PeaksWorkspaceTest.h
 	RebinnedOutputTest.h
 	RefAxisTest.h
+	SkippingPolicyTest.h
 	SpecialWorkspace2DTest.h
 	SplittersWorkspaceTest.h
 	TableColumnTest.h
