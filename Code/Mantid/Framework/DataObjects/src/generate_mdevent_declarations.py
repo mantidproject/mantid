@@ -159,7 +159,7 @@ def generate():
     # All of the classes to instantiate
     classes = classes_cpp + mdevent_types
 
-    padding,lines,lines_after=parse_file("../inc/MantidMDEvents/MDEventFactory.h",
+    padding,lines,lines_after=parse_file("../inc/MantidDataObjects/MDEventFactory.h",
                                                  "//### BEGIN AUTO-GENERATED CODE ###",
                                                  "//### END AUTO-GENERATED CODE ###");
 
@@ -203,7 +203,7 @@ def generate():
 
     lines += footer_lines + lines_after
 
-    f = open("../inc/MantidMDEvents/MDEventFactory.h", 'w')
+    f = open("../inc/MantidDataObjects/MDEventFactory.h", 'w')
     for line in lines:
         f.write(line + "\n")
     f.close()
