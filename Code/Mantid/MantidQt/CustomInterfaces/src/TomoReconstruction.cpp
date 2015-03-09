@@ -7,7 +7,6 @@
 #include "MantidQtCustomInterfaces/TomoReconstruction.h"
 
 #include <boost/lexical_cast.hpp>
-#include <jsoncpp/json/json.h>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QPainter>
@@ -857,10 +856,14 @@ void TomoReconstruction::paramValModified(QTreeWidgetItem *item,
 
   if (topLevelIndex != -1) {
     // Recreate the json string from the nodes and write back
-    ::Json::Value root;
     std::string json = m_currPlugins->cell<std::string>(topLevelIndex, 1);
-    ::Json::Reader r;
+    // potential new line out, and trim spaces
+    json.erase(std::remove(json.begin(), json.end(), '\n'), json.end());
+    json.erase(std::remove(json.begin(), json.end(), '\r'), json.end());
+    json = Poco::trimInPlace(json);
 
+    ::Json::Reader r;
+    ::Json::Value root;
     if (r.parse(json, root)) {
       // Look for the key and replace it
       root[ownItem->getKey()] = ownItem->text(0).toStdString();
@@ -1051,9 +1054,9 @@ void TomoReconstruction::createPluginTreeEntry(TableRow &row) {
   // Params will be a json string which needs splitting into child tree items
   // [key/value]
   ::Json::Value root;
-  std::string json = row.cell<std::string>(1);
+  std::string paramString = row.cell<std::string>(1);
   ::Json::Reader r;
-  if (r.parse(json, root)) {
+  if (r.parse(paramString, root)) {
     auto members = root.getMemberNames();
     for (auto it = members.begin(); it != members.end(); ++it) {
       OwnTreeWidgetItem *container =
@@ -1072,7 +1075,10 @@ void TomoReconstruction::createPluginTreeEntry(TableRow &row) {
       paramContainerTree->setHeaderHidden(true);
       paramContainerTree->setIndentation(0);
 
-      QStringList paramVal(QString::fromStdString(root[*it].asString()));
+      auto jsonVal = root.get(*it, "");
+      std::string valStr = pluginParamValString(jsonVal, *it);
+
+      QStringList paramVal(QString::fromStdString(valStr));
       OwnTreeWidgetItem *paramValueItem =
           new OwnTreeWidgetItem(paramVal, pluginBaseItem, *it);
       paramValueItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled);
@@ -1094,12 +1100,79 @@ void TomoReconstruction::createPluginTreeEntry(TableRow &row) {
   m_ui.treeCurrentPlugins->addTopLevelItem(pluginBaseItem);
 }
 
+/**
+ * This is a kind of .asString() method for arrays. It iterates
+ * through the array elements and builds the string enclosed by [].
+ *
+ * @param jsonVal Value of a parameter that seems to be an array (isArray()==true)
+ * @param name Name of the parameter (to give informative messages)
+ *
+ * @return String with a parameter value(s), enclosed by [] and
+ * separated by commas
+ */
+std::string TomoReconstruction::paramValStringFromArray(
+   const Json::Value &jsonVal, const std::string &name) {
+  std::string s;
+  s = "[";
+  for (Json::ArrayIndex i=0; i<jsonVal.size(); ++i) {
+    if (jsonVal[i].isArray()) {
+      userWarning("Could not recognize parameter value in list/array",
+                  "The value of parameter '" + name + "' could not be interpreted "
+                  "as a string. It does not seem to be well formed or supported. "
+                  "For example, parameter values given as lists of lists are not "
+                  "supported.");
+    } else {
+      try {
+        s += jsonVal[i].asString() + " ,";
+      } catch(std::exception &e) {
+        userWarning("Could not recognize value in list/array of values",
+                    "The " + boost::lexical_cast<std::string>(i) +
+                    "-th value of the list/array could not be interpreted "
+                    "as a text string. It will be empty in the list of current "
+                    "plugins. You can still edit it. Error details: " +
+                    std::string(e.what()));
+      }
+    }
+  }
+  s.back() = ']'; // and last comma becomes closing ]
+  return s;
+}
+
+/**
+ * Build a string with the value of a parameter in a json
+ * string. Works for scalar and list/array values.
+ *
+ * @param jsonVal Value of a parameter that seems to be an array
+ * @param name Name of the parameter (to give informative messages)
+ *
+ * @return String with a parameter value
+ */
+std::string TomoReconstruction::pluginParamValString(
+   const Json::Value &jsonVal, const std::string &name) {
+  std::string s;
+  // string and numeric values can (normally) be converted to string but arrays cannot
+  if (!jsonVal.isArray()) {
+    try {
+      s = jsonVal.asString();
+    } catch(std::exception &e) {
+      userWarning("Could not recognize parameter value",
+                  "The value of parameter '" + name + "' could not be interpreted "
+                  "as a string. It will be empty in the list of current plugins. "
+                  "You can still edit it. Error details: " + std::string(e.what()));
+    }
+  } else {
+    s = paramValStringFromArray(jsonVal, name);
+  }
+  return s;
+}
+
 void TomoReconstruction::createPluginTreeEntries(ITableWorkspace_sptr table) {
   for (size_t i=0; i<table->rowCount(); ++i) {
     TableRow r = table->getRow(i);
     createPluginTreeEntry(r);
   }
 }
+
 /**
  * Get path from user and update a line edit and a variable.
  *

@@ -6,6 +6,8 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
+#include <jsoncpp/json/json.h>
+
 class QTreeWidgetItem;
 class QLineEdit;
 
@@ -130,6 +132,11 @@ private:
   void userWarning(std::string err, std::string description);
 
   void userError(std::string err, std::string description);
+
+  std::string paramValStringFromArray(const Json::Value &jsonVal,
+                                      const std::string &name);
+  std::string pluginParamValString(const Json::Value &jsonVal,
+                                   const std::string &name);
 
   /// to load plugins (savu classification / API)
   void loadAvailablePlugins();
