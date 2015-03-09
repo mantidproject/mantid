@@ -38,7 +38,7 @@ public:
   /** Unit test to reduce/bin the HB2A data
    * @brief test_ReduceHB2AData
    */
-  void Ptest_ReduceHB2AData() {
+  void test_ReduceHB2AData() {
     // Init
     ConvertCWPDMDToSpectra alg;
     alg.initialize();
@@ -100,7 +100,7 @@ public:
   /** Unit test to reduce/bin the HB2A data with more options
    * @brief test_ReduceHB2AData
    */
-  void Ptest_ReduceHB2ADataMoreOptions() {
+  void test_ReduceHB2ADataMoreOptions() {
     // Init
     ConvertCWPDMDToSpectra alg;
     alg.initialize();
@@ -147,7 +147,7 @@ public:
   /** Unit test to reduce/bin the HB2A data with more options
    * @brief test_ReduceHB2AData
    */
-  void test_ReduceHB2ADataAutoBinBoundary() {
+  void Ttest_ReduceHB2ADataAutoBinBoundary() {
     // Init
     ConvertCWPDMDToSpectra alg;
     alg.initialize();

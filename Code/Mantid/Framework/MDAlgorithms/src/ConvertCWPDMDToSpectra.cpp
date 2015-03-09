@@ -55,7 +55,7 @@ void ConvertCWPDMDToSpectra::init() {
   std::vector<std::string> vecunits;
   vecunits.push_back("2theta");
   vecunits.push_back("dSpacing");
-  vecunits.push_back("Momenum Transfer (Q)");
+  vecunits.push_back("Momentum Transfer (Q)");
   auto unitval = boost::make_shared<ListValidator<std::string> >(vecunits);
   declareProperty("UnitOutput", "2theta", unitval,
                   "Unit of the output workspace.");
@@ -240,7 +240,7 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
   char unitchar = 't'; // default 2theta
   if (targetunit.compare("dSpacing") == 0)
     unitchar = 'd';
-  else if (targetunit.compare("Momenum Transfer (Q)") == 0)
+  else if (targetunit.compare("Momentum Transfer (Q)") == 0)
     unitchar = 'q';
 
   binMD(dataws, unitchar, map_runwavelength, vecx, vecy);
@@ -277,12 +277,7 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
     pdws->getAxis(0)->setUnit("MomentumTransfer");
   else {
     // Twotheta
-    Unit_sptr xUnit = pdws->getAxis(0)->unit();
-    if (xUnit) {
-      g_log.warning("Unable to set unit to an Unit::Empty object.");
-    } else {
-      throw std::runtime_error("Unable to get unit from Axis(0)");
-    }
+    pdws->getAxis(0)->setUnit("Degrees");
   }
 
   MantidVec &dataX = pdws->dataX(0);
@@ -387,7 +382,7 @@ void ConvertCWPDMDToSpectra::findXBoundary(
 
       // convert unit optionally
       double outx = -1;
-      if (targetunit.compare("2tehta") == 0)
+      if (targetunit.compare("2theta") == 0)
         outx = twotheta;
       else {
         if (wavelength <= 0)
@@ -395,7 +390,7 @@ void ConvertCWPDMDToSpectra::findXBoundary(
 
         if (targetunit.compare("dSpacing") == 0)
           outx = calculateDspaceFrom2Theta(twotheta, wavelength);
-        else if (targetunit.compare("Q") == 0)
+        else if (targetunit.compare("Momentum Transfer (Q)") == 0)
           outx = calculateQFrom2Theta(twotheta, wavelength);
         else
           throw std::runtime_error("Unrecognized unit.");
