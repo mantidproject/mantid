@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 """
 Test the SNS inelatic reduction scripts.
 """
@@ -14,15 +15,15 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
 
     #setup routines
     def topbottom(self):
-        #create top and bottom mask         
+        #create top and bottom mask
         LoadEventNexus(Filename='SEQ_12384_event.nxs', OutputWorkspace='mask',CompressTolerance=0.1)
         Rebin(InputWorkspace='mask',OutputWorkspace='mask',Params="500,15500,16000",PreserveEvents=False)
         w=mtd['mask']
         indexlist=[]
         for i in range(w.getNumberHistograms()):
-            if (i%128) in [0,1,2,3,4,5,6,7,120,121,122,123,124,125,126,127]:
+            if i%128 in [0,1,2,3,4,5,6,7,120,121,122,123,124,125,126,127]:
                 indexlist.append(i)
-        
+
         MaskDetectors(Workspace='mask',WorkspaceIndexList=indexlist)
         SaveNexus(InputWorkspace="mask",Filename = os.path.join(self.customDataDir,"mask_top_bottom.nxs"))
         DeleteWorkspace('mask')
@@ -45,8 +46,8 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
     #Routines from SNS scripts
     def createanglelist(self,ws,amin,amax,astep):
         """
-        Function to create a map of detectors corresponding to angles in a certain range	
-        """	
+        Function to create a map of detectors corresponding to angles in a certain range
+        """
         bin_angles=arange(amin+astep*0.5,amax+astep*0.5,astep)
         a=[[] for i in range(len(bin_angles))] #list of list with detector IDs
         w=mtd[ws]
@@ -56,7 +57,7 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
             index=int((ang-amin)/astep)
             if (index>=0) and (index<len(a)) and ((w.getDetector(i).getID())>0):
                 a[index].append(w.getSpectrum(i).getSpectrumNo())
-        #create lists with angles and detector ID only for bins where there are detectors 
+        #create lists with angles and detector ID only for bins where there are detectors
         ang_list=[]
         detIDlist=[]
         for elem,ang in zip(a,bin_angles):
@@ -90,7 +91,7 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         return [Ei,Tzero]
 
     def LoadPathMaker(self,runs,folder,prefix,suffix):
-        """	
+        """
         Function to create paths to files from runnumbers
         return a list of lists with the path, and a corrected list of runs. Files in the inner lists are added together
         side effects: none
@@ -111,35 +112,35 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
             for i in range(len(r)):
                 temppath.append(os.path.join(folder,prefix+str(r[i])+suffix))
                 tempnewruns.append(r[i])
-                if (not(os.path.isfile(temppath[i]))):
+                if not os.path.isfile(temppath[i]):
                     raise IOError(temppath[i]+" not found")
             path.append(temppath)
             newruns.append(tempnewruns)
         return [path,newruns]
 
-    def CreateMasksAndVanadiumNormalization(self,vanfile,maskfile=''):		
+    def CreateMasksAndVanadiumNormalization(self,vanfile,maskfile=''):
         """
         Creates the Van workspace, one bin for each histogram, containing the integrated Vanadium intensity
         VAN also contains the mask.
         """
-    	if not os.path.isfile(os.path.join(self.customDataDir, "van.nx5")):
-    		LoadEventNexus(Filename=vanfile,OutputWorkspace="VAN")
-		
-    		Rebin(InputWorkspace="VAN",OutputWorkspace="VAN",Params="1000,15000,16000",PreserveEvents=False)	#integrate all events between 1000 and 16000 microseconds
-    		NormaliseByCurrent(InputWorkspace="VAN",OutputWorkspace="VAN")									    #normalize by proton charge
-    		MedianDetectorTest(InputWorkspace="VAN",OutputWorkspace="MASK",SignificanceTest=100,HighThreshold =100) #determine which detectors to mask, and store them in the "MASK" workspace
-    		if len(maskfile)>0:
-    		    LoadNexus(Filename=maskfile,OutputWorkspace="temp_mask")
-    		    MaskDetectors(Workspace="MASK",MaskedWorkspace="temp_mask")		    						    #add detectors masked in "temp_mask" to "MASK"
-    		    DeleteWorkspace(Workspace="temp_mask")
-    		MaskDetectors(Workspace="VAN",MaskedWorkspace="MASK")										        #Mask "VAN". This prevents dividing by 0		
-    		DeleteWorkspace(Workspace="MASK")														            #Mask is carried by VAN workspace
-    		SaveNexus(InputWorkspace="VAN",Filename=os.path.join(self.customDataDir,"van.nx5"))
-    	else:
-    		LoadNexus(Filename=os.path.join(self.customDataDir,"van.nx5"),OutputWorkspace="VAN")
-		    
+        if not os.path.isfile(os.path.join(self.customDataDir, "van.nx5")):
+            LoadEventNexus(Filename=vanfile,OutputWorkspace="VAN")
 
-    #functions from stresstesting 
+            Rebin(InputWorkspace="VAN",OutputWorkspace="VAN",Params="1000,15000,16000",PreserveEvents=False)    #integrate all events between 1000 and 16000 microseconds
+            NormaliseByCurrent(InputWorkspace="VAN",OutputWorkspace="VAN")                                        #normalize by proton charge
+            MedianDetectorTest(InputWorkspace="VAN",OutputWorkspace="MASK",SignificanceTest=100,HighThreshold =100) #determine which detectors to mask, and store them in the "MASK" workspace
+            if len(maskfile)>0:
+                LoadNexus(Filename=maskfile,OutputWorkspace="temp_mask")
+                MaskDetectors(Workspace="MASK",MaskedWorkspace="temp_mask")                                        #add detectors masked in "temp_mask" to "MASK"
+                DeleteWorkspace(Workspace="temp_mask")
+            MaskDetectors(Workspace="VAN",MaskedWorkspace="MASK")                                                #Mask "VAN". This prevents dividing by 0
+            DeleteWorkspace(Workspace="MASK")                                                                    #Mask is carried by VAN workspace
+            SaveNexus(InputWorkspace="VAN",Filename=os.path.join(self.customDataDir,"van.nx5"))
+        else:
+            LoadNexus(Filename=os.path.join(self.customDataDir,"van.nx5"),OutputWorkspace="VAN")
+
+
+    #functions from stresstesting
     def requiredFiles(self):
         return ['SEQ_12384_event.nxs']
 
@@ -150,7 +151,7 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
                 DeleteWorkspace(ws)
         if os.path.exists(self.customDataDir):
             shutil.rmtree(self.customDataDir)
-       
+
     def runTest(self):
         self.setupFiles()
         runs=[[12384,12385]]
@@ -158,9 +159,9 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         V_file=os.path.join(self.customDataDir, 'SEQ_12384_event.nxs')
         Eguess=35.0														#initial energy guess
         Erange="-10.0,0.25,32.0"										#Energy bins:    Emin,Estep,Emax
-        datadir=self.customDataDir		                                #Data directory	
+        datadir=self.customDataDir		                                #Data directory
         outdir=self.customDataDir	                                    #Output directory
-        fout_prefix="Ei_35.0_"      
+        fout_prefix="Ei_35.0_"
         ang_offset=0.0
         angle_name='SEOCRot'                                            #Name of the angle to read
         maskandnormalize=True	                                        #flag to do the masking and normalization to Vanadium
@@ -171,26 +172,26 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         anglemax=70.				                                    #maximum angle
         anglestep=1.				                                    #angle step - this can be fine tuned for pixel arc over detectors
 
-        if (maskandnormalize):
-	        self.CreateMasksAndVanadiumNormalization(V_file,maskfile=maskfile)	#Creates a worspaces for Vanadium normalization and masking
+        if maskandnormalize:
+            self.CreateMasksAndVanadiumNormalization(V_file,maskfile=maskfile)    #Creates a worspaces for Vanadium normalization and masking
 
         [paths,runs]=self.LoadPathMaker(runs,self.customDataDir,'SEQ_','_event.nxs') #process teh runlist
         for flist,rlist,i in zip(paths,runs,range(len(paths))):	   		#rlist is the inner list of runnumbers
             psitmp=[]
             for f,j in zip(flist,range(len(flist))):
-                if (j==0):
-			        LoadEventNexus(Filename=f,OutputWorkspace="IWS")						#Load an event Nexus file
-			        LoadNexusMonitors(Filename=f,OutputWorkspace="monitor_ws")				#Load monitors    		
+                if j==0:
+                    LoadEventNexus(Filename=f,OutputWorkspace="IWS")                        #Load an event Nexus file
+                    LoadNexusMonitors(Filename=f,OutputWorkspace="monitor_ws")                #Load monitors
                 else:
-			        LoadEventNexus(Filename=f,OutputWorkspace="IWS_temp")					#Load an event Nexus file
-			        LoadNexusMonitors(Filename=f,OutputWorkspace="monitor_ws_temp")			#Load monitors   
-			        Plus(LHSWorkspace="IWS",RHSWorkspace="IWS_temp",OutputWorkspace="IWS")	#Add events to the original workspcace 
-			        Plus(LHSWorkspace="monitor_ws",RHSWorkspace="monitor_ws_temp",OutputWorkspace="monitor_ws")	#Add  monitors to the original monitor workspcace 
+                    LoadEventNexus(Filename=f,OutputWorkspace="IWS_temp")                    #Load an event Nexus file
+                    LoadNexusMonitors(Filename=f,OutputWorkspace="monitor_ws_temp")            #Load monitors
+                    Plus(LHSWorkspace="IWS",RHSWorkspace="IWS_temp",OutputWorkspace="IWS")    #Add events to the original workspcace
+                    Plus(LHSWorkspace="monitor_ws",RHSWorkspace="monitor_ws_temp",OutputWorkspace="monitor_ws")    #Add  monitors to the original monitor workspcace
 			        #cleanup
-			        DeleteWorkspace("IWS_temp")                                                                 						
-			        DeleteWorkspace("monitor_ws_temp")
+                    DeleteWorkspace("IWS_temp")
+                    DeleteWorkspace("monitor_ws_temp")
         w=mtd["IWS"]
-        psi=array(w.getRun()[angle_name].value).mean()+ang_offset                        
+        psi=array(w.getRun()[angle_name].value).mean()+ang_offset
         FilterBadPulses(InputWorkspace="IWS",OutputWorkspace = "IWS",LowerCutoff = 50)	    # get psi before filtering bad pulses
         [Efixed,T0]=self.GetEiT0("monitor_ws",Eguess)											#Get Ei and -T0 using the function defined before
         ChangeBinOffset(InputWorkspace="IWS",OutputWorkspace="OWS",Offset=T0)				#Change all TOF by -T0
@@ -201,29 +202,29 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         CorrectKiKf(InputWorkspace="OWS",OutputWorkspace="OWS")                                                     # apply ki/kf correction
         Rebin(InputWorkspace="OWS",OutputWorkspace="OWST",Params=Erange,PreserveEvents=False)                       # go to histogram mode (forget events)
         ConvertToDistribution(Workspace="OWST")														                #Convert to differential cross section by dividing by the energy bin width
-        DeleteWorkspace("OWS") 
-        if (maskandnormalize):
+        DeleteWorkspace("OWS")
+        if maskandnormalize:
             MaskDetectors(Workspace="OWST",MaskedWorkspace="VAN")						#apply overall mask
             # the following is commented, since it's the same run, not a real vanadium
 		    #Divide(LHSWorkspace="OWST",RHSWorkspace="VAN",OutputWorkspace="OWST")		#normalize by Vanadium, if desired
-        if (do_powder):
-            if (i==0):
+        if do_powder:
+            if i==0:
                 mapping=self.createanglelist("OWST",anglemin,anglemax,anglestep)
             GroupDetectors(InputWorkspace="OWST",OutputWorkspace="OWST",MapFile=os.path.join(self.customDataDir,"group.map"),Behaviour="Sum")
             SolidAngle(InputWorkspace="OWST",OutputWorkspace="sa")
             Divide(LHSWorkspace="OWST",RHSWorkspace="sa",OutputWorkspace="OWST")
-            DeleteWorkspace("sa") 
+            DeleteWorkspace("sa")
         barefname = "%s%d_%g" % (fout_prefix,rlist[0],psi)
         fname_out = os.path.join(outdir, barefname)
         if flag_spe:
-            SaveSPE(InputWorkspace="OWST",Filename=fname_out+".spe")					#save the data in spe format. 
-            if (i==0):
+            SaveSPE(InputWorkspace="OWST",Filename=fname_out+".spe")					#save the data in spe format.
+            if i==0:
                 SavePHX(InputWorkspace="OWST",Filename=fname_out+".spe")
         if flag_nxspe:
             #save in NXSPE format
             nxspe_name = fname_out+".nxspe"
             self._nxspe_filename = nxspe_name
-            if (do_powder):
+            if do_powder:
                 SaveNXSPE(InputWorkspace="OWST",Filename=nxspe_name,Efixed=Efixed,psi=psi,KiOverKfScaling=True,
                           ParFile=os.path.join(outdir, "group.par"))
             else:
@@ -247,7 +248,7 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         if len(nxspelist)>1 or len(nxspelist) == 0:
             print "Error: Expected single nxspe file in %s. Found %d" % (self.customDataDir, len(nxspelist))
             return False
-       
+
         # Name encodes rotation
         self.assertGreaterThan(os.path.getsize(self._nxspe_filename),100000)
         psi_part=self._nxspe_filename.split('12384_')[1]

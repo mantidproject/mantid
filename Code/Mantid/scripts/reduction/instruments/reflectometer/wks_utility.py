@@ -1466,7 +1466,7 @@ def applyScalingFactor(tof_axis,
             print '--> Data SiW: {0:2f}'.format(s2w_value)
         else:
             print '--> Data S2W: {0:2f}'.format(s2w_value)
-            
+
         for i in range(nbr_row):
 
             _file_incidentMedium = getFieldValue(sfFactorTable,i,0)

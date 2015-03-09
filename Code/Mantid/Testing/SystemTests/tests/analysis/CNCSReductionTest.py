@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 """
 System test for CNCS reduction
 """
@@ -7,22 +8,22 @@ import os
 import stresstesting
 
 class CNCSReductionTest(stresstesting.MantidStressTest):
-    
+
     def requiredFiles(self):
         return ["CNCS_51936_event.nxs","CNCS_23936_event.nxs","CNCS_23937_event.nxs"]
 
     def requiredMemoryMB(self):
         return 4000
 
-    def cleanup(self):     
+    def cleanup(self):
         if os.path.exists(self.groupingFile):
-                    os.remove(self.groupingFile)
+            os.remove(self.groupingFile)
         if os.path.exists(self.parFile):
-                    os.remove(self.parFile)
+            os.remove(self.parFile)
         if os.path.exists(self.nxspeFile):
-                    os.remove(self.nxspeFile)
+            os.remove(self.nxspeFile)
         if os.path.exists(self.vanFile):
-                    os.remove(self.vanFile)
+            os.remove(self.vanFile)
         return True
 
 
@@ -31,7 +32,7 @@ class CNCSReductionTest(stresstesting.MantidStressTest):
         self.parFile=os.path.join(config.getString('defaultsave.directory'),'CNCS_powder_group.par')
         self.nxspeFile=os.path.join(config.getString('defaultsave.directory'),'CNCS_powder_group.nxspe')
         self.vanFile=os.path.join(config.getString('defaultsave.directory'),'van.nx5')
-        
+
         config['default.facility']="SNS"
         Load(Filename='CNCS_23936-23937',OutputWorkspace='sum')
         GenerateGroupingPowder(InputWorkspace="sum",AngleStep=0.5,GroupingFilename=self.groupingFile)
@@ -56,11 +57,11 @@ class CNCSReductionTest(stresstesting.MantidStressTest):
                     SaveProcessedDetVan=True,
                     SaveProcDetVanFilename=self.vanFile,
                     )
-        
+
         rotationdevice="SERotator2"
         psi=mtd["reduced"].run().get(rotationdevice).value[0]
         SaveNXSPE(InputWorkspace="reduced",Filename=self.nxspeFile,Efixed=Ei,psi=psi,KiOverKfScaling=True,ParFile=self.parFile)
-        
+
     def validate(self):
         #test vanadium file
         self.assertTrue(os.path.exists(self.vanFile))

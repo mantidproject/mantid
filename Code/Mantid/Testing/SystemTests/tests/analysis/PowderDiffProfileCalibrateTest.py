@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init
 ########################################################################
 #
 # This is the system test for workflow algorithms
@@ -12,9 +13,9 @@ import mantid.simpleapi as api
 from mantid.simpleapi import *
 
 def getSaveDir():
-        """determine where to save - the current working directory"""
-        import os
-        return os.path.abspath(os.path.curdir)
+    """determine where to save - the current working directory"""
+    import os
+    return os.path.abspath(os.path.curdir)
 
 class VulcanExamineProfile(stresstesting.MantidStressTest):
     irf_file = 'arg_powder.irf'
@@ -62,7 +63,7 @@ class VulcanExamineProfile(stresstesting.MantidStressTest):
         return ('Arg_Si_Calculated','Arg_Si_golden')
 
 class VulcanSeqRefineProfileFromScratch(stresstesting.MantidStressTest):
-    """ System test for sequential refinement 
+    """ System test for sequential refinement
     """
     irf_file = 'VULCAN_SNS_1.irf'
     dat_file = 'VULCAN_22946_NOM.dat'
@@ -74,26 +75,26 @@ class VulcanSeqRefineProfileFromScratch(stresstesting.MantidStressTest):
     def runTest(self):
         savedir = getSaveDir()
 
-        # Data 
-        LoadAscii(Filename=self.dat_file, OutputWorkspace='VULCAN_22946_NOM',Unit='TOF') 
-        
-        # Reflections and starting profile parameters 
-        CreateLeBailFitInput(FullprofParameterFile=self.irf_file, 
+        # Data
+        LoadAscii(Filename=self.dat_file, OutputWorkspace='VULCAN_22946_NOM',Unit='TOF')
+
+        # Reflections and starting profile parameters
+        CreateLeBailFitInput(FullprofParameterFile=self.irf_file,
                 GenerateBraggReflections='1',LatticeConstant='5.431364000',
-                InstrumentParameterWorkspace='Vulcan_B270_Profile', 
+                InstrumentParameterWorkspace='Vulcan_B270_Profile',
                 BraggPeakParameterWorkspace='GeneralReflectionTable')
 
         # Pre-refined background
-        paramnames = ["Bkpos", "A0", "A1", "A2", "A3", "A4", "A5"] 
-        paramvalues = [11000.000, 0.034, 0.027, -0.129, 0.161, -0.083, .015] 
-        bkgdtablewsname = "VULCAN_22946_Bkgd_Parameter" 
-        api.CreateEmptyTableWorkspace(OutputWorkspace=bkgdtablewsname) 
-        ws = mtd[bkgdtablewsname] 
-        ws.addColumn("str", "Name") 
-        ws.addColumn("double", "Value") 
-        for i in xrange(len(paramnames)): 
+        paramnames = ["Bkpos", "A0", "A1", "A2", "A3", "A4", "A5"]
+        paramvalues = [11000.000, 0.034, 0.027, -0.129, 0.161, -0.083, .015]
+        bkgdtablewsname = "VULCAN_22946_Bkgd_Parameter"
+        api.CreateEmptyTableWorkspace(OutputWorkspace=bkgdtablewsname)
+        ws = mtd[bkgdtablewsname]
+        ws.addColumn("str", "Name")
+        ws.addColumn("double", "Value")
+        for i in xrange(len(paramnames)):
             ws.addRow([paramnames[i], paramvalues[i]])
-        
+
         # Examine profile
         ExaminePowderDiffProfile(
                 InputWorkspace      = "VULCAN_22946_NOM",
@@ -180,14 +181,14 @@ class VulcanSeqRefineProfileFromScratch(stresstesting.MantidStressTest):
         api.RefinePowderDiffProfileSeq(
                 InputWorkspace      = "VULCAN_22946_NOM",
                 SeqControlInfoWorkspace = "RecordIDx890Table",
-                FunctionOption = "Save", 
+                FunctionOption = "Save",
                 OutputProjectFilename = "temp991.nxs",
                 ProjectID = "IDx890")
 
         return
-        
+
     def validateMethod(self):
-        """ Return None as running is all that we want at this moment. 
+        """ Return None as running is all that we want at this moment.
         """
         return None
 
@@ -196,7 +197,7 @@ class VulcanSeqRefineProfileFromScratch(stresstesting.MantidStressTest):
         return ('VULCAN_22946_Calculated', 'VULCAN_22946_Calculated')
 
 class VulcanSeqRefineProfileLoadPlus(stresstesting.MantidStressTest):
-    """ System test for sequential refinement 
+    """ System test for sequential refinement
     """
     seqfile = "VULCAN_Calibrate_Seq.nxs"
 
@@ -209,7 +210,7 @@ class VulcanSeqRefineProfileLoadPlus(stresstesting.MantidStressTest):
 
         # Load
         api.RefinePowderDiffProfileSeq(
-                FunctionOption = "Load", 
+                FunctionOption = "Load",
                 InputProjectFilename = self.seqfile,
                 ProjectID = "IDx890")
 
@@ -227,7 +228,7 @@ class VulcanSeqRefineProfileLoadPlus(stresstesting.MantidStressTest):
 
 
     def validateMethod(self):
-        """ Return None as running is all that we want at this moment. 
+        """ Return None as running is all that we want at this moment.
         """
         return None
 

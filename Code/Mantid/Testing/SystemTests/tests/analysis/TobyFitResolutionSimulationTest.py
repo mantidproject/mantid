@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 """Testing of the VATES quantification using
 the TobyFitResolutionModel
 """
@@ -28,9 +29,9 @@ class TobyFitResolutionSimulationTest(MantidStressTest):
     def runTest(self):
         ei = 300.
         bins = [-30,3,279]
-        temperature = 6. 
+        temperature = 6.
         chopper_speed = 600.
-          
+
         # Oriented lattice & goniometer.
         alatt = 5.57
         blatt = 5.51
@@ -63,39 +64,39 @@ class TobyFitResolutionSimulationTest(MantidStressTest):
         AddSampleLog(Workspace=fake_data, LogName='temperature_log',LogText=str(temperature), LogType="Number")
         AddSampleLog(Workspace=fake_data, LogName='chopper_speed_log',LogText=str(chopper_speed), LogType="Number")
         AddSampleLog(Workspace=fake_data, LogName='eta_sigma',LogText=str(eta_sig), LogType="Number")
-        
+
         ##
         ## Sample shape
         ##
         CreateSampleShape(InputWorkspace=fake_data, ShapeXML=create_cuboid_xml(sx,sy,sz))
-        
+
         ##
-        ## Chopper & Moderator models. 
+        ## Chopper & Moderator models.
         ##
         CreateModeratorModel(Workspace=fake_data,ModelType='IkedaCarpenterModerator',
                              Parameters="TiltAngle=32,TauF=2.7,TauS=0,R=0")
         CreateChopperModel(Workspace=fake_data,ModelType='FermiChopperModel',
                            Parameters="AngularVelocity=chopper_speed_log,ChopperRadius=0.049,SlitThickness=0.0023,SlitRadius=1.3,Ei=Ei,JitterSigma=0.0")
-        
+
         ##
         ## UB matrix
         ##
         SetUB(Workspace=fake_data,a=alatt,b=blatt,c=clatt,u=uvec,v=vvec)
-        
+
         ##
         ## Sample rotation. Simulate 1 run at zero degrees psi
         ##
-        
+
         psi = 0.0
         AddSampleLog(Workspace=fake_data,LogName='psi',LogText=str(psi),LogType='Number')
         SetGoniometer(Workspace=fake_data,Axis0="psi,0,1,0,1")
-        
+
         # Create the MD workspace
         qscale = 'Q in A^-1'
         fake_md = ConvertToMD(InputWorkspace=fake_data, QDimensions="Q3D", QConversionScales=qscale,
                               SplitInto=[3], SplitThreshold=100,
         		      MinValues="-15,-15,-15,-30", MaxValues="25,25,25,279",OverwriteExisting=True)
-        
+
         # Run the simulation.
         resol_model = "TobyFitResolutionModel"
         xsec_model = "Strontium122"
@@ -119,9 +120,9 @@ class TobyFitResolutionSimulationTest(MantidStressTest):
         self._success = ('success' in result.lower())
 
         if not self._success:
-            SaveMD(InputWorkspace=slice_ws, 
+            SaveMD(InputWorkspace=slice_ws,
                    Filename='TobyFitResolutionSimulationTest-mismatch.nxs')
-        
+
     def validate(self):
         return self._success
 

@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid import config
 import os
 import re
@@ -8,20 +9,20 @@ import glob
 EXPECTED_EXT = '.expected'
 
 class ValidateFacilitiesFile(stresstesting.MantidStressTest):
-    
+
     def skipTests(self):
         try:
             import genxmlif
             import minixsv
         except ImportError:
             return True
-        return False    
-         
+        return False
+
 
     def runTest(self):
         """Main entry point for the test suite"""
         from genxmlif import GenXmlIfError
-        from minixsv import pyxsval 
+        from minixsv import pyxsval
         direc = config['instrumentDefinition.directory']
         filename = os.path.join(direc,'Facilities.xml')
         xsdFile =  os.path.join(direc,'Schema/Facilities/1.0/','FacilitiesSchema.xsd')

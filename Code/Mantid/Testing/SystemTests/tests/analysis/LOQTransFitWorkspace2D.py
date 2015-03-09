@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 import stresstesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *
@@ -7,7 +8,7 @@ class LOQTransFitWorkspace2D(stresstesting.MantidStressTest):
         Tests the SANS interface commands TransFit() and TransWorkspace(). Also tests
         a LOQ reduction in 2D with can and transmission files
     """
-    
+
     def runTest(self):
         self.setup()
 

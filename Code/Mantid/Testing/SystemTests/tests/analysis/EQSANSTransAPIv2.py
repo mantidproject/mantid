@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 import stresstesting
 import mantid
 from mantid.simpleapi import *
@@ -35,14 +36,14 @@ class EQSANSTransmission(stresstesting.MantidStressTest):
         TotalChargeNormalization(normalize_to_beam=False)
         DirectBeamTransmission("EQSANS_1466_event.nxs", "EQSANS_4061_event.nxs", beam_radius=3)
         ThetaDependentTransmission(True)
-        Reduce1D()  
+        Reduce1D()
         # Scale up to match correct scaling.
-        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81, 
-              Operation='Multiply', OutputWorkspace="EQSANS_1466_event_Iq")              
-                
+        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81,
+              Operation='Multiply', OutputWorkspace="EQSANS_1466_event_Iq")
+
     def validate(self):
         # Be more tolerant with the output, mainly because of the errors.
-        # The following tolerance check the errors up to the third digit.   
+        # The following tolerance check the errors up to the third digit.
         self.tolerance = 0.1
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
@@ -71,12 +72,12 @@ class EQSANSTransmissionEvent(EQSANSTransmission):
         ThetaDependentTransmission(True)
         Reduce1D()
         # Scale up to match correct scaling.
-        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81, 
+        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81,
               Operation='Multiply', OutputWorkspace="EQSANS_1466_event_Iq")
 
     def validate(self):
         # Be more tolerant with the output, mainly because of the errors.
-        # The following tolerance check the errors up to the third digit.   
+        # The following tolerance check the errors up to the third digit.
         self.tolerance = 0.1
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
@@ -108,14 +109,14 @@ class EQSANSTransmissionDC(stresstesting.MantidStressTest):
         TotalChargeNormalization(normalize_to_beam=False)
         DirectBeamTransmission("EQSANS_1466_event.nxs", "EQSANS_1466_event.nxs", beam_radius=3)
         ThetaDependentTransmission(True)
-        Reduce1D()  
+        Reduce1D()
         # Scale up to match correct scaling.
-        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81, 
-              Operation='Multiply', OutputWorkspace="EQSANS_1466_event_Iq")              
-                
+        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81,
+              Operation='Multiply', OutputWorkspace="EQSANS_1466_event_Iq")
+
     def validate(self):
         # Be more tolerant with the output, mainly because of the errors.
-        # The following tolerance check the errors up to the third digit.  
+        # The following tolerance check the errors up to the third digit.
         self.tolerance = 0.1
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
@@ -134,7 +135,7 @@ class EQSANSTransmissionCompatibility(EQSANSTransmission):
         Check that the transmission correction can be applied if the 
         sample run and transmission runs don't have the same binning
     """
-    
+
     def runTest(self):
         config = ConfigService.Instance()
         config["facilityName"]='SNS'
@@ -150,12 +151,12 @@ class EQSANSTransmissionCompatibility(EQSANSTransmission):
         ThetaDependentTransmission(True)
         Reduce1D()
         # Scale up to match correct scaling.
-        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81, 
-              Operation='Multiply', OutputWorkspace="EQSANS_1466_event_Iq")              
+        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81,
+              Operation='Multiply', OutputWorkspace="EQSANS_1466_event_Iq")
 
     def validate(self):
         # Be more tolerant with the output, mainly because of the errors.
-        # The following tolerance check the errors up to the third digit.   
+        # The following tolerance check the errors up to the third digit.
         self.tolerance = 0.1
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
@@ -186,15 +187,15 @@ class EQSANSTransmissionFS(stresstesting.MantidStressTest):
         SetTransmission(0.5, 0.1)
         ThetaDependentTransmission(False)
         Reduce1D()
-        
+
     def validate(self):
         self.tolerance = 0.000001
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
-        return "EQSANS_4061_event_frame1_Iq", 'EQSANSTransmissionFS.nxs' 
-    
+        return "EQSANS_4061_event_frame1_Iq", 'EQSANSTransmissionFS.nxs'
+
 class EQSANSDirectTransFS(stresstesting.MantidStressTest):
 
     def cleanup(self):
@@ -218,9 +219,9 @@ class EQSANSDirectTransFS(stresstesting.MantidStressTest):
         ThetaDependentTransmission(False)
         NoIQxQy()
         Reduce1D()
-        Scale(InputWorkspace="EQSANS_4061_event_frame1_Iq", Factor=2.0, 
-              Operation='Multiply', OutputWorkspace="EQSANS_4061_event_frame1_Iq")              
-       
+        Scale(InputWorkspace="EQSANS_4061_event_frame1_Iq", Factor=2.0,
+              Operation='Multiply', OutputWorkspace="EQSANS_4061_event_frame1_Iq")
+
     def validate(self):
         # Relax the tolerance since the reference data is not for that exact
         # scenario but for one that's very close to it.
@@ -229,5 +230,5 @@ class EQSANSDirectTransFS(stresstesting.MantidStressTest):
         self.disableChecking.append('Sample')
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
-        return "EQSANS_4061_event_frame1_Iq", 'EQSANSDirectTransFS.nxs' 
-    
+        return "EQSANS_4061_event_frame1_Iq", 'EQSANSDirectTransFS.nxs'
+
