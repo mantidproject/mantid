@@ -1,20 +1,20 @@
 #ifndef MANTID_MDEVENTS_IMPORTMDHISTOWORKSPACETEST_H_
 #define MANTID_MDEVENTS_IMPORTMDHISTOWORKSPACETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-#include <fstream>
-#include "MantidMDAlgorithms/ImportMDHistoWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidMDAlgorithms/ImportMDHistoWorkspace.h"
+
+#include <cxxtest/TestSuite.h>
+
 #include <Poco/Path.h>
 
+#include <fstream>
+
 using namespace Mantid;
-using namespace Mantid::MDEvents;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using namespace Mantid::MDAlgorithms;
 
 /**
 Helper type. Creates a test file, and also manages the resource to ensure that the file is closed and removed, no matter what the outcome of the test.

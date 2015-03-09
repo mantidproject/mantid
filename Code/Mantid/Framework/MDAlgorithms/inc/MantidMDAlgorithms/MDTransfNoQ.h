@@ -1,12 +1,10 @@
 #ifndef MANTID_MDALGORITHMS_NOQ_TRANSF_H
 #define MANTID_MDALGORITHMS_NOQ_TRANSF_H
-//
-#include "MantidDataObjects/MDTransfInterface.h"
-//#include "MantidDataObjects/ConvToMDBase.h"
-#include "MantidDataObjects/MDTransfFactory.h"
-#include "MantidAPI/NumericAxis.h"
 
-//
+#include "MantidAPI/NumericAxis.h"
+#include "MantidMDAlgorithms/MDTransfInterface.h"
+#include "MantidMDAlgorithms/MDTransfFactory.h"
+
 namespace Mantid {
 namespace MDAlgorithms {
 

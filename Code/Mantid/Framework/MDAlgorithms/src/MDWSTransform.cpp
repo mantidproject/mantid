@@ -1,7 +1,9 @@
 #include "MantidMDAlgorithms/MDWSTransform.h"
-#include "MantidDataObjects/MDTransfAxisNames.h"
+
 #include "MantidKernel/Strings.h"
-#include <float.h>
+#include "MantidMDAlgorithms/MDTransfAxisNames.h"
+
+#include <cfloat>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -38,7 +40,7 @@ using namespace CnvrtToMD;
  *   coordinate system.
 */
 std::vector<double>
-MDWSTransform::getTransfMatrix(DataObjects::MDWSDescription &TargWSDescription,
+MDWSTransform::getTransfMatrix(MDWSDescription &TargWSDescription,
                                const std::string &FrameRequested,
                                const std::string &QScaleRequested) const {
   CoordScaling ScaleID = getQScaling(QScaleRequested);
@@ -61,7 +63,7 @@ MDWSTransform::getTransfMatrix(DataObjects::MDWSDescription &TargWSDescription,
   *Sample frame -- otherwise
   */
 CnvrtToMD::TargetFrame MDWSTransform::findTargetFrame(
-    DataObjects::MDWSDescription &TargWSDescription) const {
+    MDWSDescription &TargWSDescription) const {
 
   bool hasGoniometer = TargWSDescription.hasGoniometer();
   bool hasLattice = TargWSDescription.hasLattice();
@@ -85,7 +87,7 @@ CnvrtToMD::TargetFrame MDWSTransform::findTargetFrame(
  *insufficient to define the frame requested
 */
 void MDWSTransform::checkTargetFrame(
-    const DataObjects::MDWSDescription &TargWSDescription,
+    const MDWSDescription &TargWSDescription,
     const CnvrtToMD::TargetFrame CoordFrameID) const {
   switch (CoordFrameID) {
   case (LabFrame): // nothing needed for lab frame
@@ -111,7 +113,7 @@ void MDWSTransform::checkTargetFrame(
 
 /** The matrix to convert neutron momentums into the target coordinate system */
 std::vector<double>
-MDWSTransform::getTransfMatrix(DataObjects::MDWSDescription &TargWSDescription,
+MDWSTransform::getTransfMatrix(MDWSDescription &TargWSDescription,
                                CnvrtToMD::TargetFrame FrameID,
                                CoordScaling &ScaleID) const {
 
@@ -198,7 +200,7 @@ MDWSTransform::getTransfMatrix(DataObjects::MDWSDescription &TargWSDescription,
  W*Unit*Lattice_param depending on inputs
 */
 Kernel::DblMatrix
-MDWSTransform::buildQTrahsf(DataObjects::MDWSDescription &TargWSDescription,
+MDWSTransform::buildQTrahsf(MDWSDescription &TargWSDescription,
                             CnvrtToMD::CoordScaling ScaleID,
                             bool UnitUB) const {
   // implements strategy
@@ -293,7 +295,7 @@ MDWSTransform::buildQTrahsf(DataObjects::MDWSDescription &TargWSDescription,
 
 */
 void MDWSTransform::setQ3DDimensionsNames(
-    DataObjects::MDWSDescription &TargWSDescription,
+    MDWSDescription &TargWSDescription,
     CnvrtToMD::TargetFrame FrameID, CnvrtToMD::CoordScaling ScaleID) const {
 
   std::vector<Kernel::V3D> dimDirections;
@@ -358,7 +360,7 @@ void MDWSTransform::setQ3DDimensionsNames(
   else
     for (int i = 0; i < 3; i++)
       TargWSDescription.setDimName(
-          i, DataObjects::makeAxisName(dimDirections[i], dimNames));
+          i, MDAlgorithms::makeAxisName(dimDirections[i], dimNames));
 
   if (ScaleID == NoScaling) {
     for (int i = 0; i < 3; i++)
@@ -370,7 +372,7 @@ void MDWSTransform::setQ3DDimensionsNames(
       dMax = (dMax > LatPar[i]) ? (dMax) : (LatPar[i]);
     for (int i = 0; i < 3; i++)
       TargWSDescription.setDimUnit(
-          i, "in " + DataObjects::sprintfd(2 * M_PI / dMax, 1.e-3) + " A^-1");
+          i, "in " + MDAlgorithms::sprintfd(2 * M_PI / dMax, 1.e-3) + " A^-1");
   }
   if ((ScaleID == OrthogonalHKLScale) || (ScaleID == HKLScale)) {
     // get the length along each of the axes
@@ -384,12 +386,12 @@ void MDWSTransform::setQ3DDimensionsNames(
     len.push_back(2 * M_PI * x.norm());
     for (int i = 0; i < 3; i++)
       TargWSDescription.setDimUnit(
-          i, "in " + DataObjects::sprintfd(len[i], 1.e-3) + " A^-1");
+          i, "in " + MDAlgorithms::sprintfd(len[i], 1.e-3) + " A^-1");
   }
 }
 
 void MDWSTransform::setModQDimensionsNames(
-    DataObjects::MDWSDescription &TargWSDescription,
+    MDWSDescription &TargWSDescription,
     const std::string &QScaleRequested) const { // TODO: nothing meaningful has
                                                 // been done at the moment,
                                                 // should enable scaling if

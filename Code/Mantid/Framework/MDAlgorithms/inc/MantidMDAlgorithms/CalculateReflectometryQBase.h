@@ -17,10 +17,10 @@ Base class for reflectometry Q transformations
 class DLLExport CalculateReflectometryQBase {
 protected:
   const double to_radians_factor;
-  CalculateReflectometryQBase();
+  CalculateReflectometryQBase() : to_radians_factor(0.0) {}
 
 protected:
-  ~CalculateReflectometryQBase();
+  ~CalculateReflectometryQBase() {}
 };
 }
 }

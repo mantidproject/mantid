@@ -1,26 +1,27 @@
 #ifndef MANTID_MDWS_SLICE_H_
 #define MANTID_MDWS_SLICE_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidMDEvents/MDTransfAxisNames.h"
-#include "MantidMDEvents/MDWSDescription.h"
-#include "MantidMDEvents/MDWSTransform.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidMDAlgorithms/MDTransfAxisNames.h"
+#include "MantidMDAlgorithms/MDWSDescription.h"
+#include "MantidMDAlgorithms/MDWSTransform.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 using namespace Mantid::Kernel;
 
 class MDWSTransformTestHelper: public MDWSTransform
 {
   public:
-      std::vector<double> getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::TargetFrame frames,CnvrtToMD::CoordScaling scaling)const
+      std::vector<double> getTransfMatrix(MDWSDescription &TargWSDescription,CnvrtToMD::TargetFrame frames,CnvrtToMD::CoordScaling scaling)const
    {
        CnvrtToMD::CoordScaling inScaling(scaling);
        return MDWSTransform::getTransfMatrix(TargWSDescription,frames,inScaling);
    }
-   CnvrtToMD::TargetFrame findTargetFrame(MDEvents::MDWSDescription &TargWSDescription)const
+   CnvrtToMD::TargetFrame findTargetFrame(MDWSDescription &TargWSDescription)const
    {
      return MDWSTransform::findTargetFrame(TargWSDescription);
    }
@@ -49,7 +50,7 @@ public:
 
 void testFindTargetFrame()
 {
-   MDEvents::MDWSDescription TargWSDescription;
+   MDWSDescription TargWSDescription;
    Mantid::API::MatrixWorkspace_sptr spws =WorkspaceCreationHelper::Create2DWorkspaceBinned(10,10);
    //Mantid::API::MatrixWorkspace_sptr spws =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
    std::vector<double> minVal(4,-3),maxVal(4,3);
@@ -71,7 +72,7 @@ void testFindTargetFrame()
 }
 void testForceTargetFrame()
 {
-   MDEvents::MDWSDescription TargWSDescription;
+   MDWSDescription TargWSDescription;
    
    Mantid::API::MatrixWorkspace_sptr spws =WorkspaceCreationHelper::Create2DWorkspaceBinned(10,10);
    std::vector<double> minVal(4,-3),maxVal(4,3);
@@ -99,7 +100,7 @@ void testForceTargetFrame()
 
 void test_buildDimNames(){
 
-    MDEvents::MDWSDescription TargWSDescription;
+    MDWSDescription TargWSDescription;
     std::vector<double> minVal(4,-3),maxVal(4,3);
     TargWSDescription.setMinMax(minVal,maxVal);
 
@@ -132,7 +133,7 @@ void testCoplanarProjections()
 void testTransfMat1()
 {
      std::vector<std::string> dimNames;
-     MDEvents::MDWSDescription TWS;
+     MDWSDescription TWS;
      std::vector<double> minVal(4,-3),maxVal(4,3);
      TWS.setMinMax(minVal,maxVal);
 
@@ -200,7 +201,7 @@ void testTransfMat1()
 
 void testTransf2HoraceQinA()
 {
-     MDEvents::MDWSDescription TWS;
+     MDWSDescription TWS;
      std::vector<double> minVal(4,-3),maxVal(4,3);
      TWS.setMinMax(minVal,maxVal);
      Geometry::OrientedLattice latt(5*M_PI,M_PI,2*M_PI, 90., 90., 90.);
@@ -293,7 +294,7 @@ void testTransf2HoraceQinA()
 }
 void testTransf2HKL()
 {
-     MDEvents::MDWSDescription TWS;
+     MDWSDescription TWS;
      std::vector<double> minVal(4,-3),maxVal(4,3);
      TWS.setMinMax(minVal,maxVal);
 
@@ -332,7 +333,7 @@ void testTransf2HKL()
 
 void testModQAnyLattice()
 {
-   MDEvents::MDWSDescription TWS;
+   MDWSDescription TWS;
    std::vector<double> rot,sample(9,0);
 
    Mantid::API::MatrixWorkspace_sptr spws =WorkspaceCreationHelper::Create2DWorkspaceBinned(10,10);

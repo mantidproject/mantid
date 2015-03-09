@@ -1,27 +1,20 @@
 #ifndef MANTID_MD_CONVERT2_Q_NDANY_TEST_H_
 #define MANTID_MD_CONVERT2_Q_NDANY_TEST_H_
 
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
+#include "MantidMDAlgorithms/ConvToMDSelector.h"
+#include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidMDEvents/ConvToMDSelector.h"
-#include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
+
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
-using namespace Mantid::MDEvents;
 
 class Convert2AnyTestHelper: public ConvertToMD
 {
@@ -269,7 +262,7 @@ class ConvertToMDTestPerformance : public CxxTest::TestSuite
    // pointer to mock algorithm to work with progress bar
    std::auto_ptr<WorkspaceCreationHelper::MockAlgorithm> pMockAlgorithm;
 
-    boost::shared_ptr<MDEvents::MDEventWSWrapper> pTargWS;
+    boost::shared_ptr<MDEventWSWrapper> pTargWS;
 
 public:
 static ConvertToMDTestPerformance *createSuite() { return new ConvertToMDTestPerformance(); }

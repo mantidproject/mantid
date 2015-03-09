@@ -1,16 +1,17 @@
 #ifndef CURVEFITTING_FITMDTEST_H_
 #define CURVEFITTING_FITMDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidTestHelpers/FakeObjects.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidMDEvents/UserFunctionMD.h"
+#include "MantidMDAlgorithms/UserFunctionMD.h"
+#include "MantidTestHelpers/FakeObjects.h"
+
+#include <cxxtest/TestSuite.h>
 
 #include <sstream>
 
@@ -148,7 +149,7 @@ public:
       }
     }
 
-    API::IFunction_sptr fun(new Mantid::MDEvents::UserFunctionMD);
+    API::IFunction_sptr fun(new Mantid::MDAlgorithms::UserFunctionMD);
     fun->setAttributeValue("Formula","h + y + (s + 0.1*y) * x");
     fun->setParameter("h",1.0);
     fun->setParameter("s",1.0);

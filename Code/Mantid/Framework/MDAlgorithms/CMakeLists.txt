@@ -14,6 +14,9 @@ set ( SRC_FILES
 	src/CloneMDWorkspace.cpp
 	src/CompareMDWorkspaces.cpp
 	src/ConvToMDBase.cpp
+	src/ConvToMDEventsWS.cpp
+	src/ConvToMDHistoWS.cpp
+	src/ConvToMDSelector.cpp 
 	src/ConvertSpiceDataToRealSpace.cpp
 	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToDiffractionMDWorkspace.cpp
@@ -36,6 +39,7 @@ set ( SRC_FILES
 	src/IDynamicRebinning.cpp
 	src/ImportMDEventWorkspace.cpp
 	src/ImportMDHistoWorkspace.cpp
+	src/ImportMDHistoWorkspaceBase.cpp
 	src/Integrate3DEvents.cpp
 	src/IntegrateFlux.cpp
 	src/IntegratePeaksMD.cpp
@@ -54,8 +58,10 @@ set ( SRC_FILES
 	src/MDTransfAxisNames.cpp
 	src/MDTransfFactory.cpp
 	src/MDTransfModQ.cpp
+	src/MDTransfNoQ.cpp
 	src/MDTransfQ3D.cpp
 	src/MDWSDescription.cpp
+	src/MDWSTransform.cpp
 	src/MaskMD.cpp
 	src/MergeMD.cpp
 	src/MergeMDFiles.cpp
@@ -83,6 +89,7 @@ set ( SRC_FILES
 	src/Quantification/ResolutionConvolvedCrossSection.cpp
 	src/Quantification/SimulateResolutionConvolvedModel.cpp
 	src/QueryMDWorkspace.cpp
+	src/ReflectometryTransform.cpp
 	src/ReflectometryTransformKiKf.cpp
 	src/ReflectometryTransformP.cpp
 	src/ReflectometryTransformQxQz.cpp
@@ -96,6 +103,7 @@ set ( SRC_FILES
 	src/TransformMD.cpp
 	src/UnaryOperationMD.cpp
 	src/UnitsConversionHelper.cpp
+	src/UserFunctionMD.cpp
 	src/Vector3DParameterParser.cpp
 	src/WeightedMeanMD.cpp
 	src/XorMD.cpp
@@ -141,6 +149,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/ImportMDEventWorkspace.h
 	inc/MantidMDAlgorithms/ImportMDHistoWorkspace.h
+	inc/MantidMDAlgorithms/ImportMDHistoWorkspaceBase.h
 	inc/MantidMDAlgorithms/Integrate3DEvents.h
 	inc/MantidMDAlgorithms/IntegrateFlux.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD.h
@@ -159,8 +168,10 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/MDTransfAxisNames.h
 	inc/MantidMDAlgorithms/MDTransfFactory.h
 	inc/MantidMDAlgorithms/MDTransfModQ.h
+	inc/MantidMDAlgorithms/MDTransfNoQ.h
 	inc/MantidMDAlgorithms/MDTransfQ3D.h
 	inc/MantidMDAlgorithms/MDWSDescription.h
+	inc/MantidMDAlgorithms/MDWSTransform.h
 	inc/MantidMDAlgorithms/MaskMD.h
 	inc/MantidMDAlgorithms/MergeMD.h
 	inc/MantidMDAlgorithms/MergeMDFiles.h
@@ -188,6 +199,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h
 	inc/MantidMDAlgorithms/Quantification/SimulateResolutionConvolvedModel.h
 	inc/MantidMDAlgorithms/QueryMDWorkspace.h
+	inc/MantidMDAlgorithms/ReflectometryTransform.h
 	inc/MantidMDAlgorithms/ReflectometryTransformKiKf.h
 	inc/MantidMDAlgorithms/ReflectometryTransformP.h
 	inc/MantidMDAlgorithms/ReflectometryTransformQxQz.h
@@ -221,7 +233,6 @@ set ( TEST_FILES
 	CentroidPeaksMDTest.h
 	CloneMDWorkspaceTest.h
 	CompareMDWorkspacesTest.h
-	ConvToMDBaseTest.h
 	ConvertEventsToMDTest.h
 	ConvertSpiceDataToRealSpaceTest.h
 	ConvertToDetectorFaceMDTest.h
@@ -266,6 +277,7 @@ set ( TEST_FILES
 	MDTransfModQTest.h
 	MDTransfQ3DTest.h
 	MDWSDescriptionTest.h
+	MDWSTransfTest.h
 	MaskMDTest.h
 	MergeMDFilesTest.h
 	MergeMDTest.h

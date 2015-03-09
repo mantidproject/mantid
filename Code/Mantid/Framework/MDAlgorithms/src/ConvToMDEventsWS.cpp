@@ -1,12 +1,13 @@
-#include "MantidMDAlgorithms/ConvToDataObjectsWS.h"
-#include "MantidDataObjects/UnitsConversionHelper.h"
+#include "MantidMDAlgorithms/ConvToMDEventsWS.h"
+
+#include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
 /**function converts particular list of events of type T into MD workspace and
  * adds these events to the workspace itself  */
 template <class T>
-size_t ConvToDataObjectsWS::convertEventList(size_t workspaceIndex) {
+size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
 
   const Mantid::DataObjects::EventList &el =
       m_EventWS->getEventList(workspaceIndex);
@@ -73,7 +74,7 @@ size_t ConvToDataObjectsWS::convertEventList(size_t workspaceIndex) {
 
 /** The method runs conversion for a single event list, corresponding to a
  * particular workspace index */
-size_t ConvToDataObjectsWS::conversionChunk(size_t workspaceIndex) {
+size_t ConvToMDEventsWS::conversionChunk(size_t workspaceIndex) {
 
   switch (m_EventWS->getEventList(workspaceIndex).getEventType()) {
   case Mantid::API::TOF:
@@ -98,9 +99,9 @@ workspaces
 @param inWSWrapper -- the class wrapping the target MD workspace
 @param ignoreZeros  -- if zero value signals should be rejected
 */
-size_t ConvToDataObjectsWS::initialize(
-    const DataObjects::MDWSDescription &WSD,
-    boost::shared_ptr<DataObjects::MDEventWSWrapper> inWSWrapper,
+size_t ConvToMDEventsWS::initialize(
+    const MDWSDescription &WSD,
+    boost::shared_ptr<MDEventWSWrapper> inWSWrapper,
     bool ignoreZeros) {
   size_t numSpec = ConvToMDBase::initialize(WSD, inWSWrapper, ignoreZeros);
 
@@ -115,7 +116,7 @@ size_t ConvToDataObjectsWS::initialize(
   return numSpec;
 }
 
-void ConvToDataObjectsWS::runConversion(API::Progress *pProgress) {
+void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
 
   // Get the box controller
   Mantid::API::BoxController_sptr bc =

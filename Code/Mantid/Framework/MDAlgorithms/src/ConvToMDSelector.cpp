@@ -1,5 +1,10 @@
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
 
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidMDAlgorithms/ConvToMDEventsWS.h"
+#include "MantidMDAlgorithms/ConvToMDHistoWS.h"
+
 namespace Mantid {
 namespace MDAlgorithms {
 // workspaces which currently can be converted to md workspaces:
@@ -35,7 +40,7 @@ boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
   wsType existingWsConvType(Undefined);
   ConvToMDBase *pSolver = currentSolver.get();
   if (pSolver) {
-    if (dynamic_cast<ConvToDataObjectsWS *>(pSolver))
+    if (dynamic_cast<ConvToMDEventsWS *>(pSolver))
       existingWsConvType = EventWS;
     if (dynamic_cast<ConvToMDHistoWS *>(pSolver))
       existingWsConvType = Matrix2DWS;
@@ -46,7 +51,7 @@ boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
       (existingWsConvType != inputWSType)) {
     switch (inputWSType) {
     case (EventWS):
-      return boost::shared_ptr<ConvToMDBase>(new ConvToDataObjectsWS());
+      return boost::shared_ptr<ConvToMDBase>(new ConvToMDEventsWS());
     case (Matrix2DWS):
       return boost::shared_ptr<ConvToMDBase>(new ConvToMDHistoWS());
     default:

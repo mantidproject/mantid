@@ -1,22 +1,18 @@
 #ifndef MANTID_MD_CONVERT2_MDEV_FACTORY_TEST_H_
 #define MANTID_MD_CONVERT2_MDEV_FACTORY_TEST_H_
 
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
+
+#include "MantidMDAlgorithms/MDTransfModQ.h"
+#include "MantidMDAlgorithms/MDTransfNoQ.h"
+#include "MantidMDAlgorithms/MDTransfQ3D.h"
+
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
-
-#include "MantidMDEvents/MDTransfNoQ.h"
-#include "MantidMDEvents/MDTransfModQ.h"
-#include "MantidMDEvents/MDTransfQ3D.h"
-
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
-
+using namespace Mantid::MDAlgorithms;
 
 //
 class MDTransfFactoryTest : public CxxTest::TestSuite
@@ -57,7 +53,7 @@ void testGetAlg()
 //
 MDTransfFactoryTest()
 {
-       API::FrameworkManager::Instance();
+    API::FrameworkManager::Instance();
 }
 
 };

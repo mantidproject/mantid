@@ -1,24 +1,21 @@
 #ifndef MANTID_MDALGORITHMS_LOADMDEWTEST_H_
 #define MANTID_MDALGORITHMS_LOADMDEWTEST_H_
 
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidKernel/CPUTimer.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDGridBox.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/BoxControllerNeXusIO.h"
 #include "SaveMDTest.h"
-#include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
+
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDGridBox.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidMDAlgorithms/LoadMD.h"
 
+#include <cxxtest/TestSuite.h>
+
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -215,8 +212,6 @@ public:
     // Name of the output workspace.
     std::string outWSName("LoadMDTest_OutputWS");
 
-    CPUTimer tim;
-
     LoadMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
@@ -229,17 +224,14 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
-    std::cout << tim << " to do the entire MDEW loading." << std::endl;
-
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr iws;
     TS_ASSERT_THROWS_NOTHING( iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName) );
     TS_ASSERT(iws);
     if (!iws) return;
-
-    boost::shared_ptr<MDEventWorkspace<MDE,nd> > ws = boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>,nd> >(iws);
-
+ 
     // Perform the full comparison
+    auto ws = boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>,nd> >(iws);
     do_compare_MDEW(ws, ws1, BoxStructureOnly);
 
     // Look for the not-disk-cached-cause-they-are-too-small

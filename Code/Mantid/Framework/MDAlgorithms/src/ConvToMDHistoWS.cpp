@@ -20,8 +20,8 @@ workspaces
 @param ignoreZeros  -- if zero value signals should be rejected
 */
 size_t ConvToMDHistoWS::initialize(
-    const DataObjects::MDWSDescription &WSD,
-    boost::shared_ptr<DataObjects::MDEventWSWrapper> inWSWrapper,
+    const MDWSDescription &WSD,
+    boost::shared_ptr<MDEventWSWrapper> inWSWrapper,
     bool ignoreZeros) {
 
   size_t numSpec = ConvToMDBase::initialize(WSD, inWSWrapper, ignoreZeros);

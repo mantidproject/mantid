@@ -2,18 +2,17 @@
 #define MANTID_MDALGORITHMS_CONV_TOMD_HISTOWS_H
 
 #include "MantidDataObjects/Workspace2D.h"
-
-#include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/Progress.h"
-
-#include "MantidDataObjects/MDEventWSWrapper.h"
 #include "MantidDataObjects/MDEvent.h"
-
-#include "MantidDataObjects/ConvToMDBase.h"
-// coordinate transformation
-#include "MantidDataObjects/MDTransfInterface.h"
+#include "MantidMDAlgorithms/ConvToMDBase.h"
+#include "MantidMDAlgorithms/MDEventWSWrapper.h"
+#include "MantidMDAlgorithms/MDTransfInterface.h"
 
 namespace Mantid {
+
+// Forward declaration
+namespace API {
+class Progress;
+}
 namespace MDAlgorithms {
 /** The class to transform matrix workspace into MDEvent workspace when matrix
   workspace is ragged 2D workspace
@@ -52,9 +51,10 @@ namespace MDAlgorithms {
 class ConvToMDHistoWS : public ConvToMDBase {
 
 public:
-  size_t initialize(const DataObjects::MDWSDescription &WSD,
-                    boost::shared_ptr<DataObjects::MDEventWSWrapper> inWSWrapper,
-                    bool ignoreZeros);
+  size_t
+  initialize(const MDWSDescription &WSD,
+             boost::shared_ptr<MDEventWSWrapper> inWSWrapper,
+             bool ignoreZeros);
 
   void runConversion(API::Progress *pProgress);
 

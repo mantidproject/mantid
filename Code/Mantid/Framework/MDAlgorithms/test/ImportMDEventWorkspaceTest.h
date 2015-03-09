@@ -1,22 +1,21 @@
 #ifndef MANTID_MDEVENTS_IMPORTMDEVENTWORKSPACETEST_H_
 #define MANTID_MDEVENTS_IMPORTMDEVENTWORKSPACETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include <iostream>
-#include <fstream>
-#include <iomanip>
 #include "MantidMDAlgorithms/ImportMDEventWorkspace.h"
 #include "MantidKernel/ConfigService.h"
+
+#include <cxxtest/TestSuite.h>
+
 #include <Poco/Path.h>
+
+#include <fstream>
 
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::MDAlgorithms;
 
 /*
 This builder type provides a convenient way to create and change the contents of a virtual file of the type expected 

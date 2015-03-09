@@ -7,6 +7,7 @@
  *********************************************************************************/
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -59,16 +60,14 @@ namespace MDEventsTestHelper {
  */
 EventWorkspace_sptr
 createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
-  FacilityHelper::ScopedFacilities loadTESTFacility(
-      "IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
-
   double binDelta = 10.0;
 
   EventWorkspace_sptr retVal(new EventWorkspace);
   retVal->initialize(numPixels, 1, 1);
 
   // --------- Load the instrument -----------
-  const std::string filename = "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml";
+  const std::string filename = FileFinder::Instance().getFullPath(
+      "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
   InstrumentDefinitionParser parser;
   parser.initialize(filename, "MINITOPAZ", Strings::loadFile(filename));
   auto instrument = parser.parseXML(NULL);
@@ -129,8 +128,8 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
  *randomly if numEvents>0 or regularly & homogeneously if numEvents<0
  * @return MDEW sptr
  */
-MDEventWorkspace3Lean::sptr
-makeFakeMDEventWorkspace(const std::string & wsName, long numEvents) {
+MDEventWorkspace3Lean::sptr makeFakeMDEventWorkspace(const std::string &wsName,
+                                                     long numEvents) {
   // ---------- Make a file-backed MDEventWorkspace -----------------------
   std::string snEvents = boost::lexical_cast<std::string>(numEvents);
   MDEventWorkspace3Lean::sptr ws1 =
@@ -221,19 +220,17 @@ makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins,
     ws = new MDHistoWorkspace(MDHistoDimension_sptr(
         new MDHistoDimension("x", "x", "m", 0.0, max, numBins)));
   } else if (numDims == 2) {
-    ws = new MDHistoWorkspace(
-        MDHistoDimension_sptr(
-            new MDHistoDimension("x", "x", "m", 0.0, max, numBins)),
-        MDHistoDimension_sptr(
-            new MDHistoDimension("y", "y", "m", 0.0, max, numBins)));
+    ws = new MDHistoWorkspace(MDHistoDimension_sptr(new MDHistoDimension(
+                                  "x", "x", "m", 0.0, max, numBins)),
+                              MDHistoDimension_sptr(new MDHistoDimension(
+                                  "y", "y", "m", 0.0, max, numBins)));
   } else if (numDims == 3) {
-    ws = new MDHistoWorkspace(
-        MDHistoDimension_sptr(
-            new MDHistoDimension("x", "x", "m", 0.0, max, numBins)),
-        MDHistoDimension_sptr(
-            new MDHistoDimension("y", "y", "m", 0.0, max, numBins)),
-        MDHistoDimension_sptr(
-            new MDHistoDimension("z", "z", "m", 0.0, max, numBins)));
+    ws = new MDHistoWorkspace(MDHistoDimension_sptr(new MDHistoDimension(
+                                  "x", "x", "m", 0.0, max, numBins)),
+                              MDHistoDimension_sptr(new MDHistoDimension(
+                                  "y", "y", "m", 0.0, max, numBins)),
+                              MDHistoDimension_sptr(new MDHistoDimension(
+                                  "z", "z", "m", 0.0, max, numBins)));
   } else if (numDims == 4) {
     ws = new MDHistoWorkspace(
         MDHistoDimension_sptr(

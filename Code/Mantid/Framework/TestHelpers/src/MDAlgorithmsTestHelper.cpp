@@ -6,9 +6,13 @@
 #include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
 namespace Mantid {
+using namespace API;
+using namespace DataObjects;
+
 namespace MDAlgorithms {
 
 /** Set of helper methods for testing MDEventWorkspace things
@@ -27,8 +31,8 @@ namespace MDAlgorithmsTestHelper {
  *randomly if numEvents>0 or regularly & homogeneously if numEvents<0
  * @return MDEW sptr
  */
-DataObjects::MDEventWorkspace3Lean_sptr
-makeFileBackedMDEW(std::string wsName, bool fileBacked, long numEvents) {
+DataObjects::MDEventWorkspace3Lean::sptr
+makeFileBackedMDEW(const std::string & wsName, bool fileBacked, long numEvents) {
   // ---------- Make a file-backed MDEventWorkspace -----------------------
   std::string snEvents = boost::lexical_cast<std::string>(numEvents);
   MDEventWorkspace3Lean::sptr ws1 =
@@ -41,7 +45,7 @@ makeFileBackedMDEW(std::string wsName, bool fileBacked, long numEvents) {
                                     snEvents.c_str(), "RandomizeSignal", "1");
   if (fileBacked) {
     std::string filename = wsName + ".nxs";
-    Mantid::API::IAlgorithm_sptr saver = FrameworkManager::Instance().exec(
+    auto saver = FrameworkManager::Instance().exec(
         "SaveMD", 4, "InputWorkspace", wsName.c_str(), "Filename",
         filename.c_str());
     FrameworkManager::Instance().exec(

@@ -1,25 +1,22 @@
 #ifndef MANTID_MDALGORITHMS_CONV_TOMD_EVENTSWS_H
 #define MANTID_MDALGORITHMS_CONV_TOMD_EVENTSWS_H
 //
-#include "MantidKernel/System.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/MDEvent.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidMDAlgorithms/ConvToMDBase.h"
+#include "MantidMDAlgorithms/MDEventWSWrapper.h"
+#include "MantidMDAlgorithms/MDTransfFactory.h"
+
 #include <vector>
 
-#include "MantidDataObjects/EventWorkspace.h"
-
-#include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/Progress.h"
-#include "MantidKernel/PhysicalConstants.h"
-
-#include "MantidDataObjects/MDEventWSWrapper.h"
-#include "MantidDataObjects/MDEvent.h"
-
-#include "MantidDataObjects/ConvToMDBase.h"
-// coordinate transformation
-#include "MantidDataObjects/MDTransfFactory.h"
-
 namespace Mantid {
+// Forward declarations
+namespace API {
+class Progress;
+}
 namespace MDAlgorithms {
 /** The class specializes ConvToDataObjectsBase for the case when the conversion
   occurs from Events WS to the MD events WS
@@ -56,10 +53,10 @@ namespace MDAlgorithms {
 
 // Class to process event workspace by direct conversion:
 
-class ConvToDataObjectsWS : public ConvToMDBase {
+class ConvToMDEventsWS : public ConvToMDBase {
 public:
-  size_t initialize(const DataObjects::MDWSDescription &WSD,
-                    boost::shared_ptr<DataObjects::MDEventWSWrapper> inWSWrapper,
+  size_t initialize(const MDWSDescription &WSD,
+                    boost::shared_ptr<MDEventWSWrapper> inWSWrapper,
                     bool ignoreZeros);
   void runConversion(API::Progress *pProgress);
 

@@ -1,18 +1,15 @@
 #ifndef MANTID_MDEVENTS_INTEGRATE_3D_EVENTS_TEST_H_
 #define MANTID_MDEVENTS_INTEGRATE_3D_EVENTS_TEST_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidMDAlgorithms/Integrate3DEvents.h"
+#include "MantidDataObjects/PeakShapeEllipsoid.h"
+
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
-
-//typedef Mantid::Kernel::Matrix<double>                  DblMatrix;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Kernel;
+using namespace Mantid::MDAlgorithms;
 
 class Integrate3DEventsTest : public CxxTest::TestSuite
 {

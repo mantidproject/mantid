@@ -4,8 +4,9 @@
 #include "MantidKernel/UnitFactory.h"
 #include <boost/shared_ptr.hpp>
 
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Kernel;
 
 namespace Mantid {
 namespace MDAlgorithms {

@@ -1,14 +1,17 @@
 #include "MantidMDAlgorithms/ImportMDHistoWorkspaceBase.h"
+
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
+
 #include <algorithm>
 
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 
 namespace Mantid {
 namespace MDAlgorithms {

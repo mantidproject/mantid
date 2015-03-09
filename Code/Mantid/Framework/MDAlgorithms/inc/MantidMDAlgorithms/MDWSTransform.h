@@ -2,7 +2,7 @@
 #define MANTID_MDALGORITHMS_MDWS_TRANSFORMATION_H
 
 #include "MantidMDAlgorithms/MDTransfAxisNames.h"
-#include "MantidMDAlgorithms//MDWSDescription.h"
+#include "MantidMDAlgorithms/MDWSDescription.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

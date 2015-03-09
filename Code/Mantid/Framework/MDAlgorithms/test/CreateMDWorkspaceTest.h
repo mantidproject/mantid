@@ -12,7 +12,7 @@
 //#include "MantidAPI/IMDEventWorkspace.h"
 //#include "MantidKernel/System.h"
 //#include "MantidKernel/Timer.h"
-//#include "MantidMDEvents/MDEventFactory.h"
+//#include "MantidDataObjects/MDEventFactory.h"
 
 
 using namespace Mantid::API;
