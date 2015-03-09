@@ -36,7 +36,6 @@ One MatrixWorskpaces will be exported from the algorith.
 'OutputWorkspace' is ... 
 
 
-
 Usage
 -----
 
@@ -44,14 +43,29 @@ Usage
 
 .. testcode:: ExLoadHB3AMXLData
 
+  # Load data by LoadSpiceXML2DDet()
+  LoadSpiceXML2DDet(Filename='HB3A_exp355_scan0001_0522.xml', 
+      OutputWorkspace='s0001_0522', DetectorGeometry='256,256')    
+
+  # Access output workspace and print out some result
+  ws = mtd["s0001_0522"]
+
+  print "Number of spectrum = %d." % (ws.getNumberHistograms())
+  for i, j in [(0, 0), (255, 255), (136, 140), (143, 140)]:
+      print "Y[%-3d, %-3d] = %.5f" % (i, j, ws.readY(i)[j])
 
 .. testcleanup:: ExLoadHB3AXMLData
 
-  #DeleteWorkspace(infows)
+  DeleteWorkspace(ws)
 
 Output:
 
 .. testoutput:: ExLoadHB3AXMLData
 
+  Number of spectrum = 256.
+  Y[0  , 0  ] = 0.00000
+  Y[255, 255] = 0.00000
+  Y[136, 140] = 1.00000
+  Y[143, 140] = 2.00000
 
 .. categories::
