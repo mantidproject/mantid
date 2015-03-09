@@ -2,6 +2,8 @@
 """
     Script used to start the DGS reduction GUI from MantidPlot
 """
+import sys
+
 from HFIRPowderReduction import HfirPDReductionGUI
 from PyQt4 import QtGui
 
