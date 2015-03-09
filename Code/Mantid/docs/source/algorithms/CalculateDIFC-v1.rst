@@ -13,7 +13,7 @@ Description
 CalculateDIFC calculates the value of :math:`DIFC` for every pixel in
 an instrument. 
 
-.. math:: DIFC = 252.816 \frac{(L_1 + L_2) 2 \sin(\theta)}{1 + {offset}}
+.. math:: DIFC = \frac{m_n}{h} \frac{(L_1 + L_2) 2 \sin(\theta)}{1 + {offset}}
 
 This is used in the equation
 
