@@ -71,17 +71,17 @@ def diagnose(white_int,**kwargs):
 
     # process subsequent calls to this routine, when white mask is already defined
     white= kwargs.get('white_mask',None) # and white beam is not changed
-    # white mask assumed to be global so no sectors in there 
-    if not(white is None) and isinstance(white,RunDescriptor.RunDescriptor):
-       hardmask_file = None
-       white_mask,num_failed = white.get_masking()
-       add_masking(white_int, white_mask)
-       van_mask  = None
+    #white mask assumed to be global so no sectors in there
+    if not white is None and isinstance(white,RunDescriptor.RunDescriptor):
+        hardmask_file = None
+        white_mask,num_failed = white.get_masking(2)
+        add_masking(white_int, white_mask)
+        van_mask  = None
     else: # prepare workspace to keep white mask
         white_mask = None
         van_mask = CloneWorkspace(white_int)
 
-    if not (hardmask_file is None):
+    if not hardmask_file is None:
         LoadMask(Instrument=kwargs.get('instr_name',''),InputFile=parser.hard_mask_file,
                  OutputWorkspace='hard_mask_ws')
         MaskDetectors(Workspace=white_int, MaskedWorkspace='hard_mask_ws')
@@ -94,48 +94,47 @@ def diagnose(white_int,**kwargs):
         DeleteWorkspace('hard_mask_ws')
 
     if not parser.use_hard_mask_only :
-       # White beam Test
-       if white_mask:
+        # White beam Test
+        if white_mask:
             test_results[1] = ['white_mask cache global', num_failed]
-       else:
-          __white_masks, num_failed = do_white_test(white_int, parser.tiny, parser.huge,
+        else:
+            __white_masks, num_failed = do_white_test(white_int, parser.tiny, parser.huge,
                                                     parser.van_out_lo, parser.van_out_hi,
                                                     parser.van_lo, parser.van_hi,
                                                     parser.van_sig, start_index, end_index)
-          test_results[1] = [str(__white_masks), num_failed]
-          add_masking(white_int, __white_masks, start_index, end_index)
-          if van_mask:
-             add_masking(van_mask, __white_masks, start_index, end_index)
-          DeleteWorkspace(__white_masks)
+            test_results[1] = [str(__white_masks), num_failed]
+            add_masking(white_int, __white_masks, start_index, end_index)
+            if van_mask:
+                add_masking(van_mask, __white_masks, start_index, end_index)
+            DeleteWorkspace(__white_masks)
 
-       # Second white beam test
-       if 'second_white' in kwargs: #NOT IMPLEMENTED 
-           raise NotImplementedError("Second white is not yet implemented")
-           __second_white_masks, num_failed = do_second_white_test(white_int, parser.second_white, parser.tiny, parser.huge,\
+        # Second white beam test
+        if 'second_white' in kwargs: #NOT IMPLEMENTED 
+            raise NotImplementedError("Second white is not yet implemented")
+            __second_white_masks, num_failed = do_second_white_test(white_int, parser.second_white, parser.tiny, parser.huge,\
                                                        parser.van_out_lo, parser.van_out_hi,\
                                                        parser.van_lo, parser.van_hi, parser.variation,\
                                                        parser.van_sig, start_index, end_index)
-           test_results[2] = [str(__second_white_masks), num_failed]
-           add_masking(white_int, __second_white_masks, start_index, end_index)
-           #TODO
-           #add_masking(van_mask, __second_white_masks, start_index, end_index)
+            test_results[2] = [str(__second_white_masks), num_failed]
+            add_masking(white_int, __second_white_masks, start_index, end_index)
+            #TODO
+            #add_masking(van_mask, __second_white_masks, start_index, end_index)
 
         #
         # Zero total count check for sample counts
         #
-       zero_count_failures = 0
-       if kwargs.get('sample_counts',None) is not None and kwargs.get('samp_zero',False):
+        zero_count_failures = 0
+        if kwargs.get('sample_counts',None) is not None and kwargs.get('samp_zero',False):
             add_masking(parser.sample_counts, white_int)
             maskZero, zero_count_failures = FindDetectorsOutsideLimits(InputWorkspace=parser.sample_counts,\
-                                                                    StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index,\
+                                                                   StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index,\
                                                                    LowThreshold=1e-10, HighThreshold=1e100)
             add_masking(white_int, maskZero, start_index, end_index)
             DeleteWorkspace(maskZero)
-
         #
         # Background check
         #
-       if hasattr(parser, 'background_int'):
+        if hasattr(parser, 'background_int'):
             add_masking(parser.background_int, white_int)
             __bkgd_mask, failures = do_background_test(parser.background_int, parser.samp_lo,\
                                                        parser.samp_hi, parser.samp_sig, parser.samp_zero, start_index, end_index)
@@ -146,7 +145,7 @@ def diagnose(white_int,**kwargs):
         #
         # Bleed test
         #
-       if hasattr(parser, 'bleed_test') and parser.bleed_test:
+        if hasattr(parser, 'bleed_test') and parser.bleed_test:
             if not hasattr(parser, 'sample_run'):
                 raise RuntimeError("Bleed test requested but the sample_run keyword has not been provided")
             __bleed_masks, failures = do_bleed_test(parser.sample_run, parser.bleed_maxrate, parser.bleed_pixels)
@@ -158,18 +157,18 @@ def diagnose(white_int,**kwargs):
     end_index_name=" to: end"
     default = True
     if hasattr(parser, 'print_diag_results') and parser.print_diag_results:
-            default=True
+        default=True
     if 'start_index' in kwargs:
-            default = False
-            start_index_name = "from: "+str(kwargs['start_index'])
+        default = False
+        start_index_name = "from: "+str(kwargs['start_index'])
     if 'end_index' in kwargs :
-            default = False
-            end_index_name = " to: "+str(kwargs['end_index'])
+        default = False
+        end_index_name = " to: "+str(kwargs['end_index'])
 
 
     testName=start_index_name+end_index_name
     if not default :
-       testName = " For bank: "+start_index_name+end_index_name
+        testName = " For bank: "+start_index_name+end_index_name
 
     if hasattr(parser, 'print_diag_results') and parser.print_diag_results:
         print_test_summary(test_results,testName)
@@ -294,7 +293,8 @@ def normalise_background(background_int, white_int, second_white_int=None):
 
     """
     if second_white_int is None:
-        # quetly divide background integral by white beam integral not reporting about possible 0 in wb integral (they will be removed by diag anyway)
+        #quetly divide background integral by white beam integral not reporting about possible 0 in
+        #wb integral (they will be removed by diag anyway)
         background_int =  Divide(LHSWorkspace=background_int,RHSWorkspace=white_int,WarnOnZeroDivide='0')
     else:
         hmean = 2.0*white_int*second_white_int/(white_int+second_white_int)
