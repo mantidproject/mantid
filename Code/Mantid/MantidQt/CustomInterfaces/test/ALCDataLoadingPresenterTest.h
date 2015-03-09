@@ -34,6 +34,8 @@ public:
   MOCK_CONST_METHOD0(log, std::string());
   MOCK_CONST_METHOD0(calculationType, std::string());
   MOCK_CONST_METHOD0(timeRange, boost::optional<PAIR_OF_DOUBLES>());
+  MOCK_CONST_METHOD0(deadTimeType, std::string());
+  MOCK_CONST_METHOD0(deadTimeFile, std::string());
 
   MOCK_METHOD0(initialize, void());
   MOCK_METHOD1(setDataCurve, void(const QwtData&));
@@ -77,6 +79,7 @@ public:
     ON_CALL(*m_view, calculationType()).WillByDefault(Return("Integral"));
     ON_CALL(*m_view, log()).WillByDefault(Return("sample_magn_field"));
     ON_CALL(*m_view, timeRange()).WillByDefault(Return(boost::none));
+    ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("None"));
   }
 
   void tearDown()
@@ -184,6 +187,32 @@ public:
     ON_CALL(*m_view, lastRun()).WillByDefault(Return("non-existent-file"));
     EXPECT_CALL(*m_view, setDataCurve(_)).Times(0);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
+    m_view->requestLoading();
+  }
+
+  void test_correctionsFromDataFile ()
+  {
+    // Change dead time correction type
+    // Test results with corrections from run data
+    ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("FromRunData"));
+    EXPECT_CALL(*m_view, deadTimeType()).Times(2);
+    EXPECT_CALL(*m_view, deadTimeFile()).Times(0);
+    EXPECT_CALL(*m_view, restoreCursor()).Times(1);
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size,3),
+                                            QwtDataY(0, 0.150616, 1E-3),
+                                            QwtDataY(1, 0.143444, 1E-3),
+                                            QwtDataY(2, 0.128856, 1E-3))));
+    m_view->requestLoading();
+  }
+
+  void test_correctionsFromCustomFile ()
+  {
+    // Change dead time correction type
+    // Test only expected number of calls
+    ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("FromSpecifiedFile"));
+    EXPECT_CALL(*m_view, deadTimeType()).Times(2);
+    EXPECT_CALL(*m_view, deadTimeFile()).Times(1);
+    EXPECT_CALL(*m_view, restoreCursor()).Times(1);
     m_view->requestLoading();
   }
 };

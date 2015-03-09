@@ -312,23 +312,60 @@ namespace MantidQt
 
       m_uiForm.cbAnalyser->clear();
 
-      IAlgorithm_sptr loadInstAlg = AlgorithmManager::Instance().create("CreateSimulationWorkspace");
-      loadInstAlg->initialize();
-      loadInstAlg->setChild(true);
-      loadInstAlg->setProperty("Instrument", instrumentName.toStdString());
-      loadInstAlg->setProperty("BinParams", "0,0.5,1");
-      loadInstAlg->setProperty("OutputWorkspace", "__empty_instrument_workspace");
-      loadInstAlg->execute();
-      MatrixWorkspace_sptr instWorkspace = loadInstAlg->getProperty("OutputWorkspace");
+      // Try to load the instrument into an empty workspace
+      MatrixWorkspace_sptr instWorkspace;
+      try
+      {
+        IAlgorithm_sptr loadInstAlg = AlgorithmManager::Instance().create("CreateSimulationWorkspace");
+        loadInstAlg->initialize();
+        loadInstAlg->setChild(true);
+        loadInstAlg->setLogging(false);
+        loadInstAlg->setProperty("Instrument", instrumentName.toStdString());
+        loadInstAlg->setProperty("BinParams", "0,0.5,1");
+        loadInstAlg->setProperty("OutputWorkspace", "__empty_instrument_workspace");
+        loadInstAlg->execute();
+        instWorkspace = loadInstAlg->getProperty("OutputWorkspace");
+      }
+      catch(...)
+      {
+      }
+
+      // Try to update the list of analysers
+      bool valid = updateAnalysersList(instWorkspace);
+      m_uiForm.cbAnalyser->setEnabled(valid);
+      if(!valid)
+        m_uiForm.cbAnalyser->addItem("No Valid Analysers");
+
+      // Update the list of reflections
+      int index = m_uiForm.cbAnalyser->currentIndex();
+      updateReflectionsList(index);
+
+      m_uiForm.cbAnalyser->blockSignals(analyserPreviousBlocking);
+    }
+
+
+    /**
+     * Update the list of analysers based on an instrument workspace.
+     *
+     * @param ws Instrument workspace
+     * @return If the workspace contained valid analysers
+     */
+    bool IndirectInstrumentConfig::updateAnalysersList(MatrixWorkspace_sptr ws)
+    {
+      if(!ws)
+        return false;
 
       QList<QPair<QString, QString>> instrumentModes;
-      Instrument_const_sptr instrument = instWorkspace->getInstrument();
+      Instrument_const_sptr instrument = ws->getInstrument();
 
       std::vector<std::string> ipfAnalysers = instrument->getStringParameter("analysers");
-      if(ipfAnalysers.size() == 0)
-        return;
+      QStringList analysers;
+      if(ipfAnalysers.size() > 0)
+        analysers = QString::fromStdString(ipfAnalysers[0]).split(",");
 
-      QStringList analysers = QString::fromStdString(ipfAnalysers[0]).split(",");
+      // Do not try to display analysers if there are none
+      if(analysers.size() == 0)
+        return false;
 
       for(auto it = analysers.begin(); it != analysers.end(); ++it)
       {
@@ -353,10 +390,7 @@ namespace MantidQt
         }
       }
 
-      int index = m_uiForm.cbAnalyser->currentIndex();
-      updateReflectionsList(index);
-
-      m_uiForm.cbAnalyser->blockSignals(analyserPreviousBlocking);
+      return true;
     }
 
 
