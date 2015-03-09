@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/V3D.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidMDEvents/Integrate3DEvents.h"
 #include <cxxtest/TestSuite.h>
@@ -11,6 +12,7 @@
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
+using Mantid::Kernel::V3D;
 
 //typedef Mantid::Kernel::Matrix<double>                  DblMatrix;
 
