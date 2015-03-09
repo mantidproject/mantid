@@ -13,15 +13,17 @@ using Mantid::DataObjects::Workspace2D_sptr;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
+namespace {
+  const double OFFSET = .1;
+  const int NUM_SPEC = 3;
+}
+
 class CalculateDIFCTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static CalculateDIFCTest *createSuite() { return new CalculateDIFCTest(); }
   static void destroySuite(CalculateDIFCTest *suite) { delete suite; }
-
-  const double OFFSET = .1;
-  const int NUM_SPEC = 3;
 
   void test_Init() {
     CalculateDIFC alg;
@@ -79,7 +81,7 @@ public:
 
     auto offsetsWS =
         OffsetsWorkspace_sptr(new OffsetsWorkspace(inputWS->getInstrument()));
-    for (size_t i = 0; i < NUM_SPEC; ++i) {
+    for (int i = 0; i < NUM_SPEC; ++i) {
       IDetector_const_sptr det = inputWS->getDetector(i);
       offsetsWS->setValue(det->getID(), OFFSET);
     }
