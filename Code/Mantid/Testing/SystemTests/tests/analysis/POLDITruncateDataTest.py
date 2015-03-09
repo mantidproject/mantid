@@ -2,7 +2,7 @@
 import stresstesting
 from mantid.simpleapi import *
 
-'''This test checks that the results of PoldiAutoCorrelation match the expected outcome.'''
+# This test checks that the results of PoldiAutoCorrelation match the expected outcome.
 class POLDITruncateDataTest(stresstesting.MantidStressTest):
     def runTest(self):
         self.dataFileName = "poldi2013n006903"

@@ -31,8 +31,7 @@ class ARCSReductionTest(stresstesting.MantidStressTest):
         self.vanFile0=os.path.join(config.getString('defaultsave.directory'),'ARCSvan_0.nxs')
         self.nxspeFile=os.path.join(config.getString('defaultsave.directory'),'ARCSsystemtest.nxspe')
         config['default.facility']="SNS"
-        DgsReduction(
-                        SampleInputFile="ARCS_23961_event.nxs",
+        DgsReduction(   SampleInputFile="ARCS_23961_event.nxs",
                         OutputWorkspace="reduced",
                         IncidentBeamNormalisation="ByCurrent",
                         DetectorVanadiumInputFile="WBARCS.nxs",
@@ -42,8 +41,7 @@ class ARCSReductionTest(stresstesting.MantidStressTest):
                         DetVanIntRangeUnits="Wavelength",
                         SaveProcessedDetVan=True,
                         SaveProcDetVanFilename=self.vanFile0)
-        DgsReduction(
-                        SampleInputFile="ARCS_23961_event.nxs",
+        DgsReduction(   SampleInputFile="ARCS_23961_event.nxs",
                         OutputWorkspace="reduced",
                         IncidentBeamNormalisation="ByCurrent",
                         DetectorVanadiumInputFile="WBARCS.nxs",

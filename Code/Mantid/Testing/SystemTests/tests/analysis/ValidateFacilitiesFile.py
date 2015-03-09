@@ -1,9 +1,7 @@
 #pylint: disable=no-init,invalid-name
 from mantid import config
 import os
-import re
 import stresstesting
-import glob
 
 
 EXPECTED_EXT = '.expected'

@@ -39,8 +39,7 @@ class CNCSReductionTest(stresstesting.MantidStressTest):
         Ei=mtd['sum'].getRun()['EnergyRequest'].firstValue()
         tib=SuggestTibCNCS(Ei)
 
-        DgsReduction(
-                        SampleInputWorkspace="sum",
+        DgsReduction(   SampleInputWorkspace="sum",
                         OutputWorkspace="reduced",
                         EnergyTransferRange="-0.2,0.05,2.2",
                         GroupingFile=self.groupingFile,

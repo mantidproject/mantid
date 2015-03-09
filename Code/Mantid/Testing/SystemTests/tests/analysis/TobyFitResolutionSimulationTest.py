@@ -39,11 +39,6 @@ class TobyFitResolutionSimulationTest(MantidStressTest):
         uvec = [9.700000e-03,9.800000e-03,9.996000e-01]
         vvec = [9.992000e-01,-3.460000e-02,-4.580000e-02]
 
-        omega = 0.0
-        alpha = 0.0
-        beta = 0.0
-        gamma = 0.0
-
         # sample dimensions
         sx = 0.05 # Perp
         sy = 0.025 # Up direction
@@ -93,24 +88,25 @@ class TobyFitResolutionSimulationTest(MantidStressTest):
 
         # Create the MD workspace
         qscale = 'Q in A^-1'
-        fake_md = ConvertToMD(InputWorkspace=fake_data, QDimensions="Q3D", QConversionScales=qscale,
-                              SplitInto=[3], SplitThreshold=100,
-        		      MinValues="-15,-15,-15,-30", MaxValues="25,25,25,279",OverwriteExisting=True)
+        fake_md = ConvertToMD(  InputWorkspace=fake_data, QDimensions="Q3D", QConversionScales=qscale,
+                                SplitInto=[3], SplitThreshold=100,
+        		                MinValues="-15,-15,-15,-30", MaxValues="25,25,25,279",OverwriteExisting=True)
 
         # Run the simulation.
         resol_model = "TobyFitResolutionModel"
         xsec_model = "Strontium122"
-        parameters = "Seff=0.7,J1a=38.7,J1b=-5.0,J2=27.3,SJc=10.0,GammaSlope=0.08,MultEps=0,TwinType=0,MCLoopMin=10,MCLoopMax=10,MCType=1" # Use sobol & restart each pixel to ensure reproducible result
+        # Use sobol & restart each pixel to ensure reproducible result
+        parameters = "Seff=0.7,J1a=38.7,J1b=-5.0,J2=27.3,SJc=10.0,GammaSlope=0.08,MultEps=0,TwinType=0,MCLoopMin=10,MCLoopMax=10,MCType=1"
         simulated = SimulateResolutionConvolvedModel(InputWorkspace=fake_md,
                                                      ResolutionFunction=resol_model,
                                                      ForegroundModel=xsec_model,
                                                      Parameters=parameters)
         # Take a slice
-        slice_ws = BinMD(InputWorkspace=simulated,
-                      AlignedDim0='[H,0,0], -12.000000, 9.000000, 100',
-                      AlignedDim1='[0,K,0], -6.000000, 7.000000, 100',
-                      AlignedDim2='[0,0,L], 0.000000, 6.000000, 1',
-                      AlignedDim3='DeltaE, 100.000000, 150.000000, 1')
+        slice_ws = BinMD(   InputWorkspace=simulated,
+                            AlignedDim0='[H,0,0], -12.000000, 9.000000, 100',
+                            AlignedDim1='[0,K,0], -6.000000, 7.000000, 100',
+                            AlignedDim2='[0,0,L], 0.000000, 6.000000, 1',
+                            AlignedDim3='DeltaE, 100.000000, 150.000000, 1')
 
         # Check
         ref_file = LoadMD(Filename='TobyFitResolutionSimulationTest.nxs')

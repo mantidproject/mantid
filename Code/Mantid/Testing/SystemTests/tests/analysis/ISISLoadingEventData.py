@@ -12,6 +12,7 @@ class ISISLoadingEventData(stresstesting.MantidStressTest):
         # isis_vms_compat/SPB[2]
         self.assertEqual(ev_ws.sample().getGeometryFlag(), 1, "It does not read correctly the vms compat (check ")
         # Isis correct the tof using loadTimeOfFlight method.
-        self.assertDelta(ev_ws.getEventList(10).getTofs()[1], 1041.89,0.01, "The ISIS event correction is incorrect (check LoadEventNexus::loadTimeOfFlight")
+        self.assertDelta(   ev_ws.getEventList(10).getTofs()[1], 1041.89,0.01, 
+                            "The ISIS event correction is incorrect (check LoadEventNexus::loadTimeOfFlight")
     def validate(self):
         return True

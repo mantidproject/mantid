@@ -1,6 +1,6 @@
-#pylint: disable=no-init
+#pylint: disable=no-init,unused-import
 from stresstesting import MantidStressTest
-from mantid.simpleapi import mtd, config
+from mantid.simpleapi import config
 
 class OffspecSESANS(MantidStressTest):
 
