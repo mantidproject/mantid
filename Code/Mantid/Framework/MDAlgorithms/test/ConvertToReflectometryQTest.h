@@ -1,24 +1,25 @@
 #ifndef MANTID_MDEVENTS_CONVERTTOREFLECTOMETRYQTEST_H_
 #define MANTID_MDEVENTS_CONVERTTOREFLECTOMETRYQTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidMDAlgorithms/ConvertToReflectometryQ.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidMDAlgorithms/ConvertToReflectometryQ.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include <boost/assign.hpp>
 
-using namespace Mantid;
-using namespace Mantid::MDEvents;
+#include <cxxtest/TestSuite.h>
+
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
+using namespace Mantid::MDAlgorithms;
 
 class ConvertToReflectometryQTest : public CxxTest::TestSuite
 {
@@ -36,10 +37,10 @@ private:
     MatrixWorkspace_sptr in_ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
     in_ws->getAxis(0)->setUnit("Wavelength");
 
-    Kernel::PropertyWithValue<std::string>* testProperty = new Kernel::PropertyWithValue<std::string>("test_property", "test_value", Kernel::Direction::Input);
+    PropertyWithValue<std::string>* testProperty = new PropertyWithValue<std::string>("test_property", "test_value", Direction::Input);
     in_ws->mutableRun().addLogData(testProperty);
 
-    Mantid::API::NumericAxis* const newAxis = new Mantid::API::NumericAxis(in_ws->getAxis(1)->length());
+    NumericAxis* const newAxis = new NumericAxis(in_ws->getAxis(1)->length());
     in_ws->replaceAxis(1,newAxis);
     newAxis->unit() = boost::make_shared<Mantid::Kernel::Units::Degrees>();
 
@@ -274,7 +275,7 @@ public:
     specaxisalg->setPropertyValue("Target", "signed_theta");
     specaxisalg->execute();
     
-    ws = API::AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("testws");
+    ws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("testws");
 
   }
 
@@ -290,7 +291,7 @@ public:
     alg.setProperty("IncidentTheta", 0.5);
     TS_ASSERT(alg.execute());
     TS_ASSERT(alg.isExecuted());
-    IMDWorkspace_sptr out = API::AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("OutputTransformedWorkspace");
+    IMDWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("OutputTransformedWorkspace");
     TS_ASSERT(out != NULL);
     TS_ASSERT_EQUALS(out->getNumDims(), 2);
   }

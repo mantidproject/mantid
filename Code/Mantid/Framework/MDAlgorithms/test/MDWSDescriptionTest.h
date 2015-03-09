@@ -1,18 +1,20 @@
 #ifndef MDEVENTS_MDWSDESCRIPTION_TEST_H
 #define MDEVENTS_MDWSDESCRIPTION_TEST_H
 
-#include "MantidMDAlgorithms/MDWSDescription.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/Exception.h"
+#include "MantidMDAlgorithms/MDWSDescription.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include <cxxtest/TestSuite.h>
 
-using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using namespace Mantid::MDAlgorithms;
 
 class MDWSDescriptionTest : public CxxTest::TestSuite
 {
-    Mantid::API::MatrixWorkspace_sptr ws2D;
+  Mantid::API::MatrixWorkspace_sptr ws2D;
 
 public:
   static MDWSDescriptionTest *createSuite() { return new MDWSDescriptionTest(); }
@@ -62,7 +64,7 @@ public:
     std::vector<std::string> PropNamews(2,"Ei");
     PropNamews[1]="P";
     // no property named "P" is attached to workspace
-    TS_ASSERT_THROWS(WSD.buildFromMatrixWS(ws2D,"|Q|","Direct",PropNamews),Kernel::Exception::NotFoundError);
+    TS_ASSERT_THROWS(WSD.buildFromMatrixWS(ws2D,"|Q|","Direct",PropNamews), Exception::NotFoundError);
 
     // H is attached
     PropNamews[1]="H";
@@ -98,10 +100,10 @@ public:
   }
   void testGetWS4DimIDFine()
   {
-    Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
+    MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
     ws2D->mutableRun().addProperty("Ei",12.,"meV",true);
 
-    MDEvents::MDWSDescription TWS;
+    MDWSDescription TWS;
     std::vector<double> min(4,-10),max(4,10);
     TWS.setMinMax(min,max);
 
@@ -135,7 +137,6 @@ public:
 
   void test_setCoordinateSystem()
   {
-    using namespace Mantid::Kernel;
     const SpecialCoordinateSystem expectedResult = QSample;
 
     MDWSDescription description;

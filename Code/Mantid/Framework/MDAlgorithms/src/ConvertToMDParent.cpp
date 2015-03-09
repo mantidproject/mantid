@@ -1,27 +1,18 @@
-
 #include "MantidMDAlgorithms/ConvertToMDParent.h"
 
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/IPropertyManager.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/IPropertySettings.h"
-#include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/VisibleWhenProperty.h"
-//
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 
-#include "MantidDataObjects/MDWSTransform.h"
-//
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
-#include "MantidDataObjects/ConvToMDSelector.h"
+#include "MantidMDAlgorithms/MDWSTransform.h"
+#include "MantidMDAlgorithms/ConvToMDSelector.h"
 
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using namespace Mantid::DataObjects::CnvrtToMD;
+using namespace Mantid::Kernel;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -44,7 +35,7 @@ void ConvertToMDParent::init() {
                   "An input Matrix Workspace (2DMatrix or Event workspace) ");
 
   std::vector<std::string> Q_modes =
-      DataObjects::MDTransfFactory::Instance().getKeys();
+      MDTransfFactory::Instance().getKeys();
   // something to do with different moments of time when algorithm or test loads
   // library. To avoid empty factory always do this.
   if (Q_modes.empty())
@@ -71,7 +62,7 @@ void ConvertToMDParent::init() {
                   "*MD Transformation factory* for further details.",
                   Direction::InOut);
 
-  DataObjects::MDWSTransform QSclAndFrames;
+  MDWSTransform QSclAndFrames;
   std::vector<std::string> TargFrames = QSclAndFrames.getTargetFrames();
   declareProperty(
       "Q3DFrames", TargFrames[CnvrtToMD::AutoSelect],

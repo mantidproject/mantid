@@ -1,10 +1,9 @@
 #ifndef MANTID_MDALGORITHMS_REFLECTOMETRYTRANFORMQXQZ_H_
 #define MANTID_MDALGORITHMS_REFLECTOMETRYTRANFORMQXQZ_H_
 
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/ReflectometryTransform.h"
+#include "MantidMDAlgorithms/CalculateReflectometryQBase.h"
 #include "MantidKernel/ClassMacros.h"
-#include "MantidDataObjects/ReflectometryTransform.h"
-#include "MantidDataObjects/CalculateReflectometryQBase.h"
 
 namespace Mantid {
 

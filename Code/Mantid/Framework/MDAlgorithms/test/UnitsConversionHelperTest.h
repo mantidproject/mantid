@@ -1,23 +1,22 @@
 #ifndef CONVERT2_MDEVENTS_UNITS_CONVERSION_TEST_H_
 #define CONVERT2_MDEVENTS_UNITS_CONVERSION_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidKernel/UnitFactory.h"
-
 #include "MantidAPI/NumericAxis.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/Progress.h"
-
+#include "MantidKernel/UnitFactory.h"
+#include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
-#include "MantidMDEvents/MDWSDescription.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using namespace Mantid;
+#include <cxxtest/TestSuite.h>
+
+#include <cmath>
+
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using namespace Mantid::MDEvents;
-
+using namespace Mantid::Kernel;
+using namespace Mantid::MDAlgorithms;
 
 class UnitsConversionHelperTest : public CxxTest::TestSuite
 {
@@ -34,15 +33,15 @@ public:
   {
     double factor,power;
 
-    const Kernel::Unit_sptr pThisUnit=Kernel::UnitFactory::Instance().create("Wavelength");
+    const auto pThisUnit = UnitFactory::Instance().create("Wavelength");
     TS_ASSERT(!pThisUnit->quickConversion("MomentumTransfer",factor,power));
   }
 
   void testTOFConversionRuns()
   { 
 
-    Kernel::Unit_sptr pSourceWSUnit     = Kernel::UnitFactory::Instance().create("Wavelength");
-    Kernel::Unit_sptr pWSUnit           = Kernel::UnitFactory::Instance().create("MomentumTransfer");
+    auto pSourceWSUnit     = UnitFactory::Instance().create("Wavelength");
+    auto pWSUnit           = UnitFactory::Instance().create("MomentumTransfer");
     double delta;
     double L1(10),L2(10),TwoTheta(0.1),efix(10);
     int emode(0);
@@ -73,7 +72,7 @@ public:
     // initialize peculiar conversion from ws units to DeltaE_inWavenumber
     TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD,"DeltaE_inWavenumber"));
 
-    const MantidVec& X        = ws2D->readX(0);
+    const auto& X = ws2D->readX(0);
     size_t n_bins = X.size()-1;
     for(size_t i=0;i<n_bins;i++)
     {
@@ -118,8 +117,8 @@ public:
     double t_4 = Conv.convertUnits(-100);
     double t_lim = Conv.convertUnits(-DBL_MAX);
 
-    const MantidVec& X        = ws2D->readX(0);
-    MantidVec E_storage(X.size());
+    const auto& X        = ws2D->readX(0);
+    Mantid::MantidVec E_storage(X.size());
     TS_ASSERT_THROWS_NOTHING(Conv.updateConversion(0));
 
     size_t n_bins = X.size();
@@ -131,9 +130,9 @@ public:
     }
 
     // Let WS know that it is in TOF now (one column)
-    MantidVec& T = ws2D->dataX(0);
+    auto& T = ws2D->dataX(0);
 
-    NumericAxis *pAxis0 = new NumericAxis(n_bins-1); 
+    auto *pAxis0 = new NumericAxis(n_bins-1); 
     for(size_t i=0; i < n_bins-1; i++){
       double Tm =0.5*(TOFS[i]+TOFS[i+1]);
       pAxis0->setValue(i,Tm);
@@ -181,15 +180,15 @@ public:
   {
 
     // Modify input workspace to be elastic workspace
-    const MantidVec& X        = ws2D->readX(0);
-    MantidVec E_storage(X.size());
+    const auto& X        = ws2D->readX(0);
+    Mantid::MantidVec E_storage(X.size());
     size_t n_bins = X.size();
     for(size_t i=0;i<n_bins;i++)
     {
       E_storage[i]=-0.1+0.1*static_cast<double>(i);
     }
 
-    NumericAxis *pAxis0 = new NumericAxis(n_bins-1); 
+    auto *pAxis0 = new NumericAxis(n_bins-1); 
     pAxis0->setUnit("Energy");
     ws2D->replaceAxis(0,pAxis0);    
 
@@ -255,7 +254,7 @@ public:
   UnitsConversionHelperTest()
   {
 
-    API::FrameworkManager::Instance();
+    FrameworkManager::Instance();
 
     std::vector<double> L2(5,5);
     std::vector<double> polar(5,(30./180.)*M_PI);

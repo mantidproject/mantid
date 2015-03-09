@@ -1,15 +1,16 @@
 #ifndef MANTID_MDEVENTS_WSWRAPPERTEST_H_
 #define MANTID_MDEVENTS_WSWRAPPERTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidMDAlgorithms/MDEventWSWrapper.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidMDAlgorithms/MDEventWSWrapper.h"
+
+#include <cxxtest/TestSuite.h>
 
 
-using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::MDAlgorithms;
 
 class MDEventWSWrapperTest : public CxxTest::TestSuite
 {

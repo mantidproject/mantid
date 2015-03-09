@@ -1,12 +1,13 @@
-#include <iostream>
+#include "MantidMDAlgorithms/SaveIsawQvector.h"
+
 #include <fstream>
+
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidDataObjects/MDTransfFactory.h"
-#include "MantidDataObjects/UnitsConversionHelper.h"
-#include "MantidMDAlgorithms/SaveIsawQvector.h"
+#include "MantidMDAlgorithms/MDTransfFactory.h"
+#include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

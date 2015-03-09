@@ -9,8 +9,7 @@
 #include <iomanip>
 #include "MantidMDAlgorithms/ReflectometryTransformP.h"
 
-using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 
 class ReflectometryTransformPTest : public CxxTest::TestSuite

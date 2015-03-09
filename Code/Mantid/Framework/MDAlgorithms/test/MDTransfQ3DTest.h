@@ -1,15 +1,16 @@
 #ifndef MANTID_MDALGORITHMS_MDTRANSFQ3D_H_
 #define MANTID_MDALGORITHMS_MDTRANSFQ3D_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidKernel/DeltaEMode.h"
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-//#include "MantidMDEvents/MDTransfDEHelper.h"
-#include "MantidKernel/DeltaEMode.h"
 
+#include <cxxtest/TestSuite.h>
 
-using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::Kernel;
+using namespace Mantid::MDAlgorithms;
+
+using Mantid::coord_t;
 
 class MDTransfQ3DTestHelper: public MDTransfQ3D
 {
@@ -34,23 +35,23 @@ void testWSDescriptionPart()
   MDTransfQ3D Q3DTransformer;
   TS_ASSERT_EQUALS("Q3D",Q3DTransformer.transfID());
 
-  TS_ASSERT_EQUALS(4,Q3DTransformer.getNMatrixDimensions(Kernel::DeltaEMode::Direct));
-  TS_ASSERT_EQUALS(3,Q3DTransformer.getNMatrixDimensions(Kernel::DeltaEMode::Elastic));
-  TS_ASSERT_EQUALS(4,Q3DTransformer.getNMatrixDimensions(Kernel::DeltaEMode::Indirect));
+  TS_ASSERT_EQUALS(4,Q3DTransformer.getNMatrixDimensions(DeltaEMode::Direct));
+  TS_ASSERT_EQUALS(3,Q3DTransformer.getNMatrixDimensions(DeltaEMode::Elastic));
+  TS_ASSERT_EQUALS(4,Q3DTransformer.getNMatrixDimensions(DeltaEMode::Indirect));
 }
 void testWSDescrUnitsPart()
 {
   MDTransfQ3D Q3DTransformer;
   std::vector<std::string> outputDimUnits;
 
-  TS_ASSERT_THROWS_NOTHING(outputDimUnits=Q3DTransformer.outputUnitID(Kernel::DeltaEMode::Direct));
+  TS_ASSERT_THROWS_NOTHING(outputDimUnits=Q3DTransformer.outputUnitID(DeltaEMode::Direct));
   TS_ASSERT_EQUALS(4,outputDimUnits.size());
   TS_ASSERT_EQUALS("MomentumTransfer",outputDimUnits[0]);
   TS_ASSERT_EQUALS("MomentumTransfer",outputDimUnits[1]);
   TS_ASSERT_EQUALS("MomentumTransfer",outputDimUnits[2]);
   TS_ASSERT_EQUALS("DeltaE",outputDimUnits[3]);
 
-  TS_ASSERT_THROWS_NOTHING(outputDimUnits=Q3DTransformer.outputUnitID(Kernel::DeltaEMode::Elastic));
+  TS_ASSERT_THROWS_NOTHING(outputDimUnits=Q3DTransformer.outputUnitID(DeltaEMode::Elastic));
   TS_ASSERT_EQUALS(3,outputDimUnits.size());
 }
 void testWSDescrIDPart()
@@ -58,14 +59,14 @@ void testWSDescrIDPart()
   MDTransfQ3D Q3DTransformer;
   std::vector<std::string> outputDimID;
 
-  TS_ASSERT_THROWS_NOTHING(outputDimID=Q3DTransformer.getDefaultDimID(Kernel::DeltaEMode::Direct));
+  TS_ASSERT_THROWS_NOTHING(outputDimID=Q3DTransformer.getDefaultDimID(DeltaEMode::Direct));
   TS_ASSERT_EQUALS(4,outputDimID.size());
   TS_ASSERT_EQUALS("Q1",outputDimID[0]);
   TS_ASSERT_EQUALS("Q2",outputDimID[1]);
   TS_ASSERT_EQUALS("Q3",outputDimID[2]);
   TS_ASSERT_EQUALS("DeltaE",outputDimID[3]);
 
-  TS_ASSERT_THROWS_NOTHING(outputDimID=Q3DTransformer.getDefaultDimID(Kernel::DeltaEMode::Elastic));
+  TS_ASSERT_THROWS_NOTHING(outputDimID=Q3DTransformer.getDefaultDimID(DeltaEMode::Elastic));
   TS_ASSERT_EQUALS(3,outputDimID.size());
   TS_ASSERT_EQUALS("Q1",outputDimID[0]);
   TS_ASSERT_EQUALS("Q2",outputDimID[1]);
@@ -77,13 +78,13 @@ void testWSDescrInputUnitID()
   MDTransfQ3D Q3DTransformer;
   std::string inputUnitID;
 
-  TS_ASSERT_THROWS_NOTHING(inputUnitID=Q3DTransformer.inputUnitID(Kernel::DeltaEMode::Direct));
+  TS_ASSERT_THROWS_NOTHING(inputUnitID=Q3DTransformer.inputUnitID(DeltaEMode::Direct));
   TS_ASSERT_EQUALS("DeltaE",inputUnitID);
 
-  TS_ASSERT_THROWS_NOTHING(inputUnitID=Q3DTransformer.inputUnitID(Kernel::DeltaEMode::Indirect));
+  TS_ASSERT_THROWS_NOTHING(inputUnitID=Q3DTransformer.inputUnitID(DeltaEMode::Indirect));
   TS_ASSERT_EQUALS("DeltaE",inputUnitID);
 
-  TS_ASSERT_THROWS_NOTHING(inputUnitID=Q3DTransformer.inputUnitID(Kernel::DeltaEMode::Elastic));
+  TS_ASSERT_THROWS_NOTHING(inputUnitID=Q3DTransformer.inputUnitID(DeltaEMode::Elastic));
   TS_ASSERT_EQUALS("Momentum",inputUnitID);
 
 
@@ -98,7 +99,7 @@ void testISLorents()
 
   MDWSDescription WSDescr(5);
   std::string QMode = Q3DTransf.transfID();
-  std::string dEMode= Kernel::DeltaEMode::asString(Kernel::DeltaEMode::Elastic);
+  std::string dEMode= DeltaEMode::asString(DeltaEMode::Elastic);
   std::vector<std::string> dimPropNames(2,"T");
   dimPropNames[1]="Ei";
 

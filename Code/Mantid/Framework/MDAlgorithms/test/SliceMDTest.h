@@ -1,24 +1,19 @@
 #ifndef MANTID_MDEVENTS_SLICEMDTEST_H_
 #define MANTID_MDEVENTS_SLICEMDTEST_H_
 
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/VMD.h"
-#include "MantidMDEvents/CoordTransformAffine.h"
-#include "MantidMDAlgorithms/SliceMD.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidAPI/FrameworkManager.h"
-#include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
-#include <Poco/File.h>
+#include "MantidMDAlgorithms/SliceMD.h"
+#include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
-using namespace Mantid;
-using namespace Mantid::MDEvents;
-using namespace Mantid::MDAlgorithms;
+#include <cxxtest/TestSuite.h>
+
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
+using namespace Mantid::MDAlgorithms;
+
+using Mantid::coord_t;
 
 class SliceMDTest : public CxxTest::TestSuite
 {

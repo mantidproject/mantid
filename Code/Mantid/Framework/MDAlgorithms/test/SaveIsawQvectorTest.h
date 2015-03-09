@@ -1,15 +1,16 @@
 #ifndef MANTID_MDEVENTS_SAVEISAWQVECTORTEST_H_
 #define MANTID_MDEVENTS_SAVEISAWQVECTORTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <Poco/File.h>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidMDAlgorithms/SaveIsawQvector.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
+#include <cxxtest/TestSuite.h>
+#include <Poco/File.h>
+
 using Mantid::API::AnalysisDataService;
-using Mantid::MDEvents::SaveIsawQvector;
+using Mantid::MDAlgorithms::SaveIsawQvector;
 
 class SaveIsawQvectorTest : public CxxTest::TestSuite
 {
@@ -35,7 +36,7 @@ public:
 
     // create the test workspace
     int numEventsPer = 100;
-    Mantid::DataObjects::EventWorkspace_sptr inputW = Mantid::MDEvents::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer);
+    Mantid::DataObjects::EventWorkspace_sptr inputW = Mantid::DataObjects::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer);
     AnalysisDataService::Instance().addOrReplace(inWSName, inputW);
     size_t nevents = inputW->getNumberEvents();
 

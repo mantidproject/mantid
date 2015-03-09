@@ -1,18 +1,18 @@
 #include "MantidMDAlgorithms/QueryMDWorkspace.h"
-#include "MantidKernel/System.h"
+
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "../inc/MantidDataObjects/MDEventWorkspace.h"
-#include "../inc/MantidDataObjects/MDEventFactory.h"
 
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Kernel;
 
 namespace Mantid {
 namespace MDAlgorithms {

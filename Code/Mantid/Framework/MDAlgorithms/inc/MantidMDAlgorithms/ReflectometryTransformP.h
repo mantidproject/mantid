@@ -3,8 +3,7 @@
 
 #include <cmath>
 
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/ReflectometryTransform.h"
+#include "MantidMDAlgorithms/ReflectometryTransform.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -35,7 +34,6 @@ class CalculateReflectometryDiffP : public CalculateReflectometryPBase {
 public:
   CalculateReflectometryDiffP(const double &thetaInitial)
       : CalculateReflectometryPBase(thetaInitial) {}
-  ~CalculateReflectometryDiffP(){};
   double execute(const double &wavelength) {
     double wavenumber = 2 * M_PI / wavelength;
     double ki = wavenumber * m_sinThetaInitial;

@@ -1,11 +1,12 @@
 #ifndef MANTID_MDWS_DESCRIPTION_H_
 #define MANTID_MDWS_DESCRIPTION_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidMDAlgorithms/MDTransfAxisNames.h"
 
-using namespace Mantid::MDEvents;
+#include <cxxtest/TestSuite.h>
+
 using namespace Mantid::Kernel;
+using namespace Mantid::MDAlgorithms;
 
 class MDTransfAxisNamesTest : public CxxTest::TestSuite
 {

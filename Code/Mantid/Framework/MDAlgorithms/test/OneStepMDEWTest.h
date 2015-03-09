@@ -2,18 +2,13 @@
 #define MANTID_MDEVENTS_ONESTEPMDEWTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
 
-#include "MantidMDAlgorithms/OneStepMDEW.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidMDAlgorithms/OneStepMDEW.h"
 
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 
 class OneStepMDEWTest : public CxxTest::TestSuite
 {
@@ -29,8 +24,6 @@ public:
   
   void test_exec()
   {
-    ConfigService::Instance().setString("default.facility", "SNS");
-
     OneStepMDEW alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )

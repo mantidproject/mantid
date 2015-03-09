@@ -3,12 +3,12 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/MDWSDescription.h"
+#include "MantidMDAlgorithms//MDWSDescription.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
 
-/** SaveIsawQvector : TODO: DESCRIPTION
+/** SaveIsawQvector
 
   Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source

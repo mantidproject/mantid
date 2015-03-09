@@ -3,16 +3,11 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/Progress.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/ProgressText.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/V3D.h"
-#include "MantidDataObjects/BoxControllerSettingsAlgorithm.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidKernel/V3D.h"
+#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -25,10 +20,9 @@ namespace MDAlgorithms {
  * @date 2011-03-01 13:14:48.236513
  */
 class DLLExport ConvertToDiffractionMDWorkspace
-    : public DataObjects::BoxControllerSettingsAlgorithm {
+    : public BoxControllerSettingsAlgorithm {
 public:
   ConvertToDiffractionMDWorkspace();
-  ~ConvertToDiffractionMDWorkspace(){};
 
   /// Algorithm's name for identification
   virtual const std::string name() const {
@@ -41,7 +35,7 @@ public:
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  virtual int version() const { return 1; }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "MDAlgorithms"; }
 

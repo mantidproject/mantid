@@ -1,18 +1,13 @@
 #ifndef MANTID_MDEVENTS_REFLECTOMETRYTRANSFORMKIKFTEST_H_
 #define MANTID_MDEVENTS_REFLECTOMETRYTRANSFORMKIKFTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-
 #include "MantidMDAlgorithms/ReflectometryTransformKiKf.h"
 
+#include <cxxtest/TestSuite.h>
+#include <cmath>
 
-using namespace Mantid::MDEvents;
 using namespace Mantid::API;
+using namespace Mantid::MDAlgorithms;
 
 class ReflectometryTransformKiKfTest : public CxxTest::TestSuite
 {

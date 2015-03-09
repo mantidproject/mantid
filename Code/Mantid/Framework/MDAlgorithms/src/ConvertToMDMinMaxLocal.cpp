@@ -1,16 +1,12 @@
 #include "MantidMDAlgorithms/ConvertToMDMinMaxLocal.h"
 
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidAPI/IMDNode.h"
-#include "MantidDataObjects/MDWSTransform.h"
-#include "MantidDataObjects/ConvToMDSelector.h"
-#include "MantidDataObjects/UnitsConversionHelper.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/MultiThreaded.h"
-
 #include <cfloat>
+
+#include "MantidKernel/ArrayProperty.h"
+
+#include "MantidMDAlgorithms/ConvToMDSelector.h"
+#include "MantidMDAlgorithms/MDWSTransform.h"
+#include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -73,12 +69,12 @@ void ConvertToMDMinMaxLocal::exec() {
 
   // Build the target ws description as function of the input & output ws and
   // the parameters, supplied to the algorithm
-  DataObjects::MDWSDescription targWSDescr;
+  MDWSDescription targWSDescr;
 
   // get raw pointer to Q-transformation (do not delete this pointer, it's held
   // by MDTransfFactory!)
-  DataObjects::MDTransfInterface *pQtransf =
-      DataObjects::MDTransfFactory::Instance().create(QModReq).get();
+  MDTransfInterface *pQtransf =
+      MDTransfFactory::Instance().create(QModReq).get();
   // get number of dimensions this Q transformation generates from the
   // workspace.
   auto iEmode = Kernel::DeltaEMode().fromString(dEModReq);
@@ -99,7 +95,7 @@ void ConvertToMDMinMaxLocal::exec() {
   targWSDescr.addProperty("RUN_INDEX", uint16_t(0), true);
 
   // instantiate class, responsible for defining Mslice-type projection
-  DataObjects::MDWSTransform MsliceProj;
+  MDAlgorithms::MDWSTransform MsliceProj;
   // identify if u,v are present among input parameters and use defaults if not
   std::vector<double> ut = getProperty("UProj");
   std::vector<double> vt = getProperty("VProj");
@@ -130,12 +126,12 @@ void ConvertToMDMinMaxLocal::exec() {
 }
 
 void ConvertToMDMinMaxLocal::findMinMaxValues(
-    DataObjects::MDWSDescription &WSDescription,
-    DataObjects::MDTransfInterface *const pQtransf,
+    MDWSDescription &WSDescription,
+    MDTransfInterface *const pQtransf,
     Kernel::DeltaEMode::Type iEMode, std::vector<double> &MinValues,
     std::vector<double> &MaxValues) {
 
-  DataObjects::UnitsConversionHelper unitsConverter;
+  MDAlgorithms::UnitsConversionHelper unitsConverter;
   double signal(1), errorSq(1);
   //
   size_t nDims = MinValues.size();

@@ -1,15 +1,14 @@
 #ifndef MANTID_MDEVENTS_MDTRANSF_MODQTEST_H_
 #define MANTID_MDEVENTS_MDTRANSF_MODQTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidMDEvents/MDTransfQ3D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-//#include "MantidMDEvents/MDTransfDEHelper.h"
+#include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidKernel/DeltaEMode.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 
 
 //

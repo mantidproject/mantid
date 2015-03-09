@@ -1,13 +1,15 @@
 #include "MantidMDAlgorithms/ReflectometryTransformP.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include <stdexcept>
 
-using namespace Mantid::Kernel;
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/Exception.h"
+
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 
 namespace Mantid {
 namespace MDAlgorithms {

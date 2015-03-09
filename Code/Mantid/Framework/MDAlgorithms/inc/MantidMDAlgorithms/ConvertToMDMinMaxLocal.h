@@ -46,8 +46,8 @@ public:
   virtual int version() const { return 1; }
 
 protected: // for testing
-  void findMinMaxValues(DataObjects::MDWSDescription &targWSDescr,
-                        DataObjects::MDTransfInterface *const qTransf,
+  void findMinMaxValues(MDWSDescription &targWSDescr,
+                        MDTransfInterface *const qTransf,
                         Kernel::DeltaEMode::Type dEMode,
                         std::vector<double> &MinValues,
                         std::vector<double> &MaxValues);

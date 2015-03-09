@@ -1,21 +1,17 @@
 #ifndef MANTID_MDEVENTS_MERGEMDEWTEST_H_
 #define MANTID_MDEVENTS_MERGEMDEWTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-
 #include "MantidMDAlgorithms/MergeMDFiles.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
+
+#include <cxxtest/TestSuite.h>
+
 #include <Poco/File.h>
 
-using namespace Mantid;
-using namespace Mantid::MDEvents;
-using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::MDAlgorithms;
 
 class MergeMDFilesTest : public CxxTest::TestSuite
 {
@@ -55,7 +51,7 @@ public:
     {
       std::ostringstream mess;
       mess << "MergeMDFilesTestInput" << i;
-      MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeFileBackedMDEW(mess.str(), true,-nFileEvents);
+      MDEventWorkspace3Lean::sptr ws = MDAlgorithmsTestHelper::makeFileBackedMDEW(mess.str(), true,-nFileEvents);
       inWorkspaces.push_back(ws);
       filenames.push_back(std::vector<std::string>(1,ws->getBoxController()->getFilename()));
     }

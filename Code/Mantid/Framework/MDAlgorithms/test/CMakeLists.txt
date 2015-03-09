@@ -7,6 +7,7 @@ if ( CXXTEST_FOUND )
   set ( TESTHELPER_SRCS ../../TestHelpers/src/TearDownWorld.cpp
                         ../../TestHelpers/src/ComponentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
+                        ../../TestHelpers/src/MDAlgorithmsTestHelper.cpp
                         ../../TestHelpers/src/MDEventsTestHelper.cpp
                         ../../TestHelpers/src/BinaryOperationMDTestHelper.cpp )
   if ( GMOCK_FOUND AND GTEST_FOUND )

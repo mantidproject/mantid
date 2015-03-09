@@ -1,23 +1,18 @@
 #ifndef MANTID_MDEVENTS_QUERYMDWORKSPACETEST_H_
 #define MANTID_MDEVENTS_QUERYMDWORKSPACETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-#include <boost/shared_ptr.hpp>
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidMDAlgorithms/QueryMDWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidMDAlgorithms/QueryMDWorkspace.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
-using namespace Mantid;
-using namespace Mantid::MDEvents;
+#include <cxxtest/TestSuite.h>
+
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::MDAlgorithms;
 
 class QueryMDWorkspaceTest : public CxxTest::TestSuite
 {
