@@ -536,8 +536,8 @@ LoadMuonNexus1::createDeadTimeTable(std::vector<int> specToLoad,
 /**
  * Creates Detector Grouping Table using all the data between begin and end.
  *
- * @param begin :: Iterator to the first element of the data to use
- * @param   end :: Iterator to the last element of the data to use
+ * @param specToLoad :: Vector containing the spectrum list to load
+ * @param grouping :: Vector containing corresponding grouping
  * @return Detector Grouping Table create using the data
  */
 TableWorkspace_sptr LoadMuonNexus1::createDetectorGroupingTable(
