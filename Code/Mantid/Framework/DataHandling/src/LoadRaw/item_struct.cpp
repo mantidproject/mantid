@@ -109,13 +109,12 @@ int item_struct<T>::getArrayItemSize(const std::string &item_name,
 
 /** Gets an array of items
 @param item_name :: the item name
-@param spec_array :: The array of spectra numbers
 @param nspec :: the number of spectra in the array
 @param larray :: The returned array
 @return 0 on success
 */
 template <typename T>
-int item_struct<T>::getArrayItem(const std::string &item_name, long *spec_array,
+int item_struct<T>::getArrayItem(const std::string &item_name,
                                  int nspec, T *larray) {
   const item_t *item;
   item = findItem(item_name, false);
