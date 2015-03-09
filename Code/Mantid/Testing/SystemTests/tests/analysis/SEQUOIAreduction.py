@@ -126,15 +126,15 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         if not os.path.isfile(os.path.join(self.customDataDir, "van.nx5")):
             LoadEventNexus(Filename=vanfile,OutputWorkspace="VAN")
 
-            Rebin(InputWorkspace="VAN",OutputWorkspace="VAN",Params="1000,15000,16000",PreserveEvents=False)    #integrate all events between 1000 and 16000 microseconds
-            NormaliseByCurrent(InputWorkspace="VAN",OutputWorkspace="VAN")                                        #normalize by proton charge
-            MedianDetectorTest(InputWorkspace="VAN",OutputWorkspace="MASK",SignificanceTest=100,HighThreshold =100) #determine which detectors to mask, and store them in the "MASK" workspace
+            Rebin(InputWorkspace="VAN",OutputWorkspace="VAN",Params="1000,15000,16000",PreserveEvents=False)
+            NormaliseByCurrent(InputWorkspace="VAN",OutputWorkspace="VAN")
+            MedianDetectorTest(InputWorkspace="VAN",OutputWorkspace="MASK",SignificanceTest=100,HighThreshold =100)
             if len(maskfile)>0:
                 LoadNexus(Filename=maskfile,OutputWorkspace="temp_mask")
-                MaskDetectors(Workspace="MASK",MaskedWorkspace="temp_mask")                                        #add detectors masked in "temp_mask" to "MASK"
+                MaskDetectors(Workspace="MASK",MaskedWorkspace="temp_mask")
                 DeleteWorkspace(Workspace="temp_mask")
-            MaskDetectors(Workspace="VAN",MaskedWorkspace="MASK")                                                #Mask "VAN". This prevents dividing by 0
-            DeleteWorkspace(Workspace="MASK")                                                                    #Mask is carried by VAN workspace
+            MaskDetectors(Workspace="VAN",MaskedWorkspace="MASK")
+            DeleteWorkspace(Workspace="MASK")
             SaveNexus(InputWorkspace="VAN",Filename=os.path.join(self.customDataDir,"van.nx5"))
         else:
             LoadNexus(Filename=os.path.join(self.customDataDir,"van.nx5"),OutputWorkspace="VAN")
@@ -159,7 +159,6 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         V_file=os.path.join(self.customDataDir, 'SEQ_12384_event.nxs')
         Eguess=35.0														#initial energy guess
         Erange="-10.0,0.25,32.0"										#Energy bins:    Emin,Estep,Emax
-        datadir=self.customDataDir		                                #Data directory
         outdir=self.customDataDir	                                    #Output directory
         fout_prefix="Ei_35.0_"
         ang_offset=0.0
@@ -173,62 +172,60 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         anglestep=1.				                                    #angle step - this can be fine tuned for pixel arc over detectors
 
         if maskandnormalize:
-            self.CreateMasksAndVanadiumNormalization(V_file,maskfile=maskfile)    #Creates a worspaces for Vanadium normalization and masking
+            self.CreateMasksAndVanadiumNormalization(V_file,maskfile=maskfile)
 
-        [paths,runs]=self.LoadPathMaker(runs,self.customDataDir,'SEQ_','_event.nxs') #process teh runlist
-        for flist,rlist,i in zip(paths,runs,range(len(paths))):	   		#rlist is the inner list of runnumbers
-            psitmp=[]
+        [paths,runs]=self.LoadPathMaker(runs,self.customDataDir,'SEQ_','_event.nxs')
+        for flist,rlist,i in zip(paths,runs,range(len(paths))):
             for f,j in zip(flist,range(len(flist))):
                 if j==0:
-                    LoadEventNexus(Filename=f,OutputWorkspace="IWS")                        #Load an event Nexus file
-                    LoadNexusMonitors(Filename=f,OutputWorkspace="monitor_ws")                #Load monitors
+                    LoadEventNexus(Filename=f,OutputWorkspace="IWS")
+                    LoadNexusMonitors(Filename=f,OutputWorkspace="monitor_ws")
                 else:
-                    LoadEventNexus(Filename=f,OutputWorkspace="IWS_temp")                    #Load an event Nexus file
-                    LoadNexusMonitors(Filename=f,OutputWorkspace="monitor_ws_temp")            #Load monitors
-                    Plus(LHSWorkspace="IWS",RHSWorkspace="IWS_temp",OutputWorkspace="IWS")    #Add events to the original workspcace
-                    Plus(LHSWorkspace="monitor_ws",RHSWorkspace="monitor_ws_temp",OutputWorkspace="monitor_ws")    #Add  monitors to the original monitor workspcace
+                    LoadEventNexus(Filename=f,OutputWorkspace="IWS_temp")
+                    LoadNexusMonitors(Filename=f,OutputWorkspace="monitor_ws_temp")
+                    Plus(LHSWorkspace="IWS",RHSWorkspace="IWS_temp",OutputWorkspace="IWS")
+                    Plus(LHSWorkspace="monitor_ws",RHSWorkspace="monitor_ws_temp",OutputWorkspace="monitor_ws")
 			        #cleanup
                     DeleteWorkspace("IWS_temp")
                     DeleteWorkspace("monitor_ws_temp")
-        w=mtd["IWS"]
-        psi=array(w.getRun()[angle_name].value).mean()+ang_offset
-        FilterBadPulses(InputWorkspace="IWS",OutputWorkspace = "IWS",LowerCutoff = 50)	    # get psi before filtering bad pulses
-        [Efixed,T0]=self.GetEiT0("monitor_ws",Eguess)											#Get Ei and -T0 using the function defined before
-        ChangeBinOffset(InputWorkspace="IWS",OutputWorkspace="OWS",Offset=T0)				#Change all TOF by -T0
-        NormaliseByCurrent(InputWorkspace="OWS",OutputWorkspace="OWS")						#normalize by proton charge
-        ConvertUnits(InputWorkspace="OWS",OutputWorkspace="OWS",Target="Wavelength",EMode="Direct",EFixed=Efixed)	#The algorithm for He3 tube efficiency requires wavelength units
-        He3TubeEfficiency(InputWorkspace="OWS",OutputWorkspace="OWS")										        #Apply correction due to absorption in He3
-        ConvertUnits(InputWorkspace="OWS",OutputWorkspace="OWS",Target="DeltaE",EMode="Direct",EFixed=Efixed)		#Switch  to energy transfer
-        CorrectKiKf(InputWorkspace="OWS",OutputWorkspace="OWS")                                                     # apply ki/kf correction
-        Rebin(InputWorkspace="OWS",OutputWorkspace="OWST",Params=Erange,PreserveEvents=False)                       # go to histogram mode (forget events)
-        ConvertToDistribution(Workspace="OWST")														                #Convert to differential cross section by dividing by the energy bin width
-        DeleteWorkspace("OWS")
-        if maskandnormalize:
-            MaskDetectors(Workspace="OWST",MaskedWorkspace="VAN")						#apply overall mask
-            # the following is commented, since it's the same run, not a real vanadium
-		    #Divide(LHSWorkspace="OWST",RHSWorkspace="VAN",OutputWorkspace="OWST")		#normalize by Vanadium, if desired
-        if do_powder:
-            if i==0:
-                mapping=self.createanglelist("OWST",anglemin,anglemax,anglestep)
-            GroupDetectors(InputWorkspace="OWST",OutputWorkspace="OWST",MapFile=os.path.join(self.customDataDir,"group.map"),Behaviour="Sum")
-            SolidAngle(InputWorkspace="OWST",OutputWorkspace="sa")
-            Divide(LHSWorkspace="OWST",RHSWorkspace="sa",OutputWorkspace="OWST")
-            DeleteWorkspace("sa")
-        barefname = "%s%d_%g" % (fout_prefix,rlist[0],psi)
-        fname_out = os.path.join(outdir, barefname)
-        if flag_spe:
-            SaveSPE(InputWorkspace="OWST",Filename=fname_out+".spe")					#save the data in spe format.
-            if i==0:
-                SavePHX(InputWorkspace="OWST",Filename=fname_out+".spe")
-        if flag_nxspe:
-            #save in NXSPE format
-            nxspe_name = fname_out+".nxspe"
-            self._nxspe_filename = nxspe_name
+            w=mtd["IWS"]
+            psi=array(w.getRun()[angle_name].value).mean()+ang_offset
+            FilterBadPulses(InputWorkspace="IWS",OutputWorkspace = "IWS",LowerCutoff = 50)
+            [Efixed,T0]=self.GetEiT0("monitor_ws",Eguess)
+            ChangeBinOffset(InputWorkspace="IWS",OutputWorkspace="OWS",Offset=T0)
+            NormaliseByCurrent(InputWorkspace="OWS",OutputWorkspace="OWS")
+            ConvertUnits(InputWorkspace="OWS",OutputWorkspace="OWS",Target="Wavelength",EMode="Direct",EFixed=Efixed)
+            He3TubeEfficiency(InputWorkspace="OWS",OutputWorkspace="OWS")
+            ConvertUnits(InputWorkspace="OWS",OutputWorkspace="OWS",Target="DeltaE",EMode="Direct",EFixed=Efixed)
+            CorrectKiKf(InputWorkspace="OWS",OutputWorkspace="OWS")
+            Rebin(InputWorkspace="OWS",OutputWorkspace="OWST",Params=Erange,PreserveEvents=False)
+            ConvertToDistribution(Workspace="OWST")
+            DeleteWorkspace("OWS")
+            if maskandnormalize:
+                MaskDetectors(Workspace="OWST",MaskedWorkspace="VAN")
             if do_powder:
-                SaveNXSPE(InputWorkspace="OWST",Filename=nxspe_name,Efixed=Efixed,psi=psi,KiOverKfScaling=True,
-                          ParFile=os.path.join(outdir, "group.par"))
-            else:
-                SaveNXSPE(InputWorkspace="OWST",Filename=nxspe_name,Efixed=Efixed,psi=psi,KiOverKfScaling=True)
+                if i==0:
+                    dummy_mapping=self.createanglelist("OWST",anglemin,anglemax,anglestep)
+                GroupDetectors( InputWorkspace="OWST",OutputWorkspace="OWST",
+                                MapFile=os.path.join(self.customDataDir,"group.map"),Behaviour="Sum")
+                SolidAngle(InputWorkspace="OWST",OutputWorkspace="sa")
+                Divide(LHSWorkspace="OWST",RHSWorkspace="sa",OutputWorkspace="OWST")
+                DeleteWorkspace("sa")
+            barefname = "%s%d_%g" % (fout_prefix,rlist[0],psi)
+            fname_out = os.path.join(outdir, barefname)
+            if flag_spe:
+                SaveSPE(InputWorkspace="OWST",Filename=fname_out+".spe")					#save the data in spe format.
+                if i==0:
+                    SavePHX(InputWorkspace="OWST",Filename=fname_out+".spe")
+            if flag_nxspe:
+                #save in NXSPE format
+                nxspe_name = fname_out+".nxspe"
+                self._nxspe_filename = nxspe_name
+                if do_powder:
+                    SaveNXSPE(InputWorkspace="OWST",Filename=nxspe_name,Efixed=Efixed,psi=psi,KiOverKfScaling=True,
+                              ParFile=os.path.join(outdir, "group.par"))
+                else:
+                    SaveNXSPE(InputWorkspace="OWST",Filename=nxspe_name,Efixed=Efixed,psi=psi,KiOverKfScaling=True)
 
     def validate(self):
         #check if required files are created

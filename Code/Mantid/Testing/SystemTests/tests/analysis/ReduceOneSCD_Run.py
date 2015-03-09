@@ -13,13 +13,9 @@
 #information.
 #
 #
-import os
-import sys
-import shutil
 import time
 
 import stresstesting
-import numpy
 
 
 from mantid.api import *
@@ -96,14 +92,13 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
                            FilterByTofMin=min_tof, FilterByTofMax=max_tof )
 
         if (calibration_file_1 is not None) or (calibration_file_2 is not None):
-            LoadIsawDetCal( event_ws,
-                  Filename=calibration_file_1)
+            LoadIsawDetCal(event_ws, Filename=calibration_file_1)
 
         monitor_ws = LoadNexusMonitors( Filename=full_name )
 
-        integrated_monitor_ws = Integration( InputWorkspace=monitor_ws,
-                                     RangeLower=min_monitor_tof, RangeUpper=max_monitor_tof,
-                                     StartWorkspaceIndex=monitor_index, EndWorkspaceIndex=monitor_index )
+        integrated_monitor_ws = Integration(InputWorkspace=monitor_ws,
+                                            RangeLower=min_monitor_tof, RangeUpper=max_monitor_tof,
+                                            StartWorkspaceIndex=monitor_index, EndWorkspaceIndex=monitor_index)
 
         monitor_count = integrated_monitor_ws.dataY(0)[0]
         print "\n", run, " has calculated monitor count", monitor_count, "\n"
@@ -112,16 +107,16 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
 # Make MD workspace using Lorentz correction, to find peaks
 #
         MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",
-                    dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",
-    LorentzCorrection='1', MinValues="-50,-50,-50", MaxValues="50,50,50",
-                    SplitInto='2', SplitThreshold='50',MaxRecursionDepth='11' )
+                            dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",
+                            LorentzCorrection='1', MinValues="-50,-50,-50", MaxValues="50,50,50",
+                            SplitInto='2', SplitThreshold='50',MaxRecursionDepth='11' )
 #
 # Find the requested number of peaks.  Once the peaks are found, we no longer
 # need the weighted MD event workspace, so delete it.
 #
         distance_threshold = 0.9 * 6.28 / float(max_d)
         peaks_ws = FindPeaksMD( MDEW, MaxPeaks=num_peaks_to_find,
-                        PeakDistanceThreshold=distance_threshold )
+                                PeakDistanceThreshold=distance_threshold )
 
         AnalysisDataService.remove( MDEW.getName() )
 #      SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False,
@@ -169,22 +164,22 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
 # LorentzCorrection to do the raw sphere integration )
 #
             MDEW = ConvertToDiffractionMDWorkspace( InputWorkspace=event_ws,
-                 LorentzCorrection='0', OutputDimensions='Q (lab frame)',
-                 SplitInto='2', SplitThreshold='500', MaxRecursionDepth='5' )
+                                                    LorentzCorrection='0', OutputDimensions='Q (lab frame)',
+                                                    SplitInto='2', SplitThreshold='500', MaxRecursionDepth='5' )
 
-            peaks_ws = IntegratePeaksMD( InputWorkspace=MDEW, PeakRadius=peak_radius,
-	          BackgroundOuterRadius=bkg_outer_radius,
-                  BackgroundInnerRadius=bkg_inner_radius,
-	          PeaksWorkspace=peaks_ws,
-                  IntegrateIfOnEdge=integrate_if_edge_peak )
+            peaks_ws = IntegratePeaksMD(InputWorkspace=MDEW, PeakRadius=peak_radius,
+	                                    BackgroundOuterRadius=bkg_outer_radius,
+                                        BackgroundInnerRadius=bkg_inner_radius,
+	                                    PeaksWorkspace=peaks_ws,
+                                        IntegrateIfOnEdge=integrate_if_edge_peak )
 
         elif use_fit_peaks_integration:
-            event_ws = Rebin( InputWorkspace=event_ws,
-                    Params=rebin_params, PreserveEvents=preserve_events )
+            event_ws = Rebin(InputWorkspace=event_ws,
+                                Params=rebin_params, PreserveEvents=preserve_events )
             peaks_ws = PeakIntegration( InPeaksWorkspace=peaks_ws, InputWorkspace=event_ws,
-                              IkedaCarpenterTOF=use_ikeda_carpenter,
-                              MatchingRunNo=True,
-                              NBadEdgePixels=n_bad_edge_pixels )
+                                        IkedaCarpenterTOF=use_ikeda_carpenter,
+                                        MatchingRunNo=True,
+                                        NBadEdgePixels=n_bad_edge_pixels )
 #
 # Save the final integrated peaks, using the Niggli reduced cell.
 # This is the only file needed, for the driving script to get a combined
@@ -203,8 +198,8 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
             run_conventional_integrate_file = self.output_directory + "/" + run + "_" + \
                                     cell_type + "_" + centering + ".integrate"
             SelectCellOfType( PeaksWorkspace=peaks_ws,
-                    CellType=cell_type, Centering=centering,
-                    Apply=True, Tolerance=tolerance )
+                                CellType=cell_type, Centering=centering,
+                                Apply=True, Tolerance=tolerance )
          # UNCOMMENT the line below to get new output values if an algorithm changes
          #SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=run_conventional_integrate_file )
             SaveIsawUB( InputWorkspace=peaks_ws, Filename=self.run_conventional_matrix_file )

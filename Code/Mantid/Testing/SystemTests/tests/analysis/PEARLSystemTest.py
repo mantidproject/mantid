@@ -138,22 +138,22 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
 
     def PEARL_getmonitor(self, number,ext,spline_terms=20):
 
-       works="monitor"+str(number)
-       self.PearlLoadMon(number,ext,works)
-       ConvertUnits(InputWorkspace=works,OutputWorkspace=works,Target="Wavelength")
-       lmin,lmax=self.PEARL_getlambdarange()
-       CropWorkspace(InputWorkspace=works,OutputWorkspace=works,XMin=lmin,XMax=lmax)
-       ex_regions=n.zeros((2,4))
-       ex_regions[:,0]=[3.45,3.7]
-       ex_regions[:,1]=[2.96,3.2]
-       ex_regions[:,2]=[2.1,2.26]
-       ex_regions[:,3]=[1.73,1.98]
+        works="monitor"+str(number)
+        self.PearlLoadMon(number,ext,works)
+        ConvertUnits(InputWorkspace=works,OutputWorkspace=works,Target="Wavelength")
+        lmin,lmax=self.PEARL_getlambdarange()
+        CropWorkspace(InputWorkspace=works,OutputWorkspace=works,XMin=lmin,XMax=lmax)
+        ex_regions=n.zeros((2,4))
+        ex_regions[:,0]=[3.45,3.7]
+        ex_regions[:,1]=[2.96,3.2]
+        ex_regions[:,2]=[2.1,2.26]
+        ex_regions[:,3]=[1.73,1.98]
 
-       for reg in range(0,4):
-                MaskBins(InputWorkspace=works,OutputWorkspace=works,XMin=ex_regions[0,reg],XMax=ex_regions[1,reg])
+        for reg in range(0,4):
+            MaskBins(InputWorkspace=works,OutputWorkspace=works,XMin=ex_regions[0,reg],XMax=ex_regions[1,reg])
 
-       SplineBackground(InputWorkspace=works,OutputWorkspace=works,WorkspaceIndex=0,NCoeff=spline_terms)
-       return works
+        SplineBackground(InputWorkspace=works,OutputWorkspace=works,WorkspaceIndex=0,NCoeff=spline_terms)
+        return works
 
 
     def PEARL_read(self, number,ext,outname):

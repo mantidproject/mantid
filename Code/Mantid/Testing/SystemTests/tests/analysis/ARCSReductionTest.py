@@ -32,30 +32,28 @@ class ARCSReductionTest(stresstesting.MantidStressTest):
         self.nxspeFile=os.path.join(config.getString('defaultsave.directory'),'ARCSsystemtest.nxspe')
         config['default.facility']="SNS"
         DgsReduction(
-          SampleInputFile="ARCS_23961_event.nxs",
-          OutputWorkspace="reduced",
-          IncidentBeamNormalisation="ByCurrent",
-          DetectorVanadiumInputFile="WBARCS.nxs",
-          UseBoundsForDetVan=True,
-          DetVanIntRangeLow=0.35,
-          DetVanIntRangeHigh=0.75,
-          DetVanIntRangeUnits="Wavelength",
-          SaveProcessedDetVan=True,
-          SaveProcDetVanFilename=self.vanFile0,
-          )
+                        SampleInputFile="ARCS_23961_event.nxs",
+                        OutputWorkspace="reduced",
+                        IncidentBeamNormalisation="ByCurrent",
+                        DetectorVanadiumInputFile="WBARCS.nxs",
+                        UseBoundsForDetVan=True,
+                        DetVanIntRangeLow=0.35,
+                        DetVanIntRangeHigh=0.75,
+                        DetVanIntRangeUnits="Wavelength",
+                        SaveProcessedDetVan=True,
+                        SaveProcDetVanFilename=self.vanFile0)
         DgsReduction(
-          SampleInputFile="ARCS_23961_event.nxs",
-          OutputWorkspace="reduced",
-          IncidentBeamNormalisation="ByCurrent",
-          DetectorVanadiumInputFile="WBARCS.nxs",
-          UseBoundsForDetVan=True,
-          DetVanIntRangeLow=0.35,
-          DetVanIntRangeHigh=0.75,
-          DetVanIntRangeUnits="Wavelength",
-          MedianTestLevelsUp=1.,
-          SaveProcessedDetVan=True,
-          SaveProcDetVanFilename=self.vanFile1,
-          )
+                        SampleInputFile="ARCS_23961_event.nxs",
+                        OutputWorkspace="reduced",
+                        IncidentBeamNormalisation="ByCurrent",
+                        DetectorVanadiumInputFile="WBARCS.nxs",
+                        UseBoundsForDetVan=True,
+                        DetVanIntRangeLow=0.35,
+                        DetVanIntRangeHigh=0.75,
+                        DetVanIntRangeUnits="Wavelength",
+                        MedianTestLevelsUp=1.,
+                        SaveProcessedDetVan=True,
+                        SaveProcDetVanFilename=self.vanFile1)
 
         Ei=mtd["reduced"].run().get("Ei").value
         SaveNXSPE(InputWorkspace="reduced",Filename=self.nxspeFile,Efixed=Ei,psi=0,KiOverKfScaling=True)
@@ -74,7 +72,7 @@ class ARCSReductionTest(stresstesting.MantidStressTest):
         DeleteWorkspace(van0)
         DeleteWorkspace(van1)
         self.assertTrue(os.path.exists(self.nxspeFile))
-        nxspe=LoadNXSPE(self.nxspeFile)
+        LoadNXSPE(self.nxspeFile,OutputWorkspace='nxspe')
         self.disableChecking.append('Instrument')
 
         return 'nxspe','ARCSsystemtest.nxs'

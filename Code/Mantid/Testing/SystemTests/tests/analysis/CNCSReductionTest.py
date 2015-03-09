@@ -38,25 +38,23 @@ class CNCSReductionTest(stresstesting.MantidStressTest):
         GenerateGroupingPowder(InputWorkspace="sum",AngleStep=0.5,GroupingFilename=self.groupingFile)
         Ei=mtd['sum'].getRun()['EnergyRequest'].firstValue()
         tib=SuggestTibCNCS(Ei)
-        erange=str(-Ei)+','+str(0.01*Ei)+','+str(0.95*Ei)
 
         DgsReduction(
-                    SampleInputWorkspace="sum",
-                    OutputWorkspace="reduced",
-                    EnergyTransferRange="-0.2,0.05,2.2",
-                    GroupingFile=self.groupingFile,
-                    IncidentBeamNormalisation="ByCurrent",
-                    TimeIndepBackgroundSub=True,
-                    TibTofRangeStart=tib[0],
-                    TibTofRangeEnd=tib[1],
-                    DetectorVanadiumInputFile="CNCS_51936_event.nxs",
-                    UseBoundsForDetVan=True,
-                    DetVanIntRangeLow=52000.0,
-                    DetVanIntRangeHigh=53000.0,
-                    DetVanIntRangeUnits="TOF",
-                    SaveProcessedDetVan=True,
-                    SaveProcDetVanFilename=self.vanFile,
-                    )
+                        SampleInputWorkspace="sum",
+                        OutputWorkspace="reduced",
+                        EnergyTransferRange="-0.2,0.05,2.2",
+                        GroupingFile=self.groupingFile,
+                        IncidentBeamNormalisation="ByCurrent",
+                        TimeIndepBackgroundSub=True,
+                        TibTofRangeStart=tib[0],
+                        TibTofRangeEnd=tib[1],
+                        DetectorVanadiumInputFile="CNCS_51936_event.nxs",
+                        UseBoundsForDetVan=True,
+                        DetVanIntRangeLow=52000.0,
+                        DetVanIntRangeHigh=53000.0,
+                        DetVanIntRangeUnits="TOF",
+                        SaveProcessedDetVan=True,
+                        SaveProcDetVanFilename=self.vanFile)
 
         rotationdevice="SERotator2"
         psi=mtd["reduced"].run().get(rotationdevice).value[0]
@@ -70,7 +68,7 @@ class CNCSReductionTest(stresstesting.MantidStressTest):
         self.assertEqual(van.getNumberHistograms(),51200)
         DeleteWorkspace(van)
         self.assertTrue(os.path.exists(self.nxspeFile))
-        nxspe=LoadNXSPE(self.nxspeFile)
+        LoadNXSPE(self.nxspeFile,OutputWorkspace='nxspe')
         self.disableChecking.append('Instrument')
 
         return 'nxspe','CNCSReduction_TIBasEvents.nxs'
