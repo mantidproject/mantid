@@ -114,8 +114,8 @@ int item_struct<T>::getArrayItemSize(const std::string &item_name,
 @return 0 on success
 */
 template <typename T>
-int item_struct<T>::getArrayItem(const std::string &item_name,
-                                 int nspec, T *larray) {
+int item_struct<T>::getArrayItem(const std::string &item_name, int nspec,
+                                 T *larray) {
   const item_t *item;
   item = findItem(item_name, false);
   if (item == NULL) {

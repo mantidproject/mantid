@@ -161,9 +161,8 @@ ProxyInfoVec proxyInformationFromPac(CFDictionaryRef dict,
  * @param portKey
  * @return return Proxy object.
  */
-ProxyInfo proxyFromDictionary(CFDictionaryRef dict,
-                              CFStringRef enableKey, CFStringRef hostKey,
-                              CFStringRef portKey) {
+ProxyInfo proxyFromDictionary(CFDictionaryRef dict, CFStringRef enableKey,
+                              CFStringRef hostKey, CFStringRef portKey) {
   ProxyInfo proxyInfo;
   CFNumberRef protoEnabled;
   CFNumberRef protoPort;
@@ -192,9 +191,9 @@ ProxyInfo proxyFromDictionary(CFDictionaryRef dict,
  * @return Return the proxy info object.
  */
 ProxyInfo httpProxyFromSystem(CFDictionaryRef dict) {
-  ProxyInfo tempProxy = proxyFromDictionary(
-      dict, kSCPropNetProxiesHTTPEnable, kSCPropNetProxiesHTTPProxy,
-      kSCPropNetProxiesHTTPPort);
+  ProxyInfo tempProxy = proxyFromDictionary(dict, kSCPropNetProxiesHTTPEnable,
+                                            kSCPropNetProxiesHTTPProxy,
+                                            kSCPropNetProxiesHTTPPort);
 
   return tempProxy;
 }
