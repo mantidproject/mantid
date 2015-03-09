@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/BooleanBinaryOperationMD.cpp
 	src/BoxControllerSettingsAlgorithm.cpp
 	src/CalculateCoverageDGS.cpp
+	src/CalculateReflectometryQBase.cpp
 	src/CentroidPeaksMD.cpp
 	src/CentroidPeaksMD2.cpp
 	src/CloneMDWorkspace.cpp
@@ -120,6 +121,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/BooleanBinaryOperationMD.h
 	inc/MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h
 	inc/MantidMDAlgorithms/CalculateCoverageDGS.h
+	inc/MantidMDAlgorithms/CalculateReflectometryQBase.h
 	inc/MantidMDAlgorithms/CentroidPeaksMD.h
 	inc/MantidMDAlgorithms/CentroidPeaksMD2.h
 	inc/MantidMDAlgorithms/CloneMDWorkspace.h
