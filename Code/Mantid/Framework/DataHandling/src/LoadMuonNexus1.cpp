@@ -18,6 +18,7 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 
 #include <Poco/Path.h>
 #include <limits>
@@ -269,6 +270,13 @@ void LoadMuonNexus1::exec() {
         groupingTable =
             boost::dynamic_pointer_cast<TableWorkspace>(group->getItem(period));
       }
+      std::vector<int> specIDs, detecIDs;
+      for (size_t i=0; i<localWorkspace->getNumberHistograms(); i++) {
+        specIDs.push_back(localWorkspace->getSpectrum(i)->getSpectrumNo());
+        detecIDs.push_back(localWorkspace->getSpectrum(i)->getSpectrumNo());
+      }
+      API::SpectrumDetectorMapping mapping(specIDs,detecIDs);
+      localWorkspace->updateSpectraUsing(mapping);
 
       Algorithm_sptr groupDet = createChildAlgorithm("MuonGroupDetectors");
       groupDet->setProperty("InputWorkspace", localWorkspace);
