@@ -15,7 +15,7 @@ class ProjectionTest(unittest.TestCase):
         self.assertEqual(Projection(10).getNumDims(), 10)
 
         p = Projection(VMD(0,1),VMD(1,2))
-        self.assertEqual(p.getNumDims(), 2)
+        self.assertEqual(p.getNumDims(), 3)
 
         p = Projection(VMD(0,1,2),
                        VMD(3,4,5),
