@@ -97,6 +97,12 @@ TomoReconstruction::TomoReconstruction(QWidget *parent)
   m_currPlugins->addColumns("str", "name", 4);
 }
 
+TomoReconstruction::~TomoReconstruction() {
+  // be tidy and always log out if we're in.
+  if (m_loggedIn)
+    doLogout();
+}
+
 void TomoReconstruction::doSetupSectionParameters() {
   // TODO: should split the tabs out into their own files
 
@@ -414,7 +420,7 @@ void TomoReconstruction::setupRunTool() {
     for (size_t i=0; i<tools.size(); i++) {
       rt->addItem(QString::fromStdString(tools[i].c_str()));
 
-      // put savu but disable, as it's not yet sorted out
+      // put savu but disable it, as it's not yet sorted out
       if ("Savu" == tools[i]) {
         QModelIndex idx = rt->model()->index(static_cast<int>(i), 0);
         QVariant disabled(0);

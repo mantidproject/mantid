@@ -46,7 +46,7 @@ public: // public constructor, destructor and functions
   /// Default Constructor
   TomoReconstruction(QWidget *parent = 0);
   /// Destructor
-  ~TomoReconstruction() {}
+  virtual ~TomoReconstruction();
   /// Interface name
   static std::string name() { return "Tomography Reconstruction"; }
   /// This interface's categories.
