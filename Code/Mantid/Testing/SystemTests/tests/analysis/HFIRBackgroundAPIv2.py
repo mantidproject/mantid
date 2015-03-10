@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 import stresstesting
 import mantid
 from mantid.api import FileFinder
@@ -32,7 +33,7 @@ class HFIRBackground(stresstesting.MantidStressTest):
         Background("BioSANS_test_data.xml")
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
         Reduce1D()
-                
+
     def validate(self):
         self.tolerance = 0.00001
         self.disableChecking.append('Instrument')
@@ -46,7 +47,7 @@ class HFIRBackgroundTransmission(stresstesting.MantidStressTest):
     def cleanup(self):
         do_cleanup()
         return True
-        
+
     def runTest(self):
         config = ConfigService.Instance()
         config["facilityName"]='HFIR'
@@ -56,7 +57,7 @@ class HFIRBackgroundTransmission(stresstesting.MantidStressTest):
         SetBckTransmission(0.55, 0.1)
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
         Reduce1D()
-                
+
     def validate(self):
         self.tolerance = 0.00001
         self.disableChecking.append('Instrument')
@@ -70,7 +71,7 @@ class HFIRBackgroundDirectBeamTrans(stresstesting.MantidStressTest):
     def cleanup(self):
         do_cleanup()
         return True
-        
+
     def runTest(self):
         config = ConfigService.Instance()
         config["facilityName"]='HFIR'
@@ -82,7 +83,7 @@ class HFIRBackgroundDirectBeamTrans(stresstesting.MantidStressTest):
                                   beam_radius=10.0)
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
         Reduce1D()
-                
+
     def validate(self):
         self.tolerance = 0.00001
         self.disableChecking.append('Instrument')
@@ -96,22 +97,22 @@ class HFIRBackgroundBeamSpreaderTrans(stresstesting.MantidStressTest):
     def cleanup(self):
         do_cleanup()
         return True
-        
+
     def runTest(self):
         config = ConfigService.Instance()
         config["facilityName"]='HFIR'
         GPSANS()
         AppendDataFile("BioSANS_test_data.xml")
         Background("BioSANS_test_data.xml")
-        BckBeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml", 
+        BckBeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml",
                                  direct_spreader="BioSANS_empty_cell.xml",
-                                 sample_scattering="BioSANS_test_data.xml", 
+                                 sample_scattering="BioSANS_test_data.xml",
                                  direct_scattering="BioSANS_empty_cell.xml",
-                                 spreader_transmission=0.5, 
+                                 spreader_transmission=0.5,
                                  spreader_transmission_err=0.1)
         AzimuthalAverage(binning="0.01,0.001,0.11")
         Reduce1D()
-                
+
     def validate(self):
         self.tolerance = 0.00001
         self.disableChecking.append('Instrument')
@@ -125,7 +126,7 @@ class HFIRBackgroundTransDarkCurrent(stresstesting.MantidStressTest):
     def cleanup(self):
         do_cleanup()
         return True
-        
+
     def runTest(self):
         config = ConfigService.Instance()
         config["facilityName"]='HFIR'
@@ -146,13 +147,13 @@ class HFIRBackgroundTransDarkCurrent(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRBackgroundTransDarkCurrent.nxs'
-    
+
 class HFIRBackgroundDirectBeamTransDC(stresstesting.MantidStressTest):
 
     def cleanup(self):
         do_cleanup()
         return True
-        
+
     def runTest(self):
         config = ConfigService.Instance()
         config["facilityName"]='HFIR'
@@ -165,7 +166,7 @@ class HFIRBackgroundDirectBeamTransDC(stresstesting.MantidStressTest):
         BckTransmissionDarkCurrent("BioSANS_dark_current.xml")
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
         Reduce1D()
-                
+
     def validate(self):
         self.tolerance = 0.00001
         self.disableChecking.append('Instrument')
@@ -173,4 +174,4 @@ class HFIRBackgroundDirectBeamTransDC(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRBackgroundDirectBeamTransDC.nxs'
-    
+

@@ -3,6 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -79,6 +83,87 @@ public:
 
     return ws;
   }
+
+  void test_default_pixel_spacing()
+  {
+      CreateSampleWorkspace alg;
+      alg.setChild(true);
+      alg.initialize();
+      alg.setPropertyValue("OutputWorkspace", "dummy");
+      alg.execute();
+      MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+      const auto instrument = outWS->getInstrument();
+      auto bank1 = boost::dynamic_pointer_cast<const RectangularDetector>(instrument->getComponentByName("bank1"));
+      TSM_ASSERT_EQUALS("PixelSpacing on the bank is not the same as the expected default in x", 0.008, bank1->xstep());
+      TSM_ASSERT_EQUALS("PixelSpacing on the bank is not the same as the expected default in y", 0.008, bank1->ystep());
+  }
+
+  void test_apply_pixel_spacing()
+  {
+      // Set the spacing we want
+      const double pixelSpacing = 0.01;
+
+      CreateSampleWorkspace alg;
+      alg.setChild(true);
+      alg.initialize();
+      alg.setProperty("PixelSpacing", pixelSpacing);
+      alg.setPropertyValue("OutputWorkspace", "dummy");
+      alg.execute();
+      MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+      const auto instrument = outWS->getInstrument();
+      auto bank1 = boost::dynamic_pointer_cast<const RectangularDetector>(instrument->getComponentByName("bank1"));
+      TSM_ASSERT_EQUALS("Not the specified pixel spacing in x", pixelSpacing, bank1->xstep());
+      TSM_ASSERT_EQUALS("Not the specified pixel spacing in y", pixelSpacing, bank1->ystep());
+  }
+
+  void test_default_instrument_bank_setup()
+  {
+      CreateSampleWorkspace alg;
+      alg.setChild(true);
+      alg.initialize();
+      alg.setPropertyValue("OutputWorkspace", "dummy");
+      alg.execute();
+      MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+      const auto instrument = outWS->getInstrument();
+      const auto bank1 = instrument->getComponentByName("bank1");
+      const auto bank2 = instrument->getComponentByName("bank2");
+      const auto sample = instrument->getComponentByName("sample");
+
+      const V3D bank1ToSample = bank1->getPos() - sample->getPos();
+      const V3D bank2ToSample = bank2->getPos() - sample->getPos();
+      auto refFrame = instrument->getReferenceFrame();
+      TSM_ASSERT_EQUALS("By default bank1 should be offset from the sample in the beam direction by 5m", 5.0, refFrame->vecPointingAlongBeam().scalar_prod(bank1ToSample));
+      TSM_ASSERT_EQUALS("By default bank2 should be offset from the sample in the beam direction by 2 * 5m", 10.0, refFrame->vecPointingAlongBeam().scalar_prod(bank2ToSample));
+  }
+
+  void test_apply_offset_instrument_banks()
+  {
+      // Set the offset we want
+      const double bankToSampleDistance = 4.0;
+
+      CreateSampleWorkspace alg;
+      alg.setChild(true);
+      alg.initialize();
+      alg.setPropertyValue("OutputWorkspace", "dummy");
+      alg.setProperty("BankDistanceFromSample", bankToSampleDistance);
+      alg.execute();
+      MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+      const auto instrument = outWS->getInstrument();
+      const auto bank1 = instrument->getComponentByName("bank1");
+      const auto bank2 = instrument->getComponentByName("bank2");
+      const auto sample = instrument->getComponentByName("sample");
+
+      const V3D bank1ToSample = bank1->getPos() - sample->getPos();
+      const V3D bank2ToSample = bank2->getPos() - sample->getPos();
+      auto refFrame = instrument->getReferenceFrame();
+      TSM_ASSERT_EQUALS("Wrong offset applied for bank1", bankToSampleDistance, refFrame->vecPointingAlongBeam().scalar_prod(bank1ToSample));
+      TSM_ASSERT_EQUALS("Wrong offset applied for bank2", bankToSampleDistance * 2, refFrame->vecPointingAlongBeam().scalar_prod(bank2ToSample));
+  }
+
   
   void test_histogram_defaults()
   {
@@ -93,7 +178,7 @@ public:
     TS_ASSERT_DELTA(ws->readY(0)[50], 10.3,0.0001);
     TS_ASSERT_DELTA(ws->readY(0)[60], 0.3,0.0001);
     TS_ASSERT_DELTA(ws->readY(0)[80], 0.3,0.0001);
-    
+
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }

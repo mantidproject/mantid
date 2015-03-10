@@ -32,7 +32,8 @@ class PoldiMerge(PythonAlgorithm):
                                                direction=Direction.Output),
                              doc="Workspace where all counts from the list workspaces have been added")
 
-        self.declareProperty("CheckInstruments", True, "If checked, only workspaces with equal instrument parameters are merged. Do not disable without a very good reason.")
+        self.declareProperty("CheckInstruments", True, "If checked, only workspaces with equal"\
+                                "instrument parameters are merged. Do not disable without a very good reason.")
 
     def PyExec(self):
         self.checkInstruments = self.getProperty("CheckInstruments").value

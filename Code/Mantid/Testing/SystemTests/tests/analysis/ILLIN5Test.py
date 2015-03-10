@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init
 import stresstesting
 
 from mantid.api import MatrixWorkspace, mtd
@@ -8,7 +9,7 @@ import unittest
 DIFF_PLACES = 12
 
 class ILLIN5Tests(unittest.TestCase):
-    
+
     wsData_name = "in5_ws_data"
     wsVana_name = "in5_ws_vana"
     dataDispersionFile = "ILL/ILLIN5_Sample_096003.nxs"
@@ -24,14 +25,14 @@ class ILLIN5Tests(unittest.TestCase):
     #================== Success cases ================================
     def test_load_single_file(self):
         self._run_load(self.dataDispersionFile)
-        
+
         # Check some data
         wsOut = mtd[self.wsData_name]
         self.assertEqual(wsOut.getNumberHistograms(), 98305)
-    
+
     def test_load_dispersion_file_and_vanadium_file(self):
         self._run_load(self.dataDispersionFile,self.vanadiumFile)
-        
+
         # Check some data
         wsOut = mtd[self.wsData_name]
         self.assertEqual(wsOut.getNumberHistograms(), 98305)
@@ -45,18 +46,18 @@ class ILLIN5Tests(unittest.TestCase):
 
 
         self._run_load(self.dataDispersionFile,vanaFile=None,vanaWS=self.wsVana_name,outWSName=self.wsData_name)
-        
+
         # Check some data
         wsData = mtd[self.wsData_name]
         self.assertEqual(wsData.getNumberHistograms(), 98305)
-            
+
     #================== Failure cases ================================
 
     # TODO
 
     #================== Private methods ================================
 
-    
+
     def _run_load(self, dataFile, vanaFile=None,vanaWS=None,outWSName=wsData_name):
         """
         ILL Loader
@@ -81,7 +82,7 @@ class LoadILLIN5Test(stresstesting.MantidStressTest):
         # Run using either runner
         res = runner.run(suite)
         if res.wasSuccessful():
-            self._success = True 
+            self._success = True
         else:
             self._success = False
 

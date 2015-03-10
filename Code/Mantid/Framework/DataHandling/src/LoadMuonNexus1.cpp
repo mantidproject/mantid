@@ -457,9 +457,8 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
 
 /**
  * Creates Dead Time Table using all the data between begin and end.
- *
- * @param begin :: Iterator to the first element of the data to use
- * @param   end :: Iterator to the last element of the data to use
+ * @param specToLoad :: vector containing the spectrum numbers to load
+ * @param deadTimes :: vector containing the corresponding dead times
  * @return Dead Time Table create using the data
  */
 TableWorkspace_sptr
@@ -516,7 +515,8 @@ TableWorkspace_sptr LoadMuonNexus1::createDetectorGroupingTable(
 
 /** Load in a single spectrum taken from a NeXus file
 *  @param hist ::     The workspace index
-*  @param i ::        The spectrum number
+*  @param i ::        The spectrum index
+*  @param specNo ::   The spectrum number
 *  @param nxload ::   A reference to the MuonNeXusReader object
 *  @param lengthIn :: The number of elements in a spectrum
 *  @param localWorkspace :: A pointer to the workspace in which the data will be
