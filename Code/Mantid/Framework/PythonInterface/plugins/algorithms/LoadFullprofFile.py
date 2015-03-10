@@ -1,13 +1,18 @@
-from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction, MatrixWorkspaceProperty, WorkspaceProperty
-from mantid.kernel import Direction, StringListValidator
+#pylint: disable=no-init,invalid-name
+from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory,\
+    FileProperty, FileAction, MatrixWorkspaceProperty
+from mantid.kernel import Direction
 
-import mantid.simpleapi as api
 
 _OUTPUTLEVEL = "NOOUTPUT"
 
 class LoadFullprofFile(PythonAlgorithm):
     """ Create the input TableWorkspaces for LeBail Fitting
     """
+
+    _tableWS = None
+    _dataWS = None
+
     def category(self):
         """
         """
@@ -25,20 +30,20 @@ class LoadFullprofFile(PythonAlgorithm):
 
     def PyInit(self):
         """ Declare properties
-        """        
-        self.declareProperty(FileProperty("Filename","", FileAction.Load, ['.hkl', '.prf', '.dat']),
+        """
+        self.declareProperty(FileProperty("Filename","", FileAction.Load, ['.hkl', '.prf', '.dat']),\
                 "Name of [http://www.ill.eu/sites/fullprof/ Fullprof] .hkl or .prf file.")
 
         #self.declareProperty("Bank", 1, "Bank ID for output if there are more than one bank in .irf file.")
 
-        self.declareProperty(ITableWorkspaceProperty("PeakParameterWorkspace", "", Direction.Output), 
+        self.declareProperty(ITableWorkspaceProperty("PeakParameterWorkspace", "", Direction.Output),\
                 "Name of table workspace containing peak parameters from .hkl file.")
- 
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), 
+
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),\
                 "Name of data workspace containing the diffraction pattern in .prf file. ")
 
         return
- 
+
     def PyExec(self):
         """ Main Execution Body
         """
@@ -46,12 +51,12 @@ class LoadFullprofFile(PythonAlgorithm):
         fpfilename = self.getPropertyValue("Filename")
 
         # 2. Import
-        if fpfilename.lower().endswith(".hkl") is True: 
+        if fpfilename.lower().endswith(".hkl") is True:
             # (.hkl) file
             self._tableWS = self._loadFPHKLFile(fpfilename)
             self._dataWS = self._makeEmptyDataWorkspace()
         elif fpfilename.lower().endswith(".prf") is True:
-            # (.prf) file 
+            # (.prf) file
             self._tableWS, self._dataWS= self._loadFullprofPrfFile(fpfilename)
         elif fpfilename.lower().endswith(".dat") is True:
             # (.dat) file: Fullprof data file
@@ -131,13 +136,13 @@ class LoadFullprofFile(PythonAlgorithm):
             dkey = (h, k, l)
 
             if hkldict.has_key(dkey):
-                if _OUTPUTLEVEL == "INFORMATION": 
-                    self.warning("Warning! Duplicate HKL %d, %d, %d" (h, k, l))
+                if _OUTPUTLEVEL == "INFORMATION":
+                    self.warning("Warning! Duplicate HKL %d, %d, %d" % (h, k, l))
                 continue
 
             if fwhm < 1.0E-5:
                 # Peak width is too small/annihilated peak
-                if _OUTPUTLEVEL == "INFORMATION": 
+                if _OUTPUTLEVEL == "INFORMATION":
                     self.log.information("Peak (%d, %d, %d) has an unreasonable small FWHM.  Peak does not exist. " % (h, k, l))
                 continue
 
@@ -156,20 +161,20 @@ class LoadFullprofFile(PythonAlgorithm):
         return hkldict
 
     def _createReflectionWorkspace(self, hkldict):
-        """ Create TableWorkspace containing reflections and etc. 
+        """ Create TableWorkspace containing reflections and etc.
         """
         # 1. Set up columns
         tablews = WorkspaceFactory.createTable()
-        
-        tablews.addColumn("int", "H");
-        tablews.addColumn("int", "K");
-        tablews.addColumn("int", "L"); 
-        tablews.addColumn("double", "Alpha"); 
-        tablews.addColumn("double", "Beta"); 
-        tablews.addColumn("double", "Sigma2"); 
-        tablews.addColumn("double", "Gamma"); 
-        tablews.addColumn("double", "FWHM"); 
-        tablews.addColumn("double", "PeakHeight"); 
+
+        tablews.addColumn("int", "H")
+        tablews.addColumn("int", "K")
+        tablews.addColumn("int", "L")
+        tablews.addColumn("double", "Alpha")
+        tablews.addColumn("double", "Beta")
+        tablews.addColumn("double", "Sigma2")
+        tablews.addColumn("double", "Gamma")
+        tablews.addColumn("double", "FWHM")
+        tablews.addColumn("double", "PeakHeight")
 
         # 2. Add rows
         for hkl in sorted(hkldict.keys()):
@@ -250,7 +255,7 @@ class LoadFullprofFile(PythonAlgorithm):
         #    spacegroup = terms[1].strip()
         #    infodict["SpaceGroup"] = spacegroup
 
-        # Find data line header 
+        # Find data line header
         firstline = -1
         for i in xrange(1, len(lines)):
             if lines[i].count("Yobs-Ycal") > 0:
@@ -266,14 +271,14 @@ class LoadFullprofFile(PythonAlgorithm):
         headerterms = dataheader.split()
         dataperline = 5
         # TOF., ... h k l ...
-        reflectionperline = len(headerterms)-5+3 
+        reflectionperline = len(headerterms)-5+3
 
 
         # Parse data
         count = 0
-        for i in xrange(firstline, len(lines)): 
-            line = lines[i].strip() 
-            if len(line) == 0: # empty line 
+        for i in xrange(firstline, len(lines)):
+            line = lines[i].strip()
+            if len(line) == 0: # empty line
                 continue
 
             if line.count(")") == 0 and line.count("(") == 0:
@@ -312,10 +317,10 @@ class LoadFullprofFile(PythonAlgorithm):
                     ycal = float(terms[2])
                     ydif = float(terms[3])
                     ybak = float(terms[4])
-                
+
                     dataset.append([x, yobs, ycal, ydif, ybak])
                     count += 1
-                   
+
                     raise NotImplementedError("Need a sample line of this use case.")
                     hklstr = line.split(")")[1].split(")")[0].strip()
                     infodict[hklstr] = tofh
@@ -357,7 +362,7 @@ class LoadFullprofFile(PythonAlgorithm):
                     # header
                     title += line + ", "
                 else:
-                    # line information 
+                    # line information
                     terms = line.split()
                     if terms[0] != 'BANK':
                         raise NotImplementedError("First word must be 'BANK', but not %s" % (terms[0]))

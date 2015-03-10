@@ -15,6 +15,9 @@ if ( CXXTEST_FOUND )
   target_link_libraries( DataHandlingTest DataHandling )
   add_dependencies ( DataHandlingTest Algorithms MDAlgorithms )
   add_dependencies ( FrameworkTests DataHandlingTest )
+  # Test data
+  add_dependencies ( DataHandlingTest StandardTestData )
+
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET DataHandlingTest PROPERTY FOLDER "UnitTests" )
 endif ()

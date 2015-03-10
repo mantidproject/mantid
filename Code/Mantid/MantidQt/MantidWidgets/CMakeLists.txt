@@ -1,59 +1,64 @@
 set ( SRC_FILES
-	src/AlgorithmSelectorWidget.cpp
-	src/CatalogHelper.cpp
-	src/CatalogSearch.cpp
-	src/CatalogSelector.cpp
-	src/CheckboxHeader.cpp
-	src/DataSelector.cpp
-	src/DiagResults.cpp
-	src/FilenameDialogEditor.cpp
-	src/FindDialog.cpp
-	src/FindReplaceDialog.cpp
-	src/FitPropertyBrowser.cpp
-	src/FormulaDialogEditor.cpp
-	src/FunctionBrowser.cpp
-	src/HintingLineEdit.cpp
-	src/InstrumentSelector.cpp
-  src/IndirectInstrumentConfig.cpp
-        src/MantidHelpWindow.cpp
-	src/MWDiag.cpp
-	src/MWRunFiles.cpp
-	src/MessageDisplay.cpp
-	src/MultifitSetupDialog.cpp
-	src/MuonFitPropertyBrowser.cpp
-	src/MuonSequentialFitDialog.cpp
-	src/PeakPicker.cpp
-	src/ProcessingAlgoWidget.cpp
-	src/PropertyHandler.cpp
-	src/RangeSelector.cpp
-	src/RenameParDialog.cpp
-	src/SafeQwtPlot.cpp
-	src/SaveWorkspaces.cpp
-	src/ScriptEditor.cpp
-	src/SelectFunctionDialog.cpp
-	src/SelectWorkspacesDialog.cpp
-	src/SequentialFitDialog.cpp
-	src/StringDialogEditor.cpp
-	src/StringEditorFactory.cpp
-	src/UserFunctionDialog.cpp
-	src/WorkspaceEditorFactory.cpp
-	src/WorkspaceSelector.cpp
-        src/pqHelpWindow.cxx
-	src/pythonCalc.cpp
-	src/LineEditWithClear.cpp
+    src/AlgorithmSelectorWidget.cpp
+    src/CatalogHelper.cpp
+    src/CatalogSearch.cpp
+    src/CatalogSelector.cpp
+    src/CheckboxHeader.cpp
+    src/DataSelector.cpp
+    src/DiagResults.cpp
+    src/FilenameDialogEditor.cpp
+    src/FindDialog.cpp
+    src/FindReplaceDialog.cpp
+    src/FitPropertyBrowser.cpp
+    src/FormulaDialogEditor.cpp
+    src/FitOptionsBrowser.cpp
+    src/FunctionBrowser.cpp
+    src/HintingLineEdit.cpp
+    src/InstrumentSelector.cpp
+    src/IndirectInstrumentConfig.cpp
+    src/MantidHelpWindow.cpp
+    src/MWDiag.cpp
+    src/MWRunFiles.cpp
+    src/MessageDisplay.cpp
+    src/MultifitSetupDialog.cpp
+    src/MuonFitPropertyBrowser.cpp
+    src/MuonSequentialFitDialog.cpp
+    src/PeakPicker.cpp
+    src/PreviewPlot.cpp
+    src/ProcessingAlgoWidget.cpp
+    src/PropertyHandler.cpp
+    src/RangeSelector.cpp
+    src/RenameParDialog.cpp
+    src/SafeQwtPlot.cpp
+    src/SaveWorkspaces.cpp
+    src/ScriptEditor.cpp
+    src/SelectFunctionDialog.cpp
+    src/SelectWorkspacesDialog.cpp
+    src/SequentialFitDialog.cpp
+    src/SlicingAlgorithmDialog.cpp
+    src/SlitCalculator.cpp
+    src/StringDialogEditor.cpp
+    src/StringEditorFactory.cpp
+    src/UserFunctionDialog.cpp
+    src/WorkspaceEditorFactory.cpp
+    src/WorkspaceSelector.cpp
+    src/pqHelpWindow.cxx
+    src/pythonCalc.cpp
+    src/LineEditWithClear.cpp
 )
 
 # Header files with Q_OBJECT that qmake will "moc"
 set ( MOC_FILES 
-	  inc/MantidQtMantidWidgets/AlgorithmSelectorWidget.h
-	  inc/MantidQtMantidWidgets/CheckboxHeader.h
-	  inc/MantidQtMantidWidgets/DataSelector.h
+    inc/MantidQtMantidWidgets/AlgorithmSelectorWidget.h
+    inc/MantidQtMantidWidgets/CheckboxHeader.h
+    inc/MantidQtMantidWidgets/DataSelector.h
     inc/MantidQtMantidWidgets/DiagResults.h
-	inc/MantidQtMantidWidgets/FilenameDialogEditor.h
-	inc/MantidQtMantidWidgets/FormulaDialogEditor.h
+    inc/MantidQtMantidWidgets/FilenameDialogEditor.h
+    inc/MantidQtMantidWidgets/FormulaDialogEditor.h
     inc/MantidQtMantidWidgets/FindReplaceDialog.h
     inc/MantidQtMantidWidgets/FindDialog.h
     inc/MantidQtMantidWidgets/FitPropertyBrowser.h
+    inc/MantidQtMantidWidgets/FitOptionsBrowser.h
     inc/MantidQtMantidWidgets/FunctionBrowser.h
     inc/MantidQtMantidWidgets/HintingLineEdit.h
     inc/MantidQtMantidWidgets/CatalogSearch.h
@@ -69,6 +74,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/MWRunFiles.h
     inc/MantidQtMantidWidgets/PeakPicker.h
     inc/MantidQtMantidWidgets/pqHelpWindow.h
+    inc/MantidQtMantidWidgets/PreviewPlot.h
     inc/MantidQtMantidWidgets/PropertyHandler.h
     inc/MantidQtMantidWidgets/ProcessingAlgoWidget.h
     inc/MantidQtMantidWidgets/pythonCalc.h
@@ -80,6 +86,8 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/SelectFunctionDialog.h
     inc/MantidQtMantidWidgets/SelectWorkspacesDialog.h
     inc/MantidQtMantidWidgets/SequentialFitDialog.h
+    inc/MantidQtMantidWidgets/SlicingAlgorithmDialog.h
+    inc/MantidQtMantidWidgets/SlitCalculator.h
     inc/MantidQtMantidWidgets/StringDialogEditor.h
     inc/MantidQtMantidWidgets/StringEditorFactory.h
     inc/MantidQtMantidWidgets/UserFunctionDialog.h
@@ -90,16 +98,16 @@ set ( MOC_FILES
 
 # Add the include files are NOT already in MOC_FILES
 set ( INC_FILES
-	${MOC_FILES}
-	inc/MantidQtMantidWidgets/AlgorithmHintStrategy.h
-	inc/MantidQtMantidWidgets/CatalogHelper.h
-	inc/MantidQtMantidWidgets/WidgetDllOption.h
-	inc/MantidQtMantidWidgets/HintStrategy.h
+    ${MOC_FILES}
+    inc/MantidQtMantidWidgets/AlgorithmHintStrategy.h
+    inc/MantidQtMantidWidgets/CatalogHelper.h
+    inc/MantidQtMantidWidgets/WidgetDllOption.h
+    inc/MantidQtMantidWidgets/HintStrategy.h
 )
 
 # QtDesigner UI files to process
 set ( UI_FILES 
-	  inc/MantidQtMantidWidgets/DataSelector.ui
+    inc/MantidQtMantidWidgets/DataSelector.ui
     inc/MantidQtMantidWidgets/CatalogSearch.ui
     inc/MantidQtMantidWidgets/CatalogSelector.ui
     inc/MantidQtMantidWidgets/IndirectInstrumentConfig.ui
@@ -111,7 +119,10 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/RenameParDialog.ui
     inc/MantidQtMantidWidgets/SelectFunctionDialog.ui
     inc/MantidQtMantidWidgets/SequentialFitDialog.ui
+    inc/MantidQtMantidWidgets/SlicingAlgorithmDialog.ui
+    inc/MantidQtMantidWidgets/SlitCalculator.ui
     inc/MantidQtMantidWidgets/UserFunctionDialog.ui
+    inc/MantidQtMantidWidgets/PreviewPlot.ui
     inc/MantidQtMantidWidgets/pqHelpWindow.ui
 )
 
@@ -128,7 +139,6 @@ find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)
 include(${QT_USE_FILE})
 
 include_directories ( ../../QtPropertyBrowser/src )
-
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
@@ -145,6 +155,10 @@ add_definitions ( -DIN_MANTIDQT_MANTIDWIDGETS -DQT_QTPROPERTYBROWSER_IMPORT )
 # Use a precompiled header where they are supported
 enable_precompiled_headers( inc/MantidQtMantidWidgets/PrecompiledHeader.h ALL_SRC )
 add_library ( MantidWidgets ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( MantidWidgets PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif ()
 
 target_link_libraries ( MantidWidgets MantidQtAPI QtPropertyBrowser 
     ${QT_LIBRARIES} ${QWT_LIBRARIES} 

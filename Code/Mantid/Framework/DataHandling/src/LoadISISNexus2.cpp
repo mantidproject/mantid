@@ -51,7 +51,9 @@ LoadISISNexus2::LoadISISNexus2()
       m_monBlockInfo(), m_loadBlockInfo(), m_have_detector(false),
       m_load_selected_spectra(false), m_specInd2specNum_map(), m_spec2det_map(),
       m_entrynumber(0), m_tof_data(), m_proton_charge(0.), m_spec(),
-      m_monitors(), m_logCreator(), m_progress() {}
+      m_spec_end(NULL), m_monitors(), m_logCreator(), m_progress(),
+      m_cppFile() {
+}
 
 /**
 * Return the confidence criteria for this algorithm can load the file

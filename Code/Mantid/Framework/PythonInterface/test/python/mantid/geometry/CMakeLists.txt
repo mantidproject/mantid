@@ -11,8 +11,10 @@ set ( TEST_PY_FILES
   RectangularDetectorTest.py
   ReferenceFrameTest.py
   UnitCellTest.py
+  PeakShapeTest.py
   PointGroupTest.py
   SpaceGroupTest.py
+  SymmetryElementTest.py
   SymmetryOperationTest.py
 )
 

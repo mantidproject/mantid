@@ -31,6 +31,7 @@ set ( SRC_FILES
 	src/ExperimentInfo.cpp
 	src/Expression.cpp
 	src/FermiChopperModel.cpp
+	src/FileBackedExperimentInfo.cpp
 	src/FileFinder.cpp
 	src/FileLoaderRegistry.cpp
 	src/FileProperty.cpp
@@ -39,6 +40,7 @@ set ( SRC_FILES
 	src/FunctionDomain1D.cpp
 	src/FunctionDomainMD.cpp
 	src/FunctionFactory.cpp
+        src/FunctionParameterDecorator.cpp
 	src/FunctionProperty.cpp
 	src/FunctionValues.cpp
 	src/GridDomain.cpp
@@ -93,6 +95,7 @@ set ( SRC_FILES
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
+	src/PeakFunctionIntegrator.cpp
 	src/PeakTransform.cpp
 	src/PeakTransformHKL.cpp
 	src/PeakTransformQLab.cpp
@@ -170,6 +173,7 @@ set ( INC_FILES
 	inc/MantidAPI/ExperimentInfo.h
 	inc/MantidAPI/Expression.h
 	inc/MantidAPI/FermiChopperModel.h
+	inc/MantidAPI/FileBackedExperimentInfo.h
 	inc/MantidAPI/FileFinder.h
 	inc/MantidAPI/FileLoaderRegistry.h
 	inc/MantidAPI/FileProperty.h
@@ -179,6 +183,7 @@ set ( INC_FILES
 	inc/MantidAPI/FunctionDomain1D.h
 	inc/MantidAPI/FunctionDomainMD.h
 	inc/MantidAPI/FunctionFactory.h
+        inc/MantidAPI/FunctionParameterDecorator.h
 	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/FunctionValues.h
 	inc/MantidAPI/GridDomain.h
@@ -252,6 +257,7 @@ set ( INC_FILES
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
+	inc/MantidAPI/PeakFunctionIntegrator.h
 	inc/MantidAPI/PeakTransform.h
 	inc/MantidAPI/PeakTransformFactory.h
 	inc/MantidAPI/PeakTransformHKL.h
@@ -272,7 +278,6 @@ set ( INC_FILES
 	inc/MantidAPI/ScriptRepositoryFactory.h
 	inc/MantidAPI/SingleValueParameter.h
 	inc/MantidAPI/SingleValueParameterParser.h
-	inc/MantidAPI/SpecialCoordinateSystem.h
 	inc/MantidAPI/SpectraAxis.h
 	inc/MantidAPI/SpectrumDetectorMapping.h
 	inc/MantidAPI/TableRow.h
@@ -310,12 +315,14 @@ set ( TEST_FILES
 	ExperimentInfoTest.h
 	ExpressionTest.h
 	FermiChopperModelTest.h
+	FileBackedExperimentInfoTest.h
 	FileFinderTest.h
 	FilePropertyTest.h
 	FrameworkManagerTest.h
 	FuncMinimizerFactoryTest.h
 	FunctionAttributeTest.h
 	FunctionDomainTest.h
+        FunctionParameterDecoratorTest.h
 	FunctionFactoryTest.h
 	FunctionPropertyTest.h
 	FunctionTest.h
@@ -349,6 +356,7 @@ set ( TEST_FILES
 	ParamFunctionAttributeHolderTest.h
 	ParameterReferenceTest.h
 	ParameterTieTest.h
+	PeakFunctionIntegratorTest.h
 	PeakTransformHKLTest.h
 	PeakTransformQLabTest.h
 	PeakTransformQSampleTest.h
@@ -398,6 +406,11 @@ add_library ( API ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( API PROPERTIES OUTPUT_NAME MantidAPI 
                                        COMPILE_DEFINITIONS IN_MANTID_API )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( API PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif ()
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 

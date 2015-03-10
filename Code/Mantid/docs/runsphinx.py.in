@@ -17,6 +17,8 @@ SRC_DIR = "@SPHINX_SRC_DIR@"
 CONF_DIR = "@SPHINX_CONF_DIR@"
 SPHINX_BUILD_DIR = "@SPHINX_BUILD_DIR@"
 SCREENSHOTS_DIR = "@SCREENSHOTS_DIR@"
+DIAGRAMS_DIR = "@DIAGRAMS_DIR@"
+DOT_EXECUTABLE = "@DOT_EXECUTABLE@"
 
 ###############################################################################
 # Main
@@ -46,6 +48,12 @@ def main(sysarg):
     if SCREENSHOTS_DIR != "":
         os.environ["SCREENSHOTS_DIR"] = SCREENSHOTS_DIR
 
+    if DIAGRAMS_DIR != "":
+        os.environ["DIAGRAMS_DIR"] = DIAGRAMS_DIR
+
+    if os.path.isfile(DOT_EXECUTABLE):
+        os.environ["DOT_EXECUTABLE"] = DOT_EXECUTABLE
+
     # Arguments for main
     output_dir = pathjoin(SPHINX_BUILD_DIR, BUILDER)
     doctree_dir = pathjoin(SPHINX_BUILD_DIR, "doctrees")
@@ -64,7 +72,18 @@ def main(sysarg):
 
     # Run
     import sphinx
-    sys.exit(sphinx.main(argv))
+    # IPython monkey patches the RegexLexer.get_tokens_unprocessed method and
+    # causes Sphinx to fall over. We need to put it back while processing
+    # the documentation
+    from pygments.lexer import RegexLexer
+    # Reverse monkeypatch using unpatched function stored in mantid_ipython_widget!
+    RegexLexer.get_tokens_unprocessed = RegexLexer.get_tokens_unprocessed_unpatched
+    try:
+        return_value = sphinx.main(argv)
+    finally:
+        from IPython.qt.console import pygments_highlighter
+        RegexLexer.get_tokens_unprocessed = pygments_highlighter.get_tokens_unprocessed
+    sys.exit(return_value)
 
 #-----------------------------------------------------------------------------------------------
 

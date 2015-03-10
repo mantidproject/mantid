@@ -9,21 +9,63 @@
 Description
 -----------
 
-Header file
------------
-
--  Line 0: Test date: [Test date in string]
--  Line 1: Test description: [Description of this log file]
--  Line 2: Header content given by user via input property *Header*.
-   Usually it is the column names in the .csv file
+Algorithm *LoadSampleLogsToCSVFile* exports a specified set of sample logs
+, which are stored in a MatrixWorkspace, to a CSV file.
+The header for the sample log csv file can also 
+be created by this algorithm in a seperate *header* file. 
 
 CSV File format
----------------
+===============
 
--  Column 0: Absolute time in second
--  Column 1: Relative to first log entry's time
--  Column 2 to (2 + n) - 1: log values in the order determined by input
+Sample logs are written to a csv file.   
+A tab separates any two adjacent values. 
+
+Each entry of each exported sample log will be an individual entry in the
+output CSV file,
+except in the situation that two entries with time stamps within time tolerance.
+
+The output CSV file has 2+n columns, where n is the number of sample logs 
+to be exported. 
+
+Here is the definition for the columns. 
+
+-  Column 1: Absolute time (with respect to the Unix epoch) in seconds
+-  Column 2: Relative to first log entry's time
+-  Column 3 to (2 + n): log values in the order determined by input
    *SampleLogNames*
+
+Header file
+===========
+
+A sample log header file can be generated optionally.  
+It contains theree lines described as below. 
+
+-  Line 1: Test date: [Test date in string]
+-  Line 2: Test description: [Description of this log file]
+-  Line 3: Header content given by user via input property *Header*.
+   Usually it is the column names in the .csv file
+
+Time Zone
+=========
+
+The time stamps of sample logs are recorded as UTC time in SNS.
+Some users wants to see the exported sample log as the neutron facility's local time.
+So the input property 'TimeZone' is for this purpose.
+
+Property *TimeZone* does not support all the time zones
+but only those with facilities that use Mantid. 
+
+Here is the list of all time zones that are allowed by this algorithm.
+- UTC
+- GMT+0
+- America/New_York
+- Asia/Shanghai
+- Australia/Sydney
+- Europe/London
+- Europe/Paris
+- Europe/Copenhagen
+
+
 
 Usage
 -----

@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -14,6 +15,7 @@ def _split_line(a):
         extracted.append(float(n))
     return extracted  # values as list
 
+
 def _find_starts(data, c, l1):
     for l in range(l1, len(data)):
         char = data[l]
@@ -21,6 +23,7 @@ def _find_starts(data, c, l1):
             line = l
             break
     return line
+
 
 def _find_tab_starts(data, c, l1):
     for l in range(l1, len(data)):
@@ -30,6 +33,7 @@ def _find_tab_starts(data, c, l1):
             break
     return line
 
+
 def _find_ends(data, c, l1):
     for l in range(l1, len(data)):
         char = data[l]
@@ -38,6 +42,7 @@ def _find_ends(data, c, l1):
             break
     return line
 
+
 def _find_char(data, c, l1):
     for l in range(l1, len(data)):
         char = data[l]
@@ -45,6 +50,7 @@ def _find_char(data, c, l1):
             line = l
             break
     return line
+
 
 def _make_list(a, l1, l2):
     data = ''
@@ -56,6 +62,16 @@ def _make_list(a, l1, l2):
 
 class MolDyn(PythonAlgorithm):
 
+    _plot = None
+    _save = None
+    _sam_path = None
+    _symmetrise = None
+    _functions = None
+    _emax = None
+    _res_ws = None
+    _out_ws = None
+    _mtd_plot = None
+
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
 
@@ -65,7 +81,7 @@ class MolDyn(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(FileProperty('Filename', '',
                                           action=FileAction.OptionalLoad,
-                                          extensions=['.cdl', '.dat']),
+                                          extensions=['.cdl', '.dat']),\
                                           doc='File path for data')
 
         self.declareProperty(StringArrayProperty('Functions'),
@@ -83,9 +99,6 @@ class MolDyn(PythonAlgorithm):
         self.declareProperty(name='Plot', defaultValue='None',
                              validator=StringListValidator(['None', 'Spectra', 'Contour', 'Both']),
                              doc='Plot result workspace')
-
-        self.declareProperty(name='Verbose', defaultValue=False,
-                             doc='Output more verbose message to log')
 
         self.declareProperty(name='Save', defaultValue=False,
                              doc='Save result workspace to nexus file in the default save directory')
@@ -126,16 +139,21 @@ class MolDyn(PythonAlgorithm):
         # Do setup
         self._setup()
 
-        # Load data file
-        data, name, ext = self._load_file()
+        try:
+            # Load data file
+            data, name, ext = self._load_file()
 
-        # Run nMOLDYN import
-        if ext == 'cdl':
-            self._cdl_import(data, name)
-        elif ext == 'dat':
-            self._ascii_import(data, name)
-        else:
-            raise RuntimeError('Unrecognised file format: %s' % ext)
+            # Run nMOLDYN import
+            if ext == 'cdl':
+                self._cdl_import(data, name)
+            elif ext == 'dat':
+                self._ascii_import(data, name)
+            else:
+                raise RuntimeError('Unrecognised file format: %s' % ext)
+
+        except Exception as ex:
+            logger.error('Error parsing file %s' % (self._sam_path))
+            logger.debug('Error is: %s' % (str(ex)))
 
         # Do processing specific to workspaces in energy
         if isinstance(mtd[self._out_ws], WorkspaceGroup):
@@ -155,7 +173,7 @@ class MolDyn(PythonAlgorithm):
                     if self._symmetrise:
                         # Symmetrise the sample workspace in x=0
                         Symmetrise(Sample=ws_name, XMin=0, XMax=e_max,
-                                   Verbose=self._verbose, Plot=False, Save=False,
+                                   Plot=False, Save=False,
                                    OutputWorkspace=ws_name)
 
                     elif self._emax is not None:
@@ -173,8 +191,7 @@ class MolDyn(PythonAlgorithm):
                 if ws_name.lower().find('sqw') != -1:
                     self._convolve_with_res(resolution_ws, ws_name)
                 else:
-                    if self._verbose:
-                        logger.notice('Ignoring workspace %s in convolution step' % ws_name)
+                    logger.information('Ignoring workspace %s in convolution step' % ws_name)
 
             # Remove the generated resolution workspace
             DeleteWorkspace(resolution_ws)
@@ -183,9 +200,8 @@ class MolDyn(PythonAlgorithm):
         if self._save:
             workdir = config['defaultsave.directory']
             out_filename = os.path.join(workdir, self._out_ws + '.nxs')
-            if self._verbose:
-                logger.information('Creating file: %s' % out_filename)
-                SaveNexus(InputWorkspace=self._out_ws, Filename=out_filename)
+            logger.information('Creating file: %s' % out_filename)
+            SaveNexus(InputWorkspace=self._out_ws, Filename=out_filename)
 
         # Set the output workspace
         self.setProperty('OutputWorkspace', self._out_ws)
@@ -208,7 +224,6 @@ class MolDyn(PythonAlgorithm):
         Gets algorithm properties.
         """
 
-        self._verbose = self.getProperty('Verbose').value
         self._plot = self.getProperty('Plot').value
         self._save = self.getProperty('Save').value
 
@@ -244,15 +259,13 @@ class MolDyn(PythonAlgorithm):
         if len(ext) > 1:
             ext = ext[1:]
 
-        if self._verbose:
-            logger.information('Base filename for %s is %s' % (self._sam_path, name))
-            logger.information('File type of %s is %s' % (self._sam_path, ext))
+        logger.debug('Base filename for %s is %s' % (self._sam_path, name))
+        logger.debug('File type of %s is %s' % (self._sam_path, ext))
 
         if not os.path.isfile(path):
             path = FileFinder.getFullPath(path)
 
-        if self._verbose:
-            logger.information('Got file path for %s: %s' % (self._sam_path, path))
+        logger.information('Got file path for %s: %s' % (self._sam_path, path))
 
         # Open file and get data
         try:
@@ -287,10 +300,9 @@ class MolDyn(PythonAlgorithm):
         f_el = data[num_freq_values].split()
         num_f = int(f_el[2])
 
-        if self._verbose:
-            logger.debug(data[2][1:-1])
-            logger.debug(data[3][1:-1])
-            logger.debug(data[6][1:-1])
+        logger.debug(data[2][1:-1])
+        logger.debug(data[3][1:-1])
+        logger.debug(data[6][1:-1])
 
         return num_q, num_t, num_f
 
@@ -303,8 +315,7 @@ class MolDyn(PythonAlgorithm):
         @param name Name of data file
         """
 
-        if self._verbose:
-            logger.notice('Loading CDL file: %s' % name)
+        logger.notice('Loading CDL file: %s' % name)
 
         len_data = len(data)
 
@@ -322,8 +333,7 @@ class MolDyn(PythonAlgorithm):
             Q.append(float(Qlist[m]) / 10.0)
 
         Q.append(float(Qlist[nQ - 1][:-1]) / 10.0)
-        if self._verbose:
-            logger.information('Q values = ' + str(Q))
+        logger.information('Q values = ' + str(Q))
 
         lt1 = _find_starts(data, ' time =', lq2)  # start T values
         lt2 = _find_ends(data, ';', lt1)
@@ -338,8 +348,7 @@ class MolDyn(PythonAlgorithm):
 
         T.append(float(Tlist[nT - 1][:-1]))
         T.append(2 * T[nT - 1] - T[nT - 2])
-        if self._verbose:
-            logger.information('T values = ' + str(T[:2]) + ' to ' + str(T[-3:]))
+        logger.information('T values = ' + str(T[:2]) + ' to ' + str(T[-3:]))
 
         lf1 = _find_starts(data, ' frequency =', lq2)  # start F values
         lf2 = _find_ends(data, ';', lf1)
@@ -354,8 +363,7 @@ class MolDyn(PythonAlgorithm):
 
         F.append(float(Flist[nF - 1][:-1]))
         F.append(2 * F[nF - 1] - T[nF - 2])
-        if self._verbose:
-            logger.information('F values = ' + str(F[:2]) + ' to ' + str(F[-3:]))
+        logger.information('F values = ' + str(F[:2]) + ' to ' + str(F[-3:]))
 
         # Function
         output_ws_list = list()
@@ -390,9 +398,8 @@ class MolDyn(PythonAlgorithm):
 
             Qaxis = ''
             for n in range(0, nQ):
-                if self._verbose:
-                    logger.information(str(start))
-                    logger.information('Reading : ' + data[start[n]])
+                logger.information(str(start))
+                logger.information('Reading : ' + data[start[n]])
 
                 Slist = _make_list(data, start[n] + 1, start[n + 1] - 1)
                 if n == nQ - 1:
@@ -403,8 +410,7 @@ class MolDyn(PythonAlgorithm):
                 if nP != len(S):
                     raise RuntimeError('Error reading S values')
                 else:
-                    if self._verbose:
-                        logger.information('S values = ' + str(S[:2]) + ' to ' + str(S[-2:]))
+                    logger.information('S values = ' + str(S[:2]) + ' to ' + str(S[-2:]))
                 if n == 0:
                     Qaxis += str(Q[n])
                     xDat = xEn
@@ -433,8 +439,7 @@ class MolDyn(PythonAlgorithm):
 
         from IndirectNeutron import ChangeAngles, InstrParas, RunParas
 
-        if self._verbose:
-            logger.notice('Loading ASCII data: %s' % name)
+        logger.notice('Loading ASCII data: %s' % name)
 
         val = _split_line(data[3])
         Q = []
@@ -451,16 +456,14 @@ class MolDyn(PythonAlgorithm):
             y.append(yval)
 
         nX = len(x)
-        if self._verbose:
-            logger.information('nQ = ' + str(nQ))
-            logger.information('nT = ' + str(nX))
+        logger.information('nQ = ' + str(nQ))
+        logger.information('nT = ' + str(nX))
 
         xT = np.array(x)
         eZero = np.zeros(nX)
         Qaxis = ''
         for m in range(0, nQ):
-            if self._verbose:
-                logger.information('Q[' + str(m + 1) + '] : ' + str(Q[m]))
+            logger.information('Q[' + str(m + 1) + '] : ' + str(Q[m]))
 
             S = []
             for n in range(0, nX):
@@ -488,9 +491,8 @@ class MolDyn(PythonAlgorithm):
             refl = '4'
 
         InstrParas(self._out_ws, instr, ana, refl)
-        efixed = RunParas(self._out_ws, instr, name, name, self._verbose)
-        if self._verbose:
-            logger.information('Qmax = ' + str(Qmax) + ' ; efixed = ' + str(efixed))
+        efixed = RunParas(self._out_ws, instr, name, name)
+        logger.information('Qmax = ' + str(Qmax) + ' ; efixed = ' + str(efixed))
         pi4 = 4.0 * math.pi
         wave = 1.8 * math.sqrt(25.2429 / efixed)
         theta = []
@@ -499,7 +501,7 @@ class MolDyn(PythonAlgorithm):
             ang = 2.0 * math.degrees(math.asin(qw))
             theta.append(ang)
 
-        ChangeAngles(self._out_ws, instr, theta, self._verbose)
+        ChangeAngles(self._out_ws, instr, theta)
 
 
     def _create_res_ws(self, num_sample_hist):
@@ -512,16 +514,14 @@ class MolDyn(PythonAlgorithm):
 
         num_res_hist = mtd[self._res_ws].getNumberHistograms()
 
-        if self._verbose:
-            logger.notice('Creating resolution workspace.')
-            logger.information('Sample has %d spectra\nResolution has %d spectra'
-                               % (num_sample_hist, num_res_hist))
+        logger.notice('Creating resolution workspace.')
+        logger.information('Sample has %d spectra\nResolution has %d spectra'
+                           % (num_sample_hist, num_res_hist))
 
         # If the sample workspace has more spectra than the resolution then copy the first spectra
         # to make a workspace with equal spectra count to sample
         if num_sample_hist > num_res_hist:
-            if self._verbose:
-                logger.information('Copying first resolution spectra for convolution')
+            logger.information('Copying first resolution spectra for convolution')
 
             res_ws_list = []
             for _ in range(0, num_sample_hist):
@@ -533,16 +533,14 @@ class MolDyn(PythonAlgorithm):
         # If sample has less spectra then crop the resolution to the same number of spectra as
         # resolution
         elif num_sample_hist < num_res_hist:
-            if self._verbose:
-                logger.information('Cropping resolution workspace to sample')
+            logger.information('Cropping resolution workspace to sample')
 
             resolution_ws = CropWorkspace(InputWorkspace=self._res_ws, StartWorkspaceIndex=0,
                                           EndWorkspaceIndex=num_sample_hist)
 
         # If the spectra counts match then just use the resolution as it is
         else:
-            if self._verbose:
-                logger.information('Using resolution workspace as is')
+            logger.information('Using resolution workspace as is')
 
             resolution_ws = CloneWorkspace(self._res_ws)
 
@@ -557,9 +555,8 @@ class MolDyn(PythonAlgorithm):
         @param function_ws_name The workspace name for the function to convolute
         """
 
-        if self._verbose:
-            logger.notice('Convoluting sample %s with resolution %s'
-                          % (function_ws_name, resolution_ws))
+        logger.notice('Convoluting sample %s with resolution %s'
+                      % (function_ws_name, resolution_ws))
 
         # Convolve the symmetrised sample with the resolution
         ConvolveWorkspaces(OutputWorkspace=function_ws_name,

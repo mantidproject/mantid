@@ -33,15 +33,17 @@ The following example shows how to calculate the residuals following a fit perfo
     peaks_Si_raw = PoldiPeakSearch(correlation_Si)
 
     # Only use the 11 strongest peaks
-    DeleteTableRows(TableWorkspace=peaks_Si_raw, Rows="12-20")
+    DeleteTableRows(TableWorkspace=peaks_Si_raw, Rows="11-20")
 
     peaks_Si_1D = PoldiFitPeaks1D(correlation_Si, FwhmMultiples=4, PoldiPeakTable="peaks_Si_raw",
-                                    ResultTableWorkspace = "result_table_Si",
-                                    FitCharacteristicsWorkspace = "raw_fit_results_Si",
-                                    FitPlotsWorkspace = "fit_plots_Si")
+                                    FitPlotsWorkspace = "fit_plots_Si",
+                                    Version=1)
 
     # Fit peaks to original 2D data
-    fit_result_Si_2D = PoldiFitPeaks2D(data_Si, PoldiPeakWorkspace="peaks_Si_1D", MaximumIterations=100, RefinedPoldiPeakWorkspace="peaks_Si_2D")
+    fit_result_Si_2D = PoldiFitPeaks2D(data_Si,
+				    PoldiPeakWorkspace="peaks_Si_1D", MaximumIterations=100,
+				    RefinedPoldiPeakWorkspace="peaks_Si_2D",
+				    Calculated1DSpectrum="fit_result_Si_1D")
 
     # Calculate residuals
     residuals_Si = PoldiAnalyseResiduals(MeasuredCountData=data_Si, FittedCountData="fit_result_Si_2D", MaxIterations=5)
@@ -54,7 +56,7 @@ The output contains the range in which residuals are found:
     
 .. testoutput:: ExSiliconMerged
 
-    Residuals are in the range: [ -2237.82 ,  2647.45 ]
+    Residuals are in the range: [ -2361.48 ,  2651.68 ]
 
 .. categories::
 

@@ -104,9 +104,12 @@ namespace MantidQt
       Q_PROPERTY(QStringList fileExtensions READ getFileExtensions WRITE setFileExtensions)
       Q_PROPERTY(bool extsAsSingleOption READ extsAsSingleOption WRITE extsAsSingleOption)
       Q_PROPERTY(LiveButtonOpts liveButton READ liveButtonState WRITE liveButtonState)
+      Q_PROPERTY(QString instrumentOverride READ getInstrumentOverride WRITE setInstrumentOverride)
       Q_ENUMS(ButtonOpts)
       Q_ENUMS(LiveButtonOpts)
+
       friend class DataSelector;
+
     public:
       /// options for bringing up the load file dialog
       enum ButtonOpts
@@ -189,6 +192,10 @@ namespace MantidQt
       void setNumberOfEntries(int number);
       /// Inform the widget of a running instance of MonitorLiveData to be used in stopLiveListener()
       void setLiveAlgorithm(const boost::shared_ptr<Mantid::API::IAlgorithm>& monitorLiveData);
+      /// Gets the instrument currently fixed to
+      QString getInstrumentOverride();
+      /// Overrides the value of default instrument
+      void setInstrumentOverride(const QString & instName);
 
     signals:
       /// Emitted when the file text changes
@@ -199,6 +206,8 @@ namespace MantidQt
       void findingFiles();
       /// Emitted when files have been found
       void filesFound();
+      /// Emitted when files have been found that are different to what was found last time
+      void filesFoundChanged();
       /// Emitted when file finding is finished (files may or may not have been found).
       void fileFindingFinished();
       /// Emitted when the live button is toggled
@@ -275,12 +284,16 @@ namespace MantidQt
       Ui::MWRunFiles m_uiForm;
       /// An array of valid file names derived from the entries in the leNumber LineEdit
       QStringList m_foundFiles;
+      /// An array of the last valid file names found
+      QStringList m_lastFoundFiles;
       /// The last directory viewed by the browse dialog
       QString m_lastDir;
       /// A file filter for the file browser
       QString m_fileFilter;
       /// Thread to allow asynchronous finding of files.
       FindFilesThread * m_thread;
+
+      QString m_defaultInstrumentName;
     };
   }
 }

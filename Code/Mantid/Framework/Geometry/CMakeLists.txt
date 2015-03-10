@@ -1,16 +1,16 @@
 set ( SRC_FILES
 	src/ComponentParser.cpp
-        src/Crystal/BraggScatterer.cpp
-        src/Crystal/BraggScattererFactory.cpp
+	src/Crystal/BraggScatterer.cpp
+	src/Crystal/BraggScattererFactory.cpp
 	src/Crystal/BraggScattererInCrystalStructure.cpp
 	src/Crystal/CenteringGroup.cpp
-        src/Crystal/CompositeBraggScatterer.cpp
+	src/Crystal/CompositeBraggScatterer.cpp
 	src/Crystal/ConventionalCell.cpp
 	src/Crystal/CrystalStructure.cpp
 	src/Crystal/CyclicGroup.cpp
 	src/Crystal/Group.cpp
 	src/Crystal/IndexingUtils.cpp
-        src/Crystal/IsotropicAtomBraggScatterer.cpp
+	src/Crystal/IsotropicAtomBraggScatterer.cpp
 	src/Crystal/NiggliCell.cpp
 	src/Crystal/OrientedLattice.cpp
 	src/Crystal/PointGroup.cpp
@@ -21,6 +21,8 @@ set ( SRC_FILES
 	src/Crystal/ScalarUtils.cpp
 	src/Crystal/SpaceGroup.cpp
 	src/Crystal/SpaceGroupFactory.cpp
+	src/Crystal/SymmetryElement.cpp
+	src/Crystal/SymmetryElementFactory.cpp
 	src/Crystal/SymmetryOperation.cpp
 	src/Crystal/SymmetryOperationFactory.cpp
 	src/Crystal/SymmetryOperationSymbolParser.cpp
@@ -116,19 +118,20 @@ set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
         
 set ( INC_FILES
 	inc/MantidGeometry/ComponentParser.h
-        inc/MantidGeometry/Crystal/BraggScatterer.h
-        inc/MantidGeometry/Crystal/BraggScattererFactory.h
+	inc/MantidGeometry/Crystal/BraggScatterer.h
+	inc/MantidGeometry/Crystal/BraggScattererFactory.h
 	inc/MantidGeometry/Crystal/BraggScattererInCrystalStructure.h
 	inc/MantidGeometry/Crystal/CenteringGroup.h
-        inc/MantidGeometry/Crystal/CompositeBraggScatterer.h
+	inc/MantidGeometry/Crystal/CompositeBraggScatterer.h
 	inc/MantidGeometry/Crystal/ConventionalCell.h
 	inc/MantidGeometry/Crystal/CrystalStructure.h
 	inc/MantidGeometry/Crystal/CyclicGroup.h
 	inc/MantidGeometry/Crystal/Group.h
 	inc/MantidGeometry/Crystal/IndexingUtils.h
-        inc/MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h
+	inc/MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h
 	inc/MantidGeometry/Crystal/NiggliCell.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
+	inc/MantidGeometry/Crystal/PeakShape.h
 	inc/MantidGeometry/Crystal/PointGroup.h
 	inc/MantidGeometry/Crystal/PointGroupFactory.h
 	inc/MantidGeometry/Crystal/ProductOfCyclicGroups.h
@@ -137,6 +140,8 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/ScalarUtils.h
 	inc/MantidGeometry/Crystal/SpaceGroup.h
 	inc/MantidGeometry/Crystal/SpaceGroupFactory.h
+	inc/MantidGeometry/Crystal/SymmetryElement.h
+	inc/MantidGeometry/Crystal/SymmetryElementFactory.h
 	inc/MantidGeometry/Crystal/SymmetryOperation.h
 	inc/MantidGeometry/Crystal/SymmetryOperationFactory.h
 	inc/MantidGeometry/Crystal/SymmetryOperationSymbolParser.h
@@ -228,15 +233,15 @@ set ( TEST_FILES
 	AlgebraTest.h
 	BnIdTest.h
 	BoundingBoxTest.h
-        BraggScattererFactoryTest.h
-        BraggScattererInCrystalStructureTest.h
-        BraggScattererTest.h
+	BraggScattererFactoryTest.h
+	BraggScattererInCrystalStructureTest.h
+	BraggScattererTest.h
 	CenteringGroupTest.h
 	CompAssemblyTest.h
 	ComponentHelperTest.h
 	ComponentParserTest.h
 	ComponentTest.h
-        CompositeBraggScattererTest.h
+	CompositeBraggScattererTest.h
 	CompositeImplicitFunctionTest.h
 	ConeTest.h
 	ConventionalCellTest.h
@@ -257,7 +262,7 @@ set ( TEST_FILES
 	InstrumentDefinitionParserTest.h
 	InstrumentRayTracerTest.h
 	InstrumentTest.h
-        IsotropicAtomBraggScattererTest.h
+	IsotropicAtomBraggScattererTest.h
 	LaszloIntersectionTest.h
 	LineIntersectVisitTest.h
 	LineTest.h
@@ -312,6 +317,8 @@ set ( TEST_FILES
 	SphereTest.h
 	SurfaceFactoryTest.h
 	SurfaceTest.h
+	SymmetryElementFactoryTest.h
+	SymmetryElementTest.h
 	SymmetryOperationFactoryTest.h
 	SymmetryOperationSymbolParserTest.h
 	SymmetryOperationTest.h
@@ -367,6 +374,11 @@ add_library ( Geometry ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
 set_target_properties ( Geometry PROPERTIES OUTPUT_NAME MantidGeometry 
                                             COMPILE_DEFINITIONS IN_MANTID_GEOMETRY )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( Geometry PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif () 
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 

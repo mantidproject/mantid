@@ -78,8 +78,15 @@ static const double TOF_CONVERSION = .1;
 static const double CURRENT_CONVERSION = 1.e-6 / 3600.;
 
 LoadEventPreNexus::LoadEventPreNexus()
-    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), eventfile(NULL),
-      max_events(0) {}
+  : Mantid::API::IFileLoader<Kernel::FileDescriptor>(),
+  prog(NULL), spectra_list(), pulsetimes(), event_indices(), proton_charge(),
+  proton_charge_tot(0), pixel_to_wkspindex(), pixelmap(), detid_max(),
+  eventfile(NULL), num_events(0), num_pulses(0), numpixel(0),
+  num_good_events(0), num_error_events(0), num_ignored_events(0),
+  first_event(0), max_events(0), using_mapping_file(false),
+  loadOnlySomeSpectra(false), spectraLoadMap(), longest_tof(0),
+  shortest_tof(0), parallelProcessing(false) {
+}
 
 LoadEventPreNexus::~LoadEventPreNexus() { delete this->eventfile; }
 

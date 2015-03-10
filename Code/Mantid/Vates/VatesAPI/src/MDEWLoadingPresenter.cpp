@@ -3,11 +3,15 @@
 #include "MantidAPI/FrameworkManager.h"
 
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
-#include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
+#include "MantidVatesAPI/VatesKnowledgeSerializer.h"
+#include "MantidVatesAPI/MetaDataExtractorUtils.h"
+#include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
-#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/VatesXMLDefinitions.h"
+#include "MantidVatesAPI/VatesConfigurations.h"
 #include "MantidVatesAPI/Common.h"
 
+#include <boost/scoped_ptr.hpp>
 #include <boost/algorithm/string.hpp>
 #include <vtkFieldData.h>
 #include <vtkDataSet.h>
@@ -23,7 +27,10 @@ namespace Mantid
     m_time(-1),
     m_recursionDepth(0),
     m_loadInMemory(false),
-    m_firstLoad(true)
+    m_firstLoad(true),
+    m_metadataJsonManager(new MetadataJsonManager()),
+    m_metaDataExtractor(new MetaDataExtractorUtils()),
+    m_vatesConfigurations(new VatesConfigurations())
     {
       Mantid::API::FrameworkManager::Instance();
     }
@@ -148,15 +155,19 @@ namespace Mantid
       vtkFieldData* outputFD = vtkFieldData::New();
       
       //Serialize metadata
-      RebinningKnowledgeSerializer serializer(LocationNotRequired);
+      VatesKnowledgeSerializer serializer(LocationNotRequired);
       serializer.setWorkspaceName(wsName);
       serializer.setGeometryXML(xmlBuilder.create());
       serializer.setImplicitFunction( Mantid::Geometry::MDImplicitFunction_sptr(new Mantid::Geometry::NullImplicitFunction()));
       std::string xmlString = serializer.createXMLString();
 
+      // Serialize Json metadata
+      std::string jsonString = m_metadataJsonManager->getSerializedJson();
+
       //Add metadata to dataset.
       MetadataToFieldData convert;
       convert(outputFD, xmlString, XMLDefinitions::metaDataId().c_str());
+      convert(outputFD, jsonString, m_vatesConfigurations->getMetadataIdJson().c_str());
       visualDataSet->SetFieldData(outputFD);
       outputFD->Delete();
     }
@@ -230,6 +241,33 @@ namespace Mantid
         throw std::runtime_error("Have not yet run ::extractMetaData!");
       }
       return tDimension->getName() + " (" + tDimension->getUnits().ascii() + ")";
+    }
+
+    /**
+     * Getter for the instrument.
+     * @returns The name of the instrument which is associated with the workspace.
+     */
+    const std::string& MDEWLoadingPresenter::getInstrument()
+    {
+      return m_metadataJsonManager->getInstrument();
+    }
+
+    /**
+    * Getter for the minimum value;
+    * @return The minimum value of the data set.
+    */
+    double MDEWLoadingPresenter::getMinValue()
+    {
+      return m_metadataJsonManager->getMinValue();
+    }
+
+   /**
+    * Getter for the maximum value;
+    * @return The maximum value of the data set.
+    */
+    double MDEWLoadingPresenter::getMaxValue()
+    {
+      return m_metadataJsonManager->getMaxValue();
     }
   }
 }

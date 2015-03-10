@@ -112,6 +112,7 @@ public:
   static void loadEntryMetadata(const std::string &nexusfilename,
                                 Mantid::API::MatrixWorkspace_sptr WS,
                                 const std::string &entry_name);
+
   /// Load instrument from Nexus file if possible, else from IDF spacified by
   /// Nexus file
   static bool loadInstrument(const std::string &nexusfilename,
@@ -170,9 +171,6 @@ public:
   /// number of chunks per bank
   size_t eventsPerChunk;
 
-  /// Was the instrument loaded?
-  bool instrument_loaded_correctly;
-
   /// Mutex protecting tof limits
   Poco::FastMutex m_tofMutex;
 
@@ -192,9 +190,6 @@ public:
 
   /// Tolerance for CompressEvents; use -1 to mean don't compress.
   double compressTolerance;
-
-  /// Do we load the sample logs?
-  bool loadlogs;
 
   /// Pointer to the vector of events
   typedef std::vector<Mantid::DataObjects::TofEvent> *EventVector_pt;
@@ -216,14 +211,18 @@ public:
   /// Offset in the pixelID_to_wi_vector to use.
   detid_t pixelID_to_wi_offset;
 
-  /// True if the event_id is spectrum no not pixel ID
-  bool event_id_is_spec;
-
   /// One entry of pulse times for each preprocessor
   std::vector<boost::shared_ptr<BankPulseTimes>> m_bankPulseTimes;
 
   /// Pulse times for ALL banks, taken from proton_charge log.
   boost::shared_ptr<BankPulseTimes> m_allBanksPulseTimes;
+
+  /// name of top level NXentry to use
+  std::string m_top_entry_name;
+  ::NeXus::File *m_file;
+
+  /// whether or not to launch multiple ProcessBankData jobs per bank
+  bool splitProcessing;
 
   /// Flag for dealing with a simulated file
   bool m_haveWeights;
@@ -236,11 +235,19 @@ public:
   /// in the event list.
   std::vector<WeightedEventVector_pt> weightedEventVectors;
 
+private:
+  /// Intialisation code
+  void init();
+
+  /// Execution code
+  void exec();
+
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
 
   /// Map detector IDs to event lists.
   template <class T> void makeMapToEventLists(std::vector<T> &vectors);
 
+  void createWorkspaceIndexMaps(const bool monitors, const std::vector<std::string> &bankNames);
   void loadEvents(API::Progress *const prog, const bool monitors);
   void createSpectraMapping(
       const std::string &nxsfile, const bool monitorsOnly,
@@ -257,17 +264,12 @@ public:
   bool loadSpectraMapping(const std::string &filename, const bool monitorsOnly,
                           const std::string &entry_name);
 
-private:
-  void init();
-  void exec();
-
   /// ISIS specific methods for dealing with wide events
-  static void loadTimeOfFlight(const std::string &nexusfilename,
-                               DataObjects::EventWorkspace_sptr WS,
-                               const std::string &entry_name,
-                               const std::string &classType);
+  void loadTimeOfFlight(DataObjects::EventWorkspace_sptr WS,
+                        const std::string &entry_name,
+                        const std::string &classType);
 
-  static void loadTimeOfFlightData(::NeXus::File &file,
+  void loadTimeOfFlightData(::NeXus::File &file,
                                    DataObjects::EventWorkspace_sptr WS,
                                    const std::string &binsName,
                                    size_t start_wi = 0, size_t end_wi = 0);
@@ -277,13 +279,26 @@ private:
   // Validate the optional spectra input properties and initialize m_specList
   void createSpectraList(int32_t min, int32_t max);
 
-public:
-  /// name of top level NXentry to use
-  std::string m_top_entry_name;
   /// Set the top entry field name
   void setTopEntryName();
-  /// whether or not to launch multiple ProcessBankData jobs per bank
-  bool splitProcessing;
+
+  /// to re-use (copy) logs from data workspace to monitors, etc. workspace
+  void copyLogs(const DataObjects::EventWorkspace_sptr& from,
+                    DataObjects::EventWorkspace_sptr& to);
+
+  /// to open the nexus file with specific exception handling/message
+  void safeOpenFile(const std::string fname);
+
+  /// Was the instrument loaded?
+  bool m_instrument_loaded_correctly;
+
+  /// Do we load the sample logs?
+  bool loadlogs;
+  /// have the logs been loaded?
+  bool m_logs_loaded_correctly;
+
+  /// True if the event_id is spectrum no not pixel ID
+  bool event_id_is_spec;
 };
 
 } // namespace DataHandling

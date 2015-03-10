@@ -55,10 +55,18 @@ namespace Geometry {
     is overloaded:
 
         SymmetryOperation inversion("-x,-y,-z");
-        V3D hklPrime = inversion * V3D(1, 1, -1); // results in -1, -1, 1
+        V3D transformed = inversion * V3D(1, 1, -1); // results in -1, -1, 1
 
     The operator is templated and works for any object Kernel::IntMatrix can be
-    multiplied with and V3R can be added to (for example V3R, V3D).
+    multiplied with and V3R can be added to (for example V3R, V3D). Note that
+    for the transformation of HKLs, the matrix needs to be transposed. In some
+    cases, such as the example above, it does not matter, because the matrix is
+    identical to its transposed. In general however, transposing is necessary,
+    so there is a dedicated method for that:
+
+        SymmetryOperation sixFold("x-y,x,z");
+        V3D hklPrime = sixFold.transformHKL(V3D(1,0,0)); //
+
 
     A special case is the multiplication of several symmetry operations, which
     can be used to generate new operations:
@@ -137,8 +145,12 @@ public:
     return (m_matrix * operand) + m_vector;
   }
 
+  Kernel::V3D transformHKL(const Kernel::V3D &hkl) const;
+
   SymmetryOperation operator*(const SymmetryOperation &operand) const;
   SymmetryOperation inverse() const;
+
+  SymmetryOperation operator^(size_t exponent) const;
 
   bool operator!=(const SymmetryOperation &other) const;
   bool operator==(const SymmetryOperation &other) const;
@@ -153,6 +165,7 @@ protected:
 
   size_t m_order;
   Kernel::IntMatrix m_matrix;
+  Kernel::IntMatrix m_inverseMatrix;
   V3R m_vector;
   std::string m_identifier;
 };

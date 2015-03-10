@@ -4,7 +4,7 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
@@ -75,7 +75,8 @@ void SortHKL::exec() {
     peaksW->getPeaks()[i].setHKL(hkl1);
   }
   // Use the primitive by default
-  PointGroup_sptr pointGroup(new PointGroupLaue1());
+  PointGroup_sptr pointGroup =
+      PointGroupFactory::Instance().createPointGroup("-1");
   // Get it from the property
   std::string pointGroupName = getPropertyValue("PointGroup");
   for (size_t i = 0; i < m_pointGroups.size(); ++i)
@@ -96,7 +97,7 @@ void SortHKL::exec() {
     }
   }
 
-  std::vector<std::pair<std::string, bool>> criteria;
+  std::vector<std::pair<std::string, bool> > criteria;
   // Sort by detector ID then descending wavelength
   criteria.push_back(std::pair<std::string, bool>("BankName", true));
   criteria.push_back(std::pair<std::string, bool>("H", true));

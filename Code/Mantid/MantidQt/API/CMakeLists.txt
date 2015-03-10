@@ -16,6 +16,9 @@ set ( SRC_FILES
   src/MantidHelpInterface.cpp
   src/MantidQwtIMDWorkspaceData.cpp
   src/MantidWidget.cpp
+  src/MdConstants.cpp
+  src/MdPlottingCmapsProvider.cpp
+  src/MdSettings.cpp
   src/Message.cpp
   src/OptionsPropertyWidget.cpp
   src/PlotAxis.cpp
@@ -80,6 +83,9 @@ set ( INC_FILES
   inc/MantidQtAPI/MantidColorMap.h
   inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
   inc/MantidQtAPI/MantidQwtWorkspaceData.h
+  inc/MantidQtAPI/MdConstants.h
+  inc/MantidQtAPI/MdPlottingCmapsProvider.h
+  inc/MantidQtAPI/MdSettings.h
   inc/MantidQtAPI/PropertyWidgetFactory.h
   inc/MantidQtAPI/QwtRasterDataMD.h
   inc/MantidQtAPI/QwtWorkspaceBinData.h
@@ -121,6 +127,10 @@ enable_precompiled_headers( inc/MantidQtAPI/PrecompiledHeader.h ALL_SRC )
 add_library ( MantidQtAPI ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 set_target_properties ( MantidQtAPI PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_API )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( MantidQtAPI PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif () 
 
 target_link_libraries ( MantidQtAPI ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 

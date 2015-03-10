@@ -9,7 +9,9 @@
 Description
 -----------
 
-A workflow algorithm to perform a data reduction for Indirect ILL instruments. Note that currently only IN16B is supported.
+A workflow algorithm to perform a data reduction for Indirect ILL instruments.
+
+Note that currently only IN16B is supported.
 
 Usage
 -----
@@ -18,7 +20,10 @@ Usage
 
 .. testcode:: ExIndirectILLReduction
 
-    IndirectILLReduction(Run='ILLIN16B_034745.nxs', RawWorkspace='raw_workspace', ReducedWorkspace='reduced_workspace')
+    IndirectILLReduction(Run='ILLIN16B_034745.nxs',
+                         RawWorkspace='raw_workspace',
+                         ReducedWorkspace='reduced_workspace')
+
     print "Reduced workspace has %d spectra" % mtd['reduced_workspace'].getNumberHistograms()
     print "Raw workspace has %d spectra" % mtd['raw_workspace'].getNumberHistograms()
 
@@ -33,11 +38,14 @@ Output:
 
 .. testcode:: ExIndirectILLReductionMirrorMode
 
-    IndirectILLReduction(Run='ILLIN16B_034745.nxs', RawWorkspace='raw_workspace', ReducedWorkspace='reduced_workspace', LeftWorkspace='reduced_workspace_left',
-                         RightWorkspace='reduced_workspace_right', MirrorMode=True)
+    IndirectILLReduction(Run='ILLIN16B_034745.nxs',
+                         RawWorkspace='raw_workspace',
+                         ReducedWorkspace='reduced_workspace',
+                         LeftWorkspace='reduced_workspace_left',
+                         RightWorkspace='reduced_workspace_right',
+                         MirrorMode=True)
 
     print "Raw workspace has %d spectra" % mtd['raw_workspace'].getNumberHistograms()
-
     print "Reduced workspace has %d spectra" % mtd['reduced_workspace'].getNumberHistograms()
     print "Reduced left workspace has %d spectra" % mtd['reduced_workspace_left'].getNumberHistograms()
     print "Reduced right workspace has %d spectra" % mtd['reduced_workspace_right'].getNumberHistograms()

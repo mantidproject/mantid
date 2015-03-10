@@ -152,8 +152,12 @@ void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {
   for (size_t j = 0; j < getNumberHistograms(); ++j) {
     auto spec = getSpectrum(j);
     try {
-      spec->setDetectorIDs(
-          map.getDetectorIDsForSpectrumNo(spec->getSpectrumNo()));
+      if(map.indexIsSpecNumber())
+        spec->setDetectorIDs(
+            map.getDetectorIDsForSpectrumNo(spec->getSpectrumNo()));
+      else
+        spec->setDetectorIDs(
+            map.getDetectorIDsForSpectrumIndex(j));
     } catch (std::out_of_range &e) {
       // Get here if the spectrum number is not in the map.
       spec->clearDetectorIDs();
@@ -1704,9 +1708,9 @@ void MatrixWorkspace::clearMDMasking() {
 /**
 @return the special coordinate system used if any.
 */
-Mantid::API::SpecialCoordinateSystem
+Mantid::Kernel::SpecialCoordinateSystem
 MatrixWorkspace::getSpecialCoordinateSystem() const {
-  return Mantid::API::None;
+  return Mantid::Kernel::None;
 }
 
 /**

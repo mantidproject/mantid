@@ -3,6 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/V3D.h"
+#include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidMDEvents/Integrate3DEvents.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
@@ -10,6 +12,7 @@
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
+using Mantid::Kernel::V3D;
 
 //typedef Mantid::Kernel::Matrix<double>                  DblMatrix;
 
@@ -95,11 +98,14 @@ public:
     double sigi;
     for ( size_t i = 0; i < peak_q_list.size(); i++ )
     {
-      integrator.ellipseIntegrateEvents( peak_q_list[i], specify_size,
+      auto shape = integrator.ellipseIntegrateEvents( peak_q_list[i], specify_size,
                           peak_radius, back_inner_radius, back_outer_radius,
                           new_sigma, inti, sigi );
       TS_ASSERT_DELTA( inti, inti_all[i], 0.1);      
-      TS_ASSERT_DELTA( sigi, sigi_all[i], 0.01);      
+      TS_ASSERT_DELTA( sigi, sigi_all[i], 0.01);
+
+      auto ellipsoid_shape = boost::dynamic_pointer_cast<const Mantid::DataObjects::PeakShapeEllipsoid>(shape);
+      TSM_ASSERT("Expect to get back an ellipsoid shape", ellipsoid_shape);
     }
 
                                   // The test data is not normally distributed,

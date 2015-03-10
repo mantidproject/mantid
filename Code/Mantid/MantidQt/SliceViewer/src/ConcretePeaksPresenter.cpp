@@ -12,6 +12,7 @@
 #include <boost/regex.hpp>
 
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 using Mantid::Geometry::IMDDimension_const_sptr;
 
 namespace MantidQt {
@@ -27,13 +28,13 @@ Mantid::Kernel::Logger g_log("PeaksPresenter");
  * @return coordinate system as a string
  */
 std::string
-coordinateToString(Mantid::API::SpecialCoordinateSystem coordSystem) {
+coordinateToString(Mantid::Kernel::SpecialCoordinateSystem coordSystem) {
   switch (coordSystem) {
-  case Mantid::API::QLab:
+  case Mantid::Kernel::QLab:
     return "QLab";
-  case Mantid::API::QSample:
+  case Mantid::Kernel::QSample:
     return "QSample";
-  case Mantid::API::HKL:
+  case Mantid::Kernel::HKL:
     return "HKL";
   default:
     return "Unknown";
@@ -450,7 +451,7 @@ void ConcretePeaksPresenter::setPeakSizeIntoProjection(const double fraction) {
 
 double ConcretePeaksPresenter::getPeakSizeOnProjection() const {
   double result = 0;
-  if (m_viewPeaks != NULL && m_viewPeaks->positionOnly()) {
+  if (m_viewPeaks != NULL && (m_peaksWS->getNumberPeaks() > 0) && m_viewPeaks->positionOnly()) {
     result = m_viewPeaks->getOccupancyInView();
   }
   return result;
@@ -458,7 +459,7 @@ double ConcretePeaksPresenter::getPeakSizeOnProjection() const {
 
 double ConcretePeaksPresenter::getPeakSizeIntoProjection() const {
   double result = 0;
-  if (m_viewPeaks != NULL && m_viewPeaks->positionOnly()) {
+  if (m_viewPeaks != NULL && (m_peaksWS->getNumberPeaks() > 0) && m_viewPeaks->positionOnly()) {
     result = m_viewPeaks->getOccupancyIntoView();
   }
   return result;

@@ -9,7 +9,6 @@
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
 #include <Poco/File.h>
-#include <Poco/Net/HTTPResponse.h>
 // Visual Studio complains with the inclusion of Poco/FileStream
 // disabling this warning.
 #if defined(_WIN32) || defined(_WIN64)
@@ -153,7 +152,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   try {
     doDownloadFile(gitHubInstrumentRepoUrl, gitHubJson.toString(), headers);
   } catch (Exception::InternetError &ex) {
-    if (ex.errorCode() == HTTPResponse::HTTP_NOT_MODIFIED) {
+    if (ex.errorCode() == InternetHelper::HTTP_NOT_MODIFIED) {
       // No changes since last time
       return fileMap;
     } else {
@@ -349,7 +348,8 @@ int DownloadInstrument::doDownloadFile(const std::string &urlFile,
                                        const StringToStringMap &headers) {
   int retStatus = 0;
   InternetHelper inetHelper;
-  retStatus = inetHelper.downloadFile(urlFile, localFilePath, headers);
+  inetHelper.headers() = headers;
+  retStatus = inetHelper.downloadFile(urlFile, localFilePath);
   return retStatus;
 }
 

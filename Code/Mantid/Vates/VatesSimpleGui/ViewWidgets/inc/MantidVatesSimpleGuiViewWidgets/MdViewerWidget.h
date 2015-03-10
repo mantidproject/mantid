@@ -3,12 +3,19 @@
 
 #include "ui_MdViewerWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h"
+#include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 
 #include "MantidQtAPI/VatesViewerInterface.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
+#include "boost/shared_ptr.hpp"
+#include "MantidQtAPI/MdConstants.h"
+#include "MantidQtAPI/MdSettings.h"
+#include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 
 #include <QPointer>
 #include <QWidget>
+#include <QString>
 
 class pqLoadDataReaction;
 class pqPipelineSource;
@@ -31,7 +38,7 @@ namespace SimpleGui
 class RotationPointDialog;
 class SaveScreenshotReaction;
 class ViewBase;
-
+class RebinDialog;
 /**
  *
   This class represents the central widget for handling VATES visualization
@@ -101,6 +108,12 @@ protected slots:
   void renderingDone();
   /// Execute view switch.
   void switchViews(ModeControlWidget::Views v);
+  /// On rebin 
+  void onRebin(std::string algorithmType);
+  /// On  unbin
+  void onUnbin();
+  /// On switching an MDEvent source to a temporary source.
+  void onSwitchSoures(std::string rebinnedWorkspaceName, std::string sourceType);
 
 protected:
   /// Handle workspace preDeletion tasks.
@@ -127,7 +140,11 @@ private:
   pqViewSettingsReaction *viewSettings; ///< Holder for the view settings reaction
   bool viewSwitched;
   ModeControlWidget::Views initialView; ///< Holds the initial view
-
+  MantidQt::API::MdSettings mdSettings;///<Holds the MD settings which are used to persist data
+  MantidQt::API::MdConstants mdConstants;/// < Holds the MD constants
+  RebinAlgorithmDialogProvider m_rebinAlgorithmDialogProvider; ///<Provides dialogs to execute rebin algorithms
+  RebinnedSourcesManager m_rebinnedSourcesManager; ///<Holds the rebinned sources manager
+  QString m_rebinnedWorkspaceIdentifier; ///< Holds the identifier for temporary workspaces
 
   /// Check the environmental variables.
   void checkEnvSetup();
@@ -170,11 +187,27 @@ private:
   /// Get the technique associated with an instrument.
   const std::string getTechniqueForInstrument(const std::string& instrumentName) const;
   /// Get the view for a specified instrument
-  std::string getViewForInstrument(const std::string& instrument) const;
+  QString getViewForInstrument(const std::string& instrument) const;
   /// Check if a technique contains a keyword
   bool checkIfTechniqueContainsKeyword(const std::set<std::string>& techniques, const std::string& keyword) const;
   /// Reset the current view to the appropriate initial view.
   void resetCurrentView(int workspaceType, const std::string& instrumentName);
+  /// Render rebinned workspace
+  void prepareRebinnedWorkspace(const std::string rebinnedWorkspaceName, std::string sourceType); 
+  /// Set visibility listener
+  void setVisibilityListener();
+  /// Set up the default color for the background of the view.
+  void setColorForBackground();
+  /// Render the original workspace
+  void renderOriginalWorkspace(const std::string originalWorkspaceName);
+  /// Delete a specific workspace
+  void deleteSpecificSource(std::string workspaceName);
+  /// Remove the rebinning when switching views or otherwise.
+  void removeRebinning(pqPipelineSource* source, bool forced, ModeControlWidget::Views view = ModeControlWidget::STANDARD);
+  /// Remove all rebinned sources
+  void removeAllRebinning(ModeControlWidget::Views view);
+  /// Sets a listener for when sources are being destroyed
+  void setDestroyedListener();
 };
 
 } // SimpleGui

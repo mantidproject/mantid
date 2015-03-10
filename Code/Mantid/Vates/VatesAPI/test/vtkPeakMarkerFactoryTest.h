@@ -29,14 +29,14 @@ class MockPeaksWorkspace : public PeaksWorkspace
 {
 public:
   MOCK_METHOD1(setInstrument, void (Mantid::Geometry::Instrument_const_sptr inst));
-  MOCK_METHOD0(getInstrument, Mantid::Geometry::Instrument_const_sptr ());
+  MOCK_CONST_METHOD0(getInstrument, Mantid::Geometry::Instrument_const_sptr ());
   MOCK_CONST_METHOD0(clone, Mantid::DataObjects::PeaksWorkspace*());
   MOCK_CONST_METHOD0(getNumberPeaks, int());
   MOCK_METHOD1(removePeak, void (int peakNum) );
   MOCK_METHOD1(addPeak, void (const IPeak& ipeak));
   MOCK_METHOD1(getPeak, Mantid::DataObjects::Peak & (int peakNum));
   MOCK_CONST_METHOD1(getPeak, const Mantid::DataObjects::Peak & (int peakNum));
-  MOCK_CONST_METHOD2(createPeak, Mantid::API::IPeak* (Mantid::Kernel::V3D QLabFrame, double detectorDistance));
+  MOCK_CONST_METHOD2(createPeak, Mantid::API::IPeak* (Mantid::Kernel::V3D QLabFrame, boost::optional<double> detectorDistance));
 };
 
 //=====================================================================================

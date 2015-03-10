@@ -29,6 +29,10 @@
       <value val="true" />
     </parameter>
 
+    <parameter name="fold-frames-choice" type="string">
+      <value val="true" />
+    </parameter>
+
     <!-- Reduction workflow parameters under this line -->
     <parameter name="Workflow.InfoTable" type="string">
       <value val="inst_abrv, run_number, user_name, run_title, hd_dur" />

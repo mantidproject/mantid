@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 #
 # File: ReduceDictionary.py
 #
@@ -14,44 +15,44 @@
 #
 def LoadDictionary( *filenames, **kwargs ):
   # create a dictionary to load into
-  params_dictionary = kwargs.get("existing", {})
+    params_dictionary = kwargs.get("existing", {})
   # create a list of run numbers
-  run_nums = params_dictionary.get("run_nums", [])
+    run_nums = params_dictionary.get("run_nums", [])
 
-  file = open(filenames[0])
-  for line in file:
-    line = line.strip();
-    line = line.rstrip();
-    if (not line.startswith('#')) and len(line) > 2:
-      words = line.split()
+    file = open(filenames[0])
+    for line in file:
+        line = line.strip()
+        line = line.rstrip()
+        if (not line.startswith('#')) and len(line) > 2:
+            words = line.split()
       # error check the number of values
-      if len(words) < 2:
-        print "Syntax Error On Line: " + line
+            if len(words) < 2:
+                print "Syntax Error On Line: " + line
       # set the value
-      else:
-        (key, value) = words[0:2]
+            else:
+                (key, value) = words[0:2]
 
         # fix up special values
-        if value.lower() == "none":
-          value = None
-        elif value.lower() == "true":
-          value = True
-        elif value.lower() == "false":
-          value = False
+                if value.lower() == "none":
+                    value = None
+                elif value.lower() == "true":
+                    value = True
+                elif value.lower() == "false":
+                    value = False
 
         # set the values
-        if key == "run_nums":
-          run_nums.extend(ParseRunList(value))
-        else:
-          params_dictionary[key] = value
+                if key == "run_nums":
+                    run_nums.extend(ParseRunList(value))
+                else:
+                    params_dictionary[key] = value
 
-  params_dictionary["run_nums"]=run_nums
+    params_dictionary["run_nums"]=run_nums
 
   # it isn't awesome without recursion
-  if len(filenames) > 1:
-    return LoadDictionary(*filenames[1:], existing=params_dictionary)
-  else:
-    return params_dictionary;
+    if len(filenames) > 1:
+        return LoadDictionary(*filenames[1:], existing=params_dictionary)
+    else:
+        return params_dictionary
 
 #
 # Return a list of run numbers from a string containing a comma separated
@@ -59,17 +60,17 @@ def LoadDictionary( *filenames, **kwargs ):
 # with a colon separator.
 #
 def ParseRunList( run_string ):
-  run_list = []
-  groups = run_string.split(",")
-  for group in groups:
-    runs = group.split(":")
-    if len(runs) == 1:
-      run_list.append( runs[0] )
-    else:
-      first = int(runs[0])
-      last  = int(runs[1])
-      for run in range(first, last+1):
-        run_list.append(str(run))
+    run_list = []
+    groups = run_string.split(",")
+    for group in groups:
+        runs = group.split(":")
+        if len(runs) == 1:
+            run_list.append( runs[0] )
+        else:
+            first = int(runs[0])
+            last  = int(runs[1])
+            for run in range(first, last+1):
+                run_list.append(str(run))
 
-  return run_list
+    return run_list
 

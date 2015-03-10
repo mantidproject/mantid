@@ -16,14 +16,14 @@ using namespace API;
 DECLARE_FUNCTION(PoldiSpectrumDomainFunction)
 
 PoldiSpectrumDomainFunction::PoldiSpectrumDomainFunction()
-    : ParamFunction(), m_chopperSlitOffsets(), m_deltaT(0.0),
-      m_timeTransformer() {}
+    : FunctionParameterDecorator(), m_chopperSlitOffsets(), m_deltaT(0.0),
+      m_timeTransformer(), m_2dHelpers(), m_profileFunction() {}
 
 /**
  * Sets the workspace and initializes helper data
  *
  * This method calls
- *PoldiSpectrumDomainFunction::initializeParametersFromWorkspace to
+ * PoldiSpectrumDomainFunction::initializeParametersFromWorkspace to
  * setup the factors required for calculation of the spectrum with given index.
  *
  * @param ws :: Workspace with valid POLDI instrument and run information
@@ -44,9 +44,9 @@ void PoldiSpectrumDomainFunction::setWorkspace(
 /**
  * Performs the actual function calculation
  *
- * This method performs the necessary transformations for the parameters and
- *calculates the function
- * values for the spectrum with the index stored in domain.
+ * This method calculates a peak profile and transforms the resulting function
+ * values from the d-based domain into the desired arrival time based domain,
+ * using Poldi2DHelper.
  *
  * @param domain :: FunctionDomain1DSpectrum, containing a workspace index
  * @param values :: Object to store the calculated function values
@@ -57,80 +57,150 @@ void PoldiSpectrumDomainFunction::function1DSpectrum(
   values.zeroCalculated();
 
   size_t index = domain.getWorkspaceIndex();
-  int domainSize = static_cast<int>(domain.size());
+  Poldi2DHelper_sptr helper = m_2dHelpers[index];
 
-  /* Parameters are given in d, but need to be processed in arrival time.
-   * This section performs the conversions. They depend on several factors
-   * terminated by the position in the detector, so the index is stored.
-   */
-  double fwhm = getParameter("Fwhm");
-  double fwhmT = m_timeTransformer->timeTransformedWidth(fwhm, index);
-  double fwhmChannel = fwhmT / m_deltaT;
-  double sigmaChannel = fwhmChannel / (2.0 * sqrt(2.0 * log(2.0)));
+  if (helper) {
+    int domainSize = static_cast<int>(domain.size());
 
-  double centre = getParameter("Centre");
-  double centreT = m_timeTransformer->timeTransformedCentre(centre, index);
+    double fwhm = m_profileFunction->fwhm();
+    double centre = m_profileFunction->centre();
 
-  double area = getParameter("Area");
-  double areaT =
-      m_timeTransformer->timeTransformedIntensity(area, centre, index);
+    double dWidth = 2.0 * fwhm;
+    double dCalcMin = centre - dWidth;
+    size_t dWidthN = static_cast<size_t>(std::min(
+        50, std::max(10, 2 * static_cast<int>(dWidth / helper->deltaD) + 1)));
 
-  /* Once all the factors are all there, the calculation needs to be
-   * performed with one offset per chopper slit.
-   */
-  for (size_t o = 0; o < m_chopperSlitOffsets.size(); ++o) {
-    double centreTOffset = centreT + m_chopperSlitOffsets[o];
-    double centreTOffsetChannel = centreTOffset / m_deltaT;
+    int pos = 0;
 
-    /* Calculations are performed in channel units
-     * Needs to be signed integer, because the profile can extend beyond the
-     * left edge,
-     * which results in negative indices. Since the spectrum "wraps around" the
-     * indices have to be transformed to the right edge.
-     */
-    int centreChannel = static_cast<int>(centreTOffsetChannel);
-    int widthChannels = std::max(2, static_cast<int>(fwhmChannel * 2.0));
-
-    for (int i = centreChannel - widthChannels;
-         i <= centreChannel + widthChannels; ++i) {
-      /* Since the POLDI spectra "wrap around" on the time axis, the x-value of
-       * the
-       * domain can not be used, because if the profile extends to x < 0, it
-       * should appear
-       * at 500 - x. The same for the other side.
-       */
-      int cleanChannel = i % domainSize;
-      if (cleanChannel < 0) {
-        cleanChannel += domainSize;
+    for (size_t i = 0; i < helper->domain->size(); ++i) {
+      if ((*(helper->domain))[i] >= dCalcMin) {
+        pos = static_cast<int>(i + 1);
+        break;
       }
-
-      double xValue = static_cast<double>(i) + 0.5;
-
-      /* This is a workaround for later, when "actualFunction" will be replaced
-       * with
-       * an arbitrary profile.
-       */
-      values.addToCalculated(
-          cleanChannel,
-          actualFunction(xValue, centreTOffsetChannel, sigmaChannel, areaT));
     }
+
+    std::vector<double> localOut(dWidthN, 0.0);
+
+    size_t baseOffset = static_cast<size_t>(pos + helper->minTOFN);
+
+    for (size_t i = 0; i < helper->dOffsets.size(); ++i) {
+      double newD = centre + helper->dFractionalOffsets[i];
+      size_t offset = static_cast<size_t>(helper->dOffsets[i]) + baseOffset;
+
+      m_profileFunction->setCentre(newD);
+      m_profileFunction->functionLocal(
+          &localOut[0], helper->domain->getPointerAt(pos), dWidthN);
+
+      for (size_t j = 0; j < dWidthN; ++j) {
+        values.addToCalculated((offset + j) % domainSize,
+                               localOut[j] * helper->factors[pos + j]);
+      }
+    }
+
+    m_profileFunction->setCentre(centre);
   }
 }
 
 /**
- * Initializes function parameters
+ * Calculates derivatives
+ *
+ * The method calculates derivatives of the wrapped profile function and
+ * transforms them into the correct domain.
+ *
+ * @param domain :: FunctionDomain1DSpectrum, containing a workspace index
+ * @param jacobian :: Jacobian matrix.
  */
-void PoldiSpectrumDomainFunction::init() {
-  declareParameter("Area", 1.0);
-  declareParameter("Fwhm", 1.0);
-  declareParameter("Centre", 0.0);
+void PoldiSpectrumDomainFunction::functionDeriv1DSpectrum(
+    const FunctionDomain1DSpectrum &domain, Jacobian &jacobian) {
+  size_t index = domain.getWorkspaceIndex();
+  Poldi2DHelper_sptr helper = m_2dHelpers[index];
+
+  if (helper) {
+    int domainSize = static_cast<int>(domain.size());
+
+    double fwhm = m_profileFunction->fwhm();
+    double centre = m_profileFunction->centre();
+
+    double dWidth = 2.0 * fwhm;
+    double dCalcMin = centre - dWidth;
+    size_t dWidthN = static_cast<size_t>(std::min(
+        50, std::max(10, 2 * static_cast<int>(dWidth / helper->deltaD) + 1)));
+
+    int pos = 0;
+
+    for (size_t i = 0; i < helper->domain->size(); ++i) {
+      if ((*(helper->domain))[i] >= dCalcMin) {
+        pos = static_cast<int>(i + 1);
+        break;
+      }
+    }
+
+    size_t np = m_profileFunction->nParams();
+
+    size_t baseOffset = static_cast<size_t>(pos + helper->minTOFN);
+
+    for (size_t i = 0; i < helper->dOffsets.size(); ++i) {
+      LocalJacobian smallJ(dWidthN, np);
+
+      double newD = centre + helper->dFractionalOffsets[i];
+      size_t offset = static_cast<size_t>(helper->dOffsets[i]) + baseOffset;
+
+      m_profileFunction->setCentre(newD);
+
+      m_profileFunction->functionDerivLocal(
+          &smallJ, helper->domain->getPointerAt(pos), dWidthN);
+
+      for (size_t j = 0; j < dWidthN; ++j) {
+        size_t off = (offset + j) % domainSize;
+        for (size_t p = 0; p < np; ++p) {
+          jacobian.set(off, p,
+                       jacobian.get(off, p) +
+                           smallJ.getRaw(j, p) * helper->factors[pos + j]);
+        }
+      }
+    }
+
+    m_profileFunction->setCentre(centre);
+  }
 }
+
+void
+PoldiSpectrumDomainFunction::poldiFunction1D(const std::vector<int> &indices,
+                                             const FunctionDomain1D &domain,
+                                             FunctionValues &values) const {
+
+  FunctionValues localValues(domain);
+
+  m_profileFunction->functionLocal(localValues.getPointerToCalculated(0),
+                                   domain.getPointerAt(0), domain.size());
+
+  double chopperSlitCount = static_cast<double>(m_chopperSlitOffsets.size());
+
+  for (auto index = indices.begin(); index != indices.end(); ++index) {
+    std::vector<double> factors(domain.size());
+
+    for (size_t i = 0; i < factors.size(); ++i) {
+      values.addToCalculated(i,
+                             chopperSlitCount * localValues[i] *
+                                 m_timeTransformer->detectorElementIntensity(
+                                     domain[i], static_cast<size_t>(*index)));
+    }
+  }
+}
+
+/// Returns a smart pointer to the wrapped profile function.
+IPeakFunction_sptr PoldiSpectrumDomainFunction::getProfileFunction() const {
+  return m_profileFunction;
+}
+
+/// Does nothing.
+void PoldiSpectrumDomainFunction::init() {}
 
 /**
  * Extracts the time difference as well as instrument information
  *
- * @param workspace2D :: Workspace with valid POLDI instrument and required run
- *information
+ * @param workspace2D :: Workspace with valid POLDI instrument and required
+ *                       run information
  */
 void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(
     const Workspace2D_const_sptr &workspace2D) {
@@ -146,24 +216,66 @@ void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(
  * Initializes chopper offsets and time transformer
  *
  * In this method, the instrument dependent parameter for the calculation are
- *setup, so that a PoldiTimeTransformer is
- * available to transfer parameters to the time domain using correct factors
- *etc.
+ * setup, so that a PoldiTimeTransformer is available to transfer parameters to
+ * the time domain using correct factors etc.
  *
- * @param poldiInstrument :: PoldiInstrumentAdapter that holds chopper, detector
- *and spectrum
+ * @param poldiInstrument :: Valid PoldiInstrumentAdapter
  */
 void PoldiSpectrumDomainFunction::initializeInstrumentParameters(
     const PoldiInstrumentAdapter_sptr &poldiInstrument) {
   m_timeTransformer = boost::make_shared<PoldiTimeTransformer>(poldiInstrument);
   m_chopperSlitOffsets = getChopperSlitOffsets(poldiInstrument->chopper());
+
+  if (!poldiInstrument) {
+    throw std::runtime_error("No valid POLDI instrument.");
+  }
+
+  m_2dHelpers.clear();
+
+  PoldiAbstractDetector_sptr detector = poldiInstrument->detector();
+  PoldiAbstractChopper_sptr chopper = poldiInstrument->chopper();
+
+  std::pair<double, double> qLimits = detector->qLimits(1.1, 5.0);
+
+  double dMin = Conversions::qToD(qLimits.second);
+  double dMax = Conversions::dToQ(qLimits.first);
+
+  for (int i = 0; i < static_cast<int>(detector->elementCount()); ++i) {
+    double sinTheta = sin(detector->twoTheta(i) / 2.0);
+    double distance =
+        detector->distanceFromSample(i) + chopper->distanceFromSample();
+    double deltaD = Conversions::TOFtoD(m_deltaT, distance, sinTheta);
+
+    Poldi2DHelper_sptr curr = boost::make_shared<Poldi2DHelper>();
+    curr->setChopperSlitOffsets(distance, sinTheta, deltaD,
+                                m_chopperSlitOffsets);
+    curr->setDomain(dMin, dMax, deltaD);
+    curr->deltaD = deltaD;
+    curr->minTOFN = static_cast<int>(
+        Conversions::dtoTOF(dMin, distance, sinTheta) / m_deltaT);
+    curr->setFactors(m_timeTransformer, static_cast<size_t>(i));
+
+    m_2dHelpers.push_back(curr);
+  }
+}
+
+void PoldiSpectrumDomainFunction::beforeDecoratedFunctionSet(
+    const IFunction_sptr &fn) {
+  IPeakFunction_sptr peakFunction =
+      boost::dynamic_pointer_cast<IPeakFunction>(fn);
+
+  if (!peakFunction) {
+    throw std::invalid_argument("Function is not a peak function.");
+  }
+
+  m_profileFunction = peakFunction;
 }
 
 /**
  * Adds the zero-offset of the chopper to the slit times
  *
  * @param chopper :: PoldiAbstractChopper with slit times, not corrected with
- *zero-offset
+ *                   zero-offset
  * @return vector with zero-offset-corrected chopper slit times
  */
 std::vector<double> PoldiSpectrumDomainFunction::getChopperSlitOffsets(
@@ -177,24 +289,6 @@ std::vector<double> PoldiSpectrumDomainFunction::getChopperSlitOffsets(
   }
 
   return offsets;
-}
-
-/**
- * Profile function
- *
- * This is the actual profile function. Currently this is a Gaussian.
- *
- * @param x :: x-value for which y is to be calculated, in channel units
- * @param x0 :: Centre of the peak, in channel units
- * @param sigma :: Sigma-parameter of Gaussian distribution, in channel units
- * @param area :: Area parameter
- * @return Function value at position x
- */
-double PoldiSpectrumDomainFunction::actualFunction(double x, double x0,
-                                                   double sigma,
-                                                   double area) const {
-  return area / (sqrt(2.0 * M_PI) * sigma) *
-         exp(-0.5 * pow((x - x0) / sigma, 2.0));
 }
 
 } // namespace Poldi

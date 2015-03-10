@@ -49,7 +49,7 @@ private:
   /// Radius estimate
   double m_radiusEstimate;
   /// MD coordinates to use
-  Mantid::API::SpecialCoordinateSystem m_mdCoordinates;
+  Mantid::Kernel::SpecialCoordinateSystem m_mdCoordinates;
   /// Pointer to member function used for coordinate determination.
   boost::function<Mantid::Kernel::V3D(const Mantid::API::IPeak *)>
       m_coordFunction;
@@ -59,7 +59,7 @@ public:
   PeakBackground(Mantid::API::IPeaksWorkspace_const_sptr peaksWS,
                  const double &radiusEstimate, const double &thresholdSignal,
                  const Mantid::API::MDNormalization normalisation,
-                 const Mantid::API::SpecialCoordinateSystem coordinates);
+                 const Mantid::Kernel::SpecialCoordinateSystem coordinates);
 
   /// Copy constructor
   PeakBackground(const PeakBackground &other);

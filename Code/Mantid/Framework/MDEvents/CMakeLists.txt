@@ -135,6 +135,7 @@ set ( TEST_FILES
 	CoordTransformDistanceParserTest.h
 	CoordTransformDistanceTest.h
 	FitMDTest.h
+        IntegrateEllipsoidsTest.h
 	ImportMDEventWorkspaceTest.h
 	ImportMDHistoWorkspaceTest.h
 	MDBinTest.h
@@ -183,6 +184,11 @@ add_library ( MDEvents ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( MDEvents PROPERTIES OUTPUT_NAME MantidMDEvents 
                                                  COMPILE_DEFINITIONS IN_MANTID_MDEVENT )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( MDEvents PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif () 
+
 # Intensive use of templated libaries can cause large objects to be generated. These require
 # an additional flag in MSVC.
 if ( MSVC )

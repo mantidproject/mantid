@@ -19,7 +19,7 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    QtReflMainView::QtReflMainView(QWidget *parent) : UserSubWindow(parent), m_openMap(new QSignalMapper(this))
+    QtReflMainView::QtReflMainView(QWidget *parent) : UserSubWindow(parent), m_openMap(new QSignalMapper(this)), m_calculator(new MantidWidgets::SlitCalculator(this))
     {
     }
 
@@ -292,6 +292,14 @@ namespace MantidQt
     void QtReflMainView::on_actionPlotGroup_triggered()
     {
       m_presenter->notify(IReflPresenter::PlotGroupFlag);
+    }
+
+    /**
+    This slot shows the slit calculator
+    */
+    void QtReflMainView::on_actionSlitCalculator_triggered()
+    {
+      m_calculator->show();
     }
 
     /**

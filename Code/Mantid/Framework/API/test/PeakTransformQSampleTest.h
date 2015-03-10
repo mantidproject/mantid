@@ -11,6 +11,17 @@ using namespace Mantid;
 using Mantid::Kernel::V3D;
 using namespace testing;
 
+
+namespace boost{
+  template<class CharType, class CharTrait>
+  std::basic_ostream<CharType, CharTrait>& operator<<(std::basic_ostream<CharType, CharTrait>& out, optional<double> const& maybe)
+  {
+    if (maybe)
+        out << maybe;
+    return out;
+  }
+}
+
 class PeakTransformQSampleTest : public CxxTest::TestSuite
 {
 
@@ -207,7 +218,7 @@ void test_getFriendlyName()
 void test_getCoordinateSystem()
 {
   PeakTransformQSample transform;
-  TS_ASSERT_EQUALS(Mantid::API::QSample, transform.getCoordinateSystem())
+  TS_ASSERT_EQUALS(Mantid::Kernel::QSample, transform.getCoordinateSystem())
 }
 
 };

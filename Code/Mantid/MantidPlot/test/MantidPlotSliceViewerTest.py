@@ -41,7 +41,6 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
         svw = plotSlice('uniform')
         svw.setSlicePoint(2, 2.5)
         moveMouseToCentre(svw._getHeldObject())
-        screenshot(svw, "SliceViewer", "SliceViewer with mouse at center, showing coordinates.")
 
     def test_plotSlice_empty(self):
         """ Plot slice on an empty workspace """
@@ -68,7 +67,6 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
         svw.setSlicePoint(3, 7.5)
         self.assertAlmostEqual(svw.getSlicePoint(2), 2.5, 3)
         self.assertAlmostEqual(svw.getSlicePoint(3), 7.5, 3)
-        screenshot(svw, "SliceViewer_4D", "SliceViewer open to a 4D workspace; z=2.5, e=7.5.")
         svw.setXYDim("z", "e")
         self.assertEqual(svw.getDimX(), 2)
         self.assertEqual(svw.getDimY(), 3)
@@ -114,10 +112,16 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
         dest = get_screenshot_dir()
         if not dest is None:
             filename = "SliceViewerSaveImage"
-            svw.saveImage(os.path.join(dest, filename+".png") )
-            # Add to the HTML report
-            screenshot(None, filename, "SliceViewer: result of saveImage(). Should be only the 2D plot with a color bar (no GUI elements)",
-                       png_exists=True)
+            filepath = os.path.join(dest, filename+".png")
+            # Remove any old file
+            if os.path.isfile(filepath):
+                os.remove(filepath)
+            # Save
+            svw.saveImage(filepath)
+            self.assertEquals(os.path.isfile(filepath), True,
+                              "Screenshot was not written out as expected.")
+            if os.path.isfile(filepath):
+                os.remove(filepath)
 
     def test_showLine(self):
         svw = plotSlice('uniform')
@@ -133,7 +137,6 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
         self.assertAlmostEqual(liner.getBinWidth(), 0.05, 3)
         # Width was set
         self.assertAlmostEqual(liner.getPlanarWidth(), 0.88, 3)
-        screenshot(svw, "SliceViewer_and_LineViewer", "SliceViewer with LineViewer open, showing line overlay and integrated line.")
         # Now turn it off
         svw.toggleLineMode(False)
         self.assertFalse( liner.isVisible(), "LineViewer was hidden")
@@ -161,9 +164,6 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
 
         # Set the Foreground Colour
         peaksPresenter.setForegroundColor(QtGui.QColor(255, 0, 0, 255))
-        
-        # Check that it responds to changed workspaces
-        RenameWorkspace('pw',OutputWorkspace='pw_renamed')
 
         # Zoom in on peak.
         peaksPresenter.zoomToPeak(0)

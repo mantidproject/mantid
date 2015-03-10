@@ -1,14 +1,25 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
-
 #include "MantidKernel/ConfigService.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorMapManager.h"
+#include "MantidQtAPI/MdConstants.h"
+
+// Have to deal with ParaView warnings and Intel compiler the hard way.
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1170
+#endif
 
 #include <pqBuiltinColorMaps.h>
 #include <pqChartValue.h>
 #include <pqColorMapModel.h>
 #include <pqColorPresetManager.h>
 #include <pqColorPresetModel.h>
+
 #include <vtkPVXMLElement.h>
 #include <vtkPVXMLParser.h>
+
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1170
+#endif
 
 #include <QDir>
 #include <QDoubleValidator>
@@ -16,6 +27,7 @@
 #include <QFileInfo>
 
 #include <iostream>
+#include <cfloat>
 
 namespace Mantid
 {
@@ -29,7 +41,7 @@ namespace SimpleGui
  * sub-components and connections.
  * @param parent the parent widget of the mode control widget
  */
-ColorSelectionWidget::ColorSelectionWidget(QWidget *parent) : QWidget(parent)
+  ColorSelectionWidget::ColorSelectionWidget(QWidget *parent) : QWidget(parent), colorMapManager(new ColorMapManager()), m_minHistoric(0.01), m_maxHistoric(0.01)
 {
   this->ui.setupUi(this);
   this->ui.autoColorScaleCheckBox->setChecked(true);
@@ -40,8 +52,11 @@ ColorSelectionWidget::ColorSelectionWidget(QWidget *parent) : QWidget(parent)
 
   this->loadBuiltinColorPresets();
 
-  this->ui.maxValLineEdit->setValidator(new QDoubleValidator(this));
-  this->ui.minValLineEdit->setValidator(new QDoubleValidator(this));
+  m_minValidator = new QDoubleValidator(this);
+  m_maxValidator = new QDoubleValidator(this);
+
+  this->ui.maxValLineEdit->setValidator(m_minValidator);
+  this->ui.minValLineEdit->setValidator(m_maxValidator);
 
   QObject::connect(this->ui.autoColorScaleCheckBox, SIGNAL(stateChanged(int)),
   this, SLOT(autoOrManualScaling(int)));
@@ -75,24 +90,43 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
 {
   pqColorPresetModel *presetModel = this->presets->getModel();
 
-  // get builtin color maps xml
-  const char *xml = pqComponentsGetColorMapsXML();
+  // Associate the colormap value with the index a continuous index
 
   // create xml parser
   vtkPVXMLParser *xmlParser = vtkPVXMLParser::New();
+  
+
+  // 1. Get builtinw color maps (Reading fragment requires: InitializeParser, ParseChunk, CleanupParser) 
+  const char *xml = pqComponentsGetColorMapsXML();
   xmlParser->InitializeParser();
   xmlParser->ParseChunk(xml, static_cast<unsigned>(strlen(xml)));
   xmlParser->CleanupParser();
-
   this->addColorMapsFromXML(xmlParser, presetModel);
-
-  // Add color maps from IDL and Matplotlib
+ 
+  // 2. Add color maps from Slice Viewer, IDL and Matplotlib
+  this->addColorMapsFromFile("All_slice_viewer_cmaps_for_vsi.xml", xmlParser, presetModel);
   this->addColorMapsFromFile("All_idl_cmaps.xml", xmlParser, presetModel);
   this->addColorMapsFromFile("All_mpl_cmaps.xml", xmlParser, presetModel);
 
   // cleanup parser
   xmlParser->Delete();
 }
+
+ /**
+  * Load the default color map
+  * @param viewSwitched Flag if the view has switched or not.
+  */
+  void ColorSelectionWidget::loadColorMap(bool viewSwitched)
+  {
+    int defaultColorMapIndex = this->colorMapManager->getDefaultColorMapIndex(viewSwitched);
+
+    const pqColorMapModel *colorMap = this->presets->getModel()->getColorMap(defaultColorMapIndex);
+
+    if (colorMap)
+    {
+      emit this->colorMapChanged(colorMap);
+    }
+  }
 
 /**
  * This function takes color maps from a XML file, parses them and loads and
@@ -143,8 +177,15 @@ void ColorSelectionWidget::addColorMapsFromXML(vtkPVXMLParser *parser,
         pqColorPresetManager::createColorMapFromXML(colorMapElement);
     QString name = colorMapElement->GetAttribute("name");
 
-    // add color map to the model
-    model->addBuiltinColorMap(colorMap, name);
+    // Only add the color map if the name does not exist yet
+    if (!this->colorMapManager->isRecordedColorMap(name.toStdString()))
+    {
+      // add color map to the model
+      model->addBuiltinColorMap(colorMap, name);
+
+      // add color map to the color map manager
+      this->colorMapManager->readInColorMap(name.toStdString());
+    }
   }
 }
 
@@ -159,10 +200,11 @@ void ColorSelectionWidget::autoOrManualScaling(int state)
   {
   case Qt::Unchecked:
     this->setEditorStatus(true);
+    emit this->autoScale(this);
     break;
   case Qt::Checked:
     this->setEditorStatus(false);
-    emit this->autoScale();
+    emit this->autoScale(this);
     break;
   }
 }
@@ -180,8 +222,11 @@ void ColorSelectionWidget::loadPreset()
     QItemSelectionModel *selection = this->presets->getSelectionModel();
     QModelIndex index = selection->currentIndex();
     const pqColorMapModel *colorMap = this->presets->getModel()->getColorMap(index.row());
+
     if (colorMap)
     {
+      // Persist the color map change
+      this->colorMapManager->setNewActiveColorMap(index.row());
       emit this->colorMapChanged(colorMap);
     }
   }
@@ -193,8 +238,18 @@ void ColorSelectionWidget::loadPreset()
  */
 void ColorSelectionWidget::getColorScaleRange()
 {
+  if (this->ui.useLogScaleCheckBox->isChecked())
+  {
+    setupLogScale(true);
+  }
+  else
+  {
+    setupLogScale(false);
+  }
+
   double min = this->ui.minValLineEdit->text().toDouble();
   double max = this->ui.maxValLineEdit->text().toDouble();
+
   emit this->colorScaleChanged(min, max);
 }
 
@@ -207,6 +262,9 @@ void ColorSelectionWidget::setColorScaleRange(double min, double max)
 {
   if (this->ui.autoColorScaleCheckBox->isChecked())
   {
+    m_minHistoric = min;
+    m_maxHistoric = max;
+
     this->ui.minValLineEdit->clear();
     this->ui.minValLineEdit->insert(QString::number(min));
     this->ui.maxValLineEdit->clear();
@@ -230,7 +288,87 @@ void ColorSelectionWidget::useLogScaling(int state)
   {
     state -= 1;
   }
+
+  // Set up values for with or without log scale
+  getColorScaleRange();
+
   emit this->logScale(state);
+}
+
+/**
+ * Set up the min and max values and validators for use with or without log scaling
+ * @param state The state of the log scale, where 0 is no log scale
+ */
+void ColorSelectionWidget::setupLogScale(int state)
+{
+  // Get the min and max values
+  double min = this->ui.minValLineEdit->text().toDouble();
+  double max = this->ui.maxValLineEdit->text().toDouble();
+
+  // Make sure that the minimum is smaller or equal to the maximum
+  setMinSmallerMax(min, max);
+
+  // If we switched to a log state make sure that values are larger than 0
+  if (state)
+  {
+    if (min <= 0 )
+    {
+      min = m_mdConstants.getLogScaleDefaultValue();
+    }
+
+    if (max <= 0)
+    {
+      max = m_mdConstants.getLogScaleDefaultValue();
+    }
+  }
+
+  // If min and max were changed we need to persist this
+  setMinSmallerMax(min, max);
+
+  // Set the validators
+  if (state)
+  {
+    m_maxValidator->setBottom(0.0);
+    m_minValidator->setBottom(0.0);
+  }
+  else
+  {
+    m_maxValidator->setBottom(-DBL_MAX);
+    m_minValidator->setBottom(-DBL_MAX);
+  }
+}
+
+/**
+ * Slot to set the checkbox if the logscaling behaviour has been set programatically
+ * @param state Flag whether the checkbox should be checked or not
+ */
+void ColorSelectionWidget::onSetLogScale(bool state)
+{
+    ui.useLogScaleCheckBox->setChecked(state);
+}
+
+/**
+ * Make sure that min is smaller/equal than max. If not then set to the old value.
+ * @param max The maximum value.
+ * @param min The minimum value.
+ */
+void ColorSelectionWidget::setMinSmallerMax(double& min, double& max)
+{
+  if (min <= max)
+  {
+    m_minHistoric = min;
+    m_maxHistoric = max;
+  }
+  else
+  {
+    min = m_minHistoric;
+    max = m_maxHistoric;
+  }
+
+  this->ui.minValLineEdit->clear();
+  this->ui.minValLineEdit->insert(QString::number(min));
+  this->ui.maxValLineEdit->clear();
+  this->ui.maxValLineEdit->insert(QString::number(max));
 }
 
 /**
@@ -292,6 +430,7 @@ bool ColorSelectionWidget::getLogScaleState()
   {
     state -= 1;
   }
+
   return static_cast<bool>(state);
 }
 

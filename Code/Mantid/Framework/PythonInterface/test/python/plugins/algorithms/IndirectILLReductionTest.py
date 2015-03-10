@@ -14,7 +14,6 @@ class IndirectILLReductionTest(unittest.TestCase):
         self.kwargs['Reflection'] = '111'
         self.kwargs['RawWorkspace'] = run_name + '_' + self.kwargs['Analyser'] + self.kwargs['Reflection'] + '_raw'
         self.kwargs['ReducedWorkspace'] = run_name + '_' + self.kwargs['Analyser'] + self.kwargs['Reflection'] + '_red'
-        self.kwargs['Verbose'] = True
 
     def tearDown(self):
         #clean up any files we made
@@ -92,8 +91,6 @@ class IndirectILLReductionTest(unittest.TestCase):
             self.assertTrue(os.path.isfile(path))
 
     def test_no_verbose(self):
-        self.kwargs['Verbose'] = False
-
         IndirectILLReduction(**self.kwargs)
 
         red_workspace = mtd[self.kwargs['ReducedWorkspace']]

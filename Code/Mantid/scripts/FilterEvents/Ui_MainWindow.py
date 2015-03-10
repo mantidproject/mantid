@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
@@ -7,8 +8,8 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui 
-from MplFigureCanvas import Qt4MplCanvas 
+from PyQt4 import QtCore, QtGui
+from MplFigureCanvas import Qt4MplCanvas
 
 
 try:

@@ -1,9 +1,7 @@
+#pylint: disable=invalid-name
 """ Empty class temporary left for compatibility with previous interfaces """
-import DirectEnergyConversion as DRC
-import CommonFunctions as common
-import time as time
+import Direct.DirectEnergyConversion as DRC
 from mantid.simpleapi import *
-from mantid import api
 from mantid.kernel import funcreturns
 
 
@@ -15,7 +13,7 @@ Reducer = None
 #DRC=reload(DRC)
 def getReducer():
     # needed on Linux to adhere to correct reference return
-    global Reducer;
+    global Reducer
     return Reducer
 
 def setup(instname=None,reload=False):
@@ -32,11 +30,11 @@ def setup(instname=None,reload=False):
         instname = config['default.instrument']
 
 
-    if not (Reducer is None) :
-        old_name=Reducer.prop_man.instr_name;
+    if not Reducer is None :
+        old_name=Reducer.prop_man.instr_name
         if  old_name.upper()[0:3] == instname.upper()[0:3] :
             if not reload :
-               return  # has been already defined
+                return  # has been already defined
 
     Reducer = DRC.setup_reducer(instname,reload)
 
@@ -129,22 +127,22 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 
     """
     global Reducer
-    if Reducer is None or Reducer.prop_man.instrument is None:
+    if Reducer is None or Reducer.instrument is None:
         raise ValueError("instrument has not been defined, call setup(instrument_name) first.")
 # --------------------------------------------------------------------------------------------------------
 #    Deal with mandatory parameters for this and may be some top level procedures
 # --------------------------------------------------------------------------------------------------------
     if sample_run:
-        Reducer.prop_man.sample_run = sample_run
+        Reducer.sample_run = sample_run
     try:
-         n,r=funcreturns.lhs_info('both')
-         wksp_out=r[0]
+        n,r=funcreturns.lhs_info('both')
+        wksp_out=r[0]
     except:
-         wksp_out = Reducer.prop_man.get_sample_ws_name();
+        wksp_out = Reducer.prop_man.get_sample_ws_name()
     #
     res = Reducer.convert_to_energy(wb_run,sample_run,ei_guess,rebin,map_file,monovan_run,second_wb,**kwargs)
     #
-    results_name = res.name();
+    results_name = res.name()
     if results_name != wksp_out:
         RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=wksp_out)
 
@@ -241,13 +239,15 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
     kwargs['sample_rmm']         = samp_rmm
 
     if sample_run:
-        Reducer.prop_man.sample_run = sample_run
+        Reducer.sample_run = sample_run
+
     try:
         n,r=funcreturns.lhs_info('both')
         results_name=r[0]
-
     except:
-        results_name = Reducer.prop_man.get_sample_ws_name();
+        results_name = Reducer.prop_man.get_sample_ws_name()
+    if wb_for_run == wb_for_monovanadium: # wb_for_monovanadium property does not accept duplicated workspace
+        wb_for_monovanadium = None        # if this value is none, it is constructed to be equal to wb_for_run
 
     wksp_out = arb_units(wb_for_run,sample_run,ei_guess,rebin,map_file,monovan_run,wb_for_monovanadium,**kwargs)
 

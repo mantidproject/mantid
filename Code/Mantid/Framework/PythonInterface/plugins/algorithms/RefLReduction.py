@@ -1,7 +1,6 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.simpleapi import *
-from numpy import zeros, shape, arange
-import math
 
 # import sfCalculator
 import sys
@@ -93,6 +92,28 @@ class RefLReduction(PythonAlgorithm):
         # retrieve settings from GUI
         print '-> Retrieving settings from GUI'
 
+        #print 'RunNumbers: '  + str(self.getProperty("RunNumbers").value)
+        #print 'NormalizationRunNumber: ' + str(self.getProperty("NormalizationRunNumber").value)
+        #print 'SignalPeakPixelRange: ' + str(self.getProperty("SignalPeakPixelRange").value)
+        #print 'SubtractSignalBackground: ' + str(self.getProperty("SubtractSignalBackground").value)
+        #print 'SignalBackgroundPixelRange: ' + str(self.getProperty("SignalBackgroundPixelRange").value)
+        #print "NormFlag: " + str(self.getProperty("NormFlag").value)
+        #print "NormPeakPixelRange: " + str(self.getProperty("NormPeakPixelRange").value)
+        #print "NormBackgroundPixelRange: " + str(self.getProperty("NormBackgroundPixelRange").value)
+        #print "SubtractNormBackground: " + str(self.getProperty("SubtractNormBackground").value)
+        #print "LowResDataAxisPixelRangeFlag: " + str(self.getProperty("LowResDataAxisPixelRangeFlag").value)
+        #print "LowResDataAxisPixelRange: " + str(self.getProperty("LowResDataAxisPixelRange").value)
+        #print "LowResNormAxisPixelRangeFlag: " + str(self.getProperty("LowResNormAxisPixelRangeFlag").value)
+        #print "LowResNormAxisPixelRange: " + str(self.getProperty("LowResNormAxisPixelRange").value)
+        #print "TOFRange: " + str(self.getProperty("TOFRange").value)
+        #print "IncidentMediumSelected: " + str(self.getProperty("incidentMediumSelected").value)
+        #print "GeometryCorrectionFlag: " + str(self.getProperty("GeometryCorrectionFlag").value)
+        #print "QMin: " + str(self.getProperty("QMin").value)
+        #print "QStep: " + str(self.getProperty("QStep").value)
+        #print "ScalingFactorFile: " + str(self.getProperty("ScalingFactorFile").value)
+        #print "SlitsWidthFlag: " + str(self.getProperty("SlitsWidthFlag").value)
+        #print "OutputWorkspace: " + str(self.getProperty("OutputWorkspace").value)
+
         # DATA
         dataRunNumbers = self.getProperty("RunNumbers").value
         dataPeakRange = self.getProperty("SignalPeakPixelRange").value
@@ -124,7 +145,7 @@ class RefLReduction(PythonAlgorithm):
 
         #GENERAL
         TOFrangeFlag = self.getProperty("TofRangeFlag")
-        if (TOFrangeFlag):
+        if TOFrangeFlag:
             TOFrange = self.getProperty("TOFRange").value #microS
         else:
             TOFrange = [0, 200000]
@@ -137,8 +158,8 @@ class RefLReduction(PythonAlgorithm):
 
         qMin = self.getProperty("QMin").value
         qStep = self.getProperty("QStep").value
-        if (qStep > 0): #force logarithmic binning
-            qStep = -qStep;
+        if qStep > 0: #force logarithmic binning
+            qStep = -qStep
 
         # angle offset
         angleOffsetDeg = self.getProperty("AngleOffset").value
@@ -186,8 +207,8 @@ class RefLReduction(PythonAlgorithm):
         error_0 = 1. / pc
 
         # rebin data
-        ws_histo_data = wks_utility.rebinNeXus(ws_event_data,
-                              [binTOFrange[0], binTOFsteps, binTOFrange[1]],
+        ws_histo_data = wks_utility.rebinNeXus(ws_event_data,\
+                              [binTOFrange[0], binTOFsteps, binTOFrange[1]],\
                               'data')
 
         # get q range
@@ -197,18 +218,18 @@ class RefLReduction(PythonAlgorithm):
         [first_slit_size, last_slit_size] = wks_utility.getSlitsSize(ws_histo_data)
 
         # keep only TOF range
-        ws_histo_data = wks_utility.cropTOF(ws_histo_data,
-                                      TOFrange[0],
-                                      TOFrange[1],
+        ws_histo_data = wks_utility.cropTOF(ws_histo_data,\
+                                      TOFrange[0],\
+                                      TOFrange[1],\
                                       'data')
 
         # normalize by current proton charge
         ws_histo_data = wks_utility.normalizeNeXus(ws_histo_data, 'data')
 
         # integrate over low resolution range
-        [data_tof_axis, data_y_axis, data_y_error_axis] = wks_utility.integrateOverLowResRange(ws_histo_data,
-                                                            dataLowResRange,
-                                                            'data',
+        [data_tof_axis, data_y_axis, data_y_error_axis] = wks_utility.integrateOverLowResRange(ws_histo_data,\
+                                                            dataLowResRange,\
+                                                            'data',\
                                                             is_nexus_detector_rotated_flag)
 
 #        #DEBUG ONLY
@@ -248,36 +269,36 @@ class RefLReduction(PythonAlgorithm):
         error_0 = 1. / pc
 
         # rebin normalization
-        ws_histo_norm = wks_utility.rebinNeXus(ws_event_norm,
-                              [binTOFrange[0], binTOFsteps, binTOFrange[1]],
+        ws_histo_norm = wks_utility.rebinNeXus(ws_event_norm,\
+                              [binTOFrange[0], binTOFsteps, binTOFrange[1]],\
                               'normalization')
 
         # keep only TOF range
-        ws_histo_norm = wks_utility.cropTOF(ws_histo_norm,
-                                      TOFrange[0],
-                                      TOFrange[1],
+        ws_histo_norm = wks_utility.cropTOF(ws_histo_norm,\
+                                      TOFrange[0],\
+                                      TOFrange[1],\
                                       'normalization')
 
         # normalize by current proton charge
         ws_histo_norm = wks_utility.normalizeNeXus(ws_histo_norm, 'normalization')
 
         # integrate over low resolution range
-        [norm_tof_axis, norm_y_axis, norm_y_error_axis] = wks_utility.integrateOverLowResRange(ws_histo_norm,
-                                                            normLowResRange,
-                                                            'normalization',
+        [norm_tof_axis, norm_y_axis, norm_y_error_axis] = wks_utility.integrateOverLowResRange(ws_histo_norm,\
+                                                            normLowResRange,\
+                                                            'normalization',\
                                                             is_nexus_detector_rotated_flag)
 
         # substract background
-        [norm_y_axis, norm_y_error_axis] = wks_utility.substractBackground(norm_tof_axis[0:-1],
-                                                        norm_y_axis,
-                                                        norm_y_error_axis,
-                                                        normPeakRange,
-                                                        normBackFlag,
-                                                        normBackRange,
-                                                        error_0,
+        [norm_y_axis, norm_y_error_axis] = wks_utility.substractBackground(norm_tof_axis[0:-1],\
+                                                        norm_y_axis,\
+                                                        norm_y_error_axis,\
+                                                        normPeakRange,\
+                                                        normBackFlag,\
+                                                        normBackRange,\
+                                                        error_0,\
                                                         'normalization')
 
-        [av_norm, av_norm_error] = wks_utility.fullSumWithError(norm_y_axis,
+        [av_norm, av_norm_error] = wks_utility.fullSumWithError(norm_y_axis,\
                                                            norm_y_error_axis)
 
 #        ## DEBUGGING ONLY
@@ -298,7 +319,7 @@ class RefLReduction(PythonAlgorithm):
 #                                         final_data_y_error_axis)
 
         # apply Scaling factor
-        [tof_axis_full, y_axis, y_error_axis] = wks_utility.applyScalingFactor(tof_axis_full,
+        [tof_axis_full, y_axis, y_error_axis, isSFfound] = wks_utility.applyScalingFactor(tof_axis_full,
                                                                                final_data_y_axis,
                                                                                final_data_y_error_axis,
                                                                                incidentMedium,
@@ -362,7 +383,7 @@ class RefLReduction(PythonAlgorithm):
 
 
         # cleanup data
-        [final_y_axis, final_y_error_axis] = wks_utility.cleanupData1D(final_y_axis,
+        [final_y_axis, final_y_error_axis] = wks_utility.cleanupData1D(final_y_axis,\
                                                                         final_error_axis)
 
 
@@ -374,9 +395,12 @@ class RefLReduction(PythonAlgorithm):
         final_workspace = wks_utility.createFinalWorkspace(final_x_axis,
                                                            final_y_axis,
                                                            final_y_error_axis,
-                                                           name_output_ws)
+                                                           name_output_ws,
+                                                           ws_event_data)
+        AddSampleLog(Workspace=name_output_ws,
+                     LogName='isSFfound',
+                     LOgText=str(isSFfound))
 
         self.setProperty('OutputWorkspace', mtd[name_output_ws])
-
 
 AlgorithmFactory.subscribe(RefLReduction)

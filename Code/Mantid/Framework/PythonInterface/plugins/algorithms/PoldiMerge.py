@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.kernel import StringArrayProperty, Direction
 from mantid.simpleapi import *
 from mantid.api import *
@@ -31,7 +32,8 @@ class PoldiMerge(PythonAlgorithm):
                                                direction=Direction.Output),
                              doc="Workspace where all counts from the list workspaces have been added")
 
-        self.declareProperty("CheckInstruments", True, "If checked, only workspaces with equal instrument parameters are merged. Do not disable without a very good reason.")
+        self.declareProperty("CheckInstruments", True, "If checked, only workspaces with equal"\
+                                "instrument parameters are merged. Do not disable without a very good reason.")
 
     def PyExec(self):
         self.checkInstruments = self.getProperty("CheckInstruments").value
@@ -93,7 +95,7 @@ class PoldiMerge(PythonAlgorithm):
         # This is related to ticket #10090, where a new field in new data is used
         # when that ticket is finished, new data files will not need this
         # cleanup method anymore.
-        return np.floor((chopperSpeed + 250.0) / 500.0) * 500.0;
+        return np.floor((chopperSpeed + 250.0) / 500.0) * 500.0
 
     def instrumentsMatch(self, leftWorkspace, rightWorkspace):
         leftInstrument = leftWorkspace.getInstrument()
@@ -102,7 +104,7 @@ class PoldiMerge(PythonAlgorithm):
         return (not self.checkInstruments) or self.instrumentParametersMatch(leftInstrument, rightInstrument)
 
     def instrumentParametersMatch(self, leftInstrument, rightInstrument):
-        if not (leftInstrument.getDetector(0).getPos() == rightInstrument.getDetector(0).getPos()):
+        if not leftInstrument.getDetector(0).getPos() == rightInstrument.getDetector(0).getPos():
             raise RuntimeError("Detector positions are not equal")
 
         for parameterTuple in self.comparedInstrumentParameters:
@@ -112,7 +114,7 @@ class PoldiMerge(PythonAlgorithm):
             if abs(leftValue - rightValue) > 1e-12:
                 raise RuntimeError("Instrument parameter '%s'/'%s' does not match" % parameterTuple)
 
-        return True;
+        return True
 
     def getParameterValue(self, instrument, parameterTuple):
         return instrument.getComponentByName(parameterTuple[0]).getNumberParameter(parameterTuple[1])[0]
@@ -137,17 +139,17 @@ class PoldiMerge(PythonAlgorithm):
         raise RuntimeError("Workspaces can not be merged. %s. Aborting." % (str(error)))
 
     def getWorkspacesRecursive(self, workspace):
-      returnList = []
-      if isinstance(workspace, WorkspaceGroup):
-        for i in range(workspace.getNumberOfEntries()):
-          returnList += self.getWorkspacesRecursive(workspace.getItem(i))
+        returnList = []
+        if isinstance(workspace, WorkspaceGroup):
+            for i in range(workspace.getNumberOfEntries()):
+                returnList += self.getWorkspacesRecursive(workspace.getItem(i))
 
-      elif isinstance(workspace, MatrixWorkspace):
-        returnList.append(workspace)
+        elif isinstance(workspace, MatrixWorkspace):
+            returnList.append(workspace)
 
-      else:
-        raise RuntimeError("Can only merge MatrixWorkspaces, this is " + type(workspace))
+        else:
+            raise RuntimeError("Can only merge MatrixWorkspaces, this is " + type(workspace))
 
-      return returnList
+        return returnList
 
 AlgorithmFactory.subscribe(PoldiMerge)

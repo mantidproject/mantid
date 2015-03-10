@@ -5,14 +5,15 @@
 
 <!-- files properties : -->
 
+<!-- Specify that the detector positions should be taken from the data file (Not used TODO!) -->
+<parameter name="det-pos-source" type="string">
+  <value val="datafile"/>
+</parameter>
+
 <!-- The file which defines proper (calibrated) detector positions 
      if None - it is undefined -->
 <parameter name="det_cal_file" type="string">
    <value val="det_LET_cycle12-3.dat"/>
-</parameter>
-<!-- Specify that the detector positions should be taken from the data file (Not used TODO!) -->
-<parameter name="det-pos-source" type="string">
-  <value val="datafile"/>
 </parameter>
 
 <!-- The file which defines detectors to spectra mapping; File extension has to be specified here but filepath not
@@ -21,9 +22,11 @@
    <value val="LET_one2one_123.map"/>
 </parameter>
 
-<!-- Extension of the data files obtained from DAE -->
+<!-- Prefered extension of the data files obtained from DAE, e.g. what to prefer if two 
+     files with the same name and different extension are found
+ -->
 <parameter name="data_file_ext" type="string">
-   <value val=".raw"/>
+   <value val=".nxs"/>
 </parameter>
 <!-- The name of the hard mask file to use together with diag masking -->
 <parameter name="hard_mask_file" type="string">
@@ -58,14 +61,10 @@
 </parameter>
 
 <!-- Monitor used to estimate total current on the sample  while normalizing by monitor 1.  -->
-<parameter name="norm-mon1-spec">
+<parameter name="norm-mon1-spec" >
   <value val="73729"/>
 </parameter>
   
-<!-- Monitor after chopper used to estimate total current on the sample, if normalization is done on monitor 2  -->
-<parameter name="norm-mon2-spec"  type="int">
-    <value val="73729"/>
-</parameter>
 
 <!-- Time interval used for integration to estimate current on the sample 
     This interval is usually taken around the monitor peak-->
@@ -77,6 +76,26 @@
 </parameter>
 <parameter name="norm_mon_integration_range"  type="string">
   <value val="norm-mon1-min:norm-mon1-max"/>
+</parameter>
+
+<!-- Monitor after chopper used to estimate total current on the sample, if normalization is done on monitor 2  -->
+<parameter name="norm-mon2-spec"  type = "int" >
+    <value val="73729"/>
+</parameter>
+
+<!-- Relative energy range (wrt. to the incident energy) in which monitor 2 signal is present and the integration to 
+     caluclate monitor-2 current occurs   -->
+<parameter name="mon2_norm_energy_range" type = "string">
+    <value val="0.8,1.2"/>
+</parameter>
+
+<!-- Usually one wants to avoid loading monitors together with data except in special cases. One of this cases is 
+     MARI which monitors numbers are in the beginning of the spectra. If one loads them separately, 
+     spectra numbers change and ISIS hard masks (msk) prepared for workspace with monitors become invalid. 
+     This parameter is actual until Mantid Masking change
+  -->
+<parameter name="load_monitors_with_workspace"  type="bool">
+<value val="False"/>
 </parameter>
 
 
@@ -103,15 +122,23 @@
 <parameter name="spectra_to_monitors_list"  type="string">
   <value val="5506"/>
 </parameter>
-<!-- Usually one wants to avoid loading monitors together with data except in special cases. One of this cases is 
-     MARI which monitors numbers are in the beginning of the spectra. If one loads them separately, 
-     spectra numbers change and ISIS hard masks (msk) prepared for workspace with monitors become invalid. 
-     This parameter is actual until Mantid Masking change     
-  -->
-<parameter name="load_monitors_with_workspace"  type="bool">
-<value val="False"/>
+
+
+<!-- List of two spectra corresponding to the detectors which are closest and furtherest from the sample.
+     These detectors locations are used to identify TOF range, contributing into each energy range 
+     in multirep mode  -->
+<parameter name="multirep_tof_specta_list"  type="string">
+    <value val="12416,21761"/>
 </parameter>
 
+
+<!-- by default getEi looks for peaks within (1+-0.1)*TOF_GUES range where TOF_GUES is evaluated on the basis of ei guess.
+    If the peaks are very narrow, or there are a lot of them very close to each other, 
+    this value can be reduced. For example, such situation happens on MARI for very high incident energies Ei=1800.
+ -->
+<parameter name="ei_mon_peak_search_range">
+   <value val="0.1"/>
+</parameter>
 
 
 <parameter name="scale-factor">
@@ -241,7 +268,7 @@
 </parameter>
 <!-- True if the bleed tests should be run use_bleeding-->
 <parameter name="diag_bleed_test"  type="bool">
-    <value val="True"/>
+    <value val="False"/>
 </parameter>
 
 <!-- **************************************** DIAGNOSTICS DEFAILTS END ****************************************    -->
@@ -357,13 +384,23 @@
 </parameter>
 
 
-
 <!-- If this parameter is set to true, dgreduce will try to load mask from the mask file
      correspondent to the run if finds it and uses this mask as hard mask only (does not run diagnostics). 
      If such file has not been found, it will run diagnostics and save the masks into mask file for reuse 
      Hard Mask file, provided separately or as additional hard mask file is ignored in this case -->
 <parameter name="save_and_reuse_masks"  type="bool">
    <value val="False"/>
+</parameter>
+
+<!-- The semicolon separated list of possible log names, containing information on crystl rotation.
+     First found log will be used togethere with motor_offset to identify crystal rotation 
+     (psi in Horace) -->
+<parameter name="motor_log_names"  type="string">
+   <value val="CCR_ROT;wccr"/>
+</parameter>
+<!-- Initial value used to identify crytsal rotation angle psi=motor_offset+wccr.timeAverageValue()  -->
+<parameter name="motor_offset">
+   <value val="None"/>
 </parameter>
 
 
@@ -405,7 +442,7 @@
        bleed_maxrate = diag_bleed_maxrate;
        bleed_pixels  = diag_bleed_pixels;
        deltaE_mode =  deltaE-mode;
-       ei-mon1-spec=ei_mon1_spec;       
+       ei-mon1-spec=ei_mon1_spec;
        ei-mon2-spec = test_ei2_mon_spectra=ei_mon2_spec;
        ei_mon_spectra=test_mon_spectra_composite"
     />
