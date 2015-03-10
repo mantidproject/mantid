@@ -43,8 +43,8 @@ Output:
 
 .. testoutput:: CalculateDIFCExample
 
-  The output workspace has 101378 spectra
-  DIFC of pixel 100 is 1220
+  The output workspace has 101376 spectra
+  DIFC of pixel 100 is 1210
 
 .. categories::
 
