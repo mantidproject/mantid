@@ -410,13 +410,20 @@ class RunDescriptor(PropDescriptor):
                 self._clear_all()
                 # clear all would invalidate run number and workspace number
                 self._run_number = int(run_number)
+                self._ws_name = self._build_ws_name()
                 self._run_file_path = file_path
                 self._fext = fext
-                self._ws_name = self._build_ws_name()
             else: # nothing to do, there is workspace, which corresponds to this run number
                 # and it may be already loaded (may be not).  Just nullify run list
                                  # in case of previous workspace name came from a list.
                 self._run_list = None
+                if not self._ws_name in mtd:
+                    # Change existing file path and file extension if alternatives are provided
+                    if len(file_path)>0:
+                        self._run_file_path = file_path
+                    if not fext is None:
+                        self._fext = fext
+
 
 
 #--------------------------------------------------------------------------------------------------------------------

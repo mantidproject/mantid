@@ -1,6 +1,6 @@
-""" Sample LET reduction script """ 
+""" Sample LET reduction script """
 import os
-os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 
 
 from Direct.ReductionWrapper import *
@@ -291,4 +291,4 @@ if __name__=="__main__":
     #if not rez:
     #   raise RuntimeError("validation failed with error: {0}".format(mess))
     #else:
-    #   print "ALL Fine" 
+    #   print "ALL Fine"
