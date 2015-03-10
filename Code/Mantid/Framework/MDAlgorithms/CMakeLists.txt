@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/CentroidPeaksMD2.cpp
 	src/CloneMDWorkspace.cpp
 	src/CompareMDWorkspaces.cpp
+	src/ConvertCWPDMDToSpectra.cpp
 	src/ConvertSpiceDataToRealSpace.cpp
 	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToDiffractionMDWorkspace.cpp
@@ -95,6 +96,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CentroidPeaksMD2.h
 	inc/MantidMDAlgorithms/CloneMDWorkspace.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
+	inc/MantidMDAlgorithms/ConvertCWPDMDToSpectra.h
 	inc/MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h
@@ -180,6 +182,7 @@ set ( TEST_FILES
 	CentroidPeaksMDTest.h
 	CloneMDWorkspaceTest.h
 	CompareMDWorkspacesTest.h
+	ConvertCWPDMDToSpectraTest.h
 	ConvertEventsToMDTest.h
 	ConvertSpiceDataToRealSpaceTest.h
 	ConvertToDetectorFaceMDTest.h

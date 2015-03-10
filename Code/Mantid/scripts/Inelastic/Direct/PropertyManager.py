@@ -99,7 +99,9 @@ class PropertyManager(NonIDF_Properties):
         object.__setattr__(self,class_dec+'file_properties',['det_cal_file','map_file','hard_mask_file'])
         object.__setattr__(self,class_dec+'abs_norm_file_properties',['monovan_mapfile'])
 
-        # properties with allowed values
+        # Clear caches on construction to make class more like usual class then singleton (and cashes are dangerous)
+        PropertyManager.mono_correction_factor.set_cash_mono_run_number(None)
+
 
     def _convert_params_to_properties(self,param_list,detine_subst_dict=True,descr_list=[]):
         """ method processes parameters obtained from IDF and modifies the IDF properties
@@ -183,7 +185,8 @@ class PropertyManager(NonIDF_Properties):
    # ----------------------------
     def __getattr__(self,name):
         """ Overloaded get method, disallowing non-existing properties being get but allowing
-          a property been called with  different names specified in substitution dictionary. """
+          a property been called with  different names specified in substitution dictionary.
+       """
 
         if name in self.__subst_dict:
             name = self.__subst_dict[name]
@@ -204,11 +207,11 @@ class PropertyManager(NonIDF_Properties):
     #
     det_cal_file    = DetCalFile()
     #
-    map_file        = MapMaskFile('.map',"Spectra to detector mapping file for the sample run")
+    map_file        = MapMaskFile('map_file','.map',"Spectra to detector mapping file for the sample run")
     #
-    monovan_mapfile = MapMaskFile('.map',"Spectra to detector mapping file for the monovanadium integrals calculation")
+    monovan_mapfile = MapMaskFile('monovan_map_file','.map',"Spectra to detector mapping file for the monovanadium integrals calculation")
     #
-    hard_mask_file  = MapMaskFile('.msk',"Hard mask file")
+    hard_mask_file  = MapMaskFile('hard_mask_file','.msk',"Hard mask file")
     #
     monovan_integr_range     = MonovanIntegrationRange()
     #
@@ -230,13 +233,20 @@ class PropertyManager(NonIDF_Properties):
     #
     multirep_tof_specta_list=MultirepTOFSpectraList()
     #
-    mono_correction_factor = MonoCorrectionFactor(NonIDF_Properties.incident_energy)
-
+    mono_correction_factor = MonoCorrectionFactor(NonIDF_Properties.incident_energy,
+                                                  NonIDF_Properties.monovan_run)
+    # property responsible for summing runs
+    sum_runs = SumRuns(NonIDF_Properties.sample_run)
+    # properties responsible for rotation angle
+    motor_log_names= MotorLogName()
+    motor_offset   = MotorOffset()
+    psi = RotationAngle(motor_log_names,motor_offset)
 #----------------------------------------------------------------------------------------------------------------
     def getChangedProperties(self):
         """ method returns set of the properties changed from defaults """
         decor_prop = '_'+type(self).__name__+'__changed_properties'
         return self.__dict__[decor_prop]
+    #
     def setChangedProperties(self,value=set([])):
         """ Method to clear changed properties list"""
         if isinstance(value,set):
@@ -244,14 +254,14 @@ class PropertyManager(NonIDF_Properties):
             self.__dict__[decor_prop] =value
         else:
             raise KeyError("Changed properties can be initialized by appropriate properties set only")
-
+    #
     @property
     def relocate_dets(self) :
         if self.det_cal_file != None:
             return True
         else:
             return False
-
+    #
     def set_input_parameters_ignore_nan(self,**kwargs):
         """ Like similar method set_input_parameters this one is used to
             set changed parameters from dictionary of parameters.
@@ -261,40 +271,20 @@ class PropertyManager(NonIDF_Properties):
             set data from a function with a list of given parameters (*args vrt **kwargs),
             with some parameters missing.
         """
-        # if sum is in parameters one needs to set it first
-        if 'sum_runs' in kwargs and not kwargs['sum_runs'] is None:
-            self.sum_runs = kwargs['sum_runs']
-            del kwargs['sum_runs']
-        if 'sum' in kwargs and not kwargs['sum'] is None:
-            self.sum_runs = kwargs['sum']
-            del kwargs['sum']
-
 
         for par_name,value in kwargs.items() :
             if not value is None:
                 setattr(self,par_name,value)
-
-
-
+    #
     def set_input_parameters(self,**kwargs):
         """ Set input properties from a dictionary of parameters
 
         """
-        # if sum is in parameters one needs to set it first to interpret
-        #
-        if 'sum_runs' in kwargs :
-            self.sum_runs = kwargs['sum_runs']
-            del kwargs['sum_runs']
-        if 'sum' in kwargs :
-            self.sum_runs = kwargs['sum']
-            del kwargs['sum']
-
-
         for par_name,value in kwargs.items() :
             setattr(self,par_name,value)
 
         return self.getChangedProperties()
-
+    #
     def get_used_monitors_list(self):
         """ Method returns list of monitors ID used during reduction """
 
@@ -313,8 +303,7 @@ class PropertyManager(NonIDF_Properties):
         used_mon.add(self.ei_mon2_spec)
 
         return used_mon
-
-
+    #
     def get_diagnostics_parameters(self):
         """ Return the dictionary of the properties used in diagnostics with their values defined in IDF
 
@@ -335,7 +324,7 @@ class PropertyManager(NonIDF_Properties):
                 self.log('--- Diagnostics property {0} is not found in instrument properties. Default value: {1} is used instead \n'.format(key,value),'warning')
 
         return result
-
+    #
     def update_defaults_from_instrument(self,pInstrument,ignore_changes=False):
         """ Method used to update default parameters from the same instrument (with different parameters).
 
@@ -483,41 +472,153 @@ class PropertyManager(NonIDF_Properties):
         else:
             return None
     #end
+    def _get_properties_with_files(self):
+        """ Method returns list of properties, which may have
+            files as their values
 
-    def _check_file_exist(self,file_name):
-        file_path = FileFinder.getFullPath(file)
-        if len(file_path) == 0:
-            try:
-                file_path = common.find_file(file)
-            except:
-                file_path =''
-
-
-    def _check_necessary_files(self,monovan_run):
-        """ Method verifies if all files necessary for a run are available.
-
-           useful for long runs to check if all files necessary for it are present/accessible
+            it does not include sample run, as this one will be
+            treated separately.
         """
 
-        def check_files_list(files_list):
-            file_missing = False
-            for prop in files_list :
-                file = getattr(self,prop)
-                if not (file is None) and isinstance(file,str):
-                    file_path = self._check_file_exist(file)
-                    if len(file_path)==0:
-                        self.log(" Can not find file ""{0}"" for property: {1} ".format(file,prop),'error')
-                        file_missing=True
+        run_files_prop=['wb_run','monovan_run','mask_run','wb_for_monovan_run','second_white']
+        map_mask_prop =['det_cal_file','map_file','hard_mask_file']
 
-            return file_missing
+        abs_units = not self.monovan_run is None
+        files_to_check =[]
+        # run files to check
+        for prop_name in run_files_prop:
+            theProp = getattr(PropertyManager,prop_name)
+            if theProp.has_own_value():
+                if theProp.is_existing_ws(): # it is loaded workspace
+                    continue   # we do not care if it has file or not
+                val = theProp.__get__(self,PropertyManager)
+                if not val is None :
+                    files_to_check.append(prop_name)
 
-        base_file_missing = check_files_list(self.__file_properties)
-        abs_file_missing=False
-        if not monovan_run is None:
-            abs_file_missing = check_files_list(self.__abs_norm_file_properties)
+        # other files to check:
+        for prop_name in map_mask_prop:
+            val = getattr(self,prop_name)
+            if not(val is None or isinstance(val,api.Workspace)):
+                files_to_check.append(prop_name)
+        # Absolute units files (only one?)
+        if abs_units:
+            val = self.monovan_mapfile
+            if not val is None :
+                files_to_check.append('monovan_mapfile')
+        #
+        return files_to_check
+    #
+    def find_files_to_sum(self,num_files=None):
+        """ method searches for run files in run list to sum and returns
+            list of runs with run-files missing or ok and empty list if all files
+            are there
 
-        if  base_file_missing or abs_file_missing:
-            raise RuntimeError(" Files needed for the run are missing ")
+            if num_files is not None, find specified number of files out of total
+            file list to sum
+        """
+        # this returns only runs, left to sum with current sample_run sum settings
+        runs,sum_ws,added      = PropertyManager.sample_run.get_runs_to_sum(None,num_files)
+        if len(runs) == 0:
+            return (True,[],[])
+
+        ok,not_found_list,found_list = PropertyManager.sample_run.find_run_files(runs)
+        return (ok,not_found_list,found_list)
+    #
+    def _check_file_properties(self):
+        """ Method verifies if all files necessary for a reduction are available.
+
+            useful for long runs to check if all files necessary for it are
+            present/accessible before starting the run
+        """
+        file_prop_names = self._get_properties_with_files()
+        file_errors={}
+        for prop_name in file_prop_names:
+            theProp = getattr(PropertyManager,prop_name)
+            ok,file = theProp.find_file(be_quet=True)
+            if not ok:
+                file_errors[prop_name]=file
+
+        if self.sum_runs :
+            ok,missing,found=self.find_files_to_sum()
+            if not ok and not self.cashe_sum_ws:
+                file_errors['missing_runs_toSum']=str(missing)
+
+        result = (len(file_errors)==0)
+        return (result,file_errors)
+    #
+    def _check_ouptut_dir(self):
+        """ check if default save directory is accessible for writing """
+        targ_dir = config['defaultsave.directory']
+        test_file = os.path.join(targ_dir,'test_file.txt')
+        try:
+            fp = open(test_file,'w')
+            fp.close()
+            os.remove(test_file)
+            return (True,'')
+        except:
+            return (False,'Can not write to default save directory {0}.\n Reduction results can be lost'.format(targ_dir))
+    #
+    def validate_properties(self,fail_on_errors=True):
+        """ Method validates if some properties values for
+            properties set up in the property manager are correct
+        """
+
+        if self.mono_correction_factor: # disable check for monovan_run, as it is not used if mono_correction provided
+            PropertyManager.monovan_run._in_cash = True  # as soon as monovan_run is set up (mono correction disabled)
+        # this will be dropped
+        error_list={}
+        error_level=0
+
+        ok,fail_prop = self._check_file_properties()
+        if not ok :
+            for prop in fail_prop:
+                mess = "*** ERROR  : properties : {0} -->{1}".format(prop,fail_prop[prop])
+                if fail_on_errors:
+                    self.log(mess,'warning')
+                else:
+                    error_list[prop]=mess
+            error_level=2
+
+        ok,mess= self._check_ouptut_dir()
+        if not ok:
+            mess = '*** WARNING: saving results: --> {1}'.format(mess)
+
+            if fail_on_errors:
+                self.log(mess,'warning')
+            else:
+                error_list['file_output']=mess
+            error_level=max(1,error_level)
+
+        # verify interconnected properties
+        changed_prop = self.getChangedProperties()
+        for prop in changed_prop:
+            try:
+                theProp =getattr(PropertyManager,prop)
+            except: # not all changed properties are property manager properties
+                continue # we are not validating them
+            try:
+                ok,sev,message = theProp.validate(self,PropertyManager)
+                if not ok:
+                    error_level=max(sev,error_level)
+                    if sev == 1:
+                        base = '*** WARNING: properties : {0} --> {1}'
+                    else:
+                        base = '*** ERROR  : properties : {0} --> {1}'
+                    mess =  base.format(prop,message)
+                    if fail_on_errors:
+                        self.log(mess,'warning')
+                    else:
+                        error_list[prop]=mess
+            except: # its simple dictionary value, which do not have validator or
+                pass # other property without validator
+        #end
+        if error_level>1 and fail_on_errors:
+            raise RuntimeError('*** Invalid properties found. Can not run convert_to energy')
+        if error_level>0:
+            OK = False
+        else:
+            OK = True
+        return (OK,error_level,error_list)
     #
     def _check_monovan_par_changed(self):
         """ method verifies, if properties necessary for monovanadium reduction have indeed been changed  from defaults """
@@ -581,8 +682,8 @@ class PropertyManager(NonIDF_Properties):
 
         save_dir = config.getString('defaultsave.directory')
         self.log("****************************************************************",log_level)
-        if self.monovan_run != None and not 'van_mass' in changed_Keys:                                   # This output is
-            self.log("*** Monochromatic vanadium mass used : {0} ".format(self.van_mass),log_level) # Adroja request from may 2014
+        if self.monovan_run != None and not 'van_mass' in changed_Keys:  # This output is Adroja request from may 2014
+            self.log("*** Monochromatic vanadium mass used : {0} ".format(self.van_mass),log_level)
       #
         self.log("*** By default results are saved into: {0}".format(save_dir),log_level)
         self.log("*** Output will be normalized to {0}".format(self.normalise_method),log_level)

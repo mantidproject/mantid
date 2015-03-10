@@ -13,6 +13,10 @@ class DataCorrectionsWidget(BaseWidget):
     ## Widget name
     name = "Data Corrections"
 
+    _old_backgnd_sub = None
+    _old_norm_button = None
+    incident_beam_norm_grp = None
+
     def __init__(self, parent=None, state=None, settings=None, data_type=None):
         super(DataCorrectionsWidget, self).__init__(parent, state, settings, data_type=data_type)
 

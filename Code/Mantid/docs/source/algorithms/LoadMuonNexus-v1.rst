@@ -15,11 +15,12 @@ be an absolute or relative path and should have the extension .nxs or
 .NXS. If the file contains data for more than one period, a separate
 workspace will be generated for each. After the first period the
 workspace names will have "\_2", "\_3", and so on, appended to the given
-workspace name. For single period data, the optional parameters can be
+workspace name. The optional parameters can be
 used to control which spectra are loaded into the workspace. If
-spectrum\_min and spectrum\_max are given, then only that range to data
-will be loaded. If a spectrum\_list is given than those values will be
-loaded.
+SpectrumMin and SpectrumMax are given, then only that range of data
+will be loaded. If a SpectrumList is given, then those values will be
+loaded. If a range and a list are supplied, the algorithm will 
+load all the specified spectra.
 
 -  TODO get XML descriptions of Muon instruments. This data is not in
    existing Muon Nexus files.
@@ -77,5 +78,39 @@ The ChildAlgorithms used by LoadMuonNexus are:
 -  LoadIntstrumentFromNexus - this is called if the normal
    LoadInstrument fails. As the Nexus file has limited instrument data,
    this only populates a few fields.
+
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
+**Example - Load ISIS muon MUSR dataset:**
+
+.. testcode:: LoadMuonNexusOnePeriod
+
+   # Load MUSR dataset
+   ws = LoadMuonNexus(Filename="MUSR00015189.nxs",EntryNumber=1)
+   print "Workspace has ",  ws[0].getNumberHistograms(), " spectra"
+
+Output:
+
+.. testoutput:: LoadMuonNexusOnePeriod
+
+   Workspace has  64  spectra
+
+**Example - Load event nexus file with time filtering:**
+
+.. testcode:: ExLoadMuonNexusSomeSpectra
+
+   # Load some spectra
+   ws = LoadMuonNexus(Filename="MUSR00015189.nxs",SpectrumMin=5,SpectrumMax=10,EntryNumber=1)
+   print "Workspace has ",  ws[0].getNumberHistograms(), " spectra"
+
+Output:
+
+.. testoutput:: ExLoadMuonNexusSomeSpectra
+
+   Workspace has  6  spectra
+
 
 .. categories::

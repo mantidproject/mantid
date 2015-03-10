@@ -2,6 +2,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtCustomInterfaces/Indirect/IndirectDataReduction.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;

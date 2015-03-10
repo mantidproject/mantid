@@ -26,6 +26,8 @@ class FilterSetupWidget(BaseWidget):
     # Widge name
     name = "Event Filters Setup"
 
+    _metaws = None
+
     def __init__(self, parent=None, state=None, settings=None, data_type=None):
         """ Initialization
         """

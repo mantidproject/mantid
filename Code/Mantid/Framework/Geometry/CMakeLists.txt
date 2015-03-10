@@ -21,6 +21,8 @@ set ( SRC_FILES
 	src/Crystal/ScalarUtils.cpp
 	src/Crystal/SpaceGroup.cpp
 	src/Crystal/SpaceGroupFactory.cpp
+	src/Crystal/SymmetryElement.cpp
+	src/Crystal/SymmetryElementFactory.cpp
 	src/Crystal/SymmetryOperation.cpp
 	src/Crystal/SymmetryOperationFactory.cpp
 	src/Crystal/SymmetryOperationSymbolParser.cpp
@@ -129,7 +131,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h
 	inc/MantidGeometry/Crystal/NiggliCell.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
-        inc/MantidGeometry/Crystal/PeakShape.h
+	inc/MantidGeometry/Crystal/PeakShape.h
 	inc/MantidGeometry/Crystal/PointGroup.h
 	inc/MantidGeometry/Crystal/PointGroupFactory.h
 	inc/MantidGeometry/Crystal/ProductOfCyclicGroups.h
@@ -138,6 +140,8 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/ScalarUtils.h
 	inc/MantidGeometry/Crystal/SpaceGroup.h
 	inc/MantidGeometry/Crystal/SpaceGroupFactory.h
+	inc/MantidGeometry/Crystal/SymmetryElement.h
+	inc/MantidGeometry/Crystal/SymmetryElementFactory.h
 	inc/MantidGeometry/Crystal/SymmetryOperation.h
 	inc/MantidGeometry/Crystal/SymmetryOperationFactory.h
 	inc/MantidGeometry/Crystal/SymmetryOperationSymbolParser.h
@@ -313,6 +317,8 @@ set ( TEST_FILES
 	SphereTest.h
 	SurfaceFactoryTest.h
 	SurfaceTest.h
+	SymmetryElementFactoryTest.h
+	SymmetryElementTest.h
 	SymmetryOperationFactoryTest.h
 	SymmetryOperationSymbolParserTest.h
 	SymmetryOperationTest.h
