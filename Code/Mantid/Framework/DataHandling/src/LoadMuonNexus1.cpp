@@ -450,7 +450,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
     } else {
 
       if ( m_numberOfPeriods==1 ) {
-        // Simpliest case - one grouping entry per spectra
+        // Simpliest case - one grouping entry per spectrum
 
         if ( !m_entrynumber ) {
           // m_entrynumber = 0 && m_numberOfPeriods = 1 means that user did not select 
