@@ -8651,8 +8651,11 @@ void ApplicationWindow::pasteSelection()
         return;
 
       if (g->activeTool()){
-        if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector)
-          dynamic_cast<RangeSelectorTool*>(g->activeTool())->pasteSelection();
+        if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector){
+          auto rst = dynamic_cast<RangeSelectorTool*>(g->activeTool());
+          if (rst)
+            rst->pasteSelection();
+        }
       } else if (d_text_copy){
         LegendWidget *t = g->insertText(d_text_copy);
         t->move(g->mapFromGlobal(QCursor::pos()));
