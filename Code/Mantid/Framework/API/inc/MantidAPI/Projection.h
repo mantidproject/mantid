@@ -1,15 +1,18 @@
 #ifndef MANTID_API_PROJECTION_H_
 #define MANTID_API_PROJECTION_H_
 
-#include "MantidKernel/VMD.h"
+#include "MantidKernel/V3D.h"
+
 #include <stdexcept>
+
+#include <boost/shared_ptr.hpp>
 
 using namespace Mantid::Kernel;
 
 namespace Mantid {
 namespace API {
 
-/** Simple projection class for multiple dimensions (i.e. > 3).
+/** Represents 3 dimensional projections
 
   @author Harry Jeffery
   @date 2015-02-5
@@ -44,22 +47,12 @@ enum ProjectionUnit {
 
 class DLLExport Projection {
 public:
-  /// Default constructor builds with two dimensions
+  /// Default constructor builds identity projection
   Projection();
-  /// Constructor specifying the number of dimensions
-  Projection(size_t nd);
   /// Three dimensional value constructor, w is the cross product of u and v.
-  Projection(const VMD &u, const VMD &v);
+  Projection(const V3D &u, const V3D &v);
   /// Three dimensional value constructor
-  Projection(const VMD &u, const VMD &v, const VMD &w);
-  /// Four dimensional value constructor
-  Projection(const VMD &u, const VMD &v, const VMD &w, const VMD &x);
-  /// Five dimensional value constructor
-  Projection(const VMD &u, const VMD &v, const VMD &w, const VMD &x,
-             const VMD &y);
-  /// Six dimensional value constructor
-  Projection(const VMD &u, const VMD &v, const VMD &w, const VMD &x,
-             const VMD &y, const VMD &z);
+  Projection(const V3D &u, const V3D &v, const V3D &w);
   /// Copy constructor
   Projection(const Projection &other);
   /// Assignment operator
@@ -69,37 +62,28 @@ public:
   /// Retrieves the offset for the given dimension
   double getOffset(size_t nd);
   /// Retrieves the axis vector for the given dimension
-  VMD getAxis(size_t nd);
+  V3D getAxis(size_t nd);
   /// Retrives the unit of the given dimension
   ProjectionUnit getUnit(size_t nd);
   /// Set the offset for a given dimension
   void setOffset(size_t nd, double offset);
   /// Set the axis vector for a given dimension
-  void setAxis(size_t nd, VMD axis);
+  void setAxis(size_t nd, V3D axis);
   /// Set the unit for a given dimension
   void setUnit(size_t nd, ProjectionUnit unit);
-  /// Retrives the number of dimensions
-  size_t getNumDims() const { return m_nd; }
 
   // We're guaranteed to have at least 2 axes
-  VMD &U() { return m_dimensions[0]; }
-  VMD &V() { return m_dimensions[1]; }
-  VMD &W() {
-    if (m_nd >= 3)
-      return m_dimensions[2];
-    else
-      throw std::invalid_argument("invalid axis");
-  }
+  V3D &U() { return m_dimensions[0]; }
+  V3D &V() { return m_dimensions[1]; }
+  V3D &W() { return m_dimensions[2]; }
 
 protected:
-  /// Number of dimensions
-  size_t m_nd;
-  /// A vector of the dimensions
-  VMD *m_dimensions;
-  /// A vector of the offsets for each dimension
-  double *m_offsets;
-  /// A vector of the units for each dimension
-  ProjectionUnit *m_units;
+  /// The dimensions
+  V3D m_dimensions[3];
+  /// The offsets for each dimension
+  double m_offsets[3];
+  /// The units for each dimension
+  ProjectionUnit m_units[3];
 };
 
 typedef boost::shared_ptr<Projection> Projection_sptr;

@@ -12,52 +12,28 @@ class ProjectionTest : public CxxTest::TestSuite {
 public:
   void test_blank_constructor() {
     Projection p;
-    TS_ASSERT_EQUALS(p.getNumDims(), 2);
     TS_ASSERT_EQUALS(p.getOffset(0), 0.0);
-    TS_ASSERT_EQUALS(p.getAxis(0).getNumDims(), 2);
+    TS_ASSERT_EQUALS(p.U(), V3D(1,0,0));
+    TS_ASSERT_EQUALS(p.V(), V3D(0,1,0));
+    TS_ASSERT_EQUALS(p.W(), V3D(0,0,1));
     TS_ASSERT_EQUALS(p.getUnit(0), RLU);
-  }
-
-  void test_ndim_constructor() {
-    Projection p2(2), p3(3), p4(4);
-    TS_ASSERT_EQUALS(p2.getNumDims(), 2);
-    TS_ASSERT_EQUALS(p3.getNumDims(), 3);
-    TS_ASSERT_EQUALS(p4.getNumDims(), 4);
-
-    TS_ASSERT_EQUALS(p2.getAxis(0).getNumDims(), 2);
-    TS_ASSERT_EQUALS(p3.getAxis(0).getNumDims(), 3);
-    TS_ASSERT_EQUALS(p4.getAxis(0).getNumDims(), 4);
-
-    TS_ASSERT_EQUALS(p4.getOffset(0), 0.0);
-    TS_ASSERT_EQUALS(p4.getOffset(1), 0.0);
-    TS_ASSERT_EQUALS(p4.getOffset(2), 0.0);
-    TS_ASSERT_EQUALS(p4.getOffset(3), 0.0);
+    TS_ASSERT_EQUALS(p.getUnit(1), RLU);
+    TS_ASSERT_EQUALS(p.getUnit(2), RLU);
   }
 
   void test_uvw_constructors() {
-    VMD u(1, -1, 0);
-    VMD v(1, 1, 0);
-    VMD w(0, 0, 1);
+    V3D u(1, -1, 0);
+    V3D v(1, 1, 0);
+    V3D w(0, 0, 1);
     Projection p(u, v, w);
 
-    TS_ASSERT_EQUALS(p.getNumDims(), 3);
-    TS_ASSERT_EQUALS(p.getAxis(0), u);
-    TS_ASSERT_EQUALS(p.getAxis(1), v);
-    TS_ASSERT_EQUALS(p.getAxis(2), w);
-    TS_ASSERT_EQUALS(p.getAxis(0), u);
-    TS_ASSERT_EQUALS(p.getAxis(1), v);
-    TS_ASSERT_EQUALS(p.getAxis(2), w);
-  }
-
-  void test_throw_invalid_dimension_constructor() {
-    TS_ASSERT_THROWS_ANYTHING(Projection(-1));
-    TS_ASSERT_THROWS_ANYTHING(Projection(0));
-    TS_ASSERT_THROWS_ANYTHING(Projection(1));
-    TS_ASSERT_THROWS_NOTHING(Projection(2));
+    TS_ASSERT_EQUALS(p.U(), u);
+    TS_ASSERT_EQUALS(p.V(), v);
+    TS_ASSERT_EQUALS(p.W(), w);
   }
 
   void test_throw_out_of_range_access() {
-    Projection p(3);
+    Projection p;
     TS_ASSERT_THROWS_ANYTHING(p.getOffset(-1));
     TS_ASSERT_THROWS_NOTHING(p.getOffset(2));
     TS_ASSERT_THROWS_ANYTHING(p.getOffset(3));
@@ -72,9 +48,9 @@ public:
   }
 
   void test_copy_constructor() {
-    VMD u(1, -1, 0);
-    VMD v(1, 1, 0);
-    VMD w(0, 0, 1);
+    V3D u(1, -1, 0);
+    V3D v(1, 1, 0);
+    V3D w(0, 0, 1);
     Projection p(u, v, w);
     p.setUnit(0, RLU);
     p.setUnit(1, INV_ANG);
@@ -89,16 +65,14 @@ public:
   }
 
   void test_assign() {
-    VMD u(1, -1, 0);
-    VMD v(1, 1, 0);
-    VMD w(0, 0, 1);
+    V3D u(1, -1, 0);
+    V3D v(1, 1, 0);
+    V3D w(0, 0, 1);
     Projection p(u, v, w);
 
-    Projection q(5);
+    Projection q;
 
-    TS_ASSERT_EQUALS(q.getNumDims(), 5);
     q = p;
-    TS_ASSERT_EQUALS(q.getNumDims(), 3);
 
     TS_ASSERT_EQUALS(q.getAxis(0), u);
     TS_ASSERT_EQUALS(q.getAxis(1), v);
@@ -106,7 +80,7 @@ public:
   }
 
   void test_setOffset() {
-    Projection p(3);
+    Projection p;
     p.setOffset(0, 1.00);
     p.setOffset(1, 1.50);
     p.setOffset(2, 4.75);
@@ -116,17 +90,17 @@ public:
   }
 
   void test_setAxis() {
-    Projection p(3);
-    p.setAxis(0, VMD(1,2,3));
-    p.setAxis(1, VMD(4,5,6));
-    p.setAxis(2, VMD(7,8,8));
-    TS_ASSERT_EQUALS(p.getAxis(0), VMD(1,2,3));
-    TS_ASSERT_EQUALS(p.getAxis(1), VMD(4,5,6));
-    TS_ASSERT_EQUALS(p.getAxis(2), VMD(7,8,8));
+    Projection p;
+    p.setAxis(0, V3D(1,2,3));
+    p.setAxis(1, V3D(4,5,6));
+    p.setAxis(2, V3D(7,8,8));
+    TS_ASSERT_EQUALS(p.getAxis(0), V3D(1,2,3));
+    TS_ASSERT_EQUALS(p.getAxis(1), V3D(4,5,6));
+    TS_ASSERT_EQUALS(p.getAxis(2), V3D(7,8,8));
   }
 
   void test_setUnit() {
-    Projection p(3);
+    Projection p;
     p.setUnit(0, INV_ANG);
     p.setUnit(1, RLU);
     p.setUnit(2, INV_ANG);

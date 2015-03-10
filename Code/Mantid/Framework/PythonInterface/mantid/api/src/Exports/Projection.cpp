@@ -2,7 +2,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/kernel/Converters/PyObjectToVMD.h"
+#include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/python/class.hpp>
@@ -43,35 +43,28 @@ void setUnit(Projection &p, size_t nd, std::string unit) {
 }
 
 ITableWorkspace_sptr toWorkspace(Projection &p) {
-  if (p.getNumDims() > 3)
-    throw std::runtime_error("Only 2 or 3 dimensional projections can be "
-                             "converted to a workspace.");
-
   ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
   auto colName = ws->addColumn("str", "name");
   auto colValue = ws->addColumn("str", "value");
   auto colType = ws->addColumn("str", "type");
   auto colOffset = ws->addColumn("double", "offset");
 
-  for (size_t i = 0; i < p.getNumDims(); ++i) {
+  for (size_t i = 0; i < 3; ++i) {
     TableRow row = ws->appendRow();
-    row << indexToName(i) << p.getAxis(i).toString(",") << getUnit(p, i)
+    row << indexToName(i) << p.getAxis(i).toString() << getUnit(p, i)
         << p.getOffset(i);
   }
 
   return ws;
 }
 
-VMD listToVMD(const object& data) {
-  return Converters::PyObjectToVMD(data)();
-}
-
 void projSetAxis(Projection &self, size_t nd, const object& data) {
-  self.setAxis(nd, listToVMD(data));
+  self.setAxis(nd, Converters::PyObjectToV3D(data)());
 }
 
-Projection_sptr projCtor2(const object& d1, const object& d2) {
-  return Projection_sptr(new Projection(listToVMD(d1), listToVMD(d2)));
+Projection_sptr projCtor2(const object &d1, const object &d2) {
+  return Projection_sptr(new Projection(Converters::PyObjectToV3D(d1)(),
+                                        Converters::PyObjectToV3D(d2)()));
 }
 
 Projection_sptr projCtor3(
@@ -79,54 +72,9 @@ Projection_sptr projCtor3(
   const object& d2,
   const object& d3) {
   return Projection_sptr(new Projection(
-    listToVMD(d1),
-    listToVMD(d2),
-    listToVMD(d3))
-  );
-}
-
-Projection_sptr projCtor4(
-  const object& d1,
-  const object& d2,
-  const object& d3,
-  const object& d4) {
-  return Projection_sptr(new Projection(
-    listToVMD(d1),
-    listToVMD(d2),
-    listToVMD(d3),
-    listToVMD(d4))
-  );
-}
-
-Projection_sptr projCtor5(
-  const object& d1,
-  const object& d2,
-  const object& d3,
-  const object& d4,
-  const object& d5) {
-  return Projection_sptr(new Projection(
-    listToVMD(d1),
-    listToVMD(d2),
-    listToVMD(d3),
-    listToVMD(d4),
-    listToVMD(d5))
-  );
-}
-
-Projection_sptr projCtor6(
-  const object& d1,
-  const object& d2,
-  const object& d3,
-  const object& d4,
-  const object& d5,
-  const object& d6) {
-  return Projection_sptr(new Projection(
-    listToVMD(d1),
-    listToVMD(d2),
-    listToVMD(d3),
-    listToVMD(d4),
-    listToVMD(d5),
-    listToVMD(d6))
+    Converters::PyObjectToV3D(d1)(),
+    Converters::PyObjectToV3D(d2)(),
+    Converters::PyObjectToV3D(d3)())
   );
 }
 
@@ -139,24 +87,12 @@ void export_Projection()
     init<>("Default constructor creates a two dimensional projection")
   )
   .def(
-    init<size_t>
-    ("Constructs an n-dimensional projection", args("num_dimensions")))
-  .def(
-    init<const VMD&,const VMD&>
+    init<const V3D&,const V3D&>
     ("Constructs a 3 dimensional projection, with w as the cross product "
      "of u and v.", args("u","v")))
   .def(
-    init<const VMD&,const VMD&,const VMD&>
+    init<const V3D&,const V3D&,const V3D&>
     ("Constructs a 3 dimensional projection", args("u","v","w")))
-  .def(
-    init<const VMD&,const VMD&,const VMD&,const VMD&>
-    ("Constructs a 4 dimensional projection", args("u","v","w","x")))
-  .def(
-    init<const VMD&,const VMD&,const VMD&,const VMD&,const VMD&>
-    ("Constructs a 5 dimensional projection", args("u","v","w","x","y")))
-  .def(
-    init<const VMD&,const VMD&,const VMD&,const VMD&,const VMD&,const VMD&>
-    ("Constructs a 6 dimensional projection", args("u","v","w","x","y","z")))
   .def(
     "__init__",
     make_constructor(&projCtor2),
@@ -166,22 +102,6 @@ void export_Projection()
     "__init__",
     make_constructor(&projCtor3),
     "Constructs a 3 dimensional projection")
-  .def(
-    "__init__",
-    make_constructor(&projCtor4),
-    "Constructs a 4 dimensional projection")
-  .def(
-    "__init__",
-    make_constructor(&projCtor5),
-    "Constructs a 5 dimensional projection")
-  .def(
-    "__init__",
-    make_constructor(&projCtor6),
-    "Constructs a 6 dimensional projection")
-  .def(
-    "getNumDims",
-    &Projection::getNumDims,
-    "Returns the number of dimensions in the projection")
   .def(
     "getOffset",
     &Projection::getOffset,
@@ -221,43 +141,43 @@ void export_Projection()
     make_function(
       &Projection::U,
       return_internal_reference<>(),
-      boost::mpl::vector2<VMD&, Projection&>()
+      boost::mpl::vector2<V3D&, Projection&>()
     ),
     make_function(
       boost::bind(&Projection::setAxis, _1, 0, _2),
       default_call_policies(),
-      boost::mpl::vector3<void, Projection&, VMD>()
+      boost::mpl::vector3<void, Projection&, V3D>()
     )
   )
   .add_property("v",
     make_function(
       &Projection::V,
       return_internal_reference<>(),
-      boost::mpl::vector2<VMD&, Projection&>()
+      boost::mpl::vector2<V3D&, Projection&>()
     ),
     make_function(
       boost::bind(&Projection::setAxis, _1, 1, _2),
       default_call_policies(),
-      boost::mpl::vector3<void, Projection&, VMD>()
+      boost::mpl::vector3<void, Projection&, V3D>()
     )
   )
   .add_property("w",
     make_function(
       &Projection::W,
       return_internal_reference<>(),
-      boost::mpl::vector2<VMD&, Projection&>()
+      boost::mpl::vector2<V3D&, Projection&>()
     ),
     make_function(
       boost::bind(&Projection::setAxis, _1, 2, _2),
       default_call_policies(),
-      boost::mpl::vector3<void, Projection&, VMD>()
+      boost::mpl::vector3<void, Projection&, V3D>()
     )
   )
   .add_property("u",
     make_function(
       &Projection::U,
       return_internal_reference<>(),
-      boost::mpl::vector2<VMD&, Projection&>()
+      boost::mpl::vector2<V3D&, Projection&>()
     ),
     make_function(
       boost::bind(&projSetAxis, _1, 0, _2),
@@ -269,7 +189,7 @@ void export_Projection()
     make_function(
       &Projection::V,
       return_internal_reference<>(),
-      boost::mpl::vector2<VMD&, Projection&>()
+      boost::mpl::vector2<V3D&, Projection&>()
     ),
     make_function(
       boost::bind(&projSetAxis, _1, 1, _2),
@@ -281,7 +201,7 @@ void export_Projection()
     make_function(
       &Projection::W,
       return_internal_reference<>(),
-      boost::mpl::vector2<VMD&, Projection&>()
+      boost::mpl::vector2<V3D&, Projection&>()
     ),
     make_function(
       boost::bind(&projSetAxis, _1, 2, _2),
