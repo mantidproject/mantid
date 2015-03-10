@@ -9128,7 +9128,7 @@ void ApplicationWindow::minimizeWindow(MdiSubWindow *w)
 {
   auto wli = dynamic_cast<WindowListItem*>(lv->currentItem());
 
-  if (!w)
+  if (!wli)
     w = wli->window();
 
   if (!w)
