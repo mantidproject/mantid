@@ -14726,7 +14726,10 @@ void ApplicationWindow::showAllFolderWindows()
       break;
     lst = fld->windowsList();
     foreach(MdiSubWindow *w, lst){
-      if (w && show_windows_policy == SubFolders){
+      if(!w)
+        continue;
+
+      if (show_windows_policy == SubFolders) {
         updateWindowLists(w);
         switch (w->status())
         {
