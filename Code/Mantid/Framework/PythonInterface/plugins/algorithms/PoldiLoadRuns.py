@@ -36,8 +36,11 @@ class PoldiLoadRuns(PythonAlgorithm):
         self.declareProperty('MergeWidth', 1, direction=Direction.Input, doc="Number of runs to merge.",
                              validator=IntBoundedValidator(lower=1))
 
-        self.declareProperty('OverwriteExistingGroups', False, direction=Direction.Input,
+        self.declareProperty('OverwriteExistingWorkspace', False, direction=Direction.Input,
                              doc="If a WorkspaceGroup already exists, overwrite it.")
+
+        self.declareProperty('EnableMergeCheck', True, direction=Direction.Input,
+                             doc="Enable all the checks in PoldiMerge. Do not deactivate without very good reason.")
 
         self.declareProperty(WorkspaceProperty(name='OutputWorkspace',
                                                defaultValue='',
@@ -70,7 +73,7 @@ class PoldiLoadRuns(PythonAlgorithm):
         nameTemplate = outputWorkspaceName + "_data_"
 
         # If any output was produced, it needs to be checked what to do with it.
-        overwriteWorkspaces = self.getProperty('OverwriteExistingGroups').value
+        overwriteWorkspaces = self.getProperty('OverwriteExistingWorkspace').value
 
         # One case can be caught before loading any data. If it's not a WorkspaceGroup and it should not be
         # overwritten, there's nothing to do, so there's no need to load anything.
@@ -84,8 +87,11 @@ class PoldiLoadRuns(PythonAlgorithm):
         # Get the actual merge range, if the number of files is not compatible with the number of files to merge.
         mergeRange = self.getActualMergeRange(firstRun, lastRun, mergeWidth)
 
+        # PoldiMerge checks that instruments are compatible, but it can be disabled (calibration measurements)
+        mergeCheckEnabled = self.getProperty('EnableMergeCheck').value
+
         # Get a list of output workspace names.
-        outputWorkspaces = self.getLoadedWorkspaceNames(year, mergeRange, mergeWidth, nameTemplate)
+        outputWorkspaces = self.getLoadedWorkspaceNames(year, mergeRange, mergeWidth, nameTemplate, mergeCheckEnabled)
 
         # No workspaces, return - the algorithm will fail with an error. Additional log entry.
         if len(outputWorkspaces) == 0:
@@ -131,7 +137,7 @@ class PoldiLoadRuns(PythonAlgorithm):
         return (firstRun, actualLastRun)
 
     # Load workspaces and return a list of workspaces that were actually loaded.
-    def getLoadedWorkspaceNames(self, year, mergeRange, mergeWidth, nameTemplate):
+    def getLoadedWorkspaceNames(self, year, mergeRange, mergeWidth, nameTemplate, mergeCheckEnabled):
         outputWorkspaces = []
         for i in range(mergeRange[0], mergeRange[1] + 1, mergeWidth):
             # The name of the possibly merged workspace is this the last name of the merged series.
@@ -153,7 +159,7 @@ class PoldiLoadRuns(PythonAlgorithm):
             if mergeWidth > 1 and len(workspaceNames) > 1:
                 # If workspaces are not compatible, the range is skipped and the workspaces deleted.
                 try:
-                    PoldiMerge(workspaceNames, OutputWorkspace=currentTotalWsName)
+                    PoldiMerge(workspaceNames, OutputWorkspace=currentTotalWsName, CheckInstruments=mergeCheckEnabled)
                 except:
                     self.log().warning(
                         "Could not merge range [" + str(i) + ", " + str(currentNameNumor) + "], skipping.")

@@ -13,6 +13,11 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
         self.loadWorkspacesMergeTwoReverse()
         self.loadWorkspacesNotFound()
 
+        self.loadWorkspacesAddToGroup()
+        self.loadWorkspacesOverwriteGroup()
+        self.loadWorkspacesDontOverwriteOther()
+        self.loadWorkspacesOverwriteOther()
+
     def loadSingleWorkspace(self):
         singleWs = PoldiLoadRuns(2013, 6904)
 
@@ -71,6 +76,56 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
             self.assertTrue(False)
         except:
             self.assertTrue(True)
+
+    def loadWorkspacesAddToGroup(self):
+        wsGroup = PoldiLoadRuns(2013, 6903)
+
+        wsNames = wsGroup.getNames()
+        self.assertEquals(len(wsNames), 1)
+        self.assertEquals(wsNames[0], "wsGroup_data_6903")
+
+        wsGroup = PoldiLoadRuns(2013, 6904, OverwriteExistingWorkspace=False)
+
+        wsNames = wsGroup.getNames()
+        self.assertEquals(len(wsNames), 2)
+        self.assertEquals(wsNames[0], "wsGroup_data_6903")
+        self.assertEquals(wsNames[1], "wsGroup_data_6904")
+
+        self.clearAnalysisDataService()
+
+    def loadWorkspacesOverwriteGroup(self):
+        wsGroup = PoldiLoadRuns(2013, 6903)
+
+        wsNames = wsGroup.getNames()
+        self.assertEquals(len(wsNames), 1)
+        self.assertEquals(wsNames[0], "wsGroup_data_6903")
+
+        wsGroup = PoldiLoadRuns(2013, 6904, OverwriteExistingWorkspace=True)
+
+        wsNames = wsGroup.getNames()
+        self.assertEquals(len(wsNames), 1)
+        self.assertEquals(wsNames[0], "wsGroup_data_6904")
+
+    def loadWorkspacesOverwriteOther(self):
+        otherWs = CreateWorkspace(1.0, 1.0)
+
+        self.assertTrue(issubclass(type(otherWs), Workspace))
+
+        otherWs = PoldiLoadRuns(2013, 6904, OverwriteExistingWorkspace=True)
+
+        self.assertTrue(issubclass(type(otherWs), WorkspaceGroup))
+        wsNames = otherWs.getNames()
+        self.assertEquals(len(wsNames), 1)
+        self.assertEquals(wsNames[0], "otherWs_data_6904")
+
+    def loadWorkspacesDontOverwriteOther(self):
+        otherWs = CreateWorkspace(1.0, 1.0)
+
+        self.assertTrue(issubclass(type(otherWs), Workspace))
+
+        otherWs = PoldiLoadRuns(2013, 6904, OverwriteExistingWorkspace=False)
+
+        self.assertTrue(issubclass(type(otherWs), Workspace))
 
     def compareWorkspaces(self, left, right):
         for i in range(left.getNumberHistograms()):
