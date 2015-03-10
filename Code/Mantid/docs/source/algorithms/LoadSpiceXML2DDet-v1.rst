@@ -56,7 +56,8 @@ Usage
 
 .. testcleanup:: ExLoadHB3AXMLData
 
-  DeleteWorkspace(ws)
+  ws = mtd["s0001_0522"]
+  DeleteWorkspace(Workspace=str(ws))
 
 Output:
 
