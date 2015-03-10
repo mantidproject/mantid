@@ -73,7 +73,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidget">
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -334,6 +334,159 @@
            <attribute name="title">
             <string>Advanced Setup</string>
            </attribute>
+           <widget class="QLineEdit" name="lineEdit_cache">
+            <property name="geometry">
+             <rect>
+              <x>210</x>
+              <y>40</y>
+              <width>231</width>
+              <height>21</height>
+             </rect>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_cache">
+            <property name="geometry">
+             <rect>
+              <x>70</x>
+              <y>40</y>
+              <width>141</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cache data file download from server to local disk. &lt;/p&gt;&lt;p&gt;The default is current working directory.  &lt;/p&gt;&lt;p&gt;The cached files will be deleted with normal quit. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Cache Raw Data File</string>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="pushButton_broseCache">
+            <property name="geometry">
+             <rect>
+              <x>530</x>
+              <y>20</y>
+              <width>114</width>
+              <height>32</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Browse</string>
+            </property>
+           </widget>
+           <widget class="QCheckBox" name="checkBox_delCache">
+            <property name="geometry">
+             <rect>
+              <x>690</x>
+              <y>50</y>
+              <width>161</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cached files will be deleted upon quitting normally.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Delete Cache Before Quit</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label">
+            <property name="geometry">
+             <rect>
+              <x>80</x>
+              <y>130</y>
+              <width>141</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Server Address</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_localSrc">
+            <property name="geometry">
+             <rect>
+              <x>80</x>
+              <y>190</y>
+              <width>161</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Local Data Storage</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="lineEdit">
+            <property name="geometry">
+             <rect>
+              <x>260</x>
+              <y>130</y>
+              <width>251</width>
+              <height>21</height>
+             </rect>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="pushButton_browseLocalSrc">
+            <property name="geometry">
+             <rect>
+              <x>570</x>
+              <y>180</y>
+              <width>114</width>
+              <height>32</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Browse</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="lineEdit_localSrc">
+            <property name="geometry">
+             <rect>
+              <x>270</x>
+              <y>180</y>
+              <width>241</width>
+              <height>21</height>
+             </rect>
+            </property>
+           </widget>
+           <widget class="QRadioButton" name="radioButton_useServer">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>130</y>
+              <width>31</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+           <widget class="QRadioButton" name="radioButton_userLocal">
+            <property name="geometry">
+             <rect>
+              <x>30</x>
+              <y>190</y>
+              <width>31</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="pushButton_chkServer">
+            <property name="geometry">
+             <rect>
+              <x>570</x>
+              <y>120</y>
+              <width>114</width>
+              <height>32</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Check URL</string>
+            </property>
+           </widget>
           </widget>
          </widget>
         </item>
@@ -349,7 +502,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
