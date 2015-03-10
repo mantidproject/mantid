@@ -127,12 +127,19 @@ class CutMD(DataProcessorAlgorithm):
         if not isinstance(projection_table, ITableWorkspace):
             I = np.identity(3)
             return (I[0, :], I[1, :], I[2, :])
-        u = np.array(map(float,str(projection_table.cell("value", 0)).split(",")))
-        v = np.array(map(float,str(projection_table.cell("value", 1)).split(",")))
-        if projection_table.rowCount() >= 3:
-            w = np.array(map(float,str(projection_table.cell("value", 2)).split(",")))
-        else:
-            w = np.cross(v,u)
+        (u, v, w) = (None, None, None)
+        for i in range(projection_table.rowCount()):
+            name = str(projection_table.cell("name", i))
+            value = str(projection_table.cell("value", i))
+            if name == "u":
+                u = np.array(map(float,value.split(",")))
+            if name == "v":
+                v = np.array(map(float,value.split(",")))
+            if name == "w":
+                w = np.array(map(float,value.split(",")))
+
+        if u is None or v is None or w is None:
+            raise ValueError("u, v, or w missing from projection table")
 
         return (u, v, w)
 
@@ -140,7 +147,20 @@ class CutMD(DataProcessorAlgorithm):
         if not isinstance(projection_table, ITableWorkspace) or not "type" in projection_table.getColumnNames():
             units = (ProjectionUnit.r, ProjectionUnit.r, ProjectionUnit.r)
         else:
-            units = tuple(projection_table.column("type"))
+            #Extract units for each dimension
+            (u, v, w) = (None, None, None)
+            for i in range(projection_table.rowCount()):
+                name = str(projection_table.cell("name", i))
+                unit = str(projection_table.cell("type", i))
+                if name == "u":
+                    u = unit
+                if name == "v":
+                    v = unit
+                if name == "w":
+                    w = unit
+            if u is None or v is None or w is None:
+                raise ValueError("u, v, or w missing from projection table")
+            units = (u, v, w)
         return units
 
 
