@@ -19,15 +19,16 @@ Projection::Projection(const V3D &u, const V3D &v) {
   m_dimensions[0] = u;
   m_dimensions[1] = v;
   m_dimensions[2] = u.cross_prod(v);
-  m_offsets[0] = 0.0;
-  m_offsets[1] = 0.0;
-  m_offsets[2] = 0.0;
-  m_units[0] = RLU;
-  m_units[1] = RLU;
-  m_units[2] = RLU;
+  for (size_t i = 0; i < 3; ++i) {
+    m_offsets[i] = 0.0;
+    m_units[i] = RLU;
+  }
 }
 
 Projection::Projection(const V3D &u, const V3D &v, const V3D &w) {
+  if (w.scalar_prod(u.cross_prod(v)) <= 0.00001)
+    throw std::runtime_error("u, v, and w must be coplanar!");
+
   m_dimensions[0] = u;
   m_dimensions[1] = v;
   m_dimensions[2] = w;
