@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init
 from mantid.simpleapi import *
 from mantid.api import FrameworkManager
 import copy
@@ -16,7 +17,7 @@ BANNED_FILES = ['992 Descriptions.txt',
                 'CNCS_TS_2008_08_18.dat',
                 'DISF_NaF.cdl',
                 'det_corrected7.dat',
-                'det_LET_cycle12-3.dat',                
+                'det_LET_cycle12-3.dat',
                 'eqsans_configuration.1463',
                 'FLAT_CELL.061',
                 'HYSA_mask.xml',
@@ -101,7 +102,7 @@ def useDir(direc):
         return False
     if config["defaultsave.directory"] == direc:
         return False
-    return ("Data" in direc)
+    return "Data" in direc
 
 def useFile(direc, filename):
     """Returns (useFile, abspath)"""
@@ -184,7 +185,7 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
         for test in tests:
             test = test.strip()
             result = eval(test)
-            if not (result == True):
+            if not result == True:
                 failed.append((test, result))
         if len(failed) > 0:
             for item in failed:

@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 import stresstesting
 import mantid
 from mantid.simpleapi import *
@@ -30,17 +31,17 @@ class EQSANSBeamCenter(stresstesting.MantidStressTest):
         UseConfigMask(False)
         SetTransmission(1.0, 0.0)
         TotalChargeNormalization(normalize_to_beam=False)
-        DirectBeamCenter("EQSANS_1466_event.nxs")    
-        Reduce()  
-        # Scale up to match correct scaling. The reference data is off by a factor 10.0 
-        Scale(InputWorkspace="EQSANS_4061_event_frame2_Iq", Factor=10.0, 
+        DirectBeamCenter("EQSANS_1466_event.nxs")
+        Reduce()
+        # Scale up to match correct scaling. The reference data is off by a factor 10.0
+        Scale(InputWorkspace="EQSANS_4061_event_frame2_Iq", Factor=10.0,
               Operation='Multiply', OutputWorkspace="EQSANS_4061_event_frame2_Iq")
-        Scale(InputWorkspace="EQSANS_4061_event_frame2_Iq", Factor=277.781, 
+        Scale(InputWorkspace="EQSANS_4061_event_frame2_Iq", Factor=277.781,
               Operation='Multiply', OutputWorkspace="EQSANS_4061_event_frame2_Iq")
-                
+
     def validate(self):
         # Be more tolerant with the output, mainly because of the errors.
-        # The following tolerance check the errors up to the third digit.   
+        # The following tolerance check the errors up to the third digit.
         self.tolerance = 0.1
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
@@ -66,10 +67,10 @@ class EQSANSBeamCenterEvent(EQSANSBeamCenter):
         UseConfigMask(False)
         SetTransmission(1.0, 0.0)
         TotalChargeNormalization(normalize_to_beam=False)
-        DirectBeamCenter("EQSANS_1466_event.nxs")    
+        DirectBeamCenter("EQSANS_1466_event.nxs")
         Reduce()
-        # Scale up to match correct scaling. The reference data is off by a factor 10.0 
-        Scale(InputWorkspace="EQSANS_4061_event_frame2_Iq", Factor=10.0, 
+        # Scale up to match correct scaling. The reference data is off by a factor 10.0
+        Scale(InputWorkspace="EQSANS_4061_event_frame2_Iq", Factor=10.0,
               Operation='Multiply', OutputWorkspace="EQSANS_4061_event_frame2_Iq")
-        Scale(InputWorkspace="EQSANS_4061_event_frame2_Iq", Factor=277.781, 
+        Scale(InputWorkspace="EQSANS_4061_event_frame2_Iq", Factor=277.781,
               Operation='Multiply', OutputWorkspace="EQSANS_4061_event_frame2_Iq")

@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from abc import ABCMeta, abstractmethod
 import stresstesting
 

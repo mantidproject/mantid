@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 import stresstesting
 from mantid import *
 
@@ -5,7 +6,7 @@ from mantid.simpleapi import *
 
 class REFMReduction(stresstesting.MantidStressTest):
     def runTest(self):
-          RefReduction(DataRun=str(9709),
+        RefReduction(DataRun=str(9709),
               NormalizationRun=str(9684),
               SignalPeakPixelRange=[216, 224],
               SubtractSignalBackground=True,
@@ -22,10 +23,10 @@ class REFMReduction(stresstesting.MantidStressTest):
               PolarizedData=True,
               Instrument="REF_M",
               OutputWorkspacePrefix='reflectivity')
-                
+
     def validate(self):
         # Be more tolerant with the output, mainly because of the errors.
-        # The following tolerance check the errors up to the third digit.   
+        # The following tolerance check the errors up to the third digit.
         self.tolerance = 0.25
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')

@@ -90,7 +90,7 @@ class DirectEnergyConversion(object):
 
    bkgd_range  =[15000,19000]  :integration range for background tests
 
-   second_white     - If provided an additional set of tests is performed on this. 
+   second_white     - If provided an additional set of tests is performed on this.
                          (default = None)
    hardmaskPlus     - A file specifying those spectra that should be masked
                          without testing (default=None)
@@ -275,7 +275,7 @@ class DirectEnergyConversion(object):
         # Check how we should run diag
         diag_spectra_blocks = self.diag_spectra
 
-        if not(white_mask is None):
+        if not white_mask is None:
             diag_params['white_mask'] = white
         # keep white mask workspace for further usage
         if diag_spectra_blocks is None:
@@ -294,7 +294,7 @@ class DirectEnergyConversion(object):
                     DeleteWorkspace(white_masked_ws)
 
         if out_ws_name:
-            if not(diag_sample is None):
+            if not diag_sample is None:
                 diag_sample.add_masked_ws(whiteintegrals)
                 mask = diag_sample.get_masking(1)
                 diag_mask = CloneWorkspace(mask,OutputWorkspace=out_ws_name)
@@ -551,7 +551,7 @@ class DirectEnergyConversion(object):
                 else:
                     # in this case the masking2 is different but points to the
                     # same  workspace Should be better solution for that
-                    if not self.use_hard_mask_only : 
+                    if not self.use_hard_mask_only :
                         prop_man.log("======== Run diagnose for monochromatic vanadium run ===========",'notice')
                         masking2 = self.diagnose(PropertyManager.wb_for_monovan_run,PropertyManager.monovan_run,\
                                         second_white = None,print_diag_results=True)
@@ -624,7 +624,7 @@ class DirectEnergyConversion(object):
         data_ws = data_run.get_workspace()
         monitor_ws = data_run.get_monitors_ws()
         if not monitor_ws:
-           raise RuntimeError("Can not find monitors workspace for workspace {0}, run N{1}".\
+            raise RuntimeError("Can not find monitors workspace for workspace {0}, run N{1}".\
                  format(data_ws.name(),data_ws.getRunNumber()))
         separate_monitors = data_run.is_monws_separate()
         data_run.set_action_suffix('_shifted')
@@ -642,8 +642,8 @@ class DirectEnergyConversion(object):
            # instrument is shifted in case it is shifted to this monitor (usual
            # case)
            #Find TOF range, correspondent to incident energy monitor peak
-           energy_rage = self.mon2_norm_energy_range
-           self._mon2_norm_time_range = self.get_TOF_for_energies(monitor_ws,energy_rage,\
+            energy_rage = self.mon2_norm_energy_range
+            self._mon2_norm_time_range = self.get_TOF_for_energies(monitor_ws,energy_rage,\
                                                                  [self.mon2_norm_spec],None,self._debug_mode)
         #end
         if separate_monitors:
@@ -704,16 +704,16 @@ class DirectEnergyConversion(object):
         method = method.lower()
         for case in common.switch(method):
             if case('monitor-1'):
-               method,old_ws_name = self._normalize_to_monitor1(run,old_ws_name, range_offset,external_monitors_ws)
-               break
+                method,old_ws_name = self._normalize_to_monitor1(run,old_ws_name, range_offset,external_monitors_ws)
+                break
             if case('monitor-2'):
-               method,old_ws_name = self._normalize_to_monitor2(run,old_ws_name, range_offset,external_monitors_ws)
-               break
+                method,old_ws_name = self._normalize_to_monitor2(run,old_ws_name, range_offset,external_monitors_ws)
+                break
             if case('current'):
                 NormaliseByCurrent(InputWorkspace=old_ws_name,OutputWorkspace=old_ws_name)
                 break
             if case(): # default
-               raise RuntimeError('Normalization method {0} not found. It must be one of monitor-1, monitor-2, current, or None'.format(method))
+                raise RuntimeError('Normalization method {0} not found. It must be one of monitor-1, monitor-2, current, or None'.format(method))
         #endCase
 
 
@@ -730,29 +730,29 @@ class DirectEnergyConversion(object):
         # get monitor's workspace
         separate_monitors = run.is_monws_separate()
         if external_monitor_ws:
-           separate_monitors = True
-           mon_ws = external_monitor_ws
+            separate_monitors = True
+            mon_ws = external_monitor_ws
         else:
-           mon_ws = run.get_monitors_ws()
+            mon_ws = run.get_monitors_ws()
 
         if not mon_ws: # no monitors
-           if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not
+            if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not
                                              # have monitors
-              self.normalise(run,'current',range_offset)
-              ws = run.get_workspace()
-              new_name = ws.name()
-              return ('current',new_name)
-           else:
-              ws = run.get_workspace()
-              raise RuntimeError('Normalise by monitor-1:: Workspace {0} for run {1} does not have monitors in it'\
+                self.normalise(run,'current',range_offset)
+                ws = run.get_workspace()
+                new_name = ws.name()
+                return ('current',new_name)
+            else:
+                ws = run.get_workspace()
+                raise RuntimeError('Normalise by monitor-1:: Workspace {0} for run {1} does not have monitors in it'\
                    .format(ws.name(),run.run_number()))
 
 
         range = self.norm_mon_integration_range
         if self._debug_mode:
-           kwargs = {'NormFactorWS':'NormMon1_WS' + data_ws.getName()}
+            kwargs = {'NormFactorWS':'NormMon1_WS' + data_ws.getName()}
         else:
-           kwargs = {}
+            kwargs = {}
 
         mon_spect = self.prop_man.mon1_norm_spec
         if separate_monitors:
@@ -776,28 +776,28 @@ class DirectEnergyConversion(object):
       # get monitor's workspace
         separate_monitors = run.is_monws_separate()
         if external_monitor_ws:
-           separate_monitors = True
-           mon_ws = external_monitor_ws
+            separate_monitors = True
+            mon_ws = external_monitor_ws
         else:
-           mon_ws = run.get_monitors_ws()
+            mon_ws = run.get_monitors_ws()
 
 
         if not mon_ws: # no monitors
-           if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not
+            if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not
                                              # have monitors
-              self.normalise(run,'current',range_offset)
-              ws = run.get_workspace()
-              new_name = ws.name()
-              return ('current',new_name)
-           else:
-              ws = run.get_workspace()
-              raise RuntimeError('Normalize by monitor-2:: Workspace {0} for run {1} does not have monitors in it'\
+                self.normalise(run,'current',range_offset)
+                ws = run.get_workspace()
+                new_name = ws.name()
+                return ('current',new_name)
+            else:
+                ws = run.get_workspace()
+                raise RuntimeError('Normalize by monitor-2:: Workspace {0} for run {1} does not have monitors in it'\
                    .format(ws.name(),run.run_number()))
         #
         if self._debug_mode:
-           kwargs = {'NormFactorWS':'NormMon2_WS' + mon_ws.getName()}
+            kwargs = {'NormFactorWS':'NormMon2_WS' + mon_ws.getName()}
         else:
-           kwargs = {}
+            kwargs = {}
 
         mon_spect = self.prop_man.mon2_norm_spec
         mon_index = int(mon_ws.getIndexFromSpectrumNumber(mon_spect))
@@ -809,23 +809,23 @@ class DirectEnergyConversion(object):
 
         #Find TOF range, correspondent to incident energy monitor peak
         if self._mon2_norm_time_range: # range has been found during ei-calculations
-           range = self._mon2_norm_time_range
-           range_min = range[0] + range_offset
-           range_max = range[1] + range_offset
-           self._mon2_norm_time_range = None
+            range = self._mon2_norm_time_range
+            range_min = range[0] + range_offset
+            range_max = range[1] + range_offset
+            self._mon2_norm_time_range = None
         else:
-           mon_ws_name = mon_ws.name() #monitor's workspace and detector's workspace are e
-           if mon_ws_name.find('_shifted') != -1:
+            mon_ws_name = mon_ws.name() #monitor's workspace and detector's workspace are e
+            if mon_ws_name.find('_shifted') != -1:
               # monitor-2 normalization ranges have to be identified before the
               # instrument is shifted
                 raise RuntimeError("Instrument have been shifted but no time range has been identified. Monitor-2 normalization can not be performed ")
-           else:
+            else:
               # instrument and workspace shifted, so TOF will be calculated wrt
               # shifted instrument
-              energy_rage = self.mon2_norm_energy_range
-              TOF_range = self.get_TOF_for_energies(mon_ws,energy_rage,[mon_spect],None,self._debug_mode)
-              range_min = TOF_range[0]
-              range_max = TOF_range[1]
+                energy_rage = self.mon2_norm_energy_range
+                TOF_range = self.get_TOF_for_energies(mon_ws,energy_rage,[mon_spect],None,self._debug_mode)
+                range_min = TOF_range[0]
+                range_max = TOF_range[1]
        # Normalize to monitor 2
         NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name,IntegrationRangeMin=range_min,
                            IntegrationRangeMax=range_max,IncludePartialBins=True,**kwargs)
@@ -837,7 +837,7 @@ class DirectEnergyConversion(object):
             energy range requested
         """
         if not workspace:
-           workspace = PropertyManager.sample_run.get_workspace()
+            workspace = PropertyManager.sample_run.get_workspace()
 
         spectra_id = self.prop_man.multirep_tof_specta_list
         if not spectra_id:
@@ -860,14 +860,14 @@ class DirectEnergyConversion(object):
 
         nBlocks = len(spectra_id)
         if nBlocks > 1:
-           tof_min,t_step,tof_max = process_block(TOF_range[0])
-           for ind in xrange(1,nBlocks):
-               tof_min1,t_step1,tof_max1 = process_block(TOF_range[ind])
-               tof_min = min(tof_min,tof_min1)
-               tof_max = max(tof_max,tof_max1)
-               t_step = min(t_step,t_step1)
+            tof_min,t_step,tof_max = process_block(TOF_range[0])
+            for ind in xrange(1,nBlocks):
+                tof_min1,t_step1,tof_max1 = process_block(TOF_range[ind])
+                tof_min = min(tof_min,tof_min1)
+                tof_max = max(tof_max,tof_max1)
+                t_step = min(t_step,t_step1)
         else:
-               tof_min,t_step,tof_max = process_block(TOF_range)
+            tof_min,t_step,tof_max = process_block(TOF_range)
         #end
         return (tof_min,t_step,tof_max)
     #
@@ -918,17 +918,17 @@ class DirectEnergyConversion(object):
         """
         if formats:
            # clear up existing save formats as one is defined in parameters
-           self.prop_man.save_format = None
+            self.prop_man.save_format = None
         # set up internal format variable from method parameters
         self.prop_man.set_input_parameters_ignore_nan(save_file_name=save_file,save_format=formats)
         formats = self.prop_man.save_format
 
         if save_file:
-           save_file,ext = os.path.splitext(save_file)
-           if len(ext) > 1:
-               formats.add(ext[1:])
+            save_file,ext = os.path.splitext(save_file)
+            if len(ext) > 1:
+                formats.add(ext[1:])
         else:
-           save_file = self.prop_man.save_file_name
+            save_file = self.prop_man.save_file_name
 
         if save_file is None:
             save_file = workspace.getName()
@@ -944,27 +944,27 @@ class DirectEnergyConversion(object):
         for file_format  in formats:
             for case in common.switch(file_format):
                 if case('nxspe'):
-                   filename = save_file + '.nxspe'
+                    filename = save_file + '.nxspe'
                    # nxspe can not write workspace with / in the name
                    # (something to do with folder names inside nxspe)
-                   name_supported = name_orig.replace('/','of')
-                   if name_supported != name_orig:
-                      RenameWorkspace(InputWorkspace=name_orig,OutputWorkspace=name_supported)
-                   SaveNXSPE(InputWorkspace=name_supported,Filename= filename,\
+                    name_supported = name_orig.replace('/','of')
+                    if name_supported != name_orig:
+                        RenameWorkspace(InputWorkspace=name_orig,OutputWorkspace=name_supported)
+                    SaveNXSPE(InputWorkspace=name_supported,Filename= filename,\
                              KiOverKfScaling=prop_man.apply_kikf_correction,psi=prop_man.psi)
-                   if name_supported != name_orig:
-                      RenameWorkspace(InputWorkspace=name_supported,OutputWorkspace=name_orig)
-                   break
+                    if name_supported != name_orig:
+                        RenameWorkspace(InputWorkspace=name_supported,OutputWorkspace=name_orig)
+                    break
                 if case('spe'):
-                   filename = save_file + '.spe'
-                   SaveSPE(InputWorkspace=workspace,Filename= filename)
-                   break
+                    filename = save_file + '.spe'
+                    SaveSPE(InputWorkspace=workspace,Filename= filename)
+                    break
                 if case('nxs'):
-                   filename = save_file + '.nxs'
-                   SaveNexus(InputWorkspace=workspace,Filename= filename)
-                   break
+                    filename = save_file + '.nxs'
+                    SaveNexus(InputWorkspace=workspace,Filename= filename)
+                    break
                 if case(): # default, could also just omit condition or 'if True'
-                   prop_man.log("Unknown file format {0} requested to save results. No saving performed this format".\
+                    prop_man.log("Unknown file format {0} requested to save results. No saving performed this format".\
                                format(file_format))
     #########
     @property
@@ -1086,21 +1086,21 @@ class DirectEnergyConversion(object):
         error = []
         izerc = 0
         for i in range(nhist):
-           try:
-             det = data_ws.getDetector(i)
-           except Exception:
-             continue
-           if det.isMasked():
-             continue
-           sig = data_ws.readY(i)[0]
-           err = data_ws.readE(i)[0]
-           if sig != sig:     #ignore NaN (hopefully it will mean mask some day)
-               continue
-           if (err <= 0) or (sig <= 0):  # count Inf and negative||zero readings.
-              izerc+=1                   # Presence of this indicates that
-              continue                   # something went wrong
-           signal.append(sig)
-           error.append(err)
+            try:
+                det = data_ws.getDetector(i)
+            except Exception:
+                continue
+            if det.isMasked():
+                continue
+            sig = data_ws.readY(i)[0]
+            err = data_ws.readE(i)[0]
+            if sig != sig:     #ignore NaN (hopefully it will mean mask some day)
+                continue
+            if (err <= 0) or (sig <= 0):  # count Inf and negative||zero readings.
+                izerc+=1                     # Presence of this indicates that
+                continue                     # something went wrong
+            signal.append(sig)
+            error.append(err)
         #---------------- Loop finished
 
         norm_factor = {}
@@ -1159,11 +1159,11 @@ class DirectEnergyConversion(object):
 
         # check for NaN
         if (norm_factor['LibISIS'] != norm_factor['LibISIS']) | (izerc != 0):    # It is an error, print diagnostics:
-           if norm_factor['LibISIS'] != norm_factor['LibISIS']:
-               log_value = '\n--------> Absolute normalization factor is NaN <----------------------------------------------\n'
-           else:
-               log_value = '\n--------> Warning, Monovanadium has zero spectra <--------------------------------------------\n'
-               log1_value = \
+            if norm_factor['LibISIS'] != norm_factor['LibISIS']:
+                log_value = '\n--------> Absolute normalization factor is NaN <----------------------------------------------\n'
+            else:
+                log_value = '\n--------> Warning, Monovanadium has zero spectra <--------------------------------------------\n'
+                log1_value = \
                "--------> Processing workspace: {0}\n"\
                "--------> Monovan Integration range : min={1}, max={2} (meV)\n"\
                "--------> Summed:  {3} spectra with total signal: {4} and error: {5}\n"\
@@ -1175,8 +1175,8 @@ class DirectEnergyConversion(object):
                "--------> Abs norm factors: TGP    : {11}\n"\
                .format(ws_name,minmax[0],minmax[1],nhist,sum(signal),sum(error),izerc,scale_factor,
                           norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
-           log_value = log_value + log1_value
-           propman.log(log_value,'error')
+            log_value = log_value + log1_value
+            propman.log(log_value,'error')
         else:
             if not self._debug_mode:
                 monovan_run.clear_resulting_ws()
@@ -1217,27 +1217,27 @@ class DirectEnergyConversion(object):
         #end
 
     def __getattr__(self,attr_name):
-       """  overloaded to return values of properties non-existing in the class dictionary
+        """  overloaded to return values of properties non-existing in the class dictionary
             from the property manager class except this
             property already have descriptor in self class
        """
-       if attr_name in self._descriptors:
-          return object.__getattr__(self,attr_name)
-       else:
-          return getattr(self._propMan,attr_name)
+        if attr_name in self._descriptors:
+            return object.__getattr__(self,attr_name)
+        else:
+            return getattr(self._propMan,attr_name)
 
     def __setattr__(self,attr_name,attr_value):
-       """ overloaded to prohibit adding non-starting with _properties to the class instance
+        """ overloaded to prohibit adding non-starting with _properties to the class instance
             and add all other properties to property manager except this property already
            have a descriptor
        """
-       if attr_name[0] == '_':
+        if attr_name[0] == '_':
             object.__setattr__(self,attr_name,attr_value)
-       else:
-         if attr_name in self._descriptors:
-            object.__setattr__(self,attr_name,attr_value)
-         else:
-            setattr(self._propMan,attr_name,attr_value)
+        else:
+            if attr_name in self._descriptors:
+                object.__setattr__(self,attr_name,attr_value)
+            else:
+                setattr(self._propMan,attr_name,attr_value)
 
     def initialise(self, instr,reload_instrument=False):
         """
@@ -1281,20 +1281,20 @@ class DirectEnergyConversion(object):
             instrument = workspace.getInstrument()
             name = instrument.getName()
             if name != self.prop_man.instr_name:
-               self.prop_man = PropertyManager(name,workspace)
+                self.prop_man = PropertyManager(name,workspace)
 
 
     def get_run_descriptor(self,run):
-       """ Spawn temporary run descriptor for input data given in format,
+        """ Spawn temporary run descriptor for input data given in format,
            different from run descriptor. Return existing run descriptor,
            if it is what provided.
        """
-       if not isinstance(run,RunDescriptor):
-          tRun = copy.copy(PropertyManager._tmp_run)
-          tRun.__set__(None,run)
-          return tRun
-       else:
-           return run
+        if not isinstance(run,RunDescriptor):
+            tRun = copy.copy(PropertyManager._tmp_run)
+            tRun.__set__(None,run)
+            return tRun
+        else:
+            return run
     #
 # -------------------------------------------------------------------------------------------
 #         This actually does the conversion for the mono-sample and
@@ -1355,10 +1355,10 @@ class DirectEnergyConversion(object):
 
         energy_bins = PropertyManager.energy_bins.get_abs_range(self.prop_man)
         if energy_bins:
-           Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= energy_bins,PreserveEvents=False)
-           if bkgr_ws: # remove background after converting units and rebinning
-              RemoveBackground(InputWorkspace=result_name,OutputWorkspace=result_name,BkgWorkspace=bkgr_ws,EMode='Direct')
-              DeleteWorkspace(bkgr_ws)
+            Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= energy_bins,PreserveEvents=False)
+            if bkgr_ws: # remove background after converting units and rebinning
+                RemoveBackground(InputWorkspace=result_name,OutputWorkspace=result_name,BkgWorkspace=bkgr_ws,EMode='Direct')
+                DeleteWorkspace(bkgr_ws)
         else:
             pass # TODO: investigate way of removing background from event workspace if we want
                  # result to be an event workspace
@@ -1367,8 +1367,8 @@ class DirectEnergyConversion(object):
 
         if self.apply_detector_eff and energy_bins: #should detector efficiency work on event workspace too?  At the moment it is
                                                     #not (01/02/2015)
-           DetectorEfficiencyCor(InputWorkspace=result_name,OutputWorkspace=result_name)
-           self.prop_man.log("_do_mono: finished DetectorEfficiencyCor for : " + result_name,'information')
+            DetectorEfficiencyCor(InputWorkspace=result_name,OutputWorkspace=result_name)
+            self.prop_man.log("_do_mono: finished DetectorEfficiencyCor for : " + result_name,'information')
         #############
         data_run.synchronize_ws(mtd[result_name])
 
@@ -1391,13 +1391,13 @@ class DirectEnergyConversion(object):
             if time_shift != 0: # Workspace has probably been shifted, so to have correct units conversion
                                 # one needs to do appropriate shift here as
                                                                # well
-              CopyInstrumentParameters(result_ws,bkgr_ws)
+                CopyInstrumentParameters(result_ws,bkgr_ws)
              # Adjust the TOF such that the first monitor peak is at t=0
-              ScaleX(InputWorkspace=bkgr_ws,OutputWorkspace='bkgr_ws',Operation="Add",Factor=time_shift,\
+                ScaleX(InputWorkspace=bkgr_ws,OutputWorkspace='bkgr_ws',Operation="Add",Factor=time_shift,\
                      InstrumentParameter="DelayTime",Combine=True)
         else:
-           bkgr_ws = Rebin(result_ws,Params=[bkg_range_min,(bkg_range_max - bkg_range_min) * 1.001,bkg_range_max],PreserveEvents=False)
-           bkgr_ws = self.normalise(bkgr_ws, self.normalise_method, time_shift)
+            bkgr_ws = Rebin(result_ws,Params=[bkg_range_min,(bkg_range_max - bkg_range_min) * 1.001,bkg_range_max],PreserveEvents=False)
+            bkgr_ws = self.normalise(bkgr_ws, self.normalise_method, time_shift)
 
 
         return bkgr_ws
@@ -1413,10 +1413,10 @@ class DirectEnergyConversion(object):
             self._do_mono_ISIS(run,ei_guess,\
                               white_run, map_file, spectra_masks, Tzero)
         else:
-          result_name = run.set_action_suffix('_spe')
-          self._do_mono_SNS(run,result_name,ei_guess,\
+            result_name = run.set_action_suffix('_spe')
+            self._do_mono_SNS(run,result_name,ei_guess,\
                          white_run, map_file, spectra_masks, Tzero)
-          run.synchronize_ws()
+            run.synchronize_ws()
 
         prop_man = self.prop_man
         ws = run.get_workspace()
@@ -1430,8 +1430,8 @@ class DirectEnergyConversion(object):
 
         # Make sure that our binning is consistent
         if prop_man.energy_bins:
-           bins = PropertyManager.energy_bins.get_abs_range(prop_man)
-           Rebin(InputWorkspace=result_name,OutputWorkspace= result_name,Params=bins)
+            bins = PropertyManager.energy_bins.get_abs_range(prop_man)
+            Rebin(InputWorkspace=result_name,OutputWorkspace= result_name,Params=bins)
 
         # Masking and grouping
         result_ws = mtd[result_name]
@@ -1450,7 +1450,7 @@ class DirectEnergyConversion(object):
         return result_ws
 #-------------------------------------------------------------------------------
     def _get_wb_inegrals(self,run):
-        """Obtain white bean vanadium integrals either by integrating 
+        """Obtain white bean vanadium integrals either by integrating
            workspace in question or cashed value
         """
         run = self.get_run_descriptor(run)
@@ -1469,12 +1469,12 @@ class DirectEnergyConversion(object):
                 old_log_val = targ_ws.getRun().getLogData(done_Log).value
                 done_log_VAL = self._build_white_tag()
                 if old_log_val == done_log_VAL:
-                   run.synchronize_ws(targ_ws)
-                   if self._keep_wb_workspace:
+                    run.synchronize_ws(targ_ws)
+                    if self._keep_wb_workspace:
                         result = run.get_ws_clone()
-                   else:
+                    else:
                         result = run.get_workspace()
-                   return result
+                    return result
                 else:
                     DeleteWorkspace(Workspace=new_ws_name)
             else:
@@ -1525,7 +1525,7 @@ def get_failed_spectra_list_from_masks(masked_wksp):
     #TODO: get rid of this and use data, obtained form diagnostics
     failed_spectra = []
     if masked_wksp is None:
-       return (failed_spectra,0)
+        return (failed_spectra,0)
 
     masking_wksp,sp_list = ExtractMask(masked_wksp)
     DeleteWorkspace(masking_wksp)

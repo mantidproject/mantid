@@ -8,15 +8,15 @@ import glob
 EXPECTED_EXT = '.expected'
 
 class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
-    
+
     def skipTests(self):
         try:
             import genxmlif
             import minixsv
         except ImportError:
             return True
-        return False    
-         
+        return False
+
     def __getDataFileList__(self):
         # get a list of directories to look in
         direc = config['instrumentDefinition.directory']
@@ -33,37 +33,37 @@ class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
     def runTest(self):
         """Main entry point for the test suite"""
         from genxmlif import GenXmlIfError
-        from minixsv import pyxsval 
-        
+        from minixsv import pyxsval
+
         # need to extend minixsv library to add method for that forces it to
         # validate against local schema when the xml file itself has
         # reference to schema online. The preference is to systemtest against
-        # a local schema file to avoid this systemtest failing is 
-        # external url temporariliy not available. Secondary it also avoid 
+        # a local schema file to avoid this systemtest failing is
+        # external url temporariliy not available. Secondary it also avoid
         # having to worry about proxies.
-        
+
         class MyXsValidator(pyxsval.XsValidator):
             ########################################
             # force validation of XML input against local file
             #
             def validateXmlInputForceReadFile (self, xmlInputFile, inputTreeWrapper, xsdFile):
                 xsdTreeWrapper = self.parse (xsdFile)
-	        xsdTreeWrapperList = []
+                xsdTreeWrapperList = []
                 xsdTreeWrapperList.append(xsdTreeWrapper)
                 self._validateXmlInput (xmlInputFile, inputTreeWrapper, xsdTreeWrapperList)
                 for xsdTreeWrapper in xsdTreeWrapperList:
                     xsdTreeWrapper.unlink()
                 return inputTreeWrapper
-        
+
         def parseAndValidateXmlInputForceReadFile (inputFile, xsdFile=None, **kw):
             myXsValidator = MyXsValidator(**kw)
             # parse XML input file
             inputTreeWrapper = myXsValidator.parse (inputFile)
             # validate XML input file
             return myXsValidator.validateXmlInputForceReadFile (inputFile, inputTreeWrapper, xsdFile)
-        
-        
-        
+
+
+
         direc = config['instrumentDefinition.directory']
         self.xsdFile =  os.path.join(direc,'Schema/IDF/1.0/','IDFSchema.xsd')
         files = self.__getDataFileList__()
