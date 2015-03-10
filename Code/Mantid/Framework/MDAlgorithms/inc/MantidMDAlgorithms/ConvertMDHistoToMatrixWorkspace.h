@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_CONVERTMDHISTOTOMATRIXWORKSPACE_H_
-#define MANTID_ALGORITHMS_CONVERTMDHISTOTOMATRIXWORKSPACE_H_
+#ifndef MANTID_MDALGORITHMS_CONVERTMDHISTOTOMATRIXWORKSPACE_H_
+#define MANTID_MDALGORITHMS_CONVERTMDHISTOTOMATRIXWORKSPACE_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -12,7 +12,7 @@ namespace API {
 class IMDHistoWorkspace;
 }
 
-namespace Algorithms {
+namespace MDAlgorithms {
 /** Creates a single spectrum Workspace2D with X,Y, and E copied from an first
  non-integrated dimension of a IMDHistoWorkspace.
 
@@ -83,7 +83,7 @@ private:
   size_t calcStride(const API::IMDHistoWorkspace &workspace, size_t dim) const;
 };
 
-} // namespace Algorithms
+} // namespace MDAlgorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_CONVERTMDHISTOTOMATRIXWORKSPACE_H_*/
+#endif /*MANTID_MDALGORITHMS_CONVERTMDHISTOTOMATRIXWORKSPACE_H_*/

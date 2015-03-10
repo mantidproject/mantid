@@ -1,7 +1,7 @@
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
  *
- *  This collection of functions MAY ONLY be used in MDAlgorithms
+ *  This collection of functions MAY ONLY be used in packages above MDAlgorithms
  *********************************************************************************/
 #include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
 

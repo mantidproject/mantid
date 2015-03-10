@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/ConvertMDHistoToMatrixWorkspace.h"
+#include "MantidMDAlgorithms/ConvertMDHistoToMatrixWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Unit.h"
@@ -82,7 +82,7 @@ size_t findXAxis(const VMD &start, const VMD &end,
 }
 
 namespace Mantid {
-namespace Algorithms {
+namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertMDHistoToMatrixWorkspace)
@@ -356,5 +356,5 @@ size_t ConvertMDHistoToMatrixWorkspace::calcStride(
   return stride;
 }
 
-} // namespace Algorithms
+} // namespace MDAlgorithms
 } // namespace Mantid

@@ -17,7 +17,8 @@ set ( SRC_FILES
 	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
 	src/ConvToMDHistoWS.cpp
-	src/ConvToMDSelector.cpp 
+	src/ConvToMDSelector.cpp
+	src/ConvertMDHistoToMatrixWorkspace.cpp
 	src/ConvertSpiceDataToRealSpace.cpp
 	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToDiffractionMDWorkspace.cpp
@@ -127,6 +128,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CloneMDWorkspace.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/ConvToMDBase.h
+	inc/MantidMDAlgorithms/ConvertMDHistoToMatrixWorkspace.h
 	inc/MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h
@@ -236,6 +238,7 @@ set ( TEST_FILES
 	CloneMDWorkspaceTest.h
 	CompareMDWorkspacesTest.h
 	ConvertEventsToMDTest.h
+	ConvertMDHistoToMatrixWorkspaceTest.h
 	ConvertSpiceDataToRealSpaceTest.h
 	ConvertToDetectorFaceMDTest.h
 	ConvertToDiffractionMDWorkspace2Test.h

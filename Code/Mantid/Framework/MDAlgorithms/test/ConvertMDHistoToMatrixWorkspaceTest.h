@@ -11,8 +11,8 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAlgorithms/ConvertMDHistoToMatrixWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidMDAlgorithms/ConvertMDHistoToMatrixWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -20,13 +20,19 @@
 
 using namespace Mantid;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
-using namespace Mantid::Algorithms;
-using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
+
 
 class ConvertMDHistoToMatrixWorkspaceTest : public CxxTest::TestSuite
 {
 public:
+
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ConvertMDHistoToMatrixWorkspaceTest *createSuite() { return new ConvertMDHistoToMatrixWorkspaceTest(); }
+  static void destroySuite( ConvertMDHistoToMatrixWorkspaceTest *suite ) { delete suite; }
 
   MatrixWorkspace_sptr do_execute_on_1D_directly(const size_t n_dims, const double signal, const double error_sq, size_t* nbins, coord_t* min, coord_t* max)
   {
@@ -54,89 +60,36 @@ public:
     */
   void do_test_2D_slice(size_t ndims, std::vector<size_t> nonIntegr)
   {
-    // prepare input workspace
-
     // create an MD histo workspace
     size_t size = 1;
     // property values for CreateMDHistoWorkspace
-    std::vector<double> extents(ndims*2);
-    std::vector<int> numberOfBins(ndims);
+    std::vector<size_t> numberOfBins(ndims);
     std::vector<std::string> names(ndims);
-    std::vector<std::string> units(ndims);
     // property values for SliceMDHisto
-    std::vector<int> start(ndims);
-    std::vector<int> end(ndims);
+    std::vector<coord_t> start(ndims);
+    std::vector<coord_t> end(ndims);
     for(size_t i = 0; i < ndims; ++i)
     {
-      size_t nbins = 3 + i;
-      size *= nbins;
-      numberOfBins[i] = static_cast<int>(nbins);
-      extents[2*i] = 0.0;
-      extents[2*i+1] = static_cast<double>(nbins);
       names[i] = "x_" + boost::lexical_cast<std::string>(i);
       if ( nonIntegr.end() != std::find( nonIntegr.begin(), nonIntegr.end(), i) )
       {
+        size_t nbins = 3 + i;
+        size *= nbins;
+        numberOfBins[i] = nbins;
         // if it's a non-integrated dimension - don't slice
-        end[i] = static_cast<int>(nbins);
+        end[i] = static_cast<coord_t>(nbins);
       }
       else
       {
-        end[i] = 1;
+        numberOfBins[i] = 1;
       }
     }
-    std::vector<signal_t> data(size);
-    std::vector<signal_t> error(size);
-
-    auto alg = AlgorithmManager::Instance().create("CreateMDHistoWorkspace");
-    alg->initialize();
-    alg->setRethrows(true);
-    alg->setChild(true);
-    alg->setProperty("SignalInput", data);
-    alg->setProperty("ErrorInput", error);
-    alg->setProperty("Dimensionality", static_cast<int>(ndims));
-    alg->setProperty("Extents", extents);
-    alg->setProperty("NumberOfBins", numberOfBins);
-    alg->setProperty("Names", names);
-    alg->setProperty("Units", units);
-    alg->setPropertyValue("OutputWorkspace", "_"); // Not really required for child algorithm
-
-    try
-    {
-      alg->execute();
-    }
-    catch(std::exception& e)
-    {
-      TS_FAIL(e.what());
-    }
-
-    // slice the md ws to make it acceptable by ConvertMDHistoToMatrixWorkspace
-    IMDHistoWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
-    TS_ASSERT( ws );
-
-    alg = AlgorithmManager::Instance().create("SliceMDHisto");
-    alg->initialize();
-    alg->setRethrows(true);
-    alg->setChild(true);
-    alg->setProperty("InputWorkspace", ws);
-    alg->setProperty("Start", start);
-    alg->setProperty("End", end);
-    alg->setPropertyValue("OutputWorkspace", "_1"); // Not really required for child algorithm
-
-    try
-    {
-      alg->execute();
-    }
-    catch(std::exception& e)
-    {
-      TS_FAIL(e.what());
-    }
-
-    IMDHistoWorkspace_sptr slice = alg->getProperty("OutputWorkspace");
-    TS_ASSERT( slice );
+    signal_t signal(0.f), error(0.f);
+    IMDHistoWorkspace_sptr slice = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(ndims, signal,
+        error, &numberOfBins.front(), &start.front(), &end.front(), names);
 
     // test ConvertMDHistoToMatrixWorkspace
-
-    alg = AlgorithmManager::Instance().create("ConvertMDHistoToMatrixWorkspace");
+    auto alg = AlgorithmManager::Instance().create("ConvertMDHistoToMatrixWorkspace");
     alg->initialize();
     alg->setRethrows(true);
     alg->setChild(true);
@@ -188,15 +141,9 @@ public:
 
     }
 
-    AnalysisDataService::Instance().clear();
   }
 
 public:
-
-  ConvertMDHistoToMatrixWorkspaceTest()
-  {
-    FrameworkManager::Instance();
-  }
 
   void test_input_workspace_must_be_imdhisto()
   {
