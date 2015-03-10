@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/FakeISISHistoDAE.cpp
 	src/FileEventDataListener.cpp
 	src/ISISHistoDataListener.cpp
+	src/ISISLiveEventDataListener.cpp
 	src/LiveDataAlgorithm.cpp
 	src/LoadDAE/idc.cpp
 	src/LoadDAE/idc.h
@@ -14,7 +15,7 @@ set ( SRC_FILES
 	src/MonitorLiveData.cpp
 	src/SNSLiveEventDataListener.cpp
 	src/StartLiveData.cpp
-  src/ISISLiveEventDataListener.cpp
+	src/TOPAZLiveEventDataListener.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/LoadDAE/idc.cpp
@@ -29,13 +30,14 @@ set ( INC_FILES
 	inc/MantidLiveData/FakeISISHistoDAE.h
 	inc/MantidLiveData/FileEventDataListener.h
 	inc/MantidLiveData/ISISHistoDataListener.h
+	inc/MantidLiveData/ISISLiveEventDataListener.h
+	inc/MantidLiveData/ISIS/TCPEventStreamDefs.h
 	inc/MantidLiveData/LiveDataAlgorithm.h
 	inc/MantidLiveData/LoadLiveData.h
 	inc/MantidLiveData/MonitorLiveData.h
 	inc/MantidLiveData/SNSLiveEventDataListener.h
 	inc/MantidLiveData/StartLiveData.h
-  inc/MantidLiveData/ISISLiveEventDataListener.h
-  inc/MantidLiveData/ISIS/TCPEventStreamDefs.h
+	inc/MantidLiveData/TOPAZLiveEventDataListener.h
 )
 
 set ( TEST_FILES

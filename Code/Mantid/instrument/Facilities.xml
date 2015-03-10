@@ -409,6 +409,11 @@
    <instrument name="TOPAZ" beamline="12"> 
 	<technique>Neutron Diffraction</technique>
     <technique>Single Crystal Diffraction</technique>
+    <livedata listener="TOPAZLiveEventDataListener" address="160.91.210.45:9100" />
+    <!-- HACK: The address needs to be changed to the proper value.  For now, it's
+         set to my office workstation which is running event_generator in addition
+         to event_catcher. -->
+    <!-- Act like we're ISawEV talking to event_catcher -->
    </instrument> 
   
   <instrument name="HYSPEC" shortname="HYS" beamline="14B"> 
