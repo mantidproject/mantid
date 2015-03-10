@@ -48,7 +48,7 @@ public:
   Projection();
   /// Constructor specifying the number of dimensions
   Projection(size_t nd);
-  /// Two dimensional value constructor
+  /// Three dimensional value constructor, w is the cross product of u and v.
   Projection(const VMD &u, const VMD &v);
   /// Three dimensional value constructor
   Projection(const VMD &u, const VMD &v, const VMD &w);

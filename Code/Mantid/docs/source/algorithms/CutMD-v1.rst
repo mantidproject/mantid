@@ -34,10 +34,8 @@ Usage
    SetUB(Workspace=to_cut, a=1, b=1, c=1, alpha=90, beta=90, gamma=90)
    SetSpecialCoordinates(InputWorkspace=to_cut, SpecialCoordinates='HKL')
 
-   projection = Projection(3) #3 dimensions specified
-   projection.u = [1,1,0]
-   projection.v = [-1,1,0]
-   #w defaults to [0,0,1]
+   #Since we only specify u and v, w is automatically calculated to be the cross product of u and v
+   projection = Projection([1,1,0], [-1,1,0])
    
    # Apply the cut
    out_md = CutMD(to_cut, Projection=projection.toWorkspace(), P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], P4Bin=[-5,5], NoPix=True)

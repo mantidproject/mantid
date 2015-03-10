@@ -35,14 +35,17 @@ Projection::Projection(size_t nd)
 }
 
 Projection::Projection(const VMD &u, const VMD &v)
-    : m_nd(2), m_dimensions(new VMD[m_nd]), m_offsets(new double[m_nd]),
+    : m_nd(3), m_dimensions(new VMD[m_nd]), m_offsets(new double[m_nd]),
       m_units(new ProjectionUnit[m_nd]) {
   m_dimensions[0] = u;
   m_dimensions[1] = v;
+  m_dimensions[2] = u.cross_prod(v);
   m_offsets[0] = 0.0;
   m_offsets[1] = 0.0;
+  m_offsets[2] = 0.0;
   m_units[0] = RLU;
   m_units[1] = RLU;
+  m_units[2] = RLU;
 }
 
 Projection::Projection(const VMD &u, const VMD &v, const VMD &w)

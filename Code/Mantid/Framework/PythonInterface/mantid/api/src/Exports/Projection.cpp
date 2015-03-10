@@ -143,7 +143,8 @@ void export_Projection()
     ("Constructs an n-dimensional projection", args("num_dimensions")))
   .def(
     init<const VMD&,const VMD&>
-    ("Constructs a 2 dimensional projection", args("u","v")))
+    ("Constructs a 3 dimensional projection, with w as the cross product "
+     "of u and v.", args("u","v")))
   .def(
     init<const VMD&,const VMD&,const VMD&>
     ("Constructs a 3 dimensional projection", args("u","v","w")))
@@ -159,7 +160,8 @@ void export_Projection()
   .def(
     "__init__",
     make_constructor(&projCtor2),
-    "Constructs a 2 dimensional projection")
+    "Constructs a 3 dimensional projection, with w as the cross product "
+    "of u and v.")
   .def(
     "__init__",
     make_constructor(&projCtor3),
