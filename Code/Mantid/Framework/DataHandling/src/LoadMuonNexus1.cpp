@@ -357,7 +357,7 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
 
       // At least, number of dead times should cover the number of spectra
       throw Exception::FileError(
-        "Number of dead times doesn't cover every spectra in every period",
+        "Number of dead times doesn't cover every spectrum in every period",
         m_filename);
     } else {
 
@@ -444,7 +444,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
     } else if (numGroupingEntries % m_numberOfSpectra) {
       // At least the number of entries should cover all the spectra
       throw Exception::FileError("Number of grouping entries doesn't cover "
-        "every spectra in every period",
+        "every spectrum in every period",
         m_filename);
 
     } else {
