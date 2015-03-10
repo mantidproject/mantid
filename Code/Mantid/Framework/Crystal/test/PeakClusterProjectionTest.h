@@ -8,7 +8,6 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -21,7 +20,6 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Crystal;
-using namespace Mantid::MDEvents;
 using namespace Mantid::DataObjects;
 
 class PeakClusterProjectionTest: public CxxTest::TestSuite
@@ -88,11 +86,6 @@ public:
   static void destroySuite(PeakClusterProjectionTest *suite)
   {
     delete suite;
-  }
-
-  PeakClusterProjectionTest()
-  {
-    FrameworkManager::Instance();
   }
 
   void test_throws_if_mdws_has_no_coordinate_system()

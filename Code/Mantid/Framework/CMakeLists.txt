@@ -136,7 +136,7 @@ add_subdirectory (ISISLiveData)
 set ( FRAMEWORK_LIBS Kernel Geometry API PythonKernelModule
                      PythonGeometryModule PythonAPIModule DataObjects
                      DataHandling Nexus Algorithms CurveFitting ICat
-                     Crystal MDAlgorithms MDEvents WorkflowAlgorithms
+                     Crystal MDAlgorithms WorkflowAlgorithms
                      LiveData ISISLiveData RemoteAlgorithms SINQ
 )
 
