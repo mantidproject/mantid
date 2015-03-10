@@ -5,12 +5,12 @@ from mantid.kernel import V3D
 class ProjectionTest(unittest.TestCase):
 
     def test_constructors(self):
-        p = Projection(V3D(0,1,2),
-                       V3D(3,4,5),
-                       V3D(6,7,8))
-        self.assertEqual(p.getAxis(0), V3D(0,1,2))
-        self.assertEqual(p.getAxis(0), V3D(0,1,2))
-        self.assertEqual(p.getAxis(0), V3D(0,1,2))
+        p = Projection(V3D(0,1,0),
+                       V3D(-1,1,0),
+                       V3D(0,0,1))
+        self.assertEqual(p.getAxis(0), V3D(0,1,0))
+        self.assertEqual(p.getAxis(1), V3D(-1,1,0))
+        self.assertEqual(p.getAxis(2), V3D(0,0,1))
 
     def test_accessors(self):
         p = Projection();
@@ -37,9 +37,10 @@ class ProjectionTest(unittest.TestCase):
         self.assertEqual(p.getType(2), 'r')
 
     def test_uvw(self):
-        p = Projection(V3D(0,1,2),
-                       V3D(3,4,5),
-                       V3D(6,7,8))
+        p = Projection();
+        p.setAxis(0, V3D(0,1,2))
+        p.setAxis(1, V3D(3,4,5))
+        p.setAxis(2, V3D(6,7,8))
 
         self.assertEqual(p.u, V3D(0,1,2))
         self.assertEqual(p.v, V3D(3,4,5))
