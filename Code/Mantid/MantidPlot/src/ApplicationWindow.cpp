@@ -4409,15 +4409,17 @@ void ApplicationWindow::importASCII(const QStringList& files, int import_mode, c
 
     if (w->inherits("Table")){
       Table *t = dynamic_cast<Table*>(w);
-      for (int i=0; i<files.size(); i++)
-        t->importASCII(files[i], local_column_separator, local_ignored_lines, local_rename_columns,
-            local_strip_spaces, local_simplify_spaces, local_import_comments,
-            local_comment_string, import_read_only, (Table::ImportMode)(import_mode - 2), endLineChar);
+      if (t) {
+        for (int i=0; i<files.size(); i++)
+          t->importASCII(files[i], local_column_separator, local_ignored_lines, local_rename_columns,
+              local_strip_spaces, local_simplify_spaces, local_import_comments,
+              local_comment_string, import_read_only, (Table::ImportMode)(import_mode - 2), endLineChar);
 
-      if (update_dec_separators)
-        t->updateDecimalSeparators(local_separators);
-      t->notifyChanges();
-      emit modifiedProject(t);
+        if (update_dec_separators)
+          t->updateDecimalSeparators(local_separators);
+        t->notifyChanges();
+        emit modifiedProject(t);
+      }
     } else if (w->isA("Matrix")){
       Matrix *m = dynamic_cast<Matrix*>(w);
       if (m) {
