@@ -4420,10 +4420,12 @@ void ApplicationWindow::importASCII(const QStringList& files, int import_mode, c
       emit modifiedProject(t);
     } else if (w->isA("Matrix")){
       Matrix *m = dynamic_cast<Matrix*>(w);
-      for (int i=0; i<files.size(); i++){
-        m->importASCII(files[i], local_column_separator, local_ignored_lines,
-            local_strip_spaces, local_simplify_spaces, local_comment_string,
-            (Matrix::ImportMode)(import_mode - 2), local_separators, endLineChar);
+      if (m) {
+        for (int i=0; i<files.size(); i++){
+          m->importASCII(files[i], local_column_separator, local_ignored_lines,
+              local_strip_spaces, local_simplify_spaces, local_comment_string,
+              (Matrix::ImportMode)(import_mode - 2), local_separators, endLineChar);
+        }
       }
     }
     w->setWindowLabel(files.join("; "));
