@@ -10143,7 +10143,7 @@ QStringList ApplicationWindow::dependingPlots(const QString& name)
       foreach(Graph *g, layers){
         onPlot = g->curvesList();
         onPlot = onPlot.grep (name,TRUE);
-        if (static_cast<int>(onPlot.count()) && plots.contains(w->objectName())<=0)
+        if (static_cast<int>(onPlot.count()) && !plots.contains(w->objectName()))
           plots << w->objectName();
       }
     }else if (w->isA("Graph3D")){
