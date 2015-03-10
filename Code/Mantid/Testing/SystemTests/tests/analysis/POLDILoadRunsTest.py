@@ -1,10 +1,10 @@
-# pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name,bare-except
 import stresstesting
 from mantid.simpleapi import *
 from mantid.api import *
 import numpy as np
 
-'''This assembly of test cases checks that the behavior of PoldiLoadRuns is correct.'''
+#This assembly of test cases checks that the behavior of PoldiLoadRuns is correct.
 class POLDILoadRunsTest(stresstesting.MantidStressTest):
     def runTest(self):
         self.loadSingleWorkspace()
@@ -54,7 +54,7 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
         self.assertEquals(len(wsNames), 1)
         self.assertEquals(wsNames[0], "twoWorkspacesMergedReversed_data_6904")
 
-        twoWorkspacesMerged = PoldiLoadRuns(2013, 6903, 6904, 2)
+        PoldiLoadRuns(2013, 6903, 6904, 2, OutputWorkspace="twoWorkspacesMerged")
 
         wsMergedReversed = AnalysisDataService.retrieve("twoWorkspacesMergedReversed_data_6904")
         wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
@@ -65,14 +65,14 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
 
     def loadWorkspacesMergeThreeNotWorking(self):
         try:
-            threeWorkspacesFail = PoldiLoadRuns(2013, 6903, 6904, 3)
+            PoldiLoadRuns(2013, 6903, 6904, 3, OutputWorkspace="threeWorkspacesFail")
             self.assertTrue(False)
         except:
             self.assertTrue(True)
 
     def loadWorkspacesNotFound(self):
         try:
-            notFound = PoldiLoadRuns(1990, 6903)
+            PoldiLoadRuns(1990, 6903, OutputWorkspace="notFound")
             self.assertTrue(False)
         except:
             self.assertTrue(True)

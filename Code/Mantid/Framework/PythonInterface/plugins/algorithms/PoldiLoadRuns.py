@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name,bare-except
 from mantid.kernel import *
 from mantid.simpleapi import *
 from mantid.api import *
@@ -7,6 +7,9 @@ from datetime import date
 
 
 class PoldiLoadRuns(PythonAlgorithm):
+    _nameTemplate = ""
+    _mergeCheckEnabled = True
+
     def category(self):
         return "SINQ\\Poldi"
 
@@ -70,7 +73,7 @@ class PoldiLoadRuns(PythonAlgorithm):
 
         # Construct the names of the workspaces using the output workspace name to avoid ambiguities.
         outputWorkspaceName = self.getProperty("OutputWorkspace").valueAsStr
-        nameTemplate = outputWorkspaceName + "_data_"
+        self._nameTemplate = outputWorkspaceName + "_data_"
 
         # If any output was produced, it needs to be checked what to do with it.
         overwriteWorkspaces = self.getProperty('OverwriteExistingWorkspace').value
@@ -80,7 +83,7 @@ class PoldiLoadRuns(PythonAlgorithm):
         if AnalysisDataService.doesExist(outputWorkspaceName):
             if not self.isGroupWorkspace(AnalysisDataService.retrieve(outputWorkspaceName)) and not overwriteWorkspaces:
                 self.log().error("Workspace '" + outputWorkspaceName + "' already exists, is not a WorkspaceGroup "
-                "and is not supposed to be overwritten, aborting.")
+                                                                       "and is not supposed to be overwritten, aborting.")
                 return
 
 
@@ -88,10 +91,10 @@ class PoldiLoadRuns(PythonAlgorithm):
         mergeRange = self.getActualMergeRange(firstRun, lastRun, mergeWidth)
 
         # PoldiMerge checks that instruments are compatible, but it can be disabled (calibration measurements)
-        mergeCheckEnabled = self.getProperty('EnableMergeCheck').value
+        self._mergeCheckEnabled = self.getProperty('EnableMergeCheck').value
 
         # Get a list of output workspace names.
-        outputWorkspaces = self.getLoadedWorkspaceNames(year, mergeRange, mergeWidth, nameTemplate, mergeCheckEnabled)
+        outputWorkspaces = self.getLoadedWorkspaceNames(year, mergeRange, mergeWidth)
 
         # No workspaces, return - the algorithm will fail with an error. Additional log entry.
         if len(outputWorkspaces) == 0:
@@ -137,16 +140,16 @@ class PoldiLoadRuns(PythonAlgorithm):
         return (firstRun, actualLastRun)
 
     # Load workspaces and return a list of workspaces that were actually loaded.
-    def getLoadedWorkspaceNames(self, year, mergeRange, mergeWidth, nameTemplate, mergeCheckEnabled):
+    def getLoadedWorkspaceNames(self, year, mergeRange, mergeWidth):
         outputWorkspaces = []
         for i in range(mergeRange[0], mergeRange[1] + 1, mergeWidth):
             # The name of the possibly merged workspace is this the last name of the merged series.
             currentNameNumor = i + mergeWidth - 1
-            currentTotalWsName = nameTemplate + str(currentNameNumor)
+            currentTotalWsName = self._nameTemplate + str(currentNameNumor)
 
             workspaceNames = []
             for j in range(i, i + mergeWidth):
-                currentWsName = nameTemplate + str(j)
+                currentWsName = self._nameTemplate + str(j)
 
                 # Errors are handled by writing a message to the log, so the user can check the files.
                 try:
@@ -159,14 +162,15 @@ class PoldiLoadRuns(PythonAlgorithm):
             if mergeWidth > 1 and len(workspaceNames) > 1:
                 # If workspaces are not compatible, the range is skipped and the workspaces deleted.
                 try:
-                    PoldiMerge(workspaceNames, OutputWorkspace=currentTotalWsName, CheckInstruments=mergeCheckEnabled)
+                    PoldiMerge(workspaceNames, OutputWorkspace=currentTotalWsName,
+                               CheckInstruments=self._mergeCheckEnabled)
                 except:
                     self.log().warning(
                         "Could not merge range [" + str(i) + ", " + str(currentNameNumor) + "], skipping.")
 
                 # Delete all workspaces that contributed to the merged one.
                 for j in range(i, i + mergeWidth - 1):
-                    DeleteWorkspace(nameTemplate + str(j))
+                    DeleteWorkspace(self._nameTemplate + str(j))
 
             # If the workspace is still valid (merging could have failed), it's appended to the output.
             if AnalysisDataService.doesExist(currentTotalWsName):
