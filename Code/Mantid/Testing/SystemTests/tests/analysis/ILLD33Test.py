@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 import stresstesting
 
 from mantid.api import mtd
@@ -6,14 +7,14 @@ from mantid.simpleapi import SetupILLD33Reduction, SANSReduction,Rebin,SANSAzimu
 import unittest
 
 class ILLD33SANSTest(unittest.TestCase):
-    
+
     prefix = "D33"
 
     def tearDown(self):
         for wsName in mtd.getObjectNames():
             if wsName.startswith(self.prefix):
                 mtd.remove(wsName)
-            
+
     def test_all(self):
 
         SetupILLD33Reduction(
@@ -61,18 +62,18 @@ class ILLD33SANSTest(unittest.TestCase):
             TransmissionUseSampleDC=False,
             BackgroundFiles='ILL/001422.nxs',
             BckTransmissionSampleDataFile='ILL/001428.nxs',
-            DoAzimuthalAverage=False,    
+            DoAzimuthalAverage=False,
             Do2DReduction=False,
             ComputeResolution=True,
             ReductionProperties=self.prefix + "props")
-        
+
         output=SANSReduction(Filename='ILL/001425.nxs', ReductionProperties=self.prefix + "props",
                              OutputWorkspace=self.prefix + "out")
         Rebin(InputWorkspace=self.prefix + 'out',OutputWorkspace=self.prefix + 'out_rebin',
               Params='4,0.1,15')
         SANSAzimuthalAverage1D(InputWorkspace=self.prefix + 'out_rebin',Binning='0.001,0.0002,0.03',
-                               OutputWorkspace=self.prefix + 'final')        
-            
+                               OutputWorkspace=self.prefix + 'final')
+
         # Check some data
         wsOut = mtd[self.prefix + 'out']
         self.assertEqual(wsOut.getNumberHistograms(), 65538)
@@ -80,14 +81,14 @@ class ILLD33SANSTest(unittest.TestCase):
         self.assertEqual(wsOut.getNumberHistograms(), 65538)
         wsOut = mtd[self.prefix + 'final']
         self.assertEqual(wsOut.getNumberHistograms(), 1)
-        
 
-  
+
+
     #================== Failure cases ================================
 
     # TODO
 
-    
+
 
 
 #====================================================================================
@@ -107,7 +108,7 @@ class ILLD33Test(stresstesting.MantidStressTest):
         # Run using either runner
         res = runner.run(suite)
         if res.wasSuccessful():
-            self._success = True 
+            self._success = True
         else:
             self._success = False
 

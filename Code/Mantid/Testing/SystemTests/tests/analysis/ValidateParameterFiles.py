@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid import config
 import os
 import re
@@ -8,15 +9,15 @@ import time
 EXPECTED_EXT = '.expected'
 
 class ValidateParameterFiles(stresstesting.MantidStressTest):
-    
+
     def skipTests(self):
         try:
             import genxmlif
             import minixsv
         except ImportError:
             return True
-        return False    
-         
+        return False
+
     def __getDataFileList__(self):
         # get a list of directories to look in
         direc = config['instrumentDefinition.directory']
@@ -27,13 +28,13 @@ class ValidateParameterFiles(stresstesting.MantidStressTest):
         os.chdir(cwd)
         files = []
         for filename in myFiles:
-            files.append(os.path.join(direc, filename))       
+            files.append(os.path.join(direc, filename))
         return files
 
     def runTest(self):
         """Main entry point for the test suite"""
         from genxmlif import GenXmlIfError
-        from minixsv import pyxsval 
+        from minixsv import pyxsval
         direc = config['instrumentDefinition.directory']
         self.xsdFile =  os.path.join(direc,'Schema/ParameterFile/1.0/','ParameterFileSchema.xsd')
         files = self.__getDataFileList__()

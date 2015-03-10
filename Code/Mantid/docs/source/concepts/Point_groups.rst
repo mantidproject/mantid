@@ -39,10 +39,15 @@ As mentioned before, point groups can describe the symmetry of a lattice, includ
 .. math::
     \mathbf{h}' = \mathbf{S}_i \cdot \mathbf{h}
     
-To describe the rotational and translational components of the symmetry operation, a matrix :math:`M_i` and a vector :math:`v_i` are used. In three dimensions :math:`\mathbf{h}` has three elements, so :math:`\mathbf{M_i}` is a :math:`3\times3`-matrix and the symmetry operation is applied like this:
+To describe the rotational and translational components of the symmetry operation, a matrix :math:`\mathbf{W}_i` and a vector :math:`\mathbf{w}_i` are used. In three dimensions :math:`\mathbf{h}` has three elements, so :math:`\mathbf{W}_i` is a :math:`3\times3`-matrix and the symmetry operation is applied like this:
 
 .. math::
-    \mathbf{h}' = \mathbf{M}_i \cdot \mathbf{h} + \mathbf{v_i}
+    \mathbf{h}' = \mathbf{W}_i^{-1}^T \cdot \mathbf{h}
+
+Note that the translational component is not used for transforming HKLs and :math:`\mathbf{W}_i` is inverted and transposed. Coordinates :math:`\mathbf{x}` are transformed differently, they are affected by the translational component:
+
+.. math::
+    \mathbf{x}' = \mathbf{W}_i \cdot \mathbf{h} + \mathbf{w}_i
 
 A point group is an ensemble of symmetry operations. The number of operations present in this collection is the so called order :math:`N` of the corresponding point group. Applying all symmetry operations of a point group to a given vector :math:`\mathbf{h}` results in :math:`N` new vectors :math:`\mathbf{h}'`, some of which may be identical (this depends on the symmetry and also on the vectors, e.g. if one or more index is 0). This means that the symmetry operations of a point group generate a set of :math:`N'` (where :math:`N' < N`) non-identical vectors :math:`\mathbf{h}'` for a given vector :math:`\mathbf{h}` - these vectors are called symmetry equivalents.
 
@@ -75,7 +80,7 @@ Using these identifiers, ``SymmetryOperation``-objects can be created through a 
     symOp = SymmetryOperationFactory.createSymOp("x,y,-z")
     
     hkl = [1, -1, 3]
-    hklPrime = symOp.apply(hkl)
+    hklPrime = symOp.transformHKL(hkl)
     
     print "Mirrored hkl:", hklPrime
     
@@ -84,7 +89,26 @@ The above code will print the mirrored index:
 .. testoutput :: ExSymmetryOperation
 
     Mirrored hkl: [1,-1,-3]
+    
+Point groups can also be used to transform coordinates, which are handled a bit differently than vectors (as described above), so there the symmetry operation class has a dedicated method for performing this operation:
 
+.. testcode :: ExSymmetryOperationPoint
+
+    from mantid.geometry import SymmetryOperation, SymmetryOperationFactory
+    
+    symOp = SymmetryOperationFactory.createSymOp("x-y,x,z")
+    
+    coordinates = [0.3, 0.4, 0.5]
+    coordinatesPrime = symOp.transformCoordinates(coordinates)
+    
+    print "Transformed coordinates:", coordinatesPrime
+    
+The script prints the transformed coordinates:
+
+.. testoutput :: ExSymmetryOperationPoint
+
+    Transformed coordinates: [-0.1,0.3,0.5]
+    
 Sometimes it is easier to think about symmetry in terms of the elements that cause certain symmetry. These are commonly described with Herrman-Mauguin symbols. A symmetry element can be derived from the matrix/vector pair that described the symmetry operation, according to the International Tables for Crystallography A, section 11.2. Expanding a bit on the above example, it's possible to get information about the symmetry element associated to the operation ``x,y,-z``:
 
 .. testcode :: ExSymmetryElement
@@ -146,9 +170,9 @@ Which results in the following output:
 
 .. testoutput :: ExQueryPointGroups
 
-    All point groups: ['-1','-3','-31m','-3m1','112/m','2/m','4/m','4/mmm','6/m','6/mmm','m-3','m-3m','mmm']
-    Cubic point groups: ['m-3','m-3m']
-    Tetragonal point groups: ['4/m','4/mmm']
+    All point groups: ['-1','-3','-3 h','-31m','-3m','-3m1','-4','-42m','-43m','-4m2','-6','-62m','-6m2','1','112/m','2','2/m','222','23','3','3 h','312','31m','32','321','3m','3m1','4','4/m','4/mmm','422','432','4mm','6','6/m','6/mmm','622','6mm','m','m-3','m-3m','mm2','mmm']
+    Cubic point groups: ['-43m','23','432','m-3','m-3m']
+    Tetragonal point groups: ['-4','-42m','-4m2','4','4/m','4/mmm','422','4mm']
 
 After having obtained a ``PointGroup``-object, it can be used for working with reflection data, more specifically :math:`hkl`-indices. It's possible to check whether two reflections are equivalent in a certain point group:
 

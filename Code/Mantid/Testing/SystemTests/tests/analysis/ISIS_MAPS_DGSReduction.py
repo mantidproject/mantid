@@ -1,4 +1,5 @@
-""" Sample MAPS reduction scrip """ 
+#pylint: disable=invalid-name
+""" Sample MAPS reduction scrip """
 import os
 os.environ["PATH"] = r"c:\Mantid\Code\builds\br_master\bin\Release;" + os.environ["PATH"]
 from Direct.ReductionWrapper import *
@@ -11,7 +12,7 @@ except:
 class ReduceMAPS(ReductionWrapper):
     @MainProperties
     def def_main_properties(self):
-        """ Define main properties used in reduction """ 
+        """ Define main properties used in reduction """
         prop = {}
         prop['sample_run'] = 17269
         prop['wb_run'] = 17186
@@ -28,7 +29,7 @@ class ReduceMAPS(ReductionWrapper):
     def def_advanced_properties(self):
         """  separation between simple and advanced properties depends
            on scientist, experiment and user.
-           main properties override advanced properties.      
+           main properties override advanced properties.
         """
         prop = {}
         prop['map_file'] = 'default'
@@ -49,9 +50,9 @@ class ReduceMAPS(ReductionWrapper):
         prop['diag_samp_hi'] = 1.5
         prop['diag_samp_sig'] = 3.3
         prop['diag_van_hi'] = 2.0
-      
-        prop['abs_units_van_range'] = [-40,40]    
-      
+
+        prop['abs_units_van_range'] = [-40,40]
+
         return prop
       #
     @iliad
@@ -64,19 +65,19 @@ class ReduceMAPS(ReductionWrapper):
         return outWS
 
     def __init__(self,web_var=None):
-       """ sets properties defaults for the instrument with Name"""
-       ReductionWrapper.__init__(self,'MAP',web_var)
+        """ sets properties defaults for the instrument with Name"""
+        ReductionWrapper.__init__(self,'MAP',web_var)
     #
     def set_custom_output_filename(self):
-        """ define custom name of output files if standard one is not satisfactory 
-          In addition to that, example of accessing reduction properties 
+        """ define custom name of output files if standard one is not satisfactory
+          In addition to that, example of accessing reduction properties
           Changing them if necessary
-        """ 
+        """
         def custom_name(prop_man):
-            """ sample function which builds filename from 
-              incident energy and run number and adds some auxiliary information 
+            """ sample function which builds filename from
+              incident energy and run number and adds some auxiliary information
               to it.
-            """ 
+            """
             # Note -- properties have the same names as the list of advanced and
             # main properties
             ei = prop_man.incident_energy
@@ -85,7 +86,7 @@ class ReduceMAPS(ReductionWrapper):
             run_num = PropertyManager.sample_run.run_number()
             name = "RUN{0}atEi{1:<4.1f}meV_One2One".format(run_num ,ei)
             return name
-       
+
         # Uncomment this to use custom filename function
         # Note: the properties are stored in prop_man class accessed as
         # below.
@@ -146,4 +147,4 @@ if __name__ == "__main__":
     #if not rez:
     #   raise RuntimeError("validation failed with error: {0}".format(mess))
     #else:
-    #   print "ALL Fine" 
+    #   print "ALL Fine"

@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """ Sample LET reduction script """
 import os
 #os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
@@ -11,7 +12,7 @@ except:
 
 #
 def find_binning_range(energy,ebin):
-    """Function finds the binning range used in multirep mode
+    """ function finds the binning range used in multirep mode
         for merlin ls=11.8,lm2=10. mult=2.8868 dt_DAE=1
         for LET    ls=25,lm2=23.5 mult=4.1     dt_DAE=1.6
         all these values have to be already present in IDF and should be taken from there
@@ -56,7 +57,7 @@ class ReduceLET_OneRep(ReductionWrapper):
         prop = {}
         ei = 7.0
         ebin = [-1,0.002,0.95]
- 
+
         prop['sample_run'] = 'LET00006278.nxs'
         prop['wb_run'] = 'LET00005545.raw'
         prop['incident_energy'] = ei
@@ -140,13 +141,13 @@ class ReduceLET_MultiRep2015(ReductionWrapper):
         prop = {}
         ei=[3.4,8.] # multiple energies provided in the data file
         ebin=[-4,0.002,0.8]    #binning of the energy for the spe file. The numbers are as a fraction of ei [from ,step, to ]
- 
+
         prop['sample_run'] = [14305]
         prop['wb_run'] = 5545
         prop['incident_energy'] = ei
         prop['energy_bins'] = ebin
 
-       
+
         # Absolute units reduction properties.
         # Vanadium labeled Dec 2011 - flat plate of dimensions: 40.5x41x2.0# volume = 3404.025 mm**3 mass= 20.79
         prop['monovan_run'] = 14319 # vanadium run in the same configuration as your sample
@@ -223,18 +224,18 @@ class ReduceLET_MultiRep2015(ReductionWrapper):
               incident energy and run number and adds some auxiliary information
               to it.
             """
-            # Note -- properties have the same names  as the list of advanced and 
+            # Note -- properties have the same names  as the list of advanced and
             # main properties
             ei = prop_man.incident_energy
-            # sample run is more then just list of runs, so we use 
+            # sample run is more then just list of runs, so we use
             # the formalization below to access its methods
             run_num = PropertyManager.sample_run.run_number()
             name = "RUN{0}atEi{1:<4.1f}meV_One2One".format(run_num ,ei)
             return name
-       
+
         # Uncomment this to use custom filename function
         # Note: the properties are stored in prop_man class accessed as
-        # below. 
+        # below.
         #return custom_name(self.reducer.prop_man)
         # use this method to use standard file name generating function
         return None
@@ -263,23 +264,23 @@ if __name__=="__main__":
     #rd.save_web_variables(file)
 
 #### Set up time interval (sec) for reducer to check for input data file.         ####
-    #  If this file is not present and this value is 0,reduction fails 
-    #  if this value >0 the reduction wait until file appears on the data 
+    #  If this file is not present and this value is 0,reduction fails
+    #  if this value >0 the reduction wait until file appears on the data
     #  search path checking after time specified below.
     rd.wait_for_file = 0  # waiting time interval
 
 ####get reduction parameters from properties above, override what you want locally ###
    # and run reduction. Overriding would have form:
-   # rd.reducer.property_name (from the dictionary above) = new value e.g. 
+   # rd.reducer.property_name (from the dictionary above) = new value e.g.
    # rd.reducer.energy_bins = [-40,2,40]
-   # or 
+   # or
    ## rd.reducer.sum_runs = False
 
 ###### Run reduction over all run numbers or files assigned to                   ######
-    # sample_run  variable 
+    # sample_run  variable
 
-    # return output workspace only if you are going to do 
-    # something with it here. Running range of runs will return the array 
+    # return output workspace only if you are going to do
+    # something with it here. Running range of runs will return the array
     # of workspace pointers.
     #red_ws = rd.run_reduction()
     # usual way to go is to reduce workspace and save it internally
