@@ -75,6 +75,11 @@
           <property name="currentIndex">
            <number>1</number>
           </property>
+          <widget class="QWidget" name="tab_3">
+           <attribute name="title">
+            <string>Raw Detectors</string>
+           </attribute>
+          </widget>
           <widget class="QWidget" name="tab">
            <attribute name="title">
             <string>Normalized</string>
@@ -197,7 +202,7 @@
                 <item>
                  <widget class="QGraphicsView" name="graphicsView_reducedData">
                   <property name="sizePolicy">
-                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
@@ -334,159 +339,171 @@
            <attribute name="title">
             <string>Advanced Setup</string>
            </attribute>
-           <widget class="QLineEdit" name="lineEdit_cache">
-            <property name="geometry">
-             <rect>
-              <x>210</x>
-              <y>40</y>
-              <width>231</width>
-              <height>21</height>
-             </rect>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_cache">
-            <property name="geometry">
-             <rect>
-              <x>70</x>
-              <y>40</y>
-              <width>141</width>
-              <height>16</height>
-             </rect>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cache data file download from server to local disk. &lt;/p&gt;&lt;p&gt;The default is current working directory.  &lt;/p&gt;&lt;p&gt;The cached files will be deleted with normal quit. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Cache Raw Data File</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pushButton_broseCache">
-            <property name="geometry">
-             <rect>
-              <x>530</x>
-              <y>20</y>
-              <width>114</width>
-              <height>32</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Browse</string>
-            </property>
-           </widget>
-           <widget class="QCheckBox" name="checkBox_delCache">
-            <property name="geometry">
-             <rect>
-              <x>690</x>
-              <y>50</y>
-              <width>161</width>
-              <height>20</height>
-             </rect>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cached files will be deleted upon quitting normally.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Delete Cache Before Quit</string>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label">
-            <property name="geometry">
-             <rect>
-              <x>80</x>
-              <y>130</y>
-              <width>141</width>
-              <height>16</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Server Address</string>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_localSrc">
-            <property name="geometry">
-             <rect>
-              <x>80</x>
-              <y>190</y>
-              <width>161</width>
-              <height>16</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Local Data Storage</string>
-            </property>
-           </widget>
-           <widget class="QLineEdit" name="lineEdit">
-            <property name="geometry">
-             <rect>
-              <x>260</x>
-              <y>130</y>
-              <width>251</width>
-              <height>21</height>
-             </rect>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pushButton_browseLocalSrc">
-            <property name="geometry">
-             <rect>
-              <x>570</x>
-              <y>180</y>
-              <width>114</width>
-              <height>32</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Browse</string>
-            </property>
-           </widget>
-           <widget class="QLineEdit" name="lineEdit_localSrc">
-            <property name="geometry">
-             <rect>
-              <x>270</x>
-              <y>180</y>
-              <width>241</width>
-              <height>21</height>
-             </rect>
-            </property>
-           </widget>
-           <widget class="QRadioButton" name="radioButton_useServer">
-            <property name="geometry">
-             <rect>
-              <x>20</x>
-              <y>130</y>
-              <width>31</width>
-              <height>20</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-           <widget class="QRadioButton" name="radioButton_userLocal">
-            <property name="geometry">
-             <rect>
-              <x>30</x>
-              <y>190</y>
-              <width>31</width>
-              <height>20</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pushButton_chkServer">
-            <property name="geometry">
-             <rect>
-              <x>570</x>
-              <y>120</y>
-              <width>114</width>
-              <height>32</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Check URL</string>
-            </property>
-           </widget>
+           <layout class="QGridLayout" name="gridLayout_3">
+            <item row="0" column="0">
+             <layout class="QVBoxLayout" name="verticalLayout_4">
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_7">
+                <item>
+                 <widget class="QLabel" name="label_cache">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cache data file download from server to local disk. &lt;/p&gt;&lt;p&gt;The default is current working directory.  &lt;/p&gt;&lt;p&gt;The cached files will be deleted with normal quit. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="text">
+                   <string>Cache Raw Data File</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lineEdit_cache"/>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_broseCache">
+                  <property name="text">
+                   <string>Browse</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="checkBox_delCache">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cached files will be deleted upon quitting normally.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="text">
+                   <string>Delete Cache Before Quit</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_6">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_8">
+                <item>
+                 <widget class="QRadioButton" name="radioButton_useServer">
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label">
+                  <property name="text">
+                   <string>Server Address</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lineEdit"/>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_chkServer">
+                  <property name="text">
+                   <string>Check URL</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_7">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_9">
+                <item>
+                 <widget class="QRadioButton" name="radioButton_userLocal">
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_localSrc">
+                  <property name="text">
+                   <string>Local Data Storage</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lineEdit_localSrc"/>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_browseLocalSrc">
+                  <property name="text">
+                   <string>Browse</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_8">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_4">
+                <item>
+                 <widget class="QLabel" name="label_2">
+                  <property name="text">
+                   <string>Message</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="0">
+             <spacer name="verticalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Preferred</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+           <zorder>verticalLayoutWidget</zorder>
+           <zorder>gridLayoutWidget</zorder>
+           <zorder>verticalSpacer_2</zorder>
           </widget>
          </widget>
         </item>
@@ -502,7 +519,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
