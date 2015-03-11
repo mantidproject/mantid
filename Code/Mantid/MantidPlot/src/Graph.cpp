@@ -3653,7 +3653,7 @@ void Graph::restoreFunction(const QStringList& lst)
   double start = 0.0, end = 0.0;
 
   QStringList::const_iterator line = lst.begin();
-  for (line++; line != lst.end(); ++line){
+  for (++line; line != lst.end(); ++line){
     QString s = *line;
     if (s.contains("<Type>"))
       type = (FunctionCurve::FunctionType)s.remove("<Type>").remove("</Type>").stripWhiteSpace().toInt();
@@ -3689,7 +3689,7 @@ void Graph::restoreFunction(const QStringList& lst)
   c_keys[n_curves-1] = d_plot->insertCurve(c);
 
   QStringList l;
-  for (line++; line != lst.end(); ++line)
+  for (++line; line != lst.end(); ++line)
     l << *line;
   c->restoreCurveLayout(l);
 
@@ -4749,7 +4749,7 @@ void Graph::restoreCurveLabels(int curveID, const QStringList& lst)
   if (s.contains("<column>"))
     labelsColumn = s.remove("<column>").remove("</column>").trimmed();
 
-  for (line++; line != lst.end(); ++line){
+  for (++line; line != lst.end(); ++line){
     s = *line;
     if (s.contains("<color>"))
       c->setLabelsColor(QColor(s.remove("<color>").remove("</color>").trimmed()));
