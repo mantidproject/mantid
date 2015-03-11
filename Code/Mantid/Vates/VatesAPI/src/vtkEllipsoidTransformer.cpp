@@ -3,6 +3,7 @@
 
 #include <vtkSmartPointer.h>
 #include <vtkTransform.h>
+#include <vector>
 #include <cmath>
 
 namespace Mantid
