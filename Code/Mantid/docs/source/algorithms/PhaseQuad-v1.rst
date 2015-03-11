@@ -40,7 +40,7 @@ Usage
 .. testcode:: ExPhaseQuadList
 
    # Load a set of spectra from a EMU file
-   ws = LoadMuonNexus('EMU00006473.nxs')
+   ws = LoadMuonNexus('emu00006473.nxs')
 
    # Create a PhaseList file with some arbitrary detector information
    import os
@@ -79,7 +79,7 @@ Output:
 .. testcode:: ExPhaseQuadTable
 
    # Load a set of spectra from a EMU file
-   ws = LoadMuonNexus('EMU00006473.nxs')
+   ws = LoadMuonNexus('emu00006473.nxs')
 
    # Create a PhaseTable with some arbitrary detector information
    tab = CreateEmptyTableWorkspace()

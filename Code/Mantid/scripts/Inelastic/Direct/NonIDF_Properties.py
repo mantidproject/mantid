@@ -115,11 +115,11 @@ class NonIDF_Properties(object):
     # -----------------------------------------------------------------------------
     @property
     def cashe_sum_ws(self):
-      """ Used together with sum_runs property. If True, a workspace 
-          with partial sum is stored in ADS 
+        """ Used together with sum_runs property. If True, a workspace
+          with partial sum is stored in ADS
           and used later to add more runs to it
-      """ 
-      return self._cashe_sum_ws
+      """
+        return self._cashe_sum_ws
     @cashe_sum_ws.setter
     def cashe_sum_ws(self,val):
         self._cashe_sum_ws = bool(val)
@@ -132,7 +132,7 @@ class NonIDF_Properties(object):
     @log_to_mantid.setter
     def log_to_mantid(self,val):
         object.__setattr__(self,'_log_to_mantid',bool(val))
- 
+
     # -----------------------------------------------------------------------------
     # Service properties (used by class itself)
     #

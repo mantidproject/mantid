@@ -97,12 +97,10 @@ namespace MantidQt{
         // Get all color maps
         Poco::XML::NodeList* nodes = root->getElementsByTagName("ColorMap");
 
-        Poco::XML::Node* node = NULL;
-
-        Poco::XML::Element* element = NULL;
-
         for (unsigned long i = 0; i < nodes->length(); ++i)
         {
+          Poco::XML::Node* node = NULL;
+          Poco::XML::Element* element = NULL;
           node = nodes->item(i);
           element = dynamic_cast<Poco::XML::Element*>(node);
           std::string nameOfMap = static_cast<std::string>(element->getAttribute("name"));
