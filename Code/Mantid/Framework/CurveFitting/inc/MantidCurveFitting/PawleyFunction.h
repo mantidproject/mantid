@@ -2,6 +2,8 @@
 #define MANTID_CURVEFITTING_PAWLEYFUNCTION_H_
 
 #include "MantidKernel/System.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
 
@@ -10,6 +12,37 @@
 
 namespace Mantid {
 namespace CurveFitting {
+
+class DLLExport PawleyParameterFunction : virtual public API::IFunction,
+                                          virtual public API::ParamFunction {
+public:
+  PawleyParameterFunction();
+  virtual ~PawleyParameterFunction() {}
+
+  std::string name() const { return "PawleyParameterFunction"; }
+
+  void setAttribute(const std::string &attName, const Attribute &attValue);
+
+  Geometry::PointGroup::CrystalSystem getCrystalSystem() const;
+  Geometry::UnitCell getUnitCellFromParameters() const;
+
+  void function(const API::FunctionDomain &domain,
+                API::FunctionValues &values) const;
+  void functionDeriv(const API::FunctionDomain &domain,
+                     API::Jacobian &jacobian);
+
+protected:
+  void init();
+
+  void setCrystalSystem(const std::string &crystalSystem);
+
+  void createCrystalSystemParameters(
+      Geometry::PointGroup::CrystalSystem crystalSystem);
+
+  Geometry::PointGroup::CrystalSystem m_crystalSystem;
+};
+
+typedef boost::shared_ptr<PawleyParameterFunction> PawleyParameterFunction_sptr;
 
 /** PawleyFunction
 
@@ -46,35 +79,34 @@ namespace CurveFitting {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PawleyParameterFunction : virtual public API::IFunction,
-                                          virtual public API::ParamFunction {
+class PawleyFunction : public API::IFunction1D,
+                       public API::FunctionParameterDecorator {
 public:
-  PawleyParameterFunction();
-  virtual ~PawleyParameterFunction() {}
+  virtual ~PawleyFunction() {}
 
-  std::string name() const { return "PawleyParameterFunction"; }
+  std::string name() const { return "PawleyFunction"; }
 
-  void setAttribute(const std::string &attName, const Attribute &attValue);
+  void setCrystalSystem(const std::string &crystalSystem);
+  void setProfileFunction(const std::string &profileFunction);
 
-  Geometry::PointGroup::CrystalSystem getCrystalSystem() const;
-  Geometry::UnitCell getUnitCellFromParameters() const;
-
-  void function(const API::FunctionDomain &domain,
-                API::FunctionValues &values) const;
+  void function1D(double *out, const double *xValues, const size_t nData) const;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues,
+                       const size_t nData);
   void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &jacobian);
+                     API::Jacobian &jacobian) {
+      calNumericalDeriv(domain, jacobian);
+  }
+
+  void addPeak();
 
 protected:
   void init();
+  void beforeDecoratedFunctionSet(const API::IFunction_sptr &fn);
 
-  void setCrystalSystem(const std::string &crystalSystem);
-
-  void createCrystalSystemParameters(
-      Geometry::PointGroup::CrystalSystem crystalSystem);
-
-  Geometry::PointGroup::CrystalSystem m_crystalSystem;
+  API::CompositeFunction_sptr m_compositeFunction;
+  PawleyParameterFunction_sptr m_pawleyParameterFunction;
+  API::CompositeFunction_sptr m_peakProfileComposite;
 };
-
 } // namespace CurveFitting
 } // namespace Mantid
 

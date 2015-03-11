@@ -1,8 +1,14 @@
 #include "MantidCurveFitting/PawleyFunction.h"
+
+#include "MantidAPI/FunctionFactory.h"
+
 #include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace CurveFitting {
+
+DECLARE_FUNCTION(PawleyParameterFunction)
 
 using namespace API;
 using namespace Geometry;
@@ -158,6 +164,77 @@ void PawleyParameterFunction::createCrystalSystemParameters(
   }
 
   declareParameter("ZeroShift", 0.0);
+}
+
+void PawleyFunction::setCrystalSystem(const std::string &crystalSystem) {
+  m_pawleyParameterFunction->setAttributeValue("CrystalSystem", crystalSystem);
+  m_compositeFunction->checkFunction();
+}
+
+void PawleyFunction::setProfileFunction(const std::string &profileFunction) {
+  m_pawleyParameterFunction->setAttributeValue("ProfileFunction",
+                                               profileFunction);
+  m_compositeFunction->checkFunction();
+}
+
+void PawleyFunction::function1D(double *out, const double *xValues,
+                                const size_t nData) const {
+  UNUSED_ARG(out);
+  UNUSED_ARG(xValues);
+  UNUSED_ARG(nData);
+}
+
+void PawleyFunction::functionDeriv1D(API::Jacobian *out, const double *xValues,
+                                     const size_t nData) {
+  UNUSED_ARG(out);
+  UNUSED_ARG(xValues);
+  UNUSED_ARG(nData);
+}
+
+void PawleyFunction::addPeak() {
+  m_peakProfileComposite->addFunction(
+      FunctionFactory::Instance().createFunction("Gaussian"));
+}
+
+void PawleyFunction::init() {
+  setDecoratedFunction("CompositeFunction");
+
+  if (!m_compositeFunction) {
+    throw std::runtime_error(
+        "PawleyFunction could not construct internal CompositeFunction.");
+  }
+}
+
+void PawleyFunction::beforeDecoratedFunctionSet(const API::IFunction_sptr &fn) {
+  CompositeFunction_sptr composite =
+      boost::dynamic_pointer_cast<CompositeFunction>(fn);
+
+  if (!composite) {
+    throw std::invalid_argument("PawleyFunction only works with "
+                                "CompositeFunction. Selecting another "
+                                "decorated function is not possible.");
+  }
+
+  m_compositeFunction = composite;
+
+  if (m_compositeFunction->nFunctions() == 0) {
+    m_peakProfileComposite = boost::dynamic_pointer_cast<CompositeFunction>(
+        FunctionFactory::Instance().createFunction("CompositeFunction"));
+
+    m_pawleyParameterFunction =
+        boost::dynamic_pointer_cast<PawleyParameterFunction>(
+            FunctionFactory::Instance().createFunction(
+                "PawleyParameterFunction"));
+
+    m_compositeFunction->addFunction(m_pawleyParameterFunction);
+    m_compositeFunction->addFunction(m_peakProfileComposite);
+  } else {
+    m_pawleyParameterFunction =
+        boost::dynamic_pointer_cast<PawleyParameterFunction>(
+            m_compositeFunction->getFunction(0));
+    m_peakProfileComposite = boost::dynamic_pointer_cast<CompositeFunction>(
+        m_compositeFunction->getFunction(1));
+  }
 }
 
 } // namespace CurveFitting

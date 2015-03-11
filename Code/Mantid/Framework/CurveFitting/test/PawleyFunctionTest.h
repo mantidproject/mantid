@@ -6,7 +6,7 @@
 #include "MantidCurveFitting/PawleyFunction.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
 
-using Mantid::CurveFitting::PawleyParameterFunction;
+using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -251,9 +251,31 @@ public:
     cellParametersAre(cell, 3.0, 4.0, 5.0, 101.0, 111.0, 103.0);
   }
 
+  void testPawleyFunctionInitialization() {
+    PawleyFunction fn;
+    fn.initialize();
+
+    TS_ASSERT(boost::dynamic_pointer_cast<CompositeFunction>(
+        fn.getDecoratedFunction()));
+
+    // The base parameters of PawleyParameterFunction
+    TS_ASSERT_EQUALS(fn.nParams(), 7);
+  }
+
+  void testPawleyFunctionSetCrystalSystem() {
+      PawleyFunction fn;
+      fn.initialize();
+
+      TS_ASSERT_EQUALS(fn.nParams(), 7);
+
+      fn.setCrystalSystem("Cubic");
+
+      TS_ASSERT_EQUALS(fn.nParams(), 2);
+  }
+
 private:
-  void cellParametersAre(const UnitCell &cell, double a, double b, double c, double alpha,
-                         double beta, double gamma) {
+  void cellParametersAre(const UnitCell &cell, double a, double b, double c,
+                         double alpha, double beta, double gamma) {
     TS_ASSERT_DELTA(cell.a(), a, 1e-9);
     TS_ASSERT_DELTA(cell.b(), b, 1e-9);
     TS_ASSERT_DELTA(cell.c(), c, 1e-9);
