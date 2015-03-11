@@ -189,7 +189,7 @@ void PlotAsymmetryByLogValue::exec() {
     Workspace_sptr loadedWs = doLoad(i);
 
     // Analyse loadedWs
-    doAnalysis (loadedWs);
+    doAnalysis (loadedWs, i-is);
 
     progress.report();
   }
@@ -426,8 +426,9 @@ void PlotAsymmetryByLogValue::groupDetectors (Workspace_sptr &loadedWs, Workspac
 
 /**  Performs asymmetry analysis on a loaded workspace
 *   @param loadedWs :: [input] Workspace to apply analysis to
+*   @param index :: [input] Vector index where results will be stored
 */
-void PlotAsymmetryByLogValue::doAnalysis (Workspace_sptr loadedWs ) {
+void PlotAsymmetryByLogValue::doAnalysis (Workspace_sptr loadedWs, int64_t index ) {
 
     // Check if workspace is a workspace group
     WorkspaceGroup_sptr loadedGroup =
@@ -440,9 +441,9 @@ void PlotAsymmetryByLogValue::doAnalysis (Workspace_sptr loadedWs ) {
 
       double Y, E;
       calcIntAsymmetry(loadedWs2D, Y, E);
-      m_redX.push_back(getLogValue(*loadedWs2D));
-      m_redY.push_back(Y);
-      m_redE.push_back(E);
+      m_redX[index]=getLogValue(*loadedWs2D);
+      m_redY[index]=Y;
+      m_redE[index]=E;
 
     } else {
 
@@ -477,9 +478,9 @@ void PlotAsymmetryByLogValue::doAnalysis (Workspace_sptr loadedWs ) {
       if ( m_green==EMPTY_INT() ){
         double Y, E;
         calcIntAsymmetry(ws_red, Y, E);
-        m_redX.push_back(getLogValue(*ws_red));
-        m_redY.push_back(Y);
-        m_redE.push_back(E);
+        m_redX[index] = getLogValue(*ws_red);
+        m_redY[index] = Y;
+        m_redE[index] = E;
 
       } else{
       
@@ -489,23 +490,23 @@ void PlotAsymmetryByLogValue::doAnalysis (Workspace_sptr loadedWs ) {
         calcIntAsymmetry(ws_red, YR, ER);
         calcIntAsymmetry(ws_green, YG, EG);
         // Red data
-        m_redX.push_back(logValue);
-        m_redY.push_back(YR);
-        m_redE.push_back(ER);
+        m_redX[index] = logValue;
+        m_redY[index] = YR;
+        m_redE[index] = ER;
         // Green data
-        m_greenX.push_back(logValue);
-        m_greenY.push_back(YG);
-        m_greenE.push_back(EG);
+        m_greenX[index] = logValue;
+        m_greenY[index] = YG;
+        m_greenE[index] = EG;
         // Sum
-        m_sumX.push_back(logValue);
-        m_sumY.push_back(YR+YG);
-        m_sumE.push_back(sqrt(ER * ER + EG * EG));
+        m_sumX[index] = logValue;
+        m_sumY[index] = YR+YG;
+        m_sumE[index] = sqrt(ER * ER + EG * EG);
         // move to last for safety since some grouping takes place in the
         // calcIntAsymmetry call below
         calcIntAsymmetry(ws_red, ws_green, YR, ER);
-        m_diffX.push_back(logValue);
-        m_diffY.push_back(YR);
-        m_diffE.push_back(ER);
+        m_diffX[index] = logValue;
+        m_diffY[index] = YR;
+        m_diffE[index] = ER;
       }
     } // else loadedGroup
 

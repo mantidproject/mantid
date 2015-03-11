@@ -81,7 +81,7 @@ private:
   // Load run, apply dead time corrections and detector grouping
   API::Workspace_sptr doLoad (int64_t runNumber );
   // Analyse loaded run
-  void doAnalysis (API::Workspace_sptr loadedWs);
+  void doAnalysis (API::Workspace_sptr loadedWs, int64_t index);
   // Parse run names
   void parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt, int& fnZeros);
   // Load dead-time corrections from specified file
