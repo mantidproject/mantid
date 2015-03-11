@@ -7,19 +7,19 @@ import glob
 EXPECTED_EXT = '.expected'
 
 class ValidateGroupingFiles(stresstesting.MantidStressTest):
-    
+
     def skipTests(self):
         try:
             import genxmlif
             import minixsv
         except ImportError:
             return True
-        return False    
-         
+        return False
+
     def __getDataFileList__(self):
         # get a list of directories to look in
         direc = config['instrumentDefinition.directory']
-	direc =  os.path.join(direc,'Grouping')
+        direc =  os.path.join(direc,'Grouping')
         print "Looking for Grouping files in: %s" % direc
         cwd = os.getcwd()
         os.chdir(direc)
@@ -33,7 +33,7 @@ class ValidateGroupingFiles(stresstesting.MantidStressTest):
     def runTest(self):
         """Main entry point for the test suite"""
         from genxmlif import GenXmlIfError
-        from minixsv import pyxsval 
+        from minixsv import pyxsval
         direc = config['instrumentDefinition.directory']
         self.xsdFile =  os.path.join(direc,'Schema/Grouping/1.0/','GroupingSchema.xsd')
         files = self.__getDataFileList__()

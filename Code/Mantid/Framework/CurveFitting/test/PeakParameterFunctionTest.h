@@ -59,6 +59,8 @@ public:
     TS_ASSERT(fn);
 
     fn->setDecoratedFunction("Gaussian");
+    fn->setParameter("Sigma", 1.0);
+    fn->setParameter("Height", 4.0);
 
     FunctionDomain1DVector domain(std::vector<double>(4, 0.0));
     Mantid::CurveFitting::Jacobian jacobian(4, 3);
@@ -68,16 +70,16 @@ public:
     /* Make sure that (0,1) is larger than (0,0) and (0,2)
      * because d(centre)/d(PeakCentre) should be highest.
      */
-    TS_ASSERT_LESS_THAN(jacobian.get(0, 0), jacobian.get(0, 1));
-    TS_ASSERT_LESS_THAN(jacobian.get(0, 2), jacobian.get(0, 1));
+    TS_ASSERT_LESS_THAN(fabs(jacobian.get(0, 0)), fabs(jacobian.get(0, 1)));
+    TS_ASSERT_LESS_THAN(fabs(jacobian.get(0, 2)), fabs(jacobian.get(0, 1)));
 
     // Same for d(height)/d(Height)
-    TS_ASSERT_LESS_THAN(jacobian.get(1, 1), jacobian.get(1, 0));
-    TS_ASSERT_LESS_THAN(jacobian.get(1, 2), jacobian.get(1, 0));
+    TS_ASSERT_LESS_THAN(fabs(jacobian.get(1, 1)), fabs(jacobian.get(1, 0)));
+    TS_ASSERT_LESS_THAN(fabs(jacobian.get(1, 2)), fabs(jacobian.get(1, 0)));
 
     // Same for d(fwhm)/d(Sigma)
-    TS_ASSERT_LESS_THAN(jacobian.get(2, 0), jacobian.get(2, 2));
-    TS_ASSERT_LESS_THAN(jacobian.get(2, 1), jacobian.get(2, 2));
+    TS_ASSERT_LESS_THAN(fabs(jacobian.get(2, 0)), fabs(jacobian.get(2, 2)));
+    TS_ASSERT_LESS_THAN(fabs(jacobian.get(2, 1)), fabs(jacobian.get(2, 2)));
   }
 
   void testWrongDomainSize() {

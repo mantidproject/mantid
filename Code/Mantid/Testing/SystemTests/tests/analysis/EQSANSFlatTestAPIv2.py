@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 import stresstesting
 import mantid
 from mantid.simpleapi import *
@@ -17,7 +18,7 @@ class EQSANSFlatTest(stresstesting.MantidStressTest):
         files.append(FILE_LOCATION+"EQSANS_5703_event.nxs")
         files.append("bl6_flux_at_sample")
         return files
-    
+
     def runTest(self):
         """
             System test for EQSANS.
@@ -37,24 +38,24 @@ class EQSANSFlatTest(stresstesting.MantidStressTest):
         PerformFlightPathCorrection(True)
         UseConfigMask(True)
         SetBeamCenter(89.6749, 129.693)
-        SensitivityCorrection(FILE_LOCATION+'EQSANS_5703_event.nxs', 
-                              min_sensitivity=0.5, 
+        SensitivityCorrection(FILE_LOCATION+'EQSANS_5703_event.nxs',
+                              min_sensitivity=0.5,
                               max_sensitivity=1.5, use_sample_dc=True)
-        DirectBeamTransmission(FILE_LOCATION+"EQSANS_5734_event.nxs", 
+        DirectBeamTransmission(FILE_LOCATION+"EQSANS_5734_event.nxs",
                                FILE_LOCATION+"EQSANS_5738_event.nxs", beam_radius=3)
         ThetaDependentTransmission(False)
         AppendDataFile([FILE_LOCATION+"EQSANS_5729_event.nxs"])
         CombineTransmissionFits(True)
-        
+
         Background(FILE_LOCATION+"EQSANS_5732_event.nxs")
-        BckDirectBeamTransmission(FILE_LOCATION+"EQSANS_5737_event.nxs", 
+        BckDirectBeamTransmission(FILE_LOCATION+"EQSANS_5737_event.nxs",
                                   FILE_LOCATION+"EQSANS_5738_event.nxs", beam_radius=3)
         BckThetaDependentTransmission(False)
         BckCombineTransmissionFits(True)
         SaveIqAscii(process='None')
         SetAbsoluteScale(277.781)
         Reduce1D()
-    
+
     def validate(self):
         self.tolerance = 0.3
         self.disableChecking.append('Instrument')

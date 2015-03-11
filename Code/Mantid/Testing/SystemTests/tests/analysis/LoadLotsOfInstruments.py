@@ -1,7 +1,7 @@
+#pylint: disable=no-init,invalid-name
 from mantid.simpleapi import *
 from mantid.api import FrameworkManager
 import os
-import re
 import glob
 import stresstesting
 
@@ -75,4 +75,4 @@ class LoadLotsOfInstruments(stresstesting.MantidStressTest):
                                    % (len(failed), len(files)))
         else:
             print "Successfully loaded %d files" % len(files)
-	    print files
+        print files

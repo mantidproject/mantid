@@ -20,6 +20,7 @@ namespace Mantid {
 namespace MDEvents {
 
 using namespace std;
+using Mantid::Kernel::V3D;
 
 /**
  * Construct an object to store events that correspond to a peak an are

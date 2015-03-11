@@ -1,5 +1,5 @@
 import stresstesting
-from mantid.simpleapi import * 
+from mantid.simpleapi import *
 import isis_reducer
 import ISISCommandInterface as i
 import isis_instrument

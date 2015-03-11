@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init
 from stresstesting import MantidStressTest
 from mantid.simpleapi import *
 from mantid.kernel import PropertyManager
@@ -12,26 +13,26 @@ def getNamedParameter(ws, name):
     return ws.getInstrument().getNumberParameter(name)[0]
 
 class DirectInelasticDiagnostic2(MantidStressTest):
-    
+
     def requiredMemoryMB(self):
         """Requires 4Gb"""
         return 4000
 
-    
+
     def runTest(self):
         red_man = PropertyManager()
         red_man_name = "__dgs_reduction_properties"
         pmds[red_man_name] = red_man
-        
+
         if 'detvan' in mtd:
             detvan = mtd['detvan']
         else:
-            detvan = Load('MAP17186.raw')        
+            detvan = Load('MAP17186.raw')
         if 'sample' in mtd:
             sample = mtd['sample']
         else:
-            sample = Load('MAP17269.raw')        
-        
+            sample = Load('MAP17269.raw')
+
         # Libisis values to check against
         # All PropertyManager properties need to be set
         red_man["LowCounts"] = 1e-10
@@ -61,10 +62,10 @@ class DirectInelasticDiagnostic2(MantidStressTest):
 
         diag_mask = DgsDiagnose(DetVanWorkspace=detvan, SampleWorkspace=sample,
                                 ReductionProperties=red_man_name)
-        
+
         MaskDetectors(sample, MaskedWorkspace=diag_mask)
         # Save the masked spectra numbers to a simple ASCII file for comparison
-        self.saved_diag_file = os.path.join(config['defaultsave.directory'], 
+        self.saved_diag_file = os.path.join(config['defaultsave.directory'],
                                             'CurrentDirectInelasticDiag2.txt')
         handle = file(self.saved_diag_file, 'w')
         for index in range(sample.getNumberHistograms()):
@@ -72,18 +73,18 @@ class DirectInelasticDiagnostic2(MantidStressTest):
                 spec_no = sample.getSpectrum(index).getSpectrumNo()
                 handle.write(str(spec_no) + '\n')
         handle.close
-        
+
     def cleanup(self):
         if os.path.exists(self.saved_diag_file):
             if self.succeeded():
                 os.remove(self.saved_diag_file)
             else:
-                os.rename(self.saved_diag_file, 
-                          os.path.join(config['defaultsave.directory'], 
+                os.rename(self.saved_diag_file,
+                          os.path.join(config['defaultsave.directory'],
                                        'DirectInelasticDiag2-Mismatch.txt'))
-        
+
     def validateMethod(self):
         return 'validateASCII'
-        
+
     def validate(self):
         return (self.saved_diag_file, 'DirectInelasticDiagnostic.txt')
