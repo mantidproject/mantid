@@ -31,7 +31,7 @@ public:
   std::map<std::string, std::vector<bool>> getInitializedViewablePeaks();
   void removePresenter(std::string peaksWorkspaceName);
   void updateWorkspaces(std::vector<std::string> peaksWorkspaceNames);
-  bool CompositePeaksPresenterVsi::hasPeaks();
+  bool hasPeaks();
 private:
   /// The list of presenters
   std::vector<PeaksPresenterVsi_sptr> m_peaksPresenters;
