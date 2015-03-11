@@ -106,7 +106,7 @@ private:
   /// Stores extension shared by all runs
   std::string m_filenameExt;
   /// Sotres number of zeros in run name
-  std::string m_filenameZeros;
+  int m_filenameZeros;
   /// Stores property "Int"
   bool m_int;
   /// Store forward spectra
