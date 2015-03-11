@@ -107,6 +107,8 @@ private:
   std::vector<int> m_backward_list;
   /// If true call LoadMuonNexus with Autogroup on
   bool m_autogroup;
+  /// Store type of dead time corrections
+  std::string m_dtcType;
   // Mantid vectors to store results
   // Red mantid vectors
   MantidVec m_redX, m_redY, m_redE;

@@ -168,7 +168,7 @@ void PlotAsymmetryByLogValue::exec() {
   std::string stype = getProperty("Type");
   m_int = stype == "Integral";
   // Get type of dead-time corrections
-  const std::string dtcType = getPropertyValue("DeadTimeCorrType");
+  m_dtcType = getPropertyValue("DeadTimeCorrType");
   // Get runs
   std::string firstFN = getProperty("FirstRun");
   std::string lastFN = getProperty("LastRun");
@@ -304,12 +304,12 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad (int64_t runNumber ) {
   Workspace_sptr loadedWs = load->getProperty("OutputWorkspace");
 
   // Check if dead-time corrections have to be applied
-  if (dtcType != "None") {
-    if (dtcType == "FromSpecifiedFile") {
+  if (m_dtcType != "None") {
+    if (m_dtcType == "FromSpecifiedFile") {
 
       // Dead-time corrections: if user specifies a file, load corrections now
       Workspace_sptr customDeadTimes;
-      if (dtcType == "FromSpecifiedFile") {
+      if (m_dtcType == "FromSpecifiedFile") {
         loadCorrectionsFromFile (customDeadTimes, getPropertyValue("DeadTimeCorrFile"));
       }
       applyDeadtimeCorr (loadedWs, customDeadTimes);
