@@ -191,86 +191,8 @@ void PlotAsymmetryByLogValue::exec() {
     Workspace_sptr loadedWs = doLoad(i);
 
     // Analyse loadedWs
+    doAnalysis (loadedWs);
 
-    // Check if workspace is a workspace group
-    WorkspaceGroup_sptr loadedGroup =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWs);
-
-    // If it is not, we only have 'red' data
-    if (!loadedGroup) {
-      Workspace2D_sptr loadedWs2D =
-          boost::dynamic_pointer_cast<Workspace2D>(loadedWs);
-
-      double Y, E;
-      calcIntAsymmetry(loadedWs2D, Y, E);
-      m_redX.push_back(getLogValue(*loadedWs2D));
-      m_redY.push_back(Y);
-      m_redE.push_back(E);
-
-    } else {
-
-      DataObjects::Workspace2D_sptr ws_red;
-      DataObjects::Workspace2D_sptr ws_green;
-      // Run through the periods of the loaded file and save the
-      // selected ones
-      for (int mi = 0; mi < loadedGroup->getNumberOfEntries(); mi++) {
-
-        Workspace2D_sptr memberWs =
-            boost::dynamic_pointer_cast<Workspace2D>(loadedGroup->getItem(mi));
-        int period = mi + 1;
-        if ( period == red ){
-          ws_red = memberWs;
-        }
-        if ( green!= EMPTY_INT() ){
-          if ( period == green ){
-            ws_green = memberWs;
-          }
-        }
-      }
-
-      // Check ws_red
-      if (!ws_red){
-        throw std::invalid_argument("Red period is out of range");
-      }
-      // Check ws_green
-      if ( (green!=EMPTY_INT()) && (!ws_green) ){
-        throw std::invalid_argument("Green period is out of range");
-      }
-
-      if ( green==EMPTY_INT() ){
-        double Y, E;
-        calcIntAsymmetry(ws_red, Y, E);
-        m_redX.push_back(getLogValue(*ws_red));
-        m_redY.push_back(Y);
-        m_redE.push_back(E);
-
-      } else{
-      
-        double YR, ER;
-        double YG, EG;
-        double logValue = getLogValue(*ws_red);
-        calcIntAsymmetry(ws_red, YR, ER);
-        calcIntAsymmetry(ws_green, YG, EG);
-        // Red data
-        m_redX.push_back(logValue);
-        m_redY.push_back(YR);
-        m_redE.push_back(ER);
-        // Green data
-        m_greenX.push_back(logValue);
-        m_greenY.push_back(YG);
-        m_greenE.push_back(EG);
-        // Sum
-        m_sumX.push_back(logValue);
-        m_sumY.push_back(YR+YG);
-        m_sumE.push_back(sqrt(ER * ER + EG * EG));
-        // move to last for safety since some grouping takes place in the
-        // calcIntAsymmetry call below
-        calcIntAsymmetry(ws_red, ws_green, YR, ER);
-        m_diffX.push_back(logValue);
-        m_diffY.push_back(YR);
-        m_diffE.push_back(ER);
-      }
-    } // else loadedGroup
     progress.report();
   }
 
@@ -496,6 +418,91 @@ void PlotAsymmetryByLogValue::groupDetectors (Workspace_sptr &loadedWs, Workspac
 
   loadedWs = outWS.retrieve();
 }
+
+void PlotAsymmetryByLogValue::doAnalysis (Workspace_sptr loadedWs ) {
+
+    // Check if workspace is a workspace group
+    WorkspaceGroup_sptr loadedGroup =
+        boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWs);
+
+    // If it is not, we only have 'red' data
+    if (!loadedGroup) {
+      Workspace2D_sptr loadedWs2D =
+          boost::dynamic_pointer_cast<Workspace2D>(loadedWs);
+
+      double Y, E;
+      calcIntAsymmetry(loadedWs2D, Y, E);
+      m_redX.push_back(getLogValue(*loadedWs2D));
+      m_redY.push_back(Y);
+      m_redE.push_back(E);
+
+    } else {
+
+      DataObjects::Workspace2D_sptr ws_red;
+      DataObjects::Workspace2D_sptr ws_green;
+      // Run through the periods of the loaded file and save the
+      // selected ones
+      for (int mi = 0; mi < loadedGroup->getNumberOfEntries(); mi++) {
+
+        Workspace2D_sptr memberWs =
+            boost::dynamic_pointer_cast<Workspace2D>(loadedGroup->getItem(mi));
+        int period = mi + 1;
+        if ( period == red ){
+          ws_red = memberWs;
+        }
+        if ( green!= EMPTY_INT() ){
+          if ( period == green ){
+            ws_green = memberWs;
+          }
+        }
+      }
+
+      // Check ws_red
+      if (!ws_red){
+        throw std::invalid_argument("Red period is out of range");
+      }
+      // Check ws_green
+      if ( (green!=EMPTY_INT()) && (!ws_green) ){
+        throw std::invalid_argument("Green period is out of range");
+      }
+
+      if ( green==EMPTY_INT() ){
+        double Y, E;
+        calcIntAsymmetry(ws_red, Y, E);
+        m_redX.push_back(getLogValue(*ws_red));
+        m_redY.push_back(Y);
+        m_redE.push_back(E);
+
+      } else{
+      
+        double YR, ER;
+        double YG, EG;
+        double logValue = getLogValue(*ws_red);
+        calcIntAsymmetry(ws_red, YR, ER);
+        calcIntAsymmetry(ws_green, YG, EG);
+        // Red data
+        m_redX.push_back(logValue);
+        m_redY.push_back(YR);
+        m_redE.push_back(ER);
+        // Green data
+        m_greenX.push_back(logValue);
+        m_greenY.push_back(YG);
+        m_greenE.push_back(EG);
+        // Sum
+        m_sumX.push_back(logValue);
+        m_sumY.push_back(YR+YG);
+        m_sumE.push_back(sqrt(ER * ER + EG * EG));
+        // move to last for safety since some grouping takes place in the
+        // calcIntAsymmetry call below
+        calcIntAsymmetry(ws_red, ws_green, YR, ER);
+        m_diffX.push_back(logValue);
+        m_diffY.push_back(YR);
+        m_diffE.push_back(ER);
+      }
+    } // else loadedGroup
+
+}
+
 /**  Calculate the integral asymmetry for a workspace.
 *   The calculation is done by MuonAsymmetryCalc and SimpleIntegration
 * algorithms.

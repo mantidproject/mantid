@@ -80,6 +80,8 @@ private:
   void exec();
   // Load run, apply dead time corrections and detector grouping
   Workspace_sptr doLoad (int64_t runNumber );
+  // Analyse loaded run
+  void doAnalysis (Workspace_sptr loadedWs);
   // Parse run names
   void parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt);
   // Load dead-time corrections from specified file
