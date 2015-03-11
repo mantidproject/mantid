@@ -51,7 +51,7 @@ int PoldiFitPeaks2D::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string PoldiFitPeaks2D::category() const {
-  return "SINQ\\Poldi\\PoldiSet";
+  return "SINQ\\Poldi";
 }
 
 /// Very short algorithm summary. @see Algorith::summary
