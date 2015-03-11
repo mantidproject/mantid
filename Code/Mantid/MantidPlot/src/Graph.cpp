@@ -4219,17 +4219,19 @@ void Graph::copy(Graph* g)
       }
 
       if (c_type[i] != Box && c_type[i] != ErrorBars){
-        c->setData(x.data(), y.data(), n);
-        if (c->type() != Function && c->type() != Pie) {
-          DataCurve *dc = dynamic_cast<DataCurve*>(c);
-          if (dc)
-            dc->clone(cv);
-        } else if (c->type() == Pie) {
-          QwtPieCurve *cPie = dynamic_cast<QwtPieCurve*>(c);
-          if (cPie) {
-            QwtPieCurve *cvPie = dynamic_cast<QwtPieCurve*>(cv);
-            if (cvPie)
-              cPie->clone(cvPie);
+        if (c) {
+          c->setData(x.data(), y.data(), n);
+          if (c->type() != Function && c->type() != Pie) {
+            DataCurve *dc = dynamic_cast<DataCurve*>(c);
+            if (dc)
+              dc->clone(cv);
+          } else if (c->type() == Pie) {
+            QwtPieCurve *cPie = dynamic_cast<QwtPieCurve*>(c);
+            if (cPie) {
+              QwtPieCurve *cvPie = dynamic_cast<QwtPieCurve*>(cv);
+              if (cvPie)
+                cPie->clone(cvPie);
+            }
           }
         }
       }
