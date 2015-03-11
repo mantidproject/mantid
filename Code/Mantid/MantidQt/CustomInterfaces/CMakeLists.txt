@@ -2,6 +2,7 @@ set ( SRC_FILES
   src/DataComparison.cpp
 	src/DirectConvertToEnergy.cpp
 	src/Homer.cpp
+	src/Indirect/AbsCorr.cpp
 	src/Indirect/ApplyCorr.cpp
 	src/Indirect/CalcCorr.cpp
 	src/Indirect/ConvFit.cpp
@@ -84,6 +85,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/DllConfig.h
 	inc/MantidQtCustomInterfaces/Homer.h
 	inc/MantidQtCustomInterfaces/Indirect/IDATab.h
+	inc/MantidQtCustomInterfaces/Indirect/AbsCorr.h
 	inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.h
 	inc/MantidQtCustomInterfaces/Indirect/CalcCorr.h
 	inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
@@ -173,6 +175,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/Homer.h
                 inc/MantidQtCustomInterfaces/Indirect/IDATab.h
+                inc/MantidQtCustomInterfaces/Indirect/AbsCorr.h
                 inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.h
                 inc/MantidQtCustomInterfaces/Indirect/CalcCorr.h
                 inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
@@ -241,6 +244,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
 set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
                inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.ui
+               inc/MantidQtCustomInterfaces/Indirect/AbsCorr.ui
                inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.ui
                inc/MantidQtCustomInterfaces/Indirect/CalcCorr.ui
                inc/MantidQtCustomInterfaces/Indirect/ConvFit.ui
