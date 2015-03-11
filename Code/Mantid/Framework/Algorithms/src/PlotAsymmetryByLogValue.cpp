@@ -307,13 +307,14 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad (int64_t runNumber ) {
   if (m_dtcType != "None") {
     if (m_dtcType == "FromSpecifiedFile") {
 
-      // Dead-time corrections: if user specifies a file, load corrections now
+      // If user specifies a file, load corrections now
       Workspace_sptr customDeadTimes;
       if (m_dtcType == "FromSpecifiedFile") {
         loadCorrectionsFromFile (customDeadTimes, getPropertyValue("DeadTimeCorrFile"));
       }
       applyDeadtimeCorr (loadedWs, customDeadTimes);
     } else {
+      // Load corrections from run
       Workspace_sptr deadTimes = load->getProperty("DeadTimeTable");
       applyDeadtimeCorr (loadedWs, deadTimes);
     }
