@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1200</width>
+    <width>1124</width>
     <height>1024</height>
    </rect>
   </property>
@@ -73,7 +73,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidget">
           <property name="currentIndex">
-           <number>1</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -91,18 +91,46 @@
                <layout class="QHBoxLayout" name="horizontalLayout_3">
                 <item>
                  <widget class="QLabel" name="label_normalizeMonitor">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>155</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string>Normalization Monitor</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="lineEdit_normalizeMonitor"/>
+                 <widget class="QLineEdit" name="lineEdit_normalizeMonitor">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>300</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_3">
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Preferred</enum>
                   </property>
                   <property name="sizeHint" stdset="0">
                    <size>
@@ -137,6 +165,9 @@
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Preferred</enum>
+                  </property>
                   <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
@@ -151,18 +182,46 @@
                <layout class="QHBoxLayout" name="horizontalLayout_6">
                 <item>
                  <widget class="QLabel" name="label_detExcluded">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>155</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="text">
-                   <string>Detectors to Exclude</string>
+                   <string>Detectors to Exclude   </string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="lineEdit_detExcluded"/>
+                 <widget class="QLineEdit" name="lineEdit_detExcluded">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>300</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_4">
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Preferred</enum>
                   </property>
                   <property name="sizeHint" stdset="0">
                    <size>
@@ -186,6 +245,9 @@
                  <spacer name="horizontalSpacer_5">
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Preferred</enum>
                   </property>
                   <property name="sizeHint" stdset="0">
                    <size>
@@ -346,6 +408,18 @@
                <layout class="QHBoxLayout" name="horizontalLayout_7">
                 <item>
                  <widget class="QLabel" name="label_cache">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>155</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="toolTip">
                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cache data file download from server to local disk. &lt;/p&gt;&lt;p&gt;The default is current working directory.  &lt;/p&gt;&lt;p&gt;The cached files will be deleted with normal quit. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
@@ -355,7 +429,20 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="lineEdit_cache"/>
+                 <widget class="QLineEdit" name="lineEdit_cache">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>400</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButton_broseCache">
@@ -393,6 +480,18 @@
                <layout class="QHBoxLayout" name="horizontalLayout_8">
                 <item>
                  <widget class="QRadioButton" name="radioButton_useServer">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>20</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
@@ -400,13 +499,38 @@
                 </item>
                 <item>
                  <widget class="QLabel" name="label">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>135</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string>Server Address</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="lineEdit"/>
+                 <widget class="QLineEdit" name="lineEdit">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>400</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButton_chkServer">
@@ -434,6 +558,18 @@
                <layout class="QHBoxLayout" name="horizontalLayout_9">
                 <item>
                  <widget class="QRadioButton" name="radioButton_userLocal">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>20</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
@@ -441,13 +577,38 @@
                 </item>
                 <item>
                  <widget class="QLabel" name="label_localSrc">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>135</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string>Local Data Storage</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="lineEdit_localSrc"/>
+                 <widget class="QLineEdit" name="lineEdit_localSrc">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>400</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButton_browseLocalSrc">
@@ -501,8 +662,6 @@
              </spacer>
             </item>
            </layout>
-           <zorder>verticalLayoutWidget</zorder>
-           <zorder>gridLayoutWidget</zorder>
            <zorder>verticalSpacer_2</zorder>
           </widget>
          </widget>
@@ -518,7 +677,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1200</width>
+     <width>1124</width>
      <height>25</height>
     </rect>
    </property>

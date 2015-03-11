@@ -2,6 +2,7 @@
 import numpy
 import sys
 import os
+import urllib2
 
 from Ui_MainWindow import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui
@@ -324,3 +325,21 @@ class MainWindow(QtGui.QMainWindow):
         """ Log debug information
         """
         print dbinfo
+
+
+
+    def _downloadFile(self, url, localfilepath):
+        """
+        """
+        url = 'http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400_scan0001.dat'
+
+        response = urllib2.urlopen(url)
+        wbuf = response.read()
+
+        if wbuf.count('not found') > 0:
+            self._logError("File cannot be found.")
+
+        ofile = open(localfilepath, 'w')
+        ofile.write(wbuf)
+        ofile.close()
+
