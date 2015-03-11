@@ -16,23 +16,54 @@ and other sample log data.
 
 
 Format of SPICE XML data file
-#########################
+#############################
 
-The SPICE XML data file contains four sections
- - ???
- - ???
- - Parameters
- - Counts
+The SPICE XML data file contains four sections under parent node *SPICErack*.
+Each section contains child nodes for detailed information.
 
-Each of them contains child nodes for detailed information, such as ... 
+ - Header: instrument name, reactor power, experiment title and number, scan number and etc.
+ - Motor_Position: positions of motor *m1*, *marc*, *2theta*, *chi*, *phi*, *omega* and etc. 
+ - Parameter_Positions: reading of sample environment devices, such as temperature at sample.  
+ - Counters: counting time, monitor counts, and *N x N* detectors' counts,
+
+
+Counts of 2D detector
++++++++++++++++++++++
+
+Counts of an :math:`n\times m` 2D detectors  are recorded in XML file as below::
+
+  X(1,1)  X(1,2)  X(1,3) ... X(1,m)
+  .
+  .
+  .
+  X(n,1)  X(n,2) X(n,3) ... X(n,m)
+
+And the (1,1) position is the bottom left corner of the Anger camera as seen from the sample position.
+
 
 
 Output Worskpaces
 #################
 
-One MatrixWorskpaces will be exported from the algorith. 
+The output from this algorithm is a MatrixWorskpaces. 
 
-'OutputWorkspace' is ... 
+For a 2D detector with :math:`n\times m` pixels, the output MatrixWorkspace
+will have :math:`n` spectrum, each of which has a vector of length equal to :math:`m`. 
+It can be mapped to the raw data as :math:`WS.readY(i)[j] = X(i+1,j+1)`. 
+
+All experiment information, sample environment devices' readings and monitor counts,
+which are recorded in XML files,
+are converted to the properties in output MatrixWorkspace's sample log. 
+
+
+Workflow
+########
+
+Algorithm *LoadSpiceXML2DDet* is one of a series of algorithms that are implemented to 
+reduced HFIR HB3A data collected from Anger camera. 
+It will be called at the first step in the complete workflow.  
+
+Instrument will not be loaded to its output workspace. 
 
 
 Usage
