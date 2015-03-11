@@ -1,6 +1,7 @@
 import unittest
 from mantid.api import Projection
 from mantid.kernel import V3D
+from mantid.simpleapi import mtd
 
 class ProjectionTest(unittest.TestCase):
 
@@ -53,6 +54,16 @@ class ProjectionTest(unittest.TestCase):
         self.assertEqual(p.u, V3D(2,3,0))
         self.assertEqual(p.v, V3D(7,8,9))
         self.assertEqual(p.w, V3D(4,6,0))
+
+    def test_ads(self):
+        p = Projection();
+        p.setAxis(0, V3D(0,1,2))
+        p.setAxis(1, V3D(3,4,5))
+        p.setAxis(2, V3D(6,7,8))
+        proj_test_ads = p.createWorkspace()
+        proj_test_ads3 = p.createWorkspace(OutputWorkspace="proj_test_ads2")
+        self.assertIn("proj_test_ads", mtd, msg="Workspace not added to ADS successfully")
+        self.assertIn("proj_test_ads2", mtd, msg="Workspace not added to ADS successfully")
 
 if __name__ == '__main__':
     unittest.main()
