@@ -58,7 +58,7 @@ namespace DataObjects
     /// Get ellipsoid directions
     std::vector<Mantid::Kernel::V3D> directions() const;
     /// Get ellipsoid directions in a specified frame
-    std::vector<Kernel::V3D> PeakShapeEllipsoid::getDirectionInSpecificFrame(Kernel::Matrix<double>& invertedGoniometerMatrix) const;
+    std::vector<Kernel::V3D> getDirectionInSpecificFrame(Kernel::Matrix<double>& invertedGoniometerMatrix) const;
 
     /// PeakShape interface
     std::string toJSON() const;
