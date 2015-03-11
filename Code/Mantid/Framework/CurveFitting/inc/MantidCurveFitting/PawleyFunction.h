@@ -5,6 +5,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ParamFunction.h"
 
 #include "MantidGeometry/Crystal/PointGroup.h"
@@ -26,6 +27,14 @@ public:
   Geometry::PointGroup::CrystalSystem getCrystalSystem() const;
   Geometry::UnitCell getUnitCellFromParameters() const;
 
+  std::string getProfileFunctionName() const {
+    return getAttribute("ProfileFunction").asString();
+  }
+
+  std::string getProfileFunctionCenterParameterName() const {
+    return m_profileFunctionCenterParameterName;
+  }
+
   void function(const API::FunctionDomain &domain,
                 API::FunctionValues &values) const;
   void functionDeriv(const API::FunctionDomain &domain,
@@ -34,12 +43,16 @@ public:
 protected:
   void init();
 
+  void setProfileFunction(const std::string &profileFunction);
   void setCrystalSystem(const std::string &crystalSystem);
 
   void createCrystalSystemParameters(
       Geometry::PointGroup::CrystalSystem crystalSystem);
+  void setCenterParameterNameFromFunction(
+      const API::IPeakFunction_sptr &profileFunction);
 
   Geometry::PointGroup::CrystalSystem m_crystalSystem;
+  std::string m_profileFunctionCenterParameterName;
 };
 
 typedef boost::shared_ptr<PawleyParameterFunction> PawleyParameterFunction_sptr;
@@ -82,6 +95,7 @@ typedef boost::shared_ptr<PawleyParameterFunction> PawleyParameterFunction_sptr;
 class PawleyFunction : public API::IFunction1D,
                        public API::FunctionParameterDecorator {
 public:
+  PawleyFunction();
   virtual ~PawleyFunction() {}
 
   std::string name() const { return "PawleyFunction"; }
@@ -94,10 +108,12 @@ public:
                        const size_t nData);
   void functionDeriv(const API::FunctionDomain &domain,
                      API::Jacobian &jacobian) {
-      calNumericalDeriv(domain, jacobian);
+    calNumericalDeriv(domain, jacobian);
   }
 
-  void addPeak();
+  void addPeak(const Kernel::V3D &hkl, double centre, double fwhm,
+               double height);
+  API::IPeakFunction_sptr getPeak(size_t i) const;
 
 protected:
   void init();
@@ -106,6 +122,8 @@ protected:
   API::CompositeFunction_sptr m_compositeFunction;
   PawleyParameterFunction_sptr m_pawleyParameterFunction;
   API::CompositeFunction_sptr m_peakProfileComposite;
+
+  std::vector<Kernel::V3D> m_hkls;
 };
 } // namespace CurveFitting
 } // namespace Mantid

@@ -263,14 +263,40 @@ public:
   }
 
   void testPawleyFunctionSetCrystalSystem() {
-      PawleyFunction fn;
-      fn.initialize();
+    PawleyFunction fn;
+    fn.initialize();
 
-      TS_ASSERT_EQUALS(fn.nParams(), 7);
+    TS_ASSERT_EQUALS(fn.nParams(), 7);
 
-      fn.setCrystalSystem("Cubic");
+    fn.setCrystalSystem("Cubic");
 
-      TS_ASSERT_EQUALS(fn.nParams(), 2);
+    TS_ASSERT_EQUALS(fn.nParams(), 2);
+  }
+
+  void testPawleyFunctionAddPeak() {
+    PawleyFunction fn;
+    fn.initialize();
+
+    TS_ASSERT_EQUALS(fn.nParams(), 7);
+
+    fn.addPeak(V3D(), 2.0, 3.0, 4.0);
+
+    TS_ASSERT_EQUALS(fn.nParams(), 10);
+  }
+
+  void testPawleyFunctionSetProfileFunction() {
+    PawleyFunction fn;
+    fn.initialize();
+
+    TS_ASSERT_EQUALS(fn.nParams(), 7);
+
+    fn.addPeak(V3D(), 2.0, 3.0, 4.0);
+
+    TS_ASSERT_EQUALS(fn.nParams(), 10);
+
+    fn.setProfileFunction("PseudoVoigt");
+
+    TS_ASSERT_EQUALS(fn.nParams(), 11);
   }
 
 private:

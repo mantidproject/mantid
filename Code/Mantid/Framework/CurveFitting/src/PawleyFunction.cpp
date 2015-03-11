@@ -14,12 +14,15 @@ using namespace API;
 using namespace Geometry;
 
 PawleyParameterFunction::PawleyParameterFunction()
-    : ParamFunction(), m_crystalSystem(PointGroup::Triclinic) {}
+    : ParamFunction(), m_crystalSystem(PointGroup::Triclinic),
+      m_profileFunctionCenterParameterName() {}
 
 void PawleyParameterFunction::setAttribute(const std::string &attName,
                                            const Attribute &attValue) {
   if (attName == "CrystalSystem") {
     setCrystalSystem(attValue.asString());
+  } else if (attName == "ProfileFunction") {
+    setProfileFunction(attValue.asString());
   }
 
   ParamFunction::setAttribute(attName, attValue);
@@ -81,15 +84,21 @@ void PawleyParameterFunction::init() {
   declareAttribute("CrystalSystem", IFunction::Attribute("Triclinic"));
   declareAttribute("ProfileFunction", IFunction::Attribute("Gaussian"));
 
-  declareParameter("a", 1.0);
-  declareParameter("b", 1.0);
-  declareParameter("c", 1.0);
+  setCrystalSystem("Triclinic");
+  setProfileFunction("Gaussian");
+}
 
-  declareParameter("Alpha", 90.0);
-  declareParameter("Beta", 90.0);
-  declareParameter("Gamma", 90.0);
+void PawleyParameterFunction::setProfileFunction(
+    const std::string &profileFunction) {
+  IPeakFunction_sptr peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(
+      FunctionFactory::Instance().createFunction(profileFunction));
 
-  declareParameter("ZeroShift", 0.0);
+  if (!peakFunction) {
+    throw std::invalid_argument("PawleyFunction can only use IPeakFunctions to "
+                                "calculate peak profiles.");
+  }
+
+  setCenterParameterNameFromFunction(peakFunction);
 }
 
 void
@@ -166,6 +175,19 @@ void PawleyParameterFunction::createCrystalSystemParameters(
   declareParameter("ZeroShift", 0.0);
 }
 
+void PawleyParameterFunction::setCenterParameterNameFromFunction(
+    const IPeakFunction_sptr &profileFunction) {
+  m_profileFunctionCenterParameterName.clear();
+  if (profileFunction) {
+    m_profileFunctionCenterParameterName =
+        profileFunction->getCentreParameterName();
+  }
+}
+
+PawleyFunction::PawleyFunction()
+    : FunctionParameterDecorator(), m_compositeFunction(),
+      m_pawleyParameterFunction(), m_peakProfileComposite(), m_hkls() {}
+
 void PawleyFunction::setCrystalSystem(const std::string &crystalSystem) {
   m_pawleyParameterFunction->setAttributeValue("CrystalSystem", crystalSystem);
   m_compositeFunction->checkFunction();
@@ -174,6 +196,23 @@ void PawleyFunction::setCrystalSystem(const std::string &crystalSystem) {
 void PawleyFunction::setProfileFunction(const std::string &profileFunction) {
   m_pawleyParameterFunction->setAttributeValue("ProfileFunction",
                                                profileFunction);
+
+  // At this point PawleyParameterFunction guarantees that it's an IPeakFunction
+  for (size_t i = 0; i < m_peakProfileComposite->nFunctions(); ++i) {
+    IPeakFunction_sptr oldFunction = boost::dynamic_pointer_cast<IPeakFunction>(
+        m_peakProfileComposite->getFunction(i));
+
+    IPeakFunction_sptr newFunction = boost::dynamic_pointer_cast<IPeakFunction>(
+        FunctionFactory::Instance().createFunction(
+            m_pawleyParameterFunction->getProfileFunctionName()));
+
+    newFunction->setCentre(oldFunction->centre());
+    newFunction->setFwhm(oldFunction->fwhm());
+    newFunction->setHeight(oldFunction->height());
+
+    m_peakProfileComposite->replaceFunction(i, newFunction);
+  }
+
   m_compositeFunction->checkFunction();
 }
 
@@ -191,9 +230,26 @@ void PawleyFunction::functionDeriv1D(API::Jacobian *out, const double *xValues,
   UNUSED_ARG(nData);
 }
 
-void PawleyFunction::addPeak() {
-  m_peakProfileComposite->addFunction(
-      FunctionFactory::Instance().createFunction("Gaussian"));
+void PawleyFunction::addPeak(const Kernel::V3D &hkl, double centre, double fwhm,
+                             double height) {
+  m_hkls.push_back(hkl);
+
+  IPeakFunction_sptr peak = boost::dynamic_pointer_cast<IPeakFunction>(
+      FunctionFactory::Instance().createFunction(
+          m_pawleyParameterFunction->getProfileFunctionName()));
+
+  peak->setCentre(centre);
+  peak->setFwhm(fwhm);
+  peak->setHeight(height);
+
+  m_peakProfileComposite->addFunction(peak);
+
+  m_compositeFunction->checkFunction();
+}
+
+IPeakFunction_sptr PawleyFunction::getPeak(size_t i) const {
+  return boost::dynamic_pointer_cast<IPeakFunction>(
+      m_peakProfileComposite->getFunction(i));
 }
 
 void PawleyFunction::init() {
