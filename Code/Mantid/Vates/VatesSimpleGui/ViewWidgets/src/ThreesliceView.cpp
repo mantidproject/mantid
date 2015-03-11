@@ -68,6 +68,8 @@ ThreeSliceView::ThreeSliceView(QWidget *parent) : ViewBase(parent)
   this->mainView = this->createRenderView(this->ui.mainRenderFrame,
                                           QString("pqQuadView"));
   pqActiveObjects::instance().setActiveView(this->mainView);
+
+  vtkSMPropertyHelper(this->mainView->getProxy(), "ShowCubeAxes").Set(1);
 }
 
 ThreeSliceView::~ThreeSliceView()
