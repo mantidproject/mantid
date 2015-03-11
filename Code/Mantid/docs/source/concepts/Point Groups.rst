@@ -1,6 +1,6 @@
 .. _Point groups:
 
-Point groups
+Point Groups
 ============
 
 This document explains how crystallographic point groups are used in Mantid.

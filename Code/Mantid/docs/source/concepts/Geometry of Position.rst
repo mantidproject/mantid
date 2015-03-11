@@ -1,6 +1,6 @@
 .. _Geometry of Position:
 
-Geometry_of_Position
+Geometry of Position
 ====================
 
 What is it?

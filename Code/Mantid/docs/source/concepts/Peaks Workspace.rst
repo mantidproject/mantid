@@ -1,4 +1,6 @@
-PeaksWorkspace
+.. _peaksworkspace:
+
+Peaks Workspace
 ===============
 
 The PeaksWorkspace is a special Workspace that holds a list of single crystal Peak objects.
