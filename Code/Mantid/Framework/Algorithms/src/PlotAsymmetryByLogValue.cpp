@@ -249,6 +249,7 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad (int64_t runNumber ) {
     groupDetectors(loadedWs,loadedDetGrouping);
   }
 
+  return loadedWs;
 }
 
 /**  Load dead-time corrections from specified file
