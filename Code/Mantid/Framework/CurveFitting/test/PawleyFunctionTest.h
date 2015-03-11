@@ -6,9 +6,10 @@
 #include "MantidCurveFitting/PawleyFunction.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
 
-using Mantid::CurveFitting::PawleyFunction;
+using Mantid::CurveFitting::PawleyParameterFunction;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 
 class PawleyFunctionTest : public CxxTest::TestSuite {
 public:
@@ -18,7 +19,7 @@ public:
   static void destroySuite(PawleyFunctionTest *suite) { delete suite; }
 
   void testCrystalSystem() {
-    PawleyFunction fn;
+    PawleyParameterFunction fn;
     fn.initialize();
 
     TS_ASSERT(fn.hasAttribute("CrystalSystem"));
@@ -89,6 +90,177 @@ public:
     // invalid string
     TS_ASSERT_THROWS(fn.setAttributeValue("CrystalSystem", "invalid"),
                      std::invalid_argument);
+  }
+
+  void testCrystalSystemConstraintsCubic() {
+    PawleyParameterFunction fn;
+    fn.initialize();
+
+    fn.setAttributeValue("CrystalSystem", "Cubic");
+
+    TS_ASSERT_EQUALS(fn.nParams(), 2);
+
+    fn.setParameter("a", 3.0);
+    TS_ASSERT_EQUALS(fn.getParameter("a"), 3.0);
+
+    TS_ASSERT_THROWS(fn.getParameter("b"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("c"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("Alpha"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("Beta"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("Gamma"), std::invalid_argument);
+
+    UnitCell cell = fn.getUnitCellFromParameters();
+    cellParametersAre(cell, 3.0, 3.0, 3.0, 90.0, 90.0, 90.0);
+  }
+
+  void testCrystalSystemConstraintsTetragonal() {
+    PawleyParameterFunction fn;
+    fn.initialize();
+
+    fn.setAttributeValue("CrystalSystem", "Tetragonal");
+
+    TS_ASSERT_EQUALS(fn.nParams(), 3);
+
+    fn.setParameter("a", 3.0);
+    TS_ASSERT_EQUALS(fn.getParameter("a"), 3.0);
+    fn.setParameter("c", 5.0);
+    TS_ASSERT_EQUALS(fn.getParameter("c"), 5.0);
+
+    TS_ASSERT_THROWS(fn.getParameter("b"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("Alpha"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("Beta"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("Gamma"), std::invalid_argument);
+
+    UnitCell cell = fn.getUnitCellFromParameters();
+    cellParametersAre(cell, 3.0, 3.0, 5.0, 90.0, 90.0, 90.0);
+  }
+
+  void testCrystalSystemConstraintsHexagonal() {
+    PawleyParameterFunction fn;
+    fn.initialize();
+
+    fn.setAttributeValue("CrystalSystem", "Hexagonal");
+
+    TS_ASSERT_EQUALS(fn.nParams(), 3);
+
+    fn.setParameter("a", 3.0);
+    TS_ASSERT_EQUALS(fn.getParameter("a"), 3.0);
+    fn.setParameter("c", 5.0);
+    TS_ASSERT_EQUALS(fn.getParameter("c"), 5.0);
+
+    TS_ASSERT_THROWS(fn.getParameter("b"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("Alpha"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("Beta"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("Gamma"), std::invalid_argument);
+
+    UnitCell cell = fn.getUnitCellFromParameters();
+    cellParametersAre(cell, 3.0, 3.0, 5.0, 90.0, 90.0, 120.0);
+  }
+
+  void testCrystalSystemConstraintsTrigonal() {
+    PawleyParameterFunction fn;
+    fn.initialize();
+
+    fn.setAttributeValue("CrystalSystem", "Trigonal");
+
+    TS_ASSERT_EQUALS(fn.nParams(), 3);
+
+    fn.setParameter("a", 3.0);
+    TS_ASSERT_EQUALS(fn.getParameter("a"), 3.0);
+    fn.setParameter("Alpha", 101.0);
+    TS_ASSERT_EQUALS(fn.getParameter("Alpha"), 101.0);
+
+    TS_ASSERT_THROWS(fn.getParameter("b"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("c"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("Beta"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("Gamma"), std::invalid_argument);
+
+    UnitCell cell = fn.getUnitCellFromParameters();
+    cellParametersAre(cell, 3.0, 3.0, 3.0, 101.0, 101.0, 101.0);
+  }
+
+  void testCrystalSystemConstraintsOrthorhombic() {
+    PawleyParameterFunction fn;
+    fn.initialize();
+
+    fn.setAttributeValue("CrystalSystem", "Orthorhombic");
+
+    TS_ASSERT_EQUALS(fn.nParams(), 4);
+
+    fn.setParameter("a", 3.0);
+    TS_ASSERT_EQUALS(fn.getParameter("a"), 3.0);
+    fn.setParameter("b", 4.0);
+    TS_ASSERT_EQUALS(fn.getParameter("b"), 4.0);
+    fn.setParameter("c", 5.0);
+    TS_ASSERT_EQUALS(fn.getParameter("c"), 5.0);
+
+    TS_ASSERT_THROWS(fn.getParameter("Alpha"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("Beta"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("Gamma"), std::invalid_argument);
+
+    UnitCell cell = fn.getUnitCellFromParameters();
+    cellParametersAre(cell, 3.0, 4.0, 5.0, 90.0, 90.0, 90.0);
+  }
+
+  void testCrystalSystemConstraintsMonoclinic() {
+    PawleyParameterFunction fn;
+    fn.initialize();
+
+    fn.setAttributeValue("CrystalSystem", "Monoclinic");
+
+    TS_ASSERT_EQUALS(fn.nParams(), 5);
+
+    fn.setParameter("a", 3.0);
+    TS_ASSERT_EQUALS(fn.getParameter("a"), 3.0);
+    fn.setParameter("b", 4.0);
+    TS_ASSERT_EQUALS(fn.getParameter("b"), 4.0);
+    fn.setParameter("c", 5.0);
+    TS_ASSERT_EQUALS(fn.getParameter("c"), 5.0);
+    fn.setParameter("Beta", 101.0);
+    TS_ASSERT_EQUALS(fn.getParameter("Beta"), 101.0);
+
+    TS_ASSERT_THROWS(fn.getParameter("Alpha"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("Gamma"), std::invalid_argument);
+
+    UnitCell cell = fn.getUnitCellFromParameters();
+    cellParametersAre(cell, 3.0, 4.0, 5.0, 90.0, 101.0, 90.0);
+  }
+
+  void testCrystalSystemConstraintsTriclinic() {
+    PawleyParameterFunction fn;
+    fn.initialize();
+
+    fn.setAttributeValue("CrystalSystem", "Triclinic");
+
+    TS_ASSERT_EQUALS(fn.nParams(), 7);
+
+    fn.setParameter("a", 3.0);
+    TS_ASSERT_EQUALS(fn.getParameter("a"), 3.0);
+    fn.setParameter("b", 4.0);
+    TS_ASSERT_EQUALS(fn.getParameter("b"), 4.0);
+    fn.setParameter("c", 5.0);
+    TS_ASSERT_EQUALS(fn.getParameter("c"), 5.0);
+    fn.setParameter("Alpha", 101.0);
+    TS_ASSERT_EQUALS(fn.getParameter("Alpha"), 101.0);
+    fn.setParameter("Beta", 111.0);
+    TS_ASSERT_EQUALS(fn.getParameter("Beta"), 111.0);
+    fn.setParameter("Gamma", 103.0);
+    TS_ASSERT_EQUALS(fn.getParameter("Gamma"), 103.0);
+
+    UnitCell cell = fn.getUnitCellFromParameters();
+    cellParametersAre(cell, 3.0, 4.0, 5.0, 101.0, 111.0, 103.0);
+  }
+
+private:
+  void cellParametersAre(const UnitCell &cell, double a, double b, double c, double alpha,
+                         double beta, double gamma) {
+    TS_ASSERT_DELTA(cell.a(), a, 1e-9);
+    TS_ASSERT_DELTA(cell.b(), b, 1e-9);
+    TS_ASSERT_DELTA(cell.c(), c, 1e-9);
+
+    TS_ASSERT_DELTA(cell.alpha(), alpha, 1e-9);
+    TS_ASSERT_DELTA(cell.beta(), beta, 1e-9);
+    TS_ASSERT_DELTA(cell.gamma(), gamma, 1e-9);
   }
 };
 

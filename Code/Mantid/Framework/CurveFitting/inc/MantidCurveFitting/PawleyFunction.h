@@ -46,21 +46,21 @@ namespace CurveFitting {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PawleyFunction : public API::IFunction1D,
-                                 public API::ParamFunction {
+class DLLExport PawleyParameterFunction : virtual public API::IFunction,
+                                          virtual public API::ParamFunction {
 public:
-  PawleyFunction();
-  virtual ~PawleyFunction() {}
+  PawleyParameterFunction();
+  virtual ~PawleyParameterFunction() {}
 
-  std::string name() const { return "PawleyFunction"; }
+  std::string name() const { return "PawleyParameterFunction"; }
 
   void setAttribute(const std::string &attName, const Attribute &attValue);
+
   Geometry::PointGroup::CrystalSystem getCrystalSystem() const;
+  Geometry::UnitCell getUnitCellFromParameters() const;
 
-  void function1D(double *out, const double *xValues, const size_t nData) const;
-
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData);
+  void function(const API::FunctionDomain &domain,
+                API::FunctionValues &values) const;
   void functionDeriv(const API::FunctionDomain &domain,
                      API::Jacobian &jacobian);
 
@@ -69,8 +69,10 @@ protected:
 
   void setCrystalSystem(const std::string &crystalSystem);
 
+  void createCrystalSystemParameters(
+      Geometry::PointGroup::CrystalSystem crystalSystem);
+
   Geometry::PointGroup::CrystalSystem m_crystalSystem;
-  Geometry::UnitCell m_unitCell;
 };
 
 } // namespace CurveFitting

@@ -7,11 +7,11 @@ namespace CurveFitting {
 using namespace API;
 using namespace Geometry;
 
-PawleyFunction::PawleyFunction()
-    : ParamFunction(), m_crystalSystem(PointGroup::Triclinic), m_unitCell() {}
+PawleyParameterFunction::PawleyParameterFunction()
+    : ParamFunction(), m_crystalSystem(PointGroup::Triclinic) {}
 
-void PawleyFunction::setAttribute(const std::string &attName,
-                                  const Attribute &attValue) {
+void PawleyParameterFunction::setAttribute(const std::string &attName,
+                                           const Attribute &attValue) {
   if (attName == "CrystalSystem") {
     setCrystalSystem(attValue.asString());
   }
@@ -19,34 +19,75 @@ void PawleyFunction::setAttribute(const std::string &attName,
   ParamFunction::setAttribute(attName, attValue);
 }
 
-PointGroup::CrystalSystem PawleyFunction::getCrystalSystem() const {
+PointGroup::CrystalSystem PawleyParameterFunction::getCrystalSystem() const {
   return m_crystalSystem;
 }
 
-void PawleyFunction::function1D(double *out, const double *xValues,
-                                const size_t nData) const {
-  UNUSED_ARG(out);
-  UNUSED_ARG(xValues);
-  UNUSED_ARG(nData);
+UnitCell PawleyParameterFunction::getUnitCellFromParameters() const {
+  switch (m_crystalSystem) {
+  case PointGroup::Cubic: {
+    double a = getParameter("a");
+    return UnitCell(a, a, a);
+  }
+  case PointGroup::Tetragonal: {
+    double a = getParameter("a");
+    return UnitCell(a, a, getParameter("c"));
+  }
+  case PointGroup::Hexagonal: {
+    double a = getParameter("a");
+    return UnitCell(a, a, getParameter("c"), 90, 90, 120);
+  }
+  case PointGroup::Trigonal: {
+    double a = getParameter("a");
+    double alpha = getParameter("Alpha");
+    return UnitCell(a, a, a, alpha, alpha, alpha);
+  }
+  case PointGroup::Orthorhombic: {
+    return UnitCell(getParameter("a"), getParameter("b"), getParameter("c"));
+  }
+  case PointGroup::Monoclinic: {
+    return UnitCell(getParameter("a"), getParameter("b"), getParameter("c"), 90,
+                    getParameter("Beta"), 90);
+  }
+  case PointGroup::Triclinic: {
+    return UnitCell(getParameter("a"), getParameter("b"), getParameter("c"),
+                    getParameter("Alpha"), getParameter("Beta"),
+                    getParameter("Gamma"));
+  }
+  }
+
+  return UnitCell();
 }
 
-void PawleyFunction::functionDeriv1D(Jacobian *out, const double *xValues,
-                                     const size_t nData) {
-  UNUSED_ARG(out);
-  UNUSED_ARG(xValues);
-  UNUSED_ARG(nData);
+void PawleyParameterFunction::function(const FunctionDomain &domain,
+                                       FunctionValues &values) const {
+  UNUSED_ARG(domain);
+  UNUSED_ARG(values);
 }
 
-void PawleyFunction::functionDeriv(const FunctionDomain &domain,
-                                   Jacobian &jacobian) {
-  calNumericalDeriv(domain, jacobian);
+void PawleyParameterFunction::functionDeriv(const FunctionDomain &domain,
+                                            Jacobian &jacobian) {
+  UNUSED_ARG(domain)
+  UNUSED_ARG(jacobian);
 }
 
-void PawleyFunction::init() {
+void PawleyParameterFunction::init() {
   declareAttribute("CrystalSystem", IFunction::Attribute("Triclinic"));
+  declareAttribute("ProfileFunction", IFunction::Attribute("Gaussian"));
+
+  declareParameter("a", 1.0);
+  declareParameter("b", 1.0);
+  declareParameter("c", 1.0);
+
+  declareParameter("Alpha", 90.0);
+  declareParameter("Beta", 90.0);
+  declareParameter("Gamma", 90.0);
+
+  declareParameter("ZeroShift", 0.0);
 }
 
-void PawleyFunction::setCrystalSystem(const std::string &crystalSystem) {
+void
+PawleyParameterFunction::setCrystalSystem(const std::string &crystalSystem) {
   std::string crystalSystemLC = boost::algorithm::to_lower_copy(crystalSystem);
 
   if (crystalSystemLC == "cubic") {
@@ -67,6 +108,56 @@ void PawleyFunction::setCrystalSystem(const std::string &crystalSystem) {
     throw std::invalid_argument("Not a valid crystal system: '" +
                                 crystalSystem + "'.");
   }
+
+  createCrystalSystemParameters(m_crystalSystem);
+}
+
+void PawleyParameterFunction::createCrystalSystemParameters(
+    PointGroup::CrystalSystem crystalSystem) {
+
+  clearAllParameters();
+  switch (crystalSystem) {
+  case PointGroup::Cubic:
+    declareParameter("a", 1.0);
+    break;
+
+  case PointGroup::Hexagonal:
+  case PointGroup::Tetragonal:
+    declareParameter("a", 1.0);
+    declareParameter("c", 1.0);
+    break;
+
+  case PointGroup::Orthorhombic:
+    declareParameter("a", 1.0);
+    declareParameter("b", 1.0);
+    declareParameter("c", 1.0);
+    break;
+
+  case PointGroup::Monoclinic:
+    declareParameter("a", 1.0);
+    declareParameter("b", 1.0);
+    declareParameter("c", 1.0);
+    declareParameter("Beta", 90.0);
+    break;
+
+  case PointGroup::Trigonal:
+    declareParameter("a", 1.0);
+    declareParameter("Alpha", 90.0);
+    break;
+
+  default:
+    // triclinic
+    declareParameter("a", 1.0);
+    declareParameter("b", 1.0);
+    declareParameter("c", 1.0);
+
+    declareParameter("Alpha", 90.0);
+    declareParameter("Beta", 90.0);
+    declareParameter("Gamma", 90.0);
+    break;
+  }
+
+  declareParameter("ZeroShift", 0.0);
 }
 
 } // namespace CurveFitting
