@@ -210,6 +210,9 @@ void PlotAsymmetryByLogValue::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
+/**  Loads one run and applies dead-time corrections and detector grouping if required
+*   @param runNumber :: [input] Run number specifying run to load
+*/
 Workspace_sptr PlotAsymmetryByLogValue::doLoad (int64_t runNumber ) {
 
   // Get complete run name
@@ -303,6 +306,7 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace (MatrixWorkspace_sptr &out
 *   @param lastFN :: [input/output] Last run's name
 *   @param fnBase :: [output] Runs base name
 *   @param fnExt :: [output] Runs extension
+*   @param fnZeros :: [output] Number of zeros in run's name
 */
 void PlotAsymmetryByLogValue::parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt, int& fnZeros)
 {
@@ -420,6 +424,9 @@ void PlotAsymmetryByLogValue::groupDetectors (Workspace_sptr &loadedWs, Workspac
   loadedWs = outWS.retrieve();
 }
 
+/**  Performs asymmetry analysis on a loaded workspace
+*   @param loadedWs :: [input] Workspace to apply analysis to
+*/
 void PlotAsymmetryByLogValue::doAnalysis (Workspace_sptr loadedWs ) {
 
     // Check if workspace is a workspace group
