@@ -68,8 +68,7 @@ public:
               T *lVal);
   int getArrayItemSize(const std::string &item_name, int *dims_array,
                        int &ndims);
-  int getArrayItem(const std::string &item_name, long *spec_array, int nspec,
-                   T *larray);
+  int getArrayItem(const std::string &item_name, int nspec, T *larray);
   int getArrayItem(const std::string &item_name, T *larray);
 };
 

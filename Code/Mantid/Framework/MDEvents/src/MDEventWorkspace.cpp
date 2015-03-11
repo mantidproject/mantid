@@ -14,7 +14,6 @@
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDGridBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
-#include "MantidMDEvents/MDSplitBox.h"
 #include <iomanip>
 #include <functional>
 #include <algorithm>
