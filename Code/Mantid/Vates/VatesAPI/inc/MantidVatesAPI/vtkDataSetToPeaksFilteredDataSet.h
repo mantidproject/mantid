@@ -50,7 +50,7 @@ namespace VATES
       /// Apply the peak filtering
       void execute(ProgressAction& progressUpdating);
       /// Get radius of no shape
-      double vtkDataSetToPeaksFilteredDataSet::getRadiusNoShape();
+      double getRadiusNoShape();
       /// Get radius factor
       double getRadiusFactor();
     private:
