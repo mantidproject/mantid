@@ -182,13 +182,6 @@ void PlotAsymmetryByLogValue::exec() {
   size_t ie = atoi(lastFN.c_str());  // last run number
   int w = static_cast<int>(firstFN.size());
 
-
-  // Dead-time corrections: if user specifies a file, load corrections now
-  Workspace_sptr customDeadTimes;
-  if (dtcType == "FromSpecifiedFile") {
-    loadCorrectionsFromFile (customDeadTimes, getPropertyValue("DeadTimeCorrFile"));
-  }
-
   Progress progress(this, 0, 1, ie - is + 2);
 
   // Loop through runs
@@ -208,6 +201,12 @@ void PlotAsymmetryByLogValue::exec() {
     // Check if dead-time corrections have to be applied
     if (dtcType != "None") {
       if (dtcType == "FromSpecifiedFile") {
+
+        // Dead-time corrections: if user specifies a file, load corrections now
+        Workspace_sptr customDeadTimes;
+        if (dtcType == "FromSpecifiedFile") {
+          loadCorrectionsFromFile (customDeadTimes, getPropertyValue("DeadTimeCorrFile"));
+        }
         applyDeadtimeCorr (loadedWs, customDeadTimes);
       } else {
         Workspace_sptr deadTimes = load->getProperty("DeadTimeTable");
