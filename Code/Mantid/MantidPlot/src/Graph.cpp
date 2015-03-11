@@ -2089,17 +2089,19 @@ QString Graph::saveCurveLayout(int index)
     }
   } else if(style == Box){
     BoxCurve *b = static_cast<BoxCurve*>(c);
-    s+=QString::number(SymbolBox::symbolIndex(b->maxStyle()))+"\t";
-    s+=QString::number(SymbolBox::symbolIndex(b->p99Style()))+"\t";
-    s+=QString::number(SymbolBox::symbolIndex(b->meanStyle()))+"\t";
-    s+=QString::number(SymbolBox::symbolIndex(b->p1Style()))+"\t";
-    s+=QString::number(SymbolBox::symbolIndex(b->minStyle()))+"\t";
-    s+=QString::number(b->boxStyle())+"\t";
-    s+=QString::number(b->boxWidth())+"\t";
-    s+=QString::number(b->boxRangeType())+"\t";
-    s+=QString::number(b->boxRange())+"\t";
-    s+=QString::number(b->whiskersRangeType())+"\t";
-    s+=QString::number(b->whiskersRange())+"\t";
+    if (b) {
+      s+=QString::number(SymbolBox::symbolIndex(b->maxStyle()))+"\t";
+      s+=QString::number(SymbolBox::symbolIndex(b->p99Style()))+"\t";
+      s+=QString::number(SymbolBox::symbolIndex(b->meanStyle()))+"\t";
+      s+=QString::number(SymbolBox::symbolIndex(b->p1Style()))+"\t";
+      s+=QString::number(SymbolBox::symbolIndex(b->minStyle()))+"\t";
+      s+=QString::number(b->boxStyle())+"\t";
+      s+=QString::number(b->boxWidth())+"\t";
+      s+=QString::number(b->boxRangeType())+"\t";
+      s+=QString::number(b->boxRange())+"\t";
+      s+=QString::number(b->whiskersRangeType())+"\t";
+      s+=QString::number(b->whiskersRange())+"\t";
+    }
   }
   return s;
 }
