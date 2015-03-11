@@ -186,7 +186,7 @@ namespace VATES
 
       // Add a glyph and append to the appendFilter
       const Mantid::Geometry::PeakShape& shape = m_workspace->getPeakPtr(i)->getPeakShape();
-      std::string name = shape.shapeName();
+
       // Pick the radius up from the factory if possible, otherwise use the user-provided value.
       vtkPolyDataAlgorithm* shapeMarker = NULL;
       if(shape.shapeName() == Mantid::DataObjects::PeakShapeSpherical::sphereShapeName())

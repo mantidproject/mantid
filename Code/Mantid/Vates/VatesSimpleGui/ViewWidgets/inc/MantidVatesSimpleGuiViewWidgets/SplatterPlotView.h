@@ -118,10 +118,10 @@ protected slots:
    * Create and apply a threshold filter to the data.
    */
   void onThresholdButtonClicked();
-  /// On peaks source destroyed
-  void onPeakSourceDestroyed(QObject*);
   /// On peaks filter destroyed
   void onPeaksFilterDestroyed();
+  /// On peaks source destroyed
+  void onPeakSourceDestroyed();
 
 private:
   Q_DISABLE_COPY(SplatterPlotView)

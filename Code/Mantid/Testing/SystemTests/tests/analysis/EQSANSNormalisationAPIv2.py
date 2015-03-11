@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 import stresstesting
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.sns_command_interface import *
@@ -7,9 +8,9 @@ import os
 class EQSANSNormalisationNoFlux(stresstesting.MantidStressTest):
     """
         Analysis Tests for EQSANS
-        Testing that the I(Q) output of is correct 
+        Testing that the I(Q) output of is correct
     """
-    
+
     def runTest(self):
         """
             Check that EQSANSTofStructure returns the correct workspace
@@ -17,27 +18,27 @@ class EQSANSNormalisationNoFlux(stresstesting.MantidStressTest):
         config = ConfigService.Instance()
         config["facilityName"]='SNS'
         ws = "__eqsans_normalisation_test"
-        
-        EQSANSLoad(Filename="EQSANS_1466_event.nxs", OutputWorkspace=ws, 
+
+        EQSANSLoad(Filename="EQSANS_1466_event.nxs", OutputWorkspace=ws,
                    PreserveEvents=False, LoadMonitors=False)
         EQSANSNormalise(InputWorkspace=ws, NormaliseToBeam=False,
                         OutputWorkspace=ws)
         SumSpectra(InputWorkspace=ws, OutputWorkspace="eqsans_no_flux")
-        
+
     def validate(self):
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
-        
+
         return "eqsans_no_flux", 'EQSANSNormalisation_NoFlux.nxs'
 
 class EQSANSNormalisationDefault(stresstesting.MantidStressTest):
     """
         Analysis Tests for EQSANS
-        Testing that the I(Q) output of is correct 
+        Testing that the I(Q) output of is correct
     """
-    
+
     def runTest(self):
         """
             Check that EQSANSTofStructure returns the correct workspace
@@ -45,16 +46,16 @@ class EQSANSNormalisationDefault(stresstesting.MantidStressTest):
         config = ConfigService.Instance()
         config["facilityName"]='SNS'
         ws = "__eqsans_normalisation_test"
-        
-        EQSANSLoad(Filename="EQSANS_1466_event.nxs", OutputWorkspace=ws, 
+
+        EQSANSLoad(Filename="EQSANS_1466_event.nxs", OutputWorkspace=ws,
                    PreserveEvents=False, LoadMonitors=False)
         EQSANSNormalise(InputWorkspace=ws,NormaliseToBeam=True,
                         OutputWorkspace=ws)
         SumSpectra(InputWorkspace=ws, OutputWorkspace="eqsans_default_flux")
-        
+
     def validate(self):
         # This test only makes sense if /SNS is not available,
-        # otherwise we will end up using the actual beam file, 
+        # otherwise we will end up using the actual beam file,
         # which may not produce the same output. This test
         # is meant to exercise the functionality to find the
         # beam profile and will only produce the correct results
@@ -65,44 +66,44 @@ class EQSANSNormalisationDefault(stresstesting.MantidStressTest):
         self.disableChecking.append('Sample')
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
-        
+
         return "eqsans_default_flux", 'EQSANSNormalisation_DefaultFlux.nxs'
-    
+
 class EQSANSNormalisationInputFlux(stresstesting.MantidStressTest):
     """
         Analysis Tests for EQSANS
-        Testing that the I(Q) output of is correct 
+        Testing that the I(Q) output of is correct
     """
-    
+
     def runTest(self):
         """
             Check that EQSANSTofStructure returns the correct workspace
         """
         config = ConfigService.Instance()
         config["facilityName"]='SNS'
-        ws = "__eqsans_normalisation_test"        
+        ws = "__eqsans_normalisation_test"
         spectrum_file = "eqsans_beam_flux.txt"
-        
-        EQSANSLoad(Filename="EQSANS_1466_event.nxs", OutputWorkspace=ws, 
+
+        EQSANSLoad(Filename="EQSANS_1466_event.nxs", OutputWorkspace=ws,
                    PreserveEvents=False, LoadMonitors=False)
         EQSANSNormalise(InputWorkspace=ws,NormaliseToBeam=True,
                         BeamSpectrumFile=spectrum_file,
                         OutputWorkspace=ws)
         SumSpectra(InputWorkspace=ws, OutputWorkspace="eqsans_input_flux")
-  
+
     def validate(self):
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
-        
+
         return "eqsans_input_flux", 'EQSANSNormalisation_InputFlux.nxs'
 
 class EQSANSNormalisationBeamFlux(stresstesting.MantidStressTest):
     """
         Analysis Tests for EQSANS
     """
-    
+
     def runTest(self):
         """
             Check that EQSANSTofStructure returns the correct workspace
@@ -116,7 +117,7 @@ class EQSANSNormalisationBeamFlux(stresstesting.MantidStressTest):
                    NoBeamCenter=True,
                    ReductionProperties=self.prop_mng,
                    OutputWorkspace=self.data_ws)
-        
+
         EQSANSNormalise(InputWorkspace=self.data_ws,
                         BeamSpectrumFile='SANSBeamFluxCorrectionMonitor.nxs',
                         NormaliseToMonitor=True,
@@ -135,7 +136,7 @@ class EQSANSNormalisationBeamFlux(stresstesting.MantidStressTest):
                       0.00000000e+00, 2.49096583e-08, 0.00000000e+00, 8.48764614e-09,
                       8.59073435e-09, 0.00000000e+00, 8.77853612e-09, 0.00000000e+00,
                       3.69158961e-08, 2.16789982e-08, 1.41834793e-08]
-   
+
         output_y = mtd[self.data_ws].readY(0)
         if output_y[0]-ref_values[0] > 0.000006:
             return False
@@ -145,6 +146,6 @@ class EQSANSNormalisationBeamFlux(stresstesting.MantidStressTest):
             return False
         if output_y[25]-ref_values[25] > 0.000006:
             return False
-        
+
         return True
 

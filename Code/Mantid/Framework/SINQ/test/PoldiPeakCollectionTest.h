@@ -188,7 +188,8 @@ public:
         PoldiPeakCollection peaks;
         TS_ASSERT(!peaks.pointGroup());
 
-        PointGroup_sptr m3m = boost::make_shared<PointGroupLaue13>();
+        PointGroup_sptr m3m = PointGroupFactory::Instance().createPointGroup("m-3m");
+
         peaks.setPointGroup(m3m);
         TS_ASSERT_EQUALS(peaks.pointGroup()->getName(), m3m->getName());
     }
@@ -196,7 +197,14 @@ public:
     void testPointGroupStringConversion()
     {
         TestablePoldiPeakCollection peaks;
-        PointGroup_sptr m3m = boost::make_shared<PointGroupLaue13>();
+        PointGroup_sptr m3m = PointGroupFactory::Instance().createPointGroup("m-3m");
+
+        TS_ASSERT(peaks.pointGroupFromString(peaks.pointGroupToString(m3m)));
+
+        std::cout << m3m->getName() << std::endl;
+
+        std::vector<PointGroup_sptr> pgs = getAllPointGroups();
+        std::cout << "Size:  " << pgs.size() << std::endl;
 
         TS_ASSERT_EQUALS(m3m->getName(), peaks.pointGroupFromString(peaks.pointGroupToString(m3m))->getName());
     }

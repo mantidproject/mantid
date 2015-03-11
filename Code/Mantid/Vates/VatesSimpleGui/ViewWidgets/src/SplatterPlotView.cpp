@@ -189,8 +189,8 @@ void SplatterPlotView::render()
     setPeakSourceFrame(src);
     renderType = "Wireframe";
     // Start listening if the source was destroyed
-    QObject::connect(src, SIGNAL(destroyed(QObject*)), 
-                     this, SLOT(onPeakSourceDestroyed(QObject*)));
+    QObject::connect(src, SIGNAL(destroyed()), 
+                     this, SLOT(onPeakSourceDestroyed()));
     setPeakButton(true);
   }
 
@@ -360,6 +360,7 @@ void SplatterPlotView::destroyPeakSources()
   this->peaksSource.clear();
 }
 
+
 /**
  * This function reads the coordinates from the probe point plugin and
  * passes them on to a listening serivce that will handle them in the
@@ -475,10 +476,8 @@ void SplatterPlotView::createPeaksFilter()
     return;
   }
 
-
   // Create the peak filter
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  pqPipelineSource* filter = NULL;
 
   // Set the peaks workspace name. We need to trigger accept in order to log the workspace in the filter
   try
@@ -516,7 +515,7 @@ void SplatterPlotView::createPeaksFilter()
 /* On peaks source destroyed
  * @param source The reference to the destroyed source
  */
-void SplatterPlotView::onPeakSourceDestroyed(QObject* source)
+void SplatterPlotView::onPeakSourceDestroyed()
 {
   // For each peak Source check if there is a "true" source available.
   // If it is not availble then remove it from the peakSource storage.

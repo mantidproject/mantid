@@ -112,5 +112,42 @@ Output:
 
    Workspace has  6  spectra
 
+**Example - Load dead times into table:**
+
+.. testcode:: ExLoadDeadTimeTable
+
+   # Load some spectra
+   ws = LoadMuonNexus(Filename="emu00006473.nxs",SpectrumMin=5,SpectrumMax=10,DeadTimeTable="deadTimeTable")
+   tab = mtd['deadTimeTable']
+   for i in range(0,tab.rowCount()):
+       print tab.cell(i,0), tab.cell(i,1)
+
+Output:
+
+.. testoutput:: ExLoadDeadTimeTable
+
+   5 0.00161112251226
+   6 0.00215016817674
+   7 0.0102171599865
+   8 0.00431686220691
+   9 0.00743605662137
+   10 0.00421147653833
+
+**Example - Load detector grouping into table:**
+
+.. testcode:: ExLoadDetectorGrouping
+
+   # Load some spectra
+   ws = LoadMuonNexus(Filename="emu00006473.nxs",SpectrumList="1,16,17,32",DetectorGroupingTable="detectorTable")
+   tab = mtd['detectorTable']
+   for i in range(0,tab.rowCount()):
+       print tab.cell(i,0)
+
+Output:
+
+.. testoutput:: ExLoadDetectorGrouping
+
+   [ 1 16]
+   [17 32]
 
 .. categories::
