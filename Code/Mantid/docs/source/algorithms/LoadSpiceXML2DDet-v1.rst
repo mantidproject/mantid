@@ -25,7 +25,6 @@ The SPICE XML data file contains four sections
  - Counts
 
 Each of them contains child nodes for detailed information, such as ... 
- 
 
 
 Output Worskpaces
@@ -41,7 +40,7 @@ Usage
 
 **Example - load a HB3A SPICE .xml file:**
 
-.. testcode:: ExLoadHB3AMXLData
+.. testcode:: ExLoadHB3AXMLData
 
   # Load data by LoadSpiceXML2DDet()
   LoadSpiceXML2DDet(Filename='HB3A_exp355_scan0001_0522.xml', 
@@ -56,8 +55,8 @@ Usage
 
 .. testcleanup:: ExLoadHB3AXMLData
 
-  #ws = mtd["s0001_0522"]
-  #DeleteWorkspace(Workspace=str(ws))
+  ws = mtd["s0001_0522"]
+  DeleteWorkspace(Workspace=str(ws))
 
 Output:
 
