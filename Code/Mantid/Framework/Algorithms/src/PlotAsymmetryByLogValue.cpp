@@ -162,8 +162,8 @@ void PlotAsymmetryByLogValue::exec() {
   // Get log value
   m_logName = getPropertyValue("LogValue");
   // Get green and red periods
-  int red = getProperty("Red");
-  int green = getProperty("Green");
+  m_red = getProperty("Red");
+  m_green = getProperty("Green");
   // Get type of computation
   std::string stype = getProperty("Type");
   m_int = stype == "Integral";
@@ -447,11 +447,11 @@ void PlotAsymmetryByLogValue::doAnalysis (Workspace_sptr loadedWs ) {
         Workspace2D_sptr memberWs =
             boost::dynamic_pointer_cast<Workspace2D>(loadedGroup->getItem(mi));
         int period = mi + 1;
-        if ( period == red ){
+        if ( period == m_red ){
           ws_red = memberWs;
         }
-        if ( green!= EMPTY_INT() ){
-          if ( period == green ){
+        if ( m_green!= EMPTY_INT() ){
+          if ( period == m_green ){
             ws_green = memberWs;
           }
         }
@@ -462,11 +462,11 @@ void PlotAsymmetryByLogValue::doAnalysis (Workspace_sptr loadedWs ) {
         throw std::invalid_argument("Red period is out of range");
       }
       // Check ws_green
-      if ( (green!=EMPTY_INT()) && (!ws_green) ){
+      if ( (m_green!=EMPTY_INT()) && (!ws_green) ){
         throw std::invalid_argument("Green period is out of range");
       }
 
-      if ( green==EMPTY_INT() ){
+      if ( m_green==EMPTY_INT() ){
         double Y, E;
         calcIntAsymmetry(ws_red, Y, E);
         m_redX.push_back(getLogValue(*ws_red));

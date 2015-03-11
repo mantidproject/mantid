@@ -111,6 +111,10 @@ private:
   bool m_autogroup;
   /// Store type of dead time corrections
   std::string m_dtcType;
+  /// Store red period
+  int m_red;
+  /// Store green period
+  int m_green;
   // Mantid vectors to store results
   // Red mantid vectors
   MantidVec m_redX, m_redY, m_redE;
