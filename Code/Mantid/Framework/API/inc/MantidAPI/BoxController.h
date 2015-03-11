@@ -264,6 +264,9 @@ public:
   /** Return the vector giving the number of MD Boxes as a function of depth */
   const std::vector<size_t> &getNumMDBoxes() const { return m_numMDBoxes; }
 
+  /** Return the vector giving the number of MD Grid Boxes as a function of depth */
+  const std::vector<size_t> &getNumMDGridBoxes() const { return m_numMDGridBoxes; }
+
   /** Return the vector giving the MAXIMUM number of MD Boxes as a function of
    * depth */
   const std::vector<double> &getMaxNumMDBoxes() const {

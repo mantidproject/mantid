@@ -13,6 +13,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidMDEvents/ConvToMDSelector.h"
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -173,41 +174,51 @@ void testExecQ3D()
 }
 
 void testInitialSplittingEnabled()
-{
-     Mantid::API::MatrixWorkspace_sptr ws2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
-     API::NumericAxis *pAxis = new API::NumericAxis(3);
-     pAxis->setUnit("DeltaE");
+{ 
+  // Create workspace
+  auto alg = Mantid::API::AlgorithmManager::Instance().create("CreateSampleWorkspace");
+  alg->initialize();
+  alg->setChild(true);
+  alg->setProperty("WorkspaceType","Event");
+  alg->setPropertyValue("OutputWorkspace","dummy");
+  alg->execute();
 
-     ws2D->replaceAxis(0,pAxis);
+  Mantid::API::MatrixWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
 
-    pAlg->setPropertyValue("OutputWorkspace","WS5DQ3D");
-    pAlg->setPropertyValue("InputWorkspace","testWSProcessed");
-    pAlg->setPropertyValue("OtherDimensions","phi,chi");
-    pAlg->setPropertyValue("PreprocDetectorsWS","");
-     
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "Q3D"));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
-    pAlg->setPropertyValue("MinValues","-10,-10,-10,  0,-10,-10");
-    pAlg->setPropertyValue("MaxValues"," 10, 10, 10, 20, 40, 20");
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InitialSplitting", "1"));
-    pAlg->setRethrows(false);
-    pAlg->execute();
-    TSM_ASSERT("Should finish successfully",pAlg->isExecuted());
+  Mantid::API::Run& run = ws->mutableRun();
+  auto eiLog = new PropertyWithValue<double>("Ei", 12.0);
+  run.addLogData(eiLog);
 
-    IMDEventWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("WS5DQ3D");
-    Mantid::API::BoxController_sptr boxController = outputWS->getBoxController();
+  ConvertToMD convertAlg;
+  convertAlg.setChild(true);
+  convertAlg.initialize();
+  convertAlg.setPropertyValue("OutputWorkspace","dummy");
+  convertAlg.setProperty("InputWorkspace", ws);
+  convertAlg.setProperty("QDimensions", "Q3D");
+  convertAlg.setProperty("dEAnalysisMode", "Direct");
+  convertAlg.setPropertyValue("MinValues","-10,-10,-10, 0");
+  convertAlg.setPropertyValue("MaxValues"," 10, 10, 10, 1");
+  convertAlg.setPropertyValue("InitialSplitting", "1");
+  convertAlg.execute();
 
-    std::vector<size_t> numMDBoxes = boxController->getNumMDBoxes();
+  IMDEventWorkspace_sptr outEventWS = convertAlg.getProperty("OutputWorkspace");
 
-    // Check depth 0
-    TSM_ASSERT_EQUALS("Should have no MDBoxes at level 0", 0, numMDBoxes[0]);
-    // Check depth 1. The boxController is set to split with 50, 50, 50, 50, 5, 5
-    TSM_ASSERT_EQUALS("Should have 15625000 MDBoxes at level 1", 156250000, numMDBoxes[1]);
+  Mantid::API::BoxController_sptr boxController = outEventWS->getBoxController();
+  std::vector<size_t> numMDBoxes = boxController->getNumMDBoxes();
+  std::vector<size_t> numMDGridBoxes = boxController->getNumMDGridBoxes();
+  // Check depth 0
+  size_t level0 = numMDBoxes[0] + numMDGridBoxes[0];
+  TSM_ASSERT_EQUALS("Should have no MDBoxes at level 0", 1, level0);
+  // Check depth 1. The boxController is set to split with 50, 50, 50, 50.
+  // We need to ensure that the number of Boxes plus the number of Gridboxes is 50^4
+  size_t level1 = numMDBoxes[1] + numMDGridBoxes[1];
+  TSM_ASSERT_EQUALS("Should have 6250000 MDBoxes at level 1", 6250000, level1);
 
-    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS5DQ3D");
-    TS_ASSERT_EQUALS(Mantid::Kernel::HKL, outWS->getSpecialCoordinateSystem());
-
-    AnalysisDataService::Instance().remove("WS5DQ3D");
+  // Confirm that the boxcontroller is set to the original settings
+  TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(0));
+  TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(1));
+  TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(2));
+  TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(3));
 }
 
 void testInitialSplittingDisabled()
@@ -241,6 +252,11 @@ void testInitialSplittingDisabled()
     TSM_ASSERT_EQUALS("Should have no MDBoxes at level 0", 0, numMDBoxes[0]);
     // Check depth 1. The boxController is set to split with 5, 5, 5, 5, 5, 5
     TSM_ASSERT_EQUALS("Should have 15625 MDBoxes at level 1", 15625, numMDBoxes[1]);
+
+    // Confirm that the boxcontroller is set to the original settings
+    TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(0));
+    TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(1));
+    TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(2));
 
     auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS5DQ3D");
     TS_ASSERT_EQUALS(Mantid::Kernel::HKL, outWS->getSpecialCoordinateSystem());
