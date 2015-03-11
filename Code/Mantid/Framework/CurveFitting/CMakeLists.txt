@@ -67,6 +67,7 @@ set ( SRC_FILES
 	src/NormaliseByPeakArea.cpp
 	src/PRConjugateGradientMinimizer.cpp
 	src/ParDomain.cpp
+	src/PawleyFunction.cpp
 	src/PeakParameterFunction.cpp
 	src/PlotPeakByLogValue.cpp
 	src/Polynomial.cpp
@@ -179,6 +180,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/NormaliseByPeakArea.h
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/ParDomain.h
+	inc/MantidCurveFitting/PawleyFunction.h
 	inc/MantidCurveFitting/PeakParameterFunction.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
 	inc/MantidCurveFitting/Polynomial.h
@@ -257,14 +259,14 @@ set ( TEST_FILES
 	FullprofPolynomialTest.h
 	FunctionDomain1DSpectrumCreatorTest.h
 	FunctionFactoryConstraintTest.h
-        FunctionParameterDecoratorFitTest.h
+	FunctionParameterDecoratorFitTest.h
 	GSLMatrixTest.h
 	GausDecayTest.h
 	GausOscTest.h
 	GaussianComptonProfileTest.h
 	GaussianTest.h
 	GramCharlierComptonProfileTest.h
-        IPeakFunctionCentreParameterNameTest.h
+	IPeakFunctionCentreParameterNameTest.h
 	IPeakFunctionIntensityTest.h
 	IkedaCarpenterPVTest.h
 	LeBailFitTest.h
@@ -282,6 +284,7 @@ set ( TEST_FILES
 	NeutronBk2BkExpConvPVoigtTest.h
 	NormaliseByPeakAreaTest.h
 	PRConjugateGradientTest.h
+	PawleyFunctionTest.h
 	PeakParameterFunctionTest.h
 	PlotPeakByLogValueTest.h
 	PolynomialTest.h
