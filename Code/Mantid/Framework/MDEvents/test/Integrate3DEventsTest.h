@@ -35,14 +35,14 @@ public:
     double sigi_some[] = { 27.4773, 26.533, 24.5561 };
 
                                           // synthesize three peaks
-    std::vector<V3D> peak_q_list;
+    std::vector<std::pair<double, V3D> > peak_q_list;
     V3D peak_1( 10, 0, 0 );
     V3D peak_2(  0, 5, 0 );
     V3D peak_3(  0, 0, 4 );
 
-    peak_q_list.push_back( peak_1 );    
-    peak_q_list.push_back( peak_2 );    
-    peak_q_list.push_back( peak_3 );    
+    peak_q_list.push_back( std::make_pair(1., peak_1 ));
+    peak_q_list.push_back( std::make_pair(1., peak_2 ));
+    peak_q_list.push_back( std::make_pair(1., peak_3 ));
                                           // synthesize a UB-inverse to map
     DblMatrix UBinv(3,3,false);           // Q to h,k,l
     UBinv.setRow( 0, V3D( .1,  0,   0 ) );
@@ -55,31 +55,31 @@ public:
                                           // around peak 1, 704 events around
                                           // peak 2, and 603 events around
                                           // peak 3.
-    std::vector<V3D> event_Qs;
+    std::vector<std::pair<double, V3D> > event_Qs;
     for ( int i = -100; i <= 100; i++ )
     {
-      event_Qs.push_back( V3D( peak_1 + V3D( (double)i/100.0, 0, 0 ) ) );
-      event_Qs.push_back( V3D( peak_2 + V3D( (double)i/100.0, 0, 0 ) ) );
-      event_Qs.push_back( V3D( peak_3 + V3D( (double)i/100.0, 0, 0 ) ) );
+      event_Qs.push_back( std::make_pair(1., V3D( peak_1 + V3D( (double)i/100.0, 0, 0 ) ) ) );
+      event_Qs.push_back( std::make_pair(1., V3D( peak_2 + V3D( (double)i/100.0, 0, 0 ) ) ) );
+      event_Qs.push_back( std::make_pair(1., V3D( peak_3 + V3D( (double)i/100.0, 0, 0 ) ) ) );
 
-      event_Qs.push_back( V3D( peak_1 + V3D( 0, (double)i/200.0, 0 ) ) );
-      event_Qs.push_back( V3D( peak_2 + V3D( 0, (double)i/200.0, 0 ) ) );
-      event_Qs.push_back( V3D( peak_3 + V3D( 0, (double)i/200.0, 0 ) ) );
+      event_Qs.push_back( std::make_pair(1., V3D( peak_1 + V3D( 0, (double)i/200.0, 0 ) ) ) );
+      event_Qs.push_back( std::make_pair(1., V3D( peak_2 + V3D( 0, (double)i/200.0, 0 ) ) ) );
+      event_Qs.push_back( std::make_pair(1., V3D( peak_3 + V3D( 0, (double)i/200.0, 0 ) ) ) );
 
-      event_Qs.push_back( V3D( peak_1 + V3D( 0, 0, (double)i/300.0 ) ) );
-      event_Qs.push_back( V3D( peak_2 + V3D( 0, 0, (double)i/300.0 ) ) );
-      event_Qs.push_back( V3D( peak_3 + V3D( 0, 0, (double)i/300.0 ) ) );
+      event_Qs.push_back( std::make_pair(1., V3D( peak_1 + V3D( 0, 0, (double)i/300.0 ) ) ) );
+      event_Qs.push_back( std::make_pair(1., V3D( peak_2 + V3D( 0, 0, (double)i/300.0 ) ) ) );
+      event_Qs.push_back( std::make_pair(1., V3D( peak_3 + V3D( 0, 0, (double)i/300.0 ) ) ) );
     }
 
     for ( int i = -50; i <= 50; i++ )
     {
-      event_Qs.push_back( V3D( peak_1 + V3D( 0, (double)i/147.0, 0 ) ) );
-      event_Qs.push_back( V3D( peak_2 + V3D( 0, (double)i/147.0, 0 ) ) );
+      event_Qs.push_back(  std::make_pair(1., V3D( peak_1 + V3D( 0, (double)i/147.0, 0 ) ) ) );
+      event_Qs.push_back( std::make_pair(1., V3D( peak_2 + V3D( 0, (double)i/147.0, 0 ) ) ) );
     }
 
     for ( int i = -25; i <= 25; i++ )
     {
-      event_Qs.push_back( V3D( peak_1 + V3D( 0, 0, (double)i/61.0 ) ) );
+      event_Qs.push_back( std::make_pair(1., V3D( peak_1 + V3D( 0, 0, (double)i/61.0 ) ) ) );
     }
 
     double radius = 1.3;
