@@ -7,6 +7,7 @@
 #include "MantidVatesAPI/CompositePeaksPresenterVsi.h"
 #include "MantidAPI/PeakTransformSelector.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
+
 #include <QWidget>
 #include <QPointer>
 #include <boost/shared_ptr.hpp>
@@ -27,7 +28,6 @@ public:
   ~PeaksTableControllerVsi();
   std::vector<bool> getViewablePeaks();
   bool hasPeaks();
-  void showTable();
   void showFullTable();
   void removeTable();
   std::string getConcatenatedWorkspaceNames(std::string delimiter);

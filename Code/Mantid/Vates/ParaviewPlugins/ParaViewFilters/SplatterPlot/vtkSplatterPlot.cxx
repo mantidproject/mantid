@@ -5,6 +5,7 @@
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkUnstructuredGridAlgorithm.h"
 #include "vtkUnstructuredGrid.h"
+#include "vtkFieldData.h"
 
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
@@ -93,8 +94,7 @@ int vtkSplatterPlot::RequestData(vtkInformation *,
   {
     // Get the info objects
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
-    vtkDataSet *output = vtkDataSet::SafeDownCast(
-          outInfo->Get(vtkDataObject::DATA_OBJECT()));
+    vtkDataSet *output = vtkDataSet::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
     if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
     {

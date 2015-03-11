@@ -159,14 +159,14 @@ namespace VATES
     }
     else if (ellipsoidShape)
     {
-      std::vector<double> radius = ellipsoidShape->abcRadiiBackgroundOuter();
+      std::vector<double> radius = ellipsoidShape->abcRadii();
       return *(std::max_element(radius.begin(),radius.end()));
     }
     else if (sphericalShape)
     {
-      if (boost::optional<double> radius = sphericalShape->backgroundOuterRadius())
+      if (double radius = sphericalShape->radius())
       {
-        return *radius;
+        return radius;
       }
       else
       {

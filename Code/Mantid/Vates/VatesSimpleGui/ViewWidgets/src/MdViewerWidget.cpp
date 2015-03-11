@@ -970,7 +970,7 @@ void MdViewerWidget::renderAndFinalSetup()
   this->currentView->checkView(this->initialView);
   this->currentView->updateAnimationControls();
   this->setDestroyedListener();
-  this->setVisibilityListener();
+  this->currentView->setVisibilityListener();
   this->currentView->onAutoScale(this->ui.colorSelectionWidget);
 }
 
@@ -1051,7 +1051,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->updateAppState();
   this->initialView = v; 
   this->setDestroyedListener();
-  this->setVisibilityListener();
+  this->currentView->setVisibilityListener();
 }
 
 /**
@@ -1375,7 +1375,7 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
     }
     
     // Remove all visibility listeners
-    removeVisibilityListener();
+    this->currentView->removeVisibilityListener();
 
     emit this->requestClose();
   }
@@ -1432,43 +1432,7 @@ void MdViewerWidget::setDestroyedListener()
   }
 }
 
-/**
- * Set the listener for the visibility of the representations
- */
-void MdViewerWidget::setVisibilityListener()
-{
-  // Set the connection to listen to a visibility change of the representation.
-  pqServer *server = pqActiveObjects::instance().activeServer();
-  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources;
-  sources = smModel->findItems<pqPipelineSource *>(server);
 
-  // Attach the visibilityChanged signal for all sources.
-  for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
-  {
-    QObject::connect((*source), SIGNAL(visibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
-                     this->currentView, SLOT(onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
-                     Qt::UniqueConnection);
-  }
-}
-
-/**
- * Disconnects the visibility listener connection for all sources
- */
-void MdViewerWidget::removeVisibilityListener() {
-    // Set the connection to listen to a visibility change of the representation.
-  pqServer *server = pqActiveObjects::instance().activeServer();
-  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources;
-  sources = smModel->findItems<pqPipelineSource *>(server);
-
-  // Attach the visibilityChanged signal for all sources.
-  for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
-  {
-    QObject::disconnect((*source), SIGNAL(visibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
-                     this->currentView, SLOT(onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)));
-  }
-}
 
 
 

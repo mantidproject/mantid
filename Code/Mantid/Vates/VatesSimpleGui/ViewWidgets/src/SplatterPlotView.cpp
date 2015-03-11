@@ -407,14 +407,10 @@ void SplatterPlotView::setupVisiblePeaksButtons()
   m_allPeaksAction = new QAction("Show all peaks in table", peaksMenu);
   m_allPeaksAction->setIconVisibleInMenu(false);
 
-  m_visiblePeaksAction = new QAction("Show visible peaks in table", peaksMenu);
-  m_visiblePeaksAction->setIconVisibleInMenu(false);
-  
   m_removePeaksAction = new QAction("Remove table", peaksMenu);
   m_removePeaksAction->setIconVisibleInMenu(false);
 
   peaksMenu->addAction(m_allPeaksAction);
-  peaksMenu->addAction(m_visiblePeaksAction);
   peaksMenu->addAction(m_removePeaksAction);
 
   this->ui.peaksButton->setPopupMode(QToolButton::InstantPopup);
@@ -424,27 +420,10 @@ void SplatterPlotView::setupVisiblePeaksButtons()
   QObject::connect(m_allPeaksAction, SIGNAL(triggered()),
                    this, SLOT(onShowAllPeaksTable()), Qt::QueuedConnection);
 
-  QObject::connect(m_visiblePeaksAction, SIGNAL(triggered()),
-                   this, SLOT(onShowPeaksTable()), Qt::QueuedConnection);
-
   QObject::connect(m_removePeaksAction, SIGNAL(triggered()),
                    this, SLOT(onRemovePeaksTable()), Qt::QueuedConnection);
 }
 
-/**
- * Show the visible peaks table.
- */
-void SplatterPlotView::onShowPeaksTable()
-{
-  // Create a peaks filter
-  createPeaksFilter();
-
-  if (m_peaksTableController->hasPeaks())
-  {
-     m_peaksTableController->showTable();
-     m_peaksTableController->show();
-  }
-}
 
 /**
  * On show all peaks 
@@ -521,6 +500,7 @@ void SplatterPlotView::createPeaksFilter()
     pqPipelineRepresentation *pipelineRepresentation = qobject_cast<pqPipelineRepresentation*>(dataRepresentation);
     pipelineRepresentation->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
     this->resetDisplay();
+    this->setVisibilityListener();
     this->renderAll();
   } catch(std::runtime_error &ex)
   {
@@ -577,6 +557,14 @@ void SplatterPlotView::onPeakSourceDestroyed(QObject* source)
   catch(std::runtime_error &ex)
   {
     g_log.warning() << ex.what();
+  }
+
+  // Set an active source
+  if (peaksSource.isEmpty()) {
+    pqActiveObjects::instance().setActiveSource(this->splatSource);
+  }
+  else {
+    pqActiveObjects::instance().setActiveSource(this->peaksSource[0]);
   }
 }
 
@@ -641,6 +629,7 @@ void SplatterPlotView::updatePeaksFilter(pqPipelineSource* filter) {
     vtkSMPropertyHelper(filter->getProxy(), "Delimiter").Set(m_peaksWorkspaceNameDelimiter.c_str());
     emit this->triggerAccept();
     filter->updatePipeline();
+    this->resetCamera();
   }  
 }
 

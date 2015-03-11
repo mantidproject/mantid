@@ -104,8 +104,6 @@ signals:
 public slots:
   /// Check the coordinates for the peaks overlay if necessary
   void checkPeaksCoordinates();
-  /// Show the visible peaks table.
-  void onShowPeaksTable();
   /// Remove the visible peaks table.
   void onRemovePeaksTable();
   /// Show all peaks in table.
@@ -164,7 +162,6 @@ private:
   PeaksTableControllerVsi* m_peaksTableController; ///< The peaks table controller
   QAction* m_allPeaksAction;///<The action for showing all peaks in the table.
   QAction* m_removePeaksAction; ///<The action for removing the peaks table.
-  QAction*  m_visiblePeaksAction; ///<The action for adding the visible peaks table.
   std::string m_peaksWorkspaceNameDelimiter;///<Delimiter for peaks workspace strings.
 };
 

@@ -15,6 +15,7 @@
 #include <vtkObjectFactory.h>
 #include <vtkUnstructuredGridAlgorithm.h>
 #include <vtkUnstructuredGrid.h>
+#include <vtkFieldData.h>
 
 vtkStandardNewMacro(vtkPeaksFilter);
 
@@ -46,7 +47,26 @@ int vtkPeaksFilter::RequestData(vtkInformation*, vtkInformationVector **inputVec
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
   vtkUnstructuredGrid *outputDataSet = vtkUnstructuredGrid::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-#if 1
+  // If the field data does not contain the metadata, then don't do anything.
+  try
+  {
+    vtkFieldData* fieldData = inputDataSet->GetFieldData();
+  
+    // Extract information for meta data in Json format.
+    FieldDataToMetadata fieldDataToMetadata;
+
+    std::string jsonString = fieldDataToMetadata(fieldData, m_vatesConfigurations->getMetadataIdJson());
+    m_metadataJsonManager->readInSerializedJson(jsonString);
+
+    m_minValue = m_metadataJsonManager->getMinValue();
+    m_maxValue = m_metadataJsonManager->getMaxValue();
+    m_instrument = m_metadataJsonManager->getInstrument();
+  }
+  catch (...)
+  {
+  }
+
+
   std::vector<std::string> peaksWorkspaceNames = extractPeakWorkspaceNames();
   std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces = getPeaksWorkspaces(peaksWorkspaceNames);
 
@@ -59,10 +79,6 @@ int vtkPeaksFilter::RequestData(vtkInformation*, vtkInformationVector **inputVec
   vtkDataSetToPeaksFilteredDataSet peaksFilter(inputDataSet, outputDataSet);
   peaksFilter.initialize(peaksWorkspaces, m_radiusNoShape, m_radiusType);
   peaksFilter.execute(drawingProgressUpdate);
-#else
-  outputDataSet->ShallowCopy(inputDataSet);
-#endif
-  return 1;
 }
 
 int vtkPeaksFilter::RequestInformation(vtkInformation*, vtkInformationVector** inputVector, vtkInformationVector*)
@@ -105,6 +121,7 @@ void vtkPeaksFilter::PrintSelf(ostream& os, vtkIndent indent)
 void vtkPeaksFilter::SetPeaksWorkspace(std::string peaksWorkspaceName)
 {
   m_peaksWorkspaceNames = peaksWorkspaceName;
+  this->Modified();
 }
 
 /**
@@ -156,9 +173,7 @@ std::vector<std::string> vtkPeaksFilter::extractPeakWorkspaceNames()
   }
 
   // If there was only one element in there then push it
-  if (peaksWorkspaceNamesList.empty()) {
-    peaksWorkspaceNamesList.push_back(peakNames);
-  }
+  peaksWorkspaceNamesList.push_back(peakNames);
 
   return peaksWorkspaceNamesList;
 }

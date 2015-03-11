@@ -1,12 +1,5 @@
 #include "MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h"
 
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
-#include <stdexcept>
-#include <algorithm>
-#include <map>
-#include <sstream>
-
 #include "MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/CameraManager.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -38,11 +31,22 @@
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
 
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1170
+#endif
+
 #include <QString>
 #include <QPointer>
 #include <QVBoxLayout>
 #include <QLayout>
 #include <QLayoutItem>
+
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <stdexcept>
+#include <algorithm>
+#include <map>
+#include <sstream>
 
 namespace Mantid
 {
@@ -232,14 +236,6 @@ namespace
   }
 
   /**
-   * Show the table with the visible peaks
-   */
-  void PeaksTableControllerVsi::showTable()
-  {
-    createTable(false);
-  }
-
-  /**
    * Show all peaks in the table.
    */
   void PeaksTableControllerVsi::showFullTable()
@@ -276,6 +272,7 @@ namespace
 
         if (!full)
         {
+          //
           //viewablePeaks = getViewablePeaks();
         }
 
@@ -353,6 +350,7 @@ namespace
     catch (std::invalid_argument &ex)
     {
       g_log.warning() << ex.what();
+      emit setRotationToPoint(0.0, 0.0, 0.0);
     }
   }
 

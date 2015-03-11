@@ -23,7 +23,7 @@
 using namespace ::testing;
 using namespace Mantid::VATES;
 
-class MockPeak : public Mantid::DataObjects::Peak
+class MockPeakConcrete : public Mantid::DataObjects::Peak
 {
 public:
   MOCK_CONST_METHOD0(getHKL, Mantid::Kernel::V3D (void));
@@ -31,7 +31,7 @@ public:
   MOCK_CONST_METHOD0(getQSampleFrame, Mantid::Kernel::V3D (void));
 };
 
-class MockPeaksWorkspace : public Mantid::DataObjects::PeaksWorkspace
+class MockPeaksWorkspaceConcrete : public Mantid::DataObjects::PeaksWorkspace
 {
 public:
   MOCK_CONST_METHOD0(getSpecialCoordinateSystem, Mantid::Kernel::SpecialCoordinateSystem());
@@ -56,8 +56,8 @@ public:
     NearPlane nearPlane(0.0, 0.0, -1.0,1.0);
     ViewFrustum frustum(left, right, bottom, top, farPlane, nearPlane);
 
-    boost::shared_ptr<MockPeaksWorkspace> pw_ptr(new MockPeaksWorkspace());
-    MockPeaksWorkspace & pw = *pw_ptr;
+    boost::shared_ptr<MockPeaksWorkspaceConcrete> pw_ptr(new MockPeaksWorkspaceConcrete());
+    MockPeaksWorkspaceConcrete & pw = *pw_ptr;
     // Act
     ConcretePeaksPresenterVsi presenter(pw_ptr, frustum, frame);
 
@@ -67,7 +67,7 @@ public:
 
   void testCorrectPeaksInfoIsExtractedForValidRow() {
     // Arrange
-    std::string frame = "Q_LAB";
+    std::string frame = "Q_SAMPLE";
     
     LeftPlane left(1.0, 0.0, 0.0, 1.0);
     RightPlane right(-1.0, 0.0, 0.0, 1.0);
@@ -81,23 +81,27 @@ public:
     double peakRadius = 10;
     Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = Mantid::Kernel::SpecialCoordinateSystem::QSample;
     Mantid::Geometry::PeakShape_sptr shape(new Mantid::DataObjects::PeakShapeSpherical(peakRadius, coordinateSystem, "test", 1));
-    MockPeak peak;
+    MockPeakConcrete peak;
     peak.setPeakShape(shape);
-    EXPECT_CALL(peak, getQLabFrame()).WillOnce(Return(coordinate));
+    EXPECT_CALL(peak, getQLabFrame()).Times(0);
     EXPECT_CALL(peak, getHKL()).Times(0);
-    EXPECT_CALL(peak, getQSampleFrame()).Times(0);
+    EXPECT_CALL(peak, getQSampleFrame()).WillOnce(Return(coordinate));
 
 
-    boost::shared_ptr<MockPeaksWorkspace> pw_ptr(new MockPeaksWorkspace());
-    MockPeaksWorkspace & pw = *pw_ptr;
+    boost::shared_ptr<MockPeaksWorkspaceConcrete> pw_ptr(new MockPeaksWorkspaceConcrete());
+    MockPeaksWorkspaceConcrete & pw = *pw_ptr;
     EXPECT_CALL(pw, getSpecialCoordinateSystem()).WillOnce(Return(coordinateSystem));
-    EXPECT_CALL(pw, getPeak(_)).WillOnce(ReturnRef(peak));
+    EXPECT_CALL(pw, getPeak(_)).Times(2).WillRepeatedly(ReturnRef(peak));
 
     // Act
     ConcretePeaksPresenterVsi presenter(pw_ptr, frustum, frame);
-    double radius = 0;;
+    double radius = 0;
     Mantid::Kernel::V3D coord(0,0,0);
     presenter.getPeaksInfo(pw_ptr,0,coord, radius);
+
+    //Assert
+    TSM_ASSERT_EQUALS("Should have a radius of 10", radius, peakRadius);
+    TSM_ASSERT_EQUALS("Should have the same coordinate", coord, coordinate);
   }
 };
 

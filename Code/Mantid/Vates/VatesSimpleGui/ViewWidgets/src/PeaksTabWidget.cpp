@@ -3,6 +3,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidQtSliceViewer/QPeaksTableModel.h"
 #include "MantidVatesSimpleGuiViewWidgets/PeaksWidget.h"
+
 #include <QWidget>
 #include <QItemSelectionModel>
 #include <QModelIndex>
@@ -35,8 +36,7 @@ PeaksTabWidget::~PeaksTabWidget(){
  * Setup the Table model 
  * @param visiblePeaks : A vector of lists of visible peaks for each peak workspace
  */
-void PeaksTabWidget::setupMvc(std::map<std::string, std::vector<bool>> visiblePeaks)
-{
+void PeaksTabWidget::setupMvc(std::map<std::string, std::vector<bool>> visiblePeaks) {
   for (std::vector<Mantid::API::IPeaksWorkspace_sptr>::iterator it = m_ws.begin(); it != m_ws.end(); ++it) {
     // Create new tab
     std::string name((*it)->getName().c_str());

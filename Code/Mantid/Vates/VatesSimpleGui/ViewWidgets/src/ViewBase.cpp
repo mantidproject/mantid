@@ -852,6 +852,46 @@ void ViewBase::destroySinglePipeline(pqPipelineSource * source) {
     builder->destroy(sourceBuffer);
 }
 
+/**
+ * Set the listener for the visibility of the representations
+ */
+void ViewBase::setVisibilityListener()
+{
+  // Set the connection to listen to a visibility change of the representation.
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources;
+  sources = smModel->findItems<pqPipelineSource *>(server);
+
+  // Attach the visibilityChanged signal for all sources.
+  for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
+  {
+    QObject::connect((*source), SIGNAL(visibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
+                     this, SLOT(onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
+                     Qt::UniqueConnection);
+  }
+}
+
+/**
+ * Disconnects the visibility listener connection for all sources
+ */
+void ViewBase::removeVisibilityListener() {
+    // Set the connection to listen to a visibility change of the representation.
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources;
+  sources = smModel->findItems<pqPipelineSource *>(server);
+
+  // Attach the visibilityChanged signal for all sources.
+  for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
+  {
+    QObject::disconnect((*source), SIGNAL(visibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
+                         this, SLOT(onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)));
+  }
+}
+
+
+
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid

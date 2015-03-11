@@ -129,7 +129,7 @@ namespace VATES
   void CompositePeaksPresenterVsi::updateWorkspaces(std::vector<std::string>peaksWorkspaceNames) {
     std::vector<std::string> storedPeaksWorkspaces = getPeaksWorkspaceNames();
     for (std::vector<std::string>::iterator it = storedPeaksWorkspaces.begin(); it != storedPeaksWorkspaces.end(); ++it) {
-      int count = std::count(peaksWorkspaceNames.begin(), peaksWorkspaceNames.end(), *it);
+      size_t count = std::count(peaksWorkspaceNames.begin(), peaksWorkspaceNames.end(), *it);
       if (count == 0) {
         removePresenter(*it);
       }

@@ -56,7 +56,7 @@ namespace VATES
     private:
       vtkDataSetToPeaksFilteredDataSet& operator=(const vtkDataSetToPeaksFilteredDataSet& other);
       std::vector<std::pair<Mantid::Kernel::V3D, double>> getPeaksInfo(std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces);
-      void addSinglePeak(Mantid::API::IPeak* peak, const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem, std::vector<std::pair<Mantid::Kernel::V3D, double>>& peaksInfo,  size_t index);
+      void addSinglePeak(Mantid::API::IPeak* peak, const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem, std::vector<std::pair<Mantid::Kernel::V3D, double>>& peaksInfo);
       vtkUnstructuredGrid *m_inputData; ///< Data to peak filter
       vtkUnstructuredGrid *m_outputData; ///< Peak filtered data
       std::vector<Mantid::API::IPeaksWorkspace_sptr> m_peaksWorkspaces; ///< A list of peaks workspace names.

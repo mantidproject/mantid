@@ -194,8 +194,6 @@ private:
   void resetCurrentView(int workspaceType, const std::string& instrumentName);
   /// Render rebinned workspace
   void prepareRebinnedWorkspace(const std::string rebinnedWorkspaceName, std::string sourceType); 
-  /// Set visibility listener
-  void setVisibilityListener();
   /// Set up the default color for the background of the view.
   void setColorForBackground();
   /// Render the original workspace
@@ -208,8 +206,6 @@ private:
   void removeAllRebinning(ModeControlWidget::Views view);
   /// Sets a listener for when sources are being destroyed
   void setDestroyedListener();
-  /// Undo visibiltiy listener
-  void removeVisibilityListener();
 };
 
 } // SimpleGui

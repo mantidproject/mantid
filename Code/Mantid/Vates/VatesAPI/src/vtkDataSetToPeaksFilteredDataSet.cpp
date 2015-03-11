@@ -20,6 +20,7 @@
 #include <vtkUnstructuredGrid.h>
 #include <vtkFieldData.h>
 #include <vtkIdList.h>
+#include <vtkFieldData.h>
 
 #include <boost/shared_ptr.hpp>
 #include <stdexcept>
@@ -45,7 +46,7 @@ namespace VATES
                                                                     m_isInitialised(false),
                                                                     m_radiusNoShape(0.2),
                                                                     m_radiusType(0),
-                                                                    m_radiusFactor(1.25)
+                                                                    m_radiusFactor(2)
   {
     if (NULL == m_inputData)
     {
@@ -100,7 +101,7 @@ namespace VATES
     ids->SetNumberOfComponents(1);
 
     double progressFactor = 1.0/double(points->GetNumberOfPoints());
-
+    int cc = 0;
     for(int i = 0; i < points->GetNumberOfPoints(); i++)
     {
       progressUpdating.eventRaised(double(i)*progressFactor);
@@ -122,6 +123,7 @@ namespace VATES
         if (squaredDifference <= (peaksInfo[counter].second*peaksInfo[counter].second))
         {
           ids->InsertNextValue(i);
+          cc++;
           break;
         }
         counter++;
@@ -131,6 +133,7 @@ namespace VATES
     // Now we have all ids for the points,  we need to retrieve the ids of the cells
     std::map<vtkIdType, vtkIdType> uniqueCellTester;
     vtkSmartPointer<vtkIdTypeArray> cellIds = vtkSmartPointer<vtkIdTypeArray>::New();
+    int ccc = 0;
     for (int i = 0; i < ids->GetNumberOfTuples(); i++) {
       vtkIdType pId = ids->GetValue(i);
 
@@ -144,11 +147,15 @@ namespace VATES
       }
 
       vtkIdType cId = cIdList->GetId(0);
+
       if (uniqueCellTester.count(cId) == 0) {
+        ccc++;
         cellIds->InsertNextValue(cId);
         uniqueCellTester.insert(std::pair<vtkIdType, vtkIdType>(cId, cId));
       }
     }
+
+
 
     // Create the selection node and tell it the type of selection
     vtkSmartPointer<vtkSelectionNode> selectionNode = vtkSmartPointer<vtkSelectionNode>::New();
@@ -164,12 +171,11 @@ namespace VATES
     extractSelection->SetInputData(0,m_inputData);
     extractSelection->SetInputData(1, selection);
     extractSelection->Update();
-
+    
     //Extract
     m_outputData->ShallowCopy(extractSelection->GetOutput());
-
-    // Update the metadata
-    m_outputData->SetFieldData(m_inputData->GetFieldData());
+    int c = m_outputData->GetNumberOfCells();
+    int p = m_outputData->GetNumberOfPoints();
   }
 
   /**
@@ -179,14 +185,7 @@ namespace VATES
    */
   std::vector<std::pair<Mantid::Kernel::V3D, double>> vtkDataSetToPeaksFilteredDataSet::getPeaksInfo(std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces)
   {
-    // Get number of peaks
-    int numberOfPeaks = 0;
-    for (std::vector<Mantid::API::IPeaksWorkspace_sptr>::iterator it = peaksWorkspaces.begin(); it != peaksWorkspaces.end(); ++it)
-    {
-       numberOfPeaks += (*it)->getNumberPeaks();
-    }
-
-    std::vector<std::pair<Mantid::Kernel::V3D, double>> peaksInfo(numberOfPeaks);
+    std::vector<std::pair<Mantid::Kernel::V3D, double>> peaksInfo;
     // Iterate over all peaksworkspaces and add the their info to the output vector
     for (std::vector<Mantid::API::IPeaksWorkspace_sptr>::iterator it = peaksWorkspaces.begin(); it != peaksWorkspaces.end(); ++it)
     {
@@ -198,7 +197,7 @@ namespace VATES
       {
         Mantid::API::IPeak* peak = (*it)->getPeakPtr(i);
 
-        addSinglePeak(peak, coordinateSystem, peaksInfo, static_cast<size_t>(i));
+        addSinglePeak(peak, coordinateSystem, peaksInfo);
       }
     }
     return peaksInfo;
@@ -211,7 +210,7 @@ namespace VATES
    * @param peaksInfo A reference to the vector containing peak information.
    * @param index The index of the peak in the peaksInfo vector.
    */
-  void vtkDataSetToPeaksFilteredDataSet::addSinglePeak(Mantid::API::IPeak* peak, const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem, std::vector<std::pair<Mantid::Kernel::V3D, double>>& peaksInfo, size_t index)
+  void vtkDataSetToPeaksFilteredDataSet::addSinglePeak(Mantid::API::IPeak* peak, const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem, std::vector<std::pair<Mantid::Kernel::V3D, double>>& peaksInfo)
   {
     double radius;
     const Mantid::Geometry::PeakShape& shape = peak->getPeakShape();
@@ -272,13 +271,13 @@ namespace VATES
     switch(coordinateSystem)
     {
       case(Mantid::Kernel::SpecialCoordinateSystem::HKL):
-        peaksInfo[index] = std::pair<Mantid::Kernel::V3D, double>(peak->getHKL(), radius*m_radiusFactor);
+        peaksInfo.push_back(std::pair<Mantid::Kernel::V3D, double>(peak->getHKL(), radius*m_radiusFactor));
         break;
       case(Mantid::Kernel::SpecialCoordinateSystem::QLab):
-        peaksInfo[index] = std::pair<Mantid::Kernel::V3D, double>(peak->getQLabFrame(), radius*m_radiusFactor);
+        peaksInfo.push_back(std::pair<Mantid::Kernel::V3D, double>(peak->getQLabFrame(), radius*m_radiusFactor));
         break;
       case(Mantid::Kernel::SpecialCoordinateSystem::QSample):
-        peaksInfo[index] = std::pair<Mantid::Kernel::V3D, double>(peak->getQSampleFrame(), radius*m_radiusFactor);
+        peaksInfo.push_back(std::pair<Mantid::Kernel::V3D, double>(peak->getQSampleFrame(), radius*m_radiusFactor));
         break;
       default:
         throw std::invalid_argument("The special coordinate systems don't match.");
@@ -301,7 +300,5 @@ namespace VATES
   double vtkDataSetToPeaksFilteredDataSet::getRadiusFactor() {
     return m_radiusFactor;
   }
-
-
 }
 }

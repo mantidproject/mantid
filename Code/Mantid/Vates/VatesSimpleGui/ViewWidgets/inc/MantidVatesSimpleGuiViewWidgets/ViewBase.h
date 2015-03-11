@@ -133,6 +133,10 @@ public:
   virtual void destroyAllSourcesInView();
   // Destroy all sources in a single linear pipeline.
   virtual void destroySinglePipeline(pqPipelineSource * source);
+   /// Set visibility listener
+  void setVisibilityListener();
+  /// Undo visibiltiy listener
+  void removeVisibilityListener();
 
   QPointer<pqPipelineSource> origSrc; ///< The original source
   QPointer<pqPipelineRepresentation> origRep; ///< The original source representation

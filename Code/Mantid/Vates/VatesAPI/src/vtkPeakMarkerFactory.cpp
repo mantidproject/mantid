@@ -184,11 +184,12 @@ namespace VATES
       peakPoint->Squeeze();
       peakDataSet->Squeeze();
 
-      //TEST ARENA ..............
+#if 0
       double testRadius;
       Mantid::Kernel::V3D mainAxis;
+      Mantid::Kernel::V3D minorAxis;
       std::string json;
-      // TESTARENA ...............
+#endif
 
       // Add a glyph and append to the appendFilter
       const Mantid::Geometry::PeakShape& shape = m_workspace->getPeakPtr(i)->getPeakShape();
@@ -210,8 +211,7 @@ namespace VATES
         const Mantid::DataObjects::PeakShapeEllipsoid& ellipticalShape = dynamic_cast<const Mantid::DataObjects::PeakShapeEllipsoid&>(shape);
         std::vector<double> radii = ellipticalShape.abcRadii();
         std::vector<Mantid::Kernel::V3D> directions;
-        testRadius = radii[0];
-        json = ellipticalShape.toJSON();
+         
         switch (m_dimensionToShow)
         {
           case Peak_in_Q_lab:
@@ -251,10 +251,10 @@ namespace VATES
 #else
         vtkLineSource* ellipsoidSource = vtkLineSource::New();
         double point1[3] = {0,0,0};
-        double point2[3] = {radii[0], 0, 0};
+        double point2[3] = {0, 1, 0};
 
         testRadius= radii[0];
-        mainAxis = directions[0];
+        mainAxis = directions[1];
 
         ellipsoidSource->SetPoint1(point1);
         ellipsoidSource->SetPoint2(point2);
@@ -292,7 +292,7 @@ namespace VATES
       glyphFilter->Update();
       vtkPolyData *glyphed = glyphFilter->GetOutput();
 
-      // TEST ARENA
+#if 0
       double p1[3] = {0.0,0.0,0.0};
       double p2[3] = {0.0,0.0,0.0};
       glyphed->GetPoint(0, p1);
@@ -304,11 +304,11 @@ namespace VATES
       for (int j = 0; j < 3; j++)
       {
         corr1[j] = 0;
-        corr2[j] = (p2[j] -p1[j])/testRadius;
+        corr2[j] = (p2[j] -p1[j])/1;
       }
       
       bool isEqual = true;
-      const double tol = 1e-6;
+      const double tol = 1e-5;
       for (int j = 0; j < 3; j++)
       {
          double diff = abs(corr2[j] - mainAxis[j]);
@@ -322,7 +322,7 @@ namespace VATES
       {
         int a= 1;
       }
-      // TEST ARENA END
+#endif
       appendFilter->AddInputData(glyphed);
     } // for each peak
 

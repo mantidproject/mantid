@@ -1,6 +1,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/PeaksWidget.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidQtSliceViewer/QPeaksTableModel.h"
+
 #include <QWidget>
 #include <QItemSelectionModel>
 #include <QModelIndex>
@@ -71,8 +72,7 @@ void PeaksWidget::setupMvc(std::vector<bool> visiblePeaks)
  * Detects a newly selectedd peaks workspace.
  * @param current The currently selected index.
  */
-void PeaksWidget::onCurrentChanged(QModelIndex current, QModelIndex)
-{
+void PeaksWidget::onCurrentChanged(QModelIndex current, QModelIndex) {
   if (current.isValid()) 
   {
     emit zoomToPeak(m_ws, current.row());
@@ -94,7 +94,6 @@ void PeaksWidget::updateModel(std::vector<bool> visiblePeaks) {
     } 
   }
 }
-
 } // namespace
 }
 }
