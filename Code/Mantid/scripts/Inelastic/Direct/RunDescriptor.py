@@ -410,13 +410,20 @@ class RunDescriptor(PropDescriptor):
                 self._clear_all()
                 # clear all would invalidate run number and workspace number
                 self._run_number = int(run_number)
+                self._ws_name = self._build_ws_name()
                 self._run_file_path = file_path
                 self._fext = fext
-                self._ws_name = self._build_ws_name()
             else: # nothing to do, there is workspace, which corresponds to this run number
                 # and it may be already loaded (may be not).  Just nullify run list
                                  # in case of previous workspace name came from a list.
                 self._run_list = None
+                if not self._ws_name in mtd:
+                    # Change existing file path and file extension if alternatives are provided
+                    if len(file_path)>0:
+                        self._run_file_path = file_path
+                    if not fext is None:
+                        self._fext = fext
+
 
 
 #--------------------------------------------------------------------------------------------------------------------
@@ -784,6 +791,12 @@ class RunDescriptor(PropDescriptor):
                 try:
                     ws_ind = mon_ws.getIndexFromSpectrumNumber(int(monID))
                 except:
+                    try:
+                        monws_name = mon_ws.name()
+                    except: 
+                        monws_name = 'None'
+                    RunDescriptor._logger('*** Monitor workspace {0} does not have monitor with ID {1}. Monitor workspace set to None'.\
+                                          format(monws_name,monID),'warning')
                     mon_ws = None
                     break
         return mon_ws
@@ -993,7 +1006,11 @@ class RunDescriptor(PropDescriptor):
             # Spectra is already in the monitor workspace
             return mon_ws
         except:
-            ws_index = data_ws.getIndexFromSpectrumNumber(spectraID)
+            try:
+                ws_index = data_ws.getIndexFromSpectrumNumber(spectraID)
+            except: 
+                raise RuntimeError('*** Error: Can not retrieve spectra with ID {0} from source workspace: {1}'.\
+                                    format(spectraID,data_ws.name()))
 
         #
         x_param = mon_ws.readX(0)

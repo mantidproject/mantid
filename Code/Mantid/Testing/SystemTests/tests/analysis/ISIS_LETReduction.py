@@ -32,7 +32,7 @@ def find_binning_range(energy,ebin):
         mult=2.8868
         dt_DAE = 1
     else:
-        raise RuntimeError("Find_binning_range: unsupported/unknown instrument found")
+       raise RuntimeError("Find_binning_range: unsupported/unknown instrument found")
 
     energy=float(energy)
 
@@ -48,30 +48,6 @@ def find_binning_range(energy,ebin):
 
     return (energybin,tbin,t_elastic)
 #--------------------------------------------------------------------------------------------------------
-def find_background(ws_name,bg_range):
-    """ Function to find background from multirep event workspace
-     dt_DAE = 1 for MERLIN and 1.6 for LET
-     should be precalculated or taken from IDF
-
-        # THIS FUNCTION SHOULD BE MADE GENERIC AND MOVED OUT OF HERE
-    """
-    InstrName =  config['default.instrument'][0:3]
-    if InstrName.find('LET')>-1:
-        dt_DAE = 1.6
-    elif InstrName.find('MER')>-1:
-        dt_DAE = 1
-    else:
-        raise RuntimeError("Find_binning_range: unsupported/unknown instrument found")
-
-    bg_ws_name = 'bg'
-    delta=bg_range[1]-bg_range[0]
-    Rebin(InputWorkspace='w1',OutputWorkspace=bg_ws_name,Params=[bg_range[0],delta,bg_range[1]],PreserveEvents=False)
-    v=(delta)/dt_DAE
-    CreateSingleValuedWorkspace(OutputWorkspace='d',DataValue=v)
-    Divide(LHSWorkspace=bg_ws_name,RHSWorkspace='d',OutputWorkspace=bg_ws_name)
-    return bg_ws_name
-
-
 class ReduceLET_OneRep(ReductionWrapper):
     @MainProperties
     def def_main_properties(self):
@@ -200,18 +176,20 @@ class ReduceLET_MultiRep2015(ReductionWrapper):
 
         prop['monovan_mapfile'] = 'rings_103.map'
         prop['save_format'] = ''
-        # if two input files with the same name and  different extension found, what to prefer.
+        # if two input files with the same name and different extension found, what to prefer.
         prop['data_file_ext']='.nxs' # for LET it may be choice between event and histo mode if
         # raw file is written in histo, and nxs -- in event mode
 
         # Absolute units: map file to calculate monovan integrals
         prop['monovan_mapfile'] = 'rings_103.map'
-        # change this to correct value and verify that motor_log_names refers correct and existing
+        #Change this to correct value and verify that motor_log_names refers correct and existing
         # log name for crystal rotation to write correct psi value into nxspe files
         prop['motor_offset']=None
 
-        #TODO: Correct monitor, depending on workspace. This has to be loaded from the workspace and work without this settings
-        #prop['ei-mon1-spec']=40966
+        #BUG TODO: old IDF-s do not have this property. In this case, new IDF overrides the old one
+        # Should be possibility to define spectra_to_monitors_list to just monitors list, if
+        # spectra_to_monitors_list remains undefined
+        prop['spectra_to_monitors_list']=5506
         return prop
       #
     @iliad
@@ -233,7 +211,7 @@ class ReduceLET_MultiRep2015(ReductionWrapper):
         return res
 
     def __init__(self,web_var=None):
-        """ sets properties defaults for the instrument with Name"""
+        """Sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'LET',web_var)
 
     def set_custom_output_filename(self):
@@ -265,9 +243,9 @@ class ReduceLET_MultiRep2015(ReductionWrapper):
 #----------------------------------------------------------------------------------------------------------------------
 
 if __name__=="__main__":
-    maps_dir = 'd:/Data/MantidSystemTests/Data'
-    data_dir ='d:/Data/Mantid_Testing/14_11_27'
-    ref_data_dir = 'd:/Data/MantidSystemTests/SystemTests/AnalysisTests/ReferenceResults'
+    maps_dir = r'd:\Data\MantidDevArea\Datastore\DataCopies\Testing\Data\SystemTest'
+    data_dir = r'd:\Data\Mantid_Testing\15_03_01'
+    ref_data_dir = r'd:\Data\MantidDevArea\Datastore\DataCopies\Testing\SystemTests\tests\analysis\reference'
     config.setDataSearchDirs('{0};{1};{2}'.format(data_dir,maps_dir,ref_data_dir))
     #config.appendDataSearchDir('d:/Data/Mantid_GIT/Test/AutoTestData')
     config['defaultsave.directory'] = data_dir # folder to save resulting spe/nxspe files. Defaults are in
@@ -314,4 +292,4 @@ if __name__=="__main__":
     #if not rez:
     #   raise RuntimeError("validation failed with error: {0}".format(mess))
     #else:
-    #   print "ALL Fine" 
+    #   print "ALL Fine"
