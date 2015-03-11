@@ -101,6 +101,10 @@ private:
   /// Populate output workspace with results
   void populateOutputWorkspace (API::MatrixWorkspace_sptr &outWS, int nplots);
 
+  /// Stores base name shared by all runs
+  std::string m_filenameBase;
+  /// Stores extension shared by all runs
+  std::string m_filenameExt;
   /// Stores property "Int"
   bool m_int;
   /// Store forward spectra

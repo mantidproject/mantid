@@ -176,8 +176,7 @@ void PlotAsymmetryByLogValue::exec() {
   m_logFunc = getPropertyValue("Function");
 
   // Parse run names and get the number of runs
-  std::string fnBase, fnExt;
-  parseRunNames( firstFN, lastFN, fnBase, fnExt);
+  parseRunNames( firstFN, lastFN, m_filenameBase, m_filenameExt);
   size_t is = atoi(firstFN.c_str()); // starting run number
   size_t ie = atoi(lastFN.c_str());  // last run number
   int w = static_cast<int>(firstFN.size());
