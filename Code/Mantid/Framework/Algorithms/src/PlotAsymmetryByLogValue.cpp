@@ -176,10 +176,9 @@ void PlotAsymmetryByLogValue::exec() {
   m_logFunc = getPropertyValue("Function");
 
   // Parse run names and get the number of runs
-  parseRunNames( firstFN, lastFN, m_filenameBase, m_filenameExt);
+  parseRunNames( firstFN, lastFN, m_filenameBase, m_filenameExt, m_filenameZeros);
   size_t is = atoi(firstFN.c_str()); // starting run number
   size_t ie = atoi(lastFN.c_str());  // last run number
-  int w = static_cast<int>(firstFN.size());
 
   Progress progress(this, 0, 1, ie - is + 2);
 
@@ -304,7 +303,7 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace (MatrixWorkspace_sptr &out
 *   @param fnBase :: [output] Runs base name
 *   @param fnExt :: [output] Runs extension
 */
-void PlotAsymmetryByLogValue::parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt)
+void PlotAsymmetryByLogValue::parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt, int& fnZeros)
 {
 
   // Parse first run's name
@@ -370,6 +369,8 @@ void PlotAsymmetryByLogValue::parseRunNames (std::string& firstFN, std::string& 
     fnBase = firstBase;
     fnExt = firstExt;
   }
+  fnZeros = static_cast<int>(firstFN.size());
+
 }
 
 /**  Apply dead-time corrections. The calculation is done by ApplyDeadTimeCorr algorithm

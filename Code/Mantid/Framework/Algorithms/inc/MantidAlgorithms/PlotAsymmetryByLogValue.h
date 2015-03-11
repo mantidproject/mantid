@@ -83,7 +83,7 @@ private:
   // Analyse loaded run
   void doAnalysis (Workspace_sptr loadedWs);
   // Parse run names
-  void parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt);
+  void parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt, int& fnZeros);
   // Load dead-time corrections from specified file
   void loadCorrectionsFromFile (API::Workspace_sptr &customDeadTimes, std::string deadTimeFile );
   // Apply dead-time corrections
@@ -105,6 +105,8 @@ private:
   std::string m_filenameBase;
   /// Stores extension shared by all runs
   std::string m_filenameExt;
+  /// Sotres number of zeros in run name
+  std::string m_filenameZeros;
   /// Stores property "Int"
   bool m_int;
   /// Store forward spectra
