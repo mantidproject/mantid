@@ -214,8 +214,8 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad (int64_t runNumber ) {
 
   // Get complete run name
   std::ostringstream fn, fnn;
-  fnn << std::setw(w) << std::setfill('0') << i;
-  fn << fnBase << fnn.str() << fnExt;
+  fnn << std::setw(m_filenameZeros) << std::setfill('0') << runNumber;
+  fn << m_filenameBase << fnn.str() << m_filenameExt;
 
   // Load run
   IAlgorithm_sptr load = createChildAlgorithm("LoadMuonNexus");
