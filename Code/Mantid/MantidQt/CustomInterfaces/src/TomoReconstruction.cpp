@@ -243,6 +243,13 @@ void TomoReconstruction::enableLoggedActions(bool enable) {
   for (size_t i=0; i<buttons.size(); ++i) {
     buttons[i]->setEnabled(enable);
   }
+
+  if (!enable) {
+    m_ui.pushButton_reconstruct->setToolTip(
+        "Start reconstruction job. You need to be logged in to use this");
+  } else {
+    m_ui.pushButton_reconstruct->setToolTip("");
+  }
 }
 
 /**
@@ -420,8 +427,8 @@ void TomoReconstruction::setupRunTool() {
     for (size_t i=0; i<tools.size(); i++) {
       rt->addItem(QString::fromStdString(tools[i].c_str()));
 
-      // put savu but disable it, as it's not yet sorted out
-      if ("Savu" == tools[i]) {
+      // put Savu and CCPi but disable them, as it's not yet sorted out
+      if (m_SavuTool == tools[i] || m_CCPiTool == tools[i]) {
         QModelIndex idx = rt->model()->index(static_cast<int>(i), 0);
         QVariant disabled(0);
         rt->model()->setData(idx, disabled, Qt::UserRole - 1);
@@ -586,8 +593,51 @@ void TomoReconstruction::doCancelJob(const std::string &id) {
   }
 }
 
+
+
+TomoToolSetupDialog::TomoToolSetupDialog(QWidget *parent):
+  QDialog(parent) {
+  labelRun = new QLabel("Runnable script");
+  editRun = new QLineEdit("/work/imat/");
+  hRun = new QHBoxLayout();
+  hRun->addWidget(labelRun);
+  hRun->addWidget(editRun);
+
+  labelOpt = new QLabel("Command line options");
+  editOpt = new QLineEdit("/work/imat");
+  hOpt = new QHBoxLayout();
+  hOpt->addWidget(labelOpt);
+  hOpt->addWidget(editOpt);
+
+  layout = new QGridLayout();
+  layout->addLayout(hRun, 0, 0);
+  layout->addLayout(hOpt, 1, 0);
+
+  // connect(lineEdit, SIGNAL(textChanged(const QString &)),
+  //     this, SLOT(enableFindButton(const QString &)));
+  connect(okButton, SIGNAL(clicked()), this, SLOT(okClicked()));
+  connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancelClicked()));
+}
+
+void TomoToolSetupDialog::okClicked() {
+
+}
+
+void TomoToolSetupDialog::cancelClicked() {
+
+}
+
 void TomoReconstruction::toolSetupClicked() {
   // big TODO: handle tool specific options / config files
+
+  QComboBox *rt = m_ui.comboBox_run_tool;
+  if (rt) {
+    const std::string res = getComputeResource();
+    if (m_TomoPyTool == rt->currentText().toStdString()) {
+      //TomoToolSetupDialog d;
+      //d.show();
+    }
+  }
 }
 
 void TomoReconstruction::reconstructClicked() {

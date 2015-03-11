@@ -6,6 +6,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
+#include <QDialog>
 #include <jsoncpp/json/json.h>
 
 class QTreeWidgetItem;
@@ -202,6 +203,26 @@ private:
   std::string m_currentParamPath;
   static size_t m_nameSeqNo;
 };
+
+class TomoToolSetupDialog: public QDialog {
+  Q_OBJECT
+
+public:
+  TomoToolSetupDialog(QWidget *parent = 0);
+
+private slots:
+  void okClicked();
+  void cancelClicked();
+
+private:
+
+  QLabel *labelRun, *labelOpt;
+  QLineEdit *editRun, *editOpt;
+  QHBoxLayout *hRun, *hOpt;
+  QGridLayout *layout;
+  QPushButton *okButton, *cancelButton;
+};
+
 }
 }
 

@@ -1148,7 +1148,7 @@ Double-click on them to modify their values.</string>
                      <x>0</x>
                      <y>0</y>
                      <width>370</width>
-                     <height>289</height>
+                     <height>285</height>
                     </rect>
                    </property>
                    <layout class="QGridLayout" name="gridLayout_5">
@@ -1189,6 +1189,12 @@ Double-click on them to modify their values.</string>
                  <width>115</width>
                  <height>16777215</height>
                 </size>
+               </property>
+               <property name="toolTip">
+                <string/>
+               </property>
+               <property name="statusTip">
+                <string/>
                </property>
                <property name="text">
                 <string>Reconstruct</string>
@@ -1337,6 +1343,12 @@ Double-click on them to modify their values.</string>
                    </item>
                    <item row="0" column="1">
                     <widget class="QPushButton" name="pushButton_run_tool_setup">
+                     <property name="toolTip">
+                      <string>Define specific settings for the tool selected</string>
+                     </property>
+                     <property name="statusTip">
+                      <string/>
+                     </property>
                      <property name="text">
                       <string>Setup</string>
                      </property>
