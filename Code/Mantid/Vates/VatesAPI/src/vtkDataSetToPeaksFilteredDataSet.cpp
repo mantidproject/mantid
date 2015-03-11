@@ -101,7 +101,6 @@ namespace VATES
     ids->SetNumberOfComponents(1);
 
     double progressFactor = 1.0/double(points->GetNumberOfPoints());
-    int cc = 0;
     for(int i = 0; i < points->GetNumberOfPoints(); i++)
     {
       progressUpdating.eventRaised(double(i)*progressFactor);
@@ -123,7 +122,6 @@ namespace VATES
         if (squaredDifference <= (peaksInfo[counter].second*peaksInfo[counter].second))
         {
           ids->InsertNextValue(i);
-          cc++;
           break;
         }
         counter++;
@@ -133,7 +131,7 @@ namespace VATES
     // Now we have all ids for the points,  we need to retrieve the ids of the cells
     std::map<vtkIdType, vtkIdType> uniqueCellTester;
     vtkSmartPointer<vtkIdTypeArray> cellIds = vtkSmartPointer<vtkIdTypeArray>::New();
-    int ccc = 0;
+
     for (int i = 0; i < ids->GetNumberOfTuples(); i++) {
       vtkIdType pId = ids->GetValue(i);
 
@@ -149,13 +147,10 @@ namespace VATES
       vtkIdType cId = cIdList->GetId(0);
 
       if (uniqueCellTester.count(cId) == 0) {
-        ccc++;
         cellIds->InsertNextValue(cId);
         uniqueCellTester.insert(std::pair<vtkIdType, vtkIdType>(cId, cId));
       }
     }
-
-
 
     // Create the selection node and tell it the type of selection
     vtkSmartPointer<vtkSelectionNode> selectionNode = vtkSmartPointer<vtkSelectionNode>::New();
@@ -174,8 +169,6 @@ namespace VATES
     
     //Extract
     m_outputData->ShallowCopy(extractSelection->GetOutput());
-    int c = m_outputData->GetNumberOfCells();
-    int p = m_outputData->GetNumberOfPoints();
   }
 
   /**

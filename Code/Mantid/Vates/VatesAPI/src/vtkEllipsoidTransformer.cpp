@@ -1,4 +1,3 @@
-#define _USE_MATH_DEFINES
 #include "MantidVatesAPI/vtkEllipsoidTransformer.h"
 #include "MantidKernel/V3D.h"
 

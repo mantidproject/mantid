@@ -184,13 +184,6 @@ namespace VATES
       peakPoint->Squeeze();
       peakDataSet->Squeeze();
 
-#if 0
-      double testRadius;
-      Mantid::Kernel::V3D mainAxis;
-      Mantid::Kernel::V3D minorAxis;
-      std::string json;
-#endif
-
       // Add a glyph and append to the appendFilter
       const Mantid::Geometry::PeakShape& shape = m_workspace->getPeakPtr(i)->getPeakShape();
       std::string name = shape.shapeName();
@@ -236,7 +229,7 @@ namespace VATES
         default:
           directions = ellipticalShape.directions();
         }
-#if 1
+
         vtkParametricEllipsoid* ellipsoid = vtkParametricEllipsoid::New();
         ellipsoid->SetXRadius(radii[0]);
         ellipsoid->SetYRadius(radii[1]);
@@ -248,17 +241,7 @@ namespace VATES
         ellipsoidSource->SetVResolution(resolution);
         ellipsoidSource->SetWResolution(resolution);
         ellipsoidSource->Update();
-#else
-        vtkLineSource* ellipsoidSource = vtkLineSource::New();
-        double point1[3] = {0,0,0};
-        double point2[3] = {0, 1, 0};
 
-        testRadius= radii[0];
-        mainAxis = directions[1];
-
-        ellipsoidSource->SetPoint1(point1);
-        ellipsoidSource->SetPoint2(point2);
-#endif
         vtkSmartPointer<vtkTransform> transform = ellipsoidTransformer.generateTransform(directions);
 
         vtkTransformPolyDataFilter* transformFilter = vtkTransformPolyDataFilter::New();
@@ -292,37 +275,6 @@ namespace VATES
       glyphFilter->Update();
       vtkPolyData *glyphed = glyphFilter->GetOutput();
 
-#if 0
-      double p1[3] = {0.0,0.0,0.0};
-      double p2[3] = {0.0,0.0,0.0};
-      glyphed->GetPoint(0, p1);
-      glyphed->GetPoint(1, p2);
-
-      // Evaluate the output
-      double corr1[3];
-      double corr2[3];
-      for (int j = 0; j < 3; j++)
-      {
-        corr1[j] = 0;
-        corr2[j] = (p2[j] -p1[j])/1;
-      }
-      
-      bool isEqual = true;
-      const double tol = 1e-5;
-      for (int j = 0; j < 3; j++)
-      {
-         double diff = abs(corr2[j] - mainAxis[j]);
-         if (diff > tol)
-         {
-           isEqual = false;
-         }
-      }
-
-      if (!isEqual)
-      {
-        int a= 1;
-      }
-#endif
       appendFilter->AddInputData(glyphed);
     } // for each peak
 
