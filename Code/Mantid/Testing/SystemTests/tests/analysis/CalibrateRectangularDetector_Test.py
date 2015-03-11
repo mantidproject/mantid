@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init
 import stresstesting
 from mantid.simpleapi import *
 from time import strftime
@@ -24,7 +25,7 @@ class PG3Calibration(stresstesting.MantidStressTest):
         return _skip_test()
 
     def requiredFiles(self):
-        files = ["PG3_2538_event.nxs"] 
+        files = ["PG3_2538_event.nxs"]
         return files
 
     def requiredMemoryMB(self):
@@ -37,8 +38,8 @@ class PG3Calibration(stresstesting.MantidStressTest):
 
         # run the actual code
         output = CalibrateRectangularDetectors(OutputDirectory = savedir, SaveAs = 'calibration', FilterBadPulses = True,
-                          GroupDetectorsBy = 'All', DiffractionFocusWorkspace = False, Binning = '0.5, -0.0004, 2.5', 
-                          MaxOffset=0.01, PeakPositions = '.6866,.7283,.8185,.8920,1.0758,1.2615,2.0599', 
+                          GroupDetectorsBy = 'All', DiffractionFocusWorkspace = False, Binning = '0.5, -0.0004, 2.5',
+                          MaxOffset=0.01, PeakPositions = '.6866,.7283,.8185,.8920,1.0758,1.2615,2.0599',
                           CrossCorrelation = False, Instrument = 'PG3', RunNumber = '2538', Extension = '_event.nxs')
 
         if isinstance(output, basestring):
@@ -47,11 +48,11 @@ class PG3Calibration(stresstesting.MantidStressTest):
             raise NotImplementedError("Output from CalibrateRectangularDetectors is NOT string for calibration file name!")
 
         # load saved cal file
-        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName=self.saved_cal_file, WorkspaceName="PG3_2538", 
+        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName=self.saved_cal_file, WorkspaceName="PG3_2538",
             MakeGroupingWorkspace=False)
         MaskDetectors(Workspace="PG3_2538_offsets",MaskedWorkspace="PG3_2538_mask")
         # load golden cal file
-        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName="PG3_golden.cal", WorkspaceName="PG3_2538_golden", 
+        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName="PG3_golden.cal", WorkspaceName="PG3_2538_golden",
             MakeGroupingWorkspace=False)
         MaskDetectors(Workspace="PG3_2538_golden_offsets",MaskedWorkspace="PG3_2538_golden_mask")
 
@@ -70,7 +71,7 @@ class PG3CCCalibration(stresstesting.MantidStressTest):
         return _skip_test()
 
     def requiredFiles(self):
-        files = ["PG3_2538_event.nxs"] 
+        files = ["PG3_2538_event.nxs"]
         return files
 
     def requiredMemoryMB(self):
@@ -93,11 +94,11 @@ class PG3CCCalibration(stresstesting.MantidStressTest):
             raise NotImplementedError("Output from CalibrateRectangularDetectors is NOT string for calibration file name!")
 
         # load saved cal file
-        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName=self.saved_cal_file, WorkspaceName="PG3_2538", 
+        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName=self.saved_cal_file, WorkspaceName="PG3_2538",
             MakeGroupingWorkspace=False)
         MaskDetectors(Workspace="PG3_2538_offsets",MaskedWorkspace="PG3_2538_mask")
         # load golden cal file
-        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName="PG3_goldenCC.cal", WorkspaceName="PG3_2538_golden", 
+        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName="PG3_goldenCC.cal", WorkspaceName="PG3_2538_golden",
             MakeGroupingWorkspace=False)
         MaskDetectors(Workspace="PG3_2538_golden_offsets",MaskedWorkspace="PG3_2538_golden_mask")
 

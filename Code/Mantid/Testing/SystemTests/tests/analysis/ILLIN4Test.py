@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 import stresstesting
 
 from mantid.api import MatrixWorkspace, mtd
@@ -9,7 +10,7 @@ import unittest
 DIFF_PLACES = 12
 
 class ILLIN4Tests(unittest.TestCase):
-    
+
     ws_name = "in4_ws"
     dataFile = "ILL/ILLIN4_074252.nxs"
 
@@ -20,7 +21,7 @@ class ILLIN4Tests(unittest.TestCase):
     #================== Success cases ================================
     def test_load_file(self):
         self._run_load(self.dataFile)
-        
+
         # Check some data
         wsOut = mtd[self.ws_name]
         self.assertEqual(wsOut.getNumberHistograms(), 397)
@@ -32,17 +33,17 @@ class ILLIN4Tests(unittest.TestCase):
         det209 = wsOut.getDetector(209)
         self.assertEqual(det9.getTwoTheta(samplePos, beamDirection),
                          det209.getTwoTheta(samplePos, beamDirection))
-        
+
         # Same mirror position
         self.assertEqual(det9.getPos().getX(),det209.getPos().getX())
         self.assertEqual(det9.getPos().getZ(),det209.getPos().getZ())
         self.assertEqual(det9.getPos().getY(),-det209.getPos().getY())
-        
+
     #================== Failure cases ================================
 
     # TODO
 
-    
+
     def _run_load(self, dataFile):
         """
         ILL Loader
@@ -67,7 +68,7 @@ class LoadILLIN4Test(stresstesting.MantidStressTest):
         # Run using either runner
         res = runner.run(suite)
         if res.wasSuccessful():
-            self._success = True 
+            self._success = True
         else:
             self._success = False
 

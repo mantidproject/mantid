@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 import stresstesting
 import mantid
 from mantid.api import FileFinder
@@ -26,7 +27,7 @@ class HFIRReductionAPIv2(stresstesting.MantidStressTest):
     """
         Simple reduction example
     """
-    
+
     def runTest(self):
 
         config = ConfigService.Instance()
@@ -38,7 +39,7 @@ class HFIRReductionAPIv2(stresstesting.MantidStressTest):
         SensitivityCorrection("BioSANS_flood_data.xml")
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
         Reduce()
-        
+
     def validate(self):
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
@@ -55,7 +56,7 @@ class HFIRAbsoluteScalingReference(stresstesting.MantidStressTest):
     """
         Test absolute scaling using a reference data set
     """
-    
+
     def runTest(self):
         config = ConfigService.Instance()
         config["facilityName"]='HFIR'
@@ -67,7 +68,7 @@ class HFIRAbsoluteScalingReference(stresstesting.MantidStressTest):
         SetDirectBeamAbsoluteScale('BioSANS_empty_trans.xml')
         AppendDataFile(["BioSANS_test_data.xml"])
         Reduce()
-        
+
     def validate(self):
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
@@ -84,7 +85,7 @@ class HFIRAbsoluteScalingValue(stresstesting.MantidStressTest):
     """
         Test absolute scaling using a reference data set
     """
-    
+
     def runTest(self):
         config = ConfigService.Instance()
         config["facilityName"]='HFIR'
@@ -96,7 +97,7 @@ class HFIRAbsoluteScalingValue(stresstesting.MantidStressTest):
         SetAbsoluteScale(1.680537663117948)
         AppendDataFile(["BioSANS_test_data.xml"])
         Reduce()
-        
+
     def validate(self):
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
