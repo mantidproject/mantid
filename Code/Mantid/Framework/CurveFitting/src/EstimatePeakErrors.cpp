@@ -122,13 +122,20 @@ void EstimatePeakErrors::init() {
 void EstimatePeakErrors::exec() {
 
   IFunction_sptr function = getProperty("Function");
-  auto matrix = function->getCovarianceMatrix();
 
   ITableWorkspace_sptr results =
       WorkspaceFactory::Instance().createTable("TableWorkspace");
   results->addColumn("str", "Parameter");
   results->addColumn("double", "Value");
   results->addColumn("double", "Error");
+
+  auto matrix = function->getCovarianceMatrix();
+  if ( !matrix )
+  {
+    g_log.warning() << "Function dosn't have covariance matrix." << std::endl;
+    setProperty("OutputWorkspace", results);
+    return;
+  }
 
   IPeakFunction *peak = dynamic_cast<IPeakFunction *>(function.get());
 

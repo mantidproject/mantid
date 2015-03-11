@@ -101,6 +101,23 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_on_Gaussian_unfitted()
+  {
+    auto fun = FunctionFactory::Instance().createInitialized("name=Gaussian,PeakCentre=0,Height=1,Sigma=2");
+
+    EstimatePeakErrors alg;
+    alg.initialize();
+    alg.setProperty("Function",fun);
+    alg.setPropertyValue("OutputWorkspace","Errors");
+    alg.execute();
+
+    auto res = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Errors");
+    TS_ASSERT_EQUALS( res->rowCount(), 0 );
+
+    AnalysisDataService::Instance().clear();
+  }
+
+
   void test_on_Lorentzians()
   {
     std::string funStr = "name=Lorentzian,Amplitude=10,PeakCentre=-4,FWHM=2;"
