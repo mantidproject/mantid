@@ -29,7 +29,7 @@ EstimatePeakErrors::EstimatePeakErrors() : Algorithm() {}
 /// Summary of algorithms purpose
 const std::string EstimatePeakErrors::summary() const {
   return "Calculates error estimates for peak parameters: "
-         "centre, height and FWHM.";
+         "centre, height, FWHM and intensity.";
 }
 
 const std::string EstimatePeakErrors::name() const {
@@ -39,7 +39,7 @@ const std::string EstimatePeakErrors::name() const {
 int EstimatePeakErrors::version() const { return 1; }
 
 const std::string EstimatePeakErrors::category() const {
-  return "CorrectionFunctions";
+  return "Optimization";
 }
 
 //--------------------------------------------------------------------------------------------------------
@@ -110,12 +110,12 @@ void EstimatePeakErrors::init() {
 
   declareProperty(
       new FunctionProperty("Function"),
-      "Parameters defining the fitting function and its initial values");
+      "Fitting function containing peaks. Must have a covariance matrix attached.");
 
   declareProperty(
       new API::WorkspaceProperty<API::ITableWorkspace>(
           "OutputWorkspace", "", Kernel::Direction::Output),
-      "The name of the TableWorkspace in which to store the errors.");
+      "The name of the TableWorkspace with the output values and errors.");
 }
 
 /// Execute
