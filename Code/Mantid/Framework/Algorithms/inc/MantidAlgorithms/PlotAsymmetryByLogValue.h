@@ -78,6 +78,8 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+  // Load run, apply dead time corrections and detector grouping
+  Workspace_sptr doLoad (int64_t runNumber );
   // Parse run names
   void parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt);
   // Load dead-time corrections from specified file

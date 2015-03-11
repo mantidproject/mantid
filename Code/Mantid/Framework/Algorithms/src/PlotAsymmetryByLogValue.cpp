@@ -187,41 +187,10 @@ void PlotAsymmetryByLogValue::exec() {
   // Loop through runs
   for (size_t i = is; i <= ie; i++) {
 
-    // Get complete run name
-    std::ostringstream fn, fnn;
-    fnn << std::setw(w) << std::setfill('0') << i;
-    fn << fnBase << fnn.str() << fnExt;
+    // Load run, apply dead time corrections and detector grouping
+    Workspace_sptr loadedWs = doLoad(i);
 
-    // Load run
-    IAlgorithm_sptr load = createChildAlgorithm("LoadMuonNexus");
-    load->setPropertyValue("Filename", fn.str());
-    load->execute();
-    Workspace_sptr loadedWs = load->getProperty("OutputWorkspace");
-
-    // Check if dead-time corrections have to be applied
-    if (dtcType != "None") {
-      if (dtcType == "FromSpecifiedFile") {
-
-        // Dead-time corrections: if user specifies a file, load corrections now
-        Workspace_sptr customDeadTimes;
-        if (dtcType == "FromSpecifiedFile") {
-          loadCorrectionsFromFile (customDeadTimes, getPropertyValue("DeadTimeCorrFile"));
-        }
-        applyDeadtimeCorr (loadedWs, customDeadTimes);
-      } else {
-        Workspace_sptr deadTimes = load->getProperty("DeadTimeTable");
-        applyDeadtimeCorr (loadedWs, deadTimes);
-      }
-    }
-
-    // If m_autogroup, group detectors
-    if (m_autogroup) {
-      Workspace_sptr loadedDetGrouping = load->getProperty("DetectorGroupingTable");
-      if (!loadedDetGrouping)
-        throw std::runtime_error("No grouping info in the file.\n\nPlease "
-                                 "specify grouping manually");
-      groupDetectors(loadedWs,loadedDetGrouping);
-    }
+    // Analyse loadedWs
 
     // Check if workspace is a workspace group
     WorkspaceGroup_sptr loadedGroup =
@@ -319,6 +288,46 @@ void PlotAsymmetryByLogValue::exec() {
   populateOutputWorkspace(outWS,nplots);
   // Assign the result to the output workspace property
   setProperty("OutputWorkspace", outWS);
+}
+
+Workspace_sptr PlotAsymmetryByLogValue::doLoad (int64_t runNumber ) {
+
+  // Get complete run name
+  std::ostringstream fn, fnn;
+  fnn << std::setw(w) << std::setfill('0') << i;
+  fn << fnBase << fnn.str() << fnExt;
+
+  // Load run
+  IAlgorithm_sptr load = createChildAlgorithm("LoadMuonNexus");
+  load->setPropertyValue("Filename", fn.str());
+  load->execute();
+  Workspace_sptr loadedWs = load->getProperty("OutputWorkspace");
+
+  // Check if dead-time corrections have to be applied
+  if (dtcType != "None") {
+    if (dtcType == "FromSpecifiedFile") {
+
+      // Dead-time corrections: if user specifies a file, load corrections now
+      Workspace_sptr customDeadTimes;
+      if (dtcType == "FromSpecifiedFile") {
+        loadCorrectionsFromFile (customDeadTimes, getPropertyValue("DeadTimeCorrFile"));
+      }
+      applyDeadtimeCorr (loadedWs, customDeadTimes);
+    } else {
+      Workspace_sptr deadTimes = load->getProperty("DeadTimeTable");
+      applyDeadtimeCorr (loadedWs, deadTimes);
+    }
+  }
+
+  // If m_autogroup, group detectors
+  if (m_autogroup) {
+    Workspace_sptr loadedDetGrouping = load->getProperty("DetectorGroupingTable");
+    if (!loadedDetGrouping)
+      throw std::runtime_error("No grouping info in the file.\n\nPlease "
+      "specify grouping manually");
+    groupDetectors(loadedWs,loadedDetGrouping);
+  }
+
 }
 
 /**  Load dead-time corrections from specified file
