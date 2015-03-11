@@ -21,6 +21,9 @@ Usage
 
 .. testcode:: Example4D
 
+   from mantid.api import Projection
+   from mantid.kernel import VMD
+
    to_cut = CreateMDWorkspace(Dimensions=4, Extents=[-1,1,-1,1,-1,1,-10,10], Names="H,K,L,E", Units="U,U,U,V")
    # Add two fake peaks so that we can see the effect of the basis transformation
 
@@ -28,28 +31,14 @@ Usage
 
    FakeMDEventData(InputWorkspace='to_cut', PeakParams=[10000,0.5,0,0,0,0.1])
     
-
    SetUB(Workspace=to_cut, a=1, b=1, c=1, alpha=90, beta=90, gamma=90)
    SetSpecialCoordinates(InputWorkspace=to_cut, SpecialCoordinates='HKL')
-   projection = CreateEmptyTableWorkspace()
-   # Correct number of columns, and names
 
-   projection.addColumn("double", "u")
-   projection.addColumn("double", "v")
-
-   projection.addColumn("double", "w")
-   projection.addColumn("double", "offsets")
-
-   projection.addColumn("str", "type")
-
-   projection.addRow([1,-1, 0, 0, "r"])
-
-   projection.addRow([1, 1, 0, 0, "r"])
-   projection.addRow([0, 0, 1, 0, "r"])  
+   #Since we only specify u and v, w is automatically calculated to be the cross product of u and v
+   projection = Projection([1,1,0], [-1,1,0])
    
    # Apply the cut
-
-   out_md = CutMD(to_cut, Projection=projection, P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], P4Bin=[-5,5], NoPix=True)
+   out_md = CutMD(to_cut, Projection=projection.toWorkspace(), P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], P4Bin=[-5,5], NoPix=True)
    print 'number of dimensions', out_md.getNumDims()
    print 'number of dimensions not integrated', len(out_md.getNonIntegratedDimensions())
    dim_dE = out_md.getDimension(3)
