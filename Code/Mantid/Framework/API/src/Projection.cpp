@@ -26,8 +26,8 @@ Projection::Projection(const V3D &u, const V3D &v) {
 }
 
 Projection::Projection(const V3D &u, const V3D &v, const V3D &w) {
-  if (w.scalar_prod(u.cross_prod(v)) <= 0.00001)
-    throw std::runtime_error("u, v, and w must be coplanar!");
+  if (fabs(w.scalar_prod(u.cross_prod(v))) <= 0.00001)
+    throw std::runtime_error("u, v, and w must not be coplanar!");
 
   m_dimensions[0] = u;
   m_dimensions[1] = v;
