@@ -1,4 +1,4 @@
-.. _peaksworkspace:
+.. _PeaksWorkspace:
 
 Peaks Workspace
 ===============
