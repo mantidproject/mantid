@@ -28,8 +28,8 @@ except ImportError as e:
 
 
 #----- default configuration ---------------
-DEFAULT_SERVER = 'http://neutron.ornl.gov/'
-DEFAULT_INSTRUMENT = 'HB2A'
+DEFAULT_SERVER = 'http://neutron.ornl.gov/user_data'
+DEFAULT_INSTRUMENT = 'hb2a'
 DEFAULT_WAVELENGTH = 2.4100
 
 #-------------------------------------------
@@ -70,6 +70,11 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_unitQ, QtCore.SIGNAL('clicked()'),
                 self.doPlotQ)
 
+        self.connect(self.ui.pushButton_saveData, QtCore.SIGNAL('clicked()'),
+                self.doSaveData)
+
+        self.connect(self.ui.pushButton_browseCache, QtCore.SIGNAL('clicked()'),
+                self.doBrowseCache)
 
         # Define signal-event handling
 
@@ -121,23 +126,51 @@ class MainWindow(QtGui.QMainWindow):
             self._instrument = DEFAULT_INSTRUMENT
 
         # Set up data source
-        self._serverAddress = DEFAULT_SERVER + "_" + self._instrument
+        self._serverAddress = DEFAULT_SERVER 
         self._srcFromServer = True
         self._localSrcDataDir = None
         self._srcAtLocal = False
 
         self._currUnit = '2theta'
 
+        # Workspaces
+        self._outws = None
+        self._prevoutws = None
+
 
     #-- Event Handling ----------------------------------------------------
+
+    def doBrowseCache(self):
+        """ Pop out a dialog to let user specify the directory to
+        cache downloaded data
+        """
+        # home directory
+        homedir = str(self.ui.lineEdit_cache.text()).strip()
+        if len(homedir) > 0 and os.path.exists(homedir):
+            home = homedir
+        else:
+            home = os.getcwd()
+
+        # pop out a dialog
+        dirs = str(QtGui.QFileDialog.getExistingDirectory(self,'Get Directory',home))
+
+        # set to line edit
+        if dirs != home:
+            self.ui.lineEdit_cache.setText(dirs)
+
+        return
 
 
     def doLoadData(self):
         """ Load data 
         """
         # Get information
-        expno = int(self.ui.lineEdit_expNo.text())
-        scanno = int(self.ui.lineEdit_scanNo.text())
+        try:
+            expno = int(self.ui.lineEdit_expNo.text())
+            scanno = int(self.ui.lineEdit_scanNo.text())
+        except ValueError:
+            self._logError("Either Exp No or Scan No is not set up right as integer.")
+            return
 
         self._logDebug("Attending to load Exp %d Scan %d." % (expno, scanno))
 
@@ -178,6 +211,40 @@ class MainWindow(QtGui.QMainWindow):
         return
 
 
+    def doSaveData(self):
+        """ Save data
+        """
+        # check whether it is fine to save 
+        if self._outws is None:
+            self._logError("No reduced diffraction data to save.")
+            #return
+
+        # file type
+        filetype = str(self.ui.comboBox_outputFormat.currentText())
+
+        # get line edit for save data location
+        savedatadir = str(self.ui.lineEdit_outputFileName.text()).strip()
+        if savedatadir != None and os.path.exists(savedatadir) is True:
+            homedir = savedatadir
+        else:
+            homedir = os.getcwd()
+
+        # launch a dialog to get data
+        filter = "All files (*.*);;Fullprof (*.dat);;GSAS (*.gsa)"
+        sfilename = str(QtGui.QFileDialog.getSaveFileName(self, 'Save File', homedir, filter))
+
+        print "Get file name: ", sfilename
+   
+        # save
+        # FIXME - ASAP
+        if filetype.lower().count("fullprof") == 1:
+            print "going to save for Fullprof"
+
+        if filetype.lower().count("gsas") == 1:
+            print "going to save GSAS"
+
+        return
+
 
     #--------------------------------------------------------
     #
@@ -210,12 +277,27 @@ class MainWindow(QtGui.QMainWindow):
     def _loadDataFile(self, exp, scan):
         """ Load data file according to its exp and scan
         """
-        # Figure out file name
+        # Get on hold of raw data file
         if self._srcFromServer is True:
-            # Use server
-            fullurl = self._serverAddress + "/Exp%d_Scan%04d.dat" % (exp, scan)
-            cachedfile = urllib2.download()
-            self._srcFileName = "Terrible"
+            # Use server: build the URl to download data
+            if self._serverAddress.endswith('/') is False:
+                self._serverAddress += '/'
+            fullurl = "%s%s/exp%d/Datafiles/%s_exp%04d_scan%04d.dat" % (self._serverAddress,
+                    self._instrument.lower(), exp, self._instrument.upper(), exp, scan)
+            print "URL: ", fullurl
+    
+            cachedir = str(self.ui.lineEdit_cache.text()).strip()
+            if os.path.exists(cachedir) is False:
+                self._logError("Cache directory is not valid.")
+                return
+    
+            filename = '%s_exp%04d_scan%04d.dat' % (self._instrument.upper(), exp, scan)
+            self._srcFileName = os.path.join(cachedir, filename)
+            status, errmsg = self._downloadFile(fullurl, self._srcFileName)
+            if status is False:
+                self._logError(errmsg)
+                self._srcFileName = None
+                return
 
         elif self._srcAtLocal is True:
             # Data from local
@@ -230,6 +312,10 @@ class MainWindow(QtGui.QMainWindow):
     def _reduceSpicePDData(self, datafilename, unit, xmin, xmax, binsize):
         """ Reduce SPICE powder diffraction data
         """
+        # cache the previous one
+        self._prevoutws = self._outws
+        self._outws = None
+
         # base workspace name
         basewsname = os.path.basename(datafilename).split(".")[0]
 
@@ -327,19 +413,27 @@ class MainWindow(QtGui.QMainWindow):
         print dbinfo
 
 
+    def _logError(self, errinfo):
+        """ Log error information
+        """
+
+
 
     def _downloadFile(self, url, localfilepath):
         """
+        Test: 'http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400_scan0001.dat'
         """
-        url = 'http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400_scan0001.dat'
-
+        # open URL
         response = urllib2.urlopen(url)
         wbuf = response.read()
 
         if wbuf.count('not found') > 0:
-            self._logError("File cannot be found.")
+            return (False, "File cannot be found at %s." % (url))
+
 
         ofile = open(localfilepath, 'w')
         ofile.write(wbuf)
         ofile.close()
+
+        return (True, "")
 

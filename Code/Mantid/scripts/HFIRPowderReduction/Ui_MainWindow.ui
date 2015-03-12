@@ -445,7 +445,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_broseCache">
+                 <widget class="QPushButton" name="pushButton_browseCache">
                   <property name="text">
                    <string>Browse</string>
                   </property>
