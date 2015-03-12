@@ -22,6 +22,8 @@ class pqPipelineSource;
 class pqViewSettingsReaction;
 class vtkSMDoubleVectorProperty;
 
+class QDragEnterEvent;
+class QDropEvent;
 class QAction;
 class QEvent;
 class QHBoxLayout;
@@ -122,7 +124,10 @@ protected:
   /// Handle workspace replacement tasks.
   void afterReplaceHandle(const std::string &wsName,
                           const boost::shared_ptr<Mantid::API::Workspace> ws);
-
+  /// Detects if something is dragged onto the VSI
+  void dragEnterEvent(QDragEnterEvent *e);
+ /// Reacts to something being dropped onto the VSI
+ void dropEvent(QDropEvent *e);
 private:
   Q_DISABLE_COPY(MdViewerWidget)
 
@@ -194,6 +199,8 @@ private:
   void resetCurrentView(int workspaceType, const std::string& instrumentName);
   /// Render rebinned workspace
   void prepareRebinnedWorkspace(const std::string rebinnedWorkspaceName, std::string sourceType); 
+  /// Handle drag and drop of peaks workspcaes
+  void handleDragAndDropPeaksWorkspaces(QEvent* e, QString text, QStringList& wsNames);
   /// Set up the default color for the background of the view.
   void setColorForBackground();
   /// Render the original workspace

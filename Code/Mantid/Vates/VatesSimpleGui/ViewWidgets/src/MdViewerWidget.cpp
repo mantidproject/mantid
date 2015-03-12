@@ -11,6 +11,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h"
 #include "MantidQtAPI/InterfaceManager.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ConfigService.h"
@@ -93,6 +94,8 @@
 
 #include <QAction>
 #include <QDesktopServices>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QHBoxLayout>
 #include <QMainWindow>
 #include <QMenuBar>
@@ -106,6 +109,7 @@
 #include <set>
 #include <string>
 #include <boost/regex.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
@@ -137,6 +141,7 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
 
   this->internalSetup(true);
 
+  setAcceptDrops(true);
   // Connect the rebinned sources manager
   QObject::connect(&m_rebinnedSourcesManager, SIGNAL(switchSources(std::string, std::string)),
                    this, SLOT(onSwitchSoures(std::string, std::string)));
@@ -1434,6 +1439,71 @@ void MdViewerWidget::setDestroyedListener()
 
 
 
+
+/**
+ * Dectect when a PeaksWorkspace is dragged into the VSI.
+ * @param A drag event.
+ */
+void MdViewerWidget::dragEnterEvent(QDragEnterEvent *e) {
+  QString name = e->mimeData()->objectName();
+  if (name == "MantidWorkspace") {
+  QString text = e->mimeData()->text();
+  QStringList wsNames;
+  handleDragAndDropPeaksWorkspaces(e,text, wsNames);
+  }
+  else {
+  e->ignore();
+  }
+}
+
+/**
+ * React to dropping a PeaksWorkspace ontot the VSI.
+ * @param e A drop event.
+ */
+void MdViewerWidget::dropEvent(QDropEvent *e) {
+  QString name = e->mimeData()->objectName();
+  if (name == "MantidWorkspace") {
+    QString text = e->mimeData()->text();
+    QStringList wsNames;
+    handleDragAndDropPeaksWorkspaces(e,text, wsNames);
+    if(!wsNames.empty()){
+    // We render the first workspace name, it is a peak workspace and the instrument is not relevant
+    renderWorkspace(wsNames[0], 1, "");
+    }
+  }
+}
+
+/**
+  * Handle the drag and drop events of peaks workspaces.
+  * @param e The event.
+  * @param text String containing information regarding the workspace name.
+  * @param wsNames A reference to a list of workspaces names, which are being extracted.
+  */
+ void MdViewerWidget::handleDragAndDropPeaksWorkspaces(QEvent* e, QString text, QStringList& wsNames)
+ {
+  int endIndex = 0;
+  while (text.indexOf("[\"", endIndex) > -1) {
+    int startIndex = text.indexOf("[\"", endIndex) + 2;
+    endIndex = text.indexOf("\"]", startIndex);
+    QString candidate = text.mid(startIndex, endIndex - startIndex);
+    if(dynamic_cast<SplatterPlotView *>(this->currentView))
+    {
+      if(boost::dynamic_pointer_cast<IPeaksWorkspace>(AnalysisDataService::Instance().retrieve(candidate.toStdString())))
+      {
+      wsNames.append(candidate);
+      e->accept();
+      }
+      else
+      {
+      e->ignore();
+      }
+    }
+    else
+    {
+      e->ignore();
+    }
+  }
+}
 
 
 } // namespace SimpleGui
