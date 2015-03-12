@@ -58,12 +58,18 @@ class ProjectionTest(unittest.TestCase):
     def test_ads(self):
         p = Projection();
         p.setAxis(0, V3D(0,1,2))
-        p.setAxis(1, V3D(3,4,5))
-        p.setAxis(2, V3D(6,7,8))
+        p.setAxis(1, V3D(3,-4,5))
+        p.setAxis(2, V3D(6,7,8.5))
+        p.setOffset(1, 0.15)
+        p.setType(2, 'a')
         proj_test_ads = p.createWorkspace()
-        proj_test_ads3 = p.createWorkspace(OutputWorkspace="proj_test_ads2")
-        self.assertIn("proj_test_ads", mtd, msg="Workspace not added to ADS successfully")
-        self.assertIn("proj_test_ads2", mtd, msg="Workspace not added to ADS successfully")
+        proj_test_ads3 = p.createWorkspace(OutputWorkspace='proj_test_ads2')
+        self.assertIn('proj_test_ads', mtd, msg='Workspace not added to ADS successfully')
+        self.assertIn('proj_test_ads2', mtd, msg='Workspace not added to ADS successfully')
+
+        self.assertEqual(proj_test_ads.row(0), {'name':'u', 'value':'0,1,2', 'type':'r', 'offset':0.0})
+        self.assertEqual(proj_test_ads.row(1), {'name':'v', 'value':'3,-4,5', 'type':'r', 'offset':0.15})
+        self.assertEqual(proj_test_ads.row(2), {'name':'w', 'value':'6,7,8.5', 'type':'a', 'offset':0.0})
 
 if __name__ == '__main__':
     unittest.main()
