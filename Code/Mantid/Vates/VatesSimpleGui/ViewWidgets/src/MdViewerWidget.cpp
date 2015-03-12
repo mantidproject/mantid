@@ -1442,7 +1442,7 @@ void MdViewerWidget::setDestroyedListener()
 
 /**
  * Dectect when a PeaksWorkspace is dragged into the VSI.
- * @param A drag event.
+ * @param e A drag event.
  */
 void MdViewerWidget::dragEnterEvent(QDragEnterEvent *e) {
   QString name = e->mimeData()->objectName();
@@ -1458,7 +1458,7 @@ void MdViewerWidget::dragEnterEvent(QDragEnterEvent *e) {
 
 /**
  * React to dropping a PeaksWorkspace ontot the VSI.
- * @param e A drop event.
+ * @param e Drop event.
  */
 void MdViewerWidget::dropEvent(QDropEvent *e) {
   QString name = e->mimeData()->objectName();
@@ -1477,7 +1477,7 @@ void MdViewerWidget::dropEvent(QDropEvent *e) {
   * Handle the drag and drop events of peaks workspaces.
   * @param e The event.
   * @param text String containing information regarding the workspace name.
-  * @param wsNames A reference to a list of workspaces names, which are being extracted.
+  * @param wsNames  Reference to a list of workspaces names, which are being extracted.
   */
  void MdViewerWidget::handleDragAndDropPeaksWorkspaces(QEvent* e, QString text, QStringList& wsNames)
  {

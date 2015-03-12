@@ -330,7 +330,7 @@ void ViewBase::checkView(ModeControlWidget::Views initialView)
 
 /**
  * This metod sets the status of the splatterplot button explictly to a desired value
- * @param visiblity The state of the the splatterplot view button.
+ * @param visibility The state of the the splatterplot view button.
  */
 void ViewBase::setSplatterplot(bool visibility)
 {
@@ -339,7 +339,7 @@ void ViewBase::setSplatterplot(bool visibility)
 
 /**
  * This metod sets the status of the standard view button explictly to a desired value
- * @param visiblity The state of the the standard view button.
+ * @param visibility The state of the the standard view button.
  */
 void ViewBase::setStandard(bool visibility)
 {
