@@ -73,7 +73,7 @@ public:
     const Mantid::MantidVec &vecE = outws->readE(0);
 
     TS_ASSERT_DELTA(vecX.front(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(vecX.back(), 120.0 - 0.1, 0.0001);
+    TS_ASSERT_DELTA(vecX.back(), 120.0, 0.0001);
 
     double y1101 = vecY[1101];
     double e1101 = vecE[1101];
@@ -135,7 +135,7 @@ public:
 
     const Mantid::MantidVec &vecX = outws->readX(0);
     TS_ASSERT_DELTA(vecX.front(), 0.5, 0.0001);
-    TS_ASSERT_DELTA(vecX.back(), 4.99, 0.0001);
+    TS_ASSERT_DELTA(vecX.back(), 5.00, 0.0001);
 
     // Check statistics
 
@@ -147,7 +147,7 @@ public:
   /** Unit test to reduce/bin the HB2A data with more options
    * @brief test_ReduceHB2AData
    */
-  void Ttest_ReduceHB2ADataAutoBinBoundary() {
+  void test_ReduceHB2ADataAutoBinBoundary() {
     // Init
     ConvertCWPDMDToSpectra alg;
     alg.initialize();
@@ -179,8 +179,8 @@ public:
     TS_ASSERT_EQUALS(unit, "dSpacing");
 
     const Mantid::MantidVec &vecX = outws->readX(0);
-    TS_ASSERT_DELTA(vecX.front(), 0.5, 0.0001);
-    TS_ASSERT_DELTA(vecX.back(), 4.99, 0.0001);
+    TS_ASSERT_DELTA(vecX.front(), 1.3416, 0.0001);
+    TS_ASSERT_DELTA(vecX.back(), 23.0216, 0.001);
 
     // Check statistics
 
