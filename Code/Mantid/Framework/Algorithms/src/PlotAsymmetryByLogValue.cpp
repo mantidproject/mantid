@@ -196,7 +196,7 @@ void PlotAsymmetryByLogValue::exec() {
 
 
   // Create the 2D workspace for the output
-  int nplots = m_greenX.size() ? 4 : 1;
+  int nplots = (m_green!= EMPTY_INT()) ? 4 : 1;
   size_t npoints = ie - is + 1;
   MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(
       "Workspace2D",
