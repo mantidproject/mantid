@@ -36,6 +36,7 @@ class MockPeaksWorkspaceConcrete : public Mantid::DataObjects::PeaksWorkspace
 public:
   MOCK_CONST_METHOD0(getSpecialCoordinateSystem, Mantid::Kernel::SpecialCoordinateSystem());
   MOCK_METHOD1(getPeak, Mantid::DataObjects::Peak & (int peakNum));
+  MOCK_CONST_METHOD1(getPeak, const Mantid::DataObjects::Peak & (int peakNum));
 };
 
 class ConcretePeaksPresenterVsiTest : public CxxTest::TestSuite {

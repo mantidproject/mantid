@@ -36,6 +36,9 @@ using namespace ::testing;
 class MockPeakFilter : public Mantid::DataObjects::Peak
 {
 public:
+  MockPeakFilter& operator=(const MockPeakFilter& other) {
+    return *this;
+  }
   MOCK_CONST_METHOD0(getHKL, Mantid::Kernel::V3D (void));
   MOCK_CONST_METHOD0(getQLabFrame, Mantid::Kernel::V3D (void));
   MOCK_CONST_METHOD0(getQSampleFrame, Mantid::Kernel::V3D (void));
@@ -47,7 +50,7 @@ public:
   MOCK_CONST_METHOD0(getSpecialCoordinateSystem, Mantid::Kernel::SpecialCoordinateSystem());
   MOCK_CONST_METHOD0(getNumberPeaks, int());
   MOCK_METHOD1(getPeak, Mantid::DataObjects::Peak & (int peakNum));
-  MOCK_CONST_METHOD2(createPeak, Mantid::API::IPeak* (Mantid::Kernel::V3D QLabFrame, double detectorDistance));
+  MOCK_CONST_METHOD1(getPeak, const Mantid::DataObjects::Peak & (int peakNum));
 };
 
 struct PeaksFilterDataContainer {
