@@ -64,8 +64,8 @@ class ProjectionTest(unittest.TestCase):
         p.setType(2, 'a')
         proj_test_ads = p.createWorkspace()
         proj_test_ads3 = p.createWorkspace(OutputWorkspace='proj_test_ads2')
-        self.assertIn('proj_test_ads', mtd, msg='Workspace not added to ADS successfully')
-        self.assertIn('proj_test_ads2', mtd, msg='Workspace not added to ADS successfully')
+        self.assertTrue('proj_test_ads' in mtd, msg='Workspace not added to ADS successfully')
+        self.assertTrue('proj_test_ads2' in mtd, msg='Workspace not added to ADS successfully')
 
         self.assertEqual(proj_test_ads.row(0), {'name':'u', 'value':'0,1,2', 'type':'r', 'offset':0.0})
         self.assertEqual(proj_test_ads.row(1), {'name':'v', 'value':'3,-4,5', 'type':'r', 'offset':0.15})
