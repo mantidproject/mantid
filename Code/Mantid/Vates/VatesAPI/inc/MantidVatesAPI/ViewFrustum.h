@@ -73,7 +73,6 @@ class DLLExport ViewFrustum
     ViewFrustum& operator=(const ViewFrustum& other);
     std::vector<std::pair<double, double>> toExtents() const;
     std::string toExtentsAsString() const;
-    bool pointLiesInsideViewFrustum(std::vector<double> point) const;
 
   private:
     mutable LeftPlane m_leftPlane;

@@ -64,8 +64,6 @@ public:
     factory.initialize(pw_ptr);
     vtkPolyData * set = factory.create(updateProgress);
 
-    int num = set->GetNumberOfPoints();
-
     // As the marker type are three axes(2 points), we expect 5*2*3 points
     // The angle is 45degrees and the size is 0.3
 

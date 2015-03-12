@@ -115,11 +115,8 @@ public:
     vtkPoints* inPoints = in->GetPoints();
     vtkPoints* outPoints = out->GetPoints();
     
-    int numberOfInPoints = inPoints->GetNumberOfPoints();
-    int numberOfOutPoints = outPoints->GetNumberOfPoints();
-
-    int numCellsIn = in->GetNumberOfCells();
-    int numCellsOut = out->GetNumberOfCells();
+    int numberOfInPoints = static_cast<int>(inPoints->GetNumberOfPoints());
+    int numberOfOutPoints = static_cast<int>(outPoints->GetNumberOfPoints());
 
     int insideSphereInput = 0;
     int outsideSphereInput = 0;

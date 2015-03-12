@@ -21,8 +21,8 @@ namespace VATES
   ViewFrustum::ViewFrustum(const LeftPlane leftPlane, const RightPlane rightPlane, const BottomPlane bottomPlane,
                             const TopPlane topPlane, const FarPlane farPlane,  const NearPlane nearPlane) : m_leftPlane(leftPlane),
                                                                                                                     m_rightPlane(rightPlane),
-                                                                                                                    m_bottomPlane(bottomPlane),
                                                                                                                     m_topPlane(topPlane),
+                                                                                                                    m_bottomPlane(bottomPlane),
                                                                                                                     m_farPlane(farPlane),
                                                                                                                     m_nearPlane(nearPlane){}
   /**
@@ -125,14 +125,5 @@ namespace VATES
     return ss.str();
   }
 
-  /**
-  * Check if point lies in view frustum
-  * @param point A point to be checked.
-  * @returns If the point is inside the view frustum
-  */
-  bool ViewFrustum::pointLiesInsideViewFrustum(std::vector<double> point) const
-  {
-    return true;
-  }
 }
 }

@@ -79,6 +79,7 @@ int vtkPeaksFilter::RequestData(vtkInformation*, vtkInformationVector **inputVec
   vtkDataSetToPeaksFilteredDataSet peaksFilter(inputDataSet, outputDataSet);
   peaksFilter.initialize(peaksWorkspaces, m_radiusNoShape, m_radiusType);
   peaksFilter.execute(drawingProgressUpdate);
+  return 1;
 }
 
 int vtkPeaksFilter::RequestInformation(vtkInformation*, vtkInformationVector** inputVector, vtkInformationVector*)

@@ -55,13 +55,13 @@ void PeaksWidget::setupMvc(std::vector<bool> visiblePeaks)
   }
 
   // Set the visible rows 
-  for (int i = 0; i < visiblePeaks.size(); i++) {
+  for (size_t i = 0; i < visiblePeaks.size(); i++) {
     if (visiblePeaks[i]){
-      ui.tblPeaks->showRow(i);
+      ui.tblPeaks->showRow(static_cast<int>(i));
     }
     else
     {
-      ui.tblPeaks->hideRow(i);
+      ui.tblPeaks->hideRow(static_cast<int>(i));
     } 
   }
   QItemSelectionModel* selectionModel = ui.tblPeaks->selectionModel();
@@ -84,13 +84,13 @@ void PeaksWidget::onCurrentChanged(QModelIndex current, QModelIndex) {
  * @param visiblePeaks A vector indicating which peaks are visible.
  */
 void PeaksWidget::updateModel(std::vector<bool> visiblePeaks) {
-  for (int i = 0; i < visiblePeaks.size(); i++) {
+  for (size_t i = 0; i < visiblePeaks.size(); i++) {
     if (visiblePeaks[i]){
-      ui.tblPeaks->showRow(i);
+      ui.tblPeaks->showRow(static_cast<int>(i));
     }
     else
     {
-      ui.tblPeaks->hideRow(i);
+      ui.tblPeaks->hideRow(static_cast<int>(i));
     } 
   }
 }

@@ -64,6 +64,7 @@ namespace VATES
       double m_radiusNoShape; ///< The radius for peaks with no peak shape.
       int m_radiusType;
       double m_radiusFactor;///< By how much we want to trim the data set.
+      double m_defaultRadius; ///< A default radius.
   };
 }
 }

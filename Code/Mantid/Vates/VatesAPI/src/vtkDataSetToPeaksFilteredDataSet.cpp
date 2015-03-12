@@ -46,7 +46,8 @@ namespace VATES
                                                                     m_isInitialised(false),
                                                                     m_radiusNoShape(0.2),
                                                                     m_radiusType(0),
-                                                                    m_radiusFactor(2)
+                                                                    m_radiusFactor(2),
+                                                                    m_defaultRadius(0.1)
   {
     if (NULL == m_inputData)
     {
@@ -205,7 +206,7 @@ namespace VATES
    */
   void vtkDataSetToPeaksFilteredDataSet::addSinglePeak(Mantid::API::IPeak* peak, const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem, std::vector<std::pair<Mantid::Kernel::V3D, double>>& peaksInfo)
   {
-    double radius;
+    double radius = m_defaultRadius;
     const Mantid::Geometry::PeakShape& shape = peak->getPeakShape();
     std::string shapeName = shape.shapeName();
 

@@ -57,7 +57,6 @@ public:
     ViewFrustum frustum(left, right, bottom, top, farPlane, nearPlane);
 
     boost::shared_ptr<MockPeaksWorkspaceConcrete> pw_ptr(new MockPeaksWorkspaceConcrete());
-    MockPeaksWorkspaceConcrete & pw = *pw_ptr;
     // Act
     ConcretePeaksPresenterVsi presenter(pw_ptr, frustum, frame);
 

@@ -65,13 +65,11 @@ public:
 
     boost::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr(new MockPeaksWorkspaceComposite());
     std::string name = "pw1";
-    MockPeaksWorkspaceComposite & pw = *pw_ptr;
     PeaksPresenterVsi_sptr p1(new ConcretePeaksPresenterVsi(pw_ptr, frustum, frame));
 
 
     boost::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr2(new MockPeaksWorkspaceComposite());
     std::string name2 = "pw2";
-    MockPeaksWorkspaceComposite & pw2 = *pw_ptr2;
     PeaksPresenterVsi_sptr p2(new ConcretePeaksPresenterVsi(pw_ptr2, frustum, frame));
 
     presenter.addPresenter(p1);
@@ -101,12 +99,10 @@ public:
 
     boost::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr(new MockPeaksWorkspaceComposite());
     std::string name = "pw1";
-    MockPeaksWorkspaceComposite & pw = *pw_ptr;
     PeaksPresenterVsi_sptr p1(new ConcretePeaksPresenterVsi(pw_ptr, frustum, frame));
 
     boost::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr2(new MockPeaksWorkspaceComposite());
     std::string name2 = "pw2";
-    MockPeaksWorkspaceComposite & pw2 = *pw_ptr2;
     PeaksPresenterVsi_sptr p2(new ConcretePeaksPresenterVsi(pw_ptr2, frustum, frame));
 
     presenter.addPresenter(p1);
