@@ -68,9 +68,6 @@ public:
 
     TS_ASSERT(set);
     TS_ASSERT_EQUALS(set->GetNumberOfPoints(), 30);
-    //TS_ASSERT_EQUALS(set->GetPoint(0)[0], 1.0);
-    //TS_ASSERT_EQUALS(set->GetPoint(0)[1], 2.0);
-    //TS_ASSERT_EQUALS(set->GetPoint(0)[2], 3.0);
 
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&pw));
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&peak1));
