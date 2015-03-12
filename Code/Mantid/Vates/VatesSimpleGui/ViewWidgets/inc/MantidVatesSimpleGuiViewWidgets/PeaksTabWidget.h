@@ -33,7 +33,7 @@ namespace SimpleGui
     /// Update a certain tab.
     void updateTab(std::vector<bool> visiblePeaks, int index);
     /// Adds a new tab to the tab widget.
-    void PeaksTabWidget::addNewTab(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, std::string tabName, std::vector<bool> visiblePeaks);
+    void addNewTab(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, std::string tabName, std::vector<bool> visiblePeaks);
     /// Auto-generated UI controls.
     Ui::PeaksTabWidget ui;
     /// Peaks workspace to view.
