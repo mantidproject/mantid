@@ -7,7 +7,6 @@ import sys, shutil, os
 from distutils.spawn import find_executable
 
 # path to copy the libraries
-#OUTPUT_PATH = "/Users/ganeva/build/jcns-mantid/build/bin/MantidPlot.app/Contents/MacOS"
 OUTPUT_PATH = os.path.abspath("Contents/MacOS")
 
 # list of the python libraries to copy
@@ -17,7 +16,7 @@ PYTHON_LIBRARIES = ['sphinx', 'sphinx_bootstrap_theme', 'IPython', 'zmq', 'pygme
 
 # path to the nxs
 # by default the nexus library installs it here
-sys.path.append('/opt/local//lib/python2.7/site-packages/')
+sys.path.append('/opt/local/lib/python2.7/site-packages/')
 
 
 def copy_directory(src, dest):

@@ -121,6 +121,14 @@ endif(COMMAND CMAKE_POLICY)
 
 # MAKE_VATES does not work with macports
 
-
-endif()
+# the code below is needed to fix the problem with 'import nxs'
+# the bundle contains the libNeXus.0.dylib,
+# but 'import nxs' requires libNeXus.dylib
+set( legacy_link   ${bundle}/Contents/MacOS/libNeXus.dylib)
+set( legacy_target ${bundle}/Contents/MacOS/libNeXus.0.dylib)
+add_custom_command( OUTPUT ${legacy_link} POST_BUILD
+                     COMMAND ln -s ${legacy_target} ${legacy_link}
+                     DEPENDS install ${legacy_target}
+                     COMMENT "Generating legacy symbolic link")
+add_custom_target( install_legacy DEPENDS ${legacy_link} )
 
