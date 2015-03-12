@@ -11,6 +11,7 @@ set ( TEST_PY_FILES
   AxisTest.py
   CatalogManagerTest.py
   CutMDTest.py
+  CreateMDTest.py
   DataProcessorAlgorithmTest.py
   DeprecatedAlgorithmCheckerTest.py
   ExperimentInfoTest.py
