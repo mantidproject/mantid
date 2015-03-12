@@ -84,6 +84,8 @@ private:
   void doAnalysis (API::Workspace_sptr loadedWs, int64_t index);
   // Parse run names
   void parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt, int& fnZeros);
+  // Resize vectors
+  void resizeVectors (size_t size);
   // Load dead-time corrections from specified file
   void loadCorrectionsFromFile (API::Workspace_sptr &customDeadTimes, std::string deadTimeFile );
   // Apply dead-time corrections

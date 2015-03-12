@@ -180,6 +180,9 @@ void PlotAsymmetryByLogValue::exec() {
   size_t is = atoi(firstFN.c_str()); // starting run number
   size_t ie = atoi(lastFN.c_str());  // last run number
 
+  // Resize vectors that will store results
+  resizeVectors(ie-is+1);
+
   Progress progress(this, 0, 1, ie - is + 2);
 
   // Loop through runs
@@ -691,6 +694,28 @@ PlotAsymmetryByLogValue::groupDetectors(API::MatrixWorkspace_sptr &ws,
   ws = group->getProperty("OutputWorkspace");
 }
 
+/**  Resize vectors that will store results.
+ *  @param size :: The size of the vectors
+ */
+void PlotAsymmetryByLogValue::resizeVectors(size_t size) {
+
+  // Red vectors
+  m_redX.resize(size);
+  m_redY.resize(size);
+  m_redE.resize(size);
+  // Green vectors
+  m_greenX.resize(size);
+  m_greenY.resize(size);
+  m_greenE.resize(size);
+  // Diff vectors
+  m_diffX.resize(size);
+  m_diffY.resize(size);
+  m_diffE.resize(size);
+  // Sum vectors
+  m_sumX.resize(size);
+  m_sumY.resize(size);
+  m_sumE.resize(size);
+}
 /**
  * Get log value from a workspace. Convert to double if possible.
  *
