@@ -235,9 +235,7 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad (int64_t runNumber ) {
 
       // If user specifies a file, load corrections now
       Workspace_sptr customDeadTimes;
-      if (m_dtcType == "FromSpecifiedFile") {
-        loadCorrectionsFromFile (customDeadTimes, getPropertyValue("DeadTimeCorrFile"));
-      }
+      loadCorrectionsFromFile (customDeadTimes, getPropertyValue("DeadTimeCorrFile"));
       applyDeadtimeCorr (loadedWs, customDeadTimes);
     } else {
       // Load corrections from run
