@@ -32,7 +32,7 @@ class MockPeaksWorkspace : public PeaksWorkspace
 {
 public:
   MOCK_METHOD1(setInstrument, void (Mantid::Geometry::Instrument_const_sptr inst));
-  MOCK_METHOD0(getInstrument, Mantid::Geometry::Instrument_const_sptr ());
+  //MOCK_METHOD0(getInstrument, Mantid::Geometry::Instrument_const_sptr ());
   MOCK_CONST_METHOD0(clone, Mantid::DataObjects::PeaksWorkspace*());
   MOCK_CONST_METHOD0(getNumberPeaks, int());
   MOCK_METHOD1(removePeak, void (int peakNum) );

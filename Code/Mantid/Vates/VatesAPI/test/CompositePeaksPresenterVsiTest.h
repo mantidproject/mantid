@@ -23,9 +23,6 @@ using namespace Mantid::VATES;
 class MockPeaksWorkspaceComposite : public Mantid::DataObjects::PeaksWorkspace
 {
 public:
-  MOCK_CONST_METHOD0(getSpecialCoordinateSystem, Mantid::Kernel::SpecialCoordinateSystem());
-  MOCK_METHOD1(getPeak, Mantid::DataObjects::Peak & (int peakNum));
-  MOCK_CONST_METHOD2(createPeak, Mantid::API::IPeak* (Mantid::Kernel::V3D QLabFrame, double detectorDistance));
 };
 
 class CompositePeaksPresenterVsiTest : public CxxTest::TestSuite {

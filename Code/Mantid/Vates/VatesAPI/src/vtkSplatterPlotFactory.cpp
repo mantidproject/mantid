@@ -654,6 +654,7 @@ namespace VATES
       m_metadataJsonManager->setMinValue(m_minValue);
       m_metadataJsonManager->setMaxValue(m_maxValue);
       m_metadataJsonManager->setInstrument(m_metaDataExtractor->extractInstrument(m_workspace));
+      m_metadataJsonManager->setSpecialCoordinates(static_cast<int>(m_workspace->getSpecialCoordinateSystem()));
 
       // Append metadata
       std::string jsonString = m_metadataJsonManager->getSerializedJson();

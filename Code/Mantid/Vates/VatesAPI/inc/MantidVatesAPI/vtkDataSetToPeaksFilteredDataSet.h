@@ -46,7 +46,7 @@ namespace VATES
       vtkDataSetToPeaksFilteredDataSet(vtkUnstructuredGrid *input, vtkUnstructuredGrid *output);
       virtual ~vtkDataSetToPeaksFilteredDataSet();
       /// Set the name of the peaks workspace
-      void initialize(std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces, double radiusNoShape, int radiusType);
+      void initialize(std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces, double radiusNoShape, int radiusType, int coordinateSystem);
       /// Apply the peak filtering
       void execute(ProgressAction& progressUpdating);
       /// Get radius of no shape
@@ -65,6 +65,7 @@ namespace VATES
       int m_radiusType;
       double m_radiusFactor;///< By how much we want to trim the data set.
       double m_defaultRadius; ///< A default radius.
+      int m_coordinateSystem;///< A coordinate system.
   };
 }
 }

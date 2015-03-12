@@ -118,6 +118,7 @@ public:
     int numberOfInPoints = static_cast<int>(inPoints->GetNumberOfPoints());
     int numberOfOutPoints = static_cast<int>(outPoints->GetNumberOfPoints());
 
+
     int insideSphereInput = 0;
     int outsideSphereInput = 0;
     do_test_peak_inSphere(inPoints, numberOfInPoints, insideSphereInput , outsideSphereInput, false, peakData);
@@ -164,7 +165,7 @@ public:
       peaksContainer.push_back(pw_ptr);
     }
 
-    peaksFilter.initialize(peaksContainer, 0.5, 0);
+    peaksFilter.initialize(peaksContainer, 0.5, 0, static_cast<int>(coordinateSystem));
     FakeProgressAction updateProgress;
     TSM_ASSERT_THROWS_NOTHING("Should execute regularly.", peaksFilter.execute(updateProgress));
   }

@@ -40,5 +40,6 @@ private:
   std::string m_instrument;
   boost::scoped_ptr<Mantid::VATES::MetadataJsonManager> m_metadataJsonManager;
   boost::scoped_ptr<Mantid::VATES::VatesConfigurations> m_vatesConfigurations;
+  int m_coordinateSystem;
 };
 #endif

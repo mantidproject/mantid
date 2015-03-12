@@ -474,7 +474,7 @@ namespace
 
       peaksWorkspaceNames.push_back(workspaceName);
 
-      int count = std::count(trackedWorkspaceNames.begin(), trackedWorkspaceNames.end(), workspaceName);
+      int count = static_cast<int>(std::count(trackedWorkspaceNames.begin(), trackedWorkspaceNames.end(), workspaceName));
 
       if (count == 0) {
         nonTrackedWorkspaces.push_back(*it);

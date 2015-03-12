@@ -47,7 +47,8 @@ namespace VATES
                                                                     m_radiusNoShape(0.2),
                                                                     m_radiusType(0),
                                                                     m_radiusFactor(2),
-                                                                    m_defaultRadius(0.1)
+                                                                    m_defaultRadius(0.1),
+                                                                    m_coordinateSystem(0)
   {
     if (NULL == m_inputData)
     {
@@ -70,13 +71,15 @@ namespace VATES
     * @param peaksWorkspaces : A list of peak workspace names.
     * @param radiusNoShape : The peak radius for no shape.
     * @param radiusType : The type of the radius: Radius(0), Outer Radius(10, Inner Radius(1)
+    * @param coordinateSystem: A coordinate system.
     */
-  void vtkDataSetToPeaksFilteredDataSet::initialize(std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces, double radiusNoShape, int radiusType)
+  void vtkDataSetToPeaksFilteredDataSet::initialize(std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces, double radiusNoShape, int radiusType, int coordinateSystem)
   {
     m_peaksWorkspaces = peaksWorkspaces;
     m_radiusNoShape = radiusNoShape;
     m_radiusType = radiusType;
     m_isInitialised = true;
+    m_coordinateSystem = coordinateSystem;
   }
 
   /**
@@ -183,7 +186,7 @@ namespace VATES
     // Iterate over all peaksworkspaces and add the their info to the output vector
     for (std::vector<Mantid::API::IPeaksWorkspace_sptr>::iterator it = peaksWorkspaces.begin(); it != peaksWorkspaces.end(); ++it)
     {
-      const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = (*it)->getSpecialCoordinateSystem();
+      const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = static_cast<Mantid::Kernel::SpecialCoordinateSystem>(m_coordinateSystem);
       int numPeaks = (*it)->getNumberPeaks();
        
       // Iterate over all peaks for the workspace

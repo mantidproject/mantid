@@ -28,7 +28,8 @@ vtkPeaksFilter::vtkPeaksFilter() : m_peaksWorkspaceNames(""),
                                    m_minValue(0.1),
                                    m_maxValue(0.1),
                                    m_metadataJsonManager(new MetadataJsonManager()),
-                                   m_vatesConfigurations(new VatesConfigurations())
+                                   m_vatesConfigurations(new VatesConfigurations()),
+                                   m_coordinateSystem(0)
 {
   this->SetNumberOfInputPorts(1);
   this->SetNumberOfOutputPorts(1);
@@ -61,11 +62,11 @@ int vtkPeaksFilter::RequestData(vtkInformation*, vtkInformationVector **inputVec
     m_minValue = m_metadataJsonManager->getMinValue();
     m_maxValue = m_metadataJsonManager->getMaxValue();
     m_instrument = m_metadataJsonManager->getInstrument();
+    m_coordinateSystem = m_metadataJsonManager->getSpecialCoordinates();
   }
   catch (...)
   {
   }
-
 
   std::vector<std::string> peaksWorkspaceNames = extractPeakWorkspaceNames();
   std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces = getPeaksWorkspaces(peaksWorkspaceNames);
@@ -77,7 +78,7 @@ int vtkPeaksFilter::RequestData(vtkInformation*, vtkInformationVector **inputVec
   FilterUpdateProgressAction<vtkPeaksFilter> drawingProgressUpdate(this, "Drawing...");
 
   vtkDataSetToPeaksFilteredDataSet peaksFilter(inputDataSet, outputDataSet);
-  peaksFilter.initialize(peaksWorkspaces, m_radiusNoShape, m_radiusType);
+  peaksFilter.initialize(peaksWorkspaces, m_radiusNoShape, m_radiusType, m_coordinateSystem);
   peaksFilter.execute(drawingProgressUpdate);
   return 1;
 }
@@ -102,6 +103,7 @@ int vtkPeaksFilter::RequestInformation(vtkInformation*, vtkInformationVector** i
     m_minValue = m_metadataJsonManager->getMinValue();
     m_maxValue = m_metadataJsonManager->getMaxValue();
     m_instrument = m_metadataJsonManager->getInstrument();
+    m_coordinateSystem = m_metadataJsonManager->getSpecialCoordinates();
   }
   catch (...)
   {
@@ -187,7 +189,6 @@ void vtkPeaksFilter::SetDelimiter(std::string delimiter){
   m_delimiter = delimiter;
   this->Modified();
 }
-
 
 /**
   * Get a list of peaks workspace pointers
