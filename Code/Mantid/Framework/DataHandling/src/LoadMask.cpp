@@ -47,8 +47,8 @@ DECLARE_ALGORITHM(LoadMask)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadMask::LoadMask(): m_MaskWS(), m_instrumentPropValue(""), m_pDoc(NULL),
-  m_pRootElem(NULL), m_DefaultToUse(true) {
+LoadMask::LoadMask(): m_maskWS(), m_instrumentPropValue(""), m_pDoc(NULL),
+  m_pRootElem(NULL), m_defaultToUse(true) {
 }
 
 //----------------------------------------------------------------------------------------------
@@ -87,9 +87,9 @@ void LoadMask::exec() {
   m_instrumentPropValue = instrumentname;
 
   this->intializeMaskWorkspace();
-  setProperty("OutputWorkspace", m_MaskWS);
+  setProperty("OutputWorkspace", m_maskWS);
 
-  m_DefaultToUse = true;
+  m_defaultToUse = true;
 
   // 2. Parse Mask File
   std::string filename = getProperty("InputFile");
@@ -102,7 +102,7 @@ void LoadMask::exec() {
              boost::ends_with(filename, "K")) {
     // 2.2 ISIS Masking file
     loadISISMaskFile(filename);
-    m_DefaultToUse = true;
+    m_defaultToUse = true;
   } else {
     g_log.error() << "File " << filename << " is not in supported format. "
                   << std::endl;
@@ -146,10 +146,10 @@ void LoadMask::exec() {
 
 void LoadMask::initDetectors() {
 
-  if (!m_DefaultToUse) { // Default is to use all detectors
-    size_t numHist = m_MaskWS->getNumberHistograms();
+  if (!m_defaultToUse) { // Default is to use all detectors
+    size_t numHist = m_maskWS->getNumberHistograms();
     for (size_t wkspIndex = 0; wkspIndex < numHist; wkspIndex++) {
-      m_MaskWS->setMaskedIndex(wkspIndex);
+      m_maskWS->setMaskedIndex(wkspIndex);
     }
   }
 
@@ -169,7 +169,7 @@ void LoadMask::processMaskOnDetectors(bool tomask,
                                       std::vector<int32_t> pairdetids_up) {
   // 1. Get index map
   const detid2index_map indexmap =
-      m_MaskWS->getDetectorIDToWorkspaceIndexMap(true);
+      m_maskWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // 2. Mask
   g_log.debug() << "Mask = " << tomask
@@ -183,9 +183,9 @@ void LoadMask::processMaskOnDetectors(bool tomask,
     if (it != indexmap.end()) {
       size_t index = it->second;
       if (tomask)
-        m_MaskWS->dataY(index)[0] = 1;
+        m_maskWS->dataY(index)[0] = 1;
       else
-        m_MaskWS->dataY(index)[0] = 0;
+        m_maskWS->dataY(index)[0] = 0;
     } else {
       g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located"
                     << std::endl;
@@ -207,7 +207,7 @@ void LoadMask::processMaskOnDetectors(bool tomask,
  */
 void LoadMask::componentToDetectors(std::vector<std::string> componentnames,
                                     std::vector<int32_t> &detectors) {
-  Geometry::Instrument_const_sptr minstrument = m_MaskWS->getInstrument();
+  Geometry::Instrument_const_sptr minstrument = m_maskWS->getInstrument();
 
   for (size_t i = 0; i < componentnames.size(); i++) {
     g_log.debug() << "Component name = " << componentnames[i] << std::endl;
@@ -275,7 +275,7 @@ void LoadMask::bankToDetectors(std::vector<std::string> singlebanks,
   }
   g_log.debug(infoss.str());
 
-  Geometry::Instrument_const_sptr minstrument = m_MaskWS->getInstrument();
+  Geometry::Instrument_const_sptr minstrument = m_maskWS->getInstrument();
 
   for (size_t ib = 0; ib < singlebanks.size(); ib++) {
     std::vector<Geometry::IDetector_const_sptr> idetectors;
@@ -331,7 +331,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
   }
 
   // 2. Get Map
-  const spec2index_map s2imap = m_MaskWS->getSpectrumToWorkspaceIndexMap();
+  const spec2index_map s2imap = m_maskWS->getSpectrumToWorkspaceIndexMap();
   spec2index_map::const_iterator s2iter;
 
   // 3. Set mask
@@ -351,19 +351,19 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
         throw std::runtime_error("Logic error");
       } else {
         size_t wsindex = s2iter->second;
-        if (wsindex >= m_MaskWS->getNumberHistograms()) {
+        if (wsindex >= m_maskWS->getNumberHistograms()) {
           // workspace index is out of range.  bad branch
           g_log.error() << "Group workspace's spec2index map is set wrong: "
                         << " Found workspace index = " << wsindex
                         << " for spectrum ID " << specid
                         << " with workspace size = "
-                        << m_MaskWS->getNumberHistograms() << std::endl;
+                        << m_maskWS->getNumberHistograms() << std::endl;
         } else {
           // Finally set the group workspace.  only good branch
           if (mask)
-            m_MaskWS->dataY(wsindex)[0] = 1.0;
+            m_maskWS->dataY(wsindex)[0] = 1.0;
           else
-            m_MaskWS->dataY(wsindex)[0] = 0.0;
+            m_maskWS->dataY(wsindex)[0] = 0.0;
         } // IF-ELSE: ws index out of range
       }   // IF-ELSE: spectrum ID has an entry
     }     // FOR EACH SpecID
@@ -510,17 +510,17 @@ void LoadMask::parseXML() {
 
     } else if (pNode->nodeName().compare("detector-masking") == 0) {
       // Node "detector-masking".  Check default value
-      m_DefaultToUse = true;
+      m_defaultToUse = true;
       /*
       Poco::XML::NamedNodeMap* att = pNode->attributes();
       if (att->length() > 0){
         Poco::XML::Node* cNode = att->item(0);
-        m_DefaultToUse = true;
+        m_defaultToUse = true;
         if (cNode->localName().compare("default") == 0){
           if (cNode->getNodeValue().compare("use") == 0){
-            m_DefaultToUse = true;
+            m_defaultToUse = true;
           } else {
-            m_DefaultToUse = false;
+            m_defaultToUse = false;
           }
       } // if - att-length
       */
@@ -856,9 +856,9 @@ void LoadMask::intializeMaskWorkspace() {
         "Incorrect instrument name or invalid IDF given.");
   }
 
-  m_MaskWS = DataObjects::MaskWorkspace_sptr(
+  m_maskWS = DataObjects::MaskWorkspace_sptr(
       new DataObjects::MaskWorkspace(tempWs->getInstrument()));
-  m_MaskWS->setTitle("Mask");
+  m_maskWS->setTitle("Mask");
 }
 
 } // namespace Mantid

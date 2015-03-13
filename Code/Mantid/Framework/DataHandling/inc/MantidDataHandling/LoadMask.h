@@ -115,7 +115,7 @@ private:
                                std::vector<int> &rangeendvec);
 
   /// Mask Workspace
-  DataObjects::MaskWorkspace_sptr m_MaskWS;
+  DataObjects::MaskWorkspace_sptr m_maskWS;
   /// Instrument name
   std::string m_instrumentPropValue;
   /// XML document loaded
@@ -124,7 +124,7 @@ private:
   Poco::XML::Element *m_pRootElem;
 
   /// Default setup.  If true, not masking, but use the pixel
-  bool m_DefaultToUse;
+  bool m_defaultToUse;
 
   std::vector<int32_t> mask_detid_single;
   std::vector<int32_t> mask_specid_single;
