@@ -33,12 +33,12 @@ public:
     TS_ASSERT(a = boost::make_shared<SubmitRemoteJob>());
 
     // can cast to inherited interfaces and base classes
-    SubmitRemoteJob alg;
-    TS_ASSERT(dynamic_cast<Mantid::RemoteAlgorithms::SubmitRemoteJob *>(&alg));
-    TS_ASSERT(dynamic_cast<Mantid::API::Algorithm *>(&alg));
-    TS_ASSERT(dynamic_cast<Mantid::Kernel::PropertyManagerOwner *>(&alg));
-    TS_ASSERT(dynamic_cast<Mantid::API::IAlgorithm *>(&alg));
-    TS_ASSERT(dynamic_cast<Mantid::Kernel::IPropertyManager *>(&alg));
+    TS_ASSERT(
+        dynamic_cast<Mantid::RemoteAlgorithms::SubmitRemoteJob *>(a.get()));
+    TS_ASSERT(dynamic_cast<Mantid::API::Algorithm *>(a.get()));
+    TS_ASSERT(dynamic_cast<Mantid::Kernel::PropertyManagerOwner *>(a.get()));
+    TS_ASSERT(dynamic_cast<Mantid::API::IAlgorithm *>(a.get()));
+    TS_ASSERT(dynamic_cast<Mantid::Kernel::IPropertyManager *>(a.get()));
   }
 
   void test_init() {

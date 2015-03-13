@@ -31,12 +31,11 @@ public:
     TS_ASSERT(a = boost::make_shared<Authenticate>());
     // can cast to inherited interfaces and base classes
 
-    Authenticate alg;
-    TS_ASSERT(dynamic_cast<Mantid::RemoteAlgorithms::Authenticate *>(&alg));
-    TS_ASSERT(dynamic_cast<Mantid::API::Algorithm *>(&alg));
-    TS_ASSERT(dynamic_cast<Mantid::Kernel::PropertyManagerOwner *>(&alg));
-    TS_ASSERT(dynamic_cast<Mantid::API::IAlgorithm *>(&alg));
-    TS_ASSERT(dynamic_cast<Mantid::Kernel::IPropertyManager *>(&alg));
+    TS_ASSERT(dynamic_cast<Mantid::RemoteAlgorithms::Authenticate *>(a.get()));
+    TS_ASSERT(dynamic_cast<Mantid::API::Algorithm *>(a.get()));
+    TS_ASSERT(dynamic_cast<Mantid::Kernel::PropertyManagerOwner *>(a.get()));
+    TS_ASSERT(dynamic_cast<Mantid::API::IAlgorithm *>(a.get()));
+    TS_ASSERT(dynamic_cast<Mantid::Kernel::IPropertyManager *>(a.get()));
   }
 
   void test_init() {
