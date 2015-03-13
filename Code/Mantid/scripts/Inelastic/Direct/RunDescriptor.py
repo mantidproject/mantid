@@ -615,13 +615,15 @@ class RunDescriptor(PropDescriptor):
             for run in run_list:
                 if not run in existing:
                     raise RuntimeError('run {0} is not in the existing run list'.format(run))
-
+        not_found=[]
+        found = []
         inst = RunDescriptor._holder.short_instr_name
         not_found,found = self._run_list.find_run_files(inst,run_list)
         if len(not_found) == 0:
-            return (True,[],found)
+            Ok = True
         else:
-            return (False,not_found,found)
+            Ok = False
+        return (Ok,not_found,found)
 #--------------------------------------------------------------------------------------------------------------------
     def set_action_suffix(self,suffix=None):
         """Method to set part of the workspace name, which indicate some action performed over this workspace
