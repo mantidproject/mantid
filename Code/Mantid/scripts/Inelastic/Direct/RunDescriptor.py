@@ -392,11 +392,11 @@ class RunDescriptor(PropDescriptor):
                 if isinstance(run_num,list):
                     self._set_run_list(instance,run_num,file_path,fext)
                 else:
-                    self._set_single_run(instance,run_num,file_path,fext,False)
+                    self._set_single_run(instance,run_num,file_path,fext)
         elif isinstance(value,list):
             self._set_run_list(instance,value,"",instance.data_file_ext)
         else:
-            self._set_single_run(instance,value,"",instance.data_file_ext,True)
+            self._set_single_run(instance,value,"",None)
 
 #--------------------------------------------------------------------------------------------------------------------
     def get_fext(self):
@@ -548,7 +548,7 @@ class RunDescriptor(PropDescriptor):
         if self._run_list:
             runs = self._run_list.get_all_run_list()
             if run_num in runs:
-                runf = self._run_list.get_run_file_list(inst,fext)
+                runf = self._run_list.get_run_file_list(inst)
                 return runf
             else:
                 return [current_run]
