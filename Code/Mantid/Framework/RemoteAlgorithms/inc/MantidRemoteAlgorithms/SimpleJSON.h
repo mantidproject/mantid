@@ -31,14 +31,14 @@ typedef std::vector<JSONValue> JSONArray;
 
 // This is the "public" initialization function.  Since JSONObject
 // is just a typedef, there's no way to make it a constructor.
-void initFromStream(JSONObject &obj, std::istream &istr);
+void DLLExport initFromStream(JSONObject &obj, std::istream &istr);
 
 // A "public" function for formatted output.  It's sort of assumed
 // that ostr will actually be std::cout or std::cerr, but it can
 // be any output stream.  This function mostly exists for debugging
 // purposes.
-void prettyPrint(const JSONObject &obj, std::ostream &ostr,
-                 unsigned indentLevel);
+void DLLExport prettyPrint(const JSONObject &obj, std::ostream &ostr,
+                           unsigned indentLevel);
 
 class JSONException;
 
