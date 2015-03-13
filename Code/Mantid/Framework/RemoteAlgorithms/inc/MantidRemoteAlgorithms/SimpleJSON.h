@@ -20,6 +20,8 @@
 #include <istream>
 #include <ostream>
 
+#include "MantidKernel/System.h"
+
 class JSONValue;
 typedef std::map<std::string, JSONValue> JSONObject;
 typedef std::vector<JSONValue> JSONArray;
@@ -40,7 +42,7 @@ void prettyPrint(const JSONObject &obj, std::ostream &ostr,
 
 class JSONException;
 
-class JSONValue {
+class DLLExport JSONValue {
 public:
   enum VALUE_TYPE { NULLTYPE, BOOL, NUMBER, STRING, ARRAY, OBJECT };
 
@@ -90,7 +92,7 @@ private:
   };
 };
 
-class JSONException : public std::exception {
+class DLLExport JSONException : public std::exception {
 public:
   JSONException(const std::string &msg) : m_msg(msg) {}
   const std::string &getMsg() const { return m_msg; }
@@ -103,17 +105,17 @@ private:
   std::string m_msg;
 };
 
-class JSONCopyException : public JSONException {
+class DLLExport JSONCopyException : public JSONException {
 public:
   JSONCopyException(const std::string &msg) : JSONException(msg) {}
 };
 
-class JSONAssignmentException : public JSONException {
+class DLLExport JSONAssignmentException : public JSONException {
 public:
   JSONAssignmentException(const std::string &msg) : JSONException(msg) {}
 };
 
-class JSONParseException : public JSONException {
+class DLLExport JSONParseException : public JSONException {
 public:
   JSONParseException(const std::string &msg) : JSONException(msg) {}
 };
