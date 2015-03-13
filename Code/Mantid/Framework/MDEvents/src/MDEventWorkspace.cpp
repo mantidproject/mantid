@@ -787,13 +787,18 @@ Set the special coordinate system (if any) to use.
 TMDE(void MDEventWorkspace)::setCoordinateSystem(
     const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem) {
   // If there isn't an experiment info, create one.
-  if (this->getNumExperimentInfo() == 0) {
-    ExperimentInfo_sptr expInfo =
-        boost::shared_ptr<ExperimentInfo>(new ExperimentInfo());
+  uint16_t nexpts = this->getNumExperimentInfo();
+  ExperimentInfo_sptr expInfo;
+  if (nexpts == 0) {
+    expInfo = boost::make_shared<ExperimentInfo>();
     this->addExperimentInfo(expInfo);
   }
-  this->getExperimentInfo(0)->mutableRun().addProperty(
-      "CoordinateSystem", (int)coordinateSystem, true);
+  else {
+    // The last experiment info should always be the one that refers
+    // to latest converting workspace to use this
+    expInfo = this->getExperimentInfo(static_cast<uint16_t>(nexpts - 1));
+  }
+  expInfo->mutableRun().addProperty("CoordinateSystem", (int)coordinateSystem, true);
 }
 
 /**
@@ -806,11 +811,14 @@ TMDE(Mantid::Kernel::SpecialCoordinateSystem
   try {
     auto nInfos = this->getNumExperimentInfo();
     if (nInfos > 0) {
-      Property *prop =
-          this->getExperimentInfo(0)->run().getProperty("CoordinateSystem");
-      PropertyWithValue<int> *p = dynamic_cast<PropertyWithValue<int> *>(prop);
+      // The last experiment info should always be the one that refers
+      // to latest converting workspace to use this
+      auto *prop = this->getExperimentInfo(static_cast<uint16_t>(nInfos - 1))
+                       ->run()
+                       .getProperty("CoordinateSystem");
+      auto *p = dynamic_cast<PropertyWithValue<int> *>(prop);
       int temp = *p;
-      result = (SpecialCoordinateSystem)temp;
+      result = static_cast<SpecialCoordinateSystem>(temp);
     }
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
   }
