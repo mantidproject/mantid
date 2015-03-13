@@ -20,13 +20,19 @@ public:
     TS_ASSERT_THROWS_NOTHING(JSONValue vDbl(d));
 
     TS_ASSERT_THROWS_NOTHING(b = d);
-    TS_ASSERT_EQUALS(true, b);
-    d = 0.0;
-    TS_ASSERT_EQUALS(true, b);
 
     JSONValue vBool(b);
+    bool getBool = false;
+    TS_ASSERT_EQUALS(true, vBool.getValue(getBool));
+
     JSONValue vDbl(d);
     TS_ASSERT_THROWS_NOTHING(vBool = vDbl);
+    TS_ASSERT_EQUALS(false, vBool.getValue(getBool));
+    TS_ASSERT_EQUALS(true, getBool);
+    TS_ASSERT_THROWS_NOTHING(vDbl = 0.0);
+    TS_ASSERT_THROWS_NOTHING(vBool = vDbl);
+    TS_ASSERT_EQUALS(false, vBool.getValue(getBool));
+    TS_ASSERT_EQUALS(true, getBool);
 
     TS_ASSERT_THROWS_NOTHING(JSONValue str1(""));
     TS_ASSERT_THROWS_NOTHING(JSONValue str2("str"));
