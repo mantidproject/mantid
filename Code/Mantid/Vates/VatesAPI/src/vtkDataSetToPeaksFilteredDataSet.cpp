@@ -224,14 +224,14 @@ namespace VATES
       else if (m_radiusType == 1)
       {
           boost::optional<double> radOut = sphericalShape.backgroundOuterRadius();
-          if (radOut) {
+          if (radOut.is_initialized()) {
             radius = radOut.get();
           }
       }
       else if (m_radiusType == 2)
       {
           boost::optional<double> radIn = sphericalShape.backgroundInnerRadius();
-          if (radIn) { 
+          if (radIn.is_initialized()) { 
             radius = radIn.get();
           }
       }
