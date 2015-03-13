@@ -109,13 +109,13 @@ void Integrate3DEvents::addEvents(std::vector<std::pair<double, V3D> > const &ev
  *
  */
 Mantid::Geometry::PeakShape_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
-    std::pair<double, V3D> const &peak_q, bool specify_size, double peak_radius,
+    V3D const &peak_q, bool specify_size, double peak_radius,
     double back_inner_radius, double back_outer_radius,
     std::vector<double> &axes_radii, double &inti, double &sigi) {
   inti = 0.0; // default values, in case something
   sigi = 0.0; // is wrong with the peak.
 
-  int64_t hkl_key = getHklKey(peak_q.second);
+  int64_t hkl_key = getHklKey(peak_q);
   if (hkl_key == 0) {
     return boost::make_shared<NoShape>();
   }

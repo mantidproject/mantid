@@ -379,12 +379,11 @@ void IntegrateEllipsoids::exec() {
   double inti;
   double sigi;
   std::vector<double> principalaxis1,principalaxis2,principalaxis3;
-  std::pair <double, V3D> peak_q;
+  V3D peak_q;
   for (size_t i = 0; i < n_peaks; i++) {
     V3D hkl(peaks[i].getH(), peaks[i].getK(), peaks[i].getL());
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
-      peak_q.first = 1.;
-      peak_q.second = peaks[i].getQLabFrame();
+      peak_q = peaks[i].getQLabFrame();
       std::vector<double> axes_radii;
       Mantid::Geometry::PeakShape_const_sptr shape =
           integrator.ellipseIntegrateEvents(
@@ -453,12 +452,11 @@ void IntegrateEllipsoids::exec() {
       back_inner_radius = peak_radius;
       back_outer_radius = peak_radius * 1.25992105; // A factor of 2 ^ (1/3) will make the background
       // shell volume equal to the peak region volume.
-      std::pair <double, V3D> peak_q;
+      V3D peak_q;
       for (size_t i = 0; i < n_peaks; i++) {
         V3D hkl(peaks[i].getH(), peaks[i].getK(), peaks[i].getL());
         if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
-          peak_q.first = 1.;
-          peak_q.second = peaks[i].getQLabFrame();
+          peak_q = peaks[i].getQLabFrame();
           std::vector<double> axes_radii;
           integrator.ellipseIntegrateEvents(peak_q, specify_size, peak_radius,
                                             back_inner_radius, back_outer_radius,
