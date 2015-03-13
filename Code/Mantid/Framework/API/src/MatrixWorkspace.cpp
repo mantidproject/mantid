@@ -1977,6 +1977,8 @@ void MatrixWorkspace::setImage(
       (this->*dataVec)(spec)[0] = *pixel;
     }
   }
+  // suppress warning when built without openmp.
+  UNUSED_ARG(parallelExecution)
 }
 
 /**

@@ -859,6 +859,8 @@ public:
       const MantidVec & E_other = ew1->readE(i+1);
       TS_ASSERT_DELTA( E_other[0], sqrt(2.0), 1e-5);
     }
+    //suppress unused argument when built without openmp.
+    UNUSED_ARG(do_parallel)
   }
 
   void test_dirtyFlag()

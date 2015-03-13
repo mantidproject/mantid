@@ -9,14 +9,8 @@ set ( SRC_FILES
         src/PoldiFitPeaks1D2.cpp
         src/PoldiFitPeaks2D.cpp
 	src/PoldiIndexKnownCompounds.cpp
-	src/PoldiLoadChopperSlits.cpp
-	src/PoldiLoadIPP.cpp
-	src/PoldiLoadLog.cpp
-	src/PoldiLoadSpectra.cpp
-	src/PoldiPeakDetection2.cpp
 	src/PoldiPeakSearch.cpp
 	src/PoldiPeakSummary.cpp
-	src/PoldiRemoveDeadWires.cpp
 	src/PoldiTruncateData.cpp
 	src/PoldiUtilities/IPoldiFunction1D.cpp
 	src/PoldiUtilities/MillerIndices.cpp
@@ -58,14 +52,8 @@ set ( INC_FILES
         inc/MantidSINQ/PoldiFitPeaks1D2.h
         inc/MantidSINQ/PoldiFitPeaks2D.h
 	inc/MantidSINQ/PoldiIndexKnownCompounds.h
-	inc/MantidSINQ/PoldiLoadChopperSlits.h
-	inc/MantidSINQ/PoldiLoadIPP.h
-	inc/MantidSINQ/PoldiLoadLog.h
-	inc/MantidSINQ/PoldiLoadSpectra.h
-	inc/MantidSINQ/PoldiPeakDetection2.h
 	inc/MantidSINQ/PoldiPeakSearch.h
 	inc/MantidSINQ/PoldiPeakSummary.h
-	inc/MantidSINQ/PoldiRemoveDeadWires.h
 	inc/MantidSINQ/PoldiTruncateData.h
 	inc/MantidSINQ/PoldiUtilities/IPoldiFunction1D.h
 	inc/MantidSINQ/PoldiUtilities/MillerIndices.h
