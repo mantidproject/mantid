@@ -88,7 +88,7 @@ public:
     TS_ASSERT(!alg3.isExecuted());
   }
 
-  void test_wronProperty() {
+  void test_wrongProperty() {
     DownloadRemoteFile dl;
     TS_ASSERT_THROWS_NOTHING(dl.initialize();)
     TS_ASSERT_THROWS(dl.setPropertyValue("Compute", "anything"),

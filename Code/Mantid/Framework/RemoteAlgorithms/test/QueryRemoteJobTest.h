@@ -71,7 +71,7 @@ public:
     TS_ASSERT(!alg2.isExecuted());
   }
 
-  void test_wronProperty() {
+  void test_wrongProperty() {
     QueryRemoteJob qr;
     TS_ASSERT_THROWS_NOTHING(qr.initialize();)
     TS_ASSERT_THROWS(qr.setPropertyValue("job", "whatever"),

@@ -71,7 +71,7 @@ public:
     TS_ASSERT(!alg3.isExecuted());
   }
 
-  void test_wronProperty() {
+  void test_wrongProperty() {
     AbortRemoteJob ab;
     TS_ASSERT_THROWS_NOTHING(ab.initialize();)
     TS_ASSERT_THROWS(ab.setPropertyValue("ComputeRes", "anything"),

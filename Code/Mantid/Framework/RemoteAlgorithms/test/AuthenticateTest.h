@@ -83,7 +83,7 @@ public:
     TS_ASSERT(!alg3.isExecuted());
   }
 
-  void test_wronProperty() {
+  void test_wrongProperty() {
     Authenticate auth;
     TS_ASSERT_THROWS_NOTHING(auth.initialize());
     TS_ASSERT_THROWS(auth.setPropertyValue("usernam", "anything"),

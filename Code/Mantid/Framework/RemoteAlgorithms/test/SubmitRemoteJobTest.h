@@ -125,7 +125,7 @@ public:
     TS_ASSERT(!alg5.isExecuted());
   }
 
-  void test_wronProperty() {
+  void test_wrongProperty() {
     SubmitRemoteJob s;
     TS_ASSERT_THROWS_NOTHING(s.initialize();)
     TS_ASSERT_THROWS(s.setPropertyValue("Compute", "anything"),

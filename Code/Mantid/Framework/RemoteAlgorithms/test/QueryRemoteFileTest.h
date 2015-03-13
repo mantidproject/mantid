@@ -74,7 +74,7 @@ public:
     TS_ASSERT(!alg2.isExecuted());
   }
 
-  void test_wronProperty() {
+  void test_wrongProperty() {
     QueryRemoteFile qrf;
     TS_ASSERT_THROWS_NOTHING(qrf.initialize();)
     TS_ASSERT_THROWS(qrf.setPropertyValue("Compute", "anything"),

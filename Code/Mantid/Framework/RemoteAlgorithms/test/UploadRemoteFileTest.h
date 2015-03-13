@@ -103,7 +103,7 @@ public:
     TS_ASSERT(!alg4.isExecuted());
   }
 
-  void test_wronProperty() {
+  void test_wrongProperty() {
     UploadRemoteFile ul;
     TS_ASSERT_THROWS_NOTHING(ul.initialize();)
     TS_ASSERT_THROWS(ul.setPropertyValue("Compute", "anything"),

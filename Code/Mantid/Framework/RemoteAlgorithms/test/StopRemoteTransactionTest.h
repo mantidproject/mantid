@@ -75,7 +75,7 @@ public:
     TS_ASSERT(!alg2.isExecuted());
   }
 
-  void test_wronProperty() {
+  void test_wrongProperty() {
     StopRemoteTransaction stop;
     TS_ASSERT_THROWS_NOTHING(stop.initialize();)
     TS_ASSERT_THROWS(stop.setPropertyValue("Compute", "anything"),

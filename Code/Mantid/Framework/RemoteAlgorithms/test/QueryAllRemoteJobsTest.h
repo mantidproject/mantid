@@ -65,7 +65,7 @@ public:
     TS_ASSERT(!qar.isExecuted());
   }
 
-  void test_wronProperty() {
+  void test_wrongProperty() {
     QueryAllRemoteJobs qar;
     TS_ASSERT_THROWS_NOTHING(qar.initialize();)
     TS_ASSERT_THROWS(qar.setPropertyValue("ComputeRes", "anything"),
