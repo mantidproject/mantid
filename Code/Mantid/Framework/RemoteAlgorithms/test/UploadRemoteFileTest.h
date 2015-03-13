@@ -145,6 +145,7 @@ public:
       // TS_ASSERT_THROWS(ul.execute(), std::exception);
       TS_ASSERT(!ul.isExecuted());
     }
+    Mantid::Kernel::ConfigService::Instance().setFacility(prevFac.name());
   }
 
   // TODO: void test_runOK() - with a mock when we can add it.
