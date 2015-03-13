@@ -1,3 +1,9 @@
+################################################################################
+#
+# Main class for HFIR powder reduction GUI
+#
+################################################################################
+
 #pylint: disable=invalid-name
 import numpy
 import sys
@@ -6,8 +12,6 @@ import urllib2
 
 from Ui_MainWindow import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui
-#from PyQt4.QtCore import *
-#from PyQt4.QtGui import *
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -16,6 +20,9 @@ except AttributeError:
 
 from matplotlib.pyplot import setp
 
+# FIXME - Remove after debugging
+NOMANTID = True
+
 try:
     import mantid.simpleapi as api
     import mantid.kernel
@@ -23,8 +30,11 @@ try:
     from mantid.kernel import ConfigService
     IMPORT_MANTID = True
 except ImportError as e:
-    print "Unable to import Mantid: %s." % (str(e))
-    IMPORT_MANTID = False
+    if NOMANTID is False: 
+        print "Unable to import Mantid: %s." % (str(e))
+        raise e
+    else:
+        print "NO MANTID IS USED FOR DEBUGGING PURPOSE."
 
 
 #----- default configuration ---------------
@@ -114,16 +124,17 @@ class MainWindow(QtGui.QMainWindow):
         """ Initial setup
         """
         # FIXME - This part will be implemented soon as default configuration is made
+        # Mantid configuration
+        self._instrument = str(self.ui.comboBox_instrument.currentText())
+        #if IMPORT_MANTID is True:
+        #    config = ConfigService.Instance()
+        #    self._instrument = config["default.instrument"]
+        #else:
+        #    self._instrument = DEFAULT_INSTRUMENT
 
         # UI widgets setup
         self.ui.comboBox_outputFormat.addItems(['Fullprof', 'GSAS', 'Fullprof+GSAS'])
 
-        # Mantid configuration
-        if IMPORT_MANTID is True:
-            config = ConfigService.Instance()
-            self._instrument = config["default.instrument"]
-        else:
-            self._instrument = DEFAULT_INSTRUMENT
 
         # Set up data source
         self._serverAddress = DEFAULT_SERVER 
@@ -315,6 +326,12 @@ class MainWindow(QtGui.QMainWindow):
         # cache the previous one
         self._prevoutws = self._outws
         self._outws = None
+
+        # Rebin
+        if xmin is None or xmax is None:
+            binpar = "%.7f" % (binsize)
+        else:
+            binpar = "%.7f, %.7f, %.7f" % (xmin, binsize, xmax)
 
         # base workspace name
         basewsname = os.path.basename(datafilename).split(".")[0]
