@@ -19,8 +19,6 @@ public:
     double d = 0.1;
     TS_ASSERT_THROWS_NOTHING(JSONValue vDbl(d));
 
-    TS_ASSERT_THROWS_NOTHING(b = d);
-
     JSONValue vBool(b);
     bool getBool = false;
     TS_ASSERT_EQUALS(true, vBool.getValue(getBool));
