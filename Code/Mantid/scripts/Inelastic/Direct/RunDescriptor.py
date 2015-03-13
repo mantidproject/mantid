@@ -394,7 +394,7 @@ class RunDescriptor(PropDescriptor):
                 else:
                     self._set_single_run(instance,run_num,file_path,fext)
         elif isinstance(value,list):
-            self._set_run_list(instance,value,"",instance.data_file_ext)
+            self._set_run_list(instance,value,"",None)
         else:
             self._set_single_run(instance,value,"",None)
 
