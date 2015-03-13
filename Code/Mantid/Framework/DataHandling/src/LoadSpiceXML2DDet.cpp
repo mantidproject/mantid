@@ -225,8 +225,9 @@ void LoadSpiceXML2DDet::exec() {
 //----------------------------------------------------------------------------------------------
 /** Parse SPICE XML file for one Pt./measurement
  * @brief LoadSpiceXML2DDet::parseSpiceXML
- * @param xmlfilename
- * @param logstringmap
+ * @param xmlfilename :: name of the XML file to parse
+ * @param vecspicenode :: output vector of SpiceXMLNode containing information
+ * in XML file
  */
 void LoadSpiceXML2DDet::parseSpiceXML(const std::string &xmlfilename,
                                       std::vector<SpiceXMLNode> &vecspicenode) {
@@ -318,6 +319,15 @@ void LoadSpiceXML2DDet::parseSpiceXML(const std::string &xmlfilename,
   return;
 }
 
+//----------------------------------------------------------------------------------------------
+/** Create MatrixWorkspace from Spice XML file
+ * @brief LoadSpiceXML2DDet::createMatrixWorkspace
+ * @param vecxmlnode :: vector of SpiceXMLNode obtained from XML file
+ * @param numpixelx :: number of pixel in x-direction
+ * @param numpixely :: number of pixel in y-direction
+ * @param detnodename :: the XML node's name for detector counts.
+ * @return
+ */
 MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
     const std::vector<SpiceXMLNode> &vecxmlnode, const size_t &numpixelx,
     const size_t &numpixely, const std::string &detnodename) {
