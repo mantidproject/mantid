@@ -11,9 +11,9 @@ class CreateMD(DataProcessorAlgorithm):
     def __possible_emodes(self):
         return ['Elastic', 'Direct', 'Indirect']
 
-    def __single_gen_sqw(self, input_workspace, emode, alatt=[], angdeg=[], u=[], v=[], psi=None, gl=None, gs=None):
+    def __single_run(self, input_workspace, emode, alatt=[], angdeg=[], u=[], v=[], psi=None, gl=None, gs=None):
         import numpy as np
-        ub_params = [any(alatt), any(angdeg), any(u), any(v)]
+        ub_params = map(any, [alatt, angdeg, u, v])
         goniometer_params = [psi, gl, gs]
         if any(ub_params) and not all(ub_params):
             raise ValueError("Either specify all of alatt, angledeg, u, v or none of them")
@@ -36,8 +36,8 @@ class CreateMD(DataProcessorAlgorithm):
                 SetGoniometer(Workspace=input_workspace, Axis0=axis0, Axis1=axis1, Axis2=axis2)
         
         min_extents, max_extents = ConvertToMDMinMaxLocal(InputWorkspace=input_workspace,QDimensions='Q3D',dEAnalysisMode=emode)
-        output_workspace = ConvertToMD(InputWorkspace=input_workspace, QDimensions='Q3D', QConversionScales='HKL',dEAnalysisMode=emode, MinValues=min_extents, MaxValues=max_extents)
-        return output_workspace
+        output_run = ConvertToMD(InputWorkspace=input_workspace, QDimensions='Q3D', QConversionScales='HKL',dEAnalysisMode=emode, MinValues=min_extents, MaxValues=max_extents)
+        return output_run
 
     def category(self):
         return 'MDAlgorithms'
@@ -84,23 +84,23 @@ class CreateMD(DataProcessorAlgorithm):
         if len(input_workspaces) < 1:
             raise ValueError("Need one or more input workspace")
 
-
-
         if not emode in self.__possible_emodes():
             raise ValueError("Unknown emode %s Allowed values are %s" % (emode, self.__possible_emodes()))
     
-        output_workspaces = list()
+        output_workspace = None
+        run_md = None
         for ws in input_workspaces:
-                out_ws = self.__single_gen_sqw(input_workspace=ws, emode=emode, alatt=alatt, angdeg=angdeg, u=u, v=v, psi=psi, gl=gl, gs=gs)
-                output_workspaces.append(out_ws)
-                # TODO. Need to merge runs.
+                run_md = self.__single_run(input_workspace=ws, emode=emode, alatt=alatt, angdeg=angdeg, u=u, v=v, psi=psi, gl=gl, gs=gs)
+                
+                if not output_workspace:
+                    output_workspace = run_md.rename()
+                else:
+                    print output_workspace.name()
+                    print run_md.name()
+                    output_workspace += run_md # Accumulate results via PlusMD. TODO, will need to find the best performance method for doing this.
 
-        if len(input_workspaces) > 1:
-            raise RuntimeError("Merging not implmented yet")
-            # TODO We will need to merge everything
-            # TODO We should offer to merge file-backed
-       
-        self.setProperty("OutputWorkspace", output_workspaces[0])
+        self.setProperty("OutputWorkspace", output_workspace)
+                
 
 
 
