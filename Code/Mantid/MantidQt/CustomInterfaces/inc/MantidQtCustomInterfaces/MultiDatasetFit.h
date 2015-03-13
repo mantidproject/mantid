@@ -28,6 +28,7 @@ namespace API
 {
   class IFunction;
   class IAlgorithm;
+  class MatrixWorkspace;
 }
 }
 
@@ -77,6 +78,8 @@ public:
   std::string getWorkspaceName(int i) const;
   /// Workspace index of the i-th spectrum
   int getWorkspaceIndex(int i) const;
+  /// Get the fitting range for the i-th spectrum
+  std::pair<double,double> getFittingRange(int i) const;
   /// Total number of spectra (datasets).
   int getNumberOfSpectra() const;
   /// Get value of a local parameter
@@ -95,14 +98,15 @@ private slots:
   void editLocalParameterValues(const QString& parName);
   void finishFit(bool);
   void updateLocalParameters(int index);
-
+  void enableZoom();
+  void enablePan();
+  void enableRange();
 
 protected:
   /// To be overridden to set the appropriate layout
   virtual void initLayout();
 
 private:
-public:
   void createPlotToolbar();
   boost::shared_ptr<Mantid::API::IFunction> createFunction() const;
   void initLocalParameter(const QString& parName)const;
@@ -178,15 +182,18 @@ public:
   bool isRangeSelectorEnabled() const;
 signals:
   void currentIndexChanged(int);
+  void fittingRangeChanged(int, double, double);
 public slots:
   void enableZoom();
   void enablePan();
   void enableRange();
+  void updateRange(int index);
 private slots:
   void tableUpdated();
   void prevPlot();
   void nextPlot();
   void plotDataSet(int);
+  void updateFittingRange(double startX, double endX);
 private:
   MultiDatasetFit *owner() const {return static_cast<MultiDatasetFit*>(parent());}
   void disableAllTools();
@@ -195,6 +202,7 @@ private:
   bool eventFilter(QObject *widget, QEvent *evn);
   void resetRange();
   void zoomToRange();
+  boost::shared_ptr<DatasetPlotData> getData(int i);
 
   /// The plot widget
   QwtPlot *m_plot;
@@ -252,23 +260,26 @@ public:
   int getWorkspaceIndex(int i) const;
   int getNumberOfSpectra() const;
   void checkDataSets();
-  void setFittingRange(int i, double startX, double endX);
+  std::pair<double,double> getFittingRange(int i) const;
 
 signals:
   void dataTableUpdated();
+  void dataSetUpdated(int i);
   void hasSelection(bool);
 
 public slots:
   void setFittingRangeGlobal(bool);
+  void setFittingRange(int, double, double);
 
 private slots:
   void addWorkspace();
   void workspaceSelectionChanged();
   void removeSelectedSpectra();
+  void updateDataset(int, int);
 
 private:
   MultiDatasetFit *owner() const {return static_cast<MultiDatasetFit*>(parent());}
-  void addWorkspaceSpectrum(const QString &wsName, int wsIndex);
+  void addWorkspaceSpectrum(const QString &wsName, int wsIndex, const Mantid::API::MatrixWorkspace& ws);
   void removeDataSets(std::vector<int>& rows);
 
   /// Table with data set names and other data.
