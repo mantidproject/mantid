@@ -29,54 +29,18 @@ void BackToBackExponential::init() {
   declareParameter(
       "S", 1.0,
       "standard deviation of gaussian part of peakshape function"); // 4
+
+  defineCentreParameter("X0");
+  defineHeightParameter("I");
+  defineWidthParameter("S", Linear);
+  defineWidthParameter("A", Inverse);
+  defineWidthParameter("B", Inverse);
 }
 
-/**
- * Get approximate height of the peak: function value at X0.
- */
-double BackToBackExponential::height() const {
-  double x0 = getParameter(3);
-  std::vector<double> vec(1, x0);
-  FunctionDomain1DVector domain(vec);
-  FunctionValues values(domain);
+double BackToBackExponential::intensity() const { return getParameter("I"); }
 
-  function(domain, values);
-
-  return values[0];
-}
-
-/**
- * Set new height of the peak. This method does this approximately.
- * @param h :: New value for the height.
- */
-void BackToBackExponential::setHeight(const double h) {
-  double h0 = height();
-  if (h0 == 0.0) {
-    setParameter(0, 1e-6);
-    h0 = height();
-  }
-  double area = getParameter(0); // == I
-  area *= h / h0;
-  if (area <= 0.0) {
-    area = 1e-6;
-  }
-  if (boost::math::isnan(area) || boost::math::isinf(area)) {
-    area = std::numeric_limits<double>::max() / 2;
-  }
-  setParameter(0, area);
-}
-
-/**
- * Get approximate peak width.
- */
-double BackToBackExponential::fwhm() const { return 2 * getParameter("S"); }
-
-/**
- * Set new peak width approximately.
- * @param w :: New value for the width.
- */
-void BackToBackExponential::setFwhm(const double w) {
-  setParameter("S", w / 2.0);
+void BackToBackExponential::setIntensity(const double newIntensity) {
+  setParameter("I", newIntensity);
 }
 
 void BackToBackExponential::function1D(double *out, const double *xValues,
@@ -142,6 +106,25 @@ double BackToBackExponential::expWidth() const {
   if (a * b == 0.0)
     return M_LN2;
   return M_LN2 * (a + b) / (a * b);
+}
+
+std::pair<double, double> BackToBackExponential::getExtent() const {
+  double a = getParameter(1) / 5.0;
+  double b = getParameter(2) / 5.0;
+  if (a == 0.0) {
+    a = 1.0;
+  } else {
+    a = 1.0 / a;
+  }
+  if (b == 0.0) {
+    b = 1.0;
+  } else {
+    b = 1.0 / b;
+  }
+  auto c = getParameter("X0");
+  auto start = c - a;
+  auto end = c + b;
+  return std::make_pair(start, end);
 }
 
 } // namespace CurveFitting
