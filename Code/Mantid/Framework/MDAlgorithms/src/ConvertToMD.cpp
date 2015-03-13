@@ -326,9 +326,13 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
     }
   }
 
+  // The last experiment info should always be the one that refers
+  // to latest converting workspace. All others should have had this
+  // information set already
   uint16_t nexpts = mdEventWS->getNumExperimentInfo();
-  for (uint16_t i = 0; i < nexpts; ++i) {
-    ExperimentInfo_sptr expt = mdEventWS->getExperimentInfo(i);
+  if (nexpts > 0) {
+    ExperimentInfo_sptr expt =
+        mdEventWS->getExperimentInfo(static_cast<uint16_t>(nexpts - 1));
     expt->mutableRun().storeHistogramBinBoundaries(binBoundaries);
     expt->cacheDetectorGroupings(*mapping);
   }
