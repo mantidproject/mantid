@@ -116,9 +116,11 @@ class RunList(object):
         """Get file extension for file with run number
            Should be used on defined Run_list only(which should be always true)
         """
-        fext_int =self._fext[index]
-        if fext_int is None:
+        fext_given =self._fext[index]
+        if fext_given is None:
             return self._theRun._holder.data_file_ext
+        else:
+            return fext_given
     #
     def get_file_guess(self,inst_name,run_num,index=None):
         """Return the name of run file for run number provided
