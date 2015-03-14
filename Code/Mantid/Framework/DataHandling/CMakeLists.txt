@@ -96,6 +96,7 @@ set ( SRC_FILES
 	src/LoadSpec.cpp
 	src/LoadSpice2D.cpp
 	src/LoadSpiceAscii.cpp
+	src/LoadSpiceXML2DDet.cpp
 	src/LoadTOFRawNexus.cpp
 	src/LoadVulcanCalFile.cpp
 	src/MaskDetectors.cpp
@@ -141,8 +142,8 @@ set ( SRC_FILES
 	src/SaveReflCustomAscii.cpp
 	src/SaveReflTBL.cpp
 	src/SaveReflThreeColumnAscii.cpp
-        src/SaveSavuTomoConfig.cpp
 	src/SaveSPE.cpp
+	src/SaveSavuTomoConfig.cpp
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
 	src/SetSampleMaterial.cpp
@@ -244,6 +245,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/LoadSpiceAscii.h
+	inc/MantidDataHandling/LoadSpiceXML2DDet.h
 	inc/MantidDataHandling/LoadTOFRawNexus.h
 	inc/MantidDataHandling/LoadVulcanCalFile.h
 	inc/MantidDataHandling/MaskDetectors.h
@@ -289,8 +291,8 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveReflCustomAscii.h
 	inc/MantidDataHandling/SaveReflTBL.h
 	inc/MantidDataHandling/SaveReflThreeColumnAscii.h
-        inc/MantidDataHandling/SaveSavuTomoConfig.h
 	inc/MantidDataHandling/SaveSPE.h
+	inc/MantidDataHandling/SaveSavuTomoConfig.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
 	inc/MantidDataHandling/SetSampleMaterial.h
@@ -384,9 +386,10 @@ set ( TEST_FILES
 	LoadSPETest.h
 	LoadSassenaTest.h
 	LoadSaveAsciiTest.h
-        LoadSavuTomoConfigTest.h
+	LoadSavuTomoConfigTest.h
 	LoadSpice2dTest.h
 	LoadSpiceAsciiTest.h
+	LoadSpiceXML2DDetTest.h
 	LoadTOFRawNexusTest.h
 	LoadTest.h
 	LoadVulcanCalFileTest.h
@@ -432,8 +435,8 @@ set ( TEST_FILES
 	SaveReflCustomAsciiTest.h
 	SaveReflTBLTest.h
 	SaveReflThreeColumnAsciiTest.h
-	SaveSavuTomoConfigTest.h
 	SaveSPETest.h
+	SaveSavuTomoConfigTest.h
 	SaveToSNSHistogramNexusTest.h
 	SetSampleMaterialTest.h
 	SetScalingPSDTest.h
