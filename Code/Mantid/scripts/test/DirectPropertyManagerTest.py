@@ -1,5 +1,5 @@
 import os
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;" + os.environ["PATH"]
+os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;" + os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -1069,6 +1069,11 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(len(found),1)
         self.assertEqual(not_found[0],11111)
         self.assertEqual(found[0],11001)
+
+        ok1,not_found1,found1 = propman.find_files_to_sum()
+        self.assertEqual(len(not_found1),1)
+        self.assertEqual(len(found1),1)
+
 
 
         ok,err_list = propman._check_file_properties()
