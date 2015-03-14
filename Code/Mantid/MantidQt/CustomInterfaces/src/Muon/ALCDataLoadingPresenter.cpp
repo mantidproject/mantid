@@ -28,7 +28,7 @@ namespace CustomInterfaces
     m_view->initialize();
 
     connect(m_view, SIGNAL(loadRequested()), SLOT(load()));
-    connect(m_view, SIGNAL(firstRunSelected()), SLOT(updateAvailableLogs()));
+    connect(m_view, SIGNAL(firstRunSelected()), SLOT(updateAvailableInfo()));
   }
 
   void ALCDataLoadingPresenter::load()
@@ -44,6 +44,7 @@ namespace CustomInterfaces
       alg->setProperty("LogValue", m_view->log());
       alg->setProperty("Type", m_view->calculationType());
       alg->setProperty("DeadTimeCorrType",m_view->deadTimeType());
+      alg->setProperty("Red",m_view->redPeriod());
 
       // If time limiting requested, set min/max times
       if (auto timeRange = m_view->timeRange())
@@ -51,8 +52,21 @@ namespace CustomInterfaces
         alg->setProperty("TimeMin", timeRange->first);
         alg->setProperty("TimeMax", timeRange->second);
       }
+
+      // If corrections from custom file requested, set file property
       if (m_view->deadTimeType() == "FromSpecifiedFile") {
         alg->setProperty("DeadTimeCorrFile",m_view->deadTimeFile());
+      }
+
+      // If custom grouping requested, set forward/backward groupings
+      if ( m_view->detectorGroupingType() == "Custom" ) {
+        alg->setProperty("ForwardSpectra",m_view->getForwardGrouping());
+        alg->setProperty("BackwardSpectra",m_view->getBackwardGrouping());
+      }
+
+      // If Subtract checkbox is selected, set green period
+      if ( m_view->subtractIsChecked() ) {
+        alg->setProperty("Green",m_view->greenPeriod());
       }
 
       alg->setPropertyValue("OutputWorkspace", "__NotUsed");
@@ -60,10 +74,20 @@ namespace CustomInterfaces
 
       m_loadedData = alg->getProperty("OutputWorkspace");
 
-      assert(m_loadedData); // If errors are properly caught, shouldn't happen
-      assert(m_loadedData->getNumberHistograms() == 1); // PlotAsymmetryByLogValue guarantees that
+      // If errors are properly caught, shouldn't happen
+      assert(m_loadedData);
+      // If subtract is not checked, only one spectrum,
+      // else four spectra
+      if ( !m_view->subtractIsChecked() ) {
+        assert(m_loadedData->getNumberHistograms() == 1);
+      } else {
+        assert(m_loadedData->getNumberHistograms() == 4);
+      }
 
+      // Plot spectrum 0. It is either red period (if subtract is unchecked) or 
+      // red - green (if subtract is checked)
       m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_loadedData, 0)));
+
     }
     catch(std::exception& e)
     {
@@ -73,7 +97,7 @@ namespace CustomInterfaces
     m_view->restoreCursor();
   }
 
-  void ALCDataLoadingPresenter::updateAvailableLogs()
+  void ALCDataLoadingPresenter::updateAvailableInfo()
   {
     Workspace_sptr loadedWs;
 
@@ -95,9 +119,11 @@ namespace CustomInterfaces
     catch(...)
     {
       m_view->setAvailableLogs(std::vector<std::string>()); // Empty logs list
+      m_view->setAvailablePeriods(std::vector<std::string>()); // Empty period list
       return;
     }
 
+    // Set logs
     MatrixWorkspace_const_sptr ws = MuonAnalysisHelper::firstPeriod(loadedWs);
     std::vector<std::string> logs;
 
@@ -106,8 +132,16 @@ namespace CustomInterfaces
     {
       logs.push_back((*it)->name());
     }
-
     m_view->setAvailableLogs(logs);
+
+    // Set periods
+    size_t numPeriods = MuonAnalysisHelper::numPeriods(loadedWs);
+    std::vector<std::string> periods;
+    for (size_t i=0; i<numPeriods; i++)
+    {
+      periods.push_back(std::to_string(static_cast<long long int>(i)+1));
+    }
+    m_view->setAvailablePeriods(periods);
   }
 
 } // namespace CustomInterfaces
