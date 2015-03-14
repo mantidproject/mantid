@@ -1533,9 +1533,9 @@ class CalculateNormISIS(object):
         """
         detector = detector.upper()
 
-        if detector in ("FRONT","HAB","FRONT-DETECTOR-BANK"):
+        if detector in ("FRONT", "HAB", "FRONT-DETECTOR-BANK"):
             self._high_angle_pixel_file = filename
-        if detector in ("REAR","MAIN","","MAIN-DETECTOR-BANK"):
+        if detector in ("REAR", "MAIN", "", "MAIN-DETECTOR-BANK", "DETECTORBENCH"):
             self._low_angle_pixel_file = filename
 
     def getPixelCorrFile(self, detector ):
@@ -1546,9 +1546,9 @@ class CalculateNormISIS(object):
 
         """
         detector = detector.upper()
-        if detector in ("FRONT","HAB","FRONT-DETECTOR-BANK", "FRONT-DETECTOR"):
+        if detector in ("FRONT", "HAB", "FRONT-DETECTOR-BANK", "FRONT-DETECTOR"):
             return self._high_angle_pixel_file
-        elif detector in ("REAR","MAIN","MAIN-DETECTOR-BANK","", "REAR-DETECTOR"):
+        elif detector in ("REAR","MAIN", "MAIN-DETECTOR-BANK", "", "REAR-DETECTOR", "DETECTORBENCH"):
             return self._low_angle_pixel_file
         else :
             logger.warning("Request of pixel correction file with unknown detector ("+ str(detector)+")")
@@ -1998,19 +1998,23 @@ class UserFile(ReductionStep):
             hab_str_pos = upper_line.find('HAB')
             x_pos = 0.0
             y_pos = 0.0
+            # use the scale factors supplied in the parameter file
+            XSF = reducer.inst.beam_centre_scale_factor1
+            YSF = reducer.inst.beam_centre_scale_factor2
+
             if main_str_pos > 0:
                 values = upper_line[main_str_pos+5:].split() #remov the SET CENTRE/MAIN
-                x_pos = float(values[0])/1000.0
-                y_pos = float(values[1])/1000.0
+                x_pos = float(values[0])/XSF
+                y_pos = float(values[1])/YSF
             elif hab_str_pos > 0:
                 values = upper_line[hab_str_pos+4:].split() # remove the SET CENTRE/HAB
                 print ' convert values ',values
-                x_pos = float(values[0])/1000.0
-                y_pos = float(values[1])/1000.0
+                x_pos = float(values[0])/XSF
+                y_pos = float(values[1])/YSF
             else:
                 values = upper_line.split()
-                x_pos = float(values[2])/1000.0
-                y_pos = float(values[3])/1000.0
+                x_pos = float(values[2])/XSF
+                y_pos = float(values[3])/YSF
             if hab_str_pos > 0:
                 print 'Front values = ',x_pos,y_pos
                 reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos),'front')
@@ -2085,7 +2089,7 @@ class UserFile(ReductionStep):
                 else:
                     _issueWarning('FIT/MONITOR line specific to LOQ instrument. Line ignored')
 
-        elif upper_line == 'SANS2D' or upper_line == 'LOQ':
+        elif upper_line == 'SANS2D' or upper_line == 'LOQ' or upper_line == 'LARMOR':
             self._check_instrument(upper_line, reducer)
 
         elif upper_line.startswith('PRINT '):

@@ -316,9 +316,12 @@ def SetCentre(xcoord, ycoord, bank = 'rear'):
     Introduced #5942
     """
     _printMessage('SetCentre(' + str(xcoord) + ', ' + str(ycoord) + ')')
+    # use the scale factors from the parameter file to scale correctly
+    XSF = ReductionSingleton().inst.beam_centre_scale_factor1
+    YSF = ReductionSingleton().inst.beam_centre_scale_factor2
 
     ReductionSingleton().set_beam_finder(isis_reduction_steps.BaseBeamFinder(\
-                                float(xcoord)/1000.0, float(ycoord)/1000.0), bank)
+                                float(xcoord)/XSF, float(ycoord)/YSF), bank)
 
 def GetMismatchedDetList():
     """
@@ -1038,7 +1041,10 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
         @return: the best guess for the beam centre point
     """
     XSTEP = ReductionSingleton().inst.cen_find_step
-    YSTEP = ReductionSingleton().inst.cen_find_step
+    YSTEP = ReductionSingleton().inst.cen_find_step2
+
+    XSF = ReductionSingleton().inst.beam_centre_scale_factor1
+    YSF = ReductionSingleton().inst.beam_centre_scale_factor2
 
     original = ReductionSingleton().get_instrument().cur_detector_position(ReductionSingleton().get_sample().get_wksp_name())
 
@@ -1077,6 +1083,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
     XNEW = xstart + XSTEP
     YNEW = ystart + YSTEP
     graph_handle = None
+    it = 0
     for i in range(1, MaxIter+1):
         it = i
 
@@ -1123,7 +1130,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
 
     ReductionSingleton().set_beam_finder(
         isis_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
-    centre.logger.notice("Centre coordinates updated: [" + str(XNEW)+ ", "+ str(YNEW) + ']')
+    centre.logger.notice("Centre coordinates updated: [" + str(XNEW*XSF) + ", " + str(YNEW*YSF) + ']')
 
     return XNEW, YNEW
 

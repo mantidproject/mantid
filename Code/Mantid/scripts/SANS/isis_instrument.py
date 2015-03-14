@@ -10,6 +10,7 @@ import xml.dom.minidom
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup, Workspace, ExperimentInfo
 from mantid.kernel import Logger
+from mantid.kernel import V3D
 import SANSUtility as su
 
 sanslog = Logger("SANS")
@@ -427,8 +428,28 @@ class ISISInstrument(BaseInstrument):
         #the spectrum with this number is used to normalize the workspace data
         self._incid_monitor = int(self.definition.getNumberParameter(
             'default-incident-monitor-spectrum')[0])
-        self.cen_find_step = float(self.definition.getNumberParameter(
-            'centre-finder-step-size')[0])
+        self.cen_find_step = float(self.definition.getNumberParameter('centre-finder-step-size')[0])
+        # see if a second step size is defined. If not set the second value to the first for compatibility
+        #logger.warning("Trying to find centre-finder-step-size2")
+        try:
+           self.cen_find_step2 = float(self.definition.getNumberParameter('centre-finder-step-size2')[0])
+        except:
+           #logger.warning("Failed to find centre-finder-step-size2")
+           self.cen_find_step2 = self.cen_find_step
+
+        logger.warning("Trying to find beam-centre-scale-factor1")
+        try:
+           self.beam_centre_scale_factor1 = float(self.definition.getNumberParameter('beam-centre-scale-factor1')[0])
+        except:
+           logger.warning("Failed to find beam-centre-scale-factor1")
+           self.beam_centre_scale_factor1 = 1000.0
+
+        logger.warning("Trying to find beam-centre-scale-factor2")
+        try:
+           self.beam_centre_scale_factor2 = float(self.definition.getNumberParameter('beam-centre-scale-factor2')[0])
+        except:
+           logger.warning("Failed to find beam-centre-scale-factor2")
+           self.beam_centre_scale_factor2 = 1000.0
 
         firstDetect = DetectorBank(self.definition, 'low-angle')
         #firstDetect.disable_y_and_rot_corrs()
@@ -462,6 +483,10 @@ class ISISInstrument(BaseInstrument):
         self.FRONT_DET_ROT = 0.0
         self.REAR_DET_Z = 0.0
         self.REAR_DET_X = 0
+
+        # LOG files for Larmor will have these encoder readings
+        # why are these not defined in Larmor
+        self.BENCH_ROT = 0.0
 
         #spectrum number of the monitor used to as the incidient in the transmission calculations
         self.default_trans_spec = int(self.definition.getNumberParameter(
@@ -1140,10 +1165,16 @@ class SANS2D(ISISInstrument):
 
 class LARMOR(ISISInstrument):
     _NAME = 'LARMOR'
-    WAV_RANGE_MIN = 2.2
-    WAV_RANGE_MAX = 10.0
+    WAV_RANGE_MIN = 0.5
+    WAV_RANGE_MAX = 13.5
     def __init__(self):
         super(LARMOR,self).__init__('LARMOR_Definition.xml')
+        self._marked_dets = []
+        # set to true once the detector positions have been moved to the locations given in the sample logs
+        self.corrections_applied = False
+        # a warning is issued if the can logs are not the same as the sample
+        self._can_logs = {}
+
         self.monitor_names = dict()
 
         for i in range(1,6):
@@ -1161,82 +1192,259 @@ class LARMOR(ISISInstrument):
         second.set_orien('Horizontal')
         second.place_after(first)
 
+    def getDetValues(self, ws_name):
+        """
+        Retrive the values of Bench_Rot from the workspace. If it does not find the value at the run info,
+        it takes as default value the self.BENCH_ROT, which are extracted from the sample workspace
+        at apply_detector_log.
+        This is done to allow the function move_components to use the correct values and not to use
+        all the values for TRANS ans SAMPLE the same, as sometimes, this assumption is not valid.
+        The reason for this method is explained at the ticket http://trac.mantidproject.org/mantid/ticket/7314.
+        """
+        # set the default value for these variables
+        values = [self.BENCH_ROT]
+        # get these variables from the workspace run
+        run_info = mtd[str(ws_name)].run()
+        ind = 0
+        name = 'Bench_Rot'
+        try:
+            var = run_info.get(name).value
+            if hasattr(var, '__iter__'):
+                var = var[-1]
+            values[ind] = float(var)
+        except:
+            pass # ignore, because we do have a default value
+        ind += 1
+        #return these variables
+        return tuple(values)
+
+    def get_detector_log(self, wksp):
+        """
+            Reads information about the state of the instrument on the information
+            stored in the sample
+            @param logs: a workspace pointer
+            @return the values that were read as a dictionary
+        """
+        #logger.warning("Entering get_detector_log")
+        self._marked_dets = []
+        wksp = su.getWorkspaceReference(wksp)
+        #assume complete log information is stored in the first entry, it isn't stored in the group workspace itself
+        if isinstance(wksp, WorkspaceGroup):
+            wksp = wksp[0]
+
+        samp = wksp.getRun()
+
+        logvalues = {}
+        logvalues['Bench_Rot'] = self._get_const_num(samp, 'Bench_Rot')
+        #logger.warning(str(logvalues))
+
+        return logvalues
+
+    def _get_const_num(self, log_data, log_name):
+        """
+            Get a the named entry from the log object. If the entry is a
+            time series it's assumed to contain unchanging data and the first
+            value is used. The answer must be convertible to float otherwise
+            this throws.
+            @param log_data: the sample object from a workspace
+            @param log_name: a string with the name of the individual entry to load
+            @return: the floating point number
+            @raise TypeError: if that log entry can't be converted to a float
+        """
+        try:
+            # return the log value if it stored as a single number
+            return float(log_data.getLogData(log_name).value)
+        except TypeError:
+            # Python 2.4 doesn't have datetime.strptime...
+            def format_date(date_string, format, date_str_len):
+                if len(date_string)>date_str_len:
+                    date_string = date_string[:date_str_len]
+                from datetime import datetime
+                if sys.version_info[0] == 2 and sys.version_info[1] <  5:
+                    import time
+                    return datetime(*(time.strptime(date_string, format)[0:6]))
+                else:
+                    return datetime.strptime(date_string, format)
+
+            # if the value was stored as a time series we have an array here
+            property = log_data.getLogData(log_name)
+
+            size = len(property.value)
+            if size == 1:
+                return float(log_data.getLogData(log_name).value[0])
+
+            start = log_data.getLogData('run_start')
+            dt_0 = format_date(start.value,"%Y-%m-%dT%H:%M:%S",19)
+            for i in range(0, size):
+                dt = format_date(str(property.times[i]),"%Y-%m-%dT%H:%M:%S",19)
+                if dt > dt_0:
+                    if i == 0:
+                        return float(log_data.getLogData(log_name).value[0])
+                    else:
+                        return float(log_data.getLogData(log_name).value[i-1])
+
+            # this gets executed if all entries is before the start-time
+            return float(log_data.getLogData(log_name).value[size-1])
+
+    def apply_detector_logs(self, logvalues):
+        #apply the corrections that came from the logs
+        self.BENCH_ROT = float(logvalues['Bench_Rot'])
+        self.corrections_applied = True
+        if len(self._can_logs) > 0:
+            self.check_can_logs(self._can_logs)
+
+    def check_can_logs(self, new_logs):
+        """
+            Tests if applying the corrections from the passed logvalues
+            would give the same result as the corrections that were
+            already made
+            @param new_logs: the new values to check are equivalent
+            @return: True if the are the same False if not
+        """
+        #logger.warning("Entering check_can_logs")
+
+        if not self.corrections_applied:
+            #the check needs to wait until there's something to compare against
+            self._can_logs = new_logs
+
+        if len(new_logs) == 0:
+            return False
+
+        existing_values = []
+        existing_values.append(self.BENCH_ROT)
+
+        new_values = []
+        new_values.append(float(new_logs['Bench_Rot']))
+
+        errors = 0
+        corr_names = ['Bench_Rot']
+        for i in range(0, len(existing_values)):
+            if math.fabs(existing_values[i] - new_values[i]) > 5e-04:
+                sanslog.warning('values differ between sample and can runs: Sample ' + corr_names[i] + ' = ' + str(existing_values[i]) + \
+                    ', can value is ' + str(new_values[i]))
+                errors += 1
+
+                self.append_marked(corr_names[i])
+
+        #the check has been done clear up
+        self._can_logs = {}
+
+        return errors == 0
+
     def move_components(self, ws, xbeam, ybeam):
+        #logger.warning("Entering move_components")
         self.move_all_components(ws)
+        #logger.warning("Back from move_all_components")
 
-        detBanch = self.getDetector('rear')
+        detBench = self.getDetector('rear')
 
-        xshift = -xbeam
+        # get the bench rotation value from the instrument log
+        BENCH_ROT = self.getDetValues(ws)[0]
+
+        # use the scale factors from the parameter file to scale appropriately
+        XSF = self.beam_centre_scale_factor1
+        YSF = self.beam_centre_scale_factor2
+
+        # in this case the x shift is actually a value of 2theta rotated about the sample stack centre
+        # so... we need to do two moves first a shift in y and then a rotation
         yshift = -ybeam
         #zshift = ( detBanch.z_corr)/1000.
         #zshift -= self.REAR_DET_DEFAULT_SD_M
+        xshift = 0
         zshift = 0
-        sanslog.notice("Setup move " + str(xshift*1000) + " " + str(yshift*1000) + " " + str(zshift*1000))
-        MoveInstrumentComponent(ws, ComponentName=detBanch.name(), X=xshift,
-                                Y=yshift, Z=zshift)
+        sanslog.notice("Setup move " + str(xshift*XSF) + " " + str(yshift*YSF) + " " + str(zshift*1000))
+        MoveInstrumentComponent(ws, ComponentName=detBench.name(), X=xshift, Y=yshift, Z=zshift)
+        # in order to avoid rewriting old mask files from initial commisioning during 2014.
+        ws_ref=mtd[ws]
+        try:
+            run_num = ws_ref.getRun().getLogData('run_number').value
+        except:
+            run_num = int(re.findall(r'\d+',str(ws_name))[-1])
+
+        # The angle value
+        # Note that the x position gets converted from mm to m when read from the user file so we need to reverse this if X is now an angle
+        if(int(run_num) < 2217):
+            # Initial commisioning before run 2217 did not pay much attention to making sure the bench_rot value was meaningful
+            xshift = -xbeam
+            sanslog.notice("Setup move " + str(xshift*XSF) + " " + str(0.0) + " " + str(0.0))
+            MoveInstrumentComponent(ws, ComponentName=detBench.name(), X=xshift, Y=0.0, Z=0.0)
+        else:
+            xshift = BENCH_ROT-xbeam*XSF
+            sanslog.notice("Setup move " + str(xshift*XSF) + " " + str(0.0) + " " + str(0.0))
+            RotateInstrumentComponent(ws, ComponentName=detBench.name(), X=0, Y=1, Z=0, Angle=xshift)
+            #logger.warning("Back from RotateInstrumentComponent")
+
         # beam centre, translation
         return [0.0, 0.0], [-xbeam, -ybeam]
 
-    def cur_detector_position(self, ws_name):
-        """Return the position of the center of the detector bank"""
-        ws = mtd[ws_name]
-        pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
+    def append_marked(self, detNames):
+        self._marked_dets.append(detNames)
 
-        return [-pos.getX(), -pos.getY()]
-
-
-class LARMOR(ISISInstrument):
-    _NAME = 'LARMOR'
-    WAV_RANGE_MIN = 2.2
-    WAV_RANGE_MAX = 10.0
-    def __init__(self):
-        super(LARMOR,self).__init__('LARMOR_Definition.xml')
-        self.monitor_names = dict()
-
-        for i in range(1,6):
-            self.monitor_names[i] = 'monitor'+str(i)
-
-    def set_up_for_run(self, base_runno):
-        """
-            Needs to run whenever a sample is loaded
-        """
-        first = self.DETECTORS['low-angle']
-        second = self.DETECTORS['high-angle']
-
-        first.set_orien('Horizontal')
-        first.set_first_spec_num(10)
-        second.set_orien('Horizontal')
-        second.place_after(first)
-
-    def move_components(self, ws, xbeam, ybeam):
-        self.move_all_components(ws)
-
-        detBanch = self.getDetector('rear')
-
-        xshift = -xbeam
-        yshift = -ybeam
-        #zshift = ( detBanch.z_corr)/1000.
-        #zshift -= self.REAR_DET_DEFAULT_SD_M
-        zshift = 0
-        sanslog.notice("Setup move " + str(xshift*1000) + " " + str(yshift*1000) + " " + str(zshift*1000))
-        MoveInstrumentComponent(ws, ComponentName=detBanch.name(), X=xshift,
-                                Y=yshift, Z=zshift)
-        # beam centre, translation
-        return [0.0, 0.0], [-xbeam, -ybeam]
+    def get_marked_dets(self):
+        return self._marked_dets
 
     def load_transmission_inst(self, ws_trans, ws_direct, beamcentre):
         """
-            Not required for SANS2D
+        Larmor requires centralisation of the detectors of the transmission
+        as well as the sample and can.
         """
-        pass
+        self.move_components(ws_trans, beamcentre[0], beamcentre[1])
+        if ws_trans != ws_direct:
+            self.move_components(ws_direct, beamcentre[0], beamcentre[1])
 
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""
+        """Unforunately getting the angle of the bench does not work so we have to get bench and detector"""
+
+        #logger.warning("Entering cur_detector_position")
         ws = mtd[ws_name]
-        pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
+        # define the vector along the beam axis
+        a1 = V3D(0,0,1)
+        # position of the detector itself
+        pos = ws.getInstrument().getComponentByName('LARMORSANSDetector').getPos()
+        # position of the bench
+        pos2 = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
+        # take the difference
+        posdiff = pos-pos2
+        deg2rad = 4.0*math.atan(1.0)/180.0
+        # now finally find the angle between the vector for the difference and the beam axis
+        angle = posdiff.angle(a1)/deg2rad
 
-        return [-pos.getX(), -pos.getY()]
+        # return the angle and the y displacement
+        #logger.warning("Blah: angle=" + str(angle) + " Y displacement=" +str(-pos2.getY()) )
+        return [-angle, -pos2.getY()]
 
+    def on_load_sample(self, ws_name, beamcentre, isSample):
+        """For Larmor in addition to the operations defined in on_load_sample of ISISInstrument
+        it has to deal with the log, which defines some offsets for the movement of the
+        detector bank.
+        """
+        #logger.warning("Entering on_load_sample")
+        ws_ref = mtd[str(ws_name)]
+        # in order to avoid problems with files from initial commisioning during 2014.
+        # these didn't have the required log entries for the detector position
+        try:
+            run_num = ws_ref.getRun().getLogData('run_number').value
+        except:
+            run_num = int(re.findall(r'\d+',str(ws_name))[-1])
+        if(int(run_num) >= 2217):
+            try:
+                #logger.warning("Trying get_detector_log")
+                log = self.get_detector_log(ws_ref)
+                if log == "":
+                    raise "Invalid log"
+            except:
+                if isSample:
+                    raise RuntimeError('Sample logs cannot be loaded, cannot continue')
+                else:
+                    logger.warning("Can logs could not be loaded, using sample values.")
+
+            if isSample:
+                self.apply_detector_logs(log)
+            else:
+                self.check_can_logs(log)
+
+        ISISInstrument.on_load_sample(self, ws_name, beamcentre,  isSample)
 
 if __name__ == '__main__':
     pass
