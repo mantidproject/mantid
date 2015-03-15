@@ -927,8 +927,10 @@ class SANS2D(ISISInstrument):
         # 10/03/15 RKH need to add tilt of detector, in degrees, with respect to the horizontal or vertical of the detector plane 
         # this time we can rotate about the detector's own axis so can use RotateInstrumentComponent, ytilt rotates about x axis, xtilt rotates about z axis
         #
-        RotateInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X = "1.", Y = "0.", Z = "0.", Angle = frontDet.y_tilt)
-        RotateInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X = "0.", Y = "0.", Z = "1.", Angle = frontDet.x_tilt)
+        if frontDet.y_tilt != 0.0:
+            RotateInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X = "1.", Y = "0.", Z = "0.", Angle = frontDet.y_tilt)
+        if frontDet.x_tilt != 0.0:
+            RotateInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X = "0.", Y = "0.", Z = "1.", Angle = frontDet.x_tilt)
         #		
         # 9/1/12  this all dates to Richard Heenan & Russell Taylor's original python development for SANS2d
     	# the rotation axis on the SANS2d front detector is actually set front_det_radius = 306mm behind the detector.
@@ -962,8 +964,10 @@ class SANS2D(ISISInstrument):
         # 10/03/15 RKH need to add tilt of detector, in degrees, with respect to the horizontal or vertical of the detector plane 
         # Best to do the tilts first, while the detector is still centred on the z axis, ytilt rotates about x axis, xtilt rotates about z axis
         # NOTE the beam centre coordinates may change
-        RotateInstrumentComponent(Workspace=ws,ComponentName= rearDet.name(), X = "1.", Y = "0.", Z = "0.", Angle = rearDet.y_tilt)
-        RotateInstrumentComponent(Workspace=ws,ComponentName= rearDet.name(), X = "0.", Y = "0.", Z = "1.", Angle = rearDet.x_tilt)
+        if rearDet.y_tilt != 0.0:
+            RotateInstrumentComponent(Workspace=ws,ComponentName= rearDet.name(), X = "1.", Y = "0.", Z = "0.", Angle = rearDet.y_tilt)
+        if rearDet.x_tilt != 0.0:
+            RotateInstrumentComponent(Workspace=ws,ComponentName= rearDet.name(), X = "0.", Y = "0.", Z = "1.", Angle = rearDet.x_tilt)
 
         xshift = -xbeam
         yshift = -ybeam
