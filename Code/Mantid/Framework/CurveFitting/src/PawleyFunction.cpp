@@ -184,6 +184,8 @@ void PawleyParameterFunction::setCenterParameterNameFromFunction(
   }
 }
 
+DECLARE_FUNCTION(PawleyFunction)
+
 PawleyFunction::PawleyFunction()
     : FunctionParameterDecorator(), m_compositeFunction(),
       m_pawleyParameterFunction(), m_peakProfileComposite(), m_hkls() {}
@@ -216,18 +218,19 @@ void PawleyFunction::setProfileFunction(const std::string &profileFunction) {
   m_compositeFunction->checkFunction();
 }
 
-void PawleyFunction::function1D(double *out, const double *xValues,
-                                const size_t nData) const {
-  UNUSED_ARG(out);
-  UNUSED_ARG(xValues);
-  UNUSED_ARG(nData);
-}
+void PawleyFunction::function(const FunctionDomain &domain,
+                              FunctionValues &values) const {
+  UnitCell cell = m_pawleyParameterFunction->getUnitCellFromParameters();
+  double zeroShift = m_pawleyParameterFunction->getParameter("ZeroShift");
 
-void PawleyFunction::functionDeriv1D(API::Jacobian *out, const double *xValues,
-                                     const size_t nData) {
-  UNUSED_ARG(out);
-  UNUSED_ARG(xValues);
-  UNUSED_ARG(nData);
+  for (size_t i = 0; i < m_hkls.size(); ++i) {
+    double d = cell.d(m_hkls[i]) + zeroShift;
+    m_peakProfileComposite->getFunction(i)->setParameter(
+        m_pawleyParameterFunction->getProfileFunctionCenterParameterName(),
+        d + zeroShift);
+  }
+
+  m_peakProfileComposite->function(domain, values);
 }
 
 void PawleyFunction::addPeak(const Kernel::V3D &hkl, double centre, double fwhm,

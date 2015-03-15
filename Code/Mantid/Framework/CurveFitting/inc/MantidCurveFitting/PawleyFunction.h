@@ -4,7 +4,6 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionParameterDecorator.h"
-#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ParamFunction.h"
 
@@ -92,8 +91,7 @@ typedef boost::shared_ptr<PawleyParameterFunction> PawleyParameterFunction_sptr;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class PawleyFunction : public API::IFunction1D,
-                       public API::FunctionParameterDecorator {
+class PawleyFunction : public API::FunctionParameterDecorator {
 public:
   PawleyFunction();
   virtual ~PawleyFunction() {}
@@ -103,9 +101,8 @@ public:
   void setCrystalSystem(const std::string &crystalSystem);
   void setProfileFunction(const std::string &profileFunction);
 
-  void function1D(double *out, const double *xValues, const size_t nData) const;
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData);
+  void function(const API::FunctionDomain &domain,
+                API::FunctionValues &values) const;
   void functionDeriv(const API::FunctionDomain &domain,
                      API::Jacobian &jacobian) {
     calNumericalDeriv(domain, jacobian);
