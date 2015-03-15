@@ -220,6 +220,9 @@ class DetectorBank(object):
         #23/3/12 RKH add 2 more variables
         self._radius_corr = 0.0
         self._side_corr =0.0
+		# 10/03/15 RKH add 2 more, valid for all detectors.  WHY do some of the above have an extra leading underscore?? Seems they are the optional ones sorted below
+        self.x_tilt = 0.0
+        self.y_tilt = 0.0
 
         # hold rescale and shift object _RescaleAndShift
         self.rescaleAndShift = self._RescaleAndShift()
@@ -921,7 +924,13 @@ class SANS2D(ISISInstrument):
         FRONT_DET_Z, FRONT_DET_X, FRONT_DET_ROT, REAR_DET_Z, REAR_DET_X = self.getDetValues(ws)
 
         # Deal with front detector
-        # 9/1/2  this all dates to Richard Heenan & Russell Taylor's original python development for SANS2d
+        # 10/03/15 RKH need to add tilt of detector, in degrees, with respect to the horizontal or vertical of the detector plane 
+        # this time we can rotate about the detector's own axis so can use RotateInstrumentComponent, ytilt rotates about x axis, xtilt rotates about z axis
+        #
+        RotateInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X = "1.", Y = "0.", Z = "0.", Angle = frontDet.y_tilt)
+        RotateInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X = "0.", Y = "0.", Z = "1.", Angle = frontDet.x_tilt)
+        #		
+        # 9/1/12  this all dates to Richard Heenan & Russell Taylor's original python development for SANS2d
     	# the rotation axis on the SANS2d front detector is actually set front_det_radius = 306mm behind the detector.
     	# Since RotateInstrumentComponent will only rotate about the centre of the detector, we have to to the rest here.
         # rotate front detector according to value in log file and correction value provided in user file
@@ -949,6 +958,12 @@ class SANS2D(ISISInstrument):
 
 
         # deal with rear detector
+
+        # 10/03/15 RKH need to add tilt of detector, in degrees, with respect to the horizontal or vertical of the detector plane 
+        # Best to do the tilts first, while the detector is still centred on the z axis, ytilt rotates about x axis, xtilt rotates about z axis
+        # NOTE the beam centre coordinates may change
+        RotateInstrumentComponent(Workspace=ws,ComponentName= rearDet.name(), X = "1.", Y = "0.", Z = "0.", Angle = rearDet.y_tilt)
+        RotateInstrumentComponent(Workspace=ws,ComponentName= rearDet.name(), X = "0.", Y = "0.", Z = "1.", Angle = rearDet.x_tilt)
 
         xshift = -xbeam
         yshift = -ybeam
