@@ -826,7 +826,7 @@ def SetPhiLimit(phimin, phimax, use_mirror=True):
     #a beam centre of [0,0,0] makes sense if the detector has been moved such that beam centre is at [0,0,0]
     ReductionSingleton().mask.set_phi_limit(phimin, phimax, use_mirror)
 
-def SetDetectorOffsets(bank, x, y, z, rot, radius, side, xtilt, ytilt ):
+def SetDetectorOffsets(bank, x, y, z, rot, radius, side, xtilt=0.0, ytilt=0.0 ):
     # 10/03/15 RKH added 2 more parameters - xtilt & ytilt
     """
         Adjust detector position away from position defined in IDF. On SANS2D the detector
