@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 import stresstesting
 import mantid
 from mantid.simpleapi import *

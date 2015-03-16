@@ -122,6 +122,13 @@ void CreateSampleWorkspace::init() {
   declareProperty("BinWidth", 200.0,
                   boost::make_shared<BoundedValidator<double>>(0, 100000, true),
                   "The bin width of the X axis (default:200).");
+  declareProperty("PixelSpacing", 0.008,
+                  boost::make_shared<BoundedValidator<double>>(0, 100000, true),
+                  "The spacing between detector pixels in M (default:0.008)");
+  declareProperty("BankDistanceFromSample", 5.0,
+                  boost::make_shared<BoundedValidator<double>>(0, 1000, true),
+                  "The distance along the beam direction from the sample to "
+                  "bank in M (default:5.0)");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -139,6 +146,8 @@ void CreateSampleWorkspace::exec() {
   const double xMin = getProperty("XMin");
   const double xMax = getProperty("XMax");
   double binWidth = getProperty("BinWidth");
+  const double pixelSpacing = getProperty("PixelSpacing");
+  const double bankDistanceFromSample = getProperty("BankDistanceFromSample");
 
   if (xMax <= xMin) {
     throw std::invalid_argument("XMax must be larger than XMin");
@@ -170,8 +179,10 @@ void CreateSampleWorkspace::exec() {
     m_randGen = new Kernel::MersenneTwister(seedValue);
   }
 
-  Instrument_sptr inst =
-      createTestInstrumentRectangular(numBanks, bankPixelWidth);
+  // Create an instrument with one or more rectangular banks.
+  Instrument_sptr inst = createTestInstrumentRectangular(
+      numBanks, bankPixelWidth, pixelSpacing, bankDistanceFromSample);
+
   int num_bins = static_cast<int>((xMax - xMin) / binWidth);
   MatrixWorkspace_sptr ws;
   if (wsType == "Event") {
@@ -391,10 +402,15 @@ void CreateSampleWorkspace::replaceAll(std::string &str,
  * @param num_banks :: number of rectangular banks to create
  * @param pixels :: number of pixels in each direction.
  * @param pixelSpacing :: padding between pixels
+ * @param bankDistanceFromSample :: Distance of first bank from sample (defaults
+ *to 5.0m)
  */
 Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
-    int num_banks, int pixels, double pixelSpacing) {
+    int num_banks, int pixels, double pixelSpacing,
+    const double bankDistanceFromSample) {
   boost::shared_ptr<Instrument> testInst(new Instrument("basic_rect"));
+  // The instrument is going to be set up with z as the beam axis and y as the
+  // vertical axis.
   testInst->setReferenceFrame(
       boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
 
@@ -424,7 +440,8 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
       }
 
     testInst->add(bank);
-    bank->setPos(V3D(0.0, 0.0, 5.0 * banknum));
+    // Set the bank along the z-axis of the instrument. (beam direction).
+    bank->setPos(V3D(0.0, 0.0, bankDistanceFromSample * banknum));
   }
 
   // Define a source component

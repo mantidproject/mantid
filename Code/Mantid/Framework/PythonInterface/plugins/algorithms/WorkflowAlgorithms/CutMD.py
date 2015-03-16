@@ -97,7 +97,7 @@ class CutMD(DataProcessorAlgorithm):
         dim_max = dim.getMaximum()
         return (dim_min, dim_max)
 
-    def __calculate_extents(self, v, u, w, limits):
+    def __calculate_extents(self, u, v, w, limits):
         M=np.array([u,v,w])
         Minv=np.linalg.inv(M)
 
@@ -127,20 +127,40 @@ class CutMD(DataProcessorAlgorithm):
         if not isinstance(projection_table, ITableWorkspace):
             I = np.identity(3)
             return (I[0, :], I[1, :], I[2, :])
-        column_names = projection_table.getColumnNames()
-        u = np.array(projection_table.column(Projection.u))
-        v = np.array(projection_table.column(Projection.v))
-        if not Projection.w in column_names:
-            w = np.cross(v,u)
-        else:
-            w = np.array(projection_table.column(Projection.w))
+        (u, v, w) = (None, None, None)
+        for i in range(projection_table.rowCount()):
+            name = str(projection_table.cell("name", i))
+            value = str(projection_table.cell("value", i))
+            if name == "u":
+                u = np.array(map(float,value.split(",")))
+            if name == "v":
+                v = np.array(map(float,value.split(",")))
+            if name == "w":
+                w = np.array(map(float,value.split(",")))
+
+        if u is None or v is None or w is None:
+            raise ValueError("u, v, or w missing from projection table")
+
         return (u, v, w)
 
     def __units_from_projection_table(self, projection_table):
         if not isinstance(projection_table, ITableWorkspace) or not "type" in projection_table.getColumnNames():
             units = (ProjectionUnit.r, ProjectionUnit.r, ProjectionUnit.r)
         else:
-            units = tuple(projection_table.column("type"))
+            #Extract units for each dimension
+            (u, v, w) = (None, None, None)
+            for i in range(projection_table.rowCount()):
+                name = str(projection_table.cell("name", i))
+                unit = str(projection_table.cell("type", i))
+                if name == "u":
+                    u = unit
+                if name == "v":
+                    v = unit
+                if name == "w":
+                    w = unit
+            if u is None or v is None or w is None:
+                raise ValueError("u, v, or w missing from projection table")
+            units = (u, v, w)
         return units
 
 
@@ -174,12 +194,13 @@ class CutMD(DataProcessorAlgorithm):
     def __verify_projection_input(self, projection_table):
         if isinstance(projection_table, ITableWorkspace):
             column_names = set(projection_table.getColumnNames())
-            if not column_names == set([Projection.u, Projection.v, 'type']):
-                if not column_names == set([Projection.u, Projection.v, 'offsets', 'type']):
-                    if not column_names == set([Projection.u, Projection.v, Projection.w, 'offsets', 'type']):
-                        raise ValueError("Projection table schema is wrong! Column names received: " + str(column_names) )
-            if projection_table.rowCount() != 3:
-                raise ValueError("Projection table expects 3 rows")
+            if column_names != set(["name", "value", "type", "offset"]):
+                raise ValueError("Projection table schema is wrong! Column names received: " + str(column_names) )
+            if projection_table.rowCount() < 2:
+                raise ValueError("Projection table expects at least 2 rows")
+        elif projection_table is not None:
+            print(help(projection_table))
+            raise ValueError("Projection should be either an ITableWorkspace or None. It's a: " + str(type(projection_table)))
 
     def __scale_projection(self, (u, v, w), origin_units, target_units, to_cut):
 
@@ -235,7 +256,7 @@ class CutMD(DataProcessorAlgorithm):
 
         u,v,w = self.__scale_projection(projection, origin_units, target_units, to_cut)
 
-        extents = self.__calculate_extents(v, u, w, ( x_extents, y_extents, z_extents ) )
+        extents = self.__calculate_extents(u, v, w, ( x_extents, y_extents, z_extents ) )
         extents, bins = self.__calculate_steps( extents, ( p1_bins, p2_bins, p3_bins ) )
 
         if not p4_bins_property.isDefault:

@@ -1,5 +1,6 @@
+#pylint: disable=invalid-name,no-init
 import stresstesting
-from mantid.simpleapi import * 
+from mantid.simpleapi import *
 from mantid.api import Workspace
 from ISISCommandInterface import *
 import numpy
@@ -9,33 +10,33 @@ import unittest
 
 
 """
-Allowing the reduction to use already loaded workspace will make it easier to 
+Allowing the reduction to use already loaded workspace will make it easier to
 deal with event mode and producing new workspaces for the reduction of data.
-Till 06/2013 the reload option was available, but not implemented. 
+Till 06/2013 the reload option was available, but not implemented.
 
 In order to protect the system, it is suggested the following integration tests
-to ensure that allowing workspaces as input to the reduction will not disturb the 
+to ensure that allowing workspaces as input to the reduction will not disturb the
 reduction itself, and it is safe.
 
-LOQReductionShouldAcceptLoadedWorkspace ensure some requirements for the reloading. 
+LOQReductionShouldAcceptLoadedWorkspace ensure some requirements for the reloading.
 SANS2DReductionShouldAcceptLoadedWorkspace and SANS2DReductionShouldAcceptLoadedWorkspaceRawFile
-apply the same requirements for SANS2D instruments. 
+apply the same requirements for SANS2D instruments.
 
 
 LOQReductionShouldAcceptLoadedWorkspaceStressTest, SANS2DReductionShouldAcceptLoadedWorkspaceStressTest
 and SANS2DReductionShouldAcceptLoadedWorkspace are wrappers to make unittest.TestCase to fit the stresstesting
-framework. 
+framework.
 
 The other tests are here to ensure the results of providing directly workspaces will be the same that loading
-from files. 
+from files.
 
 """
 
 class LOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
     """
-    The following tests is to ensure that the reload obeys the following requirement: 
+    The following tests is to ensure that the reload obeys the following requirement:
      * If reload is True the real data will be always reloaded from the file
-     * If reload is False, it will be used, if it pass the following tests: 
+     * If reload is False, it will be used, if it pass the following tests:
        * The instrument components have not been moved
     """
     def setUp(self):
@@ -57,11 +58,11 @@ class LOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
         my_workspace.setY(0,aux)
         # ask to use the loaded workspace
         AssignSample(my_workspace,reload=False)
-                
+
         ws_name = ReductionSingleton().get_sample().get_wksp_name()
-        
+
         self.assertTrue(ws_name, my_workspace.name())
-        
+
         self.assertTrue(my_workspace.dataY(0)[10],5)
         # ensure that it is able to execute the reduction
         Reduce()
@@ -76,9 +77,9 @@ class LOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
         my_workspace.setY(0,aux)
         # ask to use the loaded workspace
         AssignSample(my_workspace,reload=True)
-                
+
         ws_name = ReductionSingleton().get_sample().get_wksp_name()
-        # it is different, because, it will compose the name using its rule, 
+        # it is different, because, it will compose the name using its rule,
         # wich, for sure, will be different of my_workspace.
         self.assertFalse(ws_name==my_workspace.name())
         self.assertFalse(mtd[ws_name].dataY(0)[10]==5)
@@ -118,20 +119,20 @@ class SANS2DReductionShouldAcceptLoadedWorkspaceRawFile(SANS2DReductionShouldAcc
         self.control_name = '5547front_1D_4.6_12.85'
 
 class LOQReductionShouldAcceptLoadedWorkspaceStressTest(stresstesting.MantidStressTest):
-  cl = LOQReductionShouldAcceptLoadedWorkspace
-  def runTest(self):
-    self._success = False
+    cl = LOQReductionShouldAcceptLoadedWorkspace
+    def runTest(self):
+        self._success = False
     # Custom code to create and run this single test suite
-    suite = unittest.TestSuite()
-    suite.addTest( unittest.makeSuite(self.cl, "test"))
-    runner = unittest.TextTestRunner()
+        suite = unittest.TestSuite()
+        suite.addTest( unittest.makeSuite(self.cl, "test"))
+        runner = unittest.TextTestRunner()
     # Run using either runner
-    res = runner.run(suite)
-    if res.wasSuccessful():
-        self._success = True
+        res = runner.run(suite)
+        if res.wasSuccessful():
+            self._success = True
 
-  def validate(self):
-    return self._success 
+    def validate(self):
+        return self._success
 
 class SANS2DReductionShouldAcceptLoadedWorkspaceStressTest(LOQReductionShouldAcceptLoadedWorkspaceStressTest):
     cl = SANS2DReductionShouldAcceptLoadedWorkspace
@@ -172,7 +173,7 @@ class LOQTransFitWorkspace2DWithLoadedWorkspace(stresstesting.MantidStressTest):
         return '54431main_2D_3.0_4.0_suff','LOQTransFitWorkspace2D.nxs'
 
 class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(stresstesting.MantidStressTest):
-    """ It will repeat the test done at LOQCentreNoGrav but using 
+    """ It will repeat the test done at LOQCentreNoGrav but using
     loaded workspaces
     """
     def runTest(self):
@@ -189,16 +190,16 @@ class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(stresstesting.Mant
         Can = LoadRaw('54432.raw')
         CanTrans_Sample = LoadRaw('54434.raw')
         CanTrans_Direct = LoadRaw('54433.raw')
-        
+
         AssignSample(Sample, False)
         TransmissionSample(Trans_Sample, Trans_Direct, False)
         AssignCan(Can, False)
         TransmissionCan(CanTrans_Sample, CanTrans_Direct, False)
-        
+
         FindBeamCentre(60,200, 9)
-        
+
         WavRangeReduction(3, 9, DefaultTrans)
-    
+
     def validate(self):
         return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed.nxs'
 
@@ -221,14 +222,14 @@ class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_2(stresstesting.Mant
         Can = LoadRaw('54432.raw')
         CanTrans_Sample = LoadRaw('54434.raw')
         CanTrans_Direct = LoadRaw('54433.raw')
-        
+
         SetCentre(324.765, 327.670)
 
         AssignSample(Sample, False)
         TransmissionSample(Trans_Sample, Trans_Direct, False)
         AssignCan(Can, False)
         TransmissionCan(CanTrans_Sample, CanTrans_Direct, False)
-        
+
         WavRangeReduction(3, 9, DefaultTrans)
 
     def validate(self):
@@ -240,86 +241,86 @@ class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_2(stresstesting.Mant
         self.disableChecking.append('Instrument')
 
         return '54431main_1D_3.0_9.0','LOQCentreNoGrav.nxs'
-    
+
 
 class SANSLOQCan2DReloadWorkspace(stresstesting.MantidStressTest):
-    
-  def runTest(self):
-    config["default.instrument"] = "LOQ"          
-    LOQ()
-    Set2D()
-    Detector("main-detector-bank")
-    MaskFile('MASK.094AA')
-    # apply some small artificial shift
-    SetDetectorOffsets('REAR', -1.0, 1.0, 0.0, 0.0, 0.0, 0.0)    
-    Gravity(True)
-    sample = Load('99630')
-    can = Load('99631')
-    AssignSample(sample, False)
-    AssignCan(can, False)
-    
-    WavRangeReduction(None, None, False)
 
-    
-  def validate(self):
+    def runTest(self):
+        config["default.instrument"] = "LOQ"
+        LOQ()
+        Set2D()
+        Detector("main-detector-bank")
+        MaskFile('MASK.094AA')
+    # apply some small artificial shift
+        SetDetectorOffsets('REAR', -1.0, 1.0, 0.0, 0.0, 0.0, 0.0)
+        Gravity(True)
+        sample = Load('99630')
+        can = Load('99631')
+        AssignSample(sample, False)
+        AssignCan(can, False)
+
+        WavRangeReduction(None, None, False)
+
+
+    def validate(self):
     # Need to disable checking of the Spectra-Detector map because it isn't
     # fully saved out to the nexus file (it's limited to the spectra that
     # are actually present in the saved workspace).
-    self.disableChecking.append('SpectraMap')
-    self.disableChecking.append('Instrument')
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Instrument')
     #when comparing LOQ files you seem to need the following
-    self.disableChecking.append('Axes')
+        self.disableChecking.append('Axes')
     # the change in number is because the run number reported from 99630 is 53615
-    return '53615main_2D_2.2_10.0','SANSLOQCan2D.nxs'
+        return '53615main_2D_2.2_10.0','SANSLOQCan2D.nxs'
 
 class SANS2DFrontNoGravReloadWorkspace(stresstesting.MantidStressTest):
-    
-  def runTest(self):
-    config["default.instrument"] = "SANS2D"
-    SANS2D()
-    MaskFile('MASKSANS2D_094i_RKH.txt')
-    SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
-    SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
-    Gravity(False)
-    Set1D()
-    Sample = LoadNexus('2500')
-    AssignSample(Sample, False)
-    WavRangeReduction(4.6, 12.85, False)
 
-  def validate(self):
-    self.disableChecking.append('SpectraMap')
-    self.disableChecking.append('Axes')
-    self.disableChecking.append('Instrument')
-    return '2500front_1D_4.6_12.85','SANS2DFrontNoGrav.nxs'
+    def runTest(self):
+        config["default.instrument"] = "SANS2D"
+        SANS2D()
+        MaskFile('MASKSANS2D_094i_RKH.txt')
+        SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
+        SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
+        Gravity(False)
+        Set1D()
+        Sample = LoadNexus('2500')
+        AssignSample(Sample, False)
+        WavRangeReduction(4.6, 12.85, False)
+
+    def validate(self):
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Axes')
+        self.disableChecking.append('Instrument')
+        return '2500front_1D_4.6_12.85','SANS2DFrontNoGrav.nxs'
 
 class SANS2DWaveloopsReloadWorkspace(stresstesting.MantidStressTest):
-    
-  def runTest(self):
-    config["default.instrument"] = "SANS2D"
-    SANS2D()
-    MaskFile('MASKSANS2D.091A')
-    Gravity(True)
-    Set1D()
-    s = Load('992')
-    s_t = Load('988')
-    direct = Load('987')
-    direct_can = CloneWorkspace(direct)
-    c = Load('993')
-    c_t = Load('989')    
-    AssignSample(s,False)
-    TransmissionSample(s_t, direct, False)
-    AssignCan(c, False)
-    TransmissionCan(c_t, direct_can, False)
 
-    CompWavRanges([3, 5, 7, 11], False)
-    
-  def validate(self):
-    self.disableChecking.append('SpectraMap')
-    self.disableChecking.append('Axes')
-    self.disableChecking.append('Instrument')
-    # testing one of the workspaces that is produced, best not to choose the 
+    def runTest(self):
+        config["default.instrument"] = "SANS2D"
+        SANS2D()
+        MaskFile('MASKSANS2D.091A')
+        Gravity(True)
+        Set1D()
+        s = Load('992')
+        s_t = Load('988')
+        direct = Load('987')
+        direct_can = CloneWorkspace(direct)
+        c = Load('993')
+        c_t = Load('989')
+        AssignSample(s,False)
+        TransmissionSample(s_t, direct, False)
+        AssignCan(c, False)
+        TransmissionCan(c_t, direct_can, False)
+
+        CompWavRanges([3, 5, 7, 11], False)
+
+    def validate(self):
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Axes')
+        self.disableChecking.append('Instrument')
+    # testing one of the workspaces that is produced, best not to choose the
     # first one in produced by the loop as this is the least error prone
-    return '992rear_1D_7.0_11.0','SANS2DWaveloops.nxs'
+        return '992rear_1D_7.0_11.0','SANS2DWaveloops.nxs'
 
 
 if __name__ == "__main__":

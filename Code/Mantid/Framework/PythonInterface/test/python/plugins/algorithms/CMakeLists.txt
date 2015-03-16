@@ -15,6 +15,7 @@ set ( TEST_PY_FILES
   DSFinterpTest.py
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
+  FlatPlatePaalmanPingsCorrectionTest.py
   GetEiT0atSNSTest.py
   IndirectAnnulusAbsorptionTest.py
   IndirectCylinderAbsorptionTest.py

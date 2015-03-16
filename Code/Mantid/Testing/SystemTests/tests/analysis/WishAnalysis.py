@@ -5,7 +5,7 @@ class WishAnalysis(stresstesting.MantidStressTest):
     """
     Runs the WISH analysis chain on one bank of data
     """
-    
+
     def runTest(self):
         # MG: 5/5/2010: The test machine only has 1 Gb of RAM and can't handle a whole bank of WISH
         # load Data
@@ -35,13 +35,13 @@ class WishAnalysis(stresstesting.MantidStressTest):
         AlignDetectors(InputWorkspace="w16748-1",OutputWorkspace="w16748-1",CalibrationFile="wish_grouping_noends2_no_offsets_nov2009.cal")
         #focus data
         DiffractionFocussing(InputWorkspace="w16748-1",OutputWorkspace="w16748-1foc",GroupingFileName="wish_grouping_noends2_no_offsets_nov2009.cal")
-	DeleteWorkspace(Workspace="w16748-1")
+        DeleteWorkspace(Workspace="w16748-1")
         CropWorkspace(InputWorkspace="w16748-1foc",OutputWorkspace="w16748-1foc",XMin="0.83",XMax="45")
         #load pre-processed empty and subtract
         LoadNexusProcessed(Filename="emptycryo3307-1foc.nx5",OutputWorkspace="empty")
         RebinToWorkspace(WorkspaceToRebin="empty",WorkspaceToMatch="w16748-1foc",OutputWorkspace="empty")
         Minus(LHSWorkspace="w16748-1foc",RHSWorkspace="empty",OutputWorkspace="w16748-1foc")
-	DeleteWorkspace(Workspace="empty")
+        DeleteWorkspace(Workspace="empty")
         #Load preprocessed Vanadium and divide
         LoadNexusProcessed(Filename="vana3123-1foc-SS.nx5",OutputWorkspace="vana")
         RebinToWorkspace(WorkspaceToRebin="vana",WorkspaceToMatch="w16748-1foc",OutputWorkspace="vana")

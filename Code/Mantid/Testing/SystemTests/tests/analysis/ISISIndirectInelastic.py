@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 import stresstesting
 import os
 import platform
@@ -376,7 +377,7 @@ class ISISIndirectInelasticReductionOutput(stresstesting.MantidStressTest):
 
     def assert_spe_file_matches(self):
         #Old SPE format:
-        #   '       3    1532', 
+        #   '       3    1532',
         #   '### Phi Grid',
         #   ' 5.000E-01 1.500E+00 2.500E+00 3.500E+00',
         #   '### Energy Grid',
@@ -1051,7 +1052,7 @@ class ISISIndirectInelasticFuryAndFuryFitMulti(ISISIndirectInelasticBase):
 class OSIRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
 
     def skipTests(self):
-        return (platform.system() == "Darwin")
+        return platform.system() == "Darwin"
 
     def __init__(self):
         ISISIndirectInelasticFuryAndFuryFitMulti.__init__(self)

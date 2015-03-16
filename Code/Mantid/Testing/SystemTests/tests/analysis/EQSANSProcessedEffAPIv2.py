@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 import stresstesting
 import mantid
 from mantid.simpleapi import *
@@ -30,13 +31,13 @@ class EQSANSProcessedEff(stresstesting.MantidStressTest):
         SetTransmission(1.0, 0.0)
         TotalChargeNormalization(normalize_to_beam=False)
         SensitivityCorrection("EQSANS_sensitivity.nxs")
-        Reduce1D()  
-        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=277.781, 
-              Operation='Multiply', OutputWorkspace="EQSANS_1466_event_Iq")              
-                
+        Reduce1D()
+        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=277.781,
+              Operation='Multiply', OutputWorkspace="EQSANS_1466_event_Iq")
+
     def validate(self):
         # Be more tolerant with the output, mainly because of the errors.
-        # The following tolerance check the errors up to the third digit.   
+        # The following tolerance check the errors up to the third digit.
         self.tolerance = 0.1
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')

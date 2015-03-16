@@ -95,6 +95,8 @@ signals:
 public slots:
   /// Check the coordinates for the peaks overlay if necessary
   void checkPeaksCoordinates();
+  /// Listen to destruction of peak sources
+  void onPeakSourceDestroyed();
 
 protected slots:
   /// Check state of toggle button with respect to peak coordinates.
