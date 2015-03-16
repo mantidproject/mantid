@@ -25,6 +25,7 @@ public:
 
   Geometry::PointGroup::CrystalSystem getCrystalSystem() const;
   Geometry::UnitCell getUnitCellFromParameters() const;
+  void setParametersFromUnitCell(const Geometry::UnitCell &cell);
 
   std::string getProfileFunctionName() const {
     return getAttribute("ProfileFunction").asString();
@@ -100,6 +101,7 @@ public:
 
   void setCrystalSystem(const std::string &crystalSystem);
   void setProfileFunction(const std::string &profileFunction);
+  void setUnitCell(const std::string &unitCellString);
 
   void function(const API::FunctionDomain &domain,
                 API::FunctionValues &values) const;
@@ -108,9 +110,14 @@ public:
     calNumericalDeriv(domain, jacobian);
   }
 
-  void addPeak(const Kernel::V3D &hkl, double centre, double fwhm,
-               double height);
-  API::IPeakFunction_sptr getPeak(size_t i) const;
+  void setPeaks(const std::vector<Kernel::V3D> &hkls, double fwhm,
+                double height);
+
+  void clearPeaks();
+
+  void addPeak(const Kernel::V3D &hkl, double fwhm, double height);
+  API::IPeakFunction_sptr getPeakFunction(size_t i) const;
+  Kernel::V3D getPeakHKL(size_t i) const;
 
 protected:
   void init();

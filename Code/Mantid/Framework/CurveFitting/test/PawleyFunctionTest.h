@@ -279,7 +279,7 @@ public:
 
     TS_ASSERT_EQUALS(fn.nParams(), 7);
 
-    fn.addPeak(V3D(), 2.0, 3.0, 4.0);
+    fn.addPeak(V3D(), 3.0, 4.0);
 
     TS_ASSERT_EQUALS(fn.nParams(), 10);
   }

@@ -68,6 +68,44 @@ UnitCell PawleyParameterFunction::getUnitCellFromParameters() const {
   return UnitCell();
 }
 
+void PawleyParameterFunction::setParametersFromUnitCell(const UnitCell &cell) {
+  // Parameter "a" exists in all crystal systems.
+  setParameter("a", cell.a());
+
+  try {
+    setParameter("b", cell.b());
+  }
+  catch (std::invalid_argument) {
+    // do nothing.
+  }
+
+  try {
+    setParameter("c", cell.c());
+  }
+  catch (std::invalid_argument) {
+    // do nothing
+  }
+
+  try {
+    setParameter("Alpha", cell.alpha());
+  }
+  catch (std::invalid_argument) {
+    // do nothing.
+  }
+  try {
+    setParameter("Beta", cell.beta());
+  }
+  catch (std::invalid_argument) {
+    // do nothing.
+  }
+  try {
+    setParameter("Gamma", cell.gamma());
+  }
+  catch (std::invalid_argument) {
+    // do nothing.
+  }
+}
+
 void PawleyParameterFunction::function(const FunctionDomain &domain,
                                        FunctionValues &values) const {
   UNUSED_ARG(domain);
@@ -218,6 +256,11 @@ void PawleyFunction::setProfileFunction(const std::string &profileFunction) {
   m_compositeFunction->checkFunction();
 }
 
+void PawleyFunction::setUnitCell(const std::string &unitCellString) {
+  m_pawleyParameterFunction->setParametersFromUnitCell(
+      strToUnitCell(unitCellString));
+}
+
 void PawleyFunction::function(const FunctionDomain &domain,
                               FunctionValues &values) const {
   UnitCell cell = m_pawleyParameterFunction->getUnitCellFromParameters();
@@ -233,7 +276,23 @@ void PawleyFunction::function(const FunctionDomain &domain,
   m_peakProfileComposite->function(domain, values);
 }
 
-void PawleyFunction::addPeak(const Kernel::V3D &hkl, double centre, double fwhm,
+void PawleyFunction::clearPeaks() {
+  m_peakProfileComposite = boost::dynamic_pointer_cast<CompositeFunction>(
+      FunctionFactory::Instance().createFunction("CompositeFunction"));
+  m_compositeFunction->replaceFunction(1, m_peakProfileComposite);
+  m_hkls.clear();
+}
+
+void PawleyFunction::setPeaks(const std::vector<Kernel::V3D> &hkls, double fwhm,
+                              double height) {
+  clearPeaks();
+
+  for (size_t i = 0; i < hkls.size(); ++i) {
+    addPeak(hkls[i], fwhm, height);
+  }
+}
+
+void PawleyFunction::addPeak(const Kernel::V3D &hkl, double fwhm,
                              double height) {
   m_hkls.push_back(hkl);
 
@@ -241,7 +300,8 @@ void PawleyFunction::addPeak(const Kernel::V3D &hkl, double centre, double fwhm,
       FunctionFactory::Instance().createFunction(
           m_pawleyParameterFunction->getProfileFunctionName()));
 
-  peak->setCentre(centre);
+  peak->fix(peak->parameterIndex(
+      m_pawleyParameterFunction->getProfileFunctionCenterParameterName()));
   peak->setFwhm(fwhm);
   peak->setHeight(height);
 
@@ -250,10 +310,12 @@ void PawleyFunction::addPeak(const Kernel::V3D &hkl, double centre, double fwhm,
   m_compositeFunction->checkFunction();
 }
 
-IPeakFunction_sptr PawleyFunction::getPeak(size_t i) const {
+IPeakFunction_sptr PawleyFunction::getPeakFunction(size_t i) const {
   return boost::dynamic_pointer_cast<IPeakFunction>(
       m_peakProfileComposite->getFunction(i));
 }
+
+Kernel::V3D PawleyFunction::getPeakHKL(size_t i) const { return m_hkls[i]; }
 
 void PawleyFunction::init() {
   setDecoratedFunction("CompositeFunction");
