@@ -181,17 +181,24 @@ namespace IDA
       m_uiForm.ppPlot->removeSpectrum("Fit");
 
       // Get the workspace
-      auto groupWs = Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::WorkspaceGroup>(wsName.toStdString());
+      auto groupWs = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(wsName.toStdString());
+      auto groupWsNames = groupWs->getNames();
 
-      // If the user has just done a single fit then we probably havent got a workspace to plot
-      // when the change the spectrum selector
-      if(specNo >= static_cast<int>(groupWs->size()))
-        return;
-
-      auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(groupWs->getItem(specNo));
-
-      // Plot the new fit
-      m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
+      // Find the correct fit workspace and plot it
+      std::string searchString = "_" + std::to_string(specNo) + "_Workspace";
+      for(auto it = groupWsNames.begin(); it != groupWsNames.end(); ++it)
+      {
+        std::string wsName = *it;
+        if(wsName.find(searchString) != std::string::npos)
+        {
+          // Get the fit workspace
+          auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+          // Plot the new fit
+          m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
+          // Nothing else to do
+          return;
+        }
+      }
     }
   }
 
