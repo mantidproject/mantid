@@ -165,6 +165,7 @@ set ( INC_FILES
 	inc/MantidKernel/InstrumentInfo.h
 	inc/MantidKernel/InternetHelper.h
 	inc/MantidKernel/Interpolation.h
+	inc/MantidKernel/IRemoteJobManager.h
 	inc/MantidKernel/LibraryManager.h
 	inc/MantidKernel/LibraryWrapper.h
 	inc/MantidKernel/ListValidator.h
