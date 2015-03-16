@@ -21,29 +21,19 @@ Usage
 
 .. testcode:: ExIndirectCalibrationSimple
 
-   import os
-
    # Create a calibration workspace
    cal_ws = IndirectCalibration(InputFiles='IRS26173.raw',
                                 DetectorRange='3,53',
                                 PeakRange='62500,65000',
                                 BackgroundRange='59000,61500')
 
-   # Save the workspace to a NeXus file
-   calib_file = 'iris_calibration.nxs'
-   SaveNexus(InputWorkspace=cal_ws, Filename=calib_file)
-
-   # Check the output file
-   print "File Exists:", os.path.exists(calib_file)
+   print 'Calibration workspace has %d bin(s) and %d spectra.' % (
+          cal_ws.blocksize(), cal_ws.getNumberHistograms())
 
 Output:
 
 .. testoutput:: ExIndirectCalibrationSimple
 
-   File Exists: True
-
-.. testcleanup:: ExIndirectCalibrationSimple
-
-   os.remove(calib_file)
+   Calibration workspace has 1 bin(s) and 50 spectra.
 
 .. categories::
