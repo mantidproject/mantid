@@ -257,6 +257,22 @@ def FitDialog(*args, **kwargs):
 
 #--------------------------------------------------- --------------------------
 
+#This dictionary maps algorithm names to functions that preprocess their inputs
+#in the simpleapi. The functions take args and kwargs as regular arguments and
+#modify them as required.
+
+_algorithm_preprocessors = dict()
+
+def _pp_cutmd(args, kwargs):
+  if "P1Bin" in kwargs:
+    bins = kwargs["P1Bin"]
+    if isinstance(bins, tuple):
+      #P1Bin has been provided as a tuple, we need to split it out into PNBin(s)
+      for bin in range(len(bins)):
+        kwargs["P{0}Bin".format(bin+1)] = bins[bin]
+
+_algorithm_preprocessors["CutMD"] = _pp_cutmd
+
 def _get_function_spec(func):
     """Get the python function signature for the given function object
 
@@ -550,6 +566,11 @@ def _create_algorithm_function(algorithm, version, _algm_object):
             Note that if the Version parameter is passed, we will create
             the proper version of the algorithm without failing.
         """
+
+        # If needed, preprocess this algorithm's input
+        if algorithm in _algorithm_preprocessors:
+          _algorithm_preprocessors[algorithm](args, kwargs)
+
         _version = version
         if "Version" in kwargs:
             _version = kwargs["Version"]
