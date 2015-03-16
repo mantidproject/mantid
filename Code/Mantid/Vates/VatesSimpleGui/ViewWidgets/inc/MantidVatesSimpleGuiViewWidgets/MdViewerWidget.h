@@ -199,8 +199,6 @@ private:
   void resetCurrentView(int workspaceType, const std::string& instrumentName);
   /// Render rebinned workspace
   void prepareRebinnedWorkspace(const std::string rebinnedWorkspaceName, std::string sourceType); 
-  /// Set visibility listener
-  void setVisibilityListener();
   /// Handle drag and drop of peaks workspcaes
   void handleDragAndDropPeaksWorkspaces(QEvent* e, QString text, QStringList& wsNames);
   /// Set up the default color for the background of the view.

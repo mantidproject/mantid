@@ -94,7 +94,6 @@ namespace Mantid
       /**
        * Catch the deletion of either the rebinned or the original workspace.
        * @param wsName The name of the workspace.
-       * @param ws The handle to the workspace
        */
       void RebinnedSourcesManager::preDeleteHandle(const std::string &wsName, const boost::shared_ptr<Mantid::API::Workspace>)
       {
@@ -153,6 +152,7 @@ namespace Mantid
 
       /**
        * Get workspace name and type
+       * @param source The pipeline source.
        * @param workspaceName Reference to workspace name.
        * @param workspaceType Reference to workspace type.
        */
@@ -382,7 +382,7 @@ namespace Mantid
 
       /**
        * Stop keeping tabs on the specific workspace pair
-       * @param rebinnedWorspace The name of the rebinned workspace.
+       * @param rebinnedWorkspace The name of the rebinned workspace.
        */
       void RebinnedSourcesManager::untrackWorkspaces(std::string rebinnedWorkspace)
       {

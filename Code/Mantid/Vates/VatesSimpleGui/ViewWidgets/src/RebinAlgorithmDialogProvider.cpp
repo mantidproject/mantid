@@ -125,6 +125,7 @@ namespace Mantid
        * @param algorithm The algorithm which is to be used.
        * @param inputWorkspace The name of the input workspace.
        * @param outputWorkspace The name of the output workspace.
+       * @param algorithmType The algorithm type.
        * @returns The algorithm dialog
        */
       MantidQt::API::AlgorithmDialog* RebinAlgorithmDialogProvider::createDialog(Mantid::API::IAlgorithm_sptr algorithm,
