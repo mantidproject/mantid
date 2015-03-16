@@ -121,6 +121,7 @@ set( DOCS_BUILDDIR ${CMAKE_BINARY_DIR}/docs )
 # Framework Build options
 set ( CXXTEST_SINGLE_LOGFILE CACHE BOOL "Switch to have the tests for each package run together")
 set ( CXXTEST_ADD_PERFORMANCE OFF CACHE BOOL "Switch to add Performance tests to the list of tests run by ctest?")
+set ( NO_OPENCASCADE OFF CACHE BOOL "Disable OpenCascade-based 3D visualisation")
 
 add_subdirectory ( Framework )
 
