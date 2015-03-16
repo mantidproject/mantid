@@ -21,27 +21,37 @@ except AttributeError:
 from matplotlib.pyplot import setp
 
 # FIXME - Remove after debugging
-NOMANTID = True
+NOMANTID = None
 
 try:
-    import mantid.simpleapi as api
-    import mantid.kernel
-    from mantid.simpleapi import AnalysisDataService
-    from mantid.kernel import ConfigService
+    import mantid
     IMPORT_MANTID = True
 except ImportError as e:
-    if NOMANTID is False: 
-        print "Unable to import Mantid: %s." % (str(e))
-        raise e
+    sys.path.append('/home/wzz/Mantid_Project/Mantid2/Code/release/bin')
+    try:
+        import mantid
+    except ImportError as e2:
+        if NOMANTID is False: 
+            print "Unable to import Mantid: %s." % (str(e))
+            raise e
+        else:
+            print "NO MANTID IS USED FOR DEBUGGING PURPOSE."
+            IMPORT_MANTID = False
     else:
-        print "NO MANTID IS USED FOR DEBUGGING PURPOSE."
+        IMPORT_MANTID = True
+        NOMANTID = True
+finally:
+    if IMPORT_MANTID is True:
+        import mantid.simpleapi as api
+        import mantid.kernel
+        from mantid.simpleapi import AnalysisDataService
+        from mantid.kernel import ConfigService
 
 
 #----- default configuration ---------------
 DEFAULT_SERVER = 'http://neutron.ornl.gov/user_data'
 DEFAULT_INSTRUMENT = 'hb2a'
 DEFAULT_WAVELENGTH = 2.4100
-
 #-------------------------------------------
 
 
@@ -170,6 +180,9 @@ class MainWindow(QtGui.QMainWindow):
         # UI widgets setup
         self.ui.comboBox_outputFormat.addItems(['Fullprof', 'GSAS', 'Fullprof+GSAS'])
 
+        # FIXME : Need to disable some widgets... consider to refactor the code
+        self.ui.radioButton_useServer.setChecked(True)
+        self.ui.radioButton_useLocal.setChecked(False)
 
         # Set up data source
         self._serverAddress = DEFAULT_SERVER 
@@ -180,14 +193,15 @@ class MainWindow(QtGui.QMainWindow):
         self._currUnit = '2theta'
 
         # Workspaces
-        self._outws = None
+        self._myReducedPDWs  = None
         self._prevoutws = None
 
         self._ptNo = None
         self._detNo = None
 
         # State machine
-        self._inPlotState = False
+        # self._inPlotState = False
+
 
         return
 
@@ -284,9 +298,11 @@ class MainWindow(QtGui.QMainWindow):
             self._logError("Bin size must be specified.")
 
         unit = self._currUnit
+        wavelength = float(self.ui.lineEdit_wavelength.text())
 
         # Reduce data
-        execstatus = self._reduceSpicePDData(datafilename, unit, xmin, xmax, binsize)
+        execstatus = self._reduceSpicePDData(datafilename, unit, xmin, xmax, binsize, wavelength)
+        print "[DB] reduction status = ", execstatus
 
         # Plot data
         if execstatus is True:
@@ -301,6 +317,8 @@ class MainWindow(QtGui.QMainWindow):
         # check binning parameters and target unit
         change, xmin, xmax, binsize = self._uiCheckBinningParameters(self._myMinX, self._myMaxX, 
             self._myBinSize, self._myCurrentUnit, "2theta")
+
+        print "[DB] Rebin is required: ", change
         
         # no change,  return with a notice
         if change is False:
@@ -476,7 +494,7 @@ class MainWindow(QtGui.QMainWindow):
         """ Save data
         """
         # check whether it is fine to save 
-        if self._outws is None:
+        if self._myReducedPDWs is None:
             self._logError("No reduced diffraction data to save.")
             #return
 
@@ -570,7 +588,6 @@ class MainWindow(QtGui.QMainWindow):
             if status is False:
                 self._logError(errmsg)
                 self._srcFileName = None
-                return
 
         elif self._srcAtLocal is True:
             # Data from local
@@ -582,12 +599,12 @@ class MainWindow(QtGui.QMainWindow):
         return self._srcFileName
 
 
-    def _reduceSpicePDData(self, datafilename, unit, xmin, xmax, binsize):
+    def _reduceSpicePDData(self, datafilename, unit, xmin, xmax, binsize, wavelength):
         """ Reduce SPICE powder diffraction data. 
         """
         # cache the previous one
-        self._prevoutws = self._outws
-        self._outws = None
+        self._prevoutws = self._myReducedPDWs
+        self._myReducedPDWs = None
 
         # Rebin
         if xmin is None or xmax is None:
@@ -596,6 +613,7 @@ class MainWindow(QtGui.QMainWindow):
             binpar = "%.7f, %.7f, %.7f" % (xmin, binsize, xmax)
 
         # base workspace name
+        print "base workspace name: ", datafilename
         basewsname = os.path.basename(datafilename).split(".")[0]
 
         # load SPICE
@@ -610,7 +628,7 @@ class MainWindow(QtGui.QMainWindow):
         api.ConvertSpiceDataToRealSpace(InputWorkspace=tablewsname,
                 RunInfoWorkspace=infowsname,
                 OutputWorkspace=datamdwsname,
-                OutputMontiorWorkspace=monitorwsname)
+                OutputMonitorWorkspace=monitorwsname)
 
         self._datamdws = AnalysisDataService.retrieve(datamdwsname)
         self._monitormdws = AnalysisDataService.retrieve(monitorwsname)
@@ -629,21 +647,37 @@ class MainWindow(QtGui.QMainWindow):
                 UnitOutput = unit, 
                 NeutronWaveLength=wavelength)
 
-        self._outws = AnalysisDataService.retrieve(outwsname)
+        print "[DB] Reduction is finished.  Data is in workspace %s. " % (datamdwsname)
 
-        return 
+        # Set up class variable for min/max and 
+        outws = AnalysisDataService.retrieve(outwsname)
+        if outws is not None:
+            self._myReducedPDWs = outws
+
+        self._myMinX = self._myReducedPDWs.readX(0)[0]
+        self._myMaxX = self._myReducedPDWs.readX(0)[-1]
+        self._myBinSize = binsize
+        self._myCurrentUnit = unit
+        
+        return True
 
 
     def _plotReducedData(self, targetunit, spectrum):
         """ Plot reduced data stored in self._reducedWS to 
         """
+        # print "[DB] Plot reduced data!", "_inPlotState = ", str(self._inPlotState)
+
         # whether the data is load?
-        if self._inPlotState is False or self._myReducedPDWs is None:
+        if self._myReducedPDWs is None:
             self._logWarning("No data to plot!")
             return
             
         # plot
-        self.ui.graphicsView_reducedData.plot(self._myReducedPDWs.readX(spectrum),
+        # FIXME - Should not modify the original workspace
+        wsname = str(self._myReducedPDWs)
+        api.ConvertToPointData(InputWorkspace=self._myReducedPDWs, OutputWorkspace=wsname)
+        self._myReducedPDWs = AnalysisDataService.retrieve(wsname)
+        self.ui.graphicsView_reducedData.addPlot(self._myReducedPDWs.readX(spectrum),
             self._myReducedPDWs.readY(spectrum))
             
         return
@@ -663,7 +697,7 @@ class MainWindow(QtGui.QMainWindow):
         # check x-min
         if len(xmin) > 0:
             xmin = float(xmin)
-            if ( (curmin is None) or (curmin is not None and abs(xmin-curxmin) > 1.0E-5) ):
+            if ( (self._myMinX is None) or (self._myMinX is not None and abs(xmin-self._myMinX) > 1.0E-5) ):
                 change = True
         else:
             xmin = None
@@ -671,7 +705,8 @@ class MainWindow(QtGui.QMainWindow):
         # check x-max
         if len(xmax) > 0: 
             xmax = float(xmax)
-            if ( (curmax is None) or (curmax is not None and abs(xmax-curxmax) > 1.0E-5) ):
+            if ( (self._myMaxX is None) or (self._myMaxX is not None and 
+                abs(xmax-self._myMaxX) > 1.0E-5) ):
                 change = True
         else:
             xmax = None
@@ -679,7 +714,8 @@ class MainWindow(QtGui.QMainWindow):
         # check binsize
         if len(binsize) > 0: 
             binsize = float(binsize)
-            if ( (curbinsize is None) or (curbinsize is not None and abs(binsize-curbinsize) > 1.0E-5) ):
+            if ( (self._myBinSize is None) or (self._myBinSize is not None and 
+                abs(binsize-self._myBinSize) > 1.0E-5) ):
                 change = True
         else:
             binsize = None
@@ -689,8 +725,6 @@ class MainWindow(QtGui.QMainWindow):
             change = True
             
         return (change, xmin, xmax, binsize)
-
-
 
 
     def _rebin(self, unit, xmin, binsize, xmax):
@@ -727,8 +761,6 @@ class MainWindow(QtGui.QMainWindow):
 
 
 
-
-
     def _logDebug(self, dbinfo):
         """ Log debug information
         """
@@ -738,7 +770,13 @@ class MainWindow(QtGui.QMainWindow):
     def _logError(self, errinfo):
         """ Log error information
         """
+        print "Log(Error): %s" % (errinfo)
 
+
+    def _logWarning(self, errinfo):
+        """ Log error information
+        """
+        print "Log(Warning): %s" % (errinfo)
 
 
     def _downloadFile(self, url, localfilepath):
@@ -751,7 +789,6 @@ class MainWindow(QtGui.QMainWindow):
 
         if wbuf.count('not found') > 0:
             return (False, "File cannot be found at %s." % (url))
-
 
         ofile = open(localfilepath, 'w')
         ofile.write(wbuf)

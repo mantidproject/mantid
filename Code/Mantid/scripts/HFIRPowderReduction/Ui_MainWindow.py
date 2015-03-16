@@ -2,13 +2,12 @@
 
 # Form implementation generated from reading ui file 'Ui_MainWindow.ui'
 #
-# Created: Sun Mar 15 21:56:57 2015
-#      by: PyQt4 UI code generator 4.10.4
+# Created: Mon Mar 16 15:24:34 2015
+#      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
-
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -22,6 +21,8 @@ try:
 except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
+
+from MplFigureCanvas import *
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -69,6 +70,12 @@ class Ui_MainWindow(object):
         self.horizontalLayout_13 = QtGui.QHBoxLayout()
         self.horizontalLayout_13.setObjectName(_fromUtf8("horizontalLayout_13"))
         self.label_ptNo = QtGui.QLabel(self.tab_3)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_ptNo.sizePolicy().hasHeightForWidth())
+        self.label_ptNo.setSizePolicy(sizePolicy)
+        self.label_ptNo.setMinimumSize(QtCore.QSize(50, 0))
         self.label_ptNo.setObjectName(_fromUtf8("label_ptNo"))
         self.horizontalLayout_13.addWidget(self.label_ptNo)
         self.lineEdit_ptNo = QtGui.QLineEdit(self.tab_3)
@@ -82,6 +89,12 @@ class Ui_MainWindow(object):
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_13.addItem(spacerItem1)
         self.label_detNo = QtGui.QLabel(self.tab_3)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_detNo.sizePolicy().hasHeightForWidth())
+        self.label_detNo.setSizePolicy(sizePolicy)
+        self.label_detNo.setMinimumSize(QtCore.QSize(50, 0))
         self.label_detNo.setObjectName(_fromUtf8("label_detNo"))
         self.horizontalLayout_13.addWidget(self.label_detNo)
         self.lineEdit_detNo = QtGui.QLineEdit(self.tab_3)
@@ -97,8 +110,9 @@ class Ui_MainWindow(object):
         self.verticalLayout_7.addLayout(self.horizontalLayout_13)
         self.horizontalLayout_14 = QtGui.QHBoxLayout()
         self.horizontalLayout_14.setObjectName(_fromUtf8("horizontalLayout_14"))
-        self.graphicsView_Raw = QtGui.QGraphicsView(self.tab_3)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Preferred)
+        #self.graphicsView_Raw = QtGui.QGraphicsView(self.tab_3)
+        self.graphicsView_Raw = Qt4MplCanvas(self.tab_3)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.graphicsView_Raw.sizePolicy().hasHeightForWidth())
@@ -217,7 +231,8 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.addLayout(self.horizontalLayout_6)
         self.horizontalLayout_5 = QtGui.QHBoxLayout()
         self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
-        self.graphicsView_reducedData = QtGui.QGraphicsView(self.tab)
+        #self.graphicsView_reducedData = QtGui.QGraphicsView(self.tab)
+        self.graphicsView_reducedData = Qt4MplCanvas(self.tab)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -236,6 +251,7 @@ class Ui_MainWindow(object):
         self.label_xmin.setObjectName(_fromUtf8("label_xmin"))
         self.verticalLayout_3.addWidget(self.label_xmin)
         self.lineEdit_xmin = QtGui.QLineEdit(self.tab)
+        self.lineEdit_xmin.setEnabled(False)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -429,7 +445,7 @@ class Ui_MainWindow(object):
         self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1124, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1124, 25))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -464,7 +480,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(2)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -478,8 +494,8 @@ class Ui_MainWindow(object):
         self.pushButton_plotRaw.setText(_translate("MainWindow", "Plot Raw Detector", None))
         self.pushButton_ptUp.setText(_translate("MainWindow", "Previous Pt.", None))
         self.pushButton_ptDown.setText(_translate("MainWindow", "Next Pt.", None))
-        self.pushButton_detUp.setText(_translate("MainWindow", "PushButton", None))
-        self.pushButton_detDown.setText(_translate("MainWindow", "PushButton", None))
+        self.pushButton_detUp.setText(_translate("MainWindow", "Previous Detector", None))
+        self.pushButton_detDown.setText(_translate("MainWindow", "Next Detector", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("MainWindow", "Raw Detectors", None))
         self.label_normalizeMonitor.setText(_translate("MainWindow", "Normalization Monitor", None))
         self.label_outputFormat.setText(_translate("MainWindow", "Save As", None))
