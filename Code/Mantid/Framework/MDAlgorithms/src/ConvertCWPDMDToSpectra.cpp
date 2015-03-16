@@ -219,8 +219,8 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
     upperboundary = xmax;
   }
 
-  g_log.notice() << "[DB] Binning  from " << lowerboundary << " to "
-                 << upperboundary << "\n";
+  g_log.debug() << "Binning  from " << lowerboundary << " to " << upperboundary
+                << "\n";
 
   // Create bins in 2theta (degree)
   size_t sizex, sizey;
@@ -229,11 +229,12 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
     ++ lowerboundary;
 
   sizey = sizex - 1;
-  g_log.notice() << "[DB] Number of events = " << numevents
-                 << ", bin size = " << binsize << ", SizeX = " << sizex << ", "
-                 << ", SizeY = " << sizey << ", Delta = " << upperboundary - lowerboundary
-                 << ", Bin size = " << binsize << ", sizex_d = "
-                 << (upperboundary - lowerboundary) / binsize + 2 << "\n";
+  g_log.debug() << "Number of events = " << numevents
+                << ", bin size = " << binsize << ", SizeX = " << sizex << ", "
+                << ", SizeY = " << sizey
+                << ", Delta = " << upperboundary - lowerboundary
+                << ", Bin size = " << binsize << ", sizex_d = "
+                << (upperboundary - lowerboundary) / binsize + 2 << "\n";
   std::vector<double> vecx(sizex), vecy(sizex - 1, 0), vecm(sizex - 1, 0),
       vece(sizex - 1, 0);
 
@@ -319,7 +320,6 @@ void ConvertCWPDMDToSpectra::findXBoundary(
     double &xmax) {
   // Go through all instruments
   uint16_t numruns = dataws->getNumExperimentInfo();
-  g_log.notice() << "[DB] Tota number of ExperimentInfo = " << numruns << "\n";
 
   xmin = BIGNUMBER;
   xmax = -1;
@@ -351,8 +351,8 @@ void ConvertCWPDMDToSpectra::findXBoundary(
     std::vector<detid_t> vec_detid =
         dataws->getExperimentInfo(irun)->getInstrument()->getDetectorIDs(true);
     if (vec_detid.size() == 0) {
-      g_log.notice() << "[DB] Run " << runnumber << " has no detectors."
-                     << "\n";
+      g_log.information() << "Run " << runnumber << " has no detectors."
+                          << "\n";
       continue;
     }
     const V3D samplepos =
@@ -399,13 +399,6 @@ void ConvertCWPDMDToSpectra::findXBoundary(
           outx = calculateQFrom2Theta(twotheta, wavelength);
         else
           throw std::runtime_error("Unrecognized unit.");
-      }
-
-      if (runnumber == 1 && (idet == 1 || idet == 0))
-      {
-        g_log.notice() << "[DB] run = " << runnumber << ", ID = " << idet
-                       << ", Pos = " << detpos.X() << ", " << detpos.Y() << ", "
-                       << detpos.Z() << ", d = " << outx << "\n";
       }
 
       // Compare with xmin and xmax
@@ -545,11 +538,13 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
         }
         else
         {
-          g_log.notice() << "[DB] .. almost same.  Event X = " << outx << ", Boundary = " << vecx[xindex] << "\n";
+          g_log.debug() << "Case for almost same.  Event X = " << outx
+                        << ", Boundary = " << vecx[xindex] << "\n";
         }
         if (xindex < 0 || xindex >= static_cast<int>(vecy.size()))
         {
-          g_log.notice() << "[DB] ... weird......  Event X = " << outx << ", Boundary = " << vecx[xindex] << "\n";
+          g_log.warning() << "Case unexpected:  Event X = " << outx
+                          << ", Boundary = " << vecx[xindex] << "\n";
         }
       }
 
