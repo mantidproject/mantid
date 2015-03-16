@@ -22,7 +22,7 @@ using namespace Mantid::VATES;
 vtkStandardNewMacro(vtkMDEWSource);
 
 /// Constructor
-vtkMDEWSource::vtkMDEWSource() :  m_wsName(""), m_depth(1000), m_time(0), m_presenter(NULL)
+vtkMDEWSource::vtkMDEWSource() :  m_wsName(""), m_depth(1000), m_time(0), m_presenter(NULL), m_isStartup(true), m_startupTimeValue(0)
 {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
@@ -173,8 +173,17 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     //get the info objects
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
-
-    if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
+    if (m_isStartup)
+    {
+      // This is part of a workaround for ParaView time steps. The time we get
+      // is the first time point for all sources, and not necessarily of this source.
+      // This causes problems when getting the time slice and we end up with an empty 
+      // data set. We therefore feed m_time the first time step of this source at 
+      // start up.
+      m_time = m_startupTimeValue;
+      m_isStartup = false;
+    }
+    else if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
     {
       // usually only one actual step requested
       m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP());
@@ -255,6 +264,9 @@ void vtkMDEWSource::setTimeRange(vtkInformationVector* outputVector)
     double timeRange[2];
     timeRange[0] = timeStepValues.front();
     timeRange[1] = timeStepValues.back();
+
+    // This is part of a workaround to get the first time value of the current source.
+    m_startupTimeValue = timeRange[0];
 
     outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_RANGE(), timeRange, 2);
   }

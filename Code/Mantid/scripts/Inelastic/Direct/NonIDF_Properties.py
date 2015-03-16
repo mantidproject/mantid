@@ -34,14 +34,8 @@ class NonIDF_Properties(object):
         # Helper properties, defining logging options
         object.__setattr__(self,'_log_level','notice')
         object.__setattr__(self,'_log_to_mantid',False)
+
         object.__setattr__(self,'_current_log_level',3)
-
-
-        object.__setattr__(self,'_psi',float('NaN'))
-        # SNS motor stuff which is difficult to test as I've never seen it
-        object.__setattr__(self,'_motor_name',None)
-        object.__setattr__(self,'_motor_offset',0)
-
         object.__setattr__(self,'_save_file_name',None)
 
         self._set_instrument_and_facility(Instrument,run_workspace)
@@ -121,11 +115,11 @@ class NonIDF_Properties(object):
     # -----------------------------------------------------------------------------
     @property
     def cashe_sum_ws(self):
-      """ Used together with sum_runs property. If True, a workspace 
-          with partial sum is stored in ADS 
+        """ Used together with sum_runs property. If True, a workspace
+          with partial sum is stored in ADS
           and used later to add more runs to it
-      """ 
-      return self._cashe_sum_ws
+      """
+        return self._cashe_sum_ws
     @cashe_sum_ws.setter
     def cashe_sum_ws(self,val):
         self._cashe_sum_ws = bool(val)
@@ -138,30 +132,6 @@ class NonIDF_Properties(object):
     @log_to_mantid.setter
     def log_to_mantid(self,val):
         object.__setattr__(self,'_log_to_mantid',bool(val))
-    # -----------------------------------------------------------------------------
-    #-----------------------------------------------------------------------------------
-    @property
-    def psi(self):
-        """ rotation angle (not available from IDF)"""
-        return self._psi
-    @psi.setter
-    def psi(self,value):
-        """set rotation angle (not available from IDF). This value will be saved into NXSpe file"""
-        object.__setattr__(self,'_psi',value)
-    # -----------------------------------------------------------------------------
-    @property
-    def motor_name(self):
-        return self._motor_name
-    @motor_name.setter
-    def motor_name(self,val):
-        object.__setattr__(self,'_motor_name',val)
-    #
-    @property
-    def motor_offset(self):
-        return self._motor_offset
-    @motor_offset.setter
-    def motor_offset(self,val):
-        object.__setattr__(self,'_motor_offset',val)
 
     # -----------------------------------------------------------------------------
     # Service properties (used by class itself)
@@ -204,10 +174,6 @@ class NonIDF_Properties(object):
         object.__setattr__(self,'_instr_name',full_name)
         object.__setattr__(self,'_facility',facility_)
         object.__setattr__(self,'_short_instr_name',new_name)
-
-
-
-
 
 
 if __name__ == "__main__":
