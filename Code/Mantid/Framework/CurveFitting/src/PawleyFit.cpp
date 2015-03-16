@@ -67,6 +67,10 @@ void PawleyFit::init() {
                   "Semi-colon separated list of Miller indices given in the "
                   "format '[h,k,l]'.");
 
+  declareProperty("RefineZeroShift", false, "If checked, a zero-shift with the "
+                                            "same unit as the spectrum is "
+                                            "refined.");
+
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
                                                          Direction::Output),
                   "Workspace that contains measured spectrum, calculated "
@@ -78,21 +82,27 @@ void PawleyFit::exec() {
       boost::dynamic_pointer_cast<PawleyFunction>(
           FunctionFactory::Instance().createFunction("PawleyFunction"));
 
-  //pawleyFn->fix(pawleyFn->parameterIndex("f0.ZeroShift"));
+  bool refineZeroShift = getProperty("RefineZeroShift");
+  if(!refineZeroShift) {
+    pawleyFn->fix(pawleyFn->parameterIndex("f0.ZeroShift"));
+  }
 
+  pawleyFn->setProfileFunction("PseudoVoigt");
   pawleyFn->setCrystalSystem(getProperty("CrystalSystem"));
   pawleyFn->setUnitCell(getProperty("InitialCell"));
 
   std::vector<V3D> hkls = hklsFromString(getProperty("MillerIndices"));
 
-  pawleyFn->setPeaks(hkls, 0.002, 20000.0);
+  MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
+  int wsIndex = getProperty("WorkspaceIndex");
+
+  const MantidVec &data = ws->readY(static_cast<size_t>(wsIndex));
+  pawleyFn->setPeaks(hkls, 0.008, *(std::max_element(data.begin(), data.end())));
 
   Algorithm_sptr fit = createChildAlgorithm("Fit");
   fit->setProperty("Function", boost::static_pointer_cast<IFunction>(pawleyFn));
-
-  MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
-
   fit->setProperty("InputWorkspace", ws);
+  fit->setProperty("WorkspaceIndex", wsIndex);
   fit->setProperty("CreateOutput", true);
 
   fit->execute();
