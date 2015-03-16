@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>AbsCorr</class>
- <widget class="QWidget" name="AbsCorr">
+ <class>AbsorptionCorrections</class>
+ <widget class="QWidget" name="AbsorptionCorrections">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>594</width>
-    <height>456</height>
+    <height>697</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Absoprtion Corrections</string>
   </property>
-  <layout class="QVBoxLayout" name="layoutAbsF2P">
+  <layout class="QVBoxLayout" name="loAbsorptionCorrections">
    <item>
     <widget class="QGroupBox" name="gbInput">
      <property name="title">
@@ -140,9 +140,180 @@
       </item>
       <item>
        <widget class="QStackedWidget" name="swShapeDetails">
-        <widget class="QWidget" name="pgFlatPlate"/>
-        <widget class="QWidget" name="pgAnnulus"/>
-        <widget class="QWidget" name="pgCylinder"/>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="pgFlatPlate">
+         <layout class="QGridLayout" name="loFlatPlate">
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="lbFlatSampleHeight">
+            <property name="text">
+             <string>Sample Height:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="lbFlatSampleWidth">
+            <property name="text">
+             <string>Sample Width:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="lbFlatSampleThickness">
+            <property name="text">
+             <string>Sample Thickness:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="lbFlatElementSize">
+            <property name="text">
+             <string>Element Size:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="spFlatSampleHeight">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="spFlatSampleWidth">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QDoubleSpinBox" name="spFlatSampleThickness">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QDoubleSpinBox" name="spFlatElementSize">
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="pgAnnulus">
+         <layout class="QGridLayout" name="loAnnulus">
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="lbAnnCanInnerRadius">
+            <property name="text">
+             <string>Can Inner Radius:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="lbAnnSampleInnerRadius">
+            <property name="text">
+             <string>Sample Inner Radius:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="lbAnnSampleOuterRadius">
+            <property name="text">
+             <string>Sample Outer Radius:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="lbAnnCanOuterRadius">
+            <property name="text">
+             <string>Can Outer Radius:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="spAnnCanInnerRadius">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="spAnnSampleInnerRadius">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QDoubleSpinBox" name="spAnnSampleOuterRadius">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QDoubleSpinBox" name="spAnnCanOuterRadius">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="pgCylinder">
+         <layout class="QGridLayout" name="loCylinder">
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="lbCylSampleRadius">
+            <property name="text">
+             <string>Sample Radius:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="spCylSampleRadius">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </widget>
       </item>
      </layout>
@@ -164,7 +335,7 @@
       <item row="0" column="1">
        <widget class="QDoubleSpinBox" name="spSampleNumberDensity">
         <property name="suffix">
-         <string>A^-3</string>
+         <string> A^-3</string>
         </property>
         <property name="singleStep">
          <double>0.100000000000000</double>
@@ -182,7 +353,14 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="leSampleChemicalFormula"/>
+       <widget class="QLineEdit" name="leSampleChemicalFormula">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -197,7 +375,14 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="2" column="1">
-       <widget class="QLineEdit" name="leCanChemicalFormula"/>
+       <widget class="QLineEdit" name="leCanChemicalFormula">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="lbCanChemicalFormula">

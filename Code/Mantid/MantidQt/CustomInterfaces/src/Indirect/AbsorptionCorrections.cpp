@@ -1,9 +1,9 @@
-#include "MantidQtCustomInterfaces/Indirect/AbsCorr.h"
+#include "MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 namespace
 {
-  Mantid::Kernel::Logger g_log("AbsCorr");
+  Mantid::Kernel::Logger g_log("AbsorptionCorrections");
 }
 
 namespace MantidQt
@@ -12,18 +12,18 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  AbsCorr::AbsCorr(QWidget * parent) :
-    IDATab(parent), m_dblVal(NULL), m_posDblVal(NULL)
+  AbsorptionCorrections::AbsorptionCorrections(QWidget * parent) :
+    IDATab(parent)
   {
     m_uiForm.setupUi(parent);
   }
 
-  void AbsCorr::setup()
+  void AbsorptionCorrections::setup()
   {
     //TODO
   }
 
-  void AbsCorr::run()
+  void AbsorptionCorrections::run()
   {
     //TODO
 
@@ -31,7 +31,7 @@ namespace IDA
     m_pythonExportWsName = "";
   }
 
-  bool AbsCorr::validate()
+  bool AbsorptionCorrections::validate()
   {
     UserInputValidator uiv;
 
@@ -43,11 +43,12 @@ namespace IDA
       showMessageBox(error);
     }
 
-    return error.isAllInputValid();
+    return uiv.isAllInputValid();
   }
 
-  void AbsCorr::loadSettings(const QSettings & settings)
+  void AbsorptionCorrections::loadSettings(const QSettings & settings)
   {
+    UNUSED_ARG(settings);
     //TODO
   }
 

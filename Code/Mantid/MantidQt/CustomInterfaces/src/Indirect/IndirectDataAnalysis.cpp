@@ -11,6 +11,7 @@
 #include "MantidQtCustomInterfaces/Indirect/ConvFit.h"
 #include "MantidQtCustomInterfaces/Indirect/CalcCorr.h"
 #include "MantidQtCustomInterfaces/Indirect/ApplyCorr.h"
+#include "MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h"
 
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
@@ -51,6 +52,7 @@ namespace IDA
     m_tabs.insert(std::make_pair(CONV_FIT,   new ConvFit(m_uiForm.twIDATabs->widget(CONV_FIT))));
     m_tabs.insert(std::make_pair(CALC_CORR,  new CalcCorr(m_uiForm.twIDATabs->widget(CALC_CORR))));
     m_tabs.insert(std::make_pair(APPLY_CORR, new ApplyCorr(m_uiForm.twIDATabs->widget(APPLY_CORR))));
+    m_tabs.insert(std::make_pair(ABSORPTION_CORRECTIONS, new AbsorptionCorrections(m_uiForm.twIDATabs->widget(ABSORPTION_CORRECTIONS))));
   }
 
   /**
