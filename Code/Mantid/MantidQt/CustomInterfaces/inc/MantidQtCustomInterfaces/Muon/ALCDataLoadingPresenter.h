@@ -51,8 +51,8 @@ namespace CustomInterfaces
     /// Load new data and update the view accordingly
     void load();
 
-    /// Updates the list of logs user can choose from
-    void updateAvailableLogs();
+    /// Updates the list of logs and number of periods
+    void updateAvailableInfo();
 
   private:
     /// View which the object works with

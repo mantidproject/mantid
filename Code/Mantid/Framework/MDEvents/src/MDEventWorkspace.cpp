@@ -34,7 +34,7 @@ namespace MDEvents {
 /** Default constructor
  */
 TMDE(MDEventWorkspace)::MDEventWorkspace()
-    : m_BoxController(new BoxController(nd)) {
+    : data(NULL), m_BoxController(new BoxController(nd)), m_coordSystem(None) {
   // First box is at depth 0, and has this default boxController
   data = new MDBox<MDE, nd>(m_BoxController.get(), 0);
 }
@@ -781,48 +781,21 @@ TMDE(void MDEventWorkspace)::clearMDMasking() {
 }
 
 /**
-Set the special coordinate system (if any) to use.
-@param coordinateSystem : Special coordinate system to use.
+Get the coordinate system (if any) to use.
+@return An enumeration specifying the coordinate system if any.
 */
-TMDE(void MDEventWorkspace)::setCoordinateSystem(
-    const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem) {
-  // If there isn't an experiment info, create one.
-  uint16_t nexpts = this->getNumExperimentInfo();
-  ExperimentInfo_sptr expInfo;
-  if (nexpts == 0) {
-    expInfo = boost::make_shared<ExperimentInfo>();
-    this->addExperimentInfo(expInfo);
-  }
-  else {
-    // The last experiment info should always be the one that refers
-    // to latest converting workspace to use this
-    expInfo = this->getExperimentInfo(static_cast<uint16_t>(nexpts - 1));
-  }
-  expInfo->mutableRun().addProperty("CoordinateSystem", (int)coordinateSystem, true);
+TMDE(Kernel::SpecialCoordinateSystem
+         MDEventWorkspace)::getSpecialCoordinateSystem() const {
+  return m_coordSystem;
 }
 
 /**
-Get the special coordinate system (if any) to use.
-@return Special coordinate system if any.
+Set the coordinate system (if any) to use.
+@param coordSystem : Coordinate system to use.
 */
-TMDE(Mantid::Kernel::SpecialCoordinateSystem
-         MDEventWorkspace)::getSpecialCoordinateSystem() const {
-  Mantid::Kernel::SpecialCoordinateSystem result = None;
-  try {
-    auto nInfos = this->getNumExperimentInfo();
-    if (nInfos > 0) {
-      // The last experiment info should always be the one that refers
-      // to latest converting workspace to use this
-      auto *prop = this->getExperimentInfo(static_cast<uint16_t>(nInfos - 1))
-                       ->run()
-                       .getProperty("CoordinateSystem");
-      auto *p = dynamic_cast<PropertyWithValue<int> *>(prop);
-      int temp = *p;
-      result = static_cast<SpecialCoordinateSystem>(temp);
-    }
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
-  }
-  return result;
+TMDE(void MDEventWorkspace)::setCoordinateSystem(
+    const Kernel::SpecialCoordinateSystem coordSystem) {
+  m_coordSystem = coordSystem;
 }
 
 } // namespace MDEvents
