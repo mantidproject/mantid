@@ -18,17 +18,24 @@ values of SearchRange and ClosePeakTolerance the X axis is assumed to be in
 cm-1, however the X axis is not restricted to this unit.
 
 The algorithm works by finding peaks of a given shape (using the :ref:`FindPeaks
-<algm-FindPeaks>`) on both the forward and backscattering banks and attempting
-to match them to what is believed to be the same feature on the other bank.
+<algm-FindPeaks>`) on both the forward and backscattering banks, either
+selecting a peak in a given position or selecting the peak with the highest X
+value and attempting to match them to what is believed to be the same feature on
+the other bank.
 
-The choice can then be made to either take the difference in peak centre between
-the tallest matched peaks or to average the difference of all matched peaks to
-determine the mount that both spectra must be moved by to correct for the change
-in sample position.
+A scale factor is then calculated for each bank that will align at least the
+selected peak and in doing so will also align the majority of misaligned peaks
+across the two banks.
 
-The data is then corrected by providing a shift in the X axis of each bank
-spectra (using :ref:`ConvertAxisByFormula <algm-ConvertAxisByFormula>`) to bring
-the two individual bank spectra back into alignment.
+The sacling factor is calculated as follows:
+
+.. math::
+
+  X_{centre} = \frac{X_{forward peak} + X_{back peak}}{2}
+
+  SF_{forward} = \frac{X_{centre}}{X_{forward peak}}
+
+  SF_{back} = \frac{X_{centre}}{X_{back peak}}
 
 The corrected spectra are then rebinned to the input workspace (using
 :ref:`RebinToWorkspace <algm-RebinToWorkspace>`) to preserve the X range and to
