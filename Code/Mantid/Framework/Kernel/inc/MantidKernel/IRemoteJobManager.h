@@ -177,7 +177,7 @@ public:
    *
    * @throws std::runtime_error If the query fails
    */
-  virtual std::vector<RemoteJobInfo> queryAllRemoteJobs() = 0;
+  virtual std::vector<RemoteJobInfo> queryAllRemoteJobs() const = 0;
 
   /**
    * Get the list of files available for a transaction at the (remote)
@@ -193,7 +193,7 @@ public:
    * @throws std::runtime_error If the query fails
    */
   virtual std::vector<string>
-  queryRemoteFile(const std::string &transactionID) = 0;
+  queryRemoteFile(const std::string &transactionID) const = 0;
 
   /**
    * Get information (status etc.) for an (in principle) running job
@@ -207,7 +207,7 @@ public:
    *
    * @throws std::runtime_error If the query fails
    */
-  virtual RemoteJobInfo queryRemoteJob(const std::string &jobID) = 0;
+  virtual RemoteJobInfo queryRemoteJob(const std::string &jobID) const = 0;
 
   /**
    * Start a transaction before up/downloading files and submitting
