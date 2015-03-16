@@ -281,9 +281,9 @@ void DatasetPlotData::setData(const Mantid::API::MatrixWorkspace *ws, int wsInde
   {
     auto xBegin = std::lower_bound(xValues.begin(),xValues.end(), outputWS->readX(1).front());
     if ( xBegin == xValues.end() ) return;
-    auto i0 = std::distance(xValues.begin(),xBegin);
+    int i0 = static_cast<int>(std::distance(xValues.begin(),xBegin));
     int n = static_cast<int>(outputWS->readY(1).size());
-    if ( i0 + n > xValues.size() ) return;
+    if ( i0 + n > static_cast<int>(xValues.size()) ) return;
     m_calcCurve = new QwtPlotCurve("calc");
     m_calcCurve->setData( xValues.data() + i0, outputWS->readY(1).data(), n );
     QPen penCalc("red");
@@ -384,7 +384,7 @@ PlotController::~PlotController()
   m_plotData.clear();
 }
 
-bool PlotController::eventFilter(QObject *widget, QEvent *evn)
+bool PlotController::eventFilter(QObject *, QEvent *evn)
 {
   if ( evn->type() == QEvent::MouseButtonDblClick )
   {
@@ -544,8 +544,11 @@ void PlotController::update()
  */
 void PlotController::resetRange()
 {
-  m_rangeSelector->setMinimum( m_plot->axisScaleDiv(QwtPlot::xBottom)->lowerBound() );
-  m_rangeSelector->setMaximum( m_plot->axisScaleDiv(QwtPlot::xBottom)->upperBound() );
+  QwtScaleMap xMap = m_plot->canvasMap(QwtPlot::xBottom);
+  double startX = xMap.s1();
+  double endX = xMap.s2();
+  m_rangeSelector->setMinimum( startX );
+  m_rangeSelector->setMaximum( endX );
 }
 
 /**
@@ -1256,7 +1259,7 @@ void MultiDatasetFit::enableRange()
 /*==========================================================================================*/
 
 DataController::DataController(MultiDatasetFit *parent, QTableWidget *dataTable):
-  m_dataTable(dataTable),m_isFittingRangeGlobal(false)
+  QObject(parent),m_dataTable(dataTable),m_isFittingRangeGlobal(false)
 {
   connect(dataTable,SIGNAL(itemSelectionChanged()), this,SLOT(workspaceSelectionChanged()));
   connect(dataTable,SIGNAL(cellChanged(int,int)),this,SLOT(updateDataset(int,int)));
@@ -1467,7 +1470,7 @@ std::pair<double,double> DataController::getFittingRange(int i) const
 }
 
 /// Inform the others that a dataset was updated.
-void DataController::updateDataset(int row, int col)
+void DataController::updateDataset(int row, int)
 {
   emit dataSetUpdated(row);
 }
