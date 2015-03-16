@@ -1,7 +1,8 @@
+#pylint: disable=invalid-name,no-name-in-module
 from PyQt4 import QtCore, QtGui
 import sys
 import mantid
-from ValidateOL import ValidateUB
+from .ValidateOL import ValidateUB
 try:
     from PyQt4.QtCore import QString
 except ImportError:
@@ -9,71 +10,68 @@ except ImportError:
 
 
 class UBTableModel(QtCore.QAbstractTableModel):
-    
-    changed=QtCore.pyqtSignal(mantid.geometry.OrientedLattice) 
-    
+    changed=QtCore.pyqtSignal(mantid.geometry.OrientedLattice)
     def __init__(self, lattice,  parent = None):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.__lattice = lattice
         self.__UB=self.__lattice.getUB().copy()
         self.sendSignal()
-        
-    def rowCount(self, parent):
-        return 3
-        
-    def columnCount(self, parent):
+
+    def rowCount(self, dummy_parent):
         return 3
 
-    def flags(self, index):
+    def columnCount(self, dummy_parent):
+        return 3
+
+    def flags(self, dummy_index):
         return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
     def data(self, index, role):
         if role == QtCore.Qt.EditRole:
             row = index.row()
             column = index.column()
-            return QString(format(self.__UB[row][column],'.4f'))              
+            return QString(format(self.__UB[row][column],'.4f'))
         elif role == QtCore.Qt.DisplayRole:
             row = index.row()
             column = index.column()
             value = QString(format(self.__UB[row][column],'.4f'))
-
             return value
         elif role == QtCore.Qt.BackgroundRole:
             if ValidateUB(self.__UB):
                 return QtGui.QBrush(QtCore.Qt.white)
-            else: 
+            else:
                 return QtGui.QBrush(QtCore.Qt.red)
 
     def setData(self, index, value, role = QtCore.Qt.EditRole):
-        if role == QtCore.Qt.EditRole:            
+        if role == QtCore.Qt.EditRole:
             row = index.row()
             column = index.column()
-
             try:
                 val=value.toFloat()[0] #QVariant
-            except:
+            except AttributeError:
                 val=float(value) #string
             self.__UB[row][column]=val
             self.dataChanged.emit(index, index)
             print self.__UB
             if ValidateUB(self.__UB):
-                self.__lattice.setUB(self.__UB)    
-                self.sendSignal()   
+                self.__lattice.setUB(self.__UB)
+                self.sendSignal()
                 return True
         return False
-    
+
     def sendSignal(self):
         self.changed.emit(self.__lattice)
-        
+
     def updateOL(self,ol):
-        self.ol=ol
         self.beginResetModel()
-        self.__lattice=self.ol
-        self.__UB=self.ol.getUB().copy()
-        self.endResetModel()        
-        
+        self.__lattice=ol
+        self.__UB=self.__lattice.getUB().copy()
+        self.endResetModel()
+
 class MatrixUBInputWidget(QtGui.QWidget):
+    # pylint: disable=too-few-public-methods
     def __init__(self,ol,parent=None):
+        # pylint: disable=unused-argument,super-on-old-class
         super(MatrixUBInputWidget,self).__init__(parent)
         self.setLayout(QtGui.QVBoxLayout())
         self._tableView = QtGui.QTableView(self)
@@ -95,8 +93,9 @@ class MatrixUBInputWidget(QtGui.QWidget):
         self.LoadIsawUBButton.setMinimumSize(self._tableView.sizeHintForColumn(0)*6, self._tableView.sizeHintForRow(0)*1.5)
         self.LoadIsawUBButton.setMaximumSize(self._tableView.sizeHintForColumn(0)*6, self._tableView.sizeHintForRow(0)*1.5)
         self.layout().addStretch(1)
-        
+
     def loadIsawUBDialog(self):
+        # pylint: disable=bare-except
         try:
             fname = QtGui.QFileDialog.getOpenFileName(self, 'Open ISAW UB file',filter=QString('Mat file (*.mat);;All Files (*)'))
             __tempws=mantid.simpleapi.CreateSingleValuedWorkspace(0.)
@@ -108,17 +107,12 @@ class MatrixUBInputWidget(QtGui.QWidget):
             mantid.simpleapi.DeleteWorkspace(__tempws)
         except:
             mantid.logger.error("Could not open the file, or not a valid UB matrix")
-                
-        
-if __name__ == '__main__':
-    
-    app = QtGui.QApplication(sys.argv)        
-    ol=mantid.geometry.OrientedLattice(2,3,4,90,90,90)
 
-    mainForm=MatrixUBInputWidget(ol)
-    mainForm.show()  
-    sys.exit(app.exec_())     
-    
-    
-    
-    
+if __name__ == '__main__':
+    app = QtGui.QApplication(sys.argv)
+    inputol=mantid.geometry.OrientedLattice(2,3,4,90,90,90)
+
+    mainForm=MatrixUBInputWidget(inputol)
+    mainForm.show()
+    sys.exit(app.exec_())
+

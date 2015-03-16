@@ -1,20 +1,20 @@
-import ClassicUBInputWidget
-import MatrixUBInputWidget
-import InstrumentSetupWidget
+#pylint: disable=invalid-name
+from . import InstrumentSetupWidget,ClassicUBInputWidget,MatrixUBInputWidget
 from PyQt4 import QtCore, QtGui
 import sys
 import mantid
-from ValidateOL import ValidateOL
+from .ValidateOL import ValidateOL
 
 class DGSPlannerGUI(QtGui.QWidget):
     def __init__(self,ol=None,parent=None):
+        # pylint: disable=unused-argument
         super(DGSPlannerGUI,self).__init__(parent)
         #OrientedLattice
         if ValidateOL(ol):
             self.ol=ol
         else:
-            self.ol=mantid.geometry.OrientedLattice()  
-        self.instrumentWidget=InstrumentSetupWidget.InstrumentSetupWidget(self) 
+            self.ol=mantid.geometry.OrientedLattice()
+        self.instrumentWidget=InstrumentSetupWidget.InstrumentSetupWidget(self)
         self.setLayout(QtGui.QVBoxLayout())
         self.layout().addWidget(self.instrumentWidget)
         self.ublayout=QtGui.QHBoxLayout()
@@ -28,14 +28,14 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.matrix.UBmodel.changed.connect(self.classic.updateOL)
         self.classic.changed.connect(self.matrix.UBmodel.updateOL)
         self.layout().addLayout(self.ublayout)
-        
+
     @QtCore.pyqtSlot(mantid.geometry.OrientedLattice)
     def printUB(self,ol):
-        print ol.getUB()   
+        print ol.getUB()
 
 if __name__=='__main__':
     app=QtGui.QApplication(sys.argv)
-    ol=mantid.geometry.OrientedLattice(2,3,4,90,90,90)
-    mainForm=DGSPlannerGUI(ol)
+    orl=mantid.geometry.OrientedLattice(2,3,4,90,90,90)
+    mainForm=DGSPlannerGUI(orl)
     mainForm.show()
     sys.exit(app.exec_())
