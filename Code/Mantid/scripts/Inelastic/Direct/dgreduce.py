@@ -134,6 +134,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 # --------------------------------------------------------------------------------------------------------
     if sample_run:
         Reducer.sample_run = sample_run
+        sample_run = None
     try:
         n,r=funcreturns.lhs_info('both')
         wksp_out=r[0]
