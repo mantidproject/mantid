@@ -86,6 +86,33 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_browseCache, QtCore.SIGNAL('clicked()'),
                 self.doBrowseCache)
 
+        self.connect(self.ui.pushButton_plotRaw, QtCore.SIGNAL('clicked()'),
+                self.doPlotCurrentRawDet)
+
+        self.connect(self.ui.pushButton_ptUp, QtCore.SIGNAL('clicked()'),
+                self.doPlotPrevPtRaw)
+
+        self.connect(self.ui.pushButton_ptDown, QtCore.SIGNAL('clicked()'),
+                self.doPlotNextPtRaw)
+
+        self.connect(self.ui.pushButton_detUp, QtCore.SIGNAL('clicked()'),
+                self.doPlotPrevDetRaw)
+
+        self.connect(self.ui.pushButton_detDown, QtCore.SIGNAL('clicked()'),
+                self.doPlotNextDetRaw)
+                
+        self.connect(self.ui.radioButton_useServer, QtCore.SIGNAL('clicked()'),
+                self.doChangeSrcLocation)
+                
+        self.connect(self.ui.radioButton_useLocal, QtCore.SIGNAL('clicked()'),
+                self.doChangeSrcLocation)
+                
+        self.connect(self.ui.pushButton_browseLocalSrc, QtCore.SIGNAL('clicked()'),
+                self.doBrowseLocalDataSrc)
+                
+        self.connect(self.ui.pushButton_chkServer, QtCore.SIGNAL('clicked()'),
+                self.doCheckSrcServer)
+
         # Define signal-event handling
 
 
@@ -113,6 +140,14 @@ class MainWindow(QtGui.QMainWindow):
         validator5 = QtGui.QDoubleValidator(self.ui.lineEdit_binsize)
         validator5.setBottom(0.)
         self.ui.lineEdit_binsize.setValidator(validator5)
+
+        validator6 = QtGui.QDoubleValidator(self.ui.lineEdit_ptNo)
+        validator6.setBottom(0)
+        self.ui.lineEdit_ptNo.setValidator(validator6)
+
+        validator7 = QtGui.QDoubleValidator(self.ui.lineEdit_detNo)
+        validator7.setBottom(0)
+        self.ui.lineEdit_detNo.setValidator(validator7)
 
         # Get initial setup
         self._initSetup()
@@ -148,6 +183,14 @@ class MainWindow(QtGui.QMainWindow):
         self._outws = None
         self._prevoutws = None
 
+        self._ptNo = None
+        self._detNo = None
+
+        # State machine
+        self._inPlotState = False
+
+        return
+
 
     #-- Event Handling ----------------------------------------------------
 
@@ -170,7 +213,54 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_cache.setText(dirs)
 
         return
-
+        
+    def doBrowseLocalDataSrc(self):
+        """ Browse local data storage
+        """
+        print "Browse local data storage location."
+        
+        return
+        
+        
+    def doChangeSrcLocation(self):
+        """ Source file location is changed
+        """
+        useserver = self.ui.radioButton_useServer.isChecked()
+        uselocal = self.ui.radioButton_useLocal.isChecked()
+        
+        print "Use Server: ", useserver
+        print "Use Local : ", uselocal
+        
+        if (useserver is True and uselocal is True) or \
+            (useserver is False and uselocal is False):
+            raise NotImplementedError("Impossible for radio buttons")
+        
+        self._srcAtLocal = uselocal
+        self._srcFromServer = useserver
+        
+        if uselocal is True:
+            self.ui.lineEdit_dataIP.setDisabled(True)
+            self.ui.pushButton_chkServer.setDisabled(True)
+            self.ui.lineEdit_localSrc.setDisabled(False)
+            self.ui.pushButton_browseLocalSrc.setDisabled(False)
+            
+        else:
+            self.ui.lineEdit_dataIP.setDisabled(False)
+            self.ui.pushButton_chkServer.setDisabled(False)
+            self.ui.lineEdit_localSrc.setDisabled(True)
+            self.ui.pushButton_browseLocalSrc.setDisabled(True)
+            
+        return     
+        
+        
+        
+    def doCheckSrcServer(self):
+        """" Check source data server's availability
+        """
+        
+        print "Check source data server!"
+        
+        return
 
     def doLoadData(self):
         """ Load data 
@@ -185,8 +275,8 @@ class MainWindow(QtGui.QMainWindow):
 
         self._logDebug("Attending to load Exp %d Scan %d." % (expno, scanno))
 
-        # Form 
-        datafilename = self._loadDataFile(exp=expno, scan=scanno)
+        # Form data file name and download data
+        datafilename = self._uiLoadDataFile(exp=expno, scan=scanno)
 
         # Get other information
         xmin, xmax, binsize = self._getBinningParams()
@@ -195,7 +285,12 @@ class MainWindow(QtGui.QMainWindow):
 
         unit = self._currUnit
 
+        # Reduce data
         execstatus = self._reduceSpicePDData(datafilename, unit, xmin, xmax, binsize)
+
+        # Plot data
+        if execstatus is True:
+            self._plotReducedData(self._currUnit, 0)
 
         return
 
@@ -203,21 +298,176 @@ class MainWindow(QtGui.QMainWindow):
     def doPlot2Theta(self):
         """ Rebin the data and plot in 2theta
         """
-        self._plotReducedData('2theta')
+        # check binning parameters and target unit
+        change, xmin, xmax, binsize = self._uiCheckBinningParameters(self._myMinX, self._myMaxX, 
+            self._myBinSize, self._myCurrentUnit, "2theta")
+        
+        # no change,  return with a notice
+        if change is False:
+            self._logDebug("All binning parameters and target unit are same as current values. No need to plot again.")
+            return
+            
+        # Rebin
+        self._rebin('2theta', xmin, binsize, xmax)
+        self._plotReducedData()
 
         return
 
     def doPlotDspacing(self):
         """ Rebin the data and plot in d-spacing
         """
-        self._plotReducedData('dSpacing')
+        # check binning parameters and target unit
+        change, xmin, xmax, binsize = self._uiCheckBinningParameters(self._myMinX, self._myMaxX, 
+            self._myBinSize, self._myCurrentUnit, "dSpacing")
+        
+        # no change,  return with a notice
+        if change is False:
+            self._logDebug("All binning parameters and target unit are same as current values. No need to plot again.")
+            return
+            
+        # Rebin
+        self._rebin('dSpacing', xmin, binsize, xmax)
+        self._plotReducedData()
 
         return
 
     def doPlotQ(self):
         """ Rebin the data and plot in momentum transfer Q
         """
-        self._plotReducedData('Momentum Transfer (Q)')
+        # check binning parameters and target unit
+        change, xmin, xmax, binsize = self._uiCheckBinningParameters(self._myMinX, self._myMaxX, 
+            self._myBinSize, self._myCurrentUnit, "Momentum Transfer (Q)")
+        
+        # no change,  return with a notice
+        if change is False:
+            self._logDebug("All binning parameters and target unit are same as current values. No need to plot again.")
+            return
+            
+        # Rebin
+        self._rebin('Momentum Transfer (Q)', xmin, binsize, xmax)
+        self._plotReducedData()  
+
+        return
+
+    def doPlotCurrentRawDet(self):
+        """ Plot current raw detector signals
+        """
+        ptstr = str(self.ui.lineEdit_ptNo.text())
+        detstr = str(self.ui.lineEdit_detNo.text())
+        if len(ptstr) == 0 or len(detstr) == 0:
+            self._logError("Neither Pt. nor detector ID can be left blank to plot raw detector signal.")
+            return
+
+        ptno = int(ptstr)
+        detno = int(detstr)
+
+        status, errmsg = self._checkValidPtDet(ptno, detno) 
+        if status is False:
+            self._logError(errmsg)
+
+        self._ptNo = ptno
+        self._detNo = detno
+
+        self._plotRawDetSignal(self._ptNo, self._detNo)
+
+        return
+
+    def doPlotPrevDetRaw(self):
+        """ Plot previous raw detector
+        """
+        # check
+        if self._ptNo is not None and self._detNo is not None:
+            detno = self._detNo + 1
+        else:
+            self._logError("Unable to plot previous raw detector \
+                    because Pt. or Detector ID has not been set up yet.")
+            return
+
+        # det number minus 1
+        status, errmsg = self._checkValidPtDet(self._ptNo, detno)
+        if status is False:
+            self._logError(errmsg)
+        else:
+            self._detNo = detno
+            self.ui.lineEdit_detNo.setText(str(self._detNo))
+
+        # plot
+        self._plotRawDetSignal(self._ptNo, self._detNo)
+
+        return
+
+
+    def doPlotNextDetRaw(self):
+        """ Plot next raw detector signals
+        """
+        # check
+        if self._ptNo is not None and self._detNo is not None:
+            detno = self._detNo + 1
+        else:
+            self._logError("Unable to plot previous raw detector \
+                    because Pt. or Detector ID has not been set up yet.")
+            return
+
+        # det number minus 1
+        status, errmsg = self._checkValidPtDet(self._ptNo, detno)
+        if status is False:
+            self._logError(errmsg)
+        else:
+            self._detNo = detno
+            self.ui.lineEdit_detNo.setText(str(self._detNo))
+
+        # plot
+        self._plotRawDetSignal(self._ptNo, self._detNo)
+
+        return
+
+
+    def doPlotPrevPtRaw(self):
+        """ Plot previous raw detector
+        """
+        # check
+        if self._ptNo is not None and self._detNo is not None:
+            ptno = self._ptNo - 1
+        else:
+            self._logError("Unable to plot previous raw detector \
+                    because Pt. or Detector ID has not been set up yet.")
+            return
+
+        # det number minus 1
+        status, errmsg = self._checkValidPtDet(self._ptNo, detno)
+        if status is False:
+            self._logError(errmsg)
+        else:
+            self._ptNo = ptno
+            self.ui.lineEdit_ptNo.setText(str(self._ptNo))
+
+        # plot
+        self._plotRawDetSignal(self._ptNo, self._detNo)
+
+        return
+
+
+    def doPlotNextPtRaw(self):
+        """ Plot next raw detector signals
+        """
+        # check
+        if self._ptNo is not None and self._detNo is not None:
+            ptno = self._ptN + 1
+        else:
+            self._logError("Unable to plot previous raw detector \
+                    because Pt. or Detector ID has not been set up yet.")
+            return
+
+        # det number minus 1
+        status, errmsg = self._checkValidPtDet(self._ptNo, detno)
+        if status is False:
+            self._logError(errmsg)
+        else:
+            self._ptNo = ptno
+            self.ui.lineEdit_ptNo.setText(str(self._ptNo))
+
+        # plot
+        self._plotRawDetSignal(self._ptNo, self._detNo)
 
         return
 
@@ -280,15 +530,27 @@ class MainWindow(QtGui.QMainWindow):
         if len(binsizestr) == 0:
             binsize = None
         else:
-            binsize = float(xminstr)
+            binsize = float(binsizestr)
 
         return xmin, xmax, binsize
 
     
-    def _loadDataFile(self, exp, scan):
-        """ Load data file according to its exp and scan
+    def _uiLoadDataFile(self, exp, scan):
+        """ Load data file according to its exp and scan 
+        Either download the data from a server or copy the data file from local 
+        disk
         """
         # Get on hold of raw data file
+        useserver = self.ui.radioButton_useServer.isChecked()
+        uselocal = self.ui.radioButton_useLocal.isChecked()
+        if (useserver and uselocal) is False:
+            self._logError("It is logically wrong to set up server/local dir for data.")
+            useserver = True
+            uselocal = False
+            self.ui.radioButton_useServer.setChecked(True)
+            self.ui.radioButton_useLocal.setChecked(False)
+        
+        
         if self._srcFromServer is True:
             # Use server: build the URl to download data
             if self._serverAddress.endswith('/') is False:
@@ -321,7 +583,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def _reduceSpicePDData(self, datafilename, unit, xmin, xmax, binsize):
-        """ Reduce SPICE powder diffraction data
+        """ Reduce SPICE powder diffraction data. 
         """
         # cache the previous one
         self._prevoutws = self._outws
@@ -372,26 +634,61 @@ class MainWindow(QtGui.QMainWindow):
         return 
 
 
-    def _plotReducedData(self, targetunit):
-        """ Plot reduced data
+    def _plotReducedData(self, targetunit, spectrum):
+        """ Plot reduced data stored in self._reducedWS to 
         """
         # whether the data is load?
-        if self._inPlotState is False:
+        if self._inPlotState is False or self._myReducedPDWs is None:
             self._logWarning("No data to plot!")
+            return
+            
+        # plot
+        self.ui.graphicsView_reducedData.plot(self._myReducedPDWs.readX(spectrum),
+            self._myReducedPDWs.readY(spectrum))
+            
+        return
+        
+     
+    def _uiCheckBinningParameters(self, curxmin=None, curxmax=None, curbinsize=None, curunit=None, targetunit=None):
+        """ check the binning parameters including xmin, xmax, bin size and target unit
+        
+        Return: True or false
+        """
+        # get value
+        xmin = str(self.ui.lineEdit_xmin.text())
+        xmax = str(self.ui.lineEdit_xmax.text())
+        binsize = str(self.ui.lineEdit_binsize.text())
 
-        targetunit = '2theta'
-        if self._currUnit != targetunit:
-            self._currUnit = targetunit
-            self._rebin(targetunit)
-            self._plotBinnedData()
+        change = False        
+        # check x-min
+        if len(xmin) > 0:
+            xmin = float(xmin)
+            if ( (curmin is None) or (curmin is not None and abs(xmin-curxmin) > 1.0E-5) ):
+                change = True
+        else:
+            xmin = None
 
-
-
-        # read the xmin, xmax and bin size
-        xmin = float(self.ui.lineEdit_xmin.text())
-        xmax = float(self.ui.lineEdit_xmax.text())
-        binsize = float(self.ui.lineEdit_xmin.text())
-
+        # check x-max
+        if len(xmax) > 0: 
+            xmax = float(xmax)
+            if ( (curmax is None) or (curmax is not None and abs(xmax-curxmax) > 1.0E-5) ):
+                change = True
+        else:
+            xmax = None
+        
+        # check binsize
+        if len(binsize) > 0: 
+            binsize = float(binsize)
+            if ( (curbinsize is None) or (curbinsize is not None and abs(binsize-curbinsize) > 1.0E-5) ):
+                change = True
+        else:
+            binsize = None
+        
+        # whether the unit should be changed or bin be changed?
+        if curunit != targetunit:
+            change = True
+            
+        return (change, xmin, xmax, binsize)
 
 
 
@@ -399,8 +696,16 @@ class MainWindow(QtGui.QMainWindow):
     def _rebin(self, unit, xmin, binsize, xmax):
         """ 
         """
-        # TODO - ASAP
-
+        if self._myDataWS is None or self._myMonitorWS is None:
+            self._logError("Unable to rebin the data because either data MD workspace and \
+                monitor MD workspace is not present.")
+            return
+        
+        mantid.ConvertCWPDMDtoSpectra(InputWorkspace=self._myDataWS,
+            InputMonitorWorkspace=self._myMonitorWS,
+            BinningParams = "%f, %f, %f" % (xmin, binsize, xmax),
+            OutputWorkspace="xxx")
+        
         return
 
 

@@ -73,7 +73,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidget">
           <property name="currentIndex">
-           <number>0</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -169,7 +169,7 @@
                   <item>
                    <widget class="QPushButton" name="pushButton_plotRaw">
                     <property name="text">
-                     <string>PushButton</string>
+                     <string>Plot Raw Detector</string>
                     </property>
                    </widget>
                   </item>
@@ -192,14 +192,14 @@
                   <item>
                    <widget class="QPushButton" name="pushButton_ptUp">
                     <property name="text">
-                     <string>PushButton</string>
+                     <string>Previous Pt.</string>
                     </property>
                    </widget>
                   </item>
                   <item>
                    <widget class="QPushButton" name="pushButton_ptDown">
                     <property name="text">
-                     <string>PushButton</string>
+                     <string>Next Pt.</string>
                     </property>
                    </widget>
                   </item>
@@ -740,7 +740,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="lineEdit">
+                 <widget class="QLineEdit" name="lineEdit_dataIP">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -780,7 +780,7 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_9">
                 <item>
-                 <widget class="QRadioButton" name="radioButton_userLocal">
+                 <widget class="QRadioButton" name="radioButton_useLocal">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -890,19 +890,23 @@
      <x>0</x>
      <y>0</y>
      <width>1124</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionNew"/>
+    <addaction name="actionOpen_2"/>
+    <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>View</string>
     </property>
+    <addaction name="actionLog"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -926,6 +930,35 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionLog">
+   <property name="text">
+    <string>Log</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="actionNew">
+   <property name="text">
+    <string>New</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="actionOpen_2">
+   <property name="text">
+    <string>Open</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
  </widget>

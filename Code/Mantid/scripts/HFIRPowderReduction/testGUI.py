@@ -25,7 +25,21 @@ print "Set to exp 400, scan 1"
 reducer.ui.lineEdit_expNo.setText('400')
 reducer.ui.lineEdit_scanNo.setText('1')
 reducer.ui.lineEdit_cache.setText('/Users/wzz/Temp/')
-reducer.doLoadData()
+reducer.ui.lineEdit_binsize.setText('0.1')
+try:
+    reducer.doLoadData()
+except Exception as e:
+    print e
+
+try: 
+    reducer.doPlotDspacing()
+except Exception as e:
+    print e
+
+try: 
+    reducer.doPlotQ()
+except Exception as e:
+    print e
 
 app.exec_()
 
