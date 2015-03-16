@@ -46,8 +46,8 @@
 
 
 <parameter name="centre-finder-step-size">
-<!-- this is the initial step for the beam centre finder degrees (X value)-->
-<!-- 5mm at 4m = 0.07deg -->
+<!-- this is the initial step for the beam centre finder degrees (X value)
+5mm at 4m = 0.07deg -->
   <value val="0.07"/>
 </parameter>
 
