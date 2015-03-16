@@ -104,10 +104,6 @@ namespace IDA
     }
 
     m_batchAlgoRunner->executeBatchAsync();
-
-    // Set the result workspace for Python script export
-    QString dataName = m_uiForm.dsSampleInput->getCurrentDataName();
-    m_pythonExportWsName = dataName.left(dataName.lastIndexOf("_")).toStdString() + "_msd";
   }
 
   void MSDFit::singleFit()
