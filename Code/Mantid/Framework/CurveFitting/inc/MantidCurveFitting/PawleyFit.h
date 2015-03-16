@@ -43,7 +43,14 @@ class DLLExport PawleyFit : public API::Algorithm {
 public:
   virtual ~PawleyFit() {}
 
+    const std::string name() const { return "PawleyFit"; }
+    int version() const { return 1; }
+    const std::string summary() const;
+
 protected:
+
+  std::vector<Kernel::V3D> hklsFromString(const std::string &hklString) const;
+
   void init();
   void exec();
 };
