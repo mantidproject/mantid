@@ -10,8 +10,8 @@ class IndirectCylinderAbsorptionTest(unittest.TestCase):
         Loads the reduced container and sample files.
         """
 
-        can_ws = LoadNexusProcessed(Filename='UsageData/irs26173_graphite002_red.nxs')
-        red_ws = LoadNexusProcessed(Filename='UsageData/irs26176_graphite002_red.nxs')
+        can_ws = LoadNexusProcessed(Filename='irs26173_graphite002_red.nxs')
+        red_ws = LoadNexusProcessed(Filename='irs26176_graphite002_red.nxs')
 
         self._can_ws = can_ws
         self._red_ws = red_ws
