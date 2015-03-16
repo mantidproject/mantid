@@ -132,7 +132,7 @@ void EstimatePeakErrors::exec() {
   auto matrix = function->getCovarianceMatrix();
   if ( !matrix )
   {
-    g_log.warning() << "Function dosn't have covariance matrix." << std::endl;
+    g_log.warning() << "Function doesn't have covariance matrix." << std::endl;
     setProperty("OutputWorkspace", results);
     return;
   }
