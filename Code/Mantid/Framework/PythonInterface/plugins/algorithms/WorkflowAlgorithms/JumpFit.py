@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.kernel import *
 from mantid.api import *
 import os
@@ -5,13 +6,21 @@ import os
 
 class JumpFit(PythonAlgorithm):
 
+    _in_ws = None
+    _out_name = None
+    _jump_function = None
+    _width = None
+    _q_min = None
+    _q_max = None
+    _plot = None
+    _save = None
 
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
 
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
+        self.declareProperty(WorkspaceProperty('InputWorkspace', '', direction=Direction.Input),\
                 doc='Input workspace in HWHM')
 
         valid_functions = ['ChudleyElliot', 'HallRoss', 'FickDiffusion', 'TeixeiraWater']
@@ -19,25 +28,26 @@ class JumpFit(PythonAlgorithm):
                              validator=StringListValidator(valid_functions),
                              doc='The fit function to use')
 
-        self.declareProperty(name='Width', defaultValue=0, validator=IntMandatoryValidator(),
+        self.declareProperty(name='Width', defaultValue=0, validator=IntMandatoryValidator(),\
                 doc='Spectrum in the workspace to use for fiting')
 
-        self.declareProperty(name='QMin', defaultValue=0.0, validator=FloatMandatoryValidator(),
+        self.declareProperty(name='QMin', defaultValue=0.0, validator=FloatMandatoryValidator(),\
                 doc='Lower bound of Q range to use for fitting')
-        self.declareProperty(name='QMax', defaultValue=0.0, validator=FloatMandatoryValidator(),
+        self.declareProperty(name='QMax', defaultValue=0.0, validator=FloatMandatoryValidator(),\
                 doc='Upper bound of Q range to use for fitting')
 
-        self.declareProperty(name='Output', defaultValue='', direction=Direction.InOut,
+        self.declareProperty(name='Output', defaultValue='', direction=Direction.InOut,\
                 doc='Output name')
 
-        self.declareProperty(name='Plot', defaultValue=False,
+        self.declareProperty(name='Plot', defaultValue=False,\
                 doc='Plot result workspace')
-        self.declareProperty(name='Save', defaultValue=False,
+        self.declareProperty(name='Save', defaultValue=False,\
                 doc='Save result workspace to nexus file in the default save directory')
 
 
     def PyExec(self):
-        from mantid.simpleapi import ExtractSingleSpectrum, Scale, Fit, CopyLogs, AddSampleLog, DeleteWorkspace
+        from mantid.simpleapi import ExtractSingleSpectrum, Fit, CopyLogs, AddSampleLog, \
+                                     DeleteWorkspace
         from mantid import logger, mtd
         from IndirectCommon import StartTime, EndTime
 
@@ -47,7 +57,8 @@ class JumpFit(PythonAlgorithm):
 
         # Select the width we wish to fit
         spectrum_ws = "__" + self._in_ws
-        ExtractSingleSpectrum(InputWorkspace=self._in_ws, OutputWorkspace=spectrum_ws, WorkspaceIndex=self._width)
+        ExtractSingleSpectrum(InputWorkspace=self._in_ws, OutputWorkspace=spectrum_ws,
+                              WorkspaceIndex=self._width)
 
         logger.information('Cropping from Q= ' + str(self._q_min) + ' to ' + str(self._q_max))
         in_run = mtd[self._in_ws].getRun()

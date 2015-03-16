@@ -298,7 +298,7 @@ public:
   enum {PlotCurveTreeItem = 1002};
   CurveTreeItem(QwtPlotItem *curve, LayerItem *parent, const QString& s);
 
-  Graph* graph(){return dynamic_cast<LayerItem *>(parent())->graph();};
+  Graph* graph();
   void setActive(bool on);
 
   QwtPlotItem *plotItem() const{ return d_curve; };

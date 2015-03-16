@@ -53,9 +53,12 @@ namespace IDA
     connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(newDataLoaded(const QString&)));
     connect(m_uiForm.pbSingleFit, SIGNAL(clicked()), this, SLOT(singleFit()));
     connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
+    connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotFit()));
 
     connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this, SLOT(specMinChanged(int)));
     connect(m_uiForm.spSpectraMax, SIGNAL(valueChanged(int)), this, SLOT(specMaxChanged(int)));
+
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotFit()));
   }
 
   void MSDFit::run()
@@ -101,6 +104,10 @@ namespace IDA
     }
 
     m_batchAlgoRunner->executeBatchAsync();
+
+    // Set the result workspace for Python script export
+    QString dataName = m_uiForm.dsSampleInput->getCurrentDataName();
+    m_pythonExportWsName = dataName.left(dataName.lastIndexOf("_")).toStdString() + "_msd";
   }
 
   void MSDFit::singleFit()
@@ -128,7 +135,6 @@ namespace IDA
 
     m_batchAlgoRunner->addAlgorithm(msdAlg);
 
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotFit(bool)));
     m_batchAlgoRunner->executeBatchAsync();
   }
 
@@ -157,22 +163,36 @@ namespace IDA
     m_uiForm.dsSampleInput->readSettings(settings.group());
   }
 
-  void MSDFit::plotFit(bool error)
+  /**
+   * Plots fitted data on the mini plot.
+   *
+   * @param wsName Name of fit _Workspaces workspace group (defaults to
+   *               Python export WS name + _Workspaces)
+   * @param specNo Spectrum number relating to input workspace to plot fit
+   *               for (defaults to value of preview spectrum index)
+   */
+  void MSDFit::plotFit(QString wsName, int specNo)
   {
-    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotFit(bool)));
+    if(wsName.isEmpty())
+      wsName = QString::fromStdString(m_pythonExportWsName) + "_Workspaces";
 
-    // Ignore errors
-    if(error)
-      return;
+    if(specNo == -1)
+      specNo = m_uiForm.spPlotSpectrum->value();
 
-    if(Mantid::API::AnalysisDataService::Instance().doesExist(m_pythonExportWsName + "_Workspaces"))
+    if(Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()))
     {
-      // Get the workspace
-      auto groupWs = Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::WorkspaceGroup>(m_pythonExportWsName + "_Workspaces");
-      auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(groupWs->getItem(0));
-
       // Remove the old fit
       m_uiForm.ppPlot->removeSpectrum("Fit");
+
+      // Get the workspace
+      auto groupWs = Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::WorkspaceGroup>(wsName.toStdString());
+
+      // If the user has just done a single fit then we probably havent got a workspace to plot
+      // when the change the spectrum selector
+      if(specNo >= static_cast<int>(groupWs->size()))
+        return;
+
+      auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(groupWs->getItem(specNo));
 
       // Plot the new fit
       m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);

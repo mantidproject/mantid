@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Reduction scripter used to take reduction parameters
     end produce a Mantid reduction script

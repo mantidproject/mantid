@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from PyQt4 import QtGui, uic, QtCore
 import os
 import sys
@@ -23,6 +24,8 @@ class RemoteJobsWidget(BaseWidget):
     """
     ## Widget name
     name = "Remote Jobs"
+
+    copyAction = None
 
     def __init__(self, parent=None, state=None, settings=None):
         super(RemoteJobsWidget, self).__init__(parent, state, settings)

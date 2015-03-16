@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -47,6 +48,16 @@ def _count_monitors(raw_file):
 
 class TimeSlice(PythonAlgorithm):
 
+    _raw_files = None
+    _spectra_range = None
+    _peak_range = None
+    _output_ws_name_suffix = None
+    _background_range = None
+    _calib_ws = None
+    _out_ws_group = None
+    _plot = None
+    _save = None
+
     def category(self):
         return 'PythonAlgorithms;Inelastic'
 
@@ -59,7 +70,7 @@ class TimeSlice(PythonAlgorithm):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
                              doc='Comma separated list of input files')
 
-        self.declareProperty(WorkspaceProperty(name='CalibrationWorkspace', defaultValue='',
+        self.declareProperty(WorkspaceProperty(name='CalibrationWorkspace', defaultValue='',\
                              direction=Direction.Input, optional=PropertyMode.Optional),
                              doc='Calibration workspace')
 
@@ -81,7 +92,7 @@ class TimeSlice(PythonAlgorithm):
         self.declareProperty(name='OutputNameSuffix', defaultValue='_slice',
                              doc='Suffix to append to raw file name for name of output workspace')
 
-        self.declareProperty(WorkspaceGroupProperty(name='OutputWorkspace', defaultValue='',
+        self.declareProperty(WorkspaceGroupProperty(name='OutputWorkspace', defaultValue='',\
                              direction=Direction.Output),
                              doc='Name of workspace group to group result workspaces into')
 

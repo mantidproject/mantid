@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.kernel import *
 import math
@@ -17,7 +18,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
                                                      direction=Direction.Input))
 
-        self.declareProperty(FloatArrayProperty("Binning", values=[0.,0.,0.],
+        self.declareProperty(FloatArrayProperty("Binning", values=[0.,0.,0.],\
                              direction=Direction.InOut), "Positive is linear bins, negative is logarithmic")
 
         self.declareProperty("NumberOfBins", 100, validator=IntBoundedValidator(lower=1),
@@ -35,7 +36,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "",
                                                      direction = Direction.Output),
                              "I(q) workspace")
-        
+
         self.declareProperty("NumberOfWedges", 2, "Number of wedges to calculate")
         self.declareProperty("WedgeAngle", 30.0, "Angular opening of each wedge, in degrees")
         self.declareProperty("WedgeOffset", 0.0, "Angular offset for the wedges, in degrees")
@@ -166,7 +167,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             alg.setProperty("InfinityError", 0.0)
             alg.execute()
             wedge_i = alg.getProperty("OutputWorkspace").value
-        
+
             if compute_resolution:
                 alg = AlgorithmManager.create("ReactorSANSResolution")
                 alg.initialize()
@@ -174,7 +175,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
                 alg.setProperty("InputWorkspace", wedge_i)
                 alg.execute()
 
-            self.declareProperty(MatrixWorkspaceProperty("WedgeWorkspace_%s" % i, "",
+            self.declareProperty(MatrixWorkspaceProperty("WedgeWorkspace_%s" % i, "",\
                                                         direction = Direction.Output))
             self.setPropertyValue("WedgeWorkspace_%s" % i, wedge_i_name)
             self.setProperty("WedgeWorkspace_%s" % i, wedge_i)
@@ -238,7 +239,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             if f_step-n_step>10e-10:
                 qmax = math.pow(10.0, math.log10(qmin)+qstep*n_step)
             return qmin, -(math.pow(10.0,qstep)-1.0), qmax
-        
+
     def _get_aligned_binning(self, qmin, qmax):
         npts = self.getProperty("NumberOfBins").value
 
@@ -246,18 +247,18 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         x_max = math.pow(10,math.ceil(npts*math.log10(qmax))/npts)
         b = 1.0/npts
         nsteps = int(1+math.ceil(npts*math.log10(x_max/x_min)))
-        
+
         binning = str(x_min)
         x_bound = x_min - ( x_min*math.pow(10,b) - x_min )/2.0
         binning2 = str(x_bound)
-        
+
         x = x_min
         for i in range(nsteps):
             x_bound = 2*x-x_bound
             x *= math.pow(10,b)
             binning += ",%g,%g" % (x,x)
             binning2 += ",%g,%g" % (x_bound,x_bound)
-            
+
         return binning2
 
 

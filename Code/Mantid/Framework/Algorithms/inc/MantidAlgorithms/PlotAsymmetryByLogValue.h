@@ -69,7 +69,6 @@ public:
   virtual const std::string summary() const {
     return "Calculates asymmetry for a series of log values";
   }
-
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
@@ -79,19 +78,24 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-
+  // Parse run names
+  void parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt);
+  // Load dead-time corrections from specified file
+  void loadCorrectionsFromFile (API::Workspace_sptr &customDeadTimes, std::string deadTimeFile );
+  // Apply dead-time corrections
+  void applyDeadtimeCorr (API::Workspace_sptr &loadedWs, API::Workspace_sptr deadTimes);
+  /// Group detectors from run file
+  void groupDetectors (API::Workspace_sptr &loadedWs, API::Workspace_sptr loadedDetGrouping);
   /// Calculate the integral asymmetry for a workspace (single period)
   void calcIntAsymmetry(API::MatrixWorkspace_sptr ws, double &Y, double &E);
-
   /// Calculate the integral asymmetry for a workspace (red & green)
-  void calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red,
-                        API::MatrixWorkspace_sptr ws_geen, double &Y,
-                        double &E);
+  void calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red, API::MatrixWorkspace_sptr ws_geen, double &Y, double &E);
   /// Group detectors
-  void groupDetectors(API::MatrixWorkspace_sptr &ws,
-                      const std::vector<int> &spectraList);
+  void groupDetectors (API::MatrixWorkspace_sptr &ws, const std::vector<int> &spectraList);
   /// Get log value
-  double getLogValue(API::MatrixWorkspace &ws, const std::string &logName);
+  double getLogValue(API::MatrixWorkspace &ws);
+  /// Populate output workspace with results
+  void populateOutputWorkspace (API::MatrixWorkspace_sptr &outWS, int nplots);
 
   /// Stores property "Int"
   bool m_int;
@@ -101,6 +105,19 @@ private:
   std::vector<int> m_backward_list;
   /// If true call LoadMuonNexus with Autogroup on
   bool m_autogroup;
+  // Mantid vectors to store results
+  // Red mantid vectors
+  MantidVec m_redX, m_redY, m_redE;
+  // Green mantid vectors
+  MantidVec m_greenX, m_greenY, m_greenE;
+  // Mantid vectors to store Red + Green
+  MantidVec m_sumX, m_sumY, m_sumE;
+  // Mantid vectors to store Red - Green
+  MantidVec m_diffX, m_diffY, m_diffE;
+  // LogValue name
+  std::string m_logName;
+  // LogValue function
+  std::string m_logFunc;
 };
 
 } // namespace Algorithm

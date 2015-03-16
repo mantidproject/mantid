@@ -20,9 +20,11 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 #include <Poco/Path.h>
 #include <boost/shared_array.hpp>
+#include <boost/make_shared.hpp>
 #include "MantidGeometry/IDetector.h"
 
 using namespace Mantid::Geometry;
@@ -558,5 +560,46 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
   testInst->markAsSamplePos(sample);
 
   return testInst;
+}
+
+/**
+ * createOneDetectorInstrument, creates the most simple possible definition of an instrument in which we can extract a valid L1 and L2 distance for unit calculations.
+ *
+ * Beam direction is along X,
+ * Up direction is Y
+ *
+ * @param sourcePos : V3D position
+ * @param samplePos : V3D sample position
+ * @param detectorPos : V3D detector position
+ * @return Instrument generated.
+ */
+Instrument_sptr createMinimalInstrument(const Mantid::Kernel::V3D& sourcePos, const Mantid::Kernel::V3D& samplePos, const Mantid::Kernel::V3D& detectorPos )
+{
+    Instrument_sptr instrument = boost::make_shared<Instrument>();
+    instrument->setReferenceFrame(
+        boost::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left, "0,0,0"));
+
+    // A source
+    ObjComponent *source = new ObjComponent("source");
+    source->setPos(sourcePos);
+    source->setShape(createSphere(0.01 /*1cm*/, V3D(0,0,0), "1"));
+    instrument->add(source);
+    instrument->markAsSource(source);
+
+    // A sample
+    ObjComponent *sample = new ObjComponent("some-surface-holder");
+    sample->setPos(samplePos);
+    sample->setShape(createSphere(0.01 /*1cm*/, V3D(0,0,0), "1"));
+    instrument->add(sample);
+    instrument->markAsSamplePos(sample);
+
+    // A detector
+    Detector *det = new Detector("point-detector", 1 /*detector id*/, NULL);
+    det->setPos(detectorPos);
+    det->setShape(createSphere(0.01 /*1cm*/, V3D(0,0,0), "1"));
+    instrument->add(det);
+    instrument->markAsDetector(det);
+
+    return instrument;
 }
 }

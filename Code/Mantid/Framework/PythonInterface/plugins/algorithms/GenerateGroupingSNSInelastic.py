@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 import mantid
 import mantid.api
 import mantid.simpleapi
@@ -54,7 +55,7 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         __w = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF)
 
         i=0
-        while(__w.getDetector(i).isMonitor()):
+        while __w.getDetector(i).isMonitor():
             i += 1
         #i is the index of the first true detector
         #now, crop the workspace of the monitors
