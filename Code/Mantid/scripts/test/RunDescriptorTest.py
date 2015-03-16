@@ -90,11 +90,11 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertTrue(ok)
         self.assertTrue(len(file)>0)
 
-        ext = PropertyManager.sample_run.get_file_ext()
+        ext = PropertyManager.sample_run.get_fext()
         self.assertEqual(ext,'.raw')
 
         PropertyManager.sample_run.set_file_ext('nxs')
-        ext = PropertyManager.sample_run.get_file_ext()
+        ext = PropertyManager.sample_run.get_fext()
         self.assertEqual(ext,'.nxs')
 
         test_dir = config.getString('defaultsave.directory')
@@ -132,7 +132,7 @@ class RunDescriptorTest(unittest.TestCase):
         PropertyManager.sample_run.set_file_ext('nxs')
 
         ws = PropertyManager.sample_run.get_workspace()
-        self.assertEqual(PropertyManager.sample_run.get_file_ext(),'.raw')
+        self.assertEqual(PropertyManager.sample_run.get_fext(),'.raw')
 
         self.assertTrue(isinstance(ws, api.Workspace))
 
@@ -492,6 +492,27 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertTrue(PropertyManager.wb_for_monovan_run.has_own_value())
         self.assertEqual(propman.wb_run,2000)
         self.assertEqual(propman.wb_for_monovan_run,3000)
+
+    def test_get_correct_fext(self):
+        propman  = self.prop_man
+        propman.sample_run = None
+
+        def_fext= propman.data_file_ext
+        real_fext=PropertyManager.sample_run.get_fext()
+        self.assertEqual(def_fext,real_fext)
+
+        propman.data_file_ext = '.bla_bla'
+        real_fext=PropertyManager.sample_run.get_fext()
+        self.assertEqual('.bla_bla',real_fext)
+
+        propman.sample_run = 'MAR11001.nxs'
+        real_fext=PropertyManager.sample_run.get_fext()
+        self.assertEqual('.nxs',real_fext)
+
+        propman.data_file_ext = '.raw'
+        real_fext=PropertyManager.sample_run.get_fext()
+        self.assertEqual('.nxs',real_fext)
+
 
 
 

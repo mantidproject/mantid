@@ -74,10 +74,10 @@ public:
                    std::vector<std::string> &bankNames);
 
   /// Number of pixels
-  size_t numPixels;
+  size_t m_numPixels;
 
   /// Signal # to load. Default 1
-  int signalNo;
+  int m_signalNo;
 
 protected:
   void init();
@@ -101,7 +101,7 @@ protected:
   std::vector<Kernel::DateAndTime> pulseTimes;
 
   /// Number of bins
-  size_t numBins;
+  size_t m_numBins;
 
   /// Interval of chunk
   specid_t m_spec_min, m_spec_max;

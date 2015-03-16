@@ -41,6 +41,10 @@ static const std::string WORKSPACE_OUT("OutputWorkspace");
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
 
+LoadPreNexusMonitors::LoadPreNexusMonitors() : Mantid::API::Algorithm(),
+    nMonitors(0), instrument_loaded_correctly(false) {
+}
+  
 void LoadPreNexusMonitors::init() {
   // Filename for the runinfo file.
   declareProperty(new FileProperty(RUNINFO_FILENAME, "", FileProperty::Load,
