@@ -605,7 +605,7 @@ public:
 
   Mantid::API::IMDWorkspace_sptr
   testSaveAndLoadWorkspace(Mantid::API::IMDWorkspace_sptr inputWS,
-                           const std::string &rootGroup,
+                           const char *rootGroup,
                            const bool rmCoordField = false) {
     const std::string fileName = "SaveMDSpecialCoordinatesTest.nxs";
     SaveMD saveAlg;
@@ -622,7 +622,7 @@ public:
       // can't do this
       // so use the HDF5 API directly
       auto fid = H5Fopen(fileName.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
-      auto gid = H5Gopen(fid, rootGroup.c_str(), H5P_DEFAULT);
+      auto gid = H5Gopen(fid, rootGroup, H5P_DEFAULT);
       if (gid > 0) {
         H5Ldelete(gid, "coordinate_system", H5P_DEFAULT);
         H5Gclose(gid);

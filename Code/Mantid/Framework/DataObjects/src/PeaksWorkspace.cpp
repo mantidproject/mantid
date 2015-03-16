@@ -38,15 +38,16 @@ namespace DataObjects {
 /// Register the workspace as a type
 DECLARE_WORKSPACE(PeaksWorkspace);
 
-//  Kernel::Logger& PeaksWorkspace::g_log =
-//  Kernel::Logger::get("PeaksWorkspace");
-
 //---------------------------------------------------------------------------------------------
 /** Constructor. Create a table with all the required columns.
  *
  * @return PeaksWorkspace object
  */
-PeaksWorkspace::PeaksWorkspace() : IPeaksWorkspace() { initColumns(); }
+PeaksWorkspace::PeaksWorkspace()
+    : IPeaksWorkspace(), peaks(), columns(), columnNames(),
+      m_coordSystem(None) {
+  initColumns();
+}
 
 //---------------------------------------------------------------------------------------------
 /** Virtual constructor. Clone method to duplicate the peaks workspace.
@@ -65,7 +66,8 @@ PeaksWorkspace *PeaksWorkspace::clone() const {
  * @return
  */
 PeaksWorkspace::PeaksWorkspace(const PeaksWorkspace &other)
-    : IPeaksWorkspace(other), peaks(other.peaks) {
+    : IPeaksWorkspace(other), peaks(other.peaks), columns(), columnNames(),
+      m_coordSystem(other.m_coordSystem) {
   initColumns();
 }
 
@@ -668,6 +670,9 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   file->makeGroup("peaks_workspace", "NXentry",
                   true); // For when peaksWorkspace can be loaded
 
+  // Coordinate system
+  file->writeData("coordinate_system", static_cast<uint32_t>(m_coordSystem));
+  
   // Detectors column
   file->writeData("column_1", detectorID);
   file->openData("column_1");
@@ -827,25 +832,16 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
  * @param coordinateSystem : Option to set.
  */
 void PeaksWorkspace::setCoordinateSystem(
-    const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem) {
-  this->mutableRun().addProperty("CoordinateSystem", (int)coordinateSystem,
-                                 true);
+    const Kernel::SpecialCoordinateSystem coordinateSystem) {
+  m_coordSystem = coordinateSystem;
 }
 
 /**
  * @return the special Q3D coordinate system.
  */
-Mantid::Kernel::SpecialCoordinateSystem
+Kernel::SpecialCoordinateSystem
 PeaksWorkspace::getSpecialCoordinateSystem() const {
-  Mantid::Kernel::SpecialCoordinateSystem result = None;
-  try {
-    Property *prop = this->run().getProperty("CoordinateSystem");
-    PropertyWithValue<int> *p = dynamic_cast<PropertyWithValue<int> *>(prop);
-    int temp = *p;
-    result = (SpecialCoordinateSystem)temp;
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
-  }
-  return result;
+  return m_coordSystem;
 }
 
 // prevent shared pointer from deleting this

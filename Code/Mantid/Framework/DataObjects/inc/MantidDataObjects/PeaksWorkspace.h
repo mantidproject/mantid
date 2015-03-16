@@ -273,6 +273,9 @@ private:
 
   /** Column names */
   std::vector<std::string> columnNames;
+  
+  /// Coordinates
+  Kernel::SpecialCoordinateSystem m_coordSystem;
 
   // adapter for logs() function, which create reference to this class itself
   // and does not allow to delete the shared pointers,
