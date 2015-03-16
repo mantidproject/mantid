@@ -8,6 +8,7 @@
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/ReadLock.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidVatesAPI/ProgressAction.h"
 
 #include <vtkExtractSelection.h>
@@ -200,6 +201,7 @@ namespace VATES
     return peaksInfo;
   }
 
+GCC_DIAG_OFF(strict-aliasing)
   /**
    * Add information for a single peak to the peakInfo vector.
    * @param peak The peak from which the information will be extracted.
@@ -232,7 +234,7 @@ namespace VATES
       {
           boost::optional<double> radIn = sphericalShape.backgroundInnerRadius();
           if (radIn.is_initialized()) { 
-            radius = radIn.get();
+           radius = radIn.get();
           }
       }
       else 
@@ -284,7 +286,7 @@ namespace VATES
         throw std::invalid_argument("The special coordinate systems don't match.");
     }
   }
-
+//GCC_DIAG_ON(strict-aliasing)
   /**
    * Get the radiys for no shape
    * @returns The shape of the radius.
@@ -303,3 +305,4 @@ namespace VATES
   }
 }
 }
+
