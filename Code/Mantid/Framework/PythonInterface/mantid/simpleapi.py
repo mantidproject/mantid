@@ -264,10 +264,11 @@ def FitDialog(*args, **kwargs):
 _algorithm_preprocessors = dict()
 
 def _pp_cutmd(args, kwargs):
-  if "P1Bin" in kwargs:
-    bins = kwargs["P1Bin"]
-    if isinstance(bins, tuple):
-      #P1Bin has been provided as a tuple, we need to split it out into PNBin(s)
+  if "PBins" in kwargs:
+    bins = kwargs["PBins"]
+    del kwargs["PBins"]
+    if isinstance(bins, tuple) or isinstance(bins, list):
+      #PBin has been provided, we need to split it out into P1Bin, P2Bin, etc.
       for bin in range(len(bins)):
         kwargs["P{0}Bin".format(bin+1)] = bins[bin]
 
