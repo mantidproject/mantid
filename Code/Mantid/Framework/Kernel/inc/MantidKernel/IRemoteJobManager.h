@@ -1,5 +1,5 @@
-#ifndef IREMOTEJOBMANAGER_H
-#define IREMOTEJOBMANAGER_H
+#ifndef MANTID_KERNEL_IREMOTEJOBMANAGER_H
+#define MANTID_KERNEL_IREMOTEJOBMANAGER_H
 
 #include "MantidKernel/DllConfig.h"
 
@@ -273,4 +273,4 @@ typedef boost::shared_ptr<IRemoteJobManager> IRemoteJobManager_sptr;
 } // namespace Kernel
 } // namespace Mantid
 
-#endif // IREMOTEJOBMANAGER_H
+#endif // MANTID_KERNEL_IREMOTEJOBMANAGER_H
