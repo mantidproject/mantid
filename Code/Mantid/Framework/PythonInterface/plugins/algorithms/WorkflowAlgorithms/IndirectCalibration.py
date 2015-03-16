@@ -6,7 +6,7 @@ from mantid.simpleapi import *
 import os.path
 
 
-class CreateCalibrationWorkspace(DataProcessorAlgorithm):
+class IndirectCalibration(DataProcessorAlgorithm):
 
     _input_files = None
     _out_ws = None
@@ -81,7 +81,7 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
         from IndirectCommon import StartTime, EndTime
 
         self._setup()
-        StartTime('CreateCalibrationWorkspace')
+        StartTime('IndirectCalibration')
 
         runs = []
         for in_file in self._input_files:
@@ -122,7 +122,7 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
         self.setProperty('OutputWorkspace', self._out_ws)
         self._post_process()
 
-        EndTime('CreateCalibrationWorkspace')
+        EndTime('IndirectCalibration')
 
     def _setup(self):
         """
@@ -160,4 +160,4 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
             plotBin(mtd[self._out_ws], 0)
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(CreateCalibrationWorkspace)
+AlgorithmFactory.subscribe(IndirectCalibration)

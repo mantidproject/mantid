@@ -170,7 +170,7 @@ namespace CustomInterfaces
     QString calibrationWsName = outputWorkspaceNameStem + "_calib";
 
     // Configure the calibration algorithm
-    IAlgorithm_sptr calibrationAlg = AlgorithmManager::Instance().create("CreateCalibrationWorkspace");
+    IAlgorithm_sptr calibrationAlg = AlgorithmManager::Instance().create("IndirectCalibration");
     calibrationAlg->initialize();
 
     calibrationAlg->setProperty("InputFiles", filenames.toStdString());
