@@ -13,6 +13,7 @@ except ImportError:
     QString = type("")
 
 class GonioTableModel(QtCore.QAbstractTableModel):
+    changed=QtCore.pyqtSignal(list)
     def __init__(self, axesNames, axesDirections, axesSenses, axesMin, axesMax, axesSteps, parent = None):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.labels = axesNames
@@ -23,6 +24,8 @@ class GonioTableModel(QtCore.QAbstractTableModel):
         self.steps = axesSteps
         self.gonioColumns=['Name','Direction','Sense','Minimum','Maximum','Step']
         self.gonioRows=['Axis0','Axis1','Axis2']
+        self.values={   'labels':self.labels,'dirs':self.dirstrings,'senses':self.senses,
+                        'minvals':self.minvalues,'maxvals':self.maxvalues,'steps':self.steps}
 #        self.sendSignal()
 
     def rowCount(self, dummy_parent):
@@ -63,31 +66,29 @@ class GonioTableModel(QtCore.QAbstractTableModel):
 #            else:
 #                return QtGui.QBrush(QtCore.Qt.red)
 
-#    def setData(self, index, value, role = QtCore.Qt.EditRole):
-#        if role == QtCore.Qt.EditRole:
-#            row = index.row()
-#            column = index.column()
-#            try:
-#                val=value.toFloat()[0] #QVariant
-#            except AttributeError:
-#                val=float(value) #string
-#            self.__UB[row][column]=val
-#            self.dataChanged.emit(index, index)
+    def setData(self, index, value, role = QtCore.Qt.EditRole):
+        if role == QtCore.Qt.EditRole:
+            row = index.row()
+            column = index.column()
+            if column==0:
+                try:
+                    val=str(value.toString()) #QVariant
+                except AttributeError:
+                    val=str(value) #string
+                self.labels[row]=val
+            self.dataChanged.emit(index, index)
 #            print self.__UB
-#            if ValidateUB(self.__UB):
+            if True:
 #                self.__lattice.setUB(self.__UB)
-#                self.sendSignal()
-#                return True
-#        return False
+                self.changed.emit(self.labels)
+                return True
+        return False
 
-#    def sendSignal(self):
-#        self.changed.emit(self.__lattice)
-#
-#    def updateOL(self,ol):
-#        self.beginResetModel()
-#        self.__lattice=ol
-#        self.__UB=self.__lattice.getUB().copy()
-#        self.endResetModel()
+    def updateGon(self,labels):
+        self.beginResetModel()
+        self.labels=labels
+        self.endResetModel()
+        
 
 class InstrumentSetupWidget(QtGui.QWidget):
     def __init__(self,parent=None):
@@ -139,10 +140,10 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.tableViewGon.setModel(self.goniomodel)
         self.tableViewGon.update()
         #goniometer figure
-        self.figure=Figure(figsize=(2,5))        
+        self.figure=Figure(figsize=(2,4))
+        self.figure.patch.set_facecolor('white')
         self.canvas=FigureCanvas(self.figure)
-        self.gonfig = Axes3D(self.figure)
-        self.gonfig.hold(False)
+        self.gonfig=None
         self.updateFigure()
         #layout
         self.gridI = QtGui.QGridLayout()
@@ -165,9 +166,33 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.combo.activated[str].connect(self.instrumentSelected)
         #call instrumentSelected once. this will update everything else
         self.instrumentSelected(self.instrument)
+        #connect goniometer change with figure
+        self.goniomodel.changed.connect(self.updateGon)
+
+    def updateGon(self,names):
+        self.goniometerNames=names
+        self.updateFigure()
 
     def updateFigure(self):
-        self.figure.patch.set_facecolor('white')
+        #plot directions
+        if self.gonfig is not None:
+            self.gonfig.clear()
+        self.gonfig = Axes3D(self.figure)
+        self.gonfig.hold(True)
+        self.gonfig.set_frame_on(False)
+        self.gonfig.set_xlim3d(-0.6,0.6)
+        self.gonfig.set_ylim3d(-0.6,0.6)
+        self.gonfig.set_zlim3d(-1,5)
+        self.gonfig.set_axis_off()
+        self.gonfig.plot([0,1],[-3,-3],[0,0],zdir='y',color='black')
+        self.gonfig.plot([0,0],[-3,-2],[0,0],zdir='y',color='black')
+        self.gonfig.plot([0,0],[-3,-3],[0,1],zdir='y',color='black')
+        self.gonfig.text(0,1,-2.5,'Z',zdir=None,color='black')
+        self.gonfig.text(1,0,-2.5,'X',zdir=None,color='black')
+        
+        matplotlib.pyplot.gca().set_aspect('equal', adjustable='datalim')
+        self.gonfig.view_init(10,45)
+        
         colors=['b','g','r']
         for i in range(3):
             circle=numpy.array([mantid.kernel.Quat(0,0,0.5*numpy.sin(t),0.5*numpy.cos(t)) for t in numpy.arange(0,1.51*numpy.pi,0.1*numpy.pi)])
@@ -196,13 +221,6 @@ class InstrumentSetupWidget(QtGui.QWidget):
             self.gonfig.plot([t[0],-t[0]],[t[1]+2*i,-t[1]+2*i],[t[2],-t[2]],zdir='y',color=colors[i])
             self.gonfig.text(0,1,2*i,self.goniometerNames[i],zdir=None,color=colors[i])
 
-        #plot directions
-        self.gonfig.plot([0,1],[-3,-3],[0,0],zdir='y',color='black')
-        self.gonfig.plot([0,0],[-3,-2],[0,0],zdir='y',color='black')
-        self.gonfig.plot([0,0],[-3,-3],[0,1],zdir='y',color='black')
-        self.gonfig.text(0,1,-2.5,'Z',zdir=None,color='black')
-        self.gonfig.text(1,0,-2.5,'X',zdir=None,color='black')
-
         #plot sample
         self.gonfig.text(0,0,6.7,'Sample',zdir=None,color='black')
         u=numpy.linspace(0,2*numpy.pi,50)
@@ -211,16 +229,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         y = 0.3 * numpy.outer(numpy.sin(u), numpy.sin(v))
         z = 0.3 * numpy.outer(numpy.ones(numpy.size(u)),numpy. cos(v))
         self.gonfig.plot_surface(x,y,z+6,color='black',rstride=4, cstride=4)
-
-        self.gonfig.set_xlim3d(-0.6,0.6)
-        self.gonfig.set_ylim3d(-0.6,0.6)
-        self.gonfig.set_zlim3d(-1,7)
-        self.gonfig.set_axis_off()
-        matplotlib.pyplot.gca().set_aspect('equal', adjustable='datalim')
-        self.gonfig.view_init(10,45)
-        #self.gonfig.get_xaxis().set_visible(False)
-        #self.gonfig.get_yaxis().set_visible(False)
-        #self.gonfig.set_frame_on(False)
+        self.canvas.draw()
 
     def instrumentSelected(self,text):
         self.instrument=text
@@ -242,13 +251,12 @@ class InstrumentSetupWidget(QtGui.QWidget):
             if sender==self.editEi:
                 self.Ei=float(sender.text())
         else:
-            color = '#ffaaaa'
+            color = '#ff0000'
         sender.setStyleSheet('QLineEdit { background-color: %s }' % color)
         if state == QtGui.QValidator.Acceptable:
             self.updateAll()
 
     def updateAll(self):
-        print self.instrument,self.Ei,self.S2
         if mantid.mtd.doesExist("__InstrumentSetupWidgetWorkspace"):
             __w=mantid.mtd["__InstrumentSetupWidgetWorkspace"]
         else:
