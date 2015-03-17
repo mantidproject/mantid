@@ -19,6 +19,9 @@
     <DoubleVectorProperty name="MinValue"	command="GetMinValue" information_only="1"/>
     <DoubleVectorProperty name="MaxValue" command="GetMaxValue" information_only="1"/>
     <StringVectorProperty name="Instrument" command="GetInstrument" number_of_elements="1" information_only="1"/>
+    <IntVectorProperty name="SpecialCoordinates" command="GetSpecialCoordinates" number_of_elements="1" information_only="1" default_values="0">
+		<SimpleIntInformationHelper />
+    </IntVectorProperty>
     </SourceProxy>
   </ProxyGroup>
   <!-- End ScaleWorkspace -->

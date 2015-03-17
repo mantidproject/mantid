@@ -41,6 +41,9 @@ class CutMD(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty(name='P4Bin', values=[]),
                              doc='Projection 4 binning')
 
+        self.declareProperty(FloatArrayProperty(name='P5Bin', values=[]),
+                             doc='Projection 5 binning')
+
         self.declareProperty(IMDWorkspaceProperty('OutputWorkspace', '',\
                              direction=Direction.Output),
                              doc='Output cut workspace')
@@ -240,11 +243,16 @@ class CutMD(DataProcessorAlgorithm):
         projection_table = self.getProperty("Projection").value
         self.__verify_projection_input(projection_table)
 
-        p1_bins = self.getProperty("P1Bin").value
-        p2_bins = self.getProperty("P2Bin").value
-        p3_bins = self.getProperty("P3Bin").value
-        p4_bins_property = self.getProperty("P4Bin")
-        p4_bins = p4_bins_property.value
+        #Fetch pbins properties
+        pbins = [None] * 5 #Up to 5 dimensions
+        for i in range(len(pbins)):
+            pbins[i] = self.getProperty("P{0}Bin".format(i+1))
+
+            #Also check the correct pbin properties are set
+            if pbins[i].isDefault and i < ndims:
+                raise ValueError("P{0}Bin dimension binning must be set on a workspace with {1} dimensions.".format(i+1, ndims))
+            elif not pbins[i].isDefault and i >= ndims:
+                raise ValueError("Cannot set P{0}Bin dimension binning on a workspace with {1} dimensions.".format(i+1, ndims))
 
         x_extents = self.__extents_in_current_projection(to_cut, 0)
         y_extents = self.__extents_in_current_projection(to_cut, 1)
@@ -257,40 +265,36 @@ class CutMD(DataProcessorAlgorithm):
         u,v,w = self.__scale_projection(projection, origin_units, target_units, to_cut)
 
         extents = self.__calculate_extents(u, v, w, ( x_extents, y_extents, z_extents ) )
-        extents, bins = self.__calculate_steps( extents, ( p1_bins, p2_bins, p3_bins ) )
+        extents, bins = self.__calculate_steps( extents, ( pbins[0].value, pbins[1].value, pbins[2].value ) )
 
-        if not p4_bins_property.isDefault:
-            if ndims == 4:
-                n_args = len(p4_bins)
-                min, max = self.__extents_in_current_projection(to_cut, 3)
-                d_range = max - min
-                if n_args == 1:
-                    step_size = p4_bins[0]
-                    nbins = d_range / step_size
-                elif n_args == 2:
-                    min = p4_bins[0]
-                    max = p4_bins[1]
-                    nbins = 1
-                elif n_args == 3:
-                    min = p4_bins[0]
-                    max = p4_bins[2]
-                    step_size = p4_bins[1]
-                    dim_range = max - min
-                    if step_size > dim_range:
-                        step_size = dim_range
-                    nbins = int( dim_range / step_size)
+        for i in range(3, ndims):
+            pbin = pbins[i].value
+            n_args = len(pbin)
+            min, max = self.__extents_in_current_projection(to_cut, i)
+            d_range = max - min
+            if n_args == 1:
+                step_size = pbin[0]
+                nbins = d_range / step_size
+            elif n_args == 2:
+                min = pbin[0]
+                max = pbin[1]
+                nbins = 1
+            elif n_args == 3:
+                min = pbin[0]
+                max = pbin[2]
+                step_size = pbin[1]
+                dim_range = max - min
+                if step_size > dim_range:
+                    step_size = dim_range
+                nbins = int( dim_range / step_size)
 
-                extents.append(min)
-                extents.append(max)
-                bins.append(int(nbins))
+            extents.append(min)
+            extents.append(max)
+            bins.append(int(nbins))
 
-                e_units = to_cut.getDimension(3).getUnits()
-
-                temp = list(target_units)
-                temp.append(target_units)
-                target_units = tuple(temp)
-            else:
-                raise ValueError("Cannot specify P4Bins unless the workspace is of sufficient dimensions")
+            temp = list(target_units)
+            temp.append(target_units)
+            target_units = tuple(temp)
 
         projection_labels = self.__make_labels(projection)
 
