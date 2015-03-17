@@ -251,6 +251,47 @@ public:
     cellParametersAre(cell, 3.0, 4.0, 5.0, 101.0, 111.0, 103.0);
   }
 
+  void testSetParametersFromUnitCell() {
+    PawleyParameterFunction fn;
+    fn.initialize();
+
+    fn.setAttributeValue("CrystalSystem", "Triclinic");
+
+    UnitCell cell(3., 4., 5., 101., 111., 103.);
+
+    TS_ASSERT_THROWS_NOTHING(fn.setParametersFromUnitCell(cell));
+
+    TS_ASSERT_EQUALS(fn.getParameter("a"), 3.0);
+    TS_ASSERT_EQUALS(fn.getParameter("b"), 4.0);
+    TS_ASSERT_EQUALS(fn.getParameter("c"), 5.0);
+    TS_ASSERT_EQUALS(fn.getParameter("Alpha"), 101.0);
+    TS_ASSERT_EQUALS(fn.getParameter("Beta"), 111.0);
+    TS_ASSERT_EQUALS(fn.getParameter("Gamma"), 103.0);
+
+    fn.setAttributeValue("CrystalSystem", "Cubic");
+
+    cell.seta(5.43);
+    TS_ASSERT_THROWS_NOTHING(fn.setParametersFromUnitCell(cell));
+
+    TS_ASSERT_EQUALS(fn.getParameter("a"), 5.43);
+  }
+
+  void testProfileFunctionName() {
+    PawleyParameterFunction fn;
+    fn.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(
+        fn.setAttributeValue("ProfileFunction", "Gaussian"));
+    TS_ASSERT_EQUALS(fn.getProfileFunctionName(), "Gaussian");
+
+    // works only with IPeakFunctions
+    TS_ASSERT_THROWS(fn.setAttributeValue("ProfileFunction", "Chebyshev"),
+                     std::invalid_argument);
+
+    TS_ASSERT_THROWS(fn.setAttributeValue("ProfileFunction", "DoesNotExist"),
+                     Exception::NotFoundError);
+  }
+
   void testPawleyFunctionInitialization() {
     PawleyFunction fn;
     fn.initialize();
@@ -276,12 +317,24 @@ public:
   void testPawleyFunctionAddPeak() {
     PawleyFunction fn;
     fn.initialize();
+    TS_ASSERT_EQUALS(fn.getPeakCount(), 0);
 
     TS_ASSERT_EQUALS(fn.nParams(), 7);
 
     fn.addPeak(V3D(), 3.0, 4.0);
 
     TS_ASSERT_EQUALS(fn.nParams(), 10);
+    TS_ASSERT_EQUALS(fn.getPeakCount(), 1);
+  }
+
+  void testPawleyFunctionClearPeaks() {
+    PawleyFunction fn;
+    fn.initialize();
+
+    fn.addPeak(V3D(), 3.0, 4.0);
+    TS_ASSERT_EQUALS(fn.getPeakCount(), 1);
+    TS_ASSERT_THROWS_NOTHING(fn.clearPeaks());
+    TS_ASSERT_EQUALS(fn.getPeakCount(), 0);
   }
 
   void testPawleyFunctionSetProfileFunction() {
@@ -290,7 +343,7 @@ public:
 
     TS_ASSERT_EQUALS(fn.nParams(), 7);
 
-    fn.addPeak(V3D(), 2.0, 3.0, 4.0);
+    fn.addPeak(V3D(), 3.0, 4.0);
 
     TS_ASSERT_EQUALS(fn.nParams(), 10);
 

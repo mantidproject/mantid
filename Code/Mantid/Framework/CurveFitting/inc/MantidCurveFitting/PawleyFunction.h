@@ -112,10 +112,10 @@ public:
 
   void setPeaks(const std::vector<Kernel::V3D> &hkls, double fwhm,
                 double height);
-
   void clearPeaks();
 
   void addPeak(const Kernel::V3D &hkl, double fwhm, double height);
+  size_t getPeakCount() const;
   API::IPeakFunction_sptr getPeakFunction(size_t i) const;
   Kernel::V3D getPeakHKL(size_t i) const;
 

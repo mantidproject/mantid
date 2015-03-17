@@ -247,7 +247,12 @@ void PawleyFunction::setProfileFunction(const std::string &profileFunction) {
             m_pawleyParameterFunction->getProfileFunctionName()));
 
     newFunction->setCentre(oldFunction->centre());
-    newFunction->setFwhm(oldFunction->fwhm());
+    try {
+      newFunction->setFwhm(oldFunction->fwhm());
+    }
+    catch (...) {
+      // do nothing.
+    }
     newFunction->setHeight(oldFunction->height());
 
     m_peakProfileComposite->replaceFunction(i, newFunction);
@@ -302,13 +307,22 @@ void PawleyFunction::addPeak(const Kernel::V3D &hkl, double fwhm,
 
   peak->fix(peak->parameterIndex(
       m_pawleyParameterFunction->getProfileFunctionCenterParameterName()));
-  peak->setFwhm(fwhm);
+
+  try {
+    peak->setFwhm(fwhm);
+  }
+  catch (...) {
+    // do nothing.
+  }
+
   peak->setHeight(height);
 
   m_peakProfileComposite->addFunction(peak);
 
   m_compositeFunction->checkFunction();
 }
+
+size_t PawleyFunction::getPeakCount() const { return m_hkls.size(); }
 
 IPeakFunction_sptr PawleyFunction::getPeakFunction(size_t i) const {
   return boost::dynamic_pointer_cast<IPeakFunction>(
