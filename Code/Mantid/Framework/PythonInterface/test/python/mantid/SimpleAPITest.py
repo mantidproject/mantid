@@ -5,6 +5,7 @@ import mantid.simpleapi as simpleapi
 import numpy
 
 import os
+import subprocess
 import sys
 
 #======================================================================================================================
@@ -243,7 +244,6 @@ AlgorithmFactory.subscribe(%(name)s)
         src2 = src % {"name":name2,"execline1":"pass","execline2":"pass"}
         a = TemporaryPythonAlgorithm(name1,src1)
         b = TemporaryPythonAlgorithm(name2,src2)
-        import subprocess
         # Try to use algorithm 1 to run algorithm 2
         cmd = sys.executable + ' -c "from mantid.simpleapi import %(name)s;%(name)s()"' % {'name':name1}
         try:
@@ -320,6 +320,24 @@ AlgorithmFactory.subscribe(%(name)s)
         self.assertEquals(expected_child,alg.isChild())
         self.assertEquals(alg.version(), version)
         self.assertTrue(isinstance(alg, expected_class))
+
+    def test_validate_inputs_with_errors_stops_algorithm(self):
+        class ValidateInputsTest(PythonAlgorithm):
+            def PyInit(self):
+                self.declareProperty("Prop1", 1.0)
+                self.declareProperty("Prop2", 2.0)
+            def validateInputs(self):
+                return {"Prop1":"Value is less than Prop2"}
+            def PyExec(self):
+                pass
+        AlgorithmFactory.subscribe(ValidateInputsTest)
+        # ---------------------------------------------------------
+        alg_obj = ValidateInputsTest()
+        alg_obj.initialize()
+        
+        simpleapi_func = simpleapi._create_algorithm_function("ValidateInputsTest", 1, alg_obj)
+        # call
+        self.assertRaises(RuntimeError, simpleapi_func, Prop1=2.5, Prop2=3.5)
 
 if __name__ == '__main__':
     unittest.main()
