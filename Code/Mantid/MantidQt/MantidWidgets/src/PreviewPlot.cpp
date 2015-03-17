@@ -340,6 +340,7 @@ RangeSelector * PreviewPlot::addRangeSelector(const QString & rsName,
     throw std::runtime_error("RangeSelector already exists on PreviewPlot");
 
   m_rangeSelectors[rsName] = new MantidWidgets::RangeSelector(m_uiForm.plot, type);
+  m_rsVisibility[rsName] = m_rangeSelectors[rsName]->isVisible();
 
   return m_rangeSelectors[rsName];
 }
@@ -792,11 +793,23 @@ void PreviewPlot::handleAxisTypeSelect()
   bool xIsSquared = xAxisType == "Squared";
   for(auto it = m_rangeSelectors.begin(); it != m_rangeSelectors.end(); ++it)
   {
+    QString rsName = it.key();
     RangeSelector * rs = it.value();
     RangeSelector::SelectType type = rs->getType();
 
     if(type == RangeSelector:: XMINMAX || type == RangeSelector::XSINGLE)
-      rs->setVisible(!xIsSquared);
+    {
+      // When setting to invisible save the last visibility setting
+      if(xIsSquared)
+      {
+        m_rsVisibility[rsName] = rs->isVisible();
+        rs->setVisible(false);
+      }
+      else
+      {
+        rs->setVisible(m_rsVisibility[rsName]);
+      }
+    }
   }
 
   // Update the plot

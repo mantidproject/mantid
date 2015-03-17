@@ -37,6 +37,7 @@ namespace MantidWidgets
     double getMaximum() { return m_max; } ///< Reutnrs current max value
 
     SelectType getType() { return m_type; }
+    bool isVisible() { return m_visible; }
 
   signals:
     void minValueChanged(double);

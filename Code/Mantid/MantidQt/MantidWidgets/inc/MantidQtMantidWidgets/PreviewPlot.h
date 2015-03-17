@@ -143,6 +143,8 @@ namespace MantidWidgets
 
     /// Range selector widget for mini plot
     QMap<QString, MantidQt::MantidWidgets::RangeSelector *> m_rangeSelectors;
+    /// Cache of range selector visibility
+    QMap<QString, bool> m_rsVisibility;
 
     /// Poco Observers for ADS Notifications
     Poco::NObserver<PreviewPlot, Mantid::API::WorkspacePreDeleteNotification> m_removeObserver;
@@ -151,7 +153,6 @@ namespace MantidWidgets
     /// If the widget was initialised
     bool m_init;
 
-    /// The plot its self
     friend class RangeSelector;
 
     /// Map of curve key to plot info
