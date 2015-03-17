@@ -83,7 +83,8 @@ namespace MantidWidgets
 
     bool hasCurve(const QString & curveName);
 
-    RangeSelector * addRangeSelector(const QString & rsName);
+    RangeSelector * addRangeSelector(const QString & rsName,
+                                     RangeSelector::SelectType type = RangeSelector::XMINMAX);
     RangeSelector * getRangeSelector(const QString & rsName);
     void removeRangeSelector(const QString & rsName, bool del);
 

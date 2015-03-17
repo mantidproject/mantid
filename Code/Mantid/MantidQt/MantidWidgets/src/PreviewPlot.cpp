@@ -333,12 +333,13 @@ bool PreviewPlot::hasCurve(const QString & curveName)
  * @param rsName Name of range selector
  * @return RangeSelector object
  */
-RangeSelector * PreviewPlot::addRangeSelector(const QString & rsName)
+RangeSelector * PreviewPlot::addRangeSelector(const QString & rsName,
+                                              RangeSelector::SelectType type)
 {
   if(hasRangeSelector(rsName))
-    return NULL;
+    throw std::runtime_error("RangeSelector already exists on PreviewPlot");
 
-  m_rangeSelectors[rsName] = new MantidWidgets::RangeSelector(m_uiForm.plot);
+  m_rangeSelectors[rsName] = new MantidWidgets::RangeSelector(m_uiForm.plot, type);
 
   return m_rangeSelectors[rsName];
 }
@@ -353,7 +354,7 @@ RangeSelector * PreviewPlot::addRangeSelector(const QString & rsName)
 RangeSelector * PreviewPlot::getRangeSelector(const QString & rsName)
 {
   if(!hasRangeSelector(rsName))
-    return NULL;
+    throw std::runtime_error("RangeSelector not found on PreviewPlot");
 
   return m_rangeSelectors[rsName];
 }
