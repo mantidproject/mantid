@@ -185,7 +185,7 @@ namespace IDA
       auto groupWsNames = groupWs->getNames();
 
       // Find the correct fit workspace and plot it
-      std::string searchString = "_" + std::to_string(specNo) + "_Workspace";
+      std::string searchString = "_" + std::to_string(static_cast<long long int>(specNo)) + "_Workspace";
       for(auto it = groupWsNames.begin(); it != groupWsNames.end(); ++it)
       {
         std::string wsName = *it;
