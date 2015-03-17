@@ -31,7 +31,7 @@ from mantid.api._aliases import *
 
 #------------------------ Specialized function calls --------------------------
 # List of specialized algorithms
-__SPECIALIZED_FUNCTIONS__ = ["Load", "Fit"]
+__SPECIALIZED_FUNCTIONS__ = ["Load", "Fit", "CutMD"]
 # List of specialized algorithms
 __MDCOORD_FUNCTIONS__ = ["PeakIntensityVsRadius", "CentroidPeaksMD","IntegratePeaksMD"]
 # The "magic" keyword to enable/disable logging
@@ -257,22 +257,65 @@ def FitDialog(*args, **kwargs):
 
 #--------------------------------------------------- --------------------------
 
-#This dictionary maps algorithm names to functions that preprocess their inputs
-#in the simpleapi. The functions take args and kwargs as regular arguments and
-#modify them as required.
+def CutMD(*args, **kwargs):
+    """
+    Description TODO
+    """
+    (InputWorkspace,) = _get_mandatory_args('CutMD', ["InputWorkspace"], *args, **kwargs)
+    # Remove from keywords so it is not set twice
+    if "InputWorkspace" in kwargs:
+        del kwargs['InputWorkspace']
 
-_algorithm_preprocessors = dict()
+    # Create and execute
+    algm = _create_algorithm_object('CutMD')
+    _set_logging_option(algm, kwargs)
 
-def _pp_cutmd(args, kwargs):
-  if "PBins" in kwargs:
-    bins = kwargs["PBins"]
-    del kwargs["PBins"]
-    if isinstance(bins, tuple) or isinstance(bins, list):
-      #PBin has been provided, we need to split it out into P1Bin, P2Bin, etc.
-      for bin in range(len(bins)):
-        kwargs["P{0}Bin".format(bin+1)] = bins[bin]
+    #Split PBins up into P1Bin, P2Bin, etc.
+    if "PBins" in kwargs:
+        bins = kwargs["PBins"]
+        del kwargs["PBins"]
+        if isinstance(bins, tuple) or isinstance(bins, list):
+            for bin in range(len(bins)):
+                kwargs["P{0}Bin".format(bin+1)] = bins[bin]
 
-_algorithm_preprocessors["CutMD"] = _pp_cutmd
+    algm.setProperty('InputWorkspace', InputWorkspace)
+    # Set all workspace properties before others
+    for key in kwargs.keys():
+        if key.startswith('InputWorkspace_'):
+            algm.setProperty(key, kwargs[key])
+            del kwargs[key]
+
+    lhs = _kernel.funcreturns.lhs_info()
+    # If the output has not been assigned to anything, i.e. lhs[0] = 0 and kwargs does not have OutputWorkspace
+    # then raise a more helpful error than what we would get from an algorithm
+    if lhs[0] == 0 and 'OutputWorkspace' not in kwargs:
+        raise RuntimeError("Unable to set output workspace name. Please either assign the output of "
+                           "CutMD to a variable or use the OutputWorkspace keyword.")
+
+    lhs_args = _get_args_from_lhs(lhs, algm)
+    final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
+    # Check for any properties that aren't known and warn they will not be used
+    for key in final_keywords.keys():
+        if key not in algm:
+            raise RuntimeError("Unknown property: {0}".format(key))
+    _set_properties(algm, **final_keywords)
+    algm.execute()
+
+    return _gather_returns('CutMD', lhs, algm)
+
+# Have a better load signature for autocomplete
+_signature = "\bInputWorkspace"
+# Getting the code object for Load
+_f = CutMD.func_code
+# Creating a new code object nearly identical, but with the two variable names replaced
+# by the property list.
+_c = _f.__new__(_f.__class__, _f.co_argcount, _f.co_nlocals, _f.co_stacksize, _f.co_flags, _f.co_code, _f.co_consts, _f.co_names,\
+       (_signature, "kwargs"), _f.co_filename, _f.co_name, _f.co_firstlineno, _f.co_lnotab, _f.co_freevars)
+
+# Replace the code object of the wrapper function
+CutMD.func_code = _c
+
+#--------------------------------------------------- --------------------------
 
 def _get_function_spec(func):
     """Get the python function signature for the given function object
@@ -567,10 +610,6 @@ def _create_algorithm_function(algorithm, version, _algm_object):
             Note that if the Version parameter is passed, we will create
             the proper version of the algorithm without failing.
         """
-
-        # If needed, preprocess this algorithm's input
-        if algorithm in _algorithm_preprocessors:
-          _algorithm_preprocessors[algorithm](args, kwargs)
 
         _version = version
         if "Version" in kwargs:
