@@ -1,6 +1,6 @@
 from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, \
-                       PropertyMode
+                       PropertyMode, MatrixWorkspace
 from mantid.kernel import Direction, logger
 
 
@@ -55,10 +55,6 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         if not self._use_can:
             logger.information('Not using container')
 
-        instrument = mtd[self._sample_ws_name].getInstrument()
-        unit_id = mtd[self._sample_ws_name].getAxis(0).getUnit().unitID()
-        logger.information('x-unit is ' + unit_id)
-
         # Apply container scale factor if needed
         if self._use_can:
             if self._scale_can:
@@ -73,27 +69,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                                OutputWorkspace=self._scaled_container)
 
         if self._use_corrections:
-            # If the sample is not in wavelength then convert the corrections to
-            # whatever units the sample is in
-            if unit_id != 'Wavelength':
-                target = unit_id
-                if unit_id == 'dSpacing':
-                    emode = 'Elastic'
-                    efixed = 0.0
-                elif unit_id == 'DeltaE':
-                    emode = 'Indirect'
-                    efixed = instrument.getNumberParameter('efixed-val')[0]
-                else:
-                    raise ValueError('Unit %s in sample workspace is not supported' % unit_id)
-
-                ConvertUnits(InputWorkspace=self._corrections_ws_name,
-                             OutputWorkspace=self._corrections,
-                             Target=target,
-                             EMode=emode,
-                             EFixed=efixed)
-            else:
-                CloneWorkspace(InputWorkspace=self._corrections_ws_name,
-                               OutputWorkspace=self._corrections)
+            self._pre_process_corrections()
 
             if self._use_can:
                 # Use container factors
@@ -123,13 +99,21 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             issues['CorrectionsWorkspace'] = error_msg
             issues['CanWorkspace'] = error_msg
 
-        sample_unit_id = mtd[self._sample_ws_name].getAxis(0).getUnit().unitID()
+        sample_ws = mtd[self._sample_ws_name]
+        if isinstance(sample_ws, MatrixWorkspace):
+            sample_unit_id = sample_ws.getAxis(0).getUnit().unitID()
 
-        # Check sample and container X axis units match
-        if self._use_can:
-            can_unit_id = mtd[self._can_ws_name].getAxis(0).getUnit().unitID()
-            if can_unit_id != sample_unit_id:
-                issues['CanWorkspace'] = 'X axis unit must match SampleWorkspace'
+            # Check sample and container X axis units match
+            if self._use_can:
+                can_ws = mtd[self._can_ws_name]
+                if isinstance(can_ws, MatrixWorkspace):
+                    can_unit_id = can_ws.getAxis(0).getUnit().unitID()
+                    if can_unit_id != sample_unit_id:
+                        issues['CanWorkspace'] = 'X axis unit must match SampleWorkspace'
+                else:
+                    issues['CanWorkspace'] = 'Must be a MatrixWorkspace'
+        else:
+            issues['SampleWorkspace'] = 'Must be a MatrixWorkspace'
 
         return issues
 
@@ -156,6 +140,65 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         # This temporary WS is needed because ConvertUnits does not like named WS in a Group
         self._corrections = '__converted_corrections'
         self._scaled_container = '__scaled_container'
+
+
+    def _get_correction_factor_ws_name(self, factor_type):
+        """
+        Gets the full name for a correction factor workspace given the correction type.
+
+        @param factor_type Factory type (ass, acc, acsc, assc)
+        @return Full name of workspace (None if not found)
+        """
+
+        corrections_ws = mtd[self._corrections_ws_name]
+
+        for ws_name in corrections_ws.getNames():
+            if factor_type in ws_name:
+                return ws_name
+
+        return None
+
+
+    def _pre_process_corrections(self):
+        """
+        If the sample is not in wavelength then convert the corrections to
+        whatever units the sample is in.
+        """
+
+        instrument = mtd[self._sample_ws_name].getInstrument()
+        unit_id = mtd[self._sample_ws_name].getAxis(0).getUnit().unitID()
+        logger.information('x-unit is ' + unit_id)
+
+        factor_types = ['ass']
+        if self._use_can:
+            factor_types.extend(['acc', 'acsc', 'assc'])
+
+        for factor_type in factor_types:
+            input_name = self._get_correction_factor_ws_name(factor_type)
+            output_name = self._corrections + '_' + factor_type
+
+            if unit_id != 'Wavelength':
+                # Configure conversion
+                if unit_id == 'dSpacing':
+                    emode = 'Elastic'
+                    efixed = 0.0
+                elif unit_id == 'DeltaE':
+                    emode = 'Indirect'
+                    efixed = instrument.getNumberParameter('efixed-val')[0]
+                else:
+                    raise ValueError('Unit %s in sample workspace is not supported' % unit_id)
+
+                # Do conversion
+                ConvertUnits(InputWorkspace=input_name,
+                             OutputWorkspace=output_name,
+                             Target=unit_id,
+                             EMode=emode,
+                             EFixed=efixed)
+
+            else:
+                # No need to convert
+                CloneWorkspace(InputWorkspace=input_name,
+                               OutputWorkspace=output_name)
 
 
     def _subtract(self):
