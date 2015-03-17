@@ -17,7 +17,7 @@ copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR}
 #############################################################################################
 set ( FRAMEWORK_DIR ../../.. )
 include_directories ( ${FRAMEWORK_DIR}/CurveFitting/inc ${FRAMEWORK_DIR}/DataHandling/inc ${FRAMEWORK_DIR}/DataObjects/inc
-                      ${FRAMEWORK_DIR}/Nexus/inc ${FRAMEWORK_DIR}/TestHelpers/inc ${FRAMEWORK_DIR}/MDEvents/inc )
+                      ${FRAMEWORK_DIR}/Nexus/inc ${FRAMEWORK_DIR}/TestHelpers/inc )
 
 # WorkspaceCreationHelper
 set ( SRC_FILES
@@ -31,7 +31,7 @@ set_python_properties( PythonWorkspaceCreationHelper WorkspaceCreationHelper )
 set_target_output_directory ( PythonWorkspaceCreationHelper ${OUTPUT_DIR} .pyd )
 # Override folder
 set_property ( TARGET PythonWorkspaceCreationHelper PROPERTY FOLDER "UnitTests/Python" )
-target_link_libraries ( PythonWorkspaceCreationHelper PythonAPIModule DataObjects MDEvents DataHandling )
+target_link_libraries ( PythonWorkspaceCreationHelper PythonAPIModule DataObjects DataHandling )
 
 # Overall testhelpers target
 add_custom_target ( testhelpers DEPENDS PythonWorkspaceCreationHelper )

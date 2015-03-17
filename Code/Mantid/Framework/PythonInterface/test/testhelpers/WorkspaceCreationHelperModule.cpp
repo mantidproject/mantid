@@ -14,7 +14,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace WorkspaceCreationHelper;
-using namespace Mantid::MDEvents::MDEventsTestHelper;
+using namespace Mantid::DataObjects::MDEventsTestHelper;
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(create2DWorkspaceWithFullInstrument_overloads, create2DWorkspaceWithFullInstrument, 2, 4);
 
