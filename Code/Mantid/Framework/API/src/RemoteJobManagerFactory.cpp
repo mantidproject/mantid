@@ -73,10 +73,12 @@ RemoteJobManagerFactoryImpl::create(const std::string baseURL,
   try {
     jm = this->create(jobManagerType);
   } catch (Kernel::Exception::NotFoundError &e) {
-    throw std::runtime_error(
-        "Failed to create a remote job manager of type (class) '" +
-        jobManagerType + "' with base URL " + baseURL +
-        ". Error description: " + e.what());
+    throw Kernel::Exception::NotFoundError(
+        "RemoteJobManagerFactory: failed to create a remote job manager of "
+        "type (class) '" +
+            jobManagerType + "' with base URL " + baseURL +
+            ". Error description: " + e.what(),
+        jobManagerType);
   }
 
   return jm;

@@ -87,9 +87,11 @@ public:
   // minimal positive test
   void test_createTestJM() {
     RemoteJobManagerFactory::Instance().subscribe<TestJM>("TestJM");
-    TS_ASSERT_THROWS_NOTHING(
+    // throws not found cause it is not in facilities.xml, but otherwise fine
+    TS_ASSERT_THROWS(
         Mantid::Kernel::IRemoteJobManager_sptr jobManager =
-            Mantid::API::RemoteJobManagerFactory::Instance().create("TestJM"));
+            Mantid::API::RemoteJobManagerFactory::Instance().create("TestJM"),
+        Mantid::Kernel::Exception::NotFoundError);
   }
 
   // this must fail, resource not found in the current facility
@@ -99,15 +101,17 @@ public:
         Mantid::Kernel::ConfigService::Instance().getFacility();
 
     Mantid::Kernel::ConfigService::Instance().setFacility("ISIS");
-    TS_ASSERT_THROWS_NOTHING(
+    TS_ASSERT_THROWS(
         Mantid::Kernel::IRemoteJobManager_sptr jobManager =
-            Mantid::API::RemoteJobManagerFactory::Instance().create("Fermi"));
+            Mantid::API::RemoteJobManagerFactory::Instance().create("Fermi"),
+        Mantid::Kernel::Exception::NotFoundError);
 
     Mantid::Kernel::ConfigService::Instance().setFacility("SNS");
-    TS_ASSERT_THROWS_NOTHING(
+    TS_ASSERT_THROWS(
         Mantid::Kernel::IRemoteJobManager_sptr jobManager =
             Mantid::API::RemoteJobManagerFactory::Instance().create(
-                "SCARF@LSF"));
+                "SCARF@STFC"),
+        Mantid::Kernel::Exception::NotFoundError);
 
     // restore facility, always do this at the end
     Mantid::Kernel::ConfigService::Instance().setFacility(prevFac.name());
@@ -120,15 +124,21 @@ public:
         Mantid::Kernel::ConfigService::Instance().getFacility();
 
     Mantid::Kernel::ConfigService::Instance().setFacility("SNS");
-    TS_ASSERT_THROWS_NOTHING(
+    // TODO: at the moemnt these two create throw a NotFoundError
+    // because the RemoteJobManager classes are missing and have not
+    // done a DECLARE_REMOTEJOBMANAGER. Change this test when that is
+    // done (ticket #11126 etc.)
+    TS_ASSERT_THROWS(
         Mantid::Kernel::IRemoteJobManager_sptr jobManager =
-            Mantid::API::RemoteJobManagerFactory::Instance().create("Fermi"));
+            Mantid::API::RemoteJobManagerFactory::Instance().create("Fermi"),
+        Mantid::Kernel::Exception::NotFoundError);
 
     Mantid::Kernel::ConfigService::Instance().setFacility("ISIS");
-    TS_ASSERT_THROWS_NOTHING(
+    TS_ASSERT_THROWS(
         Mantid::Kernel::IRemoteJobManager_sptr jobManager =
             Mantid::API::RemoteJobManagerFactory::Instance().create(
-                "SCARF@LSF"));
+                "SCARF@STFC"),
+        Mantid::Kernel::Exception::NotFoundError);
 
     // restore facility, always do this at the end
     Mantid::Kernel::ConfigService::Instance().setFacility(prevFac.name());
