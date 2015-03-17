@@ -47,67 +47,16 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_prevScan">
+         <widget class="QCheckBox" name="checkBox_clearPrevious">
           <property name="text">
-           <string>Prev Scan</string>
+           <string>Clear Previous Plot</string>
           </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_nextScan">
-          <property name="text">
-           <string>Next Scan</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_12">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QComboBox" name="comboBox_wavelength">
-          <item>
-           <property name="text">
-            <string>Unknown</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Ge 113 IN Config 2.41 Å,</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>(115) 1.54 Å</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>(117) 1.12 Å.</string>
-           </property>
-          </item>
          </widget>
         </item>
         <item>
          <widget class="QLabel" name="label_calibration">
           <property name="text">
            <string/>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="checkBox_clearPrevious">
-          <property name="text">
-           <string>Clear Previous Plot</string>
           </property>
          </widget>
         </item>
@@ -496,6 +445,30 @@
                  </widget>
                 </item>
                 <item>
+                 <widget class="QComboBox" name="comboBox_wavelength">
+                  <item>
+                   <property name="text">
+                    <string>Ge 113 IN Config 2.41 Å,</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>(115) 1.54 Å</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>(117) 1.12 Å.</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>User Specified</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item>
                  <widget class="QLineEdit" name="lineEdit_wavelength"/>
                 </item>
                 <item>
@@ -531,6 +504,33 @@
                 <item>
                  <layout class="QVBoxLayout" name="verticalLayout_3">
                   <item>
+                   <widget class="QPushButton" name="pushButton_prevScan">
+                    <property name="text">
+                     <string>Prev Scan</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="pushButton_nextScan">
+                    <property name="text">
+                     <string>Next Scan</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="verticalSpacer_6">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
                    <widget class="QLabel" name="label_xmin">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -546,7 +546,7 @@
                   <item>
                    <widget class="QLineEdit" name="lineEdit_xmin">
                     <property name="enabled">
-                     <bool>false</bool>
+                     <bool>true</bool>
                     </property>
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -638,6 +638,98 @@
                   </item>
                   <item>
                    <spacer name="verticalSpacer_3">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="tab_4">
+           <attribute name="title">
+            <string>Vanadium</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_5">
+            <item row="0" column="0">
+             <layout class="QVBoxLayout" name="verticalLayout_5">
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_15">
+                <item>
+                 <widget class="QLabel" name="label_2">
+                  <property name="text">
+                   <string>Vanadium Peak List</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lineEdit_2"/>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="comboBox">
+                  <item>
+                   <property name="text">
+                    <string>dSpacing</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_12">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_resetVanPeakList">
+                  <property name="text">
+                   <string>Reset</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_11">
+                <item>
+                 <widget class="QGraphicsView" name="graphicsView_vanPeaks">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_6">
+                  <item>
+                   <widget class="QPushButton" name="pushButton_saveVanRun">
+                    <property name="text">
+                     <string>Save</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="verticalSpacer_7">
                     <property name="orientation">
                      <enum>Qt::Vertical</enum>
                     </property>
@@ -975,7 +1067,7 @@
      <x>0</x>
      <y>0</y>
      <width>1124</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

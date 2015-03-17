@@ -196,3 +196,25 @@ class Qt4MplCanvas(FigureCanvas):
         # ENDFOR(i)
         
         return combolist
+
+
+class MyNavigationToolbar(NavigationToolbar):
+    """ A customized navigation tool bar attached to canvas
+    """
+    def __init__(self, parent, canvas, direction='h'):
+        """ Initialization
+        """
+        self.canvas = canvas
+        QtGui.QWidget.__init__(self, parent)
+
+        #if direction=='h' :
+        #    self.layout = QtGui.QHBoxLayout(self)
+        #else :
+        #    self.layout = QtGui.QVBoxLayout(self)
+
+        #self.layout.setMargin(2)
+        #self.layout.setSpacing(0)
+
+        NavigationToolbar.__init__( self, canvas, canvas )
+
+        return
