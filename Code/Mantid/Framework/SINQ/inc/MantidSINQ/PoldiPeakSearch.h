@@ -4,6 +4,7 @@
 #include "MantidSINQ/DllConfig.h"
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/V2D.h"
 #include "MantidAPI/Algorithm.h"
 
@@ -97,7 +98,7 @@ protected:
   getPeaks(const MantidVec::const_iterator &baseListStart,
            const MantidVec::const_iterator &baseListEnd,
            std::list<MantidVec::const_iterator> peakPositions,
-           const MantidVec &xData) const;
+           const MantidVec &xData, const Kernel::Unit_sptr &unit) const;
   double getFWHMEstimate(const MantidVec::const_iterator &baseListStart,
                          const MantidVec::const_iterator &baseListEnd,
                          MantidVec::const_iterator peakPosition,

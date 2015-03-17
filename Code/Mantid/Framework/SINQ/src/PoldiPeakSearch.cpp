@@ -3,6 +3,8 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/V2D.h"
 
 #include "MantidDataObjects/Workspace2D.h"
@@ -214,7 +216,7 @@ std::vector<PoldiPeak_sptr>
 PoldiPeakSearch::getPeaks(const MantidVec::const_iterator &baseListStart,
                           const MantidVec::const_iterator &baseListEnd,
                           std::list<MantidVec::const_iterator> peakPositions,
-                          const MantidVec &xData) const {
+                          const MantidVec &xData, const Unit_sptr &unit) const {
   std::vector<PoldiPeak_sptr> peakData;
   peakData.reserve(peakPositions.size());
 
@@ -223,11 +225,21 @@ PoldiPeakSearch::getPeaks(const MantidVec::const_iterator &baseListStart,
        peak != peakPositions.end(); ++peak) {
     size_t index = std::distance(baseListStart, *peak);
 
-    PoldiPeak_sptr newPeak =
-        PoldiPeak::create(UncertainValue(xData[index]), UncertainValue(**peak));
+    double xDataD = 0.0;
+    if (boost::dynamic_pointer_cast<Units::dSpacing>(unit)) {
+      xDataD = xData[index];
+    } else {
+      Unit_sptr dUnit = UnitFactory::Instance().create("dSpacing");
+      xDataD = UnitConversion::run((*unit), (*dUnit), xData[index], 0, 0, 0,
+                                   DeltaEMode::Elastic, 0.0);
+    }
+
     double fwhmEstimate =
         getFWHMEstimate(baseListStart, baseListEnd, *peak, xData);
-    newPeak->setFwhm(UncertainValue(fwhmEstimate));
+    UncertainValue fwhm(fwhmEstimate / xData[index]);
+
+    PoldiPeak_sptr newPeak = PoldiPeak::create(
+        MillerIndices(), UncertainValue(xDataD), UncertainValue(**peak), fwhm);
     peakData.push_back(newPeak);
   }
 
@@ -536,6 +548,19 @@ void PoldiPeakSearch::exec() {
   MantidVec correlatedCounts = correlationWorkspace->readY(0);
   g_log.information() << "   Auto-correlation data read." << std::endl;
 
+  Unit_sptr xUnit = correlationWorkspace->getAxis(0)->unit();
+
+  if (xUnit->caption() == "") {
+    g_log.information()
+        << "   Workspace does not have unit, defaulting to MomentumTransfer."
+        << std::endl;
+
+    xUnit = UnitFactory::Instance().create("MomentumTransfer");
+  } else {
+    g_log.information() << "   Unit of workspace is " << xUnit->caption() << "."
+                        << std::endl;
+  }
+
   setMinimumDistance(getProperty("MinimumPeakSeparation"));
   setMinimumPeakHeight(getProperty("MinimumPeakHeight"));
   setMaximumPeakNumber(getProperty("MaximumPeakNumber"));
@@ -576,7 +601,7 @@ void PoldiPeakSearch::exec() {
    */
   std::vector<PoldiPeak_sptr> peakCoordinates =
       getPeaks(correlatedCounts.begin(), correlatedCounts.end(),
-               peakPositionsCorrelation, correlationQValues);
+               peakPositionsCorrelation, correlationQValues, xUnit);
   g_log.information()
       << "   Extracted peak positions in Q and intensity guesses." << std::endl;
 
