@@ -5,8 +5,8 @@
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
 #include "MantidAPI/IMDNode.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <vtkPoints.h>
@@ -14,7 +14,7 @@
 #include <boost/scoped_ptr.hpp>
 
 
-using Mantid::MDEvents::MDEventWorkspace;
+using Mantid::DataObjects::MDEventWorkspace;
 
 namespace Mantid
 {

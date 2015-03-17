@@ -13,12 +13,12 @@
 #include <gtest/gtest.h>
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::VATES;
 using namespace testing;
-using Mantid::MDEvents::MDEventsTestHelper::makeFakeMDHistoWorkspace;
+using Mantid::DataObjects::MDEventsTestHelper::makeFakeMDHistoWorkspace;
 
 
 //=====================================================================================

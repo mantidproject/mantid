@@ -22,7 +22,7 @@
 
 using namespace testing;
 using namespace Mantid::VATES;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 //=====================================================================================
 // Functional tests
@@ -428,7 +428,7 @@ public:
   {
     // Create a MDWorkspace and put it into the ADS.
     const std::string wsName = "TestMDEW";
-    auto someMDEW = Mantid::MDEvents::MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>,3>(10,0,10,0,wsName);
+    auto someMDEW = Mantid::DataObjects::MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>,3>(10,0,10,0,wsName);
 
     // Generate xml relating to the dimensionality etc. by querying this workspace.
     RebinningKnowledgeSerializer serializer(LocationNotRequired);
@@ -486,7 +486,7 @@ public:
   void testTimeLabelAfterRebinFor4DData()
   {
     const std::string wsName = "TestMDEW";
-    auto someMDEW = Mantid::MDEvents::MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<4>,4>(10,0,10,0,wsName);
+    auto someMDEW = Mantid::DataObjects::MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<4>,4>(10,0,10,0,wsName);
 
     RebinningKnowledgeSerializer serializer(LocationNotRequired);
     serializer.setWorkspace(someMDEW);
@@ -522,7 +522,7 @@ public:
   void testAxisLabelsAfterRebinFor3DData()
   {
     const std::string wsName = "TestMDEW";
-    auto someMDEW = Mantid::MDEvents::MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>,3>(10,0,10,0,wsName);
+    auto someMDEW = Mantid::DataObjects::MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>,3>(10,0,10,0,wsName);
 
     RebinningKnowledgeSerializer serializer(LocationNotRequired);
     serializer.setWorkspace(someMDEW);
@@ -571,7 +571,7 @@ public:
   void testAxisLabelsAfterRebinFor4DData()
   {
     const std::string wsName = "TestMDEW";
-    auto someMDEW = Mantid::MDEvents::MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<4>,4>(10,0,10);
+    auto someMDEW = Mantid::DataObjects::MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<4>,4>(10,0,10);
     Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName, someMDEW);
 
     RebinningKnowledgeSerializer serializer(LocationNotRequired);

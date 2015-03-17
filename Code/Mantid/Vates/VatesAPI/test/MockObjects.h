@@ -11,7 +11,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/UnitLabel.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/Clipper.h"
 #include "MantidVatesAPI/Common.h"
@@ -483,7 +483,7 @@ Create a field data entry containing (as contents) the argument text.
   Mantid::API::Workspace_sptr get3DWorkspace(bool integratedTDimension, bool sliceMD)
   {
     using namespace Mantid::API;
-    using namespace Mantid::MDEvents;
+    using namespace Mantid::DataObjects;
 
     Mantid::API::Workspace_sptr inputWs = createSimple3DWorkspace();
 

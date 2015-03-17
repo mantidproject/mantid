@@ -9,11 +9,11 @@
 #include <vector>
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/ReadLock.h"
 
 using Mantid::API::IMDWorkspace;
-using Mantid::MDEvents::MDHistoWorkspace;
+using Mantid::DataObjects::MDHistoWorkspace;
 using Mantid::API::NullCoordTransform;
 
 namespace Mantid
