@@ -27,21 +27,6 @@ set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PRE
 set ( CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION /opt /usr/share/applications /usr/share/pixmaps )
 
 ###########################################################################
-# LD_PRELOAD TCMalloc
-###########################################################################
-# User systems will only have the libraries and not the symbolic link
-# so we must set the preload to the versioned library. We will assume it is
-# in the same location as the system that the package was built on
-if ( TCMALLOC_LIBRARIES )
-  execute_process ( COMMAND readlink --no-newline --canonicalize-existing ${TCMALLOC_LIBRARIES}
-                    OUTPUT_VARIABLE TCMALLOC_PRELOAD
-                    RESULT_VARIABLE READLINK_RESULT )
-  if ( READLINK_RESULT EQUAL 1 )
-    message ( FATAL_ERROR "Unable to find real file that tcmalloc symlink, ${TCMALLOC_LIBRARIES}, points to." )
-  endif()
-endif()
-
-###########################################################################
 # Environment scripts (profile.d)
 ###########################################################################
 # default shell (bash-like)
