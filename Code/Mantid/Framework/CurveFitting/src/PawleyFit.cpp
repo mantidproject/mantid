@@ -71,6 +71,12 @@ void PawleyFit::init() {
                                             "same unit as the spectrum is "
                                             "refined.");
 
+  auto peakFunctionValidator = boost::make_shared<StringListValidator>(
+      FunctionFactory::Instance().getFunctionNames<IPeakFunction>());
+
+  declareProperty("PeakProfileFunction", "Gaussian", peakFunctionValidator,
+                  "Profile function that is used for each peak.");
+
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
                                                          Direction::Output),
                   "Workspace that contains measured spectrum, calculated "
@@ -82,12 +88,7 @@ void PawleyFit::exec() {
       boost::dynamic_pointer_cast<PawleyFunction>(
           FunctionFactory::Instance().createFunction("PawleyFunction"));
 
-  bool refineZeroShift = getProperty("RefineZeroShift");
-  if(!refineZeroShift) {
-    pawleyFn->fix(pawleyFn->parameterIndex("f0.ZeroShift"));
-  }
-
-  pawleyFn->setProfileFunction("PseudoVoigt");
+  pawleyFn->setProfileFunction(getProperty("PeakProfileFunction"));
   pawleyFn->setCrystalSystem(getProperty("CrystalSystem"));
   pawleyFn->setUnitCell(getProperty("InitialCell"));
 
@@ -97,7 +98,13 @@ void PawleyFit::exec() {
   int wsIndex = getProperty("WorkspaceIndex");
 
   const MantidVec &data = ws->readY(static_cast<size_t>(wsIndex));
-  pawleyFn->setPeaks(hkls, 0.008, *(std::max_element(data.begin(), data.end())));
+  pawleyFn->setPeaks(hkls, 0.008,
+                     *(std::max_element(data.begin(), data.end())));
+
+  bool refineZeroShift = getProperty("RefineZeroShift");
+  if (!refineZeroShift) {
+    pawleyFn->fix(pawleyFn->parameterIndex("f0.ZeroShift"));
+  }
 
   Algorithm_sptr fit = createChildAlgorithm("Fit");
   fit->setProperty("Function", boost::static_pointer_cast<IFunction>(pawleyFn));
