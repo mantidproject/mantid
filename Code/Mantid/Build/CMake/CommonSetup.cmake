@@ -60,6 +60,7 @@ include_directories ( SYSTEM ${NEXUS_INCLUDE_DIR} )
 find_package ( MuParser REQUIRED )
 
 find_package ( JsonCPP REQUIRED )
+include_directories ( SYSTEM ${JSONCPP_INCLUDE_DIR} )
 
 find_package ( Doxygen ) # optional
 

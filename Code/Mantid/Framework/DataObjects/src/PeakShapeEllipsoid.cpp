@@ -1,6 +1,6 @@
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidKernel/cow_ptr.h"
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 
 namespace Mantid {
 namespace DataObjects {
