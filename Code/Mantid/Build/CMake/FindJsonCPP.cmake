@@ -11,11 +11,8 @@
 
 # Using unset here is a temporary hack to force FindJson to find the correct
 # path in an incremental build. It should be removed a day or two after the
-# branch introducing this is merged. The if is to make sure we don't break any
-# downstream builders that are setting JSONCPP_INCLUDE_DIR to a special location.
-if ( ${JSONCPP_INCLUDE_DIR} STREQUAL "/usr/include" )
-  unset ( JSONCPP_INCLUDE_DIR CACHE )
-endif()
+# branch introducing this is merged.
+unset ( JSONCPP_INCLUDE_DIR CACHE )
 
 # Headers
 find_path ( JSONCPP_INCLUDE_DIR json/reader.h
