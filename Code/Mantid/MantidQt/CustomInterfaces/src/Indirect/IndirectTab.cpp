@@ -4,10 +4,12 @@
 #include "MantidKernel/Logger.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/InterfaceManager.h"
+#include "MantidQtMantidWidgets/RangeSelector.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using namespace MantidQt::MantidWidgets;
 
 namespace
 {
@@ -146,36 +148,52 @@ namespace CustomInterfaces
    * Sets the edge bounds of plot to prevent the user inputting invalid values
    * Also sets limits for range selector movement
    *
-   * @param rsID :: The string index of the range selector in the map m_rangeSelectors
+   * @param rs :: Pointer to the RangeSelector
    * @param min :: The lower bound property in the property browser
    * @param max :: The upper bound property in the property browser
    * @param bounds :: The upper and lower bounds to be set
    */
-  void IndirectTab::setPlotPropertyRange(const QString& rsID, QtProperty* min, QtProperty* max,
+  void IndirectTab::setPlotPropertyRange(RangeSelector * rs, QtProperty* min, QtProperty* max,
       const QPair<double, double> & bounds)
   {
     m_dblManager->setMinimum(min, bounds.first);
     m_dblManager->setMaximum(min, bounds.second);
     m_dblManager->setMinimum(max, bounds.first);
     m_dblManager->setMaximum(max, bounds.second);
-    m_rangeSelectors[rsID]->setRange(bounds.first, bounds.second);
+    rs->setRange(bounds.first, bounds.second);
   }
 
   /**
    * Set the position of the range selectors on the mini plot
    *
-   * @param rsID :: The string index of the range selector in the map m_rangeSelectors
+   * @param rs :: Pointer to the RangeSelector
    * @param lower :: The lower bound property in the property browser
    * @param upper :: The upper bound property in the property browser
    * @param bounds :: The upper and lower bounds to be set
    */
-  void IndirectTab::setRangeSelector(const QString& rsID, QtProperty* lower, QtProperty* upper,
+  void IndirectTab::setRangeSelector(RangeSelector * rs, QtProperty* lower, QtProperty* upper,
       const QPair<double, double> & bounds)
   {
     m_dblManager->setValue(lower, bounds.first);
     m_dblManager->setValue(upper, bounds.second);
-    m_rangeSelectors[rsID]->setMinimum(bounds.first);
-    m_rangeSelectors[rsID]->setMaximum(bounds.second);
+    rs->setMinimum(bounds.first);
+    rs->setMaximum(bounds.second);
+  }
+
+
+  //TODO: temp
+  void IndirectTab::setPlotPropertyRange(const QString& rsID, QtProperty* min, QtProperty* max,
+      const QPair<double, double> & bounds)
+  {
+    setPlotPropertyRange(m_rangeSelectors[rsID], min, max, bounds);
+  }
+
+
+  //TODO: temp
+  void IndirectTab::setRangeSelector(const QString& rsID, QtProperty* lower, QtProperty* upper,
+      const QPair<double, double> & bounds)
+  {
+    setRangeSelector(m_rangeSelectors[rsID], lower, upper, bounds);
   }
 
   /**
