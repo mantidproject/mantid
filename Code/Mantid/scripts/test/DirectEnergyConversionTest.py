@@ -162,7 +162,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertAlmostEqual(nf3,nf4)
 
 
-
     ##def test_diag_call(self):
     ##    tReducer = self.reducer
     ##    # should do nothing as already initialized above, but if not will initiate the instrument

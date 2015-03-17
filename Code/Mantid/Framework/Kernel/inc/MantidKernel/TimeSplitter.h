@@ -35,7 +35,7 @@ public:
 
   int index() const;
 
-  double overlaps(const SplittingInterval& b) const;
+  bool overlaps(const SplittingInterval &b) const;
 
   SplittingInterval operator &(const SplittingInterval& b) const;
 

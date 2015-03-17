@@ -75,7 +75,8 @@ namespace
     FitMW::DomainType domainType):
     API::IDomainCreator(fit,std::vector<std::string>(1,workspacePropertyName),domainType),
   m_startX(EMPTY_DBL()),
-  m_endX(EMPTY_DBL())
+  m_endX(EMPTY_DBL()),
+  m_normalise(false)
   {
     if (m_workspacePropertyNames.empty())
     {
@@ -93,7 +94,8 @@ namespace
     API::IDomainCreator(NULL,std::vector<std::string>(),domainType),
   m_startX(EMPTY_DBL()),
   m_endX(EMPTY_DBL()),
-  m_maxSize(10)
+  m_maxSize(10),
+  m_normalise(false)
   {
   }
 
@@ -124,6 +126,7 @@ namespace
         const int maxSizeInt = m_manager->getProperty( m_maxSizePropertyName );
         m_maxSize = static_cast<size_t>( maxSizeInt );
       }
+      m_normalise = m_manager->getProperty(m_normalisePropertyName);
     }
   }
 
@@ -138,6 +141,7 @@ namespace
     m_startXPropertyName = "StartX" + suffix;
     m_endXPropertyName = "EndX" + suffix;
     m_maxSizePropertyName = "MaxSize" + suffix;
+    m_normalisePropertyName = "Normalise" + suffix;
 
     if (addProp && !m_manager->existsProperty(m_workspaceIndexPropertyName))
     {
@@ -156,6 +160,8 @@ namespace
         declareProperty(new PropertyWithValue<int>(m_maxSizePropertyName,1, mustBePositive->clone()),
                         "The maximum number of values per a simple domain.");
       }
+      declareProperty(new PropertyWithValue<bool>(m_normalisePropertyName, false),
+        "An option to normalise the histogram data (divide be the bin width)." );
     }
   }
 
@@ -230,6 +236,8 @@ namespace
       values->expand(i0 + domain->size());
     }
 
+    bool shouldNormalise = m_normalise && m_matrixWorkspace->isHistogramData();
+
     // set the data to fit to
     m_startIndex = static_cast<size_t>( from - X.begin() );
     assert( n == domain->size() );
@@ -247,6 +255,17 @@ namespace
       double y = Y[i];
       double error = E[i];
       double weight = 0.0;
+
+      if ( shouldNormalise )
+      {
+        double binWidth = X[i+1] - X[i];
+        if ( binWidth == 0.0 )
+        {
+          throw std::runtime_error("Zero width bin found, division by zero.");
+        }
+        y /= binWidth;
+        error /= binWidth;
+      }
 
       if ( ! boost::math::isfinite(y) ) // nan or inf data
       {
@@ -321,13 +340,22 @@ namespace
       else ++wsIndex;
     }
 
+    bool shouldDeNormalise = m_normalise && m_matrixWorkspace->isHistogramData();
+
     // Set the difference spectrum
-    const MantidVec& Ycal = ws->readY(1);
+    const MantidVec& X = ws->readX(0);
+    MantidVec& Ycal = ws->dataY(1);
     MantidVec& Diff = ws->dataY(2);
     const size_t nData = values->size();
     for(size_t i = 0; i < nData; ++i)
     {
       Diff[i] = values->getFitData(i) - Ycal[i];
+      if ( shouldDeNormalise )
+      {
+        double binWidth = X[i+1] - X[i];
+        Ycal[i] *= binWidth;
+        Diff[i] *= binWidth;
+      }
     }
 
     if ( !outputWorkspacePropertyName.empty() )

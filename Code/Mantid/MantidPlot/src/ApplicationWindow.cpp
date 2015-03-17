@@ -360,6 +360,10 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   // Set the Paraview path BEFORE libaries are loaded. Doing it here prevents
   // the logs being poluted with library loading errors.
   trySetParaviewPath(args);
+  // Process all pending events before loading Mantid
+  // Helps particularly on Windows with cleaning up the
+  // splash screen after the 3D visualization dialog has closed
+  qApp->processEvents();
 
   using Mantid::Kernel::ConfigService;
   auto & config = ConfigService::Instance(); // Starts logging
@@ -587,11 +591,10 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
     g_log.warning("The scripting language is set to muParser. This is probably not what you want! Change the default in View->Preferences.");
   }
 
-  // Need to show first time setup dialog?#
-  if (shouldWeShowFirstTimeSetup())
-  {
-    showFirstTimeSetup();
-  }
+  // Need to show first time setup dialog?
+  // It is raised in the about2start method as on OS X if the event loop is not running then raise()
+  // does not push the dialog to the top of the stack
+  d_showFirstTimeSetup = shouldWeShowFirstTimeSetup(args);
  
   using namespace Mantid::API;
   // Do this as late as possible to avoid unnecessary updates
@@ -606,8 +609,23 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   trySetParaviewPath(args, skipDialog);
 }
 
-bool ApplicationWindow::shouldWeShowFirstTimeSetup()
+/** Determines if the first time dialog should be shown
+* @param commandArguments : all command line arguments.
+* @returns true if the dialog should be shown
+*/
+bool ApplicationWindow::shouldWeShowFirstTimeSetup(const QStringList& commandArguments)
 {
+  //Early check of execute and quit command arguments used by system tests.
+  QString str;
+  foreach(str, commandArguments)
+  {
+    if((this->shouldExecuteAndQuit(str)) ||
+       (this->isSilentStartup(str)))
+    {
+      return false;
+    }
+  }
+
   //first check the facility and instrument
   using Mantid::Kernel::ConfigService;
   auto & config = ConfigService::Instance(); 
@@ -679,7 +697,8 @@ void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments, 
     bool b_skipDialog = noDialog;
     foreach(str, commandArguments)
     {
-      if(this->shouldExecuteAndQuit(str))
+      if ((this->shouldExecuteAndQuit(str)) ||
+        (this->isSilentStartup(str)))
       {
         b_skipDialog = true;
         break;
@@ -707,6 +726,7 @@ void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments, 
       {
         //Launch the dialog to set the PV path.
         SetUpParaview pv(SetUpParaview::FirstLaunch);
+        pv.setWindowFlags(Qt::WindowStaysOnTopHint);
         pv.exec();
       }
     }
@@ -11375,7 +11395,7 @@ void ApplicationWindow::openSurfacePlot(const std::string& lines, const int file
         }
       } //select line "title"
 
-      int style;
+      int style = Qwt3D::WIREFRAME;
       if(tsv.selectLine("Style"))
         tsv >> style;
 
@@ -13735,6 +13755,15 @@ bool ApplicationWindow::shouldExecuteAndQuit(const QString& arg)
   return arg.endsWith("--execandquit") || arg.endsWith("-xq");
 }
 
+/*
+@param arg: command argument
+@return TRUE if argument suggests a silent startup
+*/
+bool ApplicationWindow::isSilentStartup(const QString& arg)
+{
+  return arg.endsWith("--silent") || arg.endsWith("-s");
+}
+
 void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
 {
   int num_args = args.count();
@@ -13772,6 +13801,10 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
       exec = true;
       quit = true;
     }
+    else if (isSilentStartup(str))
+    {
+      g_log.debug("Starting in Silent mode");
+    }\
     // if filename not found yet then these are all program arguments so we should
     // know what they all are
     else if (file_name.isEmpty() && (str.startsWith("-") || str.startsWith("--")))
@@ -16900,6 +16933,9 @@ void ApplicationWindow::validateWindowPos(MdiSubWindow* w, int& x, int& y)
  *  - Update of Script Repository
  */
 void ApplicationWindow::about2Start(){
+  // Show first time set up
+  if(d_showFirstTimeSetup) showFirstTimeSetup();
+
   // triggers the execution of UpdateScriptRepository Algorithm in a separated thread.
   // this was necessary because in order to log while in a separate thread, it is necessary to have
   // the postEvents available, so, we need to execute it here at about2Start.

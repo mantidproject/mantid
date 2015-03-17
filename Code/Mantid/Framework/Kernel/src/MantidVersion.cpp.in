@@ -75,5 +75,10 @@ std::string MantidVersion::doi()
   return doi.str();
 }
 
+std::string MantidVersion::paperCitation()
+{
+  return "http://dx.doi.org/10.1016/j.nima.2014.07.029";
+}
+
 } // namespace Kernel
 } // namespace Mantid

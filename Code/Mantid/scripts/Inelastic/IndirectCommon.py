@@ -180,7 +180,7 @@ def GetThetaQ(ws):
         q_bin_edge = axis.extractValues()
         q = list()
         for i in range(1, len(q_bin_edge)):
-            q_centre = (q_bin_edge[i] - q_bin_edge[i - 1]) / 2
+            q_centre = ((q_bin_edge[i] - q_bin_edge[i - 1]) / 2) + q_bin_edge[i - 1]
             q.append(q_centre)
         np_q = np.array(q)
         theta = 2.0 * np.degrees(np.arcsin(np_q / k0))
@@ -212,6 +212,20 @@ def PadArray(inarray,nfixed):                   #pad a list to specified size
     return outarray
 
 def CheckAnalysers(in1WS,in2WS,Verbose):
+    '''Check workspaces have identical analysers and reflections
+
+    Args:
+      @param in1WS - first 2D workspace 
+      @param in2WS - second 2D workspace
+      @param Verbose - whether to log information regarding the analysers
+
+    Returns:
+      @return None
+
+    Raises:
+      @exception Valuerror - workspaces have different analysers
+      @exception Valuerror - workspaces have different reflections
+    '''
     ws1 = mtd[in1WS]
     a1 = ws1.getInstrument().getStringParameter('analyser')[0]
     r1 = ws1.getInstrument().getStringParameter('reflection')[0]
@@ -227,6 +241,23 @@ def CheckAnalysers(in1WS,in2WS,Verbose):
             logger.notice('Analyser is '+a1+r1)
 
 def CheckHistZero(inWS):
+    '''Retrieves basic info on a worskspace
+
+    Checks the workspace is not empty, then returns the number of histogram and
+    the number of X-points, which is the number of bin boundaries minus one
+
+    Args:
+      @param inWS  2D workspace
+
+    Returns:
+      @return nhist - number of histograms in the workspace
+      @return ntc - number of X-points in the first histogram, which is the number of bin
+           boundaries minus one. It is assumed all histograms have the same
+           number of X-points.
+
+    Raises:
+      @exception ValueError - Worskpace has no histograms
+    '''
     nhist = mtd[inWS].getNumberHistograms()       # no. of hist/groups in WS
     if nhist == 0:
         raise ValueError('Workspace '+inWS+' has NO histograms')
@@ -237,6 +268,21 @@ def CheckHistZero(inWS):
     return nhist,ntc
 
 def CheckHistSame(in1WS,name1,in2WS,name2):
+    '''Check workspaces have same number of histograms and bin boundaries
+
+    Args:
+      @param in1WS - first 2D workspace
+      @param name1 - single-word descriptor of first 2D workspace
+      @param in2WS - second 2D workspace
+      @param name2 - single-word descriptor of second 2D workspace
+
+    Returns:
+      @return None
+
+    Raises:
+      Valuerror: number of histograms is different
+      Valuerror: number of bin boundaries in the histograms is different
+    '''
     nhist1 = mtd[in1WS].getNumberHistograms()       # no. of hist/groups in WS1
     X1 = mtd[in1WS].readX(0)
     xlen1 = len(X1)
@@ -283,8 +329,9 @@ def CheckElimits(erange,Xin):
 def getInstrumentParameter(ws, param_name):
     """Get an named instrument parameter from a workspace.
 
-    @param ws The workspace to get the instrument from.
-    @param param_name The name of the parameter to look up.
+    Args:
+      @param ws The workspace to get the instrument from.
+      @param param_name The name of the parameter to look up.
     """
     inst = mtd[ws].getInstrument()
 

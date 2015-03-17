@@ -10,7 +10,9 @@ class ComplexProperty(object):
  
     def __get__(self,spec_dict,owner=None):
         """ return complex properties list """
-        rez = list();
+        #if not isinstance(spec_dict,dict):
+        #    spec_dict = spec_dict.__dict__
+        rez = list()
         for key in self._other_prop:
             rez.append(spec_dict[key]);
         return rez;
@@ -18,11 +20,21 @@ class ComplexProperty(object):
         if len(value) != len(self._other_prop):
             raise KeyError("Complex property values can be set equal to the same length values list");
 
-        for i,key in enumerate(self._other_prop):
-                spec_dict[key] =value[i];
-        return;
+        #if not isinstance(spec_dict,dict):
+        #    spec_dict = spec_dict.__dict__
+         
+        #changed_prop=[];
+        for key,val in zip(self._other_prop,value):
+                spec_dict[key] =val;
+                #changed_prop.append(key);
+        #return changed_prop;
+    def dependencies(self):
+        """ returns the list of properties names, this property depends on"""
+        return self._other_prop
 
     def len(self):
+        """ returns the number of properties, this property depends on"""
+
         return len(self._other_prop);
 #end ComplexProperty
 
@@ -187,8 +199,6 @@ def gen_getter(keyval_dict,key):
         return a_val.__get__(keyval_dict);
     else:
         return a_val
-
-
     #end
 #end
 
@@ -205,21 +215,23 @@ def gen_setter(keyval_dict,key,val):
     """
 
     if not(key in keyval_dict):
-        name = '_'+key;
+        name = '_'+key
         if not(name in keyval_dict):
-            raise KeyError(' Property name: {0} is not defined'.format(key));
+            raise KeyError(' Property name: {0} is not defined'.format(key))
     else:
         name = key
 
     test_val = keyval_dict[name];
     if isinstance(test_val,ComplexProperty):
        if not isinstance(val,list):
-          raise KeyError(' You can not assign non-list value to complex property {0}'.format(key));
+          raise KeyError(' You can not assign non-list value to complex property {0}'.format(key))
        pass
             # Assigning values for composite function to the function components
-       test_val.__set__(keyval_dict,val);
+       test_val.__set__(keyval_dict,val)
+       return None
     else:
        keyval_dict[key] = val;
+    return None
 
 
 def check_instrument_name(old_name,new_name):
@@ -242,7 +254,7 @@ def check_instrument_name(old_name,new_name):
         instrument = config.getFacility().instrument(new_name)
         short_name = instrument.shortName()
         full_name = instrument.name()
-    except:
+    except RuntimeError:
         # it is possible to have wrong facility:
         facilities = config.getFacilities()
         old_facility = str(config.getFacility())
@@ -265,20 +277,4 @@ def check_instrument_name(old_name,new_name):
 
     config['default.instrument'] = full_name
     return (new_name,full_name,facility);
-
-
-
-       #if not hasattr(self,'instrument') or self.instrument.getName() != instr_name :
-       #     # Load an empty instrument if one isn't already there
-       #     idf_dir = config.getString('instrumentDefinition.directory')
-       #     try:
-       #         idf_file=api.ExperimentInfo.getInstrumentFilename(new_name)
-       #         tmp_ws_name = '__empty_' + new_name
-       #         if not mtd.doesExist(tmp_ws_name):
-       #             LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
-       #         self.instrument = mtd[tmp_ws_name].getInstrument()
-       #     except:
-       #         self.instrument = None
-       #         self._instr_name = None
-       #         raise RuntimeError('Cannot load instrument for prefix "%s"' % new_name)
 
