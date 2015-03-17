@@ -13,8 +13,7 @@ This algorithm takes a function after it has been optimized by the Fit algorithm
 
 Usage
 -----
-(*At the moment the algorithm works propertly if run from C++ only.*)
-#.. testcode::
+(*At the moment the algorithm works properly if run from C++ only.*)
 
     import numpy as np
 
