@@ -24,7 +24,7 @@ namespace CustomInterfaces
   /** Constructor
    */
   IndirectTab::IndirectTab(QObject* parent) : QObject(parent),
-      m_rangeSelectors(), m_properties(),
+      m_properties(),
       m_dblManager(new QtDoublePropertyManager()), m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
       m_dblEdFac(new DoubleEditorFactory()),
       m_pythonRunner(),
@@ -178,22 +178,6 @@ namespace CustomInterfaces
     m_dblManager->setValue(upper, bounds.second);
     rs->setMinimum(bounds.first);
     rs->setMaximum(bounds.second);
-  }
-
-
-  //TODO: temp
-  void IndirectTab::setPlotPropertyRange(const QString& rsID, QtProperty* min, QtProperty* max,
-      const QPair<double, double> & bounds)
-  {
-    setPlotPropertyRange(m_rangeSelectors[rsID], min, max, bounds);
-  }
-
-
-  //TODO: temp
-  void IndirectTab::setRangeSelector(const QString& rsID, QtProperty* lower, QtProperty* upper,
-      const QPair<double, double> & bounds)
-  {
-    setRangeSelector(m_rangeSelectors[rsID], lower, upper, bounds);
   }
 
   /**

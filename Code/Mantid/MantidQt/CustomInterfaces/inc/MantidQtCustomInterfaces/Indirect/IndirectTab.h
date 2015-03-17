@@ -42,7 +42,9 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  /** IndirectTab : TODO: DESCRIPTION
+  /** IndirectTab
+
+    Provided common functionality of all indirect interface tabs.
 
     @author Dan Nixon
     @date 08/10/2014
@@ -98,10 +100,6 @@ namespace CustomInterfaces
                           QtProperty* lower, QtProperty* upper,
                           const QPair<double, double> & bounds);
 
-    //TODO: temp
-    void setPlotPropertyRange(const QString& rsID, QtProperty* min, QtProperty* max, const QPair<double, double> & bounds);
-    void setRangeSelector(const QString& rsID, QtProperty* lower, QtProperty* upper, const QPair<double, double> & bounds);
-
     /// Function to run an algorithm on a seperate thread
     void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
 
@@ -109,9 +107,6 @@ namespace CustomInterfaces
 
     /// Parent QWidget (if applicable)
     QWidget *m_parentWidget;
-
-    //TODO: temp
-    std::map<QString, MantidQt::MantidWidgets::RangeSelector *> m_rangeSelectors;
 
     /// Tree of the properties
     std::map<QString, QtTreePropertyBrowser *> m_propTrees;
