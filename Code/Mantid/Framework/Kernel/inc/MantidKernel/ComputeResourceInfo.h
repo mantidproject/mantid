@@ -17,7 +17,8 @@ namespace Kernel {
 class FacilityInfo;
 
 /**
-Holds information about a compute resource present in a facility.
+ComputeResourceInfo holds information about / represents a compute
+resource present in a facility.
 
 At the moment (remote) compute resources are defined by their name,
 the URL they can be accessed at, and the type of remote job manager
@@ -48,6 +49,9 @@ class MANTID_KERNEL_DLL ComputeResourceInfo {
 public:
   /// constructor - from facility info and the element for this resource
   ComputeResourceInfo(const FacilityInfo *f, const Poco::XML::Element *elem);
+
+  /// Equality operator
+  bool operator==(const ComputeResourceInfo &rhs) const;
 
   /// Name of the compute resource
   std::string name() const;

@@ -275,9 +275,11 @@ FacilityInfo::computeResource(const std::string &name) const {
 
   auto it = m_computeResInfos.begin();
   for (; it != m_computeResInfos.end(); ++it) {
-    g_log.debug() << "Compute resource '" << name << "' found at facility "
-                  << this->name() << "." << std::endl;
-    return *it;
+    if (it->name() == name) {
+      g_log.debug() << "Compute resource '" << name << "' found at facility "
+                    << this->name() << "." << std::endl;
+      return *it;
+    }
   }
 
   g_log.debug() << "Could not find requested compute resource: " << name

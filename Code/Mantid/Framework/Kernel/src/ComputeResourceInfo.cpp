@@ -37,8 +37,8 @@ ComputeResourceInfo::ComputeResourceInfo(const FacilityInfo *fac,
         "The compute resource name is not defined, at element: " + elemStr);
   }
 
-  m_managerType = "MantidWebServiceAPI";
-  std::string type = elem->getAttribute("jobManagerType");
+  m_managerType = "MantidWebServiceAPIJobManager";
+  std::string type = elem->getAttribute("JobManagerType");
   if (!type.empty()) {
     m_managerType = type;
   }
@@ -72,6 +72,17 @@ ComputeResourceInfo::ComputeResourceInfo(const FacilityInfo *fac,
   }
 }
 
+/**
+* Equality operator. Two different resources cannot have the same name
+*
+* @param rhs object to compare this with
+*
+* @return True if the objects (names) are equal
+*/
+bool ComputeResourceInfo::operator==(const ComputeResourceInfo &rhs) const {
+  return (this->name() == rhs.name());
+}
+
 std::string ComputeResourceInfo::name() const { return m_name; }
 
 std::string ComputeResourceInfo::baseURL() const { return m_baseURL; }
@@ -94,7 +105,7 @@ const FacilityInfo &ComputeResourceInfo::facility() const {
  */
 std::ostream &operator<<(std::ostream &buffer, const ComputeResourceInfo &cr) {
   buffer << "'" + cr.name() + "', at '" + cr.baseURL() + "', of type '" +
-                cr.remoteJobManagerType();
+                cr.remoteJobManagerType() + "'";
   return buffer;
 }
 
