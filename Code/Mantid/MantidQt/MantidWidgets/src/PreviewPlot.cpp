@@ -723,6 +723,8 @@ void PreviewPlot::handleAxisTypeSelect()
   if(yEngine)
     m_uiForm.plot->setAxisScaleEngine(QwtPlot::yLeft, yEngine);
 
+  emit axisScaleChanged();
+
   // Update the plot
   emit needToHardReplot();
 }

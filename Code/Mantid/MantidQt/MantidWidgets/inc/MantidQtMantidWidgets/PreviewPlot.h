@@ -81,10 +81,14 @@ namespace MantidWidgets
 
     bool hasCurve(const QString & curveName);
 
+    QString getAxisType(int axisID);
+
   signals:
     /// Signals that the plot should be refreshed
     void needToReplot();
     void needToHardReplot();
+    /// Signals that the axis scale has been changed
+    void axisScaleChanged();
 
   public slots:
     void showLegend(bool show);
@@ -118,7 +122,6 @@ namespace MantidWidgets
 
     QList<QAction *> addOptionsToMenus(QString menuName, QActionGroup *group, QStringList items, QString defaultItem);
 
-    QString getAxisType(int axisID);
     QStringList getCurvesForWorkspace(const Mantid::API::MatrixWorkspace_sptr ws);
 
   private slots:
