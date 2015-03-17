@@ -74,6 +74,10 @@ private:
   API::IMDEventWorkspace_sptr
   convertToMDEventWS(const std::vector<API::MatrixWorkspace_sptr> &vec_ws2d);
 
+  /// Convert to MD workspaces
+  API::IMDEventWorkspace_sptr
+  convertToMDEventWS2(const std::vector<API::MatrixWorkspace_sptr> &vec_ws2d);
+
   /// Parse data table workspace to a vector of matrix workspaces
   std::vector<API::MatrixWorkspace_sptr>
   convertToWorkspaces(DataObjects::TableWorkspace_sptr tablews,

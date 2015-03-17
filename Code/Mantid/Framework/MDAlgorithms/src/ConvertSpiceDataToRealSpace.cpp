@@ -7,6 +7,11 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidMDEvents/MDEventInserter.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidMDEvents/MDEvent.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <Poco/TemporaryFile.h>
@@ -17,6 +22,8 @@ namespace MDAlgorithms {
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
+using namespace Mantid::MDEvents;
 
 DECLARE_ALGORITHM(ConvertSpiceDataToRealSpace)
 
@@ -683,5 +690,153 @@ void ConvertSpiceDataToRealSpace::addExperimentInfos(
 
   return;
 }
+
+/** Convert to MD Event workspace
+ * @brief ConvertSpiceDataToRealSpace::convertToMDEventWS
+ * @param vec_ws2d
+ * @return
+ */
+IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::convertToMDEventWS2(
+    const std::vector<MatrixWorkspace_sptr> &vec_ws2d) {
+
+  int m_nDimensions = 3;
+  bool m_IsFullMDEvents = true;
+
+  // Create a target output workspace.
+  g_log.notice() << "[DB] N-dimenstion = " << m_nDimensions << "\n";
+  IMDEventWorkspace_sptr outWs =
+      MDEvents::MDEventFactory::CreateMDWorkspace(m_nDimensions, "MDEvent");
+
+  // Extract Dimensions and add to the output workspace.
+
+  std::vector<std::string> vec_ID(3);
+  vec_ID[0] = "x";
+  vec_ID[1] = "y";
+  vec_ID[2] = "z";
+
+  std::vector<std::string> vec_name(3);
+  vec_name[0] = "X";
+  vec_name[1] = "Y";
+  vec_name[2] = "Z";
+
+  for (size_t i = 0; i < m_nDimensions; ++i) {
+    std::string id = vec_ID[i];
+    std::string name = vec_name[i];
+    std::string units = "m";
+    int nbins = 100;
+
+    // TODO - Find out how to determine the range of data in x-y-z dimensions
+    std::vector<double> extentMins(3), extentMaxs(3);
+    outWs->addDimension(
+        Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
+            id, name, units, static_cast<coord_t>(extentMins[i]),
+            static_cast<coord_t>(extentMaxs[i]), nbins)));
+  }
+
+  // Add events
+
+  /// Creates a new instance of the MDEventInserter.
+  MDEvents::MDEventWorkspace<MDEvents::MDEvent<3>, 3>::sptr MDEW_MDEVENT_3 =
+      boost::dynamic_pointer_cast<
+          MDEvents::MDEventWorkspace<MDEvents::MDEvent<3>, 3> >(outWs);
+
+  MDEvents::MDEventInserter<MDEvents::MDEventWorkspace<
+      MDEvents::MDEvent<3>, 3>::sptr> inserter(MDEW_MDEVENT_3);
+  DataCollectionType::iterator mdEventEntriesIterator = m_posMDEventStart;
+  std::vector<Mantid::coord_t> centers(nd);
+  g_log.notice() << "[DB] Number of MDEvents = " << m_nMDEvents << "\n";
+  for (size_t i = 0; i < m_nMDEvents; ++i) {
+    float signal = convert<float>(*(++mdEventEntriesIterator));
+    float error = convert<float>(*(++mdEventEntriesIterator));
+    uint16_t run_no = 0;
+    int32_t detector_no = 0;
+    if (m_IsFullMDEvents) {
+      run_no = convert<uint16_t>(*(++mdEventEntriesIterator));
+      detector_no = convert<int32_t>(*(++mdEventEntriesIterator));
+    }
+    for (size_t j = 0; j < m_nDimensions; ++j) {
+      centers[j] = convert<Mantid::coord_t>(*(++mdEventEntriesIterator));
+    }
+    // Actually add the mdevent.
+    if (i < 10) {
+      g_log.notice() << "[DB] Insert event " << i << ": " << signal << ", "
+                     << error * error << ", " << run_no << ", " << detector_no
+                     << "\n";
+    }
+    inserter.insertMDEvent(signal, error * error, run_no, detector_no,
+                           centers.data());
+  }
+
+  return outWs;
+
+  /*
+  // Construct a file
+  std::ofstream myfile;
+  myfile.open(tempFileName.c_str());
+  myfile << "DIMENSIONS" << std::endl;
+  myfile << "x X m 100" << std::endl;
+  myfile << "y Y m 100" << std::endl;
+  myfile << "z Z m 100" << std::endl;
+  myfile << "# Signal, Error, RunId, DetectorId, coord1, coord2, ... to end of "
+            "coords" << std::endl;
+  myfile << "MDEVENTS" << std::endl;
+
+  if (vec_ws2d.size() > 0) {
+    Progress progress(this, 0, 1, vec_ws2d.size());
+    size_t detindex = 0;
+    for (auto it = vec_ws2d.begin(); it < vec_ws2d.end(); ++it) {
+      API::MatrixWorkspace_sptr thisWorkspace = *it;
+      int runnumber =
+          atoi(thisWorkspace->run().getProperty("run_number")->value().c_str());
+
+      std::size_t nHist = thisWorkspace->getNumberHistograms();
+      for (std::size_t i = 0; i < nHist; ++i) {
+        Geometry::IDetector_const_sptr det = thisWorkspace->getDetector(i);
+        const MantidVec &signal = thisWorkspace->readY(i);
+        const MantidVec &error = thisWorkspace->readE(i);
+        myfile << signal[0] << " ";
+        myfile << error[0] << " ";
+        myfile << runnumber << " ";
+        myfile << det->getID() + detindex << " ";
+        Kernel::V3D detPos = det->getPos();
+        myfile << detPos.X() << " ";
+        myfile << detPos.Y() << " ";
+        myfile << detPos.Z() << " ";
+        myfile << std::endl;
+      }
+
+      // Increment on detector IDs
+      detindex += nHist;
+
+      progress.report("Creating MD WS");
+    }
+    myfile.close();
+  } else {
+    throw std::runtime_error(
+        "There is no MatrixWorkspace to construct MDWorkspace.");
+  }
+
+  // Import to MD Workspace
+  IAlgorithm_sptr importMDEWS = createChildAlgorithm("ImportMDEventWorkspace");
+  // Now execute the Child Algorithm.
+  try {
+    importMDEWS->setPropertyValue("Filename", tempFileName);
+    importMDEWS->setProperty("OutputWorkspace", "Test");
+    importMDEWS->executeAsChildAlg();
+  }
+  catch (std::exception &exc) {
+    throw std::runtime_error(
+        std::string("Error running ImportMDEventWorkspace: ") + exc.what());
+  }
+  IMDEventWorkspace_sptr workspace =
+      importMDEWS->getProperty("OutputWorkspace");
+  if (!workspace)
+    throw(std::runtime_error("Can not retrieve results of child algorithm "
+                             "ImportMDEventWorkspace"));
+
+  return workspace;
+  */
+}
+
 } // namespace DataHandling
 } // namespace Mantid
