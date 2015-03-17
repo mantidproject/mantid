@@ -4,6 +4,7 @@
 #include "ui_PreviewPlot.h"
 
 #include "WidgetDllOption.h"
+#include "MantidQtMantidWidgets/RangeSelector.h"
 #include "MantidQtAPI/MantidWidget.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -11,6 +12,7 @@
 #include <QActionGroup>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QMap>
 #include <QMenu>
 
 #include <qwt_plot.h>
@@ -81,6 +83,12 @@ namespace MantidWidgets
 
     bool hasCurve(const QString & curveName);
 
+    RangeSelector * addRangeSelector(const QString & rsName);
+    RangeSelector * getRangeSelector(const QString & rsName);
+    void removeRangeSelector(const QString & rsName, bool del);
+
+    bool hasRangeSelector(const QString & rsName);
+
     QString getAxisType(int axisID);
 
   signals:
@@ -131,6 +139,9 @@ namespace MantidWidgets
 
   private:
     Ui::PreviewPlot m_uiForm;
+
+    /// Range selector widget for mini plot
+    QMap<QString, MantidQt::MantidWidgets::RangeSelector *> m_rangeSelectors;
 
     /// Poco Observers for ADS Notifications
     Poco::NObserver<PreviewPlot, Mantid::API::WorkspacePreDeleteNotification> m_removeObserver;

@@ -328,6 +328,68 @@ bool PreviewPlot::hasCurve(const QString & curveName)
 
 
 /**
+ * Attaches a RangeSelector to the plot and stores it.
+ *
+ * @param rsName Name of range selector
+ * @return RangeSelector object
+ */
+RangeSelector * PreviewPlot::addRangeSelector(const QString & rsName)
+{
+  if(hasRangeSelector(rsName))
+    return NULL;
+
+  m_rangeSelectors[rsName] = new MantidWidgets::RangeSelector(m_uiForm.plot);
+
+  return m_rangeSelectors[rsName];
+}
+
+
+/**
+ * Gets a RangeSelector.
+ *
+ * @param rsName Name of range selector
+ * @return RangeSelector object
+ */
+RangeSelector * PreviewPlot::getRangeSelector(const QString & rsName)
+{
+  if(!hasRangeSelector(rsName))
+    return NULL;
+
+  return m_rangeSelectors[rsName];
+}
+
+
+/**
+ * Removes a RangeSelector from the plot.
+ *
+ * @param rsName Name of range selector
+ * @param del If the object should be deleted
+ */
+void PreviewPlot::removeRangeSelector(const QString & rsName, bool del = true)
+{
+  if(!hasRangeSelector(rsName))
+    return;
+
+  if(del)
+    delete m_rangeSelectors[rsName];
+
+  m_rangeSelectors.remove(rsName);
+}
+
+
+/**
+ * Checks to see if a range selector with a given name is on the plot.
+ *
+ * @param rsName Name of range selector
+ * @return True if the plot has a range selector with the given name
+ */
+bool PreviewPlot::hasRangeSelector(const QString & rsName)
+{
+  return m_rangeSelectors.contains(rsName);
+}
+
+
+/**
  * Shows or hides the plot legend.
  *
  * @param show If the legend should be shown
@@ -724,6 +786,17 @@ void PreviewPlot::handleAxisTypeSelect()
     m_uiForm.plot->setAxisScaleEngine(QwtPlot::yLeft, yEngine);
 
   emit axisScaleChanged();
+
+  // Hide range selectors on X axis when X axis scale is X^2
+  bool xIsSquared = xAxisType == "Squared";
+  for(auto it = m_rangeSelectors.begin(); it != m_rangeSelectors.end(); ++it)
+  {
+    RangeSelector * rs = it.value();
+    RangeSelector::SelectType type = rs->getType();
+
+    if(type == RangeSelector:: XMINMAX || type == RangeSelector::XSINGLE)
+      rs->setVisible(!xIsSquared);
+  }
 
   // Update the plot
   emit needToHardReplot();
