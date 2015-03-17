@@ -28,6 +28,7 @@ try:
     IMPORT_MANTID = True
 except ImportError as e:
     sys.path.append('/home/wzz/Mantid_Project/Mantid2/Code/release/bin')
+    sys.path.append('/Users/wzz/Mantid/Code/debug/bin')
     try:
         import mantid
     except ImportError as e2:
@@ -36,6 +37,7 @@ except ImportError as e:
             raise e
         else:
             print "NO MANTID IS USED FOR DEBUGGING PURPOSE."
+            print sys.path
             IMPORT_MANTID = False
     else:
         IMPORT_MANTID = True
@@ -80,6 +82,12 @@ class MainWindow(QtGui.QMainWindow):
         # Define gui-event handling 
         self.connect(self.ui.pushButton_loadData, QtCore.SIGNAL('clicked()'), 
                 self.doLoadData)
+
+        self.connect(self.ui.pushButton_prevScan, QtCore.SIGNAL('clicked()'),
+                self.doLoadPrevScan)
+
+        self.connect(self.ui.pushButton_nextScan, QtCore.SIGNAL('clicked()'),
+                self.doLoadNextScan)
 
         self.connect(self.ui.pushButton_unit2theta, QtCore.SIGNAL('clicked()'),
                 self.doPlot2Theta)
@@ -198,6 +206,10 @@ class MainWindow(QtGui.QMainWindow):
 
         self._ptNo = None
         self._detNo = None
+        
+        # set up for plotting
+        self._myLineMarkerColorList = self.ui.graphicsView_reducedData.getDefaultColorMarkerComboList()
+        self._myLineMarkerColorIndex = 0
 
         # State machine
         # self._inPlotState = False
@@ -267,7 +279,6 @@ class MainWindow(QtGui.QMainWindow):
         return     
         
         
-        
     def doCheckSrcServer(self):
         """" Check source data server's availability
         """
@@ -308,7 +319,54 @@ class MainWindow(QtGui.QMainWindow):
         if execstatus is True:
             self._plotReducedData(self._currUnit, 0)
 
-        return
+        return execstatus
+
+
+    def doLoadPrevScan(self):
+        """
+        """
+        # Advance scan number by 1
+        try:
+            scanno = int(self.ui.lineEdit_scanNo.text())
+        except ValueError:
+            self._logError("Either Exp No or Scan No is not set up right as integer.")
+            return
+        else:
+            scanno = scanno - 1
+            if scanno < 1:
+                self._logWarning("Scan number is 1 already.  Cannot have previous scan")
+                return
+            self.ui.lineEdit_scanNo.setText(str(scanno))
+
+        # call load data
+        execstatus = self.doLoadData()
+
+        return execstatus
+
+
+    def doLoadNextScan(self):
+        """
+        """
+        # Advance scan number by 1
+        try:
+            scanno = int(self.ui.lineEdit_scanNo.text())
+        except ValueError:
+            self._logError("Either Exp No or Scan No is not set up right as integer.")
+            return
+        else:
+            scanno = scanno + 1
+            if scanno < 1:
+                self._logWarning("Scan number is 1 already.  Cannot have previous scan")
+                return
+            self.ui.lineEdit_scanNo.setText(str(scanno))
+
+        # call load data
+        execstatus = self.doLoadData()
+        if execstatus is False:
+            scanno = scanno - 1
+            self.ui.lineEdit_scanNo.setText(str(scanno))
+
+        return execstatus
 
 
     def doPlot2Theta(self):
@@ -327,7 +385,9 @@ class MainWindow(QtGui.QMainWindow):
             
         # Rebin
         self._rebin('2theta', xmin, binsize, xmax)
-        self._plotReducedData()
+        
+        xlabel = r"$2\theta$"
+        self._plotReducedData(xlabel)
 
         return
 
@@ -677,8 +737,17 @@ class MainWindow(QtGui.QMainWindow):
         wsname = str(self._myReducedPDWs)
         api.ConvertToPointData(InputWorkspace=self._myReducedPDWs, OutputWorkspace=wsname)
         self._myReducedPDWs = AnalysisDataService.retrieve(wsname)
+        
+        # get the marker color for the line
+        marker, color = self._myLineMarkerColorList[self._myLineMarkerColorIndex]
+        if marker.count(' (') > 0:
+            marker = marker.split(' (')[0]
+        print "[DB] Print line %d: marker = %s, color = %s" % (self._myLineMarkerColorIndex, marker, color)
+        self._myLineMarkerColorIndex += 1
+        
         self.ui.graphicsView_reducedData.addPlot(self._myReducedPDWs.readX(spectrum),
-            self._myReducedPDWs.readY(spectrum))
+            self._myReducedPDWs.readY(spectrum), marker=marker, color=color,ylabel='intensity',
+            xlabel=r'2\theta',label=str(self._myReducedPDWs))
             
         return
         

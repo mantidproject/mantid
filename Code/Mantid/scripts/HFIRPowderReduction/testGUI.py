@@ -24,6 +24,8 @@ from PyQt4 import QtGui
 LINUX = 1
 OSX   = 2
 
+
+
 ##########
 
 def qapp():
@@ -35,12 +37,14 @@ def qapp():
 
 app = qapp()
 
-
+import sys
 osname = sys.platform
 if osname.count('linux2') > 0:
     MOS = LINUX
+    sys.path.append("/home/wzz/Mantid/Code/debug/bin")
 elif osname.count('darwin') > 0:
     MOS = OSX
+    sys.path.append("/Users/wzz/Mantid/Code/debug/bin")
 else:
     raise NotImplementedError("OS %s is not supported." % (osname))
 
@@ -49,8 +53,8 @@ reducer = HfirPDReductionGUI.MainWindow() #the main ui class in this file is cal
 reducer.show()
 
 # example: 'http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400_scan0001.dat'
-print "Set to exp 400, scan 1"
-reducer.ui.lineEdit_expNo.setText('400')
+print "Set to exp 231, scan 1"
+reducer.ui.lineEdit_expNo.setText('231')
 reducer.ui.lineEdit_scanNo.setText('1')
 reducer.ui.lineEdit_wavelength.setText('2.41')
 
@@ -67,22 +71,22 @@ reducer.ui.lineEdit_binsize.setText('0.1')
 # load and reduce data 
 reducer.doLoadData()
 
-try:
-    reducer.doLoadData()
-except Exception as e:
-    print e
-    raise e
-
-try: 
-    reducer.doPlotDspacing()
-except Exception as e:
-    print e
-
-try: 
-    reducer.doPlotQ()
-except Exception as e:
-    print e
-
+# try:
+#     reducer.doLoadData()
+# except Exception as e:
+#     print e
+#     raise e
+# 
+# try: 
+#     reducer.doPlotDspacing()
+# except Exception as e:
+#     print e
+# 
+# try: 
+#     reducer.doPlotQ()
+# except Exception as e:
+#     print e
+# 
 # Skip if there is something wrong
 app.exec_()
 

@@ -7,9 +7,12 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as Naviga
 from matplotlib.figure import Figure
 
 MplLineStyles = ['-' , '--' , '-.' , ':' , 'None' , ' ' , '']
-MplLineMarkers = [ ". (point)",
-        ", (pixel         )",
+MplLineMarkers = [
         "o (circle        )",
+        "s (square        )",
+        "D (diamond       )",
+        ", (pixel         )",
+        ". (point         )",
         "v (triangle_down )",
         "^ (triangle_up   )",
         "< (triangle_left )",
@@ -19,27 +22,25 @@ MplLineMarkers = [ ". (point)",
         "3 (tri_left      )",
         "4 (tri_right     )",
         "8 (octagon       )",
-        "s (square        )",
         "p (pentagon      )",
         "* (star          )",
         "h (hexagon1      )",
         "H (hexagon2      )",
         "+ (plus          )",
         "x (x             )",
-        "D (diamond       )",
         "d (thin_diamond  )",
         "| (vline         )",
         "_ (hline         )",
         "None (nothing    )"]
 
 MplBasicColors = [
+        "black",
+        "red",
         "blue",
         "green",
-        "red",
         "cyan",
         "magenta",
         "yellow",
-        "black",
         "white"]
 
 class Qt4MplCanvas(FigureCanvas):
@@ -69,21 +70,32 @@ class Qt4MplCanvas(FigureCanvas):
 
         return
 
-    def addPlot(self, x, y):
+    def addPlot(self, x, y, color=None, label="", xlabel=None, ylabel=None, marker=None, linestyle=None, linewidth=1):
         """ Plot a set of data
         Argument:
         - x: numpy array X
         - y: numpy array Y
         """
+        # process inputs and defaults
         self.x = x
         self.y = y
-
+        
+        if color is None:
+            color = (0,1,0,1)
+        if marker is None:
+            marker = 'o'
+        if linestyle is None:
+            linestyle = '-'
+            
         # color must be RGBA (4-tuple)
-        r = self.axes.plot(x, y, color=(0,1,0,1), marker='o', linestyle='--',
-                label='X???X', linewidth=2) # return: list of matplotlib.lines.Line2D object
+        r = self.axes.plot(x, y, color=color, marker=marker, linestyle=linestyle,
+                label=label, linewidth=1) # return: list of matplotlib.lines.Line2D object
 
-        # set label
-        self.axes.set_xlabel(r"$2\theta$", fontsize=20)  
+        # set x-axis and y-axis label
+        if xlabel is not None:
+            self.axes.set_xlabel(xlabel, fontsize=20)  
+        if ylabel is not None:
+            self.axes.set_ylabel(ylabel, fontsize=20)
 
         # set/update legend
         self.axes.legend()
@@ -166,3 +178,21 @@ class Qt4MplCanvas(FigureCanvas):
         """
         """
         return MplBasicColors 
+        
+    def getDefaultColorMarkerComboList(self):
+        """ Get a list of line/marker color and marker style combination 
+        as default to add more and more line to plot
+        """
+        combolist = []
+        nummarkers = len(MplLineMarkers)
+        numcolors = len(MplBasicColors)
+        
+        for i in xrange(nummarkers):
+            marker = MplLineMarkers[i]
+            for j in xrange(numcolors):
+                color = MplBasicColors[j]
+                combolist.append( (marker, color) )
+            # ENDFOR (j)
+        # ENDFOR(i)
+        
+        return combolist
