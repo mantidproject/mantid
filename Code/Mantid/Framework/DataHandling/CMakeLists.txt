@@ -462,22 +462,9 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
 
-IF (${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR OSX_VERSION VERSION_LESS 10.9)
-	SET (HDF5_DIR "${CMAKE_MODULE_PATH}")
-	find_package ( HDF5 COMPONENTS HL REQUIRED
-				        CONFIGS hdf5-config.cmake )
-ELSE()
-	find_package ( HDF5 COMPONENTS HL REQUIRED )
-ENDIF()
-
-#message (STATUS "HDF5_INCLUDE_DIRS:" ${HDF5_INCLUDE_DIRS})
-#message (STATUS "HDF5_LIBRARIES:" ${HDF5_LIBRARIES})
-
 include_directories ( inc ../Nexus/inc ${HDF5_INCLUDE_DIRS})
-#include_directories ( inc ../Nexus/inc)
 
 target_link_libraries ( DataHandling ${MANTIDLIBS} Nexus ${NEXUS_LIBRARIES} ${HDF5_LIBRARIES})
-#target_link_libraries ( DataHandling ${MANTIDLIBS} Nexus)
 
 # Add the unit tests directory
 add_subdirectory ( test )
