@@ -247,7 +247,6 @@ void MdViewerWidget::setupPluginMode()
   this->setupMainView();
 }
 
-
 /**
  * This function connects ParaView's data loader the given action.
  * @param action the action to connect data loading to

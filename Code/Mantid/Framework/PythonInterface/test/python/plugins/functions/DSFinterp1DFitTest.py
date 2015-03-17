@@ -8,7 +8,7 @@ import sys
 
 class DSFinterp1DTestTest(unittest.TestCase):
 
-  def generateWorkspaces(self, nf, startf, df, e=False):
+  def generateWorkspaces(self, nf, startf, df, e=False, seed=10):
     '''Helper function. Generates input workspaces for testing
 
     Generates a set of one-histogram workspaces, each containing a Lorentzian. Also
@@ -20,6 +20,8 @@ class DSFinterp1DTestTest(unittest.TestCase):
       df: separation between consecutive theoretical HWHM
       [e]: if true, the theoretical HWHM and the actual HWHM used to construct
         the lorentzian are different by a random amount.
+      [seed]: seed for the random generators. Default to 10.
+
     Returns:
       fvalues: list of theoretical HWHM
       InputWorkspaces: names of the generated InputWorkspaces
@@ -27,7 +29,9 @@ class DSFinterp1DTestTest(unittest.TestCase):
       HWHM: the HWHM of the target lorentzian against which we fit, stored
         in workspace of name "targetW"
     '''
-    from random import random
+    import random
+    random.seed(seed)
+    numpy.random.seed(seed)
     n=200
     dE = 0.004 #typical spacing for QENS experiments in BASIS, in meV
     xvalues = dE * numpy.arange(-n, n)
@@ -38,7 +42,7 @@ class DSFinterp1DTestTest(unittest.TestCase):
       HWHM = f# half-width at half maximum
       # Impose uncertainty in the Lorentzian by making its actual HWHM different than the theoretical one
       if e:
-        HWHM += 2*df*(0.5-random()) # add uncertainty as big as twice the step between consecutive HWHM!!!
+        HWHM += 2*df*(0.5-random.random()) # add uncertainty as big as twice the step between consecutive HWHM!!!
         if HWHM < 0: HWHM = f
       yvalues = 1/numpy.pi * HWHM / (HWHM*HWHM + xvalues*xvalues) * (1.1 - 0.2*numpy.random.rand(2*n)) #10% random noise
       evalues = yvalues*0.1*numpy.random.rand(2*n) # errors
