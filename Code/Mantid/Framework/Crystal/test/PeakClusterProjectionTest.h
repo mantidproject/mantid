@@ -4,11 +4,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/PeakClusterProjection.h"
-
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
-#include "MantidAPI/AlgorithmManager.h"
 
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -86,6 +86,10 @@ public:
   static void destroySuite(PeakClusterProjectionTest *suite)
   {
     delete suite;
+  }
+
+  PeakClusterProjectionTest() {
+    FrameworkManager::Instance();
   }
 
   void test_throws_if_mdws_has_no_coordinate_system()

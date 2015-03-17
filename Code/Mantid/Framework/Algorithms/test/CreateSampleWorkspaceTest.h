@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -21,6 +22,9 @@ public:
   static CreateSampleWorkspaceTest *createSuite() { return new CreateSampleWorkspaceTest(); }
   static void destroySuite( CreateSampleWorkspaceTest *suite ) { delete suite; }
 
+  CreateSampleWorkspaceTest() {
+    FrameworkManager::Instance();
+  }
 
   void test_Init()
   {
