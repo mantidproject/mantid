@@ -6,7 +6,9 @@
 #include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Exception.h"
+
 #include <boost/make_shared.hpp>
 
 #include <gtest/gtest.h>
@@ -48,7 +50,7 @@ DECLARE_FUNCTION(TestableFunctionParameterDecorator);
 
 class FunctionWithParameters : public ParamFunction {
 public:
-  FunctionWithParameters() : ParamFunction() {}
+  FunctionWithParameters() : ParamFunction(), m_workspace() {}
 
   std::string name() const { return "FunctionWithParameters"; }
 
@@ -63,6 +65,13 @@ public:
     UNUSED_ARG(values);
     // Does nothing, not required for this test.
   }
+
+  void setWorkspace(boost::shared_ptr<const Workspace> ws) { m_workspace = ws; }
+
+  Workspace_const_sptr getWorkspace() const { return m_workspace; }
+
+private:
+  Workspace_const_sptr m_workspace;
 };
 DECLARE_FUNCTION(FunctionWithParameters);
 
@@ -347,6 +356,25 @@ public:
     TS_ASSERT_EQUALS(cloned->getParameter("Height"), 3.0);
     TS_ASSERT_EQUALS(cloned->getParameter("PeakCentre"), 0.5);
     TS_ASSERT_EQUALS(cloned->getParameter("Sigma"), 0.3);
+  }
+
+  void testSetWorkspace() {
+    // using WorkspaceGroup because it is in API
+    Workspace_const_sptr ws = boost::make_shared<const WorkspaceGroup>();
+
+    TestableFunctionParameterDecorator invalidFn;
+    TS_ASSERT_THROWS(invalidFn.setWorkspace(ws), std::runtime_error);
+
+    FunctionParameterDecorator_sptr fn =
+        getFunctionParameterDecoratorGaussian();
+
+    TS_ASSERT_THROWS_NOTHING(fn->setWorkspace(ws));
+
+    boost::shared_ptr<FunctionWithParameters> decorated =
+        boost::dynamic_pointer_cast<FunctionWithParameters>(
+            fn->getDecoratedFunction());
+
+    TS_ASSERT_EQUALS(decorated->getWorkspace(), ws);
   }
 
 private:
