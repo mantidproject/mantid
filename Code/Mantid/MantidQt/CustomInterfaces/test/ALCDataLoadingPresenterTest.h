@@ -85,7 +85,7 @@ public:
     ON_CALL(*m_view, lastRun()).WillByDefault(Return("MUSR00015191.nxs"));
     ON_CALL(*m_view, calculationType()).WillByDefault(Return("Integral"));
     ON_CALL(*m_view, log()).WillByDefault(Return("sample_magn_field"));
-    ON_CALL(*m_view, timeRange()).WillByDefault(Return(boost::none));
+    ON_CALL(*m_view, timeRange()).WillByDefault(Return(boost::make_optional(std::make_pair(-6.0,32.0))));
     ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("None"));
     ON_CALL(*m_view, detectorGroupingType()).WillByDefault(Return("Auto"));
     ON_CALL(*m_view, redPeriod()).WillByDefault(Return("1"));
