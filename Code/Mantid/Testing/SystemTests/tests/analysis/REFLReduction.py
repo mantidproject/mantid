@@ -9,7 +9,8 @@ class REFLReduction(stresstesting.MantidStressTest):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
         
-        RefLReduction(RunNumbers=[119814],
+        #RefLReduction(RunNumbers=[119814],
+        LiquidsReflectometryReduction(RunNumbers=[119814],
                       NormalizationRunNumber=119690,
                       SignalPeakPixelRange=[154, 166],
                       SubtractSignalBackground=True,
@@ -36,7 +37,7 @@ class REFLReduction(stresstesting.MantidStressTest):
     def validate(self):
         # Be more tolerant with the output, mainly because of the errors.
         # The following tolerance check the errors up to the third digit.
-        self.tolerance = 0.25
+        self.tolerance = 0.008
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
         self.disableChecking.append('SpectraMap')
