@@ -82,6 +82,13 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             # Do simple subtraction
             self._subtract()
 
+        # Record the container scale factor
+        if self._use_can and self._scale_can:
+            AddSampleLog(Workspace=self._output_ws_name,
+                         LogName='apply_corr_can_scale_factor',
+                         LogType='Number',
+                         LogText=str(self._can_scale_factor))
+
         self.setPropertyValue('OutputWorkspace', self._output_ws_name)
 
 
