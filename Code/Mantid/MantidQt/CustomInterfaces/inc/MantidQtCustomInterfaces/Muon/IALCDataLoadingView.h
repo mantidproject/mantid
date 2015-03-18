@@ -53,6 +53,30 @@ namespace CustomInterfaces
     /// @return Log name
     virtual std::string log() const = 0;
 
+    /// @return dead time correction type to use
+    virtual std::string deadTimeType() const = 0;
+
+    /// @return dead time correction file
+    virtual std::string deadTimeFile() const = 0;
+
+    /// @return detector grouping type
+    virtual std::string detectorGroupingType() const = 0;
+
+    /// @return forward grouping
+    virtual std::string getForwardGrouping() const = 0;
+
+    /// @return backward grouping
+    virtual std::string getBackwardGrouping() const = 0;
+
+    /// @return red period
+    virtual std::string redPeriod() const = 0;
+
+    /// @return green period
+    virtual std::string greenPeriod() const = 0;
+
+    /// @return subtract checkbox
+    virtual bool subtractIsChecked() const =0;
+
     /// @return Selected calculation type - "Integral" or "Differential"
     virtual std::string calculationType() const = 0;
 
@@ -74,6 +98,10 @@ namespace CustomInterfaces
     /// Update the list of logs user can select
     /// @param logs :: New list of log names
     virtual void setAvailableLogs(const std::vector<std::string>& logs) = 0;
+
+    /// Update the list of periods user can select
+    /// @param periods :: New list of periods
+    virtual void setAvailablePeriods(const std::vector<std::string>& periods) = 0;
 
     /// Set waiting cursor for long operation
     virtual void setWaitingCursor() = 0;

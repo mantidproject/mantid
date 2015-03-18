@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import os
 
 from mantid.api import *
@@ -36,10 +37,9 @@ def getWsIndicesForBank(bank, ws):
     def isIndexInBank(index):
         try:
             det = ws.getDetector(index)
-            return (det.getID() in detIDs)
+            return det.getID() in detIDs
         except:
             return False
 
     return filter(isIndexInBank, range(0, ws.getNumberHistograms()))
-
 

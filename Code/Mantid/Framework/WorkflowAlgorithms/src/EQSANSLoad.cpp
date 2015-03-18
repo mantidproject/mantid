@@ -106,6 +106,10 @@ double getRunPropertyDbl(MatrixWorkspace_sptr inputWS,
   Mantid::Kernel::Property *prop = inputWS->run().getProperty(pname);
   Mantid::Kernel::PropertyWithValue<double> *dp =
       dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+  if (!dp) {
+    throw std::runtime_error("Could not cast (interpret) the property " +
+                             pname + " as a floating point numeric value.");
+  }
   return *dp;
 }
 
@@ -124,7 +128,7 @@ std::string EQSANSLoad::findConfigFile(const int &run) {
 
   int max_run_number = 0;
   std::string config_file = "";
-  static boost::regex re1("eqsans_configuration\\.([0-9]+)");
+  static boost::regex re1("eqsans_configuration\\.([0-9]+)$");
   boost::smatch matches;
   for (; it != searchPaths.end(); ++it) {
     Poco::DirectoryIterator file_it(*it);
@@ -243,10 +247,11 @@ void EQSANSLoad::readSourceSlitSize(const std::string &line) {
         num_str = posVec[3];
         boost::regex re_size("\\w*?([0-9]+)mm");
         int slit_size = 0;
-        boost::regex_search(num_str, posVec, re_size);
-        if (posVec.size() == 2) {
-          num_str = posVec[1];
-          Poco::NumberParser::tryParse(num_str, slit_size);
+        if (boost::regex_search(num_str, posVec, re_size)) {
+          if (posVec.size() == 2) {
+            num_str = posVec[1];
+            Poco::NumberParser::tryParse(num_str, slit_size);
+          }
         }
         m_slit_positions[wheel_number][slit_number] = slit_size;
       }
@@ -262,17 +267,35 @@ void EQSANSLoad::getSourceSlitSize() {
     return;
   }
 
-  Mantid::Kernel::Property *prop = dataWS->run().getProperty("vBeamSlit");
+  const std::string slit1Name = "vBeamSlit";
+  Mantid::Kernel::Property *prop = dataWS->run().getProperty(slit1Name);
   Mantid::Kernel::TimeSeriesProperty<double> *dp =
       dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
+  if (!dp) {
+    throw std::runtime_error("Could not cast (interpret) the property " +
+                             slit1Name + " as a time series property with "
+                             "floating point values.");
+  }
   int slit1 = (int)dp->getStatistics().mean;
 
-  prop = dataWS->run().getProperty("vBeamSlit2");
+  const std::string slit2Name = "vBeamSlit2";
+  prop = dataWS->run().getProperty(slit2Name);
   dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
+  if (!dp) {
+    throw std::runtime_error("Could not cast (interpret) the property " +
+                             slit2Name + " as a time series property with "
+                             "floating point values.");
+  }
   int slit2 = (int)dp->getStatistics().mean;
 
-  prop = dataWS->run().getProperty("vBeamSlit3");
+  const std::string slit3Name = "vBeamSlit3";
+  prop = dataWS->run().getProperty(slit3Name);
   dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
+  if (!dp) {
+    throw std::runtime_error("Could not cast (interpret) the property " +
+                             slit3Name + " as a time series property with "
+                             "floating point values.");
+  }
   int slit3 = (int)dp->getStatistics().mean;
 
   if (slit1 < 0 && slit2 < 0 && slit3 < 0) {
@@ -527,9 +550,15 @@ void EQSANSLoad::exec() {
       throw std::invalid_argument(
           "Could not determine Z position: stopping execution");
     }
-    Mantid::Kernel::Property *prop = dataWS->run().getProperty("detectorZ");
+
+    const std::string dzName = "detectorZ";
+    Mantid::Kernel::Property *prop = dataWS->run().getProperty(dzName);
     Mantid::Kernel::TimeSeriesProperty<double> *dp =
         dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
+    if (!dp) {
+      throw std::runtime_error("Could not cast (interpret) the property " +
+                               dzName + " as a time series property value.");
+    } 
     sdd = dp->getStatistics().mean;
 
     // Modify SDD according to offset if given

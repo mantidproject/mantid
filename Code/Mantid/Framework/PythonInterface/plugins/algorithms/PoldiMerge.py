@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.kernel import StringArrayProperty, Direction
 from mantid.simpleapi import *
 from mantid.api import *
@@ -31,7 +32,8 @@ class PoldiMerge(PythonAlgorithm):
                                                direction=Direction.Output),
                              doc="Workspace where all counts from the list workspaces have been added")
 
-        self.declareProperty("CheckInstruments", True, "If checked, only workspaces with equal instrument parameters are merged. Do not disable without a very good reason.")
+        self.declareProperty("CheckInstruments", True, "If checked, only workspaces with equal"\
+                                "instrument parameters are merged. Do not disable without a very good reason.")
 
     def PyExec(self):
         self.checkInstruments = self.getProperty("CheckInstruments").value
@@ -61,9 +63,7 @@ class PoldiMerge(PythonAlgorithm):
                 except RuntimeError as error:
                     self.handleError(error)
 
-        output = MergeRuns(workspaceNames)
-
-        self.setProperty("OutputWorkspace", output)
+        self.setProperty("OutputWorkspace", MergeRuns(workspaceNames))
 
     def canMerge(self, leftWorkspace, rightWorkspace):
         if not self.timingsMatch(leftWorkspace.dataX(0), rightWorkspace.dataX(0)):
@@ -102,7 +102,7 @@ class PoldiMerge(PythonAlgorithm):
         return (not self.checkInstruments) or self.instrumentParametersMatch(leftInstrument, rightInstrument)
 
     def instrumentParametersMatch(self, leftInstrument, rightInstrument):
-        if not (leftInstrument.getDetector(0).getPos() == rightInstrument.getDetector(0).getPos()):
+        if not leftInstrument.getDetector(0).getPos() == rightInstrument.getDetector(0).getPos():
             raise RuntimeError("Detector positions are not equal")
 
         for parameterTuple in self.comparedInstrumentParameters:

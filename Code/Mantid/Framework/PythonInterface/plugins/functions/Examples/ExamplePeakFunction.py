@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 """
 This example reimplements a Gaussian fitting function. It is not meant to
 be used in production for fitting, it is simply provided as a relatively complete
@@ -12,6 +13,8 @@ import math
 import numpy as np
 
 class ExamplePeakFunction(IPeakFunction):
+
+    _nterms = None
 
     def category(self):
         """
@@ -114,7 +117,6 @@ class ExamplePeakFunction(IPeakFunction):
         set than that declared
         """
         param_value = value
-        explicit = False
         if index == 2:
             param_value = math.sqrt(math.fabs(1.0/value))
         else:

@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import refl_window
 import refl_save
 import refl_choose_col
@@ -32,6 +33,12 @@ except ImportError:
 
 
 class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
+
+    current_instrument = None
+    current_table = None
+    current_polarisation_method = None
+    labelStatus = None
+    accMethod = None
 
     def __init__(self):
         """
@@ -82,11 +89,11 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.live_method = settings.value(self.__live_data_method_key, "", type=str)
         self.live_freq = settings.value(self.__live_data_frequency_key, 0, type=float)
 
-        if not (self.live_freq):
+        if not self.live_freq:
             logger.information("No settings were found for Update frequency of loading live data, Loading default of 60 seconds")
             self.live_freq = float(60)
             settings.setValue(self.__live_data_frequency_key, self.live_freq)
-        if not (self.live_method):
+        if not self.live_method:
             logger.information("No settings were found for Accumulation Method of loading live data, Loading default of \"Add\"")
             self.live_method = "Add"
             settings.setValue(self.__live_data_method_key, self.live_method)
@@ -279,12 +286,12 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
         for column in range(self.tableMain.columnCount()):
             for row in range(self.tableMain.rowCount()):
-                if (column in self.run_cols):
+                if column in self.run_cols:
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
                     item.setToolTip('Runs can be colon delimited to coadd them')
                     self.tableMain.setItem(row, column, item)
-                elif (column in self.angle_cols):
+                elif column in self.angle_cols:
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
                     item.setToolTip('Angles are in degrees')
@@ -438,15 +445,15 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         howMany = len(self.tableMain.selectedItems())
         for cell in self.tableMain.selectedItems():
             sum = sum + self.tableMain.row(cell)
-        if (howMany):
+        if howMany:
             selectedrow = self.tableMain.row(self.tableMain.selectedItems()[0])
-            if (sum / howMany == selectedrow):
+            if sum / howMany == selectedrow:
                 startrow = selectedrow + 1
                 filled = 0
                 for cell in self.tableMain.selectedItems():
                     row = startrow
                     txt = cell.text()
-                    while (self.tableMain.item(row, 0).text() != ''):
+                    while self.tableMain.item(row, 0).text() != '':
                         item = QtGui.QTableWidgetItem()
                         item.setText(txt)
                         self.tableMain.setItem(row, self.tableMain.column(cell), item)
@@ -685,22 +692,22 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                     overlapLow = []
                     overlapHigh = []
                     theta = [0, 0, 0]
-                    if (self.tableMain.item(row, 0).text() != ''):
+                    if self.tableMain.item(row, 0).text() != '':
                         self.statusMain.showMessage("Processing row: " + str(row + 1))
                         logger.debug("Processing row: " + str(row + 1))
 
                         for i in range(3):
                             run_entry = str(self.tableMain.item(row, i * 5).text())
-                            if (run_entry != ''):
+                            if run_entry != '':
                                 runno.append(run_entry)
                             ovLow = str(self.tableMain.item(row, (i * 5) + 3).text())
-                            if (ovLow != ''):
+                            if ovLow != '':
                                 overlapLow.append(float(ovLow))
                             ovHigh = str(self.tableMain.item(row, (i * 5) + 4).text())
-                            if (ovHigh != ''):
+                            if ovHigh != '':
                                 overlapHigh.append(float(ovHigh))
                         # Determine resolution
-                        if (self.tableMain.item(row, 15).text() == ''):
+                        if self.tableMain.item(row, 15).text() == '':
                             loadedRun = None
                             if load_live_runs.is_live_run(runno[0]):
                                 loadedRun = load_live_runs.get_live_data(config['default.instrument'], frequency = self.live_freq, accumulation = self.live_method)
@@ -760,16 +767,16 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                             qmin = round(qmin, 3)
                             qmax = round(qmax, 3)
                             wksp.append(wq.name())
-                            if (self.tableMain.item(row, i * 5 + 1).text() == ''):
+                            if self.tableMain.item(row, i * 5 + 1).text() == '':
                                 item = QtGui.QTableWidgetItem()
                                 item.setText(str(theta))
                                 self.tableMain.setItem(row, i * 5 + 1, item)
-                            if (self.tableMain.item(row, i * 5 + 3).text() == ''):
+                            if self.tableMain.item(row, i * 5 + 3).text() == '':
                                 item = QtGui.QTableWidgetItem()
                                 item.setText(str(qmin))
                                 self.tableMain.setItem(row, i * 5 + 3, item)
                                 overlapLow.append(qmin)
-                            if (self.tableMain.item(row, i * 5 + 4).text() == ''):
+                            if self.tableMain.item(row, i * 5 + 4).text() == '':
                                 item = QtGui.QTableWidgetItem()
                                 if i == len(runno) - 1:
                                 # allow full high q-range for last angle
@@ -785,18 +792,18 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                                 Scale(InputWorkspace=wksp[i], OutputWorkspace=wksp[i], Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
 
                         if self.__checked_row_stiched(row):
-                            if (len(runno) == 1):
+                            if len(runno) == 1:
                                 logger.notice("Nothing to combine for processing row : " + str(row))
                             else:
                                 w1 = getWorkspace(wksp[0])
                                 w2 = getWorkspace(wksp[-1])
-                                if (len(runno) == 2):
+                                if len(runno) == 2:
                                     outputwksp = runno[0] + '_' + runno[1][3:5]
                                 else:
                                     outputwksp = runno[0] + '_' + runno[-1][3:5]
                                 begoverlap = w2.readX(0)[0]
                                 # get Qmax
-                                if (self.tableMain.item(row, i * 5 + 4).text() == ''):
+                                if self.tableMain.item(row, i * 5 + 4).text() == '':
                                     overlapHigh = 0.3 * max(w1.readX(0))
 
                                 Qmin = min(w1.readX(0))
@@ -880,7 +887,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 self.__graphs[wksp[i]] = base_graph
 
                 titl = groupGet(ws_name_binned, 'samp', 'run_title')
-                if (type(titl) == str):
+                if type(titl) == str:
                     base_graph.activeLayer().setTitle(titl)
                 base_graph.activeLayer().setAxisScale(Layer.Left, Imin * 0.1, Imax * 10, Layer.Log10)
                 base_graph.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
@@ -889,7 +896,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
         # Create and plot stitched outputs
         if self.__checked_row_stiched(row):
-            if (len(runno) == 2):
+            if len(runno) == 2:
                 outputwksp = runno[0] + '_' + runno[1][3:5]
             else:
                 outputwksp = runno[0] + '_' + runno[2][3:5]
@@ -1043,7 +1050,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 rowtext = []
                 for column in range(self.tableMain.columnCount() - 2):
                     rowtext.append(self.tableMain.item(row, column).text())
-                if (len(rowtext) > 0):
+                if len(rowtext) > 0:
                     writer.writerow(rowtext)
             self.current_table = filename
             logger.notice("Saved file to " + filename)
@@ -1132,7 +1139,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 reader = csv.reader(open(filename, "rb"))
                 row = 0
                 for line in reader:
-                    if (row < 100):
+                    if row < 100:
                         for column in range(self.tableMain.columnCount() - 2):
                             item = QtGui.QTableWidgetItem()
                             item.setText(line[column])
@@ -1167,7 +1174,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 reader = csv.reader(open(filename, "rb"))
                 row = 0
                 for line in reader:
-                    if (row < 100):
+                    if row < 100:
                         for column in range(self.tableMain.columnCount() - 2):
                             item = QtGui.QTableWidgetItem()
                             item.setText(line[column])

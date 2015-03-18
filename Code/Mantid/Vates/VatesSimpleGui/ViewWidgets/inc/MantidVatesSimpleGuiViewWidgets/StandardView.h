@@ -10,6 +10,7 @@
 
 class pqPipelineSource;
 class pqRenderView;
+class QAction;
 
 namespace Mantid
 {
@@ -70,27 +71,43 @@ public:
   void updateUI();
   /// @see ViewBase::updateView()
   void updateView();
+  /// @see ViewBase::closeSubWindows
+  void closeSubWindows();
+
+public slots:
+  /// React when the visibility of a representation changes
+  void onSourceDestroyed();
+  /// Listen to a change in the active source.
+  void activeSourceChangeListener(pqPipelineSource* source);
 
 protected slots:
   /// Add a slice to the current dataset.
   void onCutButtonClicked();
-  /// Check for a rebinning source being destroyed.
-  void onDestroyingSource(pqPipelineSource *src);
-  /// Invoke the RebinnerCutter on the current dataset.
-  void onRebinButtonClicked();
   /// Perform operations when rendering is done.
   void onRenderDone();
   /// Invoke the ScaleWorkspace on the current dataset.
   void onScaleButtonClicked();
+  /// On BinMD button clicked
+  void onBinMD();
+  /// On SliceMD button clicked
+  void onSliceMD();
 
 private:
   Q_DISABLE_COPY(StandardView)
 
   bool cameraReset;
-  QPointer<pqPipelineSource> rebinCut; ///< Holder for the RebinnerCutter
   QPointer<pqPipelineSource> scaler; ///< Holder for the ScaleWorkspace
   Ui::StandardView ui; ///< The standard view's UI form
   QPointer<pqRenderView> view; ///< The main view
+
+  /// Set the rebin and unbin button visibility
+  void setRebinAndUnbinButtons();
+  /// Set up the buttons
+  void setupViewButtons();
+
+  QAction* m_binMDAction;
+  QAction* m_sliceMDAction;
+  QAction* m_unbinAction;
 };
 
 } // SimpleGui

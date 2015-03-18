@@ -1,8 +1,6 @@
+#pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
-import numpy as np
-
-import os
 
 class TestWorkspaceGroupProperty(PythonAlgorithm):
     """

@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory
 from mantid.kernel import Direction
 

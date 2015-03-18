@@ -175,6 +175,7 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
         (*data[spec]).dataE()[0] = *pixelE;
     }
   }
+  UNUSED_ARG(parallelExecution)
 }
 
 //--------------------------------------------------------------------------------------------

@@ -190,7 +190,7 @@ namespace MantidQt
 
 			pyInput += "QLRun('"+program+"','"+sampleName+"','"+resName+"','"+resNormFile+"',"+eRange+","
 										" "+nBins+","+fitOps+",'"+fixedWidthFile+"',"+sequence+", "
-										" Save="+save+", Plot='"+plot+"', Verbose=True)\n";
+										" Save="+save+", Plot='"+plot+"')\n";
 
 			runPythonScript(pyInput);
 
@@ -243,12 +243,22 @@ namespace MantidQt
       for(size_t histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++)
       {
         QString specName = QString::fromStdString(axis->label(histIndex));
+        QColor curveColour;
 
-        if(specName.contains("fit"))
-		  m_uiForm.ppPlot->addSpectrum(specName, outputWorkspace, histIndex, Qt::red);
+        if(specName.contains("fit.1"))
+          curveColour = Qt::red;
+        else if(specName.contains("fit.2"))
+          curveColour = Qt::magenta;
 
-        if(specName.contains("diff"))
-		  m_uiForm.ppPlot->addSpectrum(specName, outputWorkspace, histIndex, Qt::green);
+        else if(specName.contains("diff.1"))
+          curveColour = Qt::green;
+        else if(specName.contains("diff.2"))
+          curveColour = Qt::cyan;
+
+        else
+          continue;
+
+        m_uiForm.ppPlot->addSpectrum(specName, outputWorkspace, histIndex, curveColour);
       }
     }
 

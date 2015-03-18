@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -6,6 +7,15 @@ import os.path
 
 
 class CreateCalibrationWorkspace(DataProcessorAlgorithm):
+
+    _input_files = None
+    _out_ws = None
+    _peak_range = None
+    _back_range = None
+    _spec_range = None
+    _intensity_scale = None
+    _plot = None
+
 
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
@@ -17,17 +27,21 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
-                             doc='Comma separated list of input files.')
+                             doc='Comma separated list of input files')
 
-        self.declareProperty(IntArrayProperty(name='DetectorRange', values=[0, 1],
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
+                             direction=Direction.Output),
+                             doc='Output workspace for calibration data')
+
+        self.declareProperty(IntArrayProperty(name='DetectorRange', values=[0, 1],\
                              validator=IntArrayMandatoryValidator()),
                              doc='Range of detectors.')
 
-        self.declareProperty(FloatArrayProperty(name='PeakRange', values=[0.0, 100.0],
+        self.declareProperty(FloatArrayProperty(name='PeakRange', values=[0.0, 100.0],\
                              validator=FloatArrayMandatoryValidator()),
                              doc='Time of flight range over the peak.')
 
-        self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0.0, 1000.0],
+        self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0.0, 1000.0],\
                              validator=FloatArrayMandatoryValidator()),
                              doc='Time of flight range over the background.')
 
@@ -83,8 +97,8 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
             (_, filename) = os.path.split(in_file)
             (root, _) = os.path.splitext(filename)
             try:
-                Load(Filename=in_file, OutputWorkspace=root,
-                    SpectrumMin=int(self._spec_range[0]), SpectrumMax=int(self._spec_range[1]),
+                Load(Filename=in_file, OutputWorkspace=root,\
+                    SpectrumMin=int(self._spec_range[0]), SpectrumMax=int(self._spec_range[1]),\
                     LoadLogFiles=False)
                 runs.append(root)
             except Exception as exc:

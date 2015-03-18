@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -5,6 +6,18 @@ from mantid import logger
 
 
 class IndirectResolution(DataProcessorAlgorithm):
+
+    _input_files = None
+    _out_ws = None
+    _instrument = None
+    _analyser = None
+    _reflection = None
+    _detector_range = None
+    _background = None
+    _rebin_string = None
+    _scale_factor = None
+    _plot = None
+    _save = None
 
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'

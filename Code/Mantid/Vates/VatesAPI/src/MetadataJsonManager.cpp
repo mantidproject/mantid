@@ -8,7 +8,7 @@ namespace Mantid
   namespace VATES
   {
     // Note that we need to have a non-empty default string
-    MetadataJsonManager::MetadataJsonManager() : instrument("_EMPTY_"), minValue(0.0), maxValue(1.0)
+    MetadataJsonManager::MetadataJsonManager() : instrument("_EMPTY_"), minValue(0.0), maxValue(1.0), specialCoordinates(-1)
     {
       
     }
@@ -29,6 +29,7 @@ namespace Mantid
       metadataContainer["instrument"] = instrument;
       metadataContainer["minValue"] = minValue;
       metadataContainer["maxValue"] = maxValue;
+      metadataContainer["specialCoordinates"] = specialCoordinates;
 
       return writer.write(metadataContainer);
     }
@@ -74,6 +75,16 @@ namespace Mantid
         else 
         {
           instrument = "_EMPTY_";
+        }
+
+        // Set the instrument
+        if (metadataContainer.isObject() && metadataContainer.isMember("specialCoordinates"))
+        {
+          specialCoordinates = metadataContainer["specialCoordinates"].asInt();
+        }
+        else 
+        {
+          specialCoordinates = -1;
         }
       }
     }
@@ -131,6 +142,24 @@ namespace Mantid
     std::string& MetadataJsonManager::getInstrument()
     {
       return instrument;
+    }
+
+    /**
+     * Set the special coordinates.
+     * @param specialCoordinates. The special coordinates.
+     */
+    void MetadataJsonManager::setSpecialCoordinates(int specialCoordinates)
+    {
+      this->specialCoordinates = specialCoordinates;
+    }
+
+    /**
+     * Get the special coordinates
+     * @returns The special coordinates.
+     */
+    int MetadataJsonManager::getSpecialCoordinates()
+    {
+      return specialCoordinates;
     }
   }
 }

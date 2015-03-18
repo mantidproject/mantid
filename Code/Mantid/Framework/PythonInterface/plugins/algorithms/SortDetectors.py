@@ -1,5 +1,6 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import PythonAlgorithm, AlgorithmFactory
-from mantid.kernel import Direction, IntArrayProperty, FloatArrayProperty
+from mantid.kernel import Direction,IntArrayProperty, FloatArrayProperty
 import  mantid,math,numpy
 
 
@@ -24,9 +25,9 @@ class SortDetectors(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",
-                             direction=mantid.kernel.Direction.Input,
-                             validator=mantid.api.InstrumentValidator()),
+        self.declareProperty(mantid.api.WorkspaceProperty(  "Workspace", "",
+                                                            direction=mantid.kernel.Direction.Input,
+                                                            validator=mantid.api.InstrumentValidator()),
                              "Input workspace")
 
         self.declareProperty(IntArrayProperty("UpstreamSpectra", Direction.Output))

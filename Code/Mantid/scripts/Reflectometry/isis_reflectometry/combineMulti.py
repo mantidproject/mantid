@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from l2q import *
 from mantid.simpleapi import *
 import math
@@ -75,9 +76,9 @@ def stitch2(ws1, ws2, output_ws_name, begoverlap,endoverlap,Qmin,Qmax,binning,sc
         manual_scalefactor = False
         scalefactor = 1.0
     # Interally use the Stitch1D algorithm.
-    outputs = Stitch1D(LHSWorkspace=ws1, RHSWorkspace=ws2,
-    		OutputWorkspace=output_ws_name, StartOverlap=begoverlap, EndOverlap=endoverlap,
-    		UseManualScaleFactor=manual_scalefactor,
+    outputs = Stitch1D(LHSWorkspace=ws1, RHSWorkspace=ws2,\
+    		OutputWorkspace=output_ws_name, StartOverlap=begoverlap, EndOverlap=endoverlap,\
+    		UseManualScaleFactor=manual_scalefactor,\
     		ManualScaleFactor=scalefactor, Params="%f,%f,%f" % (Qmin, binning, Qmax))
 
     return outputs
@@ -104,9 +105,9 @@ def combine2(wksp1,wksp2,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning,scal
         manual_scalefactor = False
         scalefactor = 1.0
     # Interally use the Stitch1D algorithm.
-    outputs = Stitch1D(LHSWorkspace=mtd[wksp1], RHSWorkspace=mtd[wksp2],
-    		OutputWorkspace=outputwksp, StartOverlap=begoverlap, EndOverlap=endoverlap,
-    		UseManualScaleFactor=manual_scalefactor,
+    outputs = Stitch1D(LHSWorkspace=mtd[wksp1], RHSWorkspace=mtd[wksp2],\
+    		OutputWorkspace=outputwksp, StartOverlap=begoverlap, EndOverlap=endoverlap,\
+    		UseManualScaleFactor=manual_scalefactor,\
     		ManualScaleFactor=scalefactor, Params="%f,%f,%f" % (Qmin, binning, Qmax))
 
     outscalefactor = outputs[1]

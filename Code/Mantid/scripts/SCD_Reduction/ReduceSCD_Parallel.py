@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 
 # File: ReduceSCD_Parallel.py
 #
@@ -68,7 +69,7 @@ class ProcessThread ( threading.Thread ):
 #
 # Get the config file name from the command line
 #
-if (len(sys.argv) < 2):
+if len(sys.argv) < 2:
     print "You MUST give the config file name on the command line"
     exit(0)
 
@@ -131,7 +132,7 @@ for r_num in run_nums:
 all_done = False
 active_list=[]
 while not all_done:
-    if ( len(list) > 0 and len(active_list) < max_processes ):
+    if  len(list) > 0 and len(active_list) < max_processes :
         thread = list[0]
         list.remove(thread)
         active_list.append( thread )
@@ -218,7 +219,7 @@ if not use_cylindrical_integration:
         conventional_integrate_file = conv_name + ".integrate"
         conventional_matrix_file = conv_name + ".mat"
 
-        SelectCellOfType( PeaksWorkspace=peaks_ws, CellType=cell_type, Centering=centering,
+        SelectCellOfType( PeaksWorkspace=peaks_ws, CellType=cell_type, Centering=centering,\
                       AllowPermutations=allow_perm, Apply=True, Tolerance=tolerance )
         SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=conventional_integrate_file )
         SaveIsawUB( InputWorkspace=peaks_ws, Filename=conventional_matrix_file )

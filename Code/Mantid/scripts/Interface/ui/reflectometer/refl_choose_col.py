@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 #This is an extension of refl_columns.py as that is a auto-generated script form pyqt and shouldn't be edited
 #so this file provides any extra GUI tweaks not easily doable in the designer
 #for the time being this also includes non-GUI behaviour

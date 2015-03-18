@@ -12,7 +12,7 @@ namespace API {
  *  See also PeakFunctionIntegrator::setRequiredRelativePrecision.
  *
  * @param requiredRelativePrecision :: Desired relative precision of the
- *integral estimations.
+ * integral estimations.
  */
 PeakFunctionIntegrator::PeakFunctionIntegrator(double requiredRelativePrecision)
     : m_integrationWorkspace(gsl_integration_workspace_alloc(1000)),
@@ -69,6 +69,7 @@ IntegrationResult PeakFunctionIntegrator::integrateInfinity(
  *  gsl_integration_qagiu is used for this.
  *
  *  @param peakFunction :: Peak function to integrate.
+ *  @param lowerLimit :: Lower limit of the integration.
  */
 IntegrationResult PeakFunctionIntegrator::integratePositiveInfinity(
     const IPeakFunction &peakFunction, double lowerLimit) const {
@@ -89,6 +90,7 @@ IntegrationResult PeakFunctionIntegrator::integratePositiveInfinity(
  *  gsl_integration_qagil is used for this.
  *
  *  @param peakFunction :: Peak function to integrate.
+ *  @param upperLimit :: Upper limit of the integration.
  */
 IntegrationResult PeakFunctionIntegrator::integrateNegativeInfinity(
     const IPeakFunction &peakFunction, double upperLimit) const {
@@ -109,6 +111,8 @@ IntegrationResult PeakFunctionIntegrator::integrateNegativeInfinity(
  *  gsl_integration_qags is used for this.
  *
  *  @param peakFunction :: Peak function to integrate.
+ *  @param lowerLimit :: Lower limit of the integration.
+ *  @param upperLimit :: Upper limit of the integration.
  */
 IntegrationResult
 PeakFunctionIntegrator::integrate(const IPeakFunction &peakFunction,

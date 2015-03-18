@@ -1,8 +1,9 @@
+#pylint: disable=invalid-name
 from xml.dom.minidom import getDOMImplementation
 from datetime import datetime
-from string import split,join
 import re
-class MantidGeom:
+
+class MantidGeom(object):
 
     def __init__(self, instname, valid_from=None):
         if valid_from is None:
@@ -115,9 +116,9 @@ class MantidGeom:
 
         for i in range(len(r)):
             for j in range(len(r[i])):
-                if (str(r[i][j]) != "nan"):
+                if str(r[i][j]) != "nan":
                     basecomponent = self._append_child("component", type_element, type="pixel")
-                    location_element = self._append_child("location", basecomponent,r=str(r[i][j]),
+                    location_element = self._append_child("location", basecomponent,r=str(r[i][j]),\
                           t=str(theta[i][j]), p=str(phi[i][j]), name=str(names[i][j]))
                     self._append_child("facing", location_element, x="0.0", y="0.0", z="0.0")
 
@@ -128,7 +129,7 @@ class MantidGeom:
         component = self._append_child("idlist", self._root, idname=name)
         for i in range(len(r)):
             for j in range(len(r[i])):
-                if (str(r[i][j]) != "nan"):
+                if str(r[i][j]) != "nan":
                     self._append_child("id", component, val=str(names[i][j]))
 
     def addMonitors(self, distance=[], names=[]):
@@ -332,7 +333,7 @@ class MantidGeom:
         self._append_child("height", cylinder, val=str(pixel_height))
         self._append_child("algebra", type_element, val="cyl-approx")
 
-    def addCuboidPixel(self, name, lfb_pt, lft_pt, lbb_pt, rfb_pt,
+    def addCuboidPixel(self, name, lfb_pt, lft_pt, lbb_pt, rfb_pt,\
                       is_type="detector"):
         """
         Add a cuboid pixel. The origin of the cuboid is assumed to be the
@@ -341,13 +342,13 @@ class MantidGeom:
         """
         type_element = self._append_child("type", self._root, **{"name":name, "is":is_type})
         cuboid = self._append_child("cuboid", type_element, id="shape")
-        self._append_child("left-front-bottom-point", cuboid, x=str(lfb_pt[0]),
+        self._append_child("left-front-bottom-point", cuboid, x=str(lfb_pt[0]),\
                       y=str(lfb_pt[1]), z=str(lfb_pt[2]))
-        self._append_child("left-front-top-point", cuboid, x=str(lft_pt[0]),
+        self._append_child("left-front-top-point", cuboid, x=str(lft_pt[0]),\
                       y=str(lft_pt[1]), z=str(lft_pt[2]))
-        self._append_child("left-back-bottom-point", cuboid, x=str(lbb_pt[0]),
+        self._append_child("left-back-bottom-point", cuboid, x=str(lbb_pt[0]),\
                       y=str(lbb_pt[1]), z=str(lbb_pt[2]))
-        self._append_child("right-front-bottom-point", cuboid, x=str(rfb_pt[0]),
+        self._append_child("right-front-bottom-point", cuboid, x=str(rfb_pt[0]),\
                       y=str(rfb_pt[1]), z=str(rfb_pt[2]))
         self._append_child("algebra", type_element, val="shape")
 
@@ -389,11 +390,11 @@ class MantidGeom:
         id_element = self._append_child("idlist", self._root, idname=idname)
         for i in range(num_ids):
             if idlist[(i*3)+2] is None:
-                self._append_child("id", id_element, start=str(idlist[(i*3)]),
+                self._append_child("id", id_element, start=str(idlist[(i*3)]),\
                               end=str(idlist[(i*3)+1]))
             else:
-                self._append_child("id", id_element, start=str(idlist[(i*3)]),
-                              step=str(idlist[(i*3)+2]),
+                self._append_child("id", id_element, start=str(idlist[(i*3)]),\
+                              step=str(idlist[(i*3)+2]),\
                               end=str(idlist[(i*3)+1]))
 
     def addMonitorIds(self, ids=[]):

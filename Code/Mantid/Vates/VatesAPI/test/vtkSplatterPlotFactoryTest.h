@@ -8,6 +8,10 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
 #include "MantidVatesAPI/vtkSplatterPlotFactory.h"
+#include "MantidVatesAPI/MetadataToFieldData.h"
+#include "MantidVatesAPI/FieldDataToMetadata.h"
+#include "MantidVatesAPI/VatesConfigurations.h"
+#include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -161,6 +165,45 @@ public:
     product->Delete();
   }
 
+  void test_MetadataIsAddedCorrectly() 
+  {
+    // Arrange 
+    vtkFieldData* fakeInputFieldDataWithXML = vtkFieldData::New();
+    std::string xmlString = "myXmlString";
+    MetadataToFieldData converterMtoF;
+    converterMtoF(fakeInputFieldDataWithXML, xmlString, XMLDefinitions::metaDataId().c_str());
+
+
+    FakeProgressAction progressUpdate;
+    Mantid::MDEvents::MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    factory.initialize(ws);
+    vtkDataSet* product = NULL;
+
+    // Act
+    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
+    TS_ASSERT_THROWS_NOTHING(factory.setMetadata(fakeInputFieldDataWithXML, product));
+
+    // Assert
+    FieldDataToMetadata converterFtoM;
+    vtkFieldData* fd = product->GetFieldData();
+    std::string xmlOut; 
+    std::string jsonOut;
+    VatesConfigurations vatesConfigurations;
+
+    TSM_ASSERT_EQUALS("One array expected on field data, one for XML and one for JSON!", 2, product->GetFieldData()->GetNumberOfArrays());
+
+    TSM_ASSERT_THROWS_NOTHING("There is XML metadata!", xmlOut = converterFtoM(fd, XMLDefinitions::metaDataId().c_str()));
+    TSM_ASSERT_THROWS_NOTHING("There is JSON metadata!", jsonOut = converterFtoM(fd, vatesConfigurations.getMetadataIdJson().c_str()));
+
+    TSM_ASSERT("The xml string should be retrieved", xmlOut == xmlString);
+
+    MetadataJsonManager manager;
+    manager.readInSerializedJson(jsonOut);
+    TSM_ASSERT("The instrument should be empty", manager.getInstrument().empty());
+    TSM_ASSERT_EQUALS("The max value is 1", 1.0, manager.getMaxValue());
+    TSM_ASSERT_EQUALS("The min value is 1", 1.0, manager.getMinValue());
+  }
 };
 
 #endif

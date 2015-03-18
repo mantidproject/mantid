@@ -1,8 +1,8 @@
+#pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
 
 import math
-import numpy as np
 
 class EnginXFitPeaks(PythonAlgorithm):
     def category(self):
@@ -15,21 +15,21 @@ class EnginXFitPeaks(PythonAlgorithm):
         return "The algorithm fits an expected diffraction pattern to a workpace spectrum by performing single peak fits."
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),\
     		"Workspace to fit peaks in. ToF is expected X unit.")
 
-        self.declareProperty("WorkspaceIndex", 0,
+        self.declareProperty("WorkspaceIndex", 0,\
     		"Index of the spectra to fit peaks in")
 
-        self.declareProperty(FloatArrayProperty("ExpectedPeaks", (self._getDefaultPeaks())),
+        self.declareProperty(FloatArrayProperty("ExpectedPeaks", (self._getDefaultPeaks())),\
     		"A list of dSpacing values to be translated into TOF to find expected peaks.")
 
         self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",action=FileAction.OptionalLoad,extensions = [".csv"]),"Load from file a list of dSpacing values to be translated into TOF to find expected peaks.")
 
-        self.declareProperty("Difc", 0.0, direction = Direction.Output,
+        self.declareProperty("Difc", 0.0, direction = Direction.Output,\
     		doc = "Fitted Difc value")
 
-        self.declareProperty("Zero", 0.0, direction = Direction.Output,
+        self.declareProperty("Zero", 0.0, direction = Direction.Output,\
     		doc = "Fitted Zero value")
 
     def PyExec(self):
@@ -49,7 +49,7 @@ class EnginXFitPeaks(PythonAlgorithm):
         findPeaksAlg.execute()
         foundPeaks = findPeaksAlg.getProperty('PeaksList').value
 
-        if (foundPeaks.rowCount() < len(expectedPeaksTof)):
+        if foundPeaks.rowCount() < len(expectedPeaksTof):
             raise Exception("Some peaks were not found")
 
         fittedPeaks = self._createFittedPeaksTable()

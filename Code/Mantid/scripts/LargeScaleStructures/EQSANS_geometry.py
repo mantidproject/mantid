@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from geometry_writer import MantidGeom
 import math
 
@@ -54,8 +55,8 @@ def create_geometry(file_name=None, tube_width=TUBE_WIDTH, tube_length=TUBE_SIZE
     det.addComponent(id_str, id_str)
     doc_handle = det.makeTypeElement(id_str)
 
-    det.addCylinderPixel("pixel", (0.0, 0.0, 0.0), (0.0, 1.0, 0.0),
-                        (tube_width/2.0),
+    det.addCylinderPixel("pixel", (0.0, 0.0, 0.0), (0.0, 1.0, 0.0),\
+                        (tube_width/2.0),\
                         (tube_length/NUM_PIXELS_PER_TUBE))
 
     for i in range(0, NUM_BANKS/2):

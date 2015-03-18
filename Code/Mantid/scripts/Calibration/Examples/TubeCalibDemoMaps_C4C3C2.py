@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 #
 # TUBE CALIBRATION DEMONSTRATION PROGRAM FOR MAPS - Execute this
 #
@@ -34,7 +35,7 @@ print "Created objects needed for calibration."
 
 # == Get the calibration and put results into calibration table ==
 
-calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponents, knownPos, funcForm,
+calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponents, knownPos, funcForm,\
     outputPeak=True)
 print "Got calibration (new positions of detectors) "
 

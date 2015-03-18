@@ -1,9 +1,7 @@
+#pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
 
-import csv
-import numpy as np
-import math
 
 class EnginXCalibrate(PythonAlgorithm):
     def category(self):
@@ -16,21 +14,21 @@ class EnginXCalibrate(PythonAlgorithm):
         return "Calibrates a detector bank by performing a single peak fitting."
 
     def PyInit(self):
-        self.declareProperty(FileProperty("Filename", "", FileAction.Load),
+        self.declareProperty(FileProperty("Filename", "", FileAction.Load),\
     		"Calibration run to use")
 
-        self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),
+        self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),\
     		"A list of dSpacing values where peaks are expected.")
 
         self.declareProperty("Bank", 1, "Which bank to calibrate")
 
-        self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "", Direction.Input, PropertyMode.Optional),
+        self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "", Direction.Input, PropertyMode.Optional),\
     		"Calibrated detector positions. If not specified, default ones are used.")
 
-        self.declareProperty("Difc", 0.0, direction = Direction.Output,
+        self.declareProperty("Difc", 0.0, direction = Direction.Output,\
     		doc = "Calibrated Difc value for the bank")
 
-        self.declareProperty("Zero", 0.0, direction = Direction.Output,
+        self.declareProperty("Zero", 0.0, direction = Direction.Output,\
     		doc = "Calibrated Zero value for the bank")
 
     def PyExec(self):
