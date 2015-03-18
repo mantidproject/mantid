@@ -10,8 +10,6 @@ from mantid.simpleapi import *
 from mantid.api import FileFinder
 
 # Import our workflows.
-from inelastic_indirect_reducer import IndirectReducer
-from inelastic_indirect_reduction_steps import CreateCalibrationWorkspace
 from IndirectDataAnalysis import msdfit, furyfitSeq, furyfitMult, confitSeq, abscorFeeder
 
 '''
@@ -170,24 +168,21 @@ class ISISIndirectInelasticReduction(ISISIndirectInelasticBase):
 
     def _run(self):
         self.tolerance = 1e-7
-        '''Defines the workflow for the test'''
-        reducer = IndirectReducer()
-        reducer.set_instrument_name(self.instr_name)
-        reducer.set_detector_range(self.detector_range[0],
-                                   self.detector_range[1])
-        reducer.set_sum_files(self.sum_files)
-        self.parameter_file = self.instr_name + '_graphite_002_Parameters.xml'
-        reducer.set_parameter_file(self.parameter_file)
 
-        for name in self.data_files:
-            reducer.append_data_file(name)
+        kwargs = {}
 
         if self.rebin_string is not None:
-            reducer.set_rebin_string(self.rebin_string)
+            kwargs['RebinString'] = self.rebin_string
 
-        # Do the reduction and rename the result.
-        reducer.reduce()
-        self.result_names = sorted(reducer.get_result_workspaces())
+        reductions = ISISIndirectEnergyTransfer(Instrument=self.instr_name,
+                                                Analyser='graphite',
+                                                Reflection='002',
+                                                InputFiles=self.data_files,
+                                                SumFiles=self.sum_files,
+                                                SpectraRange=self.detector_range,
+                                                **kwargs)
+
+        self.result_names = sorted(reductions.getNames())
 
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
@@ -211,7 +206,7 @@ class TOSCAReduction(ISISIndirectInelasticReduction):
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'TOSCA'
-        self.detector_range = [0, 139]
+        self.detector_range = [1, 140]
         self.data_files = ['TSC15352.raw']
         self.rebin_string = '-2.5,0.015,3,-0.005,1000'
 
@@ -223,7 +218,7 @@ class TOSCAMultiFileReduction(ISISIndirectInelasticReduction):
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'TOSCA'
-        self.detector_range = [0, 139]
+        self.detector_range = [1, 140]
         self.data_files = ['TSC15352.raw', 'TSC15353.raw','TSC15354.raw']
         self.rebin_string = '-2.5,0.015,3,-0.005,1000'
 
@@ -237,7 +232,7 @@ class TOSCAMultiFileSummedReduction(ISISIndirectInelasticReduction):
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'TOSCA'
-        self.detector_range = [0, 139]
+        self.detector_range = [1, 140]
         self.data_files = ['TSC15352.raw', 'TSC15353.raw','TSC15354.raw']
         self.rebin_string = '-2.5,0.015,3,-0.005,1000'
         self.sum_files = True
@@ -254,7 +249,7 @@ class OSIRISReduction(ISISIndirectInelasticReduction):
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'OSIRIS'
-        self.detector_range = [962, 1003]
+        self.detector_range = [963, 1004]
         self.data_files = ['OSIRIS00106550.raw']
         self.rebin_string = None
 
@@ -266,7 +261,7 @@ class OSIRISMultiFileReduction(ISISIndirectInelasticReduction):
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'OSIRIS'
-        self.detector_range = [962, 1003]
+        self.detector_range = [963, 1004]
         self.data_files = ['OSIRIS00106550.raw',' OSIRIS00106551.raw']
         self.rebin_string = None
 
@@ -280,7 +275,7 @@ class OSIRISMultiFileSummedReduction(ISISIndirectInelasticReduction):
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'OSIRIS'
-        self.detector_range = [962, 1003]
+        self.detector_range = [963, 1004]
         self.data_files = ['OSIRIS00106550.raw', 'OSIRIS00106551.raw']
         self.rebin_string = None
         self.sum_files = True
@@ -295,7 +290,7 @@ class IRISReduction(ISISIndirectInelasticReduction):
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'IRIS'
-        self.detector_range = [2, 52]
+        self.detector_range = [3, 53]
         self.data_files = ['IRS21360.raw']
         self.rebin_string = None
 
@@ -308,7 +303,7 @@ class IRISMultiFileReduction(ISISIndirectInelasticReduction):
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'IRIS'
-        self.detector_range = [2, 52]
+        self.detector_range = [3, 53]
         self.data_files = ['IRS21360.raw', 'IRS53664.raw']
         self.rebin_string = None
 
@@ -321,7 +316,7 @@ class IRISMultiFileSummedReduction(ISISIndirectInelasticReduction):
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'IRIS'
-        self.detector_range = [2, 52]
+        self.detector_range = [3, 53]
         self.data_files = ['IRS21360.raw', 'IRS53664.raw']
         self.sum_files = True
         self.rebin_string = None
@@ -331,119 +326,6 @@ class IRISMultiFileSummedReduction(ISISIndirectInelasticReduction):
         #as they should be the same
         return ['II.IRISMultiFileSummedReduction.nxs']
 
-#--------------------- Generic Reduction tests -----------------------------
-
-class ISISIndirectInelasticReductionOutput(stresstesting.MantidStressTest):
-
-    def runTest(self):
-        reducer = self._setup_reducer()
-        reducer.reduce()
-        self.result_names = sorted(reducer.get_result_workspaces())
-
-    def validate(self):
-        self.assertEqual(len(self.result_names), 1)
-        self.result_name = self.result_names[0]
-
-        self.output_file_names = self._get_file_names()
-        self.assert_reduction_output_exists(self.output_file_names)
-        self.assert_ascii_file_matches()
-        self.assert_aclimax_file_matches()
-        self.assert_spe_file_matches()
-
-    def cleanup(self):
-        mtd.clear()
-
-        for file_path in self.output_file_names.itervalues():
-            if os.path.isfile(file_path):
-                os.remove(file_path)
-
-    def assert_ascii_file_matches(self):
-        expected_result = [
-            'X , Y0 , E0 , Y1 , E1 , Y2 , E2',
-            '-2.4925,0,0,0.617579,0.362534,0.270868,0.159006',
-            '-2.4775,0.375037,0.273017,0,0,0.210547,0.153272'
-        ]
-        self.assert_file_format_matches_expected(expected_result, self.output_file_names['ascii'],
-                                                 "Output of ASCII format did not match expected result.")
-
-    def assert_aclimax_file_matches(self):
-        expected_result = [
-            '# X \t Y \t E',
-            '0',
-            '3.0075\t0.175435\t0.115017'
-        ]
-        self.assert_file_format_matches_expected(expected_result, self.output_file_names['aclimax'],
-                                                 "Output of aclimax format did not match expected result.")
-
-    def assert_spe_file_matches(self):
-        #Old SPE format:
-        #   '       3    1532',
-        #   '### Phi Grid',
-        #   ' 5.000E-01 1.500E+00 2.500E+00 3.500E+00',
-        #   '### Energy Grid',
-        #   '-2.500E+00-2.485E+00-2.470E+00-2.455E+00-2.440E+00-2.425E+00-2.410E+00-2.395E+00'
-        #
-        # New SPE format:
-        expected_result = [
-            '       3    1532',
-            '### Phi Grid',
-            '0.5       1.5       2.5       3.5',
-            '### Energy Grid',
-            '-2.5      -2.485    -2.47     -2.455    -2.44     -2.425    -2.41     -2.395'
-        ]
-        self.assert_file_format_matches_expected(expected_result, self.output_file_names['spe'],
-                                                 "Output of SPE format did not match expected result.")
-
-    def assert_reduction_output_exists(self, output_file_names):
-        for file_path in output_file_names.itervalues():
-            self.assertTrue(os.path.exists(file_path), "File does not exist in the default save directory")
-            self.assertTrue(os.path.isfile(file_path), "Output file of reduction output is not a file.")
-
-    def assert_file_format_matches_expected(self, expected_result, file_path, msg=""):
-        num_lines = len(expected_result)
-        actual_result = self._read_ascii_file(file_path, num_lines)
-        self.assertTrue(actual_result == expected_result, msg + " (%s != %s)" % (actual_result, expected_result))
-
-    def _setup_reducer(self):
-        self.file_formats = ['nxs', 'spe', 'nxspe', 'ascii', 'aclimax']
-        self.file_extensions = ['.nxs', '.spe', '.nxspe', '.dat', '_aclimax.dat']
-        self.instr_name = 'TOSCA'
-        self.detector_range = [0, 139]
-        self.data_files = ['TSC15352.raw']
-        self.rebin_string = '-2.5,0.015,3,-0.005,1000'
-        self.parameter_file = self.instr_name + '_graphite_002_Parameters.xml'
-
-        reducer = IndirectReducer()
-        reducer.set_instrument_name(self.instr_name)
-        reducer.set_detector_range(self.detector_range[0],
-                                   self.detector_range[1])
-        reducer.set_sum_files(False)
-        reducer.set_parameter_file(self.parameter_file)
-        reducer.set_save_formats(self.file_formats)
-
-        for name in self.data_files:
-            reducer.append_data_file(name)
-
-        if self.rebin_string is not None:
-            reducer.set_rebin_string(self.rebin_string)
-
-        return reducer
-
-    def _read_ascii_file(self, path, num_lines):
-        with open(path,'rb') as file_handle:
-            lines = [file_handle.readline().rstrip() for _ in xrange(num_lines)]
-            return lines
-
-    def _get_file_names(self):
-        working_directory = config['defaultsave.directory']
-
-        output_names = {}
-        for format, ext in zip(self.file_formats, self.file_extensions):
-            output_file_name = self.result_name + ext
-            output_file_name = os.path.join(working_directory, output_file_name)
-            output_names[format] = output_file_name
-
-        return output_names
 
 #==============================================================================
 class ISISIndirectInelasticCalibration(ISISIndirectInelasticBase):
