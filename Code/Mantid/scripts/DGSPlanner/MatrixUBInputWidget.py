@@ -52,7 +52,6 @@ class UBTableModel(QtCore.QAbstractTableModel):
                 val=float(value) #string
             self.__UB[row][column]=val
             self.dataChanged.emit(index, index)
-            print self.__UB
             if ValidateUB(self.__UB):
                 self.__lattice.setUB(self.__UB)
                 self.sendSignal()

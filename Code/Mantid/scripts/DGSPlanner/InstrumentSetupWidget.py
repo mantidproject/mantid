@@ -12,21 +12,22 @@ try:
 except ImportError:
     QString = type("")
 
+
 class GonioTableModel(QtCore.QAbstractTableModel):
-    changed=QtCore.pyqtSignal(list)
-    def __init__(self, axesNames, axesDirections, axesSenses, axesMin, axesMax, axesSteps, parent = None):
+    """
+    Dealing with the goniometer input
+    """
+    changed=QtCore.pyqtSignal(dict) #each value is a list
+    def __init__(self, axes, parent = None):
         QtCore.QAbstractTableModel.__init__(self, parent)
-        self.labels = axesNames
-        self.dirstrings = axesDirections
-        self.senses = axesSenses
-        self.minvalues = axesMin
-        self.maxvalues = axesMax
-        self.steps = axesSteps
+        self.labels = axes['labels']
+        self.dirstrings = axes['dirs']
+        self.senses = axes['senses']
+        self.minvalues = axes['minvals']
+        self.maxvalues = axes['maxvals']
+        self.steps = axes['steps']
         self.gonioColumns=['Name','Direction','Sense','Minimum','Maximum','Step']
         self.gonioRows=['Axis0','Axis1','Axis2']
-        self.values={   'labels':self.labels,'dirs':self.dirstrings,'senses':self.senses,
-                        'minvals':self.minvalues,'maxvals':self.maxvalues,'steps':self.steps}
-#        self.sendSignal()
 
     def rowCount(self, dummy_parent):
         return 3
@@ -44,9 +45,10 @@ class GonioTableModel(QtCore.QAbstractTableModel):
             return self.gonioRows[section]
 
     def data(self, index, role):
+        row = index.row()
+        column = index.column()
         if role == QtCore.Qt.EditRole or role == QtCore.Qt.DisplayRole:
-            row = index.row()
-            column = index.column()
+            
             if column==0:
                 value=QString(self.labels[row])
             elif column==1:
@@ -60,35 +62,73 @@ class GonioTableModel(QtCore.QAbstractTableModel):
             elif column==5:
                 value=QString(str(self.steps[row]))
             return value
-#        elif role == QtCore.Qt.BackgroundRole:
-#            if ValidateUB(self.__UB):
-#                return QtGui.QBrush(QtCore.Qt.white)
-#            else:
-#                return QtGui.QBrush(QtCore.Qt.red)
+        elif role == QtCore.Qt.BackgroundRole:
+            if column==0 and len(self.labels[row])>0 and self.labels.count(self.labels[row])==1:
+                return QtGui.QBrush(QtCore.Qt.white)
+            elif column==1 and self.validDir(self.dirstrings[row]):
+                return QtGui.QBrush(QtCore.Qt.white)
+            elif column==2 and (self.senses[row]==1 or self.senses[row]==-1):
+                return QtGui.QBrush(QtCore.Qt.white)
+            elif (column==3 or column==4) and self.minvalues[row]<=self.maxvalues[row]:
+                return QtGui.QBrush(QtCore.Qt.white)
+            elif column==5 and self.steps[row]>0:
+                return QtGui.QBrush(QtCore.Qt.white)
+            else:
+                return QtGui.QBrush(QtCore.Qt.red)
 
     def setData(self, index, value, role = QtCore.Qt.EditRole):
         if role == QtCore.Qt.EditRole:
             row = index.row()
             column = index.column()
-            if column==0:
+            if column<=1:
                 try:
                     val=str(value.toString()) #QVariant
                 except AttributeError:
                     val=str(value) #string
-                self.labels[row]=val
+                if column==0:
+                    self.labels[row]=val
+                else:
+                    self.dirstrings[row]=val
+            elif column==2:
+                try:
+                    val=value.toInt()[0] #QVariant
+                except AttributeError:
+                    val=int(value) #string
+                self.senses[row]=val
+            else:
+                try:
+                    val=value.toFloat()[0] #QVariant
+                except AttributeError:
+                    val=float(value) #string
+                if column==3:
+                    self.minvalues[row]=val
+                elif column==4:
+                    self.maxvalues[row]=val
+                else:
+                    self.steps[row]=val
             self.dataChanged.emit(index, index)
-#            print self.__UB
-            if True:
-#                self.__lattice.setUB(self.__UB)
-                self.changed.emit(self.labels)
+            if self.validateGon():
+                values={'labels':self.labels,'dirs':self.dirstrings,'senses':self.senses,
+                        'minvals':self.minvalues,'maxvals':self.maxvalues,'steps':self.steps}
+                self.changed.emit(values)
                 return True
         return False
+    
+    def validDir(self,dirstring):
+        d=numpy.fromstring(dirstring,dtype=float,sep=',')
+        if len(d)==3:
+            return numpy.alltrue(numpy.isfinite(d))
+        return False
 
-    def updateGon(self,labels):
-        self.beginResetModel()
-        self.labels=labels
-        self.endResetModel()
-        
+    def validateGon(self):
+        for i in range(3):
+            if len(self.labels[i])==0 or self.labels.count(self.labels[i])>1 or self.senses[i] not in [-1,1]:
+                return False
+            if not self.validDir(self.dirstrings[i]):
+                return False
+            if self.minvalues[i]>self.maxvalues[i] or self.steps[i]<=0:
+                return False
+        return True
 
 class InstrumentSetupWidget(QtGui.QWidget):
     def __init__(self,parent=None):
@@ -135,8 +175,9 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.goniometerMin=[0.,0.,0.]
         self.goniometerMax=[0.,0.,0.]
         self.goniometerStep=[1.,1.,1.]
-        self.goniomodel = GonioTableModel(  self.goniometerNames,self.goniometerDirections,self.goniometerRotationSense,
-                                            self.goniometerMin,self.goniometerMax,self.goniometerStep,self)
+        values={'labels':self.goniometerNames,'dirs':self.goniometerDirections,'senses':self.goniometerRotationSense,
+                'minvals':self.goniometerMin,'maxvals':self.goniometerMax,'steps':self.goniometerStep}
+        self.goniomodel = GonioTableModel(values,self)
         self.tableViewGon.setModel(self.goniomodel)
         self.tableViewGon.update()
         #goniometer figure
@@ -169,8 +210,8 @@ class InstrumentSetupWidget(QtGui.QWidget):
         #connect goniometer change with figure
         self.goniomodel.changed.connect(self.updateGon)
 
-    def updateGon(self,names):
-        self.goniometerNames=names
+    def updateGon(self,axes):
+        self.goniometerNames=axes['labels']
         self.updateFigure()
 
     def updateFigure(self):
@@ -257,13 +298,14 @@ class InstrumentSetupWidget(QtGui.QWidget):
             self.updateAll()
 
     def updateAll(self):
-        if mantid.mtd.doesExist("__InstrumentSetupWidgetWorkspace"):
-            __w=mantid.mtd["__InstrumentSetupWidgetWorkspace"]
-        else:
-            __w=mantid.simpleapi.CreateSingleValuedWorkspace(0., OutputWorkspace="__InstrumentSetupWidgetWorkspace")
-        mantid.simpleapi.AddSampleLog(__w,LogName="Ei",LogText=str(self.Ei), LogType="Number Series")
-        mantid.simpleapi.AddSampleLog(__w,LogName="s2",LogText=str(self.S2), LogType="Number Series")
-        mantid.simpleapi.LoadInstrument(__w,InstrumentName=str(self.instrument))
+        pass
+        #if mantid.mtd.doesExist("__InstrumentSetupWidgetWorkspace"):
+        #    __w=mantid.mtd["__InstrumentSetupWidgetWorkspace"]
+        #else:
+        #    __w=mantid.simpleapi.CreateSingleValuedWorkspace(0., OutputWorkspace="__InstrumentSetupWidgetWorkspace")
+        #mantid.simpleapi.AddSampleLog(__w,LogName="Ei",LogText=str(self.Ei), LogType="Number Series")
+        #mantid.simpleapi.AddSampleLog(__w,LogName="s2",LogText=str(self.S2), LogType="Number Series")
+        #mantid.simpleapi.LoadInstrument(__w,InstrumentName=str(self.instrument))
 
 if __name__=='__main__':
     app=QtGui.QApplication(sys.argv)
