@@ -9,10 +9,12 @@
 Description
 -----------
 
-Performs jump fitting on a workspace created by either ConvFit (Indirct Data Analysis)
-or Quasi (Indirect Bayes).
+Fits the Q variation of the fitted widths  from either ConvFit or Quasi to one
+of 4 models:
 
-For more details, see the `Indirect Bayes docs
-<http://www.mantidproject.org/IndirectBayes:JumpFit>`_.
+- simple Fick Diffusion
+- Chudley-Elliott model
+- Hall-Ross model
+- Teixeira's model for water
 
 .. categories::
