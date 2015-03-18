@@ -229,12 +229,12 @@ void DetermineChunking::exec() {
     filesize = double(info.getSize()) * 144.0 / (1024.0 * 1024.0 * 1024.0);
     g_log.notice() << "Wksp size is " << filesize << " GB" << std::endl;
     LoadTOFRawNexus lp;
-    lp.signalNo = 1;
+    lp.m_signalNo = 1;
     // Find the entry name we want.
     std::string entry_name = LoadTOFRawNexus::getEntryName(filename);
     std::vector<std::string> bankNames;
     lp.countPixels(filename, entry_name, bankNames);
-    m_numberOfSpectra = static_cast<int>(lp.numPixels);
+    m_numberOfSpectra = static_cast<int>(lp.m_numPixels);
     g_log.notice() << "Spectra size is " << m_numberOfSpectra << " spectra"
                    << std::endl;
   } else {

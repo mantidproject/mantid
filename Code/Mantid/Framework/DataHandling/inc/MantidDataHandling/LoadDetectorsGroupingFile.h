@@ -102,20 +102,20 @@ private:
   void generateNoInstrumentGroupWorkspace();
 
   /// Grouping Workspace
-  DataObjects::GroupingWorkspace_sptr mGroupWS;
+  DataObjects::GroupingWorkspace_sptr m_groupWS;
 
   /// Instrument to use if given by user
-  Geometry::Instrument_const_sptr mInstrument;
+  Geometry::Instrument_const_sptr m_instrument;
 
   /// XML document loaded
-  Poco::XML::Document *pDoc;
+  Poco::XML::Document *m_pDoc;
   /// Root element of the parsed XML
-  Poco::XML::Element *pRootElem;
+  Poco::XML::Element *m_pRootElem;
 
   /// Data structures to store XML to Group/Detector conversion map
-  std::map<int, std::vector<std::string>> mGroupComponentsMap;
-  std::map<int, std::vector<detid_t>> mGroupDetectorsMap;
-  std::map<int, std::vector<int>> mGroupSpectraMap;
+  std::map<int, std::vector<std::string>> m_groupComponentsMap;
+  std::map<int, std::vector<detid_t>> m_groupDetectorsMap;
+  std::map<int, std::vector<int>> m_groupSpectraMap;
 };
 
 class DLLExport LoadGroupXMLFile {
@@ -125,59 +125,59 @@ public:
 
   void loadXMLFile(std::string xmlfilename);
   void setDefaultStartingGroupID(int startgroupid) {
-    mStartGroupID = startgroupid;
+    m_startGroupID = startgroupid;
   }
 
-  std::string getInstrumentName() { return mInstrumentName; }
-  bool isGivenInstrumentName() { return mUserGiveInstrument; }
+  std::string getInstrumentName() { return m_instrumentName; }
+  bool isGivenInstrumentName() { return m_userGiveInstrument; }
 
-  std::string getDate() { return mDate; }
-  bool isGivenDate() { return mUserGiveDate; }
+  std::string getDate() { return m_date; }
+  bool isGivenDate() { return m_userGiveDate; }
 
-  std::string getDescription() { return mDescription; }
-  bool isGivenDescription() { return mUserGiveDescription; }
+  std::string getDescription() { return m_description; }
+  bool isGivenDescription() { return m_userGiveDescription; }
 
   /// Data structures to store XML to Group/Detector conversion map
   std::map<int, std::vector<std::string>> getGroupComponentsMap() {
-    return mGroupComponentsMap;
+    return m_groupComponentsMap;
   }
   std::map<int, std::vector<detid_t>> getGroupDetectorsMap() {
-    return mGroupDetectorsMap;
+    return m_groupDetectorsMap;
   }
   std::map<int, std::vector<int>> getGroupSpectraMap() {
-    return mGroupSpectraMap;
+    return m_groupSpectraMap;
   }
 
-  std::map<int, std::string> getGroupNamesMap() { return mGroupNamesMap; }
+  std::map<int, std::string> getGroupNamesMap() { return m_groupNamesMap; }
 
 private:
   /// Instrument name
-  std::string mInstrumentName;
+  std::string m_instrumentName;
   /// User-define instrument name
-  bool mUserGiveInstrument;
+  bool m_userGiveInstrument;
 
   /// Date in ISO 8601 for which this grouping is relevant
-  std::string mDate;
+  std::string m_date;
   /// Whether date is given by user
-  bool mUserGiveDate;
+  bool m_userGiveDate;
 
   /// Grouping description. Empty if not specified.
-  std::string mDescription;
+  std::string m_description;
   /// Whether description is given by user
-  bool mUserGiveDescription;
+  bool m_userGiveDescription;
 
   /// XML document loaded
-  Poco::XML::Document *pDoc;
+  Poco::XML::Document *m_pDoc;
   /// Root element of the parsed XML
-  Poco::XML::Element *pRootElem;
+  Poco::XML::Element *m_pRootElem;
   /// Data structures to store XML to Group/Detector conversion map
-  std::map<int, std::vector<std::string>> mGroupComponentsMap;
-  std::map<int, std::vector<detid_t>> mGroupDetectorsMap;
-  std::map<int, std::vector<int>> mGroupSpectraMap;
-  int mStartGroupID;
+  std::map<int, std::vector<std::string>> m_groupComponentsMap;
+  std::map<int, std::vector<detid_t>> m_groupDetectorsMap;
+  std::map<int, std::vector<int>> m_groupSpectraMap;
+  int m_startGroupID;
 
   /// Map of group names
-  std::map<int, std::string> mGroupNamesMap;
+  std::map<int, std::string> m_groupNamesMap;
 
   /// Initialize XML parser
   void initializeXMLParser(const std::string &filename);

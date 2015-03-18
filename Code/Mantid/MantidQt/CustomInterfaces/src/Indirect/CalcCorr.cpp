@@ -365,13 +365,13 @@ namespace IDA
     switch(m_uiForm.cbSampleInputType->currentIndex())
     {
       case 0:
-          //using direct input
-          uiv.checkFieldIsValid("Sample Scattering Cross-Section", m_uiForm.lesamsigs, m_uiForm.valSamsigs);
-          uiv.checkFieldIsValid("Sample Absorption Cross-Section", m_uiForm.lesamsiga, m_uiForm.valSamsiga);
+        //input using formula
+        uiv.checkFieldIsValid("Sample Formula", m_uiForm.leSampleFormula, m_uiForm.valSampleFormula);
         break;
       case 1:
-          //input using formula
-          uiv.checkFieldIsValid("Sample Formula", m_uiForm.leSampleFormula, m_uiForm.valSampleFormula);
+        //using direct input
+        uiv.checkFieldIsValid("Sample Scattering Cross-Section", m_uiForm.lesamsigs, m_uiForm.valSamsigs);
+        uiv.checkFieldIsValid("Sample Absorption Cross-Section", m_uiForm.lesamsiga, m_uiForm.valSamsiga);
         break;
     }
 
@@ -390,13 +390,13 @@ namespace IDA
       switch(m_uiForm.cbCanInputType->currentIndex())
       {
         case 0:
-            // using direct input
-            uiv.checkFieldIsValid("Can Scattering Cross-Section", m_uiForm.lecansigs, m_uiForm.valCansigs);
-            uiv.checkFieldIsValid("Can Absorption Cross-Section", m_uiForm.lecansiga, m_uiForm.valCansiga);
+          //input using formula
+          uiv.checkFieldIsValid("Can Formula", m_uiForm.leCanFormula, m_uiForm.valCanFormula);
           break;
         case 1:
-            //input using formula
-            uiv.checkFieldIsValid("Can Formula", m_uiForm.leCanFormula, m_uiForm.valCanFormula);
+          // using direct input
+          uiv.checkFieldIsValid("Can Scattering Cross-Section", m_uiForm.lecansigs, m_uiForm.valCansigs);
+          uiv.checkFieldIsValid("Can Absorption Cross-Section", m_uiForm.lecansiga, m_uiForm.valCansiga);
           break;
       }
     }
