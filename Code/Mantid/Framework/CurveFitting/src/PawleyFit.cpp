@@ -2,6 +2,7 @@
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/PawleyFunction.h"
+#include "MantidAPI/TableRow.h"
 
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/ListValidator.h"
@@ -32,6 +33,45 @@ std::vector<V3D> PawleyFit::hklsFromString(const std::string &hklString) const {
   }
 
   return hkls;
+}
+
+void PawleyFit::addHKLsToFunction(PawleyFunction_sptr &pawleyFn,
+                                  const ITableWorkspace_sptr &tableWs) const {
+  if (!tableWs || !pawleyFn) {
+    throw std::invalid_argument("Can only process non-null function & table.");
+  }
+
+  pawleyFn->clearPeaks();
+
+  for (size_t i = 0; i < tableWs->rowCount(); ++i) {
+    TableRow currentRow = tableWs->getRow(i);
+
+    try {
+      V3D hkl = getHkl(currentRow.String(0));
+      double height = boost::lexical_cast<double>(currentRow.String(3));
+
+      pawleyFn->addPeak(hkl, 0.006, height);
+    }
+    catch (...) {
+      // do nothing.
+    }
+  }
+}
+
+V3D PawleyFit::getHkl(const std::string &hklString) const {
+  std::vector<std::string> indicesStr;
+  boost::split(indicesStr, hklString, boost::is_any_of(" "));
+
+  if (indicesStr.size() != 3) {
+    throw std::invalid_argument("Input string cannot be parsed as HKL.");
+  }
+
+  V3D hkl;
+  hkl.setX(boost::lexical_cast<double>(indicesStr[0]));
+  hkl.setY(boost::lexical_cast<double>(indicesStr[1]));
+  hkl.setZ(boost::lexical_cast<double>(indicesStr[2]));
+
+  return hkl;
 }
 
 void PawleyFit::init() {
@@ -67,6 +107,12 @@ void PawleyFit::init() {
                   "Semi-colon separated list of Miller indices given in the "
                   "format '[h,k,l]'.");
 
+  declareProperty(
+      new WorkspaceProperty<ITableWorkspace>("PeakTable", "", Direction::Input,
+                                             PropertyMode::Optional),
+      "Table with peak information. Can be used instead of "
+      "supplying a list of indices for better starting parameters.");
+
   declareProperty("RefineZeroShift", false, "If checked, a zero-shift with the "
                                             "same unit as the spectrum is "
                                             "refined.");
@@ -92,23 +138,34 @@ void PawleyFit::exec() {
   pawleyFn->setCrystalSystem(getProperty("CrystalSystem"));
   pawleyFn->setUnitCell(getProperty("InitialCell"));
 
-  std::vector<V3D> hkls = hklsFromString(getProperty("MillerIndices"));
-
-  MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
   int wsIndex = getProperty("WorkspaceIndex");
 
-  const MantidVec &data = ws->readY(static_cast<size_t>(wsIndex));
-  pawleyFn->setPeaks(hkls, 0.008,
-                     *(std::max_element(data.begin(), data.end())));
+  Property *peakTableProperty = getPointerToProperty("PeakTable");
+  if (!peakTableProperty->isDefault()) {
+    ITableWorkspace_sptr peakTable = getProperty("PeakTable");
+    addHKLsToFunction(pawleyFn, peakTable);
+  } else {
+    std::vector<V3D> hkls = hklsFromString(getProperty("MillerIndices"));
+
+    const MantidVec &data = ws->readY(static_cast<size_t>(wsIndex));
+    pawleyFn->setPeaks(hkls, 0.008,
+                       *(std::max_element(data.begin(), data.end())));
+  }
 
   bool refineZeroShift = getProperty("RefineZeroShift");
   if (!refineZeroShift) {
     pawleyFn->fix(pawleyFn->parameterIndex("f0.ZeroShift"));
   }
 
+  const MantidVec &xData = ws->readX(static_cast<size_t>(wsIndex));
+  pawleyFn->setMatrixWorkspace(ws, static_cast<size_t>(wsIndex), xData.front(),
+                               xData.back());
+
   Algorithm_sptr fit = createChildAlgorithm("Fit");
   fit->setProperty("Function", boost::static_pointer_cast<IFunction>(pawleyFn));
-  fit->setProperty("InputWorkspace", ws);
+  fit->setProperty("InputWorkspace",
+                   boost::const_pointer_cast<MatrixWorkspace>(ws));
   fit->setProperty("WorkspaceIndex", wsIndex);
   fit->setProperty("CreateOutput", true);
 

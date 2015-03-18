@@ -129,6 +129,9 @@ protected:
 
   std::vector<Kernel::V3D> m_hkls;
 };
+
+typedef boost::shared_ptr<PawleyFunction> PawleyFunction_sptr;
+
 } // namespace CurveFitting
 } // namespace Mantid
 

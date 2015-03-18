@@ -273,9 +273,9 @@ void PawleyFunction::function(const FunctionDomain &domain,
 
   for (size_t i = 0; i < m_hkls.size(); ++i) {
     double d = cell.d(m_hkls[i]) + zeroShift;
+
     m_peakProfileComposite->getFunction(i)->setParameter(
-        m_pawleyParameterFunction->getProfileFunctionCenterParameterName(),
-        d + zeroShift);
+        m_pawleyParameterFunction->getProfileFunctionCenterParameterName(), d);
   }
 
   m_peakProfileComposite->function(domain, values);
