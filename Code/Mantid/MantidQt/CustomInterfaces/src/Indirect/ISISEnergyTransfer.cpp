@@ -254,7 +254,7 @@ namespace CustomInterfaces
       m_uiForm.leRebinString->setText(instDetails["rebin-default"]);
       m_uiForm.ckDoNotRebin->setChecked(false);
       QStringList rbp = instDetails["rebin-default"].split(",", QString::SkipEmptyParts);
-      if ( rbp.size() == 3 )
+      if(rbp.size() == 3)
       {
         m_uiForm.spRebinLow->setValue(rbp[0].toDouble());
         m_uiForm.spRebinWidth->setValue(rbp[1].toDouble());
@@ -395,8 +395,8 @@ namespace CustomInterfaces
     }
 
     std::vector<int> detectorRange;
-    detectorRange.push_back(m_uiForm.spSpectraMin->value());
-    detectorRange.push_back(m_uiForm.spSpectraMax->value());
+    detectorRange.push_back(m_uiForm.spPlotTimeSpecMin->value());
+    detectorRange.push_back(m_uiForm.spPlotTimeSpecMax->value());
 
     QString rawFile = m_uiForm.dsRunFiles->getFirstFilename();
     QFileInfo rawFileInfo(rawFile);
