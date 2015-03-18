@@ -44,10 +44,10 @@ namespace IDA
     m_msdTree->addProperty(m_properties["Start"]);
     m_msdTree->addProperty(m_properties["End"]);
 
-    m_rangeSelectors["MSDRange"] = new MantidWidgets::RangeSelector(m_uiForm.ppPlot);
+    auto fitRangeSelector = m_uiForm.ppPlot->addRangeSelector("MSDRange");
 
-    connect(m_rangeSelectors["MSDRange"], SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
-    connect(m_rangeSelectors["MSDRange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
+    connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
+    connect(fitRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
 
     connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(newDataLoaded(const QString&)));
@@ -248,7 +248,7 @@ namespace IDA
     try
     {
       QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
-      m_rangeSelectors["MSDRange"]->setRange(range.first, range.second);
+      m_uiForm.ppPlot->getRangeSelector("MSDRange")->setRange(range.first, range.second);
     }
     catch(std::invalid_argument & exc)
     {
@@ -294,8 +294,10 @@ namespace IDA
 
   void MSDFit::updateRS(QtProperty* prop, double val)
   {
-    if ( prop == m_properties["Start"] ) m_rangeSelectors["MSDRange"]->setMinimum(val);
-    else if ( prop == m_properties["End"] ) m_rangeSelectors["MSDRange"]->setMaximum(val);
+    auto fitRangeSelector = m_uiForm.ppPlot->getRangeSelector("MSDRange");
+
+    if(prop == m_properties["Start"])    fitRangeSelector->setMinimum(val);
+    else if(prop == m_properties["End"]) fitRangeSelector->setMaximum(val);
   }
 
 } // namespace IDA
