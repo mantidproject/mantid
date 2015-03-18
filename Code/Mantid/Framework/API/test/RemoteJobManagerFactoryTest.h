@@ -89,8 +89,7 @@ public:
     RemoteJobManagerFactory::Instance().subscribe<TestJM>("TestJM");
     // throws not found cause it is not in facilities.xml, but otherwise fine
     TS_ASSERT_THROWS(
-        Mantid::Kernel::IRemoteJobManager_sptr jobManager =
-            Mantid::API::RemoteJobManagerFactory::Instance().create("TestJM"),
+        jm = Mantid::API::RemoteJobManagerFactory::Instance().create("TestJM"),
         Mantid::Kernel::Exception::NotFoundError);
   }
 
@@ -102,8 +101,7 @@ public:
 
     Mantid::Kernel::ConfigService::Instance().setFacility("ISIS");
     TS_ASSERT_THROWS(
-        Mantid::Kernel::IRemoteJobManager_sptr jobManager =
-            Mantid::API::RemoteJobManagerFactory::Instance().create("Fermi"),
+        jm = Mantid::API::RemoteJobManagerFactory::Instance().create("Fermi"),
         Mantid::Kernel::Exception::NotFoundError);
 
     Mantid::Kernel::ConfigService::Instance().setFacility("SNS");
