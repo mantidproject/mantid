@@ -163,6 +163,10 @@ class CreateMD(DataProcessorAlgorithm):
         else:
             output_workspace = AnalysisDataService.retrieve(to_merge_names[0])
 
+        # Clear out temporary workspaces.
+        for ws in to_merge_names:
+            DeleteWorkspace(ws)
+
         self.setProperty("OutputWorkspace", output_workspace)
                 
 
