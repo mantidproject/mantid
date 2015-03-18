@@ -5,6 +5,9 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
 #include "MockObjects.h"
+
+#include <vtkPolyData.h>
+
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -29,14 +32,13 @@ class MockPeaksWorkspace : public PeaksWorkspace
 {
 public:
   MOCK_METHOD1(setInstrument, void (Mantid::Geometry::Instrument_const_sptr inst));
-  MOCK_METHOD0(getInstrument, Mantid::Geometry::Instrument_const_sptr ());
+  //MOCK_METHOD0(getInstrument, Mantid::Geometry::Instrument_const_sptr ());
   MOCK_CONST_METHOD0(clone, Mantid::DataObjects::PeaksWorkspace*());
   MOCK_CONST_METHOD0(getNumberPeaks, int());
   MOCK_METHOD1(removePeak, void (int peakNum) );
   MOCK_METHOD1(addPeak, void (const IPeak& ipeak));
   MOCK_METHOD1(getPeak, Mantid::DataObjects::Peak & (int peakNum));
   MOCK_CONST_METHOD1(getPeak, const Mantid::DataObjects::Peak & (int peakNum));
-  MOCK_CONST_METHOD2(createPeak, Mantid::API::IPeak* (Mantid::Kernel::V3D QLabFrame, double detectorDistance));
 };
 
 //=====================================================================================
@@ -59,12 +61,13 @@ public:
 
     vtkPeakMarkerFactory factory("signal", dims);
     factory.initialize(pw_ptr);
-    vtkDataSet * set = factory.create(updateProgress);
+    vtkPolyData * set = factory.create(updateProgress);
+
+    // As the marker type are three axes(2 points), we expect 5*2*3 points
+    // The angle is 45degrees and the size is 0.3
+
     TS_ASSERT(set);
-    TS_ASSERT_EQUALS( set->GetNumberOfPoints(), 5);
-    TS_ASSERT_EQUALS(set->GetPoint(0)[0], 1.0);
-    TS_ASSERT_EQUALS(set->GetPoint(0)[1], 2.0);
-    TS_ASSERT_EQUALS(set->GetPoint(0)[2], 3.0);
+    TS_ASSERT_EQUALS(set->GetNumberOfPoints(), 30);
 
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&pw));
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&peak1));
@@ -91,11 +94,10 @@ public:
 
     vtkPeakMarkerFactory factory("signal", vtkPeakMarkerFactory::Peak_in_Q_lab);
     factory.initialize(pw_ptr);
-    vtkDataSet * set = factory.create(mockProgress);
+    vtkPolyData * set = factory.create(mockProgress);
     set->Delete();
 
     TSM_ASSERT("Progress Updates not used as expected.", Mock::VerifyAndClearExpectations(&mockProgress));
-
   }
 
   void test_q_lab()

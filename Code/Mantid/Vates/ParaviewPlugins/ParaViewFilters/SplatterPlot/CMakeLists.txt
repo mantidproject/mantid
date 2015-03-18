@@ -9,8 +9,10 @@ ADD_PARAVIEW_PLUGIN(MantidParaViewSplatterPlotSMPlugin "1.0"
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewSplatterPlotSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
 
-target_link_libraries( MantidParaViewSplatterPlotSMPlugin LINK_PUBLIC
-${MANTID_SUBPROJECT_LIBS} )
+include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
+
+target_link_libraries( MantidParaViewSplatterPlotSMPlugin 
+${MANTID_SUBPROJECT_LIBS} ${QWT_LIBRARIES})
 
 # Put library into subfolder.
 SET_TARGET_OUTPUT_DIRECTORY(MantidParaViewSplatterPlotSMPlugin ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR})

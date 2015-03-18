@@ -22,8 +22,7 @@ namespace CustomInterfaces
   /** Constructor
    */
   IndirectTab::IndirectTab(QObject* parent) : QObject(parent),
-      m_plots(), m_curves(), m_rangeSelectors(),
-      m_properties(),
+      m_rangeSelectors(), m_properties(),
       m_dblManager(new QtDoublePropertyManager()), m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
       m_dblEdFac(new DoubleEditorFactory()),
       m_pythonRunner(),
@@ -144,146 +143,6 @@ namespace CustomInterfaces
   }
 
   /**
-   * Gets the range of the curve plotted in the mini plot
-   *
-   * @param curveID :: The string index of the curve in the m_curves map
-   * @return A pair containing the maximum and minimum points of the curve
-   */
-  std::pair<double, double> IndirectTab::getCurveRange(const QString& curveID)
-  {
-    size_t npts = m_curves[curveID]->data().size();
-
-    if( npts < 2 )
-      throw std::invalid_argument("Too few points on data curve to determine range.");
-
-    return std::make_pair(m_curves[curveID]->data().x(0), m_curves[curveID]->data().x(npts-1));
-  }
-
-  /**
-   * Set the range of an axis on a miniplot
-   *
-   * @param plotID :: Index of plot in m_plots map
-   * @param axis :: ID of axis to set range of
-   * @param range :: Pair of double values specifying range
-   */
-  void IndirectTab::setAxisRange(const QString& plotID, QwtPlot::Axis axis,
-      std::pair<double, double> range)
-  {
-    m_plots[plotID]->setAxisScale(axis, range.first, range.second);
-  }
-
-  /**
-   * Sets the X axis of a plot to match the range of x values on a curve
-   *
-   * @param plotID :: Index of plot in m_plots map
-   * @param curveID :: Index of curve in m_curves map
-   */
-  void IndirectTab::setXAxisToCurve(const QString& plotID, const QString& curveID)
-  {
-    auto range = getCurveRange(curveID);
-    setAxisRange(plotID, QwtPlot::xBottom, range);
-  }
-
-  /**
-   * Plot a workspace to the miniplot given a workspace name and
-   * a specturm index.
-   *
-   * This method uses the analysis data service to retrieve the workspace.
-   *
-   * @param workspace :: The name of the workspace
-   * @param index :: The spectrum index of the workspace
-   * @param plotID :: String index of the plot in the m_plots map
-   * @param curveID :: String index of the curve in the m_curves map, defaults to plot ID
-   */
-  void IndirectTab::plotMiniPlot(const QString& workspace, size_t index,
-      const QString& plotID, const QString& curveID)
-  {
-    auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(workspace.toStdString());
-    plotMiniPlot(ws, index, plotID, curveID);
-  }
-
-  /**
-   * Replot a given mini plot
-   *
-   * @param plotID :: ID of plot in m_plots map
-   */
-  void IndirectTab::replot(const QString& plotID)
-  {
-    m_plots[plotID]->replot();
-  }
-
-  /**
-   * Removes a curve from a mini plot and deletes it.
-   *
-   * @param curveID :: ID of plot in m_plots map
-   */
-  void IndirectTab::removeCurve(const QString& curveID)
-  {
-    if(m_curves[curveID] == NULL)
-      return;
-
-    m_curves[curveID]->attach(NULL);
-    delete m_curves[curveID];
-    m_curves[curveID] = NULL;
-  }
-
-  /**
-   * Removes all curves from their plots.
-   */
-  void IndirectTab::removeAllCurves()
-  {
-    for(auto it = m_curves.begin(); it != m_curves.end(); ++it)
-    {
-      it->second->attach(NULL);
-      delete it->second;
-    }
-
-    m_curves.clear();
-  }
-
-  /**
-   * Plot a workspace to the miniplot given a workspace pointer and
-   * a specturm index.
-   *
-   * @param workspace :: Pointer to the workspace
-   * @param wsIndex :: The spectrum index of the workspace
-   * @param plotID :: String index of the plot in the m_plots map
-   * @param curveID :: String index of the curve in the m_curves map, defaults to plot ID
-   */
-  void IndirectTab::plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex,
-      const QString& plotID, const QString& curveID)
-  {
-    using Mantid::MantidVec;
-
-    QString cID = curveID;
-    if(cID == "")
-      cID = plotID;
-
-    //check if we can plot
-    if( wsIndex >= workspace->getNumberHistograms() || workspace->readX(0).size() < 2 )
-      return;
-
-    const bool logScale(false), distribution(false);
-    QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(wsIndex), logScale, distribution);
-
-    removeCurve(cID);
-
-    size_t nhist = workspace->getNumberHistograms();
-    if ( wsIndex >= nhist )
-    {
-      emit showMessageBox("Error: Workspace index out of range.");
-    }
-    else
-    {
-      m_curves[cID] = new QwtPlotCurve();
-      m_curves[cID]->setData(wsData);
-      m_curves[cID]->attach(m_plots[plotID]);
-
-      m_plots[plotID]->replot();
-    }
-  }
-
-  /**
    * Sets the edge bounds of plot to prevent the user inputting invalid values
    * Also sets limits for range selector movement
    *
@@ -292,8 +151,8 @@ namespace CustomInterfaces
    * @param max :: The upper bound property in the property browser
    * @param bounds :: The upper and lower bounds to be set
    */
-  void IndirectTab::setPlotRange(const QString& rsID, QtProperty* min, QtProperty* max,
-      const std::pair<double, double>& bounds)
+  void IndirectTab::setPlotPropertyRange(const QString& rsID, QtProperty* min, QtProperty* max,
+      const QPair<double, double> & bounds)
   {
     m_dblManager->setMinimum(min, bounds.first);
     m_dblManager->setMaximum(min, bounds.second);
@@ -303,15 +162,15 @@ namespace CustomInterfaces
   }
 
   /**
-   * Set the position of the guides on the mini plot
+   * Set the position of the range selectors on the mini plot
    *
    * @param rsID :: The string index of the range selector in the map m_rangeSelectors
    * @param lower :: The lower bound property in the property browser
    * @param upper :: The upper bound property in the property browser
    * @param bounds :: The upper and lower bounds to be set
    */
-  void IndirectTab::setMiniPlotGuides(const QString& rsID, QtProperty* lower, QtProperty* upper,
-      const std::pair<double, double>& bounds)
+  void IndirectTab::setRangeSelector(const QString& rsID, QtProperty* lower, QtProperty* upper,
+      const QPair<double, double> & bounds)
   {
     m_dblManager->setValue(lower, bounds.first);
     m_dblManager->setValue(upper, bounds.second);

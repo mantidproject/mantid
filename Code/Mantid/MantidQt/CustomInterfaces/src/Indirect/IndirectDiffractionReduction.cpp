@@ -91,17 +91,17 @@ void IndirectDiffractionReduction::initLayout()
   // Update the list of plot options when individual grouping is toggled
   connect(m_uiForm.ckIndividualGrouping, SIGNAL(stateChanged(int)), this, SLOT(individualGroupingToggled(int)));
 
-  // Set initial layout based on instrument
-  m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
-
   loadSettings();
 
   // Update invalid rebinning markers
   validateRebin();
+
+  // Update instrument dependant widgets
+  m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
 }
 
 /**
- * Runs a diffraction reduction when the user clieks Run.
+ * Runs a diffraction reduction when the user clicks Run.
  */
 void IndirectDiffractionReduction::demonRun()
 {

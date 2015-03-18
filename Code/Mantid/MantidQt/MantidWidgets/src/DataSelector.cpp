@@ -24,7 +24,7 @@ namespace MantidQt
       connect(m_uiForm.pbLoadFile, SIGNAL(clicked()), this, SIGNAL(loadClicked()));
 
       //data selected changes
-      connect(m_uiForm.rfFileInput, SIGNAL(filesFound()), this, SLOT(handleFileInput()));
+      connect(m_uiForm.rfFileInput, SIGNAL(filesFoundChanged()), this, SLOT(handleFileInput()));
       connect(m_uiForm.wsWorkspaceInput, SIGNAL(currentIndexChanged(int)), this, SLOT(handleWorkspaceInput()));
       connect(m_uiForm.pbLoadFile, SIGNAL(clicked()), this, SLOT(handleFileInput()));
 
@@ -66,7 +66,7 @@ namespace MantidQt
     /**
      * Get if the file selector is currently being shown.
      *
-     * @return :: true if it is visible, otherwise false 
+     * @return :: true if it is visible, otherwise false
      */
     bool DataSelector::isFileSelectorVisible() const
     {
@@ -77,7 +77,7 @@ namespace MantidQt
     /**
      * Get if the workspace selector is currently being shown.
      *
-     * @return :: true if it is visible, otherwise false 
+     * @return :: true if it is visible, otherwise false
      */
     bool DataSelector::isWorkspaceSelectorVisible() const
     {
@@ -107,7 +107,7 @@ namespace MantidQt
         if(isValid && m_autoLoad)
         {
           const QString wsName = getCurrentDataName();
-          
+
           if(!AnalysisDataService::Instance().doesExist(wsName.toStdString()))
           {
             //attempt to reload if we can
@@ -118,9 +118,9 @@ namespace MantidQt
             loadAlg->setProperty("Filename", filepath.toStdString());
             loadAlg->setProperty("OutputWorkspace", wsName.toStdString());
             loadAlg->execute();
-            
+
             isValid = AnalysisDataService::Instance().doesExist(wsName.toStdString());
-            
+
             if(!isValid)
             {
               m_uiForm.rfFileInput->setFileProblem("The specified workspace is missing from the analysis data service");
@@ -416,23 +416,50 @@ namespace MantidQt
     }
 
     /**
+     * Gets the instrument currently set by the override property.
+     *
+     * If no override is set then the instrument set by default instrument configurtion
+     * option will be used and this function returns an empty string.
+     *
+     * @return Name of instrument, empty if not set
+     */
+    QString DataSelector::getInstrumentOverride()
+    {
+      return m_uiForm.rfFileInput->getInstrumentOverride();
+    }
+
+    /**
+     * Sets an instrument to fix the widget to.
+     *
+     * If an instrument name is geven then the widget will only look for files for that
+     * instrument, providing na empty string will remove this restriction and will search
+     * using the default instrument.
+     *
+     * @param instName Name of instrument, empty to disable override
+     */
+    void DataSelector::setInstrumentOverride(const QString & instName)
+    {
+      m_uiForm.rfFileInput->setInstrumentOverride(instName);
+    }
+
+    /**
      * Called when an item is dropped
      * @param de :: the drop event data package
      */
     void DataSelector::dropEvent(QDropEvent *de)
     {
-      const QMimeData *mimeData = de->mimeData();  
+      const QMimeData *mimeData = de->mimeData();
       auto before_action = de->dropAction();
 
       if (de->mimeData() && mimeData->text().contains(" = mtd[\"")){
         m_uiForm.wsWorkspaceInput->dropEvent(de);
-        if (de->dropAction() == before_action){    
+        if (de->dropAction() == before_action){
           m_uiForm.cbInputType->setCurrentIndex(1);
           return;
         }
-        de->setDropAction(before_action);    
+        de->setDropAction(before_action);
       }
-  
+
       m_uiForm.rfFileInput->dropEvent(de);
       if (de->dropAction() == before_action){
         m_uiForm.cbInputType->setCurrentIndex(0);

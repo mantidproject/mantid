@@ -1,5 +1,6 @@
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtAPI/MdConstants.h"
 
 #include <map>
 #include <algorithm>
@@ -30,10 +31,11 @@ ModeControlWidget::ModeControlWidget(QWidget *parent) : QWidget(parent)
                    this, SLOT(onSplatterPlotViewButtonClicked()));
 
   // Add the mapping from string to the view enum
-  mapFromStringToView.insert(std::pair<std::string ,ModeControlWidget::Views>("STANDARD", ModeControlWidget::STANDARD));
-  mapFromStringToView.insert(std::pair<std::string ,ModeControlWidget::Views>("THREESLICE", ModeControlWidget::THREESLICE));
-  mapFromStringToView.insert(std::pair<std::string ,ModeControlWidget::Views>("MULTISLICE", ModeControlWidget::MULTISLICE));
-  mapFromStringToView.insert(std::pair<std::string ,ModeControlWidget::Views>("SPLATTERPLOT", ModeControlWidget::SPLATTERPLOT));
+  MantidQt::API::MdConstants mdConstants;
+  mapFromStringToView.insert(std::pair<QString, ModeControlWidget::Views>(mdConstants.getStandardView(), ModeControlWidget::STANDARD));
+  mapFromStringToView.insert(std::pair<QString, ModeControlWidget::Views>(mdConstants.getThreeSliceView(), ModeControlWidget::THREESLICE));
+  mapFromStringToView.insert(std::pair<QString, ModeControlWidget::Views>(mdConstants.getMultiSliceView(), ModeControlWidget::MULTISLICE));
+  mapFromStringToView.insert(std::pair<QString, ModeControlWidget::Views>(mdConstants.getSplatterPlotView(), ModeControlWidget::SPLATTERPLOT));
 }
 
 ModeControlWidget::~ModeControlWidget()
@@ -192,11 +194,9 @@ void ModeControlWidget::enableViewButton(ModeControlWidget::Views mode,
  * @param view A selected view.
  * @returns The selected view as enum or the standard view.
  */
-ModeControlWidget::Views ModeControlWidget::getViewFromString(std::string view)
+ModeControlWidget::Views ModeControlWidget::getViewFromString(QString view)
 {
-  std::transform(view.begin(), view.end(), view.begin(), toupper);
-
-  if (!view.empty() && mapFromStringToView.count(view) == 1)
+  if (!view.isEmpty() && mapFromStringToView.count(view) == 1)
   {
     return mapFromStringToView[view];
   }

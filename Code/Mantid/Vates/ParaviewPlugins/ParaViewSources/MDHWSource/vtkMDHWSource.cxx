@@ -89,6 +89,68 @@ int vtkMDHWSource::GetSpecialCoordinates()
   }
 }
 
+/**
+ * Gets the minimum value of the data associated with the 
+ * workspace.
+ * @return The minimum value of the workspace data.
+ */
+double vtkMDHWSource::GetMinValue()
+{
+  if (NULL == m_presenter)
+  {
+    return 0.0;
+  }
+  try
+  {
+    return m_presenter->getMinValue();
+  }
+  catch (std::runtime_error &)
+  {
+    return 0.0;
+  }
+}
+
+/**
+ * Gets the maximum value of the data associated with the 
+ * workspace.
+ * @return The maximum value of the workspace data.
+ */
+double vtkMDHWSource::GetMaxValue()
+{
+  if (NULL == m_presenter)
+  {
+    return 0.0;
+  }
+  try
+  {
+    return m_presenter->getMaxValue();
+  }
+  catch (std::runtime_error &)
+  {
+    return 0.0;
+  }
+}
+
+/**
+ * Gets the (first) instrument which is associated with the workspace.
+ * @return The name of the instrument.
+ */
+const char* vtkMDHWSource::GetInstrument()
+{
+  if (NULL == m_presenter)
+  {
+    return "";
+  }
+  try
+  {
+    return m_presenter->getInstrument().c_str();
+  }
+  catch (std::runtime_error &)
+  {
+    return "";
+  }
+}
+
 int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *outputVector)
 {
   if(m_presenter->canReadFile())
@@ -127,7 +189,7 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     }
     catch (std::invalid_argument &e)
     {
-	  std::string error = e.what();
+    std::string error = e.what();
       vtkDebugMacro(<< "Workspace does not have correct information to "
                     << "plot non-orthogonal axes. " << error);
     }
@@ -141,7 +203,18 @@ int vtkMDHWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkIn
 {
   if(m_presenter == NULL && !m_wsName.empty())
   {
-    m_presenter = new MDHWInMemoryLoadingPresenter(new MDLoadingViewAdapter<vtkMDHWSource>(this), new ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace>, m_wsName);
+    m_presenter = new MDHWInMemoryLoadingPresenter(new MDLoadingViewAdapter<vtkMDHWSource>(this),
+                                                   new ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace>,
+                                                   m_wsName);
+    if(!m_presenter->canReadFile())
+    {
+      vtkErrorMacro(<<"Cannot fetch the specified workspace from Mantid ADS.");
+    }
+    else
+    {
+      m_presenter->executeLoadMetadata();
+      setTimeRange(outputVector);
+    }
   }
   if (m_presenter == NULL)
   {

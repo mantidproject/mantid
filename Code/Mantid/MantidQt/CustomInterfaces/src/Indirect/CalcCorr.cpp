@@ -111,8 +111,6 @@ namespace IDA
     connect(m_uiForm.cbShape, SIGNAL(currentIndexChanged(int)), this, SLOT(shape(int)));
     connect(m_uiForm.ckUseCan, SIGNAL(toggled(bool)), this, SLOT(useCanChecked(bool)));
     connect(m_uiForm.letc1, SIGNAL(editingFinished()), this, SLOT(tcSync()));
-    connect(m_uiForm.cbSampleInputType, SIGNAL(currentIndexChanged(int)), m_uiForm.swSampleInputType, SLOT(setCurrentIndex(int)));
-    connect(m_uiForm.cbCanInputType, SIGNAL(currentIndexChanged(int)), m_uiForm.swCanInputType, SLOT(setCurrentIndex(int)));
     connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(getBeamWidthFromWorkspace(const QString&)));
 
     // Sort the fields into various lists.
@@ -272,9 +270,6 @@ namespace IDA
     }
 
     //Output options
-    if ( m_uiForm.ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-    else pyInput += "verbose = False\n";
-
     if ( m_uiForm.ckSave->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";
 
@@ -286,7 +281,7 @@ namespace IDA
       "plotOpt = '" + m_uiForm.cbPlotOutput->currentText() + "'\n"
       "sampleFormula = " + sampleFormula + "\n"
       "canFormula = " + canFormula + "\n"
-      "print IndirectAbsCor.AbsRunFeeder(inputws, canws, geom, ncan, size, avar, density, beam, sampleFormula, canFormula, sigs, siga, plot_opt=plotOpt, save=save, verbose=verbose)\n";
+      "print IndirectAbsCor.AbsRunFeeder(inputws, canws, geom, ncan, size, avar, density, beam, sampleFormula, canFormula, sigs, siga, plot_opt=plotOpt, save=save)\n";
 
     QString pyOutput = runPythonCode(pyInput);
 
@@ -370,13 +365,13 @@ namespace IDA
     switch(m_uiForm.cbSampleInputType->currentIndex())
     {
       case 0:
-          //using direct input
-          uiv.checkFieldIsValid("Sample Scattering Cross-Section", m_uiForm.lesamsigs, m_uiForm.valSamsigs);
-          uiv.checkFieldIsValid("Sample Absorption Cross-Section", m_uiForm.lesamsiga, m_uiForm.valSamsiga);
+        //input using formula
+        uiv.checkFieldIsValid("Sample Formula", m_uiForm.leSampleFormula, m_uiForm.valSampleFormula);
         break;
       case 1:
-          //input using formula
-          uiv.checkFieldIsValid("Sample Formula", m_uiForm.leSampleFormula, m_uiForm.valSampleFormula);
+        //using direct input
+        uiv.checkFieldIsValid("Sample Scattering Cross-Section", m_uiForm.lesamsigs, m_uiForm.valSamsigs);
+        uiv.checkFieldIsValid("Sample Absorption Cross-Section", m_uiForm.lesamsiga, m_uiForm.valSamsiga);
         break;
     }
 
@@ -395,13 +390,13 @@ namespace IDA
       switch(m_uiForm.cbCanInputType->currentIndex())
       {
         case 0:
-            // using direct input
-            uiv.checkFieldIsValid("Can Scattering Cross-Section", m_uiForm.lecansigs, m_uiForm.valCansigs);
-            uiv.checkFieldIsValid("Can Absorption Cross-Section", m_uiForm.lecansiga, m_uiForm.valCansiga);
+          //input using formula
+          uiv.checkFieldIsValid("Can Formula", m_uiForm.leCanFormula, m_uiForm.valCanFormula);
           break;
         case 1:
-            //input using formula
-            uiv.checkFieldIsValid("Can Formula", m_uiForm.leCanFormula, m_uiForm.valCanFormula);
+          // using direct input
+          uiv.checkFieldIsValid("Can Scattering Cross-Section", m_uiForm.lecansigs, m_uiForm.valCansigs);
+          uiv.checkFieldIsValid("Can Absorption Cross-Section", m_uiForm.lecansiga, m_uiForm.valCansiga);
           break;
       }
     }

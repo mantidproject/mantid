@@ -69,7 +69,6 @@ public:
   virtual const std::string summary() const {
     return "Calculates asymmetry for a series of log values";
   }
-
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
@@ -79,20 +78,37 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-
+  // Load run, apply dead time corrections and detector grouping
+  API::Workspace_sptr doLoad (int64_t runNumber );
+  // Analyse loaded run
+  void doAnalysis (API::Workspace_sptr loadedWs, int64_t index);
+  // Parse run names
+  void parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt, int& fnZeros);
+  // Resize vectors
+  void resizeVectors (size_t size);
+  // Load dead-time corrections from specified file
+  void loadCorrectionsFromFile (API::Workspace_sptr &customDeadTimes, std::string deadTimeFile );
+  // Apply dead-time corrections
+  void applyDeadtimeCorr (API::Workspace_sptr &loadedWs, API::Workspace_sptr deadTimes);
+  /// Group detectors from run file
+  void groupDetectors (API::Workspace_sptr &loadedWs, API::Workspace_sptr loadedDetGrouping);
   /// Calculate the integral asymmetry for a workspace (single period)
   void calcIntAsymmetry(API::MatrixWorkspace_sptr ws, double &Y, double &E);
-
   /// Calculate the integral asymmetry for a workspace (red & green)
-  void calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red,
-                        API::MatrixWorkspace_sptr ws_geen, double &Y,
-                        double &E);
+  void calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red, API::MatrixWorkspace_sptr ws_geen, double &Y, double &E);
   /// Group detectors
-  void groupDetectors(API::MatrixWorkspace_sptr &ws,
-                      const std::vector<int> &spectraList);
+  void groupDetectors (API::MatrixWorkspace_sptr &ws, const std::vector<int> &spectraList);
   /// Get log value
-  double getLogValue(API::MatrixWorkspace &ws, const std::string &logName);
+  double getLogValue(API::MatrixWorkspace &ws);
+  /// Populate output workspace with results
+  void populateOutputWorkspace (API::MatrixWorkspace_sptr &outWS, int nplots);
 
+  /// Stores base name shared by all runs
+  std::string m_filenameBase;
+  /// Stores extension shared by all runs
+  std::string m_filenameExt;
+  /// Sotres number of zeros in run name
+  int m_filenameZeros;
   /// Stores property "Int"
   bool m_int;
   /// Store forward spectra
@@ -101,6 +117,25 @@ private:
   std::vector<int> m_backward_list;
   /// If true call LoadMuonNexus with Autogroup on
   bool m_autogroup;
+  /// Store type of dead time corrections
+  std::string m_dtcType;
+  /// Store red period
+  int m_red;
+  /// Store green period
+  int m_green;
+  // Mantid vectors to store results
+  // Red mantid vectors
+  MantidVec m_redX, m_redY, m_redE;
+  // Green mantid vectors
+  MantidVec m_greenX, m_greenY, m_greenE;
+  // Mantid vectors to store Red + Green
+  MantidVec m_sumX, m_sumY, m_sumE;
+  // Mantid vectors to store Red - Green
+  MantidVec m_diffX, m_diffY, m_diffE;
+  // LogValue name
+  std::string m_logName;
+  // LogValue function
+  std::string m_logFunc;
 };
 
 } // namespace Algorithm

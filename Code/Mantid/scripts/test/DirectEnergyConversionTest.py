@@ -1,5 +1,5 @@
 import os, sys
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#os.environ["PATH"] = r"c:\Mantid\Code\builds\br_master\bin\Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -7,7 +7,6 @@ import inspect
 from Direct.DirectEnergyConversion import DirectEnergyConversion
 from Direct.PropertyManager  import PropertyManager
 import Direct.dgreduce as dgreduce
-
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
@@ -22,10 +21,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
         if self.reducer == None or type(self.reducer) != type(DirectEnergyConversion):
             self.reducer = DirectEnergyConversion("MAR")
     def tearDown(self):
+        api.AnalysisDataService.clear()
         pass
-
-   #def test_build_coupled_keys_dict_simple(self):
-   #    params = ["]
 
     def test_init_reducer(self):
         tReducer = self.reducer
@@ -38,40 +35,47 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_save_formats(self):
         tReducer = self.reducer
 
+        files = ['save_formats_test_file.spe','save_formats_test_file.nxspe'
+                 'save_formats_test_file','save_formats_test_file.nxs']
 
-        tws =CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, NumEvents=10, XUnit='DeltaE', XMin=-10, XMax=10, BinWidth=0.1)
+        def clean_up(file_list):
+            for file in file_list:
+                file = FileFinder.getFullPath(file)
+                if len(file) > 0:
+                    os.remove(file)
+
+        def verify_absent(file_list):
+            for file in file_list:
+                file = FileFinder.getFullPath(file)
+                self.assertTrue(len(file)==0)
+
+        def verify_present_and_delete(file_list):
+            for file in file_list:
+                file = FileFinder.getFullPath(file)
+                self.assertTrue(len(file)>0)
+                os.remove(file)
+
+        clean_up(files)
+        tReducer.prop_man.save_format=''
+
+        tws =CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1,\
+                NumEvents=10, XUnit='DeltaE', XMin=-10, XMax=10, BinWidth=0.1)
 
 
         self.assertTrue(len(tReducer.prop_man.save_format) ==0)
         # do nothing
         tReducer.save_results(tws,'save_formats_test_file')
         #
-        file = FileFinder.getFullPath('save_formats_test_file.spe')
-        self.assertTrue(len(file)==0)
-        file = FileFinder.getFullPath('save_formats_test_file.nxspe')
-        self.assertTrue(len(file)==0)
-        file = FileFinder.getFullPath('save_formats_test_file')
-        self.assertTrue(len(file)==0)
-        file = FileFinder.getFullPath('save_formats_test_file.nxs')
-        self.assertTrue(len(file)==0)
+        verify_absent(files)
 
 
 
-        # redefine test save methors to produce test ouptut
-
+        # redefine test save methods to produce test output
         tReducer.prop_man.save_format=['spe','nxspe','nxs']
-
         tReducer.save_results(tws,'save_formats_test_file.tt')
 
-        file = FileFinder.getFullPath('save_formats_test_file.spe')
-        self.assertTrue(len(file)>0)
-        os.remove(file)
-        file = FileFinder.getFullPath('save_formats_test_file.nxspe')
-        self.assertTrue(len(file)>0)
-        os.remove(file)
-        file = FileFinder.getFullPath('save_formats_test_file.nxs')
-        self.assertTrue(len(file)>0)
-        os.remove(file)
+        files = ['save_formats_test_file.spe','save_formats_test_file.nxspe','save_formats_test_file.nxs']
+        verify_present_and_delete(files)
 
         tReducer.prop_man.save_format=None
         # do nothing
@@ -81,9 +85,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         # save file with given extension on direct request:
         tReducer.save_results(tws,'save_formats_test_file.nxs')
-        file = FileFinder.getFullPath('save_formats_test_file.nxs')
-        self.assertTrue(len(file)>0)
-        os.remove(file)
+        verify_present_and_delete(['save_formats_test_file.nxs'])
 
         tReducer.prop_man.save_format=[]
         # do nothing
@@ -94,12 +96,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         # save files with extensions on request
         tReducer.save_results(tws,'save_formats_test_file',['nxs','.nxspe'])
-        file = FileFinder.getFullPath('save_formats_test_file.nxs')
-        self.assertTrue(len(file)>0)
-        os.remove(file)
-        file = FileFinder.getFullPath('save_formats_test_file.nxspe')
-        self.assertTrue(len(file)>0)
-        os.remove(file)
+        verify_present_and_delete(['save_formats_test_file.nxspe','save_formats_test_file.nxs'])
 
         # this is strange feature.
         self.assertTrue(len(tReducer.prop_man.save_format) ==2)
@@ -114,6 +111,9 @@ class DirectEnergyConversionTest(unittest.TestCase):
         mask_workspace=tReducer.diagnose(wb_ws)
         self.assertTrue(mask_workspace)
 
+        api.AnalysisDataService.clear()
+
+
     def test_do_white_wb(self) :
         wb_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000)
         #LoadParameterFile(Workspace=wb_ws,ParameterXML = used_parameters)
@@ -123,7 +123,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         white_ws = tReducer.do_white(wb_ws, None, None)
         self.assertTrue(white_ws)
- 
+
 
     def test_get_set_attributes(self):
         tReducer = self.reducer
@@ -150,7 +150,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertEqual(tReducer.prop_man.sample_run,10234)
 
 
-
     def test_get_abs_normalization_factor(self) :
         mono_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000,XUnit='DeltaE',XMin=-5,XMax=15,BinWidth=0.1,function='Flat background')
         LoadInstrument(mono_ws,InstrumentName='MARI')
@@ -158,24 +157,27 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer = DirectEnergyConversion(mono_ws.getInstrument())
         tReducer.prop_man.incident_energy = 5.
         tReducer.prop_man.monovan_integr_range=[-10,10]
+        tReducer.wb_run = mono_ws
 
-        (nf1,nf2,nf3,nf4) = tReducer.get_abs_normalization_factor(mono_ws.getName(),5.)        
+        (nf1,nf2,nf3,nf4) = tReducer.get_abs_normalization_factor(PropertyManager.wb_run,5.)
         self.assertAlmostEqual(nf1,0.58561121802167193,7)
         self.assertAlmostEqual(nf1,nf2)
         self.assertAlmostEqual(nf2,nf3)
         self.assertAlmostEqual(nf3,nf4)
 
-        # check warning. WB spectra with 0 signal indicate troubles. 
+        # check warning. WB spectra with 0 signal indicate troubles.
         mono_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000,XUnit='DeltaE',XMin=-5,XMax=15,BinWidth=0.1,function='Flat background')
         LoadInstrument(mono_ws,InstrumentName='MARI')
         sig = mono_ws.dataY(0)
-        sig[:]=0          
+        sig[:]=0
 
-        (nf1,nf2,nf3,nf4) = tReducer.get_abs_normalization_factor(mono_ws.getName(),5.)
+        tReducer.wb_run = mono_ws
+        (nf1,nf2,nf3,nf4) = tReducer.get_abs_normalization_factor(PropertyManager.wb_run,5.)
         self.assertAlmostEqual(nf1,0.585611218022,7)
         self.assertAlmostEqual(nf1,nf2)
         self.assertAlmostEqual(nf2,nf3)
         self.assertAlmostEqual(nf3,nf4)
+
 
     def test_dgreduce_works(self):
         """ Test for old interface """
@@ -184,9 +186,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
         #mono_ws = CloneWorkspace(run_ws)
         wb_ws   = CloneWorkspace(run_ws)
         #wb_ws=CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=10000)
-
-
-
 
         dgreduce.setup('MAR')
         par = {}
@@ -199,19 +198,12 @@ class DirectEnergyConversionTest(unittest.TestCase):
         #abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,samp_mass,ei_guess,rebin,map_file='default',monovan_mapfile='default',**kwargs):
         ws = dgreduce.abs_units(wb_ws,run_ws,None,wb_ws,10,100,8.8,[-10,0.1,7],None,None,**par)
         self.assertTrue(isinstance(ws,api.MatrixWorkspace))
-    
-
-
-    ##def test_diag_call(self):
-    ##    tReducer = self.reducer
-    ##    # should do nothing as already initialized above, but if not will initiate the instrument
-    ##    tReducer.initialise("MAP")
 
     ##    tReducet.di
     def test_energy_to_TOF_range(self):
 
         ws = Load(Filename='MAR11001.raw',LoadMonitors='Include')
-        
+
         en_range = [0.8*13,13,1.2*13]
         detIDs=[1,2,3,10]
         red = DirectEnergyConversion()
@@ -252,10 +244,195 @@ class DirectEnergyConversionTest(unittest.TestCase):
             eni = EnWs.dataX(0)
             for samp,rez in zip(eni,en_range): self.assertAlmostEqual(samp,rez)
 
+    def test_late_rebinning(self):
+        run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, NumEvents=100000, XUnit='Energy',
+                                                     XMin=3, XMax=200, BinWidth=0.1)
+        LoadInstrument(run_monitors,InstrumentName='MARI')
+        ConvertUnits(InputWorkspace='run_monitors', OutputWorkspace='run_monitors', Target='TOF')
+        run_monitors = mtd['run_monitors']
+        tof = run_monitors.dataX(3)
+        tMin = tof[0]
+        tMax = tof[-1]
+        run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1, NumEvents=100000,
+                                    XUnit='TOF',xMin=tMin,xMax=tMax)
+        LoadInstrument(run,InstrumentName='MARI')
+        wb_ws   = Rebin(run,Params=[tMin,1,tMax],PreserveEvents=False)
 
-     
+        # References used to test against ordinary reduction
+        ref_ws = Rebin(run,Params=[tMin,1,tMax],PreserveEvents=False)
+        ref_ws_monitors = CloneWorkspace('run_monitors')
+        # just in case, wb should work without clone too.
+        wb_clone = CloneWorkspace(wb_ws)
 
+        # Run Mono
+        tReducer = DirectEnergyConversion(run.getInstrument())
+        tReducer.energy_bins =  [-20,0.2,60]
+        ei_guess = 67.
+        mono_s = tReducer.mono_sample(run, ei_guess,wb_ws)
+
+
+        #
+        mono_ref = tReducer.mono_sample(ref_ws, ei_guess,wb_clone)
+
+        rez = CheckWorkspacesMatch(mono_s,mono_ref)
+        self.assertEqual(rez,'Success!')
+
+
+    def test_tof_range(self):
+
+        run=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=6, BankPixelWidth=1, NumEvents=10,\
+                                  XUnit='DeltaE', XMin=-20, XMax=65, BinWidth=0.2)
+        LoadInstrument(run,InstrumentName='MARI')
+
+        red = DirectEnergyConversion(run.getInstrument())
+
+        red.prop_man.incident_energy = 67
+        red.prop_man.energy_bins =  [-20,0.2,65]
+        red.prop_man.multirep_tof_specta_list = [5,5]
+
+        tof_range = red.find_tof_range_for_multirep(run)
+
+        self.assertEqual(len(tof_range),3)
+
+        run_tof = ConvertUnits(run,Target='TOF',EMode='Direct',EFixed=67.)
+        x = run_tof.readX(4)
+        dx=abs(x[1:]-x[:-1])
+        xMin = min(x)
+        xMax = max(x)
+        dt   = min(dx)
+
+        self.assertAlmostEqual(tof_range[0],xMin)
+        self.assertAlmostEqual(tof_range[1],dt)
+        self.assertAlmostEqual(tof_range[2],xMax)
+
+        # check another working mode
+        red.prop_man.multirep_tof_specta_list = 5
+        tof_range1 = red.find_tof_range_for_multirep(run)
+
+        self.assertAlmostEqual(tof_range[0],tof_range1[0])
+        self.assertAlmostEqual(tof_range[1],tof_range1[1])
+        self.assertAlmostEqual(tof_range[2],tof_range1[2])
+
+    def test_multirep_mode(self):
+        # create test workspace
+        run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1,\
+                                           NumEvents=100000,XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
+        LoadInstrument(run_monitors,InstrumentName='MARI')
+        ConvertUnits(InputWorkspace='run_monitors', OutputWorkspace='run_monitors', Target='TOF')
+        run_monitors = mtd['run_monitors']
+        tof = run_monitors.dataX(3)
+        tMin = tof[0]
+        tMax = tof[-1]
+        run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1,\
+                                     NumEvents=100000, XUnit='TOF',xMin=tMin,xMax=tMax)
+        LoadInstrument(run,InstrumentName='MARI')
+
+        # do second
+        run2 = CloneWorkspace(run)
+        run2_monitors = CloneWorkspace(run_monitors)
+
+        wb_ws   = Rebin(run,Params=[tMin,1,tMax],PreserveEvents=False)
+
+        # Run multirep
+        tReducer = DirectEnergyConversion(run.getInstrument())
+        tReducer.prop_man.run_diagnostics=True
+        tReducer.hard_mask_file=None
+        tReducer.map_file=None
+        tReducer.save_format=None
+
+        result = tReducer.convert_to_energy(wb_ws,run,[67.,122.],[-2,0.02,0.8])
+
+        self.assertEqual(len(result),2)
+
+        ws1=result[0]
+        self.assertEqual(ws1.getAxis(0).getUnit().unitID(),'DeltaE')
+        x = ws1.readX(0)
+        self.assertAlmostEqual(x[0],-2*67.)
+        self.assertAlmostEqual(x[-1],0.8*67.)
+
+        ws2=result[1]
+        self.assertEqual(ws2.getAxis(0).getUnit().unitID(),'DeltaE')
+        x = ws2.readX(0)
+        self.assertAlmostEqual(x[0],-2*122.)
+        self.assertAlmostEqual(x[-1],0.8*122.)
+
+        # test another ws
+        # rename samples from previous workspace to avoid deleting them on current run
+        for ind,item in enumerate(result):
+            result[ind]=RenameWorkspace(item,OutputWorkspace='SampleRez#'+str(ind))
+        #
+        result2 = tReducer.convert_to_energy(None,run2,[67.,122.],[-2,0.02,0.8])
+
+        rez = CheckWorkspacesMatch(result[0],result2[0])
+        self.assertEqual(rez,'Success!')
+        rez = CheckWorkspacesMatch(result[1],result2[1])
+        self.assertEqual(rez,'Success!')
+
+
+    def test_multirep_abs_units_mode(self):
+        # create test workspace
+        run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1,\
+                                            NumEvents=100000, XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
+        LoadInstrument(run_monitors,InstrumentName='MARI')
+        ConvertUnits(InputWorkspace='run_monitors', OutputWorkspace='run_monitors', Target='TOF')
+        run_monitors = mtd['run_monitors']
+        tof = run_monitors.dataX(3)
+        tMin = tof[0]
+        tMax = tof[-1]
+        run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1,\
+                                     NumEvents=100000, XUnit='TOF',xMin=tMin,xMax=tMax)
+        LoadInstrument(run,InstrumentName='MARI')
+
+        # build "monovanadium"
+        mono = CloneWorkspace(run)
+        mono_monitors = CloneWorkspace(run_monitors)
+
+        # build "White-beam"
+        wb_ws   = Rebin(run,Params=[tMin,1,tMax],PreserveEvents=False)
+
+        # build "second run" to ensure repeated execution
+        run2 = CloneWorkspace(run)
+        run2_monitors = CloneWorkspace(run_monitors)
+
+        # Run multirep
+        tReducer = DirectEnergyConversion(run.getInstrument())
+        tReducer.prop_man.run_diagnostics=True 
+        tReducer.hard_mask_file=None
+        tReducer.map_file=None
+        tReducer.prop_man.background_range=[0.99*tMax,tMax]
+        tReducer.prop_man.monovan_mapfile=None
+        tReducer.save_format=None
+        tReducer.prop_man.normalise_method='monitor-1'
+        tReducer.norm_mon_integration_range=[tMin,tMax]
+
+        result = tReducer.convert_to_energy(wb_ws,run,[67.,122.],[-2,0.02,0.8],None,mono)
+
+        self.assertEqual(len(result),2)
+
+        ws1=result[0]
+        self.assertEqual(ws1.getAxis(0).getUnit().unitID(),'DeltaE')
+        x = ws1.readX(0)
+        self.assertAlmostEqual(x[0],-2*67.)
+        self.assertAlmostEqual(x[-1],0.8*67.)
+
+        ws2=result[1]
+        self.assertEqual(ws2.getAxis(0).getUnit().unitID(),'DeltaE')
+        x = ws2.readX(0)
+        self.assertAlmostEqual(x[0],-2*122.)
+        self.assertAlmostEqual(x[-1],0.8*122.)
+
+        # test another ws
+        # rename samples from previous workspace to avoid deleting them on current run
+        for ind,item in enumerate(result):
+            result[ind]=RenameWorkspace(item,OutputWorkspace='SampleRez#'+str(ind))
+        #
+        result2 = tReducer.convert_to_energy(None,run2)
+
+        rez = CheckWorkspacesMatch(result[0],result2[0])
+        self.assertEqual(rez,'Success!')
+        rez = CheckWorkspacesMatch(result[1],result2[1])
+        self.assertEqual(rez,'Success!')
 
 
 if __name__=="__main__":
-        unittest.main()
+   unittest.main()

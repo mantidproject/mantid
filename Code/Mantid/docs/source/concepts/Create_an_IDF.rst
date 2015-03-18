@@ -8,25 +8,26 @@ This page will help you get started with making an instrument definition file. F
 Basic Steps
 -----------
 
-The best way to get started is to:
+The recommended set of steps to get started is to:
 
-- `Set up an editor for XML that uses schema validation <http://www.mantidproject.org/Using_XML_Schema>`__
-- Read the :ref:`introduction to IDFs <InstrumentDefinitionFile>`
-- Read the annotated existing IDFs
-- Look for similar existing IDFs
-- Use the IDF page for more detailed documentation
+- Read the introduction section of :ref:`IDF <InstrumentDefinitionFile>`
+- Study the annotated IDF examples at the bottom of this page
+- Look for similar existing IDFs to the one you would like to create
+- Use an editor, which is :ref:`XML schema aware  <Using_XML_Schema>`
+- Use the full :ref:`IDF <InstrumentDefinitionFile>` page for detailed documentation
+
+The above are suggestive steps for generating an IDF. In addition there have 
+been created several scripts for automatic the creation of IDFs. Such scripts 
+can be found `here <https://github.com/mantidproject/mantidgeometry>`__.
 
 Using the Schema
 ----------------
 
-To set up your editor with the schema, `Follow These Instructions <http://www.mantidproject.org/Using_XML_Schema>`__.
+To set up your editor with the schema, :ref:`Follow These Instructions <Using_XML_Schema>`.
 The Schema can help with writing the IDF. For example:
 
 - In Visual Studio the schema can be used to auto-insert elements and attributes permitted by the schema.
 - In eclipse the IDF can be created in a design view by selected available elements and attributes without having to type the code yourself.
-
-The IDF schema (IDFSchema.xsd) is located in your mantid install directory at MantidInstall\instrument\Schema. Note this folder also includes the schema, ParameterFileSchema.xsd, which may be used to assist in writting a :ref:`parameter file <InstrumentParameterFile>`
-
 
 Find a Similar existing IDF
 ---------------------------

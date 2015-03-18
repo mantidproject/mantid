@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from PyQt4 import QtGui, uic, QtCore
 import reduction_gui.widgets.util as util
 import math
@@ -31,6 +32,8 @@ class DataReflWidget(BaseWidget):
     short_name = 'REFM'
     peak_pixel_range = []
     background_pixel_range = []
+    _run_number_first_edit = None
+    ref_det_view = None
 
     def __init__(self, parent=None, state=None, settings=None, name="REFM", data_proxy=None):
         super(DataReflWidget, self).__init__(parent, state, settings, data_proxy=data_proxy)
@@ -359,7 +362,7 @@ class DataReflWidget(BaseWidget):
                     f = open(file_path,'w')
                     f.write(content)
                     f.close()
-                    QtGui.QMessageBox.information(self, "Automated reduction script saved",
+                    QtGui.QMessageBox.information(self, "Automated reduction script saved",\
                                            "The automated reduction script has been updated")
                 except:
                     _report_error()
@@ -461,14 +464,14 @@ class DataReflWidget(BaseWidget):
         self._summary.norm_peak_to_pixel.setEnabled(is_checked)
 
         self._summary.norm_background_switch.setEnabled(is_checked)
-        if (not(is_checked)):
+        if not is_checked:
             self._norm_background_clicked(False)
         else:
             NormBackFlag = self._summary.norm_background_switch.isChecked()
             self._norm_background_clicked(NormBackFlag)
 
         self._summary.norm_low_res_range_switch.setEnabled(is_checked)
-        if (not(is_checked)):
+        if not is_checked:
             self._norm_low_res_clicked(False)
         else:
             LowResFlag = self._summary.norm_low_res_range_switch.isChecked()
@@ -846,7 +849,7 @@ class DataReflWidget(BaseWidget):
         m.DataPeakPixels = [int(self._summary.data_peak_from_pixel.text()),
                             int(self._summary.data_peak_to_pixel.text())]
 
-        m.data_x_range = [int(self._summary.x_min_edit.text()),
+        m.data_x_range = [int(self._summary.x_min_edit.text()),\
                      int(self._summary.x_max_edit.text())]
         m.data_x_range_flag = self._summary.data_low_res_range_switch.isChecked()
 
@@ -964,12 +967,12 @@ class DataReflWidget(BaseWidget):
         #mantidplot.app.connect(mantidplot.app.mantidUI, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
         #mantidplot.app.connect(mantidplot.app.RefDetectorViewer, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
 
-        peak_min = int(self._summary.data_peak_from_pixel.text());
-        peak_max = int(self._summary.data_peak_to_pixel.text());
-        back_min = int(self._summary.data_background_from_pixel1.text());
-        back_max = int(self._summary.data_background_to_pixel1.text());
-        tof_min = int(self._summary.data_from_tof.text());
-        tof_max = int(self._summary.data_to_tof.text());
+        peak_min = int(self._summary.data_peak_from_pixel.text())
+        peak_max = int(self._summary.data_peak_to_pixel.text())
+        back_min = int(self._summary.data_background_from_pixel1.text())
+        back_max = int(self._summary.data_background_to_pixel1.text())
+        tof_min = int(self._summary.data_from_tof.text())
+        tof_max = int(self._summary.data_to_tof.text())
 
         import mantidqtpython
         self.ref_det_view = mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base_ff+'_2D', peak_min, peak_max, back_min, back_max, tof_min, tof_max)

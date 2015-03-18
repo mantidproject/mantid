@@ -31,6 +31,7 @@ set ( TEST_PY_FILES
   MultipleExperimentInfos.py
   MultipleFilePropertyTest.py
   ProgressTest.py
+  ProjectionTest.py
   PythonAlgorithmPropertiesTest.py
   PythonAlgorithmChildAlgCallTest.py
   PythonAlgorithmTraitsTest.py

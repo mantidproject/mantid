@@ -5,13 +5,14 @@
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkUnstructuredGridAlgorithm.h"
 #include "vtkUnstructuredGrid.h"
+#include "vtkFieldData.h"
 
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/NoThresholdRange.h"
-#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
 #include "MantidVatesAPI/vtkSplatterPlotFactory.h"
@@ -93,8 +94,7 @@ int vtkSplatterPlot::RequestData(vtkInformation *,
   {
     // Get the info objects
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
-    vtkDataSet *output = vtkDataSet::SafeDownCast(
-          outInfo->Get(vtkDataObject::DATA_OBJECT()));
+    vtkDataSet *output = vtkDataSet::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
     if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
     {
@@ -110,7 +110,10 @@ int vtkSplatterPlot::RequestData(vtkInformation *,
     FilterUpdateProgressAction<vtkSplatterPlot> drawUpdateProgress(this,
                                                                    "Drawing...");
     vtkDataSet* product = m_presenter->create(drawUpdateProgress);
-    product->SetFieldData(input->GetFieldData());
+
+    // Extract the relevant metadata from the underlying source
+    m_presenter->setMetadata(input->GetFieldData(), product);
+
     output->ShallowCopy(product);
 
     try
@@ -168,3 +171,66 @@ void vtkSplatterPlot::updateAlgorithmProgress(double progress, const std::string
   this->SetProgress(progress);
   this->SetProgressText(message.c_str());
 }
+
+/**
+ * Gets the minimum value of the data associated with the 
+ * workspace.
+ * @return The minimum value of the workspace data.
+ */
+double vtkSplatterPlot::GetMinValue()
+{
+  if (NULL == m_presenter)
+  {
+    return 0.0;
+  }
+  try
+  {
+    return m_presenter->getMinValue();
+  }
+  catch (std::runtime_error &)
+  {
+    return 0.0;
+  }
+}
+
+/**
+ * Gets the maximum value of the data associated with the 
+ * workspace.
+ * @return The maximum value of the workspace data.
+ */
+double vtkSplatterPlot::GetMaxValue()
+{
+  if (NULL == m_presenter)
+  {
+    return 0.0;
+  }
+  try
+  {
+    return m_presenter->getMaxValue();
+  }
+  catch (std::runtime_error &)
+  {
+    return 0.0;
+  }
+}
+
+/**
+ * Gets the (first) instrument which is associated with the workspace.
+ * @return The name of the instrument.
+ */
+const char* vtkSplatterPlot::GetInstrument()
+{
+  if (NULL == m_presenter)
+  {
+    return "";
+  }
+  try
+  {
+    return m_presenter->getInstrument().c_str();
+  }
+  catch (std::runtime_error &)
+  {
+    return "";
+  }
+}
+

@@ -5,6 +5,7 @@
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/NoThresholdRange.h"
+#include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
 #include <vtkCellData.h>
 #include <vtkFloatArray.h>
 #include <vtkHexahedron.h>
@@ -184,6 +185,15 @@ namespace Mantid
 
       //Add scalars
       visualDataSet->GetCellData()->SetScalars(signals);
+
+      // Hedge against empty data sets
+      if (visualDataSet->GetNumberOfPoints() <= 0)
+      {
+        visualDataSet->Delete();
+        vtkNullUnstructuredGrid nullGrid;
+        visualDataSet = nullGrid.createNullData();
+        this->dataSet = visualDataSet;
+      }
 
       if (VERBOSE) std::cout << tim << " to create " << imageSizeActual << " hexahedrons." << std::endl;
 

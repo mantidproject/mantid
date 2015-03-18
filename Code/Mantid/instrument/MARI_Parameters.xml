@@ -95,7 +95,6 @@
 </parameter>
 
 
-
 <!-- First spectra number (monitor number) to use when measuring incident energy
     Should be spectra with well defined energy peak -->
 <parameter name="ei-mon1-spec"  type="int">
@@ -117,6 +116,14 @@
 <parameter name="spectra_to_monitors_list"  type="string">
     <value val="None"/>
 </parameter>
+
+<!-- List of two spectra corresponding to the detectors which are closest and furtherest from the sample.
+     These detectors locations are used to identify TOF range, contributing into each energy range 
+     in multirep mode. Mari have all distance equal  -->
+<parameter name="multirep_tof_specta_list"  type="string">
+    <value val="5,5"/>
+</parameter>
+
 
 <!-- by default getEi looks for peaks within (1+-0.1)*TOF_GUES range where TOF_GUES is evaluated on the basis of ei guess.
     If the peaks are very narrow, or there are a lot of them very close to each other, 
@@ -380,6 +387,18 @@
      Hard Mask file, provided separately or as additional hard mask file is ignored in this case -->
 <parameter name="save_and_reuse_masks"  type="bool">
    <value val="False"/>
+</parameter>
+
+<!-- The semicolon separated list of possible log names, containing information on crystl rotation.
+     First found log will be used togethere with motor_offset to identify crystal rotation 
+     (psi in Horace) MARI of course not uses it and probably not writes such log, but 
+     it is goot to have it here for testing purtposes -->
+<parameter name="motor_log_names"  type="string">
+   <value val="wccr;Rot"/>
+</parameter>
+<!-- Initial value used to identify crytsal rotation angle psi=motor_offset+wccr.timeAverageValue()  -->
+<parameter name="motor_offset">
+   <value val="None"/>
 </parameter>
 
 

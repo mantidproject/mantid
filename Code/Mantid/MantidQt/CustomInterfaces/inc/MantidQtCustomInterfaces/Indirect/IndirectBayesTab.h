@@ -96,9 +96,9 @@ namespace MantidQt
 			/// Function to run a string as python code
 			void runPythonScript(const QString& pyInput);
 			/// Function to read an instrument's resolution from the IPF using a string
-    	bool getInstrumentResolution(const QString& filename, std::pair<double,double>& res);
+    	bool getInstrumentResolution(const QString& filename, QPair<double, double> & res);
 			/// Function to read an instrument's resolution from the IPF using a workspace pointer
-			bool getInstrumentResolution(Mantid::API::MatrixWorkspace_const_sptr ws, std::pair<double,double>& res);
+			bool getInstrumentResolution(Mantid::API::MatrixWorkspace_const_sptr ws, QPair<double, double> & res);
 			/// Function to set the position of the lower guide on the plot
 	    void updateLowerGuide(MantidQt::MantidWidgets::RangeSelector* rs, QtProperty* lower, QtProperty* upper, double value);
 			/// Function to set the position of the upper guide on the plot

@@ -99,7 +99,7 @@ where :math:`k_I` is the momentum of the incident neutron and :math:`k_F` is the
 of the scattered neutron. R is the rotation matrix of the goniometer. For diffraction case,
 :math:`k_I = k_F =k`. For direct geometry inelastic :math:`k_I` is fixed in 
 a particular experiment, while for indirect geometry inelastic :math:`k_F` is fixed for
-the detctor. From equation :eq:`MasterEquation` one can see that the trajectories in the reciprocal
+the detector. From equation :eq:`MasterEquation` one can see that the trajectories in the reciprocal
 space are simply straight lines, parametrized by :math:`k` for diffraction, 
 :math:`k_I` for direct geometry, or :math:`k_F` for indirect geometry.
 If we calculate what the :math:`H, K, L` coordinates are for two points, say at 
@@ -125,7 +125,7 @@ contribution to this particular region in the :math:`HKL` space.
 
 A similar equation to :eq:`proportionality` can be obtained for inelastic scattering, by replacing
 :math:`k` with :math:`k_F` for direct geometry or with :math:`k_I` for the
-indirect case. We can then relate :math:`k_I` or :math:`k_F` with the enrgy
+indirect case. We can then relate :math:`k_I` or :math:`k_F` with the energy
 transfer :math:`\Delta E`, to get the intersections along the energy transfer
 direction.
 

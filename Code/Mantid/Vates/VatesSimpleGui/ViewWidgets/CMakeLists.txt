@@ -2,13 +2,22 @@ project( MantidVatesSimpleGuiViewWidgets )
 
 # These are the C++ files to be compiled.
 set( INCLUDE_FILES
+  inc/MantidVatesSimpleGuiViewWidgets/AutoScaleRangeGenerator.h
+  inc/MantidVatesSimpleGuiViewWidgets/CameraManager.h
+  inc/MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h
+  inc/MantidVatesSimpleGuiViewWidgets/ColorMapManager.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorUpdater.h
   inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
   inc/MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h
+  inc/MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksWidget.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h
+  inc/MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h
   inc/MantidVatesSimpleGuiViewWidgets/ThreesliceView.h
@@ -18,11 +27,20 @@ set( INCLUDE_FILES
 )
 
 set( SOURCE_FILES
+  src/AutoScaleRangeGenerator.cpp
+  src/CameraManager.cpp
+  src/BackgroundRgbProvider.cpp
+  src/ColorMapManager.cpp
   src/ColorSelectionWidget.cpp
   src/ColorUpdater.cpp
   src/MdViewerWidget.cpp
   src/MultisliceView.cpp
+  src/RebinAlgorithmDialogProvider.cpp
+  src/PeaksTableControllerVsi.cpp
+  src/PeaksTabWidget.cpp
+  src/PeaksWidget.cpp
   src/SaveScreenshotReaction.cpp
+  src/RebinnedSourcesManager.cpp
   src/StandardView.cpp
   src/SplatterPlotView.cpp
   src/ThreesliceView.cpp
@@ -31,13 +49,21 @@ set( SOURCE_FILES
   src/ViewBase.cpp
 )
 
+set( TEST_FILES
+  test/unitTests/ColorMapManagerTest.h
+)
+
 # These are the headers to be preprocessed using
 # Qt's moc preprocessor.
 qt4_wrap_cpp( MOC_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksWidget.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h
+  inc/MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h
   inc/MantidVatesSimpleGuiViewWidgets/ThreesliceView.h
@@ -52,6 +78,8 @@ qt4_wrap_ui( UI_BUILT_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.ui
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.ui
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.ui
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksWidget.ui
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.ui
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.ui
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.ui
   inc/MantidVatesSimpleGuiViewWidgets/ThreesliceView.ui
@@ -66,6 +94,7 @@ include_directories(
   inc
   ${CMAKE_SOURCE_DIR}/MantidQt/API/inc
   ${CMAKE_SOURCE_DIR}/MantidQt/MantidWidgets/inc
+  ${CMAKE_BINARY_DIR}/MantidQt/MantidWidgets
   ${CMAKE_SOURCE_DIR}/MantidQt/SliceViewer/inc
   ${CMAKE_BINARY_DIR}/MantidQt/SliceViewer
   ${CMAKE_SOURCE_DIR}/MantidQt/Factory/inc
@@ -112,7 +141,24 @@ ${MANTID_SUBPROJECT_LIBS}
 MantidQtSliceViewer
 MantidQtFactory
 ${PYTHON_LIBRARIES}
+MantidWidgets
 )
+
+# Create test file projects
+if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
+  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+
+  include_directories( inc ../../../Framework/TestHelpers/inc ../../../Framework/DataHandling/inc ../../../Framework/DataObjects/inc)
+  set ( TESTHELPER_SRCS ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
+                        ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+                        ../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp 
+                        ../../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
+  cxxtest_add_test( VatesSimpleGuiViewWidgetsTest ${TEST_FILES} )
+  target_link_libraries( VatesSimpleGuiViewWidgetsTest VatesSimpleGuiViewWidgets DataHandling Kernel DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+  add_dependencies( AllTests VatesSimpleGuiViewWidgetsTest )
+  # Add to the 'UnitTests' group in VS
+  set_property ( TARGET VatesSimpleGuiViewWidgetsTest PROPERTY FOLDER "UnitTests" )
+endif()
 
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h.in
                  ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h )

@@ -170,11 +170,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::InstrumentSelector</class>
-   <extends>QComboBox</extends>
-   <header>MantidQtMantidWidgets/InstrumentSelector.h</header>
-  </customwidget>
-  <customwidget>
    <class>MantidQt::MantidWidgets::IndirectInstrumentConfig</class>
    <extends>QComboBox</extends>
    <header>MantidQtMantidWidgets/IndirectInstrumentConfig.h</header>

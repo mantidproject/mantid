@@ -5,7 +5,7 @@
 #include "MantidGeometry/MDGeometry/MDPlaneImplicitFunction.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidQtFactory/WidgetFactory.h"
-#include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
+#include "MantidVatesAPI/VatesKnowledgeSerializer.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
@@ -169,19 +169,14 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
   foreach (pqPipelineSource *src, srcs)
   {
     const QString name(src->getProxy()->GetXMLName());
-    if (name.contains("MDEWRebinningCutter"))
-    {
-      src1 = src;
-    }
+
     if (name.contains("ScaleWorkspace"))
     {
       src2 = src;
     }
   }
-  if (NULL == src1)
-  {
-    src1 = smModel->getItemAtIndex<pqPipelineSource *>(0);
-  }
+
+  src1 = smModel->getItemAtIndex<pqPipelineSource *>(0);
 
   // Get the current dataset characteristics
   const char *inGeomXML = vtkSMPropertyHelper(src1->getProxy(),
@@ -235,7 +230,7 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
   origin[2] = sliceOffsetOnAxis * orient[2];
 
   // Create the XML holder
-  VATES::RebinningKnowledgeSerializer rks(VATES::LocationNotRequired);
+  VATES::VatesKnowledgeSerializer rks(VATES::LocationNotRequired);
   rks.setWorkspaceName(wsName.toStdString());
   rks.setGeometryXML(geomXML);
 

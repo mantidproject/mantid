@@ -80,7 +80,7 @@ endif ()
 # Force 64-bit compiler as that's all we support
 ###########################################################################
 
-set ( CLANG_WARNINGS "-Wall -Wno-deprecated-register")
+set ( CLANG_WARNINGS "-Wall -Wextra -Winit-self -Wpointer-arith -Wcast-qual -fno-common  -Wno-deprecated-register")
 
 set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64 ${CLANG_WARNINGS}" )
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64 -std=c++0x" )
@@ -139,20 +139,30 @@ else()
  set ( CMAKE_OSX_ARCHITECTURES x86_64 )
  set ( CMAKE_OSX_DEPLOYMENT_TARGET 10.8 )
  # Follow symlinks so cmake copies the file
- set ( PYQT4_PATH /usr/local/lib/python${PY_VER}/site-packages/PyQt4 )
+ # PYQT4_PATH, SITEPACKAGES_PATH, OPENSSL_ROOT_DIR may be defined externally (cmake -D)
+ # it would be good do not overwrite them (important for the compilation with macports)
+ if (NOT PYQT4_PATH)
+  set ( PYQT4_PATH /usr/local/lib/python${PY_VER}/site-packages/PyQt4 )
+ endif(NOT PYQT4_PATH)
  execute_process(COMMAND readlink ${PYQT4_PATH}/Qt.so OUTPUT_VARIABLE PYQT4_SYMLINK_Qtso)
- string(FIND ${PYQT4_SYMLINK_Qtso} "Qt.so" STOPPOS)
- string(SUBSTRING ${PYQT4_SYMLINK_Qtso} 0 ${STOPPOS} PYQT4_SYMLINK)
+ string(FIND "${PYQT4_SYMLINK_Qtso}" "Qt.so" STOPPOS)
+ string(SUBSTRING "${PYQT4_SYMLINK_Qtso}" 0 ${STOPPOS} PYQT4_SYMLINK)
  set  ( PYQT4_PYTHONPATH ${PYQT4_PATH}/${PYQT4_SYMLINK} )
+ string(REGEX REPLACE "/$" "" PYQT4_PYTHONPATH "${PYQT4_PYTHONPATH}")
 
- set ( SITEPACKAGES_PATH /usr/local/lib/python${PY_VER}/site-packages )
+ if (NOT SITEPACKAGES_PATH)
+   set ( SITEPACKAGES_PATH /usr/local/lib/python${PY_VER}/site-packages )
+ endif(NOT SITEPACKAGES_PATH)
  execute_process(COMMAND readlink ${SITEPACKAGES_PATH}/sip.so OUTPUT_VARIABLE SITEPACKAGES_SYMLINK_sipso)
- string(FIND ${SITEPACKAGES_SYMLINK_sipso} "sip.so" STOPPOS)
- string(SUBSTRING ${SITEPACKAGES_SYMLINK_sipso} 0 ${STOPPOS} SITEPACKAGES_SYMLINK)
+ string(FIND "${SITEPACKAGES_SYMLINK_sipso}" "sip.so" STOPPOS)
+ string(SUBSTRING "${SITEPACKAGES_SYMLINK_sipso}" 0 ${STOPPOS} SITEPACKAGES_SYMLINK)
  set  ( SITEPACKAGES ${SITEPACKAGES_PATH}/${SITEPACKAGES_SYMLINK} )
+ string(REGEX REPLACE "/$" "" SITEPACKAGES "${SITEPACKAGES}")
 
  # use homebrew OpenSSL package
- set ( OPENSSL_ROOT_DIR /usr/local/opt/openssl )
+ if (NOT OPENSSL_ROOT_DIR)
+   set ( OPENSSL_ROOT_DIR /usr/local/opt/openssl )
+ endif(NOT OPENSSL_ROOT_DIR)
 endif()
 
 # Python packages

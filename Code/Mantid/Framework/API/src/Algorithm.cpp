@@ -1164,7 +1164,7 @@ bool Algorithm::checkGroups() {
     // Workspace groups are NOT returned by IWP->getWorkspace() most of the time
     // because WorkspaceProperty is templated by <MatrixWorkspace>
     // and WorkspaceGroup does not subclass <MatrixWorkspace>
-    if (!wsGroup && !prop->value().empty()) {
+    if (!wsGroup && prop && !prop->value().empty()) {
       // So try to use the name in the AnalysisDataService
       try {
         wsGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(

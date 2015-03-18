@@ -1,6 +1,7 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/NoShape.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
@@ -29,11 +30,11 @@ Peak::Peak()
  *
  * @param m_inst :: Shared pointer to the instrument for this peak detection
  * @param QLabFrame :: Q of the center of the peak, in reciprocal space
- * @param detectorDistance :: distance between the sample and the detector.
+ * @param detectorDistance :: Optional distance between the sample and the detector. Calculated if not explicitly provided.
  *        Used to give a valid TOF. Default 1.0 meters.
  */
 Peak::Peak(Geometry::Instrument_const_sptr m_inst,
-           Mantid::Kernel::V3D QLabFrame, double detectorDistance)
+           Mantid::Kernel::V3D QLabFrame, boost::optional<double> detectorDistance)
     : m_H(0), m_K(0), m_L(0), m_Intensity(0), m_SigmaIntensity(0),
       m_BinCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_RunNumber(0), m_MonitorCount(0),
@@ -51,12 +52,12 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst,
  * @param QSampleFrame :: Q of the center of the peak, in reciprocal space, in
  *the sample frame (goniometer rotation accounted for).
  * @param goniometer :: a 3x3 rotation matrix
- * @param detectorDistance :: distance between the sample and the detector.
+ * @param detectorDistance :: Optional distance between the sample and the detector. Calculated if not explicitly provided.
  *        Used to give a valid TOF. Default 1.0 meters.
  */
 Peak::Peak(Geometry::Instrument_const_sptr m_inst,
            Mantid::Kernel::V3D QSampleFrame,
-           Mantid::Kernel::Matrix<double> goniometer, double detectorDistance)
+           Mantid::Kernel::Matrix<double> goniometer, boost::optional<double> detectorDistance)
     : m_H(0), m_K(0), m_L(0), m_Intensity(0), m_SigmaIntensity(0),
       m_BinCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_RunNumber(0), m_MonitorCount(0),
@@ -463,10 +464,10 @@ Mantid::Kernel::V3D Peak::getQSampleFrame() const {
  *        This is in inelastic convention: momentum transfer of the LATTICE!
  *        Also, q does NOT have a 2pi factor = it is equal to 1/wavelength.
  * @param detectorDistance :: distance between the sample and the detector.
- *        Used to give a valid TOF. Default 1.0 meters.
+ *        Used to give a valid TOF. You do NOT need to explicitly set this.
  */
 void Peak::setQSampleFrame(Mantid::Kernel::V3D QSampleFrame,
-                           double detectorDistance) {
+                           boost::optional<double> detectorDistance) {
   V3D Qlab = m_GoniometerMatrix * QSampleFrame;
   this->setQLabFrame(Qlab, detectorDistance);
 }
@@ -483,11 +484,11 @@ void Peak::setQSampleFrame(Mantid::Kernel::V3D QSampleFrame,
  *        This is in inelastic convention: momentum transfer of the LATTICE!
  *        Also, q does have a 2pi factor = it is equal to 2pi/wavelength (in
  *Angstroms).
- * @param detectorDistance :: distance between the sample and the detector.
- *        Used to give a valid TOF. Default 1.0 meters.
+ * @param detectorDistance :: distance between the sample and the detector. If this is provided. Then we do not
+ * ray trace to find the intersecing detector.
  */
 void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
-                        double detectorDistance) {
+                        boost::optional<double> detectorDistance) {
   // Clear out the detector = we can't know them
   m_DetectorID = -1;
   m_det = IDetector_sptr();
@@ -495,25 +496,32 @@ void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
   m_Col = -1;
   m_BankName = "None";
 
+
   // The q-vector direction of the peak is = goniometer * ub * hkl_vector
   V3D q = QLabFrame;
 
-  /* The incident neutron wavevector is in the +Z direction, ki = 1/wl (in z
-   * direction).
+  /* The incident neutron wavevector is along the beam direction, ki = 1/wl (usually z, but referenceframe is definitive).
    * In the inelastic convention, q = ki - kf.
-   * The final neutron wavector kf = -qx in x; -qy in y; and (-qz+1/wl) in z.
+   * The final neutron wavector kf = -qx in x; -qy in y; and (-q.beam_dir+1/wl) in beam direction.
    * AND: norm(kf) = norm(ki) = 2*pi/wavelength
-   * THEREFORE: 1/wl = norm(q)^2 / (2*qz)
+   * THEREFORE: 1/wl = norm(q)^2 / (2*q.beam_dir)
    */
   double norm_q = q.norm();
+  if(!this->m_inst)
+  {
+      throw std::invalid_argument("Setting QLab without an instrument would lead to an inconsistent state for the Peak");
+  }
+  boost::shared_ptr<const ReferenceFrame> refFrame = this->m_inst->getReferenceFrame();
+  const V3D refBeamDir = refFrame->vecPointingAlongBeam();
+  const double qBeam = q.scalar_prod(refBeamDir);
 
   if (norm_q == 0.0)
     throw std::invalid_argument("Peak::setQLabFrame(): Q cannot be 0,0,0.");
-  if (q.Z() == 0.0)
+  if ( qBeam == 0.0)
     throw std::invalid_argument(
-        "Peak::setQLabFrame(): Q cannot be 0 in the Z (beam) direction.");
+        "Peak::setQLabFrame(): Q cannot be 0 in the beam direction.");
 
-  double one_over_wl = (norm_q * norm_q) / (2.0 * q.Z());
+  double one_over_wl = (norm_q * norm_q) / (2.0 * qBeam);
   double wl = (2.0 * M_PI) / one_over_wl;
   if (wl < 0.0) {
     std::ostringstream mess;
@@ -522,16 +530,30 @@ void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
     throw std::invalid_argument(mess.str());
   }
 
-  // This is the scattered direction, kf = (-qx, -qy, 1/wl-qz)
-  V3D beam = q * -1.0;
-  beam.setZ(one_over_wl - q.Z());
-  beam.normalize();
 
   // Save the wavelength
   this->setWavelength(wl);
 
+  V3D detectorDir = q * -1.0;
+  detectorDir[refFrame->pointingAlongBeam()] = one_over_wl - qBeam;
+  detectorDir.normalize();
+
   // Use the given detector distance to find the detector position.
-  detPos = samplePos + beam * detectorDistance;
+  if(detectorDistance.is_initialized())
+  {
+      detPos = samplePos + detectorDir * detectorDistance.get();
+      // We do not-update the detector as by manually setting the distance the client seems to know better.
+  }
+  else
+  {
+      // Find the detector
+      const bool found = findDetector(detectorDir);
+      if (!found)
+      {
+          // This is important, so we ought to log when this fails to happen.
+          g_log.debug("Could not find detector after setting qLab via setQLab with QLab : " + q.toString());
+      }
+  }
 }
 
 /** After creating a peak using the Q in the lab frame,
@@ -544,12 +566,22 @@ void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
  * @return true if the detector ID was found.
  */
 bool Peak::findDetector() {
-  bool found = false;
+
   // Scattered beam direction
   V3D oldDetPos = detPos;
   V3D beam = detPos - samplePos;
   beam.normalize();
 
+  return findDetector(beam);
+}
+
+/**
+ * @brief Peak::findDetector : Find the detector along the beam location. sets the detector, and detector position if found
+ * @param beam : detector direction from the sample as V3D
+ * @return True if a detector has been found
+ */
+bool Peak::findDetector(const Mantid::Kernel::V3D &beam) {
+    bool found = false;
   // Create a ray tracer
   InstrumentRayTracer tracker(m_inst);
   tracker.traceFromSample(beam);
@@ -825,7 +857,7 @@ double Peak::getValueByColName(const std::string &name_in) const {
  * @brief Get the peak shape
  * @return : const ref to current peak shape.
  */
-const PeakShape &Peak::getPeakShape() { return *this->m_peakShape; }
+const PeakShape &Peak::getPeakShape() const { return *this->m_peakShape; }
 
 /**
  * @brief Set the peak shape
@@ -895,6 +927,8 @@ Mantid::Kernel::V3D Peak::getDetectorPosition() const {
   }
   return getDetector()->getPos();
 }
+
+Mantid::Kernel::Logger Peak::g_log("PeakLogger");
 
 } // namespace Mantid
 } // namespace DataObjects

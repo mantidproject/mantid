@@ -54,6 +54,8 @@ public:
                             const std::size_t &verticalIndex) const;
   virtual void setValue(const std::size_t &index, const double &value);
   virtual bool operator==(const Axis &) const;
+  virtual bool equalWithinTolerance(const Axis &axis2,
+                                    const double tolerance) const;
   virtual double getMin() const;
   virtual double getMax() const;
 

@@ -11,11 +11,13 @@ The Indirect Data Reduction interface provides the initial reduction that
 is used to convert raw instrument data to S(Q, w) for analysis in the
 Indirect Data Analysis and Indirect Bayes interfaces.
 
+The tabs shown on this interface will vary depending on the current default
+facility such that only tabs that will work with data from the facility are
+shown, this page describes all the tabs which can possibly be shown.
+
 .. interface:: Data Reduction
   :align: right
   :width: 350
-
-.. warning:: Currently this interface only supports ISIS instruments.
 
 Instrument Options
 ~~~~~~~~~~~~~~~~~~
@@ -49,11 +51,11 @@ Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
   and default save directory and enable/disable data archive search.
 
-Energy Transfer
----------------
+ISIS Energy Transfer
+--------------------
 
 .. interface:: Data Reduction
-  :widget: tabEnergyTransfer
+  :widget: tabISISEnergyTransfer
 
 This tab provides you with the functionality to convert the raw data from the
 experiment run into units of :math:`\Delta E`.
@@ -108,9 +110,9 @@ Plot Output
   Allows the result to be plotted as either a spectrum plot or contour plot.
 
 Fold Multiple Frames
-  This option is only relevant for TOSCA. If unchecked, then reduction on
-  multiply-framed data will cease at the point where the frames would have been
-  merged.
+  This option is only relevant for TOSCA. If checked, then multiple-framed data
+  will be folded back into a single spectra, if unchecked the frames wil lbe
+  left as is with the frame number given at the end of the workspace name.
 
 Output in :math:`cm^{-1}`
   Converts the units of the energy axis from :math:`meV` to wave number
@@ -166,11 +168,44 @@ Multiple
 In this mode multiple binning ranges can be defined using he rebin string syntax
 used by the :ref:`Rebin <algm-Rebin>` algorithm.
 
-Calibration & Resolution
-------------------------
+ILL Energy Transfer
+-------------------
 
 .. interface:: Data Reduction
-  :widget: tabCalibration
+  :widget: tabILLEnergyTransfer
+
+This tab handles the reduction of data from the IN16B instrument at the ILL.
+
+This will output the raw (*_raw*) data read from the file and reduced (*_red*)
+workspace by default, with mirror mode enabled you will also get the left
+(*_left*) and right (*_right*) hand components of the data as separate
+workspaces.
+
+Options
+~~~~~~~
+
+Input
+  Used to select the raw data in *.nxs* format
+
+Grouping
+  Used to switch between grouping as per the IDF (*Default*) or grouping using a
+  mapping file (*Map FIle*).
+
+Mirror Mode
+  Enable to reduce data that has been captured with mirror mode enabled.
+
+Plot
+  If enabled will plot the result as a spectra plot.
+
+Save
+  If enabled the result will be saved as a NeXus file in the default save
+  directory.
+
+ISIS Calibration & Resolution
+-----------------------------
+
+.. interface:: Data Reduction
+  :widget: tabISISCalibration
 
 This tab gives you the ability to create Calibration and Resolution files.
 
@@ -233,11 +268,11 @@ Background Start & Background End
 Low, Width & High
   Binning parameters used to rebin the resolution curve.
 
-Diagnostics
------------
+ISIS Diagnostics
+----------------
 
 .. interface:: Data Reduction
-  :widget: tabDiagnostics
+  :widget: tabISISDiagnostics
 
 This tab allows you to perform an integration on a raw file over a specified
 time of flight range, and is equivalent to the Slice functionality found in
@@ -318,7 +353,7 @@ Symmetrise
 ----------
 
 .. interface:: Data Reduction
-  :widget: tabSymmertrise
+  :widget: tabSymmetrise
 
 This tab allows you to take an asymmetric reduced file and symmetrise it about
 the Y axis.
@@ -379,7 +414,7 @@ S(Q, w)
 -------
 
 .. interface:: Data Reduction
-  :widget: tabSofQW
+  :widget: tabSQw
 
 Provides an interface for running the SofQW algorithms.
 

@@ -34,11 +34,20 @@ public:
   MOCK_CONST_METHOD0(log, std::string());
   MOCK_CONST_METHOD0(calculationType, std::string());
   MOCK_CONST_METHOD0(timeRange, boost::optional<PAIR_OF_DOUBLES>());
+  MOCK_CONST_METHOD0(deadTimeType, std::string());
+  MOCK_CONST_METHOD0(deadTimeFile, std::string());
+  MOCK_CONST_METHOD0(detectorGroupingType, std::string());
+  MOCK_CONST_METHOD0(getForwardGrouping, std::string());
+  MOCK_CONST_METHOD0(getBackwardGrouping, std::string());
+  MOCK_CONST_METHOD0(redPeriod, std::string());
+  MOCK_CONST_METHOD0(greenPeriod, std::string());
+  MOCK_CONST_METHOD0(subtractIsChecked, bool());
 
   MOCK_METHOD0(initialize, void());
   MOCK_METHOD1(setDataCurve, void(const QwtData&));
   MOCK_METHOD1(displayError, void(const std::string&));
   MOCK_METHOD1(setAvailableLogs, void(const std::vector<std::string>&));
+  MOCK_METHOD1(setAvailablePeriods, void(const std::vector<std::string>&));
   MOCK_METHOD0(setWaitingCursor, void());
   MOCK_METHOD0(restoreCursor, void());
 
@@ -77,6 +86,10 @@ public:
     ON_CALL(*m_view, calculationType()).WillByDefault(Return("Integral"));
     ON_CALL(*m_view, log()).WillByDefault(Return("sample_magn_field"));
     ON_CALL(*m_view, timeRange()).WillByDefault(Return(boost::none));
+    ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("None"));
+    ON_CALL(*m_view, detectorGroupingType()).WillByDefault(Return("Auto"));
+    ON_CALL(*m_view, redPeriod()).WillByDefault(Return("1"));
+    ON_CALL(*m_view, subtractIsChecked()).WillByDefault(Return(false));
   }
 
   void tearDown()
@@ -184,6 +197,67 @@ public:
     ON_CALL(*m_view, lastRun()).WillByDefault(Return("non-existent-file"));
     EXPECT_CALL(*m_view, setDataCurve(_)).Times(0);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
+    m_view->requestLoading();
+  }
+
+  void test_correctionsFromDataFile ()
+  {
+    // Change dead time correction type
+    // Test results with corrections from run data
+    ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("FromRunData"));
+    EXPECT_CALL(*m_view, deadTimeType()).Times(2);
+    EXPECT_CALL(*m_view, deadTimeFile()).Times(0);
+    EXPECT_CALL(*m_view, restoreCursor()).Times(1);
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size,3),
+                                            QwtDataY(0, 0.150616, 1E-3),
+                                            QwtDataY(1, 0.143444, 1E-3),
+                                            QwtDataY(2, 0.128856, 1E-3))));
+    m_view->requestLoading();
+  }
+
+  void test_correctionsFromCustomFile ()
+  {
+    // Change dead time correction type
+    // Test only expected number of calls
+    ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("FromSpecifiedFile"));
+    EXPECT_CALL(*m_view, deadTimeType()).Times(2);
+    EXPECT_CALL(*m_view, deadTimeFile()).Times(1);
+    EXPECT_CALL(*m_view, restoreCursor()).Times(1);
+    m_view->requestLoading();
+  }
+
+  void test_customGrouping ()
+  {
+    // Change grouping type to 'Custom'
+    ON_CALL(*m_view, detectorGroupingType()).WillByDefault(Return("Custom"));
+    // Set grouping, the same as the default
+    ON_CALL(*m_view, getForwardGrouping()).WillByDefault(Return("33-64"));
+    ON_CALL(*m_view, getBackwardGrouping()).WillByDefault(Return("1-32"));
+    EXPECT_CALL(*m_view, getForwardGrouping()).Times(1);
+    EXPECT_CALL(*m_view, getBackwardGrouping()).Times(1);
+    EXPECT_CALL(*m_view, restoreCursor()).Times(1);
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3), QwtDataX(0, 1350, 1E-8),
+                           QwtDataX(1, 1360, 1E-8), QwtDataX(2, 1370, 1E-8),
+                           QwtDataY(0, 0.150, 1E-3), QwtDataY(1, 0.143, 1E-3),
+                           QwtDataY(2, 0.128, 1E-3))));
+
+    m_view->requestLoading();
+  }
+
+  void test_customPeriods ()
+  {
+    // Change red period to 2
+    // Change green period to 1
+    // Check Subtract, greenPeriod() should be called once
+    ON_CALL(*m_view, subtractIsChecked()).WillByDefault(Return(true));
+    ON_CALL(*m_view, redPeriod()).WillByDefault(Return("2"));
+    ON_CALL(*m_view, greenPeriod()).WillByDefault(Return("1"));
+    EXPECT_CALL(*m_view, greenPeriod()).Times(1);
+    // Check results
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3), QwtDataX(0, 1350, 1E-8),
+                           QwtDataX(1, 1360, 1E-8), QwtDataX(2, 1370, 1E-8),
+                           QwtDataY(0, 0.012884, 1E-6), QwtDataY(1, 0.022489, 1E-6),
+                           QwtDataY(2, 0.038717, 1E-6))));
     m_view->requestLoading();
   }
 };

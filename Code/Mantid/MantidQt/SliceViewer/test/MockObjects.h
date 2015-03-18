@@ -200,9 +200,9 @@ class MockPeakTransformFactory : public PeakTransformFactory
     MOCK_METHOD0(findDetector,
       bool());
     MOCK_METHOD2(setQSampleFrame,
-      void(Mantid::Kernel::V3D QSampleFrame, double detectorDistance));
+      void(Mantid::Kernel::V3D QSampleFrame, boost::optional<double> detectorDistance));
     MOCK_METHOD2(setQLabFrame,
-      void(Mantid::Kernel::V3D QLabFrame, double detectorDistance));
+      void(Mantid::Kernel::V3D QLabFrame, boost::optional<double> detectorDistance));
     MOCK_METHOD1(setWavelength,
       void(double wavelength));
     MOCK_CONST_METHOD0(getWavelength,
@@ -253,7 +253,7 @@ class MockPeakTransformFactory : public PeakTransformFactory
       Mantid::Kernel::V3D());
     MOCK_CONST_METHOD0(getDetectorPositionNoCheck,
           Mantid::Kernel::V3D());
-    MOCK_METHOD0(getPeakShape, const Mantid::Geometry::PeakShape&());  
+    MOCK_CONST_METHOD0(getPeakShape, const Mantid::Geometry::PeakShape&());
 };
 
   /*------------------------------------------------------------

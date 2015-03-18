@@ -15,11 +15,12 @@ be an absolute or relative path and should have the extension .nxs or
 .NXS. If the file contains data for more than one period, a separate
 workspace will be generated for each. After the first period the
 workspace names will have "\_2", "\_3", and so on, appended to the given
-workspace name. For single period data, the optional parameters can be
+workspace name. The optional parameters can be
 used to control which spectra are loaded into the workspace. If
-spectrum\_min and spectrum\_max are given, then only that range to data
-will be loaded. If a spectrum\_list is given than those values will be
-loaded.
+SpectrumMin and SpectrumMax are given, then only that range of data
+will be loaded. If a SpectrumList is given, then those values will be
+loaded. If a range and a list are supplied, the algorithm will 
+load all the specified spectra.
 
 -  TODO get XML descriptions of Muon instruments. This data is not in
    existing Muon Nexus files.
@@ -77,5 +78,76 @@ The ChildAlgorithms used by LoadMuonNexus are:
 -  LoadIntstrumentFromNexus - this is called if the normal
    LoadInstrument fails. As the Nexus file has limited instrument data,
    this only populates a few fields.
+
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
+**Example - Load ISIS muon MUSR dataset:**
+
+.. testcode:: LoadMuonNexusOnePeriod
+
+   # Load MUSR dataset
+   ws = LoadMuonNexus(Filename="MUSR00015189.nxs",EntryNumber=1)
+   print "Workspace has ",  ws[0].getNumberHistograms(), " spectra"
+
+Output:
+
+.. testoutput:: LoadMuonNexusOnePeriod
+
+   Workspace has  64  spectra
+
+**Example - Load event nexus file with time filtering:**
+
+.. testcode:: ExLoadMuonNexusSomeSpectra
+
+   # Load some spectra
+   ws = LoadMuonNexus(Filename="MUSR00015189.nxs",SpectrumMin=5,SpectrumMax=10,EntryNumber=1)
+   print "Workspace has ",  ws[0].getNumberHistograms(), " spectra"
+
+Output:
+
+.. testoutput:: ExLoadMuonNexusSomeSpectra
+
+   Workspace has  6  spectra
+
+**Example - Load dead times into table:**
+
+.. testcode:: ExLoadDeadTimeTable
+
+   # Load some spectra
+   ws = LoadMuonNexus(Filename="emu00006473.nxs",SpectrumMin=5,SpectrumMax=10,DeadTimeTable="deadTimeTable")
+   tab = mtd['deadTimeTable']
+   for i in range(0,tab.rowCount()):
+       print tab.cell(i,0), tab.cell(i,1)
+
+Output:
+
+.. testoutput:: ExLoadDeadTimeTable
+
+   5 0.00161112251226
+   6 0.00215016817674
+   7 0.0102171599865
+   8 0.00431686220691
+   9 0.00743605662137
+   10 0.00421147653833
+
+**Example - Load detector grouping into table:**
+
+.. testcode:: ExLoadDetectorGrouping
+
+   # Load some spectra
+   ws = LoadMuonNexus(Filename="emu00006473.nxs",SpectrumList="1,16,17,32",DetectorGroupingTable="detectorTable")
+   tab = mtd['detectorTable']
+   for i in range(0,tab.rowCount()):
+       print tab.cell(i,0)
+
+Output:
+
+.. testoutput:: ExLoadDetectorGrouping
+
+   [ 1 16]
+   [17 32]
 
 .. categories::

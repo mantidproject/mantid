@@ -16,6 +16,9 @@ set ( SRC_FILES
   src/MantidHelpInterface.cpp
   src/MantidQwtIMDWorkspaceData.cpp
   src/MantidWidget.cpp
+  src/MdConstants.cpp
+  src/MdPlottingCmapsProvider.cpp
+  src/MdSettings.cpp
   src/Message.cpp
   src/OptionsPropertyWidget.cpp
   src/PlotAxis.cpp
@@ -80,6 +83,9 @@ set ( INC_FILES
   inc/MantidQtAPI/MantidColorMap.h
   inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
   inc/MantidQtAPI/MantidQwtWorkspaceData.h
+  inc/MantidQtAPI/MdConstants.h
+  inc/MantidQtAPI/MdPlottingCmapsProvider.h
+  inc/MantidQtAPI/MdSettings.h
   inc/MantidQtAPI/PropertyWidgetFactory.h
   inc/MantidQtAPI/QwtRasterDataMD.h
   inc/MantidQtAPI/QwtWorkspaceBinData.h

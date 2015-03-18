@@ -1,9 +1,14 @@
 #include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
-
+#include "MantidVatesSimpleGuiViewWidgets/CameraManager.h"
+#include "MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidQtAPI/SelectionNotificationService.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
+#include "MantidVatesAPI/ViewFrustum.h"
+#include "MantidKernel/Logger.h"
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
@@ -31,6 +36,9 @@
 
 #include <QKeyEvent>
 #include <QMessageBox>
+#include <QToolButton>
+#include <QMenu>
+#include <QAction>
 
 using namespace MantidQt::API;
 using namespace Mantid::VATES;
@@ -42,10 +50,28 @@ namespace Vates
 namespace SimpleGui
 {
 
-SplatterPlotView::SplatterPlotView(QWidget *parent) : ViewBase(parent)
+namespace
+{
+  Mantid::Kernel::Logger g_log("SplatterPlotView");
+}
+
+
+SplatterPlotView::SplatterPlotView(QWidget *parent) : ViewBase(parent),
+                                                      m_cameraManager(boost::make_shared<CameraManager>()),
+                                                      m_peaksTableController(NULL),
+                                                      m_peaksWorkspaceNameDelimiter(";")                         
 {
   this->noOverlay = false;
   this->ui.setupUi(this);
+
+ // Setup the peaks viewer
+  m_peaksTableController = new PeaksTableControllerVsi(m_cameraManager, this);
+  m_peaksTableController->setMaximumHeight(150);
+  //this->ui.tableLayout->addWidget(m_peaksTableController);
+  this->ui.verticalLayout->addWidget(m_peaksTableController);
+  m_peaksTableController->setVisible(true);
+  QObject::connect(m_peaksTableController, SIGNAL(setRotationToPoint(double, double, double)),
+                   this, SLOT(onResetCenterToPoint(double, double, double)));
 
   // Set the threshold button to create a threshold filter on data
   QObject::connect(this->ui.thresholdButton, SIGNAL(clicked()),
@@ -65,6 +91,9 @@ SplatterPlotView::SplatterPlotView(QWidget *parent) : ViewBase(parent)
 
   this->view = this->createRenderView(this->ui.renderFrame);
   this->installEventFilter(this);
+
+  setupVisiblePeaksButtons();
+  
 }
 
 SplatterPlotView::~SplatterPlotView()
@@ -101,24 +130,10 @@ bool SplatterPlotView::eventFilter(QObject *obj, QEvent *ev)
 
 void SplatterPlotView::destroyView()
 {
+  destroyFiltersForSplatterPlotView();
+
+  // Destroy the view.
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  if (!this->peaksSource.isEmpty())
-  {
-    this->destroyPeakSources();
-    pqActiveObjects::instance().setActiveSource(this->origSrc);
-  }
-  if (this->probeSource)
-  {
-    builder->destroy(this->probeSource);
-  }
-  if (this->threshSource)
-  {
-    builder->destroy(this->threshSource);
-  }
-  if (this->splatSource)
-  {
-    builder->destroy(this->splatSource);
-  }
   builder->destroy(this->view);
   pqActiveObjects::instance().setActiveSource(this->origSrc);
 }
@@ -162,8 +177,23 @@ void SplatterPlotView::render()
   }
   else
   {
+      // We don't want to load the same peak workspace twice into the splatterplot mode
+    if (checkIfPeaksWorkspaceIsAlreadyBeingTracked(src)) {
+      QMessageBox::warning(this, QApplication::tr("Duplicate Peaks Workspace"),
+                           QApplication::tr("You cannot load the same "\
+                                          "Peaks Workpsace multiple times."));
+      builder->destroy(src);
+      pqActiveObjects::instance().setActiveSource(this->splatSource);
+      return;
+    }
+
     this->peaksSource.append(src);
+    setPeakSourceFrame(src);
     renderType = "Wireframe";
+    // Start listening if the source was destroyed
+    QObject::connect(src, SIGNAL(destroyed()), 
+                     this, SLOT(onPeakSourceDestroyed()));
+    setPeakButton(true);
   }
 
   // Show the data
@@ -186,12 +216,31 @@ void SplatterPlotView::render()
   this->resetDisplay();
   if (this->peaksSource.isEmpty())
   {
-    this->onAutoScale();
+    //this->setAutoColorScale();
   }
   else
   {
     this->renderAll();
   }
+
+  // Add peaksSource to the peak controller and the peak filter
+  if (isPeaksWorkspace)
+  {
+    try
+    {
+      m_peaksTableController->updatePeaksWorkspaces(this->peaksSource, this->splatSource);
+
+      if (m_peaksFilter)
+      {
+       updatePeaksFilter(m_peaksFilter);
+      }
+    }
+    catch (...)
+    {
+      setPeakButton(false);
+    }
+  }
+
   emit this->triggerAccept();
 }
 
@@ -294,6 +343,9 @@ void SplatterPlotView::resetCamera()
 
 void SplatterPlotView::destroyPeakSources()
 {
+  // First remove the peaks table, since it makes use of the peaks workspace.
+  onRemovePeaksTable();
+
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
@@ -309,6 +361,7 @@ void SplatterPlotView::destroyPeakSources()
   }
   this->peaksSource.clear();
 }
+
 
 /**
  * This function reads the coordinates from the probe point plugin and
@@ -343,6 +396,287 @@ void SplatterPlotView::readAndSendCoordinates()
   else
   {
     return;
+  }
+}
+
+/**
+ * Set up the buttons for the visible peaks.
+ */
+void SplatterPlotView::setupVisiblePeaksButtons()
+{
+  // Populate the rebin button
+  QMenu* peaksMenu = new QMenu(this->ui.peaksButton);
+
+  m_allPeaksAction = new QAction("Show all peaks in table", peaksMenu);
+  m_allPeaksAction->setIconVisibleInMenu(false);
+
+  m_removePeaksAction = new QAction("Remove table", peaksMenu);
+  m_removePeaksAction->setIconVisibleInMenu(false);
+
+  peaksMenu->addAction(m_allPeaksAction);
+  peaksMenu->addAction(m_removePeaksAction);
+
+  this->ui.peaksButton->setPopupMode(QToolButton::InstantPopup);
+  this->ui.peaksButton->setMenu(peaksMenu);
+  setPeakButton(false);
+
+  QObject::connect(m_allPeaksAction, SIGNAL(triggered()),
+                   this, SLOT(onShowAllPeaksTable()), Qt::QueuedConnection);
+
+  QObject::connect(m_removePeaksAction, SIGNAL(triggered()),
+                   this, SLOT(onRemovePeaksTable()), Qt::QueuedConnection);
+}
+
+
+/**
+ * On show all peaks 
+ */
+void SplatterPlotView::onShowAllPeaksTable()
+{
+  createPeaksFilter();
+
+  if (m_peaksTableController->hasPeaks())
+  {
+     m_peaksTableController->showFullTable();
+     m_peaksTableController->show();
+  }
+}
+
+
+/**
+ * Remove the visible peaks table.
+ */
+void SplatterPlotView::onRemovePeaksTable()
+{
+  if (m_peaksTableController->hasPeaks())
+  {
+    m_peaksTableController->removeTable();
+  }
+
+  if (m_peaksFilter)
+  {
+    pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+    builder->destroy(m_peaksFilter);
+  }
+}
+
+
+/**
+ * Create the peaks filter
+ */
+void SplatterPlotView::createPeaksFilter()
+{
+  // If the peaks filter already exists, then stay idle.
+  if (m_peaksFilter)
+  {
+    return;
+  }
+
+  // If the there is no peaks workspace, then stay idle.
+  if (peaksSource.isEmpty())
+  {
+    return;
+  }
+
+  // Create the peak filter
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+
+  // Set the peaks workspace name. We need to trigger accept in order to log the workspace in the filter
+  try
+  {
+    m_peaksFilter = builder->createFilter("filters","MantidParaViewPeaksFilter", this->splatSource);
+    QObject::connect(m_peaksFilter, SIGNAL(destroyed()),
+                     this, SLOT(onPeaksFilterDestroyed()));
+
+    // Setup the peaks filter
+    updatePeaksFilter(m_peaksFilter);
+
+    // Create point representation of the source and set the point size 
+    const double pointSize = 4;
+    pqDataRepresentation *dataRepresentation  = m_peaksFilter->getRepresentation(this->view);
+    vtkSMPropertyHelper(dataRepresentation->getProxy(), "Representation").Set("Points");
+    vtkSMPropertyHelper(dataRepresentation->getProxy(), "PointSize").Set(pointSize);
+    dataRepresentation->getProxy()->UpdateVTKObjects();
+
+    pqPipelineRepresentation *pipelineRepresentation = qobject_cast<pqPipelineRepresentation*>(dataRepresentation);
+    pipelineRepresentation->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    this->resetDisplay();
+    this->setVisibilityListener();
+    this->renderAll();
+  } catch(std::runtime_error &ex)
+  {
+    // Destroy peak filter
+    if (m_peaksFilter)
+    {
+      builder->destroy(m_peaksFilter);
+    }
+    g_log.warning() << ex.what();
+  }
+}
+
+/* On peaks source destroyed
+ * @param source The reference to the destroyed source
+ */
+void SplatterPlotView::onPeakSourceDestroyed()
+{
+  // For each peak Source check if there is a "true" source available.
+  // If it is not availble then remove it from the peakSource storage.
+  for (QList<QPointer<pqPipelineSource>>::Iterator it = peaksSource.begin(); it != peaksSource.end();) {
+    pqServer *server = pqActiveObjects::instance().activeServer();
+    pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+    QList<pqPipelineSource *> sources;
+    sources = smModel->findItems<pqPipelineSource *>(server);
+
+    bool foundSource = false;
+    for (QList<pqPipelineSource *>::iterator src = sources.begin(); src != sources.end(); ++src) {
+      if ((*src) == (*it)) {
+        foundSource = true;
+      }
+    }
+
+    if (!foundSource) {
+      it = peaksSource.erase(it); 
+    } 
+    else {
+      ++it;
+    }
+  }
+
+  if (peaksSource.isEmpty())
+  {
+    setPeakButton(false);
+  }
+
+  // Update the availbale peaksTableController with the available workspaces 
+  m_peaksTableController->updatePeaksWorkspaces(peaksSource, splatSource);
+  
+  // Update the peaks filter
+  try
+  {  
+    updatePeaksFilter(m_peaksFilter);
+  }
+  catch(std::runtime_error &ex)
+  {
+    g_log.warning() << ex.what();
+  }
+
+  // Set an active source
+  if (peaksSource.isEmpty()) {
+    pqActiveObjects::instance().setActiveSource(this->splatSource);
+  }
+  else {
+    pqActiveObjects::instance().setActiveSource(this->peaksSource[0]);
+  }
+}
+
+/**
+ * Sets the visibility of the peak button.
+ * @param state The visibility state of the peak button.
+ */
+void SplatterPlotView::setPeakButton(bool state)
+{
+  this->ui.peaksButton->setEnabled(state);
+}
+
+/**
+ * Set the frame of the peak source
+ * @param source The peak source
+ */
+void SplatterPlotView::setPeakSourceFrame(pqPipelineSource* source)
+{
+  int peakViewCoords = vtkSMPropertyHelper(this->origSrc->getProxy(), "SpecialCoordinates").GetAsInt();
+  peakViewCoords--;
+  vtkSMPropertyHelper(source->getProxy(), "Peak Dimensions").Set(peakViewCoords);
+}
+
+/**
+ * Check if a peaks workspace is already tracked by the peaksSource list.
+ */
+bool SplatterPlotView::checkIfPeaksWorkspaceIsAlreadyBeingTracked(pqPipelineSource* source) {
+  bool isContained = false;
+  std::string sourceName(vtkSMPropertyHelper(source->getProxy(), "WorkspaceName").GetAsString());
+  for (QList<QPointer<pqPipelineSource>>::Iterator it = peaksSource.begin(); it != peaksSource.end(); ++it) {
+    std::string trackedName(vtkSMPropertyHelper((*it)->getProxy(), "WorkspaceName").GetAsString());
+    if ((*it == source) || (sourceName == trackedName)) {
+      isContained = true;
+      break;
+    }
+  }
+  return isContained;
+}
+
+/**
+ * Updates the peaks filter, i.e. supplies the filter with a list of peaks workspaces and delimiter
+ * @param filter The peaks filter.
+ */
+void SplatterPlotView::updatePeaksFilter(pqPipelineSource* filter) {
+  if (!filter){
+    return;
+  }
+
+  // If there are no peaks, then destroy the filter, else update it.
+  if (peaksSource.isEmpty()) {
+    pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+    builder->destroy(filter);
+  }
+  else {
+    std::string workspaceNamesConcatentated = m_peaksTableController->getConcatenatedWorkspaceNames(m_peaksWorkspaceNameDelimiter);
+    if (workspaceNamesConcatentated.empty())
+    {
+      throw std::runtime_error("The peaks viewer does not contain a valid peaks workspace.");
+    }
+
+    vtkSMPropertyHelper(filter->getProxy(), "PeaksWorkspace").Set(workspaceNamesConcatentated.c_str());
+    vtkSMPropertyHelper(filter->getProxy(), "Delimiter").Set(m_peaksWorkspaceNameDelimiter.c_str());
+    emit this->triggerAccept();
+    filter->updatePipeline();
+    this->resetCamera();
+  }  
+}
+
+/**
+ * Reacts to a destroyed peaks filter, mainly for setting the peak filter pointer to NULL.
+ * We need to do this, since PV can destroy the filter in a general destorySources command.
+ */
+void SplatterPlotView::onPeaksFilterDestroyed() {
+  m_peaksFilter = NULL;
+}
+
+/**
+ * Destroy all sources in the splatterplot view. We need to delete the filters before 
+ * we can delete the underlying sources
+ */
+void SplatterPlotView::destroyAllSourcesInView() {
+  destroyFiltersForSplatterPlotView();
+
+  // Destroy the remaning sources and filters
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  builder->destroySources();
+}
+
+
+void SplatterPlotView::destroyFiltersForSplatterPlotView(){
+   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  if (this->m_peaksFilter)
+  {
+    builder->destroy(this->m_peaksFilter);
+  }
+  if (!this->peaksSource.isEmpty())
+  {
+    this->destroyPeakSources();
+    pqActiveObjects::instance().setActiveSource(this->origSrc);
+  }
+  if (this->probeSource)
+  {
+    builder->destroy(this->probeSource);
+  }
+  if (this->threshSource)
+  {
+    builder->destroy(this->threshSource);
+  }
+  if (this->splatSource)
+  {
+    builder->destroy(this->splatSource);
   }
 }
 

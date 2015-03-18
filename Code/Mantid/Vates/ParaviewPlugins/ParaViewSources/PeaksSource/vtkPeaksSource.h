@@ -52,6 +52,8 @@ public:
   const char* GetWorkspaceName();
   /// Getter for the workspace type
   char* GetWorkspaceTypeName();
+  /// Getter for the instrument associated with the workspace
+  const char* GetInstrument();
 
 protected:
   vtkPeaksSource();
@@ -74,6 +76,9 @@ private:
 
   /// Cached workspace.
   Mantid::API::IPeaksWorkspace_sptr m_PeakWS;
+
+  /// Instrument name.
+  std::string m_instrument;
 
   vtkPeaksSource(const vtkPeaksSource&);
   void operator = (const vtkPeaksSource&);

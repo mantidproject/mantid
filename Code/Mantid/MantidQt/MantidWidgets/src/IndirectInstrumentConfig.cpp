@@ -22,18 +22,18 @@ namespace MantidQt
   namespace MantidWidgets
   {
 
-    IndirectInstrumentConfig::IndirectInstrumentConfig(QWidget *parent, bool init): API::MantidWidget(parent),
+    IndirectInstrumentConfig::IndirectInstrumentConfig(QWidget *parent): API::MantidWidget(parent),
       m_algRunner(),
       m_disabledInstruments()
     {
       m_uiForm.setupUi(this);
 
-      m_instrumentSelector = new InstrumentSelector(0, init);
+      m_instrumentSelector = new InstrumentSelector(0, false);
       m_instrumentSelector->updateInstrumentOnSelection(false);
 			m_uiForm.loInstrument->addWidget(m_instrumentSelector);
 
       // Use this signal to filter the instrument list for disabled instruments
-      connect(m_instrumentSelector, SIGNAL(currentIndexChanged(int)),
+      connect(m_instrumentSelector, SIGNAL(instrumentListUpdated()),
               this, SLOT(filterDisabledInstruments()));
 
       connect(m_instrumentSelector, SIGNAL(instrumentSelectionChanged(const QString)),
@@ -42,6 +42,8 @@ namespace MantidQt
               this, SLOT(updateReflectionsList(int)));
       connect(m_uiForm.cbReflection, SIGNAL(currentIndexChanged(int)),
               this, SLOT(newInstrumentConfiguration()));
+
+      m_instrumentSelector->fillWithInstrumentsFromFacility();
     }
 
 
@@ -142,6 +144,7 @@ namespace MantidQt
         forceDiffraction(false);
 
       m_removeDiffraction = !enabled;
+      updateInstrumentConfigurations(getInstrumentName());
     }
 
 
@@ -167,6 +170,7 @@ namespace MantidQt
         enableDiffraction(true);
 
       m_forceDiffraction = forced;
+      updateInstrumentConfigurations(getInstrumentName());
     }
 
 
@@ -308,23 +312,60 @@ namespace MantidQt
 
       m_uiForm.cbAnalyser->clear();
 
-      IAlgorithm_sptr loadInstAlg = AlgorithmManager::Instance().create("CreateSimulationWorkspace");
-      loadInstAlg->initialize();
-      loadInstAlg->setChild(true);
-      loadInstAlg->setProperty("Instrument", instrumentName.toStdString());
-      loadInstAlg->setProperty("BinParams", "0,0.5,1");
-      loadInstAlg->setProperty("OutputWorkspace", "__empty_instrument_workspace");
-      loadInstAlg->execute();
-      MatrixWorkspace_sptr instWorkspace = loadInstAlg->getProperty("OutputWorkspace");
+      // Try to load the instrument into an empty workspace
+      MatrixWorkspace_sptr instWorkspace;
+      try
+      {
+        IAlgorithm_sptr loadInstAlg = AlgorithmManager::Instance().create("CreateSimulationWorkspace");
+        loadInstAlg->initialize();
+        loadInstAlg->setChild(true);
+        loadInstAlg->setLogging(false);
+        loadInstAlg->setProperty("Instrument", instrumentName.toStdString());
+        loadInstAlg->setProperty("BinParams", "0,0.5,1");
+        loadInstAlg->setProperty("OutputWorkspace", "__empty_instrument_workspace");
+        loadInstAlg->execute();
+        instWorkspace = loadInstAlg->getProperty("OutputWorkspace");
+      }
+      catch(...)
+      {
+      }
+
+      // Try to update the list of analysers
+      bool valid = updateAnalysersList(instWorkspace);
+      m_uiForm.cbAnalyser->setEnabled(valid);
+      if(!valid)
+        m_uiForm.cbAnalyser->addItem("No Valid Analysers");
+
+      // Update the list of reflections
+      int index = m_uiForm.cbAnalyser->currentIndex();
+      updateReflectionsList(index);
+
+      m_uiForm.cbAnalyser->blockSignals(analyserPreviousBlocking);
+    }
+
+
+    /**
+     * Update the list of analysers based on an instrument workspace.
+     *
+     * @param ws Instrument workspace
+     * @return If the workspace contained valid analysers
+     */
+    bool IndirectInstrumentConfig::updateAnalysersList(MatrixWorkspace_sptr ws)
+    {
+      if(!ws)
+        return false;
 
       QList<QPair<QString, QString>> instrumentModes;
-      Instrument_const_sptr instrument = instWorkspace->getInstrument();
+      Instrument_const_sptr instrument = ws->getInstrument();
 
       std::vector<std::string> ipfAnalysers = instrument->getStringParameter("analysers");
-      if(ipfAnalysers.size() == 0)
-        return;
+      QStringList analysers;
+      if(ipfAnalysers.size() > 0)
+        analysers = QString::fromStdString(ipfAnalysers[0]).split(",");
 
-      QStringList analysers = QString::fromStdString(ipfAnalysers[0]).split(",");
+      // Do not try to display analysers if there are none
+      if(analysers.size() == 0)
+        return false;
 
       for(auto it = analysers.begin(); it != analysers.end(); ++it)
       {
@@ -349,10 +390,7 @@ namespace MantidQt
         }
       }
 
-      int index = m_uiForm.cbAnalyser->currentIndex();
-      updateReflectionsList(index);
-
-      m_uiForm.cbAnalyser->blockSignals(analyserPreviousBlocking);
+      return true;
     }
 
 
@@ -422,6 +460,8 @@ namespace MantidQt
           ++i;
         }
       }
+
+      updateInstrumentConfigurations(getInstrumentName());
     }
 
   } /* namespace MantidWidgets */

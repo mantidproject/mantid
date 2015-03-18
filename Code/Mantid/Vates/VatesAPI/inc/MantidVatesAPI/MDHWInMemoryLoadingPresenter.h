@@ -38,7 +38,9 @@ namespace Mantid
 
     class MDLoadingView;
     class WorkspaceProvider;
+    class MetaDataExtractorUtils;
     class vtkDataSetFactory;
+    
     class DLLExport MDHWInMemoryLoadingPresenter : public MDHWLoadingPresenter
     {
     public:
