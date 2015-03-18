@@ -2,18 +2,29 @@
 # Tester 
 #
 # Next:
-# (-) Add an option/option groups such that the new reduced data can be plot 
+# (-) Add an option/option groups such that the new reduced data can be plot \
 #     on a clean canvas or over plot on the original one;
 # (-) An inner sequence for line-color-marker-style of the plot should be made
-# (3) A dictionary should be used to manage the history data
-# (4) Shall add button to load 'next' and 'previous' 
-# (5) Make Ge 113 In Config and etc a comboBox for wavelength
-# (6) Add tool bar to plot for save/zoom in and out and etc.
-# (7) Label of the plots
-# (8) Merge runs
-# (9) Proper quit
+# (-) Shall add button to load 'next' and 'previous' 
+# (-) Make Ge 113 In Config and etc a comboBox for wavelength
+# (-) Add tool bar to plot for save/zoom in and out and etc.
+# (-) Label of the plots
+#
+#
+# ( 3) A dictionary should be used to manage the history data
+# ( 8) Merge runs
+# ( 9) Proper quit
 # (10) Need a configuration file to load
 # (11) Auto reset the x-y-limit of the plot
+# (12) Design for vanadium peak strip
+# (13) Implementation for vanadium peak strip
+# (14) doPlotUnitDspace: auto fill minD, maxD, binsizeD
+# (15) During loading, ui.label_ptNo and ui.label_detNo should give out the \
+#      range of pt. and det number
+#     
+#
+#
+#
 #
 ###############################################################################
 

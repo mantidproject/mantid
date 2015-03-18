@@ -134,6 +134,18 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.comboBox_wavelength, QtCore.SIGNAL('currentIndexChanged(int)'),
                 self.doUpdateWavelength)
 
+        self.connect(self.ui.actionQuit, QtCore.SIGNAL('triggered()'),
+                self.doExist)
+
+
+        # TODO - Add event handling
+        """
+        pushButton_stripVanPeaks
+        pushButton_saveVanRun
+
+        """
+
+
         # Define signal-event handling
 
 
@@ -170,6 +182,14 @@ class MainWindow(QtGui.QMainWindow):
         validator7.setBottom(0)
         self.ui.lineEdit_detNo.setValidator(validator7)
 
+        # TODO - Add valdiators
+        """ 
+        lineEdit_minD 
+        lineEdit_maxD
+        lineEdit_binsizeD 
+        pushButton_rebinD
+        lineEdit_scanStart
+        """
         # Get initial setup
         self._initSetup()
 
@@ -197,6 +217,8 @@ class MainWindow(QtGui.QMainWindow):
         
         self.ui.comboBox_wavelength.setCurrentIndex(0)
         self.ui.lineEdit_wavelength.setText('2.41')
+
+        self.ui.pushButton_unit2theta.setText(r'$2\theta$')
 
         # Set up data source
         self._serverAddress = DEFAULT_SERVER 
@@ -379,6 +401,20 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_scanNo.setText(str(scanno))
 
         return execstatus
+
+
+    def doExist(self):
+        """ Exist the application
+        """
+        clearcache = self.ui.checkBox_delCache.isChecked()
+
+        if clearcache is True:
+            # TODO - Clear cache
+            print "Clear Cache!"
+
+        self.close()
+
+        return
 
 
     def doPlot2Theta(self):
@@ -918,4 +954,10 @@ class MainWindow(QtGui.QMainWindow):
         ofile.close()
 
         return (True, "")
+
+
+    def _plotRawDetSignal(self, ptno, detno):
+        """ Retrieve and plot raw detector signal 
+        """
+        # TODO - Implement ASAP
 

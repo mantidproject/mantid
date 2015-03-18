@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1124</width>
+    <width>1115</width>
     <height>1024</height>
    </rect>
   </property>
@@ -47,18 +47,45 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="checkBox_clearPrevious">
-          <property name="text">
-           <string>Clear Previous Plot</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QLabel" name="label_calibration">
           <property name="text">
            <string/>
           </property>
          </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_wavelength">
+          <property name="text">
+           <string>Wavelength</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="comboBox_wavelength">
+          <item>
+           <property name="text">
+            <string>Ge 113 IN Config 2.41 Å,</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>(115) 1.54 Å</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>(117) 1.12 Å.</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>User Specified</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_wavelength"/>
         </item>
         <item>
          <spacer name="horizontalSpacer">
@@ -76,11 +103,54 @@
        </layout>
       </item>
       <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_22">
+        <item>
+         <widget class="QLabel" name="label_outputFormat">
+          <property name="text">
+           <string>Save As</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="comboBox_outputFormat"/>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_outputFileName"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_saveData">
+          <property name="text">
+           <string>Save</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_14">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
          <widget class="QTabWidget" name="tabWidget">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -347,22 +417,9 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_outputFormat">
+                 <widget class="QCheckBox" name="checkBox_clearPrevious">
                   <property name="text">
-                   <string>Save As</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QComboBox" name="comboBox_outputFormat"/>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="lineEdit_outputFileName"/>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pushButton_saveData">
-                  <property name="text">
-                   <string>Save</string>
+                   <string>Clear Previous Plot</string>
                   </property>
                  </widget>
                 </item>
@@ -422,56 +479,6 @@
                  </widget>
                 </item>
                 <item>
-                 <spacer name="horizontalSpacer_4">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeType">
-                   <enum>QSizePolicy::Preferred</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <widget class="QLabel" name="label_wavelength">
-                  <property name="text">
-                   <string>Wavelength</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QComboBox" name="comboBox_wavelength">
-                  <item>
-                   <property name="text">
-                    <string>Ge 113 IN Config 2.41 Å,</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>(115) 1.54 Å</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>(117) 1.12 Å.</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>User Specified</string>
-                   </property>
-                  </item>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="lineEdit_wavelength"/>
-                </item>
-                <item>
                  <spacer name="horizontalSpacer_5">
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
@@ -525,6 +532,9 @@
                    <spacer name="verticalSpacer_6">
                     <property name="orientation">
                      <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::Preferred</enum>
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>
@@ -611,6 +621,9 @@
                     <property name="orientation">
                      <enum>Qt::Vertical</enum>
                     </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::Preferred</enum>
+                    </property>
                     <property name="sizeHint" stdset="0">
                      <size>
                       <width>20</width>
@@ -661,6 +674,172 @@
             </item>
            </layout>
           </widget>
+          <widget class="QWidget" name="tab_merge">
+           <attribute name="title">
+            <string>Merge Scans</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_6">
+            <item row="0" column="0">
+             <layout class="QVBoxLayout" name="verticalLayout_merge">
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_19">
+                <item>
+                 <widget class="QLabel" name="label_8">
+                  <property name="text">
+                   <string>From</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lineEdit_scanStart">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_9">
+                  <property name="text">
+                   <string>To</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lineEdit_scanEnd">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_10">
+                  <property name="text">
+                   <string>Excluded Scans</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lineEdit_3"/>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton">
+                  <property name="text">
+                   <string>Merge</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_13">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_18">
+                <item>
+                 <widget class="QLabel" name="label_6">
+                  <property name="text">
+                   <string>Message</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_16">
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_mergeView">
+                  <item>
+                   <widget class="QGraphicsView" name="graphicsView_mergeRun"/>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_11">
+                  <item>
+                   <spacer name="verticalSpacer_11">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::Preferred</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="pushButton_viewMerge">
+                    <property name="text">
+                     <string>View Merged</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="pushButton_view2D">
+                    <property name="text">
+                     <string>View 2D</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="pushButton_saveMerge">
+                    <property name="text">
+                     <string>Save</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="verticalSpacer_10">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_20">
+                <item>
+                 <widget class="QLabel" name="label_7">
+                  <property name="text">
+                   <string>Message</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
           <widget class="QWidget" name="tab_4">
            <attribute name="title">
             <string>Vanadium</string>
@@ -678,21 +857,19 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="lineEdit_2"/>
-                </item>
-                <item>
-                 <widget class="QComboBox" name="comboBox">
-                  <item>
-                   <property name="text">
-                    <string>dSpacing</string>
-                   </property>
-                  </item>
+                 <widget class="QLineEdit" name="lineEdit_stripVPeaks">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
                  </widget>
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_12">
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Preferred</enum>
                   </property>
                   <property name="sizeHint" stdset="0">
                    <size>
@@ -705,7 +882,7 @@
                 <item>
                  <widget class="QPushButton" name="pushButton_resetVanPeakList">
                   <property name="text">
-                   <string>Reset</string>
+                   <string>Reset Vanadium Peaks List</string>
                   </property>
                  </widget>
                 </item>
@@ -725,6 +902,110 @@
                 </item>
                 <item>
                  <layout class="QVBoxLayout" name="verticalLayout_6">
+                  <item>
+                   <spacer name="verticalSpacer_9">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::Preferred</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="label_3">
+                    <property name="text">
+                     <string>Minimum d-Spacing</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="Line" name="line">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="lineEdit_minD">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="label_4">
+                    <property name="text">
+                     <string>Maximum d-Spacing</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="lineEdit_maxD">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="label_5">
+                    <property name="text">
+                     <string>Bin size in d-Spacing</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="lineEdit_binsizeD">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="pushButton_rebinD">
+                    <property name="text">
+                     <string>Rebin</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="verticalSpacer_8">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::Preferred</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="pushButton_stripVanPeaks">
+                    <property name="text">
+                     <string>Strip Vanadium Peaks</string>
+                    </property>
+                   </widget>
+                  </item>
                   <item>
                    <widget class="QPushButton" name="pushButton_saveVanRun">
                     <property name="text">
@@ -1070,7 +1351,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1124</width>
+     <width>1115</width>
      <height>25</height>
     </rect>
    </property>
