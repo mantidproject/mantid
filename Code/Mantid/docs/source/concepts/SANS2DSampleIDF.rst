@@ -4,7 +4,7 @@
 .. role:: xml(literal)
    :class: highlight
 
-IDF-ISIS-SANS2D-annotated
+IDF ISIS SANS2D annotated
 =========================
 
 This page annotates the small angle scattering SANS2D IDF, with the purpose of (hopefully) quickly learn the basis of creating a similar IDF.

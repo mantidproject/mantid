@@ -32,7 +32,13 @@ namespace MDEvents {
  * */
 TMDE_CLASS
 class DLLExport MDEventWorkspace : public API::IMDEventWorkspace {
+
 public:
+  /// Typedef for a shared pointer of this kind of event workspace
+  typedef boost::shared_ptr<MDEventWorkspace<MDE, nd>> sptr;
+  /// Typedef to access the MDEventType.
+  typedef MDE MDEventType;
+
   MDEventWorkspace();
   MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other);
   virtual ~MDEventWorkspace();
@@ -119,9 +125,6 @@ public:
 
   size_t addEvents(const std::vector<MDE> &events);
 
-  // void addManyEvents(const std::vector<MDE> & events,
-  // Mantid::Kernel::ProgressBase * prog);
-
   std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
   getMinimumExtents(size_t depth = 2);
 
@@ -149,13 +152,10 @@ public:
   /// Clear masking
   void clearMDMasking();
 
-  /// Get the special coordinate system.
-  virtual Mantid::Kernel::SpecialCoordinateSystem
-  getSpecialCoordinateSystem() const;
-
-  /// Set the special coordinate system.
-  void setCoordinateSystem(
-      const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem);
+  /// Get the coordinate system.
+  Kernel::SpecialCoordinateSystem getSpecialCoordinateSystem() const;
+  /// Set the coordinate system.
+  void setCoordinateSystem(const Kernel::SpecialCoordinateSystem coordSystem);
   /// make the workspace file backed if it has not been already file backed;
   virtual void setFileBacked(const std::string &fileName);
   /// if workspace was file-backed, this should clear file-backed information
@@ -167,14 +167,10 @@ protected:
   MDBoxBase<MDE, nd> *data;
 
   /// Box controller in use
-  Mantid::API::BoxController_sptr m_BoxController;
+  API::BoxController_sptr m_BoxController;
   // boost::shared_ptr<BoxCtrlChangesList > m_BoxController;
 private:
-public:
-  /// Typedef for a shared pointer of this kind of event workspace
-  typedef boost::shared_ptr<MDEventWorkspace<MDE, nd>> sptr;
-  /// Typedef to access the MDEventType.
-  typedef MDE MDEventType;
+  Kernel::SpecialCoordinateSystem m_coordSystem;
 };
 
 } // namespace MDEvents

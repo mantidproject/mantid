@@ -79,6 +79,9 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(name='NumberWavelengths', defaultValue=10,
                              validator=IntBoundedValidator(1),
                              doc='Number of wavelengths for calculation')
+        self.declareProperty(name='Interpolate', defaultValue=True,
+                             doc='Interpolate the correction workspaces to match the sample workspace')
+
         self.declareProperty(name='Emode', defaultValue='Elastic',
                              validator=StringListValidator(['Elastic', 'Indirect']),
                              doc='Emode: Elastic or Indirect')
@@ -174,6 +177,14 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             self._add_sample_logs(acc_ws, sample_logs)
             AddSampleLog(Workspace=acc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
 
+        if self._interpolate:
+            self._interpolate_corrections(workspaces)
+
+        try:
+            self. _copy_detector_table(workspaces)
+        except RuntimeError:
+            logger.warning('Cannot copy spectra mapping. Check input workspace instrument.')
+
         GroupWorkspaces(InputWorkspaces=','.join(workspaces), OutputWorkspace=self._output_ws_name)
         self.setPropertyValue('OutputWorkspace', self._output_ws_name)
 
@@ -195,8 +206,11 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self._can_scale = self.getProperty('CanScaleFactor').value
 
         self._number_wavelengths = self.getProperty('NumberWavelengths').value
+        self._interpolate = self.getProperty('Interpolate').value
+
         self._emode = self.getPropertyValue('Emode')
         self._efixed = self.getProperty('Efixed').value
+
         self._output_ws_name = self.getPropertyValue('OutputWorkspace')
 
 
@@ -232,6 +246,39 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         logger.information('Elastic lambda %f' % self._elastic)
         DeleteWorkspace(wave_range)
+
+
+    def _interpolate_corrections(self, workspaces):
+        """
+        Performs interpolation on the correction workspaces such that the number of bins
+        matches that of the input sample workspace.
+
+        @param workspaces List of correction workspaces to interpolate
+        """
+
+        for ws in workspaces:
+            SplineInterpolation(WorkspaceToMatch=self._sample_ws_name,
+                                WorkspaceToInterpolate=ws,
+                                OutputWorkspace=ws,
+                                OutputWorkspaceDeriv='')
+
+
+    def _copy_detector_table(self, workspaces):
+        """
+        Copy the detector table from the sample workspaces to the correction workspaces.
+
+        @param workspaces List of correction workspaces
+        """
+
+        instrument = mtd[self._sample_ws_name].getInstrument().getName()
+
+        for ws in workspaces:
+            LoadInstrument(Workspace=ws,
+                           InstrumentName=instrument)
+
+            CopyDetectorMapping(WorkspaceToMatch=self._sample_ws_name,
+                                WorkspaceToRemap=ws,
+                                IndexBySpectrumNumber=True)
 
 
     def _add_sample_logs(self, ws, sample_logs):
