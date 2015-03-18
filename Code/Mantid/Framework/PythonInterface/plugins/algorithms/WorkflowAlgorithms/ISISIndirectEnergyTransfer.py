@@ -47,7 +47,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(name='RebinString', defaultValue='', doc='Rebin string parameters.')
         self.declareProperty(name='DetailedBalance', defaultValue='', doc='')
         self.declareProperty(name='ScaleFactor', defaultValue=1.0, doc='Factor by which to scale result.')
-        self.declareProperty(name='FoldMultipleFrames', defaultValue=False,
+        self.declareProperty(name='FoldMultipleFrames', defaultValue=True,
                              doc='Folds multiple framed data sets into a single workspace.')
 
         # Spectra grouping options

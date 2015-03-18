@@ -95,15 +95,18 @@ class ISISIndirectInelasticBase(stresstesting.MantidStressTest):
         raise NotImplementedError("Implement _run.")
 
     def validate_results_and_references(self):
+        num_ref_files = len(self.get_reference_files())
+        num_results = len(self.result_names)
+
         if type(self.get_reference_files()) != list:
             raise RuntimeError("The reference file(s) should be in a list")
         if type(self.result_names) != list:
             raise RuntimeError("The result workspace(s) should be in a list")
-        if len(self.get_reference_files()) !=\
-           len(self.result_names):
-            raise RuntimeError("The number of result workspaces does not match"
-                               " the number of reference files.")
-        if len(self.get_reference_files()) < 1:
+        if num_ref_files != num_results:
+            raise RuntimeError("The number of result workspaces (%d) does not match"
+                               " the number of reference files (%d)." % (
+                               num_ref_files, num_results))
+        if num_ref_files < 1 or num_results < 1:
             raise RuntimeError("There needs to be a least one result and "
                                "reference.")
 
