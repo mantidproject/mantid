@@ -130,6 +130,9 @@ class MainWindow(QtGui.QMainWindow):
                 
         self.connect(self.ui.pushButton_chkServer, QtCore.SIGNAL('clicked()'),
                 self.doCheckSrcServer)
+                
+        self.connect(self.ui.comboBox_wavelength, QtCore.SIGNAL('currentIndexChanged(int)'),
+                self.doUpdateWavelength)
 
         # Define signal-event handling
 
@@ -191,6 +194,9 @@ class MainWindow(QtGui.QMainWindow):
         # FIXME : Need to disable some widgets... consider to refactor the code
         self.ui.radioButton_useServer.setChecked(True)
         self.ui.radioButton_useLocal.setChecked(False)
+        
+        self.ui.comboBox_wavelength.setCurrentIndex(0)
+        self.ui.lineEdit_wavelength.setText('2.41')
 
         # Set up data source
         self._serverAddress = DEFAULT_SERVER 
@@ -210,6 +216,10 @@ class MainWindow(QtGui.QMainWindow):
         # set up for plotting
         self._myLineMarkerColorList = self.ui.graphicsView_reducedData.getDefaultColorMarkerComboList()
         self._myLineMarkerColorIndex = 0
+
+        # workspaces
+        self._myDataMDWS = None
+        self._myMonitorMDWS = None
 
         # State machine
         # self._inPlotState = False
@@ -316,8 +326,10 @@ class MainWindow(QtGui.QMainWindow):
         print "[DB] reduction status = ", execstatus
 
         # Plot data
+        
+        clearcanvas = self.ui.checkBox_clearPrevious.isChecked() 
         if execstatus is True:
-            self._plotReducedData(self._currUnit, 0)
+            self._plotReducedData(self._currUnit, 0, clearcanvas)
 
         return execstatus
 
@@ -386,8 +398,8 @@ class MainWindow(QtGui.QMainWindow):
         # Rebin
         self._rebin('2theta', xmin, binsize, xmax)
         
-        xlabel = r"$2\theta$"
-        self._plotReducedData(xlabel)
+        xlabel = r'$2\theta$' 
+        self._plotReducedData(xlabel, 0, True)
 
         return
 
@@ -405,7 +417,8 @@ class MainWindow(QtGui.QMainWindow):
             
         # Rebin
         self._rebin('dSpacing', xmin, binsize, xmax)
-        self._plotReducedData()
+        xlabel = r"$d (\AA)$"
+        self._plotReducedData(xlabel, 0, True)
 
         return
 
@@ -423,7 +436,8 @@ class MainWindow(QtGui.QMainWindow):
             
         # Rebin
         self._rebin('Momentum Transfer (Q)', xmin, binsize, xmax)
-        self._plotReducedData()  
+        xlabel = r"$Q \AA^{-1}$"
+        self._plotReducedData(xlabel, 0, True)  
 
         return
 
@@ -584,6 +598,26 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def doUpdateWavelength(self):
+        """ Update the wavelength to line edit
+        """
+        index = self.ui.comboBox_wavelength.currentIndex()
+        
+        print "Update wavelength to ", index
+        
+        if index == 0:
+            wavelength = 2.41
+        elif index == 1:
+            wavelength = 1.54
+        elif index == 2:
+            wavelength = 1.12
+        else:
+            wavelength = None
+            
+        self.ui.lineEdit_wavelength.setText(str(wavelength))
+        
+        return
+
 
     #--------------------------------------------------------
     #
@@ -690,8 +724,8 @@ class MainWindow(QtGui.QMainWindow):
                 OutputWorkspace=datamdwsname,
                 OutputMonitorWorkspace=monitorwsname)
 
-        self._datamdws = AnalysisDataService.retrieve(datamdwsname)
-        self._monitormdws = AnalysisDataService.retrieve(monitorwsname)
+        self._myDataMDWS = AnalysisDataService.retrieve(datamdwsname)
+        self._myMonitorMDWS = AnalysisDataService.retrieve(monitorwsname)
 
         # Rebin
         if xmin is None or xmax is None:
@@ -722,7 +756,7 @@ class MainWindow(QtGui.QMainWindow):
         return True
 
 
-    def _plotReducedData(self, targetunit, spectrum):
+    def _plotReducedData(self, targetunit, spectrum, clearcanvas):
         """ Plot reduced data stored in self._reducedWS to 
         """
         # print "[DB] Plot reduced data!", "_inPlotState = ", str(self._inPlotState)
@@ -731,6 +765,11 @@ class MainWindow(QtGui.QMainWindow):
         if self._myReducedPDWs is None:
             self._logWarning("No data to plot!")
             return
+            
+        # get to know whether it is required to clear the image
+        if clearcanvas is True:
+            self.ui.graphicsView_reducedData.clearAllLines()
+            self._myLineMarkerColorIndex = 0
             
         # plot
         # FIXME - Should not modify the original workspace
@@ -747,7 +786,7 @@ class MainWindow(QtGui.QMainWindow):
         
         self.ui.graphicsView_reducedData.addPlot(self._myReducedPDWs.readX(spectrum),
             self._myReducedPDWs.readY(spectrum), marker=marker, color=color,ylabel='intensity',
-            xlabel=r'2\theta',label=str(self._myReducedPDWs))
+            xlabel=targetunit,label=str(self._myReducedPDWs))
             
         return
         
@@ -797,19 +836,34 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def _rebin(self, unit, xmin, binsize, xmax):
-        """ 
+        """ Rebin the data MD workspace and monitor MD workspace for new bin parameter and/or 
+        units
         """
-        if self._myDataWS is None or self._myMonitorWS is None:
+        if self._myDataMDWS is None or self._myMonitorMDWS is None:
             self._logError("Unable to rebin the data because either data MD workspace and \
                 monitor MD workspace is not present.")
             return
-        
-        mantid.ConvertCWPDMDtoSpectra(InputWorkspace=self._myDataWS,
-            InputMonitorWorkspace=self._myMonitorWS,
+
+        try: 
+            wavelength = float(self.ui.lineEdit_wavelength.text())
+        except ValueError as e:
+            print e
+            return
+       
+        reducedwsname = self._myDataMDWS.name() + "_" + unit
+        api.ConvertCWPDMDToSpectra(InputWorkspace=self._myDataMDWS,
+            InputMonitorWorkspace=self._myMonitorMDWS,
+            OutputWorkspace=reducedwsname,
+            UnitOutput=unit,
             BinningParams = "%f, %f, %f" % (xmin, binsize, xmax),
-            OutputWorkspace="xxx")
+            NeutronWaveLength=wavelength)
+        outws = AnalysisDataService.retrieve(reducedwsname)
+        if outws is not None: 
+            self._myReducedPDWs = outws
+        else:
+            raise NotImplementedError("Failed to convert unit to %s." % (unit))
         
-        return
+        return 
 
 
     def _excludeDetectors(self, detids):

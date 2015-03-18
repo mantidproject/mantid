@@ -93,6 +93,14 @@ class Qt4MplCanvas(FigureCanvas):
 
         # set x-axis and y-axis label
         if xlabel is not None:
+            # FIXME - I cannot find out how to pass r'$math formula$' via method parameters
+            if xlabel.count('theta') == 1: 
+                s = r'$2\theta$'
+            elif xlabel.lower().count('dspace') == 1:
+                s = r'd ($\AA$)'
+            elif xlabel.lower().count('momentum') == 1:
+                s = r'$Q \AA^{-1}$'
+            #print "[DB] Input x-label = %s; set to %s." % (xlabel, s)
             self.axes.set_xlabel(xlabel, fontsize=20)  
         if ylabel is not None:
             self.axes.set_ylabel(ylabel, fontsize=20)
@@ -106,7 +114,25 @@ class Qt4MplCanvas(FigureCanvas):
         else:
             print "Impoooooooooooooooosible!"
         self._lineIndex += 1
+        
+        # Flush/commit
+        self.draw()
 
+        return
+        
+    def clearAllLines(self):
+        """ Remove all lines from the canvas
+        """
+        for ikey in self._lineDict.keys():
+            plot = self._lineDict[ikey]
+            if plot is not None:
+                self.axes.lines.remove(plot)
+                self._lineDict[ikey] = None
+            # ENDIF(plot)
+        # ENDFOR
+        
+        self.draw()
+        
         return
 
     def getLastPlotIndexKey(self):
@@ -160,6 +186,9 @@ class Qt4MplCanvas(FigureCanvas):
         line.set_label(oldlabel)
 
         self.axes.legend()
+        
+        # commit
+        self.draw()
 
         return
 
