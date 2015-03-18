@@ -29,10 +29,6 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
                              doc='Comma separated list of input files')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
-                             doc='Output workspace for calibration data')
-
         self.declareProperty(IntArrayProperty(name='DetectorRange', values=[0, 1],\
                              validator=IntArrayMandatoryValidator()),
                              doc='Range of detectors.')
