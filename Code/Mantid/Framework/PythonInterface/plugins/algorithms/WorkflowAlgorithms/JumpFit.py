@@ -15,6 +15,7 @@ class JumpFit(PythonAlgorithm):
     _plot = None
     _save = None
 
+
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
 
@@ -49,11 +50,8 @@ class JumpFit(PythonAlgorithm):
         from mantid.simpleapi import ExtractSingleSpectrum, Fit, CopyLogs, AddSampleLog, \
                                      DeleteWorkspace
         from mantid import logger, mtd
-        from IndirectCommon import StartTime, EndTime
 
         self._setup()
-
-        StartTime('Jump fit : ' + self._jump_function + ' ; ')
 
         # Select the width we wish to fit
         spectrum_ws = "__" + self._in_ws
@@ -131,8 +129,6 @@ class JumpFit(PythonAlgorithm):
         self.setProperty('Output', self._out_name)
 
         DeleteWorkspace(Workspace=spectrum_ws)
-
-        EndTime('Jump fit : ' + self._jump_function + ' ; ')
 
 
     def _setup(self):
