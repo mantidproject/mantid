@@ -13,10 +13,20 @@ DECLARE_FUNCTION(PawleyParameterFunction)
 using namespace API;
 using namespace Geometry;
 
+/// Constructor
 PawleyParameterFunction::PawleyParameterFunction()
     : ParamFunction(), m_crystalSystem(PointGroup::Triclinic),
       m_profileFunctionCenterParameterName() {}
 
+/**
+ * @brief Sets the supplied attribute value
+ *
+ * The function calls ParamFunction::setAttribute, but performs additional
+ * actions for CrystalSystem and ProfileFunction.
+ *
+ * @param attName :: Name of the attribute
+ * @param attValue :: Value of the attribute
+ */
 void PawleyParameterFunction::setAttribute(const std::string &attName,
                                            const Attribute &attValue) {
   if (attName == "CrystalSystem") {
@@ -28,10 +38,12 @@ void PawleyParameterFunction::setAttribute(const std::string &attName,
   ParamFunction::setAttribute(attName, attValue);
 }
 
+/// Returns the crystal system
 PointGroup::CrystalSystem PawleyParameterFunction::getCrystalSystem() const {
   return m_crystalSystem;
 }
 
+/// Returns a UnitCell object constructed from the function's parameters.
 UnitCell PawleyParameterFunction::getUnitCellFromParameters() const {
   switch (m_crystalSystem) {
   case PointGroup::Cubic: {
@@ -68,6 +80,7 @@ UnitCell PawleyParameterFunction::getUnitCellFromParameters() const {
   return UnitCell();
 }
 
+/// Sets the function's parameters from the supplied UnitCell.
 void PawleyParameterFunction::setParametersFromUnitCell(const UnitCell &cell) {
   // Parameter "a" exists in all crystal systems.
   setParameter("a", cell.a());
@@ -106,18 +119,21 @@ void PawleyParameterFunction::setParametersFromUnitCell(const UnitCell &cell) {
   }
 }
 
+/// This method does nothing.
 void PawleyParameterFunction::function(const FunctionDomain &domain,
                                        FunctionValues &values) const {
   UNUSED_ARG(domain);
   UNUSED_ARG(values);
 }
 
+/// This method does nothing.
 void PawleyParameterFunction::functionDeriv(const FunctionDomain &domain,
                                             Jacobian &jacobian) {
   UNUSED_ARG(domain)
   UNUSED_ARG(jacobian);
 }
 
+/// Declares attributes and generates parameters based on the defaults.
 void PawleyParameterFunction::init() {
   declareAttribute("CrystalSystem", IFunction::Attribute("Triclinic"));
   declareAttribute("ProfileFunction", IFunction::Attribute("Gaussian"));
@@ -126,6 +142,15 @@ void PawleyParameterFunction::init() {
   setProfileFunction("Gaussian");
 }
 
+/**
+ * Sets the profile function
+ *
+ * This method takes a function name and tries to create the corresponding
+ * function through FunctionFactory. Then it checks whether the function
+ * inherits from IPeakFunction and determines the centre parameter to store it.
+ *
+ * @param profileFunction :: Name of an IPeakFunction implementation.
+ */
 void PawleyParameterFunction::setProfileFunction(
     const std::string &profileFunction) {
   IPeakFunction_sptr peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(
@@ -139,6 +164,16 @@ void PawleyParameterFunction::setProfileFunction(
   setCenterParameterNameFromFunction(peakFunction);
 }
 
+/**
+ * Assigns the crystal system
+ *
+ * This method takes the name of a crystal system (case insensitive) and stores
+ * it. Furthermore it creates the necessary parameters, which means that after
+ * calling this function, PawleyParameterFunction potentially exposes a
+ * different number of parameters.
+ *
+ * @param crystalSystem :: Crystal system, case insensitive.
+ */
 void
 PawleyParameterFunction::setCrystalSystem(const std::string &crystalSystem) {
   std::string crystalSystemLC = boost::algorithm::to_lower_copy(crystalSystem);
@@ -165,6 +200,8 @@ PawleyParameterFunction::setCrystalSystem(const std::string &crystalSystem) {
   createCrystalSystemParameters(m_crystalSystem);
 }
 
+/// This method clears all parameters and declares parameters according to the
+/// supplied crystal system.
 void PawleyParameterFunction::createCrystalSystemParameters(
     PointGroup::CrystalSystem crystalSystem) {
 
@@ -213,6 +250,7 @@ void PawleyParameterFunction::createCrystalSystemParameters(
   declareParameter("ZeroShift", 0.0);
 }
 
+/// Tries to extract and store the center parameter name from the function.
 void PawleyParameterFunction::setCenterParameterNameFromFunction(
     const IPeakFunction_sptr &profileFunction) {
   m_profileFunctionCenterParameterName.clear();
@@ -224,20 +262,27 @@ void PawleyParameterFunction::setCenterParameterNameFromFunction(
 
 DECLARE_FUNCTION(PawleyFunction)
 
+/// Constructor
 PawleyFunction::PawleyFunction()
     : FunctionParameterDecorator(), m_compositeFunction(),
       m_pawleyParameterFunction(), m_peakProfileComposite(), m_hkls() {}
 
+/// Sets the crystal system on the internal parameter function and updates the
+/// exposed parameters
 void PawleyFunction::setCrystalSystem(const std::string &crystalSystem) {
   m_pawleyParameterFunction->setAttributeValue("CrystalSystem", crystalSystem);
   m_compositeFunction->checkFunction();
 }
 
+/// Sets the profile function and replaces already existing functions in the
+/// internally stored CompositeFunction.
 void PawleyFunction::setProfileFunction(const std::string &profileFunction) {
   m_pawleyParameterFunction->setAttributeValue("ProfileFunction",
                                                profileFunction);
 
-  // At this point PawleyParameterFunction guarantees that it's an IPeakFunction
+  /* At this point PawleyParameterFunction guarantees that it's an IPeakFunction
+   * and all existing profile functions are replaced.
+   */
   for (size_t i = 0; i < m_peakProfileComposite->nFunctions(); ++i) {
     IPeakFunction_sptr oldFunction = boost::dynamic_pointer_cast<IPeakFunction>(
         m_peakProfileComposite->getFunction(i));
@@ -258,14 +303,28 @@ void PawleyFunction::setProfileFunction(const std::string &profileFunction) {
     m_peakProfileComposite->replaceFunction(i, newFunction);
   }
 
+  // Update exposed parameters.
   m_compositeFunction->checkFunction();
 }
 
+/// Sets the unit cell from a string with either 6 or 3 space-separated numbers.
 void PawleyFunction::setUnitCell(const std::string &unitCellString) {
   m_pawleyParameterFunction->setParametersFromUnitCell(
       strToUnitCell(unitCellString));
 }
 
+/**
+ * Calculates the function values on the supplied domain
+ *
+ * This function is the core of PawleyFunction. It calculates the d-value for
+ * each stored HKL from the unit cell that is the result of the parameters
+ * stored in the internal PawleyParameterFunction and adds the ZeroShift
+ * parameter. The value is set as center parameter on the internally stored
+ * PeakFunctions.
+ *
+ * @param domain :: Function domain.
+ * @param values :: Function values.
+ */
 void PawleyFunction::function(const FunctionDomain &domain,
                               FunctionValues &values) const {
   UnitCell cell = m_pawleyParameterFunction->getUnitCellFromParameters();
@@ -281,6 +340,7 @@ void PawleyFunction::function(const FunctionDomain &domain,
   m_peakProfileComposite->function(domain, values);
 }
 
+/// Removes all peaks from the function.
 void PawleyFunction::clearPeaks() {
   m_peakProfileComposite = boost::dynamic_pointer_cast<CompositeFunction>(
       FunctionFactory::Instance().createFunction("CompositeFunction"));
@@ -288,6 +348,8 @@ void PawleyFunction::clearPeaks() {
   m_hkls.clear();
 }
 
+/// Clears peaks and adds a peak for each hkl, all with the same FWHM and
+/// height.
 void PawleyFunction::setPeaks(const std::vector<Kernel::V3D> &hkls, double fwhm,
                               double height) {
   clearPeaks();
@@ -297,6 +359,7 @@ void PawleyFunction::setPeaks(const std::vector<Kernel::V3D> &hkls, double fwhm,
   }
 }
 
+/// Adds a peak with the supplied FWHM and height.
 void PawleyFunction::addPeak(const Kernel::V3D &hkl, double fwhm,
                              double height) {
   m_hkls.push_back(hkl);
@@ -322,15 +385,28 @@ void PawleyFunction::addPeak(const Kernel::V3D &hkl, double fwhm,
   m_compositeFunction->checkFunction();
 }
 
+/// Returns the number of peaks that are stored in the function.
 size_t PawleyFunction::getPeakCount() const { return m_hkls.size(); }
 
 IPeakFunction_sptr PawleyFunction::getPeakFunction(size_t i) const {
+  if (i >= m_hkls.size()) {
+    throw std::out_of_range("Peak index out of range.");
+  }
+
   return boost::dynamic_pointer_cast<IPeakFunction>(
       m_peakProfileComposite->getFunction(i));
 }
 
-Kernel::V3D PawleyFunction::getPeakHKL(size_t i) const { return m_hkls[i]; }
+/// Return the HKL of the i-th peak.
+Kernel::V3D PawleyFunction::getPeakHKL(size_t i) const {
+  if (i >= m_hkls.size()) {
+    throw std::out_of_range("Peak index out of range.");
+  }
 
+  return m_hkls[i];
+}
+
+/// Returns the internally stored PawleyParameterFunction.
 PawleyParameterFunction_sptr
 PawleyFunction::getPawleyParameterFunction() const {
   return m_pawleyParameterFunction;
@@ -345,6 +421,7 @@ void PawleyFunction::init() {
   }
 }
 
+/// Checks that the decorated function has the correct structure.
 void PawleyFunction::beforeDecoratedFunctionSet(const API::IFunction_sptr &fn) {
   CompositeFunction_sptr composite =
       boost::dynamic_pointer_cast<CompositeFunction>(fn);

@@ -13,12 +13,23 @@
 namespace Mantid {
 namespace CurveFitting {
 
+/** @class PawleyParameterFunction
+
+  This function is used internally by PawleyFunction to hold the unit cell
+  parameters as well as the ZeroShift parameter. The function and functionDeriv-
+  methods have been implemented to do nothing, the calculation of the spectrum
+  that results from the unit cell is calculated in PawleyFunction.
+
+  Additionally it stores the crystal system and the name of the profile function
+  that is used to model the Bragg peaks as attributes.
+*/
 class DLLExport PawleyParameterFunction : virtual public API::IFunction,
                                           virtual public API::ParamFunction {
 public:
   PawleyParameterFunction();
   virtual ~PawleyParameterFunction() {}
 
+  /// Returns the function name
   std::string name() const { return "PawleyParameterFunction"; }
 
   void setAttribute(const std::string &attName, const Attribute &attValue);
@@ -27,10 +38,12 @@ public:
   Geometry::UnitCell getUnitCellFromParameters() const;
   void setParametersFromUnitCell(const Geometry::UnitCell &cell);
 
+  /// Returns the stored profile function name
   std::string getProfileFunctionName() const {
     return getAttribute("ProfileFunction").asString();
   }
 
+  /// Returns the name of the stored function's center parameter
   std::string getProfileFunctionCenterParameterName() const {
     return m_profileFunctionCenterParameterName;
   }
@@ -57,7 +70,7 @@ protected:
 
 typedef boost::shared_ptr<PawleyParameterFunction> PawleyParameterFunction_sptr;
 
-/** PawleyFunction
+/** @class PawleyFunction
 
   The Pawley approach to obtain lattice parameters from a powder diffractogram
   works by placing peak profiles at d-values (which result from the lattice
@@ -97,6 +110,7 @@ public:
   PawleyFunction();
   virtual ~PawleyFunction() {}
 
+  /// Returns the name of the function.
   std::string name() const { return "PawleyFunction"; }
 
   void setCrystalSystem(const std::string &crystalSystem);
@@ -105,6 +119,8 @@ public:
 
   void function(const API::FunctionDomain &domain,
                 API::FunctionValues &values) const;
+
+  /// Derivates are calculated numerically.
   void functionDeriv(const API::FunctionDomain &domain,
                      API::Jacobian &jacobian) {
     calNumericalDeriv(domain, jacobian);
