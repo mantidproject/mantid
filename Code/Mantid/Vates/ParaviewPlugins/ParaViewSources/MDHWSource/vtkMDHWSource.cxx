@@ -56,7 +56,8 @@ const char* vtkMDHWSource::GetInputGeometryXML()
 {
   if(m_presenter == NULL)
   {
-    return "";
+    std::string output;
+    return output.c_str();
   }
   try
   {
@@ -64,7 +65,8 @@ const char* vtkMDHWSource::GetInputGeometryXML()
   }
   catch(std::runtime_error&)
   {
-    return "";
+    std::string output;
+    return output.c_str();
   }
 }
 
@@ -139,7 +141,8 @@ const char* vtkMDHWSource::GetInstrument()
 {
   if (NULL == m_presenter)
   {
-    return "";
+    std::string output;
+    return output.c_str();
   }
   try
   {
@@ -147,7 +150,8 @@ const char* vtkMDHWSource::GetInstrument()
   }
   catch (std::runtime_error &)
   {
-    return "";
+    std::string output;
+    return output.c_str();
   }
 }
 
@@ -301,11 +305,12 @@ void vtkMDHWSource::updateAlgorithmProgress(double progress, const std::string& 
 /*
 Getter for the workspace type name.
 */
-char* vtkMDHWSource::GetWorkspaceTypeName()
+const char* vtkMDHWSource::GetWorkspaceTypeName()
 {
   if(m_presenter == NULL)
   {
-    return "";
+    std::string output;
+    return output.c_str();
   }
   try
   {
@@ -315,7 +320,8 @@ char* vtkMDHWSource::GetWorkspaceTypeName()
   }
   catch(std::runtime_error&)
   {
-    return "";
+    std::string output;
+    return output.c_str();
   }
 }
 

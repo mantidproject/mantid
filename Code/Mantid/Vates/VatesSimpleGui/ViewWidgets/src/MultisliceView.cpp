@@ -230,7 +230,7 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
   origin[2] = sliceOffsetOnAxis * orient[2];
 
   // Create the XML holder
-  VATES::VatesKnowledgeSerializer rks(VATES::LocationNotRequired);
+  VATES::VatesKnowledgeSerializer rks;
   rks.setWorkspaceName(wsName.toStdString());
   rks.setGeometryXML(geomXML);
 
