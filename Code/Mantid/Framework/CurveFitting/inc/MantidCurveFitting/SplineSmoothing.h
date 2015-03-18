@@ -6,111 +6,118 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/BSpline.h"
 
-namespace Mantid
-{
-namespace CurveFitting
-{
+namespace Mantid {
+namespace CurveFitting {
 
-  /** Takes a 2D workspace and produces an output workspace containing a smoothed version of the data by selecting
-    a number of points to define a spline for each histogram in the workspace.
-    
-    @author Samuel Jackson, STFC
-    @date 24/07/2013
+/** Takes a 2D workspace and produces an output workspace containing a smoothed
+  version of the data by selecting
+  a number of points to define a spline for each histogram in the workspace.
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  @author Samuel Jackson, STFC
+  @date 24/07/2013
 
-    This file is part of Mantid.
+  Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport SplineSmoothing  : public API::Algorithm
-  {
-  public:
-    SplineSmoothing();
-    virtual ~SplineSmoothing();
-    
-    virtual const std::string name() const;
-    virtual int version() const;
-    virtual const std::string category() const;
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Smoothes a set of spectra using a cubic spline. Optionally, this algorithm can also calculate derivatives up to order 2 as a side product";}
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  private:
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport SplineSmoothing : public API::Algorithm {
+public:
+  SplineSmoothing();
+  virtual ~SplineSmoothing();
 
-    /// number of smoothing points to start with
-    const int M_START_SMOOTH_POINTS;
+  virtual const std::string name() const;
+  virtual int version() const;
+  virtual const std::string category() const;
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Smoothes a set of spectra using a cubic spline. Optionally, this "
+           "algorithm can also calculate derivatives up to order 2 as a side "
+           "product";
+  }
 
+private:
+  /// number of smoothing points to start with
+  const int M_START_SMOOTH_POINTS;
 
-    //Overriden methods
-    void init();
-    void exec();
-    
-    /// smooth a single spectrum of the workspace
-    void smoothSpectrum(int index);
-  
-    /// calculate derivatives for a single spectrum
-    void calculateSpectrumDerivatives(int index, int order);
+  // Overriden methods
+  void init();
+  void exec();
 
-    /// setup an output workspace using meta data from inws and taking a number of spectra
-    API::MatrixWorkspace_sptr setupOutputWorkspace(API::MatrixWorkspace_const_sptr inws, int size) const;
+  /// smooth a single spectrum of the workspace
+  void smoothSpectrum(int index);
 
-    /// convert a binned workspace to point data. Uses mean of the bins as point
-    API::MatrixWorkspace_sptr convertBinnedData(API::MatrixWorkspace_sptr workspace);
+  /// calculate derivatives for a single spectrum
+  void calculateSpectrumDerivatives(int index, int order);
 
-    /// set the points used in the spline for smoothing
-    void setSmoothingPoint(const int index, const double xpoint, const double ypoint) const;
+  /// setup an output workspace using meta data from inws and taking a number of
+  /// spectra
+  API::MatrixWorkspace_sptr
+  setupOutputWorkspace(API::MatrixWorkspace_const_sptr inws, int size) const;
 
-    /// choose points to define a spline and smooth the data
-    void selectSmoothingPoints(API::MatrixWorkspace_const_sptr inputWorkspace, size_t row);
+  /// convert a binned workspace to point data. Uses mean of the bins as point
+  API::MatrixWorkspace_sptr
+  convertBinnedData(API::MatrixWorkspace_sptr workspace);
 
-    /// calculate the spline based on the smoothing points chosen
-    void calculateSmoothing(API::MatrixWorkspace_const_sptr inputWorkspace,
-      API::MatrixWorkspace_sptr outputWorkspace, size_t row) const;
+  /// set the points used in the spline for smoothing
+  void setSmoothingPoint(const int index, const double xpoint,
+                         const double ypoint) const;
 
-    /// calculate the derivatives for a set of points on the spline
-    void calculateDerivatives(API::MatrixWorkspace_const_sptr inputWorkspace,
-        API::MatrixWorkspace_sptr outputWorkspace, int order, size_t row) const;
+  /// choose points to define a spline and smooth the data
+  void selectSmoothingPoints(API::MatrixWorkspace_const_sptr inputWorkspace,
+                             size_t row);
 
-    /// add a set of smoothing points to the spline
-    void addSmoothingPoints(const std::set<int>& points,
-        const double* xs, const double* ys) const;
+  /// calculate the spline based on the smoothing points chosen
+  void calculateSmoothing(API::MatrixWorkspace_const_sptr inputWorkspace,
+                          API::MatrixWorkspace_sptr outputWorkspace,
+                          size_t row) const;
 
-    /// check if the difference between smoothing points and data points is within a certain error bound
-    bool checkSmoothingAccuracy(const int start, const int end,
-        const double* ys, const double* ysmooth) const;
+  /// calculate the derivatives for a set of points on the spline
+  void calculateDerivatives(API::MatrixWorkspace_const_sptr inputWorkspace,
+                            API::MatrixWorkspace_sptr outputWorkspace,
+                            int order, size_t row) const;
 
-    /// Use an existing fit function to tidy smoothing
-    void performAdditionalFitting(API::MatrixWorkspace_sptr ws, const int row);
+  /// add a set of smoothing points to the spline
+  void addSmoothingPoints(const std::set<int> &points, const double *xs,
+                          const double *ys) const;
 
-    /// CubicSpline member used to perform smoothing
-    boost::shared_ptr<BSpline> m_cspline;
-    /// pointer to the input workspace
-    API::MatrixWorkspace_sptr m_inputWorkspace;
-    /// pointer to the input workspace converted to point data
-    API::MatrixWorkspace_sptr m_inputWorkspacePointData;
-    /// pointer to the output workspace group of derivatives
-    API::WorkspaceGroup_sptr m_derivativeWorkspaceGroup;
-    /// pointer to the smoothed output workspace
-    API::MatrixWorkspace_sptr m_outputWorkspace;
+  /// check if the difference between smoothing points and data points is within
+  /// a certain error bound
+  bool checkSmoothingAccuracy(const int start, const int end, const double *ys,
+                              const double *ysmooth) const;
 
-  };
+  /// Use an existing fit function to tidy smoothing
+  void performAdditionalFitting(API::MatrixWorkspace_sptr ws, const int row);
 
+  /// CubicSpline member used to perform smoothing
+  boost::shared_ptr<BSpline> m_cspline;
+  /// pointer to the input workspace
+  API::MatrixWorkspace_sptr m_inputWorkspace;
+  /// pointer to the input workspace converted to point data
+  API::MatrixWorkspace_sptr m_inputWorkspacePointData;
+  /// pointer to the output workspace group of derivatives
+  API::WorkspaceGroup_sptr m_derivativeWorkspaceGroup;
+  /// pointer to the smoothed output workspace
+  API::MatrixWorkspace_sptr m_outputWorkspace;
+};
 
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif  /* MANTID_CURVEFITTING_SPLINESMOOTHING_H_ */
+#endif /* MANTID_CURVEFITTING_SPLINESMOOTHING_H_ */

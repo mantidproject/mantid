@@ -10,10 +10,16 @@
     <height>710</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>1057</width>
+    <height>0</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,1,0">
+  <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -179,18 +185,18 @@
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
-       <widget class="pqPipelineBrowserWidget" name="pipelineBrowser" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>50</height>
-         </size>
-        </property>
-       </widget>
-       <widget class="QTabWidget" name="propInfoTabs">
-        <property name="currentIndex">
-         <number>0</number>
-        </property>
+      <widget class="pqPipelineBrowserWidget" name="pipelineBrowser" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>350</width>
+         <height>50</height>
+        </size>
+       </property>
+      </widget>
+      <widget class="QTabWidget" name="propInfoTabs">
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
         <widget class="QWidget" name="properties2">
          <attribute name="title">
           <string>Properties</string>
@@ -211,7 +217,6 @@
           </item>
          </layout>
         </widget>
-
         <widget class="QWidget" name="information">
          <attribute name="title">
           <string>Information</string>

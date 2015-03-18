@@ -214,6 +214,7 @@ set ( INC_FILES
 	inc/MantidKernel/RemoteJobManager.h
 	inc/MantidKernel/SingletonHolder.h
 	inc/MantidKernel/SobolSequence.h
+        inc/MantidKernel/SpecialCoordinateSystem.h
 	inc/MantidKernel/StartsWithValidator.h
 	inc/MantidKernel/Statistics.h
 	inc/MantidKernel/StdoutChannel.h
@@ -327,7 +328,8 @@ set ( TEST_FILES
 	RegexStringsTest.h
 	SLSQPMinimizerTest.h
 	SobolSequenceTest.h
-	StartsWithValidatorTest.h
+	SpecialCoordinateSystemTest.h
+        StartsWithValidatorTest.h
 	StatisticsTest.h
 	StdoutChannelTest.h
 	StringsTest.h
@@ -378,6 +380,10 @@ add_library ( Kernel ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
 set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel
                                           COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1" )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif ()
 
 # Add to the 'Framework' group in VS
 set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )

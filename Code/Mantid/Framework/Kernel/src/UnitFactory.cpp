@@ -1,18 +1,11 @@
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid
-{
-namespace Kernel
-{
+namespace Mantid {
+namespace Kernel {
 
-UnitFactoryImpl::UnitFactoryImpl() :
-  DynamicFactory<Unit>()
-{
-}
+UnitFactoryImpl::UnitFactoryImpl() : DynamicFactory<Unit>() {}
 
-UnitFactoryImpl::~UnitFactoryImpl()
-{
-}
+UnitFactoryImpl::~UnitFactoryImpl() {}
 
 } // namespace Kernel
 } // namespace Mantid

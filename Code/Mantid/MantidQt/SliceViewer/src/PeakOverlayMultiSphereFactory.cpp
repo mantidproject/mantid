@@ -67,7 +67,12 @@ namespace MantidQt
 
     int PeakOverlayMultiSphereFactory::FOM() const
     {
-      return m_FOM;
+        return m_FOM;
+    }
+
+    void PeakOverlayMultiSphereFactory::swapPeaksWorkspace(boost::shared_ptr<IPeaksWorkspace> &peaksWS)
+    {
+        m_peaksWS = peaksWS;
     }
 
   }

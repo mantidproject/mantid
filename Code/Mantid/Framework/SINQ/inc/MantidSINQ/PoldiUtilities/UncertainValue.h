@@ -5,16 +5,15 @@
 #include <cmath>
 #include <string>
 
-namespace Mantid
-{
-namespace Poldi
-{
+namespace Mantid {
+namespace Poldi {
 
 /** UncertainValue :
 
     A value with error. This class is convenient when numbers with uncertainties
     have to be stored. It supports conversion to double (then only the value
-    is supplied, without the uncertainty) and arithmetic operations with doubles,
+    is supplied, without the uncertainty) and arithmetic operations with
+   doubles,
     preserving the errors.
 
         @author Michael Wedel, Paul Scherrer Institut - SINQ
@@ -40,39 +39,39 @@ namespace Poldi
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class MANTID_SINQ_DLL UncertainValue
-{
+class MANTID_SINQ_DLL UncertainValue {
 public:
-    UncertainValue();
-    explicit UncertainValue(double value);
-    UncertainValue(double value, double error);
-    ~UncertainValue() {}
+  UncertainValue();
+  explicit UncertainValue(double value);
+  UncertainValue(double value, double error);
+  ~UncertainValue() {}
 
-    double value() const;
-    double error() const;
+  double value() const;
+  double error() const;
 
-    operator double() const;
-    UncertainValue operator*(double d);
-    UncertainValue operator/(double d);
-    UncertainValue operator+(double d);
-    UncertainValue operator-(double d);
+  operator double() const;
+  UncertainValue operator*(double d);
+  UncertainValue operator/(double d);
+  UncertainValue operator+(double d);
+  UncertainValue operator-(double d);
 
-    static const UncertainValue plainAddition(UncertainValue const& left, UncertainValue const& right);
+  static const UncertainValue plainAddition(UncertainValue const &left,
+                                            UncertainValue const &right);
 
-    static bool lessThanError(UncertainValue const& left, UncertainValue const& right);
-    static double valueToErrorRatio(UncertainValue const& uncertainValue);
-    static double errorToValueRatio(UncertainValue const& uncertainValue);
+  static bool lessThanError(UncertainValue const &left,
+                            UncertainValue const &right);
+  static double valueToErrorRatio(UncertainValue const &uncertainValue);
+  static double errorToValueRatio(UncertainValue const &uncertainValue);
 
-private:    
-    double m_value;
-    double m_error;
+private:
+  double m_value;
+  double m_error;
 };
 
 UncertainValue MANTID_SINQ_DLL operator*(double d, const UncertainValue &v);
 UncertainValue MANTID_SINQ_DLL operator/(double d, const UncertainValue &v);
 UncertainValue MANTID_SINQ_DLL operator+(double d, const UncertainValue &v);
 UncertainValue MANTID_SINQ_DLL operator-(double d, const UncertainValue &v);
-
 }
 }
 

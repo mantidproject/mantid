@@ -10,16 +10,16 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ITransformScale.h"
 
-namespace Mantid
-{
-namespace API
-{
-/*Base class  representing a logarithm scaling transformation acting on a one-dimensional grid domain
+namespace Mantid {
+namespace API {
+/*Base class  representing a logarithm scaling transformation acting on a
+  one-dimensional grid domain
 
   @author Jose Borreguero
   @date Aug/28/2012
 
-  Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -40,21 +40,20 @@ namespace API
   Code Documentation is available at: <http://doxygen.mantidproject.org>.
 */
 
-class MANTID_API_DLL LogarithmScale : public ITransformScale
-{
+class MANTID_API_DLL LogarithmScale : public ITransformScale {
 public:
-  LogarithmScale() : m_base(M_E) {};
-  ~LogarithmScale() {};
+  LogarithmScale() : m_base(M_E){};
+  ~LogarithmScale(){};
   const std::string name() const { return "LogarithmScale"; }
-  void transform( std::vector<double> &gd );
-  void setBase( double &base);
-  /// The scaling transformation. First and last elements of the grid remain unchanged
+  void transform(std::vector<double> &gd);
+  void setBase(double &base);
+  /// The scaling transformation. First and last elements of the grid remain
+  /// unchanged
 
 private:
-  double m_base; //base of the logarithm
+  double m_base; // base of the logarithm
 
 }; // class LogarithmScale
-
 
 } // namespace API
 } // namespace Mantid

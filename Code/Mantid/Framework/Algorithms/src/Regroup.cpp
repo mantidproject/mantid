@@ -14,14 +14,11 @@
 
 #include <iostream>
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Regroup)
-
 
 using namespace Kernel;
 using API::WorkspaceProperty;
@@ -30,38 +27,36 @@ using API::MatrixWorkspace_const_sptr;
 using API::MatrixWorkspace;
 
 /// Initialisation method. Declares properties to be used in algorithm.
-void Regroup::init()
-{
+void Regroup::init() {
   auto wsVal = boost::make_shared<CompositeValidator>();
   wsVal->add<API::HistogramValidator>();
   wsVal->add<API::CommonBinsValidator>();
-  declareProperty(
-    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, wsVal),
-    "The input workspace." );
-  declareProperty(
-    new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
-    "The result of regrouping.");
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+                      "InputWorkspace", "", Direction::Input, wsVal),
+                  "The input workspace.");
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
+                                                         Direction::Output),
+                  "The result of regrouping.");
 
   declareProperty(
-    new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>()),
-    "The new approximate bin boundaries in the form: x1,dx1,x2,dx2,...,xn");
+      new ArrayProperty<double>("Params",
+                                boost::make_shared<RebinParamsValidator>()),
+      "The new approximate bin boundaries in the form: x1,dx1,x2,dx2,...,xn");
 }
 
 /** Executes the regroup algorithm
  *
  *  @throw runtime_error Thrown if
  */
-void Regroup::exec()
-{
+void Regroup::exec() {
   // retrieve the properties
-  std::vector<double> rb_params=getProperty("Params");
+  std::vector<double> rb_params = getProperty("Params");
 
   // Get the input workspace
   MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
 
   // can work only if all histograms have the same boundaries
-  if (!API::WorkspaceHelpers::commonBoundaries(inputW))
-  {
+  if (!API::WorkspaceHelpers::commonBoundaries(inputW)) {
     g_log.error("Histograms with different boundaries");
     throw std::runtime_error("Histograms with different boundaries");
   }
@@ -70,36 +65,37 @@ void Regroup::exec()
 
   int histnumber = static_cast<int>(inputW->getNumberHistograms());
   MantidVecPtr XValues_new;
-  const MantidVec & XValues_old = inputW->readX(0);
-  std::vector<int> xoldIndex;// indeces of new x in XValues_old
+  const MantidVec &XValues_old = inputW->readX(0);
+  std::vector<int> xoldIndex; // indeces of new x in XValues_old
   // create new output X axis
-  int ntcnew = newAxis(rb_params,XValues_old,XValues_new.access(),xoldIndex);
+  int ntcnew = newAxis(rb_params, XValues_old, XValues_new.access(), xoldIndex);
 
-  // make output Workspace the same type is the input, but with new length of signal array
-  API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,ntcnew,ntcnew-1);
+  // make output Workspace the same type is the input, but with new length of
+  // signal array
+  API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(
+      inputW, histnumber, ntcnew, ntcnew - 1);
 
   int progress_step = histnumber / 100;
-  if (progress_step == 0) progress_step = 1;
-  for (int hist=0; hist <  histnumber;hist++)
-  {
+  if (progress_step == 0)
+    progress_step = 1;
+  for (int hist = 0; hist < histnumber; hist++) {
     // get const references to input Workspace arrays (no copying)
-    const MantidVec& XValues = inputW->readX(hist);
-    const MantidVec& YValues = inputW->readY(hist);
-    const MantidVec& YErrors = inputW->readE(hist);
+    const MantidVec &XValues = inputW->readX(hist);
+    const MantidVec &YValues = inputW->readY(hist);
+    const MantidVec &YErrors = inputW->readE(hist);
 
-    //get references to output workspace data (no copying)
-    MantidVec& YValues_new=outputW->dataY(hist);
-    MantidVec& YErrors_new=outputW->dataE(hist);
+    // get references to output workspace data (no copying)
+    MantidVec &YValues_new = outputW->dataY(hist);
+    MantidVec &YErrors_new = outputW->dataE(hist);
 
     // output data arrays are implicitly filled by function
-    rebin(XValues,YValues,YErrors,xoldIndex,YValues_new,YErrors_new, dist);
+    rebin(XValues, YValues, YErrors, xoldIndex, YValues_new, YErrors_new, dist);
 
-    outputW->setX(hist,XValues_new);
+    outputW->setX(hist, XValues_new);
 
-    if (hist % progress_step == 0)
-    {
-        progress(double(hist)/histnumber);
-        interruption_point();
+    if (hist % progress_step == 0) {
+      progress(double(hist) / histnumber);
+      interruption_point();
     }
   }
 
@@ -108,17 +104,15 @@ void Regroup::exec()
   // Copy units
   if (outputW->getAxis(0)->unit().get())
     outputW->getAxis(0)->unit() = inputW->getAxis(0)->unit();
-  try
-  {
+  try {
     if (inputW->getAxis(1)->unit().get())
       outputW->getAxis(1)->unit() = inputW->getAxis(1)->unit();
-   }
-  catch(Exception::IndexError &) {
+  } catch (Exception::IndexError &) {
     // OK, so this isn't a Workspace2D
   }
 
   // Assign it to the output workspace property
-  setProperty("OutputWorkspace",outputW);
+  setProperty("OutputWorkspace", outputW);
 
   return;
 }
@@ -135,19 +129,20 @@ void Regroup::exec()
  * @throw runtime_error Thrown if algorithm cannot execute
  * @throw invalid_argument Thrown if input to function is incorrect
  **/
-void Regroup::rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
-    const std::vector<int>& xoldIndex, std::vector<double>& ynew, std::vector<double>& enew, bool distribution)
-{
+void Regroup::rebin(const std::vector<double> &xold,
+                    const std::vector<double> &yold,
+                    const std::vector<double> &eold,
+                    const std::vector<int> &xoldIndex,
+                    std::vector<double> &ynew, std::vector<double> &enew,
+                    bool distribution) {
 
-  for(int i=0;i<int(xoldIndex.size()-1);i++)
-  {
+  for (int i = 0; i < int(xoldIndex.size() - 1); i++) {
 
-    int n = xoldIndex[i];// start the group
-    int m = xoldIndex[i+1];// end the group
+    int n = xoldIndex[i];             // start the group
+    int m = xoldIndex[i + 1];         // end the group
     double width = xold[m] - xold[n]; // width of the group
-    
-    if (width == 0.)
-    {
+
+    if (width == 0.) {
       g_log.error("Zero bin width");
       throw std::runtime_error("Zero bin width");
     }
@@ -155,97 +150,89 @@ void Regroup::rebin(const std::vector<double>& xold, const std::vector<double>& 
      *        yold contains counts/unit time, ynew contains counts
      *	       enew contains counts**2
      */
-    if(distribution)
-    {
+    if (distribution) {
       ynew[i] = 0.;
       enew[i] = 0.;
-      for(int j=n;j<m;j++)
-      {
-        double wdt = xold[j+1] - xold[j]; // old bin width
-        ynew[i] += yold[j]*wdt;
-        enew[i] += eold[j]*eold[j]*wdt*wdt;
+      for (int j = n; j < m; j++) {
+        double wdt = xold[j + 1] - xold[j]; // old bin width
+        ynew[i] += yold[j] * wdt;
+        enew[i] += eold[j] * eold[j] * wdt * wdt;
       }
       ynew[i] /= width;
-      enew[i] = sqrt(enew[i])/width;
-    }
-    else// yold,eold data is not distribution but counts
+      enew[i] = sqrt(enew[i]) / width;
+    } else // yold,eold data is not distribution but counts
     {
       ynew[i] = 0.;
       enew[i] = 0.;
-      for(int j=n;j<m;j++)
-      {
+      for (int j = n; j < m; j++) {
         ynew[i] += yold[j];
-        enew[i] += eold[j]*eold[j];
+        enew[i] += eold[j] * eold[j];
       }
       enew[i] = sqrt(enew[i]);
     }
   }
 
-  return; //without problems
+  return; // without problems
 }
 
 /** Creates a new  output X array  according to specific boundary defnitions
  *
- *  @param params ::    rebin parameters input [x_1, delta_1,x_2, ... ,x_n-1,delta_n-1,x_n)
+ *  @param params ::    rebin parameters input [x_1, delta_1,x_2, ...
+ *,x_n-1,delta_n-1,x_n)
  *  @param xold ::      the current x array
  *  @param xnew ::      new output workspace x array
  *  @param xoldIndex :: indeces of new x in XValues_old
  *  @return The number of bin boundaries in the new X array
  **/
-int Regroup::newAxis(const std::vector<double>& params,
-    const std::vector<double>& xold, std::vector<double>& xnew,std::vector<int> &xoldIndex)
-{
+int Regroup::newAxis(const std::vector<double> &params,
+                     const std::vector<double> &xold, std::vector<double> &xnew,
+                     std::vector<int> &xoldIndex) {
   double xcurr, xs;
   int ibound(2), istep(1), inew(0);
-  int ibounds=static_cast<int>(params.size()); //highest index in params array containing a bin boundary
-  int isteps=ibounds-1; // highest index in params array containing a step
+  int ibounds = static_cast<int>(
+      params.size()); // highest index in params array containing a bin boundary
+  int isteps = ibounds - 1; // highest index in params array containing a step
 
   xcurr = params[0];
   std::vector<double>::const_iterator iup =
-    std::find_if(xold.begin(),xold.end(),std::bind2nd(std::greater_equal<double>(),xcurr));
-  if (iup != xold.end())
-  {
+      std::find_if(xold.begin(), xold.end(),
+                   std::bind2nd(std::greater_equal<double>(), xcurr));
+  if (iup != xold.end()) {
     xcurr = *iup;
     xnew.push_back(xcurr);
     xoldIndex.push_back(inew);
     inew++;
-  }
-  else
+  } else
     return 0;
 
-  while( (ibound <= ibounds) && (istep <= isteps) )
-  {
+  while ((ibound <= ibounds) && (istep <= isteps)) {
     // if step is negative then it is logarithmic step
-    if ( params[istep] >= 0.0)
+    if (params[istep] >= 0.0)
       xs = params[istep];
     else
       xs = xcurr * fabs(params[istep]);
 
-    //xcurr += xs;
+    // xcurr += xs;
 
     // find nearest x_i that is >= xcurr
-    iup = std::find_if(xold.begin(),xold.end(),std::bind2nd(std::greater_equal<double>(),xcurr+xs));
-    if (iup != xold.end())
-    {
-      if (*iup <= params[ibound])
-      {
+    iup = std::find_if(xold.begin(), xold.end(),
+                       std::bind2nd(std::greater_equal<double>(), xcurr + xs));
+    if (iup != xold.end()) {
+      if (*iup <= params[ibound]) {
         xcurr = *iup;
         xnew.push_back(xcurr);
         xoldIndex.push_back(inew);
         inew++;
-      }
-      else
-      {
+      } else {
         ibound += 2;
         istep += 2;
       }
-    }
-    else
+    } else
       return inew;
   }
-  //returns length of new x array or -1 if failure
+  // returns length of new x array or -1 if failure
   return inew;
-  //return( (ibound == ibounds) && (istep == isteps) ? inew : -1 );
+  // return( (ibound == ibounds) && (istep == isteps) ? inew : -1 );
 }
 
 } // namespace Algorithm

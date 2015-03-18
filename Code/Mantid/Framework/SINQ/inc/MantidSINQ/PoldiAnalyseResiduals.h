@@ -7,10 +7,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 
-namespace Mantid
-{
-namespace Poldi
-{
+namespace Mantid {
+namespace Poldi {
 
 /** PoldiAnalyseResiduals
 
@@ -41,40 +39,47 @@ namespace Poldi
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class MANTID_SINQ_DLL PoldiAnalyseResiduals  : public API::Algorithm
-{
+class MANTID_SINQ_DLL PoldiAnalyseResiduals : public API::Algorithm {
 public:
-    PoldiAnalyseResiduals();
-    virtual ~PoldiAnalyseResiduals();
-    
-    virtual const std::string name() const;
-    virtual int version() const;
-    virtual const std::string category() const;
-    virtual const std::string summary() const;
+  PoldiAnalyseResiduals();
+  virtual ~PoldiAnalyseResiduals();
+
+  virtual const std::string name() const;
+  virtual int version() const;
+  virtual const std::string category() const;
+  virtual const std::string summary() const;
 
 protected:
-    double sumCounts(const DataObjects::Workspace2D_sptr &workspace, const std::vector<int> &workspaceIndices) const;
-    size_t numberOfPoints(const DataObjects::Workspace2D_sptr &workspace, const std::vector<int> &workspaceIndices) const;
-    void addValue(DataObjects::Workspace2D_sptr &workspace, double value, const std::vector<int> &workspaceIndices) const;
+  double sumCounts(const DataObjects::Workspace2D_sptr &workspace,
+                   const std::vector<int> &workspaceIndices) const;
+  size_t numberOfPoints(const DataObjects::Workspace2D_sptr &workspace,
+                        const std::vector<int> &workspaceIndices) const;
+  void addValue(DataObjects::Workspace2D_sptr &workspace, double value,
+                const std::vector<int> &workspaceIndices) const;
 
-    DataObjects::Workspace2D_sptr calculateResidualWorkspace(const DataObjects::Workspace2D_sptr &measured, const DataObjects::Workspace2D_sptr &calculated);
-    void normalizeResiduals(DataObjects::Workspace2D_sptr &residuals, const std::vector<int> &validWorkspaceIndices);
-    double relativeCountChange(const DataObjects::Workspace2D_sptr &sum, double totalMeasuredCounts);
+  DataObjects::Workspace2D_sptr
+  calculateResidualWorkspace(const DataObjects::Workspace2D_sptr &measured,
+                             const DataObjects::Workspace2D_sptr &calculated);
+  void normalizeResiduals(DataObjects::Workspace2D_sptr &residuals,
+                          const std::vector<int> &validWorkspaceIndices);
+  double relativeCountChange(const DataObjects::Workspace2D_sptr &sum,
+                             double totalMeasuredCounts);
 
-    DataObjects::Workspace2D_sptr addWorkspaces(const DataObjects::Workspace2D_sptr &lhs, const DataObjects::Workspace2D_sptr &rhs);
-    void logIteration(int iteration, double relativeChange);
+  DataObjects::Workspace2D_sptr
+  addWorkspaces(const DataObjects::Workspace2D_sptr &lhs,
+                const DataObjects::Workspace2D_sptr &rhs);
+  void logIteration(int iteration, double relativeChange);
 
-    bool nextIterationAllowed(int iterations, double relativeChange);
-    bool relativeChangeIsLargerThanLimit(double relativeChange);
-    bool iterationLimitReached(int iterations);
+  bool nextIterationAllowed(int iterations, double relativeChange);
+  bool relativeChangeIsLargerThanLimit(double relativeChange);
+  bool iterationLimitReached(int iterations);
 
 private:
-    void init();
-    void exec();
+  void init();
+  void exec();
 };
-
 
 } // namespace Poldi
 } // namespace Mantid
 
-#endif  /* MANTID_SINQ_POLDIANALYSERESIDUALS_H_ */
+#endif /* MANTID_SINQ_POLDIANALYSERESIDUALS_H_ */

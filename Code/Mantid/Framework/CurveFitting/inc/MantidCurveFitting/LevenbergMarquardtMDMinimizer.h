@@ -8,20 +8,19 @@
 #include "MantidCurveFitting/GSLVector.h"
 #include "MantidCurveFitting/GSLMatrix.h"
 
-namespace Mantid
-{
-namespace CurveFitting
-{
+namespace Mantid {
+namespace CurveFitting {
 
 class CostFuncLeastSquares;
 
-/** Implementing Levenberg-Marquardt algorithm. Uses the normal system calculate 
+/** Implementing Levenberg-Marquardt algorithm. Uses the normal system calculate
     the corrections to the parameters. Expects a cost function that can evaluate
     the value, the derivatives and the hessian matrix.
 
     @author Roman Tolchenov, Tessella plc
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -41,16 +40,16 @@ class CostFuncLeastSquares;
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LevenbergMarquardtMDMinimizer : public API::IFuncMinimizer
-{
+class DLLExport LevenbergMarquardtMDMinimizer : public API::IFuncMinimizer {
 public:
   /// Constructor
   LevenbergMarquardtMDMinimizer();
   /// Name of the minimizer.
-  std::string name() const {return "Levenberg-MarquardtMD";}
+  std::string name() const { return "Levenberg-MarquardtMD"; }
 
   /// Initialize minimizer, i.e. pass a function to minimize.
-  virtual void initialize(API::ICostFunction_sptr function, size_t  maxIterations = 0);
+  virtual void initialize(API::ICostFunction_sptr function,
+                          size_t maxIterations = 0);
   /// Do one iteration.
   virtual bool iterate(size_t iteration);
   /// Return current value of the cost function
@@ -71,7 +70,6 @@ private:
   double m_F;
   std::vector<double> m_D;
 };
-
 
 } // namespace CurveFitting
 } // namespace Mantid

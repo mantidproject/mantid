@@ -6,10 +6,8 @@
 #include "MantidAPI/Algorithm.h"
 #include <string>
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 
 /**
  Class for marking algorithms as deprecated.
@@ -17,7 +15,8 @@ namespace API
  @author Peter Peterson, NScD Oak Ridge National Laboratory
  @date 25/02/2011
 
- Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -37,15 +36,16 @@ namespace API
  File change history is stored at: <https://github.com/mantidproject/mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL DeprecatedAlgorithm
-{
+class MANTID_API_DLL DeprecatedAlgorithm {
 public:
   DeprecatedAlgorithm();
   virtual ~DeprecatedAlgorithm();
   const std::string deprecationMsg(const IAlgorithm *);
+
 public:
-  void useAlgorithm(const std::string &, const int version= -1);
+  void useAlgorithm(const std::string &, const int version = -1);
   void deprecatedDate(const std::string &);
+
 private:
   /// The algorithm to use instead of this one.
   std::string m_replacementAlgorithm;

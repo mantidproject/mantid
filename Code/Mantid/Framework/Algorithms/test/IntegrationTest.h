@@ -50,7 +50,9 @@ public:
   }
 
   ~IntegrationTest()
-  {}
+  {
+    AnalysisDataService::Instance().clear();
+  }
 
   void testInit()
   {
@@ -448,6 +450,96 @@ public:
     doTestRealBinBoundaries(inWsName, "2.2", "3.03", 0);
     doTestRealBinBoundaries(inWsName, "-42.2", "-3.03", 0);
 
+  }
+
+  void test_point_data_linear_x()
+  {
+    // Set up a small workspace for testing
+    const size_t nspec = 5;
+    Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",nspec,5,5);
+    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
+
+    for (int j = 0; j < 5; ++j) {
+      for (int k = 0; k < 5; ++k) {
+        space2D->dataX(j)[k] = 0.9*k;
+        space2D->dataY(j)[k] = 2*k + double(j);
+        space2D->dataE(j)[k] = 1.0;
+      }
+    }
+
+    const std::string outWsName = "IntegrationTest_PointData";
+    Integration alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", space2D);
+    alg.setPropertyValue("OutputWorkspace", outWsName);
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName) );
+    TS_ASSERT( output );
+    if ( !output ) return;
+
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), 5 );
+    TS_ASSERT_EQUALS( output->blocksize(), 1 );
+    TS_ASSERT( output->isHistogramData() );
+
+    TS_ASSERT_DELTA( output->readX(0).front(), -0.5 * 0.9, 1e-14 );
+    TS_ASSERT_DELTA( output->readX(0).back(),   4.5 * 0.9, 1e-14 );
+
+    TS_ASSERT_DELTA( output->readY(0)[0], 20 * 0.9, 1e-14 );
+    TS_ASSERT_DELTA( output->readY(1)[0], 25 * 0.9, 1e-14 );
+    TS_ASSERT_DELTA( output->readY(2)[0], 30 * 0.9, 1e-14 );
+    TS_ASSERT_DELTA( output->readY(3)[0], 35 * 0.9, 1e-14 );
+    TS_ASSERT_DELTA( output->readY(4)[0], 40 * 0.9, 1e-14 );
+
+    AnalysisDataService::Instance().remove( outWsName );
+  }
+
+  void test_point_data_non_linear_x()
+  {
+    // Set up a small workspace for testing
+    const size_t nspec = 5;
+    Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",nspec,5,5);
+    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
+
+    for (int j = 0; j < 5; ++j) {
+      for (int k = 0; k < 5; ++k) {
+        space2D->dataX(j)[k] = k * (1.0 + 1.0 * k);
+        space2D->dataY(j)[k] = 2*k + double(j);
+        space2D->dataE(j)[k] = 1.0;
+      }
+    }
+
+    const std::string outWsName = "IntegrationTest_PointData";
+    Integration alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", space2D);
+    alg.setPropertyValue("OutputWorkspace", outWsName);
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName) );
+    TS_ASSERT( output );
+    if ( !output ) return;
+
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), 5 );
+    TS_ASSERT_EQUALS( output->blocksize(), 1 );
+    TS_ASSERT( output->isHistogramData() );
+
+    TS_ASSERT_EQUALS( output->readX(0).front(), -1.0 );
+    TS_ASSERT_EQUALS( output->readX(0).back(), 24.0 );
+
+    TS_ASSERT_EQUALS( output->readY(0)[0], 132.0 );
+    TS_ASSERT_EQUALS( output->readY(1)[0], 157.0 );
+    TS_ASSERT_EQUALS( output->readY(2)[0], 182.0 );
+    TS_ASSERT_EQUALS( output->readY(3)[0], 207.0 );
+    TS_ASSERT_EQUALS( output->readY(4)[0], 232.0 );
+
+    AnalysisDataService::Instance().remove( outWsName );
   }
 
 private:

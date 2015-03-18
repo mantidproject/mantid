@@ -6,18 +6,19 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** Takes a 2D workspace as input and find the maximum in each 1D spectrum.
-    The algorithm creates a new 1D workspace containing all maxima as well as their X boundaries
-    and error. This is used in particular for single crystal as a quick way to find strong peaks.
+    The algorithm creates a new 1D workspace containing all maxima as well as
+   their X boundaries
+    and error. This is used in particular for single crystal as a quick way to
+   find strong peaks.
 
     Required Properties:
     <UL>
     <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
+    <LI> OutputWorkspace - The name of the workspace in which to store the
+   result </LI>
     </UL>
 
     Optional Properties (assume that you count from zero):
@@ -30,7 +31,8 @@ namespace Algorithms
 
     @author L C Chapon, ISIS, Rutherford Appleton Laboratory
     @date 11/08/2009
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
+   Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -50,30 +52,28 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport Max : public API::Algorithm
-{
+class DLLExport Max : public API::Algorithm {
 public:
   /// Default constructor
-  Max() : API::Algorithm() {};
+  Max() : API::Algorithm(){};
   /// Destructor
-  virtual ~Max() {};
+  virtual ~Max(){};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "Max";}
+  virtual const std::string name() const { return "Max"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1);}
+  virtual int version() const { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Arithmetic";}
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const
-  {
-    return "Takes a 2D workspace as input and find the maximum in each 1D spectrum.";
+  virtual const std::string category() const { return "Arithmetic"; }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Takes a 2D workspace as input and find the maximum in each 1D "
+           "spectrum.";
   }
 
 private:
   // Overridden Algorithm methods
   void init();
   void exec();
-
 };
 
 } // namespace Algorithm

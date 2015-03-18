@@ -2,6 +2,7 @@
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/ParaViewVersion.h"
@@ -27,9 +28,12 @@ namespace {
 /// The key in Mantid::Kernel::ConfigService to use.
 const std::string SEND_USAGE_CONFIG_KEY("usagereports.enabled");
 
+/// The default status for html to return if it wasn't run
+const int STATUS_DEFAULT = -1;
+
 /// The URL endpoint.
-const std::string URL("http://django-mantid.rhcloud.com/api/usage");
-//const std::string URL("http://127.0.0.1:8000/api/usage"); // dev location
+const std::string URL("http://reports.mantidproject.org/api/usage");
+// const std::string URL("http://127.0.0.1:8000/api/usage"); // dev location
 
 /// The string for post method
 const std::string POST(Poco::Net::HTTPRequest::HTTP_POST);
@@ -87,9 +91,10 @@ const std::string SendUsage::summary() const {
 /** Initialize the algorithm's properties.
  */
 void SendUsage::init() {
-  // declareProperty("UsageString", "", Direction::Input);
+  declareProperty("Application", "mantidplot", "how mantid was invoked");
+  declareProperty("Component", "", "leave blank for now");
   declareProperty("Json", "", Direction::Output);
-  declareProperty("HtmlCode", -1, Direction::Output);
+  declareProperty("HtmlCode", STATUS_DEFAULT, Direction::Output);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -113,21 +118,45 @@ void SendUsage::exec() {
 void SendUsage::sendReport(const std::string &json) {
   g_log.debug() << json << "\n";
 
-  // set up the headers
-  std::map<string, string> htmlHeaders;
+  int status = STATUS_DEFAULT;
 
-  std::stringstream responseStream;
-  Kernel::InternetHelper helper;
-  int status = helper.sendRequest(URL, responseStream, htmlHeaders, POST, json);
+  try {
+    std::map<string, string> htmlHeaders;
+    Kernel::InternetHelper helper;
+    std::stringstream responseStream;
+    status = helper.sendRequest(URL, responseStream, htmlHeaders, POST, json);
+    g_log.debug() << "Call to \"" << URL << "\" responded with " << status
+                  << "\n" << responseStream.str() << "\n";
+  }
+  catch (Mantid::Kernel::Exception::InternetError &e) {
+    status = e.errorCode();
+    g_log.information() << "Call to \"" << URL << "\" responded with " << status
+                        << "\n" << e.what() << "\n";
+  }
+
   this->setProperty("HtmlCode", status);
-  g_log.debug() << "Call responded with " << status << "\n"
-                << responseStream.str() << "\n";
 }
 
 std::string SendUsage::generateJson() {
   // later in life the additional parameters can be done after
   // the current date and time
-  return std::string(g_header + currentDateAndTime() + "}");
+  std::stringstream buffer;
+  buffer << g_header << currentDateAndTime();
+
+  // get the properties that were set
+  std::string application = this->getPropertyValue("Application");
+  if (!application.empty()) {
+    buffer << ",\"application\":\"" << application << "\"";
+  }
+  std::string component = this->getPropertyValue("Component");
+  if (!component.empty()) {
+    buffer << ",\"component\":\"" << component << "\"";
+  }
+
+  // close the document
+  buffer << "}";
+
+  return buffer.str();
 }
 
 /**
@@ -160,7 +189,9 @@ void SendUsage::generateHeader() {
          << "\"osArch\":\"" << ConfigService::Instance().getOSArchitecture()
          << "\","
          << "\"osVersion\":\"" << ConfigService::Instance().getOSVersion()
-         << "\",";
+         << "\","
+         << "\"osReadable\":\""
+         << ConfigService::Instance().getOSVersionReadable() << "\",";
 
   // paraview version or zero
   buffer << "\"ParaView\":\"";

@@ -8,12 +8,11 @@
 
 #include <set>
 
-namespace Mantid
-{
-namespace Geometry
-{
+namespace Mantid {
+namespace Geometry {
 
-/** SpaceGroup :
+/**
+    @class SpaceGroup
 
     A class for representing space groups, inheriting from Group.
 
@@ -26,12 +25,13 @@ namespace Geometry
     SpaceGroup may for example be used to generate all equivalent positions
     within the unit cell:
 
-      SpaceGroup_const_sptr someGroup;
+        SpaceGroup_const_sptr group;
 
-      V3D position(0.13, 0.54, 0.38);
-      std::vector<V3D> equivalents = someGroup->getEquivalentPositions(position);
+        V3D position(0.13, 0.54, 0.38);
+        std::vector<V3D> equivalents = group->getEquivalentPositions(position);
 
-    The class should not be instantiated directly, see SpaceGroupFactory instead.
+    The class should not be instantiated directly, see SpaceGroupFactoryImpl
+    instead.
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 03/10/2014
@@ -56,35 +56,35 @@ namespace Geometry
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class MANTID_GEOMETRY_DLL SpaceGroup : public Group
-{
+class MANTID_GEOMETRY_DLL SpaceGroup : public Group {
 public:
-    SpaceGroup(size_t itNumber, const std::string &hmSymbol, const Group &group);
+  SpaceGroup(size_t itNumber, const std::string &hmSymbol, const Group &group);
 
-    SpaceGroup(const SpaceGroup &other);
-    SpaceGroup &operator =(const SpaceGroup &other);
+  SpaceGroup(const SpaceGroup &other);
+  SpaceGroup &operator=(const SpaceGroup &other);
 
-    virtual ~SpaceGroup() { }
+  virtual ~SpaceGroup() {}
 
-    size_t number() const;
-    std::string hmSymbol() const;
+  size_t number() const;
+  std::string hmSymbol() const;
 
-    template<typename T>
-    std::vector<T> getEquivalentPositions(const T &position) const
-    {
-        const std::vector<SymmetryOperation> &symmetryOperations = getSymmetryOperations();
+  template <typename T>
+  std::vector<T> getEquivalentPositions(const T &position) const {
+    const std::vector<SymmetryOperation> &symmetryOperations =
+        getSymmetryOperations();
 
-        std::set<T> equivalents;
-        for(auto it = symmetryOperations.begin(); it != symmetryOperations.end(); ++it) {
-            equivalents.insert(Geometry::getWrappedVector((*it) * position));
-        }
-
-        return std::vector<T>(equivalents.begin(), equivalents.end());
+    std::set<T> equivalents;
+    for (auto it = symmetryOperations.begin(); it != symmetryOperations.end();
+         ++it) {
+      equivalents.insert(Geometry::getWrappedVector((*it) * position));
     }
 
+    return std::vector<T>(equivalents.begin(), equivalents.end());
+  }
+
 protected:
-    size_t m_number;
-    std::string m_hmSymbol;
+  size_t m_number;
+  std::string m_hmSymbol;
 };
 
 typedef boost::shared_ptr<SpaceGroup> SpaceGroup_sptr;
@@ -93,4 +93,4 @@ typedef boost::shared_ptr<const SpaceGroup> SpaceGroup_const_sptr;
 } // namespace Geometry
 } // namespace Mantid
 
-#endif  /* MANTID_GEOMETRY_SPACEGROUP_H_ */
+#endif /* MANTID_GEOMETRY_SPACEGROUP_H_ */

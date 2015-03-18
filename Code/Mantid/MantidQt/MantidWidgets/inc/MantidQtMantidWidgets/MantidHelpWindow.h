@@ -34,6 +34,8 @@ public:
   virtual void showConcept(const std::string &name);
   virtual void showConcept(const QString &name);
   virtual void showFitFunction(const std::string &name=std::string());
+  virtual void showCustomInterface(const std::string &name=std::string());
+  virtual void showCustomInterface(const QString &name);
 
 private:
   void showHelp(const QString &url);

@@ -6,18 +6,17 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/IValidator.h"
 
-namespace Mantid
-{
-namespace Kernel
-{
+namespace Mantid {
+namespace Kernel {
 /** @class NullValidator NullValidator.h Kernel/NullValidator.h
 
     NullValidator is a validator that doesn't.
 
     @author Nick Draper, Tessella Support Services plc
     @date 28/11/2007
-    
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -37,16 +36,17 @@ namespace Kernel
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport NullValidator : public IValidator
-{
+class DLLExport NullValidator : public IValidator {
 public:
-  IValidator_sptr clone() const { return boost::make_shared<NullValidator>(*this); }
+  IValidator_sptr clone() const {
+    return boost::make_shared<NullValidator>(*this);
+  }
 
 private:
   /** Always returns valid, that is ""
    *  @returns an empty string
    */
-   std::string check(const boost::any &) const { return ""; }
+  std::string check(const boost::any &) const { return ""; }
 };
 
 } // namespace Kernel

@@ -17,7 +17,8 @@ namespace MDAlgorithms {
  For more details on data format, please see:
  <http://www.ill.eu/instruments-support/computing-for-science/data-analysis/raw-data/>
 
- Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -37,36 +38,38 @@ namespace MDAlgorithms {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport LoadILLAscii: public API::IFileLoader<Kernel::FileDescriptor> {
+class DLLExport LoadILLAscii : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
-	LoadILLAscii();
-	virtual ~LoadILLAscii();
+  LoadILLAscii();
+  virtual ~LoadILLAscii();
 
-	virtual const std::string name() const;
-	virtual int version() const;
-	virtual const std::string category() const;
-	virtual const std::string summary() const;
-	/// Returns a confidence value that this algorithm can load a file
-	virtual int confidence(Kernel::FileDescriptor & descriptor) const;
-
+  virtual const std::string name() const;
+  virtual int version() const;
+  virtual const std::string category() const;
+  virtual const std::string summary() const;
+  /// Returns a confidence value that this algorithm can load a file
+  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
 
 private:
-	void init();
-	void exec();
-	void loadInstrumentName(ILLParser &);
-	void loadExperimentDetails(ILLParser &p);
-	void loadIDF(API::MatrixWorkspace_sptr &workspace);
-	void loadsDataIntoTheWS(API::MatrixWorkspace_sptr &, const std::vector<int> &);
-	API::IMDEventWorkspace_sptr mergeWorkspaces(std::vector<API::MatrixWorkspace_sptr> &);
-	void setWorkspaceRotationAngle(API::MatrixWorkspace_sptr, double rotationAngle);
+  void init();
+  void exec();
+  void loadInstrumentName(ILLParser &);
+  void loadExperimentDetails(ILLParser &p);
+  void loadIDF(API::MatrixWorkspace_sptr &workspace);
+  void loadsDataIntoTheWS(API::MatrixWorkspace_sptr &,
+                          const std::vector<int> &);
+  API::IMDEventWorkspace_sptr
+  mergeWorkspaces(std::vector<API::MatrixWorkspace_sptr> &);
+  void setWorkspaceRotationAngle(API::MatrixWorkspace_sptr,
+                                 double rotationAngle);
 
-	//LoadHelper m_loader;
-	std::string m_instrumentName; ///< Name of the instrument
-	double m_wavelength;
-	std::vector<std::string> m_supportedInstruments;
+  // LoadHelper m_loader;
+  std::string m_instrumentName; ///< Name of the instrument
+  double m_wavelength;
+  std::vector<std::string> m_supportedInstruments;
 };
 
 } // namespace MDAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_MDALGORITHMS_LOADILLASCII_H_ */
+#endif /* MANTID_MDALGORITHMS_LOADILLASCII_H_ */

@@ -40,13 +40,8 @@ def combineDataMulti(wksp_list,output_wksp,beg_overlap,end_overlap,Qmin,Qmax,bin
     	else:
     		overlapLow = beg_overlap[i+1]
     		overlapHigh = end_overlap[i]
-
-        #check if multi-period
-    	if isinstance(currentSum, WorkspaceGroup):
-    		raise RuntimeError("combineMulti, does not support multi-period input workspaces")
-    	else:
-    		print "Iteration",i
-    		currentSum, scale_factor = stitch2(currentSum, mtd[wksp_list[i+1]], currentSum.name(), overlapLow, overlapHigh, Qmin, Qmax, binning, scale_high)
+    	print "Iteration",i
+    	currentSum, scale_factor = stitch2(currentSum, mtd[wksp_list[i+1]], currentSum.name(), overlapLow, overlapHigh, Qmin, Qmax, binning, scale_high)
     RenameWorkspace(InputWorkspace=currentSum.name(),OutputWorkspace=output_wksp)
 
     # Remove any existing workspaces from the workspace list.

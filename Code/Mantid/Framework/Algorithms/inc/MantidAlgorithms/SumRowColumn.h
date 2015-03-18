@@ -6,15 +6,16 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** This algorithm is the equivalent of the COLETTE "DISPLAY H/V" command.
-    It firsts integrates the input workspace, which must contain all the spectra from
-    the detector of interest - no more and no less (so 128x128 or 192x192), 
-    between the X values given. Then each row or column is summed between the HOverVMin/Max
-    values, if given, and the result is a single spectrum of row or column number against
+    It firsts integrates the input workspace, which must contain all the spectra
+   from
+    the detector of interest - no more and no less (so 128x128 or 192x192),
+    between the X values given. Then each row or column is summed between the
+   HOverVMin/Max
+    values, if given, and the result is a single spectrum of row or column
+   number against
     total counts.
 
     Required Properties:
@@ -26,16 +27,21 @@ namespace Algorithms
 
     Optional properties:
     <UL>
-    <LI> XMin - The starting X value for each spectrum to include in the summation (default min). </LI>
-    <LI> XMax - The ending X value for each spectrum to include in the summation (default max). </LI>
-    <LI> HOverVMin - The first row to include when summing by columns, or vice versa (default all). </LI>
-    <LI> HOverVmax - The last row to include when summing by columns, or vice versa (default all). </LI>
+    <LI> XMin - The starting X value for each spectrum to include in the
+   summation (default min). </LI>
+    <LI> XMax - The ending X value for each spectrum to include in the summation
+   (default max). </LI>
+    <LI> HOverVMin - The first row to include when summing by columns, or vice
+   versa (default all). </LI>
+    <LI> HOverVmax - The last row to include when summing by columns, or vice
+   versa (default all). </LI>
     </UL>
 
     @author Russell Taylor, Tessella plc
     @date 22/06/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -55,8 +61,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SumRowColumn : public API::Algorithm
-{
+class DLLExport SumRowColumn : public API::Algorithm {
 public:
   /// (Empty) Constructor
   SumRowColumn() : API::Algorithm() {}
@@ -64,19 +69,24 @@ public:
   virtual ~SumRowColumn() {}
   /// Algorithm's name
   virtual const std::string name() const { return "SumRowColumn"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "SANS-specific algorithm which gives a single spectrum containing the total counts in either each row or each column of pixels in a square LOQ or SANS2D detector bank.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "SANS-specific algorithm which gives a single spectrum containing "
+           "the total counts in either each row or each column of pixels in a "
+           "square LOQ or SANS2D detector bank.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "SANS;Transforms\\Grouping"; }
+  virtual const std::string category() const {
+    return "SANS;Transforms\\Grouping";
+  }
 
 private:
-  
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
 
   API::MatrixWorkspace_sptr integrateWorkspace();

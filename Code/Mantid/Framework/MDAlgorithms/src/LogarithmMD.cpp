@@ -4,79 +4,70 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid
-{
-namespace MDAlgorithms
-{
+namespace Mantid {
+namespace MDAlgorithms {
 
-  // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(LogarithmMD)
-  
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(LogarithmMD)
 
+//----------------------------------------------------------------------------------------------
+/** Constructor
+ */
+LogarithmMD::LogarithmMD() {}
 
-  //----------------------------------------------------------------------------------------------
-  /** Constructor
-   */
-  LogarithmMD::LogarithmMD()
-  {
-  }
-    
-  //----------------------------------------------------------------------------------------------
-  /** Destructor
-   */
-  LogarithmMD::~LogarithmMD()
-  {
-  }
-  
+//----------------------------------------------------------------------------------------------
+/** Destructor
+ */
+LogarithmMD::~LogarithmMD() {}
 
-  //----------------------------------------------------------------------------------------------
-  /// Algorithm's name for identification. @see Algorithm::name
-  const std::string LogarithmMD::name() const { return "LogarithmMD";};
-  
-  /// Algorithm's version for identification. @see Algorithm::version
-  int LogarithmMD::version() const { return 1;};
-  
-  //----------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------
+/// Algorithm's name for identification. @see Algorithm::name
+const std::string LogarithmMD::name() const { return "LogarithmMD"; };
 
-  //----------------------------------------------------------------------------------------------
-  /// Optional method to be subclassed to add properties
-  void LogarithmMD::initExtraProperties()
-  {
-    declareProperty("Filler", 0.0,
-      "Some values in a workspace can normally be zeros or may get negative values after transformations\n"
-      "log(x) is not defined for such values, so here is the value, that will be placed as the result of log(x<=0) operation\n"
-      "Default value is 0");
-    declareProperty("Natural",true,"Switch to choose between natural or base 10 logarithm. Default true (natural).");
-  }
+/// Algorithm's version for identification. @see Algorithm::version
+int LogarithmMD::version() const { return 1; };
 
-  //----------------------------------------------------------------------------------------------
-  /// Check the inputs and throw if the algorithm cannot be run
-  void LogarithmMD::checkInputs()
-  {
-    if (!m_in_histo)
-      throw std::runtime_error(this->name() + " can only be run on a MDHistoWorkspace.");
-  }
+//----------------------------------------------------------------------------------------------
 
-  //----------------------------------------------------------------------------------------------
-  /// Run the algorithm on a MDEventWorkspace
-  void LogarithmMD::execEvent(Mantid::API::IMDEventWorkspace_sptr /*out*/)
-  {
-    throw std::runtime_error(this->name() + " can only be run on a MDHistoWorkspace.");
-  }
+//----------------------------------------------------------------------------------------------
+/// Optional method to be subclassed to add properties
+void LogarithmMD::initExtraProperties() {
+  declareProperty("Filler", 0.0, "Some values in a workspace can normally be "
+                                 "zeros or may get negative values after "
+                                 "transformations\n"
+                                 "log(x) is not defined for such values, so "
+                                 "here is the value, that will be placed as "
+                                 "the result of log(x<=0) operation\n"
+                                 "Default value is 0");
+  declareProperty("Natural", true, "Switch to choose between natural or base "
+                                   "10 logarithm. Default true (natural).");
+}
 
-  //----------------------------------------------------------------------------------------------
-  /// LogarithmMD::Run the algorithm with a MDHistoWorkspace
-  void LogarithmMD::execHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out)
-  {
-    bool natural = getProperty("Natural");
-    double filler = getProperty("Filler");
-    if (natural)
-      out->log(filler);
-    else
-      out->log10(filler);
-  }
+//----------------------------------------------------------------------------------------------
+/// Check the inputs and throw if the algorithm cannot be run
+void LogarithmMD::checkInputs() {
+  if (!m_in_histo)
+    throw std::runtime_error(this->name() +
+                             " can only be run on a MDHistoWorkspace.");
+}
 
+//----------------------------------------------------------------------------------------------
+/// Run the algorithm on a MDEventWorkspace
+void LogarithmMD::execEvent(Mantid::API::IMDEventWorkspace_sptr /*out*/) {
+  throw std::runtime_error(this->name() +
+                           " can only be run on a MDHistoWorkspace.");
+}
 
+//----------------------------------------------------------------------------------------------
+/// LogarithmMD::Run the algorithm with a MDHistoWorkspace
+void LogarithmMD::execHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out) {
+  bool natural = getProperty("Natural");
+  double filler = getProperty("Filler");
+  if (natural)
+    out->log(filler);
+  else
+    out->log10(filler);
+}
 
 } // namespace Mantid
 } // namespace MDAlgorithms

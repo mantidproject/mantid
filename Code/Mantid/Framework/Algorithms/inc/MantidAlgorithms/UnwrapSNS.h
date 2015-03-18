@@ -7,13 +7,13 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
-/** Takes an input Workspace2D that contains 'raw' data, unwraps the data according to
+namespace Mantid {
+namespace Algorithms {
+/** Takes an input Workspace2D that contains 'raw' data, unwraps the data
+   according to
     the reference flightpath provided and converts the units to wavelength.
-    The output workspace will have common bins in the maximum theoretical wavelength range.
+    The output workspace will have common bins in the maximum theoretical
+   wavelength range.
 
     Required Properties:
     <UL>
@@ -25,7 +25,8 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 25/07/2008
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -45,40 +46,45 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport UnwrapSNS : public API::Algorithm
-{
+class DLLExport UnwrapSNS : public API::Algorithm {
 public:
   UnwrapSNS();
   virtual ~UnwrapSNS();
   virtual const std::string name() const;
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Takes an input workspace that contains 'raw' data, unwraps the data according to the reference flightpath provided and converts the units to wavelength. The output workspace will have common bins in the maximum theoretical wavelength range.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Takes an input workspace that contains 'raw' data, unwraps the "
+           "data according to the reference flightpath provided and converts "
+           "the units to wavelength. The output workspace will have common "
+           "bins in the maximum theoretical wavelength range.";
+  }
 
   virtual int version() const;
   virtual const std::string category() const;
 
 private:
-  
   void init();
   void exec();
   void execEvent();
   void runMaskDetectors();
 
-  double calculateFlightpath(const int& spectrum, bool& isMonitor) const;
-  int unwrapX(const MantidVec&, MantidVec&, const double& Ld);
+  double calculateFlightpath(const int &spectrum, bool &isMonitor) const;
+  int unwrapX(const MantidVec &, MantidVec &, const double &Ld);
   void getTofRangeData(const bool);
-  double m_conversionConstant; ///< The constant used in the conversion from TOF to wavelength
+  double m_conversionConstant; ///< The constant used in the conversion from TOF
+  /// to wavelength
   API::MatrixWorkspace_const_sptr m_inputWS; ///< Pointer to the input workspace
-  DataObjects::EventWorkspace_const_sptr m_inputEvWS; ///< Pointer to the input event workspace
-  double m_LRef; ///< The 'reference' flightpath
-  double m_L1; ///< The instrument initial flightpath
-  double m_Tmin; ///< The start of the time-of-flight frame
-  double m_Tmax; ///< The end of the time-of-flight frame
-  double m_frameWidth; ///< The width of the frame cached to speed up things
+  DataObjects::EventWorkspace_const_sptr
+      m_inputEvWS;       ///< Pointer to the input event workspace
+  double m_LRef;         ///< The 'reference' flightpath
+  double m_L1;           ///< The instrument initial flightpath
+  double m_Tmin;         ///< The start of the time-of-flight frame
+  double m_Tmax;         ///< The end of the time-of-flight frame
+  double m_frameWidth;   ///< The width of the frame cached to speed up things
   int m_numberOfSpectra; ///< The number of spectra in the workspace
-  int m_XSize; ///< The size of the X vectors in the input workspace
+  int m_XSize;           ///< The size of the X vectors in the input workspace
   /// Progress reporting
-  API::Progress* m_progress;
+  API::Progress *m_progress;
 };
 
 } // namespace Algorithm

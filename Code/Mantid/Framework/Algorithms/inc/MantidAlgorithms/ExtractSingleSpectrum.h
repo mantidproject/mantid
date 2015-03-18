@@ -6,23 +6,24 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** Copies a single spectrum from a 2D Workspace into a new workspace.
 
     Required Properties:
     <UL>
     <LI> InputWorkspace - The name of the workspace to take as input. </LI>
-    <LI> OutputWorkspace - The name under which to store the output workspace. </LI>
-    <LI> SpectrumIndex - The workspace index number of the spectrum to extract. </LI>
+    <LI> OutputWorkspace - The name under which to store the output workspace.
+   </LI>
+    <LI> SpectrumIndex - The workspace index number of the spectrum to extract.
+   </LI>
     </UL>
 
     @author Russell Taylor, Tessella Support Services plc
     @date 30/06/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -42,8 +43,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ExtractSingleSpectrum : public API::Algorithm
-{
+class DLLExport ExtractSingleSpectrum : public API::Algorithm {
 public:
   /// (Empty) Constructor
   ExtractSingleSpectrum() : API::Algorithm() {}
@@ -51,8 +51,11 @@ public:
   virtual ~ExtractSingleSpectrum() {}
   /// Algorithm's name
   virtual const std::string name() const { return "ExtractSingleSpectrum"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Extracts the specified spectrum from a workspace and places it in a new single-spectrum workspace.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Extracts the specified spectrum from a workspace and places it in "
+           "a new single-spectrum workspace.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -60,12 +63,10 @@ public:
   virtual const std::string category() const { return "Transforms\\Splitting"; }
 
 private:
-  
   /// Initialisation code
   void init();
   /// Execution code
   void exec();
-
 };
 
 } // namespace Algorithms

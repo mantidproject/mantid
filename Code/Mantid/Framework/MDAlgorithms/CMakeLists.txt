@@ -40,6 +40,7 @@ set ( SRC_FILES
 	src/LoadMD.cpp
 	src/LoadSQW.cpp
 	src/LogarithmMD.cpp
+	src/MDNormDirectSC.cpp
 	src/MDNormSCD.cpp
 	src/MaskMD.cpp
 	src/MergeMD.cpp
@@ -123,6 +124,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/LoadMD.h
 	inc/MantidMDAlgorithms/LoadSQW.h
 	inc/MantidMDAlgorithms/LogarithmMD.h
+	inc/MantidMDAlgorithms/MDNormDirectSC.h
 	inc/MantidMDAlgorithms/MDNormSCD.h
 	inc/MantidMDAlgorithms/MaskMD.h
 	inc/MantidMDAlgorithms/MergeMD.h
@@ -205,6 +207,7 @@ set ( TEST_FILES
 	LoadMDTest.h
 	LoadSQWTest.h
 	LogarithmMDTest.h
+	MDNormDirectSCTest.h
 	MDNormSCDTest.h
 	MDResolutionConvolutionFactoryTest.h
 	MaskMDTest.h
@@ -254,6 +257,11 @@ add_library ( MDAlgorithms ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( MDAlgorithms PROPERTIES OUTPUT_NAME MantidMDAlgorithms 
                                                 COMPILE_DEFINITIONS IN_MANTID_MDALGORITHMS )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( MDAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+endif () 
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework" )
 

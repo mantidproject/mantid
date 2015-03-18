@@ -21,28 +21,27 @@
 #define GEOMETRY_DLL_EXPORT
 #endif
 
-namespace Mantid
-{
-        
-namespace Kernel
-{
-  class Logger;
+namespace Mantid {
+
+namespace Kernel {
+class Logger;
 }
-        
-namespace Geometry
-{
+
+namespace Geometry {
 
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
 class Parameter;
 
-/** The ParameterFactory class creates parameters for the instrument ParameterMap. 
-    
+/** The ParameterFactory class creates parameters for the instrument
+   ParameterMap.
+
     @author Roman Tolchenov, Tessella plc
     @date 19/05/2009
-    
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -59,34 +58,34 @@ class Parameter;
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>    
+    File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class GEOMETRY_DLL_EXPORT ParameterFactory
-{
+class GEOMETRY_DLL_EXPORT ParameterFactory {
 public:
-  template<class C>
-  static void subscribe(const std::string& className);
-  
-  static boost::shared_ptr<Parameter> create(const std::string& className, const std::string& name);
-  
+  template <class C> static void subscribe(const std::string &className);
+
+  static boost::shared_ptr<Parameter> create(const std::string &className,
+                                             const std::string &name);
+
 private:
   /// Private default constructor
   ParameterFactory();
   /// Private copy constructor
-  ParameterFactory(const ParameterFactory&);
+  ParameterFactory(const ParameterFactory &);
   /// Private assignment operator
-  ParameterFactory& operator=(const ParameterFactory&);
-  
+  ParameterFactory &operator=(const ParameterFactory &);
+
   /// A typedef for the instantiator
   typedef Kernel::AbstractInstantiator<Parameter> AbstractFactory;
-  /// An inner class to specialise map such that it does a deep delete when s_map is destroyed
-  class MANTID_GEOMETRY_DLL FactoryMap : public std::map<std::string, AbstractFactory*>
-  {
+  /// An inner class to specialise map such that it does a deep delete when
+  /// s_map is destroyed
+  class MANTID_GEOMETRY_DLL FactoryMap
+      : public std::map<std::string, AbstractFactory *> {
   public:
     /// Destructor. Deletes the AbstractInstantiator objects stored in the map.
-    virtual ~FactoryMap()
-    {
-      for (iterator it = this->begin(); it!=this->end(); ++it) delete it->second;
+    virtual ~FactoryMap() {
+      for (iterator it = this->begin(); it != this->end(); ++it)
+        delete it->second;
     }
   };
   /// The map holding the registered class names and their instantiators
@@ -97,17 +96,14 @@ private:
  *   @param className :: The parameter type name
  *   @tparam C The parameter type
  */
-template<class C>
-void ParameterFactory::subscribe(const std::string& className)
-{
+template <class C>
+void ParameterFactory::subscribe(const std::string &className) {
   typename FactoryMap::iterator it = s_map.find(className);
-  if (!className.empty() && it == s_map.end())
-  {
+  if (!className.empty() && it == s_map.end()) {
     s_map[className] = new Kernel::Instantiator<C, Parameter>;
-  }
-  else
-  {
-    throw std::runtime_error("Parameter type" + className + " is already registered.\n");
+  } else {
+    throw std::runtime_error("Parameter type" + className +
+                             " is already registered.\n");
   }
 }
 

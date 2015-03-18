@@ -16,11 +16,11 @@ void export_IMDWorkspace()
           .value("VolumeNormalization", Mantid::API::VolumeNormalization)
           .value("NumEventsNormalization", Mantid::API::NumEventsNormalization);
 
-  boost::python::enum_<Mantid::API::SpecialCoordinateSystem>("SpecialCoordinateSystem")
-          .value("None", Mantid::API::None)
-          .value("QLab", Mantid::API::QLab)
-          .value("QSample", Mantid::API::QSample)
-          .value("HKL", Mantid::API::HKL);
+  boost::python::enum_<Mantid::Kernel::SpecialCoordinateSystem>("SpecialCoordinateSystem")
+          .value("None", Mantid::Kernel::None)
+          .value("QLab", Mantid::Kernel::QLab)
+          .value("QSample", Mantid::Kernel::QSample)
+          .value("HKL", Mantid::Kernel::HKL);
 
   // EventWorkspace class
   class_< IMDWorkspace, bases<Workspace, MDGeometry>, boost::noncopyable >("IMDWorkspace", no_init)

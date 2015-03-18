@@ -685,21 +685,48 @@ void MantidUI::showVatesSimpleInterface()
     {
       return;
     }
-    // Set the type of workspace, the GUI needs it
+
+    // Set the type of workspace, the GUI needs it and
+    // extract the instrument which was used to measure the workspace data
     int wsType = MantidQt::API::VatesViewerInterface::MDEW;
+
+    std::string instrumentName;
+    
+    // check for peak workspace
     if (pws)
     {
       wsType = MantidQt::API::VatesViewerInterface::PEAKS;
+      
+      instrumentName = pws->getInstrument()->getFullName();
     }
+
+  // Check for histo workspace
     if (mdhist)
     {
       wsType = MantidQt::API::VatesViewerInterface::MDHW;
+      
+      // Get the instrument name
+      if  (mdhist->getNumExperimentInfo() > 0 )
+      {
+        instrumentName = mdhist->getExperimentInfo(0)->getInstrument()->getFullName();
+      }
+    }
+
+    // Check for event workspace
+    if (mdews)
+    {
+      // Get the instrument name
+      if  (mdews->getNumExperimentInfo() > 0 )
+      {
+        instrumentName = mdews->getExperimentInfo(0)->getInstrument()->getFullName();
+      }
     }
 
     {
       QMdiSubWindow *vatesSubWindow = new QMdiSubWindow;
       vatesSubWindow->setAttribute(Qt::WA_DeleteOnClose, false);
-      QIcon icon; icon.addFile(QString::fromUtf8(":/VatesSimpleGuiViewWidgets/icons/pvIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
+      QIcon icon; 
+      icon.addFile(QString::fromUtf8(":/VatesSimpleGuiViewWidgets/icons/pvIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
       vatesSubWindow->setWindowIcon(icon);
       connect(m_appWindow, SIGNAL(shutting_down()), vatesSubWindow, SLOT(close()));
 
@@ -1064,7 +1091,8 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
   {
     indices[i] = m->workspaceIndex(i);
   }
-  return createDetectorTable(m->workspaceName(), indices);
+  Table* t = createDetectorTable(m->workspaceName(), indices);
+  return t;
 }
 
 /**
@@ -1269,6 +1297,9 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
       }
     }
   }
+
+  // want all the detector tables as read-only
+  t->setReadOnlyAllColumns(true);
   t->showNormal();
 
   return t;
@@ -1289,7 +1320,10 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
   bool transpose = false;
   QString tableName = wsName + "-Detectors";
   Table* t = new MantidTable(appWindow()->scriptingEnv(), idtable, tableName, appWindow(), transpose);
-  if(!t) return NULL;
+  if(!t)
+    return NULL;
+  // want all the detector tables as read-only
+  t->setReadOnlyAllColumns(true);
   t->showNormal();
   return t;
 }
@@ -3096,7 +3130,6 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
   }
   bool isGraphNew = false;
   MultiLayer* ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow, plotTitle, clearWindow);
-  ml->setName(appWindow()->generateUniqueName(plotTitle + "-"));
   m_lastShown1DPlotWin = ml;
 
   // Do we plot try to plot as distribution. If request and it is not already one!
