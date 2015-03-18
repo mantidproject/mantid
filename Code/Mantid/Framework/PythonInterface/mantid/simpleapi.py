@@ -20,6 +20,7 @@
 
 """
 from __future__ import absolute_import
+import os, string
 
 import mantid.api as _api
 import mantid.kernel as _kernel
@@ -261,7 +262,7 @@ def CutMD(*args, **kwargs):
     """
     Description TODO
     """
-    (InputWorkspace,) = _get_mandatory_args('CutMD', ["InputWorkspace"], *args, **kwargs)
+    (in_wss,) = _get_mandatory_args('CutMD', ["InputWorkspace"], *args, **kwargs)
     # Remove from keywords so it is not set twice
     if "InputWorkspace" in kwargs:
         del kwargs['InputWorkspace']
@@ -270,7 +271,7 @@ def CutMD(*args, **kwargs):
     algm = _create_algorithm_object('CutMD')
     _set_logging_option(algm, kwargs)
 
-    #Split PBins up into P1Bin, P2Bin, etc.
+    # Split PBins up into P1Bin, P2Bin, etc.
     if "PBins" in kwargs:
         bins = kwargs["PBins"]
         del kwargs["PBins"]
@@ -278,30 +279,89 @@ def CutMD(*args, **kwargs):
             for bin in range(len(bins)):
                 kwargs["P{0}Bin".format(bin+1)] = bins[bin]
 
-    algm.setProperty('InputWorkspace', InputWorkspace)
-    # Set all workspace properties before others
+
+    # If it's not a list, wrap it in one to allow simple iteration anyway
+    if isinstance(in_wss, list):
+        in_list = in_wss
+        output_list = True
+    else:
+        in_list = [in_wss]
+        output_list = False
+
+    lhs = _kernel.funcreturns.lhs_info()
+    if lhs[0] == 0 and 'OutputWorkspace' not in kwargs:
+        raise RuntimeError("Unable to set output workspace name. Please either assign the output of "
+                           "CutMD to a variable or use the OutputWorkspace keyword.")
+
+    to_process = list() #List of workspaces to process
+    out_names = list() #List of what to call the output workspaces
+    for i in range(len(in_list)):
+        ws = in_list[i]
+        #Get the lhs variable name if we can
+        if i + 1 <= lhs[0]:
+            lhs_name = lhs[1][i]
+        else:
+            lhs_name = None
+
+        if isinstance(ws, _api.Workspace):
+            to_process.append(ws)
+            if lhs_name:
+                out_names.append(lhs_name)
+            else:
+                out_names.append(ws.name() + "_cut")
+        elif isinstance(ws, str):
+            if ws in mtd:
+                to_process.append(_api.AnalysisDataService[ws])
+                if lhs_name:
+                    out_names.append(lhs_name)
+                else:
+                    out_names.append(ws + "_cut")
+            else:
+                load_alg = AlgorithmManager.create("Load")
+                load_alg.setLogging(True)
+                load_alg.setAlwaysStoreInADS(False)
+                load_alg.setProperty("Filename", ws)
+                load_alg.setProperty("OutputWorkspace", "__loaded_by_cutmd_{0}".format(i+1))
+                load_alg.execute()
+                if not load_alg.isExecuted():
+                    raise TypeError("Failed to load " + ws)
+                wsn = load_alg.getProperty("OutputWorkspace").valueAsStr
+                to_process.append(_api.AnalysisDataService[wsn])
+                if lhs_name:
+                    out_names.append(lhs_name)
+                else:
+                    #Figure out a name for this loaded workspace
+                    out_name = os.path.basename(ws) #remove any path elements
+                    out_name = os.path.splitext(out_name)[0] #remove extension
+                    allowed_chars = string.letters + string.digits + "_"
+                    out_name = ''.join(c for c in out_name if c in allowed_chars) #remove disallowed characters
+                    out_names.append(out_name)
+        else:
+            raise TypeError("Unexpected type: " + type(ws))
+
     for key in kwargs.keys():
         if key.startswith('InputWorkspace_'):
             algm.setProperty(key, kwargs[key])
             del kwargs[key]
 
-    lhs = _kernel.funcreturns.lhs_info()
-    # If the output has not been assigned to anything, i.e. lhs[0] = 0 and kwargs does not have OutputWorkspace
-    # then raise a more helpful error than what we would get from an algorithm
-    if lhs[0] == 0 and 'OutputWorkspace' not in kwargs:
-        raise RuntimeError("Unable to set output workspace name. Please either assign the output of "
-                           "CutMD to a variable or use the OutputWorkspace keyword.")
-
     lhs_args = _get_args_from_lhs(lhs, algm)
     final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
-    # Check for any properties that aren't known and warn they will not be used
+
     for key in final_keywords.keys():
         if key not in algm:
             raise RuntimeError("Unknown property: {0}".format(key))
-    _set_properties(algm, **final_keywords)
-    algm.execute()
 
-    return _gather_returns('CutMD', lhs, algm)
+    for i in range(len(to_process)):
+        _set_properties(algm, **final_keywords)
+        algm.setProperty('InputWorkspace', to_process[i])
+        algm.setProperty('OutputWorkspace', out_names[i])
+        algm.execute()
+
+    #If we only returned one workspace, don't bother wrapping it in a list
+    if output_list:
+        return out_names
+    else:
+        return algm.getProperty("OutputWorkspace")
 
 # Have a better load signature for autocomplete
 _signature = "\bInputWorkspace"
