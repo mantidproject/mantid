@@ -1,5 +1,5 @@
 #pylint: disable=invalid-name
-from . import InstrumentSetupWidget,ClassicUBInputWidget,MatrixUBInputWidget
+from . import InstrumentSetupWidget,ClassicUBInputWidget,MatrixUBInputWidget,DimensionSelectorWidget
 from PyQt4 import QtCore, QtGui
 import sys
 import mantid
@@ -28,6 +28,8 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.matrix.UBmodel.changed.connect(self.classic.updateOL)
         self.classic.changed.connect(self.matrix.UBmodel.updateOL)
         self.layout().addLayout(self.ublayout)
+        self.dimensionWidget=DimensionSelectorWidget.DimensionSelectorWidget(self)
+        self.layout().addWidget(self.dimensionWidget)
 
     @QtCore.pyqtSlot(mantid.geometry.OrientedLattice)
     def printUB(self,ol):

@@ -8,7 +8,7 @@ def qapp():
         _app = QtGui.QApplication.instance()
     else:
         _app = QtGui.QApplication(sys.argv)
-    return app
+    return _app
 
 if __name__ == '__main__':
     app = qapp()

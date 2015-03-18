@@ -208,11 +208,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         #call instrumentSelected once. this will update everything else
         self.instrumentSelected(self.instrument)
         #connect goniometer change with figure
-        self.goniomodel.changed.connect(self.updateGon)
-
-    def updateGon(self,axes):
-        self.goniometerNames=axes['labels']
-        self.updateFigure()
+        self.goniomodel.changed.connect(self.updateFigure)
 
     def updateFigure(self):
         #plot directions
@@ -271,6 +267,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         z = 0.3 * numpy.outer(numpy.ones(numpy.size(u)),numpy. cos(v))
         self.gonfig.plot_surface(x,y,z+6,color='black',rstride=4, cstride=4)
         self.canvas.draw()
+        self.updateAll()
 
     def instrumentSelected(self,text):
         self.instrument=text
