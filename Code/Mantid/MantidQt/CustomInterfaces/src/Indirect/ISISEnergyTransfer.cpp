@@ -307,7 +307,7 @@ namespace CustomInterfaces
    * @param groupType :: Type of grouping (All, Group, Indiviual)
    * @return path to mapping file, or an empty string if file could not be created.
    */
-  QPair<QString, QString> ISISConvertToEnergy::createMapFile(const QString& groupType)
+  QPair<QString, QString> ISISEnergyTransfer::createMapFile(const QString& groupType)
   {
     QString specRange = m_uiForm.spSpectraMin->text() + "," + m_uiForm.spSpectraMax->text();
 
