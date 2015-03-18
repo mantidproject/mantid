@@ -20,7 +20,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     _can_number_density = None
     _can_front_thickness = None
     _can_back_thickness = None
-    _can_scale = 1.0
     _number_wavelengths = 10
     _emode = None
     _efixed = 0.0
@@ -72,9 +71,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(name='CanBackThickness', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Container back thickness in cm')
-
-        self.declareProperty(name='CanScaleFactor', defaultValue=1.0,
-                             doc='Scale factor to multiply can data')
 
         self.declareProperty(name='NumberWavelengths', defaultValue=10,
                              validator=IntBoundedValidator(1),
@@ -203,7 +199,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self._can_number_density = self.getProperty('CanNumberDensity').value
         self._can_front_thickness = self.getProperty('CanFrontThickness').value
         self._can_back_thickness = self.getProperty('CanBackThickness').value
-        self._can_scale = self.getProperty('CanScaleFactor').value
 
         self._number_wavelengths = self.getProperty('NumberWavelengths').value
         self._interpolate = self.getProperty('Interpolate').value
