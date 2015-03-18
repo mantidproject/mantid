@@ -48,9 +48,11 @@ void PawleyFit::addHKLsToFunction(PawleyFunction_sptr &pawleyFn,
 
     try {
       V3D hkl = getHkl(currentRow.String(0));
+      double d = boost::lexical_cast<double>(currentRow.String(1));
       double height = boost::lexical_cast<double>(currentRow.String(3));
+      double fwhm = boost::lexical_cast<double>(currentRow.String(4)) * d;
 
-      pawleyFn->addPeak(hkl, 0.006, height);
+      pawleyFn->addPeak(hkl, fwhm, height);
     }
     catch (...) {
       // do nothing.
@@ -72,6 +74,65 @@ V3D PawleyFit::getHkl(const std::string &hklString) const {
   hkl.setZ(boost::lexical_cast<double>(indicesStr[2]));
 
   return hkl;
+}
+
+ITableWorkspace_sptr
+PawleyFit::getLatticeFromFunction(const PawleyFunction_sptr &pawleyFn) const {
+  if (!pawleyFn) {
+    throw std::invalid_argument(
+        "Cannot extract lattice parameters from null function.");
+  }
+
+  ITableWorkspace_sptr latticeParameterTable =
+      WorkspaceFactory::Instance().createTable();
+
+  latticeParameterTable->addColumn("str", "Parameter");
+  latticeParameterTable->addColumn("double", "Value");
+  latticeParameterTable->addColumn("double", "Error");
+
+  PawleyParameterFunction_sptr parameters =
+      pawleyFn->getPawleyParameterFunction();
+
+  for (size_t i = 0; i < parameters->nParams(); ++i) {
+    TableRow newRow = latticeParameterTable->appendRow();
+    newRow << parameters->parameterName(i) << parameters->getParameter(i)
+           << parameters->getError(i);
+  }
+
+  return latticeParameterTable;
+}
+
+ITableWorkspace_sptr PawleyFit::getPeakParametersFromFunction(
+    const PawleyFunction_sptr &pawleyFn) const {
+  if (!pawleyFn) {
+    throw std::invalid_argument(
+        "Cannot extract peak parameters from null function.");
+  }
+
+  ITableWorkspace_sptr peakParameterTable =
+      WorkspaceFactory::Instance().createTable();
+
+  peakParameterTable->addColumn("int", "Peak");
+  peakParameterTable->addColumn("V3D", "HKL");
+  peakParameterTable->addColumn("str", "Parameter");
+  peakParameterTable->addColumn("double", "Value");
+  peakParameterTable->addColumn("double", "Error");
+
+  for (size_t i = 0; i < pawleyFn->getPeakCount(); ++i) {
+
+    IPeakFunction_sptr currentPeak = pawleyFn->getPeakFunction(i);
+
+    int peakNumber = static_cast<int>(i + 1);
+    V3D peakHKL = pawleyFn->getPeakHKL(i);
+
+    for (size_t j = 0; j < currentPeak->nParams(); ++j) {
+      TableRow newRow = peakParameterTable->appendRow();
+      newRow << peakNumber << peakHKL << currentPeak->parameterName(j)
+             << currentPeak->getParameter(j) << currentPeak->getError(j);
+    }
+  }
+
+  return peakParameterTable;
 }
 
 void PawleyFit::init() {
@@ -127,6 +188,16 @@ void PawleyFit::init() {
                                                          Direction::Output),
                   "Workspace that contains measured spectrum, calculated "
                   "spectrum and difference curve.");
+
+  declareProperty(
+      new WorkspaceProperty<ITableWorkspace>("RefinedCellTable", "",
+                                             Direction::Output),
+      "TableWorkspace with refined lattice parameters, including errors.");
+
+  declareProperty(
+      new WorkspaceProperty<ITableWorkspace>("RefinedPeakParameterTable", "",
+                                             Direction::Output),
+      "TableWorkspace with refined peak parameters, including errors.");
 }
 
 void PawleyFit::exec() {
@@ -149,7 +220,7 @@ void PawleyFit::exec() {
     std::vector<V3D> hkls = hklsFromString(getProperty("MillerIndices"));
 
     const MantidVec &data = ws->readY(static_cast<size_t>(wsIndex));
-    pawleyFn->setPeaks(hkls, 0.008,
+    pawleyFn->setPeaks(hkls, 0.005,
                        *(std::max_element(data.begin(), data.end())));
   }
 
@@ -168,17 +239,13 @@ void PawleyFit::exec() {
                    boost::const_pointer_cast<MatrixWorkspace>(ws));
   fit->setProperty("WorkspaceIndex", wsIndex);
   fit->setProperty("CreateOutput", true);
-
   fit->execute();
-
-  for (size_t i = 0; i < pawleyFn->nParams(); ++i) {
-    std::cout << i << " " << pawleyFn->parameterName(i) << " "
-              << pawleyFn->getParameter(i) << " " << pawleyFn->getError(i)
-              << std::endl;
-  }
 
   MatrixWorkspace_sptr output = fit->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", output);
+  setProperty("RefinedCellTable", getLatticeFromFunction(pawleyFn));
+  setProperty("RefinedPeakParameterTable",
+              getPeakParametersFromFunction(pawleyFn));
 }
 
 } // namespace CurveFitting

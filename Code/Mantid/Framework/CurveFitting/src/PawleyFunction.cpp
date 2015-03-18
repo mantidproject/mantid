@@ -331,6 +331,11 @@ IPeakFunction_sptr PawleyFunction::getPeakFunction(size_t i) const {
 
 Kernel::V3D PawleyFunction::getPeakHKL(size_t i) const { return m_hkls[i]; }
 
+PawleyParameterFunction_sptr
+PawleyFunction::getPawleyParameterFunction() const {
+  return m_pawleyParameterFunction;
+}
+
 void PawleyFunction::init() {
   setDecoratedFunction("CompositeFunction");
 

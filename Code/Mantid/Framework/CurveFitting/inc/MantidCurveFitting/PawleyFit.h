@@ -55,6 +55,11 @@ protected:
 
   Kernel::V3D getHkl(const std::string &hklString) const;
 
+  API::ITableWorkspace_sptr
+  getLatticeFromFunction(const PawleyFunction_sptr &pawleyFn) const;
+  API::ITableWorkspace_sptr
+  getPeakParametersFromFunction(const PawleyFunction_sptr &pawleyFn) const;
+
   void init();
   void exec();
 };

@@ -119,6 +119,8 @@ public:
   API::IPeakFunction_sptr getPeakFunction(size_t i) const;
   Kernel::V3D getPeakHKL(size_t i) const;
 
+  PawleyParameterFunction_sptr getPawleyParameterFunction() const;
+
 protected:
   void init();
   void beforeDecoratedFunctionSet(const API::IFunction_sptr &fn);
