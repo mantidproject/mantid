@@ -6,6 +6,8 @@
 
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/UnitConversion.h"
 
 #include <algorithm>
 
@@ -17,6 +19,8 @@ using namespace Kernel;
 using namespace Geometry;
 
 DECLARE_ALGORITHM(PawleyFit);
+
+PawleyFit::PawleyFit() : Algorithm(), m_dUnit() {}
 
 const std::string PawleyFit::summary() const {
   return "This algorithm performs a Pawley-fit on the supplied workspace.";
@@ -36,7 +40,8 @@ std::vector<V3D> PawleyFit::hklsFromString(const std::string &hklString) const {
 }
 
 void PawleyFit::addHKLsToFunction(PawleyFunction_sptr &pawleyFn,
-                                  const ITableWorkspace_sptr &tableWs) const {
+                                  const ITableWorkspace_sptr &tableWs,
+                                  const Unit_sptr &unit) const {
   if (!tableWs || !pawleyFn) {
     throw std::invalid_argument("Can only process non-null function & table.");
   }
@@ -48,9 +53,13 @@ void PawleyFit::addHKLsToFunction(PawleyFunction_sptr &pawleyFn,
 
     try {
       V3D hkl = getHkl(currentRow.String(0));
+
       double d = boost::lexical_cast<double>(currentRow.String(1));
+      double center = UnitConversion::run(*m_dUnit, *unit, d, 0, 0, 0,
+                                          DeltaEMode::Elastic, 0);
+      double fwhm = boost::lexical_cast<double>(currentRow.String(4)) * center;
+
       double height = boost::lexical_cast<double>(currentRow.String(3));
-      double fwhm = boost::lexical_cast<double>(currentRow.String(4)) * d;
 
       pawleyFn->addPeak(hkl, fwhm, height);
     }
@@ -144,6 +153,9 @@ void PawleyFit::init() {
   declareProperty("WorkspaceIndex", 0,
                   "Spectrum on which the fit should be performed.");
 
+  declareProperty("StartX", 0, "Lower border of fitted data range.");
+  declareProperty("EndX", 0, "Upper border of fitted data range.");
+
   std::vector<std::string> crystalSystems;
   crystalSystems.push_back("Cubic");
   crystalSystems.push_back("Tetragonal");
@@ -198,24 +210,32 @@ void PawleyFit::init() {
       new WorkspaceProperty<ITableWorkspace>("RefinedPeakParameterTable", "",
                                              Direction::Output),
       "TableWorkspace with refined peak parameters, including errors.");
+
+  m_dUnit = UnitFactory::Instance().create("dSpacing");
 }
 
 void PawleyFit::exec() {
-  boost::shared_ptr<PawleyFunction> pawleyFn =
-      boost::dynamic_pointer_cast<PawleyFunction>(
-          FunctionFactory::Instance().createFunction("PawleyFunction"));
+  // Setup PawleyFunction with cell from input parameters
+  PawleyFunction_sptr pawleyFn = boost::dynamic_pointer_cast<PawleyFunction>(
+      FunctionFactory::Instance().createFunction("PawleyFunction"));
 
   pawleyFn->setProfileFunction(getProperty("PeakProfileFunction"));
   pawleyFn->setCrystalSystem(getProperty("CrystalSystem"));
   pawleyFn->setUnitCell(getProperty("InitialCell"));
 
+  // Get the input workspace with the data
   MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
   int wsIndex = getProperty("WorkspaceIndex");
 
+  // and also the peak table, if there is one
   Property *peakTableProperty = getPointerToProperty("PeakTable");
   if (!peakTableProperty->isDefault()) {
     ITableWorkspace_sptr peakTable = getProperty("PeakTable");
-    addHKLsToFunction(pawleyFn, peakTable);
+
+    Axis *xAxis = ws->getAxis(0);
+    Unit_sptr xUnit = xAxis->unit();
+
+    addHKLsToFunction(pawleyFn, peakTable, xUnit);
   } else {
     std::vector<V3D> hkls = hklsFromString(getProperty("MillerIndices"));
 
@@ -224,16 +244,33 @@ void PawleyFit::exec() {
                        *(std::max_element(data.begin(), data.end())));
   }
 
+  // Determine if zero-shift should be refined
   bool refineZeroShift = getProperty("RefineZeroShift");
   if (!refineZeroShift) {
     pawleyFn->fix(pawleyFn->parameterIndex("f0.ZeroShift"));
   }
 
+  // Get x-range start and end values, depending on user input
   const MantidVec &xData = ws->readX(static_cast<size_t>(wsIndex));
-  pawleyFn->setMatrixWorkspace(ws, static_cast<size_t>(wsIndex), xData.front(),
-                               xData.back());
+  double startX = xData.front();
+  double endX = xData.back();
 
-  Algorithm_sptr fit = createChildAlgorithm("Fit");
+  Property *startXProperty = getPointerToProperty("StartX");
+  if (!startXProperty->isDefault()) {
+    double startXInput = getProperty("StartX");
+    startX = std::max(startX, startXInput);
+  }
+
+  Property *endXProperty = getPointerToProperty("EndX");
+  if (!endXProperty->isDefault()) {
+    double endXInput = getProperty("EndX");
+    endX = std::max(endX, endXInput);
+  }
+
+  pawleyFn->setMatrixWorkspace(ws, static_cast<size_t>(wsIndex), startX, endX);
+
+  // Generate Fit-algorithm with required properties.
+  Algorithm_sptr fit = createChildAlgorithm("Fit", -1, -1, true);
   fit->setProperty("Function", boost::static_pointer_cast<IFunction>(pawleyFn));
   fit->setProperty("InputWorkspace",
                    boost::const_pointer_cast<MatrixWorkspace>(ws));
@@ -241,6 +278,7 @@ void PawleyFit::exec() {
   fit->setProperty("CreateOutput", true);
   fit->execute();
 
+  // Create output
   MatrixWorkspace_sptr output = fit->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", output);
   setProperty("RefinedCellTable", getLatticeFromFunction(pawleyFn));

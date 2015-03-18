@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidCurveFitting/PawleyFunction.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -42,16 +43,19 @@ namespace CurveFitting {
 */
 class DLLExport PawleyFit : public API::Algorithm {
 public:
+  PawleyFit();
   virtual ~PawleyFit() {}
 
   const std::string name() const { return "PawleyFit"; }
   int version() const { return 1; }
   const std::string summary() const;
+  const std::string category() const { return "Diffraction"; }
 
 protected:
   std::vector<Kernel::V3D> hklsFromString(const std::string &hklString) const;
   void addHKLsToFunction(PawleyFunction_sptr &pawleyFn,
-                         const API::ITableWorkspace_sptr &tableWs) const;
+                         const API::ITableWorkspace_sptr &tableWs,
+                         const Kernel::Unit_sptr &unit) const;
 
   Kernel::V3D getHkl(const std::string &hklString) const;
 
@@ -62,6 +66,8 @@ protected:
 
   void init();
   void exec();
+
+  Kernel::Unit_sptr m_dUnit;
 };
 
 } // namespace CurveFitting
