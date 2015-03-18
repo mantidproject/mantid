@@ -36,6 +36,20 @@ namespace CustomInterfaces
   {
     m_view->setWaitingCursor();
 
+    // Check time limits
+    if (auto timeRange = m_view->timeRange()) {
+
+      if (timeRange->first >= timeRange->second){
+        m_view->restoreCursor();
+        m_view->displayError("Invalid time interval");
+        return;
+      }
+    } else {
+      m_view->restoreCursor();
+      m_view->displayError("No time interval");
+      return;
+    }
+
     try
     {
       IAlgorithm_sptr alg = AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
