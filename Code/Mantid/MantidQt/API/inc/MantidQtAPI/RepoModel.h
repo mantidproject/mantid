@@ -223,7 +223,7 @@ private:
     /// auxiliary method to help populating the model
     RepoItem * getParent(const QString & folder, QList<RepoItem*>&parents);
 
-    Q_DISABLE_COPY(RepoModel);
+    Q_DISABLE_COPY(RepoModel)
     
     /// auxiliary method to deal with exceptions
     void handleExceptions(const Mantid::API::ScriptRepoException & ex, 
