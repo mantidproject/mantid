@@ -1,6 +1,8 @@
 #include "MantidCurveFitting/PawleyFunction.h"
 
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/UnitConversion.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
@@ -12,6 +14,7 @@ DECLARE_FUNCTION(PawleyParameterFunction)
 
 using namespace API;
 using namespace Geometry;
+using namespace Kernel;
 
 /// Constructor
 PawleyParameterFunction::PawleyParameterFunction()
@@ -265,7 +268,27 @@ DECLARE_FUNCTION(PawleyFunction)
 /// Constructor
 PawleyFunction::PawleyFunction()
     : FunctionParameterDecorator(), m_compositeFunction(),
-      m_pawleyParameterFunction(), m_peakProfileComposite(), m_hkls() {}
+      m_pawleyParameterFunction(), m_peakProfileComposite(), m_hkls(),
+      m_dUnit(), m_wsUnit() {}
+
+void PawleyFunction::setMatrixWorkspace(
+    boost::shared_ptr<const MatrixWorkspace> workspace, size_t wi,
+    double startX, double endX) {
+  if (workspace) {
+    Axis *xAxis = workspace->getAxis(0);
+
+    Kernel::Unit_sptr wsUnit = xAxis->unit();
+
+    double factor, power;
+    if (wsUnit->quickConversion(*m_dUnit, factor, power)) {
+      m_wsUnit = wsUnit;
+    } else {
+      throw std::invalid_argument("Can not use quick conversion for unit.");
+    }
+  }
+
+  m_wrappedFunction->setMatrixWorkspace(workspace, wi, startX, endX);
+}
 
 /// Sets the crystal system on the internal parameter function and updates the
 /// exposed parameters
@@ -331,10 +354,14 @@ void PawleyFunction::function(const FunctionDomain &domain,
   double zeroShift = m_pawleyParameterFunction->getParameter("ZeroShift");
 
   for (size_t i = 0; i < m_hkls.size(); ++i) {
-    double d = cell.d(m_hkls[i]) + zeroShift;
+    double d = cell.d(m_hkls[i]);
+
+    double centre = UnitConversion::run(*m_dUnit, *m_wsUnit, d, 0, 0, 0,
+                                        DeltaEMode::Elastic, 0);
 
     m_peakProfileComposite->getFunction(i)->setParameter(
-        m_pawleyParameterFunction->getProfileFunctionCenterParameterName(), d);
+        m_pawleyParameterFunction->getProfileFunctionCenterParameterName(),
+        centre + zeroShift);
   }
 
   m_peakProfileComposite->function(domain, values);
@@ -419,6 +446,8 @@ void PawleyFunction::init() {
     throw std::runtime_error(
         "PawleyFunction could not construct internal CompositeFunction.");
   }
+
+  m_dUnit = UnitFactory::Instance().create("dSpacing");
 }
 
 /// Checks that the decorated function has the correct structure.

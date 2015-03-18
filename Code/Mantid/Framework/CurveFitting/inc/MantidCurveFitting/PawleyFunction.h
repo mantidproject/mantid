@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionParameterDecorator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ParamFunction.h"
 
@@ -113,6 +114,10 @@ public:
   /// Returns the name of the function.
   std::string name() const { return "PawleyFunction"; }
 
+  void
+  setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
+                     size_t wi, double startX, double endX);
+
   void setCrystalSystem(const std::string &crystalSystem);
   void setProfileFunction(const std::string &profileFunction);
   void setUnitCell(const std::string &unitCellString);
@@ -146,6 +151,9 @@ protected:
   API::CompositeFunction_sptr m_peakProfileComposite;
 
   std::vector<Kernel::V3D> m_hkls;
+
+  Kernel::Unit_sptr m_dUnit;
+  Kernel::Unit_sptr m_wsUnit;
 };
 
 typedef boost::shared_ptr<PawleyFunction> PawleyFunction_sptr;
